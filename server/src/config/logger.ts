@@ -1,4 +1,8 @@
+<<<<<<< HEAD
+// @ts-ignore
+=======
 // @ts-nocheck
+>>>>>>> main
 import pino from 'pino';
 <<<<<<< HEAD
 import { correlationEngine } from '../lib/telemetry/correlation-engine';
@@ -44,6 +48,9 @@ const REDACT_PATHS = [
   'user.phone',
 ];
 
+<<<<<<< HEAD
+export const logger = (pino as any)({
+=======
 // Standard logging context
 export interface SummitLogContext {
   correlationId?: string;
@@ -60,13 +67,14 @@ export interface SummitLogContext {
 }
 
 export const logger = pino({
+>>>>>>> main
   level: process.env.LOG_LEVEL || 'info',
   base: {
     service: 'intelgraph-server',
     env: cfg.NODE_ENV,
     version: process.env.npm_package_version || 'unknown',
   },
-  timestamp: pino.stdTimeFunctions.isoTime,
+  timestamp: () => `,"time":"${new Date().toISOString()}"`,
   redact: {
     paths: REDACT_PATHS,
     censor: '[REDACTED]',
@@ -85,10 +93,10 @@ export const logger = pino({
     return {};
   },
   formatters: {
-    level: (label) => {
+    level: (label: string) => {
       return { level: label.toUpperCase() };
     },
-    bindings: (bindings) => {
+    bindings: (bindings: any) => {
       return {
         pid: bindings.pid,
         host: bindings.hostname,
@@ -96,9 +104,12 @@ export const logger = pino({
     },
   },
   serializers: {
-    err: pino.stdSerializers.err,
-    req: pino.stdSerializers.req,
-    res: pino.stdSerializers.res,
+    // @ts-ignore
+    err: (pino as any).stdSerializers?.err,
+    // @ts-ignore
+    req: (pino as any).stdSerializers?.req,
+    // @ts-ignore
+    res: (pino as any).stdSerializers?.res,
   },
 <<<<<<< HEAD
   // Remove pino-pretty transport for production readiness

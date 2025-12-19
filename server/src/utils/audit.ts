@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import { getPostgresPool } from '../config/database.js';
 
 type JsonObject = Record<string, unknown>;
@@ -17,7 +17,7 @@ function deepDiff(before: JsonObject = {}, after: JsonObject = {}): JsonObject {
     ...Object.keys(before || {}),
     ...Object.keys(after || {}),
   ]);
-  for (const k of keys) {
+  for (const k of Array.from(keys)) {
     const bv = (before as any)?.[k];
     const av = (after as any)?.[k];
     const bothObjects =

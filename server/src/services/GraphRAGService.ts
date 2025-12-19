@@ -12,9 +12,9 @@
 
 import { Driver, Session as _Session } from 'neo4j-driver';
 import Redis from 'ioredis';
-import * as z from 'zod';
+import { z } from 'zod/v4';
 import { createHash } from 'crypto';
-import pino from 'pino';
+import logger from '../utils/logger.js';
 import { CircuitBreaker } from '../utils/CircuitBreaker.js'; // Import CircuitBreaker
 import { rankPaths, ScoreBreakdown as _PathScoreBreakdown } from './PathRankingService.js';
 import {
@@ -24,7 +24,7 @@ import {
 import { mapGraphRAGError, UserFacingError } from '../lib/errors.js';
 import graphragConfig from '../config/graphrag.js';
 
-const logger: pino.Logger = pino({ name: 'GraphRAGService' });
+const serviceLogger = logger.child({ name: 'GraphRAGService' });
 
 // Zod schemas for type safety and validation
 const GraphRAGRequestSchema = z.object({
@@ -87,7 +87,7 @@ const GraphRAGResponseSchema = z.object({
 
 // Types derived from schemas
 // @ts-ignore - zod type resolution issue
-export type GraphRAGRequest = z.infer<typeof GraphRAGRequestSchema>;
+export type GraphRAGRequest = z.input<typeof GraphRAGRequestSchema>;
 // @ts-ignore - zod type resolution issue
 export type Entity = z.infer<typeof EntitySchema>;
 // @ts-ignore - zod type resolution issue
@@ -198,7 +198,7 @@ export class GraphRAGService {
       const startTime = Date.now();
 
       try {
-        logger.info(
+        serviceLogger.info(
           `GraphRAG query initiated. Investigation ID: ${validated.investigationId}, Question Length: ${validated.question.length}, Focus Entities: ${validated.focusEntityIds?.length || 0}`,
         );
 
@@ -221,11 +221,11 @@ export class GraphRAGService {
 
         const responseTime = Date.now() - startTime;
         if (responseTime > useCaseConfig.latencyBudgetMs) {
-          logger.warn(
+          serviceLogger.warn(
             `Latency budget exceeded for use case ${useCase}: ${responseTime}ms > ${useCaseConfig.latencyBudgetMs}ms`,
           );
         }
-        logger.info(
+        serviceLogger.info(
           `GraphRAG query completed. Investigation ID: ${validated.investigationId}, Response Time: ${responseTime}, Entities Retrieved: ${subgraphContext.entities.length}, Relationships Retrieved: ${subgraphContext.relationships.length}, Confidence: ${response.confidence}`,
         );
 
@@ -238,17 +238,17 @@ export class GraphRAGService {
               subgraphContext.ttl,
               JSON.stringify(response),
             );
-            logger.debug(
+            serviceLogger.debug(
               `Cached GraphRAG response. Response Cache Key: ${responseCacheKey}`,
             );
           } catch (error) {
-            logger.warn(`Redis response cache write failed. Error: ${error}`);
+            serviceLogger.warn(`Redis response cache write failed. Error: ${error}`);
           }
         }
 
         return response;
       } catch (error) {
-        logger.error(
+        serviceLogger.error(
           {
             investigationId: validated.investigationId,
             error: error instanceof Error ? error.message : 'Unknown error',
@@ -260,8 +260,7 @@ export class GraphRAGService {
           throw error;
         }
         throw new Error(
-          `GraphRAG query failed: ${
-            error instanceof Error ? error.message : 'Unknown error'
+          `GraphRAG query failed: ${error instanceof Error ? error.message : 'Unknown error'
           }`,
         );
       }
@@ -287,12 +286,12 @@ export class GraphRAGService {
           graphragCacheHitRatio.set(
             this.cacheStats.hits / this.cacheStats.total,
           );
-          logger.debug(`Cache hit for subgraph. Cache Key: ${cacheKey}`);
+          serviceLogger.debug(`Cache hit for subgraph. Cache Key: ${cacheKey}`);
           await this.redis.expire(cacheKey, ttl);
           return { ...JSON.parse(cached), ttl };
         }
       } catch (error) {
-        logger.warn(`Redis cache read failed. Error: ${error}`);
+        serviceLogger.warn(`Redis cache read failed. Error: ${error}`);
       }
     }
 
@@ -310,11 +309,11 @@ export class GraphRAGService {
     if (this.redis) {
       try {
         await this.redis.setex(cacheKey, ttl, JSON.stringify(context));
-        logger.debug(
+        serviceLogger.debug(
           `Cached subgraph. Cache Key: ${cacheKey}, Hash: ${subgraphHash}`,
         );
       } catch (error) {
-        logger.warn(`Redis cache write failed. Error: ${error}`);
+        serviceLogger.warn(`Redis cache write failed. Error: ${error}`);
       }
     }
 
@@ -337,7 +336,7 @@ export class GraphRAGService {
       );
       return ttl;
     } catch (error) {
-      logger.warn(`Redis frequency tracking failed. Error: ${error}`);
+      serviceLogger.warn(`Redis frequency tracking failed. Error: ${error}`);
       return this.config.cacheTTL;
     }
   }
@@ -481,13 +480,13 @@ export class GraphRAGService {
           error instanceof z.ZodError
             ? this.summarizeZodIssues(error)
             : error.message;
-        logger.warn(
+        serviceLogger.warn(
           { issues: summary },
           `LLM schema violation or invalid JSON; retrying with temperature=0`
         );
         try {
           const retryResponse = await callLLMAndValidate(0); // Second attempt with stricter prompt/temperature=0
-          logger.info('LLM response validated on retry.');
+          serviceLogger.info('LLM response validated on retry.');
           return retryResponse;
         } catch (retryError) {
           graphragSchemaFailuresTotal.inc();
@@ -498,7 +497,7 @@ export class GraphRAGService {
               : retryError instanceof Error
                 ? retryError.message
                 : 'Unknown error';
-          logger.error({
+          serviceLogger.error({
             traceId: mapped.traceId,
             issues: retrySummary,
           }, 'LLM schema invalid after retry');

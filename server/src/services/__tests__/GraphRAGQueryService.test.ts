@@ -65,7 +65,7 @@ describe('GraphRAGQueryService', () => {
     // Initialize services
     glassBoxService = new GlassBoxRunService(pool, redis);
 
-    const nlToCypherService = new NlToCypherService(neo4jDriver, pool);
+    const nlToCypherService = new NlToCypherService({ generate: async () => 'MATCH (n) RETURN n' });
 
     queryPreviewService = new QueryPreviewService(
       pool,
@@ -526,7 +526,7 @@ function createMockPool(): any {
       // Mock implementation
       return { rows: [], rowCount: 0 };
     },
-    end: async () => {},
+    end: async () => { },
   };
 }
 
@@ -536,7 +536,7 @@ function createMockNeo4jDriver(): any {
       run: async (cypher: string, params?: any) => {
         return { records: [] };
       },
-      close: async () => {},
+      close: async () => { },
     }),
   };
 }

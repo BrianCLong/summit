@@ -1,8 +1,12 @@
+<<<<<<< HEAD
+import * as dotenv from 'dotenv';
+=======
 import dotenv from 'dotenv';
 import { ConfigSchema, type Config } from './schema.js';
 import { z } from 'zod';
 
 // Load environment variables
+>>>>>>> main
 dotenv.config();
 
 // Create a raw config object from process.env to map to our schema structure

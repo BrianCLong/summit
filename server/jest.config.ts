@@ -120,11 +120,15 @@ const config: Config = {
   bail: false,
   errorOnDeprecated: true,
 <<<<<<< HEAD
+  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$|uuid))'],
+=======
+<<<<<<< HEAD
   transformIgnorePatterns: [
     'node_modules/(?!(.*\\.mjs$))',
   ],
 =======
   transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$|node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill)'],
+>>>>>>> main
 >>>>>>> main
   maxWorkers: process.env.CI ? 2 : '50%',
 };

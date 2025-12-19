@@ -11,7 +11,8 @@
  * - Any operation where unpredictability is a security requirement
  */
 
-import crypto from 'crypto';
+import * as crypto from 'crypto';
+
 
 /**
  * Generate a cryptographically secure random string

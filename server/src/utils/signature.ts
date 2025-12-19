@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 
 /**
  * Computes an HMAC digest in hexadecimal format.

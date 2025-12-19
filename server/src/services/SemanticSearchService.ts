@@ -2,7 +2,8 @@
 import { Pool } from 'pg';
 import EmbeddingService from './EmbeddingService.js';
 import { synonymService } from './SynonymService.js';
-import pino from 'pino';
+// @ts-ignore
+import { default as pino } from 'pino';
 
 // Manual interface to match what search.ts expects if we return raw rows,
 // but we defined SemanticSearchResult.
@@ -50,23 +51,23 @@ export default class SemanticSearchService {
   async indexDocument(doc: any) {
     this.logger.warn("indexDocument is deprecated in SemanticSearchService. Use specific indexing methods.");
     if (doc.id && doc.text) {
-        await this.indexCase(doc.id, doc.text);
+      await this.indexCase(doc.id, doc.text);
     }
   }
 
   // Deprecated search method for backward compatibility
   async search(query: string, filters: any = {}, limit = 10): Promise<any[]> {
-     this.logger.warn("search() is deprecated in SemanticSearchService. Use searchCases() or update usage.");
-     const results = await this.searchCases(query, {
-         status: undefined,
-     }, limit);
+    this.logger.warn("search() is deprecated in SemanticSearchService. Use searchCases() or update usage.");
+    const results = await this.searchCases(query, {
+      status: undefined,
+    }, limit);
 
-     return results.map(r => ({
-         id: r.id,
-         text: r.title,
-         score: r.score,
-         metadata: { status: r.status, date: r.created_at }
-     }));
+    return results.map(r => ({
+      id: r.id,
+      text: r.title,
+      score: r.score,
+      metadata: { status: r.status, date: r.created_at }
+    }));
   }
 
   async indexCase(caseId: string, text: string) {
@@ -163,8 +164,8 @@ export default class SemanticSearchService {
         client.release();
       }
     } catch (err) {
-        this.logger.error({ err }, "Semantic search failed");
-        return [];
+      this.logger.error({ err }, "Semantic search failed");
+      return [];
     }
   }
 }

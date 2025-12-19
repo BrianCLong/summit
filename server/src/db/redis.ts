@@ -1,10 +1,12 @@
 // @ts-nocheck
 import Redis from 'ioredis';
-import dotenv from 'dotenv';
-import pino from 'pino';
+import * as dotenv from 'dotenv';
+// @ts-ignore
+import { default as pino } from 'pino';
 
 dotenv.config();
 
+// @ts-ignore
 const logger: pino.Logger = pino();
 
 const REDIS_HOST = process.env.REDIS_HOST || 'redis';
@@ -61,10 +63,10 @@ export function getRedisClient(): Redis {
       };
 
       const originalDel = redisClient.del.bind(redisClient);
-      redisClient.del = async (key: string) => {
+      redisClient.del = (async (key: string) => {
         telemetry.subsystems.cache.dels.add(1);
         return await originalDel(key);
-      };
+      }) as any;
     } catch (error) {
       logger.warn(
         `Redis initialization failed - using development mode. Error: ${(error as Error).message}`,
@@ -97,9 +99,9 @@ function createMockRedisClient() {
       logger.debug(`Mock Redis EXPIRE: Key: ${key}, Seconds: ${seconds}`);
       return 1;
     },
-    quit: async () => {},
-    on: () => {},
-    connect: async () => {},
+    quit: async () => { },
+    on: () => { },
+    connect: async () => { },
   };
 }
 

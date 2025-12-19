@@ -18,10 +18,16 @@ import {
   MeterProvider,
 } from '@opentelemetry/sdk-metrics';
 <<<<<<< HEAD
+import { Resource } from '@opentelemetry/resources';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+import * as os from 'os';
+=======
+<<<<<<< HEAD
 import os from 'os';
 =======
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+>>>>>>> main
 >>>>>>> main
 
 // @deprecated - Use server/src/lib/observability/ instead

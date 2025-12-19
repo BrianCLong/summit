@@ -1,5 +1,6 @@
 <<<<<<< HEAD
 import { createRequire } from 'module';
+// @ts-ignore
 const require = createRequire(import.meta.url);
 const RelationshipService = require('./RelationshipService.js');
 =======
@@ -162,12 +163,12 @@ export class PredictiveRelationshipService {
 
         // Generate target embedding if missing (and allowed)
         if (!targetEmbedding && generateMissingEmbeddings) {
-           try {
-             targetEmbedding = await this.generateAndStoreEmbedding(targetProps.id, targetProps);
-           } catch (e) {
-             logger.warn(`Failed to generate embedding for candidate ${targetProps.id}`, e);
-             continue;
-           }
+          try {
+            targetEmbedding = await this.generateAndStoreEmbedding(targetProps.id, targetProps);
+          } catch (e) {
+            logger.warn(`Failed to generate embedding for candidate ${targetProps.id}`, e);
+            continue;
+          }
         }
 
         if (!targetEmbedding) continue;

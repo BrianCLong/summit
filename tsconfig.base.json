@@ -17,6 +17,11 @@
     "tsBuildInfoFile": ".tsbuildinfo",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+<<<<<<< HEAD
+    "typeRoots": ["./node_modules/@types", "./types/shims"],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["node", "jest"],
+=======
     "typeRoots": [
       "./node_modules/@types",
       "./types/shims"
@@ -30,17 +35,11 @@
       "node",
       "jest"
     ],
+>>>>>>> main
     "baseUrl": ".",
     "paths": {
-      "zod/v4": [
-        "types/shims/zod-v4.d.ts"
-      ]
+      "zod/v4": ["types/shims/zod-v4.d.ts"]
     }
   },
-  "exclude": [
-    "**/dist",
-    "**/build",
-    "**/.turbo",
-    "**/.next"
-  ]
+  "exclude": ["**/dist", "**/build", "**/.turbo", "**/.next"]
 }

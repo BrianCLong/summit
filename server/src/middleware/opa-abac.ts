@@ -4,7 +4,7 @@ import { verify, JwtPayload } from 'jsonwebtoken';
 import axios from 'axios';
 import { trace, context } from '@opentelemetry/api';
 import { logger } from '../utils/logger';
-import type { User, OPAClient } from '../graphql/intelgraph/types';
+import type { User, OPAClient as IOPAClient } from '../graphql/intelgraph/types';
 
 const tracer = trace.getTracer('intelgraph-opa-abac');
 
@@ -26,7 +26,7 @@ interface OPAPolicyResult {
   result: boolean | string[] | Record<string, any>;
 }
 
-export class OPAClient implements OPAClient {
+export class OPAClient implements IOPAClient {
   private baseUrl: string;
   private timeout: number;
   private logger = logger.child({ component: 'opa-client' });

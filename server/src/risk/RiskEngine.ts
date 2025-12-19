@@ -1,4 +1,5 @@
 import { FeatureVector } from './FeatureStore';
+export { FeatureVector } from './FeatureStore';
 
 export type RiskResult = {
   score: number;
@@ -19,7 +20,7 @@ export class RiskEngine {
     private readonly weights: FeatureVector,
     private readonly bias: number,
     private readonly version = 'v1',
-  ) {}
+  ) { }
 
   score(features: FeatureVector, window: RiskResult['window']): RiskResult {
     let z = this.bias;

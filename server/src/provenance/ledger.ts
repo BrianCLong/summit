@@ -7,7 +7,7 @@
 import { Counter, Histogram, Gauge } from 'prom-client';
 import { pool } from '../db/pg';
 import { EventEmitter } from 'events';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import { execSync } from 'child_process';
 import {
   CryptoPipeline,
@@ -25,10 +25,10 @@ const tracer = {
     fn: (span: any) => Promise<any> | any,
   ) => {
     const span = {
-      setAttributes: (_a?: any) => {},
-      recordException: (_e?: any) => {},
-      setStatus: (_s?: any) => {},
-      end: () => {},
+      setAttributes: (_a?: any) => { },
+      recordException: (_e?: any) => { },
+      setStatus: (_s?: any) => { },
+      end: () => { },
     };
     return await fn(span);
   },
@@ -82,6 +82,7 @@ export interface ProvenanceEntry {
     userAgent?: string;
     sessionId?: string;
     requestId?: string;
+    correlationId?: string;
     purpose?: string;
     classification?: string[];
     privacy?: {

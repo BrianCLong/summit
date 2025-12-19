@@ -5,7 +5,7 @@
  * for Neo4j graph database operations.
  */
 
-import neo4j, { Driver, Session } from 'neo4j-driver';
+import neo4j, { Driver, Session, SessionConfig } from 'neo4j-driver';
 
 import pino from 'pino';
 import { performance } from 'node:perf_hooks';

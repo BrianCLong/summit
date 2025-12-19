@@ -2,9 +2,7 @@
 import { getNeo4jDriver } from '../db/neo4j.js';
 import { getPostgresPool } from '../db/postgres.js';
 import { randomUUID as uuidv4 } from 'crypto';
-import pino from 'pino';
-
-const logger = pino();
+import { logger } from './logger.js';
 
 /**
  * Creates sample data in Neo4j and PostgreSQL for development purposes.

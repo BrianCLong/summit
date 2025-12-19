@@ -47,9 +47,9 @@ const entitySchema = z.object({
   sentiment: z.number().min(-1).max(1),
   volatility: z.number().min(0).max(1),
   resilience: z.number().min(0).max(1),
-  themes: z.record(z.number()),
+  themes: z.record(z.string(), z.number()),
   relationships: z.array(relationshipSchema).default([]),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 const parameterSchema = z.object({
@@ -86,7 +86,7 @@ const createSimulationSchema = z.object({
   initialEntities: z.array(entitySchema).min(1),
   initialParameters: z.array(parameterSchema).optional(),
   agents: z.array(agentSchema).optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
   llm: llmSchema,
 });
 
@@ -111,7 +111,7 @@ const eventSchema = z.object({
     .optional(),
   description: z.string().min(1),
   scheduledTick: z.number().int().nonnegative().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 const shockSchema = z.object({
@@ -136,7 +136,7 @@ const tickSchema = z.object({
 class EchoLLMClient implements LLMClient {
   constructor(
     private readonly template: string = 'Tick {tick}: {arcs}. Recent: {events}.',
-  ) {}
+  ) { }
 
   async generateNarrative(request: LLMNarrativeRequest): Promise<string> {
     const arcSummary = request.state.arcs

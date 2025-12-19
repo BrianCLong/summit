@@ -12,8 +12,12 @@
  * - Permission checks
  */
 
+<<<<<<< HEAD
+import { z } from 'zod/v4';
+=======
 import { z } from 'zod';
 import { sanitizeHtml } from '../utils/htmlSanitizer.js';
+>>>>>>> main
 
 // Base validation schemas
 export const TenantIdSchema = z
@@ -61,7 +65,7 @@ export const EntityLabelsSchema = z
   );
 
 export const EntityPropsSchema = z
-  .record(z.any())
+  .record(z.string(), z.any())
   .refine(
     (props) => JSON.stringify(props).length <= 32768,
     'Entity properties too large (max 32KB)',
@@ -100,7 +104,7 @@ export const InvestigationStatusSchema = z.enum([
 
 // Custom metadata validation
 export const CustomMetadataSchema = z
-  .record(z.any())
+  .record(z.string(), z.any())
   .refine(
     (metadata) => JSON.stringify(metadata).length <= 16384,
     'Custom metadata too large (max 16KB)',
@@ -631,7 +635,7 @@ export const GraphQLInputSchema = z.object({
       },
       'Query depth exceeds maximum allowed'
     ),
-  variables: z.record(z.any()).optional(),
+  variables: z.record(z.string(), z.any()).optional(),
 });
 
 /**

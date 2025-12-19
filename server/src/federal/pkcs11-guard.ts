@@ -1,6 +1,6 @@
 // @ts-nocheck
 import * as pkcs11 from 'pkcs11js';
-import crypto from 'node:crypto';
+import * as crypto from 'node:crypto';
 import { otelService } from '../middleware/observability/otel-tracing.js';
 
 // Type declarations for pkcs11js (not fully typed in the package)

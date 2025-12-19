@@ -14,7 +14,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 
 // ============================================================================
 // Error Codes and Categories
@@ -597,10 +597,10 @@ export class ErrorHandlerManager {
     };
 
     this.logger = logger ?? {
-      debug: (msg, data) => console.debug(JSON.stringify({ level: 'debug', msg, ...data })),
-      info: (msg, data) => console.info(JSON.stringify({ level: 'info', msg, ...data })),
-      warn: (msg, data) => console.warn(JSON.stringify({ level: 'warn', msg, ...data })),
-      error: (msg, data) => console.error(JSON.stringify({ level: 'error', msg, ...data })),
+      debug: (msg, data) => console.debug(JSON.stringify({ level: 'debug', msg, ...(data as object) })),
+      info: (msg, data) => console.info(JSON.stringify({ level: 'info', msg, ...(data as object) })),
+      warn: (msg, data) => console.warn(JSON.stringify({ level: 'warn', msg, ...(data as object) })),
+      error: (msg, data) => console.error(JSON.stringify({ level: 'error', msg, ...(data as object) })),
     };
   }
 
@@ -807,7 +807,7 @@ export async function withRetry<T>(
       // Check if error is retryable
       const isRetryable = appError
         ? (appError.retryable ||
-           (finalConfig.retryableErrors?.includes(appError.code) ?? false))
+          (finalConfig.retryableErrors?.includes(appError.code) ?? false))
         : false;
 
       if (!isRetryable || attempt === finalConfig.maxRetries) {

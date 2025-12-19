@@ -11,10 +11,15 @@ import evidenceOkTypeDefs from '../schema.evidenceOk.js';
 import trustRiskTypeDefs from '../schema.trust-risk.js';
 import provenanceTypeDefs from '../schema.provenance.js';
 <<<<<<< HEAD
+import * as fs from 'fs';
+import * as path from 'path';
+=======
+<<<<<<< HEAD
 import { sprint28TypeDefs } from './sprint28.js';
 =======
 import fs from 'fs';
 import path from 'path';
+>>>>>>> main
 import { fileURLToPath } from 'url';
 >>>>>>> main
 
@@ -27,7 +32,7 @@ const { annotationsTypeDefs } = annotationsModule as {
 const graphragTypes =
   (graphragTypesModule as any).default || graphragTypesModule;
 
-const __filename = fileURLToPath(import.meta.url);
+const __filename = fileURLToPath((import.meta as any).url);
 const __dirname = path.dirname(__filename);
 
 // Load EW schema
