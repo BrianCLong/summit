@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://intelgraph.dev/prov-ledger/receipt.v0.1.json",
+  "title": "ExecutionReceipt",
+  "description": "Cryptographically verifiable execution receipt with selective disclosure hints.",
+  "type": "object",
+  "required": ["id", "createdAt", "executionId", "hashes", "signer", "signature"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique receipt identifier."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "executionId": {
+      "type": "string",
+      "description": "ID of the pipeline/run this receipt covers."
+    },
+    "hashes": {
+      "type": "object",
+      "required": ["inputs", "outputs", "manifest"],
+      "properties": {
+        "inputs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "hash"],
+            "properties": {
+              "name": { "type": "string" },
+              "hash": { "type": "string" },
+              "redactable": {
+                "type": "boolean",
+                "description": "Whether this entry can be redacted for export."
+              }
+            }
+          }
+        },
+        "outputs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "hash"],
+            "properties": {
+              "name": { "type": "string" },
+              "hash": { "type": "string" },
+              "redactable": { "type": "boolean" }
+            }
+          }
+        },
+        "manifest": {
+          "type": "string",
+          "description": "Content-addressed manifest hash for all steps."
+        }
+      }
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "timestamp", "status"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "timestamp": { "type": "string", "format": "date-time" },
+          "status": { "type": "string", "enum": ["pending", "completed", "failed"] },
+          "inputs": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "outputs": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "properties": {
+        "decisions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "effect"],
+            "properties": {
+              "id": { "type": "string" },
+              "effect": { "type": "string", "enum": ["allow", "deny", "review"] },
+              "reason": { "type": "string" },
+              "attributes": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "opaBundle": { "type": "string" }
+      }
+    },
+    "signer": {
+      "type": "object",
+      "required": ["keyId", "algorithm"],
+      "properties": {
+        "keyId": { "type": "string" },
+        "algorithm": { "type": "string", "enum": ["ed25519", "kms:aws:kms"] },
+        "certificateChain": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "signature": {
+      "type": "string",
+      "description": "Base64-encoded detached signature over the canonical receipt."
+    },
+    "disclosure": {
+      "type": "object",
+      "properties": {
+        "redactions": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "reason": { "type": "string" }
+      }
+    }
+  },
+  "additionalProperties": false
+}
