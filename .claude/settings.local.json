@@ -77,7 +77,8 @@
       "Bash(xargs sed:*)",
       "Bash(readlink:*)",
       "Bash(pnpm --filter @intelgraph/server typecheck:*)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(pnpm tsc:*)"
     ],
     "deny": [],
     "ask": []

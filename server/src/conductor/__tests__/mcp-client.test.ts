@@ -86,13 +86,6 @@ describe('MCPClient', () => {
 
     test('handles connection failure', async () => {
       const error = new Error('Connection failed');
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string | symbol, callback: (...args: any[]) => void) => {
       mockWs.once.mockImplementation((event: string, callback: any) => {
         if (event === 'error') {
           setTimeout(() => callback(error), 0);
@@ -113,13 +106,6 @@ describe('MCPClient', () => {
 
     test('disconnects from server', async () => {
       // First connect
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string | symbol, callback: (...args: any[]) => void) => {
       mockWs.once.mockImplementation((event: string, callback: any) => {
         if (event === 'open') setTimeout(callback, 0);
         return mockWs;
@@ -135,13 +121,6 @@ describe('MCPClient', () => {
   describe('tool execution', () => {
     beforeEach(async () => {
       // Setup successful connection
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string | symbol, callback: (...args: any[]) => void) => {
       mockWs.once.mockImplementation((event: string, callback: any) => {
         if (event === 'open') setTimeout(callback, 0);
         return mockWs;
@@ -227,13 +206,6 @@ describe('MCPClient', () => {
         timeout: 100,
       });
 
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string | symbol, callback: (...args: any[]) => void) => {
       mockWs.once.mockImplementation((event: string, callback: any) => {
         if (event === 'open') setTimeout(callback, 0);
         return mockWs;
@@ -255,13 +227,6 @@ describe('MCPClient', () => {
 
   describe('server info', () => {
     beforeEach(async () => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string | symbol, callback: (...args: any[]) => void) => {
       mockWs.once.mockImplementation((event: string, callback: any) => {
         if (event === 'open') setTimeout(callback, 0);
         return mockWs;
@@ -308,13 +273,6 @@ describe('MCPClient', () => {
       expect(client.isConnected('test-server')).toBe(false);
 
       // After connecting
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string | symbol, callback: (...args: any[]) => void) => {
       mockWs.once.mockImplementation((event: string, callback: any) => {
         if (event === 'open') setTimeout(callback, 0);
         return mockWs;
