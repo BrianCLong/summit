@@ -4,16 +4,7 @@
     "module": "commonjs",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "resolveJsonModule": true,
-    "types": ["jest", "node"],
-    "allowImportingTsExtensions": false,
-    "noEmit": true
+    "resolveJsonModule": true
   },
-  "include": [
-    "**/*.test.ts",
-    "**/*.test.tsx",
-    "**/*.spec.ts",
-    "**/*.spec.tsx",
-    "server/src/conductor/__tests__/mcp-client.test.ts"
-  ]
+  "include": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts"]
 }

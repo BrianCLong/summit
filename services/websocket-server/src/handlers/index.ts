@@ -4,6 +4,8 @@
  */
 
 import { Server } from 'socket.io';
+<<<<<<< HEAD
+=======
 import {
   AuthenticatedSocket,
   ClientToServerEvents,
@@ -11,6 +13,7 @@ import {
   InterServerEvents,
   SocketData,
 } from '../types/index.js';
+>>>>>>> main
 import { ConnectionManager } from '../managers/ConnectionManager.js';
 import { PresenceManager } from '../managers/PresenceManager.js';
 import { RoomManager } from '../managers/RoomManager.js';
@@ -34,20 +37,39 @@ export interface HandlerDependencies {
 export function registerEventHandlers(deps: HandlerDependencies): void {
   const { io, connectionManager, presenceManager, roomManager, messagePersistence, rateLimiter } = deps;
 
+<<<<<<< HEAD
+  io.on('connection', (socket) => {
+=======
   io.on('connection', (socket: any) => {
     const authSocket = socket as AuthenticatedSocket;
+>>>>>>> main
     const startTime = Date.now();
 
     logger.info(
       {
+<<<<<<< HEAD
+        connectionId: socket.data.connectionId,
+        userId: socket.data.user.userId,
+        tenantId: socket.data.tenantId,
+=======
         connectionId: authSocket.connectionId,
         userId: authSocket.user.userId,
         tenantId: authSocket.tenantId,
+>>>>>>> main
       },
       'Client connected'
     );
 
     // Register connection
+<<<<<<< HEAD
+    connectionManager.register(socket);
+    metrics.recordConnectionStart(socket.data.tenantId);
+
+    // Send connection established event
+    socket.emit('connection:established', {
+      connectionId: socket.data.connectionId,
+      tenantId: socket.data.tenantId,
+=======
     connectionManager.register(authSocket);
     metrics.recordConnectionStart(authSocket.tenantId);
 
@@ -55,6 +77,7 @@ export function registerEventHandlers(deps: HandlerDependencies): void {
     authSocket.emit('connection:established', {
       connectionId: authSocket.connectionId,
       tenantId: authSocket.tenantId,
+>>>>>>> main
     });
 
     // Register specific handlers
@@ -68,9 +91,15 @@ export function registerEventHandlers(deps: HandlerDependencies): void {
 
       logger.info(
         {
+<<<<<<< HEAD
+          connectionId: socket.data.connectionId,
+          userId: socket.data.user.userId,
+          tenantId: socket.data.tenantId,
+=======
           connectionId: authSocket.connectionId,
           userId: authSocket.user.userId,
           tenantId: authSocket.tenantId,
+>>>>>>> main
           reason,
           durationSeconds: duration,
         },
@@ -78,6 +107,17 @@ export function registerEventHandlers(deps: HandlerDependencies): void {
       );
 
       // Unregister connection
+<<<<<<< HEAD
+      connectionManager.unregister(socket.data.connectionId);
+
+      // Leave all rooms
+      roomManager.leaveAll(socket.data.connectionId);
+
+      // Remove presence from all rooms where user was active
+      const rooms = roomManager.getSocketRooms(socket.data.connectionId);
+      for (const room of rooms) {
+        await presenceManager.removePresence(room, socket.data.user.userId);
+=======
       connectionManager.unregister(authSocket.connectionId);
 
       // Leave all rooms
@@ -87,6 +127,7 @@ export function registerEventHandlers(deps: HandlerDependencies): void {
       const rooms = roomManager.getSocketRooms(authSocket.connectionId);
       for (const room of rooms) {
         await presenceManager.removePresence(room, authSocket.user.userId);
+>>>>>>> main
 
         // Broadcast presence update
         const presence = await presenceManager.getRoomPresence(room);
@@ -94,25 +135,42 @@ export function registerEventHandlers(deps: HandlerDependencies): void {
       }
 
       // Record metrics
+<<<<<<< HEAD
+      metrics.recordConnectionEnd(socket.data.tenantId, reason, duration);
+=======
       metrics.recordConnectionEnd(authSocket.tenantId, reason, duration);
+>>>>>>> main
     });
 
     // Handle errors
     authSocket.on('error', (error) => {
       logger.error(
         {
+<<<<<<< HEAD
+          connectionId: socket.data.connectionId,
+=======
           connectionId: authSocket.connectionId,
+>>>>>>> main
           error: error.message,
         },
         'Socket error'
       );
 
+<<<<<<< HEAD
+      metrics.recordError(socket.data.tenantId, 'socket_error', 'unknown');
+    });
+
+    // Update activity on any event
+    socket.onAny(() => {
+      connectionManager.updateActivity(socket.data.connectionId);
+=======
       metrics.recordError(authSocket.tenantId, 'socket_error', 'unknown');
     });
 
     // Update activity on any event
     authSocket.onAny(() => {
       connectionManager.updateActivity(authSocket.connectionId);
+>>>>>>> main
     });
   });
 
