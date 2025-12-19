@@ -36,6 +36,7 @@ jobs:
       - run: pnpm audit --audit-level=high || true
 
   opa-policy-check:
+    name: OPA Policy Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

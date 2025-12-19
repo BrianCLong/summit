@@ -50,7 +50,7 @@ jobs:
             --argjson linear $( [ "$LINEAR" = "true" ] && echo true || echo false ) \
             --argjson reviews ${REVIEWS:-1} \
             '{
-              required_status_checks: { strict: true, contexts: ["test:golden-path"] },
+              required_status_checks: { strict: true, contexts: ["Smoke Tests (Golden Path)", "OPA Policy Check", "Static Checks & Security"] },
               enforce_admins: $enforce_admins,
               required_pull_request_reviews: { required_approving_review_count: $reviews },
               restrictions: null,
