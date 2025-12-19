@@ -120,20 +120,20 @@ export const aiJobsTotal = new client.Counter({
 });
 
 // LLM Metrics
-const llmRequestDuration = new client.Histogram({
+export const llmRequestDuration = new client.Histogram({
   name: 'llm_request_duration_seconds',
   help: 'Duration of LLM requests in seconds',
   labelNames: ['provider', 'model', 'status'],
   buckets: [0.5, 1, 2, 5, 10, 20, 60],
 });
 
-const llmTokensTotal = new client.Counter({
+export const llmTokensTotal = new client.Counter({
   name: 'llm_tokens_total',
   help: 'Total number of tokens processed',
   labelNames: ['provider', 'model', 'type'], // type: prompt, completion
 });
 
-const llmRequestsTotal = new client.Counter({
+export const llmRequestsTotal = new client.Counter({
   name: 'llm_requests_total',
   help: 'Total number of LLM requests',
   labelNames: ['provider', 'model', 'status'],
@@ -442,6 +442,24 @@ export const maestroMttrHours = new client.Histogram({
   buckets: [0.1, 0.5, 1, 4, 24],
 });
 
+// Maestro Orchestration Health Metrics
+export const maestroDagExecutionDurationSeconds = new client.Histogram({
+  name: 'maestro_dag_execution_duration_seconds',
+  help: 'Duration of Maestro DAG execution in seconds',
+  labelNames: ['dag_id', 'status', 'tenant_id'],
+  buckets: [1, 5, 10, 30, 60, 300, 600],
+});
+
+export const maestroJobExecutionDurationSeconds = new client.Histogram({
+  name: 'maestro_job_execution_duration_seconds',
+  help: 'Duration of Maestro Job execution in seconds',
+  labelNames: ['job_type', 'status', 'tenant_id'],
+  buckets: [0.1, 0.5, 1, 5, 10, 30, 60],
+});
+
+register.registerMetric(maestroDagExecutionDurationSeconds);
+register.registerMetric(maestroJobExecutionDurationSeconds);
+
 register.registerMetric(graphExpandRequestsTotal);
 register.registerMetric(aiRequestTotal);
 register.registerMetric(resolverLatencyMs);
@@ -483,6 +501,8 @@ export const metrics = {
   maestroPrLeadTimeHours,
   maestroChangeFailureRate,
   maestroMttrHours,
+  maestroDagExecutionDurationSeconds,
+  maestroJobExecutionDurationSeconds,
   httpRequestDuration,
   httpRequestsTotal,
   graphqlRequestDuration,
