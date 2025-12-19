@@ -185,6 +185,7 @@ const startServer = async () => {
 
   // Initialize Socket.IO
   const io = initSocket(httpServer);
+  const { shutdownSocket } = await import('./realtime/socket.js');
 
   const { closeNeo4jDriver } = await import('./db/neo4j.js');
   const { closePostgresPool } = await import('./db/postgres.js');
@@ -195,7 +196,7 @@ const startServer = async () => {
     logger.info(`Shutting down. Signal: ${sig}`);
     await stopOTEL();
     wss.close();
-    io.close(); // Close Socket.IO server
+    await shutdownSocket(); // Graceful Socket.IO shutdown
     streamingRateLimiter.destroy();
     if (stopKafkaConsumer) await stopKafkaConsumer(); // WAR-GAMED SIMULATION - Stop Kafka Consumer
     await Promise.allSettled([
