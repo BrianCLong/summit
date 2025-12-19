@@ -9,6 +9,7 @@ import { TEST_API_KEY } from '../src/api-keys';
 import { stopObservability } from '../src/observability';
 
 const eventsPath = path.join(__dirname, 'fixtures', 'api-events.log');
+const auditPath = path.join(__dirname, 'fixtures', 'audit-bus.log');
 
 let opaServer: Server;
 
@@ -30,6 +31,9 @@ afterAll(async () => {
   if (fs.existsSync(eventsPath)) {
     fs.unlinkSync(eventsPath);
   }
+  if (fs.existsSync(auditPath)) {
+    fs.unlinkSync(auditPath);
+  }
   await stopObservability();
 });
 
@@ -37,9 +41,13 @@ beforeEach(() => {
   if (fs.existsSync(eventsPath)) {
     fs.unlinkSync(eventsPath);
   }
+  if (fs.existsSync(auditPath)) {
+    fs.unlinkSync(auditPath);
+  }
   process.env.API_EVENT_LOG = eventsPath;
   process.env.API_RATE_WINDOW_MS = '1000';
   process.env.API_QUOTA_WINDOW_MS = '60000';
+  process.env.AUDIT_LOG_PATH = auditPath;
 });
 
 afterEach(() => {
@@ -48,6 +56,7 @@ afterEach(() => {
   delete process.env.API_RATE_WINDOW_MS;
   delete process.env.API_QUOTA_LIMIT;
   delete process.env.API_QUOTA_WINDOW_MS;
+  delete process.env.AUDIT_LOG_PATH;
 });
 
 describe('external decision API', () => {
@@ -73,6 +82,14 @@ describe('external decision API', () => {
       .map((line) => JSON.parse(line));
     expect(events[0].apiMethod).toBe('companyos.decisions.check');
     expect(events[0].statusCode).toBe(200);
+
+    const auditLog = fs
+      .readFileSync(auditPath, 'utf8')
+      .trim()
+      .split('\n')
+      .map((line) => JSON.parse(line));
+    expect(auditLog[0].event.action).toBe('dataset:read');
+    expect(auditLog[0].event.traceId).toBe(res.body.trace_id);
   });
 
   it('enforces per-key rate limits', async () => {

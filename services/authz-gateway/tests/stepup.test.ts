@@ -24,11 +24,15 @@ describe('StepUpManager', () => {
       classification: 'confidential',
       tenantId: 'tenantA',
     });
+    const credential = challenge.allowCredentials[0];
+    if (!credential) {
+      throw new Error('challenge did not include a credential');
+    }
     const signature = sign(challenge.challenge);
     const elevation = manager.verifyResponse(
       'alice',
       {
-        credentialId: challenge.allowCredentials[0].id,
+        credentialId: credential.id,
         challenge: challenge.challenge,
         signature,
       },
@@ -41,7 +45,7 @@ describe('StepUpManager', () => {
       manager.verifyResponse(
         'alice',
         {
-          credentialId: challenge.allowCredentials[0].id,
+          credentialId: credential.id,
           challenge: challenge.challenge,
           signature,
         },
@@ -57,13 +61,17 @@ describe('StepUpManager', () => {
       sessionId: 'session-1',
       requestedAction: 'dataset:read',
     });
+    const credential = challenge.allowCredentials[0];
+    if (!credential) {
+      throw new Error('challenge did not include a credential');
+    }
     now += 20;
     const signature = sign(challenge.challenge);
     expect(() =>
       manager.verifyResponse(
         'alice',
         {
-          credentialId: challenge.allowCredentials[0].id,
+          credentialId: credential.id,
           challenge: challenge.challenge,
           signature,
         },
@@ -78,12 +86,16 @@ describe('StepUpManager', () => {
       sessionId: 'session-1',
       requestedAction: 'dataset:read',
     });
+    const credential = challenge.allowCredentials[0];
+    if (!credential) {
+      throw new Error('challenge did not include a credential');
+    }
     const signature = sign(challenge.challenge);
     expect(() =>
       manager.verifyResponse(
         'alice',
         {
-          credentialId: challenge.allowCredentials[0].id,
+          credentialId: credential.id,
           challenge: challenge.challenge,
           signature,
         },

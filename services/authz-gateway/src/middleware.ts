@@ -3,6 +3,7 @@ import type { JWTPayload } from 'jose';
 import pino from 'pino';
 import { authorize } from './policy';
 import { log } from './audit';
+import { createTraceId } from './events';
 import { sessionManager } from './session';
 import type { AttributeService } from './attribute-service';
 import type {
@@ -105,13 +106,28 @@ export function requireAuth(
           ),
         };
         const decision = await authorize(input);
+        const traceId =
+          (typeof (req as Request & { id?: unknown }).id === 'string' &&
+            (req as Request & { id?: string }).id) ||
+          (Array.isArray(req.headers['x-request-id'])
+            ? req.headers['x-request-id'][0]
+            : (req.headers['x-request-id'] as string | undefined)) ||
+          createTraceId();
         await log({
           subject: String(payload.sub || ''),
           action: options.action,
-          resource: JSON.stringify(resource),
+          resource: resource.id,
           tenantId: subject.tenantId,
           allowed: decision.allowed,
           reason: decision.reason,
+          obligations: decision.obligations,
+          resourceAttributes: resource,
+          traceId,
+          apiMethod: 'authz.requireAuth',
+          context: {
+            path: req.path,
+            method: req.method,
+          },
         });
         if (!decision.allowed) {
           if (decision.obligations.length > 0) {
