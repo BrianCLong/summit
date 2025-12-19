@@ -1,6 +1,7 @@
 export type FeatureKey =
   | 'maestro.newRunConsole'
-  | 'dashboard.realtime';
+  | 'dashboard.realtime'
+  | 'ui.workspaces';
 
 export interface WebConfig {
   apiBaseUrl: string;
@@ -52,6 +53,7 @@ const config: WebConfig = {
   features: {
     'maestro.newRunConsole': getEnv('VITE_ENABLE_NEW_MAESTRO_RUN_CONSOLE') === 'true',
     'dashboard.realtime': getEnv('VITE_ENABLE_REALTIME_DASHBOARD') === 'true',
+    'ui.workspaces': getEnv('VITE_UI_WORKSPACES') === 'true',
   },
   integrations: {
     github: {
@@ -67,6 +69,11 @@ const config: WebConfig = {
 };
 
 export function isFeatureEnabled(key: FeatureKey): boolean {
+  if (typeof localStorage !== 'undefined') {
+    const override = localStorage.getItem(`feature.${key}`)
+    if (override === 'true') return true
+    if (override === 'false') return false
+  }
   return config.features[key] ?? false;
 }
 
