@@ -6,6 +6,7 @@
 import logger from '../utils/logger.js';
 import { applicationErrors } from '../monitoring/metrics.js';
 import { otelService } from '../monitoring/opentelemetry.js';
+import { CircuitBreaker } from '../utils/CircuitBreaker.js';
 
 // Global history buffer for the "Prompt Activity Monitor"
 // Stores the last 50 interactions across all LLMService instances.
@@ -40,6 +41,22 @@ class LLMService {
       totalTokensGenerated: 0,
       averageTokensPerCompletion: 0,
     };
+
+    // Initialize Circuit Breaker
+    // 5 failures, 60s cooldown
+    // Using a static map to ensure shared circuit breaker state across instances if they are not singletons
+    if (!LLMService.circuitBreakers) {
+      LLMService.circuitBreakers = new Map();
+    }
+    const breakerKey = `llm-${this.config.provider}`;
+    if (!LLMService.circuitBreakers.has(breakerKey)) {
+       LLMService.circuitBreakers.set(breakerKey, new CircuitBreaker(
+        breakerKey,
+        5,
+        60000
+      ));
+    }
+    this.circuitBreaker = LLMService.circuitBreakers.get(breakerKey);
   }
 
   /**
@@ -66,10 +83,19 @@ class LLMService {
       throw new Error('Prompt is required');
     }
 
+    if (!this.circuitBreaker.canExecute()) {
+        const error = new Error(`LLM Service Circuit Breaker Open for ${this.config.provider}`);
+        logger.warn(error.message);
+        throw error;
+    }
+
     const startTime = Date.now();
     let attempt = 0;
+    // Base delay 100ms
+    let delay = 100;
+    const maxDelay = 1600;
 
-    while (attempt < this.config.maxRetries) {
+    while (attempt <= this.config.maxRetries) {
       try {
         let response;
 
@@ -123,11 +149,13 @@ class LLMService {
           status: 'success',
         });
 
+        this.circuitBreaker.recordSuccess();
         return response.content;
       } catch (error) {
         attempt++;
+        this.circuitBreaker.recordFailure(error);
 
-        if (attempt >= this.config.maxRetries) {
+        if (attempt > this.config.maxRetries) {
           this.metrics.errorCount++;
           applicationErrors
             .labels('llm_service', 'CompletionError', 'error')
@@ -161,10 +189,13 @@ class LLMService {
           error: error.message,
         });
 
-        // Exponential backoff
+        // Exponential backoff with jitter
+        const jitter = Math.random() * 10;
+        const waitTime = Math.min(delay, maxDelay) + jitter;
         await new Promise((resolve) =>
-          setTimeout(resolve, Math.pow(2, attempt) * 1000),
+          setTimeout(resolve, waitTime)
         );
+        delay = Math.min(delay * 2, maxDelay);
       }
     }
   }
@@ -181,6 +212,10 @@ class LLMService {
 
     if (!Array.isArray(messages) || messages.length === 0) {
       throw new Error('Messages array is required');
+    }
+
+    if (!this.circuitBreaker.canExecute()) {
+        throw new Error(`LLM Service Circuit Breaker Open for ${this.config.provider}`);
     }
 
     const startTime = Date.now();
@@ -219,10 +254,12 @@ class LLMService {
         status: 'success',
       });
 
+      this.circuitBreaker.recordSuccess();
       return response.content;
     } catch (error) {
       this.metrics.errorCount++;
       applicationErrors.labels('llm_service', 'ChatError', 'error').inc();
+      this.circuitBreaker.recordFailure(error);
 
       logger.error('LLM chat failed', {
         provider: this.config.provider,
@@ -457,9 +494,10 @@ Answer:`;
    */
   getHealth() {
     return {
-      status: 'healthy',
+      status: this.circuitBreaker.getState() === 'open' ? 'degraded' : 'healthy',
       provider: this.config.provider,
       model: this.config.model,
+      circuitState: this.circuitBreaker.getState(),
       metrics: {
         totalCompletions: this.metrics.totalCompletions,
         averageLatency: Math.round(this.metrics.averageLatency),

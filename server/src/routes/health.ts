@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
-import { logger } from '../utils/logger.js';
+import logger from '../utils/logger.js';
+import LLMService from '../services/LLMService.js';
 
 const router = Router();
 
@@ -39,6 +40,7 @@ router.get('/health/detailed', async (_req: Request, res: Response) => {
       neo4j: 'unknown',
       postgres: 'unknown',
       redis: 'unknown',
+      llm: 'unknown',
     },
     memory: {
       used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
@@ -48,10 +50,18 @@ router.get('/health/detailed', async (_req: Request, res: Response) => {
     errors: [] as ServiceHealthError[],
   };
 
+  const timeoutPromise = (ms: number, name: string) =>
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error(`${name} health check timed out`)), ms)
+    );
+
   // Check Neo4j connection
   try {
-    const neo4j = (await import('../db/neo4jConnection.js')).default;
-    await neo4j.getDriver().verifyConnectivity();
+    const check = async () => {
+        const { getNeo4jDriver } = await import('../config/database.js');
+        await getNeo4jDriver().verifyConnectivity();
+    };
+    await Promise.race([check(), timeoutPromise(10000, 'Neo4j')]);
     health.services.neo4j = 'healthy';
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : 'Connection failed';
@@ -62,14 +72,20 @@ router.get('/health/detailed', async (_req: Request, res: Response) => {
       error: errorMsg,
       timestamp: new Date().toISOString(),
     });
-    logger.error({ error, service: 'neo4j' }, 'Neo4j health check failed');
+    logger.error('Neo4j health check failed', { error, service: 'neo4j' });
   }
 
   // Check PostgreSQL connection
   try {
-    const { getPostgresPool } = await import('../db/postgres.js');
-    const pool = getPostgresPool();
-    await pool.query('SELECT 1');
+    const check = async () => {
+        const { getPostgresPool } = await import('../db/postgres.js');
+        const pool = getPostgresPool();
+        // healthCheck returns status array, we want to know if all are healthy
+        const snapshots = await pool.healthCheck();
+        const allHealthy = snapshots.every(s => s.healthy);
+        if (!allHealthy) throw new Error('One or more Postgres pools unhealthy');
+    };
+    await Promise.race([check(), timeoutPromise(10000, 'PostgreSQL')]);
     health.services.postgres = 'healthy';
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : 'Connection failed';
@@ -80,14 +96,17 @@ router.get('/health/detailed', async (_req: Request, res: Response) => {
       error: errorMsg,
       timestamp: new Date().toISOString(),
     });
-    logger.error({ error, service: 'postgres' }, 'PostgreSQL health check failed');
+    logger.error('PostgreSQL health check failed', { error, service: 'postgres' });
   }
 
   // Check Redis connection
   try {
-    const { getRedisClient } = await import('../db/redis.js');
-    const redis = getRedisClient();
-    await redis.ping();
+    const check = async () => {
+        const { getRedisClient } = await import('../config/database.js');
+        const redis = getRedisClient();
+        if (redis) await redis.ping();
+    };
+    await Promise.race([check(), timeoutPromise(10000, 'Redis')]);
     health.services.redis = 'healthy';
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : 'Connection failed';
@@ -98,7 +117,35 @@ router.get('/health/detailed', async (_req: Request, res: Response) => {
       error: errorMsg,
       timestamp: new Date().toISOString(),
     });
-    logger.error({ error, service: 'redis' }, 'Redis health check failed');
+    logger.error('Redis health check failed', { error, service: 'redis' });
+  }
+
+  // Check LLM Service
+  try {
+    // LLMService is a class, we need an instance or static check.
+    // The previous implementation used an instance.
+    // Assuming we can instantiate a lightweight one or get a singleton if existed.
+    // For now, let's create a temporary instance to check status or configuration.
+    // Ideally, this should be a singleton exported from a module.
+    // Given the previous file content of LLMService.js, it's a class.
+    // We will check if we can make a test call or just check config.
+    // For health check, checking the circuit breaker state is good.
+    const llmService = new LLMService();
+    const llmHealth = llmService.getHealth();
+    if (llmHealth.status !== 'healthy') {
+        throw new Error(`LLM Service degraded: ${llmHealth.circuitState}`);
+    }
+    health.services.llm = 'healthy';
+  } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'LLM check failed';
+      health.services.llm = 'unhealthy';
+      health.status = 'degraded'; // LLM failure might not be critical for all routes
+      errors.push({
+          service: 'llm',
+          error: errorMsg,
+          timestamp: new Date().toISOString()
+      });
+      logger.error('LLM health check failed', { error, service: 'llm' });
   }
 
   // Include errors in response for debugging
@@ -117,12 +164,12 @@ router.get('/health/ready', async (_req: Request, res: Response) => {
 
   // Check if critical services are available
   try {
-    const neo4j = (await import('../db/neo4jConnection.js')).default;
-    await neo4j.getDriver().verifyConnectivity();
+    const { getNeo4jDriver } = await import('../config/database.js');
+    await getNeo4jDriver().verifyConnectivity();
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'Unknown error';
     failures.push(`Neo4j: ${msg}`);
-    logger.warn({ error }, 'Readiness check failed: Neo4j unavailable');
+    logger.warn('Readiness check failed: Neo4j unavailable', { error });
   }
 
   try {
@@ -132,7 +179,7 @@ router.get('/health/ready', async (_req: Request, res: Response) => {
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'Unknown error';
     failures.push(`PostgreSQL: ${msg}`);
-    logger.warn({ error }, 'Readiness check failed: PostgreSQL unavailable');
+    logger.warn('Readiness check failed: PostgreSQL unavailable', { error });
   }
 
   if (failures.length > 0) {

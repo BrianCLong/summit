@@ -3,7 +3,9 @@ import { performance } from 'node:perf_hooks';
 // @ts-ignore - pg type imports
 import { Pool, QueryConfig, QueryResult, PoolClient } from 'pg';
 import dotenv from 'dotenv';
-import baseLogger from '../config/logger';
+import baseLogger from '../config/logger.js';
+import { CircuitBreaker, CircuitState } from '../utils/CircuitBreaker.js';
+import { dbConnectionsActive, dbQueryDuration, dbQueriesTotal, applicationErrors } from '../monitoring/metrics.js';
 
 dotenv.config();
 
@@ -42,6 +44,9 @@ export interface ManagedPostgresPool {
   on: Pool['on'];
   healthCheck: () => Promise<PoolHealthSnapshot[]>;
   slowQueryInsights: () => SlowQueryInsight[];
+  totalCount: number;
+  idleCount: number;
+  waitingCount: number;
 }
 
 interface SlowQueryInsight {
@@ -52,25 +57,30 @@ interface SlowQueryInsight {
   maxDurationMs: number;
 }
 
-type CircuitState = 'closed' | 'half-open' | 'open';
-
 const logger = baseLogger.child({ name: 'postgres-pool' });
 
 const DEFAULT_WRITE_POOL_SIZE = parseInt(
-  process.env.PG_WRITE_POOL_SIZE ?? '24',
+  process.env.PG_WRITE_POOL_SIZE ?? '50', // Updated max to 50
   10,
 );
 const DEFAULT_READ_POOL_SIZE = parseInt(
   process.env.PG_READ_POOL_SIZE ?? '60',
   10,
 );
+const DEFAULT_POOL_MIN = parseInt(
+    process.env.PG_POOL_MIN ?? '10', // Updated min to 10
+    10
+);
+
 const MAX_RETRIES = parseInt(process.env.PG_QUERY_MAX_RETRIES ?? '3', 10);
+
+// Updated base delay to 100ms
 const RETRY_BASE_DELAY_MS = parseInt(
-  process.env.PG_RETRY_BASE_DELAY_MS ?? '40',
+  process.env.PG_RETRY_BASE_DELAY_MS ?? '100',
   10,
 );
 const RETRY_MAX_DELAY_MS = parseInt(
-  process.env.PG_RETRY_MAX_DELAY_MS ?? '500',
+  process.env.PG_RETRY_MAX_DELAY_MS ?? '1600',
   10,
 );
 const READ_TIMEOUT_MS = parseInt(process.env.PG_READ_TIMEOUT_MS ?? '5000', 10);
@@ -98,8 +108,9 @@ const CIRCUIT_BREAKER_FAILURE_THRESHOLD = parseInt(
   process.env.PG_CIRCUIT_BREAKER_FAILURE_THRESHOLD ?? '5',
   10,
 );
+// Updated cooldown to 60s
 const CIRCUIT_BREAKER_COOLDOWN_MS = parseInt(
-  process.env.PG_CIRCUIT_BREAKER_COOLDOWN_MS ?? '30000',
+  process.env.PG_CIRCUIT_BREAKER_COOLDOWN_MS ?? '60000',
   10,
 );
 
@@ -118,6 +129,10 @@ const POOL_MONITOR_INTERVAL_MS = parseInt(
 );
 const WAIT_QUEUE_THRESHOLD = parseInt(
   process.env.PG_WAIT_QUEUE_THRESHOLD ?? '20',
+  10,
+);
+const CONNECT_TIMEOUT_MS = parseInt(
+  process.env.PG_CONNECT_TIMEOUT_MS ?? '5000',
   10,
 );
 
@@ -140,81 +155,6 @@ interface PoolConfig {
 // Extend PoolClient to include connectedAt
 interface ExtendedPoolClient extends PoolClient {
   connectedAt?: number;
-}
-
-class CircuitBreaker {
-  private failureCount = 0;
-  private state: CircuitState = 'closed';
-  private openUntil = 0;
-  private lastError?: Error;
-
-  constructor(
-    private readonly name: string,
-    private readonly failureThreshold: number,
-    private readonly cooldownMs: number,
-  ) {}
-
-  canExecute(): boolean {
-    if (this.state === 'open') {
-      if (Date.now() >= this.openUntil) {
-        this.state = 'half-open';
-        logger.warn(
-          { pool: this.name },
-          'PostgreSQL circuit breaker half-open',
-        );
-        return true;
-      }
-      return false;
-    }
-
-    return true;
-  }
-
-  recordSuccess(): void {
-    if (this.state !== 'closed' || this.failureCount !== 0) {
-      logger.info({ pool: this.name }, 'PostgreSQL circuit breaker reset');
-    }
-    this.failureCount = 0;
-    this.state = 'closed';
-    this.openUntil = 0;
-    this.lastError = undefined;
-  }
-
-  recordFailure(error: Error): void {
-    this.failureCount += 1;
-    this.lastError = error;
-
-    if (this.failureCount >= this.failureThreshold) {
-      this.state = 'open';
-      this.openUntil = Date.now() + this.cooldownMs;
-      logger.error(
-        { pool: this.name, failureCount: this.failureCount, err: error },
-        'PostgreSQL circuit breaker opened',
-      );
-    } else if (this.state === 'half-open') {
-      this.state = 'open';
-      this.openUntil = Date.now() + this.cooldownMs;
-      logger.error(
-        { pool: this.name, err: error },
-        'PostgreSQL circuit breaker re-opened while half-open',
-      );
-    }
-  }
-
-  getState(): CircuitState {
-    if (this.state === 'open' && Date.now() >= this.openUntil) {
-      return 'half-open';
-    }
-    return this.state;
-  }
-
-  getFailureCount(): number {
-    return this.failureCount;
-  }
-
-  getLastError(): Error | undefined {
-    return this.lastError;
-  }
 }
 
 class PoolMonitor {
@@ -252,6 +192,9 @@ class PoolMonitor {
       const waiting = wrapper.pool.waitingCount ?? 0;
       const active = total - idle;
 
+      // Update Prometheus Metrics
+      dbConnectionsActive.labels(wrapper.name).set(active);
+
       // Log pool stats
       logger.debug(
         {
@@ -274,10 +217,8 @@ class PoolMonitor {
           },
           'PostgreSQL Pool Exhaustion Risk',
         );
+        applicationErrors.labels('postgres', 'PoolExhaustion', 'warning').inc();
       }
-
-      // Proactive health check on idle connections could be implemented here
-      // But we rely on validateConnection on borrow for now to avoid storming
     }
   }
 }
@@ -349,12 +290,14 @@ function createPool(
   name: string,
   type: 'write' | 'read',
   max: number,
+  min: number = 0
 ): PoolWrapper {
   const pool = new Pool({
     ...config,
     max,
+    min, // Explicitly set min
     idleTimeoutMillis: IDLE_TIMEOUT_MS,
-    connectionTimeoutMillis: 5000,
+    connectionTimeoutMillis: CONNECT_TIMEOUT_MS,
     application_name: `summit-${type}-${process.env.CURRENT_REGION || 'global'}`,
     ssl:
       process.env.NODE_ENV === 'production'
@@ -395,12 +338,13 @@ function initializePools(): void {
     'write-primary',
     'write',
     DEFAULT_WRITE_POOL_SIZE,
+    DEFAULT_POOL_MIN // Use configured min
   );
   poolMonitor.register(writePoolWrapper);
 
   const replicaUrls = parseReadReplicaUrls();
   if (replicaUrls.length === 0) {
-    const pool = createPool(baseConfig, 'read-default', 'read', DEFAULT_READ_POOL_SIZE);
+    const pool = createPool(baseConfig, 'read-default', 'read', DEFAULT_READ_POOL_SIZE, DEFAULT_POOL_MIN);
     readPoolWrappers = [pool];
     poolMonitor.register(pool);
   } else {
@@ -410,6 +354,7 @@ function initializePools(): void {
         `read-replica-${idx + 1}`,
         'read',
         DEFAULT_READ_POOL_SIZE,
+        DEFAULT_POOL_MIN
       );
       poolMonitor.register(pool);
       return pool;
@@ -537,6 +482,15 @@ function createManagedPool(
     on,
     healthCheck,
     slowQueryInsights,
+    get totalCount() {
+        return writePool.pool.totalCount + readPools.reduce((acc, p) => acc + p.pool.totalCount, 0);
+    },
+    get idleCount() {
+        return writePool.pool.idleCount + readPools.reduce((acc, p) => acc + p.pool.idleCount, 0);
+    },
+    get waitingCount() {
+        return writePool.pool.waitingCount + readPools.reduce((acc, p) => acc + p.pool.waitingCount, 0);
+    }
   };
 }
 
@@ -576,9 +530,12 @@ async function executeManagedQuery({
     }
 
     try {
-      return await executeWithRetry(candidate, normalized, timeoutMs, label);
+      const result = await executeWithRetry(candidate, normalized, timeoutMs, label);
+      dbQueriesTotal.labels(candidate.name, label, 'success').inc();
+      return result;
     } catch (error) {
       lastError = error as Error;
+      dbQueriesTotal.labels(candidate.name, label, 'error').inc();
 
       if (!isRetryableError(error)) {
         break;
@@ -596,14 +553,21 @@ async function executeWithRetry(
   label: string,
 ): Promise<QueryResult<any>> {
   let attempt = 0;
+  // Start with configured base delay (100ms)
   let delay = RETRY_BASE_DELAY_MS;
 
   while (attempt <= MAX_RETRIES) {
     try {
+      const start = performance.now();
       const result = await withManagedClient(wrapper, timeoutMs, (client) =>
         executeQueryOnClient(client, normalizedQuery, wrapper, label),
       );
       wrapper.circuitBreaker.recordSuccess();
+
+      // Record query duration
+      const duration = (performance.now() - start) / 1000; // in seconds
+      dbQueryDuration.labels(wrapper.name, label).observe(duration);
+
       return result;
     } catch (error) {
       const err = error as Error;
@@ -613,8 +577,12 @@ async function executeWithRetry(
         throw err;
       }
 
+      // Explicit retry backoff sequence: 100, 200, 400, 800, 1600 (approx)
       const jitter = Math.random() * 10;
-      await delayAsync(Math.min(delay, RETRY_MAX_DELAY_MS) + jitter);
+      const waitTime = Math.min(delay, RETRY_MAX_DELAY_MS) + jitter;
+      logger.warn({ pool: wrapper.name, attempt, waitTime }, 'Retrying PostgreSQL query');
+
+      await delayAsync(waitTime);
       delay = Math.min(delay * 2, RETRY_MAX_DELAY_MS);
       attempt += 1;
     }
