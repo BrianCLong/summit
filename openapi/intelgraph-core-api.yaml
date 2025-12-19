@@ -436,10 +436,1199 @@ paths:
       responses:
         '201':
           description: Relationship created successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Relationship'
+
+  # Case Management
+  /cases:
+    post:
+      tags: [Cases]
+      summary: Create investigation case
+      description: Creates a new investigation case in draft status
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title:
+                  type: string
+                  example: 'Suspicious Network Activity Investigation'
+      responses:
+        '200':
+          description: Case created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Relationship'
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  case:
+                    $ref: '#/components/schemas/Case'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /cases/{caseId}:
+    get:
+      tags: [Cases]
+      summary: Get case details
+      description: Retrieve a case by ID
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Case details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  case:
+                    $ref: '#/components/schemas/Case'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /cases/{caseId}/approve:
+    post:
+      tags: [Cases]
+      summary: Approve case
+      description: Updates case status to approved and records audit entry
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Case approved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  case:
+                    $ref: '#/components/schemas/Case'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /cases/{caseId}/export:
+    get:
+      tags: [Cases]
+      summary: Export case bundle
+      description: Exports case data including evidence references and watermark metadata
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Case export bundle
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseExport'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  # Evidence
+  /evidence/{evidenceId}/annotations:
+    get:
+      tags: [Evidence]
+      summary: List evidence annotations
+      description: Retrieve annotations attached to a piece of evidence
+      parameters:
+        - name: evidenceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Annotation list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Annotation'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+    post:
+      tags: [Evidence]
+      summary: Create evidence annotation
+      description: Adds a new annotation to the evidence item
+      parameters:
+        - name: evidenceId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [range, note]
+              properties:
+                range:
+                  type: string
+                  example: '45-89'
+                note:
+                  type: string
+                  example: 'Correlates with external event'
+      responses:
+        '200':
+          description: Annotation created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  annotation:
+                    $ref: '#/components/schemas/Annotation'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /evidence/{evidenceId}/pdf:
+    get:
+      tags: [Evidence]
+      summary: Export evidence PDF
+      description: Generates a signed download URL for the evidence PDF
+      parameters:
+        - name: evidenceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Export URL generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  url:
+                    type: string
+                    format: uri
+                    example: '/downloads/evidence123.pdf'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  # Ingestion
+  /ingest/connectors:
+    get:
+      tags: [Ingest]
+      summary: List ingest connectors
+      description: Returns connectors supported by the ingestion service
+      security: []
+      responses:
+        '200':
+          description: Connector catalog
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Connector'
+
+  /ingest/start:
+    post:
+      tags: [Ingest]
+      summary: Start ingest job
+      description: Starts a new ingest job using the specified connector configuration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [connector]
+              properties:
+                connector:
+                  type: string
+                  example: twitter
+                config:
+                  type: object
+                  additionalProperties: true
+      responses:
+        '200':
+          description: Job accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  jobId:
+                    type: string
+                  connector:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+
+  /ingest/progress/{jobId}:
+    get:
+      tags: [Ingest]
+      summary: Get ingest job progress
+      description: Returns progress for an ingest job
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Job progress
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestJob'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /ingest/cancel/{jobId}:
+    post:
+      tags: [Ingest]
+      summary: Cancel ingest job
+      description: Cancels a queued or running ingest job
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Cancelled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  id:
+                    type: string
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /ingest/schema/{connectorId}:
+    get:
+      tags: [Ingest]
+      summary: Connector configuration schema
+      description: Returns JSON schema describing configuration fields for a connector
+      security: []
+      parameters:
+        - name: connectorId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Connector schema
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectorSchema'
+
+  /ingest/dry-run/{connectorId}:
+    post:
+      tags: [Ingest]
+      summary: Validate connector configuration
+      description: Validates configuration without starting ingestion
+      parameters:
+        - name: connectorId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Configuration valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  warnings:
+                    type: array
+                    items:
+                      type: string
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+
+  # Triage
+  /triage/suggestions:
+    get:
+      tags: [Triage]
+      summary: List triage suggestions
+      description: Retrieves AI-generated suggestions in reverse chronological order
+      responses:
+        '200':
+          description: Suggestion list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Suggestion'
+    post:
+      tags: [Triage]
+      summary: Create triage suggestion
+      description: Creates a new triage suggestion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum: [link, anomaly]
+                  default: link
+                data:
+                  type: object
+                  additionalProperties: true
+      responses:
+        '200':
+          description: Suggestion created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  suggestion:
+                    $ref: '#/components/schemas/Suggestion'
+
+  /triage/suggestions/{suggestionId}/approve:
+    post:
+      tags: [Triage]
+      summary: Approve suggestion
+      description: Approves the suggestion and marks it as ready to materialize
+      parameters:
+        - name: suggestionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Suggestion approved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  suggestion:
+                    $ref: '#/components/schemas/Suggestion'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /triage/suggestions/{suggestionId}/materialize:
+    post:
+      tags: [Triage]
+      summary: Materialize suggestion
+      description: Applies an approved suggestion to the graph
+      parameters:
+        - name: suggestionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Suggestion materialized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  suggestion:
+                    $ref: '#/components/schemas/Suggestion'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  # Analytics
+  /analytics/link-prediction:
+    get:
+      tags: [Analytics]
+      summary: Predict potential links
+      description: Predicts potential connections between the provided seed entities
+      parameters:
+        - name: seeds
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Comma separated entity IDs
+      responses:
+        '200':
+          description: Prediction results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/LinkPrediction'
+
+  # Copilot
+  /copilot/estimate:
+    post:
+      tags: [Copilot]
+      summary: Estimate prompt cost
+      description: Estimates resource cost for a natural language prompt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                prompt:
+                  type: string
+      responses:
+        '200':
+          description: Cost estimate
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CostEstimate'
+
+  /copilot/classify:
+    post:
+      tags: [Copilot]
+      summary: Classify prompt safety
+      description: Flags policy-violating content in prompts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                prompt:
+                  type: string
+      responses:
+        '200':
+          description: Classification result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafetyClassification'
+
+  /copilot/cookbook:
+    post:
+      tags: [Copilot]
+      summary: Retrieve query templates
+      description: Returns reusable query templates for common tasks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                topic:
+                  type: string
+                  example: analytics
+      responses:
+        '200':
+          description: Templates returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  topic:
+                    type: string
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CookbookQuery'
+
+  # Administration
+  /admin/tenants:
+    get:
+      tags: [Admin]
+      summary: List tenants
+      description: Returns all tenants (admin only)
+      responses:
+        '200':
+          description: Tenants returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Tenant'
+
+  /admin/users:
+    get:
+      tags: [Admin]
+      summary: List users
+      description: Returns all users (admin only)
+      responses:
+        '200':
+          description: Users returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+
+  /admin/audit:
+    get:
+      tags: [Admin]
+      summary: Query audit events
+      description: Returns audit events filtered by optional query and limit
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 200
+            maximum: 1000
+        - name: query
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Audit log entries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AuditEvent'
+
+  /admin/audit/record:
+    post:
+      tags: [Admin]
+      summary: Record external audit event
+      description: Records an external audit event using signed headers
+      security: []
+      parameters:
+        - name: x-audit-token
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: x-audit-nonce
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: x-audit-ts
+          in: header
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                details:
+                  type: object
+                  additionalProperties: true
+      responses:
+        '201':
+          description: Event recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '400':
+          description: Stale timestamp or missing nonce
+          content:
+            text/plain:
+              schema:
+                type: string
+        '401':
+          description: Invalid audit token
+          content:
+            text/plain:
+              schema:
+                type: string
+        '409':
+          description: Replay detected
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /admin/flags:
+    get:
+      tags: [Admin]
+      summary: Get feature flags
+      description: Returns current feature flag settings
+      responses:
+        '200':
+          description: Feature flags
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  flags:
+                    $ref: '#/components/schemas/FeatureFlag'
+
+  /admin/flags/{key}:
+    put:
+      tags: [Admin]
+      summary: Update feature flag
+      description: Sets a feature flag value
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                value:
+                  type: boolean
+      responses:
+        '200':
+          description: Flag updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  key:
+                    type: string
+                  value:
+                    type: boolean
+
+  /admin/policy:
+    get:
+      tags: [Admin]
+      summary: Get OPA policy
+      description: Returns the current Rego policy (development only)
+      responses:
+        '200':
+          description: Policy returned
+          content:
+            text/plain:
+              schema:
+                type: string
+
+    put:
+      tags: [Admin]
+      summary: Update OPA policy
+      description: Updates the Rego policy source (development only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+      responses:
+        '200':
+          description: Policy updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+
+  # Versioning
+  /versioning/versions:
+    get:
+      tags: [Versioning]
+      summary: List API versions
+      description: Returns current, latest, and supported API versions
+      security: []
+      responses:
+        '200':
+          description: Version manifest
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  current:
+                    type: string
+                  latest:
+                    type: string
+                  active:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        version:
+                          type: string
+                        status:
+                          type: string
+                          enum: [active, stable, deprecated, sunset]
+                        releaseDate:
+                          type: string
+                          format: date
+                        description:
+                          type: string
+                        breaking:
+                          type: boolean
+                  deprecated:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        version:
+                          type: string
+                        deprecationDate:
+                          type: string
+                          format: date
+                        sunsetDate:
+                          type: string
+                          format: date
+                        description:
+                          type: string
+
+  /versioning/versions/{version}:
+    get:
+      tags: [Versioning]
+      summary: Get version details
+      description: Returns metadata for a specific API version
+      security: []
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Version metadata
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version:
+                    type: string
+                  status:
+                    type: string
+                  releaseDate:
+                    type: string
+                    format: date
+                  deprecationDate:
+                    type: string
+                    format: date
+                  sunsetDate:
+                    type: string
+                    format: date
+                  description:
+                    type: string
+                  breaking:
+                    type: boolean
+                  changelog:
+                    type: array
+                    items:
+                      type: object
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /versioning/compatibility:
+    get:
+      tags: [Versioning]
+      summary: Version compatibility matrix
+      description: Returns compatibility across supported versions
+      security: []
+      responses:
+        '200':
+          description: Compatibility matrix
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: object
+                  additionalProperties:
+                    type: object
+                    properties:
+                      compatible:
+                        type: boolean
+                      autoMigrate:
+                        type: boolean
+                      warnings:
+                        type: array
+                        items:
+                          type: string
+
+  /versioning/compatibility/{fromVersion}/{toVersion}:
+    get:
+      tags: [Versioning]
+      summary: Compatibility for two versions
+      description: Returns compatibility between two specific versions
+      security: []
+      parameters:
+        - name: fromVersion
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: toVersion
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Compatibility result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  from:
+                    type: string
+                  to:
+                    type: string
+                  compatible:
+                    type: boolean
+                  autoMigrate:
+                    type: boolean
+                  warnings:
+                    type: array
+                    items:
+                      type: string
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /versioning/changelog:
+    get:
+      tags: [Versioning]
+      summary: Get full changelog
+      description: Returns changelog across all API versions
+      security: []
+      parameters:
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [markdown, json]
+            default: markdown
+      responses:
+        '200':
+          description: Changelog content
+          content:
+            text/markdown:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+
+  /versioning/changelog/{version}:
+    get:
+      tags: [Versioning]
+      summary: Get changelog for version
+      description: Returns changelog for a specific version
+      security: []
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [json, markdown, html]
+            default: json
+      responses:
+        '200':
+          description: Changelog returned
+          content:
+            application/json:
+              schema:
+                type: object
+            text/markdown:
+              schema:
+                type: string
+            text/html:
+              schema:
+                type: string
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /versioning/docs/{version}:
+    get:
+      tags: [Versioning]
+      summary: Get documentation for version
+      description: Returns documentation for a specific API version
+      security: []
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [json, markdown]
+            default: json
+      responses:
+        '200':
+          description: Documentation returned
+          content:
+            application/json:
+              schema:
+                type: object
+            text/markdown:
+              schema:
+                type: string
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /versioning/openapi/{version}:
+    get:
+      tags: [Versioning]
+      summary: Get OpenAPI spec for version
+      description: Returns OpenAPI document for a specific API version
+      security: []
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OpenAPI document
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /versioning/migration/{fromVersion}/{toVersion}:
+    get:
+      tags: [Versioning]
+      summary: Migration guide
+      description: Returns migration guide between two versions
+      security: []
+      parameters:
+        - name: fromVersion
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: toVersion
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Migration guidance
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  fromVersion:
+                    type: string
+                  toVersion:
+                    type: string
+                  steps:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        title:
+                          type: string
+                        description:
+                          type: string
+                        breaking:
+                          type: boolean
+                  examples:
+                    type: array
+                    items:
+                      type: object
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /versioning/breaking-changes/{version}:
+    get:
+      tags: [Versioning]
+      summary: Breaking changes for version
+      description: Returns breaking changes for the specified API version
+      security: []
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Breaking changes list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version:
+                    type: string
+                  breakingChanges:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        description:
+                          type: string
+                        impact:
+                          type: string
+                        migration:
+                          type: string
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /versioning/status:
+    get:
+      tags: [Versioning]
+      summary: Versioning status
+      description: Returns overall versioning status and statistics
+      security: []
+      responses:
+        '200':
+          description: Versioning stats
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalVersions:
+                    type: integer
+                  activeVersions:
+                    type: integer
+                  deprecatedVersions:
+                    type: integer
+                  currentDefault:
+                    type: string
+                  latestVersion:
+                    type: string
+                  supportedVersions:
+                    type: array
+                    items:
+                      type: string
 
   # AI Enhancement Endpoints
   /ai/analyze:
@@ -641,11 +1830,15 @@ components:
           type: string
         role:
           type: string
-          enum: [user, analyst, admin]
+          enum:
+            [user, analyst, investigator, supervisor, admin, viewer]
         permissions:
           type: array
           items:
             type: string
+        tenantId:
+          type: string
+          example: default
         createdAt:
           type: string
           format: date-time
@@ -880,6 +2073,209 @@ components:
           type: object
           additionalProperties: true
 
+    Case:
+      type: object
+      required: [id, title, status, evidence]
+      properties:
+        id:
+          type: string
+          description: Unique case identifier
+        title:
+          type: string
+          description: Case title
+        status:
+          type: string
+          enum: [draft, open, approved, closed]
+        evidence:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    CaseExport:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          example: true
+        bundle:
+          type: object
+          properties:
+            id:
+              type: string
+            title:
+              type: string
+            status:
+              type: string
+            evidence:
+              type: array
+              items:
+                type: string
+            watermark:
+              type: object
+              properties:
+                ts:
+                  type: string
+                  format: date-time
+
+    Annotation:
+      type: object
+      required: [id, range, note]
+      properties:
+        id:
+          type: string
+        range:
+          type: string
+        note:
+          type: string
+        author:
+          type: string
+          format: email
+
+    Suggestion:
+      type: object
+      required: [id, type, data, status]
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [link, anomaly]
+        data:
+          type: object
+          additionalProperties: true
+        status:
+          type: string
+          enum: [new, approved, rejected, materialized]
+        score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+
+    IngestJob:
+      type: object
+      required: [id, connector, status, progress]
+      properties:
+        id:
+          type: string
+        connector:
+          type: string
+        status:
+          type: string
+          enum: [queued, running, completed, failed]
+        progress:
+          type: number
+          minimum: 0
+          maximum: 100
+
+    Connector:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+
+    ConnectorSchema:
+      type: object
+      properties:
+        required:
+          type: array
+          items:
+            type: string
+        properties:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              type:
+                type: string
+              format:
+                type: string
+              title:
+                type: string
+
+    FeatureFlag:
+      type: object
+      additionalProperties:
+        type: boolean
+
+    LinkPrediction:
+      type: object
+      properties:
+        a:
+          type: string
+        b:
+          type: string
+        score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+
+    CostEstimate:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        cost:
+          type: number
+          format: float
+
+    SafetyClassification:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        classification:
+          type: string
+          enum: [safe, unsafe]
+        reasons:
+          type: array
+          items:
+            type: string
+
+    CookbookQuery:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        query:
+          type: string
+
+    Tenant:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+
+    AuditEvent:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        userId:
+          type: string
+        action:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+        ip:
+          type: string
+          format: ipv4
+        tenantId:
+          type: string
+
     QueryResult:
       type: object
       properties:
@@ -987,6 +2383,9 @@ components:
         status:
           type: string
           enum: [healthy, degraded, unhealthy]
+        uptime:
+          type: number
+          description: Service uptime in seconds
         timestamp:
           type: string
           format: date-time
@@ -1053,6 +2452,11 @@ components:
         traceId:
           type: string
           description: Request trace ID for debugging
+        fields:
+          type: array
+          items:
+            type: string
+          description: Validation errors
 
   responses:
     UnauthorizedError:
@@ -1159,5 +2563,21 @@ tags:
     description: AI-powered analysis and insights
   - name: Collaboration
     description: Real-time collaboration features
+  - name: Cases
+    description: Investigation case management
+  - name: Evidence
+    description: Evidence annotations and exports
+  - name: Ingest
+    description: Data ingestion connectors and jobs
+  - name: Triage
+    description: AI-driven triage suggestions
+  - name: Analytics
+    description: Analytics and link prediction
+  - name: Copilot
+    description: Copilot safety and estimation
+  - name: Admin
+    description: Administrative and policy endpoints
+  - name: Versioning
+    description: API versioning and documentation
   - name: System
     description: System health and monitoring

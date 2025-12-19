@@ -5,5 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "echo skip"
+  },
+  "dependencies": {
+    "zod": "^4.2.1"
   }
 }
