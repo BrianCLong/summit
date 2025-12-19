@@ -18,6 +18,7 @@ env:
   SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
   SLO_ENVIRONMENT: production
   ROLLBACK_EVENT: slo-breach
+  BURN_RATE_THRESHOLD: "2.0"
 
 jobs:
   error-budget-check:
@@ -57,6 +58,7 @@ jobs:
 
           prom_url = os.environ.get("PROMETHEUS_URL", "").rstrip("/")
           prom_token = os.environ.get("PROMETHEUS_TOKEN")
+          burn_threshold = float(os.environ.get("BURN_RATE_THRESHOLD", "2.0"))
 
           with open("slo-config.yaml", "r", encoding="utf-8") as handle:
             slo_config = yaml.safe_load(handle)
@@ -72,6 +74,7 @@ jobs:
             target = float(objective.get("target", 0))
             query = objective.get("sli", {}).get("query", "")
             measured = None
+            burn_rate = None
             status = "unknown"
             source = prom_url or "manual-input"
 
@@ -95,6 +98,13 @@ jobs:
             else:
               status = "unavailable"
 
+            if measured is not None and target < 100:
+              error_budget = max(0.0001, 100 - target)
+              error_spend = max(0, 100 - measured)
+              burn_rate = error_spend / error_budget
+              if burn_rate > burn_threshold and status != "breach":
+                status = "burning"
+
             display_value = measured if measured is not None else "n/a"
             results.append(
               {
@@ -102,13 +112,18 @@ jobs:
                 "target": target,
                 "value": display_value,
                 "status": status,
+                "burn_rate": burn_rate,
                 "query": query,
                 "source": source,
               }
             )
 
-            if status == "breach":
-              failing.append(name)
+            if status in ("breach", "burning"):
+              detail = f"{name} ({status}"
+              if burn_rate is not None:
+                detail += f", burn={burn_rate:.2f}x"
+              detail += ")"
+              failing.append(detail)
 
           with open("slo-report.json", "w", encoding="utf-8") as handle:
             json.dump(results, handle, indent=2)
@@ -168,29 +183,43 @@ jobs:
           with open("slo-report.json", "r", encoding="utf-8") as handle:
             slo_results = json.load(handle)
 
-          breached = any(item.get("status") == "breach" for item in slo_results)
+          burn_threshold = float(os.environ.get("BURN_RATE_THRESHOLD", "2.0"))
+          breached = any(
+            item.get("status") in ("breach", "burning") for item in slo_results
+          )
 
           lines = [
             "# 📊 Error Budget Status Report",
             f"**Timestamp:** {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}",
             "",
             "## Service Level Objectives",
-            "| Metric | Current | Target | Status | Source |",
-            "|--------|---------|--------|--------|--------|",
+            f"Burn-rate alert threshold: **{burn_threshold:.2f}x** (short window)",
+            "| Metric | Current | Target | Burn Rate | Status | Source |",
+            "|--------|---------|--------|-----------|--------|--------|",
           ]
 
           for item in slo_results:
             status = item.get("status")
-            status_icon = "❌ BREACH" if status == "breach" else "✅ OK" if status == "ok" else "⚠️ unavailable"
+            status_icon = (
+              "❌ BREACH"
+              if status == "breach"
+              else "⚠️ BURNING"
+              if status == "burning"
+              else "✅ OK"
+              if status == "ok"
+              else "⚠️ unavailable"
+            )
             value = item.get("value", "n/a")
+            burn_rate = item.get("burn_rate")
+            burn_cell = f"{burn_rate:.2f}x" if burn_rate is not None else "n/a"
             lines.append(
-              f"| {item.get('name')} | {value} | ≥ {item.get('target')} | {status_icon} | {item.get('source')} |"
+              f"| {item.get('name')} | {value} | ≥ {item.get('target')} | {burn_cell} | {status_icon} | {item.get('source')} |"
             )
 
           if breached:
             lines.append("")
             lines.append("## Actions Required")
-            lines.append("- 🚨 One or more SLOs breached. Automatic rollback will be triggered.")
+            lines.append(f"- 🚨 One or more SLOs breached or burning error budget faster than {burn_threshold:.2f}x. Automatic rollback will be triggered.")
 
           with open("error-budget-report.md", "w", encoding="utf-8") as handle:
             handle.write("\n".join(lines))
