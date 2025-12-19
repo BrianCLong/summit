@@ -17,6 +17,8 @@ import { createHash, createVerify } from 'crypto';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
+import { emitVerificationTelemetry } from '../observability.js';
+
 // ============================================================================
 // Types & Interfaces
 // ============================================================================
@@ -242,6 +244,10 @@ export class SLSA3Verifier {
     const verified =
       violations.filter((v) => v.severity === 'critical').length === 0;
 
+    const sbomHash = provenance
+      ? this.extractSbomDigest(provenance)
+      : undefined;
+
     const result: SLSAVerificationResult = {
       verified,
       slsaLevel,
@@ -255,6 +261,25 @@ export class SLSA3Verifier {
       timestamp: new Date(),
       verificationDuration: Date.now() - startTime,
     };
+
+    emitVerificationTelemetry({
+      stage: 'verify',
+      actor: builderInfo?.id || sourceInfo?.repository,
+      imageRef,
+      commit: sourceInfo?.commit,
+      digest,
+      sbomHash,
+      policyOutcome: {
+        allowed: verified,
+        summary: verified ? 'slsa-policy-pass' : 'slsa-policy-block',
+        violations: violations.map((v) => `${v.code}:${v.message}`),
+      },
+      metadata: {
+        slsaLevel,
+        builder: builderInfo,
+        source: sourceInfo,
+      },
+    });
 
     // Cache successful results
     if (verified) {
@@ -637,6 +662,31 @@ export class SLSA3Verifier {
     ];
 
     return reproducibleBuildTypes.includes(buildType);
+  }
+
+  /**
+   * Extract SBOM digest from provenance byproducts or resolved dependencies
+   */
+  private extractSbomDigest(
+    provenance: SLSAProvenanceV1,
+  ): string | undefined {
+    const byproducts = provenance.predicate.runDetails.byproducts || [];
+    const sbomByproduct = byproducts.find((item) => {
+      const uri = item.uri?.toLowerCase() || '';
+      const mediaType = item.mediaType?.toLowerCase() || '';
+      return uri.includes('sbom') || mediaType.includes('sbom');
+    });
+
+    if (sbomByproduct?.digest?.sha256) {
+      return sbomByproduct.digest.sha256;
+    }
+
+    const resolved = provenance.predicate.buildDefinition.resolvedDependencies || [];
+    const sbomDependency = resolved.find((dep) =>
+      dep.uri?.toLowerCase().includes('sbom'),
+    );
+
+    return sbomDependency?.digest?.sha256;
   }
 
   /**

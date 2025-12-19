@@ -9,6 +9,7 @@
 import { Job } from 'bullmq';
 import { queueRegistry, QueueName } from '../config.js';
 import logger from '../../utils/logger.js';
+import { generateOrgVulnerabilityReport } from '../../security/vuln-weekly-report.js';
 
 const DAILY_CLEANUP_JOB = 'daily-cleanup';
 const HOURLY_ANALYTICS_JOB = 'hourly-analytics';
@@ -66,10 +67,16 @@ export async function weeklyReportProcessor(job: Job): Promise<void> {
   logger.info('Running weekly report job', { jobId: job.id });
 
   try {
+    const { reportPath, payload } = await generateOrgVulnerabilityReport();
     await generateWeeklyReport();
-    await sendReportEmails();
+    await sendReportEmails(reportPath);
 
-    logger.info('Weekly report completed', { jobId: job.id });
+    logger.info('Weekly report completed', {
+      jobId: job.id,
+      reportPath,
+      critical: payload.summary.criticalOpen,
+      expiringExceptions: payload.exceptions.expiringSoon.length,
+    });
   } catch (error) {
     logger.error('Weekly report failed', {
       jobId: job.id,
@@ -110,8 +117,9 @@ async function generateWeeklyReport(): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, 100));
 }
 
-async function sendReportEmails(): Promise<void> {
+async function sendReportEmails(reportPath: string): Promise<void> {
   logger.debug('Sending report emails');
+  logger.debug('Vulnerability weekly report ready', { reportPath });
   await new Promise((resolve) => setTimeout(resolve, 100));
 }
 

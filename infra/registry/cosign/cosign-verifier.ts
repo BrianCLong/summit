@@ -13,6 +13,8 @@ import { createHash } from 'crypto';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
+import { emitVerificationTelemetry } from '../observability.js';
+
 // ============================================================================
 // Types & Interfaces
 // ============================================================================
@@ -35,6 +37,7 @@ export interface SignatureInfo {
   signedAt: Date;
   payload: Record<string, unknown>;
   certificateChain?: string[];
+  rekorUuid?: string;
 }
 
 export interface AttestationInfo {
@@ -183,6 +186,29 @@ export class CosignVerifier {
       verificationDuration: Date.now() - startTime,
       errors,
     };
+
+    const rekorUuid = signatures.find((sig) => sig.rekorUuid)?.rekorUuid;
+    const sbomHash = attestations[0]?.predicate
+      ? JSON.stringify(attestations[0].predicate)
+      : undefined;
+
+    emitVerificationTelemetry({
+      stage: 'verify',
+      actor: signatures[0]?.subject || signatures[0]?.issuer,
+      imageRef,
+      digest,
+      sbomHash,
+      rekorUuid,
+      policyOutcome: {
+        allowed: verified,
+        summary: verified ? 'cosign-signature-verified' : 'cosign-verification-failed',
+        violations: errors.map((e) => `${e.code}:${e.message}`),
+      },
+      metadata: {
+        attestationCount: attestations.length,
+        signatureCount: signatures.length,
+      },
+    });
 
     // Cache successful results
     if (verified) {
@@ -481,6 +507,10 @@ export class CosignVerifier {
             subject: entry.optional?.Subject,
             signedAt: new Date(entry.optional?.['Bundle']?.SignedEntryTimestamp || Date.now()),
             payload: entry,
+            rekorUuid:
+              entry.optional?.Bundle?.Payload?.logID?.uuid ||
+              entry.optional?.Bundle?.Payload?.logId?.uuid ||
+              entry.optional?.Bundle?.Payload?.logID,
           });
         }
       }
