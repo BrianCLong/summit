@@ -12,17 +12,31 @@ RELEASE_NAME="${RELEASE_NAME:-intelgraph}"
 CHART_PATH="${CHART_PATH:-infra/helm/intelgraph}"
 IMAGE_TAG="${IMAGE_TAG:-latest}"
 PROMETHEUS_URL="${PROMETHEUS_URL:-http://prometheus.monitoring.svc.cluster.local:9090}"
+CANARY_FEATURE_FLAG="${CANARY_FEATURE_FLAG:-}"
 
 # Canary stages configuration
-CANARY_STAGES=(10 50 100)
-STAGE_DURATION_MINUTES=30
+if [ -n "${CANARY_STAGES_CSV:-}" ]; then
+    IFS=',' read -r -a CANARY_STAGES <<< "${CANARY_STAGES_CSV}"
+else
+    CANARY_STAGES=(10 50 100)
+fi
+
+STAGE_DURATION_MINUTES="${CANARY_STAGE_DURATION_MINUTES:-30}"
 SLO_CHECK_INTERVAL=30  # seconds
+
+HELM_CANARY_FLAG_ARGS=()
+if [ -n "${CANARY_FEATURE_FLAG}" ]; then
+    HELM_CANARY_FLAG_ARGS+=(--set-string canary.featureFlag="${CANARY_FEATURE_FLAG}")
+fi
 
 echo "🚀 IntelGraph Production Canary Deployment"
 echo "=========================================="
 echo "Namespace: $NAMESPACE"
 echo "Release: $RELEASE_NAME"
 echo "Image Tag: $IMAGE_TAG"
+if [ -n "${CANARY_FEATURE_FLAG}" ]; then
+    echo "Feature Flag: ${CANARY_FEATURE_FLAG}"
+fi
 echo "Stages: ${CANARY_STAGES[*]}%"
 echo "Stage Duration: ${STAGE_DURATION_MINUTES} minutes"
 
@@ -127,6 +141,7 @@ rollback_canary() {
         --namespace "$NAMESPACE" \
         --set canary.enabled=false \
         --set image.tag="$IMAGE_TAG" \
+        ${HELM_CANARY_FLAG_ARGS[@]+"${HELM_CANARY_FLAG_ARGS[@]}"} \
         --wait \
         --timeout=10m
 
@@ -166,6 +181,7 @@ deploy_canary_stage() {
         --set canary.enabled=true \
         --set canary.maxWeight="$stage" \
         --set image.tag="$IMAGE_TAG" \
+        ${HELM_CANARY_FLAG_ARGS[@]+"${HELM_CANARY_FLAG_ARGS[@]}"} \
         --wait \
         --timeout=15m
 
@@ -224,6 +240,7 @@ finalize_deployment() {
         --namespace "$NAMESPACE" \
         --set canary.enabled=false \
         --set image.tag="$IMAGE_TAG" \
+        ${HELM_CANARY_FLAG_ARGS[@]+"${HELM_CANARY_FLAG_ARGS[@]}"} \
         --wait \
         --timeout=10m
 

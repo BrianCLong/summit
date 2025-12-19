@@ -15,13 +15,19 @@ on:
       canary_percentage:
         description: 'Percentage of traffic for canary (1-50)'
         required: false
-        default: '10'
+        default: 'auto'
         type: choice
         options:
+          - 'auto'
           - '5'
           - '10'
+          - '15'
           - '20'
+          - '25'
+          - '35'
           - '50'
+          - '75'
+          - '100'
       environment:
         description: 'Target environment'
         required: true
@@ -29,6 +35,14 @@ on:
         options:
           - 'staging'
           - 'production'
+      application:
+        description: 'Target application'
+        required: true
+        type: choice
+        options:
+          - 'maestro'
+          - 'intelgraph'
+          - 'companyos'
       action:
         description: 'Canary action to perform'
         required: true
@@ -42,7 +56,7 @@ env:
   REGISTRY: ghcr.io
 
 concurrency:
-  group: canary-${{ inputs.environment }}
+  group: canary-${{ inputs.environment }}-${{ inputs.application }}
   cancel-in-progress: false
 
 jobs:
@@ -51,10 +65,21 @@ jobs:
     outputs:
       version-valid: ${{ steps.validate.outputs.version-valid }}
       namespace: ${{ steps.validate.outputs.namespace }}
+      release-name: ${{ steps.validate.outputs.release-name }}
+      canary-stages: ${{ steps.validate.outputs.canary-stages }}
+      feature-flag: ${{ steps.validate.outputs.feature-flag }}
+      resolved-canary-percent: ${{ steps.validate.outputs.resolved-canary-percent }}
     steps:
       - name: Validate inputs
         id: validate
         run: |
+          CONFIG_PATH="summit_release_env_pack/canary/canary-traffic.json"
+
+          if ! jq -e --arg app "${{ inputs.application }}" '.[$app]' "$CONFIG_PATH" >/dev/null; then
+            echo "❌ Application '${{ inputs.application }}' not found in $CONFIG_PATH"
+            exit 1
+          fi
+
           # Validate version format
           if [[ "${{ inputs.version }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "version-valid=true" >> $GITHUB_OUTPUT
@@ -64,18 +89,44 @@ jobs:
             exit 1
           fi
 
-          # Set namespace based on environment
-          if [ "${{ inputs.environment }}" = "production" ]; then
-            echo "namespace=intelgraph-prod" >> $GITHUB_OUTPUT
-          else
-            echo "namespace=intelgraph-staging" >> $GITHUB_OUTPUT
-          fi
-
-          # Validate canary percentage
-          if [ "${{ inputs.canary_percentage }}" -gt 50 ]; then
-            echo "❌ Canary percentage cannot exceed 50%"
+          # Set namespace based on environment and application
+          NAMESPACE=$(jq -r --arg app "${{ inputs.application }}" --arg env "${{ inputs.environment }}" '.[$app].namespaces[$env]' "$CONFIG_PATH")
+          if [ -z "$NAMESPACE" ] || [ "$NAMESPACE" = "null" ]; then
+            echo "❌ Namespace not defined for ${{ inputs.application }} in ${{ inputs.environment }}"
             exit 1
           fi
+          echo "namespace=$NAMESPACE" >> $GITHUB_OUTPUT
+
+          RELEASE_NAME=$(jq -r --arg app "${{ inputs.application }}" '.[$app].releaseName' "$CONFIG_PATH")
+          echo "release-name=$RELEASE_NAME" >> $GITHUB_OUTPUT
+
+          CANARY_STAGES=$(jq -r --arg app "${{ inputs.application }}" '.[$app].canaryStages | join(",")' "$CONFIG_PATH")
+          echo "canary-stages=$CANARY_STAGES" >> $GITHUB_OUTPUT
+
+          FEATURE_FLAG=$(jq -r --arg app "${{ inputs.application }}" '.[$app].featureFlag' "$CONFIG_PATH")
+          echo "feature-flag=$FEATURE_FLAG" >> $GITHUB_OUTPUT
+
+          # Validate canary percentage
+          IFS=',' read -r -a STAGE_LIST <<< "$CANARY_STAGES"
+          REQUESTED_PERCENT="${{ inputs.canary_percentage }}"
+          if [ "$REQUESTED_PERCENT" = "auto" ]; then
+            RESOLVED_PERCENT="${STAGE_LIST[0]}"
+          else
+            RESOLVED_PERCENT="$REQUESTED_PERCENT"
+          fi
+
+          VALID_PERCENT=false
+          for stage in "${STAGE_LIST[@]}"; do
+            if [ "$stage" = "$RESOLVED_PERCENT" ]; then
+              VALID_PERCENT=true
+            fi
+          done
+
+          if [ "$VALID_PERCENT" = false ]; then
+            echo "❌ Canary percentage ${RESOLVED_PERCENT}% is not permitted for ${{ inputs.application }} (allowed: ${CANARY_STAGES//,/%, }%)"
+            exit 1
+          fi
+          echo "resolved-canary-percent=$RESOLVED_PERCENT" >> $GITHUB_OUTPUT
 
   pre-flight-checks:
     if: inputs.action == 'deploy'
@@ -105,13 +156,15 @@ jobs:
       - name: Check current deployment health
         run: |
           NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+          RELEASE_NAME="${{ needs.validate-inputs.outputs.release-name }}"
+          CANARY_NAME="${RELEASE_NAME}-canary"
 
           # Check if main deployment is healthy
-          kubectl get deployment intelgraph -n ${NAMESPACE}
-          kubectl rollout status deployment/intelgraph -n ${NAMESPACE} --timeout=60s
+          kubectl get deployment "${RELEASE_NAME}" -n "${NAMESPACE}"
+          kubectl rollout status deployment/"${RELEASE_NAME}" -n "${NAMESPACE}" --timeout=60s
 
           # Check if canary already exists
-          if kubectl get deployment intelgraph-canary -n ${NAMESPACE} 2>/dev/null; then
+          if kubectl get deployment "${CANARY_NAME}" -n "${NAMESPACE}" 2>/dev/null; then
             echo "⚠️ Canary deployment already exists!"
             echo "Please promote or abort existing canary before deploying new one"
             exit 1
@@ -151,17 +204,20 @@ jobs:
       - name: Deploy canary
         run: |
           NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+          RELEASE_NAME="${{ needs.validate-inputs.outputs.release-name }}"
 
           ./scripts/rollback-deployment.sh canary-deploy ${{ inputs.version }} \
             --namespace ${NAMESPACE} \
-            --canary-percent ${{ inputs.canary_percentage }}
+            --release ${RELEASE_NAME} \
+            --canary-percent ${{ needs.validate-inputs.outputs.resolved-canary-percent }}
 
       - name: Run canary health checks (SLO Gate)
         run: |
           NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+          RELEASE_NAME="${{ needs.validate-inputs.outputs.release-name }}"
 
           # Wait for canary to be ready
-          kubectl rollout status deployment/intelgraph-canary -n ${NAMESPACE} --timeout=300s
+          kubectl rollout status deployment/${RELEASE_NAME}-canary -n ${NAMESPACE} --timeout=300s
 
           # Run comprehensive health checks
           ./scripts/rollback-deployment.sh health-check --namespace ${NAMESPACE}
@@ -177,7 +233,7 @@ jobs:
         run: |
           echo "🚀 Canary deployment successful!"
           echo "Version: ${{ inputs.version }}"
-          echo "Traffic: ${{ inputs.canary_percentage }}%"
+          echo "Traffic: ${{ needs.validate-inputs.outputs.resolved-canary-percent }}%"
           echo "Environment: ${{ inputs.environment }}"
 
   promote-canary:
@@ -208,13 +264,14 @@ jobs:
       - name: Pre-promote health check (SLO Gate)
         run: |
           NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+          RELEASE_NAME="${{ needs.validate-inputs.outputs.release-name }}"
 
           # Verify canary exists and is healthy
-          kubectl get deployment intelgraph-canary -n ${NAMESPACE}
-          kubectl rollout status deployment/intelgraph-canary -n ${NAMESPACE} --timeout=60s
+          kubectl get deployment ${RELEASE_NAME}-canary -n ${NAMESPACE}
+          kubectl rollout status deployment/${RELEASE_NAME}-canary -n ${NAMESPACE} --timeout=60s
 
           # Run health checks
-          ./scripts/rollback-deployment.sh health-check --namespace ${NAMESPACE}
+          ./scripts/rollback-deployment.sh health-check --namespace ${NAMESPACE} --release ${RELEASE_NAME}
 
           # BURN RATE CHECK (Simulated - TEMPLATE)
           # TODO: Implement real burn rate check.
@@ -224,18 +281,20 @@ jobs:
       - name: Promote canary to production
         run: |
           NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+          RELEASE_NAME="${{ needs.validate-inputs.outputs.release-name }}"
 
-          ./scripts/rollback-deployment.sh canary-promote --namespace ${NAMESPACE}
+          ./scripts/rollback-deployment.sh canary-promote --namespace ${NAMESPACE} --release ${RELEASE_NAME}
 
       - name: Post-promotion verification
         run: |
           NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+          RELEASE_NAME="${{ needs.validate-inputs.outputs.release-name }}"
 
           # Verify promotion
-          kubectl rollout status deployment/intelgraph -n ${NAMESPACE} --timeout=300s
+          kubectl rollout status deployment/${RELEASE_NAME} -n ${NAMESPACE} --timeout=300s
 
           # Final health check
-          ./scripts/rollback-deployment.sh health-check --namespace ${NAMESPACE}
+          ./scripts/rollback-deployment.sh health-check --namespace ${NAMESPACE} --release ${RELEASE_NAME}
 
       - name: Update deployment status
         run: |
@@ -272,24 +331,26 @@ jobs:
       - name: Abort canary deployment
         run: |
           NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+          RELEASE_NAME="${{ needs.validate-inputs.outputs.release-name }}"
 
-          ./scripts/rollback-deployment.sh canary-abort --namespace ${NAMESPACE}
+          ./scripts/rollback-deployment.sh canary-abort --namespace ${NAMESPACE} --release ${RELEASE_NAME}
 
       - name: Verify abort and rollback
         run: |
           NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+          RELEASE_NAME="${{ needs.validate-inputs.outputs.release-name }}"
 
           # Verify canary is removed
-          if kubectl get deployment intelgraph-canary -n ${NAMESPACE} 2>/dev/null; then
+          if kubectl get deployment ${RELEASE_NAME}-canary -n ${NAMESPACE} 2>/dev/null; then
             echo "❌ Canary deployment still exists!"
             exit 1
           fi
 
           # Verify stable deployment is healthy
-          kubectl rollout status deployment/intelgraph -n ${NAMESPACE} --timeout=300s
+          kubectl rollout status deployment/${RELEASE_NAME} -n ${NAMESPACE} --timeout=300s
 
           # Health check
-          ./scripts/rollback-deployment.sh health-check --namespace ${NAMESPACE}
+          ./scripts/rollback-deployment.sh health-check --namespace ${NAMESPACE} --release ${RELEASE_NAME}
 
       - name: Update deployment status
         run: |
@@ -344,6 +405,18 @@ jobs:
                 fields: [{
                   title: 'Status',
                   value: '${{ steps.status.outputs.status }}',
+                  short: true
+                }, {
+                  title: 'Application',
+                  value: '${{ inputs.application }}',
+                  short: true
+                }, {
+                  title: 'Traffic',
+                  value: '${{ needs.validate-inputs.outputs.resolved-canary-percent }}%',
+                  short: true
+                }, {
+                  title: 'Flag',
+                  value: '${{ needs.validate-inputs.outputs.feature-flag }}',
                   short: true
                 }, {
                   title: 'Environment',
