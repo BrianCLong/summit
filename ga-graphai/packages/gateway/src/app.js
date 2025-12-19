@@ -11,6 +11,7 @@ import {
   observePolicyDeny,
   observeSuccess,
   registry as metricsRegistry,
+  timeGraphqlRequest,
 } from './metrics.js';
 import { InMemoryLedger, buildEvidencePayload } from 'prov-ledger';
 import { ChaosEngine, ChaosError } from './chaos.js';
@@ -160,6 +161,14 @@ export function createApp(options = {}) {
       res.status(404).json({ error: 'NOT_FOUND' });
     });
   }
+
+  app.use('/graphql', (req, res, next) => {
+    const stopTimer = timeGraphqlRequest();
+    res.once('finish', () => {
+      stopTimer(res.statusCode);
+    });
+    next();
+  });
 
   async function executePlan(input, context) {
     if (!input?.objective) {
