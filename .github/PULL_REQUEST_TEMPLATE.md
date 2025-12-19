@@ -1,67 +1,26 @@
+# PR Checklist
+
 ## Summary
+- [ ] Conventional Commit title (e.g., `feat: add review matrix automation`)
+- [ ] Risk assessed and documented below
+- [ ] Canary/rollback plan completed
+- [ ] Runbook link included
+- [ ] No `WIP`/`TODO` labels; checkboxes completed
 
-[What/why]
+## Risk & Rollback
+- **Risk level (low/medium/high):**
+- **Rollback plan:**
+- **Canary plan:**
+- **Related runbook(s):**
 
-## Canary Plan
-- Metrics to watch: [p95 latency, error rate, saturation]
-- Ramp: 5% → 20% → 50% → 100% (hold 20% for 30–60m)
-- Rollback trigger(s): [SLO burn > X, error rate > Y, anomaly Z]
-- Rollback steps: `helm rollback <release> <rev>` + feature flag off
+## Testing
+- [ ] Unit tests
+- [ ] Integration/e2e
+- [ ] Security scans
+- [ ] Migration gate (if applicable)
 
-## Migration Gate (if applicable)
-- [ ] Schema/contract change
-- Gate: apply behind flag; run forward/backward compat tests
+## Notes
+- [ ] Conversation(s) resolved
+- [ ] Emergency override rationale attached (if used)
 
-## Observability
-- [ ] New traces/metrics/logs added
-- Dashboards/alerts link:
-
-## Security/Compliance
-- [ ] Secrets via sealed-secrets
-- [ ] SBOM attached; SAST/SCA clean
-
-## Verification
-- [ ] Smoke checks
-- [ ] Golden path e2e: ingest → resolve → runbook → report
-
-## Canary Plan
-
-- Metrics to watch: [p95 latency, error rate, saturation]
-- Ramp: 5% → 20% → 50% → 100% (hold 20% for 30–60m)
-- Rollback trigger(s): [SLO burn > X, error rate > Y, anomaly Z]
-- Rollback steps: `helm rollback <release> <rev>` + feature flag off
-
-## Migration Gate (if applicable)
-
-- [ ] Schema/contract change
-- Gate: apply behind flag; run forward/backward compat tests
-
-## Observability
-
-- [ ] New traces/metrics/logs added
-- Dashboards/alerts link:
-
-## Security/Compliance
-
-- [ ] Secrets via sealed-secrets
-- [ ] SBOM attached; SAST/SCA clean
-
-## Verification
-
-- [ ] Smoke checks
-- [ ] Golden path e2e: ingest → resolve → runbook → report
-
-## 🧠 Copilot Review Tasks
-
-- [ ] `/explain-changes`
-- [ ] `/generate-tests`
-- [ ] `/risk-callouts`
-- [ ] `/summarize-diff`
-
-## ✅ Checklist
-
-- [ ] Code compiles & passes CI
-- [ ] Tests added/updated
-- [ ] Documentation updated
-- [ ] OPA policies verified
-- [ ] Grafana dashboards updated if applicable
+Closes #
