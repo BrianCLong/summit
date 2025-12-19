@@ -31,7 +31,9 @@ import {
   DisclosureArtifact,
   DisclosureJob,
   createDisclosureExport,
+  createGovernanceBundle,
   getDisclosureJob,
+  GovernanceBundle,
   listDisclosureJobs,
   sendDisclosureAnalyticsEvent,
 } from '../services/disclosures';
@@ -94,6 +96,10 @@ const DisclosurePackagerPage: React.FC = () => {
   const [activeJob, setActiveJob] = useState<DisclosureJob | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [govError, setGovError] = useState<string | null>(null);
+  const [isGovLoading, setIsGovLoading] = useState(false);
+  const [governanceBundle, setGovernanceBundle] =
+    useState<GovernanceBundle | null>(null);
   const pollingRef = useRef<number | null>(null);
 
   const activeJobEta = useMemo(() => {
@@ -228,6 +234,27 @@ const DisclosurePackagerPage: React.FC = () => {
 
   const latestJobs = useMemo(() => jobs.slice(0, 5), [jobs]);
 
+  const handleGovernanceBundle = async () => {
+    setGovError(null);
+    setIsGovLoading(true);
+    try {
+      const bundle = await createGovernanceBundle({
+        tenantId,
+        startTime: fromLocalInputValue(startTime),
+        endTime: fromLocalInputValue(endTime),
+      });
+      setGovernanceBundle(bundle);
+    } catch (bundleError: unknown) {
+      const message =
+        bundleError instanceof Error
+          ? bundleError.message
+          : 'Unable to generate governance bundle';
+      setGovError(message);
+    } finally {
+      setIsGovLoading(false);
+    }
+  };
+
   return (
     <Box sx={{ px: 4, py: 6 }}>
       <Stack spacing={4}>
@@ -349,12 +376,21 @@ const DisclosurePackagerPage: React.FC = () => {
                     >
                       Refresh status
                     </Button>
+                    <Button
+                      type="button"
+                      variant="outlined"
+                      onClick={handleGovernanceBundle}
+                      disabled={isSubmitting || isGovLoading}
+                    >
+                      {isGovLoading ? 'Building bundle…' : 'Governance bundle'}
+                    </Button>
                     <Tooltip title="SLO: p95 export under 2 minutes for 10k events; ≥99% success rate.">
                       <InfoIcon color="action" />
                     </Tooltip>
                   </Stack>
 
                   {error && <Alert severity="error">{error}</Alert>}
+                  {govError && <Alert severity="error">{govError}</Alert>}
                 </Stack>
               </CardContent>
             </Card>
@@ -452,6 +488,71 @@ const DisclosurePackagerPage: React.FC = () => {
                                 </Typography>
                               ),
                             )}
+                          </Stack>
+                        )}
+                      </Stack>
+                    )}
+                  </Stack>
+                </CardContent>
+              </Card>
+
+              <Card variant="outlined">
+                <CardContent>
+                  <Stack spacing={1.5}>
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <Typography variant="h6">Governance bundle</Typography>
+                      <Tooltip title="Includes audit slice, policy decision logs, SBOM references, and provenance refs">
+                        <InfoIcon color="action" fontSize="small" />
+                      </Tooltip>
+                    </Stack>
+                    {!governanceBundle && (
+                      <Typography variant="body2" color="text.secondary">
+                        Generate a governance bundle to bundle audit events,
+                        policy decisions, SBOM references, and provenance
+                        manifests for the selected timeframe and tenant.
+                      </Typography>
+                    )}
+                    {governanceBundle && (
+                      <Stack spacing={1}>
+                        <Alert severity="success">
+                          Bundle {governanceBundle.id} ready. SHA256:{' '}
+                          <code>{governanceBundle.sha256}</code>
+                        </Alert>
+                        <Typography variant="body2" color="text.secondary">
+                          Counts — audit: {governanceBundle.counts.auditEvents},
+                          policy: {governanceBundle.counts.policyDecisions},
+                          sbom refs: {governanceBundle.counts.sbomRefs},
+                          provenance refs:{' '}
+                          {governanceBundle.counts.provenanceRefs}
+                        </Typography>
+                        <Stack direction="row" spacing={1} flexWrap="wrap">
+                          <Button
+                            startIcon={<DownloadIcon />}
+                            href={governanceBundle.downloadUrl}
+                          >
+                            Download tarball
+                          </Button>
+                          <Button variant="outlined" href={governanceBundle.manifestUrl}>
+                            Manifest
+                          </Button>
+                          <Button variant="outlined" href={governanceBundle.checksumsUrl}>
+                            Checksums
+                          </Button>
+                        </Stack>
+                        {governanceBundle.warnings.length > 0 && (
+                          <Stack spacing={0.5}>
+                            <Typography variant="subtitle2">Warnings</Typography>
+                            <Stack direction="row" spacing={1} flexWrap="wrap">
+                              {governanceBundle.warnings.map((warning) => (
+                                <Chip
+                                  key={warning}
+                                  label={warning}
+                                  color="warning"
+                                  variant="outlined"
+                                  size="small"
+                                />
+                              ))}
+                            </Stack>
                           </Stack>
                         )}
                       </Stack>

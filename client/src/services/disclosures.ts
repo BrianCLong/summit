@@ -18,6 +18,21 @@ export interface DisclosureJob {
   error?: string;
 }
 
+export interface GovernanceBundle {
+  id: string;
+  sha256: string;
+  warnings: string[];
+  counts: {
+    auditEvents: number;
+    policyDecisions: number;
+    sbomRefs: number;
+    provenanceRefs: number;
+  };
+  downloadUrl: string;
+  manifestUrl: string;
+  checksumsUrl: string;
+}
+
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
 
 async function handleResponse<T>(response: Response): Promise<T> {
@@ -100,4 +115,22 @@ export async function sendDisclosureAnalyticsEvent(
   } catch (error) {
     console.warn('Disclosure analytics event failed', error);
   }
+}
+
+export async function createGovernanceBundle(payload: {
+  tenantId: string;
+  startTime: string;
+  endTime: string;
+}): Promise<GovernanceBundle> {
+  const response = await fetch(`${API_BASE}/disclosures/governance-bundle`, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-tenant-id': payload.tenantId,
+    },
+    credentials: 'include',
+    body: JSON.stringify(payload),
+  });
+  const body = await handleResponse<{ bundle: GovernanceBundle }>(response);
+  return body.bundle;
 }

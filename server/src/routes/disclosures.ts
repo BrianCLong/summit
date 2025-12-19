@@ -2,6 +2,10 @@ import express from 'express';
 import { z } from 'zod';
 import { disclosureExportService } from '../disclosure/export-service.js';
 import { disclosureMetrics } from '../metrics/disclosureMetrics.js';
+import {
+  GovernanceBundleResult,
+  generateGovernanceBundle,
+} from '../governance/governance-bundle.js';
 
 const router = express.Router();
 router.use(express.json());
@@ -18,6 +22,18 @@ function resolveTenant(req: express.Request): string | undefined {
   return header || requestTenant;
 }
 
+interface GovernanceBundleRecord {
+  tenantId: string;
+  createdAt: string;
+  result: GovernanceBundleResult;
+}
+
+const governanceBundles = new Map<string, GovernanceBundleRecord>();
+
+function resolveGovernanceBundle(bundleId: string) {
+  return governanceBundles.get(bundleId);
+}
+
 router.post('/analytics', (req, res) => {
   try {
     const payload = analyticsSchema.parse(req.body ?? {});
@@ -31,6 +47,59 @@ router.post('/analytics', (req, res) => {
     return res
       .status(400)
       .json({ error: 'invalid_payload', details: error?.message });
+  }
+});
+
+router.post('/governance-bundle', async (req, res) => {
+  try {
+    const tenantHeader = resolveTenant(req);
+    if (!tenantHeader) {
+      return res.status(400).json({ error: 'tenant_required' });
+    }
+
+    const bodyTenant = req.body?.tenantId;
+    const effectiveTenant = bodyTenant ?? tenantHeader;
+    if (effectiveTenant !== tenantHeader) {
+      return res.status(403).json({ error: 'tenant_mismatch' });
+    }
+
+    const { startTime, endTime } = req.body ?? {};
+    if (!startTime || !endTime) {
+      return res.status(400).json({ error: 'invalid_time_window' });
+    }
+
+    const result = await generateGovernanceBundle({
+      tenantId: effectiveTenant,
+      startTime,
+      endTime,
+      auditLogPaths: req.body?.auditLogPaths,
+      policyLogPaths: req.body?.policyLogPaths,
+      sbomPaths: req.body?.sbomPaths,
+      provenancePaths: req.body?.provenancePaths,
+    });
+
+    governanceBundles.set(result.id, {
+      tenantId: effectiveTenant,
+      createdAt: new Date().toISOString(),
+      result,
+    });
+
+    return res.status(201).json({
+      bundle: {
+        id: result.id,
+        sha256: result.sha256,
+        warnings: result.warnings,
+        counts: result.counts,
+        downloadUrl: `/disclosures/governance-bundle/${result.id}/download`,
+        manifestUrl: `/disclosures/governance-bundle/${result.id}/manifest`,
+        checksumsUrl: `/disclosures/governance-bundle/${result.id}/checksums`,
+      },
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      error: 'governance_bundle_failed',
+      details: error?.message,
+    });
   }
 });
 
@@ -72,6 +141,63 @@ router.get('/export', (req, res) => {
   }
   const jobs = disclosureExportService.listJobsForTenant(tenantHeader);
   return res.json({ jobs });
+});
+
+router.get('/governance-bundle/:bundleId/download', (req, res) => {
+  const tenantHeader = resolveTenant(req);
+  if (!tenantHeader) {
+    return res.status(400).json({ error: 'tenant_required' });
+  }
+
+  const record = resolveGovernanceBundle(req.params.bundleId);
+  if (!record) {
+    return res.status(404).json({ error: 'not_found' });
+  }
+
+  if (record.tenantId !== tenantHeader) {
+    return res.status(403).json({ error: 'tenant_mismatch' });
+  }
+
+  return res.download(
+    record.result.tarPath,
+    `governance-bundle-${record.result.id}.tar.gz`,
+  );
+});
+
+router.get('/governance-bundle/:bundleId/manifest', (req, res) => {
+  const tenantHeader = resolveTenant(req);
+  if (!tenantHeader) {
+    return res.status(400).json({ error: 'tenant_required' });
+  }
+
+  const record = resolveGovernanceBundle(req.params.bundleId);
+  if (!record) {
+    return res.status(404).json({ error: 'not_found' });
+  }
+
+  if (record.tenantId !== tenantHeader) {
+    return res.status(403).json({ error: 'tenant_mismatch' });
+  }
+
+  return res.download(record.result.manifestPath, 'manifest.json');
+});
+
+router.get('/governance-bundle/:bundleId/checksums', (req, res) => {
+  const tenantHeader = resolveTenant(req);
+  if (!tenantHeader) {
+    return res.status(400).json({ error: 'tenant_required' });
+  }
+
+  const record = resolveGovernanceBundle(req.params.bundleId);
+  if (!record) {
+    return res.status(404).json({ error: 'not_found' });
+  }
+
+  if (record.tenantId !== tenantHeader) {
+    return res.status(403).json({ error: 'tenant_mismatch' });
+  }
+
+  return res.download(record.result.checksumsPath, 'checksums.txt');
 });
 
 router.get('/export/:jobId', (req, res) => {
