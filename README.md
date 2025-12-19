@@ -20,7 +20,7 @@
 - ✅ **Real-Time Systems**: Narrative simulation engine with REST API
 - ✅ **Production Ready**: Helm charts, automated deployments, comprehensive monitoring
 
-**[View Release Notes](CHANGELOG-v2.0.0.md)** | **[Migration Guide](docs/MIGRATION-v0.1-to-v2.0.md)**
+**[View Release Notes](CHANGELOG-v2.0.0.md)** | **[Migration Guide](docs/MIGRATION-v0.1-to-v2.0.md)** | **[Roadmap](docs/roadmap.md)**
 
 ---
 
