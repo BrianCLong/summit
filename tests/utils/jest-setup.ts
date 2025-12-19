@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Jest Global Setup
  *

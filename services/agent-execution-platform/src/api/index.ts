@@ -2,7 +2,7 @@
  * REST API for Agent Execution Platform
  */
 
-import express, { Request, Response, NextFunction } from 'express';
+import express, { Request, Response, NextFunction, RequestHandler } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -46,7 +46,7 @@ export class APIServer {
       max: configManager.get().server.rateLimit.maxRequests,
       message: 'Too many requests from this IP',
     });
-    this.app.use('/api/', limiter);
+    this.app.use('/api/', limiter as unknown as RequestHandler);
 
     // Body parsing
     this.app.use(express.json({ limit: '10mb' }));
@@ -99,6 +99,10 @@ export class APIServer {
     router.get('/prompts', this.listPrompts.bind(this));
     router.get('/prompts/:name', this.getPrompt.bind(this));
     router.post('/prompts/:name/render', this.renderPrompt.bind(this));
+    router.post('/prompts/:name/status', this.updatePromptStatus.bind(this));
+    router.post('/prompts/:name/run', this.runPrompt.bind(this));
+    router.get('/prompts/runs/:runId', this.getPromptRun.bind(this));
+    router.post('/prompts/runs/:runId/replay', this.replayPromptRun.bind(this));
     router.delete('/prompts/:name', this.deletePrompt.bind(this));
     router.get('/prompts/:name/versions', this.getPromptVersions.bind(this));
     router.get('/prompts/stats', this.getPromptStats.bind(this));
@@ -184,6 +188,14 @@ export class APIServer {
   private async getExecution(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
+      if (!id) {
+        res.status(400).json({
+          success: false,
+          error: { code: 'BAD_REQUEST', message: 'Execution id is required' },
+        });
+        return;
+      }
+
       const execution = await agentRunner.getExecution(id);
 
       if (!execution) {
@@ -216,6 +228,14 @@ export class APIServer {
   private async cancelExecution(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
+      if (!id) {
+        res.status(400).json({
+          success: false,
+          error: { code: 'BAD_REQUEST', message: 'Execution id is required' },
+        });
+        return;
+      }
+
       const cancelled = await agentRunner.cancelExecution(id);
 
       const response: APIResponse = {
@@ -303,6 +323,14 @@ export class APIServer {
   private async getPipelineExecution(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
+      if (!id) {
+        res.status(400).json({
+          success: false,
+          error: { code: 'BAD_REQUEST', message: 'Pipeline execution id is required' },
+        });
+        return;
+      }
+
       const execution = await pipelineEngine.getExecution(id);
 
       if (!execution) {
@@ -335,6 +363,14 @@ export class APIServer {
   private async cancelPipelineExecution(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
+      if (!id) {
+        res.status(400).json({
+          success: false,
+          error: { code: 'BAD_REQUEST', message: 'Pipeline execution id is required' },
+        });
+        return;
+      }
+
       const cancelled = await pipelineEngine.cancelExecution(id);
 
       const response: APIResponse = {
@@ -403,7 +439,17 @@ export class APIServer {
       const { name } = req.params;
       const { version } = req.query;
 
-      const prompt = await promptRegistry.get(name, version as string);
+      if (!name) {
+        res.status(400).json({
+          success: false,
+          error: { code: 'BAD_REQUEST', message: 'Prompt name is required' },
+        });
+        return;
+      }
+
+      const resolvedVersion = typeof version === 'string' ? version : undefined;
+
+      const prompt = await promptRegistry.get(name, resolvedVersion);
 
       if (!prompt) {
         res.status(404).json({
@@ -437,11 +483,186 @@ export class APIServer {
       const { name } = req.params;
       const { variables, version } = req.body;
 
-      const rendered = await promptRegistry.render(name, variables, version);
+      if (!name) {
+        res.status(400).json({
+          success: false,
+          error: { code: 'BAD_REQUEST', message: 'Prompt name is required' },
+        });
+        return;
+      }
+
+      const resolvedVersion = typeof version === 'string' ? version : undefined;
+
+      const rendered = await promptRegistry.render(name, variables, resolvedVersion);
 
       const response: APIResponse = {
         success: true,
         data: rendered,
+        metadata: {
+          requestId: this.generateRequestId(),
+          timestamp: new Date(),
+          version: '1.0.0',
+        },
+      };
+
+      res.json(response);
+    } catch (error) {
+      this.handleError(res, error as Error);
+    }
+  }
+
+  private async updatePromptStatus(req: Request, res: Response): Promise<void> {
+    if (!this.ensurePromptRegistryEnabled(res)) {
+      return;
+    }
+
+    try {
+      const { name } = req.params;
+      const { version, status, actor, notes } = req.body as {
+        version: string;
+        status: 'draft' | 'approved' | 'deprecated';
+        actor: string;
+        notes?: string;
+      };
+
+      if (!name || !version || !status || !actor) {
+        res.status(400).json({
+          success: false,
+          error: { code: 'BAD_REQUEST', message: 'Name, version, actor, and status are required' },
+        });
+        return;
+      }
+
+      const updated = await promptRegistry.updateStatus(name, version, status, actor, notes);
+
+      const response: APIResponse = {
+        success: true,
+        data: updated,
+        metadata: {
+          requestId: this.generateRequestId(),
+          timestamp: new Date(),
+          version: '1.0.0',
+        },
+      };
+
+      res.json(response);
+    } catch (error) {
+      this.handleError(res, error as Error);
+    }
+  }
+
+  private async runPrompt(req: Request, res: Response): Promise<void> {
+    if (!this.ensurePromptRegistryEnabled(res)) {
+      return;
+    }
+
+    try {
+      const { name } = req.params;
+      const { variables, version, model, modelFamily, toolVersions, temperature, output } = req.body;
+
+      if (!name) {
+        res.status(400).json({
+          success: false,
+          error: { code: 'BAD_REQUEST', message: 'Prompt name is required' },
+        });
+        return;
+      }
+
+      const resolvedVersion = typeof version === 'string' ? version : undefined;
+
+      const runRecord = await promptRegistry.invoke(name, variables || {}, {
+        version: resolvedVersion,
+        model,
+        modelFamily,
+        toolVersions,
+        temperature,
+        output,
+      });
+
+      const response: APIResponse = {
+        success: true,
+        data: runRecord,
+        metadata: {
+          requestId: this.generateRequestId(),
+          timestamp: new Date(),
+          version: '1.0.0',
+        },
+      };
+
+      res.json(response);
+    } catch (error) {
+      this.handleError(res, error as Error);
+    }
+  }
+
+  private async getPromptRun(req: Request, res: Response): Promise<void> {
+    if (!this.ensurePromptRegistryEnabled(res)) {
+      return;
+    }
+
+    try {
+      const { runId } = req.params;
+      if (!runId) {
+        res.status(400).json({
+          success: false,
+          error: { code: 'BAD_REQUEST', message: 'Run id is required' },
+        });
+        return;
+      }
+
+      const run = promptRegistry.getInvocation(runId);
+
+      if (!run) {
+        res.status(404).json({
+          success: false,
+          error: { code: 'NOT_FOUND', message: 'Run not found' },
+        });
+        return;
+      }
+
+      const response: APIResponse = {
+        success: true,
+        data: run,
+        metadata: {
+          requestId: this.generateRequestId(),
+          timestamp: new Date(),
+          version: '1.0.0',
+        },
+      };
+
+      res.json(response);
+    } catch (error) {
+      this.handleError(res, error as Error);
+    }
+  }
+
+  private async replayPromptRun(req: Request, res: Response): Promise<void> {
+    if (!this.ensurePromptRegistryEnabled(res)) {
+      return;
+    }
+
+    try {
+      const { runId } = req.params;
+      const { variables, model, toolVersions, output } = req.body;
+
+      if (!runId) {
+        res.status(400).json({
+          success: false,
+          error: { code: 'BAD_REQUEST', message: 'Run id is required' },
+        });
+        return;
+      }
+
+      const replay = await promptRegistry.replayInvocation(runId, {
+        variables,
+        model,
+        toolVersions,
+        output,
+      });
+
+      const response: APIResponse = {
+        success: true,
+        data: replay,
         metadata: {
           requestId: this.generateRequestId(),
           timestamp: new Date(),
@@ -460,7 +681,17 @@ export class APIServer {
       const { name } = req.params;
       const { version } = req.query;
 
-      const deleted = await promptRegistry.delete(name, version as string);
+      if (!name) {
+        res.status(400).json({
+          success: false,
+          error: { code: 'BAD_REQUEST', message: 'Prompt name is required' },
+        });
+        return;
+      }
+
+      const resolvedVersion = typeof version === 'string' ? version : undefined;
+
+      const deleted = await promptRegistry.delete(name, resolvedVersion);
 
       const response: APIResponse = {
         success: deleted,
@@ -481,6 +712,13 @@ export class APIServer {
   private async getPromptVersions(req: Request, res: Response): Promise<void> {
     try {
       const { name } = req.params;
+      if (!name) {
+        res.status(400).json({
+          success: false,
+          error: { code: 'BAD_REQUEST', message: 'Prompt name is required' },
+        });
+        return;
+      }
       const versions = await promptRegistry.getVersions(name);
 
       const response: APIResponse = {
@@ -559,6 +797,22 @@ export class APIServer {
     } catch (error) {
       this.handleError(res, error as Error);
     }
+  }
+
+  private ensurePromptRegistryEnabled(res: Response): boolean {
+    if (promptRegistry.isFeatureEnabled()) {
+      return true;
+    }
+
+    res.status(412).json({
+      success: false,
+      error: {
+        code: 'PROMPT_REGISTRY_DISABLED',
+        message: 'Enable prompt registry by setting PROMPT_REGISTRY=1',
+      },
+    });
+
+    return false;
   }
 
   private handleError(res: Response, error: Error): void {

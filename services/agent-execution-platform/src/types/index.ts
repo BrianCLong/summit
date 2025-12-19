@@ -199,6 +199,10 @@ export interface ValidationRule {
 }
 
 export interface PromptMetadata {
+  owner: string;
+  purpose: string;
+  modelFamily: string;
+  safetyConstraints: string[];
   author: string;
   createdAt: Date;
   updatedAt: Date;
@@ -207,6 +211,7 @@ export interface PromptMetadata {
   model?: string;
   temperature?: number;
   maxTokens?: number;
+  lifecycle?: PromptLifecycleStatus;
 }
 
 export interface RenderedPrompt {
@@ -214,6 +219,7 @@ export interface RenderedPrompt {
   metadata: PromptMetadata;
   variables: Record<string, any>;
   renderedAt: Date;
+  version: string;
 }
 
 export interface PromptVersion {
@@ -223,6 +229,64 @@ export interface PromptVersion {
   createdBy: string;
   changelog?: string;
   deprecated?: boolean;
+  status?: PromptLifecycleStatus;
+  approvals?: PromptApproval[];
+}
+
+export type PromptLifecycleStatus = 'draft' | 'approved' | 'deprecated';
+
+export interface PromptApproval {
+  approvedBy: string;
+  approvedAt: Date;
+  notes?: string;
+}
+
+export interface PromptAuditEntry {
+  actor: string;
+  action: 'created' | 'status-changed' | 'updated';
+  timestamp: Date;
+  fromStatus?: PromptLifecycleStatus;
+  toStatus?: PromptLifecycleStatus;
+  notes?: string;
+}
+
+export interface PromptLockfile {
+  promptName: string;
+  promptVersion: string;
+  promptVersionId: string;
+  model: string;
+  modelFamily: string;
+  temperature?: number;
+  toolVersions: Record<string, string>;
+  safetyConstraints: string[];
+}
+
+export interface PromptInvocationRecord {
+  id: string;
+  promptName: string;
+  promptVersion: string;
+  promptVersionId: string;
+  status: PromptLifecycleStatus;
+  model: string;
+  toolVersions: Record<string, string>;
+  inputHash: string;
+  outputHash: string;
+  input: Record<string, any>;
+  output: string;
+  lockfile: PromptLockfile;
+  createdAt: Date;
+  replayOf?: string;
+}
+
+export interface PromptInvocationReplay {
+  originalRunId: string;
+  replayRun: PromptInvocationRecord;
+  diff: TokenDiff;
+}
+
+export interface TokenDiff {
+  added: string[];
+  removed: string[];
 }
 
 // ========================================

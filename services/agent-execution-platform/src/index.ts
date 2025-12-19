@@ -120,10 +120,17 @@ export class AgentExecutionPlatform {
         ],
         metadata: {
           author: 'system',
+          owner: 'platform-engineering',
+          purpose: 'Default entity analysis workflow',
+          modelFamily: 'gpt-4o',
+          safetyConstraints: ['redact pii', 'stay on topic'],
           createdAt: new Date(),
           updatedAt: new Date(),
           description: 'Default prompt for entity analysis',
           category: 'analysis',
+          lifecycle: 'approved' as const,
+          model: 'gpt-4o-mini',
+          temperature: 0.2,
         },
         tags: ['analysis', 'entity', 'default'],
       },
@@ -159,7 +166,13 @@ export class AgentExecutionPlatform {
 }
 
 // Main execution when run directly
-if (import.meta.url === 'file://' + process.argv[1]) {
+const isDirectRun =
+  typeof process !== 'undefined' &&
+  Array.isArray(process.argv) &&
+  typeof process.argv[1] === 'string' &&
+  process.argv[1].includes('index.');
+
+if (isDirectRun) {
   const platform = new AgentExecutionPlatform();
 
   // Handle graceful shutdown
