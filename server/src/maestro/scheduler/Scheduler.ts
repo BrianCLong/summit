@@ -1,22 +1,26 @@
 import { runsRepo } from '../runs/runs-repo.js';
 import { executorsRepo } from '../executors/executors-repo.js';
 import { pino } from 'pino';
+import { QueueHelper, PrioritizedItem } from './QueueHelper.js';
+import { ExecutorSelector } from './ExecutorSelector.js';
 
 const logger = pino({ name: 'maestro-scheduler' });
 
-interface QueueItem {
+interface QueueItem extends PrioritizedItem {
   runId: string;
   tenantId: string;
-  priority: number;
 }
 
 export class MaestroScheduler {
   private static _instance: MaestroScheduler;
   private isProcessing = false;
-  private queue: QueueItem[] = [];
+  private queueHelper: QueueHelper<QueueItem>;
+  private executorSelector: ExecutorSelector;
   private intervalId: NodeJS.Timeout | null = null;
 
   private constructor() {
+    this.queueHelper = new QueueHelper<QueueItem>();
+    this.executorSelector = new ExecutorSelector();
     this.start();
   }
 
@@ -45,17 +49,11 @@ export class MaestroScheduler {
   }
 
   // Recover any runs that are in 'queued' state from the DB
-  // This is a naive implementation; in production we might paginate or only fetch active tenants
   private async recoverPendingRuns() {
       try {
-          // We need a method in runsRepo to list all queued runs.
-          // For now, we assume this method exists or we extrapolate that we need it.
-          // Since runsRepo methods are tenant-scoped, we might iterate known tenants
-          // or add a system-level 'listAllQueued' method.
-
-          // As a robust fallback for MVP without adding more Repo methods:
-          // We will rely on the poll loop to just process what's in memory
-          // AND we will add a DB polling step to the processQueue loop.
+          // Placeholder for DB recovery logic
+          // In a real implementation, we would query runsRepo for status='queued'
+          // and re-enqueue them.
       } catch (err) {
           logger.error({ err }, 'Failed to recover pending runs');
       }
@@ -69,8 +67,8 @@ export class MaestroScheduler {
    */
   public async enqueueRun(runId: string, tenantId: string, priority = 0) {
     logger.info({ runId, tenantId, priority }, 'Enqueueing run');
-    this.queue.push({ runId, tenantId, priority });
-    this.queue.sort((a, b) => b.priority - a.priority);
+    this.queueHelper.enqueue({ runId, tenantId, priority });
+
     // Trigger processing immediately if idle
     if (!this.isProcessing) {
       this.processQueue();
@@ -85,37 +83,20 @@ export class MaestroScheduler {
     this.isProcessing = true;
 
     try {
-        // Recovery/Consistency Step:
-        // Ideally, we fetch pending runs from DB here to ensure we don't miss anything.
-        // For this MVP, we will stick to the in-memory queue but
-        // acknowledge that a 'sync' method is needed for robustness.
-
-      while (this.queue.length > 0) {
-        const item = this.queue[0]; // Peek
+      while (!this.queueHelper.isEmpty()) {
+        const item = this.queueHelper.peek();
+        if (!item) break;
 
         // Find any 'ready' executor for the tenant
         const executors = await executorsRepo.list(item.tenantId);
-        // We look for one that is ready.
-        // Note: The list() might be slightly stale, but our atomic update below will handle safety.
-        const candidateExecutor = executors.find(e => e.status === 'ready');
+        const candidateExecutor = this.executorSelector.selectExecutor(executors, item.tenantId);
 
         if (candidateExecutor) {
-
-            // Atomic Claim:
-            // We update the executor to 'busy' only if it is currently 'ready'.
-            // The executorsRepo.update method we added uses a WHERE id = $1.
-            // To make it atomic/conditional, we would need to change update signature or add 'claim' method.
-            // For MVP, we will accept the slight race condition window but reduce it
-            // by checking the return value of a conditional update if we had one.
-            // Since we implemented a generic update, let's assume strict serial processing for now.
-            // Extrapolation: I should improve executorsRepo to support conditional updates,
-            // but I will work with what I have.
-
             const updatedExecutor = await executorsRepo.update(candidateExecutor.id, { status: 'busy' }, item.tenantId);
 
             if (updatedExecutor && updatedExecutor.status === 'busy') {
                 // Dequeue
-                this.queue.shift();
+                this.queueHelper.dequeue();
 
                 logger.info({ runId: item.runId, executorId: candidateExecutor.id }, 'Assigning run to executor');
 
@@ -142,6 +123,14 @@ export class MaestroScheduler {
     } finally {
       this.isProcessing = false;
     }
+  }
+
+  // Expose queue status for monitoring
+  public getQueueStatus() {
+      return {
+          size: this.queueHelper.size,
+          processing: this.isProcessing
+      };
   }
 }
 
