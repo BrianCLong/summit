@@ -23,6 +23,7 @@ class ContextAwareLogger implements Logger {
     if (ctx) {
       if (ctx.correlationId) meta.correlationId = ctx.correlationId;
       if (ctx.tenantId) meta.tenantId = ctx.tenantId;
+      if (ctx.traceId) meta.traceId = ctx.traceId;
       if (ctx.requestId) meta.requestId = ctx.requestId;
     }
 
@@ -60,6 +61,8 @@ export function getRequestLogger(ctx: RequestContext): Logger {
   const bindings: Record<string, unknown> = {
     correlationId: ctx.correlationId,
     tenantId: ctx.tenantId,
+    traceId: ctx.traceId,
+    requestId: ctx.requestId,
   };
   // Create a child of the root pino logger with these bindings
   const childPino = rootLogger.child(bindings);
