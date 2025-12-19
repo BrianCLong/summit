@@ -61,7 +61,11 @@ afterEach(() => {
 });
 
 // Global error handler for unhandled rejections in tests
-process.on('unhandledRejection', (reason, promise) => {
+const globalProcess = (globalThis as Record<string, unknown>).process as
+  | { on: (event: string, handler: (...args: unknown[]) => void) => void }
+  | undefined;
+
+globalProcess?.on('unhandledRejection', (reason: unknown) => {
   console.error('Unhandled Rejection in test:', reason);
 });
 
