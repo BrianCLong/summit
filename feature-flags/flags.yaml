@@ -31,3 +31,8 @@ features:
   dark_mode_ui:
     default: true
     owners: [frontend]
+
+  # GA Flags (Disabled until P8)
+  search.ga.enabled: { default: false, owners: [search] }
+  realtime.enabled: { default: false, owners: [realtime] }
+  reports.renderer.v2.enabled: { default: false, owners: [reports] }

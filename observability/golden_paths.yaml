@@ -1,0 +1,23 @@
+version: "v1"
+paths:
+  - name: "ingest-pipeline"
+    criticality: "high"
+    slo_ref: "ingest_latency"
+    probes:
+      - type: "synthetic"
+        endpoint: "/api/ingest/health"
+        interval: "1m"
+  - name: "search-api"
+    criticality: "high"
+    slo_ref: "search_latency"
+    probes:
+      - type: "synthetic"
+        endpoint: "/api/search/health"
+        interval: "30s"
+  - name: "report-generation"
+    criticality: "medium"
+    slo_ref: "report_generation_success"
+    probes:
+      - type: "synthetic"
+        endpoint: "/api/reports/health"
+        interval: "5m"
