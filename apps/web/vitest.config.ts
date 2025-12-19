@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { defineConfig, mergeConfig } from 'vitest/config'
 import viteConfig from './vite.config'
 
@@ -15,7 +14,6 @@ export default mergeConfig(viteConfig, defineConfig({
     exclude: ['**/node_modules/**', '**/dist/**'],
   },
 }))
-=======
 /// <reference types="vitest" />
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
@@ -36,4 +34,3 @@ export default defineConfig({
     include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
   },
 })
->>>>>>> main

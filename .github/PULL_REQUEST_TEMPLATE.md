@@ -1,7 +1,6 @@
 ## Summary
 
 [What/why]
-<<<<<<< HEAD
 
 ## Canary Plan
 - Metrics to watch: [p95 latency, error rate, saturation]
@@ -24,7 +23,6 @@
 ## Verification
 - [ ] Smoke checks
 - [ ] Golden path e2e: ingest → resolve → runbook → report
-=======
 
 ## Canary Plan
 
@@ -67,4 +65,3 @@
 - [ ] Documentation updated
 - [ ] OPA policies verified
 - [ ] Grafana dashboards updated if applicable
->>>>>>> main

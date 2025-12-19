@@ -10,13 +10,7 @@
     "lint": "eslint src/"
   },
   "dependencies": {
-<<<<<<< HEAD:packages/sigint-collector/package.json
-=======
-<<<<<<< HEAD
-=======
     "@summit/shared": "workspace:^",
->>>>>>> main
->>>>>>> main:packages/sigint-collector/package.json.disabled
     "eventemitter3": "^5.0.1",
     "uuid": "^9.0.0",
     "zod": "^3.22.4"

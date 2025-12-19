@@ -18,36 +18,18 @@
   "dependencies": {
     "socket.io": "^4.8.1",
     "@socket.io/redis-adapter": "^8.3.0",
-<<<<<<< HEAD:services/websocket-server/package.json
     "@socket.io/redis-streams-adapter": "^0.2.2",
-=======
-<<<<<<< HEAD:services/websocket-server/package.json
     "@socket.io/redis-streams-adapter": "^0.2.2",
-=======
-<<<<<<< HEAD
     "@socket.io/redis-streams-adapter": "^0.2.3",
-=======
-<<<<<<< HEAD
     "@socket.io/redis-streams-adapter": "^0.2.3",
-=======
-<<<<<<< HEAD
     "@socket.io/redis-streams-adapter": "^0.2.2",
-=======
     "@socket.io/redis-streams-adapter": "^0.2.3",
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main:services/websocket-server/package.json.disabled
->>>>>>> main:services/websocket-server/package.json.disabled
     "ioredis": "^5.8.2",
     "jsonwebtoken": "^9.0.2",
     "pino": "^10.1.0",
     "pino-http": "^11.0.0",
-<<<<<<< HEAD:services/websocket-server/package.json
     "pino-pretty": "^10.1.0",
-=======
     "pino-pretty": "^11.0.0",
->>>>>>> main:services/websocket-server/package.json.disabled
     "prom-client": "^15.1.3",
     "express": "^5.2.0",
     "helmet": "^8.1.0",

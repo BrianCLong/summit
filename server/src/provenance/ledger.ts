@@ -60,10 +60,8 @@ const ledgerIntegrityStatus = new Gauge({
   labelNames: ['tenant_id'],
 });
 
-<<<<<<< HEAD
 // Export the V2 type as the primary ProvenanceEntry
 export type ProvenanceEntry = ProvenanceEntryV2;
-=======
 export interface ProvenanceEntry {
   id: string;
   tenantId: string;
@@ -99,7 +97,6 @@ export interface ProvenanceEntry {
     timestamp: Date;
   };
 }
->>>>>>> main
 
 export interface LedgerRoot {
   id: string;

@@ -1,9 +1,6 @@
-<<<<<<< HEAD
 import * as crypto from 'node:crypto';
 import fetch from 'node-fetch';
-=======
 import crypto from 'node:crypto';
->>>>>>> main
 import { writeAudit } from '../../utils/audit.js';
 import type { CryptoAuditEvent, JsonObject, KeyVersion } from './types.js';
 

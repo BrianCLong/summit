@@ -1,20 +1,14 @@
-<<<<<<< HEAD
 import * as crypto from 'node:crypto';
-=======
 // @ts-nocheck
 import crypto from 'node:crypto';
->>>>>>> main
 import { performance } from 'node:perf_hooks';
 import { Pool, QueryConfig, QueryResult, PoolClient } from 'pg';
-<<<<<<< HEAD
 import * as dotenv from 'dotenv';
 import baseLogger from '../config/logger';
 
 dotenv.config();
-=======
 import { dbConfig } from './config.js';
 import baseLogger from '../config/logger.js';
->>>>>>> main
 
 type QueryInput = string | QueryConfig<any>;
 
@@ -82,7 +76,6 @@ interface PoolWrapper {
   circuitBreaker: CircuitBreaker;
 }
 
-<<<<<<< HEAD
 interface PoolConfig {
   connectionString?: string;
   host?: string;
@@ -97,13 +90,11 @@ interface ExtendedPoolClient {
   release(err?: boolean | Error): void;
   query(...args: any[]): Promise<any>;
   [key: string]: any;
-=======
 // Extend PoolClient to include connectedAt
 interface ExtendedPoolClient extends PoolClient {
   connectedAt?: number;
   release(destroy?: boolean): void;
   query(queryTextOrConfig: string | QueryConfig<any>, values?: any[]): Promise<QueryResult<any>>;
->>>>>>> main
 }
 
 class CircuitBreaker {
@@ -181,7 +172,6 @@ class CircuitBreaker {
   }
 }
 
-<<<<<<< HEAD
 class PoolMonitor {
   private intervalId?: NodeJS.Timeout;
   private pools: PoolWrapper[] = [];
@@ -247,8 +237,6 @@ class PoolMonitor {
   }
 }
 
-=======
->>>>>>> main
 const preparedStatementCache = new Map<string, string>();
 const slowQueryStats = new Map<
   string,
@@ -283,7 +271,6 @@ const transientNodeErrors = new Set([
   'EPIPE',
 ]);
 
-<<<<<<< HEAD
 function parseConnectionConfig(): PoolConfig {
   if (process.env.DATABASE_URL) {
     return { connectionString: process.env.DATABASE_URL };
@@ -327,8 +314,6 @@ function parseReadReplicaUrls(): string[] {
   return Array.from(new Set([...explicit, ...legacy]));
 }
 
-=======
->>>>>>> main
 function createPool(
   name: string,
   type: 'write' | 'read',
@@ -495,19 +480,16 @@ function createManagedPool(
         };
 
         try {
-<<<<<<< HEAD
           // Use withManagedClient to leverage validation logic
           await withManagedClient(wrapper, 1000, async (client) => {
             await client.query('SELECT 1');
           });
-=======
            const client = await wrapper.pool.connect();
            try {
                await client.query('SELECT 1');
            } finally {
                client.release();
            }
->>>>>>> main
         } catch (error) {
           snapshot.healthy = false;
           snapshot.lastError = (error as Error).message;
@@ -680,7 +662,6 @@ async function executeQueryOnClient(
   return result;
 }
 
-<<<<<<< HEAD
 // Validation and Lifetime check
 async function withManagedClient<T>(
   poolWrapper: PoolWrapper,
@@ -747,8 +728,6 @@ async function withManagedClient<T>(
   }
 }
 
-=======
->>>>>>> main
 function normalizeQuery(
   query: QueryInput,
   params?: any[],

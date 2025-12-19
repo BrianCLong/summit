@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 name: Reusable Package
 on:
   workflow_call:
@@ -49,7 +48,6 @@ jobs:
             .turbo
             node_modules/.cache
           retention-days: 1
-=======
 name: package
 
 on:
@@ -109,4 +107,3 @@ jobs:
           name: package-artifacts
           path: artifacts
           retention-days: 7
->>>>>>> main

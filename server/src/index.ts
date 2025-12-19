@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import http from 'http';
 import express from 'express';
 import { GraphQLError } from 'graphql';
@@ -18,27 +17,18 @@ import { subscriptionEngine } from './graphql/subscriptionEngine.js';
 import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
 import { cfg } from './config.js';
-<<<<<<< HEAD
 import { startOTEL, stopOTEL } from '../otel.js';
-=======
 import { streamingRateLimiter } from './routes/streaming.js';
-<<<<<<< HEAD
 import { startOSINTWorkers } from './services/OSINTQueueService.js';
-=======
 import { BackupManager } from './backup/BackupManager.js';
 import { checkNeo4jIndexes } from './db/indexManager.js';
->>>>>>> main
->>>>>>> main
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logger: pino.Logger = pino();
-=======
 import { bootstrapSecrets } from './bootstrap-secrets.js';
 import { logger } from './config/logger.js';
 import { logConfigSummary } from './config/index.js';
->>>>>>> main
 
-<<<<<<< HEAD
 const startServer = async () => {
   await startOTEL();
   // Optional Kafka consumer import - only when AI services enabled
@@ -55,7 +45,6 @@ const startServer = async () => {
     } catch (error) {
       logger.warn('Kafka not available - running in minimal mode');
     }
-=======
 (async () => {
   try {
     // 1. Load Secrets (Environment or Vault)
@@ -70,9 +59,7 @@ const startServer = async () => {
   } catch (err) {
     logger.error(`Fatal error during startup: ${err}`);
     process.exit(1);
->>>>>>> main
   }
-<<<<<<< HEAD
   const app = await createApp();
   const schema = makeExecutableSchema({ typeDefs, resolvers });
   const httpServer = http.createServer(app);
@@ -170,25 +157,9 @@ const startServer = async () => {
     const dataRetentionService = new DataRetentionService(neo4jDriver);
     dataRetentionService.startCleanupJob(); // Start the cleanup job
 
-<<<<<<< HEAD
     // Start OSINT Workers
     startOSINTWorkers();
 
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
     // Initialize Backup Manager
     const backupManager = new BackupManager();
     backupManager.startScheduler();
@@ -196,14 +167,6 @@ const startServer = async () => {
     // Check Neo4j Indexes
     checkNeo4jIndexes().catch(err => logger.error('Failed to run initial index check', err));
 
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
     // WAR-GAMED SIMULATION - Start Kafka Consumer
     await startKafkaConsumer();
 
@@ -255,6 +218,4 @@ const startServer = async () => {
 };
 
 startServer();
-=======
 })();
->>>>>>> main

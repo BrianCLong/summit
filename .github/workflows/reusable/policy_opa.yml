@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 name: Reusable policy_opa
 on:
   workflow_call:
@@ -9,7 +8,6 @@ jobs:
     steps:
       - name: Placeholder for policy_opa
         run: echo "Running policy_opa workflow placeholder"
-=======
 name: policy_opa
 
 on:
@@ -38,4 +36,3 @@ jobs:
         run: |
           opa test policy/migration_gate.rego policy/release.rego
           opa eval --fail-defined --data policy --input policy/sample_inputs/migration_safe.json "data.summit.gates.migration.allow"
->>>>>>> main

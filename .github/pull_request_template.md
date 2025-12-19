@@ -1,10 +1,8 @@
-<<<<<<< HEAD
 # Overview
 - [ ] Feature flag name(s):
 - [ ] Breaking changes: NO
 - [ ] Preview env URL(s):
 
-<<<<<<< HEAD
 [What/why]
 
 ## Canary Plan
@@ -48,7 +46,6 @@
 - [ ] Documentation updated
 - [ ] OPA policies verified
 - [ ] Grafana dashboards updated if applicable
-=======
 ## Acceptance & Tests
 - [ ] Unit ≥ target
 - [ ] Contract tests updated
@@ -60,7 +57,6 @@
 - [ ] Runbook updated
 - [ ] Metrics + dashboards added
 - [ ] Feature flag default: OFF
-=======
 # Feature Flag(s): <name(s)>
 - [ ] Flag default OFF
 - [ ] Read-only or additive changes only
@@ -77,5 +73,3 @@
 - [ ] /healthz exposed
 - [ ] Metrics plan (stub ok)
 - [ ] Runbook link
->>>>>>> 76edd5fd48 (feat: seed service acceleration pack)
->>>>>>> main

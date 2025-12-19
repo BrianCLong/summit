@@ -11,13 +11,10 @@ Please follow the **[Onboarding & Quickstart Guide](planning/enablement-pack/onb
 
 See **[Daily Developer Workflows](planning/enablement-pack/daily-dev-workflows.md)**.
 
-<<<<<<< HEAD
 > **Note:** Check out the [Examples Directory](examples/) for plugins and custom pipelines.
 
 ## Branch & Pull Request Workflow
-=======
 ## Mergefix / Express 5 Changes (Fast Path)
->>>>>>> main
 
 This section defines **coding rules, commit conventions, and the minimal gate** for any PR that touches the Express 5 migration or related merge conflict work. Use it for PRs labeled `mergefix`.
 
@@ -104,13 +101,11 @@ See **[AI Agent Guidelines](planning/enablement-pack/ai-agent-guidelines.md)**.
 
 ## Merge Rules & CI Gates
 
-<<<<<<< HEAD
 See **[Merge Rules & CI Gates](planning/enablement-pack/merge-rules-and-ci-gates.md)** for:
 *   Branching Strategy
 *   Pull Request Expectations
 *   CI Gates
 *   Fast Path / Mergefix instructions
-=======
 Unit tests focus on testing individual functions, classes, and modules in isolation.
 
 **Location:** `__tests__` directories next to source files **Pattern:** `*.test.ts`, `*.test.tsx`
@@ -531,4 +526,3 @@ To support gradual migration, existing files with errors are grandfathered via:
 
 **New code must not be added to these exemption lists.**
 If you modify a legacy file, aim to fix the errors and remove it from the exemption list.
->>>>>>> cfa40f325f (feat: Enforce strict TypeScript and ESLint checks in CI)

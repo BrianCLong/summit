@@ -153,11 +153,8 @@ export class CacheVersionManager {
    * Load versions from Redis
    */
   private async loadVersions(): Promise<void> {
-<<<<<<< HEAD
     if (!this.redis) return;
-=======
     if (!this.redis) {return;}
->>>>>>> main
 
     try {
       const keys = await this.redis.keys('cache:version:*');

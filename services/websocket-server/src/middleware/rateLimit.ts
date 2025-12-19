@@ -1,16 +1,12 @@
-<<<<<<< HEAD
 /**
  * Rate Limiting Middleware using Token Bucket Algorithm
  */
 
 import { Socket } from 'socket.io';
-=======
 import { AuthenticatedSocket } from '../types/index.js';
->>>>>>> main
 import { logger } from '../utils/logger.js';
 import { AdaptiveRateLimiter } from '../../../../lib/streaming/rate-limiter.js';
 
-<<<<<<< HEAD
 interface TokenBucket {
   tokens: number;
   lastRefill: number;
@@ -100,7 +96,6 @@ export function createRateLimitMiddleware(rateLimiter: RateLimiter) {
           connectionId: socket.data.connectionId,
           tenantId: socket.data.tenantId,
           userId: socket.data.user.userId,
-=======
 export function createRateLimitMiddleware(rateLimiter: AdaptiveRateLimiter) {
   return async (socket: AuthenticatedSocket, next: (err?: Error) => void) => {
     try {
@@ -112,7 +107,6 @@ export function createRateLimitMiddleware(rateLimiter: AdaptiveRateLimiter) {
           tenantId: socket.tenantId,
           userId: socket.user.userId,
           error,
->>>>>>> main
         },
         'Rate limit exceeded for connection'
       );
@@ -122,7 +116,6 @@ export function createRateLimitMiddleware(rateLimiter: AdaptiveRateLimiter) {
 }
 
 export function wrapHandlerWithRateLimit<T extends unknown[]>(
-<<<<<<< HEAD
   socket: Socket,
   rateLimiter: RateLimiter,
   handler: (...args: T) => void | Promise<void>
@@ -141,7 +134,6 @@ export function wrapHandlerWithRateLimit<T extends unknown[]>(
         'Message rate limit exceeded'
       );
 
-=======
   socket: AuthenticatedSocket,
   rateLimiter: AdaptiveRateLimiter,
   handler: (...args: T) => void | Promise<void>
@@ -152,7 +144,6 @@ export function wrapHandlerWithRateLimit<T extends unknown[]>(
       handler(...args);
     } else {
       logger.warn({ key }, 'Message dropped due to rate limit');
->>>>>>> main
       socket.emit('system:error', {
         code: 'RATE_LIMIT_EXCEEDED',
         message: 'Too many messages, please slow down',

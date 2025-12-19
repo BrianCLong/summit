@@ -9,21 +9,12 @@
     "build": "tsc"
   },
   "dependencies": {
-<<<<<<< HEAD:services/warehouse-service/package.json
-=======
-<<<<<<< HEAD
     "@summit/data-warehouse": "workspace:*",
     "@summit/dimensional-modeling": "workspace:*",
     "@summit/olap-engine": "workspace:*",
-=======
-<<<<<<< HEAD
-=======
     "@summit/data-warehouse": "workspace:*",
     "@summit/dimensional-modeling": "workspace:*",
     "@summit/olap-engine": "workspace:*",
->>>>>>> main
->>>>>>> main
->>>>>>> main:services/warehouse-service/package.json.disabled
     "express": "^4.18.2",
     "pg": "^8.11.3"
   },

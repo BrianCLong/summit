@@ -4,7 +4,6 @@ URL=${1:?usage: $0 <base-url>}
 
 curl -fsS "$URL/health" >/dev/null
 
-<<<<<<< HEAD
 echo "🧪 IntelGraph GA-Core Smoke Test - Committee Validation"
 echo "Testing all integration train phases..."
 echo ""
@@ -122,6 +121,4 @@ else
     echo "❌ Review failed tests before deployment"
     exit 1
 fi
-=======
 echo "smoke ok"
->>>>>>> main

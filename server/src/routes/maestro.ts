@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import express from 'express';
 import pipelinesRouter from '../maestro/pipelines/pipelines-api.js';
 import runsRouter from '../maestro/runs/runs-api.js';
@@ -24,7 +23,6 @@ router.use('/', executorsRouter);
 // or do a URL rewrite here. For now, we stick to the implementation.
 
 export default router;
-=======
 
 import { Router } from 'express';
 import { ensureAuthenticated } from '../middleware/auth';
@@ -145,4 +143,3 @@ export const createMaestroRouter = (engine: MaestroEngine, db: Pool) => {
 
   return router;
 };
->>>>>>> main

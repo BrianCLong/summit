@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # AI in Production
 
 This guide covers strategies for deploying Summit's AI/ML capabilities in a production environment.
@@ -49,7 +48,6 @@ services:
 ### Kubernetes
 
 Use the NVIDIA Device Plugin for Kubernetes to schedule pods on GPU nodes.
-=======
 # AI Production Guide
 
 This playbook covers model serving, versioning, GPU scheduling, and monitoring patterns to keep Summit's AI features production-ready.
@@ -96,13 +94,11 @@ Expose Prometheus metrics using `prometheus_fastapi_instrumentator` and secure w
 
 - Build GPU images with `Dockerfile.ai` and `--gpus all` using NVIDIA Container Toolkit.
 - Define `runtimeClassName: nvidia` in K8s deployments and request GPU resources:
->>>>>>> main
 
 ```yaml
 resources:
   limits:
     nvidia.com/gpu: 1
-<<<<<<< HEAD
 ```
 
 ## Monitoring AI Workloads
@@ -133,7 +129,6 @@ Use MLflow or DVC to manage model versions.
 MODEL_VERSION=v2.1.0
 MODEL_BUCKET=s3://summit-models-prod
 ```
-=======
     memory: 8Gi
   requests:
     cpu: 2000m
@@ -162,4 +157,3 @@ MODEL_BUCKET=s3://summit-models-prod
 - Throttle GraphQL AI entrypoints using feature flags stored in Redis.
 - Drain GPU nodes with `kubectl cordon` and `kubectl drain --ignore-daemonsets` before driver upgrades.
 - Keep a fallback rules-based extractor deployed alongside ML models for graceful degradation.
->>>>>>> main

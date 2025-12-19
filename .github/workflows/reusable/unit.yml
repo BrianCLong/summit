@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 name: Reusable Unit Tests
 on:
   workflow_call:
@@ -59,7 +58,6 @@ jobs:
             exit 1
           fi
           echo "Prod guardrails correctly blocked unsafe config"
-=======
 name: unit
 
 on:
@@ -101,4 +99,3 @@ jobs:
 
       - name: Run unit tests
         run: pnpm run test:jest
->>>>>>> main

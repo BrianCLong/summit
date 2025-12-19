@@ -1,19 +1,4 @@
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
 // @ts-nocheck
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
 import { Request, Response, NextFunction } from 'express';
 import { provenanceLedger } from '../provenance/ledger.js';
 import logger from '../config/logger.js';
@@ -117,26 +102,11 @@ export function auditFirstMiddleware(
         actorType: user ? 'user' : 'system', // or 'unknown'
         payload,
         metadata: {
-<<<<<<< HEAD
           requestId: (req as any).id || (req.headers['x-request-id'] as string),
           correlationId: (req as any).correlationId || (req.headers['x-correlation-id'] as string),
-=======
           requestId: (req as any).id || req.headers['x-request-id'],
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
           // @ts-ignore
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
           correlationId: (req as any).correlationId || req.headers['x-correlation-id'],
->>>>>>> main
           sessionId: (req as any).sessionID,
         },
       });

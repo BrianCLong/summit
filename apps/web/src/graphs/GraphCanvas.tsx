@@ -1,28 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react'
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
 import * as d3 from 'd3'
-=======
 // Tree-shaken D3 imports for better bundle size
 import { select } from 'd3-selection'
 import {
@@ -40,7 +17,6 @@ import {
 } from 'd3-force'
 import { zoom } from 'd3-zoom'
 import { drag } from 'd3-drag'
->>>>>>> main
 import { cn } from '@/lib/utils'
 import type { Entity, Relationship, GraphLayout } from '@/types'
 
@@ -86,22 +62,6 @@ export function GraphCanvas({
   const frameCountRef = useRef(0)
   const lastTimeRef = useRef(performance.now())
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
   // Calculate FPS
   useEffect(() => {
     if (!debugMode) return
@@ -124,14 +84,6 @@ export function GraphCanvas({
     return () => cancelAnimationFrame(animationFrameId)
   }, [debugMode])
 
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
   // Update dimensions on resize
   useEffect(() => {
     const updateDimensions = () => {
@@ -174,90 +126,23 @@ export function GraphCanvas({
       }))
 
     // Create simulation based on layout type
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
     let simulation: d3.Simulation<GraphNode, GraphLink>
 
     switch (layout.type) {
       case 'force':
         simulation = d3
           .forceSimulation(nodes)
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-=======
     let simulation: Simulation<GraphNode, GraphLink>
 
     switch (layout.type) {
       case 'force':
         simulation = forceSimulation(nodes)
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
           .force(
             'link',
             forceLink<GraphNode, GraphLink>(links)
               .id(d => d.id)
               .distance(100)
           )
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
           .force('charge', d3.forceManyBody().strength(-300))
           .force('center', d3.forceCenter(width / 2, height / 2))
           .force('collision', d3.forceCollide().radius(30))
@@ -266,21 +151,6 @@ export function GraphCanvas({
       case 'radial':
         simulation = d3
           .forceSimulation(nodes)
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-=======
           .force('charge', forceManyBody().strength(-300))
           .force('center', forceCenter(width / 2, height / 2))
           .force('collision', forceCollide().radius(30))
@@ -288,107 +158,51 @@ export function GraphCanvas({
 
       case 'radial':
         simulation = forceSimulation(nodes)
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
           .force(
             'link',
             forceLink<GraphNode, GraphLink>(links)
               .id(d => d.id)
               .distance(80)
           )
-<<<<<<< HEAD
           .force('charge', d3.forceManyBody().strength(-200))
           .force('radial', d3.forceRadial(150, width / 2, height / 2))
-=======
-<<<<<<< HEAD
           .force('charge', d3.forceManyBody().strength(-200))
           .force('radial', d3.forceRadial(150, width / 2, height / 2))
-=======
-<<<<<<< HEAD
           .force('charge', d3.forceManyBody().strength(-200))
           .force('radial', d3.forceRadial(150, width / 2, height / 2))
-=======
-<<<<<<< HEAD
           .force('charge', d3.forceManyBody().strength(-200))
           .force('radial', d3.forceRadial(150, width / 2, height / 2))
-=======
-<<<<<<< HEAD
           .force('charge', d3.forceManyBody().strength(-200))
           .force('radial', d3.forceRadial(150, width / 2, height / 2))
-=======
-<<<<<<< HEAD
           .force('charge', d3.forceManyBody().strength(-200))
           .force('radial', d3.forceRadial(150, width / 2, height / 2))
-=======
-<<<<<<< HEAD
           .force('charge', d3.forceManyBody().strength(-200))
           .force('radial', d3.forceRadial(150, width / 2, height / 2))
-=======
-<<<<<<< HEAD
           .force('charge', d3.forceManyBody().strength(-200))
           .force('radial', d3.forceRadial(150, width / 2, height / 2))
-=======
           .force('charge', forceManyBody().strength(-200))
           .force('radial', forceRadial(150, width / 2, height / 2))
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
         break
 
       case 'hierarchic':
         // Simple hierarchical layout - in a real app you'd use dagre or similar
-<<<<<<< HEAD
         simulation = d3
           .forceSimulation(nodes)
-=======
-<<<<<<< HEAD
         simulation = d3
           .forceSimulation(nodes)
-=======
-<<<<<<< HEAD
         simulation = d3
           .forceSimulation(nodes)
-=======
-<<<<<<< HEAD
         simulation = d3
           .forceSimulation(nodes)
-=======
-<<<<<<< HEAD
         simulation = d3
           .forceSimulation(nodes)
-=======
-<<<<<<< HEAD
         simulation = d3
           .forceSimulation(nodes)
-=======
-<<<<<<< HEAD
         simulation = d3
           .forceSimulation(nodes)
-=======
-<<<<<<< HEAD
         simulation = d3
           .forceSimulation(nodes)
-=======
         simulation = forceSimulation(nodes)
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
           .force(
             'link',
             forceLink<GraphNode, GraphLink>(links)
@@ -404,33 +218,9 @@ export function GraphCanvas({
         break
 
       default:
-<<<<<<< HEAD
         simulation = d3
           .forceSimulation(nodes)
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-=======
         simulation = forceSimulation(nodes)
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
           .force(
             'link',
             forceLink<GraphNode, GraphLink>(links).id(d => d.id)
@@ -661,38 +451,22 @@ export function GraphCanvas({
       {/* Graph controls overlay */}
       <div className="absolute top-4 right-4 flex flex-col gap-2">
         <div className="bg-background/90 backdrop-blur-sm border rounded-lg p-2 shadow-sm">
-<<<<<<< HEAD
           <div className="text-xs font-medium text-muted-foreground mb-1">
             Graph Info
-=======
-<<<<<<< HEAD
           <div className="text-xs font-medium text-muted-foreground mb-1">
             Graph Info
-=======
-<<<<<<< HEAD
           <div className="text-xs font-medium text-muted-foreground mb-1">
             Graph Info
-=======
-<<<<<<< HEAD
           <div className="text-xs font-medium text-muted-foreground mb-1">
             Graph Info
-=======
-<<<<<<< HEAD
           <div className="text-xs font-medium text-muted-foreground mb-1">
             Graph Info
-=======
-<<<<<<< HEAD
           <div className="text-xs font-medium text-muted-foreground mb-1">
             Graph Info
-=======
-<<<<<<< HEAD
           <div className="text-xs font-medium text-muted-foreground mb-1">
             Graph Info
-=======
-<<<<<<< HEAD
           <div className="text-xs font-medium text-muted-foreground mb-1">
             Graph Info
-=======
           <div className="flex justify-between items-center mb-1 gap-2">
             <div className="text-xs font-medium text-muted-foreground">
               Graph Info
@@ -703,35 +477,11 @@ export function GraphCanvas({
             >
               {debugMode ? 'Debug: ON' : 'Debug'}
             </button>
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
           </div>
           <div className="text-xs space-y-1">
             <div>Entities: {entities.length}</div>
             <div>Relationships: {relationships.length}</div>
             <div>Layout: {layout.type}</div>
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
             {debugMode && (
               <>
                 <div className="border-t my-1 pt-1 border-muted" />
@@ -747,14 +497,6 @@ export function GraphCanvas({
                 </div>
               </>
             )}
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
           </div>
         </div>
       </div>

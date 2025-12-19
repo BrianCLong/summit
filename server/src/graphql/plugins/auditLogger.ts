@@ -7,19 +7,7 @@ import fs from 'fs';
 import axios from 'axios';
 import _ from 'lodash';
 import { provenanceLedger } from '../../provenance/ledger.js';
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
 import { getAuditSystem } from '../../audit/advanced-audit-system.js';
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
 const { isEqual } = _;
 
 const ELASTIC_URL = process.env.ELASTICSEARCH_URL;
@@ -55,20 +43,8 @@ const auditLoggerPlugin: ApolloServerPlugin = {
           'unknown';
         const userId = ctx.contextValue?.user?.id ?? null;
         const tenantId = ctx.contextValue?.user?.tenantId || 'unknown-tenant';
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
         const requestId = ctx.request.http?.headers.get('x-request-id') || undefined;
         const correlationId = ctx.request.http?.headers.get('x-correlation-id') || undefined;
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
 
         const before = ctx.contextValue?.audit?.before;
         const after =
@@ -108,14 +84,6 @@ const auditLoggerPlugin: ApolloServerPlugin = {
           diff,
         };
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
         // Log to Advanced Audit System
         try {
           getAuditSystem().recordEvent({
@@ -144,10 +112,6 @@ const auditLoggerPlugin: ApolloServerPlugin = {
           }
         }
 
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
         // Stamp to Provenance Ledger
         try {
           await provenanceLedger.appendEntry({
@@ -159,28 +123,16 @@ const auditLoggerPlugin: ApolloServerPlugin = {
             actorType: userId ? 'user' : 'system',
             payload: logEntry,
             metadata: {
-<<<<<<< HEAD
               requestId: ctx.request.http?.headers.get('x-request-id') || undefined,
               correlationId: ctx.request.http?.headers.get('x-correlation-id') || undefined,
-=======
-<<<<<<< HEAD
               requestId: ctx.request.http?.headers.get('x-request-id') || undefined,
               correlationId: ctx.request.http?.headers.get('x-correlation-id') || undefined,
-=======
-<<<<<<< HEAD
               requestId: ctx.request.http?.headers.get('x-request-id') || undefined,
               correlationId: ctx.request.http?.headers.get('x-correlation-id') || undefined,
-=======
-<<<<<<< HEAD
               requestId: ctx.request.http?.headers.get('x-request-id') || undefined,
               correlationId: ctx.request.http?.headers.get('x-correlation-id') || undefined,
-=======
               requestId,
               correlationId,
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
             },
           });
         } catch (error) {

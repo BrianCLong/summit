@@ -1,10 +1,6 @@
-<<<<<<< HEAD
 // @ts-ignore
-=======
 // @ts-nocheck
->>>>>>> main
 import pino from 'pino';
-<<<<<<< HEAD
 import { correlationEngine } from '../lib/telemetry/correlation-engine';
 
 // Custom stream that intercepts logs for the Correlation Engine and passes them to stdout
@@ -23,10 +19,8 @@ const stream = {
     process.stdout.write(msg);
   },
 };
-=======
 import { cfg } from '../config.js';
 import { AsyncLocalStorage } from 'async_hooks';
->>>>>>> main
 
 // AsyncLocalStorage for correlation ID propagation
 export const correlationStorage = new AsyncLocalStorage<Map<string, string>>();
@@ -48,9 +42,7 @@ const REDACT_PATHS = [
   'user.phone',
 ];
 
-<<<<<<< HEAD
 export const logger = (pino as any)({
-=======
 // Standard logging context
 export interface SummitLogContext {
   correlationId?: string;
@@ -67,7 +59,6 @@ export interface SummitLogContext {
 }
 
 export const logger = pino({
->>>>>>> main
   level: process.env.LOG_LEVEL || 'info',
   base: {
     service: 'intelgraph-server',
@@ -111,12 +102,9 @@ export const logger = pino({
     // @ts-ignore
     res: (pino as any).stdSerializers?.res,
   },
-<<<<<<< HEAD
   // Remove pino-pretty transport for production readiness
   // In production, logs should be structured JSON for log aggregation
 }, stream);
-=======
 });
->>>>>>> main
 
 export default logger;

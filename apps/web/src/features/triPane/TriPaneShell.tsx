@@ -150,13 +150,10 @@ export function TriPaneShell({
       filteredTimelineEvents.map(e => e.entityId).filter(Boolean) as string[]
     )
 
-<<<<<<< HEAD
     const filteredEntities = entities.filter(entity => {
       if (relevantEntityIds.has(entity.id)) {return true}
-=======
     const filteredEntities = currentEntities.filter(entity => {
       if (relevantEntityIds.has(entity.id)) return true
->>>>>>> main
 
       // Also include entities updated within the time window
       if (entity.updatedAt) {

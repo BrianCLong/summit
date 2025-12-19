@@ -35,11 +35,8 @@ describe('Production Guardrails', () => {
     process.env.NEO4J_URI = 'bolt://h:7687';
     process.env.NEO4J_USER = 'neo4j';
     process.env.NEO4J_PASSWORD = 'p';
-<<<<<<< HEAD
 
-=======
 
->>>>>>> 0d658dbf2
     // We expect it to call process.exit(1)
     await expect(importConfig()).rejects.toThrow('PROCESS_EXIT_1');
     expect(consoleErrorMock).toHaveBeenCalledWith(expect.stringContaining('Production Configuration Error'));
@@ -69,11 +66,8 @@ describe('Production Guardrails', () => {
     process.env.NEO4J_USER = 'neo4j';
     process.env.NEO4J_PASSWORD = 'securepassword';
     process.env.REDIS_PASSWORD = 'securepassword';
-<<<<<<< HEAD
     process.env.CORS_ORIGIN = 'https://app.example.com';
-=======
     process.env.CORS_ORIGIN = 'https://app.example.com';
->>>>>>> 0d658dbf2
 
     // Should not throw
     await expect(importConfig()).resolves.not.toThrow();

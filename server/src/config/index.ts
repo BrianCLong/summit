@@ -1,12 +1,9 @@
-<<<<<<< HEAD
 import * as dotenv from 'dotenv';
-=======
 import dotenv from 'dotenv';
 import { ConfigSchema, type Config } from './schema.js';
 import { z } from 'zod';
 
 // Load environment variables
->>>>>>> main
 dotenv.config();
 
 // Create a raw config object from process.env to map to our schema structure
@@ -40,11 +37,8 @@ const rawConfig = {
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
   },
   bcrypt: {
-<<<<<<< HEAD
     rounds: parseInt(process.env.BCRYPT_ROUNDS || '14'),
-=======
     rounds: process.env.BCRYPT_ROUNDS,
->>>>>>> main
   },
   rateLimit: {
     windowMs: process.env.RATE_LIMIT_WINDOW_MS,
@@ -59,7 +53,6 @@ const rawConfig = {
   },
 };
 
-<<<<<<< HEAD
 // Validation for production readiness
 if (config.requireRealDbs || config.env === 'production') {
   const requiredEnvVars = [
@@ -78,7 +71,6 @@ if (config.requireRealDbs || config.env === 'production') {
     console.error(
       `❌ Production/RealDBs mode missing env vars: ${missing.join(', ')}`,
     );
-=======
 let config: Config;
 
 try {
@@ -86,13 +78,11 @@ try {
 } catch (error) {
   if (error instanceof z.ZodError) {
     console.error('❌ Invalid Configuration:', error.format());
->>>>>>> main
     process.exit(1);
   }
   throw error;
 }
 
-<<<<<<< HEAD
   // Ensure not using default dev passwords in production
   const devPasswords = [
     'devpassword',
@@ -109,7 +99,6 @@ try {
     console.error(
       '❌ Production/RealDBs mode but using default dev passwords. Set proper secrets.',
     );
-=======
 // Production Readiness Checks
 if (config.requireRealDbs) {
   const devPasswords = ['devpassword', 'dev_jwt_secret_12345'];
@@ -122,7 +111,6 @@ if (config.requireRealDbs) {
   if (violations.length > 0) {
     console.error('❌ REQUIRE_REAL_DBS=true but security violations found:');
     violations.forEach(v => console.error(`   - ${v}`));
->>>>>>> main
     process.exit(1);
   }
 }

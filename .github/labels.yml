@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 - name: needs-canary-plan
   color: CC9900
   description: Canary plan required before merge
@@ -17,7 +16,6 @@
 - name: type/runbook
   color: c2e0c6
   description: Documentation/runbook
-=======
 # Standard set of labels for Summit repo
 # Use with actions/labeler or a label sync tool
 
@@ -39,7 +37,6 @@
 
 - name: 'priority: critical'
   color: 'b60205'
-<<<<<<< HEAD
   description: 'Must handle immediately'
 - name: 'priority: high'
   color: 'ff0000'
@@ -48,7 +45,6 @@
   color: 'fbca04'
   description: 'Normal priority'
 - name: 'priority: low'
-=======
   description: 'Monthly operational hygiene tasks'
 
 - name: needs-canary-plan
@@ -72,7 +68,6 @@
   description: 'High priority items'
 
 - name: 'priority:normal'
->>>>>>> main
   color: 'c2e0c6'
   description: 'Nice to have'
 
@@ -99,14 +94,12 @@
   color: 'bfdadc'
   description: 'Database, migration, data integrity'
 
-<<<<<<< HEAD
 - name: 'needs-canary-plan'
   color: 'bfd4f2'
   description: 'Requires a canary deployment plan before merge'
 - name: 'migration-gate'
   color: 'd93f0b'
   description: 'Contains database migrations, requires verification'
-=======
 - name: security
   color: '6610f2'
   description: 'Security-related tasks'
@@ -130,5 +123,3 @@
 - name: type/runbook
   color: 'c2e0c6'
   description: Documentation/runbook
->>>>>>> main
->>>>>>> main
