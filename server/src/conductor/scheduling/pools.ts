@@ -38,7 +38,10 @@ export function pickCheapestEligible(
   residency?: string,
 ) {
   let best: { id: string; price: number } | null = null;
-  for (const p of candidates) {
+  const orderedCandidates = [...candidates].sort((a, b) =>
+    a.id.localeCompare(b.id),
+  );
+  for (const p of orderedCandidates) {
     if (
       residency &&
       !p.region.toLowerCase().startsWith(residency.toLowerCase())
@@ -50,7 +53,13 @@ export function pickCheapestEligible(
       (est.cpuSec || 0) * Number(c.cpu_sec_usd) +
       (est.gbSec || 0) * Number(c.gb_sec_usd) +
       (est.egressGb || 0) * Number(c.egress_gb_usd);
-    if (!best || price < best.price) best = { id: p.id, price };
+    if (
+      !best ||
+      price < best.price ||
+      (price === best.price && p.id.localeCompare(best.id) < 0)
+    ) {
+      best = { id: p.id, price };
+    }
   }
   return best;
 }

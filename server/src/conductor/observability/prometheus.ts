@@ -92,6 +92,19 @@ export const conductorTaskTimeoutTotal = new client.Counter({
   labelNames: ['expert', 'timeout_type'],
 });
 
+export const conductorScheduledTasksTotal = new client.Counter({
+  name: 'conductor_scheduled_tasks_total',
+  help: 'Total number of scheduled tasks processed by workers',
+  labelNames: ['queueName', 'poolId', 'status'],
+});
+
+export const conductorScheduledTaskLatencySeconds = new client.Histogram({
+  name: 'conductor_scheduled_task_latency_seconds',
+  help: 'Processing latency for scheduled tasks by pool',
+  labelNames: ['poolId'],
+  buckets: [0.1, 0.5, 1, 2, 5, 10, 30, 60, 120, 300],
+});
+
 // Register all conductor metrics with the main registry
 [
   conductorRouterDecisionsTotal,
@@ -108,6 +121,8 @@ export const conductorTaskTimeoutTotal = new client.Counter({
   conductorRoutingConfidenceHistogram,
   conductorConcurrencyLimitHitsTotal,
   conductorTaskTimeoutTotal,
+  conductorScheduledTasksTotal,
+  conductorScheduledTaskLatencySeconds,
 ].forEach((metric) => register.registerMetric(metric));
 
 // Helper functions to work with confidence buckets
@@ -268,12 +283,15 @@ export class PrometheusConductorMetrics {
    */
   public recordOperationalEvent(
     eventType: string,
-    metadata?: Record<string, any>,
+    metadata?: Record<string, any> | boolean,
+    labels?: Record<string, any>,
   ): void {
+    const successFlag =
+      typeof metadata === 'boolean' ? metadata : metadata?.success !== false;
     // Record as a security event with generic type
     conductorSecurityEventsTotal.inc({
       type: eventType,
-      result: metadata?.success !== false ? 'allowed' : 'denied',
+      result: successFlag ? 'allowed' : 'denied',
     });
   }
 
@@ -290,6 +308,30 @@ export class PrometheusConductorMetrics {
     if (metricName.includes('active') || metricName.includes('count')) {
       conductorActiveTasksGauge.set(value);
     }
+  }
+
+  /**
+   * Record worker task outcomes with pool labeling
+   */
+  public recordScheduledTask(
+    queueName: string,
+    poolId: string,
+    status: 'completed' | 'failed' | 'error',
+  ): void {
+    conductorScheduledTasksTotal.inc({ queueName, poolId, status });
+  }
+
+  /**
+   * Observe worker task latency labeled by pool
+   */
+  public observeScheduledTaskLatency(
+    poolId: string,
+    latencyMs: number,
+  ): void {
+    conductorScheduledTaskLatencySeconds.observe(
+      { poolId },
+      latencyMs / 1000,
+    );
   }
 }
 

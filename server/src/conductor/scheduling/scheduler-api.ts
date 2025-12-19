@@ -7,6 +7,8 @@ import {
   SchedulingContext,
   BudgetConfig,
 } from './cost-aware-scheduler';
+import { choosePool } from './selector.js';
+import { recordPoolSelectionAudit } from './pool-selection-audit';
 import { ExpertArm } from '../learn/bandit';
 import { prometheusConductorMetrics } from '../observability/prometheus';
 
@@ -26,6 +28,9 @@ interface ScheduleRequest {
     businessUnit?: string;
     costCenter?: string;
   };
+  est?: { cpuSec?: number; gbSec?: number; egressGb?: number };
+  residency?: string;
+  purpose?: string;
 }
 
 /**
@@ -71,6 +76,10 @@ schedulerRouter.post('/schedule', async (req, res) => {
       code_generation: 20000,
     };
 
+    const est = scheduleRequest.est || {};
+    const residency = scheduleRequest.residency;
+    const purpose = scheduleRequest.purpose;
+
     const schedulingContext: SchedulingContext = {
       expertType: scheduleRequest.expertType,
       priority: scheduleRequest.priority || 'normal',
@@ -86,7 +95,27 @@ schedulerRouter.post('/schedule', async (req, res) => {
       requestId: scheduleRequest.requestId,
       timeout: scheduleRequest.timeout || 300000, // 5 minutes default
       metadata: scheduleRequest.metadata,
+      est,
+      residency,
+      purpose,
     };
+
+    try {
+      const bestPool = await choosePool(est, residency);
+      if (bestPool) {
+        schedulingContext.poolId = bestPool.id;
+        schedulingContext.poolPriceUsd = bestPool.price;
+      } else {
+        console.warn(
+          `No eligible pool found for request ${scheduleRequest.requestId}`,
+        );
+      }
+    } catch (error) {
+      console.warn('Pool selection failed', {
+        error: error instanceof Error ? error.message : error,
+        requestId: scheduleRequest.requestId,
+      });
+    }
 
     // Make scheduling decision
     const decision = await costAwareScheduler.schedule(schedulingContext);
@@ -95,14 +124,35 @@ schedulerRouter.post('/schedule', async (req, res) => {
       success: decision.approved,
       decision,
       requestId: scheduleRequest.requestId,
+      poolId: schedulingContext.poolId || null,
+      poolPriceUsd: schedulingContext.poolPriceUsd ?? null,
       processingTime: Date.now() - startTime,
     };
 
+    if (decision.approved) {
+      try {
+        await recordPoolSelectionAudit({
+          tenantId: scheduleRequest.tenantId,
+          requestId: scheduleRequest.requestId,
+          poolId: schedulingContext.poolId,
+          poolPriceUsd: schedulingContext.poolPriceUsd,
+          residency: schedulingContext.residency,
+          est: schedulingContext.est,
+          purpose: schedulingContext.purpose,
+        });
+      } catch (auditError) {
+        console.warn('Pool selection audit failed softly', {
+          error: auditError instanceof Error ? auditError.message : auditError,
+          requestId: scheduleRequest.requestId,
+        });
+      }
+    }
+
     // Record metrics
-    prometheusConductorMetrics.recordOperationalEvent(
-      'scheduler_request',
-      decision.approved,
-    );
+    prometheusConductorMetrics.recordOperationalEvent('scheduler_request', {
+      success: decision.approved,
+      poolId: schedulingContext.poolId,
+    });
     prometheusConductorMetrics.recordOperationalMetric(
       'scheduler_decision_time',
       response.processingTime,
