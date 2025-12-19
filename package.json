@@ -21,6 +21,7 @@
     "test:quick": "turbo run test --filter='!*integration*' --filter='!*e2e*' --cache-dir=.turbo -- --testPathPattern='(sample|mathUtils|stringUtils)\\.test' --maxWorkers=2 --bail || echo 'Quick tests passed or jest not configured'",
     "test:unit": "npm run test",
     "test:integration": "cd server && npm run test:integration",
+    "test:tenant-isolation": "jest --config jest.config.cjs --runInBand --runTestsByPath tests/tenant/isolation.test.ts",
     "build": "npm run build:client && npm run build:server",
     "build:client": "cd client && npm run build",
     "build:server": "cd server && npm run build",
