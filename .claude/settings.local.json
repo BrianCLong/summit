@@ -87,7 +87,8 @@
       "Bash(for f in server/src/telemetry/tracing.ts server/otel.ts server/src/utils/summit-metrics.ts)",
       "Bash(do if [ -f \"$f\" ])",
       "Bash(then if ! head -1 \"$f\")",
-      "Bash(then echo \"// @ts-nocheck\")"
+      "Bash(then echo \"// @ts-nocheck\")",
+      "Bash(pnpm add:*)"
     ],
     "deny": [],
     "ask": []
