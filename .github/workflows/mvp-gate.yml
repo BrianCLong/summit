@@ -1,0 +1,67 @@
+name: mvp-gate
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, edited]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mvp-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      NODE_VERSION: "18.18"
+      PNPM_VERSION: "9"
+      DEFAULT_MVP_TIER: "mvp-0"
+      SMOKE_URL: "http://127.0.0.1:3000/healthz"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Build
+        run: pnpm build
+
+      - name: Test
+        run: pnpm test
+
+      - name: Determine MVP tier from PR body
+        id: tier
+        if: ${{ github.event_name == 'pull_request' }}
+        run: node scripts/mvp/gate.mjs tier-from-pr
+
+      - name: MVP Gate (mvp-0 always enforced)
+        run: node scripts/mvp/gate.mjs run
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+
+      - name: Gate Summary
+        if: always()
+        run: node scripts/mvp/gate.mjs summary
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
