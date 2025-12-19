@@ -1,0 +1,46 @@
+{
+  "name": "@summit/adapter-sdk",
+  "version": "0.1.0",
+  "description": "Adapter packaging SDK with signing, SBOM, and verification helpers",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint \"src/**/*.ts\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "semver": "^7.6.3",
+    "tar": "^7.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "eslint": "^9.14.0",
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BrianCLong/summit.git",
+    "directory": "packages/adapter-sdk"
+  },
+  "license": "MIT",
+  "keywords": [
+    "adapter",
+    "sdk",
+    "bundle",
+    "cosign",
+    "sbom",
+    "slsa"
+  ]
+}

@@ -33,6 +33,7 @@
     "commander": "^12.1.0",
     "conf": "^13.0.1",
     "dotenv": "^16.4.5",
+    "@summit/adapter-sdk": "workspace:*",
     "ink": "^5.0.1",
     "ink-spinner": "^5.0.0",
     "ink-table": "^3.1.0",
