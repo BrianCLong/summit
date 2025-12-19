@@ -38,6 +38,16 @@ npm run db:seed:managed
 - Each migration is executed with `lock_timeout` and `statement_timeout` to avoid long blocking DDL.
 - Use additive changes (create table/column, backfill with defaults) for smooth deploys.
 
+## Concurrent + partial index helper
+- Feature flag: set `INDEX_CONCURRENT=1` in environments that support concurrent builds.
+- Use `buildCreateIndexSql`/`buildDropIndexSql` from `src/db/migrations/indexing.ts` to generate SQL for managed migrations, including partial filters for tenant/case scopes or active-only rows.
+- The migration runner automatically retries index builds, tracks status in `index_build_history`, and falls back to non-transactional execution when PostgreSQL rejects `CREATE INDEX CONCURRENTLY` inside a transaction.
+- Avoid concurrent builds when:
+  - The table is small (regular builds finish faster and avoid extra overhead).
+  - You can tolerate a brief lock during deploy (maintenance windows).
+  - You are in a migration bundle that must stay transactional end-to-end (concurrent indexes require autocommit).
+- If an index build fails, the runner logs the failure, drops any invalid index, and exits cleanly so you can fix and re-run safely.
+
 ## Backup & restore
 ```bash
 # pg_dump prior to running migrations (default behavior of `db:migrate:managed`)
