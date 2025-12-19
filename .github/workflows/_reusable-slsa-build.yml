@@ -74,6 +74,8 @@ permissions:
 env:
   REGISTRY: ghcr.io
   COSIGN_EXPERIMENTAL: '1'
+  OIDC_ISSUER: https://token.actions.githubusercontent.com
+  OIDC_SUBJECT_REGEX: ^https://github.com/${{ github.repository }}/.*
 
 jobs:
   build:
@@ -168,6 +170,17 @@ jobs:
             -a "workflow=${{ github.workflow }}" \
             -a "slsa_level=3" \
             "$IMAGE"
+
+      - name: Verify image signature identity pins
+        if: inputs.sign && inputs.push
+        run: |
+          set -euo pipefail
+
+          IMAGE="${{ steps.image-uri.outputs.uri }}"
+
+          cosign verify "$IMAGE" \
+            --certificate-identity-regexp="${{ env.OIDC_SUBJECT_REGEX }}" \
+            --certificate-oidc-issuer="${{ env.OIDC_ISSUER }}"
 
       - name: Generate SBOM
         if: inputs.sbom

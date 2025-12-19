@@ -137,6 +137,41 @@ jobs:
             echo "Lockfile hash: $LOCKFILE_HASH"
           fi
 
+  component-matrix-builds:
+    name: Component Matrix Builds (${{ matrix.name }})
+    needs: pre-build-checks
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Maestro
+            slug: maestro
+            context: .
+            dockerfile: ./Dockerfile
+          - name: IntelGraph
+            slug: intelgraph
+            context: .
+            dockerfile: ./Dockerfile
+          - name: CompanyOS
+            slug: companyos
+            context: .
+            dockerfile: ./Dockerfile
+          - name: Switchboard
+            slug: switchboard
+            context: .
+            dockerfile: ./Dockerfile
+    uses: ./.github/workflows/_reusable-slsa-build.yml
+    with:
+      image_name: ${{ github.repository }}/${{ matrix.slug }}
+      context: ${{ matrix.context }}
+      dockerfile: ${{ matrix.dockerfile }}
+      push: ${{ github.event_name != 'pull_request' }}
+      sign: true
+      sbom: true
+      slsa_provenance: true
+      reproducible: true
+    secrets: inherit
+
   # ===========================================================================
   # Stage 2: Multi-Stage Hermetic Build (SLSA L3 Requirement)
   # ===========================================================================

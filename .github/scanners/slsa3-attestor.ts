@@ -73,6 +73,9 @@ export class SLSA3Attestor {
     const startTime = new Date();
 
     try {
+      const attestationDir = path.resolve('artifacts/provenance');
+      await fs.mkdir(attestationDir, { recursive: true });
+
       // Calculate artifact digest
       const artifactContent = await fs.readFile(options.artifactPath);
       const digest = crypto.createHash('sha256').update(artifactContent).digest('hex');
@@ -131,10 +134,12 @@ export class SLSA3Attestor {
 
       // Output path
       const outputPath =
-        options.outputPath || `${options.artifactPath}.provenance.json`;
+        options.outputPath ||
+        path.join(attestationDir, `${path.basename(options.artifactPath)}.provenance.json`);
 
       // Sign with Cosign if requested
-      if (options.signWithCosign) {
+      const shouldSign = options.signWithCosign ?? this.config.cosign.keylessEnabled;
+      if (shouldSign) {
         const signResult = await this.signProvenance(envelope, outputPath);
         if (!signResult.success) {
           return {

@@ -8,6 +8,19 @@ on:
 
 jobs:
   build:
+    name: Build & Sign (${{ matrix.name }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Maestro
+            slug: maestro
+          - name: IntelGraph
+            slug: intelgraph
+          - name: CompanyOS
+            slug: companyos
+          - name: Switchboard
+            slug: switchboard
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -30,16 +43,16 @@ jobs:
       - name: Build Artifact (Stub)
         run: |
           # Simulate build
-          mkdir -p dist
-          echo "Build Artifact" > dist/app.bin
+          mkdir -p "dist/${{ matrix.slug }}"
+          echo "Build Artifact for ${{ matrix.name }}" > "dist/${{ matrix.slug }}/app.bin"
 
       - name: Generate SBOM
-        run: syft . -o cyclonedx-json > dist/sbom.json
+        run: syft . -o cyclonedx-json > "dist/${{ matrix.slug }}/sbom.json"
 
       - name: Sign Artifacts (Mock)
         if: github.event_name != 'pull_request'
         env:
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
         run: |
-          echo "Signing would happen here with cosign sign-blob --key env://COSIGN_KEY dist/app.bin"
-          # cosign sign-blob --key env://COSIGN_KEY dist/app.bin
+          echo "Signing would happen here with cosign sign-blob --key env://COSIGN_KEY dist/${{ matrix.slug }}/app.bin"
+          # cosign sign-blob --key env://COSIGN_KEY dist/${{ matrix.slug }}/app.bin
