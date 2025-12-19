@@ -6,8 +6,10 @@
  */
 
 import { randomUUID } from 'crypto';
-import pino from 'pino';
+// @ts-ignore
+import { default as pino } from 'pino';
 
+// @ts-ignore
 const logger = pino({ name: 'AnomalyCorrelationService' });
 
 // Core Anomaly Types
@@ -234,13 +236,13 @@ export interface TimelineEvent {
 export interface ThreatHypothesis {
   primary: string;
   confidence: number;
-  alternatives: AlternativeHypothesis[];
+  alternatives: AnomalyAlternativeHypothesis[];
   evidenceFor: string[];
   evidenceAgainst: string[];
   gaps: string[];
 }
 
-export interface AlternativeHypothesis {
+export interface AnomalyAlternativeHypothesis {
   hypothesis: string;
   probability: number;
   requiredEvidence: string[];
@@ -538,13 +540,13 @@ export class AnomalyCorrelationService {
     ];
 
     const overallScore = components.reduce((sum, c) => sum + c.score * c.weight, 0) /
-                         components.reduce((sum, c) => sum + c.weight, 0);
+      components.reduce((sum, c) => sum + c.weight, 0);
 
     const previousScore = this.riskScores.get(entityId);
     const trend = previousScore
       ? overallScore > previousScore.overallScore + 5 ? 'INCREASING'
         : overallScore < previousScore.overallScore - 5 ? 'DECREASING'
-        : 'STABLE'
+          : 'STABLE'
       : 'STABLE';
 
     const riskScore: RiskScore = {
@@ -826,7 +828,7 @@ export class AnomalyCorrelationService {
   }
 
   private async createCluster(anomalies: Anomaly[], pattern: ThreatPattern): Promise<CorrelationCluster> {
-    const entities = [...new Set(anomalies.filter(a => a.entityId).map(a => a.entityId!))];
+    const entities = Array.from(new Set(anomalies.filter(a => a.entityId).map(a => a.entityId!)));
     const timestamps = anomalies.map(a => a.timestamp.getTime());
 
     const cluster: CorrelationCluster = {

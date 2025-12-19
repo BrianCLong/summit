@@ -12,13 +12,13 @@ import {
   type ModelRegistryConfig,
 } from '@intelgraph/mlops-platform';
 
-const app = express();
+const app: express.Express = express();
 const PORT = process.env.MODEL_REGISTRY_PORT || 8081;
 
 // Middleware
 app.use(helmet());
 app.use(cors());
-app.use(compression());
+app.use(compression() as express.RequestHandler);
 app.use(express.json());
 
 // Initialize model registry

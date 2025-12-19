@@ -63,6 +63,7 @@ redis:
 
 neo4j:
   enabled: true
+  name: neo4j
   neo4j:
     name: intelgraph-stage
     password: devpassword
