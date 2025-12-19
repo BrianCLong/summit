@@ -1,6 +1,6 @@
 {
   "name": "mtif",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
   "description": "Model Threat Intelligence Feeds service providing STIX/TAXII 2.1 data for LLM threats",

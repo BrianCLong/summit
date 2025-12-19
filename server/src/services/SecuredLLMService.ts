@@ -16,11 +16,13 @@
  */
 
 import { LLMGuardrailsService } from '../security/llm-guardrails.js';
-import { Logger } from '../observability/logger.js';
+// @ts-ignore
+import { default as pino } from 'pino';
 // @ts-ignore - JS import
 import LLMService from './LLMService.js';
 
-const logger = new Logger('SecuredLLMService');
+// @ts-ignore
+const logger = pino({ name: 'SecuredLLMService' });
 
 interface SecuredLLMParams {
   prompt: string;
@@ -65,7 +67,7 @@ interface SecuredLLMResponse {
  * Secured LLM Service with integrated guardrails
  */
 export class SecuredLLMService {
-  private llmService: typeof LLMService;
+  private llmService: any;
   private guardrails: LLMGuardrailsService;
 
   constructor(config?: Record<string, unknown>) {
@@ -329,9 +331,8 @@ export class SecuredLLMService {
     tenantId?: string;
     privacyLevel?: 'public' | 'internal' | 'confidential' | 'restricted';
   }): Promise<SecuredLLMResponse> {
-    const systemMessage = `You are a summarization assistant. Summarize the following text concisely${
-      params.maxLength ? ` in no more than ${params.maxLength} words` : ''
-    }.`;
+    const systemMessage = `You are a summarization assistant. Summarize the following text concisely${params.maxLength ? ` in no more than ${params.maxLength} words` : ''
+      }.`;
 
     return this.complete({
       prompt: params.text,

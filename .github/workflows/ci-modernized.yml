@@ -538,11 +538,13 @@ jobs:
           node-version: ${{ needs.preflight.outputs.node-version }}
           cache: 'pnpm'
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
 
-      - name: Bootstrap environment
-        run: make bootstrap
+      - name: 1. Bootstrap
+        run: ./scripts/bootstrap.sh
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -555,25 +557,29 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
-      - name: Start services
-        run: make up
+      - name: 2. Start Services
+        run: ./scripts/start.sh
 
-      - name: Wait for services
-        run: ./scripts/wait-for-stack.sh || echo "Some services may not be ready"
+      - name: 3. Health Check
+        run: ./scripts/healthcheck.sh || echo "Some services may not be ready"
         timeout-minutes: 5
 
-      - name: Run smoke tests
-        run: make smoke
+      - name: 4. Smoke Test
+        run: |
+          if command -v pnpm &> /dev/null; then
+             pnpm smoke
+          else
+             npm run smoke
+          fi
 
       - name: Show logs on failure
         if: failure()
         run: |
-          ./scripts/run-compose.sh -f docker-compose.dev.yml logs --tail=200
+          docker compose -f docker-compose.dev.yml logs --tail=200
 
-      - name: Cleanup
+      - name: 5. Cleanup
         if: always()
-        run: |
-          ./scripts/run-compose.sh -f docker-compose.dev.yml down -v || true
+        run: ./scripts/teardown.sh
 
   # ============================================================================
   # PHASE 6: Production Guardrails

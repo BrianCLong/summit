@@ -1,0 +1,82 @@
+---
+description: Testing conventions and patterns
+globs:
+  - "**/*.test.ts"
+  - "**/*.spec.ts"
+  - "**/tests/**/*"
+  - "**/__tests__/**/*"
+alwaysApply: false
+---
+
+# Testing Conventions
+
+## Framework
+
+- Jest with SWC transformer
+- Playwright for E2E tests
+- `make smoke` for golden path validation
+
+## File Naming
+
+- Unit tests: `*.test.ts` or `*.spec.ts`
+- E2E tests: `e2e/*.spec.ts`
+- Co-located: `src/__tests__/`
+
+## Test Structure
+
+Use Arrange/Act/Assert pattern:
+
+```typescript
+describe('EntityService', () => {
+  it('should create entity with valid data', async () => {
+    // Arrange
+    const entityData = { name: 'Test', type: 'Person' };
+
+    // Act
+    const result = await entityService.create(entityData);
+
+    // Assert
+    expect(result).toHaveProperty('id');
+    expect(result.name).toBe('Test');
+  });
+
+  it('should throw error when entity type is invalid', async () => {
+    // Arrange
+    const invalidData = { name: 'Test', type: 'InvalidType' };
+
+    // Act & Assert
+    await expect(entityService.create(invalidData))
+      .rejects.toThrow('Invalid entity type');
+  });
+});
+```
+
+## Rules
+
+- NEVER use `.only()` or `.skip()` in committed code
+- Mock external services in unit tests
+- Use `beforeEach`/`afterEach` for setup/teardown
+- Target 80%+ coverage for changed code
+
+## Commands
+
+```bash
+pnpm test              # Run all tests
+pnpm test:jest         # Jest only
+pnpm test:integration  # Integration tests
+pnpm e2e               # Playwright E2E
+make smoke             # Golden path validation
+```
+
+## Mocking
+
+```typescript
+jest.mock('@intelgraph/db', () => ({
+  db: {
+    entity: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+    },
+  },
+}));
+```

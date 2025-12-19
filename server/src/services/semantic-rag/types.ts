@@ -3,7 +3,7 @@
  * Type-safe definitions for agentic RAG orchestration
  */
 
-import * as z from 'zod';
+import { z } from 'zod/v4';
 
 // ============================================================================
 // Agent Types for Multi-Agent RAG Orchestration
@@ -77,7 +77,7 @@ export const GraphNodeSchema = z.object({
   id: z.string(),
   type: z.string(),
   label: z.string(),
-  properties: z.record(z.any()),
+  properties: z.record(z.string(), z.any()),
   embedding: z.array(z.number()).optional(),
   confidence: z.number().min(0).max(1).default(1.0),
   timestamp: z.string().optional(),
@@ -92,7 +92,7 @@ export const GraphEdgeSchema = z.object({
   type: z.string(),
   sourceId: z.string(),
   targetId: z.string(),
-  properties: z.record(z.any()),
+  properties: z.record(z.string(), z.any()),
   weight: z.number().min(0).max(1).default(1.0),
   confidence: z.number().min(0).max(1).default(1.0),
   timestamp: z.string().optional(),

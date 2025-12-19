@@ -1,9 +1,10 @@
 import { jest } from '@jest/globals';
 
 // Create mock instances
-const mockRun = jest.fn();
-const mockClose = jest.fn();
-const mockSession = jest.fn().mockReturnValue({
+// Create mock instances
+const mockRun = jest.fn<any>();
+const mockClose = jest.fn<any>();
+const mockSession = jest.fn<any>().mockReturnValue({
   run: mockRun,
   close: mockClose,
 });
@@ -17,8 +18,8 @@ jest.unstable_mockModule('../../config/database.js', () => ({
 }));
 
 const mockEmbeddingServiceInstance = {
-  generateEmbedding: jest.fn(),
-  cosineSimilarity: jest.fn(),
+  generateEmbedding: jest.fn<any>(),
+  cosineSimilarity: jest.fn<any>(),
 };
 
 jest.unstable_mockModule('../EmbeddingService.js', () => ({
@@ -26,8 +27,8 @@ jest.unstable_mockModule('../EmbeddingService.js', () => ({
 }));
 
 const mockRelationshipServiceInstance = {
-  suggestRelationshipTypes: jest.fn(),
-  setDriver: jest.fn(),
+  suggestRelationshipTypes: jest.fn<any>(),
+  setDriver: jest.fn<any>(),
 };
 
 // Since RelationshipService is required via createRequire, we can't easily mock it via unstable_mockModule for the require call.
@@ -35,7 +36,7 @@ const mockRelationshipServiceInstance = {
 // So we don't strictly need to mock the require if we inject the dependency.
 
 // Import the class under test
-const { PredictiveRelationshipService } = await import('../PredictiveRelationshipService.ts');
+const { PredictiveRelationshipService } = await import('../PredictiveRelationshipService.js');
 
 describe('PredictiveRelationshipService', () => {
   let service: any;

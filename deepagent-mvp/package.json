@@ -1,6 +1,6 @@
 {
   "name": "deepagent-mvp",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "DeepAgent-style MVP for IntelGraph",
   "main": "dist/index.js",
   "scripts": {
@@ -22,7 +22,7 @@
     "typescript"
   ],
   "author": "Jules",
-  "license": "ISC",
+  "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
     "@apollo/server": "^4.9.5",
     "@open-policy-agent/opa-wasm": "^1.8.0",

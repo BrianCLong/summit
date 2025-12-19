@@ -1,6 +1,8 @@
 import { Pool } from 'pg';
-import { Redis } from 'redis';
+import { createClient, type RedisClientType } from 'redis';
 import { createLogger, format, transports, Logger } from 'winston';
+
+type Redis = RedisClientType;
 
 import { SearchQuery, SearchAnalytics } from '../types';
 

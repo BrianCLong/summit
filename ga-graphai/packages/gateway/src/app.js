@@ -11,8 +11,10 @@ import {
   observePolicyDeny,
   observeSuccess,
   registry as metricsRegistry,
+  timeGraphqlRequest,
 } from './metrics.js';
 import { InMemoryLedger, buildEvidencePayload } from 'prov-ledger';
+import { ChaosEngine, ChaosError } from './chaos.js';
 
 const ALLOWED_PURPOSES = new Set([
   'investigation',
@@ -130,10 +132,43 @@ export function createApp(options = {}) {
     options.policyEngine ?? PolicyEngine.fromFile(policyPath);
   const modelRegistry = options.modelRegistry ?? new ModelRegistry();
   const ledger = options.ledger ?? new InMemoryLedger();
+  const chaos =
+    options.chaos ??
+    new ChaosEngine({
+      environment:
+        options.environment ??
+        process.env.APP_ENV ??
+        process.env.NODE_ENV ??
+        'development',
+    });
 
   const app = express();
   app.use(express.json({ limit: '1mb' }));
   app.use(createContextMiddleware(options));
+  app.use(chaos.middleware());
+
+  if (chaos.safeEnvironment) {
+    app.get('/internal/chaos', (req, res) => {
+      res.json(chaos.snapshot());
+    });
+
+    app.post('/internal/chaos', (req, res) => {
+      const snapshot = chaos.updateConfig(req.body ?? {});
+      res.json(snapshot);
+    });
+  } else {
+    app.all('/internal/chaos', (_req, res) => {
+      res.status(404).json({ error: 'NOT_FOUND' });
+    });
+  }
+
+  app.use('/graphql', (req, res, next) => {
+    const stopTimer = timeGraphqlRequest();
+    res.once('finish', () => {
+      stopTimer(res.statusCode);
+    });
+    next();
+  });
 
   async function executePlan(input, context) {
     if (!input?.objective) {
@@ -165,13 +200,15 @@ export function createApp(options = {}) {
       );
     }
 
-    const adapterResult = await modelRegistry.generate(decision.model.id, {
-      mode: 'plan',
-      objective: input.objective,
-      language: input.language,
-      attachments: input.sources?.map((uri) => ({ uri })) ?? [],
-      context: context.purpose,
-    });
+    const adapterResult = await chaos.apply('llm', () =>
+      modelRegistry.generate(decision.model.id, {
+        mode: 'plan',
+        objective: input.objective,
+        language: input.language,
+        attachments: input.sources?.map((uri) => ({ uri })) ?? [],
+        context: context.purpose,
+      }),
+    );
 
     const evaluation = policyEngine.enforceCost(
       tenantKey,
@@ -191,24 +228,26 @@ export function createApp(options = {}) {
     }
 
     const planArtifacts = buildPlanArtifacts(input, decision, evaluation);
-    const evidence = ledger.record(
-      buildEvidencePayload({
-        tenant: context.tenant,
-        caseId: context.caseId,
-        environment: context.environment,
-        operation: 'plan',
-        request: { input, headers: { purpose: context.purpose } },
-        policy: policyEngine.describe(),
-        decision,
-        model: decision.model,
-        cost: {
-          usd: adapterResult.usd,
-          tokensIn: adapterResult.tokensIn,
-          tokensOut: adapterResult.tokensOut,
-          latencyMs: adapterResult.latencyMs,
-        },
-        output: planArtifacts,
-      }),
+    const evidence = await chaos.apply('neo4j', () =>
+      ledger.record(
+        buildEvidencePayload({
+          tenant: context.tenant,
+          caseId: context.caseId,
+          environment: context.environment,
+          operation: 'plan',
+          request: { input, headers: { purpose: context.purpose } },
+          policy: policyEngine.describe(),
+          decision,
+          model: decision.model,
+          cost: {
+            usd: adapterResult.usd,
+            tokensIn: adapterResult.tokensIn,
+            tokensOut: adapterResult.tokensOut,
+            latencyMs: adapterResult.latencyMs,
+          },
+          output: planArtifacts,
+        }),
+      ),
     );
 
     observeSuccess('plan', decision.model.id, adapterResult);
@@ -248,13 +287,15 @@ export function createApp(options = {}) {
     }
 
     const toolSchema = parseToolSchema(input.toolSchemaJson);
-    const adapterResult = await modelRegistry.generate(decision.model.id, {
-      mode: 'generate',
-      objective: input.objective,
-      language: input.language,
-      attachments,
-      tools: Array.isArray(toolSchema?.tools) ? toolSchema.tools : undefined,
-    });
+    const adapterResult = await chaos.apply('llm', () =>
+      modelRegistry.generate(decision.model.id, {
+        mode: 'generate',
+        objective: input.objective,
+        language: input.language,
+        attachments,
+        tools: Array.isArray(toolSchema?.tools) ? toolSchema.tools : undefined,
+      }),
+    );
 
     const evaluation = policyEngine.enforceCost(
       tenantKey,
@@ -279,24 +320,26 @@ export function createApp(options = {}) {
       decision,
       evaluation,
     );
-    const evidence = ledger.record(
-      buildEvidencePayload({
-        tenant: context.tenant,
-        caseId: context.caseId,
-        environment: context.environment,
-        operation: 'generate',
-        request: { input, headers: { purpose: context.purpose } },
-        policy: policyEngine.describe(),
-        decision,
-        model: decision.model,
-        cost: {
-          usd: adapterResult.usd,
-          tokensIn: adapterResult.tokensIn,
-          tokensOut: adapterResult.tokensOut,
-          latencyMs: adapterResult.latencyMs,
-        },
-        output: artifacts,
-      }),
+    const evidence = await chaos.apply('neo4j', () =>
+      ledger.record(
+        buildEvidencePayload({
+          tenant: context.tenant,
+          caseId: context.caseId,
+          environment: context.environment,
+          operation: 'generate',
+          request: { input, headers: { purpose: context.purpose } },
+          policy: policyEngine.describe(),
+          decision,
+          model: decision.model,
+          cost: {
+            usd: adapterResult.usd,
+            tokensIn: adapterResult.tokensIn,
+            tokensOut: adapterResult.tokensOut,
+            latencyMs: adapterResult.latencyMs,
+          },
+          output: artifacts,
+        }),
+      ),
     );
 
     observeSuccess('generate', decision.model.id, adapterResult);
@@ -374,6 +417,13 @@ export function createApp(options = {}) {
           .status(error.statusCode)
           .json({ error: error.code, details: error.details });
       }
+      if (error instanceof ChaosError) {
+        return res.status(error.statusCode).json({
+          error: error.code,
+          fault: error.fault,
+          service: error.service,
+        });
+      }
       res.status(500).json({ error: 'UNEXPECTED_ERROR' });
     }
   });
@@ -387,6 +437,13 @@ export function createApp(options = {}) {
         return res
           .status(error.statusCode)
           .json({ error: error.code, details: error.details });
+      }
+      if (error instanceof ChaosError) {
+        return res.status(error.statusCode).json({
+          error: error.code,
+          fault: error.fault,
+          service: error.service,
+        });
       }
       res.status(500).json({ error: 'UNEXPECTED_ERROR' });
     }

@@ -1,10 +1,10 @@
 
-import v8 from 'v8';
-import fs from 'fs';
+import * as v8 from 'v8';
+import * as fs from 'fs';
 import { telemetry } from './comprehensive-telemetry';
 import { Request } from 'express';
-import path from 'path';
-import os from 'os';
+import * as path from 'path';
+import * as os from 'os';
 import { performance } from 'perf_hooks';
 
 import { telemetryConfig } from '../../config/telemetry';
