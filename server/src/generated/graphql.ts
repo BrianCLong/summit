@@ -1,5 +1,5 @@
-import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from "graphql";
-import { GraphQLContext } from "../types/context";
+import { GraphQLResolveInfo } from "graphql";
+import { GraphQLContext } from "../graphql/apollo-v5-server.js";
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -18,29 +18,21 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean };
   Int: { input: number; output: number };
   Float: { input: number; output: number };
-  DateTime: { input: Date; output: Date };
-  JSON: { input: any; output: any };
 };
 
-export type HealthStatus = {
-  __typename?: "HealthStatus";
-  environment: Scalars["String"]["output"];
-  services: Array<ServiceHealth>;
-  status: Scalars["String"]["output"];
-  timestamp: Scalars["DateTime"]["output"];
-  version: Scalars["String"]["output"];
+export type Mutation = {
+  __typename?: "Mutation";
+  _empty?: Maybe<Scalars["String"]["output"]>;
 };
 
 export type Query = {
   __typename?: "Query";
-  health: HealthStatus;
+  _empty?: Maybe<Scalars["String"]["output"]>;
 };
 
-export type ServiceHealth = {
-  __typename?: "ServiceHealth";
-  details?: Maybe<Scalars["JSON"]["output"]>;
-  name: Scalars["String"]["output"];
-  status: Scalars["String"]["output"];
+export type Subscription = {
+  __typename?: "Subscription";
+  _empty?: Maybe<Scalars["String"]["output"]>;
 };
 
 export type WithIndex<TObject> = TObject & Record<string, any>;
@@ -131,67 +123,44 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{
   Boolean: ResolverTypeWrapper<Scalars["Boolean"]["output"]>;
-  DateTime: ResolverTypeWrapper<Scalars["DateTime"]["output"]>;
-  HealthStatus: ResolverTypeWrapper<HealthStatus>;
-  JSON: ResolverTypeWrapper<Scalars["JSON"]["output"]>;
+  Mutation: ResolverTypeWrapper<{}>;
   Query: ResolverTypeWrapper<{}>;
-  ServiceHealth: ResolverTypeWrapper<ServiceHealth>;
   String: ResolverTypeWrapper<Scalars["String"]["output"]>;
+  Subscription: ResolverTypeWrapper<{}>;
 }>;
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = ResolversObject<{
   Boolean: Scalars["Boolean"]["output"];
-  DateTime: Scalars["DateTime"]["output"];
-  HealthStatus: HealthStatus;
-  JSON: Scalars["JSON"]["output"];
+  Mutation: {};
   Query: {};
-  ServiceHealth: ServiceHealth;
   String: Scalars["String"]["output"];
+  Subscription: {};
 }>;
 
-export interface DateTimeScalarConfig
-  extends GraphQLScalarTypeConfig<ResolversTypes["DateTime"], any> {
-  name: "DateTime";
-}
-
-export type HealthStatusResolvers<
+export type MutationResolvers<
   ContextType = GraphQLContext,
-  ParentType extends ResolversParentTypes["HealthStatus"] = ResolversParentTypes["HealthStatus"],
+  ParentType extends ResolversParentTypes["Mutation"] = ResolversParentTypes["Mutation"],
 > = ResolversObject<{
-  environment?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
-  services?: Resolver<Array<ResolversTypes["ServiceHealth"]>, ParentType, ContextType>;
-  status?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
-  timestamp?: Resolver<ResolversTypes["DateTime"], ParentType, ContextType>;
-  version?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+  _empty?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
 }>;
-
-export interface JsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes["JSON"], any> {
-  name: "JSON";
-}
 
 export type QueryResolvers<
   ContextType = GraphQLContext,
   ParentType extends ResolversParentTypes["Query"] = ResolversParentTypes["Query"],
 > = ResolversObject<{
-  health?: Resolver<ResolversTypes["HealthStatus"], ParentType, ContextType>;
+  _empty?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
 }>;
 
-export type ServiceHealthResolvers<
+export type SubscriptionResolvers<
   ContextType = GraphQLContext,
-  ParentType extends ResolversParentTypes["ServiceHealth"] = ResolversParentTypes["ServiceHealth"],
+  ParentType extends ResolversParentTypes["Subscription"] = ResolversParentTypes["Subscription"],
 > = ResolversObject<{
-  details?: Resolver<Maybe<ResolversTypes["JSON"]>, ParentType, ContextType>;
-  name?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
-  status?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+  _empty?: SubscriptionResolver<Maybe<ResolversTypes["String"]>, "_empty", ParentType, ContextType>;
 }>;
 
 export type Resolvers<ContextType = GraphQLContext> = ResolversObject<{
-  DateTime?: GraphQLScalarType;
-  HealthStatus?: HealthStatusResolvers<ContextType>;
-  JSON?: GraphQLScalarType;
+  Mutation?: MutationResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
-  ServiceHealth?: ServiceHealthResolvers<ContextType>;
+  Subscription?: SubscriptionResolvers<ContextType>;
 }>;
