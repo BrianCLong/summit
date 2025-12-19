@@ -9,6 +9,7 @@ import { makeContext } from './lib/context.js';
 import { expressjwt, type GetVerificationKey } from 'express-jwt';
 import jwksRsa from 'jwks-rsa';
 import { trace, context } from '@opentelemetry/api';
+import { metricsRegistry } from './lib/dbPool.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4000;
 const app = express();
@@ -29,6 +30,10 @@ const logger = pinoLogger; // Use the custom pino logger
 
 app.use(cors());
 app.get('/healthz', (_, res) => res.json({ ok: true }));
+app.get('/metrics', async (_, res) => {
+  res.set('Content-Type', metricsRegistry.contentType);
+  res.send(await metricsRegistry.metrics());
+});
 
 // JWT middleware for authentication
 const jwksSecret = jwksRsa.expressJwtSecret({

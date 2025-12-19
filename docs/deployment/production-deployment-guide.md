@@ -991,6 +991,16 @@ data:
   CACHE_TTL_LONG: '3600' # 1 hour
 ```
 
+#### Connection pool guardrails by environment
+
+| Environment | DB_POOL_TUNING | DB_POOL_MAX | DB_POOL_IDLE_TIMEOUT_MS | DB_POOL_MAX_LIFETIME_SECONDS | DB_STATEMENT_TIMEOUT_MS | Notes |
+| ----------- | -------------- | ----------- | ----------------------- | ---------------------------- | ----------------------- | ----- |
+| Local/Dev   | `0`            | 10          | 30000                   | _unset_                      | 0 (inherit server-side defaults) | Avoid aggressive timeouts while debugging; keep pool small. |
+| Staging     | `1`            | 30          | 30000                   | 900                          | 15000                   | Enables prepared statements, read-only transactions for reads, and lock/idle timeouts to prevent \"idle in transaction\". |
+| Production  | `1`            | 50          | 30000                   | 900                          | 15000                   | Match Grafana dashboards to `db_pool_*` and `db_transaction_*` Prometheus series for active/waiting connections, lock waits, and transaction durations. |
+
+Set `DB_IDLE_IN_TX_TIMEOUT_MS=5000` and `DB_LOCK_TIMEOUT_MS=5000` alongside `DB_POOL_TUNING=1` to ensure long-running locks are surfaced through the new `db_lock_wait_total` metric without impacting successful transactions.
+
 ## Scaling Configuration
 
 ### Horizontal Pod Autoscaler

@@ -1,14 +1,21 @@
 // @ts-nocheck
-import * as crypto from 'node:crypto';
 import crypto from 'node:crypto';
 import { performance } from 'node:perf_hooks';
 import { Pool, QueryConfig, QueryResult, PoolClient } from 'pg';
 import * as dotenv from 'dotenv';
-import baseLogger from '../config/logger';
+import baseLogger from '../config/logger.js';
+import {
+  dbPoolActive,
+  dbPoolIdle,
+  dbPoolSize,
+  dbPoolWaiting,
+  dbPoolWaitDurationSeconds,
+  dbTransactionDurationSeconds,
+  dbLockWaits,
+} from '../metrics/dbMetrics.js';
+import { dbConfig } from './config.js';
 
 dotenv.config();
-import { dbConfig } from './config.js';
-import baseLogger from '../config/logger.js';
 
 type QueryInput = string | QueryConfig<any>;
 
@@ -16,6 +23,7 @@ interface QueryOptions {
   forceWrite?: boolean;
   timeoutMs?: number;
   label?: string;
+  readOnly?: boolean;
 }
 
 type QueryExecutor = <T = any>(
@@ -25,6 +33,11 @@ type QueryExecutor = <T = any>(
 ) => Promise<QueryResult<T>>;
 
 type TransactionCallback<T> = (client: PoolClient) => Promise<T>;
+interface TransactionOptions {
+  readOnly?: boolean;
+  timeoutMs?: number;
+  label?: string;
+}
 
 interface PoolHealthSnapshot {
   name: string;
@@ -36,14 +49,21 @@ interface PoolHealthSnapshot {
   idleConnections: number;
   queuedRequests: number;
   totalConnections: number;
+  healthScore: number;
 }
 
 export interface ManagedPostgresPool {
   query: QueryExecutor;
   read: QueryExecutor;
   write: QueryExecutor;
-  transaction: <T>(callback: TransactionCallback<T>) => Promise<T>; // Alias for withTransaction
-  withTransaction: <T>(callback: TransactionCallback<T>) => Promise<T>;
+  transaction: <T>(
+    callback: TransactionCallback<T>,
+    options?: TransactionOptions,
+  ) => Promise<T>; // Alias for withTransaction
+  withTransaction: <T>(
+    callback: TransactionCallback<T>,
+    options?: TransactionOptions,
+  ) => Promise<T>;
   connect: () => Promise<PoolClient>;
   end: () => Promise<void>;
   on: Pool['on'];
@@ -68,6 +88,12 @@ const CIRCUIT_BREAKER_FAILURE_THRESHOLD = 5;
 const CIRCUIT_BREAKER_COOLDOWN_MS = 30000;
 const MAX_PREPARED_STATEMENTS = 500;
 const MAX_SLOW_QUERY_ENTRIES = 200;
+const CONNECTION_LEAK_THRESHOLD_MS = 60000;
+const WAIT_QUEUE_THRESHOLD = 5;
+const LOCK_ERROR_CODES = new Set(['55P03', '40P01']);
+const tuningEnabled = dbConfig.tuningEnabled;
+const getMaxLifetimeMs = () => (dbConfig.maxLifetimeSeconds ?? 0) * 1000;
+const getPoolMonitorIntervalMs = () => dbConfig.monitorIntervalMs;
 
 interface PoolWrapper {
   name: string;
@@ -181,7 +207,7 @@ class PoolMonitor {
     if (this.intervalId) return;
     this.intervalId = setInterval(
       () => this.check(),
-      POOL_MONITOR_INTERVAL_MS,
+      getPoolMonitorIntervalMs(),
     );
     // Unref so it doesn't prevent shutdown if only monitor is running
     this.intervalId.unref();
@@ -201,6 +227,8 @@ class PoolMonitor {
       const idle = wrapper.pool.idleCount ?? 0;
       const waiting = wrapper.pool.waitingCount ?? 0;
       const active = total - idle;
+
+      recordPoolSnapshot(wrapper);
 
       // Log pool stats
       logger.debug(
@@ -238,10 +266,38 @@ const slowQueryStats = new Map<
   { count: number; totalDuration: number; maxDuration: number; pool: string }
 >();
 
+function recordPoolSnapshot(wrapper: PoolWrapper): void {
+  const total = wrapper.pool.totalCount ?? 0;
+  const idle = wrapper.pool.idleCount ?? 0;
+  const waiting = wrapper.pool.waitingCount ?? 0;
+  const active = total - idle;
+
+  dbPoolSize.set({ database: 'postgres', type: wrapper.type }, total);
+  dbPoolIdle.set({ database: 'postgres', type: wrapper.type }, idle);
+  dbPoolWaiting.set({ database: 'postgres', type: wrapper.type }, waiting);
+  dbPoolActive.set({ database: 'postgres', type: wrapper.type }, active);
+}
+
+async function acquireClient(
+  wrapper: PoolWrapper,
+): Promise<ExtendedPoolClient> {
+  const startWait = performance.now();
+  const client = (await wrapper.pool.connect()) as ExtendedPoolClient;
+  const waitSeconds = (performance.now() - startWait) / 1000;
+
+  dbPoolWaitDurationSeconds.observe(
+    { pool: wrapper.name, type: wrapper.type },
+    waitSeconds,
+  );
+  recordPoolSnapshot(wrapper);
+  return client;
+}
+
 let writePoolWrapper: PoolWrapper | null = null;
 let readPoolWrappers: PoolWrapper[] = [];
 let managedPool: ManagedPostgresPool | null = null;
 let readReplicaCursor = 0;
+const poolMonitor = new PoolMonitor();
 
 const transientErrorCodes = new Set([
   '57P01', // admin_shutdown
@@ -266,47 +322,34 @@ const transientNodeErrors = new Set([
   'EPIPE',
 ]);
 
-function parseConnectionConfig(): PoolConfig {
-  if (process.env.DATABASE_URL) {
-    return { connectionString: process.env.DATABASE_URL };
-  }
-
-  const isProduction = process.env.NODE_ENV === 'production';
-  const password = process.env.POSTGRES_PASSWORD;
-
-  if (isProduction) {
-    if (!password) {
-      throw new Error(
-        'POSTGRES_PASSWORD environment variable is required in production',
-      );
-    }
-    if (password === 'devpassword') {
-      throw new Error(
-        'Security Error: POSTGRES_PASSWORD cannot be the default "devpassword" in production',
-      );
-    }
-  }
-
-  return {
-    host: process.env.POSTGRES_HOST || 'postgres',
-    user: process.env.POSTGRES_USER || 'intelgraph',
-    password: password || 'devpassword',
-    database: process.env.POSTGRES_DB || 'intelgraph_dev',
-    port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
-  };
-}
-
-function parseReadReplicaUrls(): string[] {
-  const explicit = (process.env.DATABASE_READ_REPLICAS || '')
+function parseReadReplicaConfigs(): Array<{
+  url: string;
+  region?: string;
+  priority: number;
+  name: string;
+}> {
+  const raw = (process.env.DATABASE_READ_REPLICAS || '')
     .split(',')
-    .map((url) => url.trim())
+    .map((entry) => entry.trim())
     .filter(Boolean);
 
-  const legacy = process.env.DATABASE_READ_URL
-    ? [process.env.DATABASE_READ_URL]
-    : [];
+  return raw.map((entry, index) => {
+    const [url, ...metaParts] = entry.split('|').map((part) => part.trim());
+    const meta = metaParts.reduce((acc, part) => {
+      const [key, value] = part.split('=');
+      if (key && value) {
+        acc[key] = value;
+      }
+      return acc;
+    }, {} as Record<string, string>);
 
-  return Array.from(new Set([...explicit, ...legacy]));
+    return {
+      url,
+      region: meta.region,
+      priority: parseInt(meta.priority || `${100 - index}`, 10),
+      name: meta.name || `read-replica-${index + 1}`,
+    };
+  });
 }
 
 function createPool(
@@ -314,13 +357,47 @@ function createPool(
   type: 'write' | 'read',
   max: number,
 ): PoolWrapper {
-  const pool = new Pool({
+  const baseConfig: PoolConfig = {
     ...dbConfig.connectionConfig,
     max,
     idleTimeoutMillis: dbConfig.idleTimeoutMs,
     connectionTimeoutMillis: dbConfig.connectionTimeoutMs,
     application_name: `summit-${type}-${process.env.CURRENT_REGION || 'global'}`,
+  };
+
+  if (tuningEnabled) {
+    if (dbConfig.maxLifetimeSeconds) {
+      baseConfig.maxLifetimeSeconds = dbConfig.maxLifetimeSeconds;
+    }
+    if (dbConfig.maxUses) {
+      baseConfig.maxUses = dbConfig.maxUses;
+    }
+    if (dbConfig.statementTimeoutMs > 0) {
+      baseConfig.statement_timeout = dbConfig.statementTimeoutMs;
+    }
+    if (dbConfig.idleInTransactionTimeoutMs > 0) {
+      baseConfig.idle_in_transaction_session_timeout =
+        dbConfig.idleInTransactionTimeoutMs;
+    }
+    baseConfig.allowExitOnIdle = true;
+  }
+
+  const pool = new Pool({
+    ...baseConfig,
   });
+
+  const circuitBreaker = new CircuitBreaker(
+    name,
+    CIRCUIT_BREAKER_FAILURE_THRESHOLD,
+    CIRCUIT_BREAKER_COOLDOWN_MS,
+  );
+
+  const wrapper: PoolWrapper = {
+    name,
+    type,
+    pool,
+    circuitBreaker,
+  };
 
   pool.on('error', (err) => {
     logger.error({ pool: name, err }, 'Unexpected PostgreSQL client error');
@@ -330,18 +407,10 @@ function createPool(
   pool.on('connect', (client: ExtendedPoolClient) => {
     client.connectedAt = Date.now();
     logger.debug({ pool: name }, 'New PostgreSQL connection established');
+    recordPoolSnapshot(wrapper);
   });
 
-  return {
-    name,
-    type,
-    pool,
-    circuitBreaker: new CircuitBreaker(
-      name,
-      CIRCUIT_BREAKER_FAILURE_THRESHOLD,
-      CIRCUIT_BREAKER_COOLDOWN_MS,
-    ),
-  };
+  return wrapper;
 }
 
 function initializePools(): void {
@@ -365,6 +434,12 @@ function initializePools(): void {
       dbConfig.readPoolSize
   );
   readPoolWrappers = [readPool];
+
+  poolMonitor.register(writePoolWrapper);
+  poolMonitor.register(readPool);
+  poolMonitor.start();
+  recordPoolSnapshot(writePoolWrapper);
+  recordPoolSnapshot(readPool);
 
   managedPool = createManagedPool(writePoolWrapper, readPoolWrappers);
 }
@@ -423,22 +498,22 @@ function createManagedPool(
     });
 
   const connect = async (): Promise<PoolClient> => {
-    return writePool.pool.connect();
+    return acquireClient(writePool);
   };
 
-  const withTransaction = async <T>(callback: TransactionCallback<T>): Promise<T> => {
-    const client = await connect();
-    try {
-      await client.query('BEGIN');
-      const result = await callback(client);
-      await client.query('COMMIT');
-      return result;
-    } catch (error) {
-      await client.query('ROLLBACK');
-      throw error;
-    } finally {
-      client.release();
-    }
+  const withTransaction = async <T>(
+    callback: TransactionCallback<T>,
+    options: TransactionOptions = {},
+  ): Promise<T> => {
+    const timeout = options.timeoutMs ?? dbConfig.statementTimeoutMs;
+    const mode: 'read' | 'write' = options.readOnly ? 'read' : 'write';
+
+    return withManagedClient(
+      writePool,
+      timeout,
+      async (client) => callback(client),
+      { transactionMode: mode },
+    );
   };
 
   const end = async (): Promise<void> => {
@@ -472,6 +547,7 @@ function createManagedPool(
           idleConnections: wrapper.pool.idleCount ?? 0,
           queuedRequests: wrapper.pool.waitingCount ?? 0,
           totalConnections: wrapper.pool.totalCount ?? 0,
+          healthScore: 100,
         };
 
         try {
@@ -479,16 +555,17 @@ function createManagedPool(
           await withManagedClient(wrapper, 1000, async (client) => {
             await client.query('SELECT 1');
           });
-           const client = await wrapper.pool.connect();
-           try {
-               await client.query('SELECT 1');
-           } finally {
-               client.release();
-           }
         } catch (error) {
           snapshot.healthy = false;
           snapshot.lastError = (error as Error).message;
         }
+        snapshot.healthScore = Math.max(
+          0,
+          100 -
+            snapshot.queuedRequests * 10 -
+            snapshot.activeConnections * 2 -
+            (snapshot.circuitState === 'open' ? 20 : 0),
+        );
 
         const breakerError = wrapper.circuitBreaker.getLastError();
         if (breakerError && !snapshot.lastError) {
@@ -555,6 +632,7 @@ async function executeManagedQuery({
       : [...pickReadPoolSequence(readPools), writePool];
   const timeoutMs = options.timeoutMs ?? dbConfig.statementTimeoutMs;
   const label = options.label ?? inferOperation(normalized.text);
+  const readOnly = options.readOnly ?? queryType === 'read';
 
   let lastError: Error | undefined;
 
@@ -565,7 +643,13 @@ async function executeManagedQuery({
     }
 
     try {
-      return await executeWithRetry(candidate, normalized, timeoutMs, label);
+      return await executeWithRetry(
+        candidate,
+        normalized,
+        timeoutMs,
+        label,
+        readOnly && tuningEnabled,
+      );
     } catch (error) {
       lastError = error as Error;
 
@@ -583,21 +667,37 @@ async function executeWithRetry(
   normalizedQuery: { text: string; values: any[]; name: string },
   timeoutMs: number,
   label: string,
+  readOnly: boolean,
 ): Promise<QueryResult<any>> {
   let attempt = 0;
   let delay = 40; // Base delay
 
   while (attempt <= 3) {
     try {
-        const client = await wrapper.pool.connect();
-        try {
-            return await executeQueryOnClient(client, normalizedQuery, wrapper, label, timeoutMs);
-        } finally {
-            client.release();
-        }
+        return await withManagedClient(
+          wrapper,
+          timeoutMs,
+          async (client) =>
+            executeQueryOnClient(
+              client,
+              normalizedQuery,
+              wrapper,
+              label,
+              timeoutMs,
+            ),
+          { transactionMode: readOnly ? 'read' : undefined },
+        );
     } catch (error) {
       const err = error as Error;
       wrapper.circuitBreaker.recordFailure(err);
+      const lockCode = getLockErrorCode(err);
+      if (lockCode) {
+        dbLockWaits.inc({
+          pool: wrapper.name,
+          type: wrapper.type,
+          code: lockCode,
+        });
+      }
 
       if (!isRetryableError(err) || attempt === 3) {
         throw err;
@@ -618,7 +718,7 @@ async function executeQueryOnClient(
   normalizedQuery: { text: string; values: any[]; name: string },
   wrapper: PoolWrapper,
   label: string,
-  timeoutMs: number
+  _timeoutMs: number,
 ): Promise<QueryResult<any>> {
   const start = performance.now();
 
@@ -662,16 +762,21 @@ async function withManagedClient<T>(
   poolWrapper: PoolWrapper,
   timeoutMs: number,
   fn: (client: PoolClient) => Promise<T>,
-  options: { skipRelease?: boolean } = {}
+  options: { skipRelease?: boolean; transactionMode?: 'read' | 'write'; label?: string } = {},
 ): Promise<T> {
-  const startWait = performance.now();
-  let client = (await poolWrapper.pool.connect()) as ExtendedPoolClient;
-  const waitTime = performance.now() - startWait;
-
-  // Track wait times? (Could add to metrics if needed)
+  let client = await acquireClient(poolWrapper);
+  const start = performance.now();
+  const transactionMode = options.transactionMode;
+  const useTransaction = Boolean(transactionMode);
+  const isReadOnlyTx = transactionMode === 'read';
+  let outcome: 'committed' | 'rolled_back' = 'committed';
 
   // Max Lifetime Check
-  if (client.connectedAt && (Date.now() - client.connectedAt > MAX_LIFETIME_MS)) {
+  if (
+    getMaxLifetimeMs() > 0 &&
+    client.connectedAt &&
+    Date.now() - client.connectedAt > getMaxLifetimeMs()
+  ) {
     logger.debug({ pool: poolWrapper.name }, 'Closing expired PostgreSQL connection');
     client.release(true); // Destroy
     // Retry get new connection
@@ -692,7 +797,30 @@ async function withManagedClient<T>(
   }, CONNECTION_LEAK_THRESHOLD_MS);
 
   try {
-    await client.query('SET statement_timeout = $1', [timeoutMs]);
+    if (useTransaction) {
+      await client.query('BEGIN');
+      if (dbConfig.statementTimeoutMs > 0) {
+        await client.query('SET LOCAL statement_timeout = $1', [timeoutMs]);
+      }
+      if (dbConfig.lockTimeoutMs > 0) {
+        await client.query('SET LOCAL lock_timeout = $1', [
+          dbConfig.lockTimeoutMs,
+        ]);
+      }
+      if (dbConfig.idleInTransactionTimeoutMs > 0) {
+        await client.query('SET LOCAL idle_in_transaction_session_timeout = $1', [
+          dbConfig.idleInTransactionTimeoutMs,
+        ]);
+      }
+      if (isReadOnlyTx) {
+        await client.query('SET TRANSACTION READ ONLY');
+      }
+    } else if (dbConfig.statementTimeoutMs > 0) {
+      await client.query('SET statement_timeout = $1', [timeoutMs]);
+      if (dbConfig.lockTimeoutMs > 0) {
+        await client.query('SET lock_timeout = $1', [dbConfig.lockTimeoutMs]);
+      }
+    }
   } catch (error) {
     clearTimeout(leakTimer);
     client.release(true); // Force release on setup error
@@ -701,14 +829,55 @@ async function withManagedClient<T>(
 
   try {
     const result = await fn(client as any);
+    if (useTransaction) {
+      await client.query('COMMIT');
+    }
     if (!options.skipRelease) {
       // release logic is handled in finally
     }
     return result;
+  } catch (error) {
+    outcome = 'rolled_back';
+    if (useTransaction) {
+      try {
+        await client.query('ROLLBACK');
+      } catch (rollbackError) {
+        logger.warn(
+          { pool: poolWrapper.name, err: rollbackError },
+          'Failed to rollback transaction',
+        );
+      }
+    }
+    const lockCode = getLockErrorCode(error);
+    if (lockCode) {
+      dbLockWaits.inc({
+        pool: poolWrapper.name,
+        type: poolWrapper.type,
+        code: lockCode,
+      });
+    }
+    throw error;
   } finally {
     if (!options.skipRelease) {
       try {
-        await client.query('RESET statement_timeout');
+        if (useTransaction) {
+          const durationSeconds = (performance.now() - start) / 1000;
+          const txnMode = transactionMode || 'write';
+          dbTransactionDurationSeconds.observe(
+            {
+              pool: poolWrapper.name,
+              type: poolWrapper.type,
+              mode: txnMode,
+              outcome,
+            } as any,
+            durationSeconds,
+          );
+        } else if (dbConfig.statementTimeoutMs > 0) {
+          await client.query('RESET statement_timeout');
+          if (dbConfig.lockTimeoutMs > 0) {
+            await client.query('RESET lock_timeout');
+          }
+        }
         client.release();
       } catch (error) {
         logger.warn(
@@ -720,6 +889,7 @@ async function withManagedClient<T>(
     }
 
     clearTimeout(leakTimer);
+    recordPoolSnapshot(poolWrapper);
   }
 }
 
@@ -877,6 +1047,19 @@ function isRetryableError(error: unknown): boolean {
   return false;
 }
 
+function getLockErrorCode(error: unknown): string | null {
+  if (!error || typeof error !== 'object') {
+    return null;
+  }
+
+  const code = (error as { code?: string }).code;
+  if (code && LOCK_ERROR_CODES.has(code)) {
+    return code;
+  }
+
+  return null;
+}
+
 function delayAsync(duration: number): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, duration);
@@ -904,5 +1087,7 @@ export const __private = {
   getPreparedStatementName,
   inferQueryType,
   isRetryableError,
+  parseReadReplicaConfigs,
+  getLockErrorCode,
   CircuitBreaker,
 };

@@ -1,15 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import neo4j from 'neo4j-driver';
-import pkg from 'pg';
-
-const { Pool } = pkg;
+import { createDbClient } from './dbPool.js';
 
 export function makeContext(req: any, logger: any) {
   const neo = neo4j.driver(
     process.env.NEO4J_URI!,
     neo4j.auth.basic(process.env.NEO4J_USER!, process.env.NEO4J_PASSWORD!),
   );
-  const pg = new Pool({ connectionString: process.env.PG_CONNECTION });
+  const pg = createDbClient();
 
   // Extract user from JWT payload attached by express-jwt middleware
   const auth = req.auth || {}; // req.auth will contain the decoded JWT payload
@@ -24,13 +22,6 @@ export function makeContext(req: any, logger: any) {
     logger,
     user,
     neo,
-    pg: {
-      one: async (q: string, params: any[] = []) =>
-        (await pg.query(q, params)).rows[0],
-      oneOrNone: async (q: string, params: any[] = []) =>
-        (await pg.query(q, params)).rows?.[0] || null,
-      any: async (q: string, params: any[] = []) =>
-        (await pg.query(q, params)).rows,
-    },
+    pg,
   };
 }

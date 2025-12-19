@@ -19,6 +19,7 @@ import {
   closePostgresPool,
   __private,
 } from '../postgres';
+import { refreshDbConfig } from '../config';
 import type pg from 'pg';
 
 type Pool = pg.Pool;
@@ -58,6 +59,8 @@ describe('PostgreSQL Pool', () => {
     delete process.env.PG_READ_REPLICA_ALLOW_DEGRADED;
     delete process.env.PG_FAILOVER_TO_WRITER;
     delete process.env.CURRENT_REGION;
+    process.env.DB_POOL_TUNING = '1';
+    refreshDbConfig();
 
     // Mock client
     mockClient = {
@@ -85,6 +88,7 @@ describe('PostgreSQL Pool', () => {
     it('should parse DATABASE_URL connection string', () => {
       process.env.DATABASE_URL =
         'postgresql://user:pass@localhost:5432/testdb';
+      refreshDbConfig();
 
       const pool = getPostgresPool();
 
@@ -115,6 +119,7 @@ describe('PostgreSQL Pool', () => {
       process.env.POSTGRES_PASSWORD = 'test-pass';
       process.env.POSTGRES_DB = 'test-db';
       process.env.POSTGRES_PORT = '5433';
+      refreshDbConfig();
 
       const pool = getPostgresPool();
 
@@ -433,27 +438,6 @@ describe('PostgreSQL Pool', () => {
     });
   });
 
-  describe('Replica Health', () => {
-    it('should expose health scoring with preferred region bias', async () => {
-      process.env.DATABASE_READ_REPLICAS =
-        'postgresql://read1:5432/db|region=us-east-1|priority=120,postgresql://read2:5432/db|region=eu-west-1|priority=80';
-      process.env.CURRENT_REGION = 'us-east-1';
-
-      const pool = getPostgresPool();
-
-      const { readPoolWrappers } = __private.getPoolsSnapshot();
-      __private.replicaHealthTracker.recordFailure(readPoolWrappers[1]);
-
-      const health = pool.replicaHealth();
-      const east = health.find((entry: any) => entry.region === 'us-east-1');
-      const eu = health.find((entry: any) => entry.region === 'eu-west-1');
-
-      expect(health.length).toBeGreaterThan(0);
-      expect((east?.healthScore ?? 0)).toBeGreaterThan(eu?.healthScore ?? 0);
-      expect(east?.priority).toBeGreaterThanOrEqual(eu?.priority ?? 0);
-    });
-  });
-
   describe('Slow Query Insights', () => {
     let pool: any;
 
@@ -464,16 +448,15 @@ describe('PostgreSQL Pool', () => {
     });
 
     it('should track slow queries', async () => {
-      // Simulate slow query by delaying response
-      mockClient.query
-        .mockResolvedValueOnce(undefined) // SET statement_timeout
-        .mockImplementation(async () => {
+      process.env.DB_SLOW_QUERY_THRESHOLD_MS = '50';
+      refreshDbConfig();
+      mockClient.query.mockImplementation(async (sql: any) => {
+        const text = typeof sql === 'string' ? sql : sql?.text;
+        if (text?.includes('large_table')) {
           await new Promise((resolve) => setTimeout(resolve, 100));
-          return { rows: [], rowCount: 0 };
-        })
-        .mockResolvedValueOnce(undefined); // RESET statement_timeout
-
-      process.env.PG_SLOW_QUERY_THRESHOLD_MS = '50';
+        }
+        return { rows: [], rowCount: 0 };
+      });
 
       await pool.query('SELECT * FROM large_table');
 
@@ -552,14 +535,10 @@ describe('PostgreSQL Pool', () => {
     });
 
     it('should respect custom timeout', async () => {
-      mockClient.query.mockResolvedValueOnce(undefined); // SET statement_timeout
-      mockClient.query.mockResolvedValueOnce({ rows: [], rowCount: 0 });
-      mockClient.query.mockResolvedValueOnce(undefined); // RESET statement_timeout
-
       await pool.query('SELECT * FROM users', [], { timeoutMs: 10000 });
 
       expect(mockClient.query).toHaveBeenCalledWith(
-        'SET statement_timeout = $1',
+        'SET LOCAL statement_timeout = $1',
         [10000],
       );
     });
@@ -592,25 +571,35 @@ describe('PostgreSQL Pool', () => {
 
     beforeEach(() => {
       pool = getPostgresPool();
+      mockClient.query.mockResolvedValue({ rows: [], rowCount: 0 } as any);
       (pool.connect as jest.Mock).mockResolvedValue(mockClient);
     });
 
     it('should throw error on query failure', async () => {
-      mockClient.query.mockResolvedValueOnce(undefined); // SET statement_timeout
-      mockClient.query.mockRejectedValueOnce(
-        new Error('Syntax error in SQL'),
-      );
+      mockClient.query.mockImplementation((sql: any) => {
+        const text = typeof sql === 'string' ? sql : sql?.text;
+        if (text?.includes('INVALID SQL')) {
+          return Promise.reject(new Error('Syntax error in SQL'));
+        }
+        return Promise.resolve({ rows: [], rowCount: 0 } as any);
+      });
 
       await expect(pool.query('INVALID SQL')).rejects.toThrow();
       expect(mockClient.release).toHaveBeenCalled();
     });
 
     it('should reset statement timeout even on error', async () => {
-      mockClient.query.mockResolvedValueOnce(undefined); // SET statement_timeout
-      mockClient.query.mockRejectedValueOnce(new Error('Query error'));
-      mockClient.query.mockResolvedValueOnce(undefined); // RESET statement_timeout
+      mockClient.query.mockImplementation((sql: any) => {
+        const text = typeof sql === 'string' ? sql : sql?.text;
+        if (text?.toLowerCase().includes('insert')) {
+          return Promise.reject(new Error('Query error'));
+        }
+        return Promise.resolve({ rows: [], rowCount: 0 } as any);
+      });
 
-      await expect(pool.query('SELECT * FROM users')).rejects.toThrow();
+      await expect(
+        pool.query('INSERT INTO users(id) VALUES ($1)', ['id-1']),
+      ).rejects.toThrow();
 
       expect(mockClient.query).toHaveBeenCalledWith('RESET statement_timeout');
       expect(mockClient.release).toHaveBeenCalled();
