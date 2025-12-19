@@ -22,9 +22,9 @@ We employ an **Active-Active** architecture for stateless services and an **Acti
 
 Traffic is routed using **AWS Route53** with a combination of policies:
 
-1.  **Latency-Based Routing**: Users are routed to the region with the lowest latency for standard read/stateless requests.
+1.  **Latency-Based Routing**: Users are routed to the region with the lowest latency for standard read/stateless requests. This effectively provides **Active-Active** behavior for the stateless layer.
 2.  **Health Checks**: Route53 monitors the health of the Application Load Balancers (ALB) in each region.
-3.  **Failover Routing**: If the Primary region is unhealthy, traffic is automatically shifted to the Secondary region.
+3.  **Failover via Health Checks**: If the Primary region is unhealthy (Health Check fails), Route53 automatically stops routing traffic to it, shifting all users to the Secondary region.
 
 ## Compute Layer (Kubernetes/EKS)
 

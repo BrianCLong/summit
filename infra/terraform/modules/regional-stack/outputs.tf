@@ -43,6 +43,17 @@ output "redis_endpoint" {
   value       = module.redis.replication_group_primary_endpoint_address
 }
 
+output "redis_replication_group_id" {
+  description = "The ID of the Redis replication group"
+  value       = module.redis.replication_group_id
+}
+
+output "redis_auth_token" {
+  description = "The Auth Token of the Redis replication group (sensitive)"
+  value       = var.is_primary_region ? try(random_password.redis_auth_token[0].result, null) : null
+  sensitive   = true
+}
+
 output "opensearch_endpoint" {
   description = "Domain-specific endpoint for OpenSearch"
   value       = module.opensearch.domain_endpoint

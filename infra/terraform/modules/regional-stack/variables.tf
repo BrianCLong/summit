@@ -118,6 +118,13 @@ variable "global_replication_group_id" {
   default     = null
 }
 
+variable "primary_auth_token" {
+  description = "Auth token from the primary Redis cluster (required for secondary region)"
+  type        = string
+  default     = null
+  sensitive   = true
+}
+
 variable "ingress_domain" {
   description = "The DNS name of the Ingress Load Balancer (simulated for now)"
   type        = string

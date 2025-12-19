@@ -40,6 +40,20 @@ resource "random_password" "neo4j_password" {
   special = true
 }
 
+# KMS Key for RDS Encryption (Required for Cross-Region Replication)
+resource "aws_kms_key" "rds" {
+  description             = "KMS key for RDS encryption"
+  deletion_window_in_days = 10
+  enable_key_rotation     = true
+
+  tags = local.tags
+}
+
+resource "aws_kms_alias" "rds" {
+  name          = "alias/${local.name}-rds"
+  target_key_id = aws_kms_key.rds.key_id
+}
+
 # VPC Configuration
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
@@ -192,11 +206,12 @@ module "rds" {
   instance_class    = var.postgres_instance_class
   allocated_storage = var.postgres_allocated_storage
   storage_encrypted = true
+  kms_key_id        = aws_kms_key.rds.arn
 
   # Primary Config
   db_name  = var.is_primary_region ? "intelgraph" : null
   username = var.is_primary_region ? "postgres" : null
-  password = var.is_primary_region ? random_password.postgres_password[0].result : null
+  password = var.is_primary_region ? try(random_password.postgres_password[0].result, null) : null
 
   # Read Replica Config
   replicate_source_db = var.is_primary_region ? null : var.source_db_identifier
@@ -280,7 +295,9 @@ module "redis" {
   snapshot_window         = "03:00-05:00"
 
   # Security
-  auth_token                 = var.is_primary_region ? random_password.redis_auth_token[0].result : null # Secondary auth token is managed by global replication
+  # Auth Token must be consistent across Global Datastore.
+  # If primary, use generated. If secondary, use passed primary token.
+  auth_token                 = var.is_primary_region ? try(random_password.redis_auth_token[0].result, null) : var.primary_auth_token
   transit_encryption_enabled = true
   at_rest_encryption_enabled = true
 

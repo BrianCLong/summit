@@ -60,6 +60,9 @@ module "primary_stack" {
   # Production settings
   postgres_instance_class = "db.r6g.large"
   redis_node_type        = "cache.r6g.large"
+
+  # DNS Configuration (Placeholder for future Ingress)
+  ingress_domain         = "us-west-2-api.intelgraph.io"
 }
 
 # Redis Global Datastore
@@ -67,7 +70,7 @@ resource "aws_elasticache_global_replication_group" "redis" {
   provider = aws.primary
 
   global_replication_group_id_suffix = "intelgraph-global"
-  primary_replication_group_id       = "${var.project_name}-${var.environment}-us-west-2-redis"
+  primary_replication_group_id       = module.primary_stack.redis_replication_group_id
 
   # Ensure primary stack is created first
   depends_on = [module.primary_stack]
@@ -93,6 +96,10 @@ module "secondary_stack" {
   # Cross-Region Replication inputs
   source_db_identifier        = module.primary_stack.rds_arn
   global_replication_group_id = aws_elasticache_global_replication_group.redis.global_replication_group_id
+  primary_auth_token          = module.primary_stack.redis_auth_token
+
+  # DNS Configuration (Placeholder for future Ingress)
+  ingress_domain              = "us-east-1-api.intelgraph.io" # Must be managed via ExternalDNS or manually
 
   # Reduced capacity for DR / Cost optimization
   postgres_instance_class = "db.t3.medium"
@@ -100,7 +107,7 @@ module "secondary_stack" {
 }
 
 # Route53 Global Traffic Management
-resource "aws_route53_zone" "primary" {
+data "aws_route53_zone" "primary" {
   provider = aws.primary
   name     = "intelgraph.io"
 }
@@ -139,7 +146,7 @@ resource "aws_route53_health_check" "secondary" {
 # Primary Region Record
 resource "aws_route53_record" "api_primary" {
   provider = aws.primary
-  zone_id  = aws_route53_zone.primary.zone_id
+  zone_id  = data.aws_route53_zone.primary.zone_id
   name     = "api.intelgraph.io"
   type     = "CNAME"
   ttl      = "60"
@@ -155,7 +162,7 @@ resource "aws_route53_record" "api_primary" {
 # Secondary Region Record
 resource "aws_route53_record" "api_secondary" {
   provider = aws.primary
-  zone_id  = aws_route53_zone.primary.zone_id
+  zone_id  = data.aws_route53_zone.primary.zone_id
   name     = "api.intelgraph.io"
   type     = "CNAME"
   ttl      = "60"
