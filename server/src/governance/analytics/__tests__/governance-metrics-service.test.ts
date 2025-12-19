@@ -19,21 +19,21 @@ import {
 // Mock Redis
 jest.mock('ioredis', () => {
   return jest.fn().mockImplementation(() => ({
-    get: jest.fn(),
-    set: jest.fn(),
-    setex: jest.fn(),
-    zadd: jest.fn(),
-    zrange: jest.fn().mockResolvedValue([]),
-    zrevrange: jest.fn().mockResolvedValue([]),
-    zremrangebyrank: jest.fn(),
-    smembers: jest.fn().mockResolvedValue([]),
-    exists: jest.fn().mockResolvedValue(0),
-    quit: jest.fn(),
-  }));
+    get: (jest.fn() as any),
+    set: (jest.fn() as any),
+    setex: (jest.fn() as any),
+    zadd: (jest.fn() as any),
+    zrange: (jest.fn() as any).mockResolvedValue([]),
+    zrevrange: (jest.fn() as any).mockResolvedValue([]),
+    zremrangebyrank: (jest.fn() as any),
+    smembers: (jest.fn() as any).mockResolvedValue([]),
+    exists: (jest.fn() as any).mockResolvedValue(0),
+    quit: (jest.fn() as any),
+  } as any));
 });
 
 // Mock fetch for Prometheus queries
-const mockFetch = jest.fn();
+const mockFetch: any = jest.fn();
 global.fetch = mockFetch as any;
 
 describe('GovernanceMetricsService', () => {

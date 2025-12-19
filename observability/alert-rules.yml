@@ -44,6 +44,32 @@ groups:
           description: 'The availability of the /health/ready endpoint has dropped below 99.5% over the last 7 days.'
           runbook_url: 'https://docs.intelgraph.com/runbooks/golden-path-health-low'
 
+  # API latency regression and p99 visibility
+  - name: api.latency
+    rules:
+      - record: api_http_request_duration_seconds_p99
+        expr: histogram_quantile(0.99, sum by (le) (rate(http_request_duration_seconds_bucket{service="api-server"}[5m])))
+
+      - record: api_http_request_duration_seconds_p99_baseline
+        expr: histogram_quantile(0.99, sum by (le) (rate(http_request_duration_seconds_bucket{service="api-server"}[1h])))
+
+      - alert: ApiP99LatencyRegression
+        expr: |
+          api_http_request_duration_seconds_p99 > 0.5
+          and api_http_request_duration_seconds_p99
+              > (api_http_request_duration_seconds_p99_baseline * 1.4)
+        for: 10m
+        labels:
+          severity: warning
+          service: api-server
+          component: http
+        annotations:
+          summary: 'API p99 latency regression'
+          description: >-
+            p99 latency is {{ $value }}s and more than 40% above the 1h baseline.
+            Inspect upstream dependencies, database health, and recent deploys.
+          runbook_url: 'https://docs.intelgraph.com/runbooks/api-latency-regression'
+
   # Routing performance and reliability
   - name: conductor.routing
     rules:
@@ -357,3 +383,17 @@ groups:
           summary: 'Conductor performance is degraded'
           description: 'Both expert execution and MCP operation latencies are elevated'
           runbook_url: 'https://docs.intelgraph.com/runbooks/performance-degraded'
+
+  # Background Job monitoring
+  - name: intelgraph.jobs
+    rules:
+      - alert: SOC2EvidenceJobFailed
+        expr: increase(intelgraph_soc2_job_runs_total{status="failure"}[1h]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          team: compliance
+        annotations:
+          summary: "SOC2 evidence generation job failed"
+          description: "The automated monthly SOC2 evidence generation job has failed. Manual investigation is required to ensure compliance evidence is not missed for the audit period."
+          runbook_url: "https://docs.intelgraph.com/runbooks/soc2-evidence-job-failed"

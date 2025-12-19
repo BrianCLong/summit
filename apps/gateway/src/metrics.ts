@@ -4,7 +4,18 @@
  */
 
 import { meter } from './instrumentation';
+import client from "prom-client"; // Add prom-client for manual registry if needed, though OTEL is preferred.
+// But prompt asks for "export const gqlLatency = new client.Histogram..."
+// I will add the requested export using prom-client side-by-side or integrate it.
+
 import type { GraphQLRequestContext } from '@apollo/server';
+
+// Requested export for Day-3
+export const gqlLatency = new client.Histogram({
+  name:"gateway_graphql_latency",
+  help:"ms",
+  buckets:[50,100,200,400,800,1600,3200]
+});
 
 // Histogram for query duration (milliseconds)
 const queryDurationHistogram = meter.createHistogram(
