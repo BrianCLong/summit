@@ -26,6 +26,7 @@ import { useSearch } from '@/contexts/SearchContext'
 import { useRbac } from '@/hooks/useRbac'
 import type { User } from '@/types'
 import { cn } from '@/lib/utils'
+import { isFeatureEnabled } from '@/config'
 
 interface NavigationProps {
   user: User | null
@@ -99,6 +100,11 @@ const navItems: NavItem[] = [
     action: 'read',
   },
   {
+    name: 'Review Queue',
+    href: '/review-queue',
+    icon: FileBarChart as React.ComponentType<{ className?: string }>,
+  },
+  {
     name: 'Admin',
     href: '/admin',
     icon: Settings as React.ComponentType<{ className?: string }>,
@@ -118,6 +124,10 @@ export function Navigation({ user }: NavigationProps) {
   const { openSearch } = useSearch()
 
   const NavItemComponent = ({ item }: { item: NavItem }) => {
+    if (item.href === '/review-queue' && !isFeatureEnabled('ui.reviewQueue')) {
+      return null
+    }
+
     const { hasPermission } = useRbac(item.resource || '', item.action || '', {
       user,
       fallback: !item.resource,

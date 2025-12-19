@@ -1,6 +1,7 @@
 export type FeatureKey =
   | 'maestro.newRunConsole'
-  | 'dashboard.realtime';
+  | 'dashboard.realtime'
+  | 'ui.reviewQueue';
 
 export interface WebConfig {
   apiBaseUrl: string;
@@ -52,6 +53,11 @@ const config: WebConfig = {
   features: {
     'maestro.newRunConsole': getEnv('VITE_ENABLE_NEW_MAESTRO_RUN_CONSOLE') === 'true',
     'dashboard.realtime': getEnv('VITE_ENABLE_REALTIME_DASHBOARD') === 'true',
+    'ui.reviewQueue':
+      getEnv(
+        'VITE_UI_REVIEW_QUEUE',
+        getMode() === 'development' ? 'true' : 'false'
+      ) === 'true',
   },
   integrations: {
     github: {

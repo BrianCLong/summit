@@ -38,14 +38,25 @@ const SignupPage = React.lazy(() => import('@/pages/SignupPage'))
 const VerifyEmailPage = React.lazy(() => import('@/pages/VerifyEmailPage'))
 const AccessDeniedPage = React.lazy(() => import('@/pages/AccessDeniedPage'))
 const TriPanePage = React.lazy(() => import('@/pages/TriPanePage'))
-const GeoIntPane = React.lazy(() => import('@/panes/GeoIntPane').then(module => ({ default: module.GeoIntPane })))
-const NarrativeIntelligencePage = React.lazy(() => import('@/pages/NarrativeIntelligencePage'))
+const GeoIntPane = React.lazy(() =>
+  import('@/panes/GeoIntPane').then(module => ({ default: module.GeoIntPane }))
+)
+const NarrativeIntelligencePage = React.lazy(
+  () => import('@/pages/NarrativeIntelligencePage')
+)
+const ReviewQueuePage = React.lazy(() =>
+  import('@/features/review-queue/ReviewQueuePage').then(module => ({
+    default: module.ReviewQueuePage,
+  }))
+)
 
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ErrorBoundary, NotFound } from '@/components/error'
 import Explain from '@/components/Explain'
+import { KeyboardShortcutsProvider } from '@/contexts/KeyboardShortcutsContext'
+import { isFeatureEnabled } from './config'
 
 function App() {
   const [showPalette, setShowPalette] = React.useState(false);
@@ -68,105 +79,112 @@ function App() {
         <TooltipProvider>
           <AuthProvider>
             <SearchProvider>
-              <Router>
-                <ErrorBoundary>
-                  <React.Suspense
-                    fallback={
-                      <div className="flex h-screen items-center justify-center">
-                        <div className="text-center">
-                          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite]" />
-                          <p className="mt-4 text-sm text-muted-foreground">
-                            Loading...
-                          </p>
+              <KeyboardShortcutsProvider>
+                <Router>
+                  <ErrorBoundary>
+                    <React.Suspense
+                      fallback={
+                        <div className="flex h-screen items-center justify-center">
+                          <div className="text-center">
+                            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite]" />
+                            <p className="mt-4 text-sm text-muted-foreground">
+                              Loading...
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    }
-                  >
-                    {/* Explain overlay stub */}
-                    {showPalette && (
-                       <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" onClick={()=>setShowPalette(false)}>
-                         <div className="bg-white p-4 rounded shadow-lg w-96" onClick={e=>e.stopPropagation()}>
-                           <input type="text" placeholder="Command..." className="w-full border p-2 mb-2" autoFocus />
-                           <button onClick={()=>{ setShowPalette(false); setShowExplain(true); }} className="block w-full text-left p-2 hover:bg-gray-100">
-                             Explain this view
-                           </button>
+                      }
+                    >
+                      {/* Explain overlay stub */}
+                      {showPalette && (
+                         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" onClick={()=>setShowPalette(false)}>
+                           <div className="bg-white p-4 rounded shadow-lg w-96" onClick={e=>e.stopPropagation()}>
+                             <input type="text" placeholder="Command..." className="w-full border p-2 mb-2" autoFocus />
+                             <button onClick={()=>{ setShowPalette(false); setShowExplain(true); }} className="block w-full text-left p-2 hover:bg-gray-100">
+                               Explain this view
+                             </button>
+                           </div>
                          </div>
-                       </div>
-                    )}
-                    {showExplain && <Explain facts={["Linked via shared IP (1.2.3.4)", "Match score: 0.98"]} />}
+                      )}
+                      {showExplain && <Explain facts={["Linked via shared IP (1.2.3.4)", "Match score: 0.98"]} />}
 
-                    <Routes>
-                      {/* Auth routes */}
-                    <Route path="/signin" element={<SignInPage />} />
-                    <Route path="/signup" element={<SignupPage />} />
-                    <Route path="/verify-email" element={<VerifyEmailPage />} />
-                    <Route
-                      path="/access-denied"
-                      element={<AccessDeniedPage />}
-                    />
-
-                    {/* Protected routes with layout */}
-                    <Route path="/" element={<Layout />}>
-                      <Route index element={<HomePage />} />
-                      <Route path="explore" element={<ExplorePage />} />
-
-                      {/* Tri-Pane Analysis */}
+                      <Routes>
+                        {/* Auth routes */}
+                      <Route path="/signin" element={<SignInPage />} />
+                      <Route path="/signup" element={<SignupPage />} />
+                      <Route path="/verify-email" element={<VerifyEmailPage />} />
                       <Route
-                        path="analysis/tri-pane"
-                        element={<TriPanePage />}
-                      />
-                      <Route
-                        path="geoint"
-                        element={<GeoIntPane />}
+                        path="/access-denied"
+                        element={<AccessDeniedPage />}
                       />
 
-                      {/* Narrative Intelligence */}
-                      <Route
-                        path="analysis/narrative"
-                        element={<NarrativeIntelligencePage />}
-                      />
+                      {/* Protected routes with layout */}
+                      <Route path="/" element={<Layout />}>
+                        <Route index element={<HomePage />} />
+                        <Route path="explore" element={<ExplorePage />} />
 
-                      {/* Alerts */}
-                      <Route path="alerts" element={<AlertsPage />} />
-                      <Route path="alerts/:id" element={<AlertDetailPage />} />
+                        {/* Tri-Pane Analysis */}
+                        <Route
+                          path="analysis/tri-pane"
+                          element={<TriPanePage />}
+                        />
+                        <Route
+                          path="geoint"
+                          element={<GeoIntPane />}
+                        />
 
-                      {/* Cases */}
-                      <Route path="cases" element={<CasesPage />} />
-                      <Route path="cases/:id" element={<CaseDetailPage />} />
+                        {/* Narrative Intelligence */}
+                        <Route
+                          path="analysis/narrative"
+                          element={<NarrativeIntelligencePage />}
+                        />
 
-                      {/* Dashboards */}
-                      <Route
-                        path="dashboards/command-center"
-                        element={<CommandCenterDashboard />}
-                      />
-                      <Route
-                        path="dashboards/supply-chain"
-                        element={<SupplyChainDashboard />}
-                      />
+                        {/* Alerts */}
+                        <Route path="alerts" element={<AlertsPage />} />
+                        <Route path="alerts/:id" element={<AlertDetailPage />} />
 
-                      {/* Data & Models */}
-                      <Route
-                        path="data/sources"
-                        element={<DataSourcesPage />}
-                      />
-                      <Route path="models" element={<ModelsPage />} />
-                      <Route path="reports" element={<ReportsPage />} />
+                        {/* Cases */}
+                        <Route path="cases" element={<CasesPage />} />
+                        <Route path="cases/:id" element={<CaseDetailPage />} />
 
-                      {/* Admin */}
-                      <Route path="admin/*" element={<AdminPage />} />
-                      <Route path="admin/consistency" element={<ConsistencyDashboard />} />
+                        {/* Review Queue (feature-flagged) */}
+                        {isFeatureEnabled('ui.reviewQueue') && (
+                          <Route path="review-queue" element={<ReviewQueuePage />} />
+                        )}
 
-                      {/* Support */}
-                      <Route path="help" element={<HelpPage />} />
-                      <Route path="changelog" element={<ChangelogPage />} />
+                        {/* Dashboards */}
+                        <Route
+                          path="dashboards/command-center"
+                          element={<CommandCenterDashboard />}
+                        />
+                        <Route
+                          path="dashboards/supply-chain"
+                          element={<SupplyChainDashboard />}
+                        />
 
-                      {/* Catch all */}
-                      <Route path="*" element={<NotFound />} />
-                    </Route>
-                  </Routes>
-                  </React.Suspense>
-                </ErrorBoundary>
-              </Router>
+                        {/* Data & Models */}
+                        <Route
+                          path="data/sources"
+                          element={<DataSourcesPage />}
+                        />
+                        <Route path="models" element={<ModelsPage />} />
+                        <Route path="reports" element={<ReportsPage />} />
+
+                        {/* Admin */}
+                        <Route path="admin/*" element={<AdminPage />} />
+                        <Route path="admin/consistency" element={<ConsistencyDashboard />} />
+
+                        {/* Support */}
+                        <Route path="help" element={<HelpPage />} />
+                        <Route path="changelog" element={<ChangelogPage />} />
+
+                        {/* Catch all */}
+                        <Route path="*" element={<NotFound />} />
+                      </Route>
+                    </Routes>
+                    </React.Suspense>
+                  </ErrorBoundary>
+                </Router>
+              </KeyboardShortcutsProvider>
             </SearchProvider>
           </AuthProvider>
         </TooltipProvider>
