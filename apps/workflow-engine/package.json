@@ -58,7 +58,7 @@
     "workflow-engine"
   ],
   "author": "IntelGraph Team",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "engines": {
     "node": ">=18.0.0"
   },

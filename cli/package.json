@@ -93,7 +93,7 @@
     "url": "https://github.com/BrianCLong/summit.git",
     "directory": "cli"
   },
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
