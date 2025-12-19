@@ -1,0 +1,115 @@
+{
+  "privileged_actions": [
+    {
+      "id": "dataset-purge-requires-dual-control",
+      "description": "Privileged dataset purge without dual-control approvals should be blocked with obligations to collect approvals and step-up auth.",
+      "input": {
+        "subject": {
+          "id": "cora",
+          "tenantId": "tenantA",
+          "roles": ["admin"],
+          "entitlements": ["dataset-critical:purge"],
+          "residency": "us",
+          "clearance": "secret",
+          "loa": "loa1",
+          "riskScore": 6,
+          "groups": ["dataset-critical"]
+        },
+        "resource": {
+          "id": "dataset-critical",
+          "tenantId": "tenantA",
+          "residency": "us",
+          "classification": "secret",
+          "tags": ["mission-critical", "pii"]
+        },
+        "action": "dataset:purge",
+        "context": {
+          "protectedActions": ["dataset:purge", "audit-log:read"],
+          "requestTime": "2025-01-07T12:00:00Z",
+          "currentAcr": "loa1",
+          "approvals": []
+        }
+      },
+      "expect": {
+        "allow": false,
+        "reason": "dual_control_required",
+        "obligationTypes": ["step_up", "dual_control"]
+      }
+    },
+    {
+      "id": "dataset-purge-allowed-with-approvals",
+      "description": "Privileged dataset purge with dual-control approvals and LOA2 should pass with no pending obligations.",
+      "input": {
+        "subject": {
+          "id": "drew",
+          "tenantId": "tenantA",
+          "roles": ["steward", "admin"],
+          "entitlements": ["dataset-critical:purge"],
+          "residency": "us",
+          "clearance": "secret",
+          "loa": "loa2",
+          "riskScore": 3,
+          "groups": ["dataset-critical"]
+        },
+        "resource": {
+          "id": "dataset-critical",
+          "tenantId": "tenantA",
+          "residency": "us",
+          "classification": "secret",
+          "tags": ["mission-critical", "pii"]
+        },
+        "action": "dataset:purge",
+        "context": {
+          "protectedActions": ["dataset:purge", "audit-log:read"],
+          "requestTime": "2025-01-07T12:00:00Z",
+          "currentAcr": "loa2",
+          "approvals": [
+            { "actorId": "secops-1", "role": "security-admin" },
+            { "actorId": "compliance-2", "role": "compliance-officer" }
+          ]
+        }
+      },
+      "expect": {
+        "allow": true,
+        "reason": "allow",
+        "obligationTypes": []
+      }
+    },
+    {
+      "id": "audit-log-read-step-up",
+      "description": "Audit log access for the auditor role should be allowed with a step-up obligation at LOA1.",
+      "input": {
+        "subject": {
+          "id": "pat",
+          "tenantId": "tenantA",
+          "roles": ["auditor"],
+          "entitlements": [],
+          "residency": "us",
+          "clearance": "secret",
+          "loa": "loa1",
+          "riskScore": 4,
+          "groups": ["audit"]
+        },
+        "resource": {
+          "id": "audit-log",
+          "tenantId": "tenantA",
+          "residency": "us",
+          "classification": "secret",
+          "tags": ["audit", "operational"]
+        },
+        "action": "audit-log:read",
+        "context": {
+          "protectedActions": ["dataset:purge", "audit-log:read"],
+          "requestTime": "2025-01-07T12:00:00Z",
+          "currentAcr": "loa1",
+          "approvals": []
+        }
+      },
+      "expect": {
+        "allow": true,
+        "reason": "allow",
+        "obligationTypes": ["step_up"]
+      }
+    }
+  ]
+}

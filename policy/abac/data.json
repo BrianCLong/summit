@@ -1,35 +1,47 @@
 {
-  "clearance_rank": {
-    "public": 0,
-    "restricted": 1,
-    "confidential": 2,
-    "secret": 3
-  },
-  "actions": {
-    "dataset:read": {
-      "allowedRoles": ["reader", "analyst"],
-      "requiresStepUp": false
+  "abac": {
+    "clearance_rank": {
+      "public": 0,
+      "restricted": 1,
+      "confidential": 2,
+      "secret": 3
     },
-    "dataset:write": {
-      "allowedRoles": ["analyst"],
-      "requiresStepUp": true
+    "actions": {
+      "dataset:read": {
+        "allowedRoles": ["reader", "analyst"],
+        "requiresStepUp": false
+      },
+      "dataset:write": {
+        "allowedRoles": ["analyst"],
+        "requiresStepUp": true
+      },
+      "dataset:delete": {
+        "allowedRoles": ["admin"],
+        "requiresStepUp": true
+      },
+      "dataset:share-external": {
+        "allowedRoles": ["admin", "analyst"],
+        "requiresStepUp": true
+      },
+      "policy:publish": {
+        "allowedRoles": ["admin"],
+        "requiresStepUp": true
+      },
+      "dataset:purge": {
+        "allowedRoles": ["admin", "steward"],
+        "requiresStepUp": true,
+        "requiresDualControl": true,
+        "dualControlRoles": ["security-admin", "compliance-officer"]
+      },
+      "audit-log:read": {
+        "allowedRoles": ["auditor", "admin"],
+        "requiresStepUp": true
+      }
     },
-    "dataset:delete": {
-      "allowedRoles": ["admin"],
-      "requiresStepUp": true
-    },
-    "dataset:share-external": {
-      "allowedRoles": ["admin", "analyst"],
-      "requiresStepUp": true
-    },
-    "policy:publish": {
-      "allowedRoles": ["admin"],
-      "requiresStepUp": true
+    "residency_matrix": {
+      "us": ["us"],
+      "eu": ["eu"],
+      "apac": ["apac", "us"]
     }
-  },
-  "residency_matrix": {
-    "us": ["us"],
-    "eu": ["eu"],
-    "apac": ["apac", "us"]
   }
 }

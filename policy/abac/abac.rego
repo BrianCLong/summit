@@ -8,6 +8,8 @@ default decision = {
   "obligations": []
 }
 
+default deny_reason = "policy_denied"
+
 clearance_rank(level) = rank {
   rank := abac.clearance_rank[level]
 }
@@ -21,7 +23,7 @@ tenant_match {
 
 residency_match {
   allowed := abac.residency_matrix[input.subject.residency]
-  allowed[input.resource.residency]
+  allowed[_] == input.resource.residency
 }
 
 has_required_role(action) {
@@ -31,16 +33,14 @@ has_required_role(action) {
 
 has_required_role(action) {
   required := abac.actions[action].allowedRoles
-  some role
-  required[role]
+  role := required[_]
   input.subject.roles[_] == role
 }
 
 has_required_role(action) {
   action_parts := split(action, ":")
   count(action_parts) == 2
-  some ent
-  input.subject.entitlements[_] == ent
+  ent := input.subject.entitlements[_]
   ent_parts := split(ent, ":")
   count(ent_parts) == 3
   ent_parts[0] == action_parts[0]
@@ -48,18 +48,62 @@ has_required_role(action) {
   ent_parts[2] == action_parts[1]
 }
 
+dual_control_required {
+  action := input.action
+  cfg := abac.actions[action]
+  object.get(cfg, "requiresDualControl", false)
+}
+
+dual_control_roles(action) = roles {
+  cfg := abac.actions[action]
+  roles := object.get(cfg, "dualControlRoles", [])
+}
+
+approvals = object.get(input.context, "approvals", [])
+
+approval_for_role(role) {
+  approvals[_].role == role
+}
+
+has_required_approvals(required_roles) {
+  not missing_roles(required_roles)
+}
+
+missing_roles(required_roles) {
+  role := required_roles[_]
+  not approval_for_role(role)
+}
+
+distinct_approvers_count = count(approver_ids) {
+  approver_ids := {a |
+    approval := approvals[_]
+    a := approval.actorId
+  }
+}
+
+dual_control_satisfied {
+  not dual_control_required
+}
+
+dual_control_satisfied {
+  dual_control_required
+  count(approvals) >= 2
+  distinct_approvers_count >= 2
+  required_roles := dual_control_roles(input.action)
+  has_required_approvals(required_roles)
+}
+
 clearance_sufficient {
   subject_clearance_rank >= resource_classification_rank
 }
 
 step_up_needed {
-  input.action == action
-  abac.actions[action].requiresStepUp
+  action_cfg := abac.actions[input.action]
+  object.get(action_cfg, "requiresStepUp", false)
 }
 
 step_up_needed {
-  input.action == action
-  input.context.protectedActions[_] == action
+  input.context.protectedActions[_] == input.action
 }
 
 step_up_needed {
@@ -75,6 +119,7 @@ allow {
   residency_match
   clearance_sufficient
   has_required_role(input.action)
+  dual_control_satisfied
 }
 
 deny_reason = "tenant_mismatch" {
@@ -99,11 +144,15 @@ deny_reason = "least_privilege_violation" {
   not has_required_role(input.action)
 }
 
-deny_reason = "policy_denied" {
-  true
+deny_reason = "dual_control_required" {
+  tenant_match
+  residency_match
+  clearance_sufficient
+  has_required_role(input.action)
+  not dual_control_satisfied
 }
 
-obligations[obligation] {
+obligation_item[obligation] {
   step_up_needed
   not sufficient_acr
   obligation := {
@@ -113,13 +162,27 @@ obligations[obligation] {
   }
 }
 
+obligation_item[obligation] {
+  dual_control_required
+  not dual_control_satisfied
+  required_roles := dual_control_roles(input.action)
+  min_approvers := max([2, count(required_roles)])
+  obligation := {
+    "type": "dual_control",
+    "required_roles": required_roles,
+    "min_approvers": min_approvers,
+    "approvals_present": approvals,
+  }
+}
+
 decision := {
   "allow": true,
   "reason": "allow",
   "obligations": obligations,
 } {
   allow
-  obligations := [obligation | obligations[obligation]]
+  obligation_list := [obligation | obligation_item[obligation]]
+  obligations := obligation_list
 }
 
 decision := {
@@ -129,5 +192,6 @@ decision := {
 } {
   not allow
   reason := deny_reason
-  obligations := [obligation | obligations[obligation]]
+  obligation_list := [obligation | obligation_item[obligation]]
+  obligations := obligation_list
 }
