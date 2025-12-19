@@ -99,7 +99,7 @@ export function GraphCanvas({
   }, [])
 
   useEffect(() => {
-    if (!svgRef.current || entities.length === 0) {return}
+    if (!svgRef.current || entities.length === 0) return
 
     const svg = select(svgRef.current)
     svg.selectAll('*').remove()
@@ -126,12 +126,6 @@ export function GraphCanvas({
       }))
 
     // Create simulation based on layout type
-    let simulation: d3.Simulation<GraphNode, GraphLink>
-
-    switch (layout.type) {
-      case 'force':
-        simulation = d3
-          .forceSimulation(nodes)
     let simulation: Simulation<GraphNode, GraphLink>
 
     switch (layout.type) {
@@ -143,14 +137,6 @@ export function GraphCanvas({
               .id(d => d.id)
               .distance(100)
           )
-          .force('charge', d3.forceManyBody().strength(-300))
-          .force('center', d3.forceCenter(width / 2, height / 2))
-          .force('collision', d3.forceCollide().radius(30))
-        break
-
-      case 'radial':
-        simulation = d3
-          .forceSimulation(nodes)
           .force('charge', forceManyBody().strength(-300))
           .force('center', forceCenter(width / 2, height / 2))
           .force('collision', forceCollide().radius(30))
@@ -164,44 +150,12 @@ export function GraphCanvas({
               .id(d => d.id)
               .distance(80)
           )
-          .force('charge', d3.forceManyBody().strength(-200))
-          .force('radial', d3.forceRadial(150, width / 2, height / 2))
-          .force('charge', d3.forceManyBody().strength(-200))
-          .force('radial', d3.forceRadial(150, width / 2, height / 2))
-          .force('charge', d3.forceManyBody().strength(-200))
-          .force('radial', d3.forceRadial(150, width / 2, height / 2))
-          .force('charge', d3.forceManyBody().strength(-200))
-          .force('radial', d3.forceRadial(150, width / 2, height / 2))
-          .force('charge', d3.forceManyBody().strength(-200))
-          .force('radial', d3.forceRadial(150, width / 2, height / 2))
-          .force('charge', d3.forceManyBody().strength(-200))
-          .force('radial', d3.forceRadial(150, width / 2, height / 2))
-          .force('charge', d3.forceManyBody().strength(-200))
-          .force('radial', d3.forceRadial(150, width / 2, height / 2))
-          .force('charge', d3.forceManyBody().strength(-200))
-          .force('radial', d3.forceRadial(150, width / 2, height / 2))
           .force('charge', forceManyBody().strength(-200))
           .force('radial', forceRadial(150, width / 2, height / 2))
         break
 
       case 'hierarchic':
         // Simple hierarchical layout - in a real app you'd use dagre or similar
-        simulation = d3
-          .forceSimulation(nodes)
-        simulation = d3
-          .forceSimulation(nodes)
-        simulation = d3
-          .forceSimulation(nodes)
-        simulation = d3
-          .forceSimulation(nodes)
-        simulation = d3
-          .forceSimulation(nodes)
-        simulation = d3
-          .forceSimulation(nodes)
-        simulation = d3
-          .forceSimulation(nodes)
-        simulation = d3
-          .forceSimulation(nodes)
         simulation = forceSimulation(nodes)
           .force(
             'link',
@@ -212,14 +166,12 @@ export function GraphCanvas({
           .force('charge', forceManyBody().strength(-100))
           .force(
             'y',
-            forceY<GraphNode>().y(d => (d.index || 0) * 80 + 100)
+            forceY<GraphNode>().y(d => ((d.index || 0) * 80 + 100))
           )
           .force('x', forceX(width / 2))
         break
 
       default:
-        simulation = d3
-          .forceSimulation(nodes)
         simulation = forceSimulation(nodes)
           .force(
             'link',
@@ -309,7 +261,7 @@ export function GraphCanvas({
       .call(
         drag<SVGGElement, GraphNode>()
           .on('start', (event, d) => {
-            if (!event.active) {simulation.alphaTarget(0.3).restart()}
+            if (!event.active) simulation.alphaTarget(0.3).restart()
             d.fx = d.x
             d.fy = d.y
           })
@@ -318,7 +270,7 @@ export function GraphCanvas({
             d.fy = event.y
           })
           .on('end', (event, d) => {
-            if (!event.active) {simulation.alphaTarget(0)}
+            if (!event.active) simulation.alphaTarget(0)
             d.fx = null
             d.fy = null
           })
@@ -358,7 +310,7 @@ export function GraphCanvas({
       .style('pointer-events', 'none')
       .text(d =>
         d.entity.name.length > 15
-          ? `${d.entity.name.slice(0, 15)  }...`
+          ? `${d.entity.name.slice(0, 15)}...`
           : d.entity.name
       )
 
@@ -451,22 +403,6 @@ export function GraphCanvas({
       {/* Graph controls overlay */}
       <div className="absolute top-4 right-4 flex flex-col gap-2">
         <div className="bg-background/90 backdrop-blur-sm border rounded-lg p-2 shadow-sm">
-          <div className="text-xs font-medium text-muted-foreground mb-1">
-            Graph Info
-          <div className="text-xs font-medium text-muted-foreground mb-1">
-            Graph Info
-          <div className="text-xs font-medium text-muted-foreground mb-1">
-            Graph Info
-          <div className="text-xs font-medium text-muted-foreground mb-1">
-            Graph Info
-          <div className="text-xs font-medium text-muted-foreground mb-1">
-            Graph Info
-          <div className="text-xs font-medium text-muted-foreground mb-1">
-            Graph Info
-          <div className="text-xs font-medium text-muted-foreground mb-1">
-            Graph Info
-          <div className="text-xs font-medium text-muted-foreground mb-1">
-            Graph Info
           <div className="flex justify-between items-center mb-1 gap-2">
             <div className="text-xs font-medium text-muted-foreground">
               Graph Info
