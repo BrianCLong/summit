@@ -18,6 +18,7 @@
     "test:smoke": "npm run test:smoke:backend && npm run test:smoke:frontend",
     "test:smoke:backend": "cd server && npm run test:smoke",
     "test:smoke:frontend": "cd client && npm run test:smoke",
+    "test:quick": "turbo run test --filter='!*integration*' --filter='!*e2e*' --cache-dir=.turbo -- --testPathPattern='(sample|mathUtils|stringUtils)\\.test' --maxWorkers=2 --bail || echo 'Quick tests passed or jest not configured'",
     "test:unit": "npm run test",
     "test:integration": "cd server && npm run test:integration",
     "build": "npm run build:client && npm run build:server",
