@@ -18,6 +18,7 @@ import { correlationIdMiddleware } from './middleware/correlation-id.js';
 import { featureFlagContextMiddleware } from './middleware/feature-flag-context.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
+import { defaultReasonForAccessMiddleware } from './middleware/reason-for-access.js';
 import { overloadProtection } from './middleware/overloadProtection.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
 import { safetyModeMiddleware, resolveSafetyState } from './middleware/safety-mode.js';
@@ -183,6 +184,7 @@ export const createApp = async () => {
   // Audit-First middleware for cryptographic stamping of sensitive operations
   app.use(auditFirstMiddleware);
   app.use(httpCacheMiddleware);
+  app.use(defaultReasonForAccessMiddleware);
 
   // API Versioning Middleware (Epic 2: API v1.1 Default)
   app.use((req, res, next) => {
@@ -276,6 +278,8 @@ export const createApp = async () => {
   app.use('/api/scenarios', scenarioRouter);
   app.use('/api/costs', resourceCostsRouter);
   app.use('/api/query-replay', queryReplayRouter);
+  const policySimulationRouter = (await import('./routes/policy-simulation.js')).default;
+  app.use('/api/policy', policySimulationRouter);
   app.use('/api/stream', streamRouter); // Register stream route
   app.use('/api/v1/search', searchV1Router); // Register Unified Search API
   app.get('/metrics', metricsRoute);

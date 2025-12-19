@@ -11,5 +11,6 @@ router.get('/policies', OpaController.getPolicies);
 router.get('/policies/:filename', OpaController.getPolicyContent);
 router.post('/evaluate', OpaController.evaluatePolicy);
 router.post('/validate', OpaController.validatePolicy);
+// Feature-flagged: policy simulation handled by /api/policy/simulate
 
 export const opaRoutes = router;
