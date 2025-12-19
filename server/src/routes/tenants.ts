@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { tenantService, createTenantSchema } from '../services/TenantService.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
 import logger from '../utils/logger.js';
+import usageRouter from './tenants/usage.js';
 
 const router = Router();
 
@@ -50,6 +51,8 @@ router.post('/', ensureAuthenticated, async (req, res) => {
     }
   }
 });
+
+router.use('/:tenantId/usage', usageRouter);
 
 /**
  * @route GET /api/tenants/:id
