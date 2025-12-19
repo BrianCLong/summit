@@ -1,0 +1,31 @@
+{
+  "name": "@summit/adapter-sdk",
+  "version": "1.0.0",
+  "description": "Adapter SDK for Summit runtime with lifecycle guardrails and receipts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "eslint": "^8.55.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0"
+  },
+  "keywords": [
+    "adapter",
+    "sdk",
+    "lifecycle",
+    "policy",
+    "receipts",
+    "summit"
+  ],
+  "author": "Summit Team",
+  "license": "MIT"
+}
