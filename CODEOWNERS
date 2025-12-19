@@ -11,9 +11,31 @@
 /contracts/graphql/**             @intelgraph-core @intelgraph-ci
 /docs/merge/**                    @intelgraph-core @intelgraph-ci
 /scripts/merge_s25.sh             @intelgraph-core @intelgraph-ci
-/.github/workflows/**             @intelgraph-core @intelgraph-ci
+/.github/workflows/**             @intelgraph-core @intelgraph-ci @summit-architect @summit-security
 /.github/PULL_REQUEST_TEMPLATE.md @intelgraph-core @intelgraph-ci
 /.github/ISSUE_TEMPLATE/**        @intelgraph-core @intelgraph-ci
 
+# Agent governance and audit
+/docs/governance/agent-ops.md     @brianclong @intelgraph-core @intelgraph-ci @summit-architect @summit-security
+/docs/audit/**                    @brianclong @intelgraph-core @intelgraph-ci @summit-architect @summit-security
+/.github/CODEOWNERS               @intelgraph-core @summit-architect
+
+# Restricted architect domains (Tier 3)
+/packages/                        @intelgraph-core @summit-architect
+/server/src/db/                   @intelgraph-core @intelgraph-ci @summit-architect @summit-security
+/server/src/auth/                 @intelgraph-core @intelgraph-ci @summit-architect @summit-security
+
+# Domain specialists (Tier 2)
+/server/src/rag/                  @intelgraph-core @intelgraph-ci @summit-ai
+/server/src/analysis/             @intelgraph-core @intelgraph-ci @summit-graph
+/server/src/algorithms/           @intelgraph-core @intelgraph-ci @summit-graph
+/server/src/realtime/             @intelgraph-core @intelgraph-ci @summit-platform
+
+# Mechanical executor surfaces (Tier 1)
+/client/src/                      @intelgraph-core @intelgraph-ci @summit-frontend
+/server/src/routes/               @intelgraph-core @intelgraph-ci @summit-backend
+/docs/                            @brianclong @intelgraph-core @intelgraph-ci @summit-docs
+/sandbox/                         @summit-sandbox
+
 # Optional: catch-all for mergefix PRs that touch multiple areas
-*                                   @intelgraph-core
+*                                   @intelgraph-core @summit-architect
