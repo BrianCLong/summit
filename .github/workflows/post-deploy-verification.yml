@@ -11,7 +11,7 @@ on:
       - completed
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
 
 jobs:
@@ -29,6 +29,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
 
       - name: Resolve deployment target
         id: target
@@ -63,6 +66,28 @@ jobs:
           echo "ui_url=$ui" >> $GITHUB_OUTPUT
           echo "api_url=$api" >> $GITHUB_OUTPUT
           echo "gql_url=${api%/}/graphql" >> $GITHUB_OUTPUT
+          echo "run_url=${{ github.event.workflow_run.html_url }}" >> $GITHUB_OUTPUT
+
+      - name: Discover release tag
+        id: release
+        env:
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          git fetch --tags --force origin
+          tag="$HEAD_BRANCH"
+          if [ -n "$tag" ] && git rev-parse "refs/tags/$tag" >/dev/null 2>&1; then
+            echo "Using tag from head_branch: $tag"
+          else
+            tag=""
+          fi
+
+          if [ -z "$tag" ] && [ -n "$HEAD_SHA" ]; then
+            tag=$(git tag --points-at "$HEAD_SHA" | head -n1 || true)
+          fi
+
+          echo "tag=$tag" >> $GITHUB_OUTPUT
+          echo "resolved_tag=${tag:-<none>}"
 
       - name: Setup k6
         uses: grafana/setup-k6-action@v1
@@ -84,18 +109,98 @@ jobs:
           COS_GQL_URL: ${{ steps.endpoints.outputs.gql_url }}
         run: k6 run tests/load/graphql_read_p95.js
 
+      - name: Setup Node.js for synthetic journey
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install synthetic journey deps
+        run: npm install axios ts-node typescript --no-save
+
+      - name: Run synthetic journey
+        id: synthetic
+        continue-on-error: true
+        env:
+          API_URL: ${{ steps.endpoints.outputs.api_url }}
+          SYNTHETIC_USER_EMAIL: ${{ secrets.SYNTHETIC_USER_EMAIL }}
+          SYNTHETIC_USER_PASSWORD: ${{ secrets.SYNTHETIC_USER_PASSWORD }}
+        run: npx ts-node scripts/synthetic/run-journey.ts
+
       - name: Summarize outcomes
         id: summary
         run: |
           smoke="${{ steps.smoke.outcome }}"
           load="${{ steps.load.outcome }}"
+          synthetic="${{ steps.synthetic.outcome }}"
           status="success"
-          if [ "$smoke" != "success" ] || [ "$load" != "success" ]; then
+          if [ "$smoke" != "success" ] || [ "$load" != "success" ] || [ "$synthetic" != "success" ]; then
             status="failure"
           fi
           echo "smoke=$smoke" >> $GITHUB_OUTPUT
           echo "load=$load" >> $GITHUB_OUTPUT
+          echo "synthetic=$synthetic" >> $GITHUB_OUTPUT
           echo "status=$status" >> $GITHUB_OUTPUT
+
+      - name: Write deploy verification artifact
+        if: always()
+        env:
+          TARGET: ${{ steps.target.outputs.target }}
+          UI_URL: ${{ steps.endpoints.outputs.ui_url }}
+          API_URL: ${{ steps.endpoints.outputs.api_url }}
+          GQL_URL: ${{ steps.endpoints.outputs.gql_url }}
+          SMOKE: ${{ steps.summary.outputs.smoke }}
+          LOAD: ${{ steps.summary.outputs.load }}
+          SYNTHETIC: ${{ steps.summary.outputs.synthetic }}
+          STATUS: ${{ steps.summary.outputs.status }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+          RUN_URL: ${{ steps.endpoints.outputs.run_url }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          RUN_NAME: ${{ github.event.workflow_run.name }}
+        run: |
+          cat > deploy_verification.json <<'EOF'
+          {
+            "target": "${TARGET}",
+            "status": "${STATUS}",
+            "endpoints": {
+              "ui": "${UI_URL}",
+              "api": "${API_URL}",
+              "graphql": "${GQL_URL}"
+            },
+            "results": {
+              "smoke": "${SMOKE}",
+              "load": "${LOAD}",
+              "synthetic": "${SYNTHETIC}"
+            },
+            "run": {
+              "id": "${RUN_ID}",
+              "name": "${RUN_NAME}",
+              "url": "${RUN_URL}",
+              "release_tag": "${RELEASE_TAG}"
+            },
+            "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          }
+EOF
+
+      - name: Upload deploy verification artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy_verification-${{ steps.target.outputs.target }}
+          path: deploy_verification.json
+          retention-days: 14
+
+      - name: Attach verification to release
+        if: always() && steps.release.outputs.tag != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "Release $RELEASE_TAG not found; skipping attachment."
+            exit 0
+          fi
+          gh release upload "$RELEASE_TAG" deploy_verification.json --clobber
+          echo "Attached deploy_verification.json to release $RELEASE_TAG"
 
       - name: Comment results on PR
         if: always() && github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.pull_requests[0]
@@ -110,6 +215,7 @@ jobs:
             }
             const smoke = '${{ steps.summary.outputs.smoke }}';
             const load = '${{ steps.summary.outputs.load }}';
+            const synthetic = '${{ steps.summary.outputs.synthetic }}';
             const target = '${{ steps.target.outputs.target }}';
             const icon = (value) => (value === 'success' ? '✅' : '❌');
             const runUrl = context.payload.workflow_run.html_url;
@@ -117,6 +223,7 @@ jobs:
               `Post-deploy verification for **${target}**`,
               `- Smoke: ${icon(smoke)} (${smoke})`,
               `- Load: ${icon(load)} (${load})`,
+              `- Synthetic journey: ${icon(synthetic)} (${synthetic})`,
               `- Run: ${runUrl}`,
             ].join('\n');
             await github.rest.issues.createComment({
