@@ -10,6 +10,10 @@ import type { OSINTAlert } from '@/types';
 export const saveEntity = async (entityData: any): Promise<void> => {
   await database.write(async () => {
     await entitiesCollection.create(entity => {
+      // Use existing ID if available to prevent duplicates
+      if (entityData.id) {
+        entity._raw.id = entityData.id;
+      }
       entity.name = entityData.name;
       entity.type = entityData.type;
       entity.description = entityData.description;
@@ -26,6 +30,9 @@ export const saveEntities = async (entitiesData: any[]): Promise<void> => {
   await database.write(async () => {
     const batch = entitiesData.map(data =>
       entitiesCollection.prepareCreate(entity => {
+        if (data.id) {
+          entity._raw.id = data.id;
+        }
         entity.name = data.name;
         entity.type = data.type;
         entity.description = data.description;
@@ -80,6 +87,9 @@ export const getEntitiesByType = async (type: string): Promise<Entity[]> => {
 export const saveInvestigation = async (data: any): Promise<void> => {
   await database.write(async () => {
     await investigationsCollection.create(inv => {
+      if (data.id) {
+        inv._raw.id = data.id;
+      }
       inv.title = data.title;
       inv.status = data.status;
       inv.priority = data.priority;
@@ -95,6 +105,9 @@ export const saveInvestigations = async (list: any[]): Promise<void> => {
   await database.write(async () => {
     const batch = list.map(data =>
       investigationsCollection.prepareCreate(inv => {
+        if (data.id) {
+          inv._raw.id = data.id;
+        }
         inv.title = data.title;
         inv.status = data.status;
         inv.priority = data.priority;
@@ -144,6 +157,9 @@ export const clearInvestigations = async (): Promise<void> => {
 export const saveAlert = async (data: OSINTAlert): Promise<void> => {
   await database.write(async () => {
     await alertsCollection.create(alert => {
+      if (data.id) {
+        alert._raw.id = data.id;
+      }
       alert.title = data.title;
       alert.description = data.description;
       alert.type = data.type;
@@ -160,6 +176,9 @@ export const saveAlerts = async (list: OSINTAlert[]): Promise<void> => {
   await database.write(async () => {
     const batch = list.map(data =>
       alertsCollection.prepareCreate(alert => {
+        if (data.id) {
+          alert._raw.id = data.id;
+        }
         alert.title = data.title;
         alert.description = data.description;
         alert.type = data.type;
@@ -230,6 +249,9 @@ export const clearAlerts = async (): Promise<void> => {
 export const saveGEOINTFeature = async (data: any): Promise<void> => {
   await database.write(async () => {
     await geointCollection.create(f => {
+      if (data.id) {
+        f._raw.id = data.id;
+      }
       f.type = data.type;
       f.geometry = data.geometry;
       f.properties = data.properties;
@@ -242,6 +264,9 @@ export const saveGEOINTFeatures = async (list: any[]): Promise<void> => {
   await database.write(async () => {
     const batch = list.map(data =>
       geointCollection.prepareCreate(f => {
+        if (data.id) {
+          f._raw.id = data.id;
+        }
         f.type = data.type;
         f.geometry = data.geometry;
         f.properties = data.properties;
