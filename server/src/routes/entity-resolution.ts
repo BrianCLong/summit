@@ -1,54 +1,68 @@
-import express from 'express';
-import { EntityResolutionService } from '../services/entity-resolution/service';
-import { DataQualityService } from '../services/entity-resolution/quality';
+import { Router, Request, Response } from 'express';
+import { EntityResolver } from '../entity-resolution/engine/EntityResolver.js';
+import { ensureAuthenticated } from '../middleware/auth.js';
 
-const router = express.Router();
-const erService = new EntityResolutionService();
-const dqService = new DataQualityService();
+const router = Router();
+const resolver = new EntityResolver();
 
-// Batch Resolution Endpoint
-router.post('/resolve-batch', async (req, res) => {
+// Find potential duplicates
+router.post('/find-duplicates', ensureAuthenticated, async (req: Request, res: Response) => {
   try {
-    const { entities } = req.body;
-    if (!Array.isArray(entities)) {
-      return res.status(400).json({ error: 'Entities must be an array' });
+    const { entityId, threshold } = req.body;
+    const tenantId = (req as any).user.tenantId;
+
+    if (!entityId) {
+      return res.status(400).json({ error: 'entityId is required' });
     }
 
-    // Inject tenantId from authenticated user context if not present on entities
-    // Assuming req.user is populated by auth middleware
-    const tenantId = (req as any).user?.tenantId;
-
-    const enrichedEntities = entities.map(e => ({
-        ...e,
-        tenantId: e.tenantId || tenantId
-    }));
-
-    if (enrichedEntities.some(e => !e.tenantId)) {
-        return res.status(400).json({ error: 'Tenant ID missing on some entities' });
-    }
-
-    const decisions = await erService.resolveBatch(enrichedEntities);
-    res.json({ decisions });
-  } catch (error) {
-    console.error('Batch resolution error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    const results = await resolver.findDuplicates(tenantId, entityId, threshold);
+    res.json({ results });
+  } catch (error: any) {
+    console.error('Error in find-duplicates:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
-// Data Quality Metrics Endpoint
-router.get('/quality/metrics', async (req, res) => {
+// Get merge recommendation
+router.post('/recommend-merge', ensureAuthenticated, async (req: Request, res: Response) => {
   try {
-    const tenantId = (req as any).user?.tenantId;
-    if (!tenantId) {
-        return res.status(400).json({ error: 'Tenant context required' });
+    const { entityIds } = req.body;
+    const tenantId = (req as any).user.tenantId;
+
+    if (!entityIds || !Array.isArray(entityIds) || entityIds.length !== 2) {
+      return res.status(400).json({ error: 'entityIds must be an array of two IDs' });
     }
 
-    const metrics = await dqService.getQualityMetrics(tenantId);
-    res.json({ metrics });
-  } catch (error) {
-    console.error('Quality metrics error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    const recommendation = await resolver.recommendMerge(tenantId, entityIds[0], entityIds[1]);
+    res.json({ recommendation });
+  } catch (error: any) {
+    console.error('Error in recommend-merge:', error);
+    res.status(500).json({ error: error.message });
   }
+});
+
+// Execute merge
+router.post('/merge', ensureAuthenticated, async (req: Request, res: Response) => {
+  try {
+    const { entityIds, strategies, dryRun } = req.body;
+    const tenantId = (req as any).user.tenantId;
+
+    if (!entityIds || !Array.isArray(entityIds) || entityIds.length !== 2) {
+      return res.status(400).json({ error: 'entityIds must be an array of two IDs' });
+    }
+
+    const result = await resolver.merge(tenantId, entityIds[0], entityIds[1], strategies, dryRun);
+    res.json({ result });
+  } catch (error: any) {
+    console.error('Error in merge:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Batch resolution
+router.post('/batch', ensureAuthenticated, async (req: Request, res: Response) => {
+    // Not implemented in this iteration
+    res.status(501).json({ error: 'Batch resolution not implemented' });
 });
 
 export default router;

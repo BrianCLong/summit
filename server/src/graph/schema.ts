@@ -11,6 +11,7 @@ export const EdgeTypes = {
   OWNS: 'OWNS',
   MENTIONED_IN: 'MENTIONED_IN',
   RELATED_TO: 'RELATED_TO',
+  MERGED_INTO: 'MERGED_INTO',
 } as const;
 
 export type NodeLabel = keyof typeof NodeLabels;
