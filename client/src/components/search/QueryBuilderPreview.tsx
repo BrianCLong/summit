@@ -16,7 +16,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import Grid from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid';
 import { FilterList, PlayArrow } from '@mui/icons-material';
 import { QueryChip, QueryChipBuilder } from './QueryChipBuilder';
 import { GRAPH_QUERY_PREVIEW_SUBSCRIPTION } from './graphql';
