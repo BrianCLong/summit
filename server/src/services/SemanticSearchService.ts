@@ -11,6 +11,8 @@ export interface SemanticSearchFilters {
   status?: string[];
   dateFrom?: string;
   dateTo?: string;
+  entityType?: string[];
+  evidenceCategory?: string[];
 }
 
 export interface SemanticSearchResult {
@@ -20,6 +22,7 @@ export interface SemanticSearchResult {
   similarity: number;
   status: string;
   created_at: Date;
+  matchType?: 'vector' | 'keyword' | 'hybrid';
 }
 
 export interface SemanticSearchOptions {
@@ -151,67 +154,137 @@ export default class SemanticSearchService {
     }
   }
 
+  /**
+   * Performs a hybrid search using Reciprocal Rank Fusion (RRF).
+   * Combines Vector Similarity Search (Semantic) and Keyword Search (BM25/ts_rank).
+   */
   async searchCases(
     query: string,
     filters: SemanticSearchFilters = {},
     limit = 20
   ): Promise<SemanticSearchResult[]> {
     try {
-      // 1. Synonym Expansion for Embedding ONLY
-      // We expand the query to get a richer vector representation.
+      // 1. Synonym Expansion for Embedding
       const expandedQuery = synonymService.expandQuery(query);
-      this.logger.debug({ query, expandedQuery }, "Expanded query with synonyms");
 
       // 2. Generate Embedding
       const vector = await this.embeddingService.generateEmbedding({ text: expandedQuery });
       const vectorStr = `[${vector.join(',')}]`;
 
-      // 3. Build Query with Hybrid Scoring
-      // We use the ORIGINAL query for the text rank part to ensure we boost exact matches
-      // of what the user actually typed, avoiding the AND-logic pitfall with synonyms.
-      // Vector search handles the semantic similarity (synonyms).
-
       const pool = await this.getPool();
       const client = await pool.connect();
+
       try {
-        const whereClauses = [`embedding IS NOT NULL`];
-        const params: any[] = [vectorStr];
-        let pIdx = 2;
+        // Build base filters
+        const whereConditions: string[] = [];
+        const params: any[] = [];
+        let pIdx = 1;
 
         if (filters.status && filters.status.length) {
-          whereClauses.push(`status = ANY($${pIdx})`);
+          whereConditions.push(`status = ANY($${pIdx})`);
           params.push(filters.status);
           pIdx++;
         }
-
         if (filters.dateFrom) {
-          whereClauses.push(`created_at >= $${pIdx}`);
+          whereConditions.push(`created_at >= $${pIdx}`);
           params.push(filters.dateFrom);
           pIdx++;
         }
-
         if (filters.dateTo) {
-          whereClauses.push(`created_at <= $${pIdx}`);
+          whereConditions.push(`created_at <= $${pIdx}`);
           params.push(filters.dateTo);
           pIdx++;
         }
 
-        // Add ORIGINAL query text for ts_rank
-        params.push(query);
-        const qIdx = pIdx;
+        // Entity & Category filters (assuming these JSONB keys exist in metadata)
+        if (filters.entityType && filters.entityType.length) {
+             // Use JSONB containment operator ?| (exists any) or similar logic
+             // Assuming metadata is { entityTypes: ["TypeA", "TypeB"] }
+             whereConditions.push(`metadata->'entityTypes' ?| $${pIdx}`);
+             params.push(filters.entityType);
+             pIdx++;
+        }
 
+        if (filters.evidenceCategory && filters.evidenceCategory.length) {
+             whereConditions.push(`metadata->'evidenceCategory' ?| $${pIdx}`);
+             params.push(filters.evidenceCategory);
+             pIdx++;
+        }
+
+        const filterSql = whereConditions.length ? 'AND ' + whereConditions.join(' AND ') : '';
+
+        // Push vector and query to params
+        const vectorParamIdx = pIdx;
+        params.push(vectorStr);
+        pIdx++;
+
+        const queryParamIdx = pIdx;
+        params.push(query);
+        pIdx++;
+
+        // Add limits as parameters for security (SQL Injection prevention)
+        const limitParamIdx = pIdx;
+        params.push(limit);
+        pIdx++;
+
+        const searchLimitParamIdx = pIdx;
+        const searchLimit = limit * 2;
+        params.push(searchLimit);
+        pIdx++;
+
+        // RRF Constant
+        const k = 60;
+
+        // Perform Parallel Search via CTEs
+        // We fetch top L results from both methods to fuse.
+        // We compute rank inside CTE to ensure correctness.
+
+        // NOTE: Ideally 'cases' table should have a GIN index on to_tsvector('english', title || ' ' || coalesce(description,''))
+        // for performance on large datasets.
         const sql = `
+          WITH vector_search AS (
+            SELECT
+              id,
+              1 - (embedding <=> $${vectorParamIdx}::vector) as vector_score,
+              ROW_NUMBER() OVER (ORDER BY embedding <=> $${vectorParamIdx}::vector) as rank_vec
+            FROM cases
+            WHERE embedding IS NOT NULL ${filterSql}
+            ORDER BY embedding <=> $${vectorParamIdx}::vector
+            LIMIT $${searchLimitParamIdx}
+          ),
+          text_search AS (
+            SELECT
+              id,
+              ts_rank(to_tsvector('english', title || ' ' || coalesce(description,'')), plainto_tsquery('english', $${queryParamIdx})) as text_score,
+              ROW_NUMBER() OVER (ORDER BY ts_rank(to_tsvector('english', title || ' ' || coalesce(description,'')), plainto_tsquery('english', $${queryParamIdx})) DESC) as rank_text
+            FROM cases
+            WHERE
+              to_tsvector('english', title || ' ' || coalesce(description,'')) @@ plainto_tsquery('english', $${queryParamIdx})
+              ${filterSql}
+            ORDER BY text_score DESC
+            LIMIT $${searchLimitParamIdx}
+          ),
+          combined_scores AS (
+            SELECT
+              COALESCE(v.id, t.id) as id,
+              v.vector_score,
+              t.text_score,
+              COALESCE(1.0 / (${k} + v.rank_vec), 0.0) +
+              COALESCE(1.0 / (${k} + t.rank_text), 0.0) as rrf_score
+            FROM vector_search v
+            FULL OUTER JOIN text_search t ON v.id = t.id
+          )
           SELECT
-            id,
-            title,
-            status,
-            created_at,
-            1 - (embedding <=> $1::vector) as similarity,
-            ts_rank(to_tsvector('english', title || ' ' || coalesce(description,'')), plainto_tsquery('english', $${qIdx})) as text_rank
-          FROM cases
-          WHERE ${whereClauses.join(' AND ')}
-          ORDER BY ( (1 - (embedding <=> $1::vector)) * 0.7 + (ts_rank(to_tsvector('english', title || ' ' || coalesce(description,'')), plainto_tsquery('english', $${qIdx})) / 10.0) * 0.3 ) DESC
-          LIMIT ${limit}
+            c.id,
+            c.title,
+            c.status,
+            c.created_at,
+            cs.rrf_score as score,
+            COALESCE(cs.vector_score, 0) as similarity
+          FROM combined_scores cs
+          JOIN cases c ON cs.id = c.id
+          ORDER BY cs.rrf_score DESC
+          LIMIT $${limitParamIdx};
         `;
 
         const res = await client.query(sql, params);
@@ -221,14 +294,41 @@ export default class SemanticSearchService {
           title: r.title,
           status: r.status,
           created_at: r.created_at,
+          score: parseFloat(r.score),
           similarity: parseFloat(r.similarity),
-          score: parseFloat(r.similarity)
+          matchType: 'hybrid'
         }));
+
       } finally {
         client.release();
       }
     } catch (err) {
       this.logger.error({ err }, "Semantic search failed");
+      return [];
+    }
+  }
+
+  /**
+   * Provides autocomplete suggestions based on case titles and tags.
+   */
+  async getAutocomplete(prefix: string, limit = 5): Promise<string[]> {
+    try {
+      const pool = await this.getPool();
+      const client = await pool.connect();
+      try {
+        const sql = `
+          SELECT title
+          FROM cases
+          WHERE title ILIKE $1 || '%'
+          LIMIT $2
+        `;
+        const res = await client.query(sql, [prefix, limit]);
+        return res.rows.map(r => r.title);
+      } finally {
+        client.release();
+      }
+    } catch (err) {
+      this.logger.error({ err }, "Autocomplete failed");
       return [];
     }
   }
