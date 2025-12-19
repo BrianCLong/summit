@@ -4,6 +4,8 @@
 /ops/helm/              @brianclong
 /policies/              @brianclong
 /docs/                  @brianclong
+/docs/governance/**     @intelgraph-core @intelgraph-ci
+/docs/security/**       @intelgraph-core @intelgraph-ci
 
 # Mergefix / Express 5–related surfaces
 /server/**                        @intelgraph-core @intelgraph-ci
@@ -12,6 +14,7 @@
 /docs/merge/**                    @intelgraph-core @intelgraph-ci
 /scripts/merge_s25.sh             @intelgraph-core @intelgraph-ci
 /.github/workflows/**             @intelgraph-core @intelgraph-ci
+/.github/**                       @intelgraph-core @intelgraph-ci
 /.github/PULL_REQUEST_TEMPLATE.md @intelgraph-core @intelgraph-ci
 /.github/ISSUE_TEMPLATE/**        @intelgraph-core @intelgraph-ci
 
