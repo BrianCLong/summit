@@ -28,6 +28,17 @@
       "storage_gb": 1000
     }
   },
+  "preview_defaults": {
+    "daily_usd": 3.0,
+    "max_ttl_hours": 72,
+    "idle_minutes": 30
+  },
+  "preview_pricing": {
+    "vcpu_hour": 0.046,
+    "memory_gib_hour": 0.006,
+    "storage_gib_month": 0.1,
+    "lb_hour": 0.025
+  },
   "slos": {
     "graphql_read_p95_ms": 350,
     "graphql_write_p95_ms": 700,
