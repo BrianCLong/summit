@@ -66,7 +66,10 @@ jobs:
         # Run audit but don't fail immediately on moderate issues to prevent blocking dev flow unnecessarily,
         # but ensure critical/high are caught. Adjust level as needed.
         # Ideally: pnpm audit --audit-level=high
-        run: pnpm run security:audit || echo "::warning::Security audit found issues"
+        run: pnpm run supply-chain:generate || echo "::warning::Supply chain generation emitted warnings"
+
+      - name: GA Supply Chain Gate
+        run: pnpm run supply-chain:verify
 
       - name: Security Lint
         run: pnpm run security:lint

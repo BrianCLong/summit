@@ -36,6 +36,8 @@
     "typecheck:client": "cd client && tsc --noEmit",
     "format": "prettier -w . && ruff format",
     "pr:risk": "node scripts/pr-risk-score.js",
+    "supply-chain:generate": "node scripts/supply-chain/supply-chain-artifacts.js generate",
+    "supply-chain:verify": "node scripts/supply-chain/supply-chain-artifacts.js verify",
     "db:migrate": "cd server && npm run db:migrate",
     "db:seed": "cd server && npm run db:seed",
     "db:reset": "npm run db:migrate && npm run db:seed",

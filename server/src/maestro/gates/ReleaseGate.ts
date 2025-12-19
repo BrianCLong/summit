@@ -1,12 +1,16 @@
 import { dlpService } from '../../services/DLPService.js';
 import fs from 'fs';
 import path from 'path';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+const { validateSupplyChainArtifacts } = require('../../../../scripts/supply-chain/supply-chain-artifacts.js');
 
 export interface ReleaseArtifacts {
   version: string;
-  sbomPath: string;
-  slsaPath: string;
-  signaturePath?: string;
+  sbomPaths: string[];
+  provenancePath: string;
+  auditPath: string;
 }
 
 export interface GateResult {
@@ -14,29 +18,42 @@ export interface GateResult {
   reason?: string;
   artifacts?: ReleaseArtifacts;
   checks: {
-    sbomExists: boolean;
-    slsaExists: boolean;
-    signed: boolean;
+    sbomsPresent: boolean;
+    provenancePresent: boolean;
+    provenanceValid: boolean;
+    dependencyAuditPassed: boolean;
     governanceCompliant: boolean;
   };
 }
 
 export class ReleaseGate {
   private artifactsDir: string;
+  private provenancePath: string;
+  private auditPath: string;
 
-  constructor(artifactsDir: string = 'artifacts/sbom') {
+  constructor(
+    artifactsDir: string = 'artifacts/sbom',
+    provenancePath: string = 'artifacts/provenance.json',
+    auditPath: string = 'artifacts/dependency-audit.json',
+  ) {
     this.artifactsDir = artifactsDir;
+    this.provenancePath = provenancePath;
+    this.auditPath = auditPath;
   }
 
   async verifyRelease(version: string, tenantId: string = 'system'): Promise<GateResult> {
-    const sbomPath = path.join(this.artifactsDir, `sbom-${version}.json`);
-    const slsaPath = path.join(this.artifactsDir, `attestation-${version}.intoto.jsonl`);
-    const sigPath = `${sbomPath}.sig`;
+    const validation = validateSupplyChainArtifacts({
+      commitSha: version,
+      artifactsDir: this.artifactsDir,
+      provenancePath: this.provenancePath,
+      auditPath: this.auditPath,
+    });
 
-    const sbomExists = fs.existsSync(sbomPath);
-    const slsaExists = fs.existsSync(slsaPath);
-    // In real scenario, verify signature with cosign
-    const signed = fs.existsSync(sigPath) || fs.existsSync(`${sbomPath}.cosign.sig`);
+    const sbomTargets = validation.details?.targetArtifacts || [];
+    const sbomsPresent = !validation.details?.missingTargets?.length;
+    const provenancePresent = validation.details?.provenancePresent ?? false;
+    const provenanceValid = validation.details?.provenanceValid ?? false;
+    const dependencyAuditPassed = validation.details?.dependencyAuditPassed ?? false;
 
     // Governance Check: Simulate checking if DLP is active and policies are loaded
     // Explicitly scan a dummy artifact to verify DLP is functioning
@@ -50,21 +67,24 @@ export class ReleaseGate {
 
     const governanceCompliant = dlpService.listPolicies().length > 0 && dlpResult !== null;
 
-    const passed = sbomExists && slsaExists && signed && governanceCompliant;
+    const passed = validation.passed && governanceCompliant;
+
+    const failureReasons = validation.reasons?.length ? validation.reasons.join('; ') : 'Missing artifacts or compliance failures';
 
     return {
       passed,
-      reason: passed ? 'All checks passed' : 'Missing artifacts or compliance failures',
+      reason: passed ? 'All checks passed' : failureReasons,
       artifacts: passed ? {
         version,
-        sbomPath,
-        slsaPath,
-        signaturePath: sigPath
+        sbomPaths: sbomTargets.map((target) => target.path),
+        provenancePath: this.provenancePath,
+        auditPath: this.auditPath,
       } : undefined,
       checks: {
-        sbomExists,
-        slsaExists,
-        signed,
+        sbomsPresent,
+        provenancePresent,
+        provenanceValid,
+        dependencyAuditPassed,
         governanceCompliant
       }
     };
