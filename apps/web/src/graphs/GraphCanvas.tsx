@@ -189,7 +189,7 @@ export const GraphCanvas = forwardRef<GraphCanvasRef, GraphCanvasProps>(({
           )
           .force('charge', d3.forceManyBody().strength(-300))
           .force('center', d3.forceCenter(width / 2, height / 2))
-          .force('collision', d3.forceCollide().radius(30))
+          .force('collision', forceCollide().radius(30))
         break
 
       case 'radial':
@@ -262,8 +262,6 @@ export const GraphCanvas = forwardRef<GraphCanvasRef, GraphCanvasProps>(({
     const handleKeyDown = (event: KeyboardEvent) => {
        const transform = d3.zoomTransform(svg.node()!)
        const k = transform.k
-       const x = transform.x
-       const y = transform.y
        const step = 50
 
        switch(event.key) {
@@ -406,18 +404,24 @@ export const GraphCanvas = forwardRef<GraphCanvasRef, GraphCanvasProps>(({
             if (isLinking && linkSource) {
               // Update drag line
               // We need to transform mouse coordinates back to SVG space
-              const transform = d3.zoomTransform(svg.node()!)
-              const [mouseX, mouseY] = d3.pointer(event, svg.node())
-              // Invert transform not needed if we use the mouse position relative to container,
-              // but drag event gives us coordinates in the subject's coordinate system usually.
-              // d3.drag behavior on the node gives us event.x/y which are the node's new position.
 
-              // However, since we are dragging the *node*, event.x/y are where the node would be.
-              // If shift is held, we want the mouse position.
+              // Use event.x/y from drag event which are relative to the container for svg dragging usually,
+              // but we are on a node.
+              // We want the current mouse position.
+              // d3.pointer returns [x, y] relative to the target.
+              // Note: event.x/y in d3 v6/7 drag are the new subject position, but we want the pointer position?
+              // Actually, simpler:
 
               dragLine
                 .attr('x2', event.x)
                 .attr('y2', event.y)
+
+               // Note: 'transform' variable was unused, removed it.
+               // mouseX, mouseY were unused in previous implementation,
+               // here I'm using them for illustration but actually event.x/y is enough for the node drag context
+               // as it maps to the coordinate system of the node's parent (which is what we want for x2/y2).
+
+               // So I'm removing the unused vars.
             } else {
               d.fx = event.x
               d.fy = event.y

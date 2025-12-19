@@ -2,7 +2,6 @@ import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react'
 import { GraphCanvas, GraphCanvasRef } from '@/graphs/GraphCanvas'
 import { Button } from '@/components/ui/Button'
 import { Slider } from '@/components/ui/slider'
-import { cn } from '@/lib/utils'
 import type { Entity, Relationship, GraphLayout } from '@/types'
 
 // Mock data for initial state
@@ -71,20 +70,24 @@ const ENTITY_TYPES = [
 export function InvestigatorWorkbench() {
   const [entities, setEntities] = useState<Entity[]>(INITIAL_ENTITIES)
   const [relationships, setRelationships] = useState<Relationship[]>(INITIAL_RELATIONSHIPS)
-  const [layout, setLayout] = useState<GraphLayout>({ type: 'force', settings: {} })
+  const [layout] = useState<GraphLayout>({ type: 'force', settings: {} })
   const [selectedEntityId, setSelectedEntityId] = useState<string | undefined>()
   const [timeRange, setTimeRange] = useState<number[]>([0, 100])
 
   const graphRef = useRef<GraphCanvasRef>(null)
 
+  // Use a constant for current time to avoid purity issues in useMemo
+  // In a real app, this might come from a prop or context
+  const [now] = useState(() => Date.now())
+
   const dateRange = useMemo(() => {
     const dates = [...entities, ...relationships].map(item => new Date(item.createdAt).getTime())
-    if (dates.length === 0) return { min: Date.now(), max: Date.now() }
+    if (dates.length === 0) return { min: now, max: now }
     return {
       min: Math.min(...dates),
       max: Math.max(...dates)
     }
-  }, [entities, relationships])
+  }, [entities, relationships, now])
 
   const filteredData = useMemo(() => {
     const minTime = dateRange.min
@@ -115,7 +118,7 @@ export function InvestigatorWorkbench() {
     setSelectedEntityId(entity.id)
   }, [])
 
-  const handleNodeDrop = useCallback((type: string, x: number, y: number) => {
+  const handleNodeDrop = useCallback((type: string, _x: number, _y: number) => {
     const newEntity: Entity = {
       id: `e-${Date.now()}`,
       name: `New ${type}`,
