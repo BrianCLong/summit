@@ -1,6 +1,8 @@
 name: Pipeline - Rollback
 
 on:
+  repository_dispatch:
+    types: [slo-breach]
   workflow_dispatch:
     inputs:
       environment:
@@ -18,13 +20,51 @@ jobs:
   rollback:
     name: ⏪ Rollback
     runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'repository_dispatch' && github.event.action == 'slo-breach')
     steps:
       - uses: actions/checkout@v4
 
-      - name: Execute Rollback
+      - name: Resolve rollback context
+        id: context
+        env:
+          PAYLOAD_ENV: ${{ github.event.client_payload.environment }}
+          PAYLOAD_TARGET: ${{ github.event.client_payload.rollback_target }}
+          PAYLOAD_SHA: ${{ github.event.client_payload.deployment_sha }}
+          PAYLOAD_SLOS: ${{ github.event.client_payload.failing_slos }}
+          INPUT_ENV: ${{ inputs.environment }}
+          INPUT_TARGET: ${{ inputs.target_tag }}
         run: |
-          echo "🚨 Initiating Rollback for ${{ inputs.environment }} to version ${{ inputs.target_tag }}"
-          ./scripts/deploy.sh -e ${{ inputs.environment }} -t ${{ inputs.target_tag }}
+          set -euo pipefail
+
+          ENVIRONMENT="${PAYLOAD_ENV:-${INPUT_ENV:-production}}"
+          TARGET="${PAYLOAD_TARGET:-${INPUT_TARGET:-}}"
+
+          if [[ -z "$TARGET" && -n "${PAYLOAD_SHA:-}" ]]; then
+            TARGET="$PAYLOAD_SHA"
+          fi
+
+          if [[ -z "$TARGET" ]]; then
+            echo "No rollback target supplied via webhook or manual inputs." >&2
+            exit 1
+          fi
+
+          echo "environment=$ENVIRONMENT" >> "$GITHUB_OUTPUT"
+          echo "target=$TARGET" >> "$GITHUB_OUTPUT"
+          echo "slos=${PAYLOAD_SLOS:-}" >> "$GITHUB_OUTPUT"
+
+      - name: Execute Rollback
+        env:
+          TARGET_TAG: ${{ steps.context.outputs.target }}
+          TARGET_ENV: ${{ steps.context.outputs.environment }}
+          FAILING_SLOS: ${{ steps.context.outputs.slos }}
+        run: |
+          echo "🚨 Initiating Rollback for ${TARGET_ENV} to version ${TARGET_TAG}"
+          if [[ -n "${FAILING_SLOS:-}" ]]; then
+            echo "SLO context: ${FAILING_SLOS}"
+          fi
+          ./scripts/deploy.sh -e "${TARGET_ENV}" -t "${TARGET_TAG}"
 
       - name: Post-Rollback Verification
         run: |
