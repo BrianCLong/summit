@@ -47,22 +47,47 @@ global:
 
   # Security context
   podSecurityContext:
-    fsGroup: 10001
+    fsGroup: 65532
     runAsNonRoot: true
-    runAsUser: 10001
-    runAsGroup: 10001
+    runAsUser: 65532
+    runAsGroup: 65532
     seccompProfile:
       type: RuntimeDefault
 
   securityContext:
     runAsNonRoot: true
-    runAsUser: 10001
-    runAsGroup: 10001
+    runAsUser: 65532
+    runAsGroup: 65532
     readOnlyRootFilesystem: true
     allowPrivilegeEscalation: false
     capabilities:
       drop:
         - ALL
+
+# Default runtime hardening controls
+hardening:
+  enabled: true
+  runAsUser: 65532
+  runAsGroup: 65532
+  fsGroup: 65532
+  seccompProfile: RuntimeDefault
+  apparmorProfile: runtime/default
+  preStopSleepSeconds: 5
+  preStopCommand: []
+  extraCapabilities: []
+  writablePaths:
+    - name: runtime-tmp
+      mountPath: /tmp
+      type: memory
+      sizeLimit: 128Mi
+    - name: runtime-cache
+      mountPath: /app/.cache
+      type: memory
+      sizeLimit: 256Mi
+    - name: runtime-state
+      mountPath: /var/run/app
+      type: memory
+      sizeLimit: 32Mi
 
 # Pod Security Standards configuration for namespace labelling
 podSecurityStandards:
@@ -206,17 +231,9 @@ common:
       value: 'service.namespace=intelgraph,service.version=2025.08.21'
 
   # Volume mounts for tmp and cache
-  volumeMounts:
-    - name: tmp
-      mountPath: /tmp
-    - name: cache
-      mountPath: /app/.cache
+  volumeMounts: []
 
-  volumes:
-    - name: tmp
-      emptyDir: {}
-    - name: cache
-      emptyDir: {}
+  volumes: []
 
   # Pod labels
   podLabels:

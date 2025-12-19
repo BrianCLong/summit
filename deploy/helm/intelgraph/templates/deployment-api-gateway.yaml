@@ -30,11 +30,12 @@ spec:
       annotations:
         {{- include "intelgraph.configChecksum" . | nindent 8 }}
         {{- include "intelgraph.podAnnotations" (dict "service" $service "root" .) | nindent 8 }}
+        {{- include "intelgraph.security.annotations" (dict "Values" .Values "service" $service) | nindent 8 }}
     spec:
       serviceAccountName: {{ include "intelgraph.serviceAccountName" $ctx }}
       automountServiceAccountToken: {{ $serviceAccountConfig.automount | default false }}
       securityContext:
-        {{- include "intelgraph.podSecurityContext" . | nindent 8 }}
+        {{- include "intelgraph.security.podContext" . | nindent 8 }}
       containers:
         - name: {{ $service.name }}
           image: {{ include "intelgraph.image" (dict "service" $service "root" .) }}
@@ -72,7 +73,22 @@ spec:
           resources:
             {{- include "intelgraph.resources" (dict "service" $service "root" .) | nindent 12 }}
           securityContext:
-            {{- include "intelgraph.securityContext" . | nindent 12 }}
+            {{- include "intelgraph.security.containerContext" . | nindent 12 }}
+          {{- if .Values.hardening.enabled }}
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  {{- if .Values.hardening.preStopCommand }}
+                  {{- range $cmd := .Values.hardening.preStopCommand }}
+                  - {{ $cmd | quote }}
+                  {{- end }}
+                  {{- else }}
+                  - /bin/sh
+                  - -c
+                  - {{ printf "sleep %d" (.Values.hardening.preStopSleepSeconds | default 5) | quote }}
+                  {{- end }}
+          {{- end }}
           volumeMounts:
             {{- include "intelgraph.volumeMounts" . | nindent 12 }}
       volumes:
