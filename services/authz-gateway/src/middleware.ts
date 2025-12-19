@@ -10,6 +10,7 @@ import type {
   DecisionObligation,
   ResourceAttributes,
   SubjectAttributes,
+  ElevationGrant,
 } from './types';
 
 interface Options {
@@ -37,13 +38,17 @@ async function buildResource(
   if (typeof resourceId === 'string' && resourceId.length > 0) {
     return attributeService.getResourceAttributes(resourceId);
   }
-  const tenantId = String(req.headers['x-tenant-id'] || subject.tenantId);
-  const residency = String(
-    req.headers['x-resource-residency'] || subject.residency,
-  );
-  const classification = String(
-    req.headers['x-resource-classification'] || subject.clearance,
-  );
+  const tenantHeader = req.headers['x-tenant-id'];
+  const residencyHeader = req.headers['x-resource-residency'];
+  const classificationHeader = req.headers['x-resource-classification'];
+  const tenantId =
+    tenantHeader === undefined ? subject.tenantId : String(tenantHeader);
+  const residency =
+    residencyHeader === undefined ? subject.residency : String(residencyHeader);
+  const classification =
+    classificationHeader === undefined
+      ? subject.clearance
+      : String(classificationHeader);
   const tagsHeader = req.headers['x-resource-tags'];
   const tags =
     typeof tagsHeader === 'string'
@@ -85,6 +90,23 @@ export function requireAuth(
           .set('WWW-Authenticate', `acr=${options.requiredAcr}`)
           .json({ error: 'step_up_required' });
       }
+      const elevation = (payload as { elevation?: unknown }).elevation as
+        | ElevationGrant
+        | undefined;
+      if (elevation) {
+        if (
+          elevation.sessionId &&
+          elevation.sessionId !== String(payload.sid || '')
+        ) {
+          return res.status(401).json({ error: 'step_up_required' });
+        }
+        if (
+          elevation.expiresAt &&
+          new Date(elevation.expiresAt).getTime() < Date.now()
+        ) {
+          return res.status(401).json({ error: 'step_up_required' });
+        }
+      }
       const subject = await attributeService.getSubjectAttributes(
         String(payload.sub || ''),
       );
@@ -105,6 +127,13 @@ export function requireAuth(
           ),
         };
         const decision = await authorize(input);
+        if (subject.tenantId !== resource.tenantId) {
+          decision.allowed = false;
+          decision.reason = 'tenant_mismatch';
+        } else if (subject.residency !== resource.residency) {
+          decision.allowed = false;
+          decision.reason = 'residency_mismatch';
+        }
         await log({
           subject: String(payload.sub || ''),
           action: options.action,
@@ -143,6 +172,9 @@ export function requireAuth(
       }
       if (message === 'session_not_found') {
         return res.status(401).json({ error: 'invalid_session' });
+      }
+      if (message === 'step_up_required') {
+        return res.status(401).json({ error: 'step_up_required' });
       }
       if (process.env.NODE_ENV !== 'test') {
         logger.error({ err: error }, 'Authorization error');

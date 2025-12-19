@@ -7,9 +7,12 @@ export interface AuditEntry {
   tenantId: string;
   allowed: boolean;
   reason: string;
+  details?: Record<string, unknown>;
 }
+
+const auditLogPath = process.env.AUDIT_LOG_PATH || 'audit.log';
 
 export function log(entry: AuditEntry) {
   const record = { ...entry, ts: new Date().toISOString() };
-  appendFileSync('audit.log', JSON.stringify(record) + '\n');
+  appendFileSync(auditLogPath, JSON.stringify(record) + '\n');
 }

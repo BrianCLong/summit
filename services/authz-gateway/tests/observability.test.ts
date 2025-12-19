@@ -42,11 +42,14 @@ describe('trace context propagation', () => {
     const headers: Record<string, string> = {};
 
     tracer.startActiveSpan('proxy-span', (span) => {
-      injectTraceContext({
-        setHeader: (key: string, value: unknown) => {
-          headers[key] = String(value);
-        },
-      } as unknown as import('http').ClientRequest);
+      injectTraceContext(
+        {
+          setHeader: (key: string, value: unknown) => {
+            headers[key] = String(value);
+          },
+        } as unknown as import('http').ClientRequest,
+        span.spanContext(),
+      );
       expect(headers.traceparent).toContain(span.spanContext().traceId);
       span.end();
     });
@@ -54,7 +57,7 @@ describe('trace context propagation', () => {
     await provider.shutdown();
   });
 
-  it('adds authorization baggage entries for downstream spans', () => {
+  it('adds authorization baggage entries for downstream spans', async () => {
     const provider = new BasicTracerProvider();
     provider.register();
     const tracer = provider.getTracer('baggage-test');

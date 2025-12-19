@@ -417,12 +417,21 @@ export function attachAuthorizationBaggage(details: {
   return propagation.setBaggage(context.active(), updated);
 }
 
-export function injectTraceContext(proxyReq: ClientRequest) {
-  propagation.inject(context.active(), proxyReq, {
-    set(carrier, key, value) {
-      carrier.setHeader(key, value);
+export function injectTraceContext(
+  proxyReq: ClientRequest,
+  _spanContext?: { traceId: string; spanId: string },
+) {
+  propagation.inject(
+    _spanContext
+      ? trace.setSpan(context.active(), trace.wrapSpanContext(_spanContext))
+      : context.active(),
+    proxyReq,
+    {
+      set(carrier, key, value) {
+        carrier.setHeader(key, value);
+      },
     },
-  });
+  );
 }
 
 let started = false;

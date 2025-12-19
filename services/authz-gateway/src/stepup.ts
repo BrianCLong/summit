@@ -112,6 +112,9 @@ export class StepUpManager {
     const challengeBuffer = crypto.randomBytes(32);
     const challenge = toBase64Url(challengeBuffer);
     const primary = registered[0];
+    if (!primary) {
+      throw new Error('no_registered_device');
+    }
     this.challengeCache.set(userId, {
       challenge,
       credentialId: primary.credentialId,

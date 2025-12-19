@@ -24,11 +24,12 @@ describe('StepUpManager', () => {
       classification: 'confidential',
       tenantId: 'tenantA',
     });
+    const credentialId = challenge.allowCredentials[0]!.id;
     const signature = sign(challenge.challenge);
     const elevation = manager.verifyResponse(
       'alice',
       {
-        credentialId: challenge.allowCredentials[0].id,
+        credentialId,
         challenge: challenge.challenge,
         signature,
       },
@@ -41,7 +42,7 @@ describe('StepUpManager', () => {
       manager.verifyResponse(
         'alice',
         {
-          credentialId: challenge.allowCredentials[0].id,
+          credentialId: challenge.allowCredentials[0]!.id,
           challenge: challenge.challenge,
           signature,
         },
@@ -63,7 +64,7 @@ describe('StepUpManager', () => {
       manager.verifyResponse(
         'alice',
         {
-          credentialId: challenge.allowCredentials[0].id,
+          credentialId: challenge.allowCredentials[0]!.id,
           challenge: challenge.challenge,
           signature,
         },
@@ -83,7 +84,7 @@ describe('StepUpManager', () => {
       manager.verifyResponse(
         'alice',
         {
-          credentialId: challenge.allowCredentials[0].id,
+          credentialId: challenge.allowCredentials[0]!.id,
           challenge: challenge.challenge,
           signature,
         },

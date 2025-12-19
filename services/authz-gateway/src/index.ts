@@ -19,13 +19,30 @@ import type { AuthenticatedRequest } from './middleware';
 import type { ResourceAttributes } from './types';
 import { sessionManager } from './session';
 import { requireServiceAuth } from './service-auth';
+import { BreakGlassManager } from './break-glass';
+import { log as auditLog } from './audit';
+import { lookupApiClient } from './api-keys';
+import { RateLimiter } from './rate-limit';
+import { QuotaManager } from './quota';
+import { emitApiCallEvent } from './events';
 
 export async function createApp(): Promise<express.Application> {
   await initKeys();
   await startObservability();
   const attributeService = new AttributeService();
   const stepUpManager = new StepUpManager();
-  const trustedServices = (process.env.SERVICE_AUTH_CALLERS || 'api-gateway,maestro')
+  const breakGlassManager = new BreakGlassManager();
+  const rateLimiter = new RateLimiter({
+    limit: Number(process.env.API_RATE_LIMIT || 100),
+    windowMs: Number(process.env.API_RATE_WINDOW_MS || 60_000),
+  });
+  const quotaManager = new QuotaManager({
+    limit: Number(process.env.API_QUOTA_LIMIT || 1_000),
+    windowMs: Number(process.env.API_QUOTA_WINDOW_MS || 60_000),
+  });
+  const trustedServices = (
+    process.env.SERVICE_AUTH_CALLERS || 'api-gateway,maestro'
+  )
     .split(',')
     .map((v) => v.trim())
     .filter(Boolean);
@@ -79,6 +96,172 @@ export async function createApp(): Promise<express.Application> {
         res.json(payload);
       } catch {
         res.status(401).json({ error: 'invalid_token' });
+      }
+    },
+  );
+
+  app.post('/v1/companyos/decisions:check', async (req, res) => {
+    const apiKey = req.headers['x-api-key'];
+    if (!apiKey || typeof apiKey !== 'string') {
+      return res.status(401).json({ error: 'api_key_required' });
+    }
+    const client = lookupApiClient(apiKey);
+    if (!client) {
+      return res.status(403).json({ error: 'invalid_api_key' });
+    }
+    const rate = rateLimiter.check(client.keyId);
+    res.setHeader('X-RateLimit-Limit', String(rate.limit));
+    res.setHeader('X-RateLimit-Remaining', String(rate.remaining));
+    res.setHeader('X-RateLimit-Reset', String(rate.reset));
+    if (!rate.allowed) {
+      emitApiCallEvent({
+        tenantId: client.tenantId,
+        clientId: client.clientId,
+        subjectId: client.subjectHint,
+        apiMethod: 'companyos.decisions.check',
+        statusCode: 429,
+        decision: 'rate_limited',
+        latencyMs: 0,
+      });
+      return res.status(429).json({ error: 'rate_limit_exceeded' });
+    }
+
+    const quota = quotaManager.consume(client.keyId);
+    res.setHeader('X-Quota-Limit', String(quota.limit));
+    res.setHeader('X-Quota-Remaining', String(quota.remaining));
+    res.setHeader('X-Quota-Reset', String(quota.reset));
+    if (!quota.allowed) {
+      emitApiCallEvent({
+        tenantId: client.tenantId,
+        clientId: client.clientId,
+        subjectId: client.subjectHint,
+        apiMethod: 'companyos.decisions.check',
+        statusCode: 429,
+        decision: 'quota_exhausted',
+        latencyMs: 0,
+      });
+      return res.status(429).json({ error: 'quota_exhausted' });
+    }
+
+    const traceId = emitApiCallEvent({
+      tenantId: client.tenantId,
+      clientId: client.clientId,
+      subjectId: client.subjectHint,
+      apiMethod: 'companyos.decisions.check',
+      statusCode: 200,
+      decision: 'allow',
+      latencyMs: 1,
+    });
+    res.json({
+      allow: true,
+      reason: 'allow',
+      obligations: [],
+      trace_id: traceId,
+    });
+  });
+
+  app.post(
+    '/admin/break-glass/grant',
+    requireServiceAuth({
+      audience: 'authz-gateway',
+      allowedServices: trustedServices,
+      requiredScopes: ['breakglass:manage'],
+    }),
+    async (req, res) => {
+      try {
+        const {
+          sid,
+          reason,
+          role,
+          requestedBy,
+          durationSeconds,
+          approvals,
+          resourceId,
+        } = req.body || {};
+        if (!sid || !reason || !role || !requestedBy) {
+          return res
+            .status(400)
+            .json({ error: 'sid_reason_role_requestedBy_required' });
+        }
+        if (process.env.BREAK_GLASS !== '1') {
+          return res.status(403).json({ error: 'break_glass_disabled' });
+        }
+        const { token, session } = await breakGlassManager.grant({
+          sid,
+          reason,
+          role,
+          requestedBy,
+          durationSeconds: Number(durationSeconds),
+          approvals,
+          resourceId,
+        });
+        res.json({ token, session });
+      } catch (error) {
+        res.status(400).json({ error: (error as Error).message });
+      }
+    },
+  );
+
+  app.post(
+    '/admin/break-glass/revoke',
+    requireServiceAuth({
+      audience: 'authz-gateway',
+      allowedServices: trustedServices,
+      requiredScopes: ['breakglass:manage'],
+    }),
+    (req, res) => {
+      const { sid, actor, reason } = req.body || {};
+      if (!sid || !actor) {
+        return res.status(400).json({ error: 'sid_and_actor_required' });
+      }
+      breakGlassManager.revoke(sid, actor, reason || 'revoked');
+      res.json({ status: 'revoked' });
+    },
+  );
+
+  app.get(
+    '/admin/break-glass/active',
+    requireServiceAuth({
+      audience: 'authz-gateway',
+      allowedServices: trustedServices,
+      requiredScopes: ['breakglass:manage'],
+    }),
+    (_req, res) => {
+      if (process.env.BREAK_GLASS !== '1') {
+        return res.status(403).json({ error: 'break_glass_disabled' });
+      }
+      res.json({ sessions: breakGlassManager.listActive() });
+    },
+  );
+
+  app.get(
+    '/break-glass/verify',
+    requireAuth(attributeService, {
+      action: 'break-glass:verify',
+      skipAuthorization: true,
+    }),
+    (req: AuthenticatedRequest, res) => {
+      try {
+        if (process.env.BREAK_GLASS !== '1') {
+          return res.status(404).json({ error: 'not_found' });
+        }
+        const sid = String(req.user?.sid || '');
+        const session = breakGlassManager.requireActive(sid);
+        auditLog({
+          subject: String(req.user?.sub || ''),
+          tenantId: session.tenantId,
+          action: 'break_glass_use',
+          resource: session.role,
+          allowed: true,
+          reason: session.reason,
+          details: {
+            approvals: session.approvals ?? [],
+            expiresAt: session.expiresAt,
+          },
+        });
+        res.json({ status: 'ok', session });
+      } catch (error) {
+        res.status(401).json({ error: (error as Error).message });
       }
     },
   );
@@ -188,7 +371,30 @@ export async function createApp(): Promise<express.Application> {
     (req: AuthenticatedRequest, res) => {
       try {
         const userId = String(req.user?.sub || '');
-        const challenge = stepUpManager.createChallenge(userId);
+        const sid = String(req.user?.sid || '');
+        const requestedAction =
+          (req.body?.action as string) || req.headers['x-action'];
+        const resourceId =
+          (req.body?.resourceId as string) ||
+          (req.headers['x-resource-id'] as string);
+        const classification =
+          (req.body?.classification as string) ||
+          (req.headers['x-resource-classification'] as string) ||
+          req.subjectAttributes?.clearance;
+        const tenantId =
+          (req.body?.tenantId as string) ||
+          (req.headers['x-tenant-id'] as string) ||
+          req.subjectAttributes?.tenantId;
+        const challenge = stepUpManager.createChallenge(userId, {
+          sessionId: sid,
+          requestedAction: requestedAction
+            ? String(requestedAction)
+            : 'step-up',
+          resourceId: resourceId ? String(resourceId) : undefined,
+          classification: classification ? String(classification) : undefined,
+          tenantId: tenantId ? String(tenantId) : undefined,
+          currentAcr: String(req.user?.acr || 'loa1'),
+        });
         res.json(challenge);
       } catch (error) {
         res.status(400).json({ error: (error as Error).message });
@@ -209,18 +415,28 @@ export async function createApp(): Promise<express.Application> {
         if (!credentialId || !signature || !challenge) {
           return res.status(400).json({ error: 'missing_challenge_payload' });
         }
-        stepUpManager.verifyResponse(userId, {
-          credentialId,
-          signature,
-          challenge,
-        });
         const sid = String(req.user?.sid || '');
+        const grant = stepUpManager.verifyResponse(
+          userId,
+          {
+            credentialId,
+            signature,
+            challenge,
+          },
+          sid,
+        );
         const token = await sessionManager.elevateSession(sid, {
           acr: 'loa2',
           amr: ['hwk', 'fido2'],
           extendSeconds: 30 * 60,
+          claims: { elevation: grant },
         });
-        res.json({ token, acr: 'loa2', amr: ['hwk', 'fido2'] });
+        res.json({
+          token,
+          acr: 'loa2',
+          amr: ['hwk', 'fido2'],
+          elevation: grant,
+        });
       } catch (error) {
         res.status(400).json({ error: (error as Error).message });
       }
@@ -238,10 +454,10 @@ export async function createApp(): Promise<express.Application> {
       target: upstream,
       changeOrigin: true,
       pathRewrite: { '^/protected': '' },
-      onProxyReq: (proxyReq) => {
+      onProxyReq: (proxyReq: import('http').ClientRequest) => {
         injectTraceContext(proxyReq);
       },
-    }),
+    } as unknown as Parameters<typeof createProxyMiddleware>[0]),
   );
 
   return app;
