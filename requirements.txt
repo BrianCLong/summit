@@ -217,3 +217,4 @@ yarl==1.22.0
     # via aiohttp
 zstandard==0.25.0
     # via langsmith
+ruff==0.14.4

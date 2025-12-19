@@ -102,7 +102,8 @@
       "prettier -w"
     ],
     "*.py": [
-      "pre-commit run -a --hook-stage pre-commit"
+      "ruff check --fix",
+      "ruff format"
     ],
     "*.graphql": [
       "graphql-schema-linter"
