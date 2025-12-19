@@ -6,6 +6,7 @@
 import { Router, Request, Response } from 'express';
 import { ProvenanceLedgerBetaService } from '../services/provenance-ledger-beta.js';
 import { ingestDocument } from '../services/evidence-registration-flow.js';
+import { evidenceAccessService } from '../services/evidence-access.service.js';
 import logger from '../utils/logger.js';
 import type {
   SourceInput,
@@ -267,6 +268,59 @@ router.get('/evidence/:id', async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to get evidence',
+    });
+  }
+});
+
+/**
+ * GET /api/provenance-beta/evidence/:id/access
+ * Retrieve access URL for evidence (signed when enabled) with cache guidance.
+ */
+router.get('/evidence/:id/access', async (req: Request, res: Response) => {
+  try {
+    const evidence = await provenanceLedger.getEvidence(req.params.id);
+
+    if (!evidence) {
+      return res.status(404).json({
+        success: false,
+        error: 'Evidence not found',
+      });
+    }
+
+    const tenantId = (req as any).tenantId || 'default';
+    const caseId = (req.query.caseId as string) || evidence.metadata?.caseId;
+    const derivativeType =
+      (req.query.derivative as string) || evidence.metadata?.derivativeType;
+
+    const descriptor = await evidenceAccessService.getAccessDescriptor(
+      evidence,
+      {
+        tenantId,
+        caseId,
+        derivativeType,
+        requestId: (req.headers['x-request-id'] as string) || undefined,
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'] as string | undefined,
+      },
+    );
+
+    res.setHeader('Cache-Control', descriptor.cacheControl);
+    res.json({
+      success: true,
+      data: descriptor,
+    });
+  } catch (error) {
+    logger.error({
+      message: 'Failed to build evidence access descriptor',
+      error: error instanceof Error ? error.message : String(error),
+    });
+
+    res.status(500).json({
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to build evidence access descriptor',
     });
   }
 });

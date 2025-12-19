@@ -13,6 +13,7 @@ import {
   buildMerkleTreeWithProofs,
   exportMerkleTree,
 } from '../utils/merkle-tree.js';
+import { evidenceAccessService } from './evidence-access.service.js';
 import type {
   Source,
   SourceInput,
@@ -334,6 +335,32 @@ export class ProvenanceLedgerBetaService {
           now,
         ],
       );
+
+      if (
+        process.env.TIERED_STORAGE_V1 === '1' ||
+        process.env.SIGNED_URLS === '1'
+      ) {
+        try {
+          await evidenceAccessService.trackEvidenceRegistration(
+            {
+              id,
+              storage_uri: input.storage_uri,
+              collected_at: now,
+              metadata: input.metadata,
+            },
+            input.metadata?.tenantId,
+            input.metadata?.caseId || input.metadata?.investigation_id,
+          );
+        } catch (error) {
+          logger.warn(
+            {
+              evidence_id: id,
+              error: error instanceof Error ? error.message : String(error),
+            },
+            'Failed to register evidence with tiered storage service',
+          );
+        }
+      }
 
       // Record in provenance chain
       await this.recordProvenanceEntry({
