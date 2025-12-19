@@ -72,6 +72,7 @@ import resourceCostsRouter from './routes/resource-costs.js';
 import queryReplayRouter from './routes/query-replay.js';
 import streamRouter from './routes/stream.js'; // Added import
 import searchV1Router from './routes/search-v1.js';
+import dataGovernanceRouter from './routes/data-governance-routes.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -278,6 +279,7 @@ export const createApp = async () => {
   app.use('/api/query-replay', queryReplayRouter);
   app.use('/api/stream', streamRouter); // Register stream route
   app.use('/api/v1/search', searchV1Router); // Register Unified Search API
+  app.use('/api', dataGovernanceRouter); // Register Data Governance API
   app.get('/metrics', metricsRoute);
 
   // Initialize SummitInvestigate Platform Routes
