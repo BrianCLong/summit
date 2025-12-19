@@ -51,6 +51,7 @@
     "db:knex:migrate": "knex migrate:latest --knexfile packages/db/knex/knexfile.cjs",
     "db:knex:rollback": "knex migrate:rollback --knexfile packages/db/knex/knexfile.cjs",
     "db:neo4j:migrate": "node scripts/neo4j-migrate.js",
+    "lint:migrations": "pnpm --filter @summit/migration-linter run lint:ci -- --paths \"server/migrations/**/*.{sql,ts,js},server/src/**/migrations/**/*.{sql,ts,js},server/db/migrations/**/*.{sql,ts,js,cypher}\"",
     "changeset": "changeset",
     "release": "changeset version && changeset publish",
     "precommit": "lint-staged",
