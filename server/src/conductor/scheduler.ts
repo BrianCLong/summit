@@ -55,7 +55,14 @@ async function loop() {
               est = estimateFromRunbook(s.runbook);
               // Residency from runbook hint (e.g., eu/us prefix) or env default
               const residency = process.env.DEFAULT_RESIDENCY || undefined;
-              choice = await choosePool(est, residency);
+              try {
+                choice = await choosePool(est, residency);
+              } catch (error) {
+                otelService.addSpanAttributes({
+                  'scheduler.pool_selection_error': (error as Error).message,
+                });
+                continue;
+              }
             }
             // Fairness: gate per-tenant concurrency (tenant inference TBD)
             const tenant = 'default';

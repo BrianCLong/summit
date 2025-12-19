@@ -10,6 +10,7 @@ import { policyRoutes } from './policy-routes';
 import { evidenceRoutes } from './evidence-routes';
 import { agentRoutes } from './agent-routes';
 import { servingRoutes } from './serving-routes';
+import { operationsRouter } from './operations-routes.js';
 import {
   authenticateUser,
   requirePermission,
@@ -50,6 +51,7 @@ const initializeServices = async () => {
 
 // Authentication and authorization middleware for all routes
 router.use(authenticateUser);
+router.use('/', operationsRouter);
 
 /**
  * 🎯 MAESTRO CORE API: Universal Web Intelligence Orchestration

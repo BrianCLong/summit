@@ -42,18 +42,16 @@ const REDACT_PATHS = [
   'user.phone',
 ];
 
-export const logger = (pino as any)({
-// Standard logging context
 export interface SummitLogContext {
   correlationId?: string;
   tenantId?: string;
   principalId?: string;
-  principalKind?: "user" | "api_key" | "service_account" | "system";
+  principalKind?: 'user' | 'api_key' | 'service_account' | 'system';
   service: string;
   subsystem?: string;
   requestId?: string;
   runId?: string;
-  severity?: "debug" | "info" | "warn" | "error";
+  severity?: 'debug' | 'info' | 'warn' | 'error';
   message?: string;
   [key: string]: any;
 }
@@ -105,6 +103,5 @@ export const logger = pino({
   // Remove pino-pretty transport for production readiness
   // In production, logs should be structured JSON for log aggregation
 }, stream);
-});
 
 export default logger;
