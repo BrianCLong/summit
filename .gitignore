@@ -256,3 +256,6 @@ pr-dashboard.html
 pr-backlog-stats.json
 tests/e2e/auth-state.json
 artifacts/
+!artifacts/
+!artifacts/evidence/
+!artifacts/evidence/**
