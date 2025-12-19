@@ -38,6 +38,25 @@ jobs:
       - name: Run npm audit (JSON output)
         run: pnpm audit --json > audit-report.json || true
 
+      - name: Generate vulnerability report
+        run: node .github/scripts/audit-gate.js audit-report.json --record-only
+        env:
+          SERVICE_NAME: security-scan
+          VULN_REPORT_DIR: ${{ runner.temp }}
+          VULN_REPORT_FILE: vuln_report.security-scan.json
+          WAIVER_ROOT: security/waivers
+          AUDIT_EXIT_CODE: 0
+
+      - name: Upload vulnerability report
+        uses: actions/upload-artifact@v4
+        with:
+          name: vuln_report.security-scan
+          path: |
+            ${{ runner.temp }}/vuln_report.security-scan.json
+            ${{ runner.temp }}/waiver.security-scan.yml
+            ${{ runner.temp }}/audit-trail.security-scan.log
+          if-no-files-found: ignore
+
       - name: Upload audit report
         uses: actions/upload-artifact@v4
         with:

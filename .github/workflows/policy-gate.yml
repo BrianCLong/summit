@@ -65,3 +65,51 @@ jobs:
         # Verify governance policy evaluates successfully
         run: |
           opa eval -d policy/rego/ 'data.governance' > /dev/null
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: pnpm
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run pnpm audit (JSON)
+        run: pnpm audit --json > audit-policy.json || true
+
+      - name: Generate vulnerability report
+        run: node .github/scripts/audit-gate.js audit-policy.json --record-only
+        env:
+          SERVICE_NAME: policy-gate
+          VULN_REPORT_DIR: ${{ runner.temp }}
+          VULN_REPORT_FILE: vuln_report.policy-gate.json
+          WAIVER_ROOT: security/waivers
+          AUDIT_EXIT_CODE: 0
+
+      - name: Build OPA input for summit quality gate
+        run: |
+          node -e "const fs=require('fs');const path=require('path');const reportPath=path.join(process.env.RUNNER_TEMP,'vuln_report.policy-gate.json');const report=JSON.parse(fs.readFileSync(reportPath,'utf8'));const input={pr:{draft:false,mergeable:true,author:'policy-gate',labels:[]},quality_gates:{build:true,typecheck:true,lint:true,tests:true,security:report.decision==='pass'},security_scan:{critical_count:report.summary?.critical||0,high_count:report.summary?.high||0},analysis:{risk_level:'LOW',additions:0,deletions:0,complexity:0},migration_review_approved:true,file_contents:{},changed_files:[]};fs.writeFileSync(path.join(process.env.RUNNER_TEMP,'opa-security-input.json'),JSON.stringify(input,null,2));"
+
+      - name: Enforce summit quality policy
+        id: security-gate
+        run: |
+          result=$(opa eval -f json -d .github/policies -i $RUNNER_TEMP/opa-security-input.json "data.summit.quality.allow" | jq -r '.result[0].expressions[0].value')
+          echo "allow=$result" >> "$GITHUB_OUTPUT"
+          if [ "$result" != "true" ]; then
+            echo "Security quality gate failed - vulnerabilities above threshold without waiver"
+            exit 1
+          fi
+
+      - name: Upload vulnerability artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: vuln_report.policy-gate
+          path: |
+            ${{ runner.temp }}/vuln_report.policy-gate.json
+            ${{ runner.temp }}/waiver.policy-gate.yml
+            ${{ runner.temp }}/audit-trail.policy-gate.log
+          if-no-files-found: ignore
