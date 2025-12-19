@@ -50,6 +50,15 @@ export {
   TooltipProvider,
   TooltipTrigger,
 } from './Tooltip'
+export {
+  Toast,
+  ToastAction,
+  ToastClose,
+  ToastDescription,
+  ToastProvider,
+  ToastTitle,
+  ToastViewport,
+} from './toast'
 
 // NOTE: Recharts components were previously re-exported here for convenience,
 // but this caused the entire recharts library (~120KB) to be included when

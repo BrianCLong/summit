@@ -6,7 +6,6 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/react'
-import { fn } from '@storybook/test'
 import { TriPaneShell } from './TriPaneShell'
 import {
   generateMockEntities,
@@ -81,12 +80,12 @@ const meta: Meta<typeof TriPaneShell> = {
     },
   },
   args: {
-    onEntitySelect: fn(),
-    onEventSelect: fn(),
-    onLocationSelect: fn(),
-    onTimeWindowChange: fn(),
-    onSyncStateChange: fn(),
-    onExport: fn(),
+    onEntitySelect: () => undefined,
+    onEventSelect: () => undefined,
+    onLocationSelect: () => undefined,
+    onTimeWindowChange: () => undefined,
+    onSyncStateChange: () => undefined,
+    onExport: () => undefined,
   },
 }
 

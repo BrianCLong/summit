@@ -4,6 +4,7 @@ import { Provider } from 'react-redux'
 import { store } from './store'
 import App from './App'
 import config from './config'
+import { DesignSystemProvider } from './theme/DesignSystemProvider'
 import './index.css'
 
 // Start MSW for development
@@ -23,7 +24,9 @@ enableMocking().then(() => {
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
       <Provider store={store}>
-        <App />
+        <DesignSystemProvider>
+          <App />
+        </DesignSystemProvider>
       </Provider>
     </React.StrictMode>
   )

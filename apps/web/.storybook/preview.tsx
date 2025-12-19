@@ -1,6 +1,8 @@
 import type { Preview } from '@storybook/react'
+import React from 'react'
 import { initialize, mswLoader } from 'msw-storybook-addon'
 import { handlers } from '../src/mock/handlers'
+import { DesignSystemProvider } from '../src/theme/DesignSystemProvider'
 import '../src/index.css'
 
 // Initialize MSW
@@ -33,6 +35,13 @@ const preview: Preview = {
     },
   },
   loaders: [mswLoader],
+  decorators: [
+    Story => (
+      <DesignSystemProvider enableTokens>
+        <Story />
+      </DesignSystemProvider>
+    ),
+  ],
   tags: ['autodocs'],
 }
 

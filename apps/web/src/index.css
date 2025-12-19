@@ -1,4 +1,6 @@
-@import 'tailwindcss';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Define theme as CSS-first configuration for Tailwind v4 */
 @theme {
@@ -49,6 +51,8 @@
 
 /* Legacy CSS custom properties for components that still use them */
 :root {
+  font-family: var(--ds-font-family-sans, 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif);
+  line-height: var(--ds-line-height-standard, 1.5);
   --background: 0 0% 100%;
   --foreground: 222.2 84% 4.9%;
   --card: 0 0% 100%;
@@ -68,7 +72,8 @@
   --border: 214.3 31.8% 91.4%;
   --input: 214.3 31.8% 91.4%;
   --ring: 221.2 83.2% 53.3%;
-  --radius: 0.5rem;
+  --radius: var(--ds-radius-md, 0.5rem);
+  --shadow-elevation: var(--ds-shadow-sm, 0 2px 6px rgba(0, 0, 0, 0.08));
 }
 
 .dark {

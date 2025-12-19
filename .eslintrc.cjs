@@ -1,3 +1,7 @@
+const {
+  designTokenRestrictions,
+} = require('./apps/web/tools/eslint/design-token-restrictions')
+
 module.exports = {
   root: true,
   env: { node: true, browser: true, es2022: true, jest: true },
@@ -55,6 +59,16 @@ module.exports = {
               'Use @intelgraph/errors errorFactory helpers instead of raw Error.',
           },
         ],
+      },
+    },
+    {
+      files: [
+        'apps/web/src/components/ui/**/*.{ts,tsx}',
+        'apps/web/src/theme/**/*.{ts,tsx}',
+        'apps/web/src/theme.ts',
+      ],
+      rules: {
+        'no-restricted-syntax': ['warn', ...designTokenRestrictions],
       },
     },
   ],
