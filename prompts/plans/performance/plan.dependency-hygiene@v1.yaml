@@ -1,0 +1,211 @@
+meta:
+  id: plan.dependency-hygiene@v1
+  owner: 'platform-engineering'
+  purpose: 'Audit and maintain dependencies to prevent bloat and latency regressions'
+  tags:
+    - dependencies
+    - security
+    - performance
+    - maintenance
+    - upgrades
+  guardrails:
+    - 'Critical security updates must be applied within SLA'
+    - 'Breaking changes must be tested before merge'
+    - 'Transitive dependency changes must be reviewed'
+    - 'License changes must be approved'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  package_managers: string
+  current_dependency_count: string
+  known_issues: string
+  update_cadence: string
+  security_sla: string
+
+template: |
+  You are a Dependency Manager maintaining dependencies for Summit/IntelGraph.
+
+  **Objective:** Ensure dependencies don't introduce bloat or latency.
+
+  **Package Managers:**
+  {{package_managers}}
+
+  **Current Dependency Count:**
+  {{current_dependency_count}}
+
+  **Known Issues:**
+  {{known_issues}}
+
+  **Update Cadence:**
+  {{update_cadence}}
+
+  **Security SLA:**
+  {{security_sla}}
+
+  ## Deliverables
+
+  ### 1. Dependency Audit Report
+  ```yaml
+  audit:
+    summary:
+      direct_deps: [count]
+      transitive_deps: [count]
+      outdated: [count]
+      deprecated: [count]
+      vulnerable: [count]
+      duplicate: [count]
+
+    high_priority:
+      - package: [name]
+        current: [version]
+        latest: [version]
+        reason: [security|deprecated|performance]
+        breaking_changes: [yes/no]
+        effort: [low/medium/high]
+
+    bloat_analysis:
+      - package: [name]
+        size: [KB]
+        used_exports: [%]
+        alternatives: [list]
+  ```
+
+  ### 2. Upgrade Plan
+  ```yaml
+  upgrades:
+    immediate:  # Security critical
+      - package: lodash
+        from: 4.17.19
+        to: 4.17.21
+        reason: Prototype pollution fix
+        risk: low
+        testing: unit + integration
+
+    short_term:  # Within sprint
+      - package: typescript
+        from: 5.2.0
+        to: 5.3.3
+        reason: Performance improvements
+        risk: medium
+        testing: full build + types
+
+    planned:  # Backlog
+      - package: react
+        from: 18.2.0
+        to: 18.3.0
+        reason: New features
+        risk: medium
+        testing: full regression
+  ```
+
+  ### 3. Lockfile Hygiene Steps
+  ```yaml
+  lockfile_maintenance:
+    daily:
+      - dependabot security updates
+      - auto-merge patch versions (if tests pass)
+
+    weekly:
+      - review pending PRs
+      - deduplicate lockfile
+      - prune unused packages
+
+    monthly:
+      - major version review
+      - license audit
+      - size analysis
+
+    commands:
+      dedupe: "pnpm dedupe"
+      prune: "pnpm prune"
+      audit: "pnpm audit"
+      outdated: "pnpm outdated"
+      why: "pnpm why <package>"
+  ```
+
+  ### 4. Transitive Dependency Controls
+  ```yaml
+  controls:
+    overrides:
+      # Force specific versions for security
+      "lodash": "^4.17.21"
+      "minimist": "^1.2.6"
+
+    resolutions:
+      # pnpm overrides in package.json
+      "pnpm":
+        "overrides":
+          "glob-parent": ">=5.1.2"
+
+    blocked:
+      # Packages that should never be added
+      - "moment"  # Use date-fns instead
+      - "request"  # Use native fetch or axios
+      - "colors"  # Supply chain risk
+
+    allowed_licenses:
+      - MIT
+      - Apache-2.0
+      - ISC
+      - BSD-2-Clause
+      - BSD-3-Clause
+  ```
+
+  ### 5. Size Budget Enforcement
+  ```yaml
+  size_budgets:
+    total_node_modules: 500MB
+    individual_package_max: 50MB
+    bundle_size:
+      main: 200KB
+      vendor: 500KB
+
+    enforcement:
+      - CI check on package.json changes
+      - Alert on budget exceeded
+      - Block merge if critical
+
+    tooling:
+      - bundlephobia integration
+      - size-limit in CI
+      - import-cost in IDE
+  ```
+
+  ### 6. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] All critical vulnerabilities patched
+  - [ ] No deprecated packages in use
+  - [ ] Lockfile deduplicated
+  - [ ] Size budgets enforced in CI
+  - [ ] Upgrade plan documented
+
+  ## Rollback Plan
+  - Revert lockfile changes if builds fail
+  - Pin problematic packages to known-good version
+  - Document workarounds for breaking changes
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'pnpm-dependency-audit'
+    inputs:
+      package_managers: 'pnpm 9.x for Node.js, pip for Python ML'
+      current_dependency_count: 'Direct: 150, Transitive: 1200'
+      known_issues: 'lodash outdated, moment still in use, some duplicate versions'
+      update_cadence: 'Dependabot daily, manual review weekly'
+      security_sla: 'Critical: 24h, High: 72h, Medium: 1 week'
+    expected_contains:
+      - 'Dependency Audit'
+      - 'Upgrade Plan'
+      - 'Lockfile Hygiene'
+      - 'Size Budget'

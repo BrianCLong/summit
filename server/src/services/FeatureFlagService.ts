@@ -5,12 +5,15 @@
  * Supports LaunchDarkly for production and file-based flags for development.
  *
  * @module services/FeatureFlagService
+ * @deprecated Use '@intelgraph/feature-flags' instead. See server/src/feature-flags/setup.ts
  */
 
 import { readFileSync } from 'fs';
-import { join } from 'path';
+import { resolve, isAbsolute } from 'path';
+// @ts-ignore
 import * as LaunchDarkly from 'launchdarkly-node-server-sdk';
-import { Logger } from '../utils/logger';
+// @ts-ignore
+import { logger } from '../utils/logger.js';
 
 /**
  * Feature flag configuration
@@ -71,11 +74,11 @@ export interface FlagEvaluation {
  */
 export class FeatureFlagService {
   private provider: 'local' | 'launchdarkly';
-  private ldClient?: LaunchDarkly.LDClient;
+  private ldClient?: any;
   private localFlags: Map<string, FlagMetadata> = new Map();
   private cache: Map<string, { value: FlagValue; timestamp: number }> = new Map();
   private cacheTimeout: number = 60000; // 1 minute cache
-  private logger: Logger;
+  private logger: any;
   private initialized: boolean = false;
   private initializationPromise?: Promise<void>;
 
@@ -87,10 +90,10 @@ export class FeatureFlagService {
    */
   constructor(
     private config: FeatureFlagConfig,
-    logger?: Logger
+    injectedLogger?: any
   ) {
     this.provider = config.provider;
-    this.logger = logger || new Logger('FeatureFlagService');
+    this.logger = injectedLogger || logger.child({ service: 'FeatureFlagService' });
   }
 
   /**
@@ -185,7 +188,7 @@ export class FeatureFlagService {
     this.logger.info(`Loading feature flags from file: ${file}`);
 
     try {
-      const configPath = join(process.cwd(), file);
+      const configPath = isAbsolute(file) ? file : resolve(process.cwd(), file);
       const configData = readFileSync(configPath, 'utf-8');
       const config = JSON.parse(configData);
 
@@ -312,7 +315,7 @@ export class FeatureFlagService {
    * });
    * ```
    */
-  async getJSONValue<T = any>(
+  async getJSONValue<T extends FlagValue = any>(
     flagKey: string,
     user: FlagUser,
     defaultValue: T
@@ -352,7 +355,7 @@ export class FeatureFlagService {
     }
 
     // Convert user to LaunchDarkly format
-    const ldUser: LaunchDarkly.LDUser = {
+    const ldUser: any = {
       key: user.key,
       email: user.email,
       name: user.name,
@@ -633,7 +636,7 @@ let instance: FeatureFlagService | null = null;
  */
 export function getFeatureFlagService(
   config?: FeatureFlagConfig,
-  logger?: Logger
+  logger?: any
 ): FeatureFlagService {
   if (!instance && !config) {
     throw new Error('Feature flag service not initialized. Provide config on first call.');

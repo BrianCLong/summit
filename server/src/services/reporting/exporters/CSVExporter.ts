@@ -4,7 +4,7 @@
  */
 
 import { promises as fs } from 'fs';
-import path from 'path';
+import * as path from 'path';
 import { BaseReportExporter } from './IReportExporter.js';
 import type { Report, ExportResult } from '../types/index.js';
 import type { ReportTemplate } from '../types/Template.js';

@@ -1,128 +1,128 @@
-import SemanticSearchService, { SemanticSearchOptions } from '../services/SemanticSearchService.js';
-
-class MockEmbeddingService {
-  async generateEmbedding({ text }: { text: string }): Promise<number[]> {
-    return Array.from({ length: 3 }, (_, idx) => text.length * (idx + 1));
-  }
-}
-
-class MockClient {
-  public readonly queries: Array<{ sql: string; params?: any[] }> = [];
-  private readonly responses: any[];
-  public released = false;
-
-  constructor(responses: any[]) {
-    this.responses = responses;
-  }
-
-  async query(sql: string, params?: any[]) {
-    this.queries.push({ sql, params });
-    return this.responses.shift() ?? { rows: [] };
-  }
-
-  release() {
-    this.released = true;
-  }
-}
-
-class MockPool {
-  public readonly client: MockClient;
-  public ended = false;
-  public query = jest.fn(async () => ({ rows: [{ ok: 1 }] }));
-  private failHealthCheck = false;
-
-  constructor(client: MockClient) {
-    this.client = client;
-  }
-
-  async connect() {
-    if (this.failHealthCheck) {
-      throw new Error('health check failed');
-    }
-    return this.client;
-  }
-
-  async end() {
-    this.ended = true;
-  }
-
-  simulateUnhealthy() {
-    this.failHealthCheck = true;
-  }
-}
-
-function buildService(options: Partial<SemanticSearchOptions> & { pool: MockPool }) {
-  return new SemanticSearchService({
-    healthCheckIntervalMs: 0,
-    healthCheckTimeoutMs: 10,
-    embeddingService: new MockEmbeddingService() as any,
-    ...options,
-  });
-}
+import SemanticSearchService from '../services/SemanticSearchService';
+import { describe, it, expect } from '@jest/globals';
 
 describe('SemanticSearchService', () => {
-  it('performs search with filters and reuses provided pool', async () => {
-    const client = new MockClient([
-      {
-        rows: [
-          {
-            id: '1',
-            title: 'Threat case',
-            status: 'open',
-            created_at: new Date('2024-01-01'),
-            similarity: 0.9,
+  class MockEmbeddingService {
+    async generateEmbedding({ text }: { text: string }): Promise<number[]> {
+      return [text.includes('threat') ? 1 : 0];
+    }
+  }
+
+  class MockWeaviateClient {
+    docs: any[] = [];
+    data = {
+      creator: () => {
+        const ctx = this;
+        const record: any = {};
+        return {
+          withClassName(name: string) {
+            record.className = name;
+            return this;
           },
-        ],
-      },
-    ]);
-    const pool = new MockPool(client);
-    const service = buildService({ pool });
-
-    const results = await service.searchCases('query', { status: ['open'], dateFrom: '2024-01-01' }, 5);
-
-    expect(results).toHaveLength(1);
-    expect(results[0].id).toBe('1');
-    expect(pool.query).toHaveBeenCalled(); // health check
-    expect(client.queries[0].params?.[1]).toEqual(['open']);
-    expect(client.released).toBe(true);
-
-    await service.close();
-    expect(pool.ended).toBe(false);
-  });
-
-  it('closes owned pools created via factory', async () => {
-    const client = new MockClient([
-      {
-        rows: [
-          {
-            id: '2',
-            title: 'Case owned pool',
-            status: 'closed',
-            created_at: new Date('2024-02-02'),
-            similarity: 0.8,
+          withId(id: string) {
+            record.id = id;
+            return this;
           },
-        ],
+          withVector(vector: number[]) {
+            record.vector = vector;
+            return this;
+          },
+          withProperties(props: any) {
+            record.props = props;
+            return this;
+          },
+          async do() {
+            ctx.docs.push(record);
+          },
+        };
       },
-    ]);
-    const pool = new MockPool(client);
-    const poolFactory = () => pool as any;
-    const service = buildService({ poolFactory });
+    };
+    graphql = {
+      get: () => {
+        const ctx = this;
+        const query: any = { limit: 10 };
+        return {
+          withClassName(name: string) {
+            query.className = name;
+            return this;
+          },
+          withFields(_f: string) {
+            return this;
+          },
+          withNearVector(nv: any) {
+            query.nearVector = nv;
+            return this;
+          },
+          withWhere(where: any) {
+            query.where = where;
+            return this;
+          },
+          withLimit(limit: number) {
+            query.limit = limit;
+            return this;
+          },
+          async do() {
+            let items = ctx.docs;
+            if (query.where?.operands) {
+              for (const op of query.where.operands) {
+                const field = op.path[0];
+                const val = op.valueString ?? op.valueInt ?? op.valueDate;
+                if (op.operator === 'Equal') {
+                  items = items.filter((d) => d.props[field] === val);
+                } else if (op.operator === 'GreaterThanEqual') {
+                  items = items.filter((d) => d.props[field] >= val);
+                } else if (op.operator === 'LessThanEqual') {
+                  items = items.filter((d) => d.props[field] <= val);
+                }
+              }
+            }
+            items = items
+              .map((d) => ({
+                ...d.props,
+                _additional: {
+                  distance: Math.abs(d.vector[0] - query.nearVector.vector[0]),
+                },
+              }))
+              .sort((a, b) => a._additional.distance - b._additional.distance)
+              .slice(0, query.limit);
+            const data: any = {};
+            data[query.className] = items;
+            return { data: { Get: data } };
+          },
+        };
+      },
+    };
+  }
 
-    const results = await service.searchCases('alert');
-    expect(results[0].id).toBe('2');
+  it('performs search with metadata filters', async () => {
+    const client = new MockWeaviateClient();
+    const service = new SemanticSearchService(
+      client as any,
+      new MockEmbeddingService() as any,
+    );
 
-    await service.close();
-    expect(pool.ended).toBe(true);
-  });
-
-  it('fails fast when health checks fail', async () => {
-    const client = new MockClient([]);
-    const pool = new MockPool(client);
-    pool.query = jest.fn(async () => {
-      throw new Error('database unavailable');
+    await service.indexDocument({
+      id: '1',
+      text: 'threat report one',
+      source: 'OSINT',
+      date: '2024-01-01',
+      threatLevel: 3,
+      graphId: 'e1',
     });
-    const service = buildService({ pool });
+    await service.indexDocument({
+      id: '2',
+      text: 'benign report',
+      source: 'OSINT',
+      date: '2024-01-02',
+      threatLevel: 1,
+      graphId: 'e2',
+    });
 
-    await expect(service.searchCases('broken')).rejects.toThrow('database unavailable');
+    const results = await service.search('threat', {
+      source: 'OSINT',
+      threatLevel: 3,
+    });
+    expect(results).toHaveLength(1);
+    expect(results[0].metadata.graphId).toBe('e1');
   });
 });

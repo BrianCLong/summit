@@ -1,0 +1,58 @@
+# Machine-readable view of shipping vs. non-shipping units.
+# Owners are placeholders; update when teams are assigned.
+units:
+  - name: web-app
+    type: frontend
+    path: apps/web
+    ships: true
+    owner: TBD
+  - name: gateway
+    type: service
+    path: apps/gateway
+    ships: true
+    owner: TBD
+  - name: intelgraph-api
+    type: backend
+    path: apps/intelgraph-api
+    ships: true
+    owner: TBD
+  - name: server-legacy
+    type: backend
+    path: apps/server
+    ships: true
+    owner: TBD
+  - name: analytics-engine
+    type: service
+    path: apps/analytics-engine
+    ships: true
+    owner: TBD
+  - name: workflow-engine
+    type: service
+    path: apps/workflow-engine
+    ships: true
+    owner: TBD
+  - name: compliance-console
+    type: frontend
+    path: apps/compliance-console
+    ships: true
+    owner: TBD
+  - name: shared-packages
+    type: libraries
+    path: packages
+    ships: true
+    owner: TBD
+  - name: shared-services
+    type: services
+    path: services
+    ships: true
+    owner: TBD
+  - name: experiments
+    type: labs
+    path: labs
+    ships: false
+    owner: TBD
+  - name: archive
+    type: archive
+    path: archive
+    ships: false
+    owner: TBD

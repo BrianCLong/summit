@@ -4,7 +4,7 @@
 
 import * as client from 'prom-client';
 import Redis from 'ioredis';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import {
   AIGovernanceMetrics,
   ValidationMetrics,

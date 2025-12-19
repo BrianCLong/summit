@@ -15,6 +15,7 @@ import {
   nextFactory,
 } from '../../../../tests/factories/requestFactory';
 import { userFactory } from '../../../../tests/factories/userFactory';
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
 jest.mock('../../services/AuthService');
 
@@ -227,7 +228,7 @@ describe('RBAC Middleware', () => {
     });
 
     it('should be case insensitive', () => {
-      const user = userFactory({ role: 'ANALYST' });
+      const user = userFactory({ role: 'ANALYST' as any });
       const req = requestFactory({ user });
       const res = responseFactory();
       const next = nextFactory();
