@@ -298,6 +298,7 @@ make down
 - [Developer Onboarding Guide](docs/ONBOARDING.md) - 30-minute quickstart for new developers
 - [AI Agent Collaboration Guide](CONTRIBUTING.md) - Guidelines for AI agent contributions
 - [Documentation Index](docs/README.md) - Complete documentation reference
+- [Adapter quickstart](docs/adapters/quickstart.md) - Build, test, package, and deploy gateway adapters
 - [CLAUDE.md](CLAUDE.md) - Comprehensive AI assistant guide for the codebase
 - [CLAUDE_CODE.md](CLAUDE_CODE.md) - Guide for using Claude Code CLI with this repository
 
