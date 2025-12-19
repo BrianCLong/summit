@@ -1,0 +1,39 @@
+meta:
+  id: workflow.bugfix@v1
+  owner: engineering
+  purpose: Workflow for diagnosing and fixing bugs.
+  tags: [workflow, bugfix]
+
+modelConfig:
+  model: gpt-4-turbo
+  temperature: 0.1
+
+inputs:
+  bug_report: string
+  logs: string
+  context: string
+
+template: |
+  # PHASE 1: DIAGNOSIS
+  Analyze the following bug report and logs. Identify the root cause.
+
+  Report: {{bug_report}}
+  Logs: {{logs}}
+  Context: {{context}}
+
+  Output a "Root Cause Analysis" (RCA).
+
+  ---
+
+  # PHASE 2: REPRODUCTION
+  Create a reproduction script or test case that fails.
+
+  ---
+
+  # PHASE 3: FIX
+  {{> agent.engineer task_description="Apply fix and ensure test passes." tech_stack="TypeScript" related_files="Affected files"}}
+
+  ---
+
+  # PHASE 4: VERIFICATION
+  Run the reproduction script again to confirm the fix.

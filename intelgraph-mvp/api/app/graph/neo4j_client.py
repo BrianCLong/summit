@@ -2,11 +2,16 @@ from __future__ import annotations
 
 import uuid
 from collections import defaultdict
-from typing import Sequence
 
-from neo4j import Driver, GraphDatabase
-
-from ..models import Document, Event, Location, NodeBase, Org, Person, Relationship
+from ..models import (
+    Document,
+    Event,
+    Location,
+    NodeBase,
+    Org,
+    Person,
+    Relationship,
+)
 
 
 class InMemoryGraph:
@@ -14,10 +19,9 @@ class InMemoryGraph:
         self.nodes: dict[str, dict[str, NodeBase]] = defaultdict(dict)
         self.edges: list[Relationship] = []
 
-    def setup_constraints(self) -> None:  # parity with Neo4jGraph
-        return None
-
-    def merge_node(self, label: str, node_id: str, data: dict) -> str:
+    def create_node(self, label: str, data: dict) -> str:
+        node_id = data.get("id") or str(uuid.uuid4())
+        data["id"] = node_id
         model_cls = {
             "Person": Person,
             "Org": Org,
@@ -25,102 +29,9 @@ class InMemoryGraph:
             "Event": Event,
             "Document": Document,
         }[label]
-        existing = self.nodes[label].get(node_id)
-        if existing:
-            merged = existing.copy(update=data, deep=True)
-            # merge list-like fields for persons and documents
-            if isinstance(merged, Person):
-                merged.emails = list({*merged.emails, *data.get("emails", [])})
-                merged.phones = list({*merged.phones, *data.get("phones", [])})
-            self.nodes[label][node_id] = merged
-            return node_id
-        node = model_cls(**{**data, "id": node_id})
+        node = model_cls(**data)
         self.nodes[label][node_id] = node
         return node_id
-
-    def merge_edge(self, source: str, rel_type: str, target: str, data: dict) -> str:
-        edge_id = data.get("id") or f"{source}:{rel_type}:{target}"
-        data.update({"id": edge_id, "source": source, "target": target, "type": rel_type})
-        existing = next((e for e in self.edges if e.id == edge_id), None)
-        if existing:
-            return existing.id
-        edge = Relationship(**data)
-        self.edges.append(edge)
-        return edge.id
-
-    def entity_by_id(self, node_id: str) -> dict | None:
-        node = self.node_by_id(node_id)
-        if not node:
-            return None
-        return {"id": node.id, "type": node.__class__.__name__, "name": getattr(node, "name", "")}
-
-    def search_entities(self, query: str, tenant_id: str, case_id: str, limit: int = 25) -> list[dict]:
-        results: list[dict] = []
-        for label, nodes in self.nodes.items():
-            for node in nodes.values():
-                if node.tenant_id != tenant_id or node.case_id != case_id:
-                    continue
-                if query.lower() in getattr(node, "name", "").lower():
-                    results.append(
-                        {
-                            "id": node.id,
-                            "type": label,
-                            "name": getattr(node, "name", ""),
-                            "policy": getattr(node, "policy", None),
-                        }
-                    )
-        return results[:limit]
-
-    def neighbors(
-        self, node_id: str, max_hops: int = 1, labels: Sequence[str] | None = None
-    ) -> dict:
-        allowed = set(labels or [])
-        nodes: dict[str, dict] = {}
-        edges: dict[str, dict] = {}
-        start = self.node_by_id(node_id)
-        if not start:
-            return {"nodes": [], "edges": []}
-        nodes[start.id] = {
-            "id": start.id,
-            "type": start.__class__.__name__,
-            "name": getattr(start, "name", ""),
-            "properties": start.model_dump(),
-        }
-        frontier = [(node_id, 0)]
-        seen = {node_id}
-        while frontier:
-            current, depth = frontier.pop(0)
-            if depth >= max_hops:
-                continue
-            for edge in self.edges:
-                if edge.source == current:
-                    next_id = edge.target
-                elif edge.target == current:
-                    next_id = edge.source
-                else:
-                    continue
-                if next_id in seen:
-                    continue
-                node = self.node_by_id(next_id)
-                if not node:
-                    continue
-                if allowed and node.__class__.__name__ not in allowed:
-                    continue
-                nodes[node.id] = {
-                    "id": node.id,
-                    "type": node.__class__.__name__,
-                    "name": getattr(node, "name", ""),
-                    "properties": node.model_dump(),
-                }
-                edges[edge.id] = {
-                    "id": edge.id,
-                    "source": edge.source,
-                    "target": edge.target,
-                    "type": edge.type,
-                }
-                seen.add(next_id)
-                frontier.append((next_id, depth + 1))
-        return {"nodes": list(nodes.values()), "edges": list(edges.values())}
 
     def get_nodes(self, label: str, tenant_id: str, case_id: str) -> list[NodeBase]:
         return [
@@ -138,20 +49,6 @@ class InMemoryGraph:
             if phone and phone in n.phones:
                 return n
         return None
-
-    def create_node(self, label: str, data: dict) -> str:
-        node_id = data.get("id") or str(uuid.uuid4())
-        data["id"] = node_id
-        model_cls = {
-            "Person": Person,
-            "Org": Org,
-            "Location": Location,
-            "Event": Event,
-            "Document": Document,
-        }[label]
-        node = model_cls(**data)
-        self.nodes[label][node_id] = node
-        return node_id
 
     def create_edge(self, source: str, rel_type: str, target: str, data: dict) -> str:
         edge_id = data.get("id") or str(uuid.uuid4())
@@ -179,6 +76,12 @@ class InMemoryGraph:
                 e.source = new_id
             if e.target == old_id:
                 e.target = new_id
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
 
 
 class Neo4jGraph:
@@ -187,6 +90,13 @@ class Neo4jGraph:
 
     def close(self) -> None:
         self.driver.close()
+
+    def health_check(self) -> bool:
+        try:
+            self.driver.verify_connectivity()
+            return True
+        except Exception:
+            return False
 
     def _run_write(self, query: str, **params):
         with self.driver.session() as session:
@@ -338,3 +248,6 @@ class Neo4jGraph:
         unique_nodes = {n["id"]: n for n in nodes if n.get("id")}
         unique_edges = {e["id"]: e for e in edges if e.get("id")}
         return {"nodes": list(unique_nodes.values()), "edges": list(unique_edges.values())}
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main

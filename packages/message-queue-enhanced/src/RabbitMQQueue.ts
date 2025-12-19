@@ -177,7 +177,11 @@ export class RabbitMQQueue {
       await this.channel.consume(
         queueName,
         async (msg: ConsumeMessage | null) => {
+<<<<<<< HEAD
+          if (!msg) return;
+=======
           if (!msg) {return;}
+>>>>>>> main
 
           await this.handleMessage(queueName, msg);
         },
@@ -204,7 +208,11 @@ export class RabbitMQQueue {
     const startTime = Date.now();
 
     try {
+<<<<<<< HEAD
+      if (!this.channel) return;
+=======
       if (!this.channel) {return;}
+>>>>>>> main
 
       const handler = this.handlers.get(queueName);
       if (!handler) {
@@ -255,7 +263,11 @@ export class RabbitMQQueue {
     queueName: string,
     msg: ConsumeMessage
   ): Promise<void> {
+<<<<<<< HEAD
+    if (!this.channel) return;
+=======
     if (!this.channel) {return;}
+>>>>>>> main
 
     const retryCount = (msg.properties.headers?.retryCount || 0) + 1;
     const maxRetries = msg.properties.headers?.maxRetries || 3;
@@ -265,7 +277,11 @@ export class RabbitMQQueue {
       const retryDelay = Math.min(1000 * Math.pow(2, retryCount), 60000);
 
       setTimeout(() => {
+<<<<<<< HEAD
+        if (!this.channel) return;
+=======
         if (!this.channel) {return;}
+>>>>>>> main
 
         this.channel.sendToQueue(
           queueName,
