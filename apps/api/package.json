@@ -1,0 +1,21 @@
+{
+  "name": "@intelgraph/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest --config ./jest.config.cjs"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/supertest": "^6.0.3",
+    "supertest": "^7.0.0"
+  },
+  "engines": {
+    "node": ">=18.18.0"
+  }
+}
