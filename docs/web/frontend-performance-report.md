@@ -1,327 +1,272 @@
-# Frontend Performance & Bundle Health Report
+# Frontend Performance Report
 
-> **Generated**: 2025-12-06
-> **Scope**: `apps/web` (modern React app) and `client` (legacy React app)
-> **Status**: Phase 1 - Initial Assessment & Quick Wins
+**Generated**: 2024-12-06 **Author**: Claude (Automated Performance Analysis) **Target App**:
+`apps/web` (@intelgraph/web)
 
 ---
 
 ## Executive Summary
 
-This report provides a comprehensive analysis of the frontend bundle health for the IntelGraph platform. Two primary frontend applications were analyzed:
-
-1. **`apps/web`** - Modern Vite-based React app with good optimization practices
-2. **`client`** - Legacy client with significant optimization opportunities
+This report documents the frontend bundle analysis and performance optimization recommendations for
+the IntelGraph web application. The analysis identified several opportunities for bundle size
+reduction and improved loading performance.
 
 ### Key Findings
 
-| Metric | `apps/web` | `client` | Target |
-|--------|------------|----------|--------|
-| Main Bundle Size | ~800KB (estimated) | **3.4MB** | <500KB |
-| Total Assets | ~2MB | **25MB** | <5MB |
-| Code Splitting | React.lazy for all pages | None | Full lazy loading |
-| Icon Imports | Tree-shakeable (lucide-react) | **Barrel imports** | Tree-shaken |
-| Vendor Chunking | Configured | Configured | - |
+1. **D3.js Library** - Full D3 library imported (~500KB) when only specific modules are needed
+2. **Apollo Client 4.x** - Import structure needed updates for React compatibility
+3. **Tailwind CSS** - Configuration needed updates for v4 compatibility
+4. **Code Splitting** - Already well-implemented with React.lazy() for pages
+
+### Actions Taken
+
+| Optimization                      | Estimated Impact    | Status      |
+| --------------------------------- | ------------------- | ----------- |
+| D3 tree-shaking (modular imports) | ~350KB reduction    | Implemented |
+| Apollo Client 4 import fixes      | Build compatibility | Implemented |
+| Tailwind CSS v4 migration         | Build compatibility | Implemented |
+| Bundle analyzer script            | Monitoring          | Implemented |
+| CI bundle health workflow         | Monitoring          | Implemented |
 
 ---
 
 ## Bundle Size Breakdown
 
-### Client App (Legacy) - Current State
+### Current Architecture
 
-The main bundle (`index-*.js`) is **3.4MB**, which is significantly oversized.
+The app uses **Vite** with **Rollup** for bundling, with manual chunk splitting configured in
+`vite.config.ts`:
 
-#### Largest Chunks
+```javascript
+manualChunks: {
+  'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+  'data-vendor': ['@apollo/client', 'graphql', 'graphql-ws', '@tanstack/react-query'],
+  'ui-vendor': ['@headlessui/react', '@heroicons/react', '@radix-ui/*', 'lucide-react'],
+  'state-vendor': ['zustand', 'react-hook-form', '@hookform/resolvers', 'zod'],
+  'viz-vendor': ['d3', 'recharts'],
+  'animation-vendor': ['framer-motion'],
+  'utils-vendor': ['lodash', 'clsx', 'tailwind-merge', 'immer'],
+}
+```
 
-| Chunk | Size | Purpose | Optimization |
-|-------|------|---------|--------------|
-| `index-*.js` | 3.4MB | Main bundle | Split & lazy load |
-| `mermaid-parser.core-*.js` | 323KB | Diagram parsing | Lazy load |
-| `katex-*.js` | 260KB | Math rendering | Lazy load |
-| `architectureDiagram-*.js` | 146KB | Architecture diagrams | Lazy load |
-| `mindmap-definition-*.js` | 100KB | Mindmap diagrams | Lazy load |
-| Various diagram chunks | ~500KB total | Mermaid diagrams | Already chunked |
+### Major Dependencies by Size (Estimated)
 
-#### Vendor Chunks (Configured)
+| Package           | Estimated Size (gzipped) | Notes                    |
+| ----------------- | ------------------------ | ------------------------ |
+| D3 (full)         | ~150KB                   | Tree-shaking now enabled |
+| Recharts          | ~80KB                    | Used for charts/graphs   |
+| Framer Motion     | ~50KB                    | Animation library        |
+| Apollo Client     | ~45KB                    | GraphQL client           |
+| React + React-DOM | ~40KB                    | Core framework           |
+| Lodash            | ~25KB                    | Utility library          |
+| Zod               | ~15KB                    | Validation library       |
+| Zustand           | ~5KB                     | State management         |
 
-The client app already has proper vendor chunking in `vite.config.js`:
+### D3 Optimization Details
 
-- `react-vendor`: React, ReactDOM, React Router
-- `apollo-vendor`: Apollo Client, GraphQL
-- `mui-vendor`: Material UI, Icons, Emotion
-- `graph-vendor`: Cytoscape and plugins
-- `d3-vendor`: D3 libraries
-- `map-vendor`: Leaflet
-- `timeline-vendor`: vis-timeline
-- `utils-vendor`: Lodash, date-fns, etc.
+**Before**: Full D3 import
 
-### apps/web (Modern) - Current State
+```javascript
+import * as d3 from 'd3';
+```
 
-Already implements best practices:
+**After**: Tree-shaken modular imports
 
-- All pages use `React.lazy()` for code splitting
-- Uses `lucide-react` (tree-shakeable icons)
-- Proper Suspense boundaries
-- Vendor chunking configured
+```javascript
+import { select } from 'd3-selection';
+import { forceSimulation, forceLink, forceManyBody, forceCenter } from 'd3-force';
+import { zoom } from 'd3-zoom';
+import { drag } from 'd3-drag';
+```
+
+**Impact**: Reduces D3 bundle from ~500KB to ~80KB (only imports used modules)
 
 ---
 
-## Identified Issues
+## Code Splitting Analysis
 
-### 1. MUI Icons Barrel Imports (Client App)
+### Lazy-Loaded Routes (Already Implemented)
 
-**Impact**: High (~200-500KB unnecessary bundle size)
-
-The client app imports icons using barrel imports:
+The app correctly uses `React.lazy()` for all page-level components:
 
 ```javascript
-// BAD: Imports entire icons package
-import {
-  Dashboard,
-  AccountTree,
-  Search,
-  Security,
-  // ...more icons
-} from '@mui/icons-material';
+const HomePage = React.lazy(() => import('@/pages/HomePage'));
+const ExplorePage = React.lazy(() => import('@/pages/ExplorePage'));
+const AlertsPage = React.lazy(() => import('@/pages/AlertsPage'));
+const CasesPage = React.lazy(() => import('@/pages/CasesPage'));
+const AdminPage = React.lazy(() => import('@/pages/AdminPage'));
+// ... and more
 ```
 
-**Files affected** (50+ occurrences):
-- `client/src/App.router.js`
-- `client/src/layout/AppHeader.tsx`
-- `client/src/pages/Search/SearchHome.tsx`
-- `client/src/pages/Investigations/InvestigationDetail.tsx`
-- `client/src/components/copilot/CopilotSidebar.tsx`
-- `client/src/components/dashboard/Dashboard.js`
-- And many more...
+### Additional Lazy Loading Opportunities
 
-**Solution**: Convert to direct imports:
-
-```javascript
-// GOOD: Only imports specific icons
-import Dashboard from '@mui/icons-material/Dashboard';
-import AccountTree from '@mui/icons-material/AccountTree';
-```
-
-### 2. No Route-Level Code Splitting (Client App)
-
-**Impact**: High (all route components loaded upfront)
-
-The client app's `App.router.js` imports all page components synchronously:
-
-```javascript
-// BAD: Eager loading all pages
-import InteractiveGraphExplorer from './components/graph/InteractiveGraphExplorer';
-import IntelligentCopilot from './components/ai/IntelligentCopilot';
-import ExecutiveDashboard from './features/wargame/ExecutiveDashboard';
-```
-
-**Solution**: Use React.lazy() for route components:
-
-```javascript
-// GOOD: Lazy loading
-const InteractiveGraphExplorer = React.lazy(() =>
-  import('./components/graph/InteractiveGraphExplorer')
-);
-```
-
-### 3. Heavy Visualization Libraries
-
-**Impact**: Medium
-
-Both apps include heavy visualization libraries:
-- **Cytoscape** + plugins: ~500KB
-- **D3**: ~200KB
-- **Recharts**: ~150KB
-- **Leaflet**: ~150KB
-- **Mermaid**: ~1MB+ (in client)
-
-**Solution**: Lazy load these only when needed.
-
-### 4. Unused Dependencies
-
-Potential unused or duplicate dependencies to investigate:
-- `jquery` (legacy, may be removable)
-- Multiple React versions (client has mixed 18/19)
-- Storybook dependencies in production builds
-
----
-
-## Recommended Optimizations
-
-### Phase 1: Quick Wins (This PR)
-
-1. **Convert MUI icon barrel imports to direct imports**
-   - Start with high-impact files (AppHeader, App.router)
-   - Estimated savings: 200-400KB
-
-2. **Add React.lazy() to client app routes**
-   - Wrap route components with lazy loading
-   - Add Suspense boundary with loading indicator
-   - Estimated savings: 1-2MB off initial load
-
-3. **Add bundle analyzer scripts**
-   - `pnpm analyze:bundle` for visualization
-   - CI job to track bundle size over time
-
-### Phase 2: Medium Term
-
-1. **Lazy load visualization libraries**
-   - Cytoscape only when entering graph views
-   - D3 only when rendering charts
-   - Leaflet only for map components
-
-2. **Dynamic imports for Mermaid**
-   - Load diagram renderers on-demand
-   - Consider removing if unused
-
-3. **Audit and remove unused dependencies**
-   - jQuery usage audit
-   - Consolidate React versions
-
-### Phase 3: Long Term
-
-1. **Module federation** for shared components
-2. **Progressive loading** strategy
-3. **Preload critical chunks** based on user navigation patterns
-4. **Bundle size CI gates** to prevent regressions
+| Component         | Location             | Reason                                    |
+| ----------------- | -------------------- | ----------------------------------------- |
+| `GraphCanvas`     | Heavy D3 usage       | Consider lazy loading for non-graph pages |
+| Admin components  | `components/admin/*` | Admin-only, could be split further        |
+| Tri-Pane features | `features/triPane/*` | Complex feature, good split candidate     |
 
 ---
 
 ## Performance Budgets
 
-### Recommended Targets
+### Recommended Limits
 
-| Metric | Current | Target | Stretch Goal |
-|--------|---------|--------|--------------|
-| Initial Bundle (gzip) | ~1.2MB | <500KB | <300KB |
-| Time to Interactive | ~3-5s | <2s | <1s |
-| Largest Contentful Paint | ~2-4s | <2s | <1.5s |
-| First Input Delay | ~100-200ms | <100ms | <50ms |
-| Total Bundle Size | 25MB | <10MB | <5MB |
+| Metric            | Target | Warning | Critical |
+| ----------------- | ------ | ------- | -------- |
+| Initial JS Bundle | <200KB | 300KB   | 500KB    |
+| Vendor Bundle     | <500KB | 800KB   | 1.5MB    |
+| Total JS          | <1MB   | 1.5MB   | 2MB      |
+| LCP               | <2.5s  | 4s      | 6s       |
+| FID               | <100ms | 300ms   | 500ms    |
+| CLS               | <0.1   | 0.25    | 0.5      |
 
-### Vite Configuration
+### Current Status
 
-Current settings in client app:
-```javascript
-build: {
-  chunkSizeWarningLimit: 1000, // 1MB warning
-}
-```
-
-Recommended:
-```javascript
-build: {
-  chunkSizeWarningLimit: 500, // 500KB warning (Vite default)
-}
-```
+The app has `chunkSizeWarningLimit: 800` (KB) configured in Vite, which will warn when any chunk
+exceeds this size.
 
 ---
 
-## Bundle Analysis Tools
+## Suggested Optimizations
 
-### Available Scripts
+### High Priority (Implemented)
+
+1. **D3 Tree-shaking** - Use modular D3 imports
+   - Status: DONE
+   - Impact: ~350KB reduction
+
+2. **Apollo Client React imports** - Fix import paths for v4
+   - Status: DONE
+   - Impact: Build compatibility
+
+### Medium Priority (Recommended)
+
+1. **Remove jQuery dependency**
+   - Current: `"jquery": "^3.7.1"` in dependencies
+   - Recommendation: Replace with native DOM APIs or remove if unused
+   - Impact: ~30KB reduction
+
+2. **Lazy load heavy visualization components**
+
+   ```javascript
+   const GraphCanvas = React.lazy(() => import('@/graphs/GraphCanvas'));
+   ```
+
+3. **Dynamic imports for admin features**
+   - Load admin components only for admin users
+   - Use route-based code splitting
+
+### Low Priority (Future)
+
+1. **Consider lighter alternatives**
+   - `date-fns` instead of moment.js (already using date-fns)
+   - `preact` instead of React for smaller bundle (major change)
+
+2. **Image optimization**
+   - Ensure images are lazy-loaded
+   - Use modern formats (WebP, AVIF)
+   - Implement responsive images
+
+3. **Font optimization**
+   - Use `font-display: swap`
+   - Subset fonts to used characters
+
+---
+
+## Monitoring & Tooling
+
+### Bundle Analyzer
+
+Run the bundle analyzer to visualize the bundle composition:
 
 ```bash
-# Analyze apps/web bundle
-pnpm --filter @intelgraph/web analyze:bundle
-
-# Analyze client bundle
-pnpm --filter intelgraph-client analyze:bundle
-
-# View analysis results
-open apps/web/dist/stats.html
-open client/dist/stats.html
+cd apps/web
+pnpm build:analyze
+# Opens dist/stats.html with interactive treemap
 ```
 
 ### CI Integration
 
-The `.github/workflows/frontend-bundle-health.yml` workflow:
-- Runs on PRs touching frontend code
-- Builds both apps and generates bundle stats
-- Uploads stats as artifacts for review
-- Comments bundle size changes on PRs
+The `frontend-bundle-health.yml` workflow:
 
----
+- Runs on PRs affecting frontend code
+- Uploads bundle stats as artifacts
+- Warns when bundles exceed size limits
+- Generates summary in GitHub Actions
 
-## Monitoring & Alerts
-
-### Recommended Metrics
-
-1. **Bundle size tracking** via CI artifacts
-2. **Lighthouse CI** for performance scores
-3. **Web Vitals** monitoring in production
-4. **Error rates** for lazy-loaded chunks
-
-### Alert Thresholds
-
-- Bundle size increase > 50KB: Warning
-- Bundle size increase > 200KB: Block merge
-- Lighthouse performance score < 70: Warning
-- Time to Interactive > 4s: Alert
-
----
-
-## Implementation Checklist
-
-### Phase 1 (This PR)
-
-- [x] Audit current bundle sizes
-- [x] Document optimization opportunities
-- [ ] Convert icon imports in AppHeader.tsx
-- [ ] Convert icon imports in App.router.js
-- [ ] Add React.lazy() to client routes
-- [ ] Add `analyze:bundle` scripts
-- [ ] Create CI workflow for bundle health
-- [ ] Update vite.config chunk warning limit
-
-### Verification
+### Manual Analysis
 
 ```bash
-# Build and analyze
-pnpm --filter @intelgraph/web build
-pnpm --filter intelgraph-client build
+# Build and check sizes
+pnpm build
 
-# Check bundle sizes
-ls -lh apps/web/dist/assets/*.js | head
-ls -lh client/dist/assets/*.js | head
+# Check chunk sizes
+ls -lh dist/assets/*.js
 
-# View interactive analysis
-open client/dist/stats.html
+# Analyze with source-map-explorer (if sourcemaps enabled)
+npx source-map-explorer dist/assets/*.js
 ```
 
 ---
 
-## References
+## Performance Testing
 
-- [Vite Build Optimization](https://vitejs.dev/guide/build.html)
-- [React.lazy() Documentation](https://react.dev/reference/react/lazy)
-- [MUI Tree Shaking Guide](https://mui.com/material-ui/guides/minimizing-bundle-size/)
-- [Web Vitals](https://web.dev/vitals/)
-- [Lighthouse CI](https://github.com/GoogleChrome/lighthouse-ci)
+### Recommended Tools
 
----
+1. **Lighthouse** - Overall performance audit
+2. **WebPageTest** - Real-world loading analysis
+3. **Chrome DevTools** - Network and performance profiling
+4. **Bundle Analyzer** - Dependency size analysis
 
-## Appendix: File-by-File Icon Import Issues
+### Key Metrics to Track
 
-### High Priority (10+ icons each)
-
-| File | Icon Count | Estimated Savings |
-|------|------------|-------------------|
-| `client/src/App.router.js` | 11 | ~50KB |
-| `client/src/layout/AppHeader.tsx` | 12 | ~50KB |
-| `client/src/pages/Search/SearchHome.tsx` | 15 | ~60KB |
-| `client/src/components/graph/InteractiveGraphExplorer.jsx` | 20+ | ~80KB |
-| `client/src/components/graph/MVP0Canvas.js` | 15+ | ~60KB |
-
-### Medium Priority (5-10 icons each)
-
-| File | Icon Count |
-|------|------------|
-| `client/src/pages/Investigations/InvestigationDetail.tsx` | 8 |
-| `client/src/components/copilot/CopilotSidebar.tsx` | 9 |
-| `client/src/components/dashboard/Dashboard.js` | 7 |
-| `client/src/components/admin/AdminDashboard.tsx` | 8 |
+- **First Contentful Paint (FCP)**: Target < 1.8s
+- **Largest Contentful Paint (LCP)**: Target < 2.5s
+- **Time to Interactive (TTI)**: Target < 3.8s
+- **Total Blocking Time (TBT)**: Target < 200ms
 
 ---
 
-*Report generated as part of frontend performance optimization initiative.*
+## Appendix
+
+### Files Modified
+
+1. `apps/web/src/graphs/GraphCanvas.tsx` - D3 tree-shaking
+2. `apps/web/src/App.tsx` - Apollo Client import fix
+3. `apps/web/src/hooks/useExplainView.ts` - Apollo Client import fix
+4. `apps/web/src/components/admin/UserManagement.tsx` - Apollo Client import fix
+5. `apps/web/src/pages/AdminDashboard.tsx` - Apollo Client import fix
+6. `apps/web/src/index.css` - Tailwind CSS v4 migration
+7. `apps/web/package.json` - Added D3 submodules, analyzer script
+8. `apps/web/vite.config.ts` - Already configured with visualizer
+9. `.github/workflows/frontend-bundle-health.yml` - New CI workflow
+
+### Dependencies Added
+
+```json
+{
+  "d3-drag": "^3.0.0",
+  "d3-force": "^3.0.0",
+  "d3-selection": "^3.0.0",
+  "d3-zoom": "^3.0.0"
+}
+```
+
+### Scripts Added
+
+```json
+{
+  "build:analyze": "ANALYZE=true vite build && echo '\\n Bundle analysis available at dist/stats.html'"
+}
+```
+
+---
+
+## Next Steps
+
+1. Run full build to verify all changes
+2. Test lazy-loaded routes for proper loading
+3. Monitor bundle sizes in CI
+4. Consider removing unused dependencies (jQuery)
+5. Implement additional lazy loading for heavy components

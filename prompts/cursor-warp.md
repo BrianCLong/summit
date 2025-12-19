@@ -1,119 +1,104 @@
-# CURSOR / WARP / VSCODE SUPERPROMPT — ZERO-FRICTION DEVLOOP
+# Cursor / Warp / VSCode Superprompt — Zero-Friction Devloop
 
 You are operating inside a live editor/terminal environment.
 
 All output MUST:
 
-- run immediately  
-- require zero manual editing  
-- provide the exact shell commands to run  
-- be merge-ready  
-- be CI-ready  
+- Run immediately
+- Require zero manual editing
+- Provide the exact shell commands to run
+- Be merge-ready
+- Be CI-ready
 
 ---
 
-## REQUIRED OUTPUT SECTIONS
+## Required Output Sections
 
-1. Code  
-2. Tests  
-3. Config updates  
-4. Documentation  
-5. Terminal commands  
-6. PR creation steps  
-7. CI verification steps  
+1. Code
+2. Tests
+3. Config updates
+4. Documentation
+5. Terminal commands
+6. PR creation steps
+7. CI verification steps
 
 ---
 
-## EXAMPLE WORKFLOW
+## Command Execution Pattern
+
+Always provide copy-paste ready commands:
 
 ```bash
 # Install dependencies
 pnpm install
 
-# Build project
+# Build the project
 pnpm build
 
 # Run tests
 pnpm test
 
-# Lint code
+# Run linting
 pnpm lint
 
 # Type check
 pnpm typecheck
 
-# Stage changes
+# Commit changes
 git add -A
-
-# Commit with conventional format
-git commit -m "feat: implement feature X
-
-- Add feature implementation
-- Add comprehensive tests
-- Update documentation
-
-Closes #123"
+git commit -m "feat: implementation description"
 
 # Push to remote
-git push origin feat/feature-x
+git push -u origin feature-branch
 
-# Create PR
-gh pr create --fill --label "ready-for-review"
+# Create PR (if gh CLI available)
+gh pr create --fill
 
-# Watch CI
+# Watch CI status
 gh run watch
 ```
 
 ---
 
-## SUMMIT DEVLOOP SPECIFICS
+## Editor Integration
 
-### Local Development
+When in Cursor/VSCode:
+
+1. **Multi-file edits** - Provide complete file contents for each file
+2. **Inline completions** - Context-aware suggestions
+3. **Terminal commands** - Exact commands to execute
+4. **Diagnostics** - Address all editor warnings/errors
+
+---
+
+## Devloop Optimization
+
+For rapid iteration:
+
+1. **Hot reload aware** - Changes should work with HMR
+2. **Type-safe** - No `any` types that break completions
+3. **Import paths** - Use workspace aliases correctly
+4. **Testing** - Include commands to run affected tests
+
+---
+
+## IntelGraph Quick Commands
+
 ```bash
-# Start all services
-pnpm dev
+# Start development stack
+make up
 
-# Start specific service
-pnpm dev --filter=@summit/api
+# Run smoke tests
+make smoke
 
-# Run database migrations
-pnpm migrate:dev
+# View logs
+make logs
 
-# Seed test data
-pnpm seed:dev
+# Stop all services
+make down
 
-# Reset database
-pnpm db:reset
-```
-
-### Testing
-```bash
-# Run all tests
-pnpm test
-
-# Run specific test file
-pnpm test path/to/test
-
-# Run tests in watch mode
-pnpm test:watch
-
-# Run tests with coverage
-pnpm test:coverage
-
-# Run integration tests
-pnpm test:integration
-```
-
-### Quality Checks
-```bash
-# Run all checks
-pnpm check
-
-# This runs:
-# - pnpm lint
-# - pnpm typecheck
-# - pnpm test
-# - pnpm build
+# Full rebuild
+make bootstrap
 ```
 
 ---

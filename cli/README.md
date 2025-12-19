@@ -37,6 +37,17 @@ pnpm build
 
 ## Quick Start
 
+### Summit Doctor (local environment health)
+
+Build the CLI and run the developer doctor locally:
+
+```bash
+pnpm --filter @intelgraph/cli build
+node cli/dist/summit.js doctor --fix
+```
+
+Use `--json` for machine-readable output or `--env-file` to point at a custom `.env`.
+
 ### Initialize Configuration
 
 ```bash

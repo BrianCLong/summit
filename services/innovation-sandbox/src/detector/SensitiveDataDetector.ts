@@ -234,9 +234,10 @@ export class SensitiveDataDetector {
         return `***-**-${value.slice(-4)}`;
       case 'CREDIT_CARD':
         return `****-****-****-${value.slice(-4)}`;
-      case 'EMAIL':
+      case 'EMAIL': {
         const [local, domain] = value.split('@');
         return `${local[0]}***@${domain}`;
+      }
       case 'PHONE':
         return `***-***-${value.slice(-4)}`;
       default:

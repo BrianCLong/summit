@@ -143,7 +143,11 @@ export class EventNotificationService extends EventEmitter {
     event: DomainEventNotification,
     filter?: SubscriptionFilter
   ): boolean {
+<<<<<<< HEAD
+    if (!filter) return true;
+=======
     if (!filter) {return true;}
+>>>>>>> main
 
     if (
       filter.eventTypes &&

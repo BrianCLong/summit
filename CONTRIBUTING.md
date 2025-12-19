@@ -1,298 +1,116 @@
 # Contributing to Summit (IntelGraph)
 
-> **For AI Assistants:** See [CLAUDE.md](CLAUDE.md) for comprehensive codebase context, conventions,
-> and development workflows.
+> **⚠️ IMPORTANT:** This document is being superseded by the **[Developer Enablement Pack](planning/enablement-pack/README.md)**.
+> Please refer to that directory for the authoritative "Golden Path" on onboarding, workflows, and architecture.
 
-## Prerequisites
+## Prerequisites & Setup
 
-- Node 20 LTS, pnpm 9 (corepack enabled)
-- Docker Desktop with Compose for local services
-- Git with conventional commit hooks configured
-- 8GB+ RAM for full development stack
-
-## Setup
-
-```bash
-# Enable corepack and install pnpm
-corepack enable && corepack prepare pnpm@9.12.3 --activate
-
-# Bootstrap the development environment
-make bootstrap
-
-# Verify the golden path
-make up && make smoke
-```
+Please follow the **[Onboarding & Quickstart Guide](planning/enablement-pack/onboarding-quickstart.md)**.
 
 ## Common Development Tasks
 
-- **Typecheck:** `make typecheck` or `pnpm typecheck`
-- **Lint:** `make lint` or `pnpm lint`
-- **Test:** `make test` or `pnpm test`
-- **E2E (smoke):** `make smoke` or `pnpm smoke`
-- **Build all:** `make build` or `pnpm build`
-- **GraphQL Codegen:** `make codegen` or `pnpm graphql:codegen`
-- **Services:** `make up` / `make down`
-- **AI Services:** `make up-ai` / `make down`
+See **[Daily Developer Workflows](planning/enablement-pack/daily-dev-workflows.md)**.
 
-## Pre-commit Hooks
-
-Our pre-commit hooks ensure code quality and generate documentation artifacts.
-
-### Configuration
-
-- **Lint-staged:** Runs ESLint and Prettier on staged files.
-- **Gitleaks:** Scans for secrets.
-- **Screenshots:** Generates UI screenshots (skipped if server is down).
-
-### Troubleshooting
-
-- **Logs:** Check `git-hook.log` in the root directory for detailed output.
-- **Skipping:** Use `git commit --no-verify` to bypass hooks in emergencies.
-- **Screenshots:** Requires `npm run dev` to be running on port 3000. If the server is not running,
-  screenshot generation is skipped automatically.
+<<<<<<< HEAD
+> **Note:** Check out the [Examples Directory](examples/) for plugins and custom pipelines.
 
 ## Branch & Pull Request Workflow
+=======
+## Mergefix / Express 5 Changes (Fast Path)
+>>>>>>> main
 
-### Branch Naming
+This section defines **coding rules, commit conventions, and the minimal gate** for any PR that touches the Express 5 migration or related merge conflict work. Use it for PRs labeled `mergefix`.
 
-- Feature: `feature/<description>`
-- Fix: `fix/<description>`
-- Docs: `docs/<description>`
-- AI Agent: `claude/<session-id>`, `jules/<session-id>`, `codex/<session-id>`
+### Coding Rules (must)
 
-### Commit Messages
+1. **One global error handler** at the end of the middleware chain. No router-level error handlers.
+2. **Async handlers `throw`**; never call `next(err)` from an `async` function.
+3. **Structured errors** only:
+   ```json
+   { "error": { "code": "BAD_REQUEST", "message": "Human-readable text" } }
+   ```
+4. **Order**: routes → 404 → error handler.
+5. **Return after responding** (avoid `"headers already sent"`).
+6. **Validation**: validators may `throw` `{ statusCode, code, message }`; do not `next(err)`.
+7. **Streaming**: use `await pipeline(stream, res)`; let rejections bubble to the global error handler.
+8. **Tests**: Supertest must `await`; assert JSON errors; 404 is JSON.
 
-Follow [Conventional Commits](https://www.conventionalcommits.org/):
+### Commit Message Convention
 
-```
-<type>(<scope>): <description>
+Use the `mergefix` type + scope:
 
-[optional body]
+- `mergefix(express5): centralize error handler`
+- `mergefix(router): drop next(err) in async handlers`
+- `mergefix(build): adjust Vite 7 config`
+- `mergefix(tests): update Supertest for JSON errors`
 
-[optional footer]
-```
+If a commit is a pure conflict resolution, prefer the prefix `mergefix(express5):` and keep the diff tightly scoped.
 
-**Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `ci`, `build`,
-`revert`
+> Add formatting-only or mass-rename SHAs to `.git-blame-ignore-revs`.
 
-**Examples:**
+### Minimal Local Gate (must pass before pushing)
 
-```
-feat(api): add entity search endpoint
-fix(graph): resolve neo4j connection timeout
-docs(readme): update quickstart instructions
-chore(deps): update pnpm-lock.yaml
-```
-
-### Pull Request Requirements
-
-- Keep changes scoped and focused
-- Run `scripts/pr_guard.sh` before creating PR
-- Ensure CI is green (all checks must pass)
-- Include tests for new features
-- Update documentation as needed
-- Request review from core maintainers
-- Merge queue enforces required checks
-
-## Troubleshooting
-
-- **Build issues:** Run `scripts/green_build.sh` to self-heal and build
-- **Workspace audit:** Run `node scripts/audit_workspaces.mjs --strict`
-- **Golden path fails:** Run `make down && make up && make smoke`
-- **Docker issues:** `docker system prune -af` then `make up`
-
-## AI Agent Collaboration
-
-Summit embraces AI-augmented development through multi-agent collaboration. This section provides
-guidelines for AI agents (Claude, Jules, Codex, GitHub Copilot) and their human partners.
-
-### AI Agent Types
-
-1. **Claude (Anthropic)** - Code generation, refactoring, documentation, architectural guidance
-2. **Jules (GitHub)** - Pull request reviews, issue triage, automated workflows
-3. **GitHub Copilot** - In-editor code completions and suggestions
-4. **GitHub Actions** - Automated CI/CD, testing, deployment pipelines
-5. **CodeRabbit** - Automated PR reviews and code quality analysis
-
-### AI Agent Workflow
-
-```mermaid
-graph TD
-    A[Developer/AI Agent] -->|Create Branch| B[Feature Branch]
-    B -->|Commit Changes| C[Pre-commit Hooks]
-    C -->|Gitleaks, Lint, Format| D{Checks Pass?}
-    D -->|No| E[Fix Issues]
-    E -->|Retry| C
-    D -->|Yes| F[Push to Remote]
-    F -->|Create PR| G[GitHub Actions CI]
-    G -->|Lint, Test, Smoke| H{CI Green?}
-    H -->|No| E
-    H -->|Yes| I[CodeRabbit Review]
-    I -->|Jules Triage| J[Human Review]
-    J -->|Approved| K[Merge to Main]
-    K -->|Deploy| L[Production]
+```bash
+pnpm install --frozen-lockfile
+pnpm lint
+pnpm test -- --ci
+pnpm -r build
+pnpm playwright install --with-deps
+pnpm e2e
+pnpm jest contracts/graphql/__tests__/schema.contract.ts --runInBand
+curl -sL -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64 && chmod +x ./opa && ./opa test policies/ -v
+pnpm cyclonedx-npm --output-format JSON --output-file sbom.json
+node .ci/gen-provenance.js > provenance.json && node .ci/verify-provenance.js provenance.json
 ```
 
-### Guidelines for AI Agents
+Or with `make`:
 
-#### DO ✅
-
-- **Always run golden path:** `make bootstrap && make up && make smoke` before claiming success
-- **Follow existing patterns:** Read CLAUDE.md for codebase conventions
-- **Write tests:** Include unit and integration tests for new features
-- **Document changes:** Update relevant docs (README, ONBOARDING, API docs)
-- **Use TypeScript types:** Avoid `any`, prefer interfaces and types
-- **Handle errors gracefully:** Use try/catch, return error objects
-- **Reference file paths:** Use `file_path:line_number` pattern in responses
-- **Maintain security:** Check for OWASP vulnerabilities, no hardcoded secrets
-- **Verify incrementally:** Test each change before moving to the next
-- **Use conventional commits:** Follow commit message standards
-
-#### DON'T ❌
-
-- **Skip the smoke test:** Never claim completion without running `make smoke`
-- **Commit secrets:** Never commit credentials, API keys, or sensitive data
-- **Break golden path:** Ensure Investigation → Entities → Relationships → Copilot → Results
-  workflow
-- **Use production defaults:** Never use default passwords or localhost in production config
-- **Bypass security:** Don't disable security checks or skip validation
-- **Ignore test failures:** Fix all failing tests before committing
-- **Use magic numbers:** Use named constants instead of hardcoded values
-- **Skip documentation:** Always update docs to reflect code changes
-- **Batch too much:** Keep PRs focused and reviewable (< 500 lines preferred)
-- **Commit debug code:** Remove console.log, debugger statements, and .only() tests
-
-### AI-Generated Code Review Checklist
-
-Before submitting AI-generated code:
-
-- [ ] Code follows TypeScript/ESLint conventions
-- [ ] All imports are properly ordered and grouped
-- [ ] No unused imports or variables
-- [ ] Functions have clear, descriptive names
-- [ ] Complex logic includes comments explaining "why"
-- [ ] Error handling is comprehensive
-- [ ] Tests cover new functionality (aim for 80%+ coverage)
-- [ ] No security vulnerabilities introduced
-- [ ] GraphQL schema changes are backward-compatible
-- [ ] Database migrations are reversible
-- [ ] Environment variables are documented in .env.example
-- [ ] Performance implications considered (no N+1 queries, etc.)
-- [ ] Accessibility requirements met (WCAG 2.1 AA)
-- [ ] Documentation updated (README, API docs, inline comments)
-- [ ] `make smoke` passes locally
-
-### Multi-Agent Coordination
-
-When multiple AI agents work on the same codebase:
-
-1. **Branch isolation:** Each agent works on a dedicated branch (`claude/<session-id>`, etc.)
-2. **Merge strategy:** Rebase on main frequently to avoid conflicts
-3. **Communication:** Document decisions in PR descriptions and commit messages
-4. **Handoff protocol:** Leave clear TODO comments for next agent or human
-5. **State preservation:** Use git commits to checkpoint progress frequently
-6. **Context sharing:** Reference related PRs, issues, and documentation
-
-### AI Agent Best Practices
-
-#### For Code Generation
-
-```typescript
-// ✅ Good: Typed, explicit, testable
-interface EntityInput {
-  type: string;
-  name: string;
-  properties: Record<string, unknown>;
-}
-
-async function createEntity(input: EntityInput): Promise<Entity> {
-  try {
-    const validated = await validateEntity(input);
-    const entity = await entityRepo.create(validated);
-    await auditLog.record('entity:create', entity.id);
-    return entity;
-  } catch (error) {
-    logger.error('Failed to create entity', { input, error });
-    throw new EntityCreationError('Entity creation failed', { cause: error });
-  }
-}
-
-// ❌ Bad: Untyped, implicit, hard to test
-async function createEntity(input: any) {
-  const entity = await entityRepo.create(input);
-  return entity;
-}
+```bash
+make ci-check contracts policy-sim
 ```
 
-#### For Documentation
+### Conflict-Resolution Tips
 
-- Use clear, concise language
-- Include code examples with expected output
-- Link to related documentation
-- Keep examples up-to-date with current codebase
-- Use proper markdown formatting
-- Include troubleshooting sections
+- Enable `git rerere` once:
 
-#### For Testing
+  ```bash
+  git config --global rerere.enabled true
+  git config --global rerere.autoUpdate true
+  git config --global rerere.log true
+  ```
 
-```typescript
-// ✅ Good: Descriptive, isolated, comprehensive
-describe('EntityService', () => {
-  describe('createEntity', () => {
-    it('should create entity with valid data', async () => {
-      const input = entityFactory({ type: 'Person', name: 'Test' });
-      const result = await entityService.create(input);
+- Detect duplicates before opening your PR:
 
-      expect(result).toHaveProperty('id');
-      expect(result.type).toBe('Person');
-      expect(result.name).toBe('Test');
-    });
+  ```bash
+  git log --oneline --cherry origin/main...HEAD
+  ```
 
-    it('should throw error when entity type is invalid', async () => {
-      const input = entityFactory({ type: 'InvalidType' });
+### PR Checklist
 
-      await expect(entityService.create(input)).rejects.toThrow(ValidationError);
-    });
-
-    it('should audit entity creation', async () => {
-      const input = entityFactory();
-      await entityService.create(input);
-
-      expect(auditLog.record).toHaveBeenCalledWith('entity:create', expect.any(String));
-    });
-  });
-});
-```
-
-### Multi-Agent Workflow Documentation
-
-For detailed multi-agent collaboration patterns, see:
-
-- **[AI Agent Workflow Guide](docs/AI_AGENT_WORKFLOW.md)** - Complete multi-agent workflow
-  documentation
-- **[Multi-Agent LLM Innovation Roadmap](docs/ai/multi-agent-llm-innovation-roadmap.md)** -
-  Strategic multi-agent architecture
-- **[Multi-Agent Frameworks 2025](docs/multi-agent-frameworks-2025.md)** - Framework comparison and
-  recommendations
-
-### Getting Help
-
-- **AI Assistants:** Read [CLAUDE.md](CLAUDE.md) for complete codebase context
-- **Humans:** Check existing code, tests, and documentation for patterns
-- **Community:** Ask in #summit-dev or #ai-agents Slack channels
-- **Documentation:** See [docs/README.md](docs/README.md) for complete doc index
+- [ ] No `next(err)` in async handlers
+- [ ] Single global error handler (after 404)
+- [ ] JSON error shape consistent
+- [ ] Tests updated for Express 5 semantics
+- [ ] Contracts + policy sim pass
+- [ ] SBOM + provenance generated and verified
 
 ## Testing Guidelines
 
-### Overview
+See **[Testing Guidelines](planning/enablement-pack/testing-guidelines.md)** for detailed patterns, factories, and mocking strategies.
 
-We maintain a comprehensive test suite with high coverage requirements to ensure code quality and
-reliability. All code changes should include appropriate tests.
+## AI Agent Collaboration
 
-### Test Types
+See **[AI Agent Guidelines](planning/enablement-pack/ai-agent-guidelines.md)**.
 
-#### 1. Unit Tests
+## Merge Rules & CI Gates
 
+<<<<<<< HEAD
+See **[Merge Rules & CI Gates](planning/enablement-pack/merge-rules-and-ci-gates.md)** for:
+*   Branching Strategy
+*   Pull Request Expectations
+*   CI Gates
+*   Fast Path / Mergefix instructions
+=======
 Unit tests focus on testing individual functions, classes, and modules in isolation.
 
 **Location:** `__tests__` directories next to source files **Pattern:** `*.test.ts`, `*.test.tsx`
@@ -695,3 +513,22 @@ make ci-check contracts policy-sim
 - [ ] Tests updated for Express 5 semantics
 - [ ] Contracts + policy sim pass
 - [ ] SBOM + provenance generated and verified
+
+## Strict CI Enforcement & Code Quality
+
+We enforce strict TypeScript checks (`strict: true`, `noImplicitAny`) and ESLint rules (`no-explicit-any`, `no-unused-vars`).
+
+### Zero Tolerance
+
+- All PRs must pass `npm run typecheck` and `npm run lint` with **zero errors and zero warnings**.
+- CI will fail fast on the first error.
+
+### Legacy Code Exemption
+
+To support gradual migration, existing files with errors are grandfathered via:
+- `.eslint-legacy-files.json`: Files exempt from strict ESLint rules.
+- `tsconfig.strict.json` exclude list: Files exempt from strict type checking.
+
+**New code must not be added to these exemption lists.**
+If you modify a legacy file, aim to fix the errors and remove it from the exemption list.
+>>>>>>> cfa40f325f (feat: Enforce strict TypeScript and ESLint checks in CI)
