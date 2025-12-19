@@ -22,6 +22,7 @@ import type {
 } from '@/types'
 import type { TriPaneSyncState } from '@/features/triPane'
 import { Loader2 } from 'lucide-react'
+import { ErrorBoundary } from '@/components/error'
 
 /**
  * TriPanePage component
@@ -162,19 +163,21 @@ export default function TriPanePage() {
   // Main render
   return (
     <div className="h-full p-6">
-      <TriPaneShell
-        entities={entities}
-        relationships={relationships}
-        timelineEvents={timelineEvents}
-        geospatialEvents={geospatialEvents}
-        onEntitySelect={handleEntitySelect}
-        onEventSelect={handleEventSelect}
-        onLocationSelect={handleLocationSelect}
-        onSyncStateChange={handleSyncStateChange}
-        onExport={handleExport}
-        showProvenanceOverlay={true}
-        className="h-full"
-      />
+      <ErrorBoundary>
+        <TriPaneShell
+          entities={entities}
+          relationships={relationships}
+          timelineEvents={timelineEvents}
+          geospatialEvents={geospatialEvents}
+          onEntitySelect={handleEntitySelect}
+          onEventSelect={handleEventSelect}
+          onLocationSelect={handleLocationSelect}
+          onSyncStateChange={handleSyncStateChange}
+          onExport={handleExport}
+          showProvenanceOverlay={true}
+          className="h-full"
+        />
+      </ErrorBoundary>
     </div>
   )
 }

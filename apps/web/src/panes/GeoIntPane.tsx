@@ -9,6 +9,7 @@ import { Label } from '../components/ui/label';
 import { Input } from '../components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { ErrorBoundary } from '../components/error';
 
 import L from 'leaflet';
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -104,129 +105,133 @@ export const GeoIntPane: React.FC = () => {
 
             <div className="flex flex-row h-[700px] gap-4">
                 {/* Map View */}
-                <div className="flex-grow rounded-md border overflow-hidden flex flex-col gap-2">
-                    <MapContainer center={center} zoom={13} style={{ height: '60%', width: '100%' }}>
-                        <TileLayer
-                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                        />
-                        {/* Detected Objects */}
-                        {satData?.analyzeSatelliteImage?.objectsDetected?.map((obj: any, idx: number) => (
-                            <Circle
-                                key={idx}
-                                center={[obj.location.lat, obj.location.lon]}
-                                pathOptions={{ color: 'red', fillColor: 'red' }}
-                                radius={50}
-                            >
-                                <Popup>
-                                    {obj.type} ({(obj.confidence * 100).toFixed(1)}%)
-                                </Popup>
-                            </Circle>
-                        ))}
-                         {/* Elevation Path */}
-                         {elevationData && (
-                            <Polyline
-                                positions={path.map(p => [p.lat, p.lon])}
-                                pathOptions={{ color: 'blue' }}
+                <ErrorBoundary>
+                    <div className="flex-grow rounded-md border overflow-hidden flex flex-col gap-2">
+                        <MapContainer center={center} zoom={13} style={{ height: '60%', width: '100%' }}>
+                            <TileLayer
+                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                             />
-                        )}
-                    </MapContainer>
+                            {/* Detected Objects */}
+                            {satData?.analyzeSatelliteImage?.objectsDetected?.map((obj: any, idx: number) => (
+                                <Circle
+                                    key={idx}
+                                    center={[obj.location.lat, obj.location.lon]}
+                                    pathOptions={{ color: 'red', fillColor: 'red' }}
+                                    radius={50}
+                                >
+                                    <Popup>
+                                        {obj.type} ({(obj.confidence * 100).toFixed(1)}%)
+                                    </Popup>
+                                </Circle>
+                            ))}
+                             {/* Elevation Path */}
+                             {elevationData && (
+                                <Polyline
+                                    positions={path.map(p => [p.lat, p.lon])}
+                                    pathOptions={{ color: 'blue' }}
+                                />
+                            )}
+                        </MapContainer>
 
-                    {/* Elevation Chart Area */}
-                    {elevationData?.getElevationProfile && (
-                        <div className="flex-grow p-4 bg-white border-t">
-                             <h3 className="text-sm font-semibold mb-2">Elevation Profile</h3>
-                             <ResponsiveContainer width="100%" height={200}>
-                                <AreaChart data={elevationData.getElevationProfile}>
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="distance" unit="m" tickFormatter={(val) => val.toFixed(0)} />
-                                    <YAxis unit="m" />
-                                    <Tooltip />
-                                    <Area type="monotone" dataKey="elevation" stroke="#8884d8" fill="#8884d8" />
-                                </AreaChart>
-                             </ResponsiveContainer>
-                        </div>
-                    )}
-                </div>
+                        {/* Elevation Chart Area */}
+                        {elevationData?.getElevationProfile && (
+                            <div className="flex-grow p-4 bg-white border-t">
+                                 <h3 className="text-sm font-semibold mb-2">Elevation Profile</h3>
+                                 <ResponsiveContainer width="100%" height={200}>
+                                    <AreaChart data={elevationData.getElevationProfile}>
+                                        <CartesianGrid strokeDasharray="3 3" />
+                                        <XAxis dataKey="distance" unit="m" tickFormatter={(val) => val.toFixed(0)} />
+                                        <YAxis unit="m" />
+                                        <Tooltip />
+                                        <Area type="monotone" dataKey="elevation" stroke="#8884d8" fill="#8884d8" />
+                                    </AreaChart>
+                                 </ResponsiveContainer>
+                            </div>
+                        )}
+                    </div>
+                </ErrorBoundary>
 
                 {/* Controls Pane */}
                 <div className="w-[350px] flex flex-col gap-4 overflow-y-auto">
-                    <Tabs defaultValue="satellite">
-                        <TabsList className="grid w-full grid-cols-3">
-                            <TabsTrigger value="satellite">Sat</TabsTrigger>
-                            <TabsTrigger value="change">Diff</TabsTrigger>
-                            <TabsTrigger value="terrain">Terrain</TabsTrigger>
-                        </TabsList>
+                    <ErrorBoundary>
+                        <Tabs defaultValue="satellite">
+                            <TabsList className="grid w-full grid-cols-3">
+                                <TabsTrigger value="satellite">Sat</TabsTrigger>
+                                <TabsTrigger value="change">Diff</TabsTrigger>
+                                <TabsTrigger value="terrain">Terrain</TabsTrigger>
+                            </TabsList>
 
-                        <TabsContent value="satellite">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Satellite Imagery</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label>Image URL</Label>
-                                        <Input value={satelliteUrl} onChange={(e) => setSatelliteUrl(e.target.value)} />
-                                    </div>
-                                    <Button onClick={handleSatAnalysis} disabled={satLoading}>
-                                        {satLoading ? "Analyzing..." : "Analyze Image"}
-                                    </Button>
-
-                                    {satData && (
-                                        <div className="mt-4 p-2 bg-slate-100 dark:bg-slate-800 rounded text-sm">
-                                            <p><strong>Class:</strong> {satData.analyzeSatelliteImage.classification}</p>
-                                            <p><strong>Cloud Cover:</strong> {satData.analyzeSatelliteImage.cloudCover}</p>
-                                            <p><strong>Objects:</strong> {satData.analyzeSatelliteImage.objectsDetected.length}</p>
+                            <TabsContent value="satellite">
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Satellite Imagery</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <div className="space-y-2">
+                                            <Label>Image URL</Label>
+                                            <Input value={satelliteUrl} onChange={(e) => setSatelliteUrl(e.target.value)} />
                                         </div>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        </TabsContent>
+                                        <Button onClick={handleSatAnalysis} disabled={satLoading}>
+                                            {satLoading ? "Analyzing..." : "Analyze Image"}
+                                        </Button>
 
-                        <TabsContent value="change">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Change Detection</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label>Before Image URL</Label>
-                                        <Input value={beforeUrl} onChange={(e) => setBeforeUrl(e.target.value)} />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>After Image URL</Label>
-                                        <Input value={afterUrl} onChange={(e) => setAfterUrl(e.target.value)} />
-                                    </div>
-                                    <Button onClick={handleChangeDetection} disabled={changeLoading}>
-                                        {changeLoading ? "Processing..." : "Detect Changes"}
-                                    </Button>
+                                        {satData && (
+                                            <div className="mt-4 p-2 bg-slate-100 dark:bg-slate-800 rounded text-sm">
+                                                <p><strong>Class:</strong> {satData.analyzeSatelliteImage.classification}</p>
+                                                <p><strong>Cloud Cover:</strong> {satData.analyzeSatelliteImage.cloudCover}</p>
+                                                <p><strong>Objects:</strong> {satData.analyzeSatelliteImage.objectsDetected.length}</p>
+                                            </div>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
 
-                                    {changeData && (
-                                        <div className="mt-4 p-2 bg-slate-100 dark:bg-slate-800 rounded text-sm">
-                                            <p><strong>Change Detected:</strong> {changeData.detectChange.changeDetected ? "Yes" : "No"}</p>
-                                            <p><strong>Magnitude:</strong> {changeData.detectChange.percentageChange}%</p>
+                            <TabsContent value="change">
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Change Detection</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <div className="space-y-2">
+                                            <Label>Before Image URL</Label>
+                                            <Input value={beforeUrl} onChange={(e) => setBeforeUrl(e.target.value)} />
                                         </div>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        </TabsContent>
+                                        <div className="space-y-2">
+                                            <Label>After Image URL</Label>
+                                            <Input value={afterUrl} onChange={(e) => setAfterUrl(e.target.value)} />
+                                        </div>
+                                        <Button onClick={handleChangeDetection} disabled={changeLoading}>
+                                            {changeLoading ? "Processing..." : "Detect Changes"}
+                                        </Button>
 
-                        <TabsContent value="terrain">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Terrain Analysis</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="text-xs text-muted-foreground">
-                                        Analyzes elevation profile along the predefined vector path.
-                                    </div>
-                                    <Button onClick={handleElevation} disabled={elevationLoading}>
-                                        {elevationLoading ? "Computing DEM..." : "Generate Profile"}
-                                    </Button>
-                                </CardContent>
-                            </Card>
-                        </TabsContent>
-                    </Tabs>
+                                        {changeData && (
+                                            <div className="mt-4 p-2 bg-slate-100 dark:bg-slate-800 rounded text-sm">
+                                                <p><strong>Change Detected:</strong> {changeData.detectChange.changeDetected ? "Yes" : "No"}</p>
+                                                <p><strong>Magnitude:</strong> {changeData.detectChange.percentageChange}%</p>
+                                            </div>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+
+                            <TabsContent value="terrain">
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Terrain Analysis</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <div className="text-xs text-muted-foreground">
+                                            Analyzes elevation profile along the predefined vector path.
+                                        </div>
+                                        <Button onClick={handleElevation} disabled={elevationLoading}>
+                                            {elevationLoading ? "Computing DEM..." : "Generate Profile"}
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+                        </Tabs>
+                    </ErrorBoundary>
                 </div>
             </div>
         </div>

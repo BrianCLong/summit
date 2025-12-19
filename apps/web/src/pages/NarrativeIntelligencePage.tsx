@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Title, Text, Metric, Flex, Grid, Badge } from '@tremor/react';
+import { ErrorBoundary } from '@/components/error';
 
 interface NarrativeIntelligencePageProps {}
 
@@ -49,67 +50,73 @@ export const NarrativeIntelligencePage: React.FC<NarrativeIntelligencePageProps>
         </div>
       </div>
 
-      <Grid numItems={3} className="gap-6">
-        <Card decoration="top" decorationColor="red">
-          <Text>CIB Detection Precision</Text>
-          <Metric>{(data.cib.precisionScore * 100).toFixed(1)}%</Metric>
-          <Text className="mt-2">Benchmark: &gt;85%</Text>
-        </Card>
-        <Card decoration="top" decorationColor="orange">
-          <Text>Identified Bot Clusters</Text>
-          <Metric>{data.cib.identifiedBotClusters.length}</Metric>
-          <Text className="mt-2">Total Bots: {data.cib.identifiedBotClusters.reduce((acc: number, c: any) => acc + c.size, 0)}</Text>
-        </Card>
-        <Card decoration="top" decorationColor="yellow">
-          <Text>Amplification Velocity</Text>
-          <Metric>{data.narrative.amplificationVelocity}</Metric>
-          <Text className="mt-2">Events / Hour</Text>
-        </Card>
-      </Grid>
+      <ErrorBoundary>
+        <Grid numItems={3} className="gap-6">
+          <Card decoration="top" decorationColor="red">
+            <Text>CIB Detection Precision</Text>
+            <Metric>{(data.cib.precisionScore * 100).toFixed(1)}%</Metric>
+            <Text className="mt-2">Benchmark: &gt;85%</Text>
+          </Card>
+          <Card decoration="top" decorationColor="orange">
+            <Text>Identified Bot Clusters</Text>
+            <Metric>{data.cib.identifiedBotClusters.length}</Metric>
+            <Text className="mt-2">Total Bots: {data.cib.identifiedBotClusters.reduce((acc: number, c: any) => acc + c.size, 0)}</Text>
+          </Card>
+          <Card decoration="top" decorationColor="yellow">
+            <Text>Amplification Velocity</Text>
+            <Metric>{data.narrative.amplificationVelocity}</Metric>
+            <Text className="mt-2">Events / Hour</Text>
+          </Card>
+        </Grid>
+      </ErrorBoundary>
 
-      <Grid numItems={2} className="gap-6">
+      <ErrorBoundary>
+        <Grid numItems={2} className="gap-6">
+          <Card>
+              <Title>Bot Network Clusters</Title>
+              <div className="mt-4 space-y-2">
+                  {data.cib.identifiedBotClusters.map((cluster: any) => (
+                      <Flex key={cluster.clusterId} className="border-b pb-2">
+                          <Text>Cluster {cluster.clusterId}</Text>
+                          <div className="text-right">
+                              <Text>{cluster.size} Accounts</Text>
+                              <Badge size="xs" color="red">{(cluster.confidence * 100).toFixed(0)}% Conf.</Badge>
+                          </div>
+                      </Flex>
+                  ))}
+              </div>
+          </Card>
+
+          <Card>
+              <Title>Top Narrative Topics</Title>
+              <div className="mt-4 space-y-2">
+                  {data.narrative.topTopics.map((topic: any) => (
+                      <Flex key={topic.topic} className="border-b pb-2">
+                          <Text>#{topic.topic}</Text>
+                          <Text>{topic.frequency} mentions</Text>
+                      </Flex>
+                  ))}
+              </div>
+          </Card>
+        </Grid>
+      </ErrorBoundary>
+
+      <ErrorBoundary>
         <Card>
-            <Title>Bot Network Clusters</Title>
-            <div className="mt-4 space-y-2">
-                {data.cib.identifiedBotClusters.map((cluster: any) => (
-                    <Flex key={cluster.clusterId} className="border-b pb-2">
-                        <Text>Cluster {cluster.clusterId}</Text>
-                        <div className="text-right">
-                            <Text>{cluster.size} Accounts</Text>
-                            <Badge size="xs" color="red">{(cluster.confidence * 100).toFixed(0)}% Conf.</Badge>
-                        </div>
-                    </Flex>
-                ))}
-            </div>
+            <Title>Recent Anomalies</Title>
+            <div className="mt-4">
+                  {data.cib.anomalies.map((anomaly: any, idx: number) => (
+                      <div key={idx} className="p-3 bg-red-50 border border-red-100 rounded mb-2">
+                          <Flex>
+                              <Text className="font-bold text-red-800 uppercase">{anomaly.type}</Text>
+                              <Badge color="red">{anomaly.severity}</Badge>
+                          </Flex>
+                          <Text className="text-red-700 mt-1">{anomaly.description}</Text>
+                      </div>
+                  ))}
+              </div>
         </Card>
-
-        <Card>
-            <Title>Top Narrative Topics</Title>
-            <div className="mt-4 space-y-2">
-                {data.narrative.topTopics.map((topic: any) => (
-                    <Flex key={topic.topic} className="border-b pb-2">
-                        <Text>#{topic.topic}</Text>
-                        <Text>{topic.frequency} mentions</Text>
-                    </Flex>
-                ))}
-            </div>
-        </Card>
-      </Grid>
-
-      <Card>
-          <Title>Recent Anomalies</Title>
-           <div className="mt-4">
-                {data.cib.anomalies.map((anomaly: any, idx: number) => (
-                    <div key={idx} className="p-3 bg-red-50 border border-red-100 rounded mb-2">
-                        <Flex>
-                            <Text className="font-bold text-red-800 uppercase">{anomaly.type}</Text>
-                            <Badge color="red">{anomaly.severity}</Badge>
-                        </Flex>
-                        <Text className="text-red-700 mt-1">{anomaly.description}</Text>
-                    </div>
-                ))}
-            </div>
-      </Card>
+      </ErrorBoundary>
     </div>
   );
 };
