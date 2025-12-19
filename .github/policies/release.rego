@@ -8,6 +8,7 @@ import future.keywords.in
 
 # Default deny - must explicitly allow
 default allow = false
+default removes_endpoints = false
 
 # Risk assessment mapping
 risk_levels := {"LOW": 0, "MEDIUM": 1, "HIGH": 2}

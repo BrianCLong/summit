@@ -104,6 +104,12 @@
     "contact": "data-team@intelgraph.com",
     "created_at": "2025-08-14T00:00:00Z",
     "classification": "public",
-    "retention_days": 365
+    "retention_days": 365,
+    "tags": [
+      "system:intelgraph",
+      "data-path:pipelines/twitter",
+      "classification:public",
+      "residency:us"
+    ]
   }
 }

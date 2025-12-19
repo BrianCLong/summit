@@ -5,6 +5,9 @@ on:
     paths:
       - 'policy/abac/**'
       - 'policy/tests/**'
+      - '.github/policies/**'
+      - 'schemas/**'
+      - 'server/data-pipelines/contracts/**'
       - 'services/authz-gateway/**'
   push:
     branches:
@@ -12,6 +15,9 @@ on:
     paths:
       - 'policy/abac/**'
       - 'policy/tests/**'
+      - '.github/policies/**'
+      - 'schemas/**'
+      - 'server/data-pipelines/contracts/**'
 
 jobs:
   opa:
@@ -25,7 +31,7 @@ jobs:
           chmod +x opa
           sudo mv opa /usr/local/bin/opa
       - name: Check formatting
-        run: opa fmt policy/abac/abac.rego --diff
+        run: opa fmt policy/abac/abac.rego .github/policies/*.rego --diff
       - name: Run policy unit tests with coverage
         run: |
           opa test policy/abac policy/tests -v --coverage --format json > opa-coverage.json
@@ -34,3 +40,12 @@ jobs:
         with:
           name: opa-abac-coverage
           path: opa-coverage.json
+      - name: Validate data path tags
+        run: |
+          node .github/policies/collect-data-path-tags.js > data-path-tags.json
+          violations=$(opa eval --format=raw -d .github/policies -i data-path-tags.json "data.summit.datapaths.violations")
+          echo "$violations"
+          if [ "$violations" != "[]" ]; then
+            echo "Data path tag validation failed"
+            exit 1
+          fi
