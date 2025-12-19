@@ -15,12 +15,15 @@ export interface UserClaims {
   iat: number;
 }
 
+<<<<<<< HEAD
+=======
 export interface AuthenticatedSocket extends Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData> {
   user: UserClaims;
   tenantId: string;
   connectionId: string;
   connectedAt: number;
 }
+>>>>>>> main
 
 export interface ConnectionMetadata {
   id: string;

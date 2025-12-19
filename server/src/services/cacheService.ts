@@ -141,7 +141,7 @@ export class CacheService {
     let validEntries = 0;
     let expiredEntries = 0;
 
-    for (const entry of this.memoryCache.values()) {
+    for (const entry of Array.from(this.memoryCache.values())) {
       if (this.isExpired(entry)) {
         expiredEntries++;
       } else {
@@ -159,7 +159,7 @@ export class CacheService {
 
   cleanup(): void {
     let cleaned = 0;
-    for (const [key, entry] of this.memoryCache.entries()) {
+    for (const [key, entry] of Array.from(this.memoryCache.entries())) {
       if (this.isExpired(entry)) {
         this.memoryCache.delete(key);
         cleaned++;

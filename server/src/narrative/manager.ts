@@ -7,6 +7,7 @@ import type {
   NarrativeEvent,
   NarrativeGeneratorMode,
 } from './types.js';
+import { metrics } from '../observability/metrics.js';
 
 interface CreateSimulationInput {
   name: string;
@@ -48,6 +49,7 @@ export class NarrativeSimulationManager {
 
     const engine = new NarrativeSimulationEngine(config);
     this.simulations.set(id, engine);
+    metrics.narrativeSimulationActiveSimulations.inc();
     return engine.getState();
   }
 
@@ -66,7 +68,11 @@ export class NarrativeSimulationManager {
   }
 
   remove(id: string): boolean {
-    return this.simulations.delete(id);
+    const deleted = this.simulations.delete(id);
+    if (deleted) {
+      metrics.narrativeSimulationActiveSimulations.dec();
+    }
+    return deleted;
   }
 
   queueEvent(id: string, event: NarrativeEvent): void {
@@ -74,6 +80,7 @@ export class NarrativeSimulationManager {
     if (!engine) {
       throw new Error(`Simulation ${id} not found`);
     }
+    metrics.narrativeSimulationEventsTotal.inc({ simulation_id: id, event_type: event.type });
     engine.queueEvent(event);
   }
 
@@ -95,7 +102,14 @@ export class NarrativeSimulationManager {
     if (!engine) {
       throw new Error(`Simulation ${id} not found`);
     }
-    return engine.tick(steps);
+
+    const end = metrics.narrativeSimulationDurationSeconds.startTimer({ simulation_id: id });
+    try {
+      metrics.narrativeSimulationTicksTotal.inc({ simulation_id: id }, steps);
+      return await engine.tick(steps);
+    } finally {
+      end();
+    }
   }
 }
 

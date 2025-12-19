@@ -1,4 +1,5 @@
 import { createHash, createHmac } from 'node:crypto';
+import { performance } from 'node:perf_hooks';
 import type {
   EvidenceBundle,
   LedgerEntry,
@@ -72,6 +73,7 @@ import type {
 import type { ValueNode } from 'graphql';
 import {
   GraphQLBoolean,
+  GraphQLError,
   GraphQLEnumType,
   GraphQLInputObjectType,
   GraphQLInt,
@@ -96,6 +98,8 @@ import type {
 import { PolicyEngine, buildDefaultPolicyEngine } from 'policy';
 import { ProvenanceLedger } from 'prov-ledger';
 import { WorkcellRuntime } from 'workcell-runtime';
+import type { GraphQLRateLimiterOptions } from './graphql-cost.js';
+import { GraphQLRateLimiter } from './graphql-cost.js';
 
 function parseJsonLiteral(ast: ValueNode): unknown {
   switch (ast.kind) {
@@ -501,10 +505,20 @@ export interface GatewayWorkcellOptions {
   agents?: WorkcellAgentDefinition[];
 }
 
+export interface GatewayCostGuardOptions extends GraphQLRateLimiterOptions {
+  enabled?: boolean;
+  defaultTenantId?: string;
+}
+
+export interface GatewayExecutionOptions {
+  tenantId?: string;
+}
+
 export interface GatewayOptions {
   rules?: PolicyRule[];
   seedEntries?: LedgerFactInput[];
   workcell?: GatewayWorkcellOptions;
+  costGuard?: GatewayCostGuardOptions;
 }
 
 export class GatewayRuntime {
@@ -512,6 +526,9 @@ export class GatewayRuntime {
   private readonly ledger: ProvenanceLedger;
   private readonly schema: GraphQLSchema;
   private readonly workcell: WorkcellRuntime;
+  private readonly costGuardOptions?: GatewayCostGuardOptions;
+  private readonly rateLimiter?: GraphQLRateLimiter;
+  private readonly defaultTenantId: string;
 
   constructor(options: GatewayOptions = {}) {
     this.policy = options.rules
@@ -529,6 +546,8 @@ export class GatewayRuntime {
       tools: options.workcell?.tools,
       agents: options.workcell?.agents,
     });
+    this.costGuardOptions = options.costGuard;
+    this.defaultTenantId = this.costGuardOptions?.defaultTenantId ?? 'public';
     if (!options.workcell?.tools || options.workcell.tools.length === 0) {
       this.workcell.registerTool({
         name: 'analysis',
@@ -548,9 +567,57 @@ export class GatewayRuntime {
       });
     }
     this.schema = buildSchema();
+    if (this.costGuardOptions?.enabled !== false) {
+      const { enabled: _enabled, defaultTenantId: _defaultTenantId, ...rateLimiterOptions } =
+        this.costGuardOptions ?? {};
+      this.rateLimiter = new GraphQLRateLimiter(this.schema, rateLimiterOptions);
+    }
   }
 
-  async execute(source: string, variableValues?: Record<string, unknown>) {
+  async execute(
+    source: string,
+    variableValues?: Record<string, unknown>,
+    options?: GatewayExecutionOptions,
+  ) {
+    const tenantId = options?.tenantId ?? this.defaultTenantId;
+    const guard = this.rateLimiter;
+    if (guard) {
+      const evaluation = guard.beginExecution(source, tenantId);
+      if (evaluation.decision.action === 'kill' || evaluation.decision.action === 'throttle') {
+        return {
+          data: null,
+          errors: [
+            new GraphQLError(evaluation.decision.reason, {
+              extensions: {
+                code:
+                  evaluation.decision.action === 'kill'
+                    ? 'COST_GUARD_KILL'
+                    : 'COST_GUARD_THROTTLE',
+                retryAfterMs: evaluation.decision.nextCheckMs,
+                metrics: evaluation.decision.metrics,
+                plan: evaluation.plan,
+              },
+            }),
+          ],
+        };
+      }
+      const startedAt = performance.now();
+      try {
+        return await graphql({
+          schema: this.schema,
+          source,
+          variableValues,
+          contextValue: {
+            policy: this.policy,
+            ledger: this.ledger,
+            workcell: this.workcell,
+          },
+        });
+      } finally {
+        evaluation.release?.(performance.now() - startedAt);
+      }
+    }
+
     return graphql({
       schema: this.schema,
       source,
@@ -1561,6 +1628,7 @@ function parseScopes(input: unknown): string[] {
 // ============================================================================
 
 export { TicketNormalizer, NormalizationOptions } from './normalization.js';
+export { GraphQLCostAnalyzer, GraphQLRateLimiter } from './graphql-cost.js';
 export {
   AcceptanceCriteriaSynthesizer,
   AcceptanceCriteriaVerifier,

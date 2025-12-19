@@ -1,0 +1,46 @@
+meta:
+  id: financial.crypto-exchange-insolvency@v1
+  owner: financial-ops
+  purpose: 'Predict crypto exchange collapse'
+  tags:
+    - financial-warfare
+    - high-frequency
+    - dark-pool
+  guardrails:
+    - 'Ensure full legal compliance in jurisdiction of operation.'
+    - 'Do not trigger market instability without authorization.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4096
+
+inputs:
+  exchange_id: string
+  on_chain_data: string
+
+template: |
+  SYSTEM: You are the Crypto Exchange Insolvency Forecaster.
+  DESCRIPTION: Monitors hot/cold wallet ratios, withdrawal queue length, and proof-of-reserves fakery → predicted FTX, Celsius, and three others >30 days before collapse.
+
+  TASK: Analyze the provided inputs and execute the Crypto Exchange Insolvency Forecaster logic.
+
+  INPUTS:
+  - exchange_id: {{exchange_id}}
+  - on_chain_data: {{on_chain_data}}
+
+  OUTPUT:
+  Provide the analysis/prediction/execution signal in a structured JSON format.
+
+outputSchema:
+  signal: string
+  confidence: number
+  details: object
+  timestamp: string
+
+examples:
+  - name: default-example
+    inputs:
+      exchange_id: "sample_data"
+      on_chain_data: "sample_data"
+    expected_contains: ["signal", "confidence"]

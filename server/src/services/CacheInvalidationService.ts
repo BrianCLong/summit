@@ -11,10 +11,13 @@
  */
 
 import { EventEmitter } from 'events';
-import pino from 'pino';
+// @ts-ignore
+import { default as pino } from 'pino';
+// @ts-ignore
 import { RedisCacheManager, CACHE_PREFIX } from '../../config/redis.js';
 import { NeighborhoodCache } from './NeighborhoodCache.js';
 
+// @ts-ignore
 const logger = pino();
 
 export interface InvalidationEvent {

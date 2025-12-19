@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { verifyWeights } from '../risk/WeightsVerifier';
+import { describe, it, expect } from '@jest/globals';
 
 describe('WeightsVerifier', () => {
   it('verifies checksum', () => {
