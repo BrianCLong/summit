@@ -1,3 +1,7 @@
+// @ts-nocheck
+/// <reference types="jest" />
+/// <reference types="node" />
+
 /**
  * Jest Global Setup
  *
@@ -61,7 +65,7 @@ afterEach(() => {
 });
 
 // Global error handler for unhandled rejections in tests
-process.on('unhandledRejection', (reason, promise) => {
+process.on('unhandledRejection', (reason: unknown, promise: Promise<unknown>) => {
   console.error('Unhandled Rejection in test:', reason);
 });
 
