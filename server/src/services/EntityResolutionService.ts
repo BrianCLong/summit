@@ -9,6 +9,8 @@ import {
 import { Histogram, Counter } from 'prom-client';
 import { createHash } from 'node:crypto';
 import { erMetrics } from './ERMetrics.js';
+import { ConflictResolutionService, ConflictResolutionStrategy } from './ConflictResolutionService.js';
+import { resolveEntities } from './HybridEntityResolutionService.js';
 
 const logger = pino({ name: 'EntityResolutionService' });
 
@@ -64,12 +66,6 @@ interface ERRuleConfig {
   similarityThreshold: number;
 }
 
-export class EntityResolutionService {
-  private behavioralService = new BehavioralFingerprintService();
-  private ruleConfigs: Map<string, ERRuleConfig> = new Map([
-    ['basic', { latencyBudgetMs: 100, similarityThreshold: 0.9 }],
-    ['fuzzy', { latencyBudgetMs: 500, similarityThreshold: 0.85 }],
-  ]);
 const DEFAULT_CONFIG: EntityResolutionConfig = {
   blocking: {
     enabled: true,
@@ -87,7 +83,13 @@ const DEFAULT_CONFIG: EntityResolutionConfig = {
 
 export class EntityResolutionService {
   private behavioralService = new BehavioralFingerprintService();
+  private conflictResolver = new ConflictResolutionService();
   private config: EntityResolutionConfig;
+
+  private ruleConfigs: Map<string, ERRuleConfig> = new Map([
+    ['basic', { latencyBudgetMs: 100, similarityThreshold: 0.9 }],
+    ['fuzzy', { latencyBudgetMs: 500, similarityThreshold: 0.85 }],
+  ]);
 
   constructor(config: Partial<EntityResolutionConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -166,8 +168,11 @@ export class EntityResolutionService {
     erLatency.observe({ rule }, duration / 1000);
 
     if (config && duration > config.latencyBudgetMs) {
-      log.warn({ rule, duration, budget: config.latencyBudgetMs }, 'ER Rule exceeded latency budget');
+      logger.warn({ rule, duration, budget: config.latencyBudgetMs }, 'ER Rule exceeded latency budget');
     }
+  }
+
+  /**
    * Evaluate match between two entities with explainability.
    * @param entityA Source entity
    * @param entityB Target entity
@@ -320,17 +325,56 @@ export class EntityResolutionService {
   }
 
   /**
+   * Uses ML-based hybrid entity resolution to score the match between two entities.
+   */
+  public async resolveWithML(entityA: any, entityB: any): Promise<ERResult> {
+     // Prepare simple JSON representation for the Python script
+     const jsonA = JSON.stringify(entityA);
+     const jsonB = JSON.stringify(entityB);
+
+     const mlResult = await resolveEntities(jsonA, jsonB);
+
+     // Map Hybrid result to ERResult
+     const explanation: MatchExplanation[] = Object.entries(mlResult.explanation).map(([key, score]) => ({
+         ruleId: `ml_${key}`,
+         score: score,
+         features: { [key]: score },
+         description: `ML similarity score for ${key}`
+     }));
+
+     // Determine confidence based on Python result or our thresholds
+     let confidence: 'high' | 'medium' | 'low' | 'none' = 'none';
+     if (typeof mlResult.confidence === 'string') {
+        confidence = mlResult.confidence as any;
+     } else if (typeof mlResult.confidence === 'number') {
+        if (mlResult.confidence > 0.9) confidence = 'high';
+        else if (mlResult.confidence > 0.7) confidence = 'medium';
+        else if (mlResult.confidence > 0.4) confidence = 'low';
+     }
+
+     return {
+         isMatch: mlResult.match,
+         score: mlResult.score,
+         explanation,
+         confidence
+     };
+  }
+
+  /**
    * Merges duplicate entities into a master entity.
+   * Uses ConflictResolutionService to merge properties intelligently.
    * All relationships from duplicate entities are re-pointed to the master.
    * Duplicate entities are then deleted.
    * @param session Neo4j session.
    * @param masterEntityId The ID of the entity to keep.
    * @param duplicateEntityIds An array of IDs of entities to merge into the master.
+   * @param strategy Conflict resolution strategy (default: LATEST_WINS).
    */
   public async mergeEntities(
     session: Session,
     masterEntityId: string,
     duplicateEntityIds: string[],
+    strategy: ConflictResolutionStrategy = ConflictResolutionStrategy.LATEST_WINS
   ): Promise<void> {
     const startTime = Date.now();
     const rule = 'merge';
@@ -343,51 +387,53 @@ export class EntityResolutionService {
 
     const allEntityIds = [masterEntityId, ...duplicateEntityIds];
 
-    // Update canonicalId for all entities being merged to point to the master's canonicalId
-    await session.run(
-      `
-      MATCH (e:Entity)
-      WHERE e.id IN $allEntityIds
-      SET e.canonicalId = $masterEntityId
-    `,
-      { allEntityIds, masterEntityId },
-    );
+    // Fetch all entities properties first to perform conflict resolution
+    const result = await session.run(
+        `MATCH (e:Entity) WHERE e.id IN $allEntityIds RETURN e.id as id, properties(e) as props`
+    , { allEntityIds });
 
-    // Re-point incoming relationships to the master entity
-    await session.run(
-      `
-      MATCH (n)-[r]->(d:Entity)
-      WHERE d.id IN $duplicateEntityIds
-      MATCH (m:Entity {id: $masterEntityId})
-      CREATE (n)-[newRel:RELATIONSHIP]->(m)
-      SET newRel = r
-      DELETE r
-    `,
-      { duplicateEntityIds, masterEntityId },
-    );
+    let masterProps: any = {};
+    const duplicatePropsList: any[] = [];
 
-    // Re-point outgoing relationships to the master entity
-    await session.run(
-      `
-      MATCH (d:Entity)-[r]->(n)
-      WHERE d.id IN $duplicateEntityIds
-      MATCH (m:Entity {id: $masterEntityId})
-      CREATE (m)-[newRel:RELATIONSHIP]->(n)
-      SET newRel = r
-      DELETE r
-    `,
-      { duplicateEntityIds, masterEntityId },
-    );
+    result.records.forEach(record => {
+        const id = record.get('id');
+        const props = record.get('props');
+        if (id === masterEntityId) {
+            masterProps = props;
+        } else {
+            duplicatePropsList.push(props);
+        }
+    });
 
-    // Delete duplicate entities
-    await session.run(
-      `
-      MATCH (d:Entity)
-      WHERE d.id IN $duplicateEntityIds
-      DETACH DELETE d
-    `,
-      { duplicateEntityIds },
-    );
+    // Iteratively merge duplicate properties into master using conflict resolver
+    for (const dupProps of duplicatePropsList) {
+        masterProps = this.conflictResolver.resolveConflicts(masterProps, dupProps, strategy);
+    }
+
+    // Update master entity with merged properties
+    // Note: We need to handle potential removal of keys if needed, but resolveConflicts is additive usually.
+    // Neo4j SET += updates existing properties and adds new ones.
+    await session.run(`
+        MATCH (m:Entity {id: $masterEntityId})
+        SET m += $masterProps
+        SET m.canonicalId = $masterEntityId
+    `, { masterEntityId, masterProps });
+
+    // Use apoc.refactor.mergeNodes which handles property combination and edge movement correctly.
+    // This preserves relationship types and properties automatically.
+
+    await session.run(`
+        MATCH (m:Entity {id: $masterEntityId})
+        MATCH (d:Entity) WHERE d.id IN $duplicateEntityIds
+
+        WITH m, collect(d) as duplicates
+        CALL apoc.refactor.mergeNodes([m] + duplicates, {
+            properties: "discard",
+            mergeRels: true,
+            produceSelfRel: false
+        }) YIELD node
+        RETURN count(node)
+    `, { masterEntityId, duplicateEntityIds });
 
     logger.info(
       `Merged entities: ${duplicateEntityIds.join(', ')} into ${masterEntityId}`,
