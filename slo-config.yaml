@@ -17,6 +17,7 @@ spec:
       # 99.9% availability over a 28-day window.
       target: 99.9
       window: 28d
+      burnRateThreshold: 4.0
       # Service Level Indicator (SLI) definition.
       sli:
         type: 'prometheus'
@@ -30,6 +31,7 @@ spec:
       # 99% of the time, the latency target should be met.
       target: 99.0
       window: 28d
+      burnRateThreshold: 2.5
       sli:
         type: 'prometheus'
         query: |
@@ -41,6 +43,7 @@ spec:
       description: 'Docling parse p95 latency stays under 900ms for build artifacts.'
       target: 99.0
       window: 28d
+      burnRateThreshold: 2.0
       sli:
         type: 'prometheus'
         query: |
@@ -52,6 +55,7 @@ spec:
       description: 'Docling summarize p95 latency stays under 1.5s for build logs.'
       target: 99.0
       window: 28d
+      burnRateThreshold: 2.0
       sli:
         type: 'prometheus'
         query: |
