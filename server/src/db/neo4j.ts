@@ -131,6 +131,8 @@ export function getNeo4jDriver(): Neo4jDriver {
   return driverFacade;
 }
 
+export const neo4jDriver = driverFacade;
+
 export function isNeo4jMockMode(): boolean {
   return isMockMode;
 }

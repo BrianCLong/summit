@@ -5,7 +5,6 @@
  */
 
 import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types';
-import { PolicyLabel } from './Decision';
 
 export interface ClaimSubject {
   /** Subject entity ID */
@@ -130,9 +129,6 @@ export interface CanonicalClaim extends BaseCanonicalEntity, CanonicalEntityMeta
     reportId?: string;
   };
 
-  /** Policy labels for compliance */
-  policyLabels?: PolicyLabel;
-
   /** Risk indicators */
   riskFlags?: {
     type: string;
@@ -150,7 +146,7 @@ export interface CanonicalClaim extends BaseCanonicalEntity, CanonicalEntityMeta
  */
 export function createClaim(
   data: Omit<CanonicalClaim, keyof BaseCanonicalEntity | 'entityType' | 'schemaVersion'>,
-  baseFields: Omit<BaseCanonicalEntity, 'provenanceId'>,
+  baseFields: Omit<BaseCanonicalEntity, 'provenanceId' | 'entityType' | 'schemaVersion'>,
   provenanceId: string,
 ): CanonicalClaim {
   return {

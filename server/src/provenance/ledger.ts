@@ -115,6 +115,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
   private readonly genesisHash =
     '0000000000000000000000000000000000000000000000000000000000000000';
   private rootSigningInterval: NodeJS.Timeout | null = null;
+  private rootSigningTimeout: NodeJS.Timeout | null = null;
   private cryptoPipeline?: CryptoPipeline;
   private cryptoPipelineInit?: Promise<void>;
 
@@ -132,18 +133,30 @@ export class ProvenanceLedgerV2 extends EventEmitter {
 
   private initializeCryptoPipeline(): void {
     if (this.cryptoPipelineInit) return;
-    this.cryptoPipelineInit = createDefaultCryptoPipeline({
-      timestampingEndpointEnv: 'CRYPTO_TIMESTAMP_ENDPOINT',
-      auditSubsystem: 'provenance-ledger',
-      trustAnchorsEnv: 'CRYPTO_TRUST_ANCHORS',
-    })
-      .then((pipeline) => {
-        this.cryptoPipeline = pipeline ?? undefined;
+
+    // Safety check for test environment
+    if (process.env.NODE_ENV === 'test' && !createDefaultCryptoPipeline) {
+         this.cryptoPipelineInit = Promise.resolve();
+         return;
+    }
+
+    try {
+      this.cryptoPipelineInit = createDefaultCryptoPipeline({
+        timestampingEndpointEnv: 'CRYPTO_TIMESTAMP_ENDPOINT',
+        auditSubsystem: 'provenance-ledger',
+        trustAnchorsEnv: 'CRYPTO_TRUST_ANCHORS',
       })
-      .catch((error) => {
-        console.warn('Failed to initialize cryptographic pipeline', error);
-        this.cryptoPipeline = undefined;
-      });
+        .then((pipeline) => {
+          this.cryptoPipeline = pipeline ?? undefined;
+        })
+        .catch((error) => {
+          console.warn('Failed to initialize cryptographic pipeline', error);
+          this.cryptoPipeline = undefined;
+        });
+    } catch (e) {
+      console.warn('Crypto pipeline initialization error:', e);
+      this.cryptoPipelineInit = Promise.resolve();
+    }
   }
 
   private async ensureCryptoPipeline(): Promise<void> {
@@ -153,6 +166,61 @@ export class ProvenanceLedgerV2 extends EventEmitter {
     } catch {
       // initialization already logged
     }
+  }
+
+  async registerClaim(
+    claimId: string,
+    claimData: Record<string, any>,
+    tenantId: string,
+    actorId: string,
+    relatedClaims?: { claimId: string; relationship: string }[]
+  ): Promise<ProvenanceEntry> {
+    const payload = {
+      ...claimData,
+      relatedClaims,
+    };
+
+    return this.appendEntry({
+      tenantId,
+      actionType: 'REGISTER_CLAIM',
+      resourceType: 'Claim',
+      resourceId: claimId,
+      actorId,
+      actorType: 'user', // Default, should be passed
+      timestamp: new Date(),
+      payload,
+      metadata: {
+        purpose: 'Claim Registration',
+      },
+    });
+  }
+
+  async registerTransformation(
+    inputResourceIds: string[],
+    outputResourceId: string,
+    transformationType: string,
+    tenantId: string,
+    actorId: string,
+    details?: Record<string, any>
+  ): Promise<ProvenanceEntry> {
+    return this.appendEntry({
+      tenantId,
+      actionType: 'TRANSFORM',
+      resourceType: 'Transformation',
+      resourceId: outputResourceId, // The result of the transformation
+      actorId,
+      actorType: 'system',
+      timestamp: new Date(),
+      payload: {
+        inputs: inputResourceIds,
+        output: outputResourceId,
+        type: transformationType,
+        details,
+      },
+      metadata: {
+        purpose: 'Data Transformation',
+      },
+    });
   }
 
   async appendEntry(
@@ -884,7 +952,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
 
     const msUntilNextRun = nextRun.getTime() - now.getTime();
 
-    setTimeout(() => {
+    this.rootSigningTimeout = setTimeout(() => {
       this.performDailyRootSigning();
 
       // Set up daily interval
@@ -895,6 +963,11 @@ export class ProvenanceLedgerV2 extends EventEmitter {
         24 * 60 * 60 * 1000,
       ); // 24 hours
     }, msUntilNextRun);
+
+    // Ensure the timeout doesn't block process exit if running in script/test
+    if (this.rootSigningTimeout.unref) {
+      this.rootSigningTimeout.unref();
+    }
   }
 
   private async performDailyRootSigning(): Promise<void> {
@@ -1026,6 +1099,10 @@ export class ProvenanceLedgerV2 extends EventEmitter {
     if (this.rootSigningInterval) {
       clearInterval(this.rootSigningInterval);
       this.rootSigningInterval = null;
+    }
+    if (this.rootSigningTimeout) {
+      clearTimeout(this.rootSigningTimeout);
+      this.rootSigningTimeout = null;
     }
   }
 }
