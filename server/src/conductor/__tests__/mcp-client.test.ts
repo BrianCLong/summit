@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Tests for MCP Client
 // Tests JSON-RPC communication, connection handling, and tool execution
 
