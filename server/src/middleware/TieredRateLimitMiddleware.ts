@@ -208,7 +208,8 @@ export class AdvancedRateLimiter {
              const costResult = await this.checkCostQuota(userId, limits.costLimit, cost);
              if (!costResult.allowed) {
                  res.set('X-RateLimit-Quota-Remaining', '0');
-                 res.set('Retry-After', Math.ceil(costResult.reset / 1000).toString());
+                 const retryAfterSeconds = Math.ceil((costResult.reset - Date.now()) / 1000);
+                 res.set('Retry-After', retryAfterSeconds.toString());
                  res.status(429).json({
                      error: 'Daily quota exceeded',
                      limit: limits.costLimit,
