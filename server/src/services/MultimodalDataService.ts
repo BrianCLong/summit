@@ -985,9 +985,17 @@ export class MultimodalDataService {
   /**
    * Upload a new media source
    */
-  async uploadMediaSource(upload: any, userId: string): Promise<MediaSource> {
+  async uploadMediaSource(
+    upload: any,
+    userId: string,
+    tenantId?: string,
+  ): Promise<MediaSource> {
     try {
-        const metadata = await this.mediaUploadService.uploadMedia(upload, userId);
+        const metadata = await this.mediaUploadService.uploadMedia(
+          upload,
+          userId,
+          tenantId,
+        );
         return this.createMediaSource(metadata, userId);
     } catch (error) {
         logger.error(error, 'Failed to upload media source:');

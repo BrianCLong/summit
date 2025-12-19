@@ -24,6 +24,7 @@ interface AuthContext {
   isAuthenticated: boolean;
   requestId: string;
   loaders: Loaders;
+  tenantId?: string;
 }
 
 export const getContext = async ({
@@ -33,29 +34,55 @@ export const getContext = async ({
 }): Promise<AuthContext> => {
   const requestId = randomUUID();
   const loaders = createLoaders();
+  const tenantIdFromReq =
+    (req as any).tenantId ||
+    (req as any).tenant_id ||
+    (req.headers && (req.headers['x-tenant-id'] || req.headers['x-tenant']));
 
   try {
     // If user is already attached by middleware (e.g. for GraphQL route)
     if (req.user) {
          logger.info({ requestId, userId: req.user.id }, 'Authenticated request (middleware)');
-         return { user: req.user, isAuthenticated: true, requestId, loaders };
+         return {
+           user: req.user,
+           isAuthenticated: true,
+           requestId,
+           loaders,
+           tenantId: tenantIdFromReq || req.user.tenantId || req.user.tenant_id,
+         };
     }
 
     const token = extractToken(req);
     if (!token) {
       logger.info({ requestId }, 'Unauthenticated request');
-      return { isAuthenticated: false, requestId, loaders };
+      return {
+        isAuthenticated: false,
+        requestId,
+        loaders,
+        tenantId: tenantIdFromReq || undefined,
+      };
     }
 
     const user = await verifyToken(token);
     logger.info({ requestId, userId: user.id }, 'Authenticated request');
-    return { user, isAuthenticated: true, requestId, loaders };
+    return {
+      user,
+      isAuthenticated: true,
+      requestId,
+      loaders,
+      tenantId: tenantIdFromReq || (user as any)?.tenantId,
+    };
   } catch (error) {
     logger.warn(
       { requestId, error: (error as Error).message },
       'Authentication failed',
     );
-    return { isAuthenticated: false, requestId, loaders };
+    return {
+      isAuthenticated: false,
+      requestId,
+      loaders,
+      tenantId: tenantIdFromReq || undefined,
+    };
   }
 };
 

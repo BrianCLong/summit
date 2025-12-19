@@ -45,11 +45,12 @@ export class PluginEventBus extends EventEmitter {
   /**
    * Emit event and record in history
    */
-  async emitEvent(event: string, data: any): Promise<void> {
+  async emitEvent(event: string, data: any, tenantId?: string): Promise<void> {
     // Record event
     this.recordEvent({
       event,
       data,
+      tenantId: tenantId || (data?.tenantId as string) || 'global',
       timestamp: new Date(),
     });
 
@@ -65,6 +66,10 @@ export class PluginEventBus extends EventEmitter {
 
     if (filter?.event) {
       history = history.filter(record => record.event === filter.event);
+    }
+
+    if (filter?.tenantId) {
+      history = history.filter(record => record.tenantId === filter.tenantId);
     }
 
     if (filter?.since) {
@@ -219,11 +224,13 @@ export interface RetryPolicy {
 export interface EventRecord {
   event: string;
   data: any;
+  tenantId: string;
   timestamp: Date;
 }
 
 export interface EventFilter {
   event?: string;
+  tenantId?: string;
   since?: Date;
   until?: Date;
 }

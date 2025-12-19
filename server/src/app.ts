@@ -72,6 +72,7 @@ import resourceCostsRouter from './routes/resource-costs.js';
 import queryReplayRouter from './routes/query-replay.js';
 import streamRouter from './routes/stream.js'; // Added import
 import searchV1Router from './routes/search-v1.js';
+import { tenantContextMiddleware } from './middleware/tenantContext.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -86,6 +87,7 @@ export const createApp = async () => {
 
   // Add correlation ID middleware FIRST (before other middleware)
   app.use(correlationIdMiddleware);
+  app.use(tenantContextMiddleware);
 
   app.use(
     helmet({

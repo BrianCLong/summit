@@ -161,7 +161,7 @@ declare class MultimodalDataService {
     similarity?: number;
     limit?: number;
   }): Promise<any[]>;
-  uploadMediaSource(mediaData: MediaSourceInput, userId: string): Promise<any>;
+  uploadMediaSource(mediaData: MediaSourceInput, userId: string, tenantId?: string): Promise<any>;
   deleteMediaSource(id: string, userId: string): Promise<any>;
   updateMediaMetadata(id: string, metadata: any, userId: string): Promise<any>;
   createMultimodalEntity(

@@ -175,6 +175,7 @@ export const multimodalResolvers = {
           mediaMetadata = await context.mediaUploadService.uploadMedia(
             upload,
             context.user.id,
+            context.user?.tenantId || context.tenantId,
           );
         } else if (input.uri) {
           // Handle URI-based media (external files)

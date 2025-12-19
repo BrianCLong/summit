@@ -426,6 +426,7 @@ export const multimodalResolvers = {
       return await multimodalService.uploadMediaSource(
         args.input,
         context.user.id,
+        context.user?.tenantId || (context as any)?.tenantId,
       );
     },
 
@@ -691,6 +692,7 @@ export const multimodalResolvers = {
           const result = await multimodalService.uploadMediaSource(
             input,
             context.user.id,
+            context.user?.tenantId || (context as any)?.tenantId,
           );
           results.push(result);
         } catch (error) {
