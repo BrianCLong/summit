@@ -70,6 +70,13 @@ sufficient_acr {
   input.context.currentAcr == "loa2"
 }
 
+dual_control_required {
+  input.action == action
+  dc := abac.actions[action].dualControl
+  dc.required
+  dc.approvalsRequired >= 2
+}
+
 allow {
   tenant_match
   residency_match
@@ -110,6 +117,24 @@ obligations[obligation] {
     "type": "step_up",
     "mechanism": "webauthn",
     "required_acr": "loa2"
+  }
+}
+
+obligations[obligation] {
+  dual_control_required
+  dc := abac.actions[input.action].dualControl
+  attrs := dc.attributes
+  obligation := {
+    "type": "dual_control",
+    "approvals_required": dc.approvalsRequired,
+    "approver_roles": dc.approverRoles,
+    "require_distinct": dc.requireDistinctApprovers,
+    "attributes": {
+      "match_residency": attrs.matchResidency,
+      "min_clearance": attrs.minClearance,
+      "resource_residency": input.resource.residency,
+      "resource_classification": input.resource.classification,
+    },
   }
 }
 

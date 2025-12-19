@@ -8,9 +8,11 @@ import type { AttributeService } from './attribute-service';
 import type {
   AuthorizationInput,
   DecisionObligation,
+  DualControlObligation,
   ResourceAttributes,
   SubjectAttributes,
 } from './types';
+import { approvalsStore } from './db/models/approvals';
 
 interface Options {
   action: string;
@@ -24,6 +26,12 @@ export interface AuthenticatedRequest extends Request {
   subjectAttributes?: SubjectAttributes;
   resourceAttributes?: ResourceAttributes;
   obligations?: DecisionObligation[];
+}
+
+function isDualControlObligation(
+  obligation: DecisionObligation,
+): obligation is DualControlObligation {
+  return obligation?.type === 'dual_control';
 }
 
 async function buildResource(
@@ -128,6 +136,25 @@ export function requireAuth(
           return res
             .status(403)
             .json({ error: 'forbidden', reason: decision.reason });
+        }
+
+        const dualControl = decision.obligations.find(isDualControlObligation);
+        if (dualControl) {
+          const validation = approvalsStore.validateDualControl({
+            action: options.action,
+            resource,
+            requester: subject,
+            obligation: dualControl,
+          });
+          if (!validation.satisfied) {
+            return res.status(403).json({
+              error: 'dual_control_required',
+              reason: 'pending_approvals',
+              missing: validation.missing,
+              obligations: decision.obligations,
+              details: validation.reasons,
+            });
+          }
         }
         req.obligations = decision.obligations;
       }

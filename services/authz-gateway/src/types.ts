@@ -50,6 +50,21 @@ export interface DecisionObligation {
   [key: string]: unknown;
 }
 
+export interface DualControlAttributes {
+  match_residency?: boolean;
+  min_clearance?: string;
+  resource_residency?: string;
+  resource_classification?: string;
+}
+
+export interface DualControlObligation extends DecisionObligation {
+  type: 'dual_control';
+  approvals_required?: number;
+  approver_roles?: string[];
+  require_distinct?: boolean;
+  attributes?: DualControlAttributes;
+}
+
 export interface AuthorizationInput {
   subject: SubjectAttributes;
   resource: ResourceAttributes;

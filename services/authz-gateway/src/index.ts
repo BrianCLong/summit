@@ -1,5 +1,6 @@
 import express from 'express';
-import { createProxyMiddleware } from 'http-proxy-middleware';
+import { createProxyMiddleware, type Options } from 'http-proxy-middleware';
+import type { ClientRequest } from 'http';
 import pino from 'pino';
 import pinoHttp from 'pino-http';
 import { initKeys, getPublicJwk } from './keys';
@@ -19,13 +20,16 @@ import type { AuthenticatedRequest } from './middleware';
 import type { ResourceAttributes } from './types';
 import { sessionManager } from './session';
 import { requireServiceAuth } from './service-auth';
+import { approvalsStore } from './db/models/approvals';
 
 export async function createApp(): Promise<express.Application> {
   await initKeys();
   await startObservability();
   const attributeService = new AttributeService();
   const stepUpManager = new StepUpManager();
-  const trustedServices = (process.env.SERVICE_AUTH_CALLERS || 'api-gateway,maestro')
+  const trustedServices = (
+    process.env.SERVICE_AUTH_CALLERS || 'api-gateway,maestro'
+  )
     .split(',')
     .map((v) => v.trim())
     .filter(Boolean);
@@ -180,6 +184,80 @@ export async function createApp(): Promise<express.Application> {
   );
 
   app.post(
+    '/approvals',
+    requireServiceAuth({
+      audience: 'authz-gateway',
+      allowedServices: trustedServices,
+      requiredScopes: ['approvals:write'],
+    }),
+    async (req, res) => {
+      try {
+        const { action, resourceId, requesterId, approverId, decision, note } =
+          req.body || {};
+        if (
+          !action ||
+          !resourceId ||
+          !requesterId ||
+          !approverId ||
+          !decision
+        ) {
+          return res.status(400).json({ error: 'missing_approval_fields' });
+        }
+        const requester =
+          await attributeService.getSubjectAttributes(requesterId);
+        const approver =
+          await attributeService.getSubjectAttributes(approverId);
+        const resource =
+          await attributeService.getResourceAttributes(resourceId);
+
+        const approval = approvalsStore.recordApproval({
+          action,
+          resourceId: resource.id,
+          tenantId: resource.tenantId,
+          requesterId: requester.id,
+          approver,
+          decision,
+          note,
+        });
+        res.json({ approval });
+      } catch (error) {
+        res.status(400).json({ error: (error as Error).message });
+      }
+    },
+  );
+
+  app.get(
+    '/approvals/status',
+    requireServiceAuth({
+      audience: 'authz-gateway',
+      allowedServices: trustedServices,
+      requiredScopes: ['approvals:read'],
+    }),
+    async (req, res) => {
+      try {
+        const action = String(req.query.action || '');
+        const resourceId = String(req.query.resourceId || '');
+        const requesterId = String(req.query.requesterId || '');
+        if (!action || !resourceId || !requesterId) {
+          return res.status(400).json({ error: 'missing_status_filters' });
+        }
+        const requester =
+          await attributeService.getSubjectAttributes(requesterId);
+        const resource =
+          await attributeService.getResourceAttributes(resourceId);
+        const validation = approvalsStore.validateDualControl({
+          action,
+          resource,
+          requester,
+        });
+        res.json(validation);
+      } catch (error) {
+        res.status(400).json({ error: (error as Error).message });
+      }
+    },
+  );
+
+  app.post(
     '/auth/webauthn/challenge',
     requireAuth(attributeService, {
       action: 'step-up:challenge',
@@ -188,7 +266,21 @@ export async function createApp(): Promise<express.Application> {
     (req: AuthenticatedRequest, res) => {
       try {
         const userId = String(req.user?.sub || '');
-        const challenge = stepUpManager.createChallenge(userId);
+        const sid = String(req.user?.sid || '');
+        const requestedAction = String(req.body?.action || '');
+        if (!sid || !requestedAction) {
+          return res.status(400).json({ error: 'missing_challenge_context' });
+        }
+        const challenge = stepUpManager.createChallenge(userId, {
+          sessionId: sid,
+          requestedAction,
+          resourceId: String(req.body?.resourceId || ''),
+          classification: String(
+            req.body?.classification || req.user?.clearance || '',
+          ),
+          tenantId: String(req.user?.tenantId || ''),
+          currentAcr: String(req.user?.acr || 'loa1'),
+        });
         res.json(challenge);
       } catch (error) {
         res.status(400).json({ error: (error as Error).message });
@@ -209,12 +301,16 @@ export async function createApp(): Promise<express.Application> {
         if (!credentialId || !signature || !challenge) {
           return res.status(400).json({ error: 'missing_challenge_payload' });
         }
-        stepUpManager.verifyResponse(userId, {
-          credentialId,
-          signature,
-          challenge,
-        });
         const sid = String(req.user?.sid || '');
+        stepUpManager.verifyResponse(
+          userId,
+          {
+            credentialId,
+            signature,
+            challenge,
+          },
+          sid,
+        );
         const token = await sessionManager.elevateSession(sid, {
           acr: 'loa2',
           amr: ['hwk', 'fido2'],
@@ -228,20 +324,21 @@ export async function createApp(): Promise<express.Application> {
   );
 
   const upstream = process.env.UPSTREAM || 'http://localhost:4001';
+  const proxyOptions: Options & { onProxyReq?: (proxyReq: unknown) => void } = {
+    target: upstream,
+    changeOrigin: true,
+    pathRewrite: { '^/protected': '' },
+    onProxyReq: (proxyReq: unknown) => {
+      injectTraceContext(proxyReq as ClientRequest);
+    },
+  };
   app.use(
     '/protected',
     requireAuth(attributeService, {
       action: 'dataset:read',
       resourceIdHeader: 'x-resource-id',
     }),
-    createProxyMiddleware({
-      target: upstream,
-      changeOrigin: true,
-      pathRewrite: { '^/protected': '' },
-      onProxyReq: (proxyReq) => {
-        injectTraceContext(proxyReq);
-      },
-    }),
+    createProxyMiddleware(proxyOptions),
   );
 
   return app;

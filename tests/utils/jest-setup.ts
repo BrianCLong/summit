@@ -1,11 +1,11 @@
+/// <reference types="jest" />
+/// <reference types="node" />
 /**
  * Jest Global Setup
  *
  * This file is run before each test file.
  * It sets up global test utilities and configuration.
  */
-
-import { jest } from '@jest/globals';
 
 // Extend Jest timeout for integration tests
 jest.setTimeout(30000);
@@ -61,7 +61,7 @@ afterEach(() => {
 });
 
 // Global error handler for unhandled rejections in tests
-process.on('unhandledRejection', (reason, promise) => {
+process.on('unhandledRejection', (reason: unknown, promise: Promise<unknown>) => {
   console.error('Unhandled Rejection in test:', reason);
 });
 
