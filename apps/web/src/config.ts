@@ -1,6 +1,7 @@
 export type FeatureKey =
   | 'maestro.newRunConsole'
-  | 'dashboard.realtime';
+  | 'dashboard.realtime'
+  | 'ui.searchSessions';
 
 export interface WebConfig {
   apiBaseUrl: string;
@@ -52,6 +53,7 @@ const config: WebConfig = {
   features: {
     'maestro.newRunConsole': getEnv('VITE_ENABLE_NEW_MAESTRO_RUN_CONSOLE') === 'true',
     'dashboard.realtime': getEnv('VITE_ENABLE_REALTIME_DASHBOARD') === 'true',
+    'ui.searchSessions': getEnv('VITE_ENABLE_SEARCH_SESSIONS', 'true') === 'true',
   },
   integrations: {
     github: {

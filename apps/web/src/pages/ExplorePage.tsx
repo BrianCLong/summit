@@ -1,7 +1,14 @@
-import React, { useState, useEffect } from 'react'
-import { Search, Filter, Settings, Download, RefreshCw, Shield, FileCheck } from 'lucide-react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  Search,
+  Filter,
+  Settings,
+  Download,
+  RefreshCw,
+  Shield,
+  History,
+} from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
-import { Search, Filter, Settings, Download, RefreshCw, History } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { SearchBar } from '@/components/ui/SearchBar'
 import { EntityDrawer } from '@/components/panels/EntityDrawer'
@@ -12,6 +19,8 @@ import { GraphCanvas } from '@/graphs/GraphCanvas'
 import { useEntities, useEntityUpdates } from '@/hooks/useGraphQL'
 import { ConnectionStatus } from '@/components/ConnectionStatus'
 import { SnapshotManager } from '@/components/features/investigation/SnapshotManager'
+import { SearchSessionTabs, useSearchSessions } from '@/features/search-sessions'
+import { isFeatureEnabled } from '@/config'
 import { trackGoldenPathStep } from '@/telemetry/metrics'
 import mockData from '@/mock/data.json'
 import type {
@@ -34,6 +43,34 @@ export default function ExplorePage() {
   const [searchParams] = useSearchParams()
   const investigationId = searchParams.get('investigation')
 
+  const createDefaultFilters = useCallback(
+    (): FilterState => ({
+      entityTypes: [],
+      relationshipTypes: [],
+      dateRange: { start: '', end: '' },
+      confidenceRange: { min: 0, max: 1 },
+      tags: [],
+      sources: [],
+    }),
+    []
+  )
+
+  const searchSessionsEnabled = isFeatureEnabled('ui.searchSessions')
+  const {
+    sessions,
+    activeSession,
+    activeSessionId,
+    addSession,
+    closeSession,
+    selectSession,
+    duplicateSession,
+    resetSession,
+    updateActiveSession,
+    importSession,
+    exportSession,
+    markSessionRefreshed,
+  } = useSearchSessions(searchSessionsEnabled, createDefaultFilters)
+
   const [entities, setEntities] = useState<Entity[]>([])
   const [relationships, setRelationships] = useState<Relationship[]>([])
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([])
@@ -41,12 +78,10 @@ export default function ExplorePage() {
   const [error, setError] = useState<Error | null>(null)
 
   // UI State
-  const [selectedEntityId, setSelectedEntityId] = useState<string>()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [filterPanelOpen, setFilterPanelOpen] = useState(true)
   const [timelineOpen, setTimelineOpen] = useState(true)
   const [snapshotsOpen, setSnapshotsOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
   const [policyOverlay, setPolicyOverlay] = useState<'none' | 'purpose' | 'retention' | 'residency'>('none')
 
   // Graph state
@@ -55,15 +90,14 @@ export default function ExplorePage() {
     settings: {},
   })
 
-  // Filters
-  const [filters, setFilters] = useState<FilterState>({
-    entityTypes: [],
-    relationshipTypes: [],
-    dateRange: { start: '', end: '' },
-    confidenceRange: { min: 0, max: 1 },
-    tags: [],
-    sources: [],
-  })
+  const activeFilters = activeSession?.filters ?? createDefaultFilters()
+  const searchQuery = activeSession?.query ?? ''
+  const selectedEntityId = activeSession?.selectedEntityId
+  const timeWindow = activeSession?.timeWindow ?? activeFilters.dateRange
+
+  useEffect(() => {
+    setDrawerOpen(Boolean(selectedEntityId))
+  }, [selectedEntityId])
 
   // Load data - prefer GraphQL over mock data
   useEffect(() => {
@@ -112,26 +146,44 @@ export default function ExplorePage() {
   }, [entityUpdates])
 
   // Filter data based on current filters
+  const isWithinTimeWindow = useCallback(
+    (timestamp: string) => {
+      if (!timeWindow.start && !timeWindow.end) {
+        return true
+      }
+
+      const eventTime = new Date(timestamp)
+      if (timeWindow.start && eventTime < new Date(timeWindow.start)) {
+        return false
+      }
+      if (timeWindow.end && eventTime > new Date(timeWindow.end)) {
+        return false
+      }
+      return true
+    },
+    [timeWindow.end, timeWindow.start]
+  )
+
   const filteredEntities = entities.filter(entity => {
     if (
-      filters.entityTypes.length > 0 &&
-      !filters.entityTypes.includes(entity.type)
+      activeFilters.entityTypes.length > 0 &&
+      !activeFilters.entityTypes.includes(entity.type)
     )
       {return false}
     if (
-      filters.confidenceRange.min > entity.confidence ||
-      filters.confidenceRange.max < entity.confidence
+      activeFilters.confidenceRange.min > entity.confidence ||
+      activeFilters.confidenceRange.max < entity.confidence
     )
       {return false}
     if (
-      filters.tags.length > 0 &&
-      !entity.tags?.some(tag => filters.tags.includes(tag))
+      activeFilters.tags.length > 0 &&
+      !entity.tags?.some(tag => activeFilters.tags.includes(tag))
     )
       {return false}
     if (
-      filters.sources.length > 0 &&
+      activeFilters.sources.length > 0 &&
       entity.source &&
-      !filters.sources.includes(entity.source)
+      !activeFilters.sources.includes(entity.source)
     )
       {return false}
     if (
@@ -144,8 +196,8 @@ export default function ExplorePage() {
 
   const filteredRelationships = relationships.filter(rel => {
     if (
-      filters.relationshipTypes.length > 0 &&
-      !filters.relationshipTypes.includes(rel.type)
+      activeFilters.relationshipTypes.length > 0 &&
+      !activeFilters.relationshipTypes.includes(rel.type)
     )
       {return false}
     // Only include relationships where both entities are in filtered set
@@ -154,6 +206,11 @@ export default function ExplorePage() {
       filteredEntities.some(e => e.id === rel.targetId)
     )
   })
+
+  const filteredTimelineEvents = useMemo(
+    () => timelineEvents.filter(event => isWithinTimeWindow(event.timestamp)),
+    [isWithinTimeWindow, timelineEvents]
+  )
 
   // Get available filter options
   const availableEntityTypes = Array.from(new Set(entities.map(e => e.type)))
@@ -165,8 +222,31 @@ export default function ExplorePage() {
     new Set(entities.map(e => e.source).filter(Boolean))
   ) as string[]
 
+  const handleFiltersChange = (updatedFilters: FilterState) => {
+    updateActiveSession({
+      filters: updatedFilters,
+      timeWindow: updatedFilters.dateRange,
+    })
+  }
+
+  const handleSearchChange = (value: string) => {
+    updateActiveSession({ query: value })
+  }
+
+  const clearSessionState = () => {
+    const defaults = createDefaultFilters()
+    updateActiveSession({
+      filters: defaults,
+      timeWindow: defaults.dateRange,
+      query: '',
+      selectedEntityId: undefined,
+    })
+  }
+
   const handleEntitySelect = (entity: Entity) => {
-    setSelectedEntityId(entity.id)
+    updateActiveSession({
+      selectedEntityId: entity.id,
+    })
     setDrawerOpen(true)
   }
 
@@ -180,33 +260,34 @@ export default function ExplorePage() {
       await new Promise(resolve => setTimeout(resolve, 1000))
       setLoading(false)
     }
+    markSessionRefreshed(activeSessionId)
   }
 
-  const handleExport = async (format: 'json' | 'csv' | 'png') => {
+  const handleDataExport = async (format: 'json' | 'csv' | 'png') => {
     trackGoldenPathStep('results_viewed')
 
     // 1. Prepare Manifest
-    const timestamp = new Date().toISOString();
+    const timestamp = new Date().toISOString()
     const manifestPayload = {
-        tenant: 'CURRENT_TENANT', // Should come from context
-        filters,
-        timestamp
-    };
+      tenant: 'CURRENT_TENANT', // Should come from context
+      filters: activeFilters,
+      timestamp,
+    }
 
     // 2. Sign Manifest (Simulated call to new endpoint)
-    let signature = 'mock-signature';
+    let signature = 'mock-signature'
     try {
-        const res = await fetch('/api/exports/sign-manifest', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(manifestPayload)
-        });
-        if (res.ok) {
-            const json = await res.json();
-            signature = json.signature;
-        }
+      const res = await fetch('/api/exports/sign-manifest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(manifestPayload),
+      })
+      if (res.ok) {
+        const json = await res.json()
+        signature = json.signature
+      }
     } catch (e) {
-        console.warn("Failed to sign export manifest", e);
+      console.warn('Failed to sign export manifest', e)
     }
 
     if (format === 'json') {
@@ -252,6 +333,13 @@ export default function ExplorePage() {
     }
   }
 
+  const handleDrawerOpenChange = (open: boolean) => {
+    setDrawerOpen(open)
+    if (!open) {
+      updateActiveSession({ selectedEntityId: undefined })
+    }
+  }
+
   if (error) {
     return (
       <div className="h-full flex items-center justify-center">
@@ -270,6 +358,21 @@ export default function ExplorePage() {
 
   return (
     <div className="h-full flex flex-col">
+      {searchSessionsEnabled && (
+        <div className="border-b bg-background px-6 py-3">
+          <SearchSessionTabs
+            sessions={sessions}
+            activeSessionId={activeSessionId}
+            onAddSession={addSession}
+            onSelectSession={selectSession}
+            onCloseSession={closeSession}
+            onDuplicateSession={duplicateSession}
+            onResetSession={resetSession}
+            onExportSession={exportSession}
+            onImportSession={importSession}
+          />
+        </div>
+      )}
       {/* Header */}
       <div className="flex items-center justify-between p-6 border-b">
         <div className="flex items-center gap-4">
@@ -278,7 +381,7 @@ export default function ExplorePage() {
           <SearchBar
             placeholder="Search entities..."
             value={searchQuery}
-            onChange={setSearchQuery}
+            onChange={handleSearchChange}
             className="w-80"
           />
         </div>
@@ -343,11 +446,11 @@ export default function ExplorePage() {
           </Button>
 
           <div className="flex gap-1">
-             <Button variant="outline" size="sm" onClick={() => handleExport('json')}>
+            <Button variant="outline" size="sm" onClick={() => handleDataExport('json')}>
               <Download className="h-4 w-4 mr-2" />
               JSON
             </Button>
-             <Button variant="outline" size="sm" onClick={() => handleExport('csv')}>
+            <Button variant="outline" size="sm" onClick={() => handleDataExport('csv')}>
               <Download className="h-4 w-4 mr-2" />
               CSV
             </Button>
@@ -366,8 +469,8 @@ export default function ExplorePage() {
         {filterPanelOpen && (
           <div className="w-80 border-r overflow-y-auto">
             <FilterPanel
-              data={filters}
-              onFilterChange={setFilters}
+              data={activeFilters}
+              onFilterChange={handleFiltersChange}
               availableEntityTypes={availableEntityTypes}
               availableRelationshipTypes={availableRelationshipTypes}
               availableTags={availableTags}
@@ -395,17 +498,7 @@ export default function ExplorePage() {
                 description="Try adjusting your filters or search query"
                 action={{
                   label: 'Clear filters',
-                  onClick: () => {
-                    setFilters({
-                      entityTypes: [],
-                      relationshipTypes: [],
-                      dateRange: { start: '', end: '' },
-                      confidenceRange: { min: 0, max: 1 },
-                      tags: [],
-                      sources: [],
-                    })
-                    setSearchQuery('')
-                  },
+                  onClick: clearSessionState,
                 }}
               />
             </div>
@@ -438,11 +531,11 @@ export default function ExplorePage() {
         {timelineOpen && (
           <div className="w-80 border-l overflow-y-auto">
             <TimelineRail
-              data={timelineEvents}
+              data={filteredTimelineEvents}
               loading={loading}
               onEventSelect={event => {
                 if (event.entityId) {
-                  setSelectedEntityId(event.entityId)
+                  updateActiveSession({ selectedEntityId: event.entityId })
                   setDrawerOpen(true)
                 }
               }}
@@ -467,7 +560,7 @@ export default function ExplorePage() {
         data={entities}
         relationships={relationships}
         open={drawerOpen}
-        onOpenChange={setDrawerOpen}
+        onOpenChange={handleDrawerOpenChange}
         selectedEntityId={selectedEntityId}
         onSelect={handleEntitySelect}
         onAction={(action, payload) => {
