@@ -17,6 +17,7 @@ const { connectNeo4j, connectPostgres, connectRedis, closeConnections } = requir
 const GraphService = require('./src/services/GraphService');
 const EntityService = require('./src/services/EntityService');
 const GraphAnalysisService = require('./src/services/GraphAnalysisService');
+const SimilarityService = require('./src/services/SimilarityService');
 
 // GraphQL Schema
 const { typeDefs } = require('./src/graphql/schema');
@@ -50,10 +51,23 @@ const resolvers = {
     // Provenance
     decision: async (_, { id }) => {
         return await graphService.getDecisionProvenance(id);
+    },
+
+    // Deduplication
+    deduplicationCandidates: async (_, { investigationId, threshold }) => {
+      const entities = await entityService.getEntities(investigationId);
+      return SimilarityService.findDuplicateCandidates(entities, threshold);
     }
   },
   Mutation: {
     ping: () => 'pong',
+
+    // Deduplication
+    suggestMerge: async (_, { sourceId, targetId }) => {
+      // In a real application, we would have a more sophisticated merge strategy.
+      // For now, we'll just call the existing mergeEntities mutation.
+      return await entityService.mergeEntities(sourceId, targetId);
+    },
 
     // Provenance
     createDecision: async (_, { input }, context) => {

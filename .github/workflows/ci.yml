@@ -106,6 +106,8 @@ jobs:
         run: pnpm -w run build
       - name: Unit & integration tests
         run: pnpm -w run test
+      - name: Deduplication check
+        run: node scripts/check-deduplication.js
       - name: Upload build artifacts for golden path
         uses: actions/upload-artifact@v4
         with:
