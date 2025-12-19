@@ -4,10 +4,12 @@ import type {
   CostGuardDecision,
   PlanBudgetInput,
   ResourceOptimizationConfig,
+  QueueScalingDecision,
   ScalingDecision,
   SlowQueryRecord,
   TenantBudgetProfile,
   WorkloadBalancingPlan,
+  WorkloadQueueSignal,
   WorkloadSample,
 } from './types.js';
 
@@ -90,6 +92,52 @@ export class CostGuard {
         projectedLatencyMs: projectedLatency,
         saturation,
       },
+    };
+  }
+
+  evaluateQueueScaling(signal: WorkloadQueueSignal): QueueScalingDecision {
+    const latencyPressure = signal.p95LatencyMs / this.profile.maxLatencyMs;
+    const queuePressure =
+      signal.queueDepth / Math.max(1, this.profile.concurrencyLimit * 1.5);
+    const costPressure = signal.costPerJobUsd / 0.25;
+    const budgetPressure = signal.budgetConsumptionRatio ?? 0;
+    const saturation = signal.saturationRatio ?? Math.min(1, queuePressure);
+
+    const score = Number(
+      (
+        queuePressure * 0.4 +
+        latencyPressure * 0.35 +
+        costPressure * 0.15 +
+        budgetPressure * 0.05 +
+        saturation * 0.05
+      ).toFixed(3),
+    );
+
+    let action: QueueScalingDecision['action'] = 'hold';
+    let reason =
+      'Queue steady; maintain current worker footprint while tracking SLO burn.';
+
+    if (score >= 1.05 || latencyPressure > 1.1) {
+      action = 'scale_up';
+      reason =
+        'Latency or queue pressure breaching SLO; scale up workers to drain backlog.';
+    } else if (score <= 0.35 && signal.queueDepth === 0) {
+      action = 'scale_down';
+      reason =
+        'Queue empty and costs elevated; scale down to protect budget without harming SLOs.';
+    }
+
+    const recommendedReplicas = Math.max(
+      1,
+      Math.round(this.profile.concurrencyLimit * (0.6 + score / 1.5)),
+    );
+
+    return {
+      action,
+      score,
+      recommendedReplicas,
+      reason,
+      inputs: signal,
     };
   }
 
@@ -330,5 +378,7 @@ export type {
   SlowQueryRecord,
   TenantBudgetProfile,
   WorkloadBalancingPlan,
+  WorkloadQueueSignal,
   WorkloadSample,
+  QueueScalingDecision,
 } from './types.js';

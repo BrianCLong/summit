@@ -264,6 +264,48 @@ spec:
             rate(copilot_response_duration_seconds_bucket[5m]))
 
 ---
+# Agent Workload Queue - KEDA scaling with latency and cost signals
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: agent-workload-queue-scaler
+  namespace: prod
+  labels:
+    app: agent-workload-queue
+    cost-center: engineering
+    environment: production
+spec:
+  scaleTargetRef:
+    name: agent-workload-runner
+  minReplicaCount: 0
+  maxReplicaCount: 30
+  pollingInterval: 15
+  cooldownPeriod: 180
+  idleReplicaCount: 0
+  triggers:
+    - type: redis
+      metadata:
+        address: redis:6379
+        listName: agent_workload_queue
+        listLength: '10'
+        activationListLength: '1'
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus:9090
+        metricName: agent_workload_latency_p95_seconds
+        threshold: '2'
+        query: |
+          histogram_quantile(0.95,
+            rate(agent_workload_queue_wait_seconds_bucket[5m]))
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus:9090
+        metricName: agent_queue_cost_pressure
+        threshold: '0.85'
+        query: |
+          max(agent_queue_scaling_score)
+
+---
 # Data Export Worker - KEDA with cron and queue triggers
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
