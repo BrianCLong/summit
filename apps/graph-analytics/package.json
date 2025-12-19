@@ -1,5 +1,9 @@
 {
+<<<<<<< HEAD
+  "name": "@intelgraph/graph-analytics-app",
+=======
   "name": "@intelgraph/graph-analytics-service",
+>>>>>>> main
   "version": "1.0.0",
   "description": "Advanced Graph Analytics Engine for IntelGraph",
   "main": "dist/server.js",

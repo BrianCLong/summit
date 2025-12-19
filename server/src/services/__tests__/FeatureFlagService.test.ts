@@ -10,17 +10,28 @@
  * - Edge cases
  */
 
+<<<<<<< HEAD
 import { FeatureFlagService, resetFeatureFlagService, getFeatureFlagService } from '../FeatureFlagService';
 import { Logger } from '../../utils/logger';
+=======
+import { FeatureFlagService, resetFeatureFlagService, getFeatureFlagService } from '../FeatureFlagService.js';
+<<<<<<< HEAD
+// @ts-ignore
+import { logger } from '../../utils/logger.js';
+=======
+import { Logger } from '../../utils/logger.js';
+>>>>>>> main
+>>>>>>> main
 import { writeFileSync, unlinkSync, mkdirSync } from 'fs';
 import { join } from 'path';
+import { jest, describe, it, test, expect, beforeEach, afterEach } from '@jest/globals';
 
 // Mock LaunchDarkly
 jest.mock('launchdarkly-node-server-sdk');
 
 describe('FeatureFlagService', () => {
   let service: FeatureFlagService;
-  let mockLogger: jest.Mocked<Logger>;
+  let mockLogger: any;
   let testConfigPath: string;
 
   // Test configuration

@@ -1,7 +1,7 @@
 # Sprint Planning Index
 
-**Last Updated:** November 20, 2025
-**Total Sprints Documented:** 100+
+**Last Updated:** Jan 19, 2026
+**Total Sprints Documented:** 101+
 **Status:** Active Planning ✅
 
 ---
@@ -136,6 +136,54 @@ Located in repository root (`/SPRINT_*.md`)
 
 ---
 
+## Strategic Parallel Sprints
+
+Located in `/docs/sprints/PARALLEL_STRATEGIC_SPRINTS_2025.md`
+
+**Q4 2025 Strategic Initiative:** 5 parallel tracks to accelerate platform maturity.
+
+| Sprint | Focus | Goal |
+|--------|-------|------|
+| **1. Observability** | Monitoring | Unified visibility across AI/ML & Orchestration |
+| **2. Security Compliance** | Automation | Policy-as-code & Zero Trust enforcement |
+| **3. Data Pipeline** | Optimization | Airflow refactoring & Lineage tracking |
+| **4. Frontend/UI** | Modernization | `conductor-ui` upgrade & Accessibility |
+| **5. AI/ML Eval** | Benchmarking | Reproducible evaluation framework |
+
+---
+
+## Strategic Parallel Sprints
+
+Located in `/docs/sprints/PARALLEL_STRATEGIC_SPRINTS_2025.md`
+
+**Q4 2025 Strategic Initiative:** 5 parallel tracks to accelerate platform maturity.
+
+| Sprint | Focus | Goal |
+|--------|-------|------|
+| **1. Observability** | Monitoring | Unified visibility across AI/ML & Orchestration |
+| **2. Security Compliance** | Automation | Policy-as-code & Zero Trust enforcement |
+| **3. Data Pipeline** | Optimization | Airflow refactoring & Lineage tracking |
+| **4. Frontend/UI** | Modernization | `conductor-ui` upgrade & Accessibility |
+| **5. AI/ML Eval** | Benchmarking | Reproducible evaluation framework |
+
+---
+
+## Strategic Parallel Sprints
+
+Located in `/docs/sprints/PARALLEL_STRATEGIC_SPRINTS_2025.md`
+
+**Q4 2025 Strategic Initiative:** 5 parallel tracks to accelerate platform maturity.
+
+| Sprint | Focus | Goal |
+|--------|-------|------|
+| **1. Observability** | Monitoring | Unified visibility across AI/ML & Orchestration |
+| **2. Security Compliance** | Automation | Policy-as-code & Zero Trust enforcement |
+| **3. Data Pipeline** | Optimization | Airflow refactoring & Lineage tracking |
+| **4. Frontend/UI** | Modernization | `conductor-ui` upgrade & Accessibility |
+| **5. AI/ML Eval** | Benchmarking | Reproducible evaluation framework |
+
+---
+
 ## Chronological Sprint Timeline
 
 Located in `/docs/sprints/`
@@ -173,7 +221,7 @@ Located in `/docs/sprints/`
 
 | Sprint | Dates | File | Focus Areas |
 |--------|-------|------|-------------|
-| **Sprint 2026-01-19** | Jan 19-30 | `sprint_plan_jan_19_30_2026_america_denver.md` | Federation v2 |
+| **Sprint 27** | Jan 19-30 | `sprint_plan_jan_19_30_2026_america_denver.md` | Region Sharding, RTBF, GCS/JDBC |
 | **Sprint 2026-02-02** | Feb 2-13 | `sprint_plan_feb_2_13_2026_america_denver.md` | Privacy enhancements |
 | **Sprint 2026-02-16** | Feb 16-27 | `sprint_plan_feb_16_27_2026_america_denver.md` | Policy Intelligence v1.5 |
 | **Sprint 2026-03-02** | Mar 2-13 | `sprint_plan_mar_2_13_2026_america_denver.md` | Early Access Launch |
@@ -596,6 +644,6 @@ Every sprint follows this consistent format:
 
 **End of Sprint Index**
 
-*Last Updated: November 20, 2025*
+*Last Updated: Jan 19, 2026*
 *Next Review: Sprint planning session (weekly)*
 *Maintained by: Engineering Leadership*

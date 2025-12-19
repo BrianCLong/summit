@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/mobile-interface",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Mobile-responsive Investigation Interface for IntelGraph",
   "private": true,
   "scripts": {

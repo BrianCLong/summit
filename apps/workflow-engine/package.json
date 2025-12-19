@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/workflow-engine",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Workflow Automation Engine for IntelGraph",
   "main": "dist/server.js",
   "scripts": {
@@ -58,7 +58,7 @@
     "workflow-engine"
   ],
   "author": "IntelGraph Team",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "engines": {
     "node": ">=18.0.0"
   },

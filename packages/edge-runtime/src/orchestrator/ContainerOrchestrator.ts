@@ -1,7 +1,6 @@
 import Docker from 'dockerode';
 import EventEmitter from 'eventemitter3';
 import { pino, type Logger } from 'pino';
-import type { EdgeDeployment } from '@intelgraph/edge-computing';
 
 export interface ContainerInfo {
   id: string;
@@ -359,8 +358,8 @@ export class ContainerOrchestrator extends EventEmitter {
           tx: Object.values(stats.networks || {}).reduce((sum: number, n: any) => sum + (n.tx_bytes || 0), 0)
         },
         blockIO: {
-          read: stats.blkio_stats.io_service_bytes_recursive?.find((io: any) => io.op === 'Read')?.value || 0,
-          write: stats.blkio_stats.io_service_bytes_recursive?.find((io: any) => io.op === 'Write')?.value || 0
+          read: stats.blkio_stats?.io_service_bytes_recursive?.find((io: any) => io.op === 'Read')?.value || 0,
+          write: stats.blkio_stats?.io_service_bytes_recursive?.find((io: any) => io.op === 'Write')?.value || 0
         }
       };
     } catch (error) {

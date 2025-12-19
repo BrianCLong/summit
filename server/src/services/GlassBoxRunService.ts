@@ -46,7 +46,7 @@ export type GlassBoxRun = {
   investigationId: string;
   tenantId: string;
   userId: string;
-  type: 'graphrag_query' | 'nl_to_cypher' | 'nl_to_sql' | 'subgraph_retrieval';
+  type: 'graphrag_query' | 'graphrag_query_enhanced' | 'nl_to_cypher' | 'nl_to_sql' | 'subgraph_retrieval' | 'auto_query' | 'nl2cypher_query';
   status: RunStatus;
 
   // Input capture

@@ -3,6 +3,7 @@ import express from 'express';
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@as-integrations/express4';
 import { makeExecutableSchema } from '@graphql-tools/schema';
+import { applyMiddleware } from 'graphql-middleware';
 import cors from 'cors';
 import helmet from 'helmet';
 import pinoHttp from 'pino-http';
@@ -10,22 +11,28 @@ import { logger as appLogger } from './config/logger.js';
 import { telemetry } from './lib/telemetry/comprehensive-telemetry.js';
 import { snapshotter } from './lib/telemetry/diagnostic-snapshotter.js';
 import { anomalyDetector } from './lib/telemetry/anomaly-detector.js';
-import { buildCorsOptions } from './config/cors-options.js';
 import { auditLogger } from './middleware/audit-logger.js';
 import { auditFirstMiddleware } from './middleware/audit-first.js';
 import { correlationIdMiddleware } from './middleware/correlation-id.js';
+import { featureFlagContextMiddleware } from './middleware/feature-flag-context.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
+import { overloadProtection } from './middleware/overloadProtection.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
+import { safetyModeMiddleware, resolveSafetyState } from './middleware/safety-mode.js';
 import monitoringRouter from './routes/monitoring.js';
+import billingRouter from './routes/billing.js';
+import entityResolutionRouter from './routes/entity-resolution.js';
+import workspaceRouter from './routes/workspaces.js';
 import aiRouter from './routes/ai.js';
 import nlGraphQueryRouter from './routes/nl-graph-query.js';
 import disclosuresRouter from './routes/disclosures.js';
 import narrativeSimulationRouter from './routes/narrative-sim.js';
 import { metricsRoute } from './http/metricsRoute.js';
-import rbacRouter from './routes/rbacRoutes.js';
+const rbacRouter = require('./routes/rbacRoutes.js');
 import { typeDefs } from './graphql/schema.js';
 import resolvers from './graphql/resolvers/index.js';
+import { licenseRuleValidationMiddleware } from './graphql/middleware/licenseRuleValidationMiddleware.js';
 import { getContext } from './lib/auth.js';
 import { getNeo4jDriver } from './db/neo4j.js';
 import { initializeTracing, getTracer } from './observability/tracer.js';
@@ -47,27 +54,170 @@ import { mnemosyneRouter } from './routes/mnemosyne.js';
 import { necromancerRouter } from './routes/necromancer.js';
 import { zeroDayRouter } from './routes/zero_day.js';
 import { abyssRouter } from './routes/abyss.js';
+<<<<<<< HEAD
+import authRouter from './routes/authRoutes.js';
+=======
+<<<<<<< HEAD
+import qafRouter from './routes/qaf.js';
+=======
+<<<<<<< HEAD
+import siemPlatformRouter from './routes/siem-platform.js';
+=======
+<<<<<<< HEAD
+import maestroRouter from './routes/maestro.js';
+=======
+<<<<<<< HEAD
+import { SummitInvestigate } from './services/SummitInvestigate.js';
+=======
+<<<<<<< HEAD
+import osintRouter from './routes/osint.js';
+=======
+<<<<<<< HEAD
+import edgeOpsRouter from './routes/edge-ops.js';
+=======
+<<<<<<< HEAD
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './config/swagger.js';
+=======
+<<<<<<< HEAD
+import metaOrchestratorRouter from './routes/meta-orchestrator.js';
+=======
+<<<<<<< HEAD
+import adminSmokeRouter from './routes/admin-smoke.js';
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
 import lineageRouter from './routes/lineage.js';
 import scenarioRouter from './routes/scenarios.js';
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+import resourceCostsRouter from './routes/resource-costs.js';
+=======
+<<<<<<< HEAD
+import queryReplayRouter from './routes/query-replay.js';
+=======
+<<<<<<< HEAD
+=======
 import streamRouter from './routes/stream.js'; // Added import
+import searchV1Router from './routes/search-v1.js';
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
 
   // Initialize OpenTelemetry tracing
-  const tracer = initializeTracing();
-  await tracer.initialize();
+  // const tracer = initializeTracing();
+  // await tracer.initialize();
 
   const app = express();
+<<<<<<< HEAD
+  const logger = pino();
+<<<<<<< HEAD
 
   // Add correlation ID middleware FIRST (before other middleware)
   app.use(correlationIdMiddleware);
 
-  app.use(helmet());
-  const corsOptions = buildCorsOptions(cfg);
-  app.use(cors(corsOptions));
-  app.options('*', cors(corsOptions));
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        useDefaults: true,
+        directives: {
+          'script-src': [
+            "'self'",
+            "'unsafe-inline'",
+            'https://cdn.jsdelivr.net',
+          ],
+          'connect-src': ["'self'", 'https://api.intelgraph.example'],
+        },
+      },
+      crossOriginOpenerPolicy: { policy: 'same-origin' },
+      crossOriginEmbedderPolicy: { policy: 'require-corp' },
+      crossOriginResourcePolicy: { policy: 'same-origin' },
+      hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
+    })
+  );
+=======
+  const isProduction = cfg.NODE_ENV === 'production';
+>>>>>>> main
+  const allowedOrigins = cfg.CORS_ORIGIN.split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+=======
+
+  const safetyState = await resolveSafetyState();
+  if (safetyState.killSwitch || safetyState.safeMode) {
+    appLogger.warn({ safetyState }, 'Safety gates enabled');
+  }
+>>>>>>> main
+
+  // Add correlation ID middleware FIRST (before other middleware)
+  app.use(correlationIdMiddleware);
+  app.use(featureFlagContextMiddleware);
+
+  // Load Shedding / Overload Protection (Second, to reject early)
+  app.use(overloadProtection);
+
+  app.use(
+    helmet({
+      contentSecurityPolicy: isProduction
+        ? {
+            directives: {
+              defaultSrc: ["'self'"],
+              objectSrc: ["'none'"],
+              imgSrc: ["'self'", 'data:'],
+              scriptSrc: ["'self'"],
+              styleSrc: ["'self'", "'unsafe-inline'"],
+              connectSrc: ["'self'", ...allowedOrigins],
+            },
+          }
+        : false,
+      referrerPolicy: { policy: 'no-referrer' },
+      hsts: isProduction ? undefined : false,
+      crossOriginEmbedderPolicy: false,
+    }),
+  );
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        if (!origin || cfg.NODE_ENV !== 'production') {
+          return callback(null, true);
+        }
+        if (allowedOrigins.includes(origin)) {
+          return callback(null, true);
+        }
+        return callback(new Error(`Origin ${origin} not allowed by Summit CORS policy`));
+      },
+      credentials: true,
+    }),
+  );
 
   // Enhanced Pino HTTP logger with correlation and trace context
   app.use(
@@ -89,11 +239,44 @@ export const createApp = async () => {
   );
 
   app.use(express.json({ limit: '1mb' }));
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+  app.use(safetyModeMiddleware);
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
   // Standard audit logger for basic request tracking
   app.use(auditLogger);
   // Audit-First middleware for cryptographic stamping of sensitive operations
   app.use(auditFirstMiddleware);
   app.use(httpCacheMiddleware);
+
+  // API Versioning Middleware (Epic 2: API v1.1 Default)
+  app.use((req, res, next) => {
+    const version = req.headers['x-ig-api-version'];
+    if (!version) {
+      // Default to v1.1 if not specified
+      req.headers['x-ig-api-version'] = '1.1';
+    }
+    // Attach to request for downstream consumption
+    (req as any).apiVersion = req.headers['x-ig-api-version'];
+
+    // Compat guard: If legacy client detected (v1.0), we might want to log or adjust behavior
+    if ((req as any).apiVersion === '1.0') {
+      // Logic for v1.0 compatibility if needed
+    }
+    next();
+  });
 
   // Telemetry middleware
   app.use((req, res, next) => {
@@ -125,12 +308,19 @@ export const createApp = async () => {
   const healthRouter = (await import('./routes/health.js')).default;
   app.use(healthRouter);
 
+  // Swagger UI
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
   // Global Rate Limiting (fallback for unauthenticated or non-specific routes)
   // Note: /graphql has its own rate limiting chain above
   app.use((req, res, next) => {
       if (req.path === '/graphql') return next(); // Skip global limiter for graphql, handled in route
       return rateLimitMiddleware(req, res, next);
   });
+
+  // Authentication routes (exempt from global auth middleware)
+  app.use('/auth', authRouter);
+  app.use('/api/auth', authRouter); // Alternative path
 
   // Other routes
   app.use('/monitoring', monitoringRouter);
@@ -139,6 +329,9 @@ export const createApp = async () => {
   app.use('/api/narrative-sim', narrativeSimulationRouter);
   app.use('/disclosures', disclosuresRouter);
   app.use('/rbac', rbacRouter);
+  app.use('/api/billing', billingRouter);
+  app.use('/api/er', entityResolutionRouter);
+  app.use('/api/workspaces', workspaceRouter);
   app.use('/api/webhooks', webhookRouter);
   app.use('/api/support', supportTicketsRouter);
   app.use('/api', ticketLinksRouter);
@@ -148,12 +341,98 @@ export const createApp = async () => {
   app.use('/api/echelon2', echelon2Router);
   app.use('/api/mnemosyne', mnemosyneRouter);
   app.use('/api/necromancer', necromancerRouter);
-  app.use('/api/lineage', lineageRouter);
   app.use('/api/zero-day', zeroDayRouter);
   app.use('/api/abyss', abyssRouter);
+<<<<<<< HEAD
+  app.use('/api/qaf', qafRouter);
+=======
+<<<<<<< HEAD
+  app.use('/api/siem-platform', siemPlatformRouter);
+=======
+<<<<<<< HEAD
+  app.use('/api/maestro', maestroRouter);
+=======
+<<<<<<< HEAD
+  app.use('/api/osint', osintRouter);
+=======
+<<<<<<< HEAD
+  app.use('/api/edge', edgeOpsRouter);
+=======
+<<<<<<< HEAD
+  app.use('/api/meta-orchestrator', metaOrchestratorRouter);
+=======
+<<<<<<< HEAD
+  app.use('/api', adminSmokeRouter);
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
   app.use('/api/scenarios', scenarioRouter);
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+  app.use('/api/costs', resourceCostsRouter);
+=======
+<<<<<<< HEAD
+  app.use('/api/query-replay', queryReplayRouter);
+=======
+<<<<<<< HEAD
+=======
   app.use('/api/stream', streamRouter); // Register stream route
+  app.use('/api/v1/search', searchV1Router); // Register Unified Search API
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
   app.get('/metrics', metricsRoute);
+
+<<<<<<< HEAD
+  // Initialize SummitInvestigate Platform Routes
+  SummitInvestigate.initialize(app);
+=======
+  // Maestro
+  const { buildMaestroRouter } = await import('./routes/maestro_routes.js');
+  const { Maestro } = await import('./maestro/core.js');
+  const { MaestroQueries } = await import('./maestro/queries.js');
+  const { IntelGraphClientImpl } = await import('./intelgraph/client-impl.js');
+  const { CostMeter } = await import('./maestro/cost_meter.js');
+
+  const igClient = new IntelGraphClientImpl();
+  const costMeter = new CostMeter(igClient, {
+    'openai:gpt-4.1': { inputPer1K: 0.01, outputPer1K: 0.03 },
+  });
+  // Simple LLM stub
+  const llmClient = {
+    callCompletion: async (prompt: string, model: string) => `[Stub LLM Response] for: ${prompt}`
+  };
+
+  const maestro = new Maestro(igClient, costMeter, llmClient, {
+    defaultPlannerAgent: 'openai:gpt-4.1',
+    defaultActionAgent: 'openai:gpt-4.1',
+  });
+  const maestroQueries = new MaestroQueries(igClient);
+
+  app.use('/api/maestro', buildMaestroRouter(maestro, maestroQueries));
+>>>>>>> main
 
   app.get('/search/evidence', async (req, res) => {
     const { q, skip = 0, limit = 10 } = req.query;
@@ -214,10 +493,12 @@ export const createApp = async () => {
     }
   });
 
-  const schema = makeExecutableSchema({
+  const executableSchema = makeExecutableSchema({
     typeDefs: typeDefs as any,
     resolvers: resolvers as any,
   });
+
+  const schema = applyMiddleware(executableSchema, licenseRuleValidationMiddleware);
 
   // GraphQL over HTTP
   const { persistedQueriesPlugin } = await import(
@@ -303,10 +584,17 @@ export const createApp = async () => {
     expressMiddleware(apollo, { context: getContext }),
   );
 
-  // Start background trust worker if enabled
-  startTrustWorker();
-  // Start retention worker if enabled
-  startRetentionWorker();
+  if (!safetyState.killSwitch && !safetyState.safeMode) {
+    // Start background trust worker if enabled
+    startTrustWorker();
+    // Start retention worker if enabled
+    startRetentionWorker();
+  } else {
+    appLogger.warn(
+      { safetyState },
+      'Skipping background workers because safety mode or kill switch is enabled',
+    );
+  }
 
   // Ensure webhook worker is running (it's an auto-starting worker, but importing it ensures it's registered)
   // In a real production setup, this might be in a separate process/container.

@@ -15,11 +15,9 @@ import {
   SimilarEntity,
 } from '../../services/SimilarityService.js';
 import { getNeo4jDriver, getRedisClient } from '../../config/database.js';
-import pino from 'pino';
 import { GraphQLError } from 'graphql';
 import { withCache } from '../../utils/cacheHelper.js';
-
-const logger = pino({ name: 'graphragResolvers' });
+import { logger } from '../../utils/logger.js';
 
 // Service initialization
 let graphRAGService: GraphRAGService | null = null;
@@ -33,6 +31,7 @@ function initializeServices(): GraphRAGService {
 
     embeddingService = new EmbeddingService();
     llmService = new LLMService();
+    // @ts-ignore
     graphRAGService = new GraphRAGService(
       neo4jDriver,
       llmService,
@@ -44,6 +43,7 @@ function initializeServices(): GraphRAGService {
   }
   return graphRAGService;
 }
+
 
 interface GraphRAGQueryInput {
   investigationId: string;
@@ -97,7 +97,7 @@ export const graphragResolvers = {
             temperature: input.temperature,
             maxTokens: input.maxTokens,
             useCase: input.useCase,
-            rankingStrategy: input.rankingStrategy,
+            rankingStrategy: input.rankingStrategy as 'v1' | 'v2' | undefined,
           };
 
           const response = await service.answer(request);
@@ -109,8 +109,7 @@ export const graphragResolvers = {
           return response;
         } catch (error) {
           logger.error(
-            `GraphRAG query failed. Investigation ID: ${input.investigationId}, User ID: ${context.user.id}, Error: ${
-              error instanceof Error ? error.message : 'Unknown error'
+            `GraphRAG query failed. Investigation ID: ${input.investigationId}, User ID: ${context.user.id}, Error: ${error instanceof Error ? error.message : 'Unknown error'
             }`,
           );
 

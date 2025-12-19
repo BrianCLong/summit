@@ -7,17 +7,32 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const MIGRATIONS_DIR = path.resolve(__dirname, '../db/migrations/postgres');
-const MANIFEST_PATH = path.join(MIGRATIONS_DIR, 'manifest.json');
+const DEFAULT_MIGRATIONS_DIR = path.resolve(__dirname, '../db/migrations/postgres');
+const DEFAULT_MANIFEST_PATH = path.join(DEFAULT_MIGRATIONS_DIR, 'manifest.json');
 
-interface Manifest {
-  [filename: string]: string; // filename -> sha256 hash
-}
+export type Manifest = Record<string, string>; // filename -> sha256 hash
 
 interface AuditResult {
   file: string;
   errors: string[];
   warnings: string[];
+}
+
+export type AuditMode = 'check' | 'update';
+
+export interface AuditOptions {
+  mode?: AuditMode;
+  migrationsDir?: string;
+  manifestPath?: string;
+  logger?: Pick<Console, 'log' | 'warn' | 'error'>;
+}
+
+export interface AuditSummary {
+  mode: AuditMode;
+  hasError: boolean;
+  errors: string[];
+  warnings: string[];
+  manifest: Manifest;
 }
 
 const DESTRUCTIVE_REGEX = [
@@ -28,14 +43,17 @@ const DESTRUCTIVE_REGEX = [
 ];
 
 const CONTRACT_REGEX = [
-  { pattern: /\bALTER\s+TABLE\s+.*\s+RENAME\s+/i, message: 'RENAME COLUMN detected. This breaks existing code. Use Expand/Contract pattern.' },
+  {
+    pattern: /\bALTER\s+TABLE\s+.*\s+RENAME\s+/i,
+    message: 'RENAME COLUMN detected. This breaks existing code. Use Expand/Contract pattern.',
+  },
 ];
 
-function calculateHash(content: string): string {
+export function calculateHash(content: string): string {
   return crypto.createHash('sha256').update(content).digest('hex');
 }
 
-function scanFile(filepath: string, content: string): AuditResult {
+export function scanFile(filepath: string, content: string): AuditResult {
   const filename = path.basename(filepath);
   const result: AuditResult = { file: filename, errors: [], warnings: [] };
   const lines = content.split('\n');
@@ -46,8 +64,6 @@ function scanFile(filepath: string, content: string): AuditResult {
     if (trimmed.startsWith('--') || trimmed.length === 0) return;
 
     // 2. Remove inline comments (e.g. "DROP TABLE x; -- comment") for checking
-    // Simple naive check: split by '--' and take the first part
-    // This isn't perfect for strings containing '--', but good enough for SQL keywords outside strings
     const codePart = line.split('--')[0];
 
     // 3. Check for suppression (still allow suppression on previous line or same line in original content)
@@ -77,120 +93,158 @@ function scanFile(filepath: string, content: string): AuditResult {
   return result;
 }
 
-function loadManifest(): Manifest {
-  if (!fs.existsSync(MANIFEST_PATH)) {
+function loadManifest(manifestPath: string): Manifest {
+  if (!fs.existsSync(manifestPath)) {
     return {};
   }
   try {
-    return JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf-8'));
+    const raw = fs.readFileSync(manifestPath, 'utf-8');
+    const parsed = JSON.parse(raw);
+    if (typeof parsed !== 'object' || Array.isArray(parsed) || parsed === null) {
+      throw new Error('manifest.json must contain an object map of filename -> hash');
+    }
+    return parsed as Manifest;
   } catch (e) {
-    console.error('Failed to parse manifest.json');
-    return {};
+    throw new Error(`Failed to parse manifest at ${manifestPath}: ${(e as Error).message}`);
   }
 }
 
-function saveManifest(manifest: Manifest) {
-  fs.writeFileSync(MANIFEST_PATH, JSON.stringify(manifest, null, 2));
-  console.log(`Updated manifest at ${MANIFEST_PATH}`);
+function persistManifest(manifestPath: string, manifest: Manifest, logger: Pick<Console, 'log'>) {
+  const existingContent = fs.existsSync(manifestPath) ? fs.readFileSync(manifestPath, 'utf-8') : null;
+  const tmpPath = `${manifestPath}.tmp`;
+
+  try {
+    fs.writeFileSync(tmpPath, JSON.stringify(manifest, null, 2));
+    fs.renameSync(tmpPath, manifestPath);
+    logger.log(`Updated manifest at ${manifestPath}`);
+  } catch (error) {
+    if (existingContent !== null) {
+      fs.writeFileSync(manifestPath, existingContent);
+    }
+    throw error;
+  } finally {
+    if (fs.existsSync(tmpPath)) {
+      fs.rmSync(tmpPath);
+    }
+  }
 }
 
-async function main() {
-  const args = process.argv.slice(2);
-  const mode = args.includes('--update-manifest') ? 'update' : 'check';
-  // const strict = args.includes('--strict');
+function assertMigrationsDir(migrationsDir: string) {
+  if (!fs.existsSync(migrationsDir)) {
+    throw new Error(`Migrations directory not found: ${migrationsDir}`);
+  }
+}
 
-  console.log(`Starting Migration Audit in ${mode.toUpperCase()} mode...`);
-  console.log(`Directory: ${MIGRATIONS_DIR}`);
+export function readMigrations(migrationsDir: string): string[] {
+  assertMigrationsDir(migrationsDir);
+  return fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort();
+}
 
-  if (!fs.existsSync(MIGRATIONS_DIR)) {
-    console.error(`Migrations directory not found: ${MIGRATIONS_DIR}`);
-    process.exit(1);
+function auditFile(manifest: Manifest, newManifest: Manifest, file: string, migrationsDir: string, mode: AuditMode) {
+  const filepath = path.join(migrationsDir, file);
+  const content = fs.readFileSync(filepath, 'utf-8');
+  const hash = calculateHash(content);
+  const errors: string[] = [];
+  const warnings: string[] = [];
+
+  if (manifest[file]) {
+    if (manifest[file] !== hash) {
+      errors.push(
+        `INTEGRITY ERROR: File ${file} has been modified!\n   Expected: ${manifest[file]}\n   Actual:   ${hash}\n   Modification of existing migrations is PROHIBITED.`,
+      );
+    }
+  } else if (mode === 'check') {
+    errors.push(`MANIFEST ERROR: New migration file detected but not tracked: ${file}\n   Run with --update-manifest to acknowledge this file.`);
+  } else {
+    warnings.push(`New migration file detected: ${file}`);
+    newManifest[file] = hash;
   }
 
-  const files = fs.readdirSync(MIGRATIONS_DIR).filter(f => f.endsWith('.sql')).sort();
-  const manifest = loadManifest();
+  const audit = scanFile(filepath, content);
+  if (audit.errors.length > 0) {
+    errors.push(`RULE VIOLATION: ${file}\n${audit.errors.map((e) => `   ${e}`).join('\n')}`);
+  }
+  if (audit.warnings.length > 0) {
+    warnings.push(`WARNING: ${file}\n${audit.warnings.map((w) => `   ${w}`).join('\n')}`);
+  }
+
+  return { errors, warnings };
+}
+
+export async function auditMigrations(options: AuditOptions = {}): Promise<AuditSummary> {
+  const mode: AuditMode = options.mode ?? 'check';
+  const migrationsDir = options.migrationsDir ?? DEFAULT_MIGRATIONS_DIR;
+  const manifestPath = options.manifestPath ?? DEFAULT_MANIFEST_PATH;
+  const logger = options.logger ?? console;
+
+  assertMigrationsDir(migrationsDir);
+
+  logger.log(`Starting Migration Audit in ${mode.toUpperCase()} mode...`);
+  logger.log(`Directory: ${migrationsDir}`);
+
+  const files = readMigrations(migrationsDir);
+  const manifest = loadManifest(manifestPath);
   const newManifest: Manifest = { ...manifest };
-  let hasError = false;
-
-  // Track which files we've seen to detect deletions (optional, but good)
   const seenFiles = new Set<string>();
+  const errors: string[] = [];
+  const warnings: string[] = [];
 
   for (const file of files) {
     seenFiles.add(file);
-    const filepath = path.join(MIGRATIONS_DIR, file);
-    const content = fs.readFileSync(filepath, 'utf-8');
-    const hash = calculateHash(content);
-
-    // 1. Integrity Check (Drift)
-    if (manifest[file]) {
-      if (manifest[file] !== hash) {
-        console.error(`❌ INTEGRITY ERROR: File ${file} has been modified!`);
-        console.error(`   Expected: ${manifest[file]}`);
-        console.error(`   Actual:   ${hash}`);
-        console.error(`   Modification of existing migrations is PROHIBITED.`);
-        hasError = true;
-      }
-    } else {
-      // New file
-      if (mode === 'check') {
-        console.error(`❌ MANIFEST ERROR: New migration file detected but not tracked: ${file}`);
-        console.error(`   Run with --update-manifest to acknowledge this file.`);
-        hasError = true;
-      } else {
-        console.log(`ℹ️  New migration file detected: ${file}`);
-        newManifest[file] = hash;
-      }
-    }
-
-    // 2. Content Scan (Destructive/Contract)
-    const audit = scanFile(filepath, content);
-    if (audit.errors.length > 0) {
-      console.error(`❌ RULE VIOLATION: ${file}`);
-      audit.errors.forEach(e => console.error(`   ${e}`));
-      hasError = true;
-    }
-    if (audit.warnings.length > 0) {
-      console.warn(`⚠️  WARNING: ${file}`);
-      audit.warnings.forEach(w => console.warn(`   ${w}`));
-    }
+    const { errors: fileErrors, warnings: fileWarnings } = auditFile(manifest, newManifest, file, migrationsDir, mode);
+    errors.push(...fileErrors);
+    warnings.push(...fileWarnings);
   }
 
-  // Check for deleted files?
   if (mode === 'check') {
-      for (const file of Object.keys(manifest)) {
-          if (!seenFiles.has(file)) {
-             console.error(`❌ MANIFEST ERROR: Migration file missing: ${file}`);
-             hasError = true;
-          }
+    for (const file of Object.keys(manifest)) {
+      if (!seenFiles.has(file)) {
+        errors.push(`MANIFEST ERROR: Migration file missing: ${file}`);
       }
+    }
   } else {
-      // Clean up manifest
-      for (const file of Object.keys(newManifest)) {
-          if (!seenFiles.has(file)) {
-             console.log(`ℹ️  Migration file removed from manifest: ${file}`);
-             delete newManifest[file];
-          }
+    for (const file of Object.keys(newManifest)) {
+      if (!seenFiles.has(file)) {
+        warnings.push(`Migration file removed from manifest: ${file}`);
+        delete newManifest[file];
       }
+    }
   }
 
+  if (mode === 'update' && errors.length === 0) {
+    persistManifest(manifestPath, newManifest, logger);
+  }
 
-  if (mode === 'update') {
-    if (hasError) {
-      console.error('❌ Cannot update manifest due to audit errors.');
-      process.exit(1);
-    }
-    saveManifest(newManifest);
-    console.log('✅ Manifest updated successfully.');
-  } else {
-    if (hasError) {
+  return {
+    mode,
+    hasError: errors.length > 0,
+    errors,
+    warnings,
+    manifest: mode === 'update' && errors.length === 0 ? newManifest : manifest,
+  };
+}
+
+export async function main(args = process.argv.slice(2)) {
+  const mode: AuditMode = args.includes('--update-manifest') ? 'update' : 'check';
+
+  try {
+    const result = await auditMigrations({ mode });
+
+    result.warnings.forEach((w) => console.warn(`⚠️  ${w}`));
+
+    if (result.hasError) {
+      result.errors.forEach((e) => console.error(`❌ ${e}`));
       console.error('❌ Audit FAILED.');
       process.exit(1);
     }
-    console.log('✅ Audit PASSED.');
+
+    console.log(mode === 'update' ? '✅ Manifest updated successfully.' : '✅ Audit PASSED.');
+  } catch (err) {
+    console.error(`❌ Audit failed with error: ${(err as Error).message}`);
+    process.exit(1);
   }
 }
 
-main().catch(err => {
-  console.error(err);
-  process.exit(1);
-});
+if (import.meta.url === `file://${__filename}`) {
+  main();
+}

@@ -29,7 +29,7 @@ describe('GraphRAGQueryServiceEnhanced', () => {
   beforeEach(() => {
     // Mock GraphRAG Service
     mockGraphRAGService = {
-      answer: jest.fn().mockResolvedValue({
+      answer: jest.fn<any>().mockResolvedValue({
         answer: 'Test answer',
         confidence: 0.85,
         citations: {
@@ -41,7 +41,7 @@ describe('GraphRAGQueryServiceEnhanced', () => {
 
     // Mock Query Preview Service
     mockQueryPreviewService = {
-      createPreview: jest.fn().mockResolvedValue({
+      createPreview: jest.fn<any>().mockResolvedValue({
         id: 'preview-1',
         generatedQuery: 'MATCH (n) RETURN n LIMIT 10',
         queryExplanation: 'Returns first 10 nodes',
@@ -55,7 +55,7 @@ describe('GraphRAGQueryServiceEnhanced', () => {
 
     // Mock Glass Box Service
     mockGlassBoxService = {
-      createRun: jest.fn().mockResolvedValue({
+      createRun: jest.fn<any>().mockResolvedValue({
         id: 'run-1',
         investigationId: 'inv-1',
         tenantId: 'tenant-1',
@@ -65,26 +65,26 @@ describe('GraphRAGQueryServiceEnhanced', () => {
         status: 'pending',
         createdAt: new Date(),
       }),
-      updateStatus: jest.fn().mockResolvedValue(undefined),
-      addStep: jest.fn().mockResolvedValue(undefined),
-      completeStep: jest.fn().mockResolvedValue(undefined),
+      updateStatus: jest.fn<any>().mockResolvedValue(undefined),
+      addStep: jest.fn<any>().mockResolvedValue(undefined),
+      completeStep: jest.fn<any>().mockResolvedValue(undefined),
     } as any;
 
     // Mock Redaction Service
     mockRedactionService = {
-      redactObject: jest.fn().mockResolvedValue({
+      redactObject: jest.fn<any>().mockResolvedValue({
         redactedField: '[REDACTED]',
       }),
     } as any;
 
     // Mock Prov Ledger Client
     mockProvLedgerClient = {
-      getEvidence: jest.fn().mockResolvedValue({
+      getEvidence: jest.fn<any>().mockResolvedValue({
         id: 'evidence-1',
         sha256: 'hash123',
         claimIds: ['claim-1'],
       }),
-      getProvenanceChains: jest.fn().mockResolvedValue([
+      getProvenanceChains: jest.fn<any>().mockResolvedValue([
         {
           id: 'chain-1',
           rootHash: 'roothash123',
@@ -92,13 +92,13 @@ describe('GraphRAGQueryServiceEnhanced', () => {
           verified: true,
         },
       ]),
-      createClaim: jest.fn().mockResolvedValue({
+      createClaim: jest.fn<any>().mockResolvedValue({
         id: 'claim-new',
         statement: 'Test answer',
         confidence: 0.85,
         evidenceIds: ['evidence-1'],
       }),
-      createProvenanceChain: jest.fn().mockResolvedValue({
+      createProvenanceChain: jest.fn<any>().mockResolvedValue({
         id: 'chain-new',
         claimId: 'claim-new',
         rootHash: 'newhash',
@@ -107,7 +107,7 @@ describe('GraphRAGQueryServiceEnhanced', () => {
 
     // Mock Guardrails Service
     mockGuardrailsService = {
-      validateInput: jest.fn().mockResolvedValue({
+      validateInput: jest.fn<any>().mockResolvedValue({
         allowed: true,
         risk_score: 0.2,
         warnings: [],
@@ -116,7 +116,7 @@ describe('GraphRAGQueryServiceEnhanced', () => {
 
     // Mock Pool
     mockPool = {
-      query: jest.fn().mockResolvedValue({
+      query: jest.fn<any>().mockResolvedValue({
         rows: [
           {
             id: 'entity-1',
@@ -148,10 +148,10 @@ describe('GraphRAGQueryServiceEnhanced', () => {
 
     // Mock Neo4j Driver
     const mockSession = {
-      run: jest.fn().mockResolvedValue({
+      run: jest.fn<any>().mockResolvedValue({
         records: [
           {
-            get: jest.fn((key: string) => {
+            get: jest.fn<any>((key: string) => {
               if (key === 'nodeCount') return { toNumber: () => 100 };
               if (key === 'edgeCount') return { toNumber: () => 50 };
               return null;
@@ -159,11 +159,11 @@ describe('GraphRAGQueryServiceEnhanced', () => {
           },
         ],
       }),
-      close: jest.fn().mockResolvedValue(undefined),
+      close: jest.fn<any>().mockResolvedValue(undefined),
     };
 
     mockNeo4jDriver = {
-      session: jest.fn().mockReturnValue(mockSession),
+      session: jest.fn<any>().mockReturnValue(mockSession),
     } as any;
 
     // Create service instance

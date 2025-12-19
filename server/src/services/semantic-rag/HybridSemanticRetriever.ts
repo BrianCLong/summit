@@ -9,13 +9,14 @@
  * - Reciprocal rank fusion for result merging
  */
 
-import { Pool, PoolClient } from 'pg';
+import { Pool } from 'pg';
 import { Driver } from 'neo4j-driver';
 import pino from 'pino';
-import * as z from 'zod';
+import { z } from 'zod/v4';
 import { GraphNode, GraphEdge } from './types.js';
+import logger from '../../utils/logger.js';
 
-const logger = pino({ name: 'HybridSemanticRetriever' });
+const serviceLogger = logger.child({ name: 'HybridSemanticRetriever' });
 
 // ============================================================================
 // Types
@@ -27,8 +28,8 @@ export const SemanticSnippetSchema = z.object({
   kind: z.string(),
   text: z.string(),
   similarity: z.number(),
-  scope: z.record(z.any()).optional(),
-  provenance: z.record(z.any()).optional(),
+  scope: z.record(z.string(), z.any()).optional(),
+  provenance: z.record(z.string(), z.any()).optional(),
   timestamp: z.string().optional(),
 });
 

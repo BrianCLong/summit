@@ -321,3 +321,59 @@ def check_time_window(policy, query):
             False,
             f"Access date {query_access_date_shifted.isoformat()} is outside policy window {policy_start_date.isoformat()} - {policy_end_date.isoformat()}",
         )
+
+def check_user_role(policy, query):
+    """Checks user role."""
+    policy_role = policy.get("user_role")
+    query_role = _resolve_field(query, "user_role")
+
+    if not policy_role:
+        COVERAGE["user_role"]["default"] += 1
+        return True, None
+
+    if policy_role == "admin":
+        if query_role == "admin":
+            COVERAGE["user_role"]["admin_match"] += 1
+            return True, None
+        else:
+            return False, f"Policy requires admin, got {query_role}"
+    elif policy_role == "analyst":
+        if query_role in ["admin", "analyst"]:
+            COVERAGE["user_role"]["analyst_match"] += 1
+            return True, None
+        else:
+            return False, f"Policy requires analyst+, got {query_role}"
+    elif policy_role == "guest":
+        COVERAGE["user_role"]["guest_match"] += 1
+        return True, None
+
+    COVERAGE["user_role"]["default"] += 1
+    return True, None
+
+def check_network_condition(policy, query):
+    """Checks network condition."""
+    policy_net = policy.get("network_condition")
+    query_net = _resolve_field(query, "network_condition")
+
+    if not policy_net:
+        COVERAGE["network_condition"]["default"] += 1
+        return True, None
+
+    if policy_net == "secure":
+        if query_net == "secure":
+            COVERAGE["network_condition"]["secure_match"] += 1
+            return True, None
+        else:
+            return False, f"Policy requires secure network, got {query_net}"
+    elif policy_net == "unsecure":
+        COVERAGE["network_condition"]["unsecure_match"] += 1
+        return True, None
+    elif policy_net == "vpn":
+        if query_net in ["secure", "vpn"]:
+             COVERAGE["network_condition"]["vpn_match"] += 1
+             return True, None
+        else:
+            return False, f"Policy requires VPN/secure, got {query_net}"
+
+    COVERAGE["network_condition"]["default"] += 1
+    return True, None

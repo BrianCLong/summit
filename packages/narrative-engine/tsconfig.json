@@ -8,6 +8,6 @@
     "emitDeclarationOnly": false,
     "types": []
   },
-  "include": ["src/**/*", "tests/**/*"],
+  "include": ["src/**/*"],
   "exclude": ["dist"]
 }
