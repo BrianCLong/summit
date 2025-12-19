@@ -1,7 +1,7 @@
 /** @type {import('jest').Config} */
 module.exports = {
   testEnvironment: 'node',
-  roots: ['<rootDir>/dist/tests'],
-  testMatch: ['**/*.test.js'],
+  testMatch: ['**/__tests__/**/*.test.js'],
+  roots: ['<rootDir>/dist'],
   clearMocks: true,
 };
