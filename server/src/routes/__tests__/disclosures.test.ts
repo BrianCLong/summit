@@ -18,12 +18,17 @@ jest.mock('../../metrics/disclosureMetrics.js', () => ({
   },
 }));
 
+jest.mock('../../disclosure/audit-bundle.js', () => ({
+  buildAuditBundle: jest.fn(),
+}));
+
 const { disclosureExportService } = jest.requireMock(
   '../../disclosure/export-service.js',
 );
 const { disclosureMetrics } = jest.requireMock(
   '../../metrics/disclosureMetrics.js',
 );
+const { buildAuditBundle } = jest.requireMock('../../disclosure/audit-bundle.js');
 
 import disclosuresRouter from '../disclosures.js';
 import { jest, describe, it, test, expect, beforeEach } from '@jest/globals';
@@ -155,6 +160,47 @@ describe('Disclosures routes', () => {
         'view',
         'tenant-a',
       );
+    });
+  });
+
+  describe('POST /disclosures/export/audit-bundle', () => {
+    it('returns a bundle for the provided tenant', async () => {
+      const tmpDir = fs.mkdtempSync(path.join(process.cwd(), 'bundle-test-'));
+      const bundlePath = path.join(tmpDir, 'bundle.tar.gz');
+      fs.writeFileSync(bundlePath, 'bundle');
+
+      buildAuditBundle.mockResolvedValueOnce({
+        bundlePath,
+        sha256: 'abc123',
+        claimSet: { id: 'claim-1' },
+        merkleRoot: 'root',
+        format: 'tar',
+        checksums: {},
+      });
+
+      const response = await request(app)
+        .post('/disclosures/export/audit-bundle')
+        .set('x-tenant-id', 'tenant-a')
+        .send({ startTime: '2024-01-01T00:00:00Z' });
+
+      expect(response.status).toBe(200);
+      expect(buildAuditBundle).toHaveBeenCalledWith(
+        expect.objectContaining({ tenantId: 'tenant-a' }),
+      );
+      expect(response.headers['x-claimset-id']).toBe('claim-1');
+      expect(response.headers['x-sha256']).toBe('abc123');
+
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    });
+
+    it('rejects mismatched tenants', async () => {
+      const response = await request(app)
+        .post('/disclosures/export/audit-bundle')
+        .set('x-tenant-id', 'tenant-a')
+        .send({ tenantId: 'tenant-b' });
+
+      expect(response.status).toBe(403);
+      expect(buildAuditBundle).not.toHaveBeenCalled();
     });
   });
 });

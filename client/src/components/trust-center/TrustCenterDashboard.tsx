@@ -280,6 +280,8 @@ export const TrustCenterDashboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<TrustCenterData | null>(null);
   const [packs, setPacks] = useState<RegulatoryPackSummary[]>([]);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   // Fetch trust center data
   useEffect(() => {
@@ -331,6 +333,47 @@ export const TrustCenterDashboard: React.FC = () => {
     }
   };
 
+  const handleExportBundle = async () => {
+    try {
+      setExporting(true);
+      setExportError(null);
+      const now = new Date();
+      const start = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+      const res = await fetch('/disclosures/export/audit-bundle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          startTime: start.toISOString(),
+          endTime: now.toISOString(),
+          format: 'tar',
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to export audit bundle');
+      }
+
+      const blob = await res.blob();
+      const disposition = res.headers.get('content-disposition');
+      const filename =
+        disposition?.split('filename=')[1]?.replace(/"/g, '') ||
+        'audit-bundle.tar.gz';
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      setExportError(err.message);
+    } finally {
+      setExporting(false);
+    }
+  };
+
   if (loading) {
     return (
       <Box p={4}>
@@ -379,6 +422,15 @@ export const TrustCenterDashboard: React.FC = () => {
             label={data.overallStatus.replace('_', ' ').toUpperCase()}
             color={getStatusColor(data.overallStatus)}
           />
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={<Download />}
+            disabled={exporting}
+            onClick={handleExportBundle}
+          >
+            {exporting ? 'Building bundle...' : 'Audit bundle'}
+          </Button>
           <Tooltip title="Refresh">
             <IconButton onClick={handleRefresh}>
               <Refresh />
@@ -386,6 +438,12 @@ export const TrustCenterDashboard: React.FC = () => {
           </Tooltip>
         </Box>
       </Box>
+
+      {exportError && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {exportError}
+        </Alert>
+      )}
 
       {/* Status Overview Cards */}
       <Grid container spacing={3} mb={3}>

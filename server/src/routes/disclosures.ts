@@ -2,6 +2,7 @@ import express from 'express';
 import { z } from 'zod';
 import { disclosureExportService } from '../disclosure/export-service.js';
 import { disclosureMetrics } from '../metrics/disclosureMetrics.js';
+import { buildAuditBundle } from '../disclosure/audit-bundle.js';
 
 const router = express.Router();
 router.use(express.json());
@@ -114,6 +115,53 @@ router.get('/export/:jobId/download', (req, res) => {
   }
 
   return res.download(download.filePath, `disclosure-${download.job.id}.zip`);
+});
+
+const auditExportSchema = z.object({
+  tenantId: z.string().optional(),
+  startTime: z.string().optional(),
+  endTime: z.string().optional(),
+  format: z.enum(['tar', 'zip']).optional(),
+});
+
+router.post('/export/audit-bundle', async (req, res) => {
+  try {
+    const parsed = auditExportSchema.parse(req.body ?? {});
+    const tenantHeader = resolveTenant(req) ?? parsed.tenantId ?? 'default';
+
+    if (!tenantHeader) {
+      return res.status(400).json({ error: 'tenant_required' });
+    }
+
+    if (parsed.tenantId && parsed.tenantId !== tenantHeader) {
+      return res.status(403).json({ error: 'tenant_mismatch' });
+    }
+
+    const now = new Date();
+    const start = parsed.startTime ? new Date(parsed.startTime) : new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const end = parsed.endTime ? new Date(parsed.endTime) : now;
+
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+      return res.status(400).json({ error: 'invalid_time_window' });
+    }
+
+    const bundle = await buildAuditBundle({
+      tenantId: tenantHeader,
+      startTime: start,
+      endTime: end,
+      format: parsed.format ?? 'tar',
+    });
+
+    res.setHeader('x-sha256', bundle.sha256);
+    res.setHeader('x-claimset-id', bundle.claimSet.id);
+    const filename =
+      parsed.format === 'zip'
+        ? `audit-bundle-${tenantHeader}.zip`
+        : `audit-bundle-${tenantHeader}.tar.gz`;
+    return res.download(bundle.bundlePath, filename);
+  } catch (error: any) {
+    return res.status(500).json({ error: 'audit_bundle_failed', message: error?.message });
+  }
 });
 
 export default router;

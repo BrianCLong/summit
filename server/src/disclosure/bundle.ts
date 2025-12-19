@@ -2,22 +2,32 @@ import { createHash } from 'crypto';
 import { createWriteStream } from 'fs';
 import archiver from 'archiver';
 
+type BundleFormat = 'zip' | 'tar';
+
 export async function makeBundle({
   artifacts,
   claimSet,
   merkleRoot,
   attestations,
+  format = 'zip',
+  checksums,
 }: {
   artifacts: { name: string; path: string; sha256?: string }[];
   claimSet: any;
   merkleRoot: string;
   attestations: any[];
+  format?: BundleFormat;
+  checksums?: Record<string, string>;
 }) {
-  const outPath = `/tmp/bundle_${Date.now()}.zip`;
+  const ext = format === 'tar' ? 'tar.gz' : 'zip';
+  const outPath = `/tmp/bundle_${Date.now()}.${ext}`;
   const out = createWriteStream(outPath);
-  const zip = archiver('zip');
+  const archive =
+    format === 'tar'
+      ? archiver('tar', { gzip: true, gzipOptions: { level: 9 } })
+      : archiver('zip', { zlib: { level: 9 } });
 
-  zip.pipe(out);
+  archive.pipe(out);
 
   const manifest = {
     version: '1',
@@ -29,14 +39,20 @@ export async function makeBundle({
     attestations,
   };
 
-  zip.append(JSON.stringify(manifest, null, 2), { name: 'manifest.json' });
-  zip.append(JSON.stringify(claimSet, null, 2), { name: 'claimset.json' });
+  archive.append(JSON.stringify(manifest, null, 2), { name: 'manifest.json' });
+  archive.append(JSON.stringify(claimSet, null, 2), { name: 'claimset.json' });
 
-  for (const artifact of artifacts) {
-    zip.file(artifact.path, { name: `artifacts/${artifact.name}` });
+  if (checksums && Object.keys(checksums).length > 0) {
+    archive.append(JSON.stringify(checksums, null, 2), {
+      name: 'checksums.json',
+    });
   }
 
-  await zip.finalize();
+  for (const artifact of artifacts) {
+    archive.file(artifact.path, { name: `artifacts/${artifact.name}` });
+  }
+
+  await archive.finalize();
 
   const sha256 = await sha(outPath);
   // WORM storage disabled - worm.ts module is commented out
@@ -53,7 +69,7 @@ export async function makeBundle({
   //   return { path: uri, sha256 };
   // }
 
-  return { path: outPath, sha256 };
+  return { path: outPath, sha256, format };
 }
 
 function sha(p: string): Promise<string> {
