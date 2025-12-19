@@ -5,6 +5,7 @@ import { logEventBus, type LogLevel } from './logEventBus.js';
 import { LogAlertEngine, defaultAlertRules } from './logAlertEngine.js';
 import { scheduleRetention, type RetentionPolicy } from './logRetention.js';
 import { formatLogEvent } from './logEventFormatter.js';
+import { AuditLogPipeline } from './auditLogPipeline.js';
 
 const logDir = process.env.LOG_DIR || path.join(process.cwd(), 'logs');
 const logFile = path.join(logDir, 'app-structured.log');
@@ -72,9 +73,24 @@ const retentionPolicy: RetentionPolicy = {
 
 const stopRetention = scheduleRetention(retentionPolicy, baseLogger);
 
+const auditPipeline = new AuditLogPipeline({
+  logDir: process.env.AUDIT_LOG_DIR || path.join(logDir, 'audit'),
+  streamName: process.env.AUDIT_LOG_STREAM || 'audit-log',
+  alertEngine,
+  logger: baseLogger.child({ component: 'audit-log-pipeline' }),
+  retentionPolicy: {
+    directory: process.env.AUDIT_LOG_DIR || path.join(logDir, 'audit'),
+    retentionDays: Number(process.env.AUDIT_LOG_RETENTION_DAYS ?? '365'),
+    compressAfterDays: Number(process.env.AUDIT_LOG_COMPRESS_AFTER_DAYS ?? '7'),
+    maxTotalSizeMb: Number(process.env.AUDIT_LOG_TOTAL_SIZE_MB ?? '4096'),
+  },
+});
+
 export const appLogger = baseLogger;
+export const auditLogDashboard = auditPipeline;
 export const stopLogAggregation = () => {
   detachAlertEngine();
   stopRetention();
+  auditPipeline.stop();
   logEventBus.reset();
 };
