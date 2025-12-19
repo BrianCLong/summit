@@ -4,14 +4,18 @@
  */
 
 import { Router, Request, Response } from 'express';
+import { trace, SpanStatusCode } from '@opentelemetry/api';
 import { body, validationResult } from 'express-validator';
 import rateLimit from 'express-rate-limit';
 import { IngestService } from '../services/IngestService.js';
 import { verifyTenantAccess } from '../services/opa-client.js';
 import logger from '../config/logger.js';
+import { recordEndpointResult } from '../observability/reliability-metrics';
 
 const ingestRouter = Router();
 const ingestLogger = logger.child({ name: 'IngestAPI' });
+const tracer = trace.getTracer('intelgraph-server.reliability');
+let ingestInFlight = 0;
 
 // Rate limiting: max 100 requests per 15 minutes per IP
 const ingestLimiter = rateLimit({
@@ -40,23 +44,44 @@ ingestRouter.post(
     body('relationships').isArray().optional(),
   ],
   async (req: Request, res: Response) => {
-    const startTime = Date.now();
+    const startTime = process.hrtime.bigint();
+    const span = tracer.startSpan('http.ingest', {
+      attributes: {
+        'http.method': 'POST',
+        'http.route': '/api/v1/ingest',
+      },
+    });
+    ingestInFlight += 1;
+
+    let statusCode = 500;
+    let tenantId: string | undefined = req.body?.tenantId;
+    let entityCount = Array.isArray(req.body?.entities) ? req.body.entities.length : 0;
+    let relationshipCount = Array.isArray(req.body?.relationships)
+      ? req.body.relationships.length
+      : 0;
 
     try {
       // Validate request
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
+        statusCode = 400;
         return res.status(400).json({
           error: 'Validation failed',
           details: errors.array(),
         });
       }
 
-      const { tenantId, sourceType, sourceId, entities, relationships = [] } = req.body;
+      const { tenantId: validatedTenantId, sourceType, sourceId, entities, relationships = [] } =
+        req.body;
+
+      tenantId = validatedTenantId;
+      entityCount = entities.length;
+      relationshipCount = relationships.length;
 
       // Authenticate user (from JWT middleware)
       const user = (req as any).user;
       if (!user) {
+        statusCode = 401;
         return res.status(401).json({
           error: 'Unauthorized',
           message: 'Valid JWT token required',
@@ -65,8 +90,9 @@ ingestRouter.post(
 
       // Authorize tenant access
       try {
-        await verifyTenantAccess(user, tenantId, 'ingest:write');
+        await verifyTenantAccess(user, validatedTenantId, 'ingest:write');
       } catch (authError: any) {
+        statusCode = 403;
         return res.status(403).json({
           error: 'Forbidden',
           message: authError.message,
@@ -76,6 +102,7 @@ ingestRouter.post(
       // Validate entity count limits
       const MAX_ENTITIES_PER_REQUEST = 10000;
       if (entities.length > MAX_ENTITIES_PER_REQUEST) {
+        statusCode = 413;
         return res.status(413).json({
           error: 'Payload too large',
           message: `Maximum ${MAX_ENTITIES_PER_REQUEST} entities per request`,
@@ -84,7 +111,7 @@ ingestRouter.post(
       }
 
       ingestLogger.info({
-        tenantId,
+        tenantId: validatedTenantId,
         userId: user.id,
         sourceType,
         entitiesCount: entities.length,
@@ -98,7 +125,7 @@ ingestRouter.post(
       );
 
       const result = await ingestService.ingest({
-        tenantId,
+        tenantId: validatedTenantId,
         sourceType,
         sourceId,
         entities,
@@ -106,19 +133,20 @@ ingestRouter.post(
         userId: user.id,
       });
 
-      const duration = Date.now() - startTime;
+      const durationMs = Number(process.hrtime.bigint() - startTime) / 1e6;
+      statusCode = result.success ? 200 : 207;
 
       ingestLogger.info({
-        tenantId,
+        tenantId: validatedTenantId,
         userId: user.id,
         provenanceId: result.provenanceId,
         entitiesCreated: result.entitiesCreated,
         entitiesUpdated: result.entitiesUpdated,
-        duration,
+        duration: durationMs,
       }, 'Ingest completed');
 
       // Return success response
-      res.status(result.success ? 200 : 207).json({
+      res.status(statusCode).json({
         success: result.success,
         provenanceId: result.provenanceId,
         summary: {
@@ -129,7 +157,7 @@ ingestRouter.post(
         },
         errors: result.errors.length > 0 ? result.errors : undefined,
         metadata: {
-          duration,
+          duration: durationMs,
           timestamp: new Date().toISOString(),
         },
       });
@@ -140,12 +168,38 @@ ingestRouter.post(
         body: req.body,
       }, 'Ingest request failed');
 
-      res.status(500).json({
+      statusCode = 500;
+      res.status(statusCode).json({
         error: 'Internal server error',
         message: process.env.NODE_ENV === 'production'
           ? 'Ingest failed'
           : error.message,
       });
+    }
+    finally {
+      ingestInFlight = Math.max(ingestInFlight - 1, 0);
+      const durationSeconds = Number(process.hrtime.bigint() - startTime) / 1e9;
+      recordEndpointResult({
+        endpoint: 'ingest',
+        statusCode,
+        durationSeconds,
+        tenantId,
+        queueDepth: ingestInFlight,
+      });
+
+      span.setAttributes({
+        'http.status_code': statusCode,
+        'tenant.id': tenantId ?? 'unknown',
+        'ingest.entity_count': entityCount,
+        'ingest.relationship_count': relationshipCount,
+        'ingest.in_flight': ingestInFlight,
+      });
+
+      if (statusCode >= 400) {
+        span.setStatus({ code: SpanStatusCode.ERROR });
+      }
+
+      span.end();
     }
   },
 );

@@ -1,5 +1,6 @@
 // @ts-nocheck
-import { registry, metrics } from './metrics.js';
+import { registry } from '../metrics';
+import '../observability/reliability-metrics';
 
 export const metricsRoute = async (_req: any, res: any) => {
   try {
