@@ -10,11 +10,11 @@ import evidenceTypeDefs from '../schema.evidence.js';
 import evidenceOkTypeDefs from '../schema.evidenceOk.js';
 import trustRiskTypeDefs from '../schema.trust-risk.js';
 import provenanceTypeDefs from '../schema.provenance.js';
+import { provenanceServiceTypeDefs } from '../schema.provenance-service.js';
+import { canonicalTypeDefs } from '../schema.canonical.js';
 import * as fs from 'fs';
 import * as path from 'path';
 import { sprint28TypeDefs } from './sprint28.js';
-import fs from 'fs';
-import path from 'path';
 import { fileURLToPath } from 'url';
 
 const { copilotTypeDefs } = copilotModule as { copilotTypeDefs: any };
@@ -63,6 +63,8 @@ export const typeDefs = [
   evidenceOkTypeDefs,
   trustRiskTypeDefs,
   provenanceTypeDefs,
+  provenanceServiceTypeDefs,
+  canonicalTypeDefs,
   sprint28TypeDefs,
   ewTypeDefs,
 ];

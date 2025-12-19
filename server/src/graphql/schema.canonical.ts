@@ -78,7 +78,7 @@ export const canonicalTypeDefs = gql`
 
   type PersonIdentifiers {
     emails: [String!]
-    phones: [JSON!] # Simplified for now
+    phones: [JSON!]
     nationalIds: [JSON!]
   }
 
@@ -103,6 +103,125 @@ export const canonicalTypeDefs = gql`
 
     name: String!
     industry: String
+    identifiers: JSON
+    locations: [Location!]
+  }
+
+  type Asset implements CanonicalEntity {
+    id: ID!
+    tenantId: String!
+    entityType: String!
+    schemaVersion: String!
+    validFrom: DateTime!
+    validTo: DateTime
+    observedAt: DateTime!
+    recordedAt: DateTime!
+    provenanceId: String!
+    policy: PolicyLabels
+    props: JSON
+
+    assetType: String!
+    value: Float
+    currency: String
+    ownerId: String
+  }
+
+  type Account implements CanonicalEntity {
+    id: ID!
+    tenantId: String!
+    entityType: String!
+    schemaVersion: String!
+    validFrom: DateTime!
+    validTo: DateTime
+    observedAt: DateTime!
+    recordedAt: DateTime!
+    provenanceId: String!
+    policy: PolicyLabels
+    props: JSON
+
+    accountNumber: String!
+    provider: String!
+    accountType: String
+    status: String
+  }
+
+  type Location implements CanonicalEntity {
+    id: ID!
+    tenantId: String!
+    entityType: String!
+    schemaVersion: String!
+    validFrom: DateTime!
+    validTo: DateTime
+    observedAt: DateTime!
+    recordedAt: DateTime!
+    provenanceId: String!
+    policy: PolicyLabels
+    props: JSON
+
+    name: String
+    address: String
+    city: String
+    country: String
+    coordinates: JSON # GeoJSON Point
+  }
+
+  type Event implements CanonicalEntity {
+    id: ID!
+    tenantId: String!
+    entityType: String!
+    schemaVersion: String!
+    validFrom: DateTime!
+    validTo: DateTime
+    observedAt: DateTime!
+    recordedAt: DateTime!
+    provenanceId: String!
+    policy: PolicyLabels
+    props: JSON
+
+    eventType: String!
+    timestamp: DateTime!
+    participants: [String!] # IDs
+    locationId: String
+  }
+
+  type Document implements CanonicalEntity {
+    id: ID!
+    tenantId: String!
+    entityType: String!
+    schemaVersion: String!
+    validFrom: DateTime!
+    validTo: DateTime
+    observedAt: DateTime!
+    recordedAt: DateTime!
+    provenanceId: String!
+    policy: PolicyLabels
+    props: JSON
+
+    title: String
+    docType: String!
+    contentHash: String
+    storageRef: String
+    authors: [String!]
+  }
+
+  type Communication implements CanonicalEntity {
+    id: ID!
+    tenantId: String!
+    entityType: String!
+    schemaVersion: String!
+    validFrom: DateTime!
+    validTo: DateTime
+    observedAt: DateTime!
+    recordedAt: DateTime!
+    provenanceId: String!
+    policy: PolicyLabels
+    props: JSON
+
+    commType: String! # email, call, message
+    senderId: String
+    recipientIds: [String!]
+    timestamp: DateTime!
+    contentPreview: String
   }
 
   # Generic fallback for other types until fully detailed
@@ -132,6 +251,8 @@ export const canonicalTypeDefs = gql`
     canonicalEntity(id: ID!, temporal: TemporalQueryInput): CanonicalEntity
 
     canonicalPerson(id: ID!, temporal: TemporalQueryInput): Person
+    canonicalOrganization(id: ID!, temporal: TemporalQueryInput): Organization
+    canonicalEvent(id: ID!, temporal: TemporalQueryInput): Event
 
     searchCanonicalEntities(
       query: String!

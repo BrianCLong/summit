@@ -8,7 +8,9 @@ import evidenceResolvers from './evidence.js';
 import evidenceOkResolvers from './evidenceOk.js';
 import healthResolvers from './health.js';
 import trustRiskResolvers from './trust-risk.js';
-import provenanceResolvers from './provenance.js';
+import { provenanceResolvers as provenanceServiceResolvers } from './provenance-service.ts'; // Our new resolver
+import provenanceResolvers from './provenance.js'; // Existing provenance ledger resolvers
+import { analyticsResolvers } from './analytics.ts'; // Our new analytics resolver
 import supportTicketResolvers from './supportTicket.js';
 import sprint28Resolvers from './sprint28.js';
 import ewResolvers from './electronic-warfare.js';
@@ -32,6 +34,8 @@ const resolvers = {
     ...(evidenceOkResolvers.Query || {}),
     ...(trustRiskResolvers.Query || {}),
     ...(provenanceResolvers.Query || {}),
+    ...(provenanceServiceResolvers.Query || {}), // Register new service query
+    ...(analyticsResolvers.Query || {}), // Register new analytics query
     ...(supportTicketResolvers.Query || {}),
     ...(sprint28Resolvers.Query || {}),
     ...(ewResolvers.Query || {}),
@@ -61,6 +65,7 @@ const resolvers = {
     ...(evidenceResolvers.Mutation || {}),
     ...(trustRiskResolvers.Mutation || {}),
     ...(provenanceResolvers.Mutation || {}),
+    ...(provenanceServiceResolvers.Mutation || {}), // Register new service mutation
     ...(supportTicketResolvers.Mutation || {}),
     ...(sprint28Resolvers.Mutation || {}),
     ...(ewResolvers.Mutation || {}),
