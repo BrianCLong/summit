@@ -1,0 +1,28 @@
+{
+  "$schema": "https://summit.dev/schemas/agent-budget-manifest.schema.json",
+  "schemaVersion": "2025-02-15",
+  "agentId": "codex",
+  "owner": "Agent Control Systems",
+  "description": "Primary reasoning agent with bounded token and concurrency ceilings for deterministic throughput.",
+  "deterministicLimits": {
+    "maxTokens": 120000,
+    "maxCallsPerRun": 40,
+    "maxWallClockMs": 240000,
+    "maxConcurrentRuns": 2,
+    "maxDailyRuns": 240,
+    "maxNetworkKB": 4096
+  },
+  "risk": {
+    "inherent": 6,
+    "controlBaseline": 3,
+    "residual": 3,
+    "riskTier": "medium",
+    "riskCeiling": 6,
+    "gates": ["lint", "typecheck", "budget-validation"]
+  },
+  "telemetry": {
+    "auditLogPath": "agents/audit/logs/agent-audit.log",
+    "emitBudgetEvents": true,
+    "sampleRate": 1
+  }
+}

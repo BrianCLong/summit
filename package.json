@@ -30,6 +30,8 @@
     "lint": "eslint . && ruff check .",
     "lint:server": "cd server && npm run lint",
     "lint:client": "cd client && npm run lint",
+    "agents:budgets:validate": "node scripts/validate-agent-budgets.js",
+    "agents:pr-risk": "node scripts/enforce-pr-risk.js",
     "typecheck": "tsc -b --pretty false",
     "typecheck:server": "cd server && tsc --noEmit",
     "typecheck:client": "cd client && tsc --noEmit",
