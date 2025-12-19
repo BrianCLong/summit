@@ -16,6 +16,7 @@ const dispatchActionRoute = defineRoute({
     status: z.string(),
     result: z.any().optional(),
   }),
+  requiresDualControl: true,
   handler: async (payload, context) => {
     // Simulate downstream call
     console.log(`[${context.requestId}] Dispatching to agent ${payload.agentId}`, payload);

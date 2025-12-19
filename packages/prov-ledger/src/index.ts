@@ -1,70 +1,19 @@
 import {
-  createHash,
   createPrivateKey,
   createPublicKey,
   KeyObject,
   sign,
   verify,
 } from 'crypto';
-
-export type ProvenanceStepType =
-  | 'ingest'
-  | 'transform'
-  | 'policy-check'
-  | 'export';
-
-export interface ProvenanceStep {
-  id: string;
-  type: ProvenanceStepType;
-  tool: string;
-  params: Record<string, unknown>;
-  inputHash: string;
-  outputHash: string;
-  timestamp: string;
-  note?: string;
-}
-
-export interface ProvenanceManifest {
-  artifactId: string;
-  steps: ProvenanceStep[];
-}
-
-export function hashContent(data: string | Buffer): string {
-  return createHash('sha256').update(data).digest('hex');
-}
-
-export function hashJson(obj: unknown): string {
-  return hashContent(JSON.stringify(obj));
-}
-
-export interface RecordStepOptions {
-  id: string;
-  type: ProvenanceStepType;
-  tool: string;
-  params: Record<string, unknown>;
-  input: string | Buffer;
-  output: string | Buffer;
-  timestamp?: string;
-  note?: string;
-}
-
-export function recordStep(
-  manifest: ProvenanceManifest,
-  opts: RecordStepOptions,
-): ProvenanceStep {
-  const step: ProvenanceStep = {
-    id: opts.id,
-    type: opts.type,
-    tool: opts.tool,
-    params: opts.params,
-    inputHash: hashContent(opts.input),
-    outputHash: hashContent(opts.output),
-    timestamp: opts.timestamp ?? new Date().toISOString(),
-    note: opts.note,
-  };
-  manifest.steps.push(step);
-  return step;
-}
+import {
+  hashContent,
+  hashJson,
+  recordStep,
+  type ProvenanceManifest,
+  type ProvenanceStep,
+  type ProvenanceStepType,
+  type RecordStepOptions,
+} from './primitives';
 
 export interface ManifestSignature {
   algorithm: 'ed25519';
@@ -157,3 +106,18 @@ export function verifyManifest(
     return hashContent(data) === step.outputHash;
   });
 }
+
+export {
+  hashContent,
+  hashJson,
+  recordStep,
+  type ProvenanceManifest,
+  type ProvenanceStep,
+  type ProvenanceStepType,
+  type RecordStepOptions,
+} from './primitives';
+export {
+  emitDecisionReceipt,
+  type DecisionReceipt,
+  type ReceiptOptions,
+} from './receipt';

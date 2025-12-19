@@ -91,4 +91,35 @@ describe('SwitchboardRouter', () => {
     await expect(router.dispatch('test.timeout', {}, context))
       .rejects.toThrow('timed out');
   }, 1000); // Increase test timeout for this specific test
+
+  it('should enforce dual control for high-privilege routes', async () => {
+    const router = new SwitchboardRouter();
+    const handler = vi.fn().mockResolvedValue({ ok: true });
+    const route = defineRoute({
+      id: 'high.priv',
+      description: 'High privilege adapter',
+      source: 'client',
+      targetService: 'other',
+      inputSchema: z.any(),
+      outputSchema: z.any(),
+      handler,
+      requiresDualControl: true,
+    });
+    router.register(route);
+
+    const missingDualContext = { requestId: '1', source: 'client' as const };
+    await expect(router.dispatch('high.priv', {}, missingDualContext)).rejects.toThrow(
+      'requires dual control',
+    );
+
+    const approvedContext = {
+      requestId: '2',
+      source: 'client' as const,
+      actor: 'initiator',
+      dualControl: { approvers: ['approver-1'] },
+    };
+    const result = await router.dispatch('high.priv', {}, approvedContext);
+    expect(result).toEqual({ ok: true });
+    expect(handler).toHaveBeenCalledWith({}, approvedContext);
+  });
 });

@@ -19,6 +19,13 @@ import type { AuthenticatedRequest } from './middleware';
 import type { ResourceAttributes } from './types';
 import { sessionManager } from './session';
 import { requireServiceAuth } from './service-auth';
+import {
+  buildAdapterResource,
+  getAdapterManifest,
+  missingAdapterPermissions,
+} from './adapter-capabilities';
+import { emitDecisionReceipt } from '../../../packages/prov-ledger/src/receipt';
+import type { ProvenanceManifest } from '../../../packages/prov-ledger/src/primitives';
 
 export async function createApp(): Promise<express.Application> {
   await initKeys();
@@ -180,6 +187,91 @@ export async function createApp(): Promise<express.Application> {
   );
 
   app.post(
+    '/adapters/:id/simulate',
+    requireServiceAuth({
+      audience: 'authz-gateway',
+      allowedServices: trustedServices,
+      requiredScopes: ['abac:simulate'],
+    }),
+    async (req, res) => {
+      try {
+        const adapterId = String(req.params.id || '').trim();
+        if (!adapterId) {
+          return res.status(400).json({ error: 'adapter_id_required' });
+        }
+        const adapter = getAdapterManifest(adapterId);
+        if (!adapter) {
+          return res.status(404).json({ error: 'adapter_not_found' });
+        }
+        const subjectId = req.body?.subjectId;
+        if (!subjectId) {
+          return res.status(400).json({ error: 'subject_id_required' });
+        }
+        const subject = await attributeService.getSubjectAttributes(subjectId);
+        const missing = missingAdapterPermissions(subject, adapter);
+        if (missing.length > 0) {
+          return res
+            .status(403)
+            .json({ error: 'missing_permissions', missing });
+        }
+
+        const resource = buildAdapterResource(
+          adapter,
+          subject,
+          req.body?.resource as Partial<ResourceAttributes> | undefined,
+        );
+        const retries =
+          typeof req.body?.retries === 'number' && req.body.retries >= 0
+            ? req.body.retries
+            : 0;
+        const decision = await authorize({
+          subject,
+          resource,
+          action: req.body?.action || 'adapter:invoke',
+          context: {
+            ...attributeService.getDecisionContext(
+              String(req.body?.context?.currentAcr || 'loa1'),
+            ),
+            adapterId,
+            retries,
+          },
+        });
+
+        const manifest: ProvenanceManifest = {
+          artifactId: `adapter:${adapterId}`,
+          steps: [],
+        };
+        const { receipt } = emitDecisionReceipt({
+          manifest,
+          adapterId,
+          action: req.body?.action || 'adapter:invoke',
+          decision: decision.allowed ? 'allow' : 'deny',
+          subject,
+          resource,
+          context: req.body?.context || {},
+          retries,
+          obligations: decision.obligations,
+        });
+
+        res.json({
+          allow: decision.allowed,
+          reason: decision.reason,
+          obligations: decision.obligations,
+          adapter: {
+            id: adapter.id,
+            requiredPermissions: adapter.requiredPermissions,
+            claims: adapter.claims,
+            capabilities: adapter.capabilities || [],
+          },
+          receipt,
+        });
+      } catch (error) {
+        res.status(400).json({ error: (error as Error).message });
+      }
+    },
+  );
+
+  app.post(
     '/auth/webauthn/challenge',
     requireAuth(attributeService, {
       action: 'step-up:challenge',
@@ -188,7 +280,18 @@ export async function createApp(): Promise<express.Application> {
     (req: AuthenticatedRequest, res) => {
       try {
         const userId = String(req.user?.sub || '');
-        const challenge = stepUpManager.createChallenge(userId);
+        const sessionId = String(req.user?.sid || '');
+        if (!sessionId) {
+          return res.status(400).json({ error: 'session_missing' });
+        }
+        const challenge = stepUpManager.createChallenge(userId, {
+          sessionId,
+          requestedAction: 'step-up:challenge',
+          resourceId: req.resourceAttributes?.id,
+          tenantId: req.subjectAttributes?.tenantId,
+          classification: req.resourceAttributes?.classification,
+          currentAcr: String(req.user?.acr || 'loa1'),
+        });
         res.json(challenge);
       } catch (error) {
         res.status(400).json({ error: (error as Error).message });
@@ -209,11 +312,16 @@ export async function createApp(): Promise<express.Application> {
         if (!credentialId || !signature || !challenge) {
           return res.status(400).json({ error: 'missing_challenge_payload' });
         }
-        stepUpManager.verifyResponse(userId, {
-          credentialId,
-          signature,
-          challenge,
-        });
+        const sessionId = String(req.user?.sid || '');
+        stepUpManager.verifyResponse(
+          userId,
+          {
+            credentialId,
+            signature,
+            challenge,
+          },
+          sessionId,
+        );
         const sid = String(req.user?.sid || '');
         const token = await sessionManager.elevateSession(sid, {
           acr: 'loa2',
@@ -238,10 +346,11 @@ export async function createApp(): Promise<express.Application> {
       target: upstream,
       changeOrigin: true,
       pathRewrite: { '^/protected': '' },
-      onProxyReq: (proxyReq) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      onProxyReq: (proxyReq: any) => {
         injectTraceContext(proxyReq);
       },
-    }),
+    } as any),
   );
 
   return app;

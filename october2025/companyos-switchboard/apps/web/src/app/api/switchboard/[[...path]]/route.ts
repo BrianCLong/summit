@@ -68,12 +68,22 @@ export async function POST(request: NextRequest, { params }: { params: { path: s
         return NextResponse.json({ error: 'routeId is required' }, { status: 400 });
       }
 
+      const dualControl = Array.isArray(body?.dualControl?.approvers)
+        ? {
+            approvers: body.dualControl.approvers,
+            evidenceId: body.dualControl.evidenceId,
+            rationale: body.dualControl.rationale,
+            enforced: Boolean(body.dualControl.enforced),
+          }
+        : undefined;
+
       // Use authenticated context - NEVER trust client-provided headers for identity
       const context = {
         requestId: crypto.randomUUID(),
         source: 'client' as const,
         tenantId: auth.tenantId,
         actor: auth.userId,
+        dualControl,
       };
 
       const result = await router.dispatch(routeId, payload, context);

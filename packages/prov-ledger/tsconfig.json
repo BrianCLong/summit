@@ -5,7 +5,7 @@
     "rootDir": "src",
     "declaration": true,
     "allowImportingTsExtensions": false,
-    "types": []
+    "types": ["node", "jest"]
   },
   "include": ["src"],
   "references": [{ "path": "../types" }]
