@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "fft.js": "^0.3.0"
+    "fft.js": "^4.0.4"
   },
   "devDependencies": {
     "typescript": "^5.9.3"
