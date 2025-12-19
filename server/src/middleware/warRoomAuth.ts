@@ -14,22 +14,24 @@ export const checkAuth = (context: any) => {
   }
 };
 
+import { db } from '../db'; // Assuming a db connection utility exists
+
 export const checkWarRoomAdmin = async (context: any, warRoomId: number) => {
   checkAuth(context);
   const userId = context.user.id;
 
-  //
-  // In a real application, you would query the database to verify the user's role.
-  // For example:
-  // const { rows } = await db.query(
-  //   'SELECT role FROM war_room_participants WHERE war_room_id = $1 AND user_id = $2',
-  //   [warRoomId, userId]
-  // );
-  // const role = rows[0]?.role;
-  // if (role !== 'ADMIN') { ... }
-  //
+  const { rows } = await db.query(
+    'SELECT role FROM war_room_participants WHERE war_room_id = $1 AND user_id = $2',
+    [warRoomId, userId]
+  );
 
-  // For now, we'll assume the check passes if the user is authenticated.
-  // This is a placeholder for a real permission check.
-  console.log(`[AUTH] User ${userId} is assumed to be an admin for War Room ${warRoomId}.`);
+  const role = rows[0]?.role;
+
+  if (role !== 'ADMIN') {
+    throw new GraphQLError('User is not an admin of this War Room', {
+      extensions: {
+        code: 'FORBIDDEN',
+      },
+    });
+  }
 };

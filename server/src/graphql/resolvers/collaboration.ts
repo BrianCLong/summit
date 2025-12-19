@@ -46,7 +46,21 @@ export const collaborationResolvers = {
     participants: async (warRoom: { id: number }) => {
       return warRoomService.getParticipants(warRoom.id);
     },
-    // createdBy resolver can be added here if needed, to fetch user details
+    createdBy: async (warRoom: { created_by: number }) => {
+      // Assuming a userService exists to fetch user details
+      // import { userService } from '../../services/userService';
+      // return userService.getUser(warRoom.created_by);
+      return { id: warRoom.created_by, name: 'Dummy User' }; // Placeholder
+    },
+    createdAt: (warRoom: { created_at: string }) => new Date(warRoom.created_at).toISOString(),
+  },
+  WarRoomParticipant: {
+    user: async (participant: { user_id: number }) => {
+      // Assuming a userService exists to fetch user details
+      // return userService.getUser(participant.user_id);
+      return { id: participant.user_id, name: 'Dummy User' }; // Placeholder
+    },
+    joinedAt: (participant: { joined_at: string }) => new Date(participant.joined_at).toISOString(),
   },
   Subscription: {
     participantAdded: {
