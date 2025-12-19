@@ -7,6 +7,10 @@ on:
         description: 'UI URL to capture (e.g., http://localhost:3000)'
         required: true
         default: 'http://localhost:3000'
+      grafana_dashboard_url:
+        description: 'Grafana dashboard URL for Summit RED + Saturation snapshot'
+        required: false
+        default: ''
 
 jobs:
   capture:
@@ -23,9 +27,15 @@ jobs:
       - name: Capture screenshots
         env:
           UI_URL: ${{ github.event.inputs.ui_url }}
+          GRAFANA_DASHBOARD_URL: ${{ github.event.inputs.grafana_dashboard_url }}
         run: npm run screenshots
       - name: Upload screenshots artifact
         uses: actions/upload-artifact@v4
         with:
           name: cookbook-screenshots
           path: docs/cookbook/screenshots
+      - name: Upload observability screenshot artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: observability-dashboards
+          path: docs/observability/evidence

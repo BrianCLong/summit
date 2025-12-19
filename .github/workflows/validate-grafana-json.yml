@@ -3,10 +3,16 @@ on:
   pull_request:
     paths:
       - 'observability/grafana/dashboards/**/*.json'
+      - 'grafana/dashboards/**/*.json'
+      - 'summit_observability/**/*.json'
+      - 'observability/alerts/**/*.{yml,yaml,json}'
   push:
     branches: [main]
     paths:
       - 'observability/grafana/dashboards/**/*.json'
+      - 'grafana/dashboards/**/*.json'
+      - 'summit_observability/**/*.json'
+      - 'observability/alerts/**/*.{yml,yaml,json}'
 
 jobs:
   lint:
@@ -18,16 +24,28 @@ jobs:
       - name: Validate Grafana Dashboard JSON
         run: |
           echo "🔍 Validating Grafana dashboard JSON files..."
-          find observability/grafana/dashboards -name "*.json" -type f | while read -r file; do
-            echo "Checking: $file"
-            if jq -e . "$file" >/dev/null; then
-              echo "✅ $file is valid JSON"
-            else
-              echo "❌ $file has invalid JSON syntax"
-              exit 1
+          set -euo pipefail
+          PATHS=(observability/grafana/dashboards grafana/dashboards summit_observability)
+          found=0
+          for dir in "${PATHS[@]}"; do
+            if [[ -d "$dir" ]]; then
+              while IFS= read -r file; do
+                found=1
+                echo "Checking: $file"
+                if jq -e . "$file" >/dev/null; then
+                  echo "✅ $file is valid JSON"
+                else
+                  echo "❌ $file has invalid JSON syntax"
+                  exit 1
+                fi
+              done < <(find "$dir" -name "*.json" -type f)
             fi
           done
-          echo "🎉 All Grafana dashboard JSON files are valid!"
+          if [[ $found -eq 0 ]]; then
+            echo "⚠️ No Grafana dashboard files found under ${PATHS[*]}"
+          else
+            echo "🎉 All Grafana dashboard JSON files are valid!"
+          fi
 
       - name: Validate MC v0.3.5 Dashboard Structure
         run: |
@@ -55,3 +73,59 @@ jobs:
           else
             echo "⚠️ MC v0.3.5 dashboard not found, skipping structure validation"
           fi
+
+      - name: Validate Summit RED dashboard coverage
+        run: |
+          set -euo pipefail
+          DASH_FILE="observability/grafana/dashboards/summit-red-saturation.json"
+          if [[ -f "$DASH_FILE" ]]; then
+            REQUIRED=("Rate" "Error" "Latency" "Saturation")
+            for keyword in "${REQUIRED[@]}"; do
+              if jq -e --arg kw "$keyword" '.panels[].title | select(test($kw; "i"))' "$DASH_FILE" >/dev/null; then
+                echo "✅ Found panel matching \"$keyword\""
+              else
+                echo "❌ Missing panel containing \"$keyword\" in title"
+                exit 1
+              fi
+            done
+            echo "🎉 Summit RED dashboard has RED + saturation coverage"
+          else
+            echo "⚠️ Summit RED dashboard not found, skipping RED panel validation"
+          fi
+
+      - name: Validate alert rule files
+        run: |
+          set -euo pipefail
+          pip install pyyaml >/dev/null
+          python - <<'PY'
+import json
+import sys
+from pathlib import Path
+
+import yaml
+
+paths = []
+for base in ("observability/alerts", "summit_observability"):
+    base_path = Path(base)
+    if base_path.exists():
+        paths.extend(base_path.rglob("*.yml"))
+        paths.extend(base_path.rglob("*.yaml"))
+        paths.extend(base_path.rglob("*.json"))
+
+if not paths:
+    print("⚠️ No alert rule files detected; skipping validation.")
+    sys.exit(0)
+
+for path in paths:
+    try:
+        if path.suffix == ".json":
+            json.loads(path.read_text())
+        else:
+            yaml.safe_load(path.read_text())
+    except Exception as exc:  # noqa: BLE001
+        print(f"❌ {path}: {exc}")
+        sys.exit(1)
+    else:
+        print(f"✅ {path} parsed successfully")
+print("🎉 Alert rules parsed without errors.")
+PY

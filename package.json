@@ -6,6 +6,7 @@
   "scripts": {
     "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
     "cleanup": "chmod +x scripts/cleanup-repository.sh && scripts/cleanup-repository.sh",
+    "screenshots": "bash scripts/docs/capture_screenshots.sh",
     "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
     "server:dev": "cd server && npm run dev",
     "client:dev": "cd client && npm run dev",

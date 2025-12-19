@@ -47,3 +47,15 @@ test('capture UI screenshots with interactions', async ({ page }) => {
   await page.screenshot({ path: `${outDir}/cases.png`, fullPage: true });
   await page.screenshot({ path: `${outDir}/triage.png`, fullPage: true });
 });
+
+test('capture Summit RED Grafana dashboard when provided', async ({ page }) => {
+  const grafanaUrl = process.env.GRAFANA_DASHBOARD_URL;
+  test.skip(!grafanaUrl, 'GRAFANA_DASHBOARD_URL not provided');
+
+  await page.goto(grafanaUrl as string);
+  await page.waitForLoadState('networkidle');
+  await page.screenshot({
+    path: `${outDir}/summit-red-saturation.png`,
+    fullPage: true,
+  });
+});
