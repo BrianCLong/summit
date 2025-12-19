@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
@@ -48,9 +48,11 @@ import { store } from './store';
 import { apolloClient } from './services/apollo';
 import { useSelector } from 'react-redux';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
+import { useFlag } from './hooks/useFlag';
 import ProtectedRoute from './components/common/ProtectedRoute.jsx';
 import LoginPage from './components/auth/LoginPage.jsx';
 import ErrorBoundary from './components/ErrorBoundary.tsx';
+import GlobalCommandPalette from './features/commandPalette/GlobalCommandPalette';
 
 // Lazy load heavy components for better initial load performance
 const InteractiveGraphExplorer = React.lazy(() =>
@@ -89,6 +91,9 @@ const AdminDashboard = React.lazy(() =>
 const ApprovalsPage = React.lazy(() =>
   import('./features/approvals/ApprovalsPage')
 );
+const CasesPage = React.lazy(() => import('./routes/Cases'));
+const NotesPage = React.lazy(() => import('./routes/Notes'));
+const WorkspacesPage = React.lazy(() => import('./routes/Workspaces'));
 
 import { MilitaryTech } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import { Security } from '@mui/icons-material';
@@ -213,7 +218,7 @@ function NavigationDrawer({ open, onClose }) {
 }
 
 // App Bar
-function AppHeader({ onMenuClick }) {
+function AppHeader({ onMenuClick, onOpenPalette, commandPaletteEnabled }) {
   const location = useLocation();
   const currentPage = navigationItems.find(
     (item) => item.path === location.pathname,
@@ -233,6 +238,16 @@ function AppHeader({ onMenuClick }) {
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           IntelGraph Platform - {currentPage?.label || 'Unknown'}
         </Typography>
+        {commandPaletteEnabled && (
+          <IconButton
+            color="inherit"
+            aria-label="Open command palette"
+            onClick={onOpenPalette}
+            size="large"
+          >
+            <Search />
+          </IconButton>
+        )}
       </Toolbar>
     </AppBar>
   );
@@ -651,14 +666,38 @@ function NotFoundPage() {
 // Main Layout Component
 function MainLayout() {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const commandPaletteEnabled = useFlag('ui.commandPalette');
+
+  useEffect(() => {
+    if (!commandPaletteEnabled) return undefined;
+    const handler = (event) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        setCommandPaletteOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [commandPaletteEnabled]);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <AppHeader onMenuClick={() => setDrawerOpen(true)} />
+      <AppHeader
+        onMenuClick={() => setDrawerOpen(true)}
+        onOpenPalette={() => setCommandPaletteOpen(true)}
+        commandPaletteEnabled={commandPaletteEnabled}
+      />
       <NavigationDrawer
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
       />
+      {commandPaletteEnabled && (
+        <GlobalCommandPalette
+          open={commandPaletteOpen}
+          onClose={() => setCommandPaletteOpen(false)}
+        />
+      )}
 
       <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8 }}>
         <React.Suspense
@@ -685,6 +724,9 @@ function MainLayout() {
               <Route path="/graph" element={<GraphExplorerPage />} />
               <Route path="/copilot" element={<CopilotPage />} />
               <Route path="/orchestrator" element={<OrchestratorPage />} />
+              <Route path="/cases" element={<CasesPage />} />
+              <Route path="/workspaces" element={<WorkspacesPage />} />
+              <Route path="/notes" element={<NotesPage />} />
               <Route path="/threats" element={<ThreatsPage />} />
               <Route path="/disclosures" element={<DisclosurePackagerPage />} />
               <Route path="/access-intel" element={<AccessIntelPage />} />

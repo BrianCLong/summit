@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { gql, useQuery, useMutation } from '@apollo/client';
 import { Button, TextField } from '@mui/material';
 
@@ -30,6 +30,7 @@ export default function Cases() {
   const [name, setName] = useState('');
   const [priority, setPriority] = useState('');
   const [summary, setSummary] = useState('');
+  const nameRef = useRef<HTMLInputElement | null>(null);
 
   const onCreate = async () => {
     if (!name) return;
@@ -48,6 +49,8 @@ export default function Cases() {
           size="small"
           label="Name"
           value={name}
+          inputRef={nameRef}
+          autoFocus
           onChange={(e) => setName(e.target.value)}
         />
         <TextField

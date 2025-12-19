@@ -108,6 +108,10 @@ const DEFAULT_FLAGS: FlagConfig = {
     enabled: true,
     rollout: 100,
   },
+  'ui.commandPalette': {
+    enabled: true,
+    rollout: 100,
+  },
 };
 
 interface UserContext {
