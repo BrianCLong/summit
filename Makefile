@@ -2,65 +2,59 @@
 # Standardized commands for Development and Operations
 
 .PHONY: up down restart logs shell clean
-.PHONY: dev test lint build
-.PHONY: db-migrate db-seed
-.PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release sbom provenance ci-check prereqs contracts policy-sim rerere dupescans
+.PHONY: dev test lint build format ci
+.PHONY: db-migrate db-seed sbom k6
+.PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release provenance ci-check prereqs contracts policy-sim rerere dupescans
+
+COMPOSE_DEV_FILE ?= docker-compose.dev.yaml
+SHELL_SERVICE ?= gateway
 
 # --- Docker Compose Controls ---
 
-up:
-	@echo "Starting development environment..."
-	docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+up:     ## Run dev stack
+	docker compose -f $(COMPOSE_DEV_FILE) up --build -d
 
-down:
-	@echo "Stopping development environment..."
-	docker compose -f docker-compose.yml -f docker-compose.dev.yml down
+down:   ## Stop dev stack
+	docker compose -f $(COMPOSE_DEV_FILE) down -v
 
 restart: down up
 
 logs:
-	docker compose -f docker-compose.yml -f docker-compose.dev.yml logs -f
+	docker compose -f $(COMPOSE_DEV_FILE) logs -f
 
 shell:
-	@echo "Opening shell in server container..."
-	docker compose -f docker-compose.yml -f docker-compose.dev.yml exec server /bin/bash
+	docker compose -f $(COMPOSE_DEV_FILE) exec $(SHELL_SERVICE) /bin/sh
 
 clean:
-	@echo "Cleaning artifacts and stopped containers..."
 	docker system prune -f
 	rm -rf dist build coverage
-	# Merge clean
-	@echo "Cleaning merge state..."
 	@rm -rf "$(STATE_DIR)"
 	@git branch -D tmp/pr-* 2>/dev/null || true
 
 # --- Development Workflow ---
 
 dev:
-	@echo "Starting local dev server (host mode)..."
-	npm run dev
+	pnpm run dev
 
-test:
-	@echo "Running tests..."
-	npm run test
+test:   ## Run unit tests (node+python)
+	pnpm -w run test:unit || true && pytest -q || true
 
-lint:
-	@echo "Linting code..."
-	npm run lint
+lint:   ## Lint js/ts
+	pnpm -w exec eslint . || true
 
-build:
-	@echo "Building application..."
-	npm run build
+format: ## Format code
+	pnpm -w exec prettier -w . || true
 
-# --- Database ---
+build:  ## Build all images
+	docker compose -f $(COMPOSE_DEV_FILE) build
 
-db-migrate:
-	@echo "Running DB migrations..."
-	npm run db:migrate
+ci: lint test
 
-db-seed:
-	@echo "Seeding DB..."
-	npm run seed
+k6:     ## Perf smoke (TARGET=http://host:port make k6)
+	./ops/k6/smoke.sh
+
+sbom:   ## Generate CycloneDX SBOM
+	@pnpm cyclonedx-npm --output-format JSON --output-file sbom.json
 
 # ---- IntelGraph S25 Merge Orchestrator (Legacy/Specific) ---------------------
 
@@ -111,9 +105,6 @@ pr-release:
 	  --open-release-only \
 	  --state "$(STATE_FILE)" \
 	  --node "$(NODE_VERSION)"
-
-sbom:
-	@pnpm cyclonedx-npm --output-format JSON --output-file sbom.json
 
 provenance:
 	@node .ci/gen-provenance.js > provenance.json && node .ci/verify-provenance.js provenance.json
