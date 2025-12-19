@@ -108,6 +108,7 @@ function AddCaseModal({ open, handleClose, itemKind, itemRefId }) {
       onClose={handleClose}
       aria-labelledby="add-to-case-modal-title"
       aria-describedby="add-to-case-modal-description"
+      data-testid="add-case-modal"
     >
       <Box sx={style}>
         <Typography id="add-to-case-modal-title" variant="h6" component="h2">
@@ -123,6 +124,7 @@ function AddCaseModal({ open, handleClose, itemKind, itemRefId }) {
             value={createOrSelect}
             label="Action"
             onChange={(e) => setCreateOrSelect(e.target.value)}
+            data-testid="case-action-select"
           >
             <MenuItem value="select">Select Existing Case</MenuItem>
             <MenuItem value="create">Create New Case</MenuItem>
@@ -137,6 +139,7 @@ function AddCaseModal({ open, handleClose, itemKind, itemRefId }) {
               value={selectedCase}
               label="Select Case"
               onChange={(e) => setSelectedCase(e.target.value)}
+              data-testid="existing-case-select"
             >
               {loading && (
                 <MenuItem disabled>
@@ -169,6 +172,7 @@ function AddCaseModal({ open, handleClose, itemKind, itemRefId }) {
               value={newCaseName}
               onChange={(e) => setNewCaseName(e.target.value)}
               sx={{ mb: 2 }}
+              inputProps={{ 'data-testid': 'new-case-name' }}
             />
             <TextField
               fullWidth
@@ -177,6 +181,7 @@ function AddCaseModal({ open, handleClose, itemKind, itemRefId }) {
               onChange={(e) => setNewCaseSummary(e.target.value)}
               multiline
               rows={3}
+              inputProps={{ 'data-testid': 'new-case-summary' }}
             />
           </Box>
         )}
@@ -203,6 +208,7 @@ function AddCaseModal({ open, handleClose, itemKind, itemRefId }) {
             (createOrSelect === 'create' && !newCaseName)
           }
           sx={{ mt: 2 }}
+          data-testid="create-case-add"
         >
           {createOrSelect === 'select'
             ? 'Add to Selected Case'

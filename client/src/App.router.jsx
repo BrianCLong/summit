@@ -68,6 +68,7 @@ const InvestigationTimeline = React.lazy(() =>
 const ThreatAssessmentEngine = React.lazy(() =>
   import('./components/threat/ThreatAssessmentEngine')
 );
+const OsintStudio = React.lazy(() => import('./routes/OsintStudio'));
 const OsintFeedConfig = React.lazy(() =>
   import('./components/admin/OSINTFeedConfig')
 );
@@ -683,6 +684,7 @@ function MainLayout() {
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/investigations" element={<InvestigationsPage />} />
               <Route path="/graph" element={<GraphExplorerPage />} />
+              <Route path="/osint" element={<OsintStudio />} />
               <Route path="/copilot" element={<CopilotPage />} />
               <Route path="/orchestrator" element={<OrchestratorPage />} />
               <Route path="/threats" element={<ThreatsPage />} />

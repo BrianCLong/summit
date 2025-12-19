@@ -15,6 +15,12 @@ import { gql, useLazyQuery, useQuery, useMutation } from '@apollo/client';
 import $ from 'jquery';
 import AddCaseModal from '../components/cases/AddCaseModal'; // New import
 
+declare global {
+  interface Window {
+    __osintCy?: cytoscape.Core;
+  }
+}
+
 const OSINT_SEARCH = gql`
   query OsintSearch($search: String, $limit: Int) {
     osintItems(search: $search, limit: $limit) {
@@ -85,6 +91,10 @@ export default function OsintStudio() {
         },
       ],
     });
+
+    if (process.env.NODE_ENV !== 'production') {
+      window.__osintCy = cyRef.current;
+    }
 
     const socket = getSocket();
     if (socket) {
@@ -162,12 +172,14 @@ export default function OsintStudio() {
               label="Search OSINT"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              inputProps={{ 'data-testid': 'osint-search-input' }}
             />
           </Tooltip>
           <Button
             variant="contained"
             onClick={onSearch}
             title="Run OSINT search (GraphQL)"
+            data-testid="osint-search-button"
           >
             Search
           </Button>
@@ -185,6 +197,7 @@ export default function OsintStudio() {
         anchor="right"
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
+        data-testid="osint-drawer"
       >
         <div style={{ width: 340, padding: 16 }}>
           <h3 style={{ marginTop: 0 }}>OSINT Item</h3>
@@ -263,12 +276,14 @@ export default function OsintStudio() {
                     if (url) window.open(url, '_blank');
                   });
               }}
+              data-testid="osint-export-button"
             >
               Export
             </Button>
             <Button
               variant="outlined"
               onClick={() => setAddCaseModalOpen(true)}
+              data-testid="osint-add-to-case"
             >
               Add to Case
             </Button>{' '}

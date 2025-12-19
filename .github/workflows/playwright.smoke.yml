@@ -51,8 +51,16 @@ jobs:
         run: |
           node scripts/monorepo_heal.mjs
           pnpm -w -r --filter ./apps... run build --if-present
-      - name: Run smoke
-        run: pnpm exec playwright test -j 1 --reporter=line --output=playwright-results
+      - name: Run smoke (OSINT P0 journeys)
+        env:
+          PLAYWRIGHT_USE_WEBSERVER: "true"
+        run: pnpm exec playwright test \
+          --config=playwright.config.ts \
+          --project=osint-journeys \
+          --grep "@osint-p0" \
+          -j 1 \
+          --reporter=line \
+          --output=playwright-results
       - name: Upload Playwright traces (on failure)
         if: failure()
         uses: actions/upload-artifact@v4
