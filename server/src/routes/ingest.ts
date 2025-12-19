@@ -9,9 +9,15 @@ import rateLimit from 'express-rate-limit';
 import { IngestService } from '../services/IngestService.js';
 import { verifyTenantAccess } from '../services/opa-client.js';
 import logger from '../config/logger.js';
+import {
+  AsyncIngestDispatcher,
+  PgAsyncIngestRepository,
+} from '../ingest/async-pipeline.js';
 
 const ingestRouter = Router();
 const ingestLogger = logger.child({ name: 'IngestAPI' });
+const asyncIngestEnabled = process.env.ASYNC_INGEST === '1';
+let asyncDispatcher: AsyncIngestDispatcher | null = null;
 
 // Rate limiting: max 100 requests per 15 minutes per IP
 const ingestLimiter = rateLimit({
@@ -91,7 +97,42 @@ ingestRouter.post(
         relationshipsCount: relationships.length,
       }, 'Processing ingest request');
 
-      // Perform ingest
+      // Async pipeline short-circuit
+      if (asyncIngestEnabled) {
+        const idempotencyKey =
+          (req.headers['x-idempotency-key'] as string) || req.body.idempotencyKey;
+
+        asyncDispatcher =
+          asyncDispatcher ||
+          new AsyncIngestDispatcher(
+            new PgAsyncIngestRepository(req.app.get('pg') as any),
+          );
+
+        const asyncResult = await asyncDispatcher.enqueue(
+          {
+            tenantId,
+            sourceType,
+            sourceId,
+            entities,
+            relationships,
+            userId: user.id,
+          },
+          idempotencyKey,
+        );
+
+        return res.status(202).json({
+          jobId: asyncResult.jobId,
+          status: asyncResult.status,
+          duplicate: asyncResult.duplicate,
+          payloadHash: asyncResult.payloadHash,
+          metadata: {
+            submittedAt: new Date().toISOString(),
+            async: true,
+          },
+        });
+      }
+
+      // Perform ingest (synchronous path)
       const ingestService = new IngestService(
         (req.app.get('pg') as any),
         (req.app.get('neo4j') as any),
@@ -173,10 +214,45 @@ ingestRouter.get(
       );
 
       if (rows.length === 0) {
-        return res.status(404).json({
-          error: 'Not found',
-          message: 'Provenance record not found',
-        });
+        if (asyncIngestEnabled) {
+          const asyncPg = req.app.get('pg') as any;
+          const asyncJob = await asyncPg.query(
+            `SELECT id, tenant_id, status, attempts, last_error, payload_hash
+               FROM ingest_async_jobs
+              WHERE id = $1`,
+            [provenanceId],
+          );
+
+          if (asyncJob.rows.length === 0) {
+            return res.status(404).json({
+              error: 'Not found',
+              message: 'Provenance record not found',
+            });
+          }
+
+          const job = asyncJob.rows[0];
+
+          try {
+            await verifyTenantAccess(user, job.tenant_id, 'entity:read');
+          } catch {
+            return res.status(403).json({ error: 'Forbidden' });
+          }
+
+          return res.json({
+            provenanceId: job.id,
+            tenantId: job.tenant_id,
+            status: job.status,
+            attempts: job.attempts,
+            lastError: job.last_error,
+            payloadHash: job.payload_hash,
+            metadata: { async: true },
+          });
+        } else {
+          return res.status(404).json({
+            error: 'Not found',
+            message: 'Provenance record not found',
+          });
+        }
       }
 
       const record = rows[0];
