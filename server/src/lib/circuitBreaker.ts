@@ -1,5 +1,5 @@
 import { dbConnectionErrors, circuitBreakerState } from '../metrics/dbMetrics.js';
-import logger from '../utils/logger.js';
+import { logger } from '../utils/logger.js';
 
 export type CircuitState = 'closed' | 'half-open' | 'open';
 

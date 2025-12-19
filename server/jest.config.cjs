@@ -2,6 +2,7 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
+  resolver: 'jest-ts-webcompat-resolver',
   setupFilesAfterEnv: [
     '<rootDir>/tests/setup/jest.setup.ts',
     'jest-extended/all',
@@ -21,10 +22,16 @@ module.exports = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
+    // Handle ESM imports in tests
+    '^(\\.{1,2}/.*)\\.js$': '$1'
   },
   transform: {
-    '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
+    '^.+\\.tsx?$': ['ts-jest', {
+      useESM: true,
+      tsconfig: 'tsconfig.json'
+    }]
   },
+  extensionsToTreatAsEsm: ['.ts'],
   testTimeout: 30000,
   globalSetup: '<rootDir>/tests/setup/globalSetup.cjs',
   globalTeardown: '<rootDir>/tests/setup/globalTeardown.cjs',

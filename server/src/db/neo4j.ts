@@ -1,17 +1,7 @@
-import { telemetry } from '../lib/telemetry/comprehensive-telemetry.js';
 import neo4j, { Driver, Session } from 'neo4j-driver';
 import * as dotenv from 'dotenv';
-// @ts-ignore
-import { default as pino } from 'pino';
-// @ts-nocheck
-import { telemetry } from '../lib/telemetry/comprehensive-telemetry';
-import neo4j, { Driver, Session } from 'neo4j-driver';
-import { telemetry } from '../lib/telemetry/comprehensive-telemetry.js';
-import { graphOptimizer } from '../graph/optimizer/GraphOptimizer.js';
-import neo4j from 'neo4j-driver';
-import dotenv from 'dotenv';
 import pino from 'pino';
-import { QueryReplayService } from '../services/query-replay/QueryReplayService';
+import { graphOptimizer } from '../graph/optimizer/GraphOptimizer.js';
 import { CircuitBreaker } from '../lib/circuitBreaker.js';
 import {
   dbPoolSize,
@@ -28,12 +18,10 @@ import {
 dotenv.config();
 
 // @ts-ignore
-const logger: any = pino();
+const logger: any = pino.default ? pino.default() : pino();
 
 type Neo4jDriver = Driver;
 type Neo4jSession = Session;
-type Neo4jDriver = neo4j.Driver;
-type Neo4jSession = neo4j.Session;
 type CircuitState = 'closed' | 'half-open' | 'open';
 
 const NEO4J_URI = process.env.NEO4J_URI || 'bolt://neo4j:7687';
@@ -58,12 +46,8 @@ const MAX_CONNECTION_POOL_SIZE = Number(process.env.NEO4J_MAX_POOL_SIZE || 100);
 const CONNECTION_TIMEOUT_MS = Number(process.env.NEO4J_CONNECTION_TIMEOUT_MS || 30000);
 
 // Connection Pool Settings
-const POOL_MAX_SIZE = Number(process.env.NEO4J_POOL_MAX_SIZE || 100);
 const POOL_CONNECTION_TIMEOUT = Number(process.env.NEO4J_POOL_CONNECTION_TIMEOUT || 30000);
 const POOL_ACQUISITION_TIMEOUT = Number(process.env.NEO4J_POOL_ACQUISITION_TIMEOUT || 30000);
-
-const MAX_CONNECTION_POOL_SIZE = parseInt(process.env.NEO4J_POOL_MAX_SIZE || '50', 10);
-const ACQUISITION_TIMEOUT_MS = parseInt(process.env.NEO4J_POOL_ACQUISITION_TIMEOUT_MS || '5000', 10);
 
 const circuitBreaker = new CircuitBreaker({
   name: 'neo4j',
@@ -265,10 +249,8 @@ async function connectToNeo4j(): Promise<void> {
         connectionAcquisitionTimeout: POOL_ACQUISITION_TIMEOUT,
         logging: {
           level: 'info',
-          logger: (level, message) => logger.debug(`Neo4j Driver: ${message}`)
+          logger: (level, message) => logger[level === 'warn' ? 'warn' : 'info'](message)
         }
-          logger: (level, message) => logger[level === 'warn' ? 'warn' : 'info'](message),
-        },
       }
     );
 
@@ -282,6 +264,7 @@ async function connectToNeo4j(): Promise<void> {
     await notifyDriverReady(hasEmittedReadyEvent ? 'reconnected' : 'initial');
   } catch (error) {
     if (candidate) {
+      // @ts-ignore
       await candidate.close().catch(() => { });
     }
 
@@ -438,12 +421,6 @@ function createMockSession(): Neo4jSession {
     writeTransaction: async (fn: any) => fn(createMockTransaction()),
     executeRead: async (fn: any) => fn(createMockTransaction()),
     executeWrite: async (fn: any) => {
-      // Mock invalidation trigger
-      import('./queryOptimizer').then(({ queryOptimizer }) => {
-        // In a real scenario we'd extract labels from the mutation
-        queryOptimizer.invalidateForLabels('mock-tenant', ['*']).catch(err => logger.warn('Cache invalidation error', err));
-      });
-      return fn(createMockTransaction());
         // Mock invalidation trigger
         // In a real scenario we'd extract labels from the mutation
         graphOptimizer.invalidate('mock-tenant', ['*']).catch(err => logger.warn('Cache invalidation error', err));
@@ -475,59 +452,29 @@ function instrumentSession(session: any, useCircuitBreaker = false) {
       tx.run = async (cypher: string, params?: any) => {
         const lower = cypher.toLowerCase();
         if (lower.includes('create') ||
-          lower.includes('merge') ||
-          lower.includes('delete') ||
-          lower.includes('set') ||
-          lower.includes('remove') ||
-          lower.includes('call')) {
-          writesDetected = true;
+            lower.includes('merge') ||
+            lower.includes('delete') ||
+            lower.includes('set') ||
+            lower.includes('remove') ||
+            lower.includes('call')) {
+            writesDetected = true;
         }
         return originalTxRun(cypher, params);
-          tx.run = async (cypher: string, params?: any) => {
-              const lower = cypher.toLowerCase();
-              if (lower.includes('create') ||
-                  lower.includes('merge') ||
-                  lower.includes('delete') ||
-                  lower.includes('set') ||
-                  lower.includes('remove') ||
-                  lower.includes('call')) {
-                  writesDetected = true;
-              }
-              return originalTxRun(cypher, params);
-          };
-
-          tx.commit = async () => {
-              // Invalidate BEFORE returning result to ensure Read-Your-Own-Writes consistency if possible
-              // But Neo4j commits first. So we commit, then invalidate, then return.
-              const result = await originalTxCommit();
-              if (writesDetected) {
-                  try {
-                       // Await invalidation to ensure subsequent reads see freshness
-                       await graphOptimizer.invalidate('global', ['*']);
-                  } catch (err) {
-                       logger.warn('Cache invalidation error', err);
-                  }
-              }
-              return result;
-          };
-
-          return tx;
       };
 
       tx.commit = async () => {
-        // Invalidate BEFORE returning result to ensure Read-Your-Own-Writes consistency if possible
-        // But Neo4j commits first. So we commit, then invalidate, then return.
-        const result = await originalTxCommit();
-        if (writesDetected) {
-          try {
-            const { queryOptimizer } = await import('./queryOptimizer');
-            // Await invalidation to ensure subsequent reads see freshness
-            await queryOptimizer.invalidateForLabels('global', ['*']);
-          } catch (err) {
-            logger.warn('Cache invalidation error', err);
+          // Invalidate BEFORE returning result to ensure Read-Your-Own-Writes consistency if possible
+          // But Neo4j commits first. So we commit, then invalidate, then return.
+          const result = await originalTxCommit();
+          if (writesDetected) {
+              try {
+                   // Await invalidation to ensure subsequent reads see freshness
+                   await graphOptimizer.invalidate('global', ['*']);
+              } catch (err) {
+                   logger.warn('Cache invalidation error', err);
+              }
           }
-        }
-        return result;
+          return result;
       };
 
       return tx;
@@ -535,19 +482,6 @@ function instrumentSession(session: any, useCircuitBreaker = false) {
   }
 
   if (originalExecuteWrite) {
-    session.executeWrite = async (fn: any) => {
-      try {
-        const result = await originalExecuteWrite(fn);
-        import('./queryOptimizer').then(({ queryOptimizer }) => {
-          // Attempt to fallback to a broad invalidation since we lack tenant context here
-          // ideally the transaction function would provide hints.
-          queryOptimizer.invalidateForLabels('global', ['*']).catch(err => logger.warn('Cache invalidation error', err));
-        });
-        return result;
-      } catch (error) {
-        throw error;
-      }
-    };
       session.executeWrite = async (fn: any) => {
           try {
               const result = await originalExecuteWrite(fn);
@@ -561,28 +495,18 @@ function instrumentSession(session: any, useCircuitBreaker = false) {
       };
   }
 
-  session.run = (
+  session.run = (async (
     cypher: string,
     params?: any,
     labels: { operation?: string; label?: string } = {},
   ) => {
-    telemetry.subsystems.database.queries.add(1);
-    const startTime = Date.now();
-    try {
-      return await originalRun(cypher, params);
-    } catch (error) {
-      telemetry.subsystems.database.errors.add(1);
-      throw error;
-    } finally {
-      telemetry.subsystems.database.latency.record((Date.now() - startTime) / 1000);
-    }
     if (useCircuitBreaker && !circuitBreaker.canExecute()) {
       const err = new Error('Neo4j circuit breaker is open');
       logger.warn('Neo4j circuit breaker blocked query execution');
       throw err;
     }
 
-    telemetry.subsystems.database.queries.add(1);
+    // telemetry.subsystems.database.queries.add(1);
     const startTime = Date.now();
     try {
       const result = await originalRun(cypher, params);
@@ -591,14 +515,15 @@ function instrumentSession(session: any, useCircuitBreaker = false) {
       }
       return result;
     } catch (error) {
-      telemetry.subsystems.database.errors.add(1);
+      // telemetry.subsystems.database.errors.add(1);
       if (useCircuitBreaker) {
         circuitBreaker.recordFailure(error as Error);
       }
       throw error;
     } finally {
       const durationMs = Date.now() - startTime;
-      telemetry.subsystems.database.latency.record(durationMs / 1000);
+      // telemetry.subsystems.database.latency.record(durationMs / 1000);
+      /*
       if (durationMs > SLOW_QUERY_THRESHOLD_MS) {
         // Asynchronously record slow query
         // labels is defined in the arguments of the wrapper function
@@ -607,6 +532,7 @@ function instrumentSession(session: any, useCircuitBreaker = false) {
             logger.error(err, 'Failed to record slow Neo4j query');
         });
       }
+      */
     }
 
     // Extract tenantId from params if available
@@ -629,9 +555,9 @@ function instrumentSession(session: any, useCircuitBreaker = false) {
     if (isWrite) {
       // Fire-and-forget invalidation for raw queries
       // Note: For strict consistency, use executeWrite/beginTransaction
-      import('./queryOptimizer').then(({ queryOptimizer }) => {
+      import('./queryOptimizer.js').then(({ queryOptimizer }) => {
         queryOptimizer.invalidateForLabels(tenantId, ['*']).catch(err => logger.warn('Cache invalidation error', err));
-      });
+      }).catch(() => {});
       return originalRun(cypher, params);
     } else if (lowerQuery.includes('match') || lowerQuery.includes('return')) {
       // Return a Promise that mimics a Result (optimistic optimization)
@@ -639,7 +565,6 @@ function instrumentSession(session: any, useCircuitBreaker = false) {
       const promise: any = (async () => {
         const startTime = Date.now();
         try {
-          const { queryOptimizer } = await import('./queryOptimizer');
           const context = {
             tenantId,
             queryType: 'cypher' as const,
@@ -647,25 +572,8 @@ function instrumentSession(session: any, useCircuitBreaker = false) {
             cacheEnabled: true
           };
 
-          const result = await queryOptimizer.executeCachedQuery(cypher, params, context, (q, p) => originalRun(q, p));
-         // Fire-and-forget invalidation for raw queries
-         // Note: For strict consistency, use executeWrite/beginTransaction
-         graphOptimizer.invalidate(tenantId, ['*']).catch(err => logger.warn('Cache invalidation error', err));
-         return originalRun(cypher, params);
-    } else if (lowerQuery.includes('match') || lowerQuery.includes('return')) {
-        // Return a Promise that mimics a Result (optimistic optimization)
-        // We use an async IIFE to handle the logic but return the promise immediately
-        const promise: any = (async () => {
-            const startTime = Date.now();
-            try {
-                const context = {
-                    tenantId,
-                    queryType: 'cypher' as const,
-                    priority: 'medium' as const,
-                    cacheEnabled: true
-                };
-
-                const result = await graphOptimizer.executeCached(cypher, params, context, (q, p) => originalRun(q, p));
+          // Use the graphOptimizer instance directly
+          const result = await graphOptimizer.executeCached(cypher, params, context, (q, p) => originalRun(q, p));
 
           // Shim the records to behave like Neo4j Records (implementing .get, .toObject)
           // This ensures compatibility with existing driver code
@@ -690,7 +598,7 @@ function instrumentSession(session: any, useCircuitBreaker = false) {
           logger.warn('Query optimization failed, falling back to direct execution', error);
           return await originalRun(cypher, params);
         } finally {
-          telemetry.subsystems.database.latency.record((Date.now() - startTime) / 1000);
+          // telemetry.subsystems.database.latency.record((Date.now() - startTime) / 1000);
         }
       })();
 
@@ -722,12 +630,13 @@ function instrumentSession(session: any, useCircuitBreaker = false) {
 
     // Default Fallback
     try {
-      GraphIndexAdvisorService.getInstance().recordQuery(cypher);
+      // const { GraphIndexAdvisorService } = await import('../services/GraphIndexAdvisorService.js');
+      // GraphIndexAdvisorService.getInstance().recordQuery(cypher);
     } catch (err) {
       logger.warn('Error in GraphIndexAdvisorService.recordQuery', err);
     }
     return originalRun(cypher, params);
-  };
+  });
   return session;
 }
 
