@@ -65,7 +65,17 @@
       "Bash(GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null git status:*)",
       "Bash(GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null git -C /Users/brianlong/.claude-worktrees/summit/nervous-benz status --short)",
       "Bash(GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null git -C /Users/brianlong/.claude-worktrees/summit/nervous-benz diff .claude/settings.local.json)",
-      "Bash(GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null git commit:*)"
+      "Bash(GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null git commit:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr close:*)",
+      "Bash(pgrep:*)",
+      "Bash(./scripts/smoke.sh:*)",
+      "Bash(npm run test:quick:*)",
+      "Bash(pnpm --version:*)",
+      "Bash(npx vite:*)",
+      "Bash(DEBUG=vite:config vite build:*)",
+      "Bash(xargs sed:*)",
+      "Bash(readlink:*)"
     ],
     "deny": [],
     "ask": []

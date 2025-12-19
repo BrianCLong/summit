@@ -65,7 +65,6 @@ import { GraphQLError } from 'graphql';
  * Throws GraphQLError if validation fails
  */
 export function validateInput<T>(
-  schema: ZodSchema<T>,
   schema: z.ZodType<T>,
   data: unknown,
   errorMessage?: string
@@ -76,11 +75,6 @@ export function validateInput<T>(
     const errors = result.error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ');
     throw new GraphQLError(errorMessage || `Validation failed: ${errors}`, {
       extensions: { code: 'BAD_USER_INPUT', validationErrors: result.error.issues },
-    // Cast to any to access .errors if types are mismatched due to Zod version differences
-    const error = result.error as any;
-    const errors = error.errors.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(', ');
-    throw new GraphQLError(errorMessage || `Validation failed: ${errors}`, {
-      extensions: { code: 'BAD_USER_INPUT', validationErrors: error.errors },
     });
   }
 
@@ -88,28 +82,9 @@ export function validateInput<T>(
 }
 
 /**
- * Helper function to validate input and return result object
- * Does not throw, returns success/error information
- */
-export function validateInputSafe<T>(
-  schema: ZodSchema<T>,
-  schema: z.ZodType<T>,
-  data: unknown
-): { success: true; data: T } | { success: false; errors: ZodError } {
-  const result = schema.safeParse(data);
-
-  if (result.success) {
-    return { success: true, data: result.data };
-  }
-
-  return { success: false, errors: result.error };
-}
-
-/**
- * Middleware factory for Express/GraphQL context validation
+ * Express middleware for request validation
  */
 export function createValidationMiddleware<T>(
-  schema: ZodSchema<T>,
   schema: z.ZodType<T>,
   dataExtractor: (req: any) => unknown
 ) {
@@ -133,50 +108,48 @@ export function createValidationMiddleware<T>(
 }
 
 /**
- * GraphQL resolver wrapper with automatic validation
- */
-export function withValidation<TArgs, TResult>(
-  schema: z.ZodType<TArgs>,
-  resolver: (parent: any, args: TArgs, context: any, info: any) => Promise<TResult> | TResult
-) {
-  return async (parent: any, args: any, context: any, info: any): Promise<TResult> => {
-    const validatedArgs = validateInput(schema, args);
-    return resolver(parent, validatedArgs, context, info);
-  };
-}
-
-/**
- * Batch validation for arrays of inputs
- */
-export function validateBatch<T>(
-  schema: ZodSchema<T>,
-  schema: z.ZodType<T>,
-  items: unknown[],
-  options?: { stopOnFirstError?: boolean }
-): { valid: T[]; errors: Array<{ index: number; errors: ZodError }> } {
-  const valid: T[] = [];
-  const errors: Array<{ index: number; errors: ZodError }> = [];
-
-  for (let i = 0; i < items.length; i++) {
-    const result = schema.safeParse(items[i]);
-    if (result.success) {
-      valid.push(result.data);
-    } else {
-      errors.push({ index: i, errors: result.error });
-      if (options?.stopOnFirstError) {
-        break;
-      }
-    }
+   * GraphQL resolver wrapper with automatic validation
+   */
+  export function withValidation<TArgs, TResult>(
+    schema: z.ZodType<TArgs>,
+    resolver: (parent: any, args: TArgs, context: any, info: any) => Promise<TResult> | TResult
+  ) {
+    return async (parent: any, args: any, context: any, info: any): Promise<TResult> => {
+      const validatedArgs = validateInput(schema, args);
+      return resolver(parent, validatedArgs, context, info);
+    };
   }
 
-  return { valid, errors };
-}
+  /**
+   * Batch validation for arrays of inputs
+   */
+  export function validateBatch<T>(
+    schema: ZodSchema<T>,
+    schema: z.ZodType<T>,
+    items: unknown[],
+    options?: { stopOnFirstError?: boolean }
+  ): { valid: T[]; errors: Array<{ index: number; errors: ZodError }> } {
+    const valid: T[] = [];
+    const errors: Array<{ index: number; errors: ZodError }> = [];
+
+    for (let i = 0; i < items.length; i++) {
+      const result = schema.safeParse(items[i]);
+      if (result.success) {
+        valid.push(result.data);
+      } else {
+        errors.push({ index: i, errors: result.error });
+        if (options?.stopOnFirstError) {
+          break;
+        }
+      }
+    }
+
+    return { valid, errors };
+  }
 
 /**
  * Compose multiple validation schemas
  */
-export function composeValidators<T>(...validators: Array<ZodSchema<any>>): ZodSchema<T> {
-  return validators.reduce((acc, validator) => acc.and(validator)) as ZodSchema<T>;
 export function composeValidators<T>(...validators: Array<z.ZodType<any>>): z.ZodType<T> {
   return validators.reduce((acc, validator) => acc.and(validator)) as z.ZodType<T>;
 }
@@ -186,14 +159,11 @@ export function composeValidators<T>(...validators: Array<z.ZodType<any>>): z.Zo
  */
 export function conditionalValidation<T>(
   condition: (data: any) => boolean,
-  schemaTrue: ZodSchema<T>,
-  schemaFalse: ZodSchema<T>
   schemaTrue: z.ZodType<T>,
   schemaFalse: z.ZodType<T>
 ) {
   return z.any().transform((data) => {
     const schema = condition(data) ? schemaTrue : schemaFalse;
     return schema.parse(data);
-  }) as ZodSchema<T>;
   }) as z.ZodType<T>;
 }

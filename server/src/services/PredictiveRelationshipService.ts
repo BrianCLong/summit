@@ -38,10 +38,6 @@ export interface PredictedRelationship {
 
 export class PredictiveRelationshipService {
   private embeddingService: EmbeddingService;
-  private relationshipService: any;
-  private driver: Driver | null = null;
-
-  constructor(embeddingService?: EmbeddingService, relationshipService?: any, driver?: Driver) {
   private relationshipService: RelationshipService;
   private driver: Driver | null = null;
 

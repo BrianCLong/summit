@@ -44,7 +44,7 @@ import {
   PendingActions,
 } from '@mui/icons-material';
 import { getIntelGraphTheme } from './theme/intelgraphTheme';
-import { store } from '../../intelgraph/client/src/store';
+import { store } from './store';
 import { apolloClient } from './services/apollo';
 import { useSelector } from 'react-redux';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';

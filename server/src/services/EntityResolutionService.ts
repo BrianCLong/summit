@@ -168,6 +168,9 @@ export class EntityResolutionService {
     if (config && duration > config.latencyBudgetMs) {
       log.warn({ rule, duration, budget: config.latencyBudgetMs }, 'ER Rule exceeded latency budget');
     }
+  }
+
+  /**
    * Evaluate match between two entities with explainability.
    * @param entityA Source entity
    * @param entityB Target entity
