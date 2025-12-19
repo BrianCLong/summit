@@ -39,7 +39,57 @@ const RunUpdateSchema = z.object({
   error_message: z.string().optional(),
 });
 
-// GET /runs - List all runs with pagination
+/**
+ * @openapi
+ * /maestro/runs:
+ *   get:
+ *     tags:
+ *       - Maestro
+ *     summary: List runs
+ *     description: Retrieve a paginated list of Maestro workflow runs.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 50
+ *         description: Number of items to return (max 100)
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *           default: 0
+ *         description: Offset for pagination
+ *     responses:
+ *       200:
+ *         description: A list of runs
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 items:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         format: uuid
+ *                       pipeline:
+ *                         type: string
+ *                       status:
+ *                         type: string
+ *                         enum: [queued, running, succeeded, failed, cancelled]
+ *                       durationMs:
+ *                         type: integer
+ *                       cost:
+ *                         type: number
+ *       500:
+ *         description: Internal server error
+ */
 router.get('/runs', authorize('run_maestro'), async (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
@@ -64,7 +114,58 @@ router.get('/runs', authorize('run_maestro'), async (req, res) => {
   }
 });
 
-// POST /runs - Create a new run
+/**
+ * @openapi
+ * /maestro/runs:
+ *   post:
+ *     tags:
+ *       - Maestro
+ *     summary: Create run
+ *     description: Create and start a new workflow run.
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - pipeline_id
+ *               - pipeline_name
+ *             properties:
+ *               pipeline_id:
+ *                 type: string
+ *                 format: uuid
+ *               pipeline_name:
+ *                 type: string
+ *               input_params:
+ *                 type: object
+ *               executor_id:
+ *                 type: string
+ *                 format: uuid
+ *     responses:
+ *       201:
+ *         description: Run created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   format: uuid
+ *                 pipeline:
+ *                   type: string
+ *                 status:
+ *                   type: string
+ *       400:
+ *         description: Invalid input
+ *       402:
+ *         description: Budget exceeded
+ *       500:
+ *         description: Internal server error
+ */
 router.post('/runs', authorize('run_maestro'), async (req, res) => {
   try {
     const validation = RunCreateSchema.safeParse(req.body);
@@ -132,7 +233,32 @@ router.post('/runs', authorize('run_maestro'), async (req, res) => {
   }
 });
 
-// GET /runs/:id - Get a specific run
+/**
+ * @openapi
+ * /maestro/runs/{id}:
+ *   get:
+ *     tags:
+ *       - Maestro
+ *     summary: Get run details
+ *     description: Retrieve details for a specific workflow run.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The run ID
+ *     responses:
+ *       200:
+ *         description: Run details
+ *       404:
+ *         description: Run not found
+ *       500:
+ *         description: Internal server error
+ */
 router.get('/runs/:id', authorize('run_maestro'), async (req, res) => {
   try {
     const tenantId = (req.context as RequestContext).tenantId; // Get tenantId from context
@@ -168,7 +294,45 @@ router.get('/runs/:id', authorize('run_maestro'), async (req, res) => {
   }
 });
 
-// PUT /runs/:id - Update a run
+/**
+ * @openapi
+ * /maestro/runs/{id}:
+ *   put:
+ *     tags:
+ *       - Maestro
+ *     summary: Update run
+ *     description: Update the status or details of a run.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The run ID
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [queued, running, succeeded, failed, cancelled]
+ *               output_data:
+ *                 type: object
+ *               error_message:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Run updated
+ *       404:
+ *         description: Run not found
+ *       500:
+ *         description: Internal server error
+ */
 router.put('/runs/:id', authorize('run_maestro'), async (req, res) => {
   try {
     const validation = RunUpdateSchema.safeParse(req.body);
@@ -200,7 +364,31 @@ router.put('/runs/:id', authorize('run_maestro'), async (req, res) => {
   }
 });
 
-// DELETE /runs/:id - Delete a run
+/**
+ * @openapi
+ * /maestro/runs/{id}:
+ *   delete:
+ *     tags:
+ *       - Maestro
+ *     summary: Delete run
+ *     description: Delete a specific run.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       204:
+ *         description: Run deleted
+ *       404:
+ *         description: Run not found
+ *       500:
+ *         description: Internal server error
+ */
 router.delete('/runs/:id', authorize('run_maestro'), async (req, res) => {
     try {
       const tenantId = (req.context as RequestContext).tenantId; // Get tenantId from context
@@ -213,7 +401,48 @@ router.delete('/runs/:id', authorize('run_maestro'), async (req, res) => {
   },
 );
 
-// GET /pipelines/:id/runs - Get runs for a specific pipeline
+/**
+ * @openapi
+ * /maestro/pipelines/{id}/runs:
+ *   get:
+ *     tags:
+ *       - Maestro
+ *     summary: List pipeline runs
+ *     description: Get runs associated with a specific pipeline.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *     responses:
+ *       200:
+ *         description: List of runs
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 items:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       status:
+ *                         type: string
+ *       500:
+ *         description: Internal server error
+ */
 router.get('/pipelines/:id/runs', authorize('run_maestro'), async (req, res) => {
     try {
       const limit = Math.min(parseInt(req.query.limit as string) || 20, 50);

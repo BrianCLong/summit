@@ -1,26 +1,34 @@
 import swaggerJsdoc from 'swagger-jsdoc';
-import { cfg } from '../config.js';
 
 const options: swaggerJsdoc.Options = {
   definition: {
-    openapi: '3.0.0',
+    openapi: '3.1.0',
     info: {
-      title: 'IntelGraph API',
+      title: 'IntelGraph Summit API',
       version: '1.0.0',
-      description: 'API documentation for the IntelGraph platform',
+      description: 'Comprehensive API documentation for the IntelGraph Summit platform. Includes REST endpoints for Authentication, Orchestration (Maestro), Health, and more.',
       contact: {
         name: 'API Support',
-        email: 'support@intelgraph.com',
+        url: 'https://docs.intelgraph.tech/support',
+        email: 'api@intelgraph.tech',
+      },
+      license: {
+        name: 'Proprietary',
+        url: 'https://intelgraph.tech/license',
       },
     },
     servers: [
       {
-        url: `http://localhost:${cfg.PORT}`,
-        description: 'Development server',
+        url: '/api',
+        description: 'Current Server (Relative Path)',
       },
       {
-        url: 'https://api.intelgraph.com',
-        description: 'Production server',
+        url: 'http://localhost:4000/api',
+        description: 'Local Development Server',
+      },
+      {
+        url: 'https://api.intelgraph.tech/v1',
+        description: 'Production Server',
       },
     ],
     components: {
@@ -29,20 +37,11 @@ const options: swaggerJsdoc.Options = {
           type: 'http',
           scheme: 'bearer',
           bearerFormat: 'JWT',
+          description: 'Enter your JWT token in the format: Bearer <token>',
         },
       },
       schemas: {
-        Error: {
-          type: 'object',
-          properties: {
-            error: {
-              type: 'string',
-            },
-            message: {
-              type: 'string',
-            },
-          },
-        },
+        // Common schemas can be referenced here or merged from external files
       },
     },
     security: [
@@ -51,7 +50,13 @@ const options: swaggerJsdoc.Options = {
       },
     ],
   },
-  apis: ['./src/routes/*.ts', './src/routes/*.js', './src/http/*.ts'], // Path to the API docs
+  // Path to the API docs
+  apis: [
+    './src/routes/*.ts',
+    './src/routes/**/*.ts',
+    './src/maestro/**/*.ts',
+    './src/docs/schemas.ts'
+  ],
 };
 
 export const swaggerSpec = swaggerJsdoc(options);

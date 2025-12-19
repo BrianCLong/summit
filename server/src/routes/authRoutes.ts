@@ -104,9 +104,54 @@ function validateBody<T extends z.ZodSchema>(schema: T) {
 }
 
 /**
- * @route POST /auth/register
- * @desc Register a new user account
- * @access Public
+ * @openapi
+ * /auth/register:
+ *   post:
+ *     tags:
+ *       - Authentication
+ *     summary: Register a new user
+ *     description: Creates a new user account with the provided details.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *               - firstName
+ *               - lastName
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 minLength: 8
+ *               username:
+ *                 type: string
+ *               firstName:
+ *                 type: string
+ *               lastName:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: User registered successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                 refreshToken:
+ *                   type: string
+ *       400:
+ *         description: Validation error
+ *       409:
+ *         description: User already exists
  */
 router.post(
   '/register',
@@ -171,9 +216,43 @@ router.post(
 );
 
 /**
- * @route POST /auth/login
- * @desc Authenticate user and return JWT tokens
- * @access Public
+ * @openapi
+ * /auth/login:
+ *   post:
+ *     tags:
+ *       - Authentication
+ *     summary: Login user
+ *     description: Authenticates a user and returns JWT tokens.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *                 format: password
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                 refreshToken:
+ *                   type: string
+ *       401:
+ *         description: Invalid credentials
  */
 router.post(
   '/login',
@@ -230,9 +309,29 @@ router.post(
 );
 
 /**
- * @route POST /auth/refresh
- * @desc Refresh access token using refresh token
- * @access Public (with valid refresh token)
+ * @openapi
+ * /auth/refresh:
+ *   post:
+ *     tags:
+ *       - Authentication
+ *     summary: Refresh access token
+ *     description: Uses a refresh token to obtain a new access token.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - refreshToken
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Token refreshed successfully
+ *       401:
+ *         description: Invalid or expired refresh token
  */
 router.post(
   '/refresh',
@@ -277,9 +376,20 @@ router.post(
 );
 
 /**
- * @route POST /auth/logout
- * @desc Logout user and invalidate tokens
- * @access Private
+ * @openapi
+ * /auth/logout:
+ *   post:
+ *     tags:
+ *       - Authentication
+ *     summary: Logout user
+ *     description: Invalidates the user's current session and tokens.
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Logout successful
+ *       401:
+ *         description: Unauthorized
  */
 router.post(
   '/logout',
@@ -316,9 +426,20 @@ router.post(
 );
 
 /**
- * @route GET /auth/me
- * @desc Get current authenticated user profile
- * @access Private
+ * @openapi
+ * /auth/me:
+ *   get:
+ *     tags:
+ *       - Authentication
+ *     summary: Get current user
+ *     description: Returns the profile of the currently authenticated user.
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User profile
+ *       401:
+ *         description: Unauthorized
  */
 router.get(
   '/me',

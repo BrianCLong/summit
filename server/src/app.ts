@@ -232,6 +232,10 @@ export const createApp = async () => {
 
   // Swagger UI
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  app.get('/api-docs.json', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerSpec);
+  });
 
   // Global Rate Limiting (fallback for unauthenticated or non-specific routes)
   // Note: /graphql has its own rate limiting chain above
