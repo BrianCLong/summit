@@ -76,6 +76,8 @@ import searchV1Router from './routes/search-v1.js';
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
+  const dbObservabilityEnabled =
+    ['1', 'true', 'yes'].includes(String(process.env.DB_OBSERVABILITY_V2 || '').toLowerCase());
 
   // Initialize OpenTelemetry tracing
   // const tracer = initializeTracing();
@@ -278,6 +280,10 @@ export const createApp = async () => {
   app.use('/api/query-replay', queryReplayRouter);
   app.use('/api/stream', streamRouter); // Register stream route
   app.use('/api/v1/search', searchV1Router); // Register Unified Search API
+  if (dbObservabilityEnabled) {
+    const dbObservabilityRouter = (await import('./routes/db-observability.js')).default;
+    app.use('/api/admin/db-observability', dbObservabilityRouter);
+  }
   app.get('/metrics', metricsRoute);
 
   // Initialize SummitInvestigate Platform Routes
