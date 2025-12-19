@@ -85,11 +85,6 @@ interface PoolConfig {
   port?: number;
 }
 
-interface ExtendedPoolClient {
-  connectedAt?: number;
-  release(err?: boolean | Error): void;
-  query(...args: any[]): Promise<any>;
-  [key: string]: any;
 // Extend PoolClient to include connectedAt
 interface ExtendedPoolClient extends PoolClient {
   connectedAt?: number;

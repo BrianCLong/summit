@@ -59,16 +59,6 @@ describe('MCPClient', () => {
       once: jest.fn().mockReturnThis(),
       removeAllListeners: jest.fn().mockReturnThis(),
     } as any;
-      on: jest.fn(),
-      once: jest.fn(),
-      removeAllListeners: jest.fn(),
-    } as any;
-    } as any;
-    } as any;
-    } as any;
-    } as any;
-    } as any;
-    };
 
     MockWebSocket.mockImplementation(() => mockWs);
   });
@@ -80,13 +70,6 @@ describe('MCPClient', () => {
   describe('connection management', () => {
     test('connects to MCP server successfully', async () => {
       // Setup connection success
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string, callback: Function) => {
-      mockWs.once.mockImplementation((event: string | symbol, callback: (...args: any[]) => void) => {
       mockWs.once.mockImplementation((event: string, callback: any) => {
         if (event === 'open') {
           setTimeout(callback, 0);

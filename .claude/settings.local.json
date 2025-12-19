@@ -75,7 +75,9 @@
       "Bash(npx vite:*)",
       "Bash(DEBUG=vite:config vite build:*)",
       "Bash(xargs sed:*)",
-      "Bash(readlink:*)"
+      "Bash(readlink:*)",
+      "Bash(pnpm --filter @intelgraph/server typecheck:*)",
+      "Bash(cd:*)"
     ],
     "deny": [],
     "ask": []

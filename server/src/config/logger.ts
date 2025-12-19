@@ -42,7 +42,6 @@ const REDACT_PATHS = [
   'user.phone',
 ];
 
-export const logger = (pino as any)({
 // Standard logging context
 export interface SummitLogContext {
   correlationId?: string;
@@ -105,6 +104,5 @@ export const logger = pino({
   // Remove pino-pretty transport for production readiness
   // In production, logs should be structured JSON for log aggregation
 }, stream);
-});
 
 export default logger;

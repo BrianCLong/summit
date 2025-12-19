@@ -24,7 +24,6 @@ import { BackupManager } from './backup/BackupManager.js';
 import { checkNeo4jIndexes } from './db/indexManager.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const logger: pino.Logger = pino();
 import { bootstrapSecrets } from './bootstrap-secrets.js';
 import { logger } from './config/logger.js';
 import { logConfigSummary } from './config/index.js';
@@ -45,21 +44,14 @@ const startServer = async () => {
     } catch (error) {
       logger.warn('Kafka not available - running in minimal mode');
     }
-(async () => {
-  try {
-    // 1. Load Secrets (Environment or Vault)
-    await bootstrapSecrets();
-
-    // Log Config
-    logConfigSummary();
-
-    // 2. Start Server
-    logger.info('Secrets loaded. Starting server...');
-    await import('./server_entry.js');
-  } catch (err) {
-    logger.error(`Fatal error during startup: ${err}`);
-    process.exit(1);
   }
+
+  // 1. Load Secrets (Environment or Vault)
+  await bootstrapSecrets();
+
+  // Log Config
+  logConfigSummary();
+
   const app = await createApp();
   const schema = makeExecutableSchema({ typeDefs, resolvers });
   const httpServer = http.createServer(app);
@@ -217,5 +209,7 @@ const startServer = async () => {
   process.on('SIGTERM', shutdown);
 };
 
-startServer();
-})();
+startServer().catch((err) => {
+  logger.error(`Fatal error during startup: ${err}`);
+  process.exit(1);
+});
