@@ -46,7 +46,7 @@ jest.mock('pg', () => {
   class MockPool extends EventEmitter {
     connect() {
       return Promise.resolve({
-        query: jest.fn().mockResolvedValue({ rows: [] }),
+        query: jest.fn<any>().mockResolvedValue({ rows: [] }),
         release: jest.fn(),
       });
     }
@@ -59,7 +59,7 @@ jest.mock('pg', () => {
 
 // Mock fluent-ffmpeg globally
 jest.mock('fluent-ffmpeg', () => {
-  const ffmpeg = jest.fn(() => {
+  const ffmpeg: any = jest.fn(() => {
     return {
       seekInput: jest.fn().mockReturnThis(),
       duration: jest.fn().mockReturnThis(),
@@ -96,10 +96,10 @@ const originalConsoleError = console.error;
 
 beforeAll(() => {
   if (!process.env.DEBUG_TESTS) {
-    console.log = jest.fn();
-    console.info = jest.fn();
-    console.warn = jest.fn();
-    console.debug = jest.fn();
+    console.log = jest.fn() as any;
+    console.info = jest.fn() as any;
+    console.warn = jest.fn() as any;
+    console.debug = jest.fn() as any;
   }
 
   console.error = (...args: unknown[]) => {

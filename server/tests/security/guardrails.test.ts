@@ -67,7 +67,6 @@ describe('Production Guardrails', () => {
     process.env.NEO4J_PASSWORD = 'securepassword';
     process.env.REDIS_PASSWORD = 'securepassword';
     process.env.CORS_ORIGIN = 'https://app.example.com';
-    process.env.CORS_ORIGIN = 'https://app.example.com';
 
     // Should not throw
     await expect(importConfig()).resolves.not.toThrow();
