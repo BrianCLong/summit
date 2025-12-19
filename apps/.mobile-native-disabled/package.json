@@ -50,21 +50,15 @@
     "react-native-geolocation-service": "^5.3.1",
     "react-native-background-geolocation": "^4.19.0",
     "@notifee/react-native": "^9.1.8",
-<<<<<<< HEAD:apps/mobile-native/package.json
     "@react-native-firebase/app": "^23.5.0",
     "@react-native-firebase/messaging": "^23.5.0",
     "@react-native-firebase/analytics": "^23.5.0",
-=======
-<<<<<<< HEAD:apps/.mobile-native-disabled/package.json
     "@react-native-firebase/app": "^20.5.0",
     "@react-native-firebase/messaging": "^20.5.0",
     "@react-native-firebase/analytics": "^20.5.0",
-=======
     "@react-native-firebase/app": "^23.5.0",
     "@react-native-firebase/messaging": "^23.5.0",
     "@react-native-firebase/analytics": "^23.5.0",
->>>>>>> main:apps/mobile-native/package.json
->>>>>>> main:apps/.mobile-native-disabled/package.json
     "react-native-push-notification": "^8.1.1",
     "react-native-image-picker": "^7.1.2",
     "react-native-document-picker": "^9.3.1",
@@ -74,25 +68,19 @@
     "react-native-fs": "^2.20.0",
     "react-native-keychain": "^9.0.3",
     "react-native-biometrics": "^3.0.1",
-<<<<<<< HEAD:apps/mobile-native/package.json
     "react-native-device-info": "^15.0.1",
     "@react-native-community/hooks": "^3.0.0",
     "react-native-mmkv": "^4.0.1",
     "react-native-fast-image": "^8.6.3",
     "react-native-svg": "^15.15.0",
     "react-native-share": "^12.2.1",
-=======
     "react-native-device-info": "^14.0.2",
-<<<<<<< Updated upstream
     "@react-native-community/hooks": "^3.0.0",
-=======
     "@react-native-community/hooks": "^100.1.0",
->>>>>>> Stashed changes
     "react-native-mmkv": "^3.1.0",
     "react-native-fast-image": "^8.6.3",
     "react-native-svg": "^15.15.0",
     "react-native-share": "^12.0.2",
->>>>>>> main:apps/.mobile-native-disabled/package.json
     "react-native-webview": "^13.16.0",
     "react-native-qrcode-scanner": "^1.6.0",
     "react-native-vector-icons": "^10.2.0",
@@ -106,15 +94,9 @@
     "react-native-performance": "^5.1.0",
     "react-native-background-fetch": "^4.2.0",
     "@sentry/react-native": "^5.15.2",
-<<<<<<< HEAD:apps/mobile-native/package.json
     "metro-minify-terser": "^0.83.3",
-=======
-<<<<<<< HEAD
     "metro-minify-terser": "^0.80.12",
-=======
     "metro-minify-terser": "^0.83.3",
->>>>>>> main
->>>>>>> main:apps/.mobile-native-disabled/package.json
     "axios": "^1.11.0",
     "date-fns": "^4.1.0",
     "zod": "^4.1.12",

@@ -10,10 +10,8 @@ import ffprobe from 'ffprobe-static';
 import ffmpeg from 'fluent-ffmpeg';
 // @ts-ignore - Upload type not exported from graphql-upload-ts
 import { Upload } from 'graphql-upload-ts';
-<<<<<<< HEAD
 // @ts-ignore
 import { default as pino } from 'pino';
-=======
 import pino from 'pino';
 import exifReader from 'exif-reader';
 import {
@@ -29,7 +27,6 @@ import {
   type CdnUploadConfig,
   type CdnUploadRequest,
 } from './CdnUploadService.js';
->>>>>>> main
 
 // @ts-ignore
 const logger = pino({ name: 'MediaUploadService' });

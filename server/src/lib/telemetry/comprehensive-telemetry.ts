@@ -1,11 +1,8 @@
 // @ts-nocheck
 
-<<<<<<< HEAD
 import { snapshotter } from './diagnostic-snapshotter.js';
-=======
 import { otelService } from '../observability/otel';
 import { metrics } from '../observability/metrics';
->>>>>>> main
 import {
   Meter,
   Counter,
@@ -17,34 +14,24 @@ import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
 import {
   MeterProvider,
 } from '@opentelemetry/sdk-metrics';
-<<<<<<< HEAD
 import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import * as os from 'os';
-=======
-<<<<<<< HEAD
 import os from 'os';
-=======
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
->>>>>>> main
->>>>>>> main
 
 // @deprecated - Use server/src/lib/observability/ instead
 class ComprehensiveTelemetry {
   private static instance: ComprehensiveTelemetry;
   private meter: Meter;
   // Performance counters
-<<<<<<< HEAD
   public readonly subsystems: {
       database: { queries: Counter; errors: Counter; latency: Histogram };
       cache: { hits: Counter; misses: Counter; sets: Counter; dels: Counter };
       api: { requests: Counter; errors: Counter };
   };
-=======
   public readonly subsystems: any;
-<<<<<<< HEAD
->>>>>>> main
 
   // Request/response timing
   public readonly requestDuration: Histogram;
@@ -56,13 +43,11 @@ class ComprehensiveTelemetry {
   private previousCpuTime: { user: number; system: number; time: number } | null = null;
 
   private constructor() {
-<<<<<<< HEAD
     const prometheusExporter = new PrometheusExporter({ port: 9464 });
 
     // In SDK 0.208+ or newer, readers are passed in constructor options
     const meterProvider = new MeterProvider({
         readers: [prometheusExporter]
-=======
     const resource = resourceFromAttributes({
       [SemanticResourceAttributes.SERVICE_NAME]: 'intelgraph-server',
     });
@@ -71,7 +56,6 @@ class ComprehensiveTelemetry {
     const meterProvider = new MeterProvider({
       resource,
       readers: [prometheusExporter],
->>>>>>> main
     });
 
     this.meter = meterProvider.getMeter('intelgraph-server-telemetry');
@@ -117,7 +101,6 @@ class ComprehensiveTelemetry {
     };
 
     this.setupResourceUtilizationMetrics();
-=======
   public readonly requestDuration: any;
   private activeConnections: any;
 
@@ -142,7 +125,6 @@ class ComprehensiveTelemetry {
         cache: { hits: { add: () => {} }, misses: { add: () => {} }, sets: { add: () => {} }, dels: { add: () => {} } },
         api: { requests: { add: () => {} }, errors: { add: () => {} } }
     };
->>>>>>> main
   }
 
   public static getInstance(): ComprehensiveTelemetry {

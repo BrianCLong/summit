@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # CI Runbook
 
 ## Overview
@@ -26,7 +25,6 @@
 - **Golden path:** inspect `artifacts/golden-path.log` (uploaded to Actions) and rerun `make smoke` locally with `set -x` to trace failing steps.
 - **Docker Compose issues:** `./scripts/run-compose.sh -f docker-compose.dev.yml logs --tail=200` surfaces container logs; check `./scripts/wait-for-stack.sh` output for readiness problems.
 - **Release automation:** `auto-draft-release.yml` selects the `summit-validation-20.x` artifact from `ci-golden-path`. Ensure the artifact exists when re-running the workflow.
-=======
 # CI/CD Runbook
 
 ## Overview
@@ -68,4 +66,3 @@ If the bot is stuck, run:
 ./scripts/merge-train.sh
 ```
 (Requires `gh` CLI installed and authenticated).
->>>>>>> main

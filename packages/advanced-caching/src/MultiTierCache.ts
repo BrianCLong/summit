@@ -164,11 +164,8 @@ export class MultiTierCache {
 
       span.setAttributes({
         ttl,
-<<<<<<< HEAD
         hasMetadata: !!options?.tags || !!options?.dependencies,
-=======
         hasMetadata: Boolean(options?.tags) || Boolean(options?.dependencies),
->>>>>>> main
       });
 
       logger.debug({ key, ttl }, 'Cache set');
@@ -329,11 +326,8 @@ export class MultiTierCache {
   // Private methods
 
   private setL1<T>(key: string, value: T, options?: CacheOptions): void {
-<<<<<<< HEAD
     if (!this.l1Cache) return;
-=======
     if (!this.l1Cache) {return;}
->>>>>>> main
 
     const ttl = options?.ttl || this.config.l1?.ttl || 300;
     const entry: CacheEntry<T> = {
@@ -351,17 +345,14 @@ export class MultiTierCache {
   }
 
   private async getFromL2<T>(key: string): Promise<T | null> {
-<<<<<<< HEAD
     if (!this.l2Redis) return null;
 
     const data = await this.l2Redis.getBuffer(this.getL2Key(key));
     if (!data) return null;
-=======
     if (!this.l2Redis) {return null;}
 
     const data = await this.l2Redis.getBuffer(this.getL2Key(key));
     if (!data) {return null;}
->>>>>>> main
 
     try {
       const entry: CacheEntry<T> = JSON.parse(data.toString());
@@ -384,11 +375,8 @@ export class MultiTierCache {
     entry: CacheEntry<T>,
     ttl: number
   ): Promise<void> {
-<<<<<<< HEAD
     if (!this.l2Redis) return;
-=======
     if (!this.l2Redis) {return;}
->>>>>>> main
 
     try {
       let dataToStore = entry;

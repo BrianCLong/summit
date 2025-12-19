@@ -76,12 +76,6 @@ class InMemoryGraph:
                 e.source = new_id
             if e.target == old_id:
                 e.target = new_id
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
 
 
 class Neo4jGraph:
@@ -248,6 +242,3 @@ class Neo4jGraph:
         unique_nodes = {n["id"]: n for n in nodes if n.get("id")}
         unique_edges = {e["id"]: e for e in edges if e.get("id")}
         return {"nodes": list(unique_nodes.values()), "edges": list(unique_edges.values())}
->>>>>>> main
->>>>>>> main
->>>>>>> main

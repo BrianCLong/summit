@@ -1,10 +1,8 @@
 # AGENTS.md - AI Coding Agent Instructions
 
-<<<<<<< HEAD
 > **Standard Format**: This file follows the [AGENTS.md](https://agents.md) open format for guiding
 > coding agents. **Supported By**: OpenAI Codex, Google Jules, Amp, Cursor, Factory, and other AI
 > coding assistants. **Last Updated**: 2025-12-03
-=======
 **⚠️ GOVERNANCE NOTICE:**
 All agents and contributors must adhere to the [Constitution of the Ecosystem](docs/governance/CONSTITUTION.md).
 This document defines the technical standards mandated by the **Law of Consistency**.
@@ -16,23 +14,19 @@ This document defines the technical standards mandated by the **Law of Consisten
 - **Rulebook:** The [Living Rulebook](docs/governance/RULEBOOK.md) contains the full index of laws and standards.
 
 ## Project Structure & Module Organization
->>>>>>> main
 
 ## Project Overview
 
 **Summit/IntelGraph** is a next-generation intelligence analysis platform with AI-augmented graph
 analytics designed for the intelligence community.
 
-<<<<<<< HEAD
 ### Core Philosophy
-=======
 - Install: `pnpm install`.
 - Dev: `pnpm run dev` (runs server and client concurrently).
 - Test: `pnpm test` (server+client), server only: `pnpm --filter intelgraph-server test`.
 - Lint/Format: `pnpm run lint && pnpm run format`.
 - DB: `pnpm run db:migrate` and `pnpm run db:seed` (from repo root).
 - Docker: `pnpm run docker:dev` or `pnpm run docker:prod`.
->>>>>>> main
 
 - **Golden Path**: `make bootstrap && make up && make smoke` - fresh clones must go green
 - **Deployable-First**: Maintain the workflow: Investigation -> Entities -> Relationships -> Copilot
@@ -41,9 +35,7 @@ analytics designed for the intelligence community.
 
 ## Codebase Structure
 
-<<<<<<< HEAD
 This is a **pnpm workspace** monorepo managed by **Turbo**:
-=======
 ## Testing Guidelines
 
 - Backend: Jest (`server/tests`), run with coverage: `pnpm --filter intelgraph-server test:coverage`.
@@ -60,7 +52,6 @@ This is a **pnpm workspace** monorepo managed by **Turbo**:
 ## Web Codex Global Guidance
 
 Run the following workflow when preparing scoped CI pull requests for the `feat/mstc`, `feat/trr`, and `feat/opa` branches:
->>>>>>> main
 
 ```
 summit/

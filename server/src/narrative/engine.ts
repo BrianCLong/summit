@@ -15,16 +15,7 @@ import {
   NarrativeGenerator,
   RuleBasedNarrativeGenerator,
 } from './generators.js';
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
 import { LLMAgent, RuleBasedAgent, SimulationAgent } from './agents.js';
->>>>>>> main
->>>>>>> main
->>>>>>> main
 
 const HISTORY_LIMIT = 64;
 const MOMENTUM_SENSITIVITY = 0.05;

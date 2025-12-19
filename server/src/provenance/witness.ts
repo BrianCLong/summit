@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 
 import { createHash, createSign, createVerify, generateKeyPairSync } from 'crypto';
 import { MutationPayload, MutationWitness } from './types.js';
@@ -127,7 +126,6 @@ export class MutationWitnessService {
 }
 
 export const mutationWitness = MutationWitnessService.getInstance();
-=======
 export interface ProvenanceWitness {
   id: string;
   name: string;
@@ -186,4 +184,3 @@ export class WitnessRegistry {
 }
 
 export const witnessRegistry = new WitnessRegistry();
->>>>>>> main

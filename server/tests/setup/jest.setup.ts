@@ -3,10 +3,8 @@
  * Provides common test utilities and matchers
  */
 
-<<<<<<< HEAD:server/tests/setup/jest.setup.ts
 import 'jest-extended';
 import { jest, beforeAll, afterAll, afterEach } from '@jest/globals';
-=======
 // Extend Jest with additional matchers from jest-extended
 import 'jest-extended';
 
@@ -90,7 +88,6 @@ jest.mock('fluent-ffmpeg', () => {
   ffmpeg.ffprobe = jest.fn();
   return ffmpeg;
 });
->>>>>>> main:server/tests/setup/jest.setup.js
 
 // Global test timeout
 import { jest } from '@jest/globals';
@@ -110,9 +107,7 @@ beforeAll(() => {
     console.debug = jest.fn();
   }
 
-<<<<<<< HEAD:server/tests/setup/jest.setup.ts
   console.error = (...args: any[]) => {
-=======
   // Allow console.error for test debugging if needed, but fail test on it?
   // The original code threw an error, which is strict but good.
   console.error = (...args) => {
@@ -122,7 +117,6 @@ beforeAll(() => {
       return;
     }
 
->>>>>>> main:server/tests/setup/jest.setup.js
     originalConsoleError(...args);
     // throw new Error(
     //   '[console.error] used in server tests — replace with assertions or throw',

@@ -1,10 +1,7 @@
-<<<<<<< HEAD
 import { gql } from '@apollo/client/core'
 import { useQuery, useMutation } from '@apollo/client/react'
-=======
 import { useQuery, useMutation } from '@apollo/client/react'
 import { gql } from '@apollo/client'
->>>>>>> main
 import { useMemo, useCallback } from 'react'
 import type { Entity, Relationship } from '@/types'
 

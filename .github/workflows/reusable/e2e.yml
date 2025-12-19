@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 name: Reusable E2E
 on:
   workflow_call:
@@ -83,7 +82,6 @@ jobs:
       - name: Tear down stack
         if: always()
         run: ./scripts/run-compose.sh -f docker-compose.dev.yml down -v
-=======
 name: e2e
 
 on:
@@ -125,4 +123,3 @@ jobs:
 
       - name: Run smoke E2E suite
         run: pnpm run smoke:ci
->>>>>>> main

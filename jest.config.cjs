@@ -1,49 +1,16 @@
 module.exports = {
-<<<<<<< HEAD
   preset: 'ts-jest',
+  testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
   transform: {
-    '^.+\\.(ts|tsx)$': ['@swc/jest', {
-      jsc: {
-        parser: {
-          syntax: 'typescript',
-          tsx: true,
-        },
-        target: 'es2022',
-        transform: {
-          react: {
-            runtime: 'automatic',
-          },
-        },
+    '^.+\\.[tj]sx?$': [
+      'ts-jest',
+      {
+        useESM: true,
+        tsconfig: 'tsconfig.json',
       },
-    }],
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
-  preset: 'ts-jest/presets/default-esm',
-  extensionsToTreatAsEsm: ['.ts'],
-  globals: {
-    'ts-jest': {
-      useESM: true,
-      tsconfig: 'tsconfig.test.json',
-    },
->>>>>>> main
+    ],
   },
-  testEnvironment: 'jsdom',
   roots: ['server', 'client', 'packages', 'services', 'tests'],
   modulePathIgnorePatterns: [
     '<rootDir>/dist/',
@@ -76,7 +43,6 @@ module.exports = {
     '!**/salvage/**',
     '!**/pull/**',
   ],
-  // Coverage thresholds - PR quality gate enforcement
   coverageThreshold: {
     global: {
       branches: 80,
@@ -84,7 +50,6 @@ module.exports = {
       lines: 80,
       statements: 80,
     },
-    // Critical paths require 85% coverage
     './server/src/middleware/**/*.ts': {
       branches: 85,
       functions: 85,
@@ -117,40 +82,7 @@ module.exports = {
     '<rootDir>/apps/.mobile-native-disabled/',
     '<rootDir>/apps/.desktop-electron-disabled/',
   ],
-  // Test timeout
   testTimeout: 30000,
-  // Setup files
   setupFilesAfterEnv: ['<rootDir>/tests/utils/jest-setup.ts'],
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-=======
-  testEnvironment: 'node',
-  transform: {
-    '^.+\\.[tj]sx?$': [
-      'ts-jest',
-      {
-        useESM: true,
-      },
-    ],
-  },
-  moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1',
-  },
-  extensionsToTreatAsEsm: ['.ts'],
-  testMatch: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
 };

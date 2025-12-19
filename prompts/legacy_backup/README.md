@@ -17,11 +17,8 @@ Enables autonomous AI agents to deliver production-grade code with:
 - **`claude-code.md`** - Deep architectural reasoning with third-order inference
 - **`codex.md`** - Deterministic zero-error build systems
 - **`jules-gemini.md`** - Cross-file schema harmonization
-<<<<<<< HEAD
 - **`jules-universal-pattern-recognizer.md`** - Universal pattern recognition and meta-abstraction
-=======
 - **`jules-historian.md`** - Systems historian & state archivist
->>>>>>> main
 - **`cursor-warp.md`** - Live devloop integration
 
 ### Enterprise Agents

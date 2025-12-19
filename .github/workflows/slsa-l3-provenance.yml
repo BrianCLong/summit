@@ -22,26 +22,11 @@ on:
         type: boolean
         default: false
 
-<<<<<<< HEAD
 # SLSA L3 requires specific permissions for OIDC token generation
-=======
-<<<<<<< HEAD
 # SLSA L3 requires specific permissions for OIDC token generation
-=======
-<<<<<<< HEAD
 # SLSA L3 requires specific permissions for OIDC token generation
-=======
-<<<<<<< HEAD
 # SLSA L3 requires specific permissions for OIDC token generation
-=======
-<<<<<<< HEAD
 # SLSA L3 requires specific permissions for OIDC token generation
-=======
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
 permissions:
   contents: read
   packages: write
@@ -52,28 +37,13 @@ permissions:
 
 env:
   REGISTRY: ghcr.io
-<<<<<<< HEAD
   IMAGE_NAME: ${{ github.repository }}
-=======
-<<<<<<< HEAD
   IMAGE_NAME: ${{ github.repository }}
-=======
-<<<<<<< HEAD
   IMAGE_NAME: ${{ github.repository }}
-=======
-<<<<<<< HEAD
   IMAGE_NAME: ${{ github.repository }}
-=======
-<<<<<<< HEAD
   IMAGE_NAME: ${{ github.repository }}
-=======
   IMAGE_NAME_SERVER: ${{ github.repository }}/server
   IMAGE_NAME_WEB: ${{ github.repository }}/web
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
   COSIGN_EXPERIMENTAL: '1'  # Enable keyless OIDC signing
   SLSA_VERIFIER_VERSION: 'v2.6.0'
 
@@ -102,31 +72,16 @@ jobs:
         id: commit-check
         run: |
           set -euo pipefail
-<<<<<<< HEAD
 
           # Check if the commit is signed
-=======
-<<<<<<< HEAD
 
           # Check if the commit is signed
-=======
-<<<<<<< HEAD
 
           # Check if the commit is signed
-=======
-<<<<<<< HEAD
 
           # Check if the commit is signed
-=======
-<<<<<<< HEAD
 
           # Check if the commit is signed
-=======
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
           if git log -1 --show-signature 2>/dev/null | grep -q "Good signature"; then
             echo "verified=true" >> "$GITHUB_OUTPUT"
             echo "Commit signature verified"
@@ -139,31 +94,16 @@ jobs:
         id: source-hash
         run: |
           set -euo pipefail
-<<<<<<< HEAD
 
           # Create deterministic hash of source tree (excluding .git)
-=======
-<<<<<<< HEAD
 
           # Create deterministic hash of source tree (excluding .git)
-=======
-<<<<<<< HEAD
 
           # Create deterministic hash of source tree (excluding .git)
-=======
-<<<<<<< HEAD
 
           # Create deterministic hash of source tree (excluding .git)
-=======
-<<<<<<< HEAD
 
           # Create deterministic hash of source tree (excluding .git)
-=======
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
           SOURCE_HASH=$(git archive HEAD --prefix=source/ | sha256sum | cut -d' ' -f1)
           echo "hash=$SOURCE_HASH" >> "$GITHUB_OUTPUT"
           echo "Source hash: $SOURCE_HASH"
@@ -171,50 +111,22 @@ jobs:
       - name: Secret scanning pre-flight
         run: |
           set -euo pipefail
-<<<<<<< HEAD
 
           # Quick check for obvious secrets in staged files
-=======
-<<<<<<< HEAD
 
           # Quick check for obvious secrets in staged files
-=======
-<<<<<<< HEAD
 
           # Quick check for obvious secrets in staged files
-=======
-<<<<<<< HEAD
 
           # Quick check for obvious secrets in staged files
-=======
-<<<<<<< HEAD
 
           # Quick check for obvious secrets in staged files
-=======
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
           if git diff --cached --name-only 2>/dev/null | xargs -r grep -l -E "(api_key|secret_key|password\s*=)" 2>/dev/null; then
             echo "Potential secrets detected in staged files"
             exit 1
           fi
           echo "No obvious secrets detected"
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
       - name: Verify lockfile integrity
         run: |
           set -euo pipefail
@@ -230,102 +142,45 @@ jobs:
   # ===========================================================================
   hermetic-build:
     name: Hermetic Multi-Stage Build
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-=======
   # ===========================================================================
   # Stage 2: Hermetic Builds (Server & Web)
   # ===========================================================================
   build-server:
     name: Build Server
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
     needs: pre-build-checks
     runs-on: ubuntu-latest
     outputs:
       image-digest: ${{ steps.build.outputs.digest }}
-<<<<<<< HEAD
       image-uri: ${{ steps.meta.outputs.tags }}
       sbom-digest: ${{ steps.sbom.outputs.digest }}
-=======
-<<<<<<< HEAD
       image-uri: ${{ steps.meta.outputs.tags }}
       sbom-digest: ${{ steps.sbom.outputs.digest }}
-=======
-<<<<<<< HEAD
       image-uri: ${{ steps.meta.outputs.tags }}
       sbom-digest: ${{ steps.sbom.outputs.digest }}
-=======
-<<<<<<< HEAD
       image-uri: ${{ steps.meta.outputs.tags }}
       sbom-digest: ${{ steps.sbom.outputs.digest }}
-=======
-<<<<<<< HEAD
       image-uri: ${{ steps.meta.outputs.tags }}
       sbom-digest: ${{ steps.sbom.outputs.digest }}
-=======
       image-uri: ${{ steps.build-image-uri.outputs.uri }}
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
       build-timestamp: ${{ steps.build-info.outputs.timestamp }}
       build-id: ${{ steps.build-info.outputs.build-id }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-<<<<<<< HEAD
         with:
           fetch-depth: 0
-=======
-<<<<<<< HEAD
         with:
           fetch-depth: 0
-=======
-<<<<<<< HEAD
         with:
           fetch-depth: 0
-=======
-<<<<<<< HEAD
         with:
           fetch-depth: 0
-=======
-<<<<<<< HEAD
         with:
           fetch-depth: 0
-=======
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
 
       - name: Generate build info
         id: build-info
         run: |
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
           set -euo pipefail
 
           BUILD_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -362,15 +217,6 @@ jobs:
             image=moby/buildkit:v0.12.4
 
       - name: Log in to Container Registry (OIDC)
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-=======
           echo "timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> "$GITHUB_OUTPUT"
           echo "build-id=${{ github.run_id }}-${{ github.run_attempt }}" >> "$GITHUB_OUTPUT"
 
@@ -378,11 +224,6 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to Registry
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -393,19 +234,6 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=branch
@@ -484,15 +312,6 @@ jobs:
   slsa-provenance:
     name: Generate SLSA L3 Provenance
     needs: hermetic-build
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-=======
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_SERVER }}
           tags: |
             type=ref,event=branch
@@ -590,11 +409,6 @@ jobs:
   # ===========================================================================
   provenance-server:
     needs: build-server
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
     if: github.event_name != 'pull_request'
     permissions:
       actions: read
@@ -603,26 +417,16 @@ jobs:
       packages: write
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.0.0
     with:
-<<<<<<< HEAD
       image: ${{ needs.hermetic-build.outputs.image-uri }}
       digest: ${{ needs.hermetic-build.outputs.image-digest }}
-=======
-<<<<<<< HEAD
       image: ${{ needs.hermetic-build.outputs.image-uri }}
       digest: ${{ needs.hermetic-build.outputs.image-digest }}
-=======
-<<<<<<< HEAD
       image: ${{ needs.hermetic-build.outputs.image-uri }}
       digest: ${{ needs.hermetic-build.outputs.image-digest }}
-=======
-<<<<<<< HEAD
       image: ${{ needs.hermetic-build.outputs.image-uri }}
       digest: ${{ needs.hermetic-build.outputs.image-digest }}
-=======
-<<<<<<< HEAD
       image: ${{ needs.hermetic-build.outputs.image-uri }}
       digest: ${{ needs.hermetic-build.outputs.image-digest }}
-=======
       image: ${{ needs.build-server.outputs.image-uri }}
       digest: ${{ needs.build-server.outputs.image-digest }}
     secrets:
@@ -640,70 +444,25 @@ jobs:
     with:
       image: ${{ needs.build-web.outputs.image-uri }}
       digest: ${{ needs.build-web.outputs.image-digest }}
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
     secrets:
       registry-password: ${{ secrets.GITHUB_TOKEN }}
 
   # ===========================================================================
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
   # Stage 4: Cosign OIDC Keyless Signing
   # ===========================================================================
   cosign-sign:
     name: Cosign OIDC Keyless Signing
     needs: hermetic-build
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-=======
   # Stage 4: Cosign Signing
   # ===========================================================================
   sign-images:
     name: Sign Images (Cosign)
     needs: [build-server, build-web]
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
       id-token: write  # OIDC token for keyless signing
     steps:
       - name: Checkout
@@ -883,45 +642,18 @@ jobs:
         uses: sigstore/cosign-installer@v3
 
       - name: Log in to Container Registry
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-=======
       id-token: write
     steps:
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3
 
       - name: Log in to Registry
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
       - name: Verify image signature
         run: |
           set -euo pipefail
@@ -1143,15 +875,6 @@ jobs:
           2. Verify all attestations with \`cosign verify-attestation\`
           3. For air-gapped deployment, use the air-gapped build workflow
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-=======
       - name: Sign Server Image
         run: |
           cosign sign --yes "${{ env.REGISTRY }}/${{ env.IMAGE_NAME_SERVER }}@${{ needs.build-server.outputs.image-digest }}"
@@ -1212,9 +935,4 @@ jobs:
 
           **Verification:**
           \`cosign verify ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_SERVER }}@...\`
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
           EOF

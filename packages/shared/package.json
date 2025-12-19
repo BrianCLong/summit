@@ -1,7 +1,6 @@
 {
   "name": "@summit/shared",
   "version": "1.0.0",
-<<<<<<< HEAD
   "description": "Shared utilities and types for Summit platform",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,8 +13,6 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {}
-=======
-<<<<<<< HEAD
   "description": "Shared utilities and types for Summit",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -29,10 +26,7 @@
   "devDependencies": {
     "typescript": "^5.3.0"
   }
-=======
   "main": "provenance.js",
   "types": "provenance.d.ts",
   "dependencies": {}
->>>>>>> main
->>>>>>> main
 }

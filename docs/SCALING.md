@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Scaling Summit
 
 This guide outlines strategies for scaling the Summit platform for high-throughput enterprise environments.
@@ -24,7 +23,6 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: summit-api-hpa
-=======
 # Summit Scaling Guide
 
 This guide documents how to operate Summit in multi-node Kubernetes clusters with production-grade autoscaling, caching, and performance testing. The examples assume `kubectl`, `helm`, and `kustomize` are available along with access to a container registry.
@@ -45,14 +43,12 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: summit-api
->>>>>>> main
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
     name: summit-api
   minReplicas: 3
-<<<<<<< HEAD
   maxReplicas: 10
   metrics:
   - type: Resource
@@ -108,7 +104,6 @@ k6 run scripts/load-testing/load-test.js
 - **Indexes**: Ensure all frequently queried properties are indexed.
 - **Query Tuning**: Use `PROFILE` in Neo4j to analyze query performance.
 - **Caching**: Aggressively cache GraphQL resolvers using `@cacheControl` directives.
-=======
   maxReplicas: 12
   behavior:
     scaleDown:
@@ -242,4 +237,3 @@ Capture p95 latency, error rate, and saturation metrics from Prometheus during e
 - Configure scheduled backups for PostgreSQL and Neo4j using `velero` or provider snapshots.
 - Keep `make smoke` parity via synthetic checks in `synthetics/` hitting `/health/ready` and `/metrics` endpoints.
 - Document restore playbooks in `docs/ONBOARDING.md` and validate quarterly.
->>>>>>> main

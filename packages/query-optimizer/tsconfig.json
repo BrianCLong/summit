@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
@@ -7,7 +6,6 @@
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
-=======
   "compilerOptions": {
     "target": "es2018",
     "module": "commonjs",
@@ -20,5 +18,4 @@
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
->>>>>>> main
 }

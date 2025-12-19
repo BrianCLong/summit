@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Summit Gaps Closure Report
 
 This report summarizes the enhancements made to the Summit platform to address identified gaps in documentation, scalability, production readiness, and community engagement.
@@ -50,7 +49,6 @@ Created a dedicated `examples/` directory to lower the barrier for customization
 1. **User Analytics**: Implement telemetry for user behavior tracking (e.g., PostHog integration).
 2. **Advanced CI**: Integrate the new security and load testing scripts into the GitHub Actions pipeline.
 3. **Plugin Registry**: Create a formal registry or marketplace for community plugins.
-=======
 # Gaps Closure Report
 
 This report summarizes the improvements made to strengthen production readiness, community engagement, and extensibility.
@@ -74,4 +72,3 @@ This report summarizes the improvements made to strengthen production readiness,
 - Add synthetic AI smoke tests to `scripts/smoke-test.js --ai` and publish MLflow promotion checklist to release notes.
 - Stand up GitHub Discussions categories (Show & Tell, Help, RFCs) and link Discord announcements to release trains.
 - Run `make up-full` in a GPU-enabled runner and capture Grafana dashboards as golden artifacts.
->>>>>>> main

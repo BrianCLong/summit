@@ -10,16 +10,13 @@
   },
   "dependencies": {
     "@intelgraph/common-types": "workspace:*",
-<<<<<<< HEAD:packages/threat-hunting/package.json
     "zod": "^4.1.12"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
     "typescript": "^5.9.3"
   }
-=======
     "zod": "4.1.12"
   },
   "devDependencies": { "@types/node": "24.10.1", "typescript": "5.9.3" }
->>>>>>> main:legacy/packages/threat-hunting/package.json
 }

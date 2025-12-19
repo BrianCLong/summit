@@ -1,10 +1,7 @@
 # Sprint 2: Maestro Conductor — Multi-Tenant Hardening & Externalization
 
-<<<<<<< HEAD
 **Duration:** 2 weeks
-=======
 **Duration:** 2 weeks  
->>>>>>> main
 **Theme:** “Conductor as the shared automation fabric for many tenants (internal + white-label + SaaS)”
 
 ## Objectives (end-of-sprint truths)
@@ -15,7 +12,6 @@
 
 ## Workstreams & Stories
 ### Workstream 1 — Multi-Tenant Isolation & Limits
-<<<<<<< HEAD
 - **Story 1.1 – Tenant Isolation & Resource Quotas**
   _Goal:_ One tenant can’t starve or break others; guardrails are visible and tunable.
   _Deliverables:_ Per-tenant max concurrent runs, max queued runs, max task concurrency, and execution classes (`standard`, `bulk`, `low-priority`) controlling scheduling.
@@ -63,7 +59,6 @@
 - **Story 5.1 – Enriched Metering for Pricing Experiments**
   _Goal:_ Finance/product can simulate pricing from real usage.
   _Deliverables:_ Metering events enriched with workflow complexity hints (steps, external calls), duration bands, and data volume/weight estimates; pricing model dashboard or spreadsheet exploring per-run/per-task/blended axes.
-=======
 - **Story 1.1 – Tenant Isolation & Resource Quotas**  
   _Goal:_ One tenant can’t starve or break others; guardrails are visible and tunable.  
   _Deliverables:_ Per-tenant max concurrent runs, max queued runs, max task concurrency, and execution classes (`standard`, `bulk`, `low-priority`) controlling scheduling.  
@@ -111,7 +106,6 @@
 - **Story 5.1 – Enriched Metering for Pricing Experiments**  
   _Goal:_ Finance/product can simulate pricing from real usage.  
   _Deliverables:_ Metering events enriched with workflow complexity hints (steps, external calls), duration bands, and data volume/weight estimates; pricing model dashboard or spreadsheet exploring per-run/per-task/blended axes.  
->>>>>>> main
   _Acceptance:_ Enriched events live in metering store; ≥2 candidate pricing axes documented with pros/cons; per-tenant usage view includes runs, tasks, and complexity score; write-up: “Conductor Pricing Inputs v0.”
 
 ## Global Definition of Done (reaffirmed)

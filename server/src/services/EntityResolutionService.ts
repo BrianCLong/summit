@@ -6,12 +6,9 @@ import {
   BehavioralTelemetry,
   BehavioralFingerprint,
 } from './BehavioralFingerprintService.js';
-<<<<<<< HEAD
 import { Histogram, Counter } from 'prom-client';
-=======
 import { createHash } from 'node:crypto';
 import { erMetrics } from './ERMetrics.js';
->>>>>>> main
 
 const logger = pino({ name: 'EntityResolutionService' });
 
@@ -62,7 +59,6 @@ interface NormalizedProperties {
   url?: string;
 }
 
-<<<<<<< HEAD
 interface ERRuleConfig {
   latencyBudgetMs: number;
   similarityThreshold: number;
@@ -74,7 +70,6 @@ export class EntityResolutionService {
     ['basic', { latencyBudgetMs: 100, similarityThreshold: 0.9 }],
     ['fuzzy', { latencyBudgetMs: 500, similarityThreshold: 0.85 }],
   ]);
-=======
 const DEFAULT_CONFIG: EntityResolutionConfig = {
   blocking: {
     enabled: true,
@@ -102,7 +97,6 @@ export class EntityResolutionService {
         throw new Error('EntityResolutionService: Salt must be provided when saltedHash privacy mode is enabled.');
     }
   }
->>>>>>> main
 
   /**
    * Normalizes entity properties for deterministic comparison.
@@ -153,7 +147,6 @@ export class EntityResolutionService {
   }
 
   /**
-<<<<<<< HEAD
    * Adaptive Thresholds Logic:
    * Adjusts the similarity threshold dynamically based on recent system load or precision feedback.
    * (Simulated here)
@@ -175,7 +168,6 @@ export class EntityResolutionService {
     if (config && duration > config.latencyBudgetMs) {
       log.warn({ rule, duration, budget: config.latencyBudgetMs }, 'ER Rule exceeded latency budget');
     }
-=======
    * Evaluate match between two entities with explainability.
    * @param entityA Source entity
    * @param entityB Target entity
@@ -227,7 +219,6 @@ export class EntityResolutionService {
       explanation,
       confidence,
     };
->>>>>>> main
   }
 
   /**
