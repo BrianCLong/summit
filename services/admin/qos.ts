@@ -1,9 +1,12 @@
 import { Router } from 'express';
 import { Pool } from 'pg';
 import { z } from 'zod';
+import { FlagClient } from '../../libs/flags/node';
 
 const r = Router();
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const flagClient = new FlagClient({ env: process.env.NODE_ENV ?? 'dev' });
+const qosFlag = flagClient.catalogKey('feature.qos.override-api');
 
 const OverrideSchema = z.object({
   tenant_id: z.string().min(1),
@@ -17,7 +20,21 @@ const OverrideSchema = z.object({
   reason: z.string().min(3),
 });
 
-r.post('/admin/qos/override', async (req, res) => {
+async function requireQosFlag(req: any, res: any, next: any) {
+  const allowed = await flagClient.get<boolean>(
+    qosFlag,
+    true,
+    {
+      env: process.env.NODE_ENV ?? 'dev',
+      tenant: req?.user?.tenant ?? req?.headers?.['x-tenant-id'],
+      userRole: req?.user?.roles?.[0],
+    },
+  );
+  if (!allowed) return res.status(403).json({ error: 'feature_disabled' });
+  return next();
+}
+
+r.post('/admin/qos/override', requireQosFlag, async (req, res) => {
   // RBAC: require admin role
   if (!req.user?.roles?.includes('admin'))
     return res.status(403).json({ error: 'forbidden' });
@@ -46,7 +63,7 @@ r.post('/admin/qos/override', async (req, res) => {
     .json({ ok: true, id: rows[0].id, expires_at: rows[0].expires_at });
 });
 
-r.get('/admin/qos/override', async (req, res) => {
+r.get('/admin/qos/override', requireQosFlag, async (req, res) => {
   const { tenant_id, expert } = req.query as any;
   const { rows } = await pool.query(
     `select * from qos_overrides
@@ -67,7 +84,7 @@ const ExtendSchema = z.object({
     .default(7 * 24 * 60),
 });
 
-r.post('/admin/qos/override/:id/extend', async (req, res) => {
+r.post('/admin/qos/override/:id/extend', requireQosFlag, async (req, res) => {
   if (!req.user?.roles?.includes('admin'))
     return res.status(403).json({ error: 'forbidden' });
   const p = ExtendSchema.safeParse(req.body);

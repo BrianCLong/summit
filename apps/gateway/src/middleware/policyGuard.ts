@@ -1,17 +1,21 @@
 import { Request, Response, NextFunction } from "express";
+import { FlagClient } from "../../../../libs/flags/node";
 
-export function policyGuard(req: Request, res: Response, next: NextFunction) {
-  void req;
-  void res;
-  next();
-const FEATURE_FLAG = "FEATURE_LAC_ENFORCE";
+const client = new FlagClient({ env: process.env.NODE_ENV ?? "dev" });
+const featureKey = client.catalogKey("feature.policy-guard");
 
-export function policyGuard(req: Request, res: Response, next: NextFunction) {
-  if (process.env[FEATURE_FLAG] !== "true") {
+export async function policyGuard(req: Request, res: Response, next: NextFunction) {
+  const enabled = await client.get<boolean>(featureKey, false, {
+    env: process.env.NODE_ENV ?? "dev",
+    tenant: req.header("x-tenant-id") ?? req.query.tenant?.toString(),
+    userId: (req as any).user?.id,
+    userRole: (req as any).user?.roles?.[0],
+  });
+
+  if (!enabled) {
     return next();
   }
 
-  // Stubbed enforcement path; downstream integration with policy-compiler will replace this.
   res.setHeader("x-policy-guard", "enabled");
   return next();
 }

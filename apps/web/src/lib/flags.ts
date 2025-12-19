@@ -1,21 +1,24 @@
-// =============================================
-// File: apps/web/src/lib/flags.ts
-// =============================================
-export function isMaestroEnabled(): boolean {
-  // Vite prefixes client env with VITE_
-  const raw = (import.meta as any).env?.VITE_MAESTRO_ENABLED
-  if (raw === undefined) {return true} // default enabled in dev
-  return String(raw).toLowerCase() === 'true'
+import crypto from 'node:crypto';
+import { FlagClient, FlagContext } from '../../../../libs/flags/node';
+
+const client = new FlagClient({ env: process.env.NODE_ENV ?? 'dev' });
+const hydrationFlag = client.catalogKey('feature.web.flag-hydration');
+
+export interface HydratedFlags {
+  values: Record<string, unknown>;
+  checksum: string;
 }
 
-export function isEnhancedTriPaneEnabled(): boolean {
-  const raw = (import.meta as any).env?.VITE_ENHANCED_TRI_PANE_ENABLED
-  if (raw === undefined) {return true} // default enabled in dev
-  return String(raw).toLowerCase() === 'true'
+export async function evaluatePageFlags(context: Partial<FlagContext> = {}): Promise<HydratedFlags> {
+  const value = await client.get<boolean>(hydrationFlag, true, context);
+  const values = { [hydrationFlag]: value };
+  return { values, checksum: checksum(values) };
 }
 
-export function isExplainViewEnabled(): boolean {
-  const raw = (import.meta as any).env?.VITE_EXPLAIN_VIEW_ENABLED
-  if (raw === undefined) {return true} // default enabled in dev
-  return String(raw).toLowerCase() === 'true'
+export function validateChecksum(payload: HydratedFlags): boolean {
+  return payload.checksum === checksum(payload.values);
+}
+
+function checksum(values: Record<string, unknown>): string {
+  return crypto.createHash('sha1').update(JSON.stringify(values)).digest('hex');
 }
