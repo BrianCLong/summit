@@ -4,7 +4,7 @@
  */
 
 import { Pool } from 'pg';
-import logger from '../../config/logger.js';
+import logger from '../../config/logger';
 import {
   CaseStage,
   WorkflowTransition,
@@ -12,7 +12,7 @@ import {
   WorkflowTransitionRequest,
   WorkflowTransitionResult,
   CaseWithWorkflow,
-} from './types.js';
+} from './types';
 
 const machineLogger = logger.child({ name: 'StateMachine' });
 

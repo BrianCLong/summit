@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Jest Global Setup Configuration
  * Provides common test utilities and matchers

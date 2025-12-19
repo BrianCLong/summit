@@ -374,6 +374,19 @@ export interface CaseWithWorkflow {
   graphReferences?: CaseGraphReference[];
   stageHistory?: CaseStateHistory[];
   currentStageInfo?: CaseStage;
+
+  // Read-model metrics (optional, behind READ_MODELS_V1)
+  dashboardMetrics?: CaseDashboardMetrics;
+}
+
+export interface CaseDashboardMetrics {
+  participantCount: number;
+  openTaskCount: number;
+  breachedSlaCount: number;
+  atRiskSlaCount: number;
+  pendingApprovalCount: number;
+  lastTaskDueAt?: Date | null;
+  refreshedAt?: Date;
 }
 
 // ==================== QUERIES & FILTERS ====================

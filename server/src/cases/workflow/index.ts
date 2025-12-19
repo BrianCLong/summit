@@ -4,16 +4,16 @@
  */
 
 // Main service
-export { CaseWorkflowService, EventHandler } from './CaseWorkflowService.js';
+export { CaseWorkflowService, EventHandler } from './CaseWorkflowService';
 
 // Core engines
-export { WorkflowStateMachine, TransitionContext } from './StateMachine.js';
-export { SLATracker, SLABreachEvent, SLAAtRiskEvent } from './SLATracker.js';
+export { WorkflowStateMachine, TransitionContext } from './StateMachine';
+export { SLATracker, SLABreachEvent, SLAAtRiskEvent } from './SLATracker';
 
 // Repositories
-export { TaskRepo } from './repos/TaskRepo.js';
-export { ParticipantRepo } from './repos/ParticipantRepo.js';
-export { ApprovalRepo } from './repos/ApprovalRepo.js';
+export { TaskRepo } from './repos/TaskRepo';
+export { ParticipantRepo } from './repos/ParticipantRepo';
+export { ApprovalRepo } from './repos/ApprovalRepo';
 
 // Types
-export * from './types.js';
+export * from './types';

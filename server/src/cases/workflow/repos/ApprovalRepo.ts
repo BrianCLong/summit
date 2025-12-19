@@ -4,7 +4,7 @@
 
 import { Pool } from 'pg';
 import { randomUUID as uuidv4 } from 'crypto';
-import logger from '../../../config/logger.js';
+import logger from '../../../config/logger';
 import {
   CaseApproval,
   CaseApprovalInput,
@@ -13,7 +13,7 @@ import {
   ApprovalListFilters,
   PendingApproval,
   ApprovalStatus,
-} from '../types.js';
+} from '../types';
 
 const repoLogger = logger.child({ name: 'ApprovalRepo' });
 

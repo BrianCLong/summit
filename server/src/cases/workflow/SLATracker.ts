@@ -4,8 +4,8 @@
  */
 
 import { Pool } from 'pg';
-import logger from '../../config/logger.js';
-import { CaseSLA, CaseSLAInput, SLAStatus, SLAType } from './types.js';
+import logger from '../../config/logger';
+import { CaseSLA, CaseSLAInput, SLAStatus, SLAType } from './types';
 
 const slaLogger = logger.child({ name: 'SLATracker' });
 

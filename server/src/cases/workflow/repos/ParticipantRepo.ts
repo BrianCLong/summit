@@ -4,13 +4,13 @@
 
 import { Pool } from 'pg';
 import { randomUUID as uuidv4 } from 'crypto';
-import logger from '../../../config/logger.js';
+import logger from '../../../config/logger';
 import {
   CaseParticipant,
   CaseParticipantInput,
   CaseRole,
   CaseRoleInput,
-} from '../types.js';
+} from '../types';
 
 const repoLogger = logger.child({ name: 'ParticipantRepo' });
 

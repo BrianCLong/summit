@@ -21,6 +21,7 @@ module.exports = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
+    '^\\.\\.\\/\\.\\.\\/config\\/logger$': '<rootDir>/src/config/logger',
   },
   transform: {
     '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.json' }],

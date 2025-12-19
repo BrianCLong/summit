@@ -5,14 +5,15 @@
  */
 
 import { Pool } from 'pg';
-import logger from '../../config/logger.js';
-import { WorkflowStateMachine } from './StateMachine.js';
-import { SLATracker } from './SLATracker.js';
-import { TaskRepo } from './repos/TaskRepo.js';
-import { ParticipantRepo } from './repos/ParticipantRepo.js';
-import { ApprovalRepo } from './repos/ApprovalRepo.js';
-import { CaseRepo } from '../CaseRepo.js';
-import { AuditAccessLogRepo } from '../../repos/AuditAccessLogRepo.js';
+import logger from '../../config/logger';
+import { WorkflowStateMachine } from './StateMachine';
+import { SLATracker } from './SLATracker';
+import { TaskRepo } from './repos/TaskRepo';
+import { ParticipantRepo } from './repos/ParticipantRepo';
+import { ApprovalRepo } from './repos/ApprovalRepo';
+import { CaseDashboardReadModelRepo } from './repos/CaseDashboardReadModelRepo';
+import { CaseRepo } from '../../repos/CaseRepo';
+import { AuditAccessLogRepo } from '../../repos/AuditAccessLogRepo';
 import {
   CaseWithWorkflow,
   CaseTask,
@@ -28,7 +29,8 @@ import {
   TaskListFilters,
   CaseEvent,
   CaseEventType,
-} from './types.js';
+  CaseDashboardMetrics,
+} from './types';
 
 const serviceLogger = logger.child({ name: 'CaseWorkflowService' });
 
@@ -42,6 +44,7 @@ export class CaseWorkflowService {
   private approvalRepo: ApprovalRepo;
   private caseRepo: CaseRepo;
   private auditRepo: AuditAccessLogRepo;
+  private dashboardRepo: CaseDashboardReadModelRepo;
   private eventHandlers: Map<CaseEventType, EventHandler[]> = new Map();
 
   constructor(private pg: Pool) {
@@ -52,6 +55,7 @@ export class CaseWorkflowService {
     this.approvalRepo = new ApprovalRepo(pg);
     this.caseRepo = new CaseRepo(pg);
     this.auditRepo = new AuditAccessLogRepo(pg);
+    this.dashboardRepo = new CaseDashboardReadModelRepo(pg);
   }
 
   // ==================== CASE MANAGEMENT ====================
@@ -107,6 +111,17 @@ export class CaseWorkflowService {
       ) || undefined;
     }
 
+    if (this.isReadModelsEnabled()) {
+      const summaries = await this.dashboardRepo.getSummariesForTenant(
+        tenantId,
+        [caseId],
+      );
+      const metrics = summaries.get(caseId);
+      if (metrics) {
+        caseWithWorkflow.dashboardMetrics = metrics;
+      }
+    }
+
     return caseWithWorkflow;
   }
 
@@ -124,11 +139,20 @@ export class CaseWorkflowService {
       offset: filters.offset,
     });
 
+    let metricsByCase: Map<string, CaseDashboardMetrics> | undefined;
+    if (this.isReadModelsEnabled() && baseCases.length > 0) {
+      metricsByCase = await this.dashboardRepo.getSummariesForTenant(
+        filters.tenantId,
+        baseCases.map((c) => c.id),
+      );
+    }
+
     return baseCases.map((c) => ({
       ...c,
       priority: 'medium',
       caseType: 'investigation',
       tags: [],
+      dashboardMetrics: metricsByCase?.get(c.id),
     }));
   }
 
@@ -580,5 +604,9 @@ export class CaseWorkflowService {
         );
       }
     }
+  }
+
+  private isReadModelsEnabled(): boolean {
+    return process.env.READ_MODELS_V1 === '1';
   }
 }
