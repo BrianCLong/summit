@@ -59,6 +59,11 @@ jobs:
         uses: pnpm/action-setup@v3
         with:
 
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
       - name: Install dependencies
         run: |
           pnpm install --frozen-lockfile
@@ -72,6 +77,18 @@ jobs:
           echo "NEO4J_URI=bolt://localhost:7687" >> $GITHUB_ENV
           echo "NEO4J_USER=neo4j" >> $GITHUB_ENV
           echo "NEO4J_PASSWORD=password" >> $GITHUB_ENV
+
+      - name: Wait for Postgres
+        run: |
+          for i in {1..20}; do
+            if pg_isready -d "$DATABASE_URL"; then
+              exit 0
+            fi
+            echo "Waiting for Postgres..."
+            sleep 2
+          done
+          echo "Postgres did not become ready in time" >&2
+          exit 1
 
       - name: Run migration safety checks
         run: |
@@ -106,18 +123,7 @@ jobs:
 
       - name: Validate database schema integrity
         run: |
-          cd server
-
-          # Check for schema consistency
-          echo "📋 Validating schema integrity..."
-
-          # Test basic connectivity and schema
-          npx --yes pg-cli $DATABASE_URL --command "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" || {
-            echo "❌ Database schema validation failed"
-            exit 1
-          }
-
-          echo "✅ Database schema validation passed"
+          ./ops/db/verify --shadow
 
       - name: Neo4j migration dry-run
         run: |
@@ -143,8 +149,8 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Component | Status | Notes |" >> $GITHUB_STEP_SUMMARY
           echo "|-----------|--------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| PostgreSQL Migrations | ✅ Passed | Idempotent and safe |" >> $GITHUB_STEP_SUMMARY
-          echo "| Schema Validation | ✅ Passed | Integrity maintained |" >> $GITHUB_STEP_SUMMARY
+          echo "| PostgreSQL Migrations | ✅ Passed | Shadow verification succeeded |" >> $GITHUB_STEP_SUMMARY
+          echo "| Schema Validation | ✅ Passed | ops/db/verify --shadow" >> $GITHUB_STEP_SUMMARY
           echo "| Neo4j Connectivity | ✅ Tested | Basic connectivity verified |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Migration dry-run completed at $(date)" >> $GITHUB_STEP_SUMMARY

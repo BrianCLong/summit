@@ -1,8 +1,211 @@
 #!/usr/bin/env bash
 set -euo pipefail
-if [[ "${1:-}" != "--shadow" ]]; then
-  echo "Usage: $0 --shadow"; exit 2; fi
 
-# Example shadow verification (replace with real commands)
-echo "[db] Shadow verifying schema against prod snapshot"
-# e.g., create shadow DB, apply migrations, run checksum & critical queries
+usage() {
+  cat <<'USAGE'
+Usage: ops/db/verify --shadow [--dir <path>] [--require-table <name>...]
+
+Options:
+  --shadow              Run verification against a temporary shadow database (required).
+  --dir <path>          Migration directory (default: db/migrations).
+  --require-table <name>  Additional table that must exist after migrations (repeatable).
+USAGE
+}
+
+if ! command -v psql >/dev/null 2>&1; then
+  echo "psql is required for verification. Please install the PostgreSQL client." >&2
+  exit 1
+fi
+
+SHADOW=false
+MIGRATION_DIR="db/migrations"
+REQUIRED_TABLES=()
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --shadow) SHADOW=true ;;
+    --dir)
+      MIGRATION_DIR="$2"
+      shift
+      ;;
+    --require-table)
+      REQUIRED_TABLES+=("$2")
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown argument: $1" >&2
+      usage
+      exit 2
+      ;;
+  esac
+  shift
+done
+
+if ! $SHADOW; then
+  echo "--shadow flag is required." >&2
+  usage
+  exit 2
+fi
+
+if [[ -z "${DATABASE_URL:-}" ]]; then
+  echo "DATABASE_URL is required for shadow verification." >&2
+  exit 1
+fi
+
+if [[ ! -d "$MIGRATION_DIR" ]]; then
+  echo "Migration directory not found: $MIGRATION_DIR" >&2
+  exit 1
+fi
+
+add_required_table() {
+  local table="$1"
+  for existing in "${REQUIRED_TABLES[@]:-}"; do
+    if [[ "$existing" == "$table" ]]; then
+      return
+    fi
+  done
+  REQUIRED_TABLES+=("$table")
+}
+
+add_required_table "pool_registry"
+add_required_table "pool_pricing"
+
+table_defined() {
+  local pattern="$1"
+  if command -v rg >/dev/null 2>&1; then
+    rg -qi "$pattern" "$MIGRATION_DIR" >/dev/null
+    return $?
+  fi
+
+  python - "$MIGRATION_DIR" "$pattern" <<'PY'
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+pattern = sys.argv[2].lower()
+for path in root.rglob("*.sql"):
+    try:
+        content = path.read_text(encoding="utf-8", errors="ignore").lower()
+    except Exception:
+        continue
+    if pattern in content:
+        sys.exit(0)
+sys.exit(1)
+PY
+}
+
+if table_defined("capacity_reservations"); then
+  add_required_table "capacity_reservations"
+fi
+if table_defined("pool_selection_audit"); then
+  add_required_table "pool_selection_audit"
+fi
+
+short_sha=$(git rev-parse --short HEAD 2>/dev/null || date +%s)
+shadow_db="summit_shadow_${short_sha}"
+export SHADOW_DB_NAME="$shadow_db"
+
+BASE_DATABASE_URL=$(
+  python - <<'PY'
+import os
+from urllib.parse import urlsplit, urlunsplit
+
+url = urlsplit(os.environ["DATABASE_URL"])
+base_path = "/postgres"
+print(urlunsplit((url.scheme, url.netloc, base_path, url.query, url.fragment)))
+PY
+)
+
+SHADOW_DATABASE_URL=$(
+  python - <<'PY'
+import os
+from urllib.parse import urlsplit, urlunsplit
+
+url = urlsplit(os.environ["DATABASE_URL"])
+shadow_db = os.environ["SHADOW_DB_NAME"]
+print(urlunsplit((url.scheme, url.netloc, f"/{shadow_db}", url.query, url.fragment)))
+PY
+)
+
+cleanup() {
+  echo "Dropping shadow database ${shadow_db}..."
+  psql "$BASE_DATABASE_URL" --no-psqlrc -v ON_ERROR_STOP=1 -c "DROP DATABASE IF EXISTS \"${shadow_db}\";" >/dev/null || true
+}
+trap cleanup EXIT
+
+echo "Creating shadow database ${shadow_db}..."
+psql "$BASE_DATABASE_URL" --no-psqlrc -v ON_ERROR_STOP=1 -c "DROP DATABASE IF EXISTS \"${shadow_db}\";"
+psql "$BASE_DATABASE_URL" --no-psqlrc -v ON_ERROR_STOP=1 -c "CREATE DATABASE \"${shadow_db}\";"
+
+echo "Applying migrations to shadow database..."
+SHADOW_DB_NAME="$shadow_db" DATABASE_URL="$SHADOW_DATABASE_URL" ./ops/db/migrate --apply --dir "$MIGRATION_DIR"
+
+echo "Validating schema invariants..."
+table_report_file=$(mktemp)
+verify_status="ok"
+
+for table in "${REQUIRED_TABLES[@]}"; do
+  exists=$(psql "$SHADOW_DATABASE_URL" --no-psqlrc -At -v ON_ERROR_STOP=1 -v "table=$table" -c "SELECT to_regclass('public.\"' || :'table' || '\"') IS NOT NULL;")
+  if [[ "$exists" == "t" ]]; then
+    status="present"
+    message="Table ${table} exists"
+  else
+    status="missing"
+    message="Table ${table} is missing"
+    verify_status="failed"
+  fi
+  echo "${table}|${status}|${message}" >> "$table_report_file"
+done
+
+schema_migrations_present=$(psql "$SHADOW_DATABASE_URL" --no-psqlrc -At -v ON_ERROR_STOP=1 -c "SELECT to_regclass('schema_migrations') IS NOT NULL;")
+schema_migrations_count=0
+if [[ "$schema_migrations_present" == "t" ]]; then
+  schema_migrations_count=$(psql "$SHADOW_DATABASE_URL" --no-psqlrc -At -v ON_ERROR_STOP=1 -c "SELECT count(*) FROM schema_migrations;")
+  if [[ "$schema_migrations_count" == "0" ]]; then
+    verify_status="failed"
+  fi
+else
+  verify_status="failed"
+fi
+
+REPORT_PATH="artifacts/db-verify-report.json"
+TABLE_REPORT_FILE="$table_report_file" VERIFY_STATUS="$verify_status" SCHEMA_MIGRATIONS_PRESENT="$schema_migrations_present" SCHEMA_MIGRATIONS_COUNT="$schema_migrations_count" SHADOW_DB_NAME="$shadow_db" MIGRATION_DIR="$MIGRATION_DIR" python - <<'PY'
+import json
+import os
+from datetime import datetime, timezone
+from pathlib import Path
+
+table_report_file = Path(os.environ["TABLE_REPORT_FILE"])
+tables = []
+for line in table_report_file.read_text().splitlines():
+    table, status, message = line.split("|", 2)
+    tables.append({"table": table, "status": status, "message": message})
+
+report = {
+    "generated_at": datetime.now(timezone.utc).isoformat(),
+    "shadow_database": os.environ["SHADOW_DB_NAME"],
+    "directory": os.environ["MIGRATION_DIR"],
+    "status": os.environ["VERIFY_STATUS"],
+    "schema_migrations": {
+        "present": os.environ["SCHEMA_MIGRATIONS_PRESENT"] == "t",
+        "count": int(os.environ["SCHEMA_MIGRATIONS_COUNT"]),
+    },
+    "tables": tables,
+}
+
+report_path = Path("artifacts/db-verify-report.json")
+report_path.parent.mkdir(parents=True, exist_ok=True)
+report_path.write_text(json.dumps(report, indent=2))
+print(f"Wrote verification report to {report_path}")
+PY
+
+if [[ "$verify_status" != "ok" ]]; then
+  echo "Verification failed. See ${REPORT_PATH} for details." >&2
+  exit 1
+fi
+
+echo "Verification succeeded."

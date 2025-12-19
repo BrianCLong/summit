@@ -3,11 +3,27 @@ name: Migration Gate
 on:
   pull_request:
     paths:
+      - 'db/migrations/**'
       - 'server/db/migrations/**'
 
 jobs:
   check-migration:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/summit_gate
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: summit_gate
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
     steps:
       - uses: actions/checkout@v4
         with:
@@ -19,3 +35,26 @@ jobs:
         run: |
           chmod +x ops/migration_gate.sh
           ./ops/migration_gate.sh
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Wait for Postgres
+        run: |
+          for i in {1..20}; do
+            if pg_isready -d "$DATABASE_URL"; then
+              exit 0
+            fi
+            echo "Waiting for Postgres..."
+            sleep 2
+          done
+          echo "Postgres did not become ready in time" >&2
+          exit 1
+
+      - name: Plan migrations
+        run: ./ops/db/migrate --plan --no-apply
+
+      - name: Shadow verify migrations
+        run: ./ops/db/verify --shadow

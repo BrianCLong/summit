@@ -1,23 +1,155 @@
 #!/usr/bin/env bash
 set -euo pipefail
+
+usage() {
+  cat <<'USAGE'
+Usage: ops/db/migrate [--plan] [--apply|--no-apply] [--dir <path>] [--seed <file>] [--seed-pricing]
+
+Options:
+  --plan           Print an ordered migration plan with checksums (also writes artifacts/db-migration-plan.json).
+  --apply          Apply migrations to DATABASE_URL (default unless --no-apply is provided).
+  --no-apply       Do not apply migrations (plan only).
+  --dir <path>     Migration directory (default: db/migrations).
+  --seed <file>    Apply an additional seed file after migrations (repeatable).
+  --seed-pricing   Convenience flag for db/seeds/pool_pricing_v1.sql.
+USAGE
+}
+
 PLAN=false
 APPLY=true
-for arg in "$@"; do
-  case "$arg" in
-    --plan) PLAN=true; APPLY=false ;;
+MIGRATION_DIR="db/migrations"
+SEED_FILES=()
+export MIGRATION_DIR
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --plan) PLAN=true ;;
+    --apply) APPLY=true ;;
     --no-apply) APPLY=false ;;
+    --dir)
+      MIGRATION_DIR="$2"
+      shift
+      ;;
+    --seed)
+      SEED_FILES+=("$2")
+      shift
+      ;;
+    --seed-pricing)
+      SEED_FILES+=("db/seeds/pool_pricing_v1.sql")
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown argument: $1" >&2
+      usage
+      exit 2
+      ;;
   esac
+  shift
 done
 
-# Example: invoke your migration toolchain (Prisma, Alembic, Flyway, Liquibase)
-# Replace with project-specific commands
-if $PLAN; then
-  echo "[db] Planning migrations (no apply)";
-  echo "(simulate): prisma migrate diff --to-schema-datamodel schema.prisma"
+if [[ ! -d "$MIGRATION_DIR" ]]; then
+  echo "Migration directory not found: $MIGRATION_DIR" >&2
+  exit 1
+fi
+
+mapfile -t MIGRATION_FILES < <(find "$MIGRATION_DIR" -type f -name '*.sql' | sort)
+
+if [[ ${#MIGRATION_FILES[@]} -eq 0 ]]; then
+  echo "No migration files found under $MIGRATION_DIR" >&2
+  exit 1
+fi
+
+PLAN_RECORDS=()
+
+for file in "${MIGRATION_FILES[@]}"; do
+  filename="${file#$MIGRATION_DIR/}"
+  checksum=$(sha256sum "$file" | awk '{print $1}')
+  bytes=$(wc -c < "$file")
+  PLAN_RECORDS+=("$filename|$checksum|$bytes|$file")
+  printf "%s\t%s\t%s bytes\n" "$filename" "$checksum" "$bytes"
+done
+
+printf "%s\n" "${PLAN_RECORDS[@]}" > /tmp/migration_plan_records
+python - <<'PY'
+import json
+import os
+from datetime import datetime, timezone
+from pathlib import Path
+
+records_file = Path("/tmp/migration_plan_records")
+dir_path = os.environ.get("MIGRATION_DIR", "db/migrations")
+records = []
+for line in records_file.read_text().splitlines():
+    filename, checksum, bytes_str, _ = line.split("|", 3)
+    records.append(
+        {"filename": filename, "checksum": checksum, "bytes": int(bytes_str)}
+    )
+
+artifact_path = Path("artifacts/db-migration-plan.json")
+artifact_path.parent.mkdir(parents=True, exist_ok=True)
+artifact_path.write_text(
+    json.dumps(
+        {
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "directory": dir_path,
+            "count": len(records),
+            "migrations": records,
+        },
+        indent=2,
+    )
+)
+print(f"Wrote migration plan to {artifact_path}")
+PY
+
+if ! $APPLY; then
   exit 0
 fi
 
-if $APPLY; then
-  echo "[db] Applying gated migrations";
-  echo "(simulate): prisma migrate deploy"
+if ! command -v psql >/dev/null 2>&1; then
+  echo "psql is required to apply migrations. Please install the PostgreSQL client." >&2
+  exit 1
 fi
+
+if [[ -z "${DATABASE_URL:-}" ]]; then
+  echo "DATABASE_URL is required to apply migrations." >&2
+  exit 1
+fi
+
+psql "$DATABASE_URL" --no-psqlrc -v ON_ERROR_STOP=1 -c "CREATE TABLE IF NOT EXISTS schema_migrations (filename text PRIMARY KEY, checksum text NOT NULL, applied_at timestamptz NOT NULL DEFAULT now());"
+
+applied=0
+skipped=0
+
+for record in "${PLAN_RECORDS[@]}"; do
+  IFS="|" read -r filename checksum _ filepath <<< "$record"
+  existing_checksum=$(psql "$DATABASE_URL" --no-psqlrc -At -v ON_ERROR_STOP=1 -v "filename=$filename" -c "SELECT checksum FROM schema_migrations WHERE filename = :'filename';" || true)
+
+  if [[ -n "$existing_checksum" ]]; then
+    if [[ "$existing_checksum" != "$checksum" ]]; then
+      echo "ERROR: Checksum mismatch for $filename. Migrations are immutable. Expected $existing_checksum, found $checksum." >&2
+      exit 1
+    fi
+    echo "Skipping $filename (already applied)."
+    ((skipped++))
+    continue
+  fi
+
+  echo "Applying migration: $filename"
+  psql "$DATABASE_URL" --no-psqlrc -v ON_ERROR_STOP=1 -f "$filepath"
+  psql "$DATABASE_URL" --no-psqlrc -v ON_ERROR_STOP=1 -v "filename=$filename" -v "checksum=$checksum" -c "INSERT INTO schema_migrations (filename, checksum) VALUES ( :'filename', :'checksum');"
+  ((applied++))
+done
+
+for seed_file in "${SEED_FILES[@]}"; do
+  if [[ ! -f "$seed_file" ]]; then
+    echo "Seed file not found: $seed_file" >&2
+    exit 1
+  fi
+  echo "Applying seed: $seed_file"
+  psql "$DATABASE_URL" --no-psqlrc -v ON_ERROR_STOP=1 -f "$seed_file"
+done
+
+echo "Migration summary: applied=${applied}, skipped=${skipped}"
