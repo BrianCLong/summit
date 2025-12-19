@@ -1,0 +1,35 @@
+{
+  "name": "@intelgraph/api",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "HTTP API surface for provenance receipts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "node --loader ts-node/esm src/index.ts",
+    "lint": "eslint src --ext .ts",
+    "test": "jest --runInBand --config ../../jest.config.cjs apps/api"
+  },
+  "dependencies": {
+    "@intelgraph/provenance": "workspace:*",
+    "@intelgraph/receipt-signer": "workspace:*",
+    "express": "^4.21.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^24.10.1",
+    "@types/supertest": "^6.0.3",
+    "supertest": "^7.0.0",
+    "typescript": "^5.7.3"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "@intelgraph/receipt-signer",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "KMS-backed signing utilities for provenance receipts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src --ext .ts",
+    "test": "jest --runInBand --config ../../jest.config.cjs services/receipt-signer"
+  },
+  "dependencies": {
+    "@aws-sdk/client-kms": "^3.716.0",
+    "@intelgraph/provenance": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.7.3"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}

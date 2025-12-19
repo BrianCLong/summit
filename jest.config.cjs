@@ -7,9 +7,13 @@ module.exports = {
       'ts-jest',
       {
         useESM: true,
-        tsconfig: 'tsconfig.json',
+        tsconfig: 'tsconfig.test.json',
       },
     ],
+  },
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
+  haste: {
+    throwOnModuleCollision: false,
   },
   roots: ['server', 'client', 'packages', 'services', 'tests'],
   modulePathIgnorePatterns: [

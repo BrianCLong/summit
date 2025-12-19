@@ -1,0 +1,137 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://intelgraph.dev/prov-ledger/schema/receipt.v0.1.json",
+  "title": "ProvenanceReceipt",
+  "description": "Signed provenance receipt for ledger payloads",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "schemaVersion",
+    "issuer",
+    "subject",
+    "issuedAt",
+    "payload",
+    "signature"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Stable identifier for the receipt"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "const": "0.1",
+      "description": "Schema version guard for receipts"
+    },
+    "issuer": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Entity that produced the receipt"
+    },
+    "subject": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Primary subject of the receipt (e.g. artifact, job, or bundle)"
+    },
+    "issuedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the receipt was issued"
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Optional expiration for the receipt"
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifactHash", "manifestUri", "nonce"],
+      "properties": {
+        "artifactHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "description": "SHA-256 hash of the artifact or bundle being acknowledged"
+        },
+        "manifestUri": {
+          "type": "string",
+          "format": "uri",
+          "description": "URI for the manifest or bundle described by the receipt"
+        },
+        "nonce": {
+          "type": "string",
+          "minLength": 16,
+          "description": "Randomized nonce to prevent replay of identical payloads"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Arbitrary metadata captured alongside the payload"
+        },
+        "chain": {
+          "type": "array",
+          "description": "Optional provenance chain entries folded into the receipt",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["stepId", "outputHash"],
+            "properties": {
+              "stepId": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Identifier for the provenance step"
+              },
+              "inputHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$",
+                "description": "Hash of the input to the step"
+              },
+              "outputHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$",
+                "description": "Hash of the output from the step"
+              },
+              "timestamp": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When the step was executed"
+              }
+            }
+          }
+        }
+      }
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "keyId", "value", "messageDigest"],
+      "properties": {
+        "algorithm": {
+          "type": "string",
+          "enum": ["RSASSA_PSS_SHA_256", "ECDSA_SHA_256"],
+          "description": "KMS signing algorithm used to sign the receipt"
+        },
+        "keyId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Key identifier or ARN used by KMS"
+        },
+        "value": {
+          "type": "string",
+          "description": "Base64-encoded signature over the canonical receipt payload"
+        },
+        "messageDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "description": "Hex-encoded SHA-256 digest of the canonical payload"
+        },
+        "certificateArn": {
+          "type": "string",
+          "description": "Optional certificate ARN when using asymmetric keys"
+        }
+      }
+    }
+  }
+}
