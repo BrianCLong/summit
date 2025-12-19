@@ -56,3 +56,11 @@ jobs:
 
       # Rollback logic usually triggered on failure, here we simulate the happy path.
       # In a real workflow, we might use steps.canary-analyze.outcome == 'failure'
+
+  sbom:
+    name: Attach SBOM
+    needs: maestro-delivery
+    uses: ./.github/workflows/reusable/sbom.yml
+    with:
+      service: maestro
+    secrets: inherit
