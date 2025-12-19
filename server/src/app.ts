@@ -17,6 +17,7 @@ import { auditFirstMiddleware } from './middleware/audit-first.js';
 import { correlationIdMiddleware } from './middleware/correlation-id.js';
 import { featureFlagContextMiddleware } from './middleware/feature-flag-context.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { rlsSessionMiddleware } from './middleware/rls-session.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
 import { overloadProtection } from './middleware/overloadProtection.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
@@ -119,6 +120,7 @@ export const createApp = async () => {
   // Add correlation ID middleware FIRST (before other middleware)
   app.use(correlationIdMiddleware);
   app.use(featureFlagContextMiddleware);
+  app.use(rlsSessionMiddleware());
 
   // Load Shedding / Overload Protection (Second, to reject early)
   app.use(overloadProtection);

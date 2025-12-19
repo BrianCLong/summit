@@ -4,7 +4,11 @@ import crypto from 'node:crypto';
 import { performance } from 'node:perf_hooks';
 import { Pool, QueryConfig, QueryResult, PoolClient } from 'pg';
 import * as dotenv from 'dotenv';
-import baseLogger from '../config/logger';
+import {
+  getRlsContext,
+  isRlsFeatureFlagEnabled,
+  recordRlsOverhead,
+} from '../security/rlsContext.js';
 
 dotenv.config();
 import { dbConfig } from './config.js';
@@ -613,6 +617,42 @@ async function executeWithRetry(
   throw new Error('PostgreSQL query exhausted retries');
 }
 
+async function applyRlsSessionContext(
+  client: PoolClient,
+  label: string,
+): Promise<void> {
+  if (!isRlsFeatureFlagEnabled() || process.env.NODE_ENV !== 'staging') {
+    return;
+  }
+
+  const ctx = getRlsContext();
+  if (!ctx?.enabled || !ctx.tenantId) {
+    return;
+  }
+
+  const start = performance.now();
+  try {
+    await client.query("SELECT set_config('app.rls_v1', '1', true)");
+    await client.query("SELECT set_config('app.current_tenant_id', $1, true)", [
+      ctx.tenantId,
+    ]);
+
+    if (ctx.caseId) {
+      await client.query(
+        "SELECT set_config('app.current_case_id', $1, true)",
+        [ctx.caseId],
+      );
+    }
+
+    recordRlsOverhead(performance.now() - start);
+  } catch (error) {
+    logger.warn(
+      { label, tenantId: ctx.tenantId, err: error },
+      'Unable to apply RLS session context; continuing with app-level filtering',
+    );
+  }
+}
+
 async function executeQueryOnClient(
   client: PoolClient,
   normalizedQuery: { text: string; values: any[]; name: string },
@@ -621,6 +661,8 @@ async function executeQueryOnClient(
   timeoutMs: number
 ): Promise<QueryResult<any>> {
   const start = performance.now();
+
+  await applyRlsSessionContext(client, label);
 
   // Set statement timeout
   // Note: It's better to set this per session or query if possible,
