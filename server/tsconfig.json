@@ -1,11 +1,21 @@
 {
   "compilerOptions": {
     "target": "ES2022",
+<<<<<<< HEAD
+    "module": "Node16",
+    "moduleResolution": "Node16",
+=======
     "module": "ESNext",
     "moduleResolution": "node",
+<<<<<<< HEAD
+    "rootDir": "./",
+=======
+>>>>>>> main
     "rootDir": ".",
+>>>>>>> main
     "outDir": "./dist",
     "esModuleInterop": true,
+    "downlevelIteration": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "strict": false,
@@ -20,7 +30,11 @@
   "ts-node": {
     "esm": true
   },
+<<<<<<< HEAD
+  "include": ["src/**/*", "src/**/__tests__/**/*", "tests/**/*"],
+=======
   "include": ["src/**/*", "src/**/__tests__/**/*", "health/**/*"],
+>>>>>>> main
   "exclude": [
     "node_modules",
     "dist",
@@ -29,7 +43,6 @@
     "src/ai/**",
     "src/kpro/**",
     "src/nl2cypher/**",
-    "src/runbooks/**",
     "src/routes/replay.ts",
     "src/maestro/**",
     "src/monitoring/opentelemetry.ts",
@@ -71,8 +84,6 @@
     "src/rate/redisBucket.ts",
     "src/routes/assistant.ts",
     "src/graphql/mutations/SafeMutations.ts",
-    "src/services/GraphRAGService.ts",
-    "src/services/SimilarityService.ts",
     "src/graphql/plugins/requireBudgetPlugin.ts",
     "src/routes/tokcount.ts",
     "src/routes/trust-center.ts",

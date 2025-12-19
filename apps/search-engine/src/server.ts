@@ -61,7 +61,7 @@ app.use(
   }),
 );
 
-app.use(compression());
+app.use(compression() as express.RequestHandler);
 
 const generalRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000,

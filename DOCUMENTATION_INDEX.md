@@ -103,6 +103,9 @@ Operational blueprint for delivering a production-ready multi-tenant control pla
 - **Test my code** → VISUALIZATION_DEVELOPMENT_GUIDE.md (Testing Pattern) or QUICK_REFERENCE.md (Testing)
 - **Deploy to production** → QUICK_REFERENCE.md (Release & Deployment)
 
+### Licensing and distribution
+- **Understand the proprietary licensing model and release obligations** → docs/licensing/PROPRIETARY_LICENSING_GUIDE.md
+
 ## Key Statistics
 
 - **Frontend Components**: 64+ component directories

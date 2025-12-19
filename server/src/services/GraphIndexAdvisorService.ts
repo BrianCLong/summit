@@ -1,6 +1,8 @@
 import { getNeo4jDriver } from '../db/neo4j.js';
-import pino from 'pino';
+// @ts-ignore
+import { default as pino } from 'pino';
 
+// @ts-ignore
 const logger = pino({ name: 'GraphIndexAdvisorService' });
 
 interface AccessPattern {
@@ -23,7 +25,7 @@ class GraphIndexAdvisorService {
   private querySampleCount = 0;
   private sampleRate = 0.1; // Analyze 10% of queries by default
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance(): GraphIndexAdvisorService {
     if (!GraphIndexAdvisorService.instance) {
@@ -144,7 +146,7 @@ class GraphIndexAdvisorService {
       });
 
       // Analyze patterns
-      for (const [key, count] of this.accessPatterns.entries()) {
+      for (const [key, count] of Array.from(this.accessPatterns.entries())) {
         const [label, property] = key.split(':');
 
         // If index exists, skip

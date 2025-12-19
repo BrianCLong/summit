@@ -20,16 +20,16 @@ import {
 // ============================================================================
 
 const mockNeo4jDriver = {
-  session: jest.fn(() => ({
-    run: jest.fn().mockResolvedValue({ records: [] }),
-    close: jest.fn().mockResolvedValue(undefined),
+  session: jest.fn<any>(() => ({
+    run: jest.fn<any>().mockResolvedValue({ records: [] }),
+    close: jest.fn<any>().mockResolvedValue(undefined),
   })),
 };
 
 const mockPgPool = {
-  connect: jest.fn(() => ({
-    query: jest.fn().mockResolvedValue({ rows: [] }),
-    release: jest.fn(),
+  connect: jest.fn<any>(() => ({
+    query: jest.fn<any>().mockResolvedValue({ rows: [] }),
+    release: jest.fn<any>(),
   })),
 };
 
@@ -83,14 +83,14 @@ const mockLLMService = {
 };
 
 const mockEmbeddingService = {
-  generateEmbedding: jest.fn().mockResolvedValue(new Array(1536).fill(0.1)),
-  generateBatchEmbeddings: jest.fn().mockResolvedValue([new Array(1536).fill(0.1)]),
+  generateEmbedding: jest.fn<any>().mockResolvedValue(new Array(1536).fill(0.1)),
+  generateBatchEmbeddings: jest.fn<any>().mockResolvedValue([new Array(1536).fill(0.1)]),
 };
 
 const mockRedis = {
-  get: jest.fn().mockResolvedValue(null),
-  setex: jest.fn().mockResolvedValue('OK'),
-  ping: jest.fn().mockResolvedValue('PONG'),
+  get: jest.fn<any>().mockResolvedValue(null),
+  setex: jest.fn<any>().mockResolvedValue('OK'),
+  ping: jest.fn<any>().mockResolvedValue('PONG'),
 };
 
 // ============================================================================

@@ -4,6 +4,12 @@
 
 This runbook guides on-call engineers through diagnosing and resolving SLO, cost, and telemetry regressions surfaced by the platform SRE pipeline, Grafana dashboards, and Prometheus burn alerts.
 
+## Automation quicklinks
+
+- Generate alert-specific runbooks and JSON payloads: `python ops/observability-ci/scripts/generate_alert_runbooks.py`
+- One-click remediation for any generated alert: `./ops/observability-ci/scripts/one-click-remediation.sh "<AlertName>"`
+- CI guardrails for PagerDuty/on-call paths: GitHub workflow `incident-automation`
+
 ## Quick Decision Tree
 
 1. **Pager triggers?**

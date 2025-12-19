@@ -1,3 +1,4 @@
+# ops/prometheus/alerts/burnrate.yaml
 groups:
 - name: gateway.slo
   rules:

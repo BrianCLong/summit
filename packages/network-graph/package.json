@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/network-graph",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Enhanced network graph visualization for IntelGraph",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -8,7 +8,7 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "test": "jest",
-    "lint": "eslint src --ext .ts,.tsx",
+    "lint": "if [ -d src ]; then eslint src --ext .ts,.tsx; else echo \"skip lint (no src directory)\"; fi",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

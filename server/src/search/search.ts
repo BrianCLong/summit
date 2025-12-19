@@ -13,74 +13,80 @@ type SearchInput = {
 
 export async function searchAll(input: SearchInput) {
   const pg = new Pool({ connectionString: process.env.DATABASE_URL });
+  const semanticService = new SemanticSearchService({ pool: pg });
 
-  // Semantic Search with Fallback
-  if (input.semantic && input.q) {
-    const semanticService = new SemanticSearchService();
-    try {
-      const results = await semanticService.searchCases(input.q, {
-        status: input.facets?.status,
-        dateFrom: input.time?.from,
-        dateTo: input.time?.to,
-      }, 100);
+  try {
+    // Semantic Search with Fallback
+    if (input.semantic && input.q) {
+      try {
+        const results = await semanticService.searchCases(
+          input.q,
+          {
+            status: input.facets?.status,
+            dateFrom: input.time?.from,
+            dateTo: input.time?.to,
+          },
+          100,
+        );
 
-      // If we got good results, return them (possibly expanding graph later)
-      if (results.length > 0) {
-        // Map to expected format
-        const rows = results.map(r => ({
-          id: r.id,
-          title: r.title,
-          status: r.status,
-          created_at: r.created_at
-        }));
+        // If we got good results, return them (possibly expanding graph later)
+        if (results.length > 0) {
+          // Map to expected format
+          const rows = results.map((r) => ({
+            id: r.id,
+            title: r.title,
+            status: r.status,
+            created_at: r.created_at,
+          }));
 
-        await pg.end(); // close pg pool if we are done with it
-
-        return expandGraph(rows, input.graphExpand);
+          return expandGraph(rows, input.graphExpand);
+        }
+      } catch (e) {
+        console.warn('Semantic search failed, falling back to keyword search', e);
       }
-    } catch (e) {
-      console.warn("Semantic search failed, falling back to keyword search", e);
     }
-  }
 
-  // Keyword Search Fallback
-  const driver = neo4j.driver(
-    process.env.NEO4J_URI!,
-    neo4j.auth.basic(
-      process.env.NEO4J_USER!,
-      process.env.NEO4J_PASSWORD || process.env.NEO4J_PASS || '',
-    ),
-  );
-
-  const where: string[] = [];
-  const params: any = {};
-  if (input.q) {
-    where.push(
-      `to_tsvector('english', title || ' ' || coalesce(description,'')) @@ plainto_tsquery('english', $1)`,
+    // Keyword Search Fallback
+    const driver = neo4j.driver(
+      process.env.NEO4J_URI!,
+      neo4j.auth.basic(
+        process.env.NEO4J_USER!,
+        process.env.NEO4J_PASSWORD || process.env.NEO4J_PASS || '',
+      ),
     );
-    params.q = input.q;
-  }
-  if (input.facets?.status?.length) {
-    where.push(`status = ANY($2)`);
-    params.status = input.facets.status;
-  }
-  if (input.time?.from) {
-    where.push(`created_at >= $3`);
-    params.from = input.time.from;
-  }
-  if (input.time?.to) {
-    where.push(`created_at <= $4`);
-    params.to = input.time.to;
-  }
-  const sql = `SELECT id, title, status, created_at FROM cases ${where.length ? 'WHERE ' + where.join(' AND ') : ''} ORDER BY created_at DESC LIMIT 100`;
-  const base = await pg.query(sql, Object.values(params));
-  await pg.end();
 
-  // Keyword search expansion uses the local driver, but we want to use the helper.
-  // The helper creates its own driver.
-  await driver.close();
+    const where: string[] = [];
+    const params: any = {};
+    if (input.q) {
+      where.push(
+        `to_tsvector('english', title || ' ' || coalesce(description,'')) @@ plainto_tsquery('english', $1)`,
+      );
+      params.q = input.q;
+    }
+    if (input.facets?.status?.length) {
+      where.push(`status = ANY($2)`);
+      params.status = input.facets.status;
+    }
+    if (input.time?.from) {
+      where.push(`created_at >= $3`);
+      params.from = input.time.from;
+    }
+    if (input.time?.to) {
+      where.push(`created_at <= $4`);
+      params.to = input.time.to;
+    }
+    const sql = `SELECT id, title, status, created_at FROM cases ${where.length ? 'WHERE ' + where.join(' AND ') : ''} ORDER BY created_at DESC LIMIT 100`;
+    const base = await pg.query(sql, Object.values(params));
 
-  return expandGraph(base.rows, input.graphExpand);
+    // Keyword search expansion uses the local driver, but we want to use the helper.
+    // The helper creates its own driver.
+    await driver.close();
+
+    return expandGraph(base.rows, input.graphExpand);
+  } finally {
+    await semanticService.close();
+    await pg.end();
+  }
 }
 
 // Separate function for graph expansion to be reused by semantic and keyword search

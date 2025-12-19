@@ -5,9 +5,9 @@
  */
 
 import { randomUUID } from 'crypto';
-import type { Request } from 'express';
 
-export interface MockRequest extends Partial<Request> {
+export interface MockRequest {
+  [key: string]: any;
   id?: string;
   headers: Record<string, string>;
   body?: any;
@@ -62,8 +62,8 @@ export function requestFactory(options: RequestFactoryOptions = {}): MockRequest
     path: options.path || '/',
     get: function (name: string) {
       return this.headers[name.toLowerCase()];
-    } as any,
-  };
+    },
+  } as unknown as MockRequest;
 }
 
 /**

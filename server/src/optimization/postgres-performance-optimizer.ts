@@ -1,6 +1,5 @@
 // server/src/optimization/postgres-performance-optimizer.ts
 
-// @ts-ignore - pg type imports
 import { Pool, PoolClient, QueryResult } from 'pg';
 import { getRedisClient } from '../config/database.js';
 import logger from '../config/logger.js';

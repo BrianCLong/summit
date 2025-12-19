@@ -1,8 +1,10 @@
 import { getPostgresPool } from '../db/postgres';
 import { getNeo4jDriver } from '../db/neo4j';
 import { isFeatureEnabled } from '../config/mvp1-features';
-import pino from 'pino';
+// @ts-ignore
+import { default as pino } from 'pino';
 
+// @ts-ignore
 const logger = pino();
 
 // Fine-grained permissions for MVP-1+

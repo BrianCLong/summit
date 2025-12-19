@@ -18,6 +18,7 @@ jest.mock('../../monitoring/metrics', () => {
     maestroPrLeadTimeHours: { observe },
     maestroChangeFailureRate: { set: jest.fn() },
     maestroMttrHours: { observe },
+    uiErrorBoundaryCatchTotal: { inc },
     register: {
       contentType: 'text/plain',
       metrics: jest.fn().mockResolvedValue('mocked_metrics'),
@@ -67,6 +68,28 @@ describe('Monitoring Routes', () => {
 
       expect(response.status).toBe(400);
     });
+  });
+
+  it('should route ui_error_boundary telemetry to metrics', async () => {
+    const payload = {
+      event: 'ui_error_boundary',
+      labels: {
+        component: 'TestComponent',
+        message: 'Boom',
+      },
+    };
+
+    const response = await request(app)
+      .post('/telemetry/events')
+      .set('x-tenant-id', 'tenant-123')
+      .send(payload);
+
+    expect(response.status).toBe(202);
+    expect(goldenPathStepTotal.inc).not.toHaveBeenCalled();
+    expect(maestroDeploymentsTotal.inc).not.toHaveBeenCalled();
+    expect(
+      (await import('../../monitoring/metrics')).uiErrorBoundaryCatchTotal.inc,
+    ).toHaveBeenCalledWith({ component: 'TestComponent', tenant_id: 'tenant-123' });
   });
 
   describe('POST /telemetry/dora', () => {
