@@ -5,12 +5,19 @@ import { randomUUID } from 'crypto';
 import logger from '../utils/logger.js';
 import { provenanceLedger } from '../provenance/ledger.js';
 import { QuotaManager } from '../lib/resources/quota-manager.js';
+import { tenantRouter } from '../db/tenantRouter.js';
 
 // Input Validation Schema
 export const createTenantSchema = z.object({
   name: z.string().min(2).max(100),
   slug: z.string().min(3).max(50).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
   residency: z.enum(['US', 'EU']),
+  partitionKey: z
+    .string()
+    .min(2)
+    .max(64)
+    .regex(/^[a-z0-9_-]+$/, 'Partition key must be alphanumeric, dash, or underscore')
+    .optional(),
 });
 
 export type CreateTenantInput = z.infer<typeof createTenantSchema>;
@@ -25,6 +32,7 @@ export interface Tenant {
   config: Record<string, any>;
   settings: Record<string, any>;
   createdBy: string | null;
+  partitionKey?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -88,11 +96,18 @@ export class TenantService {
 
       // 4. Create Tenant in DB
       const tenantId = randomUUID();
+      const partitionKey = tenantRouter.isEnabled()
+        ? await tenantRouter.assignTenantToPartition(
+            client,
+            tenantId,
+            validated.partitionKey,
+          )
+        : null;
       const insertQuery = `
         INSERT INTO tenants (
-          id, name, slug, residency, tier, status, config, settings, created_by
+          id, name, slug, residency, tier, status, config, settings, created_by, partition_key
         ) VALUES (
-          $1, $2, $3, $4, $5, $6, $7, $8, $9
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
         ) RETURNING *
       `;
 
@@ -105,7 +120,8 @@ export class TenantService {
         defaults.status,
         defaults.config,
         defaults.settings,
-        actorId
+        actorId,
+        partitionKey,
       ]);
 
       const tenant = this.mapRowToTenant(result.rows[0]);
@@ -183,6 +199,7 @@ export class TenantService {
       config: row.config,
       settings: row.settings,
       createdBy: row.created_by,
+      partitionKey: row.partition_key,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
     };
