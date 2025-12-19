@@ -53,6 +53,7 @@
     "db:neo4j:migrate": "node scripts/neo4j-migrate.js",
     "changeset": "changeset",
     "release": "changeset version && changeset publish",
+    "sdk:generate": "pnpm --filter @intelgraph/sdk generate",
     "precommit": "lint-staged",
     "db:prisma:diff": "prisma migrate diff --from-url $DATABASE_URL --to-schema-datamodel prisma/schema.prisma",
     "db:knex:smoke": "knex migrate:down && knex migrate:up"
