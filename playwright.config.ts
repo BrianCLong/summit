@@ -1,63 +1,77 @@
-import { defineConfig } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test';
+import dotenv from 'dotenv';
+import path from 'path';
+
+/**
+ * Read environment variables from file.
+ * https://github.com/motdotla/dotenv
+ */
+try {
+  dotenv.config({ path: path.resolve(__dirname, '.env') });
+} catch (e) {
+  // Ignore error if .env file is missing or dotenv is not installed
+  console.warn('dotenv not loaded', e);
+}
 
 const useWebServer = process.env.PLAYWRIGHT_USE_WEBSERVER === 'true';
+const baseURL = process.env.BASE_URL || 'http://localhost:3000';
 
+/**
+ * See https://playwright.dev/docs/test-configuration.
+ */
 export default defineConfig({
-  testDir: '.',
-  testMatch: [
-    'e2e/golden-path.spec.ts',
-    'e2e/maestro.spec.ts',
-    'e2e/golden-path.spec.ts',
-    'e2e/golden-path.spec.ts',
-    'e2e/osint/**/*.spec.ts',
-    'e2e/**/*.a11y.spec.ts',
-    'tests/e2e/**/*.spec.ts',
-    'tests/performance.spec.ts',
-    'e2e/simple.spec.ts',
-  ],
-  timeout: 60_000,
-  retries: 2,
+  testDir: './e2e',
+  /* Run tests in files in parallel */
+  fullyParallel: true,
+  /* Fail the build on CI if you accidentally left test.only in the source code. */
+  forbidOnly: !!process.env.CI,
+  /* Retry on CI only */
+  retries: process.env.CI ? 2 : 0,
+  /* Opt out of parallel tests on CI. */
+  workers: process.env.CI ? 1 : undefined,
+  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [['html', { outputFolder: 'reports/playwright' }], ['list']],
+  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    // The client seems to be running on port 3000 now based on vite.config.js and curl check
-    baseURL: process.env.BASE_URL || 'http://localhost:3000',
+    /* Base URL to use in actions like `await page.goto('/')`. */
+    baseURL,
+
+    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'retain-on-failure',
     video: 'retain-on-failure',
     screenshot: 'on',
-    baseURL: process.env.BASE_URL || (process.env.CI ? 'http://localhost:3000' : 'http://localhost:5173'),
-    baseURL: process.env.BASE_URL || 'http://localhost:3000', // Defaulting to 3000 for apps/web
-    trace: 'retain-on-failure',
-    video: 'on',
   },
-  ...(useWebServer
+
+  /* Configure projects for major browsers */
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
+    },
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
+    },
+  ],
+
+  /* Run your local dev server before starting the tests */
+  webServer: useWebServer
     ? {
-        webServer: [
-          {
-            command: 'npm run client:dev',
-            port: 3000, // Changed to 3000
-            command: 'npm run web:dev',
-            port: 3000,
-            reuseExistingServer: !process.env.CI,
-            timeout: 120_000,
-          },
-          {
-            command: 'npm run server:dev',
-            port: 4000,
-            reuseExistingServer: !process.env.CI,
-            timeout: 120_000,
-          },
-        ],
+        command: 'npm run dev',
+        url: 'http://localhost:3000',
+        reuseExistingServer: !process.env.CI,
+        timeout: 120_000,
       }
-    : {}),
-  // In CI, we use docker-compose which exposes port 3000, so we just check it
-  ...((process.env.CI && !useWebServer)
+    : process.env.CI
     ? {
-        webServer: {
-          command: 'echo "CI uses make up"',
-          url: 'http://localhost:3000',
-          reuseExistingServer: true,
-          timeout: 120_000,
-        }
+        command: 'make up', // Use make up in CI if not using existing server
+        url: 'http://localhost:3000',
+        reuseExistingServer: true,
+        timeout: 120_000,
       }
-    : {})
+    : undefined,
 });
