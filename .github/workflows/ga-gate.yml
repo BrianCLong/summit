@@ -1,0 +1,99 @@
+name: GA Gate
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  ga-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.24.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tests
+        id: tests
+        continue-on-error: true
+        run: |
+          set +e
+          pnpm test --runInBand
+          echo "status=$?" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Run typecheck
+        id: typecheck
+        continue-on-error: true
+        run: |
+          set +e
+          pnpm typecheck
+          echo "status=$?" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Run lint
+        id: lint
+        continue-on-error: true
+        run: |
+          set +e
+          pnpm lint
+          echo "status=$?" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Run build
+        id: build
+        continue-on-error: true
+        run: |
+          set +e
+          pnpm build
+          echo "status=$?" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Dependency audit placeholder
+        id: dependency_audit
+        run: echo "status=0" >> "$GITHUB_OUTPUT"
+
+      - name: Provenance placeholder
+        id: provenance
+        run: echo "status=0" >> "$GITHUB_OUTPUT"
+
+      - name: Run GA gate
+        id: gate
+        env:
+          TESTS_STATUS: ${{ steps.tests.outputs.status || '1' }}
+          TYPECHECK_STATUS: ${{ steps.typecheck.outputs.status || '1' }}
+          LINT_STATUS: ${{ steps.lint.outputs.status || '1' }}
+          BUILD_STATUS: ${{ steps.build.outputs.status || '1' }}
+          SECURITY_DEPENDENCY_AUDIT_STATUS: ${{ steps.dependency_audit.outputs.status || '1' }}
+          SECURITY_PROVENANCE_STATUS: ${{ steps.provenance.outputs.status || '1' }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SHA: ${{ github.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: node scripts/ga-gate.js
+
+      - name: Upload GA report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ga-report
+          path: artifacts/ga-report.json
+          if-no-files-found: error

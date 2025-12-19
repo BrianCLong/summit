@@ -7,6 +7,8 @@
 
 # Mergefix / Express 5–related surfaces
 /server/**                        @intelgraph-core @intelgraph-ci
+/apps/web/**                      @intelgraph-core @intelgraph-ci
+/packages/**                      @intelgraph-core @intelgraph-ci
 /policies/**                      @intelgraph-core @intelgraph-ci
 /contracts/graphql/**             @intelgraph-core @intelgraph-ci
 /docs/merge/**                    @intelgraph-core @intelgraph-ci
