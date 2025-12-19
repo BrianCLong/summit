@@ -1,15 +1,38 @@
 # AGENTS.md - AI Coding Agent Instructions
 
+<<<<<<< HEAD
 > **Standard Format**: This file follows the [AGENTS.md](https://agents.md) open format for guiding
 > coding agents. **Supported By**: OpenAI Codex, Google Jules, Amp, Cursor, Factory, and other AI
 > coding assistants. **Last Updated**: 2025-12-03
+=======
+**⚠️ GOVERNANCE NOTICE:**
+All agents and contributors must adhere to the [Constitution of the Ecosystem](docs/governance/CONSTITUTION.md).
+This document defines the technical standards mandated by the **Law of Consistency**.
+
+## Governance & Compliance
+
+- **Authority:** This repository is governed by the [Meta-Governance Framework](docs/governance/META_GOVERNANCE.md).
+- **Mandates:** See [Agent Mandates](docs/governance/AGENT_MANDATES.md) for role-specific powers and limits.
+- **Rulebook:** The [Living Rulebook](docs/governance/RULEBOOK.md) contains the full index of laws and standards.
+
+## Project Structure & Module Organization
+>>>>>>> main
 
 ## Project Overview
 
 **Summit/IntelGraph** is a next-generation intelligence analysis platform with AI-augmented graph
 analytics designed for the intelligence community.
 
+<<<<<<< HEAD
 ### Core Philosophy
+=======
+- Install: `pnpm install`.
+- Dev: `pnpm run dev` (runs server and client concurrently).
+- Test: `pnpm test` (server+client), server only: `pnpm --filter intelgraph-server test`.
+- Lint/Format: `pnpm run lint && pnpm run format`.
+- DB: `pnpm run db:migrate` and `pnpm run db:seed` (from repo root).
+- Docker: `pnpm run docker:dev` or `pnpm run docker:prod`.
+>>>>>>> main
 
 - **Golden Path**: `make bootstrap && make up && make smoke` - fresh clones must go green
 - **Deployable-First**: Maintain the workflow: Investigation -> Entities -> Relationships -> Copilot
@@ -18,7 +41,26 @@ analytics designed for the intelligence community.
 
 ## Codebase Structure
 
+<<<<<<< HEAD
 This is a **pnpm workspace** monorepo managed by **Turbo**:
+=======
+## Testing Guidelines
+
+- Backend: Jest (`server/tests`), run with coverage: `pnpm --filter intelgraph-server test:coverage`.
+- Frontend: see client tests; e2e via Playwright: `pnpm run test:e2e`.
+- Naming: `*.spec.ts`/`*.test.js` (client), `*.test.js` (server). Target ≥80% coverage for changed code.
+- **Official CI Standard**: The `pr-quality-gate.yml` workflow is the single source of truth for PR validation. See `docs/CI_STANDARDS.md` for details.
+
+## Commit & Pull Request Guidelines
+
+- Conventional Commits: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`.
+- PRs: concise description, linked issues (`Closes #123`), screenshots for UI; CI green required.
+- Branches: `type/scope/short-desc` (e.g., `feat/ingest/rest-connector`).
+
+## Web Codex Global Guidance
+
+Run the following workflow when preparing scoped CI pull requests for the `feat/mstc`, `feat/trr`, and `feat/opa` branches:
+>>>>>>> main
 
 ```
 summit/

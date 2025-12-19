@@ -285,7 +285,7 @@ export function TriPaneAnalysisView({
   const getProvenanceTooltip = useCallback(
     (entityId: string) => {
       const provenance = provenanceData.get(entityId)
-      if (!provenance) return null
+      if (!provenance) {return null}
 
       return (
         <div className="space-y-2 text-xs">
@@ -462,7 +462,7 @@ export function TriPaneAnalysisView({
               {showProvenance &&
                 filteredData.entities.map(entity => {
                   const provenance = provenanceData.get(entity.id)
-                  if (!provenance) return null
+                  if (!provenance) {return null}
 
                   return (
                     <Tooltip

@@ -148,7 +148,12 @@ describe('token lifecycle', () => {
 
     const challengeRes = await request(app)
       .post('/auth/webauthn/challenge')
-      .set('Authorization', `Bearer ${token}`);
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        action: 'dataset:read',
+        resourceId: 'dataset-alpha',
+        classification: 'confidential',
+      });
     expect(challengeRes.status).toBe(200);
     expect(challengeRes.body.challenge).toBeDefined();
     const signature = signChallenge(challengeRes.body.challenge);
@@ -167,6 +172,7 @@ describe('token lifecycle', () => {
       .send({ token: step.body.token });
     expect(introspectRes.status).toBe(200);
     expect(introspectRes.body.acr).toBe('loa2');
+    expect(introspectRes.body.elevation.requestedAction).toBe('dataset:read');
     opaServer.close();
   });
 });

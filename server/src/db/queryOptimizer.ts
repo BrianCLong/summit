@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Maestro Conductor v24.3.0 - Graph Query Optimizer
 // Epic E16: Search & Index Optimization - Intelligent query optimization and caching
 

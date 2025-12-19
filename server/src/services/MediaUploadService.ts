@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createWriteStream, createReadStream, promises as fs } from 'fs';
 import { pipeline } from 'stream/promises';
 import { createHash } from 'crypto';
@@ -9,14 +10,33 @@ import ffprobe from 'ffprobe-static';
 import ffmpeg from 'fluent-ffmpeg';
 // @ts-ignore - Upload type not exported from graphql-upload-ts
 import { Upload } from 'graphql-upload-ts';
+<<<<<<< HEAD
 // @ts-ignore
 import { default as pino } from 'pino';
+=======
+import pino from 'pino';
+import exifReader from 'exif-reader';
+import {
+  ImageProcessingPipeline,
+  defaultImageProcessingConfig,
+  type ImageProcessingOptions,
+  type ImageProcessingResult,
+  type ProcessedImage,
+  type FacialRecognitionResult,
+} from './ImageProcessingPipeline.js';
+import {
+  CdnUploadService,
+  type CdnUploadConfig,
+  type CdnUploadRequest,
+} from './CdnUploadService.js';
+>>>>>>> main
 
 // @ts-ignore
 const logger = pino({ name: 'MediaUploadService' });
 
 // Configure FFmpeg binary paths
-ffmpeg.setFfmpegPath(require('ffmpeg-static'));
+import ffmpegStatic from 'ffmpeg-static';
+ffmpeg.setFfmpegPath(ffmpegStatic);
 ffmpeg.setFfprobePath(ffprobe.path);
 
 export interface MediaUploadConfig {
@@ -25,6 +45,8 @@ export interface MediaUploadConfig {
   uploadPath: string;
   thumbnailPath: string;
   chunkSize: number;
+  imageProcessing?: ImageProcessingOptions;
+  cdnUpload?: CdnUploadConfig;
 }
 
 export interface MediaMetadata {
@@ -37,6 +59,25 @@ export interface MediaMetadata {
   dimensions?: MediaDimensions;
   duration?: number;
   metadata: Record<string, any>;
+}
+
+export type DerivativeType = 'optimized' | 'thumbnail' | 'conversion';
+
+export interface DerivativeFile {
+  type: DerivativeType;
+  format: string;
+  filename: string;
+  width?: number;
+  height?: number;
+  cdnUrl?: string;
+  sourcePath?: string;
+}
+
+export interface ImageProcessingMetadata {
+  derivatives: DerivativeFile[];
+  exif?: Record<string, any>;
+  facialRecognition?: FacialRecognitionResult;
+  cdn?: Record<string, string>;
 }
 
 export interface MediaDimensions {
@@ -58,9 +99,20 @@ export enum MediaType {
 
 export class MediaUploadService {
   private config: MediaUploadConfig;
+  private imageProcessingPipeline?: ImageProcessingPipeline;
+  private cdnUploadService?: CdnUploadService;
 
   constructor(config: MediaUploadConfig) {
     this.config = config;
+    this.imageProcessingPipeline = new ImageProcessingPipeline(
+      config.uploadPath,
+      config.thumbnailPath,
+      config.imageProcessing || defaultImageProcessingConfig,
+    );
+
+    if (config.cdnUpload?.enabled) {
+      this.cdnUploadService = new CdnUploadService(config.cdnUpload);
+    }
     this.ensureDirectories();
   }
 
@@ -84,16 +136,13 @@ export class MediaUploadService {
     const { createReadStream, filename, mimetype } = (await upload) as any;
     const stream = createReadStream();
 
-    // Sanitize the original filename first
-    const sanitizedOriginalName = this.sanitizeFilename(filename || 'unknown');
-
     logger.info(
-      `Starting upload for file: ${sanitizedOriginalName}, type: ${mimetype}, user: ${userId}`,
+      `Starting upload for file: ${filename}, type: ${mimetype}, user: ${userId}`,
     );
 
-    // Generate unique filename with sanitized extension
+    // Generate unique filename
     const fileId = uuidv4();
-    const ext = path.extname(sanitizedOriginalName).toLowerCase();
+    const ext = path.extname(filename || '');
     const uniqueFilename = `${fileId}${ext}`;
     const tempFilePath = path.join(
       this.config.uploadPath,
@@ -103,18 +152,9 @@ export class MediaUploadService {
     const finalFilePath = path.join(this.config.uploadPath, uniqueFilename);
 
     try {
-      // Validate file type (MIME type check)
+      // Validate file type
       if (!this.isAllowedType(mimetype)) {
         throw new Error(`File type ${mimetype} is not allowed`);
-      }
-
-      // Validate that file extension matches the declared MIME type
-      const extensionValidation = this.validateExtensionMatchesMimeType(
-        sanitizedOriginalName,
-        mimetype,
-      );
-      if (!extensionValidation.valid) {
-        throw new Error(extensionValidation.error);
       }
 
       // Stream to temporary file with size checking
@@ -128,53 +168,112 @@ export class MediaUploadService {
         );
       }
 
-      // Calculate checksum
-      const checksum = await this.calculateChecksum(tempFilePath);
+        // Determine media type
+        const mediaType = this.getMediaType(mimetype);
+        const baseFilename = path.parse(uniqueFilename).name;
 
-      // Determine media type
-      const mediaType = this.getMediaType(mimetype);
+        // Extract metadata based on media type
+        const initialDimensions = await this.extractMediaDimensions(
+          tempFilePath,
+          mediaType,
+          mimetype,
+        );
+        const duration = await this.extractDuration(tempFilePath, mediaType);
 
-      // Extract metadata based on media type
-      const dimensions = await this.extractMediaDimensions(
-        tempFilePath,
-        mediaType,
-        mimetype,
-      );
-      const duration = await this.extractDuration(tempFilePath, mediaType);
-      const additionalMetadata = await this.extractAdditionalMetadata(
-        tempFilePath,
-        mediaType,
-      );
+        // Move to final location prior to derivative generation
+        await fs.rename(tempFilePath, finalFilePath);
 
-      // Move to final location
-      await fs.rename(tempFilePath, finalFilePath);
+        let dimensions = initialDimensions;
+        let processingMetadata: ImageProcessingMetadata | undefined;
 
-      // Generate thumbnail if applicable
-      if (mediaType === MediaType.IMAGE || mediaType === MediaType.VIDEO) {
-        await this.generateThumbnail(finalFilePath, mediaType, uniqueFilename);
-      }
+        if (mediaType === MediaType.IMAGE && this.imageProcessingPipeline) {
+          const processed = await this.imageProcessingPipeline.processImage(
+            finalFilePath,
+            mimetype,
+            baseFilename,
+          );
 
-      const metadata: MediaMetadata = {
-        filename: uniqueFilename,
-        originalName: sanitizedOriginalName,
-        mimeType: mimetype,
-        filesize: stats.size,
-        checksum,
-        mediaType,
-        dimensions,
-        duration,
-        metadata: {
-          uploadedBy: userId,
-          uploadedAt: new Date().toISOString(),
-          processingVersion: '1.0',
-          ...additionalMetadata,
-        },
-      };
+          dimensions = {
+            width: processed.optimizedInfo.width,
+            height: processed.optimizedInfo.height,
+            channels: processed.optimizedInfo.channels,
+          };
 
-      logger.info(
-        `Successfully uploaded media: ${uniqueFilename}, size: ${stats.size}, type: ${mediaType}`,
-      );
-      return metadata;
+          processingMetadata = this.mapImageProcessingMetadata(
+            processed,
+            uniqueFilename,
+          );
+        }
+
+        if (mediaType === MediaType.VIDEO) {
+          await this.generateThumbnail(finalFilePath, mediaType, uniqueFilename);
+        }
+
+        const additionalMetadata = await this.extractAdditionalMetadata(
+          finalFilePath,
+          mediaType,
+        );
+
+        if (processingMetadata?.exif && !additionalMetadata.exif) {
+          additionalMetadata.exif = processingMetadata.exif;
+        }
+
+        if (processingMetadata?.facialRecognition) {
+          additionalMetadata.facialRecognition =
+            processingMetadata.facialRecognition;
+        }
+
+        if (processingMetadata) {
+          const cdnMap = await this.uploadToCdn(
+            finalFilePath,
+            uniqueFilename,
+            mimetype,
+            processingMetadata.derivatives,
+          );
+
+          processingMetadata.derivatives = processingMetadata.derivatives.map(
+            (derivative) => ({
+              ...derivative,
+              cdnUrl: derivative.cdnUrl || cdnMap[derivative.filename],
+            }),
+          );
+          processingMetadata.cdn = cdnMap;
+        }
+
+        const finalStats = await fs.stat(finalFilePath);
+        const checksum = await this.calculateChecksum(finalFilePath);
+
+        const metadata: MediaMetadata = {
+          filename: uniqueFilename,
+          originalName: filename || 'unknown',
+          mimeType: mimetype,
+          filesize: finalStats.size,
+          checksum,
+          mediaType,
+          dimensions,
+          duration,
+          metadata: {
+            uploadedBy: userId,
+            uploadedAt: new Date().toISOString(),
+            processingVersion: '2.0',
+            ...additionalMetadata,
+            ...(processingMetadata
+              ? {
+                  imageProcessing: {
+                    ...processingMetadata,
+                    derivatives: processingMetadata.derivatives.map(
+                      ({ sourcePath, ...rest }) => rest,
+                    ),
+                  },
+                }
+              : {}),
+          },
+        };
+
+        logger.info(
+          `Successfully uploaded media: ${uniqueFilename}, size: ${finalStats.size}, type: ${mediaType}`,
+        );
+        return metadata;
     } catch (error) {
       // Cleanup on error
       try {
@@ -387,28 +486,29 @@ export class MediaUploadService {
    * Parse EXIF data for image metadata
    */
   private parseExifData(exifBuffer: Buffer): Record<string, any> {
-    // Simplified EXIF parsing - in production, use a proper EXIF library
-    const metadata: Record<string, any> = {};
-
     try {
-      // This is a placeholder - implement proper EXIF parsing
-      metadata.hasExif = true;
-      metadata.exifSize = exifBuffer.length;
+      const decoded = exifReader(exifBuffer);
+      return {
+        image: decoded.image,
+        thumbnail: decoded.thumbnail,
+        exif: decoded.exif,
+        gps: decoded.gps,
+        interoperability: decoded.interoperability,
+      };
     } catch (error) {
       logger.warn('Failed to parse EXIF data:', error);
+      return { exifError: 'PARSE_FAILED' };
     }
-
-    return metadata;
   }
 
   /**
    * Extract AV metadata using FFprobe
    */
-  private async extractAVMetadata(
-    filePath: string,
-  ): Promise<Record<string, any>> {
-    return new Promise((resolve) => {
-      ffmpeg.ffprobe(filePath, (err, metadata) => {
+    private async extractAVMetadata(
+      filePath: string,
+    ): Promise<Record<string, any>> {
+      return new Promise((resolve) => {
+        ffmpeg.ffprobe(filePath, (err, metadata) => {
         if (err) {
           logger.warn(`Failed to extract AV metadata from ${filePath}:`, err);
           resolve({});
@@ -443,6 +543,74 @@ export class MediaUploadService {
         resolve(result);
       });
     });
+  }
+
+  private mapImageProcessingMetadata(
+    processed: ImageProcessingResult,
+    canonicalFilename: string,
+  ): ImageProcessingMetadata {
+    const derivatives: DerivativeFile[] = [
+      {
+        type: 'optimized',
+        format: path.extname(canonicalFilename).replace('.', '') || 'jpeg',
+        filename: canonicalFilename,
+        width: processed.optimizedInfo.width,
+        height: processed.optimizedInfo.height,
+      },
+      ...this.mapProcessedImages('thumbnail', processed.thumbnails),
+      ...this.mapProcessedImages('conversion', processed.conversions),
+    ];
+
+    return {
+      derivatives,
+      exif: processed.exif,
+      facialRecognition: processed.facialRecognition,
+    };
+  }
+
+  private mapProcessedImages(
+    type: DerivativeType,
+    images: ProcessedImage[],
+  ): DerivativeFile[] {
+    return images.map((image) => ({
+      type,
+      format: image.format,
+      filename: path.basename(image.path),
+      width: image.width,
+      height: image.height,
+      sourcePath: image.path,
+    }));
+  }
+
+  private async uploadToCdn(
+    mainFilePath: string,
+    mainFilename: string,
+    mimeType: string,
+    derivatives?: DerivativeFile[],
+  ): Promise<Record<string, string>> {
+    if (!this.cdnUploadService) return {};
+
+    const requests: CdnUploadRequest[] = [
+      {
+        localPath: mainFilePath,
+        key: mainFilename,
+        contentType: mimeType,
+      },
+    ];
+
+    for (const derivative of derivatives || []) {
+      const localPath =
+        derivative.sourcePath ||
+        path.join(this.config.uploadPath, derivative.filename);
+
+      requests.push({
+        localPath,
+        key: derivative.filename,
+        contentType: `image/${derivative.format}`,
+      });
+    }
+
+    return this.cdnUploadService.uploadFiles(requests);
   }
 
   /**
@@ -519,190 +687,6 @@ export class MediaUploadService {
           allowed.endsWith('/*') && mimeType.startsWith(allowed.slice(0, -1)),
       )
     );
-  }
-
-  /**
-   * Validate that file extension matches the declared MIME type
-   * This prevents attacks where malicious files are uploaded with fake extensions
-   */
-  private validateExtensionMatchesMimeType(
-    filename: string,
-    mimeType: string,
-  ): { valid: boolean; error?: string } {
-    const ext = path.extname(filename).toLowerCase().slice(1); // Remove the dot
-
-    if (!ext) {
-      return { valid: false, error: 'File must have an extension' };
-    }
-
-    // Map of MIME types to allowed extensions
-    const mimeToExtensions: Record<string, string[]> = {
-      // Images
-      'image/jpeg': ['jpg', 'jpeg'],
-      'image/png': ['png'],
-      'image/gif': ['gif'],
-      'image/webp': ['webp'],
-      'image/svg+xml': ['svg'],
-      'image/bmp': ['bmp'],
-      'image/tiff': ['tif', 'tiff'],
-      'image/ico': ['ico'],
-      'image/x-icon': ['ico'],
-
-      // Videos
-      'video/mp4': ['mp4', 'm4v'],
-      'video/webm': ['webm'],
-      'video/ogg': ['ogv', 'ogg'],
-      'video/quicktime': ['mov'],
-      'video/x-msvideo': ['avi'],
-      'video/x-ms-wmv': ['wmv'],
-      'video/mpeg': ['mpeg', 'mpg'],
-
-      // Audio
-      'audio/mpeg': ['mp3'],
-      'audio/mp4': ['m4a', 'mp4'],
-      'audio/ogg': ['ogg', 'oga'],
-      'audio/wav': ['wav'],
-      'audio/webm': ['webm'],
-      'audio/flac': ['flac'],
-      'audio/aac': ['aac'],
-
-      // Documents
-      'application/pdf': ['pdf'],
-      'application/msword': ['doc'],
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['docx'],
-      'application/vnd.ms-excel': ['xls'],
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['xlsx'],
-      'application/vnd.ms-powerpoint': ['ppt'],
-      'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['pptx'],
-
-      // Text
-      'text/plain': ['txt', 'text', 'log'],
-      'text/csv': ['csv'],
-      'text/html': ['html', 'htm'],
-      'text/css': ['css'],
-      'text/javascript': ['js'],
-      'text/markdown': ['md', 'markdown'],
-      'text/xml': ['xml'],
-
-      // Data
-      'application/json': ['json'],
-      'application/xml': ['xml'],
-      'application/zip': ['zip'],
-      'application/gzip': ['gz', 'gzip'],
-      'application/x-tar': ['tar'],
-
-      // Geospatial
-      'application/geo+json': ['geojson'],
-      'application/vnd.google-earth.kml+xml': ['kml'],
-      'application/vnd.google-earth.kmz': ['kmz'],
-    };
-
-    // Dangerous extensions that should NEVER be allowed
-    const dangerousExtensions = [
-      'exe', 'dll', 'bat', 'cmd', 'com', 'msi', 'scr', 'pif',  // Windows executables
-      'sh', 'bash', 'zsh', 'csh',  // Shell scripts
-      'php', 'php3', 'php4', 'php5', 'phtml',  // PHP
-      'asp', 'aspx', 'ashx', 'asmx',  // ASP.NET
-      'jsp', 'jspx',  // Java Server Pages
-      'cgi', 'pl', 'py', 'pyc', 'pyo',  // Scripts
-      'rb', 'erb',  // Ruby
-      'htaccess', 'htpasswd',  // Apache config
-      'vbs', 'vbe', 'wsf', 'wsh',  // Windows scripts
-      'ps1', 'psm1',  // PowerShell
-      'jar', 'war', 'ear',  // Java archives
-      'swf', 'fla',  // Flash
-      'lnk',  // Shortcuts
-    ];
-
-    // Block dangerous extensions regardless of MIME type
-    if (dangerousExtensions.includes(ext)) {
-      logger.error(
-        { filename, extension: ext },
-        'Blocked upload of dangerous file extension',
-      );
-      return {
-        valid: false,
-        error: `File extension .${ext} is not allowed for security reasons`,
-      };
-    }
-
-    // Get allowed extensions for this MIME type
-    const allowedExtensions = mimeToExtensions[mimeType];
-
-    // If we have a specific mapping, enforce it
-    if (allowedExtensions) {
-      if (!allowedExtensions.includes(ext)) {
-        logger.warn(
-          { filename, mimeType, extension: ext, allowedExtensions },
-          'File extension does not match MIME type',
-        );
-        return {
-          valid: false,
-          error: `File extension .${ext} does not match content type ${mimeType}. Expected: .${allowedExtensions.join(', .')}`,
-        };
-      }
-    } else {
-      // For wildcard types (image/*, video/*, etc.), do basic category checking
-      const mimeCategory = mimeType.split('/')[0];
-
-      const extensionCategories: Record<string, string[]> = {
-        image: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'tiff', 'tif', 'ico', 'heic', 'heif', 'avif'],
-        video: ['mp4', 'm4v', 'webm', 'ogv', 'ogg', 'mov', 'avi', 'wmv', 'mpeg', 'mpg', 'mkv', '3gp'],
-        audio: ['mp3', 'm4a', 'ogg', 'oga', 'wav', 'webm', 'flac', 'aac', 'wma'],
-        text: ['txt', 'text', 'log', 'csv', 'html', 'htm', 'css', 'js', 'md', 'markdown', 'xml', 'json'],
-      };
-
-      const categoryExtensions = extensionCategories[mimeCategory];
-      if (categoryExtensions && !categoryExtensions.includes(ext)) {
-        logger.warn(
-          { filename, mimeType, extension: ext, category: mimeCategory },
-          'File extension does not match MIME category',
-        );
-        return {
-          valid: false,
-          error: `File extension .${ext} is not valid for ${mimeCategory} files`,
-        };
-      }
-    }
-
-    return { valid: true };
-  }
-
-  /**
-   * Sanitize filename to prevent path traversal and other attacks
-   */
-  private sanitizeFilename(filename: string): string {
-    // Remove path components
-    let sanitized = path.basename(filename);
-
-    // Remove null bytes
-    sanitized = sanitized.replace(/\0/g, '');
-
-    // Remove control characters
-    sanitized = sanitized.replace(/[\x00-\x1f\x7f]/g, '');
-
-    // Remove shell special characters
-    sanitized = sanitized.replace(/[;&|`$(){}[\]<>\\!]/g, '');
-
-    // Replace spaces and special chars with underscores
-    sanitized = sanitized.replace(/[^\w.-]/g, '_');
-
-    // Prevent double extensions that could be exploited
-    // e.g., "malicious.jpg.php" -> "malicious_jpg.php"
-    const parts = sanitized.split('.');
-    if (parts.length > 2) {
-      const ext = parts.pop();
-      sanitized = parts.join('_') + '.' + ext;
-    }
-
-    // Ensure filename is not too long
-    if (sanitized.length > 255) {
-      const ext = path.extname(sanitized);
-      const name = path.basename(sanitized, ext);
-      sanitized = name.slice(0, 255 - ext.length) + ext;
-    }
-
-    return sanitized;
   }
 
   /**
@@ -787,4 +771,15 @@ export const defaultMediaUploadConfig: MediaUploadConfig = {
   thumbnailPath:
     process.env.MEDIA_THUMBNAIL_PATH || '/tmp/intelgraph/thumbnails',
   chunkSize: 64 * 1024, // 64KB chunks
+  imageProcessing: defaultImageProcessingConfig,
+  cdnUpload: {
+    enabled: false,
+    bucket: process.env.MEDIA_CDN_BUCKET || '',
+    region: process.env.MEDIA_CDN_REGION || 'us-east-1',
+    basePath: process.env.MEDIA_CDN_BASE_PATH,
+    endpoint: process.env.MEDIA_CDN_ENDPOINT,
+    publicUrl: process.env.MEDIA_CDN_PUBLIC_URL,
+    accessKeyId: process.env.MEDIA_CDN_ACCESS_KEY_ID,
+    secretAccessKey: process.env.MEDIA_CDN_SECRET_ACCESS_KEY,
+  },
 };

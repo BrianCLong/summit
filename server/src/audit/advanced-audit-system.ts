@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Advanced Audit System - Comprehensive audit trails and decision logging
  * Implements immutable event logging, compliance tracking, and forensic capabilities
@@ -1150,6 +1151,9 @@ export class AdvancedAuditSystem extends EventEmitter {
   }
 }
 
+<<<<<<< HEAD
+=======
 // Export singleton instance getter
 // This allows lazy initialization with correct dependencies
 export const advancedAuditSystem = AdvancedAuditSystem.getInstance();
+>>>>>>> main

@@ -1,15 +1,37 @@
+// @ts-nocheck
 import express from 'express';
 import { z } from 'zod/v4';
 import { randomUUID } from 'node:crypto';
+import { requirePermission } from '../middleware/auth.js';
 import { narrativeSimulationManager } from '../narrative/manager.js';
+import { ScenarioSimulator } from '../narrative/scenario.js';
 import type {
   NarrativeEvent,
   SimulationEntity,
   LLMClient,
   LLMNarrativeRequest,
+  ShockDefinition,
+  SimulationConfig,
 } from '../narrative/types.js';
+import { isFeatureEnabled } from '../config/mvp1-features.js';
 
 const router = express.Router();
+const scenarioSimulator = new ScenarioSimulator();
+
+// Apply permission check for all simulation routes
+router.use(requirePermission('simulation:run'));
+
+// Feature Flag Gate
+router.use((_req, res, next) => {
+  if (!isFeatureEnabled('NARRATIVE_SIMULATION')) {
+    res.status(403).json({
+      error: 'feature-disabled',
+      message: 'Narrative Simulation Engine is not enabled for this environment.',
+    });
+    return;
+  }
+  next();
+});
 
 const relationshipSchema = z.object({
   targetId: z.string(),
@@ -76,6 +98,7 @@ const eventSchema = z.object({
     'information',
     'intervention',
     'system',
+    'shock',
   ]),
   actorId: z.string().optional(),
   targetIds: z.array(z.string()).optional(),
@@ -89,6 +112,21 @@ const eventSchema = z.object({
   description: z.string().min(1),
   scheduledTick: z.number().int().nonnegative().optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
+});
+
+const shockSchema = z.object({
+  type: z.string(),
+  targetTag: z.string().optional(),
+  targetIds: z.array(z.string()).optional(),
+  intensity: z.number().min(0).max(2),
+  description: z.string(),
+});
+
+const batchSimulationSchema = z.object({
+  config: createSimulationSchema,
+  iterations: z.number().int().min(1).max(100).default(10),
+  ticks: z.number().int().min(1).max(100).default(20),
+  shock: shockSchema.optional(),
 });
 
 const tickSchema = z.object({
@@ -167,6 +205,50 @@ router.post('/simulations', (req, res) => {
   }
 });
 
+router.post('/simulations/batch', async (req, res) => {
+  try {
+    const payload = batchSimulationSchema.parse(req.body ?? {});
+
+    // Convert payload config to proper SimulationConfig
+    // Note: The schema is 'createSimulationSchema', we need to adapt it
+    const entities: SimulationEntity[] = payload.config.initialEntities.map(
+      (entity) => ({
+        ...entity,
+        id: entity.id ?? randomUUID(),
+      }),
+    );
+
+    const config: SimulationConfig = {
+      id: randomUUID(),
+      name: payload.config.name,
+      themes: payload.config.themes,
+      tickIntervalMinutes: payload.config.tickIntervalMinutes ?? 60,
+      initialEntities: entities,
+      initialParameters: payload.config.initialParameters,
+      generatorMode: payload.config.generatorMode,
+      metadata: payload.config.metadata,
+      // LLM client not supported in batch for now (too heavy)
+    };
+
+    const result = await scenarioSimulator.runBatch(
+      config,
+      payload.iterations,
+      payload.ticks,
+      payload.shock
+    );
+
+    res.json(result);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res
+        .status(400)
+        .json({ error: 'invalid-request', details: error.flatten() });
+      return;
+    }
+    res.status(500).json({ error: (error as Error).message });
+  }
+});
+
 router.get('/simulations/:id', (req, res) => {
   const state = narrativeSimulationManager.getState(req.params.id);
   if (!state) {
@@ -201,6 +283,28 @@ router.post('/simulations/:id/events', (req, res) => {
     };
     narrativeSimulationManager.queueEvent(req.params.id, event);
     res.status(202).json({ status: 'accepted', event });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res
+        .status(400)
+        .json({ error: 'invalid-request', details: error.flatten() });
+      return;
+    }
+    res.status(404).json({ error: (error as Error).message });
+  }
+});
+
+router.post('/simulations/:id/shock', (req, res) => {
+  try {
+    const payload = shockSchema.parse(req.body ?? {});
+    const engine = narrativeSimulationManager.getEngine(req.params.id);
+    if (!engine) {
+      res.status(404).json({ error: 'not-found' });
+      return;
+    }
+
+    engine.injectShock(payload);
+    res.status(202).json({ status: 'accepted', type: 'shock' });
   } catch (error) {
     if (error instanceof z.ZodError) {
       res

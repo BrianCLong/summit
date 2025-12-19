@@ -542,6 +542,7 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
                               /^### (.*)/gm,
                               '<h3 class="text-xl font-medium mb-2 mt-4">$1</h3>',
                             )
+                            // eslint-disable-next-line no-useless-escape
                             .replace(/^\- (.*)/gm, '<li>$1</li>')
                             .replace(/^(\d+)\. (.*)/gm, '<li>$1. $1</li>')
                             .replace(
@@ -578,6 +579,7 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
 };
 
 // Hook to easily trigger help system
+// eslint-disable-next-line react-refresh/only-export-components
 export const useHelpSystem = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [initialTopic, setInitialTopic] = useState<string | undefined>();

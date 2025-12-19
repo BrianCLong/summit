@@ -1,6 +1,35 @@
+<<<<<<< HEAD
 // @ts-ignore
+=======
+// @ts-nocheck
+>>>>>>> main
 import pino from 'pino';
+<<<<<<< HEAD
+import { correlationEngine } from '../lib/telemetry/correlation-engine';
+
+// Custom stream that intercepts logs for the Correlation Engine and passes them to stdout
+const stream = {
+  write: (msg: string) => {
+    // Optimization: avoid parsing JSON on every log line unless it looks like JSON
+    // and we are actually running the correlation engine.
+    if (msg.trim().startsWith('{')) {
+        try {
+          const logEntry = JSON.parse(msg);
+          correlationEngine.ingestLog(logEntry);
+        } catch (e) {
+          // If parsing fails, ignore for correlation but still print
+        }
+    }
+    process.stdout.write(msg);
+  },
+};
+=======
 import { cfg } from '../config.js';
+import { AsyncLocalStorage } from 'async_hooks';
+>>>>>>> main
+
+// AsyncLocalStorage for correlation ID propagation
+export const correlationStorage = new AsyncLocalStorage<Map<string, string>>();
 
 // Configuration for redaction of sensitive data
 const REDACT_PATHS = [
@@ -19,10 +48,27 @@ const REDACT_PATHS = [
   'user.phone',
 ];
 
+<<<<<<< HEAD
 export const logger = (pino as any)({
+=======
+// Standard logging context
+export interface SummitLogContext {
+  correlationId?: string;
+  tenantId?: string;
+  principalId?: string;
+  principalKind?: "user" | "api_key" | "service_account" | "system";
+  service: string;
+  subsystem?: string;
+  requestId?: string;
+  runId?: string;
+  severity?: "debug" | "info" | "warn" | "error";
+  message?: string;
+  [key: string]: any;
+}
+
+export const logger = pino({
+>>>>>>> main
   level: process.env.LOG_LEVEL || 'info',
-  // Enforce structured JSON logging in all environments for consistency and to avoid missing dependency issues (pino-pretty).
-  // This satisfies the requirement "All logs must be JSON structured".
   base: {
     service: 'intelgraph-server',
     env: cfg.NODE_ENV,
@@ -32,6 +78,19 @@ export const logger = (pino as any)({
   redact: {
     paths: REDACT_PATHS,
     censor: '[REDACTED]',
+  },
+  mixin(_context, level) {
+    const store = correlationStorage.getStore();
+    if (store) {
+        return {
+            correlationId: store.get('correlationId'),
+            tenantId: store.get('tenantId'),
+            principalId: store.get('principalId'),
+            requestId: store.get('requestId'),
+            traceId: store.get('traceId'),
+        }
+    }
+    return {};
   },
   formatters: {
     level: (label: string) => {
@@ -52,6 +111,12 @@ export const logger = (pino as any)({
     // @ts-ignore
     res: (pino as any).stdSerializers?.res,
   },
+<<<<<<< HEAD
+  // Remove pino-pretty transport for production readiness
+  // In production, logs should be structured JSON for log aggregation
+}, stream);
+=======
 });
+>>>>>>> main
 
 export default logger;

@@ -1,9 +1,18 @@
 {
   "compilerOptions": {
     "target": "ES2022",
+<<<<<<< HEAD
     "module": "Node16",
     "moduleResolution": "Node16",
+=======
+    "module": "ESNext",
+    "moduleResolution": "node",
+<<<<<<< HEAD
+    "rootDir": "./",
+=======
+>>>>>>> main
     "rootDir": ".",
+>>>>>>> main
     "outDir": "./dist",
     "esModuleInterop": true,
     "downlevelIteration": true,
@@ -21,7 +30,11 @@
   "ts-node": {
     "esm": true
   },
+<<<<<<< HEAD
+  "include": ["src/**/*", "src/**/__tests__/**/*", "tests/**/*"],
+=======
   "include": ["src/**/*", "src/**/__tests__/**/*", "health/**/*"],
+>>>>>>> main
   "exclude": [
     "node_modules",
     "dist",
@@ -30,7 +43,6 @@
     "src/ai/**",
     "src/kpro/**",
     "src/nl2cypher/**",
-    "src/runbooks/**",
     "src/routes/replay.ts",
     "src/maestro/**",
     "src/monitoring/opentelemetry.ts",

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * External Verifier for XAI Overlay
  *

@@ -1,6 +1,6 @@
 {
   "name": "@summit/jira-integration",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "description": "PerfTrace Jira automation toolkit with workflow, field mapping, and audit logging.",
   "type": "module",
   "main": "dist/index.js",

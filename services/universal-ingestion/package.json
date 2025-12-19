@@ -1,0 +1,35 @@
+{
+  "name": "@intelgraph/universal-ingestion",
+  "version": "1.0.0",
+  "description": "Universal Data Ingestion Service with ETL and policy enforcement",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@intelgraph/connector-sdk": "workspace:*",
+    "@intelgraph/etl-assistant": "workspace:*",
+    "@intelgraph/license-registry": "workspace:*",
+    "fastify": "^5.6.1",
+    "@fastify/cors": "^11.1.0",
+    "@fastify/helmet": "^13.0.2",
+    "zod": "^4.1.12",
+    "pino": "^10.1.0",
+    "pino-pretty": "^13.1.2",
+    "axios": "^1.11.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3",
+    "tsx": "^4.7.0",
+    "jest": "^30.2.0",
+    "@types/jest": "^30.0.0",
+    "eslint": "^9.39.1"
+  }
+}
