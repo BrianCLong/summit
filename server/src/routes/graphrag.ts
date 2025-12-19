@@ -8,6 +8,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import logger from '../utils/logger.js';
 import { getGraphRagService, UserContext, GraphRagRequest } from '../services/graphrag/index.js';
+import { applyCitationGateStatus, citationGateContext } from '../middleware/citation-gate.js';
 
 const router = Router();
 
@@ -65,6 +66,7 @@ function extractUserContext(req: Request): UserContext {
  */
 router.post(
   '/answer',
+  citationGateContext,
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // Validate request body
@@ -101,7 +103,10 @@ router.post(
       const response = await service.answer(graphRagRequest, userContext);
 
       // Apply response limits
-      const limitedResponse = applyResponseLimits(response);
+      const limitedResponse = applyCitationGateStatus(
+        applyResponseLimits(response),
+        res,
+      );
 
       res.json(limitedResponse);
     } catch (error) {
