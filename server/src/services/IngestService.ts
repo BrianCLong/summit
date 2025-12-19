@@ -445,63 +445,95 @@ export class IngestService {
 
   /**
    * Sync entities/relationships to Neo4j
+   * Uses pagination to avoid loading all records into memory
    */
   private async syncToNeo4j(tenantId: string, provenanceId: string): Promise<void> {
     const session = this.neo4j.session();
+    const BATCH_SIZE = 1000;
 
     try {
-      // Fetch entities from this provenance batch
       const client = await this.pg.connect();
       try {
-        const { rows: entities } = await client.query(
-          `SELECT * FROM entities WHERE provenance_id = $1`,
-          [provenanceId],
-        );
+        // Sync Entities
+        let offset = 0;
+        let hasMore = true;
 
-        const { rows: relationships } = await client.query(
-          `SELECT * FROM relationships WHERE provenance_id = $1`,
-          [provenanceId],
-        );
-
-        // Batch upsert to Neo4j
-        for (const entity of entities) {
-          await session.run(
-            `MERGE (n {id: $id, tenantId: $tenantId})
-             SET n += $properties, n:${entity.kind}
-             RETURN n`,
-            {
-              id: entity.id,
-              tenantId: entity.tenant_id,
-              properties: {
-                ...JSON.parse(entity.props),
-                labels: entity.labels,
-                createdAt: entity.created_at.toISOString(),
-                updatedAt: entity.updated_at.toISOString(),
-              },
-            },
+        while (hasMore) {
+          const { rows: entities } = await client.query(
+            `SELECT * FROM entities WHERE provenance_id = $1 ORDER BY id LIMIT $2 OFFSET $3`,
+            [provenanceId, BATCH_SIZE, offset],
           );
+
+          if (entities.length === 0) {
+            hasMore = false;
+            break;
+          }
+
+          // Process entity batch
+          // We could use UNWIND in Cypher for better performance, but keeping logic similar for now
+          // to minimize risk, just fixing the memory issue.
+          for (const entity of entities) {
+             await session.run(
+              `MERGE (n {id: $id, tenantId: $tenantId})
+               SET n += $properties, n:${entity.kind}
+               RETURN n`,
+              {
+                id: entity.id,
+                tenantId: entity.tenant_id,
+                properties: {
+                  ...JSON.parse(entity.props),
+                  labels: entity.labels,
+                  createdAt: entity.created_at.toISOString(),
+                  updatedAt: entity.updated_at.toISOString(),
+                },
+              },
+            );
+          }
+
+          offset += entities.length;
+          if (entities.length < BATCH_SIZE) hasMore = false;
         }
 
-        for (const rel of relationships) {
-          await session.run(
-            `MATCH (from {id: $fromId, tenantId: $tenantId})
-             MATCH (to {id: $toId, tenantId: $tenantId})
-             MERGE (from)-[r:${rel.relationship_type}]->(to)
-             SET r += $properties
-             RETURN r`,
-            {
-              fromId: rel.from_entity_id,
-              toId: rel.to_entity_id,
-              tenantId: rel.tenant_id,
-              properties: {
-                ...JSON.parse(rel.props),
-                confidence: rel.confidence,
-                source: rel.source,
-                firstSeen: rel.first_seen.toISOString(),
-              },
-            },
+        // Sync Relationships
+        offset = 0;
+        hasMore = true;
+        while (hasMore) {
+          const { rows: relationships } = await client.query(
+            `SELECT * FROM relationships WHERE provenance_id = $1 ORDER BY id LIMIT $2 OFFSET $3`,
+            [provenanceId, BATCH_SIZE, offset],
           );
+
+           if (relationships.length === 0) {
+            hasMore = false;
+            break;
+          }
+
+          for (const rel of relationships) {
+            await session.run(
+              `MATCH (from {id: $fromId, tenantId: $tenantId})
+               MATCH (to {id: $toId, tenantId: $tenantId})
+               MERGE (from)-[r:${rel.relationship_type}]->(to)
+               SET r += $properties
+               RETURN r`,
+              {
+                fromId: rel.from_entity_id,
+                toId: rel.to_entity_id,
+                tenantId: rel.tenant_id,
+                properties: {
+                  ...JSON.parse(rel.props),
+                  confidence: rel.confidence,
+                  source: rel.source,
+                  firstSeen: rel.first_seen.toISOString(),
+                  lastSeen: rel.last_seen ? rel.last_seen.toISOString() : new Date().toISOString()
+                },
+              },
+            );
+          }
+
+          offset += relationships.length;
+           if (relationships.length < BATCH_SIZE) hasMore = false;
         }
+
       } finally {
         client.release();
       }
