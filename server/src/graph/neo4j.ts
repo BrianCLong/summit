@@ -1,90 +1,213 @@
 // @ts-nocheck
 import neo4j, { Driver } from 'neo4j-driver';
-import { quotaEnforcer } from '../lib/resources/QuotaEnforcer.js';
-import { PrometheusMetrics } from '../utils/metrics.js';
+import { quotaEnforcer } from '../lib/resources/QuotaEnforcer';
+import { PrometheusMetrics } from '../utils/metrics';
+import {
+  invalidateGraphQueryCache,
+  recordCacheBypass,
+  runWithGraphQueryCache,
+} from './queryCache.js';
 
-let driver: Driver | null = null;
+let primaryDriver: Driver | null = null;
+let replicaDriver: Driver | null = null;
 const metrics = new PrometheusMetrics('neo4j_driver');
 metrics.createGauge('active_sessions', 'Number of active Neo4j sessions');
 metrics.createHistogram('query_duration_seconds', 'Neo4j query duration', { buckets: [0.01, 0.05, 0.1, 0.5, 1, 5] });
+metrics.createCounter('replica_fallbacks', 'Replica fallbacks when read path fails');
+metrics.createCounter('route_choice_total', 'Route selection for graph queries');
+metrics.createCounter('sticky_reads', 'Sticky reads routed to primary after write');
 
 let activeSessions = 0;
+const recentWrites = new Map<string, number>();
+const stickyWindowMs = parseInt(process.env.GRAPH_STICKY_MS || '3000', 10);
 
-export function getDriver() {
-  if (!driver) {
+function readReplicaConfigured() {
+  return process.env.READ_REPLICA === '1' && (process.env.NEO4J_READ_URI || process.env.NEO4J_REPLICA_URI);
+}
+
+function stickyKey(tenantId?: string, caseId?: string) {
+  return `${tenantId || 'global'}::${caseId || 'global'}`;
+}
+
+function markRecentWrite(options: { tenantId?: string; caseId?: string }) {
+  recentWrites.set(stickyKey(options.tenantId, options.caseId), Date.now());
+}
+
+function shouldStickToPrimary(options: { tenantId?: string; caseId?: string }) {
+  const key = stickyKey(options.tenantId, options.caseId);
+  const ts = recentWrites.get(key);
+  if (!ts) return false;
+  const fresh = Date.now() - ts < stickyWindowMs;
+  if (!fresh) recentWrites.delete(key);
+  return fresh;
+}
+
+function buildDriver(uri: string) {
+  return neo4j.driver(
+    uri,
+    neo4j.auth.basic(process.env.NEO4J_USER || 'neo4j', process.env.NEO4J_PASSWORD || 'password'),
+    { disableLosslessIntegers: true },
+  );
+}
+
+export function getDriver(target: 'primary' | 'replica' = 'primary') {
+  const wantsReplica = target === 'replica' && readReplicaConfigured();
+  if (wantsReplica) {
+    if (!replicaDriver) {
+      replicaDriver = buildDriver(process.env.NEO4J_READ_URI || process.env.NEO4J_REPLICA_URI || process.env.NEO4J_URI || 'bolt://localhost:7687');
+    }
+    return replicaDriver;
+  }
+
+  if (!primaryDriver) {
     if (!process.env.NEO4J_URI || !process.env.NEO4J_USER || !process.env.NEO4J_PASSWORD) {
-        // Fallback or error, but for now we might be in test mode without env
-        // If strict, we throw.
-        if (process.env.NODE_ENV === 'test') {
-            // Return a mock-able structure or throw if not mocked
-             throw new Error("Neo4j env vars missing in test");
-        }
-        console.warn("Neo4j environment variables missing");
+      if (process.env.NODE_ENV === 'test') {
+        throw new Error('Neo4j env vars missing in test');
+      }
+      console.warn('Neo4j environment variables missing');
     }
 
-    driver = neo4j.driver(
-      process.env.NEO4J_URI || 'bolt://localhost:7687',
-      neo4j.auth.basic(process.env.NEO4J_USER || 'neo4j', process.env.NEO4J_PASSWORD || 'password'),
-      { disableLosslessIntegers: true },
-    );
+    primaryDriver = buildDriver(process.env.NEO4J_URI || 'bolt://localhost:7687');
   }
-  return driver;
+  return primaryDriver;
+}
+
+async function executeWithDriver<T>(
+  driver: Driver,
+  cypher: string,
+  params: Record<string, any>,
+  mode: 'read' | 'write',
+  route: 'primary' | 'replica',
+) {
+  const session = driver.session({
+    defaultAccessMode: mode === 'write' ? neo4j.session.WRITE : neo4j.session.READ,
+  });
+
+  activeSessions++;
+  metrics.setGauge('active_sessions', activeSessions, { route });
+
+  const start = Date.now();
+  try {
+    const res = await session.run(cypher, params);
+    const duration = (Date.now() - start) / 1000;
+    metrics.observeHistogram('query_duration_seconds', duration, { route, mode });
+    return res.records.map((r) => r.toObject()) as T[];
+  } finally {
+    await session.close();
+    activeSessions--;
+    metrics.setGauge('active_sessions', activeSessions, { route });
+  }
 }
 
 export async function runCypher<T = any>(
   cypher: string,
   params: Record<string, any> = {},
-  options: { tenantId?: string; write?: boolean } = {}
+  options: {
+    tenantId?: string;
+    caseId?: string;
+    permissionsHash?: string;
+    cacheTtlSeconds?: number;
+    bypassCache?: boolean;
+    write?: boolean;
+  } = {},
 ) {
   // Write-Aware Sharding Gate (Limited GA)
   if (options.write && options.tenantId) {
     const featureAllowed = quotaEnforcer.isFeatureAllowed(options.tenantId, 'write_aware_sharding');
 
-    // In "Limited GA", if they are NOT on the allowlist, we might fallback to legacy write path
-    // OR block if the intention is to only allow sharded writes for some.
-    // Assuming "write_aware_sharding" is the *new* path, checking it here implies we might select a different driver/db.
-    // But since I don't have multiple drivers set up in this MVP, I will just log/metric the check
-    // to prove the gate is active.
-
-    // Queue Depth Guard (Simple active session count as proxy)
-    // "Autoscale + queue depth guards"
-    const MAX_CONCURRENT_WRITES = 50; // Simple guard
+    const MAX_CONCURRENT_WRITES = 50;
     if (activeSessions > MAX_CONCURRENT_WRITES) {
-       // Only block if feature is enabled, or maybe for everyone?
-       // Let's protect the DB for everyone.
-       throw new Error('Database write queue full (Queue Depth Guard)');
+      throw new Error('Database write queue full (Queue Depth Guard)');
     }
 
     if (featureAllowed) {
-        // Proceed with "sharded" logic (simulated here)
+      // Future hook for sharded writes
     }
   }
 
-  const session = getDriver().session({
-    defaultAccessMode: options.write ? neo4j.session.WRITE : neo4j.session.READ,
-  });
-
-  activeSessions++;
-  metrics.setGauge('active_sessions', activeSessions);
-
-  const start = Date.now();
-
-  try {
-    const res = await session.run(cypher, params);
-    return res.records.map((r) => r.toObject()) as T[];
-  } finally {
-    const duration = (Date.now() - start) / 1000;
-    metrics.observeHistogram('query_duration_seconds', duration);
-
-    await session.close();
-    activeSessions--;
-    metrics.setGauge('active_sessions', activeSessions);
+  const isWrite = !!options.write;
+  const stickyPrimary = shouldStickToPrimary(options);
+  if (stickyPrimary && !isWrite) {
+    metrics.incrementCounter('sticky_reads', { scope: options.caseId ? 'case' : 'tenant' });
   }
+
+  const preferReplica = readReplicaConfigured() && !isWrite && !stickyPrimary;
+  const routes: Array<'primary' | 'replica'> = preferReplica ? ['replica', 'primary'] : ['primary'];
+
+  const fetchFromDb = async () => {
+    let lastError: any;
+    for (const route of routes) {
+      try {
+        const driver = getDriver(route);
+        metrics.incrementCounter('route_choice_total', { target: route });
+        return await executeWithDriver<T>(driver, cypher, params, isWrite ? 'write' : 'read', route);
+      } catch (err: any) {
+        lastError = err;
+        if (route === 'replica') {
+          metrics.incrementCounter('replica_fallbacks', { reason: err?.message || 'replica_error' });
+          continue;
+        }
+        throw err;
+      }
+    }
+    throw lastError;
+  };
+
+  const cacheEnabled = process.env.QUERY_CACHE === '1' && !isWrite && options.bypassCache !== true;
+  const tenantLabel = options.tenantId || 'unknown';
+  let result: T[];
+
+  if (cacheEnabled) {
+    result = await runWithGraphQueryCache<T>(
+      {
+        query: cypher,
+        params,
+        tenantId: options.tenantId,
+        caseId: options.caseId,
+        permissionsHash: options.permissionsHash,
+        ttlSeconds: options.cacheTtlSeconds,
+        op: 'graph-query',
+      },
+      fetchFromDb,
+    );
+  } else {
+    const reason = isWrite
+      ? 'write'
+      : options.bypassCache
+        ? 'explicit_bypass'
+        : process.env.QUERY_CACHE === '1'
+          ? 'sticky_or_other'
+          : 'disabled';
+    recordCacheBypass(reason, 'graph-query', tenantLabel);
+    result = await fetchFromDb();
+  }
+
+  if (isWrite) {
+    markRecentWrite(options);
+    await invalidateGraphQueryCache({
+      tenantId: options.tenantId,
+      caseId: options.caseId,
+      permissionsHash: options.permissionsHash,
+    });
+  }
+
+  return result;
 }
 
 export async function closeDriver() {
-    if (driver) {
-        await driver.close();
-        driver = null;
-    }
+  if (primaryDriver) {
+    await primaryDriver.close();
+    primaryDriver = null;
+  }
+  if (replicaDriver) {
+    await replicaDriver.close();
+    replicaDriver = null;
+  }
+}
+
+export function __resetGraphConnectionsForTests() {
+  primaryDriver = null;
+  replicaDriver = null;
+  activeSessions = 0;
+  recentWrites.clear();
 }

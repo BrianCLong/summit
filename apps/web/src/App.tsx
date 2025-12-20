@@ -33,6 +33,7 @@ const AdminPage = React.lazy(() => import('@/pages/AdminPage'))
 const ConsistencyDashboard = React.lazy(() => import('@/pages/admin/ConsistencyDashboard').then(m => ({ default: m.ConsistencyDashboard })))
 const HelpPage = React.lazy(() => import('@/pages/HelpPage'))
 const ChangelogPage = React.lazy(() => import('@/pages/ChangelogPage'))
+const InternalCommandDashboard = React.lazy(() => import('@/pages/internal/InternalCommandDashboard'))
 const SignInPage = React.lazy(() => import('@/pages/SignInPage'))
 const SignupPage = React.lazy(() => import('@/pages/SignupPage'))
 const VerifyEmailPage = React.lazy(() => import('@/pages/VerifyEmailPage'))
@@ -46,6 +47,7 @@ import { SearchProvider } from '@/contexts/SearchContext'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ErrorBoundary, NotFound } from '@/components/error'
 import Explain from '@/components/Explain'
+import { CommandStatusProvider } from '@/features/internal-command/CommandStatusProvider'
 
 function App() {
   const [showPalette, setShowPalette] = React.useState(false);
@@ -68,8 +70,9 @@ function App() {
         <TooltipProvider>
           <AuthProvider>
             <SearchProvider>
-              <Router>
-                <ErrorBoundary>
+              <CommandStatusProvider>
+                <Router>
+                  <ErrorBoundary>
                   <React.Suspense
                     fallback={
                       <div className="flex h-screen items-center justify-center">
@@ -143,6 +146,10 @@ function App() {
                         path="dashboards/supply-chain"
                         element={<SupplyChainDashboard />}
                       />
+                      <Route
+                        path="internal/command"
+                        element={<InternalCommandDashboard />}
+                      />
 
                       {/* Data & Models */}
                       <Route
@@ -167,6 +174,7 @@ function App() {
                   </React.Suspense>
                 </ErrorBoundary>
               </Router>
+              </CommandStatusProvider>
             </SearchProvider>
           </AuthProvider>
         </TooltipProvider>
