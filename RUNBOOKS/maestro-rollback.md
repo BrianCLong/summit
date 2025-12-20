@@ -1,73 +1,82 @@
-# Maestro Orchestrator SLO + Rollback Runbook
+# Maestro rollback and triage runbook
 
-**Owners:** Maestro SRE (@maestro-sre)
-**Pager:** `#maestro-pager`
-**Dashboards:** Grafana `maestro/overview`, `maestro/slo-burn`, `maestro/deployments`
-**Workloads:** `Deployment/maestro-orchestrator` (namespace: `intelgraph-prod`), Helm release `maestro`
+**Service**: Maestro control plane and UI
 
-## When to Use
-Trigger this runbook when any Maestro alert fires or user reports match these symptoms:
+**Purpose**: Provide a concise map from symptoms to triage to rollback actions when Maestro alerts fire. Use this after any Maestro deployment or infra change that correlates with availability, latency, or error-rate regressions.
 
-| Symptom/Alert | What it means | First checks |
-| --- | --- | --- |
-| `MaestroHighErrorRate` | Error rate >10% in orchestration handlers | `kubectl -n intelgraph-prod logs deploy/maestro-orchestrator --since=10m | tail -n 80`; Prometheus `rate(maestro_orchestration_errors_total[5m])` |
-| `MaestroHighLatency` | p95 orchestration duration >30s | `kubectl -n intelgraph-prod get hpa maestro-orchestrator -o wide`; Prometheus `histogram_quantile(0.95, rate(maestro_orchestration_duration_seconds_bucket[5m]))` |
-| `MaestroPodDown` | Pods not reporting to Prometheus | `kubectl -n intelgraph-prod get pods -l app=maestro-orchestrator`; `kubectl -n intelgraph-prod describe deploy/maestro-orchestrator` |
-| `MaestroMemoryUsageHigh` | Pod memory >85% limit | `kubectl -n intelgraph-prod top pod -l app=maestro-orchestrator`; `kubectl -n intelgraph-prod describe pod <pod>` |
-| `MaestroCPUUsageHigh` | Pod CPU >85% quota | `kubectl -n intelgraph-prod top pod -l app=maestro-orchestrator`; check background jobs or runaway queries |
+## Symptoms that trigger this runbook
 
-## Triage
-1. **Confirm scope**
-   - `kubectl -n intelgraph-prod get pods -l app=maestro-orchestrator -o wide`
-   - `kubectl -n intelgraph-prod rollout status deploy/maestro-orchestrator`
-2. **Collect signals**
-   - Logs: `kubectl -n intelgraph-prod logs deploy/maestro-orchestrator --since=15m | tail -n 200`
-   - Events: `kubectl -n intelgraph-prod get events --sort-by=.lastTimestamp | tail -n 20`
-   - Metrics: Prometheus queries above; check SLO burn dashboard for budget burn.
-3. **Decide path**
-   - If **error/latency spike** followed a deploy, prioritize rollback.
-   - If **pod down**, restart then rollback if restart fails.
-   - If **resource pressure**, scale or roll back to last known good image.
+- `MaestroServiceDown`, `MaestroIngressDown`, or load balancer health checks failing
+- `MaestroHighErrorRate`, `MaestroAPIHealthDegraded`, or SLO burn alerts
+- `MaestroHighLatency` / `MaestroHighLatencyP95`, or p95/p99 spikes on dashboards
+- Deployment instability: pod restart loops, replica mismatches, or elevated resource alerts (CPU/memory)
 
-## Mitigation & Rollback
+## 10-minute triage (stabilize + gather evidence)
 
-### Quick stabilizers
-- Restart: `kubectl -n intelgraph-prod rollout restart deploy/maestro-orchestrator`
-- Drain stuck pod: `kubectl -n intelgraph-prod delete pod -l app=maestro-orchestrator --grace-period=30`
+1. **Confirm recent change**
+   - `kubectl -n maestro rollout history deployment/maestro-control-plane | tail -5`
+   - `helm history maestro-control-plane -n maestro | tail -5`
+2. **Check control plane health**
+   - `kubectl -n maestro get deploy maestro-control-plane`
+   - `kubectl -n maestro get pods -l app=maestro-control-plane -o wide`
+   - `kubectl -n maestro logs deploy/maestro-control-plane --tail=200`
+   - `kubectl -n maestro describe deploy/maestro-control-plane | tail -n 50`
+3. **Validate ingress + endpoints**
+   - `kubectl -n ingress-nginx get pods`
+   - `curl -fsSL https://maestro.intelgraph.ai/health` (or the environment-specific health endpoint)
+4. **Dependencies**
+   - Database: `kubectl -n maestro logs statefulset/maestro-postgres --tail=50`
+   - Redis: `kubectl -n maestro logs statefulset/maestro-redis --tail=50`
+   - Queue depth: check Grafana panel `Maestro queue depth`
+5. **Decide**: If the regression started immediately after a deploy or config change, proceed to rollback; otherwise continue investigation (logs, dashboards, traces).
 
-### Kubernetes rollback (fastest)
-1. Inspect history: `kubectl -n intelgraph-prod rollout history deploy/maestro-orchestrator`
-2. Roll back: `kubectl -n intelgraph-prod rollout undo deploy/maestro-orchestrator --to-revision=<REV>`
-3. Watch: `kubectl -n intelgraph-prod rollout status deploy/maestro-orchestrator --watch`
+## Rollback execution
 
-### Helm rollback
-1. `helm -n intelgraph-prod history maestro`
-2. `helm -n intelgraph-prod rollback maestro <REV>`
-3. Verify service endpoints and ingress:
-   - `kubectl -n intelgraph-prod get ing maestro`
-   - `curl -I https://maestro.intelgraph.ai/health`
+### Option A: GitHub Action (preferred for prod) — `.github/workflows/cd-rollback.yml`
 
-### GitHub Actions rollback (cd-rollback.yml)
-Use this for auditable, remote rollbacks:
+1. Identify the last known good image tag (from `helm history` or release notes).
+2. Trigger the workflow with the target environment and tag:
+   ```bash
+   gh workflow run cd-rollback.yml \
+     -f environment=staging \
+     -f image_tag=<good_tag>
+   ```
+   - The workflow logs into GHCR, pulls the requested tag, recreates `server`/`client` via Compose, and prunes unused images.
+3. Monitor the workflow logs and proceed to post-rollback validation below.
+
+### Option B: Helm rollback (cluster-admin)
 
 ```bash
-# Requires GitHub CLI auth with environment permissions
-# Roll back staging to previous image tag
-gh workflow run cd-rollback.yml \
-  --ref main \
-  -f environment=staging \
-  -f image_tag=<stable-image-tag>
+# Inspect revisions
+helm history maestro-control-plane -n maestro
+
+# Roll back to the last good revision
+helm rollback maestro-control-plane <REVISION> -n maestro --cleanup-on-fail
+
+# If only the image needs reverting
+helm upgrade maestro-control-plane oci://ghcr.io/intelgraph/maestro-control-plane \
+  --namespace maestro \
+  --reuse-values \
+  --set image.tag=<good_tag>
 ```
 
-- Validate workflow dispatch in **Actions → CD Rollback** and monitor console output for compose pull/up steps.
-- Production runs require approved secrets in the target environment. If secrets are missing, fall back to Helm rollback above.
+### Option C: Kubernetes deployment rollback
 
-## Verification (post-mitigation)
-- Health: `curl -I https://maestro.intelgraph.ai/health` (expect `200 OK`).
-- Metrics: confirm error rate/latency return below thresholds for 10 minutes.
-- Logs: no repeating stack traces in the last 5 minutes.
-- Traffic: `kubectl -n intelgraph-prod top pod -l app=maestro-orchestrator` shows steady utilization.
+```bash
+kubectl -n maestro rollout history deploy/maestro-control-plane
+kubectl -n maestro rollout undo deploy/maestro-control-plane --to-revision=<REVISION>
+kubectl -n maestro rollout status deploy/maestro-control-plane --watch
+```
 
-## Evidence & Follow-up
-- Record the rollback (revision, time, image tag) in `drills/maestro-cd-rollback-drill.md`.
-- Open a follow-up issue if the rollback was due to a bad release; include offending commit SHA and failing alerts.
+## Post-rollback validation
+
+1. **Pods healthy**: `kubectl -n maestro get pods -l app=maestro-control-plane` shows all Ready.
+2. **Traffic healthy**: `curl -fsSL https://maestro.intelgraph.ai/health` (or internal health check) returns 200 with `status: ok`.
+3. **SLOs recover**: confirm alert clears and Grafana panels for availability/error rate return to baseline.
+4. **Events/logs clean**: `kubectl -n maestro get events --sort-by=.metadata.creationTimestamp | tail -n 20`; check fresh logs for errors.
+5. **Communicate**: update the incident channel and create a post-incident note referencing the image tag and revision rolled back.
+
+## Escalation
+
+- If rollback does not restore service within 10 minutes, escalate to platform on-call and database owners.
+- If ingress remains unhealthy, engage the networking/ingress owner before retrying rollout.

@@ -10,10 +10,6 @@ Quick reference for operational procedures and incident response.
   - Feature flags, pin/unpin commands, failure modes, recovery procedures
   - P1 service with comprehensive monitoring and alerting
 
-### Maestro
-
-- **[Maestro Orchestrator SLO + Rollback](./maestro-rollback.md)** - Symptoms → triage → rollback (kubectl/Helm/CD workflow)
-
 ### General Operations
 
 - [Release Captain Quick Reference](./release-captain-quick-reference.md)
@@ -73,4 +69,4 @@ Quick reference for operational procedures and incident response.
 **🚨 For P1 incidents involving MC Platform v0.4.5 IncidentAutoReweighter, go directly to:**
 [incident-auto-reweighter.md](./incident-auto-reweighter.md)
 
-**Last Updated:** 2025-12-19 - Added Maestro orchestrator rollback runbook
+**Last Updated:** $(date -u +%Y-%m-%d) - Added MC Platform v0.4.5 IncidentAutoReweighter runbook

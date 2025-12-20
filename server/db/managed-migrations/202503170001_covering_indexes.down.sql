@@ -1,0 +1,5 @@
+DROP INDEX IF EXISTS idx_entities_tenant_kind_created_cover;
+DROP INDEX IF EXISTS idx_entities_tenant_created_cover;
+DROP INDEX IF EXISTS idx_relationships_tenant_src_created_cover;
+DROP INDEX IF EXISTS idx_relationships_tenant_dst_created_cover;
+DROP INDEX IF EXISTS idx_relationships_tenant_type_created_cover;

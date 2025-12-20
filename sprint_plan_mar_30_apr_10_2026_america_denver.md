@@ -1,35 +1,35 @@
 # Sprint Plan — Mar 30–Apr 10, 2026 (America/Denver)
 
-> **Context:** Sprint after **EA Cohort Expansion**. Objective: deliver **Public Beta Prep** by hardening stability at 50+ tenants, elevating docs/help, enforcing cost/residency/security controls, and polishing upgrade/support flows for a broader invite.
+> **Context:** Sprint 8 — **Growth & Expansion: Self-Serve, Distribution, and Enterprise Add-Ons.** Objective: **“Scale acquisition without scaling headcount”** by enabling self-serve tenant creation, rapid activation, partner-ready distribution bundles, and two enforceable enterprise add-ons with invoice-ready reporting.
 
 ---
 
 ## 1) Sprint Goal (SMART)
 
-Achieve **public-beta readiness** by Apr 10, 2026: run green **50-tenant soak** (ingest → query → compile → export) within SLOs and <10% error-budget burn; ship **contextual help + docs beta** with telemetry; enable **per-tenant cost budgets** with alerts/soft caps; surface **residency/legal nameplates** in UI/API/export; enforce **token scopes v1.1 + anomaly alerts**; deliver **upgrade/plan UX v1** and **one-click redacted diagnostics** — all behind flags with demo script recorded.
+Enable a new customer to **sign up → create first tenant → ingest first receipt in <15 minutes** (hosted), drive **≥70% activation checklist completion within 24 hours**, ship the **partner distribution pack with validation**, and launch **two enterprise add-ons** with entitlements, quotas, and invoice-ready reporting by Apr 10, 2026.
 
-**Key outcomes**
+**Target outcomes**
 
-- 50-tenant soak scenario runnable with report artifact; p95 latency within targets; error-budget burn <10%.
-- Contextual help accessible inline and via command palette; usage telemetry live; links to versioned docs.
-- Docs beta live with search, permalinks, stable URLs, and release notes mapped to feature flags.
-- Cost budgets enforce thresholds with email/webhook alerts, soft-stop + override and audit trail.
-- Residency v1.1 labels visible in UI/API/export; exports include residency + policy ID and fail closed on mismatch.
-- Plan/upgrade UX v1 delivers compare table, upgrade modal, audit event, and return-to-task flow.
-- One-click redacted diagnostics bundle (JSON + recent logs) with secrets removed and time-limited link.
-- Token scopes v1.1 exposes finer scopes, last-used/IP, and anomaly alert rules with runbook.
+- Self-serve onboarding from signup to first receipt in **<15 minutes** with audit receipts.
+- ≥ **70%** of new tenants complete the activation checklist within 24 hours.
+- Partner distribution pack installs repeatably with versioned configs + validation evidence.
+- Two enterprise add-ons shipped with enforcement, metering, and invoice-ready line items.
+- Switchboard exposes cohort/usage health signals for retention nudges.
 
 ---
 
 ## 2) Success Metrics & Verification
 
-- **Soak reliability:** p95 latency within SLO; **error-budget burn <10%** during 50-tenant drill.  _Verify:_ automated soak report artifact; SLO dashboard.
-- **Help/docs adoption:** contextual help open rate and article CTR captured; docs search/permalink usage tracked.  _Verify:_ telemetry dashboards; command palette analytics.
-- **Cost governance:** budget alerts fire for threshold breaches; **soft-stop enforced** with override + audit.  _Verify:_ alert logs; audit records; override telemetry.
-- **Residency compliance:** **100% exports** include residency + policy ID; mismatches block export.  _Verify:_ export validator results; API/UI label checks.
-- **Security:** token scopes v1.1 scoped correctly; anomaly alerts triggered on unusual token use with runbook followed.  _Verify:_ scope matrix tests; alert drill notes.
-- **Supportability:** diagnostics bundle generated with redaction; link expiry honored.  _Verify:_ download audit; link expiry test.
-- **Upgrade UX:** upgrade modal produces audit event and returns user to prior task.  _Verify:_ audit log; UX walkthrough.
+- **Onboarding time:** Median time from signup to first receipt **<15 minutes**.  
+  _Verify:_ timed flow + receipt artifact per tenant.
+- **Activation:** ≥ **70%** of new tenants finish the activation checklist in 24 hours.  
+  _Verify:_ activation event funnel; checklist completion export.
+- **Distribution reliability:** 100% partner bundle installs complete after validation suite.  
+  _Verify:_ validation run log + signed evidence bundle.
+- **Enterprise add-ons:** Add-on enforcement blocks/permits correctly; usage metered; invoice lines generated.  
+  _Verify:_ entitlement checks, quota tests, invoice report.
+- **Health signals:** Cohort health score visible with at least three actionable nudges.  
+  _Verify:_ Switchboard dashboard; nudge delivery logs.
 
 ---
 
@@ -37,55 +37,58 @@ Achieve **public-beta readiness** by Apr 10, 2026: run green **50-tenant soak** 
 
 **Must-have (commit):**
 
-- **Scale & Resilience Drill @ 50 Tenants (6 pts):** scripted ingest → query → compile → export scenario, fixtures, p95 in target, error-budget burn <10%, automated report.
-- **Contextual Help v1 (5 pts):** inline “?” and ⌘/Ctrl-K command palette; searchable; article usage telemetry.
-- **Docs Site Beta + Versioned Release Notes (5 pts):** structured docs (setup, governance, golden path) with search, permalinks, stable URLs; release notes mapped to feature flags.
-- **Cost Controls & Budgets (5 pts):** per-tenant budgets on rows/tokens/exports; threshold alerts via email/webhook; soft-stop with override + audit.
-- **Residency v1.1 (3 pts):** region/legal entity nameplates in UI/API/export; exports carry residency + policy ID; fail closed on mismatch.
-- **Authority Compiler v1.3 (5 pts):** cross-references/link picker; evidence links; validator runs on export; broken links block publish with fix guidance.
-- **Plan/Upgrade UX v1 (3 pts):** compare table; upgrade modal; audit event; return-to-task flow.
-- **One-Click Redacted Diagnostics (3 pts):** UI trigger for redacted JSON + recent logs; secrets removed; time-limited link.
-- **Security: API Token Scopes v1.1 + Anomaly Alerts (5 pts):** finer-grained scopes; last-used/IP surfaced; alert rules + runbook.
+- **Self-Serve Signup & Tenant Creation (6 pts):** Hosted portal flow for org/tenant, region/retention selection, policy profile pick, email/domain verification, receipts, policy-gated steps.
+- **Integration Quick Connect (4 pts):** OIDC wizard (common IdPs) with optional SCIM; automated health checks with prescriptive fixes.
+- **Activation Checklist & Tracking (5 pts):** Checklist items for identity connect, first privileged approval, first evidence export, first usage/cost report; completion telemetry per tenant.
+- **Growth Instrumentation (4 pts):** Tenant milestone events, activation/retention metrics, transparent health score.
+- **Lifecycle Nudges (3 pts):** Admin-only prompts (“finish setup,” “set quotas,” “export evidence,” “invite auditor”) with per-tenant opt-out.
+- **Partner Distribution Pack v1 (5 pts):** Versioned config bundles with install profiles, region defaults, policy presets, observability defaults, and one-command validation suite + signed evidence.
+- **Upgrade Assistant (3 pts):** Preflight checks + migration notes surfaced in Switchboard; generate “Upgrade Evidence Bundle.”
+- **Enterprise Add-Ons (choose two) (6 pts):** 
+  - **Dedicated compute pool per tenant** (no noisy neighbors).  
+  - **Audit archive (WORM-like) to customer bucket** with retention enforcement.
+- **Entitlements + Invoice-Ready Reporting (4 pts):** Feature flags/quotas/policy obligations, usage metering, and invoice line items for the selected add-ons.
 
 **Stretch (time-boxed):**
 
-- **Localization Hooks (US/EU date/number) (2 pts):** locale-aware formatting in UI shell and exports.
+- **Advanced data residency enforcement** (region-locked services + cross-region deny) behind flag with partial metering (2 pts).
 
-**Out-of-scope:** additional GA feature expansions beyond listed flags; new tenancy models.
+**Explicit non-goals:** Marketplace listings; complex marketing automation; new tenancy models beyond hosted flow.
 
 ---
 
 ## 4) Team & Capacity
 
-- **Capacity:** ~40–42 pts (stretch optional). Hold buffer for support/soak findings.
-- **Roster/planes:** dev → stage (50-tenant cohort) with canary + auto-rollback across US/EU planes.
+- **Capacity:** ~40–42 pts (stretch optional); reserve buffer for partner validation and add-on enforcement fixes.
+- **Planes:** dev → stage → partner-candidate bundles; canary + auto-rollback; demo tenants seeded for activation flow.
 
 ---
 
 ## 5) Backlog (Ready for Sprint)
 
-| ID      | Title                                 | Owner  | Est | Dependencies | Acceptance Criteria (summary)                |
-| ------- | ------------------------------------- | ------ | --: | ------------ | -------------------------------------------- |
-| PBP-101 | Soak & Resilience @ 50 Tenants        | Ops    |   6 | —            | Scripted scenario; p95/SLOs; report artifact |
-| PBP-111 | Contextual Help v1 (Inline + Palette) | FE     |   5 | —            | “?” + palette; searchable; telemetry         |
-| PBP-112 | Docs Site (Beta) + Versioned Notes    | PM+FE  |   5 | —            | Search; permalinks; notes map to flags       |
-| PBP-121 | Cost Budgets & Alerts (Admin)         | BE+FE  |   5 | —            | Thresholds; alerts; soft-stop + override     |
-| PBP-131 | Residency v1.1 (Labels & Exports)     | BE     |   3 | —            | UI/API/export labels; fail-closed            |
-| PBP-141 | Authority Compiler v1.3 (Cross-Refs)  | FE+BE  |   5 | —            | Link picker; validator; block on break       |
-| PBP-151 | Plan/Upgrade UX v1                    | FE     |   3 | —            | Compare table; upgrade modal; audit          |
-| PBP-161 | One-Click Redacted Diagnostics        | BE+FE  |   3 | —            | Redacted JSON/logs; expiring link            |
-| PBP-171 | Token Scopes v1.1 + Anomaly Alerts    | BE+Ops |   5 | —            | Finer scopes; last-used/IP; alerts + runbook |
-| PBP-181 | Localization Hooks (Stretch)          | FE     |   2 | —            | Locale formatting in shell & exports         |
+| ID      | Title                                         | Owner     | Est | Dependencies | Acceptance Criteria (summary)                                      |
+| ------- | --------------------------------------------- | --------- | --: | ------------ | ------------------------------------------------------------------ |
+| GROW-201| Self-Serve Signup + Tenant Creation           | FE+BE     |   6 | —            | Hosted flow; region/retention; policy profile; verification; receipts |
+| GROW-211| OIDC Quick Connect + SCIM (opt)               | FE+BE     |   4 | GROW-201     | IdP wizard; health checks; prescriptive fixes                      |
+| GROW-221| Activation Checklist & Tracking               | FE        |   5 | GROW-201     | Checklist items; telemetry; completion export                      |
+| GROW-231| Growth Instrumentation & Health Score         | BE        |   4 | GROW-221     | Milestone events; transparent formula; dashboard hook              |
+| GROW-241| Lifecycle Nudges (Admin-only)                 | FE+BE     |   3 | GROW-221     | Prompts; targeting; opt-out per tenant                             |
+| DIST-251| Partner Distribution Pack v1 + Validation     | BE+Ops    |   5 | —            | Versioned bundles; validation suite; signed evidence               |
+| DIST-261| Upgrade Assistant + Evidence Bundle           | FE+BE     |   3 | DIST-251     | Preflight checks; migration notes; evidence bundle                 |
+| ENT-271 | Dedicated Compute Pool Add-On                 | BE+Ops    |   3 | —            | Entitlement + enforcement; metering; invoice line                  |
+| ENT-272 | Audit Archive Add-On (WORM)                   | BE        |   3 | —            | Retention enforcement; export to customer bucket; invoice line     |
+| ENT-281 | Entitlements + Invoice Reporting Framework    | BE        |   4 | ENT-271/272  | Flags/quotas; metering; invoice-ready export                       |
+| RES-291 | Advanced Data Residency Enforcement (Stretch) | BE        |   2 | —            | Region-locked services; deny cross-region; partial metering        |
 
-> Planned: 40–42 pts including stretch hook.
+> Planned: ~40–42 pts; stretch only if core onboarding/add-ons are stable.
 
 ---
 
 ## 6) Dependencies & Assumptions
 
-- Flags: `soak50`, `contextHelpV1`, `docsBeta`, `costBudgets`, `residencyV11`, `authorityRefsV13`, `planUxV1`, `supportDiagOneClick`, `tokenScopesV11`, `i18nHooks` (stretch).
-- Test data: load profiles for 50 tenants; budget thresholds; docs stubs; localized formatting fixtures.
-- Canary + auto-rollback active; budget alerts wired to email/webhook endpoints; telemetry sinks available for help/docs usage.
+- Flags: `selfServeOnboarding`, `oidcQuickConnect`, `activationChecklist`, `growthInstrumentation`, `adminNudges`, `distributionPackV1`, `upgradeAssistant`, `addonDedicatedCompute`, `addonAuditArchive`, `entitlementsBilling`, `advancedResidency` (stretch).
+- Seed data: demo tenants with identity connectors, sample receipts, evidence bundle templates, partner bundle profiles (S/M/L).
+- Infra: Switchboard panels for health score + nudges; signed evidence pipeline available for bundles.
 
 ---
 
@@ -94,54 +97,53 @@ Achieve **public-beta readiness** by Apr 10, 2026: run green **50-tenant soak** 
 - **Mon Mar 30 — 09:30–11:00:** Sprint Planning.
 - **Daily — 09:15–09:30:** Stand-up.
 - **Thu Apr 2 — 14:00–14:45:** Mid-sprint Refinement.
-- **Fri Apr 10 — 10:00–11:00:** Sprint Review (Public Beta go/no-go).
+- **Fri Apr 10 — 10:00–11:00:** Sprint Review (Growth & Add-Ons demo).
 - **Fri Apr 10 — 11:15–12:00:** Retro.
 
 ---
 
 ## 8) Definition of Ready (DoR)
 
-- Each story has AC, dependencies, flags, rollback, seeded data/fixtures, and wire/API sketch where UI exists.
+- Story has AC, dependencies, flags, rollback/kill-switch, seeded data/fixtures, policy/entitlement mapping, and UI/API wireframe where applicable.
 
 ## 9) Definition of Done (DoD)
 
-- All AC met; features behind flags where noted; demo script recorded.
-- Tests: unit + contract + one recorded E2E (fresh tenant) and one **soak report** artifact.
-- Security: token-scope tests, anomaly alert drill; no criticals.
-- Observability: dashboards for tenant count, p95s, export success, help-article usage, budget alerts.
+- All AC met; features behind flags/entitlements; demo script recorded.
+- Tests: unit + contract + one fresh-tenant E2E for onboarding; validation suite green for partner bundle.
+- Security/Compliance: domain verification enforced; add-on entitlements enforced with audit; retention/WORM tests for archive.
+- Observability: dashboards for onboarding time, activation completion, bundle validation, add-on usage/metering, and nudge delivery.
 
 ---
 
 ## 10) QA & Validation Plan
 
-- **Functional:** 50-tenant soak report; contextual help opens and tracks usage; docs search/permalinks; budget alerts + soft-stop with override; residency labels in UI/API/export; cross-ref validation blocks broken links; plan compare & upgrade modal; diagnostics bundle redacted with expiring link; token scopes + anomaly alerts.
-- **End-to-end:** New tenant → golden path → hit budget alert → upgrade plan → resume task → export PASS with residency policy → generate diagnostics bundle.
-- **Non-functional:** 50-tenant soak p95s within SLO; error-budget burn; help article CTR; cost-alert latency.
+- **Functional:** Self-serve signup/tenant creation with receipts; OIDC wizard + health checks; activation checklist completion; milestone events + health score; admin nudges with opt-out; distribution pack validation + signed evidence; upgrade assistant evidence bundle; dedicated compute enforcement; audit archive WORM retention; invoice export with add-on lines.
+- **End-to-end:** Signup → tenant creation → OIDC quick connect → activation checklist → first privileged approval → export evidence bundle → enable dedicated compute + audit archive → validate invoice lines → partner installs via distribution pack.
+- **Non-functional:** Onboarding time SLA; validation suite duration; quota/enforcement latency; archive retention checks; health score freshness.
 
 ---
 
 ## 11) Risks & Mitigations
 
-| Risk                                       | Prob. | Impact | Mitigation                                                  |
-| ------------------------------------------ | ----- | -----: | ----------------------------------------------------------- |
-| Docs/help drift from product               | Med   |   High | Versioned docs; link to specific release; review checklist in CI |
-| Budget soft-stops frustrate users          | Med   |   Med  | Clear copy; override with audit; preview impact in UI       |
-| Anomaly alert noise                        | Med   |   Med  | Threshold tuning; suppression windows; weekly review        |
-| Cross-ref validator false positives        | Low   |   Med  | Allow skip with justification + audit in early beta         |
+| Risk                                                      | Prob. | Impact | Mitigation                                                       |
+| --------------------------------------------------------- | ----- | -----: | ---------------------------------------------------------------- |
+| Onboarding exceeds 15 minutes due to IdP/SCIM delays      | Med   |   High | Cache IdP presets; parallelize health checks; fallback manual link |
+| Activation checklist ignored by admins                    | Med   |   Med  | Inline prompts; email follow-up; highlight progress in header    |
+| Partner bundle validation flakes across regions           | Med   |   Med  | Deterministic fixtures; replayable validation suite; signed evidence |
+| Add-on enforcement gaps (compute/archival)                | Low   |   High | Entitlement gate in control plane + audit logs + denial tests    |
+| Invoice export mismatch with metering                     | Low   |   Med  | Reconcile metering snapshots; nightly sanity check               |
 
 ---
 
 ## 12) Reporting Artifacts & Demo Script
 
-- **Artifacts:** Soak-50 report, public-beta checklist, budget/alerts dashboard, token-anomaly alert drill notes, release notes & changelog, burndown/throughput, SLO snapshots.
+- **Artifacts:** Onboarding time report, activation funnel, health score dashboard, nudge delivery log, distribution pack validation evidence, upgrade evidence bundle, add-on enforcement tests, invoice-ready report with add-on lines.
 - **Demo script:**
-  1. Trigger Soak-50 job → open report with p95 & error-budget view.
-  2. Show Contextual Help in Wizard and Compiler → search an article from command palette.
-  3. Open Docs (Beta) → navigate to golden-path guide → follow permalinks from changelog.
-  4. Set Budget → run workload → hit soft cap → alert fires → override with audit.
-  5. Verify Residency labeling + export policy ID in the report.
-  6. Use Authority Cross-Refs → intentionally break one → export blocks with fix guidance.
-  7. Hit a Plan Block → open compare → upgrade → resume task seamlessly.
-  8. Generate Redacted Diagnostics → download link expires.
-  9. Create new Token Scope → simulate anomaly → alert & runbook steps.
-
+  1. Self-serve signup → create tenant → select region/retention/policy → show receipt.
+  2. Run OIDC quick connect; health checks surface fixes; confirm green.
+  3. Complete activation checklist (approval, evidence export, usage/cost view).
+  4. Show cohort health score + nudges; opt-out toggle per tenant.
+  5. Enable **Dedicated Compute** and **Audit Archive**; show enforcement + metering.
+  6. Export invoice-ready report with add-on line items.
+  7. Partner runs distribution pack install with validation and signed evidence.
+  8. Use Upgrade Assistant to surface migration notes and produce Upgrade Evidence Bundle.

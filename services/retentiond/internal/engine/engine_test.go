@@ -30,6 +30,7 @@ func TestDryRunMatchesExecution(t *testing.T) {
 						Type:   "s3",
 						Bucket: "archive",
 						Prefix: "logs/",
+						Tenant: "tenant-a",
 					},
 					{
 						Type:            "postgres",
@@ -43,8 +44,8 @@ func TestDryRunMatchesExecution(t *testing.T) {
 	}
 
 	objectStore := newFakeObjectStore()
-	objectStore.add("archive", storage.Object{Key: "logs/2023-01-01.json", UpdatedAt: now.Add(-48 * time.Hour).Unix()})
-	objectStore.add("archive", storage.Object{Key: "logs/2023-01-02.json", UpdatedAt: now.Add(-23 * time.Hour).Unix()})
+	objectStore.add("archive", storage.Object{Key: "tenant-a/logs/2023-01-01.json", UpdatedAt: now.Add(-48 * time.Hour).Unix()})
+	objectStore.add("archive", storage.Object{Key: "tenant-a/logs/2023-01-02.json", UpdatedAt: now.Add(-23 * time.Hour).Unix()})
 
 	database := newFakeDatabase()
 	database.add(map[string]string{"id": "1"}, now.Add(-72*time.Hour).Unix())
