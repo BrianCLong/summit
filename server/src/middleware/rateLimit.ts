@@ -5,6 +5,10 @@ import { cfg } from '../config.js';
 import QuotaManager from '../lib/resources/quota-manager.js';
 import { tenantIsolationGuard } from '../tenancy/TenantIsolationGuard.js';
 import { TenantContext } from '../tenancy/types.js';
+import { tenantLimitEnforcer } from '../lib/resources/tenant-limit-enforcer.js';
+import { provenanceLedger } from '../provenance/ledger.js';
+
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 /**
  * Rate limiting middleware.
@@ -26,19 +30,56 @@ export const rateLimitMiddleware = async (req: Request, res: Response, next: Nex
         ? 'rag'
         : 'api';
 
-    const rateResult = await tenantIsolationGuard.enforceRateLimit(
-      tenantContext,
-      resource,
-    );
+    const rateResult = await tenantIsolationGuard.enforceRateLimit(tenantContext, resource);
 
     res.set('X-Tenant-Quota-Limit', 'true');
     res.set('X-Tenant-Quota-Remaining', String(rateResult.remaining));
     res.set('X-Tenant-Quota-Reset', String(Math.ceil(rateResult.reset / 1000)));
 
     if (!rateResult.allowed) {
+      try {
+        await provenanceLedger.appendEntry({
+          tenantId: tenantContext.tenantId,
+          actionType: 'TENANT_RATE_LIMIT_EXCEEDED',
+          resourceType: 'rate_limit',
+          resourceId: `${tenantContext.tenantId}:${resource}`,
+          actorId: (req as any).user?.id || 'system',
+          actorType: 'user',
+          payload: {
+            bucket: rateResult.bucket,
+            remaining: rateResult.remaining,
+            reset: rateResult.reset,
+            path: req.originalUrl,
+          },
+          metadata: {
+            method: req.method,
+            ipAddress: req.ip,
+            correlationId: (req as any).correlationId,
+          },
+        });
+      } catch (err) {
+        // best-effort audit; continue with response
+        (req as any).logger?.warn?.({ err }, 'Failed to audit tenant rate limit exceedance');
+      }
       res.status(429).json({
         error: 'Tenant quota exceeded',
         retryAfter: Math.ceil((rateResult.reset - Date.now()) / 1000),
+      });
+      return;
+    }
+
+    // 1b. Seat cap enforcement
+    const seatCheck = await tenantLimitEnforcer.enforceSeatCap(
+      tenantContext,
+      (req as any).user?.id,
+    );
+    res.set('X-Tenant-Seat-Limit', String(seatCheck.limit));
+    res.set('X-Tenant-Seat-Remaining', String(seatCheck.remaining));
+    if (!seatCheck.allowed) {
+      const retryMs = ONE_DAY_MS - (Date.now() % ONE_DAY_MS);
+      res.status(429).json({
+        error: 'Tenant seat cap reached',
+        retryAfter: Math.ceil(retryMs / 1000),
       });
       return;
     }
@@ -83,6 +124,26 @@ export const rateLimitMiddleware = async (req: Request, res: Response, next: Nex
   res.set('X-RateLimit-Reset', String(Math.ceil(result.reset / 1000)));
 
   if (!result.allowed) {
+    const tenantId = (req as any).tenant?.tenantId || (req as any).user?.tenantId;
+    if (tenantId) {
+      provenanceLedger
+        .appendEntry({
+          tenantId,
+          actionType: 'TENANT_RATE_LIMIT_EXCEEDED',
+          resourceType: 'rate_limit',
+          resourceId: key,
+          actorId: (req as any).user?.id || 'system',
+          actorType: 'user',
+          payload: {
+            remaining: result.remaining,
+            reset: result.reset,
+            key,
+            path: req.originalUrl,
+          },
+          metadata: { ipAddress: req.ip },
+        })
+        .catch(() => {});
+    }
     res.status(429).json({
       error: 'Too many requests, please try again later',
       retryAfter: Math.ceil((result.reset - Date.now()) / 1000)

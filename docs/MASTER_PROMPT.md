@@ -1,291 +1,244 @@
-# 🚀 Master Prompt: IntelGraph Supercharged MVP Development
+# MASTER PROMPT — The Summit Constitution (Canonical Doctrine)
 
-> **IntelGraph** is a production-ready AI-augmented intelligence analysis platform.
-> **Current Status: MVP-0 Complete, MVP-1 In Progress**
->
-> Our core philosophy: **1) Always keep a working, deployable build** (smoke tests must pass).
-> **2) Accelerate MVP feature delivery** with enterprise-grade quality.
-> **3) Ship production-ready code with comprehensive testing, observability, and security.**
+## PREAMBLE
 
-## 🎯 Current Production Status
+This document is the **supreme governing artifact** of Summit.
 
-✅ **PRODUCTION READY** - All MVP-0 features complete and validated
+All code, agents, policies, deployments, integrations, partnerships, refusals, shutdowns, archives, and successions **derive authority from this Constitution**.
 
-- ✅ Complete development environment with health checks
-- ✅ Postgres persistence for Copilot runs/tasks/events
-- ✅ CSV + STIX/TAXII data ingestion pipeline
-- ✅ OPA security policies with 150+ test cases
-- ✅ OpenTelemetry observability and Prometheus metrics
-- ✅ Graph Performance Mode (10k+ nodes)
-- ✅ Golden Path Wizard and Enhanced Copilot Panel
-- ✅ Comprehensive smoke testing suite
+If any instruction, prompt, agent, or artifact conflicts with this document, **this document prevails**.
 
-## 🔥 Core Development Principles
+Summit is not optimized for:
 
-### 1. **Deployability First (Non-Negotiable)**
+* Growth at all costs
+* Power without accountability
+* Intelligence without governance
+* Capability without restraint
 
-```bash
-# Every feature must pass these gates:
-make up                    # ✅ Environment starts cleanly
-make smoke                 # ✅ Full golden path works
-node scripts/smoke-test-simple.js  # ✅ Quick validation
-```
-
-**Never merge if:**
-
-- Docker Compose fails to start
-- Smoke tests fail (0% tolerance)
-- Golden path breaks (investigation → entities → Copilot → results)
-- Health checks fail or timeout
-
-### 2. **Feature Velocity (Ship Fast, Ship Right)**
-
-**MVP-1 Priority Stack** (High → Medium → Low):
-
-```
-🔥 HIGH (Production Blockers):
-  - Security scanning (Gitleaks, Trivy) in CI
-  - Backup/disaster recovery procedures
-  - Performance testing and optimization
-  - OTLP exporter configuration
-
-⚡ MEDIUM (Value Multipliers):
-  - Redis Streams event replay
-  - Advanced graph clustering algorithms
-  - OSINT API connectors (Shodan, VirusTotal)
-  - Temporal analysis and timeline views
-
-🎯 LOW (Future Scale):
-  - GNN link prediction models
-  - Federated graph queries
-  - Advanced AI analytics pipeline
-```
-
-**MVP-2+ Stretch Goals** (Don't block MVP-1):
-
-- Multi-modal AI analysis (text, images, documents)
-- Real-time collaborative investigations
-- Advanced threat hunting workflows
-- Enterprise SSO integration
-
-### 3. **Production-Grade Code Standards**
-
-**Architecture Requirements:**
-
-- ✅ **Observability**: Every new API emits OpenTelemetry spans + Prometheus metrics
-- ✅ **Security**: All operations go through OPA policy engine
-- ✅ **Performance**: Handle 10k+ graph nodes smoothly
-- ✅ **Reliability**: Graceful degradation and error recovery
-- ✅ **Testing**: Unit + integration + smoke test coverage
-
-**Code Quality Gates:**
-
-```bash
-# Before any commit:
-npm run lint               # ESLint + Prettier
-npm run typecheck          # TypeScript validation
-npm run test               # Unit tests
-make smoke                 # Integration validation
-
-# Conventional commits required:
-feat(copilot): add event replay capability
-fix(graph): resolve clustering performance issue
-docs(api): update GraphQL schema documentation
-```
-
-### 4. **CI/CD Production Alignment**
-
-**Required for every PR:**
-
-- ✅ All smoke tests pass (blocking)
-- ✅ Security scans clean (no high severity)
-- ✅ Performance benchmarks stable
-- ✅ Documentation updated
-- ✅ Metrics/tracing instrumented
-
-**Infrastructure as Code:**
-
-```bash
-# Keep these updated:
-.env.example               # New configuration options
-docker-compose.dev.yml     # Service dependencies
-scripts/smoke-test.js      # Feature validation
-monitoring/grafana-dashboard.json  # New metrics
-server/policies/           # Security policies
-```
-
-### 5. **Developer Experience Excellence**
-
-**30-Second Start:**
-
-```bash
-git clone https://github.com/BrianCLong/summit.git
-cd intelgraph && cp .env.example .env
-make up                    # Full environment in Docker
-make smoke                 # Verify everything works
-# ✅ Ready to code!
-```
-
-**Development Loop:**
-
-```bash
-# Daily workflow:
-make up                    # Start services
-npm run dev               # Hot reload development
-make smoke                # Validate changes
-git commit -m "feat: ..."  # Ship when ready
-```
-
-## 🎯 Acceptance Criteria (Definition of Done)
-
-### For Every Feature:
-
-- ✅ **Deployable**: `make up && make smoke` passes
-- ✅ **Observable**: Metrics + tracing instrumented
-- ✅ **Secure**: OPA policies cover new operations
-- ✅ **Performant**: No degradation in smoke test timings
-- ✅ **Documented**: README, API docs, troubleshooting updated
-- ✅ **Tested**: Unit tests + integration + golden path coverage
-
-### For Every Release:
-
-- ✅ **Security**: Gitleaks + Trivy scans clean
-- ✅ **Performance**: Load testing on 10k+ node graphs
-- ✅ **Reliability**: Disaster recovery procedures tested
-- ✅ **Monitoring**: Grafana alerts configured
-- ✅ **Compliance**: Audit logs and RBAC verified
-
-## 🔧 Enhanced Command Arsenal
-
-```bash
-# Environment Management
-make up                    # Start all services with health checks
-make down                  # Graceful shutdown
-make logs                  # Tail service logs
-make seed                  # Load demo investigation data
-make clean                 # Reset to clean state
-
-# Testing & Validation
-make smoke                 # Full golden path validation
-node scripts/smoke-test-simple.js  # Quick infrastructure check
-npm run test               # Unit test suite
-npm run test:e2e           # End-to-end tests
-opa test server/policies/  # Security policy validation
-
-# Code Quality
-npm run lint               # ESLint + Prettier
-npm run typecheck          # TypeScript validation
-npm run audit              # Security vulnerability scan
-npm run coverage           # Test coverage report
-
-# Production Preparation
-python scripts/create-github-issues.py  # Generate MVP-1 tickets
-python scripts/preview-github-issues.py # Preview without token
-docker compose -f docker-compose.prod.yml up  # Production build
-curl http://localhost:9090/metrics      # Verify metrics export
-```
-
-## 🚦 Development Flow
-
-### 1. **Feature Planning**
-
-```bash
-# Check current production state
-make smoke                 # Baseline: everything works
-
-# Plan feature with issues
-python scripts/preview-github-issues.py  # See MVP-1 roadmap
-```
-
-### 2. **Development Cycle**
-
-```bash
-# Start feature branch
-git checkout -b feat/new-capability
-make up                    # Ensure clean environment
-
-# Develop with hot reload
-npm run dev                # Backend + frontend
-
-# Validate frequently
-make smoke                 # Verify no regressions
-```
-
-### 3. **Production Readiness**
-
-```bash
-# Pre-commit validation
-npm run lint && npm run typecheck && npm run test
-make smoke                 # Full integration test
-
-# Security validation
-opa test server/policies/  # Policy compliance
-npm audit                  # Dependency security
-
-# Performance validation
-# (Load test with production data volumes)
-```
-
-## 🎪 Advanced Features Ready
-
-**AI & Analytics:**
-
-- Graph Neural Networks for link prediction
-- Community detection clustering
-- Anomaly detection in network patterns
-- Multi-modal content analysis
-
-**Enterprise Integration:**
-
-- OSINT API connectors (Shodan, VirusTotal, etc.)
-- STIX/TAXII federation
-- Enterprise SSO (SAML/OIDC)
-- Advanced audit and compliance
-
-**Scale & Performance:**
-
-- Federated graph queries
-- Temporal graph analysis
-- Real-time collaborative editing
-- WebGL graph rendering
-
-## 🌟 Developer Mantra
-
-> **"Work ambitiously, ship fast, but never break deployability."**
-
-**Every contribution should:**
-
-1. 🎯 **Add significant user value** (move MVP forward)
-2. 🛡️ **Maintain production quality** (security, performance, reliability)
-3. 🚀 **Keep deployment simple** (smoke tests always pass)
-4. 📊 **Include observability** (metrics, logs, traces)
-5. 📚 **Update documentation** (README, API docs, troubleshooting)
+Summit exists to provide **defensible, explainable, governed intelligence** in service of legitimate institutions and public trust.
 
 ---
 
-## 🆘 Troubleshooting
+## ARTICLE I — PURPOSE & LIMITS
 
-**Common Issues:**
+### 1.1 Purpose
 
-```bash
-# Services won't start
-make down && make clean && make up
+Summit exists to:
 
-# Smoke tests failing
-docker compose logs        # Check service health
-make seed                  # Reload demo data
+* Integrate complex information into explainable intelligence
+* Support human decision-making, not replace it
+* Operate safely in adversarial, regulated, and high-stakes environments
 
-# Performance issues
-curl localhost:9090/metrics # Check resource usage
-```
+### 1.2 Explicit Limits
 
-**Getting Help:**
+Summit will not:
 
-- 📖 **Documentation**: Complete guides in `docs/`
-- 🧪 **Smoke Tests**: Built-in validation and diagnostics
-- 🎫 **Issues**: [GitHub Issues](https://github.com/brianlong/intelgraph/issues)
-- 💬 **Discussions**: Team chat or GitHub Discussions
+* Make autonomous lethal decisions
+* Perform covert mass persuasion
+* Launder unverifiable intelligence
+* Operate without auditability or provenance
+* Optimize for outcomes that violate governance, law, or ethics
+
+These limits are **non-revocable**.
 
 ---
 
-**Remember: IntelGraph is production-ready NOW. Every change should maintain that standard while pushing capabilities forward.**
+## ARTICLE II — AUTHORITY & CONTROL
+
+### 2.1 Human Primacy
+
+All consequential actions require:
+
+* Human authorization
+* Traceable intent
+* Reversible execution where possible
+
+### 2.2 Governance Supremacy
+
+Policy, provenance, and audit controls:
+
+* Override performance
+* Override automation
+* Override commercial pressure
+
+No agent may bypass governance.
+
+---
+
+## ARTICLE III — AGENTS & AUTONOMY
+
+### 3.1 Agent Classes
+
+Summit agents may exist only as:
+
+* Assistive (Copilot)
+* Evaluative (Simulation / Recommendation)
+* Operational (Strictly bounded, approval-gated)
+
+### 3.2 Autonomy Prohibition
+
+Autonomy:
+
+* Is never production-default
+* Exists only in sandboxed evaluation
+* May be permanently prohibited by governance decision
+
+No autonomy graduates without explicit constitutional amendment.
+
+---
+
+## ARTICLE IV — DATA, PROVENANCE & TRUTH
+
+### 4.1 Provenance Requirement
+
+All outputs must be:
+
+* Attributable
+* Explainable
+* Replayable
+* Contestable
+
+Unattributed intelligence is invalid.
+
+### 4.2 Truth Model
+
+Summit does not assert absolute truth.
+It provides:
+
+* Evidence
+* Confidence bounds
+* Alternatives
+* Assumptions
+
+Final judgment belongs to humans.
+
+---
+
+## ARTICLE V — SCALE, ECOSYSTEM & ABSORPTION
+
+### 5.1 Controlled Growth
+
+Summit may scale only when:
+
+* Governance scales with it
+* Cost and risk are measurable
+* Tenant and institutional isolation remains intact
+
+### 5.2 Absorption Doctrine
+
+External systems may join Summit only if they:
+
+* Converge to the control plane
+* Adopt Summit’s governance and provenance model
+* Do not introduce parallel truths
+
+Fragmentation is grounds for rejection.
+
+---
+
+## ARTICLE VI — REFUSAL, CONSTRAINT & SHUTDOWN
+
+### 6.1 Right of Refusal
+
+Summit retains the absolute right to refuse:
+
+* Customers
+* Governments
+* Partners
+* Use cases
+
+Refusal may be ethical, legal, or safety-based.
+
+### 6.2 Graduated Constraint
+
+Before harm:
+
+* Capabilities may be throttled
+* Fidelity reduced
+* Automation disabled
+* Access suspended
+
+### 6.3 Ethical Shutdown
+
+Summit may be:
+
+* Partially sunset
+* Fully shut down
+* Cryptographically finalized
+
+Shutdown is a **legitimate outcome**, not a failure.
+
+---
+
+## ARTICLE VII — STEWARDSHIP & SUCCESSION
+
+### 7.1 Stewardship Model
+
+Summit must always have:
+
+* Named stewards
+* Independent oversight
+* Deadlock resolution mechanisms
+
+No permanent concentration of authority is allowed.
+
+### 7.2 Succession
+
+Authority must be transferable beyond:
+
+* Founders
+* Original teams
+* Any single organization
+
+---
+
+## ARTICLE VIII — LEGACY & FINALITY
+
+### 8.1 Archival Integrity
+
+When Summit ends:
+
+* History remains
+* Decisions are preserved
+* Power does not persist
+
+### 8.2 Non-Revival
+
+Summit may not be silently resurrected.
+Revival requires:
+
+* Explicit authority
+* Public acknowledgment
+* Governance reconstitution
+
+---
+
+## ARTICLE IX — AMENDMENT
+
+### 9.1 Amendment Threshold
+
+This Constitution may be amended only if:
+
+* Governance approves
+* Risks are documented
+* Public trust impact is assessed
+
+### 9.2 Non-Amendable Clauses
+
+Articles I, II, IV, and VI **cannot be removed**, only strengthened.
+
+---
+
+## RATIFICATION
+
+By executing this prompt, all agents, systems, and operators agree:
+
+* Summit is governed before it is powerful
+* Refusal is as important as capability
+* Ending well matters as much as building well
+
+This document is **the root of Summit**.
+
+---
+
+## BEGIN CONSTITUTIONAL EXECUTION.

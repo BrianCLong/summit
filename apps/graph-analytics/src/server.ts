@@ -116,11 +116,32 @@ app.get(
       ? Math.min(parsedLimit, 500)
       : 250;
 
-    const orderedPoints = sortGeoPoints(filteredPoints);
+    const orderedPoints = filteredPoints
+      .slice()
+      .sort((a, b) => {
+        const timeDiff =
+          new Date(b.observedAt).getTime() - new Date(a.observedAt).getTime();
+
+        if (timeDiff !== 0) {
+          return timeDiff;
+        }
+
+        const latDiff = a.lat - b.lat;
+        if (latDiff !== 0) {
+          return latDiff;
+        }
+
+        const lngDiff = a.lng - b.lng;
+        if (lngDiff !== 0) {
+          return lngDiff;
+        }
+
+        return a.id.localeCompare(b.id);
+      });
 
     res.json({
       count: filteredPoints.length,
-      orderedBy: 'observedAt desc, id asc',
+      orderedBy: 'observedAt desc, lat asc, lng asc, id asc',
       points: orderedPoints.slice(0, limitCap),
     });
   },

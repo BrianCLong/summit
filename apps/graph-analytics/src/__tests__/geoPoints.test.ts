@@ -60,9 +60,9 @@ describe('GET /geo/points', () => {
     expect(secondIds).toEqual(expectedOrder);
   });
 
-  it('respects bbox filters and limits while keeping ordering deterministic', async () => {
-    const token = createToken();
-    const bbox = '-75,40,-73,42';
+  it('applies bbox filtering with stable ordering and limits', async () => {
+    const token = createToken('admin');
+    const bbox = '-75,40,-73,41';
 
     const firstResponse = await request(app)
       .get('/geo/points')
@@ -76,10 +76,14 @@ describe('GET /geo/points', () => {
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
 
-    const expectedIds = ['p-nyc-002'];
+    const expected = ['p-nyc-002'];
 
-    expect((firstResponse.body as { points: GeoPoint[] }).points.map((p) => p.id)).toEqual(expectedIds);
-    expect((secondResponse.body as { points: GeoPoint[] }).points.map((p) => p.id)).toEqual(expectedIds);
+    expect((firstResponse.body as { points: GeoPoint[] }).points.map((p) => p.id)).toEqual(
+      expected,
+    );
+    expect((secondResponse.body as { points: GeoPoint[] }).points.map((p) => p.id)).toEqual(
+      expected,
+    );
   });
 
   it('rejects requests without a valid bbox', async () => {

@@ -13,21 +13,23 @@ This checklist captures the hardening controls implemented in `ops/helm` and the
 - **Audit logging**: ConfigMap with API audit policy, retention, and size limits carried via annotations for downstream log processors.
 
 ## Preflight validation steps
-- [ ] **Render and lint**: `helm template ops/helm --namespace intelgraph-secure | kubeval --strict` (ensure API compatibility and namespace labels).
+- [ ] **Render and lint**: `helm template ops/helm --namespace intelgraph-secure | kubeval --strict` (ensure API compatibility and namespace labels). The template now fails fast if inline secret values are present, guaranteeing chart-sourced YAML cannot leak credentials.
 - [ ] **Namespace safety**: `kubectl get ns intelgraph-secure -o jsonpath='{.metadata.labels}' | jq` verifies PodSecurity and Istio labels; apply only with `--create-namespace` when desired.
+- [ ] **ServiceAccount hardening**: `kubectl get sa gateway ui -n intelgraph-secure -o jsonpath='{.items[*].automountServiceAccountToken}'` should return `false false` (workloads) while `external-secrets` can remain `true` for provider auth.
 - [ ] **RBAC bindings**: `kubectl auth can-i --as=system:serviceaccount:tekton-pipelines:ci-deployer create deployment -n intelgraph-secure` (CI) and equivalent for ops subjects.
 - [ ] **Network policy**: `kubectl describe networkpolicy default-deny -n intelgraph-secure` confirms default-deny with explicit namespace allowances.
 - [ ] **mTLS**: `istioctl authn tls-check gateway.intelgraph-secure.svc.cluster.local` (expect STRICT) and `istioctl x describe pod <pod>` to confirm sidecar injection.
 - [ ] **Ingress TLS**: `kubectl describe ingress gateway -n intelgraph-secure` confirms cert-manager issuer annotation and bound TLS secret.
-- [ ] **External-secrets wiring**: `kubectl get externalsecrets.gateway-config -n intelgraph-secure -o yaml | yq '.spec.secretStoreRef'` ensures remote references are used and no plaintext data exists.
+- [ ] **External-secrets wiring**: `kubectl get externalsecrets.gateway-config -n intelgraph-secure -o yaml | yq '.spec.secretStoreRef'` ensures remote references are used and no plaintext data exists; the rendered manifest requires `remoteRef.key` for every item.
 - [ ] **Audit policy load**: `kubectl get configmap audit-policy -n intelgraph-secure -o yaml | yq '.metadata.annotations'` validates retention annotations and rule presence.
+- [ ] **Logging retention**: ensure downstream log pipeline honors `audit.summit.dev/retention-days` and `audit.summit.dev/max-file-size-mb` annotations when shipping API audit logs.
 
 ## Compliance posture and expectations
 - Pod Security: `restricted` level enforced via namespace labels; workloads run as non-root with immutable root filesystems.
-- Identity and access: per-service ServiceAccounts bound to scoped Roles; ops has full namespace administration while CI is constrained to deployments and service wiring.
+- Identity and access: per-service ServiceAccounts bound to scoped Roles; ops has full namespace administration while CI is constrained to deployments and service wiring. ServiceAccount tokens are not automounted for workloads to minimize credential exposure.
 - Data in transit: mTLS enforced by Istio; ingress TLS certificates issued by cert-manager with explicit issuers.
-- Secrets management: exclusive use of external-secrets with JWT/IAM-backed auth; charts intentionally avoid embedding static secrets.
-- Auditability: Kubernetes audit policy and retention metadata published for downstream log shipping/rotation controls.
+- Secrets management: exclusive use of external-secrets with JWT/IAM-backed auth; charts intentionally avoid embedding static secrets and will fail render if inline values are supplied.
+- Auditability: Kubernetes audit policy and retention metadata published for downstream log shipping/rotation controls, with explicit annotations for retention and log sizing.
 
 ## Operational runbook fragments
 - Rotate TLS issuer or secret name via `ingress.tls` values and re-run `helm upgrade --install`.

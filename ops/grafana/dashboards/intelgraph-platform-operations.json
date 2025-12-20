@@ -159,6 +159,66 @@
           "legendFormat": "SLO pressure ({{queue}})"
         }
       ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Agent Queue Latency + Cost vs Scaling",
+      "gridPos": {"x": 0, "y": 24, "w": 12, "h": 8},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "orange", "value": 1},
+              {"color": "red", "value": 1.5}
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(agent_workload_queue_wait_seconds_bucket[5m]))",
+          "legendFormat": "p95 queue wait (s)"
+        },
+        {
+          "expr": "max_over_time(agent_queue_cost_pressure{queue=\"agent-default\"}[5m])",
+          "legendFormat": "Cost pressure"
+        },
+        {
+          "expr": "max_over_time(agent_queue_slo_pressure{queue=\"agent-default\"}[5m])",
+          "legendFormat": "SLO pressure"
+        },
+        {
+          "expr": "max(kube_deployment_status_replicas{deployment=~\"agent-worker|agent-workload-runner\"})",
+          "legendFormat": "Replicas"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Adaptive Scaling Composite",
+      "gridPos": {"x": 12, "y": 24, "w": 12, "h": 8},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 2},
+              {"color": "red", "value": 2.5}
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "max_over_time(agent_queue_slo_pressure{queue=\"agent-default\"}[5m]) + max_over_time(agent_queue_cost_pressure{queue=\"agent-default\"}[5m])",
+          "legendFormat": "Composite pressure"
+        }
+      ]
     }
   ]
 }
