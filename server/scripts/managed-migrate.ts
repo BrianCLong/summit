@@ -66,6 +66,7 @@ Commands:
   test
   backup [--backup-path <file>]
   restore --restore <file>
+  schema-dump [--backup-path <file>]
 `);
 }
 
@@ -114,6 +115,11 @@ async function run() {
           throw new Error('Provide --restore <path> to restore from a backup');
         }
         await manager.restore(options.restorePath);
+        break;
+      }
+      case 'schema-dump': {
+        const destination = await manager.dumpSchema(options.backupPath);
+        console.log(`Schema dumped to ${destination}`);
         break;
       }
       default:

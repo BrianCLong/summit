@@ -1,0 +1,18 @@
+{{- if .Values.global.limitRange.enabled }}
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: {{ .Values.global.limitRange.name }}
+  namespace: {{ .Values.global.namespace | default .Release.Namespace }}
+spec:
+  limits:
+    - type: Container
+      default:
+{{ toYaml .Values.global.limitRange.default | indent 8 }}
+      defaultRequest:
+{{ toYaml .Values.global.limitRange.defaultRequest | indent 8 }}
+      max:
+{{ toYaml .Values.global.limitRange.max | indent 8 }}
+      min:
+{{ toYaml .Values.global.limitRange.min | indent 8 }}
+{{- end }}
