@@ -1,0 +1,389 @@
+name: Optimized Deployment Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'release/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+      deployment_strategy:
+        description: 'Deployment strategy'
+        required: true
+        type: choice
+        options:
+          - standard
+          - blue-green
+          - canary
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+
+jobs:
+  # Build optimized Docker image with caching
+  build-image:
+    name: Build Optimized Docker Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+      image-digest: ${{ steps.build.outputs.digest }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: |
+            image=moby/buildkit:latest
+            network=host
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.optimized
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: |
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:cache
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:cache,mode=max
+          build-args: |
+            API_BASE_URL=${{ secrets.API_BASE_URL }}
+            GRAPHQL_SCHEMA_URL=${{ secrets.GRAPHQL_SCHEMA_URL }}
+            TURBO_TOKEN=${{ secrets.TURBO_TOKEN }}
+            TURBO_TEAM=${{ secrets.TURBO_TEAM }}
+          platforms: linux/amd64,linux/arm64
+          provenance: true
+          sbom: true
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
+          format: spdx-json
+          output-file: sbom.spdx.json
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.spdx.json
+
+      - name: Scan image for vulnerabilities
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # Determine deployment environment
+  determine-environment:
+    name: Determine Deployment Environment
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.determine.outputs.environment }}
+      deployment-strategy: ${{ steps.determine.outputs.deployment-strategy }}
+      namespace: ${{ steps.determine.outputs.namespace }}
+
+    steps:
+      - name: Determine environment
+        id: determine
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+            echo "deployment-strategy=${{ github.event.inputs.deployment_strategy }}" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+            echo "deployment-strategy=canary" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+            echo "environment=staging" >> $GITHUB_OUTPUT
+            echo "deployment-strategy=canary" >> $GITHUB_OUTPUT
+          else
+            echo "environment=development" >> $GITHUB_OUTPUT
+            echo "deployment-strategy=standard" >> $GITHUB_OUTPUT
+          fi
+
+          # Set namespace based on environment
+          ENV="${{ github.event.inputs.environment || 'development' }}"
+          echo "namespace=intelgraph-${ENV}" >> $GITHUB_OUTPUT
+
+  # Deploy to Kubernetes
+  deploy:
+    name: Deploy to Kubernetes
+    runs-on: ubuntu-latest
+    needs: [build-image, determine-environment]
+    environment:
+      name: ${{ needs.determine-environment.outputs.environment }}
+      url: https://${{ needs.determine-environment.outputs.environment }}.summit.example.com
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+            --name summit-${{ needs.determine-environment.outputs.environment }} \
+            --region us-east-1
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: '3.13.0'
+
+      - name: Add Helm repositories
+        run: |
+          helm repo add neo4j https://neo4j.github.io/helm-charts/
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo update
+
+      - name: Deploy with Helm
+        run: |
+          helm upgrade summit ./helm/summit \
+            --install \
+            --namespace ${{ needs.determine-environment.outputs.namespace }} \
+            --create-namespace \
+            --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} \
+            --set image.tag=${{ github.sha }} \
+            --set deploymentStrategy=${{ needs.determine-environment.outputs.deployment-strategy }} \
+            --set global.environment=${{ needs.determine-environment.outputs.environment }} \
+            --values ./helm/summit/values-${{ needs.determine-environment.outputs.environment }}.yaml \
+            --wait \
+            --timeout 30m \
+            --atomic
+
+      - name: Verify deployment
+        run: |
+          kubectl rollout status deployment/summit \
+            -n ${{ needs.determine-environment.outputs.namespace }} \
+            --timeout=10m
+
+      - name: Run smoke tests
+        run: |
+          kubectl run smoke-test \
+            --image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            --restart=Never \
+            --namespace=${{ needs.determine-environment.outputs.namespace }} \
+            --command -- npm run test:smoke
+
+          kubectl wait --for=condition=complete job/smoke-test \
+            --namespace=${{ needs.determine-environment.outputs.namespace }} \
+            --timeout=5m
+
+          kubectl logs job/smoke-test \
+            --namespace=${{ needs.determine-environment.outputs.namespace }}
+
+      - name: Monitor deployment health
+        run: |
+          ./scripts/automated-rollback-system.sh check \
+            --namespace ${{ needs.determine-environment.outputs.namespace }}
+
+  # Monitor canary deployment (production only)
+  monitor-canary:
+    name: Monitor Canary Deployment
+    runs-on: ubuntu-latest
+    needs: [deploy, determine-environment]
+    if: needs.determine-environment.outputs.deployment-strategy == 'canary'
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+            --name summit-${{ needs.determine-environment.outputs.environment }} \
+            --region us-east-1
+
+      - name: Install Argo Rollouts CLI
+        run: |
+          curl -LO https://github.com/argoproj/argo-rollouts/releases/latest/download/kubectl-argo-rollouts-linux-amd64
+          chmod +x kubectl-argo-rollouts-linux-amd64
+          sudo mv kubectl-argo-rollouts-linux-amd64 /usr/local/bin/kubectl-argo-rollouts
+
+      - name: Watch canary rollout
+        run: |
+          kubectl argo rollouts get rollout summit-canary-rollout \
+            -n ${{ needs.determine-environment.outputs.namespace }} \
+            --watch \
+            --timeout 30m
+
+      - name: Verify canary health
+        run: |
+          # Wait for canary to reach 100%
+          kubectl argo rollouts status summit-canary-rollout \
+            -n ${{ needs.determine-environment.outputs.namespace }} \
+            --timeout 30m
+
+          # Run comprehensive health check
+          ./scripts/automated-rollback-system.sh check \
+            --namespace ${{ needs.determine-environment.outputs.namespace }} \
+            --prometheus-url http://prometheus-server.monitoring.svc.cluster.local
+
+  # Post-deployment verification
+  post-deployment:
+    name: Post-Deployment Verification
+    runs-on: ubuntu-latest
+    needs: [deploy, determine-environment]
+    if: always()
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+            --name summit-${{ needs.determine-environment.outputs.environment }} \
+            --region us-east-1
+
+      - name: Collect deployment metrics
+        run: |
+          kubectl get deployments -n ${{ needs.determine-environment.outputs.namespace }}
+          kubectl get pods -n ${{ needs.determine-environment.outputs.namespace }}
+          kubectl top pods -n ${{ needs.determine-environment.outputs.namespace }}
+
+      - name: Run integration tests
+        run: |
+          kubectl run integration-test \
+            --image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            --restart=Never \
+            --namespace=${{ needs.determine-environment.outputs.namespace }} \
+            --command -- npm run test:integration
+
+      - name: Notify deployment status
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: |
+            Deployment to ${{ needs.determine-environment.outputs.environment }} ${{ job.status }}
+            Environment: ${{ needs.determine-environment.outputs.environment }}
+            Strategy: ${{ needs.determine-environment.outputs.deployment-strategy }}
+            Commit: ${{ github.sha }}
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+
+  # Rollback on failure
+  rollback:
+    name: Rollback on Failure
+    runs-on: ubuntu-latest
+    needs: [deploy, determine-environment, post-deployment]
+    if: failure() && needs.determine-environment.outputs.environment == 'production'
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+            --name summit-${{ needs.determine-environment.outputs.environment }} \
+            --region us-east-1
+
+      - name: Execute automatic rollback
+        run: |
+          ./scripts/automated-rollback-system.sh rollback \
+            --namespace ${{ needs.determine-environment.outputs.namespace }} \
+            --slack-webhook ${{ secrets.SLACK_WEBHOOK }}
+
+      - name: Verify rollback
+        run: |
+          kubectl rollout status deployment/summit \
+            -n ${{ needs.determine-environment.outputs.namespace }}
+
+          ./scripts/automated-rollback-system.sh check \
+            --namespace ${{ needs.determine-environment.outputs.namespace }}
+
+      - name: Notify rollback
+        uses: 8398a7/action-slack@v3
+        with:
+          status: 'warning'
+          text: |
+            🔄 Automatic rollback executed for ${{ needs.determine-environment.outputs.environment }}
+            Previous commit: ${{ github.sha }}
+            Reason: Deployment verification failed
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}

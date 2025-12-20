@@ -1,0 +1,523 @@
+# ============================================================================
+# Canary Deployment Strategy using Argo Rollouts
+# ============================================================================
+# Progressive traffic shifting with automated analysis, metrics-based
+# promotion, and automatic rollback on failure
+# ============================================================================
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: summit-stable
+  namespace: intelgraph-prod
+  labels:
+    app: summit
+    service: stable
+spec:
+  selector:
+    app: summit
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3000
+      protocol: TCP
+    - name: metrics
+      port: 9090
+      targetPort: 9090
+      protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: summit-canary
+  namespace: intelgraph-prod
+  labels:
+    app: summit
+    service: canary
+spec:
+  selector:
+    app: summit
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3000
+      protocol: TCP
+    - name: metrics
+      port: 9090
+      targetPort: 9090
+      protocol: TCP
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: summit-canary-rollout
+  namespace: intelgraph-prod
+  labels:
+    app: summit
+    deployment-strategy: canary
+  annotations:
+    notifications.argoproj.io/subscribe.on-analysis-run-failed.slack: "deployments"
+    notifications.argoproj.io/subscribe.on-analysis-run-error.slack: "deployments"
+spec:
+  replicas: 10
+  revisionHistoryLimit: 5
+
+  selector:
+    matchLabels:
+      app: summit
+
+  template:
+    metadata:
+      labels:
+        app: summit
+        version: "v1"  # Updated by CI/CD
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: summit
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
+      containers:
+        - name: summit
+          image: ghcr.io/brianclong/summit:latest  # Updated by CI/CD
+          imagePullPolicy: Always
+
+          ports:
+            - name: http
+              containerPort: 3000
+            - name: metrics
+              containerPort: 9090
+
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: DEPLOYMENT_STRATEGY
+              value: "canary"
+            - name: FEATURE_FLAGS_URL
+              value: "http://feature-flags.intelgraph-prod.svc.cluster.local"
+
+          envFrom:
+            - secretRef:
+                name: summit-secrets
+            - configMapRef:
+                name: summit-config
+
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 2000m
+              memory: 4Gi
+
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 3000
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 2
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - ALL
+
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+
+      volumes:
+        - name: tmp
+          emptyDir: {}
+
+  # Canary Strategy Configuration with Progressive Traffic Shift
+  strategy:
+    canary:
+      # Service references
+      stableService: summit-stable
+      canaryService: summit-canary
+
+      # Traffic routing (using Istio/Linkerd/Nginx)
+      trafficRouting:
+        # Using Istio VirtualService
+        istio:
+          virtualService:
+            name: summit-vsvc
+            routes:
+              - primary
+
+      # Canary steps with gradual traffic increase
+      steps:
+        # Step 1: Deploy canary with 5% traffic
+        - setWeight: 5
+        - pause:
+            duration: 5m
+        - analysis:
+            templates:
+              - templateName: canary-health
+              - templateName: canary-error-rate
+              - templateName: canary-latency
+            args:
+              - name: canary-service
+                value: summit-canary
+              - name: stable-service
+                value: summit-stable
+
+        # Step 2: Increase to 10% traffic
+        - setWeight: 10
+        - pause:
+            duration: 5m
+        - analysis:
+            templates:
+              - templateName: canary-error-rate
+              - templateName: canary-latency
+              - templateName: canary-comparison
+            args:
+              - name: canary-service
+                value: summit-canary
+              - name: stable-service
+                value: summit-stable
+
+        # Step 3: Increase to 25% traffic
+        - setWeight: 25
+        - pause:
+            duration: 10m
+        - analysis:
+            templates:
+              - templateName: canary-error-rate
+              - templateName: canary-latency
+              - templateName: canary-comparison
+              - templateName: canary-business-metrics
+            args:
+              - name: canary-service
+                value: summit-canary
+              - name: stable-service
+                value: summit-stable
+
+        # Step 4: Increase to 50% traffic
+        - setWeight: 50
+        - pause:
+            duration: 10m
+        - analysis:
+            templates:
+              - templateName: canary-error-rate
+              - templateName: canary-latency
+              - templateName: canary-comparison
+              - templateName: canary-business-metrics
+            args:
+              - name: canary-service
+                value: summit-canary
+              - name: stable-service
+                value: summit-stable
+
+        # Step 5: Increase to 75% traffic
+        - setWeight: 75
+        - pause:
+            duration: 10m
+        - analysis:
+            templates:
+              - templateName: canary-error-rate
+              - templateName: canary-latency
+            args:
+              - name: canary-service
+                value: summit-canary
+
+        # Step 6: Full rollout to 100%
+        - setWeight: 100
+
+      # Background analysis runs continuously during canary
+      analysis:
+        templates:
+          - templateName: canary-continuous-monitoring
+        args:
+          - name: canary-service
+            value: summit-canary
+          - name: stable-service
+            value: summit-stable
+        startingStep: 1  # Start after first weight step
+
+      # Anti-affinity for canary pods
+      antiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution: {}
+
+---
+# Canary Analysis: Health Check
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: canary-health
+  namespace: intelgraph-prod
+spec:
+  args:
+    - name: canary-service
+  metrics:
+    - name: health-check
+      interval: 30s
+      count: 5
+      successCondition: result == "healthy"
+      failureLimit: 1
+      provider:
+        web:
+          url: "http://{{ args.canary-service }}/health"
+          timeoutSeconds: 10
+          jsonPath: "{$.status}"
+
+---
+# Canary Analysis: Error Rate
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: canary-error-rate
+  namespace: intelgraph-prod
+spec:
+  args:
+    - name: canary-service
+  metrics:
+    - name: error-rate
+      interval: 1m
+      count: 5
+      successCondition: result < 0.02  # Less than 2% error rate
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus-server.monitoring.svc.cluster.local
+          query: |
+            sum(rate(http_requests_total{service="{{ args.canary-service }}",status=~"5.."}[2m])) /
+            sum(rate(http_requests_total{service="{{ args.canary-service }}"}[2m]))
+
+---
+# Canary Analysis: Latency
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: canary-latency
+  namespace: intelgraph-prod
+spec:
+  args:
+    - name: canary-service
+  metrics:
+    - name: p95-latency
+      interval: 1m
+      count: 5
+      successCondition: result < 500  # Less than 500ms
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus-server.monitoring.svc.cluster.local
+          query: |
+            histogram_quantile(0.95,
+              sum(rate(http_request_duration_seconds_bucket{service="{{ args.canary-service }}"}[2m])) by (le)
+            ) * 1000
+    - name: p99-latency
+      interval: 1m
+      count: 5
+      successCondition: result < 1000  # Less than 1s
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus-server.monitoring.svc.cluster.local
+          query: |
+            histogram_quantile(0.99,
+              sum(rate(http_request_duration_seconds_bucket{service="{{ args.canary-service }}"}[2m])) by (le)
+            ) * 1000
+
+---
+# Canary Analysis: Canary vs Stable Comparison
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: canary-comparison
+  namespace: intelgraph-prod
+spec:
+  args:
+    - name: canary-service
+    - name: stable-service
+  metrics:
+    - name: error-rate-comparison
+      interval: 2m
+      count: 5
+      # Canary error rate should not be more than 20% higher than stable
+      successCondition: result < 1.2
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus-server.monitoring.svc.cluster.local
+          query: |
+            (sum(rate(http_requests_total{service="{{ args.canary-service }}",status=~"5.."}[2m])) /
+             sum(rate(http_requests_total{service="{{ args.canary-service }}"}[2m])))
+            /
+            (sum(rate(http_requests_total{service="{{ args.stable-service }}",status=~"5.."}[2m])) /
+             sum(rate(http_requests_total{service="{{ args.stable-service }}"}[2m])))
+
+    - name: latency-comparison
+      interval: 2m
+      count: 5
+      # Canary p95 latency should not be more than 10% higher than stable
+      successCondition: result < 1.1
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus-server.monitoring.svc.cluster.local
+          query: |
+            histogram_quantile(0.95,
+              sum(rate(http_request_duration_seconds_bucket{service="{{ args.canary-service }}"}[2m])) by (le)
+            )
+            /
+            histogram_quantile(0.95,
+              sum(rate(http_request_duration_seconds_bucket{service="{{ args.stable-service }}"}[2m])) by (le)
+            )
+
+---
+# Canary Analysis: Business Metrics
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: canary-business-metrics
+  namespace: intelgraph-prod
+spec:
+  args:
+    - name: canary-service
+    - name: stable-service
+  metrics:
+    - name: api-success-rate
+      interval: 2m
+      count: 5
+      successCondition: result > 0.98  # 98% success rate
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus-server.monitoring.svc.cluster.local
+          query: |
+            sum(rate(graphql_requests_total{service="{{ args.canary-service }}",status="success"}[2m])) /
+            sum(rate(graphql_requests_total{service="{{ args.canary-service }}"}[2m]))
+
+    - name: database-connection-errors
+      interval: 1m
+      count: 5
+      successCondition: result < 5  # Less than 5 connection errors per minute
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus-server.monitoring.svc.cluster.local
+          query: |
+            sum(rate(db_connection_errors_total{service="{{ args.canary-service }}"}[1m]))
+
+---
+# Canary Analysis: Continuous Monitoring (runs in background)
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: canary-continuous-monitoring
+  namespace: intelgraph-prod
+spec:
+  args:
+    - name: canary-service
+    - name: stable-service
+  metrics:
+    - name: memory-usage
+      interval: 1m
+      successCondition: result < 3.5  # Less than 3.5GB (4GB limit)
+      failureLimit: 3
+      provider:
+        prometheus:
+          address: http://prometheus-server.monitoring.svc.cluster.local
+          query: |
+            avg(container_memory_usage_bytes{pod=~"summit-.*",container="summit",service="{{ args.canary-service }}"}) / 1024 / 1024 / 1024
+
+    - name: cpu-usage
+      interval: 1m
+      successCondition: result < 1.8  # Less than 1.8 cores (2 core limit)
+      failureLimit: 3
+      provider:
+        prometheus:
+          address: http://prometheus-server.monitoring.svc.cluster.local
+          query: |
+            avg(rate(container_cpu_usage_seconds_total{pod=~"summit-.*",container="summit",service="{{ args.canary-service }}"}[1m]))
+
+---
+# Istio VirtualService for Traffic Routing
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: summit-vsvc
+  namespace: intelgraph-prod
+spec:
+  hosts:
+    - summit
+    - api.summit.example.com
+  gateways:
+    - summit-gateway
+  http:
+    - name: primary
+      match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            host: summit-stable
+            port:
+              number: 80
+          weight: 100
+        - destination:
+            host: summit-canary
+            port:
+              number: 80
+          weight: 0
+      retries:
+        attempts: 3
+        perTryTimeout: 10s
+        retryOn: 5xx,reset,connect-failure,refused-stream
+      timeout: 30s
+
+---
+# Istio Gateway
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: summit-gateway
+  namespace: intelgraph-prod
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - api.summit.example.com
+      tls:
+        httpsRedirect: true
+    - port:
+        number: 443
+        name: https
+        protocol: HTTPS
+      hosts:
+        - api.summit.example.com
+      tls:
+        mode: SIMPLE
+        credentialName: summit-tls-cert

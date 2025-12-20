@@ -1,0 +1,414 @@
+# ============================================================================
+# Blue-Green Deployment Strategy using Argo Rollouts
+# ============================================================================
+# This manifest defines a comprehensive blue-green deployment strategy for
+# zero-downtime deployments with automated analysis and rollback
+# ============================================================================
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: summit-active
+  namespace: intelgraph-prod
+  labels:
+    app: summit
+    service: active
+spec:
+  selector:
+    app: summit
+    role: active
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3000
+      protocol: TCP
+    - name: grpc
+      port: 9000
+      targetPort: 9000
+      protocol: TCP
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: summit-preview
+  namespace: intelgraph-prod
+  labels:
+    app: summit
+    service: preview
+spec:
+  selector:
+    app: summit
+    role: preview
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3000
+      protocol: TCP
+    - name: grpc
+      port: 9000
+      targetPort: 9000
+      protocol: TCP
+  type: ClusterIP
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: summit-rollout
+  namespace: intelgraph-prod
+  labels:
+    app: summit
+    component: api
+  annotations:
+    notifications.argoproj.io/subscribe.on-rollout-completed.slack: "deployments"
+    notifications.argoproj.io/subscribe.on-rollout-aborted.slack: "deployments"
+spec:
+  replicas: 5
+  revisionHistoryLimit: 5
+
+  selector:
+    matchLabels:
+      app: summit
+
+  template:
+    metadata:
+      labels:
+        app: summit
+        version: "v1"  # Updated by CI/CD
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: summit
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
+      containers:
+        - name: summit
+          image: ghcr.io/brianclong/summit:v1.0.0  # Updated by CI/CD
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+            - name: grpc
+              containerPort: 9000
+              protocol: TCP
+            - name: metrics
+              containerPort: 9090
+              protocol: TCP
+
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "3000"
+            - name: DEPLOYMENT_STRATEGY
+              value: "blue-green"
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+
+          envFrom:
+            - secretRef:
+                name: summit-secrets
+            - configMapRef:
+                name: summit-config
+
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 2000m
+              memory: 4Gi
+
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 3000
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 2
+
+          startupProbe:
+            httpGet:
+              path: /health/startup
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 12
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            capabilities:
+              drop:
+                - ALL
+
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: cache
+              mountPath: /app/.cache
+
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: cache
+          emptyDir: {}
+
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - summit
+                topologyKey: kubernetes.io/hostname
+
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: summit
+
+  # Blue-Green Strategy Configuration
+  strategy:
+    blueGreen:
+      # Active service receives production traffic
+      activeService: summit-active
+
+      # Preview service for testing new version
+      previewService: summit-preview
+
+      # Auto-promotion disabled - requires manual approval
+      autoPromotionEnabled: false
+
+      # Time to wait before scaling down old version
+      scaleDownDelaySeconds: 300  # 5 minutes
+
+      # Time to keep old version before deletion
+      scaleDownDelayRevisionLimit: 2
+
+      # Preview replica count (can be less than production)
+      previewReplicaCount: 2
+
+      # Pre-promotion analysis - runs before switching traffic
+      prePromotionAnalysis:
+        templates:
+          - templateName: summit-health-check
+          - templateName: summit-error-rate
+          - templateName: summit-latency-check
+          - templateName: summit-smoke-tests
+        args:
+          - name: service-name
+            value: summit-preview
+
+      # Post-promotion analysis - runs after switching traffic
+      postPromotionAnalysis:
+        templates:
+          - templateName: summit-error-rate
+          - templateName: summit-latency-check
+          - templateName: summit-slo-compliance
+        args:
+          - name: service-name
+            value: summit-active
+
+---
+# Analysis Template: Health Check
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: summit-health-check
+  namespace: intelgraph-prod
+spec:
+  args:
+    - name: service-name
+  metrics:
+    - name: health-check
+      interval: 30s
+      count: 3
+      successCondition: result == "healthy"
+      failureLimit: 1
+      provider:
+        web:
+          url: "http://{{ args.service-name }}/health"
+          timeoutSeconds: 10
+          jsonPath: "{$.status}"
+
+---
+# Analysis Template: Error Rate
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: summit-error-rate
+  namespace: intelgraph-prod
+spec:
+  args:
+    - name: service-name
+  metrics:
+    - name: error-rate
+      interval: 1m
+      count: 5
+      successCondition: result < 0.05  # Less than 5% error rate
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus-server.monitoring.svc.cluster.local
+          query: |
+            sum(rate(http_requests_total{service="{{ args.service-name }}",status=~"5.."}[1m])) /
+            sum(rate(http_requests_total{service="{{ args.service-name }}"}[1m]))
+
+---
+# Analysis Template: Latency Check
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: summit-latency-check
+  namespace: intelgraph-prod
+spec:
+  args:
+    - name: service-name
+  metrics:
+    - name: p95-latency
+      interval: 1m
+      count: 5
+      successCondition: result < 500  # Less than 500ms p95 latency
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus-server.monitoring.svc.cluster.local
+          query: |
+            histogram_quantile(0.95,
+              sum(rate(http_request_duration_seconds_bucket{service="{{ args.service-name }}"}[1m])) by (le)
+            ) * 1000
+
+---
+# Analysis Template: Smoke Tests
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: summit-smoke-tests
+  namespace: intelgraph-prod
+spec:
+  args:
+    - name: service-name
+  metrics:
+    - name: smoke-tests
+      count: 1
+      provider:
+        job:
+          spec:
+            template:
+              spec:
+                containers:
+                  - name: smoke-tests
+                    image: ghcr.io/brianclong/summit-tests:latest
+                    command: ["npm", "run", "test:smoke"]
+                    env:
+                      - name: API_URL
+                        value: "http://{{ args.service-name }}"
+                restartPolicy: Never
+            backoffLimit: 1
+
+---
+# Analysis Template: SLO Compliance
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: summit-slo-compliance
+  namespace: intelgraph-prod
+spec:
+  args:
+    - name: service-name
+  metrics:
+    - name: availability-slo
+      interval: 1m
+      count: 5
+      successCondition: result > 0.999  # 99.9% availability
+      failureLimit: 1
+      provider:
+        prometheus:
+          address: http://prometheus-server.monitoring.svc.cluster.local
+          query: |
+            sum(rate(http_requests_total{service="{{ args.service-name }}",status!~"5.."}[5m])) /
+            sum(rate(http_requests_total{service="{{ args.service-name }}"}[5m]))
+
+---
+# Ingress for Blue-Green Deployment
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: summit-ingress
+  namespace: intelgraph-prod
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/healthcheck-path: /health/ready
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "30"
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: "5"
+    alb.ingress.kubernetes.io/healthy-threshold-count: "2"
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: "3"
+spec:
+  rules:
+    - host: api.summit.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: summit-active
+                port:
+                  number: 80
+    - host: preview.summit.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: summit-preview
+                port:
+                  number: 80
