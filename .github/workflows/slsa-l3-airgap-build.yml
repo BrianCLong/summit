@@ -38,21 +38,7 @@ on:
   push:
     tags:
       - 'airgap-v*'
-  push:
-    tags:
-      - 'airgap-v*'
-  push:
-    tags:
-      - 'airgap-v*'
-  push:
-    tags:
-      - 'airgap-v*'
-  push:
-    tags:
-      - 'airgap-v*'
-
-permissions:
-  contents: read
+      permissions:
   packages: write
   id-token: write
   attestations: write

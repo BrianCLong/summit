@@ -1,50 +1,48 @@
+# k6 Performance Suite
 
-# Summit k6 Load Tests
+This suite exercises golden journeys with smoke, baseline, stress, spike, and soak coverage. It reads targets from `perf/models.yaml` and isolates traffic using synthetic tenant metadata.
 
-This directory contains k6 load tests for the Summit API.
+## Prerequisites
+- k6 0.50+ (local or Docker).
+- Access to preview/stage endpoints; avoid production except low-QPS smoke.
+- Environment variables:
+  - `K6_BASE_URL` (required)
+  - `K6_TENANT` (default: `test-perf`)
+  - `K6_HEADERS_JSON` (JSON map appended to every request; defaults to `{ "x-perf": "true", "x-tenant": "test-perf" }`).
+  - `K6_DURATION_FACTOR` (scale durations, e.g., `0.5` for quicker local runs).
+  - `PROM_REMOTE_URL` for remote write (optional; enables `k6 run --out experimental-prometheus-remote`).
 
-## Structure
-
-- `main.js`: The entry point for the load tests. It configures scenarios and thresholds.
-- `config.js`: Configuration for base URL, authentication, and test parameters.
-- `scenarios/`: Individual test scenarios.
-  - `cases.js`: Tests the REST API for Cases (List, Create, Get).
-  - `graphql.js`: Tests the GraphQL API (Investigations query).
-  - `search.js`: Tests the Search API.
-
-## Running Tests
-
-### Prerequisites
-
-- [k6](https://k6.io/docs/getting-started/installation/) installed.
-- A running instance of the Summit server.
-
-### Configuration
-
-You can configure the test using environment variables:
-
-- `BASE_URL`: The base URL of the API (default: `http://localhost:3000`)
-- `TENANT_ID`: The tenant ID to use (default: `tenant-1`)
-- `TOKEN`: The authentication token (default: `dev-token`)
-- `VUS`: Number of Virtual Users (default: `10`)
-- `DURATION`: Test duration (default: `1m`)
-
-### Execution
+## Running
 
 ```bash
-# Run with default settings
-k6 run k6/main.js
+# Smoke (quick guard)
+k6 run k6/golden-baseline.js --tag run=smoke --summary-export perf/results/k6-smoke-summary.json
 
-# Run with custom settings
-k6 run -e BASE_URL=http://staging-api.example.com -e VUS=50 k6/main.js
+# Baseline with thresholds and Prometheus remote write
+k6 run k6/golden-baseline.js \
+  --out json=perf/results/k6-baseline.json \
+  --summary-export perf/results/k6-baseline-summary.json \
+  ${PROM_REMOTE_URL:+--out experimental-prometheus-remote=$PROM_REMOTE_URL}
+
+# Stress ramp
+k6 run k6/golden-stress.js --summary-export perf/results/k6-stress-summary.json
+
+# Spike burst
+k6 run k6/golden-spike.js --summary-export perf/results/k6-spike-summary.json
+
+# Soak (default 3h, scale via K6_DURATION_FACTOR)
+k6 run k6/golden-soak.js --summary-export perf/results/k6-soak-summary.json
 ```
 
-## Scenarios
+Artifacts are written to `perf/results/` and consumed by `.ci/scripts/perf/pr_comment_summary.py` for PR summaries.
 
-1. **Cases**: Simulates an analyst listing cases, creating a new case, and viewing its details.
-2. **GraphQL**: Simulates querying the graph for investigations.
-3. **Search**: Simulates searching for evidence.
+## Thresholds and Checks
+- Global: `<1%` HTTP failures.
+- Journey-specific: p95 budgets per `perf/models.yaml`.
+- Application SLIs validated via `check()` blocks for response schema correctness.
 
-## Monitoring
+## Synthetic Data and Tenancy
+All scenarios send `x-perf: true` and `x-tenant: test-perf` headers. Fixtures should be pre-seeded for the `test-perf` tenant; tests must not mutate production data.
 
-A Grafana dashboard definition is available at `observability/grafana/dashboards/load-test-metrics.json`. Import this into Grafana to visualize test results (requires k6-prometheus-exporter or similar setup).
+## Prometheus Remote Write
+Pass `PROM_REMOTE_URL` and optional `K6_PROM_PUSH_INTERVAL` to ship metrics to long-term storage. Grafana dashboards expect `run` and `journey` tags.

@@ -1,14 +1,10 @@
 {
-  "extends": "../../tsconfig.build.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "composite": true,
+    "outDir": "dist",
+    "rootDir": "src",
     "declaration": true,
-    "declarationMap": true,
-    "tsBuildInfoFile": "./.tsbuildinfo",
-    "types": ["node", "jest"]
+    "composite": false
   },
-  "include": ["src/**/*", "templates/**/*"],
-  "exclude": ["dist", "node_modules", "**/*.test.ts"]
+  "include": ["src"]
 }

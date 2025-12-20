@@ -1,54 +1,127 @@
-import fs from 'fs-extra';
-import path from 'path';
-import { createHash } from 'crypto';
-import { BundleManifest, manifestSchema } from './schemas';
+import { spawnSync } from 'node:child_process';
+import { promises as fs } from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import tar from 'tar';
+import type {
+  AdapterManifest,
+  BundleBuildOptions,
+  BundleBuildResult,
+} from './types.js';
+import { BundleValidationError } from './types.js';
+import {
+  validateCompatibility,
+  validateConfigSchema,
+  validateManifest,
+} from './validation.js';
+import { createDefaultSbom, createDefaultSlsa } from './metadata.js';
+import { hashDirectory, hashFile, readJsonFile, writeJson } from './fs.js';
 
-export interface BuildBundleOptions {
-  manifest: BundleManifest;
-  sourceDir: string;
-  outputDir: string;
-  sign?: (artifactPath: string) => Promise<string>;
-}
+export async function buildAdapterBundle(
+  options: BundleBuildOptions
+): Promise<BundleBuildResult> {
+  const {
+    manifest,
+    compatibility,
+    sourceDir,
+    configSchemaPath,
+    outputDir = 'dist',
+    sbomPath,
+    slsaPath,
+    cosignBinary = 'cosign',
+    signingKeyPath,
+  } = options;
 
-export async function buildBundle(options: BuildBundleOptions): Promise<string> {
-  const parsed = manifestSchema.parse(options.manifest);
-  const bundleDir = path.resolve(options.outputDir, `${parsed.name}-${parsed.version}`);
-  await fs.emptyDir(bundleDir);
+  const stagingDir = await fs.mkdtemp(path.join(os.tmpdir(), 'adapter-bundle-'));
+  const payloadDir = path.join(stagingDir, 'payload');
 
-  const manifestPath = path.join(bundleDir, 'manifest.json');
-  await fs.writeJson(manifestPath, parsed, { spaces: 2 });
+  try {
+    await fs.mkdir(payloadDir, { recursive: true });
+    await fs.cp(sourceDir, payloadDir, { recursive: true });
 
-  // Copy source payload (adapter code + assets)
-  const payloadDir = path.join(bundleDir, 'payload');
-  await fs.ensureDir(payloadDir);
-  await fs.copy(options.sourceDir, payloadDir, {
-    filter: (src) => !src.includes('node_modules') && !src.includes('dist'),
-  });
+    // Validate and write configuration schema
+    const configSchema = await readJsonFile(configSchemaPath);
+    validateConfigSchema(configSchema);
+    const configSchemaFile = path.join(stagingDir, 'config.schema.json');
+    await writeJson(configSchemaFile, configSchema);
 
-  // Produce basic digest to aid receipts; real implementation should supply SBOM/SLSA externally.
-  const digest = await hashDirectory(payloadDir);
-  const digestPath = path.join(bundleDir, 'digest.txt');
-  await fs.writeFile(digestPath, digest, 'utf8');
+    // Validate and write compatibility
+    validateCompatibility(compatibility);
+    const compatibilityFile = path.join(stagingDir, 'compatibility.json');
+    await writeJson(compatibilityFile, compatibility);
 
-  if (options.sign) {
-    const signature = await options.sign(bundleDir);
-    await fs.writeFile(path.join(bundleDir, 'signature.txt'), signature, 'utf8');
-  }
+    // SBOM
+    const sbom = sbomPath
+      ? await readJsonFile(sbomPath)
+      : createDefaultSbom(manifest, compatibility);
+    const sbomFile = path.join(stagingDir, 'sbom.json');
+    await writeJson(sbomFile, sbom);
 
-  return bundleDir;
-}
+    const payloadDigest = await hashDirectory(payloadDir);
 
-async function hashDirectory(dir: string): Promise<string> {
-  const hash = createHash('sha256');
-  const entries = await fs.readdir(dir);
-  for (const entry of entries.sort()) {
-    const full = path.join(dir, entry);
-    const stat = await fs.stat(full);
-    if (stat.isDirectory()) {
-      hash.update(await hashDirectory(full));
-    } else {
-      hash.update(await fs.readFile(full));
+    // SLSA
+    const slsa = slsaPath
+      ? await readJsonFile(slsaPath)
+      : createDefaultSlsa(manifest, payloadDigest);
+    const slsaFile = path.join(stagingDir, 'slsa.json');
+    await writeJson(slsaFile, slsa);
+
+    const manifestWithArtifacts: AdapterManifest = {
+      ...manifest,
+      createdAt: manifest.createdAt ?? new Date().toISOString(),
+      compatibility,
+      artifacts: {
+        payload: 'payload',
+        sbom: path.basename(sbomFile),
+        slsa: path.basename(slsaFile),
+        configSchema: path.basename(configSchemaFile),
+        compatibility: path.basename(compatibilityFile),
+      },
+      checksums: {
+        payload: payloadDigest,
+        sbom: await hashFile(sbomFile),
+        slsa: await hashFile(slsaFile),
+        configSchema: await hashFile(configSchemaFile),
+      },
+      metadata: {
+        buildHost: os.hostname(),
+        ...(manifest.metadata ?? {}),
+      },
+    };
+
+    validateManifest(manifestWithArtifacts);
+
+    const manifestFile = path.join(stagingDir, 'manifest.json');
+    await writeJson(manifestFile, manifestWithArtifacts);
+
+    await fs.mkdir(outputDir, { recursive: true });
+    const bundleName = `${manifestWithArtifacts.id}-${manifestWithArtifacts.version}.tgz`;
+    const bundlePath = path.join(outputDir, bundleName);
+
+    await tar.c({ gzip: true, file: bundlePath, cwd: stagingDir }, ['.']);
+
+    const bundleDigest = await hashFile(bundlePath);
+    const signaturePath = `${bundlePath}.sig`;
+
+    const signResult = spawnSync(
+      cosignBinary,
+      ['sign-blob', '--key', signingKeyPath, '--output-signature', signaturePath, bundlePath],
+      { encoding: 'utf8' }
+    );
+
+    if (signResult.status !== 0) {
+      throw new BundleValidationError(
+        `Cosign signing failed: ${signResult.stderr || signResult.stdout || signResult.error?.message || 'unknown error'}`
+      );
     }
+
+    return {
+      bundlePath,
+      signaturePath,
+      manifest: manifestWithArtifacts,
+      bundleDigest,
+    };
+  } finally {
+    await fs.rm(stagingDir, { recursive: true, force: true });
   }
-  return hash.digest('hex');
 }
