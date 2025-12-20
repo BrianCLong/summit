@@ -1,193 +1,192 @@
 # Sprint Plan — Feb 2–13, 2026 (America/Denver)
 
-> **Context:** Third sprint of 2026. Consolidate January foundations: **policy assistant GA**, **graph scenarios at scale**, **SOAR v2.0 GA**, and **intel v5.2** for higher precision and safer automation.
+> **Sprint 4 — Summit CompanyOS + Switchboard**
+> Theme: **Operate & Scale: SLO Automation, DR/Chaos Proof, Perf + Cost Gates**
 
 ---
 
 ## 1) Sprint Goal (SMART)
 
-Ship **Policy Intelligence v1.4 (Assistant GA)**, **Graph UI v2.2** (scenario diffs + recommended controls rollout + exposure time series), **SOAR v2.0 GA** (autoscaling runners, Queues v2, blue/green deploys, quota policies), and **Intel v5.2** (disagreement detection + reviewer routing + federation 25%) to achieve **MTTC P50 ≤ 8 min / P90 ≤ 20 min** and **auto‑approved low‑risk actions ≥ 40%** — **by Feb 13, 2026**.
+Demonstrate **operationally boring SaaS** by Feb 13, 2026: hold **API uptime 99.9%**, keep **p99 error rate < 0.5%** and **p95 latency < 1.5s** on the 50k-node benchmark, prove **RPO ≤ 15 min / RTO ≤ 60 min** in a DR drill, and ensure **≥95% cost attribution accuracy** with automated rollback/pause when SLOs burn.
 
 **Key outcomes**
 
-- Policy Assistant GA with **risk explanations**, **what‑if**, and **drift‑prevention** rules default‑on.
-- Graph supports **scenario diffs**, **recommended control rollout**, and **exposure time series** for top entities.
-- SOAR v2.0 **general availability**: stable autoscaling, exactly‑once queues, **blue/green runners**, per‑tenant quotas + budgets.
-- Intel v5.2 improves calibration with **disagreement detection** and **reviewer routing**; partner federation at **25% sample** (guarded).
+- Golden SLO set (latency, error rate, receipt lag, approval lag, metering lag) with **error-budget policies that trigger actions** (pause/rollback/ramp freeze).
+- **Automated ramp controller** wired to feature flags and Switchboard overrides (with rationale capture).
+- **Synthetic probes** that exercise critical flows and emit receipts for health validation.
+- **Backup + restore workflow** with receipts and a documented DR drill hitting the RPO/RTO targets.
+- **Benchmark harness** for graph/policy/receipt pipelines, with dashboards capturing trends per build.
+- **FinOps reconciliation** delivering ≥95% per-tenant accuracy and exportable invoice-ready reports.
 
 ---
 
 ## 2) Success Metrics & Verification
 
-- **Incident response:** MTTC **P50 ≤ 8 min**, **P90 ≤ 20 min** (7‑day rolling).  
-  _Verify:_ Incident dashboard; weekly export.
-- **Policy assistant effectiveness:** Suggestion acceptance **≥ 65%**; backtest AUC **≥ 0.83**; **0** critical authz escapes.  
-  _Verify:_ Assistant telemetry; CI gate logs; audit.
-- **Automation adoption & safety:** **≥ 40%** of eligible actions auto‑approved (low‑risk); **false‑allow = 0** in prod.  
-  _Verify:_ SOAR logs; simulation reports.
-- **Graph adoption:** **≥ 75%** of P1/P2 investigations use scenarios or diffs; recommended controls exported in **≥ 50%** of those.  
-  _Verify:_ UI telemetry; ticket linkage.
-- **Intel quality:** κ **≥ 0.83**; Brier **≤ 0.13** on canary; override rate **≤ 7.5%**.  
-  _Verify:_ Eval reports; sampling.
+- **Reliability:** API uptime **≥99.9%**; **p99 error rate < 0.5%** on critical flows.  
+  _Verify:_ SLO dashboard + error-budget burn alerts; incident timeline.
+- **Latency:** **p95 < 1.5s** on representative **50k-node graph** (or current max dataset).  
+  _Verify:_ Benchmark harness run + Grafana panel; compare to last sprint trendline.
+- **DR:** **RPO ≤ 15 min**, **RTO ≤ 60 min** in staged drill with signed evidence bundle.  
+  _Verify:_ Drill report, restore receipts, timestamps.
+- **Rollback automation:** Sustained SLO breach triggers **auto rollback / ramp pause** with human override rationale logged.  
+  _Verify:_ Switchboard event log, deploy controller audit, flag state.
+- **FinOps accuracy:** **≥95%** per-tenant daily cost attribution and dashboard reconciliation.  
+  _Verify:_ Reconciliation job output, anomaly alerts, export receipts.
 
 ---
 
 ## 3) Scope
 
-**Must‑have (commit):**
+**Must-have (commit):**
 
-- **Policy v1.4 (Assistant GA):** finalize NL risk explanations; enforce drift‑prevention default‑on; assistant inline suggestions with acceptance telemetry; governance & kill‑switch; what‑if simulator polish.
-- **Graph v2.2:** scenario diff view (time‑boxed); recommended controls rollout (tickets + SOAR links); exposure time series (entity/node panels); owner handoff improvements.
-- **SOAR v2.0 GA:** autoscaling runners hardened; Queues v2 (exactly‑once) canary → GA; blue/green runner deploys; per‑tenant quotas; budget/cost telemetry; approval dashboard integration.
-- **Intel v5.2:** disagreement detection; reviewer routing (expertise, load); partner federation to 25% sample within cost/privacy caps; export to detections gated; calibration monitoring.
-- **Operational analytics:** adoption & safety widgets (assistant, auto‑approve, graph diffs, reviewer SLAs) and weekly exec snapshot.
+- **A1 — SLO definitions + error budget policy:** Golden SLOs for latency/error/receipt/approval/metering; burn alerts wired to actions.
+- **A2 — Automated ramp controller:** Feature-flag integration that auto-pauses/rolls back on SLO burn; human override with rationale via Switchboard.
+- **A3 — Synthetic probes:** Continuous synthetic flows producing receipts and health assertions.
+- **B1 — Backup + restore workflow:** Scheduled backups, restore validation job, receipts, and published drill evidence meeting RPO/RTO.
+- **B2 — DR drill execution:** Simulated outage + restore in staging with signed report and runbook deltas.
+- **B3 — Chaos-lite:** Failure injections (queue outage, DB read-only, signer unavailable) with DLQ/guardrail verification.
+- **C1 — Benchmark harness:** Repeatable suites for 50k-node traversals, policy decision latency, and receipt issuance; dashboard publishing.
+- **C2 — Hot-path optimizations:** Safe OPA caching/batching/index updates while preserving “no receipt, no privileged completion.”
+- **D1 — Cost reconciliation:** Daily job comparing metering vs infra, anomaly flags, confidence score.
+- **D2 — Invoice-ready export:** Per-tenant usage/cost export with receipts and period summaries.
 
-**Stretch:**
+**Stretch:** auto-tune ramp controller policies from burn rate history; synthetic probe coverage for edge tenant configs; chaos expansion to signer HSM failover.
 
-- **Responder Copilot v0.5 (alpha):** fuse assistant + graph scenarios into guided next steps (read‑only, no auto‑exec).
-- **SOAR cost dashboard v1:** per‑action/vendor cost, budgets, alerts.
-- **Graph risk overlays:** highlight control gaps on scenarios.
-
-**Out‑of‑scope:**
-
-- Destructive automation default‑on; cross‑tenant playbooks; mobile clients.
+**Out-of-scope:** Multi-region failover beyond staged drill; destructive chaos in production; customer-visible UI changes.
 
 ---
 
 ## 4) Team & Capacity
 
-- Same roster; **10 working days**; focus factor **0.8** → **commit 40 pts** (≈50 nominal).
-- Keep **~10% slack** for incident/ops interrupts.
+- Same roster; **10 working days**; focus factor **0.8** → **commit 40 pts** (~50 nominal).
+- Reserve **10% buffer** for incidents/approvals.
 
 ---
 
 ## 5) Backlog (Ready for Sprint)
 
-### Epic AY — Policy Intelligence v1.4 (Assistant GA) — **12 pts**
+### Epic A — SLOs, error budgets, and automated guardrails — **12 pts**
 
-- **AY1 — GA hardening & UX** (5 pts)  
-  _AC:_ copy reviewed; accessibility; telemetry; kill‑switch.
-- **AY2 — Drift‑prevention default‑on** (5 pts)  
-  _AC:_ CI gate; exception workflow; audit; previews.
-- **AY3 — What‑if simulator polish** (2 pts)  
-  _AC:_ clearer diffs; export; link to approvals.
+- **A1 — Golden SLOs + policy** (4 pts)  
+  _AC:_ SLO doc; alert → action matrix; burn-rate alerts live; owner rotation.
+- **A2 — Ramp controller automation** (5 pts)  
+  _AC:_ flag hooks; auto-pause/rollback; rationale capture; override audit.
+- **A3 — Synthetic probes** (3 pts)  
+  _AC:_ critical flows covered; receipts stored; failure alarms.
 
-### Epic AZ — Graph UI v2.2 — **10 pts**
+### Epic B — DR + backup verification + chaos drills — **10 pts**
 
-- **AZ1 — Scenario diffing** (4 pts)  
-  _AC:_ T‑0 vs T‑1; annotate changes; export.
-- **AZ2 — Recommended controls rollout** (4 pts)  
-  _AC:_ control templates; owner handoff; ticket export; SOAR link.
-- **AZ3 — Exposure time series** (2 pts)  
-  _AC:_ entity trend; freshness banner; CSV.
+- **B1 — Backup + restore receipts** (4 pts)  
+  _AC:_ scheduled jobs; restore validation; receipt artifacts.
+- **B2 — DR drill execution** (4 pts)  
+  _AC:_ simulated outage; RPO/RTO met; signed drill bundle; runbook update.
+- **B3 — Chaos-lite injections** (2 pts)  
+  _AC:_ queue/DB/signer scenarios; DLQ + guardrail checks; report.
 
-### Epic BA — SOAR v2.0 GA — **12 pts**
+### Epic C — Performance workstream — **10 pts**
 
-- **BA1 — Autoscaling & Queues v2 hardening** (5 pts)  
-  _AC:_ exactly‑once verified; soak test; alarms.
-- **BA2 — Blue/green runner deploys** (4 pts)  
-  _AC:_ zero‑downtime; rollback switch; audit.
-- **BA3 — Quotas & cost telemetry** (3 pts)  
-  _AC:_ per‑tenant limits; budget alerts; report.
+- **C1 — Benchmark harness** (5 pts)  
+  _AC:_ 50k-node traversal + policy + receipt benchmarks; dashboards.
+- **C2 — Hot-path optimizations** (5 pts)  
+  _AC:_ OPA cache/batching/index changes with safety tests; perf delta recorded.
 
-### Epic BB — Intel v5.2 — **6 pts**
+### Epic D — FinOps + billing hooks — **8 pts**
 
-- **BB1 — Disagreement detection + routing** (3 pts)  
-  _AC:_ detect conflicts; route to expert; SLA.
-- **BB2 — Federation expansion 25%** (3 pts)  
-  _AC:_ isolation; PII filters; cost caps; canary → GA.
+- **D1 — Cost reconciliation job** (4 pts)  
+  _AC:_ daily rollup; anomaly detection; confidence score ≥95%; alerts.
+- **D2 — Invoice-ready export** (4 pts)  
+  _AC:_ per-tenant report; receipts; line items; period summary.
 
-### Epic BC — Operational Analytics & Enablement — **2 pts**
-
-- **BC1 — Exec snapshot + dashboards** (2 pts)  
-  _AC:_ weekly PDF/email; KPIs; drill‑downs.
-
-> **Planned:** 42 pts total — **commit 40 pts**, hold ~2 pts buffer.
+> **Planned:** 40 pts committed; stretch adds up to +6 pts headroom if buffer holds.
 
 ---
 
 ## 6) Dependencies & Assumptions
 
-- CI gates active with exception path; approver groups defined.
-- Graph data (identity + asset) fresh ≤ 24h; permission model enforced.
-- Queue store supports idempotency; autoscaling infra quota approved.
-- Partner legal/privacy approvals current; budget alerts in place.
+- Feature flag platform supports pause/rollback hooks and audit metadata.
+- Staging dataset can host 50k-node graph or closest current max; infra budget approved for benchmarks/chaos.
+- Backup storage credentials and restore targets pre-provisioned; HSM/signer endpoints expose failover controls.
+- Cost data sources (metering + infra billing) are available within 24h; Grafana/Prometheus reachable.
 
 ---
 
 ## 7) Timeline & Ceremonies (MT)
 
-- **Mon Feb 2** — Planning & Kickoff; SOAR GA readiness review (30m).
-- **Fri Feb 6** — Mid‑sprint demo/checkpoint (30m).
-- **Wed Feb 11** — Grooming for next sprint (45m).
-- **Fri Feb 13** — Demo (45m) + Retro (45m) + Release cut.
+- **Mon Feb 2** — Planning & kickoff; SLO/guardrail sign-off (30m).
+- **Fri Feb 6** — Mid-sprint demo + ramp-controller dry run (30m).
+- **Wed Feb 11** — Next-sprint grooming; DR drill readiness check (45m).
+- **Fri Feb 13** — Sprint demo + Retro + Release cut; DR drill evidence review (60m total).
 
 ---
 
 ## 8) Definition of Ready (DoR)
 
-- Policies/catalogs documented; datasets ready; flags/telemetry named.
-- Blue/green pipelines configured; rollback plans drafted.
+- SLO definitions, thresholds, and owners documented; flag names agreed.
+- Drill scenarios scripted; restore targets identified; chaos switches controllable.
+- Benchmark datasets and load parameters checked in; dashboards templated.
 
 ## 9) Definition of Done (DoD)
 
-- Tests pass; dashboards live; audits wired; approvals enforced.
-- Runbooks updated; enablement notes posted; rollback verified.
+- Tests green; dashboards live; alerts firing to on-call.
+- Receipts stored for backups, drills, probes, and exports; audit trails linked.
+- Runbooks updated; override rationale logged; rollback path validated.
 
 ---
 
 ## 10) QA & Validation Plan
 
-- **Policy:** A/B acceptance; backtests; CI gate simulation; human review of top 20 guardrails.
-- **Graph:** scenario diff accuracy spot checks; control rollout e2e to ticket/SOAR; exposure trend sanity checks.
-- **SOAR:** load tests; chaos on queues; blue/green failover drill.
-- **Intel:** κ monitoring; override rate; reviewer SLA; cost alerts.
+- **SLOs/guardrails:** burn-rate simulations; alert → action dry runs; override audit review.
+- **Ramp controller:** canary rollout with induced error-rate spike; verify auto-pause/rollback + Switchboard log.
+- **Synthetics:** continuous run in staging; receipt validation; failure alarms.
+- **DR:** execute drill; measure RPO/RTO; verify restore receipts; update runbook.
+- **Chaos-lite:** queue outage, DB read-only, signer unavailable; observe DLQ and guardrails; document findings.
+- **Performance:** nightly benchmark; compare to baseline; track p95/p99 deltas on dashboard.
+- **FinOps:** reconciliation job unit tests + golden fixtures; anomaly alert validation; export checksum receipts.
 
 ---
 
 ## 11) Risk Register (RAID)
 
-| Risk                                     | Prob. | Impact | Owner | Mitigation                                  |
-| ---------------------------------------- | ----- | -----: | ----- | ------------------------------------------- |
-| Drift rules block legitimate changes     | Med   |    Med | AY2   | Previews; exception path; audit             |
-| Scenario diffs mislead due to stale data | Low   |   High | AZ1   | Freshness banner; sampling; quick fixes     |
-| Queue/runner bugs under GA load          | Low   |   High | BA1   | Soak + chaos tests; rollback                |
-| Federation privacy/cost issues           | Low   |    Med | BB2   | Isolation; PII filters; budget caps         |
-| Auto‑approve rate plateaus               | Med   |    Med | BA3   | Expand low‑risk catalog; education; metrics |
+| Risk                                                | Prob. | Impact | Owner | Mitigation                                         |
+| --------------------------------------------------- | ----- | -----: | ----- | -------------------------------------------------- |
+| Ramp controller false positives halt ramps          | Med   |    Med | A2    | Tune burn thresholds; manual override; dry runs    |
+| Benchmark infra unavailable for 50k graph           | Med   |    High | C1    | Use current max dataset; parallel infra request    |
+| DR drill misses RPO/RTO due to backup lag           | Low   |   High | B2    | Pre-drill restore rehearsal; tighter backup SLO    |
+| Chaos-lite impacts shared staging tenants           | Med   |    Med | B3    | Schedule windows; announce; traffic shaping        |
+| Cost data gaps reduce attribution accuracy          | Med   |    Med | D1    | Fallback estimators; alert on missing sources      |
 
 ---
 
 ## 12) Communications & Status
 
-- **Channels:** #sprint‑room (daily), #analyst‑ops (enablement), Exec update (Fri).
-- **Reports:** Burnup, MTTC, assistant acceptance, auto‑approve rate, graph adoption, κ/Brier, SOAR cost.
+- **Channels:** #sprint-room (daily), #switchboard-ops (guardrails), Exec update (Fri).
+- **Reports:** Burn-up, SLO burn, ramp controller actions, DR drill evidence, benchmark trendline, FinOps reconciliation score.
 
 ---
 
 ## 13) Compliance/Security Guardrails
 
-- Signed policy changes; immutable audit; least privilege.
-- No PII in model features; encryption in transit/at rest; retention limits.
-- SOAR destructive steps always HITL; approvals with reason codes; blue/green rollouts.
+- Immutable receipts for backups/drills/exports/rollbacks; least-privilege for ramp controller actions.
+- No secrets in repos; DR artifacts sanitized; approval logs retained.
+- Chaos and drill data confined to staging; production changes gated by flags and audit.
 
 ---
 
 ## 14) Release & Rollback
 
-- **Staged rollout:** Internal cohort → all analysts → selected tenants (if applicable).
-- **Rollback:** Disable drift rules; hide scenario diffs; revert to Queues v1; scale runners to baseline; pin intel to v5.1.
-- **Docs:** Release notes; analyst changelog; change tickets.
+- **Staged rollout:** ramp by tenant cohort; auto-pause on burn; manual override requires rationale.
+- **Rollback:** deploy controller reverts to last good version; disable synthetic flows if they degrade env; restore from latest validated backup if needed.
+- **Docs:** Release notes + drill report + Switchboard incident timeline appended to runbooks.
 
 ---
 
-## 15) Next Sprint Seeds (Feb 16–27, 2026)
+## 15) Demo Flow (live)
 
-- **Holiday capacity note:** U.S. Presidents’ Day **Mon Feb 16** (reduced capacity).
-- **Policy v1.5:** change‑risk explanations with examples; proactive guardrail suggestions.
-- **Graph v2.3:** risk overlays + control gap analysis; saved scenario sharing.
-- **SOAR v2.1:** GA hardening + cost dashboard + quota policies.
-- **Intel v5.3:** reviewer routing + semi‑supervised improvements; federation 35–40%.
+1) Deploy new build and start tenant ramp.
+2) Induce controlled error-rate increase → ramp auto-pauses/rolls back; capture Switchboard timeline and receipts.
+3) Run DR restore validation → present RPO/RTO metrics and signed drill report.
+4) Show benchmark dashboard trendline vs last sprint and FinOps reconciliation score.
 
 ---
 
-_Prepared by: Covert Insights — last updated Sep 11, 2025 (America/Denver)._
+_Prepared by: Covert Insights — updated for Sprint 4 (America/Denver)._ 
