@@ -1,176 +1,96 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT=${ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}
-EVIDENCE_DIR="${ROOT}/evidence-bundles/demo"
-OUT_DIR="${EVIDENCE_DIR}/runtime"
-BUNDLE_PATH="${EVIDENCE_DIR}/policy-dual-control-bundle.json"
+# Demonstrates an end-to-end dual-control export policy check using the
+# OPA policy defined in policy/opa/export_enhanced.rego.
+#
+# The script runs two evaluations:
+#   1) A single-approver request that should be held because dual control
+#      and step-up authentication are missing.
+#   2) A dual-control request (two approvers + step-up) that should pass
+#      with an "allow" decision and a dual-control requirement recorded in
+#      the risk assessment.
+#
+# Outputs are written to .demo/policy-dual-control/ so repo files are not
+# mutated. A static reference bundle lives at
+# evidence-bundles/demo/policy-dual-control-bundle.json for comparison.
 
-log() {
-  echo -e "\n[$(date -Iseconds)] $*"
-}
+if ! command -v opa >/dev/null 2>&1; then
+  echo "[error] opa CLI is required. Install from https://www.openpolicyagent.org/docs/latest/#running-opa." >&2
+  exit 1
+fi
 
-require() {
-  if ! command -v "$1" >/dev/null 2>&1; then
-    echo "Missing dependency: $1" >&2
-    exit 1
-  fi
-}
+if ! command -v jq >/dev/null 2>&1; then
+  echo "[error] jq is required for JSON shaping (https://stedolan.github.io/jq/)." >&2
+  exit 1
+fi
 
-require git
-require python3
+ROOT="$(git rev-parse --show-toplevel)"
+WORKDIR="${ROOT}/.demo/policy-dual-control"
+mkdir -p "${WORKDIR}"
 
-mkdir -p "$OUT_DIR"
+INPUT_TEMPLATE="${ROOT}/evidence-bundles/demo/policy-dual-control-input.json"
+SINGLE_INPUT="${WORKDIR}/request.single-approver.json"
+DUAL_INPUT="${WORKDIR}/request.dual-control.json"
 
-log "Preflight: generating request and validating JSON"
-cat >"${OUT_DIR}/request.json" <<'EOF_REQUEST'
-{
-  "requestId": "POLICY-REQ-DEMO-001",
-  "action": "enable-dual-control",
-  "target": "graph/ingestion",
-  "initiator": "analyst.alfa@example.com",
-  "businessReason": "Pair-review enforcement for ingestion controls",
-  "riskTier": "moderate",
-  "requestedAt": "2026-01-11T00:00:00Z"
-}
-EOF_REQUEST
-python3 -m json.tool "${OUT_DIR}/request.json" >/dev/null
-
-log "Preflight: capturing repository context"
-python3 - "${OUT_DIR}/preflight.json" "$ROOT" <<'PY'
-import datetime
-import hashlib
+ROOT_DIR="${ROOT}" python - <<'PY'
 import json
-import pathlib
-import subprocess
-import sys
+import os
+from copy import deepcopy
+from pathlib import Path
 
-target = pathlib.Path(sys.argv[1])
-root = pathlib.Path(sys.argv[2])
-root_path = root.resolve()
+root = Path(os.environ["ROOT_DIR"])
+base_path = root / "evidence-bundles/demo/policy-dual-control-input.json"
+base = json.loads(base_path.read_text())
 
+single = deepcopy(base)
+single["context"]["approvals"] = ["compliance-officer"]
+single["context"]["step_up_verified"] = False
 
-def git(args):
-  return subprocess.check_output(["git", *args], cwd=root, text=True).strip()
+dual = deepcopy(base)
+# Dual control already present in the base template; keep step-up true.
 
-def rel(path: pathlib.Path) -> str:
-  try:
-    return str(path.resolve().relative_to(root_path))
-  except ValueError:
-    return str(path)
+def write(doc, path):
+    Path(path).write_text(json.dumps(doc, indent=2))
 
-request_path = target.parent.joinpath("request.json").resolve()
-request_sha = hashlib.sha256(request_path.read_bytes()).hexdigest()
-
-payload = {
-  "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-  "git": {
-    "commit": git(["rev-parse", "HEAD"]),
-    "short": git(["rev-parse", "--short", "HEAD"]),
-    "branch": git(["rev-parse", "--abbrev-ref", "HEAD"]),
-  },
-  "validations": {
-    "json": "request.json validated with python -m json.tool",
-    "schema": "demo schema check: required fields present",
-  },
-  "inputs": {
-    "requestFile": rel(request_path),
-    "requestSha256": request_sha,
-  },
-}
-target.write_text(json.dumps(payload, indent=2))
-print(f"Wrote {target}")
+write(single, Path(root / ".demo/policy-dual-control/request.single-approver.json"))
+write(dual, Path(root / ".demo/policy-dual-control/request.dual-control.json"))
 PY
 
-log "Approvals: drafting dual-control signatures"
-cat >"${OUT_DIR}/approvals.json" <<'EOF_APPROVALS'
-{
-  "requestId": "POLICY-REQ-DEMO-001",
-  "approvals": [
-    {
-      "role": "Data Owner",
-      "actor": "owner.bravo@example.com",
-      "decision": "approve",
-      "timestamp": "2026-01-11T01:15:00Z",
-      "notes": "Validated scope and blast radius."
-    },
-    {
-      "role": "Security",
-      "actor": "sec.charlie@example.com",
-      "decision": "approve",
-      "timestamp": "2026-01-11T01:20:00Z",
-      "notes": "Controls mapped to ABAC policy set."
-    }
-  ]
+OPA_DATA="${ROOT}/policy/opa/export_enhanced.rego"
+
+run_eval() {
+  local input="$1"
+  local output="$2"
+  opa eval --format=json -d "${OPA_DATA}" -i "${input}" \
+    'data.intelgraph.policy.export.enhanced.decision' \
+    | jq -r '.result[0].expressions[0].value' > "${output}"
 }
-EOF_APPROVALS
 
-log "Execution: simulating change rollout"
-cat >"${OUT_DIR}/execution.json" <<'EOF_EXECUTION'
-{
-  "requestId": "POLICY-REQ-DEMO-001",
-  "plan": [
-    "OPA dry-run on sample events",
-    "Deploy policy bundle to staging gatekeeper",
-    "Monitor audit log for 5m",
-    "Promote to production after zero regressions"
-  ],
-  "result": "success",
-  "completedAt": "2026-01-11T01:45:00Z",
-  "evidence": {
-    "logs": "logs/policy-gatekeeper-2026-01-11T01-45-00Z.log",
-    "export": "evidence-bundles/demo/policy-dual-control-bundle.json"
-  }
+run_eval "${SINGLE_INPUT}" "${WORKDIR}/decision.single.json"
+run_eval "${DUAL_INPUT}" "${WORKDIR}/decision.dual.json"
+
+print_summary() {
+  local label="$1"
+  local path="$2"
+  echo "\n[${label}]" >&2
+  jq '{action, allow, required_approvals, risk_assessment: {requires_dual_control: .risk_assessment.requires_dual_control, requires_step_up: .risk_assessment.requires_step_up, level: .risk_assessment.level}, next_steps}' "${path}" >&2
 }
-EOF_EXECUTION
 
-log "Receipt: exporting bundle with digests"
-python3 - "$BUNDLE_PATH" "$OUT_DIR" <<'PY'
-import datetime
-import hashlib
-import json
-import pathlib
-import sys
+print_summary "single-approver (expected: hold for dual control/step-up)" "${WORKDIR}/decision.single.json"
+print_summary "dual-control (expected: allow with dual control recorded)" "${WORKDIR}/decision.dual.json"
 
-bundle_path = pathlib.Path(sys.argv[1])
-out_dir = pathlib.Path(sys.argv[2])
-root_path = bundle_path.parent.parent.parent.resolve()
+INPUT_SHA=$(sha256sum "${DUAL_INPUT}" | cut -d ' ' -f1)
 
+jq -n \
+  --arg scenario "policy-dual-control-demo" \
+  --arg inputPath "${DUAL_INPUT}" \
+  --arg inputSha "${INPUT_SHA}" \
+  --arg policy "${OPA_DATA}" \
+  --slurpfile single "${WORKDIR}/decision.single.json" \
+  --slurpfile dual "${WORKDIR}/decision.dual.json" \
+  '{scenario: $scenario, policy: $policy, input: {path: $inputPath, sha256: $inputSha}, evaluations: {single: $single[0], dual: $dual[0]}}' \
+  > "${WORKDIR}/policy-dual-control-evidence.json"
 
-def digest(path: pathlib.Path) -> str:
-  return hashlib.sha256(path.read_bytes()).hexdigest()
-
-def rel(path: pathlib.Path) -> str:
-  try:
-    return str(path.resolve().relative_to(root_path))
-  except ValueError:
-    return str(path)
-
-files = ["request.json", "preflight.json", "approvals.json", "execution.json"]
-artifacts = []
-for name in files:
-  path = out_dir / name
-  artifacts.append(
-    {
-      "name": name,
-      "path": rel(path),
-      "sha256": digest(path),
-    }
-  )
-
-bundle = {
-  "version": "0.1.0-demo",
-  "generatedAt": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-  "requestId": "POLICY-REQ-DEMO-001",
-  "stages": {
-    "preflight": json.loads((out_dir / "preflight.json").read_text()),
-    "approvals": json.loads((out_dir / "approvals.json").read_text()),
-    "execution": json.loads((out_dir / "execution.json").read_text()),
-  },
-  "artifacts": artifacts,
-}
-bundle_path.write_text(json.dumps(bundle, indent=2))
-print(f"Bundle written to {bundle_path}")
-PY
-
-log "Done. Bundle ready at ${BUNDLE_PATH}"
+echo "\n[evidence] wrote ${WORKDIR}/policy-dual-control-evidence.json"
+echo "Reference sample: ${ROOT}/evidence-bundles/demo/policy-dual-control-bundle.json"

@@ -1,56 +1,84 @@
 # Policy Dual-Control Demo
 
-Demonstrates the dual-control gate for policy changes: preflight validation, sequential approvals,
-execution, and the final receipt/export.
+Demonstrates how the `intelgraph.policy.export.enhanced` OPA policy enforces dual control and step-up authentication for high-volume dataset exports.
+
+## Assets
+
+- Script: `scripts/demo/policy-dual-control.sh`
+- Sample input: `evidence-bundles/demo/policy-dual-control-input.json`
+- Sample evidence bundle: `evidence-bundles/demo/policy-dual-control-bundle.json`
 
 ## Prerequisites
 
-- `bash`, `python3`, and `jq` available on your PATH
-- Repository checkout (the script reads git metadata for the receipt)
+- `opa` CLI available on `PATH`.
+- `jq` CLI available on `PATH`.
+- Run from the repo root (`/workspace/summit`).
 
 ## Run the demo
 
-Execute the helper script from the repo root:
+1. Execute the script:
+
+   ```bash
+   scripts/demo/policy-dual-control.sh
+   ```
+
+2. Observe the summaries emitted by the script:
+
+   ```json
+   [single-approver (expected: hold for dual control/step-up)]
+   {
+     "action": "deny",
+     "allow": false,
+     "required_approvals": ["dual-control"],
+     "risk_assessment": {
+       "requires_dual_control": true,
+       "requires_step_up": true,
+       "level": "high"
+     },
+     "next_steps": ["Complete step-up authentication"]
+   }
+
+   [dual-control (expected: allow with dual control recorded)]
+   {
+     "action": "allow",
+     "allow": true,
+     "required_approvals": ["dual-control"],
+     "risk_assessment": {
+       "requires_dual_control": true,
+       "requires_step_up": true,
+       "level": "high"
+     },
+     "next_steps": ["Export approved - proceed with download"]
+   }
+   ```
+
+3. Review generated artifacts under `.demo/policy-dual-control/`:
+
+   - `request.single-approver.json` — missing second approval and step-up verification.
+   - `request.dual-control.json` — dual approvals + step-up ready to ship.
+   - `decision.*.json` — policy decisions for each request.
+   - `policy-dual-control-evidence.json` — ephemeral bundle for this run.
+
+## Verify the sample evidence bundle
+
+Use the provided bundle and input for offline verification:
 
 ```bash
-scripts/demo/policy-dual-control.sh
+# Confirm the input hash matches the sample bundle metadata
+sha256sum evidence-bundles/demo/policy-dual-control-input.json
+jq -r '.policy.inputSha256' evidence-bundles/demo/policy-dual-control-bundle.json
+
+# Inspect the required approvals and risk assessment captured in the bundle
+jq '.decision.required_approvals' evidence-bundles/demo/policy-dual-control-bundle.json
+jq '.decision.risk_assessment' evidence-bundles/demo/policy-dual-control-bundle.json
+
+# Compare the static bundle to a fresh run (differences should be timestamps only)
+diff -u evidence-bundles/demo/policy-dual-control-bundle.json \
+  .demo/policy-dual-control/policy-dual-control-evidence.json || true
 ```
 
-### Expected output
+Expected checks:
 
-```
-[YYYY-MM-DDTHH:MM:SSZ] Preflight: generating request and validating JSON
-[YYYY-MM-DDTHH:MM:SSZ] Preflight: capturing repository context
-[YYYY-MM-DDTHH:MM:SSZ] Approvals: drafting dual-control signatures
-[YYYY-MM-DDTHH:MM:SSZ] Execution: simulating change rollout
-[YYYY-MM-DDTHH:MM:SSZ] Receipt: exporting bundle with digests
-[YYYY-MM-DDTHH:MM:SSZ] Done. Bundle ready at evidence-bundles/demo/policy-dual-control-bundle.json
-```
-
-The timestamps will reflect your local run, and the git metadata will use your current branch/commit.
-
-## Artifacts produced
-
-- `evidence-bundles/demo/policy-dual-control-bundle.json` – consolidated receipt with preflight,
-  approvals, execution, and digests.
-- `evidence-bundles/demo/runtime/` – stage payloads (`request.json`, `preflight.json`,
-  `approvals.json`, `execution.json`).
-
-## Verify the evidence bundle
-
-```bash
-# Validate the recorded digests against the runtime files
-jq -r '.artifacts[] | "\(.sha256)  \(.path)"' \
-  evidence-bundles/demo/policy-dual-control-bundle.json | sha256sum --check
-
-# Inspect the stage payloads inline from the bundle
-jq '.stages' evidence-bundles/demo/policy-dual-control-bundle.json
-```
-
-## What to look for
-
-- **Preflight** – JSON validation noted under `stages.preflight.validations` with the request hash.
-- **Approvals** – Two approvals captured with roles and timestamps under `stages.approvals`.
-- **Execution** – Result set to `success` with the rollout plan listed.
-- **Receipt/Export** – `artifacts` array lists every stage file and its SHA-256 digest for
-  reproducible verification.
+- Hash values agree between the input file and bundle metadata.
+- `required_approvals` contains `dual-control` and `risk_assessment.requires_dual_control` is `true`.
+- The fresh run only diverges on timestamps/temporary paths from the static sample.

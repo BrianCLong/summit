@@ -1,0 +1,58 @@
+apiVersion: 1
+groups:
+  - name: summit-red-saturation
+    interval: 1m
+    rules:
+      - alert: SummitHighErrorRate
+        expr: |
+          (sum(rate(http_requests_total{job="intelgraph-server",status=~"5.."}[5m])) /
+            sum(rate(http_requests_total{job="intelgraph-server"}[5m]))) * 100 > 2
+        for: 5m
+        labels:
+          severity: critical
+          service: intelgraph-api
+          component: red
+        annotations:
+          summary: "High HTTP 5xx error rate"
+          description: "5xx error percentage has exceeded 2% over the past 5 minutes."
+      - alert: SummitSlowResponsesP95
+        expr: |
+          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="intelgraph-server"}[5m])) by (le)) > 0.75
+        for: 5m
+        labels:
+          severity: warning
+          service: intelgraph-api
+          component: red
+        annotations:
+          summary: "p95 latency above target"
+          description: "95th percentile latency is above 750ms for 5 minutes."
+      - alert: SummitCpuSaturation
+        expr: 100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+        for: 10m
+        labels:
+          severity: warning
+          service: platform
+          component: saturation
+        annotations:
+          summary: "CPU saturation sustained"
+          description: "Average CPU utilization exceeded 85% for 10 minutes."
+      - alert: SummitMemorySaturation
+        expr: (1 - (avg(node_memory_MemAvailable_bytes) / avg(node_memory_MemTotal_bytes))) * 100 > 90
+        for: 10m
+        labels:
+          severity: critical
+          service: platform
+          component: saturation
+        annotations:
+          summary: "Memory saturation risk"
+          description: "Available memory dropped below 10% of total capacity."
+      - alert: SummitQueueBackpressure
+        expr: max_over_time(workqueue_depth{job="intelgraph-server"}[5m]) > 150
+        for: 5m
+        labels:
+          severity: critical
+          service: intelgraph-api
+          component: saturation
+        annotations:
+          summary: "Persistent queue depth"
+          description: "Work queue depth has exceeded 150 for more than 5 minutes."

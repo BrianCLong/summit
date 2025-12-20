@@ -1,79 +1,67 @@
 {
-  "version": "0.1.0-demo",
-  "generatedAt": "2025-12-19T17:07:48.114826+00:00",
-  "requestId": "POLICY-REQ-DEMO-001",
-  "stages": {
-    "preflight": {
-      "timestamp": "2025-12-19T17:07:47.517848+00:00",
-      "git": {
-        "commit": "049a4901128f76073128ef3f2307178a466847a9",
-        "short": "049a4901",
-        "branch": "work"
-      },
-      "validations": {
-        "json": "request.json validated with python -m json.tool",
-        "schema": "demo schema check: required fields present"
-      },
-      "inputs": {
-        "requestFile": "evidence-bundles/demo/runtime/request.json",
-        "requestSha256": "40fe851d26de5533871a02dcb1992a0f2e60fe090f39e63cb448b813b9d1d1be"
-      }
-    },
-    "approvals": {
-      "requestId": "POLICY-REQ-DEMO-001",
-      "approvals": [
-        {
-          "role": "Data Owner",
-          "actor": "owner.bravo@example.com",
-          "decision": "approve",
-          "timestamp": "2026-01-11T01:15:00Z",
-          "notes": "Validated scope and blast radius."
-        },
-        {
-          "role": "Security",
-          "actor": "sec.charlie@example.com",
-          "decision": "approve",
-          "timestamp": "2026-01-11T01:20:00Z",
-          "notes": "Controls mapped to ABAC policy set."
-        }
-      ]
-    },
-    "execution": {
-      "requestId": "POLICY-REQ-DEMO-001",
-      "plan": [
-        "OPA dry-run on sample events",
-        "Deploy policy bundle to staging gatekeeper",
-        "Monitor audit log for 5m",
-        "Promote to production after zero regressions"
-      ],
-      "result": "success",
-      "completedAt": "2026-01-11T01:45:00Z",
-      "evidence": {
-        "logs": "logs/policy-gatekeeper-2026-01-11T01-45-00Z.log",
-        "export": "evidence-bundles/demo/policy-dual-control-bundle.json"
-      }
-    }
+  "version": "1.0.0",
+  "scenario": "policy-dual-control-demo",
+  "generatedAt": "2025-12-19T19:30:15.254229Z",
+  "policy": {
+    "package": "intelgraph.policy.export.enhanced",
+    "inputPath": "evidence-bundles/demo/policy-dual-control-input.json",
+    "inputSha256": "fb797099067b7693c8c8b5f5b8d8ed7e4b6be49fc20c7a2c929ad7da00423fff",
+    "policySource": "policy/opa/export_enhanced.rego"
   },
-  "artifacts": [
+  "context": {
+    "exportType": "dataset",
+    "destination": "s3://external-auditor/demo-bucket",
+    "user": "analyst-123",
+    "sourceCount": 120
+  },
+  "approvals": [
     {
-      "name": "request.json",
-      "path": "evidence-bundles/demo/runtime/request.json",
-      "sha256": "40fe851d26de5533871a02dcb1992a0f2e60fe090f39e63cb448b813b9d1d1be"
+      "actor": "compliance-officer",
+      "channel": "ticket",
+      "evidence": "IG-REQ-8721"
     },
     {
-      "name": "preflight.json",
-      "path": "evidence-bundles/demo/runtime/preflight.json",
-      "sha256": "088cffafb5d1716f9f3b5e1c92cbea8190f7123875c41774163872b16d3c6018"
-    },
-    {
-      "name": "approvals.json",
-      "path": "evidence-bundles/demo/runtime/approvals.json",
-      "sha256": "791cf37d292e25baaeead8b3c6dcf8fe0458dba4e9bbcd750f79ab889f44e8c4"
-    },
-    {
-      "name": "execution.json",
-      "path": "evidence-bundles/demo/runtime/execution.json",
-      "sha256": "f75efc030d56ca6d7db0128e6e8b6745e2697da67d6720b6477736f1959f017e"
+      "actor": "security-approver",
+      "channel": "ticket",
+      "evidence": "IG-REQ-8721"
     }
-  ]
+  ],
+  "decision": {
+    "action": "allow",
+    "allow": true,
+    "violations": [],
+    "risk_assessment": {
+      "level": "high",
+      "factors": [
+        "Large number of sources",
+        "External dataset export"
+      ],
+      "requires_approval": false,
+      "requires_dual_control": true,
+      "requires_step_up": true
+    },
+    "required_approvals": [
+      "dual-control"
+    ],
+    "appeal_available": false,
+    "next_steps": [
+      "Export approved - proceed with download"
+    ]
+  },
+  "verification": {
+    "expectedCommands": [
+      "opa eval -f pretty -d policy/opa/export_enhanced.rego -i evidence-bundles/demo/policy-dual-control-input.json 'data.intelgraph.policy.export.enhanced.decision'",
+      "jq -r '.decision.required_approvals' evidence-bundles/demo/policy-dual-control-bundle.json"
+    ],
+    "notes": [
+      "Decision should show requires_dual_control = true with allow = true only after a second approver is present and step_up_verified = true.",
+      "Risk factors should include the external destination and source volume triggers.",
+      "Appeal availability remains false because there are no blocking violations in this sanitized sample."
+    ]
+  },
+  "attestations": {
+    "cosignSigned": false,
+    "dualControlConfirmed": true,
+    "stepUpVerified": true
+  }
 }
