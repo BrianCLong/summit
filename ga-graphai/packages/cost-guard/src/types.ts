@@ -67,6 +67,27 @@ export interface WorkloadSample {
   throughputPerNode: number;
 }
 
+export interface QueueRuntimeSignals {
+  queueName: string;
+  backlog: number;
+  inflight: number;
+  arrivalRatePerSecond: number;
+  serviceRatePerSecondPerWorker: number;
+  observedP95LatencyMs: number;
+  costPerJobUsd: number;
+  spendRatePerMinuteUsd: number;
+}
+
+export interface QueueSloConfig {
+  targetP95Ms: number;
+  maxCostPerMinuteUsd: number;
+  backlogTargetSeconds: number;
+  minReplicas: number;
+  maxReplicas: number;
+  scaleStep: number;
+  stabilizationSeconds: number;
+}
+
 export interface ClusterNodeState {
   nodeId: string;
   cpuUtilization: number;
@@ -90,6 +111,27 @@ export interface ScalingDecision {
   confidence: number;
   loadIndex: number;
   forecast: ScalingForecast;
+}
+
+export interface QueueScalingTelemetry {
+  latencyPressure: number;
+  backlogPressure: number;
+  costPressure: number;
+  backlogSeconds: number;
+  sloTargetSeconds: number;
+}
+
+export interface QueueScalingDecision {
+  action: ScalingAction;
+  recommendedReplicas: number;
+  reason: string;
+  telemetry: QueueScalingTelemetry;
+  kedaMetric: {
+    metricName: string;
+    labels: Record<string, string>;
+    value: number;
+    query: string;
+  };
 }
 
 export interface WorkloadAllocation {
