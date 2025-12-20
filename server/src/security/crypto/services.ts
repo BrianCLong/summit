@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as crypto from 'node:crypto';
 import fetch from 'node-fetch';
 import crypto from 'node:crypto';

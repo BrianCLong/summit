@@ -1,0 +1,70 @@
+version: 1
+defaultTenant: default
+tenants:
+  default:
+    monthlyCost:
+      soft: 50
+      hard: 100
+    maxRequestsPerMinute: 120
+    promptLimit: 12000
+    abuse:
+      failureThreshold: 4
+      windowSeconds: 300
+      suspiciousPatterns:
+        - "(?i)system prompt"
+        - "(?i)ignore previous instructions"
+        - "(?i)print the system prompt"
+    tasks:
+      rag:
+        maxTokens: 8000
+        modelClasses:
+          fast:
+            maxTokens: 6000
+            allowedModels:
+              - provider: mock
+                model: mock-model
+              - provider: openai
+                model: gpt-4o-mini
+          balanced:
+            allowedModels:
+              - provider: openai
+                model: gpt-4o-mini
+          premium:
+            allowedModels:
+              - provider: openai
+                model: gpt-4o
+      summarization:
+        maxTokens: 6000
+        modelClasses:
+          fast:
+            allowedModels:
+              - provider: mock
+                model: mock-model
+              - provider: openai
+                model: gpt-4o-mini
+          balanced:
+            allowedModels:
+              - provider: openai
+                model: gpt-4o-mini
+      extraction:
+        maxTokens: 4000
+        modelClasses:
+          fast:
+            allowedModels:
+              - provider: mock
+                model: mock-model
+          balanced:
+            allowedModels:
+              - provider: openai
+                model: gpt-4o-mini
+      agent:
+        maxTokens: 4000
+        modelClasses:
+          balanced:
+            allowedModels:
+              - provider: openai
+                model: gpt-4o-mini
+          premium:
+            allowedModels:
+              - provider: openai
+                model: gpt-4o

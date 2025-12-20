@@ -83,7 +83,24 @@ class WebSocketService {
       cursor: null,
     });
     socket.processedOps = new Set();
-    socket.rateState = { count: 0, ts: Date.now() };
+
+    // Check concurrent connection limit
+    if (this.userSessions.size > 10000) { // Global limit example
+        socket.disconnect(true);
+        this.logger.warn(`Global connection limit reached, disconnecting ${userId}`);
+        return;
+    }
+
+    // Per-user connection limit (e.g. 5 tabs max)
+    const userConnections = this.connectedUsers.get(userId)?.size || 0;
+    if (userConnections > 5) {
+        socket.emit('error', { message: 'Too many active connections' });
+        socket.disconnect(true);
+        this.logger.warn(`User ${userId} exceeded connection limit`);
+        return;
+    }
+
+    socket.rateState = { tokens: 100, lastRefill: Date.now() }; // Token bucket init
 
     // Update presence
     this.updateUserPresence(userId, {
@@ -500,11 +517,20 @@ class WebSocketService {
 
   isRateLimited(socket) {
     const now = Date.now();
-    if (now - socket.rateState.ts > 1000) {
-      socket.rateState = { count: 0, ts: now };
+    const refillRate = MAX_OPS_PER_SEC; // Tokens per second
+    const capacity = MAX_OPS_PER_SEC * 2; // Burst size
+
+    // Refill
+    const elapsed = (now - socket.rateState.lastRefill) / 1000;
+    const added = elapsed * refillRate;
+    socket.rateState.tokens = Math.min(capacity, socket.rateState.tokens + added);
+    socket.rateState.lastRefill = now;
+
+    if (socket.rateState.tokens >= 1) {
+        socket.rateState.tokens -= 1;
+        return false;
     }
-    socket.rateState.count += 1;
-    return socket.rateState.count > MAX_OPS_PER_SEC;
+    return true;
   }
 
   handleCollabBatch(socket, batch = []) {

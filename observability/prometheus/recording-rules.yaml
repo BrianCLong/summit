@@ -5,3 +5,9 @@ groups:
         expr: sum(rate(http_requests_total{job="web",code=~"5.."}[5m])) / sum(rate(http_requests_total{job="web"}[5m]))
       - record: job:http_request_duration_seconds:p95
         expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="web"}[5m])) by (le))
+  - name: vector-search
+    rules:
+      - record: vector_query_duration_seconds:p99
+        expr: histogram_quantile(0.99, sum(rate(vector_query_duration_seconds_bucket[5m])) by (le, operation))
+      - record: vector_query_duration_seconds:p99:baseline
+        expr: histogram_quantile(0.99, sum(rate(vector_query_duration_seconds_bucket[30m])) by (le, operation))

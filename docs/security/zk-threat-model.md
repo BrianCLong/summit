@@ -1,73 +1,71 @@
-# Zero-Knowledge Threat Model
+# Zero-Knowledge Threat Model (ZK-TM)
 
-> Scope: Specifications and governance only. No cryptographic primitives or runtime
-> integrations are included in this repository.
+**Version:** 1.0
+**Status:** DRAFT
+**Scope:** Zero-Knowledge Deconfliction Service
 
-## System Overview
+---
 
-The ZK capability is envisioned as a controlled subsystem that accepts structured
-requests, validates them against governance policies, and emits determinate responses
-and audit evidence. All interactions are mediated through typed envelopes and offline
-review; no prover or verifier executes within this codebase.
+## 1. Trust Assumptions
 
-## Assets
+### 1.1 Actors
+| Actor | Role | Trust Level | Capability |
+|-------|------|-------------|------------|
+| **Tenant** | Data Owner / Querier | **Untrusted** | Can ingest data, run queries, attempt inference attacks. |
+| **Summit Host** | Service Provider | **Semi-Honest** | "Honest-but-curious". Follows protocol but may log side-channels. |
+| **Coalition Peer** | External Partner | **Untrusted** | Similar to Tenant but connects via network API. |
+| **Auditor** | Verifier | **Trusted** | Can decrypt audit logs (with quorum) to verify compliance. |
 
-- **ZK request envelopes** (IDs, tenant scope, circuit identifiers, payload hashes)
-- **ZK response envelopes** (status, reviewer rationale, safeguards applied)
-- **Audit manifests** (immutable references to evidence bundles and review steps)
-- **Governance metadata** (risk tier, approver identity, timestamps)
+### 1.2 Security Boundaries
+*   **Tenancy Boundary:** Data from Tenant A must never be visible to Tenant B in plaintext.
+*   **Inference Boundary:** Tenant A must not be able to deduce the existence of specific non-overlapping records in Tenant B.
+*   **Cardinality Boundary:** Exact size of Tenant B's dataset should be masked (bucketed) to prevent granular tracking.
 
-## Trust Boundaries
+---
 
-- **Repository boundary**: Only specifications and interfaces live in-repo; proof
-  artifacts and witnesses are out-of-repo and access-controlled.
-- **Workflow boundary**: CI guard enforces Tier-4 approval before merges touching ZK
-  assets.
-- **Tenant boundary**: Each request carries tenant IDs to prevent cross-tenant leakage
-  in downstream systems.
+## 2. Assets at Risk
 
-## Threat Actors
+| Asset | Description | Sensitivity | Risk of Compromise |
+|-------|-------------|-------------|-------------------|
+| **Raw Identifiers** | Emails, Phone #s, Crypto wallet addresses. | **CRITICAL** | Direct identification of targets/sources. |
+| **Embeddings** | Vector representations of entities. | **HIGH** | Inversion attacks can reconstruct original text/data. |
+| **Intersection Set** | The actual overlapping items. | **HIGH** | Reveals shared operational interest/context. |
+| **Dataset Cardinality** | Total number of items in a set. | **MEDIUM** | leaks operational tempo or size of knowledge base. |
 
-- Malicious contributors attempting to introduce unsafe cryptographic code
-- Supply-chain attackers inserting unvetted ZK dependencies
-- Insider threat bypassing approvals to weaken controls
-- Configuration drifts that remove auditability or degrade determinism
+---
 
-## Attack Surface
+## 3. Threat Scenarios
 
-- Pull requests that alter ZK documents, interfaces, or guardrails
-- Typings that could be misinterpreted to include secrets or plaintext witnesses
-- Missing or inconsistent audit manifest schemas
+### 3.1 Dictionary / Brute-Force Attacks (The "Rainbow Table" Risk)
+*   **Attack:** Malicious Tenant A uploads a massive dictionary of all possible emails (e.g., from a breach) as "their" dataset to find overlaps with Tenant B.
+*   **Mitigation:**
+    *   **Rate Limiting:** Strict limits on query batch sizes.
+    *   **Entropy Checks:** Reject low-entropy inputs if detectable.
+    *   **Cost:** Proof-of-Work or financial cost per query (future scope).
+    *   **Policy:** "Need-to-know" access controls before allowing overlap checks.
 
-## Key Threats & Mitigations
+### 3.2 Intersection Size Leakage
+*   **Attack:** Tenant A queries with 1 item. If overlap is found, they know Tenant B has that specific item.
+*   **Mitigation:**
+    *   **Minimum Set Size (k-anonymity):** Queries must contain at least $k$ distinct items.
+    *   **Noise:** Differential Privacy (DP) noise added to the result count (e.g., "Overlap: Low/Med/High" instead of "1").
 
-| Threat | Impact | Mitigation | Residual Risk |
-| --- | --- | --- | --- |
-| Introduction of live cryptography without review | High | CI guard requiring `tier-4-approved` label; document-level prohibition; reviewer checklist | Low |
-| Leakage of sensitive witness data | High | Envelope requires hashes only; no plaintext allowed; audit manifest redaction requirement | Low |
-| Missing provenance for ZK activity | Medium | Mandatory request/response IDs, schema versions, and manifest linkage | Low |
-| Ambiguous circuit usage | Medium | Circuit IDs and statement summaries are mandatory; responses must specify safeguards | Low |
-| Unauthorized change to ZK specs | Medium | Tier-4 approval requirement; scope-limited paths for ZK assets | Low |
-| Dependency supply-chain insertion | High | No runtime hooks permitted; any future dependency requires separate review and SBOM update | Low |
+### 3.3 Side-Channel Attacks
+*   **Attack:** Measuring the *time* taken to compute intersection to infer set size or data distribution.
+*   **Mitigation:**
+    *   **Constant-Time Algorithms:** Use constant-time crypto operations where possible.
+    *   **Padding:** Pad all sets to fixed block sizes before processing.
 
-## Assumptions
+### 3.4 Malicious Host (Man-in-the-Middle)
+*   **Attack:** The Summit Host saves the intermediate hashes from both Alice and Bob and runs a brute-force attack offline.
+*   **Mitigation:**
+    *   **Ephemeral Keys:** Use ephemeral keys for the ECDH exchange that are discarded immediately.
+    *   **Salt:** High-entropy, per-session salts.
 
-- All ZK operations occur in isolated services not represented in this repository.
-- Evidence storage supports immutable identifiers and retention policies.
-- Tier-4 approvers are defined in governance and available during review cycles.
+---
 
-## Validation Checklist (Static)
+## 4. Unacceptable Failures (Must Block)
 
-- [ ] ZK changes limited to docs, interfaces, or CI guardrails
-- [ ] No cryptographic implementations, circuits, or keys introduced
-- [ ] Request/response envelopes include IDs, tenant scoping, schema version, and
-      payload fingerprints
-- [ ] Audit manifest schema aligns with evidence storage capabilities
-- [ ] CI guard is active and references correct path filters and label name
-- [ ] Reviewer sign-off recorded with Tier-4 authority
-
-## Residual Risk and Next Steps
-
-Residual risk remains around human error in reviews and future integration work.
-Next steps include tying this threat model into the central Threat Model Index and
-introducing automated schema validation once downstream systems are ready.
+1.  **Plaintext Leak:** Any raw identifier appearing in logs, errors, or temporary tables.
+2.  **Unilateral Deanonymization:** A single tenant successfully mapping >1% of another tenant's private graph via repeated queries.
+3.  **Silent Failure:** The system returning "No Overlap" due to error when overlaps exist (false negative), leading to intelligence failure / fratricide.

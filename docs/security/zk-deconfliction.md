@@ -1,83 +1,112 @@
-# Zero-Knowledge Deconfliction Guardrails
+# Zero-Knowledge Deconfliction Specification
 
-## Purpose
+**Version:** 1.0
+**Status:** DRAFT
+**Author:** Staff Engineer, ZK Systems
 
-This document defines the scaffolding for zero-knowledge (ZK) workflows within the Summit
-platform. The goal is to enable secure design and review without introducing any live
-cryptography or runtime hooks. All content here is limited to specifications, validation
-checklists, and governance expectations.
+---
 
-## Scope
+## 1. Executive Summary
 
-- ZK proving and verification interfaces (request/response envelopes only)
-- Evidence and audit manifests required for ZK lifecycles
-- Change-management gates for high-risk ZK paths
-- Explicit exclusions: no circuit definitions, prover/verifier implementations, key
-  handling, or cryptographic parameter generation
+This specification defines the architecture for **Zero-Knowledge Deconfliction** within Summit. It enables multiple tenants (or coalition partners) to identify overlapping entities (e.g., "Do we both know Person X?") without sharing their non-overlapping datasets or revealing the raw data of the overlapping entities to the platform itself in plaintext during the process.
 
-## Design Principles
+**Strategic Goal:** Provable non-exfiltrating overlap detection across Tenants, Coalitions, and Compartments.
 
-1. **Safety-first posture**: Treat ZK as a Tier-4 risk domain that requires explicit
-   senior approval before any code or documentation change is merged.
-2. **Deterministic envelopes**: Standardize requests and responses with deterministic
-   metadata so that future verification systems can reason about provenance without
-   needing to inspect cryptographic artifacts.
-3. **Auditability over performance**: Prioritize evidence capture (manifests, hashes,
-   reviewer attestations) ahead of performance considerations.
-4. **No implicit coupling**: Keep ZK-specific types isolated from runtime paths; no
-   initialization, network calls, or prover hooks are permitted at this stage.
-5. **Defense in depth**: Require layered controls—static documentation, typed contracts,
-   and CI gates—to reduce the chance of unsafe changes reaching production.
+---
 
-## Control Objectives
+## 2. Threat Model Summary
 
-- **Change isolation**: All ZK-related assets live under `docs/security/zk-*` and
-  typed contracts in `packages/types/src/zk.ts`.
-- **Approval workflow**: Any change touching ZK assets must carry a `tier-4-approved`
-  label on the pull request before it can merge.
-- **Traceability**: ZK requests and responses must include globally unique IDs,
-  tenant scoping, schema versions, and integrity fingerprints.
-- **Data minimization**: Requests carry hashes/fingerprints only; no plaintext inputs
-  to circuits are stored in envelopes.
-- **Audit coverage**: Every ZK request maps to an audit manifest entry with retained
-  evidence pointers.
+*Full detail in [ZK Threat Model](./zk-threat-model.md).*
 
-## Request/Response Envelope Expectations
+**Core Risks:**
+*   **Intersection Size Leakage:** Inferring dataset size from match counts.
+*   **Dictionary Attacks:** Brute-forcing the hash space with low-entropy inputs (e.g., phone numbers).
+*   **Timing Side-Channels:** Inferring set composition from processing time.
 
-- **Requests** include: request ID, tenant ID, circuit ID, statement summary,
-  payload fingerprint, evidence bundle IDs, and requester accountability metadata.
-- **Responses** include: request ID, status (`accepted`, `rejected`, `needs-review`,
-  `blocked`), review rationale, safeguards applied, and audit manifest linkage.
-- **Versioning**: Both requests and responses carry schema versions to prevent
-  ambiguity during upgrades.
+**Trust Boundaries:**
+*   **Tenant:** Untrusted.
+*   **Summit Host:** Semi-Honest (Follows protocol, but curious).
+*   **Enclave:** None (Software-only assumption).
 
-## Evidence and Audit Alignment
+---
 
-- Audit manifests must enumerate inputs (by hash only), outputs (by hash only),
-  review steps, and applicable controls (e.g., segregation-of-duties, data
-  minimization).
-- Retention follows the higher of legal hold or security policy; manifests reference
-  off-repo evidence stores with immutable content identifiers.
+## 3. Protocol Selection & Rationale
 
-## Change-Management Guardrails
+### Primary Pattern: ECDH-PSI
+**Selected Protocol:** **ECDH-PSI** (Elliptic Curve Diffie-Hellman Private Set Intersection).
 
-- A dedicated CI workflow (`zk-deconfliction-guard`) blocks merges when ZK assets are
-  modified without a `tier-4-approved` label.
-- Reviewers must confirm that no cryptographic implementations or runtime hooks are
-  introduced; only specifications, interfaces, and evidence plans are permitted.
-- Security Engineering owns final approval authority for Tier-4 ZK changes.
+**Rationale:**
+*   **Security:** Provides information-theoretic security against semi-honest adversaries. Relies on the Discrete Logarithm Problem (DLP).
+*   **Software-Only:** Implementable using standard cryptographic libraries (TweetNaCl / Node `crypto` / `elliptic`) without specialized hardware (SGX/Enclaves).
+*   **Performance:** $O(n)$ complexity. Efficient enough for typical "Watchlist vs. Database" operations (thousands of items).
 
-## Out-of-Scope (Explicitly Prohibited)
+**Mechanism:**
+1.  Alice computes $H(x)^a$.
+2.  Bob computes $(H(x)^a)^b = H(x)^{ab}$ and $H(y)^b$.
+3.  Alice computes $(H(y)^b)^a = H(y)^{ab}$.
+4.  Intersection is found on matching $H(z)^{ab}$.
 
-- Shipping prover/verifier binaries, circuits, keys, or setup parameters
-- Adding runtime imports to ZK tooling
-- Integrating third-party ZK frameworks at build or runtime
-- Persisting plaintext witness data or secrets in the repository
+### Fallback Pattern: Bloom Filters with DP
+**Selected For:** High-volume, low-sensitivity "existence checks".
+**Mechanism:** Alice sends a Bloom Filter of her set. Bob queries it.
+**Privacy:** Differential Privacy (Randomized Response) is applied to bit indices to provide plausible deniability.
 
-## Roadmap (Safe Next Steps)
+---
 
-- Map ZK threat scenarios to the central Threat Model Index with references to this
-  document and the ZK threat model.
-- Generate machine-readable policy artifacts (e.g., Rego) once interfaces are stable.
-- Add synthetic tests that validate schema adherence without executing cryptographic
-  routines.
+## 4. Integration Specification
+
+### 4.1 Architecture Diagram
+
+```mermaid
+sequenceDiagram
+    participant TA as Tenant A (Requestor)
+    participant S as Summit (Broker)
+    participant TB as Tenant B (Responder)
+
+    Note over TA, TB: ZK Deconfliction Request
+    TA->>S: POST /api/zk/deconflict/start (Items X hashed with A's key)
+    S->>S: Validate Policy (Quota, Permissions)
+    S->>TB: Job: Compute (X^b) and (Y^b)
+    Note right of TB: Async Worker
+    TB->>S: POST /api/zk/deconflict/response (X^ab, Y^b)
+    S->>TA: Result (X^ab, Y^b)
+    TA->>TA: Compute Y^ab, Compare, Find Matches
+```
+
+### 4.2 Component Integration
+
+#### A. Ingestion Pipeline
+*   **Normalization:** The `NormalizationStage` in the ingestion pipeline must produce **Canonical Strings** (e.g., `person:email:john.doe@example.com` normalized to lowercase/trimmed).
+*   **Salting:** Deconfliction operations use **per-session** ephemeral keys. No persistent "rainbow tables" of hashes are stored to prevent leaks if the DB is dumped.
+
+#### B. Knowledge Graph & Storage
+*   The ZK service operates on **Natural Keys** extracted from the Graph schema (`server/src/graph/schema.ts`).
+*   It does **not** query the graph directly during the ZK exchange. It queries a specialized, access-controlled view or index that maps `TenantID -> EntityHashes`.
+
+#### C. Multi-Tenant Isolation
+*   **Enforcement:** The Broker uses `server/src/tenancy/tenantScope.ts` to enforce boundaries.
+*   **Cross-Tenant Access:** Only permitted via explicit **Coalition Policy** documents (OPA rules). "Open" deconfliction is disabled by default.
+
+---
+
+## 5. Audit & CI Hooks
+
+### 5.1 Governance
+*   **Tier-4 Approval:** Required for changes to `src/security/zk/**` and `server/src/tenancy/tenantScope.ts`.
+*   **Evidence:** Every execution generates a `zk_proof_bundle.json` (See [Audit Evidence](./zk-audit-evidence.md)).
+
+### 5.2 CI Gates
+*   **Crypto Lint:** CI fails if `Math.random()` is used in ZK modules.
+*   **Dependency Lock:** Changes to `elliptic` or `sodium-native` trigger a security alert.
+
+### 5.3 Operational Safeguards
+*   **Misuse Detection:** Alert on "High Cardinality Intersection" (> 50% matches).
+*   **Kill-Switch:** `ZK_DECONFLICTION_ENABLED=false` immediately halts all ZK endpoints.
+
+---
+
+## 6. Appendices
+
+*   [Appendix A: Threat Model](./zk-threat-model.md) - detailed risk analysis.
+*   [Appendix B: Audit Evidence Spec](./zk-audit-evidence.md) - schema for proof bundles.
+*   [Appendix C: Explainable Denials](./zk-explainable-denials.md) - templates for user responses.

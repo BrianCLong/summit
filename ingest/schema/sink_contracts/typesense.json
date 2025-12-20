@@ -1,0 +1,295 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://companyos.example.com/schemas/ingest/sink_contracts/typesense.schema.json",
+  "title": "Typesense Sink Contract v1",
+  "description": "Contract for Typesense sink operations with idempotency, revision guards, and exactly-once semantics for search indexing.",
+  "type": "object",
+  "additionalProperties": false,
+  "definitions": {
+    "upsert_operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "operation": {
+          "const": "upsert"
+        },
+        "collection": {
+          "description": "Target Typesense collection name.",
+          "type": "string",
+          "pattern": "^[a-zA-Z][a-zA-Z0-9_-]*$"
+        },
+        "id_field": {
+          "description": "Field to use as document ID.",
+          "type": "string",
+          "default": "id"
+        },
+        "revision_field": {
+          "description": "Field storing revision number for optimistic locking.",
+          "type": "string",
+          "default": "_revision"
+        },
+        "revision_guard": {
+          "description": "If true, reject updates where incoming revision <= existing revision.",
+          "type": "boolean",
+          "default": true
+        },
+        "fields": {
+          "description": "Field mappings from ingest data to document fields.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "source_path": {
+                "description": "JSONPath or dot-notation path in data payload.",
+                "type": "string"
+              },
+              "type": {
+                "description": "Typesense field type.",
+                "type": "string",
+                "enum": [
+                  "string", "string[]",
+                  "int32", "int32[]",
+                  "int64", "int64[]",
+                  "float", "float[]",
+                  "bool", "bool[]",
+                  "geopoint", "geopoint[]",
+                  "object", "object[]",
+                  "auto"
+                ]
+              },
+              "facet": {
+                "description": "Enable faceting on this field.",
+                "type": "boolean",
+                "default": false
+              },
+              "index": {
+                "description": "Enable indexing on this field.",
+                "type": "boolean",
+                "default": true
+              },
+              "optional": {
+                "description": "Allow null/missing values.",
+                "type": "boolean",
+                "default": true
+              },
+              "sort": {
+                "description": "Enable sorting on this field.",
+                "type": "boolean",
+                "default": false
+              },
+              "infix": {
+                "description": "Enable infix search on this field.",
+                "type": "boolean",
+                "default": false
+              },
+              "locale": {
+                "description": "Locale for string fields.",
+                "type": "string"
+              }
+            },
+            "required": ["source_path", "type"]
+          }
+        },
+        "audit_fields": {
+          "description": "Standard audit fields to populate automatically.",
+          "type": "object",
+          "properties": {
+            "_created_at": { "type": "string", "default": "_created_at" },
+            "_updated_at": { "type": "string", "default": "_updated_at" },
+            "_tenant_id": { "type": "string", "default": "_tenant_id" },
+            "_source": { "type": "string", "default": "_source" }
+          }
+        },
+        "dirty_values": {
+          "description": "How to handle values that don't match schema.",
+          "type": "string",
+          "enum": ["coerce_or_reject", "coerce_or_drop", "drop", "reject"],
+          "default": "coerce_or_reject"
+        }
+      },
+      "required": ["operation", "collection", "fields"]
+    },
+    "delete_operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "operation": {
+          "const": "delete"
+        },
+        "collection": {
+          "type": "string",
+          "pattern": "^[a-zA-Z][a-zA-Z0-9_-]*$"
+        },
+        "filter_by": {
+          "description": "Typesense filter expression for deletion.",
+          "type": "string"
+        },
+        "by_id": {
+          "description": "Delete by document ID (alternative to filter_by).",
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "required": ["operation", "collection"]
+    }
+  },
+  "properties": {
+    "contract_version": {
+      "description": "Version of this sink contract.",
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "sink_type": {
+      "const": "typesense"
+    },
+    "connection": {
+      "description": "Connection configuration (secrets resolved at runtime).",
+      "type": "object",
+      "properties": {
+        "nodes": {
+          "description": "Typesense server nodes.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "host": { "type": "string" },
+              "port": { "type": "integer", "default": 8108 },
+              "protocol": { "type": "string", "enum": ["http", "https"], "default": "https" }
+            },
+            "required": ["host"]
+          },
+          "minItems": 1
+        },
+        "connection_timeout_seconds": { "type": "integer", "default": 10 },
+        "num_retries": { "type": "integer", "default": 3 },
+        "retry_interval_seconds": { "type": "number", "default": 0.1 },
+        "healthcheck_interval_seconds": { "type": "integer", "default": 15 }
+      },
+      "required": ["nodes"]
+    },
+    "idempotency": {
+      "description": "Idempotency configuration for exactly-once semantics.",
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "store_type": {
+          "description": "Where to store idempotency keys.",
+          "type": "string",
+          "enum": ["redis", "postgres"],
+          "default": "redis"
+        },
+        "ttl_days": {
+          "type": "integer",
+          "default": 7,
+          "minimum": 1,
+          "maximum": 365
+        }
+      }
+    },
+    "retry": {
+      "description": "Retry configuration for transient failures.",
+      "type": "object",
+      "properties": {
+        "max_attempts": { "type": "integer", "default": 3, "minimum": 1, "maximum": 10 },
+        "initial_delay_ms": { "type": "integer", "default": 1000 },
+        "max_delay_ms": { "type": "integer", "default": 30000 },
+        "backoff_multiplier": { "type": "number", "default": 2.0 },
+        "jitter_factor": { "type": "number", "default": 0.1 },
+        "retryable_status_codes": {
+          "description": "HTTP status codes that should trigger retry.",
+          "type": "array",
+          "items": { "type": "integer" },
+          "default": [429, 500, 502, 503, 504]
+        }
+      }
+    },
+    "batching": {
+      "description": "Batch processing configuration.",
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "max_size": { "type": "integer", "default": 40, "minimum": 1, "maximum": 100 },
+        "max_wait_ms": { "type": "integer", "default": 1000 },
+        "action": {
+          "description": "Import action for batches.",
+          "type": "string",
+          "enum": ["create", "upsert", "update", "emplace"],
+          "default": "upsert"
+        }
+      }
+    },
+    "operations": {
+      "description": "List of operations this contract supports.",
+      "type": "array",
+      "items": {
+        "oneOf": [
+          { "$ref": "#/definitions/upsert_operation" },
+          { "$ref": "#/definitions/delete_operation" }
+        ]
+      },
+      "minItems": 1
+    },
+    "dlq": {
+      "description": "Dead letter queue configuration.",
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "collection": { "type": "string", "default": "ingest_dlq" },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "SCHEMA_DRIFT",
+              "VALIDATION_FAIL",
+              "OLDER_REVISION",
+              "SINK_TIMEOUT",
+              "COLLECTION_NOT_FOUND",
+              "FIELD_TYPE_MISMATCH",
+              "CONNECTION_ERROR",
+              "RATE_LIMITED",
+              "UNKNOWN"
+            ]
+          }
+        }
+      }
+    },
+    "collection_schema": {
+      "description": "Collection schema to ensure on startup (optional, for auto-creation).",
+      "type": "object",
+      "properties": {
+        "auto_create": {
+          "description": "Auto-create collection if it doesn't exist.",
+          "type": "boolean",
+          "default": false
+        },
+        "name": { "type": "string" },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "type": { "type": "string" },
+              "facet": { "type": "boolean" },
+              "optional": { "type": "boolean" },
+              "index": { "type": "boolean" },
+              "sort": { "type": "boolean" }
+            },
+            "required": ["name", "type"]
+          }
+        },
+        "default_sorting_field": { "type": "string" },
+        "token_separators": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "symbols_to_index": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  },
+  "required": ["contract_version", "sink_type", "connection", "operations"]
+}
