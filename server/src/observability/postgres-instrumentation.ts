@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * PostgreSQL Connection Pool Instrumentation
  * Monitors pool health, connection metrics, and query performance

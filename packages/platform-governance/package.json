@@ -17,10 +17,6 @@
     "./ownership": {
       "import": "./dist/ownership/index.js",
       "types": "./dist/ownership/index.d.ts"
-    },
-    "./isolation": {
-      "import": "./dist/isolation/index.js",
-      "types": "./dist/isolation/index.d.ts"
     }
   },
   "scripts": {

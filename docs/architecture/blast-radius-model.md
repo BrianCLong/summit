@@ -1,32 +1,97 @@
-# Blast Radius Model
+# Blast-Radius & Containment Model
 
-This model defines how tenant and compartment boundaries constrain the impact of defects, misconfigurations, or malicious actions. The goal is to ensure that any failure is contained to the smallest possible surface area and is rapidly detectable.
+## 1. Philosophy: "The Ship Survives the Hull Breach"
 
-## Boundaries and scopes
+In Summit, we assume components *will* fail and actors *will* be compromised. Our architecture ensures these events are **local tragedies, not systemic catastrophes**.
 
-- **Tenant boundary:** All customer data, compute, and observability signals are keyed by `tenantId`. Cross-tenant access is never implicit.
-- **Compartment boundary:** Within a tenant, sensitive missions/programs are segmented via compartment labels. Access requires membership in all target compartments.
-- **System boundary:** Global control-plane state (feature flags, topology, schedules) is read-only to tenants and write-limited to platform operators.
+We measure success by the **Blast Radius**: the maximum scope of damage a single failure mode can cause.
 
-## Failure scenarios and containment
+---
 
-| Scenario | Expected containment | Enforcement hooks |
-| --- | --- | --- |
-| SQL query missing tenant filter | Impact limited to changed service only | `scopeSqlToTenant` injection + static scan gating |
-| Background worker receives unscoped message | Message rejected before processing | `assertServiceIsolation` at consumer entrypoint |
-| Cache key collision | Keys namespaced by tenant to prevent bleed-through | `tenantKey` helper and cache prefixing policy |
-| Compartment mismatch | Request denied, audit trail emitted | `enforceCompartments` guard + service telemetry |
+## 2. Failure Scenarios & Containment
 
-## Detection and CI gates
+### Scenario A: The Rogue Agent (AI Misalignment)
+*   **Trigger:** An agent (e.g., Codex) gets stuck in a loop, hallucinates destructive commands, or is prompt-injected.
+*   **Max Allowed Impact:**
+    *   Loss of the specific *Task* or *Run*.
+    *   Financial loss capped at the **Team** budget limit.
+    *   NO corruption of long-term memory (Graph) without human approval.
+*   **Containment Mechanisms:**
+    1.  **Hard Budget Limits:** `QuotaManager` enforces strict token/dollar caps per Run.
+    2.  **Tool Whitelisting:** Agents only access tools explicitly granted in their manifest.
+    3.  **Human-in-the-Loop (HITL):** High-impact actions (e.g., `delete_database`, `publish_report`) require `WAIT_FOR_APPROVAL` signal.
+    4.  **Semantic Validation:** Output parsers (Zod) reject hallucinated arguments before execution.
 
-- **Static scanner:** `scripts/security/scan-tenant-isolation.mjs` blocks pull requests introducing new unguarded SQL/Cypher changes (fail-closed by default). Use `TENANT_SCAN_FULL=true` for periodic full sweeps.
-- **Dynamic verifier:** `scripts/security/verify-tenant-isolation.ts` seeds multi-tenant fixtures and validates that isolation controls prevent leakage at runtime.
-- **Unit contracts:** `packages/platform-governance/src/isolation/primitives.test.ts` codifies expected guardrail behavior.
+### Scenario B: The Hostile Tenant (Insider Threat)
+*   **Trigger:** A valid tenant attempts to access other tenants' data or DDOS the platform via complex Graph queries.
+*   **Max Allowed Impact:**
+    *   Performance degradation for *that tenant only* (Self-inflicted DOS).
+    *   Zero data leakage to/from other tenants.
+*   **Containment Mechanisms:**
+    1.  **Row-Level Security (RLS):** Postgres strictly enforces `tenant_id` at the database engine level.
+    2.  **Graph Query Guardrails:** Neo4j queries run with `CALL { ... } IN TRANSACTIONS` and strict timeout limits (e.g., 5s).
+    3.  **Rate Limiting:** Tiered API rate limits (IP + Token) isolate noisy neighbors.
+    4.  **Resource Quotas:** `QuotaManager` blocks requests after tier limits are reached.
 
-## Operational responses
+### Scenario C: Credential Compromise (Leaked API Key)
+*   **Trigger:** A Service Account or User API key is leaked publicly.
+*   **Max Allowed Impact:**
+    *   Attacker can access data *only* within the scope of that key (specific tenant/role).
+    *   No access to underlying infrastructure or other tenants.
+*   **Containment Mechanisms:**
+    1.  **Scope Minimization:** Keys are scoped to specific resources (Least Privilege).
+    2.  **Short-Lived Tokens:** JWTs expire in 1 hour; Refresh tokens are strictly cookie-bound (HttpOnly).
+    3.  **Automated Revocation:** `AuthService.revokeAllTokens(userId)` endpoint available for immediate kill-switch.
+    4.  **Secret Scanning:** Github Actions and Pre-commit hooks block key commits.
 
-1. **Tripwire:** Any `IsolationViolationError` should be surfaced to centralized alerting with tenant + compartment context.
-2. **Blast radius reduction:** Prefer rolling back or feature-flagging the offending service slice rather than broad restarts.
-3. **Post-incident review:** Map the incident to the boundary type (tenant vs compartment) and add reproducing tests to the isolation primitives package.
+### Scenario D: CI/CD Supply Chain Attack
+*   **Trigger:** A compromised developer account pushes malicious code or dependency to the repo.
+*   **Max Allowed Impact:**
+    *   Bad code reaches the `dev` branch but is blocked from `main` or Production.
+    *   No production secrets are accessible from the build environment.
+*   **Containment Mechanisms:**
+    1.  **Branch Protection:** `main` requires 2 reviews + Code Owner approval.
+    2.  **Ephemeral Build Envs:** Github Actions runners are ephemeral and have no access to Prod VPC.
+    3.  **Signed Commits:** All commits must be GPG signed.
+    4.  **Deployment Gates:** "Guarded Code Gate" script runs smoke tests before any traffic shift.
 
-By keeping boundaries explicit and instrumented, the platform bounds the blast radius of defects while maintaining clear auditability across data and service planes.
+---
+
+## 3. Escalation Thresholds
+
+When does a localized failure become an Incident?
+
+| Severity | Condition | Response |
+| :--- | :--- | :--- |
+| **SEV-3 (Low)** | Single agent failure, Single user rate-limited. | Auto-recovery / User notification. |
+| **SEV-2 (Medium)** | Tenant-wide performance degradation, Budget exhaustion. | Alert to Tenant Admin + Platform Support. |
+| **SEV-1 (High)** | Cross-tenant leakage attempt detected (RLS Policy Violation), API Gateway outage. | **PAGER DUTY**. Auto-scale or Circuit Break affected region. |
+| **SEV-0 (Critical)** | Root key compromise, Data corruption detected in Ledger. | **FULL LOCKDOWN**. Read-only mode enabled. Global token revocation. |
+
+---
+
+## 4. Visualizing the Blast Walls
+
+```ascii
+[ GLOBAL INTERNET ]
+       |
+       v
+[ WAF / DDoS PROTECTION ] <--- Wall 1: Network
+       |
+       v
+[ API GATEWAY (AuthZ) ] <--- Wall 2: Identity (Valid Token?)
+       |
+       v
++-------------------------------------------------------+
+| TENANT CONTAINER (Logical)                            |
+|                                                       |
+|  [ QUOTA MANAGER ] <--- Wall 3: Resources             |
+|        |                                              |
+|        v                                              |
+|  [ AGENT RUNTIME ] <--- Wall 4: Semantic (Tool Valid?)|
+|        |                                              |
+|        v                                              |
+|  [ DATA LAYER (RLS/Graph) ] <--- Wall 5: Data Access  |
+|                                                       |
++-------------------------------------------------------+
+```

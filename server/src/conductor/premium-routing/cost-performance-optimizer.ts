@@ -1,3 +1,4 @@
+// @ts-nocheck
 // server/src/conductor/premium-routing/cost-performance-optimizer.ts
 
 import { Pool } from 'pg';

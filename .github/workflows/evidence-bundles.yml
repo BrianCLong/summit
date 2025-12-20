@@ -1,0 +1,62 @@
+name: evidence-bundles
+
+on:
+  push:
+    branches: [main]
+    tags:
+      - 'v*.*.*-GA'
+
+jobs:
+  generate-and-verify:
+    name: Generate evidence bundle
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify control mapping presence
+        run: test -f docs/audit/control-mapping.md
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Compute timestamp
+        id: meta
+        run: echo "timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+      - name: Generate evidence bundle
+        id: bundle
+        env:
+          EVIDENCE_OUTPUT_ROOT: ${{ runner.temp }}/evidence
+          EVIDENCE_TIMESTAMP: ${{ steps.meta.outputs.timestamp }}
+          EVIDENCE_COMMIT_SHA: ${{ github.sha }}
+          EVIDENCE_BRANCH: ${{ github.ref_name }}
+        run: pnpm ts-node --esm scripts/ops/generate-evidence-bundle.ts
+
+      - name: Verify manifest integrity
+        run: |
+          BUNDLE_PATH="${{ steps.bundle.outputs.bundle-path }}"
+          cd "$BUNDLE_PATH"
+          sha256sum -c manifest.sha256
+          jq -e '.status=="pass"' ga-gate-report.json >/dev/null
+
+      - name: Upload evidence bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-bundle-${{ github.sha }}
+          path: ${{ steps.bundle.outputs.bundle-path }}
+          retention-days: 14
+

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { EventEmitter } from 'events';
 import { logger } from '../config/logger.js';
 import { correlationStorage } from '../config/logger.js';

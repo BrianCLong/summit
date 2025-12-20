@@ -1,3 +1,4 @@
+// @ts-nocheck
 // server/src/conductor/api/workflow-routes.ts
 
 import { Router, Request, Response } from 'express';

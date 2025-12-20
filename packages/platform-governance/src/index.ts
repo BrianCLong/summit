@@ -17,9 +17,6 @@ export * from './policy/engine.js';
 // Ownership exports
 export * from './ownership/matrix.js';
 
-// Isolation exports
-export * from './isolation/index.js';
-
 // Re-export commonly used items
 export {
   PolicyEngine,

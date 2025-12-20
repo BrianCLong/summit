@@ -1,5 +1,8 @@
-const lightCodeTheme = require('./src/main/docusaurus-theme-live-code/lib/theme/prismLight');
-const darkCodeTheme = require('./src/main/docusaurus-theme-live-code/lib/theme/prismDark');
+// const lightCodeTheme = require('./src/main/docusaurus-theme-live-code/lib/theme/prismLight');
+// const darkCodeTheme = require('./src/main/docusaurus-theme-live-code/lib/theme/prismDark');
+// const prism = require('prism-react-renderer');
+// const lightCodeTheme = prism.themes.github;
+// const darkCodeTheme = prism.themes.dracula;
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -14,6 +17,11 @@ const config = {
   // GitHub pages deployment config.
   organizationName: 'intelgraph', // Usually your GitHub org/user name.
   projectName: 'intelgraph', // Usually your repo name.
+
+  themes: ['@docusaurus/theme-mermaid'],
+  markdown: {
+    mermaid: true,
+  },
 
   presets: [
     [
@@ -45,6 +53,11 @@ const config = {
           { type: 'doc', docId: 'intro', position: 'left', label: 'Docs' },
           { to: '/blog', label: 'Blog', position: 'left' },
           {
+             href: '/storybook',
+             label: 'Storybook',
+             position: 'left',
+          },
+          {
             href: 'https://github.com/intelgraph/intelgraph',
             label: 'GitHub',
             position: 'right',
@@ -56,7 +69,7 @@ const config = {
         links: [],
         copyright: `Copyright © ${new Date().getFullYear()} IntelGraph. Built with Docusaurus.`,
       },
-      prism: { theme: lightCodeTheme, darkTheme: darkCodeTheme },
+      // prism: { theme: lightCodeTheme, darkTheme: darkCodeTheme },
       algolia: {
         appId: 'APP_ID',
         apiKey: 'PUBLIC_SEARCH_KEY',

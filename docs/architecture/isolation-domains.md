@@ -1,42 +1,109 @@
-# Isolation Domains
+# Summit Isolation Domains & Trust Boundaries
 
-The platform enforces explicit isolation domains so that data, execution, and observability signals remain bounded to the principal that owns them. Isolation primitives must **fail closed** and be auditable at both the service and data layers.
+## 1. Executive Summary
 
-## Core domains
+This document defines the **canonical isolation domains** for the Summit platform. It serves as the source of truth for all access control decisions, network segmentation, and data handling policies.
 
-| Domain | Purpose | Isolation Key | Mandatory Controls |
-| --- | --- | --- | --- |
-| Tenant | Primary customer or organization boundary | `tenant_id` / `tenantId` | Row-level filters on SQL/Cypher, resolver scoping, cache key prefixing |
-| Compartment | Sub-tenant segmentation for missions, programs, or clearance bands | `compartments: string[]` | Membership enforcement per request, allow-list only |
-| System | Global control-plane objects (feature flags, topology) | `scope = system` | Read-only for tenants, explicit allowlists |
+Summit operates as a **mixed-trust environment**. We host mutually distrusting tenants, execute potentially erratic third-party agents, and manage data ranging from public OSINT to classified intelligence.
 
-## Invariants
+**Core Principle:** Isolation is *default-deny*. Interaction between domains requires an explicit, auditable bridge.
 
-1. **No implicit context:** Every DB query and resolver must receive an explicit `tenantId` and (when applicable) compartment list from the authenticated context.
-2. **Fail closed:** Missing or mismatched tenant/compartment data results in immediate rejection. Soft fallbacks are prohibited.
-3. **Dual-plane coverage:** Controls must exist in both the data plane (SQL/Cypher, caches, queues) and service plane (GraphQL/REST middleware, background workers).
-4. **Composable scopes:** Tenant scopes can be paired with compartment scopes to narrow blast radius without duplicating services.
+## 2. Domain Classifications
 
-## Service-layer enforcement
+We define five primary isolation domains, ranked by trust level.
 
-- **GraphQL/REST:** Wrap resolvers and handlers with tenant middleware (e.g., `withTenant`) and propagate `tenantId` + `compartments` into downstream calls.
-- **Workers/streams:** Treat every message as untrusted; require `tenantId` on payloads and validate against the processing worker's allowed tenants/compartments before executing business logic.
-- **Caches:** Derive cache keys via `tenantKey(tenantId, rawKey)` or equivalent prefixes so cross-tenant eviction is impossible.
+### D1: The Tenant Domain (Hard Boundary)
+*   **Definition:** A logical enclosure for a single customer organization.
+*   **Trust Level:** **Zero Trust** (Assume compromised/hostile).
+*   **Enforcement:** Cryptographic (Keys), Logical (RLS), and Topological (Graph Labels).
+*   **Data:** Proprietary intelligence, PII, user profiles.
+*   **Breach Impact:** Critical (Data leak), but strictly scoped to *that* tenant.
 
-## Data-layer enforcement
+### D2: The Compartment Domain (Soft Boundary)
+*   **Definition:** A sub-enclosure within a Tenant for specific cases, investigations, or teams (e.g., "Operation Aurora" vs. "HR Data").
+*   **Trust Level:** **Medium** (Authenticated internal users).
+*   **Enforcement:** Application-level ABAC (OPA), Graph ACLs.
+*   **Data:** Case-specific evidence, derived insights.
+*   **Breach Impact:** Lateral movement within the tenant.
 
-- **PostgreSQL:** Use helpers that inject `WHERE tenant_id = $N` automatically and reject missing tenant values. Inserts must include `tenant_id` sourced from the validated context.
-- **Neo4j:** Append `WHERE n.tenantId = $tenantId` (or the appropriate alias) and attach tenant metadata on writes.
-- **Queues and logs:** Encode `tenantId` and compartment metadata on every event so downstream consumers can re-validate.
+### D3: The Agent Domain (Sandboxed Runtime)
+*   **Definition:** The execution environment for AI agents (Codex, Jules, external plugins).
+*   **Trust Level:** **Low** (Code is trusted, behavior is non-deterministic).
+*   **Enforcement:** Ephemeral containers/VMs, Network policies (Egress filtering), Time/Resource quotas.
+*   **Data:** Transient context, function tool outputs.
+*   **Breach Impact:** Resource exhaustion, hallucinated actions, potential data exfiltration if egress isn't clamped.
 
-## Shared utilities
+### D4: The Platform Control Plane (High Trust)
+*   **Definition:** The core Summit services (Maestro, Auth, Billing, Routing).
+*   **Trust Level:** **High** (System Operators).
+*   **Enforcement:** mTLS, IAM Roles, VPN/Bastion access only.
+*   **Data:** Metadata, billing info, encrypted keys (at rest), system telemetry.
+*   **Breach Impact:** Catastrophic (Platform compromise).
 
-The `@summit/platform-governance/isolation` module provides building blocks that fail closed by default:
+### D5: The Data Commons (Public/Shared)
+*   **Definition:** Shared read-only datasets (OSINT feeds, Maps, Ontologies).
+*   **Trust Level:** **Public/Shared**.
+*   **Enforcement:** Read-only APIs.
+*   **Data:** Open source intelligence, standard schemas.
+*   **Breach Impact:** Pollution/Poisoning of shared data.
 
-- `requireTenantScope(scope)` — validates and normalizes tenant scope input.
-- `scopeSqlToTenant(query, params, scope, column?)` — injects a tenant guard into SQL text and parameters.
-- `enforceCompartments(targetCompartments, scope)` — asserts compartment membership before processing.
-- `assertServiceIsolation(context, resource, options)` — one-shot guard combining tenant and compartment checks at service boundaries.
-- `createTenantScopedParams(scope, baseParams?)` — propagates isolation metadata to downstream calls.
+---
 
-Adopt these helpers in new services and when refactoring existing code to ensure consistent, auditable enforcement.
+## 3. Isolation Matrix
+
+This matrix defines allowed interactions initiated by the **Source**.
+
+| Source \ Target | Tenant (Own) | Tenant (Other) | Compartment (Own) | Agent (Own) | Control Plane | Data Commons |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Tenant User** | **Full** | ⛔ **BLOCK** | 🟢 **Conditional** (ABAC) | 🟢 **Trigger** | 🟡 **Read** (Billing/Logs) | 🟢 **Read** |
+| **Agent** | 🟢 **Scoped** | ⛔ **BLOCK** | 🟢 **Scoped** | 🟢 **Cooperate** | ⛔ **BLOCK** | 🟢 **Read** |
+| **Control Plane** | 🟡 **Maintenance** | 🟡 **Maintenance** | 🟡 **Audit** | 🟢 **Manage** | **Internal** | **Manage** |
+| **External API** | 🟢 **Ingest** | ⛔ **BLOCK** | 🟢 **Ingest** | ⛔ **BLOCK** | ⛔ **BLOCK** | ⛔ **BLOCK** |
+
+**Legend:**
+*   **Full**: Read/Write/Delete.
+*   **Scoped**: Defined by Agent manifest (e.g., "Read-Only", "Append-Only").
+*   **Conditional**: Requires specific Attribute-Based Access Control (ABAC) policy match.
+*   **Maintenance**: Automated system tasks (backups, migration) or "Break Glass" operator access (audited).
+*   **BLOCK**: Hard architectural impossibility. Fail closed.
+
+---
+
+## 4. Data Classification Overlay
+
+Isolation rules are further tightened by Data Classification:
+
+1.  **Restricted (Red):** PII, Credentials, Keys.
+    *   *Constraint:* Never leaves D1 (Tenant). Never enters D3 (Agent) memory without redaction.
+2.  **Confidential (Amber):** Business Logic, Knowledge Graph.
+    *   *Constraint:* Accessible by D3 (Agent) only if ephemeral.
+3.  **Internal (Green):** IDs, Metadata, Timestamps.
+    *   *Constraint:* Visible to Control Plane for observability.
+4.  **Public (White):** Documentation, Schemas.
+    *   *Constraint:* Freely cacheable.
+
+## 5. Visual Boundary Diagram (ASCII)
+
+```ascii
++-------------------------------------------------------------+
+|  PLATFORM CONTROL PLANE (D4)                                |
+|  [Auth] [Billing] [Maestro Orchestrator] [Routing]          |
++---------------+------------------------------+--------------+
+                |  mTLS / JWT                  |
++---------------v------------------------------v--------------+
+| TENANT A (D1)                                               |
+|                                                             |
+|  +-------------------+      +----------------------------+  |
+|  | Compartment X (D2)|      | AGENT RUNTIME (D3)         |  |
+|  | [Case Data]       |<---->| [Codex] [Jules]            |  |
+|  | [Evidence]        |      | (Ephemeral / Sandboxed)    |  |
+|  +-------------------+      +-------------+--------------+  |
+|                                           |                 |
+|  +-------------------+                    | (Read Only)     |
+|  | Compartment Y (D2)|                    v                 |
+|  +-------------------+      +----------------------------+  |
+|                             | DATA COMMONS (D5)          |  |
+|                             | [OSINT] [Ontologies]       |  |
+|                             +----------------------------+  |
++-------------------------------------------------------------+
+```

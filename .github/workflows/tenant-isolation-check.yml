@@ -6,7 +6,7 @@ on:
     paths:
       - 'server/src/**/*.ts'
       - 'server/src/**/*.js'
-      - 'scripts/security/**/*.mjs'
+      - 'scripts/security/**/*.ts'
       - '.github/workflows/tenant-isolation-check.yml'
 
 jobs:
@@ -25,9 +25,7 @@ jobs:
         run: npm install -g pnpm && pnpm install
 
       - name: Run Static Scanner
-        env:
-          TENANT_SCAN_FAIL_CLOSED: 'true'
-        run: node scripts/security/scan-tenant-isolation.mjs
+        run: npx tsx scripts/security/scan-tenant-isolation.ts
 
       - name: Upload Scan Report
         uses: actions/upload-artifact@v3

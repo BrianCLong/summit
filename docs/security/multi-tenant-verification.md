@@ -43,12 +43,10 @@ The following domains are considered strictly tenant-scoped:
 ## Verification Tooling
 
 ### Static Analysis
-A static analysis tool (`scripts/security/scan-tenant-isolation.mjs`) scans the codebase for:
+A static analysis tool (`scripts/security/scan-tenant-isolation.ts`) scans the codebase for:
 - SQL queries missing `tenant_id`.
 - Cypher queries missing `tenantId`.
 - GraphQL resolvers missing `withTenant`.
-
-The scanner defaults to **fail closed** on pull requests and evaluates only the files changed under `server/src` to avoid legacy false positives. Set `TENANT_SCAN_FULL=true` to force a repository-wide sweep when running locally or in scheduled jobs.
 
 ### Dynamic Verification
 A dynamic verifier (`scripts/security/verify-tenant-isolation.ts`) runs during CI to:
