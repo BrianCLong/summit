@@ -1,0 +1,38 @@
+{
+  "name": "my-extension",
+  "displayName": "My Extension",
+  "version": "0.1.0",
+  "description": "A brief description of what this extension does",
+  "author": "Your Name",
+  "license": "MIT",
+  "type": "tool",
+  "capabilities": [
+    "copilot.tool"
+  ],
+  "permissions": [],
+  "entrypoints": {
+    "main": {
+      "type": "function",
+      "path": "dist/index.js",
+      "export": "activate"
+    }
+  },
+  "copilot": {
+    "tools": []
+  },
+  "ui": {
+    "commands": [],
+    "widgets": []
+  },
+  "cli": {
+    "commands": []
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {}
+  },
+  "keywords": [],
+  "summit": {
+    "minVersion": "1.0.0"
+  }
+}

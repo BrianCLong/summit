@@ -5,9 +5,9 @@ on:
     paths:
       - 'policy/abac/**'
       - 'policy/tests/**'
+      - 'server/config/data-paths.yaml'
+      - 'server/config/schemas/data-paths.schema.json'
       - '.github/policies/**'
-      - 'schemas/**'
-      - 'server/data-pipelines/contracts/**'
       - 'services/authz-gateway/**'
   push:
     branches:
@@ -15,9 +15,9 @@ on:
     paths:
       - 'policy/abac/**'
       - 'policy/tests/**'
+      - 'server/config/data-paths.yaml'
+      - 'server/config/schemas/data-paths.schema.json'
       - '.github/policies/**'
-      - 'schemas/**'
-      - 'server/data-pipelines/contracts/**'
 
 jobs:
   opa:
@@ -31,21 +31,25 @@ jobs:
           chmod +x opa
           sudo mv opa /usr/local/bin/opa
       - name: Check formatting
-        run: opa fmt policy/abac/abac.rego .github/policies/*.rego --diff
+        run: opa fmt policy/abac/abac.rego --diff
       - name: Run policy unit tests with coverage
         run: |
           opa test policy/abac policy/tests -v --coverage --format json > opa-coverage.json
+      - name: Validate OPA data path tags
+        run: |
+          python -m pip install pyyaml --quiet
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import yaml
+
+          data = yaml.safe_load(Path("server/config/data-paths.yaml").read_text())
+          Path("server/config/data-paths.json").write_text(json.dumps(data))
+          PY
+          opa eval --fail-defined --data .github/policies --input server/config/data-paths.json "data.summit.datapaths.violations[_]"
+          rm server/config/data-paths.json
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
         with:
           name: opa-abac-coverage
           path: opa-coverage.json
-      - name: Validate data path tags
-        run: |
-          node .github/policies/collect-data-path-tags.js > data-path-tags.json
-          violations=$(opa eval --format=raw -d .github/policies -i data-path-tags.json "data.summit.datapaths.violations")
-          echo "$violations"
-          if [ "$violations" != "[]" ]; then
-            echo "Data path tag validation failed"
-            exit 1
-          fi

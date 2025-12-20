@@ -32,6 +32,8 @@ jobs:
       risk_level: ${{ steps.analyze.outputs.risk_level }}
       risk_tiers: ${{ steps.classify.outputs.risk_tiers }}
       risk_tier_count: ${{ steps.classify.outputs.risk_tier_count }}
+      helm_changed: ${{ steps.change-detection.outputs.helm_changed }}
+      database_changed: ${{ steps.change-detection.outputs.database_changed }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -130,25 +132,31 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
 
-  # Comprehensive validation suite
-  full-validation:
-    name: 🛡️ Full Validation Suite
+      - name: Detect change scopes
+        id: change-detection
+        if: steps.check.outputs.should_run_full_validation == 'true'
+        run: |
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }})
+          echo "helm_changed=false" >> $GITHUB_OUTPUT
+          echo "database_changed=false" >> $GITHUB_OUTPUT
+
+          if echo "$CHANGED_FILES" | grep -E '^(charts/|helm/|infra/helm/)' >/dev/null; then
+            echo "helm_changed=true" >> $GITHUB_OUTPUT
+          fi
+
+          if echo "$CHANGED_FILES" | grep -E '^(db/migrations/|db/seeds/|server/src/migrations/|ops/db/)' >/dev/null; then
+            echo "database_changed=true" >> $GITHUB_OUTPUT
+          elif echo "$CHANGED_FILES" | grep -E "migration" >/dev/null; then
+            echo "database_changed=true" >> $GITHUB_OUTPUT
+          fi
+
+  # Build & Typecheck validation
+  build-and-typecheck:
+    name: 🔨 Build & TypeCheck
     needs: validate-pr
     if: needs.validate-pr.outputs.should_run_full_validation == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 45
-    strategy:
-      matrix:
-        validation: [build, test, security, quality]
-        include:
-          - validation: build
-            name: '🔨 Build & TypeCheck'
-          - validation: test
-            name: '🧪 Test Suite'
-          - validation: security
-            name: '🔒 Security Scan'
-          - validation: quality
-            name: '🎯 Code Quality'
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
@@ -172,34 +180,48 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run Build Validation
-        if: matrix.validation == 'build'
+      - name: Run build and typecheck
         run: |
-          echo "🔨 Running build validation..."
-
-          # TypeScript build
+          echo "🔨 Running build and typecheck..."
           pnpm run build 2>&1 | tee build.log
-
-          # TypeScript type checking
+          BUILD_EXIT=${PIPESTATUS[0]}
           pnpm run typecheck 2>&1 | tee typecheck.log
-
-          # Check for build warnings
-          if grep -i "warning" build.log; then
-            echo "⚠️ Build warnings detected"
-            gh pr comment ${{ github.event.pull_request.number }} --body "
-            ⚠️ **Build Warnings Detected**
-
-            The build completed but with warnings. Please review:
-            `$(grep -i "warning" build.log | head -10)`
-            "
+          TYPECHECK_EXIT=${PIPESTATUS[0]}
+          if [[ $BUILD_EXIT -ne 0 || $TYPECHECK_EXIT -ne 0 ]]; then
+            exit 1
           fi
 
-          echo "✅ Build validation completed"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # Test validation
+  test-validation:
+    name: 🧪 Test Suite
+    needs: validate-pr
+    if: needs.validate-pr.outputs.should_run_full_validation == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Enable corepack
+        run: corepack enable && corepack prepare pnpm@${{ env.PNPM_VERSION }} --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Run Test Validation
-        if: matrix.validation == 'test'
         run: |
           echo "🧪 Running test validation..."
 
@@ -228,8 +250,37 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  # Security validation
+  security-validation:
+    name: 🔒 Security Scan
+    needs: validate-pr
+    if: needs.validate-pr.outputs.should_run_full_validation == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Enable corepack
+        run: corepack enable && corepack prepare pnpm@${{ env.PNPM_VERSION }} --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Run Security Validation
-        if: matrix.validation == 'security'
         run: |
           echo "🔒 Running security validation..."
 
@@ -239,10 +290,10 @@ jobs:
           # Check for secrets in code
           echo "Scanning for potential secrets..."
           SECRET_PATTERNS=(
-            "password\s*[:=]\s*['\"][^'\"]+['"]"
-            "api[_-]?key\s*[:=]\s*['\"][^'\"]+['"]"
-            "secret\s*[:=]\s*['\"][^'\"]+['"]"
-            "token\s*[:=]\s*['\"][^'\"]+['"]"
+            "password\\s*[:=]\\s*['\"][^'\"]+['\"]"
+            "api[_-]?key\\s*[:=]\\s*['\"][^'\"]+['\"]"
+            "secret\\s*[:=]\\s*['\"][^'\"]+['\"]"
+            "token\\s*[:=]\\s*['\"][^'\"]+['\"]"
           )
 
           SECRETS_FOUND=false
@@ -280,7 +331,6 @@ jobs:
           node .github/scripts/audit-gate.js audit.json
 
       - name: Secret scan with Gitleaks
-        if: matrix.validation == 'security'
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -289,14 +339,13 @@ jobs:
           args: '--redact --exit-code 1 --report-format sarif --report-path gitleaks.sarif'
 
       - name: Upload Gitleaks SARIF
-        if: matrix.validation == 'security' && always()
+        if: always()
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: gitleaks.sarif
           category: gitleaks
 
       - name: Secret scan with TruffleHog
-        if: matrix.validation == 'security'
         uses: trufflesecurity/trufflehog@main
         with:
           path: ./
@@ -305,7 +354,6 @@ jobs:
           extra_args: --only-verified --json
 
       - name: Generate SBOM (CycloneDX)
-        if: matrix.validation == 'security'
         run: |
           # For Node.js projects
           if [[ -f "package.json" ]]; then
@@ -330,7 +378,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload SBOM Artifacts
-        if: matrix.validation == 'security' && always()
+        if: always()
         uses: actions/upload-artifact@v3
         with:
           name: sbom-artifacts
@@ -342,33 +390,50 @@ jobs:
           retention-days: 5
 
       - name: Run npm audit
-        if: matrix.validation == 'security' && -f 'package.json'
-        run: npm audit --omit=dev --json > npm-audit.json || true
+        run: |
+          if [[ -f "package.json" ]]; then
+            npm audit --omit=dev --json > npm-audit.json || true
+          else
+            echo "Skipping npm audit; package.json not found."
+          fi
 
       - name: Run pip-audit
-        if: matrix.validation == 'security' && -f 'requirements.txt'
         run: |
-          python3.12 -m pip install pip-audit
-          pip-audit -r requirements.txt --json > pip-audit.json || true
+          if [[ -f "requirements.txt" ]]; then
+            python3.12 -m pip install pip-audit
+            pip-audit -r requirements.txt --json > pip-audit.json || true
+          else
+            echo "Skipping pip-audit; requirements.txt not found."
+          fi
 
       - name: Run go vet
-        if: matrix.validation == 'security' && ls *.go &> /dev/null
-        run: go vet ./...
+        run: |
+          if ls *.go &> /dev/null; then
+            go vet ./...
+          else
+            echo "Skipping go vet; no Go files detected."
+          fi
 
       - name: Run cargo audit
-        if: matrix.validation == 'security' && -f 'Cargo.toml'
         run: |
-          cargo install cargo-audit
-          cargo audit --json > cargo-audit.json || true
+          if [[ -f "Cargo.toml" ]]; then
+            cargo install cargo-audit
+            cargo audit --json > cargo-audit.json || true
+          else
+            echo "Skipping cargo audit; Cargo.toml not found."
+          fi
 
       - name: Run gradle dependencyCheck
-        if: matrix.validation == 'security' && -f 'build.gradle'
         run: |
-          ./gradlew dependencyCheckAnalyze
-          # Convert XML report to SARIF if possible
+          if [[ -f "build.gradle" ]]; then
+            ./gradlew dependencyCheckAnalyze
+            # Convert XML report to SARIF if possible
+          else
+            echo "Skipping gradle dependencyCheck; build.gradle not found."
+          fi
 
       - name: Generate security annotations
-        if: matrix.validation == 'security' && always()
+        if: always()
         run: |
           # Create security annotations for PR
           if [[ -f "gitleaks.sarif" ]]; then
@@ -387,8 +452,37 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Run Quality Validation
-        if: matrix.validation == 'quality'
+  # Lint validation
+  lint-validation:
+    name: 🎯 Code Quality
+    needs: validate-pr
+    if: needs.validate-pr.outputs.should_run_full_validation == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Enable corepack
+        run: corepack enable && corepack prepare pnpm@${{ env.PNPM_VERSION }} --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Lint Validation
         run: |
           echo "🎯 Running code quality validation..."
 
@@ -412,36 +506,77 @@ jobs:
             $(grep "error" lint.log | head -10)
             ```
 
-            Run `pnpm run lint --fix` to auto-fix some issues.
+            Run \\`pnpm run lint --fix\\` to auto-fix some issues.
             "
             exit 1
-          fi
-
-          # Helm validation (if charts changed)
-          if git diff --name-only ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | grep "charts/"; then
-            echo "Validating Helm charts..."
-
-            # Install Helm
-            curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-
-            # Validate each chart
-            for chart in charts/*/; do
-              if [[ -d "$chart" ]]; then
-                echo "Validating $chart"
-                helm lint "$chart" || exit 1
-              fi
-            done
           fi
 
           echo "✅ Quality validation completed"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  # Helm lint validation
+  helm-lint:
+    name: ⛵ Helm Lint
+    needs: validate-pr
+    if: needs.validate-pr.outputs.should_run_full_validation == 'true' && needs.validate-pr.outputs.helm_changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Helm
+        run: curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+      - name: Lint Helm charts
+        run: |
+          shopt -s nullglob
+          FOUND=false
+          for chart in charts/*/ helm/*/ infra/helm/*/; do
+            if [[ -d "$chart" ]]; then
+              FOUND=true
+              echo "Validating $chart"
+              helm lint "$chart"
+            fi
+          done
+
+          if [[ "$FOUND" == false ]]; then
+            echo "No Helm chart directories found to lint."
+          fi
+
+  # Migration validation
+  migration-validation:
+    name: 🗄️ Migration Gate
+    needs: validate-pr
+    if: needs.validate-pr.outputs.should_run_full_validation == 'true' && needs.validate-pr.outputs.database_changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run migration plan
+        run: |
+          chmod +x ops/db/migrate ops/db/verify
+          ./ops/db/migrate --plan --no-apply
+          ./ops/db/verify --shadow
+
   # Policy validation using OPA
   policy-validation:
     name: 📋 Policy Validation
-    needs: [validate-pr, full-validation]
-    if: needs.validate-pr.outputs.should_run_full_validation == 'true'
+    needs:
+      - validate-pr
+      - build-and-typecheck
+      - test-validation
+      - security-validation
+      - lint-validation
+      - helm-lint
+      - migration-validation
+      - e2e-validation
+    if: always() && needs.validate-pr.outputs.should_run_full_validation == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -470,12 +605,14 @@ jobs:
               "risk_level": "${{ needs.validate-pr.outputs.risk_level }}"
             },
             "quality_gates": {
-              "build": true,
-              "typecheck": true,
-              "lint": true,
-              "tests": true,
-              "security": true,
-              "helm": true
+              "build": ${{ needs.build-and-typecheck.result == 'success' }},
+              "typecheck": ${{ needs.build-and-typecheck.result == 'success' }},
+              "lint": ${{ needs.lint-validation.result == 'success' }},
+              "tests": ${{ needs.test-validation.result == 'success' }},
+              "security": ${{ needs.security-validation.result == 'success' }},
+              "helm": ${{ needs.helm-lint.result == 'success' || needs.validate-pr.outputs.helm_changed != 'true' }},
+              "migrations": ${{ needs.migration-validation.result == 'success' || needs.validate-pr.outputs.database_changed != 'true' }},
+              "e2e": ${{ needs.e2e-validation.result == 'success' || needs.e2e-validation.result == 'skipped' }}
             },
             "changed_files": $(git diff --name-only ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | jq -R . | jq -s .)
           }
@@ -517,6 +654,12 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Validate policy output shape
+        run: |
+          jq -e '.result.approved | type == "boolean"' policy-result.json >/dev/null
+          jq -e '(.result.requirements // []) | type == "array"' policy-result.json >/dev/null
+          jq -e '(.result.warnings // []) | type == "array"' policy-result.json >/dev/null
+
   # High risk E2E validation
   e2e-validation:
     name: 🎬 E2E Validation
@@ -550,7 +693,16 @@ jobs:
   # Summary status check
   validation-summary:
     name: 📊 Validation Summary
-    needs: [validate-pr, full-validation, policy-validation]
+    needs:
+      - validate-pr
+      - build-and-typecheck
+      - test-validation
+      - security-validation
+      - lint-validation
+      - helm-lint
+      - migration-validation
+      - e2e-validation
+      - policy-validation
     if: always() && needs.validate-pr.outputs.should_run_full_validation == 'true'
     runs-on: ubuntu-latest
     steps:
@@ -558,11 +710,16 @@ jobs:
         run: |
           echo "📊 Summarizing validation results..."
 
-          # Check if all required jobs passed
-          BUILD_STATUS="${{ needs.full-validation.result }}"
+          BUILD_STATUS="${{ needs.build-and-typecheck.result }}"
+          TEST_STATUS="${{ needs.test-validation.result }}"
+          SECURITY_STATUS="${{ needs.security-validation.result }}"
+          LINT_STATUS="${{ needs.lint-validation.result }}"
+          HELM_STATUS="${{ needs.helm-lint.result }}"
+          MIGRATION_STATUS="${{ needs.migration-validation.result }}"
+          E2E_STATUS="${{ needs.e2e-validation.result }}"
           POLICY_STATUS="${{ needs.policy-validation.result }}"
 
-          if [[ "$BUILD_STATUS" == "success" && "$POLICY_STATUS" == "success" ]]; then
+          if [[ "$BUILD_STATUS" == "success" && "$TEST_STATUS" == "success" && "$SECURITY_STATUS" == "success" && "$LINT_STATUS" == "success" && ("$HELM_STATUS" == "success" || "$HELM_STATUS" == "skipped") && ("$MIGRATION_STATUS" == "success" || "$MIGRATION_STATUS" == "skipped") && ("$E2E_STATUS" == "success" || "$E2E_STATUS" == "skipped") && "$POLICY_STATUS" == "success" ]]; then
             echo "✅ All validations passed"
             gh pr comment ${{ github.event.pull_request.number }} --body "
             🎉 **All Validations Passed!**
@@ -585,6 +742,12 @@ jobs:
 
             **Status:**
             - Build: $BUILD_STATUS
+            - Tests: $TEST_STATUS
+            - Security: $SECURITY_STATUS
+            - Lint: $LINT_STATUS
+            - Helm: $HELM_STATUS
+            - Migrations: $MIGRATION_STATUS
+            - E2E: $E2E_STATUS
             - Policy: $POLICY_STATUS
 
             Use `/merge-pr ${{ github.event.pull_request.number }} --dry-run` to run Release Captain analysis.

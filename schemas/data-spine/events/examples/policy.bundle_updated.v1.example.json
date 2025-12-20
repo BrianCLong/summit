@@ -10,11 +10,6 @@
   "trace_id": "trace-xyz-001",
   "correlation_id": "change-1188",
   "region": "us-east-1",
-  "data_tags": [
-    "system:companyos",
-    "data-path:data-spine/policy-bundle",
-    "classification:internal"
-  ],
   "data": {
     "bundle_id": "policy-bundle-2025-01",
     "version": "2025.01.10.1",

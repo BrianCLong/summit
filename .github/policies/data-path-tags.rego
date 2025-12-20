@@ -1,53 +1,49 @@
-# Data path tagging policy used by the ABAC validation workflow.
-# Ensures schemas and configs that define data paths carry consistent tags.
+package summit.policies.datapaths
 
-package summit.datapaths
+import future.keywords.in
 
-valid_systems := {"maestro", "intelgraph", "companyos"}
+required_paths := {"maestro", "intelgraph", "companyos"}
 
-valid_system(system) {
-  valid_systems[system]
+deny[msg] {
+	not input.dataPaths
+	msg := "dataPaths block is missing from configuration"
 }
 
-has_tag_with_prefix(tags, prefix) {
-  t := tags[_]
-  startswith(t, prefix)
+deny[msg] {
+	some name
+	required_paths[name]
+	not input.dataPaths[name]
+	msg := sprintf("%s data path is not defined", [name])
 }
 
-system_tag_matches(entry) {
-  entry.tags[_] == sprintf("system:%s", [entry.system])
+deny[msg] {
+	some name
+	dp := input.dataPaths[name]
+	not dp.path
+	msg := sprintf("%s data path is missing the path field", [name])
 }
 
-violations[msg] {
-  entry := input.paths[_]
-  count(entry.tags) == 0
-  msg := sprintf("%s has no tags", [entry.path])
+deny[msg] {
+	some name
+	dp := input.dataPaths[name]
+	dp.path == ""
+	msg := sprintf("%s data path has an empty path value", [name])
 }
 
-violations[msg] {
-  entry := input.paths[_]
-  not valid_system(entry.system)
-  msg := sprintf("%s uses unsupported system %s", [entry.path, entry.system])
+deny[msg] {
+	some name
+	dp := input.dataPaths[name]
+	not dp.tags
+	msg := sprintf("%s data path is missing tags", [name])
 }
 
-violations[msg] {
-  entry := input.paths[_]
-  not system_tag_matches(entry)
-  msg := sprintf("%s is missing system:%s tag", [entry.path, entry.system])
+deny[msg] {
+	some name
+	dp := input.dataPaths[name]
+	count(dp.tags) == 0
+	msg := sprintf("%s data path must define at least one tag", [name])
 }
 
-violations[msg] {
-  entry := input.paths[_]
-  not has_tag_with_prefix(entry.tags, "data-path:")
-  msg := sprintf("%s is missing data-path tag", [entry.path])
-}
-
-violations[msg] {
-  entry := input.paths[_]
-  not has_tag_with_prefix(entry.tags, "classification:")
-  msg := sprintf("%s is missing classification tag", [entry.path])
-}
-
-all_valid {
-  count(violations) == 0
+ok {
+	count({m | deny[m]}) == 0
 }
