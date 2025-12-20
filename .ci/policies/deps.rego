@@ -4,6 +4,7 @@ import future.keywords.if
 
 policy := data.policy
 
+# Extract normalized license tokens from SPDX fields.
 licenses(pkg) = result {
   raw := [pkg.licenseConcluded, pkg.licenseDeclared][_]
   raw != null
@@ -33,12 +34,22 @@ version_matches(version, regex) {
   re_match(regex, tostring(version))
 }
 
+valid_override_metadata(override) {
+  override.ticket
+  override.ticket != ""
+  override.expires
+  override.expires != ""
+  override.justification
+  override.justification != ""
+}
+
 allow_override(pkg, rule) {
   some override
   override := policy.allow_overrides[_]
   override.package == pkg.name
   version_matches(pkg.versionInfo, override.version_regex)
   not expired(override.expires)
+  valid_override_metadata(override)
   rule_is_covered(rule, override)
 }
 
@@ -95,4 +106,10 @@ violation[msg] {
   version_matches(pkg.versionInfo, entry.version_regex)
   not allow_override(pkg, entry)
   msg := sprintf("dependency %s@%s blocked for %s: %s", [pkg.name, pkg.versionInfo, entry.id, entry.reason])
+}
+
+violation[msg] {
+  override := policy.allow_overrides[_]
+  expired(override.expires)
+  msg := sprintf("override for %s is expired (%s)", [override.package, override.expires])
 }

@@ -230,7 +230,9 @@ PY
       - name: Enforce SBOM policy with Conftest
         run: |
           for sbom in *sbom.json; do
-            conftest test "$sbom" -p policy/sbom_policy.rego
+            conftest test "$sbom" \
+              --policy .ci/policies/deps.rego \
+              --data .security/deps/policy.yaml
           done
 
         - name: Abort promotion on guard failure
@@ -343,7 +345,9 @@ PY
       - name: Enforce SBOM policy with Conftest
         run: |
           for sbom in *sbom.json; do
-            conftest test "$sbom" -p policy/sbom_policy.rego
+            conftest test "$sbom" \
+              --policy .ci/policies/deps.rego \
+              --data .security/deps/policy.yaml
           done
 
       - name: Pre-promote health check (SLO Gate)

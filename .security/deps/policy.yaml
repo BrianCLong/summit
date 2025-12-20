@@ -3,12 +3,14 @@ policy:
     owner: "Security Engineering"
     updated: "2025-03-06"
     description: "Baseline dependency allow/deny controls for SBOM validation."
+    enforcement: "SBOMs validated in build + promotion pipelines via conftest"
 
   disallowed_licenses:
     - AGPL-3.0-only
     - AGPL-3.0-or-later
     - SSPL-1.0
     - BUSL-1.1
+    - Commons-Clause
 
   denylist:
     packages:
@@ -17,6 +19,9 @@ policy:
       - name: ua-parser-js
         version_regex: "^0\\.7\\.29"
         reason: "Malware-tainted npm release (Oct 2021)."
+      - name: eslint-scope
+        version_regex: "^3\\.7\\.2"
+        reason: "Typosquat injection chain; pin avoided."
     cves:
       - id: CVE-2024-3094
         package: xz
@@ -26,6 +31,10 @@ policy:
         package: glibc
         version_regex: "^2\\.39"
         reason: "Critical glibc resolver vulnerability."
+      - id: CVE-2024-1597
+        package: postgresql
+        version_regex: "^16\\.2"
+        reason: "SQL injection risk in logical replication worker."
 
   allow_overrides:
     - package: xz
@@ -45,3 +54,9 @@ policy:
       justification: "Risk accepted for a limited period while upstream remediation lands."
       ticket: "SEC-2025"
       expires: "2025-07-31T23:59:59Z"
+    - package: postgresql
+      version_regex: "^16\\.2"
+      cve: CVE-2024-1597
+      justification: "Postgres only used for ephemeral local tooling; patched upgrade tracked in sprint board."
+      ticket: "SEC-4501"
+      expires: "2025-08-15T23:59:59Z"
