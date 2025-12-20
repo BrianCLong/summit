@@ -63,6 +63,43 @@ This document provides links and descriptions for all IntelGraph observability d
 - `worker_queue_size` - Current queue depth
 - `worker_active_workers` - Active worker count
 
+### Policy Decisions Dashboard
+
+**Purpose**: Monitor policy enforcement health, decision speed, and user-impacting violations.
+**Panels**:
+
+1. **Policy decisions by result**: Allow/Deny throughput using `policy_decisions_total` (5m rate)
+2. **Deny rate (5m %)**: Deny ratio against total decision volume
+3. **Policy decision latency**: P50/P95 latency from `policy_decision_latency_ms_bucket`
+4. **Cache hit ratio**: Percentage of cached policy decisions from histogram counts
+5. **Top tenants by denies**: `policy_decisions_total{result="deny"}` by `tenant_id`
+6. **Purpose violations**: `purpose_violations_total` by `tenant_id` and `required_purpose`
+7. **Reason-for-access violations**: `reason_violations_total` by `violation_type`
+8. **Selector expansion violations**: `selector_expansion_violations_total` by `query_type`
+9. **Policy evaluation throughput**: `policy_evaluations_total` rate
+
+**SLO/Alerts**:
+
+- P95 latency < 150ms (page if breached for 10m)
+- Deny rate < 5% sustained (warn at >5% for 10m)
+
+### Policy Decision Receipts Dashboard
+
+**Purpose**: Track provenance receipts for decisions and ensure evidence pipelines keep pace.
+**Panels**:
+
+1. **Receipt throughput**: `provenance_writes_total` and `export_requests_total` rates
+2. **Receipt coverage vs policy decisions**: Receipt/write coverage percentage vs decisions
+3. **Decision receipts missing (15m)**: Gap between decision and receipt counts
+4. **Decision receipt generation latency**: P50/P95 from `policy_decision_time_ms_bucket`
+5. **Policy receipts blocked vs requested**: `export_blocks_total` vs `export_requests_total`
+6. **Decision flow context**: Decision mix by result plus evaluation rate
+
+**SLO/Alerts**:
+
+- Receipt coverage ≥ 98% of decisions over 15m (page if below)
+- Backlog < 50 receipts over 30m (warn when exceeded)
+
 ## Alert Integration
 
 All dashboards integrate with Prometheus alerting rules defined in:

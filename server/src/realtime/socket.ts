@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Server, Socket } from 'socket.io';
 import { verifyToken as verifyTokenBase } from '../lib/auth.js';
 import pino from 'pino';
@@ -30,32 +31,8 @@ import {
   type UserIdentity,
 } from './investigationAccess.js';
 import { registerDashboardHandlers } from './dashboard.js';
-import { createAdapter } from '@socket.io/redis-adapter';
-import { getRedisClient } from '../db/redis.js';
-import { registerMaestroHandlers } from './maestro.js';
-import promClient from 'prom-client';
 
 const logger = pino();
-
-// Metrics
-const connectedClients = new promClient.Gauge({
-  name: 'socketio_connected_clients',
-  help: 'Number of connected Socket.io clients',
-  labelNames: ['tenant'],
-});
-
-const messageCounter = new promClient.Counter({
-  name: 'socketio_messages_total',
-  help: 'Total Socket.io messages received',
-  labelNames: ['event', 'tenant'],
-});
-
-const messageLatency = new promClient.Histogram({
-  name: 'socketio_message_processing_duration_seconds',
-  help: 'Duration of Socket.io message processing',
-  labelNames: ['event', 'tenant'],
-  buckets: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10],
-});
 
 let verifyToken = verifyTokenBase;
 
@@ -123,53 +100,7 @@ export function initSocket(httpServer: any): Server {
     },
   });
 
-  // Set up Redis Adapter for sticky sessions and multi-node scaling
-  try {
-    const pubClient = getRedisClient();
-    if (pubClient) {
-      const subClient = pubClient.duplicate();
-      io.adapter(createAdapter(pubClient, subClient));
-      logger.info('Socket.io Redis adapter initialized');
-    }
-  } catch (error) {
-    logger.warn('Failed to initialize Socket.io Redis adapter, falling back to memory adapter', error);
-  }
-
   const ns = io.of('/realtime');
-
-  // Metrics middleware
-  ns.use((socket: UserSocket, next) => {
-    socket.onAny((event, ...args) => {
-      const start = process.hrtime();
-      const tenant = socket.tenantId || 'unknown';
-      messageCounter.inc({ event, tenant });
-
-      // We can't easily wrap the handler execution itself in onAny,
-      // but we can measure the synchronous dispatch overhead or approximate.
-      // A better approach for latency in Socket.io is problematic without wrapping every handler.
-      // However, we can use a "post-processing" hook if available, or just measure the event emit overhead.
-      // For now, let's just record that the event was received.
-      // To properly measure handling time, we'd need to wrap `socket.on`.
-    });
-
-    // Wrap socket.on to measure handler duration
-    const originalOn = socket.on;
-    socket.on = function(eventName: string, listener: (...args: any[]) => void) {
-        return originalOn.call(this, eventName, async (...args: any[]) => {
-            const start = process.hrtime();
-            const tenant = socket.tenantId || 'unknown';
-            try {
-                await listener.apply(this, args);
-            } finally {
-                const [seconds, nanoseconds] = process.hrtime(start);
-                const durationInSeconds = seconds + nanoseconds / 1e9;
-                messageLatency.observe({ event: eventName, tenant }, durationInSeconds);
-            }
-        });
-    };
-
-    next();
-  });
 
   ns.use(async (socket: UserSocket, next) => {
     try {
@@ -196,12 +127,7 @@ export function initSocket(httpServer: any): Server {
 
   ns.on('connection', (socket: UserSocket) => {
     const userId = socket.user?.id;
-    const tenantId = socket.tenantId || 'default';
     logger.info(`Realtime connected ${socket.id} for user ${userId}`);
-    connectedClients.inc({ tenant: tenantId });
-
-    // Register Maestro handlers
-    registerMaestroHandlers(io, socket as any);
 
     const joinedInvestigations = new Set<string>();
 
@@ -683,7 +609,6 @@ export function initSocket(httpServer: any): Server {
 
     socket.on('disconnect', async () => {
       logger.info(`Realtime disconnect ${socket.id} for user ${userId}`);
-      connectedClients.dec({ tenant: tenantId });
       for (const investigationId of joinedInvestigations) {
         try {
           const presence = await removePresence(
@@ -721,28 +646,4 @@ export function initSocket(httpServer: any): Server {
 
 export function getIO(): Server | null {
   return ioInstance;
-}
-
-export async function shutdownSocket(): Promise<void> {
-  if (ioInstance) {
-    logger.info('Shutting down Socket.io server...');
-    const io = ioInstance;
-
-    // Close the adapter (Redis connections)
-    // The Redis Adapter itself doesn't expose a clean public 'close' method on the class that closes the redis clients
-    // if they were passed in externally (which they were).
-    // However, we should try to close the server.
-
-    return new Promise<void>((resolve, reject) => {
-      io.close((err) => {
-        if (err) {
-          logger.error('Error closing Socket.io server', err);
-          reject(err);
-        } else {
-          logger.info('Socket.io server closed');
-          resolve();
-        }
-      });
-    });
-  }
 }

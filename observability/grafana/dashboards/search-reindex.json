@@ -1,0 +1,16 @@
+{
+  "title": "Search Reindex",
+  "uid": "search-reindex",
+  "panels": [
+    {
+      "title": "Reindex Backlog",
+      "type": "gauge",
+      "targets": [{ "expr": "reindex_backlog_gauge" }]
+    },
+    {
+      "title": "Parity Gap",
+      "type": "stat",
+      "targets": [{ "expr": "abs(search_collection_docs_count{alias='current'} - search_collection_docs_count{alias='next'})" }]
+    }
+  ]
+}

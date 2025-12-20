@@ -5,7 +5,7 @@
  * See: https://web.dev/vitals/
  */
 
-import { onCLS, onFID, onFCP, onLCP, onTTFB } from 'web-vitals';
+import { onCLS, onINP, onFCP, onLCP, onTTFB } from 'web-vitals';
 
 const isDevelopment = import.meta.env.DEV;
 const isProduction = import.meta.env.PROD;
@@ -103,7 +103,7 @@ function logBundlePerformance() {
 export function initWebVitals() {
   // Track all Core Web Vitals
   onCLS(handleMetric); // Cumulative Layout Shift
-  onFID(handleMetric); // First Input Delay
+  onINP(handleMetric); // Interaction to Next Paint (replaced FID in web-vitals v5)
   onFCP(handleMetric); // First Contentful Paint
   onLCP(handleMetric); // Largest Contentful Paint
   onTTFB(handleMetric); // Time to First Byte

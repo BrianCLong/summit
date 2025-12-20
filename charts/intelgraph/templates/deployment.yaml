@@ -87,6 +87,18 @@ spec:
               value: "{{ .Values.monitoring.tracing.samplingRate }}"
             - name: JAEGER_ENDPOINT
               value: "{{ .Values.monitoring.tracing.jaeger.endpoint }}"
+            - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+              value: "{{ .Values.monitoring.tracing.otlp.endpoint }}"
+            - name: OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
+              value: "{{ .Values.monitoring.tracing.otlp.endpoint }}"
+            - name: OTEL_SERVICE_NAME
+              value: "{{ .Values.monitoring.tracing.serviceName }}"
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: "{{ .Values.monitoring.tracing.resourceAttributes }}"
+            - name: OTEL_TRACES_SAMPLER
+              value: "parentbased_traceidratio"
+            - name: OTEL_TRACES_SAMPLER_ARG
+              value: "{{ .Values.monitoring.tracing.samplingRate }}"
             {{- end }}
           livenessProbe:
             httpGet:

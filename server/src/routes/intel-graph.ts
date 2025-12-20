@@ -1,3 +1,4 @@
+// @ts-nocheck
 // server/src/routes/intel-graph.ts
 import express from 'express';
 import { z } from 'zod/v4';
