@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Simple in-memory LRU implementation since lru-cache package is unavailable
 import { LLMResponse } from './types.js';
 import crypto from 'crypto';

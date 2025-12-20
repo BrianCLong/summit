@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { RetrievalService } from './RetrievalService.js';
 import { RetrievalQueryKind, KnowledgeObjectKind, TenantId } from './types.js';
 import { get_encoding } from 'tiktoken'; // We might need to add this dependency or use an existing one

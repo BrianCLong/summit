@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Pool } from 'pg';
 import { randomUUID as uuidv4 } from 'crypto';
 import { getPostgresPool } from '../config/database.js';

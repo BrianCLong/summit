@@ -1,0 +1,54 @@
+name: GA Supply Chain Gate
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '20.x'
+  PNPM_VERSION: '9.12.0'
+
+jobs:
+  supply-chain:
+    name: Supply Chain Verification
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate SBOMs & Provenance
+        run: pnpm run supply-chain:generate
+
+      - name: Verify GA Supply Chain Gate
+        run: pnpm run supply-chain:verify
+
+      - name: Upload supply-chain artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: supply-chain-${{ github.sha }}
+          path: |
+            artifacts/sbom/*.json
+            artifacts/provenance.json
+            artifacts/dependency-audit.json
+          retention-days: 30

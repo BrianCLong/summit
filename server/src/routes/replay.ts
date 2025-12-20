@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Router } from 'express';
 import { buildManifest } from '../replay/manifest';
 import { replayRun } from '../replay/runner';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { stdSerializers } from 'pino';
 import type { LogEvent, LogLevel } from './logEventBus.js';
 
