@@ -71,6 +71,10 @@ tags:
     description: Health check and monitoring endpoints
   - name: Versioning
     description: API versioning, compatibility, and migration information
+  - name: Policy
+    description: Policy bundle lifecycle, simulations, and drift reporting
+  - name: Signing
+    description: Signing and attestation services for policy and provenance
 
 security:
   - BearerAuth: []
@@ -381,6 +385,177 @@ components:
           items:
             type: string
           description: List of problematic fields (for validation errors)
+
+    PolicyBundle:
+      type: object
+      required:
+        - id
+        - version
+        - digest
+        - signerKeyId
+        - status
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the bundle
+          example: bundle-prod-authz
+        version:
+          type: string
+          description: SemVer identifier for the bundle
+          example: 2025.12.03
+        digest:
+          type: string
+          description: SHA256 digest of the bundle tarball
+          example: sha256:012345abcdef
+        signerKeyId:
+          type: string
+          description: Signing key identifier used to attest the bundle
+          example: opa-signer-dev
+        status:
+          type: string
+          enum: [staging, active, deprecated]
+          description: Promotion status of the bundle
+        activatedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the bundle was activated
+        rules:
+          type: array
+          items:
+            type: object
+            properties:
+              package:
+                type: string
+              decision:
+                type: string
+              coverage:
+                type: number
+                format: float
+            required: [package, decision]
+          description: Summary of rules contained in the bundle
+        targetEnvironments:
+          type: array
+          items:
+            type: string
+          description: Environments where the bundle should be distributed
+
+    PolicySimulationRequest:
+      type: object
+      required:
+        - input
+      properties:
+        input:
+          type: object
+          description: Structured input passed to the policy decision point
+        bundleVersion:
+          type: string
+          description: Override bundle version used for simulation
+          example: 2025.12.03
+        trace:
+          type: boolean
+          description: Enable decision tracing
+          default: false
+        strictValidation:
+          type: boolean
+          description: Enforce schema validation during simulation
+          default: true
+
+    DecisionTrace:
+      type: object
+      properties:
+        package:
+          type: string
+        rule:
+          type: string
+        outcome:
+          type: string
+        metrics:
+          type: object
+          additionalProperties: true
+
+    PolicySimulationResult:
+      type: object
+      required:
+        - decision
+      properties:
+        decision:
+          type: string
+          enum: [allow, deny, dry-run]
+          description: Final decision from the simulated bundle
+        bundle:
+          $ref: '#/components/schemas/PolicyBundle'
+        trace:
+          type: array
+          items:
+            $ref: '#/components/schemas/DecisionTrace'
+        warnings:
+          type: array
+          items:
+            type: string
+        validation:
+          type: object
+          properties:
+            passed:
+              type: boolean
+            errors:
+              type: array
+              items:
+                type: string
+
+    SignerAttestationRequest:
+      type: object
+      required:
+        - artifactId
+        - artifactDigest
+        - policyVersion
+      properties:
+        artifactId:
+          type: string
+          description: Stable identifier for the artifact being attested
+          example: policy-bundle-prod
+        artifactDigest:
+          type: string
+          description: Content digest for integrity verification
+          example: sha256:abcdef012345
+        policyVersion:
+          type: string
+          description: Policy bundle version associated with the attestation
+        tenant:
+          type: string
+          description: Tenant or workspace identifier
+          example: acme-co
+        ttlSeconds:
+          type: integer
+          description: Optional TTL for the attestation token
+          example: 3600
+
+    SignerAttestationResponse:
+      type: object
+      required:
+        - attestationId
+        - status
+        - signature
+        - signerKeyId
+      properties:
+        attestationId:
+          type: string
+          description: Identifier for the issued attestation
+          example: attest-123
+        status:
+          type: string
+          enum: [issued, pending, rejected]
+        signature:
+          type: string
+          description: Detached signature over the artifact digest
+        signerKeyId:
+          type: string
+          description: Signing key identifier
+        issuedAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
 
 paths:
   # Health & Monitoring
@@ -2077,3 +2252,85 @@ paths:
                     type: array
                     items:
                       type: string
+
+  # Policy bundles
+  /api/policy/bundles:
+    get:
+      summary: List policy bundles
+      description: Returns the latest policy bundles and their signing metadata
+      operationId: listPolicyBundles
+      tags:
+        - Policy
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Bundles retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PolicyBundle'
+
+  /api/policy/simulations:
+    post:
+      summary: Simulate a policy decision
+      description: Evaluate a policy bundle using supplied input and optionally record a trace
+      operationId: simulatePolicy
+      tags:
+        - Policy
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolicySimulationRequest'
+      responses:
+        '200':
+          description: Simulation completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicySimulationResult'
+        '400':
+          description: Invalid simulation input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # Signing service
+  /api/signing/attestations:
+    post:
+      summary: Issue an attestation for a signed artifact
+      description: Generates a detached signature and metadata for a policy bundle or artifact
+      operationId: createAttestation
+      tags:
+        - Signing
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignerAttestationRequest'
+      responses:
+        '201':
+          description: Attestation issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignerAttestationResponse'
+        '400':
+          description: Invalid attestation request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'

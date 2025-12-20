@@ -4,8 +4,8 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import { randomBytes, randomUUID } from 'crypto';
-import { trace as otelTrace } from '@opentelemetry/api';
+import { randomUUID } from 'crypto';
+import { trace } from '@opentelemetry/api';
 import { getTracer } from '../observability/tracer.js';
 import { correlationStorage } from '../config/logger.js';
 
@@ -23,23 +23,6 @@ declare global {
 export const CORRELATION_ID_HEADER = 'x-correlation-id';
 export const REQUEST_ID_HEADER = 'x-request-id';
 export const TENANT_ID_HEADER = 'x-tenant-id';
-const TRACEPARENT_HEADER = 'traceparent';
-
-function parseTraceparentHeader(
-  traceparent?: string | string[],
-): { traceId?: string; spanId?: string } {
-  const headerValue = Array.isArray(traceparent) ? traceparent[0] : traceparent;
-  if (!headerValue) return {};
-
-  const [, traceId, spanId] = headerValue.split('-');
-  const isValidTraceId = traceId && /^[0-9a-f]{32}$/i.test(traceId);
-  const isValidSpanId = spanId && /^[0-9a-f]{16}$/i.test(spanId);
-
-  return {
-    traceId: isValidTraceId ? traceId : undefined,
-    spanId: isValidSpanId ? spanId : undefined,
-  };
-}
 
 /**
  * Correlation ID middleware
@@ -64,25 +47,16 @@ export function correlationIdMiddleware(
 
   // Get OpenTelemetry trace/span IDs if available
   const tracer = getTracer();
-  const { traceId: headerTraceId, spanId: headerSpanId } = parseTraceparentHeader(
-    req.headers[TRACEPARENT_HEADER],
-  );
-  const activeSpan = otelTrace.getActiveSpan();
-  const activeContext = activeSpan?.spanContext();
+  const activeSpan = trace.getActiveSpan();
+  req.traceId = activeSpan?.spanContext().traceId || tracer.getTraceId() || '';
+  req.spanId = activeSpan?.spanContext().spanId || tracer.getSpanId() || '';
 
-  const traceId =
-    headerTraceId ||
-    tracer.getTraceId() ||
-    activeContext?.traceId ||
-    randomBytes(16).toString('hex');
-  const spanId =
-    headerSpanId ||
-    tracer.getSpanId() ||
-    activeContext?.spanId ||
-    randomBytes(8).toString('hex');
-
-  req.traceId = traceId;
-  req.spanId = spanId;
+  // Fallback: honor upstream traceparent header for structured logging when no span is active
+  if (!req.traceId && typeof req.headers['traceparent'] === 'string') {
+    const [, inboundTraceId, inboundSpanId] = (req.headers['traceparent'] as string).split('-');
+    req.traceId = inboundTraceId || req.traceId;
+    req.spanId = inboundSpanId || req.spanId;
+  }
 
   const tenantId = (req.headers[TENANT_ID_HEADER] as string) || (req as any).user?.tenant_id || 'unknown';
 
@@ -100,19 +74,15 @@ export function correlationIdMiddleware(
   res.setHeader(REQUEST_ID_HEADER, correlationId);
 
   // Add trace ID to response if available (for debugging)
-  if (traceId) {
-    res.setHeader('x-trace-id', traceId);
-  }
-  if (spanId) {
-    res.setHeader('x-span-id', spanId);
+  if (req.traceId) {
+    res.setHeader('x-trace-id', req.traceId);
   }
 
   // Setup AsyncLocalStorage context
   const store = new Map<string, string>();
   store.set('correlationId', correlationId);
   store.set('requestId', correlationId);
-  store.set('traceId', traceId);
-  store.set('spanId', spanId);
+  store.set('traceId', req.traceId);
   store.set('tenantId', tenantId);
 
   if ((req as any).user) {

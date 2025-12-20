@@ -15,6 +15,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import Slide from '@mui/material/Slide';
+import { useRestoreFocus } from '../hooks/useRestoreFocus';
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -33,6 +34,7 @@ export default function DecisionPreviewModal({
   const [diff, setDiff] = useState(null);
   const [policy, setPolicy] = useState({ allow: false, reason: '' });
   const [dryRun, setDryRun] = useState(true);
+  useRestoreFocus(open);
 
   useEffect(() => {
     if (!open) return;

@@ -10,7 +10,6 @@ declare global {
     interface Request {
       requestId: string;
       correlationId: string;
-      traceId?: string;
       requestStart: [number, number];
     }
   }
@@ -19,7 +18,6 @@ declare global {
 export const observabilityMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const correlationId = (req.headers['x-correlation-id'] as string) || uuidv4();
   const requestId = (req.headers['x-request-id'] as string) || uuidv4();
-  const traceId = req.traceId || (req.headers['x-trace-id'] as string);
   // We do NOT trust headers for tenantId by default, and user is not yet authenticated.
   // We set tenantId to undefined initially. It will be updated by contextBindingMiddleware later.
   const tenantId = undefined;
@@ -30,15 +28,11 @@ export const observabilityMiddleware = (req: Request, res: Response, next: NextF
 
   // Propagate correlationId to response header
   res.setHeader('X-Correlation-Id', correlationId);
-  if (traceId) {
-    res.setHeader('x-trace-id', traceId);
-  }
 
   const ctx: RequestContext = {
     correlationId,
     requestId,
     tenantId,
-    traceId,
   };
 
   // Run everything downstream in the context

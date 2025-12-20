@@ -29,6 +29,12 @@ import type {
   BlackBoxServiceConfig,
 } from '../core/types.js';
 import { AuditEventSchema } from '../core/types.js';
+import {
+  buildManifest,
+  buildSchemaSummary,
+  sanitizeEventForExport,
+  verifyChainForExport,
+} from './export-utils.js';
 
 /**
  * Authorization context from request
@@ -84,6 +90,13 @@ const ExportRequestSchema = z.object({
   serviceIds: z.array(z.string()).optional(),
   complianceFrameworks: z.array(z.string()).optional(),
   includeDetails: z.boolean().default(true),
+});
+
+const ExportQuerySchema = z.object({
+  from: z.string().datetime(),
+  to: z.string().datetime(),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(500).default(100),
 });
 
 /**
@@ -184,7 +197,15 @@ export function createAuditRouter(
     async (req: AuthenticatedRequest, res: Response) => {
       try {
         const events = Array.isArray(req.body) ? req.body : [req.body];
-        const results: Array<{ eventId: string; success: boolean; error?: string }> = [];
+        const results: Array<{
+          eventId: string;
+          success: boolean;
+          error?: string;
+          eventHash?: string;
+          previousHash?: string;
+          chainHash?: string;
+          sequence?: string;
+        }> = [];
 
         for (const eventData of events) {
           try {
@@ -217,6 +238,10 @@ export function createAuditRouter(
             results.push({
               eventId: event.id,
               success: true,
+              eventHash: chainEntry.eventHash,
+              previousHash: chainEntry.previousHash,
+              chainHash: chainEntry.chainHash,
+              sequence: chainEntry.sequence.toString(),
             });
           } catch (error) {
             const message = error instanceof Error ? error.message : 'Unknown error';
@@ -479,6 +504,74 @@ export function createAuditRouter(
         } else {
           res.json({ report, message: 'PDF export not yet implemented' });
         }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        res.status(500).json({ error: message });
+      }
+    },
+  );
+
+  /**
+   * Export audit events with pagination and verification
+   * GET /audit/export?from&to&page&pageSize
+   */
+  router.get(
+    '/export',
+    extractAuth,
+    requirePermission('audit:export'),
+    async (req: AuthenticatedRequest, res: Response) => {
+      const parsed = ExportQuerySchema.safeParse(req.query);
+
+      if (!parsed.success) {
+        res.status(400).json({ error: parsed.error.message });
+        return;
+      }
+
+      try {
+        const { from, to, page, pageSize } = parsed.data;
+        const startTime = new Date(from);
+        const endTime = new Date(to);
+        const tenantId = req.auth!.roles.includes('admin')
+          ? undefined
+          : req.auth!.tenantId;
+
+        const { events, total } = await store.queryEvents({
+          startTime,
+          endTime,
+          tenantId,
+          limit: pageSize,
+          offset: (page - 1) * pageSize,
+          sortDirection: 'asc',
+        });
+
+        const verification = verifyChainForExport(events);
+        const sanitizedEvents = events.map(sanitizeEventForExport);
+
+        const manifest = buildManifest(
+          sanitizedEvents,
+          startTime,
+          endTime,
+          page,
+          pageSize,
+          total,
+        );
+
+        res.json({
+          manifest,
+          schema: buildSchemaSummary(),
+          verification,
+          pageInfo: {
+            page,
+            pageSize,
+            total,
+            totalPages: Math.ceil(total / pageSize),
+          },
+          events: sanitizedEvents.map((event) => ({
+            ...event,
+            prevHash: event.previousEventHash,
+            eventHash: event.hash,
+          })),
+        });
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
         res.status(500).json({ error: message });
