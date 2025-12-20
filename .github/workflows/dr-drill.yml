@@ -1,0 +1,26 @@
+name: DR Drill Simulation
+
+on:
+  schedule:
+    - cron: '0 2 * * 0' # Every Sunday at 2am
+  workflow_dispatch:
+
+jobs:
+  dr-drill:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install typescript tsx --no-save
+
+      - name: Run Failover Simulation
+        run: npx tsx scripts/dr/simulate_failover.ts
+
+      - name: Run DR Drill Orchestrator
+        run: npx tsx scripts/dr/dr_drill.ts

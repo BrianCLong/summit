@@ -2,6 +2,8 @@ export interface Quota {
     tier: 'FREE' | 'STARTER' | 'PRO' | 'ENTERPRISE';
     requestsPerMinute: number;
     maxTokensPerRequest: number;
+    storageLimitBytes: number;
+    seatCap: number;
 }
 
 export class QuotaManager {
@@ -28,14 +30,38 @@ export class QuotaManager {
     public getQuotaForTier(tier: string): Quota {
         switch (tier) {
             case 'ENTERPRISE':
-                return { tier: 'ENTERPRISE', requestsPerMinute: 10000, maxTokensPerRequest: 32000 };
+                return {
+                    tier: 'ENTERPRISE',
+                    requestsPerMinute: 10000,
+                    maxTokensPerRequest: 32000,
+                    storageLimitBytes: 1_000_000_000_000, // 1 TB
+                    seatCap: 500,
+                };
             case 'PRO':
-                return { tier: 'PRO', requestsPerMinute: 1000, maxTokensPerRequest: 16000 };
+                return {
+                    tier: 'PRO',
+                    requestsPerMinute: 1000,
+                    maxTokensPerRequest: 16000,
+                    storageLimitBytes: 250_000_000_000, // 250 GB
+                    seatCap: 150,
+                };
             case 'STARTER':
-                return { tier: 'STARTER', requestsPerMinute: 100, maxTokensPerRequest: 4000 };
+                return {
+                    tier: 'STARTER',
+                    requestsPerMinute: 100,
+                    maxTokensPerRequest: 4000,
+                    storageLimitBytes: 50_000_000_000, // 50 GB
+                    seatCap: 50,
+                };
             case 'FREE':
             default:
-                return { tier: 'FREE', requestsPerMinute: 20, maxTokensPerRequest: 1000 };
+                return {
+                    tier: 'FREE',
+                    requestsPerMinute: 20,
+                    maxTokensPerRequest: 1000,
+                    storageLimitBytes: 5_000_000_000, // 5 GB
+                    seatCap: 5,
+                };
         }
     }
 
