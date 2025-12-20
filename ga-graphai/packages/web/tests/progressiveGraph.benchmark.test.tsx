@@ -2,7 +2,7 @@ import { act } from 'react-dom/test-utils';
 import { createRoot } from 'react-dom/client';
 import { describe, expect, it } from 'vitest';
 import { performance } from 'node:perf_hooks';
-import { ProgressiveGraph } from '../src/index.js';
+import { MAX_VISIBLE_NODES, ProgressiveGraph } from '../src/index.js';
 import { buildFixtureGraph } from './fixtures/graph.js';
 
 describe('ProgressiveGraph benchmark', () => {
@@ -39,8 +39,8 @@ describe('ProgressiveGraph benchmark', () => {
     const busy = container.querySelector('[role="region"]')?.getAttribute('aria-busy');
 
     expect(renderDuration).toBeGreaterThan(0);
-    expect(renderDuration).toBeLessThan(200);
-    expect(renderedCount).toBe(nodes.length);
+    expect(renderDuration).toBeLessThan(180);
+    expect(renderedCount).toBe(Math.min(nodes.length, MAX_VISIBLE_NODES));
     expect(busy === null || busy === 'false').toBe(true);
   });
 });

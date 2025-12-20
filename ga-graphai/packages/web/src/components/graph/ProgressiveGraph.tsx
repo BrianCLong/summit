@@ -30,6 +30,7 @@ const DEFAULT_BATCH_SIZE = 80;
 const DEFAULT_FRAME_BUDGET = 18;
 const LOD_THRESHOLD = 320;
 const MAX_BATCH_SIZE = 320;
+export const MAX_VISIBLE_NODES = 1200;
 const MAX_VISIBLE_EDGES_COMPACT = 3200;
 const FRAME_OVERRUN_MULTIPLIER = 2.5;
 
@@ -60,11 +61,15 @@ export function ProgressiveGraph({
   onSelectNode,
   onRenderComplete,
 }: ProgressiveGraphProps): JSX.Element {
+  const renderTarget = useMemo(
+    () => Math.min(nodes.length, MAX_VISIBLE_NODES),
+    [nodes],
+  );
   const [renderedCount, setRenderedCount] = useState(() =>
-    Math.min(initialBatchSize, nodes.length),
+    Math.min(initialBatchSize, renderTarget),
   );
   const [lodMode, setLodMode] = useState<'detailed' | 'compact'>(
-    nodes.length > LOD_THRESHOLD ? 'compact' : 'detailed',
+    renderTarget > LOD_THRESHOLD ? 'compact' : 'detailed',
   );
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -80,11 +85,11 @@ export function ProgressiveGraph({
   }, [nodes]);
 
   useEffect(() => {
-    setRenderedCount(Math.min(initialBatchSize, nodes.length));
-    setLodMode(nodes.length > LOD_THRESHOLD ? 'compact' : 'detailed');
+    setRenderedCount(Math.min(initialBatchSize, renderTarget));
+    setLodMode(renderTarget > LOD_THRESHOLD ? 'compact' : 'detailed');
 
     let cancelled = false;
-    let currentCount = Math.min(initialBatchSize, nodes.length);
+    let currentCount = Math.min(initialBatchSize, renderTarget);
     let batchSize = Math.max(initialBatchSize, 1);
     const start = performance.now();
 
@@ -94,19 +99,19 @@ export function ProgressiveGraph({
       let nextCount = currentCount;
 
       while (
-        nextCount < nodes.length &&
+        nextCount < renderTarget &&
         performance.now() - frameStart < frameBudgetMs
       ) {
         const nextBatch = Math.min(batchSize * 1.35, MAX_BATCH_SIZE);
         batchSize = Math.max(Math.round(nextBatch), 1);
-        nextCount = Math.min(nextCount + batchSize, nodes.length);
+        nextCount = Math.min(nextCount + batchSize, renderTarget);
       }
 
       currentCount = nextCount;
 
       const elapsed = performance.now() - start;
       const shouldCompact =
-        nodes.length > LOD_THRESHOLD &&
+        renderTarget > LOD_THRESHOLD &&
         (performance.now() - frameStart > frameBudgetMs ||
           elapsed > frameBudgetMs * FRAME_OVERRUN_MULTIPLIER);
 
@@ -116,7 +121,7 @@ export function ProgressiveGraph({
 
       setRenderedCount(currentCount);
 
-      if (currentCount < nodes.length) {
+      if (currentCount < renderTarget) {
         frameRef.current = scheduleFrame(step);
       } else {
         onRenderComplete?.(performance.now() - start);
@@ -128,7 +133,7 @@ export function ProgressiveGraph({
       cancelled = true;
       cancelFrame(frameRef.current);
     };
-  }, [nodes, initialBatchSize, frameBudgetMs, onRenderComplete]);
+  }, [renderTarget, initialBatchSize, frameBudgetMs, onRenderComplete]);
 
   const visibleNodes = useMemo(() => {
     return nodes.slice(0, renderedCount);
@@ -179,7 +184,7 @@ export function ProgressiveGraph({
     <div
       role="region"
       aria-label="Progressive graph"
-      aria-busy={renderedCount < nodes.length}
+      aria-busy={renderedCount < renderTarget}
       style={{ position: 'relative', width: '100%', height: '100%' }}
     >
       <svg
