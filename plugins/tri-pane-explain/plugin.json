@@ -1,0 +1,44 @@
+{
+  "id": "tri-pane-explain",
+  "name": "Tri-Pane View with Explainer",
+  "version": "1.0.0",
+  "description": "Synchronized timeline/map/graph panes with brushing, XAI overlays, and provenance tooltips",
+  "permissions": [
+    "graph:read",
+    "view:create",
+    "view:save"
+  ],
+  "entrypoints": {
+    "ui": "./dist/index.js"
+  },
+  "panels": [
+    {
+      "id": "tri-pane-main",
+      "name": "Tri-Pane View",
+      "component": "TriPaneMain"
+    },
+    {
+      "id": "explainer-panel",
+      "name": "View Explainer",
+      "component": "ExplainerPanel"
+    }
+  ],
+  "settings": {
+    "defaultLayout": {
+      "type": "string",
+      "enum": ["horizontal", "vertical", "grid"],
+      "default": "horizontal",
+      "description": "Default pane layout"
+    },
+    "enableXaiOverlays": {
+      "type": "boolean",
+      "default": true,
+      "description": "Show XAI importance overlays"
+    },
+    "enableProvenanceTooltips": {
+      "type": "boolean",
+      "default": true,
+      "description": "Show provenance information on hover"
+    }
+  }
+}

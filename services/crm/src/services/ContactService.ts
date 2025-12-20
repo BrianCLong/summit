@@ -264,8 +264,8 @@ export class ContactService extends EventEmitter {
     results.sort((a, b) => {
       const aVal = (a as Record<string, unknown>)[sortBy];
       const bVal = (b as Record<string, unknown>)[sortBy];
-      if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
-      if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
+      if (aVal < bVal) {return sortOrder === 'asc' ? -1 : 1;}
+      if (aVal > bVal) {return sortOrder === 'asc' ? 1 : -1;}
       return 0;
     });
 
@@ -433,19 +433,19 @@ export class ContactService extends EventEmitter {
     }
 
     // Contact completeness
-    if (contact.phone) score += 5;
-    if (contact.mobile) score += 5;
-    if (contact.companyId) score += 10;
-    if (contact.socialProfiles.length > 0) score += 5;
+    if (contact.phone) {score += 5;}
+    if (contact.mobile) {score += 5;}
+    if (contact.companyId) {score += 10;}
+    if (contact.socialProfiles.length > 0) {score += 5;}
 
     // Engagement (simplified - would connect to activity service)
     if (contact.lastContactedAt) {
       const daysSinceContact = Math.floor(
         (Date.now() - contact.lastContactedAt.getTime()) / (1000 * 60 * 60 * 24)
       );
-      if (daysSinceContact <= 7) score += 15;
-      else if (daysSinceContact <= 30) score += 10;
-      else if (daysSinceContact <= 90) score += 5;
+      if (daysSinceContact <= 7) {score += 15;}
+      else if (daysSinceContact <= 30) {score += 10;}
+      else if (daysSinceContact <= 90) {score += 5;}
     }
 
     // Source quality

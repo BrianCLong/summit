@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "1.0",
+  "bundleId": "bundle-missing",
+  "generatedAt": "2024-01-01T00:00:00Z",
+  "assets": [
+    {
+      "id": "report",
+      "path": "missing.pdf",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ]
+}

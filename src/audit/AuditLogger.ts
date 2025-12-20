@@ -94,6 +94,7 @@ export class AdvancedAuditLogger extends EventEmitter {
    */
   async logEvent(eventData: Partial<AuditEvent>): Promise<void> {
     try {
+      this.validateEventInput(eventData)
       const event = this.enrichEvent(eventData);
 
       // Generate integrity hash
@@ -127,6 +128,28 @@ export class AdvancedAuditLogger extends EventEmitter {
       console.error('Failed to log audit event:', error);
       // Log the failure itself
       await this.logSystemEvent('AUDIT_FAILURE', { error: error.message });
+    }
+  }
+
+  /**
+   * Validate the public API input to prevent malformed or malicious events
+   */
+  private validateEventInput(eventData: Partial<AuditEvent>): void {
+    if (!eventData.action || typeof eventData.action !== 'string') {
+      throw new Error('audit.action is required')
+    }
+    if (!eventData.resource || typeof eventData.resource !== 'string') {
+      throw new Error('audit.resource is required')
+    }
+    if (eventData.details && typeof eventData.details !== 'object') {
+      throw new Error('audit.details must be an object')
+    }
+    if (eventData.tags?.some((tag) => typeof tag !== 'string')) {
+      throw new Error('audit.tags must be strings')
+    }
+    const outcomes = ['SUCCESS', 'FAILURE', 'PARTIAL'] as const
+    if (eventData.outcome && !outcomes.includes(eventData.outcome)) {
+      throw new Error('audit.outcome is invalid')
     }
   }
 

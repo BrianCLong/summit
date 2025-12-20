@@ -15,7 +15,7 @@ export class InMemoryKeyStore implements KeyStore {
       return Array.from(this.store.get(keyId)?.values() ?? []);
     }
     const result: KeyVersion[] = [];
-    for (const versions of this.store.values()) {
+    for (const versions of Array.from(this.store.values())) {
       result.push(...versions.values());
     }
     return result;
@@ -42,7 +42,7 @@ export class InMemoryKeyStore implements KeyStore {
 }
 
 export class KeyManager {
-  constructor(private readonly store: KeyStore) {}
+  constructor(private readonly store: KeyStore) { }
 
   async getActiveKey(keyId: string): Promise<KeyVersion | undefined> {
     const keys = await this.store.listKeys(keyId);

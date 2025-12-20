@@ -1,4 +1,4 @@
-import client from 'prom-client';
+import * as client from 'prom-client';
 
 // Create a Registry to hold metrics
 export const registry = new client.Registry();
@@ -136,6 +136,19 @@ export const subscriptionFanoutLatency = new client.Histogram({
   name: 'subscription_fanout_latency_ms',
   help: 'Subscription fan-out latency in milliseconds',
   buckets: [10, 50, 100, 250, 500, 1000],
+  registers: [registry]
+});
+
+export const subscriptionBackpressureTotal = new client.Counter({
+  name: 'subscription_backpressure_total',
+  help: 'Count of WebSocket disconnects or drops caused by backpressure',
+  registers: [registry]
+});
+
+export const subscriptionBatchesEmitted = new client.Histogram({
+  name: 'subscription_batch_size',
+  help: 'Distribution of batched subscription payload sizes',
+  buckets: [1, 5, 10, 25, 50, 75, 100],
   registers: [registry]
 });
 

@@ -2,12 +2,17 @@ import entityResolvers from './entity';
 import relationshipResolvers from './relationship';
 import userResolvers from './user';
 import investigationResolvers from './investigation';
+import authResolvers from './auth.js';
 import { WargameResolver } from '../../resolvers/WargameResolver.js'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import evidenceResolvers from './evidence.js';
 import evidenceOkResolvers from './evidenceOk.js';
+import healthResolvers from './health.js';
 import trustRiskResolvers from './trust-risk.js';
 import provenanceResolvers from './provenance.js';
 import supportTicketResolvers from './supportTicket.js';
+import sprint28Resolvers from './sprint28.js';
+import ewResolvers from './electronic-warfare.js';
+import { collaborationResolvers } from './collaboration';
 
 // MC Platform v0.4.0 Transcendent Intelligence Resolvers (DISABLED - incomplete)
 // import { v040Resolvers } from './v040';
@@ -22,11 +27,16 @@ const resolvers = {
   Query: {
     ...entityResolvers.Query,
     ...userResolvers.Query,
+    ...healthResolvers.Query,
     ...investigationResolvers.Query,
+    ...(authResolvers.Query || {}),
     ...(evidenceOkResolvers.Query || {}),
     ...(trustRiskResolvers.Query || {}),
     ...(provenanceResolvers.Query || {}),
     ...(supportTicketResolvers.Query || {}),
+    ...(sprint28Resolvers.Query || {}),
+    ...(ewResolvers.Query || {}),
+    ...(collaborationResolvers.Query || {}),
     // MC Platform v0.4.0 Transcendent Intelligence (DISABLED)
     // ...(v040Resolvers.Query || {}),
     // MC Platform v0.4.1 Sovereign Safeguards (DISABLED)
@@ -49,10 +59,14 @@ const resolvers = {
     ...relationshipResolvers.Mutation,
     ...userResolvers.Mutation,
     ...investigationResolvers.Mutation,
+    ...(authResolvers.Mutation || {}),
     ...(evidenceResolvers.Mutation || {}),
     ...(trustRiskResolvers.Mutation || {}),
     ...(provenanceResolvers.Mutation || {}),
     ...(supportTicketResolvers.Mutation || {}),
+    ...(sprint28Resolvers.Mutation || {}),
+    ...(ewResolvers.Mutation || {}),
+    ...(collaborationResolvers.Mutation || {}),
     // MC Platform v0.4.0 Transcendent Intelligence (DISABLED)
     // ...(v040Resolvers.Mutation || {}),
     // MC Platform v0.4.1 Sovereign Safeguards (DISABLED)
@@ -66,6 +80,10 @@ const resolvers = {
       wargameResolver.deleteCrisisScenario.bind(wargameResolver),
   },
   SupportTicket: supportTicketResolvers.SupportTicket,
+  WarRoom: collaborationResolvers.WarRoom,
+  Subscription: {
+    ...(collaborationResolvers.Subscription || {}),
+  },
 };
 
 export default resolvers;
