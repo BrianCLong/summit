@@ -1,0 +1,12 @@
+{
+  "subject": "policy-bundle",
+  "digest": "b1946ac92492d2347c6235b4d2611184",
+  "signature": {
+    "signerId": "mc-platform-signer",
+    "keyVersion": "v3",
+    "algorithm": "ed25519",
+    "value": "MEQCIFRJp"
+  },
+  "now": "2025-02-12T11:00:00Z",
+  "expiry": "2025-02-13T11:00:00Z"
+}

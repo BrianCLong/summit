@@ -36,6 +36,7 @@ SANITIZE="${SANITIZE:-false}"
 CONFIRM_PRODUCTION="${CONFIRM_PRODUCTION:-false}"
 SKIP_VERIFICATION="${SKIP_VERIFICATION:-false}"
 VERBOSE="${VERBOSE:-false}"
+TENANT="${TENANT:-}"
 
 # S3 Configuration
 S3_BUCKET="${S3_BUCKET:-}"
@@ -119,6 +120,9 @@ OPTIONS:
     --confirm-production
                         Required flag to restore to production environment
 
+    --tenant=TENANT     Tenant identifier to restore. Required for multi-tenant
+                        backups and validated against backup metadata or folder
+
     --verbose           Enable verbose output
 
     --help              Show this help message
@@ -192,6 +196,10 @@ parse_args() {
         case "$1" in
             --env=*)
                 ENV="${1#*=}"
+                shift
+                ;;
+            --tenant=*)
+                TENANT="${1#*=}"
                 shift
                 ;;
             --backup-path=*)
@@ -314,6 +322,8 @@ validate_environment() {
         log_error "Backup directory not found: $BACKUP_PATH"
         exit 1
     fi
+
+    enforce_tenant_partitioning
 
     # Check for production data being restored to non-production
     if [[ -f "$BACKUP_PATH/backup-metadata.json" ]]; then
@@ -445,6 +455,49 @@ download_from_s3() {
     log_success "Backup downloaded and extracted to: $BACKUP_PATH"
 }
 
+enforce_tenant_partitioning() {
+    # Detect tenant from metadata or directory structure and enforce selection
+    local metadata_tenant=""
+
+    if [[ -f "$BACKUP_PATH/backup-metadata.json" ]]; then
+        metadata_tenant=$(grep -o '"tenant"[[:space:]]*:[[:space:]]*"[^"]*"' "$BACKUP_PATH/backup-metadata.json" | cut -d'"' -f4 || true)
+        if [[ -z "$metadata_tenant" ]]; then
+            metadata_tenant=$(grep -o '"tenant_id"[[:space:]]*:[[:space:]]*"[^"]*"' "$BACKUP_PATH/backup-metadata.json" | cut -d'"' -f4 || true)
+        fi
+    fi
+
+    # If tenant directories are present, pick the requested tenant
+    if [[ -d "$BACKUP_PATH/tenants" ]]; then
+        if [[ -z "$TENANT" ]]; then
+            log_error "Backup contains multiple tenants but --tenant was not provided"
+            log_error "Available tenants: $(cd \"$BACKUP_PATH/tenants\" && ls)"
+            exit 1
+        fi
+
+        if [[ ! -d "$BACKUP_PATH/tenants/$TENANT" ]]; then
+            log_error "Tenant '$TENANT' not found in backup: $BACKUP_PATH/tenants"
+            exit 1
+        fi
+
+        BACKUP_PATH="$BACKUP_PATH/tenants/$TENANT"
+        log_info "Using tenant-scoped backup path: $BACKUP_PATH"
+    elif [[ -n "$metadata_tenant" ]]; then
+        if [[ -n "$TENANT" ]] && [[ "$TENANT" != "$metadata_tenant" ]]; then
+            log_error "Tenant mismatch: requested '$TENANT' but backup metadata is '$metadata_tenant'"
+            exit 1
+        fi
+        TENANT="${TENANT:-$metadata_tenant}"
+        log_info "Validated tenant from metadata: $TENANT"
+    else
+        log_warn "No tenant metadata found. Backups should be tagged per tenant."
+        if [[ -z "$TENANT" ]]; then
+            log_error "Specify --tenant to continue without metadata"
+            exit 1
+        fi
+        log_warn "Proceeding with tenant override: $TENANT"
+    fi
+}
+
 confirm_restore() {
     if [[ "$FORCE" == "true" ]]; then
         log_warn "Skipping confirmation (--force specified)"
@@ -464,6 +517,9 @@ confirm_restore() {
     echo ""
     echo "Target Environment: $ENV"
     echo "Backup Path:        $BACKUP_PATH"
+    if [[ -n "$TENANT" ]]; then
+        echo "Tenant:             $TENANT"
+    fi
     echo "Datastores:         $DATASTORES"
     echo ""
     printf "${RED}WARNING: This operation will OVERWRITE existing data!${NC}\n"

@@ -1,0 +1,15 @@
+{
+  "title": "Neo4j Queries",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Transaction retries",
+      "targets": [{ "expr": "increase(neo4j_transaction_retries_total[5m])" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Page fault rate",
+      "targets": [{ "expr": "neo4j_page_fault_rate" }]
+    }
+  ]
+}

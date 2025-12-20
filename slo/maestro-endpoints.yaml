@@ -1,0 +1,62 @@
+apiVersion: sloth.slok.dev/v1
+kind: PrometheusServiceLevel
+metadata:
+  name: maestro-endpoints
+  labels:
+    service: maestro
+    team: platform
+spec:
+  service: maestro
+  window: 30d
+  slo: 99.9
+  slos:
+    - name: maestro-health-availability
+      objective: 99.99
+      description: "Ensure Maestro control plane health endpoint stays green."
+      sli:
+        events:
+          errorQuery: sum(rate(http_requests_total{route="/api/maestro/v1/health",status=~"5.."}[5m]))
+          totalQuery: sum(rate(http_requests_total{route="/api/maestro/v1/health"}[5m]))
+      alerting:
+        name: MaestroHealthBurnRate
+        labels:
+          severity: critical
+          channel: pagerduty
+        annotations:
+          summary: "Maestro health check is burning error budget"
+          description: "5xx ratio on /api/maestro/v1/health is depleting the budget faster than expected."
+
+    - name: maestro-runs-availability
+      objective: 99.9
+      description: "Run lifecycle endpoints (/runs, /runs/{id}) maintain 99.9% success."
+      sli:
+        events:
+          errorQuery: sum(rate(http_requests_total{service="maestro",route=~"/api/maestro/v1/runs.*",status=~"5.."}[5m]))
+          totalQuery: sum(rate(http_requests_total{service="maestro",route=~"/api/maestro/v1/runs.*"}[5m]))
+      alerting:
+        name: MaestroRunsBurnRate
+        labels:
+          severity: warning
+          channel: pagerduty
+        annotations:
+          summary: "Run API availability degrading"
+          description: "5xx ratio on run endpoints is consuming the 0.1% error budget at a burn rate >2x."
+
+    - name: maestro-runs-latency
+      objective: 99.0
+      description: "Keep p95 latency for run read/write endpoints under 350ms."
+      sli:
+        events:
+          errorQuery: |
+            sum(rate(maestro_http_request_duration_seconds_bucket{route=~"/api/maestro/v1/runs.*",le="+Inf"}[5m]))
+              - sum(rate(maestro_http_request_duration_seconds_bucket{route=~"/api/maestro/v1/runs.*",le="0.35"}[5m]))
+          totalQuery: |
+            sum(rate(maestro_http_request_duration_seconds_bucket{route=~"/api/maestro/v1/runs.*",le="+Inf"}[5m]))
+      alerting:
+        name: MaestroRunsLatencyBurnRate
+        labels:
+          severity: warning
+          channel: pagerduty
+        annotations:
+          summary: "Run API latency p95 over 350ms"
+          description: "Latency budget for Maestro run endpoints is burning faster than target (<350ms p95)."

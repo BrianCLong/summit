@@ -19,13 +19,16 @@ import type { AuthenticatedRequest } from './middleware';
 import type { ResourceAttributes } from './types';
 import { sessionManager } from './session';
 import { requireServiceAuth } from './service-auth';
+import { breakGlassManager } from './break-glass';
 
 export async function createApp(): Promise<express.Application> {
   await initKeys();
   await startObservability();
   const attributeService = new AttributeService();
   const stepUpManager = new StepUpManager();
-  const trustedServices = (process.env.SERVICE_AUTH_CALLERS || 'api-gateway,maestro')
+  const trustedServices = (
+    process.env.SERVICE_AUTH_CALLERS || 'api-gateway,maestro'
+  )
     .split(',')
     .map((v) => v.trim())
     .filter(Boolean);
@@ -180,6 +183,73 @@ export async function createApp(): Promise<express.Application> {
   );
 
   app.post(
+    '/access/break-glass/request',
+    requireAuth(attributeService, {
+      action: 'break-glass:request',
+    }),
+    (req: AuthenticatedRequest, res) => {
+      const justification = String(req.body?.justification || '').trim();
+      const ticketId = String(req.body?.ticketId || '').trim();
+      if (!justification || !ticketId) {
+        return res
+          .status(400)
+          .json({ error: 'justification_and_ticket_required' });
+      }
+      const scope = Array.isArray(req.body?.scope)
+        ? req.body.scope.map(String).filter(Boolean)
+        : ['break_glass:elevated'];
+      try {
+        const record = breakGlassManager.createRequest(
+          String(req.user?.sub || ''),
+          justification,
+          ticketId,
+          scope,
+        );
+        return res.status(201).json({
+          requestId: record.id,
+          status: record.status,
+          scope: record.scope,
+        });
+      } catch (error) {
+        return res.status(400).json({ error: (error as Error).message });
+      }
+    },
+  );
+
+  app.post(
+    '/access/break-glass/approve',
+    requireAuth(attributeService, {
+      action: 'break-glass:approve',
+      requiredAcr: 'loa2',
+    }),
+    async (req: AuthenticatedRequest, res) => {
+      const requestId = String(req.body?.requestId || '').trim();
+      if (!requestId) {
+        return res.status(400).json({ error: 'request_id_required' });
+      }
+      try {
+        const approval = await breakGlassManager.approve(
+          requestId,
+          String(req.user?.sub || ''),
+        );
+        return res.json(approval);
+      } catch (error) {
+        const message = (error as Error).message;
+        if (message === 'request_not_found') {
+          return res.status(404).json({ error: message });
+        }
+        if (message === 'request_already_approved') {
+          return res.status(409).json({ error: message });
+        }
+        if (message === 'request_expired') {
+          return res.status(410).json({ error: message });
+        }
+        return res.status(400).json({ error: message });
+      }
+    },
+  );
+
+  app.post(
     '/auth/webauthn/challenge',
     requireAuth(attributeService, {
       action: 'step-up:challenge',
@@ -188,7 +258,15 @@ export async function createApp(): Promise<express.Application> {
     (req: AuthenticatedRequest, res) => {
       try {
         const userId = String(req.user?.sub || '');
-        const challenge = stepUpManager.createChallenge(userId);
+        const sessionId = String(req.user?.sid || '');
+        const challenge = stepUpManager.createChallenge(userId, {
+          sessionId,
+          requestedAction: String(req.body?.action || 'step-up:challenge'),
+          resourceId: req.body?.resourceId,
+          classification: req.body?.classification,
+          tenantId: req.subjectAttributes?.tenantId,
+          currentAcr: String(req.user?.acr || 'loa1'),
+        });
         res.json(challenge);
       } catch (error) {
         res.status(400).json({ error: (error as Error).message });
@@ -209,11 +287,15 @@ export async function createApp(): Promise<express.Application> {
         if (!credentialId || !signature || !challenge) {
           return res.status(400).json({ error: 'missing_challenge_payload' });
         }
-        stepUpManager.verifyResponse(userId, {
-          credentialId,
-          signature,
-          challenge,
-        });
+        stepUpManager.verifyResponse(
+          userId,
+          {
+            credentialId,
+            signature,
+            challenge,
+          },
+          String(req.user?.sid || ''),
+        );
         const sid = String(req.user?.sid || '');
         const token = await sessionManager.elevateSession(sid, {
           acr: 'loa2',
@@ -241,7 +323,7 @@ export async function createApp(): Promise<express.Application> {
       onProxyReq: (proxyReq) => {
         injectTraceContext(proxyReq);
       },
-    }),
+    } as any),
   );
 
   return app;
