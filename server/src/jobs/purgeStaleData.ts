@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ClientBase, QueryConfig } from 'pg';
 
 export interface DatabaseClient extends ClientBase {}

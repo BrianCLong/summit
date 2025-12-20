@@ -1,5 +1,5 @@
-import {
 import { describe, it, expect, beforeAll } from '@jest/globals';
+import {
   DataRecord,
   PiiOntologyEngine,
   PIICategory,

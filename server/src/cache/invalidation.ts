@@ -11,7 +11,7 @@ async function broadcastInvalidation(patterns: string[]) {
   if (!redis) return;
   try {
     await redis.publish(INVALIDATION_CHANNEL, JSON.stringify({ patterns }));
-  } catch {}
+  } catch { }
 }
 
 async function performInvalidation(redis: any, patterns: string[]): Promise<void> {
@@ -31,9 +31,9 @@ async function performInvalidation(redis: any, patterns: string[]): Promise<void
       const members = await redis.sMembers(idxKey);
       for (const k of members || []) toDelete.add(k);
       if (members?.length) await redis.sRem(idxKey, members);
-    } catch {}
+    } catch { }
   }
-  if (toDelete.size) await redis.del([...toDelete]);
+  if (toDelete.size > 0) await redis.del(...Array.from(toDelete));
 }
 
 export async function startCacheInvalidationListener(): Promise<void> {
@@ -52,7 +52,7 @@ export async function startCacheInvalidationListener(): Promise<void> {
           await performInvalidation(getRedisClient(), parsed.patterns);
           parsed.patterns.forEach((p: string) => recInvalidation(p));
         }
-      } catch {}
+      } catch { }
       flushLocalCache();
     });
     await sub.subscribe(INVALIDATION_CHANNEL);
