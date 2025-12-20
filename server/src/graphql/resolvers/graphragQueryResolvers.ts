@@ -401,6 +401,9 @@ export const graphragQueryResolvers = {
           dryRun?: boolean;
           maxRows?: number;
           timeout?: number;
+          cursor?: string | null;
+          batchSize?: number;
+          stream?: boolean;
         };
       },
       context: Context
@@ -423,6 +426,9 @@ export const graphragQueryResolvers = {
           dryRun: args.input.dryRun,
           maxRows: args.input.maxRows,
           timeout: args.input.timeout,
+          cursor: args.input.cursor,
+          batchSize: args.input.batchSize,
+          stream: args.input.stream,
         });
 
         return response;

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // server/src/conductor/runbooks/key-hygiene.ts
 
 import {

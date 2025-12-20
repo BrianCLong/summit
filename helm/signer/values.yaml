@@ -1,0 +1,64 @@
+image:
+  repository: ghcr.io/BrianCLong/intelgraph/signer
+  tag: ''
+  pullPolicy: IfNotPresent
+
+replicaCount: 2
+
+service:
+  type: ClusterIP
+  port: 8080
+  metricsPort: 9090
+
+env:
+  - name: LOG_LEVEL
+    value: info
+  - name: POLICY_BUNDLE_FILE
+    value: /etc/policy/bundles.yaml
+  - name: POLICY_REFRESH_SECONDS
+    value: '300'
+  - name: SIGNING_KEY_ID
+    value: ''
+  - name: KMS_KEY_ARN
+    value: ''
+
+policyBundles:
+  enabled: true
+  fileName: bundles.yaml
+  sources:
+    - name: base-rbac
+      url: https://bundles.intelgraph.com/rbac/bundle.tar.gz
+      checksum: sha256:d34db33f
+      signatureKey: bundle-signing-key
+  inlinePolicies:
+    guardrails.rego: |
+      package intelgraph.guardrails
+
+      default allow = false
+
+      allow {
+        input.request.method == "POST"
+      }
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 1000m
+    memory: 512Mi
+
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  path: /metrics
+  release: prometheus
+
+pdb:
+  enabled: true
+  minAvailable: 1
+
+podAnnotations: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
