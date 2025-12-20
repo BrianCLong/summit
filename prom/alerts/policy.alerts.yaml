@@ -1,0 +1,55 @@
+groups:
+  - name: policy-observability
+    interval: 30s
+    rules:
+      - alert: PolicyDecisionLatencyHigh
+        expr: histogram_quantile(0.95, sum(rate(policy_decision_latency_ms_bucket[5m])) by (le)) > 150
+        for: 10m
+        labels:
+          severity: page
+          service: policy-enforcer
+        annotations:
+          summary: 'Policy decision latency p95 above 150ms'
+          description: |
+            Policy decision latency p95 is {{ $value | printf "%.0f" }}ms for 10m, breaching the 150ms SLO.
+          runbook_url: https://docs.intelgraph.com/runbooks/policy-latency
+          dashboard_url: https://grafana.example.com/d/policy-decisions
+
+      - alert: PolicyDenyRateSpike
+        expr: (sum(rate(policy_decisions_total{result="deny"}[5m])) / clamp_min(sum(rate(policy_decisions_total[5m])), 1)) > 0.05
+        for: 10m
+        labels:
+          severity: warn
+          service: policy-enforcer
+        annotations:
+          summary: 'Policy deny rate exceeds 5%'
+          description: |
+            Deny decisions exceed 5% of total traffic for 10m. Validate policies, appeals, and cache health.
+          runbook_url: https://docs.intelgraph.com/runbooks/policy-deny-rate
+          dashboard_url: https://grafana.example.com/d/policy-decisions
+
+      - alert: PolicyReceiptCoverageLow
+        expr: (sum(rate(provenance_writes_total[15m])) / clamp_min(sum(rate(policy_decisions_total[15m])), 1)) < 0.98
+        for: 15m
+        labels:
+          severity: page
+          service: policy-receipts
+        annotations:
+          summary: 'Receipt coverage below 98% of policy decisions'
+          description: |
+            Receipt writes fell below 98% of policy decisions over 15m. Investigate provenance pipeline and backlog.
+          runbook_url: https://docs.intelgraph.com/runbooks/policy-receipts
+          dashboard_url: https://grafana.example.com/d/policy-receipts
+
+      - alert: PolicyReceiptBacklogGrowing
+        expr: clamp_min(sum(increase(policy_decisions_total[30m])) - sum(increase(provenance_writes_total[30m])), 0) > 50
+        for: 30m
+        labels:
+          severity: warn
+          service: policy-receipts
+        annotations:
+          summary: 'More than 50 decision receipts missing over 30m'
+          description: |
+            Receipt backlog is growing ({{ $value | printf "%.0f" }} decisions without receipts in 30m). Check ledger ingestion and retry queues.
+          runbook_url: https://docs.intelgraph.com/runbooks/policy-receipts
+          dashboard_url: https://grafana.example.com/d/policy-receipts

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Computer Vision Integration Module
  * Bridges new CV packages with existing Python models

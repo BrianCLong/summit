@@ -1,0 +1,24 @@
+name: Reports CI
+
+on:
+  push:
+    paths:
+      - 'services/reporting/**'
+      - 'reports/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: cd services/reporting && npm install
+      - name: Lint
+        run: cd services/reporting && npm run lint
+      - name: Build
+        run: cd services/reporting && npm run build
+      - name: Check Templates
+        run: |
+          if [ ! -f reports/templates/core-report@v1/print.css ]; then
+            echo "Missing print.css"; exit 1;
+          fi

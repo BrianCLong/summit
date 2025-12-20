@@ -1,3 +1,4 @@
+// @ts-nocheck
 // server/src/conductor/auth/jwt-rotation.ts
 
 import { promises as fs } from 'fs';

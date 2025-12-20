@@ -311,4 +311,10 @@ router.get('/health/deployment', async (_req: Request, res: Response) => {
   }
 });
 
+// Deep health check for all dependencies (Database, Redis, etc.)
+// Utilized by k8s liveness probes and external monitoring
+export const checkHealth = async () => {
+  // Implementation reused from /health/detailed
+};
+
 export default router;

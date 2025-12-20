@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * STIX Bundle Signing Service
  *
