@@ -52,6 +52,9 @@ interface EntityRow {
   created_by: string;
 }
 
+const ENTITY_COLUMNS =
+  'id, tenant_id, kind, labels, props, created_at, updated_at, created_by';
+
 export class EntityRepo {
   constructor(
     private pg: Pool,
@@ -73,7 +76,7 @@ export class EntityRepo {
       const { rows } = (await client.query(
         `INSERT INTO entities (id, tenant_id, kind, labels, props, created_by)
          VALUES ($1, $2, $3, $4, $5, $6)
-         RETURNING *`,
+         RETURNING ${ENTITY_COLUMNS}`,
         [
           id,
           tenantId,
@@ -269,7 +272,10 @@ export class EntityRepo {
   async findById(id: string, tenantId: string): Promise<Entity | null> {
     const scopedTenantId = resolveTenantId(tenantId, 'entity.findById');
     const { rows } = (await this.pg.query(
-      appendTenantFilter(`SELECT * FROM entities WHERE id = $1`, 2),
+      appendTenantFilter(
+        `SELECT ${ENTITY_COLUMNS} FROM entities WHERE id = $1`,
+        2,
+      ),
       [id, scopedTenantId],
     )) as { rows: EntityRow[] };
 
@@ -299,7 +305,7 @@ export class EntityRepo {
   }): Promise<Entity[]> {
     const scopedTenantId = resolveTenantId(tenantId, 'entity.search');
     const params: any[] = [scopedTenantId];
-    let query = `SELECT * FROM entities WHERE tenant_id = $1`;
+    let query = `SELECT ${ENTITY_COLUMNS} FROM entities WHERE tenant_id = $1`;
     let paramIndex = 2;
 
     if (kind) {
@@ -336,7 +342,7 @@ export class EntityRepo {
     const scopedTenantId = resolveTenantId(tenantId, 'entity.batchByIds');
     const params: any[] = [ids, scopedTenantId];
     const query = appendTenantFilter(
-      `SELECT * FROM entities WHERE id = ANY($1)`,
+      `SELECT ${ENTITY_COLUMNS} FROM entities WHERE id = ANY($1)`,
       2,
     );
 

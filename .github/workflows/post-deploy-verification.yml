@@ -9,25 +9,14 @@ on:
       - Manual Deploy
     types:
       - completed
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Environment to verify (dev/staging/production)'
-        required: true
-        default: dev
-      drill_id:
-        description: 'Optional drill identifier for evidence storage'
-        required: false
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
 
 jobs:
   smoke-and-load:
-    if: >
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -43,26 +32,15 @@ jobs:
 
       - name: Resolve deployment target
         id: target
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          WORKFLOW_NAME: ${{ github.event.workflow_run.name || '' }}
-          WORKFLOW_INPUT_ENV: ${{ github.event.workflow_run.inputs.environment || '' }}
-          DISPATCH_ENV: ${{ inputs.environment || '' }}
         run: |
+          workflow="${{ github.event.workflow_run.name }}"
           target="dev"
-          if [ "$EVENT_NAME" = "workflow_run" ]; then
-            workflow="$WORKFLOW_NAME"
-            if [ "$workflow" = "Deploy to Production" ]; then
-              target="prod"
-            elif [ "$workflow" = "Deploy to Staging" ]; then
-              target="staging"
-            elif [ "$workflow" = "Manual Deploy" ] && [ -n "$WORKFLOW_INPUT_ENV" ]; then
-              target="$WORKFLOW_INPUT_ENV"
-            fi
-          else
-            if [ -n "$DISPATCH_ENV" ]; then
-              target="$DISPATCH_ENV"
-            fi
+          if [ "$workflow" = "Deploy to Production" ]; then
+            target="prod"
+          elif [ "$workflow" = "Deploy to Staging" ]; then
+            target="staging"
+          elif [ "$workflow" = "Manual Deploy" ] && [ -n "${{ github.event.workflow_run.inputs.environment }}" ]; then
+            target="${{ github.event.workflow_run.inputs.environment }}"
           fi
           echo "target=$target" >> $GITHUB_OUTPUT
 
@@ -86,6 +64,11 @@ jobs:
           echo "api_url=$api" >> $GITHUB_OUTPUT
           echo "gql_url=${api%/}/graphql" >> $GITHUB_OUTPUT
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Setup k6
         uses: grafana/setup-k6-action@v1
 
@@ -106,49 +89,138 @@ jobs:
           COS_GQL_URL: ${{ steps.endpoints.outputs.gql_url }}
         run: k6 run tests/load/graphql_read_p95.js
 
+      - name: Install synthetic dependencies
+        run: npm install axios ts-node typescript --no-save
+
+      - name: Run synthetic journey
+        id: synthetic
+        continue-on-error: true
+        env:
+          API_URL: ${{ steps.endpoints.outputs.api_url }}
+          SYNTHETIC_USER_EMAIL: ${{ secrets.SYNTHETIC_USER_EMAIL }}
+          SYNTHETIC_USER_PASSWORD: ${{ secrets.SYNTHETIC_USER_PASSWORD }}
+        run: npx ts-node scripts/synthetic/run-journey.ts
+
       - name: Summarize outcomes
         id: summary
         run: |
           smoke="${{ steps.smoke.outcome }}"
           load="${{ steps.load.outcome }}"
+          synthetic="${{ steps.synthetic.outcome }}"
           status="success"
-          if [ "$smoke" != "success" ] || [ "$load" != "success" ]; then
+          if [ "$smoke" != "success" ] || [ "$load" != "success" ] || [ "$synthetic" != "success" ]; then
             status="failure"
           fi
           echo "smoke=$smoke" >> $GITHUB_OUTPUT
           echo "load=$load" >> $GITHUB_OUTPUT
+          echo "synthetic=$synthetic" >> $GITHUB_OUTPUT
           echo "status=$status" >> $GITHUB_OUTPUT
 
-      - name: Persist verification evidence
+      - name: Build deploy verification report
         if: always()
-        env:
-          DRILL_ID: ${{ inputs.drill_id || '' }}
-          TARGET_ENV: ${{ steps.target.outputs.target }}
-          EVENT_NAME: ${{ github.event_name }}
-          WORKFLOW_NAME: ${{ github.event.workflow_run.name || '' }}
         run: |
-          run_url="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          cat > verification-summary.json <<EOF
-          {
-            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-            "target": "${TARGET_ENV}",
-            "smoke": "${{ steps.summary.outputs.smoke }}",
-            "load": "${{ steps.summary.outputs.load }}",
-            "status": "${{ steps.summary.outputs.status }}",
-            "trigger": "${EVENT_NAME}",
-            "source_workflow": "${WORKFLOW_NAME}",
-            "drill_id": "${DRILL_ID}",
-            "run_url": "${run_url}"
-          }
-          EOF
+          node - <<'NODE'
+          const fs = require('fs');
 
-      - name: Upload verification evidence
+          const readJson = (path) => {
+            try { return JSON.parse(fs.readFileSync(path, 'utf8')); }
+            catch (_) { return null; }
+          };
+
+          const report = {
+            target: process.env.TARGET_ENV,
+            endpoints: {
+              ui: process.env.UI_URL,
+              api: process.env.API_URL,
+              graphql: process.env.GQL_URL,
+            },
+            outcomes: {
+              smoke: process.env.SMOKE_OUTCOME,
+              load: process.env.LOAD_OUTCOME,
+              synthetic: process.env.SYNTH_OUTCOME,
+            },
+            synthetic: {
+              results: readJson('synthetic-results.json'),
+              latency: readJson('synthetic-latency-histogram.json'),
+            },
+            workflow_run: {
+              id: process.env.WORKFLOW_RUN_ID,
+              name: process.env.WORKFLOW_NAME,
+              url: process.env.WORKFLOW_URL,
+              event: process.env.WORKFLOW_EVENT,
+            },
+            generated_at: new Date().toISOString(),
+          };
+
+          fs.writeFileSync('deploy_verification.json', JSON.stringify(report, null, 2));
+          NODE
+        env:
+          TARGET_ENV: ${{ steps.target.outputs.target }}
+          UI_URL: ${{ steps.endpoints.outputs.ui_url }}
+          API_URL: ${{ steps.endpoints.outputs.api_url }}
+          GQL_URL: ${{ steps.endpoints.outputs.gql_url }}
+          SMOKE_OUTCOME: ${{ steps.smoke.outcome }}
+          LOAD_OUTCOME: ${{ steps.load.outcome }}
+          SYNTH_OUTCOME: ${{ steps.synthetic.outcome }}
+          WORKFLOW_RUN_ID: ${{ github.event.workflow_run.id }}
+          WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
+          WORKFLOW_URL: ${{ github.event.workflow_run.html_url }}
+          WORKFLOW_EVENT: ${{ github.event.workflow_run.event }}
+
+      - name: Upload deploy verification artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: post-deploy-verification-${{ github.run_id }}
-          path: verification-summary.json
-          retention-days: 60
+          name: deploy-verification-${{ steps.target.outputs.target }}-${{ github.run_id }}
+          path: |
+            deploy_verification.json
+            synthetic-results.json
+            synthetic-latency-histogram.json
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Locate release for deployment tag
+        if: always()
+        id: release_tag
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const headSha = '${{ github.event.workflow_run.head_sha }}';
+            const { owner, repo } = context.repo;
+
+            const tags = await github.paginate(github.rest.git.listMatchingRefs, {
+              owner,
+              repo,
+              ref: 'tags/',
+            });
+            const match = tags.find((tag) => tag.object?.sha === headSha);
+            if (!match) {
+              core.info('No tag found for head SHA; skipping release attachment.');
+              return;
+            }
+            const tagName = match.ref.replace('refs/tags/', '');
+            let release;
+            try {
+              release = await github.rest.repos.getReleaseByTag({ owner, repo, tag: tagName });
+            } catch (error) {
+              core.info(`No release exists for tag ${tagName}; skipping attachment.`);
+              return;
+            }
+
+            core.setOutput('tag', tagName);
+            core.setOutput('upload_url', release.data.upload_url);
+
+      - name: Attach verification to release
+        if: steps.release_tag.outputs.upload_url
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.release_tag.outputs.upload_url }}
+          asset_path: ./deploy_verification.json
+          asset_name: deploy_verification.json
+          asset_content_type: application/json
 
       - name: Comment results on PR
         if: always() && github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.pull_requests[0]
@@ -163,6 +235,7 @@ jobs:
             }
             const smoke = '${{ steps.summary.outputs.smoke }}';
             const load = '${{ steps.summary.outputs.load }}';
+            const synthetic = '${{ steps.summary.outputs.synthetic }}';
             const target = '${{ steps.target.outputs.target }}';
             const icon = (value) => (value === 'success' ? '✅' : '❌');
             const runUrl = context.payload.workflow_run.html_url;
@@ -170,6 +243,7 @@ jobs:
               `Post-deploy verification for **${target}**`,
               `- Smoke: ${icon(smoke)} (${smoke})`,
               `- Load: ${icon(load)} (${load})`,
+              `- Synthetic: ${icon(synthetic)} (${synthetic})`,
               `- Run: ${runUrl}`,
             ].join('\n');
             await github.rest.issues.createComment({
@@ -182,5 +256,5 @@ jobs:
       - name: Fail if checks failed
         if: steps.summary.outputs.status == 'failure'
         run: |
-          echo "Smoke/load verification failed." >&2
+          echo "Post-deploy verification failed (smoke/load/synthetic)." >&2
           exit 1

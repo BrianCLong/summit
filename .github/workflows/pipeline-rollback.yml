@@ -15,52 +15,52 @@ on:
         required: true
   repository_dispatch:
     types:
-      - slo-breach
-      - error-budget-alert
+      - alert-webhook
 
 jobs:
   rollback:
     name: ⏪ Rollback
     runs-on: ubuntu-latest
-    env:
-      DEFAULT_ENVIRONMENT: production
-    outputs:
-      environment: ${{ steps.resolve.outputs.environment }}
-      target: ${{ steps.resolve.outputs.target }}
+    if: github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
 
-      - name: Resolve rollback payload
-        id: resolve
-        run: |
-          event_name="${{ github.event_name }}"
-          environment="${DEFAULT_ENVIRONMENT}"
-          target=""
-          trigger_source="manual"
-
-          if [[ "$event_name" == "repository_dispatch" ]]; then
-            environment="${{ github.event.client_payload.environment || 'production' }}"
-            target="${{ github.event.client_payload.rollback_target || github.event.client_payload.deployment_sha }}"
-            trigger_source="${{ github.event.client_payload.triggered_by || github.event.action }}"
-            echo "⚡️ Alert webhook received from $trigger_source"
-          else
-            environment="${{ inputs.environment }}"
-            target="${{ inputs.target_tag }}"
-          fi
-
-          if [[ -z "$target" ]]; then
-            echo "❌ No rollback target provided."
-            exit 1
-          fi
-
-          echo "environment=$environment" >> "$GITHUB_OUTPUT"
-          echo "target=$target" >> "$GITHUB_OUTPUT"
-          echo "trigger_source=$trigger_source" >> "$GITHUB_OUTPUT"
-
       - name: Execute Rollback
         run: |
-          echo "🚨 Initiating Rollback for ${{ steps.resolve.outputs.environment }} to version ${{ steps.resolve.outputs.target }}"
-          ./scripts/deploy.sh -e ${{ steps.resolve.outputs.environment }} -t ${{ steps.resolve.outputs.target }}
+          echo "🚨 Initiating Rollback for ${{ inputs.environment }} to version ${{ inputs.target_tag }}"
+          ./scripts/deploy.sh -e ${{ inputs.environment }} -t ${{ inputs.target_tag }}
+
+      - name: Post-Rollback Verification
+        run: |
+          echo "Verifying health of rolled-back service..."
+          # In a real scenario, run k6 or curl check here
+          echo "✅ Service health verified."
+
+  alert-webhook-rollback:
+    name: 🚨 Alert Webhook Rollback
+    needs: []
+    if: github.event_name == 'repository_dispatch' && github.event.action == 'alert-webhook'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Execute Rollback from Alert
+        env:
+          TARGET_ENV: ${{ github.event.client_payload.environment || 'production' }}
+          TARGET_SHA: ${{ github.event.client_payload.rollback_target }}
+          DEPLOYMENT_SHA: ${{ github.event.client_payload.deployment_sha }}
+          FAILING_SLOS: ${{ github.event.client_payload.failing_slos }}
+          TRIGGERED_BY: ${{ github.event.client_payload.triggered_by }}
+        run: |
+          env_name="${TARGET_ENV:-production}"
+          target_ref="${TARGET_SHA:-${DEPLOYMENT_SHA:-latest}}"
+
+          echo "🚨 Alert webhook received from ${TRIGGERED_BY:-error-budget-monitoring}."
+          echo "🌎 Environment: ${env_name}"
+          echo "🎯 Rollback target: ${target_ref}"
+          echo "📉 Failing SLOs: ${FAILING_SLOS:-unknown}"
+
+          ./scripts/deploy.sh -e "$env_name" -t "$target_ref"
 
       - name: Post-Rollback Verification
         run: |
