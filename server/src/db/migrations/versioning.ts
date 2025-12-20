@@ -4,7 +4,11 @@ import fs from 'fs';
 import path from 'path';
 import { Pool, PoolClient } from 'pg';
 import { spawn as childSpawn, SpawnOptions } from 'child_process';
-import { buildDropIndexSql } from './indexing.js';
+import { fileURLToPath } from 'url';
+import client from 'prom-client';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export interface MigrationManagerOptions {
   migrationsDir?: string;
@@ -15,7 +19,6 @@ export interface MigrationManagerOptions {
   spawn?: typeof childSpawn;
   migrationsTable?: string;
   seedsTable?: string;
-  indexHistoryTable?: string;
 }
 
 interface ManagedMigration {
@@ -39,16 +42,11 @@ export interface MigrationStatus {
   seedsPending: string[];
 }
 
-const resolveDefaultPath = (relative: string) => {
-  const directPath = path.resolve(process.cwd(), relative);
-  if (fs.existsSync(directPath)) {
-    return directPath;
-  }
-  return path.resolve(process.cwd(), 'server', relative);
-};
-
-const DEFAULT_MIGRATIONS_DIR = resolveDefaultPath('db/managed-migrations');
-const DEFAULT_SEEDS_DIR = resolveDefaultPath('db/managed-seeds');
+const DEFAULT_MIGRATIONS_DIR = path.resolve(
+  __dirname,
+  '../../../db/managed-migrations',
+);
+const DEFAULT_SEEDS_DIR = path.resolve(__dirname, '../../../db/managed-seeds');
 
 export class MigrationManager {
   private migrationsDir: string;
@@ -58,19 +56,39 @@ export class MigrationManager {
   private allowBreakingChanges: boolean;
   private migrationsTable: string;
   private seedsTable: string;
-  private indexHistoryTable: string;
+
+  // Metrics
+  private migrationDurationHistogram: client.Histogram;
+  private migrationTotalCounter: client.Counter;
+  private migrationStatusGauge: client.Gauge;
 
   constructor(options: MigrationManagerOptions = {}) {
     this.migrationsDir = options.migrationsDir ?? DEFAULT_MIGRATIONS_DIR;
     this.seedsDir = options.seedsDir ?? DEFAULT_SEEDS_DIR;
+
+    // Initialize metrics
+    this.migrationDurationHistogram = new client.Histogram({
+      name: 'db_migration_duration_seconds',
+      help: 'Duration of database migrations in seconds',
+      labelNames: ['name', 'type'], // type: 'up' or 'down'
+    });
+
+    this.migrationTotalCounter = new client.Counter({
+      name: 'db_migration_total',
+      help: 'Total number of migrations applied',
+      labelNames: ['status'], // 'success', 'failure'
+    });
+
+    this.migrationStatusGauge = new client.Gauge({
+      name: 'db_migration_status',
+      help: 'Status of the last migration run (1 = success, 0 = failure)',
+    });
     this.spawn = options.spawn ?? childSpawn;
     this.allowBreakingChanges =
       options.allowBreakingChanges ??
       process.env.ALLOW_BREAKING_MIGRATIONS === 'true';
     this.migrationsTable = options.migrationsTable ?? 'migration_history';
     this.seedsTable = options.seedsTable ?? 'seed_history';
-    this.indexHistoryTable =
-      options.indexHistoryTable ?? 'index_build_history';
 
     const connectionString =
       options.connectionString ||
@@ -92,16 +110,42 @@ export class MigrationManager {
 
   static validateOnlineSafety(sql: string) {
     const riskyPatterns = [
-      /DROP\s+TABLE/i,
-      /DROP\s+COLUMN/i,
-      /ALTER\s+TABLE\s+\w+\s+RENAME/i,
-      /ALTER\s+TABLE\s+\w+\s+ALTER\s+COLUMN\s+\w+\s+TYPE/i,
+      {
+        pattern: /DROP\s+TABLE/i,
+        message: 'DROP TABLE is not online-safe. Use Expand-Contract pattern.',
+      },
+      {
+        pattern: /DROP\s+COLUMN/i,
+        message: 'DROP COLUMN is not online-safe. Use Expand-Contract pattern.',
+      },
+      {
+        pattern: /ALTER\s+TABLE\s+\w+\s+RENAME/i,
+        message: 'Renaming tables/columns causes downtime. Use views or dual-write.',
+      },
+      {
+        pattern: /ALTER\s+TABLE\s+\w+\s+ALTER\s+COLUMN\s+\w+\s+TYPE/i,
+        message: 'Changing column type locks the table. Use a new column + backfill.',
+      },
+      {
+        pattern: /ADD\s+COLUMN\s+.*\s+NOT\s+NULL(?!\s+DEFAULT)/i,
+        message: 'Adding NOT NULL column without DEFAULT locks the table. Add as nullable first or with DEFAULT.',
+      },
+      {
+        pattern: /CREATE\s+INDEX\s+(?!CONCURRENTLY)/i,
+        message: 'CREATE INDEX locks the table. Use CREATE INDEX CONCURRENTLY.',
+      },
     ];
 
-    if (riskyPatterns.some((pattern) => pattern.test(sql))) {
-      throw new Error(
-        'Migration contains potentially breaking change. Use additive/online-safe patterns or set ALLOW_BREAKING_MIGRATIONS=true to bypass.',
-      );
+    for (const check of riskyPatterns) {
+      if (check.pattern.test(sql)) {
+        if (sql.includes('-- SAFE:')) {
+            // Allow bypassing with a comment
+            continue;
+        }
+        throw new Error(
+          `Migration safety check failed: ${check.message} (Set ALLOW_BREAKING_MIGRATIONS=true to bypass)`,
+        );
+      }
     }
   }
 
@@ -135,20 +179,6 @@ export class MigrationManager {
         execution_ms INTEGER
       )
     `);
-
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS ${this.indexHistoryTable} (
-        index_name TEXT PRIMARY KEY,
-        table_name TEXT,
-        predicate TEXT,
-        concurrently BOOLEAN DEFAULT false,
-        status TEXT NOT NULL,
-        attempts INTEGER NOT NULL DEFAULT 0,
-        last_error TEXT,
-        last_started_at TIMESTAMPTZ DEFAULT now(),
-        completed_at TIMESTAMPTZ
-      )
-    `);
   }
 
   private hashStatements(...chunks: string[]) {
@@ -157,7 +187,7 @@ export class MigrationManager {
     return hash.digest('hex');
   }
 
-  private readMigrationFiles(): ManagedMigration[] {
+  public readMigrationFiles(): ManagedMigration[] {
     if (!fs.existsSync(this.migrationsDir)) {
       return [];
     }
@@ -219,186 +249,6 @@ export class MigrationManager {
     await client.query(sql);
   }
 
-  private requiresConcurrentExecution(sql: string) {
-    return /CREATE\s+(UNIQUE\s+)?INDEX\s+CONCURRENTLY/i.test(sql) ||
-      /DROP\s+INDEX\s+CONCURRENTLY/i.test(sql);
-  }
-
-  private isConcurrentTransactionError(error: unknown) {
-    const message = ((error as Error)?.message ?? '').toLowerCase();
-    return message.includes('concurrently') && message.includes('transaction');
-  }
-
-  private splitSqlStatements(sql: string) {
-    return sql
-      .split(';')
-      .map((statement) => statement.trim())
-      .filter(Boolean);
-  }
-
-  private parseIndexStatement(statement: string) {
-    const match = statement.match(
-      /CREATE\s+(?:UNIQUE\s+)?INDEX\s+(?:CONCURRENTLY\s+)?(?:IF\s+NOT\s+EXISTS\s+)?("?[\w.-]+"?)\s+ON\s+("?[\w.-]+"?)(?:\s*\([^)]*\))?(?:\s+WHERE\s+(.+))?/is,
-    );
-
-    if (!match) return null;
-
-    return {
-      indexName: match[1]?.replace(/"/g, ''),
-      tableName: match[2]?.replace(/"/g, ''),
-      predicate: match[3]?.trim(),
-      concurrently: /CONCURRENTLY/i.test(statement),
-    };
-  }
-
-  private async recordIndexStatus(
-    client: PoolClient,
-    indexName: string,
-    tableName: string | undefined,
-    status: 'building' | 'succeeded' | 'failed',
-    concurrently: boolean,
-    predicate?: string,
-    error?: string,
-  ) {
-    const completedAt = status === 'succeeded' ? 'now()' : 'NULL';
-    await client.query(
-      `INSERT INTO ${this.indexHistoryTable} (index_name, table_name, predicate, concurrently, status, attempts, last_error, last_started_at, completed_at)
-       VALUES ($1, $2, $3, $4, $5, 1, $6, now(), ${completedAt})
-       ON CONFLICT (index_name) DO UPDATE SET
-         table_name = EXCLUDED.table_name,
-         predicate = EXCLUDED.predicate,
-         concurrently = EXCLUDED.concurrently,
-         status = EXCLUDED.status,
-         attempts = ${this.indexHistoryTable}.attempts + 1,
-         last_error = EXCLUDED.last_error,
-         last_started_at = EXCLUDED.last_started_at,
-         completed_at = CASE WHEN EXCLUDED.status = 'succeeded' THEN EXCLUDED.completed_at ELSE NULL END`,
-      [indexName, tableName, predicate ?? null, concurrently, status, error ?? null],
-    );
-  }
-
-  private async dropIndexSafely(
-    client: PoolClient,
-    indexName: string,
-    concurrently?: boolean,
-  ) {
-    const dropStatement = buildDropIndexSql({ indexName, concurrently });
-    try {
-      await client.query(dropStatement.sql);
-    } catch {
-      // Best-effort cleanup; swallow errors to avoid masking the original failure.
-    }
-  }
-
-  private async applySessionTimeouts(client: PoolClient) {
-    await client.query("SET lock_timeout = '5s'");
-    await client.query("SET statement_timeout = '5s'");
-  }
-
-  private async resetSessionTimeouts(client: PoolClient) {
-    await client.query('RESET lock_timeout');
-    await client.query('RESET statement_timeout');
-  }
-
-  private async runNonTransactionalMigration(client: PoolClient, sql: string) {
-    const statements = this.splitSqlStatements(sql);
-    await this.applySessionTimeouts(client);
-
-    try {
-      for (const statement of statements) {
-        const indexMeta = this.parseIndexStatement(statement);
-        if (indexMeta) {
-          await this.recordIndexStatus(
-            client,
-            indexMeta.indexName,
-            indexMeta.tableName,
-            'building',
-            indexMeta.concurrently,
-            indexMeta.predicate,
-          );
-        }
-
-        try {
-          await client.query(statement);
-          if (indexMeta) {
-            await this.recordIndexStatus(
-              client,
-              indexMeta.indexName,
-              indexMeta.tableName,
-              'succeeded',
-              indexMeta.concurrently,
-              indexMeta.predicate,
-            );
-          }
-        } catch (error) {
-          if (indexMeta) {
-            const message = (error as Error)?.message ?? 'unknown error';
-            await this.recordIndexStatus(
-              client,
-              indexMeta.indexName,
-              indexMeta.tableName,
-              'failed',
-              indexMeta.concurrently,
-              indexMeta.predicate,
-              message,
-            );
-            await this.dropIndexSafely(
-              client,
-              indexMeta.indexName,
-              indexMeta.concurrently,
-            );
-
-            // Retry once for transient failures
-            try {
-              await this.recordIndexStatus(
-                client,
-                indexMeta.indexName,
-                indexMeta.tableName,
-                'building',
-                indexMeta.concurrently,
-                indexMeta.predicate,
-              );
-              await client.query(statement);
-              await this.recordIndexStatus(
-                client,
-                indexMeta.indexName,
-                indexMeta.tableName,
-                'succeeded',
-                indexMeta.concurrently,
-                indexMeta.predicate,
-              );
-              continue;
-            } catch (retryError) {
-              const retryMessage = (retryError as Error)?.message ?? 'unknown error';
-              await this.recordIndexStatus(
-                client,
-                indexMeta.indexName,
-                indexMeta.tableName,
-                'failed',
-                indexMeta.concurrently,
-                indexMeta.predicate,
-                retryMessage,
-              );
-              await this.dropIndexSafely(
-                client,
-                indexMeta.indexName,
-                indexMeta.concurrently,
-              );
-            }
-          }
-
-          throw error;
-        }
-      }
-    } finally {
-      await this.resetSessionTimeouts(client);
-    }
-  }
-
-  private stripConcurrentClauses(sql: string) {
-    return sql.replace(/\s+CONCURRENTLY/gi, '');
-  }
-
   async migrate(options: { dryRun?: boolean; to?: string } = {}) {
     const migrations = this.readMigrationFiles();
 
@@ -422,38 +272,39 @@ export class MigrationManager {
         }
 
         const start = Date.now();
-        const shouldRunOutsideTransaction = this.requiresConcurrentExecution(
-          migration.upSql,
-        );
+        const timer = this.migrationDurationHistogram.startTimer({
+          name: migration.name,
+          type: 'up',
+        });
 
-        const insertHistory = async () => {
+        const useTransaction = !migration.upSql.includes('-- NO_TRANSACTION');
+
+        if (useTransaction) {
+          await client.query('BEGIN');
+        }
+
+        try {
+          await this.runSqlSafely(client, migration.upSql);
           await client.query(
             `INSERT INTO ${this.migrationsTable} (name, checksum, execution_ms, zero_downtime_safe)
              VALUES ($1, $2, $3, $4)
              ON CONFLICT (name) DO NOTHING`,
             [migration.name, migration.checksum, Date.now() - start, true],
           );
-        };
 
-        if (shouldRunOutsideTransaction) {
-          await this.runNonTransactionalMigration(client, migration.upSql);
-          await insertHistory();
-          continue;
-        }
-
-        await client.query('BEGIN');
-
-        try {
-          await this.runSqlSafely(client, migration.upSql);
-          await insertHistory();
-          await client.query('COMMIT');
-        } catch (error) {
-          await client.query('ROLLBACK');
-          if (this.isConcurrentTransactionError(error)) {
-            await this.runNonTransactionalMigration(client, migration.upSql);
-            await insertHistory();
-            continue;
+          if (useTransaction) {
+            await client.query('COMMIT');
           }
+
+          timer();
+          this.migrationTotalCounter.inc({ status: 'success' });
+          this.migrationStatusGauge.set(1);
+        } catch (error) {
+          if (useTransaction) {
+            await client.query('ROLLBACK');
+          }
+          this.migrationTotalCounter.inc({ status: 'failure' });
+          this.migrationStatusGauge.set(0);
           throw error;
         }
       }
@@ -483,6 +334,10 @@ export class MigrationManager {
           );
         }
 
+        const timer = this.migrationDurationHistogram.startTimer({
+          name: migration.name,
+          type: 'down',
+        });
         await client.query('BEGIN');
         try {
           await this.runSqlSafely(client, migration.downSql);
@@ -491,12 +346,36 @@ export class MigrationManager {
             [migration.name],
           );
           await client.query('COMMIT');
+          timer();
         } catch (error) {
           await client.query('ROLLBACK');
           throw error;
         }
       }
     });
+  }
+
+  async dumpSchema(outputPath?: string) {
+    const connectionString =
+      process.env.POSTGRES_URL || process.env.DATABASE_URL || undefined;
+    if (!connectionString) {
+      throw new Error('POSTGRES_URL or DATABASE_URL is required to dump schema');
+    }
+
+    const destination =
+      outputPath || path.resolve(this.migrationsDir, '../schema.sql');
+
+    // pg_dump --schema-only --no-owner --no-privileges
+    await this.runCommand('pg_dump', [
+      '--schema-only',
+      '--no-owner',
+      '--no-privileges',
+      '--file',
+      destination,
+      connectionString,
+    ]);
+
+    return destination;
   }
 
   async seed(options: { force?: boolean } = {}) {
@@ -570,12 +449,7 @@ export class MigrationManager {
           if (!this.allowBreakingChanges) {
             MigrationManager.validateOnlineSafety(migration.upSql);
           }
-
-          const sqlToRun = this.requiresConcurrentExecution(migration.upSql)
-            ? this.stripConcurrentClauses(migration.upSql)
-            : migration.upSql;
-
-          await this.runSqlSafely(client, sqlToRun);
+          await this.runSqlSafely(client, migration.upSql);
         }
       } finally {
         await client.query('ROLLBACK');

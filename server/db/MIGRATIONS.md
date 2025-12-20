@@ -38,16 +38,6 @@ npm run db:seed:managed
 - Each migration is executed with `lock_timeout` and `statement_timeout` to avoid long blocking DDL.
 - Use additive changes (create table/column, backfill with defaults) for smooth deploys.
 
-## Concurrent + partial index helper
-- Feature flag: set `INDEX_CONCURRENT=1` in environments that support concurrent builds.
-- Use `buildCreateIndexSql`/`buildDropIndexSql` from `src/db/migrations/indexing.ts` to generate SQL for managed migrations, including partial filters for tenant/case scopes or active-only rows.
-- The migration runner automatically retries index builds, tracks status in `index_build_history`, and falls back to non-transactional execution when PostgreSQL rejects `CREATE INDEX CONCURRENTLY` inside a transaction.
-- Avoid concurrent builds when:
-  - The table is small (regular builds finish faster and avoid extra overhead).
-  - You can tolerate a brief lock during deploy (maintenance windows).
-  - You are in a migration bundle that must stay transactional end-to-end (concurrent indexes require autocommit).
-- If an index build fails, the runner logs the failure, drops any invalid index, and exits cleanly so you can fix and re-run safely.
-
 ## Backup & restore
 ```bash
 # pg_dump prior to running migrations (default behavior of `db:migrate:managed`)
@@ -64,6 +54,12 @@ npm run db:restore -- --restore /tmp/db.sql
 # Validates SQL by running all migrations inside a single transaction and rolling back
 npm run db:migrate:test
 ```
+
+## Online migration toolkit (expand/contract helpers)
+- Helpers live in `src/db/online-migrations` (expand/contract phases, dual-writes, backfills, parity checks).
+- Managed migration `202604150001_online_migration_toolkit.up.sql` seeds the tracking tables and adds the example column used by `runExampleDisplayNameMigration`.
+- Templates and docs: `server/templates/online-migration/expand-contract.template.ts` and `docs/online-migration-toolkit.md`.
+- Metrics are exposed via the `migrationMetricsRegistry` Prometheus registry (`online_migration_*` series).
 
 ## Adding migrations
 1. Add paired files under `db/managed-migrations` following `YYYYMMDDHHMM_name.up.sql`/`down.sql`.

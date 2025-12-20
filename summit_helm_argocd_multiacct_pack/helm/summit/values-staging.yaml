@@ -1,7 +1,34 @@
 replicaCount: 2
-image:
-  tag: latest
 
-provenance:
-  # Base64-encoded Ed25519 public keys used for verifying manifest signatures
-  publicKeys: []
+namespace:
+  name: summit-staging
+  labels:
+    istio-injection: enabled
+
+image:
+  tag: staging
+
+serviceAccount:
+  name: summit-staging-app
+
+rbac:
+  ops:
+    serviceAccountName: summit-staging-ops
+  ci:
+    serviceAccountName: summit-staging-ci
+
+ingress:
+  hosts:
+    - host: summit-staging.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          servicePort: 80
+  tls:
+    secretName: summit-staging-tls
+    clusterIssuer: letsencrypt-staging
+    dnsNames:
+      - summit-staging.example.com
+
+auditLogging:
+  retentionDays: 14

@@ -16,6 +16,12 @@ data:
     max_wal_senders = '20'
     max_replication_slots = '20'
     max_connections = '500'
+    work_mem = '256MB'
+    maintenance_work_mem = '2GB'
+    max_parallel_workers_per_gather = 4
+    max_parallel_workers = 8
+    max_parallel_maintenance_workers = 4
+    parallel_leader_participation = on
     hot_standby = 'on'
     wal_keep_size = '4096MB'
 ---

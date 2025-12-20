@@ -8,7 +8,7 @@ groups:
         annotations:
           {
             summary: 'Maestro availability < 99% (10m)',
-            runbook_url: 'https://…/prod-readiness-runbook.md',
+            runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md',
           }
 
       - alert: MaestroP95TTFBHigh
@@ -18,5 +18,5 @@ groups:
         annotations:
           {
             summary: 'p95 TTFB > 1.5s (10m)',
-            runbook_url: 'https://…/prod-readiness-runbook.md',
+            runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md',
           }
