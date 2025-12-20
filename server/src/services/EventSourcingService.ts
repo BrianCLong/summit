@@ -5,9 +5,10 @@
 
 import { Pool } from 'pg';
 import { randomUUID, createHash } from 'crypto';
-import logger from '../config/logger.js';
+import logger from '../config/logger';
 
 const serviceLogger = logger.child({ name: 'EventSourcingService' });
+type PoolClientLike = Awaited<ReturnType<Pool['connect']>>;
 
 // ============================================================================
 // TYPES
@@ -71,8 +72,21 @@ export interface AggregateSnapshot {
 
 export class EventSourcingService {
   private lastEventHash: string = '';
+  private readonly usePartitions: boolean;
+  private readonly primaryEventTable: string;
+  private readonly legacyEventTable = 'event_store';
+  private readonly monthsAhead: number;
+  private readonly retentionMonths: number;
 
   constructor(private pg: Pool) {
+    this.usePartitions = process.env.DB_PARTITIONS_V1 === '1';
+    this.monthsAhead =
+      Number(process.env.DB_PARTITION_MONTHS_AHEAD || 2) || 2;
+    this.retentionMonths =
+      Number(process.env.DB_PARTITION_RETENTION_MONTHS || 18) || 18;
+    this.primaryEventTable = this.usePartitions
+      ? 'event_store_partitioned'
+      : 'event_store';
     this.initializeLastEventHash();
   }
 
@@ -82,8 +96,11 @@ export class EventSourcingService {
   private async initializeLastEventHash(): Promise<void> {
     try {
       const { rows } = await this.pg.query(
-        `SELECT event_hash FROM event_store
-         ORDER BY event_timestamp DESC, created_at DESC LIMIT 1`,
+        this.buildEventSourceQuery(
+          '',
+          'ORDER BY event_timestamp DESC, created_at DESC',
+          'LIMIT 1',
+        ),
       );
       if (rows[0]?.event_hash) {
         this.lastEventHash = rows[0].event_hash;
@@ -99,13 +116,18 @@ export class EventSourcingService {
   /**
    * Append a new event to the event store
    */
-  async appendEvent(event: DomainEvent): Promise<StoredEvent> {
+  async appendEvent(
+    event: DomainEvent,
+    client?: PoolClientLike,
+    options?: { skipTransaction?: boolean },
+  ): Promise<StoredEvent> {
     const eventId = event.eventId || randomUUID();
 
     // Get current version for this aggregate
     const currentVersion = await this.getAggregateVersion(
       event.aggregateType,
       event.aggregateId,
+      client,
     );
     const newVersion = currentVersion + 1;
 
@@ -123,10 +145,47 @@ export class EventSourcingService {
 
     const previousEventHash = this.lastEventHash || null;
     this.lastEventHash = eventHash;
+    const managedClient = client || (this.usePartitions ? await this.pg.connect() : null);
+    const manageTx = this.usePartitions && !options?.skipTransaction;
+
+    const values = [
+      eventId,
+      event.eventType,
+      event.aggregateType,
+      event.aggregateId,
+      newVersion,
+      JSON.stringify(event.eventData),
+      JSON.stringify(event.eventMetadata || {}),
+      event.tenantId,
+      event.userId,
+      event.correlationId || null,
+      event.causationId || null,
+      event.legalBasis || null,
+      event.dataClassification || 'INTERNAL',
+      event.retentionPolicy || 'STANDARD',
+      event.ipAddress || null,
+      event.userAgent || null,
+      event.sessionId || null,
+      event.requestId || null,
+      eventHash,
+      previousEventHash,
+      event.eventTimestamp || new Date(),
+    ];
 
     try {
-      const { rows } = await this.pg.query(
-        `INSERT INTO event_store (
+      if (manageTx) {
+        await managedClient!.query('BEGIN');
+      }
+
+      if (this.usePartitions) {
+        await managedClient!.query(
+          'SELECT ensure_event_store_partition($1, $2, $3)',
+          [event.tenantId, this.monthsAhead, this.retentionMonths],
+        );
+      }
+
+      const { rows } = await (managedClient || this.pg).query(
+        `INSERT INTO ${this.primaryEventTable} (
           event_id, event_type, aggregate_type, aggregate_id, aggregate_version,
           event_data, event_metadata, tenant_id, user_id, correlation_id, causation_id,
           legal_basis, data_classification, retention_policy,
@@ -135,30 +194,27 @@ export class EventSourcingService {
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
         RETURNING *`,
-        [
-          eventId,
-          event.eventType,
-          event.aggregateType,
-          event.aggregateId,
-          newVersion,
-          JSON.stringify(event.eventData),
-          JSON.stringify(event.eventMetadata || {}),
-          event.tenantId,
-          event.userId,
-          event.correlationId || null,
-          event.causationId || null,
-          event.legalBasis || null,
-          event.dataClassification || 'INTERNAL',
-          event.retentionPolicy || 'STANDARD',
-          event.ipAddress || null,
-          event.userAgent || null,
-          event.sessionId || null,
-          event.requestId || null,
-          eventHash,
-          previousEventHash,
-          event.eventTimestamp || new Date(),
-        ],
+        values,
       );
+
+      if (this.usePartitions) {
+        await managedClient!.query(
+          `INSERT INTO ${this.legacyEventTable} (
+            event_id, event_type, aggregate_type, aggregate_id, aggregate_version,
+            event_data, event_metadata, tenant_id, user_id, correlation_id, causation_id,
+            legal_basis, data_classification, retention_policy,
+            ip_address, user_agent, session_id, request_id,
+            event_hash, previous_event_hash, event_timestamp
+          )
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
+          ON CONFLICT (event_id) DO NOTHING`,
+          values,
+        );
+      }
+
+      if (manageTx) {
+        await managedClient!.query('COMMIT');
+      }
 
       const storedEvent = this.mapEventRow(rows[0]);
 
@@ -169,11 +225,11 @@ export class EventSourcingService {
           aggregateType: event.aggregateType,
           aggregateId: event.aggregateId,
           aggregateVersion: newVersion,
+          partitioned: this.usePartitions,
         },
         'Event appended to event store',
       );
 
-      // Check if we should create a snapshot (every 100 events)
       if (newVersion % 100 === 0) {
         await this.createSnapshotIfNeeded(
           event.aggregateType,
@@ -184,6 +240,9 @@ export class EventSourcingService {
 
       return storedEvent;
     } catch (error) {
+      if (manageTx) {
+        await managedClient!.query('ROLLBACK');
+      }
       serviceLogger.error(
         {
           error: (error as Error).message,
@@ -192,6 +251,10 @@ export class EventSourcingService {
         'Failed to append event',
       );
       throw error;
+    } finally {
+      if (!client && managedClient) {
+        managedClient.release();
+      }
     }
   }
 
@@ -199,18 +262,24 @@ export class EventSourcingService {
    * Append multiple events in a transaction (atomic batch)
    */
   async appendEvents(events: DomainEvent[]): Promise<StoredEvent[]> {
-    const client = await this.pg.connect();
+    const client = this.usePartitions ? await this.pg.connect() : null;
     const storedEvents: StoredEvent[] = [];
 
     try {
-      await client.query('BEGIN');
+      if (client) {
+        await client.query('BEGIN');
+      }
 
       for (const event of events) {
-        const storedEvent = await this.appendEvent(event);
+        const storedEvent = await this.appendEvent(event, client || undefined, {
+          skipTransaction: true,
+        });
         storedEvents.push(storedEvent);
       }
 
-      await client.query('COMMIT');
+      if (client) {
+        await client.query('COMMIT');
+      }
 
       serviceLogger.info(
         { eventCount: events.length },
@@ -219,14 +288,18 @@ export class EventSourcingService {
 
       return storedEvents;
     } catch (error) {
-      await client.query('ROLLBACK');
+      if (client) {
+        await client.query('ROLLBACK');
+      }
       serviceLogger.error(
         { error: (error as Error).message },
         'Failed to append batch events',
       );
       throw error;
     } finally {
-      client.release();
+      if (client) {
+        client.release();
+      }
     }
   }
 
@@ -238,12 +311,16 @@ export class EventSourcingService {
     aggregateId: string,
     fromVersion: number = 0,
   ): Promise<StoredEvent[]> {
-    const { rows } = await this.pg.query(
-      `SELECT * FROM event_store
-       WHERE aggregate_type = $1 AND aggregate_id = $2 AND aggregate_version > $3
-       ORDER BY aggregate_version ASC`,
-      [aggregateType, aggregateId, fromVersion],
+    const sql = this.buildEventSourceQuery(
+      'aggregate_type = $1 AND aggregate_id = $2 AND aggregate_version > $3',
+      'ORDER BY aggregate_version ASC',
     );
+
+    const { rows } = await this.pg.query(sql, [
+      aggregateType,
+      aggregateId,
+      fromVersion,
+    ]);
 
     return rows.map(this.mapEventRow);
   }
@@ -254,11 +331,26 @@ export class EventSourcingService {
   async getAggregateVersion(
     aggregateType: string,
     aggregateId: string,
+    client?: PoolClientLike,
   ): Promise<number> {
-    const { rows } = await this.pg.query(
-      `SELECT COALESCE(MAX(aggregate_version), 0) as version
-       FROM event_store
-       WHERE aggregate_type = $1 AND aggregate_id = $2`,
+    if (!this.usePartitions) {
+      const { rows } = await this.pg.query(
+        `SELECT COALESCE(MAX(aggregate_version), 0) as version
+         FROM ${this.legacyEventTable}
+         WHERE aggregate_type = $1 AND aggregate_id = $2`,
+        [aggregateType, aggregateId],
+      );
+      return parseInt(rows[0]?.version || '0', 10);
+    }
+
+    const target = client || this.pg;
+    const { rows } = await target.query(
+      `
+        SELECT GREATEST(
+          COALESCE((SELECT MAX(aggregate_version) FROM ${this.primaryEventTable} WHERE aggregate_type = $1 AND aggregate_id = $2), 0),
+          COALESCE((SELECT MAX(aggregate_version) FROM ${this.legacyEventTable} WHERE aggregate_type = $1 AND aggregate_id = $2), 0)
+        ) AS version
+      `,
       [aggregateType, aggregateId],
     );
 
@@ -270,64 +362,71 @@ export class EventSourcingService {
    */
   async queryEvents(query: EventQuery): Promise<StoredEvent[]> {
     const params: any[] = [query.tenantId];
-    let sql = `SELECT * FROM event_store WHERE tenant_id = $1`;
+    let filter = `tenant_id = $1`;
     let paramIndex = 2;
 
     if (query.aggregateType) {
-      sql += ` AND aggregate_type = $${paramIndex}`;
+      filter += ` AND aggregate_type = $${paramIndex}`;
       params.push(query.aggregateType);
       paramIndex++;
     }
 
     if (query.aggregateId) {
-      sql += ` AND aggregate_id = $${paramIndex}`;
+      filter += ` AND aggregate_id = $${paramIndex}`;
       params.push(query.aggregateId);
       paramIndex++;
     }
 
     if (query.eventType) {
-      sql += ` AND event_type = $${paramIndex}`;
+      filter += ` AND event_type = $${paramIndex}`;
       params.push(query.eventType);
       paramIndex++;
     }
 
     if (query.userId) {
-      sql += ` AND user_id = $${paramIndex}`;
+      filter += ` AND user_id = $${paramIndex}`;
       params.push(query.userId);
       paramIndex++;
     }
 
     if (query.startTime) {
-      sql += ` AND event_timestamp >= $${paramIndex}`;
+      filter += ` AND event_timestamp >= $${paramIndex}`;
       params.push(query.startTime);
       paramIndex++;
     }
 
     if (query.endTime) {
-      sql += ` AND event_timestamp <= $${paramIndex}`;
+      filter += ` AND event_timestamp <= $${paramIndex}`;
       params.push(query.endTime);
       paramIndex++;
     }
 
     if (query.correlationId) {
-      sql += ` AND correlation_id = $${paramIndex}`;
+      filter += ` AND correlation_id = $${paramIndex}`;
       params.push(query.correlationId);
       paramIndex++;
     }
 
-    sql += ` ORDER BY event_timestamp DESC, aggregate_version DESC`;
+    const orderClause = `ORDER BY event_timestamp DESC, aggregate_version DESC`;
+    const limitClause: string[] = [];
 
     if (query.limit) {
-      sql += ` LIMIT $${paramIndex}`;
+      limitClause.push(`LIMIT $${paramIndex}`);
       params.push(Math.min(query.limit, 10000));
       paramIndex++;
     }
 
     if (query.offset) {
-      sql += ` OFFSET $${paramIndex}`;
+      limitClause.push(`OFFSET $${paramIndex}`);
       params.push(query.offset);
       paramIndex++;
     }
+
+    const sql = this.buildEventSourceQuery(
+      filter,
+      orderClause,
+      limitClause.join(' '),
+    );
 
     const { rows } = await this.pg.query(sql, params);
     return rows.map(this.mapEventRow);
@@ -341,8 +440,9 @@ export class EventSourcingService {
 
     // Get event count for this aggregate up to this version
     const { rows: countRows } = await this.pg.query(
-      `SELECT COUNT(*) as count FROM event_store
-       WHERE aggregate_type = $1 AND aggregate_id = $2 AND aggregate_version <= $3`,
+      this.buildEventSourceQuery(
+        'aggregate_type = $1 AND aggregate_id = $2 AND aggregate_version <= $3',
+      ),
       [snapshot.aggregateType, snapshot.aggregateId, snapshot.aggregateVersion],
     );
 
@@ -529,6 +629,44 @@ export class EventSourcingService {
     serviceLogger.info(result, 'Event store integrity verification completed');
 
     return result;
+  }
+
+  /**
+   * Build an event store query that prefers partitions but falls back to the legacy table.
+   */
+  private buildEventSourceQuery(
+    whereClause: string,
+    orderClause?: string,
+    trailingClause?: string,
+  ): string {
+    const where = whereClause ? `WHERE ${whereClause}` : '';
+
+    if (!this.usePartitions) {
+      return [
+        `SELECT * FROM ${this.legacyEventTable} ${where}`,
+        orderClause ?? '',
+        trailingClause ?? '',
+      ]
+        .join(' ')
+        .trim();
+    }
+
+    const legacyWhere = whereClause
+      ? `WHERE ${whereClause} AND NOT EXISTS (
+          SELECT 1 FROM ${this.primaryEventTable} p WHERE p.event_id = ${this.legacyEventTable}.event_id
+        )`
+      : `WHERE NOT EXISTS (
+          SELECT 1 FROM ${this.primaryEventTable} p WHERE p.event_id = ${this.legacyEventTable}.event_id
+        )`;
+
+    return `
+      WITH combined AS (
+        SELECT * FROM ${this.primaryEventTable} ${where}
+        UNION ALL
+        SELECT * FROM ${this.legacyEventTable} ${legacyWhere}
+      )
+      SELECT * FROM combined ${orderClause ?? ''} ${trailingClause ?? ''};
+    `.trim();
   }
 
   /**

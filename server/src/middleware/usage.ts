@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import UsageMeteringService from '../services/UsageMeteringService.js';
 import QuotaService from '../services/QuotaService.js';
 import logger from '../utils/logger.js';
+import { meteringEmitter } from '../metering/emitter.js';
 
 export const usageMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     // Only meter if we have a tenantId.
@@ -66,6 +67,19 @@ export const usageMiddleware = async (req: Request, res: Response, next: NextFun
         }
     }).catch(err => {
         logger.error('Failed to record API usage', err);
+    });
+
+    meteringEmitter.emitActiveSeat({
+        tenantId,
+        source: 'usage-middleware',
+        userId: user.id,
+        idempotencyKey: `${tenantId}:${user.id}:${new Date().toISOString().slice(0, 10)}`,
+        metadata: {
+            path: route,
+            method
+        }
+    }).catch(err => {
+        logger.warn({ err }, 'Failed to emit active seat event');
     });
 
     next();

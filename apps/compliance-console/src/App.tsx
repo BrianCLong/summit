@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
+import { ApprovalsPage } from './approvals/ApprovalsPage';
 
 type DisclosurePack = {
   id: string;
@@ -262,6 +263,14 @@ export default function App() {
           </div>
         </div>
       )}
+
+      <section style={{ marginTop: '2rem' }}>
+        <h2>Approvals</h2>
+        <p style={{ color: '#555', marginTop: '-0.35rem', marginBottom: '0.5rem' }}>
+          Dual-control approvals with ABAC guardrails and correlated audit timeline.
+        </p>
+        <ApprovalsPage />
+      </section>
     </div>
   );
 }
