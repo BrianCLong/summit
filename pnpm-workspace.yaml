@@ -3,6 +3,7 @@ packages:
   - 'packages/*'
   - 'services/*'
   - 'tools/*'
+  - 'prov-ledger-service'
 exclude:
   - 'archive/**'
   - 'apps/desktop-electron'
