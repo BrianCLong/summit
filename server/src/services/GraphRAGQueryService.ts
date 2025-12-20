@@ -19,6 +19,7 @@ import { GraphRAGService, type GraphRAGRequest, type GraphRAGResponse } from './
 import { QueryPreviewService, type CreatePreviewInput, type QueryPreview, type ExecutePreviewResult } from './QueryPreviewService.js';
 import { GlassBoxRunService, type GlassBoxRun } from './GlassBoxRunService.js';
 import { NlToCypherService } from '../ai/nl-to-cypher/nl-to-cypher.service.js';
+import { meteringEmitter } from '../metering/emitter.js';
 
 export type GraphRAGQueryRequest = {
   investigationId: string;
@@ -286,6 +287,25 @@ export class GraphRAGQueryService {
         executionTimeMs,
         hasPreview: !!preview,
       }, 'Completed GraphRAG query');
+
+      try {
+        await meteringEmitter.emitQueryCredits({
+          tenantId: request.tenantId,
+          credits: 1,
+          source: 'graphrag-query-service',
+          correlationId: run.id,
+          idempotencyKey: run.id,
+          metadata: {
+            investigationId: request.investigationId,
+            autoExecute: request.autoExecute ?? true,
+          },
+        });
+      } catch (meterError) {
+        logger.warn(
+          { meterError, runId: run.id },
+          'Failed to emit query metering event',
+        );
+      }
 
       return response;
     } catch (error) {

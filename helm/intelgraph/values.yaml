@@ -32,6 +32,25 @@ env:
   REDIS_URI_SECRET: redis-uri
   S3_BUCKET: intelgraph-dev-artifacts
 
+signer:
+  enabled: true
+  replicas: 1
+  image:
+    repository: <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/intelgraph/signer
+    tag: 'latest'
+  service:
+    port: 8081
+  bundle:
+    url: https://artifacts.intelgraph.dev/policy/maestro-policy-bundle.tgz
+    signerKeyId: opa-signer-dev
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 512Mi
+
 neo4j:
   acceptLicenseAgreement: 'yes'
   neo4j:
