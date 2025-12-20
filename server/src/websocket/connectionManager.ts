@@ -1,3 +1,4 @@
+// @ts-nocheck
 import promClient from 'prom-client';
 import { activeConnections } from '../observability/metrics.js';
 

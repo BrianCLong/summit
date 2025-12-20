@@ -1,0 +1,118 @@
+{
+  "generatedAt": "2025-01-15T00:00:00.000Z",
+  "analyze": false,
+  "queries": [
+    {
+      "id": "open-investigations",
+      "description": "Top open investigations ordered by priority and recency; should stay on the status/priority covering index.",
+      "sql": "SELECT id, owner_id, status, priority, created_at FROM plan_regression.investigations WHERE status = 'open' ORDER BY priority DESC, created_at DESC LIMIT 20;",
+      "sqlHash": "d79dd5966d5ef68363e126322c6f53284aaa8a13",
+      "signature": {
+        "nodeType": "Limit",
+        "estimatedRows": 20,
+        "children": [
+          {
+            "nodeType": "Index Scan",
+            "relationName": "plan_regression.investigations",
+            "indexName": "pr_investigations_status_priority_created_at_idx",
+            "estimatedRows": 420
+          }
+        ]
+      }
+    },
+    {
+      "id": "investigation-activity-fanout",
+      "description": "Aggregates activity by investigation to validate join strategy and row estimate stability.",
+      "sql": "SELECT i.id, i.priority, COUNT(al.*) AS activity_events FROM plan_regression.investigations i LEFT JOIN plan_regression.activity_log al ON al.investigation_id = i.id WHERE i.status = 'open' GROUP BY i.id, i.priority ORDER BY activity_events DESC LIMIT 15;",
+      "sqlHash": "e662b481d74383d9bf945e373e4da1b8cb6bdf73",
+      "signature": {
+        "nodeType": "Limit",
+        "estimatedRows": 15,
+        "children": [
+          {
+            "nodeType": "Sort",
+            "estimatedRows": 500,
+            "children": [
+              {
+                "nodeType": "HashAggregate",
+                "estimatedRows": 500,
+                "children": [
+                  {
+                    "nodeType": "Hash Join",
+                    "joinType": "Left",
+                    "estimatedRows": 8000,
+                    "children": [
+                      {
+                        "nodeType": "Seq Scan",
+                        "relationName": "plan_regression.investigations",
+                        "estimatedRows": 1200
+                      },
+                      {
+                        "nodeType": "Seq Scan",
+                        "relationName": "plan_regression.activity_log",
+                        "estimatedRows": 12000
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "investigation-entity-resolution",
+      "description": "Join-heavy lookup that simulates entity resolution across actors touching an investigation.",
+      "sql": "SELECT i.id, e.entity_type, COUNT(*) AS related_entities FROM plan_regression.investigations i JOIN plan_regression.activity_log al ON al.investigation_id = i.id JOIN plan_regression.entities e ON e.id = al.actor_id WHERE i.priority = 'high' GROUP BY i.id, e.entity_type ORDER BY related_entities DESC, i.id LIMIT 25;",
+      "sqlHash": "75f03a4cce7b3f8293c840eb9e44260cde09c02b",
+      "signature": {
+        "nodeType": "Limit",
+        "estimatedRows": 25,
+        "children": [
+          {
+            "nodeType": "Sort",
+            "estimatedRows": 1000,
+            "children": [
+              {
+                "nodeType": "HashAggregate",
+                "estimatedRows": 1000,
+                "children": [
+                  {
+                    "nodeType": "Hash Join",
+                    "joinType": "Inner",
+                    "estimatedRows": 3500,
+                    "children": [
+                      {
+                        "nodeType": "Hash Join",
+                        "joinType": "Inner",
+                        "estimatedRows": 4000,
+                        "children": [
+                          {
+                            "nodeType": "Seq Scan",
+                            "relationName": "plan_regression.investigations",
+                            "estimatedRows": 800
+                          },
+                          {
+                            "nodeType": "Seq Scan",
+                            "relationName": "plan_regression.activity_log",
+                            "estimatedRows": 12000
+                          }
+                        ]
+                      },
+                      {
+                        "nodeType": "Seq Scan",
+                        "relationName": "plan_regression.entities",
+                        "estimatedRows": 4000
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

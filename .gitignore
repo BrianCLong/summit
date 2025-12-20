@@ -81,8 +81,6 @@ Thumbs.db
 
 # Logs
 logs/
-!agents/audit/logs/
-!agents/audit/logs/.gitkeep
 *.log
 
 # Temporary files

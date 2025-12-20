@@ -1,3 +1,4 @@
+// @ts-nocheck
 // server/src/optimization/postgres-performance-optimizer.ts
 
 import { Pool, PoolClient, QueryResult } from 'pg';

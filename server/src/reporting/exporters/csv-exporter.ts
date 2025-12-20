@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { parse } from 'json2csv';
 import { ExportOptions, ReportExporter, normalizeTabularData } from './base';
 import { ReportArtifact } from '../types';

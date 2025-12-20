@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import Grid from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid';
 import {
   Box,
   Paper,

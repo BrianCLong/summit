@@ -21,7 +21,7 @@ import {
   Tabs,
   Tab,
 } from '@mui/material';
-import Grid from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid';
 import {
   Add as AddIcon,
   PlayArrow as RunIcon,

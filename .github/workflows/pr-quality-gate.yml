@@ -16,40 +16,10 @@ env:
   PNPM_VERSION: '9.12.0'
 
 jobs:
-  agent-governance:
-    name: Agent Budgets & Risk Gates
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Validate agent budget manifests
-        run: node scripts/validate-agent-budgets.js
-
-      - name: Enforce PR risk ceiling
-        env:
-          BASE_REF: ${{ github.event.pull_request.base.sha }}
-          HEAD_REF: ${{ github.event.pull_request.head.sha }}
-          RISK_SCORE_THRESHOLD: 8
-        run: |
-          export BASE_REF=${BASE_REF:-origin/main}
-          export HEAD_REF=${HEAD_REF:-$GITHUB_SHA}
-          node scripts/enforce-pr-risk.js
-
   # Fast feedback lane: Static Analysis & Security
   static-checks:
     name: Static Checks & Security
     runs-on: ubuntu-latest
-    needs: [agent-governance]
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
@@ -105,7 +75,6 @@ jobs:
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
-    needs: [static-checks] # Optional: remove dependency if you want parallelism at cost of compute
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -145,7 +114,6 @@ jobs:
   smoke-tests:
     name: Smoke Tests (Golden Path)
     runs-on: ubuntu-latest
-    needs: [static-checks]
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4

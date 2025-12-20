@@ -1,36 +1,102 @@
-# Agent Risk Scoring & Gates
+# Agent Risk Scoring Model
 
-Risk scoring governs when autonomous changes are allowed to merge. The scoring model is deterministic and based solely on repository state—no external billing or dynamic pricing inputs are used.
+**Owner:** Security Operations
+**Status:** DRAFT
 
-## Scoring model
+## 1. Overview
 
-| Signal | Score | Rationale |
-| --- | --- | --- |
-| Touches `server/src`, `client/src`, `infra/`, or `.github/workflows/` | +3 each | Core runtime, infra, and CI changes are high-impact. |
-| Touches `schemas/` or `agents/budgets/` | +2 each | Governance artifacts directly affect validation. |
-| Touches `agents/` code (non-budget) | +1 | Agent logic changes require caution. |
-| Files changed > 30 | +4 | Large surface area increases blast radius. |
-| Files changed > 15 (≤ 30) | +2 | Moderate surface area. |
-| Files changed > 8 (≤ 15) | +1 | Small but non-trivial set of files. |
-| Add/remove budget manifest | +2 | Budget drift impacts enforcement. |
+The **Risk Scoring Model** assigns a numerical value (0-100) to every agent execution context. This score determines the scrutiny level, approval requirements, and runtime sandboxing applied to the agent.
 
-Derived tiers:
+Unlike static code analysis, this score is dynamic—calculated based on the *intent* and *capabilities* requested by the agent for a specific run.
 
-- **Low**: score < 3
-- **Medium**: 3 ≤ score < 6
-- **High**: 6 ≤ score < 9
-- **Critical**: score ≥ 9
+---
 
-## Enforcement rules
+## 2. Risk Factors & Calculation
 
-- PRs flagged **critical** or with score > 8 fail the gate.
-- PRs flagged **high** must have manifests present and valid (the manifest check runs first).
-- The gate runs before lint/tests to fail fast when governance constraints are violated.
+The Total Risk Score ($R_{total}$) is a summation of weighted factors, clamped at 100.
 
-## CI integration
+$$ R_{total} = \min(100, \sum (Factor \times Weight)) $$
 
-`scripts/enforce-pr-risk.js` implements the scoring model and fails with a descriptive message when thresholds are exceeded. The script consumes `BASE_REF` and `HEAD_REF` (provided in CI) to diff the PR safely.
+### A. Surface Area (Files & Directories)
 
-## Audit trail
+Agents declaring intent to modify specific paths incur risk points.
 
-Each enforcement run writes a JSONL record via `agents/audit/logStub.js` containing the score, tier, and whether the gate passed. This provides a deterministic telemetry feed for higher-level governance dashboards without external billing hooks.
+| Directory / Pattern | Risk Points | Rationale |
+| :--- | :--- | :--- |
+| `docs/**` | 1 | Documentation is low risk. |
+| `apps/web/**` | 5 | Frontend code changes. |
+| `server/src/services/**` | 15 | Business logic modification. |
+| `server/src/auth/**` | **40** | Authentication bypass risk. |
+| `policy/**` | **50** | Changing the rules of the system (OPA). |
+| `.github/workflows/**` | **60** | CI/CD pipeline modification (Supply Chain). |
+| `security/**` | **80** | Core security controls. |
+
+### B. Permissions & Capabilities
+
+| Capability | Risk Points | Rationale |
+| :--- | :--- | :--- |
+| `READ_ONLY` | 0 | Passive observation. |
+| `FILE_WRITE` | 10 | Standard code editing. |
+| `SHELL_EXEC` | 30 | Arbitrary command execution. |
+| `NETWORK_EGRESS` | 20 | Data exfiltration risk. |
+| `DB_WRITE` | 25 | Database mutation. |
+| `SECRET_READ` | **50** | Access to API keys/credentials. |
+
+### C. Scope & Tenancy
+
+| Scope | Multiplier |
+| :--- | :--- |
+| Single Tenant (Self) | 1.0x |
+| Multi-Tenant (Specific List) | 1.5x |
+| **Global / All Tenants** | **3.0x** |
+
+---
+
+## 3. Risk Thresholds & Actions
+
+Scores map to operational zones that trigger specific enforcement actions in CI/CD and Runtime.
+
+| Score Range | Level | Required Actions |
+| :--- | :--- | :--- |
+| **0 - 19** | **Low** | **Log Only.** Standard telemetry. Auto-approve. |
+| **20 - 49** | **Medium** | **Standard Review.** Requires 1 human review on PR. Runtime sandbox standard. |
+| **50 - 79** | **High** | **Enhanced Audit.** Requires Senior approval. Full session recording enabled. Shadow-mode execution (if applicable). |
+| **80 - 100** | **Critical** | **Lockdown.** Requires Security Officer approval. MFA challenge for deployment. Isolated runtime environment. |
+
+---
+
+## 4. CI/CD Integration (Pre-Flight Check)
+
+Before an agent is allowed to run, the `risk-calculator` action evaluates the manifest.
+
+### Pseudo-code Implementation
+
+```typescript
+function calculateRisk(manifest: AgentManifest, diff: FileDiff): RiskResult {
+  let score = 0;
+
+  // 1. Check touched files
+  for (const file of diff.files) {
+    if (file.path.startsWith('server/src/auth')) score += 40;
+    if (file.path.startsWith('.github')) score += 60;
+    // ...
+  }
+
+  // 2. Check capabilities
+  if (manifest.capabilities.includes('SHELL_EXEC')) score += 30;
+
+  // 3. Apply Multipliers
+  if (manifest.scope === 'GLOBAL') score *= 3.0;
+
+  return {
+    score: Math.min(100, score),
+    level: getLevel(score),
+    block: score >= 80 && !manifest.approvals.has('SECURITY_OFFICER')
+  };
+}
+```
+
+### Blocking Logic
+
+*   **Risk Score > 80:** The CI job fails immediately with `RISK_THRESHOLD_EXCEEDED` unless a cryptographically signed approval token from the Security team is present in the run context.
+*   **Risk Score Increase:** If an agent's code changes causes its derived risk score to jump by >20 points compared to the previous version, manual re-approval is triggered.
