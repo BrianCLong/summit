@@ -198,7 +198,6 @@ conductor-ui/.jest-cache-ui/
 .orchestrator/
 apps/**/dist/
 **/dist/
-policy/bin/
 server/test-results/
 server/junit.xml
 coverage/

@@ -1,0 +1,122 @@
+name: PR Labeler & Auto-Reviewers
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+  metadata: read
+
+jobs:
+  label-and-assign:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install yaml parser
+        run: npm install js-yaml
+      - name: Load reviewer matrix
+        id: load-matrix
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const yaml = require('js-yaml');
+            const data = yaml.load(fs.readFileSync('.github/auto-reviewers.yml', 'utf8'));
+            return data.matrix;
+      - name: Apply labels and request reviewers
+        id: apply
+        uses: actions/github-script@v7
+        env:
+          MATRIX: ${{ steps.load-matrix.outputs.result }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const matrix = JSON.parse(process.env.MATRIX);
+            const pr = context.payload.pull_request;
+
+            const pathLabels = [
+              { pattern: /^deploy\/helm\//, labels: ['infra', 'devops'] },
+              { pattern: /^deploy\/terraform\//, labels: ['infra', 'devops'] },
+              { pattern: /^deploy\//, labels: ['infra'] },
+              { pattern: /^\.github\/workflows\//, labels: ['cicd'] },
+              { pattern: /^\.maestro\//, labels: ['cicd'] },
+              { pattern: /^\.ci\//, labels: ['cicd'] },
+              { pattern: /^services\/graph\//, labels: ['services-graph'] },
+              { pattern: /^services\/api\//, labels: ['services-api'] },
+              { pattern: /^services\/ingest\//, labels: ['services-ingest'] },
+              { pattern: /^apps\/web/, labels: ['web'] },
+              { pattern: /^apps\/gateway/, labels: ['gateway'] },
+              { pattern: /^\.security\//, labels: ['security'] },
+              { pattern: /^\.ci\/policies\//, labels: ['security'] },
+              { pattern: /^migrations\//, labels: ['data', 'needs-migration-gate'] },
+              { pattern: /^schemas\//, labels: ['data'] },
+              { pattern: /^observability\//, labels: ['observability'] },
+              { pattern: /^RUNBOOKS\//, labels: ['observability'] }
+            ];
+
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+              per_page: 100,
+            });
+
+            const labels = new Set();
+            let totalChanges = 0;
+            for (const file of files) {
+              totalChanges += (file.additions || 0) + (file.deletions || 0);
+              for (const entry of pathLabels) {
+                if (entry.pattern.test(file.filename)) {
+                  entry.labels.forEach(l => labels.add(l));
+                }
+              }
+            }
+
+            let size = 'small';
+            if (totalChanges > 800) size = 'large';
+            else if (totalChanges > 200) size = 'medium';
+            labels.add(`size/${size}`);
+
+            if (labels.size > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                labels: Array.from(labels),
+              });
+            }
+
+            const primaryLabel = Array.from(labels).find(l => matrix[l]);
+            const poolKey = primaryLabel && matrix[primaryLabel] ? primaryLabel : 'default';
+            const pool = matrix[poolKey] || matrix['default'];
+            const approvalsNeeded = (pool.approvals && pool.approvals[size]) || 1;
+            const reviewers = (pool.reviewers || []).slice(0, approvalsNeeded);
+
+            if (reviewers.length > 0) {
+              await github.rest.pulls.requestReviewers({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                team_reviewers: reviewers,
+              });
+            }
+
+            core.setOutput('labels', Array.from(labels).join(', '));
+            core.setOutput('size', size);
+      - name: Comment routing summary
+        if: steps.apply.outputs.labels != ''
+        uses: actions/github-script@v7
+        env:
+          LABELS: ${{ steps.apply.outputs.labels }}
+          SIZE: ${{ steps.apply.outputs.size }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: `Auto-labeler applied: ${process.env.LABELS}. Size class: ${process.env.SIZE}.`
+            });

@@ -4,38 +4,49 @@
       "public": 0,
       "restricted": 1,
       "confidential": 2,
-      "secret": 3
+      "secret": 3,
+      "top-secret": 4
     },
     "actions": {
       "dataset:read": {
         "allowedRoles": ["reader", "analyst"],
-        "requiresStepUp": false
+        "requiresStepUp": false,
+        "requiresDualControl": false
       },
       "dataset:write": {
         "allowedRoles": ["analyst"],
-        "requiresStepUp": true
+        "requiresStepUp": true,
+        "requiresDualControl": false
       },
       "dataset:delete": {
         "allowedRoles": ["admin"],
-        "requiresStepUp": true
+        "requiresStepUp": true,
+        "requiresDualControl": true
+      },
+      "dataset:reclassify": {
+        "allowedRoles": ["custodian", "admin"],
+        "requiresStepUp": true,
+        "requiresDualControl": true
+      },
+      "dataset:purge": {
+        "allowedRoles": ["admin", "incident-responder"],
+        "requiresStepUp": true,
+        "requiresDualControl": true
+      },
+      "dataset:break-glass": {
+        "allowedRoles": ["admin", "incident-responder"],
+        "requiresStepUp": true,
+        "requiresDualControl": true
       },
       "dataset:share-external": {
         "allowedRoles": ["admin", "analyst"],
-        "requiresStepUp": true
+        "requiresStepUp": true,
+        "requiresDualControl": true
       },
       "policy:publish": {
         "allowedRoles": ["admin"],
-        "requiresStepUp": true
-      },
-      "dataset:purge": {
-        "allowedRoles": ["admin", "steward"],
         "requiresStepUp": true,
-        "requiresDualControl": true,
-        "dualControlRoles": ["security-admin", "compliance-officer"]
-      },
-      "audit-log:read": {
-        "allowedRoles": ["auditor", "admin"],
-        "requiresStepUp": true
+        "requiresDualControl": true
       }
     },
     "residency_matrix": {

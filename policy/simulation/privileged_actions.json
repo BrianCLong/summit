@@ -1,114 +1,132 @@
 {
-  "privileged_actions": [
+  "scenarios": [
     {
-      "id": "dataset-purge-requires-dual-control",
-      "description": "Privileged dataset purge without dual-control approvals should be blocked with obligations to collect approvals and step-up auth.",
+      "id": "purge_requires_dual_control",
       "input": {
         "subject": {
-          "id": "cora",
+          "id": "sam",
           "tenantId": "tenantA",
-          "roles": ["admin"],
-          "entitlements": ["dataset-critical:purge"],
-          "residency": "us",
-          "clearance": "secret",
-          "loa": "loa1",
-          "riskScore": 6,
-          "groups": ["dataset-critical"]
-        },
-        "resource": {
-          "id": "dataset-critical",
-          "tenantId": "tenantA",
-          "residency": "us",
-          "classification": "secret",
-          "tags": ["mission-critical", "pii"]
-        },
-        "action": "dataset:purge",
-        "context": {
-          "protectedActions": ["dataset:purge", "audit-log:read"],
-          "requestTime": "2025-01-07T12:00:00Z",
-          "currentAcr": "loa1",
-          "approvals": []
-        }
-      },
-      "expect": {
-        "allow": false,
-        "reason": "dual_control_required",
-        "obligationTypes": ["step_up", "dual_control"]
-      }
-    },
-    {
-      "id": "dataset-purge-allowed-with-approvals",
-      "description": "Privileged dataset purge with dual-control approvals and LOA2 should pass with no pending obligations.",
-      "input": {
-        "subject": {
-          "id": "drew",
-          "tenantId": "tenantA",
-          "roles": ["steward", "admin"],
-          "entitlements": ["dataset-critical:purge"],
-          "residency": "us",
-          "clearance": "secret",
-          "loa": "loa2",
-          "riskScore": 3,
-          "groups": ["dataset-critical"]
-        },
-        "resource": {
-          "id": "dataset-critical",
-          "tenantId": "tenantA",
-          "residency": "us",
-          "classification": "secret",
-          "tags": ["mission-critical", "pii"]
-        },
-        "action": "dataset:purge",
-        "context": {
-          "protectedActions": ["dataset:purge", "audit-log:read"],
-          "requestTime": "2025-01-07T12:00:00Z",
-          "currentAcr": "loa2",
-          "approvals": [
-            { "actorId": "secops-1", "role": "security-admin" },
-            { "actorId": "compliance-2", "role": "compliance-officer" }
-          ]
-        }
-      },
-      "expect": {
-        "allow": true,
-        "reason": "allow",
-        "obligationTypes": []
-      }
-    },
-    {
-      "id": "audit-log-read-step-up",
-      "description": "Audit log access for the auditor role should be allowed with a step-up obligation at LOA1.",
-      "input": {
-        "subject": {
-          "id": "pat",
-          "tenantId": "tenantA",
-          "roles": ["auditor"],
+          "roles": ["incident-responder"],
           "entitlements": [],
           "residency": "us",
-          "clearance": "secret",
+          "clearance": "top-secret",
           "loa": "loa1",
-          "riskScore": 4,
-          "groups": ["audit"]
+          "riskScore": 5,
+          "groups": [],
+          "metadata": {
+            "email": "sam@example.com"
+          }
         },
         "resource": {
-          "id": "audit-log",
+          "id": "dataset-omega",
           "tenantId": "tenantA",
           "residency": "us",
-          "classification": "secret",
-          "tags": ["audit", "operational"]
+          "classification": "top-secret",
+          "tags": ["pii", "privileged"]
         },
-        "action": "audit-log:read",
+        "action": "dataset:purge",
         "context": {
-          "protectedActions": ["dataset:purge", "audit-log:read"],
+          "protectedActions": [
+            "dataset:purge",
+            "dataset:reclassify",
+            "dataset:break-glass",
+            "policy:publish"
+          ],
           "requestTime": "2025-01-07T12:00:00Z",
           "currentAcr": "loa1",
-          "approvals": []
+          "dualControlApprovals": []
         }
       },
-      "expect": {
+      "expected": {
+        "allow": false,
+        "reason": "dual_control_required",
+        "obligations": ["dual_control", "step_up"]
+      }
+    },
+    {
+      "id": "purge_with_dual_control_and_step_up",
+      "input": {
+        "subject": {
+          "id": "sam",
+          "tenantId": "tenantA",
+          "roles": ["incident-responder"],
+          "entitlements": [],
+          "residency": "us",
+          "clearance": "top-secret",
+          "loa": "loa2",
+          "riskScore": 4,
+          "groups": [],
+          "metadata": {
+            "email": "sam@example.com"
+          }
+        },
+        "resource": {
+          "id": "dataset-omega",
+          "tenantId": "tenantA",
+          "residency": "us",
+          "classification": "top-secret",
+          "tags": ["pii", "privileged"]
+        },
+        "action": "dataset:purge",
+        "context": {
+          "protectedActions": [
+            "dataset:purge",
+            "dataset:reclassify",
+            "dataset:break-glass",
+            "policy:publish"
+          ],
+          "requestTime": "2025-01-07T12:00:00Z",
+          "currentAcr": "loa2",
+          "dualControlApprovals": ["approver-one", "approver-two"]
+        }
+      },
+      "expected": {
         "allow": true,
         "reason": "allow",
-        "obligationTypes": ["step_up"]
+        "obligations": []
+      }
+    },
+    {
+      "id": "break_glass_requires_two_external_approvals",
+      "input": {
+        "subject": {
+          "id": "case-owner",
+          "tenantId": "tenantA",
+          "roles": ["admin"],
+          "entitlements": [],
+          "residency": "us",
+          "clearance": "top-secret",
+          "loa": "loa2",
+          "riskScore": 7,
+          "groups": [],
+          "metadata": {
+            "email": "owner@example.com"
+          }
+        },
+        "resource": {
+          "id": "dataset-omega",
+          "tenantId": "tenantA",
+          "residency": "us",
+          "classification": "top-secret",
+          "tags": ["break-glass", "privileged"]
+        },
+        "action": "dataset:break-glass",
+        "context": {
+          "protectedActions": [
+            "dataset:purge",
+            "dataset:reclassify",
+            "dataset:break-glass",
+            "policy:publish"
+          ],
+          "requestTime": "2025-01-07T12:00:00Z",
+          "currentAcr": "loa2",
+          "dualControlApprovals": ["case-owner", "approver-one"]
+        }
+      },
+      "expected": {
+        "allow": false,
+        "reason": "dual_control_required",
+        "obligations": ["dual_control"]
       }
     }
   ]

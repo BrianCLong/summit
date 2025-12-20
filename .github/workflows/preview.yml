@@ -35,3 +35,43 @@ jobs:
               --set imageGateway=ghcr.io/${{ github.repository }}:apps-gateway-pr${{ github.event.number }} \
               --set imageUI=ghcr.io/${{ github.repository }}:apps-ui-pr${{ github.event.number }}
             ```
+
+  deploy-preview:
+    name: Deploy Preview (Helm)
+    needs: build-push
+    if: ${{ secrets.KUBE_CONFIG != '' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure kubeconfig
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+        run: |
+          mkdir -p ~/.kube
+          echo "${KUBE_CONFIG}" | { base64 -d 2>/dev/null || cat; } > ~/.kube/config
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+      - name: Deploy with Helm
+        env:
+          PR_NUMBER: ${{ github.event.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          NAMESPACE="ig-pr-${PR_NUMBER}"
+          RELEASE="ig-${PR_NUMBER}"
+          helm upgrade --install "${RELEASE}" ops/helm \
+            --namespace "${NAMESPACE}" \
+            --create-namespace \
+            --set imageGateway="ghcr.io/${REPO}:apps-gateway-pr${PR_NUMBER}" \
+            --set imageUI="ghcr.io/${REPO}:apps-ui-pr${PR_NUMBER}" \
+            --set ingress.host="pr-${PR_NUMBER}.preview.intelgraph.local"
+      - name: Publish deployed preview link
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: preview
+          message: |
+            🧪 Preview deployed to namespace `ig-pr-${{ github.event.number }}` with host `pr-${{ github.event.number }}.preview.intelgraph.local`.
+            Images: `ghcr.io/${{ github.repository }}:apps-gateway-pr${{ github.event.number }}` and `ghcr.io/${{ github.repository }}:apps-ui-pr${{ github.event.number }}`.

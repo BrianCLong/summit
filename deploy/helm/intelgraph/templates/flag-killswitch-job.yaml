@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "intelgraph.fullname" . }}-flag-killswitch
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: flagctl-kill
+          image: {{ .Values.flagctl.image | default "python:3.11-slim" }}
+          command: ["python", "tools/flagctl/flagctl.py", "kill", "$(FLAG_KEY)", "--env", "$(FLAG_ENV)", "--reason", "$(FLAG_REASON)"]
+          env:
+            - name: FLAG_ENV
+              value: {{ .Values.global.environment | default "dev" | quote }}
+            - name: FLAG_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "intelgraph.fullname" . }}-flag-job
+                  key: flagKey
+            - name: FLAG_REASON
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "intelgraph.fullname" . }}-flag-job
+                  key: reason
+          volumeMounts:
+            - name: flag-targets
+              mountPath: /app/flags
+      volumes:
+        - name: flag-targets
+          configMap:
+            name: {{ include "intelgraph.fullname" . }}-flags
