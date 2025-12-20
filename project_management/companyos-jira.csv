@@ -1,0 +1,268 @@
+Summary,Description,Issue Type,Story Points,Components,Labels,Acceptance Criteria
+COS-ID-SCIM-ABAC — OIDC/SCIM + ABAC Enforcement,"Goal: Enforce tenant-scoped ABAC while synchronizing identities through OIDC and SCIM v2.
+
+Scope:
+- Deliver OIDC login for console and API clients with tenant context injection.
+- Build a SCIM v2 role-to-COS role mapper that projects IdP groups into CompanyOS roles and tenants.
+- Apply OPA policy gates on every read/write, attach {tenant, purpose} metadata to requests, and stand up a documented break-glass user rotation.
+
+Implementation Plan:
+1. Draft the tenant/purpose ABAC matrix with Security and encode the rules in OPA rego modules supported by unit fixtures.
+2. Integrate OIDC libraries, configure token refresh + JWKS caching, and add middleware that derives tenant and purpose claims for downstream services.
+3. Stand up the SCIM webhook ingestion worker, map external groups to COS roles, and backfill existing assignments without downtime.
+4. Inject purpose metadata within service adapters, enforce OPA decisions at the edge and service layer, and emit structured audit events.
+5. Provision a break-glass admin account, automate credential rotation, and document escalation and validation steps.
+
+Telemetry & Ops:
+- Emit login success/failure metrics, OPA decision counts, and SCIM sync lag; alert on sustained failures.
+- Create dashboards covering denied decisions, drift detection, and break-glass activity.
+
+Documentation & Enablement:
+- Update console/API authentication guides, publish the break-glass runbook, and brief on-call on the escalation path.
+
+Tests:
+- Unit: ABAC allow/deny vectors across tenant and purpose dimensions.
+- Contract: SCIM webhook event → role visible and enforced via OPA.
+- E2E: login flow → verify access paths with and without declared purpose.
+
+RACI: R—App Eng; A—COS Lead; C—Security; I—SRE
+Estimate: 8 points
+Risks: Role drift; Mitigation: contract tests + drift alarms
+Dependencies: Policy Pack v0 already present",Story,8,CompanyOS,cos;identity;policy,"- SCIM role change takes effect in ≤60s across console and API surfaces.
+- Cross-tenant access attempts are denied with an OPA audit record.
+- Audit logs ship {sub, tenant, purpose, decision} to the SIEM within 2 minutes.
+- Break-glass rotation runbook exercised and signed off by Security." 
+COS-POL-FETCH — Policy Pack Consumer + OPA Hot-Reload,"Goal: Continuously pull and verify policy-pack-v0 while hot-reloading OPA without destabilizing traffic.
+
+Scope:
+- Use clients/cos-policy-fetcher to poll /v1/policy/packs/policy-pack-v0 with Sigstore verification.
+- Support ETag conditional GET with jittered backoff, persisting last-known-good bundles on failure.
+- Trigger sidecar or embedded OPA hot-reload and expose status endpoints.
+
+Implementation Plan:
+1. Implement polling scheduler with exponential backoff, cache busting, and metrics for digest age.
+2. Add SHA256 + Sigstore signature verification and fail closed on mismatch.
+3. Persist policy bundles atomically (write temp → move) and wire last-known-good fallback logic.
+4. Invoke OPA reload hooks (sidecar or embedded) and surface health probes reflecting bundle freshness.
+5. Document operational playbooks for manual rollbacks and failure inspection.
+
+Telemetry & Ops:
+- Emit metrics for fetch latency, bundle digest age, reload successes/failures, and fallback activations.
+- Provide Grafana panels and alerts on stale policy (>15m) and repeated verification failures.
+
+Documentation & Enablement:
+- Update policy loader README, add troubleshooting FAQ, and brief MC integrators on expected headers.
+
+Tests:
+- Contract: digest mismatch results in a hard failure and last-known-good retention.
+- E2E: swap pack → OPA decisions reflect the new policy within 30s.
+- Load: simulate 5xx spike scenario to validate the 0.5% ceiling.
+
+RACI: R—App Eng; A—COS Lead; C—Security; I—MC
+Estimate: 5 points
+Risks: Reload race; Mitigation: atomic bundle swap + canary reload
+Dependencies: Pack route & attestation live (done)",Story,5,CompanyOS,cos;policy-pack,"- On new digest, reload completes in ≤30s with policy version metric updated.
+- No >0.5% 5xx spike observed during induced reload tests.
+- Unsigned or mismatched packs are rejected with alerts to App Eng + Security.
+- Last-known-good bundle continues serving decisions when fetch fails." 
+COS-EVIDENCE-PUB — Publish Evidence (SLO+Cost) to MC,"Goal: Emit canonical release Evidence payloads with SLO and cost telemetry to the MC GraphQL API.
+
+Scope:
+- Implement a resilient client for publishEvidence including Sigstore token handling and retries.
+- Attach SBOM/test hashes, p95/p99/errorRate metrics, and unit cost data sourced from observability pipelines.
+- Correlate releaseId from pod/rollout labels and ensure idempotent submissions.
+
+Implementation Plan:
+1. Define the Evidence payload schema with MC, covering metadata, telemetry, and provenance hashes.
+2. Build a client module with exponential retry, jitter, and idempotency keys keyed on releaseId.
+3. Integrate observability exporters to collect p95/p99/errorRate/unit cost snapshots during rollout.
+4. Gather SBOM + test artifact hashes from CI and embed references in the payload.
+5. Expose operational metrics (success/failure counts) and document manual replay procedures.
+
+Telemetry & Ops:
+- Emit metrics for publish latency, retry counts, and dedupe hits; alert on sustained failure.
+- Provide dashboards for release evidence status across environments.
+
+Documentation & Enablement:
+- Update release engineering guides, annotate rollout checklist, and share example payloads with Finance and MC teams.
+
+Tests:
+- Unit: payload schema validation, redaction checks for sensitive fields, and retry limiter coverage.
+- Contract: GraphQL publishEvidence invocation verified against MC sandbox.
+- E2E: rollout pipeline → evidenceOk==true when metrics under thresholds, including duplicate submission test.
+
+RACI: R—Backend Eng; A—COS Lead; C—MC; I—SRE, Finance
+Estimate: 5 points
+Risks: Token leakage; Mitigation: Secret storage + least privilege + secret rotation
+Dependencies: MC endpoint/token",Story,5,CompanyOS,cos;mc;telemetry,"- Evidence appears in MC within 1 minute of rollout completion with correct releaseId.
+- Duplicate sends are de-duplicated and logged without creating duplicate records.
+- publishEvidence client exposes success/failure metrics and alerting hooks.
+- Finance and MC stakeholders sign off on payload contents and redaction coverage." 
+COS-OTEL-SLO — OTEL Telemetry + SLO Dashboards,"Goal: Provide end-to-end traces, metrics, and logs enriched with {service, tenant, env, purpose} plus opinionated SLO dashboards and alerts.
+
+Scope:
+- Export OTLP data from services, propagate trace IDs into logs, and normalize tenant + purpose labels.
+- Build Grafana dashboards for p95/p99 latency, error budget burn, and unit cost by tenant.
+- Configure multi-window multi-burn-rate alerts for latency, error rate, and budget consumption.
+
+Implementation Plan:
+1. Update service instrumentation libraries to include tenant/purpose attributes and ensure trace-log correlation.
+2. Configure OTLP exporters (metrics, traces, logs) with resilient batching and secure endpoints.
+3. Design SLO definitions with Product + SRE, codify them in Terraform/YAML, and publish to Grafana.
+4. Build per-tenant dashboards with templated variables and document navigation paths.
+5. Create alerting policies for p95 breach, >2% error rate, and 80% burn, routing to on-call with noise controls.
+6. Run synthetic load to validate thresholds and capture runbooks for tuning.
+
+Telemetry & Ops:
+- Add metrics for ingestion lag, dropped spans, and alert firings; hook alerts into incident management.
+- Provide runbooks for tuning thresholds and handling noisy tenants.
+
+Documentation & Enablement:
+- Publish observability handbook updates, record walkthrough of dashboards, and share alert response SOPs.
+
+Tests:
+- Synthetic traffic hitting SLO thresholds to validate alert triggers and dashboard accuracy.
+- Chaos scenarios to ensure telemetry continuity during outages.
+
+RACI: R—SRE; A—SRE Lead; C—App Eng; I—MC
+Estimate: 8 points
+Risks: Noisy alerts; Mitigation: burn-rate rules + staged rollout
+Dependencies: None",Story,8,CompanyOS,cos;slo;observability,"- Synthetic load triggers latency, error, and burn-rate alerts with expected routing.
+- Per-tenant panels render with correct templating and latency/error metrics.
+- Dashboards include unit cost overlays sourced from telemetry exporters.
+- Alert runbooks validated with on-call sign-off." 
+COS-ROLLOUT-GATE — Argo Evidence-Gated Promotion,"Goal: Gate canary promotions at 20%/50% based on MC evidenceOk signals, ensuring automated rollback when quality gates fail.
+
+Scope:
+- Apply an Argo AnalysisTemplate (web or job provider) that queries MC evidenceOk via ConfigMap + Secret token.
+- Ensure release-id labels on pods/deployments and maintain a rollback playbook.
+- Integrate gate status into deployment notifications and audit logs.
+
+Implementation Plan:
+1. Design the AnalysisTemplate with parametrized releaseId and MC endpoint, including success/failure conditions.
+2. Store MC API token in External Secret, mount as Secret, and configure ConfigMap for query payloads.
+3. Update deployment manifests to guarantee release-id labels and propagate to workloads.
+4. Wire Argo Rollouts steps at 20% and 50% with automatic pause + evaluation + promotion/abort logic.
+5. Document rollback playbook covering manual override, token rotation, and evidence troubleshooting.
+6. Add notification hooks (Slack/PagerDuty) for gate outcomes and record events in deployment audit logs.
+
+Telemetry & Ops:
+- Emit metrics for gate evaluations, pass/fail counts, and rollback durations; alert on repeated failures.
+- Create dashboards tracking promotion outcomes per environment.
+
+Documentation & Enablement:
+- Update release engineering runbooks, train on-call on manual override, and share sample MC responses.
+
+Tests:
+- Dry-run analysis with mocked evidenceOk responses to validate gating logic.
+- Failure path halts rollout and triggers rollback automation within SLA.
+- Integration test ensures release-id propagation and notification delivery.
+
+RACI: R—SRE; A—COS Lead; C—MC; I—On-call
+Estimate: 5 points
+Risks: Flaky checks; Mitigation: retry/backoff + manual override guardrails
+Dependencies: COS-EVIDENCE-PUB, MC evidenceOk",Story,5,CompanyOS,cos;argo;rollout,"- Gate blocks when evidenceOk is false and records reason codes in rollout history.
+- Auto-rollback restores prior stable version within 5 minutes end-to-end.
+- Promotion notifications reflect gate results and include rollout + releaseId context.
+- Manual override documented and approved by COS Lead + MC." 
+COS-RET-RTBF — Retention & Right-to-be-Forgotten,"Goal: Enforce data retention tiers and right-to-be-forgotten (RTBF) workflows with auditable controls.
+
+Scope:
+- Tag entities with retention tiers, schedule deletion/anonymization jobs, and enforce purpose limitations.
+- Implement RTBF flow: intake request → authorize → execute → audit with cryptographic receipts.
+- Ensure PITR restores exclude tombstoned data and that RTBF actions propagate to replicas.
+
+Implementation Plan:
+1. Catalogue data assets, assign retention tiers, and codify rules in policy-pack retention.json.
+2. Build scheduler + workers for tier-based deletion/anonymization with dry-run and sampling modes.
+3. Implement RTBF service handling request validation, authorization workflow, execution, and audit log emission.
+4. Add PITR guardrails ensuring tombstoned data is filtered during restore and add verification scripts.
+5. Coordinate with Legal/Security for approval workflows and document manual review steps.
+6. Provide dashboards for retention job success/failure and RTBF throughput.
+
+Telemetry & Ops:
+- Emit metrics for deletion backlog, RTBF duration, and restore validation results; alert on deviations.
+- Archive signed RTBF receipts and integrate with compliance storage.
+
+Documentation & Enablement:
+- Publish retention policy handbook, RTBF runbook, and training materials for support + legal review.
+
+Tests:
+- Unit: retention calculators, anonymization functions, and PITR exclusion logic.
+- E2E: RTBF on sample subject covering approval, execution, audit, and restore validation.
+- Compliance tabletop to validate legal + security checkpoints.
+
+RACI: R—Data Eng; A—COS Lead; C—Legal/Security; I—SRE
+Estimate: 13 points
+Risks: Over-delete; Mitigation: dry-run + sample audit + staged rollout
+Dependencies: Policy Pack retention.json",Story,13,CompanyOS,cos;data-compliance,"- Scheduled job removes or anonymizes data per tier with audit trails stored.
+- RTBF requests complete with signed audit receipts and legal approval records.
+- Restore process demonstrates that deleted PII is not resurrected in PITR tests.
+- Compliance sign-off received from Legal and Security." 
+COS-HELM-HARDEN — Charts, Limits, Secrets,"Goal: Harden Helm charts for production with least privilege, resilience, and externalized secrets.
+
+Scope:
+- Define requests/limits, probes, PDB, securityContext (runAsNonRoot, fsGroup, seccomp) for all workloads.
+- Configure HPA/VPA policies, anti-affinity, External Secrets integration, and image digest pinning.
+- Remove plaintext secrets from charts, relying on external secret managers and sealed secrets where needed.
+
+Implementation Plan:
+1. Inventory all charts, document current gaps, and prioritize remediation order.
+2. Add resource requests/limits, liveness/readiness probes, and PodDisruptionBudgets with environment overrides.
+3. Apply security contexts (runAsNonRoot, fsGroup, seccomp) and enforce restricted Pod Security Standards.
+4. Integrate External Secrets, convert existing plaintext secrets, and add image digest pinning to CI workflows.
+5. Configure HPA/VPA with guarded scaling ranges, anti-affinity rules, and chaos testing hooks.
+6. Run helm lint, kube-bench, and CIS scans; fix findings and document deviations.
+
+Telemetry & Ops:
+- Emit metrics for HPA/VPA activity, pod disruptions, and External Secret sync status.
+- Create dashboards for capacity, disruption budgets, and chaos test outcomes.
+
+Documentation & Enablement:
+- Update deployment playbooks, provide security review summary, and share remediation checklist with Platform.
+
+Tests:
+- kube-bench/gate, pod-security admission tests, and chaos experiments validating error budget impact.
+- CI gating to ensure helm lint + conftest/OPA policies pass.
+
+RACI: R—Platform; A—SRE Lead; C—Security; I—COS
+Estimate: 8 points
+Risks: HPA thrash; Mitigation: disable scale-to-zero off-peak + tuned scaling thresholds
+Dependencies: None",Story,8,CompanyOS,cos;helm;platform,"- helm lint, conftest, and security scans pass with documented exceptions only.
+- CIS compliance checks succeed with approvals from Security.
+- Chaos kill tests stay within agreed error budgets and auto-recovery works.
+- No plaintext secrets remain in charts; External Secrets sync dashboard is green." 
+COS-PACT-E2E — Pact-style Contract + End-to-End Cold-Start,"Goal: Prevent seam drift with Pact contracts and prove both standalone and MC-integrated cold-start paths meet SLOs.
+
+Scope:
+- Author Pact tests covering headers (Content-Type, Digest, ETag) and /attestation payload contracts.
+- Build E2E workflows for standalone mode (local users/policy) and MC-integrated mode (fetch+reload+evidence).
+- Execute k6 load testing validating p95 ≤350ms reads and ≤700ms writes at target RPS.
+
+Implementation Plan:
+1. Define provider/consumer contract scenarios with QA/Eng, encode in Pact files, and set up CI broker publishing.
+2. Implement provider verification in CI gating upstream services and assert header/body invariants.
+3. Automate standalone environment bootstrapping with local policy pack + user seeds and smoke validations.
+4. Automate MC-integrated path: fetch policy pack, hot-reload, emit evidence, and assert readiness checks.
+5. Author k6 scripts with staged ramp, run in CI with thresholds, and publish trend dashboards.
+6. Document troubleshooting guides for contract failures, cold-start issues, and load regressions.
+
+Telemetry & Ops:
+- Track contract test pass/fail history, k6 latency percentiles, and cold-start durations.
+- Provide dashboards plus alerts when thresholds regress.
+
+Documentation & Enablement:
+- Publish contract testing handbook, load testing SOP, and environment bootstrapping guide.
+
+Tests:
+- Pact contract suites executed in CI for every change touching seam APIs.
+- End-to-end standalone + MC-integrated pipelines running nightly.
+- k6 load tests with threshold gates and artifact retention for analysis.
+
+RACI: R—QA/Eng; A—COS Lead; C—MC; I—SRE
+Estimate: 8 points
+Risks: Flaky k6 infrastructure; Mitigation: fixed RPS profile + isolated runners
+Dependencies: COS-POL-FETCH, COS-EVIDENCE-PUB",Story,8,CompanyOS,cos;testing;performance,"- Pact contracts fail on any seam change and block merges until updated + reviewed.
+- Standalone and MC-integrated E2E pipelines pass consecutively for two nights before release.
+- k6 load results meet latency thresholds with trends published to observability dashboards.
+- Runbooks for contract/load failures reviewed and acknowledged by QA/Eng + SRE." 

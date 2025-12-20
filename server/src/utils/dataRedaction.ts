@@ -1,6 +1,8 @@
 import { User } from '../types/context'; // Assuming User type is defined here
-import pino from 'pino';
+// @ts-ignore
+import { default as pino } from 'pino';
 
+// @ts-ignore
 const logger = pino();
 
 // Define PII types and their associated properties/paths

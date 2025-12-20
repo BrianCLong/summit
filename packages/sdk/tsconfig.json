@@ -1,9 +1,9 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "dist"
-    "types": []
+    "outDir": "dist",
+    "types": ["jest", "node"]
   },
-  "include": ["src"],
-  "references": [{ "path": "../types" }, { "path": "../ai-core" }]
+  "include": ["src", "tests"],
+  "references": [{ "path": "../types" }]
 }

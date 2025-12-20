@@ -10,6 +10,15 @@ v4/archive/**
 **/.next/**
 **/.cache/**
 **/.vite/**
-tools/testing/flaky-detector.ts
+**/.turbo/**
 **/v24_modules/**
-tools/pm/wsjf_rice.ts
+*.min.js
+*.min.css
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+CHANGELOG.md
+LICENSE
+*.snap
+.git/
+.husky/

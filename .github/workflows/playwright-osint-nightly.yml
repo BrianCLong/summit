@@ -1,0 +1,40 @@
+name: Playwright OSINT Nightly
+
+on:
+  schedule:
+    - cron: '30 7 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  osint-nightly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.14.x'
+          cache: pnpm
+      - name: Install deps & browsers
+        run: |
+          corepack enable || true
+          corepack prepare pnpm@9.12.3 --activate || true
+          pnpm i --frozen-lockfile=false
+          pnpm exec playwright install --with-deps
+      - name: Heal & build UI
+        run: |
+          node scripts/monorepo_heal.mjs
+          pnpm -w -r --filter ./apps... run build --if-present
+      - name: Run full OSINT journey suite
+        env:
+          PLAYWRIGHT_USE_WEBSERVER: "true"
+        run: pnpm exec playwright test --config=playwright.config.ts --project=osint-journeys --output=playwright-results
+      - name: Upload Playwright traces (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: |
+            playwright-results
+            playwright-report
+          retention-days: 7

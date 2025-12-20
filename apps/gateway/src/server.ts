@@ -1,26 +1,13 @@
-import { ApolloServer } from '@apollo/server';
-import { ApolloGateway, IntrospectAndCompose } from '@apollo/gateway';
-import { persistedOnlyPlugin } from './plugins/persistedOnly';
-import { costLimitPlugin } from './plugins/costLimit';
+import express from "express";
+import { security } from "./security";
+import { policyGuard } from "./middleware/policyGuard";
+import searchRouter from "./routes/search";
 
-function rateLimitPlugin() {
-  return {
-    async requestDidStart() {
-      return {
-        async willSendResponse() {
-          /* placeholder */
-        },
-      };
-    },
-  };
-}
+const app = express();
+app.use(express.json({ limit: "1mb" }));
+app.use(security);
+app.use(policyGuard);
+app.use(searchRouter);
+app.get("/healthz", (_req, res) => res.json({ ok: true, service: "gateway" }));
 
-const gateway = new ApolloGateway({
-  supergraphSdl: new IntrospectAndCompose({ subgraphs: [] }),
-});
-
-export const server = new ApolloServer({
-  gateway,
-  includeStacktraceInErrorResponses: false,
-  plugins: [rateLimitPlugin(), persistedOnlyPlugin(), costLimitPlugin()],
-});
+export default app;

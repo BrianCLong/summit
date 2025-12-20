@@ -1,0 +1,5 @@
+event_id,target_id,target_label,impact,purpose_tags,provenance_ref
+EVT-7001,P-0001,Person,credential-lockout,security-monitoring|operations,s3csv/relationships/2025-09-01T15:30:00Z
+EVT-7001,ACCT-9001,Account,login-failure,security-monitoring|operations,s3csv/relationships/2025-09-01T15:30:00Z
+EVT-7002,ORG-200,Organization,policy-violation,operations|compliance,s3csv/relationships/2025-09-01T15:30:00Z
+EVT-7003,P-0002,Person,build-delay,security-monitoring|analytics,s3csv/relationships/2025-09-01T15:30:00Z

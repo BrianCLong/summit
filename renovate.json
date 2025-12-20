@@ -1,14 +1,11 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended", ":preserveSemverRanges"],
-  "schedule": ["before 8am on monday"],
+  "extends": ["config:best-practices"],
   "rangeStrategy": "bump",
-  "automerge": false,
+  "labels": ["dependencies"],
+  "prHourlyLimit": 4,
+  "separateMajorMinor": true,
   "packageRules": [
-    {
-      "matchManagers": ["github-actions"],
-      "groupName": "github-actions",
-      "schedule": ["before 8am on monday"]
-    }
+    { "matchManagers": ["npm", "pip_requirements"], "labels": ["deps", "automerge-safe"] }
   ]
 }

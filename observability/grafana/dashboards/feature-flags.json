@@ -1,0 +1,134 @@
+{
+  "dashboard": {
+    "title": "Feature Flags",
+    "tags": ["feature-flags", "analytics"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Flag Evaluation Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(feature_flags_evaluations_total[5m])) by (flag_key)",
+            "legendFormat": "{{ flag_key }}"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Evaluations/sec",
+            "format": "short"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Cache Hit Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(rate(feature_flags_cache_hits_total[5m])) / (sum(rate(feature_flags_cache_hits_total[5m])) + sum(rate(feature_flags_cache_misses_total[5m])))",
+            "legendFormat": "Hit Rate"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percentunit",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "red" },
+                { "value": 0.7, "color": "yellow" },
+                { "value": 0.9, "color": "green" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Evaluation Duration",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(feature_flags_evaluation_duration_ms_bucket[5m])) by (le, flag_key))",
+            "legendFormat": "p95 - {{ flag_key }}"
+          },
+          {
+            "expr": "histogram_quantile(0.99, sum(rate(feature_flags_evaluation_duration_ms_bucket[5m])) by (le, flag_key))",
+            "legendFormat": "p99 - {{ flag_key }}"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Duration (ms)",
+            "format": "ms"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Error Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(feature_flags_errors_total[5m])) by (flag_key, error_type)",
+            "legendFormat": "{{ flag_key }} - {{ error_type }}"
+          }
+        ],
+        "alert": {
+          "name": "High Feature Flag Error Rate",
+          "conditions": [
+            {
+              "evaluator": { "type": "gt", "params": [0.1] },
+              "query": { "params": ["A", "5m", "now"] }
+            }
+          ]
+        }
+      },
+      {
+        "id": 5,
+        "title": "Flag Variations Distribution",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "sum(feature_flags_evaluations_total) by (variation)",
+            "legendFormat": "{{ variation }}"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Top Evaluated Flags",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "topk(10, sum(rate(feature_flags_evaluations_total[5m])) by (flag_key))",
+            "format": "table",
+            "instant": true
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Cache Operations",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(feature_flags_cache_hits_total[5m]))",
+            "legendFormat": "Hits"
+          },
+          {
+            "expr": "sum(rate(feature_flags_cache_misses_total[5m]))",
+            "legendFormat": "Misses"
+          }
+        ]
+      }
+    ],
+    "refresh": "30s",
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    }
+  }
+}

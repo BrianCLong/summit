@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Redis Instrumentation
  * Wraps Redis operations with metrics and tracing

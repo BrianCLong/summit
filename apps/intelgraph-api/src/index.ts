@@ -9,6 +9,7 @@ import { makeContext } from './lib/context.js';
 import { expressjwt, type GetVerificationKey } from 'express-jwt';
 import jwksRsa from 'jwks-rsa';
 import { trace, context } from '@opentelemetry/api';
+import { registerInternalStatusRoutes } from './routes/internalStatus.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4000;
 const app = express();
@@ -70,6 +71,7 @@ async function main() {
   });
   await server.start();
   server.applyMiddleware({ app: app as any, path: '/graphql' });
+  registerInternalStatusRoutes(app);
   app.listen(PORT, () => logger.info({ PORT }, 'IntelGraph API listening'));
 }
 

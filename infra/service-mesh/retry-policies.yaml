@@ -1,0 +1,424 @@
+# Retry Policies for Summit Microservices
+# Implements intelligent retry strategies to handle transient failures
+#
+# Retry policies help with:
+# - Transient network failures
+# - Temporary service unavailability
+# - Load balancing across healthy instances
+# - Graceful degradation under partial failures
+
+---
+# Global default retry policy via VirtualService
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: default-retry-policy
+  namespace: istio-system
+spec:
+  hosts:
+  - "*.svc.cluster.local"
+  http:
+  - retries:
+      attempts: 3
+      perTryTimeout: 2s
+      retryOn: 5xx,reset,connect-failure,refused-stream
+    timeout: 10s
+
+---
+# API Gateway - Retry with exponential backoff
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: api-gateway-retry
+  namespace: summit
+spec:
+  hosts:
+  - api-gateway.summit.svc.cluster.local
+  http:
+  - match:
+    - uri:
+        prefix: /graphql
+    retries:
+      attempts: 3
+      perTryTimeout: 3s
+      retryOn: 5xx,reset,connect-failure,refused-stream,retriable-4xx
+      retryRemoteLocalities: true
+    timeout: 15s
+    headers:
+      request:
+        set:
+          x-retry-policy: "api-gateway"
+  - match:
+    - uri:
+        prefix: /health
+    retries:
+      attempts: 1
+      perTryTimeout: 1s
+    timeout: 2s
+
+---
+# Graph Core Service - Critical path with aggressive retries
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: graph-core-retry
+  namespace: summit
+spec:
+  hosts:
+  - graph-core.summit.svc.cluster.local
+  http:
+  - match:
+    - uri:
+        prefix: /api/v1/entities
+    method:
+      exact: GET
+    retries:
+      attempts: 4
+      perTryTimeout: 3s
+      retryOn: 5xx,reset,connect-failure,refused-stream
+    timeout: 20s
+  - match:
+    - uri:
+        prefix: /api/v1/entities
+    method:
+      regex: POST|PUT|DELETE
+    retries:
+      attempts: 2 # Fewer retries for mutations
+      perTryTimeout: 5s
+      retryOn: 5xx,reset,connect-failure
+    timeout: 15s
+  - match:
+    - uri:
+        prefix: /api/v1/query
+    retries:
+      attempts: 3
+      perTryTimeout: 10s # Longer timeout for complex queries
+      retryOn: 5xx,reset,connect-failure,refused-stream
+    timeout: 45s
+
+---
+# Neo4j - Careful retry for graph operations
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: neo4j-retry
+  namespace: summit
+spec:
+  hosts:
+  - neo4j.summit.svc.cluster.local
+  tcp:
+  - match:
+    - port: 7687 # Bolt protocol
+    route:
+    - destination:
+        host: neo4j.summit.svc.cluster.local
+        port:
+          number: 7687
+  http:
+  - match:
+    - uri:
+        prefix: /db/data
+    retries:
+      attempts: 2
+      perTryTimeout: 10s
+      retryOn: 5xx,reset,connect-failure
+    timeout: 30s
+
+---
+# PostgreSQL - Database retry with idempotency check
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: postgres-retry
+  namespace: summit
+spec:
+  hosts:
+  - postgres.summit.svc.cluster.local
+  tcp:
+  - match:
+    - port: 5432
+    route:
+    - destination:
+        host: postgres.summit.svc.cluster.local
+        port:
+          number: 5432
+
+---
+# Redis - Fast retry for cache operations
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: redis-retry
+  namespace: summit
+spec:
+  hosts:
+  - redis.summit.svc.cluster.local
+  tcp:
+  - match:
+    - port: 6379
+    route:
+    - destination:
+        host: redis.summit.svc.cluster.local
+        port:
+          number: 6379
+        subset: primary
+    - destination:
+        host: redis.summit.svc.cluster.local
+        port:
+          number: 6379
+        subset: replica
+      weight: 0 # Failover only
+
+---
+# AI/ML Services - Patient retry for long operations
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: nlp-service-retry
+  namespace: summit
+spec:
+  hosts:
+  - nlp-service.summit.svc.cluster.local
+  http:
+  - match:
+    - uri:
+        prefix: /api/v1/extract
+    retries:
+      attempts: 2
+      perTryTimeout: 30s
+      retryOn: 5xx,reset,connect-failure
+    timeout: 120s
+  - match:
+    - uri:
+        prefix: /api/v1/classify
+    retries:
+      attempts: 2
+      perTryTimeout: 20s
+      retryOn: 5xx,reset,connect-failure
+    timeout: 90s
+
+---
+# Analytics Engine - Batch tolerant retries
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: analytics-engine-retry
+  namespace: summit
+spec:
+  hosts:
+  - analytics-engine.summit.svc.cluster.local
+  http:
+  - match:
+    - uri:
+        prefix: /api/v1/analyze
+    retries:
+      attempts: 2
+      perTryTimeout: 60s
+      retryOn: 5xx,reset,connect-failure
+    timeout: 300s # 5 minutes for analytics
+  - match:
+    - uri:
+        prefix: /api/v1/stream
+    retries:
+      attempts: 1 # Streaming operations shouldn't retry
+      perTryTimeout: 120s
+    timeout: 600s
+
+---
+# Stream Processor - Event processing retries
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: stream-processor-retry
+  namespace: summit
+spec:
+  hosts:
+  - stream-processor.summit.svc.cluster.local
+  http:
+  - match:
+    - uri:
+        prefix: /api/v1/process
+    retries:
+      attempts: 3
+      perTryTimeout: 10s
+      retryOn: 5xx,reset,connect-failure,refused-stream
+    timeout: 60s
+
+---
+# Authz Gateway - Fast fail for authorization
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: authz-gateway-retry
+  namespace: summit
+spec:
+  hosts:
+  - authz-gateway.summit.svc.cluster.local
+  http:
+  - match:
+    - uri:
+        prefix: /authorize
+    retries:
+      attempts: 2
+      perTryTimeout: 1s # Fast timeout for authz
+      retryOn: 5xx,reset,connect-failure
+    timeout: 3s
+  - match:
+    - uri:
+        prefix: /policy
+    retries:
+      attempts: 3
+      perTryTimeout: 2s
+      retryOn: 5xx,reset,connect-failure,retriable-4xx
+    timeout: 10s
+
+---
+# Provenance Ledger - Reliable audit trail
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: prov-ledger-retry
+  namespace: summit
+spec:
+  hosts:
+  - prov-ledger.summit.svc.cluster.local
+  http:
+  - match:
+    - uri:
+        prefix: /api/v1/evidence
+    method:
+      exact: GET
+    retries:
+      attempts: 4
+      perTryTimeout: 5s
+      retryOn: 5xx,reset,connect-failure,refused-stream
+    timeout: 30s
+  - match:
+    - uri:
+        prefix: /api/v1/evidence
+    method:
+      exact: POST
+    retries:
+      attempts: 3 # Critical writes need retries
+      perTryTimeout: 10s
+      retryOn: 5xx,reset,connect-failure
+    timeout: 45s
+
+---
+# Webhook Receiver - External integration retry
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: webhook-receiver-retry
+  namespace: summit
+spec:
+  hosts:
+  - webhook-receiver.summit.svc.cluster.local
+  http:
+  - match:
+    - uri:
+        prefix: /webhooks
+    retries:
+      attempts: 1 # Webhooks typically handle their own retries
+      perTryTimeout: 30s
+      retryOn: 5xx,reset,connect-failure
+    timeout: 60s
+
+---
+# Search Engine - Query retry with cache awareness
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: search-engine-retry
+  namespace: summit
+spec:
+  hosts:
+  - search-engine.summit.svc.cluster.local
+  http:
+  - match:
+    - uri:
+        prefix: /api/v1/search
+    headers:
+      x-cache-control:
+        exact: no-cache
+    retries:
+      attempts: 2
+      perTryTimeout: 5s
+      retryOn: 5xx,reset,connect-failure
+    timeout: 20s
+  - match:
+    - uri:
+        prefix: /api/v1/search
+    retries:
+      attempts: 3
+      perTryTimeout: 3s
+      retryOn: 5xx,reset,connect-failure,retriable-4xx
+    timeout: 15s
+
+---
+# Export Service - Large payload handling
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: export-service-retry
+  namespace: summit
+spec:
+  hosts:
+  - export-service.summit.svc.cluster.local
+  http:
+  - match:
+    - uri:
+        prefix: /api/v1/export
+    retries:
+      attempts: 1 # Large exports shouldn't retry
+      perTryTimeout: 300s # 5 minutes
+    timeout: 600s # 10 minutes
+
+---
+# Kafka Connect - Event streaming
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: kafka-retry
+  namespace: summit
+spec:
+  hosts:
+  - kafka.summit.svc.cluster.local
+  tcp:
+  - match:
+    - port: 9092
+    route:
+    - destination:
+        host: kafka.summit.svc.cluster.local
+        port:
+          number: 9092
+
+---
+# Global timeout and retry policy for health checks
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: health-check-policy
+  namespace: summit
+spec:
+  hosts:
+  - "*.summit.svc.cluster.local"
+  http:
+  - match:
+    - uri:
+        exact: /health
+    - uri:
+        exact: /health/ready
+    - uri:
+        exact: /health/live
+    retries:
+      attempts: 1
+      perTryTimeout: 1s
+    timeout: 2s
+  - match:
+    - uri:
+        exact: /metrics
+    retries:
+      attempts: 1
+      perTryTimeout: 5s
+    timeout: 10s

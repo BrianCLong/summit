@@ -1,36 +1,36 @@
-IntelGraph Agents (Safe, Defensive Scope)
+# IntelGraph Agents & Economics
 
-This directory documents the seven defensive agents and how they integrate with Summit/IntelGraph.
+This directory documents the **Budget, Risk, and Operational Framework** for all agents running on the Summit platform, as well as the specific defensive agent implementations.
 
-- Singlaub: Field Resilience & Continuity (degraded comms, lawful logistics)
-- LeMay: Strategic Overwatch & Crisis Response (escalation, rollback, comms)
-- Angleton: Counter‑Deception & Data Integrity (trust scores, quarantine)
-- Budanov: Adversary Mapping (OSINT/legal, ambiguity tracking)
-- Wolf: Long‑Term Risk Insight (drift/novelty, stakeholder signals)
-- Harel: Threat Network Disruption (protective ops, case bundles)
-- Gehlen: Telemetry & Peer Capability Analysis (comparative insights)
+## Core Governance (Economics & Risk)
 
-Guardrails
+Before deploying any agent, review the mandatory governance standards:
 
-- Anonymization + retention (OPA policy pack v0)
-- Zero‑trust access (ABAC, SCIM+OIDC)
-- Provenance bundles per decision; signatures verified
-- Cost/SLO gates in rollouts; auto‑pause on breach
+*   **[Agent Budgets](./agent-budgets.md)**: Canonical budget dimensions, agent classes (Tier 0-4), and resource limits.
+*   **[Risk Scoring Model](./risk-scoring.md)**: How agent risk is calculated based on files touched, permissions, and scope.
+*   **[Budget Enforcement](./budget-enforcement.md)**: Mechanisms for invocation-time checks, runtime throttling, and kill switches.
+*   **[Telemetry & Audit](./agent-telemetry.md)**: Required metrics, audit logs, and anomaly detection schemas.
 
-Feature Flags
+---
 
-- Enable/disable per agent via env: FEATURE*AGENT*{NAME}=true|false
-  - Example: FEATURE_AGENT_ANGLETON=false
+## Agent Roster (Defensive Scope)
 
-Metrics/Dashboards
+Specific implementations of the seven defensive agents:
 
-- Prometheus: intelgraph_trust_score, intelgraph_risk_signals_total
-- Grafana: server/grafana/trust-risk-overview.json
+- **Singlaub**: Field Resilience & Continuity (degraded comms, lawful logistics)
+- **LeMay**: Strategic Overwatch & Crisis Response (escalation, rollback, comms)
+- **Angleton**: Counter‑Deception & Data Integrity (trust scores, quarantine)
+- **Budanov**: Adversary Mapping (OSINT/legal, ambiguity tracking)
+- **Wolf**: Long‑Term Risk Insight (drift/novelty, stakeholder signals)
+- **Harel**: Threat Network Disruption (protective ops, case bundles)
+- **Gehlen**: Telemetry & Peer Capability Analysis (comparative insights)
 
-Runbooks
+---
 
-- See server/runbooks/agents for operational steps and escalation paths.
+## Operational Resources
 
-Master Prompts
-
-- [Link Analysis Canvas Orchestrator](./link-analysis-canvas-master-prompt.md) — coordinates the tri-pane workspace, telemetry, and policy guardrails for investigative workflows.
+*   **Guardrails**: Anonymization, Zero-trust (ABAC), Provenance bundles.
+*   **Feature Flags**: Enable/disable per agent via env `FEATURE_AGENT_{NAME}`.
+*   **Prompts**:
+    *   [Link Analysis Canvas Orchestrator](./link-analysis-canvas-master-prompt.md)
+    *   [Agent Variant Superprompts](./variants/README.md) (Claude, Codex, Jules, etc.)

@@ -1,399 +1,324 @@
-# ============================================================================
-# Summit Helm Chart Values
-# Comprehensive configuration for deployment strategies and infrastructure
-# ============================================================================
+# Global defaults for Summit umbrella deployment
+namespace: summit
+createNamespace: false
 
-# Global configuration
-global:
-  environment: production  # development, staging, production
-  region: us-east-1
-  clusterName: summit-prod
-
-# Deployment strategy: standard, blue-green, canary
-deploymentStrategy: canary
-
-# Application image configuration
-image:
-  repository: ghcr.io/brianclong/summit
-  tag: latest
-  pullPolicy: IfNotPresent
-  pullSecrets: []
-
-# Replica configuration
-replicaCount: 5
-
-# Auto-scaling configuration
-autoscaling:
-  enabled: true
-  minReplicas: 3
-  maxReplicas: 20
-  targetCPUUtilizationPercentage: 70
-  targetMemoryUtilizationPercentage: 80
-  behavior:
-    scaleDown:
-      stabilizationWindowSeconds: 300
-      policies:
-        - type: Percent
-          value: 50
-          periodSeconds: 60
-    scaleUp:
-      stabilizationWindowSeconds: 60
-      policies:
-        - type: Percent
-          value: 100
-          periodSeconds: 30
-
-# Resource limits
-resources:
-  requests:
-    cpu: 500m
-    memory: 1Gi
-  limits:
-    cpu: 2000m
-    memory: 4Gi
-
-# Health check configuration
-healthChecks:
-  liveness:
+# Defaults applied to all services unless overridden
+common:
+  imagePullSecrets: []
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  autoscaling:
     enabled: true
-    path: /health/live
-    initialDelaySeconds: 60
-    periodSeconds: 10
-    timeoutSeconds: 5
-    failureThreshold: 3
-  readiness:
-    enabled: true
-    path: /health/ready
-    initialDelaySeconds: 30
-    periodSeconds: 5
-    timeoutSeconds: 3
-    failureThreshold: 2
-  startup:
-    enabled: true
-    path: /health/startup
-    initialDelaySeconds: 10
-    periodSeconds: 5
-    timeoutSeconds: 3
-    failureThreshold: 12
-
-# Service configuration
-service:
-  type: ClusterIP
-  port: 80
-  targetPort: 3000
-  annotations: {}
-
-# Ingress configuration
-ingress:
-  enabled: true
-  className: alb
-  annotations:
-    alb.ingress.kubernetes.io/scheme: internet-facing
-    alb.ingress.kubernetes.io/target-type: ip
-    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
-    alb.ingress.kubernetes.io/ssl-redirect: "443"
-    alb.ingress.kubernetes.io/healthcheck-path: /health/ready
-    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "30"
-  hosts:
-    - host: api.summit.example.com
-      paths:
-        - path: /
-          pathType: Prefix
-  tls:
-    - secretName: summit-tls-cert
-      hosts:
-        - api.summit.example.com
-
-# Blue-Green deployment configuration
-blueGreen:
-  enabled: false
-  autoPromotionEnabled: false
-  scaleDownDelaySeconds: 300
-  scaleDownDelayRevisionLimit: 2
-  previewReplicaCount: 2
-  activeService: summit-active
-  previewService: summit-preview
-  analysis:
-    enabled: true
-    prePromotion:
-      - health-check
-      - error-rate
-      - latency
-      - smoke-tests
-    postPromotion:
-      - error-rate
-      - latency
-      - slo-compliance
-
-# Canary deployment configuration
-canary:
-  enabled: true
-  steps:
-    - weight: 5
-      pause: 5m
-    - weight: 10
-      pause: 5m
-    - weight: 25
-      pause: 10m
-    - weight: 50
-      pause: 10m
-    - weight: 75
-      pause: 10m
-    - weight: 100
-  trafficRouting:
-    istio:
+    minReplicas: 2
+    maxReplicas: 10
+    cpu:
+      averageUtilization: 70
+    memory:
+      averageUtilization: 75
+    customMetrics: []
+  probes:
+    liveness:
+      path: /healthz
+      initialDelaySeconds: 20
+      periodSeconds: 10
+    readiness:
+      path: /healthz
+      initialDelaySeconds: 10
+      periodSeconds: 10
+    startup:
       enabled: true
-      virtualService: summit-vsvc
-    nginx:
-      enabled: false
-  analysis:
+      path: /healthz
+      failureThreshold: 30
+      periodSeconds: 5
+  service:
+    type: ClusterIP
+  ingress:
     enabled: true
-    continuous: true
-    templates:
-      - health-check
-      - error-rate
-      - latency
-      - comparison
-      - business-metrics
-    thresholds:
-      errorRate: 0.02  # 2%
-      p95Latency: 500  # 500ms
-      p99Latency: 1000 # 1s
-      successRate: 0.98 # 98%
+    className: istio
+    tls:
+      enabled: true
+      secretName: summit-tls
+      clusterIssuer: summit-issuer
+  blueGreen:
+    enabled: true
+    activeColor: blue
+    standbyColor: green
+    promotionJob:
+      enabled: true
+      image: bitnami/kubectl:1.30
+      serviceAccountName: summit-bluegreen
 
-# Rollback configuration
-rollback:
+namespaceResources:
+  limitRange:
+    enabled: true
+    default:
+      cpu: 500m
+      memory: 512Mi
+    defaultRequest:
+      cpu: 250m
+      memory: 256Mi
+    max:
+      cpu: "2"
+      memory: 4Gi
+    min:
+      cpu: 100m
+      memory: 128Mi
+  resourceQuota:
+    enabled: true
+    hard:
+      requests.cpu: "4"
+      requests.memory: 8Gi
+      limits.cpu: "8"
+      limits.memory: 16Gi
+      pods: "50"
+      persistentvolumeclaims: "10"
+
+mesh:
   enabled: true
-  automatic: true
-  onFailure: true
-  healthCheckTimeout: 300
-  analysisThreshold: 2
+  sidecarInjection: true
+  mtlsMode: STRICT
+  destinationRules:
+    - host: server
+      trafficPolicy:
+        tls:
+          mode: ISTIO_MUTUAL
+    - host: client
+      trafficPolicy:
+        tls:
+          mode: ISTIO_MUTUAL
+    - host: ai-service
+      trafficPolicy:
+        tls:
+          mode: ISTIO_MUTUAL
+    - host: worker-python
+      trafficPolicy:
+        tls:
+          mode: ISTIO_MUTUAL
 
-# Monitoring and observability
-monitoring:
+istio-config:
+  sidecarInjection:
+    enabled: true
+    namespaceLabel: istio-injection
+  peerAuthentication:
+    enabled: true
+    mtlsMode: STRICT
+  destinationRules:
+    - host: server
+      trafficPolicy:
+        tls:
+          mode: ISTIO_MUTUAL
+    - host: client
+      trafficPolicy:
+        tls:
+          mode: ISTIO_MUTUAL
+    - host: ai-service
+      trafficPolicy:
+        tls:
+          mode: ISTIO_MUTUAL
+    - host: worker-python
+      trafficPolicy:
+        tls:
+          mode: ISTIO_MUTUAL
+
+networkPolicies:
   enabled: true
-  prometheus:
-    enabled: true
-    scrape: true
-    port: 9090
-    path: /metrics
-  grafana:
-    enabled: true
-    dashboards: true
-  servicemonitor:
-    enabled: true
-    interval: 30s
-  alerts:
-    enabled: true
+  ingressNamespaces:
+    - istio-system
+  egressNamespaces:
+    - kube-system
+    - monitoring
 
-# Security configuration
-security:
-  podSecurityContext:
-    runAsNonRoot: true
-    runAsUser: 1000
-    fsGroup: 1000
-    seccompProfile:
-      type: RuntimeDefault
-  containerSecurityContext:
-    allowPrivilegeEscalation: false
-    readOnlyRootFilesystem: true
-    runAsNonRoot: true
-    runAsUser: 1000
-    capabilities:
-      drop:
-        - ALL
-  networkPolicy:
-    enabled: true
-    ingress:
-      - from:
-          - namespaceSelector:
-              matchLabels:
-                name: ingress
-    egress:
-      - to:
-          - namespaceSelector: {}
-        ports:
-          - protocol: TCP
-            port: 443
-          - protocol: TCP
-            port: 80
-
-# Service mesh configuration
-serviceMesh:
-  enabled: true
-  type: istio  # istio, linkerd, consul
-  mtls:
-    enabled: true
-    mode: STRICT
-  retry:
-    attempts: 3
-    perTryTimeout: 10s
-    retryOn: 5xx,reset,connect-failure,refused-stream
-  timeout: 30s
-  circuitBreaker:
-    enabled: true
-    consecutiveErrors: 5
-    interval: 30s
-    baseEjectionTime: 30s
-
-# Database configuration
-database:
-  neo4j:
-    enabled: true
-    uri: bolt://neo4j.intelgraph-prod.svc.cluster.local:7687
-    existingSecret: neo4j-credentials
-  postgresql:
-    enabled: true
-    host: postgres.intelgraph-prod.svc.cluster.local
-    port: 5432
-    database: summit
-    existingSecret: postgres-credentials
-  redis:
-    enabled: true
-    host: redis.intelgraph-prod.svc.cluster.local
-    port: 6379
-    existingSecret: redis-credentials
-
-# External secrets
 externalSecrets:
-  enabled: false
-  backend: aws-secrets-manager  # aws-secrets-manager, vault, gcp-secret-manager
-  region: us-east-1
-  secrets:
-    - name: summit-secrets
-      key: summit/prod/secrets
+  storeRef:
+    kind: ClusterSecretStore
+    name: summit-secrets
+  manifests:
+    - name: server-secret
+      target:
+        name: server-secret
+      data:
+        - secretKey: jwt-secret
+          remoteRef:
+            key: summit/server
+            property: jwt-secret
+        - secretKey: jwt-refresh-secret
+          remoteRef:
+            key: summit/server
+            property: jwt-refresh-secret
+    - name: neo4j-secret
+      target:
+        name: neo4j-secret
+      data:
+        - secretKey: password
+          remoteRef:
+            key: summit/neo4j
+            property: password
+    - name: postgres-secret
+      target:
+        name: postgres-secret
+      data:
+        - secretKey: password
+          remoteRef:
+            key: summit/postgres
+            property: password
+    - name: ai-service-secret
+      target:
+        name: ai-service-secret
+      data:
+        - secretKey: api-key
+          remoteRef:
+            key: summit/ai-service
+            property: api-key
 
-# Environment variables
-env:
-  NODE_ENV: production
-  LOG_LEVEL: info
-  DEPLOYMENT_STRATEGY: canary
-
-# Config maps
-configMaps:
-  - name: summit-config
-    data: {}
-
-# Secrets (use external secrets in production)
-secrets:
-  - name: summit-secrets
-    data: {}
-
-# Persistence
-persistence:
-  enabled: false
-  storageClass: gp3
-  accessMode: ReadWriteOnce
-  size: 10Gi
-
-# Pod disruption budget
-podDisruptionBudget:
+# Service inventory
+server:
   enabled: true
-  minAvailable: 2
+  image:
+    repository: ghcr.io/BrianCLong/intelgraph/server
+    pullPolicy: IfNotPresent
+  replicaCount: 2
+  service:
+    port: 4000
+    type: ClusterIP
+  env:
+    - name: NODE_ENV
+      value: production
+    - name: PORT
+      value: "4000"
+    - name: NEO4J_URI
+      value: bolt://neo4j:7687
+    - name: POSTGRES_HOST
+      value: postgres
+    - name: POSTGRES_USER
+      value: intelgraph
+    - name: REDIS_HOST
+      value: redis
+    - name: REDIS_PORT
+      value: "6379"
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  secrets:
+    - name: neo4j-secret
+      key: password
+      env: NEO4J_PASSWORD
+    - name: postgres-secret
+      key: password
+      env: POSTGRES_PASSWORD
+    - name: server-secret
+      key: jwt-secret
+      env: JWT_SECRET
+    - name: server-secret
+      key: jwt-refresh-secret
+      env: JWT_REFRESH_SECRET
+  ingress:
+    hosts:
+      - host: api.summit.local
+        paths:
+          - path: /
+            pathType: Prefix
+  hpa:
+    customMetrics:
+      - name: cypher_query_rate
+        averageValue: 10
+  networkPolicy:
+    tiers:
+      allowedIngressLabels:
+        - matchLabels:
+            istio: ingressgateway
+      allowedEgressFQDNs:
+        - postgresql.example.internal
 
-# Pod anti-affinity
-affinity:
-  podAntiAffinity:
-    preferredDuringSchedulingIgnoredDuringExecution:
-      - weight: 100
-        podAffinityTerm:
-          labelSelector:
-            matchExpressions:
-              - key: app
-                operator: In
-                values:
-                  - summit
-          topologyKey: kubernetes.io/hostname
+client:
+  enabled: true
+  image:
+    repository: ghcr.io/BrianCLong/intelgraph/client
+    pullPolicy: IfNotPresent
+  replicaCount: 2
+  service:
+    port: 80
+  resources:
+    requests:
+      cpu: 150m
+      memory: 192Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  ingress:
+    hosts:
+      - host: app.summit.local
+        paths:
+          - path: /
+            pathType: Prefix
+  probes:
+    liveness:
+      path: /
+    readiness:
+      path: /
+    startup:
+      enabled: false
 
-# Topology spread constraints
-topologySpreadConstraints:
-  - maxSkew: 1
-    topologyKey: topology.kubernetes.io/zone
-    whenUnsatisfiable: ScheduleAnyway
-    labelSelector:
-      matchLabels:
-        app: summit
+ai-service:
+  enabled: true
+  image:
+    repository: ghcr.io/BrianCLong/intelgraph/ai-service
+    pullPolicy: IfNotPresent
+  replicaCount: 2
+  service:
+    port: 8080
+  env:
+    - name: PORT
+      value: "8080"
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 750m
+      memory: 768Mi
+  secrets:
+    - name: ai-service-secret
+      key: api-key
+      env: AI_API_KEY
+  ingress:
+    hosts:
+      - host: ai.summit.local
+        paths:
+          - path: /
+            pathType: Prefix
 
-# Service account
-serviceAccount:
-  create: true
-  name: summit
-  annotations: {}
-
-# RBAC
-rbac:
-  create: true
-  rules: []
-
-# Node selector
-nodeSelector: {}
-
-# Tolerations
-tolerations: []
-
-# Init containers
-initContainers: []
-
-# Sidecar containers
-sidecars: []
-
-# Volume mounts
-volumeMounts:
-  - name: tmp
-    mountPath: /tmp
-  - name: cache
-    mountPath: /app/.cache
-
-# Volumes
-volumes:
-  - name: tmp
-    emptyDir: {}
-  - name: cache
-    emptyDir: {}
-
-# Lifecycle hooks
-lifecycle:
-  preStop:
-    exec:
-      command: ["/bin/sh", "-c", "sleep 15"]
-
-# Annotations
-podAnnotations:
-  prometheus.io/scrape: "true"
-  prometheus.io/port: "9090"
-  prometheus.io/path: "/metrics"
-
-# Labels
-podLabels:
-  app: summit
-  version: v1
-
-# Priority class
-priorityClassName: ""
-
-# DNS config
-dnsConfig: {}
-dnsPolicy: ClusterFirst
-
-# Host aliases
-hostAliases: []
-
-# Termination grace period
-terminationGracePeriodSeconds: 30
-
-# Dependencies (enable/disable sub-charts)
-neo4j:
-  enabled: false
-  # See neo4j chart values
-
-postgresql:
-  enabled: false
-  # See postgresql chart values
-
-redis:
-  enabled: false
-  # See redis chart values
-
-prometheus:
-  enabled: false
-  # See prometheus chart values
+worker-python:
+  enabled: true
+  image:
+    repository: ghcr.io/BrianCLong/intelgraph/worker-python
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicas: 2
+  env:
+    - name: WORKER_MODE
+      value: live
+  service:
+    port: 9000
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 800m
+      memory: 1Gi
+  probes:
+    liveness:
+      path: /healthz
+    readiness:
+      path: /healthz
+    startup:
+      path: /healthz

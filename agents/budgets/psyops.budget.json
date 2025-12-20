@@ -1,0 +1,28 @@
+{
+  "$schema": "https://summit.dev/schemas/agent-budget-manifest.schema.json",
+  "schemaVersion": "2025-02-15",
+  "agentId": "psyops",
+  "owner": "Agent Control Systems",
+  "description": "PsyOps simulation agent with tight concurrency and network ceilings to isolate campaigns.",
+  "deterministicLimits": {
+    "maxTokens": 50000,
+    "maxCallsPerRun": 24,
+    "maxWallClockMs": 150000,
+    "maxConcurrentRuns": 1,
+    "maxDailyRuns": 120,
+    "maxNetworkKB": 2048
+  },
+  "risk": {
+    "inherent": 7,
+    "controlBaseline": 3,
+    "residual": 4,
+    "riskTier": "high",
+    "riskCeiling": 5,
+    "gates": ["lint", "policy-check"]
+  },
+  "telemetry": {
+    "auditLogPath": "agents/audit/logs/agent-audit.log",
+    "emitBudgetEvents": true,
+    "sampleRate": 1
+  }
+}

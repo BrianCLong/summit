@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="IntelGraph Platform API Documentation - Next-generation intelligence analysis with AI-augmented graph analytics">
+    <meta name="keywords" content="IntelGraph, API, Documentation, Graph Analytics, Intelligence Analysis, REST API, GraphQL">
+    <title>IntelGraph API Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            padding: 60px 20px;
+        }
+
+        header h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        header p {
+            font-size: 1.3rem;
+            opacity: 0.95;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            color: white;
+            font-size: 0.9rem;
+            margin: 10px 5px;
+            backdrop-filter: blur(10px);
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .card-link {
+            color: #667eea;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .card-link:hover {
+            text-decoration: underline;
+        }
+
+        .quick-links {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .quick-links h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .link-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .link-item {
+            padding: 15px;
+            background: #f7f7f7;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #333;
+            transition: background 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .link-item:hover {
+            background: #e7e7e7;
+        }
+
+        .link-icon {
+            font-size: 1.5rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: white;
+            background: rgba(0,0,0,0.2);
+            margin-top: 60px;
+        }
+
+        footer a {
+            color: white;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        .version {
+            display: inline-block;
+            padding: 5px 12px;
+            background: #28a745;
+            color: white;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2.5rem;
+            }
+
+            header p {
+                font-size: 1.1rem;
+            }
+
+            .cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🔍 IntelGraph Platform API</h1>
+        <p>Next-generation intelligence analysis with AI-augmented graph analytics</p>
+        <div>
+            <span class="badge">REST API v1.0.0</span>
+            <span class="badge">GraphQL API v2.1.0</span>
+            <span class="badge">Production Ready</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="cards">
+            <a href="./openapi/index.html" class="card">
+                <div class="card-icon">📚</div>
+                <h2>REST API Documentation</h2>
+                <p>Complete OpenAPI/Swagger documentation for REST endpoints including cases, evidence, ingestion, and analytics.</p>
+                <span class="card-link">Browse REST API →</span>
+            </a>
+
+            <a href="/api/docs/graphql-playground" class="card">
+                <div class="card-icon">⚡</div>
+                <h2>GraphQL Playground</h2>
+                <p>Interactive GraphQL explorer with schema introspection, query examples, and real-time testing.</p>
+                <span class="card-link">Launch Playground →</span>
+            </a>
+
+            <a href="./API_INTEGRATION_GUIDE.html" class="card">
+                <div class="card-icon">🚀</div>
+                <h2>Integration Guide</h2>
+                <p>Step-by-step guide for integrating IntelGraph API with code examples in TypeScript and Python.</p>
+                <span class="card-link">Read Guide →</span>
+            </a>
+
+            <a href="./API_VERSIONING_STRATEGY.html" class="card">
+                <div class="card-icon">🔄</div>
+                <h2>Versioning Strategy</h2>
+                <p>Learn about our API versioning approach, deprecation policy, and migration guidelines.</p>
+                <span class="card-link">View Strategy →</span>
+            </a>
+
+            <a href="https://github.com/BrianCLong/summit/tree/main/sdks/typescript" class="card">
+                <div class="card-icon">📦</div>
+                <h2>TypeScript SDK</h2>
+                <p>Official TypeScript/JavaScript client SDK with full type safety and comprehensive examples.</p>
+                <span class="card-link">Get SDK →</span>
+            </a>
+
+            <a href="https://github.com/BrianCLong/summit/tree/main/sdks/python" class="card">
+                <div class="card-icon">🐍</div>
+                <h2>Python SDK</h2>
+                <p>Official Python client SDK with async support, type hints, and detailed documentation.</p>
+                <span class="card-link">Get SDK →</span>
+            </a>
+        </div>
+
+        <div class="quick-links">
+            <h2>Quick Links</h2>
+            <div class="link-grid">
+                <a href="/graphql" class="link-item">
+                    <span class="link-icon">🔌</span>
+                    <span>GraphQL Endpoint</span>
+                </a>
+                <a href="/api/docs" class="link-item">
+                    <span class="link-icon">📖</span>
+                    <span>Swagger UI</span>
+                </a>
+                <a href="/api/docs/redoc" class="link-item">
+                    <span class="link-icon">📄</span>
+                    <span>ReDoc UI</span>
+                </a>
+                <a href="/api/docs/openapi.json" class="link-item">
+                    <span class="link-icon">📋</span>
+                    <span>OpenAPI Spec (JSON)</span>
+                </a>
+                <a href="/api/docs/openapi.yaml" class="link-item">
+                    <span class="link-icon">📝</span>
+                    <span>OpenAPI Spec (YAML)</span>
+                </a>
+                <a href="/api/docs/graphql-schema" class="link-item">
+                    <span class="link-icon">📐</span>
+                    <span>GraphQL Schema (SDL)</span>
+                </a>
+                <a href="/health" class="link-item">
+                    <span class="link-icon">💚</span>
+                    <span>Health Check</span>
+                </a>
+                <a href="/metrics" class="link-item">
+                    <span class="link-icon">📊</span>
+                    <span>Metrics</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="quick-links">
+            <h2>Code Examples</h2>
+            <div class="link-grid">
+                <a href="https://github.com/BrianCLong/summit/tree/main/examples/typescript" class="link-item">
+                    <span class="link-icon">📘</span>
+                    <span>TypeScript Examples</span>
+                </a>
+                <a href="https://github.com/BrianCLong/summit/tree/main/examples/python" class="link-item">
+                    <span class="link-icon">📗</span>
+                    <span>Python Examples</span>
+                </a>
+                <a href="https://github.com/BrianCLong/summit/tree/main/examples" class="link-item">
+                    <span class="link-icon">💼</span>
+                    <span>All Examples</span>
+                </a>
+                <a href="https://github.com/BrianCLong/summit" class="link-item">
+                    <span class="link-icon">🔗</span>
+                    <span>GitHub Repository</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 IntelGraph Platform. Licensed under MIT.</p>
+        <p>
+            <a href="https://github.com/BrianCLong/summit">GitHub</a> |
+            <a href="mailto:support@intelgraph.ai">Support</a> |
+            <a href="https://docs.intelgraph.ai">Full Documentation</a>
+        </p>
+    </footer>
+</body>
+</html>

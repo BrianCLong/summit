@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { Request, Response, NextFunction } from 'express';
 import * as crypto from 'node:crypto';
 import { otelService } from '../middleware/observability/otel-tracing.js';

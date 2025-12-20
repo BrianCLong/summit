@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/nuclear-monitoring",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "license": "MIT",
   "type": "module",
   "main": "dist/index.js",
@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@intelgraph/hrn": "workspace:*",
-    "@intelgraph/types": "workspace:*"
+    "@intelgraph/common-types": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.9.3",

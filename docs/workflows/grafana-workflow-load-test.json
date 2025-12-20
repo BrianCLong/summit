@@ -1,0 +1,213 @@
+{
+  "id": null,
+  "uid": "argo-workflows-load",
+  "title": "Argo Workflow Load Test Overview",
+  "tags": ["k6", "argo", "load-testing"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "10s",
+  "panels": [
+    {
+      "type": "row",
+      "title": "Load Generation",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Active Virtual Users",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 1 },
+      "targets": [
+        {
+          "expr": "sum(k6_vus{service=\"k6-load-test\"})",
+          "legendFormat": "VU Count"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP Request Rate",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 1 },
+      "targets": [
+        {
+          "expr": "sum(rate(http_reqs_total{service=\"k6-load-test\"}[1m]))",
+          "legendFormat": "req/s"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "req/s" },
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Workflow Submission Duration (p95)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 9 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(workflow_submission_duration_bucket[5m])))",
+          "legendFormat": "p95"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "decimals": 0
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Workflow Status Duration (p95)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 9 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(workflow_status_duration_bucket[5m])))",
+          "legendFormat": "p95"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 0
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Workflow Error Rate",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 17 },
+      "targets": [
+        {
+          "expr": "sum(rate(workflow_errors_total[5m]))",
+          "legendFormat": "errors/s"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "req/s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 0.05 },
+              { "color": "red", "value": 0.1 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Workflow Completion Status",
+      "gridPos": { "h": 6, "w": 10, "x": 6, "y": 17 },
+      "targets": [
+        {
+          "expr": "sum by (status) (increase(workflow_status_total[5m]))",
+          "legendFormat": "{{status}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Workflow Engine CPU",
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 17 },
+      "targets": [
+        {
+          "expr": "rate(container_cpu_usage_seconds_total{pod=~\"workflow-engine.*\"}[5m])",
+          "legendFormat": "CPU"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "cores",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Workflow Engine Memory",
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 23 },
+      "targets": [
+        {
+          "expr": "container_memory_working_set_bytes{pod=~\"workflow-engine.*\"}",
+          "legendFormat": "{{pod}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "decimals": 0
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Completed Workflows",
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 23 },
+      "targets": [
+        {
+          "expr": "sum(increase(workflow_status_total{status=\"Succeeded\"}[5m]))",
+          "legendFormat": "Succeeded"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Failed Workflows",
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 23 },
+      "targets": [
+        {
+          "expr": "sum(increase(workflow_status_total{status=~\"Failed|Error\"}[5m]))",
+          "legendFormat": "Failed"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 1 },
+              { "color": "red", "value": 5 }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "namespace",
+        "type": "query",
+        "datasource": "Prometheus",
+        "refresh": 1,
+        "query": "label_values(workflow_status_total, namespace)",
+        "current": {
+          "text": "argo",
+          "value": "argo"
+        }
+      }
+    ]
+  }
+}

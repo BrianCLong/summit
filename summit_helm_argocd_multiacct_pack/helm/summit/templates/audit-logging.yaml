@@ -1,0 +1,34 @@
+{{- if .Values.auditLogging.enabled }}
+{{- $namespace := default .Release.Namespace .Values.namespace.name }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "summit.name" . }}-audit-policy
+  namespace: {{ $namespace }}
+  labels:
+    {{- include "summit.labels" . | nindent 4 }}
+data:
+  audit-policy.yaml: |
+    apiVersion: audit.k8s.io/v1
+    kind: Policy
+    rules:
+      - level: Metadata
+        resources:
+          - group: ""
+            resources: ["pods", "configmaps", "secrets", "serviceaccounts"]
+          - group: "apps"
+            resources: ["deployments", "replicasets"]
+      - level: RequestResponse
+        verbs: ["create", "update", "patch", "delete", "deletecollection"]
+        resources:
+          - group: ""
+            resources: ["pods", "secrets", "serviceaccounts", "namespaces"]
+          - group: "rbac.authorization.k8s.io"
+            resources: ["roles", "rolebindings"]
+      - level: None
+        users: ["system:kube-proxy"]
+  retention.yaml: |
+    retentionDays: {{ .Values.auditLogging.retentionDays }}
+    maxFileSizeMiB: {{ .Values.auditLogging.maxFileSizeMiB }}
+    maxBackups: {{ .Values.auditLogging.maxBackups }}
+{{- end }}

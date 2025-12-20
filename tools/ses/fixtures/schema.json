@@ -1,0 +1,22 @@
+{
+  "version": "1.0.0",
+  "tables": [
+    {
+      "name": "customers",
+      "columns": [
+        { "name": "id", "type": "integer" },
+        { "name": "full_name", "type": "string" },
+        { "name": "email", "type": "string" },
+        { "name": "signup_date", "type": "date" }
+      ]
+    },
+    {
+      "name": "orders",
+      "columns": [
+        { "name": "id", "type": "integer" },
+        { "name": "customer_id", "type": "integer" },
+        { "name": "total_amount", "type": "integer" }
+      ]
+    }
+  ]
+}
