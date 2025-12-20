@@ -16,14 +16,20 @@ function cleanupLogs() {
   });
 }
 
-async function bootstrap({ ttlSeconds = '60' }: { ttlSeconds?: string } = {}) {
+async function bootstrap({
+  ttlSeconds = '60',
+  opaDecision,
+}: {
+  ttlSeconds?: string;
+  opaDecision?: unknown;
+} = {}) {
   cleanupLogs();
   jest.resetModules();
   process.env.BREAK_GLASS_TTL_SECONDS = ttlSeconds;
   const opa = express();
   opa.use(express.json());
   opa.post('/v1/data/summit/abac/decision', (_req, res) =>
-    res.json({ result: { allow: true, reason: 'allow', obligations: [] } }),
+    res.json({ result: opaDecision ?? { allow: true, reason: 'allow', obligations: [] } }),
   );
   const opaServer = opa.listen(0);
   const opaPort = (opaServer.address() as AddressInfo).port;
@@ -164,6 +170,52 @@ describe('break glass access', () => {
 
     const events = fs.readFileSync(breakGlassEventsPath, 'utf8');
     expect(events).toMatch(/expiry/);
+    await teardown([opaServer, upstreamServer], stopObservability);
+  });
+
+  it('enforces ABAC/OPA decisions and emits audit trail during break-glass usage', async () => {
+    const { app, opaServer, upstreamServer, stopObservability, sessionManager } =
+      await bootstrap({ ttlSeconds: '10', opaDecision: { allow: false, reason: 'policy_denied' } });
+
+    const loginRes = await request(app)
+      .post('/auth/login')
+      .send({ username: 'alice', password: 'password123' });
+    const baseToken = loginRes.body.token;
+
+    const requestRes = await request(app)
+      .post('/access/break-glass/request')
+      .set('Authorization', `Bearer ${baseToken}`)
+      .send({ justification: 'zero trust drill', ticketId: 'INC-77' });
+
+    const { session } = await sessionManager.validate(baseToken);
+    const elevatedToken = await sessionManager.elevateSession(session.sid, {
+      acr: 'loa2',
+      amr: ['mfa'],
+    });
+
+    const approvalRes = await request(app)
+      .post('/access/break-glass/approve')
+      .set('Authorization', `Bearer ${elevatedToken}`)
+      .send({ requestId: requestRes.body.requestId });
+
+    expect(approvalRes.status).toBe(200);
+
+    const protectedRes = await request(app)
+      .get('/protected/data')
+      .set('Authorization', `Bearer ${approvalRes.body.token}`)
+      .set('x-resource-id', 'dataset-alpha');
+
+    expect(protectedRes.status).toBe(403);
+    expect(protectedRes.body.reason).toBe('policy_denied');
+
+    const events = fs.readFileSync(breakGlassEventsPath, 'utf8').trim().split('\n');
+    expect(events.filter((line) => line.includes('"type":"request"')).length).toBe(1);
+    expect(events.filter((line) => line.includes('"type":"approval"')).length).toBe(1);
+    expect(events.filter((line) => line.includes('"type":"usage"')).length).toBe(1);
+
+    const auditLog = fs.readFileSync(auditLogPath, 'utf8');
+    expect(auditLog).toMatch(/policy_denied/);
+
     await teardown([opaServer, upstreamServer], stopObservability);
   });
 });
