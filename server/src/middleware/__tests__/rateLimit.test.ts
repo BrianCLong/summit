@@ -10,6 +10,23 @@ jest.mock('../../services/RateLimiter.js', () => ({
   }
 }));
 
+jest.mock('../../lib/resources/tenant-limit-enforcer.js', () => ({
+  tenantLimitEnforcer: {
+    enforceSeatCap: jest.fn().mockResolvedValue({
+      allowed: true,
+      remaining: 5,
+      limit: 5,
+    }),
+    enforceStorageBudget: jest.fn(),
+  },
+}));
+
+jest.mock('../../provenance/ledger.js', () => ({
+  provenanceLedger: {
+    appendEntry: jest.fn().mockResolvedValue(undefined),
+  },
+}));
+
 // Mock config if necessary (though usually importing it works if it's a value)
 // If cfg is a live binding that fails, we might need to mock it too.
 // For now, let's assume imports work but we need to fix relative paths.

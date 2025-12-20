@@ -29,6 +29,14 @@ interface QueryResult<T> {
   };
 }
 
+interface GeoPointResult {
+  id: string;
+  latitude: number;
+  longitude: number;
+  type: string;
+  name?: string;
+}
+
 /**
  * Spatial query options
  */
@@ -281,6 +289,85 @@ export class GEOINTNeo4jRepository {
           queryTime,
           nodesAccessed: result.summary.counters.updates().nodesCreated,
           relationshipsAccessed: 0,
+          cacheHit: false,
+        },
+      };
+    } finally {
+      await session.close();
+    }
+  }
+
+  /**
+   * Retrieve geo points within a bounding box with deterministic ordering
+   */
+  async getGeoPointsByBBox(
+    bbox: { minLon: number; minLat: number; maxLon: number; maxLat: number },
+    options: { limit?: number; offset?: number } = {},
+  ): Promise<QueryResult<GeoPointResult[]>> {
+    const cacheKey = `geo_points_${bbox.minLon}_${bbox.minLat}_${bbox.maxLon}_${bbox.maxLat}_${options.limit || 500}_${options.offset || 0}`;
+    const cached = this.getFromCache<GeoPointResult[]>(cacheKey);
+    if (cached) {
+      return {
+        data: cached,
+        metrics: { queryTime: 0, nodesAccessed: 0, relationshipsAccessed: 0, cacheHit: true },
+      };
+    }
+
+    const startTime = performance.now();
+    const session = this.driver.session();
+
+    try {
+      const limit = Math.min(options.limit ?? 500, 1000);
+      const offset = options.offset ?? 0;
+
+      const result = await session.run(
+        `
+        MATCH (t:GeoThreatActor)-[:OPERATES_FROM]->(l:ThreatLocation)
+        WHERE l.point.latitude >= $minLat
+          AND l.point.latitude <= $maxLat
+          AND l.point.longitude >= $minLon
+          AND l.point.longitude <= $maxLon
+        WITH DISTINCT t, l
+        ORDER BY l.point.latitude ASC, l.point.longitude ASC, t.name ASC
+        SKIP $offset
+        LIMIT $limit
+        RETURN {
+          id: t.id,
+          name: t.name,
+          type: 'THREAT_ACTOR',
+          latitude: l.point.latitude,
+          longitude: l.point.longitude
+        } AS point
+        `,
+        {
+          minLat: bbox.minLat,
+          maxLat: bbox.maxLat,
+          minLon: bbox.minLon,
+          maxLon: bbox.maxLon,
+          limit,
+          offset,
+        }
+      );
+
+      const orderedPoints = result.records
+        .map(record => record.get('point') as GeoPointResult)
+        .sort((a, b) =>
+          a.latitude - b.latitude ||
+          a.longitude - b.longitude ||
+          (a.name || '').localeCompare(b.name || '') ||
+          a.id.localeCompare(b.id)
+        );
+
+      const queryTime = performance.now() - startTime;
+
+      this.setCache(cacheKey, orderedPoints);
+
+      return {
+        data: orderedPoints,
+        metrics: {
+          queryTime,
+          nodesAccessed: result.summary.counters.updates().nodesCreated,
+          relationshipsAccessed: result.summary.counters.updates().relationshipsCreated,
           cacheHit: false,
         },
       };

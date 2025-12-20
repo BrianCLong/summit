@@ -1,26 +1,15 @@
 import NetInfo, { type NetInfoState } from '@react-native-community/netinfo';
-import { MMKV } from 'react-native-mmkv';
 import BackgroundFetch from 'react-native-background-fetch';
+import { synchronize } from '@nozbe/watermelondb/sync';
 
-import { SYNC_CONFIG, FEATURES } from '@/config';
-import { getApolloClient } from './GraphQLClient';
-import {
-  getPendingMutations,
-  removePendingMutation,
-  updateMutationRetry,
-  shouldRetryMutation,
-  isOnline,
-  type OfflineMutation,
-} from './OfflineQueueService';
+import { SYNC_CONFIG, FEATURES, API_CONFIG } from '@/config';
+import { database } from './WatermelonDB';
 import { useAppStore } from '@/stores/appStore';
-
-const storage = new MMKV({ id: 'sync-service' });
+import { getAuthToken } from './AuthService';
 
 export interface SyncResult {
   success: boolean;
-  synced: number;
-  failed: number;
-  errors: string[];
+  error?: string;
 }
 
 let syncInProgress = false;
@@ -37,12 +26,12 @@ export const initializeSyncService = async (): Promise<void> => {
   }
 
   // Perform initial sync if online
-  const online = await isOnline();
-  if (online) {
+  const state = await NetInfo.fetch();
+  if (state.isConnected && state.isInternetReachable) {
     await performSync();
   }
 
-  console.log('[SyncService] Initialized');
+  console.log('[SyncService] Initialized (WatermelonDB)');
 };
 
 // Cleanup sync service
@@ -78,12 +67,7 @@ const setupBackgroundSync = async (): Promise<void> => {
       },
       async (taskId) => {
         console.log('[BackgroundFetch] Task started:', taskId);
-
-        const online = await isOnline();
-        if (online) {
-          await performSync();
-        }
-
+        await performSync();
         BackgroundFetch.finish(taskId);
       },
       async (taskId) => {
@@ -91,9 +75,6 @@ const setupBackgroundSync = async (): Promise<void> => {
         BackgroundFetch.finish(taskId);
       },
     );
-
-    const status = await BackgroundFetch.status();
-    console.log('[BackgroundFetch] Status:', status);
   } catch (error) {
     console.error('[BackgroundFetch] Configuration failed:', error);
   }
@@ -103,111 +84,83 @@ const setupBackgroundSync = async (): Promise<void> => {
 export const performSync = async (): Promise<SyncResult> => {
   if (syncInProgress) {
     console.log('[SyncService] Sync already in progress, skipping');
-    return { success: true, synced: 0, failed: 0, errors: [] };
+    return { success: true };
   }
 
-  const online = await isOnline();
-  if (!online) {
+  const state = await NetInfo.fetch();
+  if (!state.isConnected || !state.isInternetReachable) {
     console.log('[SyncService] Device offline, skipping sync');
-    return { success: false, synced: 0, failed: 0, errors: ['Device offline'] };
+    return { success: false, error: 'Device offline' };
   }
 
   syncInProgress = true;
   useAppStore.getState().setSyncStatus({ isSyncing: true });
 
-  const result: SyncResult = {
-    success: true,
-    synced: 0,
-    failed: 0,
-    errors: [],
-  };
-
   try {
-    const mutations = getPendingMutations();
-    console.log(`[SyncService] Starting sync with ${mutations.length} pending mutations`);
+    await synchronize({
+      database,
+      pullChanges: async ({ lastPulledAt, schemaVersion, migration }) => {
+        const token = await getAuthToken();
+        const urlParams = new URLSearchParams({
+          lastPulledAt: lastPulledAt ? new String(lastPulledAt) : '',
+          schemaVersion: String(schemaVersion),
+          migration: JSON.stringify(migration),
+        });
 
-    for (const mutation of mutations.slice(0, SYNC_CONFIG.batchSize)) {
-      try {
-        await executeMutation(mutation);
-        removePendingMutation(mutation.id);
-        result.synced += 1;
-        console.log(`[SyncService] Synced mutation: ${mutation.operationName}`);
-      } catch (error: any) {
-        console.error(`[SyncService] Failed to sync mutation: ${mutation.operationName}`, error);
+        const response = await fetch(`${API_CONFIG.baseUrl}/sync/pull?${urlParams}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
 
-        if (shouldRetryMutation(mutation)) {
-          updateMutationRetry(mutation.id, error.message);
-        } else {
-          // Max retries exceeded, remove from queue
-          removePendingMutation(mutation.id);
-          result.errors.push(`${mutation.operationName}: Max retries exceeded`);
+        if (!response.ok) {
+          throw new Error(await response.text());
         }
 
-        result.failed += 1;
-      }
-    }
+        const { changes, timestamp } = await response.json();
+        return { changes, timestamp };
+      },
+      pushChanges: async ({ changes, lastPulledAt }) => {
+        const token = await getAuthToken();
+        const response = await fetch(`${API_CONFIG.baseUrl}/sync/push?lastPulledAt=${lastPulledAt}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(changes),
+        });
 
-    // Update last sync timestamp
+        if (!response.ok) {
+          throw new Error(await response.text());
+        }
+      },
+      migrationsEnabledAtVersion: 1,
+    });
+
     const now = new Date().toISOString();
-    storage.set('last_sync_at', now);
-
     useAppStore.getState().setSyncStatus({
       isSyncing: false,
       lastSyncAt: now,
-      pendingChanges: getPendingMutations().length,
-      error: result.errors.length > 0 ? result.errors[0] : null,
+      error: null,
     });
-
-    console.log(`[SyncService] Sync completed: ${result.synced} synced, ${result.failed} failed`);
+    console.log('[SyncService] Sync completed successfully');
+    return { success: true };
   } catch (error: any) {
     console.error('[SyncService] Sync failed:', error);
-    result.success = false;
-    result.errors.push(error.message);
-
     useAppStore.getState().setSyncStatus({
       isSyncing: false,
       error: error.message,
     });
+    return { success: false, error: error.message };
   } finally {
     syncInProgress = false;
   }
-
-  return result;
-};
-
-// Execute a single mutation
-const executeMutation = async (mutation: OfflineMutation): Promise<void> => {
-  const client = getApolloClient();
-
-  // Parse the query string back to a document
-  const { gql } = await import('@apollo/client');
-  const document = gql(mutation.query);
-
-  await client.mutate({
-    mutation: document,
-    variables: mutation.variables,
-  });
 };
 
 // Force sync
 export const forceSync = async (): Promise<SyncResult> => {
   syncInProgress = false; // Reset flag to allow sync
   return performSync();
-};
-
-// Get sync status
-export const getSyncStatus = () => {
-  const lastSyncAt = storage.getString('last_sync_at');
-  const pendingCount = getPendingMutations().length;
-
-  return {
-    lastSyncAt: lastSyncAt || null,
-    pendingChanges: pendingCount,
-    isSyncing: syncInProgress,
-  };
-};
-
-// Clear sync data
-export const clearSyncData = (): void => {
-  storage.clearAll();
 };

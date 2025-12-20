@@ -1,36 +1,9 @@
-# CODEOWNERS for summit-2025.09.23.1710
-# Critical path ownership maps for automated review enforcement
-
-# Infra / deploy
-/deploy/** @platform/infra
-/deploy/helm/** @platform/devops
-/deploy/terraform/** @platform/devops
-
-# CI/CD
-/.github/workflows/** @platform/cicd
-/.maestro/** @platform/cicd
-/.ci/** @platform/cicd
-
-# Backend services
-/services/graph/** @svc/graph
-/services/api/** @svc/api
-/services/ingest/** @svc/ingest
-
-# Applications
-/apps/web/** @ui/web
-/apps/gateway/** @platform/gateway
-
-# Security and policy
-/.security/** @sec/appsec
-/.ci/policies/** @sec/appsec
-
-# Data
-/migrations/** @data/platform
-/schemas/** @data/platform
-
-# Observability & runbooks
-/observability/** @sre/observability
-/RUNBOOKS/** @sre/observability
-
-# Fallback
-* @platform/maintainers
+/services/prov-ledger/  @team-prov-ledger
+/services/policy-compiler/ @team-lac
+/services/ai-nlq/ @team-nlq
+/services/er-service/ @team-er
+/services/ingest/ @team-ingest
+/apps/ui/ @team-ui
+/apps/gateway/ @team-gateway
+/services/zk-tx/ @team-zk
+/ops/ @team-ops

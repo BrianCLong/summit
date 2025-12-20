@@ -1,0 +1,22 @@
+{{- if .Values.mesh.enabled }}
+{{- $namespace := default .Release.Namespace .Values.namespace.name }}
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: {{ include "summit.name" . }}-mtls
+  namespace: {{ $namespace }}
+spec:
+  mtls:
+    mode: {{ .Values.mesh.peerAuthentication.mtlsMode }}
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: {{ include "summit.name" . }}-dr
+  namespace: {{ $namespace }}
+spec:
+  host: {{ default (printf "%s.%s.svc.cluster.local" (include "summit.name" .) $namespace) .Values.mesh.destinationRule.host }}
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+{{- end }}

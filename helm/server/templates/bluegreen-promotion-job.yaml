@@ -1,0 +1,23 @@
+{{- if and .Values.blueGreen.enabled .Values.blueGreen.promotionJob.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "server.fullname" . }}-promote-{{ .Values.blueGreen.selectorColor }}
+  annotations:
+    "helm.sh/hook": post-upgrade,post-install
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    spec:
+      serviceAccountName: {{ default "default" .Values.blueGreen.promotionJob.serviceAccountName }}
+      restartPolicy: OnFailure
+      containers:
+        - name: promote
+          image: {{ .Values.blueGreen.promotionJob.image }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              kubectl -n {{ .Release.Namespace }} patch service {{ include "server.fullname" . }} \
+                -p '{"spec":{"selector":{"release-color":"{{ .Values.blueGreen.selectorColor }}"}}}'
+{{- end }}
