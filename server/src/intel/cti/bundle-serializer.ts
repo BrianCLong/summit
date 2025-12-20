@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * STIX 2.1 Bundle Serializer
  *

@@ -124,7 +124,6 @@ export function createValidationMiddleware<T>(
    * Batch validation for arrays of inputs
    */
   export function validateBatch<T>(
-    schema: ZodSchema<T>,
     schema: z.ZodType<T>,
     items: unknown[],
     options?: { stopOnFirstError?: boolean }

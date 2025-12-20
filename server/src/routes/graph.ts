@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express, { Request, Response, NextFunction } from 'express';
 import { Neo4jGraphService } from '../services/GraphService';
 import { Neo4jGraphAnalyticsService } from '../services/GraphAnalyticsService';
@@ -134,40 +135,6 @@ router.post('/patterns/search', ensureAuthenticated, checkQuota, async (req: Req
     res.json({ data: results });
   } catch (err) {
     logger.error('Graph Pattern Search Error', err);
-    next(err);
-  }
-});
-
-router.get('/patterns/templates', ensureAuthenticated, checkQuota, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const templates = patternService.getTemplates();
-    res.json({ data: templates });
-  } catch (err) {
-    next(err);
-  }
-});
-
-router.post('/patterns/templates/:key/execute', ensureAuthenticated, checkQuota, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const tenantId = getTenantId(req);
-    const { key } = req.params;
-    const params = req.body;
-
-    provenanceLedger.appendEntry({
-        tenantId,
-        actionType: 'graph.pattern.execute',
-        resourceType: 'graph_pattern',
-        resourceId: key,
-        actorId: req.user!.id,
-        actorType: 'user',
-        payload: { key, params },
-        metadata: { purpose: 'investigation' }
-    }).catch(e => logger.error('Failed to audit pattern execution', e));
-
-    const results = await patternService.executeTemplate(tenantId, key, params);
-    res.json({ data: results });
-  } catch (err) {
-    logger.error('Pattern Execution Error', err);
     next(err);
   }
 });

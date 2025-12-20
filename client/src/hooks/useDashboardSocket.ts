@@ -2,11 +2,11 @@ import { useEffect, useState, useCallback } from 'react';
 import { useSocket } from './useSocket';
 
 export const useDashboardSocket = () => {
-  const { socket, connected, error } = useSocket('/realtime');
-  const [metrics, setMetrics] = useState(null);
-  const [insights, setInsights] = useState([]);
-  const [activity, setActivity] = useState([]);
-  const [graphUpdates, setGraphUpdates] = useState([]);
+  const { socket, connected, error } = useSocket('/realtime') as any;
+  const [metrics, setMetrics] = useState<any>(null);
+  const [insights, setInsights] = useState<any[]>([]);
+  const [activity, setActivity] = useState<any[]>([]);
+  const [graphUpdates, setGraphUpdates] = useState<any[]>([]);
 
   useEffect(() => {
     if (socket && connected) {
@@ -14,20 +14,20 @@ export const useDashboardSocket = () => {
       socket.emit('dashboard:join');
 
       // Listen for updates
-      socket.on('dashboard:metrics', (data) => {
+      socket.on('dashboard:metrics', (data: any) => {
         setMetrics(data);
       });
 
-      socket.on('dashboard:insights', (data) => {
+      socket.on('dashboard:insights', (data: any) => {
         setInsights(data); // In a real app, you might want to append/merge
       });
 
-      socket.on('dashboard:activity', (data) => {
-        setActivity(prev => [data, ...prev].slice(0, 50)); // Keep last 50
+      socket.on('dashboard:activity', (data: any) => {
+        setActivity((prev: any[]) => [data, ...prev].slice(0, 50)); // Keep last 50
       });
 
-       socket.on('dashboard:graph_update', (data) => {
-        setGraphUpdates(prev => [data, ...prev].slice(0, 20));
+      socket.on('dashboard:graph_update', (data: any) => {
+        setGraphUpdates((prev: any[]) => [data, ...prev].slice(0, 20));
       });
 
       return () => {

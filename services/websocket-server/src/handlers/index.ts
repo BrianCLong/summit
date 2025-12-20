@@ -21,6 +21,7 @@ import * as metrics from '../metrics/prometheus.js';
 import { registerPresenceHandlers } from './presence.js';
 import { registerRoomHandlers } from './rooms.js';
 import { registerMessageHandlers } from './messages.js';
+import { registerCollaborationHandlers } from './collaboration.js';
 
 export interface HandlerDependencies {
   io: Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
@@ -72,6 +73,7 @@ export function registerEventHandlers(deps: HandlerDependencies): void {
     registerPresenceHandlers(authSocket, deps);
     registerRoomHandlers(authSocket, deps);
     registerMessageHandlers(authSocket, deps);
+    registerCollaborationHandlers(authSocket, deps);
 
     // Handle disconnection
     authSocket.on('disconnect', async (reason) => {

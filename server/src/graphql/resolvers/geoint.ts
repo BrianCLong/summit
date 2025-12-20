@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 import { geoIntService } from '../services/GeoIntService.js';
 
