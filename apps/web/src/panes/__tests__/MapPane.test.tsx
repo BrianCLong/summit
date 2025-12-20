@@ -172,6 +172,7 @@ describe('MapPane clustering controls', () => {
     await renderPane();
 
     expect(screen.queryByTestId('clustering-toggle')).toBeNull();
+    expect(screen.queryByTestId('page-indicator')).toBeNull();
     const markers = screen.getAllByTestId('circle-marker');
     expect(markers.length).toBe(4);
   });
