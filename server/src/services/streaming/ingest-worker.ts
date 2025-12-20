@@ -3,17 +3,14 @@
  * IntelGraph GA-Core Streaming Ingest Worker
  * Committee Requirements: PII redaction, real-time processing, observability
  * Stribol: "PII redaction worker; OTEL/Prom scaffolding; SLO dashboards"
- * Updated: Now uses Redis Streams for high-throughput ingestion
  */
 
 import { EventEmitter } from 'events';
 import crypto from 'crypto';
-import Redis from 'ioredis';
-import { insertEvent } from '../../db/timescale';
-import { insertAnalyticsTrace } from '../../db/timescale';
-import ProvenanceLedgerService from '../provenance-ledger';
-import logger from '../../utils/logger';
-import { AlertingEngine } from './AlertingEngine';
+import { insertEvent } from '../../db/timescale.js';
+import { insertAnalyticsTrace } from '../../db/timescale.js';
+import ProvenanceLedgerService from '../provenance-ledger.js';
+import logger from '../../utils/logger.js';
 
 interface IngestMessage {
   message_id: string;
@@ -58,16 +55,13 @@ interface WorkerMetrics {
 
 export class StreamingIngestWorker extends EventEmitter {
   private static instance: StreamingIngestWorker;
-  private redis: Redis;
-  private streamKey = 'investigation:events';
-  private consumerGroup = 'ingest-workers';
-  private consumerName = `worker-${crypto.randomUUID()}`;
+  private messageQueue: IngestMessage[] = [];
   private processing: boolean = false;
   private batchSize: number = 100;
+  private batchTimeout: number = 5000; // 5 seconds
   private metrics: WorkerMetrics;
   private provenanceService: ProvenanceLedgerService;
   private piiConfig: PIIRedactionConfig;
-  private alertingEngine: AlertingEngine;
 
   public static getInstance(): StreamingIngestWorker {
     if (!StreamingIngestWorker.instance) {
@@ -78,28 +72,10 @@ export class StreamingIngestWorker extends EventEmitter {
 
   constructor() {
     super();
-    this.redis = new Redis({
-        host: process.env.REDIS_HOST || 'localhost',
-        port: parseInt(process.env.REDIS_PORT || '6379'),
-        password: process.env.REDIS_PASSWORD,
-    });
     this.provenanceService = ProvenanceLedgerService.getInstance();
-    this.alertingEngine = new AlertingEngine();
     this.initializeMetrics();
     this.initializePIIRedaction();
-    this.initializeStream();
-    this.startStreamConsumer();
-  }
-
-  private async initializeStream() {
-      try {
-          // Create consumer group if it doesn't exist
-          await this.redis.xgroup('CREATE', this.streamKey, this.consumerGroup, '$', 'MKSTREAM');
-      } catch (err: any) {
-          if (!err.message.includes('BUSYGROUP')) {
-              logger.error({ err }, 'Failed to create Redis consumer group');
-          }
-      }
+    this.startBatchProcessor();
   }
 
   private initializeMetrics(): void {
@@ -140,7 +116,7 @@ export class StreamingIngestWorker extends EventEmitter {
     };
   }
 
-  // Main ingest endpoint - Pushes to Redis Stream
+  // Main ingest endpoint
   async ingestMessage(
     message: Omit<IngestMessage, 'message_id'>,
   ): Promise<string> {
@@ -150,131 +126,120 @@ export class StreamingIngestWorker extends EventEmitter {
       ...message,
     };
 
-    try {
-        await this.redis.xadd(
-            this.streamKey,
-            '*',
-            'data',
-            JSON.stringify(fullMessage)
-        );
+    // Add to queue
+    this.messageQueue.push(fullMessage);
+    this.metrics.queue_size = this.messageQueue.length;
 
-        logger.debug({
-            message: 'Message added to ingest stream',
-            message_id: messageId,
-            source: message.source,
-        });
-
-        return messageId;
-    } catch (error) {
-        logger.error({
-            message: 'Failed to add message to ingest stream',
-            error: error instanceof Error ? error.message : String(error),
-        });
-        throw error;
+    // Emit queue size alert if getting too large
+    if (this.messageQueue.length > 1000) {
+      this.emit('queue_alert', {
+        queue_size: this.messageQueue.length,
+        severity: 'HIGH',
+      });
     }
+
+    logger.debug({
+      message: 'Message added to ingest queue',
+      message_id: messageId,
+      source: message.source,
+      queue_size: this.messageQueue.length,
+    });
+
+    return messageId;
   }
 
-  // Stream Consumer
-  private startStreamConsumer(): void {
-      // Loop indefinitely to consume messages
-      const consume = async () => {
-          if (this.processing) return; // simple lock
-          this.processing = true;
-
-          try {
-              // Read from consumer group
-              const result = await this.redis.xreadgroup(
-                  'GROUP',
-                  this.consumerGroup,
-                  this.consumerName,
-                  'COUNT',
-                  this.batchSize,
-                  'BLOCK',
-                  5000, // 5s block
-                  'STREAMS',
-                  this.streamKey,
-                  '>' // New messages
-              );
-
-              if (result) {
-                  // result format: [[streamName, [[id, [field, value, ...]], ...]]]
-                  const streamData = result[0][1];
-                  await this.processStreamBatch(streamData);
-              }
-          } catch (error) {
-              logger.error({
-                  message: 'Error consuming stream',
-                  error: error instanceof Error ? error.message : String(error),
-              });
-              // Backoff slightly on error
-              await new Promise(resolve => setTimeout(resolve, 1000));
-          } finally {
-              this.processing = false;
-              // Schedule next consumption immediately
-              setImmediate(consume);
-          }
-      };
-
-      // Start the loop
-      consume();
+  // Batch processor for efficient handling
+  private startBatchProcessor(): void {
+    setInterval(async () => {
+      if (!this.processing && this.messageQueue.length > 0) {
+        await this.processBatch();
+      }
+    }, this.batchTimeout);
   }
 
-  private async processStreamBatch(streamData: any[]): Promise<void> {
+  private async processBatch(): Promise<void> {
+    if (this.processing || this.messageQueue.length === 0) {
+      return;
+    }
+
+    this.processing = true;
     const batchStartTime = Date.now();
-    let successCount = 0;
-    let errorCount = 0;
 
-    for (const [streamId, fields] of streamData) {
-        // fields is usually [key1, val1, key2, val2]. We stored 'data' as JSON.
-        // ioredis might parse this differently depending on version/config, but typically it's an array.
-        // Assuming we stored 'data' -> JSON string.
-        let rawJson: string | null = null;
-        for (let i = 0; i < fields.length; i += 2) {
-            if (fields[i] === 'data') {
-                rawJson = fields[i + 1];
-                break;
-            }
-        }
+    try {
+      // Take batch from queue
+      const batch = this.messageQueue.splice(
+        0,
+        Math.min(this.batchSize, this.messageQueue.length),
+      );
+      this.metrics.queue_size = this.messageQueue.length;
 
-        if (!rawJson) {
-            logger.warn({ message: 'Malformed stream message', streamId });
-            await this.redis.xack(this.streamKey, this.consumerGroup, streamId); // Ack to skip
-            continue;
-        }
+      logger.info({
+        message: 'Processing ingest batch',
+        batch_size: batch.length,
+        remaining_queue: this.messageQueue.length,
+      });
 
-        try {
-            const message: IngestMessage = JSON.parse(rawJson);
-            await this.processMessage(message);
-            await this.redis.xack(this.streamKey, this.consumerGroup, streamId);
-            successCount++;
-        } catch (error) {
-            errorCount++;
-            logger.error({
-                message: 'Failed to process stream message',
-                streamId,
-                error: error instanceof Error ? error.message : String(error),
-            });
-            // We do NOT Ack here, so it can be picked up by PEL monitoring (not implemented yet)
-            // or we could implement a retry counter/Dead Letter Queue here.
-            // For now, let's leave it un-acked.
+      // Process batch in parallel
+      const processedMessages = await Promise.allSettled(
+        batch.map((message) => this.processMessage(message)),
+      );
+
+      // Handle results
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (let i = 0; i < processedMessages.length; i++) {
+        const result = processedMessages[i];
+
+        if (result.status === 'fulfilled') {
+          successCount++;
+          await this.handleProcessedMessage(result.value);
+        } else {
+          errorCount++;
+          this.metrics.errors_encountered++;
+
+          logger.error({
+            message: 'Message processing failed in batch',
+            message_id: batch[i].message_id,
+            error: result.reason,
+            batch_index: i,
+          });
+
+          // Emit error event
+          this.emit('processing_error', {
+            message_id: batch[i].message_id,
+            error: result.reason,
+          });
         }
+      }
+
+      const batchProcessingTime = Date.now() - batchStartTime;
+      this.metrics.messages_processed += successCount;
+
+      logger.info({
+        message: 'Batch processing completed',
+        batch_size: batch.length,
+        successful: successCount,
+        errors: errorCount,
+        processing_time_ms: batchProcessingTime,
+        messages_per_second: Math.round(
+          (batch.length / batchProcessingTime) * 1000,
+        ),
+      });
+
+      // Update worker status
+      this.updateWorkerStatus(errorCount, batch.length);
+    } catch (error) {
+      logger.error({
+        message: 'Batch processing failed',
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      this.metrics.worker_status = 'unhealthy';
+      this.emit('worker_error', error);
+    } finally {
+      this.processing = false;
     }
-
-    const batchProcessingTime = Date.now() - batchStartTime;
-    this.metrics.messages_processed += successCount;
-    this.metrics.errors_encountered += errorCount;
-
-    if (successCount > 0 || errorCount > 0) {
-        logger.info({
-            message: 'Stream batch processed',
-            count: successCount + errorCount,
-            success: successCount,
-            error: errorCount,
-            time_ms: batchProcessingTime
-        });
-    }
-
-    this.updateWorkerStatus(errorCount, successCount + errorCount);
   }
 
   // Individual message processing
@@ -302,7 +267,7 @@ export class StreamingIngestWorker extends EventEmitter {
       const processedMessage: ProcessedMessage = {
         message_id: message.message_id,
         source: message.source,
-        timestamp: new Date(message.timestamp), // Ensure date object
+        timestamp: message.timestamp,
         data_type: message.data_type,
         processed_data: normalizedData,
         redaction_applied: redactionResult.redaction_applied,
@@ -332,10 +297,6 @@ export class StreamingIngestWorker extends EventEmitter {
         },
       });
 
-      // Step 4: Real-time Aggregation
-      await this.aggregateMetrics(processedMessage);
-
-      await this.handleProcessedMessage(processedMessage);
       return processedMessage;
     } catch (error) {
       logger.error({
@@ -585,96 +546,6 @@ export class StreamingIngestWorker extends EventEmitter {
     }
   }
 
-  // Real-time Aggregation
-  private async aggregateMetrics(processed: ProcessedMessage): Promise<void> {
-    try {
-      const { metadata, message_id } = processed;
-      // We assume metadata contains investigationId or we extract it from processed_data if available
-      // For now, let's look for it in metadata
-      const investigationId = metadata.investigation_id || metadata.investigationId;
-
-      if (!investigationId) return;
-
-      const pipeline = this.redis.pipeline();
-      const tenantId = metadata.tenant_id || 'default';
-
-      // 1. Case Velocity (events per minute)
-      // Key: investigation:{id}:velocity:{minute_timestamp}
-      const minute = Math.floor(Date.now() / 60000);
-      const velocityKey = `investigation:${investigationId}:velocity:${minute}`;
-      pipeline.incr(velocityKey);
-      pipeline.expire(velocityKey, 3600); // Keep for 1 hour
-
-      // 2. Evidence Accumulation (distinct count)
-      if (processed.data_type === 'evidence') {
-         const evidenceKey = `investigation:${investigationId}:evidence`;
-         pipeline.pfadd(evidenceKey, message_id); // HyperLogLog for distinct count
-      }
-
-      // 3. Entity Discovery Rate
-      if (processed.data_type === 'entity') {
-          const entityRateKey = `investigation:${investigationId}:entity_rate:${minute}`;
-          pipeline.incr(entityRateKey);
-          pipeline.expire(entityRateKey, 3600);
-      }
-
-      await pipeline.exec();
-
-      const velocity = parseInt((await this.redis.get(velocityKey)) || '0', 10);
-      const metrics = {
-          velocity,
-          confidence: processed.confidence, // Use current message confidence as a proxy or average if tracked
-          // Add other metrics as needed
-      };
-
-      // Check Alerts
-      const alerts = this.alertingEngine.checkAlerts({
-          investigationId,
-          tenantId,
-          metrics,
-          event: processed
-      });
-
-      if (alerts.length > 0) {
-          const alertChannel = `maestro:${tenantId}.alerts`;
-          for (const alert of alerts) {
-              await this.redis.publish(alertChannel, JSON.stringify({
-                  type: 'alert',
-                  ...alert
-              }));
-
-              logger.info({
-                  message: 'Alert triggered',
-                  alert,
-                  investigationId
-              });
-          }
-      }
-
-      // Publish update to WebSocketCore via Redis Pub/Sub
-      // Topic format: maestro:tenantId.dashboard:metrics
-      const channel = `maestro:${tenantId}.dashboard:metrics`;
-      const updatePayload = {
-          type: 'metrics_update',
-          investigationId,
-          timestamp: Date.now(),
-          metrics: {
-             velocity,
-             // For a real dashboard, we might want the last N minutes.
-             // But for real-time push, sending the current minute's count is a good start "pulse".
-          }
-      };
-
-      await this.redis.publish(channel, JSON.stringify(updatePayload));
-
-    } catch (error) {
-        logger.error({
-            message: 'Failed to aggregate metrics',
-            error: error instanceof Error ? error.message : String(error)
-        });
-    }
-  }
-
   // Utility methods
   private hashMessage(message: any): string {
     const normalized = {
@@ -700,18 +571,7 @@ export class StreamingIngestWorker extends EventEmitter {
       );
     }
 
-    // Queue size is now stream lag, effectively.
-    // We can't easily get total lag without extra calls, so we'll approximate or skip for now
-    // Or we could use XINFO STREAM.
-    if (this.redis && typeof this.redis.xlen === 'function') {
-        const xlenPromise = this.redis.xlen(this.streamKey);
-        if (xlenPromise && typeof xlenPromise.then === 'function') {
-           xlenPromise.then((len: number) => {
-               this.metrics.queue_size = len;
-           }).catch(() => {});
-        }
-    }
-
+    this.metrics.queue_size = this.messageQueue.length;
 
     // Update worker status
     if (this.metrics.errors_encountered > 10) {
@@ -727,12 +587,11 @@ export class StreamingIngestWorker extends EventEmitter {
   }
 
   private updateWorkerStatus(errorCount: number, batchSize: number): void {
-      if (batchSize === 0) return;
     const errorRate = errorCount / batchSize;
 
     if (errorRate > 0.2) {
       this.metrics.worker_status = 'unhealthy';
-    } else if (errorRate > 0.1) {
+    } else if (errorRate > 0.1 || this.messageQueue.length > 500) {
       this.metrics.worker_status = 'degraded';
     } else {
       this.metrics.worker_status = 'healthy';
@@ -745,25 +604,12 @@ export class StreamingIngestWorker extends EventEmitter {
   }
 
   getQueueSize(): number {
-    return this.metrics.queue_size;
+    return this.messageQueue.length;
   }
 
-  async getInvestigationMetrics(investigationId: string): Promise<any> {
-      const minute = Math.floor(Date.now() / 60000);
-      const velocityKey = `investigation:${investigationId}:velocity:${minute}`;
-      const velocity = parseInt((await this.redis.get(velocityKey)) || '0', 10);
-      const evidenceCount = await this.redis.pfcount(`investigation:${investigationId}:evidence`);
-
-      // Handle the case where Redis returns undefined or null (e.g. mocked in tests)
-      return {
-          velocity: isNaN(velocity) ? 0 : velocity,
-          evidenceCount: evidenceCount || 0
-      };
-  }
-
-  async clearQueue(): Promise<void> {
-    const queueSize = this.metrics.queue_size;
-    await this.redis.xtrim(this.streamKey, 'MAXLEN', 0);
+  clearQueue(): void {
+    const queueSize = this.messageQueue.length;
+    this.messageQueue = [];
     this.metrics.queue_size = 0;
 
     logger.info({
@@ -778,9 +624,14 @@ export class StreamingIngestWorker extends EventEmitter {
   async shutdown(): Promise<void> {
     logger.info({
       message: 'Streaming ingest worker shutting down',
+      pending_messages: this.messageQueue.length,
     });
 
-    this.processing = false; // Stop the consumer loop
+    // Process remaining messages
+    while (this.messageQueue.length > 0 && !this.processing) {
+      await this.processBatch();
+    }
+
     this.removeAllListeners();
 
     logger.info({ message: 'Streaming ingest worker shutdown complete' });

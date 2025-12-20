@@ -1,0 +1,42 @@
+groups:
+  - name: adapters.reliability
+    rules:
+      - alert: AdapterRepeatedFailures
+        expr: |
+          sum(rate(adapter_requests_total{status=~"5.."}[5m]))
+            /
+          sum(rate(adapter_requests_total[5m]))
+            > 0.05
+        for: 10m
+        labels:
+          severity: critical
+          service: adapters
+        annotations:
+          summary: "Adapter failure rate is above 5%"
+          description: "Adapters are returning 5xx responses in more than 5% of requests for over 10 minutes. Investigate failing adapters and upstream dependencies."
+          runbook: "RUNBOOKS/adapters/isolation-incidents.md"
+
+      - alert: AdapterExcessiveRetries
+        expr: sum by (adapter) (rate(adapter_retries_total[5m])) > 20
+        for: 10m
+        labels:
+          severity: warning
+          service: adapters
+        annotations:
+          summary: "Adapter retries are elevated"
+          description: "Retry attempts for one or more adapters exceeded 20 per minute for 10 minutes. Check upstream dependency health and backoff configuration."
+          runbook: "RUNBOOKS/adapters/signature-verification-failures.md"
+
+      - alert: AdapterDLQBacklogGrowing
+        expr: |
+          increase(adapter_dlq_messages_total[15m]) > 0
+            and
+          max_over_time(adapter_dlq_messages_total[15m]) > 50
+        for: 15m
+        labels:
+          severity: critical
+          service: adapters
+        annotations:
+          summary: "Dead letter queue backlog is growing"
+          description: "DLQ depth has increased for 15 minutes and now exceeds 50 messages. Replay or isolate the impacted adapter before data loss occurs."
+          runbook: "RUNBOOKS/adapters/dlq-replay.md"

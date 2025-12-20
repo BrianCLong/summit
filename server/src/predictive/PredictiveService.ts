@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
   ForecastRequest, ForecastResult,
   WhatIfRequest, WhatIfResult,

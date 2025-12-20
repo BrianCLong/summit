@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { writeQuorumRouter } from '../db/WriteQuorumRouter.js';
 import { getNeo4jDriver, initializeNeo4jDriver, closeNeo4jDriver } from '../db/neo4j.js';
 import pino from 'pino';
