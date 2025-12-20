@@ -131,11 +131,32 @@ describe('MapPane clustering controls', () => {
     expect(expandedMarkers.length).toBe(4);
   });
 
+  it('paginates rendered points when clustering is enabled', async () => {
+    vi.stubEnv('VITE_ENABLE_MAP_CLUSTERING', 'true');
+    vi.stubEnv('VITE_MAP_MARKER_PAGE_SIZE', '2');
+
+    await renderPane();
+
+    expect(screen.getByTestId('page-indicator').textContent).toContain('Page 1 / 2');
+    expect(screen.getAllByTestId('circle-marker').length).toBe(2);
+
+    await userEvent.click(screen.getByTestId('page-next'));
+
+    expect(screen.getByTestId('page-indicator').textContent).toContain('Page 2 / 2');
+    expect(screen.getAllByTestId('circle-marker').length).toBe(1);
+
+    await userEvent.click(screen.getByTestId('page-previous'));
+
+    expect(screen.getByTestId('page-indicator').textContent).toContain('Page 1 / 2');
+    expect(screen.getAllByTestId('circle-marker').length).toBe(2);
+  });
+
   it('hides clustering controls when the feature flag is disabled', async () => {
     vi.stubEnv('VITE_ENABLE_MAP_CLUSTERING', 'false');
     await renderPane();
 
     expect(screen.queryByTestId('clustering-toggle')).toBeNull();
+    expect(screen.queryByTestId('page-indicator')).toBeNull();
     const markers = screen.getAllByTestId('circle-marker');
     expect(markers.length).toBe(4);
   });

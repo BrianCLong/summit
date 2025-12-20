@@ -11,7 +11,7 @@ import { NetworkVisualizationService } from './services/NetworkVisualizationServ
 import { logger } from './utils/logger';
 import { config } from './config';
 import { authenticate, authorize } from './middleware/auth';
-import { geoPoints } from './data/geoPoints';
+import { geoPoints, type GeoPoint } from './data/geoPoints';
 
 const app: Application = express();
 const PORT = config.server.port || 4006;
@@ -55,6 +55,20 @@ const parseBbox = (
 
   return [minLng, minLat, maxLng, maxLat];
 };
+
+const sortGeoPoints = (points: GeoPoint[]) =>
+  points
+    .slice()
+    .sort((a, b) => {
+      const timeDiff =
+        new Date(b.observedAt).getTime() - new Date(a.observedAt).getTime();
+
+      if (timeDiff !== 0) {
+        return timeDiff;
+      }
+
+      return a.id.localeCompare(b.id);
+    });
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -102,18 +116,7 @@ app.get(
       ? Math.min(parsedLimit, 500)
       : 250;
 
-    const orderedPoints = filteredPoints
-      .slice()
-      .sort((a, b) => {
-        const timeDiff =
-          new Date(b.observedAt).getTime() - new Date(a.observedAt).getTime();
-
-        if (timeDiff !== 0) {
-          return timeDiff;
-        }
-
-        return a.id.localeCompare(b.id);
-      });
+    const orderedPoints = sortGeoPoints(filteredPoints);
 
     res.json({
       count: filteredPoints.length,

@@ -9,6 +9,7 @@ import {
 } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useWorkspaceStore } from '../store/workspaceStore';
+import { isFeatureEnabled } from '../config';
 
 type MarkerEntity = ReturnType<typeof useWorkspaceStore.getState>['entities'][number];
 
@@ -24,8 +25,22 @@ interface ClusteredMarker {
 
 type RenderableMarker = MarkerEntity | ClusteredMarker;
 
-const CLUSTERING_FEATURE_ENABLED =
-  import.meta.env.VITE_ENABLE_MAP_CLUSTERING === 'true';
+const isPositiveInteger = (value?: string | number) => {
+  const parsed = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : undefined;
+};
+
+const CLUSTERING_FEATURE_ENABLED = isFeatureEnabled('ui.mapClustering');
+
+const MAP_PAGE_SIZE =
+  isPositiveInteger(
+    // @ts-ignore - import.meta is available in the browser build
+    typeof import.meta !== 'undefined' ? import.meta.env?.VITE_MAP_MARKER_PAGE_SIZE : undefined,
+  ) ||
+  isPositiveInteger(
+    typeof process !== 'undefined' ? process.env?.VITE_MAP_MARKER_PAGE_SIZE : undefined,
+  ) ||
+  50;
 
 const getZoomPrecision = (zoom: number) => {
   if (zoom >= 13) return 3;
@@ -207,7 +222,7 @@ export const MapPane = () => {
   );
   const [zoomLevel, setZoomLevel] = useState(2);
   const [page, setPage] = useState(1);
-  const pageSize = 50;
+  const pageSize = MAP_PAGE_SIZE;
 
   const markers = useMemo(() => {
     return entities.filter(e => e.lat && e.lng);
@@ -227,7 +242,7 @@ export const MapPane = () => {
     }
 
     return Math.max(1, Math.ceil(renderableMarkers.length / pageSize));
-  }, [renderableMarkers.length]);
+  }, [pageSize, renderableMarkers.length]);
 
   useEffect(() => {
     setPage(1);
@@ -240,7 +255,7 @@ export const MapPane = () => {
 
     const start = (page - 1) * pageSize;
     return renderableMarkers.slice(start, start + pageSize);
-  }, [renderableMarkers, page]);
+  }, [page, pageSize, renderableMarkers]);
 
   const handleToggleClustering = useCallback(() => {
     setClusteringEnabled((prev) => !prev);
