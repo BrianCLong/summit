@@ -57,7 +57,13 @@ const investigationResolvers = {
       logger.info(`Fetching audit trace for investigation ${investigationId}`);
       const pool = getPostgresPool();
       const params: any[] = [investigationId];
-      const conditions: string[] = ["details->>'investigationId' = $1"];
+      // Optimized: Use JSONB containment operator (@>) to leverage GIN index on 'details'
+      // conditions.push("details @> $1");
+      // Parameter $1 becomes '{"investigationId": "..."}'
+      const conditions: string[] = ["details @> $1"];
+      // Re-map investigationId to a JSON string for the @> operator
+      params[0] = JSON.stringify({ investigationId: params[0] });
+
       if (filter?.userId) {
         params.push(filter.userId);
         conditions.push(`user_id = $${params.length}`);

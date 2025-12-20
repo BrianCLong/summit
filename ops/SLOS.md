@@ -7,5 +7,6 @@
 | Connectors | Success Rate      | 99%    | Page if <97% success over 1h    | 1%           |
 | Ledger     | Export Validation | 99.9%  | Page if chain validation fails  | 0.1%         |
 | Copilot    | Response Accuracy | 95%    | Warn <95%; disable feature <90% | 5%           |
+| Agent Workers | Queue Pressure (latency+backlog) | ≤1.0 | Page if SLO pressure >1 for 10m; ticket if cost pressure >1.1 for 15m | 10% spare capacity |
 
 Alerting integrates with Prometheus and OTEL. Error budgets reset quarterly.

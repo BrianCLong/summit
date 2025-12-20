@@ -1,8 +1,9 @@
 import express from 'express';
+import { promises as fs } from 'fs';
 import { z } from 'zod';
 import { disclosureExportService } from '../disclosure/export-service.js';
 import { disclosureMetrics } from '../metrics/disclosureMetrics.js';
-import { buildAuditBundle } from '../disclosure/audit-bundle.js';
+import { runtimeEvidenceService } from '../disclosure/runtime-evidence.js';
 
 const router = express.Router();
 router.use(express.json());
@@ -117,51 +118,130 @@ router.get('/export/:jobId/download', (req, res) => {
   return res.download(download.filePath, `disclosure-${download.job.id}.zip`);
 });
 
-const auditExportSchema = z.object({
-  tenantId: z.string().optional(),
-  startTime: z.string().optional(),
-  endTime: z.string().optional(),
-  format: z.enum(['tar', 'zip']).optional(),
-});
+router.post('/runtime-bundle', async (req, res) => {
+  const tenantHeader = resolveTenant(req);
+  const bodyTenant = req.body?.tenantId as string | undefined;
 
-router.post('/export/audit-bundle', async (req, res) => {
+  if (!tenantHeader && !bodyTenant) {
+    return res.status(400).json({ error: 'tenant_required' });
+  }
+
+  const effectiveTenant = bodyTenant ?? (tenantHeader as string);
+  if (tenantHeader && tenantHeader !== effectiveTenant) {
+    return res.status(403).json({ error: 'tenant_mismatch' });
+  }
+
   try {
-    const parsed = auditExportSchema.parse(req.body ?? {});
-    const tenantHeader = resolveTenant(req) ?? parsed.tenantId ?? 'default';
-
-    if (!tenantHeader) {
-      return res.status(400).json({ error: 'tenant_required' });
-    }
-
-    if (parsed.tenantId && parsed.tenantId !== tenantHeader) {
-      return res.status(403).json({ error: 'tenant_mismatch' });
-    }
-
-    const now = new Date();
-    const start = parsed.startTime ? new Date(parsed.startTime) : new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    const end = parsed.endTime ? new Date(parsed.endTime) : now;
-
-    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
-      return res.status(400).json({ error: 'invalid_time_window' });
-    }
-
-    const bundle = await buildAuditBundle({
-      tenantId: tenantHeader,
-      startTime: start,
-      endTime: end,
-      format: parsed.format ?? 'tar',
+    const bundle = await runtimeEvidenceService.createBundle({
+      tenantId: effectiveTenant,
+      startTime: req.body?.startTime,
+      endTime: req.body?.endTime,
+      auditPaths: req.body?.auditPaths,
+      policyPaths: req.body?.policyPaths,
+      sbomPaths: req.body?.sbomPaths,
+      provenancePaths: req.body?.provenancePaths,
+      deployedVersion: req.body?.deployedVersion,
     });
 
-    res.setHeader('x-sha256', bundle.sha256);
-    res.setHeader('x-claimset-id', bundle.claimSet.id);
-    const filename =
-      parsed.format === 'zip'
-        ? `audit-bundle-${tenantHeader}.zip`
-        : `audit-bundle-${tenantHeader}.tar.gz`;
-    return res.download(bundle.bundlePath, filename);
+    const base = `${req.protocol}://${req.get('host')}${req.baseUrl}/runtime-bundle/${bundle.id}`;
+    const downloadUrl = `${base}/download`;
+    const manifestUrl = `${base}/manifest`;
+    const checksumsUrl = `${base}/checksums`;
+
+    return res.status(201).json({
+      bundle: {
+        ...bundle,
+        downloadUrl,
+        manifestUrl,
+        checksumsUrl,
+      },
+    });
   } catch (error: any) {
-    return res.status(500).json({ error: 'audit_bundle_failed', message: error?.message });
+    const status = error?.message === 'invalid_date' ? 400 : 500;
+    return res.status(status).json({
+      error: 'runtime_bundle_failed',
+      message: error?.message ?? 'unknown_error',
+    });
   }
+});
+
+router.get('/runtime-bundle/:bundleId/download', async (req, res) => {
+  const tenantHeader = resolveTenant(req);
+  if (!tenantHeader) {
+    return res.status(400).json({ error: 'tenant_required' });
+  }
+
+  const bundle = runtimeEvidenceService.getBundle(req.params.bundleId);
+  if (!bundle) {
+    return res.status(404).json({ error: 'not_found' });
+  }
+
+  if (bundle.tenantId !== tenantHeader) {
+    return res.status(403).json({ error: 'tenant_mismatch' });
+  }
+
+  const exists = await fs
+    .access(bundle.bundlePath)
+    .then(() => true)
+    .catch(() => false);
+
+  if (!exists) {
+    return res.status(410).json({ error: 'bundle_missing' });
+  }
+
+  return res.download(bundle.bundlePath, `runtime-evidence-${bundle.id}.tar.gz`);
+});
+
+router.get('/runtime-bundle/:bundleId/manifest', async (req, res) => {
+  const tenantHeader = resolveTenant(req);
+  if (!tenantHeader) {
+    return res.status(400).json({ error: 'tenant_required' });
+  }
+
+  const bundle = runtimeEvidenceService.getBundle(req.params.bundleId);
+  if (!bundle) {
+    return res.status(404).json({ error: 'not_found' });
+  }
+
+  if (bundle.tenantId !== tenantHeader) {
+    return res.status(403).json({ error: 'tenant_mismatch' });
+  }
+
+  const exists = await fs
+    .access(bundle.manifestPath)
+    .then(() => true)
+    .catch(() => false);
+  if (!exists) {
+    return res.status(410).json({ error: 'bundle_missing' });
+  }
+
+  return res.download(bundle.manifestPath, `runtime-evidence-${bundle.id}-manifest.json`);
+});
+
+router.get('/runtime-bundle/:bundleId/checksums', async (req, res) => {
+  const tenantHeader = resolveTenant(req);
+  if (!tenantHeader) {
+    return res.status(400).json({ error: 'tenant_required' });
+  }
+
+  const bundle = runtimeEvidenceService.getBundle(req.params.bundleId);
+  if (!bundle) {
+    return res.status(404).json({ error: 'not_found' });
+  }
+
+  if (bundle.tenantId !== tenantHeader) {
+    return res.status(403).json({ error: 'tenant_mismatch' });
+  }
+
+  const exists = await fs
+    .access(bundle.checksumsPath)
+    .then(() => true)
+    .catch(() => false);
+  if (!exists) {
+    return res.status(410).json({ error: 'bundle_missing' });
+  }
+
+  return res.download(bundle.checksumsPath, `runtime-evidence-${bundle.id}-checksums.txt`);
 });
 
 export default router;
