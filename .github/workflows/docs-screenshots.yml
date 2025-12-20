@@ -13,23 +13,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'pnpm'
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
       - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps
+        run: npx playwright install --with-deps
       - name: Capture screenshots
         env:
           UI_URL: ${{ github.event.inputs.ui_url }}
-        run: pnpm run screenshots
+        run: npm run screenshots
       - name: Upload screenshots artifact
         uses: actions/upload-artifact@v4
         with:
           name: cookbook-screenshots
           path: docs/cookbook/screenshots
+      - name: Upload observability screenshots artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: observability-screenshots
+          path: docs/observability/screenshots

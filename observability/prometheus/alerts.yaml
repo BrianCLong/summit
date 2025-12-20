@@ -10,3 +10,21 @@ groups:
     labels: { severity: critical }
     annotations:
       summary: "5xx too high (burning error budget)"
+- name: vector-search
+  rules:
+  - alert: VectorSearchP99Regression
+    expr: |
+      vector_query_duration_seconds:p99{operation="similarity-search"} > 0.35
+      and vector_query_duration_seconds:p99{operation="similarity-search"}
+        > vector_query_duration_seconds:p99:baseline{operation="similarity-search"} * 1.5
+    for: 10m
+    labels:
+      severity: warning
+      service: api-server
+      component: pgvector
+    annotations:
+      summary: "Vector search p99 latency regression"
+      description: >-
+        Similarity search p99 latency is {{ $value }}s and 50% above the 30m baseline.
+        Check pgvector configuration, hot embedding refresh health, and recent index changes.
+      runbook_url: "https://docs.intelgraph.com/runbooks/vector-latency-regression"

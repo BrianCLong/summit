@@ -3,6 +3,7 @@ package httpapi
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -19,6 +20,7 @@ func NewHandler(svc *core.Service, auditor *audit.Manager) http.Handler {
 	mux.HandleFunc("/requests", h.handleRequests)
 	mux.HandleFunc("/requests/", h.handleRequestAction)
 	mux.HandleFunc("/audit/events", h.handleAuditEvents)
+	mux.HandleFunc("/audit/export", h.handleAuditExport)
 	mux.HandleFunc("/audit/public-key", h.handlePublicKey)
 	return mux
 }
@@ -146,6 +148,42 @@ func (h *handler) handleAuditEvents(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, h.auditor.Events())
+}
+
+func (h *handler) handleAuditExport(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	if h.auditor == nil {
+		writeError(w, http.StatusServiceUnavailable, "audit manager not configured")
+		return
+	}
+
+	from, to := 0, 0
+	if v := r.URL.Query().Get("from"); v != "" {
+		parsed, err := strconv.Atoi(v)
+		if err != nil {
+			writeError(w, http.StatusBadRequest, "invalid from parameter")
+			return
+		}
+		from = parsed
+	}
+	if v := r.URL.Query().Get("to"); v != "" {
+		parsed, err := strconv.Atoi(v)
+		if err != nil {
+			writeError(w, http.StatusBadRequest, "invalid to parameter")
+			return
+		}
+		to = parsed
+	}
+
+	bundle, err := h.auditor.Export(from, to)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, bundle)
 }
 
 func (h *handler) handlePublicKey(w http.ResponseWriter, r *http.Request) {

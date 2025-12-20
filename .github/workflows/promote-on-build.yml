@@ -18,6 +18,15 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Download SBOM artifacts from build run
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          pattern: sbom-*
+          merge-multiple: true
+          path: sboms
+
       - name: Tooling
         run: |
           sudo apt-get update -y
@@ -26,6 +35,27 @@ jobs:
           curl -sSL -o cosign.tgz "https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-amd64.tar.gz"
           tar -xzf cosign.tgz cosign && sudo mv cosign /usr/local/bin/
           echo "COSIGN_EXPERIMENTAL=1" >> $GITHUB_ENV
+
+      - name: Install Conftest
+        run: |
+          curl -sSL -o conftest.tar.gz https://github.com/open-policy-agent/conftest/releases/download/v0.52.0/conftest_0.52.0_Linux_x86_64.tar.gz
+          tar -xzf conftest.tar.gz conftest
+          sudo mv conftest /usr/local/bin/conftest
+
+      - name: Enforce dependency policy on SBOMs
+        env:
+          SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          shopt -s nullglob
+          files=(sboms/*.spdx.json)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No SBOM artifacts found from build run ${SOURCE_RUN_ID}" >&2
+            exit 1
+          fi
+
+          conftest test "${files[@]}" \
+            --policy .ci/policies/deps.rego \
+            --data .security/deps/policy.yaml
 
       - name: Fetch digests + verify
         env:

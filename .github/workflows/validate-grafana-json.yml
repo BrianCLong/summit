@@ -2,19 +2,19 @@ name: validate-grafana-json
 on:
   pull_request:
     paths:
+      - 'observability/grafana/dashboards/**/*.json'
       - 'grafana/dashboards/**/*.json'
       - 'summit_observability/**/*.json'
-      - 'grafana/alerts/**/*.yml'
-      - 'grafana/alerts/**/*.yaml'
-      - 'grafana/alerts/**/*.json'
+      - 'observability/grafana/alerts/**/*.{yml,yaml,json}'
+      - 'grafana/alerts/**/*.{yml,yaml,json}'
   push:
     branches: [main]
     paths:
+      - 'observability/grafana/dashboards/**/*.json'
       - 'grafana/dashboards/**/*.json'
       - 'summit_observability/**/*.json'
-      - 'grafana/alerts/**/*.yml'
-      - 'grafana/alerts/**/*.yaml'
-      - 'grafana/alerts/**/*.json'
+      - 'observability/grafana/alerts/**/*.{yml,yaml,json}'
+      - 'grafana/alerts/**/*.{yml,yaml,json}'
 
 jobs:
   lint:
@@ -23,12 +23,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install validation dependencies
+        run: python -m pip install --quiet pyyaml
+
       - name: Validate Grafana Dashboard JSON
         run: |
           echo "🔍 Validating Grafana dashboard JSON files..."
-          for dir in grafana/dashboards summit_observability; do
+          set -euo pipefail
+
+          dashboard_dirs=(
+            observability/grafana/dashboards
+            grafana/dashboards
+            summit_observability
+          )
+
+          found=false
+
+          for dir in "${dashboard_dirs[@]}"; do
             if [[ -d "$dir" ]]; then
-              find "$dir" -name "*.json" -type f | while read -r file; do
+              while IFS= read -r file; do
+                found=true
                 echo "Checking: $file"
                 if jq -e . "$file" >/dev/null; then
                   echo "✅ $file is valid JSON"
@@ -36,17 +50,101 @@ jobs:
                   echo "❌ $file has invalid JSON syntax"
                   exit 1
                 fi
-              done
-            else
-              echo "ℹ️ Directory $dir not found, skipping."
+              done < <(find "$dir" -name "*.json" -type f)
             fi
           done
-          echo "🎉 All Grafana dashboard JSON files are valid!"
+
+          if [[ "$found" == "false" ]]; then
+            echo "ℹ️ No Grafana dashboard JSON files found to validate."
+          else
+            echo "🎉 All Grafana dashboard JSON files are valid!"
+          fi
+
+      - name: Validate Grafana Alert Rules
+        run: |
+          echo "🔍 Validating Grafana alert rule files..."
+          set -euo pipefail
+
+          alert_dirs=(
+            observability/grafana/alerts
+            grafana/alerts
+          )
+
+          alert_files=()
+          for dir in "${alert_dirs[@]}"; do
+            if [[ -d "$dir" ]]; then
+              while IFS= read -r file; do
+                alert_files+=("$file")
+              done < <(find "$dir" -type f \( -name "*.yml" -o -name "*.yaml" -o -name "*.json" \))
+            fi
+          done
+
+          if [[ ${#alert_files[@]} -eq 0 ]]; then
+            echo "ℹ️ No Grafana alert rule files found; skipping."
+            exit 0
+          fi
+
+          python - "${alert_files[@]}" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+import yaml
+
+paths = sys.argv[1:]
+errors = []
+
+for path_str in paths:
+    path = Path(path_str)
+    try:
+        if path.suffix.lower() == '.json':
+            with path.open() as f:
+                content = json.load(f)
+        else:
+            with path.open() as f:
+                content = yaml.safe_load(f)
+    except Exception as exc:  # noqa: BLE001
+        errors.append(f"{path}: unable to parse ({exc})")
+        continue
+
+    if not isinstance(content, dict):
+        errors.append(f"{path}: expected a mapping at the top level")
+        continue
+
+    groups = content.get('groups')
+    if not isinstance(groups, list) or not groups:
+        errors.append(f"{path}: missing or empty 'groups' collection")
+        continue
+
+    for group in groups:
+        if not isinstance(group, dict):
+            errors.append(f"{path}: group entry is not a mapping")
+            continue
+        rules = group.get('rules')
+        if not isinstance(rules, list) or not rules:
+            errors.append(f"{path}: group '{group.get('name', '<unnamed>')}' has no rules")
+            continue
+        for rule in rules:
+            if not isinstance(rule, dict):
+                errors.append(f"{path}: rule entry is not a mapping")
+                continue
+            if not (rule.get('alert') or rule.get('title')):
+                errors.append(f"{path}: rule missing 'alert' or 'title' key")
+            if 'expr' not in rule and 'condition' not in rule:
+                errors.append(f"{path}: rule '{rule.get('alert', rule.get('title', '<untitled>'))}' is missing 'expr'/'condition'")
+
+if errors:
+    for err in errors:
+        print(f"❌ {err}")
+    sys.exit(1)
+
+print('🎉 All Grafana alert rule files look well-structured!')
+PY
 
       - name: Validate MC v0.3.5 Dashboard Structure
         run: |
           echo "🔍 Validating MC v0.3.5 dashboard structure..."
-          DASH_FILE="grafana/dashboards/mc-v035-tiles.json"
+          DASH_FILE="observability/grafana/dashboards/mc-v035-tiles.json"
           if [[ -f "$DASH_FILE" ]]; then
             # Check for required panels
             PANEL_COUNT=$(jq '.panels | length' "$DASH_FILE")
@@ -69,63 +167,3 @@ jobs:
           else
             echo "⚠️ MC v0.3.5 dashboard not found, skipping structure validation"
           fi
-
-      - name: Validate Alert Rules
-        run: |
-          if [[ ! -d grafana/alerts ]]; then
-            echo "ℹ️ No grafana/alerts directory found, skipping alert validation."
-            exit 0
-          fi
-
-          python - <<'PY'
-import json
-import sys
-from pathlib import Path
-
-try:
-    import yaml  # type: ignore
-except ImportError:  # pragma: no cover - dependency bootstrap
-    import subprocess
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "pyyaml"])
-    import yaml  # type: ignore
-
-alert_dir = Path("grafana/alerts")
-failures = []
-
-for path in alert_dir.rglob("*"):
-    if path.is_dir():
-        continue
-    try:
-        if path.suffix.lower() == ".json":
-            with path.open() as handle:
-                content = json.load(handle)
-        else:
-            with path.open() as handle:
-                content = yaml.safe_load(handle)
-    except Exception as exc:  # pragma: no cover - validation
-        failures.append(f"{path}: parse error ({exc})")
-        continue
-
-    groups = content.get("groups") if isinstance(content, dict) else None
-    if not groups:
-        failures.append(f"{path}: missing 'groups' definition")
-        continue
-
-    for group in groups:
-        rules = group.get("rules") if isinstance(group, dict) else None
-        if not rules:
-            failures.append(f"{path}: group '{group.get('name', 'unknown')}' missing rules")
-            continue
-        for rule in rules:
-            if not rule.get("alert") and not rule.get("title"):
-                failures.append(f"{path}: rule missing alert/title")
-            if not rule.get("expr") and not rule.get("condition"):
-                failures.append(f"{path}: rule missing expr/condition")
-
-if failures:
-    for failure in failures:
-        print(f"❌ {failure}")
-    sys.exit(1)
-
-print(\"✅ Alert rule syntax and structure look good.\")
-PY
