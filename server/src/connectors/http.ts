@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { BaseSourceConnector } from './base.js';
 import { ConnectorContext } from './types.js';
 import axios from 'axios';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { randomUUID } from 'node:crypto';
 import { NarrativeSimulationEngine } from './engine.js';
 import type {

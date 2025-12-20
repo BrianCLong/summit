@@ -15,4 +15,10 @@ describe('capability helper', () => {
     expect(operatorPerms).toContain(PERMISSIONS.RUN_MAESTRO);
     expect(hasCapability({ role: 'OPERATOR' }, 'run:create')).toBe(true);
   });
+
+  it('treats actions:* aliases as graph read permissions', () => {
+    expect(hasCapability({ role: 'ANALYST' }, 'actions:read')).toBe(true);
+    expect(hasCapability({ role: 'ANALYST' }, 'action:view')).toBe(true);
+    expect(hasCapability({ role: 'VIEWER' }, 'actions:list')).toBe(true);
+  });
 });

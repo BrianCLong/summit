@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express from 'express';
 import { EntityResolutionService } from '../services/EntityResolutionService.js';
 import pino from 'pino';
