@@ -49,6 +49,7 @@ import webhookRouter from './routes/webhooks.js';
 import { webhookWorker } from './webhooks/webhook.worker.js';
 import supportTicketsRouter from './routes/support-tickets.js';
 import ticketLinksRouter from './routes/ticket-links.js';
+import tenantContextMiddleware from './middleware/tenantContext.js';
 import { auroraRouter } from './routes/aurora.js';
 import { oracleRouter } from './routes/oracle.js';
 import { phantomLimbRouter } from './routes/phantom_limb.js';
@@ -196,6 +197,9 @@ export const createApp = async () => {
     }
     next();
   });
+
+  // Resolve and enforce tenant context for API and GraphQL surfaces
+  app.use(['/api', '/graphql'], tenantContextMiddleware());
 
   // Telemetry middleware
   app.use((req, res, next) => {
