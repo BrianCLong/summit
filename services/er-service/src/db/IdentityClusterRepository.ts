@@ -223,14 +223,18 @@ export class IdentityClusterRepository {
     const db = getDatabase();
 
     return db.transaction(async (client) => {
-      // Get both clusters
-      const [targetResult, sourceResult] = await Promise.all([
-        client.query(`SELECT * FROM er_identity_clusters WHERE cluster_id = $1 FOR UPDATE`, [targetClusterId]),
-        client.query(`SELECT * FROM er_identity_clusters WHERE cluster_id = $1 FOR UPDATE`, [sourceClusterId]),
-      ]);
+      // Get both clusters using a deterministic lock order to avoid deadlocks
+      const lockOrder = [targetClusterId, sourceClusterId].sort();
+      const { rows: lockedRows } = await client.query(
+        `SELECT * FROM er_identity_clusters
+         WHERE cluster_id = ANY($1)
+         ORDER BY cluster_id
+         FOR UPDATE`,
+        [lockOrder]
+      );
 
-      const targetRow = targetResult.rows[0] as ClusterRow | undefined;
-      const sourceRow = sourceResult.rows[0] as ClusterRow | undefined;
+      const targetRow = lockedRows.find((row) => row.cluster_id === targetClusterId) as ClusterRow | undefined;
+      const sourceRow = lockedRows.find((row) => row.cluster_id === sourceClusterId) as ClusterRow | undefined;
 
       if (!targetRow || !sourceRow) {
         throw new Error('One or both clusters not found');

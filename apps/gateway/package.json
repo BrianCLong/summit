@@ -8,10 +8,9 @@
     "test:unit": "vitest run"
   },
   "dependencies": {
-    "@types/js-yaml": "^4.0.9",
     "express": "^4.19.2",
     "helmet": "^7.1.0",
-    "js-yaml": "^4.1.1"
+    "typesense": "^1.8.2"
   },
   "devDependencies": {
     "ts-node": "^10.9.2",
