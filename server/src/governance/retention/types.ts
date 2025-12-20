@@ -32,6 +32,9 @@ export interface DatasetMetadata {
   storageSystems: StorageSystem[];
   owner: string;
   createdAt: Date;
+  tenantId?: string;
+  caseId?: string;
+  evidenceType?: string;
   recordCount?: number;
 }
 
@@ -76,6 +79,53 @@ export interface LegalHold {
   scope: 'full' | 'partial';
 }
 
+export interface TenantRetentionPolicy {
+  tenantId: string;
+  retentionDays: number;
+  purgeGraceDays?: number;
+  updatedBy: string;
+  updatedAt: Date;
+  notes?: string;
+}
+
+export interface CaseRetentionOverride {
+  tenantId: string;
+  caseId: string;
+  retentionDays: number;
+  purgeGraceDays?: number;
+  evidenceType?: string;
+  updatedBy: string;
+  updatedAt: Date;
+  reason?: string;
+}
+
+export interface EvidenceTypeOverride {
+  tenantId: string;
+  evidenceType: string;
+  retentionDays: number;
+  purgeGraceDays?: number;
+  updatedBy: string;
+  updatedAt: Date;
+  reason?: string;
+}
+
+export interface ResolvedRetentionPolicy {
+  retentionDays: number;
+  purgeGraceDays: number;
+  source: 'tenant-default' | 'case-override' | 'evidence-type-override' | 'applied-policy';
+  appliedPolicyId?: string;
+  appliedLayers: string[];
+  reason?: string;
+}
+
+export interface PendingDeletion {
+  runId: string;
+  markedAt: Date;
+  executeAfter: Date;
+  reason: string;
+  resolvedPolicy: ResolvedRetentionPolicy;
+}
+
 export interface RetentionSchedule {
   datasetId: string;
   intervalMs: number;
@@ -108,8 +158,26 @@ export interface RetentionRecord {
   policy: AppliedRetentionPolicy;
   legalHold?: LegalHold;
   schedule?: RetentionSchedule;
+  pendingDeletion?: PendingDeletion;
   archiveHistory: ArchivalWorkflow[];
   lastEvaluatedAt: Date;
+}
+
+export interface RetentionSweepRow {
+  datasetId: string;
+  policySource: ResolvedRetentionPolicy['source'];
+  executeAfter: Date;
+  reason: string;
+}
+
+export interface RetentionSweepReport {
+  runId: string;
+  dryRun: boolean;
+  enforcementEnabled: boolean;
+  marked: RetentionSweepRow[];
+  deleted: RetentionSweepRow[];
+  skipped: { datasetId: string; reason: string }[];
+  generatedAt: Date;
 }
 
 /**

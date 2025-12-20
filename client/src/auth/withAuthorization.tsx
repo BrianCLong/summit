@@ -1,86 +1,194 @@
-import React, { ComponentType, PropsWithChildren } from 'react';
-import { Alert, LinearProgress } from '@mui/material';
+import React, {
+  ComponentType,
+  PropsWithChildren,
+  useCallback,
+  useMemo,
+} from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
-import { normalizePermission } from '../utils/capabilities';
+import {
+  normalizePermission,
+  permissionsForRole,
+} from '../utils/capabilities';
 
-export interface AuthorizationOptions {
-  actions?: string[];
-  tenant?: string;
-  fallback?: React.ReactNode;
-}
-
-interface Claim {
+type AccessRequest = {
   action: string;
-  tenant?: string;
-}
+  tenantId?: string;
+};
 
-function matchClaim(claim: Claim, action: string, tenant?: string) {
-  const normalizedAction = normalizePermission(action) || action;
-  const normalizedClaim = normalizePermission(claim.action) || claim.action;
-  const tenantMatches =
-    !claim.tenant || !tenant || claim.tenant === '*' || claim.tenant === tenant;
-  const actionMatches =
-    normalizedClaim === '*' ||
-    normalizedClaim === normalizedAction ||
-    claim.action === normalizedAction;
+type WithAuthorizationOptions<P> = {
+  action: string;
+  tenantId?: string | ((props: P) => string | undefined);
+  fallback?: React.ReactNode;
+  loadingFallback?: React.ReactNode;
+};
 
-  return tenantMatches && actionMatches;
-}
+const normalizeAction = (action?: string | null) => {
+  if (!action) return null;
+  const normalized = normalizePermission(action);
+  if (normalized) return normalized;
+  return action.toLowerCase();
+};
 
-export function useAuthorization() {
-  const { user, loading, claims = [], canAccess, tenantId } = useAuth();
+const unique = (values: Array<string | undefined>) =>
+  Array.from(new Set(values.filter(Boolean) as string[]));
 
-  const getTenantForAction = (action?: string, requestedTenant?: string) => {
-    if (!action) return requestedTenant || tenantId;
-    if (requestedTenant && canAccess?.(action, requestedTenant)) {
-      return requestedTenant;
-    }
-    const claimTenant =
-      claims.find((claim: Claim) => matchClaim(claim, action, claim.tenant))
-        ?.tenant || tenantId;
-    return claimTenant || tenantId;
-  };
+const resolveTenantScopes = (
+  user: any,
+  preferredTenant?: string,
+): string[] => {
+  const explicitScopes = unique([
+    ...(user?.tenants || []),
+    ...(user?.attributes?.tenants || []),
+    user?.tenantId,
+  ]);
+
+  if (explicitScopes.length > 0) {
+    return explicitScopes;
+  }
+
+  const storedTenant =
+    typeof localStorage !== 'undefined'
+      ? localStorage.getItem('tenantId') || undefined
+      : undefined;
+
+  if (preferredTenant) return [preferredTenant];
+  if (storedTenant) return [storedTenant];
+
+  return ['*'];
+};
+
+const resolveAllowedActions = (user: any): string[] => {
+  if (!user) return [];
+  if (user.role?.toUpperCase() === 'ADMIN') return ['*'];
+
+  const fromUser = (user.actionGrants || user.permissions || [])
+    .map((action: string) => normalizeAction(action))
+    .filter(Boolean) as string[];
+  const fromRole = permissionsForRole(user.role).map((action) =>
+    normalizeAction(action),
+  );
+
+  return unique([...fromUser, ...fromRole]);
+};
+
+export function useAuthorization(preferredTenant?: string) {
+  const { user, loading } = useAuth();
+
+  const tenantScopes = useMemo(
+    () => resolveTenantScopes(user, preferredTenant),
+    [user, preferredTenant],
+  );
+
+  const allowedActions = useMemo(
+    () => resolveAllowedActions(user),
+    [user],
+  );
+
+  const canAccess = useCallback(
+    ({ action, tenantId }: AccessRequest) => {
+      if (!user || !action) return false;
+
+      const normalizedAction = normalizeAction(action);
+      if (!normalizedAction) return false;
+
+      const actionAllowed =
+        allowedActions.includes('*') || allowedActions.includes(normalizedAction);
+
+      if (!actionAllowed) return false;
+
+      if (!tenantId || tenantScopes.includes('*')) return true;
+
+      return tenantScopes.some(
+        (tenant) => tenant.toLowerCase() === tenantId.toLowerCase(),
+      );
+    },
+    [allowedActions, tenantScopes, user],
+  );
+
+  const filterByAccess = useCallback(
+    <T,>(
+      items: T[],
+      builder: (item: T) => AccessRequest,
+    ): T[] => items.filter((item) => canAccess(builder(item))),
+    [canAccess],
+  );
+
+  const resolvedTenant =
+    preferredTenant || tenantScopes.find((scope) => scope !== '*');
 
   return {
-    user,
+    allowedActions,
+    canAccess,
+    filterByAccess,
     loading,
-    claims,
-    canAccess: canAccess || (() => false),
-    tenantId,
-    getTenantForAction,
+    tenant: resolvedTenant,
+    tenantScopes,
   };
 }
 
-export function withAuthorization<P extends object>(
-  options: AuthorizationOptions,
-) {
-  return (WrappedComponent: ComponentType<P>) => {
-    return function AuthorizedComponent(props: PropsWithChildren<P>) {
-      const { loading, canAccess, tenantId, claims } = useAuthorization();
-      const scopedTenant = options.tenant || tenantId;
-      const isAllowed =
-        !options.actions ||
-        options.actions.every((action) => canAccess(action, scopedTenant));
+const DefaultAccessDenied: React.FC<{ action: string; tenantId?: string }> = ({
+  action,
+  tenantId,
+}) => (
+  <div role="alert" aria-label="access-denied">
+    Access denied for <strong>{action}</strong>
+    {tenantId ? ` in tenant ${tenantId}` : ''}.
+  </div>
+);
 
-      if (loading) {
-        return <LinearProgress data-testid="auth-loading" />;
-      }
+export function AuthorizationGate({
+  action,
+  tenantId,
+  fallback,
+  loadingFallback,
+  children,
+}: PropsWithChildren<{
+  action: string;
+  tenantId?: string;
+  fallback?: React.ReactNode;
+  loadingFallback?: React.ReactNode;
+}>) {
+  const { canAccess, loading, tenant } = useAuthorization(tenantId);
+  const scopedTenant = tenantId || tenant;
 
-      if (!isAllowed) {
-        return (
-          options.fallback || (
-            <Alert severity="error" data-testid="auth-denied">
-              Access denied for this action in the current tenant scope.
-              <br />
-              {claims?.length
-                ? 'Your active claims do not grant the required capability.'
-                : 'No active claims were found on your session.'}
-            </Alert>
-          )
-        );
-      }
+  if (loading) {
+    return (
+      <>{loadingFallback || <div role="status">Checking permissions…</div>}</>
+    );
+  }
 
-      return <WrappedComponent {...props} />;
+  if (!canAccess({ action, tenantId: scopedTenant })) {
+    return (
+      <>
+        {fallback || (
+          <DefaultAccessDenied action={action} tenantId={scopedTenant} />
+        )}
+      </>
+    );
+  }
+
+  return <>{children}</>;
+}
+
+export function withAuthorization<P>(
+  options: WithAuthorizationOptions<P>,
+): (component: ComponentType<P>) => ComponentType<P> {
+  return (Component: ComponentType<P>) =>
+    function GuardedComponent(props: P) {
+      const resolvedTenant =
+        typeof options.tenantId === 'function'
+          ? options.tenantId(props)
+          : options.tenantId;
+
+      return (
+        <AuthorizationGate
+          action={options.action}
+          tenantId={resolvedTenant}
+          fallback={options.fallback}
+          loadingFallback={options.loadingFallback}
+        >
+          <Component {...props} />
+        </AuthorizationGate>
+      );
     };
-  };
 }

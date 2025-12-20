@@ -51,7 +51,6 @@ import { store } from './store';
 import { apolloClient } from './services/apollo';
 import { useSelector } from 'react-redux';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
-import { useAuthorization, withAuthorization } from './auth/withAuthorization';
 import ProtectedRoute from './components/common/ProtectedRoute.jsx';
 import LoginPage from './components/auth/LoginPage.jsx';
 
@@ -79,7 +78,7 @@ const OsintFeedConfig = React.lazy(() =>
 const ExecutiveDashboard = React.lazy(() =>
   import('./features/wargame/ExecutiveDashboard')
 );
-const AccessIntelPageLazy = React.lazy(() =>
+const AccessIntelPage = React.lazy(() =>
   import('./features/rbac/AccessIntelPage.jsx')
 );
 
@@ -107,61 +106,19 @@ function PageLoadingFallback() {
 // Navigation items
 const navigationItems = [
   { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
-  {
-    path: '/investigations',
-    label: 'Timeline',
-    icon: <Search />,
-    actions: ['investigation:read'],
-  },
-  {
-    path: '/graph',
-    label: 'Graph Explorer',
-    icon: <Timeline />,
-    actions: ['graph:read'],
-  },
-  {
-    path: '/copilot',
-    label: 'AI Copilot',
-    icon: <Psychology />,
-    actions: ['ai:request'],
-  },
-  {
-    path: '/threats',
-    label: 'Threat Assessment',
-    icon: <Assessment />,
-    actions: ['view_dashboards'],
-  },
-  {
-    path: '/access-intel',
-    label: 'Access Intel',
-    icon: <Security />,
-    actions: ['graph:read'],
-  },
-  {
-    path: '/geoint',
-    label: 'GeoInt Map',
-    icon: <Map />,
-    actions: ['view_dashboards'],
-  },
-  {
-    path: '/reports',
-    label: 'Reports',
-    icon: <Assessment />,
-    actions: ['view_dashboards'],
-  },
-  {
-    path: '/system',
-    label: 'System',
-    icon: <Settings />,
-    roles: [ADMIN],
-    actions: ['manage_settings'],
-  },
+  { path: '/investigations', label: 'Timeline', icon: <Search /> },
+  { path: '/graph', label: 'Graph Explorer', icon: <Timeline /> },
+  { path: '/copilot', label: 'AI Copilot', icon: <Psychology /> },
+  { path: '/threats', label: 'Threat Assessment', icon: <Assessment /> },
+  { path: '/access-intel', label: 'Access Intel', icon: <Security /> },
+  { path: '/geoint', label: 'GeoInt Map', icon: <Map /> },
+  { path: '/reports', label: 'Reports', icon: <Assessment /> },
+  { path: '/system', label: 'System', icon: <Settings />, roles: [ADMIN] },
   {
     path: '/admin/osint-feeds',
     label: 'OSINT Feeds',
     icon: <Settings />,
     roles: [ADMIN],
-    actions: ['manage_settings'],
   },
   // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
   // Ethics Compliance: This dashboard is for hypothetical scenario simulation only.
@@ -170,7 +127,6 @@ const navigationItems = [
     label: 'WarGame Dashboard',
     icon: <MilitaryTech />,
     roles: [ADMIN],
-    actions: ['manage_settings'],
   },
 ];
 
@@ -223,7 +179,6 @@ function NavigationDrawer({ open, onClose }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { hasRole, hasPermission } = useAuth();
-  const { canAccess, tenantId } = useAuthorization();
 
   const handleNavigation = (path) => {
     navigate(path);
@@ -233,8 +188,6 @@ function NavigationDrawer({ open, onClose }) {
   const items = navigationItems.filter((item) => {
     if (item.roles && !item.roles.some((r) => hasRole(r))) return false;
     if (item.permissions && !item.permissions.some((p) => hasPermission(p)))
-      return false;
-    if (item.actions && !item.actions.every((action) => canAccess(action, tenantId)))
       return false;
     return true;
   });
@@ -628,9 +581,7 @@ function DashboardPage() {
   );
 }
 
-const InvestigationsPage = withAuthorization({
-  actions: ['investigation:read'],
-})(function InvestigationsPage() {
+function InvestigationsPage() {
   return (
     <Container maxWidth="xl" sx={{ height: '100vh', py: 2 }}>
       <Suspense fallback={<PageLoadingFallback />}>
@@ -638,63 +589,37 @@ const InvestigationsPage = withAuthorization({
       </Suspense>
     </Container>
   );
-});
+}
 
-const GraphExplorerPage = withAuthorization({ actions: ['graph:read'] })(
-  function GraphExplorerPage() {
-    return (
-      <Container maxWidth="xl" sx={{ height: '100vh', py: 2 }}>
-        <Suspense fallback={<PageLoadingFallback />}>
-          <InteractiveGraphExplorer />
-        </Suspense>
-      </Container>
-    );
-  },
-);
-
-const CopilotPage = withAuthorization({ actions: ['ai:request'] })(
-  function CopilotPage() {
-    return (
-      <Container maxWidth="xl" sx={{ height: '100vh', py: 2 }}>
-        <Suspense fallback={<PageLoadingFallback />}>
-          <IntelligentCopilot />
-        </Suspense>
-      </Container>
-    );
-  },
-);
-
-const ThreatsPage = withAuthorization({ actions: ['view_dashboards'] })(
-  function ThreatsPage() {
-    return (
-      <Container maxWidth="xl" sx={{ height: '100vh', py: 2 }}>
-        <Suspense fallback={<PageLoadingFallback />}>
-          <ThreatAssessmentEngine />
-        </Suspense>
-      </Container>
-    );
-  },
-);
-
-const AccessIntelPage = withAuthorization({ actions: ['graph:read'] })(
-  function AccessIntelPage() {
-    return (
-      <Suspense fallback={<PageLoadingFallback />}>
-        <AccessIntelPageLazy />
-      </Suspense>
-    );
-  },
-);
-
-const OsintFeedConfigPage = withAuthorization({
-  actions: ['manage_settings'],
-})(function OsintFeedConfigPage() {
+function GraphExplorerPage() {
   return (
-    <Suspense fallback={<PageLoadingFallback />}>
-      <OsintFeedConfig />
-    </Suspense>
+    <Container maxWidth="xl" sx={{ height: '100vh', py: 2 }}>
+      <Suspense fallback={<PageLoadingFallback />}>
+        <InteractiveGraphExplorer />
+      </Suspense>
+    </Container>
   );
-});
+}
+
+function CopilotPage() {
+  return (
+    <Container maxWidth="xl" sx={{ height: '100vh', py: 2 }}>
+      <Suspense fallback={<PageLoadingFallback />}>
+        <IntelligentCopilot />
+      </Suspense>
+    </Container>
+  );
+}
+
+function ThreatsPage() {
+  return (
+    <Container maxWidth="xl" sx={{ height: '100vh', py: 2 }}>
+      <Suspense fallback={<PageLoadingFallback />}>
+        <ThreatAssessmentEngine />
+      </Suspense>
+    </Container>
+  );
+}
 
 function NotFoundPage() {
   const navigate = useNavigate();
@@ -740,12 +665,12 @@ function MainLayout() {
             <Route path="/graph" element={<GraphExplorerPage />} />
             <Route path="/copilot" element={<CopilotPage />} />
             <Route path="/threats" element={<ThreatsPage />} />
-            <Route path="/access-intel" element={<AccessIntelPage />} />
+            <Route path="/access-intel" element={<Suspense fallback={<PageLoadingFallback />}><AccessIntelPage /></Suspense>} />
             <Route path="/geoint" element={<InvestigationsPage />} />
             <Route path="/reports" element={<InvestigationsPage />} />
-            <Route element={<ProtectedRoute roles={['ADMIN']} actions={['manage_settings']} />}>
+            <Route element={<ProtectedRoute roles={['ADMIN']} />}>
               <Route path="/system" element={<InvestigationsPage />} />
-              <Route path="/admin/osint-feeds" element={<OsintFeedConfigPage />} />
+              <Route path="/admin/osint-feeds" element={<Suspense fallback={<PageLoadingFallback />}><OsintFeedConfig /></Suspense>} />
               <Route
                 path="/wargame-dashboard"
                 element={<Suspense fallback={<PageLoadingFallback />}><ExecutiveDashboard /></Suspense>}

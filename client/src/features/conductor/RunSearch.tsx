@@ -1,6 +1,4 @@
-import React, { useMemo, useState } from 'react';
-import { Alert } from '@mui/material';
-import { useAuthorization } from '../../auth/withAuthorization';
+import React, { useState } from 'react';
 
 interface RunHit {
   runId: string;
@@ -19,31 +17,12 @@ export default function RunSearch() {
     since: '',
     until: '',
   });
-  const [error, setError] = useState('');
-  const { canAccess, getTenantForAction, tenantId } = useAuthorization();
-  const action = 'run:read';
-  const scopedTenant = useMemo(
-    () => getTenantForAction(action, q.tenant || tenantId),
-    [action, getTenantForAction, q.tenant, tenantId],
-  );
-  const isAuthorized = canAccess(action, scopedTenant);
-
   async function search() {
-    const tenantScope = getTenantForAction(action, q.tenant || tenantId);
-    if (!canAccess(action, tenantScope)) {
-      setError('You are not allowed to search runs for this tenant.');
-      setHits([]);
-      return;
-    }
-    setError('');
     const r = await fetch('/graphql', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
-        query: `{ searchRuns(q:${JSON.stringify({
-          ...q,
-          tenant: tenantScope,
-        })}){ runId status startedAt tenant summary } }`,
+        query: `{ searchRuns(q:${JSON.stringify(q)}){ runId status startedAt tenant summary } }`,
       }),
     });
     const j = await r.json();
@@ -52,11 +31,6 @@ export default function RunSearch() {
   return (
     <div className="p-4 rounded-2xl shadow">
       <h3 className="text-lg font-semibold">Run Search</h3>
-      {error && (
-        <Alert severity="warning" className="mb-2" data-testid="run-search-denied">
-          {error}
-        </Alert>
-      )}
       <div className="grid grid-cols-5 gap-2 mb-2">
         <input
           placeholder="tenant"
@@ -84,12 +58,7 @@ export default function RunSearch() {
           onChange={(e) => setQ({ ...q, until: e.target.value })}
         />
       </div>
-      <button
-        onClick={search}
-        className="px-3 py-1 rounded-2xl shadow"
-        disabled={!isAuthorized}
-        data-testid="run-search-submit"
-      >
+      <button onClick={search} className="px-3 py-1 rounded-2xl shadow">
         Search
       </button>
       <table className="w-full text-sm mt-3">
