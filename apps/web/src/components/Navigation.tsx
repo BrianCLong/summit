@@ -26,7 +26,6 @@ import { useSearch } from '@/contexts/SearchContext'
 import { useRbac } from '@/hooks/useRbac'
 import type { User } from '@/types'
 import { cn } from '@/lib/utils'
-import { isFeatureEnabled } from '@/config'
 
 interface NavigationProps {
   user: User | null
@@ -79,6 +78,13 @@ const navItems: NavItem[] = [
     action: 'read',
   },
   {
+    name: 'Internal Command',
+    href: '/internal/command',
+    icon: Command as React.ComponentType<{ className?: string }>,
+    resource: 'dashboards',
+    action: 'read',
+  },
+  {
     name: 'Data Sources',
     href: '/data/sources',
     icon: Database as React.ComponentType<{ className?: string }>,
@@ -100,11 +106,6 @@ const navItems: NavItem[] = [
     action: 'read',
   },
   {
-    name: 'Review Queue',
-    href: '/review-queue',
-    icon: FileBarChart as React.ComponentType<{ className?: string }>,
-  },
-  {
     name: 'Admin',
     href: '/admin',
     icon: Settings as React.ComponentType<{ className?: string }>,
@@ -124,10 +125,6 @@ export function Navigation({ user }: NavigationProps) {
   const { openSearch } = useSearch()
 
   const NavItemComponent = ({ item }: { item: NavItem }) => {
-    if (item.href === '/review-queue' && !isFeatureEnabled('ui.reviewQueue')) {
-      return null
-    }
-
     const { hasPermission } = useRbac(item.resource || '', item.action || '', {
       user,
       fallback: !item.resource,
@@ -207,14 +204,14 @@ export function Navigation({ user }: NavigationProps) {
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2 mt-6">
           Dashboards
         </div>
-        {navItems.slice(3, 5).map(item => (
+        {navItems.slice(3, 6).map(item => (
           <NavItemComponent key={item.href} item={item} />
         ))}
 
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2 mt-6">
           Platform
         </div>
-        {navItems.slice(5).map(item => (
+        {navItems.slice(6).map(item => (
           <NavItemComponent key={item.href} item={item} />
         ))}
       </div>

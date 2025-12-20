@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   EntityResolutionService,
   type CandidateScore,
@@ -62,5 +62,68 @@ describe('EntityResolutionService', () => {
     const events = audit.filter((entry) => entry.target === merge.mergeId);
     expect(events).toHaveLength(2);
     expect(events[1].event).toBe('revert');
+  });
+
+  it('emits structured observability for entity extraction workflows', () => {
+    const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() };
+    const metrics = { observe: vi.fn(), increment: vi.fn() };
+    const spans: { name: string; end: ReturnType<typeof vi.fn> }[] = [];
+    const tracer = {
+      startSpan: vi.fn((name: string) => {
+        const end = vi.fn();
+        const span = { name, end, recordException: vi.fn() };
+        spans.push({ name, end });
+        return span;
+      }),
+    };
+
+    const service = new EntityResolutionService(
+      () => new Date('2024-03-03T00:00:00Z'),
+      { logger, metrics, tracer },
+    );
+
+    const { candidates } = service.candidates({
+      tenantId: fixture.tenantId,
+      entity: fixture.entities[0],
+      population: fixture.entities,
+      topK: 2,
+    });
+
+    const merge = service.merge(
+      {
+        tenantId: fixture.tenantId,
+        primaryId: fixture.entities[0].id,
+        duplicateId: candidates[0].entityId,
+        actor: 'observer@example.com',
+        reason: 'Consolidation',
+        policyTags: ['er:observed'],
+      },
+      candidates[0],
+    );
+
+    expect(logger.info).toHaveBeenCalledWith(
+      'intelgraph.entities.candidates',
+      expect.objectContaining({
+        entityId: fixture.entities[0].id,
+        candidates: 2,
+      }),
+    );
+    expect(metrics.observe).toHaveBeenCalledWith(
+      'intelgraph_er_candidates_ms',
+      expect.any(Number),
+      expect.objectContaining({ tenantId: fixture.tenantId }),
+    );
+    expect(metrics.increment).toHaveBeenCalledWith(
+      'intelgraph_er_merges_total',
+      1,
+      expect.objectContaining({ tenantId: fixture.tenantId }),
+    );
+    expect(tracer.startSpan).toHaveBeenCalledWith(
+      'intelgraph.entities.merge',
+      expect.objectContaining({ tenantId: fixture.tenantId }),
+    );
+    expect(spans.some((span) => span.end.mock.calls.length > 0)).toBe(true);
+
+    service.revertMerge(merge.mergeId, 'observer@example.com', 'test revert');
   });
 });
