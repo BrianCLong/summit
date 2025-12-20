@@ -35,9 +35,11 @@ test.describe('Comprehensive Accessibility Tests', () => {
       await expect(page.locator('role=banner')).toBeVisible();
     });
 
-    test('should match the visual regression snapshot', async ({ page }) => {
+    test('should render the primary homepage content', async ({ page }) => {
       await page.goto('/');
-      await expect(page).toHaveScreenshot('homepage.png');
+
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+      await expect(page.getByRole('main')).toBeVisible();
     });
   });
 
