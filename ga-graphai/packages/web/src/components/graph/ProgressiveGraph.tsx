@@ -30,6 +30,8 @@ const DEFAULT_BATCH_SIZE = 80;
 const DEFAULT_FRAME_BUDGET = 18;
 const LOD_THRESHOLD = 320;
 const MAX_BATCH_SIZE = 320;
+const MAX_VISIBLE_EDGES_COMPACT = 3200;
+const FRAME_OVERRUN_MULTIPLIER = 2.5;
 
 function scheduleFrame(fn: () => void): FrameHandle {
   if (typeof requestAnimationFrame !== 'undefined') {
@@ -69,30 +71,50 @@ export function ProgressiveGraph({
   const frameRef = useRef<FrameHandle>();
 
   useEffect(() => {
+    setSelectedId((current) =>
+      nodes.some((node) => node.id === current) ? current : null,
+    );
+    setHoveredId((current) =>
+      nodes.some((node) => node.id === current) ? current : null,
+    );
+  }, [nodes]);
+
+  useEffect(() => {
     setRenderedCount(Math.min(initialBatchSize, nodes.length));
     setLodMode(nodes.length > LOD_THRESHOLD ? 'compact' : 'detailed');
 
     let cancelled = false;
     let currentCount = Math.min(initialBatchSize, nodes.length);
-    let batchSize = initialBatchSize;
+    let batchSize = Math.max(initialBatchSize, 1);
     const start = performance.now();
 
     const step = () => {
       if (cancelled) return;
-      const elapsed = performance.now() - start;
-      const nextBatch = Math.min(batchSize * 1.5, MAX_BATCH_SIZE);
-      batchSize = Math.max(Math.round(nextBatch), 1);
-      currentCount = Math.min(currentCount + batchSize, nodes.length);
-      setRenderedCount(currentCount);
+      const frameStart = performance.now();
+      let nextCount = currentCount;
 
-      if (elapsed > frameBudgetMs && nodes.length > LOD_THRESHOLD) {
-        // Switch to compact mode and fast-forward to finish to keep DOM/canvas load capped
-        setLodMode('compact');
-        currentCount = nodes.length;
-        setRenderedCount(currentCount);
-        onRenderComplete?.(performance.now() - start);
-        return;
+      while (
+        nextCount < nodes.length &&
+        performance.now() - frameStart < frameBudgetMs
+      ) {
+        const nextBatch = Math.min(batchSize * 1.35, MAX_BATCH_SIZE);
+        batchSize = Math.max(Math.round(nextBatch), 1);
+        nextCount = Math.min(nextCount + batchSize, nodes.length);
       }
+
+      currentCount = nextCount;
+
+      const elapsed = performance.now() - start;
+      const shouldCompact =
+        nodes.length > LOD_THRESHOLD &&
+        (performance.now() - frameStart > frameBudgetMs ||
+          elapsed > frameBudgetMs * FRAME_OVERRUN_MULTIPLIER);
+
+      if (shouldCompact) {
+        setLodMode('compact');
+      }
+
+      setRenderedCount(currentCount);
 
       if (currentCount < nodes.length) {
         frameRef.current = scheduleFrame(step);
@@ -112,15 +134,29 @@ export function ProgressiveGraph({
     return nodes.slice(0, renderedCount);
   }, [nodes, renderedCount]);
 
+  const nodeById = useMemo(() => {
+    const lookup = new Map<string, GraphNode>();
+    for (const node of nodes) {
+      lookup.set(node.id, node);
+    }
+    return lookup;
+  }, [nodes]);
+
   const visibleNodeIds = useMemo(() => {
     return new Set(visibleNodes.map((node) => node.id));
   }, [visibleNodes]);
 
   const visibleEdges = useMemo(() => {
-    return edges.filter(
+    const connectedEdges = edges.filter(
       (edge) => visibleNodeIds.has(edge.from) && visibleNodeIds.has(edge.to),
     );
-  }, [edges, visibleNodeIds]);
+
+    if (lodMode === 'compact') {
+      return connectedEdges.slice(0, MAX_VISIBLE_EDGES_COMPACT);
+    }
+
+    return connectedEdges;
+  }, [edges, visibleNodeIds, lodMode]);
 
   const handleHover = (id: string | null) => {
     setHoveredId(id);
@@ -143,6 +179,7 @@ export function ProgressiveGraph({
     <div
       role="region"
       aria-label="Progressive graph"
+      aria-busy={renderedCount < nodes.length}
       style={{ position: 'relative', width: '100%', height: '100%' }}
     >
       <svg
@@ -152,8 +189,8 @@ export function ProgressiveGraph({
         style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
       >
         {visibleEdges.map((edge) => {
-          const from = nodes.find((node) => node.id === edge.from);
-          const to = nodes.find((node) => node.id === edge.to);
+          const from = nodeById.get(edge.from);
+          const to = nodeById.get(edge.to);
           if (!from || !to) return null;
           return (
             <line
