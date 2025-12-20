@@ -1,5 +1,5 @@
-import * as crypto from 'node:crypto';
 // @ts-nocheck
+import * as crypto from 'node:crypto';
 import crypto from 'node:crypto';
 import { performance } from 'node:perf_hooks';
 import { Pool, QueryConfig, QueryResult, PoolClient } from 'pg';
@@ -85,11 +85,6 @@ interface PoolConfig {
   port?: number;
 }
 
-interface ExtendedPoolClient {
-  connectedAt?: number;
-  release(err?: boolean | Error): void;
-  query(...args: any[]): Promise<any>;
-  [key: string]: any;
 // Extend PoolClient to include connectedAt
 interface ExtendedPoolClient extends PoolClient {
   connectedAt?: number;

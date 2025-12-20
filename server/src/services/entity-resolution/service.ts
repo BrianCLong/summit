@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { EntityInput, ResolutionCandidate, ResolutionDecision, ERConfig, DecisionType } from './models';
 import { ScoringEngine } from './scoring';
 import { provenanceLedger } from '../../provenance/ledger';

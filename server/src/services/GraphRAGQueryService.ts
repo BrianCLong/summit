@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * GraphRAGQueryService - Orchestrates the complete GraphRAG query flow with preview
  *

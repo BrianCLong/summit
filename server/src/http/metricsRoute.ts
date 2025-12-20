@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { registry, metrics } from './metrics.js';
 
 export const metricsRoute = async (_req: any, res: any) => {

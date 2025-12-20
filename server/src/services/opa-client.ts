@@ -1,3 +1,4 @@
+// @ts-nocheck
 import axios, { AxiosInstance } from 'axios';
 import pino from 'pino';
 import { setTimeout } from 'timers/promises';

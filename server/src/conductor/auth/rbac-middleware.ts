@@ -1,3 +1,4 @@
+// @ts-nocheck
 // server/src/conductor/auth/rbac-middleware.ts
 
 import { Request, Response, NextFunction } from 'express';

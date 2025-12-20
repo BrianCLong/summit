@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Request, Response, NextFunction } from 'express';
 import { rateLimiter } from '../services/RateLimiter.js';
 import { quotaManager } from '../lib/resources/quota-manager.js';

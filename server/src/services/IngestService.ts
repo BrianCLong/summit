@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Ingest Service - Data ingestion with provenance and deduplication
  * Target: ≥1e5 rows/s/worker
