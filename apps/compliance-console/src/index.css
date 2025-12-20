@@ -12,3 +12,8 @@ body {
 button {
   cursor: pointer;
 }
+
+ol {
+  margin: 0;
+  padding: 0;
+}

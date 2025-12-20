@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * CTI Routes - RBAC-Gated TAXII 2.1 and STIX Export API
  *

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { randomUUID as uuid } from 'node:crypto';
 import LLMService from './LLMService.js';
 

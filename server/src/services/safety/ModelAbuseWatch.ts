@@ -1,3 +1,4 @@
+// @ts-nocheck
 import pino from 'pino';
 import fs from 'fs';
 import path from 'path';

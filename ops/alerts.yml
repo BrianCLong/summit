@@ -82,3 +82,23 @@ groups:
         annotations:
           summary: 'Moderate error-budget burn (op) — tenant={{ $labels.tenant }} op={{ $labels.operation }}'
           description: 'Burn > 0.5 against 99.95% SLO in 30m & 6h windows.'
+
+  - name: intelgraph-agent-queues
+    rules:
+      - alert: AgentQueueSloBreach
+        expr: max_over_time(agent_queue_slo_pressure[5m]) > 1
+        for: 10m
+        labels:
+          severity: page
+        annotations:
+          summary: 'Agent queue SLO pressure exceeds 1'
+          description: 'Latency/backlog SLO pressure above target ({{ $value }}). Queue={{ $labels.queue }}'
+
+      - alert: AgentQueueCostBudgetExceeded
+        expr: max_over_time(agent_queue_cost_pressure[15m]) > 1.1
+        for: 15m
+        labels:
+          severity: ticket
+        annotations:
+          summary: 'Agent queue spend rate over budget'
+          description: 'Cost pressure sustained above 110% of budget with healthy latency/backlog. Queue={{ $labels.queue }}'

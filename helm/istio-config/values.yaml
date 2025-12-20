@@ -1,0 +1,9 @@
+sidecarInjection:
+  enabled: true
+  namespaceLabel: istio-injection
+
+peerAuthentication:
+  enabled: true
+  mtlsMode: STRICT
+
+destinationRules: []

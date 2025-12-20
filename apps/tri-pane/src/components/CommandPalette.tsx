@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { geofences, layers } from '../data';
+import { featureFlags } from '../config';
 import { useTriPane } from './EventBus';
 
 interface PaletteAction {
@@ -31,17 +32,39 @@ export function CommandPalette() {
 
   const actions: PaletteAction[] = useMemo(
     () => [
+      ...(featureFlags.savedViews
+        ? [
+            {
+              id: 'save-view',
+              label: 'Save current view',
+              hint: 'Capture time brush, pins, and layout',
+              shortcut: '↵',
+              run: () => {
+                const name = `View ${state.savedViews.length + 1}`;
+                dispatch({ type: 'saveView', payload: name });
+                setQuery('');
+                setOpen(false);
+              }
+            },
+            ...state.savedViews.map((view) => ({
+              id: `restore-${view.id}`,
+              label: `Restore: ${view.snapshot.name}`,
+              hint: `${view.snapshot.timeRange.start}h → ${view.snapshot.timeRange.end} · layout ${view.snapshot.layoutMode}`,
+              run: () => dispatch({ type: 'loadView', payload: view.id })
+            }))
+          ]
+        : []),
       {
-        id: 'save-view',
-        label: 'Save current view',
-        hint: 'Capture time brush + filters',
-        shortcut: '↵',
-        run: () => {
-          const name = `View ${state.savedViews.length + 1}`;
-          dispatch({ type: 'saveView', payload: name });
-          setQuery('');
-          setOpen(false);
-        }
+        id: 'layout-grid',
+        label: 'Layout: Grid',
+        hint: 'Spatial grid for dense exploration',
+        run: () => dispatch({ type: 'setLayoutMode', payload: 'grid' })
+      },
+      {
+        id: 'layout-timeline',
+        label: 'Layout: Timeline',
+        hint: 'Align nodes along time axis for brushing',
+        run: () => dispatch({ type: 'setLayoutMode', payload: 'timeline' })
       },
       ...layers.map((layer) => ({
         id: `layer-${layer.id}`,
@@ -61,7 +84,7 @@ export function CommandPalette() {
         run: () => dispatch({ type: 'setGeofence', payload: null })
       }
     ],
-    [dispatch, state.activeLayers, state.savedViews.length]
+    [dispatch, state.activeLayers, state.savedViews]
   );
 
   const filtered = actions.filter((action) => action.label.toLowerCase().includes(query.toLowerCase()));

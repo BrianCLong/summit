@@ -1,0 +1,33 @@
+name: Realtime Service CI
+
+on:
+  push:
+    paths:
+      - 'services/realtime/**'
+      - 'packages/events-producer/**'
+      - 'libs/realtime/**'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build Events Producer
+        run: pnpm --filter @intelgraph/events-producer build
+
+      - name: Build Realtime Service
+        run: pnpm --filter realtime-service build
+
+      - name: Build SDKs
+        run: pnpm --filter @intelgraph/realtime-sdk build
+
+      - name: Test
+        run: pnpm test
