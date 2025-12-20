@@ -266,24 +266,6 @@ risk_factors contains factor if {
     factor := "Large number of sources"
 }
 
-obligations contains obligation if {
-    input.action == "export"
-    requires_dual_control
-    obligation := {
-        "type": "dual_control",
-        "required_approvals": 2,
-        "allowed_roles": ["compliance-officer", "admin"],
-        "reason": "Sensitive export requires dual control review",
-        "context": {
-            "export_type": input.context.export_type,
-            "destination": input.context.destination,
-            "source_count": count(input.dataset.sources)
-        }
-    }
-}
-
-obligations := [obligation | obligations[obligation]]
-
 # Policy decision summary
 decision := {
     "action": action_decision,
@@ -291,7 +273,6 @@ decision := {
     "violations": deny,
     "risk_assessment": risk_assessment,
     "required_approvals": required_approvals_list,
-    "obligations": obligations,
     "appeal_available": count(deny) > 0,
     "next_steps": next_steps
 }

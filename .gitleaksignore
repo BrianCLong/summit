@@ -6,10 +6,19 @@
 
 # Test files often have fake secrets
 **/*.test.ts
+**/*.test.js
 **/*.spec.ts
 **/__tests__/**
+**/setup/**
 **/test/fixtures/**
 **/examples/**
+
+# Docs and Scripts (False Positives)
+docs/**
+.orchestrator/patches/**
+server/scripts/*.sh
+helm/**
+.github/workflows/**
 
 # Lock files
 pnpm-lock.yaml
