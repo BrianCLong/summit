@@ -33,14 +33,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Typecheck validation
-        run: pnpm run typecheck || true
-        continue-on-error: true
+        run: pnpm run typecheck
       - name: Build validation
-        run: pnpm run build || true
-        continue-on-error: true
+        run: pnpm run build
       - name: Lint validation
-        run: pnpm run lint || true
-        continue-on-error: true
+        run: pnpm run lint
       # Optional: upload SARIF if your linter emits it (guard to avoid hard-fail)
       - name: Upload SARIF (if present)
         if: always() && hashFiles('**/*.sarif') != ''

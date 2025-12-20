@@ -119,3 +119,21 @@ test('production keeps chaos controls unreachable', async () => {
   assert.equal(response.status, 200);
   assert.ok(response.body.content);
 });
+
+test('blocks overly expensive GraphQL queries using cost analysis', async () => {
+  const { app } = createApp({ graphqlCostLimit: 10 });
+  const query = `
+    query { 
+      models { id family license modality ctx local description }
+    }
+  `;
+  const response = await request(app)
+    .post('/graphql')
+    .set('x-tenant', 'acme-corp')
+    .set('x-purpose', 'investigation')
+    .send({ query });
+
+  assert.equal(response.status, 422);
+  assert.equal(response.body.errors?.[0]?.message, 'QUERY_COST_EXCEEDED');
+  assert.equal(response.body.errors?.[0]?.extensions?.code, 'QUERY_COST_EXCEEDED');
+});

@@ -93,6 +93,19 @@ export const dbQueriesTotal = new client.Counter({
   labelNames: ['database', 'operation', 'status'],
 });
 
+export const vectorQueryDurationSeconds = new client.Histogram({
+  name: 'vector_query_duration_seconds',
+  help: 'Latency of pgvector operations in seconds',
+  labelNames: ['operation', 'tenant_id'],
+  buckets: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2, 5],
+});
+
+export const vectorQueriesTotal = new client.Counter({
+  name: 'vector_queries_total',
+  help: 'Total pgvector operations by outcome',
+  labelNames: ['operation', 'tenant_id', 'status'],
+});
+
 // AI/ML Processing metrics
 export const aiJobsQueued = new client.Gauge({
   name: 'ai_jobs_queued',
@@ -120,20 +133,20 @@ export const aiJobsTotal = new client.Counter({
 });
 
 // LLM Metrics
-const llmRequestDuration = new client.Histogram({
+export const llmRequestDuration = new client.Histogram({
   name: 'llm_request_duration_seconds',
   help: 'Duration of LLM requests in seconds',
   labelNames: ['provider', 'model', 'status'],
   buckets: [0.5, 1, 2, 5, 10, 20, 60],
 });
 
-const llmTokensTotal = new client.Counter({
+export const llmTokensTotal = new client.Counter({
   name: 'llm_tokens_total',
   help: 'Total number of tokens processed',
   labelNames: ['provider', 'model', 'type'], // type: prompt, completion
 });
 
-const llmRequestsTotal = new client.Counter({
+export const llmRequestsTotal = new client.Counter({
   name: 'llm_requests_total',
   help: 'Total number of LLM requests',
   labelNames: ['provider', 'model', 'status'],
@@ -251,6 +264,8 @@ register.registerMetric(tenantScopeViolationsTotal);
 register.registerMetric(dbConnectionsActive);
 register.registerMetric(dbQueryDuration);
 register.registerMetric(dbQueriesTotal);
+register.registerMetric(vectorQueryDurationSeconds);
+register.registerMetric(vectorQueriesTotal);
 register.registerMetric(aiJobsQueued);
 register.registerMetric(aiJobsProcessing);
 register.registerMetric(aiJobDuration);
@@ -442,6 +457,24 @@ export const maestroMttrHours = new client.Histogram({
   buckets: [0.1, 0.5, 1, 4, 24],
 });
 
+// Maestro Orchestration Health Metrics
+export const maestroDagExecutionDurationSeconds = new client.Histogram({
+  name: 'maestro_dag_execution_duration_seconds',
+  help: 'Duration of Maestro DAG execution in seconds',
+  labelNames: ['dag_id', 'status', 'tenant_id'],
+  buckets: [1, 5, 10, 30, 60, 300, 600],
+});
+
+export const maestroJobExecutionDurationSeconds = new client.Histogram({
+  name: 'maestro_job_execution_duration_seconds',
+  help: 'Duration of Maestro Job execution in seconds',
+  labelNames: ['job_type', 'status', 'tenant_id'],
+  buckets: [0.1, 0.5, 1, 5, 10, 30, 60],
+});
+
+register.registerMetric(maestroDagExecutionDurationSeconds);
+register.registerMetric(maestroJobExecutionDurationSeconds);
+
 register.registerMetric(graphExpandRequestsTotal);
 register.registerMetric(aiRequestTotal);
 register.registerMetric(resolverLatencyMs);
@@ -483,6 +516,8 @@ export const metrics = {
   maestroPrLeadTimeHours,
   maestroChangeFailureRate,
   maestroMttrHours,
+  maestroDagExecutionDurationSeconds,
+  maestroJobExecutionDurationSeconds,
   httpRequestDuration,
   httpRequestsTotal,
   graphqlRequestDuration,

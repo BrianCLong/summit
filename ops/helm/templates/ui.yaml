@@ -1,16 +1,39 @@
+{{- $uiImage := default .Values.imageUI .Values.images.ui }}
 apiVersion: apps/v1
 kind: Deployment
-metadata: { name: ui }
+metadata:
+  name: ui
+  labels: { app: ui }
 spec:
   replicas: {{ .Values.replicas }}
   selector: { matchLabels: { app: ui } }
   template:
-    metadata: { labels: { app: ui } }
+    metadata:
+      labels: { app: ui }
+      annotations:
+        sidecar.istio.io/inject: "true"
     spec:
+      serviceAccountName: ui
+      imagePullSecrets:
+{{- range .Values.imagePullSecrets }}
+        - name: {{ .name }}
+{{- end }}
+      securityContext:
+        fsGroup: 2000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
       containers:
       - name: ui
-        image: {{ .Values.imageUI }}
-        ports: [{ containerPort: 80 }]
+        image: {{ $uiImage }}
+        ports:
+          - containerPort: 80
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
 ---
 apiVersion: v1
 kind: Service
