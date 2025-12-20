@@ -9,6 +9,7 @@ interface TransformerOptions {
 interface AnnotationRequest {
   context: string;
   coref: Record<string, string[]>;
+  language?: string;
 }
 
 interface CachedEntry<T> {
@@ -59,33 +60,49 @@ export class TransformerInferenceService {
     return result;
   }
 
-  private flushQueue() {
+  private async flushQueue() {
     if (this.queue.length === 0) return;
     const batch = this.queue.splice(0, this.maxBatchSize);
     const resolvers = this.queueResolvers.splice(0, this.maxBatchSize);
 
-    const annotations = batch.map((item) => this.fakeForwardPass(item));
-    annotations.forEach((annotation, idx) => resolvers[idx](annotation));
+    try {
+      // Process requests sequentially or in parallel depending on Python script capability
+      // Here we process sequentially for simplicity as the script is single-shot
+      const results = await Promise.all(batch.map((item) => this.runPythonInference(item)));
+      results.forEach((result, idx) => resolvers[idx](result));
+    } catch (error) {
+       // Fallback or error handling
+       console.error("NER Inference failed", error);
+       resolvers.forEach(resolve => resolve({ error: "Inference failed" }));
+    }
   }
 
-  private fakeForwardPass(request: AnnotationRequest): Record<string, unknown> {
-    const tokenCount = request.context.split(/\s+/).length;
-    const entities = this.extractEntities(request.context);
-    return {
-      model: this.modelName,
-      tokenCount,
-      coreferenceChains: request.coref,
-      entities,
+  private async runPythonInference(request: AnnotationRequest): Promise<Record<string, unknown>> {
+    const { PythonShell } = await import('python-shell');
+    const options = {
+      mode: 'json' as const,
+      pythonPath: 'python', // Assumes python is in PATH and has spacy installed
+      scriptPath: 'src/nlp/scripts',
+      args: [JSON.stringify({ text: request.context, language: request.language || 'en' })]
     };
-  }
 
-  private extractEntities(text: string) {
-    const sentences = text.split(/[.!?]/).filter(Boolean);
-    return sentences.map((sentence) => ({
-      text: sentence.trim(),
-      label: 'SENTENCE',
-      confidence: Math.min(0.99, sentence.length / 120),
-    }));
+    return new Promise((resolve, reject) => {
+      PythonShell.run('ner.py', options).then(messages => {
+         if (messages && messages.length > 0) {
+           const output = messages[0] as Record<string, unknown>;
+           resolve({
+             model: this.modelName,
+             tokenCount: request.context.split(/\s+/).length,
+             coreferenceChains: request.coref,
+             ...output
+           });
+         } else {
+           resolve({ error: "No output from NER script" });
+         }
+      }).catch(err => {
+        reject(err);
+      });
+    });
   }
 
   private buildCacheKey(request: AnnotationRequest): string {

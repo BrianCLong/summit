@@ -1,46 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-TARGET="."
-SERVICE_NAME=${SERVICE_NAME:-summit}
-SHA=${GITHUB_SHA:-local}
-OUTPUT=""
+SERVICE_NAME=${1:-workspace}
+TARGET=${2:-.}
+OUTPUT_DIR=${SBOM_DIR:-artifacts/sbom}
+SHA=${GITHUB_SHA:-$(git rev-parse --short HEAD)}
+OUTPUT_PATH="${OUTPUT_DIR}/${SERVICE_NAME}-${SHA}.spdx.json"
 
-usage() {
-  cat <<'USAGE'
-Usage: generate_syft.sh [--target <path|image>] [--service <name>] [--sha <sha>] [--output <file>]
-Generates an SPDX SBOM using Syft and writes it to artifacts/sbom/<service>-<sha>.spdx.json by default.
-USAGE
-}
-
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --target)
-      TARGET="$2"; shift 2 ;;
-    --service)
-      SERVICE_NAME="$2"; shift 2 ;;
-    --sha)
-      SHA="$2"; shift 2 ;;
-    --output)
-      OUTPUT="$2"; shift 2 ;;
-    -h|--help)
-      usage; exit 0 ;;
-    *)
-      echo "Unknown argument: $1" >&2
-      usage
-      exit 1 ;;
-  esac
-done
-
-OUTPUT=${OUTPUT:-artifacts/sbom/${SERVICE_NAME}-${SHA}.spdx.json}
-mkdir -p "$(dirname "$OUTPUT")"
+mkdir -p "${OUTPUT_DIR}"
 
 if ! command -v syft >/dev/null 2>&1; then
-  echo "Syft not found; installing..."
-  curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sudo sh -s -- -b /usr/local/bin
+  echo "Installing syft..."
+  curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sudo sh -s -- -b /usr/local/bin >/dev/null
 fi
 
-echo "Generating SBOM for $TARGET -> $OUTPUT"
-syft packages "$TARGET" -o "spdx-json=${OUTPUT}"
+echo "Generating SPDX SBOM for ${TARGET} -> ${OUTPUT_PATH}"
+syft "${TARGET}" -o spdx-json > "${OUTPUT_PATH}"
 
-echo "SBOM created at $OUTPUT"
+if [ -n "${GITHUB_OUTPUT:-}" ]; then
+  echo "sbom_path=${OUTPUT_PATH}" >> "${GITHUB_OUTPUT}"
+fi
+
+echo "${OUTPUT_PATH}"

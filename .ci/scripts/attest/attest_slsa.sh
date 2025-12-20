@@ -1,62 +1,47 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SUBJECT=""
-PREDICATE=""
-ATTESTATION_TYPE="slsaprovenance"
-BUNDLE_OUT=""
+ARTIFACT=${1:?"Artifact to attest is required"}
+SERVICE_NAME=${2:-workspace}
+OUTPUT_DIR=${3:-artifacts/attestations}
+SHA=${GITHUB_SHA:-$(git rev-parse --short HEAD)}
 
-usage() {
-  cat <<'USAGE'
-Usage: attest_slsa.sh --subject <path> --predicate <path> [--type <type>] [--bundle <output>]
-Creates a local SLSA-style attestation bundle for a subject using cosign attest-blob.
-USAGE
+mkdir -p "${OUTPUT_DIR}"
+ATTEST_PATH="${OUTPUT_DIR}/${SERVICE_NAME}-${SHA}.slsa.json"
+DIGEST=$(sha256sum "${ARTIFACT}" | awk '{print $1}')
+
+cat > "${ATTEST_PATH}" <<JSON
+{
+  "_type": "https://in-toto.io/Statement/v0.1",
+  "subject": [
+    {
+      "name": "${SERVICE_NAME}",
+      "digest": {
+        "sha256": "${DIGEST}"
+      }
+    }
+  ],
+  "predicateType": "https://slsa.dev/provenance/v1",
+  "predicate": {
+    "buildType": "https://github.com/slsa-framework/slsa-github-generator",
+    "builder": {
+      "id": "https://github.com/${GITHUB_REPOSITORY:-unknown}"
+    },
+    "buildConfig": {
+      "artifact": "${ARTIFACT}",
+      "commit": "${GITHUB_SHA:-unknown}",
+      "runner": "github-actions"
+    },
+    "metadata": {
+      "invocationId": "${GITHUB_RUN_ID:-local}",
+      "startedOn": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+    }
+  }
 }
+JSON
 
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --subject)
-      SUBJECT="$2"; shift 2 ;;
-    --predicate)
-      PREDICATE="$2"; shift 2 ;;
-    --type)
-      ATTESTATION_TYPE="$2"; shift 2 ;;
-    --bundle)
-      BUNDLE_OUT="$2"; shift 2 ;;
-    -h|--help)
-      usage; exit 0 ;;
-    *)
-      echo "Unknown argument: $1" >&2
-      usage
-      exit 1 ;;
-  esac
-done
-
-if [[ -z "$SUBJECT" || -z "$PREDICATE" ]]; then
-  echo "Both --subject and --predicate are required" >&2
-  usage
-  exit 1
+if [ -n "${GITHUB_OUTPUT:-}" ]; then
+  echo "attestation=${ATTEST_PATH}" >> "${GITHUB_OUTPUT}"
 fi
 
-BUNDLE_OUT=${BUNDLE_OUT:-"${SUBJECT}.attestation.bundle"}
-mkdir -p "$(dirname "$BUNDLE_OUT")"
-
-if ! command -v cosign >/dev/null 2>&1; then
-  echo "Installing cosign..."
-  curl -sSfL https://raw.githubusercontent.com/sigstore/cosign/main/install.sh | sudo COSIGN_EXPERIMENTAL=1 sh -s -- -b /usr/local/bin
-fi
-
-export COSIGN_EXPERIMENTAL=1
-
-echo "Creating attestation bundle for ${SUBJECT}"
-cosign attest-blob \
-  --yes \
-  --predicate "$PREDICATE" \
-  --type "$ATTESTATION_TYPE" \
-  --bundle "$BUNDLE_OUT" \
-  "$SUBJECT"
-
-echo "Verifying attestation bundle"
-cosign verify-blob --bundle "$BUNDLE_OUT" "$SUBJECT" >/dev/null
-
-echo "Attestation stored at $BUNDLE_OUT"
+echo "${ATTEST_PATH}"

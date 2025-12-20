@@ -1,55 +1,42 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ARTIFACT=""
-SIG_OUT=""
-CERT_OUT=""
+ARTIFACT=${1:?"Artifact path required"}
+OUTPUT_DIR=${2:-artifacts/signatures}
+ATTESTATION=${3:-}
+COSIGN_BIN=${COSIGN_BIN:-cosign}
 
-usage() {
-  cat <<'USAGE'
-Usage: cosign_sign_verify.sh --artifact <path> [--signature <path>] [--certificate <path>]
-Signs an artifact with cosign keyless mode and immediately verifies the signature.
-USAGE
-}
+mkdir -p "${OUTPUT_DIR}"
+SIG_PATH="${OUTPUT_DIR}/$(basename "${ARTIFACT}").sig"
+LOG_PATH="${OUTPUT_DIR}/$(basename "${ARTIFACT}").cosign.log"
 
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --artifact)
-      ARTIFACT="$2"; shift 2 ;;
-    --signature)
-      SIG_OUT="$2"; shift 2 ;;
-    --certificate)
-      CERT_OUT="$2"; shift 2 ;;
-    -h|--help)
-      usage; exit 0 ;;
-    *)
-      echo "Unknown argument: $1" >&2
-      usage
-      exit 1 ;;
-  esac
-done
+export COSIGN_EXPERIMENTAL=${COSIGN_EXPERIMENTAL:-1}
 
-if [[ -z "$ARTIFACT" ]]; then
-  echo "--artifact is required" >&2
-  usage
-  exit 1
-fi
-
-SIG_OUT=${SIG_OUT:-"${ARTIFACT}.sig"}
-CERT_OUT=${CERT_OUT:-"${ARTIFACT}.cert"}
-mkdir -p "$(dirname "$SIG_OUT")" "$(dirname "$CERT_OUT")"
-
-if ! command -v cosign >/dev/null 2>&1; then
+if ! command -v "${COSIGN_BIN}" >/dev/null 2>&1; then
   echo "Installing cosign..."
-  curl -sSfL https://raw.githubusercontent.com/sigstore/cosign/main/install.sh | sudo COSIGN_EXPERIMENTAL=1 sh -s -- -b /usr/local/bin
+  curl -sSfL https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64 -o /tmp/cosign
+  sudo install /tmp/cosign /usr/local/bin/cosign
 fi
 
-export COSIGN_EXPERIMENTAL=1
+echo "Signing ${ARTIFACT} with cosign"
+"${COSIGN_BIN}" sign-blob --yes "${ARTIFACT}" --output-signature "${SIG_PATH}" 2>&1 | tee "${LOG_PATH}"
+"${COSIGN_BIN}" verify-blob --signature "${SIG_PATH}" "${ARTIFACT}"
 
-echo "Signing $ARTIFACT"
-cosign sign-blob --yes --output-certificate "$CERT_OUT" --output-signature "$SIG_OUT" "$ARTIFACT"
+ATTEST_SIG=""
+if [ -n "${ATTESTATION}" ] && [ -f "${ATTESTATION}" ]; then
+  ATTEST_SIG="${OUTPUT_DIR}/$(basename "${ATTESTATION}").sig"
+  echo "Signing attestation ${ATTESTATION}"
+  "${COSIGN_BIN}" sign-blob --yes "${ATTESTATION}" --output-signature "${ATTEST_SIG}" 2>&1 | tee -a "${LOG_PATH}"
+  "${COSIGN_BIN}" verify-blob --signature "${ATTEST_SIG}" "${ATTESTATION}"
+fi
 
-echo "Verifying signature"
-cosign verify-blob --certificate "$CERT_OUT" --signature "$SIG_OUT" "$ARTIFACT" >/dev/null
+TLOG_INDEX=$(grep -oE 'tlog entry created with index: [0-9]+' "${LOG_PATH}" | awk '{print $NF}' | tail -n 1)
 
-echo "Signature stored at $SIG_OUT with certificate $CERT_OUT"
+if [ -n "${GITHUB_OUTPUT:-}" ]; then
+  echo "signature=${SIG_PATH}" >> "${GITHUB_OUTPUT}"
+  echo "attestation_signature=${ATTEST_SIG}" >> "${GITHUB_OUTPUT}"
+  echo "tlog_index=${TLOG_INDEX}" >> "${GITHUB_OUTPUT}"
+  echo "log=${LOG_PATH}" >> "${GITHUB_OUTPUT}"
+fi
+
+echo "${SIG_PATH}"
