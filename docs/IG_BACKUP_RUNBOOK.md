@@ -6,7 +6,7 @@ This runbook documents the `ig backup` workflow that ships with the monorepo. Th
 
 - **Encryption on by default.** The CLI requires `IG_BACKUP_PASSPHRASE` or `--passphrase-file` unless you explicitly opt out with `--no-encrypt`.
 - **No secrets are printed.** Only counts, hashes, and file paths are logged; passphrases are never echoed.
-- **Integrity enforced.** Every backup stores payload-wide and per-case hashes; restores fail fast on any mismatch.
+- **Integrity enforced.** Every backup stores payload-wide and per-case hashes; restores fail fast on any mismatch and report whether checksums match.
 
 ## Commands
 
@@ -36,12 +36,13 @@ node tools/ig-backup/index.js backup restore \
 Key flags:
 - `--case <id>`: restore only the selected case(s).
 - `--dry-run`: verify checksums/hashes and show counts without writing to the database file.
+- `--input <path>`: required; the CLI refuses to restore without an explicit source file.
 
 ## Validation and integrity checks
 
 - Backups include SHA-256 hashes for the entire payload plus per-case hashes of the case record and linked objects.
 - During restore, hashes must match; otherwise the command fails with `checksum` or `Hash mismatch` errors.
-- Successful restores report `checksum` and `expectedChecksum`; these should be identical for full restores.
+- Successful restores report `checksum`, `expectedChecksum`, and `checksumMatches`; full restores should return identical values.
 
 ## Local integration smoke test (ephemeral DB)
 

@@ -49,6 +49,7 @@ test('backup and restore round-trip with encryption and checksum validation', ()
   assert.strictEqual(restoreResult.expectedChecksum, createResult.backup.checksum);
   assert.strictEqual(restoreResult.counts.cases, createResult.backup.counts.cases);
   assert.strictEqual(restoreResult.counts.objects, createResult.backup.counts.objects);
+  assert.ok(restoreResult.checksumMatches);
 
   const restoredData = readDatabase(restoreDb);
   assert.strictEqual(restoredData.cases.length, 2);
@@ -79,6 +80,7 @@ test('partial restore limits to selected case and preserves hashes', () => {
   assert.strictEqual(restoreResult.counts.cases, 1);
   assert.strictEqual(restoreResult.counts.objects, 2);
   assert.strictEqual(restoreResult.caseHashes.length, 1);
+  assert.strictEqual(restoreResult.checksumMatches, false);
 
   const restoredData = readDatabase(restoreDb);
   assert.deepStrictEqual(restoredData.cases.map((c) => c.id), ['CASE-1']);
@@ -135,4 +137,45 @@ test('dry-run restore does not mutate target database', () => {
 
   assert.ok(summary.dryRun);
   assert.ok(!fs.existsSync(restoreDb));
+});
+
+test('restore requires an explicit input path', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ig-backup-'));
+  const restoreDb = path.join(dir, 'restored.json');
+
+  assert.throws(() => {
+    restoreBackup({
+      dbPath: restoreDb,
+      inputPath: undefined,
+    });
+  }, /--input flag is required/);
+});
+
+test('cli dry-run create surfaces hashes without writing files', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ig-backup-'));
+  const dbPath = path.join(dir, 'db.json');
+  const backupPath = path.join(dir, 'backup.json');
+  seedDatabase(dbPath);
+
+  const { spawnSync } = require('node:child_process');
+  const result = spawnSync('node', [
+    path.join(__dirname, 'index.js'),
+    'backup',
+    'create',
+    '--db',
+    dbPath,
+    '--output',
+    backupPath,
+    '--dry-run',
+    '--no-encrypt',
+  ]);
+
+  assert.strictEqual(result.status, 0);
+  assert.ok(!fs.existsSync(backupPath));
+
+  const parsed = JSON.parse(result.stdout.toString());
+  assert.deepStrictEqual(parsed.counts, { cases: 2, objects: 3 });
+  assert.ok(parsed.checksum);
+  assert.ok(Array.isArray(parsed.caseHashes));
+  assert.ok(parsed.dryRun);
 });
