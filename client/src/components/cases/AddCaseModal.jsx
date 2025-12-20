@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { useQuery, useMutation, gql } from '@apollo/client';
 import $ from 'jquery'; // Import jQuery for toasts
+import { useRestoreFocus } from '../../hooks/useRestoreFocus';
 
 const GET_CASES = gql`
   query GetCases {
@@ -58,6 +59,7 @@ function AddCaseModal({ open, handleClose, itemKind, itemRefId }) {
   const [newCaseName, setNewCaseName] = useState('');
   const [newCaseSummary, setNewCaseSummary] = useState('');
   const [createOrSelect, setCreateOrSelect] = useState('select'); // 'select' or 'create'
+  useRestoreFocus(open);
 
   const { loading, error, data, refetch } = useQuery(GET_CASES);
   const [addToCase, { loading: adding, error: addError }] =

@@ -10,6 +10,11 @@ interface FeatureFlags {
   ANALYTICS_PANEL: boolean;
   PDF_EXPORT: boolean;
   OPENTELEMETRY: boolean;
+  /**
+   * Enables the Narrative Simulation Engine (Enterprise).
+   * Allows creating and running narrative simulations via /simulations endpoints.
+   */
+  NARRATIVE_SIMULATION: boolean;
 }
 
 // Default feature flags for MVP-1+
@@ -20,6 +25,8 @@ const DEFAULT_FLAGS: FeatureFlags = {
   ANALYTICS_PANEL: true,
   PDF_EXPORT: true,
   OPENTELEMETRY: true,
+  // Feature disabled by default (Phase 2 rollout)
+  NARRATIVE_SIMULATION: true,
 };
 
 // Runtime feature flags (can be overridden by database or environment)

@@ -1,0 +1,18 @@
+{
+  "name": "entities",
+  "fields": [
+    { "name": "id", "type": "string" },
+    { "name": "tenant", "type": "string", "facet": true },
+    { "name": "type", "type": "string", "facet": true },
+    { "name": "title", "type": "string" },
+    { "name": "body", "type": "string" },
+    { "name": "tags", "type": "string[]", "facet": true, "optional": true },
+    { "name": "timestamp", "type": "int64", "facet": true },
+    { "name": "classification", "type": "int32", "facet": true },
+    { "name": "category", "type": "string", "facet": true, "optional": true },
+    { "name": "metadata", "type": "object", "optional": true }
+  ],
+  "default_sorting_field": "timestamp",
+  "token_separators": ["-", "_", "."],
+  "enable_nested_fields": true
+}

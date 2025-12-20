@@ -7,6 +7,9 @@ export class MetricsCollector {
   private jobsCompleted: Counter;
   private jobsFailed: Counter;
   private jobProcessingDuration: Histogram;
+  private jobsRetried: Counter;
+  private leaseExpired: Counter;
+  private deadLettered: Counter;
   private queueMetrics: Map<
     string,
     {
@@ -14,6 +17,9 @@ export class MetricsCollector {
       processingTimes: number[];
       errors: number;
       total: number;
+      retries: number;
+      leaseExpirations: number;
+      deadLetters: number;
     }
   > = new Map();
 
@@ -53,6 +59,27 @@ export class MetricsCollector {
       help: 'Job processing duration in milliseconds',
       labelNames: ['queue'],
       buckets: [10, 50, 100, 500, 1000, 5000, 10000, 30000, 60000],
+      registers: [this.registry],
+    });
+
+    this.jobsRetried = new Counter({
+      name: 'queue_jobs_retried_total',
+      help: 'Total number of job retries',
+      labelNames: ['queue'],
+      registers: [this.registry],
+    });
+
+    this.leaseExpired = new Counter({
+      name: 'queue_job_lease_expired_total',
+      help: 'Total number of lease expirations while processing jobs',
+      labelNames: ['queue'],
+      registers: [this.registry],
+    });
+
+    this.deadLettered = new Counter({
+      name: 'queue_jobs_dead_letter_total',
+      help: 'Total number of jobs sent to dead-letter queue',
+      labelNames: ['queue'],
       registers: [this.registry],
     });
   }
@@ -98,6 +125,24 @@ export class MetricsCollector {
     }
   }
 
+  recordJobRetry(queueName: string): void {
+    this.jobsRetried.inc({ queue: queueName });
+    this.initQueueMetrics(queueName);
+    this.queueMetrics.get(queueName)!.retries++;
+  }
+
+  recordLeaseExpired(queueName: string): void {
+    this.leaseExpired.inc({ queue: queueName });
+    this.initQueueMetrics(queueName);
+    this.queueMetrics.get(queueName)!.leaseExpirations++;
+  }
+
+  recordDeadLetter(queueName: string): void {
+    this.deadLettered.inc({ queue: queueName });
+    this.initQueueMetrics(queueName);
+    this.queueMetrics.get(queueName)!.deadLetters++;
+  }
+
   getQueueMetrics(queueName: string) {
     const metrics = this.queueMetrics.get(queueName);
     if (!metrics) {
@@ -105,6 +150,10 @@ export class MetricsCollector {
         throughput: 0,
         avgProcessingTime: 0,
         errorRate: 0,
+        deadLetterRate: 0,
+        retries: 0,
+        leaseExpirations: 0,
+        deadLetters: 0,
       };
     }
 
@@ -123,11 +172,17 @@ export class MetricsCollector {
 
     // Calculate error rate
     const errorRate = metrics.total > 0 ? (metrics.errors / metrics.total) * 100 : 0;
+    const deadLetterRate =
+      metrics.total > 0 ? (metrics.deadLetters / metrics.total) * 100 : 0;
 
     return {
       throughput,
       avgProcessingTime: Math.round(avgProcessingTime),
       errorRate: Math.round(errorRate * 100) / 100,
+      deadLetterRate: Math.round(deadLetterRate * 100) / 100,
+      retries: metrics.retries,
+      leaseExpirations: metrics.leaseExpirations,
+      deadLetters: metrics.deadLetters,
     };
   }
 
@@ -146,6 +201,9 @@ export class MetricsCollector {
         processingTimes: [],
         errors: 0,
         total: 0,
+        retries: 0,
+        leaseExpirations: 0,
+        deadLetters: 0,
       });
     }
   }

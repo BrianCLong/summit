@@ -61,6 +61,30 @@ export class ExecutorsRepo {
     );
     return rows;
   }
+
+  async update(id: string, updates: Partial<ExecutorRecord>, tenantId: string): Promise<ExecutorRecord | null> {
+      await this.ensureTable();
+      const fields: string[] = [];
+      const values: any[] = [];
+      let idx = 1;
+
+      if (updates.status) {
+          fields.push(`status = $${idx++}`);
+          values.push(updates.status);
+      }
+      // Add other fields as needed
+
+      if (fields.length === 0) return null;
+
+      values.push(id);
+      values.push(tenantId);
+
+      const { rows } = await this.getPool().query(
+          `UPDATE executors SET ${fields.join(', ')} WHERE id = $${idx} AND tenant_id = $${idx+1} RETURNING *`,
+          values
+      );
+      return rows[0] || null;
+  }
 }
 
 let _executorsRepo: ExecutorsRepo | null = null;
@@ -84,4 +108,8 @@ export const executorsRepo = {
   async list(tenantId: string): Promise<ExecutorRecord[]> {
     return this.instance.list(tenantId);
   },
+
+  async update(id: string, updates: Partial<ExecutorRecord>, tenantId: string): Promise<ExecutorRecord | null> {
+      return this.instance.update(id, updates, tenantId);
+  }
 };

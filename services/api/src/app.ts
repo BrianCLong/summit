@@ -24,6 +24,7 @@ import { tenantMiddleware } from './middleware/tenant.js';
 import { auditMiddleware } from './middleware/audit.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
 import { logger } from './utils/logger.js';
+import { metricsContentType, renderMetrics } from './observability/rateLimitMetrics.js';
 import { ingestRouter } from './routes/ingest.js';
 import { copilotRouter } from './routes/copilot.js';
 import { adminRouter } from './routes/admin.js';
@@ -31,6 +32,7 @@ import { casesRouter } from './routes/cases.js';
 import { evidenceRouter } from './routes/evidence.js';
 import { analyticsExtRouter } from './routes/analytics_ext.js';
 import { triageRouter } from './routes/triage.js';
+import { actionsPreflightRouter } from './routes/actions/preflight.js';
 import { swaggerRouter } from './docs/swagger.js';
 import { graphqlDocsRouter } from './docs/graphql-docs.js';
 import { validateRequest } from './middleware/openapi-validator.js';
@@ -83,13 +85,15 @@ export async function createApp() {
   });
 
   // Metrics endpoint for monitoring
-  app.get('/metrics', (req, res) => {
-    // TODO: Implement Prometheus metrics
-    res.json({
-      uptime: process.uptime(),
-      memory: process.memoryUsage(),
-      timestamp: new Date().toISOString(),
-    });
+  app.get('/metrics', async (_req, res) => {
+    try {
+      const metrics = await renderMetrics();
+      res.setHeader('Content-Type', metricsContentType);
+      res.send(metrics);
+    } catch (error) {
+      logger.error({ error }, 'Failed to render metrics');
+      res.status(503).json({ error: 'metrics_unavailable' });
+    }
   });
 
   // API Documentation (Swagger/OpenAPI)
@@ -113,6 +117,8 @@ export async function createApp() {
   app.use('/api/analytics', analyticsExtRouter);
   // Triage queue
   app.use('/api/triage', triageRouter);
+  // Actions preflight (policy simulation)
+  app.use('/api/actions', actionsPreflightRouter);
 
   // Create Apollo Server
   const server = new ApolloServer({

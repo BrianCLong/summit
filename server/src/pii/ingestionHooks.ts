@@ -1,3 +1,4 @@
+
 /**
  * Ingestion Hooks for PII Detection
  *
@@ -8,13 +9,15 @@
 import { HybridEntityRecognizer } from './recognizer.js';
 import { TaxonomyManager } from './taxonomy.js';
 import { SensitivityClassifier } from './sensitivity.js';
-import { MetadataStore } from './metadata.js';
+// Added for Privacy Engine visibility
 import {
   ClassifiedEntity,
   RecognitionOptions,
   SchemaMetadata,
   SchemaFieldMetadata,
 } from './types.js';
+import { DataCatalogService } from '../data-governance/catalog/DataCatalogService.js';
+import { DataAssetType } from '../data-governance/types.js';
 
 /**
  * Configuration for ingestion hooks
@@ -25,9 +28,6 @@ export interface IngestionHookConfig {
 
   /** Minimum confidence threshold for PII detection */
   minimumConfidence?: number;
-
-  /** Metadata store for persistence */
-  metadataStore?: MetadataStore;
 
   /** Custom recognition options */
   recognitionOptions?: RecognitionOptions;
@@ -102,12 +102,14 @@ export class IngestionHook {
   private taxonomyManager: TaxonomyManager;
   private sensitivityClassifier: SensitivityClassifier;
   private config: IngestionHookConfig;
+  private catalogCache: Map<string, { id: string; tags: string[] }>;
 
   constructor(config: IngestionHookConfig) {
     this.config = config;
     this.recognizer = new HybridEntityRecognizer();
     this.taxonomyManager = new TaxonomyManager();
     this.sensitivityClassifier = new SensitivityClassifier();
+    this.catalogCache = new Map();
   }
 
   /**
@@ -194,14 +196,74 @@ export class IngestionHook {
       );
     }
 
-    // Auto-tag catalog if enabled
+    // Auto-tag catalog
     let catalogId: string | undefined;
-    if (
-      this.config.autoTagCatalog &&
-      this.config.metadataStore &&
-      sensitivityMetadata
-    ) {
-      catalogId = await this.tagCatalog(record, sensitivityMetadata, allEntities);
+
+    if (this.config.autoTagCatalog && record.tableName) {
+        try {
+            const urn = `urn:${record.source}:${record.tableName}`;
+            let assetId: string | undefined;
+            let currentTags: string[] = [];
+
+            // Check cache first
+            if (this.catalogCache.has(urn)) {
+                const cached = this.catalogCache.get(urn)!;
+                assetId = cached.id;
+                currentTags = cached.tags;
+            } else {
+                const catalog = DataCatalogService.getInstance();
+                // Try to find existing asset
+                let asset = await catalog.getAssetByUrn(urn);
+
+                if (!asset && record.metadata?.tenantId) {
+                     // Register new asset
+                     asset = await catalog.registerAsset({
+                         urn,
+                         name: record.tableName,
+                         type: 'table', // Defaulting to table
+                         source: record.source,
+                         schema: { fields: [] }, // Populate if we have schema metadata
+                         owners: [],
+                         tags: [],
+                         sensitivity: sensitivityMetadata?.level || 'internal',
+                         metadata: {},
+                         tenantId: record.metadata.tenantId
+                     });
+                }
+
+                if (asset) {
+                    assetId = asset.id;
+                    currentTags = asset.tags;
+                    this.catalogCache.set(urn, { id: assetId, tags: currentTags });
+                }
+            }
+
+            if (assetId) {
+                catalogId = assetId;
+                // Update tags if PII detected
+                if (sensitivityMetadata) {
+                     const newTags = [...currentTags];
+                     let changed = false;
+                     if (!newTags.includes('PII')) { newTags.push('PII'); changed = true; }
+                     if (!newTags.includes(sensitivityMetadata.level)) { newTags.push(sensitivityMetadata.level); changed = true; }
+
+                     if (changed) {
+                         const catalog = DataCatalogService.getInstance();
+                         // Avoid duplicates
+                         const uniqueTags = [...new Set(newTags)];
+                         await catalog.updateAsset(assetId, {
+                             tags: uniqueTags,
+                             sensitivity: sensitivityMetadata.level as any
+                         });
+                         // Update cache
+                         this.catalogCache.set(urn, { id: assetId, tags: uniqueTags });
+                     }
+                }
+            }
+        } catch (err) {
+            // Non-blocking error logging for catalog integration
+            console.error('Failed to auto-tag catalog:', err);
+        }
     }
 
     return {
@@ -210,7 +272,7 @@ export class IngestionHook {
       blocked,
       blockReason,
       sensitivityMetadata,
-      catalogId,
+      catalogId
     };
   }
 
@@ -228,45 +290,6 @@ export class IngestionHook {
     }
 
     return results;
-  }
-
-  /**
-   * Tag catalog entry with sensitivity metadata
-   */
-  private async tagCatalog(
-    record: IngestionRecord,
-    sensitivityMetadata: any,
-    entities: ClassifiedEntity[],
-  ): Promise<string> {
-    if (!this.config.metadataStore) {
-      throw new Error('Metadata store not configured');
-    }
-
-    // Build field-level sensitivity map
-    const fieldSensitivity: Record<string, any> = {};
-    for (const entity of entities) {
-      const fieldPath = entity.context.schemaPath?.join('.') || entity.context.schemaField || 'unknown';
-      if (!fieldSensitivity[fieldPath]) {
-        fieldSensitivity[fieldPath] = this.sensitivityClassifier.classify(
-          [entity.type],
-          entity.severity,
-        );
-      }
-    }
-
-    const catalogId = `${record.source}:${record.tableName || 'unknown'}:${record.id}`;
-
-    await this.config.metadataStore.storeCatalogMetadata({
-      catalogId,
-      catalogType: 'table',
-      fullyQualifiedName: `${record.source}.${record.tableName}.${record.id}`,
-      sensitivity: sensitivityMetadata,
-      fieldSensitivity,
-      lastScanned: new Date(),
-      scanStatus: 'completed',
-    });
-
-    return catalogId;
   }
 
   /**
