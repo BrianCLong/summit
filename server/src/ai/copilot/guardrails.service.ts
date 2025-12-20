@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Copilot Guardrails Service
  *

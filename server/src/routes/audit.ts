@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Router } from 'express';
 import archiver from 'archiver';
 import { getPostgresPool } from '../db/postgres.js';

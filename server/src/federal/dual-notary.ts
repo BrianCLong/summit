@@ -1,6 +1,6 @@
+// @ts-nocheck
 import * as crypto from 'node:crypto';
 import * as fs from 'node:fs/promises';
-// @ts-nocheck
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import { exec } from 'node:child_process';

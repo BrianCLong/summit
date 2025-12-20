@@ -1,0 +1,91 @@
+gate:
+  name: summit-ga
+  version: 1
+checks:
+  - id: ci_pass
+    type: github
+    description: Ensure the gate runs in CI context with required checks green.
+    required: true
+  - id: lint_test_build
+    type: github
+    description: Aggregate CI signal that lint, tests, and build succeeded in this run.
+    required: true
+  - id: typescript_strict
+    type: static
+    path: tsconfig.base.json
+    description: TypeScript strict mode must be enabled.
+    required: true
+  - id: ts_ignore_tracking
+    type: pattern
+    description: `@ts-ignore` must include a tracking issue reference.
+    required: true
+    paths:
+      - apps
+      - packages
+      - services
+      - server
+      - client
+      - scripts
+    pattern: "@ts-ignore"
+    require_issue_reference: true
+  - id: audit_logging
+    type: code
+    path: server/src
+    description: Audit logging primitives exist in core server paths.
+    required: true
+  - id: docs_present
+    type: filesystem
+    description: Required documentation sets must exist.
+    required: true
+    paths:
+      - docs/architecture
+      - docs/governance
+      - docs/security
+  - id: auth_docs
+    type: filesystem
+    description: AuthN/AuthZ documentation present.
+    required: true
+    paths:
+      - docs/security/AUTH_MATRIX.md
+      - docs/security/service-to-service-auth.md
+  - id: grafana_dashboard
+    type: filesystem
+    description: Grafana dashboards are available for observability handoff.
+    required: true
+    paths:
+      - grafana/dashboards
+  - id: documentation_completeness
+    type: filesystem
+    description: GA gate documentation and audit evidence locations exist.
+    required: true
+    paths:
+      - docs/release/ga-gate.md
+      - docs/audit/ga-evidence.md
+  - id: secrets_scanning
+    type: manual
+    description: Confirm secrets scanning is enabled and current.
+    required: true
+  - id: dependency_vulnerability_scan
+    type: manual
+    description: Confirm latest dependency vulnerability scan passed or waivers recorded.
+    required: true
+  - id: error_taxonomy
+    type: manual
+    description: Confirm error taxonomy is enforced in core paths.
+    required: true
+  - id: branch_protection
+    type: manual
+    description: Confirm branch protection rules are enforced on main and release branches.
+    required: true
+  - id: agent_permissions
+    type: manual
+    description: Confirm agent permission tiers are respected in automation.
+    required: true
+  - id: audit_logging_ci_agents
+    type: manual
+    description: Confirm CI and agent actions are audit logged.
+    required: true
+  - id: observability_metrics
+    type: manual
+    description: Confirm metrics exist for ingestion, retrieval, and RAG flows and error mapping.
+    required: true

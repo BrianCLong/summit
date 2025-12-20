@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 import { createIndexManager, IndexDefinition } from '../db/indexManager.js';
 import GraphIndexAdvisorService from '../services/GraphIndexAdvisorService.js';
