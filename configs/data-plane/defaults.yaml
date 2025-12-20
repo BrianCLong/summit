@@ -1,0 +1,57 @@
+# Data plane shared defaults for database/cache/search clients
+# Values are tuned for production with overridable environment variables per deployment.
+postgres:
+  pool:
+    min: 2
+    max: 8
+    idle_seconds: 30
+  timeouts:
+    statement_ms: 15000
+    lock_ms: 5000
+    idle_in_transaction_session_ms: 10000
+  retries:
+    max_attempts: 3
+    backoff_ms: 50
+    max_backoff_ms: 800
+    jitter: true
+    retryable_errors:
+      - serialization_failure
+      - deadlock_detected
+      - read_only_transaction
+  circuit_breaker:
+    failure_threshold: 5
+    recovery_seconds: 30
+    p95_budget_ms: 150
+neo4j:
+  pool:
+    max_connection_pool_size: 50
+    connection_acquisition_timeout_ms: 5000
+  retries:
+    max_transaction_retry_ms: 10000
+  circuit_breaker:
+    failure_threshold: 5
+    recovery_seconds: 30
+    p95_budget_ms: 300
+redis:
+  connection:
+    max_retries_per_request: 2
+    command_timeout_ms: 2000
+    tls: true
+  circuit_breaker:
+    failure_threshold: 8
+    recovery_seconds: 20
+    p95_budget_ms: 20
+typesense:
+  client:
+    timeout_ms: 5000
+    num_retries: 2
+    jitter: true
+  circuit_breaker:
+    failure_threshold: 5
+    recovery_seconds: 15
+    p95_budget_ms: 200
+bulkheads:
+  postgres_hot_path: 16
+  neo4j_pattern_match: 24
+  redis_cache: 64
+  typesense_search: 16

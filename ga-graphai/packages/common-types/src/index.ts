@@ -1184,14 +1184,6 @@ export interface BaseSecretRef {
   key: string;
   version?: string;
   rotation?: SecretRotationPolicy;
-  /**
-   * Optional key identifier used during signing/verification.
-   */
-  kid?: string;
-  /**
-   * Optional overlap allowance (in seconds) when rotating to a new key.
-   */
-  overlapSeconds?: number;
 }
 
 export interface VaultSecretRef extends BaseSecretRef {
@@ -1218,19 +1210,7 @@ export interface KmsEnvelopeRef extends BaseSecretRef {
   encryptionContext?: Record<string, string>;
 }
 
-export interface EnvSecretRef extends BaseSecretRef {
-  /**
-   * Environment variable name that holds the secret.
-   */
-  env: string;
-  provider?: 'env';
-  /**
-   * Allow falling back to an external provider if the env var is missing.
-   */
-  allowFallback?: boolean;
-}
-
-export type SecretRef = VaultSecretRef | KmsEnvelopeRef | EnvSecretRef;
+export type SecretRef = VaultSecretRef | KmsEnvelopeRef;
 
 export interface NodeEstimates {
   latencyP95Ms?: number;
@@ -1920,11 +1900,6 @@ export function ensureSecret(value: unknown): value is SecretRef {
   const candidate = value as Partial<SecretRef> & { provider?: string };
   const provider = candidate.provider ?? 'vault';
 
-  if (provider === 'env') {
-    const envCandidate = candidate as EnvSecretRef;
-    return typeof envCandidate.env === 'string' && typeof envCandidate.key === 'string';
-  }
-
   if (provider === 'vault') {
     const vaultCandidate = candidate as VaultSecretRef;
     return (
@@ -2193,6 +2168,8 @@ export interface AuditLogEvent {
   severity?: AuditSeverity;
   metadata?: Record<string, unknown>;
   correlationIds?: string[];
+  previousHash?: string;
+  eventHash?: string;
 }
 
 export interface AuditQueryFilter {

@@ -1,0 +1,20 @@
+{{- if .Values.auditLogging.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: audit-policy
+  namespace: {{ .Release.Namespace }}
+  labels:
+    summit.dev/component: audit
+  annotations:
+    audit.summit.dev/retention-days: "{{ .Values.auditLogging.retentionDays }}"
+    audit.summit.dev/max-file-size-mb: "{{ .Values.auditLogging.maxFileSizeMB }}"
+data:
+  policy.yaml: |
+    apiVersion: audit.k8s.io/v1
+    kind: Policy
+{{ toYaml .Values.auditLogging.policy | indent 4 }}
+  retention.yaml: |
+    retentionDays: {{ .Values.auditLogging.retentionDays }}
+    maxFileSizeMB: {{ .Values.auditLogging.maxFileSizeMB }}
+{{- end }}
