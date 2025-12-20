@@ -113,4 +113,38 @@ describe('ProgressiveGraph', () => {
     );
     expect(labels.some((label) => label?.includes('…'))).toBe(true);
   });
+
+  it('caps visible nodes under compact LOD while reporting elided counts', async () => {
+    const { nodes, edges } = buildFixtureGraph(2400, 40, 3);
+    const container = document.createElement('div');
+    const root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        <ProgressiveGraph
+          nodes={nodes}
+          edges={edges}
+          initialBatchSize={120}
+          frameBudgetMs={10}
+        />,
+      );
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    const region = container.querySelector('[role="region"]');
+    const visibleCount = Number(
+      region?.getAttribute('data-visible-count') ?? '0',
+    );
+    const elidedCount = Number(region?.getAttribute('data-elided-count') ?? '0');
+    const lod = region?.getAttribute('data-lod');
+
+    expect(lod).toBe('compact');
+    expect(visibleCount).toBeGreaterThan(0);
+    expect(visibleCount).toBeLessThan(nodes.length);
+    expect(elidedCount).toBe(nodes.length - visibleCount);
+    expect(container.querySelectorAll('[data-node-id]').length).toBe(
+      visibleCount,
+    );
+    expect(region?.getAttribute('aria-busy')).toBe('false');
+  });
 });
