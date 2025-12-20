@@ -49,6 +49,39 @@ describe('Audit export API + verifier', () => {
     app.use(createAuditExportRouter(log));
   });
 
+  it('returns chained hashes on append and refuses mutations', () => {
+    const ledger = new AppendOnlyAuditLog();
+    const first = ledger.append({
+      id: 'e-1',
+      actor: 'system',
+      action: 'create',
+      resource: 'dataset:1',
+      system: 'audit',
+      category: 'ingest',
+    });
+
+    const second = ledger.append({
+      id: 'e-2',
+      actor: 'system',
+      action: 'update',
+      resource: 'dataset:1',
+      system: 'audit',
+      category: 'ingest',
+    });
+
+    expect(first.previousHash).toBeUndefined();
+    expect(first.eventHash).toBeDefined();
+    expect(second.previousHash).toBe(first.eventHash);
+    expect(second.eventHash).toBeDefined();
+
+    expect(() =>
+      ledger.append({
+        ...second,
+        id: first.id,
+      } as any),
+    ).toThrow(/append-only audit log rejects/i);
+  });
+
   it('includes hash chain data and verifies clean exports', async () => {
     const response = await request(app).get('/audit/export?limit=2');
     expect(response.status).toBe(200);
