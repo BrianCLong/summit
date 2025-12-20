@@ -1,0 +1,244 @@
+global:
+  namespace: summit
+  imageTag: latest
+  ingress:
+    clusterIssuer: letsencrypt-prod
+  mesh:
+    sidecar:
+      enabled: true
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 500m
+          memory: 256Mi
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  secretStoreRef:
+    name: summit-secrets
+    kind: ClusterSecretStore
+  serviceAccount: summit
+
+resourceConstraints:
+  limitRange:
+    enabled: true
+    defaults:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 1
+        memory: 1Gi
+  resourceQuota:
+    enabled: true
+    quotas:
+      requests.cpu: "4"
+      requests.memory: 8Gi
+      limits.cpu: "8"
+      limits.memory: 16Gi
+      pods: "50"
+
+services:
+  api:
+    name: api
+    image:
+      repository: ghcr.io/summit/api
+      tag: v1.0.0
+    replicaCount: 3
+    service:
+      port: 8080
+      type: ClusterIP
+    env:
+      NODE_ENV: production
+      LOG_LEVEL: info
+    secretRefs:
+      - name: DATABASE_URL
+        secretName: summit-api
+        key: database-url
+    externalSecrets:
+      enabled: true
+      keys:
+        - name: database-url
+          remoteKey: summit/api
+          property: DATABASE_URL
+    probes:
+      liveness:
+        path: /healthz
+      readiness:
+        path: /ready
+      startup:
+        path: /startup
+    hpa:
+      minReplicas: 3
+      maxReplicas: 10
+      cpuUtilization: 70
+      memoryUtilization: 80
+    ingress:
+      enabled: true
+      className: nginx
+      hosts:
+        - host: api.summit.local
+          path: /
+      tlsSecret: api-summit-tls
+    networkPolicy:
+      egressCIDRs:
+        - 0.0.0.0/0
+    blueGreen:
+      enabled: true
+      activeColor: blue
+      targetColor: green
+    serviceMesh:
+      outboundCIDRs: "*"
+
+  client:
+    name: client
+    image:
+      repository: ghcr.io/summit/client
+      tag: v1.0.0
+    replicaCount: 2
+    service:
+      port: 80
+    env:
+      NODE_ENV: production
+    probes:
+      liveness:
+        path: /healthz
+      readiness:
+        path: /ready
+      startup:
+        path: /startup
+    ingress:
+      enabled: true
+      hosts:
+        - host: app.summit.local
+          path: /
+    hpa:
+      minReplicas: 2
+      maxReplicas: 6
+      cpuUtilization: 60
+      memoryUtilization: 75
+    networkPolicy:
+      egressCIDRs:
+        - 0.0.0.0/0
+    blueGreen:
+      enabled: true
+      activeColor: blue
+      targetColor: green
+
+  ai-service:
+    name: ai-service
+    image:
+      repository: ghcr.io/summit/ai-service
+      tag: v1.0.0
+    replicaCount: 2
+    service:
+      port: 8081
+    env:
+      MODEL_PROVIDER: openai
+    secretRefs:
+      - name: OPENAI_API_KEY
+        secretName: summit-ai
+        key: api-key
+    externalSecrets:
+      enabled: true
+      keys:
+        - name: api-key
+          remoteKey: summit/ai
+          property: OPENAI_API_KEY
+    probes:
+      liveness:
+        path: /health
+      readiness:
+        path: /ready
+      startup:
+        path: /startup
+    hpa:
+      minReplicas: 2
+      maxReplicas: 8
+      cpuUtilization: 65
+      memoryUtilization: 75
+      customMetrics:
+        - name: inference_latency_ms
+          target: 200m
+    ingress:
+      enabled: true
+      hosts:
+        - host: ai.summit.local
+          path: /
+    networkPolicy:
+      egressCIDRs:
+        - 0.0.0.0/0
+    blueGreen:
+      enabled: true
+      activeColor: blue
+      targetColor: green
+
+  nlp-service:
+    name: nlp-service
+    image:
+      repository: ghcr.io/summit/nlp-service
+      tag: v1.0.0
+    replicaCount: 2
+    service:
+      port: 8082
+    env:
+      MODEL_PROVIDER: huggingface
+    probes:
+      liveness:
+        path: /health
+      readiness:
+        path: /ready
+      startup:
+        path: /startup
+    hpa:
+      minReplicas: 2
+      maxReplicas: 6
+      cpuUtilization: 70
+      memoryUtilization: 80
+    ingress:
+      enabled: false
+    networkPolicy:
+      egressCIDRs:
+        - 10.0.0.0/8
+    blueGreen:
+      enabled: true
+      activeColor: blue
+      targetColor: green
+
+  worker:
+    name: worker
+    image:
+      repository: ghcr.io/summit/worker
+      tag: v1.0.0
+    replicaCount: 2
+    service:
+      port: 9090
+    env:
+      QUEUE: critical
+    probes:
+      liveness:
+        path: /health
+      readiness:
+        path: /ready
+      startup:
+        path: /startup
+    hpa:
+      minReplicas: 1
+      maxReplicas: 5
+      cpuUtilization: 65
+      memoryUtilization: 80
+    ingress:
+      enabled: false
+    networkPolicy:
+      egressCIDRs:
+        - 10.0.0.0/8
+    blueGreen:
+      enabled: true
+      activeColor: blue
+      targetColor: green

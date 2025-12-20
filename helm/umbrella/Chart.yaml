@@ -1,0 +1,9 @@
+apiVersion: v2
+name: summit-umbrella
+version: 0.1.0
+description: Umbrella chart for Summit services with service mesh, security, and blue-green deployment patterns.
+type: application
+dependencies:
+  - name: summit-service
+    version: 0.1.0
+    repository: "file://../charts/summit-service"
