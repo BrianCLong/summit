@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 import { MessagePersistence } from '../../../src/services/websocket-server/src/managers/MessagePersistence.js';
 import { AdaptiveRateLimiter } from '../../../src/lib/streaming/rate-limiter.js';

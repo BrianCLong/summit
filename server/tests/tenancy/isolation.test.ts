@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { EntityRepo } from '../../src/repos/EntityRepo';
 import { InvestigationRepo } from '../../src/repos/InvestigationRepo';

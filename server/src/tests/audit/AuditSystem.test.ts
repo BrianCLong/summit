@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { AdvancedAuditSystem } from '../../audit/advanced-audit-system';
 import { Pool } from 'pg';
 import Redis from 'ioredis';

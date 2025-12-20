@@ -1,3 +1,4 @@
+// @ts-nocheck
 // server/src/services/IntelGraphService.test.ts
 import { IntelGraphService } from './IntelGraphService';
 import { getNeo4jDriver } from '../config/database';

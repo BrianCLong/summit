@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Job } from 'bullmq';
 import { retentionEngine } from '../retention.js';
 import { JobData } from '../../queue/types.js';

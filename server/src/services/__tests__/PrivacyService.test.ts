@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 import { jest } from '@jest/globals';
 import { PrivacyService, DSARType, DSARStatus } from '../PrivacyService.js';

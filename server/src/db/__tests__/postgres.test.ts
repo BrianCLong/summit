@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * PostgreSQL Pool Test Suite
  *

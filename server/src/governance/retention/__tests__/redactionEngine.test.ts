@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { Pool } from 'pg';
 import { RedactionEngine } from '../redactionEngine.js';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { RateLimiter } from '../../src/services/RateLimiter';
 

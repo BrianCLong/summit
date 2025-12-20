@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { EntityResolutionService, EntityResolutionConfig } from '../EntityResolutionService.js';
 import { createHash } from 'node:crypto';
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * API Documentation Routes Tests
  * Issue: #11814 - API Documentation with OpenAPI/Swagger

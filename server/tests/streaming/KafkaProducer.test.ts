@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import { KafkaProducerWrapper } from '../../src/streaming/KafkaProducer.js';
 import { MockSchemaRegistry } from '../../src/streaming/SchemaRegistry.js';

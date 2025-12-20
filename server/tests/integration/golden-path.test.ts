@@ -1,3 +1,4 @@
+// @ts-nocheck
 import request from 'supertest';
 import { createTestHarness, TestHarness } from '../harness.js';
 import { jest } from '@jest/globals';

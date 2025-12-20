@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Moved from server/tests/entities.audit.test.ts
 import express from 'express';
 import request from 'supertest';

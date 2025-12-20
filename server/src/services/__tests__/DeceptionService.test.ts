@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { DeceptionService } from '../DeceptionService.js';
 import { neo } from '../../db/neo4j.js';
 

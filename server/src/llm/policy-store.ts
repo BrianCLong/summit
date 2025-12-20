@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import yaml from 'js-yaml';

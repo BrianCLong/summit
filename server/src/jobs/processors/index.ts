@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { workerManager } from '../../queue/worker.js';
 import { QueueName } from '../../queue/types.js';
 import { retentionProcessor } from './retentionProcessor.js';

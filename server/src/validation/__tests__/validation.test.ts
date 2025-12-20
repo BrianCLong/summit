@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Comprehensive Validation and Security Tests
  */

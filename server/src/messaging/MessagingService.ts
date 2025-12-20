@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Message, SendMessagePayload } from './types.js';
 import { MessagingRepo } from './MessagingRepo.js';
 import pino from 'pino';

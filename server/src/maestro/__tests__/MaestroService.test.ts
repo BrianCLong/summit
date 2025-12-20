@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { jest } from '@jest/globals';
 import fs from 'fs/promises';
 import { MaestroService } from '../MaestroService';

@@ -11,6 +11,9 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+
+const AnyGrid = Grid as any;
+
 import {
   CheckCircle as CheckCircleIcon,
   Cancel as CancelIcon,
@@ -126,9 +129,9 @@ export default function ApprovalsPage() {
         </Alert>
       ) : null}
 
-      <Grid container spacing={2}>
+      <AnyGrid container spacing={2}>
         {approvals.map((approval) => (
-          <Grid item xs={12} md={6} key={approval.id}>
+          <AnyGrid xs={12} md={6} key={approval.id}>
             <Card variant="outlined">
               <CardContent>
                 <Stack spacing={1.5}>
@@ -190,9 +193,9 @@ export default function ApprovalsPage() {
                 </Stack>
               </CardContent>
             </Card>
-          </Grid>
+          </AnyGrid>
         ))}
-      </Grid>
+      </AnyGrid>
     </Box>
   );
 }

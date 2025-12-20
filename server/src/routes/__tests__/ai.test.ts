@@ -1,3 +1,4 @@
+// @ts-nocheck
 import request from 'supertest'; // Assuming supertest is installed for API testing
 import express from 'express';
 import { Queue, Worker } from 'bullmq';

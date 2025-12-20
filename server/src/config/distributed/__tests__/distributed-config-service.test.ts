@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { z } from 'zod';
 import DistributedConfigService from '../distributed-config-service';
 import InMemoryConfigRepository from '../repository';

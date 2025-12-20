@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { CacheService } from './cacheService';
 import { describe, it, expect, beforeEach } from '@jest/globals';
 

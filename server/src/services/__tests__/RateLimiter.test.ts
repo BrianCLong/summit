@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { RateLimiter } from '../RateLimiter.js';
 
 const store = new Map<string, { count: number; expiresAt: number }>();

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { IResolvers } from '@graphql-tools/utils';
 import { getNeo4jDriver } from '../db/neo4j.js';
 

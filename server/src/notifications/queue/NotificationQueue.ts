@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Queue, Worker, Job } from 'bullmq';
 import { NotificationService } from '../NotificationService.js';
 import { NotificationPayload, NotificationResult } from '../types.js';

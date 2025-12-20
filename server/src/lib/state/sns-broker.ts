@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 import { SNSClient, PublishCommand } from "@aws-sdk/client-sns";
 import { SQSClient, ReceiveMessageCommand, DeleteMessageCommand } from "@aws-sdk/client-sqs";

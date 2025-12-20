@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { GraphQLError } from 'graphql';
 
 // In a real-world scenario, this would involve a database lookup

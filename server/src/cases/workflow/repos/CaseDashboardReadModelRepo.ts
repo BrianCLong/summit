@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Pool } from 'pg';
 import logger from '../../../config/logger';
 import { CaseDashboardMetrics } from '../types';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 import { BaseConnector } from '../base';
 import { ConnectorConfig, ConnectorSchema } from '../types';

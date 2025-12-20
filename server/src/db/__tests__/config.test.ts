@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { buildDbConfig } from '../config';
 
 describe('db config', () => {

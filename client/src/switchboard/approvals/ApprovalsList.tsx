@@ -15,6 +15,9 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+
+const AnyGrid = Grid as any;
+
 import {
   CheckCircle as CheckCircleIcon,
   Close as CloseIcon,
@@ -223,8 +226,8 @@ export default function ApprovalsList() {
           No pending approvals. You are all caught up.
         </Alert>
       ) : (
-        <Grid container spacing={2} alignItems="stretch">
-          <Grid item xs={12} md={5} lg={4}>
+        <AnyGrid container spacing={2} alignItems="stretch">
+          <AnyGrid xs={12} md={5} lg={4}>
             <Paper variant="outlined" sx={{ height: '100%' }}>
               <List disablePadding>
                 {approvals.map((item) => (
@@ -278,9 +281,9 @@ export default function ApprovalsList() {
                 ))}
               </List>
             </Paper>
-          </Grid>
+          </AnyGrid>
 
-          <Grid item xs={12} md={7} lg={8}>
+          <AnyGrid xs={12} md={7} lg={8}>
             <Paper variant="outlined" sx={{ height: '100%', p: 2 }}>
               {selected ? (
                 <Stack spacing={2} height="100%">
@@ -368,8 +371,8 @@ export default function ApprovalsList() {
                 </Stack>
               )}
             </Paper>
-          </Grid>
-        </Grid>
+          </AnyGrid>
+        </AnyGrid>
       )}
     </Paper>
   );

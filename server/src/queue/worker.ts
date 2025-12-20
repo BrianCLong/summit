@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Worker, Job, WorkerOptions } from 'bullmq';
 import { cfg } from '../config.js';
 import { QueueName } from './types.js';

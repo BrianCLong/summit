@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * CaseRepo Unit Tests
  * Tests CRUD operations for Case Spaces

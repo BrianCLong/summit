@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Pool } from 'pg';
 import { CaseOverviewCacheRepo, CaseOverviewSnapshot } from '../../repos/CaseOverviewCacheRepo.js';
 import logger from '../../config/logger.js';

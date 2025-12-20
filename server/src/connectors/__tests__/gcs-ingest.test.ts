@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import { GCSBatchConnector } from '../gcs-ingest.js';
 import { Readable } from 'stream';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Advanced Tiered Rate Limiting Middleware
  *

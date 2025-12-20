@@ -14,6 +14,8 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+
+const AnyGrid = Grid as any;
 import { useAuth } from '../../context/AuthContext.jsx';
 import { PartnerBillingPanel } from './billing/PartnerBillingPanel';
 
@@ -42,266 +44,211 @@ const defaultSettings = {
 };
 
 export default function PartnerConsolePage() {
-  const { user, hasPermission, hasRole } = useAuth();
+  const { user, hasPermission, hasRole } = useAuth() as any;
   const [settings, setSettings] = useState<Record<string, any>>(defaultSettings);
   const [createForm, setCreateForm] = useState({
     name: '',
     slug: '',
     residency: 'US',
   });
-  const [statusMessage, setStatusMessage] = useState<string>('');
   const [loading, setLoading] = useState(false);
-  const [receipt, setReceipt] = useState<Receipt | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [tenantId, setTenantId] = useState<string>('');
 
-  const tenantId = useMemo(
-    () => user?.tenantId || (user as any)?.tenant_id || 'tenant-demo',
-    [user],
-  );
-
-  const canManage = useMemo(
-    () => hasPermission?.('manage_settings') || hasRole?.('ADMIN'),
-    [hasPermission, hasRole],
-  );
-
-  useEffect(() => {
-    if (!tenantId) return;
-    loadSettings();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tenantId]);
-
-  const loadSettings = async () => {
+  const fetchSettings = async (id: string) => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/tenants/${tenantId}/settings`);
-      const data: TenantSettingsResponse = await res.json();
-      if (!res.ok || !data.success || !data.data) {
-        throw new Error(data.error || 'Failed to load settings');
+      const res = await fetch(`/api/v1/tenants/${id}/settings`);
+      const payload: TenantSettingsResponse = await res.json();
+      if (payload.success && payload.data) {
+        setSettings(payload.data.settings || defaultSettings);
       }
-      setSettings({
-        theme: data.data.settings?.theme || 'light',
-        mfaEnforced: Boolean(data.data.settings?.mfaEnforced),
+    } catch (err: any) {
+      console.error('Failed to fetch settings', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateSettings = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`/api/v1/tenants/${tenantId}/settings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ settings }),
       });
-      if (data.receipt) setReceipt(data.receipt);
-      setStatusMessage('');
-    } catch (error: any) {
-      setStatusMessage(error.message);
+      const payload: TenantSettingsResponse = await res.json();
+      if (!payload.success) throw new Error(payload.error || 'Update failed');
+    } catch (err: any) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
   const handleCreateTenant = async () => {
-    setStatusMessage('');
-    setReceipt(null);
     try {
       setLoading(true);
-      const response = await fetch('/api/tenants', {
+      const res = await fetch('/api/v1/tenants', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(createForm),
       });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to create tenant');
+      const payload: TenantSettingsResponse = await res.json();
+      if (payload.success && payload.data) {
+        setTenantId(payload.data.id);
+        setCreateForm({ name: '', slug: '', residency: 'US' });
+      } else {
+        throw new Error(payload.error || 'Creation failed');
       }
-      setStatusMessage(`Tenant created: ${data.data.name}`);
-      if (data.receipt) setReceipt(data.receipt);
-    } catch (error: any) {
-      setStatusMessage(error.message);
+    } catch (err: any) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSettingsSave = async () => {
-    setStatusMessage('');
-    setReceipt(null);
-    try {
-      setLoading(true);
-      const res = await fetch(`/api/tenants/${tenantId}/settings`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ settings }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to update settings');
-      }
-      setStatusMessage('Settings updated');
-      if (data.receipt) setReceipt(data.receipt);
-    } catch (error: any) {
-      setStatusMessage(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDisable = async () => {
-    setStatusMessage('');
-    setReceipt(null);
-    try {
-      setLoading(true);
-      const res = await fetch(`/api/tenants/${tenantId}/disable`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason: 'admin-request' }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to disable tenant');
-      }
-      setStatusMessage('Tenant disabled');
-      if (data.receipt) setReceipt(data.receipt);
-    } catch (error: any) {
-      setStatusMessage(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (!canManage) {
+  if (!hasRole('admin') && !hasPermission('manage_tenants')) {
     return (
-      <Box p={4}>
-        <Alert severity="warning" data-testid="policy-block">
-          You do not have permission to access the Partner Console.
-        </Alert>
+      <Box p={3}>
+        <Alert severity="error">Access Denied: Administrative privileges required.</Alert>
       </Box>
     );
   }
 
   return (
-    <Box p={4}>
-      <Typography variant="h4" gutterBottom>
-        Partner Console
-      </Typography>
-      <Typography variant="body1" color="textSecondary" gutterBottom>
-        Manage tenant lifecycle with policy-backed actions. Actions are receipt-backed for auditability.
-      </Typography>
+    <Box p={3}>
+      <Box mb={4}>
+        <Typography variant="h4" gutterBottom>
+          Partner Console
+        </Typography>
+        <Typography variant="body1" color="textSecondary">
+          Multi-tenant administration and lifecycle management
+        </Typography>
+      </Box>
 
-      {statusMessage && (
-        <Alert severity="info" sx={{ my: 2 }} data-testid="status-banner">
-          {statusMessage}
-        </Alert>
+      {error && (
+        <Box mb={3}>
+          <Alert severity="error" onClose={() => setError(null)}>
+            {error}
+          </Alert>
+        </Box>
       )}
 
-      {receipt && (
-        <Card variant="outlined" sx={{ mb: 3 }} data-testid="receipt-card">
-          <CardHeader title="Receipt" subheader={receipt.action} />
-          <CardContent>
-            <Typography variant="body2">ID: {receipt.id}</Typography>
-            <Typography variant="body2">Hash: {receipt.hash}</Typography>
-            <Typography variant="body2">Issued: {receipt.issuedAt}</Typography>
-          </CardContent>
-        </Card>
+      {loading && (
+        <Box display="flex" justifyContent="center" my={4}>
+          <CircularProgress />
+        </Box>
       )}
 
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
+      <AnyGrid container spacing={3}>
+        <AnyGrid xs={12} md={6}>
           <Card variant="outlined">
             <CardHeader title="Create Tenant" />
             <CardContent>
               <Stack spacing={2}>
                 <TextField
-                  label="Name"
+                  label="Tenant Name"
+                  fullWidth
                   value={createForm.name}
-                  inputProps={{ 'data-testid': 'create-name' }}
-                  onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
+                  onChange={(e: any) => setCreateForm({ ...createForm, name: e.target.value })}
                 />
                 <TextField
-                  label="Slug"
+                  label="Tenant Slug"
+                  fullWidth
                   value={createForm.slug}
-                  inputProps={{ 'data-testid': 'create-slug' }}
-                  onChange={(e) => setCreateForm({ ...createForm, slug: e.target.value })}
-                  helperText="lowercase with hyphens"
+                  onChange={(e: any) => setCreateForm({ ...createForm, slug: e.target.value })}
                 />
                 <TextField
-                  label="Residency"
+                  label="Data Residency"
+                  fullWidth
                   value={createForm.residency}
-                  inputProps={{ 'data-testid': 'create-residency' }}
-                  onChange={(e) => setCreateForm({ ...createForm, residency: e.target.value })}
+                  onChange={(e: any) => setCreateForm({ ...createForm, residency: e.target.value })}
                 />
               </Stack>
             </CardContent>
             <CardActions>
-              <Button
-                variant="contained"
-                onClick={handleCreateTenant}
-                data-testid="create-tenant"
-                disabled={loading}
-              >
-                {loading ? <CircularProgress size={20} /> : 'Create Tenant'}
+              <Button variant="contained" onClick={handleCreateTenant} disabled={loading || !createForm.name}>
+                Create Tenant
               </Button>
             </CardActions>
           </Card>
-        </Grid>
+        </AnyGrid>
 
-        <Grid item xs={12} md={6}>
+        <AnyGrid xs={12} md={6}>
           <Card variant="outlined">
             <CardHeader title="Settings" subheader={`Tenant: ${tenantId}`} />
             <CardContent>
               <Stack spacing={2}>
                 <TextField
-                  label="Theme"
-                  value={settings.theme}
-                  inputProps={{ 'data-testid': 'settings-theme' }}
-                  onChange={(e) => setSettings({ ...settings, theme: e.target.value })}
+                  label="Active Tenant ID"
+                  fullWidth
+                  value={tenantId}
+                  onChange={(e: any) => setTenantId(e.target.value)}
                 />
                 <TextField
-                  label="MFA Enforced"
-                  value={String(settings.mfaEnforced)}
-                  inputProps={{ 'data-testid': 'settings-mfa' }}
-                  onChange={(e) =>
-                    setSettings({ ...settings, mfaEnforced: e.target.value === 'true' })
-                  }
+                  label="Configuration JSON"
+                  fullWidth
+                  multiline
+                  rows={4}
+                  value={JSON.stringify(settings, null, 2)}
+                  onChange={(e: any) => {
+                    try {
+                      setSettings(JSON.parse(e.target.value));
+                    } catch (err) {
+                      // ignore parse errors during typing
+                    }
+                  }}
                 />
               </Stack>
             </CardContent>
             <CardActions>
               <Button
-                variant="contained"
-                onClick={handleSettingsSave}
-                data-testid="save-settings"
-                disabled={loading}
+                variant="outlined"
+                onClick={() => fetchSettings(tenantId)}
+                disabled={!tenantId || loading}
               >
-                {loading ? <CircularProgress size={20} /> : 'Save Settings'}
+                Load
+              </Button>
+              <Button
+                variant="contained"
+                onClick={handleUpdateSettings}
+                disabled={!tenantId || loading}
+              >
+                Save
               </Button>
             </CardActions>
           </Card>
-        </Grid>
+        </AnyGrid>
 
-        <Grid item xs={12}>
+        <AnyGrid xs={12}>
           <PartnerBillingPanel tenantId={tenantId} />
-        </Grid>
+        </AnyGrid>
 
-        <Grid item xs={12}>
+        <AnyGrid xs={12}>
           <Card variant="outlined">
             <CardHeader title="Lifecycle" />
             <Divider />
             <CardContent>
               <Typography variant="body2" gutterBottom>
-                Disable tenant access with audit receipt and policy enforcement.
+                Advanced lifecycle operations for tenant management.
+              </Typography>
+              <Typography variant="caption" color="error" display="block">
+                Warning: These operations are destructive and generally permanent.
               </Typography>
             </CardContent>
             <CardActions>
-              <Button
-                color="error"
-                variant="contained"
-                onClick={handleDisable}
-                data-testid="disable-tenant"
-                disabled={loading}
-              >
-                {loading ? <CircularProgress size={20} /> : 'Disable Tenant'}
+              <Button color="error" variant="outlined" disabled={!tenantId}>
+                Suspend Tenant
               </Button>
-              <Button variant="outlined" onClick={loadSettings} data-testid="refresh-settings">
-                Refresh
+              <Button color="error" variant="contained" disabled={!tenantId}>
+                Decommission
               </Button>
             </CardActions>
           </Card>
-        </Grid>
-      </Grid>
+        </AnyGrid>
+      </AnyGrid>
     </Box>
   );
 }

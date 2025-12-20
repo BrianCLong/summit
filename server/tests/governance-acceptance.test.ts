@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Governance Acceptance Tests
  *

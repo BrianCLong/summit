@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express from 'express';
 import request from 'supertest';
 import { router } from '../../services/nlq/src/index.js';

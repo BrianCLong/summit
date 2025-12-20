@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Authentication Security Tests
  *

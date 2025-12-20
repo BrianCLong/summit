@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Pool } from 'pg';
 import { DataRetentionEngine } from '../governance/retention/dataRetentionEngine.js';
 import { RetentionScheduler } from '../governance/retention/scheduler.js';

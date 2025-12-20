@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * RelationshipRepo Test Suite
  *

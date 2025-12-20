@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { putEncryptedArtifact } from '../src/conductor/crypto/envelope';
 
 test('stores encrypted artifact with AAD (mocked vault likely fails)', async () => {

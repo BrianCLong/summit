@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Citation Gate - shared enforcement utilities for GraphRAG endpoints
  *

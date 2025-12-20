@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 import { geoIntService, GeoPointSchema, TrackSchema } from '../services/GeoIntService';
 

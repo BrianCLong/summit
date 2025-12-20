@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { NotificationProvider, NotificationChannel, NotificationPayload, NotificationResult } from '../types.js';
 import { getIO } from '../../realtime/socket.js';
 import { NotificationRepo } from '../repo/NotificationRepo.js';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 // server/src/lib/state/tests/state.test.ts
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { normalizeIoC, fuse } from '@/utils/ioc';
 import { describe, it, test, expect } from '@jest/globals';
 

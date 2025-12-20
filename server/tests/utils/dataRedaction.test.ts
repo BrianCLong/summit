@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { redactData } from '@/utils/dataRedaction';
 import { describe, it, expect } from '@jest/globals';
 

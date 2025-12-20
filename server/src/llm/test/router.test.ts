@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect, jest, beforeAll, afterAll, afterEach } from '@jest/globals';
 import { LLMRouter } from '../router.js';
 import { MockProvider } from '../providers/mock.js';

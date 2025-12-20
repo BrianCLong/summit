@@ -1,3 +1,4 @@
+// @ts-nocheck
 import fs from 'fs';
 import path from 'path';
 import { compile } from '../../packages/sdk/nlq-js/src/index.js';

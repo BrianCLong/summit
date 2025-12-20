@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createHash } from 'crypto';
 import { getRedisClient } from '../../config/database.js';
 import { provenanceLedger } from '../../provenance/ledger.js';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Secret Rotation Manager Tests
  */

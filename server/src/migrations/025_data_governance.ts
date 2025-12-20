@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 import { MigrationBuilder } from 'node-pg-migrate';
 

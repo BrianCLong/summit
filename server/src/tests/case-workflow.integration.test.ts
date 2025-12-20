@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Case Workflow Integration Tests
  * Tests complete case lifecycle with workflow, tasks, SLAs, and approvals

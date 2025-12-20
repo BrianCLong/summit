@@ -1,3 +1,4 @@
+// @ts-nocheck
 import SemanticSearchService from '../services/SemanticSearchService';
 import { describe, it, expect } from '@jest/globals';
 

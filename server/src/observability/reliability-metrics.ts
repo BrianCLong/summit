@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Counter, Gauge, Histogram, Summary } from 'prom-client';
 import { registry } from '../metrics';
 

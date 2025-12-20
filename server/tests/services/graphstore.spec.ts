@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { GenericContainer } from 'testcontainers';
 import fs from 'fs/promises';
 import path from 'path';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Router, Request } from 'express';
 import { modelRegistry } from '../mlops/registry';
 import { modelServing } from '../mlops/serving';

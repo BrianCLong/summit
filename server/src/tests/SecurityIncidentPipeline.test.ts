@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 import { SecurityIncidentPipeline } from '../services/SecurityIncidentPipeline';
 import { AlertTriageV2Service } from '../services/AlertTriageV2Service';

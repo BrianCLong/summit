@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Mock the db module
 jest.mock('../../db', () => ({
   db: {

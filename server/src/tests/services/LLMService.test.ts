@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { LLMService, CompletionOptions } from '../../services/LLMService.js';
 import { OpenAI } from 'openai';

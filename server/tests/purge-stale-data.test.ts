@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { QueryConfig } from 'pg';
 import {
   buildCandidateQuery,

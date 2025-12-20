@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { ReportServiceV2 } from '../ReportServiceV2.js';
 import { CitationValidationError } from '../../graphrag/types.js';

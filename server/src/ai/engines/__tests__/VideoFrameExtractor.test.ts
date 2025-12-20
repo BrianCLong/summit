@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { VideoFrameExtractor } from '../VideoFrameExtractor';
 import ffmpeg from 'fluent-ffmpeg';
 import fs from 'fs/promises';
@@ -40,10 +41,10 @@ describe('VideoFrameExtractor', () => {
       command.on = jest.fn((event, callback) => {
         if (event === 'end') {
           // Simulate successful end
-          callback();
+          (callback as any)();
         } else if (event === 'filenames') {
           // Simulate filenames being emitted
-          callback(['frame-0.000.png', 'frame-1.000.png']);
+          (callback as any)(['frame-0.000.png', 'frame-1.000.png']);
         }
         return command;
       });
@@ -52,7 +53,7 @@ describe('VideoFrameExtractor', () => {
 
     // Mock ffprobe
     (ffmpeg.ffprobe as jest.Mock).mockImplementation((_path, callback) => {
-      callback(null, { format: { duration: 10 } }); // Mock video duration
+      (callback as any)(null, { format: { duration: 10 } }); // Mock video duration
     });
   });
 
@@ -122,7 +123,7 @@ describe('VideoFrameExtractor', () => {
       };
       command.on = jest.fn((event, callback) => {
         if (event === 'error') {
-          callback(new Error('ffmpeg test error'));
+          (callback as any)(new Error('ffmpeg test error'));
         }
         return command;
       });

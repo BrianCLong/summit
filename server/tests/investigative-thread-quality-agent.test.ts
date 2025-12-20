@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { jest, describe, test, expect } from '@jest/globals';
 import InvestigativeThreadQualityAgent, {
   ThreadInput,

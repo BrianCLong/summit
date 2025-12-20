@@ -1,10 +1,9 @@
-// @ts-nocheck
 import { spawn } from 'child_process';
 import path from 'path';
 import pino from 'pino';
 import { ExtractionEngineConfig } from '../types.js';
 
-const logger = pino({ name: 'TextAnalysisEngine' });
+const logger = (pino as any)({ name: 'TextAnalysisEngine' });
 
 export interface NamedEntity {
   text: string;
@@ -664,7 +663,7 @@ export class TextAnalysisEngine {
    */
   private calculateTextStatistics(text: string): TextStatistics {
     const characterCount = text.length;
-const words = (text.toLowerCase().match(/\b\w+\b/g) || []) as string[];
+    const words = (text.toLowerCase().match(/\b\w+\b/g) || []) as string[];
     const wordCount = words.length;
     const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 0);
     const sentenceCount = sentences.length;
@@ -682,7 +681,7 @@ const words = (text.toLowerCase().match(/\b\w+\b/g) || []) as string[];
       wordCount > 0 ? uniqueWords.size / wordCount : 0;
 
     // Simple complexity score based on various factors
-const avgWordLength =
+    const avgWordLength =
       (words.reduce((sum: number, word: string) => sum + word.length, 0) /
         (wordCount || 1)) || 0;
     const complexityScore =

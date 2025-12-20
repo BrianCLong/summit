@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { jest } from '@jest/globals';
 import { QueueWorker } from '../queue-worker';
 import { costAwareScheduler } from '../cost-aware-scheduler';

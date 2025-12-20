@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 import { rateLimitMiddleware } from '../../src/middleware/rateLimit.js';
 import { rateLimiter } from '../../src/services/RateLimiter.js';

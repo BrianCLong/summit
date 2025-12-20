@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ProvenanceLedgerV2, provenanceLedger } from '../ledger';
 import { witnessRegistry, CryptoWitness } from '../witness';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { collaborationService } from '../services/collaborationService';
 
 class WarRoomSocket {

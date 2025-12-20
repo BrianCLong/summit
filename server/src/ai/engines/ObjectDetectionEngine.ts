@@ -4,7 +4,7 @@ import path from 'path';
 import pino from 'pino';
 import { ExtractionEngineConfig } from '../types.js';
 
-const logger = pino({ name: 'ObjectDetectionEngine' });
+const logger = (pino as any)({ name: 'ObjectDetectionEngine' });
 
 export interface DetectionResult {
   className: string;

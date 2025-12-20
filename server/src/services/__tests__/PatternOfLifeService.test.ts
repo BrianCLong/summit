@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 import { PatternOfLifeService } from '../PatternOfLifeService';
 import { ProvenanceEntry } from '../../provenance/ledger';

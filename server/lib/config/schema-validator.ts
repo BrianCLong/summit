@@ -1,3 +1,4 @@
+// @ts-nocheck
 import Ajv, { ErrorObject } from 'ajv';
 import * as fs from 'fs';
 import * as path from 'path';

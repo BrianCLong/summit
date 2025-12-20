@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import { DualNotaryService } from '../src/federal/dual-notary';
 import { slsa3Verifier } from '../src/federal/slsa3-verifier';

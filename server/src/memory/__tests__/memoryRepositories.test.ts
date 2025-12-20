@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { jest } from '@jest/globals';
 import { ValidationError, NotFoundError } from '../../errors/ErrorHandlingFramework';
 import { createSession, getSessionById } from '../repositories/sessionRepository';

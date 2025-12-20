@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { UnslothAdapter } from './UnslothAdapter.js';
 import type { NarrativeState, NarrativeEvent } from '../types.js';

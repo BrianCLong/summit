@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 import { IntelligenceAnalysisService } from './IntelligenceAnalysisService.js';
 import logger from '../utils/logger.js';

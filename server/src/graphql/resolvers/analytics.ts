@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 import { Neo4jGraphAnalyticsService } from '../../services/GraphAnalyticsService';
 

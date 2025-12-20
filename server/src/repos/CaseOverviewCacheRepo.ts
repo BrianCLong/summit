@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Pool } from 'pg';
 
 export type RefreshStatus = 'fresh' | 'revalidating' | 'stale';

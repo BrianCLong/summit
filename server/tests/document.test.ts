@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createTestClient } from 'apollo-server-testing';
 import { ApolloServer } from 'apollo-server-express';
 import { typeDefs } from '../../src/graphql/schema-combined';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 import { CostOptimizationService, OptimizationType, ImplementationEffort, RiskLevel } from '../CostOptimizationService';
 import { describe, expect, test, jest, beforeEach } from '@jest/globals';

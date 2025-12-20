@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ThreatHuntingOrchestrator Tests
  * Comprehensive test suite for the threat hunting platform

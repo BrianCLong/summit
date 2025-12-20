@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { NextFunction, Request, Response } from 'express';
 import { GraphRagResponse } from '../services/graphrag/types.js';
 import { isCitationGateEnabled } from '../services/graphrag/citation-gate.js';

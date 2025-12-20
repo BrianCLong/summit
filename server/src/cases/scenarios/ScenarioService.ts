@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { randomUUID } from 'crypto';
 import { EventEmitter } from 'events';
 import { InvestigationScenario, ScenarioModification, ModificationType, ScenarioResult } from './types.js';

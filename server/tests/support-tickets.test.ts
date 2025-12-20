@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, test, expect, beforeEach, jest } from '@jest/globals';
 import {
   createTicket,

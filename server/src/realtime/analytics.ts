@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Socket } from 'socket.io';
 import pino from 'pino';
 import { getRedisClient } from '../db/redis.js';

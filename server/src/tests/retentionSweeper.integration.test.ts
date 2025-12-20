@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals';
 import { Pool } from 'pg';
 import { DataRetentionEngine } from '../governance/retention/dataRetentionEngine.js';

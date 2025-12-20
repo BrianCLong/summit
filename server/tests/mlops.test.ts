@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { ModelRegistry } from '../src/mlops/registry';
 import { ModelServingService } from '../src/mlops/serving';

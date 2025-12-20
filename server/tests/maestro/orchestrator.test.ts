@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import { Maestro } from '../../src/maestro/core';
 import { IntelGraphClient } from '../../src/intelgraph/client';

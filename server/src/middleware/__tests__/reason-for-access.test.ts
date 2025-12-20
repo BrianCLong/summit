@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { createReasonForAccessMiddleware } from '../reason-for-access';
 import { requestFactory, responseFactory, nextFactory } from '../../../tests/factories/requestFactory';

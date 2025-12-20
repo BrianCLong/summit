@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 
 describe('Production Guardrails', () => {

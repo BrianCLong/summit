@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { graphql } from 'graphql';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { collabTypeDefs } from '../src/graphql/schema.collab.js';

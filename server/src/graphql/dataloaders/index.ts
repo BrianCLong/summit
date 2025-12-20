@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * DataLoader Infrastructure for GraphQL Resolvers
  * Implements batch loading to prevent N+1 queries

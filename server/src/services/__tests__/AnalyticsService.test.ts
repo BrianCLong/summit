@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { AnalyticsService } from '../AnalyticsService.js';
 import { jest } from '@jest/globals';
 

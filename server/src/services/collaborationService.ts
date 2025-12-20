@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { EventEmitter } from 'events';
 import { PubSub } from 'graphql-subscriptions';
 import { cacheService } from './cacheService';

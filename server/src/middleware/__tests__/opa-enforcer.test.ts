@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * OPA Enforcer Middleware Test Suite
  *

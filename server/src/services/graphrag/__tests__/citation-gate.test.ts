@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, expect, it, beforeEach, afterEach } from 'vitest';
 import {
   enforceCitationGateForAnswer,

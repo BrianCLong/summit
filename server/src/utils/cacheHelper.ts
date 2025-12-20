@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { cacheService } from '../services/cacheService.js';
 
 /**

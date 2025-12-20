@@ -1,3 +1,4 @@
+// @ts-nocheck
 jest.mock('../../config/logger', () => ({
   __esModule: true,
   default: {

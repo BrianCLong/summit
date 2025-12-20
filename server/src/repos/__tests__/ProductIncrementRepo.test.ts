@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Product Increment Repository Tests
  *

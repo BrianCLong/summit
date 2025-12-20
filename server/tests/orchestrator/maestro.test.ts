@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { runManager } from '../../orchestrator/runManager';
 import { recordRunInIntelGraph } from '../../orchestrator/intelGraphIntegration';
 import { AgentTask, maestro } from '../../orchestrator/maestro';

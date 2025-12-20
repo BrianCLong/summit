@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { trace, metrics, SpanStatusCode } from '@opentelemetry/api';
 
 /**

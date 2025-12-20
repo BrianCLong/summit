@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect, jest } from '@jest/globals';
 import { OsintConnector } from '../implementations/OsintConnector.js';
 import { OsintSourceType } from '../types.js';

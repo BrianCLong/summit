@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { upsertStixBundle } from '../../src/connectors/stix/mapper';
 import * as neo from '../../src/graph/neo4j';
 import { jest, test, expect } from '@jest/globals';

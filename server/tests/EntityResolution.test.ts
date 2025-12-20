@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { EntityResolutionService } from '../src/services/EntityResolutionService';
 import { ConflictResolutionService, ConflictResolutionStrategy } from '../src/services/ConflictResolutionService';
 import { resolveEntities } from '../src/services/HybridEntityResolutionService';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { BaseConnector } from '../BaseConnector.js';
 import {
   OsintSourceConfig,

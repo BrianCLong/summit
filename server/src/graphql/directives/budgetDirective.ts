@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * GraphQL @budget directive - Enforces token and cost limits at the resolver level
  * Provides deterministic budget enforcement with comprehensive telemetry

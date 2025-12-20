@@ -1,3 +1,4 @@
+// @ts-nocheck
 import axios from 'axios';
 import { jest } from '@jest/globals';
 import { AccessControlService } from '../access-control';

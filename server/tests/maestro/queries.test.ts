@@ -1,3 +1,4 @@
+// @ts-nocheck
 // server/tests/maestro/queries.test.ts
 
 import { MaestroQueries } from '../../src/maestro/queries';

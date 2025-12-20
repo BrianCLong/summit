@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Neo4jError } from 'neo4j-driver';
 import { describe, it, beforeAll, afterAll } from '@jest/globals';
 

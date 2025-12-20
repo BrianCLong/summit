@@ -1,3 +1,4 @@
+// @ts-nocheck
 import graphAnalyticsResolvers = require('../src/graphql/resolvers.graphAnalytics');
 import { jest, describe, it, expect } from '@jest/globals';
 

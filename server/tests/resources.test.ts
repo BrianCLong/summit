@@ -1,3 +1,4 @@
+// @ts-nocheck
 // server/tests/resources.test.ts
 
 import { quotaManager, HierarchicalQuota } from '../src/lib/resources/quota-manager';

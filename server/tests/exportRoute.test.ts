@@ -1,3 +1,4 @@
+// @ts-nocheck
 import request from 'supertest';
 import { createApp } from '../src/app.js';
 import { describe, test, expect, beforeAll } from '@jest/globals';

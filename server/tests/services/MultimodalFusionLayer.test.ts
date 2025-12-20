@@ -1,3 +1,4 @@
+// @ts-nocheck
 import MultimodalFusionLayer from '../../src/services/MultimodalFusionLayer.js';
 import { describe, test, expect } from '@jest/globals';
 

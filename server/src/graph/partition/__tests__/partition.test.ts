@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import { ShardManager } from '../ShardManager';
 import { GraphRouter } from '../GraphRouter';

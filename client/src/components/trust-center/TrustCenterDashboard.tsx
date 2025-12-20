@@ -27,10 +27,13 @@ import {
   ListItemText,
   ListItemIcon,
 } from '@mui/material';
+
+const AnyGrid = Grid as any;
+
 import {
   CheckCircle,
   Warning,
-  Error,
+  Error as ErrorIcon,
   Security,
   Assessment,
   Download,
@@ -131,7 +134,7 @@ const getStatusIcon = (status: string) => {
     case 'partial_outage':
     case 'major_outage':
     case 'expired':
-      return <Error color="error" />;
+      return <ErrorIcon color="error" />;
     default:
       return <CheckCircle color="info" />;
   }
@@ -388,8 +391,8 @@ export const TrustCenterDashboard: React.FC = () => {
       </Box>
 
       {/* Status Overview Cards */}
-      <Grid container spacing={3} mb={3}>
-        <Grid item xs={12} sm={6} md={3}>
+      <AnyGrid container spacing={3} mb={3}>
+        <AnyGrid xs={12} sm={6} md={3}>
           <StatusCard
             title="Availability (30d)"
             value={formatPercentage(data.uptime.last30d)}
@@ -397,8 +400,8 @@ export const TrustCenterDashboard: React.FC = () => {
             icon={<CloudDone fontSize="large" />}
             status={data.uptime.last30d >= 99.9 ? 'success' : 'warning'}
           />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        </AnyGrid>
+        <AnyGrid xs={12} sm={6} md={3}>
           <StatusCard
             title="Latency P95"
             value={`${data.sloSummary.latency.p95}ms`}
@@ -406,8 +409,8 @@ export const TrustCenterDashboard: React.FC = () => {
             icon={<Speed fontSize="large" />}
             status={data.sloSummary.latency.p95 <= data.sloSummary.latency.target ? 'success' : 'warning'}
           />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        </AnyGrid>
+        <AnyGrid xs={12} sm={6} md={3}>
           <StatusCard
             title="Active Certifications"
             value={String(data.certifications.filter(c => c.status === 'active').length)}
@@ -415,16 +418,16 @@ export const TrustCenterDashboard: React.FC = () => {
             icon={<VerifiedUser fontSize="large" />}
             status="success"
           />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        </AnyGrid>
+        <AnyGrid xs={12} sm={6} md={3}>
           <StatusCard
             title="Incidents (30d)"
             value={String(data.incidentCount)}
             icon={<Assessment fontSize="large" />}
             status={data.incidentCount === 0 ? 'success' : data.incidentCount < 3 ? 'warning' : 'error'}
           />
-        </Grid>
-      </Grid>
+        </AnyGrid>
+      </AnyGrid>
 
       {/* Tabs */}
       <Paper sx={{ mb: 3 }}>
@@ -442,21 +445,21 @@ export const TrustCenterDashboard: React.FC = () => {
 
       {/* Tab Content */}
       {activeTab === 0 && (
-        <Grid container spacing={3}>
+        <AnyGrid container spacing={3}>
           {data.certifications.map((cert) => (
-            <Grid item xs={12} sm={6} md={4} key={cert.framework}>
+            <AnyGrid xs={12} sm={6} md={4} key={cert.framework}>
               <CertificationCard
                 cert={cert}
                 onDownload={() => console.log('Download', cert.framework)}
               />
-            </Grid>
+            </AnyGrid>
           ))}
-        </Grid>
+        </AnyGrid>
       )}
 
       {activeTab === 1 && (
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
+        <AnyGrid container spacing={3}>
+          <AnyGrid xs={12} md={6}>
             <Card>
               <CardContent>
                 <Typography variant="h6" gutterBottom>
@@ -480,8 +483,8 @@ export const TrustCenterDashboard: React.FC = () => {
                 />
               </CardContent>
             </Card>
-          </Grid>
-          <Grid item xs={12} md={6}>
+          </AnyGrid>
+          <AnyGrid xs={12} md={6}>
             <Card>
               <CardContent>
                 <Typography variant="h6" gutterBottom>
@@ -518,14 +521,14 @@ export const TrustCenterDashboard: React.FC = () => {
                 </List>
               </CardContent>
             </Card>
-          </Grid>
-        </Grid>
+          </AnyGrid>
+        </AnyGrid>
       )}
 
       {activeTab === 2 && (
-        <Grid container spacing={3}>
+        <AnyGrid container spacing={3}>
           {packs.map((pack) => (
-            <Grid item xs={12} sm={6} md={4} key={pack.id}>
+            <AnyGrid xs={12} sm={6} md={4} key={pack.id}>
               <Card>
                 <CardContent>
                   <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
@@ -568,9 +571,9 @@ export const TrustCenterDashboard: React.FC = () => {
                   </Box>
                 </CardContent>
               </Card>
-            </Grid>
+            </AnyGrid>
           ))}
-        </Grid>
+        </AnyGrid>
       )}
 
       {/* Footer */}

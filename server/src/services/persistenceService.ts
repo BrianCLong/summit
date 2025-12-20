@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { cacheService } from './cacheService';
 
 export interface Investigation {

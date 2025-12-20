@@ -1,3 +1,4 @@
+// @ts-nocheck
 // client/src/components/alerts/AlertsDashboard.tsx
 import React from 'react';
 

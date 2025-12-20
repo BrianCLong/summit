@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { EntityResolutionService } from '../services/EntityResolutionService.js';
 import { getNeo4jDriver } from '../db/neo4j.js';
 

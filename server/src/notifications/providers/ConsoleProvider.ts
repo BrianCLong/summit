@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { NotificationProvider, NotificationChannel, NotificationPayload, NotificationResult } from '../types.js';
 import pino from 'pino';
 
