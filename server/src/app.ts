@@ -63,6 +63,7 @@ import qafRouter from './routes/qaf.js';
 import siemPlatformRouter from './routes/siem-platform.js';
 import maestroRouter from './routes/maestro.js';
 import caseRouter from './routes/cases.js';
+import tenantsRouter from './routes/tenants.js';
 import { SummitInvestigate } from './services/SummitInvestigate.js';
 import osintRouter from './routes/osint.js';
 import edgeOpsRouter from './routes/edge-ops.js';
@@ -280,6 +281,7 @@ export const createApp = async () => {
   app.use('/api/qaf', qafRouter);
   app.use('/api/siem-platform', siemPlatformRouter);
   app.use('/api/maestro', maestroRouter);
+  app.use('/api/tenants', tenantsRouter);
   app.use('/api/actions', actionsRouter);
   app.use('/api/osint', osintRouter);
   app.use('/api/edge', edgeOpsRouter);
