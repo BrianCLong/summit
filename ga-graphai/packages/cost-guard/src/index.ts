@@ -14,6 +14,8 @@ import type {
   WorkloadBalancingPlan,
   WorkloadQueueSignal,
   WorkloadSample,
+  KedaScaledObjectSpec,
+  QueueAlertConfig,
 } from './types.js';
 
 const DEFAULT_PROFILE: TenantBudgetProfile = {
@@ -196,6 +198,10 @@ const DEFAULT_QUEUE_SLO: QueueSloConfig = {
   maxReplicas: 64,
   scaleStep: 2,
   stabilizationSeconds: 180,
+  maxScaleStep: 6,
+  errorBudgetMinutes: 30,
+  latencyBurnThreshold: 1.2,
+  costBurnThreshold: 1.05,
 };
 
 export class ResourceOptimizationEngine {
@@ -271,6 +277,15 @@ export class ResourceOptimizationEngine {
       slo.maxCostPerMinuteUsd === 0
         ? 0
         : signals.spendRatePerMinuteUsd / slo.maxCostPerMinuteUsd;
+    const costBurnRate =
+      slo.costBurnThreshold && slo.costBurnThreshold > 0
+        ? costPressure / slo.costBurnThreshold
+        : costPressure;
+
+    const sloBurnRate =
+      slo.latencyBurnThreshold && slo.latencyBurnThreshold > 0
+        ? Math.max(latencyPressure / slo.latencyBurnThreshold, backlogPressure)
+        : Math.max(latencyPressure, backlogPressure);
 
     const normalizedLatency = Number(latencyPressure.toFixed(3));
     const normalizedBacklog = Number(backlogPressure.toFixed(3));
@@ -280,23 +295,35 @@ export class ResourceOptimizationEngine {
         .toFixed(1),
     );
 
+    const adaptiveScaleStep = Math.min(
+      slo.maxScaleStep ?? slo.scaleStep,
+      Math.max(
+        slo.scaleStep,
+        Math.ceil(slo.scaleStep * Math.max(1, sloBurnRate)),
+      ),
+    );
+
     let recommendedReplicas = safeReplicas;
     const backlogDrivenReplicas =
       safeServiceRate === 0 || slo.backlogTargetSeconds === 0
-        ? safeReplicas + slo.scaleStep
+        ? safeReplicas + adaptiveScaleStep
         : Math.ceil(
             (totalOutstanding / slo.backlogTargetSeconds) / safeServiceRate,
           );
     const latencyDrivenReplicas =
       latencyPressure > 1
         ? Math.ceil(
-            safeReplicas * Math.min(2.5, Math.max(1.2, latencyPressure + 0.15)),
+            safeReplicas *
+              Math.min(
+                2.5,
+                Math.max(1.2, latencyPressure + 0.15 * adaptiveScaleStep),
+              ),
           )
         : safeReplicas;
 
     if (normalizedLatency > 1 || normalizedBacklog > 1) {
       recommendedReplicas = Math.max(
-        safeReplicas + slo.scaleStep,
+        safeReplicas + adaptiveScaleStep,
         backlogDrivenReplicas,
         latencyDrivenReplicas,
       );
@@ -341,12 +368,125 @@ export class ResourceOptimizationEngine {
         costPressure: normalizedCost,
         backlogSeconds: normalizedBacklogSeconds,
         sloTargetSeconds: slo.backlogTargetSeconds,
+        sloBurnRate: Number(sloBurnRate.toFixed(3)),
+        costBurnRate: Number(costBurnRate.toFixed(3)),
+        adaptiveScaleStep,
       },
       kedaMetric: {
         metricName: 'agent_queue_slo_pressure',
         labels: { queue: signals.queueName },
         value: Number(dominantPressure.toFixed(3)),
         query: `max_over_time(agent_queue_slo_pressure{queue="${signals.queueName}"}[2m])`,
+      },
+      alerts: this.buildQueueAlertConfig(signals.queueName, slo, {
+        latency: normalizedLatency,
+        backlog: normalizedBacklog,
+        cost: normalizedCost,
+      }),
+    };
+  }
+
+  buildQueueAlertConfig(
+    queueName: string,
+    slo: QueueSloConfig,
+    pressures: { latency: number; backlog: number; cost: number },
+  ): QueueAlertConfig {
+    const labels = { queue: queueName };
+    const fastBurn = `max_over_time(agent_queue_slo_pressure{queue="${queueName}"}[5m])`;
+    const slowBurn = `max_over_time(agent_queue_slo_pressure{queue="${queueName}"}[30m])`;
+    const costAnomaly = `avg_over_time(agent_queue_cost_pressure{queue="${queueName}"}[10m])`;
+
+    const latencyBudget = slo.latencyBurnThreshold ?? 1;
+    const costBudget = slo.costBurnThreshold ?? 1;
+    const fastBurnThreshold = Math.max(latencyBudget, pressures.latency);
+    const slowBurnThreshold = Math.max(1, latencyBudget * 0.75);
+    const costThreshold = Math.max(costBudget, pressures.cost);
+    const fastBurnRateQuery = `${fastBurn} > ${fastBurnThreshold.toFixed(2)}`;
+    const slowBurnRateQuery = `${slowBurn} > ${slowBurnThreshold.toFixed(2)}`;
+    const costAnomalyQuery = `${costAnomaly} > ${costThreshold.toFixed(2)}`;
+
+    return {
+      fastBurnRateQuery,
+      slowBurnRateQuery,
+      costAnomalyQuery,
+      labels,
+    };
+  }
+
+  buildKedaScaledObject(
+    queueName: string,
+    deploymentName: string,
+    namespace: string,
+    decision: QueueScalingDecision,
+    slo: QueueSloConfig = DEFAULT_QUEUE_SLO,
+  ): KedaScaledObjectSpec {
+    const metric = decision.kedaMetric;
+    const minReplicaCount = slo.minReplicas;
+    const maxReplicaCount = slo.maxReplicas;
+
+    return {
+      apiVersion: 'keda.sh/v1alpha1',
+      kind: 'ScaledObject',
+      metadata: {
+        name: `${deploymentName}-keda`,
+        namespace,
+        labels: {
+          'queue.graphai.io/name': queueName,
+          'slo.graphai.io/enabled': 'true',
+        },
+      },
+      spec: {
+        scaleTargetRef: {
+          name: deploymentName,
+        },
+        pollingInterval: 15,
+        cooldownPeriod: slo.stabilizationSeconds,
+        minReplicaCount,
+        maxReplicaCount,
+        fallback: {
+          failureThreshold: 3,
+          replicas: Math.max(minReplicaCount, 1),
+        },
+        advanced: {
+          horizontalPodAutoscalerConfig: {
+            behavior: {
+              scaleDown: {
+                stabilizationWindowSeconds: slo.stabilizationSeconds,
+                policies: [
+                  { type: 'Pods', value: Math.max(1, slo.scaleStep), periodSeconds: 60 },
+                  { type: 'Percent', value: 20, periodSeconds: 60 },
+                ],
+              },
+              scaleUp: {
+                stabilizationWindowSeconds: Math.max(60, slo.stabilizationSeconds / 3),
+                policies: [
+                  { type: 'Pods', value: decision.telemetry.adaptiveScaleStep, periodSeconds: 60 },
+                  { type: 'Percent', value: 50, periodSeconds: 60 },
+                ],
+              },
+            },
+          },
+        },
+        triggers: [
+          {
+            type: 'prometheus',
+            metadata: {
+              serverAddress: 'http://prometheus.monitoring.svc:9090',
+              metricName: metric.metricName,
+              threshold: `${Math.max(1, decision.telemetry.sloBurnRate).toFixed(2)}`,
+              query: metric.query,
+            },
+          },
+          {
+            type: 'prometheus',
+            metadata: {
+              serverAddress: 'http://prometheus.monitoring.svc:9090',
+              metricName: 'agent_queue_cost_pressure',
+              threshold: `${Math.max(1, decision.telemetry.costBurnRate).toFixed(2)}`,
+              query: `avg_over_time(agent_queue_cost_pressure{queue="${queueName}"}[5m])`,
+            },
+          },
+        ],
       },
     };
   }
@@ -516,10 +656,11 @@ export type {
   QueueRuntimeSignals,
   QueueScalingDecision,
   QueueSloConfig,
+  QueueAlertConfig,
+  KedaScaledObjectSpec,
   SlowQueryRecord,
   TenantBudgetProfile,
   WorkloadBalancingPlan,
   WorkloadQueueSignal,
   WorkloadSample,
-  QueueScalingDecision,
 } from './types.js';

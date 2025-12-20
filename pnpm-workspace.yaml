@@ -2,6 +2,8 @@ packages:
   - 'apps/*'
   - 'packages/*'
   - 'services/*'
+  - 'client'
+  - 'server'
   - 'tools/*'
   - 'prov-ledger-service'
 exclude:
@@ -10,8 +12,6 @@ exclude:
   - 'apps/mobile-native'
   - 'apps/desktop-electron'
   - 'tools/summitctl'
-  - 'client'
-  - 'server'
   - 'intelgraph-mvp/ui'
   - '!**/test/**'
   - '!**/tests/**'

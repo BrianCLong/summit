@@ -94,8 +94,11 @@ const ApprovalsPage = React.lazy(() =>
 const PartnerConsolePage = React.lazy(() =>
   import('./pages/partner-console/PartnerConsolePage')
 );
+const AlertingPage = React.lazy(() =>
+  import('./pages/AlertingPage')
+);
 
-import { MilitaryTech } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
+import { MilitaryTech, Notifications } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import { Security } from '@mui/icons-material';
 
 // Navigation items
@@ -134,6 +137,7 @@ const navigationItems = [
     icon: <MilitaryTech />,
     roles: [ADMIN],
   },
+  { path: '/alerting', label: 'Alerting', icon: <Notifications />, roles: [ADMIN] },
 ];
 
 // Connection Status Component
@@ -734,6 +738,7 @@ function MainLayout() {
                   path="/wargame-dashboard"
                   element={<ExecutiveDashboard />}
                 />
+                <Route path="/alerting" element={<AlertingPage />} />
               </Route>
               <Route path="*" element={<NotFoundPage />} />
             </Route>
