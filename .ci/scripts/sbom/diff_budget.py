@@ -60,6 +60,11 @@ def parse_args() -> argparse.Namespace:
         default=int(os.environ.get("EXCEPTION_ALERT_WINDOW", "7")),
         help="Days before expiry to emit alerts.",
     )
+    parser.add_argument(
+        "--output-json",
+        default=os.environ.get("DIFF_BUDGET_OUTPUT"),
+        help="Optional JSON summary output path.",
+    )
     return parser.parse_args()
 
 
@@ -237,6 +242,29 @@ def format_summary(
     return "\n".join(lines)
 
 
+def write_json_summary(
+    path: Path,
+    baseline: Dict[str, int],
+    current: Dict[str, int],
+    deltas: Dict[str, int],
+    ok: bool,
+    alerts: List[str],
+    errors: List[str],
+) -> None:
+    payload = {
+        "ok": ok,
+        "baseline": baseline,
+        "current": current,
+        "deltas": deltas,
+        "alerts": alerts,
+        "errors": errors,
+        "budgetPath": str(Path(os.environ.get("CI_BUDGET", ".maestro/ci_budget.json"))),
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8") as handle:
+        json.dump(payload, handle, indent=2)
+
+
 def main():
     args = parse_args()
     report_path = Path(args.report)
@@ -272,6 +300,17 @@ def main():
     ok, errors = evaluate(deltas, budgets)
 
     print(format_summary(baseline_counts, current_counts, deltas, alerts))
+
+    if args.output_json:
+        write_json_summary(
+            Path(args.output_json),
+            baseline_counts,
+            current_counts,
+            deltas,
+            ok,
+            alerts,
+            errors,
+        )
 
     if errors:
         for err in errors:
