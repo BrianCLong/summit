@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Title, Text, Metric, Flex, Grid, Badge } from '@tremor/react';
 import { ErrorBoundary } from '@/components/error';
 
-interface NarrativeIntelligencePageProps {}
+interface NarrativeIntelligencePageProps { className?: string }
 
 export const NarrativeIntelligencePage: React.FC<NarrativeIntelligencePageProps> = () => {
   const [loading, setLoading] = useState(true);

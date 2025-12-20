@@ -3,19 +3,19 @@ import React, { useState } from 'react';
 import { MapContainer, TileLayer, Circle, Popup, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useLazyQuery, gql } from '@apollo/client';
-import { Button } from '../components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Label } from '../components/ui/label';
-import { Input } from '../components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { Button } from '@/components/ui/Button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { ErrorBoundary } from '../components/error';
+import { ErrorBoundary } from '@/components/error';
 
 import L from 'leaflet';
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 
-let DefaultIcon = L.icon({
+const DefaultIcon = L.icon({
     iconUrl: icon,
     shadowUrl: iconShadow,
     iconSize: [25, 41],
@@ -71,7 +71,7 @@ const GET_ELEVATION = gql`
 `;
 
 export const GeoIntPane: React.FC = () => {
-    const [center, setCenter] = useState<[number, number]>([34.0522, -118.2437]); // LA default
+    const [center] = useState<[number, number]>([34.0522, -118.2437]); // LA default
     const [satelliteUrl, setSatelliteUrl] = useState("https://example.com/sat1.jpg");
     const [analyzeSat, { data: satData, loading: satLoading }] = useLazyQuery(ANALYZE_SATELLITE);
 

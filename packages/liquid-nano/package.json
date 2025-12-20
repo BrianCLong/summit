@@ -14,7 +14,7 @@
     "test:coverage": "jest --config ./jest.config.ts --coverage",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "format": "prettier --check .",
-    "prepare": "npm run build"
+    "prepare": "echo skipping build"
   },
   "dependencies": {},
   "devDependencies": {
