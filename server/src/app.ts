@@ -79,6 +79,7 @@ import streamRouter from './routes/stream.js'; // Added import
 import commandConsoleRouter from './routes/internal/command-console.js';
 import searchV1Router from './routes/search-v1.js';
 import dataGovernanceRouter from './routes/data-governance-routes.js';
+import tenantBillingRouter from './routes/tenants/billing.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -289,6 +290,7 @@ export const createApp = async () => {
   app.use('/api', adminSmokeRouter);
   app.use('/api/scenarios', scenarioRouter);
   app.use('/api/costs', resourceCostsRouter);
+  app.use('/api/tenants/:tenantId/billing', tenantBillingRouter);
   app.use('/api/internal/command-console', commandConsoleRouter);
   app.use('/api/query-replay', queryReplayRouter);
   app.use('/api/stream', streamRouter); // Register stream route
