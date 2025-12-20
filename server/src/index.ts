@@ -2,7 +2,7 @@
 import http from 'http';
 import express from 'express';
 import { GraphQLError } from 'graphql';
-import { useServer } from 'graphql-ws/use/ws';
+import { useServer } from 'graphql-ws/lib/use/ws';
 import { WebSocketServer } from 'ws';
 import { randomUUID } from 'node:crypto';
 import pino from 'pino';
