@@ -1,0 +1,28 @@
+{
+  "$schema": "https://summit.dev/schemas/agent-budget-manifest.schema.json",
+  "schemaVersion": "2025-02-15",
+  "agentId": "orchestrator",
+  "owner": "Agent Control Systems",
+  "description": "Plan-and-route orchestrator with guarded runtime and call ceilings to protect downstream services.",
+  "deterministicLimits": {
+    "maxTokens": 90000,
+    "maxCallsPerRun": 32,
+    "maxWallClockMs": 210000,
+    "maxConcurrentRuns": 3,
+    "maxDailyRuns": 240,
+    "maxNetworkKB": 4096
+  },
+  "risk": {
+    "inherent": 6,
+    "controlBaseline": 3,
+    "residual": 4,
+    "riskTier": "medium",
+    "riskCeiling": 6,
+    "gates": ["lint", "typecheck", "routing-consistency"]
+  },
+  "telemetry": {
+    "auditLogPath": "agents/audit/logs/agent-audit.log",
+    "emitBudgetEvents": true,
+    "sampleRate": 1
+  }
+}

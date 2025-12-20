@@ -16,17 +16,29 @@ import { EventEmitter } from 'events';
 // A simple in-memory key-value store to simulate a persistent data store.
 const store: { [key: string]: any } = {};
 
-interface Cost {
+export interface Cost {
   tenantId: string;
   operation: string;
   amount: number;
   timestamp: Date;
+  details?: Record<string, any>;
 }
 
-interface Budget {
+export interface Budget {
   limit: number;
   thresholds: number[]; // e.g., [0.5, 0.8, 1.0]
   currentSpending: number;
+  currency: string;
+  periodStart: Date;
+  periodEnd: Date;
+}
+
+export interface CostReport {
+  tenantId: string;
+  totalSpend: number;
+  breakdown: Record<string, number>;
+  periodStart: Date;
+  periodEnd: Date;
 }
 
 class BudgetTracker extends EventEmitter {
@@ -61,13 +73,18 @@ class BudgetTracker extends EventEmitter {
   private checkThresholds(tenantId: string, budget: Budget): void {
     const spendingRatio = budget.currentSpending / budget.limit;
     const costs = this.getCosts(tenantId);
+    const previousSpending = budget.currentSpending - costs[costs.length - 1].amount;
+    const previousRatio = previousSpending / budget.limit;
+
     for (const threshold of budget.thresholds) {
-      if (spendingRatio >= threshold && (budget.currentSpending - costs[costs.length - 1].amount) / budget.limit < threshold) {
+      // Alert only when crossing the threshold upwards
+      if (spendingRatio >= threshold && previousRatio < threshold) {
         this.emit('alert', {
           tenantId,
           threshold,
           currentSpending: budget.currentSpending,
           limit: budget.limit,
+          timestamp: new Date()
         });
       }
     }
@@ -85,6 +102,31 @@ class BudgetTracker extends EventEmitter {
     const totalSpend = tenantCosts.reduce((sum, cost) => sum + cost.amount, 0);
     const avgDailySpend = totalSpend / days;
     return avgDailySpend * 30;
+  }
+
+  public getTenantReport(tenantId: string, startDate?: Date, endDate?: Date): CostReport {
+    const costs = this.getCosts(tenantId);
+    const filteredCosts = costs.filter(c => {
+      if (startDate && c.timestamp < startDate) return false;
+      if (endDate && c.timestamp > endDate) return false;
+      return true;
+    });
+
+    const breakdown: Record<string, number> = {};
+    let totalSpend = 0;
+
+    for (const cost of filteredCosts) {
+      breakdown[cost.operation] = (breakdown[cost.operation] || 0) + cost.amount;
+      totalSpend += cost.amount;
+    }
+
+    return {
+      tenantId,
+      totalSpend,
+      breakdown,
+      periodStart: startDate || (costs.length > 0 ? costs[0].timestamp : new Date()),
+      periodEnd: endDate || new Date()
+    };
   }
 
   public detectCostAnomalies(tenantId: string): void {

@@ -1,12 +1,8 @@
 # Summit Control Plane CLI (`summitctl`)
 
-This tool provides a control plane workflow for task management and automated PR creation.
+The official command-line interface for the Summit platform. It provides a "Golden Path" for development, validation, and automation.
 
 ## Setup
-
-The tool is located in `tools/summitctl`. Since the repository uses pnpm workspaces but currently has environmental issues preventing full installation, this tool is configured to be run independently.
-
-To set it up:
 
 ```bash
 cd tools/summitctl
@@ -16,32 +12,75 @@ npm run build
 
 ## Usage
 
-You can run the tool from the repository root using the npm script:
+You can run the tool from the repository root:
 
 ```bash
 npm run summitctl -- <command> [args]
 ```
 
-Or directly via node:
-
+Or make it globally available (optional):
 ```bash
-node tools/summitctl/dist/index.js <command> [args]
+cd tools/summitctl
+npm link
 ```
 
-## Commands
+## Golden Path Commands
 
-- `init <title>`: Initialize a new task.
-- `list`: List active tasks.
-- `ready <taskId>`: Mark a task as ready for PR.
-- `archive <taskId>`: Archive a task (updates velocity).
-- `velocity`: Show daily velocity stats.
-- `pr <taskId>`: Automate PR creation.
-    - Runs `npm run lint` (if present).
-    - Creates/Switches to `feat/<taskId>`.
-    - Commits all changes.
-    - Pushes to origin.
-    - Opens PR using `gh` CLI.
+These commands enforce standard workflows across the repository.
 
-## Data Store
+### `summitctl init`
+**Scaffold Development Environment**
 
-Tasks are stored in `.summit-tasks.yaml` in the repository root.
+Runs the standard bootstrapping process (`make bootstrap`), installs dependencies, and optionally starts services.
+
+```bash
+# Basic setup (dependencies + env)
+summitctl init
+
+# Full setup including starting services and running smoke tests
+summitctl init --full
+```
+
+### `summitctl check`
+**Validate Code Quality**
+
+Runs linting, type checking, and security scans without executing the full test suite. Useful for pre-commit checks.
+
+```bash
+# Run all checks
+summitctl check
+
+# Skip specific checks
+summitctl check --no-security
+```
+
+### `summitctl test`
+**Run Tests**
+
+Executes various tiers of tests.
+
+```bash
+# Run all tests (unit, integration, smoke)
+summitctl test
+
+# Run specific tier
+summitctl test --unit
+summitctl test --smoke
+```
+
+### `summitctl release-dry-run`
+**Simulate Release**
+
+Simulates the release process locally to catch issues before CI.
+
+```bash
+summitctl release-dry-run
+```
+
+## Task Management
+
+The CLI also includes tools for managing tasks and interacting with the Agentic Control Plane.
+
+- `summitctl task submit`: Submit a new task to the control plane.
+- `summitctl task status <id>`: Check task status.
+- `summitctl local-task`: Manage local tasks (legacy).

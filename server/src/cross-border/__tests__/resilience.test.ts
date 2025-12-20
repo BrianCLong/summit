@@ -2,8 +2,8 @@
  * Unit tests for Resilience Patterns
  */
 
-import {
 import { describe, it, test, expect } from '@jest/globals';
+import {
   CircuitBreaker,
   CircuitBreakerOpenError,
   RateLimiter,

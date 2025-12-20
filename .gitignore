@@ -256,5 +256,3 @@ pr-dashboard.html
 pr-backlog-stats.json
 tests/e2e/auth-state.json
 artifacts/
-playwright-report/
-e2e-runner/

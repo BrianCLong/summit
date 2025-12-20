@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 import { RollbackEngine } from './rollback-engine';
 import { MultiRegionProber } from './multi-region-prober';

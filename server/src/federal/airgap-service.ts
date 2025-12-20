@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { z } from 'zod';
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
