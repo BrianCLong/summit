@@ -24,7 +24,7 @@ export declare const config: {
     redis: {
         host: string;
         port: number;
-        password: string;
+        password: string | undefined;
         db: number;
     };
     analytics: {
@@ -56,4 +56,3 @@ export declare const config: {
         logLevel: string;
     };
 };
-//# sourceMappingURL=config.d.ts.map

@@ -63,6 +63,7 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
 }) => {
   const [showAppealForm, setShowAppealForm] = useState(false);
   const [appealSubmitted, setAppealSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Appeal form state
   const [justification, setJustification] = useState('');
@@ -111,6 +112,7 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
 
   const handleSubmitAppeal = async () => {
     try {
+      setError(null);
       const result = await submitAppeal({
         variables: {
           decisionId: decision.decisionId,
@@ -124,16 +126,11 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
       if (result.data?.submitPolicyAppeal) {
         setAppealSubmitted(true);
         setShowAppealForm(false);
-
-        // Show success message
-        console.log(
-          'Appeal submitted successfully:',
-          result.data.submitPolicyAppeal,
-        );
       }
-    } catch (error) {
-      console.error('Failed to submit appeal:', error);
-      // Handle error (show error message)
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Failed to submit appeal. Please try again.',
+      );
     }
   };
 
@@ -337,6 +334,12 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
         </Modal.Header>
         <Modal.Body>
           <Form>
+            {error && (
+              <Alert variant="danger" className="mb-3" dismissible onClose={() => setError(null)}>
+                {error}
+              </Alert>
+            )}
+
             <div className="mb-3">
               <Alert variant="info" className="small">
                 <InfoCircle className="me-2" />
@@ -355,7 +358,7 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
                 rows={3}
                 placeholder="Explain why this access is needed for business purposes..."
                 value={businessNeed}
-                onChange={(e) => setBusinessNeed(e.target.value)}
+                onChange={(e: any) => setBusinessNeed(e.target.value)}
                 required
               />
               <Form.Text className="text-muted">
@@ -371,7 +374,7 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
                 rows={3}
                 placeholder="Provide technical details about the access needed..."
                 value={justification}
-                onChange={(e) => setJustification(e.target.value)}
+                onChange={(e: any) => setJustification(e.target.value)}
                 required
               />
               <Form.Text className="text-muted">
@@ -385,7 +388,7 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
                   <Form.Label>Urgency Level *</Form.Label>
                   <Form.Select
                     value={urgency}
-                    onChange={(e) => setUrgency(e.target.value as any)}
+                    onChange={(e: any) => setUrgency(e.target.value as any)}
                   >
                     <option value="LOW">Low - Routine work</option>
                     <option value="MEDIUM">
@@ -405,7 +408,7 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
                   <Form.Label>Requested Duration</Form.Label>
                   <Form.Select
                     value={requestedDuration}
-                    onChange={(e) => setRequestedDuration(e.target.value)}
+                    onChange={(e: any) => setRequestedDuration(e.target.value)}
                   >
                     <option value="4 hours">4 hours</option>
                     <option value="12 hours">12 hours</option>

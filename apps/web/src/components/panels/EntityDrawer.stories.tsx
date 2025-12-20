@@ -5,7 +5,7 @@ import mockData from '@/mock/data.json'
 
 const meta: Meta<typeof EntityDrawer> = {
   title: 'Panels/EntityDrawer',
-  component: EntityDrawer,
+  component: EntityDrawer as any,
   parameters: {
     layout: 'fullscreen',
   },

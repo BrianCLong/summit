@@ -52,7 +52,7 @@ interface ThrottleState {
 
 export class AbuseGuard {
   private config: AbuseGuardConfig;
-  private redis: ReturnType<typeof createClient>;
+  private redis: Redis;
   private metrics: PrometheusMetrics;
   private throttledTenants: Map<string, ThrottleState> = new Map();
 
@@ -68,9 +68,7 @@ export class AbuseGuard {
       ...config,
     };
 
-    this.redis = createClient({
-      url: process.env.REDIS_URL || 'redis://localhost:6379',
-    });
+    this.redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
     this.metrics = new PrometheusMetrics('abuse_guard');
     this.initializeMetrics();

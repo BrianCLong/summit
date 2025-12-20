@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, no-console */
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
@@ -5,9 +6,10 @@ import pino from 'pino';
 import { ApolloServer } from 'apollo-server-express';
 import { typeDefs, resolvers } from './schema.js';
 import { makeContext } from './lib/context.js';
-import { expressjwt } from 'express-jwt';
+import { expressjwt, type GetVerificationKey } from 'express-jwt';
 import jwksRsa from 'jwks-rsa';
-import { trace } from '@opentelemetry/api'; // Import trace from OpenTelemetry API
+import { trace, context } from '@opentelemetry/api';
+import { registerInternalStatusRoutes } from './routes/internalStatus.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4000;
 const app = express();
@@ -15,10 +17,10 @@ const app = express();
 // Custom pino serializer to inject traceId
 const pinoLogger = pino({
   mixin() {
-    const span = trace.getSpan(trace.activeSpanContext());
+    const span = trace.getSpan(context.active());
     if (span) {
-      const { traceId, spanId } = span.spanContext();
-      return { traceId, spanId };
+      const spanContext = span.spanContext();
+      return { traceId: spanContext.traceId, spanId: spanContext.spanId };
     }
     return {};
   },
@@ -30,15 +32,17 @@ app.use(cors());
 app.get('/healthz', (_, res) => res.json({ ok: true }));
 
 // JWT middleware for authentication
+const jwksSecret = jwksRsa.expressJwtSecret({
+  cache: true,
+  rateLimit: true,
+  jwksRequestsPerMinute: 5,
+  jwksUri:
+    process.env.JWKS_URI || 'http://localhost:8080/.well-known/jwks.json',
+});
+
 app.use(
   expressjwt({
-    secret: jwksRsa.expressJwtSecret({
-      cache: true,
-      rateLimit: true,
-      jwksRequestsPerMinute: 5,
-      jwksUri:
-        process.env.JWKS_URI || 'http://localhost:8080/.well-known/jwks.json',
-    }),
+    secret: jwksSecret as GetVerificationKey,
     algorithms: ['RS256'],
     credentialsRequired: false,
   }).unless({
@@ -66,7 +70,8 @@ async function main() {
     },
   });
   await server.start();
-  server.applyMiddleware({ app, path: '/graphql' });
+  server.applyMiddleware({ app: app as any, path: '/graphql' });
+  registerInternalStatusRoutes(app);
   app.listen(PORT, () => logger.info({ PORT }, 'IntelGraph API listening'));
 }
 

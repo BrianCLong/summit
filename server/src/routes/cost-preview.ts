@@ -21,7 +21,7 @@ function estimate(doc: string): CostPreview {
   try {
     const ast = parse(doc);
     const stack: number[] = [];
-    visit(ast, {
+    (visit as any)(ast, {
       enter: {
         Field() {
           fieldCount += 1;

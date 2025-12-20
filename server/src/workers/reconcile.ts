@@ -57,7 +57,7 @@ export class ReconcileManager {
   // private queue: Queue<ReconcileJobData>;
   // private worker: Worker<ReconcileJobData>;
   // private events: QueueEvents;
-  private redis: RedisClientType;
+  private redis: Redis;
   private budgetLedger = getBudgetLedgerManager();
 
   private stats = {

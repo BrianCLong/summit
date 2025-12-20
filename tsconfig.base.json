@@ -4,22 +4,24 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "jsx": "react-jsx",
-    "strict": false,
+    "strict": true,
     "exactOptionalPropertyTypes": false,
-    "noUncheckedIndexedAccess": false,
+    "noUncheckedIndexedAccess": true,
     "noImplicitOverride": false,
     "skipLibCheck": true,
     "useUnknownInCatchVariables": false,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "composite": false,
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-
-    "typeRoots": ["./node_modules/@types"],
-    "allowImportingTsExtensions": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["node", "jest"]
+    "baseUrl": ".",
+    "paths": {
+      "zod/v4": ["types/shims/zod-v4.d.ts"]
+    }
   },
   "exclude": ["**/dist", "**/build", "**/.turbo", "**/.next"]
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Card, CardContent } from ' @mui/material';
+import { Button, Card, CardContent } from '@mui/material';
 
 async function gql<T>(query: string, variables?: any) {
   const res = await fetch('/graphql', {

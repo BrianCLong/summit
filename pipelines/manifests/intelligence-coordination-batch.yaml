@@ -1,0 +1,222 @@
+apiVersion: summit.io/v1
+kind: Pipeline
+metadata:
+  name: intelligence-coordination-batch
+  description: Daily batch processing for multi-source intelligence coordination and anomaly detection
+  owners:
+    - intelgraph-platform@summit.io
+  tags:
+    domain: intelligence
+    scope: coordination
+    criticality: high
+  annotations:
+    runbook: https://summit.io/runbooks/cti-rapid-attribution
+    source: airflow/dags/coord_batch.py
+    airflow.dag_id: coord_batch
+
+spec:
+  schedule:
+    cron: "0 2 * * *"
+    timezone: UTC
+    enabled: true
+
+  inputs:
+    - name: twitter_feed
+      namespace: s3://summit-data/raw/twitter
+    - name: youtube_feed
+      namespace: s3://summit-data/raw/youtube
+    - name: reddit_feed
+      namespace: s3://summit-data/raw/reddit
+    - name: telegram_feed
+      namespace: s3://summit-data/raw/telegram
+    - name: tiktok_feed
+      namespace: s3://summit-data/raw/tiktok
+    - name: rss_feed
+      namespace: s3://summit-data/raw/rss
+
+  outputs:
+    - name: coordination_scores
+      namespace: neo4j://summit-prod/coordination_scores
+    - name: intelligence_cases
+      namespace: postgresql://summit-prod/intelligence_cases
+
+  tasks:
+    - id: ingest_twitter
+      name: Ingest Twitter Data
+      type: python
+      code:
+        module: jobs.ingest_social
+        function: ingest_twitter
+      retry:
+        attempts: 1
+        delay: 5m
+        backoff: fixed
+      timeout: 30m
+
+    - id: ingest_youtube
+      name: Ingest YouTube Data
+      type: python
+      code:
+        module: jobs.ingest_social
+        function: ingest_youtube
+      retry:
+        attempts: 1
+        delay: 5m
+      timeout: 30m
+
+    - id: ingest_reddit
+      name: Ingest Reddit Data
+      type: python
+      code:
+        module: jobs.ingest_social
+        function: ingest_reddit
+      retry:
+        attempts: 1
+        delay: 5m
+      timeout: 30m
+
+    - id: ingest_telegram
+      name: Ingest Telegram Data
+      type: python
+      code:
+        module: jobs.ingest_social
+        function: ingest_telegram
+      retry:
+        attempts: 1
+        delay: 5m
+      timeout: 30m
+
+    - id: ingest_tiktok
+      name: Ingest TikTok Data
+      type: python
+      code:
+        module: jobs.ingest_social
+        function: ingest_tiktok
+      retry:
+        attempts: 1
+        delay: 5m
+      timeout: 30m
+
+    - id: ingest_rss
+      name: Ingest RSS Feeds
+      type: python
+      code:
+        module: jobs.ingest_rss
+        function: ingest_feeds
+      retry:
+        attempts: 1
+        delay: 5m
+      timeout: 30m
+
+    - id: build_similarity_graph
+      name: Build Similarity Graph
+      type: python
+      depends_on:
+        - ingest_twitter
+        - ingest_youtube
+        - ingest_reddit
+        - ingest_telegram
+        - ingest_tiktok
+        - ingest_rss
+      code:
+        module: jobs.graph_analytics
+        function: build_similarity_graph
+      timeout: 1h
+      resources:
+        cpu: "4"
+        memory: 8Gi
+
+    - id: detect_communities
+      name: Community Detection (Louvain)
+      type: python
+      depends_on:
+        - build_similarity_graph
+      code:
+        module: jobs.graph_analytics
+        function: detect_communities
+      timeout: 1h
+      resources:
+        cpu: "4"
+        memory: 8Gi
+
+    - id: anomaly_detection_follower
+      name: Follower Anomaly Detection (CUSUM)
+      type: python
+      depends_on:
+        - build_similarity_graph
+      code:
+        module: jobs.anomaly_detection
+        function: detect_follower_anomalies
+      timeout: 30m
+
+    - id: anomaly_detection_persona
+      name: Persona Drift Detection
+      type: python
+      depends_on:
+        - build_similarity_graph
+      code:
+        module: jobs.anomaly_detection
+        function: detect_persona_drift
+      timeout: 30m
+
+    - id: compute_campaign_metrics
+      name: Compute Campaign Metrics
+      type: python
+      depends_on:
+        - detect_communities
+      code:
+        module: jobs.metrics
+        function: compute_campaign_metrics
+      timeout: 30m
+
+    - id: score_coordination
+      name: Coordination Scoring
+      type: python
+      depends_on:
+        - detect_communities
+        - anomaly_detection_follower
+        - anomaly_detection_persona
+      code:
+        module: jobs.scoring
+        function: score_coordination
+      timeout: 30m
+
+    - id: trigger_intelligence_cases
+      name: Trigger Intelligence Cases
+      type: python
+      depends_on:
+        - score_coordination
+        - compute_campaign_metrics
+      code:
+        module: jobs.intelligence
+        function: trigger_cases
+      timeout: 15m
+
+  governance:
+    budget:
+      per_run_usd: 50.00
+      hard_cap_usd: 200.00
+    slo:
+      latency_p95_ms: 7200000  # 2 hours
+      success_rate_percent: 99.0
+    policies:
+      - data-retention-policy
+      - pii-protection-policy
+
+  observability:
+    openlineage:
+      enabled: true
+      namespace: summit-prod
+    alerts:
+      - condition: "duration > 2h"
+        channels:
+          - slack://intel-ops
+          - pagerduty://platform-oncall
+      - condition: "success_rate < 0.95"
+        channels:
+          - slack://intel-ops
+
+  execution:
+    runtime: airflow
+    concurrency: 3
+    catchup: false

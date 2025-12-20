@@ -1,8 +1,6 @@
-import winston from 'winston';
-export declare const logger: winston.Logger;
+export declare const logger: any;
 export declare const performanceLogger: {
     start: (operation: string) => {
         end: () => void;
     };
 };
-//# sourceMappingURL=logger.d.ts.map

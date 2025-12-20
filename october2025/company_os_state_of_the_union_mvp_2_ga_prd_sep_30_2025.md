@@ -1,7 +1,7 @@
 # CompanyOS – State of the Union, MVP‑2 & GA PRD
 
-_Date:_ **September 30, 2025**  
-_Owner:_ **Architect‑General (Cump IG)**  
+_Date:_ **September 30, 2025**
+_Owner:_ **Architect‑General (Cump IG)**
 _Stakeholders:_ Platform Eng, SRE, SecOps, Data, Product Ops, GTM, Compliance
 
 > **North Star:** Deliver CompanyOS—a production‑grade, auditable, policy‑governed operating system for the company and white‑label customers. Operate with separation of concerns, deterministic supply chain, and idempotent, reversible deployments. Evidence or it didn’t happen.
@@ -33,7 +33,7 @@ _Observed top‑level assets and signals (non‑exhaustive; reflects current pub
 - **Security**: `.security/`, `crypto/kms/`, `.githooks/`, `.husky/`, `.github/` (Actions/Checks), `.vale/` (docs lint), `.zap/` (DAST), `clients/cos-policy-fetcher/`
 - **Product & UX**: `apps/`, `client/` + `client-v039/`, `conductor-ui/`, `docs-site/`, `brands/`, `comms/templates/`
 - **Standards & Golden Paths**: `GOLDEN/datasets/`, `config/`, `companyos/` (platform root), `charts/` (Helm), `deploy/`, `compose/`
-- **Evidence of Active Ops**: `bug-bash-results/20250922/`, `archive_20250926/` (cleanup cadence), `backlog/`
+- **Evidence of Active Ops**: `bug-bash-results/20250922/`, `archive/20250926/` (cleanup cadence), `backlog/`
 
 **Signals:** Strong alignment to the Prime Directive (policy & evidence first), extensive scaffolding for CI/CD and security, and a monorepo structure suitable for paved‑road tooling. Gaps remain in: cross‑cutting threat model, multi‑tenant tenancy boundary, formal SLO kits per service, and one‑click white‑label automation.
 

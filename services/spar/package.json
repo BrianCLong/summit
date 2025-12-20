@@ -1,6 +1,6 @@
 {
   "name": "@summit/spar",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "private": true,
   "description": "Secure Prompt/Output Artifact Registry (SPAR)",
   "main": "dist/index.js",
@@ -19,7 +19,7 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^24.9.1",
+    "@types/node": "^24.10.1",
     "rimraf": "^6.0.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.3"

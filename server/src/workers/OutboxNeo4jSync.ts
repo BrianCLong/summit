@@ -6,9 +6,10 @@
 
 import { Pool } from 'pg';
 import type { Driver } from 'neo4j-driver';
+import type { Logger } from '../shared/logging/Logger.js';
 import logger from '../utils/logger.js';
 
-const workerLogger = logger.child({ name: 'OutboxNeo4jSync' });
+const workerLogger: Logger = logger.child({ name: 'OutboxNeo4jSync' });
 
 interface OutboxEvent {
   id: string;

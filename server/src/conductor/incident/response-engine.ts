@@ -37,7 +37,7 @@ export interface ResponseAction {
 }
 
 export interface ActionResult {
-  success: bool;
+  success: boolean;
   message: string;
   evidence?: any;
   nextActions?: string[];

@@ -1,17 +1,20 @@
 module.exports = {
-  preset: 'ts-jest/presets/default-esm',
-  extensionsToTreatAsEsm: ['.ts'],
-  globals: {
-    'ts-jest': {
-      useESM: true,
-    },
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
+  transform: {
+    '^.+\\.[tj]sx?$': [
+      'ts-jest',
+      {
+        useESM: true,
+        tsconfig: 'tsconfig.test.json',
+      },
+    ],
   },
-  testEnvironment: 'jsdom',
-  roots: ['server', 'client', 'packages'],
+  roots: ['server', 'client', 'packages', 'services', 'tests'],
   modulePathIgnorePatterns: [
     '<rootDir>/dist/',
     '<rootDir>/archive/',
-    '<rootDir>/archive_20250926/',
     '<rootDir>/salvage/',
     '<rootDir>/pull/',
   ],
@@ -19,7 +22,6 @@ module.exports = {
     '/node_modules/',
     '/dist/',
     '/archive/',
-    '/archive_20250926/',
     '/salvage/',
     '/pull/',
   ],
@@ -27,7 +29,6 @@ module.exports = {
     '/node_modules/',
     '/dist/',
     '/archive/',
-    '/archive_20250926/',
     '/salvage/',
     '/pull/',
   ],
@@ -39,10 +40,29 @@ module.exports = {
     '!**/*.config.{js,ts}',
     '!**/coverage/**',
     '!**/archive/**',
-    '!**/archive_20250926/**',
     '!**/salvage/**',
     '!**/pull/**',
   ],
+  coverageThreshold: {
+    global: {
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80,
+    },
+    './server/src/middleware/**/*.ts': {
+      branches: 85,
+      functions: 85,
+      lines: 85,
+      statements: 85,
+    },
+    './server/src/services/**/*.ts': {
+      branches: 85,
+      functions: 85,
+      lines: 85,
+      statements: 85,
+    },
+  },
   testMatch: [
     '**/__tests__/**/*.{ts,tsx,js,jsx}',
     '**/?(*.)+(spec|test).{ts,tsx,js,jsx}',
@@ -54,6 +74,15 @@ module.exports = {
     '^ioredis$': '<rootDir>/__mocks__/ioredis.js',
     '^puppeteer$': '<rootDir>/__mocks__/puppeteer.js',
     '^@server/(.*)$': '<rootDir>/server/src/$1',
+    '^@tests/(.*)$': '<rootDir>/tests/$1',
   },
-  transformIgnorePatterns: ['node_modules/(?!(uuid|.*\\.mjs$))'],
+  transformIgnorePatterns: [
+    'node_modules/(?!(.*\\.mjs$))',
+    '<rootDir>/.disabled/',
+    '<rootDir>/apps/.mobile-native-disabled/',
+    '<rootDir>/apps/.desktop-electron-disabled/',
+  ],
+  testTimeout: 30000,
+  setupFilesAfterEnv: ['<rootDir>/tests/utils/jest-setup.ts'],
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
 };

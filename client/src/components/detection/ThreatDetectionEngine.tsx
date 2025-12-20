@@ -324,8 +324,10 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
             Math.floor(Math.random() * 3)
           ],
         },
-        mitreTechniques: ['T1059.001', 'T1021.001', 'T1003.001'][
-          Math.floor(Math.random() * 3)
+        mitreTechniques: [
+          ['T1059.001', 'T1021.001', 'T1003.001'][
+            Math.floor(Math.random() * 3)
+          ],
         ],
         notes: [],
       };
@@ -372,8 +374,10 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
         lastUpdated: new Date(
           createdDate.getTime() + Math.random() * 7 * 24 * 60 * 60 * 1000,
         ),
-        assignedTeam: ['SOC Team', 'Incident Response', 'Forensics'][
-          Math.floor(Math.random() * 3)
+        assignedTeam: [
+          ['SOC Team', 'Incident Response', 'Forensics'][
+            Math.floor(Math.random() * 3)
+          ],
         ],
         affectedSystems: [`system-${Math.floor(Math.random() * 50)}`],
         alerts: [

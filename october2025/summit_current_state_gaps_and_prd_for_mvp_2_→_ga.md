@@ -64,7 +64,7 @@ We have broad scaffolding and a lot of code in place (3.8k commits, rich folder 
 
 - **Golden paths, artifacts, archived migrations**
   - `GOLDEN/datasets/` — truth sets and fixtures
-  - `bug-bash-results/20250922`, `archive_20250926`, `archive/frontend-migration` — validation artifacts & history
+  - `bug-bash-results/20250922`, `archive/20250926`, `archive/frontend-migration` — validation artifacts & history
 
 **Signal:** breadth > depth; strong R&D and scaffolding; needs consolidation into opinionated E2E workflows, reliability, and enterprise controls.
 

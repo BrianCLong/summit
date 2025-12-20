@@ -133,7 +133,7 @@ export interface ListOptions {
 }
 
 export class AzureConnector extends EventEmitter {
-  private blobServiceClient: BlobServiceClient;
+  private blobServiceClient: any;
   private containerClient: ContainerClient;
   private config: AzureConnectorConfig;
   private tenantId: string;

@@ -31,7 +31,7 @@ export default function RegionsBoard() {
     if (!handlerBoundRef.current) {
       handlerBoundRef.current = true;
       const h = function (this: HTMLInputElement) {
-        const v = this.value?.toString().toLowerCase() || '';
+        const v = Number(this.value) || 0;
         ($('.row') as JQuery<HTMLElement>).each(function () {
           const lag = Number($(this).data('lag') || 0);
           $(this).toggle(lag >= v);

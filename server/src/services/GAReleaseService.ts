@@ -47,7 +47,7 @@ export class GAReleaseService {
     const environment = this.detectEnvironment();
 
     return {
-      version: this.packageJson?.version || '1.0.0-ga',
+      version: (this.packageJson?.version as string) || '1.0.0-ga',
       buildDate: new Date().toISOString(),
       commitHash,
       environment,
@@ -93,6 +93,24 @@ export class GAReleaseService {
       component: 'services',
       status: 'pass',
       message: 'Core services available',
+    });
+
+    const consoleStatus = this.checkCommandConsoleAssets();
+    validations.push({
+      component: 'command-console',
+      status: consoleStatus.app && consoleStatus.routes ? 'pass' : 'fail',
+      message: consoleStatus.app && consoleStatus.routes
+        ? 'Command console present'
+        : 'Command console app or endpoints missing',
+    });
+
+    const healthEndpointsPresent = this.checkHealthEndpoints();
+    validations.push({
+      component: 'health-endpoints',
+      status: healthEndpointsPresent ? 'pass' : 'fail',
+      message: healthEndpointsPresent
+        ? 'Health endpoints available'
+        : 'Required health endpoints are missing',
     });
 
     const allPass = validations.every((v) => v.status === 'pass');
@@ -264,5 +282,40 @@ export class GAReleaseService {
 
   private checkSBOMExists(): boolean {
     return fs.existsSync(path.join(process.cwd(), 'sbom.json'));
+  }
+
+  private checkCommandConsoleAssets(): { app: boolean; routes: boolean } {
+    const appPath = path.join(process.cwd(), 'apps', 'command-console');
+    const routeCandidates = [
+      path.join(
+        process.cwd(),
+        'server',
+        'src',
+        'routes',
+        'internal',
+        'command-console.ts',
+      ),
+      path.join(
+        process.cwd(),
+        'server',
+        'dist',
+        'routes',
+        'internal',
+        'command-console.js',
+      ),
+    ];
+
+    return {
+      app: fs.existsSync(appPath),
+      routes: routeCandidates.some((candidate) => fs.existsSync(candidate)),
+    };
+  }
+
+  private checkHealthEndpoints(): boolean {
+    const candidates = [
+      path.join(process.cwd(), 'server', 'src', 'routes', 'health.ts'),
+      path.join(process.cwd(), 'server', 'dist', 'routes', 'health.js'),
+    ];
+    return candidates.some((candidate) => fs.existsSync(candidate));
   }
 }

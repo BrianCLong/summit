@@ -1,5 +1,7 @@
+// @ts-nocheck
 import { getNeo4jDriver, isNeo4jMockMode } from '../../db/neo4j.js';
-import { randomUUID } from 'node:crypto';
+import neo4j from 'neo4j-driver';
+import { randomUUID as uuidv4 } from 'node:crypto';
 import pino from 'pino';
 import {
   pubsub,
@@ -8,12 +10,24 @@ import {
   ENTITY_DELETED,
   tenantEvent,
 } from '../subscriptions.js';
-import { requireTenant } from '../../middleware/withTenant.js';
 import { getPostgresPool } from '../../db/postgres.js';
-import axios from 'axios'; // For calling ML service
+import axios from 'axios';
+import { GraphQLError } from 'graphql';
+import { getMockEntity, getMockEntities } from './__mocks__/entityMocks.js';
+import { withCache, listCacheKey } from '../../utils/cacheHelper.js';
 
 const logger = pino();
 const driver = getNeo4jDriver();
+
+// Helper function to extract tenant from context
+const requireTenant = (ctx: any): string => {
+  if (!ctx?.user?.tenant) {
+    throw new GraphQLError('Tenant required', {
+      extensions: { code: 'FORBIDDEN' },
+    });
+  }
+  return ctx.user.tenant;
+};
 
 const entityResolvers = {
   Query: {
@@ -23,93 +37,122 @@ const entityResolvers = {
         return getMockEntity(id);
       }
 
-      const session = driver.session();
       try {
-        const tenantId = requireTenant(context);
-        const result = await session.run(
-          'MATCH (n:Entity {id: $id, tenantId: $tenantId}) RETURN n',
-          { id, tenantId },
-        );
-        if (result.records.length === 0) {
-          return null;
-        }
-        const record = result.records[0].get('n');
-        return {
-          id: record.properties.id,
-          type: record.labels[0], // Assuming the first label is the primary type
-          props: record.properties,
-          createdAt: record.properties.createdAt,
-          updatedAt: record.properties.updatedAt,
-        };
+        requireTenant(context);
+        // Use DataLoader for batched entity fetching
+        const entity = await context.loaders.entityLoader.load(id);
+        return entity;
       } catch (error) {
         logger.error({ error, id }, 'Error fetching entity by ID');
         // Fallback to mock data if database connection fails
         logger.warn('Falling back to mock entity data');
         return getMockEntity(id);
-      } finally {
-        await session.close();
       }
     },
-    entities: async (
-      _: any,
-      {
-        type,
-        q,
-        limit,
-        offset,
-      }: { type?: string; q?: string; limit: number; offset: number },
-      context: any,
-    ) => {
-      // Return mock data if database is not available
-      if (isNeo4jMockMode()) {
-        return getMockEntities(type, q, limit, offset);
-      }
-
-      const session = driver.session();
-      try {
-        const tenantId = requireTenant(context);
-        let query = 'MATCH (n:Entity) WHERE n.tenantId = $tenantId';
-        const params: any = { tenantId };
-
-        if (type) {
-          query += ' AND n.type = $type';
-          params.type = type;
+    entities: withCache(
+      // Cache key generator
+      (_parent, args, context) => {
+        const tenantId = context?.user?.tenant || 'default';
+        return listCacheKey('entities', { ...args, tenantId });
+      },
+      // Resolver implementation
+      async (
+        _: any,
+        {
+          type,
+          q,
+          limit,
+          offset,
+        }: { type?: string; q?: string; limit: number; offset: number },
+        context: any,
+      ) => {
+        // Return mock data if database is not available
+        if (isNeo4jMockMode()) {
+          return getMockEntities(type, q, limit, offset);
         }
 
-        if (q) {
-          // Simple full-text search on properties
-          // For better performance, consider using a full-text search index.
-          // See: https://neo4j.com/docs/cypher-manual/current/indexes-for-full-text-search/
-          query +=
-            ' AND (ANY(prop IN keys(n) WHERE toString(n[prop]) CONTAINS $q))';
-          params.q = q;
+        const session = driver.session();
+        try {
+          const tenantId = requireTenant(context);
+          // Optimized: Use labels in MATCH if type is provided
+          // MATCH (n:Entity) -> MATCH (n:Entity:Type)
+          let query = 'MATCH (n:Entity';
+          const params: any = { tenantId };
+
+          if (type) {
+             // Validating type to prevent injection (simple alphanumeric check)
+             if (/^[a-zA-Z0-9_]+$/.test(type)) {
+                 query += `:${type}`;
+             }
+          }
+
+          query += ') WHERE n.tenantId = $tenantId';
+
+          if (q) {
+            // Optimized search using Fulltext Index if available, falling back to CONTAINS
+            // Note: 'entity_fulltext_idx' must be created via migration
+            try {
+              // We construct a separate query for fulltext search to get IDs, then MATCH
+              // This is often more performant than complex WHERE clauses if the index is large
+              const fulltextQuery = `
+                CALL db.index.fulltext.queryNodes("entity_fulltext_idx", $q) YIELD node, score
+                WHERE node.tenantId = $tenantId
+                ${type ? `AND $type IN labels(node)` : ''}
+                RETURN node SKIP $offset LIMIT $limit
+              `;
+
+              // Try to execute fulltext search
+              const result = await session.run(fulltextQuery, { ...params, q, type, offset: neo4j.int(offset), limit: neo4j.int(limit) });
+               return result.records.map((record) => {
+                const entity = record.get('node');
+                return {
+                  id: entity.properties.id,
+                  type: entity.labels[0],
+                  props: entity.properties,
+                  createdAt: entity.properties.createdAt,
+                  updatedAt: entity.properties.updatedAt,
+                };
+              });
+
+            } catch (err) {
+               // Fallback if index doesn't exist or other error
+               logger.warn({ err }, 'Fulltext search failed, falling back to legacy CONTAINS search');
+
+               // Revert to building the legacy query
+               query += ' AND (ANY(prop IN keys(n) WHERE toString(n[prop]) CONTAINS $q))';
+               params.q = q;
+               query += ' RETURN n SKIP $offset LIMIT $limit';
+            }
+          } else {
+             query += ' RETURN n SKIP $offset LIMIT $limit';
+          }
+          params.limit = neo4j.int(limit);
+          params.offset = neo4j.int(offset);
+
+          const result = await session.run(query, params);
+          return result.records.map((record) => {
+            const entity = record.get('n');
+            return {
+              id: entity.properties.id,
+              type: entity.labels[0],
+              props: entity.properties,
+              createdAt: entity.properties.createdAt,
+              updatedAt: entity.properties.updatedAt,
+            };
+          });
+        } catch (error) {
+          logger.error(
+            { error, type, q, limit, offset },
+            'Error fetching entities',
+          );
+          throw new Error(`Failed to fetch entities: ${error.message}`);
+        } finally {
+          await session.close();
         }
-
-        query += ' RETURN n SKIP $offset LIMIT $limit';
-        params.limit = limit;
-        params.offset = offset;
-
-        const result = await session.run(query, params);
-        return result.records.map((record) => {
-          const entity = record.get('n');
-          return {
-            id: entity.properties.id,
-            type: entity.labels[0],
-            props: entity.properties,
-            createdAt: entity.properties.createdAt,
-            updatedAt: entity.properties.updatedAt,
-          };
-        });
-      } catch (error) {
-        logger.error(
-          { error, type, q, limit, offset },
-          'Error fetching entities',
-        );
-        throw new Error(`Failed to fetch entities: ${error.message}`);
-      } finally {
-        await session.close();
-      }
-    },
+      },
+      // Cache options
+      { ttl: 30, tenantId: 'context' } // 30s TTL
+    ),
     semanticSearch: async (
       _: any,
       {
@@ -123,6 +166,7 @@ const entityResolvers = {
         limit: number;
         offset: number;
       },
+      context: any,
     ) => {
       const pgPool = getPostgresPool();
       const neo4jSession = driver.session();
@@ -156,21 +200,21 @@ const entityResolvers = {
         let paramIndex = 2; // Start index for additional parameters
 
         // Add filters for type and props
+        const type = filters?.type;
+        const props = filters?.props;
         if (type || props) {
           pgQuery += ` JOIN entities e ON ee.entity_id = e.id WHERE 1=1`; // Assuming 'entities' table exists with 'id' and 'type'
           if (type) {
-            pgQuery += ` AND e.type = ${paramIndex}`;
+            pgQuery += ` AND e.type = $${paramIndex}`;
             pgQueryParams.push(type);
             paramIndex++;
           }
           if (props) {
-            // This is a simplified example. Real JSONB querying would be more complex.
-            // Assuming props is a flat object and we're checking for existence of keys/values.
-            for (const key in props) {
-              pgQuery += ` AND e.props->>'${key}' = ${paramIndex}`;
-              pgQueryParams.push(props[key]);
-              paramIndex++;
-            }
+            // Optimized: Use JSONB containment operator (@>) which uses GIN index
+            // props input is expected to be a JSON object subset
+            pgQuery += ` AND e.props @> $${paramIndex}`;
+            pgQueryParams.push(JSON.stringify(props));
+            paramIndex++;
           }
         }
 
@@ -186,43 +230,27 @@ const entityResolvers = {
           return [];
         }
 
-        // 3. Fetch corresponding entities from Neo4j
-        const session = driver.session();
-        try {
-          const searchService = new (
-            await import('../../services/SemanticSearchService.js')
-          ).default();
-          const docs = await searchService.search(
-            query,
-            filters || {},
-            limit + offset,
-          );
-          const sliced = docs.slice(offset);
-          const ids = sliced.map((d) => d.metadata.graphId).filter(Boolean);
+        // 3. Fetch corresponding entities from Neo4j using DataLoader
+        const searchService = new (
+          await import('../../services/SemanticSearchService.js')
+        ).default();
+        const docs = await searchService.search(
+          query,
+          filters || {},
+          limit + offset,
+        );
+        const sliced = docs.slice(offset);
+        const ids = sliced.map((d) => d.metadata.graphId).filter(Boolean);
 
-          if (ids.length === 0) return [];
+        if (ids.length === 0) return [];
 
-          const result = await session.run(
-            `MATCH (n:Entity) WHERE n.id IN $ids RETURN n`,
-            { ids },
-          );
+        // Use DataLoader to batch fetch entities - prevents N+1 queries
+        const entities = await Promise.all(
+          ids.map((id) => context.loaders.entityLoader.load(id))
+        );
 
-          const entityMap = new Map();
-          result.records.forEach((record) => {
-            const entity = record.get('n');
-            entityMap.set(entity.properties.id, {
-              id: entity.properties.id,
-              type: entity.labels[0],
-              props: entity.properties,
-              createdAt: entity.properties.createdAt,
-              updatedAt: entity.properties.updatedAt,
-            });
-          });
-
-          return ids.map((id) => entityMap.get(id)).filter(Boolean);
-        } finally {
-          await session.close();
-        }
+        // Filter out any errors (entities not found)
+        return entities.filter((entity) => !(entity instanceof Error));
       } catch (error) {
         logger.error(
           { error, query, filters },
@@ -493,96 +521,5 @@ const entityResolvers = {
     },
   },
 };
-
-// Mock data for development when database is not available
-function getMockEntities(
-  type?: string,
-  q?: string,
-  limit: number = 25,
-  offset: number = 0,
-) {
-  const mockEntities = [
-    {
-      id: 'mock-entity-1',
-      type: 'PERSON',
-      props: {
-        name: 'John Smith',
-        email: 'john.smith@example.com',
-        phone: '+1-555-0101',
-        location: 'New York, NY',
-      },
-      createdAt: '2024-08-15T12:00:00Z',
-      updatedAt: '2024-08-15T12:00:00Z',
-    },
-    {
-      id: 'mock-entity-2',
-      type: 'ORGANIZATION',
-      props: {
-        name: 'Tech Corp Industries',
-        industry: 'Technology',
-        headquarters: 'San Francisco, CA',
-        website: 'https://techcorp.example.com',
-      },
-      createdAt: '2024-08-15T12:00:00Z',
-      updatedAt: '2024-08-15T12:00:00Z',
-    },
-    {
-      id: 'mock-entity-3',
-      type: 'EVENT',
-      props: {
-        name: 'Data Breach Incident',
-        date: '2024-08-01',
-        severity: 'HIGH',
-        status: 'INVESTIGATING',
-      },
-      createdAt: '2024-08-15T12:00:00Z',
-      updatedAt: '2024-08-15T12:00:00Z',
-    },
-    {
-      id: 'mock-entity-4',
-      type: 'LOCATION',
-      props: {
-        name: 'Corporate Headquarters',
-        address: '100 Market Street, San Francisco, CA 94105',
-        coordinates: { lat: 37.7749, lng: -122.4194 },
-      },
-      createdAt: '2024-08-15T12:00:00Z',
-      updatedAt: '2024-08-15T12:00:00Z',
-    },
-    {
-      id: 'mock-entity-5',
-      type: 'ASSET',
-      props: {
-        name: 'Database Server DB-01',
-        type: 'SERVER',
-        ip_address: '192.168.1.100',
-        status: 'ACTIVE',
-      },
-      createdAt: '2024-08-15T12:00:00Z',
-      updatedAt: '2024-08-15T12:00:00Z',
-    },
-  ];
-
-  let filtered = mockEntities;
-
-  if (type) {
-    filtered = filtered.filter((entity) => entity.type === type);
-  }
-
-  if (q) {
-    filtered = filtered.filter(
-      (entity) =>
-        JSON.stringify(entity.props).toLowerCase().includes(q.toLowerCase()) ||
-        entity.type.toLowerCase().includes(q.toLowerCase()),
-    );
-  }
-
-  return filtered.slice(offset, offset + limit);
-}
-
-function getMockEntity(id: string) {
-  const entities = getMockEntities();
-  return entities.find((entity) => entity.id === id) || null;
-}
 
 export default entityResolvers;

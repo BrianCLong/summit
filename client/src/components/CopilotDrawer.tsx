@@ -30,11 +30,15 @@ const CopilotDrawer: React.FC = () => {
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
-    socketRef.current = io('/copilot');
-    socketRef.current.on('copilot:response', (text: string) => {
+    const socketInstance = io('/copilot');
+    socketRef.current = socketInstance;
+    socketInstance.on('copilot:response', (text: string) => {
       setMessages((m) => [...m, { from: 'ai', text }]);
     });
-    return () => socketRef.current?.disconnect();
+    return () => {
+      socketInstance.disconnect();
+      socketRef.current = null;
+    };
   }, []);
 
   const send = () => {

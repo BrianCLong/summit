@@ -71,7 +71,7 @@ Next-Generation Intelligence Graph Platform for advanced link analysis, AI-power
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/your-org/intelgraph-platform.git
+git clone https://github.com/your-org/summit.git
 cd intelgraph-platform
 ```
 

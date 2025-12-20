@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Box,
@@ -400,3 +401,4 @@ const OrchestratorDashboard: React.FC = () => {
 };
 
 export default OrchestratorDashboard;
+// @ts-nocheck

@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
 import { Driver } from 'neo4j-driver';
-import { Redis } from 'ioredis';
+import Redis from 'ioredis';
 import { getDriver } from '../graph/neo4j';
 import { cfg, dbUrls } from '../config';
 import { breaker } from './breakers';

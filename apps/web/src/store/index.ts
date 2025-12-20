@@ -1,8 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit'
 import focusReducer from '../features/focusMode/focusSlice'
-import viewSyncReducer from '../features/viewSync/viewSyncSlice'
-import codexReducer from '../features/codex/codexSlice'
 import historyReducer from '../features/history/historySlice'
+import explainReducer from '../features/explain/explainSlice'
+import uiReducer from '../features/ui/uiSlice'
+import annotationsReducer from '../features/annotations/annotationsSlice'
 import { historyMiddleware } from '../features/history/historyMiddleware'
 import { enablePatches } from 'immer'
 
@@ -11,9 +12,10 @@ enablePatches()
 export const store = configureStore({
   reducer: {
     focus: focusReducer,
-    viewSync: viewSyncReducer,
-    codex: codexReducer,
     history: historyReducer,
+    explain: explainReducer,
+    ui: uiReducer,
+    annotations: annotationsReducer,
   },
   middleware: gDM => gDM().concat(historyMiddleware),
 })

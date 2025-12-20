@@ -2,9 +2,9 @@
 
 ## Feature Engineering → Embeddings → Entity Resolution → Link Prediction → Communities → Anomalies → Explainability → Overlays → Export
 
-**Service:** GA-GraphAI  
-**Status:** ✅ **PRODUCTION-READY**  
-**Version:** v1.0.0 (GA Release)  
+**Service:** GA-GraphAI
+**Status:** ✅ **PRODUCTION-READY**
+**Version:** v1.0.0 (GA Release)
 **License:** MIT
 
 ---
@@ -13,7 +13,7 @@
 
 ```bash
 # Clone and setup
-git clone https://github.com/BrianCLong/intelgraph.git
+git clone https://github.com/BrianCLong/summit.git
 cd intelgraph/packages/ga-graphai
 
 # Start services
@@ -1514,6 +1514,6 @@ GraphAI Metrics:
 
 _Intelligence through algorithms - From raw graphs to actionable insights_
 
-**GraphAI Authority:** AI/ML Engineering + Data Science + Platform Architecture  
-**Implementation Status:** Production-ready with comprehensive analytics pipeline  
+**GraphAI Authority:** AI/ML Engineering + Data Science + Platform Architecture
+**Implementation Status:** Production-ready with comprehensive analytics pipeline
 **GA Launch Impact:** Complete graph AI and analytics capability operational

@@ -1,7 +1,7 @@
 import { VideoFrameExtractor } from '../VideoFrameExtractor';
 import ffmpeg from 'fluent-ffmpeg';
 import fs from 'fs/promises';
-import path from 'path';
+import { jest, describe, it, test, expect, beforeEach } from '@jest/globals';
 
 // Mock ffmpeg and fs/promises
 jest.mock('fluent-ffmpeg');
@@ -26,15 +26,18 @@ describe('VideoFrameExtractor', () => {
     (fs.rm as jest.Mock).mockClear();
 
     // Mock ffmpeg chainable methods
-    (ffmpeg as any).mockImplementation(() => ({
-      seekInput: jest.fn().mockReturnThis(),
-      duration: jest.fn().mockReturnThis(),
-      fps: jest.fn().mockReturnThis(),
-      addOption: jest.fn().mockReturnThis(),
-      output: jest.fn().mockReturnThis(),
-      noVideo: jest.fn().mockReturnThis(),
-      audioCodec: jest.fn().mockReturnThis(),
-      on: jest.fn((event, callback) => {
+    (ffmpeg as any).mockImplementation(() => {
+      const command: any = {
+        seekInput: jest.fn().mockReturnThis(),
+        duration: jest.fn().mockReturnThis(),
+        fps: jest.fn().mockReturnThis(),
+        addOption: jest.fn().mockReturnThis(),
+        output: jest.fn().mockReturnThis(),
+        noVideo: jest.fn().mockReturnThis(),
+        audioCodec: jest.fn().mockReturnThis(),
+        run: jest.fn(),
+      };
+      command.on = jest.fn((event, callback) => {
         if (event === 'end') {
           // Simulate successful end
           callback();
@@ -42,10 +45,10 @@ describe('VideoFrameExtractor', () => {
           // Simulate filenames being emitted
           callback(['frame-0.000.png', 'frame-1.000.png']);
         }
-        return this;
-      }),
-      run: jest.fn(),
-    }));
+        return command;
+      });
+      return command;
+    });
 
     // Mock ffprobe
     (ffmpeg.ffprobe as jest.Mock).mockImplementation((_path, callback) => {
@@ -108,20 +111,23 @@ describe('VideoFrameExtractor', () => {
   });
 
   it('should handle ffmpeg errors during frame extraction', async () => {
-    (ffmpeg as any).mockImplementationOnce(() => ({
-      seekInput: jest.fn().mockReturnThis(),
-      duration: jest.fn().mockReturnThis(),
-      fps: jest.fn().mockReturnThis(),
-      addOption: jest.fn().mockReturnThis(),
-      output: jest.fn().mockReturnThis(),
-      on: jest.fn((event, callback) => {
+    (ffmpeg as any).mockImplementationOnce(() => {
+      const command: any = {
+        seekInput: jest.fn().mockReturnThis(),
+        duration: jest.fn().mockReturnThis(),
+        fps: jest.fn().mockReturnThis(),
+        addOption: jest.fn().mockReturnThis(),
+        output: jest.fn().mockReturnThis(),
+        run: jest.fn(),
+      };
+      command.on = jest.fn((event, callback) => {
         if (event === 'error') {
           callback(new Error('ffmpeg test error'));
         }
-        return this;
-      }),
-      run: jest.fn(),
-    }));
+        return command;
+      });
+      return command;
+    });
 
     await expect(extractor.extract(mockVideoPath)).rejects.toThrow(
       'ffmpeg test error',

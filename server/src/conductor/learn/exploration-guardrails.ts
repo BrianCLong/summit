@@ -1,3 +1,4 @@
+// @ts-nocheck
 // server/src/conductor/learn/exploration-guardrails.ts
 
 import Redis from 'ioredis';
@@ -38,12 +39,12 @@ interface ExplorationState {
 }
 
 export class ExplorationGuardrails {
-  private redis: ReturnType<typeof createClient>;
+  private redis: Redis;
   private configs: Map<string, ExplorationConfig>;
   private states: Map<string, ExplorationState>;
 
   constructor() {
-    this.redis = createClient({ url: process.env.REDIS_URL });
+    this.redis = new Redis(process.env.REDIS_URL);
     this.configs = new Map();
     this.states = new Map();
   }

@@ -17,9 +17,9 @@ export default function TgoDashboard() {
 
     if (!handlerBoundRef.current) {
       handlerBoundRef.current = true;
-      $('#tgo-q').on('input', function () {
+      $('#tgo-q').on('input', function (this: HTMLElement) {
         const v = $(this).val()?.toString().toLowerCase() || '';
-        $('.tgo-row').each(function () {
+        $('.tgo-row').each(function (this: HTMLElement) {
           $(this).toggle($(this).text().toLowerCase().includes(v));
         });
       });

@@ -7,7 +7,7 @@ let base: string
 
 test.beforeAll(async () => {
   server = http.createServer(app)
-  await new Promise(resolve => server.listen(0, resolve))
+  await new Promise<void>(resolve => server.listen(0, () => resolve()))
   const { port } = server.address() as any
   base = `http://localhost:${port}`
   await fetch(`${base}/wf/definition`, {

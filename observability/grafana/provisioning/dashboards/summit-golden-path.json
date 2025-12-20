@@ -1,0 +1,105 @@
+{
+  "id": null,
+  "uid": "summit-golden-path",
+  "title": "Summit Golden Path",
+  "tags": ["summit", "golden-path"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "HTTP Requests",
+      "gridPos": {"x": 0, "y": 0, "w": 8, "h": 7},
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total[5m]))",
+          "datasource": {"type": "prometheus", "uid": "summit-prom"}
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "GraphQL Errors",
+      "gridPos": {"x": 8, "y": 0, "w": 8, "h": 7},
+      "targets": [
+        {
+          "expr": "sum(rate(graphql_errors_total[5m]))",
+          "datasource": {"type": "prometheus", "uid": "summit-prom"}
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Request Duration (p95)",
+      "gridPos": {"x": 16, "y": 0, "w": 8, "h": 7},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))",
+          "datasource": {"type": "prometheus", "uid": "summit-prom"}
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "GraphQL Duration",
+      "gridPos": {"x": 0, "y": 7, "w": 12, "h": 8},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(graphql_request_duration_seconds_bucket[5m])) by (le))",
+          "datasource": {"type": "prometheus", "uid": "summit-prom"}
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Active Investigations",
+      "gridPos": {"x": 12, "y": 7, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "sum(investigations_active)",
+          "datasource": {"type": "prometheus", "uid": "summit-prom"}
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Health Check Uptime (5m)",
+      "gridPos": {"x": 0, "y": 15, "w": 12, "h": 7},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 2
+        }
+      },
+      "targets": [
+        {
+          "expr": "100 * (sum(rate(http_requests_total{route=\"/health\",status_code=\"200\"}[5m])) / sum(rate(http_requests_total{route=\"/health\"}[5m])))",
+          "datasource": {"type": "prometheus", "uid": "summit-prom"}
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Gateway Health Checks",
+      "gridPos": {"x": 12, "y": 15, "w": 12, "h": 7},
+      "targets": [
+        {
+          "expr": "rate(gateway_health_checks_total[5m])",
+          "datasource": {"type": "prometheus", "uid": "summit-prom"}
+        }
+      ]
+    }
+  ]
+}

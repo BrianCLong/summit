@@ -1,6 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react'
 import {
-  ExclamationTriangleIcon,
   ArrowPathIcon,
   ClipboardDocumentIcon,
   BugAntIcon,

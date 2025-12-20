@@ -152,7 +152,10 @@ export class NetworkVisualizationService {
     }
     async generateCommunityVisualization(communityIds, config = {}) {
         const defaultConfig = {
-            layout: { type: 'force', options: { nodeRepulsion: 500, edgeLength: 100 } },
+            layout: {
+                type: 'force',
+                options: { nodeRepulsion: 500, edgeLength: 100 },
+            },
             nodeStyles: {},
             edgeStyles: {},
             filters: {},
@@ -208,7 +211,13 @@ export class NetworkVisualizationService {
                 },
             },
             edgeStyles: {
-                path: { width: 3, color: '#FF9800', style: 'solid', arrow: true, curvature: 0.1 },
+                path: {
+                    width: 3,
+                    color: '#FF9800',
+                    style: 'solid',
+                    arrow: true,
+                    curvature: 0.1,
+                },
             },
             filters: {},
             rendering: {
@@ -276,7 +285,9 @@ export class NetworkVisualizationService {
     }
     extractNode(nodeValue) {
         return {
-            id: nodeValue.identity?.toString() || nodeValue.properties?.id || Math.random().toString(),
+            id: nodeValue.identity?.toString() ||
+                nodeValue.properties?.id ||
+                Math.random().toString(),
             labels: nodeValue.labels || [],
             properties: nodeValue.properties || {},
         };
@@ -511,4 +522,3 @@ ${edges}
 </graphml>`;
     }
 }
-//# sourceMappingURL=NetworkVisualizationService.js.map

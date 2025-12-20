@@ -11,7 +11,7 @@ const jwt = require('jsonwebtoken');
 let argon2;
 try {
   // Prefer native argon2 implementation when available
-   
+
   argon2 = require('argon2');
 } catch (error) {
   const deriveKey = async (input, salt) =>
@@ -51,7 +51,7 @@ try {
 
   if (error?.code !== 'MODULE_NOT_FOUND') {
     // Surface unexpected resolution failures for observability
-    // eslint-disable-next-line no-console
+
     console.warn('argon2 module unavailable, using scrypt fallback', error);
   }
 }
@@ -1285,7 +1285,7 @@ class EnterpriseSecurityService extends EventEmitter {
     try {
       await client.query(
         `
-        INSERT INTO audit_events (id, timestamp, type, user_id, session_id, ip_address, 
+        INSERT INTO audit_events (id, timestamp, type, user_id, session_id, ip_address,
                                 resource, permission, outcome, severity, details, compliance_flags)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       `,

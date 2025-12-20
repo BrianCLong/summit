@@ -97,6 +97,7 @@ export declare class DashboardService {
     private neo4jDriver;
     private redisClient;
     constructor(pgPool: Pool, neo4jDriver: Driver, redisClient: RedisClientType);
+    private parseCachePayload;
     createDashboard(dashboard: Omit<Dashboard, 'id' | 'createdAt' | 'updatedAt'>, userId: string): Promise<Dashboard>;
     getDashboard(dashboardId: string, userId: string): Promise<Dashboard | null>;
     updateDashboard(dashboardId: string, updates: Partial<Dashboard>, userId: string): Promise<Dashboard>;
@@ -130,4 +131,3 @@ export declare class DashboardService {
     getDashboardTemplates(category?: string): Promise<DashboardTemplate[]>;
     createDashboardFromTemplate(templateId: string, name: string, userId: string, customizations?: Record<string, any>): Promise<Dashboard>;
 }
-//# sourceMappingURL=DashboardService.d.ts.map

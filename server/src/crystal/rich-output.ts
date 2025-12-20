@@ -20,7 +20,7 @@ export function toRichOutput(data: JSONRecord | TestReport): RichOutputPayload {
     return {
       kind: 'test-report',
       title: 'Test Execution Report',
-      data,
+      data: data as any,
     };
   }
   if ('rows' in data && 'headers' in data) {

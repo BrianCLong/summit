@@ -4,6 +4,7 @@
     "outDir": "dist",
     "rootDir": "src",
     "declaration": true,
+    "allowImportingTsExtensions": false,
     "emitDeclarationOnly": false,
     "module": "ESNext",
     "target": "ES2022",
@@ -11,8 +12,7 @@
     "declarationMap": true,
     "sourceMap": true,
     "types": ["node"],
-    "lib": ["ES2022"],
-    "allowImportingTsExtensions": false
+    "lib": ["ES2022"]
   },
   "include": ["src/**/*"],
   "exclude": ["dist", "tests", "test-data"]

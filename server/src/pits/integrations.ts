@@ -16,7 +16,7 @@ class BaseIntegration implements IntegrationAdapter {
     return `evidence://${this.name.toLowerCase()}/${datePart}/${context.event.id}/${slug}`;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   produceArtifact(context: IntegrationContext): IntegrationArtifact {
     throw new Error('produceArtifact must be implemented by subclasses');
   }

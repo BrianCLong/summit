@@ -54,7 +54,7 @@ const SentimentVolatility: React.FC = () => {
         .padding(0.2);
       const y = d3
         .scaleLinear()
-        .domain([0, d3.max(points, (p) => p.value) || 1])
+        .domain([0, d3.max(points, (p: any) => p.value) || 1])
         .range([height, 0]);
 
       svg
@@ -68,10 +68,10 @@ const SentimentVolatility: React.FC = () => {
         .data(points)
         .enter()
         .append('rect')
-        .attr('x', (d) => x(d.label) || 0)
-        .attr('y', (d) => y(d.value))
+        .attr('x', (d: any) => x(d.label) || 0)
+        .attr('y', (d: any) => y(d.value))
         .attr('width', x.bandwidth())
-        .attr('height', (d) => height - y(d.value))
+        .attr('height', (d: any) => height - y(d.value))
         .attr('fill', '#10b981');
     }
   }, [data]);

@@ -5,3 +5,12 @@ node_modules/
 public/
 *.min.js
 .github/workflows/compliance-automation.yml
+.vite/
+.next/
+.cache/
+.turbo/
+generated/
+v4/archive/
+.venv/
+venv/
+v24_modules/

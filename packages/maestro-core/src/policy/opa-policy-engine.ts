@@ -16,6 +16,7 @@ export interface OPAPolicyEngineConfig {
 export interface PolicyDecision {
   allowed: boolean;
   reason?: string;
+  result?: any;
   explainability?: {
     trace: Array<{
       op: string;

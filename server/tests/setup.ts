@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { jest } from '@jest/globals';
+import { seedTestTenants, teardownTestTenants } from './helpers/testTenants';
 
 const resolvedMock = (value: unknown) => jest.fn(async () => value);
 
@@ -32,6 +32,8 @@ beforeAll(async () => {
     console.error('Failed to setup test database:', error);
     process.exit(1);
   }
+
+  await seedTestTenants();
 });
 
 afterAll(async () => {
@@ -39,6 +41,8 @@ afterAll(async () => {
   if (testDbPool) {
     await testDbPool.end();
   }
+
+  await teardownTestTenants();
 });
 
 beforeEach(() => {

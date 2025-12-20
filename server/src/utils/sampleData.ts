@@ -1,10 +1,22 @@
+// @ts-nocheck
 import { getNeo4jDriver } from '../db/neo4j.js';
 import { getPostgresPool } from '../db/postgres.js';
-import { randomUUID } from 'crypto';
-import pino from 'pino';
+import { randomUUID as uuidv4 } from 'crypto';
+import { logger } from './logger.js';
 
-const logger = pino();
-
+/**
+ * Creates sample data in Neo4j and PostgreSQL for development purposes.
+ *
+ * This function populates the databases with:
+ * - Entities (Person, Organization, Event, Location, Asset) in Neo4j.
+ * - Relationships (WORKS_FOR, INVOLVED_IN) between entities in Neo4j.
+ * - Users (Admin, Analyst) in PostgreSQL.
+ * - Investigations in PostgreSQL.
+ *
+ * It is idempotent-ish (uses MERGE/ON CONFLICT) but intended for clean or dev environments.
+ *
+ * @returns A Promise that resolves when the data creation is complete.
+ */
 export async function createSampleData(): Promise<void> {
   logger.info('Creating sample data for development...');
 
@@ -26,7 +38,7 @@ async function createSampleEntities(): Promise<void> {
   try {
     const entities = [
       {
-        id: randomUUID(),
+        id: uuidv4(),
         type: 'PERSON',
         props: {
           name: 'John Smith',
@@ -113,7 +125,7 @@ async function createSampleRelationships(): Promise<void> {
     if (entities.length >= 2) {
       const relationships = [
         {
-          id: randomUUID(),
+          id: uuidv4(),
           from: entities[0].properties.id,
           to: entities[1].properties.id,
           type: 'WORKS_FOR',

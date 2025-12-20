@@ -29,7 +29,7 @@ export const PolicyTags = z.object({
 export const EntitySchema = z.object({
   id: z.string().optional(),
   type: EntityType,
-  attributes: z.record(z.any()).default({}),
+  attributes: z.record(z.string(), z.any()).default({}),
   validFrom: z.string().datetime().optional(),
   validTo: z.string().datetime().optional(),
   policy: PolicyTags.optional(),
@@ -40,7 +40,7 @@ export const RelationshipSchema = z.object({
   from: z.string(),
   to: z.string(),
   type: z.string(),
-  attributes: z.record(z.any()).default({}),
+  attributes: z.record(z.string(), z.any()).default({}),
   validFrom: z.string().datetime().optional(),
   validTo: z.string().datetime().optional(),
   policy: PolicyTags.optional(),

@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import type { Patch } from 'immer'
+import { Patch } from 'immer'
 
 export interface HistoryEntry {
   label: string // e.g., "codex:addCard"
@@ -20,7 +20,7 @@ const slice = createSlice({
   reducers: {
     push(s, a: PayloadAction<HistoryEntry>) {
       s.undo.push(a.payload)
-      if (s.undo.length > s.cap) s.undo.shift()
+      if (s.undo.length > s.cap) {s.undo.shift()}
       s.redo = []
     },
     clear(s) {

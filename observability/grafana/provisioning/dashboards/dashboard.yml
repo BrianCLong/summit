@@ -1,0 +1,9 @@
+apiVersion: 1
+providers:
+  - name: Summit Dashboards
+    orgId: 1
+    folder: Summit
+    type: file
+    disableDeletion: false
+    options:
+      path: /etc/grafana/provisioning/dashboards

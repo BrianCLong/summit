@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0 # Needed to access all history
+          fetch-depth: 0
 
       - name: Set up git user
         run: |
@@ -26,7 +26,7 @@ jobs:
 
       - name: Create and checkout integration branch
         run: |
-          git checkout main # Or your default branch
+          git checkout main
           git pull origin main
           git checkout -b ${{ github.event.inputs.integration_branch }}
 

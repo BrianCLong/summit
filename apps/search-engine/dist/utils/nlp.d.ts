@@ -1,6 +1,3 @@
-import * as natural from 'natural';
-import * as stopword from 'stopword';
-export { natural, stopword };
 export declare class NLPProcessor {
     private tokenizer;
     private stemmer;
@@ -47,4 +44,3 @@ export declare class NLPProcessor {
         end: number;
     }>;
 }
-//# sourceMappingURL=nlp.d.ts.map

@@ -24,7 +24,7 @@ export default function ResolverTop5() {
       field: 'field',
       headerName: 'Field',
       flex: 1,
-      renderCell: (p) => {
+      renderCell: (p: { value?: string; row: any }) => {
         const op = `${p.row.parent}.${p.row.field}`;
         const base = (window as any).__JAEGER_BASE || 'http://localhost:16686';
         const service = (window as any).__JAEGER_SERVICE || 'intelgraph-dev';
@@ -46,7 +46,8 @@ export default function ResolverTop5() {
       field: 'avgMs',
       headerName: 'Avg (ms)',
       width: 120,
-      valueFormatter: (p) => p.value?.toFixed(1) ?? '0.0',
+      valueFormatter: (p: { value?: number }) =>
+        p.value?.toFixed(1) ?? '0.0',
     },
   ];
 

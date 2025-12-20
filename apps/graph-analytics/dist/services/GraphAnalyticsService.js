@@ -61,7 +61,9 @@ export class GraphAnalyticsService {
                 const componentsResult = await session.run(componentsQuery, {
                     nodeLabels: filters?.nodeLabels || [],
                 });
-                components = componentsResult.records[0].get('componentCount').toNumber();
+                components = componentsResult.records[0]
+                    .get('componentCount')
+                    .toNumber();
             }
             catch (error) {
                 logger.warn('Could not calculate connected components (APOC not available)');
@@ -201,8 +203,13 @@ export class GraphAnalyticsService {
     async analyzeInfluence(nodeId, depth = 3, relationshipTypes) {
         const session = this.neo4jDriver.session();
         try {
-            logger.info(`Analyzing influence for node ${nodeId}`, { depth, relationshipTypes });
-            const relFilter = relationshipTypes?.length ? `WHERE type(r) in $relationshipTypes` : '';
+            logger.info(`Analyzing influence for node ${nodeId}`, {
+                depth,
+                relationshipTypes,
+            });
+            const relFilter = relationshipTypes?.length
+                ? `WHERE type(r) in $relationshipTypes`
+                : '';
             // Calculate direct connections and their strength
             const directInfluenceQuery = `
         MATCH (node {id: $nodeId})-[r]-(connected)
@@ -224,8 +231,12 @@ export class GraphAnalyticsService {
                 relationshipTypes: relationshipTypes || [],
             });
             const directRecord = directResult.records[0];
-            const directConnections = directRecord.get('directConnections').toNumber();
-            const totalDirectInfluence = directRecord.get('totalDirectInfluence').toNumber();
+            const directConnections = directRecord
+                .get('directConnections')
+                .toNumber();
+            const totalDirectInfluence = directRecord
+                .get('totalDirectInfluence')
+                .toNumber();
             const keyConnections = directRecord.get('keyConnections');
             // Calculate reachability within specified depth
             const reachabilityQuery = `
@@ -245,7 +256,9 @@ export class GraphAnalyticsService {
                     depth,
                     relationshipTypes: relationshipTypes || [],
                 });
-                reachableNodes = reachabilityResult.records[0].get('reachableNodes').toNumber();
+                reachableNodes = reachabilityResult.records[0]
+                    .get('reachableNodes')
+                    .toNumber();
             }
             catch (error) {
                 logger.warn('APOC reachability analysis not available');
@@ -266,8 +279,12 @@ export class GraphAnalyticsService {
                 relationshipTypes: relationshipTypes || [],
             });
             const indirectRecord = indirectResult.records[0];
-            const indirectConnections = indirectRecord.get('indirectConnections').toNumber();
-            const totalIndirectInfluence = indirectRecord.get('totalIndirectInfluence').toNumber();
+            const indirectConnections = indirectRecord
+                .get('indirectConnections')
+                .toNumber();
+            const totalIndirectInfluence = indirectRecord
+                .get('totalIndirectInfluence')
+                .toNumber();
             // Calculate overall influence score (normalized)
             const maxPossibleReachability = await this.getNetworkSize();
             const reachability = reachableNodes / maxPossibleReachability;
@@ -377,7 +394,9 @@ export class GraphAnalyticsService {
                                 pattern: template.cypherPattern,
                                 significance: Math.log(occurrences + 1) / Math.log(10), // Log scale
                                 occurrences,
-                                examples: nodeGroups.slice(0, 10).map((nodes, index) => ({
+                                examples: nodeGroups
+                                    .slice(0, 10)
+                                    .map((nodes, index) => ({
                                     nodes,
                                     relationships: relationshipGroups[index] || [],
                                     context: {},
@@ -467,8 +486,7 @@ export class GraphAnalyticsService {
                 }
             }
             const meanGrowthRate = growthRates.reduce((sum, rate) => sum + rate, 0) / growthRates.length;
-            const volatility = Math.sqrt(growthRates.reduce((sum, rate) => sum + Math.pow(rate - meanGrowthRate, 2), 0) /
-                growthRates.length);
+            const volatility = Math.sqrt(growthRates.reduce((sum, rate) => sum + Math.pow(rate - meanGrowthRate, 2), 0) / growthRates.length);
             const result = {
                 timeframe,
                 snapshots,
@@ -615,4 +633,3 @@ export class GraphAnalyticsService {
         }
     }
 }
-//# sourceMappingURL=GraphAnalyticsService.js.map

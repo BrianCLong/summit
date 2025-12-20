@@ -208,10 +208,10 @@ router.post('/evaluate-batch', async (req, res) => {
       insights: {
         totalEvaluated: result.results.length,
         averageOverallScore: result.summary.averageScores
-          ? Object.values(result.summary.averageScores).reduce(
-              (sum: number, val: any) => sum + val,
+          ? (Object.values(result.summary.averageScores).reduce(
+              (sum: number, val: any) => sum + (val as number),
               0,
-            ) / Object.keys(result.summary.averageScores).length
+            ) as number) / Object.keys(result.summary.averageScores).length
           : 0,
         sloComplianceRate: result.summary.sloComplianceRate,
         regressionDetected: result.summary.regressionDetected,

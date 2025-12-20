@@ -2,11 +2,11 @@ import {
   defineTask,
   createRunContext,
   type TaskInput,
-} from ' @summit/maestro-sdk';
+} from '@summit/maestro-sdk';
 
 export default defineTask<{ url: string }, { status: number; body: string }>({
   async validate(input: TaskInput<{ url: string }>) {
-    if (!input.payload?.url) throw new Error('url is required');
+    if (!input.payload?.url) {throw new Error('url is required');}
   },
   async execute(ctx, input) {
     const res = await fetch(input.payload.url);
@@ -23,5 +23,5 @@ if (process.env.NODE_ENV === 'development') {
   const task = (await import('./http-get.ts')).default;
   task
     .execute(ctx, { payload: { url: 'https://example.com' } })
-    .then((r) => console.log(r));
+    .then((r) => ctx.logger.info('http-get.demo', r));
 }

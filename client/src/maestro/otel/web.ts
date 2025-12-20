@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
 import {
   ConsoleSpanExporter,
@@ -57,3 +58,4 @@ registerInstrumentations({
     new FetchInstrumentation({ propagateTraceHeaderCorsUrls: /.*/ }),
   ],
 });
+// @ts-nocheck

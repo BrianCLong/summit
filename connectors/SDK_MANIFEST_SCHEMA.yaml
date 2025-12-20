@@ -1,0 +1,80 @@
+# Connector SDK Manifest Schema v1.0
+# All connectors MUST conform to this schema
+
+# Core metadata
+name: string                    # Unique connector identifier (e.g., "csv-connector")
+description: string             # Human-readable description
+version: string                 # Semantic version (e.g., "1.0.0")
+author: string                  # Maintainer or organization
+ingestion_type: enum            # "batch" | "streaming" | "hybrid"
+
+# Supported data formats
+supported_formats:              # List of file/protocol formats
+  - string                      # e.g., "csv", "json", "xml", "stix", etc.
+
+# Schema mapping configuration
+schema_mapping_file: string     # Path to Python module with mapping functions
+sample_data_file: string        # Path to sample input data for testing
+
+# Golden I/O tests (required)
+golden_io_tests:                # List of test files/patterns
+  - string                      # e.g., "test_basic_mapping.py", "test_edge_cases.py"
+
+# Rate limiting policy (required)
+rate_limit:
+  requests_per_hour: integer    # Max requests per hour
+  requests_per_minute: integer  # (optional) Max requests per minute
+  burst_limit: integer          # Max burst requests
+  backoff_strategy: enum        # "exponential" | "linear" | "fixed"
+  max_retries: integer          # Max retry attempts
+  timeout_seconds: integer      # Request timeout
+
+# PII detection and handling (required)
+pii_flags:                      # List of PII concerns
+  - field_name: string          # Field that may contain PII
+    description: string         # What PII might be present
+    severity: enum              # "low" | "medium" | "high" | "critical"
+    redaction_policy: enum      # "allow" | "redact" | "block" | "prompt"
+    legal_basis: string         # (optional) Legal justification for processing
+
+# License and compliance (required)
+license:
+  type: string                  # License type (e.g., "MIT", "varies-by-feed", "commercial")
+  classification: enum          # "open-source" | "commercial" | "government" | "restricted"
+  attribution_required: boolean # Whether attribution is needed
+  allowed_use_cases:            # List of permitted uses
+    - string
+  blocked_use_cases:            # List of prohibited uses
+    - string
+  blocked_fields:               # Fields that cannot be used due to license
+    - field_name: string
+      reason: string            # Why this field is blocked
+
+# Data retention policy (required)
+retention_policy:
+  duration: string              # e.g., "90-days", "1-year", "indefinite"
+  archival_strategy: enum       # "delete" | "archive" | "anonymize"
+
+# Connector-specific configuration
+configuration:                  # Free-form config specific to this connector
+  # Examples:
+  # user_agent: string
+  # timeout_seconds: integer
+  # verify_ssl: boolean
+  # api_key_required: boolean
+
+# Dependencies (required)
+dependencies:                   # List of required packages
+  - string                      # e.g., "python>=3.8", "requests>=2.25.0"
+
+# Lineage tracking (optional but recommended)
+lineage:
+  enabled: boolean              # Whether to track data lineage
+  source_system: string         # Name of source system
+  data_classification: enum     # "public" | "internal" | "confidential" | "restricted"
+
+# Quality metrics (optional)
+quality_metrics:
+  expected_success_rate: float  # 0.0-1.0, expected success rate
+  max_error_rate: float         # 0.0-1.0, threshold for alerts
+  completeness_threshold: float # 0.0-1.0, min required data completeness

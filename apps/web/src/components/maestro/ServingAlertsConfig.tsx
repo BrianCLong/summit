@@ -4,9 +4,9 @@
 import React, { useEffect, useState } from 'react'
 import {
   BellIcon,
-  ExclamationTriangleIcon,
   CheckCircleIcon,
   CogIcon,
+  ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline'
 
 interface ServingAlertConfig {
@@ -59,7 +59,7 @@ const mockGetServingAlertConfig = async (): Promise<ServingAlertConfig> => {
 }
 
 const mockPutServingAlertConfig = async (
-  config: ServingAlertConfig
+  _config: ServingAlertConfig
 ): Promise<{ ok: boolean }> => {
   await new Promise(resolve => setTimeout(resolve, 500))
   return { ok: true }
@@ -109,7 +109,7 @@ export default function ServingAlertsConfig() {
   }, [])
 
   const handleSave = async () => {
-    if (!config) return
+    if (!config) {return}
 
     try {
       setSaving(true)
@@ -135,7 +135,7 @@ export default function ServingAlertsConfig() {
   }
 
   const updateConfig = (updates: Partial<ServingAlertConfig>) => {
-    if (!config) return
+    if (!config) {return}
     setConfig({ ...config, ...updates })
   }
 

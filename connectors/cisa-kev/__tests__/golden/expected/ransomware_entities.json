@@ -1,0 +1,24 @@
+[
+  {
+    "type": "Vulnerability",
+    "properties": {
+      "id": "CVE-2021-44228",
+      "cve_id": "CVE-2021-44228",
+      "name": "Apache Log4j Remote Code Execution Vulnerability",
+      "known_ransomware_use": true,
+      "source": "cisa-kev",
+      "confidence": 1.0
+    }
+  },
+  {
+    "type": "Vulnerability",
+    "properties": {
+      "id": "CVE-2023-00001",
+      "cve_id": "CVE-2023-00001",
+      "name": "Test Vulnerability With Ransomware",
+      "known_ransomware_use": true,
+      "source": "cisa-kev",
+      "confidence": 1.0
+    }
+  }
+]

@@ -4,9 +4,13 @@ import { spawn } from 'child_process';
 import path from 'path';
 import fs from 'fs/promises';
 export class TrainingPipeline {
+    benchmarkingService;
+    modelRegistry;
     pgPool;
     modelsDir;
-    constructor(pgPool) {
+    constructor(pgPool, benchmarkingService, modelRegistry) {
+        this.benchmarkingService = benchmarkingService;
+        this.modelRegistry = modelRegistry;
         this.pgPool = pgPool;
         this.modelsDir = path.join(process.cwd(), 'models');
         this.ensureModelsDirectory();
@@ -14,8 +18,12 @@ export class TrainingPipeline {
     async ensureModelsDirectory() {
         try {
             await fs.mkdir(this.modelsDir, { recursive: true });
-            await fs.mkdir(path.join(this.modelsDir, 'entity-resolution'), { recursive: true });
-            await fs.mkdir(path.join(this.modelsDir, 'training-data'), { recursive: true });
+            await fs.mkdir(path.join(this.modelsDir, 'entity-resolution'), {
+                recursive: true,
+            });
+            await fs.mkdir(path.join(this.modelsDir, 'training-data'), {
+                recursive: true,
+            });
         }
         catch (error) {
             logger.error('Failed to create models directory:', error);
@@ -133,6 +141,11 @@ export class TrainingPipeline {
                 f1Score: metrics.f1Score,
                 trainingTime: metrics.trainingTime,
             });
+            await this.recordPerformanceSnapshot(modelVersion, metrics, {
+                stage: 'training',
+                dataset: 'entity_resolution_feedback',
+                trainingExamples: examples.length,
+            });
             // Auto-activate if meets criteria
             if (await this.shouldActivateModel(modelVersion)) {
                 await this.activateModel(modelId);
@@ -166,6 +179,20 @@ export class TrainingPipeline {
             const metricsData = await fs.readFile(metricsFile, 'utf-8');
             const metrics = JSON.parse(metricsData);
             logger.info(`Evaluation completed for model ${modelId}:`, metrics);
+            await this.recordPerformanceSnapshot({
+                id: modelId,
+                version: modelVersion.version,
+                modelType: modelVersion.modelType,
+                metrics,
+                isActive: modelVersion.isActive,
+                createdAt: modelVersion.createdAt,
+                modelPath: modelVersion.modelPath,
+                hyperparameters: modelVersion.hyperparameters,
+            }, metrics, {
+                stage: 'evaluation',
+                dataset: 'holdout',
+                testExamples: testExamples.length,
+            });
             return metrics;
         }
         catch (error) {
@@ -248,7 +275,8 @@ export class TrainingPipeline {
         const activeModel = await this.getActiveModel(modelVersion.modelType);
         if (!activeModel) {
             // No active model, activate if meets minimum criteria
-            return modelVersion.metrics.f1Score >= 0.7 && modelVersion.metrics.accuracy >= 0.75;
+            return (modelVersion.metrics.f1Score >= 0.7 &&
+                modelVersion.metrics.accuracy >= 0.75);
         }
         // Compare with active model
         const improvement = modelVersion.metrics.f1Score - activeModel.metrics.f1Score;
@@ -276,6 +304,10 @@ export class TrainingPipeline {
         };
     }
     async activateModel(modelId) {
+        if (this.modelRegistry) {
+            await this.modelRegistry.setActive(modelId);
+            return;
+        }
         const client = await this.pgPool.connect();
         try {
             await client.query('BEGIN');
@@ -309,7 +341,7 @@ export class TrainingPipeline {
             query += ' WHERE model_type = $1';
             params.push(modelType);
         }
-        query += ' ORDER BY created_at DESC LIMIT $' + (params.length + 1);
+        query += ` ORDER BY created_at DESC LIMIT $${params.length + 1}`;
         params.push(limit);
         const result = await this.pgPool.query(query, params);
         return result.rows.map((row) => ({
@@ -328,5 +360,28 @@ export class TrainingPipeline {
         logger.info(`Scheduled training for ${modelType} with cron: ${cron}`);
         // Implementation would depend on chosen job scheduler
     }
+    async recordPerformanceSnapshot(modelVersion, metrics, context) {
+        if (!this.benchmarkingService) {
+            return;
+        }
+        try {
+            await this.benchmarkingService.recordPerformance({
+                modelVersionId: modelVersion.id,
+                modelType: modelVersion.modelType,
+                accuracy: metrics.accuracy ?? 0,
+                precision: metrics.precision ?? 0,
+                recall: metrics.recall ?? 0,
+                f1Score: metrics.f1Score ?? 0,
+                testSetSize: metrics.totalExamples ?? undefined,
+                evaluationDate: new Date(),
+                evaluationContext: context,
+            });
+        }
+        catch (error) {
+            logger.warn('Failed to record performance snapshot', {
+                modelVersionId: modelVersion.id,
+                error: error.message,
+            });
+        }
+    }
 }
-//# sourceMappingURL=TrainingPipeline.js.map

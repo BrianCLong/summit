@@ -8,8 +8,16 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "rootDir": "./",
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "allowImportingTsExtensions": false,
+    "composite": true,
+    "types": ["node", "vitest"]
   },
-  "include": ["src", "tests"],
-  "exclude": ["dist"]
+  "include": [
+    "src",
+    "tests"
+  ],
+  "exclude": [
+    "dist"
+  ]
 }

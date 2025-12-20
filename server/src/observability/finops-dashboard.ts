@@ -1,6 +1,6 @@
 import { getPostgresPool } from '../db/postgres.js';
 import { otelService } from '../middleware/observability/otel-tracing.js';
-import { Redis } from 'ioredis';
+import Redis from 'ioredis';
 import express from 'express';
 
 interface CostMetrics {

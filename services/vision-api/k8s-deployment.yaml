@@ -1,0 +1,178 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: intelgraph-vision
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vision-api-config
+  namespace: intelgraph-vision
+data:
+  NODE_ENV: "production"
+  VISION_API_PORT: "8080"
+  UPLOAD_DIR: "/tmp/vision-uploads"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vision-models-pvc
+  namespace: intelgraph-vision
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+  storageClassName: fast-ssd
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vision-api
+  namespace: intelgraph-vision
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: vision-api
+  template:
+    metadata:
+      labels:
+        app: vision-api
+    spec:
+      containers:
+      - name: vision-api
+        image: intelgraph/vision-api:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        envFrom:
+        - configMapRef:
+            name: vision-api-config
+        resources:
+          requests:
+            memory: "8Gi"
+            cpu: "4"
+            nvidia.com/gpu: 1
+          limits:
+            memory: "16Gi"
+            cpu: "8"
+            nvidia.com/gpu: 1
+        volumeMounts:
+        - name: vision-models
+          mountPath: /app/models
+        - name: tmp-uploads
+          mountPath: /tmp/vision-uploads
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+      volumes:
+      - name: vision-models
+        persistentVolumeClaim:
+          claimName: vision-models-pvc
+      - name: tmp-uploads
+        emptyDir:
+          sizeLimit: 10Gi
+      nodeSelector:
+        gpu: "true"
+      tolerations:
+      - key: "nvidia.com/gpu"
+        operator: "Exists"
+        effect: "NoSchedule"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vision-api-service
+  namespace: intelgraph-vision
+spec:
+  type: LoadBalancer
+  selector:
+    app: vision-api
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+    name: http
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: vision-api-hpa
+  namespace: intelgraph-vision
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: vision-api
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 30
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vision-api-ingress
+  namespace: intelgraph-vision
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: vision-api.intelgraph.ai
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: vision-api-service
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - vision-api.intelgraph.ai
+    secretName: vision-api-tls

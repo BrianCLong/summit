@@ -30,9 +30,9 @@ export default function ApprovalsPanel() {
   }, []);
 
   useEffect(() => {
-    $(document).on('input', '#approval-filter', function () {
+    $(document).on('input', '#approval-filter', function (this: HTMLElement) {
       const q = ($(this).val()?.toString().toLowerCase() as string) || '';
-      $('.approval-row').each(function () {
+      $('.approval-row').each(function (this: HTMLElement) {
         $(this).toggle($(this).text().toLowerCase().indexOf(q) >= 0);
       });
     });

@@ -61,7 +61,7 @@ code --install-extension ms-vscode-remote.remote-containers
 
 ```bash
 # Clone the repository
-git clone https://github.com/BrianCLong/intelgraph.git
+git clone https://github.com/BrianCLong/summit.git
 cd intelgraph
 
 # Set up Git hooks
@@ -312,7 +312,7 @@ export async function up(client: Client) {
       created_at TIMESTAMP DEFAULT NOW(),
       updated_at TIMESTAMP DEFAULT NOW()
     );
-    
+
     CREATE TABLE IF NOT EXISTS orchestration_logs (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       user_id UUID REFERENCES users(id),
@@ -328,12 +328,12 @@ export async function up(client: Client) {
   // Neo4j constraints and indexes
   const neo4jClient = getNeo4jClient();
   await neo4jClient.run(`
-    CREATE CONSTRAINT entity_id IF NOT EXISTS 
+    CREATE CONSTRAINT entity_id IF NOT EXISTS
     FOR (e:Entity) REQUIRE e.id IS UNIQUE
   `);
 
   await neo4jClient.run(`
-    CREATE INDEX entity_type_index IF NOT EXISTS 
+    CREATE INDEX entity_type_index IF NOT EXISTS
     FOR (e:Entity) ON (e.type)
   `);
 }
@@ -1754,6 +1754,6 @@ echo "  - Runbooks: docs/runbooks/"
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: $(date)  
+**Document Version**: 1.0
+**Last Updated**: $(date)
 **Maintained By**: Developer Experience Team

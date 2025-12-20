@@ -1,4 +1,4 @@
-import crypto from 'node:crypto';
+import * as crypto from 'node:crypto';
 import { CertificateValidator } from './certificates.js';
 import { InMemoryKeyStore, KeyManager, type KeyStore } from './keyStore.js';
 import {
@@ -20,7 +20,7 @@ import type {
 
 export interface SignOptions {
   includeTimestamp?: boolean;
-  metadata?: Record<string, unknown>;
+  metadata?: import('./types.js').JsonObject;
 }
 
 export interface CryptoPipelineOptions {

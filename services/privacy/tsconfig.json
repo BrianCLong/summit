@@ -4,13 +4,24 @@
     "module": "CommonJS",
     "moduleResolution": "node",
     "outDir": "dist",
-    "rootDir": "src",
+    "rootDir": ".",
     "declaration": true,
+    "allowImportingTsExtensions": false,
     "declarationMap": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "types": ["node", "jest"]
+    "types": [
+      "node",
+      "jest"
+    ],
+    "allowImportingTsExtensions": false,
+    "composite": true
   },
-  "include": ["src", "tests"],
-  "exclude": ["dist"]
+  "include": [
+    "src",
+    "tests"
+  ],
+  "exclude": [
+    "dist"
+  ]
 }

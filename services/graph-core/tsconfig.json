@@ -1,15 +1,33 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "module": "ES2020",
-    "moduleResolution": "node",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ES2022",
     "outDir": "dist",
-    "esModuleInterop": true
+    "rootDir": "src",
+    "esModuleInterop": true,
+    "allowImportingTsExtensions": false,
+    "resolveJsonModule": true,
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "tsBuildInfoFile": "dist/.tsbuildinfo"
   },
-  "include": ["src"],
-  "exclude": ["node_modules"],
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "tests"
+  ],
   "references": [
-    { "path": "../../packages/types" },
-    { "path": "../../packages/ai-core" }
+    {
+      "path": "../../packages/types"
+    },
+    {
+      "path": "../../packages/graph-ai-core"
+    }
   ]
 }

@@ -1,7 +1,7 @@
 /**
  * GraphQL type definitions for Graph Neural Network operations
  */
-const gql = require('graphql-tag');
+import gql from 'graphql-tag';
 
 const gnnTypes = gql`
   # GNN Model Information

@@ -42,7 +42,7 @@ const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({
 
       if (matchingShortcut) {
         // Check if we should prevent default behavior
-        const activeElement = document.activeElement;
+        const activeElement = document.activeElement as HTMLElement | null;
         const isInputElement =
           activeElement &&
           (activeElement.tagName === 'INPUT' ||
@@ -78,6 +78,7 @@ const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({
 };
 
 // Hook for managing keyboard shortcuts
+// eslint-disable-next-line react-refresh/only-export-components
 export const useKeyboardShortcuts = (
   shortcuts: ShortcutAction[],
   enabled = true,
@@ -105,7 +106,7 @@ export const useKeyboardShortcuts = (
       );
 
       if (matchingShortcut) {
-        const activeElement = document.activeElement;
+        const activeElement = document.activeElement as HTMLElement | null;
         const isInputElement =
           activeElement &&
           (activeElement.tagName === 'INPUT' ||
@@ -133,6 +134,7 @@ export const useKeyboardShortcuts = (
 };
 
 // Utility function to format key combinations for display
+// eslint-disable-next-line react-refresh/only-export-components
 export const formatKeyCombo = (keys: string): string => {
   return keys
     .split('+')
@@ -250,6 +252,7 @@ export const ShortcutsHelp: React.FC<ShortcutsHelpProps> = ({
 };
 
 // Default shortcuts for the application
+// eslint-disable-next-line react-refresh/only-export-components
 export const defaultShortcuts: ShortcutAction[] = [
   // Global Navigation
   {

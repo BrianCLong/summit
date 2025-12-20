@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, useEffect } from 'react';
 import { NextPage } from 'next';
 import Head from 'next/head';

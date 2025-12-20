@@ -326,6 +326,12 @@ const DataVisualizationStudio: React.FC<DataVisualizationStudioProps> = ({
   };
 
   const generateVisualizationTemplates = () => {
+    const defaultMargins = {
+      top: 24,
+      right: 24,
+      bottom: 24,
+      left: 24,
+    };
     const mockTemplates: VisualizationTemplate[] = [
       {
         id: 'threat-overview',
@@ -341,6 +347,7 @@ const DataVisualizationStudio: React.FC<DataVisualizationStudioProps> = ({
           styling: {
             colorScheme: 'diverging',
             size: { width: 800, height: 400 },
+            margins: defaultMargins,
           },
         },
         tags: ['threat', 'overview', 'security'],
@@ -359,6 +366,7 @@ const DataVisualizationStudio: React.FC<DataVisualizationStudioProps> = ({
           styling: {
             colorScheme: 'category',
             size: { width: 800, height: 600 },
+            margins: defaultMargins,
           },
         },
         tags: ['network', 'relationships', 'entities'],
@@ -382,6 +390,7 @@ const DataVisualizationStudio: React.FC<DataVisualizationStudioProps> = ({
           styling: {
             colorScheme: 'sequential',
             size: { width: 1000, height: 300 },
+            margins: defaultMargins,
           },
         },
         tags: ['timeline', 'events', 'temporal'],
@@ -400,6 +409,7 @@ const DataVisualizationStudio: React.FC<DataVisualizationStudioProps> = ({
           styling: {
             colorScheme: 'sequential',
             size: { width: 800, height: 500 },
+            margins: defaultMargins,
           },
         },
         tags: ['geographic', 'heatmap', 'location'],
@@ -418,6 +428,7 @@ const DataVisualizationStudio: React.FC<DataVisualizationStudioProps> = ({
           styling: {
             colorScheme: 'diverging',
             size: { width: 500, height: 500 },
+            margins: defaultMargins,
           },
         },
         tags: ['risk', 'assessment', 'multi-dimensional'],

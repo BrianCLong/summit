@@ -1,8 +1,8 @@
 import { EventEmitter } from 'events';
-import { createLogger } from '../config/logger';
+import baseLogger from '../config/logger';
 import * as crypto from 'crypto';
 
-const logger = createLogger('StateMerkleAnchor');
+const logger = baseLogger.child({ module: 'StateMerkleAnchor' });
 
 export interface MerkleAnchor {
   id: string;

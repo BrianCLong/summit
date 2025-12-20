@@ -320,7 +320,7 @@ intelgraph-platform/
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/your-org/intelgraph-platform.git
+git clone https://github.com/your-org/summit.git
 cd intelgraph-platform
 ```
 
@@ -788,7 +788,7 @@ mkdir -p intelgraph-platform/{docs/{erd,api},server/src/{config,models,services,
 ```bash
 cd intelgraph-platform
 git init
-git remote add origin https://github.com/your-org/intelgraph-platform.git
+git remote add origin https://github.com/your-org/summit.git
 ```
 
 ### 3. Create Core Files

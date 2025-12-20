@@ -76,6 +76,45 @@ export interface MutationContext {
 }
 
 /**
+ * Auth context provider interface - must be implemented by the application
+ */
+export interface AuthContextProvider {
+  getUserId(): string;
+  getTenantId(): string;
+}
+
+let authContextProvider: AuthContextProvider | null = null;
+
+/**
+ * Initialize the auth context provider - MUST be called before using mutations
+ */
+export function initializeAuthContext(provider: AuthContextProvider): void {
+  authContextProvider = provider;
+}
+
+/**
+ * Get auth context with validation - throws if not properly initialized
+ */
+function getAuthContext(): { userId: string; tenantId: string } {
+  if (!authContextProvider) {
+    throw new Error(
+      'Auth context not initialized. Call initializeAuthContext() before using mutations.',
+    );
+  }
+  const userId = authContextProvider.getUserId();
+  const tenantId = authContextProvider.getTenantId();
+
+  if (!userId || userId === 'current-user') {
+    throw new Error('Invalid userId: authentication required');
+  }
+  if (!tenantId || tenantId === 'current-tenant') {
+    throw new Error('Invalid tenantId: tenant context required');
+  }
+
+  return { userId, tenantId };
+}
+
+/**
  * Safe mutation wrapper with validation, error handling, and rollback
  */
 async function safeMutation<TInput, TOutput>(
@@ -87,9 +126,12 @@ async function safeMutation<TInput, TOutput>(
   ) => Promise<TOutput>,
   rollbackFn?: (output: TOutput, context: MutationContext) => Promise<void>,
 ): Promise<MutationResult<TOutput>> {
+  // Get authenticated user and tenant from auth context
+  const authContext = getAuthContext();
+
   const context: MutationContext = {
-    userId: 'current-user', // TODO: Get from auth context
-    tenantId: 'current-tenant', // TODO: Get from auth context
+    userId: authContext.userId,
+    tenantId: authContext.tenantId,
     timestamp: new Date().toISOString(),
     source: 'ui',
   };

@@ -8,11 +8,10 @@ export function registerDsarCommands(program: Command) {
   dsarCommand
     .command('export')
     .description('Export data for a subject ID')
-    .option('--subject <id>', 'Subject ID to export data for', {
-      required: true,
-    })
-    .option('--out <s3_path>', 'S3 path to export data to', { required: true })
+    .requiredOption('--subject <id>', 'Subject ID to export data for')
+    .requiredOption('--out <s3_path>', 'S3 path to export data to')
     .action((options) => {
+      // eslint-disable-next-line no-console
       console.log(
         `DSAR Export: Subject ID - ${options.subject}, Output Path - ${options.out}`,
       );
@@ -23,14 +22,13 @@ export function registerDsarCommands(program: Command) {
   dsarCommand
     .command('delete')
     .description('Delete or anonymize data for a subject ID')
-    .option('--subject <id>', 'Subject ID to delete data for', {
-      required: true,
-    })
+    .requiredOption('--subject <id>', 'Subject ID to delete data for')
     .option(
       '--preview',
       'Show what data would be deleted without making changes',
     )
     .action((options) => {
+      // eslint-disable-next-line no-console
       console.log(
         `DSAR Delete: Subject ID - ${options.subject}, Preview - ${options.preview || false}`,
       );

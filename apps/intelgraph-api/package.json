@@ -1,6 +1,6 @@
 {
   "name": "@companyos/intelgraph-api",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
@@ -8,13 +8,15 @@
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
-    "lint": "eslint . --ext .ts || true"
+    "lint": "eslint . || true"
   },
   "dependencies": {
+    "@opentelemetry/api": "^1.9.0",
     "apollo-server-express": "^3.12.0",
-    "express": "^5.1.0",
-    "graphql": "^16.8.1",
-    "neo4j-driver": "^6.0.0",
+    "express": "^5.2.0",
+    "express-jwt": "^8.4.1",
+    "graphql": "^16.12.0",
+    "neo4j-driver": "^6.0.1",
     "pg": "^8.12.0",
     "zod": "^4.1.12",
     "dotenv": "^17.2.3",
@@ -25,10 +27,11 @@
   },
   "devDependencies": {
     "@types/express": "^5.0.3",
-    "@types/node": "^24.9.1",
+    "@types/express-jwt": "^7.4.4",
+    "@types/node": "^24.10.1",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3",
-    "eslint": "^9.38.0",
+    "eslint": "^9.39.1",
     "@types/jsonwebtoken": "^9.0.6"
   },
   "types": "dist/index.d.ts",

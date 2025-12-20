@@ -1,6 +1,6 @@
 import axios from 'axios';
 import jwt from 'jsonwebtoken';
-import { v4 as uuid } from 'uuid';
+import { randomUUID as uuid } from 'node:crypto';
 import { pubsub } from '../realtime/pubsub';
 import logger from '../utils/logger';
 import { wrapResolversWithPolicy } from './policyWrapper';

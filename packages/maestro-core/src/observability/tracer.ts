@@ -17,7 +17,7 @@ import {
   SpanStatusCode,
   SpanKind,
 } from '@opentelemetry/api';
-import { Counter, Histogram, Gauge } from '@opentelemetry/api-metrics';
+import { Counter, Histogram } from '@opentelemetry/api-metrics';
 import { EventEmitter } from 'events';
 
 export interface TracingConfig {
@@ -47,7 +47,7 @@ export class MaestroTracer extends EventEmitter {
   private workflowDuration: Histogram;
   private stepExecutionsTotal: Counter;
   private stepDuration: Histogram;
-  private activeRuns: Gauge;
+  private activeRunsValue = 0;
   private costTotal: Counter;
   private errorRate: Counter;
 
@@ -80,13 +80,15 @@ export class MaestroTracer extends EventEmitter {
       );
     }
 
+    const prometheusExporter = new PrometheusExporter({
+      port: this.config.prometheusPort || 9090,
+    });
+
     // Initialize SDK
     this.sdk = new NodeSDK({
       resource,
       traceExporter: exporters.length > 0 ? exporters[0] : undefined,
-      metricExporter: new PrometheusExporter({
-        port: this.config.prometheusPort || 9090,
-      }),
+      metricReader: prometheusExporter,
       instrumentations:
         this.config.enableAutoInstrumentation !== false
           ? [getNodeAutoInstrumentations()]
@@ -140,9 +142,15 @@ export class MaestroTracer extends EventEmitter {
     );
 
     // System metrics
-    this.activeRuns = this.meter.createGauge('maestro_active_runs', {
-      description: 'Number of currently active workflow runs',
-    });
+    this.meter.createObservableGauge(
+      'maestro_active_runs',
+      {
+        description: 'Number of currently active workflow runs',
+      },
+      (observableResult) => {
+        observableResult.observe(this.activeRunsValue);
+      },
+    );
 
     this.costTotal = this.meter.createCounter('maestro_cost_usd_total', {
       description: 'Total cost in USD',
@@ -164,6 +172,10 @@ export class MaestroTracer extends EventEmitter {
   }
 
   // Workflow tracing
+  startSpan(operationName: string, options?: SpanOptions): any {
+    return this.tracer.startSpan(operationName, options);
+  }
+
   startWorkflowSpan(
     runId: string,
     workflowName: string,
@@ -380,7 +392,7 @@ export class MaestroTracer extends EventEmitter {
 
   // Metrics helpers
   updateActiveRuns(count: number): void {
-    this.activeRuns.record(count);
+    this.activeRunsValue = count;
   }
 
   recordError(errorType: string, attributes: Record<string, any> = {}): void {
@@ -457,13 +469,13 @@ export function traced(operationName?: string) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {
-      const tracer = getTracer();
-      const span = tracer.tracer.startSpan(
+      const tracerInstance = getTracer();
+      const span = tracerInstance.startSpan(
         operationName || `${target.constructor.name}.${propertyKey}`,
       );
 
       try {
-        const result = await tracer.withSpan(span, () =>
+        const result = await tracerInstance.withSpan(span, () =>
           originalMethod.apply(this, args),
         );
         span.setStatus({ code: SpanStatusCode.OK });

@@ -1,61 +1,165 @@
-.PHONY: bootstrap up smoke tools
+# Summit Platform Makefile
+# Standardized commands for Development and Operations
 
-# Minimal, portable golden path. No assumptions about project layout.
+.PHONY: up down restart logs shell clean
+.PHONY: dev test lint build format ci
+.PHONY: db-migrate db-seed sbom k6
+.PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release provenance ci-check prereqs contracts policy-sim rerere dupescans
 
-SHELL := /usr/bin/env bash
-NODE_VERSION ?= 18
-PY_VERSION ?= 3.11
+COMPOSE_DEV_FILE ?= docker-compose.dev.yaml
+SHELL_SERVICE ?= gateway
 
-bootstrap:
-	@echo "==> bootstrap: node, python, envs"
-	# Node: prefer corepack/pnpm if present, else npm
-	@if [ -f package.json ]; then \
-	  command -v corepack >/dev/null 2>&1 && corepack enable || true; \
-	  if [ -f pnpm-lock.yaml ]; then pnpm install --frozen-lockfile || pnpm install; \
-	  elif [ -f package-lock.json ]; then npm ci || npm install; \
-	  else npm install || true; fi; \
-	fi
-	# Python venv + deps
-	@if [ -f requirements.txt ] || [ -f pyproject.toml ]; then \
-	  python$(PY_VERSION) -m venv .venv 2>/dev/null || python3 -m venv .venv; \
-	  . .venv/bin/activate; python -m pip install -U pip wheel; \
-	  if [ -f requirements.txt ]; then pip install -r requirements.txt || true; fi; \
-	  if [ -f pyproject.toml ]; then pip install -e . || pip install . || true; fi; \
-	  pip install ruamel.yaml==0.18.* pip-audit==2.* || true; \
-	fi
-	# Dev tooling fallbacks (no yq/gsed reliance)
-	@mkdir -p scripts/tools
-	@printf '%s\n' '#!/usr/bin/env python3' \
-	'from ruamel.yaml import YAML; import sys,json' \
-	'y=YAML(); doc=y.load(sys.stdin.read()); print(json.dumps(doc))' > scripts/tools/yq_json.py
-	@chmod +x scripts/tools/yq_json.py
-	@echo "bootstrap: DONE"
+# --- Docker Compose Controls ---
 
-up:
-	@echo "==> up: best-effort bring-up (no-op if stack not containerized)"
-	@if [ -f docker-compose.yml ] || [ -f compose.yml ]; then \
-	  docker compose up -d --quiet-pull || docker-compose up -d; \
-	else \
-	  echo "no compose file; skipping"; \
-	fi
+up:     ## Run dev stack
+	docker compose -f $(COMPOSE_DEV_FILE) up --build -d
 
-smoke:
-	@echo "==> smoke: lightweight sanity checks"
-	# JS/TS tests if present
-	@if [ -f package.json ]; then \
-	  if jq -e '.scripts.test' package.json >/dev/null 2>&1; then npm test --silent || npm run test --silent || true; else echo "no npm test script"; fi; \
-	fi
-	# Python tests if present
-	@if [ -d tests ] || [ -f pytest.ini ] || [ -f pyproject.toml ]; then \
-	  . .venv/bin/activate 2>/dev/null || true; \
-	  python - <<'PY' || true
-	import importlib.util, sys, subprocess, shutil
-	if shutil.which("pytest"):
-	    sys.exit(subprocess.call(["pytest","-q"]))
-	print("pytest not installed; skipping")
-	PY
-	fi
-	# Last-resort canary
-	@node -e "console.log('node ok')" 2>/dev/null || true
-	@python -c "print('python ok')" 2>/dev/null || true
-	@echo "smoke: DONE"
+down:   ## Stop dev stack
+	docker compose -f $(COMPOSE_DEV_FILE) down -v
+
+restart: down up
+
+logs:
+	docker compose -f $(COMPOSE_DEV_FILE) logs -f
+
+shell:
+	docker compose -f $(COMPOSE_DEV_FILE) exec $(SHELL_SERVICE) /bin/sh
+
+clean:
+	docker system prune -f
+	rm -rf dist build coverage
+	@rm -rf "$(STATE_DIR)"
+	@git branch -D tmp/pr-* 2>/dev/null || true
+
+# --- Development Workflow ---
+
+dev:
+	pnpm run dev
+
+test:   ## Run unit tests (node+python)
+	pnpm -w run test:unit || true && pytest -q || true
+
+lint:   ## Lint js/ts
+	pnpm -w exec eslint . || true
+
+format: ## Format code
+	pnpm -w exec prettier -w . || true
+
+build:  ## Build all images
+	docker compose -f $(COMPOSE_DEV_FILE) build
+
+ci: lint test
+
+k6:     ## Perf smoke (TARGET=http://host:port make k6)
+	./ops/k6/smoke.sh
+
+sbom:   ## Generate CycloneDX SBOM
+	@pnpm cyclonedx-npm --output-format JSON --output-file sbom.json
+
+# ---- IntelGraph S25 Merge Orchestrator (Legacy/Specific) ---------------------
+
+SHELL := /bin/bash
+.ONESHELL:
+.SHELLFLAGS := -eo pipefail -c
+MAKEFLAGS += --no-builtin-rules
+
+# Config (override via env)
+REPO              ?= BrianCLong/summit
+BASE_BRANCH       ?= main
+CONSOLIDATION     ?= feature/merge-closed-prs-s25
+STACK_ARTIFACTS   ?= stack/artifacts-pack-v1
+STACK_SERVER      ?= stack/express5-eslint9
+STACK_CLIENT      ?= stack/client-vite7-leaflet5
+STACK_REBRAND     ?= stack/rebrand-docs
+PR_TARGETS        ?= 1279 1261 1260 1259
+STATE_DIR         ?= .merge-evidence
+STATE_FILE        ?= $(STATE_DIR)/state.json
+NODE_VERSION      ?= 20
+
+merge-s25: prereqs
+	@./scripts/merge_s25.sh \
+	  --repo "$(REPO)" \
+	  --base "$(BASE_BRANCH)" \
+	  --branch "$(CONSOLIDATION)" \
+	  --prs "$(PR_TARGETS)" \
+	  --state "$(STATE_FILE)" \
+	  --node "$(NODE_VERSION)"
+
+merge-s25.resume: prereqs
+	@./scripts/merge_s25.sh \
+	  --repo "$(REPO)" \
+	  --base "$(BASE_BRANCH)" \
+	  --branch "$(CONSOLIDATION)" \
+	  --prs "$(PR_TARGETS)" \
+	  --state "$(STATE_FILE)" \
+	  --resume \
+	  --node "$(NODE_VERSION)"
+
+merge-s25.clean: clean
+
+pr-release:
+	@./scripts/merge_s25.sh \
+	  --repo "$(REPO)" \
+	  --base "$(BASE_BRANCH)" \
+	  --branch "$(CONSOLIDATION)" \
+	  --open-release-only \
+	  --state "$(STATE_FILE)" \
+	  --node "$(NODE_VERSION)"
+
+provenance:
+	@node .ci/gen-provenance.js > provenance.json && node .ci/verify-provenance.js provenance.json
+
+ci-check:
+	@pnpm install --frozen-lockfile
+	@pnpm lint
+	@pnpm test -- --ci --reporters=default --reporters=jest-junit
+	@pnpm -r build
+	@pnpm playwright install --with-deps
+	@pnpm e2e
+
+contracts:
+	@pnpm jest contracts/graphql/__tests__/schema.contract.ts --runInBand
+
+policy-sim:
+	@curl -sL -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64 && chmod +x ./opa
+	@./opa test policies/ -v
+
+rerere:
+	@bash scripts/enable_rerere.sh
+
+dupescans:
+	@bash scripts/check_dupe_patches.sh $(BASE_BRANCH) $(CONSOLIDATION)
+
+prereqs:
+	@command -v git >/dev/null 2>&1 || { echo "git not found"; exit 1; }
+	@command -v gh  >/dev/null 2>&1 || { echo "gh (GitHub CLI) not found"; exit 1; }
+	@command -v pnpm >/dev/null 2>&1 || { echo "pnpm not found"; exit 1; }
+	@node -v | grep -q "v$(NODE_VERSION)" || echo "WARN: Node version differs from $(NODE_VERSION)"
+	@mkdir -p "$(STATE_DIR)"
+
+# Secrets management golden path
+secrets/bootstrap:
+	@echo "Generating org age key if missing and aligning .sops.yaml"
+	@[ -f .security/keys/age-org.pub ] || age-keygen -o .security/keys/age-org.key && age-keygen -y .security/keys/age-org.key > .security/keys/age-org.pub
+	@echo "Update .sops.yaml recipients as needed. Private key must stay in security/key-vault."
+
+secrets/encrypt:
+	@if [ -z "${path}" ]; then echo "usage: make secrets/encrypt path=secrets/envs/dev/foo.enc.yaml"; exit 1; fi
+	@sops --encrypt --in-place ${path}
+
+secrets/decrypt:
+	@if [ -z "${path}" ]; then echo "usage: make secrets/decrypt path=secrets/envs/dev/foo.enc.yaml"; exit 1; fi
+	@tmpfile=$$(mktemp); sops -d ${path} > $$tmpfile && echo "Decrypted to $$tmpfile" && trap "shred -u $$tmpfile" EXIT && ${EDITOR:-vi} $$tmpfile
+
+secrets/rotate:
+	@if [ -z "${name}" ]; then echo "usage: make secrets/rotate name=FOO_KEY"; exit 1; fi
+	@echo "Generating blue/green value for ${name}" && echo "${name}_v2=$$(openssl rand -hex 24)" > /tmp/${name}.rotation
+	@echo "Remember to flip consumers to _v2 and clean up _v1 post-cutover"
+
+secrets/lint:
+	@echo "Running SOPS validation"
+	@find secrets/envs -name '*.enc.yaml' -print0 | xargs -0 -I{} sops --verify {}
+	@echo "Running leak scan"
+	@.ci/scripts/secrets/leak_scan.sh
+	@echo "Running OPA checks"
+	@conftest test --policy .ci/policies --namespace secrets --all-namespaces

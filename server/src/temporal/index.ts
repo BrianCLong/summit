@@ -20,9 +20,7 @@ export async function startTemporalWorker() {
       namespace: process.env.TEMPORAL_NAMESPACE || 'default',
       connection: await (
         await import('temporalio')
-      ).Connection.connect({
-        address: process.env.TEMPORAL_ADDRESS || 'localhost:7233',
-      }),
+      ).Connection.connect(),
     });
     logger.info('Temporal worker created');
     const runPromise = worker.run();
@@ -49,13 +47,8 @@ export async function getTemporalClient() {
   if (process.env.TEMPORAL_ENABLED !== 'true') return null;
   try {
     const { Connection, Client } = await import('temporalio');
-    const connection = await Connection.connect({
-      address: process.env.TEMPORAL_ADDRESS || 'localhost:7233',
-    });
-    return new Client({
-      connection,
-      namespace: process.env.TEMPORAL_NAMESPACE || 'default',
-    });
+    const connection = await Connection.connect();
+    return new Client({ connection });
   } catch (e) {
     logger.warn('Temporal client not available');
     return null;

@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import $ from 'jquery';
 export default function ArtifactBusPanel() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [rows, setRows] = useState<any[]>([]);
   useEffect(() => {
     fetch('/api/oci/metrics')
       .then((r) => r.json())
       .then(setRows);
-    $('#ab-q').on('input', function () {
+    $('#ab-q').on('input', function (this: HTMLElement) {
       const v = ($(this).val() || '').toString().toLowerCase();
-      $('.ab-row').each(function () {
+      $('.ab-row').each(function (this: HTMLElement) {
         $(this).toggle($(this).text().toLowerCase().includes(v));
       });
     });
@@ -33,6 +34,7 @@ export default function ArtifactBusPanel() {
           </tr>
         </thead>
         <tbody>
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           {rows.map((x: any, i: number) => (
             <tr key={i} className="ab-row border-b">
               <td>{x.tag.slice(0, 16)}…</td>

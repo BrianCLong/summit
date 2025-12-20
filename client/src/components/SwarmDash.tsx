@@ -6,9 +6,9 @@ export default function SwarmDash() {
     fetch('/api/tgo/metrics')
       .then((r) => r.json())
       .then(setRows);
-    $('#swarm-q').on('input', function () {
+    $('#swarm-q').on('input', function (this: HTMLElement) {
       const v = $(this).val()?.toString().toLowerCase() || '';
-      $('.swarm-row').each(function () {
+      $('.swarm-row').each(function (this: HTMLElement) {
         $(this).toggle($(this).text().toLowerCase().includes(v));
       });
     });

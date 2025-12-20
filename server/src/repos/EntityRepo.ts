@@ -3,10 +3,16 @@
  * Replaces demo resolvers with PostgreSQL (canonical) + Neo4j (graph) dual-write
  */
 
+// @ts-ignore - pg type imports
 import { Pool, PoolClient } from 'pg';
 import { Driver, Session } from 'neo4j-driver';
 import { randomUUID as uuidv4 } from 'crypto';
 import logger from '../config/logger.js';
+import {
+  appendTenantFilter,
+  assertTenantMatch,
+  resolveTenantId,
+} from '../tenancy/tenantScope.js';
 
 const repoLogger = logger.child({ name: 'EntityRepo' });
 
@@ -30,6 +36,7 @@ export interface EntityInput {
 
 export interface EntityUpdateInput {
   id: string;
+  tenantId: string;
   labels?: string[];
   props?: Record<string, any>;
 }
@@ -45,6 +52,9 @@ interface EntityRow {
   created_by: string;
 }
 
+const ENTITY_COLUMNS =
+  'id, tenant_id, kind, labels, props, created_at, updated_at, created_by';
+
 export class EntityRepo {
   constructor(
     private pg: Pool,
@@ -55,6 +65,7 @@ export class EntityRepo {
    * Create new entity with dual-write to PG (canonical) + Neo4j (graph)
    */
   async create(input: EntityInput, userId: string): Promise<Entity> {
+    const tenantId = resolveTenantId(input.tenantId, 'entity.create');
     const id = uuidv4();
     const client = await this.pg.connect();
 
@@ -62,19 +73,19 @@ export class EntityRepo {
       await client.query('BEGIN');
 
       // 1. Write to PostgreSQL (source of truth)
-      const { rows } = await client.query<EntityRow>(
+      const { rows } = (await client.query(
         `INSERT INTO entities (id, tenant_id, kind, labels, props, created_by)
          VALUES ($1, $2, $3, $4, $5, $6)
-         RETURNING *`,
+         RETURNING ${ENTITY_COLUMNS}`,
         [
           id,
-          input.tenantId,
+          tenantId,
           input.kind,
           input.labels || [],
           JSON.stringify(input.props || {}),
           userId,
         ],
-      );
+      )) as { rows: EntityRow[] };
 
       const entity = rows[0];
 
@@ -120,6 +131,7 @@ export class EntityRepo {
    * Update entity with dual-write
    */
   async update(input: EntityUpdateInput): Promise<Entity | null> {
+    const tenantId = resolveTenantId(input.tenantId, 'entity.update');
     const client = await this.pg.connect();
 
     try {
@@ -143,12 +155,17 @@ export class EntityRepo {
 
       updateFields.push(`updated_at = now()`);
 
-      const { rows } = await client.query<EntityRow>(
-        `UPDATE entities SET ${updateFields.join(', ')}
-         WHERE id = $1
-         RETURNING *`,
+      const tenantParamIndex = paramIndex;
+      params.push(tenantId);
+
+      const { rows } = (await client.query(
+        appendTenantFilter(
+          `UPDATE entities SET ${updateFields.join(', ')}
+           WHERE id = $1`,
+          tenantParamIndex,
+        ),
         params,
-      );
+      )) as { rows: EntityRow[] };
 
       if (rows.length === 0) {
         await client.query('ROLLBACK');
@@ -156,6 +173,7 @@ export class EntityRepo {
       }
 
       const entity = rows[0];
+      assertTenantMatch(entity.tenant_id, tenantId, 'entity');
 
       // Outbox event for Neo4j sync
       await client.query(
@@ -198,23 +216,29 @@ export class EntityRepo {
   /**
    * Delete entity with dual-write
    */
-  async delete(id: string): Promise<boolean> {
+  async delete(id: string, tenantId: string): Promise<boolean> {
+    const scopedTenantId = resolveTenantId(tenantId, 'entity.delete');
     const client = await this.pg.connect();
 
     try {
       await client.query('BEGIN');
 
-      const { rowCount } = await client.query(
-        `DELETE FROM entities WHERE id = $1`,
-        [id],
+      const { rows } = await client.query(
+        `DELETE FROM entities WHERE id = $1 AND tenant_id = $2 RETURNING tenant_id`,
+        [id, scopedTenantId],
       );
 
-      if (rowCount && rowCount > 0) {
+      if (rows.length > 0) {
+        assertTenantMatch(rows[0].tenant_id, scopedTenantId, 'entity');
         // Outbox event for Neo4j cleanup
         await client.query(
           `INSERT INTO outbox_events (id, topic, payload)
            VALUES ($1, $2, $3)`,
-          [uuidv4(), 'entity.delete', JSON.stringify({ id })],
+          [
+            uuidv4(),
+            'entity.delete',
+            JSON.stringify({ id, tenantId: scopedTenantId }),
+          ],
         );
 
         await client.query('COMMIT');
@@ -245,17 +269,22 @@ export class EntityRepo {
   /**
    * Find entity by ID
    */
-  async findById(id: string, tenantId?: string): Promise<Entity | null> {
-    const params = [id];
-    let query = `SELECT * FROM entities WHERE id = $1`;
+  async findById(id: string, tenantId: string): Promise<Entity | null> {
+    const scopedTenantId = resolveTenantId(tenantId, 'entity.findById');
+    const { rows } = (await this.pg.query(
+      appendTenantFilter(
+        `SELECT ${ENTITY_COLUMNS} FROM entities WHERE id = $1`,
+        2,
+      ),
+      [id, scopedTenantId],
+    )) as { rows: EntityRow[] };
 
-    if (tenantId) {
-      query += ` AND tenant_id = $2`;
-      params.push(tenantId);
+    if (!rows[0]) {
+      return null;
     }
 
-    const { rows } = await this.pg.query<EntityRow>(query, params);
-    return rows[0] ? this.mapRow(rows[0]) : null;
+    assertTenantMatch(rows[0].tenant_id, scopedTenantId, 'entity');
+    return this.mapRow(rows[0]);
   }
 
   /**
@@ -274,8 +303,9 @@ export class EntityRepo {
     limit?: number;
     offset?: number;
   }): Promise<Entity[]> {
-    const params: any[] = [tenantId];
-    let query = `SELECT * FROM entities WHERE tenant_id = $1`;
+    const scopedTenantId = resolveTenantId(tenantId, 'entity.search');
+    const params: any[] = [scopedTenantId];
+    let query = `SELECT ${ENTITY_COLUMNS} FROM entities WHERE tenant_id = $1`;
     let paramIndex = 2;
 
     if (kind) {
@@ -293,8 +323,11 @@ export class EntityRepo {
     query += ` ORDER BY created_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
     params.push(Math.min(limit, 1000), offset); // Cap at 1000 for safety
 
-    const { rows } = await this.pg.query<EntityRow>(query, params);
-    return rows.map(this.mapRow);
+    const { rows } = (await this.pg.query(query, params)) as { rows: EntityRow[] };
+    return rows.map((row) => {
+      assertTenantMatch(row.tenant_id, scopedTenantId, 'entity');
+      return this.mapRow(row);
+    });
   }
 
   /**
@@ -302,20 +335,23 @@ export class EntityRepo {
    */
   async batchByIds(
     ids: readonly string[],
-    tenantId?: string,
+    tenantId: string,
   ): Promise<(Entity | null)[]> {
     if (ids.length === 0) return [];
 
-    const params = [ids];
-    let query = `SELECT * FROM entities WHERE id = ANY($1)`;
+    const scopedTenantId = resolveTenantId(tenantId, 'entity.batchByIds');
+    const params: any[] = [ids, scopedTenantId];
+    const query = appendTenantFilter(
+      `SELECT ${ENTITY_COLUMNS} FROM entities WHERE id = ANY($1)`,
+      2,
+    );
 
-    if (tenantId) {
-      query += ` AND tenant_id = $2`;
-      params.push(tenantId);
-    }
-
-    const { rows } = await this.pg.query<EntityRow>(query, params);
-    const entitiesMap = new Map(rows.map((row) => [row.id, this.mapRow(row)]));
+    const { rows } = (await this.pg.query(query, params)) as { rows: EntityRow[] };
+    const scopedEntities = rows.map((row) => {
+      assertTenantMatch(row.tenant_id, scopedTenantId, 'entity');
+      return this.mapRow(row);
+    });
+    const entitiesMap = new Map(scopedEntities.map((entity) => [entity.id, entity]));
 
     return ids.map((id) => entitiesMap.get(id) || null);
   }

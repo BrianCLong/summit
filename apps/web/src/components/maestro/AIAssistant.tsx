@@ -4,7 +4,6 @@ import {
   PaperAirplaneIcon,
   XMarkIcon,
   SparklesIcon,
-  ExclamationTriangleIcon,
   ClipboardDocumentIcon,
 } from '@heroicons/react/24/outline'
 
@@ -80,7 +79,7 @@ export function AIAssistant({ context }: AIAssistantProps) {
   }
 
   const sendMessage = async () => {
-    if (!inputValue.trim() || isLoading) return
+    if (!inputValue.trim() || isLoading) {return}
 
     const userMessage: AIMessage = {
       id: crypto.randomUUID(),

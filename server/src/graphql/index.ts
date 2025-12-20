@@ -1,5 +1,5 @@
 import { ApolloServer } from 'apollo-server-express';
-import { schema as typeDefs, safeTypes } from './schema/index.ts';
+import { schema as typeDefs, safeTypes } from './schema/index.js';
 import { resolvers } from './resolvers';
 
 export async function mountGraphQL(app: any) {
@@ -9,5 +9,5 @@ export async function mountGraphQL(app: any) {
     context: ({ req }) => ({ user: (req as any).user }),
   });
   await server.start();
-  server.applyMiddleware({ app, path: '/graphql' });
+  server.applyMiddleware({ app: app as any, path: '/graphql' });
 }

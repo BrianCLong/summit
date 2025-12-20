@@ -252,6 +252,44 @@ const pbacDecisionsTotal = new client.Counter({
   labelNames: ['decision'],
 });
 register.registerMetric(pbacDecisionsTotal);
+
+const admissionDecisionsTotal = new client.Counter({
+  name: 'admission_decisions_total',
+  help: 'Total admission control decisions',
+  labelNames: ['decision', 'policy'],
+});
+register.registerMetric(admissionDecisionsTotal);
+
+// Docling service metrics
+const doclingInferenceDuration = new client.Histogram({
+  name: 'docling_inference_duration_seconds',
+  help: 'Docling document inference duration in seconds',
+  labelNames: ['model', 'status'],
+  buckets: [0.1, 0.5, 1, 2, 5, 10, 30, 60],
+});
+register.registerMetric(doclingInferenceDuration);
+
+const doclingInferenceTotal = new client.Counter({
+  name: 'docling_inference_total',
+  help: 'Total Docling inference requests',
+  labelNames: ['model', 'status'],
+});
+register.registerMetric(doclingInferenceTotal);
+
+const doclingCharactersProcessed = new client.Counter({
+  name: 'docling_characters_processed_total',
+  help: 'Total characters processed by Docling',
+  labelNames: ['model'],
+});
+register.registerMetric(doclingCharactersProcessed);
+
+const doclingCostUsd = new client.Counter({
+  name: 'docling_cost_usd_total',
+  help: 'Total cost in USD for Docling processing',
+  labelNames: ['model'],
+});
+register.registerMetric(doclingCostUsd);
+
 // New domain metrics
 const graphExpandRequestsTotal = new client.Counter({
   name: 'graph_expand_requests_total',
@@ -393,6 +431,11 @@ export {
   graphragSchemaFailuresTotal,
   graphragCacheHitRatio,
   pbacDecisionsTotal,
+  admissionDecisionsTotal,
+  doclingInferenceDuration,
+  doclingInferenceTotal,
+  doclingCharactersProcessed,
+  doclingCostUsd,
   pipelineUptimeRatio,
   pipelineFreshnessSeconds,
   pipelineCompletenessRatio,

@@ -7,6 +7,8 @@ import {
   IntelGraphPlatform,
 } from '../platforms/intelgraph-platform';
 import { createConductor, MaestroConductor } from '../maestro/core/conductor';
+import * as fs from 'fs';
+import * as path from 'path';
 
 const program = new Command();
 let platform: IntelGraphPlatform | null = null;
@@ -347,6 +349,134 @@ program
     }
   });
 
+// ADR (Architecture Decision Records) Commands
+program
+  .command('adr:list')
+  .description('List all Architecture Decision Records')
+  .option('--area <area>', 'Filter by area (data, ai, infrastructure, auth, api, etc.)')
+  .option('--status <status>', 'Filter by status (proposed, accepted, deprecated, superseded)')
+  .option('--tags <tags>', 'Filter by tags (comma-separated)')
+  .action((options) => {
+    const adrDir = path.join(process.cwd(), 'adr');
+
+    if (!fs.existsSync(adrDir)) {
+      console.error('❌ ADR directory not found. Expected: adr/');
+      process.exit(1);
+    }
+
+    const files = fs.readdirSync(adrDir)
+      .filter(f => f.match(/^\d{4}-.+\.md$/))
+      .sort();
+
+    console.log('📚 Architecture Decision Records\n');
+
+    let filteredADRs = files.map(file => {
+      const filePath = path.join(adrDir, file);
+      const content = fs.readFileSync(filePath, 'utf-8');
+
+      // Parse frontmatter
+      const statusMatch = content.match(/\*\*Status:\*\*\s*(.+)/);
+      const areaMatch = content.match(/\*\*Area:\*\*\s*(.+)/);
+      const tagsMatch = content.match(/\*\*Tags:\*\*\s*(.+)/);
+      const titleMatch = content.match(/^#\s+ADR-\d+:\s*(.+)/m);
+
+      return {
+        file,
+        number: file.match(/^(\d{4})/)?.[1],
+        title: titleMatch?.[1]?.trim() || 'Unknown',
+        status: statusMatch?.[1]?.replace(/\[|\]/g, '').split('|')[0].trim() || 'Unknown',
+        area: areaMatch?.[1]?.replace(/\[|\]/g, '').split('|')[0].trim() || 'Unknown',
+        tags: tagsMatch?.[1]?.split(',').map(t => t.trim()) || [],
+      };
+    });
+
+    // Apply filters
+    if (options.area) {
+      filteredADRs = filteredADRs.filter(adr =>
+        adr.area.toLowerCase().includes(options.area.toLowerCase())
+      );
+    }
+
+    if (options.status) {
+      filteredADRs = filteredADRs.filter(adr =>
+        adr.status.toLowerCase().includes(options.status.toLowerCase())
+      );
+    }
+
+    if (options.tags) {
+      const searchTags = options.tags.split(',').map((t: string) => t.trim().toLowerCase());
+      filteredADRs = filteredADRs.filter(adr =>
+        searchTags.some(st => adr.tags.some(t => t.toLowerCase().includes(st)))
+      );
+    }
+
+    if (filteredADRs.length === 0) {
+      console.log('No ADRs found matching the filters.');
+      return;
+    }
+
+    // Group by area
+    const byArea: Record<string, typeof filteredADRs> = {};
+    filteredADRs.forEach(adr => {
+      if (!byArea[adr.area]) byArea[adr.area] = [];
+      byArea[adr.area].push(adr);
+    });
+
+    Object.keys(byArea).sort().forEach(area => {
+      console.log(`\n${area}:`);
+      byArea[area].forEach(adr => {
+        const statusIcon = adr.status === 'Accepted' ? '✅' :
+                          adr.status === 'Proposed' ? '🔄' :
+                          adr.status === 'Deprecated' ? '❌' : '📋';
+        console.log(`  ${statusIcon} ${adr.number}: ${adr.title}`);
+        console.log(`     Status: ${adr.status} | Tags: ${adr.tags.join(', ')}`);
+      });
+    });
+
+    console.log(`\n📊 Total: ${filteredADRs.length} ADRs`);
+    console.log('\n💡 Tip: Use "intelgraph adr:open <number>" to read an ADR');
+  });
+
+program
+  .command('adr:open')
+  .argument('<number>', 'ADR number (e.g., 0001 or 1)')
+  .option('--raw', 'Display raw markdown instead of formatted')
+  .description('Open and display an Architecture Decision Record')
+  .action((number, options) => {
+    const adrDir = path.join(process.cwd(), 'adr');
+
+    if (!fs.existsSync(adrDir)) {
+      console.error('❌ ADR directory not found. Expected: adr/');
+      process.exit(1);
+    }
+
+    // Pad number to 4 digits
+    const paddedNumber = number.toString().padStart(4, '0');
+
+    // Find matching ADR file
+    const files = fs.readdirSync(adrDir);
+    const adrFile = files.find(f => f.startsWith(paddedNumber + '-'));
+
+    if (!adrFile) {
+      console.error(`❌ ADR ${paddedNumber} not found.`);
+      console.log('\n💡 Use "intelgraph adr:list" to see all available ADRs');
+      process.exit(1);
+    }
+
+    const filePath = path.join(adrDir, adrFile);
+    const content = fs.readFileSync(filePath, 'utf-8');
+
+    if (options.raw) {
+      console.log(content);
+    } else {
+      // Display formatted (for now, just display raw; could add markdown rendering)
+      console.log('━'.repeat(80));
+      console.log(content);
+      console.log('━'.repeat(80));
+      console.log(`\n📄 File: adr/${adrFile}`);
+    }
+  });
+
 // Version and Info Commands
 program
   .command('version')
@@ -382,6 +512,8 @@ program
     console.log('  sprint      - Sprint execution management');
     console.log('  docs        - Documentation operations');
     console.log('  monitor     - Health and metrics');
+    console.log('  adr:list    - List Architecture Decision Records');
+    console.log('  adr:open    - View an ADR by number');
     console.log('');
     console.log('Quick Start:');
     console.log('  intelgraph platform start --env dev');

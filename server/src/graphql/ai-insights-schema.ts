@@ -594,7 +594,7 @@ export const aiInsightsResolvers = {
               linkScoring: health.feature_flags.ai_scoring,
               batchProcessing: true,
             },
-            uptime: health.uptime_seconds,
+            uptime: (health as any).uptime_seconds || 0,
             lastHealthCheck: new Date().toISOString(),
           };
         } catch (error) {

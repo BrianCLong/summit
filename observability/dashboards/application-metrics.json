@@ -1,0 +1,86 @@
+{
+  "dashboard": {
+    "title": "IntelGraph - Application Metrics",
+    "tags": ["intelgraph", "application", "metrics"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Jobs Processed",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(intelgraph_jobs_processed_total[5m])",
+            "legendFormat": "{{queue}} - {{status}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
+      },
+      {
+        "id": 2,
+        "title": "Outbox Sync Latency (p95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(intelgraph_outbox_sync_latency_seconds_bucket[5m]))",
+            "legendFormat": "{{operation}} p95",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(intelgraph_outbox_sync_latency_seconds_bucket[5m]))",
+            "legendFormat": "{{operation}} p99",
+            "refId": "B"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
+      },
+      {
+        "id": 3,
+        "title": "HTTP Request Duration",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(intelgraph_http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "{{method}} {{route}} p50",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(intelgraph_http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "{{method}} {{route}} p95",
+            "refId": "B"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 }
+      },
+      {
+        "id": 4,
+        "title": "Active Connections by Tenant",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "intelgraph_active_connections",
+            "legendFormat": "{{tenant}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 }
+      },
+      {
+        "id": 5,
+        "title": "Database Query Performance",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(intelgraph_database_query_duration_seconds_bucket[5m]))",
+            "legendFormat": "{{database}} {{operation}} p95",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 }
+      }
+    ],
+    "refresh": "10s",
+    "time": { "from": "now-1h", "to": "now" }
+  }
+}

@@ -1,14 +1,14 @@
 import { ApolloServer } from '@apollo/server';
-import { expressMiddleware } from '@apollo/server/express4';
+import { expressMiddleware } from '@as-integrations/express4';
 import express from 'express';
 import cors from 'cors';
 import compression from 'compression';
 import helmet from 'helmet';
-import { typeDefs } from './schema';
-import { resolvers } from './resolvers';
-import { policyGuard } from './middleware/policy';
-import { createContext } from './context';
-import { logger } from './utils/logger';
+import { typeDefs } from './schema.js';
+import { resolvers } from './resolvers.js';
+import { policyGuard } from './middleware/policy.js';
+import { createContext } from './context.js';
+import { logger } from './utils/logger.js';
 
 const PORT = process.env.PORT || 4000;
 const NODE_ENV = process.env.NODE_ENV || 'development';

@@ -1,0 +1,43 @@
+{
+  "artifacts": [
+    {
+      "key": "dataset:training-corpus",
+      "type": "dataset",
+      "name": "training-corpus",
+      "currentVersion": "2024.09",
+      "lastGoodVersion": "2024.08",
+      "syncedVersion": "2024.09",
+      "backfillNeeded": true
+    },
+    {
+      "key": "model:recommender",
+      "type": "model",
+      "name": "recommender",
+      "currentVersion": "v5",
+      "lastGoodVersion": "v4",
+      "syncedVersion": "v5"
+    },
+    {
+      "key": "policy:ranking",
+      "type": "policy",
+      "name": "ranking",
+      "currentVersion": "r3",
+      "lastGoodVersion": "r2",
+      "syncedVersion": "v5"
+    },
+    {
+      "key": "cache:reco-serving",
+      "type": "cache",
+      "name": "reco-serving",
+      "currentVersion": "v5",
+      "lastGoodVersion": "v4",
+      "syncedVersion": "v5"
+    }
+  ],
+  "dependencies": [
+    {"from": "model:recommender", "to": "dataset:training-corpus"},
+    {"from": "policy:ranking", "to": "model:recommender"},
+    {"from": "cache:reco-serving", "to": "model:recommender"},
+    {"from": "cache:reco-serving", "to": "dataset:training-corpus"}
+  ]
+}

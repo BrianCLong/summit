@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -10,12 +14,32 @@
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "module": "ESNext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "types": ["jest", "@testing-library/jest-dom"]
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ],
+      "zod/v4": [
+        "../types/shims/zod-v4.d.ts"
+      ]
+    },
+    "types": [
+      "node",
+      "jest",
+      "@testing-library/jest-dom"
+    ],
+    "jsxImportSource": "react",
+    "typeRoots": [
+      "./types",
+      "./node_modules/@types",
+      "../types/shims",
+      "./types/shims"
+    ]
   },
   "include": [
     "src/**/*",
@@ -24,5 +48,18 @@
     "src/**/*.js",
     "src/**/*.jsx"
   ],
-  "exclude": ["node_modules", "dist", "build"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "src/__tests__/**",
+    "src/components/**/__tests__/**",
+    "src/components/ai-enhanced/tests/**",
+    "src/components/ai-enhanced/__tests__/**"
+  ],
+  "files": [
+    "types/custom.d.ts",
+    "types/mui.d.ts",
+    "types/grid2.d.ts"
+  ]
 }

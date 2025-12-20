@@ -70,7 +70,7 @@ interface UseConductorMetricsOptions {
 
 export const useConductorMetrics = (options: UseConductorMetricsOptions) => {
   const { timeRange, refreshInterval = 30000, tenantId } = options
-  const intervalRef = useRef<NodeJS.Timeout>()
+  const intervalRef = useRef<NodeJS.Timeout | undefined>(undefined)
 
   const fetchMetrics = async (): Promise<ConductorMetrics> => {
     const params = new URLSearchParams({
@@ -113,7 +113,7 @@ export const useConductorMetrics = (options: UseConductorMetricsOptions) => {
 
   // Real-time updates using SSE
   useEffect(() => {
-    if (!refreshInterval) return
+    if (!refreshInterval) {return}
 
     const eventSource = new EventSource(
       `/api/conductor/v1/metrics/stream?timeRange=${timeRange}`

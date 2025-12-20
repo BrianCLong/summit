@@ -1,13 +1,20 @@
 import { EventEmitter } from 'events';
-import { createLogger } from '../config/logger';
+import baseLogger from '../config/logger';
 import * as crypto from 'crypto';
 import * as zlib from 'zlib';
 import { promisify } from 'util';
 
-const logger = createLogger('RedisStateManager');
+type BufferEncoding = 'ascii' | 'utf8' | 'utf-8' | 'utf16le' | 'ucs2' | 'ucs-2' | 'base64' | 'base64url' | 'latin1' | 'binary' | 'hex';
+
+const logger = baseLogger.child({ module: 'RedisStateManager' });
 
 const compress = promisify(zlib.gzip);
 const decompress = promisify(zlib.gunzip);
+
+const encodeBuffer = (value: Uint8Array, encoding: BufferEncoding) =>
+  Buffer.from(value).toString(encoding);
+
+const randomHex = (size: number) => encodeBuffer(crypto.randomBytes(size), 'hex');
 
 export interface StateSnapshot {
   id: string;
@@ -151,7 +158,7 @@ export class RedisStateManager extends EventEmitter {
         const compressedBuffer = await compress(
           Buffer.from(serializedData, 'utf8'),
         );
-        serializedData = compressedBuffer.toString('base64');
+        serializedData = encodeBuffer(compressedBuffer, 'base64');
         compressed = true;
       }
 
@@ -271,7 +278,7 @@ export class RedisStateManager extends EventEmitter {
       if (storedData.compressed) {
         const compressedBuffer = Buffer.from(data, 'base64');
         const decompressedBuffer = await decompress(compressedBuffer);
-        data = decompressedBuffer.toString('utf8');
+        data = encodeBuffer(decompressedBuffer, 'utf8');
       }
 
       // Parse final data
@@ -543,7 +550,7 @@ export class RedisStateManager extends EventEmitter {
   // Private helper methods
 
   private generateStateId(): string {
-    return `state_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`;
+    return `state_${Date.now()}_${randomHex(8)}`;
   }
 
   private buildRedisKey(
@@ -586,9 +593,9 @@ export class RedisStateManager extends EventEmitter {
       const authTag = cipher.getAuthTag();
 
       return JSON.stringify({
-        iv: iv.toString('hex'),
+        iv: encodeBuffer(iv, 'hex'),
         data: encrypted,
-        authTag: authTag.toString('hex'),
+        authTag: encodeBuffer(authTag, 'hex'),
       });
     } catch (error) {
       logger.error('Encryption failed', { error });

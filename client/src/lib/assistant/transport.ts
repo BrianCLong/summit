@@ -25,7 +25,9 @@ function expBackoff(
 
 function withAuthHeaders(getAuthToken: () => string | null) {
   const token = getAuthToken?.();
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  return headers;
 }
 
 // ---- Fetch streaming (HTTP) ----
@@ -34,22 +36,19 @@ export function createFetchStreamTransport(
 ): AssistantTransport {
   let handler: ((e: AssistantEvent) => void) | null = null;
   return {
-    on: (fn) => {
+    on: (fn: any) => {
       handler = fn;
       return () => {
         handler = null;
       };
     },
-    send: async (input, signal) => {
+    send: async (input: any, signal: any) => {
       try {
         // Emit a local thinking status so UIs/tests get immediate feedback
         handler?.({ type: 'status', value: 'thinking' });
         const res = await fetch(`${opts.baseUrl}/assistant/stream`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...withAuthHeaders(opts.getAuthToken),
-          },
+          headers: withAuthHeaders(opts.getAuthToken),
           body: JSON.stringify({ input }),
           signal,
         });
@@ -158,13 +157,13 @@ export function createSseTransport(opts: TransportOpts): AssistantTransport {
   };
 
   return {
-    on: (fn) => {
+    on: (fn: any) => {
       handler = fn;
       return () => {
         handler = null;
       };
     },
-    send: (input, signal) => open(input, signal),
+    send: (input: any, signal: any) => open(input, signal),
   };
 }
 
@@ -173,7 +172,7 @@ export function createSocketIoTransport(
   opts: TransportOpts,
 ): AssistantTransport {
   // Lazy-import so tests can mock without bundling the client in non-RT paths
-  let SocketIO;
+  let SocketIO: any;
   try {
     SocketIO = require('socket.io-client');
   } catch (_) {}
@@ -193,13 +192,13 @@ export function createSocketIoTransport(
   };
 
   return {
-    on: (fn) => {
+    on: (fn: any) => {
       handler = fn;
       return () => {
         handler = null;
       };
     },
-    send: (input, signal) => {
+    send: (input: any, signal: any) => {
       const run = () => {
         // handler?.({ type: "status", value: "thinking" }); // Server will send this
         socket.emit('assistant:ask', { input });

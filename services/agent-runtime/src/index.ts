@@ -19,6 +19,8 @@ import { register, collectDefaultMetrics } from 'prom-client';
 const PORT = parseInt(process.env.PORT || '4012');
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
+const jsonRecord = () => z.record(z.string(), z.any());
+
 // Prometheus metrics
 collectDefaultMetrics();
 
@@ -36,7 +38,7 @@ const RunbookTaskSchema = z.object({
   id: z.string(),
   name: z.string(),
   uses: z.string(),
-  with: z.record(z.any()).optional(),
+  with: jsonRecord().optional(),
   needs: z.array(z.string()).optional().default([]),
   timeout: z.number().optional().default(300),
   retries: z.number().optional().default(0),
@@ -63,15 +65,15 @@ const RunbookExecutionSchema = z.object({
       status: z.enum(['pending', 'running', 'completed', 'failed', 'skipped']),
       started_at: z.string().datetime().optional(),
       completed_at: z.string().datetime().optional(),
-      output: z.record(z.any()).optional(),
+      output: jsonRecord().optional(),
       error: z.string().optional(),
     }),
   ),
-  inputs: z.record(z.any()).optional(),
+  inputs: jsonRecord().optional(),
   created_at: z.string().datetime(),
   started_at: z.string().datetime().optional(),
   completed_at: z.string().datetime().optional(),
-  kpis: z.record(z.any()).optional(),
+  kpis: jsonRecord().optional(),
   replay_source: z.string().optional(),
 });
 
@@ -218,7 +220,10 @@ class RunbookEngine {
       },
       {
         attempts: 3,
-        backoff: 'exponential',
+        backoff: {
+          type: 'exponential',
+          delay: 1000,
+        },
       },
     );
 
@@ -227,7 +232,7 @@ class RunbookEngine {
 
   async getExecution(id: string): Promise<RunbookExecution | null> {
     const data = await redis.get(`execution:${id}`);
-    if (!data) return null;
+    if (!data) {return null;}
 
     return RunbookExecutionSchema.parse(JSON.parse(data));
   }
@@ -275,7 +280,7 @@ class RunbookEngine {
       if (temp.has(node)) {
         throw new Error('Circular dependency detected');
       }
-      if (visited.has(node)) return;
+      if (visited.has(node)) {return;}
 
       temp.add(node);
       const dependencies = dag.get(node) || [];
@@ -303,7 +308,7 @@ taskQueue.process('execute-runbook', 5, async (job) => {
 
   try {
     const execution = await engine.getExecution(executionId);
-    if (!execution) throw new Error('Execution not found');
+    if (!execution) {throw new Error('Execution not found');}
 
     // Update status to running
     execution.status = 'running';
@@ -319,12 +324,12 @@ taskQueue.process('execute-runbook', 5, async (job) => {
 
     // Execute tasks in topological order
     for (const taskId of sortedTaskIds) {
-      const task = taskMap.get(taskId);
-      if (!task) continue;
+      const task = taskMap.get(taskId) as RunbookTask;
+      if (!task) {continue;}
 
       // Update task status
       const taskExecution = execution.tasks.find((t) => t.id === taskId);
-      if (!taskExecution) continue;
+      if (!taskExecution) {continue;}
 
       taskExecution.status = 'running';
       taskExecution.started_at = new Date().toISOString();
@@ -332,13 +337,13 @@ taskQueue.process('execute-runbook', 5, async (job) => {
 
       try {
         // Collect inputs from dependencies
-        const taskInputs = { ...inputs, ...task.with };
+        const taskInputs = { ...inputs, ...(task.with || {}) };
         for (const depId of task.needs || []) {
           taskInputs[`${depId}_output`] = results.get(depId);
         }
 
         // Execute task
-        const executor = taskExecutors[task.uses];
+        const executor = taskExecutors[task.uses] as any;
         if (!executor) {
           throw new Error(`Unknown task type: ${task.uses}`);
         }
@@ -409,7 +414,7 @@ taskQueue.process('execute-runbook', 5, async (job) => {
 });
 
 // Policy enforcement
-function policyMiddleware(request: any, reply: any, done: any) {
+async function policyMiddleware(request: any, reply: any) {
   const authorityId = request.headers['x-authority-id'];
   const reasonForAccess = request.headers['x-reason-for-access'];
 
@@ -418,7 +423,7 @@ function policyMiddleware(request: any, reply: any, done: any) {
 
     if (dryRun) {
       request.log.warn('Policy violation in dry-run mode');
-      return done();
+      return;
     }
 
     return reply.status(403).send({
@@ -430,7 +435,6 @@ function policyMiddleware(request: any, reply: any, done: any) {
 
   request.authorityId = authorityId;
   request.reasonForAccess = reasonForAccess;
-  done();
 }
 
 // Create Fastify instance
@@ -525,7 +529,7 @@ server.post<{ Body: { name: string; version?: string; inputs?: any } }>(
 
       return execution;
     } catch (error) {
-      server.log.error('Failed to start runbook', error);
+      server.log.error(error, 'Failed to start runbook');
       reply.status(500);
       return { error: 'Failed to start runbook execution' };
     }
@@ -541,7 +545,7 @@ server.post<{ Body: { sourceId: string; inputs?: any } }>(
       const execution = await engine.replayExecution(sourceId, inputs);
       return execution;
     } catch (error) {
-      server.log.error('Failed to replay runbook', error);
+      server.log.error(error, 'Failed to replay runbook');
       reply.status(500);
       return { error: 'Failed to replay runbook execution' };
     }
@@ -549,9 +553,9 @@ server.post<{ Body: { sourceId: string; inputs?: any } }>(
 );
 
 // WebSocket for real-time updates
-server.register(async function (fastify) {
+server.register(async (fastify) => {
   fastify.get('/ws', { websocket: true }, (connection, req) => {
-    connection.socket.on('message', (message) => {
+    connection.on('message', (message) => {
       const data = JSON.parse(message.toString());
 
       if (data.type === 'subscribe' && data.executionId) {
@@ -559,7 +563,7 @@ server.register(async function (fastify) {
         const interval = setInterval(async () => {
           const execution = await engine.getExecution(data.executionId);
           if (execution) {
-            connection.socket.send(
+            connection.send(
               JSON.stringify({
                 type: 'execution_update',
                 data: execution,
@@ -574,7 +578,7 @@ server.register(async function (fastify) {
           }
         }, 1000);
 
-        connection.socket.on('close', () => {
+        connection.on('close', () => {
           clearInterval(interval);
         });
       }

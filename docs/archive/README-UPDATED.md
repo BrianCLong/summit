@@ -24,7 +24,7 @@ All critical MVP-0 features implemented with enterprise-grade security, observab
 
 ```bash
 # 1. Clone and setup
-git clone https://github.com/brianlong/intelgraph.git
+git clone https://github.com/BrianCLong/summit.git
 cd intelgraph
 cp .env.example .env
 

@@ -2,8 +2,11 @@
 interface Watchlist {
   id: string;
   name: string;
-  items: string[];
+  items: { value: string }[];
   owners: string[];
+  scope?: { tenantId: string };
+  severityWeights?: Record<string, number>;
+  createdAt?: Date;
 }
 
 interface Rule {
@@ -12,6 +15,9 @@ interface Rule {
   name: string;
   enabled: boolean;
   threshold: number;
+  trigger?: string;
+  selector?: Record<string, any>;
+  window?: number;
 }
 
 interface Alert {

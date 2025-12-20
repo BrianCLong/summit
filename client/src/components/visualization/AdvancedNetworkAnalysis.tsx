@@ -117,9 +117,13 @@ const AdvancedNetworkAnalysis: React.FC<AdvancedNetworkAnalysisProps> = ({
   const [communities, setCommunities] = useState<CommunityDetection[]>([]);
   const [selectedNodes, setSelectedNodes] = useState<NetworkNode[]>([]);
   const [selectedEdges, setSelectedEdges] = useState<NetworkEdge[]>([]);
-  const [analysisMode, setAnalysisMode] = useState<
-    'overview' | 'centrality' | 'community' | 'paths' | 'temporal'
-  >('overview');
+  type AnalysisMode =
+    | 'overview'
+    | 'centrality'
+    | 'community'
+    | 'paths'
+    | 'temporal';
+  const [analysisMode, setAnalysisMode] = useState<AnalysisMode>('overview');
   const [metrics, setMetrics] = useState<AnalysisMetrics | null>(null);
   const [pathAnalysis, setPathAnalysis] = useState<PathAnalysis[]>([]);
   const [selectedCommunity, setSelectedCommunity] =
@@ -128,12 +132,20 @@ const AdvancedNetworkAnalysis: React.FC<AdvancedNetworkAnalysisProps> = ({
     start: Date;
     end: Date;
   } | null>(null);
-  const [centralityType, setCentralityType] = useState<
-    'betweenness' | 'closeness' | 'eigenvector' | 'pagerank'
-  >('betweenness');
-  const [layoutAlgorithm, setLayoutAlgorithm] = useState<
-    'force' | 'circular' | 'hierarchical' | 'community'
-  >('force');
+  type CentralityType =
+    | 'betweenness'
+    | 'closeness'
+    | 'eigenvector'
+    | 'pagerank';
+  const [centralityType, setCentralityType] =
+    useState<CentralityType>('betweenness');
+  type LayoutAlgorithm =
+    | 'force'
+    | 'circular'
+    | 'hierarchical'
+    | 'community';
+  const [layoutAlgorithm, setLayoutAlgorithm] =
+    useState<LayoutAlgorithm>('force');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -369,6 +381,47 @@ const AdvancedNetworkAnalysis: React.FC<AdvancedNetworkAnalysisProps> = ({
     onCommunitySelect(community);
   };
 
+  const handleAnalysisModeChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    setAnalysisMode(event.target.value as AnalysisMode);
+  };
+
+  const handleLayoutChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    setLayoutAlgorithm(event.target.value as LayoutAlgorithm);
+  };
+
+  const handleCentralityChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    setCentralityType(event.target.value as CentralityType);
+  };
+
+  const handleTemporalStartChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const start = event.target.value
+      ? new Date(event.target.value)
+      : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    setTemporalFilter((prev) => ({
+      start,
+      end: prev?.end ?? new Date(),
+    }));
+  };
+
+  const handleTemporalEndChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const end = event.target.value ? new Date(event.target.value) : new Date();
+    setTemporalFilter((prev) => ({
+      start:
+        prev?.start ?? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+      end,
+    }));
+  };
+
   return (
     <div className={`advanced-network-analysis ${className}`}>
       {/* Analysis Controls */}
@@ -380,7 +433,7 @@ const AdvancedNetworkAnalysis: React.FC<AdvancedNetworkAnalysisProps> = ({
             </label>
             <select
               value={analysisMode}
-              onChange={(e) => setAnalysisMode(e.target.value as any)}
+              onChange={handleAnalysisModeChange}
               className="px-3 py-2 border rounded-md text-sm"
             >
               <option value="overview">Overview</option>
@@ -395,7 +448,7 @@ const AdvancedNetworkAnalysis: React.FC<AdvancedNetworkAnalysisProps> = ({
             <label className="block text-sm font-medium mb-1">Layout</label>
             <select
               value={layoutAlgorithm}
-              onChange={(e) => setLayoutAlgorithm(e.target.value as any)}
+              onChange={handleLayoutChange}
               className="px-3 py-2 border rounded-md text-sm"
             >
               <option value="force">Force-Directed</option>
@@ -412,7 +465,7 @@ const AdvancedNetworkAnalysis: React.FC<AdvancedNetworkAnalysisProps> = ({
               </label>
               <select
                 value={centralityType}
-                onChange={(e) => setCentralityType(e.target.value as any)}
+                onChange={handleCentralityChange}
                 className="px-3 py-2 border rounded-md text-sm"
               >
                 <option value="betweenness">Betweenness</option>
@@ -449,23 +502,13 @@ const AdvancedNetworkAnalysis: React.FC<AdvancedNetworkAnalysisProps> = ({
             <input
               type="date"
               className="px-3 py-2 border rounded-md text-sm"
-              onChange={(e) => {
-                const start = e.target.value
-                  ? new Date(e.target.value)
-                  : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-                setTemporalFilter((prev) => ({ ...prev, start }));
-              }}
+              onChange={handleTemporalStartChange}
             />
             <span>to</span>
             <input
               type="date"
               className="px-3 py-2 border rounded-md text-sm"
-              onChange={(e) => {
-                const end = e.target.value
-                  ? new Date(e.target.value)
-                  : new Date();
-                setTemporalFilter((prev) => ({ ...prev, end }));
-              }}
+              onChange={handleTemporalEndChange}
             />
           </div>
         )}

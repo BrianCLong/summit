@@ -41,4 +41,3 @@ export const authMiddleware = (req, res, next) => {
         });
     }
 };
-//# sourceMappingURL=auth.js.map

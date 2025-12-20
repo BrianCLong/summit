@@ -39,6 +39,24 @@ module.exports = {
         ],
       },
     },
+    {
+      files: [
+        'packages/rest-api/src/**/*.{ts,tsx}',
+        'packages/language-models/src/**/*.{ts,tsx}',
+        'packages/graph-query/src/**/*.{ts,tsx}',
+        'workers/**/*.ts',
+      ],
+      rules: {
+        'no-restricted-syntax': [
+          'error',
+          {
+            selector: "NewExpression[callee.name='Error']",
+            message:
+              'Use @intelgraph/errors errorFactory helpers instead of raw Error.',
+          },
+        ],
+      },
+    },
   ],
   rules: {
     'import/order': [
@@ -46,7 +64,10 @@ module.exports = {
       { 'newlines-between': 'always', alphabetize: { order: 'asc' } },
     ],
     'react/prop-types': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
+    'no-unused-expressions': 'off',
+    '@typescript-eslint/no-unused-expressions': ['error', {}],
   },
   ignorePatterns: ['dist', 'build', 'coverage', 'node_modules'],
 };

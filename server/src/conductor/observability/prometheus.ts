@@ -92,6 +92,19 @@ export const conductorTaskTimeoutTotal = new client.Counter({
   labelNames: ['expert', 'timeout_type'],
 });
 
+export const pricingReadRequestsTotal = new client.Counter({
+  name: 'pricing_read_requests_total',
+  help: 'Total number of pricing read/debug API requests',
+  labelNames: ['route', 'status'],
+});
+
+export const pricingReadLatencyMs = new client.Histogram({
+  name: 'pricing_read_latency_ms',
+  help: 'Latency of pricing read/debug API requests in milliseconds',
+  labelNames: ['route'],
+  buckets: [5, 10, 25, 50, 100, 250, 500, 1000, 2000, 5000],
+});
+
 // Register all conductor metrics with the main registry
 [
   conductorRouterDecisionsTotal,
@@ -108,6 +121,8 @@ export const conductorTaskTimeoutTotal = new client.Counter({
   conductorRoutingConfidenceHistogram,
   conductorConcurrencyLimitHitsTotal,
   conductorTaskTimeoutTotal,
+  pricingReadRequestsTotal,
+  pricingReadLatencyMs,
 ].forEach((metric) => register.registerMetric(metric));
 
 // Helper functions to work with confidence buckets
@@ -261,6 +276,35 @@ export class PrometheusConductorMetrics {
     timeoutType: 'execution' | 'routing' | 'mcp',
   ): void {
     conductorTaskTimeoutTotal.inc({ expert, timeout_type: timeoutType });
+  }
+
+  /**
+   * Record operational event (for general operational tracking)
+   */
+  public recordOperationalEvent(
+    eventType: string,
+    metadata?: Record<string, any>,
+  ): void {
+    // Record as a security event with generic type
+    conductorSecurityEventsTotal.inc({
+      type: eventType,
+      result: metadata?.success !== false ? 'allowed' : 'denied',
+    });
+  }
+
+  /**
+   * Record operational metric (for general metric tracking)
+   */
+  public recordOperationalMetric(
+    metricName: string,
+    value: number,
+    labels?: Record<string, string>,
+  ): void {
+    // For now, record as active task count or use a generic gauge
+    // This is a stub implementation that can be expanded
+    if (metricName.includes('active') || metricName.includes('count')) {
+      conductorActiveTasksGauge.set(value);
+    }
   }
 }
 

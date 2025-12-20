@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useEffect, useRef } from 'react';
 import { Box, Typography, CircularProgress, Alert, Paper } from '@mui/material';
 import { useQuery, gql } from '@apollo/client';

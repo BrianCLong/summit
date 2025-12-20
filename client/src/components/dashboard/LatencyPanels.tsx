@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAppSelector } from '../../store/index.ts';
+import { useAppSelector } from '../../store/hooks';
 import { Card, CardContent, Stack, Typography, Skeleton } from '@mui/material';
 import {
   LineChart,
@@ -12,7 +12,7 @@ import {
 import { useSafeQuery } from '../../hooks/useSafeQuery';
 
 export default function LatencyPanels() {
-  const { tenant, status, operation } = useAppSelector((s) => s.ui);
+  const { tenant, status, operation } = useAppSelector((s: any) => s.ui);
   const { data: p95, loading: loadingP95 } = useSafeQuery<{ valueMs: number }>({
     queryKey: `p95_${tenant}_${status}_${operation}`,
     mock: { valueMs: 120.4 },
@@ -56,11 +56,11 @@ export default function LatencyPanels() {
                 <LineChart data={trend} aria-label="p95 trend">
                   <XAxis
                     dataKey="ts"
-                    tickFormatter={(v) => new Date(v).toLocaleTimeString()}
+                    tickFormatter={(v: number) => new Date(v).toLocaleTimeString()}
                   />
                   <YAxis unit=" ms" />
                   <Tooltip
-                    labelFormatter={(v) => new Date(Number(v)).toLocaleString()}
+                    labelFormatter={(v: number | string) => new Date(Number(v)).toLocaleString()}
                   />
                   <Line
                     type="monotone"

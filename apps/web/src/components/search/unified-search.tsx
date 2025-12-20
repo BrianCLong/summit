@@ -32,7 +32,7 @@ const getTypeIcon = (type: string) => {
 }
 // ... (rest of the file)
 ;<Mic className="h-4 w-4" />
-import { debounce } from 'lodash'
+import debounce from 'lodash/debounce'
 import DOMPurify from 'dompurify'
 
 interface SearchResult {
@@ -183,7 +183,7 @@ export const UnifiedSearch: React.FC<UnifiedSearchProps> = ({
     return [
       {
         id: '1',
-        type: 'entity',
+        type: 'entity' as const,
         title: 'Customer Analytics Dashboard',
         description:
           'Real-time analytics for customer behavior and engagement metrics',
@@ -214,7 +214,7 @@ export const UnifiedSearch: React.FC<UnifiedSearchProps> = ({
       },
       {
         id: '2',
-        type: 'document',
+        type: 'document' as const,
         title: 'Q3 Business Review',
         description:
           'Quarterly business performance review and strategic insights',

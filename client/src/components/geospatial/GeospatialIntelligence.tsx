@@ -293,6 +293,7 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
       'osint',
       'witness',
     ];
+    const tagOptions = ['surveillance', 'meeting', 'residence', 'commercial'];
 
     const mockPoints: GeospatialPoint[] = Array.from(
       { length: 150 },
@@ -352,8 +353,10 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
               : [],
           tags:
             Math.random() > 0.5
-              ? ['surveillance', 'meeting', 'residence', 'commercial'][
-                  Math.floor(Math.random() * 4)
+              ? [
+                  tagOptions[
+                    Math.floor(Math.random() * tagOptions.length)
+                  ],
                 ]
               : [],
           riskLevel: ['low', 'medium', 'high', 'critical'][

@@ -7,16 +7,55 @@ export class QueryBuilderService {
     }
     initializeSynonyms() {
         this.synonyms.set('person', ['individual', 'human', 'people', 'personnel']);
-        this.synonyms.set('organization', ['company', 'corp', 'enterprise', 'business', 'org']);
-        this.synonyms.set('location', ['place', 'address', 'geo', 'position', 'site']);
-        this.synonyms.set('event', ['incident', 'occurrence', 'happening', 'activity']);
-        this.synonyms.set('threat', ['danger', 'risk', 'vulnerability', 'attack', 'malware']);
-        this.synonyms.set('document', ['file', 'report', 'paper', 'record', 'publication']);
+        this.synonyms.set('organization', [
+            'company',
+            'corp',
+            'enterprise',
+            'business',
+            'org',
+        ]);
+        this.synonyms.set('location', [
+            'place',
+            'address',
+            'geo',
+            'position',
+            'site',
+        ]);
+        this.synonyms.set('event', [
+            'incident',
+            'occurrence',
+            'happening',
+            'activity',
+        ]);
+        this.synonyms.set('threat', [
+            'danger',
+            'risk',
+            'vulnerability',
+            'attack',
+            'malware',
+        ]);
+        this.synonyms.set('document', [
+            'file',
+            'report',
+            'paper',
+            'record',
+            'publication',
+        ]);
     }
     initializeFieldMappings() {
         this.fieldMappings.set('name', ['title', 'label', 'identifier', 'alias']);
-        this.fieldMappings.set('description', ['content', 'summary', 'details', 'notes']);
-        this.fieldMappings.set('date', ['timestamp', 'created', 'modified', 'updated']);
+        this.fieldMappings.set('description', [
+            'content',
+            'summary',
+            'details',
+            'notes',
+        ]);
+        this.fieldMappings.set('date', [
+            'timestamp',
+            'created',
+            'modified',
+            'updated',
+        ]);
         this.fieldMappings.set('type', ['category', 'classification', 'kind']);
         this.fieldMappings.set('source', ['origin', 'provider', 'system', 'feed']);
     }
@@ -101,9 +140,18 @@ export class QueryBuilderService {
             'after',
         ]);
         const operatorTerms = new Set(['and', 'or', 'not', 'near', 'within']);
-        const modifierTerms = new Set(['similar', 'like', 'related', 'associated', 'connected']);
+        const modifierTerms = new Set([
+            'similar',
+            'like',
+            'related',
+            'associated',
+            'connected',
+        ]);
         tokens.forEach((token) => {
-            if (stopWords.has(token) && token !== 'and' && token !== 'or' && token !== 'not') {
+            if (stopWords.has(token) &&
+                token !== 'and' &&
+                token !== 'or' &&
+                token !== 'not') {
                 return;
             }
             if (entityTypeTerms.has(token)) {
@@ -125,7 +173,14 @@ export class QueryBuilderService {
         return processed;
     }
     determineSearchType(originalQuery, processed) {
-        const semanticIndicators = ['similar', 'like', 'related', 'associated', 'meaning', 'concept'];
+        const semanticIndicators = [
+            'similar',
+            'like',
+            'related',
+            'associated',
+            'meaning',
+            'concept',
+        ];
         const fuzzyIndicators = ['approximate', 'fuzzy', 'close', 'near'];
         if (semanticIndicators.some((indicator) => originalQuery.includes(indicator))) {
             return 'semantic';
@@ -210,7 +265,9 @@ export class QueryBuilderService {
             case 'bool':
                 return {
                     bool: {
-                        ...(qb.must && { must: qb.must.map((q) => this.convertQueryBuilderToElastic(q)) }),
+                        ...(qb.must && {
+                            must: qb.must.map((q) => this.convertQueryBuilderToElastic(q)),
+                        }),
                         ...(qb.should && {
                             should: qb.should.map((q) => this.convertQueryBuilderToElastic(q)),
                         }),
@@ -220,7 +277,9 @@ export class QueryBuilderService {
                         ...(qb.filter && {
                             filter: qb.filter.map((q) => this.convertQueryBuilderToElastic(q)),
                         }),
-                        ...(qb.minimum_should_match && { minimum_should_match: qb.minimum_should_match }),
+                        ...(qb.minimum_should_match && {
+                            minimum_should_match: qb.minimum_should_match,
+                        }),
                     },
                 };
             case 'match':
@@ -385,4 +444,3 @@ export class QueryBuilderService {
         };
     }
 }
-//# sourceMappingURL=QueryBuilderService.js.map

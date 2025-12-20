@@ -41,6 +41,7 @@ const parseSchema = z.object({
   hints: z.array(z.string()).optional(),
   uri: z.string().url().optional(),
   bytes: z.string().optional(),
+  policyTags: z.array(z.string()).optional(),
 });
 
 const summarizeSchema = z.object({
@@ -58,6 +59,7 @@ const summarizeSchema = z.object({
   focus: z.enum(['failures', 'changelog', 'compliance']),
   maxTokens: z.number().int().positive().optional(),
   relatedFragmentIds: z.array(z.string()).optional(),
+  policyTags: z.array(z.string()).optional(),
 });
 
 const extractSchema = z.object({
@@ -77,6 +79,7 @@ const extractSchema = z.object({
     .array(z.enum(['license', 'version', 'cve', 'owner', 'policy']))
     .min(1),
   fragmentIds: z.array(z.string()).optional(),
+  policyTags: z.array(z.string()).optional(),
 });
 
 type CacheEntry<T> = { expiresAt: number; response: DoclingResponse<T> };
@@ -122,15 +125,13 @@ export class DoclingHandler {
 
   private async dispatch<
     Schema extends z.ZodTypeAny,
-    Payload extends z.infer<Schema>,
     Result,
   >(
     req: Request,
     res: Response,
     operation: 'parse' | 'summarize' | 'extract',
     schema: Schema,
-    executor: (payload: Payload) => Promise<DoclingResponse<Result>>,
-  ) {
+          executor: (payload: any) => Promise<DoclingResponse<Result>>,  ) {
     const parsed = schema.safeParse(req.body);
     if (!parsed.success) {
       doclingSuccess.labels(operation, 'validation_error').inc();
@@ -139,9 +140,9 @@ export class DoclingHandler {
         .json({ error: 'invalid_request', details: parsed.error.issues });
     }
 
-    const payload = parsed.data;
+    const payload = parsed.data as any;
 
-    const policyDecision = evaluatePurposePolicy(payload as any);
+    const policyDecision = evaluatePurposePolicy(payload);
     if (!policyDecision.allow) {
       doclingSuccess.labels(operation, 'policy_denied').inc();
       return res
@@ -190,6 +191,7 @@ export class DoclingHandler {
         tenantId: response.tenantId,
         purpose: response.purpose,
         retention: response.retention,
+        policyTags: (payload as any).policyTags ?? [],
         modelId: response.provenance.modelId,
         modelCheckpoint: response.provenance.modelCheckpoint,
         parameters: response.provenance.parameters,

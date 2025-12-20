@@ -1,0 +1,579 @@
+# Production Alerting Rules for IntelGraph Platform
+# Based on requirements: Error rate >1% → Page, Response time >1s p95 → Slack
+# Database connections >80% → Warning, Disk space <20% → Critical
+
+groups:
+  # ============================================
+  # CRITICAL ALERTS - Page On-Call Immediately
+  # ============================================
+  - name: critical_production_alerts
+    interval: 30s
+    rules:
+      # Service Down - Immediate Page
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+          priority: P0
+          team: platform
+          runbook: https://docs.intelgraph.com/runbooks/service-down
+        annotations:
+          summary: 'CRITICAL: Service {{ $labels.instance }} is DOWN'
+          description: |
+            Service {{ $labels.job }} at {{ $labels.instance }} has been unreachable for more than 1 minute.
+
+            Impact: Service unavailable to users
+            Action: Investigate service health immediately
+            Runbook: https://docs.intelgraph.com/runbooks/service-down
+
+      # Error Rate >1% for 5min → Page On-Call
+      - alert: HighErrorRateCritical
+        expr: |
+          (
+            sum(rate(http_requests_total{status_code=~"5.."}[5m])) by (service, instance) /
+            sum(rate(http_requests_total[5m])) by (service, instance)
+          ) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+          priority: P0
+          team: platform
+          runbook: https://docs.intelgraph.com/runbooks/high-error-rate
+        annotations:
+          summary: 'CRITICAL: Error rate >1% for {{ $labels.service }}'
+          description: |
+            Error rate is {{ $value | humanizePercentage }} for {{ $labels.service }} at {{ $labels.instance }}
+
+            Threshold: >1% for 5 minutes
+            Current: {{ $value | humanizePercentage }}
+            Impact: User experience severely degraded
+            Action: Investigate errors immediately, check logs and recent deployments
+            Runbook: https://docs.intelgraph.com/runbooks/high-error-rate
+
+      # Database Connection Pool >80% → Warning, >90% → Critical
+      - alert: DatabaseConnectionPoolCritical
+        expr: |
+          (
+            pg_stat_activity_count /
+            pg_settings_max_connections
+          ) > 0.90
+        for: 2m
+        labels:
+          severity: critical
+          priority: P0
+          team: platform
+          runbook: https://docs.intelgraph.com/runbooks/database-connections
+        annotations:
+          summary: 'CRITICAL: Database connections at {{ $value | humanizePercentage }}'
+          description: |
+            Database {{ $labels.database }} is using {{ $value | humanizePercentage }} of available connections
+
+            Threshold: >90%
+            Current: {{ $value | humanizePercentage }}
+            Impact: New connections will be rejected
+            Action: Kill idle connections, investigate connection leaks
+            Runbook: https://docs.intelgraph.com/runbooks/database-connections
+
+      # Disk Space <20% → Critical Alert
+      - alert: DiskSpaceCritical
+        expr: |
+          (
+            node_filesystem_avail_bytes{mountpoint="/",fstype!="tmpfs"} /
+            node_filesystem_size_bytes{mountpoint="/",fstype!="tmpfs"}
+          ) < 0.20
+        for: 5m
+        labels:
+          severity: critical
+          priority: P0
+          team: platform
+          runbook: https://docs.intelgraph.com/runbooks/disk-space
+        annotations:
+          summary: 'CRITICAL: Disk space <20% on {{ $labels.instance }}'
+          description: |
+            Available disk space is {{ $value | humanizePercentage }} on {{ $labels.instance }}
+
+            Threshold: <20%
+            Current: {{ $value | humanizePercentage }}
+            Impact: Service may crash or fail to write logs/data
+            Action: Clean up old files, expand disk, or scale storage
+            Runbook: https://docs.intelgraph.com/runbooks/disk-space
+
+      # Database Down
+      - alert: PostgreSQLDown
+        expr: pg_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          priority: P0
+          team: platform
+          runbook: https://docs.intelgraph.com/runbooks/database-failure
+        annotations:
+          summary: 'CRITICAL: PostgreSQL is DOWN'
+          description: |
+            PostgreSQL database {{ $labels.database }} is unreachable
+
+            Impact: All database operations failing
+            Action: Check database service, investigate crash or network issues
+            Runbook: https://docs.intelgraph.com/runbooks/database-failure
+
+      # Neo4j Down
+      - alert: Neo4jDown
+        expr: neo4j_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          priority: P0
+          team: platform
+          runbook: https://docs.intelgraph.com/runbooks/neo4j-failure
+        annotations:
+          summary: 'CRITICAL: Neo4j is DOWN'
+          description: |
+            Neo4j graph database is unreachable at {{ $labels.instance }}
+
+            Impact: All graph queries failing
+            Action: Check Neo4j service, investigate crash or network issues
+            Runbook: https://docs.intelgraph.com/runbooks/neo4j-failure
+
+      # Redis Down
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          priority: P0
+          team: platform
+          runbook: https://docs.intelgraph.com/runbooks/redis-failure
+        annotations:
+          summary: 'CRITICAL: Redis is DOWN'
+          description: |
+            Redis cache is unreachable at {{ $labels.instance }}
+
+            Impact: Cache unavailable, sessions may be lost, performance degraded
+            Action: Check Redis service, investigate crash or network issues
+            Runbook: https://docs.intelgraph.com/runbooks/redis-failure
+
+      # Memory Exhaustion
+      - alert: MemoryExhaustion
+        expr: |
+          (
+            node_memory_MemAvailable_bytes /
+            node_memory_MemTotal_bytes
+          ) < 0.05
+        for: 2m
+        labels:
+          severity: critical
+          priority: P0
+          team: platform
+          runbook: https://docs.intelgraph.com/runbooks/memory-exhaustion
+        annotations:
+          summary: 'CRITICAL: Memory exhaustion on {{ $labels.instance }}'
+          description: |
+            Available memory is {{ $value | humanizePercentage }} on {{ $labels.instance }}
+
+            Threshold: <5%
+            Current: {{ $value | humanizePercentage }}
+            Impact: Service may be OOM killed
+            Action: Restart services, investigate memory leaks, add capacity
+            Runbook: https://docs.intelgraph.com/runbooks/memory-exhaustion
+
+  # ============================================
+  # WARNING ALERTS - Slack Notification
+  # ============================================
+  - name: warning_production_alerts
+    interval: 60s
+    rules:
+      # Response Time >1s p95 → Slack Alert
+      - alert: HighResponseTimeP95
+        expr: |
+          histogram_quantile(0.95,
+            rate(http_request_duration_seconds_bucket[5m])
+          ) > 1.0
+        for: 5m
+        labels:
+          severity: warning
+          priority: P1
+          team: platform
+          channel: '#alerts-warning'
+          runbook: https://docs.intelgraph.com/runbooks/high-latency
+        annotations:
+          summary: 'WARNING: API p95 latency >1s for {{ $labels.service }}'
+          description: |
+            95th percentile response time is {{ $value }}s for {{ $labels.service }}
+
+            Threshold: >1.0s
+            Current: {{ $value }}s
+            Impact: User experience degraded
+            Action: Investigate slow queries, check database performance, review recent changes
+            Runbook: https://docs.intelgraph.com/runbooks/high-latency
+
+      # Database Connections >80% → Warning
+      - alert: DatabaseConnectionPoolWarning
+        expr: |
+          (
+            pg_stat_activity_count /
+            pg_settings_max_connections
+          ) > 0.80
+        for: 5m
+        labels:
+          severity: warning
+          priority: P1
+          team: platform
+          channel: '#alerts-warning'
+          runbook: https://docs.intelgraph.com/runbooks/database-connections
+        annotations:
+          summary: 'WARNING: Database connections at {{ $value | humanizePercentage }}'
+          description: |
+            Database {{ $labels.database }} is using {{ $value | humanizePercentage }} of available connections
+
+            Threshold: >80%
+            Current: {{ $value | humanizePercentage }}
+            Impact: Risk of connection exhaustion
+            Action: Monitor connection usage, investigate potential connection leaks
+            Runbook: https://docs.intelgraph.com/runbooks/database-connections
+
+      # High CPU Usage
+      - alert: HighCPUUsage
+        expr: |
+          100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 10m
+        labels:
+          severity: warning
+          priority: P1
+          team: platform
+          channel: '#alerts-warning'
+        annotations:
+          summary: 'WARNING: High CPU usage on {{ $labels.instance }}'
+          description: |
+            CPU usage is {{ $value }}% on {{ $labels.instance }}
+
+            Threshold: >80%
+            Current: {{ $value }}%
+            Action: Investigate CPU-intensive processes, consider scaling
+
+      # High Memory Usage
+      - alert: HighMemoryUsage
+        expr: |
+          (
+            1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)
+          ) > 0.85
+        for: 10m
+        labels:
+          severity: warning
+          priority: P1
+          team: platform
+          channel: '#alerts-warning'
+        annotations:
+          summary: 'WARNING: High memory usage on {{ $labels.instance }}'
+          description: |
+            Memory usage is {{ $value | humanizePercentage }} on {{ $labels.instance }}
+
+            Threshold: >85%
+            Current: {{ $value | humanizePercentage }}
+            Action: Monitor memory trends, investigate memory-intensive processes
+
+      # Disk Space Low
+      - alert: DiskSpaceLow
+        expr: |
+          (
+            node_filesystem_avail_bytes{mountpoint="/",fstype!="tmpfs"} /
+            node_filesystem_size_bytes{mountpoint="/",fstype!="tmpfs"}
+          ) < 0.30
+        for: 10m
+        labels:
+          severity: warning
+          priority: P1
+          team: platform
+          channel: '#alerts-warning'
+        annotations:
+          summary: 'WARNING: Disk space <30% on {{ $labels.instance }}'
+          description: |
+            Available disk space is {{ $value | humanizePercentage }} on {{ $labels.instance }}
+
+            Threshold: <30%
+            Current: {{ $value | humanizePercentage }}
+            Action: Plan for cleanup or expansion
+
+      # Slow Database Queries
+      - alert: SlowDatabaseQueries
+        expr: |
+          histogram_quantile(0.95,
+            rate(pg_stat_statements_mean_time_seconds_bucket[5m])
+          ) > 1.0
+        for: 10m
+        labels:
+          severity: warning
+          priority: P1
+          team: platform
+          channel: '#alerts-warning'
+        annotations:
+          summary: 'WARNING: Slow database queries (p95 >1s)'
+          description: |
+            95th percentile database query time is {{ $value }}s
+
+            Threshold: >1.0s
+            Action: Review slow query log, optimize queries, check indexes
+
+      # High GraphQL Error Rate
+      - alert: HighGraphQLErrorRate
+        expr: |
+          (
+            sum(rate(graphql_errors_total[5m])) by (service) /
+            sum(rate(graphql_requests_total[5m])) by (service)
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          priority: P1
+          team: platform
+          channel: '#alerts-warning'
+        annotations:
+          summary: 'WARNING: GraphQL error rate >5%'
+          description: |
+            GraphQL error rate is {{ $value | humanizePercentage }}
+
+            Threshold: >5%
+            Current: {{ $value | humanizePercentage }}
+            Action: Review GraphQL resolver errors, check validation logic
+
+  # ============================================
+  # BUSINESS METRICS ALERTS
+  # ============================================
+  - name: business_metrics_alerts
+    interval: 60s
+    rules:
+      # Active Users Drop
+      - alert: ActiveUsersDrop
+        expr: |
+          (
+            (intelgraph_active_users - intelgraph_active_users offset 1h) /
+            intelgraph_active_users offset 1h
+          ) < -0.30
+        for: 10m
+        labels:
+          severity: warning
+          priority: P1
+          team: product
+          channel: '#alerts-business'
+        annotations:
+          summary: 'WARNING: Active users dropped by >30%'
+          description: |
+            Active users dropped by {{ $value | humanizePercentage }} in the last hour
+
+            Current: {{ $value }}
+            Previous hour: {{ $value offset 1h }}
+            Action: Investigate service issues, check authentication, review recent changes
+
+      # High API Request Volume
+      - alert: UnusualAPITraffic
+        expr: |
+          rate(http_requests_total[5m]) >
+          (avg_over_time(rate(http_requests_total[5m])[1h:5m]) * 2)
+        for: 10m
+        labels:
+          severity: warning
+          priority: P2
+          team: platform
+          channel: '#alerts-business'
+        annotations:
+          summary: 'INFO: API traffic 2x higher than normal'
+          description: |
+            API request rate is {{ $value }} req/s, which is 2x higher than hourly average
+
+            Action: Monitor for potential abuse or DDoS, verify legitimate traffic spike
+
+      # Graph Analysis Job Backlog
+      - alert: GraphAnalysisBacklog
+        expr: |
+          intelgraph_graph_jobs_queued > 100
+        for: 15m
+        labels:
+          severity: warning
+          priority: P1
+          team: platform
+          channel: '#alerts-business'
+        annotations:
+          summary: 'WARNING: Graph analysis job backlog >100'
+          description: |
+            {{ $value }} graph analysis jobs are queued
+
+            Threshold: >100 jobs
+            Current: {{ $value }} jobs
+            Action: Scale graph analysis workers, investigate job failures
+
+      # Data Ingestion Rate Low
+      - alert: LowDataIngestionRate
+        expr: |
+          rate(intelgraph_ingestion_records_total[10m]) < 10
+        for: 20m
+        labels:
+          severity: warning
+          priority: P2
+          team: data
+          channel: '#alerts-business'
+        annotations:
+          summary: 'WARNING: Data ingestion rate abnormally low'
+          description: |
+            Data ingestion rate is {{ $value }} records/sec
+
+            Expected: >10 records/sec
+            Current: {{ $value }} records/sec
+            Action: Check data sources, verify connectors are running
+
+      # Failed Graph Analysis Jobs
+      - alert: GraphAnalysisFailures
+        expr: |
+          (
+            rate(intelgraph_graph_jobs_failed_total[10m]) /
+            rate(intelgraph_graph_jobs_total[10m])
+          ) > 0.10
+        for: 10m
+        labels:
+          severity: warning
+          priority: P1
+          team: platform
+          channel: '#alerts-business'
+        annotations:
+          summary: 'WARNING: Graph analysis failure rate >10%'
+          description: |
+            Graph analysis job failure rate is {{ $value | humanizePercentage }}
+
+            Threshold: >10%
+            Current: {{ $value | humanizePercentage }}
+            Action: Review job logs, check for data quality issues or algorithm failures
+
+  # ============================================
+  # INFRASTRUCTURE ALERTS
+  # ============================================
+  - name: infrastructure_alerts
+    interval: 60s
+    rules:
+      # Container Restart Loop
+      - alert: ContainerRestartLoop
+        expr: |
+          rate(kube_pod_container_status_restarts_total[15m]) > 0.05
+        for: 10m
+        labels:
+          severity: warning
+          priority: P1
+          team: platform
+          channel: '#alerts-infrastructure'
+        annotations:
+          summary: 'WARNING: Container {{ $labels.container }} restarting frequently'
+          description: |
+            Container {{ $labels.container }} in pod {{ $labels.pod }} is restarting frequently
+
+            Restart rate: {{ $value }} restarts/sec
+            Action: Check container logs, investigate crashes or OOM kills
+
+      # Pod Not Ready
+      - alert: PodNotReady
+        expr: |
+          kube_pod_status_phase{phase!="Running"} == 1
+        for: 5m
+        labels:
+          severity: warning
+          priority: P1
+          team: platform
+          channel: '#alerts-infrastructure'
+        annotations:
+          summary: 'WARNING: Pod {{ $labels.pod }} not ready'
+          description: |
+            Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is in {{ $labels.phase }} phase
+
+            Action: Check pod events, investigate scheduling or resource issues
+
+      # High Network Latency
+      - alert: HighNetworkLatency
+        expr: |
+          histogram_quantile(0.95,
+            rate(node_network_receive_bytes_total[5m])
+          ) > 100000000  # 100MB/s
+        for: 10m
+        labels:
+          severity: warning
+          priority: P2
+          team: platform
+          channel: '#alerts-infrastructure'
+        annotations:
+          summary: 'WARNING: High network traffic on {{ $labels.instance }}'
+          description: |
+            Network receive rate is {{ $value | humanizeBytes }}/s on {{ $labels.instance }}
+
+            Action: Investigate network usage patterns, check for data transfer issues
+
+  # ============================================
+  # SLO BREACH ALERTS
+  # ============================================
+  - name: slo_breach_alerts
+    interval: 300s
+    rules:
+      # SLO: 99.9% Availability
+      - alert: AvailabilitySLOBreach
+        expr: |
+          (
+            1 - (
+              sum(rate(http_requests_total{status_code=~"2..|3.."}[30d])) /
+              sum(rate(http_requests_total[30d]))
+            )
+          ) > 0.001  # 0.1% error budget consumed
+        for: 1h
+        labels:
+          severity: critical
+          priority: P0
+          team: platform
+          channel: '#alerts-slo'
+          runbook: https://docs.intelgraph.com/runbooks/slo-breach
+        annotations:
+          summary: 'CRITICAL: Availability SLO breach imminent'
+          description: |
+            Availability is {{ $value | humanizePercentage }}, breaching 99.9% SLO
+
+            SLO Target: 99.9% (43.8 min downtime/month)
+            Current: {{ $value | humanizePercentage }}
+            Error Budget: Exhausted
+            Action: All hands - stabilize service immediately
+            Runbook: https://docs.intelgraph.com/runbooks/slo-breach
+
+      # SLO: Response Time <500ms p95
+      - alert: LatencySLOBreach
+        expr: |
+          histogram_quantile(0.95,
+            rate(http_request_duration_seconds_bucket[7d])
+          ) > 0.5
+        for: 2h
+        labels:
+          severity: warning
+          priority: P1
+          team: platform
+          channel: '#alerts-slo'
+        annotations:
+          summary: 'WARNING: Latency SLO breach'
+          description: |
+            P95 latency is {{ $value }}s, breaching <500ms SLO
+
+            SLO Target: <500ms p95
+            Current: {{ $value }}s
+            Action: Investigate performance issues, optimize slow endpoints
+
+      # SLO: Error Rate <1%
+      - alert: ErrorRateSLOBreach
+        expr: |
+          (
+            sum(rate(http_requests_total{status_code=~"5.."}[30d])) /
+            sum(rate(http_requests_total[30d]))
+          ) > 0.01
+        for: 1h
+        labels:
+          severity: warning
+          priority: P1
+          team: platform
+          channel: '#alerts-slo'
+        annotations:
+          summary: 'WARNING: Error rate SLO breach'
+          description: |
+            Error rate is {{ $value | humanizePercentage }}, breaching <1% SLO
+
+            SLO Target: <1% error rate
+            Current: {{ $value | humanizePercentage }}
+            Action: Investigate error causes, fix failing endpoints

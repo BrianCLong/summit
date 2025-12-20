@@ -44,4 +44,3 @@ export const authorize = (allowedRoles) => {
         }
     };
 };
-//# sourceMappingURL=auth.js.map

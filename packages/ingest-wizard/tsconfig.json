@@ -1,8 +1,18 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "dist"
+    "outDir": "dist",
+    "allowImportingTsExtensions": false,
+    "composite": true,
+    "tsBuildInfoFile": "dist/.tsbuildinfo",
+    "types": []
   },
-  "include": ["src"],
-  "references": [{ "path": "../types" }]
+  "include": [
+    "src"
+  ],
+  "references": [
+    {
+      "path": "../types"
+    }
+  ]
 }

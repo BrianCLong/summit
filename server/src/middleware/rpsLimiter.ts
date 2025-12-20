@@ -28,7 +28,7 @@ export function rpsLimiter(req: Request, res: Response, next: NextFunction) {
       .status(429)
       .set(
         'Retry-After',
-        Math.ceil((clientData.lastReset + WINDOW_SIZE_MS - now) / 1000),
+        String(Math.ceil((clientData.lastReset + WINDOW_SIZE_MS - now) / 1000)),
       )
       .send('Too Many Requests');
     return;

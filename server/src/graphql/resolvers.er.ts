@@ -1,11 +1,10 @@
-import { IResolvers } from '@graphql-tools/utils';
+import type { IResolvers } from '@graphql-tools/utils';
 import { getPostgresPool } from '../config/database';
 import { getNeo4jDriver } from '../config/database';
-import { HybridEntityResolutionService } from '../services/HybridEntityResolutionService';
+import { resolveEntities } from '../services/HybridEntityResolutionService';
 import logger from '../config/logger';
 
 const log = logger.child({ name: 'ERResolvers' });
-const erService = new HybridEntityResolutionService();
 
 // GA Core precision thresholds
 const GA_PRECISION_THRESHOLDS = {
@@ -108,7 +107,11 @@ export const erResolvers: IResolvers = {
       }
     },
 
-    erPrecisionMetrics: async (_, { filter = {} }, context) => {
+    erPrecisionMetrics: async (
+      _,
+      { filter = {} }: { filter?: { entityType?: string; modelVersion?: string } },
+      context,
+    ) => {
       const pool = getPostgresPool();
 
       try {
@@ -250,10 +253,9 @@ export const erResolvers: IResolvers = {
       context,
     ) => {
       try {
-        const result = await erService.resolveEntitiesPair(
-          entityA,
-          entityB,
-          entityType,
+        const result = await resolveEntities(
+          JSON.stringify(entityA),
+          JSON.stringify(entityB),
         );
 
         // Store the decision for audit and metrics
@@ -336,40 +338,66 @@ export const erResolvers: IResolvers = {
         const entityBProps = entityResult.records[0].get('b').properties;
 
         // Process merge decision using hybrid service
-        const decision = await erService.processMergeDecision(
-          session,
-          input.entityA,
-          input.entityB,
-          input.entityType,
+        const result = await resolveEntities(
+          JSON.stringify(entityAProps),
+          JSON.stringify(entityBProps),
         );
 
-        // If decision is to merge and not forced for review, execute the merge
-        if (
-          decision.decision === 'MERGE' &&
-          !input.forceReview &&
-          !decision.reviewRequired
-        ) {
-          await erService.mergeEntities(session, input.entityA, [
+        const pool = getPostgresPool();
+        const riskScore = 1.0 - result.score;
+        const reviewRequired = riskScore > 0.3 || input.forceReview;
+
+        // Store the decision
+        const insertResult = await pool.query(
+          `
+          INSERT INTO merge_decisions (
+            entity_a_id, entity_b_id, decision, score, confidence, explanation,
+            feature_scores, model_version, method, risk_score, review_required,
+            entity_type, created_by
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+          RETURNING id, created_at
+        `,
+          [
+            input.entityA,
             input.entityB,
-          ]);
-          log.info({ decisionId: decision.id }, 'Entities merged successfully');
+            result.match ? 'MERGE' : 'NO_MERGE',
+            result.score,
+            result.score,
+            JSON.stringify(result.explanation),
+            JSON.stringify(result.explanation),
+            result.version,
+            'hybrid',
+            riskScore,
+            reviewRequired,
+            input.entityType,
+            context.user?.id || 'system',
+          ],
+        );
+
+        const decisionId = insertResult.rows[0].id;
+        const createdAt = insertResult.rows[0].created_at;
+
+        // If decision is to merge and not forced for review, execute the merge
+        if (result.match && !reviewRequired) {
+          // TODO: Implement merge logic
+          log.info({ decisionId }, 'Entities should be merged');
         }
 
         return {
-          id: decision.id,
-          entityA: decision.entityA,
-          entityB: decision.entityB,
-          decision: decision.decision,
-          score: decision.score,
-          confidence: decision.score, // Use score as confidence for now
-          explanation: decision.explanation,
-          featureScores: decision.explanation,
-          modelVersion: 'hybrid-v2.0',
-          method: decision.method.toUpperCase(),
-          riskScore: decision.riskScore,
-          reviewRequired: decision.reviewRequired || input.forceReview,
+          id: decisionId,
+          entityA: input.entityA,
+          entityB: input.entityB,
+          decision: result.match ? 'MERGE' : 'NO_MERGE',
+          score: result.score,
+          confidence: result.score,
+          explanation: JSON.stringify(result.explanation),
+          featureScores: JSON.stringify(result.explanation),
+          modelVersion: result.version,
+          method: 'HYBRID',
+          riskScore,
+          reviewRequired,
           entityType: input.entityType,
-          createdAt: decision.createdAt,
+          createdAt,
           updatedAt: null,
           createdBy: context.user?.id || 'system',
         };

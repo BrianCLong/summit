@@ -14,7 +14,9 @@ export const config = {
             user: process.env.POSTGRES_USER || 'intelgraph',
             password: process.env.POSTGRES_PASSWORD || 'password',
             database: process.env.POSTGRES_DB || 'intelgraph',
-            ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+            ssl: process.env.NODE_ENV === 'production'
+                ? { rejectUnauthorized: false }
+                : false,
         },
         neo4j: {
             uri: process.env.NEO4J_URI || 'bolt://localhost:7687',
@@ -37,6 +39,16 @@ export const config = {
             maxBatchSize: parseInt(process.env.MAX_BATCH_SIZE || '1000'),
             trainingDataRetentionDays: parseInt(process.env.TRAINING_DATA_RETENTION_DAYS || '30'),
         },
+        autoTuning: {
+            performanceDegradationThreshold: parseFloat(process.env.ML_PERFORMANCE_DEGRADATION_THRESHOLD || '0.05'),
+            evaluationWindow: parseInt(process.env.ML_PERFORMANCE_EVALUATION_WINDOW || '12'),
+            minEvaluations: parseInt(process.env.ML_MIN_EVALUATIONS_FOR_RETRAIN || '3'),
+            checkIntervalMs: parseInt(process.env.ML_RETRAIN_CHECK_INTERVAL_MS || '300000'),
+            cooldownMs: parseInt(process.env.ML_RETRAIN_COOLDOWN_MS || '1800000'),
+        },
+        benchmarking: {
+            realtimeWindowMinutes: parseInt(process.env.ML_BENCHMARK_REALTIME_WINDOW_MINUTES || '15'),
+        },
     },
     redis: {
         host: process.env.REDIS_HOST || 'localhost',
@@ -50,4 +62,3 @@ export const config = {
         logLevel: process.env.LOG_LEVEL || 'info',
     },
 };
-//# sourceMappingURL=config.js.map

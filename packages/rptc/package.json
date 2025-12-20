@@ -1,6 +1,6 @@
 {
   "name": "@summit/rptc",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "description": "Robust Prompt Template Compiler with typed slots, validation, adapters, and test synthesis.",
   "type": "module",
   "main": "dist/index.js",
@@ -12,7 +12,7 @@
     "build": "tsc -p tsconfig.build.json",
     "clean": "rm -rf dist",
     "test": "jest --config jest.config.ts",
-    "lint": "eslint src --ext .ts",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint src",
     "format": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\""
   },
   "keywords": [

@@ -1,7 +1,7 @@
 // =============================================
 // Maestro Overview Dashboard - Health Cards & Widgets
 // =============================================
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import {
   PlayIcon,
   ExclamationTriangleIcon,
@@ -87,8 +87,8 @@ function HealthCard({
   }
 
   const getTrendIcon = () => {
-    if (trend === 'up') return '↗'
-    if (trend === 'down') return '↘'
+    if (trend === 'up') {return '↗'}
+    if (trend === 'down') {return '↘'}
     return ''
   }
 

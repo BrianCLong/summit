@@ -1,6 +1,6 @@
 import React from 'react';
-import EnhancedAIAssistant from ' @/components/ai-enhanced/EnhancedAIAssistant';
-import { makeAssistantTransport } from ' @/lib/assistant/factory';
+import EnhancedAIAssistant from '@/components/ai-enhanced/EnhancedAIAssistant';
+import { makeAssistantTransport } from '@/lib/assistant/factory';
 
 export default function AssistantPage() {
   const mode = (import.meta as any).env?.VITE_ASSISTANT_TRANSPORT ?? 'fetch';

@@ -6,10 +6,11 @@
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
     "rootDir": "./",
-    "module": "ES2022",
+    "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "types": ["node", "jest"],
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "downlevelIteration": true
   },
   "include": ["src", "examples", "scripts", "__tests__"],
   "exclude": ["dist", "deploy", "docs", "monitoring", "dashboards"]

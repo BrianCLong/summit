@@ -1,8 +1,8 @@
-import { Router } from 'express';
-import { EntitySchema } from '../schema';
-import { store } from '../services/store';
+import { Router, type Router as RouterType } from 'express';
+import { EntitySchema } from '../schema.js';
+import { store } from '../services/store.js';
 
-const router = Router();
+const router: RouterType = Router();
 
 router.post('/:type', (req, res) => {
   const parse = EntitySchema.safeParse({

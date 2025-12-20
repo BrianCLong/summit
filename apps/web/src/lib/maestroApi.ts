@@ -56,7 +56,7 @@ export type OrchestrateWebResponse = {
 export type BudgetsResponse = {
   tier: 'bronze' | 'silver' | 'gold'
   remaining: { tokens: number; usd: number }
-  burndown: Array<{ t: string; usd: number; number }>
+  burndown: Array<{ t: string; usd: number; tokens: number }>
 }
 
 export type PolicyCheckResponse = {
@@ -301,7 +301,7 @@ export class MaestroApi {
       }
     }
     src.addEventListener('message', listener)
-    if (onError) src.addEventListener('error', onError)
+    if (onError) {src.addEventListener('error', onError)}
     return () => {
       src.removeEventListener('message', listener)
       src.close()

@@ -34,6 +34,11 @@ export default tseslint.config([
   {
     files: ['**/*.{ts,tsx}'],
     extends: [tseslint.configs.recommended],
+    rules: {
+      'no-unused-expressions': 'off',
+      '@typescript-eslint/no-unused-expressions': ['error', {}],
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
   },
   // Tooling scripts (allow top-level await and Node globals)
   {

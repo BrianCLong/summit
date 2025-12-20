@@ -9,7 +9,7 @@ import {
 } from '@mui/material'
 import DOMPurify from 'dompurify'
 import $ from 'jquery'
-import { CollabClient } from '../../../../packages/sdk/collab-js/src/collabClient'
+import { CollabClient } from '@intelgraph/collab-js'
 
 interface Comment {
   commentId: string
@@ -30,7 +30,7 @@ export const CollabWidget: React.FC<Props> = ({ entityId, client }) => {
   useEffect(() => {
     const cy = (window as { cy?: unknown }).cy
     if (cy) {
-      ;(
+      (
         $ as unknown as (el: unknown) => {
           on: (
             event: string,
@@ -67,9 +67,9 @@ export const CollabWidget: React.FC<Props> = ({ entityId, client }) => {
 
   const onKey = (e: React.KeyboardEvent<HTMLLIElement>) => {
     if (e.key === 'ArrowDown')
-      (e.currentTarget.nextElementSibling as HTMLElement)?.focus()
+      {(e.currentTarget.nextElementSibling as HTMLElement)?.focus()}
     if (e.key === 'ArrowUp')
-      (e.currentTarget.previousElementSibling as HTMLElement)?.focus()
+      {(e.currentTarget.previousElementSibling as HTMLElement)?.focus()}
   }
 
   return (

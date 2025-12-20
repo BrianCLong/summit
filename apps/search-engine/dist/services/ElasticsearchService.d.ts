@@ -1,7 +1,8 @@
-import { SearchQuery, SearchResponse, SearchIndex } from '../types';
+import { SearchIndex, SearchQuery, SearchResponse } from '../types';
 export declare class ElasticsearchService {
     private client;
     private logger;
+    private getBody;
     constructor();
     search(query: SearchQuery): Promise<SearchResponse>;
     private buildElasticsearchQuery;
@@ -25,4 +26,3 @@ export declare class ElasticsearchService {
         details: any;
     }>;
 }
-//# sourceMappingURL=ElasticsearchService.d.ts.map

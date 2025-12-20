@@ -62,6 +62,17 @@ interface ProtectiveAction {
   deployedAt: Date;
 }
 
+type AlertLevel = 'NORMAL' | 'ELEVATED' | 'HIGH' | 'CRITICAL';
+type DefensiveMeasure = ProtectiveAction['type'];
+
+async function fetchJson<T>(url: string): Promise<T> {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Request failed for ${url}: ${response.status}`);
+  }
+  return (await response.json()) as T;
+}
+
 export const DefensivePsyOpsMonitor: React.FC = () => {
   const [threats, setThreats] = useState<PsyOpsThreat[]>([]);
   const [metrics, setMetrics] = useState<DefensiveMetrics>({
@@ -75,27 +86,28 @@ export const DefensivePsyOpsMonitor: React.FC = () => {
     ProtectiveAction[]
   >([]);
   const [loading, setLoading] = useState(false);
-  const [alertLevel, setAlertLevel] = useState<
-    'NORMAL' | 'ELEVATED' | 'HIGH' | 'CRITICAL'
-  >('NORMAL');
+  const [alertLevel, setAlertLevel] = useState<AlertLevel>('NORMAL');
 
   const fetchDefensiveData = useCallback(async () => {
     try {
       setLoading(true);
 
       // Fetch current threats
-      const threatsResponse = await fetch('/api/defensive-psyops/threats');
-      const threatsData = await threatsResponse.json();
+      const threatsData = await fetchJson<PsyOpsThreat[]>(
+        '/api/defensive-psyops/threats',
+      );
       setThreats(threatsData);
 
       // Fetch defensive metrics
-      const metricsResponse = await fetch('/api/defensive-psyops/metrics');
-      const metricsData = await metricsResponse.json();
+      const metricsData = await fetchJson<DefensiveMetrics>(
+        '/api/defensive-psyops/metrics',
+      );
       setMetrics(metricsData);
 
       // Fetch protective actions
-      const actionsResponse = await fetch('/api/defensive-psyops/actions');
-      const actionsData = await actionsResponse.json();
+      const actionsData = await fetchJson<ProtectiveAction[]>(
+        '/api/defensive-psyops/actions',
+      );
       setProtectiveActions(actionsData);
 
       // Calculate alert level
@@ -124,7 +136,7 @@ export const DefensivePsyOpsMonitor: React.FC = () => {
 
   const deployDefensiveMeasure = async (
     threatId: string,
-    measureType: string,
+    measureType: DefensiveMeasure,
   ) => {
     try {
       await fetch('/api/defensive-psyops/deploy-measure', {

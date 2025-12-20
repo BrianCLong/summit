@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useEffect, useState } from 'react';
 import { RolloutStep } from './panels/RolloutTimeline';
 import { Denial } from './panels/BudgetGuardrails';

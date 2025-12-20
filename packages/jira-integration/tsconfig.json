@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "rootDir": "./src",
+    "rootDir": ".",
     "outDir": "./dist",
     "strict": true,
     "noImplicitAny": true,
@@ -9,11 +9,14 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "declaration": true,
+    "allowImportingTsExtensions": false,
     "declarationMap": true,
     "sourceMap": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "target": "ES2022"
+    "target": "ES2022",
+    "composite": true,
+    "types": ["jest", "node"]
   },
   "include": ["src/**/*", "__tests__/**/*"],
   "references": []

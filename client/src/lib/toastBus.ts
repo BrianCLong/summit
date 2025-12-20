@@ -11,7 +11,7 @@ export function installToastBus() {
     d.style.zIndex = '9999';
     document.body.appendChild(d);
   }
-  $(document).on('intelgraph:toast', (_e, msg: string) => {
+  $(document).on('intelgraph:toast', (_e: any, msg: string) => {
     const el = document.createElement('div');
     el.className = 'shadow rounded-xl px-3 py-2 mb-2 bg-black text-white';
     el.style.opacity = '0.9';

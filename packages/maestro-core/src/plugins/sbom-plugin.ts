@@ -425,8 +425,10 @@ export class SBOMPlugin implements StepPlugin {
         target.includes('ghcr.io/') ||
         target.includes('gcr.io/') ||
         target.includes('registry') ||
-        target.match(
-          /^[a-z0-9]+([._-][a-z0-9]+)*\/[a-z0-9]+([._-][a-z0-9]+)*:[a-z0-9._-]+$/i,
+        Boolean(
+          target.match(
+            /^[a-z0-9]+([._-][a-z0-9]+)*\/[a-z0-9]+([._-][a-z0-9]+)*:[a-z0-9._-]+$/i,
+          ),
         ))
     );
   }

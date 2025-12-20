@@ -5,7 +5,11 @@
 
 const express = require('express');
 const WarRoomController = require('../controllers/WarRoomController');
-const { ensureAuthenticated, requireRole } = require('../middleware/auth');
+const {
+  ensureAuthenticated,
+  requireRole,
+  requirePermission,
+} = require('../middleware/auth');
 const { validateRequest } = require('../middleware/validation');
 const { rateLimiter } = require('../middleware/rateLimiting');
 

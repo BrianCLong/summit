@@ -109,7 +109,9 @@ app.post('/api/analysis/paths', authorize(['user', 'admin']), async (req, res) =
     try {
         const { sourceId, targetId, options } = req.body;
         if (!sourceId || !targetId) {
-            return res.status(400).json({ error: 'Source and target IDs are required' });
+            return res
+                .status(400)
+                .json({ error: 'Source and target IDs are required' });
         }
         const pathAnalysis = await graphAnalyticsService.findShortestPaths(sourceId, targetId, options);
         res.json(pathAnalysis);
@@ -151,7 +153,9 @@ app.post('/api/analysis/patterns', authorize(['user', 'admin']), async (req, res
     try {
         const { patternTemplates } = req.body;
         if (!Array.isArray(patternTemplates) || patternTemplates.length === 0) {
-            return res.status(400).json({ error: 'Pattern templates are required' });
+            return res
+                .status(400)
+                .json({ error: 'Pattern templates are required' });
         }
         const patterns = await graphAnalyticsService.findPatterns(patternTemplates);
         res.json({ patterns });
@@ -197,7 +201,9 @@ app.post('/api/analysis/temporal', authorize(['user', 'admin']), async (req, res
     try {
         const { timeframe, intervals } = req.body;
         if (!timeframe || !timeframe.start || !timeframe.end) {
-            return res.status(400).json({ error: 'Timeframe with start and end dates is required' });
+            return res
+                .status(400)
+                .json({ error: 'Timeframe with start and end dates is required' });
         }
         const temporalAnalysis = await graphAnalyticsService.analyzeTemporalEvolution({
             start: new Date(timeframe.start),
@@ -237,7 +243,9 @@ app.post('/api/visualization/subnet', authorize(['user', 'admin']), async (req, 
     }
     catch (error) {
         logger.error('Error generating subnet visualization:', error);
-        res.status(500).json({ error: 'Failed to generate subnet visualization' });
+        res
+            .status(500)
+            .json({ error: 'Failed to generate subnet visualization' });
     }
 });
 app.post('/api/visualization/community', authorize(['user', 'admin']), async (req, res) => {
@@ -251,14 +259,18 @@ app.post('/api/visualization/community', authorize(['user', 'admin']), async (re
     }
     catch (error) {
         logger.error('Error generating community visualization:', error);
-        res.status(500).json({ error: 'Failed to generate community visualization' });
+        res
+            .status(500)
+            .json({ error: 'Failed to generate community visualization' });
     }
 });
 app.post('/api/visualization/path', authorize(['user', 'admin']), async (req, res) => {
     try {
         const { sourceId, targetId, pathType, config } = req.body;
         if (!sourceId || !targetId) {
-            return res.status(400).json({ error: 'Source and target IDs are required' });
+            return res
+                .status(400)
+                .json({ error: 'Source and target IDs are required' });
         }
         const visualization = await networkVisualizationService.generatePathVisualization(sourceId, targetId, pathType || 'shortest', config || {});
         res.json(visualization);
@@ -272,7 +284,9 @@ app.post('/api/visualization/timeline', authorize(['user', 'admin']), async (req
     try {
         const { timeRange, config } = req.body;
         if (!timeRange || !timeRange.start || !timeRange.end) {
-            return res.status(400).json({ error: 'Time range with start and end is required' });
+            return res
+                .status(400)
+                .json({ error: 'Time range with start and end is required' });
         }
         const visualization = await networkVisualizationService.generateTimelineVisualization({
             start: new Date(timeRange.start),
@@ -282,7 +296,9 @@ app.post('/api/visualization/timeline', authorize(['user', 'admin']), async (req
     }
     catch (error) {
         logger.error('Error generating timeline visualization:', error);
-        res.status(500).json({ error: 'Failed to generate timeline visualization' });
+        res
+            .status(500)
+            .json({ error: 'Failed to generate timeline visualization' });
     }
 });
 // Visualization Export
@@ -290,7 +306,9 @@ app.post('/api/visualization/export', authorize(['user', 'admin']), async (req, 
     try {
         const { visualization, format } = req.body;
         if (!visualization || !format) {
-            return res.status(400).json({ error: 'Visualization data and format are required' });
+            return res
+                .status(400)
+                .json({ error: 'Visualization data and format are required' });
         }
         const exportData = await networkVisualizationService.exportVisualization(visualization, format);
         const contentTypes = {
@@ -319,7 +337,9 @@ app.post('/api/analysis/centrality', authorize(['user', 'admin']), async (req, r
     try {
         const { algorithm, filters } = req.body;
         // This would implement specific centrality algorithms
-        res.status(501).json({ error: 'Centrality analysis not implemented yet' });
+        res
+            .status(501)
+            .json({ error: 'Centrality analysis not implemented yet' });
     }
     catch (error) {
         logger.error('Error calculating centrality:', error);
@@ -330,7 +350,9 @@ app.post('/api/analysis/community-detection', authorize(['user', 'admin']), asyn
     try {
         const { algorithm, parameters } = req.body;
         // This would implement community detection algorithms
-        res.status(501).json({ error: 'Community detection not implemented yet' });
+        res
+            .status(501)
+            .json({ error: 'Community detection not implemented yet' });
     }
     catch (error) {
         logger.error('Error detecting communities:', error);
@@ -357,10 +379,14 @@ app.get('/api/updates/stream', authorize(['user', 'admin']), (req, res) => {
         'Access-Control-Allow-Origin': '*',
     });
     // Send initial connection
-    res.write('data: {"type": "connected", "timestamp": "' + new Date().toISOString() + '"}\n\n');
+    res.write('data: {"type": "connected", "timestamp": "' +
+        new Date().toISOString() +
+        '"}\n\n');
     // Set up interval for periodic updates
     const interval = setInterval(() => {
-        res.write('data: {"type": "heartbeat", "timestamp": "' + new Date().toISOString() + '"}\n\n');
+        res.write('data: {"type": "heartbeat", "timestamp": "' +
+            new Date().toISOString() +
+            '"}\n\n');
     }, 30000);
     // Clean up on client disconnect
     req.on('close', () => {
@@ -458,4 +484,3 @@ if (require.main === module) {
     startServer();
 }
 export { app };
-//# sourceMappingURL=server.js.map

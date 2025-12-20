@@ -1,6 +1,5 @@
 import * as React from 'react'
 import {
-  X,
   ExternalLink,
   Edit3,
   Trash2,
@@ -76,7 +75,7 @@ export function EntityDrawer({
   }
 
   const getRelatedEntities = () => {
-    if (!selectedEntity) return []
+    if (!selectedEntity) {return []}
 
     const relatedIds = relationships
       .filter(

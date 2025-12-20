@@ -1,23 +1,24 @@
 import React, { useEffect, useState } from 'react'
-import $ from 'jquery'
+// import $ from 'jquery'
 type Node = { id: string; type: string; label: string }
 export default function FlowStudio() {
-  const [nodes, setNodes] = useState<Node[]>([
+  const [nodes] = useState<Node[]>([
     { id: 'b1', type: 'build', label: 'Build' },
     { id: 't1', type: 'test', label: 'Test' },
     { id: 'd1', type: 'deploy', label: 'Deploy' },
   ])
-  const [edges, setEdges] = useState<{ from: string; to: string }[]>([
+  const [edges] = useState<{ from: string; to: string }[]>([
     { from: 'b1', to: 't1' },
     { from: 't1', to: 'd1' },
   ])
   useEffect(() => {
-    $('#q').on('input', function () {
-      const v = $(this).val()?.toString().toLowerCase() || ''
-      $('.fs-node').each(function () {
-        $(this).toggle($(this).text().toLowerCase().includes(v))
-      })
-    })
+    // TODO: Replace jQuery with React state management
+    // $('#q').on('input', function () {
+    //   const v = $(this).val()?.toString().toLowerCase() || ''
+    //   $('.fs-node').each(function () {
+    //     $(this).toggle($(this).text().toLowerCase().includes(v))
+    //   })
+    // })
   }, [nodes.length])
   function exportDsl() {
     const dsl = {

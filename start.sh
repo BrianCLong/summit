@@ -1,352 +1,365 @@
 #!/bin/bash
 
-# IntelGraph Platform Startup Script
-# Comprehensive startup with verbose logging and health checks
+# IntelGraph Platform - Development Environment Startup Script
+# Based on conductor summary requirements for Sprint 0 baseline
 
-set -euo pipefail  # Exit on error, unset variable use, or pipeline failure
+set -euo pipefail
 
-# Colors for output
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$SCRIPT_DIR"
+COMPOSE_FILE="deploy/compose/docker-compose.dev.yml"
+
+# Color codes for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-PURPLE='\033[0;35m'
 NC='\033[0m' # No Color
 
 # Logging functions
 log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
+    echo -e "${BLUE}ℹ️  $1${NC}"
 }
 
 log_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
+    echo -e "${GREEN}✅ $1${NC}"
 }
 
 log_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
+    echo -e "${YELLOW}⚠️  $1${NC}"
 }
 
 log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-}
-
-log_header() {
-    echo -e "${PURPLE}[INTELGRAPH]${NC} $1"
-}
-
-# Check if running on macOS or Linux
-detect_os() {
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        OS="macos"
-    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        OS="linux"
-    else
-        OS="unknown"
-    fi
-    log_info "Detected OS: $OS"
+    echo -e "${RED}❌ $1${NC}"
 }
 
 # Check prerequisites
 check_prerequisites() {
-    log_header "Checking Prerequisites..."
-    
-    # Check Docker
-    if command -v docker &> /dev/null; then
-        DOCKER_VERSION=$(docker --version)
-        log_success "Docker found: $DOCKER_VERSION"
+    log_info "Running environment validator..."
+    if ! "$SCRIPT_DIR/validate-env.sh"; then
+        log_error "Environment validation failed. Please address the issues above."
+        exit 1
+    fi
+    log_success "Environment validation passed."
 
-        if ! docker info > /dev/null 2>&1; then
-            log_error "Docker daemon is not running. Please start Docker."
-            exit 1
-        fi
-    else
-        log_error "Docker not found. Please install Docker Desktop."
+    log_info "Checking prerequisites..."
+
+    # Check Docker and Docker Compose
+    if ! command -v docker &> /dev/null; then
+        log_error "Docker is not installed. Please install Docker Desktop."
         exit 1
     fi
-    
-    # Check Docker Compose
-    if command -v docker-compose &> /dev/null; then
-        COMPOSE_VERSION=$(docker-compose --version)
-        log_success "Docker Compose found: $COMPOSE_VERSION"
-    else
-        log_error "Docker Compose not found. Please install Docker Compose."
+
+    if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
+        log_error "Docker Compose is not available. Please install Docker Compose."
         exit 1
     fi
-    
-    # Check Node.js
+
+    # Check Node.js version
     if command -v node &> /dev/null; then
-        NODE_VERSION=$(node --version)
-        log_success "Node.js found: $NODE_VERSION"
+        NODE_VERSION=$(node -v | cut -d'v' -f2 | cut -d'.' -f1)
+        if [ "$NODE_VERSION" -lt 20 ]; then
+            log_warning "Node.js version is $NODE_VERSION. Recommended: Node.js 20.11.x"
+        else
+            log_success "Node.js version $(node -v) detected"
+        fi
     else
-        log_warning "Node.js not found. Using containerized version."
-    fi
-    
-    # Check npm
-    if command -v npm &> /dev/null; then
-        NPM_VERSION=$(npm --version)
-        log_success "npm found: $NPM_VERSION"
-    else
-        log_warning "npm not found. Using containerized version."
+        log_warning "Node.js not found. This is optional for Docker-only development."
     fi
 
-    # Check curl
-    if ! command -v curl &> /dev/null; then
-        log_error "curl not found. Please install curl."
-        exit 1
+    # Check available disk space (minimum 10GB)
+    if command -v df &> /dev/null; then
+        AVAILABLE_SPACE=$(df -BG . | awk 'NR==2 {print $4}' | sed 's/G//')
+        if [ "$AVAILABLE_SPACE" -lt 10 ]; then
+            log_warning "Low disk space: ${AVAILABLE_SPACE}GB available. Minimum 10GB recommended."
+        fi
     fi
 
-    # Check netcat
-    if ! command -v nc &> /dev/null; then
-        log_error "nc (netcat) not found. Please install netcat."
-        exit 1
-    fi
+    log_success "Prerequisites check completed"
 }
 
-# Clean up any existing containers
-cleanup_containers() {
-    log_header "Cleaning up existing containers..."
-    
-    if docker-compose -f docker-compose.dev.yml ps | grep -q "intelgraph"; then
-        log_info "Stopping existing containers..."
-        docker-compose -f docker-compose.dev.yml down --remove-orphans
-        log_success "Containers stopped and removed"
-    else
-        log_info "No existing containers found"
+# Create necessary directories and files
+setup_directories() {
+    log_info "Setting up directory structure..."
+
+    cd "$PROJECT_ROOT"
+
+    # Create missing directories
+    mkdir -p deploy/compose/{policies,grafana/{dashboards,datasources},keys}
+    mkdir -p workers/ingest/src
+    mkdir -p tests/{integration,k6}
+    mkdir -p .artifacts
+
+    # Create dummy cosign key for development
+    if [ ! -f "deploy/compose/keys/cosign-public.key" ]; then
+        echo "-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1234567890abcdef...
+-----END PUBLIC KEY-----" > deploy/compose/keys/cosign-public.key
     fi
-    
-    # Clean up any dangling images
-    if docker images -f "dangling=true" -q | grep -q .; then
-        log_info "Removing dangling images..."
-        docker image prune -f
-    fi
+
+    log_success "Directory structure created"
 }
 
-# Build containers
-build_containers() {
-    log_header "Building containers..."
-    
-    log_info "Building client container..."
-    docker-compose -f docker-compose.dev.yml build client --no-cache
-    
-    log_info "Building server container..."
-    docker-compose -f docker-compose.dev.yml build server --no-cache
-    
-    log_success "All containers built successfully"
+# Initialize database schemas
+init_database_schemas() {
+    log_info "Creating database initialization scripts..."
+
+    mkdir -p deploy/compose/init-db
+
+    cat > deploy/compose/init-db/01-init-schemas.sql << 'EOF'
+-- IntelGraph Platform Database Schema
+-- Sprint 0 Baseline Schema
+
+-- Create staging table for ingested entities
+CREATE TABLE IF NOT EXISTS staging_entities (
+    id TEXT PRIMARY KEY,
+    type TEXT NOT NULL,
+    name TEXT,
+    attributes JSONB DEFAULT '{}'::jsonb,
+    pii_flags JSONB DEFAULT '{}'::jsonb,
+    source_id TEXT NOT NULL,
+    provenance JSONB,
+    retention_tier TEXT DEFAULT 'standard-365d',
+    purpose TEXT DEFAULT 'investigation',
+    region TEXT DEFAULT 'US',
+    collected_at TIMESTAMPTZ DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Create indexes for performance
+CREATE INDEX IF NOT EXISTS ix_staging_entities_type ON staging_entities(type);
+CREATE INDEX IF NOT EXISTS ix_staging_entities_source ON staging_entities(source_id);
+CREATE INDEX IF NOT EXISTS ix_staging_entities_purpose ON staging_entities(purpose);
+CREATE INDEX IF NOT EXISTS ix_staging_entities_region ON staging_entities(region);
+CREATE INDEX IF NOT EXISTS ix_staging_entities_gin ON staging_entities USING GIN (attributes);
+CREATE INDEX IF NOT EXISTS ix_staging_entities_created ON staging_entities(created_at);
+
+-- Create provenance ledger table
+CREATE TABLE IF NOT EXISTS provenance_ledger (
+    id SERIAL PRIMARY KEY,
+    subject_id TEXT NOT NULL,
+    activity TEXT NOT NULL,
+    actor TEXT NOT NULL,
+    hash TEXT NOT NULL,
+    timestamp TIMESTAMPTZ DEFAULT NOW(),
+    attestation JSONB
+);
+
+CREATE INDEX IF NOT EXISTS ix_provenance_subject ON provenance_ledger(subject_id);
+CREATE INDEX IF NOT EXISTS ix_provenance_timestamp ON provenance_ledger(timestamp);
+
+-- Grant permissions
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO intelgraph;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO intelgraph;
+
+-- Insert sample data for development
+INSERT INTO staging_entities (id, type, name, attributes, source_id, purpose) VALUES
+('demo:entity-001', 'indicator', 'suspicious-domain.com', '{"indicator_type": "domain", "confidence": 0.85}', 's3:demo-entities', 'threat-intel'),
+('demo:entity-002', 'entity', 'Organization Alpha', '{"org_type": "corporate", "sector": "technology"}', 's3:demo-entities', 'investigation'),
+('demo:entity-003', 'indicator', '192.168.1.100', '{"indicator_type": "ip", "confidence": 0.72}', 'http:threat-intel-feed', 'threat-intel'),
+('demo:entity-004', 'entity', 'Project Beta', '{"project_type": "research", "classification": "internal"}', 's3:demo-entities', 'investigation'),
+('demo:entity-005', 'insight', 'Anomalous Activity Pattern', '{"insight_type": "behavioral", "score": 0.91}', 'http:topicality-insights', 'enrichment')
+ON CONFLICT (id) DO NOTHING;
+EOF
+
+    log_success "Database schema initialized"
 }
 
-# Start services in order
-start_services() {
-    log_header "Starting services..."
-    
-    # Start databases first
-    log_info "Starting database services..."
-    docker-compose -f docker-compose.dev.yml up -d redis postgres neo4j
-    
-    # Wait for databases to be healthy
-    log_info "Waiting for databases to be ready..."
-    
-    local max_attempts=30
+# Setup Grafana dashboards and datasources
+setup_grafana() {
+    log_info "Setting up Grafana configuration..."
+
+    # Datasources configuration
+    cat > deploy/compose/grafana/datasources/prometheus.yml << 'EOF'
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
+
+  - name: Jaeger
+    type: jaeger
+    access: proxy
+    url: http://jaeger:16686
+    editable: true
+EOF
+
+    # Basic dashboard for IntelGraph metrics
+    cat > deploy/compose/grafana/dashboards/intelgraph-overview.json << 'EOF'
+{
+  "dashboard": {
+    "title": "IntelGraph Platform Overview",
+    "tags": ["intelgraph", "sprint-0"],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "title": "API Response Times",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "p95 Response Time"
+          }
+        ]
+      },
+      {
+        "title": "Ingestion Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(intelgraph_entities_ingested_total[5m])",
+            "legendFormat": "Entities/sec"
+          }
+        ]
+      }
+    ]
+  }
+}
+EOF
+
+    log_success "Grafana configuration created"
+}
+
+# Start the development environment
+start_environment() {
+    log_info "Starting IntelGraph development environment..."
+
+    cd "$PROJECT_ROOT"
+
+    # Pull the latest images
+    log_info "Pulling Docker images..."
+    docker compose -f "$COMPOSE_FILE" pull --ignore-pull-failures
+
+    # Start the services
+    log_info "Starting services..."
+    docker compose -f "$COMPOSE_FILE" up -d
+
+    # Wait for services to be healthy
+    log_info "Waiting for services to be ready..."
+
+    local services=("postgres" "neo4j" "redis" "vault" "opa")
+    local max_attempts=60
     local attempt=1
-    
-    while [ $attempt -le $max_attempts ]; do
-        log_info "Health check attempt $attempt/$max_attempts"
-        
-        if docker-compose -f docker-compose.dev.yml ps | grep -E "(redis|postgres|neo4j)" | grep -q "healthy"; then
-            log_success "Databases are healthy"
-            break
-        fi
-        
-        if [ $attempt -eq $max_attempts ]; then
-            log_error "Databases failed to become healthy"
-            show_database_logs
-            exit 1
-        fi
-        
-        sleep 5
-        ((attempt++))
+
+    for service in "${services[@]}"; do
+        log_info "Waiting for $service..."
+        while [ $attempt -le $max_attempts ]; do
+            if docker compose -f "$COMPOSE_FILE" ps --services --filter "status=running" | grep -q "$service"; then
+                if docker compose -f "$COMPOSE_FILE" exec -T "$service" echo "health check" &>/dev/null 2>&1 || \
+                   docker compose -f "$COMPOSE_FILE" ps "$service" --format "table {{.Status}}" | grep -q "healthy\|Up"; then
+                    log_success "$service is ready"
+                    break
+                fi
+            fi
+
+            if [ $attempt -eq $max_attempts ]; then
+                log_warning "$service is not ready after $max_attempts attempts"
+                break
+            fi
+
+            sleep 2
+            ((attempt++))
+        done
+        attempt=1
     done
-    
-    # Start application services
-    log_info "Starting application services..."
-    docker-compose -f docker-compose.dev.yml up -d server
-    
-    # Wait for server to be ready
-    log_info "Waiting for server to be ready..."
-    wait_for_service "server" "http://localhost:4000/health/ready" 60
-    
-    # Start client
-    log_info "Starting client..."
-    docker-compose -f docker-compose.dev.yml up -d client
-    
-    # Wait for client to be ready
-    log_info "Waiting for client to be ready..."
-    wait_for_service "client" "http://localhost:3000" 60
-    
-    # Start adminer
-    log_info "Starting adminer..."
-    docker-compose -f docker-compose.dev.yml up -d adminer
+
+    log_success "Core services are running"
 }
 
-# Wait for a service to be ready
-wait_for_service() {
-    local service_name=$1
-    local service_url=$2
-    local max_wait=$3
-    local wait_time=0
-    
-    while [ $wait_time -lt $max_wait ]; do
-        if curl -f -s "$service_url" > /dev/null 2>&1; then
-            log_success "$service_name is ready at $service_url"
-            return 0
-        fi
-        
-        if [ $((wait_time % 10)) -eq 0 ]; then
-            log_info "Waiting for $service_name... (${wait_time}s elapsed)"
-        fi
-        
-        sleep 2
-        wait_time=$((wait_time + 2))
-    done
-    
-    log_warning "$service_name not ready after ${max_wait}s, but continuing..."
-    return 1
+# Display access information
+show_access_info() {
+    log_success "🌐 IntelGraph Platform Development Environment Started!"
+    echo
+    echo "📊 Access Points:"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "  🌐 Web Client:          http://localhost:3000"
+    echo "  🔗 GraphQL Gateway:     http://localhost:4001/graphql"
+    echo "  🔧 Core API Server:     http://localhost:4000"
+    echo "  🗃️  Neo4j Browser:       http://localhost:7474 (neo4j/intelgraph-dev-secret)"
+    echo "  📈 Grafana Dashboards:  http://localhost:3001 (admin/admin)"
+    echo "  🔍 Jaeger Tracing:      http://localhost:16686"
+    echo "  📊 Prometheus Metrics:  http://localhost:9090"
+    echo "  🪣 MinIO Console:       http://localhost:9001 (minioadmin/minioadmin)"
+    echo "  🔐 Vault UI:            http://localhost:8200 (token: intelgraph-dev-root-token)"
+    echo "  ⚖️  OPA Policy Engine:   http://localhost:8181"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo
+    echo "🎯 Sprint 0 E2E Slice Ready: batch_ingest_graph_query_ui"
+    echo
+    echo "📚 Quick Commands:"
+    echo "  • View logs:           docker compose -f $COMPOSE_FILE logs -f [service]"
+    echo "  • Run k6 tests:        k6 run tests/k6/api-performance.js"
+    echo "  • Generate evidence:   node scripts/generate-evidence-bundle.js"
+    echo "  • Stop environment:    docker compose -f $COMPOSE_FILE down"
+    echo
+    echo "🔍 Health Check:"
+    echo "  curl http://localhost:4001/graphql -d '{\"query\":\"{health{status timestamp version}}\"}' -H 'Content-Type: application/json'"
+    echo
 }
 
-# Show service logs for debugging
-show_database_logs() {
-    log_header "Database logs for debugging:"
-    
-    echo -e "\n${YELLOW}Redis logs:${NC}"
-    docker-compose -f docker-compose.dev.yml logs redis --tail 10
-    
-    echo -e "\n${YELLOW}PostgreSQL logs:${NC}"
-    docker-compose -f docker-compose.dev.yml logs postgres --tail 10
-    
-    echo -e "\n${YELLOW}Neo4j logs:${NC}"
-    docker-compose -f docker-compose.dev.yml logs neo4j --tail 10
-}
-
-# Show service status
-show_service_status() {
-    log_header "Service Status:"
-    
-    echo -e "\nContainer Status:"
-    docker-compose -f docker-compose.dev.yml ps
-    
-    echo -e "\nService Health Check:"
-    
-    # Check each service
-    check_service_health "Frontend" "http://localhost:3000" "React Application"
-    check_service_health "Backend" "http://localhost:4000/health/ready" "Server Health"
-    check_service_health "Neo4j" "http://localhost:7474" "Graph Database"
-    check_service_health "Adminer" "http://localhost:8080" "Database Admin"
-    
-    echo -e "\nDatabase Connections:"
-    check_database_connection "PostgreSQL" "localhost" "5432"
-    check_database_connection "Redis" "localhost" "6379"
-    check_database_connection "Neo4j" "localhost" "7687"
-}
-
-# Check individual service health
-check_service_health() {
-    local service_name=$1
-    local service_url=$2
-    local description=$3
-    
-    if curl -f -s "$service_url" > /dev/null 2>&1; then
-        log_success "$service_name ($description): ✓ Available at $service_url"
-    else
-        log_error "$service_name ($description): ✗ Not available at $service_url"
-    fi
-}
-
-# Check database connections
-check_database_connection() {
-    local db_name=$1
-    local host=$2
-    local port=$3
-    
-    if nc -z "$host" "$port" 2>/dev/null; then
-        log_success "$db_name: ✓ Port $port is open"
-    else
-        log_error "$db_name: ✗ Port $port is not accessible"
-    fi
-}
-
-# Show usage information
-show_usage_info() {
-    log_header "IntelGraph Platform is starting up!"
-    
-    echo -e "\n${GREEN}🚀 Quick Access URLs:${NC}"
-    echo -e "   Frontend:    ${BLUE}http://localhost:3000${NC}     (React Application)"
-    echo -e "   Backend:     ${BLUE}http://localhost:4000/graphql${NC} (GraphQL API)"
-    echo -e "   Neo4j:       ${BLUE}http://localhost:7474${NC}     (Graph Database UI)"
-    echo -e "   Adminer:     ${BLUE}http://localhost:8080${NC}     (Database Admin)"
-    
-    echo -e "\n${GREEN}🎯 Demo Workflow:${NC}"
-    echo -e "   1. Open ${BLUE}http://localhost:3000${NC}"
-    echo -e "   2. Navigate to Dashboard"
-    echo -e "   3. Create New Investigation"
-    echo -e "   4. Add Entities to Graph"
-    echo -e "   5. Run Copilot Analysis"
-    
-    echo -e "\n${GREEN}🔧 Development Commands:${NC}"
-    echo -e "   View logs:   ${YELLOW}docker-compose -f docker-compose.dev.yml logs -f${NC}"
-    echo -e "   Stop all:    ${YELLOW}docker-compose -f docker-compose.dev.yml down${NC}"
-    echo -e "   Restart:     ${YELLOW}./start.sh${NC}"
-    
-    echo -e "\n${GREEN}📊 System Status:${NC}"
-    echo -e "   Check status: ${YELLOW}docker-compose -f docker-compose.dev.yml ps${NC}"
-    echo -e "   Monitor logs: ${YELLOW}docker-compose -f docker-compose.dev.yml logs -f [service]${NC}"
-}
-
-# Handle cleanup on script exit
-cleanup_on_exit() {
-    if [ "$1" != "0" ]; then
-        log_error "Startup failed. Check logs above for details."
-        echo -e "\n${YELLOW}Troubleshooting:${NC}"
-        echo -e "   1. Check Docker is running: ${YELLOW}docker --version${NC}"
-        echo -e "   2. Check ports are free: ${YELLOW}lsof -i :3000,4000,5432,6379,7474,7687,8080${NC}"
-        echo -e "   3. View detailed logs: ${YELLOW}docker-compose -f docker-compose.dev.yml logs${NC}"
-        echo -e "   4. Clean restart: ${YELLOW}docker-compose -f docker-compose.dev.yml down && ./start.sh${NC}"
-    fi
+# Cleanup function
+cleanup_environment() {
+    log_info "Stopping IntelGraph development environment..."
+    cd "$PROJECT_ROOT"
+    docker compose -f "$COMPOSE_FILE" down -v
+    log_success "Environment stopped and cleaned up"
 }
 
 # Main execution
 main() {
-    trap 'cleanup_on_exit $?' EXIT
-    
-    clear
-    echo -e "${PURPLE}"
-    echo "██╗███╗   ██╗████████╗███████╗██╗      ██████╗ ██████╗  █████╗ ██████╗ ██╗  ██╗"
-    echo "██║████╗  ██║╚══██╔══╝██╔════╝██║     ██╔════╝ ██╔══██╗██╔══██╗██╔══██╗██║  ██║"
-    echo "██║██╔██╗ ██║   ██║   █████╗  ██║     ██║  ███╗██████╔╝███████║██████╔╝███████║"
-    echo "██║██║╚██╗██║   ██║   ██╔══╝  ██║     ██║   ██║██╔══██╗██╔══██║██╔═══╝ ██╔══██║"
-    echo "██║██║ ╚████║   ██║   ███████╗███████╗╚██████╔╝██║  ██║██║  ██║██║     ██║  ██║"
-    echo "╚═╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝"
-    echo -e "${NC}"
-    echo -e "${BLUE}AI-Augmented Intelligence Analysis Platform${NC}"
-    echo -e "${GREEN}Production-Ready MVP • Built with ❤️ for the Intelligence Community${NC}"
-    echo ""
-    
-    detect_os
-    check_prerequisites
-    cleanup_containers
-    build_containers
-    start_services
-    
-    # Small delay to let services fully initialize
-    log_info "Allowing services to fully initialize..."
-    sleep 10
-    
-    show_service_status
-    show_usage_info
-    
-    log_success "IntelGraph Platform startup complete!"
-    log_info "Press Ctrl+C to view logs in real-time, or run: docker-compose -f docker-compose.dev.yml logs -f"
+    echo "🚀 IntelGraph Platform - Development Environment Setup"
+    echo "═══════════════════════════════════════════════════════"
+    echo
+
+    case "${1:-start}" in
+        "start")
+            check_prerequisites
+            setup_directories
+            init_database_schemas
+            setup_grafana
+            start_environment
+            show_access_info
+            ;;
+        "stop")
+            cleanup_environment
+            ;;
+        "restart")
+            cleanup_environment
+            sleep 3
+            main start
+            ;;
+        "logs")
+            cd "$PROJECT_ROOT"
+            docker compose -f "$COMPOSE_FILE" logs -f "${2:-}"
+            ;;
+        "status")
+            cd "$PROJECT_ROOT"
+            docker compose -f "$COMPOSE_FILE" ps
+            ;;
+        *)
+            echo "Usage: $0 {start|stop|restart|logs [service]|status}"
+            echo
+            echo "Commands:"
+            echo "  start    - Start the development environment (default)"
+            echo "  stop     - Stop and clean up the environment"
+            echo "  restart  - Stop and start the environment"
+            echo "  logs     - Show logs for all services or a specific service"
+            echo "  status   - Show status of all services"
+            exit 1
+            ;;
+    esac
 }
 
-# Check if script is being run directly
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    main "$@"
-fi
+# Handle Ctrl+C gracefully
+trap cleanup_environment INT
+
+# Run main function
+main "$@"

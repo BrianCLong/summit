@@ -14,7 +14,9 @@ export const config = {
             user: process.env.POSTGRES_USER || 'intelgraph',
             password: process.env.POSTGRES_PASSWORD || 'password',
             database: process.env.POSTGRES_DB || 'intelgraph',
-            ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+            ssl: process.env.NODE_ENV === 'production'
+                ? { rejectUnauthorized: false }
+                : false,
         },
         neo4j: {
             uri: process.env.NEO4J_URI || 'bolt://localhost:7687',
@@ -57,4 +59,3 @@ export const config = {
         logLevel: process.env.LOG_LEVEL || 'info',
     },
 };
-//# sourceMappingURL=config.js.map

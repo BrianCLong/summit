@@ -84,7 +84,7 @@ export const useConductorMetrics = (options: {
   const [error, setError] = useState<Error | null>(null)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
 
-  const refreshIntervalRef = useRef<NodeJS.Timeout>()
+  const refreshIntervalRef = useRef<NodeJS.Timeout | undefined>(undefined)
 
   const fetchMetrics = useCallback(async () => {
     try {

@@ -1,6 +1,6 @@
 import AuthService from '../../services/AuthService.js';
 import { PubSub } from 'graphql-subscriptions';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'node:crypto';
 import { getNeo4jDriver } from '../../db/neo4j.js';
 import { getPostgresPool } from '../../db/postgres.js';
 import logger from '../../utils/logger.js';

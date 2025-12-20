@@ -989,8 +989,8 @@ export class QualityEvaluationPlatform {
     const aggregated: Record<string, any> = {};
     const metricsByType: Record<string, number[]> = {};
 
-    evaluations.forEach((eval) => {
-      const metrics = JSON.parse(eval.metrics);
+    evaluations.forEach((evaluation) => {
+      const metrics = JSON.parse(evaluation.metrics);
       Object.entries(metrics).forEach(([metric, value]) => {
         if (!metricsByType[metric]) metricsByType[metric] = [];
         metricsByType[metric].push(value as number);
@@ -1015,8 +1015,8 @@ export class QualityEvaluationPlatform {
   private calculateSLOCompliance(evaluations: any[]): number {
     if (evaluations.length === 0) return 1.0;
 
-    const compliantCount = evaluations.filter((eval) => {
-      const violations = JSON.parse(eval.slo_violations);
+    const compliantCount = evaluations.filter((evaluation) => {
+      const violations = JSON.parse(evaluation.slo_violations);
       return violations.length === 0;
     }).length;
 

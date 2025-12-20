@@ -11,9 +11,14 @@ import {
 import StreamingIngestWorker from '../services/streaming/ingest-worker.js';
 import { otelService } from '../middleware/observability/otel-tracing.js';
 import logger from '../utils/logger.js';
+import { AdaptiveRateLimiter } from '../lib/streaming/rate-limiter.js';
 
 const router = express.Router();
 const ingestWorker = StreamingIngestWorker.getInstance();
+export const streamingRateLimiter = new AdaptiveRateLimiter({
+  maxTokens: 10, // Allow 10 connections
+  refillRate: 1, // 1 connection per second
+});
 
 // Committee requirement: All streaming operations require reason for access
 router.use(requireReasonForAccess);
@@ -364,17 +369,39 @@ router.post(
 router.get(
   '/events/stream',
   requireAuthority('streaming_ingest', ['real_time_events']),
+  async (req, res, next) => {
+    const user = req.user as any;
+    const key = `sse-connection:${user.tenantId}:${user.id}`;
+    if (!streamingRateLimiter.tryAcquireSync(key)) {
+      return res.status(429).json({
+        success: false,
+        error: 'Too many streaming connections',
+        code: 'RATE_LIMIT_EXCEEDED',
+      });
+    }
+    next();
+  },
   async (req, res) => {
     try {
       const user = req.user as any;
 
       // Set up Server-Sent Events
+      // SECURITY: Use specific origin instead of wildcard
+      const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
+        'http://localhost:3000',
+        'http://localhost:5173',
+        'https://intelgraph.app',
+      ];
+      const origin = req.headers.origin || '';
+      const allowOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+
       res.writeHead(200, {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
         Connection: 'keep-alive',
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': allowOrigin,
         'Access-Control-Allow-Headers': 'Cache-Control',
+        'Access-Control-Allow-Credentials': 'true',
       });
 
       // Send initial connection event

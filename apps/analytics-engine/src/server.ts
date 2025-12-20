@@ -4,13 +4,17 @@ import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
 import compression from 'compression';
 import { Pool } from 'pg';
-import neo4j from 'neo4j-driver';
+import neo4j, { type Driver } from 'neo4j-driver';
 import { createClient } from 'redis';
 import { DashboardService } from './services/DashboardService';
 import { ChartService } from './services/ChartService';
 import { logger } from './utils/logger';
 import { config } from './config';
-import { authenticate, authorize } from './middleware/auth';
+import {
+  authenticate,
+  authorize,
+  AuthenticatedRequest,
+} from './middleware/auth';
 
 const app: Express = express();
 const PORT = config.server.port || 4004;
@@ -33,7 +37,7 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // Body parsing middleware
-app.use(compression());
+app.use(compression() as express.RequestHandler);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -49,10 +53,26 @@ app.get('/health', (req, res) => {
 
 // Database connections
 let pgPool: Pool;
-let neo4jDriver: neo4j.Driver;
+let neo4jDriver: Driver;
 let redisClient: any;
 let dashboardService: DashboardService;
 let chartService: ChartService;
+
+const DASHBOARD_SORT_FIELDS = ['name', 'created_at', 'updated_at'] as const;
+type DashboardSortField = (typeof DASHBOARD_SORT_FIELDS)[number];
+type DashboardListOptions = Parameters<
+  DashboardService['listDashboards']
+>[1];
+
+const normalizeSortBy = (value: unknown): DashboardSortField => {
+  if (
+    typeof value === 'string' &&
+    (DASHBOARD_SORT_FIELDS as readonly string[]).includes(value)
+  ) {
+    return value as DashboardSortField;
+  }
+  return 'updated_at';
+};
 
 async function initializeServices() {
   try {
@@ -116,60 +136,77 @@ async function initializeServices() {
 app.use('/api', authenticate);
 
 // Dashboard API Routes
-app.post('/api/dashboards', authorize(['user', 'admin']), async (req, res) => {
-  try {
-    const dashboard = await dashboardService.createDashboard(
-      req.body,
-      req.user.id,
-    );
-    res.status(201).json(dashboard);
-  } catch (error) {
-    logger.error('Error creating dashboard:', error);
-    res.status(500).json({ error: 'Failed to create dashboard' });
-  }
-});
+app.post(
+  '/api/dashboards',
+  authorize(['user', 'admin']),
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = req.user.id;
+      const dashboard = await dashboardService.createDashboard(
+        req.body,
+        userId,
+      );
+      res.status(201).json(dashboard);
+    } catch (error) {
+      logger.error('Error creating dashboard:', error);
+      res.status(500).json({ error: 'Failed to create dashboard' });
+    }
+  },
+);
 
-app.get('/api/dashboards', authorize(['user', 'admin']), async (req, res) => {
-  try {
-    const {
-      page = '1',
-      limit = '20',
-      search,
-      tags,
-      sortBy = 'updated_at',
-      sortOrder = 'desc',
-    } = req.query;
+app.get(
+  '/api/dashboards',
+  authorize(['user', 'admin']),
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      const {
+        page = '1',
+        limit = '20',
+        search,
+        tags,
+        sortBy = 'updated_at',
+        sortOrder = 'desc',
+      } = req.query;
 
-    const options = {
-      limit: parseInt(limit as string),
-      offset: (parseInt(page as string) - 1) * parseInt(limit as string),
-      search: search as string,
-      tags: tags ? (tags as string).split(',') : undefined,
-      sortBy: sortBy as string,
-      sortOrder: sortOrder as 'asc' | 'desc',
-    };
+      const parsedLimit = parseInt(limit as string, 10);
+      const parsedPage = parseInt(page as string, 10);
+      const normalizedSortBy = normalizeSortBy(sortBy);
+      const normalizedSortOrder = sortOrder === 'asc' ? 'asc' : 'desc';
 
-    const result = await dashboardService.listDashboards(req.user.id, options);
+      const options: DashboardListOptions = {
+        limit: parsedLimit,
+        offset: (parsedPage - 1) * parsedLimit,
+        search: typeof search === 'string' ? search : undefined,
+        tags: typeof tags === 'string' ? tags.split(',') : undefined,
+        sortBy: normalizedSortBy,
+        sortOrder: normalizedSortOrder,
+      };
 
-    res.json({
-      dashboards: result.dashboards,
-      pagination: {
-        total: result.total,
-        page: parseInt(page as string),
-        limit: parseInt(limit as string),
-        pages: Math.ceil(result.total / parseInt(limit as string)),
-      },
-    });
-  } catch (error) {
-    logger.error('Error listing dashboards:', error);
-    res.status(500).json({ error: 'Failed to list dashboards' });
-  }
-});
+      const result = await dashboardService.listDashboards(
+        req.user.id,
+        options,
+      );
+
+      res.json({
+        dashboards: result.dashboards,
+        pagination: {
+          total: result.total,
+          page: parsedPage,
+          limit: parsedLimit,
+          pages: Math.ceil(result.total / parsedLimit),
+        },
+      });
+    } catch (error) {
+      logger.error('Error listing dashboards:', error);
+      res.status(500).json({ error: 'Failed to list dashboards' });
+    }
+  },
+);
 
 app.get(
   '/api/dashboards/:id',
   authorize(['user', 'admin']),
-  async (req, res) => {
+  async (req: AuthenticatedRequest, res) => {
     try {
       const dashboard = await dashboardService.getDashboard(
         req.params.id,
@@ -191,7 +228,7 @@ app.get(
 app.put(
   '/api/dashboards/:id',
   authorize(['user', 'admin']),
-  async (req, res) => {
+  async (req: AuthenticatedRequest, res) => {
     try {
       const dashboard = await dashboardService.updateDashboard(
         req.params.id,
@@ -210,7 +247,7 @@ app.put(
 app.delete(
   '/api/dashboards/:id',
   authorize(['user', 'admin']),
-  async (req, res) => {
+  async (req: AuthenticatedRequest, res) => {
     try {
       await dashboardService.deleteDashboard(req.params.id, req.user.id);
       res.status(204).send();
@@ -225,7 +262,7 @@ app.delete(
 app.get(
   '/api/widgets/:id/data',
   authorize(['user', 'admin']),
-  async (req, res) => {
+  async (req: AuthenticatedRequest, res) => {
     try {
       const data = await dashboardService.getWidgetData(
         req.params.id,
@@ -348,7 +385,7 @@ app.get(
 app.post(
   '/api/dashboard-templates/:id/create',
   authorize(['user', 'admin']),
-  async (req, res) => {
+  async (req: AuthenticatedRequest, res) => {
     try {
       const { name, customizations } = req.body;
 
@@ -377,7 +414,7 @@ app.post(
 app.get(
   '/api/insights/overview',
   authorize(['user', 'admin']),
-  async (req, res) => {
+  async (req: AuthenticatedRequest, res) => {
     try {
       const insights = await generateOverviewInsights(req.user.id);
       res.json(insights);
@@ -391,7 +428,7 @@ app.get(
 app.get(
   '/api/insights/trends',
   authorize(['user', 'admin']),
-  async (req, res) => {
+  async (req: AuthenticatedRequest, res) => {
     try {
       const { period = '7d' } = req.query;
       const trends = await generateTrendInsights(req.user.id, period as string);
@@ -407,7 +444,7 @@ app.get(
 app.post(
   '/api/dashboards/:id/export',
   authorize(['user', 'admin']),
-  async (req, res) => {
+  async (req: AuthenticatedRequest, res) => {
     try {
       const { format = 'json' } = req.body;
 

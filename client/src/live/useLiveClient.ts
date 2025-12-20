@@ -11,13 +11,13 @@ export function useLiveClient(workspaceId: string, token: string) {
   const socket = io('/live', { auth: { workspaceId, token } });
 
   // outbound events
-  $(document).on('ig:presence:update', (_e, data) =>
+  $(document).on('ig:presence:update', (_e: any, data: any) =>
     socket.emit('presence:update', data),
   );
-  $(document).on('ig:graph:ops', (_e, batch) =>
+  $(document).on('ig:graph:ops', (_e: any, batch: any) =>
     socket.emit('graph:ops', batch),
   );
-  $(document).on('ig:comment:add', (_e, payload) =>
+  $(document).on('ig:comment:add', (_e: any, payload: any) =>
     socket.emit('comment:add', payload),
   );
 

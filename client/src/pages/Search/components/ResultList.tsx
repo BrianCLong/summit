@@ -39,6 +39,14 @@ import {
   StarBorder,
 } from '@mui/icons-material';
 
+interface SearchResultMetadata {
+  organization?: string;
+  industry?: string;
+  threatType?: string;
+  riskScore?: number;
+  [key: string]: unknown;
+}
+
 interface SearchResult {
   id: string;
   type: 'PERSON' | 'ORGANIZATION' | 'DOCUMENT' | 'EVENT' | 'LOCATION' | 'IOC';
@@ -47,7 +55,7 @@ interface SearchResult {
   score: number;
   tags: string[];
   lastUpdated: string;
-  metadata?: Record<string, unknown>;
+  metadata?: SearchResultMetadata;
 }
 
 interface ResultListProps {
@@ -373,7 +381,7 @@ export default function ResultList({
               </Stack>
 
               {/* Additional metadata based on entity type */}
-              {result.metadata && (
+              {Boolean(result.metadata) && (
                 <Box
                   sx={{
                     mt: 2,
@@ -384,61 +392,69 @@ export default function ResultList({
                 >
                   <Stack direction="row" spacing={4}>
                     {result.type === 'PERSON' &&
-                      result.metadata.organization && (
+                      typeof result.metadata?.organization === 'string' && (
                         <Box>
                           <Typography variant="caption" color="text.secondary">
                             Organization
                           </Typography>
                           <Typography variant="body2">
-                            {result.metadata.organization as string}
+                            {result.metadata.organization}
                           </Typography>
                         </Box>
                       )}
                     {result.type === 'ORGANIZATION' &&
-                      result.metadata.industry && (
+                      typeof result.metadata?.industry === 'string' && (
                         <Box>
                           <Typography variant="caption" color="text.secondary">
                             Industry
                           </Typography>
                           <Typography variant="body2">
-                            {result.metadata.industry as string}
+                            {result.metadata.industry}
                           </Typography>
                         </Box>
                       )}
-                    {result.type === 'IOC' && result.metadata.threatType && (
-                      <Box>
-                        <Typography variant="caption" color="text.secondary">
-                          Threat Type
-                        </Typography>
-                        <Typography variant="body2">
-                          {result.metadata.threatType as string}
-                        </Typography>
-                      </Box>
-                    )}
-                    {result.metadata.riskScore && (
-                      <Box>
-                        <Typography variant="caption" color="text.secondary">
-                          Risk Score
-                        </Typography>
-                        <LinearProgress
-                          variant="determinate"
-                          value={result.metadata.riskScore as number}
-                          color={
-                            result.metadata.riskScore > 70
-                              ? 'error'
-                              : result.metadata.riskScore > 40
-                                ? 'warning'
-                                : 'success'
-                          }
-                          sx={{
-                            width: 60,
-                            height: 6,
-                            borderRadius: 3,
-                            mt: 0.5,
-                          }}
-                        />
-                      </Box>
-                    )}
+                    {result.type === 'IOC' &&
+                      typeof result.metadata?.threatType === 'string' && (
+                        <Box>
+                          <Typography variant="caption" color="text.secondary">
+                            Threat Type
+                          </Typography>
+                          <Typography variant="body2">
+                            {result.metadata.threatType}
+                          </Typography>
+                        </Box>
+                      )}
+                    {typeof result.metadata?.riskScore === 'number' &&
+                      (() => {
+                        const riskScore =
+                          typeof result.metadata?.riskScore === 'number'
+                            ? result.metadata.riskScore
+                            : 0;
+                        const color =
+                          riskScore > 70
+                            ? 'error'
+                            : riskScore > 40
+                              ? 'warning'
+                              : 'success';
+                        return (
+                          <Box>
+                            <Typography variant="caption" color="text.secondary">
+                              Risk Score
+                            </Typography>
+                            <LinearProgress
+                              variant="determinate"
+                              value={riskScore}
+                              color={color}
+                              sx={{
+                                width: 60,
+                                height: 6,
+                                borderRadius: 3,
+                                mt: 0.5,
+                              }}
+                            />
+                          </Box>
+                        );
+                      })()}
                   </Stack>
                 </Box>
               )}

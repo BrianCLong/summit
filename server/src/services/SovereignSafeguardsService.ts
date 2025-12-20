@@ -3,7 +3,7 @@
  * Independent verification, containment, lawful interoperability, and reversible autonomy
  */
 
-import { logger } from '../config/logger';
+import logger from '../config/logger';
 import { randomUUID } from 'crypto';
 import { spawn } from 'child_process';
 import { writeFile, readFile } from 'fs/promises';

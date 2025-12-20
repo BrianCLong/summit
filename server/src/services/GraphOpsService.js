@@ -68,4 +68,4 @@ async function expandNeighborhood(
   }
 }
 
-module.exports = { expandNeighbors, expandNeighborhood };
+export { expandNeighbors, expandNeighborhood };

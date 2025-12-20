@@ -5,11 +5,19 @@
     "moduleResolution": "node",
     "outDir": "dist",
     "rootDir": "src",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": false,
+    "composite": true,
+    "tsBuildInfoFile": "dist/.tsbuildinfo"
   },
-  "include": ["src"],
+  "include": [
+    "src/**/*",
+    "src/**/*.json"
+  ],
   "references": [
-    { "path": "../../packages/types" },
-    { "path": "../../packages/ai-core" }
+    {
+      "path": "../../packages/types"
+    }
   ]
 }

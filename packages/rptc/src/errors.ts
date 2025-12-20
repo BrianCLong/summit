@@ -12,7 +12,7 @@ export class SlotValidationError extends Error {
     const message = details
       .map((detail) => `${detail.code}: ${detail.message}`)
       .join('; ');
-    super(`Slot \"${slot}\" validation failed: ${message}`);
+    super(`Slot "${slot}" validation failed: ${message}`);
     this.name = 'SlotValidationError';
     this.slot = slot;
     this.details = details;
@@ -34,7 +34,7 @@ export class PromptValidationError extends Error {
       return `${slot} -> ${joined}`;
     });
     super(
-      `Prompt template \"${templateName}\" validation failed: ${segments.join(' | ')}`,
+      `Prompt template "${templateName}" validation failed: ${segments.join(' | ')}`,
     );
     this.name = 'PromptValidationError';
     this.templateName = templateName;

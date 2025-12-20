@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
-import { createLogger } from '../config/logger';
+import baseLogger from '../config/logger';
 
-const logger = createLogger('LinUCBOptimizer');
+const logger = baseLogger.child({ module: 'LinUCBOptimizer' });
 
 export interface ContextVector {
   features: number[];

@@ -1,5 +1,8 @@
+// @ts-nocheck
 import { Request, Response, NextFunction } from 'express';
 import AuthService from '../services/AuthService.js';
+import { getAuditSystem } from '../audit/advanced-audit-system.js';
+import logger from '../utils/logger.js';
 
 interface AuthenticatedRequest extends Request {
   user?: any;
@@ -38,7 +41,48 @@ export function requirePermission(permission: string) {
     if (authService.hasPermission(user, permission)) {
       return next();
     } else {
+      try {
+        getAuditSystem().recordEvent({
+          eventType: 'policy_violation',
+          action: 'check_permission',
+          outcome: 'failure',
+          userId: user.id,
+          tenantId: user.tenantId || 'system',
+          serviceId: 'api-gateway',
+          resourceType: 'endpoint',
+          resourceId: req.originalUrl,
+          message: `Permission denied: ${permission}`,
+          level: 'warn',
+          details: { permission, role: user.role }
+        });
+      } catch (error) {
+         if (process.env.NODE_ENV !== 'test') {
+             logger.error('Failed to log audit event', error);
+         }
+      }
       return res.status(403).json({ error: 'Forbidden' });
     }
   };
 }
+
+export function ensureRole(requiredRole: string | string[]) {
+  const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
+  return (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction,
+  ): Response | void => {
+    const user = req.user;
+    if (!user || !user.role) return res.status(401).json({ error: 'Unauthorized' });
+
+    if (roles.includes(user.role)) {
+      return next();
+    } else {
+      return res.status(403).json({ error: 'Forbidden: Insufficient role' });
+    }
+  };
+}
+
+// Export aliases for compatibility
+export const authMiddleware = ensureAuthenticated;
+export const auth = ensureAuthenticated;

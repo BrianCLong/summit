@@ -5,6 +5,9 @@ const graphResolvers = require('./resolvers.graphops.js');
 const aiResolvers = require('./resolvers.ai.js');
 const annotationsResolvers = require('./resolvers.annotations.js');
 import { v040Resolvers } from './resolvers/v040/index';
+import { activityResolvers } from './resolvers/activity.js';
+import { geoIntResolvers } from './resolvers/geoint.js';
+import { documentResolvers } from './resolvers.document.js';
 import { randomUUID } from 'node:crypto';
 
 interface User {
@@ -60,6 +63,9 @@ export const resolvers = {
     ...(aiResolvers.Query || {}),
     ...(annotationsResolvers.Query || {}),
     ...(v040Resolvers.Query || {}),
+    ...(activityResolvers.Query || {}),
+    ...(geoIntResolvers.Query || {}),
+    ...(documentResolvers.Query || {}),
     me: async (_: any, __: any, { user }: Context): Promise<User> => {
       if (!user) throw new Error('Not authenticated');
       return user;
@@ -77,6 +83,7 @@ export const resolvers = {
     ...(aiResolvers.Mutation || {}),
     ...(annotationsResolvers.Mutation || {}),
     ...(v040Resolvers.Mutation || {}),
+    ...(documentResolvers.Mutation || {}),
     login: async (
       _: any,
       { input }: { input: LoginInput },

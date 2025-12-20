@@ -4,8 +4,18 @@
     "outDir": "dist",
     "rootDir": "src",
     "declaration": true,
-    "sourceMap": true
+    "allowImportingTsExtensions": false,
+    "sourceMap": true,
+    "composite": true,
+    "tsBuildInfoFile": "dist/.tsbuildinfo",
+    "types": []
   },
-  "include": ["src"],
-  "references": [{ "path": "../types" }, { "path": "../ai-core" }]
+  "include": [
+    "src"
+  ],
+  "references": [
+    {
+      "path": "../types"
+    }
+  ]
 }

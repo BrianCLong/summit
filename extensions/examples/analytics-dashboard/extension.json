@@ -1,0 +1,147 @@
+{
+  "name": "analytics-dashboard",
+  "displayName": "Analytics Dashboard",
+  "version": "1.0.0",
+  "description": "Analytics dashboard extension with entity statistics and visualization tools",
+  "author": "Summit Team",
+  "license": "MIT",
+  "type": "widget",
+  "capabilities": [
+    "ui.widget",
+    "ui.command",
+    "copilot.tool",
+    "analytics"
+  ],
+  "permissions": [
+    "entities:read",
+    "relationships:read"
+  ],
+  "entrypoints": {
+    "main": {
+      "type": "function",
+      "path": "dist/index.js",
+      "export": "activate"
+    },
+    "stats": {
+      "type": "function",
+      "path": "dist/tools/stats.js",
+      "export": "getEntityStats"
+    },
+    "chart": {
+      "type": "function",
+      "path": "dist/commands/chart.js",
+      "export": "showChart"
+    },
+    "summary": {
+      "type": "function",
+      "path": "dist/tools/summary.js",
+      "export": "generateSummary"
+    }
+  },
+  "copilot": {
+    "tools": [
+      {
+        "name": "get-entity-stats",
+        "description": "Get statistics about entities in the graph",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "entityType": {
+              "type": "string",
+              "description": "Type of entity to analyze (optional)"
+            },
+            "timeRange": {
+              "type": "string",
+              "enum": ["day", "week", "month", "year"],
+              "description": "Time range for statistics"
+            }
+          }
+        },
+        "entrypoint": "stats"
+      },
+      {
+        "name": "generate-summary",
+        "description": "Generate a summary of investigation data",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "investigationId": {
+              "type": "string",
+              "description": "Investigation ID to summarize"
+            }
+          },
+          "required": ["investigationId"]
+        },
+        "entrypoint": "summary"
+      }
+    ]
+  },
+  "ui": {
+    "commands": [
+      {
+        "id": "show-analytics",
+        "title": "Show Analytics Dashboard",
+        "icon": "📊",
+        "category": "Analytics",
+        "entrypoint": "chart"
+      }
+    ],
+    "widgets": [
+      {
+        "id": "stats-widget",
+        "title": "Entity Statistics",
+        "component": "StatsWidget",
+        "placement": "dashboard"
+      }
+    ]
+  },
+  "cli": {
+    "commands": [
+      {
+        "name": "stats",
+        "description": "Display entity statistics",
+        "entrypoint": "stats",
+        "options": [
+          {
+            "name": "type",
+            "alias": "t",
+            "description": "Filter by entity type",
+            "type": "string"
+          },
+          {
+            "name": "range",
+            "alias": "r",
+            "description": "Time range (day, week, month, year)",
+            "type": "string",
+            "default": "week"
+          }
+        ]
+      }
+    ]
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "refreshInterval": {
+        "type": "number",
+        "description": "Dashboard refresh interval in seconds",
+        "default": 60
+      },
+      "defaultTimeRange": {
+        "type": "string",
+        "description": "Default time range for statistics",
+        "default": "week"
+      }
+    }
+  },
+  "keywords": [
+    "analytics",
+    "dashboard",
+    "statistics",
+    "visualization"
+  ],
+  "summit": {
+    "minVersion": "1.0.0",
+    "experimental": false
+  }
+}

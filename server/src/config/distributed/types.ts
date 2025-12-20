@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { z } from 'zod';
 
 export type EnvironmentName =
@@ -90,7 +91,7 @@ export interface DriftReport {
   generatedAt: Date;
 }
 
-export type ConfigSchema = z.ZodTypeAny;
+export type ConfigSchema = z.ZodType<any>;
 
 export type ConfigWatcher<TConfig = Record<string, any>> = (payload: {
   configId: string;

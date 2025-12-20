@@ -1189,6 +1189,7 @@ export class TenantPartitioningService extends EventEmitter {
 }
 
 // Export singleton instance
+const dbService = new DatabaseService();
 export const tenantPartitioningService = new TenantPartitioningService(
   {
     enabled: process.env.TENANT_PARTITIONING_ENABLED !== 'false',
@@ -1201,6 +1202,6 @@ export const tenantPartitioningService = new TenantPartitioningService(
     autoMigrationEnabled: process.env.PARTITIONING_AUTO_MIGRATION === 'true',
     rollbackEnabled: process.env.PARTITIONING_ROLLBACK_ENABLED !== 'false',
   },
-  new DatabaseService(),
-  new TenantCostService(),
+  dbService,
+  new TenantCostService({}, dbService),
 );

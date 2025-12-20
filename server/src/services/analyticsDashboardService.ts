@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { RedisCache } from '../cache/redis';
+import { RedisService as RedisCache } from '../cache/redis';
 
 interface DashboardWidget {
   id: string;
@@ -392,7 +392,7 @@ export class AnalyticsDashboardService extends EventEmitter {
             tension: 0.1,
           },
         ],
-      },
+      } as any,
       options: {
         responsive: true,
         interaction: { intersect: false },

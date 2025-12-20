@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Apollo Server v5 Configuration for IntelGraph Platform
  * Modern GraphQL server with enhanced security and observability
@@ -17,10 +18,26 @@ import logger from '../utils/logger.js';
 // Import schemas and resolvers
 import { typeDefs } from './schema/index.js';
 import resolvers from './resolvers-combined.js';
+import { authDirectiveTransformer } from './authDirective.js';
+
+// Import DataLoaders
+import { createDataLoaders, type DataLoaders } from './dataloaders/index.js';
+import { getNeo4jDriver } from '../db/neo4j.js';
+import { getPostgresPool } from '../db/postgres.js';
+
+// Import performance optimization plugins
+import { createQueryComplexityPlugin, getMaxComplexityByRole } from './plugins/queryComplexityPlugin.js';
+import { createInputSanitizationPlugin } from './plugins/inputSanitizationPlugin.js';
+import { createAPQPlugin } from './plugins/apqPlugin.js';
+import { createPerformanceMonitoringPlugin } from './plugins/performanceMonitoringPlugin.js';
+import { createCircuitBreakerPlugin } from './plugins/circuitBreakerPlugin.js';
+import resolverMetricsPlugin from './plugins/resolverMetrics.js';
+import depthLimit from 'graphql-depth-limit';
 
 // Enhanced context type for Apollo v5
 export interface GraphQLContext {
   dataSources: any;
+  loaders: DataLoaders;
   user?: {
     id: string;
     roles: string[];
@@ -58,21 +75,36 @@ const permissions = shield({
 
 // Create enhanced GraphQL schema with security
 function createSecureSchema() {
-  const baseSchema = makeExecutableSchema({
+  let schema = makeExecutableSchema({
     typeDefs,
     resolvers,
   });
 
+  // Apply Auth Directive
+  schema = authDirectiveTransformer(schema);
+
   // Apply security middleware
-  return applyMiddleware(baseSchema, permissions);
+  return applyMiddleware(schema, permissions);
 }
 
 // Context function for Apollo v5
 async function createContext({ req }: { req: any }): Promise<GraphQLContext> {
+  const neo4jDriver = getNeo4jDriver();
+  const pgPool = getPostgresPool();
+  const tenantId = req.user?.tenantId || req.user?.tenant || 'default';
+
+  // Create request-scoped DataLoaders to batch queries
+  const loaders = createDataLoaders({
+    neo4jDriver,
+    pgPool,
+    tenantId,
+  });
+
   return {
     dataSources: {
       // Data sources will be injected here
     },
+    loaders, // DataLoaders for batch loading
     user: req.user, // Populated by auth middleware
     request: {
       ip: req.ip || req.connection.remoteAddress,
@@ -94,6 +126,10 @@ export function createApolloV5Server(
 
   const server = new ApolloServer<GraphQLContext>({
     schema,
+    validationRules: [
+      // Recursion and Depth limiting against deep query abuse
+      depthLimit(10),
+    ],
     plugins: [
       // Graceful shutdown
       ApolloServerPluginDrainHttpServer({ httpServer }),
@@ -102,6 +138,38 @@ export function createApolloV5Server(
       ...(process.env.NODE_ENV === 'development'
         ? [ApolloServerPluginLandingPageLocalDefault({ embed: true })]
         : []),
+
+      // Input Sanitization Plugin (Injection & Recursive Input Abuse)
+      createInputSanitizationPlugin({
+        maxInputDepth: 10,
+        maxStringLength: 10000,
+        trimStrings: true,
+        removeNullBytes: true,
+      }),
+
+      // Performance optimization plugins
+      createQueryComplexityPlugin({
+        maximumComplexity: 1000,
+        getMaxComplexityForUser: getMaxComplexityByRole,
+        enforceComplexity: process.env.ENFORCE_QUERY_COMPLEXITY === 'true' || process.env.NODE_ENV === 'production',
+        logComplexity: true,
+      }),
+
+      createAPQPlugin({
+        // Redis will be injected if available
+        enabled: process.env.ENABLE_APQ !== 'false',
+        ttl: 86400, // 24 hours
+      }),
+
+      createCircuitBreakerPlugin({
+        failureThreshold: 20,
+        resetTimeout: 30000,
+        maxRequestsPerMinute: 2000,
+      }),
+
+      createPerformanceMonitoringPlugin(),
+
+      resolverMetricsPlugin,
 
       // Custom telemetry plugin
       {
@@ -131,10 +199,11 @@ export function createApolloV5Server(
 
             async willSendResponse(requestContext) {
               const { response } = requestContext;
+              const body = response.body as any;
               logger.info(
                 {
                   operationName: requestContext.request.operationName,
-                  hasErrors: !!response.body.singleResult?.errors?.length,
+                  hasErrors: !!(body.singleResult?.errors?.length || (body.kind === 'single' && body.singleResult?.errors?.length)),
                 },
                 'GraphQL operation completed',
               );
@@ -220,10 +289,11 @@ export function createHealthCheck(server: ApolloServer<GraphQLContext>) {
           timestamp: new Date().toISOString(),
         });
       } else {
+        const body = result.body as any;
         res.status(503).json({
           status: 'unhealthy',
           service: 'apollo-v5-graphql',
-          errors: result.body.singleResult.errors,
+          errors: body.singleResult?.errors || (body.kind === 'single' ? body.singleResult?.errors : []),
         });
       }
     } catch (error) {

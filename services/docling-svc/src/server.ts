@@ -11,12 +11,14 @@ import { provenanceEmitter } from './provenance/ledger.js';
 const config = loadConfig();
 const logger = pino({ level: config.LOG_LEVEL });
 
-export const createApp = () => {
+import { Express } from 'express';
+
+export const createApp = (): Express => {
   const app = express();
   app.use(express.json({ limit: '20mb' }));
   app.use(
     pinoHttp({
-      logger,
+      logger: logger as any,
       customSuccessMessage: () => 'docling-request',
       autoLogging: true,
       redact: {

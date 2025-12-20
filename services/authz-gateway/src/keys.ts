@@ -1,7 +1,7 @@
-import { generateKeyPair, exportJWK, JWK, KeyLike } from 'jose';
+import { generateKeyPair, exportJWK, type JWK } from 'jose';
 
-let privateKey: KeyLike;
-let publicKey: KeyLike;
+let privateKey: CryptoKey;
+let publicKey: CryptoKey;
 let publicJwk: JWK;
 
 export async function initKeys() {

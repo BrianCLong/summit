@@ -1,0 +1,59 @@
+name: Auto Draft Release
+
+on:
+  workflow_run:
+    workflows: ["Fast Lane", "Integration Lane"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  draft-release:
+    name: Create Draft Release
+    runs-on: ubuntu-22.04
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.11.x'
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: validation-artifacts
+          path: ./artifacts
+        continue-on-error: true
+
+      - name: Generate release notes
+        run: |
+          if [ -f scripts/gen-release-notes.sh ]; then
+            chmod +x scripts/gen-release-notes.sh
+            ./scripts/gen-release-notes.sh > release-notes.md
+          else
+            echo "## Release Notes" > release-notes.md
+            git log --pretty=format:"- %s (%h)" HEAD~10..HEAD >> release-notes.md
+          fi
+          
+      - name: Get version
+        id: version
+        run: echo "value=v$(node -p 'require("./package.json").version')" >> $GITHUB_OUTPUT
+
+      - name: Create draft release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.value }}-draft-${{ github.run_number }}
+          name: Draft Release ${{ steps.version.outputs.value }}
+          body_path: release-notes.md
+          draft: true
+          files: artifacts/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

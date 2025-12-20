@@ -179,7 +179,7 @@ export class ActionSandbox {
 
       this.logger.debug({ dockerArgs }, 'Executing Docker command');
 
-      const process = spawn('docker', dockerArgs, {
+      const dockerProcess = spawn('docker', dockerArgs, {
         cwd: sandboxPath,
         env: { ...process.env, ...context.config.environment },
       });
@@ -192,7 +192,7 @@ export class ActionSandbox {
         timeoutHandle = setTimeout(() => {
           if (!killed) {
             killed = true;
-            process.kill('SIGKILL');
+            dockerProcess.kill('SIGKILL');
             violations.push(
               `Execution timeout after ${context.config.timeoutMs}ms`,
             );
@@ -219,7 +219,7 @@ export class ActionSandbox {
                 );
                 if (!killed) {
                   killed = true;
-                  process.kill('SIGKILL');
+                  dockerProcess.kill('SIGKILL');
                 }
               }
             }
@@ -228,7 +228,7 @@ export class ActionSandbox {
       }, 1000);
 
       // Capture output
-      process.stdout?.on('data', (data) => {
+      dockerProcess.stdout?.on('data', (data) => {
         stdout += data.toString();
 
         // Check for suspicious output patterns
@@ -250,7 +250,7 @@ export class ActionSandbox {
         }
       });
 
-      process.stderr?.on('data', (data) => {
+      dockerProcess.stderr?.on('data', (data) => {
         stderr += data.toString();
       });
 
@@ -263,7 +263,7 @@ export class ActionSandbox {
         violations.push(`Network violation: ${violation}`);
       });
 
-      process.on('close', (code) => {
+      dockerProcess.on('close', (code) => {
         if (timeoutHandle) clearTimeout(timeoutHandle);
         clearInterval(resourceMonitor);
         networkMonitor.stop();

@@ -93,7 +93,9 @@ function buildBaseValues<TSlots extends SlotSchemaMap>(
   template: PromptTemplate<TSlots>,
   options: TestGenerationOptions<TSlots>,
 ): SlotValues<TSlots> {
-  const base: Partial<SlotValues<TSlots>> = { ...(options.validExample ?? {}) };
+  const base: Partial<SlotValues<TSlots>> = {
+    ...(options.validExample ?? ({} as SlotValues<TSlots>)),
+  };
 
   for (const [slotName, schema] of Object.entries(template.slots) as Array<
     [keyof TSlots, SlotSchema]
@@ -309,8 +311,9 @@ function buildNumberCases<TSlots extends SlotSchemaMap>(
 
 function buildEnumCase<TSlots extends SlotSchemaMap>(
   slotName: keyof TSlots,
-  schema: EnumSlotSchema<string>,
+  _schema: EnumSlotSchema<string>,
 ): GeneratedTestCase<TSlots> {
+  void _schema;
   return {
     description: `rejects value outside enum for ${String(slotName)}`,
     slot: slotName,
@@ -375,9 +378,9 @@ function executeTestCase<TSlots extends SlotSchemaMap>(
       return { testCase, passed: true };
     }
     let threw = false;
-    try {
-      template.render(mergedValues);
-    } catch (error) {
+  try {
+    template.render(mergedValues);
+    } catch {
       threw = true;
     }
     if (!threw) {

@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
-import { createLogger } from 'winston';
 import { v4 as uuidv4 } from 'uuid';
+import { createLogger, format, transports } from 'winston';
 export class SavedSearchService {
     db;
     logger;
@@ -17,10 +17,12 @@ export class SavedSearchService {
         });
         this.logger = createLogger({
             level: process.env.LOG_LEVEL || 'info',
-            format: require('winston').format.combine(require('winston').format.timestamp(), require('winston').format.json()),
+            format: format.combine(format.timestamp(), format.json()),
             transports: [
-                new require('winston').transports.Console(),
-                new require('winston').transports.File({ filename: 'logs/saved-search.log' }),
+                new transports.Console(),
+                new transports.File({
+                    filename: 'logs/saved-search.log',
+                }),
             ],
         });
     }
@@ -444,4 +446,3 @@ export class SavedSearchService {
         }
     }
 }
-//# sourceMappingURL=SavedSearchService.js.map

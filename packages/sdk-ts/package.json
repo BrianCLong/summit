@@ -1,6 +1,6 @@
 {
   "name": "@summit/maestro-sdk",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "description": "TypeScript SDK for Summit Maestro tasks, connectors, and policy-aware execution",
   "repository": "https://github.com/your-org/maestro",
   "license": "UNLICENSED",
@@ -19,11 +19,11 @@
     "prepublishOnly": "npm run clean && npm run build && npm test"
   },
   "devDependencies": {
-    "eslint": "^9.38.0",
+    "eslint": "^9.39.1",
     "rimraf": "^6.0.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.3",
-    "@types/node": "^24.9.1"
+    "@types/node": "^24.10.1"
   },
   "exports": {
     ".": {

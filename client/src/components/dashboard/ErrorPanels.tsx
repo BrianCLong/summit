@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAppSelector } from '../../store/index.ts';
+import { useAppSelector } from '../../store/index';
 import { Card, CardContent, Stack, Typography, Skeleton } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { useSafeQuery } from '../../hooks/useSafeQuery';
@@ -28,7 +28,8 @@ export default function ErrorPanels() {
       field: 'ratio',
       headerName: 'Error Ratio',
       flex: 1,
-      valueFormatter: (p) => `${(Number(p.value || 0) * 100).toFixed(2)}%`,
+      valueFormatter: (p: { value?: number }) =>
+        `${(Number(p.value || 0) * 100).toFixed(2)}%`,
     },
   ];
 

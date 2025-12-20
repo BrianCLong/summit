@@ -44,14 +44,14 @@ const navItems: NavItem[] = [
   {
     name: 'Explore',
     href: '/explore',
-    icon: Search,
+    icon: Search as React.ComponentType<{ className?: string }>,
     resource: 'investigations',
     action: 'read',
   },
   {
     name: 'Alerts',
     href: '/alerts',
-    icon: AlertTriangle,
+    icon: AlertTriangle as React.ComponentType<{ className?: string }>,
     badge: 3,
     resource: 'alerts',
     action: 'read',
@@ -59,57 +59,64 @@ const navItems: NavItem[] = [
   {
     name: 'Cases',
     href: '/cases',
-    icon: FileText,
+    icon: FileText as React.ComponentType<{ className?: string }>,
     resource: 'cases',
     action: 'read',
   },
   {
     name: 'Command Center',
     href: '/dashboards/command-center',
-    icon: BarChart3,
+    icon: BarChart3 as React.ComponentType<{ className?: string }>,
     resource: 'dashboards',
     action: 'read',
   },
   {
     name: 'Supply Chain',
     href: '/dashboards/supply-chain',
-    icon: BarChart3,
+    icon: BarChart3 as React.ComponentType<{ className?: string }>,
+    resource: 'dashboards',
+    action: 'read',
+  },
+  {
+    name: 'Internal Command',
+    href: '/internal/command',
+    icon: Command as React.ComponentType<{ className?: string }>,
     resource: 'dashboards',
     action: 'read',
   },
   {
     name: 'Data Sources',
     href: '/data/sources',
-    icon: Database,
+    icon: Database as React.ComponentType<{ className?: string }>,
     resource: 'data',
     action: 'read',
   },
   {
     name: 'Models',
     href: '/models',
-    icon: Brain,
+    icon: Brain as React.ComponentType<{ className?: string }>,
     resource: 'models',
     action: 'read',
   },
   {
     name: 'Reports',
     href: '/reports',
-    icon: FileBarChart,
+    icon: FileBarChart as React.ComponentType<{ className?: string }>,
     resource: 'reports',
     action: 'read',
   },
   {
     name: 'Admin',
     href: '/admin',
-    icon: Settings,
+    icon: Settings as React.ComponentType<{ className?: string }>,
     resource: 'admin',
     action: 'read',
   },
 ]
 
 const supportItems: NavItem[] = [
-  { name: 'Help', href: '/help', icon: HelpCircle },
-  { name: 'Changelog', href: '/changelog', icon: History },
+  { name: 'Help', href: '/help', icon: HelpCircle as React.ComponentType<{ className?: string }> },
+  { name: 'Changelog', href: '/changelog', icon: History as React.ComponentType<{ className?: string }> },
 ]
 
 export function Navigation({ user }: NavigationProps) {
@@ -177,6 +184,7 @@ export function Navigation({ user }: NavigationProps) {
           variant="outline"
           className="w-full justify-start text-muted-foreground"
           onClick={openSearch}
+          aria-label="Search (Command+K)"
         >
           <Command className="h-4 w-4 mr-2" />
           Search...
@@ -196,14 +204,14 @@ export function Navigation({ user }: NavigationProps) {
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2 mt-6">
           Dashboards
         </div>
-        {navItems.slice(3, 5).map(item => (
+        {navItems.slice(3, 6).map(item => (
           <NavItemComponent key={item.href} item={item} />
         ))}
 
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2 mt-6">
           Platform
         </div>
-        {navItems.slice(5).map(item => (
+        {navItems.slice(6).map(item => (
           <NavItemComponent key={item.href} item={item} />
         ))}
       </div>
@@ -235,6 +243,7 @@ export function Navigation({ user }: NavigationProps) {
             size="sm"
             className="w-full justify-start text-muted-foreground"
             onClick={logout}
+            aria-label="Sign Out"
           >
             <LogOut className="h-4 w-4 mr-2" />
             Sign Out

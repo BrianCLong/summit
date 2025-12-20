@@ -12,7 +12,7 @@ import { Badge } from './Badge'
 
 const meta: Meta<typeof Card> = {
   title: 'UI/Card',
-  component: Card,
+  component: Card as any,
   parameters: {
     layout: 'centered',
   },

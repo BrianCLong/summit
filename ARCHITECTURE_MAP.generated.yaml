@@ -1,0 +1,801 @@
+# ARCHITECTURE_MAP.generated.yaml
+# Generated: 2025-11-20
+# Repository: IntelGraph / Maestro Conductor (summit)
+# Purpose: Machine-readable map of active services vs. archives
+
+metadata:
+  repository: summit
+  full_name: IntelGraph / Maestro Conductor
+  description: >-
+    Deployable-first IntelGraph stack with GraphQL, React, Neo4j, PostgreSQL, Redis,
+    and observability/AI services for intelligence analysis platform
+  architecture: monorepo
+  package_manager: pnpm
+  workspace_config: pnpm-workspace.yaml
+  generated_at: "2025-11-20T00:00:00Z"
+  slo_targets:
+    graphql_read_p95_ms: 350
+    graphql_read_p99_ms: 900
+    graphql_write_p95_ms: 700
+    subscription_p95_ms: 250
+    neo4j_1hop_p95_ms: 300
+    neo4j_2_3hop_p95_ms: 1200
+    availability_percent: 99.9
+  cost_targets:
+    dev_monthly_usd: 1000
+    staging_monthly_usd: 3000
+    prod_monthly_usd: 18000
+    llm_monthly_usd: 5000
+
+# ============================================================================
+# ACTIVE SERVICES
+# Services currently deployed, maintained, and referenced in docker-compose
+# ============================================================================
+
+services:
+  # --------------------------------------------------------------------------
+  # PRIMARY APPLICATION SERVICES
+  # --------------------------------------------------------------------------
+
+  - name: api
+    display_name: "IntelGraph GraphQL API"
+    status: active
+    type: backend_api
+    path: server/
+    language: typescript
+    runtime: nodejs
+    version: "20+"
+    entrypoint: src/index.ts
+    build_output: dist/index.js
+    package_manager: pnpm
+    dependencies_file: server/package.json
+    dockerfile: server/Dockerfile
+    compose_service: api
+    port: 4000
+    dev_command: npm run dev
+    prod_command: node dist/index.js
+    description: >-
+      Main GraphQL API server using Apollo Server v4, Express.js middleware,
+      JWT authentication, WebSocket subscriptions, Neo4j, PostgreSQL, Redis integration
+    healthcheck: /health
+    metrics_endpoint: /metrics
+    observability:
+      - opentelemetry
+      - prometheus
+      - jaeger
+    key_features:
+      - GraphQL API with Apollo Server
+      - Real-time subscriptions via Socket.io
+      - JWT + RBAC authentication
+      - Neo4j graph queries
+      - PostgreSQL metadata storage
+      - Redis caching and rate limiting
+      - Narrative simulation engine
+    referenced_in:
+      - docker-compose.yml
+      - docker-compose.dev.yml
+      - .github/workflows/ci.yml
+      - .github/workflows/security.yml
+      - README.md
+    slo_critical: true
+
+  - name: web
+    display_name: "IntelGraph React Frontend"
+    status: active
+    type: frontend_spa
+    path: client/
+    language: typescript
+    runtime: nodejs
+    version: "20+"
+    entrypoint: src/main.jsx
+    build_tool: vite
+    package_manager: pnpm
+    dependencies_file: client/package.json
+    compose_service: ui
+    port: 3000
+    dev_command: npm run dev
+    build_command: vite build
+    description: >-
+      React 18 frontend with Material-UI, Cytoscape.js graph visualization,
+      Redux Toolkit state management, Apollo Client for GraphQL
+    key_features:
+      - React 18 with Hooks
+      - Material-UI (MUI) v5
+      - Cytoscape.js graph visualization
+      - Redux Toolkit + RTK Query
+      - Apollo Client GraphQL
+      - Real-time collaboration
+      - Responsive design
+    referenced_in:
+      - docker-compose.yml
+      - docker-compose.dev.yml
+      - .github/workflows/ci.yml
+      - README.md
+    slo_critical: true
+
+  - name: worker
+    display_name: "Background Worker (BullMQ)"
+    status: active
+    type: background_worker
+    path: server/
+    language: typescript
+    runtime: nodejs
+    version: "20+"
+    entrypoint: src/conductor/worker-entrypoint.ts
+    package_manager: pnpm
+    dependencies_file: server/package.json
+    compose_service: worker
+    port: 4100
+    dev_command: npm run dev:worker
+    description: >-
+      Background job processor using BullMQ for async tasks, data processing,
+      scheduled jobs, and long-running operations
+    key_features:
+      - BullMQ worker
+      - Redis queue processing
+      - Async job execution
+      - Health monitoring
+    referenced_in:
+      - docker-compose.yml
+      - docker-compose.dev.yml
+    slo_critical: false
+
+  # --------------------------------------------------------------------------
+  # DATABASE SERVICES
+  # --------------------------------------------------------------------------
+
+  - name: postgres
+    display_name: "PostgreSQL Database"
+    status: active
+    type: database
+    technology: postgresql
+    version: "16-alpine"
+    compose_service: postgres
+    port: 5432
+    description: >-
+      Primary relational database for user data, metadata, audit logs,
+      and structured data storage with pgvector extension
+    data_volume: postgres_data
+    migrations_path: server/db/migrations/postgres
+    healthcheck: pg_isready -U summit -d summit_dev
+    referenced_in:
+      - docker-compose.yml
+      - docker-compose.dev.yml
+    slo_critical: true
+
+  - name: redis
+    display_name: "Redis Cache & Queue"
+    status: active
+    type: cache_queue
+    technology: redis
+    version: "7-alpine"
+    compose_service: redis
+    port: 6379
+    description: >-
+      In-memory data store for sessions, caching, BullMQ job queues,
+      rate limiting, and pub/sub messaging
+    data_volume: redis_data
+    healthcheck: redis-cli ping
+    referenced_in:
+      - docker-compose.yml
+      - docker-compose.dev.yml
+    slo_critical: true
+
+  - name: neo4j
+    display_name: "Neo4j Graph Database"
+    status: active
+    type: graph_database
+    technology: neo4j
+    version: "5.8"
+    compose_service: neo4j
+    ports:
+      - 7474  # HTTP
+      - 7687  # Bolt
+    description: >-
+      Graph database for entity relationships, graph analytics,
+      community detection, and network analysis with APOC and GDS plugins
+    data_volumes:
+      - neo4j_data
+      - neo4j_logs
+      - neo4j_import
+      - neo4j_plugins
+    plugins:
+      - apoc
+      - graph-data-science
+    healthcheck: cypher-shell -u neo4j -p dev_password RETURN 1
+    referenced_in:
+      - docker-compose.yml
+      - docker-compose.dev.yml
+    slo_critical: true
+
+  # --------------------------------------------------------------------------
+  # OBSERVABILITY STACK
+  # --------------------------------------------------------------------------
+
+  - name: prometheus
+    display_name: "Prometheus Metrics"
+    status: active
+    type: monitoring_metrics
+    technology: prometheus
+    version: latest
+    compose_service: prometheus
+    port: 9090
+    config_path: observability/prometheus/prometheus-dev.yml
+    description: Time-series metrics collection and storage
+    data_volume: prometheus_data
+    retention: 15d
+    referenced_in:
+      - docker-compose.yml
+      - docker-compose.dev.yml
+    slo_critical: false
+
+  - name: grafana
+    display_name: "Grafana Dashboards"
+    status: active
+    type: monitoring_dashboards
+    technology: grafana
+    version: latest
+    compose_service: grafana
+    port: 8080
+    config_paths:
+      - observability/grafana/provisioning/dashboards
+      - observability/grafana/provisioning/datasources
+    description: Visualization dashboards for metrics and observability
+    data_volume: grafana_data
+    referenced_in:
+      - docker-compose.yml
+      - docker-compose.dev.yml
+    slo_critical: false
+
+  - name: jaeger
+    display_name: "Jaeger Tracing"
+    status: active
+    type: monitoring_tracing
+    technology: jaeger
+    version: "1.58"
+    compose_service: jaeger
+    port: 16686
+    description: Distributed tracing for request flows and performance analysis
+    referenced_in:
+      - docker-compose.yml
+    slo_critical: false
+
+  - name: otel-collector
+    display_name: "OpenTelemetry Collector"
+    status: active
+    type: monitoring_collector
+    technology: opentelemetry
+    version: "0.110.0"
+    compose_service: otel-collector
+    ports:
+      - 4317  # OTLP gRPC
+      - 4318  # OTLP HTTP
+      - 9464  # Prometheus exporter
+    config_path: ops/devkit/otel-collector.yaml
+    description: Telemetry data collection and export to observability backends
+    referenced_in:
+      - docker-compose.yml
+    slo_critical: false
+
+  # --------------------------------------------------------------------------
+  # POLICY & SECURITY
+  # --------------------------------------------------------------------------
+
+  - name: opa
+    display_name: "Open Policy Agent"
+    status: active
+    type: policy_engine
+    technology: opa
+    version: "0.65.0-rootless"
+    compose_service: opa
+    port: 8181
+    policy_path: policy/opa/
+    description: Policy-based authorization and access control engine
+    healthcheck: wget -qO- http://localhost:8181/health
+    referenced_in:
+      - docker-compose.yml
+      - docker-compose.dev.yml
+    slo_critical: true
+
+  # --------------------------------------------------------------------------
+  # DEVELOPMENT SUPPORT SERVICES
+  # --------------------------------------------------------------------------
+
+  - name: mock-services
+    display_name: "Mock External Services"
+    status: active
+    type: dev_mock
+    technology: nodejs
+    compose_service: mock-services
+    port: 4010
+    entrypoint: scripts/devkit/mock-services.js
+    description: Mock external APIs for development and testing
+    referenced_in:
+      - docker-compose.yml
+    slo_critical: false
+
+  - name: migrations
+    display_name: "Database Migrations"
+    status: active
+    type: one_time_job
+    technology: nodejs
+    compose_service: migrations
+    entrypoint: scripts/db_migrate.cjs
+    description: Database schema migration runner
+    referenced_in:
+      - docker-compose.yml
+    slo_critical: false
+
+  - name: seed-fixtures
+    display_name: "Fixture Data Seeder"
+    status: active
+    type: one_time_job
+    technology: nodejs
+    compose_service: seed-fixtures
+    entrypoint: scripts/devkit/seed-fixtures.js
+    description: Seed demo data for golden path testing
+    referenced_in:
+      - docker-compose.yml
+    slo_critical: false
+
+  # --------------------------------------------------------------------------
+  # AI/ML SERVICES (Optional - Profile: 'ai' or 'kafka')
+  # --------------------------------------------------------------------------
+
+  - name: ai-worker
+    display_name: "AI/ML Processing Worker"
+    status: active_optional
+    type: ai_ml_worker
+    path: ./
+    language: python
+    runtime: python
+    version: "3.8+"
+    dockerfile: Dockerfile.ai
+    dependencies_file: server/requirements.txt
+    profile: ai
+    description: >-
+      Multimodal AI processing worker for OCR, NLP, speech-to-text,
+      computer vision, and semantic search capabilities
+    key_features:
+      - OCR (Tesseract, PaddleOCR)
+      - Object Detection (YOLO v8)
+      - Face Recognition (MTCNN + FaceNet)
+      - Speech-to-Text (OpenAI Whisper)
+      - NLP (spaCy)
+      - Vector Embeddings (Sentence Transformers)
+    referenced_in:
+      - docker-compose.ai.yml
+      - README.md
+    slo_critical: false
+
+  - name: zookeeper
+    display_name: "Zookeeper Coordination"
+    status: active_optional
+    type: coordination
+    technology: zookeeper
+    version: "3.9"
+    compose_service: zookeeper
+    port: 2181
+    profile: kafka
+    description: Distributed coordination service for Kafka
+    referenced_in:
+      - docker-compose.yml
+    slo_critical: false
+
+  - name: kafka
+    display_name: "Kafka Message Broker"
+    status: active_optional
+    type: message_broker
+    technology: kafka
+    version: "3.7"
+    compose_service: kafka
+    ports:
+      - 9092   # Internal
+      - 29092  # External
+    profile: kafka
+    description: Distributed event streaming platform for data pipelines
+    referenced_in:
+      - docker-compose.yml
+    slo_critical: false
+
+  - name: ingestion-service
+    display_name: "Data Ingestion Service"
+    status: active_optional
+    type: data_pipeline
+    path: ingestion/
+    language: python
+    runtime: python
+    dockerfile: ingestion/Dockerfile
+    dependencies_file: ingestion/requirements.txt
+    profile: kafka
+    description: Data ingestion pipeline with Kafka integration
+    referenced_in:
+      - docker-compose.yml
+    slo_critical: false
+
+  - name: nlp-service
+    display_name: "NLP Processing Service"
+    status: active_optional
+    type: nlp_worker
+    path: nlp-service/
+    language: python
+    runtime: python
+    dockerfile: nlp-service/Dockerfile
+    dependencies_file: nlp-service/requirements.txt
+    profile: ai
+    description: Natural language processing with spaCy models
+    referenced_in:
+      - docker-compose.yml
+    slo_critical: false
+
+  - name: reliability-service
+    display_name: "Reliability Scoring Service"
+    status: active_optional
+    type: reliability_scorer
+    path: reliability-service/
+    language: python
+    runtime: python
+    dockerfile: reliability-service/Dockerfile
+    dependencies_file: reliability-service/requirements.txt
+    port: 8001
+    profile: kafka
+    description: Information reliability and credibility scoring
+    referenced_in:
+      - docker-compose.yml
+    slo_critical: false
+
+# ============================================================================
+# ARCHIVE DIRECTORIES
+# Historical code explicitly excluded from workspace and CI
+# ============================================================================
+
+archives:
+  - path: .archive/
+    description: Main archive directory for deprecated code and configurations
+    subdirectories:
+      - workflows/
+      - workflows-consolidated/
+    excluded_from:
+      - pnpm-workspace.yaml
+      - docker-compose files
+      - CI/CD pipelines
+    reason: historical_code
+
+  - path: archive/
+    description: Secondary archive with date-stamped snapshots
+    subdirectories:
+      - "20250926/"
+    excluded_from:
+      - pnpm-workspace.yaml
+    reason: historical_snapshot
+
+  - path: .disabled/
+    description: Explicitly disabled services and components
+    subdirectories:
+      - adc/
+      - afl-store/
+      - atl/
+      - cfa-tdw/
+      - intelgraph-mcp.disabled/
+      - maestro-mcp.disabled/
+      - mcp-core.disabled/
+    excluded_from:
+      - pnpm-workspace.yaml
+      - docker-compose files
+    reason: feature_disabled
+
+  - path: client/_stashed_archive/
+    description: Archived client code components
+    excluded_from:
+      - build process
+    reason: refactored_components
+
+  - path: v4/archive/
+    description: Version 4 archive
+    excluded_from:
+      - pnpm-workspace.yaml
+    reason: legacy_version
+
+  - path: docs/archive/
+    description: Archived documentation
+    reason: superseded_docs
+
+  - path: docs/archived/
+    description: Additional archived documentation
+    reason: superseded_docs
+
+# ============================================================================
+# CI/CD PIPELINES
+# GitHub Actions workflows for build, test, security, and release
+# ============================================================================
+
+pipelines:
+  # --------------------------------------------------------------------------
+  # PRIMARY PIPELINES
+  # --------------------------------------------------------------------------
+
+  - name: ci
+    file: .github/workflows/ci.yml
+    status: active
+    type: continuous_integration
+    triggers:
+      - pull_request
+      - push_to_main
+    jobs:
+      - build-test:
+          description: Lint, typecheck, build, unit tests
+          node_versions: [18.x, 20.x]
+          caching:
+            - pnpm_store
+            - docker_layers
+      - golden-path:
+          description: Docker stack smoke tests
+          services_tested:
+            - api
+            - web
+            - postgres
+            - redis
+            - neo4j
+            - prometheus
+            - grafana
+    slo_gate: true
+    required_for_merge: true
+
+  - name: security
+    file: .github/workflows/security.yml
+    status: active
+    type: security_scanning
+    triggers:
+      - pull_request
+      - push_to_main
+      - schedule_nightly
+      - workflow_dispatch
+    jobs:
+      - codeql:
+          languages: [javascript, python]
+      - dependency-review:
+          description: Scan dependencies for vulnerabilities
+      - secret-scan:
+          tool: gitleaks
+    required_for_merge: true
+
+  - name: release
+    file: .github/workflows/release.yml
+    status: active
+    type: release_automation
+    triggers:
+      - push_to_main:
+          paths:
+            - package.json
+            - pnpm-lock.yaml
+            - Makefile
+            - docker-compose*.yml
+    jobs:
+      - build_workspace
+      - run_tests
+      - package_artifact:
+          includes:
+            - docker-compose.yml
+            - docker-compose.dev.yml
+            - docker-compose.ai.yml
+            - start.sh
+            - Makefile
+            - observability/
+      - upload_artifact
+    artifacts:
+      - summit-deployable-bundle
+
+  # --------------------------------------------------------------------------
+  # SPECIALIZED PIPELINES
+  # --------------------------------------------------------------------------
+
+  - name: smoke-compose
+    file: .github/workflows/smoke-compose.yml
+    status: active
+    type: smoke_testing
+    description: Docker Compose smoke test suite
+
+  - name: playwright-smoke
+    file: .github/workflows/playwright.smoke.yml
+    status: active
+    type: e2e_testing
+    description: Playwright E2E smoke tests
+
+  - name: trivy
+    file: .github/workflows/trivy.yml
+    status: active
+    type: security_scanning
+    description: Container vulnerability scanning
+
+  - name: sbom
+    file: .github/workflows/sbom.yml
+    status: active
+    type: compliance
+    description: Software Bill of Materials generation
+
+  - name: k6-load
+    file: .github/workflows/k6-load.yml
+    status: active
+    type: performance_testing
+    description: Load testing with k6
+
+  - name: nightly-ops-delta
+    file: .github/workflows/nightly-ops-delta.yml
+    status: active
+    type: operations
+    schedule: nightly
+    description: Nightly operational checks
+
+  - name: policy-ci
+    file: .github/workflows/policy-ci.yml
+    status: active
+    type: policy_testing
+    description: OPA policy validation
+
+  - name: terraform-drift
+    file: .github/workflows/terraform-drift.yml
+    status: active
+    type: infrastructure
+    description: Terraform drift detection
+
+# ============================================================================
+# MONOREPO STRUCTURE
+# pnpm workspace configuration and package organization
+# ============================================================================
+
+workspace:
+  config_file: pnpm-workspace.yaml
+  package_manager: pnpm
+  node_version: "20+"
+
+  packages:
+    - pattern: apps/*
+      count: 21
+      description: Application entrypoints
+      examples:
+        - apps/server
+        - apps/web
+        - apps/gateway
+        - apps/analytics-engine
+        - apps/ml-engine
+        - apps/search-engine
+        - apps/intelgraph-api
+        - apps/graph-analytics
+        - apps/workflow-engine
+        - apps/webapp
+
+    - pattern: packages/*
+      count: 60+
+      description: Shared libraries and modules
+      examples:
+        - packages/common-types
+        - packages/contracts
+        - packages/sdk-ts
+        - packages/maestro-cli
+        - packages/prov-ledger
+        - packages/narrative-engine
+
+    - pattern: services/*
+      count: 150+
+      description: Microservices and service modules
+      notes: >-
+        Many services are library packages or future microservices not yet deployed.
+        Active deployed services are listed in the 'services' section above.
+      examples:
+        - services/api
+        - services/graph-core
+        - services/authz-gateway
+        - services/ingest
+        - services/entity-resolution
+        - services/rag
+
+    - pattern: contracts/*
+      description: API contracts and shared schemas
+
+    - pattern: server
+      description: Main backend server (singleton)
+
+    - pattern: client
+      description: Main frontend client (singleton)
+
+    - pattern: tools/*
+      description: Development tools and utilities
+
+  excluded:
+    - archive/**
+
+# ============================================================================
+# INFRASTRUCTURE & DEPLOYMENT
+# ============================================================================
+
+infrastructure:
+  container_orchestration:
+    - docker_compose:
+        dev: docker-compose.dev.yml
+        prod: docker-compose.yml
+        ai: docker-compose.ai.yml
+        observability: docker-compose.observability.yml
+
+    - kubernetes:
+        path: kubernetes/
+        charts: helm/
+
+  config_management:
+    - path: ops/
+      description: Operational configurations
+    - path: policy/
+      description: OPA policy bundles
+    - path: observability/
+      description: Prometheus, Grafana, OTEL configs
+
+  secrets_management:
+    - dotenv:
+        dev: .env.example
+        prod: .env.production
+        maestro: .env.maestro-dev
+
+# ============================================================================
+# DOCUMENTATION & RUNBOOKS
+# ============================================================================
+
+documentation:
+  primary:
+    - README.md
+    - REPOSITORY-STRUCTURE.md
+    - ARCHITECTURE_MAP.generated.yaml
+
+  guides:
+    - path: docs/
+      subdirs:
+        - docs/architecture/
+        - docs/api/
+        - docs/deployment/
+
+  runbooks:
+    - path: RUNBOOKS/
+      index: RUNBOOKS/INDEX.md
+      count: 40+
+      examples:
+        - RUNBOOKS/dev-bootstrap.yaml
+        - RUNBOOKS/rollback.yaml
+        - RUNBOOKS/disaster-recovery.json
+        - RUNBOOKS/release-captain-quick-reference.md
+        - RUNBOOKS/schema-migration-playbook.md
+
+# ============================================================================
+# NOTES & CLARIFICATIONS
+# ============================================================================
+
+notes:
+  monorepo_scale:
+    total_packages: "200+"
+    active_services: "15 core + 6 AI/ML optional"
+    archive_directories: 7
+    ci_workflows: "100+"
+
+  architecture_pattern:
+    style: deployable_first
+    principles:
+      - Golden path validation before development
+      - Smoke tests gate all deployments
+      - Clear separation of active vs archived code
+      - Comprehensive observability built-in
+
+  service_classification:
+    active: >-
+      Services referenced in docker-compose.yml, docker-compose.dev.yml,
+      or primary CI workflows (ci.yml, security.yml, release.yml)
+    active_optional: >-
+      Services in docker-compose profiles (ai, kafka) for optional features
+    archived: >-
+      Code in designated archive directories (.archive/, archive/, .disabled/)
+    ambiguous: >-
+      Many packages in services/ and apps/ are not deployed services but
+      library packages or future microservices. Only services with active
+      docker-compose entries or Dockerfile builds are classified as active.
+
+  future_work:
+    - Clarify status of 150+ services/ packages
+    - Document which apps/* are active vs prototypes
+    - Categorize docker-compose variants (minimal, gpu, streamlit, etc.)
+    - Map Python service dependencies and deployment status

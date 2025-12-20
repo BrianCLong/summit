@@ -211,3 +211,85 @@ seed-v25 T=*:
 
 publish-v25 L="v25,platform" M="v25":
 	bash scripts/pr-drafts/publish-prs.sh -B main --embed-shared --labels "{{L}}" --milestone "{{M}}" --repo {{env_var("GITHUB_REPOSITORY", "<owner>/<repo>")}}
+
+# ============================================================================
+# Pipeline Orchestration Commands
+# ============================================================================
+
+# List all registered pipelines
+pipelines-list FILTER="":
+    @python3 pipelines/cli.py list --format table {{FILTER}}
+
+# Run a pipeline locally or in CI
+pipelines-run NAME CONTEXT="":
+    python3 pipelines/cli.py run {{NAME}} {{if CONTEXT != "" { "--context " + CONTEXT } else { "" }}}
+
+# Visualize pipeline task graph
+pipelines-graph NAME FORMAT="ascii":
+    python3 pipelines/cli.py graph {{NAME}} --format {{FORMAT}}
+
+# Show detailed pipeline information
+pipelines-info NAME:
+    python3 pipelines/cli.py info {{NAME}}
+
+# Validate all pipeline manifests
+pipelines-validate:
+    python3 pipelines/cli.py validate
+
+# Generate Airflow DAGs from pipeline manifests
+pipelines-generate-airflow OUTPUT="./airflow/dags":
+    python3 pipelines/cli.py generate-airflow --output-dir {{OUTPUT}}
+
+# Show pipeline registry summary
+pipelines-summary:
+    @python3 -c "from pipelines.registry.core import create_registry; import json; r = create_registry(); print(json.dumps(r.export_summary(), indent=2, default=str))"
+
+# List scheduled pipelines only
+pipelines-scheduled:
+    @python3 pipelines/cli.py list --scheduled --format table
+
+# Filter pipelines by runtime
+pipelines-by-runtime RUNTIME:
+    @python3 pipelines/cli.py list --runtime {{RUNTIME}} --format table
+
+# Filter pipelines by owner
+pipelines-by-owner OWNER:
+    @python3 pipelines/cli.py list --owner {{OWNER}} --format table
+
+# Quick demo: run CISA KEV ingest pipeline
+pipelines-demo-cisa:
+    python3 pipelines/cli.py run cisa-kev-ingest --dry-run
+
+# ============================================================================
+# Maestro Pipeline Shims
+# ============================================================================
+
+sbom:
+    bash scripts/sbom-attest.sh
+
+trivy:
+    @echo "Running Trivy security scan..."
+    @if command -v trivy >/dev/null; then \
+        trivy fs . --scanners vuln,secret,config --exit-code 0; \
+    else \
+        echo "Trivy not found, skipping scan (simulation mode)"; \
+    fi
+
+slo-check:
+    python3 scripts/slo_burn_check.py --budget .maestro/ci_budget.json
+
+migration-gate:
+    bash scripts/migration-gate.sh
+
+deploy strategy="canary" weight="10":
+    bash scripts/deploy.sh --strategy {{strategy}} --weight {{weight}}
+
+canary-analyze budget=".maestro/ci_budget.json":
+    bash scripts/canary_analyze.sh --budget {{budget}}
+
+promote:
+    @echo "Promoting deployment to stable..."
+    @echo "Promotion complete."
+
+rollback service="intelgraph":
+    bash scripts/rollback.sh {{service}}

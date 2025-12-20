@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import $ from 'jquery';
 export default function FlowLintPanel() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [items, setItems] = useState<any[]>([]);
   const handlerBoundRef = useRef(false);
 
@@ -17,9 +18,9 @@ export default function FlowLintPanel() {
 
     if (!handlerBoundRef.current) {
       handlerBoundRef.current = true;
-      $('#q').on('input', function () {
+      $('#q').on('input', function (this: HTMLElement) {
         const v = $(this).val()?.toString().toLowerCase() || '';
-        $('.lint-row').each(function () {
+        $('.lint-row').each(function (this: HTMLElement) {
           $(this).toggle($(this).text().toLowerCase().includes(v));
         });
       });
@@ -44,6 +45,7 @@ export default function FlowLintPanel() {
         />
       </div>
       <ul className="text-sm">
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         {items.map((x: any, i: number) => (
           <li
             key={i}

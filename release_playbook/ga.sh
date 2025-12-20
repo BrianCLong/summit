@@ -101,7 +101,6 @@ if [[ "${GA_DRY_RUN:-0}" != "1" ]]; then
 else
   log "DRY RUN: skipping cosign verification."
 fi
->>>>>>> hotfix/workflow-pnpm-only
 
 if [[ "${GA_DRY_RUN:-0}" != "1" ]]; then
   # ===== 4) Start prod canary via workflow =====

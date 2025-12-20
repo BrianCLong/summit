@@ -1,10 +1,15 @@
-import React, { useState, useCallback, useEffect } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import React, { useState, useCallback } from 'react';
 import Toast, { ToastProps } from './Toast';
 
 interface ToastContextType {
   addToast: (toast: Omit<ToastProps, 'id' | 'onDismiss'>) => string;
   removeToast: (id: string) => void;
   clearAllToasts: () => void;
+  success: (title: string, message?: string) => string;
+  error: (title: string, message?: string) => string;
+  warning: (title: string, message?: string) => string;
+  info: (title: string, message?: string) => string;
 }
 
 export const ToastContext = React.createContext<ToastContextType | null>(null);
@@ -58,7 +63,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
 
   const removeToast = useCallback((id: string) => {
     setToasts((current) => current.filter((toast) => toast.id !== id));
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const clearAllToasts = useCallback(() => {
     setToasts([]);
@@ -81,6 +86,14 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
     addToast,
     removeToast,
     clearAllToasts,
+    success: (title: string, message?: string) =>
+      addToast({ type: 'success', title, message }),
+    error: (title: string, message?: string) =>
+      addToast({ type: 'error', title, message }),
+    warning: (title: string, message?: string) =>
+      addToast({ type: 'warning', title, message }),
+    info: (title: string, message?: string) =>
+      addToast({ type: 'info', title, message }),
   };
 
   return (

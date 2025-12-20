@@ -2,8 +2,8 @@ import React from 'react';
 import { useAnalysisStore } from './store';
 
 export const TimelinePane: React.FC = () => {
-  const timeRange = useAnalysisStore((s) => s.timeRange);
-  const setTimeRange = useAnalysisStore((s) => s.setTimeRange);
+  const timeRange = useAnalysisStore((s: any) => s.timeRange);
+  const setTimeRange = useAnalysisStore((s: any) => s.setTimeRange);
 
   return (
     <div data-testid="timeline-pane" className="p-2 space-y-2">

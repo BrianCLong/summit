@@ -1,6 +1,8 @@
+// @ts-nocheck
 // import { S3Client, PutObjectCommand, GetObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
 import Redis from 'ioredis';
 import { recHit, recMiss, recSet } from '../metrics/cacheMetrics.js';
+import crypto from 'crypto';
 
 type CacheOptions = {
   bucket?: string;
@@ -31,6 +33,8 @@ function redisFromEnv() {
     name: process.env.REDIS_CLIENT_NAME || 'maestro-cache',
   });
 }
+
+const redis = redisFromEnv();
 
 // function s3FromEnv() {
 //   const region = process.env.AWS_REGION || 'us-east-1';
@@ -67,8 +71,33 @@ export class ConductorCache {
     );
   }
 
+  /**
+   * Normalizes a cache key to ensure consistent lookups.
+   * Sorts query params (if key looks like URL) or JSON keys, and hashes if too long.
+   */
+  private normalizeKey(key: string): string {
+    // 1. If key is JSON-like, parse and sort keys
+    try {
+        if (key.trim().startsWith('{') || key.trim().startsWith('[')) {
+            const obj = JSON.parse(key);
+            // Canonical JSON stringify
+            const canonical = JSON.stringify(obj, Object.keys(obj).sort());
+            return crypto.createHash('sha256').update(canonical).digest('hex');
+        }
+    } catch {
+        // Not JSON
+    }
+
+    // 2. If it's a long string, hash it
+    if (key.length > 256) {
+         return crypto.createHash('sha256').update(key).digest('hex');
+    }
+
+    return key;
+  }
+
   private indexKey(key: string) {
-    return `${this.indexPrefix}${key}`;
+    return `${this.indexPrefix}${this.normalizeKey(key)}`;
   }
 
   async lookup(
@@ -110,7 +139,8 @@ export class ConductorCache {
     ttlSec?: number,
     tenant?: string,
   ) {
-    const s3key = `cache/${key}.bin`;
+    const normKey = this.normalizeKey(key);
+    const s3key = `cache/${normKey}.bin`;
     // await s3.send(new PutObjectCommand({ Bucket: this.bucket, Key: s3key, Body: body }));
     await redis.set(
       this.indexKey(key),

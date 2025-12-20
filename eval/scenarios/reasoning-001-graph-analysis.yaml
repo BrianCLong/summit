@@ -1,0 +1,319 @@
+# Multi-Step Reasoning Scenario: Graph Analysis
+
+id: sc-multi-step-reasoning-001
+version: 1.0.0
+type: multi_step_reasoning
+name: Identify Hidden Network Connections
+description: |
+  Analyze a complex network graph to identify hidden connections and patterns
+  that suggest coordinated activity. Requires multi-step reasoning, pattern
+  recognition, and logical inference.
+tags:
+  - reasoning
+  - graph-analysis
+  - pattern-recognition
+  - intelligence-analysis
+  - complex-problem-solving
+
+inputs:
+  - type: structured
+    content:
+      entities:
+        - id: E1
+          type: Person
+          name: Alice Chen
+          properties:
+            company: TechCorp
+            location: San Francisco
+            joined: "2023-01-15"
+
+        - id: E2
+          type: Person
+          name: Bob Smith
+          properties:
+            company: DataSys
+            location: New York
+            joined: "2023-02-20"
+
+        - id: E3
+          type: Person
+          name: Carol Wang
+          properties:
+            company: CloudNet
+            location: Seattle
+            joined: "2023-03-10"
+
+        - id: E4
+          type: Person
+          name: David Park
+          properties:
+            company: TechCorp
+            location: Austin
+            joined: "2022-11-05"
+
+        - id: E5
+          type: Company
+          name: TechCorp
+          properties:
+            industry: Software
+            founded: "2015"
+
+        - id: E6
+          type: Company
+          name: DataSys
+          properties:
+            industry: Analytics
+            founded: "2018"
+
+        - id: E7
+          type: Company
+          name: CloudNet
+          properties:
+            industry: Cloud Services
+            founded: "2019"
+
+        - id: E8
+          type: Person
+          name: Eve Martinez
+          properties:
+            company: InvestCo
+            role: "Investment Partner"
+            location: San Francisco
+
+      relationships:
+        - from: E1
+          to: E5
+          type: WORKS_AT
+          since: "2023-01-15"
+
+        - from: E2
+          to: E6
+          type: WORKS_AT
+          since: "2023-02-20"
+
+        - from: E3
+          to: E7
+          type: WORKS_AT
+          since: "2023-03-10"
+
+        - from: E4
+          to: E5
+          type: WORKS_AT
+          since: "2022-11-05"
+
+        - from: E1
+          to: E2
+          type: PREVIOUS_COLLEAGUE
+          context: "Worked together at StartupX (2020-2022)"
+
+        - from: E2
+          to: E3
+          type: PREVIOUS_COLLEAGUE
+          context: "Worked together at StartupX (2021-2022)"
+
+        - from: E1
+          to: E3
+          type: PREVIOUS_COLLEAGUE
+          context: "Worked together at StartupX (2020-2022)"
+
+        - from: E8
+          to: E5
+          type: INVESTED_IN
+          amount: "$5M Series A"
+          date: "2023-06-01"
+
+        - from: E8
+          to: E6
+          type: INVESTED_IN
+          amount: "$3M Series A"
+          date: "2023-07-15"
+
+        - from: E8
+          to: E7
+          type: INVESTED_IN
+          amount: "$4M Seed"
+          date: "2023-08-20"
+
+      timeline:
+        - date: "2020-2022"
+          event: Alice, Bob, and Carol all work at StartupX
+
+        - date: "2022-11-05"
+          event: David joins TechCorp
+
+        - date: "2023-01-15"
+          event: Alice joins TechCorp
+
+        - date: "2023-02-20"
+          event: Bob joins DataSys
+
+        - date: "2023-03-10"
+          event: Carol joins CloudNet
+
+        - date: "2023-06-01"
+          event: Eve (InvestCo) invests in TechCorp
+
+        - date: "2023-07-15"
+          event: Eve invests in DataSys
+
+        - date: "2023-08-20"
+          event: Eve invests in CloudNet
+
+      question: |
+        Analyze this network graph and identify any notable patterns or hidden
+        connections. Are there any findings that suggest coordinated activity or
+        relationships that warrant further investigation?
+    metadata:
+      analysis_type: network-investigation
+      requires_inference: true
+
+constraints:
+  - type: time_limit
+    value: 180000
+    strict: false
+  - type: tool_restriction
+    value:
+      - graph_query
+      - timeline_analysis
+      - pattern_detection
+    strict: false
+
+scoringStrategy:
+  method: llm_judged
+  llmJudge:
+    model: claude-opus-3
+    prompt: |
+      Evaluate this graph analysis on the following dimensions:
+
+      **Expected Key Finding:**
+      Three former StartupX colleagues (Alice, Bob, Carol) joined three different
+      companies in early 2023, and the same investor (Eve) subsequently invested
+      in all three companies. This pattern suggests potential coordination.
+
+      **Scoring Dimensions:**
+
+      1. **Pattern Recognition** (0-1): Did they identify the core pattern
+         (ex-colleagues → new companies → same investor)?
+
+      2. **Timeline Analysis** (0-1): Did they note the suspicious timing
+         (sequential company joins followed by sequential investments)?
+
+      3. **Inference Quality** (0-1): Did they draw reasonable conclusions about
+         what this pattern might indicate?
+
+      4. **Evidence Synthesis** (0-1): Did they connect multiple data points
+         (relationships, timeline, investments) to build their case?
+
+      5. **Analytical Rigor** (0-1): Did they consider alternative explanations
+         and avoid jumping to conclusions?
+
+      Score generously if they identified the key pattern, even if not all details.
+      Score harshly if they missed the obvious connection pattern entirely.
+    dimensions:
+      - pattern_recognition
+      - timeline_analysis
+      - inference_quality
+      - evidence_synthesis
+      - analytical_rigor
+    temperature: 0.2
+
+rubric:
+  guidance: |
+    The key insight is recognizing that three former colleagues from StartupX
+    all joined different companies within ~2 months, and then the same investor
+    invested in all three companies within ~3 months. This pattern is statistically
+    unlikely to be coincidental and warrants investigation.
+
+    Strong answers should:
+    1. Identify the ex-colleague cluster (Alice, Bob, Carol from StartupX)
+    2. Note the timing of their new positions (Jan-Mar 2023)
+    3. Identify that one investor (Eve) funded all three companies
+    4. Note the timing of investments (Jun-Aug 2023)
+    5. Infer this suggests possible coordination or insider information
+
+  dimensions:
+    - name: pattern_recognition
+      weight: 0.35
+      description: Identifies the key connection pattern
+
+    - name: timeline_analysis
+      weight: 0.20
+      description: Analyzes timing and sequencing
+
+    - name: inference_quality
+      weight: 0.20
+      description: Draws reasonable conclusions
+
+    - name: evidence_synthesis
+      weight: 0.15
+      description: Connects multiple data points
+
+    - name: analytical_rigor
+      weight: 0.10
+      description: Considers alternatives and limitations
+
+  examples:
+    - input: "Same as above"
+      output: |
+        ## Notable Pattern: Coordinated Network Activity
+
+        ### Key Finding
+        Three former colleagues from StartupX (Alice Chen, Bob Smith, Carol Wang)
+        joined three separate companies (TechCorp, DataSys, CloudNet) in quick
+        succession (Jan-Mar 2023), and the same investor (Eve Martinez/InvestCo)
+        subsequently invested in all three companies (Jun-Aug 2023).
+
+        ### Timeline Analysis
+        - **2020-2022**: Alice, Bob, and Carol work together at StartupX
+        - **Jan-Mar 2023**: All three join different companies within 2 months
+          - Alice → TechCorp (Jan 15)
+          - Bob → DataSys (Feb 20)
+          - Carol → CloudNet (Mar 10)
+        - **Jun-Aug 2023**: Eve invests in all three companies within 3 months
+          - TechCorp: $5M (Jun 1)
+          - DataSys: $3M (Jul 15)
+          - CloudNet: $4M (Aug 20)
+
+        ### Inference
+        This pattern suggests several possibilities:
+        1. **Coordinated spin-out**: Former colleagues may have coordinated to
+           start or join related ventures with pre-arranged funding
+        2. **Investor relationship**: Eve may have had prior relationship with
+           the StartupX team and followed them to new ventures
+        3. **Strategic network**: Could indicate a planned portfolio approach
+           to a specific market segment
+
+        ### Recommendation
+        Further investigation warranted to:
+        - Examine relationship between the three companies (competitors? partners?)
+        - Investigate Eve's prior relationship with StartupX team
+        - Review if the companies are in related market segments
+        - Check if there are any technology transfers or IP considerations
+        - Determine if this represents a legitimate investment thesis or
+          potential insider coordination
+
+        ### Risk Assessment
+        **Medium-High**: Pattern is statistically unusual and timing is suspicious,
+        but could have legitimate explanation (e.g., investor follows talented team).
+      score: 0.95
+      dimensionScores:
+        pattern_recognition: 1.0
+        timeline_analysis: 1.0
+        inference_quality: 0.9
+        evidence_synthesis: 1.0
+        analytical_rigor: 0.9
+      rationale: |
+        Excellent analysis. Identified all key patterns, provided detailed timeline,
+        drew reasonable inferences, considered multiple explanations, and provided
+        actionable recommendations. Showed strong analytical rigor.
+
+difficulty: hard
+estimatedCost: 0.15
+estimatedDuration: 60000
+createdBy: platform-team
+metadata:
+  category: intelligence-analysis
+  requires_reasoning: true
+  requires_synthesis: true
+  complexity: high
+  domain: graph-intelligence

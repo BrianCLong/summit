@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
+import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs'
+import { Badge } from '@/components/ui/Badge'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
@@ -12,6 +12,7 @@ import { Separator } from '@/components/ui/separator'
 import {
   AlertCircle,
   Activity,
+  Bot,
   GitBranch,
   Github,
   Gauge,
@@ -19,13 +20,11 @@ import {
   Play,
   Save,
   Shield,
-  Square,
   Triangle,
   Zap,
 } from 'lucide-react'
 import {
   Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -35,7 +34,6 @@ import {
   Bar,
   BarChart,
 } from 'recharts'
-import { motion } from 'framer-motion'
 import mermaid from 'mermaid'
 
 /**
@@ -72,17 +70,17 @@ async function getJSON<T = any>(path: string, init?: RequestInit): Promise<T> {
     headers: { 'content-type': 'application/json' },
     ...init,
   })
-  if (!r.ok) throw new Error(`${path} ${r.status}`)
+  if (!r.ok) {throw new Error(`${path} ${r.status}`)}
   return r.json()
 }
 
 function useInterval(callback: () => void, delay: number) {
-  const savedRef = useRef<() => void>()
+  const savedRef = useRef<(() => void) | undefined>(undefined)
   useEffect(() => {
     savedRef.current = callback
   }, [callback])
   useEffect(() => {
-    if (delay === null) return
+    if (delay === null) {return}
     const id = setInterval(() => savedRef.current && savedRef.current(), delay)
     return () => clearInterval(id)
   }, [delay])
@@ -95,16 +93,16 @@ function useSSE(paths: string[]) {
     let closed = false
     const base = getProxyBase()
     function connect(idx = 0) {
-      if (idx >= paths.length) return
+      if (idx >= paths.length) {return}
       try {
         es = new EventSource(`${base}${paths[idx]}`)
         es.onmessage = ev => setLines(l => [...l.slice(-999), ev.data])
         es.onerror = () => {
           es?.close()
-          if (!closed) setTimeout(() => connect(idx + 1), 500)
+          if (!closed) {setTimeout(() => connect(idx + 1), 500)}
         }
       } catch {
-        if (!closed) setTimeout(() => connect(idx + 1), 500)
+        if (!closed) {setTimeout(() => connect(idx + 1), 500)}
       }
     }
     connect()
@@ -166,10 +164,14 @@ function KPIBar() {
   const refresh = async () => {
     try {
       setBd(await getJSON<Burndown>('/status/burndown.json'))
-    } catch {}
+    } catch {
+      // Silently ignore burndown fetch errors
+    }
     try {
       setHl(await getJSON<Health>('/status/health.json'))
-    } catch {}
+    } catch {
+      // Silently ignore health fetch errors
+    }
   }
 
   useEffect(() => {
@@ -180,7 +182,7 @@ function KPIBar() {
   const p95 =
     bd?.windows?.m1?.latency_ms_p95 ?? bd?.windows?.h1?.latency_ms_p95 ?? 0
   const errRate = useMemo(() => {
-    if (!bd) return 0
+    if (!bd) {return 0}
     const w = bd.windows.m1 || bd.windows.h1
     const errors = w?.errors || 0
     const total = w?.count || 0
@@ -222,6 +224,121 @@ function KPIBar() {
   )
 }
 
+// ---------- Prompt Activity Monitor ----------
+export function PromptActivityMonitor({ active }: { active: boolean }) {
+  const [prompts, setPrompts] = useState<any[]>([])
+  const [loading, setLoading] = useState(false)
+  const [expanded, setExpanded] = useState<string | null>(null)
+  const pollerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  const fetchPrompts = async () => {
+    setLoading(true)
+    try {
+      const data = await getJSON<{ history: any[] }>('/api/ai/activity')
+      if (data && data.history) {
+        setPrompts(data.history)
+      }
+    } catch (e) {
+      console.error('Failed to fetch prompt history', e)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (!active) {
+      if (pollerRef.current) {
+        clearInterval(pollerRef.current)
+      }
+      pollerRef.current = null
+      return
+    }
+
+    fetchPrompts()
+    pollerRef.current = setInterval(fetchPrompts, 5000)
+
+    return () => {
+      if (pollerRef.current) {
+        clearInterval(pollerRef.current)
+      }
+      pollerRef.current = null
+    }
+  }, [active])
+
+  return (
+    <Card className="col-span-12">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Bot className="w-4 h-4" />
+          Agent Prompt Activity
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="flex justify-end">
+            <Button size="sm" variant="outline" onClick={fetchPrompts} disabled={loading}>
+                Refresh
+            </Button>
+          </div>
+          <div className="space-y-2">
+            {prompts.length === 0 ? (
+                <div className="text-sm text-muted-foreground text-center py-8">
+                    No prompt activity recorded yet.
+                </div>
+            ) : (
+                prompts.map((p) => (
+                    <div key={p.id} className="border rounded-md p-3 text-sm">
+                        <div className="flex justify-between items-start mb-2">
+                            <div className="flex items-center gap-2">
+                                <Badge variant={p.status === 'success' ? 'default' : 'destructive'}>
+                                    {p.status}
+                                </Badge>
+                                <span className="font-mono text-xs">{new Date(p.timestamp).toLocaleTimeString()}</span>
+                                <span className="text-muted-foreground">via {p.provider} / {p.model}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <span>{Math.round(p.latency)}ms</span>
+                                {p.tokens && <span>{p.tokens.total_tokens} tokens</span>}
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <div
+                                className="bg-muted p-2 rounded cursor-pointer hover:bg-muted/80 transition-colors"
+                                onClick={() => setExpanded(expanded === p.id ? null : p.id)}
+                            >
+                                <div className="font-semibold text-xs mb-1 text-muted-foreground">PROMPT</div>
+                                <div className={`font-mono text-xs whitespace-pre-wrap ${expanded === p.id ? '' : 'line-clamp-2'}`}>
+                                    {p.messages ? JSON.stringify(p.messages, null, 2) : p.prompt}
+                                </div>
+                            </div>
+
+                            {p.response && (
+                                <div className="bg-slate-50 dark:bg-slate-900 p-2 rounded">
+                                    <div className="font-semibold text-xs mb-1 text-muted-foreground">RESPONSE</div>
+                                    <div className={`font-mono text-xs whitespace-pre-wrap ${expanded === p.id ? '' : 'line-clamp-3'}`}>
+                                        {p.response}
+                                    </div>
+                                </div>
+                            )}
+
+                            {p.error && (
+                                <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-2 rounded">
+                                    <div className="font-semibold text-xs mb-1">ERROR</div>
+                                    <div className="font-mono text-xs">{p.error}</div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                ))
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 // ---------- Live Charts ----------
 function useBurndownSeries() {
   const [series, setSeries] = useState<
@@ -238,7 +355,9 @@ function useBurndownSeries() {
         ...s.slice(-120),
         { time: Date.now(), p95, errors, count },
       ])
-    } catch {}
+    } catch {
+      // Silently ignore telemetry fetch errors
+    }
   }
   useEffect(() => {
     tick()
@@ -348,7 +467,9 @@ function RoutingMatrix() {
       } catch {
         setModels(base)
       }
-    } catch {}
+    } catch {
+      // Silently ignore model config fetch errors
+    }
   }
   useEffect(() => {
     load()
@@ -361,7 +482,9 @@ function RoutingMatrix() {
         method: 'PUT',
         body: JSON.stringify({ models }),
       })
-    } catch {}
+    } catch {
+      // Silently ignore policy save errors
+    }
     setSaving(false)
   }
 
@@ -480,7 +603,9 @@ function UsageWindows() {
         method: 'PUT',
         body: JSON.stringify({ windows: rows }),
       })
-    } catch {}
+    } catch {
+      // Silently ignore schedule save errors
+    }
     setSaving(false)
   }
   return (
@@ -666,7 +791,7 @@ function MermaidTrace({ spec }: { spec: string }) {
     })
   }, [])
   useEffect(() => {
-    if (ref.current) mermaid.run({ querySelector: '.mermaid' })
+    if (ref.current) {(mermaid as any).run({ querySelector: '.mermaid' })}
   }, [spec])
   return (
     <Card className="col-span-12">
@@ -709,7 +834,7 @@ function GitHubPane() {
     localStorage.setItem('gh:repo', repo)
   }
   const load = async () => {
-    if (!token || !owner || !repo) return
+    if (!token || !owner || !repo) {return}
     const r = await fetch(
       `https://api.github.com/repos/${owner}/${repo}/issues?per_page=20`,
       {
@@ -719,7 +844,7 @@ function GitHubPane() {
         },
       }
     )
-    if (r.ok) setIssues(await r.json())
+    if (r.ok) {setIssues(await r.json())}
   }
   useEffect(() => {
     load()
@@ -901,7 +1026,7 @@ export default function SymphonyOperatorConsole() {
   // persist proxy base
   useEffect(() => {
     if (typeof window !== 'undefined')
-      localStorage.setItem('symphony:proxyBase', proxyBase)
+      {localStorage.setItem('symphony:proxyBase', proxyBase)}
   }, [proxyBase])
 
   return (
@@ -933,8 +1058,9 @@ export default function SymphonyOperatorConsole() {
         onValueChange={setActiveTab}
         className="space-y-4"
       >
-        <TabsList className="grid grid-cols-5 w-full">
+        <TabsList className="grid grid-cols-6 w-full">
           <TabsTrigger value="observe">Observe</TabsTrigger>
+          <TabsTrigger value="prompts">Prompts</TabsTrigger>
           <TabsTrigger value="route">Route</TabsTrigger>
           <TabsTrigger value="schedule">Schedule</TabsTrigger>
           <TabsTrigger value="compose">Compose</TabsTrigger>
@@ -949,6 +1075,11 @@ export default function SymphonyOperatorConsole() {
             <ErrorChart />
             <LiveLogs />
           </div>
+        </TabsContent>
+
+        {/* Prompts */}
+        <TabsContent value="prompts" className="space-y-4">
+            <PromptActivityMonitor active={activeTab === 'prompts'} />
         </TabsContent>
 
         {/* Route */}

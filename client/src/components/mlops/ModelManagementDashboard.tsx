@@ -134,7 +134,11 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
         modelSize: 45.3,
         environment: {
           python: '3.9.7',
-          frameworks: { tensorflow: '2.8.0', numpy: '1.21.0', pandas: '1.3.3' },
+          frameworks: {
+            tensorflow: '2.8.0',
+            numpy: '1.21.0',
+            pandas: '1.3.3',
+          } as Record<string, string>,
           hardware: 'NVIDIA V100',
         },
         endpoints: {
@@ -171,7 +175,11 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
         modelSize: 23.7,
         environment: {
           python: '3.9.7',
-          frameworks: { sklearn: '1.0.2', xgboost: '1.5.1', pandas: '1.3.3' },
+          frameworks: {
+            sklearn: '1.0.2',
+            xgboost: '1.5.1',
+            pandas: '1.3.3',
+          } as Record<string, string>,
           hardware: 'CPU Cluster',
         },
         endpoints: {
@@ -212,10 +220,11 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
             transformers: '4.18.0',
             pytorch: '1.11.0',
             tokenizers: '0.12.1',
-          },
+          } as Record<string, string>,
           hardware: 'NVIDIA A100',
         },
         isActive: false,
+        endpoints: {},
         experiments: ['exp-004'],
       },
     ],

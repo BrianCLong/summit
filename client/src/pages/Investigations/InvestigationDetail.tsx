@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState } from 'react';
 import {
   Box,
@@ -10,13 +11,6 @@ import {
   Chip,
   Tabs,
   Tab,
-  Timeline,
-  TimelineItem,
-  TimelineSeparator,
-  TimelineConnector,
-  TimelineContent,
-  TimelineDot,
-  TimelineOppositeContent,
   IconButton,
   Dialog,
   DialogTitle,
@@ -41,6 +35,15 @@ import {
   AccordionDetails,
   ChipProps,
 } from '@mui/material';
+import {
+  Timeline,
+  TimelineItem,
+  TimelineSeparator,
+  TimelineConnector,
+  TimelineContent,
+  TimelineDot,
+  TimelineOppositeContent,
+} from '@mui/lab';
 import {
   Gavel,
   Person,

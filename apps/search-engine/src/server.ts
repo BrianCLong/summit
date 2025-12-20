@@ -1,12 +1,13 @@
-import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
 import compression from 'compression';
-import rateLimit from 'express-rate-limit';
+import cors from 'cors';
+import express, { Express } from 'express';
+import { rateLimit } from 'express-rate-limit';
+import helmet from 'helmet';
 import { createLogger, format, transports } from 'winston';
+
 import searchRoutes from './routes/searchRoutes';
 
-const app = express();
+const app: Express = express();
 const port = process.env.PORT || 4006;
 
 const logger = createLogger({
@@ -60,7 +61,7 @@ app.use(
   }),
 );
 
-app.use(compression());
+app.use(compression() as express.RequestHandler);
 
 const generalRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -179,10 +180,6 @@ process.on('uncaughtException', (error) => {
 
 const gracefulShutdown = (signal: string) => {
   logger.info(`Received ${signal}, shutting down gracefully`);
-
-  const server = app.listen(port, () => {
-    logger.info(`Search Engine service running on port ${port}`);
-  });
 
   server.close(() => {
     logger.info('HTTP server closed');

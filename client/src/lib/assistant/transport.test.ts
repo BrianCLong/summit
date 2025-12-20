@@ -1,12 +1,12 @@
 import { createFetchStreamTransport } from './transport';
-import type { AssistantEvent } from ' @/components/ai-enhanced/EnhancedAIAssistant';
+import type { AssistantEvent } from '@/components/ai-enhanced/EnhancedAIAssistant';
 
 function collect(
   transport: ReturnType<typeof createFetchStreamTransport>,
   sendText = 'hi',
 ): Promise<AssistantEvent[]> {
   const events: AssistantEvent[] = [];
-  const unsub = transport.on((e) => events.push(e));
+  const unsub = transport.on((e: any) => events.push(e));
   const ctrl = new AbortController();
   transport.send(sendText, ctrl.signal);
   return new Promise((resolve) =>
@@ -49,7 +49,7 @@ test('fetch transport streams tokens then done', async () => {
   expect(events[0]).toEqual({ type: 'status', value: 'thinking' });
   expect(
     events
-      .filter((e) => e.type === 'token')
+      .filter((e: any) => e.type === 'token')
       .map((e: any) => e.value)
       .join(''),
   ).toMatch(/I understand your query/);

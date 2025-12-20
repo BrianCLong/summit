@@ -67,4 +67,3 @@ export declare class ChartService {
     getRelationshipStrengthDistribution(): Promise<ChartData>;
     getActivityHeatmapData(days?: number): Promise<any>;
 }
-//# sourceMappingURL=ChartService.d.ts.map

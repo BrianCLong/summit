@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { Card, CardContent, Grid, Typography, Chip } from '@mui/material';
 

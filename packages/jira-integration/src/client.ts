@@ -5,7 +5,7 @@ import { JiraIntegrationConfig } from './types.js';
 const DEFAULT_MAX_RETRIES = 3;
 const DEFAULT_RETRY_DELAY_MS = 500;
 
-type FetchImplementation = (
+export type FetchImplementation = (
   url: string,
   init?: RequestInit,
 ) => Promise<Response>;
@@ -35,7 +35,7 @@ export class JiraApiClient {
     fetchImplementation?: FetchImplementation,
   ) {
     this.fetchImpl =
-      fetchImplementation ?? (globalThis.fetch as FetchImplementation) ?? fetch;
+      fetchImplementation ?? (globalThis.fetch as unknown as FetchImplementation) ?? (fetch as unknown as FetchImplementation);
   }
 
   private get authHeader(): string {
@@ -68,20 +68,14 @@ export class JiraApiClient {
 
     for (let attempt = 1; attempt <= attempts; attempt += 1) {
       try {
-        const response = await this.fetchImpl(url, {
-          ...init,
+        const requestInit: RequestInit = {
           headers,
-          body: init.body,
-          // enforce JSON content-type when sending objects
-          ...(init.body && typeof init.body === 'string'
-            ? {
-                headers: {
-                  'Content-Type': 'application/json',
-                  ...headers,
-                },
-              }
-            : {}),
-        });
+          ...(init.method && { method: init.method }),
+          ...(init.body && { body: init.body }),
+          ...(init.redirect && { redirect: init.redirect }),
+          ...(init.signal && { signal: init.signal }),
+        };
+        const response = await this.fetchImpl(url, requestInit);
 
         if (!response.ok) {
           const bodyText = await response.text();

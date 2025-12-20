@@ -7,8 +7,7 @@
     "declarationMap": true,
     "emitDeclarationOnly": false,
     "sourceMap": true,
-    "noEmit": true,
-    "module": "NodeNext"
+    "allowImportingTsExtensions": false
   },
   "include": ["src"],
   "exclude": ["__tests__"]

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const path = require('path');
 
 module.exports = {
@@ -14,7 +15,7 @@ module.exports = {
   modulePathIgnorePatterns: [
     '<rootDir>/dist/',
     '<rootDir>/archive/',
-    '<rootDir>/archive_20250926/',
+    '<rootDir>/archive/',
     '<rootDir>/salvage/',
     '<rootDir>/pull/',
     '/node_modules/',
@@ -54,7 +55,7 @@ module.exports = {
     '/node_modules/',
     '/dist/',
     '/archive/',
-    '/archive_20250926/',
+    '/archive/',
     '/salvage/',
     '/pull/',
   ],
@@ -66,7 +67,7 @@ module.exports = {
     '!**/*.config.{js,ts}',
     '!**/coverage/**',
     '!**/archive/**',
-    '!**/archive_20250926/**',
+    '!**/archive/**',
     '!**/salvage/**',
     '!**/pull/**',
   ],

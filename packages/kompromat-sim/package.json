@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/kompromat-sim",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "license": "MIT",
   "type": "module",
   "bin": {
@@ -13,7 +13,7 @@
   "dependencies": {},
   "devDependencies": {
     "typescript": "^5.9.3",
-    "@types/node": "^24.9.1"
+    "@types/node": "^24.10.1"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

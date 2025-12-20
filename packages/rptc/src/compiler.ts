@@ -113,7 +113,7 @@ export function createPromptTemplate<
 
   if (placeholders.size === 0) {
     throw new Error(
-      `Prompt template \"${config.name}\" must contain at least one slot placeholder.`,
+      `Prompt template "${config.name}" must contain at least one slot placeholder.`,
     );
   }
 
@@ -154,9 +154,13 @@ export function createPromptTemplate<
     render(values) {
       return this.compile(values).rendered;
     },
-    formatFor(adapter, values, options) {
+    formatFor<TAdapter extends LLMAdapter>(
+      adapter: TAdapter,
+      values: SlotValues<ValidateTemplate<TTemplate, TSlots>>,
+      options: Record<string, unknown> = {},
+    ) {
       const compiled = this.compile(values);
-      return adapter.format(compiled, options ?? {});
+      return adapter.format(compiled, options) as ReturnType<TAdapter['format']>;
     },
     generateTestSuite(options) {
       return generateTestSuite(this, options);
@@ -202,7 +206,13 @@ function validateValues<TSlots extends SlotSchemaMap>(
     if (outcome.valid) {
       resolved[slotName] = outcome.value as SlotValues<TSlots>[typeof slotName];
     } else {
-      errors.push({ slot: slotName, details: outcome.errors });
+      errors.push({
+        slot: slotName,
+        details:
+          'errors' in outcome && Array.isArray((outcome as any).errors)
+            ? (outcome as any).errors
+            : [],
+      });
     }
   }
 
@@ -213,7 +223,7 @@ function validateValues<TSlots extends SlotSchemaMap>(
         details: [
           {
             code: 'slot.undefined',
-            message: `Placeholder \"${placeholder}\" is not defined in slot schema.`,
+            message: `Placeholder "${placeholder}" is not defined in slot schema.`,
           },
         ],
       });
@@ -227,7 +237,7 @@ function validateValues<TSlots extends SlotSchemaMap>(
       details: [
         {
           code: 'slot.unexpected',
-          message: `Value provided for undefined slot \"${key}\".`,
+          message: `Value provided for undefined slot "${key}".`,
         },
       ],
     });
@@ -273,7 +283,7 @@ function validateSlot(
         errors: [
           {
             code: 'slot.unsupported',
-            message: `Slot \"${slotName}\" has unsupported kind ${(schema as SlotSchema).kind}.`,
+            message: `Slot "${slotName}" has unsupported kind ${(schema as SlotSchema).kind}.`,
           },
         ],
       };
@@ -295,7 +305,7 @@ function validateStringSlot(
     return {
       valid: false,
       errors: [
-        { code: 'slot.required', message: `Slot \"${slotName}\" is required.` },
+        { code: 'slot.required', message: `Slot "${slotName}" is required.` },
       ],
     };
   }
@@ -306,7 +316,7 @@ function validateStringSlot(
       errors: [
         {
           code: 'slot.type',
-          message: `Slot \"${slotName}\" must be a string.`,
+          message: `Slot "${slotName}" must be a string.`,
         },
       ],
     };
@@ -366,7 +376,7 @@ function validateNumberSlot(
         errors: [
           {
             code: 'slot.required',
-            message: `Slot \"${slotName}\" is optional but requires a defaultValue for numeric slots.`,
+            message: `Slot "${slotName}" is optional but requires a defaultValue for numeric slots.`,
           },
         ],
       };
@@ -374,7 +384,7 @@ function validateNumberSlot(
     return {
       valid: false,
       errors: [
-        { code: 'slot.required', message: `Slot \"${slotName}\" is required.` },
+        { code: 'slot.required', message: `Slot "${slotName}" is required.` },
       ],
     };
   }
@@ -385,7 +395,7 @@ function validateNumberSlot(
       errors: [
         {
           code: 'slot.type',
-          message: `Slot \"${slotName}\" must be a finite number.`,
+          message: `Slot "${slotName}" must be a finite number.`,
         },
       ],
     };
@@ -432,7 +442,7 @@ function validateBooleanSlot(
         errors: [
           {
             code: 'slot.required',
-            message: `Slot \"${slotName}\" is optional but requires a defaultValue for boolean slots.`,
+            message: `Slot "${slotName}" is optional but requires a defaultValue for boolean slots.`,
           },
         ],
       };
@@ -440,7 +450,7 @@ function validateBooleanSlot(
     return {
       valid: false,
       errors: [
-        { code: 'slot.required', message: `Slot \"${slotName}\" is required.` },
+        { code: 'slot.required', message: `Slot "${slotName}" is required.` },
       ],
     };
   }
@@ -451,7 +461,7 @@ function validateBooleanSlot(
       errors: [
         {
           code: 'slot.type',
-          message: `Slot \"${slotName}\" must be a boolean.`,
+          message: `Slot "${slotName}" must be a boolean.`,
         },
       ],
     };
@@ -475,7 +485,7 @@ function validateEnumSlot(
         errors: [
           {
             code: 'slot.required',
-            message: `Slot \"${slotName}\" is optional but requires a defaultValue for enum slots.`,
+            message: `Slot "${slotName}" is optional but requires a defaultValue for enum slots.`,
           },
         ],
       };
@@ -483,7 +493,7 @@ function validateEnumSlot(
     return {
       valid: false,
       errors: [
-        { code: 'slot.required', message: `Slot \"${slotName}\" is required.` },
+        { code: 'slot.required', message: `Slot "${slotName}" is required.` },
       ],
     };
   }
@@ -494,7 +504,7 @@ function validateEnumSlot(
       errors: [
         {
           code: 'slot.type',
-          message: `Slot \"${slotName}\" must be a string literal.`,
+          message: `Slot "${slotName}" must be a string literal.`,
         },
       ],
     };

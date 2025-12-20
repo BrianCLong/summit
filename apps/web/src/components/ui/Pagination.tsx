@@ -56,7 +56,7 @@ export function Pagination({
 
   const visiblePages = getVisiblePages()
 
-  if (totalPages <= 1) return null
+  if (totalPages <= 1) {return null}
 
   return (
     <div
@@ -126,5 +126,3 @@ export function Pagination({
     </div>
   )
 }
-
-export { Pagination }

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import {
   ChartBarIcon,
-  ExclamationTriangleIcon,
   CheckCircleIcon,
   XMarkIcon,
   PlayIcon,
   PauseIcon,
   ArrowPathIcon,
+  ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline'
 
 interface CanaryMetrics {
@@ -52,9 +52,6 @@ export function AutoCanaryController({
 }: AutoCanaryControllerProps) {
   const [canaryConfig, setCanaryConfig] = useState<CanaryConfig | null>(null)
   const [loading, setLoading] = useState(true)
-  const [manualOverride, setManualOverride] = useState<
-    'promote' | 'abort' | null
-  >(null)
 
   useEffect(() => {
     fetchCanaryStatus()
@@ -79,7 +76,7 @@ export function AutoCanaryController({
   const handleManualAction = async (
     action: 'promote' | 'abort' | 'pause' | 'resume'
   ) => {
-    if (!canaryConfig) return
+    if (!canaryConfig) {return}
 
     try {
       const response = await fetch(
@@ -106,7 +103,7 @@ export function AutoCanaryController({
   }
 
   const calculateVictoryProbability = (): number => {
-    if (!canaryConfig) return 0
+    if (!canaryConfig) {return 0}
 
     const { currentMetrics, baselineMetrics, successCriteria } = canaryConfig
 

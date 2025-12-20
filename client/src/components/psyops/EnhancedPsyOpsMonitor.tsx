@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import Grid from '@mui/material/Grid';
 import {
   Box,
   Typography,
   Card,
   CardContent,
   Alert,
-  Grid,
   LinearProgress,
   List,
   ListItem,
@@ -34,6 +34,11 @@ import {
   Stop,
 } from '@mui/icons-material';
 import { analyzeText } from '../../psyops-monitor/detector';
+
+interface BasicAnalysis {
+  score: number;
+  tags: string[];
+}
 
 interface AnalysisResult {
   id: string;
@@ -70,7 +75,7 @@ const EnhancedPsyOpsMonitor: React.FC = () => {
       if (!text.trim()) return;
 
       // Use the existing client-side detector
-      const basicAnalysis = analyzeText(text);
+      const basicAnalysis: BasicAnalysis = analyzeText(text);
 
       // Enhanced analysis with additional checks
       const enhancedScore = calculateEnhancedScore(text, basicAnalysis);
@@ -114,12 +119,18 @@ const EnhancedPsyOpsMonitor: React.FC = () => {
   );
 
   // Enhanced scoring that considers additional factors
-  const calculateEnhancedScore = (text: string, basicAnalysis: any): number => {
+  const calculateEnhancedScore = (
+    text: string,
+    basicAnalysis: BasicAnalysis,
+  ): number => {
     let score = basicAnalysis.score;
 
     // Additional scoring factors
-    const upperCaseRatio = (text.match(/[A-Z]/g) || []).length / text.length;
-    if (upperCaseRatio > 0.3) score += 0.1; // Excessive caps
+    const uppercaseCount = (text.match(/[A-Z]/g) || []).length;
+    if (text.length > 0) {
+      const upperCaseRatio = uppercaseCount / text.length;
+      if (upperCaseRatio > 0.3) score += 0.1;
+    }
 
     const exclamationCount = (text.match(/!/g) || []).length;
     if (exclamationCount > 2) score += 0.1; // Excessive exclamation
@@ -172,7 +183,7 @@ const EnhancedPsyOpsMonitor: React.FC = () => {
 
   // Simulate real-time monitoring
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval> | undefined;
 
     if (realTimeEnabled && isMonitoring) {
       interval = setInterval(() => {
@@ -201,7 +212,9 @@ const EnhancedPsyOpsMonitor: React.FC = () => {
     setInputText('');
   };
 
-  const getScoreColor = (score: number) => {
+  const getScoreColor = (
+    score: number,
+  ): 'error' | 'warning' | 'success' => {
     if (score >= 0.7) return 'error';
     if (score >= 0.4) return 'warning';
     return 'success';
