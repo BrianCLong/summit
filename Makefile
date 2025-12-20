@@ -4,7 +4,31 @@
 .PHONY: up down restart logs shell clean
 .PHONY: dev test lint build
 .PHONY: db-migrate db-seed
+.PHONY: bootstrap smoke up-ai wait-for-stack
 .PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release sbom provenance ci-check prereqs contracts policy-sim rerere dupescans
+
+# --- Golden Path Commands ---
+# The golden path is: make bootstrap && make up && make smoke
+
+bootstrap:
+	@echo "🚀 Bootstrapping IntelGraph development environment..."
+	@chmod +x scripts/bootstrap.sh && scripts/bootstrap.sh
+
+smoke:
+	@echo "🧪 Running smoke tests..."
+	@if [ -n "$${API_BASE_URL:-}" ]; then \
+		chmod +x scripts/smoke.sh && scripts/smoke.sh "$${API_BASE_URL}"; \
+	else \
+		pnpm run test:smoke || npm run test:smoke; \
+	fi
+
+up-ai:
+	@echo "Starting dev + AI stack..."
+	docker compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.ai.yml up -d
+
+wait-for-stack:
+	@echo "Waiting for services to be ready..."
+	@chmod +x scripts/wait-for-stack.sh && scripts/wait-for-stack.sh
 
 # --- Docker Compose Controls ---
 

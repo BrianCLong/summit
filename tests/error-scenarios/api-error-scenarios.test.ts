@@ -3,6 +3,15 @@
  *
  * Tests for API error handling, resilience, and degradation scenarios.
  *
+ * INTEGRATION TESTS: These tests require a running API server.
+ *
+ * To run these tests:
+ *   1. Start the API server: `make up`
+ *   2. Wait for services: `make wait-for-stack`
+ *   3. Run with: `RUN_ERROR_SCENARIOS=true pnpm test tests/error-scenarios`
+ *
+ * Or in CI, set the RUN_ERROR_SCENARIOS environment variable.
+ *
  * @module tests/error-scenarios
  */
 
@@ -21,7 +30,18 @@ import { graphqlRequest, retry, timeout } from '../integration/framework';
 const API_URL = process.env.API_BASE_URL || 'http://localhost:4000';
 const GRAPHQL_URL = `${API_URL}/graphql`;
 
-describe('API Error Scenarios', () => {
+// Conditionally run tests based on environment
+// Set RUN_ERROR_SCENARIOS=true to enable these integration tests
+const runIntegrationTests = process.env.RUN_ERROR_SCENARIOS === 'true';
+const describeIntegration = runIntegrationTests ? describe : describe.skip;
+const itIntegration = runIntegrationTests ? it : it.skip;
+
+// Log test status
+if (!runIntegrationTests) {
+  console.log('ℹ️  API Error Scenario tests are skipped. Set RUN_ERROR_SCENARIOS=true to run.');
+}
+
+describeIntegration('API Error Scenarios', () => {
   let runner: ErrorScenarioRunner;
   let injector: ErrorInjector;
 
@@ -35,7 +55,7 @@ describe('API Error Scenarios', () => {
   });
 
   describe('Network Failure Scenarios', () => {
-    it.skip('should handle connection refused gracefully', async () => {
+    it('should handle connection refused gracefully', async () => {
       // Arrange
       const scenario = CommonErrorScenarios.databaseConnectionFailure(
         async () => {
@@ -56,7 +76,7 @@ describe('API Error Scenarios', () => {
       expect(result.passed).toBe(true);
     });
 
-    it.skip('should handle DNS resolution failure', async () => {
+    it('should handle DNS resolution failure', async () => {
       // Arrange
       const scenario: ErrorScenario = {
         type: 'dns_failure',
@@ -86,7 +106,7 @@ describe('API Error Scenarios', () => {
   });
 
   describe('Timeout Scenarios', () => {
-    it.skip('should handle request timeout correctly', async () => {
+    it('should handle request timeout correctly', async () => {
       // Arrange
       const scenario = CommonErrorScenarios.requestTimeout(
         async () => {
@@ -109,7 +129,7 @@ describe('API Error Scenarios', () => {
       expect(result.passed).toBe(true);
     });
 
-    it.skip('should retry on transient timeout failures', async () => {
+    it('should retry on transient timeout failures', async () => {
       // Arrange
       let attemptCount = 0;
       const maxAttempts = 3;
@@ -150,7 +170,7 @@ describe('API Error Scenarios', () => {
   });
 
   describe('GraphQL Error Scenarios', () => {
-    it.skip('should handle malformed GraphQL query', async () => {
+    it('should handle malformed GraphQL query', async () => {
       // Arrange
       const scenario: ErrorScenario = {
         type: 'validation_error',
@@ -178,7 +198,7 @@ describe('API Error Scenarios', () => {
       expect(result.passed).toBe(true);
     });
 
-    it.skip('should handle unknown GraphQL field', async () => {
+    it('should handle unknown GraphQL field', async () => {
       // Arrange
       const scenario: ErrorScenario = {
         type: 'validation_error',
@@ -215,7 +235,7 @@ describe('API Error Scenarios', () => {
       expect(result.passed).toBe(true);
     });
 
-    it.skip('should handle missing required variables', async () => {
+    it('should handle missing required variables', async () => {
       // Arrange
       const scenario: ErrorScenario = {
         type: 'validation_error',
@@ -256,7 +276,7 @@ describe('API Error Scenarios', () => {
   });
 
   describe('Authentication Error Scenarios', () => {
-    it.skip('should handle missing authentication token', async () => {
+    it('should handle missing authentication token', async () => {
       // Arrange
       const scenario = CommonErrorScenarios.authenticationFailure(
         async () => {
@@ -287,7 +307,7 @@ describe('API Error Scenarios', () => {
       expect(result.passed).toBe(true);
     });
 
-    it.skip('should handle invalid authentication token', async () => {
+    it('should handle invalid authentication token', async () => {
       // Arrange
       const scenario: ErrorScenario = {
         type: 'authentication_error',
@@ -322,7 +342,7 @@ describe('API Error Scenarios', () => {
       expect(result.passed).toBe(true);
     });
 
-    it.skip('should handle expired authentication token', async () => {
+    it('should handle expired authentication token', async () => {
       // Arrange - Create an expired JWT token
       const expiredToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjM0NTY3ODkwIiwiZXhwIjoxfQ.invalid';
 
@@ -361,7 +381,7 @@ describe('API Error Scenarios', () => {
   });
 
   describe('Authorization Error Scenarios', () => {
-    it.skip('should handle insufficient permissions', async () => {
+    it('should handle insufficient permissions', async () => {
       // This test would require a valid viewer token
       const scenario: ErrorScenario = {
         type: 'authorization_error',
@@ -394,7 +414,7 @@ describe('API Error Scenarios', () => {
   });
 
   describe('Resource Error Scenarios', () => {
-    it.skip('should handle resource not found', async () => {
+    it('should handle resource not found', async () => {
       // Arrange
       const scenario: ErrorScenario = {
         type: 'resource_not_found',
@@ -435,7 +455,7 @@ describe('API Error Scenarios', () => {
   });
 
   describe('Data Validation Error Scenarios', () => {
-    it.skip('should handle invalid input data', async () => {
+    it('should handle invalid input data', async () => {
       // Arrange
       const scenario = CommonErrorScenarios.validationError(
         async () => {
@@ -467,7 +487,7 @@ describe('API Error Scenarios', () => {
       expect(result.passed).toBe(true);
     });
 
-    it.skip('should handle SQL injection attempt', async () => {
+    it('should handle SQL injection attempt', async () => {
       // Arrange
       const scenario: ErrorScenario = {
         type: 'validation_error',
@@ -511,7 +531,7 @@ describe('API Error Scenarios', () => {
   });
 
   describe('Error Scenario Summary', () => {
-    it.skip('should generate summary of all error scenarios', async () => {
+    it('should generate summary of all error scenarios', async () => {
       // Run all registered scenarios
       await runner.runAll();
 
@@ -533,34 +553,35 @@ describe('API Error Scenarios', () => {
 
 /**
  * Service Degradation Tests
+ * These require running services and are conditionally executed.
  */
-describe('Service Degradation Scenarios', () => {
+describeIntegration('Service Degradation Scenarios', () => {
   describe('Database Degradation', () => {
-    it.skip('should continue operating with cached data when database is slow', async () => {
+    it('should continue operating with cached data when database is slow', async () => {
       // Test that the system falls back to cache when DB is slow
     });
 
-    it.skip('should queue writes when database is temporarily unavailable', async () => {
+    it('should queue writes when database is temporarily unavailable', async () => {
       // Test write queue behavior during DB outage
     });
   });
 
   describe('External Service Degradation', () => {
-    it.skip('should degrade gracefully when enrichment service is unavailable', async () => {
+    it('should degrade gracefully when enrichment service is unavailable', async () => {
       // Test behavior when external enrichment service fails
     });
 
-    it.skip('should continue with partial results when some services fail', async () => {
+    it('should continue with partial results when some services fail', async () => {
       // Test partial failure handling
     });
   });
 
   describe('Circuit Breaker Behavior', () => {
-    it.skip('should open circuit after repeated failures', async () => {
+    it('should open circuit after repeated failures', async () => {
       // Test circuit breaker opening
     });
 
-    it.skip('should attempt recovery after circuit breaker timeout', async () => {
+    it('should attempt recovery after circuit breaker timeout', async () => {
       // Test half-open state and recovery
     });
   });
