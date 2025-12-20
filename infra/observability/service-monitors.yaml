@@ -1,0 +1,92 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: otel-collector
+  labels:
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: otel-collector
+  namespaceSelector:
+    any: true
+  endpoints:
+    - port: prometheus
+      path: /metrics
+      interval: 15s
+      honorLabels: true
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: agent-runtime
+  labels:
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchExpressions:
+      - key: app.kubernetes.io/component
+        operator: In
+        values: [agent-runtime, agent-api, agent-scheduler]
+  namespaceSelector:
+    any: true
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_annotation_agent_mesh_id]
+          targetLabel: mesh_id
+        - sourceLabels: [__meta_kubernetes_pod_annotation_mesh_correlation_id]
+          targetLabel: correlation_id
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: agent-workers
+  labels:
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: agent-worker
+  namespaceSelector:
+    any: true
+  podMetricsEndpoints:
+    - port: metrics
+      interval: 30s
+      honorLabels: true
+      metricRelabelings:
+        - sourceLabels: [__name__]
+          regex: agent_task_duration_seconds_bucket
+          targetLabel: slo_class
+          replacement: interactive
+        - sourceLabels: [__meta_kubernetes_pod_label_job]
+          targetLabel: job
+        - sourceLabels: [__meta_kubernetes_pod_annotation_mesh_correlation_id]
+          targetLabel: correlation_id
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: service-mesh-envoys
+  labels:
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchExpressions:
+      - key: istio.io/rev
+        operator: Exists
+  namespaceSelector:
+    any: true
+  podMetricsEndpoints:
+    - port: http-envoy-prom
+      path: /stats/prometheus
+      interval: 15s
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_namespace]
+          targetLabel: namespace
+        - sourceLabels: [__meta_kubernetes_pod_name]
+          targetLabel: pod
+        - sourceLabels: [__meta_kubernetes_pod_annotation_mesh_correlation_id]
+          targetLabel: correlation_id

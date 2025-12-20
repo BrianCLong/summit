@@ -3,37 +3,88 @@ receivers:
     protocols:
       grpc:
       http:
-
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: otel-collector
+          scrape_interval: 15s
+          static_configs:
+            - targets: ['0.0.0.0:8889']
 processors:
+  memory_limiter:
+    limit_mib: 512
+    spike_limit_mib: 128
+    check_interval: 5s
   batch:
     send_batch_size: 1000
-    timeout: 10s
-  memory_limiter:
-    limit_mib: 256
-    spike_limit_mib: 64
-    check_interval: 5s
-
+    timeout: 5s
+  k8sattributes:
+    extract:
+      metadata: [namespace, pod, container, node, cluster, workload.name, workload.kind]
+    filter:
+      node_from_env_var: K8S_NODE_NAME
+    pod_association:
+      - from: resource_attribute
+        name: k8s.pod.uid
+      - from: connection
+  attributes/correlation:
+    actions:
+      - key: mesh.correlation_id
+        action: upsert
+        from_attribute: http.request.header.x-correlation-id
+      - key: mesh.trace_id
+        action: insert
+        from_context: trace_id
+      - key: mesh.span_id
+        action: insert
+        from_context: span_id
+  resource/service-mesh:
+    attributes:
+      - key: mesh.sidecar
+        value: istio-proxy
+        action: insert
+      - key: deployment.environment
+        value: production
+        action: upsert
+  transform/logs:
+    log_statements:
+      - context: log
+        statements:
+          - set(attributes["trace_id"], TraceID()) where attributes["trace_id"] == nil
+          - set(attributes["span_id"], SpanID()) where attributes["span_id"] == nil
+          - set(attributes["correlation_id"], attributes["mesh.correlation_id"]) where attributes["mesh.correlation_id"] != nil
 exporters:
   loki:
     endpoint: http://loki:3100/loki/api/v1/push
   tempo:
     endpoint: http://tempo:4317
+    tls:
+      insecure: true
   prometheus:
     endpoint: 0.0.0.0:8889
     resource_to_telemetry_conversion:
       enabled: true
-
+  otlphttp/grafana-cloud:
+    endpoint: https://otlp.grafana.net/otlp
+    headers:
+      Authorization: Basic ${GRAFANA_CLOUD_API_KEY}
+  debug: {}
+extensions:
+  health_check:
+  pprof:
+  zpages:
 service:
+  extensions: [health_check, pprof, zpages]
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [memory_limiter, batch]
-      exporters: [tempo]
+      processors: [memory_limiter, k8sattributes, attributes/correlation, batch]
+      exporters: [tempo, otlphttp/grafana-cloud]
     metrics:
-      receivers: [otlp]
-      processors: [memory_limiter, batch]
-      exporters: [prometheus]
+      receivers: [otlp, prometheus]
+      processors: [memory_limiter, k8sattributes, batch]
+      exporters: [prometheus, otlphttp/grafana-cloud]
     logs:
       receivers: [otlp]
-      processors: [memory_limiter, batch]
-      exporters: [loki]
+      processors: [memory_limiter, k8sattributes, attributes/correlation, transform/logs, batch]
+      exporters: [loki, otlphttp/grafana-cloud]

@@ -53,3 +53,66 @@ spec:
           annotations:
             summary: 'HPA thrashing detected'
             description: 'Horizontal Pod Autoscaler for {{ $labels.horizontalpodautoscaler }} is thrashing (scaling more than 5 times in 15 minutes).'
+
+        - alert: AgentFailureRateHigh
+          expr: sum(rate(agent_runs_total{status="failed"}[10m])) / sum(rate(agent_runs_total[10m])) > 0.1
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: 'Agent failure rate exceeds 10%'
+            description: 'Investigate upstream model errors, timeouts, or dependency failures. Correlate with trace IDs from headers.'
+
+        - alert: AgentCostSpike
+          expr: rate(agent_cost_tokens_total[10m]) > (avg_over_time(agent_cost_tokens_total[6h]) * 1.5)
+          for: 20m
+          labels:
+            severity: warning
+          annotations:
+            summary: 'Agent cost per 10m exceeded 150% of 6h baseline'
+            description: 'Costs may spike due to prompt regressions or looping jobs. Validate prompts and rate limits.'
+
+        - alert: MeshSloBreach
+          expr: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{reporter="source"}[5m])) by (le)) > 750
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: 'Mesh p99 latency SLO breach'
+            description: 'Service mesh latency above 750ms p99 for 10 minutes; check upstream dependencies.'
+
+        - alert: MeshErrorRate
+          expr: sum(rate(istio_requests_total{response_code=~"5.."}[5m])) / sum(rate(istio_requests_total[5m])) > 0.03
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: 'Service mesh 5xx rate above 3%'
+            description: 'Sustained 5xx rate across mesh. Correlate with otel trace IDs to identify failing service.'
+
+        - alert: NodeResourcePressure
+          expr: (avg(rate(container_cpu_usage_seconds_total{container!="",pod!=""}[5m])) by (node) > 0.8) or (avg(container_memory_working_set_bytes{container!="",pod!=""}) by (node) / avg(machine_memory_bytes) by (node) > 0.85)
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: 'Node resources under pressure'
+            description: 'CPU or memory utilization is above thresholds for 15 minutes; consider scaling nodes or workloads.'
+
+        - alert: OtelCollectorStuck
+          expr: rate(otelcol_exporter_send_failed_spans{job="otel-collector"}[5m]) > 0
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: 'OTel collector is failing to export spans'
+            description: 'Collector reports failed span exports. Check network to Tempo/Grafana Cloud.'
+
+        - alert: ProfileIngestionStalled
+          expr: rate(pyroscope_ingester_ingested_profiles_total[10m]) == 0
+          for: 20m
+          labels:
+            severity: warning
+          annotations:
+            summary: 'Pyroscope ingestion stalled'
+            description: 'No profiles ingested in the past 20 minutes; check parca-agent and Pyroscope service health.'

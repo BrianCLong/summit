@@ -1,0 +1,140 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vector-agent-config
+  namespace: observability
+  labels:
+    app.kubernetes.io/name: vector-agent
+    app.kubernetes.io/part-of: observability
+    app.kubernetes.io/component: logging
+    vector.dev/source: kubernetes
+  annotations:
+    fluentbit.io/exclude: "true"
+data:
+  vector.yaml: |
+    data_dir: /var/lib/vector
+    sources:
+      kubernetes_logs:
+        type: kubernetes_logs
+        pod_annotation_fields:
+          correlation_id: mesh.correlation_id
+          trace_id: mesh.trace_id
+        extra_label_fields:
+          pod_labels: true
+      audit_logs:
+        type: file
+        include: [/var/log/kubernetes/audit.log]
+    transforms:
+      enrich:
+        type: remap
+        inputs: [kubernetes_logs]
+        source: |
+          .deployment_environment = env!("DEPLOY_ENV", default: "production")
+          .correlation_id = .correlation_id || .kubernetes.pod_annotations["mesh.correlation_id"] || .kubernetes.pod_annotations["mesh.corr-id"]
+          .trace_id = .trace_id || .kubernetes.pod_annotations["mesh.trace_id"]
+          .span_id = .span_id || .kubernetes.pod_annotations["mesh.span_id"]
+          .service = .kubernetes.pod_labels["app.kubernetes.io/name"]
+    sinks:
+      loki:
+        type: loki
+        inputs: [enrich, audit_logs]
+        endpoint: http://loki:3100
+        encoding:
+          codec: json
+        labels:
+          job: vector
+          service: "{{ service | default("unknown") }}"
+          environment: "{{ deployment_environment }}"
+          correlation_id: "{{ correlation_id }}"
+      otlp:
+        type: otlp
+        inputs: [enrich]
+        endpoint: http://otel-collector:4317
+        request:
+          timeout_secs: 10
+        tls:
+          verify_certificate: false
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: vector-agent
+  namespace: observability
+  labels:
+    app.kubernetes.io/name: vector-agent
+    app.kubernetes.io/component: logging
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: vector-agent
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: vector-agent
+        app.kubernetes.io/component: logging
+      annotations:
+        mesh.correlation_id: "${MESH_CORRELATION_ID}" 
+    spec:
+      serviceAccountName: vector-agent
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          effect: NoSchedule
+      containers:
+        - name: vector
+          image: timberio/vector:0.37.0-alpine
+          imagePullPolicy: IfNotPresent
+          args: ["--config", "/etc/vector/vector.yaml"]
+          env:
+            - name: VECTOR_SELF_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: DEPLOY_ENV
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['environment']
+          volumeMounts:
+            - name: config
+              mountPath: /etc/vector
+            - name: varlog
+              mountPath: /var/log
+            - name: varlib
+              mountPath: /var/lib/vector
+      volumes:
+        - name: config
+          configMap:
+            name: vector-agent-config
+        - name: varlog
+          hostPath:
+            path: /var/log
+        - name: varlib
+          hostPath:
+            path: /var/lib/vector
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vector-agent
+  namespace: observability
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: vector-agent
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "namespaces"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: vector-agent
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: vector-agent
+subjects:
+  - kind: ServiceAccount
+    name: vector-agent
+    namespace: observability
