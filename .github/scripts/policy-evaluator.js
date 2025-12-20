@@ -16,8 +16,6 @@ class PolicyEvaluator {
     this.prNumber = prNumber;
     this.githubToken = githubToken;
     this.opaPath = this.findOPA();
-    this.policyContext = this.buildPolicyContext();
-    this.latestInput = null;
   }
 
   findOPA() {
@@ -28,17 +26,6 @@ class PolicyEvaluator {
         'OPA binary not found. Please install OPA: https://www.openpolicyagent.org/docs/latest/get-started/',
       );
     }
-  }
-
-  buildPolicyContext() {
-    return {
-      environment:
-        process.env.POLICY_ENVIRONMENT ||
-        process.env.TARGET_ENVIRONMENT ||
-        'staging',
-      data_class: process.env.POLICY_DATA_CLASS || 'internal',
-      residency: process.env.POLICY_RESIDENCY || 'us',
-    };
   }
 
   async generatePolicyInput() {
@@ -71,13 +58,7 @@ class PolicyEvaluator {
       migration_review: {
         approved: await this.hasMigrationReview(),
       },
-      environment: this.policyContext.environment,
-      data_class: this.policyContext.data_class,
-      residency: this.policyContext.residency,
-      policy_context: this.policyContext,
     };
-
-    this.latestInput = policyInput;
 
     // Write input file for OPA
     const inputFile = '/tmp/policy-input.json';
@@ -213,9 +194,7 @@ class PolicyEvaluator {
       const output = execSync(cmd, { encoding: 'utf8' });
 
       const result = JSON.parse(output);
-      const decisionValue =
-        result.result?.[0]?.expressions?.[0]?.value || result.result;
-      return decisionValue;
+      return result.result;
     } catch (error) {
       console.error('OPA evaluation failed:', error.message);
       throw error;
@@ -272,51 +251,6 @@ class PolicyEvaluator {
       riskLevel: risk_level,
       confidence,
     };
-  }
-
-  writeDecision(decision) {
-    const decisionPath =
-      process.env.POLICY_DECISION_PATH ||
-      path.join(process.cwd(), 'artifacts/policy/decision.json');
-    const outputDir = path.dirname(decisionPath);
-    fs.mkdirSync(outputDir, { recursive: true });
-
-    const payload = {
-      decision,
-      context: this.policyContext,
-      pr_number: this.prNumber,
-      input: this.latestInput,
-      generated_at: new Date().toISOString(),
-    };
-
-    fs.writeFileSync(decisionPath, JSON.stringify(payload, null, 2));
-    console.log(`📝 Decision written to ${decisionPath}`);
-    return decisionPath;
-  }
-
-  writeSummary(report, decisionPath) {
-    if (!process.env.GITHUB_STEP_SUMMARY) {
-      return;
-    }
-
-    const summary = [
-      '## ⚖️ Release policy evaluation',
-      `- **Decision**: ${report.approved ? '✅ Approved' : '❌ Blocked'}`,
-      `- **Risk level**: ${report.riskLevel}`,
-      `- **Confidence**: ${report.confidence}%`,
-      `- **Environment**: ${this.policyContext.environment}`,
-      `- **Data class**: ${this.policyContext.data_class}`,
-      `- **Residency**: ${this.policyContext.residency}`,
-      `- **Violations**: ${report.violations.length}`,
-      `- **Warnings**: ${report.warnings.length}`,
-      decisionPath ? `- **Decision artifact**: ${decisionPath}` : null,
-      '',
-    ]
-      .filter(Boolean)
-      .join('\n');
-
-    fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${summary}\n`);
-    console.log('📝 Policy summary appended to job summary');
   }
 
   async generatePRComment(report) {
@@ -413,12 +347,10 @@ Please address the violations above before requesting review:
     try {
       console.log(`🚀 Starting policy evaluation for PR #${this.prNumber}`);
 
-      const { inputFile } = await this.generatePolicyInput();
+      const { policyInput, inputFile } = await this.generatePolicyInput();
       const decision = await this.evaluatePolicy(inputFile);
       const report = this.generateReport(decision);
-      const decisionPath = this.writeDecision(decision);
       await this.generatePRComment(report);
-      this.writeSummary(report, decisionPath);
 
       // Set GitHub Action outputs
       if (process.env.GITHUB_OUTPUT) {

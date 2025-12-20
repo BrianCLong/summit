@@ -5,6 +5,9 @@ on:
     paths:
       - 'policy/abac/**'
       - 'policy/tests/**'
+      - 'server/config/data-paths.yaml'
+      - 'server/config/schemas/data-paths.schema.json'
+      - '.github/policies/**'
       - 'services/authz-gateway/**'
   push:
     branches:
@@ -12,20 +15,16 @@ on:
     paths:
       - 'policy/abac/**'
       - 'policy/tests/**'
+      - 'server/config/data-paths.yaml'
+      - 'server/config/schemas/data-paths.schema.json'
+      - '.github/policies/**'
 
 jobs:
   opa:
     name: Validate ABAC Policies
     runs-on: ubuntu-latest
-    env:
-      POLICY_ENVIRONMENT: ${{ vars.POLICY_ENVIRONMENT || 'staging' }}
-      POLICY_DATA_CLASS: ${{ vars.POLICY_DATA_CLASS || 'internal' }}
-      POLICY_RESIDENCY: ${{ vars.POLICY_RESIDENCY || 'us' }}
-      MAX_ALLOWED_RISK: ${{ vars.MAX_ALLOWED_RISK || 'HIGH' }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
       - name: Install OPA
         run: |
           curl -L -o opa https://openpolicyagent.org/downloads/v0.64.1/opa_linux_amd64_static
@@ -36,105 +35,21 @@ jobs:
       - name: Run policy unit tests with coverage
         run: |
           opa test policy/abac policy/tests -v --coverage --format json > opa-coverage.json
+      - name: Validate OPA data path tags
+        run: |
+          python -m pip install pyyaml --quiet
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import yaml
+
+          data = yaml.safe_load(Path("server/config/data-paths.yaml").read_text())
+          Path("server/config/data-paths.json").write_text(json.dumps(data))
+          PY
+          opa eval --fail-defined --data .github/policies --input server/config/data-paths.json "data.summit.datapaths.violations[_]"
+          rm server/config/data-paths.json
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
         with:
           name: opa-abac-coverage
           path: opa-coverage.json
-      - name: Build release policy input
-        id: build-release-input
-        run: |
-          mkdir -p artifacts/policy
-
-          BASE_SHA="${{ github.event.pull_request.base.sha || github.event.before }}"
-          HEAD_SHA="${{ github.event.pull_request.head.sha || github.sha }}"
-          PR_NUMBER="${{ github.event.pull_request.number || 0 }}"
-          PR_TITLE=$(cat <<'EOF'
-${{ github.event.pull_request.title || github.event.head_commit.message || 'Policy evaluation' }}
-EOF
-)
-          PR_BODY=$(cat <<'EOF'
-${{ github.event.pull_request.body || '' }}
-EOF
-)
-          PR_AUTHOR="${{ github.event.pull_request.user.login || github.actor }}"
-
-          if [ -n "$BASE_SHA" ]; then
-            git fetch --no-tags origin "${BASE_SHA}" 2>/dev/null || true
-          fi
-          if [ -n "$HEAD_SHA" ]; then
-            git fetch --no-tags origin "${HEAD_SHA}" 2>/dev/null || true
-          fi
-
-          DIFF_OUTPUT=$(git diff --name-only "${BASE_SHA:-HEAD~1}" "${HEAD_SHA}" 2>/dev/null || true)
-          FILES_JSON=$(printf "%s\n" "$DIFF_OUTPUT" | jq -R -s 'split("\n") | map(select(length>0)) | map({path: ., patch: ""})')
-          if [ -z "$FILES_JSON" ]; then
-            FILES_JSON="[]"
-          fi
-
-          jq -n \
-            --arg title "$PR_TITLE" \
-            --arg body "$PR_BODY" \
-            --arg author "$PR_AUTHOR" \
-            --arg env "$POLICY_ENVIRONMENT" \
-            --arg data_class "$POLICY_DATA_CLASS" \
-            --arg residency "$POLICY_RESIDENCY" \
-            --arg max_risk "${MAX_ALLOWED_RISK:-HIGH}" \
-            --argjson pr_number "$PR_NUMBER" \
-            --argjson files "$FILES_JSON" \
-            '{
-              pr: {
-                number: $pr_number,
-                title: $title,
-                body: $body,
-                author: $author,
-                draft: false,
-                mergeable: true,
-                mergeable_state: "unknown",
-                labels: [],
-                approvals: 0,
-                changes_requested: false,
-                codeowner_approved: false,
-                owner_approved: false
-              },
-              changed_files: $files,
-              quality_gates: {
-                build: true,
-                typecheck: true,
-                lint: true,
-                tests: true,
-                security: true,
-                helm: true,
-                integration_tests: false,
-                e2e: false,
-                contract_tests: false,
-                migration_plan: false,
-                performance_smoke: false,
-                dependency_audit: true
-              },
-              max_allowed_risk: $max_risk,
-              emergency_approval: false,
-              migration_review: { approved: false },
-              environment: $env,
-              data_class: $data_class,
-              residency: $residency
-            }' > artifacts/policy/input.json
-      - name: Evaluate release policy
-        run: |
-          opa eval --format=json -d .github/policies -i artifacts/policy/input.json "data.summit.release.decision" > artifacts/policy/decision.json
-      - name: Upload policy decision
-        uses: actions/upload-artifact@v4
-        with:
-          name: policy-decision
-          path: artifacts/policy/decision.json
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-      - name: Summarize policy evaluation (PR only)
-        if: github.event_name == 'pull_request'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          POLICY_DECISION_PATH: artifacts/policy/decision.json
-        run: |
-          node .github/scripts/policy-evaluator.js ${{ github.event.pull_request.number }}
