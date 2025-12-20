@@ -1,0 +1,129 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "targets": [
+        {
+          "expr": "sum(rate(ALERTS{alertstate=\"firing\"}[1h])) by (alertname)",
+          "legendFormat": "{{alertname}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Alert Volume (Firing)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 2,
+      "targets": [
+        {
+          "expr": "topk(5, count_over_time(ALERTS{alertstate=\"firing\"}[24h]))",
+          "legendFormat": "{{alertname}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Top 5 Noisy Alerts (Last 24h)",
+      "type": "barchart"
+    },
+    {
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 3,
+      "title": "MTTA / MTTR",
+      "type": "timeseries",
+      "targets": [
+          {
+              "expr": "avg_over_time(alert_acknowledge_latency[24h])",
+              "legendFormat": "MTTA",
+              "refId": "A"
+          },
+          {
+            "expr": "avg_over_time(alert_resolve_latency[24h])",
+            "legendFormat": "MTTR",
+            "refId": "B"
+          }
+      ]
+    },
+    {
+        "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 8
+        },
+        "id": 4,
+        "title": "Autoremediation Success Rate",
+        "type": "stat",
+        "targets": [
+            {
+                "expr": "sum(autoremediation_success_total) / sum(autoremediation_total)",
+                "legendFormat": "Success Rate",
+                "refId": "A"
+            }
+        ]
+    }
+  ],
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["observability", "oncall"],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "Prometheus",
+          "value": "prometheus"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Datasource",
+        "multi": false,
+        "name": "datasource",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "title": "On-Call Health",
+  "version": 0,
+  "weekStart": ""
+}

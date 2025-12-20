@@ -1,0 +1,37 @@
+{{- if .Values.namespaceResources.limitRange.enabled }}
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: {{ .Release.Name }}-limits
+  namespace: {{ .Release.Namespace }}
+spec:
+  limits:
+    - type: Container
+      {{- with .Values.namespaceResources.limitRange.max }}
+      max:
+{{ toYaml . | indent 8 }}
+      {{- end }}
+      {{- with .Values.namespaceResources.limitRange.min }}
+      min:
+{{ toYaml . | indent 8 }}
+      {{- end }}
+      {{- with .Values.namespaceResources.limitRange.default }}
+      default:
+{{ toYaml . | indent 8 }}
+      {{- end }}
+      {{- with .Values.namespaceResources.limitRange.defaultRequest }}
+      defaultRequest:
+{{ toYaml . | indent 8 }}
+      {{- end }}
+---
+{{- end }}
+{{- if .Values.namespaceResources.resourceQuota.enabled }}
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: {{ .Release.Name }}-quota
+  namespace: {{ .Release.Namespace }}
+spec:
+  hard:
+{{ toYaml .Values.namespaceResources.resourceQuota.hard | indent 4 }}
+{{- end }}

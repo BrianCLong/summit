@@ -8,10 +8,21 @@ import { getPostgresPool } from '../db/postgres.js';
 import { CaseService } from '../cases/CaseService.js';
 import { CaseInput, CaseUpdateInput } from '../repos/CaseRepo.js';
 import { LegalBasis } from '../repos/AuditAccessLogRepo.js';
+import { CaseOverviewService } from '../cases/overview/CaseOverviewService.js';
 import { goldenPathStepTotal } from '../monitoring/metrics.js';
 import logger from '../config/logger.js';
 
 const routeLogger = logger.child({ name: 'CaseRoutes' });
+const overviewService = new CaseOverviewService(getPostgresPool(), {
+  ttlMs: Number.isFinite(Number(process.env.CASE_OVERVIEW_CACHE_TTL_MS))
+    ? Number(process.env.CASE_OVERVIEW_CACHE_TTL_MS)
+    : undefined,
+  staleWhileRevalidateMs: Number.isFinite(
+    Number(process.env.CASE_OVERVIEW_CACHE_SWR_MS),
+  )
+    ? Number(process.env.CASE_OVERVIEW_CACHE_SWR_MS)
+    : undefined,
+});
 
 export const caseRouter = Router();
 
@@ -52,6 +63,75 @@ function getAuditContext(
     correlationId: body._correlationId,
   };
 }
+
+/**
+ * GET /api/cases/:id/overview - Cached overview metrics served from materialized cache
+ */
+caseRouter.get('/:id/overview', async (req, res) => {
+  try {
+    const { tenantId, userId } = getRequestContext(req);
+
+    if (!tenantId) {
+      return res.status(400).json({ error: 'tenant_required' });
+    }
+
+    if (!userId) {
+      return res.status(401).json({ error: 'user_required' });
+    }
+
+    const { id } = req.params;
+
+    const reason = req.query.reason as string;
+    const legalBasis = req.query.legalBasis as LegalBasis;
+
+    if (!reason) {
+      return res.status(400).json({
+        error: 'reason_required',
+        message: 'You must provide a reason for accessing this case overview',
+      });
+    }
+
+    if (!legalBasis) {
+      return res.status(400).json({
+        error: 'legal_basis_required',
+        message: 'You must provide a legal basis for accessing this case overview',
+      });
+    }
+
+    const pg = getPostgresPool();
+    const caseExists = await pg.query(
+      `SELECT 1 FROM maestro.cases WHERE id = $1 AND tenant_id = $2`,
+      [id, tenantId],
+    );
+
+    if (caseExists.rowCount === 0) {
+      return res.status(404).json({ error: 'case_not_found' });
+    }
+
+    const overview = await overviewService.getOverview(id, tenantId);
+
+    routeLogger.info(
+      {
+        caseId: id,
+        tenantId,
+        userId,
+        cacheStatus: overview.cache.status,
+      },
+      'Case overview retrieved',
+    );
+
+    res.json({
+      ...overview,
+      audit: {
+        reason,
+        legalBasis,
+      },
+    });
+  } catch (error) {
+    routeLogger.error({ error: (error as Error).message }, 'Failed to get case overview');
+    res.status(500).json({ error: (error as Error).message });
+  }
+});
 
 /**
  * POST /api/cases - Create a new case

@@ -1,0 +1,65 @@
+{
+  "title": "Preview Fleet Overview",
+  "schemaVersion": 39,
+  "refresh": "30s",
+  "tags": ["preview", "finops"],
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Active previews",
+      "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4},
+      "targets": [
+        {
+          "expr": "preview_active_total",
+          "legendFormat": "active"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Fleet burn-down",
+      "gridPos": {"x": 6, "y": 0, "w": 18, "h": 8},
+      "targets": [
+        {
+          "expr": "preview_cost_estimate_usd",
+          "legendFormat": "{{namespace}}"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "renameByName": {
+              "Value": "Estimated $/hr"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "TTL remaining",
+      "gridPos": {"x": 0, "y": 8, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "preview_ttl_seconds_remaining",
+          "legendFormat": "{{namespace}}"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Idle seconds",
+      "gridPos": {"x": 12, "y": 8, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "preview_idle_seconds",
+          "legendFormat": "{{namespace}}"
+        }
+      ]
+    }
+  ]
+}

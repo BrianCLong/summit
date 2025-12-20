@@ -149,6 +149,20 @@ export interface AuditLogEntry {
   event: SecurityEvent;
 }
 
+export interface AuditBusEnvelope {
+  topic: 'zero_trust.policy_decision';
+  auditId: string;
+  decisionId: string;
+  sequence: number;
+  checksum: string;
+  timestamp: string;
+  policyDecision: 'allow' | 'deny' | 'challenge';
+  actor: Actor;
+  resource: Resource;
+  outcome: Outcome;
+  context: Pick<EventContext, 'sourceIp' | 'requestId' | 'correlationId'>;
+}
+
 // ============================================================================
 // SIEM CONNECTOR
 // ============================================================================
@@ -196,6 +210,8 @@ export class SIEMConnector extends EventEmitter {
 
     try {
       const auditLogs = events.map((event) => this.createAuditLogEntry(event));
+
+      auditLogs.forEach((auditLog) => this.publishToAuditBus(auditLog));
       await this.sendToSIEM(auditLogs);
       this.emit('eventsFlushed', { count: events.length });
     } catch (error) {
@@ -477,6 +493,32 @@ export class SIEMConnector extends EventEmitter {
 
   private generateCorrelationId(): string {
     return `cor-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  private publishToAuditBus(log: AuditLogEntry): void {
+    if (log.event.eventType !== 'policy_decision') {
+      return;
+    }
+
+    const payload: AuditBusEnvelope = {
+      topic: 'zero_trust.policy_decision',
+      auditId: log.id,
+      decisionId: log.event.id,
+      sequence: log.sequence,
+      checksum: log.checksum,
+      timestamp: log.timestamp,
+      policyDecision: log.event.zeroTrust.policyDecision,
+      actor: log.event.actor,
+      resource: log.event.resource,
+      outcome: log.event.outcome,
+      context: {
+        sourceIp: log.event.context.sourceIp,
+        requestId: log.event.context.requestId,
+        correlationId: log.event.context.correlationId,
+      },
+    };
+
+    this.emit('audit_bus_event', payload);
   }
 
   async close(): Promise<void> {

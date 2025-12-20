@@ -1,0 +1,125 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: profiling
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pyroscope
+  namespace: profiling
+  labels:
+    app: pyroscope
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pyroscope
+  template:
+    metadata:
+      labels:
+        app: pyroscope
+    spec:
+      containers:
+        - name: pyroscope
+          image: grafana/pyroscope:1.16.0
+          args:
+            - "server"
+            - "--storage-path=/var/lib/pyroscope"
+            - "--log-level=info"
+          ports:
+            - name: http
+              containerPort: 4040
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/pyroscope
+      volumes:
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pyroscope
+  namespace: profiling
+  labels:
+    app: pyroscope
+spec:
+  type: ClusterIP
+  ports:
+    - port: 4040
+      targetPort: http
+      name: http
+  selector:
+    app: pyroscope
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: pyroscope
+  namespace: profiling
+  labels:
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: pyroscope
+  namespaceSelector:
+    matchNames: ["profiling"]
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: parca-agent
+  namespace: profiling
+  labels:
+    app: parca-agent
+spec:
+  selector:
+    matchLabels:
+      app: parca-agent
+  template:
+    metadata:
+      labels:
+        app: parca-agent
+    spec:
+      hostPID: true
+      serviceAccountName: parca-agent
+      containers:
+        - name: parca-agent
+          image: ghcr.io/parca-dev/parca-agent:v0.26.0
+          args:
+            - --node=$(NODE_NAME)
+            - --otlp-address=otel-collector.observability.svc:4317
+            - --pyroscope-address=http://pyroscope.profiling.svc:4040
+            - --remote-store.address=pyroscope.profiling.svc:4040
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: sys
+              mountPath: /sys
+            - name: proc
+              mountPath: /host/proc
+              readOnly: true
+      volumes:
+        - name: sys
+          hostPath:
+            path: /sys
+        - name: proc
+          hostPath:
+            path: /proc
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: parca-agent
+  namespace: profiling
