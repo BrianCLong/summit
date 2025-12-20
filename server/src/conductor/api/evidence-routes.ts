@@ -4,8 +4,146 @@ import express from 'express';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import { prometheusConductorMetrics } from '../observability/prometheus';
+import { getPostgresPool } from '../../db/postgres.js';
+import { requirePermission } from '../auth/rbac-middleware.js';
+import {
+  buildProvenanceReceipt,
+  canonicalStringify,
+  EvidenceArtifactRow,
+  RunEventRow,
+  RunRow,
+} from '../../maestro/evidence/receipt.js';
 
 const router = express.Router();
+
+const inlineContentKey = (artifactId: string) =>
+  `inline://evidence_artifact_content/${artifactId}`;
+
+async function loadRunContext(runId: string): Promise<{
+  run?: RunRow;
+  events: RunEventRow[];
+  artifacts: EvidenceArtifactRow[];
+}> {
+  const pool = getPostgresPool();
+  const { rows: runRows } = await pool.query<RunRow>(
+    `SELECT id, runbook, status, started_at, ended_at FROM run WHERE id=$1`,
+    [runId],
+  );
+
+  if (!runRows.length) {
+    return { events: [], artifacts: [] };
+  }
+
+  const { rows: eventRows } = await pool.query<RunEventRow>(
+    `SELECT kind, payload, ts FROM run_event WHERE run_id=$1 ORDER BY ts ASC`,
+    [runId],
+  );
+
+  const { rows: artifactRows } = await pool.query<EvidenceArtifactRow>(
+    `SELECT id, artifact_type, sha256_hash, created_at
+       FROM evidence_artifacts
+      WHERE run_id=$1
+      ORDER BY created_at ASC`,
+    [runId],
+  );
+
+  return { run: runRows[0], events: eventRows, artifacts: artifactRows };
+}
+
+router.post(
+  '/receipt',
+  requirePermission('evidence:create'),
+  express.json(),
+  async (req, res) => {
+    try {
+      const { runId } = req.body || {};
+      if (!runId) {
+        return res
+          .status(400)
+          .json({ success: false, error: 'runId is required' });
+      }
+
+      const { run, events, artifacts } = await loadRunContext(runId);
+
+      if (!run) {
+        return res.status(404).json({ success: false, error: 'Run not found' });
+      }
+
+      const receipt = buildProvenanceReceipt(run, events, artifacts);
+      const receiptJson = canonicalStringify(receipt);
+      const receiptBuffer = Buffer.from(receiptJson);
+      const artifactId = crypto.randomUUID();
+      const sha256Hash = crypto
+        .createHash('sha256')
+        .update(receiptBuffer)
+        .digest('hex');
+
+      const pool = getPostgresPool();
+
+      await pool.query(
+        `INSERT INTO evidence_artifacts
+         (id, run_id, artifact_type, s3_key, sha256_hash, size_bytes, created_at)
+         VALUES ($1, $2, 'receipt', $3, $4, $5, now())`,
+        [artifactId, runId, inlineContentKey(artifactId), sha256Hash, receiptBuffer.length],
+      );
+
+      await pool.query(
+        `INSERT INTO evidence_artifact_content (artifact_id, content, content_type)
+         VALUES ($1, $2, $3)`,
+        [artifactId, receiptBuffer, 'application/json'],
+      );
+
+      return res.json({ success: true, data: { receipt, artifactId } });
+    } catch (error: any) {
+      const message =
+        error?.message || 'Failed to generate provenance receipt';
+      return res.status(500).json({ success: false, error: message });
+    }
+  },
+);
+
+router.get(
+  '/receipt/:runId',
+  requirePermission('evidence:read'),
+  async (req, res) => {
+    try {
+      const { runId } = req.params;
+      const pool = getPostgresPool();
+
+      const { rows: artifactRows } = await pool.query<EvidenceArtifactRow>(
+        `SELECT id FROM evidence_artifacts
+         WHERE run_id=$1 AND artifact_type='receipt'
+         ORDER BY created_at DESC
+         LIMIT 1`,
+        [runId],
+      );
+
+      if (!artifactRows.length) {
+        return res
+          .status(404)
+          .json({ success: false, error: 'Receipt not found' });
+      }
+
+      const artifactId = artifactRows[0].id;
+      const { rows: contentRows } = await pool.query<{ content: Buffer }>(
+        `SELECT content FROM evidence_artifact_content WHERE artifact_id=$1`,
+        [artifactId],
+      );
+
+      if (!contentRows.length) {
+        return res
+          .status(404)
+          .json({ success: false, error: 'Receipt content not found' });
+      }
+
+      const receipt = JSON.parse(contentRows[0].content.toString('utf8'));
+      return res.json({ success: true, data: { receipt } });
+    } catch (error: any) {
+      const message = error?.message || 'Failed to load receipt';
+      return res.status(500).json({ success: false, error: message });
+    }
+  },
+);
 
 interface EvidenceBundle {
   id: string;
