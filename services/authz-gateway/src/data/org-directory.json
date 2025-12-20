@@ -12,38 +12,5 @@
     "manager": "manager-004",
     "riskScore": 45,
     "lastReviewed": "2025-01-05T09:30:00Z"
-  },
-  "carol": {
-    "roles": ["admin"],
-    "entitlements": [
-      "dataset:alpha:read",
-      "dataset:alpha:delete",
-      "dataset:gamma:delete",
-      "dataset:gamma:share"
-    ],
-    "manager": "manager-010",
-    "riskScore": 15,
-    "lastReviewed": "2025-01-07T09:45:00Z"
-  },
-  "dave": {
-    "roles": ["admin"],
-    "entitlements": [
-      "dataset:gamma:delete",
-      "dataset:gamma:read",
-      "dataset:gamma:share"
-    ],
-    "manager": "manager-011",
-    "riskScore": 18,
-    "lastReviewed": "2025-01-07T09:50:00Z"
-  },
-  "erin": {
-    "roles": ["admin"],
-    "entitlements": [
-      "dataset:gamma:delete",
-      "dataset:gamma:share"
-    ],
-    "manager": "manager-012",
-    "riskScore": 12,
-    "lastReviewed": "2025-01-07T09:55:00Z"
   }
 }

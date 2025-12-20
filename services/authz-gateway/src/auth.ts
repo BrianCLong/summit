@@ -20,30 +20,6 @@ const users: Record<string, User> = {
     roles: ['reader'],
     clearance: 'confidential',
   },
-  carol: {
-    username: 'carol',
-    password: 'password123',
-    sub: 'carol',
-    tenantId: 'tenantA',
-    roles: ['admin'],
-    clearance: 'secret',
-  },
-  dave: {
-    username: 'dave',
-    password: 'password123',
-    sub: 'dave',
-    tenantId: 'tenantA',
-    roles: ['admin'],
-    clearance: 'secret',
-  },
-  erin: {
-    username: 'erin',
-    password: 'password123',
-    sub: 'erin',
-    tenantId: 'tenantA',
-    roles: ['admin'],
-    clearance: 'secret',
-  },
 };
 
 export async function login(username: string, password: string) {

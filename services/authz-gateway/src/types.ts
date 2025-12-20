@@ -25,6 +25,7 @@ export interface DecisionContext {
   protectedActions: string[];
   requestTime: string;
   currentAcr: string;
+  breakGlass?: BreakGlassMetadata;
 }
 
 export interface ElevationContext {
@@ -50,21 +51,6 @@ export interface DecisionObligation {
   [key: string]: unknown;
 }
 
-export interface DualControlAttributes {
-  match_residency?: boolean;
-  min_clearance?: string;
-  resource_residency?: string;
-  resource_classification?: string;
-}
-
-export interface DualControlObligation extends DecisionObligation {
-  type: 'dual_control';
-  approvals_required?: number;
-  approver_roles?: string[];
-  require_distinct?: boolean;
-  attributes?: DualControlAttributes;
-}
-
 export interface AuthorizationInput {
   subject: SubjectAttributes;
   resource: ResourceAttributes;
@@ -76,4 +62,13 @@ export interface AuthorizationDecision {
   allowed: boolean;
   reason: string;
   obligations: DecisionObligation[];
+}
+
+export interface BreakGlassMetadata {
+  requestId: string;
+  ticketId: string;
+  justification: string;
+  issuedAt: string;
+  expiresAt: string;
+  approverId: string;
 }

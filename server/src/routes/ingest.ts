@@ -9,6 +9,10 @@ import rateLimit from 'express-rate-limit';
 import { IngestService } from '../services/IngestService.js';
 import { verifyTenantAccess } from '../services/opa-client.js';
 import logger from '../config/logger.js';
+import { tenantIsolationGuard } from '../tenancy/TenantIsolationGuard.js';
+import { requireTenantContext } from '../security/tenantContext.js';
+import { TenantContext } from '../tenancy/types.js';
+import { queryWithTenantContext } from '../db/tenant.js';
 
 const ingestRouter = Router();
 const ingestLogger = logger.child({ name: 'IngestAPI' });
@@ -70,6 +74,39 @@ ingestRouter.post(
         return res.status(403).json({
           error: 'Forbidden',
           message: authError.message,
+        });
+      }
+
+      const tenantContext =
+        ((req as any).tenant as TenantContext | undefined) ||
+        requireTenantContext(req);
+
+      const policyDecision = tenantIsolationGuard.evaluatePolicy(
+        tenantContext,
+        { action: 'ingest:write', resourceTenantId: tenantId },
+      );
+
+      if (!policyDecision.allowed) {
+        return res
+          .status(policyDecision.status || 403)
+          .json({ error: 'Forbidden', message: policyDecision.reason });
+      }
+
+      const capDecision =
+        await tenantIsolationGuard.enforceIngestionCap(tenantContext);
+      res.setHeader('X-Tenant-Ingest-Limit', String(capDecision.limit));
+      res.setHeader(
+        'X-Tenant-Ingest-Reset',
+        String(Math.ceil(capDecision.reset / 1000)),
+      );
+      if (capDecision.warning) {
+        res.setHeader('Warning', capDecision.warning);
+      }
+
+      if (!capDecision.allowed) {
+        return res.status(capDecision.status || 429).json({
+          error: 'IngestionQuotaExceeded',
+          message: capDecision.reason,
         });
       }
 
@@ -160,6 +197,9 @@ ingestRouter.get(
     try {
       const { provenanceId } = req.params;
       const user = (req as any).user;
+      const tenantContext =
+        ((req as any).tenant as TenantContext | undefined) ||
+        requireTenantContext(req);
 
       if (!user) {
         return res.status(401).json({ error: 'Unauthorized' });
@@ -167,7 +207,9 @@ ingestRouter.get(
 
       // Query provenance record
       const pg = req.app.get('pg') as any;
-      const { rows } = await pg.query(
+      const { rows } = await queryWithTenantContext(
+        pg,
+        tenantContext,
         `SELECT * FROM provenance_records WHERE id = $1`,
         [provenanceId],
       );

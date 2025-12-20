@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, Button } from 'react-native';
-import { Marker } from 'react-native-maps';
+import { View, Text, StyleSheet, Button, Switch, Alert } from 'react-native';
+import { Marker, Callout } from 'react-native-maps';
 import ClusteredMapView from 'react-native-map-clustering';
 import { useNavigation } from '@react-navigation/native';
 import { useSync } from '../services/SyncProvider';
@@ -15,7 +15,30 @@ const sampleIntel = [
 
 export default function DashboardScreen(): JSX.Element {
   const navigation = useNavigation();
-  const { lastSync, queueSize, status, lastError, syncNow } = useSync();
+  const { lastSync, queueSize, status, lastError, syncNow, lowDataMode, setLowDataMode, enqueue } = useSync();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleLongPress = async (e: any) => {
+    const { coordinate } = e.nativeEvent;
+    Alert.alert(
+      "Add Evidence Marker",
+      `Tag location ${coordinate.latitude.toFixed(4)}, ${coordinate.longitude.toFixed(4)}?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Tag & Queue",
+          onPress: async () => {
+            await enqueue({
+              type: 'marker',
+              lat: coordinate.latitude,
+              lng: coordinate.longitude,
+              createdAt: Date.now()
+            });
+          }
+        }
+      ]
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -27,25 +50,42 @@ export default function DashboardScreen(): JSX.Element {
         <Button title="Sync" onPress={syncNow} color="#5AC8FA" />
       </View>
 
-      <View style={styles.statusRow}>
-        <Text style={styles.statusLabel}>Queue</Text>
-        <Text style={styles.statusValue}>{queueSize}</Text>
-        <Text style={styles.statusLabel}>State</Text>
-        <Text style={styles.statusValue}>{status}</Text>
-        <Text style={styles.statusLabel}>Last Sync</Text>
-        <Text style={styles.statusValue}>{lastSync ? lastSync.toLocaleTimeString() : '—'}</Text>
+      <View style={styles.statusPanel}>
+        <View style={styles.statusRow}>
+          <Text style={styles.statusLabel}>Queue</Text>
+          <Text style={styles.statusValue}>{queueSize}</Text>
+          <Text style={styles.statusLabel}>State</Text>
+          <Text style={styles.statusValue}>{status}</Text>
+        </View>
+        <View style={styles.statusRow}>
+           <Text style={styles.statusLabel}>Low Data Mode</Text>
+           <Switch value={lowDataMode} onValueChange={setLowDataMode} trackColor={{false: '#767577', true: '#5AC8FA'}} thumbColor="#f4f3f4" />
+        </View>
+        <View style={styles.statusRow}>
+           <Text style={styles.statusLabel}>Last Sync</Text>
+           <Text style={styles.statusValue}>{lastSync ? lastSync.toLocaleTimeString() : '—'}</Text>
+        </View>
       </View>
+
       {lastError ? <Text style={styles.error}>{lastError}</Text> : null}
 
       <View style={styles.mapWrapper}>
         <ClusteredMapView
           style={styles.map}
           initialRegion={{ latitude: 37.7749, longitude: -122.4194, latitudeDelta: 15, longitudeDelta: 15 }}
+          onLongPress={handleLongPress}
         >
           {sampleIntel.map(point => (
-            <Marker coordinate={{ latitude: point.latitude, longitude: point.longitude }} key={point.id} title={point.title} />
+            <Marker coordinate={{ latitude: point.latitude, longitude: point.longitude }} key={point.id}>
+              <Callout>
+                <Text>{point.title}</Text>
+              </Callout>
+            </Marker>
           ))}
         </ClusteredMapView>
+        <View style={styles.mapOverlay}>
+          <Text style={styles.mapHint}>Long-press to add intel</Text>
+        </View>
       </View>
 
       <View style={styles.actions}>
@@ -62,11 +102,14 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
   title: { color: 'white', fontSize: 20, fontWeight: '700' },
   subtitle: { color: '#9FB3D1' },
-  statusRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 8 },
+  statusPanel: { marginBottom: 12, backgroundColor: '#111A30', padding: 8, borderRadius: 8 },
+  statusRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 },
   statusLabel: { color: '#9FB3D1', fontWeight: '600' },
   statusValue: { color: '#FFFFFF' },
   error: { color: '#FF6B6B', marginBottom: 8 },
-  mapWrapper: { flex: 1, borderRadius: 12, overflow: 'hidden', borderWidth: 1, borderColor: '#1F2A44', marginBottom: 12 },
+  mapWrapper: { flex: 1, borderRadius: 12, overflow: 'hidden', borderWidth: 1, borderColor: '#1F2A44', marginBottom: 12, position: 'relative' },
   map: { flex: 1 },
+  mapOverlay: { position: 'absolute', bottom: 10, alignSelf: 'center', backgroundColor: 'rgba(0,0,0,0.6)', padding: 4, borderRadius: 4 },
+  mapHint: { color: 'white', fontSize: 10 },
   actions: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 }
 });

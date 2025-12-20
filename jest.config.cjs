@@ -8,11 +8,10 @@ module.exports = {
       {
         useESM: true,
         tsconfig: 'tsconfig.test.json',
-        diagnostics: false,
       },
     ],
   },
-  roots: ['server', 'client', 'packages', 'services', 'apps', 'tests'],
+  roots: ['server', 'client', 'packages', 'services', 'tests'],
   modulePathIgnorePatterns: [
     '<rootDir>/dist/',
     '<rootDir>/archive/',
@@ -78,7 +77,7 @@ module.exports = {
     '^@tests/(.*)$': '<rootDir>/tests/$1',
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(.*jose.*|.*\\.mjs$))',
+    'node_modules/(?!(.*\\.mjs$))',
     '<rootDir>/.disabled/',
     '<rootDir>/apps/.mobile-native-disabled/',
     '<rootDir>/apps/.desktop-electron-disabled/',

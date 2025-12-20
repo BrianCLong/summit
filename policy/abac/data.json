@@ -1,70 +1,58 @@
 {
-  "clearance_rank": {
-    "public": 0,
-    "restricted": 1,
-    "confidential": 2,
-    "secret": 3
-  },
-  "actions": {
-    "dataset:read": {
-      "allowedRoles": ["reader", "analyst"],
-      "requiresStepUp": false
+  "abac": {
+    "clearance_rank": {
+      "public": 0,
+      "restricted": 1,
+      "confidential": 2,
+      "secret": 3,
+      "top-secret": 4
     },
-    "dataset:write": {
-      "allowedRoles": ["analyst"],
-      "requiresStepUp": true,
-      "dualControl": {
-        "required": false,
-        "approvalsRequired": 0,
-        "approverRoles": []
+    "actions": {
+      "dataset:read": {
+        "allowedRoles": ["reader", "analyst"],
+        "requiresStepUp": false,
+        "requiresDualControl": false
+      },
+      "dataset:write": {
+        "allowedRoles": ["analyst"],
+        "requiresStepUp": true,
+        "requiresDualControl": false
+      },
+      "dataset:delete": {
+        "allowedRoles": ["admin"],
+        "requiresStepUp": true,
+        "requiresDualControl": true
+      },
+      "dataset:reclassify": {
+        "allowedRoles": ["custodian", "admin"],
+        "requiresStepUp": true,
+        "requiresDualControl": true
+      },
+      "dataset:purge": {
+        "allowedRoles": ["admin", "incident-responder"],
+        "requiresStepUp": true,
+        "requiresDualControl": true
+      },
+      "dataset:break-glass": {
+        "allowedRoles": ["admin", "incident-responder"],
+        "requiresStepUp": true,
+        "requiresDualControl": true
+      },
+      "dataset:share-external": {
+        "allowedRoles": ["admin", "analyst"],
+        "requiresStepUp": true,
+        "requiresDualControl": true
+      },
+      "policy:publish": {
+        "allowedRoles": ["admin"],
+        "requiresStepUp": true,
+        "requiresDualControl": true
       }
     },
-    "dataset:delete": {
-      "allowedRoles": ["admin"],
-      "requiresStepUp": true,
-      "dualControl": {
-        "required": true,
-        "approvalsRequired": 2,
-        "approverRoles": ["admin"],
-        "requireDistinctApprovers": true,
-        "attributes": {
-          "matchResidency": true,
-          "minClearance": "secret"
-        }
-      }
-    },
-    "dataset:share-external": {
-      "allowedRoles": ["admin", "analyst"],
-      "requiresStepUp": true,
-      "dualControl": {
-        "required": true,
-        "approvalsRequired": 2,
-        "approverRoles": ["admin", "analyst"],
-        "requireDistinctApprovers": true,
-        "attributes": {
-          "matchResidency": true,
-          "minClearance": "confidential"
-        }
-      }
-    },
-    "policy:publish": {
-      "allowedRoles": ["admin"],
-      "requiresStepUp": true,
-      "dualControl": {
-        "required": true,
-        "approvalsRequired": 2,
-        "approverRoles": ["admin"],
-        "requireDistinctApprovers": true,
-        "attributes": {
-          "matchResidency": true,
-          "minClearance": "secret"
-        }
-      }
+    "residency_matrix": {
+      "us": ["us"],
+      "eu": ["eu"],
+      "apac": ["apac", "us"]
     }
-  },
-  "residency_matrix": {
-    "us": ["us"],
-    "eu": ["eu"],
-    "apac": ["apac", "us"]
   }
 }

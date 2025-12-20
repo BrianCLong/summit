@@ -18,35 +18,5 @@
     "loa": "loa1",
     "groups": ["finance", "dataset-beta"],
     "lastSynced": "2025-01-07T12:05:00Z"
-  },
-  "carol": {
-    "id": "carol",
-    "email": "carol@example.com",
-    "tenantId": "tenantA",
-    "residency": "us",
-    "clearance": "secret",
-    "loa": "loa1",
-    "groups": ["admins", "dataset-alpha", "dataset-gamma"],
-    "lastSynced": "2025-01-07T12:06:00Z"
-  },
-  "dave": {
-    "id": "dave",
-    "email": "dave@example.com",
-    "tenantId": "tenantA",
-    "residency": "us",
-    "clearance": "secret",
-    "loa": "loa1",
-    "groups": ["admins", "dataset-gamma"],
-    "lastSynced": "2025-01-07T12:06:30Z"
-  },
-  "erin": {
-    "id": "erin",
-    "email": "erin@example.com",
-    "tenantId": "tenantA",
-    "residency": "us",
-    "clearance": "secret",
-    "loa": "loa2",
-    "groups": ["admins", "dataset-gamma"],
-    "lastSynced": "2025-01-07T12:07:00Z"
   }
 }

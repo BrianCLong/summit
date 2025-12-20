@@ -48,6 +48,7 @@ export interface IREdge {
 export interface IRDag {
   name: string;
   namespace: string;
+  inputs?: Record<string, unknown>;
   nodes: IRNode[];
   edges: IREdge[];
   retry: {
@@ -89,6 +90,7 @@ export function compileToIR(spec: WorkflowSpec): IRDag {
   return {
     name: spec.metadata.name,
     namespace: spec.metadata.namespace,
+    inputs: spec.spec.inputs,
     nodes,
     edges,
     retry,
