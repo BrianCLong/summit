@@ -25,6 +25,12 @@ type User {
   id: ID!
   email: String!
   username: String
+  firstName: String
+  lastName: String
+  fullName: String
+  role: String
+  isActive: Boolean
+  lastLogin: DateTime
   preferences: JSON
   createdAt: DateTime!
   updatedAt: DateTime
@@ -33,6 +39,79 @@ type User {
 input UserInput {
   email: String!
   username: String
+}
+
+# Authentication Types
+"""
+Input for user registration
+"""
+input RegisterInput {
+  email: String!
+  password: String!
+  username: String
+  firstName: String!
+  lastName: String!
+}
+
+"""
+Authentication response with user and tokens
+"""
+type AuthResponse {
+  success: Boolean!
+  message: String
+  user: AuthUser
+  token: String
+  refreshToken: String
+  expiresIn: Int
+}
+
+"""
+User data returned in auth responses
+"""
+type AuthUser {
+  id: ID!
+  email: String!
+  username: String
+  firstName: String
+  lastName: String
+  fullName: String
+  role: String
+  isActive: Boolean
+  lastLogin: DateTime
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+"""
+Token refresh response
+"""
+type RefreshTokenResponse {
+  success: Boolean!
+  token: String
+  refreshToken: String
+}
+
+"""
+Simple success/message response
+"""
+type AuthResult {
+  success: Boolean!
+  message: String
+}
+
+"""
+Token verification result
+"""
+type TokenVerification {
+  valid: Boolean!
+  user: AuthUser
+}
+
+"""
+Reset token verification result
+"""
+type ResetTokenVerification {
+  valid: Boolean!
 }
 
 type Investigation {
@@ -315,6 +394,79 @@ type CacheOperationResult {
   message: String!
 }
 
+# Geospatial Types
+
+type GeoPoint {
+  lat: Float!
+  lon: Float!
+}
+
+type GeoObject {
+  type: String
+  confidence: Float
+  location: GeoPoint
+}
+
+type SatelliteAnalysisResult {
+  classification: String
+  objectsDetected: [GeoObject]
+  cloudCover: Float
+  timestamp: String
+}
+
+type ChangeDetectionArea {
+  type: String
+  confidence: Float
+  bounds: GeoPoint
+}
+
+type ChangeDetectionResult {
+  changeDetected: Boolean
+  percentageChange: Float
+  areas: [ChangeDetectionArea]
+}
+
+type MovementAnalysisSegment {
+  fromIndex: Int
+  toIndex: Int
+  distanceMeters: Float
+  speedMps: Float
+  bearingDegrees: Float
+}
+
+type MovementAnalysisResult {
+  totalDistanceMeters: Float
+  maxSpeedMps: Float
+  avgSpeedMps: Float
+  pattern: String
+  segments: [MovementAnalysisSegment]
+}
+
+type ElevationPoint {
+  distance: Float
+  elevation: Float
+  lat: Float
+  lon: Float
+}
+
+type CoordinateTransformResult {
+  lat: Float
+  lon: Float
+  x: Float
+  y: Float
+}
+
+input TrackPointInput {
+  lat: Float!
+  lon: Float!
+  timestamp: String
+}
+
+input GeoPointInput {
+  lat: Float!
+  lon: Float!
+}
+
 # Support Ticket Types
 enum SupportTicketStatus {
   open
@@ -355,7 +507,7 @@ type SupportTicket {
   updated_at: DateTime!
   resolved_at: DateTime
   closed_at: DateTime
-  comments: [SupportTicketComment!]!
+  comments(limit: Int = 100, offset: Int = 0): [SupportTicketComment!]!
 }
 
 type SupportTicketComment {
@@ -410,6 +562,17 @@ input SemanticSearchFilter {
 }
 
   type Query {
+    # Authentication Queries
+    """Get the currently authenticated user"""
+    me: AuthUser
+
+    """Verify if a JWT token is valid"""
+    verifyToken(token: String!): TokenVerification!
+
+    """Verify if a password reset token is valid"""
+    verifyResetToken(token: String!): ResetTokenVerification!
+
+    # Entity & User Queries
     entity(id: ID!): Entity
     entities(type: String, q: String, limit: Int = 25, offset: Int = 0): [Entity!]!
     relationship(id: ID!): Relationship
@@ -461,6 +624,14 @@ input SemanticSearchFilter {
       graphId: ID
     ): DataQualityReport!
 
+    # Geospatial Queries
+    analyzeSatelliteImage(imageUrl: String!): SatelliteAnalysisResult
+    detectChange(beforeImageUrl: String!, afterImageUrl: String!): ChangeDetectionResult
+    checkGeofence(pointLat: Float!, pointLon: Float!, polygonCoords: [[Float!]!]!): Boolean
+    analyzeMovement(trackPoints: [TrackPointInput!]!): MovementAnalysisResult
+    getElevationProfile(path: [GeoPointInput!]!): [ElevationPoint]
+    transformCoordinates(lat: Float!, lon: Float!, fromSys: String!, toSys: String!): CoordinateTransformResult
+
     """
     Query the knowledge graph using explainable GraphRAG.
     Returns structured response with answer, confidence, citations, and why_paths.
@@ -496,6 +667,32 @@ input SemanticSearchFilter {
   input RelationshipInput { from: ID!, to: ID!, type: String!, props: JSON }
   
   type Mutation {
+    # Authentication Mutations
+    """Register a new user account"""
+    register(input: RegisterInput!): AuthResponse!
+
+    """Authenticate user and return JWT tokens"""
+    login(email: String!, password: String!): AuthResponse!
+
+    """Refresh access token using refresh token"""
+    refreshToken(refreshToken: String!): RefreshTokenResponse!
+
+    """Logout user and invalidate tokens"""
+    logout: AuthResult!
+
+    """Request password reset email"""
+    requestPasswordReset(email: String!): AuthResult!
+
+    """Reset password using reset token"""
+    resetPassword(token: String!, newPassword: String!): AuthResult!
+
+    """Change password for authenticated user"""
+    changePassword(currentPassword: String!, newPassword: String!): AuthResult!
+
+    """Revoke a specific JWT token"""
+    revokeToken(token: String!): AuthResult!
+
+    # Entity & User Mutations
     createEntity(input: EntityInput!): Entity!
     updateEntity(id: ID!, input: EntityInput!): Entity!
     deleteEntity(id: ID!): Boolean!

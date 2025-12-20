@@ -135,6 +135,7 @@ const LICENSE_TEMPLATES: Record<string, Partial<License>> = {
       research_only: false,
       attribution_required: true,
       share_alike: false,
+      prohibited_markets: [],
     },
     compliance_level: 'allow',
   },
@@ -147,6 +148,7 @@ const LICENSE_TEMPLATES: Record<string, Partial<License>> = {
       research_only: false,
       attribution_required: true,
       share_alike: false,
+      prohibited_markets: [],
     },
     compliance_level: 'block',
   },
@@ -159,6 +161,7 @@ const LICENSE_TEMPLATES: Record<string, Partial<License>> = {
       research_only: true,
       attribution_required: true,
       share_alike: false,
+      prohibited_markets: [],
     },
     compliance_level: 'warn',
   },
@@ -542,7 +545,8 @@ server.post<{ Body: ComplianceCheck }>(
         const restrictions = {
           export_allowed: true,
           research_only: false,
-          prohibited_markets: [],
+          prohibited_markets: [] as string[],
+          tos_required: false,
           ...normalizeJsonField<Record<string, any>>(row.restrictions, {}),
         };
         const complianceLevel = row.compliance_level;
@@ -820,7 +824,7 @@ server.get('/compliance/report', async (request) => {
   }));
 
   for (const row of result.rows) {
-    if (row.event_type !== 'compliance_check') continue;
+    if (row.event_type !== 'compliance_check') {continue;}
     const triggered = normalizeJsonField<string[]>(row.triggered_controls, []);
 
     totals.checks += 1;

@@ -1,0 +1,34 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "allowJs": false,
+    "isolatedModules": true,
+    "noEmit": false,
+    "declaration": true,
+    "allowImportingTsExtensions": false,
+    "outDir": "../../dist/services/build-hub",
+    "rootDir": "src",
+    "removeComments": true,
+    "incremental": true,
+    "allowImportingTsExtensions": false,
+    "composite": true,
+    "tsBuildInfoFile": "dist/.tsbuildinfo"
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ],
+  "references": [
+    {
+      "path": "../../packages/types"
+    }
+  ]
+}

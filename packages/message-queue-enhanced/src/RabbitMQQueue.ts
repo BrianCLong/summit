@@ -178,6 +178,7 @@ export class RabbitMQQueue {
         queueName,
         async (msg: ConsumeMessage | null) => {
           if (!msg) return;
+          if (!msg) {return;}
 
           await this.handleMessage(queueName, msg);
         },
@@ -205,6 +206,7 @@ export class RabbitMQQueue {
 
     try {
       if (!this.channel) return;
+      if (!this.channel) {return;}
 
       const handler = this.handlers.get(queueName);
       if (!handler) {
@@ -256,6 +258,7 @@ export class RabbitMQQueue {
     msg: ConsumeMessage
   ): Promise<void> {
     if (!this.channel) return;
+    if (!this.channel) {return;}
 
     const retryCount = (msg.properties.headers?.retryCount || 0) + 1;
     const maxRetries = msg.properties.headers?.maxRetries || 3;
@@ -266,6 +269,7 @@ export class RabbitMQQueue {
 
       setTimeout(() => {
         if (!this.channel) return;
+        if (!this.channel) {return;}
 
         this.channel.sendToQueue(
           queueName,

@@ -55,6 +55,10 @@ monitoring:
     samplingRate: 0.15
     jaeger:
       endpoint: http://jaeger:14268/api/traces
+    otlp:
+      endpoint: http://otel-collector.observability.svc.cluster.local:4317
+    serviceName: intelgraph-server
+    resourceAttributes: service.namespace=intelgraph,deployment.environment=production
 
 # Security
 security:

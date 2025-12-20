@@ -144,6 +144,7 @@ export class EventNotificationService extends EventEmitter {
     filter?: SubscriptionFilter
   ): boolean {
     if (!filter) return true;
+    if (!filter) {return true;}
 
     if (
       filter.eventTypes &&

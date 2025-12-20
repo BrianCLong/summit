@@ -404,9 +404,6 @@ const typeDefs = gql`
 
   # Queries
   type Query {
-    # Deduplication
-    deduplicationCandidates(investigationId: ID, threshold: Float): [DeduplicationCandidate!]!
-
     # Authentication
     me: User
 
@@ -507,17 +504,6 @@ const typeDefs = gql`
     runGraphAnalysis(input: GraphAnalysisInput!): [AnalysisResult!]!
     generateLinkPredictions(investigationId: ID!): [LinkPrediction!]!
     detectAnomalies(investigationId: ID!): [AnomalyDetection!]!
-
-    # Deduplication
-    suggestMerge(sourceId: ID!, targetId: ID!): Entity!
-
-    # Deduplication
-    type DeduplicationCandidate {
-      entityA: Entity!
-      entityB: Entity!
-      similarity: Float!
-      reasons: [String!]!
-    }
 
     # Data Import
     importEntitiesFromText(investigationId: ID!, text: String!): [Entity!]!

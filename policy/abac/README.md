@@ -5,7 +5,7 @@ This directory contains the Rego sources and static data for the identity & poli
 ## Contents
 
 - `abac.rego` – policy definitions for tenant isolation, residency controls, least privilege, and WebAuthn obligations.
-- `data.json` – classification weights, residency matrices, and action metadata.
+- `data.json` – classification weights, residency matrices, and action metadata (including step-up and dual-control requirements).
 - `manifest.yaml` – bundle manifest used when packaging for OPA distribution.
 
 ## Usage

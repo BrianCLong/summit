@@ -10,7 +10,6 @@
 - [API Endpoints](#api-endpoints)
 - [Common Workflows](#common-workflows)
 - [GraphQL Examples](#graphql-examples)
-- [Entity Deduplication](#entity-deduplication)
 - [Error Handling](#error-handling)
 - [Rate Limiting](#rate-limiting)
 - [Best Practices](#best-practices)
@@ -424,47 +423,6 @@ subscription WatchEntities {
 # Subscribe to analysis completion
 subscription WatchAnalysis {
   analysisCompleted(jobId: "analytics-job-456")
-}
-```
-
----
-
-## Entity Deduplication
-
-The IntelGraph platform provides a deduplication oracle to help identify and merge duplicate entities.
-
-### Example 1: Find Deduplication Candidates
-
-```graphql
-# Find potential duplicate entities
-query FindDuplicates {
-  deduplicationCandidates {
-    entityA {
-      id
-      label
-      description
-    }
-    entityB {
-      id
-      label
-      description
-    }
-    similarity
-    reasons
-  }
-}
-```
-
-### Example 2: Merge Entities
-
-```graphql
-# Merge two entities
-mutation MergeEntities {
-  suggestMerge(sourceId: "entity1", targetId: "entity2") {
-    id
-    label
-    description
-  }
 }
 ```
 

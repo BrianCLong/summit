@@ -230,97 +230,6 @@ class EntityService {
     }
   }
 
-  async getEntities(investigationId = null) {
-    const session = this.driver.session();
-    try {
-      let query;
-      const params = {};
-
-      if (investigationId) {
-        query = `
-          MATCH (e:Entity)-[:BELONGS_TO]->(i:Investigation {id: $investigationId})
-          MATCH (e)-[:CREATED_BY]->(u:User)
-          OPTIONAL MATCH (e)-[:HAS_POSITION]->(pos:Position)
-          OPTIONAL MATCH (e)-[r]-(t)
-          RETURN e, u, pos, collect({rel: r, target: t}) as relationships
-        `;
-        params.investigationId = investigationId;
-      } else {
-        query = `
-          MATCH (e:Entity)
-          MATCH (e)-[:CREATED_BY]->(u:User)
-          OPTIONAL MATCH (e)-[:HAS_POSITION]->(pos:Position)
-          OPTIONAL MATCH (e)-[r]-(t)
-          RETURN e, u, pos, collect({rel: r, target: t}) as relationships
-        `;
-      }
-
-      const result = await session.run(query, params);
-      return result.records.map((record) => this.formatEntityResult(record));
-    } catch (error) {
-      logger.error('Error getting entities:', error);
-      throw error;
-    } finally {
-      await session.close();
-    }
-  }
-
-  async mergeEntities(sourceId, targetId) {
-    const session = this.driver.session();
-    try {
-      // This is a simplified merge. A real implementation would need to handle
-      // property merging, relationship transfers, and more.
-      const query = `
-        MATCH (source:Entity {id: $sourceId})
-        MATCH (target:Entity {id: $targetId})
-
-        // Copy properties from source to target, overwriting if necessary
-        SET target += source.properties
-
-        // Re-link incoming relationships
-        OPTIONAL MATCH (incoming)-[r]->(source)
-        WHERE NOT incoming = target
-        CALL apoc.create.relationship(incoming, type(r), properties(r), target) YIELD rel
-        DELETE r
-
-        // Re-link outgoing relationships
-        OPTIONAL MATCH (source)-[r]->(outgoing)
-        WHERE NOT outgoing = target
-        CALL apoc.create.relationship(target, type(r), properties(r), outgoing) YIELD rel
-        DELETE r
-
-        // Delete the source node
-        DETACH DELETE source
-
-        RETURN target
-      `;
-
-      const params = { sourceId, targetId };
-      const result = await session.run(query, params);
-
-      if (result.records.length === 0) {
-        throw new Error('Could not merge entities. One or both entities not found.');
-      }
-
-      // We need to format the result to match the GraphQL schema
-      const targetNode = result.records[0].get('target');
-
-      // Since formatEntityResult expects a record with 'e', 'u', 'pos'
-      // we need to fetch the user and position for the target entity
-      const fullTargetResult = await session.run(
-        'MATCH (e:Entity {id: $id})-[:CREATED_BY]->(u:User) OPTIONAL MATCH (e)-[:HAS_POSITION]->(pos:Position) RETURN e, u, pos',
-        { id: targetNode.properties.id }
-      );
-
-      return this.formatEntityResult(fullTargetResult.records[0]);
-    } catch (error) {
-      logger.error('Error merging entities:', error);
-      throw error;
-    } finally {
-      await session.close();
-    }
-  }
-
   async searchEntities(query, investigationId = null, limit = 20) {
     const session = this.driver.session();
 
@@ -366,7 +275,6 @@ class EntityService {
     const entity = record.get('e').properties;
     const user = record.get('u').properties;
     const position = record.has('pos') ? record.get('pos')?.properties : null;
-    const relationships = record.has('relationships') ? record.get('relationships') : [];
 
     return {
       id: entity.id,
@@ -379,11 +287,6 @@ class EntityService {
       source: entity.source,
       verified: entity.verified || false,
       position: position ? { x: position.x, y: position.y } : null,
-      relationships: relationships.map(r => ({
-        ...r.rel.properties,
-        type: r.rel.type,
-        targetEntity: r.target.properties,
-      })),
       createdBy: {
         id: user.id,
         username: user.username,

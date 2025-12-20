@@ -25,6 +25,23 @@ export interface DecisionContext {
   protectedActions: string[];
   requestTime: string;
   currentAcr: string;
+  breakGlass?: BreakGlassMetadata;
+}
+
+export interface ElevationContext {
+  sessionId: string;
+  requestedAction: string;
+  resourceId?: string;
+  tenantId?: string;
+  classification?: string;
+  currentAcr?: string;
+}
+
+export interface ElevationGrant extends ElevationContext {
+  grantedAt: string;
+  expiresAt: string;
+  mechanism: string;
+  challengeId: string;
 }
 
 export interface DecisionObligation {
@@ -45,4 +62,13 @@ export interface AuthorizationDecision {
   allowed: boolean;
   reason: string;
   obligations: DecisionObligation[];
+}
+
+export interface BreakGlassMetadata {
+  requestId: string;
+  ticketId: string;
+  justification: string;
+  issuedAt: string;
+  expiresAt: string;
+  approverId: string;
 }

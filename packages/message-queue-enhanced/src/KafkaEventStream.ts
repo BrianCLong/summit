@@ -194,6 +194,7 @@ export class KafkaEventStream {
    */
   private async startConsuming(): Promise<void> {
     if (!this.consumer || this.isConsuming) return;
+    if (!this.consumer || this.isConsuming) {return;}
 
     this.isConsuming = true;
 
@@ -275,6 +276,7 @@ export class KafkaEventStream {
    */
   async pause(topics: string[]): Promise<void> {
     if (!this.consumer) return;
+    if (!this.consumer) {return;}
 
     this.consumer.pause(topics.map((topic) => ({ topic })));
     logger.info({ topics }, 'Consumption paused');
@@ -285,6 +287,7 @@ export class KafkaEventStream {
    */
   async resume(topics: string[]): Promise<void> {
     if (!this.consumer) return;
+    if (!this.consumer) {return;}
 
     this.consumer.resume(topics.map((topic) => ({ topic })));
     logger.info({ topics }, 'Consumption resumed');

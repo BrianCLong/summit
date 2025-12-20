@@ -192,6 +192,8 @@ export class QueryDistributor {
       // This is a simplified version
       if (results.length === 0) return [];
       if (results.length === 1) return results[0].rows;
+      if (results.length === 0) {return [];}
+      if (results.length === 1) {return results[0].rows;}
 
       // Intersect all result sets
       let intersection = results[0].rows;

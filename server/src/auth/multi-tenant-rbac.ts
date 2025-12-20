@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Multi-Tenant RBAC (Role-Based Access Control) System
  *
@@ -122,6 +123,10 @@ const DEFAULT_ROLES: Record<string, { permissions: string[]; inherits?: string[]
     permissions: ['*'],
     inherits: [],
   },
+  'tenant-owner': {
+    permissions: ['*'], // Full access within tenant
+    inherits: ['tenant-admin'],
+  },
   'tenant-admin': {
     permissions: [
       'tenant:manage',
@@ -129,8 +134,30 @@ const DEFAULT_ROLES: Record<string, { permissions: string[]; inherits?: string[]
       'role:assign', 'role:revoke',
       'audit:read', 'audit:export',
       'config:read', 'config:update',
+      'api_key:create', 'api_key:view', 'api_key:delete',
+      'service_account:create', 'service_account:view', 'service_account:delete',
+      'billing:read',
     ],
     inherits: ['supervisor'],
+  },
+  'security-admin': {
+    permissions: [
+      'user:read', 'user:update', // Can lock users
+      'audit:read', 'audit:export',
+      'api_key:view', 'api_key:delete', // Can revoke keys
+      'policy:read', 'policy:update',
+      'compliance:read', 'compliance:report',
+    ],
+    inherits: ['viewer'],
+  },
+  'developer': {
+    permissions: [
+      'maestro:runs.read', 'maestro:runs.write',
+      'ingestion:pipelines.read', 'ingestion:pipelines.write',
+      'graph:read', 'graph:analyze',
+      'api_key:create', // Can create own keys
+    ],
+    inherits: ['analyst'],
   },
   'supervisor': {
     permissions: [

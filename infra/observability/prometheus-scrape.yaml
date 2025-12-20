@@ -1,0 +1,62 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: otel-collector
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: otel-collector
+  namespaceSelector:
+    matchNames: [observability]
+  endpoints:
+    - port: metrics
+      interval: 30s
+      path: /metrics
+      honorLabels: true
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: service-mesh-sidecars
+  labels:
+    release: prometheus
+spec:
+  namespaceSelector:
+    any: true
+  selector:
+    matchExpressions:
+      - key: sidecar.istio.io/inject
+        operator: In
+        values: ["true"]
+  podMetricsEndpoints:
+    - port: http-envoy-prom
+      interval: 30s
+      relabelings:
+        - action: replace
+          sourceLabels: [__meta_kubernetes_pod_annotation_istio_io_pod_name]
+          targetLabel: pod
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: agent-runtime
+  labels:
+    release: prometheus
+spec:
+  namespaceSelector:
+    any: true
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: agent
+  podMetricsEndpoints:
+    - port: metrics
+      interval: 15s
+      metricRelabelings:
+        - action: replace
+          sourceLabels: [correlation_id]
+          targetLabel: correlation_id
+        - action: keep
+          regex: "(agent_runtime_seconds|agent_cost_usd|agent_success_total|agent_failure_total|process_cpu_seconds_total|process_resident_memory_bytes)"
+          sourceLabels: [__name__]

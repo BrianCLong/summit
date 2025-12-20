@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Security Configuration",
+  "type": "object",
+  "properties": {
+    "secrets": {
+      "type": "object",
+      "properties": {
+        "providerPreference": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["vault", "awsSecretsManager", "environment", "file"]
+          }
+        },
+        "cacheTtlSeconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fileBasePath": {
+          "type": "string",
+          "description": "Base directory for resolving file:// secret references"
+        },
+        "rotation": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "intervalSeconds": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "encryptionKeyEnv": {
+          "type": "string"
+        },
+        "auditLogPath": {
+          "type": "string"
+        },
+        "vault": {
+          "type": "object",
+          "properties": {
+            "address": { "type": "string", "format": "uri" },
+            "tokenEnv": { "type": "string" },
+            "kvMountPath": { "type": "string" }
+          },
+          "required": ["address", "tokenEnv"]
+        },
+        "aws": {
+          "type": "object",
+          "properties": {
+            "region": { "type": "string" },
+            "endpoint": { "type": "string", "format": "uri" }
+          }
+        }
+      },
+      "required": ["providerPreference", "cacheTtlSeconds"]
+    }
+  },
+  "required": ["secrets"]
+}

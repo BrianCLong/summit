@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "outDir": "dist",
+    "module": "es2022",
+    "target": "es2022",
+    "moduleResolution": "node",
+    "strict": true,
+    "allowSyntheticDefaultImports": true,
+    "types": ["node", "jest"]
+    "types": []
+  },
+  "include": ["src/**/*.ts", "tests/**/*.ts"]
+}

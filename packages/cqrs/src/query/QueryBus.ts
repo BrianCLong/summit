@@ -164,6 +164,7 @@ export class QueryBus extends EventEmitter {
    */
   async invalidateCache(queryType: string, parameters?: any): Promise<void> {
     if (!this.redis) return;
+    if (!this.redis) {return;}
 
     if (parameters) {
       // Invalidate specific query

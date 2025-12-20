@@ -231,7 +231,7 @@ export class AttackSurfaceMapper {
       'low': 1
     };
 
-    if (exposures.length === 0) return 0;
+    if (exposures.length === 0) {return 0;}
 
     const totalScore = exposures.reduce((sum, exp) => {
       return sum + (severityScores[exp.severity] || 0);

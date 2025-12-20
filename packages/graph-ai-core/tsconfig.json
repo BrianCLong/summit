@@ -1,0 +1,23 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": "dist/.tsbuildinfo",
+    "outDir": "dist",
+    "rootDir": "./src",
+    "declaration": true,
+    "allowImportingTsExtensions": false,
+    "declarationMap": true,
+    "sourceMap": true,
+    "removeComments": true,
+    "types": []
+  },
+  "include": [
+    "src"
+  ],
+  "references": [
+    {
+      "path": "../types"
+    }
+  ]
+}

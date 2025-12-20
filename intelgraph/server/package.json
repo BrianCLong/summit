@@ -1,6 +1,6 @@
 {
   "name": "intelgraph-server",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "IntelGraph Platform Backend API",
   "main": "server.js",
   "scripts": {
@@ -33,7 +33,6 @@
     "jsonwebtoken": "^9.0.1",
     "lodash": "^4.17.21",
     "morgan": "^1.10.0",
-    "natural": "^8.1.0",
     "neo4j-driver": "^5.11.0",
     "pg": "^8.11.1",
     "socket.io": "^4.7.2",

@@ -1,16 +1,12 @@
+/**
+ * Rate Limiting Middleware using Token Bucket Algorithm
+ */
 
+import { Socket } from 'socket.io';
 import { AuthenticatedSocket } from '../types/index.js';
 import { logger } from '../utils/logger.js';
 import { AdaptiveRateLimiter } from '../../../../lib/streaming/rate-limiter.js';
 
-<<<<<<< Updated upstream
-export function createRateLimitMiddleware(rateLimiter: AdaptiveRateLimiter) {
-  return async (socket: AuthenticatedSocket, next: (err?: Error) => void) => {
-    try {
-      await rateLimiter.acquire(`connection:${socket.tenantId}:${socket.user.userId}`);
-      next();
-    } catch (error) {
-=======
 interface TokenBucket {
   tokens: number;
   lastRefill: number;
@@ -91,17 +87,26 @@ export class RateLimiter {
 }
 
 export function createRateLimitMiddleware(rateLimiter: RateLimiter) {
-  return (socket: any, next: (err?: Error) => void) => {
-    const authSocket = socket as AuthenticatedSocket;
-    const key = `connection:${authSocket.tenantId}:${authSocket.user.userId}`;
+  return (socket: Socket, next: (err?: Error) => void) => {
+    const key = `connection:${socket.data.tenantId}:${socket.data.user.userId}`;
 
     if (!rateLimiter.tryConsume(key, 1)) {
->>>>>>> Stashed changes
       logger.warn(
         {
-          connectionId: authSocket.connectionId,
-          tenantId: authSocket.tenantId,
-          userId: authSocket.user.userId,
+          connectionId: socket.data.connectionId,
+          tenantId: socket.data.tenantId,
+          userId: socket.data.user.userId,
+export function createRateLimitMiddleware(rateLimiter: AdaptiveRateLimiter) {
+  return async (socket: AuthenticatedSocket, next: (err?: Error) => void) => {
+    try {
+      await rateLimiter.acquire(`connection:${socket.tenantId}:${socket.user.userId}`);
+      next();
+    } catch (error) {
+      logger.warn(
+        {
+          tenantId: socket.tenantId,
+          userId: socket.user.userId,
+          error,
         },
         'Rate limit exceeded for connection'
       );
@@ -111,6 +116,24 @@ export function createRateLimitMiddleware(rateLimiter: RateLimiter) {
 }
 
 export function wrapHandlerWithRateLimit<T extends unknown[]>(
+  socket: Socket,
+  rateLimiter: RateLimiter,
+  handler: (...args: T) => void | Promise<void>
+): (...args: T) => void {
+  return (...args: T) => {
+    const key = `message:${socket.data.tenantId}:${socket.data.user.userId}`;
+
+    if (!rateLimiter.tryConsume(key, 1)) {
+      logger.warn(
+        {
+          connectionId: socket.data.connectionId,
+          tenantId: socket.data.tenantId,
+          userId: socket.data.user.userId,
+          remaining: rateLimiter.getRemainingTokens(key),
+        },
+        'Message rate limit exceeded'
+      );
+
   socket: AuthenticatedSocket,
   rateLimiter: AdaptiveRateLimiter,
   handler: (...args: T) => void | Promise<void>

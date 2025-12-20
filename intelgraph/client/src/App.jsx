@@ -19,7 +19,6 @@ import Dashboard from './components/dashboard/Dashboard';
 import InvestigationPage from './components/investigation/InvestigationPage';
 import GraphExplorer from './components/graph/GraphExplorer';
 import ActivitiesPage from './components/activities/ActivitiesPage';
-import DeduplicationInspector from './components/DeduplicationInspector';
 import NotFound from './components/common/NotFound';
 
 function App() {
@@ -42,7 +41,6 @@ function App() {
                 <Route path="graph" element={<GraphExplorer />} />
                 <Route path="graph/:id" element={<GraphExplorer />} />
                 <Route path="activities" element={<ActivitiesPage />} />
-                <Route path="deduplication" element={<DeduplicationInspector />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
