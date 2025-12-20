@@ -112,12 +112,22 @@ app.get(
           return timeDiff;
         }
 
+        const latDiff = a.lat - b.lat;
+        if (latDiff !== 0) {
+          return latDiff;
+        }
+
+        const lngDiff = a.lng - b.lng;
+        if (lngDiff !== 0) {
+          return lngDiff;
+        }
+
         return a.id.localeCompare(b.id);
       });
 
     res.json({
       count: filteredPoints.length,
-      orderedBy: 'observedAt desc, id asc',
+      orderedBy: 'observedAt desc, lat asc, lng asc, id asc',
       points: orderedPoints.slice(0, limitCap),
     });
   },

@@ -1,99 +1,51 @@
-# Disaster Recovery (DR) Runbook
+# Disaster Recovery Runbook
 
-**Status**: Production Ready
-**Last Updated**: 2025-10-26
+**Severity:** CRITICAL
+**Trigger:** Loss of service in a primary region (`us-east-1`).
 
-This document outlines the procedures for backing up and restoring the `summit` platform's critical state in **Production** environments.
+## 1. Assessment
+- **Verify Outage:** Check CloudWatch Dashboards and Route53 Health Checks.
+- **Confirm Scope:** Is it a single service or region-wide?
+- **Decision:** If outage is expected to last > 10 minutes, initiate FAILOVER.
 
-## Critical State
+## 2. Failover Procedure (Automated)
+*The system is designed to failover automatically via Route53. However, manual steps may be required for the Database.*
 
-The platform's state consists of three critical components:
+### A. Database Failover (Aurora Global)
+1. **Check Replication Status:**
+   ```bash
+   aws rds describe-global-clusters --global-cluster-identifier summit-global-db
+   ```
+2. **Promote Secondary Region:**
+   ```bash
+   aws rds failover-global-cluster \
+     --global-cluster-identifier summit-global-db \
+     --target-db-cluster-identifier summit-secondary
+   ```
+3. **Verify Promotion:** Wait for status to change from `failing-over` to `available`.
 
-1.  **Relational Data (Postgres)**: Users, tenants, metadata.
-2.  **Graph Data (Neo4j)**: Intelligence graph (entities, relationships).
-3.  **Object Storage (S3)**: Evidence files, reports, artifacts.
+### B. Redis Failover
+1. **Promote Secondary Replication Group:**
+   ```bash
+   aws elasticache modify-replication-group \
+     --replication-group-id summit-redis-secondary \
+     --automatic-failover-enabled \
+     --multi-az-enabled \
+     --apply-immediately
+   ```
 
-## Recovery Objectives
+### C. Traffic Redirection
+1. **Verify DNS:** Ensure Route53 is not returning `us-east-1` IPs.
+   ```bash
+   dig api.summit.intelgraph.io +short
+   ```
 
-*   **RPO (Recovery Point Objective)**: 5 minutes (via Postgres WAL + Neo4j Transaction Logs).
-*   **RTO (Recovery Time Objective)**: 4 hours (Cluster rebuild + Data Restore).
+## 3. Post-Failover Verification
+- **Run Smoke Tests:** Execute `scripts/smoke-test.cjs` against the new primary region.
+- **Check Latency:** Monitor `us-west-2` latency metrics.
 
-## Backup Strategy
-
-### Automated Backups
-*   **Postgres**: Continuous WAL archiving to S3 + Daily full snapshots (pgBackRest).
-*   **Neo4j**: Weekly full backups + Daily incremental backups to S3 (Neo4j Backup).
-*   **S3**: Versioning enabled + Cross-region replication (CRR) to DR region.
-
-### Manual Backup (Pre-Change)
-Before major upgrades, trigger a manual backup:
-
-```bash
-# Trigger Velero backup (Full Cluster + PVCs)
-velero backup create summit-pre-upgrade-$(date +%Y%m%d) --include-namespaces summit
-```
-
-## Restore Procedure (Total Region Failure)
-
-### 1. Provision Infrastructure
-Deploy the Summit infrastructure stack to the DR region (using Terraform/Helm).
-Ensure `replicas: 0` for all deployments to prevent split-brain during data restore.
-
-```bash
-helm install summit ./charts/summit -f values.prod.yaml --set replicaCount=0
-```
-
-### 2. Restore Data
-
-#### Postgres (Point-In-Time Recovery)
-Restore from S3 WAL archives to a specific timestamp.
-
-```bash
-# Example using pgBackRest operator
-kubectl apply -f - <<EOF
-apiVersion: postgresql.cnpg.io/v1
-kind: Cluster
-metadata:
-  name: summit-db
-spec:
-  bootstrap:
-    recovery:
-      source: "summit-db-prod"
-      recoveryTarget:
-        targetTime: "2025-10-26 14:00:00.000000+00"
-  externalClusters:
-    - name: summit-db-prod
-      barmanObjectStore:
-        destinationPath: s3://summit-backups-prod/postgres
-        endpointURL: https://s3.amazonaws.com
-EOF
-```
-
-#### Neo4j
-Restore the latest backup from S3.
-
-```bash
-# Download backup
-aws s3 cp s3://summit-backups-prod/neo4j/latest.dump .
-
-# Load into Neo4j (via Admin Job)
-kubectl apply -f k8s/admin/neo4j-restore-job.yaml
-```
-
-### 3. Verify Integrity
-Run the integrity check script to ensure graph/relational consistency.
-
-```bash
-kubectl run integrity-check --image=summit/tools:latest -- ./scripts/verify-integrity.sh
-```
-
-### 4. Restore Service
-Scale up the application.
-
-```bash
-helm upgrade summit ./charts/summit -f values.prod.yaml --set replicaCount=3
-```
-
-## Testing
-DR drills must be conducted quarterly.
-**Next Drill**: 2025-12-15
+## 4. Failback (Recovery)
+*Once `us-east-1` is stable:*
+1. **Sync Data:** Ensure the original primary is caught up as a replica.
+2. **Scheduled Maintenance:** Announce a maintenance window.
+3. **Failover Back:** Repeat the promotion process targeting `summit-primary`.

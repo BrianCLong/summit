@@ -86,6 +86,10 @@ export interface QueueSloConfig {
   maxReplicas: number;
   scaleStep: number;
   stabilizationSeconds: number;
+  maxScaleStep?: number;
+  errorBudgetMinutes?: number;
+  latencyBurnThreshold?: number;
+  costBurnThreshold?: number;
 }
 
 export interface ClusterNodeState {
@@ -119,6 +123,9 @@ export interface QueueScalingTelemetry {
   costPressure: number;
   backlogSeconds: number;
   sloTargetSeconds: number;
+  sloBurnRate: number;
+  costBurnRate: number;
+  adaptiveScaleStep: number;
 }
 
 export interface QueueScalingDecision {
@@ -132,6 +139,36 @@ export interface QueueScalingDecision {
     value: number;
     query: string;
   };
+  alerts: QueueAlertConfig;
+}
+
+export interface KedaTrigger {
+  type: string;
+  metadata: Record<string, string>;
+  authenticationRef?: { name: string };
+}
+
+export interface KedaScaledObjectSpec {
+  apiVersion: string;
+  kind: 'ScaledObject';
+  metadata: { name: string; namespace: string; labels?: Record<string, string> };
+  spec: {
+    scaleTargetRef: { name: string };
+    pollingInterval?: number;
+    cooldownPeriod?: number;
+    minReplicaCount?: number;
+    maxReplicaCount?: number;
+    fallback?: { failureThreshold: number; replicas: number };
+    advanced?: { horizontalPodAutoscalerConfig?: Record<string, unknown> };
+    triggers: KedaTrigger[];
+  };
+}
+
+export interface QueueAlertConfig {
+  fastBurnRateQuery: string;
+  slowBurnRateQuery: string;
+  costAnomalyQuery: string;
+  labels: Record<string, string>;
 }
 
 export interface WorkloadAllocation {

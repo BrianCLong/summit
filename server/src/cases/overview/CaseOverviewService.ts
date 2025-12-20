@@ -1,6 +1,6 @@
-import logger from '../../config/logger.js';
 import { Pool } from 'pg';
 import { CaseOverviewCacheRepo, CaseOverviewSnapshot } from '../../repos/CaseOverviewCacheRepo.js';
+import logger from '../../config/logger.js';
 
 export interface CaseOverviewOptions {
   ttlMs?: number;
@@ -15,6 +15,8 @@ export interface CaseOverviewResponse extends CaseOverviewSnapshot {
     missCount: number;
   };
 }
+
+const overviewLogger = logger.child({ name: 'CaseOverviewService' });
 
 export class CaseOverviewService {
   private cacheRepo: CaseOverviewCacheRepo;
