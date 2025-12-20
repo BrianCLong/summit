@@ -86,6 +86,7 @@ jobs:
       image-uri: ${{ steps.image-uri.outputs.uri }}
       sbom-digest: ${{ steps.sbom.outputs.digest }}
       slsa-level: ${{ steps.slsa-check.outputs.level }}
+      rekor-uuid: ${{ steps.rekor.outputs.uuid }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -182,6 +183,16 @@ jobs:
             --certificate-identity "${{ env.EXPECTED_OIDC_SUBJECT }}" \
             --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}"
 
+      - name: Capture Rekor UUID
+        if: inputs.sign && inputs.push
+        id: rekor
+        run: |
+          set -euo pipefail
+
+          IMAGE="${{ steps.image-uri.outputs.uri }}"
+          rekor_uuid=$(cosign verify --output=json "$IMAGE" 2>/dev/null | jq -r '.[0].optional.Bundle.Payload.logID // "unknown"')
+          echo "uuid=$rekor_uuid" >> "$GITHUB_OUTPUT"
+
       - name: Generate SBOM
         if: inputs.sbom
         id: sbom
@@ -201,6 +212,39 @@ jobs:
 
           SBOM_DIGEST=$(sha256sum sbom.cdx.json | cut -d' ' -f1)
           echo "digest=$SBOM_DIGEST" >> "$GITHUB_OUTPUT"
+
+      - name: Emit structured supply chain log
+        id: telemetry
+        run: |
+          set -euo pipefail
+
+          TRACE_ID=$(uuidgen | tr -d '-')
+          IMAGE_URI="${{ steps.image-uri.outputs.uri }}"
+          IMAGE_DIGEST="${{ steps.build.outputs.digest }}"
+          SBOM_DIGEST="${{ steps.sbom.outputs.digest }}"
+          REKOR_UUID="${{ steps.rekor.outputs.uuid || 'not-applicable' }}"
+
+          LOG=$(jq -n \
+            --arg trace_id "$TRACE_ID" \
+            --arg actor "${{ github.actor }}" \
+            --arg commit "${{ github.sha }}" \
+            --arg image "$IMAGE_URI" \
+            --arg digest "$IMAGE_DIGEST" \
+            --arg sbom "$SBOM_DIGEST" \
+            --arg rekor "$REKOR_UUID" \
+            '{
+              event: "supply_chain.build",
+              trace_id: $trace_id,
+              actor: $actor,
+              commit: $commit,
+              image: $image,
+              image_digest: $digest,
+              sbom_sha256: $sbom,
+              rekor_uuid: $rekor,
+              status: "complete"
+            }')
+
+          echo "$LOG"
 
       - name: Attest SBOM
         if: inputs.sbom && inputs.sign && inputs.push

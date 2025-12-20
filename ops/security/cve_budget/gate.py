@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import os
 import sys
 from collections import Counter, defaultdict
 from collections.abc import Iterable
@@ -483,6 +485,69 @@ def generate_weekly_report(path: Path, summary: dict[str, object]) -> None:
     path.write_text("\n".join(lines))
 
 
+def hash_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        while chunk := handle.read(8192):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def collect_rekor_uuids(vuln_report: dict[str, object]) -> list[str]:
+    uuids: set[str] = set()
+    for service_entry in vuln_report.get("services", []):
+        for artifact in service_entry.get("artifacts", []):
+            for attestation in artifact.get("attestations", []) or []:
+                candidate = (
+                    attestation.get("rekor_uuid")
+                    or attestation.get("rekorLogID")
+                    or attestation.get("rekor_log_id")
+                )
+                if candidate:
+                    uuids.add(str(candidate))
+    return sorted(uuids)
+
+
+def emit_structured_log(
+    summary: dict[str, object],
+    sboms: dict[str, dict[str, object]],
+    vuln_report: dict[str, object],
+    exit_code: int,
+) -> None:
+    actor = os.getenv("GITHUB_ACTOR", "local")
+    commit = os.getenv("GITHUB_SHA", "unknown")
+    trace_id = os.getenv("TRACE_ID") or hashlib.sha256(
+        f"{actor}-{commit}-{datetime.utcnow().isoformat()}".encode()
+    ).hexdigest()
+    sbom_hashes = {
+        name: hash_file(Path(meta["path"]))
+        for name, meta in sboms.items()
+        if Path(meta["path"]).exists()
+    }
+    rekor_ids = collect_rekor_uuids(vuln_report)
+
+    log_event = {
+        "event": "supply_chain.policy_verify",
+        "actor": actor,
+        "commit": commit,
+        "trace_id": trace_id,
+        "policy_bundle": summary.get("policy_bundle"),
+        "generated_at": summary.get("generated_at"),
+        "status": "pass" if exit_code == 0 else "fail",
+        "services": len(summary.get("services", [])),
+        "totals": summary.get("totals", {}),
+        "sbom_hashes": sbom_hashes,
+        "rekor_uuids": rekor_ids,
+        "expiring_exceptions": [
+            waiver
+            for service in summary.get("services", [])
+            for waiver in service.get("expiring_soon", [])
+        ],
+    }
+
+    print(json.dumps(log_event))
+
+
 def main() -> int:
     args = parse_args()
     config_path = Path(args.config)
@@ -505,6 +570,8 @@ def main() -> int:
         write_json(Path(args.output), summary)
     if args.weekly_report:
         generate_weekly_report(Path(args.weekly_report), summary)
+
+    emit_structured_log(summary, sboms, vuln_report, exit_code)
 
     if exit_code != 0:
         print("Build blocked: CVE budget or attestation gate failed.", file=sys.stderr)
