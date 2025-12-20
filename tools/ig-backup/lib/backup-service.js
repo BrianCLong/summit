@@ -3,6 +3,12 @@ const path = require('node:path');
 const { hashPayload, encryptSerialized, decryptSerialized } = require('./crypto');
 const { readDatabase, writeDatabase } = require('./storage');
 
+function assertInputPath(inputPath) {
+  if (!inputPath) {
+    throw new Error('The --input flag is required for restore operations.');
+  }
+}
+
 function buildCaseRefs(cases, objects) {
   return cases.map((entry) => ({
     caseId: entry.id,
@@ -65,6 +71,7 @@ function createBackup({ dbPath, outputPath, passphrase, encrypt = true, caseIds 
 }
 
 function loadBackup(inputPath, passphrase) {
+  assertInputPath(inputPath);
   const raw = JSON.parse(fs.readFileSync(inputPath, 'utf8'));
   if (raw.kind === 'ig-backup-encrypted') {
     if (!passphrase) {
@@ -77,6 +84,9 @@ function loadBackup(inputPath, passphrase) {
 }
 
 function validateBackup(backup) {
+  if (backup.kind !== 'ig-backup') {
+    throw new Error('Invalid backup format. Expected ig-backup payload.');
+  }
   const recalculated = hashPayload(backup.data);
   if (recalculated !== backup.checksum) {
     throw new Error('Backup checksum mismatch; data may be corrupted or tampered with.');
@@ -103,6 +113,7 @@ function restoreBackup({ dbPath, inputPath, passphrase, caseIds = [], dryRun = f
     },
     checksum: restoreChecksum,
     expectedChecksum: backup.checksum,
+    checksumMatches: restoreChecksum === backup.checksum,
     caseHashes,
   };
   if (!dryRun) {
