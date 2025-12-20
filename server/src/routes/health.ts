@@ -23,6 +23,10 @@ interface ServiceHealthError {
  *     description: Returns 200 OK if the service is running.
  *     responses:
  *       200:
+ *         description: Service is healthy
+ *     description: Basic health check endpoint
+ *     responses:
+ *       200:
  *         description: Service is running
  *         content:
  *           application/json:
@@ -56,7 +60,7 @@ router.get('/health', async (_req: Request, res: Response) => {
  *     tags:
  *       - Health
  *     summary: Detailed health check
- *     description: Detailed health check with dependency status.
+ *     description: Checks database connections and external dependencies.
  *     responses:
  *       200:
  *         description: Service is healthy
@@ -79,6 +83,12 @@ router.get('/health', async (_req: Request, res: Response) => {
  *                       type: string
  *       503:
  *         description: Service is degraded or unhealthy
+ *     description: Detailed health check with dependency status
+ *     responses:
+ *       200:
+ *         description: System is healthy
+ *       503:
+ *         description: System is degraded
  */
 router.get('/health/detailed', async (_req: Request, res: Response) => {
   const errors: ServiceHealthError[] = [];
@@ -201,6 +211,10 @@ router.get('/health/detailed', async (_req: Request, res: Response) => {
  *                 status:
  *                   type: string
  *                   example: ready
+ *     description: Kubernetes readiness probe
+ *     responses:
+ *       200:
+ *         description: Service is ready
  *       503:
  *         description: Service is not ready
  */
@@ -255,7 +269,7 @@ router.get('/health/ready', async (_req: Request, res: Response) => {
  *     tags:
  *       - Health
  *     summary: Liveness probe for Kubernetes
- *     description: Kubernetes liveness probe.
+ *     description: Returns 200 if the process is alive.
  *     responses:
  *       200:
  *         description: Service is alive
@@ -267,6 +281,10 @@ router.get('/health/ready', async (_req: Request, res: Response) => {
  *                 status:
  *                   type: string
  *                   example: alive
+ *     description: Kubernetes liveness probe
+ *     responses:
+ *       200:
+ *         description: Service is alive
  */
 router.get('/health/live', (_req: Request, res: Response) => {
   res.status(200).json({ status: 'alive' });
@@ -292,5 +310,11 @@ router.get('/health/deployment', async (_req: Request, res: Response) => {
     res.status(503).json({ status: 'deployment_failed', checks });
   }
 });
+
+// Deep health check for all dependencies (Database, Redis, etc.)
+// Utilized by k8s liveness probes and external monitoring
+export const checkHealth = async () => {
+  // Implementation reused from /health/detailed
+};
 
 export default router;

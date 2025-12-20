@@ -4,7 +4,7 @@
 
 ## Overview
 
-This directory contains **11 stand-alone, self-contained prompts** designed to drive IntelGraph's highest priorities:
+This directory contains **12 stand-alone, self-contained prompts** designed to drive IntelGraph's highest priorities:
 - **SLO compliance** (performance targets, error budgets)
 - **Provenance & audit** (immutable ledger, signed exports)
 - **Policy enforcement** (ABAC, purpose-based access, retention)
@@ -199,6 +199,22 @@ If you've set up slash commands (see [Setup](#setup)), you can invoke prompts di
 
 ---
 
+### 🚀 Release & Orchestration
+
+#### [12. Multi-Agent Release Orchestration (MVP-3 → GA)](./12-multi-agent-release-orchestration.md)
+**Role**: Release Conductor / Multi-Agent Orchestrator
+**Focus**: Coordinate 17 specialized agents across 9 phases to deliver MVP-3 as GA with progressive delivery
+**Deliverables**: Signed evidence packs, release notes, green dashboards, GA flags flipped, post-release KPIs
+**Key SLOs**: All gates green; canary auto-rollback on breach; RTO≤30m/RPO≤5m; perf headroom ≥20%
+
+**Use when**:
+- Orchestrating complex multi-phase releases
+- Coordinating multiple teams/agents for GA delivery
+- Implementing progressive delivery with policy gates
+- Running chaos/DR drills with evidence collection
+
+---
+
 ## Prompt Selection Guide
 
 ### By Project Phase
@@ -210,6 +226,7 @@ If you've set up slash commands (see [Setup](#setup)), you can invoke prompts di
 | **Data Pipeline** | 04 (Ingest), 05 (Provenance) |
 | **Production Readiness** | 07 (Observability), 08 (CI/CD), 09 (Testing) |
 | **Operations** | 10 (Cost), 07 (Observability) |
+| **Release/GA** | 12 (Multi-Agent Release), 08 (CI/CD), 09 (Testing) |
 
 ### By Role
 
@@ -221,13 +238,14 @@ If you've set up slash commands (see [Setup](#setup)), you can invoke prompts di
 | **SRE** | 07, 09 |
 | **FinOps Engineer** | 10 |
 | **Data Engineer** | 03, 04, 05 |
+| **Release Manager** | 12, 08, 09 |
 
 ### By Priority
 
 | Priority | Prompts | Rationale |
 |----------|---------|-----------|
 | **P0 - Critical** | 02, 03, 06, 11 | Core platform + security |
-| **P1 - High** | 01, 04, 07, 08 | Infrastructure + observability |
+| **P1 - High** | 01, 04, 07, 08, 12 | Infrastructure + observability + release |
 | **P2 - Medium** | 05, 09, 10 | Audit + quality + cost |
 
 ---
@@ -374,6 +392,11 @@ Found a better way to phrase a prompt? Have additional examples? Submit a PR!
 ---
 
 ## Changelog
+
+### 2025-12-19
+- **Added**: Prompt 12 - Multi-Agent Release Orchestration (MVP-3 → GA)
+- Coordinates 17 specialized agents across 9 phases for progressive delivery
+- Includes policy gates, evidence collection, chaos/DR drills, and instant rollback
 
 ### 2024-11-28
 - **Initial Release**: 11 core prompts covering infrastructure, security, observability, and cost

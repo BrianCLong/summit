@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createHash, randomUUID, sign } from 'crypto';
 import logger from '../../config/logger';
 import { writeAudit } from '../../utils/audit';

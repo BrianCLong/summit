@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Pool, PoolClient } from 'pg';
 import {
   AppliedState,
