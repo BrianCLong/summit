@@ -13,6 +13,7 @@ import subprocess
 import sys
 from pathlib import Path
 from typing import Dict, Iterable, List, Set, Tuple
+from urllib.parse import urlparse
 
 SEVERITY_ORDER = ["critical", "high", "medium", "low", "unknown"]
 DEFAULT_BUDGET = {"critical": 0, "high": 5, "medium": 10, "low": 50, "unknown": 0}
@@ -181,8 +182,16 @@ def load_exceptions(
                 f"Incomplete exception for {vuln_id or 'unknown'} (missing {', '.join(missing_fields)}); skipping."
             )
             continue
+
+        parsed_ticket = urlparse(str(ticket))
+        if parsed_ticket.scheme not in {"http", "https"} or not parsed_ticket.netloc:
+            alerts.append(
+                f"Invalid ticket URL for {vuln_id}: {ticket!r}; expected http(s) URL."
+            )
+            continue
+
         try:
-            expiry = dt.datetime.fromisoformat(expiry_raw.replace("Z", "+00:00"))
+            expiry = dt.datetime.fromisoformat(str(expiry_raw).replace("Z", "+00:00"))
             if expiry.tzinfo is None:
                 expiry = expiry.replace(tzinfo=dt.timezone.utc)
         except Exception:
