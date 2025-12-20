@@ -15,8 +15,8 @@ on:
         options:
           - staging
           - production
-      application:
-        description: 'Target application'
+      service:
+        description: 'Target service'
         required: true
         type: choice
         options:
@@ -30,49 +30,65 @@ permissions:
   packages: read
 
 concurrency:
-  group: blue-green-canary-${{ inputs.environment }}-${{ inputs.application }}
+  group: blue-green-canary-${{ inputs.environment }}
   cancel-in-progress: false
+
+env:
+  CANARY_CONFIG_PATH: summit_release_env_pack/k8s/canary/canary-stage-config.json
 
 jobs:
   create-deployment-record:
     runs-on: ubuntu-latest
     outputs:
       deployment_id: ${{ steps.create.outputs.deployment_id }}
-      release_name: ${{ steps.load-config.outputs.release_name }}
-      service_name: ${{ steps.load-config.outputs.service_name }}
-      namespace_prefix: ${{ steps.load-config.outputs.namespace_prefix }}
-      chart_path: ${{ steps.load-config.outputs.chart_path }}
-      canary_stages: ${{ steps.load-config.outputs.canary_stages }}
-      feature_flag: ${{ steps.load-config.outputs.feature_flag }}
+      release_name: ${{ steps.canary-config.outputs.release }}
+      service_name: ${{ steps.canary-config.outputs.service_name }}
+      namespace_prefix: ${{ steps.canary-config.outputs.namespace_prefix }}
+      namespace: ${{ steps.canary-config.outputs.namespace }}
+      chart_path: ${{ steps.canary-config.outputs.chart }}
+      canary_weights: ${{ steps.canary-config.outputs.weights }}
+      feature_flag: ${{ steps.canary-config.outputs.feature_flag }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Load canary settings
-        id: load-config
+      - name: Load canary service config
+        id: canary-config
+        env:
+          SERVICE_KEY: ${{ inputs.service }}
+          TARGET_ENV: ${{ inputs.environment }}
         run: |
-          set -euo pipefail
-          CONFIG_PATH="summit_release_env_pack/canary/canary-traffic.json"
-          APP="${{ inputs.application }}"
+          python - <<'PY'
+import json, os, pathlib, sys
 
-          if ! jq -e --arg app "$APP" '.[$app]' "$CONFIG_PATH" >/dev/null; then
-            echo "❌ Application '$APP' not found in $CONFIG_PATH"
-            exit 1
-          fi
+config_path = pathlib.Path(os.environ["CANARY_CONFIG_PATH"])
+if not config_path.exists():
+    sys.exit(f"Missing canary config at {config_path}")
 
-          RELEASE_NAME=$(jq -r --arg app "$APP" '.[$app].releaseName' "$CONFIG_PATH")
-          SERVICE_NAME=$(jq -r --arg app "$APP" '.[$app].serviceName' "$CONFIG_PATH")
-          NAMESPACE_PREFIX=$(jq -r --arg app "$APP" '.[$app].namespacePrefix' "$CONFIG_PATH")
-          CHART_PATH=$(jq -r --arg app "$APP" '.[$app].chartPath' "$CONFIG_PATH")
-          CANARY_STAGES=$(jq -r --arg app "$APP" '.[$app].canaryStages | join(",")' "$CONFIG_PATH")
-          FEATURE_FLAG=$(jq -r --arg app "$APP" '.[$app].featureFlag' "$CONFIG_PATH")
+service = os.environ["SERVICE_KEY"]
+target_env = os.environ["TARGET_ENV"]
+data = json.loads(config_path.read_text())
+service_cfg = data.get("services", {}).get(service)
+if not service_cfg:
+    sys.exit(f"Service '{service}' not defined in {config_path}")
 
-          echo "release_name=$RELEASE_NAME" >> "$GITHUB_OUTPUT"
-          echo "service_name=$SERVICE_NAME" >> "$GITHUB_OUTPUT"
-          echo "namespace_prefix=$NAMESPACE_PREFIX" >> "$GITHUB_OUTPUT"
-          echo "chart_path=$CHART_PATH" >> "$GITHUB_OUTPUT"
-          echo "canary_stages=$CANARY_STAGES" >> "$GITHUB_OUTPUT"
-          echo "feature_flag=$FEATURE_FLAG" >> "$GITHUB_OUTPUT"
+namespace_prefix = service_cfg.get("namespacePrefix", service)
+namespace = service_cfg.get("namespaces", {}).get("production" if target_env == "production" else "staging", f"{namespace_prefix}-{target_env}")
+release = service_cfg.get("release", service)
+service_name = service_cfg.get("serviceName", f"{service}-service")
+chart = service_cfg.get("chart", "infra/helm/intelgraph")
+weights = service_cfg.get("trafficWeights", [])
+feature_flag = service_cfg.get("featureFlag", f"{service}_canary_enabled")
+
+with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
+    fh.write(f"release={release}\n")
+    fh.write(f"service_name={service_name}\n")
+    fh.write(f"namespace_prefix={namespace_prefix}\n")
+    fh.write(f"namespace={namespace}\n")
+    fh.write(f"chart={chart}\n")
+    fh.write(f"weights={','.join(map(str, weights))}\n")
+    fh.write(f"feature_flag={feature_flag}\n")
+PY
 
       - name: Create deployment record
         id: create
@@ -80,7 +96,6 @@ jobs:
         env:
           TARGET_ENV: ${{ inputs.environment }}
           DEPLOY_VERSION: ${{ inputs.version }}
-          TARGET_APP: ${{ inputs.application }}
         with:
           script: |
             const deployment = await github.rest.repos.createDeployment({
@@ -88,7 +103,7 @@ jobs:
               repo: context.repo.repo,
               ref: context.ref,
               environment: process.env.TARGET_ENV,
-              description: `Blue-green with progressive canary for ${process.env.DEPLOY_VERSION} (${process.env.TARGET_APP})`,
+              description: `Blue-green with progressive canary for ${process.env.DEPLOY_VERSION}`,
               auto_merge: false,
               required_contexts: [],
               production_environment: process.env.TARGET_ENV === 'production',
@@ -127,17 +142,16 @@ jobs:
       - name: Execute blue-green deployment
         id: bluegreen
         env:
-          NAMESPACE: ${{ needs.create-deployment-record.outputs.namespace_prefix }}-${{ inputs.environment }}
+          NAMESPACE: ${{ needs.create-deployment-record.outputs.namespace }}
           RELEASE_NAME: ${{ needs.create-deployment-record.outputs.release_name }}
           SERVICE_NAME: ${{ needs.create-deployment-record.outputs.service_name }}
-          CHART_PATH: ${{ needs.create-deployment-record.outputs.chart_path }}
         run: |
           ./scripts/blue-green-deploy.sh "${{ inputs.environment }}" "${{ inputs.version }}"
 
       - name: Capture active/standby environments
         id: traffic-state
         env:
-          NAMESPACE: ${{ needs.create-deployment-record.outputs.namespace_prefix }}-${{ inputs.environment }}
+          NAMESPACE: ${{ needs.create-deployment-record.outputs.namespace }}
           SERVICE_NAME: ${{ needs.create-deployment-record.outputs.service_name }}
         run: |
           ACTIVE=$(kubectl get service "$SERVICE_NAME" -n "$NAMESPACE" -o jsonpath='{.spec.selector.environment}')
@@ -191,13 +205,12 @@ jobs:
 
       - name: Progressive canary rollout
         env:
-          NAMESPACE: ${{ needs.create-deployment-record.outputs.namespace_prefix }}-${{ inputs.environment }}
+          NAMESPACE: ${{ needs.create-deployment-record.outputs.namespace }}
           RELEASE_NAME: ${{ needs.create-deployment-record.outputs.release_name }}
           SERVICE_NAME: ${{ needs.create-deployment-record.outputs.service_name }}
           IMAGE_TAG: ${{ inputs.version }}
           CHART_PATH: ${{ needs.create-deployment-record.outputs.chart_path }}
-          CANARY_STAGES_CSV: ${{ needs.create-deployment-record.outputs.canary_stages }}
-          CANARY_FEATURE_FLAG: ${{ needs.create-deployment-record.outputs.feature_flag }}
+          CANARY_STAGES_CSV: ${{ needs.create-deployment-record.outputs.canary_weights }}
         run: |
           ./scripts/canary/deploy-canary.sh
 
