@@ -143,13 +143,13 @@ export function TriPaneShell({
     const { start, end } = syncState.globalTimeWindow
 
     // Filter timeline events
-    const filteredTimelineEvents = timelineEvents.filter(event => {
+    const filteredTimelineEvents = (timelineEvents || []).filter(event => {
       const eventTime = new Date(event.timestamp)
       return eventTime >= start && eventTime <= end
     })
 
     // Filter geospatial events
-    const filteredGeospatialEvents = geospatialEvents.filter(event => {
+    const filteredGeospatialEvents = (geospatialEvents || []).filter(event => {
       const eventTime = new Date(event.timestamp)
       return eventTime >= start && eventTime <= end
     })
