@@ -1,0 +1,151 @@
+name: supply-chain-gates
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  release:
+    types: [created, published]
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+  security-events: write
+  checks: write
+  statuses: write
+  pull-requests: write
+
+env:
+  SERVICE_NAME: summit
+  ARTIFACT_RETENTION_DAYS: 365
+  SBOM_PATH: artifacts/sbom/summit-${{ github.sha }}.spdx.json
+  GRYPE_JSON: artifacts/scans/grype-summit-${{ github.sha }}.json
+  OSV_JSON: artifacts/scans/osv-summit-${{ github.sha }}.json
+  ATTEST_BUNDLE: artifacts/attestations/summit-${{ github.sha }}.sbom.bundle
+
+jobs:
+  supply-chain:
+    name: Supply Chain Gates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare artifacts workspace
+        run: |
+          mkdir -p artifacts/build
+          echo "build_target=${{ env.SERVICE_NAME }}" > artifacts/build/build-info.txt
+          echo "sha=${{ github.sha }}" >> artifacts/build/build-info.txt
+
+      - name: Generate SBOM (Syft)
+        run: |
+          .ci/scripts/sbom/generate_syft.sh \
+            --target dir:. \
+            --service "${SERVICE_NAME}" \
+            --sha "${GITHUB_SHA}" \
+            --output "${SBOM_PATH}"
+
+      - name: Scan with Grype
+        run: |
+          .ci/scripts/sbom/scan_grype.sh \
+            --target dir:. \
+            --service "${SERVICE_NAME}" \
+            --sha "${GITHUB_SHA}" \
+            --output-dir artifacts/scans
+
+      - name: Scan with osv-scanner
+        run: |
+          .ci/scripts/sbom/scan_osv.sh \
+            --target . \
+            --service "${SERVICE_NAME}" \
+            --sha "${GITHUB_SHA}" \
+            --output-dir artifacts/scans
+
+      - name: Diff budget check
+        id: budget
+        env:
+          SBOM_REPORT: ${{ env.GRYPE_JSON }}
+        run: |
+          python3 .ci/scripts/sbom/diff_budget.py --report "${GRYPE_JSON}" --baseline "${GRYPE_JSON}" | tee artifacts/scans/budget-summary.txt
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.7.0
+
+      - name: Attest SBOM
+        run: |
+          .ci/scripts/attest/attest_slsa.sh \
+            --subject "${SBOM_PATH}" \
+            --predicate "${SBOM_PATH}" \
+            --type spdxjson \
+            --bundle "${ATTEST_BUNDLE}"
+
+      - name: Sign SBOM
+        run: |
+          .ci/scripts/signing/cosign_sign_verify.sh --artifact "${SBOM_PATH}" --signature "artifacts/signatures/sbom.sig" --certificate "artifacts/signatures/sbom.cert"
+
+      - name: Sign attestation bundle
+        run: |
+          .ci/scripts/signing/cosign_sign_verify.sh --artifact "${ATTEST_BUNDLE}" --signature "artifacts/signatures/attestation.sig" --certificate "artifacts/signatures/attestation.cert"
+
+      - name: Upload SARIF (Grype)
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: artifacts/scans/grype-${{ env.SERVICE_NAME }}-${{ github.sha }}.sarif
+
+      - name: Upload SARIF (OSV)
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: artifacts/scans/osv-${{ env.SERVICE_NAME }}-${{ github.sha }}.sarif
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: supply-chain-${{ github.sha }}
+          path: |
+            artifacts/sbom/
+            artifacts/scans/
+            artifacts/attestations/
+            artifacts/signatures/
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+
+      - name: Post PR summary
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const summary = fs.readFileSync('artifacts/scans/budget-summary.txt', 'utf8');
+            const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const body = [
+              '### Supply Chain Gate Summary',
+              '',
+              '**Budget diff**',
+              '```',
+              summary,
+              '```',
+              `- SBOM: [SPDX report](${runUrl})`,
+              `- Attestation bundle: [bundle](${runUrl})`,
+              `- Rekor visibility: stored via cosign keyless (see bundle for inclusion proof)`,
+              ''
+            ].join('\n');
+            await github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: context.issue.number,
+              body
+            });
+
+      - name: Set required status
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const conclusion = '${{ job.status }}';
+            const state = conclusion === 'success' ? 'success' : (conclusion === 'cancelled' ? 'error' : 'failure');
+            await github.rest.repos.createCommitStatus({
+              ...context.repo,
+              sha: context.sha,
+              state,
+              context: 'supply-chain-gates',
+              description: 'Supply chain gates completion status',
+              target_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+            });

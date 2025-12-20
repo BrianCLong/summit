@@ -5,6 +5,7 @@ Compares the current vulnerability report against the baseline from
 `origin/main` (last green), enforces severity budgets from
 `.maestro/ci_budget.json`, and respects risk-acceptance exceptions.
 """
+
 import argparse
 import datetime as dt
 import json
