@@ -33,6 +33,7 @@ const DEFAULT_FRAME_BUDGET = 18;
 const LOD_THRESHOLD = 320;
 const MAX_VISIBLE_NODES_COMPACT = 1100;
 const MAX_BATCH_SIZE = 320;
+export const MAX_VISIBLE_NODES = 1200;
 const MAX_VISIBLE_EDGES_COMPACT = 3200;
 const FRAME_OVERRUN_MULTIPLIER = 2.5;
 
@@ -65,11 +66,15 @@ export function ProgressiveGraph({
   streaming = false,
   streamingLabel = 'Streaming results…',
 }: ProgressiveGraphProps): JSX.Element {
+  const renderTarget = useMemo(
+    () => Math.min(nodes.length, MAX_VISIBLE_NODES),
+    [nodes],
+  );
   const [renderedCount, setRenderedCount] = useState(() =>
-    Math.min(initialBatchSize, nodes.length),
+    Math.min(initialBatchSize, renderTarget),
   );
   const [lodMode, setLodMode] = useState<'detailed' | 'compact'>(
-    nodes.length > LOD_THRESHOLD ? 'compact' : 'detailed',
+    renderTarget > LOD_THRESHOLD ? 'compact' : 'detailed',
   );
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -116,19 +121,19 @@ export function ProgressiveGraph({
       let nextCount = currentCount;
 
       while (
-        nextCount < nodes.length &&
+        nextCount < renderTarget &&
         performance.now() - frameStart < frameBudgetMs
       ) {
         const nextBatch = Math.min(batchSize * 1.35, MAX_BATCH_SIZE);
         batchSize = Math.max(Math.round(nextBatch), 1);
-        nextCount = Math.min(nextCount + batchSize, nodes.length);
+        nextCount = Math.min(nextCount + batchSize, renderTarget);
       }
 
       currentCount = nextCount;
 
       const elapsed = performance.now() - start;
       const shouldCompact =
-        nodes.length > LOD_THRESHOLD &&
+        renderTarget > LOD_THRESHOLD &&
         (performance.now() - frameStart > frameBudgetMs ||
           elapsed > frameBudgetMs * FRAME_OVERRUN_MULTIPLIER);
 
@@ -148,7 +153,7 @@ export function ProgressiveGraph({
 
       setRenderedCount(currentCount);
 
-      if (currentCount < nodes.length) {
+      if (currentCount < renderTarget) {
         frameRef.current = scheduleFrame(step);
       } else {
         onRenderComplete?.(performance.now() - start);
