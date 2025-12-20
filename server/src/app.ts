@@ -87,28 +87,6 @@ export const createApp = async () => {
   const app = express();
   const logger = pino();
 
-  // Add correlation ID middleware FIRST (before other middleware)
-  app.use(correlationIdMiddleware);
-
-  app.use(
-    helmet({
-      contentSecurityPolicy: {
-        useDefaults: true,
-        directives: {
-          'script-src': [
-            "'self'",
-            "'unsafe-inline'",
-            'https://cdn.jsdelivr.net',
-          ],
-          'connect-src': ["'self'", 'https://api.intelgraph.example'],
-        },
-      },
-      crossOriginOpenerPolicy: { policy: 'same-origin' },
-      crossOriginEmbedderPolicy: { policy: 'require-corp' },
-      crossOriginResourcePolicy: { policy: 'same-origin' },
-      hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
-    })
-  );
   const isProduction = cfg.NODE_ENV === 'production';
   const allowedOrigins = cfg.CORS_ORIGIN.split(',')
     .map((origin) => origin.trim())
@@ -130,18 +108,23 @@ export const createApp = async () => {
     helmet({
       contentSecurityPolicy: isProduction
         ? {
+            useDefaults: true,
             directives: {
               defaultSrc: ["'self'"],
               objectSrc: ["'none'"],
               imgSrc: ["'self'", 'data:'],
-              scriptSrc: ["'self'"],
+              scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net'],
               styleSrc: ["'self'", "'unsafe-inline'"],
-              connectSrc: ["'self'", ...allowedOrigins],
+              connectSrc: ["'self'", ...allowedOrigins, 'https://api.intelgraph.example'],
             },
           }
         : false,
       referrerPolicy: { policy: 'no-referrer' },
-      hsts: isProduction ? undefined : false,
+      hsts: isProduction
+        ? { maxAge: 31536000, includeSubDomains: true, preload: true }
+        : false,
+      crossOriginOpenerPolicy: { policy: 'same-origin' },
+      crossOriginResourcePolicy: { policy: 'same-origin' },
       crossOriginEmbedderPolicy: false,
     }),
   );
