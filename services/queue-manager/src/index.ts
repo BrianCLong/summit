@@ -92,6 +92,7 @@ main().catch((error) => {
 // Export for use as a library
 export { QueueManager, QueueManagerAPI, JobPriority };
 export * from './types/index.js';
+export * from './core/errors.js';
 
 // Export distributed queue components
 export * from './distributed/index.js';

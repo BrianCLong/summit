@@ -1,0 +1,53 @@
+{{- if .Values.global.networkPolicies.enabled }}
+{{- $ns := (.Values.global.namespace | default .Release.Namespace) }}
+{{- range .Values.global.networkPolicies.ingress }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .name }}
+  namespace: {{ $ns }}
+spec:
+  podSelector:
+{{ toYaml (default (dict) .podSelector) | indent 4 }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+{{- if .namespaceSelector }}
+        - namespaceSelector:
+{{ toYaml .namespaceSelector | indent 10 }}
+{{- end }}
+{{- if .podSelectorFrom }}
+        - podSelector:
+{{ toYaml .podSelectorFrom | indent 10 }}
+{{- end }}
+{{- if .ipBlock }}
+        - ipBlock:
+{{ toYaml .ipBlock | indent 10 }}
+{{- end }}
+{{- if .ports }}
+      ports:
+{{ toYaml .ports | indent 8 }}
+{{- end }}
+---
+{{- end }}
+{{- range .Values.global.networkPolicies.egress }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .name }}
+  namespace: {{ $ns }}
+spec:
+  podSelector:
+{{ toYaml (default (dict) .podSelector) | indent 4 }}
+  policyTypes:
+{{- if .policyTypes }}
+{{ toYaml .policyTypes | indent 4 }}
+{{- else }}
+    - Egress
+{{- end }}
+  egress:
+{{ toYaml (default list .egress) | indent 4 }}
+---
+{{- end }}
+{{- end }}

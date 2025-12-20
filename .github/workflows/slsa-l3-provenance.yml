@@ -137,48 +137,34 @@ jobs:
             echo "Lockfile hash: $LOCKFILE_HASH"
           fi
 
-  component-matrix-builds:
-    name: Component Matrix Builds (${{ matrix.name }})
+  # ===========================================================================
+  # Stage 2: Product Matrix Builds (Reusable SLSA build)
+  # ===========================================================================
+  matrix-builds:
+    name: Product Build (${{ matrix.product }})
     needs: pre-build-checks
     strategy:
-      fail-fast: false
       matrix:
-        include:
-          - name: Maestro
-            slug: maestro
-            context: .
-            dockerfile: ./Dockerfile
-          - name: IntelGraph
-            slug: intelgraph
-            context: .
-            dockerfile: ./Dockerfile
-          - name: CompanyOS
-            slug: companyos
-            context: .
-            dockerfile: ./Dockerfile
-          - name: Switchboard
-            slug: switchboard
-            context: .
-            dockerfile: ./Dockerfile
+        product: [maestro, intelgraph, companyos, switchboard]
     uses: ./.github/workflows/_reusable-slsa-build.yml
     with:
-      image_name: ${{ github.repository }}/${{ matrix.slug }}
-      context: ${{ matrix.context }}
-      dockerfile: ${{ matrix.dockerfile }}
+      image_name: ${{ toLower(format('{0}-{1}', github.repository, matrix.product)) }}
+      dockerfile: ./Dockerfile
+      context: .
+      platforms: linux/amd64
       push: ${{ github.event_name != 'pull_request' }}
       sign: true
       sbom: true
       slsa_provenance: true
-      reproducible: true
     secrets: inherit
 
   # ===========================================================================
-  # Stage 2: Multi-Stage Hermetic Build (SLSA L3 Requirement)
+  # Stage 3: Multi-Stage Hermetic Build (SLSA L3 Requirement)
   # ===========================================================================
   hermetic-build:
     name: Hermetic Multi-Stage Build
   # ===========================================================================
-  # Stage 2: Hermetic Builds (Server & Web)
+  # Stage 3: Hermetic Builds (Server & Web)
   # ===========================================================================
   build-server:
     name: Build Server

@@ -75,7 +75,6 @@ jobs:
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
-    needs: [static-checks] # Optional: remove dependency if you want parallelism at cost of compute
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -115,7 +114,6 @@ jobs:
   smoke-tests:
     name: Smoke Tests (Golden Path)
     runs-on: ubuntu-latest
-    needs: [static-checks]
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
