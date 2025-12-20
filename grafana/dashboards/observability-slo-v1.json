@@ -1,0 +1,180 @@
+{
+  "title": "Summit Observability - SLO Overview (v1)",
+  "uid": "summit-slo-v1",
+  "tags": ["slo", "observability", "summit"],
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "30s",
+  "editable": true,
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Request Rate (req/s)",
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{service=~\"$service\"}[5m]))",
+          "refId": "A",
+          "legendFormat": "{{service}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "p95 Latency (seconds)",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service=~\"$service\"}[5m])) by (le, service))",
+          "refId": "A",
+          "legendFormat": "{{service}}"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(llm_invocation_duration_seconds_bucket{service=~\"$service\"}[5m])) by (le, service))",
+          "refId": "B",
+          "legendFormat": "{{service}} LLM"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(ingestion_batch_duration_seconds_bucket{service=~\"$service\"}[5m])) by (le, service))",
+          "refId": "C",
+          "legendFormat": "{{service}} Ingestion"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Error Budget Burn (5m)",
+      "targets": [
+        {
+          "expr": "sum(rate(errors_total{service=~\"$service\"}[5m])) / clamp_max(sum(rate(http_requests_total{service=~\"$service\"}[5m])), 1e-6)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 0.005 },
+              { "color": "red", "value": 0.01 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        }
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 8 }
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "LLM Invocation Volume",
+      "targets": [
+        {
+          "expr": "sum(rate(llm_invocations_total{service=~\"$service\"}[5m])) by (service, status)",
+          "refId": "A",
+          "legendFormat": "{{service}} {{status}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "right"
+        }
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 8 }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Ingestion Throughput (records/s)",
+      "targets": [
+        {
+          "expr": "sum(ingestion_throughput_records_per_second{service=~\"$service\"}) by (service, pipeline)",
+          "refId": "A",
+          "legendFormat": "{{service}} {{pipeline}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "right"
+        }
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 8 }
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "service",
+        "label": "Service",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(http_requests_total, service)",
+        "refresh": 2,
+        "includeAll": true,
+        "multi": true,
+        "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": ".*"
+        }
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  }
+}

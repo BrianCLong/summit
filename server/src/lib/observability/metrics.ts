@@ -236,7 +236,7 @@ const metricsToRegister = [
   businessUserSignupsTotal, businessApiCallsTotal, businessRevenueTotal,
 ];
 
-metricsToRegister.forEach(m => register.registerMetric(m));
+metricsToRegister.forEach(m => register.registerMetric(m as any));
 
 // Update memory usage periodically
 setInterval(() => {

@@ -9,7 +9,6 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "types": ["node", "jest"],
-    "resolveJsonModule": true
     "resolveJsonModule": true,
     "downlevelIteration": true
   },

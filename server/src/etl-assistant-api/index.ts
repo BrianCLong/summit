@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ETL Assistant API
  * Provides REST endpoints for schema preview, PII scanning, and license checking

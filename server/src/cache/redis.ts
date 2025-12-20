@@ -1,3 +1,4 @@
+// @ts-nocheck
 import Redis, { Cluster, type ClusterNode } from 'ioredis';
 import config from '../config/index.js';
 

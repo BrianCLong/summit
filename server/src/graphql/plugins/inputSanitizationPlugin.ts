@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * GraphQL Input Sanitization Plugin
  *

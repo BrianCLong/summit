@@ -1,0 +1,23 @@
+{
+  "subject": {
+    "id": "analyst-b",
+    "tenant": "t1",
+    "roles": ["analyst"],
+    "clearance": "internal",
+    "mfa": "totp"
+  },
+  "resource": {
+    "type": "graph",
+    "id": "g-99",
+    "tenant": "t2",
+    "classification": "internal"
+  },
+  "action": "graph:query",
+  "context": {
+    "env": "stage",
+    "request_ip": "10.0.0.9",
+    "time": "2025-01-05T07:30:00Z",
+    "reason": "triage",
+    "risk": "low"
+  }
+}
