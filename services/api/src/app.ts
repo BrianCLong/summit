@@ -32,6 +32,7 @@ import { casesRouter } from './routes/cases.js';
 import { evidenceRouter } from './routes/evidence.js';
 import { analyticsExtRouter } from './routes/analytics_ext.js';
 import { triageRouter } from './routes/triage.js';
+import { actionsPreflightRouter } from './routes/actions/preflight.js';
 import { swaggerRouter } from './docs/swagger.js';
 import { graphqlDocsRouter } from './docs/graphql-docs.js';
 import { validateRequest } from './middleware/openapi-validator.js';
@@ -116,6 +117,8 @@ export async function createApp() {
   app.use('/api/analytics', analyticsExtRouter);
   // Triage queue
   app.use('/api/triage', triageRouter);
+  // Actions preflight (policy simulation)
+  app.use('/api/actions', actionsPreflightRouter);
 
   // Create Apollo Server
   const server = new ApolloServer({

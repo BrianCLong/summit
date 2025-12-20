@@ -5,6 +5,7 @@
   "dependencies": {
     "fastify": "^4.28.0",
     "kafkajs": "^2.2.4",
+    "prom-client": "^15.1.3",
     "uuid": "^9.0.1"
   }
 }

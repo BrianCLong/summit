@@ -29,9 +29,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
-          fetch-depth: 0
 
       - name: Resolve deployment target
         id: target
@@ -66,28 +63,11 @@ jobs:
           echo "ui_url=$ui" >> $GITHUB_OUTPUT
           echo "api_url=$api" >> $GITHUB_OUTPUT
           echo "gql_url=${api%/}/graphql" >> $GITHUB_OUTPUT
-          echo "run_url=${{ github.event.workflow_run.html_url }}" >> $GITHUB_OUTPUT
 
-      - name: Discover release tag
-        id: release
-        env:
-          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
-          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
-        run: |
-          git fetch --tags --force origin
-          tag="$HEAD_BRANCH"
-          if [ -n "$tag" ] && git rev-parse "refs/tags/$tag" >/dev/null 2>&1; then
-            echo "Using tag from head_branch: $tag"
-          else
-            tag=""
-          fi
-
-          if [ -z "$tag" ] && [ -n "$HEAD_SHA" ]; then
-            tag=$(git tag --points-at "$HEAD_SHA" | head -n1 || true)
-          fi
-
-          echo "tag=$tag" >> $GITHUB_OUTPUT
-          echo "resolved_tag=${tag:-<none>}"
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
       - name: Setup k6
         uses: grafana/setup-k6-action@v1
@@ -109,12 +89,7 @@ jobs:
           COS_GQL_URL: ${{ steps.endpoints.outputs.gql_url }}
         run: k6 run tests/load/graphql_read_p95.js
 
-      - name: Setup Node.js for synthetic journey
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install synthetic journey deps
+      - name: Install synthetic dependencies
         run: npm install axios ts-node typescript --no-save
 
       - name: Run synthetic journey
@@ -141,66 +116,111 @@ jobs:
           echo "synthetic=$synthetic" >> $GITHUB_OUTPUT
           echo "status=$status" >> $GITHUB_OUTPUT
 
-      - name: Write deploy verification artifact
+      - name: Build deploy verification report
         if: always()
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+
+          const readJson = (path) => {
+            try { return JSON.parse(fs.readFileSync(path, 'utf8')); }
+            catch (_) { return null; }
+          };
+
+          const report = {
+            target: process.env.TARGET_ENV,
+            endpoints: {
+              ui: process.env.UI_URL,
+              api: process.env.API_URL,
+              graphql: process.env.GQL_URL,
+            },
+            outcomes: {
+              smoke: process.env.SMOKE_OUTCOME,
+              load: process.env.LOAD_OUTCOME,
+              synthetic: process.env.SYNTH_OUTCOME,
+            },
+            synthetic: {
+              results: readJson('synthetic-results.json'),
+              latency: readJson('synthetic-latency-histogram.json'),
+            },
+            workflow_run: {
+              id: process.env.WORKFLOW_RUN_ID,
+              name: process.env.WORKFLOW_NAME,
+              url: process.env.WORKFLOW_URL,
+              event: process.env.WORKFLOW_EVENT,
+            },
+            generated_at: new Date().toISOString(),
+          };
+
+          fs.writeFileSync('deploy_verification.json', JSON.stringify(report, null, 2));
+          NODE
         env:
-          TARGET: ${{ steps.target.outputs.target }}
+          TARGET_ENV: ${{ steps.target.outputs.target }}
           UI_URL: ${{ steps.endpoints.outputs.ui_url }}
           API_URL: ${{ steps.endpoints.outputs.api_url }}
           GQL_URL: ${{ steps.endpoints.outputs.gql_url }}
-          SMOKE: ${{ steps.summary.outputs.smoke }}
-          LOAD: ${{ steps.summary.outputs.load }}
-          SYNTHETIC: ${{ steps.summary.outputs.synthetic }}
-          STATUS: ${{ steps.summary.outputs.status }}
-          RELEASE_TAG: ${{ steps.release.outputs.tag }}
-          RUN_URL: ${{ steps.endpoints.outputs.run_url }}
-          RUN_ID: ${{ github.event.workflow_run.id }}
-          RUN_NAME: ${{ github.event.workflow_run.name }}
-        run: |
-          cat > deploy_verification.json <<'EOF'
-          {
-            "target": "${TARGET}",
-            "status": "${STATUS}",
-            "endpoints": {
-              "ui": "${UI_URL}",
-              "api": "${API_URL}",
-              "graphql": "${GQL_URL}"
-            },
-            "results": {
-              "smoke": "${SMOKE}",
-              "load": "${LOAD}",
-              "synthetic": "${SYNTHETIC}"
-            },
-            "run": {
-              "id": "${RUN_ID}",
-              "name": "${RUN_NAME}",
-              "url": "${RUN_URL}",
-              "release_tag": "${RELEASE_TAG}"
-            },
-            "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-          }
-EOF
+          SMOKE_OUTCOME: ${{ steps.smoke.outcome }}
+          LOAD_OUTCOME: ${{ steps.load.outcome }}
+          SYNTH_OUTCOME: ${{ steps.synthetic.outcome }}
+          WORKFLOW_RUN_ID: ${{ github.event.workflow_run.id }}
+          WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
+          WORKFLOW_URL: ${{ github.event.workflow_run.html_url }}
+          WORKFLOW_EVENT: ${{ github.event.workflow_run.event }}
 
       - name: Upload deploy verification artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: deploy_verification-${{ steps.target.outputs.target }}
-          path: deploy_verification.json
+          name: deploy-verification-${{ steps.target.outputs.target }}-${{ github.run_id }}
+          path: |
+            deploy_verification.json
+            synthetic-results.json
+            synthetic-latency-histogram.json
+          if-no-files-found: warn
           retention-days: 14
 
+      - name: Locate release for deployment tag
+        if: always()
+        id: release_tag
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const headSha = '${{ github.event.workflow_run.head_sha }}';
+            const { owner, repo } = context.repo;
+
+            const tags = await github.paginate(github.rest.git.listMatchingRefs, {
+              owner,
+              repo,
+              ref: 'tags/',
+            });
+            const match = tags.find((tag) => tag.object?.sha === headSha);
+            if (!match) {
+              core.info('No tag found for head SHA; skipping release attachment.');
+              return;
+            }
+            const tagName = match.ref.replace('refs/tags/', '');
+            let release;
+            try {
+              release = await github.rest.repos.getReleaseByTag({ owner, repo, tag: tagName });
+            } catch (error) {
+              core.info(`No release exists for tag ${tagName}; skipping attachment.`);
+              return;
+            }
+
+            core.setOutput('tag', tagName);
+            core.setOutput('upload_url', release.data.upload_url);
+
       - name: Attach verification to release
-        if: always() && steps.release.outputs.tag != ''
+        if: steps.release_tag.outputs.upload_url
+        uses: actions/upload-release-asset@v1
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_TAG: ${{ steps.release.outputs.tag }}
-        run: |
-          if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
-            echo "Release $RELEASE_TAG not found; skipping attachment."
-            exit 0
-          fi
-          gh release upload "$RELEASE_TAG" deploy_verification.json --clobber
-          echo "Attached deploy_verification.json to release $RELEASE_TAG"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.release_tag.outputs.upload_url }}
+          asset_path: ./deploy_verification.json
+          asset_name: deploy_verification.json
+          asset_content_type: application/json
 
       - name: Comment results on PR
         if: always() && github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.pull_requests[0]
@@ -223,7 +243,7 @@ EOF
               `Post-deploy verification for **${target}**`,
               `- Smoke: ${icon(smoke)} (${smoke})`,
               `- Load: ${icon(load)} (${load})`,
-              `- Synthetic journey: ${icon(synthetic)} (${synthetic})`,
+              `- Synthetic: ${icon(synthetic)} (${synthetic})`,
               `- Run: ${runUrl}`,
             ].join('\n');
             await github.rest.issues.createComment({
@@ -236,5 +256,5 @@ EOF
       - name: Fail if checks failed
         if: steps.summary.outputs.status == 'failure'
         run: |
-          echo "Smoke/load verification failed." >&2
+          echo "Post-deploy verification failed (smoke/load/synthetic)." >&2
           exit 1
