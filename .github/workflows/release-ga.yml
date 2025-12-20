@@ -40,12 +40,25 @@ jobs:
         with:
           artifact_path: 'dist/**'
       - name: Verify signatures and attestations
+        id: cosign-verify
         env:
           IMAGE: ghcr.io/intelgraph/platform:${GITHUB_REF_NAME}
         run: |
-          cosign verify "${IMAGE}"
-          cosign verify-attestation --type slsaprovenance "${IMAGE}"
-          cosign verify-attestation --type spdx "${IMAGE}"
+          set -euo pipefail
+          verification=$(cosign verify --output json "${IMAGE}")
+          digest=$(echo "${verification}" | jq -r '.[0].critical.image["docker-manifest-digest"]')
+
+          if [ -z "${digest}" ] || [ "${digest}" = "null" ]; then
+            echo "❌ Unable to resolve digest after verification for ${IMAGE}" >&2
+            exit 1
+          fi
+
+          IMAGE_PINNED="${IMAGE%@*}@${digest}"
+          echo "pinned=${IMAGE_PINNED}" >> "$GITHUB_OUTPUT"
+          echo "digest=${digest}" >> "$GITHUB_OUTPUT"
+
+          cosign verify-attestation --type slsaprovenance "${IMAGE_PINNED}"
+          cosign verify-attestation --type spdx "${IMAGE_PINNED}"
       - name: Enforce SBOM diff budget or exception
         env:
           SBOM_BASELINE: .github/sbom-baseline.spdx.json
@@ -75,13 +88,15 @@ jobs:
           fi
       - name: Attach Rekor proof to release notes
         env:
-          IMAGE: ghcr.io/intelgraph/platform:${GITHUB_REF_NAME}
+          IMAGE_PINNED: ${{ steps.cosign-verify.outputs.pinned }}
+          IMAGE_DIGEST: ${{ steps.cosign-verify.outputs.digest }}
         run: |
-          TRIANGULATED=$(cosign triangulate "${IMAGE}")
+          TRIANGULATED=$(cosign triangulate "${IMAGE_PINNED}")
           printf "# Rekor Transparency Log\n\n" > release-notes.md
-          echo "Image: ${IMAGE}" >> release-notes.md
+          echo "Image: ${IMAGE_PINNED}" >> release-notes.md
+          echo "Digest: ${IMAGE_DIGEST}" >> release-notes.md
           echo "Rekor Entry: ${TRIANGULATED}" >> release-notes.md
-          cosign verify "${IMAGE}" --output-certificate rekor-cert.pem --output-signature rekor.sig
+          cosign verify "${IMAGE_PINNED}" --output-certificate rekor-cert.pem --output-signature rekor.sig
           echo "Certificate and signature artifacts emitted for transparency." >> release-notes.md
       - name: Upload release notes
         uses: actions/upload-artifact@v4

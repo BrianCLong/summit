@@ -26,7 +26,9 @@ export async function createApp(): Promise<express.Application> {
   await startObservability();
   const attributeService = new AttributeService();
   const stepUpManager = new StepUpManager();
-  const trustedServices = (process.env.SERVICE_AUTH_CALLERS || 'api-gateway,maestro')
+  const trustedServices = (
+    process.env.SERVICE_AUTH_CALLERS || 'api-gateway,maestro'
+  )
     .split(',')
     .map((v) => v.trim())
     .filter(Boolean);
@@ -238,6 +240,9 @@ export async function createApp(): Promise<express.Application> {
         }
         if (message === 'request_already_approved') {
           return res.status(409).json({ error: message });
+        }
+        if (message === 'request_expired') {
+          return res.status(410).json({ error: message });
         }
         return res.status(400).json({ error: message });
       }
