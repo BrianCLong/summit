@@ -1,0 +1,30 @@
+{
+  "manifestVersion": "1.0",
+  "bundleId": "bundle-valid",
+  "generatedAt": "2024-01-01T00:00:00Z",
+  "rootDocument": "report",
+  "assets": [
+    {
+      "id": "report",
+      "path": "report.txt",
+      "mediaType": "text/plain",
+      "sha256": "0aa7ed06232265434d7aab0ef9016c95d381b9ca9c7757c2c13db343f2890532",
+      "transforms": [
+        {
+          "type": "html",
+          "input": "report.txt",
+          "output": "report.html",
+          "sha256": "989ff8585612f7d6cf5248599d89e718a1f3b43ffc147d029279fd99b9f8c3fe"
+        }
+      ],
+      "evidence": ["e1"]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "e1",
+      "path": "evidence.txt",
+      "sha256": "cc04e50cf876f18ce6e7d7c0d62b0c83a61548c16ed83e8c6cadba911b35a518"
+    }
+  ]
+}

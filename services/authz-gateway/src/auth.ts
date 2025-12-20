@@ -42,7 +42,6 @@ export async function login(username: string, password: string) {
     tenantId: user.tenantId,
     allowed: true,
     reason: 'login',
-    apiMethod: 'auth.login',
   });
   return token;
 }
@@ -71,7 +70,6 @@ export async function oidcLogin(idToken: string) {
     tenantId: (payload as { tenantId?: string }).tenantId || 'unknown',
     allowed: true,
     reason: 'oidc_login',
-    apiMethod: 'auth.oidc_login',
   });
   return sessionToken;
 }

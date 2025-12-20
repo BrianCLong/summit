@@ -32,12 +32,8 @@ export function lookupApiClient(apiKey: string): ApiClient | null {
   if (!record || record.revoked) {
     return null;
   }
-  return {
-    keyId: record.keyId,
-    clientId: record.clientId,
-    tenantId: record.tenantId,
-    subjectHint: record.subjectHint,
-  };
+  const { hashedKey: _hashedKey, ...client } = record;
+  return client;
 }
 
 export const TEST_API_KEY = 'demo-external-key-123';

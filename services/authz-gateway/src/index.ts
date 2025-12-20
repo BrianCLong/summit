@@ -2,11 +2,9 @@ import express from 'express';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import pino from 'pino';
 import pinoHttp from 'pino-http';
-import type { ClientRequest } from 'http';
 import { initKeys, getPublicJwk } from './keys';
 import { login, introspect, oidcLogin } from './auth';
 import { requireAuth } from './middleware';
-import { lookupApiClient, type ApiClient } from './api-keys';
 import {
   startObservability,
   metricsHandler,
@@ -17,100 +15,11 @@ import {
 import { AttributeService } from './attribute-service';
 import { StepUpManager } from './stepup';
 import { authorize } from './policy';
-import { log } from './audit';
 import type { AuthenticatedRequest } from './middleware';
-import type { ResourceAttributes, SubjectAttributes } from './types';
+import type { ResourceAttributes } from './types';
 import { sessionManager } from './session';
 import { requireServiceAuth } from './service-auth';
-import { emitApiCallEvent } from './events';
-import { RateLimiter, type RateLimitStatus } from './rate-limit';
-import { QuotaManager, type QuotaStatus } from './quota';
-
-function parsePositiveInt(value?: string, fallback?: number): number | null {
-  if (value === undefined || value === null) return fallback ?? null;
-  const asNumber = Number(value);
-  if (!Number.isFinite(asNumber) || asNumber <= 0) {
-    return fallback ?? null;
-  }
-  return asNumber;
-}
-
-async function resolveResourceAttributes(
-  attributeService: AttributeService,
-  subject: SubjectAttributes,
-  resourceInput?: Partial<ResourceAttributes>,
-): Promise<ResourceAttributes> {
-  if (resourceInput?.id) {
-    try {
-      const fromCatalog = await attributeService.getResourceAttributes(
-        resourceInput.id,
-      );
-      return {
-        ...fromCatalog,
-        ...resourceInput,
-        tags: resourceInput.tags ?? fromCatalog.tags,
-      };
-    } catch (error) {
-      if (resourceInput.tenantId) {
-        return {
-          id: resourceInput.id,
-          tenantId: resourceInput.tenantId,
-          residency: resourceInput.residency || subject.residency,
-          classification: resourceInput.classification || subject.clearance,
-          tags: resourceInput.tags || [],
-        };
-      }
-      throw error;
-    }
-  }
-
-  return {
-    id: resourceInput?.id || 'inline',
-    tenantId: resourceInput?.tenantId || subject.tenantId,
-    residency: resourceInput?.residency || subject.residency,
-    classification: resourceInput?.classification || subject.clearance,
-    tags: resourceInput?.tags || [],
-  };
-}
-
-function applyGovernanceHeaders(
-  res: express.Response,
-  rateStatus?: RateLimitStatus | null,
-  quotaStatus?: QuotaStatus | null,
-) {
-  if (rateStatus) {
-    res.setHeader('X-RateLimit-Limit', String(rateStatus.limit));
-    res.setHeader('X-RateLimit-Remaining', String(rateStatus.remaining));
-    res.setHeader('X-RateLimit-Reset', String(rateStatus.reset));
-  }
-
-  if (quotaStatus) {
-    res.setHeader('X-Quota-Limit', String(quotaStatus.limit));
-    res.setHeader('X-Quota-Remaining', String(quotaStatus.remaining));
-    res.setHeader('X-Quota-Reset', String(quotaStatus.reset));
-  }
-}
-
-function createRateLimiter(): RateLimiter | null {
-  const limit = parsePositiveInt(process.env.API_RATE_LIMIT ?? undefined);
-  if (!limit) return null;
-  const windowMs = parsePositiveInt(process.env.API_RATE_WINDOW_MS, 60_000);
-  return new RateLimiter({ limit, windowMs: windowMs ?? 60_000 });
-}
-
-function createQuotaManager(): QuotaManager | null {
-  const limit = parsePositiveInt(process.env.API_QUOTA_LIMIT ?? undefined);
-  if (!limit) return null;
-  const windowMs = parsePositiveInt(process.env.API_QUOTA_WINDOW_MS, 60_000);
-  return new QuotaManager({ limit, windowMs: windowMs ?? 60_000 });
-}
-
-function sanitizeHeaderValue(value?: string | string[]): string | undefined {
-  if (Array.isArray(value)) {
-    return value[0];
-  }
-  return typeof value === 'string' ? value : undefined;
-}
+import { breakGlassManager } from './break-glass';
 
 export async function createApp(): Promise<express.Application> {
   await initKeys();
@@ -123,8 +32,6 @@ export async function createApp(): Promise<express.Application> {
     .split(',')
     .map((v) => v.trim())
     .filter(Boolean);
-  const rateLimiter = createRateLimiter();
-  const quotaManager = createQuotaManager();
 
   const app: express.Application = express();
   app.use(tracingContextMiddleware);
@@ -222,11 +129,40 @@ export async function createApp(): Promise<express.Application> {
             .json({ error: 'subject_id_and_action_required' });
         }
         const subject = await attributeService.getSubjectAttributes(subjectId);
-        const resource = await resolveResourceAttributes(
-          attributeService,
-          subject,
-          req.body?.resource,
-        );
+        let resource: ResourceAttributes;
+        if (req.body?.resource?.id) {
+          try {
+            const fromCatalog = await attributeService.getResourceAttributes(
+              req.body.resource.id,
+            );
+            resource = {
+              ...fromCatalog,
+              ...req.body.resource,
+            };
+          } catch (error) {
+            if (req.body.resource.tenantId) {
+              resource = {
+                id: req.body.resource.id,
+                tenantId: req.body.resource.tenantId,
+                residency: req.body.resource.residency || subject.residency,
+                classification:
+                  req.body.resource.classification || subject.clearance,
+                tags: req.body.resource.tags || [],
+              };
+            } else {
+              throw error;
+            }
+          }
+        } else {
+          resource = {
+            id: req.body?.resource?.id || 'inline',
+            tenantId: req.body?.resource?.tenantId || subject.tenantId,
+            residency: req.body?.resource?.residency || subject.residency,
+            classification:
+              req.body?.resource?.classification || subject.clearance,
+            tags: req.body?.resource?.tags || [],
+          };
+        }
         const decision = await authorize({
           subject,
           resource,
@@ -246,160 +182,72 @@ export async function createApp(): Promise<express.Application> {
     },
   );
 
-  app.post('/v1/companyos/decisions:check', async (req, res) => {
-    const start = Date.now();
-    const apiMethod = 'companyos.decisions.check';
-    const apiKey = sanitizeHeaderValue(req.headers['x-api-key']);
-    const subjectId = req.body?.subject?.id as string | undefined;
-    const action = req.body?.action as string | undefined;
-
-    const sendResponse = async ({
-      statusCode,
-      body,
-      client,
-      subject,
-      resource,
-      decisionReason,
-      decisionAllowed,
-      obligations,
-      error,
-    }: {
-      statusCode: number;
-      body: Record<string, unknown>;
-      client?: ApiClient | null;
-      subject?: SubjectAttributes;
-      resource?: ResourceAttributes;
-      decisionReason?: string;
-      decisionAllowed?: boolean;
-      obligations?: unknown;
-      error?: string;
-    }) => {
-      const traceId = emitApiCallEvent({
-        tenantId: client?.tenantId || 'unknown',
-        clientId: client?.clientId || 'unknown',
-        subjectId: subject?.id || subjectId,
-        apiMethod,
-        statusCode,
-        decision: decisionReason,
-        latencyMs: Date.now() - start,
-        error,
-      });
-
-      if (client) {
-        log({
-          subject: subject?.id || subjectId || 'unknown',
-          action: action || 'unknown',
-          resource: resource?.id || req.body?.resource?.id || 'unknown',
-          tenantId: subject?.tenantId || client.tenantId,
-          allowed: decisionAllowed ?? false,
-          reason: decisionReason || error || 'unknown',
-          obligations: Array.isArray(obligations) ? obligations : undefined,
-          resourceAttributes: resource,
-          traceId,
-          clientId: client.clientId,
-          apiMethod,
-          context: {
-            statusCode,
-          },
-        });
+  app.post(
+    '/access/break-glass/request',
+    requireAuth(attributeService, {
+      action: 'break-glass:request',
+    }),
+    (req: AuthenticatedRequest, res) => {
+      const justification = String(req.body?.justification || '').trim();
+      const ticketId = String(req.body?.ticketId || '').trim();
+      if (!justification || !ticketId) {
+        return res
+          .status(400)
+          .json({ error: 'justification_and_ticket_required' });
       }
+      const scope = Array.isArray(req.body?.scope)
+        ? req.body.scope.map(String).filter(Boolean)
+        : ['break_glass:elevated'];
+      try {
+        const record = breakGlassManager.createRequest(
+          String(req.user?.sub || ''),
+          justification,
+          ticketId,
+          scope,
+        );
+        return res.status(201).json({
+          requestId: record.id,
+          status: record.status,
+          scope: record.scope,
+        });
+      } catch (error) {
+        return res.status(400).json({ error: (error as Error).message });
+      }
+    },
+  );
 
-      return res.status(statusCode).json({ ...body, trace_id: traceId });
-    };
-
-    if (!apiKey) {
-      return sendResponse({
-        statusCode: 401,
-        body: { error: 'missing_api_key' },
-        decisionReason: 'missing_api_key',
-        decisionAllowed: false,
-      });
-    }
-
-    const client = lookupApiClient(apiKey);
-    if (!client) {
-      return sendResponse({
-        statusCode: 401,
-        body: { error: 'invalid_api_key' },
-        decisionReason: 'invalid_api_key',
-        decisionAllowed: false,
-      });
-    }
-
-    const rateStatus = rateLimiter?.check(client.keyId);
-    const quotaStatus = quotaManager?.consume(client.keyId);
-    applyGovernanceHeaders(res, rateStatus, quotaStatus);
-
-    if (rateStatus && !rateStatus.allowed) {
-      return sendResponse({
-        statusCode: 429,
-        body: { error: 'rate_limit_exceeded' },
-        client,
-        decisionReason: 'rate_limit_exceeded',
-        decisionAllowed: false,
-      });
-    }
-
-    if (quotaStatus && !quotaStatus.allowed) {
-      return sendResponse({
-        statusCode: 429,
-        body: { error: 'quota_exhausted' },
-        client,
-        decisionReason: 'quota_exhausted',
-        decisionAllowed: false,
-      });
-    }
-
-    if (!subjectId || !action) {
-      return sendResponse({
-        statusCode: 400,
-        body: { error: 'subject_id_and_action_required' },
-        client,
-        decisionReason: 'validation_failed',
-        decisionAllowed: false,
-      });
-    }
-
-    try {
-      const subject = await attributeService.getSubjectAttributes(subjectId);
-      const resource = await resolveResourceAttributes(
-        attributeService,
-        subject,
-        req.body?.resource,
-      );
-      const decision = await authorize({
-        subject,
-        resource,
-        action,
-        context: attributeService.getDecisionContext(
-          String(req.body?.context?.currentAcr || 'loa1'),
-        ),
-      });
-      return sendResponse({
-        statusCode: 200,
-        body: {
-          allow: decision.allowed,
-          reason: decision.reason,
-          obligations: decision.obligations,
-        },
-        client,
-        subject,
-        resource,
-        decisionReason: decision.reason,
-        decisionAllowed: decision.allowed,
-        obligations: decision.obligations,
-      });
-    } catch (error) {
-      return sendResponse({
-        statusCode: 400,
-        body: { error: (error as Error).message },
-        client,
-        decisionReason: (error as Error).message,
-        decisionAllowed: false,
-        error: (error as Error).message,
-      });
-    }
-  });
+  app.post(
+    '/access/break-glass/approve',
+    requireAuth(attributeService, {
+      action: 'break-glass:approve',
+      requiredAcr: 'loa2',
+    }),
+    async (req: AuthenticatedRequest, res) => {
+      const requestId = String(req.body?.requestId || '').trim();
+      if (!requestId) {
+        return res.status(400).json({ error: 'request_id_required' });
+      }
+      try {
+        const approval = await breakGlassManager.approve(
+          requestId,
+          String(req.user?.sub || ''),
+        );
+        return res.json(approval);
+      } catch (error) {
+        const message = (error as Error).message;
+        if (message === 'request_not_found') {
+          return res.status(404).json({ error: message });
+        }
+        if (message === 'request_already_approved') {
+          return res.status(409).json({ error: message });
+        }
+        if (message === 'request_expired') {
+          return res.status(410).json({ error: message });
+        }
+        return res.status(400).json({ error: message });
+      }
+    },
+  );
 
   app.post(
     '/auth/webauthn/challenge',
@@ -410,19 +258,13 @@ export async function createApp(): Promise<express.Application> {
     (req: AuthenticatedRequest, res) => {
       try {
         const userId = String(req.user?.sub || '');
-        const sessionId = String(req.user?.sid || 'session-unknown');
+        const sessionId = String(req.user?.sid || '');
         const challenge = stepUpManager.createChallenge(userId, {
           sessionId,
-          requestedAction: String(req.body?.action || 'dataset:read'),
-          resourceId:
-            sanitizeHeaderValue(req.headers['x-resource-id']) ||
-            (typeof req.body?.resourceId === 'string'
-              ? req.body.resourceId
-              : undefined),
-          classification:
-            (req.body?.classification as string | undefined) ||
-            req.subjectAttributes?.clearance,
-          tenantId: req.subjectAttributes?.tenantId || 'unknown',
+          requestedAction: String(req.body?.action || 'step-up:challenge'),
+          resourceId: req.body?.resourceId,
+          classification: req.body?.classification,
+          tenantId: req.subjectAttributes?.tenantId,
           currentAcr: String(req.user?.acr || 'loa1'),
         });
         res.json(challenge);
@@ -442,7 +284,6 @@ export async function createApp(): Promise<express.Application> {
       try {
         const userId = String(req.user?.sub || '');
         const { credentialId, signature, challenge } = req.body || {};
-        const sid = String(req.user?.sid || '');
         if (!credentialId || !signature || !challenge) {
           return res.status(400).json({ error: 'missing_challenge_payload' });
         }
@@ -453,8 +294,9 @@ export async function createApp(): Promise<express.Application> {
             signature,
             challenge,
           },
-          sid,
+          String(req.user?.sid || ''),
         );
+        const sid = String(req.user?.sid || '');
         const token = await sessionManager.elevateSession(sid, {
           acr: 'loa2',
           amr: ['hwk', 'fido2'],
@@ -478,12 +320,10 @@ export async function createApp(): Promise<express.Application> {
       target: upstream,
       changeOrigin: true,
       pathRewrite: { '^/protected': '' },
-      on: {
-        proxyReq: (proxyReq: ClientRequest) => {
-          injectTraceContext(proxyReq);
-        },
+      onProxyReq: (proxyReq) => {
+        injectTraceContext(proxyReq);
       },
-    }),
+    } as any),
   );
 
   return app;

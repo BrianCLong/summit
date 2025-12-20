@@ -24,7 +24,7 @@ function signChallenge(challenge: string) {
   return signer.sign(privateKey).toString('base64url');
 }
 
-async function stepUp(app: express.Application, token: string) {
+async function stepUp(app: express.Express, token: string) {
   const challengeRes = await request(app)
     .post('/auth/webauthn/challenge')
     .set('Authorization', `Bearer ${token}`)

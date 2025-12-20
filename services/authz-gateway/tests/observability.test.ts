@@ -54,7 +54,7 @@ describe('trace context propagation', () => {
     await provider.shutdown();
   });
 
-  it('adds authorization baggage entries for downstream spans', async () => {
+  it('adds authorization baggage entries for downstream spans', () => {
     const provider = new BasicTracerProvider();
     provider.register();
     const tracer = provider.getTracer('baggage-test');

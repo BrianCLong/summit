@@ -11,10 +11,7 @@
 | Telemetry   | traces/metrics/logs              |           90 days | performance      |       aggregate past 90d |
 | Backups     | DB snapshots                     |           35 days | DR/BCP           |  encrypted, cross-region |
 
-## Decision Audit Bus
-
-- AuthZ gateway decision events (tamper-evident, HMAC-chained JSONL) inherit the **Audit** retention of seven years; preserve chain anchors alongside raw files (see `services/authz-gateway/tests/fixtures/decision-audit-sample.jsonl` for the canonical shape).
-- Rotate `AUDIT_HMAC_KEY` on schedule; keep prior keys escrowed to verify historic chains without rewriting existing logs.
+Zero-trust policy decision events are mirrored onto the audit bus and SIEM with the same **7-year** retention, using the tamper-evident chain shown in `artifacts/logs/policy-decision-audit-sample.json`.
 
 ## Dual-Control Deletion
 

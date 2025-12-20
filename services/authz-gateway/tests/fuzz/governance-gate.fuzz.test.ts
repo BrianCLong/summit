@@ -14,9 +14,7 @@ import fc, { type Arbitrary } from 'fast-check';
 import { SignJWT } from 'jose';
 import path from 'path';
 import { mkdirSync, writeFileSync } from 'fs';
-// @ts-expect-error types unavailable in this environment
 import { createCoverageMap } from 'istanbul-lib-coverage';
-// @ts-expect-error types unavailable in this environment
 import type { CoverageSummaryData } from 'istanbul-lib-coverage';
 
 import * as policy from '../../src/policy';
@@ -249,9 +247,7 @@ describe('governance gate fuzzing', () => {
       'services/authz-gateway/src/policy.ts',
     ];
     for (const file of targetFiles) {
-      const match = map
-        .files()
-        .find((candidate: string) => candidate.endsWith(file));
+      const match = map.files().find((candidate) => candidate.endsWith(file));
       if (!match) {
         continue;
       }

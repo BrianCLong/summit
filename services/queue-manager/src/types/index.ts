@@ -63,6 +63,10 @@ export interface QueueMetrics {
   throughput: number; // jobs per minute
   avgProcessingTime: number; // ms
   errorRate: number; // percentage
+  deadLetter?: number;
+  deadLetterRate?: number; // percentage
+  retries?: number;
+  leaseExpirations?: number;
 }
 
 export interface JobResult {
@@ -77,9 +81,12 @@ export interface JobResult {
 
 export interface DeadLetterJobData {
   originalQueue: string;
-  originalJobId: string;
+  originalJobId: string | number;
+  originalName?: string;
   originalData: any;
   failureReason: string;
   failedAt: Date;
   attemptsMade: number;
+  errorStack?: string;
+  fatal?: boolean;
 }
