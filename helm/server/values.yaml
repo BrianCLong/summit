@@ -3,11 +3,41 @@ image:
   tag: ''
   pullPolicy: IfNotPresent
 
+imagePullSecrets: []
+
 replicaCount: 2
+
+istio:
+  enabled: true
+  peerAuthentication: strict
+
+blueGreen:
+  enabled: true
+  color: blue
+  selectorColor: blue
+  previewColor: green
+  promotionJob:
+    enabled: true
+    image: bitnami/kubectl:1.30
 
 service:
   type: ClusterIP
   port: 4000
+
+probes:
+  liveness:
+    path: /healthz
+    initialDelaySeconds: 20
+    periodSeconds: 10
+  readiness:
+    path: /healthz
+    initialDelaySeconds: 10
+    periodSeconds: 10
+  startup:
+    enabled: true
+    path: /healthz
+    failureThreshold: 30
+    periodSeconds: 5
 
 env:
   - name: NODE_ENV
@@ -72,7 +102,7 @@ resources:
 
 ingress:
   enabled: true
-  className: nginx
+  className: istio
   hosts:
     - host: api.example.com
       paths:
@@ -91,12 +121,15 @@ hpa:
   minReplicas: 2
   maxReplicas: 10
   targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 75
+  customMetrics: []
   # Scale up when cypher queries exceed this rate (queries/sec)
   cypherQueryRate: null
 
 networkPolicy:
   enabled: true
   allowNamespaces: []
+  egressFQDNs: []
 
 serviceMonitor:
   enabled: true

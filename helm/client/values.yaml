@@ -5,6 +5,13 @@ image:
 
 replicaCount: 2
 
+istio:
+  enabled: true
+
+blueGreen:
+  enabled: true
+  selectorColor: blue
+
 service:
   type: ClusterIP
   port: 80
@@ -18,6 +25,21 @@ resources:
   limits:
     cpu: 500m
     memory: 512Mi
+
+probes:
+  liveness:
+    path: /
+    initialDelaySeconds: 10
+    periodSeconds: 10
+  readiness:
+    path: /
+    initialDelaySeconds: 5
+    periodSeconds: 10
+  startup:
+    enabled: false
+    path: /
+    failureThreshold: 30
+    periodSeconds: 5
 
 ingress:
   enabled: true
@@ -37,6 +59,7 @@ hpa:
   minReplicas: 2
   maxReplicas: 10
   targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 75
 
 serviceMonitor:
   enabled: false

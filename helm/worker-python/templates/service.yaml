@@ -1,10 +1,16 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: { { include "worker-python.fullname" . } }
-  labels: { { - include "worker-python.labels" . | nindent 4 } }
+  name: {{ include "worker-python.fullname" . }}
+  labels:
+    {{- include "worker-python.labels" . | nindent 4 }}
+    release-color: {{ .Values.blueGreen.selectorColor | default "blue" }}
 spec:
-  selector: { { - include "worker-python.selectorLabels" . | nindent 4 } }
+  selector:
+    {{- include "worker-python.selectorLabels" . | nindent 4 }}
+    release-color: {{ .Values.blueGreen.selectorColor | default "blue" }}
   ports:
-    - port: 50051
+    - port: {{ .Values.service.port | default 50051 }}
+      targetPort: http
       name: grpc
+      protocol: TCP

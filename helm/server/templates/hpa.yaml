@@ -17,6 +17,12 @@ spec:
         target:
           type: Utilization
           averageUtilization: {{ .Values.hpa.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.hpa.targetMemoryUtilizationPercentage }}
     {{- if .Values.hpa.cypherQueryRate }}
     - type: Pods
       pods:
@@ -25,6 +31,15 @@ spec:
         target:
           type: AverageValue
           averageValue: {{ .Values.hpa.cypherQueryRate }}
+    {{- end }}
+    {{- range .Values.hpa.customMetrics }}
+    - type: Pods
+      pods:
+        metric:
+          name: {{ .name }}
+        target:
+          type: AverageValue
+          averageValue: {{ .averageValue }}
     {{- end }}
 {{- end }}
 
