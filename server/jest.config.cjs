@@ -2,7 +2,6 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  resolver: 'jest-ts-webcompat-resolver',
   setupFilesAfterEnv: [
     '<rootDir>/tests/setup/jest.setup.ts',
     'jest-extended/all',
@@ -20,18 +19,15 @@ module.exports = {
     '/playwright-tests/',
   ],
   moduleNameMapper: {
+    '^../../config/logger(\\.js)?$': '<rootDir>/src/config/__mocks__/logger.ts',
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
-    // Handle ESM imports in tests
-    '^(\\.{1,2}/.*)\\.js$': '$1'
+    '^(\\.{1,2}/.*)\\.js$': '$1',
   },
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   transform: {
-    '^.+\\.tsx?$': ['ts-jest', {
-      useESM: true,
-      tsconfig: 'tsconfig.json'
-    }]
+    '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
   },
-  extensionsToTreatAsEsm: ['.ts'],
   testTimeout: 30000,
   globalSetup: '<rootDir>/tests/setup/globalSetup.cjs',
   globalTeardown: '<rootDir>/tests/setup/globalTeardown.cjs',

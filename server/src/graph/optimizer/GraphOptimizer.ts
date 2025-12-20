@@ -5,9 +5,8 @@ import { QueryCostEstimator } from './QueryCostEstimator.js';
 import { IndexAdvisor } from './IndexAdvisor.js';
 import { OptimizationContext, QueryPlan } from './types.js';
 import neo4j from 'neo4j-driver';
-// import { telemetry } from '../../lib/telemetry/comprehensive-telemetry.js';
+import { telemetry } from '../../lib/telemetry/comprehensive-telemetry.js';
 import { BatchQueryExecutor } from './BatchQueryExecutor.js';
-import { QueryPlanner } from './QueryPlanner.js';
 
 export class GraphOptimizer {
   private analyzer = new QueryAnalyzer();
@@ -16,11 +15,29 @@ export class GraphOptimizer {
   private costEstimator = new QueryCostEstimator();
   private indexAdvisor = new IndexAdvisor();
   private batchExecutor = new BatchQueryExecutor();
-  private planner = new QueryPlanner();
 
   public async optimize(query: string, params: any, context: OptimizationContext): Promise<QueryPlan> {
-    // Use the comprehensive QueryPlanner
-    return this.planner.plan(query, params, context);
+    const analysis = this.analyzer.analyze(query, context);
+    const { optimizedQuery, optimizations } = this.rewriter.rewrite(query, analysis);
+
+    const cost = this.costEstimator.estimate(analysis);
+    const indexRecommendation = this.indexAdvisor.recommend(analysis.requiredIndexes);
+    if (indexRecommendation.name === 'missing_indexes') {
+        optimizations.push(indexRecommendation);
+    }
+
+    const cacheStrategy = this.cache.generateStrategy(analysis, context);
+
+    return {
+      originalQuery: query,
+      optimizedQuery,
+      indexes: analysis.requiredIndexes,
+      estimatedCost: cost.cost,
+      estimatedRows: cost.rows,
+      optimizations,
+      cacheStrategy,
+      executionHints: [] // Populate with heuristics if needed
+    };
   }
 
   public async executeCached(
@@ -29,20 +46,15 @@ export class GraphOptimizer {
       context: OptimizationContext,
       executeFn: (q: string, p: any) => Promise<any>
   ): Promise<any> {
-      // 1. Optimize & Plan
+      // 1. Optimize
       const plan = await this.optimize(query, params, context);
 
       // 2. Check Cache
-      let cached = null;
       if (plan.cacheStrategy?.enabled) {
           const key = this.cache.generateKey(query, params, context);
-          cached = await this.cache.get(key);
+          const cached = await this.cache.get(key);
           if (cached) {
               // telemetry.subsystems.database.cache.hits.add(1);
-
-              // Stale-While-Revalidate: Return cached, but re-fetch if stale (not fully implemented here as we need background job,
-              // but we can return immediately).
-              // For strict consistency, we return cached only if valid.
               return cached;
           }
           // telemetry.subsystems.database.cache.misses.add(1);

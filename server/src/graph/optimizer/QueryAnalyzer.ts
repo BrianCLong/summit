@@ -1,4 +1,4 @@
-import { QueryAnalysis, OptimizationContext, OptimizationRule, QueryIntent } from './types.js';
+import { QueryAnalysis, OptimizationContext, OptimizationRule } from './types.js';
 
 export class QueryAnalyzer {
   public analyze(query: string, context: OptimizationContext): QueryAnalysis {
@@ -25,7 +25,7 @@ export class QueryAnalyzer {
     const hasWildcard =
       lowerQuery.includes('*') || lowerQuery.includes('collect(');
     const isRead =
-      lowerQuery.includes('match') || lowerQuery.includes('return') || lowerQuery.includes('call');
+      lowerQuery.includes('match') || lowerQuery.includes('return');
     const isWrite =
       lowerQuery.includes('create') ||
       lowerQuery.includes('merge') ||
@@ -49,9 +49,6 @@ export class QueryAnalyzer {
       hasWildcard,
     });
 
-    // Infer Intent
-    const intent = this.inferIntent(lowerQuery, isWrite);
-
     return {
       complexity,
       nodeCount,
@@ -64,17 +61,7 @@ export class QueryAnalyzer {
       isWrite,
       affectedLabels,
       requiredIndexes,
-      intent
     };
-  }
-
-  private inferIntent(lowerQuery: string, isWrite: boolean): QueryIntent {
-      if (isWrite) return 'write';
-      if (lowerQuery.includes('shortestpath') || lowerQuery.includes('allshortestpaths')) return 'path_finding';
-      if (lowerQuery.includes('apoc.path') || lowerQuery.includes('neighborhood')) return 'neighborhood';
-      if (lowerQuery.includes('gds.') || lowerQuery.includes('centrality')) return 'centrality';
-      if (lowerQuery.includes('count(') || lowerQuery.includes('sum(')) return 'aggregation';
-      return 'read';
   }
 
   private calculateComplexity(factors: {
@@ -97,13 +84,13 @@ export class QueryAnalyzer {
 
   private analyzeRequiredIndexes(query: string, labels: string[]): string[] {
     const indexes: string[] = [];
-    // const lowerQuery = query.toLowerCase();
+    const lowerQuery = query.toLowerCase();
 
     const patterns = [
-      { pattern: /where\s+(\w+)\.(\w+)\s*=/gi, type: 'equality' },
-      { pattern: /where\s+(\w+)\.(\w+)\s*in/gi, type: 'in' },
-      { pattern: /where\s+(\w+)\.(\w+)\s*<|>|<=|>=/gi, type: 'range' },
-      { pattern: /order\s+by\s+(\w+)\.(\w+)/gi, type: 'sort' },
+      { pattern: /where\s+(\w+)\.(\w+)\s*=/, type: 'equality' },
+      { pattern: /where\s+(\w+)\.(\w+)\s*in/, type: 'in' },
+      { pattern: /where\s+(\w+)\.(\w+)\s*<|>|<=|>=/, type: 'range' },
+      { pattern: /order\s+by\s+(\w+)\.(\w+)/, type: 'sort' },
     ];
 
     for (const { pattern } of patterns) {

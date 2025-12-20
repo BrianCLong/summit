@@ -1,5 +1,5 @@
-// @ts-ignore
 import GraphAnalyticsService from './GraphAnalyticsService.js';
+import { runCypher } from '../graph/neo4j.js';
 
 export interface NarrativeSnapshot {
   timestamp: Date;
@@ -24,7 +24,7 @@ export interface TopicTrend {
 }
 
 export class NarrativeAnalysisService {
-  private graphService: any;
+  private graphService: GraphAnalyticsService;
   private snapshots: Map<string, NarrativeSnapshot[]> = new Map();
 
   constructor() {
@@ -37,9 +37,16 @@ export class NarrativeAnalysisService {
    */
   async takeSnapshot(narrativeId: string): Promise<NarrativeSnapshot> {
     // 1. Calculate metrics using GraphAnalyticsService
-    const basicMetrics = await this.graphService.calculateBasicMetrics(narrativeId);
+    // Assuming calculateBasicMetrics doesn't exist yet in the interface, using standard centrality as proxy or implementing it.
+    // Let's assume we want basic stats. GraphAnalyticsService doesn't have "getStats" yet.
+    // We will query Neo4j directly here for global stats of the narrative subgraph.
 
-    // 2. Identify top topics (mocked or using another service)
+    // We assume entities in a narrative are tagged with `narrativeId` property or related to a Narrative node.
+    // For MVP, assuming `investigationId` on entities = narrativeId.
+
+    const stats = await this.getNarrativeStats(narrativeId);
+
+    // 2. Identify top topics
     const topTopics = await this.extractTopTopics(narrativeId);
 
     // 3. Calculate amplification velocity
@@ -49,11 +56,11 @@ export class NarrativeAnalysisService {
       timestamp: new Date(),
       narrativeId,
       metrics: {
-        nodeCount: basicMetrics.nodeCount,
-        edgeCount: basicMetrics.edgeCount,
-        avgDegree: basicMetrics.avgDegree,
-        density: basicMetrics.density,
-        clusteringCoefficient: 0 // Placeholder, or implement in GraphService
+        nodeCount: stats.nodeCount,
+        edgeCount: stats.edgeCount,
+        avgDegree: stats.avgDegree,
+        density: stats.density,
+        clusteringCoefficient: 0 // Expensive to calc on large graph without GDS
       },
       topTopics,
       amplificationVelocity: velocity
@@ -93,7 +100,7 @@ export class NarrativeAnalysisService {
       } else if (topic.frequency > prevTopic.frequency * 1.2) {
          trends.push({
           topic: topic.topic,
-          emergenceTime: recent.timestamp, // Already emerged, but status update
+          emergenceTime: recent.timestamp,
           peakVelocity: topic.frequency,
           status: 'peaking'
         });
@@ -110,16 +117,74 @@ export class NarrativeAnalysisService {
     return trends;
   }
 
+  private async getNarrativeStats(narrativeId: string) {
+      const cypher = `
+        MATCH (n:Entity {investigationId: $narrativeId})
+        OPTIONAL MATCH (n)-[r]-(m:Entity {investigationId: $narrativeId})
+        RETURN count(distinct n) as nodeCount, count(r) as edgeCount
+      `;
+      // Note: edgeCount is double counted in undirected sense if we don't handle direction carefully,
+      // but "count(r)" counts relationships.
+
+      const result = await runCypher<{nodeCount: number, edgeCount: number}>(cypher, { narrativeId });
+      const nodeCount = Number(result[0]?.nodeCount || 0);
+      const edgeCount = Number(result[0]?.edgeCount || 0) / 2; // Undirected adjustment if needed, but let's assume directed
+
+      const avgDegree = nodeCount > 0 ? (edgeCount * 2) / nodeCount : 0;
+      const density = nodeCount > 1 ? (2 * edgeCount) / (nodeCount * (nodeCount - 1)) : 0;
+
+      return { nodeCount, edgeCount, avgDegree, density };
+  }
+
   private async extractTopTopics(narrativeId: string): Promise<{ topic: string; frequency: number }[]> {
-    // In a real impl, this would query Neo4j for most frequent keywords/hashtags in the narrative subgraph
-    return [
-      { topic: 'disinformation', frequency: 150 },
-      { topic: 'botnet', frequency: 80 }
-    ];
+    // Extract hashtags or topics from entity attributes.
+    // Since 'attributes' might be a JSON string, we fetch and parse in JS to be safe without APOC dependence.
+    const cypher = `
+        MATCH (n:Entity {investigationId: $narrativeId})
+        RETURN n.attributes as attributes
+        LIMIT 1000
+    `;
+
+    const result = await runCypher<{attributes: string | any}>(cypher, { narrativeId });
+
+    const topicCounts = new Map<string, number>();
+
+    result.forEach(row => {
+        let attrs = row.attributes;
+        if (typeof attrs === 'string') {
+            try {
+                attrs = JSON.parse(attrs);
+            } catch (e) {
+                return; // Skip invalid JSON
+            }
+        }
+
+        if (attrs && Array.isArray(attrs.hashtags)) {
+            attrs.hashtags.forEach((tag: string) => {
+                const count = topicCounts.get(tag) || 0;
+                topicCounts.set(tag, count + 1);
+            });
+        }
+    });
+
+    return Array.from(topicCounts.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10)
+        .map(([topic, frequency]) => ({ topic, frequency }));
   }
 
   private async calculateAmplificationVelocity(narrativeId: string): Promise<number> {
     // Calculate rate of new edges/nodes added in the last hour
-    return 45.5; // Mock
+    // Assuming entities have createdAt
+    const oneHourAgo = new Date(Date.now() - 3600000).toISOString();
+
+    const cypher = `
+        MATCH (n:Entity {investigationId: $narrativeId})
+        WHERE n.createdAt > $oneHourAgo
+        RETURN count(n) as newNodes
+    `;
+
+    const result = await runCypher<{newNodes: number}>(cypher, { narrativeId, oneHourAgo });
+    return Number(result[0]?.newNodes || 0);
   }
 }

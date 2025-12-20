@@ -1,5 +1,5 @@
 import { getNeo4jDriver } from '../../db/neo4j.js';
-// import { telemetry } from '../../lib/telemetry/comprehensive-telemetry.js';
+import { telemetry } from '../../lib/telemetry/comprehensive-telemetry.js';
 
 export class BatchQueryExecutor {
   private queue: Array<{

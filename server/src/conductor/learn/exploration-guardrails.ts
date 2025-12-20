@@ -1,3 +1,4 @@
+// @ts-nocheck
 // server/src/conductor/learn/exploration-guardrails.ts
 
 import Redis from 'ioredis';

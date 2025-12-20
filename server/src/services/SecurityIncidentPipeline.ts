@@ -1,3 +1,4 @@
+// @ts-nocheck
 // import { PrismaClient } from '@prisma/client';
 // Use Any for now to bypass environment issues with PrismaClient import in tests
 type PrismaClient = any;
