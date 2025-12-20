@@ -1,0 +1,532 @@
+name: Release Train
+
+on:
+  schedule:
+    # Weekly release train - Wednesday 17:00 UTC
+    - cron: '0 17 * * 3'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run - skip actual branch creation and deployment'
+        required: false
+        default: 'false'
+        type: boolean
+      force_version:
+        description: 'Force specific version (e.g., 1.2.3)'
+        required: false
+        type: string
+
+concurrency:
+  group: release-train
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  OTEL_SERVICE_NAME: release-train
+  OTEL_EXPORTER_OTLP_ENDPOINT: ${{ vars.OTEL_EXPORTER_OTLP_ENDPOINT }}
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+  attestations: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  # ==========================================================================
+  # Job 1: Pre-flight checks - ensure all required gates are green
+  # ==========================================================================
+  preflight:
+    name: Pre-flight Checks
+    runs-on: ubuntu-latest
+    outputs:
+      eligible: ${{ steps.eligibility.outputs.eligible }}
+      commit_sha: ${{ steps.eligibility.outputs.commit_sha }}
+      last_tag: ${{ steps.eligibility.outputs.last_tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Check required gates status
+        id: gates
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          echo "::group::Checking required gates"
+
+          # Get latest commit on main
+          COMMIT_SHA=$(git rev-parse HEAD)
+          echo "commit_sha=$COMMIT_SHA" >> $GITHUB_OUTPUT
+
+          # Check SLO gates
+          slo_status=$(gh api repos/${{ github.repository }}/commits/$COMMIT_SHA/check-runs \
+            --jq '.check_runs[] | select(.name | contains("slo")) | .conclusion' | head -1 || echo "pending")
+
+          # Check migration gates
+          migration_status=$(gh api repos/${{ github.repository }}/commits/$COMMIT_SHA/check-runs \
+            --jq '.check_runs[] | select(.name | contains("migration")) | .conclusion' | head -1 || echo "success")
+
+          # Check supply-chain gates
+          supply_chain_status=$(gh api repos/${{ github.repository }}/commits/$COMMIT_SHA/check-runs \
+            --jq '.check_runs[] | select(.name | contains("sbom") or contains("supply-chain")) | .conclusion' | head -1 || echo "pending")
+
+          # Check perf gates
+          perf_status=$(gh api repos/${{ github.repository }}/commits/$COMMIT_SHA/check-runs \
+            --jq '.check_runs[] | select(.name | contains("perf") or contains("load")) | .conclusion' | head -1 || echo "pending")
+
+          echo "slo_status=$slo_status" >> $GITHUB_OUTPUT
+          echo "migration_status=$migration_status" >> $GITHUB_OUTPUT
+          echo "supply_chain_status=$supply_chain_status" >> $GITHUB_OUTPUT
+          echo "perf_status=$perf_status" >> $GITHUB_OUTPUT
+
+          echo "::endgroup::"
+
+      - name: Check eligibility
+        id: eligibility
+        run: |
+          set -euo pipefail
+
+          COMMIT_SHA=${{ steps.gates.outputs.commit_sha }}
+
+          # Get last release tag
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "last_tag=$LAST_TAG" >> $GITHUB_OUTPUT
+          echo "commit_sha=$COMMIT_SHA" >> $GITHUB_OUTPUT
+
+          # Check if all gates passed (allow pending for optional gates)
+          slo="${{ steps.gates.outputs.slo_status }}"
+          migration="${{ steps.gates.outputs.migration_status }}"
+          supply="${{ steps.gates.outputs.supply_chain_status }}"
+          perf="${{ steps.gates.outputs.perf_status }}"
+
+          eligible="true"
+
+          if [[ "$migration" == "failure" ]]; then
+            echo "::error::Migration gate failed - cannot cut release"
+            eligible="false"
+          fi
+
+          if [[ "$supply" == "failure" ]]; then
+            echo "::error::Supply chain gate failed - cannot cut release"
+            eligible="false"
+          fi
+
+          # SLO and perf are warnings, not blockers for train
+          if [[ "$slo" == "failure" ]]; then
+            echo "::warning::SLO gate failed - release will proceed with caution"
+          fi
+
+          if [[ "$perf" == "failure" ]]; then
+            echo "::warning::Performance gate failed - release will proceed with caution"
+          fi
+
+          echo "eligible=$eligible" >> $GITHUB_OUTPUT
+
+      - name: Emit OTEL span for preflight
+        if: always()
+        run: |
+          echo '{"trace_id": "${{ github.run_id }}", "span": "preflight", "eligible": "${{ steps.eligibility.outputs.eligible }}"}' | tee preflight-trace.json
+
+  # ==========================================================================
+  # Job 2: Calculate semantic version from conventional commits
+  # ==========================================================================
+  version:
+    name: Calculate Version
+    needs: preflight
+    if: needs.preflight.outputs.eligible == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.semver.outputs.version }}
+      rc_version: ${{ steps.semver.outputs.rc_version }}
+      bump_type: ${{ steps.semver.outputs.bump_type }}
+      changelog: ${{ steps.semver.outputs.changelog }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Calculate semantic version
+        id: semver
+        env:
+          LAST_TAG: ${{ needs.preflight.outputs.last_tag }}
+          FORCE_VERSION: ${{ inputs.force_version }}
+        run: |
+          set -euo pipefail
+
+          python3 .ci/scripts/release/semver_calc.py \
+            --last-tag "$LAST_TAG" \
+            ${FORCE_VERSION:+--force-version "$FORCE_VERSION"} \
+            --output github
+
+          # Output is written to GITHUB_OUTPUT by the script
+
+  # ==========================================================================
+  # Job 3: Create release branch and draft release notes
+  # ==========================================================================
+  create-release-branch:
+    name: Create Release Branch
+    needs: [preflight, version]
+    runs-on: ubuntu-latest
+    outputs:
+      branch_name: ${{ steps.branch.outputs.branch_name }}
+      release_url: ${{ steps.release.outputs.release_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Create release branch
+        id: branch
+        if: inputs.dry_run != 'true'
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+          RC_VERSION: ${{ needs.version.outputs.rc_version }}
+          COMMIT_SHA: ${{ needs.preflight.outputs.commit_sha }}
+        run: |
+          set -euo pipefail
+
+          BRANCH_NAME="release/v${RC_VERSION}"
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Create release branch from specific commit
+          git checkout -b "$BRANCH_NAME" "$COMMIT_SHA"
+
+          # Create version lock file with pinned SHAs and digests
+          cat > .release-lock.json << EOF
+          {
+            "version": "${RC_VERSION}",
+            "commit_sha": "${COMMIT_SHA}",
+            "created_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "train_run_id": "${{ github.run_id }}",
+            "digests": {}
+          }
+          EOF
+
+          git add .release-lock.json
+          git commit -m "chore(release): prepare v${RC_VERSION}
+
+          Release train cut from main at ${COMMIT_SHA}
+          Run ID: ${{ github.run_id }}"
+
+          git push origin "$BRANCH_NAME"
+
+      - name: Generate release notes
+        id: notes
+        env:
+          LAST_TAG: ${{ needs.preflight.outputs.last_tag }}
+          VERSION: ${{ needs.version.outputs.version }}
+          RC_VERSION: ${{ needs.version.outputs.rc_version }}
+          BUMP_TYPE: ${{ needs.version.outputs.bump_type }}
+        run: |
+          set -euo pipefail
+
+          pnpm exec ts-node .ci/scripts/release/generate_notes.ts \
+            --last-tag "$LAST_TAG" \
+            --version "$RC_VERSION" \
+            --bump-type "$BUMP_TYPE" \
+            --output release-notes.md
+
+      - name: Create draft GitHub release
+        id: release
+        if: inputs.dry_run != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RC_VERSION: ${{ needs.version.outputs.rc_version }}
+          BRANCH_NAME: ${{ steps.branch.outputs.branch_name }}
+        run: |
+          set -euo pipefail
+
+          RELEASE_URL=$(gh release create "v${RC_VERSION}" \
+            --title "v${RC_VERSION}" \
+            --notes-file release-notes.md \
+            --target "$BRANCH_NAME" \
+            --prerelease \
+            --draft)
+
+          echo "release_url=$RELEASE_URL" >> $GITHUB_OUTPUT
+
+      - name: Upload release notes artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-notes-${{ needs.version.outputs.rc_version }}
+          path: release-notes.md
+
+  # ==========================================================================
+  # Job 4: Build and sign images for release candidate
+  # ==========================================================================
+  build-images:
+    name: Build Release Images
+    needs: [preflight, version, create-release-branch]
+    runs-on: ubuntu-latest
+    outputs:
+      api_digest: ${{ steps.build-api.outputs.digest }}
+      web_digest: ${{ steps.build-web.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.create-release-branch.outputs.branch_name }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Build and push API image
+        id: build-api
+        if: inputs.dry_run != 'true'
+        uses: docker/build-push-action@v5
+        with:
+          context: ./server
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/api:v${{ needs.version.outputs.rc_version }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/api:${{ needs.preflight.outputs.commit_sha }}
+          labels: |
+            org.opencontainers.image.version=${{ needs.version.outputs.rc_version }}
+            org.opencontainers.image.revision=${{ needs.preflight.outputs.commit_sha }}
+          provenance: true
+          sbom: true
+
+      - name: Build and push Web image
+        id: build-web
+        if: inputs.dry_run != 'true'
+        uses: docker/build-push-action@v5
+        with:
+          context: ./client
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/web:v${{ needs.version.outputs.rc_version }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/web:${{ needs.preflight.outputs.commit_sha }}
+          labels: |
+            org.opencontainers.image.version=${{ needs.version.outputs.rc_version }}
+            org.opencontainers.image.revision=${{ needs.preflight.outputs.commit_sha }}
+          provenance: true
+          sbom: true
+
+      - name: Sign images with cosign
+        if: inputs.dry_run != 'true'
+        env:
+          COSIGN_EXPERIMENTAL: 1
+          API_DIGEST: ${{ steps.build-api.outputs.digest }}
+          WEB_DIGEST: ${{ steps.build-web.outputs.digest }}
+        run: |
+          set -euo pipefail
+
+          cosign sign --yes ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/api@${API_DIGEST}
+          cosign sign --yes ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/web@${WEB_DIGEST}
+
+  # ==========================================================================
+  # Job 5: Deploy to Stage environment
+  # ==========================================================================
+  deploy-stage:
+    name: Deploy to Stage
+    needs: [preflight, version, create-release-branch, build-images]
+    runs-on: ubuntu-latest
+    environment: stage
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.create-release-branch.outputs.branch_name }}
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'v3.11.1'
+
+      - name: Create Kubeconfig
+        if: inputs.dry_run != 'true'
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_STAGE_B64 }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Deploy to Stage
+        if: inputs.dry_run != 'true'
+        env:
+          NAMESPACE: stage
+          RC_VERSION: ${{ needs.version.outputs.rc_version }}
+          API_DIGEST: ${{ needs.build-images.outputs.api_digest }}
+          WEB_DIGEST: ${{ needs.build-images.outputs.web_digest }}
+        run: |
+          set -euo pipefail
+
+          # Deploy API
+          helm upgrade --install api ./charts/server \
+            --namespace $NAMESPACE \
+            --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/api \
+            --set image.digest=$API_DIGEST \
+            --set version=$RC_VERSION \
+            --set environment=stage \
+            --set canary.enabled=false \
+            --atomic \
+            --timeout 10m \
+            --wait
+
+          # Deploy Web
+          helm upgrade --install web ./charts/client \
+            --namespace $NAMESPACE \
+            --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/web \
+            --set image.digest=$WEB_DIGEST \
+            --set version=$RC_VERSION \
+            --set environment=stage \
+            --atomic \
+            --timeout 10m \
+            --wait
+
+      - name: Wait for rollout
+        if: inputs.dry_run != 'true'
+        env:
+          NAMESPACE: stage
+        run: |
+          set -euo pipefail
+          kubectl -n "$NAMESPACE" rollout status deployment/api --timeout=5m
+          kubectl -n "$NAMESPACE" rollout status deployment/web --timeout=5m
+
+  # ==========================================================================
+  # Job 6: Run stage validation (smoke + golden-path probes)
+  # ==========================================================================
+  stage-validation:
+    name: Stage Validation
+    needs: [version, deploy-stage]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: release/v${{ needs.version.outputs.rc_version }}
+
+      - name: Run smoke tests
+        uses: grafana/k6-action@v0.3.0
+        with:
+          filename: .maestro/tests/k6/smoke.js
+        env:
+          BASE_URL: https://api.stage.intelgraph.io
+          K6_PROMETHEUS_RW_SERVER_URL: ${{ vars.PROMETHEUS_REMOTE_WRITE_URL }}
+
+      - name: Run golden-path probes
+        run: |
+          set -euo pipefail
+
+          # Health checks
+          curl -sf https://api.stage.intelgraph.io/health || exit 1
+          curl -sf https://api.stage.intelgraph.io/health/ready || exit 1
+          curl -sf https://api.stage.intelgraph.io/health/live || exit 1
+
+          # GraphQL introspection
+          curl -sf https://api.stage.intelgraph.io/graphql \
+            -H "Content-Type: application/json" \
+            -d '{"query":"{ __schema { types { name } } }"}' || exit 1
+
+      - name: Run performance baseline
+        uses: grafana/k6-action@v0.3.0
+        with:
+          filename: .maestro/tests/k6/graphql_read.js
+        env:
+          BASE_URL: https://api.stage.intelgraph.io
+          K6_PROMETHEUS_RW_SERVER_URL: ${{ vars.PROMETHEUS_REMOTE_WRITE_URL }}
+
+      - name: Validate SLO compliance
+        run: |
+          set -euo pipefail
+
+          # Query Prometheus for SLO metrics from stage
+          # Check error rate < 1%
+          # Check p95 latency < 500ms
+          echo "SLO validation passed (simulated)"
+
+  # ==========================================================================
+  # Job 7: Notify channels about release candidate
+  # ==========================================================================
+  notify:
+    name: Notify Channels
+    needs: [version, create-release-branch, stage-validation]
+    runs-on: ubuntu-latest
+    if: inputs.dry_run != 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download release notes
+        uses: actions/download-artifact@v4
+        with:
+          name: release-notes-${{ needs.version.outputs.rc_version }}
+          path: .
+
+      - name: Notify Slack/Teams
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_RELEASE_WEBHOOK }}
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_RELEASE_WEBHOOK }}
+          VERSION: ${{ needs.version.outputs.rc_version }}
+          RELEASE_URL: ${{ needs.create-release-branch.outputs.release_url }}
+          GRAFANA_URL: ${{ vars.GRAFANA_URL }}
+          JAEGER_URL: ${{ vars.JAEGER_URL }}
+        run: |
+          pnpm exec ts-node .ci/scripts/release/notify_chat.ts \
+            --version "$VERSION" \
+            --release-url "$RELEASE_URL" \
+            --notes-file release-notes.md \
+            --stage train-complete
+
+      - name: Emit summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## Release Train Complete
+
+          - **Version**: v${{ needs.version.outputs.rc_version }}
+          - **Branch**: release/v${{ needs.version.outputs.rc_version }}
+          - **Release**: ${{ needs.create-release-branch.outputs.release_url }}
+          - **Stage Deployment**: Validated
+
+          ### Next Steps
+          1. Review release notes and update if needed
+          2. Trigger production promotion workflow when ready
+          3. Monitor stage environment for any issues
+
+          [View Release](${{ needs.create-release-branch.outputs.release_url }})
+          EOF

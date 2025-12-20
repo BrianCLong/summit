@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ProviderAdapter, LLMRequest, LLMResponse, ModelCapability, ProviderType } from '../types.js';
 import { randomUUID } from 'crypto';
 

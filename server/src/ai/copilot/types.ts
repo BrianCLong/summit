@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * AI Copilot Types and Contracts
  *

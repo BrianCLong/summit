@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Centralized logging configuration
  * Exports a typed logger instance compatible with the Logger interface

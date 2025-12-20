@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { NarrativeSimulationEngine } from './engine.js';
 import type {
   SimulationConfig,

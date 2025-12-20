@@ -64,6 +64,7 @@ type Target struct {
 	// S3-specific fields
 	Bucket string `yaml:"bucket"`
 	Prefix string `yaml:"prefix"`
+	Tenant string `yaml:"tenant"`
 	Tag    string `yaml:"tag"`
 
 	// Postgres-specific fields
@@ -132,6 +133,9 @@ func (t *Target) validate() error {
 	case "s3":
 		if t.Bucket == "" {
 			return fmt.Errorf("bucket is required for s3 target")
+		}
+		if t.Tenant == "" {
+			return fmt.Errorf("tenant is required for s3 target")
 		}
 	case "postgres":
 		if t.Table == "" || t.TimestampColumn == "" {

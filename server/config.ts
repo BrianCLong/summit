@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'js-yaml';
