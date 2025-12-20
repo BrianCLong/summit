@@ -1,0 +1,39 @@
+{{- if .Values.preview }}
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: preview-budget
+  labels:
+    env: preview
+    cost-center: intelgraph-preview
+spec:
+  hard:
+    requests.cpu: "2"
+    requests.memory: 6Gi
+    limits.cpu: "4"
+    limits.memory: 8Gi
+    persistentvolumeclaims: "2"
+    services.loadbalancers: "1"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: preview-defaults
+  labels:
+    env: preview
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: 500m
+        memory: 512Mi
+      defaultRequest:
+        cpu: 200m
+        memory: 256Mi
+      max:
+        cpu: "1"
+        memory: 1Gi
+      min:
+        cpu: 100m
+        memory: 128Mi
+{{- end }}

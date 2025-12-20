@@ -6,11 +6,14 @@
  */
 export interface CRDT<T> {
   value: T;
+  type: string;
   merge(other: CRDT<T>): CRDT<T>;
+  toJSON(): any;
 }
 
 export interface CRDTFactory<T extends CRDT<any>> {
   create(value: any): T;
+  fromJSON(json: any): T;
 }
 
 // --- CRDT Implementations ---
@@ -20,6 +23,8 @@ export interface CRDTFactory<T extends CRDT<any>> {
  * A counter that only increments. Can be merged with other G-Counters.
  */
 export class GCounter implements CRDT<number> {
+  public static readonly type = 'GCounter';
+  public readonly type = GCounter.type;
   private counts: Map<string, number> = new Map();
   private nodeId: string;
 
@@ -54,6 +59,19 @@ export class GCounter implements CRDT<number> {
     });
     return merged;
   }
+
+  public toJSON(): any {
+    return {
+      nodeId: this.nodeId,
+      counts: Array.from(this.counts.entries())
+    };
+  }
+
+  public static fromJSON(json: any): GCounter {
+    const counter = new GCounter(json.nodeId);
+    counter.counts = new Map(json.counts);
+    return counter;
+  }
 }
 
 /**
@@ -61,10 +79,14 @@ export class GCounter implements CRDT<number> {
  * A counter that can be incremented and decremented, composed of two G-Counters.
  */
 export class PNCounter implements CRDT<number> {
+  public static readonly type = 'PNCounter';
+  public readonly type = PNCounter.type;
   private increments: GCounter;
   private decrements: GCounter;
+  private nodeId: string;
 
   constructor(nodeId: string) {
+    this.nodeId = nodeId;
     this.increments = new GCounter(nodeId);
     this.decrements = new GCounter(nodeId);
   }
@@ -82,10 +104,25 @@ export class PNCounter implements CRDT<number> {
   }
 
   public merge(other: PNCounter): PNCounter {
-    const merged = new PNCounter(this.increments.getNodeId());
+    const merged = new PNCounter(this.nodeId);
     merged.increments = this.increments.merge(other.increments);
     merged.decrements = this.decrements.merge(other.decrements);
     return merged;
+  }
+
+  public toJSON(): any {
+    return {
+      nodeId: this.nodeId,
+      increments: this.increments.toJSON(),
+      decrements: this.decrements.toJSON()
+    };
+  }
+
+  public static fromJSON(json: any): PNCounter {
+    const counter = new PNCounter(json.nodeId);
+    counter.increments = GCounter.fromJSON(json.increments);
+    counter.decrements = GCounter.fromJSON(json.decrements);
+    return counter;
   }
 }
 
@@ -94,6 +131,8 @@ export class PNCounter implements CRDT<number> {
  * A register where the value with the highest timestamp wins.
  */
 export class LWWRegister<T> implements CRDT<T> {
+  public static readonly type = 'LWWRegister';
+  public readonly type = LWWRegister.type;
   private _value: T;
   private timestamp: number;
   private nodeId: string;
@@ -125,6 +164,18 @@ export class LWWRegister<T> implements CRDT<T> {
       return this.nodeId > other.nodeId ? this : other;
     }
   }
+
+  public toJSON(): any {
+    return {
+      nodeId: this.nodeId,
+      value: this._value,
+      timestamp: this.timestamp
+    };
+  }
+
+  public static fromJSON<T>(json: any): LWWRegister<T> {
+    return new LWWRegister<T>(json.nodeId, json.value, json.timestamp);
+  }
 }
 
 /**
@@ -132,6 +183,8 @@ export class LWWRegister<T> implements CRDT<T> {
  * A set that allows additions and removals.
  */
 export class ORSet<T> implements CRDT<Set<T>> {
+  public static readonly type = 'ORSet';
+  public readonly type = ORSet.type;
   private elements: Map<T, string> = new Map(); // element -> unique tag
   private tombstones: Map<T, string> = new Map(); // element -> unique tag
   private nodeId: string;
@@ -172,6 +225,21 @@ export class ORSet<T> implements CRDT<Set<T>> {
 
     merged.tombstones = allTombstones;
     return merged;
+  }
+
+  public toJSON(): any {
+    return {
+      nodeId: this.nodeId,
+      elements: Array.from(this.elements.entries()),
+      tombstones: Array.from(this.tombstones.entries())
+    };
+  }
+
+  public static fromJSON<T>(json: any): ORSet<T> {
+    const set = new ORSet<T>(json.nodeId);
+    set.elements = new Map(json.elements);
+    set.tombstones = new Map(json.tombstones);
+    return set;
   }
 }
 

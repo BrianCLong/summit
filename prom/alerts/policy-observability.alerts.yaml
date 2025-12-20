@@ -1,0 +1,71 @@
+groups:
+  - name: policy-observability
+    interval: 30s
+    rules:
+      - alert: PolicyDecisionLatencyP95High
+        expr: histogram_quantile(0.95, sum(rate(policy_decision_latency_ms_bucket[5m])) by (le)) > 250
+        for: 10m
+        labels:
+          severity: page
+          service: policy-engine
+          slo: decision-latency
+        annotations:
+          summary: 'Policy decision latency p95 above 250ms'
+          description: |
+            p95 policy decision latency is {{ $value | printf "%.0f" }}ms over 10m.
+            Check OPA pods, cache hit rate, and upstream identity latency.
+          runbook_url: https://git.example.com/runbooks/policy-latency
+
+      - alert: PolicyDenyRateSpike
+        expr: sum(rate(policy_decisions_total{result="deny"}[5m])) / clamp_min(sum(rate(policy_decisions_total[5m])), 1) > 0.1
+        for: 10m
+        labels:
+          severity: warn
+          service: policy-engine
+          slo: deny-rate
+        annotations:
+          summary: 'Policy deny ratio above 10%'
+          description: |
+            Deny ratio across tenants is above 10% for 10m.
+            Validate recent policy pushes and tenant overrides.
+          runbook_url: https://git.example.com/runbooks/policy-deny-spike
+
+      - alert: PolicyCacheMissSurge
+        expr: sum(rate(policy_decision_latency_ms_count{cached="false"}[5m])) / clamp_min(sum(rate(policy_decision_latency_ms_count[5m])), 1) > 0.3
+        for: 15m
+        labels:
+          severity: warn
+          service: policy-engine
+          slo: cache-hit-rate
+        annotations:
+          summary: 'Policy cache miss ratio above 30%'
+          description: |
+            Cache miss rate exceeded 30% for 15m. Investigate Redis health or TTL regressions.
+          runbook_url: https://git.example.com/runbooks/policy-cache
+
+      - alert: ReceiptAnchoringStalled
+        expr: increase(evidence_registrations_total[15m]) < 1
+        for: 15m
+        labels:
+          severity: page
+          service: provenance-ledger
+          slo: receipt-anchoring
+        annotations:
+          summary: 'No policy receipts anchored in the last 15m'
+          description: |
+            evidence_registrations_total did not increase for 15 minutes.
+            Check ledger writers, export queues, and upstream receipt emitters.
+          runbook_url: https://git.example.com/runbooks/receipt-anchoring
+
+      - alert: ReceiptBlockersDetected
+        expr: increase(export_blocks_total[5m]) > 0
+        for: 5m
+        labels:
+          severity: page
+          service: export-gateway
+          slo: receipt-delivery
+        annotations:
+          summary: 'Blocked exports detected for policy receipts'
+          description: |
+            export_blocks_total increased in the last 5 minutes. Investigate export policy failures and downstream sinks.
+          runbook_url: https://git.example.com/runbooks/receipt-blockers

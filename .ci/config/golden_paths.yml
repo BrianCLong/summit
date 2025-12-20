@@ -1,0 +1,58 @@
+services:
+  gateway:
+    base_url: "${GATEWAY_BASE_URL:-https://gateway.${TARGET_ENVIRONMENT:-preview}.intelgraph.dev}"
+    probes:
+      - name: gateway-health
+        method: GET
+        path: /healthz
+        expected_status: 200
+        latency_p95_ms: 300
+        error_budget_percent: 1.0
+        attempts: 6
+      - name: gateway-root
+        method: GET
+        path: /
+        expected_status: 200
+        latency_p95_ms: 450
+        error_budget_percent: 1.5
+        attempts: 6
+  web:
+    base_url: "${WEB_BASE_URL:-https://pr-${PR_NUMBER:-0}.preview.intelgraph.dev}"
+    probes:
+      - name: web-root
+        method: GET
+        path: /
+        expected_status: 200
+        latency_p95_ms: 600
+        error_budget_percent: 2.0
+        attempts: 5
+  api:
+    base_url: "${API_BASE_URL:-https://gateway.${TARGET_ENVIRONMENT:-preview}.intelgraph.dev}"
+    probes:
+      - name: api-health
+        method: GET
+        path: /health/graphql
+        expected_status: 200
+        latency_p95_ms: 350
+        error_budget_percent: 1.0
+        attempts: 6
+      - name: api-graphql
+        method: POST
+        path: /graphql
+        body: '{"query":"query Health { __typename }"}'
+        headers:
+          Content-Type: application/json
+        expected_status: 200
+        latency_p95_ms: 500
+        error_budget_percent: 2.0
+        attempts: 6
+  analytics-engine:
+    base_url: "${ANALYTICS_BASE_URL:-https://analytics.${TARGET_ENVIRONMENT:-preview}.intelgraph.dev}"
+    probes:
+      - name: analytics-health
+        method: GET
+        path: /status
+        expected_status: 200
+        latency_p95_ms: 400
+        error_budget_percent: 1.0
+        attempts: 4

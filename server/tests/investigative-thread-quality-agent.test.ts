@@ -1,5 +1,5 @@
-import InvestigativeThreadQualityAgent, {
 import { jest, describe, test, expect } from '@jest/globals';
+import InvestigativeThreadQualityAgent, {
   ThreadInput,
 } from '../src/ai/investigative-thread-quality-agent';
 
