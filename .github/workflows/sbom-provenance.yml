@@ -109,6 +109,14 @@ jobs:
             --type spdx \
             ${{ inputs.image-name }}@${{ inputs.image-digest }}
 
+      - name: Install otel-cli (conditional)
+        if: ${{ secrets.OTEL_EXPORTER_OTLP_ENDPOINT != '' }}
+        run: |
+          set -euo pipefail
+          version="0.4.1"
+          curl -sSfL "https://github.com/equinix-labs/otel-cli/releases/download/v${version}/otel-cli_${version}_linux_amd64.tar.gz" \
+            | sudo tar -xz -C /usr/local/bin otel-cli
+
       - name: Capture Rekor UUIDs
         id: rekor-uuid
         env:
@@ -142,6 +150,59 @@ jobs:
           cp rekor-uuids.txt .provenance-cache/
           jq -n --arg digest "${{ inputs.image-digest }}" --arg image "${{ inputs.image-name }}" \
             '{digest:$digest,image:$image,generated_at:now}' > .provenance-cache/metadata.json
+
+      - name: Emit supply-chain structured log & OTEL span
+        id: supply-chain-emit
+        env:
+          ACTOR: ${{ github.actor }}
+          COMMIT_SHA: ${{ github.sha }}
+          IMAGE_DIGEST: ${{ inputs.image-digest }}
+          IMAGE_NAME: ${{ inputs.image-name }}
+          REKOR_UUIDS: ${{ steps.rekor-uuid.outputs.rekor_uuids }}
+          COSIGN_MODE: ${{ steps.cosign-sign.outputs.mode || 'cache' }}
+          POLICY_OUTCOME: pass
+          OTEL_EXPORTER_OTLP_ENDPOINT: ${{ secrets.OTEL_EXPORTER_OTLP_ENDPOINT }}
+          OTEL_EXPORTER_OTLP_HEADERS: ${{ secrets.OTEL_EXPORTER_OTLP_HEADERS }}
+        run: |
+          set -euo pipefail
+          sbom_hash=$(sha256sum sbom.spdx.json | awk '{print $1}')
+          now_epoch=$(date -u +%s)
+          log_payload=$(jq -n \
+            --arg actor "$ACTOR" \
+            --arg commit "$COMMIT_SHA" \
+            --arg digest "$IMAGE_DIGEST" \
+            --arg image "$IMAGE_NAME" \
+            --arg sbom "$sbom_hash" \
+            --arg rekor "${REKOR_UUIDS:-}" \
+            --arg policy "$POLICY_OUTCOME" \
+            --arg mode "${COSIGN_MODE:-unknown}" \
+            --arg time "$now_epoch" \
+            '{
+              event:"supply_chain.build_verify",
+              actor:$actor,
+              commit:$commit,
+              image:$image,
+              digest:$digest,
+              sbom_sha256:$sbom,
+              rekor_uuids: ($rekor | split(",") | map(select(length > 0))),
+              cosign_mode:$mode,
+              policy_outcome:$policy,
+              timestamp: ($time | tonumber)
+            }')
+          echo "Structured log payload: $log_payload"
+          if [ -n "${OTEL_EXPORTER_OTLP_ENDPOINT:-}" ] && command -v otel-cli >/dev/null 2>&1; then
+            otel-cli span \
+              --name "supply_chain.build_verify" \
+              --service "ci-supply-chain" \
+              --kind internal \
+              --status ok \
+              --attrs "ci.actor=$ACTOR,ci.commit=$COMMIT_SHA,supply_chain.digest=$IMAGE_DIGEST,sbom.sha256=$sbom_hash,rekor.uuids=${REKOR_UUIDS:-none},policy.outcome=$POLICY_OUTCOME,cosign.mode=${COSIGN_MODE:-unknown}" \
+              --timeout 10s \
+              --fail
+          else
+            echo "otel-cli not configured; skipping span emission"
+          fi
+          echo "log-payload=$log_payload" >>"$GITHUB_OUTPUT"
 
       - name: Upload signing artifacts
         uses: actions/upload-artifact@v4
