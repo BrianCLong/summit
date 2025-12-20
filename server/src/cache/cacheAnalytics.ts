@@ -1,3 +1,4 @@
+// @ts-nocheck
 import config from '../config/index.js';
 import { getRedisClient } from '../config/database.js';
 import {

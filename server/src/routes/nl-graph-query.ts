@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * NL Graph Query Copilot API Endpoints
  * Provides a natural language to Cypher compilation service

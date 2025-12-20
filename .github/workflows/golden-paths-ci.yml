@@ -1,0 +1,40 @@
+name: golden-paths
+
+on:
+  pull_request:
+    paths:
+      - 'observability/golden_paths.yaml'
+      - 'tools/synth-probe/**'
+      - '.github/workflows/golden-paths-ci.yml'
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  synth-probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install probe
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r tools/synth-probe/requirements.txt
+      - name: List journeys
+        run: python -m probe list --catalog observability/golden_paths.yaml
+      - name: Run GP-001 (preview)
+        env:
+          BASE_URL: ${{ secrets.PREVIEW_BASE_URL || 'https://preview.example.com' }}
+          AUTH_TOKEN: ${{ secrets.PREVIEW_TOKEN }}
+        run: |
+          python -m probe run --journey GP-001 --base "$BASE_URL" --tenant preview --samples 1 --timeout 15 --export prometheus | tee gp_results.json
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: synth-probe-results
+          path: gp_results.json
+        continue-on-error: true

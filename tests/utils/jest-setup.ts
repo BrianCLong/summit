@@ -1,4 +1,7 @@
 // @ts-nocheck
+/// <reference types="jest" />
+/// <reference types="node" />
+
 /**
  * Jest Global Setup
  *
@@ -6,6 +9,7 @@
  * It sets up global test utilities and configuration.
  */
 
+// @ts-nocheck
 import { jest } from '@jest/globals';
 
 // Extend Jest timeout for integration tests
@@ -27,7 +31,7 @@ globalThis.testHelpers = {
     while (Date.now() - start < timeout) {
       const result = await fn();
       if (result) return;
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 100));
     }
     throw new Error(`waitFor timed out after ${timeout}ms`);
   },
