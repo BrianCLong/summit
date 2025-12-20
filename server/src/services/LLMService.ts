@@ -1,7 +1,9 @@
 // @ts-nocheck
 import { OpenAI } from 'openai';
 import logger from '../utils/logger.js';
+import { tracer } from '../observability/tracing.js';
 import { applicationErrors } from '../monitoring/metrics.js';
+import { metrics as prometheusMetrics } from '../observability/metrics.js';
 
 export interface LLMConfig {
   defaultProvider: 'openai' | 'anthropic' | 'google' | 'ollama';
@@ -64,80 +66,127 @@ export class LLMService {
    * Execute a completion request
    */
   async complete(prompt: string, options: CompletionOptions = {}): Promise<string> {
-    const startTime = Date.now();
-    const provider = options.provider || this.config.defaultProvider;
-    const model = options.model || this.config.defaultModel;
+    return tracer.trace('llm.complete', async (span) => {
+      const startTime = Date.now();
+      const provider = options.provider || this.config.defaultProvider;
+      const model = options.model || this.config.defaultModel;
 
-    try {
-      let response: { text: string; usage?: any; provider: string };
-
-      switch (provider) {
-        case 'openai':
-          response = await this.callOpenAI(prompt, options);
-          break;
-        case 'anthropic':
-          response = await this.callAnthropic(prompt, options);
-          break;
-        case 'google':
-          response = await this.callGoogle(prompt, options);
-          break;
-        case 'ollama':
-          response = await this.callOllama(prompt, options);
-          break;
-        default:
-          throw new Error(`Unsupported LLM provider: ${provider}`);
-      }
-
-      this.updateMetrics(Date.now() - startTime, response.usage);
-
-      return response.text;
-    } catch (error: any) {
-      this.metrics.errorCount++;
-      logger.error('LLM request failed', {
-        provider,
-        model,
-        error: error.message,
+      span.setAttributes({
+        'llm.provider': provider,
+        'llm.model': model,
+        'llm.temperature': options.temperature || this.config.temperature,
       });
-      throw error;
-    }
+
+      try {
+        let response: { text: string; usage?: any; provider: string };
+
+        switch (provider) {
+          case 'openai':
+            response = await this.callOpenAI(prompt, options);
+            break;
+          case 'anthropic':
+            response = await this.callAnthropic(prompt, options);
+            break;
+          case 'google':
+            response = await this.callGoogle(prompt, options);
+            break;
+          case 'ollama':
+            response = await this.callOllama(prompt, options);
+            break;
+          default:
+            throw new Error(`Unsupported LLM provider: ${provider}`);
+        }
+
+        this.updateMetrics(Date.now() - startTime, response.usage, provider, model);
+
+        if (response.usage) {
+          span.setAttributes({
+            'llm.usage.prompt_tokens': response.usage.prompt_tokens,
+            'llm.usage.completion_tokens': response.usage.completion_tokens,
+            'llm.usage.total_tokens': response.usage.total_tokens,
+          });
+        }
+
+        return response.text;
+      } catch (error: any) {
+        this.metrics.errorCount++;
+        // Record failure latency/count if needed
+        if (prometheusMetrics.llmRequestDuration) {
+          prometheusMetrics.llmRequestDuration.observe({
+            provider,
+            model,
+            status: 'error'
+          }, (Date.now() - startTime) / 1000);
+        }
+        logger.error('LLM request failed', {
+          provider,
+          model,
+          error: error.message,
+        });
+        throw error;
+      }
+    });
   }
 
   /**
    * Chat completion (multi-turn)
    */
   async chat(messages: ChatMessage[], options: CompletionOptions = {}): Promise<string> {
-    const startTime = Date.now();
-    const provider = options.provider || this.config.defaultProvider;
-    const model = options.model || this.config.defaultModel;
+    return tracer.trace('llm.chat', async (span) => {
+      const startTime = Date.now();
+      const provider = options.provider || this.config.defaultProvider;
+      const model = options.model || this.config.defaultModel;
 
-    try {
-      // Currently defaulting to OpenAI for chat as well, can be expanded
-      if (provider !== 'openai') {
-        throw new Error(`Provider ${provider} not fully implemented for chat`);
+      span.setAttributes({
+        'llm.provider': provider,
+        'llm.model': model,
+        'llm.message_count': messages.length,
+      });
+
+      try {
+        // Currently defaulting to OpenAI for chat as well, can be expanded
+        if (provider !== 'openai') {
+          throw new Error(`Provider ${provider} not fully implemented for chat`);
+        }
+
+        const response = await this.openai.chat.completions.create({
+          messages: messages,
+          model: model,
+          temperature: options.temperature || this.config.temperature,
+          max_tokens: options.maxTokens,
+        });
+
+        const text = response.choices[0].message.content || '';
+
+        this.updateMetrics(Date.now() - startTime, response.usage, provider, model);
+
+        if (response.usage) {
+          span.setAttributes({
+            'llm.usage.prompt_tokens': response.usage.prompt_tokens,
+            'llm.usage.completion_tokens': response.usage.completion_tokens,
+            'llm.usage.total_tokens': response.usage.total_tokens,
+          });
+        }
+
+        return text;
+
+      } catch (error: any) {
+        this.metrics.errorCount++;
+        if (prometheusMetrics.llmRequestDuration) {
+          prometheusMetrics.llmRequestDuration.observe({
+            provider,
+            model,
+            status: 'error'
+          }, (Date.now() - startTime) / 1000);
+        }
+        logger.error('LLM chat request failed', {
+          provider,
+          model,
+          error: error.message,
+        });
+        throw error;
       }
-
-      const response = await this.openai.chat.completions.create({
-        messages: messages,
-        model: model,
-        temperature: options.temperature || this.config.temperature,
-        max_tokens: options.maxTokens,
-      });
-
-      const text = response.choices[0].message.content || '';
-
-      this.updateMetrics(Date.now() - startTime, response.usage);
-
-      return text;
-
-    } catch (error: any) {
-      this.metrics.errorCount++;
-      logger.error('LLM chat request failed', {
-        provider,
-        model,
-        error: error.message,
-      });
-      throw error;
-    }
+    });
   }
 
   /**
@@ -185,13 +234,30 @@ export class LLMService {
     throw new Error('Ollama provider not implemented');
   }
 
-  private updateMetrics(latency: number, usage: any) {
+  private updateMetrics(latency: number, usage: any, provider: string = 'openai', model: string = 'unknown') {
     this.metrics.totalRequests++;
     this.metrics.totalTokens += usage?.total_tokens || 0;
     this.metrics.averageLatency =
       (this.metrics.averageLatency * (this.metrics.totalRequests - 1) +
         latency) /
       this.metrics.totalRequests;
+
+    // Prometheus Metrics
+    if (prometheusMetrics.llmTokensTotal) {
+      prometheusMetrics.llmTokensTotal.inc({
+        provider,
+        model,
+        type: 'total'
+      }, usage?.total_tokens || 0);
+    }
+
+    if (prometheusMetrics.llmRequestDuration) {
+      prometheusMetrics.llmRequestDuration.observe({
+        provider,
+        model,
+        status: 'success'
+      }, latency / 1000); // Convert to seconds
+    }
   }
 }
 

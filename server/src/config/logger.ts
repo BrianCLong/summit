@@ -19,7 +19,7 @@ const stream = {
     process.stdout.write(msg);
   },
 };
-import { cfg } from '../config.js';
+import { cfg } from '../config';
 import { AsyncLocalStorage } from 'async_hooks';
 
 // AsyncLocalStorage for correlation ID propagation

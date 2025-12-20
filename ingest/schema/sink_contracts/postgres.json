@@ -1,0 +1,227 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://companyos.example.com/schemas/ingest/sink_contracts/postgres.schema.json",
+  "title": "PostgreSQL Sink Contract v1",
+  "description": "Contract for PostgreSQL sink operations with idempotency, revision guards, and exactly-once semantics.",
+  "type": "object",
+  "additionalProperties": false,
+  "definitions": {
+    "upsert_operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "operation": {
+          "const": "upsert"
+        },
+        "table": {
+          "description": "Target table name (schema-qualified if needed).",
+          "type": "string",
+          "pattern": "^[a-z_][a-z0-9_]*(\\.[a-z_][a-z0-9_]*)?$"
+        },
+        "conflict_target": {
+          "description": "Columns for ON CONFLICT clause (unique constraint).",
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "revision_column": {
+          "description": "Column storing revision number for optimistic locking.",
+          "type": "string",
+          "default": "revision"
+        },
+        "revision_guard": {
+          "description": "If true, reject updates where incoming revision <= existing revision.",
+          "type": "boolean",
+          "default": true
+        },
+        "columns": {
+          "description": "Column mappings from ingest data to table columns.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "source_path": {
+                "description": "JSONPath or dot-notation path in data payload.",
+                "type": "string"
+              },
+              "type": {
+                "description": "PostgreSQL column type for casting.",
+                "type": "string",
+                "enum": ["text", "integer", "bigint", "boolean", "timestamp", "timestamptz", "date", "json", "jsonb", "uuid", "numeric", "real", "double precision", "bytea", "array"]
+              },
+              "nullable": {
+                "type": "boolean",
+                "default": true
+              },
+              "default": {
+                "description": "Default value if source_path is null/missing."
+              }
+            },
+            "required": ["source_path", "type"]
+          }
+        },
+        "audit_columns": {
+          "description": "Standard audit columns to populate automatically.",
+          "type": "object",
+          "properties": {
+            "created_at": { "type": "string", "default": "created_at" },
+            "updated_at": { "type": "string", "default": "updated_at" },
+            "created_by": { "type": "string", "default": "created_by" },
+            "updated_by": { "type": "string", "default": "updated_by" },
+            "tenant_id": { "type": "string", "default": "tenant_id" },
+            "trace_id": { "type": "string", "default": "trace_id" }
+          }
+        }
+      },
+      "required": ["operation", "table", "conflict_target", "columns"]
+    },
+    "delete_operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "operation": {
+          "const": "delete"
+        },
+        "table": {
+          "type": "string",
+          "pattern": "^[a-z_][a-z0-9_]*(\\.[a-z_][a-z0-9_]*)?$"
+        },
+        "soft_delete": {
+          "description": "If true, set deleted_at instead of hard delete.",
+          "type": "boolean",
+          "default": true
+        },
+        "deleted_at_column": {
+          "type": "string",
+          "default": "deleted_at"
+        },
+        "where_columns": {
+          "description": "Columns for WHERE clause.",
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        }
+      },
+      "required": ["operation", "table", "where_columns"]
+    }
+  },
+  "properties": {
+    "contract_version": {
+      "description": "Version of this sink contract.",
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "sink_type": {
+      "const": "postgres"
+    },
+    "connection": {
+      "description": "Connection configuration (secrets resolved at runtime).",
+      "type": "object",
+      "properties": {
+        "host": { "type": "string" },
+        "port": { "type": "integer", "default": 5432 },
+        "database": { "type": "string" },
+        "schema": { "type": "string", "default": "public" },
+        "ssl_mode": {
+          "type": "string",
+          "enum": ["disable", "require", "verify-ca", "verify-full"],
+          "default": "require"
+        },
+        "pool_min": { "type": "integer", "default": 2 },
+        "pool_max": { "type": "integer", "default": 10 },
+        "connection_timeout_ms": { "type": "integer", "default": 30000 },
+        "idle_timeout_ms": { "type": "integer", "default": 60000 },
+        "statement_timeout_ms": { "type": "integer", "default": 30000 }
+      },
+      "required": ["host", "database"]
+    },
+    "idempotency": {
+      "description": "Idempotency configuration for exactly-once semantics.",
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "table": {
+          "description": "Table to store idempotency keys.",
+          "type": "string",
+          "default": "ingest_idempotency"
+        },
+        "key_column": { "type": "string", "default": "dedupe_key" },
+        "processed_at_column": { "type": "string", "default": "processed_at" },
+        "ttl_days": {
+          "description": "Days to retain idempotency keys.",
+          "type": "integer",
+          "default": 7,
+          "minimum": 1,
+          "maximum": 365
+        }
+      }
+    },
+    "retry": {
+      "description": "Retry configuration for transient failures.",
+      "type": "object",
+      "properties": {
+        "max_attempts": { "type": "integer", "default": 3, "minimum": 1, "maximum": 10 },
+        "initial_delay_ms": { "type": "integer", "default": 1000 },
+        "max_delay_ms": { "type": "integer", "default": 30000 },
+        "backoff_multiplier": { "type": "number", "default": 2.0 },
+        "jitter_factor": { "type": "number", "default": 0.1, "minimum": 0, "maximum": 1 },
+        "retryable_errors": {
+          "description": "PostgreSQL error codes that should trigger retry.",
+          "type": "array",
+          "items": { "type": "string" },
+          "default": ["40001", "40P01", "57P03", "08006", "08001", "08004"]
+        }
+      }
+    },
+    "batching": {
+      "description": "Batch processing configuration.",
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "max_size": { "type": "integer", "default": 1000, "minimum": 1, "maximum": 10000 },
+        "max_wait_ms": { "type": "integer", "default": 5000, "minimum": 100 },
+        "use_copy": {
+          "description": "Use COPY for bulk inserts when possible.",
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "operations": {
+      "description": "List of operations this contract supports.",
+      "type": "array",
+      "items": {
+        "oneOf": [
+          { "$ref": "#/definitions/upsert_operation" },
+          { "$ref": "#/definitions/delete_operation" }
+        ]
+      },
+      "minItems": 1
+    },
+    "dlq": {
+      "description": "Dead letter queue configuration for failed records.",
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "table": { "type": "string", "default": "ingest_dlq" },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "SCHEMA_DRIFT",
+              "VALIDATION_FAIL",
+              "OLDER_REVISION",
+              "SINK_TIMEOUT",
+              "CONSTRAINT_VIOLATION",
+              "SERIALIZATION_ERROR",
+              "CONNECTION_ERROR",
+              "UNKNOWN"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "required": ["contract_version", "sink_type", "connection", "operations"]
+}

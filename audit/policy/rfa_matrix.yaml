@@ -1,0 +1,71 @@
+# Action × Classification × Role Policy Matrix
+# Controls RFA and Step-Up Requirements
+
+policies:
+  - action: "export"
+    classification: "restricted"
+    role: "analyst"
+    requirements:
+      rfa_required: true
+      step_up_required: true
+      min_reason_len: 20
+      ticket_required: true
+
+  - action: "export"
+    classification: "confidential"
+    role: "*"
+    requirements:
+      rfa_required: true
+      step_up_required: false
+      min_reason_len: 10
+      ticket_required: false
+
+  - action: "impersonate"
+    classification: "*"
+    role: "admin"
+    requirements:
+      rfa_required: true
+      step_up_required: true
+      min_reason_len: 30
+      ticket_required: true
+
+  - action: "delete"
+    classification: "restricted"
+    role: "*"
+    requirements:
+      rfa_required: true
+      step_up_required: true
+      min_reason_len: 50
+      ticket_required: true
+
+  - action: "delete"
+    classification: "confidential"
+    role: "*"
+    requirements:
+      rfa_required: true
+      step_up_required: false
+      min_reason_len: 10
+      ticket_required: false
+
+  - action: "read"
+    classification: "restricted"
+    role: "analyst"
+    requirements:
+      rfa_required: false # Passive read usually implies logged but not prompting
+      step_up_required: false
+    # But prompt says "restricted reads" produce RFA. Let's add a specific rule.
+
+  - action: "read"
+    classification: "restricted"
+    role: "external_auditor"
+    requirements:
+      rfa_required: true
+      step_up_required: false
+      min_reason_len: 10
+      ticket_required: false
+
+defaults:
+  rfa_required: false
+  step_up_required: false
+  min_reason_len: 0
+  ticket_required: false

@@ -1,0 +1,344 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://companyos.example.com/schemas/ingest/sink_contracts/neo4j.schema.json",
+  "title": "Neo4j Sink Contract v1",
+  "description": "Contract for Neo4j sink operations with idempotency, revision guards, and exactly-once semantics for graph data.",
+  "type": "object",
+  "additionalProperties": false,
+  "definitions": {
+    "node_upsert": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "operation": {
+          "const": "node_upsert"
+        },
+        "labels": {
+          "description": "Neo4j node labels.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z][a-zA-Z0-9_]*$"
+          },
+          "minItems": 1
+        },
+        "merge_keys": {
+          "description": "Properties used for MERGE matching (unique identifier).",
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "revision_property": {
+          "description": "Property storing revision number for optimistic locking.",
+          "type": "string",
+          "default": "_revision"
+        },
+        "revision_guard": {
+          "description": "If true, reject updates where incoming revision <= existing revision.",
+          "type": "boolean",
+          "default": true
+        },
+        "properties": {
+          "description": "Property mappings from ingest data to node properties.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "source_path": {
+                "description": "JSONPath or dot-notation path in data payload.",
+                "type": "string"
+              },
+              "type": {
+                "description": "Neo4j property type.",
+                "type": "string",
+                "enum": ["string", "integer", "float", "boolean", "date", "datetime", "localtime", "localdatetime", "duration", "point", "list", "map"]
+              },
+              "nullable": {
+                "type": "boolean",
+                "default": true
+              },
+              "indexed": {
+                "description": "If true, create an index on this property.",
+                "type": "boolean",
+                "default": false
+              },
+              "unique": {
+                "description": "If true, create a unique constraint.",
+                "type": "boolean",
+                "default": false
+              }
+            },
+            "required": ["source_path", "type"]
+          }
+        },
+        "audit_properties": {
+          "description": "Standard audit properties to populate automatically.",
+          "type": "object",
+          "properties": {
+            "_created_at": { "type": "string", "default": "_created_at" },
+            "_updated_at": { "type": "string", "default": "_updated_at" },
+            "_created_by": { "type": "string", "default": "_created_by" },
+            "_updated_by": { "type": "string", "default": "_updated_by" },
+            "_tenant_id": { "type": "string", "default": "_tenant_id" },
+            "_trace_id": { "type": "string", "default": "_trace_id" },
+            "_source": { "type": "string", "default": "_source" }
+          }
+        }
+      },
+      "required": ["operation", "labels", "merge_keys", "properties"]
+    },
+    "relationship_upsert": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "operation": {
+          "const": "relationship_upsert"
+        },
+        "type": {
+          "description": "Relationship type (e.g., KNOWS, WORKS_AT).",
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "from_node": {
+          "description": "Source node specification.",
+          "type": "object",
+          "properties": {
+            "labels": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+            "match_properties": {
+              "type": "object",
+              "additionalProperties": { "type": "string" }
+            }
+          },
+          "required": ["labels", "match_properties"]
+        },
+        "to_node": {
+          "description": "Target node specification.",
+          "type": "object",
+          "properties": {
+            "labels": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+            "match_properties": {
+              "type": "object",
+              "additionalProperties": { "type": "string" }
+            }
+          },
+          "required": ["labels", "match_properties"]
+        },
+        "merge_keys": {
+          "description": "Relationship properties used for MERGE matching.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "revision_property": {
+          "type": "string",
+          "default": "_revision"
+        },
+        "revision_guard": {
+          "type": "boolean",
+          "default": true
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "source_path": { "type": "string" },
+              "type": { "type": "string" },
+              "nullable": { "type": "boolean", "default": true }
+            },
+            "required": ["source_path", "type"]
+          }
+        }
+      },
+      "required": ["operation", "type", "from_node", "to_node"]
+    },
+    "delete_operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "operation": {
+          "const": "delete"
+        },
+        "target": {
+          "type": "string",
+          "enum": ["node", "relationship"]
+        },
+        "soft_delete": {
+          "description": "If true, set _deleted_at instead of hard delete.",
+          "type": "boolean",
+          "default": true
+        },
+        "match_criteria": {
+          "type": "object",
+          "properties": {
+            "labels": { "type": "array", "items": { "type": "string" } },
+            "type": { "type": "string" },
+            "properties": {
+              "type": "object",
+              "additionalProperties": { "type": "string" }
+            }
+          }
+        },
+        "cascade": {
+          "description": "If true, delete related relationships when deleting node.",
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "required": ["operation", "target", "match_criteria"]
+    }
+  },
+  "properties": {
+    "contract_version": {
+      "description": "Version of this sink contract.",
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "sink_type": {
+      "const": "neo4j"
+    },
+    "connection": {
+      "description": "Connection configuration (secrets resolved at runtime).",
+      "type": "object",
+      "properties": {
+        "uri": {
+          "description": "Neo4j Bolt URI (e.g., bolt://localhost:7687, neo4j+s://host:7687).",
+          "type": "string"
+        },
+        "database": {
+          "description": "Target database name.",
+          "type": "string",
+          "default": "neo4j"
+        },
+        "encryption": {
+          "type": "string",
+          "enum": ["ENCRYPTION_OFF", "ENCRYPTION_ON"],
+          "default": "ENCRYPTION_ON"
+        },
+        "max_connection_pool_size": { "type": "integer", "default": 100 },
+        "connection_acquisition_timeout_ms": { "type": "integer", "default": 60000 },
+        "connection_timeout_ms": { "type": "integer", "default": 30000 },
+        "max_transaction_retry_time_ms": { "type": "integer", "default": 30000 }
+      },
+      "required": ["uri"]
+    },
+    "idempotency": {
+      "description": "Idempotency configuration for exactly-once semantics.",
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "store_type": {
+          "description": "Where to store idempotency keys.",
+          "type": "string",
+          "enum": ["neo4j", "redis", "postgres"],
+          "default": "redis"
+        },
+        "node_label": {
+          "description": "Label for idempotency nodes (if using neo4j store).",
+          "type": "string",
+          "default": "IngestIdempotency"
+        },
+        "ttl_days": {
+          "type": "integer",
+          "default": 7,
+          "minimum": 1,
+          "maximum": 365
+        }
+      }
+    },
+    "retry": {
+      "description": "Retry configuration for transient failures.",
+      "type": "object",
+      "properties": {
+        "max_attempts": { "type": "integer", "default": 3, "minimum": 1, "maximum": 10 },
+        "initial_delay_ms": { "type": "integer", "default": 1000 },
+        "max_delay_ms": { "type": "integer", "default": 30000 },
+        "backoff_multiplier": { "type": "number", "default": 2.0 },
+        "jitter_factor": { "type": "number", "default": 0.1 },
+        "retryable_errors": {
+          "description": "Neo4j error codes that should trigger retry.",
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [
+            "Neo.TransientError.General.TransactionMemoryLimit",
+            "Neo.TransientError.Transaction.DeadlockDetected",
+            "Neo.TransientError.Transaction.Outdated",
+            "Neo.ClientError.Cluster.NotALeader",
+            "ServiceUnavailable"
+          ]
+        }
+      }
+    },
+    "batching": {
+      "description": "Batch processing configuration.",
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "max_size": { "type": "integer", "default": 500, "minimum": 1, "maximum": 5000 },
+        "max_wait_ms": { "type": "integer", "default": 5000 },
+        "use_unwind": {
+          "description": "Use UNWIND for batch operations (more efficient).",
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "operations": {
+      "description": "List of operations this contract supports.",
+      "type": "array",
+      "items": {
+        "oneOf": [
+          { "$ref": "#/definitions/node_upsert" },
+          { "$ref": "#/definitions/relationship_upsert" },
+          { "$ref": "#/definitions/delete_operation" }
+        ]
+      },
+      "minItems": 1
+    },
+    "dlq": {
+      "description": "Dead letter queue configuration.",
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "node_label": { "type": "string", "default": "IngestDLQ" },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "SCHEMA_DRIFT",
+              "VALIDATION_FAIL",
+              "OLDER_REVISION",
+              "SINK_TIMEOUT",
+              "CONSTRAINT_VIOLATION",
+              "NODE_NOT_FOUND",
+              "RELATIONSHIP_ERROR",
+              "CONNECTION_ERROR",
+              "UNKNOWN"
+            ]
+          }
+        }
+      }
+    },
+    "constraints": {
+      "description": "Constraint definitions to ensure on startup.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": ["unique", "exists", "node_key"]
+          },
+          "label": { "type": "string" },
+          "properties": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "required": ["name", "type", "label", "properties"]
+      }
+    }
+  },
+  "required": ["contract_version", "sink_type", "connection", "operations"]
+}

@@ -1,0 +1,98 @@
+{
+  "title": "Agent Observability & KPIs",
+  "description": "Agent runtime success, cost, correlation coverage, and profiling health",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Agent Success Rate",
+      "gridPos": { "w": 6, "h": 4, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "1 - (sum(rate(agent_requests_total{status=\"failed\"}[5m])) / sum(rate(agent_requests_total[5m])))",
+          "legendFormat": "success rate"
+        }
+      ],
+      "options": { "colorMode": "value", "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    {
+      "type": "stat",
+      "title": "Runtime Cost (30m)",
+      "gridPos": { "w": 6, "h": 4, "x": 6, "y": 0 },
+      "targets": [
+        {
+          "expr": "increase(agent_runtime_cost_total[30m])",
+          "legendFormat": "cost ($)"
+        }
+      ],
+      "options": { "colorMode": "value", "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    {
+      "type": "graph",
+      "title": "Agent Latency (p95)",
+      "gridPos": { "w": 12, "h": 8, "x": 0, "y": 4 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(agent_request_duration_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p95 latency"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Agent Failure Rate",
+      "gridPos": { "w": 12, "h": 8, "x": 12, "y": 4 },
+      "targets": [
+        {
+          "expr": "sum(rate(agent_requests_total{status=\"failed\"}[5m])) / sum(rate(agent_requests_total[5m]))",
+          "legendFormat": "failure rate"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Correlation Coverage",
+      "gridPos": { "w": 12, "h": 8, "x": 0, "y": 12 },
+      "targets": [
+        {
+          "expr": "1 - (sum(rate(otel_request_correlation_total{status=\"missing\"}[15m])) / sum(rate(otel_request_correlation_total[15m])))",
+          "legendFormat": "coverage"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Audit Events",
+      "gridPos": { "w": 12, "h": 8, "x": 12, "y": 12 },
+      "targets": [
+        {
+          "expr": "rate(audit_events_total[5m])",
+          "legendFormat": "audit events/s"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Profiling Samples Ingested (5m)",
+      "gridPos": { "w": 6, "h": 4, "x": 0, "y": 20 },
+      "targets": [
+        {
+          "expr": "sum(rate(pyroscope_samples_ingested_total[5m]))",
+          "legendFormat": "samples/s"
+        }
+      ],
+      "options": { "colorMode": "value", "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    {
+      "type": "stat",
+      "title": "Vector Pipeline Errors (5m)",
+      "gridPos": { "w": 6, "h": 4, "x": 6, "y": 20 },
+      "targets": [
+        {
+          "expr": "sum(rate(vector_errors_total[5m]))",
+          "legendFormat": "errors"
+        }
+      ],
+      "options": { "colorMode": "value", "reduceOptions": { "calcs": ["lastNotNull"] } }
+    }
+  ]
+}
