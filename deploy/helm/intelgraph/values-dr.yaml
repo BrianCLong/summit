@@ -1,0 +1,29 @@
+dr:
+  enabled: true
+  traceId: ""
+  forceRegion: dr
+  freezeWrites: true
+  readOnlyMode: true
+
+replicaCounts:
+  apiGateway: 2
+  web: 2
+  workers: 1
+
+featureGates:
+  heavyAnalytics: false
+  reportExports: false
+
+postgres:
+  walArchiving: true
+  backupBucket: dr-backups
+
+neo4j:
+  logicalBackup: true
+
+redis:
+  snapshotInterval: 15m
+
+observability:
+  otelTracing: true
+  promScrape: true
