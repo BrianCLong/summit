@@ -215,6 +215,43 @@ privacy_validation:
   - 'Zero-knowledge proofs verify capabilities without exposure'
 ```
 
+## 🧭 Phase 2 Pilot Crypto/IP Readiness (FTO)
+
+### Component Inventory Mapped to Pilot Scope
+
+| Component                       | Pilot Touchpoints                                                                                  | Phase 2 Deliverable                                                                      | FTO Gate                                                                   |
+| ------------------------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Homomorphic encryption queries  | Privacy-preserving partner queries on cross-org indicators; CKKS/BFV pipelines in SEAL/OpenFHE     | Encrypted query path + aggregation with DP noise                                         | Counsel sign-off before partner data leaves org; verify library patent grants |
+| MPC threat correlation          | MP-SPDZ/ABY-style secure aggregation of fraud/IOC features across FBI/Europol/financial partners | Secure correlation protocol runbook + audit trail                                        | Confirm protocol/license provenance and export controls                     |
+| ZK membership proofs            | Circom/snarkjs verification for partner eligibility and capability attestations                    | Verifier circuit + registry contract interfaces                                          | Avoid copyleft contamination; validate proving key custody and auditability  |
+
+### Targeted Prior-Art & Patent/Licensing Scan (non-legal summary)
+
+- **HE stacks**
+  - Microsoft SEAL (MIT + Microsoft patent license) and **OpenFHE/PALISADE (BSD-2 + patent grant)** align with permissive FTO posture; continue to avoid bundling AGPL components.
+  - Zama Concrete/TFHE is **AGPL/commercial** (yellow): copyleft triggers for server deployments; commercial license available.
+  - Core schemes (BFV/BGV/CKKS) have long-standing academic prior art; maintain counsel review for any country-specific filings and for export (ECC/HE) controls.
+- **MPC protocols**
+  - MP-SPDZ/ABY implementations are MIT-licensed with public research provenance (SPDZ/Overdrive); no known active patent assertions surfaced in literature review.
+  - OT extension and malicious-secure variants rely on widely published constructions; keep audit trail of third-party crypto primitives and randomness beacons.
+- **ZK verification flows**
+  - Groth16/Plonkish proof systems and **snarkjs** are MIT; **circom** is GPLv3 (yellow) — license isolation required for pilot code.
+  - Alternatives with permissive licensing: **gnark** (Apache-2.0), **halo2** (Apache-2.0), **arkworks** (Apache-2.0/MIT). Pairing-friendly curves (BLS12-381) are not currently encumbered by active patents.
+
+### Design-Arounds & Licensing Paths
+
+- Default pilot stack: **SEAL or OpenFHE** for HE, **MP-SPDZ** for MPC, **gnark/arkworks verifier** for ZK; avoid GPL/AGPL ingress to production artifacts.
+- If TFHE bootstrapping is required, negotiate **Zama commercial license** or isolate AGPL code to a non-production lab with strict data blackhole controls.
+- Replace Circom circuits with **gnark/halo2** equivalents; if reuse is unavoidable, keep GPL components in a segregated repo and exclude from deliverables.
+- Maintain SBOM + provenance notes for all crypto dependencies; log patent grants in the IP folder for counsel validation.
+
+### Go/No-Go Controls & Partner Comms
+
+- **Gate**: No partner data flow until **FTO memo** is signed by counsel and recorded; block deployments in CI/CD via feature flag `federation.pilot.legal_gate=true`.
+- **Risk Register**: Track FTO/ licensing risks with owners, likelihood/impact, and due dates; see updated risk register.
+- **Partner updates**: Brief FBI/Europol/financial pilot sponsors that privacy tech remains in FTO review; share expected sign-off date and fallback (synthetic data rehearsals).
+- **Evidence**: Archive prior-art notes, license files, and dependency manifests with the Phase 2 pilot artifact bundle.
+
 ### Phase 3: Scale & Optimize (Weeks 9-12)
 
 ```yaml
