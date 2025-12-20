@@ -51,4 +51,54 @@ describe('ProgressiveGraph benchmark', () => {
     expect(visibleCount).toBeLessThan(nodes.length);
     expect(elidedCount).toBe(nodes.length - visibleCount);
   });
+
+  it('streams large batches without regressing rendered progress', async () => {
+    const initial = buildFixtureGraph(900, 40, 2);
+    const expanded = buildFixtureGraph(1600, 40, 3);
+    const container = document.createElement('div');
+    const root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        <ProgressiveGraph
+          streaming
+          nodes={initial.nodes}
+          edges={initial.edges}
+          initialBatchSize={72}
+          frameBudgetMs={10}
+        />,
+      );
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    const firstRendered = Number(
+      container
+        .querySelector('[data-rendered-count]')
+        ?.getAttribute('data-rendered-count'),
+    );
+
+    await act(async () => {
+      root.render(
+        <ProgressiveGraph
+          streaming
+          nodes={expanded.nodes}
+          edges={expanded.edges}
+          initialBatchSize={72}
+          frameBudgetMs={10}
+        />,
+      );
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    const region = container.querySelector('[role="region"]');
+    const secondRendered = Number(
+      container
+        .querySelector('[data-rendered-count]')
+        ?.getAttribute('data-rendered-count') ?? '0',
+    );
+    const visibleCount = Number(region?.getAttribute('data-visible-count') ?? '0');
+
+    expect(secondRendered).toBeGreaterThanOrEqual(firstRendered);
+    expect(visibleCount).toBeGreaterThan(0);
+  });
 });

@@ -75,6 +75,7 @@ import scenarioRouter from './routes/scenarios.js';
 import resourceCostsRouter from './routes/resource-costs.js';
 import queryReplayRouter from './routes/query-replay.js';
 import streamRouter from './routes/stream.js'; // Added import
+import queryPreviewStreamRouter from './routes/query-preview-stream.js';
 import commandConsoleRouter from './routes/internal/command-console.js';
 import searchV1Router from './routes/search-v1.js';
 import dataGovernanceRouter from './routes/data-governance-routes.js';
@@ -289,6 +290,7 @@ export const createApp = async () => {
   app.use('/api/costs', resourceCostsRouter);
   app.use('/api/internal/command-console', commandConsoleRouter);
   app.use('/api/query-replay', queryReplayRouter);
+  app.use('/api', queryPreviewStreamRouter);
   app.use('/api/stream', streamRouter); // Register stream route
   app.use('/api/v1/search', searchV1Router); // Register Unified Search API
   app.use('/api', dataGovernanceRouter); // Register Data Governance API

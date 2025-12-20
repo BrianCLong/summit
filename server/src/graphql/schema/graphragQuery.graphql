@@ -67,6 +67,9 @@ input ExecuteQueryPreviewInput {
   dryRun: Boolean
   maxRows: Int
   timeout: Int
+  cursor: String
+  batchSize: Int
+  stream: Boolean
 }
 
 """Input for replaying a run"""
@@ -86,6 +89,13 @@ type GraphRAGQueryResponse {
   preview: PreviewSummary
   runId: ID!
   executionTimeMs: Float!
+  rows: JSON
+  partialResults: JSON
+  rowCount: Int
+  nextCursor: String
+  hasMore: Boolean
+  streamingChannel: String
+  streamedBatches: Int
   subgraphSize: SubgraphSize
 }
 

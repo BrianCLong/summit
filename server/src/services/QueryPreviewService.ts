@@ -18,6 +18,13 @@ import { metrics } from '../observability/metrics.js';
 import { NlToCypherService } from '../ai/nl-to-cypher/nl-to-cypher.service.js';
 import { GlassBoxRunService } from './GlassBoxRunService.js';
 import { QueryResultCache } from './queryResultCache.js';
+import {
+  decodeCursor,
+  encodeCursor,
+  wrapCypherWithPagination,
+  wrapSqlWithPagination,
+} from './pagination.js';
+import { previewStreamHub } from './previewStreamHub.js';
 
 export type QueryLanguage = 'cypher' | 'sql';
 
@@ -106,12 +113,15 @@ export type ExecutePreviewInput = {
   dryRun?: boolean;
   maxRows?: number;
   timeout?: number;
+  cursor?: string | null;
+  batchSize?: number;
+  stream?: boolean;
 };
 
 export type ExecutePreviewResult = {
   runId: string;
   query: string;
-  results: unknown;
+  results: unknown[];
   rowCount: number;
   executionTimeMs: number;
   warnings: string[];
@@ -120,6 +130,10 @@ export type ExecutePreviewResult = {
   partialResults?: unknown[];
   partialCacheHit?: boolean;
   signature?: string;
+  nextCursor?: string | null;
+  hasMore?: boolean;
+  streamingChannel?: string;
+  streamedBatches?: number;
 };
 
 export class QueryPreviewService {
@@ -132,6 +146,7 @@ export class QueryPreviewService {
   private cacheTTL: number = 600; // 10 minutes
   private previewTTL: number = 3600; // 1 hour
   private queryCache: QueryResultCache;
+  private activeStreams: Set<string> = new Set();
 
   constructor(
     pool: Pool,
@@ -423,6 +438,13 @@ export class QueryPreviewService {
     const queryToExecute = input.useEditedQuery && preview.editedQuery
       ? preview.editedQuery
       : preview.generatedQuery;
+    const signature = this.buildSignature(
+      preview,
+      Boolean(input.useEditedQuery && preview.editedQuery),
+    );
+    const initialCursor = decodeCursor(input.cursor);
+    const pageSize = Math.max(1, input.batchSize ?? input.maxRows ?? 100);
+    const streamTopic = input.stream ? preview.id : undefined;
 
     // Create glass-box run
     const run = await this.glassBoxService.createRun({
@@ -455,12 +477,10 @@ export class QueryPreviewService {
       let rowCount: number = 0;
       let cached = false;
       let cacheTier: 'ram' | 'flash' | undefined;
+      let nextCursor: number | undefined;
+      let hasMore = false;
+      let streamedBatches = 0;
       const executionStartedAt = Date.now();
-      const signature = this.queryCache.buildSignature(
-        preview.language,
-        queryToExecute,
-        preview.parameters,
-      );
 
       const streamingCached = await this.queryCache.getStreamingPartial(
         signature,
@@ -475,64 +495,146 @@ export class QueryPreviewService {
         preview.tenantId,
       );
 
-      if (cachedResult) {
+      const publishBatch = (
+        cursorOffset: number,
+        batch: unknown[],
+        candidateNext?: number | null,
+        batchWarnings?: string[],
+      ) => {
+        if (!streamTopic) return;
+        previewStreamHub.publish(preview.id, {
+          previewId: preview.id,
+          batch,
+          cursor: encodeCursor(cursorOffset),
+          nextCursor:
+            candidateNext !== undefined && candidateNext !== null
+              ? encodeCursor(candidateNext)
+              : null,
+          warnings: batchWarnings,
+        });
+      };
+
+      const persistStreamingPartial = async (rows: unknown[]) => {
+        await this.queryCache.setStreamingPartial(
+          signature,
+          rows,
+          preview.tenantId,
+        );
+      };
+
+      if (cachedResult && cachedResult.rows.length > initialCursor && !input.dryRun) {
         cached = true;
         cacheTier = cachedResult.tier;
-        results = cachedResult.rows;
-        rowCount = cachedResult.rows.length;
+        const slice = cachedResult.rows.slice(
+          initialCursor,
+          initialCursor + pageSize,
+        );
+        results = slice;
+        rowCount = slice.length;
+        hasMore = initialCursor + slice.length < cachedResult.rows.length;
+        nextCursor = hasMore ? initialCursor + slice.length : undefined;
         warnings.push(...cachedResult.warnings, 'Served from read-through cache');
+        if (streamTopic) {
+          streamedBatches += 1;
+          publishBatch(initialCursor, slice, nextCursor, cachedResult.warnings);
+          await persistStreamingPartial(slice);
+        }
       } else if (input.dryRun) {
         results = [{ message: 'Dry run - query validated but not executed' }];
+        rowCount = results.length;
         warnings.push('Dry run mode - no data was accessed');
-      } else if (preview.language === 'cypher') {
-        const execResult = await this.executeCypher(
-          queryToExecute,
-          preview.parameters,
-          {
-            maxRows: input.maxRows || 100,
-            timeout: input.timeout || 30000,
-          }
-        );
-        results = execResult.records;
-        rowCount = execResult.records.length;
-        warnings.push(...execResult.warnings);
-        await this.queryCache.setResult(
-          signature,
-          {
-            rows: execResult.records,
-            warnings: execResult.warnings,
-            executionTimeMs: Date.now() - executionStartedAt,
-          },
-          preview.tenantId,
-        );
-        await this.queryCache.setStreamingPartial(
-          signature,
-          execResult.records,
-          preview.tenantId,
-        );
       } else {
-        const execResult = await this.executeSql(
-          queryToExecute,
-          {
-            maxRows: input.maxRows || 100,
-            timeout: input.timeout || 30000,
+        const executePage = async (cursorOffset: number) => {
+          if (preview.language === 'cypher') {
+            return this.executeCypher(
+              queryToExecute,
+              preview.parameters,
+              {
+                maxRows: input.maxRows || 100,
+                timeout: input.timeout || 30000,
+                cursor: cursorOffset,
+                batchSize: pageSize,
+                streamObserver: streamTopic
+                  ? (payload) =>
+                      publishBatch(
+                        cursorOffset,
+                        payload.batch,
+                        payload.nextCursor ?? null,
+                        payload.warnings,
+                      )
+                  : undefined,
+              }
+            );
           }
-        );
-        results = execResult.rows;
-        rowCount = execResult.rows.length;
-        warnings.push(...execResult.warnings);
+          return this.executeSql(
+            queryToExecute,
+            {
+              maxRows: input.maxRows || 100,
+              timeout: input.timeout || 30000,
+              cursor: cursorOffset,
+              batchSize: pageSize,
+              streamObserver: streamTopic
+                ? (payload) =>
+                    publishBatch(
+                      cursorOffset,
+                      payload.batch,
+                      payload.nextCursor ?? null,
+                      payload.warnings,
+                    )
+                : undefined,
+            }
+          );
+        };
+
+        if (streamTopic) {
+          this.activeStreams.add(preview.id);
+          let cursorOffset = initialCursor;
+          while (true) {
+            const execResult = await executePage(cursorOffset);
+            const batch = execResult.records.slice(0, pageSize);
+            if (batch.length > 0) {
+              results = results.concat(batch);
+              rowCount = results.length;
+              streamedBatches += 1;
+              await persistStreamingPartial(
+                results.slice(-this.queryCache.getPartialLimit()),
+              );
+            }
+            warnings.push(...execResult.warnings);
+            hasMore = execResult.hasMore ?? Boolean(execResult.nextCursor);
+            nextCursor = execResult.nextCursor;
+            const maxRows = input.maxRows ?? Infinity;
+            const reachedCap = results.length >= maxRows;
+            if (!hasMore || reachedCap) {
+              break;
+            }
+            cursorOffset = execResult.nextCursor ?? cursorOffset + batch.length;
+          }
+          if (input.maxRows && results.length > input.maxRows) {
+            results = results.slice(0, input.maxRows);
+            rowCount = results.length;
+            hasMore = true;
+            nextCursor = nextCursor ?? initialCursor + results.length;
+          }
+        } else {
+          const execResult = await executePage(initialCursor);
+          results = execResult.records;
+          rowCount = execResult.records.length;
+          warnings.push(...execResult.warnings);
+          hasMore = execResult.hasMore ?? Boolean(execResult.nextCursor);
+          nextCursor = execResult.nextCursor;
+          await persistStreamingPartial(
+            results.slice(0, this.queryCache.getPartialLimit()),
+          );
+        }
+
         await this.queryCache.setResult(
           signature,
           {
-            rows: execResult.rows,
-            warnings: execResult.warnings,
+            rows: results,
+            warnings,
             executionTimeMs: Date.now() - executionStartedAt,
           },
-          preview.tenantId,
-        );
-        await this.queryCache.setStreamingPartial(
-          signature,
-          execResult.rows,
           preview.tenantId,
         );
       }
@@ -585,6 +687,18 @@ export class QueryPreviewService {
         dryRun: input.dryRun,
       }, 'Executed query preview');
 
+      if (streamTopic) {
+        previewStreamHub.publish(preview.id, {
+          previewId: preview.id,
+          batch: [],
+          cursor: encodeCursor(nextCursor ?? initialCursor),
+          nextCursor: nextCursor ? encodeCursor(nextCursor) : null,
+          complete: true,
+          warnings,
+        });
+        this.activeStreams.delete(preview.id);
+      }
+
       return {
         runId: run.id,
         query: queryToExecute,
@@ -598,6 +712,10 @@ export class QueryPreviewService {
           streamingCached?.rows ?? results.slice(0, this.queryCache.getPartialLimit()),
         partialCacheHit: Boolean(streamingCached),
         signature,
+        nextCursor: nextCursor !== undefined ? encodeCursor(nextCursor) : null,
+        hasMore,
+        streamingChannel: streamTopic,
+        streamedBatches: streamTopic ? streamedBatches : undefined,
       };
     } catch (error) {
       await this.glassBoxService.updateStatus(run.id, 'failed', undefined, String(error));
@@ -615,6 +733,10 @@ export class QueryPreviewService {
       }, 'Failed to execute query preview');
 
       throw error;
+    } finally {
+      if (streamTopic) {
+        this.activeStreams.delete(preview.id);
+      }
     }
   }
 
@@ -823,30 +945,59 @@ export class QueryPreviewService {
   private async executeCypher(
     query: string,
     parameters: Record<string, unknown>,
-    options: { maxRows: number; timeout: number }
-  ): Promise<{ records: any[]; warnings: string[] }> {
+    options: {
+      maxRows: number;
+      timeout: number;
+      cursor?: number;
+      batchSize?: number;
+      streamObserver?: (payload: {
+        batch: unknown[];
+        nextCursor?: number | null;
+        warnings?: string[];
+      }) => void;
+    }
+  ): Promise<{
+    records: any[];
+    rows?: any[];
+    warnings: string[];
+    nextCursor?: number;
+    hasMore?: boolean;
+  }> {
     const session = this.neo4jDriver.session();
     const warnings: string[] = [];
+    const skip = options.cursor ?? 0;
+    const limit = Math.min(options.batchSize ?? options.maxRows, options.maxRows);
 
     try {
-      // Add LIMIT if not present
-      let finalQuery = query;
-      if (!query.includes('LIMIT')) {
-        finalQuery += ` LIMIT ${options.maxRows}`;
-        warnings.push(`Added LIMIT ${options.maxRows} to query`);
-      }
-
-      const result = await session.run(finalQuery, parameters, {
+      const finalQuery = wrapCypherWithPagination(query);
+      const result = await session.run(finalQuery, {
+        ...parameters,
+        skip,
+        limitPlusOne: limit + 1,
+      }, {
         timeout: options.timeout,
       });
 
-      const records = result.records.map(record => record.toObject());
+      const mapped = result.records.map(record => record.toObject());
+      const hasMore = mapped.length > limit;
+      const records = hasMore ? mapped.slice(0, limit) : mapped;
+      const nextCursor = hasMore ? skip + limit : undefined;
 
-      if (records.length === options.maxRows) {
+      if (hasMore) {
         warnings.push('Result set limited - more rows may be available');
+      } else {
+        warnings.push('Pagination applied with server-side LIMIT/SKIP');
       }
 
-      return { records, warnings };
+      if (options.streamObserver) {
+        options.streamObserver({
+          batch: records,
+          nextCursor,
+          warnings,
+        });
+      }
+
+      return { records, rows: records, warnings, nextCursor, hasMore };
     } finally {
       await session.close();
     }
@@ -857,24 +1008,81 @@ export class QueryPreviewService {
    */
   private async executeSql(
     query: string,
-    options: { maxRows: number; timeout: number }
-  ): Promise<{ rows: any[]; warnings: string[] }> {
+    options: {
+      maxRows: number;
+      timeout: number;
+      cursor?: number;
+      batchSize?: number;
+      streamObserver?: (payload: {
+        batch: unknown[];
+        nextCursor?: number | null;
+        warnings?: string[];
+      }) => void;
+    }
+  ): Promise<{
+    rows: any[];
+    records: any[];
+    warnings: string[];
+    nextCursor?: number;
+    hasMore?: boolean;
+  }> {
     const warnings: string[] = [];
+    const offset = options.cursor ?? 0;
+    const limit = Math.min(options.batchSize ?? options.maxRows, options.maxRows);
 
-    // Add LIMIT if not present
-    let finalQuery = query;
-    if (!query.toUpperCase().includes('LIMIT')) {
-      finalQuery += ` LIMIT ${options.maxRows}`;
-      warnings.push(`Added LIMIT ${options.maxRows} to query`);
-    }
+    const finalQuery = wrapSqlWithPagination(query);
+    const result = await this.pool.query(finalQuery, [offset, limit + 1]);
 
-    const result = await this.pool.query(finalQuery);
+    const hasMore = result.rows.length > limit;
+    const rows = hasMore ? result.rows.slice(0, limit) : result.rows;
+    const nextCursor = hasMore ? offset + limit : undefined;
 
-    if (result.rows.length === options.maxRows) {
+    if (hasMore) {
       warnings.push('Result set limited - more rows may be available');
+    } else {
+      warnings.push('Pagination applied with server-side LIMIT/OFFSET');
     }
 
-    return { rows: result.rows, warnings };
+    if (options.streamObserver) {
+      options.streamObserver({
+        batch: rows,
+        nextCursor,
+        warnings,
+      });
+    }
+
+    return { rows, records: rows, warnings, nextCursor, hasMore };
+  }
+
+  private buildSignature(
+    preview: QueryPreview,
+    useEditedQuery: boolean,
+  ): string {
+    const query = useEditedQuery && preview.editedQuery
+      ? preview.editedQuery
+      : preview.generatedQuery;
+    return this.queryCache.buildSignature(
+      preview.language,
+      query,
+      preview.parameters,
+    );
+  }
+
+  async getStreamingPartial(
+    previewId: string,
+    useEditedQuery = false,
+  ): Promise<{ rows: unknown[]; tier: 'ram' | 'flash'; signature: string } | null> {
+    const preview = await this.getPreview(previewId);
+    if (!preview) return null;
+    const signature = this.buildSignature(preview, useEditedQuery);
+    const cached = await this.queryCache.getStreamingPartial(
+      signature,
+      preview.tenantId,
+    );
+    if (!cached) {
+      return null;
+    }
+    return { ...cached, signature };
   }
 
   /**

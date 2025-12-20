@@ -147,4 +147,53 @@ describe('ProgressiveGraph', () => {
     );
     expect(region?.getAttribute('aria-busy')).toBe('false');
   });
+
+  it('preserves progress when streaming batches arrive', async () => {
+    const first = buildFixtureGraph(60);
+    const next = buildFixtureGraph(140);
+    const container = document.createElement('div');
+    const root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        <ProgressiveGraph
+          streaming
+          nodes={first.nodes}
+          edges={first.edges}
+          initialBatchSize={18}
+          frameBudgetMs={6}
+        />,
+      );
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    const firstRendered = Number(
+      container
+        .querySelector('[data-rendered-count]')
+        ?.getAttribute('data-rendered-count'),
+    );
+
+    await act(async () => {
+      root.render(
+        <ProgressiveGraph
+          streaming
+          nodes={next.nodes}
+          edges={next.edges}
+          initialBatchSize={18}
+          frameBudgetMs={6}
+        />,
+      );
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    const region = container.querySelector('[role="region"]');
+    const renderSurface = container.querySelector('[data-rendered-count]');
+    const secondRendered = Number(
+      renderSurface?.getAttribute('data-rendered-count') ?? '0',
+    );
+
+    expect(secondRendered).toBeGreaterThanOrEqual(firstRendered);
+    expect(region?.getAttribute('data-streaming')).toBe('true');
+    expect(container.querySelector('[data-streaming-indicator]')).toBeTruthy();
+  });
 });
