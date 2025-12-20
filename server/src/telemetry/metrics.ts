@@ -5,7 +5,9 @@
 import logger from '../utils/logger.js';
 
 /**
- * IntelGraph Metrics Manager
+ * IntelGraph Metrics Manager.
+ * Provides an interface for recording application metrics such as requests, durations, and business events.
+ * This implementation is a no-op fallback when OpenTelemetry is disabled.
  */
 export class IntelGraphMetrics {
   private static instance: IntelGraphMetrics;
@@ -57,6 +59,10 @@ export class IntelGraphMetrics {
     this.setupMetrics();
   }
 
+  /**
+   * Retrieves the singleton instance of IntelGraphMetrics.
+   * @returns The IntelGraphMetrics instance.
+   */
   public static getInstance(): IntelGraphMetrics {
     if (!IntelGraphMetrics.instance) {
       IntelGraphMetrics.instance = new IntelGraphMetrics();
@@ -312,6 +318,9 @@ export class IntelGraphMetrics {
   }
 
   // Public API Methods
+  /**
+   * Records an orchestration request metric.
+   */
   public recordOrchestrationRequest(
     method: string,
     endpoint: string,
@@ -320,14 +329,23 @@ export class IntelGraphMetrics {
     this.orchestrationRequests.add(1, { method, endpoint, status });
   }
 
+  /**
+   * Records the duration of an orchestration request.
+   */
   public recordOrchestrationDuration(duration: number, endpoint: string): void {
     this.orchestrationDuration.record(duration, { endpoint });
   }
 
+  /**
+   * Records an orchestration error.
+   */
   public recordOrchestrationError(error: string, endpoint: string): void {
     this.orchestrationErrors.add(1, { error_type: error, endpoint });
   }
 
+  /**
+   * Records an AI model request metric.
+   */
   public recordAIModelRequest(
     model: string,
     operation: string,
@@ -340,6 +358,9 @@ export class IntelGraphMetrics {
     }
   }
 
+  /**
+   * Records the duration of an AI model request.
+   */
   public recordAIModelDuration(
     duration: number,
     model: string,
@@ -348,10 +369,16 @@ export class IntelGraphMetrics {
     this.aiModelDuration.record(duration, { model, operation });
   }
 
+  /**
+   * Updates the Thompson Sampling reward rate for a model.
+   */
   public updateThompsonSamplingReward(model: string, rewardRate: number): void {
     this.thompsonSamplingRewards.set(rewardRate, { model });
   }
 
+  /**
+   * Records a graph database operation.
+   */
   public recordGraphOperation(
     operation: string,
     status: string,
@@ -361,10 +388,16 @@ export class IntelGraphMetrics {
     this.graphQueryDuration.record(duration, { operation });
   }
 
+  /**
+   * Updates the count of entities in the graph.
+   */
   public updateGraphEntityCount(count: number, entityType?: string): void {
     this.graphEntities.add(count, { entity_type: entityType || 'all' });
   }
 
+  /**
+   * Records a premium routing decision.
+   */
   public recordPremiumRoutingDecision(
     decision: string,
     modelTier: string,
@@ -376,10 +409,16 @@ export class IntelGraphMetrics {
     }
   }
 
+  /**
+   * Updates the premium budget utilization metric.
+   */
   public updatePremiumBudgetUtilization(percentage: number): void {
     this.premiumBudgetUtilization.set(percentage);
   }
 
+  /**
+   * Records a security event.
+   */
   public recordSecurityEvent(
     eventType: string,
     severity: string,
@@ -392,6 +431,9 @@ export class IntelGraphMetrics {
     });
   }
 
+  /**
+   * Records a compliance gate decision.
+   */
   public recordComplianceDecision(
     decision: string,
     policy: string,
@@ -404,6 +446,9 @@ export class IntelGraphMetrics {
     });
   }
 
+  /**
+   * Records an authentication attempt.
+   */
   public recordAuthenticationAttempt(
     method: string,
     status: string,
@@ -416,6 +461,9 @@ export class IntelGraphMetrics {
     });
   }
 
+  /**
+   * Records an investigation creation event.
+   */
   public recordInvestigationCreated(type: string, userId: string): void {
     this.investigationsCreated.add(1, {
       investigation_type: type,
@@ -423,10 +471,16 @@ export class IntelGraphMetrics {
     });
   }
 
+  /**
+   * Updates the count of active data sources.
+   */
   public updateActiveDataSources(count: number, sourceType?: string): void {
     this.dataSourcesActive.add(count, { source_type: sourceType || 'all' });
   }
 
+  /**
+   * Records a web scraping request.
+   */
   public recordWebScrapingRequest(status: string, domain?: string): void {
     this.webScrapingRequests.add(1, {
       status,
@@ -434,6 +488,9 @@ export class IntelGraphMetrics {
     });
   }
 
+  /**
+   * Updates the count of active connections.
+   */
   public updateActiveConnections(
     delta: number,
     connectionType: string = 'http',
@@ -441,6 +498,9 @@ export class IntelGraphMetrics {
     this.activeConnections.add(delta, { type: connectionType });
   }
 
+  /**
+   * Updates the count of active user sessions.
+   */
   public updateActiveSessions(
     delta: number,
     sessionType: string = 'user',
@@ -448,6 +508,9 @@ export class IntelGraphMetrics {
     this.activeSessions.add(delta, { type: sessionType });
   }
 
+  /**
+   * Shuts down the metrics system.
+   */
   public async shutdown(): Promise<void> {
     /* no-op */
   }

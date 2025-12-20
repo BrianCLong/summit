@@ -121,6 +121,10 @@ type XAIOverlayConfig = z.infer<typeof XAIOverlayConfigSchema>;
 // XAI Overlay Service
 // ============================================================================
 
+/**
+ * Service providing Explainable AI (XAI) capabilities for model outputs.
+ * Offers features like risk explanation, tamper detection, reproducibility verification, and parameter sensitivity analysis.
+ */
 export class XAIOverlayService {
   private static instance: XAIOverlayService;
   private config: XAIOverlayConfig;
@@ -148,6 +152,11 @@ export class XAIOverlayService {
     });
   }
 
+  /**
+   * Retrieves the singleton instance of XAIOverlayService.
+   * @param config - Optional configuration to initialize the service.
+   * @returns The XAIOverlayService instance.
+   */
   public static getInstance(config?: Partial<XAIOverlayConfig>): XAIOverlayService {
     if (!XAIOverlayService.instance) {
       XAIOverlayService.instance = new XAIOverlayService(config);
@@ -515,6 +524,12 @@ export class XAIOverlayService {
   // Tamper Detection
   // ============================================================================
 
+  /**
+   * Detects if a reasoning trace has been tampered with.
+   * Compares the computed digest with the original and verifies the signature.
+   * @param trace - The reasoning trace to check.
+   * @returns The tamper detection result.
+   */
   async detectTampering(trace: ReasoningTrace): Promise<TamperDetectionResult> {
     const span = otelService.createSpan('xai_overlay.detect_tampering');
 
@@ -646,6 +661,13 @@ export class XAIOverlayService {
   // Reproducibility Verification
   // ============================================================================
 
+  /**
+   * Verifies the reproducibility of a reasoning trace by recomputing it with the same inputs.
+   * @param originalTraceId - The ID of the original trace.
+   * @param features - The feature vector used in the original computation.
+   * @param window - The time window used.
+   * @returns A report comparing the original and reproduced traces.
+   */
   async verifyReproducibility(
     originalTraceId: string,
     features: FeatureVector,
@@ -735,6 +757,14 @@ export class XAIOverlayService {
   // Parameter Sensitivity Analysis
   // ============================================================================
 
+  /**
+   * Analyzes the sensitivity of the risk score to variations in a specific feature.
+   * @param baseFeatures - The base feature vector.
+   * @param window - The time window.
+   * @param featureToVary - The name of the feature to vary.
+   * @param variationPercent - The percentage variation to apply (default 10%).
+   * @returns The sensitivity analysis result.
+   */
   async analyzeParameterSensitivity(
     baseFeatures: FeatureVector,
     window: '24h' | '7d' | '30d',
@@ -820,15 +850,27 @@ export class XAIOverlayService {
     this.traceCache.set(trace.traceId, trace);
   }
 
+  /**
+   * Retrieves a cached reasoning trace by ID.
+   * @param traceId - The ID of the trace.
+   * @returns The trace, or undefined if not found.
+   */
   getTrace(traceId: string): ReasoningTrace | undefined {
     return this.traceCache.get(traceId);
   }
 
+  /**
+   * Clears the trace cache.
+   */
   clearCache(): void {
     this.traceCache.clear();
     logger.info({ message: 'XAI overlay trace cache cleared' });
   }
 
+  /**
+   * Retrieves statistics about the trace cache.
+   * @returns Cache statistics.
+   */
   getCacheStatistics(): {
     size: number;
     maxSize: number;
@@ -845,6 +887,10 @@ export class XAIOverlayService {
   // Health Check
   // ============================================================================
 
+  /**
+   * Performs a health check on the XAI Overlay Service and its dependencies (signing, tamper detection).
+   * @returns The health status report.
+   */
   async healthCheck(): Promise<{
     status: 'healthy' | 'degraded' | 'unhealthy';
     signing: boolean;

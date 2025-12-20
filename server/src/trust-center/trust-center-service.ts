@@ -55,6 +55,10 @@ interface TrustCenterReport {
   createdAt: Date;
 }
 
+/**
+ * Service for generating audit reports, SLSA attestations, and compliance checks.
+ * Acts as the central trust authority for the platform.
+ */
 export class TrustCenterService {
   private readonly signingKey: string;
   private readonly timestampService?: string;
@@ -64,6 +68,12 @@ export class TrustCenterService {
     this.timestampService = process.env.TIMESTAMP_SERVICE_URL; // Optional 3rd-party timestamping
   }
 
+  /**
+   * Initiates an audit export generation task.
+   * @param request - The audit export request details.
+   * @param userId - The ID of the user requesting the export.
+   * @returns The ID of the generated report.
+   */
   async createAuditExport(
     request: AuditExportRequest,
     userId: string,
@@ -255,6 +265,12 @@ export class TrustCenterService {
     return auditData;
   }
 
+  /**
+   * Generates a SLSA (Supply-chain Levels for Software Artifacts) attestation for a run.
+   * @param runId - The ID of the run.
+   * @param tenantId - The ID of the tenant.
+   * @returns The SLSA attestation object.
+   */
   async generateSLSAAttestation(
     runId: string,
     tenantId: string,
@@ -374,6 +390,11 @@ export class TrustCenterService {
     }
   }
 
+  /**
+   * Generates a Software Bill of Materials (SBOM) for a run.
+   * @param runId - The ID of the run.
+   * @returns The generated SBOM object.
+   */
   async generateSBOMReport(runId: string): Promise<any> {
     const span = otelService.createSpan('trust_center.generate_sbom');
 
@@ -459,6 +480,12 @@ export class TrustCenterService {
     }
   }
 
+  /**
+   * Checks the compliance status of a tenant against a specific framework.
+   * @param tenantId - The ID of the tenant.
+   * @param framework - The compliance framework to check against.
+   * @returns The compliance status report.
+   */
   async checkComplianceStatus(
     tenantId: string,
     framework: 'SOC2' | 'ISO27001' | 'HIPAA' | 'PCI',
@@ -558,6 +585,7 @@ export class TrustCenterService {
           `${row.created_at},${row.run_id},${row.selected_model},${JSON.parse(row.candidates || '[]').length},${row.override_reason || ''}`,
         );
       });
+      lines.push('');
     }
 
     return lines.join('\n');
@@ -585,6 +613,12 @@ export class TrustCenterService {
     }
   }
 
+  /**
+   * Generates a comprehensive audit report covering various aspects including metrics, compliance, and SLSA attestations.
+   * @param tenantId - The ID of the tenant.
+   * @param options - Options for report generation (time range, included sections, format).
+   * @returns The generated report.
+   */
   async generateComprehensiveAuditReport(
     tenantId: string,
     options: {

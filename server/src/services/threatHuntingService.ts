@@ -355,6 +355,10 @@ export type EvidenceType =
   | 'DNS_QUERY'
   | 'HTTP_REQUEST';
 
+/**
+ * Service for threat hunting and IOC management.
+ * Provides capabilities to create, search, and manage IOCs, detections, and threat hunts.
+ */
 export class ThreatHuntingService extends EventEmitter {
   private iocs: Map<string, IOC> = new Map();
   private detections: Map<string, Detection> = new Map();

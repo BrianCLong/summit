@@ -20,6 +20,10 @@ interface OutboxEvent {
   last_error?: string;
 }
 
+/**
+ * Worker responsible for synchronizing data from the PostgreSQL Outbox table to Neo4j.
+ * This ensures data consistency between the relational and graph databases.
+ */
 export class OutboxNeo4jSync {
   private isRunning = false;
   private intervalId?: NodeJS.Timeout;

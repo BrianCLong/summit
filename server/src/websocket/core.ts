@@ -36,6 +36,10 @@ interface WebSocketMessage {
   id?: string;
 }
 
+/**
+ * Core WebSocket server implementation using uWebSockets.js.
+ * Handles WebSocket upgrades, authentication, message processing, and Pub/Sub.
+ */
 export class WebSocketCore {
   private app: uWS.App;
   private redis: Redis;
@@ -532,6 +536,10 @@ export class WebSocketCore {
     }
   }
 
+  /**
+   * Starts the WebSocket server.
+   * @param port - The port to listen on.
+   */
   public listen(port: number = 9001) {
     this.app.listen(port, (token) => {
       if (token) {
@@ -542,10 +550,20 @@ export class WebSocketCore {
     });
   }
 
+  /**
+   * Notifies all connections that the server is restarting.
+   * @param reason - The reason for the restart.
+   */
   public notifyServerRestart(reason = 'maintenance'): void {
     this.connectionPool.handleServerRestart(reason);
   }
 
+  /**
+   * Publishes a message to a topic.
+   * @param tenantId - The tenant ID.
+   * @param topic - The topic name.
+   * @param payload - The message payload.
+   */
   public async publishToTopic(tenantId: string, topic: string, payload: any) {
     const tenantTopic = `${tenantId}.${topic}`;
     const message = {
@@ -562,6 +580,10 @@ export class WebSocketCore {
     );
   }
 
+  /**
+   * Retrieves current connection statistics.
+   * @returns An object containing connection statistics.
+   */
   public getConnectionStats() {
     const poolStats = this.connectionPool.getStats();
     return {

@@ -4,6 +4,13 @@
  */
 import { randomUUID as uuid } from 'node:crypto';
 
+/**
+ * Starts the writer that processes approved insights.
+ * It periodically polls for insights with status 'APPROVED' and applies them to the graph database.
+ *
+ * @param db - The database client for accessing insights and audit logs.
+ * @param neo4j - The Neo4j driver for graph operations.
+ */
 export async function startApprovedWriter(db: any, neo4j: any) {
   setInterval(async () => {
     try {

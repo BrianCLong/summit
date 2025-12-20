@@ -12,6 +12,14 @@ async function promQuery(expr: string): Promise<number> {
   return Number(v || 0);
 }
 
+/**
+ * Runs a canary guard check for a specific run.
+ * Evaluates metrics (error rate, p95 latency) against thresholds and triggers a rollback if necessary.
+ *
+ * @param runId - The ID of the run to monitor.
+ * @param thresholds - The thresholds for error rate and p95 latency.
+ * @returns The result of the canary evaluation.
+ */
 export async function runCanaryGuard(
   runId: string,
   thresholds: { errorRatePct: number; p95LatencyMs: number },

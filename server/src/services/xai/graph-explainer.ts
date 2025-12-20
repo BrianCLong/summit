@@ -60,11 +60,20 @@ interface ModelCard {
   performance_benchmarks: Record<string, any>;
 }
 
+/**
+ * Service for generating explainable AI insights for graph data.
+ * Supports various explanation types like node importance, edge importance, and path explanations.
+ * Includes caching and model card management.
+ */
 export class GraphXAIExplainer {
   private static instance: GraphXAIExplainer;
   private explanationCache: Map<string, ExplanationResult> = new Map();
   private modelCards: Map<string, ModelCard> = new Map();
 
+  /**
+   * Retrieves the singleton instance of GraphXAIExplainer.
+   * @returns The GraphXAIExplainer instance.
+   */
   public static getInstance(): GraphXAIExplainer {
     if (!GraphXAIExplainer.instance) {
       GraphXAIExplainer.instance = new GraphXAIExplainer();
@@ -191,6 +200,12 @@ export class GraphXAIExplainer {
   }
 
   // Main XAI explanation generation
+  /**
+   * Generates an explanation for a given graph query request.
+   * Checks cache first, then computes explanation if needed.
+   * @param request - The explanation request details.
+   * @returns The generated explanation result.
+   */
   async generateExplanation(
     request: ExplanationRequest,
   ): Promise<ExplanationResult> {
@@ -505,12 +520,19 @@ export class GraphXAIExplainer {
     return 0.7 + Math.random() * 0.3; // Simplified calculation
   }
 
-  // Committee requirement: Model card retrieval
+  /**
+   * Retrieves the model card for a specific model version.
+   * @param modelVersion - The version of the model.
+   * @returns The model card, or null if not found.
+   */
   getModelCard(modelVersion: string): ModelCard | null {
     return this.modelCards.get(modelVersion) || null;
   }
 
-  // Committee requirement: Cache statistics
+  /**
+   * Retrieves statistics about the explanation cache.
+   * @returns Cache statistics.
+   */
   getCacheStatistics(): any {
     return {
       cache_size: this.explanationCache.size,
@@ -519,7 +541,9 @@ export class GraphXAIExplainer {
     };
   }
 
-  // Committee requirement: Cache management
+  /**
+   * Clears the explanation cache.
+   */
   clearCache(): void {
     this.explanationCache.clear();
     logger.info({ message: 'XAI explanation cache cleared' });

@@ -16,7 +16,10 @@ const sdk: any = {
   shutdown: async () => {},
 };
 
-// Initialize OpenTelemetry v2
+/**
+ * Initializes OpenTelemetry v2.
+ * Currently a no-op implementation.
+ */
 export function initializeOTelV2(): void {
   try {
     logger.info('OTel v2 disabled (no-op).');
@@ -26,7 +29,10 @@ export function initializeOTelV2(): void {
   }
 }
 
-// Graceful shutdown
+/**
+ * Shuts down OpenTelemetry v2 gracefully.
+ * @returns A promise that resolves when shutdown is complete.
+ */
 export function shutdownOTel(): Promise<void> { return sdk.shutdown(); }
 
 // Process signal handlers

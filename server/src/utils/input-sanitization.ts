@@ -338,22 +338,44 @@ export function sanitizeRateLimitKey(key: string): string {
 export class InputValidator {
   private errors: string[] = [];
 
+  /**
+   * Adds an error message to the list of errors.
+   * @param error - The error message to add.
+   */
   addError(error: string): void {
     this.errors.push(error);
   }
 
+  /**
+   * Checks if there are any validation errors.
+   * @returns True if there are errors, false otherwise.
+   */
   hasErrors(): boolean {
     return this.errors.length > 0;
   }
 
+  /**
+   * Retrieves the list of validation errors.
+   * @returns An array of error messages.
+   */
   getErrors(): string[] {
     return this.errors;
   }
 
+  /**
+   * Resets the validator, clearing all errors.
+   */
   reset(): void {
     this.errors = [];
   }
 
+  /**
+   * Validates a string input against optional criteria.
+   * @param input - The input to validate.
+   * @param fieldName - The name of the field being validated (for error messages).
+   * @param options - Optional validation criteria (minLength, maxLength, pattern).
+   * @returns The sanitized string if valid, or null if invalid.
+   */
   validateString(input: any, fieldName: string, options?: {
     minLength?: number;
     maxLength?: number;
@@ -387,6 +409,12 @@ export class InputValidator {
     }
   }
 
+  /**
+   * Validates an email address.
+   * @param input - The input to validate.
+   * @param fieldName - The name of the field being validated.
+   * @returns The sanitized email if valid, or null if invalid.
+   */
   validateEmail(input: any, fieldName: string): string | null {
     try {
       return sanitizeEmail(input);
@@ -396,6 +424,12 @@ export class InputValidator {
     }
   }
 
+  /**
+   * Validates a URL.
+   * @param input - The input to validate.
+   * @param fieldName - The name of the field being validated.
+   * @returns The sanitized URL if valid, or null if invalid.
+   */
   validateURL(input: any, fieldName: string): string | null {
     try {
       return sanitizeURL(input);
@@ -405,6 +439,14 @@ export class InputValidator {
     }
   }
 
+  /**
+   * Validates an integer.
+   * @param input - The input to validate.
+   * @param fieldName - The name of the field being validated.
+   * @param min - Optional minimum value.
+   * @param max - Optional maximum value.
+   * @returns The validated integer if valid, or null if invalid.
+   */
   validateInteger(input: any, fieldName: string, min?: number, max?: number): number | null {
     try {
       return validateInteger(input, min, max);

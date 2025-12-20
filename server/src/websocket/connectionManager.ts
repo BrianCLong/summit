@@ -154,6 +154,9 @@ const enum TimerType {
 
 const READY_STATE_OPEN = 1;
 
+/**
+ * Manages a single WebSocket connection with state tracking, queuing, and metrics.
+ */
 export class ManagedConnection {
   private readonly options: Required<ManagedConnectionOptions>;
   private readonly metrics: ConnectionMetrics;
@@ -499,6 +502,9 @@ export class ManagedConnection {
 
 export interface ConnectionPoolOptions extends ManagedConnectionOptions {}
 
+/**
+ * Manages a pool of active WebSocket connections.
+ */
 export class WebSocketConnectionPool {
   private readonly connections = new Map<string, ManagedConnection>();
   private readonly metrics: ConnectionMetrics;
@@ -509,6 +515,13 @@ export class WebSocketConnectionPool {
     this.metrics = createMetrics();
   }
 
+  /**
+   * Registers a new connection to the pool.
+   * @param id - The unique connection identifier.
+   * @param ws - The WebSocket instance.
+   * @param context - The connection context.
+   * @returns The managed connection.
+   */
   registerConnection(
     id: string,
     ws: any,
@@ -537,6 +550,12 @@ export class WebSocketConnectionPool {
     return managed;
   }
 
+  /**
+   * Rebinds an existing connection to a new WebSocket instance (e.g., on reconnect).
+   * @param id - The connection ID.
+   * @param ws - The new WebSocket instance.
+   * @returns The managed connection, or undefined if not found.
+   */
   rebindConnection(id: string, ws: any): ManagedConnection | undefined {
     const connection = this.connections.get(id);
     if (connection) {
@@ -546,6 +565,11 @@ export class WebSocketConnectionPool {
     return connection;
   }
 
+  /**
+   * Removes a connection from the pool.
+   * @param id - The connection ID.
+   * @param reason - The reason for removal.
+   */
   removeConnection(id: string, reason = 'closed'): void {
     const connection = this.connections.get(id);
     if (!connection) {
@@ -557,6 +581,12 @@ export class WebSocketConnectionPool {
     this.refreshStateGauge();
   }
 
+  /**
+   * Sends a raw message to a specific connection.
+   * @param id - The connection ID.
+   * @param payload - The message payload.
+   * @returns True if sent or queued, false if connection not found.
+   */
   send(id: string, payload: string): boolean {
     const connection = this.connections.get(id);
     if (!connection) {
@@ -565,10 +595,21 @@ export class WebSocketConnectionPool {
     return connection.sendRaw(payload);
   }
 
+  /**
+   * Sends a JSON message to a specific connection.
+   * @param id - The connection ID.
+   * @param payload - The JSON payload.
+   * @returns True if sent or queued, false if connection not found.
+   */
   sendJson(id: string, payload: Record<string, unknown>): boolean {
     return this.send(id, JSON.stringify(payload));
   }
 
+  /**
+   * Broadcasts a message to all connections, optionally filtered.
+   * @param payload - The message payload.
+   * @param filter - Optional filter function.
+   */
   broadcast(
     payload: string,
     filter?: (conn: ManagedConnection) => boolean,
@@ -581,6 +622,10 @@ export class WebSocketConnectionPool {
     }
   }
 
+  /**
+   * Handles network status changes (online/offline).
+   * @param status - The new network status.
+   */
   handleNetworkChange(status: 'online' | 'offline'): void {
     for (const connection of this.connections.values()) {
       if (status === 'offline') {
@@ -592,6 +637,10 @@ export class WebSocketConnectionPool {
     this.refreshStateGauge();
   }
 
+  /**
+   * Notifies all connections of a server restart.
+   * @param reason - The reason for restart.
+   */
   handleServerRestart(reason = 'server_restart'): void {
     for (const connection of this.connections.values()) {
       connection.markServerRestart(reason);
@@ -604,6 +653,11 @@ export class WebSocketConnectionPool {
     this.refreshStateGauge();
   }
 
+  /**
+   * Closes connections that have timed out.
+   * @param timeoutMs - The heartbeat timeout in milliseconds.
+   * @returns An array of closed connection IDs.
+   */
   closeIdleConnections(timeoutMs: number): string[] {
     const closed: string[] = [];
     for (const [id, connection] of this.connections.entries()) {
@@ -619,6 +673,11 @@ export class WebSocketConnectionPool {
     return closed;
   }
 
+  /**
+   * Updates the routing information for a connection.
+   * @param id - The connection ID.
+   * @param route - The new route.
+   */
   updateRoute(id: string, route?: string): void {
     const connection = this.connections.get(id);
     if (!connection) {
@@ -627,6 +686,10 @@ export class WebSocketConnectionPool {
     connection.updateRoute(route);
   }
 
+  /**
+   * Retrieves statistics for the connection pool.
+   * @returns An object containing pool statistics.
+   */
   getStats() {
     const stats = [] as ReturnType<ManagedConnection['getStats']>[];
     for (const connection of this.connections.values()) {

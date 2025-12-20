@@ -56,10 +56,18 @@ interface DetectionSummary {
   processing_time_ms: number;
 }
 
+/**
+ * Service for detecting anomalies, patterns, and threats in graph data.
+ * Integrates with XAI for explainable results.
+ */
 export class DetectorService {
   private static instance: DetectorService;
   private xaiExplainer: GraphXAIExplainer;
 
+  /**
+   * Retrieves the singleton instance of DetectorService.
+   * @returns The DetectorService instance.
+   */
   public static getInstance(): DetectorService {
     if (!DetectorService.instance) {
       DetectorService.instance = new DetectorService();
@@ -72,6 +80,11 @@ export class DetectorService {
   }
 
   // Main detection orchestrator
+  /**
+   * Runs the configured detectors on the provided request data.
+   * @param request - The detection request containing data and configuration.
+   * @returns A summary of the detection results.
+   */
   async runDetectors(request: DetectionRequest): Promise<DetectionSummary> {
     const startTime = Date.now();
     const traceId = crypto.randomUUID();

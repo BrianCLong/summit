@@ -7,6 +7,12 @@ async function computeEmbedding(text: string): Promise<number[]> {
   return new Array(1536).fill(0); // Return a dummy embedding
 }
 
+/**
+ * Backfills embeddings for entities in a specific tenant.
+ * Reads entities from Neo4j, computes embeddings, and stores them in PostgreSQL.
+ *
+ * @param tenantId - The ID of the tenant.
+ */
 export async function backfillEmbeddings(tenantId: string) {
   const session = getNeo4jDriver().session();
   const pg = getPostgresPool();

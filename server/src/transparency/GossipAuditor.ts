@@ -7,6 +7,12 @@ export class GossipAuditor {
     private log: { alert: (msg: string) => void },
   ) {}
 
+  /**
+   * Performs a single audit of the transparency log.
+   * Fetches the Signed Tree Head (STH) and verifies the consistency of the log entries.
+   *
+   * @returns An object indicating success or failure, and the log size if successful.
+   */
   async auditOnce() {
     const sth = await this.fetcher.getSTH();
     const range = await this.fetcher.getRange(0, sth.size);

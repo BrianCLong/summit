@@ -10,7 +10,16 @@ export interface BehavioralFingerprint {
   editRate: number;
 }
 
+/**
+ * Service for computing and analyzing behavioral fingerprints.
+ * Used for identity resolution and anomaly detection.
+ */
 export class BehavioralFingerprintService {
+  /**
+   * Computes a behavioral fingerprint from a series of telemetry events.
+   * @param events - An array of behavioral telemetry events.
+   * @returns The computed behavioral fingerprint.
+   */
   computeFingerprint(events: BehavioralTelemetry[]): BehavioralFingerprint {
     const totals = events.reduce(
       (acc, e) => {
@@ -29,12 +38,23 @@ export class BehavioralFingerprintService {
     };
   }
 
+  /**
+   * Calculates a simple score for a behavioral fingerprint.
+   * @param fp - The behavioral fingerprint.
+   * @returns A numerical score.
+   */
   scoreFingerprint(fp: BehavioralFingerprint): number {
     return (
       fp.clicksPerMinute * 0.4 + fp.attentionSpan * 0.2 + fp.editRate * 0.4
     );
   }
 
+  /**
+   * Clusters a set of items based on their behavioral fingerprints.
+   * Uses a simple distance-based clustering algorithm.
+   * @param items - An array of items, each with an ID and a fingerprint.
+   * @returns A Map where keys are cluster IDs and values are arrays of item IDs.
+   */
   clusterFingerprints(
     items: { id: string; fingerprint: BehavioralFingerprint }[],
   ): Map<string, string[]> {

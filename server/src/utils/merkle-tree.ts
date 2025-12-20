@@ -6,6 +6,10 @@
 import crypto from 'crypto';
 import { MerkleNode, MerkleTree, MerkleProof } from '../types/provenance-beta.js';
 
+/**
+ * A builder class for constructing Merkle Trees.
+ * It allows adding leaves, building the tree, and generating proofs.
+ */
 export class MerkleTreeBuilder {
   private leaves: { hash: string; data: any }[];
   private tree: MerkleNode[];
@@ -17,6 +21,8 @@ export class MerkleTreeBuilder {
 
   /**
    * Add a leaf to the Merkle tree
+   * @param data - The data associated with the leaf
+   * @param hash - Optional hash of the data. If not provided, it will be computed.
    */
   addLeaf(data: any, hash?: string): void {
     const leafHash = hash || this.computeHash(data);
@@ -25,6 +31,7 @@ export class MerkleTreeBuilder {
 
   /**
    * Build the Merkle tree from added leaves
+   * @returns The constructed Merkle Tree
    */
   build(): MerkleTree {
     if (this.leaves.length === 0) {
@@ -75,6 +82,8 @@ export class MerkleTreeBuilder {
 
   /**
    * Get Merkle proof for a specific leaf hash
+   * @param leafHash - The hash of the leaf to get a proof for
+   * @returns An array of hashes representing the proof path
    */
   getProof(leafHash: string): string[] {
     const tree = this.buildIfNeeded();
@@ -115,6 +124,10 @@ export class MerkleTreeBuilder {
 
   /**
    * Verify a Merkle proof
+   * @param leafHash - The hash of the leaf to verify
+   * @param proof - The proof path
+   * @param rootHash - The expected root hash
+   * @returns True if the proof is valid, false otherwise
    */
   static verifyProof(
     leafHash: string,
@@ -138,6 +151,8 @@ export class MerkleTreeBuilder {
 
   /**
    * Build a Merkle tree from a list of items (convenience method)
+   * @param items - The items to include in the tree
+   * @returns The constructed Merkle Tree
    */
   static buildFromItems(items: any[]): MerkleTree {
     const builder = new MerkleTreeBuilder();
@@ -151,6 +166,9 @@ export class MerkleTreeBuilder {
 
   /**
    * Generate a full Merkle proof object
+   * @param leafHash - The hash of the leaf
+   * @param items - The list of items in the tree
+   * @returns A MerkleProof object
    */
   static generateProof(
     leafHash: string,
@@ -174,6 +192,8 @@ export class MerkleTreeBuilder {
 
   /**
    * Verify a full Merkle proof object
+   * @param proof - The MerkleProof object to verify
+   * @returns True if the proof is valid
    */
   static verifyProofObject(proof: MerkleProof): boolean {
     return MerkleTreeBuilder.verifyProof(
@@ -233,6 +253,8 @@ export class MerkleTreeBuilder {
 
 /**
  * Build a Merkle tree and return root hash
+ * @param items - The items to include
+ * @returns The root hash of the tree
  */
 export function buildMerkleRoot(items: any[]): string {
   const tree = MerkleTreeBuilder.buildFromItems(items);
@@ -241,6 +263,8 @@ export function buildMerkleRoot(items: any[]): string {
 
 /**
  * Build a complete Merkle tree with proofs for all items
+ * @param items - The items to include
+ * @returns An object containing the root hash and a map of leaf hashes to proofs
  */
 export function buildMerkleTreeWithProofs(items: any[]): {
   root: string;
@@ -268,6 +292,9 @@ export function buildMerkleTreeWithProofs(items: any[]): {
 
 /**
  * Verify that a set of items produces the expected Merkle root
+ * @param items - The items to verify
+ * @param expectedRoot - The expected root hash
+ * @returns True if the items produce the expected root
  */
 export function verifyMerkleRoot(items: any[], expectedRoot: string): boolean {
   try {
@@ -280,6 +307,10 @@ export function verifyMerkleRoot(items: any[], expectedRoot: string): boolean {
 
 /**
  * Verify a single item against a Merkle root using its proof
+ * @param itemHash - The hash of the item
+ * @param proof - The Merkle proof
+ * @param rootHash - The root hash
+ * @returns True if verified
  */
 export function verifyItem(
   itemHash: string,
@@ -291,6 +322,8 @@ export function verifyItem(
 
 /**
  * Export Merkle tree structure for storage
+ * @param tree - The MerkleTree to export
+ * @returns An object representing the exported tree structure
  */
 export function exportMerkleTree(tree: MerkleTree): {
   root: string;
@@ -316,6 +349,9 @@ export function exportMerkleTree(tree: MerkleTree): {
 
 /**
  * Import and reconstruct Merkle tree from exported structure
+ * @param exported - The exported tree structure
+ * @param originalItems - The original items to reconstruct the tree with
+ * @returns The reconstructed MerkleTree
  */
 export function importMerkleTree(
   exported: {

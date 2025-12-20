@@ -15,6 +15,10 @@ interface NormalizedProperties {
   url?: string;
 }
 
+/**
+ * Service for Entity Resolution (ER).
+ * Handles identification of duplicate entities and merging them into canonical entities.
+ */
 export class EntityResolutionService {
   private behavioralService = new BehavioralFingerprintService();
 
@@ -189,6 +193,11 @@ export class EntityResolutionService {
     );
   }
 
+  /**
+   * Fuses behavioral telemetry into a single fingerprint and calculates a trust score.
+   * @param telemetry - An array of behavioral telemetry events.
+   * @returns An object containing the computed fingerprint and score.
+   */
   public fuseBehavioralFingerprint(telemetry: BehavioralTelemetry[]): {
     fingerprint: BehavioralFingerprint;
     score: number;
@@ -198,6 +207,11 @@ export class EntityResolutionService {
     return { fingerprint, score };
   }
 
+  /**
+   * Clusters identities across projects based on behavioral fingerprints.
+   * @param identities - An array of identities with their behavioral telemetry.
+   * @returns A Map of cluster IDs to arrays of entity IDs.
+   */
   public clusterIdentitiesAcrossProjects(
     identities: { id: string; telemetry: BehavioralTelemetry[] }[],
   ): Map<string, string[]> {

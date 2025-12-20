@@ -31,6 +31,13 @@ function isRetryable(e: any): boolean {
   return false;
 }
 
+/**
+ * Runs a task loop for processing tasks from the conductor service.
+ * It leases tasks, renews the lease periodically, executes the handler, and acknowledges/nacks the task.
+ *
+ * @param client - The Conductor client to communicate with the service.
+ * @param handler - The function to execute for each task.
+ */
 export async function runTaskLoop(
   client: ConductorClient,
   handler: TaskHandler,

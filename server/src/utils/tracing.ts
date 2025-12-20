@@ -1,7 +1,30 @@
+/**
+ * Interface representing a distributed tracing span.
+ * Follows the OpenTelemetry Span interface.
+ */
 export interface Span {
+  /**
+   * Sets attributes on the span.
+   * @param attributes - A key-value map of attributes.
+   */
   setAttributes(attributes: Record<string, unknown>): void;
+
+  /**
+   * Sets a single attribute on the span.
+   * @param key - The attribute key.
+   * @param value - The attribute value.
+   */
   setAttribute(key: string, value: unknown): void;
+
+  /**
+   * Records an exception on the span.
+   * @param error - The error object.
+   */
   recordException(error: Error): void;
+
+  /**
+   * Ends the span.
+   */
   end(): void;
 }
 
