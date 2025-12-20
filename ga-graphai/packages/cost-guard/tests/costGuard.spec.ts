@@ -3,6 +3,7 @@ import {
   CostGuard,
   DEFAULT_OPTIMIZATION_CONFIG,
   DEFAULT_PROFILE,
+  DEFAULT_QUEUE_SLO,
   ResourceOptimizationEngine,
 } from '../src/index.js';
 
@@ -166,5 +167,51 @@ describe('ResourceOptimizationEngine', () => {
     );
     expect(overloaded?.delta).toBeLessThan(0);
     expect(underloaded?.delta).toBeGreaterThan(0);
+  });
+
+  it('suggests scaling up when latency and backlog exceed SLOs', () => {
+    const engine = new ResourceOptimizationEngine();
+    const decision = engine.recommendQueueAutoscaling(
+      3,
+      {
+        queueName: 'agent-default',
+        backlog: 240,
+        inflight: 30,
+        arrivalRatePerSecond: 5,
+        serviceRatePerSecondPerWorker: 1.5,
+        observedP95LatencyMs: 2400,
+        costPerJobUsd: 0.02,
+        spendRatePerMinuteUsd: 5,
+      },
+      { ...DEFAULT_QUEUE_SLO, targetP95Ms: 1500, backlogTargetSeconds: 60 },
+    );
+
+    expect(decision.action).toBe('scale_up');
+    expect(decision.recommendedReplicas).toBeGreaterThan(3);
+    expect(decision.telemetry.latencyPressure).toBeGreaterThan(1);
+    expect(decision.kedaMetric.metricName).toBe('agent_queue_slo_pressure');
+  });
+
+  it('scales down when cost pressure dominates and performance is healthy', () => {
+    const engine = new ResourceOptimizationEngine();
+    const decision = engine.recommendQueueAutoscaling(
+      10,
+      {
+        queueName: 'agent-default',
+        backlog: 10,
+        inflight: 2,
+        arrivalRatePerSecond: 1,
+        serviceRatePerSecondPerWorker: 3,
+        observedP95LatencyMs: 600,
+        costPerJobUsd: 0.12,
+        spendRatePerMinuteUsd: 36,
+      },
+      { ...DEFAULT_QUEUE_SLO, maxCostPerMinuteUsd: 20, minReplicas: 2 },
+    );
+
+    expect(decision.action).toBe('scale_down');
+    expect(decision.recommendedReplicas).toBeLessThan(10);
+    expect(decision.telemetry.costPressure).toBeGreaterThan(1);
+    expect(decision.telemetry.latencyPressure).toBeLessThan(1);
   });
 });

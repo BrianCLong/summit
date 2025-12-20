@@ -5,6 +5,9 @@ import type {
   PlanBudgetInput,
   ResourceOptimizationConfig,
   ScalingDecision,
+  QueueRuntimeSignals,
+  QueueScalingDecision,
+  QueueSloConfig,
   SlowQueryRecord,
   TenantBudgetProfile,
   WorkloadBalancingPlan,
@@ -137,6 +140,16 @@ const DEFAULT_OPTIMIZATION_CONFIG: ResourceOptimizationConfig = {
   confidenceWindow: 6,
 };
 
+const DEFAULT_QUEUE_SLO: QueueSloConfig = {
+  targetP95Ms: 1500,
+  maxCostPerMinuteUsd: 18,
+  backlogTargetSeconds: 90,
+  minReplicas: 2,
+  maxReplicas: 64,
+  scaleStep: 2,
+  stabilizationSeconds: 180,
+};
+
 export class ResourceOptimizationEngine {
   private readonly config: ResourceOptimizationConfig;
 
@@ -181,6 +194,112 @@ export class ResourceOptimizationEngine {
       confidence,
       loadIndex,
       forecast,
+    };
+  }
+
+  recommendQueueAutoscaling(
+    currentReplicas: number,
+    signals: QueueRuntimeSignals,
+    slo: QueueSloConfig = DEFAULT_QUEUE_SLO,
+  ): QueueScalingDecision {
+    const safeServiceRate = Math.max(signals.serviceRatePerSecondPerWorker, 0);
+    const safeReplicas = Math.max(1, currentReplicas);
+    const totalOutstanding = Math.max(0, signals.backlog + signals.inflight);
+    const capacityPerSecond = safeServiceRate * safeReplicas;
+    const backlogSeconds =
+      capacityPerSecond === 0
+        ? Number.POSITIVE_INFINITY
+        : totalOutstanding / capacityPerSecond;
+
+    const latencyPressure =
+      slo.targetP95Ms === 0
+        ? 0
+        : signals.observedP95LatencyMs / slo.targetP95Ms;
+    const backlogPressure =
+      slo.backlogTargetSeconds === 0 || !Number.isFinite(backlogSeconds)
+        ? 0
+        : backlogSeconds / slo.backlogTargetSeconds;
+    const costPressure =
+      slo.maxCostPerMinuteUsd === 0
+        ? 0
+        : signals.spendRatePerMinuteUsd / slo.maxCostPerMinuteUsd;
+
+    const normalizedLatency = Number(latencyPressure.toFixed(3));
+    const normalizedBacklog = Number(backlogPressure.toFixed(3));
+    const normalizedCost = Number(costPressure.toFixed(3));
+    const normalizedBacklogSeconds = Number(
+      (Number.isFinite(backlogSeconds) ? backlogSeconds : Number.MAX_SAFE_INTEGER)
+        .toFixed(1),
+    );
+
+    let recommendedReplicas = safeReplicas;
+    const backlogDrivenReplicas =
+      safeServiceRate === 0 || slo.backlogTargetSeconds === 0
+        ? safeReplicas + slo.scaleStep
+        : Math.ceil(
+            (totalOutstanding / slo.backlogTargetSeconds) / safeServiceRate,
+          );
+    const latencyDrivenReplicas =
+      latencyPressure > 1
+        ? Math.ceil(
+            safeReplicas * Math.min(2.5, Math.max(1.2, latencyPressure + 0.15)),
+          )
+        : safeReplicas;
+
+    if (normalizedLatency > 1 || normalizedBacklog > 1) {
+      recommendedReplicas = Math.max(
+        safeReplicas + slo.scaleStep,
+        backlogDrivenReplicas,
+        latencyDrivenReplicas,
+      );
+    } else if (normalizedCost > 1 && normalizedLatency < 0.9 && normalizedBacklog < 0.9) {
+      const reliefStep = Math.max(1, Math.floor(safeReplicas * 0.2));
+      const budgetAlignedReplicas = Math.max(
+        slo.minReplicas,
+        Math.ceil((signals.spendRatePerMinuteUsd / slo.maxCostPerMinuteUsd) * safeReplicas * 0.8),
+      );
+      recommendedReplicas = Math.min(
+        safeReplicas - reliefStep,
+        budgetAlignedReplicas,
+      );
+    }
+
+    recommendedReplicas = Math.min(
+      slo.maxReplicas,
+      Math.max(slo.minReplicas, recommendedReplicas),
+    );
+
+    const action: ScalingDecision['action'] =
+      recommendedReplicas > safeReplicas
+        ? 'scale_up'
+        : recommendedReplicas < safeReplicas
+          ? 'scale_down'
+          : 'hold';
+
+    const dominantPressure = Math.max(normalizedLatency, normalizedBacklog, normalizedCost);
+    const reason = this.buildQueueScalingReason(action, {
+      latency: normalizedLatency,
+      backlog: normalizedBacklog,
+      cost: normalizedCost,
+    });
+
+    return {
+      action,
+      recommendedReplicas,
+      reason,
+      telemetry: {
+        latencyPressure: normalizedLatency,
+        backlogPressure: normalizedBacklog,
+        costPressure: normalizedCost,
+        backlogSeconds: normalizedBacklogSeconds,
+        sloTargetSeconds: slo.backlogTargetSeconds,
+      },
+      kedaMetric: {
+        metricName: 'agent_queue_slo_pressure',
+        labels: { queue: signals.queueName },
+        value: Number(dominantPressure.toFixed(3)),
+        query: `max_over_time(agent_queue_slo_pressure{queue="${signals.queueName}"}[2m])`,
+      },
     };
   }
 
@@ -318,15 +437,37 @@ export class ResourceOptimizationEngine {
     }
     return `Workload steady (load index ${loadIndex.toFixed(2)}); maintaining current capacity.`;
   }
+
+  private buildQueueScalingReason(
+    action: ScalingDecision['action'],
+    pressure: { latency: number; backlog: number; cost: number },
+  ): string {
+    if (action === 'scale_up') {
+      return `Latency/backlog pressure (${pressure.latency.toFixed(
+        2,
+      )}/${pressure.backlog.toFixed(2)}) exceeds SLO guardrails; requesting more replicas.`;
+    }
+    if (action === 'scale_down') {
+      return `Cost pressure ${pressure.cost.toFixed(
+        2,
+      )} dominates while latency/backlog are healthy; reducing replicas to protect budget.`;
+    }
+    return `Within SLO envelopes (latency ${pressure.latency.toFixed(
+      2,
+    )}, backlog ${pressure.backlog.toFixed(2)}, cost ${pressure.cost.toFixed(2)}); holding steady.`;
+  }
 }
 
-export { DEFAULT_OPTIMIZATION_CONFIG };
+export { DEFAULT_OPTIMIZATION_CONFIG, DEFAULT_QUEUE_SLO };
 export type {
   ClusterNodeState,
   CostGuardDecision,
   PlanBudgetInput,
   ResourceOptimizationConfig,
   ScalingDecision,
+  QueueRuntimeSignals,
+  QueueScalingDecision,
+  QueueSloConfig,
   SlowQueryRecord,
   TenantBudgetProfile,
   WorkloadBalancingPlan,

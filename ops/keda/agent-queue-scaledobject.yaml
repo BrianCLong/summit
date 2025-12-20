@@ -1,0 +1,46 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: agent-queue-scaler
+  namespace: intelgraph
+  labels:
+    app: agent-worker
+    component: autoscaler
+spec:
+  scaleTargetRef:
+    name: agent-worker
+  pollingInterval: 30
+  cooldownPeriod: 180
+  minReplicaCount: 2
+  maxReplicaCount: 50
+  advanced:
+    restoreToOriginalReplicaCount: false
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleUp:
+          stabilizationWindowSeconds: 180
+          policies:
+            - type: Percent
+              value: 100
+              periodSeconds: 60
+        scaleDown:
+          stabilizationWindowSeconds: 300
+          policies:
+            - type: Percent
+              value: 50
+              periodSeconds: 120
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus.monitoring:9090
+        metricName: agent_queue_slo_pressure
+        query: |
+          max_over_time(agent_queue_slo_pressure{queue="agent-default"}[2m])
+        threshold: "1"
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus.monitoring:9090
+        metricName: agent_queue_cost_pressure
+        query: |
+          max_over_time(agent_queue_cost_pressure{queue="agent-default"}[5m])
+        threshold: "1.05"
