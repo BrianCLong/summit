@@ -1,190 +1,245 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import {
+  Alert,
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Link,
+  List,
+  ListItem,
+  Stack,
+  Typography,
+} from '@mui/material';
 
-type CorrelatedRecord = {
+type Outcome = 'success' | 'failure' | 'partial' | 'pending';
+
+export interface CorrelatedAuditEvent {
   id: string;
-  correlationId: string;
-  occurredAt?: string;
-  summary?: string;
-  receiptUrl?: string;
-  policyDecisionUrl?: string;
-};
-
-type CorrelatedResponse = {
-  records?: CorrelatedRecord[];
-};
-
-type AuditTimelineProps = {
-  correlationIds: string[];
-  fetcher?: typeof fetch;
-};
-
-const FALLBACK_SUMMARY = 'No summary available';
-const FALLBACK_TIME = 'Time not recorded';
-
-function formatTimestamp(timestamp?: string): string {
-  if (!timestamp) return FALLBACK_TIME;
-
-  const parsed = new Date(timestamp);
-
-  return Number.isNaN(parsed.getTime())
-    ? FALLBACK_TIME
-    : parsed.toLocaleString();
+  timestamp?: string;
+  message?: string;
+  action?: string;
+  outcome?: Outcome;
+  correlationId?: string;
+  resourceType?: string;
+  resourceId?: string;
+  resourceName?: string;
+  resourcePath?: string;
+  details?: Record<string, unknown>;
 }
 
-const AuditTimeline: React.FC<AuditTimelineProps> = ({
+export interface AuditTimelineProps {
+  correlationIds: string[];
+  limit?: number;
+  apiBaseUrl?: string;
+  fetcher?: typeof fetch;
+  className?: string;
+}
+
+const defaultApiBase =
+  (import.meta as any).env?.VITE_API_URL || 'http://localhost:4000';
+
+const getFallbackText = (value?: string) => value?.trim() || undefined;
+
+const formatTimestamp = (timestamp?: string) => {
+  if (!timestamp) return 'Unknown time';
+  const date = new Date(timestamp);
+  if (Number.isNaN(date.getTime())) return 'Unknown time';
+  return date.toISOString();
+};
+
+const buildDeepLink = (event: CorrelatedAuditEvent) => {
+  if (event.resourcePath) {
+    return {
+      href: event.resourcePath,
+      label:
+        event.resourceName ||
+        (event.resourceType && event.resourceId
+          ? `${event.resourceType} ${event.resourceId}`
+          : event.resourcePath),
+    };
+  }
+
+  if (event.resourceType && event.resourceId) {
+    return {
+      href: `/resources/${event.resourceType}/${event.resourceId}`,
+      label: `${event.resourceType} ${event.resourceId}`,
+    };
+  }
+
+  if (event.correlationId) {
+    return {
+      href: `/audit?correlationId=${encodeURIComponent(event.correlationId)}`,
+      label: `Correlation ${event.correlationId}`,
+    };
+  }
+
+  return null;
+};
+
+export const AuditTimeline: React.FC<AuditTimelineProps> = ({
   correlationIds,
+  limit = 25,
+  apiBaseUrl,
   fetcher,
+  className,
 }) => {
-  const fetchImpl = useMemo(() => fetcher ?? fetch, [fetcher]);
-  const [records, setRecords] = useState<CorrelatedRecord[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [events, setEvents] = useState<CorrelatedAuditEvent[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const apiBase = apiBaseUrl || defaultApiBase;
+  const correlationKey = useMemo(
+    () => correlationIds.filter(Boolean).join(','),
+    [correlationIds],
+  );
 
   useEffect(() => {
-    let isActive = true;
-
-    async function loadRecords(ids: string[]) {
-      if (!ids.length) {
-        setRecords([]);
-        return;
-      }
-
-      setLoading(true);
-      setError(null);
-
-      try {
-        const query = encodeURIComponent(ids.join(','));
-        const response = await fetchImpl(
-          `/api/audit/correlations?ids=${query}`,
-        );
-
-        if (!response.ok) {
-          throw new Error('Request failed');
-        }
-
-        const payload = (await response.json()) as CorrelatedResponse;
-        const incoming = Array.isArray(payload.records)
-          ? payload.records
-          : [];
-
-        if (isActive) {
-          setRecords(incoming);
-        }
-      } catch (err) {
-        if (isActive) {
-          setError('Unable to load correlated audit records.');
-          setRecords([]);
-        }
-      } finally {
-        if (isActive) {
-          setLoading(false);
-        }
-      }
+    if (!correlationKey) {
+      setEvents([]);
+      setLoading(false);
+      return;
     }
 
-    loadRecords(correlationIds);
+    const controller = new AbortController();
+    const fetchEvents = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const params = new URLSearchParams({
+          limit: String(limit),
+          correlationIds: correlationKey,
+        });
+
+        const response = await (fetcher || fetch)(`${apiBase}/audit?${params}`, {
+          signal: controller.signal,
+          headers: { Accept: 'application/json' },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Request failed with status ${response.status}`);
+        }
+
+        const payload = await response.json();
+        const data = Array.isArray(payload?.data) ? payload.data : [];
+        setEvents(data);
+      } catch (err) {
+        if ((err as Error).name === 'AbortError') return;
+        setEvents([]);
+        setError((err as Error).message || 'Failed to load audit events');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
 
     return () => {
-      isActive = false;
+      controller.abort();
     };
-  }, [correlationIds, fetchImpl]);
+  }, [apiBase, correlationKey, fetcher, limit]);
 
-  const sortedRecords = useMemo(() => {
-    return [...records].sort((a, b) => {
-      const aTime = a.occurredAt ? new Date(a.occurredAt).getTime() : 0;
-      const bTime = b.occurredAt ? new Date(b.occurredAt).getTime() : 0;
+  const sortedEvents = useMemo(
+    () =>
+      [...events].sort((a, b) => {
+        const left = new Date(a.timestamp ?? 0).getTime();
+        const right = new Date(b.timestamp ?? 0).getTime();
+        return right - left;
+      }),
+    [events],
+  );
 
-      return bTime - aTime;
-    });
-  }, [records]);
-
-  const hasNoRecords = !loading && !error && sortedRecords.length === 0;
+  const hasCorrelation = Boolean(correlationKey);
 
   return (
-    <section
-      aria-busy={loading}
-      aria-live="polite"
-      className="audit-timeline"
-      data-testid="audit-timeline"
-    >
-      <header>
-        <p className="text-xs text-gray-400 uppercase tracking-wide">
-          Correlated audit activity
-        </p>
-        <h3 className="text-lg font-semibold">Audit Timeline</h3>
-        {correlationIds.length > 0 ? (
-          <p className="text-sm text-gray-500">
-            Correlation IDs: {correlationIds.join(', ')}
-          </p>
-        ) : (
-          <p className="text-sm text-gray-500">
-            Provide correlation IDs to retrieve correlated receipts and policy
-            decisions.
-          </p>
+    <Card className={className} variant="outlined">
+      <CardContent>
+        <Stack direction="row" alignItems="center" spacing={1} mb={2}>
+          <Typography variant="h6">Audit timeline</Typography>
+          {loading && <CircularProgress size={18} data-testid="audit-loading" />}
+          {hasCorrelation && !loading && (
+            <Chip label={`${sortedEvents.length} events`} size="small" />
+          )}
+        </Stack>
+
+        {!hasCorrelation && (
+          <Typography color="text.secondary">
+            Provide correlation IDs to load correlated audit events.
+          </Typography>
         )}
-      </header>
 
-      {loading && <p>Loading correlated activity…</p>}
-      {error && (
-        <p role="alert" className="text-red-600">
-          {error}
-        </p>
-      )}
-      {hasNoRecords && <p>No correlated audit records found.</p>}
+        {error && <Alert severity="error">{error}</Alert>}
 
-      {sortedRecords.length > 0 && (
-        <ol className="space-y-4 mt-3">
-          {sortedRecords.map((record) => (
-            <li
-              key={record.id}
-              className="border-l-2 border-blue-500 pl-3"
-              data-testid={`timeline-entry-${record.id}`}
-            >
-              <div className="text-xs text-gray-500">
-                {formatTimestamp(record.occurredAt)}
-              </div>
-              <div className="text-sm font-medium">
-                {record.summary ?? FALLBACK_SUMMARY}
-              </div>
-              <div className="flex gap-3 text-sm mt-1">
-                {record.receiptUrl ? (
-                  <a
-                    href={record.receiptUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    data-testid="receipt-link"
-                  >
-                    View receipt
-                  </a>
-                ) : (
-                  <span data-testid="receipt-unavailable">
-                    Receipt unavailable
-                  </span>
-                )}
+        {hasCorrelation && !error && !loading && sortedEvents.length === 0 && (
+          <Typography color="text.secondary">
+            No correlated audit events were found.
+          </Typography>
+        )}
 
-                {record.policyDecisionUrl ? (
-                  <a
-                    href={record.policyDecisionUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    data-testid="policy-link"
-                  >
-                    Policy decision
-                  </a>
-                ) : (
-                  <span data-testid="policy-unavailable">
-                    Policy decision unavailable
-                  </span>
-                )}
-              </div>
-              <div className="text-xs text-gray-500 mt-1">
-                Correlation ID: {record.correlationId}
-              </div>
-            </li>
-          ))}
-        </ol>
-      )}
-    </section>
+        <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
+          {sortedEvents.map((event) => {
+            const link = buildDeepLink(event);
+            const summary =
+              getFallbackText(event.action) ||
+              getFallbackText(event.message) ||
+              'No details available';
+
+            const detailText =
+              getFallbackText(event.message) ||
+              getFallbackText(event.details?.summary as string) ||
+              'No additional context provided.';
+
+            return (
+              <ListItem key={event.id} alignItems="flex-start" divider>
+                <Box display="flex" flexDirection="column" gap={0.5} width="100%">
+                  <Typography variant="caption" color="text.secondary">
+                    {formatTimestamp(event.timestamp)}
+                  </Typography>
+                  <Typography variant="subtitle2">{summary}</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {detailText}
+                  </Typography>
+                  <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
+                    {event.correlationId && (
+                      <Chip
+                        label={`Correlation ${event.correlationId}`}
+                        size="small"
+                        color="primary"
+                        variant="outlined"
+                      />
+                    )}
+                    {link ? (
+                      <Link href={link.href} underline="hover" data-testid="resource-link">
+                        {link.label}
+                      </Link>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        No resource link available
+                      </Typography>
+                    )}
+                    {event.outcome && (
+                      <Chip
+                        label={event.outcome}
+                        size="small"
+                        color={
+                          event.outcome === 'success'
+                            ? 'success'
+                            : event.outcome === 'failure'
+                              ? 'error'
+                              : 'warning'
+                        }
+                        variant="outlined"
+                      />
+                    )}
+                  </Box>
+                </Box>
+              </ListItem>
+            );
+          })}
+        </List>
+      </CardContent>
+    </Card>
   );
 };
 

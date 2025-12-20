@@ -1,76 +1,64 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import AuditTimeline from './AuditTimeline';
+import AuditTimeline, { CorrelatedAuditEvent } from './AuditTimeline';
 
-function createMockResponse(data: unknown, ok = true) {
-  return {
-    ok,
-    json: async () => data,
-  } as Response;
-}
+const mockFetcher = (events: CorrelatedAuditEvent[]) =>
+  jest.fn().mockResolvedValue({
+    ok: true,
+    json: async () => ({ data: events }),
+  });
 
 describe('AuditTimeline', () => {
-  it('renders deep links for receipts and policy decisions', async () => {
-    const fetcher = jest.fn().mockResolvedValue(
-      createMockResponse({
-        records: [
-          {
-            id: 'rec-1',
-            correlationId: 'corr-123',
-            summary: 'Receipt captured',
-            occurredAt: '2024-01-01T00:00:00.000Z',
-            receiptUrl: 'https://example.com/receipt/rec-1',
-            policyDecisionUrl: 'https://example.com/policy/rec-1',
-          },
-        ],
-      }),
-    );
+  it('renders deep links for resource paths and labels', async () => {
+    const fetcher = mockFetcher([
+      {
+        id: '1',
+        timestamp: '2024-01-01T00:00:00Z',
+        action: 'create',
+        resourcePath: '/investigations/123',
+        resourceName: 'Investigation 123',
+        correlationId: 'corr-1',
+        outcome: 'success',
+      },
+    ]);
 
     render(
-      <AuditTimeline correlationIds={['corr-123']} fetcher={fetcher} />,
+      <AuditTimeline
+        correlationIds={['corr-1']}
+        fetcher={fetcher}
+        apiBaseUrl="http://example.test"
+      />,
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('timeline-entry-rec-1')).toBeInTheDocument();
-    });
+    await waitFor(() =>
+      expect(screen.getByText('Investigation 123')).toBeInTheDocument(),
+    );
 
-    expect(screen.getByText('View receipt')).toHaveAttribute(
-      'href',
-      'https://example.com/receipt/rec-1',
-    );
-    expect(screen.getByText('Policy decision')).toHaveAttribute(
-      'href',
-      'https://example.com/policy/rec-1',
-    );
+    const link = screen.getByTestId('resource-link');
+    expect(link).toHaveAttribute('href', '/investigations/123');
+    expect(screen.getByText('Correlation corr-1')).toBeInTheDocument();
   });
 
   it('shows fallbacks when data is missing', async () => {
-    const fetcher = jest.fn().mockResolvedValue(
-      createMockResponse({
-        records: [
-          {
-            id: 'rec-2',
-            correlationId: 'corr-456',
-          },
-        ],
-      }),
-    );
+    const fetcher = mockFetcher([
+      {
+        id: '2',
+        correlationId: 'corr-2',
+      },
+    ]);
 
     render(
-      <AuditTimeline correlationIds={['corr-456']} fetcher={fetcher} />,
+      <AuditTimeline correlationIds={['corr-2']} fetcher={fetcher} />,
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('timeline-entry-rec-2')).toBeInTheDocument();
-    });
+    await waitFor(() =>
+      expect(screen.getByText('No details available')).toBeInTheDocument(),
+    );
 
-    expect(screen.getByText('Time not recorded')).toBeInTheDocument();
-    expect(screen.getByText('No summary available')).toBeInTheDocument();
     expect(
-      screen.getByTestId('receipt-unavailable'),
+      screen.getByText('No additional context provided.'),
     ).toBeInTheDocument();
-    expect(
-      screen.getByTestId('policy-unavailable'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('No resource link available')).toBeInTheDocument();
+    expect(screen.getByText('Unknown time')).toBeInTheDocument();
   });
 });
