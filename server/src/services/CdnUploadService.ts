@@ -11,10 +11,6 @@ export interface CdnUploadConfig {
   bucket: string;
   region?: string;
   basePath?: string;
-  /**
-   * If true, all keys must be prefixed with a tenant identifier to enforce isolation.
-   */
-  tenantScoped?: boolean;
   endpoint?: string;
   accessKeyId?: string;
   secretAccessKey?: string;
@@ -51,19 +47,11 @@ export class CdnUploadService {
 
   async uploadFiles(
     requests: CdnUploadRequest[],
-    options: { tenantId?: string } = {},
   ): Promise<Record<string, string>> {
     if (!this.config.enabled) return {};
 
-    if (this.config.tenantScoped && !options.tenantId) {
-      throw new Error('tenantId is required for tenant-scoped uploads');
-    }
-
     const uploads = requests.map(async (request) => {
-      const key = this.buildKey(
-        request.key || path.basename(request.localPath),
-        options.tenantId,
-      );
+      const key = this.buildKey(request.key || path.basename(request.localPath));
       const command = new PutObjectCommand({
         Bucket: this.config.bucket,
         Key: key,
@@ -90,24 +78,13 @@ export class CdnUploadService {
     }, {});
   }
 
-  private buildKey(key: string, tenantId?: string): string {
+  private buildKey(key: string): string {
     const normalizedKey = key.replace(/^\/+/, '');
-    const segments = [];
-
-    if (this.config.basePath) {
-      segments.push(this.config.basePath);
+    if (!this.config.basePath) {
+      return normalizedKey;
     }
 
-    if (this.config.tenantScoped || tenantId) {
-      if (!tenantId) {
-        throw new Error('tenantId is required when tenantScoped is enabled');
-      }
-      segments.push(tenantId);
-    }
-
-    segments.push(normalizedKey);
-
-    return path.posix.join(...segments);
+    return path.posix.join(this.config.basePath, normalizedKey);
   }
 
   private buildPublicUrl(key: string): string {

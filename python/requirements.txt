@@ -22,3 +22,5 @@ python-json-logger
 opentelemetry-api
 opentelemetry-sdk
 neo4j>=5.20
+sentencepiece
+protobuf

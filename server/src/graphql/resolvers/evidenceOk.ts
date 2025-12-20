@@ -3,18 +3,9 @@ import { getLatestEvidence } from '../../db/repositories/evidenceRepo.js';
 
 export const evidenceOkResolvers = {
   Query: {
-    async evidenceOk(_root: any, { service, releaseId }: any, ctx: any) {
-      const tenantId =
-        ctx?.tenantId ||
-        ctx?.user?.tenantId ||
-        ctx?.user?.tenant_id ||
-        ctx?.req?.tenantId;
+    async evidenceOk(_root: any, { service, releaseId }: any, _ctx: any) {
       // Prefer the latest Evidence bundle for this service/releaseId if available
-      const ev = tenantId
-        ? await getLatestEvidence(service, releaseId, tenantId).catch(
-            () => null,
-          )
-        : null;
+      const ev = await getLatestEvidence(service, releaseId).catch(() => null);
       let snapshot: any;
       let cost: any;
       if (ev) {

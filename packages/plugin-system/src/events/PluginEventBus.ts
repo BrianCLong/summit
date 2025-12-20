@@ -18,7 +18,7 @@ export class PluginEventBus extends EventEmitter {
     this.webhookSubscriptions.set(subscription.event, subscriptions);
 
     // Listen to the event
-    this.on(subscription.event, async (data: any) => {
+    this.on(this.partitionedEvent(subscription.event, subscription.tenantId), async (data: any) => {
       await this.triggerWebhook(subscription, data);
     });
 
@@ -46,16 +46,24 @@ export class PluginEventBus extends EventEmitter {
    * Emit event and record in history
    */
   async emitEvent(event: string, data: any, tenantId?: string): Promise<void> {
+    const resolvedTenant = tenantId || data?.tenantId;
+    if (!resolvedTenant) {
+      throw new Error('Tenant ID is required to emit plugin events');
+    }
+
+    const eventKey = this.partitionedEvent(event, resolvedTenant);
+
     // Record event
     this.recordEvent({
       event,
       data,
-      tenantId: tenantId || (data?.tenantId as string) || 'global',
+      tenantId: resolvedTenant,
+      partitionKey: `tenant:${resolvedTenant}`,
       timestamp: new Date(),
     });
 
     // Emit event
-    this.emit(event, data);
+    this.emit(eventKey, { ...data, tenantId: resolvedTenant });
   }
 
   /**
@@ -69,7 +77,9 @@ export class PluginEventBus extends EventEmitter {
     }
 
     if (filter?.tenantId) {
-      history = history.filter(record => record.tenantId === filter.tenantId);
+      history = history.filter(
+        record => record.tenantId === filter.tenantId,
+      );
     }
 
     if (filter?.since) {
@@ -100,6 +110,10 @@ export class PluginEventBus extends EventEmitter {
   private async triggerWebhook(subscription: WebhookSubscription, data: any): Promise<void> {
     // Apply filter if present
     if (subscription.filter && !subscription.filter(data)) {
+      return;
+    }
+
+    if (subscription.tenantId && data?.tenantId && data.tenantId !== subscription.tenantId) {
       return;
     }
 
@@ -198,6 +212,10 @@ export class PluginEventBus extends EventEmitter {
     return `sub_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
+  private partitionedEvent(event: string, tenantId?: string): string {
+    return tenantId ? `${event}:${tenantId}` : event;
+  }
+
   /**
    * Sleep utility
    */
@@ -210,6 +228,7 @@ export interface WebhookSubscription {
   id?: string;
   event: string;
   url: string;
+  tenantId?: string;
   filter?: (data: any) => boolean;
   transformer?: (data: any) => any;
   retryPolicy?: RetryPolicy;
@@ -225,6 +244,7 @@ export interface EventRecord {
   event: string;
   data: any;
   tenantId: string;
+  partitionKey: string;
   timestamp: Date;
 }
 

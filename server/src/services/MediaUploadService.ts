@@ -129,11 +129,7 @@ export class MediaUploadService {
   /**
    * Upload and process a media file with comprehensive metadata extraction
    */
-  async uploadMedia(
-    upload: Upload,
-    userId?: string,
-    tenantId?: string,
-  ): Promise<MediaMetadata> {
+  async uploadMedia(upload: Upload, userId?: string): Promise<MediaMetadata> {
     const { createReadStream, filename, mimetype } = (await upload) as any;
     const stream = createReadStream();
 
@@ -230,7 +226,6 @@ export class MediaUploadService {
             uniqueFilename,
             mimetype,
             processingMetadata.derivatives,
-            tenantId,
           );
 
           processingMetadata.derivatives = processingMetadata.derivatives.map(
@@ -589,7 +584,6 @@ export class MediaUploadService {
     mainFilename: string,
     mimeType: string,
     derivatives?: DerivativeFile[],
-    tenantId?: string,
   ): Promise<Record<string, string>> {
     if (!this.cdnUploadService) return {};
 
@@ -613,7 +607,7 @@ export class MediaUploadService {
       });
     }
 
-    return this.cdnUploadService.uploadFiles(requests, { tenantId });
+    return this.cdnUploadService.uploadFiles(requests);
   }
 
   /**

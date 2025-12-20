@@ -5,6 +5,7 @@ import { getPostgresPool } from '../db/postgres.js';
 import pino from 'pino';
 import { randomUUID } from 'node:crypto';
 import { createLoaders, Loaders } from '../graphql/loaders.js';
+import { extractTenantContext } from '../security/tenantContext.js';
 
 const logger = pino();
 export const JWT_SECRET =
@@ -24,7 +25,7 @@ interface AuthContext {
   isAuthenticated: boolean;
   requestId: string;
   loaders: Loaders;
-  tenantId?: string;
+  tenantContext?: any;
 }
 
 export const getContext = async ({
@@ -34,10 +35,6 @@ export const getContext = async ({
 }): Promise<AuthContext> => {
   const requestId = randomUUID();
   const loaders = createLoaders();
-  const tenantIdFromReq =
-    (req as any).tenantId ||
-    (req as any).tenant_id ||
-    (req.headers && (req.headers['x-tenant-id'] || req.headers['x-tenant']));
 
   try {
     // If user is already attached by middleware (e.g. for GraphQL route)
@@ -48,19 +45,16 @@ export const getContext = async ({
            isAuthenticated: true,
            requestId,
            loaders,
-           tenantId: tenantIdFromReq || req.user.tenantId || req.user.tenant_id,
+           tenantContext:
+             (req as any).tenantContext ||
+             extractTenantContext(req as any, { strict: false }),
          };
     }
 
     const token = extractToken(req);
     if (!token) {
       logger.info({ requestId }, 'Unauthenticated request');
-      return {
-        isAuthenticated: false,
-        requestId,
-        loaders,
-        tenantId: tenantIdFromReq || undefined,
-      };
+      return { isAuthenticated: false, requestId, loaders };
     }
 
     const user = await verifyToken(token);
@@ -70,19 +64,16 @@ export const getContext = async ({
       isAuthenticated: true,
       requestId,
       loaders,
-      tenantId: tenantIdFromReq || (user as any)?.tenantId,
+      tenantContext:
+        (req as any).tenantContext ||
+        extractTenantContext(req as any, { strict: false }),
     };
   } catch (error) {
     logger.warn(
       { requestId, error: (error as Error).message },
       'Authentication failed',
     );
-    return {
-      isAuthenticated: false,
-      requestId,
-      loaders,
-      tenantId: tenantIdFromReq || undefined,
-    };
+    return { isAuthenticated: false, requestId, loaders };
   }
 };
 

@@ -9,19 +9,8 @@ import {
 
 export const provenanceResolvers = {
   Query: {
-    async evidenceBundles(_: any, { filter }: any, context: any) {
+    async evidenceBundles(_: any, { filter }: any) {
       const { service, releaseId, since, until, limit, offset } = filter || {};
-      const tenantId =
-        filter?.tenantId ||
-        filter?.tenant_id ||
-        context?.tenantId ||
-        context?.user?.tenantId ||
-        context?.user?.tenant_id;
-
-      if (!tenantId) {
-        return [];
-      }
-
       if (!service || !releaseId) return [];
       if (
         since ||
@@ -34,10 +23,9 @@ export const provenanceResolvers = {
           until,
           limit,
           offset,
-          tenantId,
         });
       }
-      const latest = await getLatestEvidence(service, releaseId, tenantId);
+      const latest = await getLatestEvidence(service, releaseId);
       return latest ? [latest] : [];
     },
   },
