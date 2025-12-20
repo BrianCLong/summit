@@ -40,7 +40,7 @@ upgrade: true
 
 # Additional YAML schema checks
 additional-commands:
-  - helm template {chart} | kubeval --strict --ignore-missing-schemas
+  - helm template {chart} | kubeconform -summary -strict -ignore-missing-schemas
 
 # Validate that values.yaml is properly formatted
 validate-chart-schema: true
