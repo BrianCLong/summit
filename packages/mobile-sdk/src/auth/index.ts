@@ -1,122 +1,77 @@
-/**
- * Authentication utilities for mobile apps
- */
+import ReactNativeBiometrics from 'react-native-biometrics';
+import * as Keychain from 'react-native-keychain';
 
-export interface AuthToken {
-  accessToken: string;
-  refreshToken: string;
-  expiresAt: number;
+export interface AuthConfig {
+  baseUrl: string;
+  tokenRefreshBuffer: number;
+  biometricPromptMessage: string;
+  keychainService: string;
 }
 
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: string;
-  permissions: string[];
-}
+const DEFAULT_CONFIG: Partial<AuthConfig> = {
+  tokenRefreshBuffer: 30000,
+  biometricPromptMessage: 'Confirm your identity',
+  keychainService: 'intelgraph_auth',
+};
 
-// Token storage key
-const TOKEN_KEY = 'auth_token';
-const REFRESH_TOKEN_KEY = 'refresh_token';
-const USER_KEY = 'user_data';
+export class AuthService {
+  private config: AuthConfig;
+  private rnBiometrics: ReactNativeBiometrics;
 
-// Get from storage (works with both localStorage and AsyncStorage pattern)
-const getItem = async (key: string): Promise<string | null> => {
-  if (typeof window !== 'undefined' && window.localStorage) {
-    return localStorage.getItem(key);
+  constructor(config: AuthConfig) {
+    this.config = { ...DEFAULT_CONFIG, ...config };
+    this.rnBiometrics = new ReactNativeBiometrics();
   }
-  return null;
-};
 
-// Set in storage
-const setItem = async (key: string, value: string): Promise<void> => {
-  if (typeof window !== 'undefined' && window.localStorage) {
-    localStorage.setItem(key, value);
+  // Biometrics
+  async isBiometricsAvailable(): Promise<{ available: boolean; biometryType?: string }> {
+    const { available, biometryType } = await this.rnBiometrics.isSensorAvailable();
+    return { available, biometryType };
   }
-};
 
-// Remove from storage
-const removeItem = async (key: string): Promise<void> => {
-  if (typeof window !== 'undefined' && window.localStorage) {
-    localStorage.removeItem(key);
+  async enableBiometrics(): Promise<boolean> {
+    try {
+      const { success } = await this.rnBiometrics.simplePrompt({
+        promptMessage: this.config.biometricPromptMessage,
+      });
+      return success;
+    } catch {
+      return false;
+    }
   }
-};
 
-// Get access token
-export const getAccessToken = async (): Promise<string | null> => {
-  return await getItem(TOKEN_KEY);
-};
+  async authenticateWithBiometrics(message?: string): Promise<boolean> {
+    try {
+      const { success } = await this.rnBiometrics.simplePrompt({
+        promptMessage: message || this.config.biometricPromptMessage,
+      });
+      return success;
+    } catch {
+      return false;
+    }
+  }
 
-// Set access token
-export const setAccessToken = async (token: string): Promise<void> => {
-  await setItem(TOKEN_KEY, token);
-};
+  // Secure Storage
+  async saveCredentials(username: string, token: string): Promise<boolean> {
+    const result = await Keychain.setGenericPassword(username, token, {
+      service: this.config.keychainService,
+    });
+    return !!result;
+  }
 
-// Get refresh token
-export const getRefreshToken = async (): Promise<string | null> => {
-  return await getItem(REFRESH_TOKEN_KEY);
-};
-
-// Set refresh token
-export const setRefreshToken = async (token: string): Promise<void> => {
-  await setItem(REFRESH_TOKEN_KEY, token);
-};
-
-// Get user data
-export const getUserData = async (): Promise<User | null> => {
-  const data = await getItem(USER_KEY);
-  return data ? JSON.parse(data) : null;
-};
-
-// Set user data
-export const setUserData = async (user: User): Promise<void> => {
-  await setItem(USER_KEY, JSON.stringify(user));
-};
-
-// Clear all auth data
-export const clearAuthData = async (): Promise<void> => {
-  await removeItem(TOKEN_KEY);
-  await removeItem(REFRESH_TOKEN_KEY);
-  await removeItem(USER_KEY);
-};
-
-// Check if token is expired
-export const isTokenExpired = (expiresAt: number): boolean => {
-  return Date.now() >= expiresAt;
-};
-
-// Parse JWT token (basic implementation)
-export const parseJWT = (token: string): any => {
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split('')
-        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
-    );
-    return JSON.parse(jsonPayload);
-  } catch (error) {
-    console.error('Failed to parse JWT:', error);
+  async getCredentials(): Promise<{ username: string; password: string } | null> {
+    const credentials = await Keychain.getGenericPassword({
+      service: this.config.keychainService,
+    });
+    if (credentials) {
+      return { username: credentials.username, password: credentials.password };
+    }
     return null;
   }
-};
 
-// Get token expiration
-export const getTokenExpiration = (token: string): number | null => {
-  const payload = parseJWT(token);
-  return payload?.exp ? payload.exp * 1000 : null;
-};
-
-// Check if authenticated
-export const isAuthenticated = async (): Promise<boolean> => {
-  const token = await getAccessToken();
-  if (!token) return false;
-
-  const expiresAt = getTokenExpiration(token);
-  if (!expiresAt) return false;
-
-  return !isTokenExpired(expiresAt);
-};
+  async clearCredentials(): Promise<boolean> {
+    return await Keychain.resetGenericPassword({
+      service: this.config.keychainService,
+    });
+  }
+}

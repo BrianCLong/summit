@@ -14,7 +14,7 @@ import {
   Tooltip,
 } from '@mui/material';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
-import Grid from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid';
 import {
   MoreVert,
   TrendingUp,

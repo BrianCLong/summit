@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "pgbouncer.fullname" . }}
+data:
+  pgbouncer.ini: |
+    [databases]
+    ${DB_NAME:-app} = ${PG_DATABASE_URL}
+    [pgbouncer]
+    pool_mode = {{ .Values.config.pool_mode }}
+    max_client_conn = {{ .Values.config.max_client_conn }}
+    default_pool_size = {{ .Values.config.default_pool_size }}
+    min_pool_size = {{ .Values.config.min_pool_size }}
+    server_idle_timeout = {{ .Values.config.server_idle_timeout }}
+    query_timeout = {{ .Values.config.query_timeout }}

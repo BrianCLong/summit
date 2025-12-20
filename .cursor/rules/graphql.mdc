@@ -1,0 +1,91 @@
+---
+description: GraphQL schema and resolver conventions
+globs:
+  - "**/*.graphql"
+  - "**/resolvers/**/*"
+  - "**/schema/**/*"
+  - "services/api/**/*"
+alwaysApply: false
+---
+
+# GraphQL Conventions
+
+## Schema Naming
+
+- PascalCase for types: `Entity`, `Investigation`
+- camelCase for fields: `createdAt`, `entityType`
+- PascalCase for input types: `CreateEntityInput`
+- PascalCase for enums: `EntityType`
+
+## Schema Example
+
+```graphql
+type Entity {
+  id: ID!
+  name: String!
+  type: EntityType!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  relationships: [Relationship!]!
+}
+
+enum EntityType {
+  PERSON
+  ORGANIZATION
+  LOCATION
+  EVENT
+}
+
+input CreateEntityInput {
+  name: String!
+  type: EntityType!
+  metadata: JSON
+}
+
+extend type Query {
+  entity(id: ID!): Entity
+  entities(filter: EntityFilter): [Entity!]!
+}
+
+extend type Mutation {
+  createEntity(input: CreateEntityInput!): Entity!
+  updateEntity(id: ID!, input: UpdateEntityInput!): Entity!
+  deleteEntity(id: ID!): Boolean!
+}
+```
+
+## Resolver Pattern
+
+```typescript
+export const entityResolvers = {
+  Query: {
+    entity: async (_parent, { id }, context) => {
+      await context.authorize('entity:read');
+      return context.dataSources.entityAPI.findById(id);
+    },
+    entities: async (_parent, { filter }, context) => {
+      await context.authorize('entity:list');
+      return context.dataSources.entityAPI.findAll(filter);
+    },
+  },
+  Mutation: {
+    createEntity: async (_parent, { input }, context) => {
+      await context.authorize('entity:create');
+      return context.dataSources.entityAPI.create(input);
+    },
+  },
+  Entity: {
+    relationships: async (entity, _args, context) => {
+      return context.dataSources.relationshipAPI.findByEntityId(entity.id);
+    },
+  },
+};
+```
+
+## Commands
+
+```bash
+pnpm graphql:codegen        # Generate types
+pnpm graphql:schema:check   # Check breaking changes
+pnpm persisted:build        # Build persisted queries
+```

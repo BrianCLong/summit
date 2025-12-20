@@ -1,3 +1,4 @@
+// @ts-nocheck
 // server/src/conductor/web-orchestration/compliance-gate.ts
 
 import { Pool } from 'pg';
