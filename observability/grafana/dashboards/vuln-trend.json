@@ -1,0 +1,137 @@
+{
+  "dashboard": {
+    "title": "Vulnerability Trends & Exceptions",
+    "uid": "vuln-trend",
+    "schemaVersion": 38,
+    "timezone": "browser",
+    "refresh": "5m",
+    "tags": ["security", "vulnerability", "exceptions"],
+    "time": { "from": "now-30d", "to": "now" },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Critical & High Vulnerabilities (open)",
+        "type": "timeseries",
+        "datasource": "${DS_PROMETHEUS}",
+        "targets": [
+          {
+            "expr": "sum(max_over_time(security_vulnerability_info{severity=\"critical\",status=\"open\"}[1d]))",
+            "legendFormat": "Critical open"
+          },
+          {
+            "expr": "sum(max_over_time(security_vulnerability_info{severity=\"high\",status=\"open\"}[1d]))",
+            "legendFormat": "High open"
+          }
+        ],
+        "fieldConfig": { "defaults": { "unit": "none" } },
+        "options": { "legend": { "showLegend": true }, "tooltip": { "mode": "single" } }
+      },
+      {
+        "id": 2,
+        "title": "Exception debt burn-down (days)",
+        "type": "timeseries",
+        "datasource": "${DS_PROMETHEUS}",
+        "targets": [
+          {
+            "expr": "sum(max_over_time(security_vulnerability_exception_days_remaining[1d])) or 0",
+            "legendFormat": "Days remaining on exceptions"
+          },
+          {
+            "expr": "sum(max_over_time(security_vulnerability_info{status=\"exception\"}[1d])) or 0",
+            "legendFormat": "Open exceptions (count)"
+          }
+        ],
+        "fieldConfig": { "defaults": { "unit": "d" } },
+        "options": { "legend": { "showLegend": true }, "tooltip": { "mode": "multi" } }
+      },
+      {
+        "id": 3,
+        "title": "Critical backlog (alerting)",
+        "type": "stat",
+        "datasource": "${DS_PROMETHEUS}",
+        "targets": [
+          {
+            "expr": "count(security_vulnerability_info{severity=\"critical\",status=\"open\"}) or 0",
+            "legendFormat": "Critical open"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": { "mode": "thresholds" },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "red", "value": 1 }
+              ]
+            },
+            "unit": "none"
+          }
+        },
+        "options": { "colorMode": "value", "graphMode": "none", "orientation": "auto", "textMode": "value_and_name" },
+        "alert": {
+          "name": "Critical backlog present",
+          "conditions": [
+            {
+              "type": "query",
+              "query": { "params": ["A", "5m", "now"] },
+              "reducer": { "type": "last" },
+              "evaluator": { "type": "gt", "params": [0] },
+              "operator": { "type": "and" }
+            }
+          ],
+          "executionErrorState": "alerting",
+          "noDataState": "alerting",
+          "frequency": "1m"
+        }
+      },
+      {
+        "id": 4,
+        "title": "Exception expirations (next 14d)",
+        "type": "table",
+        "datasource": "${DS_PROMETHEUS}",
+        "targets": [
+          {
+            "expr": "security_vulnerability_exception_expiry_info{days_remaining=~\"0|1|2|3|4|5|6|7|8|9|10|11|12|13|14\"}",
+            "format": "table",
+            "instant": true
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": { "displayMode": "color-text" },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 7 },
+                { "color": "red", "value": 3 }
+              ]
+            }
+          }
+        },
+        "options": { "showHeader": true }
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "type": "datasource",
+          "name": "DS_PROMETHEUS",
+          "label": "Prometheus",
+          "query": "prometheus"
+        }
+      ]
+    }
+  },
+  "overwrite": true,
+  "inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "value": "Prometheus"
+    }
+  ]
+}

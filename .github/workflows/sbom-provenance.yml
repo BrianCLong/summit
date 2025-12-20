@@ -132,6 +132,23 @@ jobs:
             echo "rekor_uuids=unknown" >>"$GITHUB_OUTPUT"
           fi
 
+      - name: Emit supply chain telemetry
+        if: always()
+        env:
+          STAGE: sbom-provenance
+          IMAGE_NAME: ${{ inputs.image-name }}
+          DIGEST: ${{ inputs.image-digest }}
+          SBOM_PATH: sbom.spdx.json
+          REKOR_UUIDS: ${{ steps.rekor-uuid.outputs.rekor_uuids || 'unknown' }}
+          SUMMARY: SBOM/signing completed
+          POLICY_JSON: >-
+            {"signing_mode":"${{ steps.cosign-sign.outputs.mode || 'cache' }}",
+             "cache_state":"${{ steps.cache-state.outputs.use-cache }}",
+             "rekor_uuid_present":${{ steps.rekor-uuid.outputs.rekor_uuids != '' }}}
+          OTEL_EXPORTER_OTLP_ENDPOINT: ${{ secrets.OTEL_EXPORTER_OTLP_ENDPOINT || vars.OTEL_EXPORTER_OTLP_ENDPOINT }}
+          OTEL_EXPORTER_OTLP_HEADERS: ${{ secrets.OTEL_EXPORTER_OTLP_HEADERS || vars.OTEL_EXPORTER_OTLP_HEADERS }}
+        run: .github/scripts/emit-supply-chain-telemetry.sh
+
       - name: Save provenance cache
         if: steps.cache-state.outputs.use-cache != 'true'
         run: |
@@ -151,6 +168,7 @@ jobs:
             sbom.spdx.json
             cosign.bundle.json
             rekor-uuids.txt
+            artifacts/telemetry/supply-chain-telemetry.jsonl
           if-no-files-found: warn
 
       - name: Export SBOM to Dependency-Track (optional)

@@ -155,3 +155,27 @@ EOF
             echo "Quality gate failed per summit-quality-gates.rego"
             exit 1
           fi
+
+      - name: Emit policy telemetry
+        if: always()
+        env:
+          STAGE: policy-gate
+          SERVICE_NAME: ${{ env.SERVICE_NAME }}
+          DIGEST: policy-gate
+          SBOM_PATH: ""
+          REKOR_UUIDS: not-applicable
+          SUMMARY: OPA quality gate evaluation
+          OTEL_EXPORTER_OTLP_ENDPOINT: ${{ secrets.OTEL_EXPORTER_OTLP_ENDPOINT || vars.OTEL_EXPORTER_OTLP_ENDPOINT }}
+          OTEL_EXPORTER_OTLP_HEADERS: ${{ secrets.OTEL_EXPORTER_OTLP_HEADERS || vars.OTEL_EXPORTER_OTLP_HEADERS }}
+        run: |
+          export POLICY_JSON=$(cat gate.json 2>/dev/null || echo '{}')
+          export IMAGE_NAME="$SERVICE_NAME"
+          .github/scripts/emit-supply-chain-telemetry.sh
+
+      - name: Upload policy telemetry
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: policy-gate-telemetry-${{ github.run_id }}
+          path: artifacts/telemetry/supply-chain-telemetry.jsonl
+          if-no-files-found: warn
