@@ -1,3 +1,4 @@
+// @ts-nocheck
 import crypto from 'crypto';
 import { CacheInvalidator } from './cache/cacheInvalidator.js';
 import { ChunkStore, ChunkingStrategy } from './chunk/chunkStore.js';

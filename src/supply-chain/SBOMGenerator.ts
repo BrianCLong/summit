@@ -3,16 +3,23 @@
  * Generate SPDX SBOMs and in-toto attestations for supply chain security
  */
 
-import { execSync } from 'child_process';
+import { execSync, spawnSync } from 'child_process';
 import { promises as fs } from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import axios from 'axios';
 
 export interface SBOMConfig {
   projectPath: string;
   outputFormat: 'spdx-json' | 'spdx-yaml' | 'cyclonedx-json';
   includeDevDependencies: boolean;
   includeTransitive: boolean;
+  dependencyTrack?: {
+    apiUrl?: string;
+    apiKey?: string;
+    projectId?: string;
+    autoPublish?: boolean;
+  };
 }
 
 export interface ProvenanceConfig {
@@ -29,6 +36,7 @@ export interface SBOMResult {
   format: string;
   componentCount: number;
   vulnerabilities?: VulnerabilityReport[];
+  dependencyTrackUpload?: { projectId: string; apiUrl: string };
 }
 
 export interface ProvenanceResult {
@@ -36,6 +44,22 @@ export interface ProvenanceResult {
   attestationPath: string;
   subjectDigest: string;
   predicateType: string;
+}
+
+export interface SigningConfig {
+  preferKeyless?: boolean;
+  keyId?: string;
+  keyPath?: string;
+  managedKeyId?: string;
+  managedKeyPath?: string;
+  rekorOutputPath?: string;
+}
+
+export interface SigningResult {
+  signaturePath: string;
+  mode: 'cosign-keyless' | 'cosign-managed' | 'local-managed' | 'kms';
+  rekorEntryUUID?: string;
+  bundlePath?: string;
 }
 
 export interface VulnerabilityReport {
@@ -92,6 +116,11 @@ export class SBOMGenerator {
         config.projectPath,
       );
 
+      const dependencyTrackUpload = await this.maybeExportToDependencyTrack(
+        outputPath,
+        config,
+      );
+
       console.log(
         `✅ SBOM generated: ${sbomData.componentCount} components found`,
       );
@@ -101,6 +130,7 @@ export class SBOMGenerator {
         format: config.outputFormat,
         componentCount: sbomData.componentCount,
         vulnerabilities,
+        dependencyTrackUpload,
       };
     } catch (error) {
       throw new Error(`SBOM generation failed: ${error}`);
@@ -155,38 +185,91 @@ export class SBOMGenerator {
    */
   async signProvenance(
     attestationPath: string,
-    signingConfig: {
-      method: 'kms' | 'local';
-      keyId?: string;
-      keyPath?: string;
-    },
-  ): Promise<string> {
+    signingConfig: SigningConfig = {},
+  ): Promise<SigningResult> {
     console.log('🔐 Signing provenance attestation...');
 
     const signaturePath = `${attestationPath}.sig`;
+    const preferKeyless = signingConfig.preferKeyless ?? true;
+    const managedKey =
+      signingConfig.managedKeyPath ||
+      signingConfig.keyPath ||
+      signingConfig.managedKeyId ||
+      signingConfig.keyId;
+
+    let rekorEntryUUID: string | undefined;
+    let bundlePath: string | undefined;
+    let mode: SigningResult['mode'] = 'cosign-keyless';
 
     try {
-      if (signingConfig.method === 'kms' && signingConfig.keyId) {
-        // Use KMS for signing (AWS KMS example)
-        await this.signWithKMS(
+      if (preferKeyless) {
+        try {
+          const result = await this.signWithCosign(attestationPath, signaturePath);
+          rekorEntryUUID = result.rekorEntryUUID;
+          bundlePath = result.bundlePath;
+        } catch (error) {
+          console.warn(
+            '⚠️  Keyless signing failed, attempting managed key fallback:',
+            error,
+          );
+
+          if (managedKey) {
+            try {
+              const result = await this.signWithCosign(
+                attestationPath,
+                signaturePath,
+                managedKey,
+              );
+              rekorEntryUUID = result.rekorEntryUUID;
+              bundlePath = result.bundlePath;
+              mode = 'cosign-managed';
+            } catch (managedError) {
+              if (signingConfig.managedKeyId || signingConfig.keyId) {
+                await this.signWithKMS(
+                  attestationPath,
+                  signaturePath,
+                  signingConfig.managedKeyId || signingConfig.keyId,
+                );
+                mode = 'kms';
+              } else if (signingConfig.managedKeyPath || signingConfig.keyPath) {
+                await this.signWithLocalKey(
+                  attestationPath,
+                  signaturePath,
+                  signingConfig.managedKeyPath || signingConfig.keyPath || '',
+                );
+                mode = 'local-managed';
+              } else {
+                throw managedError;
+              }
+            }
+          } else {
+            throw error;
+          }
+        }
+      } else if (managedKey) {
+        const result = await this.signWithCosign(
           attestationPath,
           signaturePath,
-          signingConfig.keyId,
+          managedKey,
         );
-      } else if (signingConfig.method === 'local' && signingConfig.keyPath) {
-        // Use local key for signing
-        await this.signWithLocalKey(
-          attestationPath,
-          signaturePath,
-          signingConfig.keyPath,
-        );
+        rekorEntryUUID = result.rekorEntryUUID;
+        bundlePath = result.bundlePath;
+        mode = signingConfig.keyId || signingConfig.managedKeyId ? 'kms' : 'cosign-managed';
       } else {
-        // Fallback to cosign keyless signing
-        await this.signWithCosign(attestationPath);
+        throw new Error('No signing key or keyless mode available');
+      }
+
+      if (signingConfig.rekorOutputPath && rekorEntryUUID) {
+        await this.persistRekorUUID(signingConfig.rekorOutputPath, {
+          attestationPath,
+          signaturePath,
+          rekorEntryUUID,
+          bundlePath,
+        });
       }
 
       console.log('✅ Provenance signed successfully');
-      return signaturePath;
+      return { signaturePath, mode, rekorEntryUUID, bundlePath };
     } catch (error) {
       throw new Error(`Signing failed: ${error}`);
     }
@@ -278,6 +361,64 @@ export class SBOMGenerator {
       console.warn('⚠️  Vulnerability scanning failed:', error);
       return [];
     }
+  }
+
+  private async maybeExportToDependencyTrack(
+    sbomPath: string,
+    config: SBOMConfig,
+  ): Promise<{ projectId: string; apiUrl: string } | undefined> {
+    const dependencyTrack = {
+      autoPublish: true,
+      ...config.dependencyTrack,
+      ...this.readDependencyTrackEnv(),
+    };
+
+    if (
+      !dependencyTrack.apiUrl ||
+      !dependencyTrack.apiKey ||
+      !dependencyTrack.projectId ||
+      dependencyTrack.autoPublish === false
+    ) {
+      return undefined;
+    }
+
+    try {
+      const sbomContent = await fs.readFile(sbomPath, 'utf8');
+      const apiUrl = dependencyTrack.apiUrl.replace(/\/$/, '');
+
+      await axios.post(
+        `${apiUrl}/api/v1/bom`,
+        sbomContent,
+        {
+          headers: {
+            'X-Api-Key': dependencyTrack.apiKey,
+            'Content-Type': 'application/json',
+          },
+          params: { project: dependencyTrack.projectId },
+        },
+      );
+
+      console.log(
+        `📤 SBOM pushed to Dependency-Track project ${dependencyTrack.projectId}`,
+      );
+
+      return { projectId: dependencyTrack.projectId, apiUrl };
+    } catch (error) {
+      console.warn('⚠️  Dependency-Track export skipped:', error);
+      return undefined;
+    }
+  }
+
+  private readDependencyTrackEnv() {
+    if (!process.env.DEPENDENCY_TRACK_URL || !process.env.DEPENDENCY_TRACK_API_KEY)
+      return {};
+
+    return {
+      apiUrl: process.env.DEPENDENCY_TRACK_URL,
+      apiKey: process.env.DEPENDENCY_TRACK_API_KEY,
+      projectId: process.env.DEPENDENCY_TRACK_PROJECT,
+      autoPublish: true,
+    };
   }
 
   private async scanNpmVulnerabilities(
@@ -418,6 +559,10 @@ export class SBOMGenerator {
     keyPath: string,
   ): Promise<void> {
     // Sign with local private key (RSA/ECDSA)
+    if (!keyPath) {
+      throw new Error('Local key path is required for managed signing fallback');
+    }
+
     const attestationContent = await fs.readFile(attestationPath);
     const privateKey = await fs.readFile(keyPath);
 
@@ -425,22 +570,92 @@ export class SBOMGenerator {
     await fs.writeFile(signaturePath, signature.toString('base64'));
   }
 
-  private async signWithCosign(attestationPath: string): Promise<void> {
-    try {
-      // Use cosign keyless signing
-      execSync(
-        `cosign sign-blob ${attestationPath} --output-signature=${attestationPath}.sig`,
-        {
-          stdio: 'inherit',
-          env: {
-            ...process.env,
-            COSIGN_EXPERIMENTAL: '1',
-          },
-        },
-      );
-    } catch (error) {
-      throw new Error(`Cosign signing failed: ${error}`);
+  private async signWithCosign(
+    attestationPath: string,
+    signaturePath: string,
+    keyRef?: string,
+  ): Promise<{ rekorEntryUUID?: string; bundlePath: string }> {
+    const bundlePath = `${attestationPath}.bundle.json`;
+    const args = [
+      'sign-blob',
+      '--yes',
+      '--tlog-upload=true',
+      '--bundle',
+      bundlePath,
+      '--output-signature',
+      signaturePath,
+    ];
+
+    if (keyRef) {
+      args.push('--key', keyRef);
     }
+
+    args.push(attestationPath);
+
+    const result = spawnSync('cosign', args, {
+      env: {
+        ...process.env,
+        COSIGN_EXPERIMENTAL: '1',
+        COSIGN_YES: 'true',
+      },
+      encoding: 'utf8',
+      stdio: 'pipe',
+    });
+
+    if (result.status !== 0) {
+      throw new Error(result.stderr || 'Cosign signing failed');
+    }
+
+    const rekorEntryUUID = await this.readRekorUUID(
+      bundlePath,
+      `${result.stdout}${result.stderr}`,
+    );
+
+    return { rekorEntryUUID, bundlePath };
+  }
+
+  private async readRekorUUID(
+    bundlePath: string,
+    output: string,
+  ): Promise<string | undefined> {
+    try {
+      const bundle = JSON.parse(await fs.readFile(bundlePath, 'utf8'));
+      const entries =
+        bundle.tlogEntries ||
+        bundle.tlog_entries ||
+        bundle.logEntries ||
+        bundle.log_entries;
+      const firstEntry = Array.isArray(entries) ? entries[0] : undefined;
+      if (firstEntry?.uuid) return firstEntry.uuid as string;
+      if (firstEntry?.logIndex) return String(firstEntry.logIndex);
+      if (firstEntry?.entryUUID) return firstEntry.entryUUID as string;
+    } catch {
+      // fall through to regex parsing
+    }
+
+    const match = output.match(/UUID: ([a-f0-9\-]+)/i);
+    return match?.[1];
+  }
+
+  private async persistRekorUUID(
+    outputPath: string,
+    entry: {
+      attestationPath: string;
+      signaturePath: string;
+      rekorEntryUUID: string;
+      bundlePath?: string;
+    },
+  ) {
+    const existing = await fs
+      .readFile(outputPath, 'utf8')
+      .then((content) => JSON.parse(content))
+      .catch(() => [] as any[]);
+
+    const entries = Array.isArray(existing) ? existing : [];
+    entries.push({ ...entry, recordedAt: new Date().toISOString() });
+
+    await fs.mkdir(path.dirname(outputPath), { recursive: true });
+    await fs.writeFile(outputPath, JSON.stringify(entries, null, 2));
   }
 }
 

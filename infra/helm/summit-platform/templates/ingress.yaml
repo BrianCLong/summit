@@ -1,0 +1,39 @@
+{{- if and .Values.global.ingress .Values.global.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: summit-ingress
+  namespace: {{ .Values.global.namespace | default .Release.Namespace }}
+  annotations:
+{{- if and .Values.global.ingress.tls.enabled .Values.global.ingress.tls.issuerRef }}
+    cert-manager.io/cluster-issuer: {{ .Values.global.ingress.tls.issuerRef.name }}
+{{- end }}
+{{- if .Values.global.mesh.enabled }}
+    istio.io/ingressClass: {{ .Values.global.ingress.className | default "istio" }}
+{{- end }}
+spec:
+  ingressClassName: {{ .Values.global.ingress.className | default "istio" }}
+{{- if and .Values.global.ingress.tls .Values.global.ingress.tls.enabled }}
+  tls:
+    - hosts:
+{{- range .Values.global.ingress.hosts }}
+        - {{ .host }}
+{{- end }}
+      secretName: {{ .Values.global.ingress.tls.secretName }}
+{{- end }}
+  rules:
+{{- range .Values.global.ingress.hosts }}
+    - host: {{ .host }}
+      http:
+        paths:
+{{- range .paths }}
+          - path: {{ .path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .serviceName }}
+                port:
+                  number: {{ .servicePort }}
+{{- end }}
+{{- end }}
+{{- end }}

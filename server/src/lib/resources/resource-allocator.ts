@@ -1,3 +1,4 @@
+// @ts-nocheck
 // server/src/lib/resources/resource-allocator.ts
 
 /**

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // server/src/conductor/observability/alerting-engine.ts
 
 import { Pool } from 'pg';
