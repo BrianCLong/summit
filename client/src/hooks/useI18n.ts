@@ -36,76 +36,8 @@ interface Messages {
   [key: string]: string | Messages;
 }
 
-// Base English messages
-const EN_MESSAGES: Messages = {
-  common: {
-    loading: 'Loading...',
-    error: 'Error',
-    success: 'Success',
-    cancel: 'Cancel',
-    save: 'Save',
-    edit: 'Edit',
-    delete: 'Delete',
-    search: 'Search',
-    filter: 'Filter',
-    export: 'Export',
-    refresh: 'Refresh',
-    close: 'Close',
-    yes: 'Yes',
-    no: 'No',
-  },
-  navigation: {
-    dashboard: 'Dashboard',
-    investigations: 'Investigations',
-    graphWorkbench: 'Graph Workbench',
-    reports: 'Reports',
-    settings: 'Settings',
-  },
-  presence: {
-    active: 'active',
-    away: 'away',
-    busy: 'busy',
-    offline: 'offline',
-    usersOnline: '{count} users online',
-  },
-  graph: {
-    nodes: 'Nodes',
-    edges: 'Edges',
-    paths: 'Paths',
-    neighbors: 'Neighbors',
-    streaming: 'Streaming',
-    findPaths: 'Find Paths',
-    shortestPaths: 'Shortest Paths',
-    pathLength: 'Path Length',
-  },
-  search: {
-    powerSearch: 'Power Search',
-    savedSearches: 'Saved Searches',
-    bulkActions: 'Bulk Actions',
-    queryBuilder: 'Query Builder',
-    addFilter: 'Add Filter',
-    clearFilters: 'Clear Filters',
-  },
-  reports: {
-    generateReport: 'Generate Report',
-    executiveSummary: 'Executive Summary',
-    forensicsReport: 'Forensics Report',
-    reportTemplate: 'Report Template',
-    exportFormat: 'Export Format',
-  },
-  performance: {
-    fps: 'FPS',
-    performance: 'Performance',
-    budget: 'Budget',
-    lighthouse: 'Lighthouse',
-  },
-  dates: {
-    today: 'Today',
-    yesterday: 'Yesterday',
-    lastWeek: 'Last Week',
-    lastMonth: 'Last Month',
-  },
-};
+// Cache for loaded messages
+const messageCache: Record<string, Messages> = {};
 
 // Locale configurations
 const LOCALE_CONFIGS: Record<
@@ -300,6 +232,38 @@ const LOCALE_CONFIGS: Record<
 };
 
 /**
+ * Load messages for a specific locale
+ */
+async function loadMessages(locale: Locale): Promise<Messages> {
+  // Return cached messages if available
+  if (messageCache[locale]) {
+    return messageCache[locale];
+  }
+
+  try {
+    // Dynamically import the locale file
+    const messages = await import(`../locales/${locale}.json`);
+    messageCache[locale] = messages.default || messages;
+    return messageCache[locale];
+  } catch (error) {
+    console.warn(`Failed to load locale ${locale}, falling back to en-US`, error);
+
+    // Try to load en-US as fallback
+    if (locale !== 'en-US' && !messageCache['en-US']) {
+      try {
+        const fallback = await import(`../locales/en-US.json`);
+        messageCache['en-US'] = fallback.default || fallback;
+      } catch (fallbackError) {
+        console.error('Failed to load fallback locale en-US', fallbackError);
+        messageCache['en-US'] = {};
+      }
+    }
+
+    return messageCache['en-US'] || {};
+  }
+}
+
+/**
  * i18n hook with NATO locale support
  */
 export function useI18n() {
@@ -308,23 +272,31 @@ export function useI18n() {
     return stored && stored in LOCALE_CONFIGS ? stored : 'en-US';
   });
 
-  const [messages, setMessages] = useState<Messages>(EN_MESSAGES);
+  const [messages, setMessages] = useState<Messages>({});
+  const [isLoading, setIsLoading] = useState(true);
 
   // Load messages for current locale
   useEffect(() => {
-    if (locale === 'en-US') {
-      setMessages(EN_MESSAGES);
-      return;
-    }
+    let mounted = true;
 
-    // In production, these would be loaded dynamically
-    // For now, we'll fall back to English
-    setMessages(EN_MESSAGES);
+    setIsLoading(true);
+    loadMessages(locale).then((loadedMessages) => {
+      if (mounted) {
+        setMessages(loadedMessages);
+        setIsLoading(false);
+      }
+    });
+
+    return () => {
+      mounted = false;
+    };
   }, [locale]);
 
   // Persist locale preference
   useEffect(() => {
     localStorage.setItem('locale', locale);
+    // Update HTML lang attribute for accessibility
+    document.documentElement.lang = locale;
   }, [locale]);
 
   const t = useMemo(() => {
@@ -387,6 +359,7 @@ export function useI18n() {
     formatDate,
     formatNumber,
     formatCurrency,
+    isLoading,
     availableLocales: Object.entries(LOCALE_CONFIGS).map(([code, config]) => ({
       code: code as Locale,
       name: config.name,

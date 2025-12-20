@@ -1,0 +1,10 @@
+# ETL Assistant Python dependencies
+
+# Core dependencies
+httpx>=0.24.0  # Async HTTP client for license registry
+pytest>=7.4.0  # Testing framework
+pytest-asyncio>=0.21.0  # Async test support
+
+# Optional dependencies (already available in main project)
+# rapidfuzz>=3.0.0  # Fuzzy matching (used in universal-ingest)
+# defusedxml>=0.7.1  # Safe XML parsing (used in universal-ingest)

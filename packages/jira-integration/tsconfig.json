@@ -9,17 +9,15 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "declaration": true,
+    "allowImportingTsExtensions": false,
     "declarationMap": true,
     "sourceMap": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "target": "ES2022",
-    "allowImportingTsExtensions": false,
-    "composite": true
+    "composite": true,
+    "types": ["jest", "node"]
   },
-  "include": [
-    "src/**/*",
-    "__tests__/**/*"
-  ],
+  "include": ["src/**/*", "__tests__/**/*"],
   "references": []
 }

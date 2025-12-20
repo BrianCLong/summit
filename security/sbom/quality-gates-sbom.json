@@ -1,0 +1,72 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "intelgraph-quality-gates",
+  "documentNamespace": "https://intelgraph.example.com/spdx/intelgraph-quality-gates",
+  "creationInfo": {
+    "created": "2025-03-01T12:00:00Z",
+    "creators": [
+      "Organization: IntelGraph QA Engineering",
+      "Tool: cyclonedx-npm@3.11.0"
+    ]
+  },
+  "packages": [
+    {
+      "name": "@playwright/test",
+      "SPDXID": "SPDXRef-Package-Playwright",
+      "versionInfo": "1.55.0",
+      "licenseConcluded": "Apache-2.0",
+      "downloadLocation": "npmjs:@playwright/test@1.55.0",
+      "supplier": "Organization: Microsoft",
+      "externalRefs": [
+        {
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/%40playwright/test@1.55.0"
+        }
+      ]
+    },
+    {
+      "name": "jest",
+      "SPDXID": "SPDXRef-Package-Jest",
+      "versionInfo": "30.1.3",
+      "licenseConcluded": "MIT",
+      "downloadLocation": "npmjs:jest@30.1.3",
+      "supplier": "Organization: Meta",
+      "externalRefs": [
+        {
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/jest@30.1.3"
+        }
+      ]
+    },
+    {
+      "name": "k6",
+      "SPDXID": "SPDXRef-Package-k6",
+      "versionInfo": "0.49.0",
+      "licenseConcluded": "AGPL-3.0",
+      "downloadLocation": "https://github.com/grafana/k6",
+      "supplier": "Organization: Grafana Labs",
+      "externalRefs": [
+        {
+          "referenceType": "purl",
+          "referenceLocator": "pkg:generic/k6@0.49.0"
+        }
+      ]
+    }
+  ],
+  "hasExtractedLicensingInfos": [
+    {
+      "licenseId": "LicenseRef-Acceptance-Usage",
+      "extractedText": "Tooling dependencies are used exclusively for automated quality gate execution."
+    }
+  ],
+  "annotations": [
+    {
+      "annotationType": "OTHER",
+      "annotator": "Person: QA Lead",
+      "comment": "Validated against dependency scanning policies on 2025-03-01",
+      "annotationDate": "2025-03-01T13:00:00Z"
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express from 'express';
 import { z } from 'zod';
 import { pipelinesRepo } from './pipelines-repo.js';

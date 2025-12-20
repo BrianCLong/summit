@@ -1,0 +1,369 @@
+# XAI Overlay Schema for Explainable AI
+# Provides transparency, auditability, and reproducibility for model outputs
+
+type Query {
+  """
+  Get a reasoning trace by ID
+  """
+  getReasoningTrace(traceId: ID!): ReasoningTrace
+
+  """
+  Verify the integrity and reproducibility of a trace
+  """
+  verifyTrace(
+    traceId: ID!
+    verificationLevel: VerificationLevel!
+  ): VerificationResult
+
+  """
+  Get cache statistics for XAI overlay
+  """
+  xaiOverlayStats: XAIOverlayStats!
+
+  """
+  Health check for XAI overlay service
+  """
+  xaiOverlayHealth: XAIOverlayHealth!
+}
+
+type Mutation {
+  """
+  Compute risk score with full XAI explanation
+  """
+  computeRiskWithExplanation(
+    input: RiskComputeInput!
+  ): ReasoningTrace!
+
+  """
+  Verify reproducibility of a previous trace
+  """
+  verifyReproducibility(
+    originalTraceId: ID!
+    features: FeatureVectorInput!
+    window: RiskWindow!
+  ): ReproducibilityCheck!
+
+  """
+  Analyze parameter sensitivity
+  """
+  analyzeParameterSensitivity(
+    baseFeatures: FeatureVectorInput!
+    window: RiskWindow!
+    featureToVary: String!
+    variationPercent: Float!
+  ): ParameterSensitivityResult!
+
+  """
+  Detect tampering in a trace
+  """
+  detectTampering(traceId: ID!): TamperDetectionResult!
+
+  """
+  Perform parameter sweep to test predictability
+  """
+  performParameterSweep(
+    input: ParameterSweepInput!
+  ): ParameterSweepResult!
+
+  """
+  Clear XAI overlay cache
+  """
+  clearXAIOverlayCache: Boolean!
+}
+
+# ============================================================================
+# Input Types
+# ============================================================================
+
+input RiskComputeInput {
+  features: FeatureVectorInput!
+  window: RiskWindow!
+  metadata: ModelMetadataInput
+}
+
+input FeatureVectorInput {
+  transactionFrequency: Float
+  networkCentrality: Float
+  temporalAnomaly: Float
+  geoDispersion: Float
+  customFeatures: [CustomFeatureInput!]
+}
+
+input CustomFeatureInput {
+  name: String!
+  value: Float!
+}
+
+input ModelMetadataInput {
+  modelName: String
+  trainingDate: DateTime
+}
+
+input ParameterSweepInput {
+  baseFeatures: FeatureVectorInput!
+  window: RiskWindow!
+  featureToSweep: String!
+  minValue: Float!
+  maxValue: Float!
+  steps: Int!
+}
+
+# ============================================================================
+# Core Types
+# ============================================================================
+
+type ReasoningTrace {
+  traceId: ID!
+  modelOutput: RiskResult!
+  inputSummary: InputSummary!
+  modelMetadata: ModelMetadata!
+  saliencyExplanations: [SaliencyExplanation!]!
+  intermediateSteps: [IntermediateStep!]!
+  timestamp: DateTime!
+  traceDigest: String!
+  signature: String
+  signatureMetadata: SignatureMetadata
+}
+
+type RiskResult {
+  score: Float!
+  band: RiskBand!
+  contributions: [FeatureContribution!]!
+  window: RiskWindow!
+  computedAt: DateTime!
+  modelVersion: String!
+}
+
+type FeatureContribution {
+  feature: String!
+  value: Float!
+  weight: Float!
+  delta: Float!
+}
+
+type InputSummary {
+  inputHash: String!
+  inputType: InputType!
+  featureCount: Int!
+  featureNames: [String!]!
+  inputStatistics: InputStatistics!
+  timestamp: DateTime!
+}
+
+type InputStatistics {
+  mean: Float!
+  std: Float!
+  min: Float!
+  max: Float!
+  nonZeroCount: Int!
+}
+
+type ModelMetadata {
+  modelName: String!
+  modelVersion: String!
+  modelType: ModelType!
+  parameters: JSON!
+  trainingDate: DateTime
+  lastUpdated: DateTime!
+}
+
+type SaliencyExplanation {
+  featureName: String!
+  featureValue: Float!
+  weight: Float!
+  contribution: Float!
+  contributionPercent: Float!
+  direction: ContributionDirection!
+  importance: ImportanceLevel!
+  humanReadable: String!
+}
+
+type IntermediateStep {
+  step: String!
+  description: String!
+  value: JSON!
+}
+
+type SignatureMetadata {
+  hsmSignature: String
+  tsaResponse: String
+  notarizedBy: [String!]!
+  signedAt: DateTime!
+}
+
+# ============================================================================
+# Verification Types
+# ============================================================================
+
+type VerificationResult {
+  verificationId: ID!
+  timestamp: DateTime!
+  overallValid: Boolean!
+  checks: VerificationChecks!
+  confidence: Float!
+  recommendations: [String!]!
+  warnings: [String!]!
+  errors: [String!]!
+}
+
+type VerificationChecks {
+  digestIntegrity: CheckResult!
+  signatureValidity: CheckResult!
+  reproducibility: CheckResult!
+  parameterConsistency: CheckResult!
+  modelMetadata: CheckResult!
+}
+
+type CheckResult {
+  passed: Boolean!
+  details: String!
+  evidence: JSON
+  severity: Severity!
+}
+
+type ReproducibilityCheck {
+  originalTrace: ReasoningTrace!
+  reproducedTrace: ReasoningTrace!
+  isReproducible: Boolean!
+  tolerance: Float!
+  differences: [DifferenceDetail!]!
+  withinTolerance: Boolean!
+}
+
+type DifferenceDetail {
+  field: String!
+  originalValue: JSON!
+  reproducedValue: JSON!
+  difference: Float!
+}
+
+type TamperDetectionResult {
+  isTampered: Boolean!
+  originalDigest: String!
+  computedDigest: String!
+  tamperedFields: [String!]
+  dualControlRequired: Boolean!
+  verificationErrors: [String!]!
+}
+
+# ============================================================================
+# Parameter Sensitivity Types
+# ============================================================================
+
+type ParameterSensitivityResult {
+  baseTrace: ReasoningTrace!
+  variedTrace: ReasoningTrace!
+  sensitivity: Float!
+  isSignificant: Boolean!
+  explanation: String!
+}
+
+type ParameterSweepResult {
+  feature: String!
+  sweepRange: SweepRange!
+  results: [SweepPoint!]!
+  monotonic: Boolean!
+  sensitivity: Float!
+  explanation: String!
+}
+
+type SweepRange {
+  min: Float!
+  max: Float!
+  steps: Int!
+}
+
+type SweepPoint {
+  parameterValue: Float!
+  outputScore: Float!
+  delta: Float!
+  predictable: Boolean!
+}
+
+# ============================================================================
+# Statistics & Health Types
+# ============================================================================
+
+type XAIOverlayStats {
+  cacheSize: Int!
+  maxCacheSize: Int!
+  utilizationPercent: Float!
+  tracesGenerated: Int!
+  verificationsPerformed: Int!
+}
+
+type XAIOverlayHealth {
+  status: HealthStatus!
+  signing: Boolean!
+  tamperDetection: Boolean!
+  cacheSize: Int!
+  errors: [String!]!
+}
+
+# ============================================================================
+# Enums
+# ============================================================================
+
+enum RiskBand {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum RiskWindow {
+  WINDOW_24H
+  WINDOW_7D
+  WINDOW_30D
+}
+
+enum InputType {
+  FEATURES
+  GRAPH
+  TIMESERIES
+}
+
+enum ModelType {
+  RISK_ENGINE
+  COMMUNITY_DETECTOR
+  PATH_ANALYZER
+}
+
+enum ContributionDirection {
+  INCREASES_RISK
+  DECREASES_RISK
+  NEUTRAL
+}
+
+enum ImportanceLevel {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum VerificationLevel {
+  BASIC
+  STANDARD
+  COMPREHENSIVE
+}
+
+enum Severity {
+  INFO
+  WARNING
+  ERROR
+  CRITICAL
+}
+
+enum HealthStatus {
+  HEALTHY
+  DEGRADED
+  UNHEALTHY
+}
+
+# ============================================================================
+# Scalar Types
+# ============================================================================
+
+scalar DateTime
+scalar JSON

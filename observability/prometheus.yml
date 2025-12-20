@@ -117,6 +117,25 @@ scrape_configs:
         target_label: component
         replacement: 'nodejs'
 
+  # Predictive Threat Suite - Forecasting & Simulation
+  - job_name: 'predictive-suite'
+    static_configs:
+      - targets: ['predictive-forecasting:8091']
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scrape_timeout: 10s
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'predictive_.*'
+        target_label: component
+        replacement: 'predictive-suite'
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'predictive-suite'
+    # Alternative targets for different deployment scenarios
+    # If running standalone: ['localhost:8091']
+    # If in Kubernetes: ['predictive-forecasting.predictive-suite.svc.cluster.local:8091']
+
 # Remote write configuration (for production)
 # remote_write:
 #   - url: "https://your-prometheus-remote-write-endpoint"

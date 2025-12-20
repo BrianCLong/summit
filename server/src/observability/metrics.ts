@@ -1,56 +1,85 @@
 /**
- * Centralized metrics configuration using prom-client
- * Provides typed metrics instances and a shared registry
+ * Centralized metrics configuration
+ * Re-exports from monitoring/metrics.js to maintain backward compatibility
+ * while unifying the registry.
  */
+
 import {
-  Counter,
-  Gauge,
-  Histogram,
-  Registry,
-  collectDefaultMetrics,
-} from 'prom-client';
+  register as registry,
+  intelgraphJobsProcessed as jobsProcessed,
+  intelgraphOutboxSyncLatency as outboxSyncLatency,
+  intelgraphActiveConnections as activeConnections,
+  intelgraphDatabaseQueryDuration as databaseQueryDuration,
+  intelgraphHttpRequestDuration as httpRequestDuration,
+  intelgraphGraphragQueryTotal as graphragQueryTotal,
+  intelgraphGraphragQueryDurationMs as graphragQueryDurationMs,
+  intelgraphQueryPreviewsTotal as queryPreviewsTotal,
+  intelgraphQueryPreviewLatencyMs as queryPreviewLatencyMs,
+  intelgraphQueryPreviewErrorsTotal as queryPreviewErrorsTotal,
+  intelgraphQueryPreviewExecutionsTotal as queryPreviewExecutionsTotal,
+  intelgraphGlassBoxRunsTotal as glassBoxRunsTotal,
+  intelgraphGlassBoxRunDurationMs as glassBoxRunDurationMs,
+  intelgraphGlassBoxCacheHits as glassBoxCacheHits,
+  intelgraphCacheHits as cacheHits,
+  intelgraphCacheMisses as cacheMisses,
+  copilotApiRequestTotal,
+  copilotApiRequestDurationMs,
+  // Maestro Metrics
+  maestroDagExecutionDurationSeconds,
+  maestroJobExecutionDurationSeconds,
+  // LLM Metrics
+  llmTokensTotal,
+  llmRequestDuration
+} from '../monitoring/metrics.js';
 
-// Create dedicated registry
-export const registry = new Registry();
+export { registry };
 
-// Collect default Node.js metrics
-collectDefaultMetrics({ register: registry });
+export {
+  jobsProcessed,
+  outboxSyncLatency,
+  activeConnections,
+  databaseQueryDuration,
+  httpRequestDuration,
+  graphragQueryTotal,
+  graphragQueryDurationMs,
+  queryPreviewsTotal,
+  queryPreviewLatencyMs,
+  queryPreviewErrorsTotal,
+  queryPreviewExecutionsTotal,
+  glassBoxRunsTotal,
+  glassBoxRunDurationMs,
+  glassBoxCacheHits,
+  cacheHits,
+  cacheMisses,
+  copilotApiRequestTotal,
+  copilotApiRequestDurationMs,
+  maestroDagExecutionDurationSeconds,
+  maestroJobExecutionDurationSeconds,
+  llmTokensTotal,
+  llmRequestDuration
+};
 
-// Application-specific metrics
-export const jobsProcessed = new Counter({
-  name: 'intelgraph_jobs_processed_total',
-  help: 'Total jobs processed by the system',
-  labelNames: ['queue', 'status'] as const,
-  registers: [registry],
-});
-
-export const outboxSyncLatency = new Histogram({
-  name: 'intelgraph_outbox_sync_latency_seconds',
-  help: 'Latency of outbox to Neo4j sync operations',
-  labelNames: ['operation'] as const,
-  buckets: [0.01, 0.05, 0.1, 0.25, 0.5, 1, 2, 5, 10],
-  registers: [registry],
-});
-
-export const activeConnections = new Gauge({
-  name: 'intelgraph_active_connections',
-  help: 'Number of active WebSocket connections',
-  labelNames: ['tenant'] as const,
-  registers: [registry],
-});
-
-export const databaseQueryDuration = new Histogram({
-  name: 'intelgraph_database_query_duration_seconds',
-  help: 'Database query execution time',
-  labelNames: ['database', 'operation'] as const,
-  buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 5],
-  registers: [registry],
-});
-
-export const httpRequestDuration = new Histogram({
-  name: 'intelgraph_http_request_duration_seconds',
-  help: 'HTTP request duration in seconds',
-  labelNames: ['method', 'route', 'status'] as const,
-  buckets: [0.01, 0.05, 0.1, 0.5, 1, 2, 5],
-  registers: [registry],
-});
+export const metrics = {
+  jobsProcessed,
+  outboxSyncLatency,
+  activeConnections,
+  databaseQueryDuration,
+  httpRequestDuration,
+  graphragQueryTotal,
+  graphragQueryDurationMs,
+  queryPreviewsTotal,
+  queryPreviewLatencyMs,
+  queryPreviewErrorsTotal,
+  queryPreviewExecutionsTotal,
+  glassBoxRunsTotal,
+  glassBoxRunDurationMs,
+  glassBoxCacheHits,
+  cacheHits,
+  cacheMisses,
+  copilotApiRequestTotal,
+  copilotApiRequestDurationMs,
+  maestroDagExecutionDurationSeconds,
+  maestroJobExecutionDurationSeconds,
+  llmTokensTotal,
+  llmRequestDuration
+};

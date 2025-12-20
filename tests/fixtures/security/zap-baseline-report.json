@@ -1,0 +1,71 @@
+{
+  "generated": "2025-10-05T12:00:00Z",
+  "scanner": {
+    "name": "OWASP ZAP Baseline",
+    "version": "2.14.0",
+    "target": "https://summit.local"
+  },
+  "site": [
+    {
+      "@name": "https://summit.local",
+      "@host": "summit.local",
+      "@port": "443",
+      "alerts": [
+        {
+          "pluginid": "12345",
+          "alert": "OIDC Authorization Code Flow Verified",
+          "name": "OIDC Callback Coverage",
+          "riskcode": "0",
+          "riskdesc": "Informational",
+          "confidence": "High",
+          "uri": "https://summit.local/auth/callback",
+          "param": "code",
+          "evidence": "state=xyz",
+          "otherinfo": "Validated OIDC state nonce handling and JWT audience binding",
+          "solution": "Ensure PKCE verifier is enforced for mobile clients",
+          "reference": "https://openid.net/specs/openid-connect-core-1_0.html",
+          "tags": {
+            "auth.flow": "oidc",
+            "token.type": "jwt",
+            "compliance": ["SOC2:CC6.1", "FedRAMP:IA-2", "GDPR:32"]
+          }
+        },
+        {
+          "pluginid": "400000",
+          "alert": "Strict-Transport-Security Header",
+          "name": "HSTS Enabled",
+          "riskcode": "0",
+          "riskdesc": "Informational",
+          "confidence": "Medium",
+          "uri": "https://summit.local",
+          "otherinfo": "Strict-Transport-Security: max-age=63072000; includeSubDomains; preload",
+          "solution": "Continue enforcing TLS 1.2+ for in-transit encryption",
+          "tags": {
+            "encryption.in_transit": true,
+            "compliance": ["SOC2:CC6.7", "FedRAMP:SC-8", "GDPR:32"]
+          }
+        },
+        {
+          "pluginid": "500000",
+          "alert": "Encrypted Data Store Verified",
+          "name": "At-Rest Encryption",
+          "riskcode": "0",
+          "riskdesc": "Informational",
+          "confidence": "Medium",
+          "uri": "postgresql://summit-db.internal",
+          "otherinfo": "AES-256-GCM volume encryption with customer managed keys",
+          "solution": "Monitor KMS rotation schedule",
+          "tags": {
+            "encryption.at_rest": true,
+            "compliance": ["SOC2:CC1.1", "FedRAMP:MP-6", "GDPR:5(1)(f)"]
+          }
+        }
+      ],
+      "urls": [
+        "https://summit.local/.well-known/openid-configuration",
+        "https://summit.local/auth/callback",
+        "https://summit.local/api/health"
+      ]
+    }
+  ]
+}

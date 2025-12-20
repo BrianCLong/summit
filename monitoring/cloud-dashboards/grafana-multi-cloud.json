@@ -1,0 +1,136 @@
+{
+  "dashboard": {
+    "title": "Multi-Cloud Infrastructure Overview",
+    "tags": ["multi-cloud", "infrastructure", "aws", "azure", "gcp"],
+    "timezone": "UTC",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Total Cloud Costs (Monthly)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(cloud_costs_monthly{provider=~'aws|azure|gcp'})",
+            "legendFormat": "Total Monthly Cost"
+          }
+        ],
+        "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 }
+      },
+      {
+        "id": 2,
+        "title": "Cost by Provider",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "sum by (provider) (cloud_costs_monthly)",
+            "legendFormat": "{{provider}}"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 6, "x": 6, "y": 0 }
+      },
+      {
+        "id": 3,
+        "title": "Cluster Health Status",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "kube_cluster_info",
+            "format": "table"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
+      },
+      {
+        "id": 4,
+        "title": "Resource Utilization - CPU",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "avg by (cluster) (node_cpu_utilization)",
+            "legendFormat": "{{cluster}}"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 }
+      },
+      {
+        "id": 5,
+        "title": "Resource Utilization - Memory",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "avg by (cluster) (node_memory_utilization)",
+            "legendFormat": "{{cluster}}"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 }
+      },
+      {
+        "id": 6,
+        "title": "Cross-Cloud Network Traffic",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(istio_request_bytes_sum[5m])) by (source_cluster, destination_cluster)",
+            "legendFormat": "{{source_cluster}} -> {{destination_cluster}}"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 }
+      },
+      {
+        "id": 7,
+        "title": "Service Mesh - Request Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(istio_requests_total[5m])) by (destination_service)",
+            "legendFormat": "{{destination_service}}"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 }
+      },
+      {
+        "id": 8,
+        "title": "Service Mesh - Error Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(istio_requests_total{response_code=~'5..'}[5m])) by (destination_service)",
+            "legendFormat": "{{destination_service}}"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 }
+      },
+      {
+        "id": 9,
+        "title": "Backup Status",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "backup_last_success_timestamp",
+            "format": "table"
+          }
+        ],
+        "gridPos": { "h": 6, "w": 12, "x": 0, "y": 32 }
+      },
+      {
+        "id": 10,
+        "title": "RTO/RPO Metrics",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "avg(disaster_recovery_rto_minutes)",
+            "legendFormat": "RTO (minutes)"
+          },
+          {
+            "expr": "avg(disaster_recovery_rpo_minutes)",
+            "legendFormat": "RPO (minutes)"
+          }
+        ],
+        "gridPos": { "h": 6, "w": 12, "x": 12, "y": 32 }
+      }
+    ],
+    "refresh": "30s",
+    "schemaVersion": 36,
+    "version": 1
+  }
+}

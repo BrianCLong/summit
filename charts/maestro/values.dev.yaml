@@ -1,3 +1,6 @@
+# Development Environment Configuration
+# Golden Path: OTEL + Prometheus + Feature Flags enabled by default
+
 image:
   repository: ghcr.io/brianclong/maestro-control-plane
   tag: v0.1.0
@@ -7,9 +10,69 @@ resources:
   requests: { cpu: '200m', memory: '256Mi' }
   limits: { cpu: '1', memory: '1Gi' }
 
+# ============================================================================
+# OpenTelemetry - Enabled by Default
+# ============================================================================
+opentelemetry:
+  enabled: true
+  collector:
+    endpoint: "otel-collector.observability.svc.cluster.local:4317"
+  sampling:
+    ratio: 1.0  # 100% sampling in dev
+
+# ============================================================================
+# Prometheus Metrics - Enabled by Default
+# ============================================================================
+metrics:
+  enabled: true
+  prometheusRule:
+    enabled: true
+    namespace: monitoring
+
+# ServiceMonitor for automatic Prometheus scraping
+serviceMonitor:
+  enabled: true
+  interval: 15s
+
+# ============================================================================
+# Feature Flags - Enabled by Default
+# ============================================================================
+featureFlags:
+  enabled: true
+  provider: flagd
+  defaults:
+    enableNewUI: true
+    enableBetaFeatures: true
+    enableAdvancedAnalytics: true
+
+# ============================================================================
+# Application Configuration
+# ============================================================================
 env:
   - name: NODE_ENV
-    value: 'production'
+    value: 'development'
+  - name: LOG_LEVEL
+    value: 'debug'
+
+  # OTEL Configuration
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: "http://otel-collector.observability.svc.cluster.local:4317"
+  - name: OTEL_SERVICE_NAME
+    value: "maestro"
+  - name: OTEL_RESOURCE_ATTRIBUTES
+    value: "service.namespace=summit,deployment.environment=dev"
+  - name: OTEL_TRACES_SAMPLER
+    value: "parentbased_traceidratio"
+  - name: OTEL_TRACES_SAMPLER_ARG
+    value: "1.0"
+
+  # Feature Flags
+  - name: FEATURE_FLAGS_ENABLED
+    value: "true"
+  - name: FLAGD_HOST
+    value: "flagd.summit.svc.cluster.local"
+
+  # Application Secrets
   - name: OIDC_ISSUER
     valueFrom: { secretKeyRef: { name: maestro-secrets, key: oidc_issuer } }
   - name: POSTGRES_URL
@@ -34,9 +97,31 @@ autoscaling:
   maxReplicas: 8
   targetCPUUtilizationPercentage: 60
 
+# ============================================================================
+# Network Policy - Allow OTEL and Prometheus
+# ============================================================================
 networkPolicy:
   enabled: true
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 9090
   egress:
+    # OTEL Collector
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: observability
+      ports:
+        - port: 4317
+        - port: 4318
+    # Kafka, Redis, Postgres
     - to:
         - namespaceSelector: {}
       ports:
@@ -44,3 +129,8 @@ networkPolicy:
         - port: 6379
         - port: 5432
         - port: 443
+    # DNS
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53

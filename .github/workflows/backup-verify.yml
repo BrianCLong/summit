@@ -1,0 +1,62 @@
+name: Nightly Backup Verify
+
+on:
+  schedule:
+    - cron: "0 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  backup-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install opentelemetry-sdk prometheus-client
+
+      - name: Run backup verify
+        run: |
+          python tools/backup-orchestrator/cli.py backup postgres
+          python tools/backup-orchestrator/cli.py backup neo4j
+          python tools/backup-orchestrator/cli.py backup redis
+          python tools/backup-orchestrator/cli.py backup typesense
+          python tools/backup-orchestrator/cli.py verify postgres
+          python tools/backup-orchestrator/cli.py verify neo4j
+          python tools/backup-orchestrator/cli.py verify redis
+          python tools/backup-orchestrator/cli.py verify typesense
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: backup-metrics
+          path: |
+            /tmp/backup-metrics
+            /tmp/backup-artifacts
+
+      - name: Fail if verify failed
+        run: |
+          python - <<'PYCODE'
+import json
+from pathlib import Path
+manifests = list(Path('/tmp/backup-artifacts').glob('*-manifest.json'))
+failed = []
+for manifest_path in manifests:
+    data = json.loads(manifest_path.read_text())
+    verify = Path('/tmp/backup-metrics/backup_verify_success.prom').read_text()
+    if ' 0\n' in verify:
+        failed.append(data['store'])
+if failed:
+    raise SystemExit(f"Verification failed for {', '.join(failed)}")
+PYCODE

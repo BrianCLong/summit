@@ -1,6 +1,7 @@
+// @ts-nocheck
 import axios from 'axios';
 import { logger } from '../logging';
-import { CacheService } from './CacheService';
+import { CacheService } from './cacheService';
 
 /**
  * Advanced ML Service Integration

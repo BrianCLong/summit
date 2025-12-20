@@ -16,4 +16,20 @@ const server = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
 };
 
-module.exports = { projects: [client, server] };
+const services = {
+  displayName: 'services',
+  ...base,
+  roots: ['<rootDir>/services'],
+  testEnvironment: 'node',
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+};
+
+const integration = {
+  displayName: 'integration',
+  ...base,
+  roots: ['<rootDir>/tests'],
+  testEnvironment: 'node',
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+};
+
+module.exports = { projects: [client, server, services, integration] };
