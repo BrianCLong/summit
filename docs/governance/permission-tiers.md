@@ -17,6 +17,7 @@ This document defines the **Canonical Permission Tiers** for all automated agent
 | `.github/workflows/` | `read` | No workflow triggering |
 
 **Artifacts**:
+
 - Analysis Reports (posted as PR comments)
 - Metrics (posted to telemetry endpoints)
 
@@ -32,6 +33,7 @@ This document defines the **Canonical Permission Tiers** for all automated agent
 | `AGENTS.md` | `read` | Editing instructions |
 
 **Requires**:
+
 - PR Label: `agent:docs-only`
 
 ## Tier 2: Feature Coder (Builder Agents)
@@ -46,6 +48,7 @@ This document defines the **Canonical Permission Tiers** for all automated agent
 | `server/src/services/*` | `create`, `update` | Modifying `server/src/infra/` |
 
 **Requires**:
+
 - PR Label: `agent:feature`
 - Pre-merge Review: Human Owner required
 
@@ -61,6 +64,7 @@ This document defines the **Canonical Permission Tiers** for all automated agent
 | `.github/workflows/*` | `read` | Modifying CI/CD pipelines |
 
 **Requires**:
+
 - PR Label: `agent:core`
 - Pre-merge Review: 2x Human Owners (including 1x Governance Lead)
 
@@ -76,5 +80,6 @@ This document defines the **Canonical Permission Tiers** for all automated agent
 | `policy/**` | `all` | Weakening security gates |
 
 **Requires**:
+
 - PR Label: `agent:system`
 - **Strict Audit**: All actions must be logged to `provenanceLedger`.
