@@ -6,7 +6,7 @@ on:
     workflows: ['🚢 Release Captain']
     types: [completed]
   repository_dispatch:
-    types: [slo-breach]
+    types: [slo-breach, alert-webhook]
   workflow_dispatch: # Allow manual runs during stabilization
   # Disabled scheduled trigger until production environment is configured
   # schedule:
@@ -37,7 +37,7 @@ jobs:
     if: |
       (github.event_name == 'deployment_status' && github.event.deployment_status.state == 'failure') ||
       (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure') ||
-      (github.event_name == 'repository_dispatch' && github.event.action == 'slo-breach')
+      (github.event_name == 'repository_dispatch' && (github.event.action == 'slo-breach' || github.event.action == 'alert-webhook'))
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:
@@ -77,7 +77,11 @@ jobs:
             DEPLOYMENT_SHA="${{ github.event.client_payload.deployment_sha }}"
             PREFERRED_ROLLBACK="${{ github.event.client_payload.rollback_target }}"
             ENVIRONMENT="${{ github.event.client_payload.environment }}"
-            FAILURE_TYPE="slo_breach"
+            if [[ "${{ github.event.action }}" == "alert-webhook" ]]; then
+              FAILURE_TYPE="alert_webhook"
+            else
+              FAILURE_TYPE="slo_breach"
+            fi
             SLO_CONTEXT="${{ github.event.client_payload.failing_slos }}"
           fi
 
@@ -222,53 +226,13 @@ jobs:
 
           echo "📈 Metrics check completed"
 
-  alert-webhook-rollback:
-    name: 🚨 Alert Webhook Rollback
-    if: github.event_name == 'repository_dispatch' && github.event.action == 'slo-breach'
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    outputs:
-      should_rollback: ${{ steps.extract.outputs.should_rollback }}
-      rollback_target: ${{ steps.extract.outputs.rollback_target }}
-      environment: ${{ steps.extract.outputs.environment }}
-      slo_context: ${{ steps.extract.outputs.slo_context }}
-    steps:
-      - name: Extract alert payload
-        id: extract
-        run: |
-          set -euo pipefail
-
-          ENVIRONMENT="${{ github.event.client_payload.environment || 'production' }}"
-          ROLLBACK_TARGET="${{ github.event.client_payload.rollback_target || '' }}"
-          DEPLOYMENT_SHA="${{ github.event.client_payload.deployment_sha || '' }}"
-          SLO_CONTEXT="${{ github.event.client_payload.failing_slos || '' }}"
-
-          if [[ -z "$ROLLBACK_TARGET" && -n "$DEPLOYMENT_SHA" ]]; then
-            ROLLBACK_TARGET="$DEPLOYMENT_SHA"
-          fi
-
-          SHOULD_ROLLBACK="false"
-          if [[ -n "$ROLLBACK_TARGET" ]]; then
-            SHOULD_ROLLBACK="true"
-          fi
-
-          echo "📩 Received alert webhook for $ENVIRONMENT"
-          echo "🎯 Rollback target: ${ROLLBACK_TARGET:-unset}"
-          echo "❗️ Failing SLOs: ${SLO_CONTEXT:-n/a}"
-
-          echo "should_rollback=$SHOULD_ROLLBACK" >> "$GITHUB_OUTPUT"
-          echo "rollback_target=$ROLLBACK_TARGET" >> "$GITHUB_OUTPUT"
-          echo "environment=$ENVIRONMENT" >> "$GITHUB_OUTPUT"
-          echo "slo_context=$SLO_CONTEXT" >> "$GITHUB_OUTPUT"
-
   execute-rollback:
     name: ↩️ Execute Rollback
-    needs: [detect-deployment-failure, health-monitor, alert-webhook-rollback]
+    needs: [detect-deployment-failure, health-monitor]
     if: |
       always() && (
         (needs.detect-deployment-failure.outputs.should_rollback == 'true') ||
-        (needs.health-monitor.outputs.critical_failure == 'true') ||
-        (needs.alert-webhook-rollback.outputs.should_rollback == 'true')
+        (needs.health-monitor.outputs.critical_failure == 'true')
       )
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -299,39 +263,32 @@ jobs:
         run: |
           echo "↩️ Preparing rollback operation..."
 
-          ROLLBACK_ENV="${{ needs.alert-webhook-rollback.outputs.environment || needs.detect-deployment-failure.outputs.environment || 'production' }}"
+          ROLLBACK_ENV="${{ needs.detect-deployment-failure.outputs.environment || 'production' }}"
           if [[ -z "$ROLLBACK_ENV" ]]; then
             ROLLBACK_ENV="production"
           fi
 
-          ROLLBACK_TARGET=""
-          FAILURE_KIND="${{ needs.detect-deployment-failure.outputs.failure_type }}"
-          SLO_CONTEXT="${{ needs.detect-deployment-failure.outputs.slo_context }}"
-
-          if [[ "${{ needs.alert-webhook-rollback.outputs.rollback_target }}" != "" ]]; then
-            ROLLBACK_TARGET="${{ needs.alert-webhook-rollback.outputs.rollback_target }}"
-            FAILURE_KIND="slo_breach"
-            if [[ -n "${{ needs.alert-webhook-rollback.outputs.slo_context }}" ]]; then
-              SLO_CONTEXT="${{ needs.alert-webhook-rollback.outputs.slo_context }}"
-            fi
-          elif [[ "${{ needs.detect-deployment-failure.outputs.rollback_target }}" != "" ]]; then
+          # Determine rollback target
+          if [[ "${{ needs.detect-deployment-failure.outputs.rollback_target }}" != "" ]]; then
             ROLLBACK_TARGET="${{ needs.detect-deployment-failure.outputs.rollback_target }}"
+            FAILURE_KIND="${{ needs.detect-deployment-failure.outputs.failure_type }}"
+            SLO_CONTEXT="${{ needs.detect-deployment-failure.outputs.slo_context }}"
+
+            if [[ "$FAILURE_KIND" == "slo_breach" ]]; then
+              if [[ -n "$SLO_CONTEXT" ]]; then
+                ROLLBACK_REASON="SLO breach detected: $SLO_CONTEXT"
+              else
+                ROLLBACK_REASON="SLO breach detected by automated guardrail"
+              fi
+            else
+              ROLLBACK_REASON="Deployment failure: $FAILURE_KIND"
+            fi
           else
             # Health monitor triggered rollback - find last known good deployment
             ROLLBACK_TARGET=$(gh api "/repos/$GITHUB_REPOSITORY/deployments" \
               --jq '.[] | select(.environment == "production") | .sha' \
               | head -1)
             ROLLBACK_REASON="Critical health failure detected ({{ needs.health-monitor.outputs.health_status }}% health)"
-          fi
-
-          if [[ "$FAILURE_KIND" == "slo_breach" ]]; then
-            if [[ -n "$SLO_CONTEXT" ]]; then
-              ROLLBACK_REASON="SLO breach detected: $SLO_CONTEXT"
-            else
-              ROLLBACK_REASON="SLO breach detected by automated guardrail"
-            fi
-          elif [[ -z "$ROLLBACK_REASON" ]]; then
-            ROLLBACK_REASON="Deployment failure: ${FAILURE_KIND:-unknown}"
           fi
 
           if [[ -z "$ROLLBACK_TARGET" ]]; then
@@ -438,7 +395,6 @@ jobs:
           ROLLBACK_TARGET="${{ steps.prepare.outputs.rollback_target }}"
           ROLLBACK_REASON="${{ steps.prepare.outputs.rollback_reason }}"
           ENVIRONMENT="${ROLLBACK_ENV:-production}"
-          SLO_CONTEXT_WEBHOOK="${{ needs.alert-webhook-rollback.outputs.slo_context }}"
 
           # Create incident issue
           ISSUE_BODY="## 🚨 Auto-Rollback Executed
@@ -447,7 +403,7 @@ jobs:
           **Target**: $ROLLBACK_TARGET
           **Reason**: $ROLLBACK_REASON
           **Environment**: $ENVIRONMENT
-          **SLO Context**: ${SLO_CONTEXT_WEBHOOK:-${SLO_CONTEXT:-n/a}}
+          **SLO Context**: ${SLO_CONTEXT:-n/a}
           **Time**: $(date -u +%Y-%m-%dT%H:%M:%SZ)
 
           ### Actions Taken

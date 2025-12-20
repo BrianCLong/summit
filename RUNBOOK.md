@@ -114,17 +114,14 @@ Alerts are configured in Prometheus and routed via Alertmanager to Slack/Teams a
 ## 4. Deployment & Rollback
 
 - **Deployment**: Follow the steps in `README-DEPLOY.md`.
-- **Rollback (automated)**:
-  - Error budget breaches from `error-budget-monitoring.yml` dispatch a `slo-breach` webhook that triggers both `auto-rollback.yml` and `pipeline-rollback.yml`. Those jobs pick up the rollback target from the webhook payload and revert to the last known good deployment.
-- **Rollback (manual)**:
-  1. Trigger the **Pipeline - Rollback** workflow in GitHub Actions.
-     - Choose `staging` or `production` for the environment.
-     - Provide the target Docker tag/SHA to roll back to.
-  2. (Cluster-level alternative) Use `helm rollback maestro -n intelgraph-dev <REVISION_NUMBER>`.
-  3. Monitor rollback progress in the workflow logs and in-cluster events.
-- **Verification & evidence**:
-  - After any rollback or rollback drill, run `post-deploy-verification.yml` to capture smoke/load results and retain artifacts as drill evidence.
-  - Attach the generated report links to the incident/rollback ticket for traceability.
+- **Rollback**: Use `helm rollback maestro -n intelgraph-dev <REVISION_NUMBER>`.
+  - **Verification**: After rollback, re-run post-deployment verification steps.
+  - **Manual rollback (CI/CD pipeline)**:
+    1. Navigate to GitHub Actions and open **Pipeline - Rollback**.
+    2. Use **workflow_dispatch** to choose the environment (`staging` or `production`) and specify the Docker tag/SHA to restore.
+    3. Confirm the run and monitor the job output.
+    4. Capture the job URL and verification output as drill evidence (see `post-deploy-verification.yml`).
+    5. If triggered by an alert webhook (from `error-budget-monitoring.yml`), validate that rollback and verification completed; attach links in the drill log.
 
 ## 5. Log & Metric Cribsheet
 

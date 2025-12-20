@@ -16,7 +16,7 @@ export interface LogEvent {
   context?: Record<string, unknown>;
 }
 
-class LogEventBus extends EventEmitter {
+export class LogEventBus extends EventEmitter {
   private readonly buffer: LogEvent[] = [];
 
   constructor(private readonly capacity = 500) {

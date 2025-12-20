@@ -2,7 +2,7 @@
 import http from 'http';
 import express from 'express';
 import { GraphQLError } from 'graphql';
-import { useServer } from 'graphql-ws/use/ws';
+import { useServer } from 'graphql-ws/lib/use/ws';
 import { WebSocketServer } from 'ws';
 import { randomUUID } from 'node:crypto';
 import pino from 'pino';
@@ -18,7 +18,7 @@ import { subscriptionEngine } from './graphql/subscriptionEngine.js';
 import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
 import { cfg } from './config.js';
-import { startOTEL, stopOTEL } from '../otel.js';
+import { initializeOTel } from './observability/otel-full.js';
 import { streamingRateLimiter } from './routes/streaming.js';
 import { startOSINTWorkers } from './services/OSINTQueueService.js';
 import { BackupManager } from './backup/BackupManager.js';
@@ -30,7 +30,7 @@ import { logger } from './config/logger.js';
 import { logConfigSummary } from './config/index.js';
 
 const startServer = async () => {
-  await startOTEL();
+  const sdk = initializeOTel();
   // Optional Kafka consumer import - only when AI services enabled
   let startKafkaConsumer: any = null;
   let stopKafkaConsumer: any = null;
@@ -186,7 +186,13 @@ const startServer = async () => {
   // Graceful shutdown
   const shutdown = async (sig: NodeJS.Signals) => {
     logger.info(`Shutting down. Signal: ${sig}`);
-    await stopOTEL();
+    if (sdk) {
+        try {
+            await sdk.shutdown();
+        } catch (err) {
+            logger.error(`Error shutting down OTel SDK: ${err}`);
+        }
+    }
     wss.close();
     io.close(); // Close Socket.IO server
     streamingRateLimiter.destroy();
