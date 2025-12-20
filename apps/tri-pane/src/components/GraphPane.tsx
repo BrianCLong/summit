@@ -1,12 +1,24 @@
 import React, { useMemo } from 'react';
-import { edges, nodes } from '../data';
+import { edges, layers, nodes } from '../data';
 import { useTriPane } from './EventBus';
 
-function getLayout(nodeIds: string[]) {
+function getLayout(nodeIds: string[], layoutMode: string) {
   const spacingX = 170;
   const spacingY = 120;
   const startX = 110;
   const startY = 80;
+  if (layoutMode === 'timeline') {
+    const layerOrder = layers.map((layer) => layer.id);
+    const width = 420;
+    return nodeIds.reduce<Record<string, { x: number; y: number }>>((acc, id, idx) => {
+      const node = nodes.find((n) => n.id === id);
+      const layerIndex = node ? layerOrder.indexOf(node.layer) : idx;
+      const x = startX + ((node?.timestamp ?? idx) / 24) * width;
+      acc[id] = { x, y: startY + layerIndex * spacingY };
+      return acc;
+    }, {});
+  }
+
   return nodeIds.reduce<Record<string, { x: number; y: number }>>((acc, id, idx) => {
     const column = idx % 3;
     const row = Math.floor(idx / 3);
@@ -17,7 +29,8 @@ function getLayout(nodeIds: string[]) {
 
 export function GraphPane() {
   const { state, dispatch } = useTriPane();
-  const { timeRange, activeLayers, pinnedNodes, geofence, filterText, focusNodeId } = state;
+  const { timeRange, activeLayers, pinnedNodes, geofence, filterText, focusNodeId, layoutMode } =
+    state;
 
   const visibleNodes = useMemo(() => {
     return nodes.filter((node) => {
@@ -30,7 +43,10 @@ export function GraphPane() {
     });
   }, [timeRange, activeLayers, geofence, filterText, pinnedNodes]);
 
-  const layout = useMemo(() => getLayout(visibleNodes.map((n) => n.id)), [visibleNodes]);
+  const layout = useMemo(
+    () => getLayout(visibleNodes.map((n) => n.id), layoutMode),
+    [visibleNodes, layoutMode]
+  );
 
   const visibleEdges = edges.filter(
     (edge) => layout[edge.source] !== undefined && layout[edge.target] !== undefined
@@ -46,6 +62,32 @@ export function GraphPane() {
           <h2 id="graph-heading" className="text-lg font-semibold">Connections and anomalies</h2>
         </div>
         <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2" role="group" aria-label="Graph layout mode">
+            <button
+              type="button"
+              className={`rounded-full border px-3 py-1 text-xs transition focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-ink ${
+                layoutMode === 'grid'
+                  ? 'border-accent bg-accent/15 text-accent'
+                  : 'border-sand/20 bg-horizon text-sand/80'
+              }`}
+              aria-pressed={layoutMode === 'grid'}
+              onClick={() => dispatch({ type: 'setLayoutMode', payload: 'grid' })}
+            >
+              Grid
+            </button>
+            <button
+              type="button"
+              className={`rounded-full border px-3 py-1 text-xs transition focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-ink ${
+                layoutMode === 'timeline'
+                  ? 'border-accent bg-accent/15 text-accent'
+                  : 'border-sand/20 bg-horizon text-sand/80'
+              }`}
+              aria-pressed={layoutMode === 'timeline'}
+              onClick={() => dispatch({ type: 'setLayoutMode', payload: 'timeline' })}
+            >
+              Timeline
+            </button>
+          </div>
           <label className="text-sm" htmlFor="graph-filter">
             Filter labels
           </label>
@@ -59,7 +101,8 @@ export function GraphPane() {
         </div>
       </div>
       <p id="graph-filter-help" className="text-xs text-sand/70">
-        Pin nodes to lock them in view. Expand reveals neighbor links and provenance context.
+        Pin nodes to lock them in view. Expand reveals neighbor links and provenance context. Active window: {timeRange.start}h →{' '}
+        {timeRange.end}h.
       </p>
       <div className="relative overflow-hidden rounded-xl border border-sand/10 bg-ink/60">
         <svg

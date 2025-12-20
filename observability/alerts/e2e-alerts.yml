@@ -1,0 +1,253 @@
+# E2E Test Observability Alert Rules
+# Prometheus alerting rules for E2E test monitoring
+# Part of the Summit/IntelGraph E2E Observability Pipeline
+
+groups:
+  - name: e2e-test-alerts
+    interval: 1m
+    rules:
+      # ============================================================
+      # Critical Alerts - Immediate attention required
+      # ============================================================
+
+      - alert: E2ETestSuiteFailure
+        expr: e2e_total_tests_failed > 0
+        for: 0m
+        labels:
+          severity: critical
+          team: platform
+          component: e2e-tests
+        annotations:
+          summary: "E2E test suite has failing tests"
+          description: "{{ $value }} E2E tests are currently failing. Immediate investigation required."
+          runbook_url: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/e2e-failures.md"
+          dashboard_url: "http://grafana:3001/d/e2e-test-performance"
+
+      - alert: E2ESuccessRateCritical
+        expr: e2e_test_success_rate < 0.9
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+          component: e2e-tests
+        annotations:
+          summary: "E2E test success rate below 90%"
+          description: "E2E test success rate is {{ $value | humanizePercentage }}, which is below the 90% threshold."
+          runbook_url: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/e2e-failures.md"
+
+      - alert: E2ETestSuiteDown
+        expr: absent(e2e_test_success_rate)
+        for: 30m
+        labels:
+          severity: critical
+          team: platform
+          component: e2e-tests
+        annotations:
+          summary: "E2E test metrics not being collected"
+          description: "No E2E test metrics have been received in the last 30 minutes. The observability pipeline may be down."
+          runbook_url: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/observability-pipeline.md"
+
+      # ============================================================
+      # Warning Alerts - Degraded performance
+      # ============================================================
+
+      - alert: E2ESuccessRateWarning
+        expr: e2e_test_success_rate < 0.98 and e2e_test_success_rate >= 0.9
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+          component: e2e-tests
+        annotations:
+          summary: "E2E test success rate below 98%"
+          description: "E2E test success rate is {{ $value | humanizePercentage }}, which is below the target of 98%."
+          dashboard_url: "http://grafana:3001/d/e2e-test-performance"
+
+      - alert: E2ETestDurationHigh
+        expr: e2e_total_duration_seconds > 600
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+          component: e2e-tests
+        annotations:
+          summary: "E2E test duration exceeds 10 minutes"
+          description: "Total E2E test duration is {{ $value | humanizeDuration }}, which exceeds the 10-minute threshold."
+          runbook_url: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/e2e-performance.md"
+
+      - alert: E2EFlakyTestsDetected
+        expr: sum(e2e_tests_flaky_total) > 3
+        for: 0m
+        labels:
+          severity: warning
+          team: platform
+          component: e2e-tests
+        annotations:
+          summary: "Multiple flaky E2E tests detected"
+          description: "{{ $value }} flaky tests detected. Flaky tests reduce confidence in CI/CD pipeline reliability."
+          runbook_url: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/flaky-tests.md"
+
+      - alert: E2ESingleSuiteFailure
+        expr: e2e_tests_failed_total > 0
+        for: 0m
+        labels:
+          severity: warning
+          team: platform
+          component: e2e-tests
+        annotations:
+          summary: "E2E test failures in {{ $labels.suite }} suite"
+          description: "{{ $value }} tests failed in the {{ $labels.suite }} suite."
+          dashboard_url: "http://grafana:3001/d/e2e-test-performance"
+
+      # ============================================================
+      # Performance Alerts - SLO tracking
+      # ============================================================
+
+      - alert: E2ESuiteDurationSlow
+        expr: e2e_test_duration_seconds{suite!=""} > 180
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+          component: e2e-tests
+        annotations:
+          summary: "E2E suite {{ $labels.suite }} is running slowly"
+          description: "The {{ $labels.suite }} suite took {{ $value | humanizeDuration }} to complete, exceeding the 3-minute target."
+
+      - alert: E2EDurationRegression
+        expr: |
+          (
+            avg_over_time(e2e_total_duration_seconds[1h])
+            /
+            avg_over_time(e2e_total_duration_seconds[24h] offset 1h)
+          ) > 1.5
+        for: 30m
+        labels:
+          severity: warning
+          team: platform
+          component: e2e-tests
+        annotations:
+          summary: "E2E test duration has regressed significantly"
+          description: "E2E test duration has increased by more than 50% compared to the previous 24-hour average."
+          runbook_url: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/e2e-performance.md"
+
+      - alert: E2ESuccessRateRegression
+        expr: |
+          (
+            avg_over_time(e2e_test_success_rate[1h])
+            -
+            avg_over_time(e2e_test_success_rate[24h] offset 1h)
+          ) < -0.05
+        for: 30m
+        labels:
+          severity: warning
+          team: platform
+          component: e2e-tests
+        annotations:
+          summary: "E2E test success rate has regressed"
+          description: "E2E test success rate has dropped by more than 5% compared to the previous 24-hour average."
+
+      # ============================================================
+      # SLO Alerts - Service Level Objectives
+      # ============================================================
+
+      - alert: E2ESLO99ViolationRisk
+        expr: |
+          (
+            sum_over_time(e2e_total_tests_passed[7d])
+            /
+            (sum_over_time(e2e_total_tests_passed[7d]) + sum_over_time(e2e_total_tests_failed[7d]))
+          ) < 0.995
+        for: 1h
+        labels:
+          severity: warning
+          team: platform
+          component: e2e-tests
+          slo: e2e-reliability
+        annotations:
+          summary: "E2E 99.5% reliability SLO at risk"
+          description: "7-day E2E test success rate is {{ $value | humanizePercentage }}, which may violate the 99.5% SLO."
+          dashboard_url: "http://grafana:3001/d/e2e-test-performance"
+
+      - alert: E2EBudgetBurnRateHigh
+        expr: |
+          (
+            1 - (
+              sum_over_time(e2e_total_tests_passed[1h])
+              /
+              (sum_over_time(e2e_total_tests_passed[1h]) + sum_over_time(e2e_total_tests_failed[1h]))
+            )
+          ) * 720 > 1
+        for: 15m
+        labels:
+          severity: critical
+          team: platform
+          component: e2e-tests
+          slo: e2e-reliability
+        annotations:
+          summary: "E2E error budget burning too fast"
+          description: "At the current failure rate, the monthly error budget will be exhausted in less than 30 days."
+          runbook_url: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/error-budget.md"
+
+  # ============================================================
+  # Recording Rules for SLO Calculations
+  # ============================================================
+  - name: e2e-test-recording-rules
+    interval: 1m
+    rules:
+      - record: e2e:tests:total:rate5m
+        expr: sum(rate(e2e_total_tests_passed[5m])) + sum(rate(e2e_total_tests_failed[5m]))
+
+      - record: e2e:tests:success_rate:rate5m
+        expr: |
+          sum(rate(e2e_total_tests_passed[5m]))
+          /
+          (sum(rate(e2e_total_tests_passed[5m])) + sum(rate(e2e_total_tests_failed[5m])))
+
+      - record: e2e:tests:failure_rate:rate5m
+        expr: |
+          sum(rate(e2e_total_tests_failed[5m]))
+          /
+          (sum(rate(e2e_total_tests_passed[5m])) + sum(rate(e2e_total_tests_failed[5m])))
+
+      - record: e2e:duration:avg:rate1h
+        expr: avg_over_time(e2e_total_duration_seconds[1h])
+
+      - record: e2e:duration:p95:rate1h
+        expr: quantile_over_time(0.95, e2e_total_duration_seconds[1h])
+
+      - record: e2e:flaky:total:rate1d
+        expr: sum_over_time(e2e_tests_flaky_total[1d])
+
+      # SLO burn rate calculations (multi-window)
+      - record: e2e:slo:burn_rate:1h
+        expr: |
+          1 - (
+            sum_over_time(e2e_total_tests_passed[1h])
+            /
+            (sum_over_time(e2e_total_tests_passed[1h]) + sum_over_time(e2e_total_tests_failed[1h]))
+          )
+
+      - record: e2e:slo:burn_rate:6h
+        expr: |
+          1 - (
+            sum_over_time(e2e_total_tests_passed[6h])
+            /
+            (sum_over_time(e2e_total_tests_passed[6h]) + sum_over_time(e2e_total_tests_failed[6h]))
+          )
+
+      - record: e2e:slo:burn_rate:1d
+        expr: |
+          1 - (
+            sum_over_time(e2e_total_tests_passed[1d])
+            /
+            (sum_over_time(e2e_total_tests_passed[1d]) + sum_over_time(e2e_total_tests_failed[1d]))
+          )
+
+      - record: e2e:slo:burn_rate:7d
+        expr: |
+          1 - (
+            sum_over_time(e2e_total_tests_passed[7d])
+            /
+            (sum_over_time(e2e_total_tests_passed[7d]) + sum_over_time(e2e_total_tests_failed[7d]))
+          )
