@@ -11,6 +11,8 @@
 | Telemetry   | traces/metrics/logs              |           90 days | performance      |       aggregate past 90d |
 | Backups     | DB snapshots                     |           35 days | DR/BCP           |  encrypted, cross-region |
 
+Zero-trust policy decision events are mirrored onto the audit bus and SIEM with the same **7-year** retention, using the tamper-evident chain shown in `artifacts/logs/policy-decision-audit-sample.json`.
+
 ## Dual-Control Deletion
 
 - Deletions require **two approvers** (data owner + ombuds) and leave a tombstone with reason code.

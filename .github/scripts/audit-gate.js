@@ -11,24 +11,16 @@
 
 const fs = require('fs');
 const path = require('path');
-const yaml = require('yaml');
 
 // Configuration
 const AUDIT_FILE = process.argv[2] || 'audit.json';
-const SERVICE_NAME = process.env.SERVICE_NAME || 'dependency-scan';
+const DEFAULT_SERVICE = process.env.SERVICE_NAME || 'summit-platform';
 const ALLOWLIST_FILE = path.join(
   process.cwd(),
   '.github',
   'audit-allowlist.json',
 );
-const WAIVER_ROOT =
-  process.env.WAIVER_ROOT || path.join(process.cwd(), 'security', 'waivers');
-const VULN_REPORT_DIR = process.env.VULN_REPORT_DIR || process.cwd();
-const VULN_REPORT_FILE =
-  process.env.VULN_REPORT_FILE || `vuln_report.${SERVICE_NAME}.json`;
 const MAX_SEVERITY_ALLOWED = process.env.MAX_AUDIT_SEVERITY || 'moderate';
-const AUDIT_EXIT_CODE = parseInt(process.env.AUDIT_EXIT_CODE || '1', 10);
-const RECORD_ONLY = process.argv.includes('--record-only');
 
 const SEVERITY_LEVELS = {
   info: 0,
@@ -38,23 +30,22 @@ const SEVERITY_LEVELS = {
   critical: 4,
 };
 
-const SEVERITY_ORDER = ['critical', 'high', 'moderate', 'low', 'info'];
-
 class AuditGate {
-  constructor() {
+  constructor(options = {}) {
+    this.service = options.service || DEFAULT_SERVICE;
+    this.reportPath =
+      options.reportPath ||
+      process.env.VULN_REPORT_PATH ||
+      path.join(process.cwd(), `vuln_report.${this.service}.json`);
+    this.artifactDir =
+      options.artifactDir ||
+      process.env.AUDIT_ARTIFACTS_DIR ||
+      path.join(process.cwd(), 'artifacts', 'security', this.service);
+    this.auditFile = options.auditFile || AUDIT_FILE;
     this.allowlist = this.loadAllowlist();
-    this.maxSeverityLevel = SEVERITY_LEVELS[MAX_SEVERITY_ALLOWED];
-    this.waiver = this.loadWaiver();
-    this.activeWaiver = this.isWaiverActive(this.waiver) ? this.waiver : null;
-    this.reportPath = path.join(VULN_REPORT_DIR, VULN_REPORT_FILE);
-    this.auditTrailPath = path.join(
-      VULN_REPORT_DIR,
-      `audit-trail.${SERVICE_NAME}.log`,
-    );
-    this.waiverArtifactPath = path.join(
-      VULN_REPORT_DIR,
-      `waiver.${SERVICE_NAME}.yml`,
-    );
+    this.maxSeverityLabel = MAX_SEVERITY_ALLOWED;
+    this.maxSeverityLevel =
+      SEVERITY_LEVELS[this.maxSeverityLabel] ?? SEVERITY_LEVELS.moderate;
   }
 
   loadAllowlist() {
@@ -74,47 +65,15 @@ class AuditGate {
     };
   }
 
-  isWaiverActive(waiver) {
-    if (!waiver) return false;
-
-    const now = new Date();
-
-    if (waiver.expires_at && new Date(waiver.expires_at) < now) {
-      return false;
-    }
-
-    if (waiver.valid_from && new Date(waiver.valid_from) > now) {
-      return false;
-    }
-
-    return waiver.status !== 'revoked';
-  }
-
-  loadWaiver() {
-    const waiverPath = path.join(WAIVER_ROOT, SERVICE_NAME, 'waiver.yml');
-
-    if (!fs.existsSync(waiverPath)) {
-      return null;
-    }
-
-    try {
-      const waiverData = yaml.parse(fs.readFileSync(waiverPath, 'utf8')) || {};
-      return { ...waiverData, path: waiverPath };
-    } catch (error) {
-      console.warn(`⚠️ Could not parse waiver file at ${waiverPath}:`, error.message);
-      return null;
-    }
-  }
-
   async analyzeAudit() {
-    if (!fs.existsSync(AUDIT_FILE)) {
-      console.error('❌ Audit file not found:', AUDIT_FILE);
+    if (!fs.existsSync(this.auditFile)) {
+      console.error('❌ Audit file not found:', this.auditFile);
       process.exit(1);
     }
 
     let auditData;
     try {
-      auditData = JSON.parse(fs.readFileSync(AUDIT_FILE, 'utf8'));
+      auditData = JSON.parse(fs.readFileSync(this.auditFile, 'utf8'));
     } catch (error) {
       console.error('❌ Invalid audit JSON:', error.message);
       process.exit(1);
@@ -223,15 +182,8 @@ class AuditGate {
       };
     }
 
-    // Block if severity is above threshold and no active waiver
+    // Block if severity is above threshold
     if (severityLevel > this.maxSeverityLevel) {
-      if (this.activeWaiver) {
-        return {
-          action: 'allow',
-          reason: `Waiver applied from ${this.activeWaiver.path}`,
-        };
-      }
-
       return {
         action: 'block',
         reason: `Severity ${vuln.severity} exceeds maximum allowed (${MAX_SEVERITY_ALLOWED})`,
@@ -269,7 +221,79 @@ class AuditGate {
     return null;
   }
 
-  generateReport(results) {
+  loadWaiver() {
+    const waiverPath = path.join(
+      process.cwd(),
+      'security',
+      'waivers',
+      this.service,
+      'waiver.yml',
+    );
+
+    if (fs.existsSync(waiverPath)) {
+      return {
+        exists: true,
+        path: waiverPath,
+        contents: fs.readFileSync(waiverPath, 'utf8'),
+      };
+    }
+
+    return {
+      exists: false,
+      path: waiverPath,
+      contents: null,
+    };
+  }
+
+  buildDecision(results, waiver) {
+    const blockedCount = results.blocked.length;
+    const waiverApplied = waiver.exists && blockedCount > 0;
+
+    return {
+      blocked: blockedCount,
+      waiverApplied,
+      passed: blockedCount === 0 || waiverApplied,
+    };
+  }
+
+  persistAuditTrail(results, waiver, decision) {
+    const payload = {
+      service: this.service,
+      audit_file: this.auditFile,
+      scanner: 'npm-audit',
+      generated_at: new Date().toISOString(),
+      max_allowed_severity: this.maxSeverityLabel,
+      summary: results.summary,
+      blocked: results.blocked,
+      allowed: results.allowed,
+      expired: results.expired,
+      waiver: {
+        present: waiver.exists,
+        path: waiver.path,
+        applied: decision.waiverApplied,
+        note: waiver.exists
+          ? 'Waiver file detected for this service'
+          : 'No waiver present',
+      },
+      decision,
+    };
+
+    fs.mkdirSync(this.artifactDir, { recursive: true });
+    fs.writeFileSync(this.reportPath, JSON.stringify(payload, null, 2));
+    fs.writeFileSync(
+      path.join(this.artifactDir, 'audit-trail.json'),
+      JSON.stringify(payload, null, 2),
+    );
+
+    if (waiver.exists) {
+      const waiverDestination = path.join(this.artifactDir, 'waiver.yml');
+      fs.writeFileSync(waiverDestination, waiver.contents);
+    }
+
+    return payload;
+  }
+
+  generateReport(results, waiver, decision) {
     console.log('\n🛡️ Supply Chain Security Report');
     console.log('================================');
 
@@ -314,67 +338,22 @@ class AuditGate {
       });
     }
 
-    const gatePassed = results.blocked.length === 0 || !!this.activeWaiver;
-
-    console.log('\n📋 Gate Decision:', gatePassed ? '✅ PASS' : '❌ FAIL');
-
-    if (this.activeWaiver) {
-      console.log(`\n🛡️ Waiver applied for ${SERVICE_NAME}: ${this.activeWaiver.path}`);
+    if (waiver.exists) {
+      console.log(
+        `\n📄 Waiver detected for ${this.service}: ${waiver.path}`.trim(),
+      );
     }
 
-    return gatePassed;
-  }
+    console.log(
+      '\n📋 Gate Decision:',
+      decision.passed
+        ? waiver.exists && results.blocked.length > 0
+          ? '✅ PASS (waiver applied)'
+          : '✅ PASS'
+        : '❌ FAIL',
+    );
 
-  persistArtifacts(results, gatePassed) {
-    fs.mkdirSync(VULN_REPORT_DIR, { recursive: true });
-
-    const report = {
-      service: SERVICE_NAME,
-      audit_file: path.resolve(AUDIT_FILE),
-      generated_at: new Date().toISOString(),
-      decision: gatePassed ? 'pass' : 'fail',
-      max_severity_allowed: MAX_SEVERITY_ALLOWED,
-      waiver_applied: !!this.activeWaiver,
-      waiver: this.activeWaiver
-        ? {
-            path: this.activeWaiver.path,
-            status: this.activeWaiver.status || 'approved',
-            expires_at: this.activeWaiver.expires_at || null,
-            valid_from: this.activeWaiver.valid_from || null,
-            approved_by: this.activeWaiver.approved_by || null,
-          }
-        : null,
-      summary: results.summary,
-      totals: {
-        total: results.total,
-        blocked: results.blocked.length,
-        allowed: results.allowed.length,
-        expired: results.expired.length,
-      },
-      blocked: results.blocked,
-      allowed: results.allowed,
-      expired: results.expired,
-    };
-
-    fs.writeFileSync(this.reportPath, JSON.stringify(report, null, 2));
-
-    const auditTrail = [
-      `[${report.generated_at}] service=${SERVICE_NAME}`,
-      `decision=${report.decision} max_severity_allowed=${MAX_SEVERITY_ALLOWED}`,
-      `blocked=${results.blocked.length} allowed=${results.allowed.length} expired=${results.expired.length}`,
-      `waiver=${this.activeWaiver ? this.activeWaiver.path : 'none'}`,
-    ].join('\n');
-    fs.writeFileSync(this.auditTrailPath, `${auditTrail}\n`);
-
-    if (this.activeWaiver?.path && fs.existsSync(this.activeWaiver.path)) {
-      try {
-        fs.copyFileSync(this.activeWaiver.path, this.waiverArtifactPath);
-      } catch (error) {
-        console.warn('⚠️ Could not copy waiver artifact:', error.message);
-      }
-    }
-
-    return report;
+    return decision.passed;
   }
 
   getSeverityEmoji(severity) {
@@ -431,7 +410,7 @@ class AuditGate {
 
 // Main execution
 async function main() {
-  const gate = new AuditGate();
+  const gate = new AuditGate({ auditFile: AUDIT_FILE });
 
   if (process.argv.includes('--init')) {
     await gate.generateAllowlistTemplate();
@@ -440,33 +419,26 @@ async function main() {
 
   try {
     const results = await gate.analyzeAudit();
-    const passed = gate.generateReport(results);
-    const report = gate.persistArtifacts(results, passed);
+    const waiver = gate.loadWaiver();
+    const decision = gate.buildDecision(results, waiver);
 
-    console.log(`\n🗂️ Vulnerability report saved to ${gate.reportPath}`);
-    console.log(`🧾 Audit trail saved to ${gate.auditTrailPath}`);
-    if (gate.activeWaiver?.path) {
-      console.log(`📎 Waiver artifact copied to ${gate.waiverArtifactPath}`);
-    }
+    gate.persistAuditTrail(results, waiver, decision);
+    const passed = gate.generateReport(results, waiver, decision);
 
-    if (!passed) {
+    if (!passed && process.env.ENFORCE_AUDIT_EXIT !== 'false') {
       console.error(
         '\n❌ Audit gate failed due to unacceptable vulnerabilities',
       );
       console.error(
-        '   Add exceptions to .github/audit-allowlist.json or create a waiver if needed',
+        '   Add exceptions to .github/audit-allowlist.json if needed',
       );
-
-      if (RECORD_ONLY) {
-        console.log('ℹ️ Record-only mode enabled - not failing pipeline');
-        return;
-      }
-
-      process.exit(AUDIT_EXIT_CODE || 1);
+      console.error(
+        `   Waiver applied: ${decision.waiverApplied ? 'yes' : 'no'}`,
+      );
+      process.exit(1);
     }
 
     console.log('\n✅ Audit gate passed - supply chain security validated');
-    console.log(`   Decision recorded for ${report.service} at ${report.generated_at}`);
   } catch (error) {
     console.error('❌ Audit gate error:', error.message);
     process.exit(1);

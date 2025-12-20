@@ -33,6 +33,7 @@ import ReportingCaseManagement from '../components/reporting/ReportingCaseManage
 import ThreatHuntingDarkWeb from '../components/threat/ThreatHuntingDarkWeb';
 import IntelligenceFeedsEnrichment from '../components/intelligence/IntelligenceFeedsEnrichment';
 import GraphAnomalyWidget from '../components/dashboard/GraphAnomalyWidget';
+import { useAuthorization } from '../auth/withAuthorization';
 
 function HomeRouteInner() {
   const navigate = useNavigate();
@@ -65,6 +66,7 @@ function HomeRouteInner() {
   const graphStats = useSelector((state: any) => state.graph?.graphStats);
   const { showHelp, HelpComponent } = useHelpSystem();
   const toast = useToast();
+  const { filterByAccess, tenant: tenantScope } = useAuthorization();
 
   const handleNavigateToAction = () => {
     if (actionId.trim()) {
@@ -72,18 +74,32 @@ function HomeRouteInner() {
     }
   };
 
-  const quickActions = [
-    {
-      title: 'Test Action Safety',
-      description: 'Try action ID: test-action-123',
-      action: () => navigate('/actions/test-action-123'),
-    },
-    {
-      title: 'Sample Investigation',
-      description: 'View sample action with safety controls',
-      action: () => navigate('/actions/sample-investigation'),
-    },
-  ];
+  const quickActions = useMemo(
+    () => [
+      {
+        title: 'Test Action Safety',
+        description: 'Try action ID: test-action-123',
+        action: () => navigate('/actions/test-action-123'),
+        policy: 'actions:read',
+      },
+      {
+        title: 'Sample Investigation',
+        description: 'View sample action with safety controls',
+        action: () => navigate('/actions/sample-investigation'),
+        policy: 'actions:read',
+      },
+    ],
+    [navigate],
+  );
+
+  const authorizedQuickActions = useMemo(
+    () =>
+      filterByAccess(quickActions, (item) => ({
+        action: item.policy || 'actions:read',
+        tenantId: tenantScope,
+      })),
+    [filterByAccess, quickActions, tenantScope],
+  );
 
   const handleSearchResultSelect = (result: any) => {
     console.log('Selected search result:', result);
@@ -728,7 +744,18 @@ function HomeRouteInner() {
                 gap: '16px',
               }}
             >
-              {quickActions.map((item, index) => (
+              {authorizedQuickActions.length === 0 && (
+                <div className="panel" style={{ padding: '16px' }}>
+                  <h4 style={{ fontWeight: '600', marginBottom: '8px' }}>
+                    No quick actions available
+                  </h4>
+                  <p className="muted note" style={{ marginBottom: '12px' }}>
+                    Your current tenant or role does not allow the listed quick
+                    actions.
+                  </p>
+                </div>
+              )}
+              {authorizedQuickActions.map((item, index) => (
                 <div
                   key={index}
                   className="panel"
