@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://intelgraph.summit/policy/input.schema.json",
+  "title": "AuthorizationInput",
+  "type": "object",
+  "required": ["subject", "resource", "action", "context"],
+  "properties": {
+    "subject": {
+      "type": "object",
+      "required": ["id", "roles", "clearance"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "roles": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1
+        },
+        "tenant": { "type": "string" },
+        "clearance": {
+          "type": "string",
+          "enum": ["public", "internal", "restricted"]
+        },
+        "mfa": { "type": "string" }
+      }
+    },
+    "resource": {
+      "type": "object",
+      "required": ["type", "id", "tenant", "classification"],
+      "properties": {
+        "type": { "type": "string" },
+        "id": { "type": "string" },
+        "tenant": { "type": "string" },
+        "classification": {
+          "type": "string",
+          "enum": ["public", "internal", "restricted"]
+        }
+      }
+    },
+    "action": { "type": "string", "minLength": 1 },
+    "context": {
+      "type": "object",
+      "required": ["env", "request_ip", "time", "risk"],
+      "properties": {
+        "env": { "type": "string" },
+        "request_ip": { "type": "string" },
+        "time": { "type": "string", "format": "date-time" },
+        "risk": { "type": "string", "enum": ["low", "elevated", "high"] },
+        "reason": { "type": "string" },
+        "warrant_id": { "type": "string" },
+        "approvers": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "tenant": { "type": "string" },
+        "break_glass": { "type": "boolean" }
+      }
+    }
+  },
+  "additionalProperties": false
+}

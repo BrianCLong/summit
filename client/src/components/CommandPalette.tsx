@@ -1,1 +1,1 @@
-export { default } from '../features/commandPalette/CommandPalette';
+export { default } from '../../../client/components/CommandPalette';

@@ -1,0 +1,102 @@
+{
+  "snapshotVersion": "roster.v1",
+  "generatedAt": "2025-02-05T00:00:00Z",
+  "connectorId": "team-roster-sample",
+  "outputSchemaVersion": "canonical.v1",
+  "entities": [
+    {
+      "id": "person-1",
+      "type": "Person",
+      "properties": {
+        "name": "Ada Lovelace",
+        "email": "***@example.com",
+        "role": "Analyst"
+      },
+      "source": "demo-roster"
+    },
+    {
+      "id": "team-analysis",
+      "type": "Team",
+      "properties": {
+        "name": "Analysis",
+        "slug": "analysis"
+      },
+      "source": "demo-roster"
+    },
+    {
+      "id": "person-2",
+      "type": "Person",
+      "properties": {
+        "name": "Alan Turing",
+        "email": "***@example.com",
+        "role": "ML Engineer"
+      },
+      "source": "demo-roster"
+    },
+    {
+      "id": "team-ml-lab",
+      "type": "Team",
+      "properties": {
+        "name": "ML Lab",
+        "slug": "ml-lab"
+      },
+      "source": "demo-roster"
+    }
+  ],
+  "relationships": [
+    {
+      "type": "member-of",
+      "source": "person-1",
+      "target": "team-analysis",
+      "properties": {
+        "role": "Analyst"
+      }
+    },
+    {
+      "type": "member-of",
+      "source": "person-2",
+      "target": "team-ml-lab",
+      "properties": {
+        "role": "ML Engineer"
+      }
+    }
+  ],
+  "provenance": [
+    {
+      "entityId": "person-1",
+      "sourceConnector": "team-roster-sample",
+      "source": "./fixtures/roster.json",
+      "steps": [
+        { "stage": "fixture", "detail": "connectors/contracts/reference/team-roster-sample/fixtures/roster.json" },
+        { "stage": "mapping", "hint": "roster-row" }
+      ]
+    },
+    {
+      "entityId": "team-analysis",
+      "sourceConnector": "team-roster-sample",
+      "source": "./fixtures/roster.json",
+      "steps": [
+        { "stage": "fixture", "detail": "connectors/contracts/reference/team-roster-sample/fixtures/roster.json" },
+        { "stage": "mapping", "hint": "team-dimension" }
+      ]
+    },
+    {
+      "entityId": "person-2",
+      "sourceConnector": "team-roster-sample",
+      "source": "./fixtures/roster.json",
+      "steps": [
+        { "stage": "fixture", "detail": "connectors/contracts/reference/team-roster-sample/fixtures/roster.json" },
+        { "stage": "mapping", "hint": "roster-row" }
+      ]
+    },
+    {
+      "entityId": "team-ml-lab",
+      "sourceConnector": "team-roster-sample",
+      "source": "./fixtures/roster.json",
+      "steps": [
+        { "stage": "fixture", "detail": "connectors/contracts/reference/team-roster-sample/fixtures/roster.json" },
+        { "stage": "mapping", "hint": "team-dimension" }
+      ]
+    }
+  ]
+}

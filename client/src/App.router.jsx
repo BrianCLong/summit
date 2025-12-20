@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
@@ -48,11 +48,11 @@ import { store } from './store';
 import { apolloClient } from './services/apollo';
 import { useSelector } from 'react-redux';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
-import { useFlag } from './hooks/useFlag';
 import ProtectedRoute from './components/common/ProtectedRoute.jsx';
 import LoginPage from './components/auth/LoginPage.jsx';
 import ErrorBoundary from './components/ErrorBoundary.tsx';
-import GlobalCommandPalette from './features/commandPalette/GlobalCommandPalette';
+import RouteAnnouncer from './components/a11y/RouteAnnouncer';
+import { useFeatureFlag } from './hooks/useFeatureFlag';
 
 // Lazy load heavy components for better initial load performance
 const InteractiveGraphExplorer = React.lazy(() =>
@@ -89,13 +89,16 @@ const AdminDashboard = React.lazy(() =>
   import('./components/admin/AdminDashboard')
 );
 const ApprovalsPage = React.lazy(() =>
-  import('./features/approvals/ApprovalsPage')
+  import('./switchboard/approvals/ApprovalsExperience')
 );
-const CasesPage = React.lazy(() => import('./routes/Cases'));
-const NotesPage = React.lazy(() => import('./routes/Notes'));
-const WorkspacesPage = React.lazy(() => import('./routes/Workspaces'));
+const PartnerConsolePage = React.lazy(() =>
+  import('./pages/partner-console/PartnerConsolePage')
+);
+const AlertingPage = React.lazy(() =>
+  import('./pages/AlertingPage')
+);
 
-import { MilitaryTech } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
+import { MilitaryTech, Notifications } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import { Security } from '@mui/icons-material';
 
 // Navigation items
@@ -119,6 +122,7 @@ const navigationItems = [
   { path: '/geoint', label: 'GeoInt Map', icon: <Map /> },
   { path: '/reports', label: 'Reports', icon: <Assessment /> },
   { path: '/system', label: 'System', icon: <Settings />, roles: [ADMIN] },
+  { path: '/partner-console', label: 'Partner Console', icon: <Settings />, roles: [ADMIN] },
   {
     path: '/admin/osint-feeds',
     label: 'OSINT Feeds',
@@ -133,6 +137,7 @@ const navigationItems = [
     icon: <MilitaryTech />,
     roles: [ADMIN],
   },
+  { path: '/alerting', label: 'Alerting', icon: <Notifications />, roles: [ADMIN] },
 ];
 
 // Connection Status Component
@@ -218,7 +223,7 @@ function NavigationDrawer({ open, onClose }) {
 }
 
 // App Bar
-function AppHeader({ onMenuClick, onOpenPalette, commandPaletteEnabled }) {
+function AppHeader({ onMenuClick }) {
   const location = useLocation();
   const currentPage = navigationItems.find(
     (item) => item.path === location.pathname,
@@ -238,16 +243,6 @@ function AppHeader({ onMenuClick, onOpenPalette, commandPaletteEnabled }) {
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           IntelGraph Platform - {currentPage?.label || 'Unknown'}
         </Typography>
-        {commandPaletteEnabled && (
-          <IconButton
-            color="inherit"
-            aria-label="Open command palette"
-            onClick={onOpenPalette}
-            size="large"
-          >
-            <Search />
-          </IconButton>
-        )}
       </Toolbar>
     </AppBar>
   );
@@ -666,40 +661,41 @@ function NotFoundPage() {
 // Main Layout Component
 function MainLayout() {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
-  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
-  const commandPaletteEnabled = useFlag('ui.commandPalette');
+  const mainRef = useRef(null);
+  const a11yGuardrailsEnabled = useFeatureFlag('ui.a11yGuardrails');
 
-  useEffect(() => {
-    if (!commandPaletteEnabled) return undefined;
-    const handler = (event) => {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
-        event.preventDefault();
-        setCommandPaletteOpen(true);
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [commandPaletteEnabled]);
+  const routeLabels = useMemo(
+    () =>
+      navigationItems.reduce(
+        (acc, item) => {
+          acc[item.path] = item.label;
+          return acc;
+        },
+        {
+          '/': 'Home',
+          '/login': 'Login',
+        },
+      ),
+    [],
+  );
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <AppHeader
-        onMenuClick={() => setDrawerOpen(true)}
-        onOpenPalette={() => setCommandPaletteOpen(true)}
-        commandPaletteEnabled={commandPaletteEnabled}
-      />
+      <AppHeader onMenuClick={() => setDrawerOpen(true)} />
       <NavigationDrawer
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
       />
-      {commandPaletteEnabled && (
-        <GlobalCommandPalette
-          open={commandPaletteOpen}
-          onClose={() => setCommandPaletteOpen(false)}
-        />
-      )}
 
-      <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8 }}>
+      <Box
+        component="main"
+        role="main"
+        tabIndex={a11yGuardrailsEnabled ? -1 : undefined}
+        ref={mainRef}
+        data-testid="primary-content"
+        sx={{ flexGrow: 1, p: 3, mt: 8 }}
+      >
+        <RouteAnnouncer mainRef={mainRef} routeLabels={routeLabels} />
         <React.Suspense
           fallback={
             <Box sx={{ width: '100%', mt: 2 }}>
@@ -724,14 +720,14 @@ function MainLayout() {
               <Route path="/graph" element={<GraphExplorerPage />} />
               <Route path="/copilot" element={<CopilotPage />} />
               <Route path="/orchestrator" element={<OrchestratorPage />} />
-              <Route path="/cases" element={<CasesPage />} />
-              <Route path="/workspaces" element={<WorkspacesPage />} />
-              <Route path="/notes" element={<NotesPage />} />
               <Route path="/threats" element={<ThreatsPage />} />
               <Route path="/disclosures" element={<DisclosurePackagerPage />} />
               <Route path="/access-intel" element={<AccessIntelPage />} />
               <Route path="/geoint" element={<InvestigationsPage />} />
               <Route path="/reports" element={<InvestigationsPage />} />
+              <Route element={<ProtectedRoute roles={[ADMIN]} />}>
+                <Route path="/partner-console" element={<PartnerConsolePage />} />
+              </Route>
               <Route element={<ProtectedRoute roles={APPROVER_ROLES} />}>
                 <Route path="/approvals" element={<ApprovalsPage />} />
               </Route>
@@ -742,6 +738,7 @@ function MainLayout() {
                   path="/wargame-dashboard"
                   element={<ExecutiveDashboard />}
                 />
+                <Route path="/alerting" element={<AlertingPage />} />
               </Route>
               <Route path="*" element={<NotFoundPage />} />
             </Route>
