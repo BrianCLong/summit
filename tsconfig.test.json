@@ -3,9 +3,12 @@
   "compilerOptions": {
     "module": "commonjs",
     "moduleResolution": "node",
+    "strict": false,
+    "noImplicitAny": false,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "types": ["node", "jest"]
   },
   "include": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts"]
 }

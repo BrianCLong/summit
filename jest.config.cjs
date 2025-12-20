@@ -67,14 +67,6 @@ module.exports = {
     '**/__tests__/**/*.{ts,tsx,js,jsx}',
     '**/?(*.)+(spec|test).{ts,tsx,js,jsx}',
   ],
-  haste: {
-    throwOnModuleCollision: false,
-  },
-  globals: {
-    'ts-jest': {
-      diagnostics: false,
-    },
-  },
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
     '^node-fetch$': '<rootDir>/__mocks__/node-fetch.js',

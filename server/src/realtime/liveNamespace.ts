@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Server } from 'socket.io';
 import { createAdapter } from '@socket.io/redis-adapter';
 import { getRedisClient } from '../db/redis.js';

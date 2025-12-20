@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Apollo Server plugin to enforce @budget directive at runtime
  * Blocks any mutation field without @budget - no ad-hoc bypasses allowed

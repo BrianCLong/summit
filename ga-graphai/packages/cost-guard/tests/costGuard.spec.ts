@@ -3,6 +3,7 @@ import {
   CostGuard,
   DEFAULT_OPTIMIZATION_CONFIG,
   DEFAULT_PROFILE,
+  DEFAULT_QUEUE_SLO,
   ResourceOptimizationEngine,
 } from '../src/index.js';
 
@@ -68,6 +69,31 @@ describe('CostGuard', () => {
     expect(guard.metrics.activeSlowQueries).toBe(1);
     guard.release(record.queryId);
     expect(guard.metrics.activeSlowQueries).toBe(0);
+  });
+
+  it('produces adaptive queue scaling signals that blend cost and latency', () => {
+    const guard = new CostGuard({ ...DEFAULT_PROFILE, maxLatencyMs: 1200 });
+    const hotSignal = guard.evaluateQueueScaling({
+      queueDepth: 28,
+      p95LatencyMs: 1800,
+      costPerJobUsd: 0.42,
+      budgetConsumptionRatio: 0.65,
+      saturationRatio: 0.9,
+    });
+
+    expect(hotSignal.action).toBe('scale_up');
+    expect(hotSignal.recommendedReplicas).toBeGreaterThan(guard.metrics.kills + 1);
+
+    const idleSignal = guard.evaluateQueueScaling({
+      queueDepth: 0,
+      p95LatencyMs: 120,
+      costPerJobUsd: 0.55,
+      budgetConsumptionRatio: 0.92,
+      saturationRatio: 0.1,
+    });
+
+    expect(idleSignal.action).toBe('scale_down');
+    expect(idleSignal.score).toBeLessThan(0.4);
   });
 });
 
@@ -166,5 +192,97 @@ describe('ResourceOptimizationEngine', () => {
     );
     expect(overloaded?.delta).toBeLessThan(0);
     expect(underloaded?.delta).toBeGreaterThan(0);
+  });
+
+  it('suggests scaling up when latency and backlog exceed SLOs', () => {
+    const engine = new ResourceOptimizationEngine();
+    const decision = engine.recommendQueueAutoscaling(
+      3,
+      {
+        queueName: 'agent-default',
+        backlog: 240,
+        inflight: 30,
+        arrivalRatePerSecond: 5,
+        serviceRatePerSecondPerWorker: 1.5,
+        observedP95LatencyMs: 2400,
+        costPerJobUsd: 0.02,
+        spendRatePerMinuteUsd: 5,
+      },
+      { ...DEFAULT_QUEUE_SLO, targetP95Ms: 1500, backlogTargetSeconds: 60 },
+    );
+
+    expect(decision.action).toBe('scale_up');
+    expect(decision.recommendedReplicas).toBeGreaterThan(3);
+    expect(decision.telemetry.latencyPressure).toBeGreaterThan(1);
+    expect(decision.kedaMetric.metricName).toBe('agent_queue_slo_pressure');
+    expect(decision.telemetry.sloBurnRate).toBeGreaterThan(1);
+    expect(decision.alerts.fastBurnRateQuery).toContain('agent_queue_slo_pressure');
+  });
+
+  it('scales down when cost pressure dominates and performance is healthy', () => {
+    const engine = new ResourceOptimizationEngine();
+    const decision = engine.recommendQueueAutoscaling(
+      10,
+      {
+        queueName: 'agent-default',
+        backlog: 10,
+        inflight: 2,
+        arrivalRatePerSecond: 1,
+        serviceRatePerSecondPerWorker: 3,
+        observedP95LatencyMs: 600,
+        costPerJobUsd: 0.12,
+        spendRatePerMinuteUsd: 36,
+      },
+      { ...DEFAULT_QUEUE_SLO, maxCostPerMinuteUsd: 20, minReplicas: 2 },
+    );
+
+    expect(decision.action).toBe('scale_down');
+    expect(decision.recommendedReplicas).toBeLessThan(10);
+    expect(decision.telemetry.costPressure).toBeGreaterThan(1);
+    expect(decision.telemetry.latencyPressure).toBeLessThan(1);
+    expect(decision.telemetry.costBurnRate).toBeGreaterThanOrEqual(
+      decision.telemetry.costPressure,
+    );
+  });
+
+  it('produces KEDA scaled object and alert config for queues', () => {
+    const engine = new ResourceOptimizationEngine();
+    const decision = engine.recommendQueueAutoscaling(
+      4,
+      {
+        queueName: 'agent-priority',
+        backlog: 120,
+        inflight: 14,
+        arrivalRatePerSecond: 4,
+        serviceRatePerSecondPerWorker: 1.1,
+        observedP95LatencyMs: 2100,
+        costPerJobUsd: 0.15,
+        spendRatePerMinuteUsd: 14,
+      },
+      {
+        ...DEFAULT_QUEUE_SLO,
+        targetP95Ms: 1300,
+        backlogTargetSeconds: 80,
+        latencyBurnThreshold: 1.1,
+        costBurnThreshold: 1.2,
+      },
+    );
+
+    const scaledObject = engine.buildKedaScaledObject(
+      'agent-priority',
+      'worker-agent',
+      'workloads',
+      decision,
+    );
+
+    expect(scaledObject.metadata.name).toBe('worker-agent-keda');
+    expect(scaledObject.spec.scaleTargetRef.name).toBe('worker-agent');
+    expect(scaledObject.spec.triggers).toHaveLength(2);
+    expect(scaledObject.spec.triggers[0].metadata.query).toContain(
+      'agent_queue_slo_pressure',
+    );
+    expect(decision.alerts.costAnomalyQuery).toContain(
+      'agent_queue_cost_pressure',
+    );
   });
 });

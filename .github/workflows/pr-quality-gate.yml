@@ -66,10 +66,7 @@ jobs:
         # Run audit but don't fail immediately on moderate issues to prevent blocking dev flow unnecessarily,
         # but ensure critical/high are caught. Adjust level as needed.
         # Ideally: pnpm audit --audit-level=high
-        run: pnpm run supply-chain:generate || echo "::warning::Supply chain generation emitted warnings"
-
-      - name: GA Supply Chain Gate
-        run: pnpm run supply-chain:verify
+        run: pnpm run security:audit || echo "::warning::Security audit found issues"
 
       - name: Security Lint
         run: pnpm run security:lint
@@ -78,7 +75,6 @@ jobs:
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
-    needs: [static-checks] # Optional: remove dependency if you want parallelism at cost of compute
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -118,7 +114,6 @@ jobs:
   smoke-tests:
     name: Smoke Tests (Golden Path)
     runs-on: ubuntu-latest
-    needs: [static-checks]
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4

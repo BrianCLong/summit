@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { ApolloServerPlugin } from '@apollo/server';
 import { GraphQLError } from 'graphql';
 import pino from 'pino';

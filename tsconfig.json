@@ -7,8 +7,7 @@
       "@ui/*": ["client/src/*"],
       "@server/*": ["server/src/*"],
       "@client/*": ["client/src/*"]
-    },
-    "types": ["node", "jest"]
+    }
   },
   "references": [
     {

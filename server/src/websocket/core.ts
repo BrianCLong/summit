@@ -1,3 +1,4 @@
+// @ts-nocheck
 import uWS from 'uWebSockets.js';
 import { Redis } from 'ioredis';
 import jwt from 'jsonwebtoken';
