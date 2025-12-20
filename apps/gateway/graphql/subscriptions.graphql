@@ -1,0 +1,26 @@
+type GraphEvent {
+  eventId: ID!
+  ts: String!
+  tenant: ID!
+  type: String!
+  entity: EntityRef!
+  revision: Int!
+  payload: JSON!
+  traceId: ID
+}
+
+type EntityRef {
+  kind: String!
+  id: ID!
+}
+
+scalar JSON
+
+type Subscription {
+  onGraphEvent(
+    tenant: ID!,
+    types: [String!],
+    entityIds: [ID!],
+    kinds: [String!]
+  ): GraphEvent!
+}

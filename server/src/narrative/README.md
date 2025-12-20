@@ -1,7 +1,30 @@
-# Real-Time Narrative Simulation Engine (MRSE/MIFE)
+# Real-Time Narrative Simulation Engine (MRSE/MIFE) & Information Warfare System
 
 ## Overview
 The Narrative Simulation Engine handles the dynamic evolution of narrative states, tracking entities, events, and story arcs. It integrates MRSE (Multi-Resolution Simulation Engine) and MIFE (Multi-channel Influence Field Estimator) concepts.
+
+This system is augmented by the **Information Warfare Detection System**, which provides real-time detection of coordinated campaigns, influence networks, and sentiment anomalies.
+
+## Availability & Tiering
+**Status:** Enterprise / Coalition-Restricted
+- This capability is **NOT** available in the Core Summit community edition.
+- Access requires `tier: enterprise` or `tier: coalition` claims in the tenant token.
+- Multi-lingual analysis and deep meme tracking are metered add-ons.
+
+## Roadmap & Scope
+
+### V1 (Current - Minimum GA)
+- **Narrative Detection:** Velocity tracking, basic topic extraction, and simple trend detection (Emerging/Peaking/Decaying).
+- **Influence Mapping:** PageRank (Degree-based proxy) and Community Detection (Shared Neighbor heuristic) via Neo4j Cypher.
+- **Sentiment Analysis:** Multi-dimensional analysis (Sentiment, Emotion, Toxicity) using `sentiment` and `natural`. **English-optimized**.
+- **Meme Tracking:** **Simulated** perceptual hashing (mock) and propagation tracking.
+- **CIB Detection:** Heuristic-based bot clustering (Frequency, Attention, Toxicity).
+
+### V2 (Deferred Enhancements)
+- **Advanced Graph Analytics:** Integration with Neo4j GDS for exact PageRank and Louvain algorithms.
+- **Deep Content Analysis:** Integration with external NLP providers (Google/Azure/Local BERT) for true 100+ language support.
+- **Real Meme Hashing:** Integration with `sharp` or vector databases for robust pHash/dHash image similarity.
+- **ML-Based CIB:** Training supervised models on labeled campaign data to replace heuristics.
 
 ## Core Components
 

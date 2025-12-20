@@ -17,22 +17,7 @@
     "tsBuildInfoFile": ".tsbuildinfo",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "typeRoots": ["./node_modules/@types", "./types/shims"],
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["node", "jest"],
-    "typeRoots": [
-      "./node_modules/@types",
-      "./types/shims"
-    ],
-    "lib": [
-      "ES2022",
-      "DOM",
-      "DOM.Iterable"
-    ],
-    "types": [
-      "node",
-      "jest"
-    ],
     "baseUrl": ".",
     "paths": {
       "zod/v4": ["types/shims/zod-v4.d.ts"]

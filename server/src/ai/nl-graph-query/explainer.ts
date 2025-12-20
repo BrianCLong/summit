@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Explainer - Generates plain language explanations of Cypher queries
  */

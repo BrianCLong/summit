@@ -1,0 +1,23 @@
+{
+  "source": "demo-roster",
+  "people": [
+    {
+      "id": "person-1",
+      "name": "Ada Lovelace",
+      "email": "ada.lovelace@example.com",
+      "role": "Analyst",
+      "team": "analysis",
+      "team_name": "Analysis",
+      "phone": "+1-202-555-0101"
+    },
+    {
+      "id": "person-2",
+      "name": "Alan Turing",
+      "email": "alan.turing@example.com",
+      "role": "ML Engineer",
+      "team": "ml-lab",
+      "team_name": "ML Lab",
+      "phone": "+1-202-555-0102"
+    }
+  ]
+}

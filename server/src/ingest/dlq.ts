@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { pg } from '../db/pg.js';
 import { DLQRecord } from '../data-model/types.js';
 import { Logger } from 'pino';

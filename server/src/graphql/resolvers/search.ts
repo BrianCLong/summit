@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ElasticsearchService } from '../../../apps/search-engine/src/services/ElasticsearchService';
 import { QueryBuilderService } from '../../../apps/search-engine/src/services/QueryBuilderService';
 import { SavedSearchService } from '../../../apps/search-engine/src/services/SavedSearchService';

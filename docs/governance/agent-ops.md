@@ -1,75 +1,66 @@
-# Agent Operations & Governance (agent-ops)
+# Agent Operations Specification (AgentOps)
 
-**Status:** Canonical  
-**Applies to:** All Summit contributors (human and AI-assisted)  
-**Scope:** Codex, Claude Code, GitHub Copilot, internal agents, future orchestration systems
+**Status**: Authoritative
+**Enforcement**: CI/CD Policy Gates
 
-## 1. Purpose
+This document defines the operational standards for all AI agents (Codex, Jules, specialized bots) working in the Summit repository.
 
-Summit uses AI agents to execute clearly defined intent, never to define it. This document establishes when agents may run, what they may touch, how authority is enforced, and how agent activity is audited, revoked, or terminated. Failure to follow this document is a governance violation.
+## 1. Codex & Agent Execution Rules
 
-## 2. Core Principles
+All AI agents must adhere to the following execution lifecycle:
 
-### 2.1 Human Primacy
+### 1.1 Initialization
 
-All architectural decisions, risk acceptance, and security posture are human responsibilities.
+* **Identity**: Agents must identify their **Permission Tier** (see [Permission Tiers](permission-tiers.md)).
+* **Mandate**: Agents must link their work to a specific **Ticket ID** or **Prompt ID**.
+* **Plan**: Before executing changes, agents must output a **Structured Plan** (using `set_plan` tool where available).
 
-- **Agents:** implement, refactor, validate.  
-- **Humans:** decide, approve, accept risk.
+### 1.2 Execution Constraints
 
-### 2.2 Scoped Authority
+* **Atomic PRs**: One task = One PR. Do not mix refactors with features.
+* **Test-Driven**: Logic changes must include new or updated tests.
+* **Verification**: Agents must verify every file write by reading it back.
+* **Pre-Commit**: Agents must run the equivalent of local pre-commit hooks (linting, type-checking) before submission.
 
-Agents operate only within explicitly defined scopes (file paths, domains, change types). If scope is ambiguous, work must stop.
+### 1.3 Automatic Rejection Criteria
 
-### 2.3 No Silent Change
+The **Agentic Control Plane** will automatically reject PRs if:
 
-Agents may not change authentication/authorization, security defaults, governance/CI rules, or introduce hidden/dynamic behavior without explicit, written human approval.
+* The PR touches files outside the agent's **Permission Tier**.
+* The PR lacks a linked Issue/Ticket.
+* Tests fail in the `agentic-lifecycle` workflow.
+* Documentation is missing for public API changes.
 
-## 3. Codex Orchestration Model
+## 2. CI Enforcement Mapping
 
-### Phase 0 — Intent Definition (Human Only)
+This section maps Governance Rules to Technical Enforcement Workflows.
 
-- Strategic objective defined  
-- Constraints documented  
-- Non-goals listed  
-- Risk noted
+| Governance Rule | Enforcing Workflow | Trigger | Action on Fail |
+| :--- | :--- | :--- | :--- |
+| **Tier Compliance** | `agentic-policy-check.yml` | `pull_request` | Block Merge + Comment |
+| **Test Coverage** | `pr-quality-gate.yml` | `pull_request` | Block Merge |
+| **Security Scan** | `agentic-lifecycle.yml` | `push` | Block Merge + Alert Security |
+| **Evidence Bundle** | `soc2-evidence.yml` | `pull_request` | Block Merge (if missing artifacts) |
 
-No agents may run before this phase.
+### 2.1 Label Gating
 
-### Phase 1 — Mechanical Execution (Agent-Primary)
+* `agent:approved`: Required for Tier 2+ agents to merge. Added by human reviewer or Tier 4 agent.
+* `governance:reviewed`: Required for changes to `docs/governance/`.
+* `security:signed-off`: Required for changes to `policy/` or `auth` modules.
 
-Agents may scaffold code, implement isolated features, generate tests, and produce documentation. Use one agent per PR and one domain per agent.
+## 3. Audit & Provenance
 
-### Phase 2 — Domain-Specific Execution (Agent + Human Review)
+* **Action Logs**: Every agent action (file write, shell command) should be logged in the PR description or a dedicated `AGENT_LOG.md` file in the PR.
+* **Decision Records**: If an agent makes an architectural decision, it must produce an ADR (Architecture Decision Record) in `docs/adr/`.
+* **Provenance**: All build artifacts must be signed (enforced by `slsa-attestation.yml`).
 
-Applies to RAG pipelines, graph algorithms, and security policies. Agents implement; humans review meaning and impact.
+## 4. Human-in-the-Loop
 
-### Phase 3 — Integration (Human-Led)
+* **Tier 0-1**: Can be auto-merged if `docs-deploy` passes.
+* **Tier 2**: Requires 1 Human Reviewer.
+* **Tier 3**: Requires 2 Human Reviewers (1 Code Owner).
+* **Tier 4**: Requires Consensus (Quorum) or Emergency Break-glass approval.
 
-Humans arbitrate cross-package conflicts, performance tradeoffs, and contract changes. Agents may assist with rebasing or mechanical fixes only.
+---
 
-### Phase 4 — Governance & Release (Human Final)
-
-Humans approve security posture, governance compliance, and release readiness. Agents may generate documentation and evidence but never approvals.
-
-## 4. Agent Permission Tiers
-
-| Tier | Description           | Allowed                       |
-| ---- | --------------------- | ----------------------------- |
-| 0    | Read-only             | Read, comment                 |
-| 1    | Mechanical Executor   | Scoped PRs, tests             |
-| 2    | Domain Specialist     | Domain modules only           |
-| 3    | Restricted Architect  | Cross-package (with approval) |
-| 4    | Human Authority       | Final control                 |
-
-## 5. Provenance & Attribution
-
-Every PR must include a human sponsor, agent name (if used), and scope statement. Unattributed changes are forbidden.
-
-## 6. Revocation & Kill-Switch
-
-Agent access may be revoked immediately if scope is exceeded, governance is violated, or security risk is introduced. Revocation requires no prior notice.
-
-## 7. Enforcement
-
-Governance is enforced via branch protections, CODEOWNERS, CI checks, and audit logs. This document overrides informal practice.
+**Violation of these rules will result in the agent's immediate suspension via the [Kill-Switch Protocol](agent-incident-response.md).**

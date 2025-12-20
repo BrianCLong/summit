@@ -1,32 +1,74 @@
-# Summit Agent Audit Log
+# Audit & Evidence Standards
 
-**Status:** Mandatory  
-**Applies to:** All AI-assisted contributions
+This directory contains the **Audit Trail** for the Summit Governance Ecosystem.
 
-This directory provides an append-only audit trail for all AI agent activity within Summit.
+**Purpose**: To provide irrefutable evidence of Agent actions, Governance decisions, and Compliance checks (SOC2, ISO 27001).
 
-## Purpose
+## 1. Evidence Bundles
 
-The audit log exists to preserve provenance, enable post-incident review, support governance/compliance/trust, and ensure no AI activity is anonymous or unaccountable. Deletion or modification of audit entries is forbidden.
+Evidence is collected automatically by the `soc2-evidence.yml` workflow.
 
-## What Must Be Logged
+**Required Artifacts**:
 
-Every AI-assisted PR must have a corresponding audit entry documenting who authorized the agent, what scope was granted, what changed, and what the outcome was.
+* `SBOM` (Software Bill of Materials) - from `sbom.yml`
+* `SLSA Attestation` - from `slsa-attestation.yml`
+* `Test Coverage Report` - from `pr-quality-gate.yml`
+* `Policy Scan Results` (OPA) - from `agentic-policy-check.yml`
 
-## Enforcement
+## 2. Agent Action Logs
 
-- PRs may be reverted if audit entries are missing or incomplete.  
-- Audit violations are governance incidents.  
-- This log overrides convenience.
+Agents must produce a log of their reasoning and actions.
 
-## File Structure
+**Location**: PR Description or `AGENT_LOG.md` in the PR.
 
-- `YYYY-MM-DD-agent-log.md` — daily append-only logs.  
-- `template.md` — required format.  
-- `README.md` — this document.
+### Template
 
-## Cultural Principle
+```markdown
+## Agent Action Log
 
-> **If an agent touched it, it must be traceable.**
+**Agent ID**: [Name/Version]
+**Task**: [Ticket ID]
+**Tier**: [Tier Level]
 
-Audit logs are not optional bureaucracy — they are a strategic asset.
+### Reasoning
+[Explanation of why this change was made]
+
+### Plan
+1. [Step 1]
+2. [Step 2]
+
+### Verification
+- [ ] Read file X
+- [ ] Ran test Y
+```
+
+## 3. Governance Decision Records (GDR)
+
+Major decisions by agents or humans affecting the Constitution or Permission Tiers.
+
+**Location**: `docs/audit/decisions/`
+
+### GDR Template
+
+```markdown
+# GDR-001: [Title]
+
+**Date**: [YYYY-MM-DD]
+**Author**: [Name/Agent]
+**Status**: [Proposed/Accepted/Rejected]
+
+## Context
+[Problem description]
+
+## Decision
+[The decision made]
+
+## Consequences
+[Positive and Negative impacts]
+```
+
+## 4. Incident Reports
+
+See [Agent Incident Response](../governance/agent-incident-response.md).
+
+**Location**: `docs/audit/incidents/`

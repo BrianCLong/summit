@@ -1,0 +1,34 @@
+name: zk-deconfliction-guard
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled, edited]
+    paths:
+      - 'docs/security/zk-*'
+      - 'packages/types/src/zk.ts'
+      - 'packages/types/src/index.ts'
+      - '.github/workflows/zk-deconfliction-guard.yml'
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  enforce-tier-4-approval:
+    name: Require Tier-4 approval for ZK changes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate Tier-4 approval label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = (context.payload.pull_request?.labels || []).map((label) => label.name);
+            const hasTier4Approval = labels.includes('tier-4-approved');
+
+            if (!hasTier4Approval) {
+              core.setFailed(
+                'ZK path changes detected. A `tier-4-approved` label is required before merge.'
+              );
+            } else {
+              core.info('Tier-4 approval confirmed for ZK changes.');
+            }
