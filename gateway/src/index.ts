@@ -39,23 +39,19 @@ const mockExpressMiddleware = (server: any, options: any) => (req: any, res: any
 
 // Applying the logic to the mock app
 app.get('/export/all', (req: any, res: any) => {
-  // Old: // TODO: Implement admin-only check
   if (!isAdmin(req.context)) {
     return res.status(403).send('Forbidden');
   }
-  
-  // Old: // TODO: Implement actual export logic
+
   const exportData = implementExportLogic();
   res.header('Content-Type', 'application/jsonl').send(exportData);
 });
 
 app.delete('/resource/:id', (req: any, res: any) => {
-    // Old: // TODO: Implement admin-only check
     if (!isAdmin(req.context)) {
         return res.status(403).send('Forbidden');
     }
 
-    // Old: // TODO: Implement actual delete logic
     const result = implementDeleteLogic(req.params.id);
     res.send(result);
 });

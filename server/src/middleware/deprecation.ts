@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { logger } from '../lib/logger';
+import { logger } from '../config/logger.js';
 
 export interface DeprecationConfig {
   /** Date when the endpoint will be removed (ISO 8601) */

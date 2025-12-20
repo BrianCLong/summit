@@ -19,13 +19,13 @@ import { DriftDetector } from '@intelgraph/model-monitoring';
 import { ExplainabilityEngine } from '@intelgraph/model-explainability';
 import { AutoMLEngine } from '@intelgraph/training-orchestration';
 
-const app = express();
+const app: express.Express = express();
 const PORT = process.env.MLOPS_SERVICE_PORT || 8080;
 
 // Middleware
 app.use(helmet());
 app.use(cors());
-app.use(compression());
+app.use(compression() as express.RequestHandler);
 app.use(express.json({ limit: '10mb' }));
 
 // Initialize core components

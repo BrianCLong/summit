@@ -81,6 +81,13 @@ spec:
             - npm ci --cache .npm-cache
             - docker pull node:20-alpine@sha256:7a04a39ae2cfd45e34b6c5b78bf85e4f5b6b5e5d2c2f6a8a3b3c4d5e6f7g8h9i
 
+    - name: provenance-cache
+      jobs:
+        - name: prevalidate-provenance
+          commands:
+            - mkdir -p dist
+            - node tools/provenance/cache-validate.mjs dist/.provenance-cache.json dist/index.js dist/index.js.attestation.json package.json package-lock.json tsconfig.json src
+
     - name: lint-and-type
       parallel: true
       jobs:
@@ -149,6 +156,7 @@ spec:
         - name: build-common
           service: common
           commands:
+            - if [ -f dist/.provenance-cache.hit ]; then echo "Provenance cache hit - skipping build-common"; exit 0; fi
             - cd services/common
             - npm run build
             - npm pack --pack-destination=../../dist/
@@ -157,6 +165,7 @@ spec:
           service: auth
           depends_on: [build-common]
           commands:
+            - if [ -f dist/.provenance-cache.hit ]; then echo "Provenance cache hit - skipping build-auth"; exit 0; fi
             - cd services/auth
             - npm run build
             - npm pack --pack-destination=../../dist/
@@ -165,6 +174,7 @@ spec:
           service: api
           depends_on: [build-common, build-auth]
           commands:
+            - if [ -f dist/.provenance-cache.hit ]; then echo "Provenance cache hit - skipping build-api"; exit 0; fi
             - cd services/api
             - npm run build
             - npm pack --pack-destination=../../dist/
@@ -173,6 +183,7 @@ spec:
           service: gateway
           depends_on: [build-common, build-auth]
           commands:
+            - if [ -f dist/.provenance-cache.hit ]; then echo "Provenance cache hit - skipping build-gateway"; exit 0; fi
             - cd services/gateway
             - npm run build
             - npm pack --pack-destination=../../dist/
@@ -181,6 +192,7 @@ spec:
           service: nlq
           depends_on: [build-common]
           commands:
+            - if [ -f dist/.provenance-cache.hit ]; then echo "Provenance cache hit - skipping build-nlq"; exit 0; fi
             - cd services/nlq
             - npm run build
             - npm pack --pack-destination=../../dist/
@@ -189,6 +201,7 @@ spec:
           service: web
           depends_on: [build-api, build-gateway]
           commands:
+            - if [ -f dist/.provenance-cache.hit ]; then echo "Provenance cache hit - skipping build-web"; exit 0; fi
             - cd apps/web
             - npm run build
             - npm pack --pack-destination=../../dist/
@@ -199,20 +212,32 @@ spec:
         - name: sbom-api
           depends_on: [build-api]
           commands:
+            - if [ -f dist/.provenance-cache.hit ]; then echo "Provenance cache hit - skipping sbom-api"; exit 0; fi
             - syft packages dir:services/api -o cyclonedx-json=dist/api.sbom.json
             - syft packages dir:services/api -o spdx-json=dist/api.spdx.json
 
         - name: sbom-gateway
           depends_on: [build-gateway]
           commands:
+            - if [ -f dist/.provenance-cache.hit ]; then echo "Provenance cache hit - skipping sbom-gateway"; exit 0; fi
             - syft packages dir:services/gateway -o cyclonedx-json=dist/gateway.sbom.json
             - syft packages dir:services/gateway -o spdx-json=dist/gateway.spdx.json
 
         - name: sbom-web
           depends_on: [build-web]
           commands:
+            - if [ -f dist/.provenance-cache.hit ]; then echo "Provenance cache hit - skipping sbom-web"; exit 0; fi
             - syft packages dir:apps/web -o cyclonedx-json=dist/web.sbom.json
             - syft packages dir:apps/web -o spdx-json=dist/web.spdx.json
+
+        - name: dependency-track-export
+          depends_on: [sbom-api, sbom-gateway, sbom-web]
+          commands:
+            - if [ -z "$DEPENDENCY_TRACK_URL" ] || [ -z "$DEPENDENCY_TRACK_API_KEY" ] || [ -z "$DEPENDENCY_TRACK_PROJECT" ]; then echo "Dependency-Track not configured; skipping export"; exit 0; fi
+            - if ! ls dist/*.sbom.json >/dev/null 2>&1; then echo "No SBOMs found for export"; exit 0; fi
+            - for sbom in dist/*.sbom.json; do
+                curl -sSf -H "X-Api-Key: $DEPENDENCY_TRACK_API_KEY" -H "Content-Type: application/json" --data @"$sbom" "$DEPENDENCY_TRACK_URL/api/v1/bom?project=$DEPENDENCY_TRACK_PROJECT";
+              done
 
     - name: container-images
       parallel: true
@@ -220,6 +245,7 @@ spec:
         - name: build-api-image
           depends_on: [build-api, sbom-api]
           commands:
+            - if [ -f dist/.provenance-cache.hit ]; then echo "Provenance cache hit - skipping api image"; exit 0; fi
             - docker build -f services/api/Dockerfile -t api:$BUILD_VERSION services/api
             - docker tag api:$BUILD_VERSION ghcr.io/$GITHUB_REPOSITORY/api:$BUILD_VERSION
             - docker save api:$BUILD_VERSION | gzip > dist/api-image.tar.gz
@@ -227,6 +253,7 @@ spec:
         - name: build-gateway-image
           depends_on: [build-gateway, sbom-gateway]
           commands:
+            - if [ -f dist/.provenance-cache.hit ]; then echo "Provenance cache hit - skipping gateway image"; exit 0; fi
             - docker build -f services/gateway/Dockerfile -t gateway:$BUILD_VERSION services/gateway
             - docker tag gateway:$BUILD_VERSION ghcr.io/$GITHUB_REPOSITORY/gateway:$BUILD_VERSION
             - docker save gateway:$BUILD_VERSION | gzip > dist/gateway-image.tar.gz
@@ -234,6 +261,7 @@ spec:
         - name: build-web-image
           depends_on: [build-web, sbom-web]
           commands:
+            - if [ -f dist/.provenance-cache.hit ]; then echo "Provenance cache hit - skipping web image"; exit 0; fi
             - docker build -f apps/web/Dockerfile -t web:$BUILD_VERSION apps/web
             - docker tag web:$BUILD_VERSION ghcr.io/$GITHUB_REPOSITORY/web:$BUILD_VERSION
             - docker save web:$BUILD_VERSION | gzip > dist/web-image.tar.gz
@@ -243,19 +271,42 @@ spec:
       jobs:
         - name: cosign-artifacts
           depends_on: [generate-sbom]
+          env:
+            COSIGN_EXPERIMENTAL: '1'
+            COSIGN_YES: 'true'
           commands:
             - echo "Signing artifacts with cosign..."
+            - if [ -f dist/.provenance-cache.hit ]; then echo "Provenance cache hit - skipping signing"; exit 0; fi
+            - mkdir -p dist
+            - rm -f dist/rekor-uuids.txt
             - for artifact in dist/*.tgz dist/*.tar.gz; do
-              cosign sign-blob --yes $artifact --output-signature=${artifact}.sig
-              cosign sign-blob --yes $artifact --output-certificate=${artifact}.pem
+                if cosign sign-blob --tlog-upload=true --bundle "${artifact}.bundle.json" --output-signature="${artifact}.sig" --output-certificate="${artifact}.pem" "$artifact"; then
+                  echo "Keyless signing succeeded for $artifact";
+                elif [ -n "$COSIGN_MANAGED_KEY" ]; then
+                  cosign sign-blob --tlog-upload=true --bundle "${artifact}.bundle.json" --output-signature="${artifact}.sig" --output-certificate="${artifact}.pem" --key "$COSIGN_MANAGED_KEY" "$artifact";
+                  echo "Managed key fallback used for $artifact";
+                else
+                  echo "Cosign signing failed for $artifact" && exit 1;
+                fi;
+                if command -v jq >/dev/null 2>&1; then
+                  jq -r '.tlogEntries[0].uuid // .tlog_entries[0].uuid // empty' "${artifact}.bundle.json" >> dist/rekor-uuids.txt || true;
+                fi;
               done
+            - |
+              if [ -f dist/rekor-uuids.txt ]; then
+                jq -R -s 'split("\n") | map(select(length > 0))' dist/rekor-uuids.txt > dist/rekor-entries.json || true
+              fi
 
         - name: attest-sboms
           depends_on: [generate-sbom]
+          env:
+            COSIGN_EXPERIMENTAL: '1'
+            COSIGN_YES: 'true'
           commands:
             - echo "Creating SBOM attestations..."
+            - if [ -f dist/.provenance-cache.hit ]; then echo "Provenance cache hit - skipping attestations"; exit 0; fi
             - for sbom in dist/*.sbom.json; do
-              cosign attest --yes --predicate=$sbom --type=cyclonedx
+                cosign attest --yes --tlog-upload=true --bundle "${sbom}.bundle.json" --predicate=$sbom --type=cyclonedx;
               done
 
     - name: integration-tests

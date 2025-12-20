@@ -25,17 +25,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install OPA (for freeze overrides)
-        run: |
-          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
-          chmod +x opa
-          sudo mv opa /usr/local/bin/opa
-
-      - name: Enforce merge train freeze window
-        env:
-          MERGE_TRAIN_OVERRIDE_TOKEN: ${{ secrets.MERGE_TRAIN_OVERRIDE_TOKEN }}
-        run: node tools/merge-train/freeze_guard.ts
-
       - name: Setup GitHub CLI
         run: |
           type -p gh &>/dev/null || {

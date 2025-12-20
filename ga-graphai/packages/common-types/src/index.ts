@@ -2,6 +2,8 @@
  * Common types and helpers shared across Maestro Conductor services.
  */
 
+export * from './events';
+
 // ============================================================================
 // MERGE TRAIN: Preserving existing LinearX types + adding Cursor governance
 // ============================================================================
@@ -1159,14 +1161,56 @@ export interface EvidenceOutput {
   description?: string;
 }
 
-export interface SecretRef {
+export interface SecretRotationPolicy {
+  /**
+   * Maximum interval between rotations, expressed in days.
+   */
+  intervalDays: number;
+  /**
+   * ISO timestamp of the last successful rotation.
+   */
+  lastRotated?: string;
+  /**
+   * Optional hard-expiry period in days (defaults to intervalDays).
+   */
+  expiresAfterDays?: number;
+  /**
+   * Optional grace window in days before enforcing rotation.
+   */
+  graceDays?: number;
+}
+
+export interface BaseSecretRef {
+  key: string;
+  version?: string;
+  rotation?: SecretRotationPolicy;
+}
+
+export interface VaultSecretRef extends BaseSecretRef {
   /**
    * Vault reference (`vault://path/to/secret`). Literal secrets are forbidden.
    */
   vault: string;
-  key: string;
-  version?: string;
+  provider?: 'vault';
 }
+
+export interface KmsEnvelopeRef extends BaseSecretRef {
+  /**
+   * AWS KMS key identifier used for envelope encryption.
+   */
+  keyId: string;
+  provider: 'kms';
+  /**
+   * Base64 encoded envelope containing the encrypted secret payload.
+   */
+  ciphertext: string;
+  /**
+   * Optional encryption context required for decrypt/rotate operations.
+   */
+  encryptionContext?: Record<string, string>;
+}
+
+export type SecretRef = VaultSecretRef | KmsEnvelopeRef;
 
 export interface NodeEstimates {
   latencyP95Ms?: number;
@@ -1853,10 +1897,27 @@ export function ensureSecret(value: unknown): value is SecretRef {
   if (!value || typeof value !== 'object') {
     return false;
   }
-  const candidate = value as SecretRef;
-  return (
-    typeof candidate.vault === 'string' && typeof candidate.key === 'string'
-  );
+  const candidate = value as Partial<SecretRef> & { provider?: string };
+  const provider = candidate.provider ?? 'vault';
+
+  if (provider === 'vault') {
+    const vaultCandidate = candidate as VaultSecretRef;
+    return (
+      typeof vaultCandidate.vault === 'string' &&
+      typeof vaultCandidate.key === 'string'
+    );
+  }
+
+  if (provider === 'kms') {
+    const kmsCandidate = candidate as KmsEnvelopeRef;
+    return (
+      typeof kmsCandidate.keyId === 'string' &&
+      typeof kmsCandidate.ciphertext === 'string' &&
+      typeof kmsCandidate.key === 'string'
+    );
+  }
+
+  return false;
 }
 
 // ============================================================================
@@ -2107,6 +2168,8 @@ export interface AuditLogEvent {
   severity?: AuditSeverity;
   metadata?: Record<string, unknown>;
   correlationIds?: string[];
+  previousHash?: string;
+  eventHash?: string;
 }
 
 export interface AuditQueryFilter {

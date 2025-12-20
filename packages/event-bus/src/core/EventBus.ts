@@ -249,6 +249,7 @@ export class EventBus extends EventEmitter {
 
     // Poll queue for messages
     const pollQueue = async () => {
+      if (!this.redis) return;
       if (!this.redis) {return;}
 
       const queueKey = `queue:${queue}`;
@@ -370,6 +371,7 @@ export class EventBus extends EventEmitter {
     envelope: MessageEnvelope<T>,
     dlqName: string
   ): Promise<void> {
+    if (!this.redis) return;
     if (!this.redis) {return;}
 
     const dlqKey = `dlq:${dlqName}`;
@@ -387,6 +389,7 @@ export class EventBus extends EventEmitter {
    */
   private async unsubscribe(subscriptionId: string): Promise<void> {
     const subscription = this.subscriptions.get(subscriptionId);
+    if (!subscription) return;
     if (!subscription) {return;}
 
     // Disconnect Kafka consumer

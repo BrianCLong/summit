@@ -17,9 +17,6 @@ export { EnsembleForecaster, OptimalEnsemble } from './models/ensemble.js';
 // Anomaly forecasting
 export { AnomalyForecaster } from './models/anomaly-forecast.js';
 
-// Neural network models
-export { LSTMForecaster, GRUForecaster } from './models/lstm.js';
-
 // Scenario analysis and simulation
 export {
   MonteCarloSimulator,

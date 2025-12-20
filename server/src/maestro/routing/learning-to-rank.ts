@@ -1,7 +1,7 @@
 import { getPostgresPool } from '../../db/postgres.js';
 import { otelService } from '../../middleware/observability/otel-tracing.js';
 
-interface ModelCandidate {
+export interface ModelCandidate {
   id: string;
   name: string;
   provider: string;
@@ -14,7 +14,7 @@ interface ModelCandidate {
   lastUpdated: Date;
 }
 
-interface QueryFeatures {
+export interface QueryFeatures {
   complexity: number; // 0-1
   contextLength: number;
   urgency: number; // 0-1
@@ -24,7 +24,7 @@ interface QueryFeatures {
   estimatedTokens: number;
 }
 
-interface RouteDecision {
+export interface RouteDecision {
   selectedModel: ModelCandidate;
   score: number;
   reasoning: string;
@@ -32,7 +32,7 @@ interface RouteDecision {
   explanation: ExplanationPanel;
 }
 
-interface FairnessMetrics {
+export interface FairnessMetrics {
   diversityScore: number; // How evenly distributed selections are
   biasScore: number; // Potential bias in selections
   representationScore: number; // How well different providers are represented
@@ -75,6 +75,43 @@ export class LearningToRankRouter {
     this.loadTrainingData();
   }
 
+  async rankCandidates(
+    features: QueryFeatures,
+    tenantId: string,
+  ): Promise<{
+    candidates: Array<{ model: ModelCandidate; score: number; reasoning: string }>;
+    fairnessMetrics: FairnessMetrics;
+  }> {
+    const candidates = Array.from(this.models.values());
+
+    const scoredCandidates = candidates.map((model) => ({
+      model,
+      score: this.scoreModel(model, features),
+      reasoning: this.explainScore(model, features),
+    }));
+
+    scoredCandidates.sort((a, b) => b.score - a.score);
+
+    const adjustedScores = await this.applyFairnessAdjustments(
+      scoredCandidates,
+      tenantId,
+      features,
+    );
+
+    const fairnessMetrics = await this.calculateFairnessMetrics(tenantId);
+
+    return { candidates: adjustedScores, fairnessMetrics };
+  }
+
+  async finalizeSelection(
+    modelId: string,
+    features: QueryFeatures,
+    tenantId: string,
+  ): Promise<void> {
+    this.updateFairnessTracking(modelId, tenantId);
+    await this.logDecision(modelId, features, tenantId);
+  }
+
   private initializeWeights() {
     // Initial feature weights (will be learned over time)
     this.weights.set('complexity', 0.25);
@@ -91,39 +128,20 @@ export class LearningToRankRouter {
     const span = otelService.createSpan('router.learning_to_rank');
 
     try {
-      // Get all available models
-      const candidates = Array.from(this.models.values());
-
-      // Score each candidate
-      const scoredCandidates = candidates.map((model) => ({
-        model,
-        score: this.scoreModel(model, features),
-        reasoning: this.explainScore(model, features),
-      }));
-
-      // Sort by score (descending)
-      scoredCandidates.sort((a, b) => b.score - a.score);
-
-      // Apply fairness adjustments
-      const adjustedScores = await this.applyFairnessAdjustments(
-        scoredCandidates,
-        tenantId,
+      const { candidates, fairnessMetrics } = await this.rankCandidates(
         features,
+        tenantId,
       );
 
-      const selectedCandidate = adjustedScores[0];
-      const fairnessMetrics = await this.calculateFairnessMetrics(tenantId);
+      const selectedCandidate = candidates[0];
       const explanation = this.generateExplanationPanel(
         selectedCandidate,
-        adjustedScores.slice(0, 3),
+        candidates.slice(0, 3),
         features,
       );
 
       // Update fairness tracking
-      this.updateFairnessTracking(selectedCandidate.model.id, tenantId);
-
-      // Log decision for learning
-      await this.logDecision(selectedCandidate.model.id, features, tenantId);
+      await this.finalizeSelection(selectedCandidate.model.id, features, tenantId);
 
       span?.addSpanAttributes({
         'router.selected_model': selectedCandidate.model.name,

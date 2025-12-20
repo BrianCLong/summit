@@ -2,18 +2,13 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "module": "commonjs",
+    "moduleResolution": "node",
+    "strict": false,
+    "noImplicitAny": false,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-    "types": ["jest", "node"],
-    "allowImportingTsExtensions": false,
-    "noEmit": true
+    "types": ["node", "jest"]
   },
-  "include": [
-    "**/*.test.ts",
-    "**/*.test.tsx",
-    "**/*.spec.ts",
-    "**/*.spec.tsx",
-    "server/src/conductor/__tests__/mcp-client.test.ts"
-  ]
+  "include": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts"]
 }

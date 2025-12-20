@@ -216,7 +216,7 @@ services:
           'CMD',
           'node',
           '/workspace/scripts/health-check.js',
-          'http://localhost:4000/health',
+          'http://localhost:4000/health/ready',
         ]
       interval: 10s
       timeout: 5s
@@ -242,7 +242,7 @@ services:
       - '3000:3000'
     depends_on:
       api:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
       test:
         [
@@ -288,11 +288,15 @@ services:
         condition: service_completed_successfully
       otel-collector:
         condition: service_started
+      postgres:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
     healthcheck:
       test:
         [
           'CMD-SHELL',
-          'wget -qO- http://localhost:4100/health >/dev/null 2>&1 || exit 1',
+          'wget -qO- http://localhost:4100/ready >/dev/null 2>&1 || exit 1',
         ]
       interval: 10s
       timeout: 5s
@@ -392,14 +396,25 @@ services:
     build: ./reliability-service
     container_name: reliability-service
     depends_on:
-      - kafka
-      - redis
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     ports:
       - '8001:8001'
     environment:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       REDIS_URL: redis://redis:6379
     profiles: ['kafka', 'ai']
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8001/ready')\"",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
 
 volumes:
   postgres_data:

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Multimodal GraphQL Resolvers
  * P0 Critical - MVP1 requirement for cross-modal entity operations

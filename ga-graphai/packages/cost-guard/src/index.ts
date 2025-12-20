@@ -2,17 +2,20 @@ import { performance } from 'node:perf_hooks';
 import type {
   ClusterNodeState,
   CostGuardDecision,
-  BudgetAlert,
-  BudgetPolicy,
-  CostCategory,
   PlanBudgetInput,
   ResourceOptimizationConfig,
-  SpendObservation,
+  QueueScalingDecision,
   ScalingDecision,
+  QueueRuntimeSignals,
+  QueueScalingDecision,
+  QueueSloConfig,
   SlowQueryRecord,
   TenantBudgetProfile,
   WorkloadBalancingPlan,
+  WorkloadQueueSignal,
   WorkloadSample,
+  KedaScaledObjectSpec,
+  QueueAlertConfig,
 } from './types.js';
 
 const DEFAULT_PROFILE: TenantBudgetProfile = {
@@ -22,30 +25,14 @@ const DEFAULT_PROFILE: TenantBudgetProfile = {
   concurrencyLimit: 12,
 };
 
-const DEFAULT_BUDGET_POLICY: BudgetPolicy = {
-  categories: {
-    infrastructure: { limit: 2500, alertThreshold: 0.8 },
-    inference: { limit: 1800, alertThreshold: 0.85 },
-    storage: { limit: 900, alertThreshold: 0.85 },
-  },
-  anomalyStdDevTolerance: 2.2,
-  historyWindow: 20,
-  throttleOnBreach: true,
-};
-
 export class CostGuard {
   private readonly profile: TenantBudgetProfile;
-  private readonly budgetPolicy: BudgetPolicy;
   private budgetsExceeded = 0;
   private kills = 0;
   private readonly slowQueries = new Map<string, SlowQueryRecord>();
-  private readonly categorySpend = new Map<CostCategory, number>();
-  private readonly featureSpend = new Map<string, Map<string, number>>();
-  private readonly spendHistory = new Map<CostCategory, number[]>();
 
-  constructor(profile?: TenantBudgetProfile, budgetPolicy?: BudgetPolicy) {
+  constructor(profile?: TenantBudgetProfile) {
     this.profile = profile ?? DEFAULT_PROFILE;
-    this.budgetPolicy = budgetPolicy ?? DEFAULT_BUDGET_POLICY;
   }
 
   get metrics() {
@@ -53,19 +40,6 @@ export class CostGuard {
       budgetsExceeded: this.budgetsExceeded,
       kills: this.kills,
       activeSlowQueries: this.slowQueries.size,
-      categorySpend: Object.fromEntries(this.categorySpend),
-      servicesTracked: this.featureSpend.size,
-    };
-  }
-
-  get costAttribution() {
-    const features: Record<string, Record<string, number>> = {};
-    for (const [serviceId, featureMap] of this.featureSpend.entries()) {
-      features[serviceId] = Object.fromEntries(featureMap);
-    }
-    return {
-      categories: Object.fromEntries(this.categorySpend),
-      features,
     };
   }
 
@@ -126,81 +100,49 @@ export class CostGuard {
     };
   }
 
-  trackSpend(observation: SpendObservation): BudgetAlert {
-    if (!Number.isFinite(observation.cost) || observation.cost < 0) {
-      throw new Error('Spend observation cost must be a non-negative finite value.');
-    }
+  evaluateQueueScaling(signal: WorkloadQueueSignal): QueueScalingDecision {
+    const latencyPressure = signal.p95LatencyMs / this.profile.maxLatencyMs;
+    const queuePressure =
+      signal.queueDepth / Math.max(1, this.profile.concurrencyLimit * 1.5);
+    const costPressure = signal.costPerJobUsd / 0.25;
+    const budgetPressure = signal.budgetConsumptionRatio ?? 0;
+    const saturation = signal.saturationRatio ?? Math.min(1, queuePressure);
 
-    this.recordCategorySpend(observation.category, observation.cost);
-    const featureSpend = this.recordFeatureSpend(
-      observation.serviceId,
-      observation.feature,
-      observation.cost,
+    const score = Number(
+      (
+        queuePressure * 0.4 +
+        latencyPressure * 0.35 +
+        costPressure * 0.15 +
+        budgetPressure * 0.05 +
+        saturation * 0.05
+      ).toFixed(3),
     );
-    const history = this.recordHistory(observation.category, observation.cost);
-    const anomalies = this.detectAnomalies(observation.category, history);
-    const policy = this.budgetPolicy.categories[observation.category];
-    const categoryTotal = this.categorySpend.get(observation.category) ?? 0;
-    const utilization = policy
-      ? Number((categoryTotal / policy.limit).toFixed(3))
-      : 0;
 
-    let status: BudgetAlert['status'] = 'ok';
-    let action: BudgetAlert['action'] = 'allow';
-    let reason = 'Spend within budget.';
-    let guardrailEnforced = false;
-    let incrementBudgetExceeded = false;
+    let action: QueueScalingDecision['action'] = 'hold';
+    let reason =
+      'Queue steady; maintain current worker footprint while tracking SLO burn.';
 
-    if (policy) {
-      if (utilization >= 1) {
-        status = 'breach';
-        action = this.budgetPolicy.throttleOnBreach ? 'throttle' : 'allow';
-        reason =
-          'Budget exceeded; throttling to protect spend and enforce guardrails.';
-        guardrailEnforced = true;
-        incrementBudgetExceeded = true;
-      } else if (utilization >= policy.alertThreshold) {
-        status = 'alert';
-        reason = 'Spend approaching budget limit; alerting operators.';
-      }
+    if (score >= 1.05 || latencyPressure > 1.1) {
+      action = 'scale_up';
+      reason =
+        'Latency or queue pressure breaching SLO; scale up workers to drain backlog.';
+    } else if (score <= 0.35 && signal.queueDepth === 0) {
+      action = 'scale_down';
+      reason =
+        'Queue empty and costs elevated; scale down to protect budget without harming SLOs.';
     }
 
-    if (anomalies.length > 0) {
-      reason = `${reason} Anomaly detected: ${anomalies.join('; ')}`;
-      if (status === 'ok') {
-        status = 'alert';
-      }
-      if (
-        this.budgetPolicy.throttleOnBreach &&
-        (utilization >= (policy?.alertThreshold ?? 1) || anomalies.length > 1)
-      ) {
-        action = 'throttle';
-        guardrailEnforced = guardrailEnforced || status !== 'ok';
-        incrementBudgetExceeded = incrementBudgetExceeded || status !== 'ok';
-      }
-    }
-
-    if (
-      guardrailEnforced &&
-      incrementBudgetExceeded &&
-      (action === 'throttle' || status === 'breach')
-    ) {
-      this.budgetsExceeded += 1;
-    }
+    const recommendedReplicas = Math.max(
+      1,
+      Math.round(this.profile.concurrencyLimit * (0.6 + score / 1.5)),
+    );
 
     return {
-      category: observation.category,
-      serviceId: observation.serviceId,
-      feature: observation.feature,
-      utilization,
-      status,
       action,
+      score,
+      recommendedReplicas,
       reason,
-      anomalies,
-      totals: {
-        categorySpend: categoryTotal,
-        featureSpend,
-      },
+      inputs: signal,
     };
   }
 
@@ -232,72 +174,9 @@ export class CostGuard {
   release(queryId: string): void {
     this.slowQueries.delete(queryId);
   }
-
-  private recordCategorySpend(category: CostCategory, cost: number) {
-    const total = this.categorySpend.get(category) ?? 0;
-    this.categorySpend.set(category, Number((total + cost).toFixed(3)));
-  }
-
-  private recordFeatureSpend(
-    serviceId: string,
-    feature: string,
-    cost: number,
-  ): number {
-    const existing = this.featureSpend.get(serviceId) ?? new Map();
-    const current = existing.get(feature) ?? 0;
-    const updated = Number((current + cost).toFixed(3));
-    existing.set(feature, updated);
-    this.featureSpend.set(serviceId, existing);
-    return updated;
-  }
-
-  private recordHistory(category: CostCategory, cost: number): number[] {
-    const history = this.spendHistory.get(category) ?? [];
-    history.push(cost);
-    if (history.length > this.budgetPolicy.historyWindow) {
-      history.shift();
-    }
-    this.spendHistory.set(category, history);
-    return history;
-  }
-
-  private detectAnomalies(
-    category: CostCategory,
-    history: number[],
-  ): string[] {
-    if (history.length < 3) {
-      return [];
-    }
-    const recent = history[history.length - 1];
-    const baseline = history.slice(0, -1);
-    const mean = baseline.reduce((sum, value) => sum + value, 0) / baseline.length;
-    const variance =
-      baseline.reduce((sum, value) => sum + (value - mean) ** 2, 0) /
-      baseline.length;
-    const stdDev = Math.sqrt(variance);
-    const anomalies: string[] = [];
-
-    if (stdDev === 0) {
-      if (recent > mean * (1 + this.budgetPolicy.anomalyStdDevTolerance / 10)) {
-        anomalies.push(
-          `Spend spike detected for ${category}: ${recent.toFixed(2)} vs steady baseline ${mean.toFixed(2)}.`,
-        );
-      }
-      return anomalies;
-    }
-
-    const zScore = (recent - mean) / stdDev;
-    if (zScore >= this.budgetPolicy.anomalyStdDevTolerance) {
-      anomalies.push(
-        `Spend spike detected for ${category}: z-score ${zScore.toFixed(2)} exceeds tolerance ${this.budgetPolicy.anomalyStdDevTolerance}.`,
-      );
-    }
-
-    return anomalies;
-  }
 }
 
-export { DEFAULT_BUDGET_POLICY, DEFAULT_PROFILE };
+export { DEFAULT_PROFILE };
 const DEFAULT_OPTIMIZATION_CONFIG: ResourceOptimizationConfig = {
   smoothingFactor: 0.6,
   targetCpuUtilization: 0.65,
@@ -309,6 +188,20 @@ const DEFAULT_OPTIMIZATION_CONFIG: ResourceOptimizationConfig = {
   maxNodes: 64,
   rebalanceTolerance: 0.15,
   confidenceWindow: 6,
+};
+
+const DEFAULT_QUEUE_SLO: QueueSloConfig = {
+  targetP95Ms: 1500,
+  maxCostPerMinuteUsd: 18,
+  backlogTargetSeconds: 90,
+  minReplicas: 2,
+  maxReplicas: 64,
+  scaleStep: 2,
+  stabilizationSeconds: 180,
+  maxScaleStep: 6,
+  errorBudgetMinutes: 30,
+  latencyBurnThreshold: 1.2,
+  costBurnThreshold: 1.05,
 };
 
 export class ResourceOptimizationEngine {
@@ -355,6 +248,246 @@ export class ResourceOptimizationEngine {
       confidence,
       loadIndex,
       forecast,
+    };
+  }
+
+  recommendQueueAutoscaling(
+    currentReplicas: number,
+    signals: QueueRuntimeSignals,
+    slo: QueueSloConfig = DEFAULT_QUEUE_SLO,
+  ): QueueScalingDecision {
+    const safeServiceRate = Math.max(signals.serviceRatePerSecondPerWorker, 0);
+    const safeReplicas = Math.max(1, currentReplicas);
+    const totalOutstanding = Math.max(0, signals.backlog + signals.inflight);
+    const capacityPerSecond = safeServiceRate * safeReplicas;
+    const backlogSeconds =
+      capacityPerSecond === 0
+        ? Number.POSITIVE_INFINITY
+        : totalOutstanding / capacityPerSecond;
+
+    const latencyPressure =
+      slo.targetP95Ms === 0
+        ? 0
+        : signals.observedP95LatencyMs / slo.targetP95Ms;
+    const backlogPressure =
+      slo.backlogTargetSeconds === 0 || !Number.isFinite(backlogSeconds)
+        ? 0
+        : backlogSeconds / slo.backlogTargetSeconds;
+    const costPressure =
+      slo.maxCostPerMinuteUsd === 0
+        ? 0
+        : signals.spendRatePerMinuteUsd / slo.maxCostPerMinuteUsd;
+    const costBurnRate =
+      slo.costBurnThreshold && slo.costBurnThreshold > 0
+        ? costPressure / slo.costBurnThreshold
+        : costPressure;
+
+    const sloBurnRate =
+      slo.latencyBurnThreshold && slo.latencyBurnThreshold > 0
+        ? Math.max(latencyPressure / slo.latencyBurnThreshold, backlogPressure)
+        : Math.max(latencyPressure, backlogPressure);
+
+    const normalizedLatency = Number(latencyPressure.toFixed(3));
+    const normalizedBacklog = Number(backlogPressure.toFixed(3));
+    const normalizedCost = Number(costPressure.toFixed(3));
+    const normalizedBacklogSeconds = Number(
+      (Number.isFinite(backlogSeconds) ? backlogSeconds : Number.MAX_SAFE_INTEGER)
+        .toFixed(1),
+    );
+
+    const adaptiveScaleStep = Math.min(
+      slo.maxScaleStep ?? slo.scaleStep,
+      Math.max(
+        slo.scaleStep,
+        Math.ceil(slo.scaleStep * Math.max(1, sloBurnRate)),
+      ),
+    );
+
+    let recommendedReplicas = safeReplicas;
+    const backlogDrivenReplicas =
+      safeServiceRate === 0 || slo.backlogTargetSeconds === 0
+        ? safeReplicas + adaptiveScaleStep
+        : Math.ceil(
+            (totalOutstanding / slo.backlogTargetSeconds) / safeServiceRate,
+          );
+    const latencyDrivenReplicas =
+      latencyPressure > 1
+        ? Math.ceil(
+            safeReplicas *
+              Math.min(
+                2.5,
+                Math.max(1.2, latencyPressure + 0.15 * adaptiveScaleStep),
+              ),
+          )
+        : safeReplicas;
+
+    if (normalizedLatency > 1 || normalizedBacklog > 1) {
+      recommendedReplicas = Math.max(
+        safeReplicas + adaptiveScaleStep,
+        backlogDrivenReplicas,
+        latencyDrivenReplicas,
+      );
+    } else if (normalizedCost > 1 && normalizedLatency < 0.9 && normalizedBacklog < 0.9) {
+      const reliefStep = Math.max(1, Math.floor(safeReplicas * 0.2));
+      const budgetAlignedReplicas = Math.max(
+        slo.minReplicas,
+        Math.ceil((signals.spendRatePerMinuteUsd / slo.maxCostPerMinuteUsd) * safeReplicas * 0.8),
+      );
+      recommendedReplicas = Math.min(
+        safeReplicas - reliefStep,
+        budgetAlignedReplicas,
+      );
+    }
+
+    recommendedReplicas = Math.min(
+      slo.maxReplicas,
+      Math.max(slo.minReplicas, recommendedReplicas),
+    );
+
+    const action: ScalingDecision['action'] =
+      recommendedReplicas > safeReplicas
+        ? 'scale_up'
+        : recommendedReplicas < safeReplicas
+          ? 'scale_down'
+          : 'hold';
+
+    const dominantPressure = Math.max(normalizedLatency, normalizedBacklog, normalizedCost);
+    const reason = this.buildQueueScalingReason(action, {
+      latency: normalizedLatency,
+      backlog: normalizedBacklog,
+      cost: normalizedCost,
+    });
+
+    return {
+      action,
+      recommendedReplicas,
+      reason,
+      telemetry: {
+        latencyPressure: normalizedLatency,
+        backlogPressure: normalizedBacklog,
+        costPressure: normalizedCost,
+        backlogSeconds: normalizedBacklogSeconds,
+        sloTargetSeconds: slo.backlogTargetSeconds,
+        sloBurnRate: Number(sloBurnRate.toFixed(3)),
+        costBurnRate: Number(costBurnRate.toFixed(3)),
+        adaptiveScaleStep,
+      },
+      kedaMetric: {
+        metricName: 'agent_queue_slo_pressure',
+        labels: { queue: signals.queueName },
+        value: Number(dominantPressure.toFixed(3)),
+        query: `max_over_time(agent_queue_slo_pressure{queue="${signals.queueName}"}[2m])`,
+      },
+      alerts: this.buildQueueAlertConfig(signals.queueName, slo, {
+        latency: normalizedLatency,
+        backlog: normalizedBacklog,
+        cost: normalizedCost,
+      }),
+    };
+  }
+
+  buildQueueAlertConfig(
+    queueName: string,
+    slo: QueueSloConfig,
+    pressures: { latency: number; backlog: number; cost: number },
+  ): QueueAlertConfig {
+    const labels = { queue: queueName };
+    const fastBurn = `max_over_time(agent_queue_slo_pressure{queue="${queueName}"}[5m])`;
+    const slowBurn = `max_over_time(agent_queue_slo_pressure{queue="${queueName}"}[30m])`;
+    const costAnomaly = `avg_over_time(agent_queue_cost_pressure{queue="${queueName}"}[10m])`;
+
+    const latencyBudget = slo.latencyBurnThreshold ?? 1;
+    const costBudget = slo.costBurnThreshold ?? 1;
+    const fastBurnThreshold = Math.max(latencyBudget, pressures.latency);
+    const slowBurnThreshold = Math.max(1, latencyBudget * 0.75);
+    const costThreshold = Math.max(costBudget, pressures.cost);
+    const fastBurnRateQuery = `${fastBurn} > ${fastBurnThreshold.toFixed(2)}`;
+    const slowBurnRateQuery = `${slowBurn} > ${slowBurnThreshold.toFixed(2)}`;
+    const costAnomalyQuery = `${costAnomaly} > ${costThreshold.toFixed(2)}`;
+
+    return {
+      fastBurnRateQuery,
+      slowBurnRateQuery,
+      costAnomalyQuery,
+      labels,
+    };
+  }
+
+  buildKedaScaledObject(
+    queueName: string,
+    deploymentName: string,
+    namespace: string,
+    decision: QueueScalingDecision,
+    slo: QueueSloConfig = DEFAULT_QUEUE_SLO,
+  ): KedaScaledObjectSpec {
+    const metric = decision.kedaMetric;
+    const minReplicaCount = slo.minReplicas;
+    const maxReplicaCount = slo.maxReplicas;
+
+    return {
+      apiVersion: 'keda.sh/v1alpha1',
+      kind: 'ScaledObject',
+      metadata: {
+        name: `${deploymentName}-keda`,
+        namespace,
+        labels: {
+          'queue.graphai.io/name': queueName,
+          'slo.graphai.io/enabled': 'true',
+        },
+      },
+      spec: {
+        scaleTargetRef: {
+          name: deploymentName,
+        },
+        pollingInterval: 15,
+        cooldownPeriod: slo.stabilizationSeconds,
+        minReplicaCount,
+        maxReplicaCount,
+        fallback: {
+          failureThreshold: 3,
+          replicas: Math.max(minReplicaCount, 1),
+        },
+        advanced: {
+          horizontalPodAutoscalerConfig: {
+            behavior: {
+              scaleDown: {
+                stabilizationWindowSeconds: slo.stabilizationSeconds,
+                policies: [
+                  { type: 'Pods', value: Math.max(1, slo.scaleStep), periodSeconds: 60 },
+                  { type: 'Percent', value: 20, periodSeconds: 60 },
+                ],
+              },
+              scaleUp: {
+                stabilizationWindowSeconds: Math.max(60, slo.stabilizationSeconds / 3),
+                policies: [
+                  { type: 'Pods', value: decision.telemetry.adaptiveScaleStep, periodSeconds: 60 },
+                  { type: 'Percent', value: 50, periodSeconds: 60 },
+                ],
+              },
+            },
+          },
+        },
+        triggers: [
+          {
+            type: 'prometheus',
+            metadata: {
+              serverAddress: 'http://prometheus.monitoring.svc:9090',
+              metricName: metric.metricName,
+              threshold: `${Math.max(1, decision.telemetry.sloBurnRate).toFixed(2)}`,
+              query: metric.query,
+            },
+          },
+          {
+            type: 'prometheus',
+            metadata: {
+              serverAddress: 'http://prometheus.monitoring.svc:9090',
+              metricName: 'agent_queue_cost_pressure',
+              threshold: `${Math.max(1, decision.telemetry.costBurnRate).toFixed(2)}`,
+              query: `avg_over_time(agent_queue_cost_pressure{queue="${queueName}"}[5m])`,
+            },
+          },
+        ],
+      },
     };
   }
 
@@ -492,21 +625,42 @@ export class ResourceOptimizationEngine {
     }
     return `Workload steady (load index ${loadIndex.toFixed(2)}); maintaining current capacity.`;
   }
+
+  private buildQueueScalingReason(
+    action: ScalingDecision['action'],
+    pressure: { latency: number; backlog: number; cost: number },
+  ): string {
+    if (action === 'scale_up') {
+      return `Latency/backlog pressure (${pressure.latency.toFixed(
+        2,
+      )}/${pressure.backlog.toFixed(2)}) exceeds SLO guardrails; requesting more replicas.`;
+    }
+    if (action === 'scale_down') {
+      return `Cost pressure ${pressure.cost.toFixed(
+        2,
+      )} dominates while latency/backlog are healthy; reducing replicas to protect budget.`;
+    }
+    return `Within SLO envelopes (latency ${pressure.latency.toFixed(
+      2,
+    )}, backlog ${pressure.backlog.toFixed(2)}, cost ${pressure.cost.toFixed(2)}); holding steady.`;
+  }
 }
 
-export { DEFAULT_OPTIMIZATION_CONFIG };
+export { DEFAULT_OPTIMIZATION_CONFIG, DEFAULT_QUEUE_SLO };
 export type {
-  BudgetAlert,
-  BudgetPolicy,
   ClusterNodeState,
-  CostCategory,
   CostGuardDecision,
-  SpendObservation,
   PlanBudgetInput,
   ResourceOptimizationConfig,
   ScalingDecision,
+  QueueRuntimeSignals,
+  QueueScalingDecision,
+  QueueSloConfig,
+  QueueAlertConfig,
+  KedaScaledObjectSpec,
   SlowQueryRecord,
   TenantBudgetProfile,
   WorkloadBalancingPlan,
+  WorkloadQueueSignal,
   WorkloadSample,
 } from './types.js';

@@ -13,11 +13,12 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "typecheck": "tsc --noEmit",
+    "verify:chain": "tsx src/cli/verify-chain.ts",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix"
   },
   "dependencies": {
-    "express": "^5.1.0",
+    "express": "^5.2.0",
     "pg": "^8.13.1",
     "ioredis": "^5.4.2",
     "zod": "^3.24.4",

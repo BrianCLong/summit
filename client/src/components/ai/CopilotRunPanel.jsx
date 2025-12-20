@@ -15,6 +15,7 @@ import {
   ListItem,
   ListItemText,
 } from '@mui/material';
+import NlGraphQueryExplainer from './NlGraphQueryExplainer';
 
 export default function CopilotRunPanel({ goalId }) {
   const dispatch = useDispatch();
@@ -91,6 +92,8 @@ export default function CopilotRunPanel({ goalId }) {
           </CardContent>
         </Card>
       )}
+
+      <NlGraphQueryExplainer />
     </Box>
   );
 }

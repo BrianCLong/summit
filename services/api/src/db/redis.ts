@@ -13,11 +13,21 @@ class RedisConnection {
   private subscriber: Redis | null = null;
   private publisher: Redis | null = null;
   private isConnected = false;
+    private connectionPromise: Promise<void> | null = null;
 
   async connect(): Promise<void> {
-    if (this.isConnected && this.client) {
-      return;
+    // If already connected, return immediately
+        if (this.isConnected && this.client) {
+                return;return;
     }
+
+        // If connection is already in progress, return the existing promise
+        if (this.connectionPromise) {
+                return this.connectionPromise;
+              }
+
+        // Create and store the connection promise
+        this.connectionPromise = (async () => {
 
     const config = {
       host: process.env.REDIS_HOST || 'localhost',
@@ -525,6 +535,9 @@ class RedisConnection {
     return this.client;
   }
 }
+
+// Export class for testing
+export { RedisConnection };
 
 // Export singleton instance
 export const redisConnection = new RedisConnection();

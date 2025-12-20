@@ -137,25 +137,6 @@ scripts/update-merge-metrics.sh
 - **Edit queues:** For critical paths (e.g., `ci.yml`), serialize changes via labels
 - **Feature flags:** Prefer flags over direct edits to high-traffic code
 
-### Freeze Windows & Overrides
-
-- **What is blocked?** Merge train runs are halted during holiday freezes declared in `.maestro/freeze_windows.json`, every weekend, and outside the default 08:00–18:00 window (configurable via `MERGE_TRAIN_WORKDAY_START`, `MERGE_TRAIN_WORKDAY_END`, and `MERGE_TRAIN_TIMEZONE`).
-- **Guardrail:** `tools/merge-train/freeze_guard.ts` runs before train execution and in CI to enforce the window.
-- **Emergency overrides:** Supply `MERGE_TRAIN_OVERRIDE_TOKEN` containing JSON like:
-
-  ```json
-  {
-    "id": "freeze-override-123",
-    "scope": "merge-train",
-    "reason": "incident hotfix for customer outage",
-    "approved_by": ["release-manager", "sre-oncall"],
-    "expires_at": "2025-12-20T15:00:00Z"
-  }
-  ```
-
-  The token is validated by OPA (`policy/merge_train.rego`) and requires at least two approved roles plus an explicit incident/hotfix reason for after-hours bypasses.
-- **How to use:** `MERGE_TRAIN_OVERRIDE_TOKEN='{"id":"..."}' node tools/merge-train/freeze_guard.ts` → proceeds only if policy approves the token.
-
 ---
 
 ## Automation Scripts
