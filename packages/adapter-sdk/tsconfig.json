@@ -3,11 +3,8 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
     "declaration": true,
-    "resolveJsonModule": true
+    "composite": false
   },
-  "include": ["src/**/*.ts", "src/**/*.json"],
-  "exclude": ["dist", "node_modules"]
+  "include": ["src"]
 }

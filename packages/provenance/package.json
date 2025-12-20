@@ -1,0 +1,19 @@
+{
+  "name": "@intelgraph/provenance",
+  "version": "0.1.0",
+  "description": "Shared provenance receipt types, schema alignment, and verification helpers.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "pnpm run build && jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^20.17.5",
+    "jest": "^29.7.0",
+    "typescript": "^5.7.3"
+  }
+}

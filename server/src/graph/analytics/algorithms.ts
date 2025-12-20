@@ -17,7 +17,11 @@ export class GraphAnalytics {
       LIMIT $limit
       RETURN n.globalId, n.entityType, n.attributes.name, degree
     `;
-    return await this.store.runCypher(cypher, { tenantId, limit: neo4j.int(limit) });
+    return await this.store.runCypher(
+      cypher,
+      { tenantId, limit: neo4j.int(limit) },
+      { tenantId },
+    );
   }
 
   async getShortestPath(tenantId: string, startId: string, endId: string): Promise<any> {
@@ -27,6 +31,6 @@ export class GraphAnalytics {
             p = shortestPath((start)-[*]-(end))
       RETURN p
     `;
-    return await this.store.runCypher(cypher, { tenantId, startId, endId });
+    return await this.store.runCypher(cypher, { tenantId, startId, endId }, { tenantId });
   }
 }

@@ -1,0 +1,48 @@
+postgres:
+  enabled: true
+  image: postgres:15
+  persistence:
+    enabled: false
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+  extraEnv:
+    - name: POSTGRES_DB
+      value: intelgraph_shadow
+    - name: POSTGRES_USER
+      valueFrom:
+        secretKeyRef:
+          name: migration-secrets
+          key: postgres-user
+    - name: POSTGRES_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: migration-secrets
+          key: postgres-password
+
+neo4j:
+  enabled: true
+  image: neo4j:5
+  authEnabled: true
+  config:
+    dbms.security.auth_enabled: "true"
+  persistence:
+    enabled: false
+  env:
+    NEO4J_AUTH: "neo4j/${NEO4J_PASSWORD:-devpassword}"
+
+typesense:
+  enabled: true
+  image: typesense/typesense:0.25.1
+  persistence:
+    enabled: false
+  extraEnv:
+    - name: TYPESENSE_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: migration-secrets
+          key: typesense-key
+  service:
+    type: ClusterIP
+    port: 8108
