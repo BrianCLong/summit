@@ -3,9 +3,9 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",
-    "declaration": true,
-    "allowImportingTsExtensions": false,
-    "types": ["node"]
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "allowImportingTsExtensions": false
   },
   "include": ["src"]
 }

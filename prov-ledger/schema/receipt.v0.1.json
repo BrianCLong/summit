@@ -1,137 +1,148 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://intelgraph.dev/prov-ledger/schema/receipt.v0.1.json",
-  "title": "ProvenanceReceipt",
-  "description": "Signed provenance receipt for ledger payloads",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://intelgraph.io/prov-ledger/receipt.v0.1.json",
+  "title": "Provenance Receipt v0.1",
+  "description": "Verifiable receipt for provenance-aware execution steps, including signing metadata and selective disclosure redactions.",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "id",
-    "schemaVersion",
-    "issuer",
-    "subject",
-    "issuedAt",
-    "payload",
-    "signature"
-  ],
   "properties": {
     "id": {
       "type": "string",
-      "format": "uuid",
-      "description": "Stable identifier for the receipt"
+      "description": "Unique identifier for the receipt",
+      "pattern": "^[a-zA-Z0-9._:-]{8,}$"
     },
-    "schemaVersion": {
+    "version": {
       "type": "string",
-      "const": "0.1",
-      "description": "Schema version guard for receipts"
+      "enum": ["0.1.0"],
+      "default": "0.1.0"
     },
-    "issuer": {
+    "caseId": {
       "type": "string",
-      "minLength": 1,
-      "description": "Entity that produced the receipt"
+      "description": "Case or investigation identifier the receipt belongs to"
     },
-    "subject": {
-      "type": "string",
-      "minLength": 1,
-      "description": "Primary subject of the receipt (e.g. artifact, job, or bundle)"
+    "claimIds": {
+      "type": "array",
+      "description": "Claims covered by the receipt",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
     },
-    "issuedAt": {
-      "type": "string",
-      "format": "date-time",
-      "description": "When the receipt was issued"
-    },
-    "expiresAt": {
+    "createdAt": {
       "type": "string",
       "format": "date-time",
-      "description": "Optional expiration for the receipt"
+      "description": "Timestamp when the receipt was issued"
     },
-    "payload": {
+    "actor": {
       "type": "object",
+      "description": "Identity that executed the action",
       "additionalProperties": false,
-      "required": ["artifactHash", "manifestUri", "nonce"],
       "properties": {
-        "artifactHash": {
-          "type": "string",
-          "pattern": "^[a-f0-9]{64}$",
-          "description": "SHA-256 hash of the artifact or bundle being acknowledged"
-        },
-        "manifestUri": {
-          "type": "string",
-          "format": "uri",
-          "description": "URI for the manifest or bundle described by the receipt"
-        },
-        "nonce": {
-          "type": "string",
-          "minLength": 16,
-          "description": "Randomized nonce to prevent replay of identical payloads"
-        },
-        "metadata": {
-          "type": "object",
-          "additionalProperties": true,
-          "description": "Arbitrary metadata captured alongside the payload"
-        },
-        "chain": {
-          "type": "array",
-          "description": "Optional provenance chain entries folded into the receipt",
-          "items": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["stepId", "outputHash"],
-            "properties": {
-              "stepId": {
-                "type": "string",
-                "minLength": 1,
-                "description": "Identifier for the provenance step"
-              },
-              "inputHash": {
-                "type": "string",
-                "pattern": "^[a-f0-9]{64}$",
-                "description": "Hash of the input to the step"
-              },
-              "outputHash": {
-                "type": "string",
-                "pattern": "^[a-f0-9]{64}$",
-                "description": "Hash of the output from the step"
-              },
-              "timestamp": {
-                "type": "string",
-                "format": "date-time",
-                "description": "When the step was executed"
-              }
-            }
-          }
-        }
+        "id": { "type": "string" },
+        "role": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "displayName": { "type": "string" }
+      },
+      "required": ["id", "role"]
+    },
+    "pipeline": {
+      "type": "object",
+      "description": "Execution pipeline metadata for traceability",
+      "additionalProperties": false,
+      "properties": {
+        "stage": { "type": "string" },
+        "runId": { "type": "string" },
+        "taskId": { "type": "string" },
+        "step": { "type": "string" }
       }
+    },
+    "payloadHash": {
+      "type": "string",
+      "description": "SHA-256 hash of the canonicalized receipt payload (pre-signature)",
+      "pattern": "^[a-f0-9]{64}$"
     },
     "signature": {
       "type": "object",
+      "description": "Detached signature for the receipt payload hash",
       "additionalProperties": false,
-      "required": ["algorithm", "keyId", "value", "messageDigest"],
       "properties": {
         "algorithm": {
           "type": "string",
-          "enum": ["RSASSA_PSS_SHA_256", "ECDSA_SHA_256"],
-          "description": "KMS signing algorithm used to sign the receipt"
+          "enum": ["ed25519"],
+          "description": "Signature algorithm used to sign the payload"
         },
         "keyId": {
           "type": "string",
-          "minLength": 1,
-          "description": "Key identifier or ARN used by KMS"
+          "description": "Identifier of the signing key in the KMS"
+        },
+        "publicKey": {
+          "type": "string",
+          "description": "Base64-encoded public key for verification"
         },
         "value": {
           "type": "string",
-          "description": "Base64-encoded signature over the canonical receipt payload"
+          "description": "Base64-encoded detached signature of the payload hash"
         },
-        "messageDigest": {
+        "signedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["algorithm", "keyId", "publicKey", "value", "signedAt"]
+    },
+    "proofs": {
+      "type": "object",
+      "description": "Integrity proofs linking the receipt back to the manifest and claim hashes",
+      "additionalProperties": false,
+      "properties": {
+        "receiptHash": {
           "type": "string",
           "pattern": "^[a-f0-9]{64}$",
-          "description": "Hex-encoded SHA-256 digest of the canonical payload"
+          "description": "SHA-256 hash of the fully signed receipt"
         },
-        "certificateArn": {
+        "manifestMerkleRoot": {
           "type": "string",
-          "description": "Optional certificate ARN when using asymmetric keys"
+          "pattern": "^[a-f0-9]{64}$",
+          "description": "Merkle root of the manifest the receipt was generated against"
+        },
+        "claimHashes": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "description": "Hashes of the individual claims included in the receipt"
         }
+      },
+      "required": ["receiptHash"]
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Arbitrary metadata attached during execution",
+      "additionalProperties": true
+    },
+    "redactions": {
+      "type": "array",
+      "description": "Selective disclosure controls applied to the exportable receipt",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "path": { "type": "string" },
+          "reason": { "type": "string" },
+          "appliedAt": { "type": "string", "format": "date-time" },
+          "appliedBy": { "type": "string" }
+        },
+        "required": ["path", "reason"]
       }
     }
-  }
+  },
+  "required": [
+    "id",
+    "version",
+    "caseId",
+    "claimIds",
+    "createdAt",
+    "actor",
+    "payloadHash",
+    "signature",
+    "proofs"
+  ]
 }

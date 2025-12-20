@@ -1,35 +1,33 @@
 {
   "name": "@intelgraph/api",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "description": "REST surface for provenance receipts",
   "type": "module",
-  "description": "HTTP API surface for provenance receipts",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "schema.graphql"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "dev": "node --loader ts-node/esm src/index.ts",
-    "lint": "eslint src --ext .ts",
-    "test": "jest --runInBand --config ../../jest.config.cjs apps/api"
+    "dev": "tsx watch src/index.ts",
+    "test": "jest"
   },
   "dependencies": {
+    "@aws-sdk/client-kms": "^3.744.0",
     "@intelgraph/provenance": "workspace:*",
     "@intelgraph/receipt-signer": "workspace:*",
-    "express": "^4.21.1"
+    "express": "^5.2.0"
   },
   "devDependencies": {
-    "@types/express": "^4.17.21",
-    "@types/node": "^24.10.1",
+    "@types/express": "^5.0.3",
+    "@types/jest": "^30.0.0",
     "@types/supertest": "^6.0.3",
-    "supertest": "^7.0.0",
-    "typescript": "^5.7.3"
-  },
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    }
+    "jest": "^30.2.0",
+    "supertest": "^7.1.1",
+    "ts-jest": "^29.4.5",
+    "tsx": "^4.6.2",
+    "typescript": "^5.9.3"
   }
 }

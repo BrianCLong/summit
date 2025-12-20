@@ -1,65 +1,46 @@
 import { Router } from 'express';
-import type {
-  ProvenanceReceipt,
-  UnsignedReceipt,
-} from '@intelgraph/provenance';
-import { ReceiptSigner } from '@intelgraph/receipt-signer';
 
-export interface ReceiptRepository {
-  findById(id: string): Promise<UnsignedReceipt | null>;
+import {
+  ReceiptStore,
+  ReceiptVerifier,
+} from '@intelgraph/receipt-signer';
+
+export interface GetReceiptDependencies {
+  store: ReceiptStore;
+  verifier: ReceiptVerifier;
 }
 
-export class InMemoryReceiptRepository implements ReceiptRepository {
-  constructor(private readonly receipts: UnsignedReceipt[]) {}
-
-  async findById(id: string): Promise<UnsignedReceipt | null> {
-    const receipt = this.receipts.find((entry) => entry.id === id);
-    return receipt ? { ...receipt } : null;
-  }
-}
-
-export interface ReceiptRouteDependencies {
-  repository: ReceiptRepository;
-  signer: ReceiptSigner;
-}
-
-export function createReceiptRouter(
-  deps: ReceiptRouteDependencies,
-): Router {
+export const createGetReceiptRouter = ({
+  store,
+  verifier,
+}: GetReceiptDependencies) => {
   const router = Router();
 
   router.get('/:id', async (req, res) => {
     try {
-      const { id } = req.params;
-      const unsigned = await deps.repository.findById(id);
-
-      if (!unsigned) {
-        res.status(404).json({ error: 'Receipt not found' });
-        return;
+      const receipt = await store.get(req.params.id);
+      if (!receipt) {
+        return res.status(404).json({
+          error: 'Receipt not found',
+          id: req.params.id,
+        });
       }
 
-      const signed = await deps.signer.sign(unsigned);
-      const response: ProvenanceReceipt = {
-        ...signed,
-      };
+      const verified = await verifier.verify(receipt);
 
-      res.json({
-        id: response.id,
-        schemaVersion: response.schemaVersion,
-        issuer: response.issuer,
-        subject: response.subject,
-        issuedAt: response.issuedAt,
-        expiresAt: response.expiresAt,
-        payload: response.payload,
-        signature: response.signature,
-      });
+      return res.json({ receipt, verified });
     } catch (error) {
-      res.status(500).json({
-        error: 'Failed to fetch receipt',
-        detail: error instanceof Error ? error.message : 'unknown',
+      return res.status(500).json({
+        error: 'Failed to load receipt',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Unknown error occurred',
       });
     }
   });
 
   return router;
-}
+};
+
+export default createGetReceiptRouter;

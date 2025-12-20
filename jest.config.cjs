@@ -11,10 +11,6 @@ module.exports = {
       },
     ],
   },
-  extensionsToTreatAsEsm: ['.ts', '.tsx'],
-  haste: {
-    throwOnModuleCollision: false,
-  },
   roots: ['server', 'client', 'packages', 'services', 'tests'],
   modulePathIgnorePatterns: [
     '<rootDir>/dist/',

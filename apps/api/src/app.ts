@@ -1,30 +1,21 @@
 import express from 'express';
-import { ReceiptSigner } from '@intelgraph/receipt-signer';
 
 import {
-  InMemoryReceiptRepository,
-  type ReceiptRepository,
-  createReceiptRouter,
-} from './routes/receipts/get.js';
+  GetReceiptDependencies,
+  createGetReceiptRouter,
+} from './routes/receipts/get';
 
-export interface ApiDependencies {
-  signer: ReceiptSigner;
-  repository?: ReceiptRepository;
-}
+export interface ApiDependencies extends GetReceiptDependencies {}
 
-export function buildApp(deps: ApiDependencies) {
+export function buildApp(dependencies: ApiDependencies) {
   const app = express();
-  const repository =
-    deps.repository ?? new InMemoryReceiptRepository([]);
+  app.use(express.json());
 
-  app.get('/healthz', (_req, res) => res.json({ ok: true }));
-  app.use(
-    '/receipts',
-    createReceiptRouter({
-      repository,
-      signer: deps.signer,
-    }),
-  );
+  app.use('/receipts', createGetReceiptRouter(dependencies));
+
+  app.get('/health', (_req, res) => {
+    res.json({ status: 'ok', service: 'api' });
+  });
 
   return app;
 }

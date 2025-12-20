@@ -23,6 +23,13 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
+    --surface-elevated: 0 0% 100%;
+    --surface-subtle: 210 40% 98%;
+    --stroke-strong: 214.3 31.8% 85%;
+    --success-strong: 142.1 71% 35%;
+    --warning-strong: 37 92% 50%;
+    --info-strong: 221 83% 53%;
+    --danger-strong: 340 82% 52%;
     --radius: 0.5rem;
   }
 

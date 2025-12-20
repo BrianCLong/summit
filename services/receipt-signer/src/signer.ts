@@ -1,114 +1,71 @@
-import { createHash } from 'crypto';
-import {
-  KMSClient,
-  SignCommand,
-  VerifyCommand,
-  type MessageType,
-  type SignCommandInput,
-  type SigningAlgorithmSpec,
-  type VerifyCommandInput,
-} from '@aws-sdk/client-kms';
-import {
-  type ProvenanceReceipt,
-  type ReceiptSignature,
-  type ReceiptSigningAlgorithm,
-  type UnsignedReceipt,
-} from '@intelgraph/provenance';
+import { generateKeyPairSync, sign, verify } from 'crypto';
 
-export interface ReceiptSignerOptions {
-  kmsKeyId: string;
-  kmsRegion?: string;
-  signingAlgorithm?: SigningAlgorithmSpec;
-  messageType?: MessageType;
-  client?: KMSClient;
+export interface SignRequest {
+  payload: string;
+  keyId?: string;
 }
 
-function sortKeys(value: unknown): unknown {
-  if (Array.isArray(value)) {
-    return value.map(sortKeys);
-  }
-  if (value && typeof value === 'object') {
-    return Object.entries(value as Record<string, unknown>)
-      .filter(([, v]) => v !== undefined)
-      .sort(([a], [b]) => (a > b ? 1 : a < b ? -1 : 0))
-      .reduce<Record<string, unknown>>((acc, [key, val]) => {
-        acc[key] = sortKeys(val);
-        return acc;
-      }, {});
-  }
-  return value;
-}
-
-export function canonicaliseReceipt(
-  receipt: UnsignedReceipt | ProvenanceReceipt,
-): Buffer {
-  const { signature: _signature, ...unsigned } = receipt as ProvenanceReceipt;
-  const sorted = sortKeys(unsigned);
-  return Buffer.from(JSON.stringify(sorted));
-}
-
-function sha256(data: Buffer): Buffer {
-  return createHash('sha256').update(data).digest();
+export interface SignedPayload {
+  algorithm: 'ed25519';
+  keyId: string;
+  publicKey: string;
+  value: string;
+  signedAt: string;
 }
 
 export class ReceiptSigner {
-  private readonly client: KMSClient;
-  private readonly signingAlgorithm: SigningAlgorithmSpec;
   private readonly keyId: string;
-  private readonly messageType: MessageType;
 
-  constructor(options: ReceiptSignerOptions) {
-    this.client =
-      options.client ??
-      new KMSClient({
-        region: options.kmsRegion ?? process.env.AWS_REGION ?? 'us-east-1',
-      });
-    this.signingAlgorithm = options.signingAlgorithm ?? 'RSASSA_PSS_SHA_256';
-    this.keyId = options.kmsKeyId;
-    this.messageType = options.messageType ?? 'DIGEST';
+  private readonly privateKey: ReturnType<typeof generateKeyPairSync>['privateKey'];
+
+  private readonly publicKey: string;
+
+  constructor(keyId = 'kms-default') {
+    this.keyId = keyId;
+    const pair = generateKeyPairSync('ed25519');
+    this.privateKey = pair.privateKey;
+    this.publicKey = pair.publicKey
+      .export({ type: 'spki', format: 'der' })
+      .toString('base64');
   }
 
-  async sign(unsignedReceipt: UnsignedReceipt): Promise<ProvenanceReceipt> {
-    const canonical = canonicaliseReceipt(unsignedReceipt);
-    const digest = sha256(canonical);
-    const input: SignCommandInput = {
-      KeyId: this.keyId,
-      Message: digest,
-      MessageType: this.messageType,
-      SigningAlgorithm: this.signingAlgorithm,
-    };
+  signPayload(payload: string, requestedKeyId?: string): SignedPayload {
+    const signedAt = new Date().toISOString();
+    const buffer =
+      /^[a-f0-9]{64}$/i.test(payload) && payload.length === 64
+        ? Buffer.from(payload, 'hex')
+        : Buffer.from(payload);
 
-    const result = await this.client.send(new SignCommand(input));
-    if (!result.Signature) {
-      throw new Error('KMS did not return a signature');
-    }
-
-    const signature: ReceiptSignature = {
-      algorithm: this.signingAlgorithm as ReceiptSigningAlgorithm,
-      keyId: this.keyId,
-      value: Buffer.from(result.Signature).toString('base64'),
-      messageDigest: digest.toString('hex'),
-    };
+    const value = sign(null, buffer, this.privateKey).toString('base64');
 
     return {
-      ...unsignedReceipt,
-      signature,
+      algorithm: 'ed25519',
+      keyId: requestedKeyId ?? this.keyId,
+      publicKey: this.publicKey,
+      value,
+      signedAt,
     };
   }
 
-  async verify(receipt: ProvenanceReceipt): Promise<boolean> {
-    const canonical = canonicaliseReceipt(receipt);
-    const digest = sha256(canonical);
-    const signature = Buffer.from(receipt.signature.value, 'base64');
-    const input: VerifyCommandInput = {
-      KeyId: receipt.signature.keyId ?? this.keyId,
-      Message: digest,
-      MessageType: this.messageType,
-      Signature: signature,
-      SigningAlgorithm: receipt.signature.algorithm,
-    };
+  verify(payload: string, signed: SignedPayload): boolean {
+    const buffer =
+      /^[a-f0-9]{64}$/i.test(payload) && payload.length === 64
+        ? Buffer.from(payload, 'hex')
+        : Buffer.from(payload);
 
-    const result = await this.client.send(new VerifyCommand(input));
-    return Boolean(result.SignatureValid);
+    return verify(
+      null,
+      buffer,
+      {
+        key: Buffer.from(signed.publicKey, 'base64'),
+        format: 'der',
+        type: 'spki',
+      },
+      Buffer.from(signed.value, 'base64'),
+    );
+  }
+
+  getPublicKey(): string {
+    return this.publicKey;
   }
 }

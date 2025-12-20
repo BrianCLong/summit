@@ -1,0 +1,261 @@
+# Ingest Pipeline Alerts
+#
+# SLO Targets:
+# - p95 ingest lag <= 60s steady state
+# - DLQ rate < 0.5%
+# - Replay completes within RTO
+#
+groups:
+  - name: ingest-slo-alerts
+    rules:
+      # =========================================================================
+      # Lag Alerts
+      # =========================================================================
+      - alert: IngestLagHigh
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(ingest_lag_seconds_bucket[5m])) by (le, tenant, source)
+          ) > 60
+        for: 5m
+        labels:
+          severity: warning
+          slo: ingest_lag
+          team: ingest
+        annotations:
+          summary: "Ingest lag exceeds 60s (p95)"
+          description: |
+            Tenant {{ $labels.tenant }} source {{ $labels.source }} has p95 lag of {{ $value | humanizeDuration }}.
+            This exceeds the SLO target of 60s.
+          runbook_url: "/RUNBOOKS/ingest.md#lag-high"
+          dashboard_url: "/d/ingest-overview?var-tenant={{ $labels.tenant }}"
+
+      - alert: IngestLagCritical
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(ingest_lag_seconds_bucket[5m])) by (le, tenant, source)
+          ) > 300
+        for: 10m
+        labels:
+          severity: critical
+          slo: ingest_lag
+          team: ingest
+        annotations:
+          summary: "Ingest lag exceeds 5 minutes (p95)"
+          description: |
+            Tenant {{ $labels.tenant }} source {{ $labels.source }} has p95 lag of {{ $value | humanizeDuration }}.
+            Immediate investigation required.
+          runbook_url: "/RUNBOOKS/ingest.md#lag-critical"
+          dashboard_url: "/d/ingest-overview?var-tenant={{ $labels.tenant }}"
+
+      # =========================================================================
+      # DLQ Alerts
+      # =========================================================================
+      - alert: IngestDLQRateHigh
+        expr: |
+          sum(rate(ingest_dlq_total[10m])) by (tenant)
+          / sum(rate(ingest_records_total[10m])) by (tenant)
+          > 0.005
+        for: 10m
+        labels:
+          severity: warning
+          slo: dlq_rate
+          team: ingest
+        annotations:
+          summary: "DLQ rate exceeds 0.5%"
+          description: |
+            Tenant {{ $labels.tenant }} has DLQ rate of {{ $value | humanizePercentage }}.
+            This exceeds the SLO target of 0.5%.
+          runbook_url: "/RUNBOOKS/ingest.md#dlq-rate-high"
+          dashboard_url: "/d/ingest-overview?var-tenant={{ $labels.tenant }}"
+
+      - alert: IngestDLQSpike
+        expr: |
+          increase(ingest_dlq_total[10m]) > 100
+        for: 5m
+        labels:
+          severity: warning
+          team: ingest
+        annotations:
+          summary: "DLQ spike detected"
+          description: |
+            {{ $value }} records sent to DLQ in the last 10 minutes for tenant {{ $labels.tenant }}.
+            Reason: {{ $labels.reason }}
+          runbook_url: "/RUNBOOKS/ingest.md#dlq-spike"
+          dashboard_url: "/d/ingest-overview?var-tenant={{ $labels.tenant }}"
+
+      - alert: IngestDLQReasonConcentration
+        expr: |
+          sum(rate(ingest_dlq_total[1h])) by (reason)
+          / ignoring(reason) sum(rate(ingest_dlq_total[1h]))
+          > 0.5
+        for: 30m
+        labels:
+          severity: info
+          team: ingest
+        annotations:
+          summary: "Single DLQ reason dominates"
+          description: |
+            {{ $value | humanizePercentage }} of DLQ records have reason {{ $labels.reason }}.
+            Consider investigating and fixing the root cause.
+          runbook_url: "/RUNBOOKS/ingest.md#dlq-triage"
+
+      # =========================================================================
+      # Retry Alerts
+      # =========================================================================
+      - alert: IngestUnboundedRetries
+        expr: |
+          increase(ingest_retry_total[10m]) > 500
+        for: 10m
+        labels:
+          severity: warning
+          team: ingest
+        annotations:
+          summary: "High retry rate detected"
+          description: |
+            {{ $value }} retries in the last 10 minutes for reason {{ $labels.reason }}.
+            May indicate persistent downstream issues.
+          runbook_url: "/RUNBOOKS/ingest.md#retry-storm"
+
+      # =========================================================================
+      # Backpressure Alerts
+      # =========================================================================
+      - alert: IngestBackpressureStuck
+        expr: |
+          ingest_backpressure_state{state="brownout"} == 1
+        for: 30m
+        labels:
+          severity: warning
+          team: ingest
+        annotations:
+          summary: "Backpressure stuck in brownout"
+          description: |
+            Ingest adapter {{ $labels.source }} has been in brownout mode for over 30 minutes.
+            Non-critical records are being dropped.
+          runbook_url: "/RUNBOOKS/ingest.md#backpressure-stuck"
+          dashboard_url: "/d/ingest-overview"
+
+      - alert: IngestDrainModeActive
+        expr: |
+          ingest_backpressure_state{state="drain"} == 1
+        for: 5m
+        labels:
+          severity: info
+          team: ingest
+        annotations:
+          summary: "Drain mode active"
+          description: |
+            Ingest adapter {{ $labels.source }} is in drain mode.
+            No new records are being accepted.
+          runbook_url: "/RUNBOOKS/ingest.md#drain-mode"
+
+      # =========================================================================
+      # Throughput Alerts
+      # =========================================================================
+      - alert: IngestThroughputDrop
+        expr: |
+          sum(rate(ingest_records_total[5m])) by (tenant)
+          < 0.1 * sum(rate(ingest_records_total[1h] offset 1h)) by (tenant)
+        for: 15m
+        labels:
+          severity: warning
+          team: ingest
+        annotations:
+          summary: "Ingest throughput dropped significantly"
+          description: |
+            Tenant {{ $labels.tenant }} throughput is {{ $value | humanize }} records/s,
+            which is less than 10% of the rate 1 hour ago.
+          runbook_url: "/RUNBOOKS/ingest.md#throughput-drop"
+
+      - alert: IngestNoRecords
+        expr: |
+          sum(rate(ingest_records_total[15m])) by (tenant) == 0
+          and sum(rate(ingest_records_total[1h] offset 1h)) by (tenant) > 0
+        for: 15m
+        labels:
+          severity: warning
+          team: ingest
+        annotations:
+          summary: "No ingest records for tenant"
+          description: |
+            Tenant {{ $labels.tenant }} has received no records in the last 15 minutes
+            but was active 1 hour ago.
+          runbook_url: "/RUNBOOKS/ingest.md#no-records"
+
+      # =========================================================================
+      # Circuit Breaker Alerts
+      # =========================================================================
+      - alert: IngestCircuitBreakerOpen
+        expr: |
+          ingest_circuit_breaker_state{state="open"} == 1
+        for: 5m
+        labels:
+          severity: critical
+          team: ingest
+        annotations:
+          summary: "Circuit breaker open"
+          description: |
+            Circuit breaker for sink {{ $labels.sink }} is open.
+            Downstream service appears to be failing.
+          runbook_url: "/RUNBOOKS/ingest.md#circuit-breaker"
+
+      # =========================================================================
+      # Replay Alerts
+      # =========================================================================
+      - alert: IngestReplayRunning
+        expr: |
+          ingest_replay_running == 1
+        for: 1m
+        labels:
+          severity: info
+          team: ingest
+        annotations:
+          summary: "Replay operation in progress"
+          description: |
+            Replay {{ $labels.replay_id }} is running for tenant {{ $labels.tenant }}.
+            Started at {{ $labels.started_at }}.
+
+      - alert: IngestReplayStuck
+        expr: |
+          ingest_replay_running == 1
+          and time() - ingest_replay_start_timestamp > 3600
+          and rate(ingest_replay_progress[5m]) == 0
+        for: 10m
+        labels:
+          severity: warning
+          team: ingest
+        annotations:
+          summary: "Replay appears stuck"
+          description: |
+            Replay {{ $labels.replay_id }} has made no progress in 10 minutes.
+            Current progress: {{ $value }}%
+          runbook_url: "/RUNBOOKS/ingest.md#replay-stuck"
+
+      # =========================================================================
+      # Resource Alerts
+      # =========================================================================
+      - alert: IngestWorkerConcurrencySaturated
+        expr: |
+          ingest_worker_concurrency_used / ingest_worker_concurrency_max > 0.95
+        for: 10m
+        labels:
+          severity: warning
+          team: ingest
+        annotations:
+          summary: "Worker concurrency saturated"
+          description: |
+            Worker {{ $labels.worker }} is at {{ $value | humanizePercentage }} concurrency utilization.
+            Consider scaling workers or reducing load.
+          runbook_url: "/RUNBOOKS/ingest.md#concurrency-saturated"
+
+      - alert: IngestTokenBucketDepleted
+        expr: |
+          ingest_worker_tokens_available / ingest_worker_tokens_capacity < 0.1
+        for: 5m
+        labels:
+          severity: info
+          team: ingest
+        annotations:
+          summary: "Rate limit token bucket low"
+          description: |
+            Worker {{ $labels.worker }} token bucket is at {{ $value | humanizePercentage }} capacity.
+            Rate limiting is actively throttling requests.

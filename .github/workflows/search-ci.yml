@@ -1,0 +1,44 @@
+name: Search CI
+
+on:
+  push:
+    paths:
+      - 'search/**'
+      - 'services/search-indexer/**'
+      - 'apps/gateway/src/routes/search.ts'
+
+jobs:
+  lint-schemas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate JSON Schemas
+        run: |
+          for file in search/schemas/*.json; do
+            echo "Checking $file..."
+            jq . "$file" > /dev/null
+          done
+
+  test-indexer:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/search-indexer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - run: npm test
+
+  policy-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: latest
+      - name: Check Rego Policies
+        run: opa check .ci/policies/search.rego
