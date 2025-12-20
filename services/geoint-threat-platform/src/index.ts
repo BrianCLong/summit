@@ -151,6 +151,38 @@ app.post('/api/geoint/threat-data', async (req, res) => {
 });
 
 /**
+ * Retrieve geo points within a bounding box with deterministic ordering
+ */
+app.get('/geo/points', async (req, res) => {
+  try {
+    const bboxParam = req.query.bbox;
+
+    if (typeof bboxParam !== 'string') {
+      return res.status(400).json({ error: 'bbox query parameter is required' });
+    }
+
+    const parts = bboxParam.split(',').map(Number);
+    if (parts.length !== 4 || parts.some((p) => Number.isNaN(p))) {
+      return res.status(400).json({ error: 'bbox must be formatted as minLon,minLat,maxLon,maxLat' });
+    }
+
+    const [minLon, minLat, maxLon, maxLat] = parts;
+    const limit = Math.min(parseInt((req.query.limit as string) || '500', 10), 1000);
+    const offset = parseInt((req.query.offset as string) || '0', 10);
+
+    const result = await repository.getGeoPointsByBBox(
+      { minLon, minLat, maxLon, maxLat },
+      { limit, offset }
+    );
+
+    res.json({ points: result.data, metrics: result.metrics });
+  } catch (error) {
+    console.error('Error fetching geo points:', error);
+    res.status(500).json({ error: 'Failed to fetch geo points' });
+  }
+});
+
+/**
  * Execute multi-INT fusion analysis
  */
 app.post('/api/geoint/fusion', async (req, res) => {
