@@ -62,6 +62,7 @@ import authRouter from './routes/authRoutes.js';
 import qafRouter from './routes/qaf.js';
 import siemPlatformRouter from './routes/siem-platform.js';
 import maestroRouter from './routes/maestro.js';
+import caseRouter from './routes/cases.js';
 import { SummitInvestigate } from './services/SummitInvestigate.js';
 import osintRouter from './routes/osint.js';
 import edgeOpsRouter from './routes/edge-ops.js';
@@ -267,6 +268,7 @@ export const createApp = async () => {
   app.use('/api/webhooks', webhookRouter);
   app.use('/api/support', supportTicketsRouter);
   app.use('/api', ticketLinksRouter);
+  app.use('/api/cases', caseRouter);
   app.use('/api/aurora', auroraRouter);
   app.use('/api/oracle', oracleRouter);
   app.use('/api/phantom-limb', phantomLimbRouter);
