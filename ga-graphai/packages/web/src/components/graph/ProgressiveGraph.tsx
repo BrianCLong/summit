@@ -20,6 +20,8 @@ export interface ProgressiveGraphProps {
   edges: GraphEdge[];
   initialBatchSize?: number;
   frameBudgetMs?: number;
+  streaming?: boolean;
+  streamingLabel?: string;
   onHoverNode?: (id: string | null) => void;
   onSelectNode?: (id: string) => void;
   onRenderComplete?: (elapsedMs: number) => void;
@@ -29,7 +31,10 @@ type FrameHandle = number | undefined;
 const DEFAULT_BATCH_SIZE = 80;
 const DEFAULT_FRAME_BUDGET = 18;
 const LOD_THRESHOLD = 320;
+const MAX_VISIBLE_NODES_COMPACT = 1100;
 const MAX_BATCH_SIZE = 320;
+const MAX_VISIBLE_EDGES_COMPACT = 3200;
+const FRAME_OVERRUN_MULTIPLIER = 2.5;
 
 function scheduleFrame(fn: () => void): FrameHandle {
   if (typeof requestAnimationFrame !== 'undefined') {
@@ -57,6 +62,8 @@ export function ProgressiveGraph({
   onHoverNode,
   onSelectNode,
   onRenderComplete,
+  streaming = false,
+  streamingLabel = 'Streaming results…',
 }: ProgressiveGraphProps): JSX.Element {
   const [renderedCount, setRenderedCount] = useState(() =>
     Math.min(initialBatchSize, nodes.length),
@@ -66,33 +73,80 @@ export function ProgressiveGraph({
   );
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const lodModeRef = useRef<'detailed' | 'compact'>(lodMode);
   const frameRef = useRef<FrameHandle>();
+  const previousNodeCount = useRef(nodes.length);
+  const renderedCountRef = useRef(renderedCount);
 
   useEffect(() => {
-    setRenderedCount(Math.min(initialBatchSize, nodes.length));
-    setLodMode(nodes.length > LOD_THRESHOLD ? 'compact' : 'detailed');
+    lodModeRef.current = lodMode;
+  }, [lodMode]);
+
+  useEffect(() => {
+    renderedCountRef.current = renderedCount;
+  }, [renderedCount]);
+
+  useEffect(() => {
+    setSelectedId((current) =>
+      nodes.some((node) => node.id === current) ? current : null,
+    );
+    setHoveredId((current) =>
+      nodes.some((node) => node.id === current) ? current : null,
+    );
+  }, [nodes]);
+
+  useEffect(() => {
+    const initialLod = nodes.length > LOD_THRESHOLD ? 'compact' : 'detailed';
+    const growingStream = streaming && nodes.length >= previousNodeCount.current;
+    const startingCount = growingStream
+      ? Math.min(nodes.length, Math.max(renderedCountRef.current, previousNodeCount.current))
+      : Math.min(initialBatchSize, nodes.length);
+    setRenderedCount(startingCount);
+    setLodMode(initialLod);
+    lodModeRef.current = initialLod;
 
     let cancelled = false;
-    let currentCount = Math.min(initialBatchSize, nodes.length);
-    let batchSize = initialBatchSize;
+    let currentCount = startingCount;
+    let batchSize = Math.max(initialBatchSize, 1);
     const start = performance.now();
 
     const step = () => {
       if (cancelled) return;
-      const elapsed = performance.now() - start;
-      const nextBatch = Math.min(batchSize * 1.5, MAX_BATCH_SIZE);
-      batchSize = Math.max(Math.round(nextBatch), 1);
-      currentCount = Math.min(currentCount + batchSize, nodes.length);
-      setRenderedCount(currentCount);
+      const frameStart = performance.now();
+      let nextCount = currentCount;
 
-      if (elapsed > frameBudgetMs && nodes.length > LOD_THRESHOLD) {
-        // Switch to compact mode and fast-forward to finish to keep DOM/canvas load capped
-        setLodMode('compact');
-        currentCount = nodes.length;
-        setRenderedCount(currentCount);
-        onRenderComplete?.(performance.now() - start);
-        return;
+      while (
+        nextCount < nodes.length &&
+        performance.now() - frameStart < frameBudgetMs
+      ) {
+        const nextBatch = Math.min(batchSize * 1.35, MAX_BATCH_SIZE);
+        batchSize = Math.max(Math.round(nextBatch), 1);
+        nextCount = Math.min(nextCount + batchSize, nodes.length);
       }
+
+      currentCount = nextCount;
+
+      const elapsed = performance.now() - start;
+      const shouldCompact =
+        nodes.length > LOD_THRESHOLD &&
+        (performance.now() - frameStart > frameBudgetMs ||
+          elapsed > frameBudgetMs * FRAME_OVERRUN_MULTIPLIER);
+
+      if (shouldCompact) {
+        lodModeRef.current = 'compact';
+        setLodMode('compact');
+      }
+
+      const hittingCompactCeiling =
+        lodModeRef.current === 'compact' &&
+        currentCount >= Math.min(nodes.length, MAX_VISIBLE_NODES_COMPACT) &&
+        nodes.length > MAX_VISIBLE_NODES_COMPACT;
+
+      if (hittingCompactCeiling) {
+        currentCount = nodes.length;
+      }
+
+      setRenderedCount(currentCount);
 
       if (currentCount < nodes.length) {
         frameRef.current = scheduleFrame(step);
@@ -102,25 +156,58 @@ export function ProgressiveGraph({
     };
 
     frameRef.current = scheduleFrame(step);
+    previousNodeCount.current = nodes.length;
     return () => {
       cancelled = true;
       cancelFrame(frameRef.current);
     };
-  }, [nodes, initialBatchSize, frameBudgetMs, onRenderComplete]);
+  }, [nodes, streaming, initialBatchSize, frameBudgetMs, onRenderComplete]);
 
   const visibleNodes = useMemo(() => {
-    return nodes.slice(0, renderedCount);
-  }, [nodes, renderedCount]);
+    const progressiveNodes = nodes.slice(0, renderedCount);
+
+    if (
+      lodMode === 'compact' &&
+      progressiveNodes.length > MAX_VISIBLE_NODES_COMPACT
+    ) {
+      const stride = Math.ceil(
+        progressiveNodes.length / MAX_VISIBLE_NODES_COMPACT,
+      );
+      return progressiveNodes
+        .filter((_, index) => index % stride === 0)
+        .slice(0, MAX_VISIBLE_NODES_COMPACT);
+    }
+
+    return progressiveNodes;
+  }, [nodes, renderedCount, lodMode]);
+
+  const elidedCount = useMemo(() => {
+    return Math.max(nodes.length - visibleNodes.length, 0);
+  }, [nodes.length, visibleNodes.length]);
+
+  const nodeById = useMemo(() => {
+    const lookup = new Map<string, GraphNode>();
+    for (const node of nodes) {
+      lookup.set(node.id, node);
+    }
+    return lookup;
+  }, [nodes]);
 
   const visibleNodeIds = useMemo(() => {
     return new Set(visibleNodes.map((node) => node.id));
   }, [visibleNodes]);
 
   const visibleEdges = useMemo(() => {
-    return edges.filter(
+    const connectedEdges = edges.filter(
       (edge) => visibleNodeIds.has(edge.from) && visibleNodeIds.has(edge.to),
     );
-  }, [edges, visibleNodeIds]);
+
+    if (lodMode === 'compact') {
+      return connectedEdges.slice(0, MAX_VISIBLE_EDGES_COMPACT);
+    }
+
+    return connectedEdges;
+  }, [edges, visibleNodeIds, lodMode]);
 
   const handleHover = (id: string | null) => {
     setHoveredId(id);
@@ -143,6 +230,11 @@ export function ProgressiveGraph({
     <div
       role="region"
       aria-label="Progressive graph"
+      aria-busy={streaming || renderedCount < nodes.length}
+      data-visible-count={visibleNodes.length}
+      data-elided-count={elidedCount}
+      data-lod={lodMode}
+      data-streaming={streaming || undefined}
       style={{ position: 'relative', width: '100%', height: '100%' }}
     >
       <svg
@@ -152,8 +244,8 @@ export function ProgressiveGraph({
         style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
       >
         {visibleEdges.map((edge) => {
-          const from = nodes.find((node) => node.id === edge.from);
-          const to = nodes.find((node) => node.id === edge.to);
+          const from = nodeById.get(edge.from);
+          const to = nodeById.get(edge.to);
           if (!from || !to) return null;
           return (
             <line
@@ -214,6 +306,24 @@ export function ProgressiveGraph({
             {nodeLabel(node, index)}
           </button>
         ))}
+        {streaming ? (
+          <div
+            data-streaming-indicator
+            style={{
+              position: 'absolute',
+              right: 12,
+              bottom: 12,
+              padding: '6px 10px',
+              background: '#0f172a',
+              color: '#e2e8f0',
+              borderRadius: 6,
+              fontSize: 12,
+              boxShadow: '0 4px 12px rgba(15, 23, 42, 0.2)',
+            }}
+          >
+            {streamingLabel}
+          </div>
+        ) : null}
       </div>
     </div>
   );

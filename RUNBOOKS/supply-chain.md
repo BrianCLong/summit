@@ -1,89 +1,69 @@
-# Supply Chain Assurance Runbook
+# Supply Chain Integrity Runbook
 
-This runbook describes the required controls and procedures for maintaining software supply chain integrity, including SBOM regeneration, signing method rotation, air-gapped validation, exception handling, and rollback.
+This runbook describes the operational path to maintain supply-chain assurance across software artifacts. It covers SBOM regeneration, signing method rotation, air-gapped validation, exception handling, and rollback. Follow these steps in order and record evidence in the release record.
 
-## 1. SBOM Regeneration
+## Roles & Preconditions
+- **Roles:** release captain (or delegate), security on-call, service owner.
+- **Prereqs:** working `cosign`, `syft`, `grype`, offline trust bundle (public keys, policies), access to provenance store, and CI credentials to update signing secrets.
+- **Artifacts to track:** artifact digest, SBOM hash, attestation signature(s), vulnerability scan report ID, exception ticket (if any).
 
-1. **Trigger criteria:**
-   - Any dependency upgrade or new dependency introduction.
-   - Weekly scheduled regeneration for drift detection.
-   - Prior to release candidates or security advisories.
-2. **Generate SBOMs:**
-   - Ensure a clean workspace: `git status` should be clean aside from the intended changes.
-   - Run the workspace SBOM build (CycloneDX SPDX JSON):
-     - `pnpm run sbom:generate` (or `make sbom` if available).
-   - Verify artifacts land in `artifacts/sbom/` with timestamped filenames.
-3. **Validate SBOMs:**
-   - Run schema validation: `pnpm run sbom:validate`.
-   - Scan for critical CVEs: `pnpm run sbom:scan` and review the report in `artifacts/sbom/reports`.
-   - Confirm dependency provenance annotations (purl, checksums) are present.
-4. **Attach to build:**
-   - Publish SBOMs to the build registry or artifact store (e.g., OCI `:sbom` tag) alongside images.
-   - Link the SBOM artifact path in the PR template’s Security/Compliance section.
-5. **Recordkeeping:**
-   - Update release notes with the SBOM hash (`sha256sum artifacts/sbom/*.json`).
-   - Archive reports in compliance storage with retention ≥ 1 year.
+## SBOM Regeneration
+1. **Triggers:** new/updated dependency or base image, weekly cadence for long-lived releases, or security advisory for a transitive package.
+2. **Build and generate:**
+   - Build the release artifact: `pnpm run build` or service-specific target.
+   - Generate SPDX JSON SBOM: `syft <artifact> -o spdx-json > sbom.json`.
+3. **Attest and publish:**
+   - Sign SBOM attestation: `cosign attest --key cosign.key --predicate sbom.json --type spdx <artifact-ref>`.
+   - Upload SBOM + attestation to provenance store and link digest to the release record.
+4. **Validate:**
+   - Vulnerability scan: `grype sbom:sbom.json --fail-on high` (or policy severity).
+   - Record SBOM digest, cosign bundle, grype report ID, and CI run ID in the checklist.
+5. **Success criteria:** SBOM present, signed, uploaded, and scan passes policy. Stale SBOMs (pre-dependency change) are invalid.
 
-## 2. Signing Method Rotation
+## Signing Method Rotation
+1. **Triggers:** key compromise, cryptoperiod expiry, algorithm deprecation, or mandated trust policy change.
+2. **Prepare:**
+   - Provision new key pair in HSM/KMS; tag owner, purpose, and expiry.
+   - Update CI/CD secrets and K8s sealed-secrets for `cosign`/`notation` with new key material.
+   - Establish a dual-signing window (old + new) for at least one release.
+3. **Execute:**
+   - Dual sign artifacts: `cosign sign --key ${OLD_KEY}` and `cosign sign --key ${NEW_KEY}` for the same digest.
+   - Publish updated trust policy and distribute new public keys to verifiers and air-gapped mirrors.
+   - After dual window, switch verification policy to require the new key and mark the old key revoked/retired.
+4. **Validate & audit:**
+   - Verify every release artifact: `cosign verify --key ${NEW_PUB} <digest>`.
+   - Record rotation window, keys involved, verification evidence, and policy update PRs in the change log.
 
-1. **Rotation cadence:** Every 90 days or on key exposure events.
-2. **Preparation:**
-   - Generate new signing keys via `cosign generate-key-pair` (hardware-backed where available).
-   - Store private keys in the HSM or sealed-secrets; distribute public keys through the trust store repo.
-3. **Dual-publish window:**
-   - Sign artifacts with both old and new keys for 7 days: `cosign sign --key <new> <image>` and repeat with `<old>`.
-   - Publish updated `cosign.pub` references and supply chain policy bundles.
-4. **Verification updates:**
-   - Update admission policies/OPA rules to trust the new key fingerprint and schedule removal of the old fingerprint after the dual window.
-   - Rotate CI secrets to the new key IDs.
-5. **Close-out:**
-   - Revoke the old key, document the revocation record, and notify downstream consumers.
+## Air-Gapped Validation
+1. **Objective:** prove artifact provenance without internet access.
+2. **Inputs:** artifact tarballs, SBOM, signatures/attestations, public keys/trust policy bundle, verification tools with checksums.
+3. **Procedure:**
+   - Transfer inputs via approved media; verify transfer integrity (`sha256sum --check checksums.txt`).
+   - Verify signatures offline: `cosign verify --key <pubkey> <artifact>` and `cosign verify-attestation --type spdx --key <pubkey> <artifact>`.
+   - Validate SBOM offline with pre-synced CVE data: `grype sbom:sbom.json --offline`.
+   - Log results in the offline validation record and sync back to central inventory during the next connected window.
+4. **Controls:** restricted media custody, hash chain for transfers, retained offline logs, and periodic tool checksum verification.
 
-## 3. Air-Gapped Validation
+## Exceptions (Creation & Expiry)
+1. **When needed:** temporary waiver for failing SCA/SAST, unavailable signer, or validated tooling outage.
+2. **Request:** open an exception ticket capturing owner, risk assessment, affected artifacts/digests, scope, duration, and compensating controls.
+3. **Approval & enforcement:**
+   - Security and service owners must approve before merging/deploying.
+   - CI gates must validate a non-expired exception ID before bypassing supply-chain checks.
+4. **Expiry & closure:**
+   - Exceptions auto-expire on the defined end date; deployments fail if expired.
+   - Regenerate SBOM/signatures, rerun scans, and attach evidence to close the ticket; remove bypass flags.
 
-1. **Artifact export:**
-   - Export build artifacts, SBOMs, signatures, and provenance attestations to removable media (`.tar.gz`).
-   - Include verification scripts (`verify.sh`) pinned to specific tool versions.
-2. **Offline verification steps:**
-   - Validate signatures: `cosign verify --key cosign.pub <image>` using the exported public key.
-   - Validate provenance: `cosign verify-attestation --type slsaprovenance <image>`.
-   - Validate SBOM integrity: `cosign verify-blob --signature sbom.sig --key cosign.pub artifacts/sbom/*.json`.
-3. **Environmental assurance:**
-   - Run scanners in offline mode with cached CVE feeds; record scanner version and feed date.
-   - Capture a checksum manifest before and after validation to detect tampering.
-4. **Reporting:**
-   - Store validation logs and manifests in the offline audit vault; sync summaries back to the main audit system when reconnected.
+## Rollback
+1. **Triggers:** failed verification, revoked key, critical CVE in SBOM scan, or expired/invalid exception.
+2. **Action plan:**
+   - Halt rollout and freeze artifact promotion.
+   - Restore last known-good artifact digest and its SBOM/signature pair from provenance store.
+   - Revert trust policy changes tied to recent key rotations; update revocation lists.
+   - Re-run `cosign verify` and `grype` on restored artifacts to confirm integrity.
+3. **Post-rollback:** publish incident report with timeline, root cause, and corrective actions (e.g., patched dependencies, new keys). Schedule remediation and a follow-up rotation/regeneration if required.
 
-## 4. Exception Creation and Expiry
-
-1. **When allowed:** Only for time-bound, risk-accepted deviations (e.g., temporary CVE suppressions or missing signatures) approved by the security owner.
-2. **Create an exception:**
-   - File an Exception ID in the risk register with scope, justification, owner, start date, and expiry.
-   - Attach compensating controls (e.g., runtime detection, additional monitoring).
-   - Reference the Exception ID in the PR template Security/Compliance section.
-3. **Expiry and renewal:**
-   - Default maximum duration: 30 days. Any renewal requires re-approval.
-   - Schedule automated reminders 7 days before expiry.
-   - Remove the exception from policy bindings and close the register entry after mitigation is complete.
-
-## 5. Rollback Procedures
-
-1. **Triggers:**
-   - Signature validation failures, SBOM drift with new critical CVEs, or compromised keys.
-2. **Rollback steps:**
-   - Halt promotion and freeze deployments via feature flags or ArgoCD pause.
-   - Revert to the last known good artifact and SBOM pairing: `helm rollback <release> <rev>` or re-pin image digest.
-   - Re-enable verification policies pointing to the last trusted key and SBOM hash.
-   - Notify stakeholders and incident response channels; open a post-incident record.
-3. **Post-rollback hardening:**
-   - Rotate affected keys, regenerate SBOMs, and re-run full verification before re-promoting.
-   - Add regression checks to CI to prevent recurrence (e.g., mandatory SBOM validation gate).
-
-## 6. Quick Validation Checklist
-
-- [ ] Latest SBOM generated, validated, and attached to build
-- [ ] Artifact signatures verified against current trust store
-- [ ] Provenance attestations validated (SLSA-compliant)
-- [ ] Air-gapped validation performed or scheduled
-- [ ] No active exceptions, or valid Exception ID recorded with expiry
-- [ ] Rollback plan reviewed and on-call aware
+## Contacts & References
+- Security on-call: `security-oncall@example.com`
+- Provenance service: `provenance-team@example.com`
+- Tooling docs: `tools/supply-chain/README.md` (update when tooling or trust policies change)

@@ -1,0 +1,30 @@
+{
+  "alerts": [
+    {
+      "id": "alert-100",
+      "title": "Unauthorized SSH",
+      "severity": "medium",
+      "asset_id": "srv-1",
+      "reported_by": "analyst@example.com",
+      "timestamp": "2025-02-01T08:00:00Z"
+    },
+    {
+      "id": "alert-101",
+      "title": "Unusual data egress",
+      "severity": "high",
+      "asset_id": "srv-2",
+      "reported_by": "analyst@example.com",
+      "timestamp": "2025-02-01T09:30:00Z"
+    }
+  ],
+  "assets": {
+    "srv-1": {
+      "hostname": "core-1",
+      "owner": "core-team"
+    },
+    "srv-2": {
+      "hostname": "edge-2",
+      "owner": "edge-team"
+    }
+  }
+}
