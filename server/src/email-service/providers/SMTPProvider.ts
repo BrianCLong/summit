@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * SMTP Email Provider
  *

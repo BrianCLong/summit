@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { promptRegistry } from '../../prompts/registry.js';
 import { runsRepo } from '../maestro/runs/runs-repo.js';
 

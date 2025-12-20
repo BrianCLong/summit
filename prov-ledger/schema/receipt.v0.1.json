@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://intelgraph.io/prov-ledger/receipt.v0.1.json",
+  "title": "Provenance Receipt v0.1",
+  "description": "Verifiable receipt for provenance-aware execution steps, including signing metadata and selective disclosure redactions.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the receipt",
+      "pattern": "^[a-zA-Z0-9._:-]{8,}$"
+    },
+    "version": {
+      "type": "string",
+      "enum": ["0.1.0"],
+      "default": "0.1.0"
+    },
+    "caseId": {
+      "type": "string",
+      "description": "Case or investigation identifier the receipt belongs to"
+    },
+    "claimIds": {
+      "type": "array",
+      "description": "Claims covered by the receipt",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the receipt was issued"
+    },
+    "actor": {
+      "type": "object",
+      "description": "Identity that executed the action",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "role": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "displayName": { "type": "string" }
+      },
+      "required": ["id", "role"]
+    },
+    "pipeline": {
+      "type": "object",
+      "description": "Execution pipeline metadata for traceability",
+      "additionalProperties": false,
+      "properties": {
+        "stage": { "type": "string" },
+        "runId": { "type": "string" },
+        "taskId": { "type": "string" },
+        "step": { "type": "string" }
+      }
+    },
+    "payloadHash": {
+      "type": "string",
+      "description": "SHA-256 hash of the canonicalized receipt payload (pre-signature)",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "signature": {
+      "type": "object",
+      "description": "Detached signature for the receipt payload hash",
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "type": "string",
+          "enum": ["ed25519"],
+          "description": "Signature algorithm used to sign the payload"
+        },
+        "keyId": {
+          "type": "string",
+          "description": "Identifier of the signing key in the KMS"
+        },
+        "publicKey": {
+          "type": "string",
+          "description": "Base64-encoded public key for verification"
+        },
+        "value": {
+          "type": "string",
+          "description": "Base64-encoded detached signature of the payload hash"
+        },
+        "signedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["algorithm", "keyId", "publicKey", "value", "signedAt"]
+    },
+    "proofs": {
+      "type": "object",
+      "description": "Integrity proofs linking the receipt back to the manifest and claim hashes",
+      "additionalProperties": false,
+      "properties": {
+        "receiptHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "description": "SHA-256 hash of the fully signed receipt"
+        },
+        "manifestMerkleRoot": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "description": "Merkle root of the manifest the receipt was generated against"
+        },
+        "claimHashes": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "description": "Hashes of the individual claims included in the receipt"
+        }
+      },
+      "required": ["receiptHash"]
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Arbitrary metadata attached during execution",
+      "additionalProperties": true
+    },
+    "redactions": {
+      "type": "array",
+      "description": "Selective disclosure controls applied to the exportable receipt",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "path": { "type": "string" },
+          "reason": { "type": "string" },
+          "appliedAt": { "type": "string", "format": "date-time" },
+          "appliedBy": { "type": "string" }
+        },
+        "required": ["path", "reason"]
+      }
+    }
+  },
+  "required": [
+    "id",
+    "version",
+    "caseId",
+    "claimIds",
+    "createdAt",
+    "actor",
+    "payloadHash",
+    "signature",
+    "proofs"
+  ]
+}

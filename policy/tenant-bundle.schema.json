@@ -1,0 +1,170 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Tenant Policy Bundle",
+  "description": "Schema for a tenant-bound policy bundle combining a base profile with ordered overlays.",
+  "type": "object",
+  "required": ["tenantId", "baseProfile"],
+  "properties": {
+    "tenantId": {
+      "type": "string",
+      "description": "Tenant identifier the bundle applies to."
+    },
+    "bundleId": {
+      "type": "string",
+      "description": "Optional unique bundle identifier for traceability."
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Human readable metadata about the bundle.",
+      "properties": {
+        "issuedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "source": {
+          "type": "string",
+          "description": "How this bundle was produced (e.g., pipeline name)."
+        }
+      }
+    },
+    "baseProfile": {
+      "type": "object",
+      "description": "Base policy profile applied before overlays.",
+      "required": ["id", "version", "regoPackage", "entrypoints", "rules"],
+      "properties": {
+        "id": { "type": "string" },
+        "version": { "type": "string" },
+        "regoPackage": {
+          "type": "string",
+          "description": "OPA package containing the compiled rules."
+        },
+        "entrypoints": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "guardrails": {
+          "type": "object",
+          "properties": {
+            "defaultDeny": { "type": "boolean", "default": true },
+            "requirePurpose": { "type": "boolean", "default": false },
+            "requireJustification": { "type": "boolean", "default": false }
+          }
+        },
+        "crossTenant": {
+          "type": "object",
+          "description": "Cross-tenant access posture for the bundle.",
+          "properties": {
+            "mode": {
+              "type": "string",
+              "enum": ["deny", "allowlist", "delegated"],
+              "default": "deny"
+            },
+            "allow": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Allowlisted tenant IDs when mode is allowlist."
+            },
+            "requireAgreements": {
+              "type": "boolean",
+              "default": true,
+              "description": "Whether cross-tenant agreements are required."
+            }
+          }
+        },
+        "rules": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "effect"],
+            "properties": {
+              "id": { "type": "string" },
+              "description": { "type": "string" },
+              "effect": { "type": "string", "enum": ["allow", "deny"] },
+              "priority": {
+                "type": "integer",
+                "description": "Higher priority rules are evaluated later to override lower ones.",
+                "default": 0
+              },
+              "conditions": {
+                "type": "object",
+                "properties": {
+                  "actions": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  },
+                  "resourceTenants": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  },
+                  "subjectTenants": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  },
+                  "purposes": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  },
+                  "environments": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "overlays": {
+      "type": "array",
+      "description": "Ordered overlays; higher precedence overlays are applied last.",
+      "items": {
+        "type": "object",
+        "required": ["id", "patches"],
+        "properties": {
+          "id": { "type": "string" },
+          "description": { "type": "string" },
+          "precedence": {
+            "type": "integer",
+            "default": 0,
+            "description": "Higher precedence overrides lower precedence."
+          },
+          "selectors": {
+            "type": "object",
+            "properties": {
+              "environments": { "type": "array", "items": { "type": "string" } },
+              "regions": { "type": "array", "items": { "type": "string" } },
+              "labels": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "patches": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["op", "path"],
+              "properties": {
+                "op": {
+                  "type": "string",
+                  "enum": ["set", "remove", "append", "merge"]
+                },
+                "path": {
+                  "type": "string",
+                  "description": "JSON pointer style path (e.g., /crossTenant/allow)."
+                },
+                "value": {
+                  "description": "Value to write for set/append/merge operations."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

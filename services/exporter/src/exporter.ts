@@ -1,6 +1,6 @@
 import JSZip from 'jszip';
 import stringify from 'json-stable-stringify';
-import { v5 as uuidv5 } from 'uuid';
+import { createHash } from 'crypto';
 import { applyRedactions, RedactRule } from './redact';
 import { createPdf } from './pdf';
 import { sha256, sortObject } from './utils';
@@ -12,8 +12,43 @@ export interface ExportRequest {
   format: Array<'json' | 'csv' | 'pdf'>;
 }
 
-const NAMESPACE = uuidv5.URL;
+export interface ExportFile {
+  path: string;
+  content: Buffer;
+}
+
+export interface ExportManifestEntry {
+  path: string;
+  sha256: string;
+  uuid: string;
+}
+
+export interface ExportManifest {
+  generatedAt: string;
+  chainOfCustody: Array<{ event: string; timestamp: string }>;
+  files: ExportManifestEntry[];
+}
+
+const URL_NAMESPACE = '6ba7b811-9dad-11d1-80b4-00c04fd430c8';
 const fixedDate = new Date('2000-01-01T00:00:00Z');
+const namespaceBytes = Buffer.from(URL_NAMESPACE.replace(/-/g, ''), 'hex');
+
+export function uuidV5ForPath(path: string): string {
+  const hash = createHash('sha1');
+  hash.update(namespaceBytes);
+  hash.update(path);
+  const digest = hash.digest();
+  if (digest.length < 16) {
+    throw new Error('Unable to generate UUID digest');
+  }
+  const bytes = Buffer.from(digest.subarray(0, 16));
+  const byte6 = bytes[6] ?? 0;
+  const byte8 = bytes[8] ?? 0;
+  bytes[6] = (byte6 & 0x0f) | 0x50;
+  bytes[8] = (byte8 & 0x3f) | 0x80;
+  const hex = bytes.toString('hex');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
 
 const toCsv = (data: Record<string, unknown>[]): string => {
   if (data.length === 0) return '';
@@ -71,7 +106,7 @@ export const createExport = async (req: ExportRequest): Promise<Buffer> => {
   const manifestEntries = files.map((f) => ({
     path: f.path,
     sha256: sha256(f.content),
-    uuid: uuidv5(f.path, NAMESPACE),
+    uuid: uuidV5ForPath(f.path),
   }));
 
   const manifest = {

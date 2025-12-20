@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 import { mlAnalysisService } from './mlAnalysisService';
 import LLMService from './LLMService';

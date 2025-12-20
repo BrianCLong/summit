@@ -4,7 +4,6 @@ import { verificationSwarmService } from '../services/VerificationSwarmService.j
 import { evidenceFusionService } from '../services/EvidenceFusionService.js';
 import { deepfakeHunterService } from '../services/DeepfakeHunterService.js';
 import { predictiveScenarioSimulator } from '../services/PredictiveScenarioSimulator.js';
-import { summitMLPipeline } from '../services/SummitMLPipeline.js';
 import logger from '../utils/logger.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
 
@@ -69,35 +68,6 @@ router.post('/deepfake/scan', async (req, res) => {
 router.post('/simulation/run', async (req, res) => {
   try {
     const result = await predictiveScenarioSimulator.simulateScenario(req.body);
-    res.json(result);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// --- Summit ML Pipeline (Entity Classification & Threat Scoring) ---
-
-router.post('/ml/classify', async (req, res) => {
-  try {
-    const result = await summitMLPipeline.classifyEntity(req.body);
-    res.json(result);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-router.post('/ml/threat-score', async (req, res) => {
-  try {
-    const result = await summitMLPipeline.calculateThreatScore(req.body);
-    res.json(result);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-router.post('/ml/predict', async (req, res) => {
-  try {
-    const result = await summitMLPipeline.predictFutureRisks(req.body);
     res.json(result);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
