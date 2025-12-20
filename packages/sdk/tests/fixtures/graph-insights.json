@@ -1,0 +1,39 @@
+{
+  "graphId": "2c1f6b0e-3a6d-4d6a-9c2a-4a927e7c5bb1",
+  "generatedAt": "2025-01-15T12:00:00Z",
+  "coverage": {
+    "nodesAnalyzed": 1280,
+    "relationshipsAnalyzed": 3400,
+    "completeness": 0.91,
+    "freshness": "2025-01-15T11:50:00Z"
+  },
+  "insights": [
+    {
+      "id": "0a5db35c-9de4-447b-81f2-b8ec74e68f3c",
+      "title": "Coordinated activity between high-risk accounts",
+      "summary": "Detected a tightly connected cluster of accounts sharing network infrastructure and devices.",
+      "severity": "high",
+      "confidence": 0.93,
+      "tags": ["fraud", "network", "priority"],
+      "relatedEntities": [
+        { "id": "entity-489", "type": "Account", "score": 0.82 },
+        { "id": "entity-512", "type": "Device", "score": 0.77 }
+      ],
+      "remediation": "Quarantine shared devices and rerun enrichment checks on linked accounts.",
+      "generatedAt": "2025-01-15T11:45:00Z"
+    },
+    {
+      "id": "8ef8751f-3e21-4f53-9e6a-20a4e9474cd3",
+      "title": "Sudden spike in anomalous transfers",
+      "summary": "Transfers above the median value increased 4.7x over the last hour across a single community.",
+      "severity": "medium",
+      "confidence": 0.88,
+      "tags": ["anomaly", "payments"],
+      "relatedEntities": [
+        { "id": "entity-833", "type": "Transfer", "score": 0.71 }
+      ],
+      "remediation": "Escalate to tier-2 review and pause outbound settlements in the flagged community.",
+      "generatedAt": "2025-01-15T11:40:00Z"
+    }
+  ]
+}

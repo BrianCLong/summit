@@ -12,6 +12,13 @@ route:
 
   # Child routes for different severities
   routes:
+    - receiver: 'security'
+      matchers:
+        - category = security
+      group_wait: 15s
+      repeat_interval: 2h
+      continue: true
+
     - receiver: 'critical'
       matchers:
         - severity = critical
@@ -92,6 +99,19 @@ receivers:
   - name: 'oncall'
     webhook_configs:
       - url: 'https://runbook-bot/actions/ingest'
+        send_resolved: true
+
+  - name: 'security'
+    slack_configs:
+      - channel: '#alerts-security'
+        title: '🛡️ [{{ .GroupLabels.severity | toUpper }}] {{ .GroupLabels.alertname }}'
+        text: |-
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Tenant:* {{ .Labels.tenant | default "all" }}
+          *Service:* {{ .Labels.service | default "unknown" }}
+          {{ end }}
         send_resolved: true
 
 templates:
