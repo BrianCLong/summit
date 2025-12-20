@@ -1,5 +1,7 @@
 overwrite: true
-schema: 'packages/graphql/schema.graphql'
+schema:
+  - 'packages/graphql/scalars.graphql'
+  - 'packages/graphql/schema.graphql'
 generates:
   packages/graphql/__generated__/client.ts:
     plugins:

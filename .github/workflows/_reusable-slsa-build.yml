@@ -74,6 +74,8 @@ permissions:
 env:
   REGISTRY: ghcr.io
   COSIGN_EXPERIMENTAL: '1'
+  EXPECTED_OIDC_ISSUER: https://token.actions.githubusercontent.com
+  EXPECTED_OIDC_SUBJECT: https://github.com/${{ github.repository }}/.github/workflows/_reusable-slsa-build.yml@${{ github.ref }}
 
 jobs:
   build:
@@ -168,6 +170,17 @@ jobs:
             -a "workflow=${{ github.workflow }}" \
             -a "slsa_level=3" \
             "$IMAGE"
+
+      - name: Verify signature identity pins
+        if: inputs.sign && inputs.push
+        run: |
+          set -euo pipefail
+
+          IMAGE="${{ steps.image-uri.outputs.uri }}"
+
+          cosign verify "$IMAGE" \
+            --certificate-identity "${{ env.EXPECTED_OIDC_SUBJECT }}" \
+            --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}"
 
       - name: Generate SBOM
         if: inputs.sbom

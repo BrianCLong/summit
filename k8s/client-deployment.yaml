@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: summit-client
+spec:
+  selector:
+    matchLabels:
+      app: summit-client
+  template:
+    metadata:
+      labels:
+        app: summit-client
+    spec:
+      containers:
+      - name: summit-client
+        image: summit/client
+        ports:
+        - containerPort: 3000

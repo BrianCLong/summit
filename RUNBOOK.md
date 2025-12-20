@@ -116,6 +116,12 @@ Alerts are configured in Prometheus and routed via Alertmanager to Slack/Teams a
 - **Deployment**: Follow the steps in `README-DEPLOY.md`.
 - **Rollback**: Use `helm rollback maestro -n intelgraph-dev <REVISION_NUMBER>`.
   - **Verification**: After rollback, re-run post-deployment verification steps.
+  - **Manual rollback (CI/CD pipeline)**:
+    1. Navigate to GitHub Actions and open **Pipeline - Rollback**.
+    2. Use **workflow_dispatch** to choose the environment (`staging` or `production`) and specify the Docker tag/SHA to restore.
+    3. Confirm the run and monitor the job output.
+    4. Capture the job URL and verification output as drill evidence (see `post-deploy-verification.yml`).
+    5. If triggered by an alert webhook (from `error-budget-monitoring.yml`), validate that rollback and verification completed; attach links in the drill log.
 
 ## 5. Log & Metric Cribsheet
 
