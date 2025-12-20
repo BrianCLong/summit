@@ -2,56 +2,24 @@
  * Prompt Registry - Centralized prompt management with versioning
  */
 
-import crypto from 'node:crypto';
 import {
   PromptTemplate,
   PromptVariable,
   PromptMetadata,
   RenderedPrompt,
   PromptVersion,
-  PromptLifecycleStatus,
-  PromptApproval,
-  PromptAuditEntry,
-  PromptInvocationRecord,
-  PromptInvocationReplay,
-  PromptLockfile,
-  TokenDiff,
 } from '../types/index.js';
 import { logger } from '../logging/index.js';
-
-interface PromptInvocationOptions {
-  version?: string;
-  model?: string;
-  modelFamily?: string;
-  toolVersions?: Record<string, string>;
-  temperature?: number;
-  output?: string;
-  replayOf?: string;
-  lockfile?: PromptLockfile;
-}
-
-interface ReplayOptions {
-  variables?: Record<string, any>;
-  model?: string;
-  toolVersions?: Record<string, string>;
-  output?: string;
-}
 
 export class PromptRegistry {
   private prompts: Map<string, PromptTemplate>;
   private versions: Map<string, PromptVersion[]>;
-  private versionStatus: Map<string, PromptLifecycleStatus>;
-  private audits: Map<string, PromptAuditEntry[]>;
-  private invocations: Map<string, PromptInvocationRecord>;
   private cache: Map<string, RenderedPrompt>;
   private cacheTTL: number;
 
   constructor(cacheTTL: number = 3600000) {
     this.prompts = new Map();
     this.versions = new Map();
-    this.versionStatus = new Map();
-    this.audits = new Map();
-    this.invocations = new Map();
     this.cache = new Map();
     this.cacheTTL = cacheTTL;
   }
@@ -68,7 +36,6 @@ export class PromptRegistry {
 
     // Store template
     const key = this.makeKey(template.name, template.version);
-    const lifecycle = template.metadata.lifecycle || 'draft';
     this.prompts.set(key, template);
 
     // Store version history
@@ -77,35 +44,11 @@ export class PromptRegistry {
       content: template.content,
       createdAt: template.metadata.createdAt,
       createdBy: template.metadata.author,
-      status: lifecycle,
-      approvals: [],
     };
 
     const existingVersions = this.versions.get(template.name) || [];
-    const existingIndex = existingVersions.findIndex(
-      (v) => v.version === template.version
-    );
-    if (existingIndex >= 0) {
-      existingVersions[existingIndex] = version;
-    } else {
-      existingVersions.push(version);
-    }
+    existingVersions.push(version);
     this.versions.set(template.name, existingVersions);
-    this.versionStatus.set(key, lifecycle);
-    this.appendAudit(key, {
-      actor: template.metadata.author,
-      action: 'created',
-      timestamp: template.metadata.createdAt || new Date(),
-      toStatus: lifecycle,
-      notes: template.metadata.purpose,
-    });
-    if (lifecycle === 'approved') {
-      this.addApproval(template.name, template.version, {
-        approvedBy: template.metadata.author,
-        approvedAt: template.metadata.updatedAt || new Date(),
-        notes: 'Approved on registration',
-      });
-    }
 
     logger.getLogger().info('Prompt template registered successfully', {
       promptId: template.id,
@@ -124,13 +67,7 @@ export class PromptRegistry {
       return null;
     }
 
-    const approvedVersions = versions.filter(
-      (version) => this.getVersionStatus(name, version.version) === 'approved'
-    );
-    const latestVersion =
-      approvedVersions.length > 0
-        ? approvedVersions[approvedVersions.length - 1]!
-        : versions[versions.length - 1]!;
+    const latestVersion = versions[versions.length - 1];
     const key = this.makeKey(name, latestVersion.version);
     return this.prompts.get(key) || null;
   }
@@ -138,12 +75,8 @@ export class PromptRegistry {
   async render(
     name: string,
     variables: Record<string, any>,
-    versionOrOptions?: string | PromptInvocationOptions
+    version?: string
   ): Promise<RenderedPrompt> {
-    const version =
-      typeof versionOrOptions === 'string'
-        ? versionOrOptions
-        : versionOrOptions?.version;
     const template = await this.get(name, version);
     if (!template) {
       throw new Error('Prompt template not found: ' + name);
@@ -180,7 +113,6 @@ export class PromptRegistry {
       metadata: template.metadata,
       variables,
       renderedAt: new Date(),
-      version: template.version,
     };
 
     logger.getLogger().debug('Prompt rendered successfully', {
@@ -189,130 +121,6 @@ export class PromptRegistry {
     });
 
     return result;
-  }
-
-  async invoke(
-    name: string,
-    variables: Record<string, any>,
-    options: PromptInvocationOptions = {}
-  ): Promise<PromptInvocationRecord> {
-    const renderVersion = options.version || options.lockfile?.promptVersion;
-    const rendered = await this.render(name, variables, renderVersion);
-    const promptVersion = renderVersion || rendered.version;
-    const model = options.model || rendered.metadata.model || 'unspecified';
-    const modelFamily = options.modelFamily || rendered.metadata.modelFamily || 'unspecified';
-    const toolVersions = options.toolVersions || {};
-    const temperature = options.temperature ?? rendered.metadata.temperature;
-    const lockfile =
-      options.lockfile ||
-      this.buildLockfile(
-        name,
-        rendered.metadata,
-        promptVersion,
-        model,
-        modelFamily,
-        toolVersions,
-        temperature
-      );
-
-    const output = options.output || this.defaultOutput(rendered.content, model, lockfile);
-    const status = this.getVersionStatus(name, lockfile.promptVersion);
-
-    const record: PromptInvocationRecord = {
-      id: this.generateRunId(),
-      promptName: name,
-      promptVersion: lockfile.promptVersion,
-      promptVersionId: lockfile.promptVersionId,
-      status,
-      model,
-      toolVersions: lockfile.toolVersions,
-      inputHash: this.hashPayload(variables),
-      outputHash: this.hashPayload(output),
-      input: variables,
-      output,
-      lockfile,
-      createdAt: new Date(),
-      replayOf: options.replayOf,
-    };
-
-    if (this.isFeatureEnabled()) {
-      this.invocations.set(record.id, record);
-    }
-
-    return record;
-  }
-
-  getInvocation(id: string): PromptInvocationRecord | null {
-    return this.invocations.get(id) || null;
-  }
-
-  async replayInvocation(
-    runId: string,
-    overrides: ReplayOptions = {}
-  ): Promise<PromptInvocationReplay> {
-    const original = this.getInvocation(runId);
-    if (!original) {
-      throw new Error('Invocation not found: ' + runId);
-    }
-
-    const replayRun = await this.invoke(original.promptName, overrides.variables || original.input, {
-      version: original.promptVersion,
-      model: overrides.model || original.model,
-      modelFamily: original.lockfile.modelFamily,
-      toolVersions: overrides.toolVersions || original.toolVersions,
-      temperature: original.lockfile.temperature,
-      output: overrides.output,
-      replayOf: runId,
-      lockfile: original.lockfile,
-    });
-
-    return {
-      originalRunId: runId,
-      replayRun,
-      diff: this.diffTokens(original.output, replayRun.output),
-    };
-  }
-
-  async updateStatus(
-    name: string,
-    version: string,
-    nextStatus: PromptLifecycleStatus,
-    actor: string,
-    notes?: string
-  ): Promise<PromptVersion> {
-    const key = this.makeKey(name, version);
-    const current = this.versionStatus.get(key) || 'draft';
-
-    if (!this.isLifecycleTransitionValid(current, nextStatus)) {
-      throw new Error(`Invalid status transition from ${current} to ${nextStatus}`);
-    }
-
-    this.versionStatus.set(key, nextStatus);
-    const updated = this.syncVersionStatus(name, version, nextStatus);
-
-    if (nextStatus === 'approved') {
-      this.addApproval(name, version, {
-        approvedAt: new Date(),
-        approvedBy: actor,
-        notes,
-      });
-    }
-
-    this.appendAudit(key, {
-      actor,
-      action: 'status-changed',
-      timestamp: new Date(),
-      fromStatus: current,
-      toStatus: nextStatus,
-      notes,
-    });
-
-    return updated;
-  }
-
-  getAuditTrail(name: string, version: string): PromptAuditEntry[] {
-    const key = this.makeKey(name, version);
-    return this.audits.get(key) || [];
   }
 
   async list(tags?: string[]): Promise<PromptTemplate[]> {
@@ -330,8 +138,6 @@ export class PromptRegistry {
   async delete(name: string, version?: string): Promise<boolean> {
     if (version) {
       const key = this.makeKey(name, version);
-      this.versionStatus.delete(key);
-      this.audits.delete(key);
       return this.prompts.delete(key);
     }
 
@@ -344,8 +150,6 @@ export class PromptRegistry {
     for (const v of versions) {
       const key = this.makeKey(name, v.version);
       this.prompts.delete(key);
-      this.versionStatus.delete(key);
-      this.audits.delete(key);
     }
 
     this.versions.delete(name);
@@ -353,12 +157,7 @@ export class PromptRegistry {
   }
 
   async getVersions(name: string): Promise<PromptVersion[]> {
-    const versions = this.versions.get(name) || [];
-    return versions.map((version) => ({
-      ...version,
-      status: this.versionStatus.get(this.makeKey(name, version.version)) || version.status || 'draft',
-      approvals: version.approvals || [],
-    }));
+    return this.versions.get(name) || [];
   }
 
   private validateTemplate(template: PromptTemplate): void {
@@ -368,30 +167,6 @@ export class PromptRegistry {
 
     if (!template.content) {
       throw new Error('Template content cannot be empty');
-    }
-
-    if (this.isFeatureEnabled()) {
-      if (!template.metadata.owner || !template.metadata.purpose) {
-        throw new Error('Template metadata must include owner and purpose');
-      }
-
-      if (!template.metadata.modelFamily) {
-        throw new Error('Template metadata must include modelFamily');
-      }
-
-      if (
-        !Array.isArray(template.metadata.safetyConstraints) ||
-        template.metadata.safetyConstraints.length === 0
-      ) {
-        throw new Error('Template metadata must include at least one safety constraint');
-      }
-
-      if (
-        template.metadata.lifecycle &&
-        !['draft', 'approved', 'deprecated'].includes(template.metadata.lifecycle)
-      ) {
-        throw new Error('Invalid lifecycle value for prompt metadata');
-      }
     }
 
     // Validate variables
@@ -516,155 +291,24 @@ export class PromptRegistry {
     return name + '@' + version;
   }
 
-  private buildLockfile(
-    name: string,
-    metadata: PromptMetadata,
-    promptVersion: string,
-    model: string,
-    modelFamily: string,
-    toolVersions: Record<string, string>,
-    temperature?: number
-  ): PromptLockfile {
-    return {
-      promptName: name,
-      promptVersion,
-      promptVersionId: this.makeKey(name, promptVersion),
-      model,
-      modelFamily,
-      temperature,
-      toolVersions,
-      safetyConstraints: metadata.safetyConstraints || [],
-    };
-  }
-
-  private getVersionStatus(name: string, version: string): PromptLifecycleStatus {
-    const key = this.makeKey(name, version);
-    return this.versionStatus.get(key) || 'draft';
-  }
-
-  private isLifecycleTransitionValid(
-    current: PromptLifecycleStatus,
-    next: PromptLifecycleStatus
-  ): boolean {
-    if (current === next) {
-      return true;
-    }
-
-    const transitions: Record<PromptLifecycleStatus, PromptLifecycleStatus[]> = {
-      draft: ['approved', 'deprecated'],
-      approved: ['deprecated'],
-      deprecated: [],
-    };
-
-    return transitions[current].includes(next);
-  }
-
-  private appendAudit(key: string, entry: PromptAuditEntry): void {
-    const existing = this.audits.get(key) || [];
-    existing.push(entry);
-    this.audits.set(key, existing);
-  }
-
-  private addApproval(name: string, version: string, approval: PromptApproval): void {
-    const versions = this.versions.get(name) || [];
-    const index = versions.findIndex((v) => v.version === version);
-    if (index >= 0) {
-      const versionEntry = versions[index];
-      if (!versionEntry) {
-        return;
-      }
-      const approvals = versionEntry.approvals || [];
-      approvals.push(approval);
-      versions[index] = { ...versionEntry, approvals, status: 'approved' };
-      this.versions.set(name, versions);
-    }
-  }
-
-  private syncVersionStatus(
-    name: string,
-    version: string,
-    status: PromptLifecycleStatus
-  ): PromptVersion {
-    const versions = this.versions.get(name) || [];
-    const index = versions.findIndex((v) => v.version === version);
-
-    if (index === -1) {
-      throw new Error('Prompt version not found for status update');
-    }
-
-    const versionEntry = versions[index];
-    if (!versionEntry) {
-      throw new Error('Prompt version not found for status update');
-    }
-
-    const updated: PromptVersion = { ...versionEntry, status };
-    versions[index] = updated;
-    this.versions.set(name, versions);
-    return updated;
-  }
-
-  private hashPayload(payload: any): string {
-    const hash = crypto.createHash('sha256');
-    hash.update(JSON.stringify(payload));
-    return hash.digest('hex');
-  }
-
-  private defaultOutput(content: string, model: string, lockfile: PromptLockfile): string {
-    return `[model:${model}|prompt:${lockfile.promptVersionId}] ${content}`;
-  }
-
-  private diffTokens(original: string, replayed: string): TokenDiff {
-    const originalTokens = original.split(/\s+/);
-    const replayedTokens = replayed.split(/\s+/);
-    const removed = originalTokens.filter((token) => !replayedTokens.includes(token));
-    const added = replayedTokens.filter((token) => !originalTokens.includes(token));
-
-    return { added, removed };
-  }
-
-  private generateRunId(): string {
-    return 'run_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
-  }
-
   clearCache(): void {
     this.cache.clear();
-  }
-
-  isFeatureEnabled(): boolean {
-    return (
-      process.env.PROMPT_REGISTRY === '1' ||
-      process.env.FEATURE_PROMPT_REGISTRY_ENABLED === 'true'
-    );
   }
 
   getStats(): {
     totalPrompts: number;
     totalVersions: number;
     cacheSize: number;
-    recordedRuns: number;
-    lifecycle: Record<PromptLifecycleStatus, number>;
   } {
     let totalVersions = 0;
     for (const versions of this.versions.values()) {
       totalVersions += versions.length;
     }
 
-    const lifecycle: Record<PromptLifecycleStatus, number> = {
-      draft: 0,
-      approved: 0,
-      deprecated: 0,
-    };
-
-    for (const status of this.versionStatus.values()) {
-      lifecycle[status] = (lifecycle[status] || 0) + 1;
-    }
-
     return {
       totalPrompts: this.versions.size,
       totalVersions,
       cacheSize: this.cache.size,
-      recordedRuns: this.invocations.size,
-      lifecycle,
     };
   }
 }

@@ -38,7 +38,7 @@ export class SafetyValidator {
         name: 'SQL Injection Detection',
         check: 'injection-detection',
         severity: 'critical',
-        pattern: "(union|select|insert|update|delete|drop|';|--|/\\*)",
+        pattern: "(?i)(union|select|insert|update|delete|drop|';|--|/\\*)",
         action: 'block',
         enabled: true,
       },
@@ -47,7 +47,7 @@ export class SafetyValidator {
         name: 'Script Injection Detection',
         check: 'injection-detection',
         severity: 'critical',
-        pattern: '(<script|javascript:|on\\w+=|eval\\()',
+        pattern: '(?i)(<script|javascript:|on\\w+=|eval\\()',
         action: 'block',
         enabled: true,
       },
@@ -217,18 +217,6 @@ export class SafetyValidator {
     };
   }
 
-  private compileRuleRegex(pattern: string): RegExp | null {
-    try {
-      return new RegExp(pattern, 'i');
-    } catch (error) {
-      logger.getLogger().warn('Invalid safety rule pattern skipped', {
-        pattern,
-        error: (error as Error).message,
-      });
-      return null;
-    }
-  }
-
   private async detectMaliciousContent(input: any): Promise<SafetyViolation[]> {
     const violations: SafetyViolation[] = [];
     const content = typeof input === 'string' ? input : JSON.stringify(input);
@@ -236,10 +224,7 @@ export class SafetyValidator {
     // Check against patterns
     for (const [ruleId, rule] of this.rules) {
       if (rule.check === 'malicious-content' && rule.pattern && rule.enabled) {
-        const regex = this.compileRuleRegex(rule.pattern);
-        if (!regex) {
-          continue;
-        }
+        const regex = new RegExp(rule.pattern, 'i');
         if (regex.test(content)) {
           violations.push({
             ruleId,
@@ -264,10 +249,7 @@ export class SafetyValidator {
     // Check injection patterns
     for (const [ruleId, rule] of this.rules) {
       if (rule.check === 'injection-detection' && rule.pattern && rule.enabled) {
-        const regex = this.compileRuleRegex(rule.pattern);
-        if (!regex) {
-          continue;
-        }
+        const regex = new RegExp(rule.pattern, 'i');
         if (regex.test(content)) {
           violations.push({
             ruleId,

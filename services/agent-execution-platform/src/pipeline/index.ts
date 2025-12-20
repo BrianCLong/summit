@@ -263,14 +263,7 @@ export class PipelineEngine {
 
     if (shouldExecute) {
       const childSteps = this.getChildSteps(step, definition);
-      if (childSteps.length === 0) {
-        throw new Error('Conditional step requires at least one child step');
-      }
-      const [firstChild] = childSteps;
-      if (!firstChild) {
-        throw new Error('Conditional step requires at least one child step');
-      }
-      return await this.executeTask(firstChild, execution.context);
+      return await this.executeTask(childSteps[0], execution.context);
     }
 
     return null;
@@ -288,13 +281,6 @@ export class PipelineEngine {
 
     const results: any[] = [];
     const childSteps = this.getChildSteps(step, definition);
-    if (childSteps.length === 0) {
-      throw new Error('Loop step requires at least one child step');
-    }
-    const [firstChild] = childSteps;
-    if (!firstChild) {
-      throw new Error('Loop step requires at least one child step');
-    }
 
     for (let i = 0; i < loopConfig.maxIterations; i++) {
       // Check break condition
@@ -308,7 +294,7 @@ export class PipelineEngine {
         }
       }
 
-      const result = await this.executeTask(firstChild, execution.context);
+      const result = await this.executeTask(childSteps[0], execution.context);
       results.push(result);
     }
 

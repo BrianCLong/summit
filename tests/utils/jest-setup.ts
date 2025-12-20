@@ -1,4 +1,7 @@
 // @ts-nocheck
+/// <reference types="jest" />
+/// <reference types="node" />
+
 /**
  * Jest Global Setup
  *
@@ -6,6 +9,7 @@
  * It sets up global test utilities and configuration.
  */
 
+// @ts-nocheck
 import { jest } from '@jest/globals';
 
 // Extend Jest timeout for integration tests
@@ -62,7 +66,7 @@ afterEach(() => {
 });
 
 // Global error handler for unhandled rejections in tests
-process.on('unhandledRejection', (reason, promise) => {
+process.on('unhandledRejection', (reason: unknown, promise: Promise<unknown>) => {
   console.error('Unhandled Rejection in test:', reason);
 });
 

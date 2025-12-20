@@ -2,6 +2,7 @@
  * Integration tests for Agent Execution Platform
  */
 
+import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
 import {
   AgentExecutionPlatform,
   agentRunner,
@@ -17,7 +18,6 @@ describe('Agent Execution Platform Integration Tests', () => {
   let platform: AgentExecutionPlatform;
 
   beforeAll(async () => {
-    process.env.PROMPT_REGISTRY = '1';
     platform = new AgentExecutionPlatform();
     await platform.initialize();
   });
@@ -137,8 +137,7 @@ describe('Agent Execution Platform Integration Tests', () => {
       expect(execution).toBeDefined();
       expect(execution.status).toBe('completed');
       expect(execution.steps).toHaveLength(1);
-      const firstStep = execution.steps[0]!;
-      expect(firstStep.status).toBe('completed');
+      expect(execution.steps[0].status).toBe('completed');
     });
 
     test('should handle step dependencies', async () => {
@@ -209,15 +208,8 @@ describe('Agent Execution Platform Integration Tests', () => {
         ],
         metadata: {
           author: 'test',
-          owner: 'qa-team',
-          purpose: 'Smoke-test greeting prompt',
-          modelFamily: 'gpt-4o',
-          safetyConstraints: ['no pii in greetings'],
           createdAt: new Date(),
           updatedAt: new Date(),
-          model: 'gpt-4o-mini',
-          temperature: 0.1,
-          lifecycle: 'approved',
         },
         tags: ['test'],
       };
@@ -247,68 +239,6 @@ describe('Agent Execution Platform Integration Tests', () => {
     test('should track versions', async () => {
       const versions = await promptRegistry.getVersions('test-template');
       expect(versions.length).toBeGreaterThan(0);
-    });
-
-    test('should replay prior runs with lockfile pinning', async () => {
-      const templateV1: PromptTemplate = {
-        id: 'replay-prompt-001',
-        name: 'replay-template',
-        version: '1.0.0',
-        content: 'Investigate {{topic}} using version one.',
-        variables: [
-          { name: 'topic', type: 'string', required: true },
-        ],
-        metadata: {
-          author: 'qa',
-          owner: 'qa-team',
-          purpose: 'Validate replay support',
-          modelFamily: 'gpt-4o',
-          safetyConstraints: ['stay factual'],
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          model: 'gpt-4o-mini',
-          temperature: 0,
-          lifecycle: 'approved',
-        },
-        tags: ['replay'],
-      };
-
-      const templateV2: PromptTemplate = {
-        ...templateV1,
-        id: 'replay-prompt-002',
-        version: '2.0.0',
-        content: 'Investigate {{topic}} with upgraded context.',
-        metadata: {
-          ...templateV1.metadata,
-          updatedAt: new Date(),
-        },
-      };
-
-      await promptRegistry.register(templateV1);
-      await promptRegistry.register(templateV2);
-
-      const runV1 = await promptRegistry.invoke('replay-template', { topic: 'alpha' }, {
-        version: '1.0.0',
-        model: 'gpt-4o-mini',
-        toolVersions: { retriever: '1.0.0' },
-      });
-      const runV2 = await promptRegistry.invoke('replay-template', { topic: 'alpha' }, {
-        version: '2.0.0',
-        model: 'gpt-4o-mini',
-        toolVersions: { retriever: '2.0.0' },
-      });
-
-      expect(runV1.promptVersion).toBe('1.0.0');
-      expect(runV2.promptVersion).toBe('2.0.0');
-      expect(runV2.outputHash).not.toBe(runV1.outputHash);
-
-      const replay = await promptRegistry.replayInvocation(runV1.id);
-
-      expect(replay.replayRun.promptVersion).toBe('1.0.0');
-      expect(replay.replayRun.outputHash).toBe(runV1.outputHash);
-      expect(replay.diff.added).toHaveLength(0);
-      expect(replay.diff.removed).toHaveLength(0);
-      expect(replay.replayRun.lockfile.toolVersions.retriever).toBe('1.0.0');
     });
   });
 

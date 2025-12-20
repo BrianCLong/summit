@@ -1,11 +1,14 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "module": "ESNext",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "strict": false,
+    "noImplicitAny": false,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-    "types": ["jest", "node"]
+    "types": ["node", "jest"]
   },
-  "include": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "tests/utils/jest-setup.ts"]
+  "include": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts"]
 }

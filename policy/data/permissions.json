@@ -1,0 +1,47 @@
+{
+  "permissions": {
+    "graph:query": {
+      "description": "Query graph data within assigned tenant scope.",
+      "risk": "low",
+      "requires_mfa": false,
+      "requires_reason": false,
+      "classification": ["public", "internal", "restricted"],
+      "environments": ["dev", "stage", "prod"]
+    },
+    "report:export": {
+      "description": "Export reports and datasets for downstream sharing.",
+      "risk": "elevated",
+      "requires_mfa": true,
+      "requires_reason": true,
+      "classification": ["public", "internal"],
+      "time_window": { "start": "08:00", "end": "18:00", "timezone": "UTC" }
+    },
+    "ingest:write": {
+      "description": "Write/ingest new records into the tenant graph.",
+      "risk": "elevated",
+      "requires_mfa": true,
+      "requires_reason": true,
+      "classification": ["public", "internal"],
+      "environments": ["dev", "stage", "prod"]
+    },
+    "tenant:impersonate": {
+      "description": "Operate on behalf of another tenant for support or troubleshooting.",
+      "risk": "high",
+      "requires_mfa": true,
+      "requires_reason": true,
+      "requires_warrant": true,
+      "classification": ["internal", "restricted"],
+      "environments": ["stage", "prod"]
+    },
+    "admin:*": {
+      "description": "Administrative operations including deletes and configuration changes.",
+      "risk": "high",
+      "requires_mfa": true,
+      "requires_reason": true,
+      "requires_warrant": true,
+      "dual_control": true,
+      "classification": ["restricted"],
+      "time_window": { "start": "06:00", "end": "20:00", "timezone": "UTC" }
+    }
+  }
+}
