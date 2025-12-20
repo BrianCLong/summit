@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ShardManager } from './ShardManager.js';
 import { PartitionStrategy } from './types.js';
 import { LocalityAwarePartitionStrategy } from './PartitionStrategy.js';

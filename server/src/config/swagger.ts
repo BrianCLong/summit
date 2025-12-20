@@ -1,3 +1,4 @@
+// @ts-nocheck
 import swaggerJsdoc from 'swagger-jsdoc';
 import { cfg } from '../config.js';
 

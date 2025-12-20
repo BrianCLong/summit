@@ -1,0 +1,31 @@
+number,title,state,reviewDecision,mergeStateStatus,action,notes
+1858,"test: main-to-green — clean discovery, env split, core mocks, suite f…",open,,DIRTY,halt,ci-failure-detected
+1857,"Hypervelocity Infrastructure Merge - PR 1853 Conflict Resolution",open,,UNSTABLE,halt,ci-failure-detected
+1853,"chore: restore repo baseline for scoped PRs",open,,DIRTY,halt,ci-failure-detected
+1851,"feat: introduce securiteyes ig risk gate bundle",open,,DIRTY,halt,ci-failure-detected
+1846,"[PREP] [AUTO] feature/model-card-registry",open,,DIRTY,halt,ci-failure-detected
+1845,"[AUTO] feature/model-card-registry",open,,DIRTY,skip,excluded-or-draft-or-changes-requested
+1840,"chore: automate scoped pr open flow",open,,DIRTY,halt,ci-failure-detected
+1831,"feat: add DocForge documentation generator",open,,DIRTY,halt,ci-failure-detected
+1828,"Feature/gateway tariff",open,,DIRTY,halt,ci-failure-detected
+1827,"Feature/aer ledger",open,,DIRTY,halt,ci-failure-detected
+1826,"Feature/crsp",open,,DIRTY,halt,ci-failure-detected
+1825,"Feature/atl",open,,DIRTY,halt,ci-failure-detected
+1824,"Feature/agent gateway wiring",open,,DIRTY,halt,ci-failure-detected
+1823,"Feature/hrn",open,,DIRTY,halt,ci-failure-detected
+1818,"chore: ignore binary lock artifacts",open,,DIRTY,halt,ci-failure-detected
+1812,"fix: resolve typecheck blockers and add shims",open,,DIRTY,halt,ci-failure-detected
+1810,"fix: replace wasm sample with text source",open,,DIRTY,halt,ci-failure-detected
+1809,"chore: ignore psb sdk lockfile",open,,DIRTY,halt,ci-failure-detected
+1807,"feat: deliver railhead automation pack",open,,DIRTY,halt,ci-failure-detected
+1806,"feat: add developer devkit and smoke guardrails",open,,DIRTY,halt,ci-failure-detected
+1804,"chore: ignore railhead lock artifacts",open,,DIRTY,halt,ci-failure-detected
+1795,"feat: launch observability first telemetry kit",open,,DIRTY,halt,ci-failure-detected
+1794,"feat: implement data spine governance controls",open,,DIRTY,halt,ci-failure-detected
+1793,"feat(reliability): orchestrate canary guardrails",open,,DIRTY,halt,ci-failure-detected
+1791,"feat: integrate IntelCraft tradecraft into IntelGraph",open,,DIRTY,halt,ci-failure-detected
+1785,"fix: harden dev kit tooling",open,,DIRTY,halt,ci-failure-detected
+1783,"Feat/asset inventory hardening and validation",open,,DIRTY,halt,ci-failure-detected
+1782,"chore: ignore fcs generated artifacts",open,,DIRTY,halt,ci-failure-detected
+1781,"chore: avoid binary diffs for srlc outputs",open,,DIRTY,halt,ci-failure-detected
+1780,"chore: ignore sdk typescript lockfile",open,,DIRTY,halt,ci-failure-detected

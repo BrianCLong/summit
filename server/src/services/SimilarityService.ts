@@ -9,6 +9,10 @@ import { Pool } from 'pg';
 import { getPostgresPool } from '../config/database.js';
 import EmbeddingService from './EmbeddingService.js';
 import { otelService } from '../monitoring/opentelemetry.js';
+import {
+  vectorQueriesTotal,
+  vectorQueryDurationSeconds,
+} from '../monitoring/metrics.js';
 import { logger } from '../utils/logger.js';
 import { z } from 'zod/v4';
 
@@ -23,6 +27,7 @@ const SimilarityQuerySchema = z
     topK: z.number().int().min(1).max(100).default(10),
     threshold: z.number().min(0).max(1).default(0.7),
     includeText: z.boolean().default(false),
+    tenantId: z.string().optional(),
   })
   .refine((data) => data.entityId || data.text, {
     message: 'Either entityId or text must be provided',
@@ -100,6 +105,7 @@ export class SimilarityService {
         serviceLogger.debug('Similarity search requested', {
           investigationId: validated.investigationId,
           entityId: validated.entityId,
+          tenantId: validated.tenantId,
           hasText: !!validated.text,
           topK: validated.topK,
         });
@@ -131,6 +137,7 @@ export class SimilarityService {
           validated.threshold,
           validated.includeText,
           validated.entityId, // Exclude the query entity itself
+          validated.tenantId,
         );
 
         const executionTime = Date.now() - startTime;
@@ -275,8 +282,15 @@ export class SimilarityService {
     threshold: number,
     includeText: boolean,
     excludeEntityId?: string,
+    tenantId?: string,
   ): Promise<SimilarEntity[]> {
     const client = await this.getPool().connect();
+    const tenantLabel = tenantId ?? 'unknown';
+    const stopTimer = vectorQueryDurationSeconds.startTimer({
+      operation: 'similarity-search',
+      tenant_id: tenantLabel,
+    });
+    let status: 'success' | 'error' = 'success';
 
     try {
       // Convert embedding to pgvector format
@@ -321,7 +335,14 @@ export class SimilarityService {
         similarity: parseFloat(row.similarity),
         text: includeText ? row.text : undefined,
       }));
+    } catch (error) {
+      status = 'error';
+      throw error;
     } finally {
+      stopTimer();
+      vectorQueriesTotal
+        .labels('similarity-search', tenantLabel, status)
+        .inc();
       client.release();
     }
   }

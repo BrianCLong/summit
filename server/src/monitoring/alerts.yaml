@@ -49,6 +49,24 @@ groups:
           summary: "Tenant Isolation Violation"
           description: "A tenant isolation violation was detected."
 
+      - alert: QueryCacheLowHitRate
+        expr: cache_hit_ratio{store="query-signature",op="result"} < 0.6
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Query cache hit rate degraded"
+          description: "Read-through cache hit ratio for query signatures is below 60% over the last 10 minutes. Validate load tests and cache sizing."
+
+      - alert: QueryCacheEvictionSurge
+        expr: increase(cache_evictions_total{store="query-signature"}[5m]) > 25
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Query cache eviction surge"
+          description: "LFU evictions for the query-signature cache exceeded 25 in 5 minutes, indicating RAM/flash tier pressure or poor key locality."
+
       - alert: GraphQLHighErrorRate
         expr: sum(rate(graphql_errors_total[5m])) / sum(rate(graphql_requests_total[5m])) > 0.05
         for: 5m

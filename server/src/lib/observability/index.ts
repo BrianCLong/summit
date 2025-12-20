@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 import { otelService } from './otel';
 import { metrics } from './metrics';

@@ -1,6 +1,6 @@
 import * as crypto from 'crypto';
+import { describe, it, expect, jest } from '@jest/globals';
 import {
-import { describe, it, expect } from '@jest/globals';
   DataSubjectFulfillmentEngine,
   ExportPackSigner,
   InMemoryElasticsearchConnector,
