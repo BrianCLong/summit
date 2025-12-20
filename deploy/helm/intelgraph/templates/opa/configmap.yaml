@@ -1,0 +1,30 @@
+{{- if .Values.opa.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.opa.bundle.configMapName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph.serviceLabels" (dict "serviceName" "opa" "root" .) | nindent 4 }}
+data:
+  opa-config.yaml: |
+    services:
+      bundles:
+        url: http://localhost:8181
+    bundles:
+      authz:
+        service: bundles
+        resource: bundles/{{ .Chart.AppVersion | default .Values.global.tag }}/{{ .Values.opa.bundle.fileName }}
+        persist: true
+    decision_logs:
+      console: true
+      reporting:
+        min_delay_seconds: 5
+        max_delay_seconds: 30
+    default_decision: {{ .Values.opa.decisionPath | quote }}
+    status:
+      console: true
+  README: |
+    OPA is configured to load signed bundles built from git SHA and emit decision logs.
+    Sensitive identifiers are hashed before leaving the gateway.
+{{- end }}

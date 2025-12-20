@@ -1,7 +1,34 @@
 replicaCount: 1
+
+namespace:
+  name: summit-dev
+  labels:
+    istio-injection: enabled
+
 image:
   tag: latest
 
-provenance:
-  # Base64-encoded Ed25519 public keys for bundle verification
-  publicKeys: []
+serviceAccount:
+  name: summit-dev-app
+
+rbac:
+  ops:
+    serviceAccountName: summit-dev-ops
+  ci:
+    serviceAccountName: summit-dev-ci
+
+ingress:
+  hosts:
+    - host: summit-dev.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          servicePort: 80
+  tls:
+    secretName: summit-dev-tls
+    clusterIssuer: letsencrypt-staging
+    dnsNames:
+      - summit-dev.example.com
+
+auditLogging:
+  retentionDays: 7

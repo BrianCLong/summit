@@ -1,39 +1,75 @@
-# Release Trains
+# Release Train Model
 
-## Overview
-Release trains provide a predictable cadence for shipping changes while keeping production deployable at all times. Each train aggregates changes behind a versioned tag, runs the full verification stack, and produces an auditable evidence bundle attached to the release.
+This document defines the canonical release train model for Summit. All releases must adhere to this flow to ensure stability, auditability, and provenance.
 
-## Cadence and Branching
-- **Cadence:** Weekly trains cut every Tuesday at 17:00 UTC; emergency hotfix trains may be created as needed.
-- **Branches:**
-  - `main` remains release-ready.
-  - `release/<train-id>` branches are cut from `main` at the freeze point (e.g., `release/2025.09-wk3`).
-  - Hotfixes cherry-pick into the active `release/*` branch and back into `main`.
-- **Tags:**
-  - Release candidates: `vX.Y.Z-rcN`.
-  - General availability: `vX.Y.Z`.
-  - Train identifiers are embedded in release metadata for traceability.
+## 1. Release Types (Trains)
 
-## Phases
-1. **Code Freeze & Branch Cut** – Create `release/<train-id>` and enable merge queue for train-bound PRs.
-2. **Stabilization** – Run quality gates (`pr-quality-gate.yml`, security scans, migration drift checks) on the train branch.
-3. **Release Candidate** – Tag `vX.Y.Z-rcN`, deploy to staging, and verify SLO/SLA compliance.
-4. **GA & Evidence** – Tag `vX.Y.Z`; the release evidence workflow packages the SBOM, migration set, test results, provenance, and release metadata, then attaches the bundle to the GitHub Release.
-5. **Post-GA Hardening** – Monitor error budgets and open follow-up issues for regressions discovered after GA.
+We utilize four distinct release trains, each with increasing stability guarantees and stricter promotion gates.
 
-## Quality and Release Gates
-- ✅ CI green on train branch (lint, unit, integration, typecheck, contract tests).
-- ✅ Migration drift and schema compatibility validated.
-- ✅ SBOM + vulnerability scanning complete for release images.
-- ✅ SLO verification (latency, availability, error rate) recorded in the evidence bundle.
-- ✅ Provenance and signatures present (SLSA + cosign artifacts).
+| Train | Tag Pattern | Frequency | Target Environment | Purpose |
+|-------|-------------|-----------|--------------------|---------|
+| **Canary** | `vX.Y.Z-canary.N` | Continuous | `canary` | Immediate feedback, dogfooding. |
+| **Integration** | `vX.Y.Z-rc.N` | Daily (Auto) | `staging` | Integration testing, performance baselining. |
+| **Stable** | `vX.Y.Z` | Weekly | `prod` (Internal/SaaS) | General availability for standard users. |
+| **GA** | `vX.Y.Z-ga` | On-Demand | `prod` (Enterprise/Airgap) | Hardened, long-term support releases. |
 
-## Automation
-- `.github/workflows/release-train-evidence.yml` runs on every published release tag and on manual dispatch.
-- The workflow generates the release metadata (validated against `docs/release/release-metadata.schema.json`), SBOM, checksums, and a signed evidence archive.
-- Artifacts are uploaded as both workflow artifacts and GitHub Release assets for reproducibility.
+## 2. Release Flow & Promotion
 
-## Reproducibility & Auditability
-- Every release asset references a commit SHA and pipeline run identifier.
-- Evidence bundles include SHA256 checksums, provenance attestations, and policy/test summaries.
-- Release metadata captures the train identifier, semantic version, change scope, and verification outcomes, ensuring that any release can be rebuilt and independently verified.
+The promotion of code from development to production follows a strictly linear path. "Jumping" trains is prohibited except in declared emergencies.
+
+```mermaid
+graph LR
+    A[Main Branch] -->|CI Pass| B(Canary Train)
+    B -->|Health Checks + 24h| C(Integration Train)
+    C -->|QA Signoff + 1 week| D(Stable Train)
+    D -->|Business Approval| E(GA Release)
+
+    subgraph "Automated"
+    B
+    C
+    end
+
+    subgraph "Gated"
+    D
+    E
+    end
+```
+
+### 2.1 Canary Train
+*   **Trigger**: Merge to `main`.
+*   **Gate**: CI Green (Lint, Unit, Build).
+*   **Agent**: Automated CI.
+*   **Artifacts**: Ephemeral Docker images, "Light" Evidence Bundle (SBOM + Commit SHA).
+
+### 2.2 Integration Train
+*   **Trigger**: Scheduled (Daily @ 10:00 UTC) or Manual trigger by Release Captain.
+*   **Gate**:
+    *   Canary environment healthy for > 24 hours.
+    *   No blocking issues in `canary`.
+    *   Integration tests pass.
+*   **Agent**: Automated Scheduler (promotes verified Canary SHA).
+
+### 2.3 Stable Train (Weekly)
+*   **Trigger**: Weekly (Tuesday @ 13:00 UTC).
+*   **Gate**:
+    *   Integration environment healthy.
+    *   Release Captain approval (Human).
+    *   Full Evidence Bundle generated and verified.
+*   **Agent**: Release Captain (Human) initiates promotion via ChatOps or GitHub.
+
+### 2.4 GA / Enterprise Train
+*   **Trigger**: Business requirement (Quarterly or Feature-driven).
+*   **Gate**:
+    *   Stable release proven in production for > 2 weeks.
+    *   Security Audit sign-off.
+    *   Executive Approval.
+*   **Agent**: Engineering Manager / VP.
+
+## 3. Versioning Strategy
+
+We follow [SemVer 2.0.0](https://semver.org/).
+
+*   **Major**: Breaking changes (requires migration plan).
+*   **Minor**: New features (backward compatible).
+*   **Patch**: Bug fixes.
+*   **Pre-release labels**: Used for Canary and Integration (`-canary`, `-rc`).

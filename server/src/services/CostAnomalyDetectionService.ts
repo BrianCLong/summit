@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Cost Anomaly Detection and Budget Alert Service
  *

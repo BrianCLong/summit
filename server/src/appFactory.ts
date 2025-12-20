@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import config from './config/index.js';
 import logger from './utils/logger.js';
+import { auditLogDashboard } from './logging/structuredLogger.js';
 
 interface AppOptions {
   lightweight?: boolean;
@@ -41,6 +42,10 @@ function createApp({ lightweight = false }: AppOptions = {}) {
       environment: config.env,
       version: '1.0.0',
     });
+  });
+
+  app.get('/observability/logs/dashboard', (req, res) => {
+    res.status(200).json(auditLogDashboard.getDashboardSnapshot());
   });
 
   if (lightweight) return app;

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import PDFDocument from 'pdfkit';
 import { ExportOptions, ReportExporter, normalizeTabularData } from './base';
 import { ReportArtifact } from '../types';

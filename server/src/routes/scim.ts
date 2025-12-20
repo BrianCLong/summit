@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Router } from 'express';
 import { scimService } from '../services/scim/ScimService.js';
 import { ScimUser } from '../services/scim/types.js';

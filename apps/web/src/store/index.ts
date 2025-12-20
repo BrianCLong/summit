@@ -3,6 +3,7 @@ import focusReducer from '../features/focusMode/focusSlice'
 import historyReducer from '../features/history/historySlice'
 import explainReducer from '../features/explain/explainSlice'
 import uiReducer from '../features/ui/uiSlice'
+import annotationsReducer from '../features/annotations/annotationsSlice'
 import { historyMiddleware } from '../features/history/historyMiddleware'
 import { enablePatches } from 'immer'
 
@@ -14,6 +15,7 @@ export const store = configureStore({
     history: historyReducer,
     explain: explainReducer,
     ui: uiReducer,
+    annotations: annotationsReducer,
   },
   middleware: gDM => gDM().concat(historyMiddleware),
 })

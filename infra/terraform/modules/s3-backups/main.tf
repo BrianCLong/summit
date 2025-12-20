@@ -14,6 +14,15 @@ provider "aws" {
 resource "aws_s3_bucket" "backups" {
   bucket        = var.bucket_name
   force_destroy = false
+
+  tags = merge(
+    {
+      Purpose              = "backup"
+      TenantPartitioning   = var.tenant_partitioning_enabled ? "enabled" : "disabled"
+      TenantTagKey         = var.tenant_tag_key
+    },
+    var.tags,
+  )
 }
 
 resource "aws_s3_bucket_versioning" "this" {
@@ -43,7 +52,35 @@ resource "aws_s3_bucket_lifecycle_configuration" "this" {
   }
 }
 
+# Require tenant tagging on all backup object PUT operations
+data "aws_iam_policy_document" "tenant_tag_enforcement" {
+  statement {
+    sid    = "RequireTenantTagOnUploads"
+    effect = "Deny"
+
+    principals {
+      type        = "*"
+      identifiers = ["*"]
+    }
+
+    actions = ["s3:PutObject"]
+    resources = [
+      "${aws_s3_bucket.backups.arn}/*",
+    ]
+
+    condition {
+      test     = "Null"
+      variable = "s3:RequestObjectTag/${var.tenant_tag_key}"
+      values   = ["true"]
+    }
+  }
+}
+
+resource "aws_s3_bucket_policy" "tenant_tag_enforcement" {
+  bucket = aws_s3_bucket.backups.id
+  policy = data.aws_iam_policy_document.tenant_tag_enforcement.json
+}
+
 output "bucket_name" {
   value = aws_s3_bucket.backups.bucket
 }
-

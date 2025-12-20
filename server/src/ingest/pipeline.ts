@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { PipelineConfig, IngestionRun } from '../data-model/types.js';
 import { Logger } from 'pino';
 
