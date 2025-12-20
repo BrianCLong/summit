@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "express": "^4.19.2",
-    "helmet": "^7.1.0"
+    "helmet": "^7.1.0",
+    "typesense": "^1.8.2"
   },
   "devDependencies": {
     "ts-node": "^10.9.2",

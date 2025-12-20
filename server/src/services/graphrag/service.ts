@@ -26,19 +26,16 @@ import {
   NoEvidenceError,
   PolicyViolationError,
   Citation,
-  CitationDiagnostics,
 } from './types.js';
 import {
   retrieveGraphContext,
   buildLlmContextPayload,
   getContextSummary,
+  getValidEvidenceIds,
+  getValidClaimIds,
 } from './retrieval.js';
 import { applyPolicyToContext, canAccessCase } from './policy-guard.js';
 import { createAuditRecord } from './audit-log.js';
-import {
-  enforceCitationGateForAnswer,
-  validateCitationsAgainstContext,
-} from './citation-gate.js';
 
 // Default retrieval parameters
 const DEFAULT_RETRIEVAL_PARAMS: RetrievalParams = {
@@ -50,6 +47,8 @@ const DEFAULT_RETRIEVAL_PARAMS: RetrievalParams = {
 // Fallback messages
 const FALLBACK_NO_EVIDENCE =
   'No evidence is available for you to view in this case based on your current permissions.';
+const FALLBACK_CITATION_FAILURE =
+  'Unable to generate a citation-backed answer from the provided evidence. The system refused to answer without verifiable citations.';
 const FALLBACK_NO_CASE_ACCESS =
   'You do not have access to this case.';
 
@@ -122,12 +121,12 @@ export class EvidenceFirstGraphRagService implements IGraphRagService {
       // 4. Check if any evidence is available after filtering
       if (filteredContext.evidenceSnippets.length === 0) {
         const answer = this.buildNoEvidenceAnswer(policyDecisions);
-        const response = this.buildResponse({
+        const response = this.buildResponse(
           requestId,
           timestamp,
           answer,
-          context: filteredContext,
-        });
+          filteredContext,
+        );
 
         // Log audit record
         await this.logAuditRecord(req, user, response, policyDecisions);
@@ -146,18 +145,17 @@ export class EvidenceFirstGraphRagService implements IGraphRagService {
       });
 
       // 7. Validate and enforce citations
-      const { answer: validatedAnswer, diagnostics } = this.validateAndEnforceCitations(
+      const validatedAnswer = this.validateAndEnforceCitations(
         llmAnswer,
         filteredContext.evidenceSnippets,
       );
 
-      const response = this.buildResponse({
+      const response = this.buildResponse(
         requestId,
         timestamp,
-        answer: validatedAnswer,
-        context: filteredContext,
-        diagnostics,
-      });
+        validatedAnswer,
+        filteredContext,
+      );
 
       // 8. Log audit record
       await this.logAuditRecord(req, user, response, policyDecisions);
@@ -243,30 +241,59 @@ export class EvidenceFirstGraphRagService implements IGraphRagService {
       unknowns: string[];
     },
     evidenceSnippets: { evidenceId: string; claimId?: string }[],
-  ): { answer: GraphRagAnswer; diagnostics?: CitationDiagnostics } {
-    const gateResult = enforceCitationGateForAnswer({
-      llmAnswer,
-      evidenceSnippets,
+  ): GraphRagAnswer {
+    const validEvidenceIds = new Set(evidenceSnippets.map((e) => e.evidenceId));
+    const validClaimIds = new Set(
+      evidenceSnippets
+        .filter((e) => e.claimId)
+        .map((e) => e.claimId as string),
+    );
+
+    // Filter to only valid citations
+    const validCitations = llmAnswer.citations.filter((citation) => {
+      const evidenceValid = validEvidenceIds.has(citation.evidenceId);
+      const claimValid = !citation.claimId || validClaimIds.has(citation.claimId);
+      return evidenceValid && claimValid;
     });
 
-    // Also record dangling citations even if not blocking the answer
-    const contextValidation = validateCitationsAgainstContext({
-      answerText: llmAnswer.answerText,
-      citations: llmAnswer.citations,
-      evidenceSnippets,
-    });
+    // Check if answer has substantive content but no valid citations
+    const hasSubstantiveContent =
+      llmAnswer.answerText.length > 50 &&
+      !llmAnswer.answerText.includes(FALLBACK_NO_EVIDENCE) &&
+      !llmAnswer.answerText.includes(FALLBACK_CITATION_FAILURE);
 
-    const diagnostics =
-      gateResult.diagnostics || contextValidation.diagnostics
-        ? {
-            ...contextValidation.diagnostics,
-            ...gateResult.diagnostics,
-          }
-        : undefined;
+    if (hasSubstantiveContent && validCitations.length === 0) {
+      // Enforce citation requirement - reject answer
+      logger.warn({
+        message: 'Answer rejected due to missing citations',
+        originalCitations: llmAnswer.citations.length,
+        answerLength: llmAnswer.answerText.length,
+      });
+
+      return {
+        answerText: FALLBACK_CITATION_FAILURE,
+        citations: [],
+        unknowns: [
+          'The system could not provide citations for the generated answer.',
+          ...llmAnswer.unknowns,
+        ],
+        usedContextSummary: {
+          numNodes: 0,
+          numEdges: 0,
+          numEvidenceSnippets: evidenceSnippets.length,
+        },
+      };
+    }
 
     return {
-      answer: gateResult.answer,
-      diagnostics,
+      answerText: llmAnswer.answerText,
+      citations: validCitations,
+      unknowns: llmAnswer.unknowns,
+      usedContextSummary: {
+        numNodes: 0, // Filled in by buildResponse
+        numEdges: 0,
+        numEvidenceSnippets: evidenceSnippets.length,
+      },
     };
   }
 
@@ -274,16 +301,11 @@ export class EvidenceFirstGraphRagService implements IGraphRagService {
    * Build final response
    */
   private buildResponse(
-    params: {
-      requestId: string;
-      timestamp: string;
-      answer: GraphRagAnswer;
-      context: { nodes: any[]; edges: any[]; evidenceSnippets: any[] };
-      diagnostics?: any;
-    },
+    requestId: string,
+    timestamp: string,
+    answer: GraphRagAnswer,
+    context: { nodes: any[]; edges: any[]; evidenceSnippets: any[] },
   ): GraphRagResponse {
-    const { requestId, timestamp, answer, context, diagnostics } = params;
-
     return {
       answer: {
         ...answer,
@@ -292,7 +314,6 @@ export class EvidenceFirstGraphRagService implements IGraphRagService {
       rawContext: context,
       requestId,
       timestamp,
-      citationDiagnostics: diagnostics,
     };
   }
 

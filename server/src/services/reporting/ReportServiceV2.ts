@@ -1,10 +1,6 @@
 // @ts-nocheck
 import pino from 'pino';
 import { DisclosurePackager, EvidenceItem } from './DisclosurePackager.js';
-import {
-  assertPublishReadyCitations,
-  normalizeCitationModel,
-} from '../graphrag/citation-gate.js';
 
 const log = pino({ name: 'ReportServiceV2' });
 
@@ -50,11 +46,11 @@ export class ReportServiceV2 {
 
     // 3. Generate Manifest
     // Mock evidence retrieval based on citations
-    const evidenceItems: EvidenceItem[] = req.citations.map((c) => ({
+    const evidenceItems: EvidenceItem[] = req.citations.map(c => ({
       id: c.evidenceId,
       content: c.text, // In reality, fetch from DB
       source: 'Internal DB',
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     }));
 
     const manifest = this.packager.createManifest(evidenceItems, 'https://compliance.intelgraph.io/reply');
@@ -72,11 +68,15 @@ export class ReportServiceV2 {
   }
 
   private validateCitations(req: ReportRequest): void {
-    const normalized = (req.citations || []).map((c) =>
-      normalizeCitationModel({ evidenceId: c.evidenceId, snippet: c.text }),
-    );
+    if (!req.citations || req.citations.length === 0) {
+      throw new Error("BLOCK: Publication blocked. No citations provided for claims.");
+    }
 
-    assertPublishReadyCitations({ citations: normalized });
+    for (const cit of req.citations) {
+      if (!cit.evidenceId) {
+         throw new Error("BLOCK: Invalid citation detected.");
+      }
+    }
   }
 
   private async persistReport(report: any, manifest: any): Promise<void> {

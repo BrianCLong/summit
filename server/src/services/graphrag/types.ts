@@ -96,23 +96,6 @@ export interface Citation {
   claimId?: string;
   snippet?: string;
   relevanceScore?: number;
-  snippetHash?: string;
-  source?: string;
-  observedAt?: string;
-  redactionApplied?: boolean;
-}
-
-export interface CitationProvenance extends Citation {}
-
-export interface CitationDiagnostics {
-  missingCitations?: {
-    message: string;
-    claimIds: string[];
-  };
-  danglingCitations?: {
-    message: string;
-    evidenceIds: string[];
-  };
 }
 
 export interface GraphRagAnswer {
@@ -135,7 +118,6 @@ export interface GraphRagResponse {
   rawContext: GraphContext;
   requestId: string;
   timestamp: string;
-  citationDiagnostics?: CitationDiagnostics;
 }
 
 // =============================================================================

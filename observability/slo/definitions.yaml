@@ -192,6 +192,110 @@ spec:
           labels:
             severity: "critical"
 
+    # Authentication error rate SLO - <0.05% errors
+    - name: "auth-error-rate"
+      objective: 99.95
+      description: "Authentication responses should return errors less than 0.05% of the time"
+      labels:
+        category: "security"
+        severity: "high"
+      sli:
+        events:
+          errorQuery: |
+            sum(rate(auth_requests_total{
+              status="error"
+            }[{{.window}}]))
+          totalQuery: |
+            sum(rate(auth_requests_total[{{.window}}]))
+      alerting:
+        name: "SummitAuthErrors"
+        labels:
+          category: "security"
+        annotations:
+          summary: "Authentication error rate is elevated"
+          runbook_url: "https://runbooks.summit.io/slo/auth-errors"
+        pageAlert:
+          labels:
+            severity: "high"
+
+    # Tenant isolation - Cross-tenant requests must be denied
+    - name: "tenant-isolation"
+      objective: 99.99
+      description: "Cross-tenant requests should be denied by default with near-perfect success"
+      labels:
+        category: "security"
+        severity: "critical"
+      sli:
+        events:
+          errorQuery: |
+            sum(rate(authz_cross_tenant_decisions_total{
+              decision="allow"
+            }[{{.window}}]))
+          totalQuery: |
+            sum(rate(authz_cross_tenant_decisions_total[{{.window}}]))
+      alerting:
+        name: "TenantIsolationGuardrail"
+        labels:
+          category: "security"
+        annotations:
+          summary: "Cross-tenant isolation SLO is at risk"
+          runbook_url: "https://runbooks.summit.io/slo/tenant-isolation"
+        pageAlert:
+          labels:
+            severity: "critical"
+
+    # Tenant API latency - p95 < 400ms
+    - name: "tenant-api-latency-p95"
+      objective: 99.0
+      description: "95% of tenant API requests should complete within 400ms"
+      labels:
+        category: "latency"
+        severity: "high"
+      sli:
+        events:
+          errorQuery: |
+            sum(rate(companyos_tenant_api_http_request_duration_seconds_bucket{
+              le="0.4"
+            }[{{.window}}]))
+          totalQuery: |
+            sum(rate(companyos_tenant_api_http_request_duration_seconds_count[{{.window}}]))
+      alerting:
+        name: "TenantApiLatency"
+        labels:
+          category: "latency"
+        annotations:
+          summary: "Tenant API latency SLO is at risk"
+          runbook_url: "https://runbooks.summit.io/slo/tenant-api-latency"
+        ticketAlert:
+          labels:
+            severity: "warning"
+
+    # Metering pipeline freshness - p95 lag under 2 minutes
+    - name: "metering-freshness"
+      objective: 99.5
+      description: "Metering pipeline lag should stay under two minutes for 99.5% of samples"
+      labels:
+        category: "freshness"
+        severity: "medium"
+      sli:
+        events:
+          errorQuery: |
+            sum(rate(metering_lag_seconds_bucket{
+              le="120"
+            }[{{.window}}]))
+          totalQuery: |
+            sum(rate(metering_lag_seconds_count[{{.window}}]))
+      alerting:
+        name: "MeteringLag"
+        labels:
+          category: "capacity"
+        annotations:
+          summary: "Metering lag SLO is at risk"
+          runbook_url: "https://runbooks.summit.io/slo/metering-lag"
+        ticketAlert:
+          labels:
+            severity: "medium"
+
     # Data Pipeline SLO - Freshness
     - name: "data-pipeline-freshness"
       objective: 99.0
