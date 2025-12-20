@@ -655,7 +655,15 @@ export const copilotApiRequestDurationMs = new client.Histogram({
   buckets: [50, 100, 250, 500, 1000, 2000, 5000, 10000, 30000],
 });
 
+// LLM Cost metrics
+export const llmCostTotal = new client.Counter({
+  name: 'llm_cost_total_usd',
+  help: 'Total estimated cost of LLM calls in USD',
+  labelNames: ['provider', 'model'],
+});
+
 // Register metrics
+register.registerMetric(llmCostTotal);
 register.registerMetric(intelgraphJobsProcessed);
 register.registerMetric(intelgraphOutboxSyncLatency);
 register.registerMetric(intelgraphActiveConnections);

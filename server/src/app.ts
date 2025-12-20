@@ -81,8 +81,8 @@ export const createApp = async () => {
   const __dirname = path.dirname(__filename);
 
   // Initialize OpenTelemetry tracing
-  // const tracer = initializeTracing();
-  // await tracer.initialize();
+  const tracer = initializeTracing();
+  await tracer.initialize();
 
   const app = express();
   const logger = pino();
