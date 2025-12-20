@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@ga-graphai/cost-guard": "file:../cost-guard",
-    "@ga-graphai/query-copilot": "file:../query-copilot",
+    "@ga-graphai/knowledge-graph": "file:../knowledge-graph",
     "body-parser": "^1.20.2",
     "common-types": "file:../common-types",
     "express": "^4.19.2",
@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.12.7",
+    "fast-check": "^3.23.2",
     "supertest": "^6.3.4",
     "typescript": "5.4.5",
     "vitest": "1.6.1"

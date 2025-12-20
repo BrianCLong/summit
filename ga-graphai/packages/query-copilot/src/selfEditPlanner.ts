@@ -1,8 +1,5 @@
 import { SelfEditRegistry } from '@ga-graphai/prov-ledger';
-import type {
-  SelfEditRecord,
-  SelfEditScorecard,
-} from '@ga-graphai/common-types';
+import type { SelfEditRecord, SelfEditScorecard } from 'common-types';
 
 export interface SelfEditEvaluationPlanItem {
   record: SelfEditRecord;

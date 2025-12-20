@@ -24,13 +24,6 @@ export interface CostEstimate {
   estimatedRru: number;
 }
 
-export interface CypherPlanEstimate {
-  rows: number;
-  depth: number;
-  costScore: number;
-  containsWrite?: boolean;
-}
-
 export interface NLToCypherOptions {
   schema: GraphSchema;
   limit?: number;
@@ -43,31 +36,6 @@ export interface NLToCypherResult {
   reasoning: string[];
   citations: string[];
   warnings: string[];
-}
-
-export interface NLQuerySandboxInput {
-  prompt: string;
-  schema: GraphSchema;
-  caseScope: { caseId: string };
-  approvedExecution?: boolean;
-  maxDepth?: number;
-  sandboxMode?: boolean;
-  tenantId?: string;
-  policy?: PolicyContext;
-  featureFlags?: Record<string, boolean | string>;
-  traceId?: string;
-  requestId?: string;
-  userId?: string;
-}
-
-export interface NLQuerySandboxResponse {
-  cypher: string;
-  params: Record<string, unknown>;
-  estimate: CypherPlanEstimate;
-  warnings: string[];
-  allowExecute: boolean;
-  requestId: string;
-  sandboxPreview?: SandboxResult;
 }
 
 export interface PolicyContext {
@@ -101,7 +69,6 @@ export interface SandboxExecuteInput {
   policy: PolicyContext;
   dataset?: SandboxDataset;
   timeoutMs?: number;
-  approvedExecution?: boolean;
   featureFlags?: Record<string, boolean | string>;
   traceId?: string;
   requestId?: string;
@@ -121,7 +88,7 @@ export interface SandboxResult {
   truncated: boolean;
   plan: string[];
   policyWarnings: string[];
-  monitoring?: QueryMonitoringResult;
+  monitoring: QueryMonitoringResult;
 }
 
 export interface QueryPlan {

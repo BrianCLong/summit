@@ -10,9 +10,9 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@ga-graphai/common-types": "file:../common-types",
     "@ga-graphai/cost-guard": "file:../cost-guard",
     "@ga-graphai/prov-ledger": "file:../prov-ledger",
+    "common-types": "file:../common-types",
     "prom-client": "^14.2.0"
   },
   "devDependencies": {

@@ -1,0 +1,33 @@
+name: Audit Branch Protections
+
+on:
+  pull_request:
+    paths:
+      - '.github/CODEOWNERS'
+      - '.github/workflows/**'
+      - 'deploy/terraform/github/**'
+      - '.ci/scripts/export_github_rules.py'
+      - '.ci/policies/**'
+
+permissions:
+  contents: read
+  actions: read
+  pull-requests: write
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: pip install requests
+      - name: Export GitHub rules
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: ./.ci/scripts/export_github_rules.py
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: branch-protection-evidence
+          path: artifacts/branch-protection.json

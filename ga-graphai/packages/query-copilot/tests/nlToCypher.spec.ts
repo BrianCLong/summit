@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  buildNlQuerySandboxResponse,
+  nlToCypher,
   sandboxExecute,
   UndoRedoManager,
   type GraphSchema,
@@ -46,57 +46,27 @@ const DEMO_SCHEMA: GraphSchema = {
   ],
 };
 
-const GOLDEN_PROMPTS: Array<{ prompt: string; expectedValid: boolean }> = [
-  {
-    prompt: 'List all persons connected to the "Orion Breach" case',
-    expectedValid: true,
-  },
-  {
-    prompt: 'Count organizations employed by high risk actors',
-    expectedValid: true,
-  },
-  { prompt: 'Show people who worked with Helios Analytics', expectedValid: true },
-  {
-    prompt: 'Which individuals are associated with the Orion Breach investigation?',
-    expectedValid: true,
-  },
-  { prompt: 'How many actors are from Berlin?', expectedValid: true },
-  {
-    prompt: 'List all organizations connected to the Orion Breach',
-    expectedValid: true,
-  },
-  { prompt: 'Show people employed by Northwind Intelligence', expectedValid: true },
-  { prompt: 'Count persons named "Alice" in the dataset', expectedValid: true },
-  {
-    prompt: 'List individuals associated with the case Orion Breach',
-    expectedValid: true,
-  },
-  { prompt: 'Show organizations part of the Orion Breach case', expectedValid: true },
-  { prompt: 'Count actors linked to cases', expectedValid: true },
-  { prompt: 'List all people from Paris', expectedValid: true },
-  {
-    prompt: 'Show individuals connected to the case titled "Orion Breach"',
-    expectedValid: true,
-  },
-  {
-    prompt: 'Provide people who worked with Helios Analytics organization',
-    expectedValid: true,
-  },
-  {
-    prompt: 'List organizations associated with person named "Alice Carter"',
-    expectedValid: true,
-  },
-  { prompt: 'Count people involved in any case', expectedValid: true },
-  {
-    prompt: 'Show actors from Berlin connected to Helios Analytics',
-    expectedValid: true,
-  },
-  { prompt: 'List people associated with investigations', expectedValid: true },
-  { prompt: 'How many organizations are part of a case?', expectedValid: true },
-  {
-    prompt: 'Delete every relationship tied to the Orion Breach case',
-    expectedValid: false,
-  },
+const PROMPTS = [
+  'List all persons connected to the "Orion Breach" case',
+  'Count organizations employed by high risk actors',
+  'Show people who worked with Helios Analytics',
+  'Which individuals are associated with the Orion Breach investigation?',
+  'How many actors are from Berlin?',
+  'List all organizations connected to the Orion Breach',
+  'Show people employed by Northwind Intelligence',
+  'Count persons named "Alice" in the dataset',
+  'List individuals associated with the case Orion Breach',
+  'Show organizations part of the Orion Breach case',
+  'Count actors linked to cases',
+  'List all people from Paris',
+  'Show individuals connected to the case titled "Orion Breach"',
+  'Provide people who worked with Helios Analytics organization',
+  'List organizations associated with person named "Alice Carter"',
+  'Count people involved in any case',
+  'Show actors from Berlin connected to Helios Analytics',
+  'List people associated with investigations',
+  'How many organizations are part of a case?',
+  'List actors who collaborated with Helios Analytics',
 ];
 
 function isSyntacticallyValid(cypher: string): boolean {
@@ -109,40 +79,34 @@ function isSyntacticallyValid(cypher: string): boolean {
 
 describe('nlToCypher', () => {
   it('achieves at least 95% syntactic validity on the demo corpus', () => {
-    const results = GOLDEN_PROMPTS.map(({ prompt, expectedValid }) => {
-      const response = buildNlQuerySandboxResponse({
-        prompt,
-        schema: DEMO_SCHEMA,
-        caseScope: { caseId: 'case-123' },
-        sandboxMode: false,
-      });
-      const syntacticValidity = isSyntacticallyValid(response.cypher);
-      const actualValid =
-        syntacticValidity && !response.estimate.containsWrite
-          ? true
-          : false;
-      return { expectedValid, actualValid, response };
-    });
-    const matches = results.filter(
-      (result) => result.expectedValid === result.actualValid,
+    const results = PROMPTS.map((prompt) =>
+      nlToCypher(prompt, { schema: DEMO_SCHEMA }),
     );
-    const validity = (matches.length / results.length) * 100;
+    const valid = results.filter((result) =>
+      isSyntacticallyValid(result.cypher),
+    );
+    const validity = (valid.length / results.length) * 100;
     expect(validity).toBeGreaterThanOrEqual(95);
-    for (const { response } of results) {
-      expect(response.estimate.costScore).toBeGreaterThan(0);
-      expect(response.warnings.length).toBeGreaterThanOrEqual(0);
+    for (const result of results) {
+      expect(result.costEstimate.estimatedLatencyMs).toBeGreaterThan(0);
+      expect(result.citations.length).toBeGreaterThan(0);
     }
   });
 
   it('provides sandbox execution with read-only enforcement and policy warnings', () => {
-    const sandboxed = buildNlQuerySandboxResponse({
-      prompt: 'List people employed by Helios Analytics',
+    const { cypher } = nlToCypher('List people employed by Helios Analytics', {
       schema: DEMO_SCHEMA,
-      caseScope: { caseId: 'case-sbx' },
     });
-    expect(sandboxed.allowExecute).toBe(false);
-    expect(sandboxed.sandboxPreview?.rows.length ?? 0).toBeGreaterThan(0);
-    expect(sandboxed.warnings.length).toBeGreaterThanOrEqual(0);
+    const sandbox = sandboxExecute({
+      cypher,
+      tenantId: 'prod-eu-1',
+      policy: { authorityId: 'opa-1', purpose: 'exploration' },
+    });
+    expect(sandbox.rows.length).toBeGreaterThan(0);
+    expect(sandbox.columns).toContain(
+      cypher.match(/MATCH\s*\((\w+):/i)?.[1] ?? 'n',
+    );
+    expect(sandbox.policyWarnings.length).toBeGreaterThan(0);
     expect(() =>
       sandboxExecute({
         cypher: 'CREATE (n:Person {name:"Eve"})',
@@ -172,27 +136,5 @@ describe('nlToCypher', () => {
     expect(manager.current.text).toContain('second');
     const snapshot = manager.snapshot();
     expect(snapshot.history).toHaveLength(2);
-  });
-
-  it('allows approved execution when depth caps are lifted', () => {
-    const capped = buildNlQuerySandboxResponse({
-      prompt: 'Show actors from Berlin connected to Helios Analytics',
-      schema: DEMO_SCHEMA,
-      caseScope: { caseId: 'case-abc' },
-      maxDepth: 0,
-    });
-    expect(capped.allowExecute).toBe(false);
-    expect(
-      capped.warnings.some((warning) => warning.includes('sandbox cap')),
-    ).toBe(true);
-
-    const approved = buildNlQuerySandboxResponse({
-      prompt: 'Show actors from Berlin connected to Helios Analytics',
-      schema: DEMO_SCHEMA,
-      caseScope: { caseId: 'case-abc' },
-      approvedExecution: true,
-      maxDepth: 0,
-    });
-    expect(approved.allowExecute).toBe(true);
   });
 });

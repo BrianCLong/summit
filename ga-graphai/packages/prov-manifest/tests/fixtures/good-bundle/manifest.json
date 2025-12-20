@@ -1,0 +1,51 @@
+{
+  "manifestVersion": "1.0.0",
+  "bundleId": "bundle-001",
+  "createdAt": "2025-01-01T00:00:00Z",
+  "documents": [
+    {
+      "id": "primary-report",
+      "path": "report.pdf",
+      "mediaType": "application/pdf",
+      "role": "primary",
+      "sha256": "ff1f019de329f60b7e2c729f0eefb7619a6c8fa6e20923b7c9d1de756562e4e2",
+      "transforms": ["capture", "redact"],
+      "evidence": ["source-scan"]
+    }
+  ],
+  "exhibits": [
+    {
+      "id": "appendix-html",
+      "path": "exhibits/appendix.html",
+      "mediaType": "text/html",
+      "role": "exhibit",
+      "sha256": "bbeb1c689ae88e7d270506d2bb48c238fc50af3aa85b7fdc6dc4339aa1c5a043"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "source-scan",
+      "path": "evidence/source.txt",
+      "mediaType": "text/plain",
+      "role": "source",
+      "sha256": "3c9a0e964140475921f2541815769a511768c9057927f499c3b1d7d65db596eb"
+    }
+  ],
+  "transforms": [
+    {
+      "id": "capture",
+      "description": "Capture from evidence",
+      "step": 1,
+      "inputId": "source-scan",
+      "outputId": "primary-report",
+      "evidenceIds": ["source-scan"]
+    },
+    {
+      "id": "redact",
+      "description": "Redact sensitive details",
+      "step": 2,
+      "inputId": "primary-report",
+      "outputId": "primary-report"
+    }
+  ]
+}
