@@ -9,6 +9,14 @@ import {
   recordTransform,
   getEvidence,
 } from './ledger';
+import {
+  issueReceipt,
+  getReceipt,
+  listReceipts,
+  redactReceipt,
+} from './receipts';
+import { assembleReceiptBundle } from './export/receiptBundle';
+import { RedactionRule, verifyReceiptSignature } from '@intelgraph/provenance';
 import tar from 'tar-stream';
 import { createGzip } from 'zlib';
 import pino from 'pino';
@@ -179,6 +187,26 @@ const claimSchema = z.object({
   text: z.string(),
   confidence: z.number(),
   links: z.array(z.string()).default([]),
+  caseId: z.string().optional(),
+  actor: z
+    .object({
+      id: z.string(),
+      role: z.string(),
+      tenantId: z.string().optional(),
+    })
+    .optional(),
+  pipeline: z
+    .object({
+      stage: z.string().optional(),
+      runId: z.string().optional(),
+      taskId: z.string().optional(),
+      step: z.string().optional(),
+    })
+    .optional(),
+  metadata: z.record(z.any()).optional(),
+  redactions: z
+    .array(z.object({ path: z.string(), reason: z.string() }))
+    .optional(),
 });
 
 app.post('/claims', async (req, reply) => {
@@ -189,10 +217,36 @@ app.post('/claims', async (req, reply) => {
     confidence: body.confidence,
     links: body.links,
   });
-  reply.send({ claimId: claim.id });
+
+  const manifest = buildManifest([claim.id]);
+  const receipt = await issueReceipt(manifest, {
+    caseId: body.caseId ?? claim.id,
+    claimIds: [claim.id],
+    actor: body.actor ?? { id: 'system', role: 'system' },
+    pipeline: body.pipeline,
+    metadata: body.metadata,
+    redactions: body.redactions,
+  });
+
+  reply.send({
+    claimId: claim.id,
+    receiptId: receipt.id,
+    receiptValid: verifyReceiptSignature(receipt),
+  });
 });
 
 const exportSchema = z.object({ claimId: z.array(z.string()) });
+
+const redactionSchema = z.object({
+  path: z.string(),
+  reason: z.string(),
+});
+
+const receiptExportSchema = z.object({
+  receiptIds: z.array(z.string()),
+  includeProvenance: z.boolean().default(false),
+  redactions: z.array(redactionSchema).optional(),
+});
 
 // Get provenance chain for evidence or claim
 app.get('/prov/evidence/:id', async (req, reply) => {
@@ -221,6 +275,44 @@ app.post('/prov/transform', async (req, reply) => {
     timestamp: body.timestamp ? new Date(body.timestamp) : new Date(),
   });
   reply.send({ transformId: transform.id });
+});
+
+app.get('/receipts/:id', async (req, reply) => {
+  const { id } = req.params as { id: string };
+  const receipt = getReceipt(id);
+  if (!receipt) {
+    reply.status(404).send({ error: 'Receipt not found' });
+    return;
+  }
+
+  const { redact } = (req.query ?? {}) as { redact?: string };
+  const result = redact === 'true' ? redactReceipt(receipt) : receipt;
+
+  reply.send({
+    receipt: result,
+    valid: verifyReceiptSignature(receipt),
+  });
+});
+
+app.post('/receipts/export', async (req, reply) => {
+  const body = receiptExportSchema.parse(req.body);
+  const receipts = listReceipts(body.receiptIds);
+
+  if (receipts.length === 0) {
+    reply.status(404).send({ error: 'Receipts not found' });
+    return;
+  }
+
+  const stream = assembleReceiptBundle({
+    receipts,
+    redactions: body.redactions as RedactionRule[] | undefined,
+    includeProvenance: body.includeProvenance,
+    provenanceFetcher: (id: string) => getProvenance(id),
+  });
+
+  reply.header('Content-Type', 'application/gzip');
+  reply.header('Content-Disposition', 'attachment; filename="receipts-bundle.tgz"');
+  reply.send(stream);
 });
 
 // Enhanced export schema with policy context
