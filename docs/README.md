@@ -27,12 +27,9 @@ Use this page as the fast path to the docs you need. The golden path details liv
 - **[COMPLIANCE.md](COMPLIANCE.md)** and **[DATA_RETENTION_POLICY.md](DATA_RETENTION_POLICY.md)** – Compliance, retention, and auditing references.
 - **[CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md)** – Expected behavior and reporting channels.
 
-### Absorption & Ecosystem Convergence
-- **[ABSORPTION_DOCTRINE.md](governance/ABSORPTION_DOCTRINE.md)** – The "Conform or do not join" philosophy.
-- **[INGEST_PLAYBOOK.md](governance/INGEST_PLAYBOOK.md)** – Checklists and procedures for system intake.
-- **[CONVERGENCE_ARCHITECTURE.md](architecture/CONVERGENCE_ARCHITECTURE.md)** – Technical rules for unification (One Truth, One Control Plane).
-- **[ANTI_FRAGMENTATION.md](governance/ANTI_FRAGMENTATION.md)** – Drift detection and fork prevention.
-- **[INSTITUTIONAL_MEMORY.md](governance/INSTITUTIONAL_MEMORY.md)** – Knowledge preservation strategy.
+## Communications
+
+- **[Communications Playbook](./communications/communications-playbook-execution-layer.md)** - The canonical communications standard for Summit/Intelgraph.
 
 ## Product & Architecture References
 

@@ -5,6 +5,8 @@
  */
 
 import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { existsSync, mkdirSync, readFileSync, rmSync } from 'fs';
+import { join } from 'path';
 
 // Mock child_process before importing the module
 jest.mock('child_process', () => ({
@@ -47,12 +49,18 @@ function createMockProcess(
 describe('CosignVerifier', () => {
   let verifier: CosignVerifier;
   const mockSpawn = spawn as jest.MockedFunction<typeof spawn>;
+  const cacheDir = '/tmp/cosign-test';
+  const rekorStore = join(cacheDir, 'rekor-entries.json');
 
   beforeEach(() => {
     jest.clearAllMocks();
+    rmSync(cacheDir, { recursive: true, force: true });
+    mkdirSync(cacheDir, { recursive: true });
     verifier = new CosignVerifier({
       cosignBinaryPath: '/usr/local/bin/cosign',
       timeout: 5000,
+      cacheDir,
+      rekorUuidStorePath: rekorStore,
     });
   });
 
@@ -171,6 +179,64 @@ describe('CosignVerifier', () => {
       expect(result.signatures[0].issuer).toBe('https://accounts.google.com');
       expect(result.signatures[0].subject).toBe('keyless@sigstore.dev');
     });
+
+    it('should fall back to managed key verification and persist Rekor UUIDs', async () => {
+      const managedSignatureOutput = JSON.stringify([
+        {
+          critical: {
+            identity: { 'docker-reference': 'ghcr.io/test/managed' },
+          },
+          optional: {
+            Issuer: 'https://managed-issuer',
+            Subject: 'managed@issuer',
+            Bundle: {
+              SignedEntryTimestamp: '2025-01-01T00:00:00Z',
+              Payload: {
+                logIndex: 42,
+                logID: { uuid: 'rekor-uuid-123' },
+                integratedTime: 123456,
+              },
+            },
+          },
+        },
+      ]);
+
+      const verifierWithManagedKey = new CosignVerifier(
+        {
+          cosignBinaryPath: '/usr/local/bin/cosign',
+          cacheDir,
+          rekorUuidStorePath: rekorStore,
+        },
+        {
+          trustedKeyRefs: ['managed.pub'],
+          trustedIssuers: ['https://token.actions.githubusercontent.com'],
+        }
+      );
+
+      mockSpawn.mockReturnValueOnce(
+        createMockProcess('sha256:fallback', '', 0) as any
+      );
+      mockSpawn.mockReturnValueOnce(
+        createMockProcess('', 'keyless failed', 1) as any
+      );
+      mockSpawn.mockReturnValueOnce(
+        createMockProcess(managedSignatureOutput, '', 0) as any
+      );
+
+      const result = await verifierWithManagedKey.verifyImage(
+        'ghcr.io/test/managed:v1'
+      );
+
+      expect(result.verified).toBe(true);
+      expect(result.usedManagedFallback).toBe(true);
+      expect(result.rekorEntries[0].uuid).toBe('rekor-uuid-123');
+      expect(
+        result.errors.some((error) => error.code === 'KEYLESS_FALLBACK_USED')
+      ).toBe(true);
+      expect(existsSync(rekorStore)).toBe(true);
+      const persisted = JSON.parse(readFileSync(rekorStore, 'utf-8'));
+      expect(persisted[0].entries[0].uuid).toBe('rekor-uuid-123');
+    });
   });
 
   describe('verifyImage with custom policy', () => {
@@ -207,10 +273,18 @@ describe('CosignAdmissionController', () => {
   let controller: CosignAdmissionController;
   let mockVerifier: CosignVerifier;
   const mockSpawn = spawn as jest.MockedFunction<typeof spawn>;
+  const cacheDir = '/tmp/cosign-admission-cache';
+  const rekorStore = join(cacheDir, 'rekor-entries.json');
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockVerifier = new CosignVerifier({ timeout: 5000 });
+    rmSync(cacheDir, { recursive: true, force: true });
+    mkdirSync(cacheDir, { recursive: true });
+    mockVerifier = new CosignVerifier({
+      timeout: 5000,
+      cacheDir,
+      rekorUuidStorePath: rekorStore,
+    });
     controller = new CosignAdmissionController(mockVerifier, ['kube-system']);
   });
 
