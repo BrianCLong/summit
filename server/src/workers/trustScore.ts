@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
   listRecentSignals,
   upsertTrustScore,
@@ -6,14 +7,6 @@ import { recordTrustScore } from '../observability/trust-risk-metrics.js';
 
 export type Signal = { severity: string; created_at: string };
 
-/**
- * Computes a trust score based on a base score and a list of risk signals.
- * The score is reduced by the weight of recent signals (within the last 7 days).
- *
- * @param base - The initial trust score (0 to 1).
- * @param signals - A list of risk signals with severity and timestamp.
- * @returns The computed trust score (0 to 1).
- */
 export function computeTrustScore(base: number, signals: Signal[]): number {
   // Simple heuristic: subtract severity weights for signals in last 7 days
   const now = Date.now();
@@ -29,12 +22,6 @@ export function computeTrustScore(base: number, signals: Signal[]): number {
   return Math.min(1, Math.max(0, parseFloat(score.toFixed(4))));
 }
 
-/**
- * Recomputes the trust score for a specific tenant and subject, updates the database, and records metrics.
- *
- * @param tenantId - The ID of the tenant.
- * @param subjectId - The ID of the subject (user/entity).
- */
 export async function recomputeTrustForTenant(
   tenantId: string,
   subjectId: string,

@@ -5,7 +5,9 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { randomUUID } from 'crypto';
+import { trace } from '@opentelemetry/api';
 import { getTracer } from '../observability/tracer.js';
+import { correlationStorage } from '../config/logger.js';
 
 // Extend Express Request type to include correlation IDs
 declare global {
@@ -20,12 +22,14 @@ declare global {
 
 export const CORRELATION_ID_HEADER = 'x-correlation-id';
 export const REQUEST_ID_HEADER = 'x-request-id';
+export const TENANT_ID_HEADER = 'x-tenant-id';
 
 /**
  * Correlation ID middleware
  * - Generates or extracts correlation ID from request headers
  * - Adds OpenTelemetry trace/span IDs to request
  * - Injects IDs into response headers for client-side correlation
+ * - Uses AsyncLocalStorage to propagate context to logger
  */
 export function correlationIdMiddleware(
   req: Request,
@@ -43,13 +47,26 @@ export function correlationIdMiddleware(
 
   // Get OpenTelemetry trace/span IDs if available
   const tracer = getTracer();
-  req.traceId = tracer.getTraceId() || '';
-  req.spanId = tracer.getSpanId() || '';
+  const activeSpan = trace.getActiveSpan();
+  req.traceId = activeSpan?.spanContext().traceId || tracer.getTraceId() || '';
+  req.spanId = activeSpan?.spanContext().spanId || tracer.getSpanId() || '';
+
+  // Fallback: honor upstream traceparent header for structured logging when no span is active
+  if (!req.traceId && typeof req.headers['traceparent'] === 'string') {
+    const [, inboundTraceId, inboundSpanId] = (req.headers['traceparent'] as string).split('-');
+    req.traceId = inboundTraceId || req.traceId;
+    req.spanId = inboundSpanId || req.spanId;
+  }
+
+  const tenantId = (req.headers[TENANT_ID_HEADER] as string) || (req as any).user?.tenant_id || 'unknown';
 
   // Add to current span if available
   if (req.traceId) {
     tracer.setAttribute('correlation.id', correlationId);
     tracer.setAttribute('correlation.request_id', correlationId);
+    if (tenantId !== 'unknown') {
+        tracer.setAttribute('tenant.id', tenantId);
+    }
   }
 
   // Inject correlation ID into response headers
@@ -61,7 +78,20 @@ export function correlationIdMiddleware(
     res.setHeader('x-trace-id', req.traceId);
   }
 
-  next();
+  // Setup AsyncLocalStorage context
+  const store = new Map<string, string>();
+  store.set('correlationId', correlationId);
+  store.set('requestId', correlationId);
+  store.set('traceId', req.traceId);
+  store.set('tenantId', tenantId);
+
+  if ((req as any).user) {
+      store.set('principalId', (req as any).user.sub || (req as any).user.id);
+  }
+
+  correlationStorage.run(store, () => {
+      next();
+  });
 }
 
 /**

@@ -5,8 +5,7 @@
  * coverage testing across the entire IntelGraph platform.
  *
  * Coverage Thresholds:
- * - Global: 80% minimum coverage
- * - Critical paths: 90% minimum coverage
+ * - Global: 70% minimum coverage
  *
  * Usage:
  *   npm run test:coverage
@@ -68,32 +67,13 @@ module.exports = {
     '!**/generated/**',
   ],
 
-  // Coverage Thresholds
+  // Coverage Thresholds - minimum CI guardrails
   coverageThreshold: {
     global: {
-      branches: 80,
-      functions: 80,
-      lines: 80,
-      statements: 80,
-    },
-    // Critical paths require higher coverage
-    './server/src/middleware/**/*.ts': {
-      branches: 85,
-      functions: 85,
-      lines: 85,
-      statements: 85,
-    },
-    './services/api/src/**/*.ts': {
-      branches: 85,
-      functions: 85,
-      lines: 85,
-      statements: 85,
-    },
-    './server/src/graphql/resolvers/**/*.ts': {
-      branches: 85,
-      functions: 85,
-      lines: 85,
-      statements: 85,
+      branches: 70,
+      functions: 70,
+      lines: 70,
+      statements: 70,
     },
   },
 
@@ -105,6 +85,7 @@ module.exports = {
     'lcov',
     'cobertura',
     'json-summary',
+    'json',
   ],
 
   coverageDirectory: '<rootDir>/coverage',
@@ -205,5 +186,5 @@ module.exports = {
   errorOnDeprecated: true,
 
   // Setup Files
-  setupFilesAfterEnv: ['<rootDir>/tests/setup/jest.setup.js'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
 };

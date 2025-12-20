@@ -1,0 +1,277 @@
+meta:
+  id: plan.license-compliance@v1
+  owner: 'security-engineering'
+  purpose: 'Enforce license policies across CI with automated compliance checks'
+  tags:
+    - compliance
+    - licensing
+    - legal
+    - dependencies
+    - policy
+  guardrails:
+    - 'License policy must be reviewed by legal'
+    - 'Blocking merges requires exception process'
+    - 'New licenses require explicit approval'
+    - 'Audit trail for all decisions'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  allowed_licenses: string
+  current_violations: string
+  package_managers: string
+  business_requirements: string
+  legal_constraints: string
+
+template: |
+  You are a Compliance Engineer implementing license governance for Summit/IntelGraph.
+
+  **Objective:** Enforce license policies across CI.
+
+  **Allowed Licenses:**
+  {{allowed_licenses}}
+
+  **Current Violations:**
+  {{current_violations}}
+
+  **Package Managers:**
+  {{package_managers}}
+
+  **Business Requirements:**
+  {{business_requirements}}
+
+  **Legal Constraints:**
+  {{legal_constraints}}
+
+  ## Deliverables
+
+  ### 1. License Policy Document
+  ```yaml
+  license_policy:
+    version: "1.0"
+    effective_date: "2024-01-01"
+    approved_by: "Legal Team"
+
+    categories:
+      permissive:
+        status: allowed
+        licenses:
+          - MIT
+          - Apache-2.0
+          - BSD-2-Clause
+          - BSD-3-Clause
+          - ISC
+          - CC0-1.0
+          - Unlicense
+        notes: "Generally safe for commercial use"
+
+      weak_copyleft:
+        status: allowed_with_review
+        licenses:
+          - LGPL-2.1
+          - LGPL-3.0
+          - MPL-2.0
+          - EPL-2.0
+        notes: "Review usage pattern, no static linking concerns"
+
+      strong_copyleft:
+        status: prohibited
+        licenses:
+          - GPL-2.0
+          - GPL-3.0
+          - AGPL-3.0
+        notes: "May require source disclosure, needs legal review"
+
+      proprietary:
+        status: case_by_case
+        licenses:
+          - Commercial
+          - Proprietary
+        notes: "Requires procurement and legal approval"
+
+      unknown:
+        status: blocked
+        licenses:
+          - UNKNOWN
+          - NOASSERTION
+        notes: "Must identify license before use"
+  ```
+
+  ### 2. CI Gates Configuration
+  ```yaml
+  ci_gates:
+    pre_merge:
+      - name: license-check
+        tool: license-checker | fossa | licensee
+        blocking: true
+        config:
+          fail_on:
+            - unlicensed
+            - prohibited_licenses
+          warn_on:
+            - unknown_licenses
+            - weak_copyleft
+          allow_list: .license-allow.json
+
+    post_merge:
+      - name: full-compliance-scan
+        tool: FOSSA
+        blocking: false
+        reports_to: compliance-team
+
+    scheduled:
+      - name: weekly-audit
+        schedule: "0 0 * * 0"
+        tool: license-checker
+        output: compliance-report.md
+  ```
+
+  ### 3. Enforcement Workflow
+  ```yaml
+  enforcement:
+    on_violation:
+      immediate:
+        - Block PR merge
+        - Notify developer
+        - Create ticket for tracking
+
+      escalation:
+        - Day 1: Developer notified
+        - Day 3: Team lead notified
+        - Day 7: Engineering manager notified
+        - Day 14: Legal team notified
+
+    exception_process:
+      request:
+        - Developer submits exception request
+        - Includes: package, license, usage, alternatives
+      review:
+        - Security team assesses risk
+        - Legal team reviews compliance
+      approval:
+        - Requires: Security + Legal sign-off
+        - Documented in exception registry
+        - Time-limited (annual review)
+
+    audit_trail:
+      - All decisions logged
+      - Exception registry maintained
+      - Quarterly compliance reports
+  ```
+
+  ### 4. Remediation Guide
+  ```yaml
+  remediation:
+    by_license_type:
+      GPL:
+        severity: high
+        options:
+          - Replace with MIT/Apache alternative
+          - Use as service (not linked)
+          - Request commercial license
+        examples:
+          - "readline" → "inquirer" (MIT)
+          - "mysql" → "mysql2" (MIT)
+
+      UNKNOWN:
+        severity: medium
+        options:
+          - Contact maintainer for clarification
+          - Review source code for license file
+          - Fork and add clear license
+        process:
+          1. Check package repository
+          2. Check SPDX license expression
+          3. File issue with maintainer
+          4. Document findings
+
+      NOASSERTION:
+        severity: medium
+        options:
+          - Treat as unknown
+          - Verify with maintainer
+          - Consider alternatives
+  ```
+
+  ### 5. Tooling Setup
+  ```yaml
+  tooling:
+    license-checker:
+      config: .license-checker.json
+      content: |
+        {
+          "failOn": ["GPL-3.0", "AGPL-3.0"],
+          "excludePackages": [],
+          "excludeLicenses": [],
+          "json": true,
+          "production": true
+        }
+
+    fossa:
+      config: .fossa.yml
+      content: |
+        version: 3
+        server: https://app.fossa.com
+        project:
+          name: summit
+          policy: strict
+        targets:
+          include:
+            - type: npm
+              path: .
+            - type: pip
+              path: ./ml
+
+    allow_list:
+      file: .license-allow.json
+      content: |
+        {
+          "exceptions": [
+            {
+              "package": "some-package",
+              "license": "BSD-4-Clause",
+              "reason": "Legacy dependency, isolated usage",
+              "approved_by": "legal@company.com",
+              "expires": "2025-01-01"
+            }
+          ]
+        }
+  ```
+
+  ### 6. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] License policy approved by legal
+  - [ ] CI gates blocking prohibited licenses
+  - [ ] All current violations resolved or exempted
+  - [ ] Exception process documented
+  - [ ] Quarterly audit scheduled
+
+  ## Rollback Plan
+  - CI gate can be set to warn-only
+  - Exception list can include temporary entries
+  - Manual override for emergencies (with audit)
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'license-compliance-setup'
+    inputs:
+      allowed_licenses: 'MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC'
+      current_violations: '3 GPL packages, 5 unknown licenses'
+      package_managers: 'pnpm (Node.js), pip (Python), go mod (Go)'
+      business_requirements: 'Commercial SaaS, no copyleft distribution'
+      legal_constraints: 'No AGPL, no GPL for core product'
+    expected_contains:
+      - 'License Policy'
+      - 'CI Gates'
+      - 'Exception Process'
+      - 'Remediation'

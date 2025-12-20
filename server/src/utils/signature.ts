@@ -1,12 +1,12 @@
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 
 /**
- * Generates an HMAC hex digest for a given payload and secret using the specified algorithm.
+ * Computes an HMAC digest in hexadecimal format.
  *
- * @param algorithm - The hashing algorithm to use (e.g., 'sha256' or 'sha1')
- * @param secret - The secret key for the HMAC
- * @param payloadRaw - The data to sign as a Buffer
- * @returns The hex-encoded HMAC signature
+ * @param algorithm - The hashing algorithm to use ('sha256' or 'sha1').
+ * @param secret - The secret key for the HMAC.
+ * @param payloadRaw - The data to sign as a Buffer.
+ * @returns The hexadecimal string representation of the HMAC digest.
  */
 export function hmacHex(
   algorithm: 'sha256' | 'sha1',
@@ -17,12 +17,11 @@ export function hmacHex(
 }
 
 /**
- * Performs a timing-safe equality comparison between two strings.
- * This is used to prevent timing attacks when comparing sensitive values like signatures.
+ * Performs a constant-time comparison of two strings to prevent timing attacks.
  *
- * @param a - The first string to compare
- * @param b - The second string to compare
- * @returns True if the strings are equal, false otherwise
+ * @param a - The first string to compare.
+ * @param b - The second string to compare.
+ * @returns True if the strings are equal, false otherwise.
  */
 export function safeEqual(a: string, b: string): boolean {
   const ab = Buffer.from(a, 'utf8');

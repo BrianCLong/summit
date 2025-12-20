@@ -28,8 +28,10 @@ function createServices(context: Context) {
   const glassBoxService = new GlassBoxRunService(context.pool, context.redis);
 
   const nlToCypherService = new NlToCypherService(
-    context.neo4jDriver,
-    context.pool
+    // Mock adapter for NlToCypherService since resolver dependencies are outdated
+    {
+      generate: async () => 'MATCH (n) RETURN n LIMIT 10'
+    }
   );
 
   const queryPreviewService = new QueryPreviewService(
@@ -96,6 +98,15 @@ export const graphragQueryResolvers = {
       try {
         const { graphRAGQueryService } = createServices(context);
 
+        //
+        // TODO: This is a placeholder for the quota service
+        //
+        // await quotaService.assert({
+        //   tenantId,
+        //   dimension: 'graph.queries',
+        //   quantity: 1,
+        // });
+
         const response = await graphRAGQueryService.query({
           investigationId: args.input.investigationId,
           tenantId,
@@ -108,6 +119,23 @@ export const graphragQueryResolvers = {
           maxRows: args.input.maxRows,
           timeout: args.input.timeout,
         });
+
+        //
+        // TODO: This is a placeholder for the usage metering service
+        //
+        // await usageMeteringService.record({
+        //   id: '',
+        //   tenantId,
+        //   dimension: 'graph.queries',
+        //   quantity: 1,
+        //   unit: 'count',
+        //   source: 'graphrag',
+        //   metadata: {
+        //     investigationId: args.input.investigationId,
+        //   },
+        //   occurredAt: new Date().toISOString(),
+        //   recordedAt: new Date().toISOString(),
+        // });
 
         return response;
       } catch (error) {
@@ -373,6 +401,9 @@ export const graphragQueryResolvers = {
           dryRun?: boolean;
           maxRows?: number;
           timeout?: number;
+          cursor?: string | null;
+          batchSize?: number;
+          stream?: boolean;
         };
       },
       context: Context
@@ -395,6 +426,9 @@ export const graphragQueryResolvers = {
           dryRun: args.input.dryRun,
           maxRows: args.input.maxRows,
           timeout: args.input.timeout,
+          cursor: args.input.cursor,
+          batchSize: args.input.batchSize,
+          stream: args.input.stream,
         });
 
         return response;

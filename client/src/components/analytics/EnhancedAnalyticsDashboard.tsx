@@ -27,7 +27,7 @@ import {
   Badge,
   Divider,
 } from '@mui/material';
-import Grid from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid';
 import {
   TrendingUp,
   TrendingDown,

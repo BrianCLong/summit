@@ -1,11 +1,3 @@
-/**
- * Calculates a reward score based on cost, latency, and quality metrics.
- * The reward is a weighted sum of normalized cost, normalized latency, and quality.
- *
- * @param metrics - Object containing costUsd, latencyMs, and qualityScore.
- * @param weights - Object containing weights for cost, latency, and quality.
- * @returns A normalized reward score between 0 and 1.
- */
 export function rewardFromMetrics(
   {
     costUsd,

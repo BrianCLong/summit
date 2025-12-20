@@ -47,9 +47,12 @@ Our testing philosophy is multi-layered, ensuring quality, reliability, and secu
 ### 5. Security & Compliance Tests
 
 - **Purpose:** Ensure adherence to security best practices, governance policies, and ethical guidelines.
-- **Scope:** Authentication (WebAuthn/FIDO2), authorization (OPA), audit logging, data minimization, license/TOS enforcement.
+- **Scope:** Authentication (WebAuthn/FIDO2, OIDC), authorization (OPA/RBAC), audit logging, data minimization, encryption controls, license/TOS enforcement.
 - **Specifics:**
   - Automated checks for policy violations, misuse detection, and data poisoning alerts.
+  - **Dynamic Application Security Testing:** OWASP ZAP baseline scan wired into Jest (`npx jest --config tests/security/jest.config.cjs --runTestsByPath tests/security/owasp-zap.spec.js`). Set `RUN_ZAP_SCAN=1 ZAP_TARGET=https://<env-host>` to execute a live scan; otherwise fixtures from `tests/fixtures/security/` are used for deterministic CI runs.
+  - **Container & Supply-Chain Scanning:** Trivy coverage for container images, IaC, and OPA policy bundles (`npx jest --config tests/security/jest.config.cjs --runTestsByPath tests/security/trivy-compliance.spec.js`). Use `RUN_TRIVY_SCAN=1 TRIVY_TARGET=<image-or-path>` to trigger a full scan.
+  - **Policy-as-Code Gate:** Conftest/Jest harness validating the `policy/` Rego bundle with the new SOC2/FedRAMP/GDPR-focused tests in `tests/opa/security_compliance_test.rego` (`npx jest --config tests/security/jest.config.cjs --runTestsByPath tests/security/conftest-policy.spec.js`). When the Conftest CLI is unavailable the suite falls back to `opa test` or skips gracefully, keeping CI green while still enforcing RBAC edge cases locally.
 
 ## Continuous Integration / Continuous Delivery (CI/CD)
 
@@ -76,3 +79,11 @@ For a feature or change to be considered "Done" and ready for merge, the followi
 - **License Gate Verified:** All licensing requirements are met, and no license violations are detected.
 - All automated tests (unit, integration, E2E, performance, security) pass.
 - Code reviews are completed and approved.
+
+## Detailed Guides
+
+*   **[Strategy & Pyramid](./STRATEGY.md)**: Detailed breakdown of testing levels and standards.
+*   **[Infrastructure Design](./INFRASTRUCTURE.md)**: Design of the shared `testing-sdk`.
+*   **[Quality Gates](./QUALITY_GATES.md)**: PR and Release policies.
+*   **[Service Checklist](./CHECKLIST.md)**: "Is my service ready?" checklist.
+*   **[Examples](./EXAMPLES.md)**: Narrative examples of test suites.

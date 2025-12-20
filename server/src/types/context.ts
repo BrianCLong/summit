@@ -2,9 +2,6 @@ import { Driver } from 'neo4j-driver';
 import { Pool } from 'pg';
 import Redis from 'ioredis';
 
-/**
- * Interface representing a user in the system context.
- */
 export interface User {
   id: string;
   email: string;
@@ -20,10 +17,6 @@ export interface User {
   updatedAt: Date;
 }
 
-/**
- * Interface representing the GraphQL execution context.
- * Contains database connections, request information, and user context.
- */
 export interface GraphQLContext {
   user?: User;
   neo4j: Driver;

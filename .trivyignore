@@ -1,2 +1,3 @@
-# Example: ignore noisy dev CVEs; keep CRITICAL/HIGH on main
+# Example: ignore noisy dev CVEs; keep CRITICAL/HIGH on main.
+# Keep SBOM targets (maestro, platform-sre, companyos-api, supply-chain) in scope.
 CVE-20xx-xxxx

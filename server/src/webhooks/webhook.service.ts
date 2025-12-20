@@ -4,9 +4,6 @@ import crypto from 'crypto';
 import { webhookQueue } from './webhook.queue.js';
 import { z } from 'zod/v4';
 
-/**
- * Configuration for a webhook.
- */
 export interface WebhookConfig {
   id: string;
   tenant_id: string;
@@ -18,9 +15,6 @@ export interface WebhookConfig {
   updated_at: Date;
 }
 
-/**
- * Record of a webhook delivery attempt.
- */
 export interface WebhookDelivery {
   id: string;
   webhook_id: string;
@@ -34,6 +28,20 @@ export interface WebhookDelivery {
   next_retry_at?: Date;
   created_at: Date;
   updated_at: Date;
+}
+
+export interface WebhookDeliveryAttempt {
+  id: string;
+  delivery_id: string;
+  webhook_id: string;
+  tenant_id: string;
+  attempt_number: number;
+  status: 'success' | 'failed' | 'pending';
+  response_status?: number;
+  response_body?: string;
+  error_message?: string;
+  duration_ms?: number;
+  created_at: Date;
 }
 
 export const CreateWebhookSchema = z.object({
@@ -53,16 +61,28 @@ export const UpdateWebhookSchema = z.object({
 
 export type UpdateWebhookInput = z.infer<typeof UpdateWebhookSchema>;
 
-/**
- * Service for managing webhooks.
- * Handles creation, retrieval, updates, deletion, and event triggering.
- */
 export class WebhookService {
   /**
+   * Build signing headers with timestamped HMAC for payload integrity
+   */
+  generateSignature(payload: any, secret: string, timestamp?: number): {
+    signature: string;
+    timestamp: number;
+  } {
+    const ts = timestamp || Date.now();
+    const payloadString = JSON.stringify(payload);
+    const dataToSign = `${ts}.${payloadString}`;
+    const hmac = crypto.createHmac('sha256', secret);
+    hmac.update(dataToSign);
+    const digest = hmac.digest('hex');
+    return {
+      signature: `t=${ts},v1=${digest}`,
+      timestamp: ts,
+    };
+  }
+
+  /**
    * Create a new webhook registration
-   * @param tenantId - The ID of the tenant.
-   * @param input - The webhook creation input.
-   * @returns The created webhook configuration.
    */
   async createWebhook(tenantId: string, input: CreateWebhookInput): Promise<WebhookConfig> {
     const secret = input.secret || crypto.randomBytes(32).toString('hex');
@@ -80,8 +100,6 @@ export class WebhookService {
 
   /**
    * Get webhooks for a tenant
-   * @param tenantId - The ID of the tenant.
-   * @returns An array of webhook configurations.
    */
   async getWebhooks(tenantId: string): Promise<WebhookConfig[]> {
     return pg.many(
@@ -93,9 +111,6 @@ export class WebhookService {
 
   /**
    * Get a specific webhook
-   * @param tenantId - The ID of the tenant.
-   * @param webhookId - The ID of the webhook.
-   * @returns The webhook configuration, or null if not found.
    */
   async getWebhook(tenantId: string, webhookId: string): Promise<WebhookConfig | null> {
     return pg.oneOrNone(
@@ -107,10 +122,6 @@ export class WebhookService {
 
   /**
    * Update a webhook
-   * @param tenantId - The ID of the tenant.
-   * @param webhookId - The ID of the webhook.
-   * @param input - The update input.
-   * @returns The updated webhook configuration, or null if not found.
    */
   async updateWebhook(tenantId: string, webhookId: string, input: UpdateWebhookInput): Promise<WebhookConfig | null> {
     const updates: string[] = [];
@@ -155,9 +166,6 @@ export class WebhookService {
 
   /**
    * Delete a webhook
-   * @param tenantId - The ID of the tenant.
-   * @param webhookId - The ID of the webhook.
-   * @returns True if deleted, false otherwise.
    */
   async deleteWebhook(tenantId: string, webhookId: string): Promise<boolean> {
     const result = await pg.oneOrNone(
@@ -170,9 +178,6 @@ export class WebhookService {
 
   /**
    * Trigger a webhook event for all subscribers
-   * @param tenantId - The ID of the tenant.
-   * @param eventType - The type of event.
-   * @param payload - The event payload.
    */
   async triggerEvent(tenantId: string, eventType: string, payload: any): Promise<void> {
     // Find all active webhooks for this tenant and event type
@@ -204,22 +209,60 @@ export class WebhookService {
         await webhookQueue.add('deliver-webhook', {
           deliveryId: delivery.id,
           webhookId: webhook.id,
+          tenantId,
           url: webhook.url,
           secret: webhook.secret,
           payload,
-          eventType
+          eventType,
+          triggerType: 'event',
         });
       }
     }
   }
 
   /**
+   * Trigger a single webhook, useful for testing or manual resend
+   */
+  async triggerWebhook(
+    tenantId: string,
+    webhookId: string,
+    eventType: string,
+    payload: any,
+    triggerType: 'event' | 'test' = 'event'
+  ): Promise<WebhookDelivery | null> {
+    const webhook = await this.getWebhook(tenantId, webhookId);
+    if (!webhook || !webhook.is_active) {
+      return null;
+    }
+
+    const delivery = await pg.oneOrNone(
+      `INSERT INTO webhook_deliveries (webhook_id, tenant_id, event_type, payload)
+       VALUES ($1, $2, $3, $4)
+       RETURNING *`,
+      [webhookId, tenantId, eventType, payload],
+      { tenantId }
+    );
+
+    if (!delivery) {
+      return null;
+    }
+
+    await webhookQueue.add('deliver-webhook', {
+      deliveryId: delivery.id,
+      webhookId,
+      tenantId,
+      url: webhook.url,
+      secret: webhook.secret,
+      payload,
+      eventType,
+      triggerType,
+    });
+
+    return delivery;
+  }
+
+  /**
    * Get delivery history for a webhook
-   * @param tenantId - The ID of the tenant.
-   * @param webhookId - The ID of the webhook.
-   * @param limit - The maximum number of deliveries to return (default 20).
-   * @param offset - The offset for pagination (default 0).
-   * @returns An array of webhook deliveries.
    */
   async getDeliveries(tenantId: string, webhookId: string, limit = 20, offset = 0): Promise<WebhookDelivery[]> {
     // Verify ownership first
@@ -239,15 +282,35 @@ export class WebhookService {
   }
 
   /**
-   * Generate HMAC signature
-   * @param payload - The payload to sign.
-   * @param secret - The secret key.
-   * @returns The HMAC signature.
+   * Delivery attempt history for observability and dashboards
    */
-  generateSignature(payload: any, secret: string): string {
-    const hmac = crypto.createHmac('sha256', secret);
-    hmac.update(JSON.stringify(payload));
-    return `sha256=${hmac.digest('hex')}`;
+  async getDeliveryAttempts(
+    tenantId: string,
+    webhookId: string,
+    deliveryId?: string,
+    limit = 50
+  ): Promise<WebhookDeliveryAttempt[]> {
+    const webhook = await this.getWebhook(tenantId, webhookId);
+    if (!webhook) {
+      throw new Error('Webhook not found');
+    }
+
+    const params: any[] = [webhookId, limit];
+    const deliveryFilter = deliveryId ? 'AND delivery_id = $3' : '';
+    if (deliveryId) {
+      params.push(deliveryId);
+    }
+
+    return pg.many(
+      `SELECT *
+       FROM webhook_delivery_attempts
+       WHERE webhook_id = $1
+       ${deliveryFilter}
+       ORDER BY created_at DESC
+       LIMIT $2`,
+      params,
+      { tenantId }
+    );
   }
 }
 

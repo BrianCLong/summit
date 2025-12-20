@@ -25,10 +25,6 @@ function readRetentionDays(): { riskDays: number; evidenceDays: number } {
   }
 }
 
-/**
- * Executes a single run of the data retention policy enforcement.
- * Deletes old risk signals and evidence bundles based on configured retention days.
- */
 export async function runRetentionOnce() {
   const { riskDays, evidenceDays } = readRetentionDays();
   await pg.write(
@@ -42,11 +38,6 @@ export async function runRetentionOnce() {
 }
 
 let timer: any;
-
-/**
- * Starts the retention worker.
- * The worker periodically cleans up old data.
- */
 export function startRetentionWorker() {
   if (process.env.ENABLE_RETENTION_WORKER !== 'true') return;
   const intervalMs = Number(
@@ -58,9 +49,6 @@ export function startRetentionWorker() {
   tick();
 }
 
-/**
- * Stops the retention worker.
- */
 export function stopRetentionWorker() {
   if (timer) clearInterval(timer);
 }

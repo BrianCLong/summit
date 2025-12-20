@@ -1,7 +1,49 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { router } from '@/switchboard/router';
 // Import registry to ensure routes are registered (we will create this file next)
 import '@/switchboard/registry';
+
+/**
+ * Validate and decode JWT token from authorization header or cookie
+ * Returns null if invalid/missing, or decoded payload if valid
+ */
+async function validateAuthToken(
+  request: NextRequest,
+): Promise<{ userId: string; tenantId: string } | null> {
+  // Check Authorization header first (Bearer token)
+  const authHeader = request.headers.get('authorization');
+  let token: string | undefined;
+
+  if (authHeader?.startsWith('Bearer ')) {
+    token = authHeader.slice(7);
+  } else {
+    // Fallback to session cookie
+    const cookieStore = await cookies();
+    token = cookieStore.get('session_token')?.value;
+  }
+
+  if (!token) {
+    return null;
+  }
+
+  try {
+    // TODO: Replace with actual JWT verification using your auth library
+    // This should verify signature, expiration, and issuer
+    // Example with jose library:
+    // const { payload } = await jwtVerify(token, secretKey, { issuer: 'your-issuer' });
+    // return { userId: payload.sub, tenantId: payload.tenant_id };
+
+    // For now, reject all requests until proper auth is implemented
+    // This is a security-first approach - fail closed rather than open
+    console.error(
+      'Auth validation not fully implemented - rejecting request',
+    );
+    return null;
+  } catch {
+    return null;
+  }
+}
 
 export async function POST(request: NextRequest, { params }: { params: { path: string[] } }) {
   const path = params.path || [];
@@ -10,6 +52,15 @@ export async function POST(request: NextRequest, { params }: { params: { path: s
   // Handle /api/switchboard/dispatch
   if (routePath === 'dispatch') {
     try {
+      // Validate authentication BEFORE processing request
+      const auth = await validateAuthToken(request);
+      if (!auth) {
+        return NextResponse.json(
+          { error: 'Unauthorized: valid authentication required' },
+          { status: 401 },
+        );
+      }
+
       const body = await request.json();
       const { routeId, payload } = body;
 
@@ -17,26 +68,22 @@ export async function POST(request: NextRequest, { params }: { params: { path: s
         return NextResponse.json({ error: 'routeId is required' }, { status: 400 });
       }
 
-      // TODO: Implement proper authentication and authorization here.
-      // Currently, we rely on headers, but this should be validated against a session or token.
-      // const session = await getSession(request);
-      // if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
+      // Use authenticated context - NEVER trust client-provided headers for identity
       const context = {
         requestId: crypto.randomUUID(),
         source: 'client' as const,
-        // In a real app, extract these from headers/session or token
-        tenantId: request.headers.get('x-tenant-id') || undefined,
-        actor: request.headers.get('x-actor-id') || undefined,
+        tenantId: auth.tenantId,
+        actor: auth.userId,
       };
 
       const result = await router.dispatch(routeId, payload, context);
       return NextResponse.json({ success: true, data: result });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Dispatch error:', error);
+      // Don't leak error details to client
       return NextResponse.json({
         success: false,
-        error: error.message || 'Internal Server Error'
+        error: 'Internal Server Error'
       }, { status: 500 });
     }
   }

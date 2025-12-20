@@ -10,6 +10,7 @@ node_modules/
 !.yarn/versions
 .npm/
 .eslintcache
+node-compile-cache/
 
 # Optional REPL history
 .node_repl_history
@@ -20,7 +21,15 @@ node_modules/
 # Yarn Integrity file
 .yarn-integrity
 
+# DMCL build artifacts
+tools/dmcl/bin/
+reports/dmcl/
+
+# Graph Oracle generated reports
+reports/graph-oracle-report.*
+
 # Prevent secrets / env files
+.env
 .env.*
 !.env.example
 .envrc
@@ -38,6 +47,7 @@ out
 dist
 build
 docs/site/
+# TypeScript incremental caches (avoid committing build traces)
 *.tsbuildinfo
 .turbo/
 
@@ -108,8 +118,9 @@ cognitive_insights_engine/poetry.lock
 **/poetry.lock
 **/Pipfile.lock
 
-# JavaScript/TypeScript package manager lockfiles are ignored to prevent
-# accidental binary diffs from blocking PR workflows
+# JavaScript/TypeScript package manager lockfiles
+# NOTE: pnpm-lock.yaml MUST be tracked for supply chain security
+# yarn.lock is ignored as we use pnpm
 yarn.lock
 
 # Additional large data artifacts generated during investigations or exports
@@ -191,6 +202,7 @@ server/test-results/
 server/junit.xml
 coverage/
 **/coverage/
+coverage-reports/
 
 # Neo4j & graph stores
 neo4j/data/
@@ -237,3 +249,10 @@ id_ed25519.*
 **/api-key.txt
 **/token.txt
 **/.token
+
+# PR Dashboard generated files
+pr-dashboard-report.json
+pr-dashboard.html
+pr-backlog-stats.json
+tests/e2e/auth-state.json
+artifacts/

@@ -6,9 +6,6 @@ export type DocSourceType =
   | 'COMPLIANCE_DOC'
   | 'MARKDOWN';
 
-/**
- * Metadata associated with a document fragment.
- */
 export interface DocFragmentMetadata extends Record<string, unknown> {
   finding?: Partial<DocFinding> & {
     value?: unknown;
@@ -16,9 +13,6 @@ export interface DocFragmentMetadata extends Record<string, unknown> {
   };
 }
 
-/**
- * Represents a fragment of a document.
- */
 export interface DocFragment {
   id: string;
   sha256: string;
@@ -27,9 +21,6 @@ export interface DocFragment {
   metadata?: DocFragmentMetadata;
 }
 
-/**
- * Summary of a document's analysis.
- */
 export interface DocSummary {
   id: string;
   text: string;
@@ -38,9 +29,6 @@ export interface DocSummary {
   qualitySignals: Record<string, unknown>;
 }
 
-/**
- * A specific finding extracted from a document.
- */
 export interface DocFinding {
   id: string;
   label: string;
@@ -52,9 +40,6 @@ export interface DocFinding {
   qualitySignals: Record<string, unknown>;
 }
 
-/**
- * A policy compliance signal derived from document analysis.
- */
 export interface DocPolicySignal {
   id: string;
   classification: string;
@@ -66,9 +51,6 @@ export interface DocPolicySignal {
   qualitySignals?: Record<string, number>;
 }
 
-/**
- * Usage statistics for Docling processing.
- */
 export interface DoclingUsage {
   characters: number;
   tokens?: number;
@@ -76,9 +58,6 @@ export interface DoclingUsage {
   latencyMs: number;
 }
 
-/**
- * Base response structure for Docling API operations.
- */
 export interface DoclingBaseResponse<T> {
   requestId: string;
   tenantId: string;

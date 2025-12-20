@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState, useEffect } from 'react'
+import config from '../config'
 
 interface GitHubMetrics {
   repository: {
@@ -108,19 +109,23 @@ export const useGitHubIntegration = (
   options: UseGitHubIntegrationOptions = {}
 ) => {
   const {
-    repository = process.env.NEXT_PUBLIC_GITHUB_REPO,
+    repository = config.integrations.github.repo,
     refreshInterval = 60000,
   } = options
   const queryClient = useQueryClient()
 
   const fetchGitHubMetrics = async (): Promise<GitHubMetrics> => {
+    const headers: Record<string, string> = {
+      Accept: 'application/vnd.github.v3+json',
+    }
+    if (config.integrations.github.token) {
+      headers.Authorization = `Bearer ${config.integrations.github.token}`
+    }
+
     const response = await fetch(
       `/api/integrations/github/metrics?repo=${repository}`,
       {
-        headers: {
-          Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-          Accept: 'application/vnd.github.v3+json',
-        },
+        headers,
       }
     )
 
@@ -345,5 +350,85 @@ export const useGitHubStats = (repository: string) => {
     },
     refetchInterval: 21600000, // 6 hours
     staleTime: 10800000, // 3 hours
+  })
+}
+
+// Hook for creating GitHub Pull Requests from the UI
+export interface CreatePullRequestInput {
+  title: string
+  body: string
+  head: string
+  base?: string
+  draft?: boolean
+  labels?: string[]
+  assignees?: string[]
+  repository: string
+}
+
+export interface PullRequestResult {
+  number: number
+  url: string
+  htmlUrl: string
+  state: string
+  title: string
+  draft: boolean
+  mergeable: boolean | null
+  createdAt: string
+}
+
+export const useCreatePullRequest = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (
+      pr: CreatePullRequestInput
+    ): Promise<PullRequestResult> => {
+      const response = await fetch('/api/integrations/github/pull-requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: pr.title,
+          body: pr.body,
+          head: pr.head,
+          base: pr.base || 'main',
+          draft: pr.draft || false,
+          labels: pr.labels || [],
+          assignees: pr.assignees || [],
+          targetRepo: pr.repository,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}))
+        throw new Error(error.message || 'Failed to create pull request')
+      }
+
+      return response.json()
+    },
+    onSuccess: (data, variables) => {
+      // Invalidate and refetch GitHub metrics
+      queryClient.invalidateQueries({
+        queryKey: ['github-metrics', variables.repository],
+      })
+    },
+  })
+}
+
+// Hook for listing branches
+export const useGitHubBranches = (repository: string) => {
+  return useQuery({
+    queryKey: ['github-branches', repository],
+    queryFn: async () => {
+      const response = await fetch(
+        `/api/integrations/github/branches?repo=${repository}`
+      )
+      if (!response.ok) {
+        throw new Error('Failed to fetch branches')
+      }
+      return response.json() as Promise<
+        Array<{ name: string; protected: boolean }>
+      >
+    },
+    staleTime: 60000, // 1 minute
   })
 }

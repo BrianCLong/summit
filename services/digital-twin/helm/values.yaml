@@ -1,0 +1,68 @@
+replicaCount: 2
+
+image:
+  repository: intelgraph/digital-twin
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 4100
+
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "100m"
+  limits:
+    memory: "1Gi"
+    cpu: "500m"
+
+env:
+  PORT: "4100"
+  NODE_ENV: "production"
+  LOG_LEVEL: "info"
+
+secrets:
+  - name: DATABASE_URL
+    secretRef: postgres-credentials
+    key: url
+  - name: REDIS_URL
+    secretRef: redis-credentials
+    key: url
+  - name: NEO4J_URI
+    secretRef: neo4j-credentials
+    key: uri
+  - name: NEO4J_USER
+    secretRef: neo4j-credentials
+    key: user
+  - name: NEO4J_PASSWORD
+    secretRef: neo4j-credentials
+    key: password
+  - name: KAFKA_BROKERS
+    secretRef: kafka-credentials
+    key: brokers
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  hosts:
+    - host: twin.intelgraph.local
+      paths:
+        - path: /
+          pathType: Prefix
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  path: /metrics

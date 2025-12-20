@@ -1,32 +1,44 @@
-name: Container Security
+name: Container Security Scan
 
 on:
-  push: { branches: [ main, feature/dev-aws-green ] }
+  push:
+    branches: [ "main" ]
   pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '0 0 * * *'
+
+permissions:
+  contents: read
 
 jobs:
-  sbom-and-scan:
+  build-and-scan:
+    name: Build and Scan Container
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
-      - name: Build image
-        run: |
-          if [ -f deploy/docker/Dockerfile ]; then
-            docker buildx build --load -t intelgraph/app:${{ github.sha }} -f deploy/docker/Dockerfile .
-          elif [ -f deploy/docker/Dockerfile.api ]; then
-            docker buildx build --load -t intelgraph/app:${{ github.sha }} -f deploy/docker/Dockerfile.api .
-          else
-            echo "No Dockerfile found under deploy/docker; skipping" && exit 0
-          fi
-      - name: SBOM (syft)
-        uses: anchore/sbom-action@v0
-        with: { image: intelgraph/app:${{ github.sha }}, format: 'spdx-json', output-file: 'sbom.spdx.json' }
-      - name: Scan (grype)
-        uses: anchore/scan-action@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
         with:
-          image: intelgraph/app:${{ github.sha }}
-          fail-build: false
-          severity-cutoff: critical
-      - uses: actions/upload-artifact@v4
-        with: { name: sbom, path: sbom.spdx.json }
+          context: .
+          file: deploy/aws/Dockerfile
+          push: false
+          load: true
+          tags: intelgraph/maestro:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: 'intelgraph/maestro:latest'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'

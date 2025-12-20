@@ -39,12 +39,6 @@ export type EnrichJob = {
 //   },
 // });
 
-/**
- * Enqueues an enrichment job.
- * @param payload - The data for the enrichment job.
- * @param opts - Job options.
- * @returns A promise resolving to the queued job information.
- */
 export async function enqueueEnrichment(
   payload: EnrichJob,
   opts: JobsOptions = { attempts: 2 },
