@@ -1,0 +1,184 @@
+name: Release Regression
+description: Auto-created when KPI regression is detected after a release
+labels: [kpi-regression, release, automated]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## KPI Regression Detected
+
+        This issue was automatically created by the post-release KPI monitoring system.
+
+  - type: input
+    id: version
+    attributes:
+      label: Release Version
+      description: The version where the regression was detected
+      placeholder: "v1.2.3"
+    validations:
+      required: true
+
+  - type: input
+    id: baseline_version
+    attributes:
+      label: Baseline Version
+      description: The version used for comparison
+      placeholder: "v1.2.2"
+    validations:
+      required: true
+
+  - type: input
+    id: metric_name
+    attributes:
+      label: Metric Name
+      description: The KPI metric that regressed
+      placeholder: "P95 Latency"
+    validations:
+      required: true
+
+  - type: input
+    id: baseline_value
+    attributes:
+      label: Baseline Value
+      description: The metric value before the release
+      placeholder: "250ms"
+    validations:
+      required: true
+
+  - type: input
+    id: current_value
+    attributes:
+      label: Current Value
+      description: The current metric value
+      placeholder: "450ms"
+    validations:
+      required: true
+
+  - type: input
+    id: delta_percent
+    attributes:
+      label: Change (%)
+      description: Percentage change from baseline
+      placeholder: "+80%"
+    validations:
+      required: true
+
+  - type: input
+    id: threshold
+    attributes:
+      label: Threshold (%)
+      description: The threshold that was exceeded
+      placeholder: "20%"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: Impact severity of this regression
+      options:
+        - Critical - Immediate action required
+        - High - Address within 24 hours
+        - Medium - Address within 1 week
+        - Low - Track for next release
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact Assessment
+      description: Describe the user/business impact of this regression
+      placeholder: |
+        - Affected users: X%
+        - Affected endpoints: /api/...
+        - Business impact: ...
+    validations:
+      required: false
+
+  - type: textarea
+    id: suspected_cause
+    attributes:
+      label: Suspected Cause
+      description: Initial analysis of what may have caused the regression
+      placeholder: |
+        Possible causes:
+        - PR #123: Added new database query
+        - PR #456: Changed caching strategy
+    validations:
+      required: false
+
+  - type: textarea
+    id: recommended_actions
+    attributes:
+      label: Recommended Actions
+      description: Suggested steps to investigate and resolve
+      value: |
+        1. [ ] Review changes in the release
+        2. [ ] Check relevant dashboards for anomalies
+        3. [ ] Profile affected endpoints
+        4. [ ] Consider rollback if SLO is breached
+        5. [ ] Implement fix or optimization
+        6. [ ] Verify fix in staging
+        7. [ ] Close this issue with resolution notes
+    validations:
+      required: false
+
+  - type: input
+    id: grafana_url
+    attributes:
+      label: Grafana Dashboard
+      description: Link to the relevant Grafana dashboard
+      placeholder: "https://grafana.intelgraph.io/d/kpi-overview"
+    validations:
+      required: false
+
+  - type: input
+    id: release_url
+    attributes:
+      label: Release URL
+      description: Link to the GitHub release
+      placeholder: "https://github.com/.../releases/tag/v1.2.3"
+    validations:
+      required: false
+
+  - type: input
+    id: run_url
+    attributes:
+      label: KPI Check Run
+      description: Link to the GitHub Actions run that detected this
+      placeholder: "https://github.com/.../actions/runs/..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional Context
+      description: Any other relevant information
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+        ### Triage Checklist
+
+        - [ ] Assigned to appropriate team/owner
+        - [ ] Severity confirmed
+        - [ ] SLO impact assessed
+        - [ ] Rollback decision made (if needed)
+        - [ ] Root cause identified
+        - [ ] Fix implemented and verified
+
+        ### Resolution
+
+        When closing this issue, please document:
+        1. Root cause
+        2. Fix applied (PR link)
+        3. Verification results
+        4. Preventive measures for future

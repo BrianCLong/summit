@@ -1,23 +1,163 @@
-version: "v1"
-paths:
-  - name: "ingest-pipeline"
-    criticality: "high"
-    slo_ref: "ingest_latency"
-    probes:
-      - type: "synthetic"
-        endpoint: "/api/ingest/health"
-        interval: "1m"
-  - name: "search-api"
-    criticality: "high"
-    slo_ref: "search_latency"
-    probes:
-      - type: "synthetic"
-        endpoint: "/api/search/health"
-        interval: "30s"
-  - name: "report-generation"
-    criticality: "medium"
-    slo_ref: "report_generation_success"
-    probes:
-      - type: "synthetic"
-        endpoint: "/api/reports/health"
-        interval: "5m"
+# Golden Paths catalog for synthetic probes and SLO enforcement
+journeys:
+  - id: GP-001
+    name: ingest → enrich → index → search → detail
+    description: End-to-end document ingest and search experience
+    slo:
+      availability: 99.5
+      p95_latency_ms: 2200
+      error_budget_policy: fast-burn-2h,slow-burn-6h
+    steps:
+      - id: ingest
+        method: POST
+        target: "/api/ingest"
+        expected_status: 202
+        p95_latency_ms: 800
+        error_budget_policy: slow-burn-24h
+        required_span_attributes:
+          - journey.id
+          - journey.step
+          - tenant.id
+          - route.name
+        assertions:
+          - json: "jobId"
+      - id: enrich
+        method: GET
+        target: "/api/enrich/status"
+        expected_status: 200
+        p95_latency_ms: 400
+        error_budget_policy: slow-burn-12h
+        required_span_attributes:
+          - journey.id
+          - journey.step
+          - cache.hit
+      - id: index
+        method: POST
+        target: "/api/index"
+        expected_status: 202
+        p95_latency_ms: 500
+        error_budget_policy: fast-burn-4h
+        required_span_attributes:
+          - journey.id
+          - journey.step
+          - db.system
+          - db.operation
+      - id: search
+        method: GET
+        target: "/api/search?q=synthetic"
+        expected_status: 200
+        p95_latency_ms: 350
+        error_budget_policy: fast-burn-2h
+        required_span_attributes:
+          - journey.id
+          - journey.step
+          - route.name
+      - id: detail
+        method: GET
+        target: "/api/detail/placeholder"
+        expected_status: 200
+        p95_latency_ms: 450
+        error_budget_policy: fast-burn-2h
+        required_span_attributes:
+          - journey.id
+          - journey.step
+          - feature.flags
+  - id: GP-002
+    name: login → dashboard load → graph query
+    description: Authenticated analyst experience from login to first graph results
+    slo:
+      availability: 99.7
+      p95_latency_ms: 1800
+      error_budget_policy: fast-burn-2h,slow-burn-24h
+    steps:
+      - id: login
+        method: POST
+        target: "/auth/login"
+        expected_status: 200
+        p95_latency_ms: 500
+        error_budget_policy: slow-burn-24h
+        required_span_attributes:
+          - journey.id
+          - journey.step
+          - user.role
+          - tenant.id
+        assertions:
+          - json: "token"
+      - id: dashboard
+        method: GET
+        target: "/dashboard"
+        expected_status: 200
+        p95_latency_ms: 450
+        error_budget_policy: fast-burn-4h
+        required_span_attributes:
+          - journey.id
+          - journey.step
+          - route.name
+      - id: graph-query
+        method: POST
+        target: "/api/graph/query"
+        expected_status: 200
+        p95_latency_ms: 650
+        error_budget_policy: fast-burn-4h
+        required_span_attributes:
+          - journey.id
+          - journey.step
+          - db.system
+          - db.operation
+        assertions:
+          - json: "nodes"
+          - json: "edges"
+  - id: GP-003
+    name: analyst workflow run → report export
+    description: Analyst executes workflow and exports results
+    slo:
+      availability: 99.6
+      p95_latency_ms: 2400
+      error_budget_policy: fast-burn-1h,slow-burn-6h
+    steps:
+      - id: workflow-start
+        method: POST
+        target: "/api/workflows/run"
+        expected_status: 202
+        p95_latency_ms: 700
+        error_budget_policy: fast-burn-6h
+        required_span_attributes:
+          - journey.id
+          - journey.step
+          - feature.flags
+          - canary.weight
+        assertions:
+          - json: "runId"
+      - id: workflow-status
+        method: GET
+        target: "/api/workflows/status"
+        expected_status: 200
+        p95_latency_ms: 500
+        error_budget_policy: slow-burn-12h
+        required_span_attributes:
+          - journey.id
+          - journey.step
+          - cache.hit
+      - id: workflow-detail
+        method: GET
+        target: "/api/workflows/detail/placeholder"
+        expected_status: 200
+        p95_latency_ms: 550
+        error_budget_policy: slow-burn-12h
+        required_span_attributes:
+          - journey.id
+          - journey.step
+          - route.name
+      - id: report-export
+        method: POST
+        target: "/api/reports/export"
+        expected_status: 200
+        p95_latency_ms: 650
+        error_budget_policy: fast-burn-4h
+        required_span_attributes:
+          - journey.id
+          - journey.step
+          - tenant.id
+          - release.sha
+        assertions:
+          - json: "downloadUrl"
