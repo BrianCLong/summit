@@ -20,6 +20,7 @@ export interface BreakGlassRequestRecord {
   expiresAt?: string;
   sid?: string;
   usageCount?: number;
+  consumedAt?: string;
 }
 
 interface BreakGlassState {
@@ -78,6 +79,7 @@ class BreakGlassManager {
   constructor(ttlSeconds: number) {
     this.state = readState();
     this.ttlSeconds = ttlSeconds;
+    this.pruneExpired();
     sessionManager.setHooks({
       onBreakGlassExpired: (session) => {
         if (session.sid) {
@@ -87,7 +89,12 @@ class BreakGlassManager {
     });
   }
 
-  createRequest(subjectId: string, justification: string, ticketId: string, scope: string[] = ['break_glass:elevated']): BreakGlassRequestRecord {
+  createRequest(
+    subjectId: string,
+    justification: string,
+    ticketId: string,
+    scope: string[] = ['break_glass:elevated'],
+  ): BreakGlassRequestRecord {
     if (!justification || !ticketId) {
       throw new Error('justification_and_ticket_required');
     }
@@ -111,6 +118,7 @@ class BreakGlassManager {
       ticketId,
       justification,
       ts: requestedAt,
+      detail: { scope },
     });
     log({
       subject: subjectId,
@@ -130,6 +138,9 @@ class BreakGlassManager {
     }
     if (record.status === 'approved') {
       throw new Error('request_already_approved');
+    }
+    if (record.status === 'expired') {
+      throw new Error('request_expired');
     }
     const issuedAt = nowIso();
     const expiresAtSeconds = Math.floor(Date.now() / 1000) + this.ttlSeconds;
@@ -184,13 +195,19 @@ class BreakGlassManager {
 
   recordUsage(
     sid: string,
-    details: { action: string; resource: string; tenantId: string; allowed: boolean },
+    details: {
+      action: string;
+      resource: string;
+      tenantId: string;
+      allowed: boolean;
+    },
   ) {
     const record = this.findRequestBySid(sid);
     if (!record) {
       return;
     }
     record.usageCount = (record.usageCount || 0) + 1;
+    record.consumedAt = record.consumedAt || nowIso();
     this.state.requests[record.id] = record;
     writeState(this.state);
     emitEvent({
@@ -205,6 +222,7 @@ class BreakGlassManager {
         resource: details.resource,
         tenantId: details.tenantId,
         allowed: details.allowed,
+        expiresAt: record.expiresAt,
       },
     });
     log({
@@ -264,7 +282,53 @@ class BreakGlassManager {
   }
 
   private findRequestBySid(sid: string) {
-    return Object.values(this.state.requests).find((request) => request.sid === sid);
+    return Object.values(this.state.requests).find(
+      (request) => request.sid === sid,
+    );
+  }
+
+  private pruneExpired() {
+    const nowSeconds = Math.floor(Date.now() / 1000);
+    let updated = false;
+    Object.values(this.state.requests).forEach((record) => {
+      if (record.status === 'approved' && record.expiresAt) {
+        const expiresAtSeconds = Math.floor(
+          new Date(record.expiresAt).getTime() / 1000,
+        );
+        if (expiresAtSeconds < nowSeconds) {
+          record.status = 'expired';
+          updated = true;
+          emitEvent({
+            type: 'expiry',
+            requestId: record.id,
+            subjectId: record.subjectId,
+            ticketId: record.ticketId,
+            justification: record.justification,
+            ts: nowIso(),
+            detail: { reason: 'startup_prune' },
+          });
+          log({
+            subject: record.subjectId,
+            action: 'break_glass_expired',
+            resource: 'break_glass',
+            tenantId: 'system',
+            allowed: false,
+            reason: 'break_glass_expired',
+            breakGlass: {
+              requestId: record.id,
+              ticketId: record.ticketId,
+              justification: record.justification,
+              issuedAt: record.approvedAt || record.requestedAt,
+              expiresAt: record.expiresAt,
+              approverId: record.approvedBy || 'unknown',
+            },
+          });
+        }
+      }
+    });
+    if (updated) {
+      writeState(this.state);
+    }
   }
 }
 

@@ -143,6 +143,21 @@ make down         # Stop services
 make smoke        # Run golden path tests
 ```
 
+### Summit CLI (`summitctl`)
+
+The `summitctl` tool is the preferred entrypoint for standard workflows.
+
+```bash
+# Bootstrap environment
+npm run summitctl -- init --full
+
+# Validate code quality
+npm run summitctl -- check
+
+# Run tests
+npm run summitctl -- test
+```
+
 ## Code Conventions
 
 ### TypeScript
