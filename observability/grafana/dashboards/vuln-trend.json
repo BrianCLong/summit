@@ -1,137 +1,124 @@
 {
-  "dashboard": {
-    "title": "Vulnerability Trends & Exceptions",
-    "uid": "vuln-trend",
-    "schemaVersion": 38,
-    "timezone": "browser",
-    "refresh": "5m",
-    "tags": ["security", "vulnerability", "exceptions"],
-    "time": { "from": "now-30d", "to": "now" },
-    "panels": [
-      {
-        "id": 1,
-        "title": "Critical & High Vulnerabilities (open)",
-        "type": "timeseries",
-        "datasource": "${DS_PROMETHEUS}",
-        "targets": [
-          {
-            "expr": "sum(max_over_time(security_vulnerability_info{severity=\"critical\",status=\"open\"}[1d]))",
-            "legendFormat": "Critical open"
-          },
-          {
-            "expr": "sum(max_over_time(security_vulnerability_info{severity=\"high\",status=\"open\"}[1d]))",
-            "legendFormat": "High open"
-          }
-        ],
-        "fieldConfig": { "defaults": { "unit": "none" } },
-        "options": { "legend": { "showLegend": true }, "tooltip": { "mode": "single" } }
-      },
-      {
-        "id": 2,
-        "title": "Exception debt burn-down (days)",
-        "type": "timeseries",
-        "datasource": "${DS_PROMETHEUS}",
-        "targets": [
-          {
-            "expr": "sum(max_over_time(security_vulnerability_exception_days_remaining[1d])) or 0",
-            "legendFormat": "Days remaining on exceptions"
-          },
-          {
-            "expr": "sum(max_over_time(security_vulnerability_info{status=\"exception\"}[1d])) or 0",
-            "legendFormat": "Open exceptions (count)"
-          }
-        ],
-        "fieldConfig": { "defaults": { "unit": "d" } },
-        "options": { "legend": { "showLegend": true }, "tooltip": { "mode": "multi" } }
-      },
-      {
-        "id": 3,
-        "title": "Critical backlog (alerting)",
-        "type": "stat",
-        "datasource": "${DS_PROMETHEUS}",
-        "targets": [
-          {
-            "expr": "count(security_vulnerability_info{severity=\"critical\",status=\"open\"}) or 0",
-            "legendFormat": "Critical open"
-          }
-        ],
-        "fieldConfig": {
-          "defaults": {
-            "color": { "mode": "thresholds" },
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                { "color": "green", "value": 0 },
-                { "color": "red", "value": 1 }
-              ]
-            },
-            "unit": "none"
-          }
-        },
-        "options": { "colorMode": "value", "graphMode": "none", "orientation": "auto", "textMode": "value_and_name" },
-        "alert": {
-          "name": "Critical backlog present",
-          "conditions": [
-            {
-              "type": "query",
-              "query": { "params": ["A", "5m", "now"] },
-              "reducer": { "type": "last" },
-              "evaluator": { "type": "gt", "params": [0] },
-              "operator": { "type": "and" }
-            }
-          ],
-          "executionErrorState": "alerting",
-          "noDataState": "alerting",
-          "frequency": "1m"
-        }
-      },
-      {
-        "id": 4,
-        "title": "Exception expirations (next 14d)",
-        "type": "table",
-        "datasource": "${DS_PROMETHEUS}",
-        "targets": [
-          {
-            "expr": "security_vulnerability_exception_expiry_info{days_remaining=~\"0|1|2|3|4|5|6|7|8|9|10|11|12|13|14\"}",
-            "format": "table",
-            "instant": true
-          }
-        ],
-        "fieldConfig": {
-          "defaults": {
-            "custom": { "displayMode": "color-text" },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                { "color": "green", "value": null },
-                { "color": "yellow", "value": 7 },
-                { "color": "red", "value": 3 }
-              ]
-            }
-          }
-        },
-        "options": { "showHeader": true }
-      }
-    ],
-    "templating": {
-      "list": [
-        {
-          "type": "datasource",
-          "name": "DS_PROMETHEUS",
-          "label": "Prometheus",
-          "query": "prometheus"
-        }
-      ]
-    }
-  },
-  "overwrite": true,
-  "inputs": [
+  "title": "Security — Vulnerability Trends & Exceptions",
+  "tags": ["security", "vulnerability", "exceptions", "trend"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "panels": [
     {
-      "name": "DS_PROMETHEUS",
-      "type": "datasource",
-      "pluginId": "prometheus",
-      "value": "Prometheus"
+      "id": 1,
+      "title": "Critical & High Vulnerabilities (open)",
+      "type": "timeseries",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1 },
+              { "color": "red", "value": 5 }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(security_vulnerability_info{status=\"open\", severity=\"critical\"})",
+          "legendFormat": "Critical"
+        },
+        {
+          "expr": "sum(security_vulnerability_info{status=\"open\", severity=\"high\"})",
+          "legendFormat": "High"
+        }
+      ],
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "single" },
+        "showPoints": "never"
+      },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 }
+    },
+    {
+      "id": 2,
+      "title": "Exception Debt Burn-down",
+      "type": "timeseries",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1 },
+              { "color": "red", "value": 3 }
+            ]
+          },
+          "unit": "none"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(security_vulnerability_info{status=\"exception\", severity=\"critical\"})",
+          "legendFormat": "Critical exceptions"
+        },
+        {
+          "expr": "sum(security_vulnerability_info{status=\"exception\", severity=\"high\"})",
+          "legendFormat": "High exceptions"
+        }
+      ],
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "single" },
+        "showPoints": "never"
+      },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 }
+    },
+    {
+      "id": 3,
+      "title": "Critical Vuln Alert",
+      "type": "stat",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": 1 },
+              { "color": "orange", "value": 0.1 },
+              { "color": "green", "value": 0 }
+            ]
+          },
+          "mappings": [],
+          "unit": "none"
+        }
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "horizontal",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center"
+      },
+      "targets": [
+        {
+          "expr": "sum(security_vulnerability_info{status=\"open\", severity=\"critical\"})",
+          "legendFormat": "Critical open"
+        }
+      ],
+      "gridPos": { "h": 5, "w": 24, "x": 0, "y": 16 },
+      "alert": {
+        "name": "Critical vulnerabilities present",
+        "conditions": [
+          {
+            "evaluator": { "type": "gt", "params": [0] },
+            "query": { "params": ["A", "5m", "now"] }
+          }
+        ],
+        "noDataState": "no_data",
+        "executionErrorState": "alerting",
+        "frequency": "1m"
+      }
     }
   ]
 }
