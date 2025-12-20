@@ -1,0 +1,56 @@
+# Tenant guardrail alerts for isolation, metering, and quota protection
+groups:
+  - name: tenant.guardrails
+    interval: 30s
+    rules:
+      - alert: CrossTenantAccessDenialsSpike
+        expr: |
+          sum by (tenant, service) (
+            rate(authz_cross_tenant_decisions_total{decision="deny"}[5m])
+          ) > 5
+        for: 2m
+        labels:
+          severity: warning
+          category: security
+          service: gateway
+        annotations:
+          summary: "Cross-tenant access denials are spiking"
+          description: |
+            {{ $labels.tenant }} is seeing {{ $value | humanize }} denied cross-tenant
+            attempts per second on {{ $labels.service }}. Investigate potential abuse
+            or misconfiguration before isolation is impacted.
+          runbook_url: "https://runbooks.summit.io/security/tenant-isolation"
+          dashboard_url: "/d/summit-slo-overview"
+
+      - alert: MeteringBacklogGrowing
+        expr: |
+          max_over_time(metering_backlog_records[10m]) > 5000
+        for: 10m
+        labels:
+          severity: warning
+          category: capacity
+          service: metering
+        annotations:
+          summary: "Metering backlog is growing"
+          description: |
+            Metering backlog exceeds 5k records for at least 10m.
+            Check pipeline workers and upstream event delivery to prevent billing lag.
+          runbook_url: "https://runbooks.summit.io/finops/metering-backlog"
+          dashboard_url: "/d/finops-cost-guard"
+
+      - alert: TenantQuotaNearingLimit
+        expr: |
+          max by (tenant, quota_type) (tenant_quota_utilization_ratio) > 0.85
+        for: 15m
+        labels:
+          severity: warning
+          category: quota
+          service: quota-control
+        annotations:
+          summary: "Tenant quota utilization above 85%"
+          description: |
+            Tenant {{ $labels.tenant }} quota {{ $labels.quota_type }} is at
+            {{ $value | humanizePercentage }} of limit. Prepare mitigation
+            before hard throttles or denials trigger.
+          runbook_url: "https://runbooks.summit.io/finops/tenant-quota"
+          dashboard_url: "/d/qos-tenant-health"

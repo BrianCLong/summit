@@ -1,0 +1,32 @@
+{{- if .Values.mtls.enabled }}
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: {{ .Release.Namespace }}
+spec:
+  mtls:
+    mode: {{ .Values.mtls.peerAuthentication.mode | default "STRICT" }}
+---
+apiVersion: security.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: gateway-mtls
+  namespace: {{ .Release.Namespace }}
+spec:
+  host: gateway.{{ .Release.Namespace }}.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+---
+apiVersion: security.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: ui-mtls
+  namespace: {{ .Release.Namespace }}
+spec:
+  host: ui.{{ .Release.Namespace }}.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+{{- end }}
