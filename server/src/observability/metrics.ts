@@ -23,7 +23,13 @@ import {
   intelgraphCacheHits as cacheHits,
   intelgraphCacheMisses as cacheMisses,
   copilotApiRequestTotal,
-  copilotApiRequestDurationMs
+  copilotApiRequestDurationMs,
+  // Maestro Metrics
+  maestroDagExecutionDurationSeconds,
+  maestroJobExecutionDurationSeconds,
+  // LLM Metrics
+  llmTokensTotal,
+  llmRequestDuration
 } from '../monitoring/metrics.js';
 
 export { registry };
@@ -46,7 +52,11 @@ export {
   cacheHits,
   cacheMisses,
   copilotApiRequestTotal,
-  copilotApiRequestDurationMs
+  copilotApiRequestDurationMs,
+  maestroDagExecutionDurationSeconds,
+  maestroJobExecutionDurationSeconds,
+  llmTokensTotal,
+  llmRequestDuration
 };
 
 export const metrics = {
@@ -68,4 +78,8 @@ export const metrics = {
   cacheMisses,
   copilotApiRequestTotal,
   copilotApiRequestDurationMs,
+  maestroDagExecutionDurationSeconds,
+  maestroJobExecutionDurationSeconds,
+  llmTokensTotal,
+  llmRequestDuration
 };

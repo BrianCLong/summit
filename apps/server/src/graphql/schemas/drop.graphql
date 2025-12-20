@@ -18,3 +18,7 @@ input DropInput {
 extend type Mutation {
   submitDrop(input: DropInput!): Drop!
 }
+
+type Query {
+  health: String!
+}

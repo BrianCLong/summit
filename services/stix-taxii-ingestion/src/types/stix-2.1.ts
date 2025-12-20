@@ -732,6 +732,9 @@ export interface IngestionMetadata {
   collectionId?: string;
   batchId?: string;
   processingTimeMs?: number;
+  tenantId?: string;
+  planTier?: 'FREE' | 'STARTER' | 'PRO' | 'ENTERPRISE';
+  seatHint?: number;
 }
 
 export interface EnrichedStixObject<T extends StixObject = StixObject> {
