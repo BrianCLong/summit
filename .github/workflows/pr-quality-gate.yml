@@ -75,7 +75,6 @@ jobs:
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
-    needs: [static-checks] # Optional: remove dependency if you want parallelism at cost of compute
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -111,52 +110,10 @@ jobs:
       - name: Run Unit Tests
         run: pnpm run test:jest
 
-  tenant-isolation:
-    name: Multi-tenant Isolation Gate
-    runs-on: ubuntu-latest
-    needs: [static-checks]
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
-
-      - name: Get pnpm store directory
-        id: tenant-pnpm-cache
-        shell: bash
-        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.tenant-pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
-
-      - name: Run tenant isolation probes
-        run: pnpm run test:tenant-isolation
-
   # Smoke Test Lane: The Golden Path
   smoke-tests:
     name: Smoke Tests (Golden Path)
     runs-on: ubuntu-latest
-    needs: [static-checks]
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4

@@ -5,6 +5,7 @@ import { GlobalSearch } from './GlobalSearch'
 import { useAuth } from '@/contexts/AuthContext'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { SnapshotMenu } from '@/features/snapshots'
+import { GlobalStatusBanner } from '@/features/internal-command/components/GlobalStatusBanner'
 
 export function Layout() {
   const { user, loading, isAuthenticated } = useAuth()
@@ -60,6 +61,8 @@ export function Layout() {
             </div>
           </div>
         </header>
+
+        <GlobalStatusBanner />
 
         {/* Page Content */}
         <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>

@@ -7,7 +7,7 @@ module.exports = {
       'ts-jest',
       {
         useESM: true,
-        tsconfig: 'tests/tsconfig.tests.json',
+        tsconfig: 'tsconfig.test.json',
       },
     ],
   },
