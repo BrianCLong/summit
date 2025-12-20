@@ -5,10 +5,12 @@ import random
 import statistics
 import time
 from collections import Counter, defaultdict, deque
+from copy import deepcopy
+from dataclasses import dataclass
 from typing import Any, Iterable, Literal
 
 from fastapi import FastAPI, HTTPException, Query
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 logger = logging.getLogger("search-service")
 audit_logger = logging.getLogger("search-audit")
@@ -76,6 +78,18 @@ DEFAULT_SUGGESTIONS = [
     "threat hunting",
     "multi-language intelligence",
 ]
+
+
+def env_flag(name: str, default: bool = False) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.lower() in {"1", "true", "yes", "on"}
+
+
+class FeatureFlags:
+    def enabled(self, name: str, default: bool = False) -> bool:
+        return env_flag(name, default)
 
 
 # Optional dependencies are loaded lazily to honor environments without the
@@ -167,6 +181,50 @@ class BackendSearchResult(BaseModel):
     backend: str
 
 
+class ChangeEventPayload(BaseModel):
+    sequence: int = Field(gt=0)
+    action: Literal["upsert", "delete"]
+    document: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def ensure_identifier(self) -> "ChangeEventPayload":
+        if not self.document.get("id"):
+            raise ValueError("document.id is required for reindex events")
+        return self
+
+
+class ReindexStartRequest(BaseModel):
+    label: str
+    batchSize: int = Field(default=50, ge=1, le=500)
+
+
+class ReindexBatchRequest(BaseModel):
+    batchSize: int = Field(default=50, ge=1, le=500)
+
+
+class ReindexEventsRequest(BaseModel):
+    events: list[ChangeEventPayload]
+
+
+class CutoverRequest(BaseModel):
+    label: str
+
+
+class ReindexStatus(BaseModel):
+    activeIndex: str
+    candidateIndex: str | None
+    lastSequence: int
+    processedEvents: int
+    remainingEvents: int
+    lag: int
+    lastBatchMs: float
+    batches: int
+    indexHealth: str
+    dualWriteEnabled: bool
+    status: Literal["idle", "running"]
+    startedAt: float | None
+
+
 class SearchAnalytics:
     def __init__(self) -> None:
         self.query_counter: Counter[str] = Counter()
@@ -209,8 +267,201 @@ class SearchAnalytics:
         self.latencies.clear()
 
 
+class IndexRegistry:
+    def __init__(self, feature_flags: FeatureFlags, base_documents: list[dict[str, Any]]) -> None:
+        self.feature_flags = feature_flags
+        self.base_documents = deepcopy(base_documents)
+        self.indices: dict[str, dict[str, Any]] = {}
+        self.active_label = "primary"
+        self.previous_label: str | None = None
+        self.candidate_label: str | None = None
+        self.reset()
+
+    def reset(self) -> None:
+        self.indices = {
+            "primary": {"documents": deepcopy(self.base_documents), "last_seq": 0, "health": "green"},
+        }
+        self.active_label = "primary"
+        self.previous_label = None
+        self.candidate_label = None
+
+    def active_documents(self) -> list[dict[str, Any]]:
+        return self.indices[self.active_label]["documents"]
+
+    def candidate_documents(self) -> list[dict[str, Any]]:
+        if self.candidate_label:
+            return self.indices[self.candidate_label]["documents"]
+        return []
+
+    def create_candidate(self, label: str) -> None:
+        self.indices[label] = {
+            "documents": deepcopy(self.active_documents()),
+            "last_seq": self.indices[self.active_label]["last_seq"],
+            "health": "yellow",
+        }
+        self.candidate_label = label
+
+    def apply_change(self, event: ChangeEventPayload, label: str) -> None:
+        index = self.indices.get(label)
+        if index is None:
+            raise HTTPException(status_code=400, detail=f"unknown index {label}")
+        docs = index["documents"]
+        target_id = event.document.get("id")
+        existing_idx = next((i for i, doc in enumerate(docs) if doc.get("id") == target_id), None)
+        if event.action == "delete":
+            if existing_idx is not None:
+                docs.pop(existing_idx)
+        else:
+            payload = deepcopy(event.document)
+            if existing_idx is not None:
+                docs[existing_idx] = {**docs[existing_idx], **payload}
+            else:
+                docs.append(payload)
+        index["last_seq"] = max(index.get("last_seq", 0), event.sequence)
+        index["health"] = self.health(label, 0)
+
+    def apply_live_change(self, event: ChangeEventPayload) -> bool:
+        self.apply_change(event, self.active_label)
+        applied_to_candidate = False
+        if self.feature_flags.enabled("SEARCH_DUAL_WRITE") and self.candidate_label:
+            self.apply_change(event, self.candidate_label)
+            applied_to_candidate = True
+        return applied_to_candidate
+
+    def cutover(self, label: str) -> None:
+        if label not in self.indices:
+            raise HTTPException(status_code=400, detail=f"index {label} not found")
+        self.previous_label = self.active_label
+        self.active_label = label
+
+    def rollback(self) -> None:
+        if not self.previous_label:
+            raise HTTPException(status_code=400, detail="no previous index to rollback to")
+        self.active_label, self.previous_label = self.previous_label, self.active_label
+
+    def latest_sequence(self, label: str) -> int:
+        index = self.indices.get(label, {})
+        return int(index.get("last_seq", 0))
+
+    @staticmethod
+    def health(label: str, lag: int) -> str:
+        if lag <= 0:
+            return "green"
+        if lag < 5:
+            return "yellow"
+        return "red"
+
+
+@dataclass
+class ReindexJob:
+    label: str
+    batch_size: int
+    last_processed_seq: int = 0
+    processed_events: int = 0
+    batches: int = 0
+    last_batch_ms: float = 0.0
+    started_at: float = 0.0
+
+
+class ReindexPipeline:
+    def __init__(self, registry: IndexRegistry, feature_flags: FeatureFlags) -> None:
+        self.registry = registry
+        self.feature_flags = feature_flags
+        self.events: list[ChangeEventPayload] = []
+        self.job: ReindexJob | None = None
+        self.started_at: float | None = None
+
+    def reset(self) -> None:
+        self.events = []
+        self.job = None
+        self.started_at = None
+
+    def _require_enabled(self) -> None:
+        if not self.feature_flags.enabled("SEARCH_REINDEX_V1"):
+            raise HTTPException(status_code=400, detail="reindex pipeline disabled")
+
+    def start(self, label: str, batch_size: int) -> ReindexStatus:
+        self._require_enabled()
+        self.registry.create_candidate(label)
+        self.job = ReindexJob(
+            label=label,
+            batch_size=batch_size,
+            last_processed_seq=self.registry.latest_sequence(self.registry.active_label),
+            started_at=time.time(),
+        )
+        self.started_at = self.job.started_at
+        return self.status()
+
+    def enqueue(self, events: list[ChangeEventPayload]) -> ReindexStatus:
+        self._require_enabled()
+        for event in sorted(events, key=lambda item: item.sequence):
+            already_applied = self.registry.apply_live_change(event)
+            self.events.append(event)
+            if already_applied and self.job and self.registry.candidate_label == self.job.label:
+                self.job.last_processed_seq = max(self.job.last_processed_seq, event.sequence)
+                self.job.processed_events += 1
+        return self.status()
+
+    def run_batch(self, batch_size: int | None = None) -> ReindexStatus:
+        self._require_enabled()
+        if self.job is None:
+            raise HTTPException(status_code=400, detail="no reindex job to resume")
+
+        target_batch_size = batch_size or self.job.batch_size
+        pending = [event for event in self.events if event.sequence > self.job.last_processed_seq]
+        batch = pending[:target_batch_size]
+        if batch:
+            start = time.perf_counter()
+            for event in batch:
+                self.registry.apply_change(event, self.job.label)
+                self.job.last_processed_seq = event.sequence
+                self.job.processed_events += 1
+            self.job.last_batch_ms = (time.perf_counter() - start) * 1000
+            self.job.batches += 1
+        return self.status()
+
+    def cutover(self, label: str) -> ReindexStatus:
+        self._require_enabled()
+        self.registry.cutover(label)
+        return self.status()
+
+    def rollback(self) -> ReindexStatus:
+        self._require_enabled()
+        self.registry.rollback()
+        return self.status()
+
+    def status(self) -> ReindexStatus:
+        self._require_enabled()
+        lag = 0
+        last_sequence = 0
+        if self.job:
+            last_sequence = self.job.last_processed_seq
+            if self.events:
+                lag = max(event.sequence for event in self.events) - self.job.last_processed_seq
+        active = self.registry.active_label
+        candidate = self.registry.candidate_label
+        remaining = 0
+        if self.job:
+            remaining = len([event for event in self.events if event.sequence > self.job.last_processed_seq])
+        return ReindexStatus(
+            activeIndex=active,
+            candidateIndex=candidate,
+            lastSequence=last_sequence,
+            processedEvents=self.job.processed_events if self.job else 0,
+            remainingEvents=remaining,
+            lag=lag,
+            lastBatchMs=self.job.last_batch_ms if self.job else 0.0,
+            batches=self.job.batches if self.job else 0,
+            indexHealth=self.registry.health(candidate or active, lag),
+            dualWriteEnabled=self.feature_flags.enabled("SEARCH_DUAL_WRITE"),
+            status="running" if self.job else "idle",
+            startedAt=self.started_at,
+        )
+
+
 class SearchEngine:
-    def __init__(self) -> None:
+    def __init__(self, index_registry: IndexRegistry) -> None:
+        self.index_registry = index_registry
         self.elasticsearch = self._init_elasticsearch()
         self.meilisearch = self._init_meilisearch()
         self.opensearch = self._init_opensearch()
@@ -262,7 +513,9 @@ class SearchEngine:
         return self._search_mock(request)
 
     def suggest(self, prefix: str, language: str = "any", limit: int = 5) -> list[Suggestion]:
-        filtered_docs = [doc for doc in DOCUMENTS if language == "any" or doc["language"] == language]
+        filtered_docs = [
+            doc for doc in self.index_registry.active_documents() if language == "any" or doc["language"] == language
+        ]
         candidates: list[Suggestion] = []
         prefix_lower = prefix.lower()
         for doc in filtered_docs:
@@ -417,7 +670,7 @@ class SearchEngine:
         return facets
 
     def _search_mock(self, request: QueryRequest) -> BackendSearchResult:
-        filtered = self._apply_filters(DOCUMENTS, request.filters, request.language)
+        filtered = self._apply_filters(self.index_registry.active_documents(), request.filters, request.language)
         scored = list(self._score_documents(filtered, request))
         if request.seed is not None:
             rng = random.Random(request.seed)
@@ -501,8 +754,11 @@ class SearchEngine:
 
 
 audit_logger.info("search-service initialized")
-search_engine = SearchEngine()
+feature_flags = FeatureFlags()
+index_registry = IndexRegistry(feature_flags=feature_flags, base_documents=DOCUMENTS)
+search_engine = SearchEngine(index_registry=index_registry)
 analytics = SearchAnalytics()
+reindex_pipeline = ReindexPipeline(registry=index_registry, feature_flags=feature_flags)
 
 
 @app.post("/search/query", response_model=QueryResponse)
@@ -548,6 +804,42 @@ async def index_control(req: IndexRequest) -> dict[str, str]:
     return {"status": f"{req.action}ed", "label": req.label}
 
 
+@app.post("/search/reindex/start", response_model=ReindexStatus)
+async def start_reindex(req: ReindexStartRequest) -> ReindexStatus:
+    audit_logger.info("reindex_start", extra=req.model_dump())
+    return reindex_pipeline.start(req.label, req.batchSize)
+
+
+@app.post("/search/reindex/events", response_model=ReindexStatus)
+async def enqueue_reindex_events(req: ReindexEventsRequest) -> ReindexStatus:
+    audit_logger.info("reindex_events", extra={"count": len(req.events)})
+    return reindex_pipeline.enqueue(req.events)
+
+
+@app.post("/search/reindex/run", response_model=ReindexStatus)
+async def run_reindex(req: ReindexBatchRequest) -> ReindexStatus:
+    audit_logger.info("reindex_run", extra=req.model_dump())
+    return reindex_pipeline.run_batch(req.batchSize)
+
+
+@app.post("/search/reindex/cutover", response_model=ReindexStatus)
+async def cutover_reindex(req: CutoverRequest) -> ReindexStatus:
+    audit_logger.info("reindex_cutover", extra=req.model_dump())
+    return reindex_pipeline.cutover(req.label)
+
+
+@app.post("/search/reindex/rollback", response_model=ReindexStatus)
+async def rollback_reindex() -> ReindexStatus:
+    audit_logger.info("reindex_rollback")
+    return reindex_pipeline.rollback()
+
+
+@app.get("/search/reindex/status", response_model=ReindexStatus)
+async def reindex_status() -> ReindexStatus:
+    audit_logger.info("reindex_status")
+    return reindex_pipeline.status()
+
+
 @app.get("/search/schemas", response_model=list[SchemaInfo])
 async def schemas() -> list[SchemaInfo]:
     audit_logger.info("schemas")
@@ -573,6 +865,12 @@ async def schemas() -> list[SchemaInfo]:
 async def analytics_snapshot() -> AnalyticsSnapshot:
     audit_logger.info("analytics")
     return analytics.snapshot()
+
+
+def reset_state() -> None:
+    analytics.reset()
+    index_registry.reset()
+    reindex_pipeline.reset()
 
 
 async def start_indexer() -> None:

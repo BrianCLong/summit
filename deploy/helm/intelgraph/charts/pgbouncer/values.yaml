@@ -1,0 +1,17 @@
+replicaCount: 1
+image:
+  repository: bitnami/pgbouncer
+  tag: 1.23.1
+config:
+  pool_mode: transaction
+  max_client_conn: 500
+  default_pool_size: 8
+  min_pool_size: 2
+  server_idle_timeout: 30
+  query_timeout: 15000
+  server_lifetime: 0
+auth:
+  existingSecret: pgbouncer-auth
+service:
+  type: ClusterIP
+  port: 6432
