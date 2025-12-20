@@ -1,0 +1,10 @@
+{{- if and .Values.configMapEnv.enabled (gt (len .Values.configMapEnv.data) 0) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: conductor-env
+data:
+{{- range $key := keys .Values.configMapEnv.data | sortAlpha }}
+  {{ $key }}: "{{ index $.Values.configMapEnv.data $key }}"
+{{- end }}
+{{- end }}

@@ -89,3 +89,11 @@ jobs:
             evidence-bundles/evidence-${{ github.sha }}.json
             evidence-bundles/evidence-${{ github.sha }}.json.sig
             evidence-bundles/evidence-${{ github.sha }}.json.crt
+
+  sbom:
+    name: Publish SBOM
+    needs: release
+    uses: ./.github/workflows/reusable/sbom.yml
+    with:
+      service: release
+    secrets: inherit

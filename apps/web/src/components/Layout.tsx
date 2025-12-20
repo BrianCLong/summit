@@ -5,12 +5,10 @@ import { GlobalSearch } from './GlobalSearch'
 import { useAuth } from '@/contexts/AuthContext'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { SnapshotMenu } from '@/features/snapshots'
-import { WorkspacePill, WorkspaceProvider, WorkspaceSettingsDrawer } from '@/features/workspaces'
-import { isFeatureEnabled } from '@/config'
+import { GlobalStatusBanner } from '@/features/internal-command/components/GlobalStatusBanner'
 
 export function Layout() {
   const { user, loading, isAuthenticated } = useAuth()
-  const workspacesEnabled = isFeatureEnabled('ui.workspaces')
 
   if (loading) {
     return (
@@ -33,7 +31,7 @@ export function Layout() {
     return <Navigate to="/signin" replace />
   }
 
-  const layoutContent = (
+  return (
     <div className="h-screen flex bg-background">
       <a
         href="#main-content"
@@ -56,7 +54,6 @@ export function Layout() {
 
             {/* Search trigger - actual search modal is rendered globally */}
             <div className="flex items-center gap-4">
-              {workspacesEnabled && <WorkspacePill />}
               <SnapshotMenu />
               <div className="text-sm text-muted-foreground">
                 Welcome back, {user?.name}
@@ -64,6 +61,8 @@ export function Layout() {
             </div>
           </div>
         </header>
+
+        <GlobalStatusBanner />
 
         {/* Page Content */}
         <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
@@ -73,14 +72,6 @@ export function Layout() {
 
       {/* Global Search Modal */}
       <GlobalSearch />
-
-      {workspacesEnabled && <WorkspaceSettingsDrawer />}
     </div>
   )
-
-  if (!workspacesEnabled) {
-    return layoutContent
-  }
-
-  return <WorkspaceProvider>{layoutContent}</WorkspaceProvider>
 }

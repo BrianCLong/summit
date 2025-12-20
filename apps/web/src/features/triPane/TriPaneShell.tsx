@@ -29,14 +29,15 @@ import { Button } from '@/components/ui/Button'
 import { GraphCanvas } from '@/graphs/GraphCanvas'
 import { TimelineRail } from '@/components/panels/TimelineRail'
 import { MapPane } from './MapPane'
+import AnnotationPanel from '@/features/annotations/AnnotationPanel'
 import { useCollaboration } from '@/lib/yjs/useCollaboration'
 import { useGraphSync } from '@/lib/yjs/useGraphSync'
 import { CollaborationPanel } from '@/components/CollaborationPanel'
-import { useWorkspaceLayout } from '@/features/workspaces'
 import { useAuth } from '@/contexts/AuthContext'
 import type { Entity, TimelineEvent } from '@/types'
 import type { TriPaneShellProps, TriPaneSyncState, TimeWindow } from './types'
 import { useSnapshotHandler } from '@/features/snapshots'
+import { isFeatureEnabled } from '@/config'
 
 /**
  * Main TriPaneShell component
@@ -80,7 +81,11 @@ export function TriPaneShell({
   )
   const [pinnedTools, setPinnedTools] = useState<string[]>([])
   const [densityMode, setDensityMode] = useState<'comfortable' | 'compact'>('comfortable')
-  const workspaceLayout = useWorkspaceLayout()
+  const [annotationContext, setAnnotationContext] = useState<{
+    entity?: Entity
+    timelineEvent?: TimelineEvent
+    locationId?: string
+  }>({})
 
   // Snapshot integration
   useSnapshotHandler(
@@ -152,8 +157,6 @@ export function TriPaneShell({
       filteredTimelineEvents.map(e => e.entityId).filter(Boolean) as string[]
     )
 
-    const filteredEntities = entities.filter(entity => {
-      if (relevantEntityIds.has(entity.id)) {return true}
     const filteredEntities = currentEntities.filter(entity => {
       if (relevantEntityIds.has(entity.id)) return true
 
@@ -191,6 +194,7 @@ export function TriPaneShell({
   // Handle entity selection from graph
   const handleEntitySelect = useCallback(
     (entity: Entity) => {
+      setAnnotationContext(prev => ({ ...prev, entity }))
       setSyncState(prev => ({
         ...prev,
         graph: {
@@ -230,6 +234,7 @@ export function TriPaneShell({
         }
       }
 
+      setAnnotationContext(prev => ({ ...prev, timelineEvent: event }))
       setSyncState(prev => ({
         ...prev,
         timeline: {
@@ -247,6 +252,7 @@ export function TriPaneShell({
   // Handle map location selection
   const handleLocationSelect = useCallback(
     (locationId: string) => {
+      setAnnotationContext(prev => ({ ...prev, locationId }))
       setSyncState(prev => ({
         ...prev,
         map: {
@@ -336,35 +342,6 @@ export function TriPaneShell({
     return () => window.removeEventListener('keydown', handleKeyPress)
   }, [handleResetFilters, onExport])
 
-  const defaultPaneLayout = useMemo(
-    () => ({
-      timeline: { visible: true, size: 3 },
-      graph: { visible: true, size: 6 },
-      map: { visible: true, size: 3 },
-    }),
-    []
-  )
-
-  const paneLayout = useMemo(() => {
-    const panels = workspaceLayout.activeWorkspace?.panels
-    if (!panels) {
-      return defaultPaneLayout
-    }
-
-    return {
-      timeline: { ...defaultPaneLayout.timeline, ...(panels.timeline || {}) },
-      graph: { ...defaultPaneLayout.graph, ...(panels.graph || {}) },
-      map: { ...defaultPaneLayout.map, ...(panels.map || {}) },
-    }
-  }, [defaultPaneLayout, workspaceLayout.activeWorkspace?.panels])
-
-  const layoutEnabled =
-    workspaceLayout.isEnabled && Boolean(workspaceLayout.activeWorkspace)
-
-  const paneContainerClass = layoutEnabled
-    ? 'flex-1 flex gap-4 min-h-0'
-    : 'flex-1 grid grid-cols-12 gap-4 min-h-0'
-
   return (
     <div
       className={cn('flex flex-col h-full gap-4', className)}
@@ -451,26 +428,9 @@ export function TriPaneShell({
       </div>
 
       {/* Three-pane layout */}
-      <div className={paneContainerClass}>
+      <div className="flex-1 grid grid-cols-12 gap-4 min-h-0">
         {/* Timeline Pane */}
-        <div
-          className={cn(
-            'flex flex-col min-h-0',
-            layoutEnabled ? '' : 'col-span-3'
-          )}
-          style={
-            layoutEnabled
-              ? {
-                  flex: paneLayout.timeline.visible ? paneLayout.timeline.size : 0,
-                  display: paneLayout.timeline.visible ? 'flex' : 'none',
-                }
-              : undefined
-          }
-          data-workspace-panel="timeline"
-          data-visible={String(paneLayout.timeline.visible)}
-          data-size={paneLayout.timeline.size}
-          aria-hidden={!paneLayout.timeline.visible}
-        >
+        <div className="col-span-3 flex flex-col min-h-0">
           <Card className="flex-1 flex flex-col min-h-0">
             <CardHeader className="pb-3 flex-shrink-0">
               <CardTitle className="flex items-center gap-2 text-sm" role="heading" aria-level={2}>
@@ -502,24 +462,7 @@ export function TriPaneShell({
         </div>
 
         {/* Graph Pane */}
-        <div
-          className={cn(
-            'flex flex-col min-h-0',
-            layoutEnabled ? '' : 'col-span-6'
-          )}
-          style={
-            layoutEnabled
-              ? {
-                  flex: paneLayout.graph.visible ? paneLayout.graph.size : 0,
-                  display: paneLayout.graph.visible ? 'flex' : 'none',
-                }
-              : undefined
-          }
-          data-workspace-panel="graph"
-          data-visible={String(paneLayout.graph.visible)}
-          data-size={paneLayout.graph.size}
-          aria-hidden={!paneLayout.graph.visible}
-        >
+        <div className="col-span-6 flex flex-col min-h-0">
           <Card className="flex-1 flex flex-col min-h-0">
             <CardHeader className="pb-3 flex-shrink-0">
               <CardTitle className="flex items-center gap-2 text-sm">
@@ -555,24 +498,7 @@ export function TriPaneShell({
         </div>
 
         {/* Map Pane */}
-        <div
-          className={cn(
-            'flex flex-col min-h-0',
-            layoutEnabled ? '' : 'col-span-3'
-          )}
-          style={
-            layoutEnabled
-              ? {
-                  flex: paneLayout.map.visible ? paneLayout.map.size : 0,
-                  display: paneLayout.map.visible ? 'flex' : 'none',
-                }
-              : undefined
-          }
-          data-workspace-panel="map"
-          data-visible={String(paneLayout.map.visible)}
-          data-size={paneLayout.map.size}
-          aria-hidden={!paneLayout.map.visible}
-        >
+        <div className="col-span-3 flex flex-col min-h-0">
           <Card className="flex-1 flex flex-col min-h-0">
             <CardHeader className="pb-3 flex-shrink-0">
               <CardTitle className="flex items-center gap-2 text-sm">
@@ -598,6 +524,22 @@ export function TriPaneShell({
           </Card>
         </div>
       </div>
+
+      {isFeatureEnabled('ui.annotationsV1') && (
+        <div className="grid grid-cols-12 gap-4 min-h-[260px]">
+          <div className="col-span-12 lg:col-span-5">
+            <AnnotationPanel
+              context={{
+                entity: annotationContext.entity,
+                timelineEvent: annotationContext.timelineEvent,
+                location: filteredData.geospatialEvents.find(
+                  loc => loc.id === annotationContext.locationId
+                ),
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       <CollaborationPanel users={users} isConnected={isConnected} isSynced={isSynced} />
 
