@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
-"""SBOM vulnerability delta/budget enforcement.
+"""Compare SBOM vulnerability deltas against budgets and risk exceptions.
 
-Compares the current vulnerability report against the baseline from
-`origin/main` (last green), enforces severity budgets from
-`.maestro/ci_budget.json`, and respects risk-acceptance exceptions.
+This script compares the current SBOM vulnerability report with the last green
+baseline on ``origin/main`` and enforces per-severity budgets defined in
+``.maestro/ci_budget.json``. It also supports a dual-approval risk acceptance
+workflow using signed exception files under ``artifacts/exceptions/<sha>.json``
+and surfaces impending expiry alerts.
 """
+
 import argparse
 import datetime as dt
 import json
@@ -13,6 +16,7 @@ import subprocess
 import sys
 from pathlib import Path
 from typing import Dict, Iterable, List, Set, Tuple
+from urllib.parse import urlparse
 
 SEVERITY_ORDER = ["critical", "high", "medium", "low", "unknown"]
 DEFAULT_BUDGET = {"critical": 0, "high": 5, "medium": 10, "low": 50, "unknown": 0}
@@ -23,8 +27,13 @@ class BudgetError(Exception):
 
 
 def load_json(path: Path) -> dict:
-    with path.open("r", encoding="utf-8") as handle:
-        return json.load(handle)
+    """Load JSON from disk with a helpful error on failure."""
+
+    try:
+        with path.open("r", encoding="utf-8") as handle:
+            return json.load(handle)
+    except FileNotFoundError as exc:
+        raise FileNotFoundError(f"File not found: {path}") from exc
 
 
 def parse_args() -> argparse.Namespace:
@@ -59,6 +68,11 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=int(os.environ.get("EXCEPTION_ALERT_WINDOW", "7")),
         help="Days before expiry to emit alerts.",
+    )
+    parser.add_argument(
+        "--output-json",
+        default=os.environ.get("DIFF_BUDGET_OUTPUT"),
+        help="Optional JSON summary output path.",
     )
     return parser.parse_args()
 
@@ -133,10 +147,7 @@ def count_by_severity(vulns: Iterable[dict]) -> Dict[str, int]:
 
 def load_budgets(path: Path) -> Dict[str, int]:
     data = load_json(path)
-    budgets = (
-        data.get("security", {})
-        .get("sbomSeverityBudget", {})
-    )
+    budgets = data.get("security", {}).get("sbomSeverityBudget", {})
     merged = {**DEFAULT_BUDGET, **{k.lower(): v for k, v in budgets.items()}}
     return merged
 
@@ -181,8 +192,16 @@ def load_exceptions(
                 f"Incomplete exception for {vuln_id or 'unknown'} (missing {', '.join(missing_fields)}); skipping."
             )
             continue
+
+        parsed_ticket = urlparse(str(ticket))
+        if parsed_ticket.scheme not in {"http", "https"} or not parsed_ticket.netloc:
+            alerts.append(
+                f"Invalid ticket URL for {vuln_id}: {ticket!r}; expected http(s) URL."
+            )
+            continue
+
         try:
-            expiry = dt.datetime.fromisoformat(expiry_raw.replace("Z", "+00:00"))
+            expiry = dt.datetime.fromisoformat(str(expiry_raw).replace("Z", "+00:00"))
             if expiry.tzinfo is None:
                 expiry = expiry.replace(tzinfo=dt.timezone.utc)
         except Exception:
@@ -237,6 +256,29 @@ def format_summary(
     return "\n".join(lines)
 
 
+def write_json_summary(
+    path: Path,
+    baseline: Dict[str, int],
+    current: Dict[str, int],
+    deltas: Dict[str, int],
+    ok: bool,
+    alerts: List[str],
+    errors: List[str],
+) -> None:
+    payload = {
+        "ok": ok,
+        "baseline": baseline,
+        "current": current,
+        "deltas": deltas,
+        "alerts": alerts,
+        "errors": errors,
+        "budgetPath": str(Path(os.environ.get("CI_BUDGET", ".maestro/ci_budget.json"))),
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8") as handle:
+        json.dump(payload, handle, indent=2)
+
+
 def main():
     args = parse_args()
     report_path = Path(args.report)
@@ -268,10 +310,26 @@ def main():
     current_counts = count_by_severity(filtered_current)
     deltas = delta_counts(current_counts, baseline_counts)
 
-    budgets = load_budgets(Path(args.budget))
+    try:
+        budgets = load_budgets(Path(args.budget))
+    except FileNotFoundError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        sys.exit(1)
+
     ok, errors = evaluate(deltas, budgets)
 
     print(format_summary(baseline_counts, current_counts, deltas, alerts))
+
+    if args.output_json:
+        write_json_summary(
+            Path(args.output_json),
+            baseline_counts,
+            current_counts,
+            deltas,
+            ok,
+            alerts,
+            errors,
+        )
 
     if errors:
         for err in errors:
