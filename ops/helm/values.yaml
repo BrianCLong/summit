@@ -1,5 +1,116 @@
+namespace:
+  create: true
+  labels:
+    istio.io/rev: default
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce-version: latest
+  annotations:
+    security.summit.dev/owner: platform
+
+replicas: 1
+
+images:
+  gateway: ghcr.io/example/ig:gateway
+  ui: ghcr.io/example/ig:ui
+image: ghcr.io/example/ig:app
+
+# Deprecated but retained for backward compatibility
 imageGateway: ghcr.io/example/ig:gateway
 imageUI: ghcr.io/example/ig:ui
-replicas: 1
+
+imagePullSecrets:
+  - name: regcred
+
+serviceAccounts:
+  gateway:
+    automountServiceAccountToken: false
+    annotations: {}
+  ui:
+    automountServiceAccountToken: false
+    annotations: {}
+  externalSecrets:
+    automountServiceAccountToken: true
+    annotations: {}
+
+rbac:
+  opsSubjects:
+    - kind: Group
+      name: ops-team
+  ciSubjects:
+    - kind: ServiceAccount
+      name: ci-deployer
+      namespace: tekton-pipelines
+
+networkPolicy:
+  enabled: true
+  allowedNamespaces:
+    - ingress-nginx
+    - istio-system
+  allowPrometheus: true
+
+mtls:
+  enabled: true
+  peerAuthentication:
+    mode: STRICT
+
 ingress:
+  enabled: true
+  className: nginx
   host: "ig-preview.local"
+  tls:
+    enabled: true
+    secretName: gateway-tls
+    issuerRef:
+      kind: ClusterIssuer
+      name: letsencrypt-prod
+
+externalSecrets:
+  enabled: true
+  secretStore:
+    name: summit-cluster
+    provider:
+      aws:
+        service: SecretsManager
+        region: us-east-1
+        auth:
+          jwt:
+            serviceAccountRef:
+              name: external-secrets
+  secrets:
+    - name: gateway-config
+      refreshInterval: 1h
+      target:
+        name: gateway-config
+        creationPolicy: Owner
+      data:
+        - secretKey: policy-compiler-token
+          remoteRef:
+            key: prod/gateway/policy-compiler
+            property: token
+
+auditLogging:
+  enabled: true
+  retentionDays: 30
+  maxFileSizeMB: 100
+  policy:
+    omitStages:
+      - RequestReceived
+    rules:
+      - level: Metadata
+        resources:
+          - group: ""
+            resources:
+              - pods
+              - services
+              - deployments
+      - level: RequestResponse
+        verbs:
+          - create
+          - update
+          - patch
+          - delete
+        resources:
+          - group: ""
+            resources:
+              - secrets
+              - configmaps

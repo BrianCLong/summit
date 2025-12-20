@@ -1,0 +1,103 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: audit-policy
+  namespace: observability
+  labels:
+    app.kubernetes.io/name: audit-policy
+    app.kubernetes.io/component: compliance
+  annotations:
+    checksum/policy-version: v1
+data:
+  audit-policy.yaml: |
+    apiVersion: audit.k8s.io/v1
+    kind: Policy
+    omitStages:
+      - RequestReceived
+    rules:
+      - level: Metadata
+        verbs: ["get", "list", "watch"]
+      - level: RequestResponse
+        verbs: ["create", "update", "delete", "deletecollection", "patch"]
+        resources:
+          - group: ""
+            resources: ["pods", "services", "configmaps", "secrets"]
+          - group: "rbac.authorization.k8s.io"
+            resources: ["roles", "rolebindings", "clusterroles", "clusterrolebindings"]
+      - level: Request
+        userGroups: ["system:nodes"]
+      - level: None
+        resources:
+          - group: ""
+            resources: ["events"]
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: audit-retention
+  namespace: observability
+  labels:
+    app.kubernetes.io/name: audit-retention
+spec:
+  schedule: "0 3 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: retention
+              image: busybox:1.36
+              command: ["/bin/sh", "-c"]
+              args:
+                - "find /var/log/audit -type f -mtime +30 -delete"
+              volumeMounts:
+                - name: audit-log
+                  mountPath: /var/log/audit
+          volumes:
+            - name: audit-log
+              persistentVolumeClaim:
+                claimName: audit-trail-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: audit-trail-pvc
+  namespace: observability
+  labels:
+    app.kubernetes.io/name: audit-trail
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 200Gi
+  storageClassName: standard
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: audit-pipeline-alerts
+  namespace: observability
+  labels:
+    prometheus: k8s
+    role: alert-rules
+spec:
+  groups:
+    - name: audit.rules
+      rules:
+        - alert: AuditIngestionBacklog
+          expr: rate(vector_processed_events_total{job="vector"}[5m]) == 0
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Audit pipeline is not ingesting events"
+            description: "Vector agent has stopped forwarding audit events for over 10 minutes."
+        - alert: AuditStorageHigh
+          expr: (kubelet_volume_stats_used_bytes{persistentvolumeclaim="audit-trail-pvc"} / kubelet_volume_stats_capacity_bytes{persistentvolumeclaim="audit-trail-pvc"}) > 0.85
+          for: 15m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Audit storage nearing capacity"
+            description: "Audit trail PVC is above 85% utilization."
