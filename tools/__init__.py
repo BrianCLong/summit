@@ -1,1 +1,1 @@
-"""Utility scripts and packages for Summit tooling."""
+"""Utility and orchestration tooling for the Summit platform."""

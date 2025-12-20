@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import chalk from 'chalk';
 import { Command } from 'commander';
+import { AUTOMATION_WORKFLOWS, runAutomationWorkflow } from './automation.js';
 import { DoctorCheckResult, runDoctor } from './summit-doctor.js';
 
 function renderResult(result: DoctorCheckResult): void {
@@ -15,10 +16,48 @@ function renderResult(result: DoctorCheckResult): void {
   }
 }
 
+function renderAutomationReport(report: Awaited<ReturnType<typeof runAutomationWorkflow>>, asJson: boolean) {
+  if (asJson) {
+    console.log(JSON.stringify(report, null, 2));
+    return;
+  }
+
+  console.log(chalk.bold(`\n⚙️  summit ${report.workflow} workflow`));
+  console.log('----------------------------------------------');
+  report.results.forEach((result) => {
+    const icon = result.status === 'success' ? '✅' : '❌';
+    const duration = `${result.durationMs}ms`;
+    console.log(`${icon} ${chalk.bold(result.name)} (${result.command}) [${duration}]`);
+    if (result.stderr.trim()) {
+      console.log(chalk.gray(`   stderr: ${result.stderr.trim()}`));
+    }
+  });
+
+  console.log('\nSummary:');
+  console.log(
+    `  Success: ${report.summary.successCount}/${report.summary.total} | Failed: ${report.summary.failedCount} | Duration: ${report.summary.durationMs}ms`,
+  );
+}
+
 async function main() {
   const program = new Command();
 
   program.name('summit').description('Summit developer toolbox CLI');
+
+  (['init', 'check', 'test', 'release-dry-run'] as const).forEach((workflowName) => {
+    program
+      .command(workflowName)
+      .description(AUTOMATION_WORKFLOWS[workflowName].map((step) => step.description).join(' → '))
+      .option('--json', 'Output JSON instead of human-friendly text', false)
+      .action(async (options) => {
+        const report = await runAutomationWorkflow(workflowName);
+        renderAutomationReport(report, options.json);
+
+        if (report.summary.failedCount > 0) {
+          process.exitCode = 1;
+        }
+      });
+  });
 
   program
     .command('doctor')

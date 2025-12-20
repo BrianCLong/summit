@@ -1,0 +1,44 @@
+{{- if and .Values.global.blueGreen .Values.global.blueGreen.enabled }}
+{{- $ns := (.Values.global.namespace | default .Release.Namespace) }}
+{{- $colorKey := .Values.global.blueGreen.serviceLabelKey | default "rollout.summit.dev/color" }}
+{{- $active := .Values.global.blueGreen.activeColor | default "blue" }}
+{{- $inactive := .Values.global.blueGreen.inactiveColor | default "green" }}
+{{- range .Values.global.blueGreen.services }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .name }}
+  namespace: {{ $ns }}
+  labels:
+    rollout.summit.dev/role: active
+spec:
+  type: ClusterIP
+  selector:
+{{- if .selector }}
+{{ toYaml .selector | indent 4 }}
+{{- end }}
+    {{ $colorKey }}: {{ $active }}
+  ports:
+    - port: {{ .port }}
+      targetPort: {{ .targetPort | default .port }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .name }}-preview
+  namespace: {{ $ns }}
+  labels:
+    rollout.summit.dev/role: preview
+spec:
+  type: ClusterIP
+  selector:
+{{- if .selector }}
+{{ toYaml .selector | indent 4 }}
+{{- end }}
+    {{ $colorKey }}: {{ $inactive }}
+  ports:
+    - port: {{ .port }}
+      targetPort: {{ .targetPort | default .port }}
+---
+{{- end }}
+{{- end }}
