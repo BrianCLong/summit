@@ -49,11 +49,13 @@ test('backup and restore round-trip with encryption and checksum validation', ()
   assert.strictEqual(restoreResult.expectedChecksum, createResult.backup.checksum);
   assert.strictEqual(restoreResult.counts.cases, createResult.backup.counts.cases);
   assert.strictEqual(restoreResult.counts.objects, createResult.backup.counts.objects);
+  assert.strictEqual(restoreResult.counts.caseRefs, createResult.backup.counts.caseRefs);
   assert.ok(restoreResult.checksumMatches);
 
   const restoredData = readDatabase(restoreDb);
   assert.strictEqual(restoredData.cases.length, 2);
   assert.strictEqual(restoredData.objects.length, 3);
+  assert.strictEqual(restoredData.caseRefs.length, 2);
 });
 
 test('partial restore limits to selected case and preserves hashes', () => {
@@ -79,6 +81,7 @@ test('partial restore limits to selected case and preserves hashes', () => {
   assert.ok(restoreResult.filtered);
   assert.strictEqual(restoreResult.counts.cases, 1);
   assert.strictEqual(restoreResult.counts.objects, 2);
+  assert.strictEqual(restoreResult.counts.caseRefs, 1);
   assert.strictEqual(restoreResult.caseHashes.length, 1);
   assert.strictEqual(restoreResult.checksumMatches, false);
 
@@ -199,7 +202,7 @@ test('cli dry-run create surfaces hashes without writing files', async () => {
   assert.ok(!fs.existsSync(backupPath));
 
   const parsed = JSON.parse(result.stdout.toString());
-  assert.deepStrictEqual(parsed.counts, { cases: 2, objects: 3 });
+  assert.deepStrictEqual(parsed.counts, { cases: 2, objects: 3, caseRefs: 2 });
   assert.ok(parsed.checksum);
   assert.ok(Array.isArray(parsed.caseHashes));
   assert.ok(Array.isArray(parsed.caseRefHashes));

@@ -56,7 +56,7 @@ function createBackup({ dbPath, outputPath, passphrase, encrypt = true, caseIds 
     caseRefs,
   };
   const checksum = hashPayload(payload);
-  const caseHashes = computeCaseHashes(payload.cases, payload.objects);
+  const caseHashes = computeCaseHashes(payload.cases, payload.objects, payload.caseRefs);
   const backup = {
     kind: 'ig-backup',
     version: 1,
@@ -65,6 +65,7 @@ function createBackup({ dbPath, outputPath, passphrase, encrypt = true, caseIds 
     counts: {
       cases: payload.cases.length,
       objects: payload.objects.length,
+      caseRefs: payload.caseRefs.length,
     },
     hashes: {
       cases: caseHashes,
@@ -132,6 +133,7 @@ function restoreBackup({ dbPath, inputPath, passphrase, caseIds = [], dryRun = f
     counts: {
       cases: restorePayload.cases.length,
       objects: restorePayload.objects.length,
+      caseRefs: restorePayload.caseRefs.length,
     },
     checksum: restoreChecksum,
     expectedChecksum: backup.checksum,
