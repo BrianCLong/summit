@@ -193,6 +193,13 @@
 
 ---
 
+## 5) Ops / Runbook / ADR (Price-Aware Orchestration)
+
+- **ADR-051 (Accepted):** `docs/architecture/ADR-051-Price-Aware-Orchestration.md`
+- **Runbook:** `docs/runbooks/price-aware-orchestration.md`
+- **Dashboard:** `ops/grafana/dashboards/price-aware-orchestration.json`
+- **Alerts:** `ops/prometheus/alerts/price-aware-orchestration.rules.yaml`
+
 ## 4) Cross‑Epic Dependencies (Summary)
 
 - `SM‑102` → required by `SM‑121/122/123` (runners need scheduler).

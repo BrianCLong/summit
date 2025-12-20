@@ -45,6 +45,18 @@ curl -fsSL https://get.docker.com | sh
 curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
 ```
 
+### Pre-flight Checklist (run locally before any cloud action)
+
+- ✅ **Versions**: `docker --version`, `pnpm -v`, `node -v` all present; Node 18+ required
+- ✅ **Security**: gitleaks pre-push clean; no `.env` or secrets staged
+- ✅ **CI Gate Ready**: `pnpm lint`, `pnpm test`, and `pnpm typecheck` green locally
+- ✅ **Registry Auth**: `aws sts get-caller-identity` (for ECR) or `docker login ghcr.io` succeeds
+- ✅ **Key Material**: SSH key at `~/.ssh/maestro-keypair.pem` (600 perms); Cosign keypair available for signing images
+- ✅ **DNS/Ingress**: Hostnames resolve publicly (e.g., `dig intelgraph-dev.topicality.co`)
+- ✅ **Storage/DB**: Postgres/Neo4j endpoints reachable from the target subnet (for k8s/VM deployments)
+
+> Tip: Fail fast—stop and fix any pre-flight issue before running `deploy-now.sh` or infra applies.
+
 ## 🚀 Quick Deployment
 
 ### Option 1: Automated Multi-Environment Deployment
@@ -76,6 +88,11 @@ export ECR_REGISTRY="123456789012.dkr.ecr.us-east-2.amazonaws.com"
 # Deploy with ECR images
 ./scripts/deploy-all.sh
 ```
+
+**Hardening add-ons**
+
+- Sign images: `cosign sign $ECR_REGISTRY/summit:<tag>` and verify during deploy with `cosign verify`.
+- Pin digests: pass `IMAGE_DIGEST` envs into the deploy scripts or Helm values to avoid tag drift.
 
 ### Option 3: Single Environment
 
@@ -159,6 +176,16 @@ docker tag summit:previous summit:latest
 docker-compose up -d
 ```
 
+**Rolling back Helm/Kubernetes**
+
+- `helm history summit` then `helm rollback summit <REVISION>`
+- If cluster-wide impact: scale gateway to zero replicas to halt ingress, then roll back
+
+**Disaster recovery readiness checks**
+
+- Verify daily backups for Postgres/Neo4j exist and restore to a staging namespace weekly
+- Ensure `kubectl get events -A --sort-by=.metadata.creationTimestamp` is clean post-rollback
+
 ## 📊 Monitoring & Observability
 
 ### Built-in Monitoring
@@ -199,6 +226,24 @@ REDIS_URL=redis://host:6379
 - Use AWS Secrets Manager for production secrets
 - Environment variables for configuration
 - No secrets in Docker images or git
+
+### CI/CD & Promotion Flow
+
+1. **Build & Test**: `pnpm lint && pnpm test && pnpm typecheck` (or `make smoke` for full gate)
+2. **Package & Sign**: `./scripts/build-push.sh <registry>` then `cosign sign` the pushed digest
+3. **Deploy to Dev**: `./scripts/deploy-now.sh` (or dev-specific Helm release)
+4. **Validate**: Run health checks, smoke API calls, and UI spot checks; capture evidence bundle
+5. **Promote to Stage**: Re-run deploy with staged values; execute K6 and OPA validations
+6. **Promote to Prod**: Canary 10%→50%→100%; watch SLO dashboards and error budgets
+7. **Post-Deploy**: Attach evidence bundle to the release and log change ticket/incident-free window
+
+### Test & Verification Pack (recommended minimal set)
+
+- **API**: `pnpm --filter intelgraph-server test:coverage`
+- **Client**: `pnpm --filter @intelgraph/web test -- --runInBand`
+- **E2E**: `pnpm run test:e2e` (Playwright) against the targeted environment
+- **Policies**: `pnpm run graphql:schema:check` + OPA conformance (see `staging-deployment.md`)
+- **Performance**: K6 suite (`tests/k6/api-performance.js`) with environment URL overrides
 
 ## 🚨 Troubleshooting
 
