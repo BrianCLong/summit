@@ -18,6 +18,21 @@ export interface DisclosureJob {
   error?: string;
 }
 
+export interface RuntimeEvidenceBundle {
+  id: string;
+  tenantId: string;
+  sha256: string;
+  warnings: string[];
+  downloadUrl?: string;
+  expiresAt: string;
+  counts: {
+    auditEvents: number;
+    policyDecisions: number;
+    sbomRefs: number;
+    provenanceRefs: number;
+  };
+}
+
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
 
 async function handleResponse<T>(response: Response): Promise<T> {
@@ -100,4 +115,27 @@ export async function sendDisclosureAnalyticsEvent(
   } catch (error) {
     console.warn('Disclosure analytics event failed', error);
   }
+}
+
+export async function createRuntimeEvidenceBundle(payload: {
+  tenantId: string;
+  startTime?: string;
+  endTime?: string;
+  auditPaths?: string[];
+  policyPaths?: string[];
+  sbomPaths?: string[];
+  provenancePaths?: string[];
+}): Promise<RuntimeEvidenceBundle> {
+  const response = await fetch(`${API_BASE}/disclosures/runtime-bundle`, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-tenant-id': payload.tenantId,
+    },
+    credentials: 'include',
+    body: JSON.stringify(payload),
+  });
+
+  const body = await handleResponse<{ bundle: RuntimeEvidenceBundle }>(response);
+  return body.bundle;
 }
