@@ -1,0 +1,10 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: preview-ingress-policy
+  annotations:
+    kubernetes.io/ingress.class: internal
+    preview.summit.ai/public: "false"
+    preview.summit.ai/reason: "access requires SSO"
+spec:
+  rules: []

@@ -7,6 +7,11 @@
 
 import { EventEmitter } from 'events';
 import * as crypto from 'crypto';
+import {
+  SecurityEvent,
+  ZeroTrustAuditLogger,
+  createZeroTrustAuditLogger,
+} from '../../security/zero-trust/siem/audit-logger';
 
 // Types for trust propagation
 interface TrustDomain {
@@ -375,6 +380,11 @@ class ConsensusManager {
 class AuditLogger {
   private entries: AuditEntry[] = [];
   private maxEntries: number = 100000;
+  private auditBus?: ZeroTrustAuditLogger;
+
+  constructor(auditBus?: ZeroTrustAuditLogger) {
+    this.auditBus = auditBus;
+  }
 
   log(entry: Omit<AuditEntry, 'id' | 'timestamp'>): void {
     const auditEntry: AuditEntry = {
@@ -384,6 +394,12 @@ class AuditLogger {
     };
 
     this.entries.push(auditEntry);
+
+    if (this.auditBus) {
+      this.publishToAuditBus(auditEntry).catch((error) => {
+        console.error('[AuditLogger] Failed to publish to audit bus', error);
+      });
+    }
 
     // Trim old entries if over capacity
     if (this.entries.length > this.maxEntries) {
@@ -415,6 +431,71 @@ class AuditLogger {
       (entry) => entry.timestamp >= startDate && entry.timestamp <= endDate,
     );
   }
+
+  private async publishToAuditBus(entry: AuditEntry): Promise<void> {
+    if (!this.auditBus) return;
+
+    const severity: SecurityEvent['severity'] =
+      entry.outcome === 'success' ? 'informational' : 'medium';
+
+    const event: SecurityEvent = {
+      id: entry.id,
+      timestamp: entry.timestamp.getTime(),
+      eventType: 'policy_decision',
+      severity,
+      source: {
+        type: 'application',
+        component: 'trust-propagation-controller',
+        hostname: process.env.HOSTNAME || 'unknown',
+      },
+      actor: {
+        type: 'service',
+        id: entry.identity || entry.sourceCluster,
+      },
+      action: {
+        type: entry.eventType,
+        method: entry.details?.['method'] as string | undefined,
+        parameters: {
+          targetCluster: entry.targetCluster,
+          correlationId: entry.details?.['correlationId'],
+        },
+      },
+      resource: {
+        type: 'service',
+        id: (entry.details?.['targetService'] as string | undefined) || 'trust',
+        name: entry.targetCluster || entry.sourceCluster,
+        classification: 'internal',
+      },
+      outcome: {
+        result: entry.outcome === 'success' ? 'success' : 'failure',
+        reason: entry.details?.['reason'] as string | undefined,
+      },
+      context: {
+        requestId: entry.id,
+        correlationId: entry.details?.['correlationId'] as string | undefined,
+        sourceIp: (entry.details?.['sourceIp'] as string | undefined) ||
+          'internal',
+      },
+      zeroTrust: {
+        trustScore: (entry.details?.['trustScore'] as number | undefined) || 0,
+        identityVerified: Boolean(entry.identity),
+        deviceTrusted: true,
+        sessionFresh: true,
+        mfaVerified: Boolean(entry.details?.['mfa'] ?? false),
+        policyDecision: entry.outcome === 'success' ? 'allow' : 'deny',
+        enforcementPoint: 'trust-propagation',
+      },
+      compliance: {
+        frameworks: ['NIST-800-53', 'FedRAMP'],
+        controls: ['AC-3', 'AC-6', 'AU-2'],
+        retentionRequired: true,
+        auditRequired: true,
+      },
+      rawData: entry.details,
+    };
+
+    await this.auditBus.logSecurityEvent(event);
+  }
 }
 
 /**
@@ -426,15 +507,20 @@ export class TrustPropagationController extends EventEmitter {
   private decisionCache: TrustDecisionCache;
   private consensusManager: ConsensusManager;
   private auditLogger: AuditLogger;
+  private auditBus: ZeroTrustAuditLogger;
   private clusters: Map<string, TrustDomain> = new Map();
   private syncIntervals: Map<string, NodeJS.Timeout> = new Map();
   private running: boolean = false;
 
-  constructor(localTrustDomain: string) {
+  constructor(
+    localTrustDomain: string,
+    auditBus: ZeroTrustAuditLogger = createZeroTrustAuditLogger(),
+  ) {
     super();
     this.bundleManager = new TrustBundleManager(localTrustDomain);
     this.decisionCache = new TrustDecisionCache();
-    this.auditLogger = new AuditLogger();
+    this.auditBus = auditBus;
+    this.auditLogger = new AuditLogger(this.auditBus);
     this.consensusManager = new ConsensusManager([]);
   }
 

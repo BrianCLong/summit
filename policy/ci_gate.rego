@@ -1,6 +1,7 @@
 package ci_gate
 
 import data.supply_chain
+import data.ci_agent_gate
 
 # CI Gate Policy
 # Enforces security requirements for Pull Requests and Pre-Merge builds
@@ -29,6 +30,11 @@ deny[msg] {
 deny[msg] {
     msg := data.supply_chain.deny[_]
     contains(msg, "prohibited license")
+}
+
+# Enforce Agent Permission Tiers
+deny[msg] {
+    msg := data.ci_agent_gate.deny[_]
 }
 
 # Warn on High Vulnerabilities (non-blocking, but visible)

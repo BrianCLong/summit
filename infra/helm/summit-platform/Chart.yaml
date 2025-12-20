@@ -1,0 +1,28 @@
+apiVersion: v2
+name: summit-platform
+description: Umbrella chart for a production-ready Summit deployment with mesh, security, and observability baked in.
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+dependencies:
+  - name: intelgraph
+    version: 2025.09.19
+    repository: "file://../intelgraph"
+  - name: gateway
+    version: 0.1.0
+    repository: "file://../gateway"
+  - name: web
+    version: 0.1.0
+    repository: "file://../web"
+  - name: analytics
+    version: 0.1.0
+    repository: "file://../analytics"
+  - name: redis
+    version: 0.1.0
+    repository: "file://../redis"
+  - name: postgres
+    version: 0.1.0
+    repository: "file://../postgres"
+  - name: neo4j
+    version: 0.1.0
+    repository: "file://../neo4j"
