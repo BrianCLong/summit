@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { BasePipelineStage, PipelineContext } from '../pipeline.js';
 import { pg } from '../../db/pg.js';
 

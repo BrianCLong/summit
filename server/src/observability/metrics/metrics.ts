@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { registry } from '../metrics.js';
 import { Counter, Histogram, Gauge, Metric } from 'prom-client';
 

@@ -1,0 +1,52 @@
+name: Agent Governance Enforcement
+
+on:
+  pull_request:
+    types: [opened, labeled, unlabeled, synchronize, reopened]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  enforce-agent-governance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check agent governance labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = context.payload.pull_request.labels.map(label => label.name);
+
+            const agentLabels = labels.filter(name => name.startsWith('agent:'));
+            const humanLabels = labels.filter(name => name.startsWith('human:'));
+            const riskLabels = labels.filter(name => name.startsWith('risk:'));
+            const scopeLabels = labels.filter(name => name.startsWith('scope:'));
+
+            const fail = message => core.setFailed(message);
+
+            if (agentLabels.length > 0 && humanLabels.length === 0) {
+              fail('PR uses agent labels but has no human:* sponsor label.');
+            }
+
+            if (agentLabels.includes('agent:tier-2-domain') && humanLabels.length === 0) {
+              fail('Tier-2 agent PRs require explicit human review.');
+            }
+
+            if (agentLabels.includes('agent:tier-3-architect')) {
+              if (!humanLabels.includes('human:architect-required')) {
+                fail('Tier-3 agent PRs require human:architect-required.');
+              }
+              if (!humanLabels.includes('human:security-review')) {
+                fail('Tier-3 agent PRs require human:security-review.');
+              }
+            }
+
+            if (scopeLabels.includes('scope:security') && !humanLabels.includes('human:security-review')) {
+              fail('Security-scoped PRs require human:security-review.');
+            }
+
+            if (riskLabels.includes('risk:high') && humanLabels.length < 2) {
+              fail('High-risk PRs require at least two human reviewers.');
+            }
+
+            console.log('Agent governance checks passed.');

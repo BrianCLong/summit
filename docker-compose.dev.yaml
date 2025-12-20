@@ -37,3 +37,12 @@ services:
   zk-tx:
     build: ./services/zk-tx
     ports: ["8106:8080"]
+
+  predictd:
+    build:
+      context: .
+      dockerfile: services/predictd/Dockerfile
+    ports:
+      - "4001:4001"
+    environment:
+      - PREDICTD_PORT=4001

@@ -591,3 +591,4 @@ export function createQueryBudgetMiddleware(killer: SlowQueryKiller) {
 }
 
 export default SlowQueryKiller;
+export * from './pgStatBudgeter';
