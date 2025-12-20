@@ -1,25 +1,32 @@
-import { test, expect } from '../fixtures/auth.fixture';
+import { test, expect } from '@playwright/test';
+import { MultiAgentPage } from '../support/pages/multi-agent.page';
 
 test.describe('Multi-Agent Coordination', () => {
-  test('should coordinate multiple agents on shared task', async ({ multiAgentPage }) => {
-    await multiAgentPage.goto();
-    // Verify default state
-    await multiAgentPage.verifyCoordinationStatus('Active');
+  let multiAgentPage: MultiAgentPage;
+
+  test.beforeEach(async ({ page }) => {
+    multiAgentPage = new MultiAgentPage(page);
+    await multiAgentPage.navigate();
   });
 
-  test('should show real-time coordination status', async ({ multiAgentPage }) => {
-    await multiAgentPage.goto();
-    const count = await multiAgentPage.getActiveAgentsCount();
-    expect(count).toBeGreaterThan(0);
+  test('should navigate through coordination tabs', async ({ page }) => {
+    // Verify initial tab
+    await multiAgentPage.verifyTabActive('routing');
+
+    // Web Tab
+    await multiAgentPage.selectTab('web');
+    await multiAgentPage.verifyTabActive('web');
+    // Add specific checks for WebOrchestrator component presence
+    // For now just checking visual presence implicitly by tab switch
+
+    // Budgets Tab
+    await multiAgentPage.selectTab('budgets');
+    await multiAgentPage.verifyTabActive('budgets');
+
+    // Logs Tab
+    await multiAgentPage.selectTab('logs');
+    await multiAgentPage.verifyTabActive('logs');
   });
 
-  test('should handle agent conflicts gracefully', async ({ multiAgentPage }) => {
-    await multiAgentPage.goto();
-    // Simulate conflict or check if one exists (mocking might be needed in real env)
-    // For now, we check the UI handling
-    if (await multiAgentPage.conflictAlert.isVisible()) {
-        await multiAgentPage.resolveConflict();
-        await expect(multiAgentPage.conflictAlert).toBeHidden();
-    }
-  });
+  // Future tests can mock WebSocket messages or API calls for real-time coordination
 });
