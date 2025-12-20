@@ -1,39 +1,23 @@
-import crypto from 'node:crypto';
+import * as crypto from 'node:crypto';
 import type { ChainValidationResult } from './types.js';
 
 function normalizeDn(dn: string): string {
   return dn.trim().replace(/\s+/g, ' ').toLowerCase();
 }
 
-/**
- * Validates X.509 certificate chains against a set of trust anchors.
- */
 export class CertificateValidator {
   private readonly trustAnchors = new Map<string, crypto.X509Certificate>();
 
-  /**
-   * Initializes the validator with an optional list of trust anchors.
-   * @param anchors - Array of PEM encoded certificates to trust.
-   */
   constructor(anchors: string[] = []) {
     anchors.forEach((anchor) => this.addTrustAnchor(anchor));
   }
 
-  /**
-   * Adds a new trust anchor (root certificate) to the validator.
-   * @param pem - The PEM encoded certificate string.
-   */
   addTrustAnchor(pem: string): void {
     const cert = new crypto.X509Certificate(pem);
     this.trustAnchors.set(normalizeDn(cert.subject), cert);
     this.trustAnchors.set(cert.fingerprint256, cert);
   }
 
-  /**
-   * Validates a certificate chain.
-   * @param chain - Array of PEM encoded certificates, starting with the leaf and ending with the root (or intermediate signed by a root).
-   * @returns Validation result containing status, errors, and details.
-   */
   validate(chain: string[] = []): ChainValidationResult {
     if (!chain.length) {
       return {

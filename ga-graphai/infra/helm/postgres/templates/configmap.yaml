@@ -1,0 +1,17 @@
+{{- if .Values.config }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "postgres.fullname" . }}-config
+  labels:
+    {{- include "postgres.labels" . | nindent 4 }}
+    app.kubernetes.io/component: config
+  annotations:
+    replication.summit.sh/cluster-name: {{ .Values.clusterName | quote }}
+    replication.summit.sh/primary-region: {{ .Values.primaryRegion | quote }}
+data:
+  postgresql.conf: |
+    {{- range $key, $value := .Values.config }}
+    {{ $key }} = {{ $value | quote }}
+    {{- end }}
+{{- end }}

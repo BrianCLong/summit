@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
 
-/**
- * Represents a single diff row between two runs.
- */
 interface DiffRow {
   stepId: string;
   type: 'artifact' | 'metric' | 'log' | 'duration';
@@ -11,12 +8,6 @@ interface DiffRow {
   severity: 'info' | 'warn' | 'error';
 }
 
-/**
- * A component for comparing two runs (Time Travel Diff).
- * Allows entering two run IDs and displays the differences between them.
- *
- * @returns The rendered TimeTravelDiff component.
- */
 export default function TimeTravelDiff() {
   const [a, setA] = useState('');
   const [b, setB] = useState('');

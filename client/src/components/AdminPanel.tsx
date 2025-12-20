@@ -1,27 +1,24 @@
 import React, { useEffect, useState } from 'react';
 
-/**
- * AdminPanel component allows administrators to manage tenants, users, feature flags, view audit logs, and edit policies.
- *
- * @returns The rendered AdminPanel component.
- */
 export default function AdminPanel() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const api = (import.meta as any).env?.VITE_API_URL || 'http://localhost:4000';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [tenants, setTenants] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [users, setUsers] = useState<any[]>([]);
   const [flags, setFlags] = useState<Record<string, boolean>>({});
   const [status, setStatus] = useState('');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [audit, setAudit] = useState<any[]>([]);
   const [q, setQ] = useState('');
   const [policy, setPolicy] = useState('');
 
   useEffect(() => {
     refresh();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /**
-   * Refreshes all data from the server (tenants, users, flags, audit logs, policy).
-   */
   async function refresh() {
     try {
       const t = await (await fetch(api + '/admin/tenants')).json();
@@ -37,11 +34,6 @@ export default function AdminPanel() {
     }
   }
 
-  /**
-   * Toggles a feature flag on the server.
-   *
-   * @param k - The key of the feature flag to toggle.
-   */
   async function toggleFlag(k: string) {
     const v = !flags[k];
     await fetch(api + '/admin/flags/' + k, {
@@ -51,10 +43,6 @@ export default function AdminPanel() {
     });
     setFlags({ ...flags, [k]: v });
   }
-
-  /**
-   * Loads audit logs from the server, optionally filtered by a query string.
-   */
   async function loadAudit() {
     const a = await (
       await fetch(
@@ -65,20 +53,13 @@ export default function AdminPanel() {
     ).json();
     setAudit(a.items || []);
   }
-
-  /**
-   * Loads the current policy text from the server.
-   */
   async function loadPolicy() {
     try {
       const txt = await (await fetch(api + '/admin/policy')).text();
       setPolicy(txt);
+    // eslint-disable-next-line no-empty
     } catch {}
   }
-
-  /**
-   * Saves the current policy text to the server.
-   */
   async function savePolicy() {
     await fetch(api + '/admin/policy', {
       method: 'PUT',

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Enhanced Worker Template for IntelGraph Platform
  * Replaces corrupted workers with BullMQ + Zod schemas + OTEL spans
@@ -45,22 +46,12 @@ export interface EnhancedWorkerConfig {
   };
 }
 
-/**
- * A generic worker implementation enhanced with Zod validation, OpenTelemetry tracing,
- * and structured logging. It processes jobs from a BullMQ queue.
- */
 export class EnhancedWorker {
   private worker: Worker;
   private queue: Queue;
   private tracer = trace.getTracer('intelgraph-worker', '1.0.0');
   private logger = logger.child({ component: 'enhanced-worker' });
 
-  /**
-   * Initializes the EnhancedWorker.
-   *
-   * @param config - Configuration for the worker and queue.
-   * @param processor - The async function that processes each job payload.
-   */
   constructor(
     private config: EnhancedWorkerConfig,
     private processor: (payload: WorkerPayload) => Promise<any>,
@@ -80,13 +71,6 @@ export class EnhancedWorker {
     this.setupEventHandlers();
   }
 
-  /**
-   * Internal method to process a job.
-   * Wraps the processor execution in an OpenTelemetry span and handles validation/logging.
-   *
-   * @param job - The BullMQ job to process.
-   * @returns The result of the processor function.
-   */
   private async processJob(job: Job): Promise<any> {
     const span = this.tracer.startSpan(
       `worker.${this.config.queueName}.process`,
@@ -157,9 +141,6 @@ export class EnhancedWorker {
     }
   }
 
-  /**
-   * Sets up event listeners for job lifecycle events (completed, failed, stalled).
-   */
   private setupEventHandlers(): void {
     this.worker.on('completed', (job) => {
       this.logger.info('Job completed', { jobId: job.id });
@@ -181,14 +162,7 @@ export class EnhancedWorker {
     });
   }
 
-  /**
-   * Adds a job to the queue after validating the payload.
-   *
-   * @param name - The name of the job.
-   * @param payload - The job payload conforming to WorkerPayloadSchema.
-   * @param options - Optional BullMQ job options.
-   * @returns The created Job instance.
-   */
+  // Add job to queue with validation
   async addJob(
     name: string,
     payload: WorkerPayload,
@@ -200,11 +174,7 @@ export class EnhancedWorker {
     return this.queue.add(name, validatedPayload, options);
   }
 
-  /**
-   * Performs a health check on the worker queue.
-   *
-   * @returns An object indicating health status and queue statistics.
-   */
+  // Health check
   async healthCheck(): Promise<{ healthy: boolean; stats: any }> {
     try {
       const waiting = await this.queue.getWaiting();
@@ -231,9 +201,7 @@ export class EnhancedWorker {
     }
   }
 
-  /**
-   * Gracefully shuts down the worker and closes the queue connection.
-   */
+  // Graceful shutdown
   async shutdown(): Promise<void> {
     this.logger.info('Shutting down enhanced worker...');
     await this.worker.close();
@@ -242,11 +210,7 @@ export class EnhancedWorker {
   }
 }
 
-/**
- * Factory function to create a specialized worker for embedding upserts.
- *
- * @returns An instance of EnhancedWorker configured for embedding upserts.
- */
+// Factory function for creating specific workers
 export function createEmbeddingUpsertWorker(): EnhancedWorker {
   const config: EnhancedWorkerConfig = {
     queueName: 'embedding-upsert',

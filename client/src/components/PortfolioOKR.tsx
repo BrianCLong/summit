@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import $ from 'jquery';
-
-/**
- * A component that displays a summary of Objectives and Key Results (OKRs) for a portfolio.
- * Fetches data from the PM API and renders a table with progress and risk indicators.
- *
- * @returns The rendered PortfolioOKR component.
- */
 export default function PortfolioOKR() {
   const [rows, setRows] = useState<any[]>([]);
   useEffect(() => {

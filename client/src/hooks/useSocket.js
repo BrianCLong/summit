@@ -1,14 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
 
-/**
- * Custom hook to manage a Socket.IO connection.
- * Handles connection, reconnection, errors, and heartbeat.
- *
- * @param namespace - The Socket.IO namespace to connect to (default: '/').
- * @param options - Additional Socket.IO client options.
- * @returns An object containing the socket instance, connection status, error state, and helper methods (emit, on, off).
- */
 export const useSocket = (namespace = '/', options = {}) => {
   const [socket, setSocket] = useState(null);
   const [connected, setConnected] = useState(false);
@@ -107,12 +99,6 @@ export const useSocket = (namespace = '/', options = {}) => {
   }, [socket, connected]);
 
   // Helper functions
-  /**
-   * Emits an event to the socket.
-   *
-   * @param event - The event name.
-   * @param data - The data to send.
-   */
   const emit = (event, data) => {
     if (socket && connected) {
       socket.emit(event, data);
@@ -121,24 +107,12 @@ export const useSocket = (namespace = '/', options = {}) => {
     }
   };
 
-  /**
-   * Registers an event handler.
-   *
-   * @param event - The event name.
-   * @param callback - The function to call when the event is received.
-   */
   const on = (event, callback) => {
     if (socket) {
       socket.on(event, callback);
     }
   };
 
-  /**
-   * Unregisters an event handler.
-   *
-   * @param event - The event name.
-   * @param callback - The function to remove.
-   */
   const off = (event, callback) => {
     if (socket) {
       socket.off(event, callback);

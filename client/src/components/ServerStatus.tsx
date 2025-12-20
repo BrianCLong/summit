@@ -8,12 +8,6 @@ const SERVER_STATUS_QUERY = gql`
   }
 `;
 
-/**
- * A component that displays the current status of the server.
- * Checks both the HTTP health endpoint and the GraphQL endpoint.
- *
- * @returns The rendered ServerStatus component.
- */
 function ServerStatus() {
   const [healthStatus, setHealthStatus] = useState<
     'unknown' | 'healthy' | 'error'

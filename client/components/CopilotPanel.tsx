@@ -1,12 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { estimatePromptCost } from './utils/costEstimator';
 
-/**
- * Represents the response from the Copilot API.
- */
 type CopilotResponse = {
   ok?: boolean;
-  type?: 'nl2cypher' | 'rag' | 'safety' | 'cookbook';
+  type?: 'nl2cypher' | 'rag';
   preview?: string;
   plan?: any;
   costEstimate?: any;
@@ -19,12 +16,6 @@ const url =
   (import.meta as any).env?.VITE_COPILOT_URL ||
   'http://localhost:4100/copilot/query';
 
-/**
- * A panel component that provides an interface for interacting with the AI Copilot.
- * Supports executing queries in different modes (auto, nl2cypher, ask), checking prompt safety, and viewing responses.
- *
- * @returns The rendered CopilotPanel component.
- */
 export default function CopilotPanel() {
   const [prompt, setPrompt] = useState('shortest path from person P1 to H1');
   const [mode, setMode] = useState<'auto' | 'nl2cypher' | 'ask'>('auto');
@@ -59,9 +50,6 @@ export default function CopilotPanel() {
     };
   }, []);
 
-  /**
-   * Executes the copilot query with the current prompt and mode.
-   */
   async function run() {
     setLoading(true);
     setResp(null);
@@ -80,9 +68,6 @@ export default function CopilotPanel() {
     }
   }
 
-  /**
-   * Checks the safety of the current prompt using the classification API.
-   */
   async function checkSafety() {
     try {
       const api =
@@ -103,9 +88,6 @@ export default function CopilotPanel() {
     }
   }
 
-  /**
-   * Loads the cookbook entries for analytics.
-   */
   async function loadCookbook() {
     try {
       const api =

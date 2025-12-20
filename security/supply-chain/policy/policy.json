@@ -1,0 +1,20 @@
+{
+  "cvss": {
+    "maxBaseScore": 7.0,
+    "blockedSeverities": ["critical"],
+    "gracePeriodDays": 14
+  },
+  "licenses": {
+    "blocked": ["GPL-3.0", "AGPL-3.0"],
+    "allowedFamilies": ["MIT", "Apache-2.0", "BSD-3-Clause"],
+    "dualControl": {
+      "requiredApprovals": 2,
+      "approverRoles": ["legal", "security"]
+    }
+  },
+  "attestations": {
+    "signing": "sigstore-keyless",
+    "predicateTypes": ["cyclonedx", "spdx", "vuln-scan"],
+    "complianceCenterBucket": "compliance-center/manifests"
+  }
+}

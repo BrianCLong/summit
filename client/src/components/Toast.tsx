@@ -1,35 +1,18 @@
 import React, { useState, useEffect } from 'react';
 
-/**
- * Props for the Toast component.
- */
 export interface ToastProps {
-  /** Unique ID for the toast. */
   id: string;
-  /** Type of the toast notification. */
   type: 'info' | 'success' | 'warning' | 'error';
-  /** Title of the toast. */
   title: string;
-  /** Optional message body. */
   message?: string;
-  /** Duration in milliseconds before auto-dismissal. 0 to disable. Defaults to 5000. */
   duration?: number;
-  /** Callback when the toast is dismissed. */
   onDismiss: (id: string) => void;
-  /** Optional action button. */
   action?: {
     label: string;
     onClick: () => void;
   };
 }
 
-/**
- * A notification toast component with varying types and styles.
- * Supports auto-dismissal and optional action buttons.
- *
- * @param props - The component props.
- * @returns The rendered Toast component.
- */
 const Toast: React.FC<ToastProps> = ({
   id,
   type,

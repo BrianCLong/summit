@@ -1,14 +1,9 @@
 import React, { useEffect, useState } from 'react';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Box, Avatar, Tooltip, Typography, Paper } from '@mui/material';
 import { useSocket } from '../../hooks/useSocket';
 import { useParams } from 'react-router-dom';
 
-/**
- * A component that displays the active users present in a specific investigation.
- * It connects to a real-time socket namespace and listens for join/leave events.
- *
- * @returns The rendered InvestigationPresence component, or null if no investigation ID is present.
- */
 function InvestigationPresence() {
   const { id: investigationId } = useParams(); // Get investigation ID from URL params
   const { socket, connected } = useSocket('/realtime'); // Connect to the /realtime namespace

@@ -5,13 +5,6 @@ import { promises as fs } from 'fs';
 const ajv = new Ajv({ allErrors: true, strict: true });
 addFormats(ajv);
 
-/**
- * Validates an artifact against a JSON schema contract.
- *
- * @param contractPath - The path to the JSON schema file.
- * @param artifact - The artifact object to validate.
- * @returns An object indicating success or failure, with error messages if validation fails.
- */
 export async function validateArtifact(
   contractPath: string,
   artifact: unknown,

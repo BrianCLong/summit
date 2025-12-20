@@ -1,9 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import $ from 'jquery';
 
-/**
- * Represents data for a site.
- */
 interface SiteData {
   id: string;
   name: string;
@@ -16,13 +13,6 @@ interface SiteData {
   last_seen?: string;
 }
 
-/**
- * A dashboard component that displays site information.
- * Connects to a server-sent events stream for real-time updates on site status.
- * Allows filtering by site details.
- *
- * @returns The rendered SitesDashboard component.
- */
 export default function SitesDashboard() {
   const [sites, setSites] = useState<SiteData[]>([]);
   const eventSourceRef = useRef<EventSource | null>(null);

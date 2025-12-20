@@ -43,12 +43,6 @@ interface Contradiction {
   timestamp: string;
 }
 
-/**
- * Computes the Merkle root hash for a given list of hashes.
- *
- * @param hashes - An array of hash strings (hex format) to compute the root from.
- * @returns The Merkle root hash as a hex string. Returns an empty string if the input array is empty.
- */
 export function merkleRoot(hashes: string[]): string {
   if (hashes.length === 0) return '';
   if (hashes.length === 1) return hashes[0];
@@ -72,13 +66,6 @@ export function merkleRoot(hashes: string[]): string {
   return layer[0].toString('hex');
 }
 
-/**
- * Builds a Merkle tree from a list of evidence items.
- *
- * @param evidenceList - An array of Evidence objects to be included in the tree.
- * @returns The root MerkleNode of the constructed tree.
- * @throws Error if the evidence list is empty.
- */
 export function buildMerkleTree(evidenceList: Evidence[]): MerkleNode {
   if (evidenceList.length === 0) {
     throw new Error('Cannot build Merkle tree from empty evidence list');
@@ -120,13 +107,6 @@ export function buildMerkleTree(evidenceList: Evidence[]): MerkleNode {
   return nodes[0];
 }
 
-/**
- * Generates a Merkle proof for a specific target hash within a Merkle tree.
- *
- * @param tree - The root MerkleNode of the tree.
- * @param targetHash - The hash for which the proof is to be generated.
- * @returns A MerkleProof object if the target hash is found, or null otherwise.
- */
 export function generateMerkleProof(
   tree: MerkleNode,
   targetHash: string,
@@ -172,12 +152,6 @@ export function generateMerkleProof(
   };
 }
 
-/**
- * Verifies a Merkle proof against its root hash.
- *
- * @param proof - The MerkleProof object to verify.
- * @returns True if the proof is valid and reconstructs the root hash, false otherwise.
- */
 export function verifyMerkleProof(proof: MerkleProof): boolean {
   let currentHash = proof.leaf;
 
@@ -198,17 +172,7 @@ export function verifyMerkleProof(proof: MerkleProof): boolean {
   return currentHash === proof.root;
 }
 
-/**
- * Manages the provenance ledger, including evidence registration, Merkle tree updates,
- * manifest exports, and claim management.
- */
 export class ProvenanceLedger {
-  /**
-   * Registers a new piece of evidence in the ledger and updates the Merkle tree.
-   *
-   * @param evidence - The Evidence object to register.
-   * @returns The ID of the registered evidence.
-   */
   async registerEvidence(evidence: Evidence): Promise<string> {
     const span = otelService.createSpan('provenance.register_evidence');
 
@@ -248,11 +212,6 @@ export class ProvenanceLedger {
     }
   }
 
-  /**
-   * Updates the Merkle tree for a specific run based on stored evidence.
-   *
-   * @param runId - The ID of the run to update the tree for.
-   */
   private async updateMerkleTree(runId: string): Promise<void> {
     const pool = getPostgresPool();
 
@@ -289,12 +248,6 @@ export class ProvenanceLedger {
     );
   }
 
-  /**
-   * Exports a manifest of all evidence and the Merkle root for a specific run.
-   *
-   * @param runId - The ID of the run to export the manifest for.
-   * @returns An object containing the run ID, root hash, evidence count, manifest, and timestamp.
-   */
   async exportManifest(runId: string): Promise<{
     runId: string;
     rootHash: string;
@@ -366,12 +319,6 @@ export class ProvenanceLedger {
     }
   }
 
-  /**
-   * Verifies the integrity of an exported manifest by reconstructing the Merkle tree.
-   *
-   * @param manifest - The manifest object to verify.
-   * @returns An object containing the validity status, root hashes, and verification details.
-   */
   async verifyManifest(manifest: any): Promise<{
     valid: boolean;
     rootHash: string;
@@ -403,12 +350,6 @@ export class ProvenanceLedger {
     }
   }
 
-  /**
-   * Creates a new claim in the ledger and checks for contradictions with existing claims.
-   *
-   * @param claim - The Claim object to create.
-   * @returns The ID of the created claim.
-   */
   async createClaim(claim: Claim): Promise<string> {
     const pool = getPostgresPool();
 
@@ -432,11 +373,6 @@ export class ProvenanceLedger {
     return claim.id;
   }
 
-  /**
-   * Detects contradictions between a new claim and existing claims in the same run.
-   *
-   * @param newClaimId - The ID of the newly created claim to check.
-   */
   private async detectContradictions(newClaimId: string): Promise<void> {
     const pool = getPostgresPool();
 
@@ -474,13 +410,6 @@ export class ProvenanceLedger {
     }
   }
 
-  /**
-   * Analyzes two claims to determine if they contradict each other.
-   *
-   * @param claimA - The first claim to compare.
-   * @param claimB - The second claim to compare.
-   * @returns An object describing the contradiction reason and severity if found, or null.
-   */
   private analyzeContradiction(
     claimA: any,
     claimB: any,
@@ -522,12 +451,6 @@ export class ProvenanceLedger {
     return null;
   }
 
-  /**
-   * Retrieves all claims and contradictions for a specific run.
-   *
-   * @param runId - The ID of the run to retrieve data for.
-   * @returns An object containing arrays of claims and contradictions.
-   */
   async getClaimsAndContradictions(runId: string): Promise<{
     claims: Claim[];
     contradictions: Contradiction[];

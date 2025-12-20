@@ -43,16 +43,9 @@ interface QueryBudgetMetrics {
   budgetSaved: number;
 }
 
-/**
- * Service responsible for collecting and aggregating financial operations (FinOps) metrics.
- * This includes cost tracking, performance metrics, SLO compliance, and query budget monitoring.
- */
 export class FinOpsObservabilityService {
   private redis: Redis;
 
-  /**
-   * Initializes the FinOps Observability Service and the Redis connection.
-   */
   constructor() {
     this.redis = new Redis({
       host: process.env.REDIS_HOST || 'localhost',
@@ -60,13 +53,6 @@ export class FinOpsObservabilityService {
     });
   }
 
-  /**
-   * Retrieves cost metrics for a given tenant and timeframe.
-   *
-   * @param tenantId - Optional tenant ID to filter metrics by.
-   * @param timeframe - The time window for metrics (default: '24h').
-   * @returns A CostMetrics object containing spend details.
-   */
   async getCostMetrics(
     tenantId?: string,
     timeframe: string = '24h',
@@ -225,12 +211,6 @@ export class FinOpsObservabilityService {
     }
   }
 
-  /**
-   * Retrieves performance metrics including latency, throughput, and error rates.
-   *
-   * @param timeframe - The time window for metrics (default: '1h').
-   * @returns A PerformanceMetrics object.
-   */
   async getPerformanceMetrics(
     timeframe: string = '1h',
   ): Promise<PerformanceMetrics> {
@@ -306,11 +286,6 @@ export class FinOpsObservabilityService {
     }
   }
 
-  /**
-   * Retrieves Service Level Objective (SLO) metrics, calculating error budgets and burn rates.
-   *
-   * @returns A SLOMetrics object.
-   */
   async getSLOMetrics(): Promise<SLOMetrics> {
     const span = otelService.createSpan('finops.get_slo_metrics');
 
@@ -423,11 +398,6 @@ export class FinOpsObservabilityService {
     }
   }
 
-  /**
-   * Retrieves metrics related to slow queries and potential cost savings from query killing.
-   *
-   * @returns A QueryBudgetMetrics object.
-   */
   async getSlowQueryMetrics(): Promise<QueryBudgetMetrics> {
     const span = otelService.createSpan('finops.get_slow_query_metrics');
 
@@ -480,14 +450,6 @@ export class FinOpsObservabilityService {
     }
   }
 
-  /**
-   * Creates a new alert configuration for FinOps metrics.
-   *
-   * @param condition - The condition type (e.g., 'threshold_exceeded').
-   * @param threshold - The numerical threshold value.
-   * @param metric - The name of the metric to monitor.
-   * @param tenantId - Optional tenant ID to scope the alert to.
-   */
   async createAlert(
     condition: string,
     threshold: number,
@@ -506,11 +468,7 @@ export class FinOpsObservabilityService {
   }
 }
 
-/**
- * Creates an Express Router handling FinOps Observability API endpoints.
- *
- * @returns An Express Router instance.
- */
+// API Router
 export function createFinOpsRouter(): express.Router {
   const router = express.Router();
   const service = new FinOpsObservabilityService();

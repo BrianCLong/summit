@@ -26,9 +26,6 @@ const RELATIONSHIP_CREATED = gql`
   }
 `;
 
-/**
- * Represents an item in the live ticker.
- */
 interface TickerItem {
   id: string;
   message: string;
@@ -44,12 +41,6 @@ const typeIcon: Record<string, string> = {
   location: '📍',
 };
 
-/**
- * A component that displays a live stream of entity and relationship creation events.
- * Subscribes to GraphQL subscriptions for real-time updates.
- *
- * @returns The rendered LiveTicker component.
- */
 export default function LiveTicker() {
   const [items, setItems] = React.useState<TickerItem[]>([]);
 

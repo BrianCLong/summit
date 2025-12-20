@@ -1,9 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import $ from 'jquery';
 
-/**
- * Represents the data for a region's replication status.
- */
 interface RegionData {
   region: string;
   peer: string;
@@ -12,13 +9,6 @@ interface RegionData {
   status: string;
 }
 
-/**
- * A dashboard component that displays regional replication status and lag.
- * Connects to a server-sent events stream for real-time updates.
- * Allows filtering by lag.
- *
- * @returns The rendered RegionsBoard component.
- */
 export default function RegionsBoard() {
   const [rows, setRows] = useState<RegionData[]>([]);
   const eventSourceRef = useRef<EventSource | null>(null);

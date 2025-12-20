@@ -1,0 +1,259 @@
+openapi: 3.0.3
+info:
+  title: Provenance & Claim Ledger Service
+  description: |
+    Evidence/claim registration, provenance chain tracking, and disclosure bundle generation.
+
+    All requests require authorization headers:
+    - `x-authority-id`: Identifier for the requesting authority
+    - `x-reason-for-access`: Justification for the request
+  version: 1.0.0
+  contact:
+    name: IntelGraph Team
+    email: support@intelgraph.com
+
+servers:
+  - url: http://localhost:4010
+    description: Local development
+  - url: https://prov-ledger.intelgraph.com
+    description: Production
+
+tags:
+  - name: Claims
+    description: Claim registration
+  - name: Evidence
+    description: Evidence registration
+  - name: Transforms
+    description: Transformation registration
+  - name: Manifests
+    description: Bundle generation and verification
+  - name: Health
+    description: Service health checks
+
+security:
+  - PolicyHeaders: []
+
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      description: Returns service health status
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /evidence:
+    post:
+      tags: [Evidence]
+      summary: Register evidence
+      description: Accepts a blob or URL + source info, license, and hash. Returns evidenceId.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEvidenceRequest'
+      responses:
+        '201':
+          description: Evidence registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvidenceResponse'
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal error
+
+  /transform:
+    post:
+      tags: [Transforms]
+      summary: Register transformation
+      description: Records a transformation (inputs, tool, params, outputs). Returns transformId.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTransformRequest'
+      responses:
+        '201':
+          description: Transformation registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransformResponse'
+        '400':
+          description: Invalid request
+
+  /claim:
+    post:
+      tags: [Claims]
+      summary: Register claim
+      description: Records a claim (subject, predicate, object, evidenceRefs). Returns claimId.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateClaimRequest'
+      responses:
+        '201':
+          description: Claim registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClaimResponse'
+        '400':
+          description: Invalid request
+
+  /manifest/{bundleId}:
+    get:
+      tags: [Manifests]
+      summary: Get deterministic Merkle manifest
+      description: Returns a hash tree of inputs -> transforms -> claims.
+      parameters:
+        - name: bundleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Manifest generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManifestResponse'
+        '404':
+          description: Bundle not found
+
+components:
+  securitySchemes:
+    PolicyHeaders:
+      type: apiKey
+      in: header
+      name: x-authority-id
+
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+        pcl_enabled:
+          type: boolean
+
+    CreateEvidenceRequest:
+      type: object
+      required:
+        - source
+        - hash
+      properties:
+        url:
+          type: string
+          description: URL to the evidence file
+        blob:
+          type: string
+          description: Base64 encoded content (optional if URL provided)
+        source:
+          type: string
+          description: Source identifier
+        license:
+          type: string
+          description: License identifier
+        hash:
+          type: string
+          description: SHA-256 hash of the content
+
+    EvidenceResponse:
+      type: object
+      properties:
+        evidenceId:
+          type: string
+
+    CreateTransformRequest:
+      type: object
+      required:
+        - inputs
+        - tool
+        - outputs
+        - operatorId
+      properties:
+        inputs:
+          type: array
+          items:
+            type: string
+          description: List of input Evidence/Claim IDs
+        tool:
+          type: string
+          description: Name of the tool used
+        params:
+          type: object
+          description: Parameters passed to the tool
+        outputs:
+          type: array
+          items:
+            type: string
+          description: List of output Evidence/Claim IDs (if known, or placeholders)
+        operatorId:
+          type: string
+
+    TransformResponse:
+      type: object
+      properties:
+        transformId:
+          type: string
+
+    CreateClaimRequest:
+      type: object
+      required:
+        - subject
+        - predicate
+        - object
+        - evidenceRefs
+        - confidence
+        - licenseId
+      properties:
+        subject:
+          type: string
+        predicate:
+          type: string
+        object:
+          type: string
+        evidenceRefs:
+          type: array
+          items:
+            type: string
+          description: List of supporting Evidence IDs
+        confidence:
+          type: number
+          format: float
+        licenseId:
+          type: string
+
+    ClaimResponse:
+      type: object
+      properties:
+        claimId:
+          type: string
+
+    ManifestResponse:
+      type: object
+      properties:
+        bundleId:
+          type: string
+        merkleRoot:
+          type: string
+        entries:
+          type: array
+          items:
+            type: object
+            description: Ordered list of entries in the bundle

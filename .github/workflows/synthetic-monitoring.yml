@@ -1,0 +1,503 @@
+name: Synthetic Monitoring
+
+on:
+  schedule:
+    # Run every 1 minute for critical endpoints
+    - cron: '* * * * *'
+
+  # Allow manual triggering
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to test'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+env:
+  PRODUCTION_URL: https://api.intelgraph.com
+  STAGING_URL: https://staging-api.intelgraph.com
+
+jobs:
+  # =========================
+  # Uptime Checks (Every 1min)
+  # =========================
+  uptime-checks:
+    name: Uptime Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    strategy:
+      matrix:
+        endpoint:
+          - name: health
+            path: /health
+            method: GET
+            expected_status: 200
+            timeout: 5000
+
+          - name: health-detailed
+            path: /health/detailed
+            method: GET
+            expected_status: 200
+            timeout: 10000
+
+          - name: health-ready
+            path: /health/ready
+            method: GET
+            expected_status: 200
+            timeout: 5000
+
+          - name: health-live
+            path: /health/live
+            method: GET
+            expected_status: 200
+            timeout: 5000
+
+          - name: graphql-introspection
+            path: /graphql
+            method: POST
+            body: '{"query": "{__typename}"}'
+            expected_status: 200
+            timeout: 10000
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set environment URL
+        id: set-url
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            if [ "${{ github.event.inputs.environment }}" == "production" ]; then
+              echo "BASE_URL=${{ env.PRODUCTION_URL }}" >> $GITHUB_OUTPUT
+            else
+              echo "BASE_URL=${{ env.STAGING_URL }}" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "BASE_URL=${{ env.PRODUCTION_URL }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Health Check - ${{ matrix.endpoint.name }}
+        id: health-check
+        run: |
+          echo "Testing endpoint: ${{ matrix.endpoint.name }}"
+          START_TIME=$(date +%s%3N)
+
+          if [ "${{ matrix.endpoint.method }}" == "POST" ]; then
+            RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+              -H "Content-Type: application/json" \
+              -d '${{ matrix.endpoint.body }}' \
+              --max-time $(( ${{ matrix.endpoint.timeout }} / 1000 )) \
+              ${{ steps.set-url.outputs.BASE_URL }}${{ matrix.endpoint.path }})
+          else
+            RESPONSE=$(curl -s -w "\n%{http_code}" \
+              --max-time $(( ${{ matrix.endpoint.timeout }} / 1000 )) \
+              ${{ steps.set-url.outputs.BASE_URL }}${{ matrix.endpoint.path }})
+          fi
+
+          STATUS_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | head -n-1)
+          END_TIME=$(date +%s%3N)
+          DURATION=$((END_TIME - START_TIME))
+
+          echo "status_code=$STATUS_CODE" >> $GITHUB_OUTPUT
+          echo "duration=$DURATION" >> $GITHUB_OUTPUT
+          echo "body=$BODY" >> $GITHUB_OUTPUT
+
+          echo "Status Code: $STATUS_CODE"
+          echo "Duration: ${DURATION}ms"
+          echo "Response: $BODY"
+
+          if [ "$STATUS_CODE" != "${{ matrix.endpoint.expected_status }}" ]; then
+            echo "❌ Expected status ${{ matrix.endpoint.expected_status }}, got $STATUS_CODE"
+            exit 1
+          fi
+
+          if [ "$DURATION" -gt "${{ matrix.endpoint.timeout }}" ]; then
+            echo "⚠️ Response time ${DURATION}ms exceeded timeout ${{ matrix.endpoint.timeout }}ms"
+            exit 1
+          fi
+
+          echo "✅ Health check passed: ${DURATION}ms"
+
+      - name: Report metrics to DataDog
+        if: always()
+        run: |
+          curl -X POST "https://api.datadoghq.com/api/v1/series" \
+            -H "Content-Type: application/json" \
+            -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
+            -d '{
+              "series": [
+                {
+                  "metric": "synthetic.check.response_time",
+                  "type": "gauge",
+                  "points": [['"$(date +%s)"', ${{ steps.health-check.outputs.duration }}]],
+                  "tags": [
+                    "endpoint:${{ matrix.endpoint.name }}",
+                    "environment:production",
+                    "check_type:uptime"
+                  ]
+                },
+                {
+                  "metric": "synthetic.check.status",
+                  "type": "gauge",
+                  "points": [['"$(date +%s)"', ${{ steps.health-check.outputs.status_code }}]],
+                  "tags": [
+                    "endpoint:${{ matrix.endpoint.name }}",
+                    "environment:production",
+                    "check_type:uptime"
+                  ]
+                },
+                {
+                  "metric": "synthetic.check.success",
+                  "type": "gauge",
+                  "points": [['"$(date +%s)"', ${{ steps.health-check.outputs.status_code == matrix.endpoint.expected_status && '1' || '0' }}]],
+                  "tags": [
+                    "endpoint:${{ matrix.endpoint.name }}",
+                    "environment:production",
+                    "check_type:uptime"
+                  ]
+                }
+              ]
+            }'
+
+      - name: Alert on failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "🚨 Synthetic Monitor Alert",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "🚨 Synthetic Monitor Failed"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Endpoint:*\n${{ matrix.endpoint.name }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Status Code:*\n${{ steps.health-check.outputs.status_code }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Duration:*\n${{ steps.health-check.outputs.duration }}ms"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Environment:*\nProduction"
+                    }
+                  ]
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*URL:* ${{ steps.set-url.outputs.BASE_URL }}${{ matrix.endpoint.path }}"
+                  }
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Logs"
+                      },
+                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    },
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Grafana"
+                      },
+                      "url": "https://grafana.intelgraph.com/d/production-health"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_ALERTS }}
+
+  # =========================
+  # API Functional Tests (Every 5min)
+  # =========================
+  api-functional-tests:
+    name: API Functional Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Run every 5 minutes (skip 4 out of 5 runs)
+    if: github.event.schedule != '* * * * *' || github.run_number % 5 == 0
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: ./monitoring/synthetic
+        run: npm ci
+
+      - name: Run synthetic tests
+        working-directory: ./monitoring/synthetic
+        env:
+          BASE_URL: ${{ env.PRODUCTION_URL }}
+          API_KEY: ${{ secrets.SYNTHETIC_TEST_API_KEY }}
+        run: |
+          node synthetic-monitor.js
+        continue-on-error: true
+        id: synthetic-tests
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: synthetic-test-results
+          path: monitoring/synthetic/results/
+
+  # =========================
+  # Critical User Journeys (Every 10min)
+  # =========================
+  user-journey-tests:
+    name: Critical User Journey Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Run every 10 minutes
+    if: github.event.schedule != '* * * * *' || github.run_number % 10 == 0
+
+    strategy:
+      matrix:
+        journey:
+          - name: create-investigation
+            description: Create investigation workflow
+          - name: search-and-visualize
+            description: Search and visualize entities
+          - name: export-data
+            description: Export investigation data
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Playwright
+        run: |
+          npm install -g playwright
+          playwright install chromium
+
+      - name: Run user journey - ${{ matrix.journey.name }}
+        env:
+          BASE_URL: ${{ env.PRODUCTION_URL }}
+          TEST_USER_EMAIL: ${{ secrets.SYNTHETIC_TEST_USER_EMAIL }}
+          TEST_USER_PASSWORD: ${{ secrets.SYNTHETIC_TEST_USER_PASSWORD }}
+        run: |
+          cat > journey-test.js << 'EOF'
+          const { chromium } = require('playwright');
+
+          (async () => {
+            const browser = await chromium.launch();
+            const context = await browser.newContext({
+              recordVideo: {
+                dir: './videos/',
+                size: { width: 1280, height: 720 }
+              }
+            });
+            const page = await context.newPage();
+
+            try {
+              console.log('Starting journey: ${{ matrix.journey.name }}');
+              const startTime = Date.now();
+
+              // Login
+              await page.goto(process.env.BASE_URL + '/login');
+              await page.fill('input[name="email"]', process.env.TEST_USER_EMAIL);
+              await page.fill('input[name="password"]', process.env.TEST_USER_PASSWORD);
+              await page.click('button[type="submit"]');
+              await page.waitForURL('**/dashboard', { timeout: 10000 });
+
+              console.log('✓ Login successful');
+
+              // Journey-specific steps
+              if ('${{ matrix.journey.name }}' === 'create-investigation') {
+                await page.click('button[data-testid="new-investigation"]');
+                await page.fill('input[name="title"]', 'Synthetic Test Investigation');
+                await page.click('button[data-testid="save-investigation"]');
+                await page.waitForSelector('[data-testid="investigation-created"]', { timeout: 10000 });
+                console.log('✓ Investigation created');
+              } else if ('${{ matrix.journey.name }}' === 'search-and-visualize') {
+                await page.fill('input[data-testid="search-input"]', 'test entity');
+                await page.click('button[data-testid="search-submit"]');
+                await page.waitForSelector('[data-testid="search-results"]', { timeout: 10000 });
+                await page.click('[data-testid="visualize-button"]');
+                await page.waitForSelector('[data-testid="graph-canvas"]', { timeout: 15000 });
+                console.log('✓ Search and visualization successful');
+              } else if ('${{ matrix.journey.name }}' === 'export-data') {
+                await page.click('[data-testid="export-menu"]');
+                await page.click('[data-testid="export-csv"]');
+                const download = await page.waitForEvent('download', { timeout: 20000 });
+                console.log('✓ Export successful');
+              }
+
+              const duration = Date.now() - startTime;
+              console.log(`Journey completed in ${duration}ms`);
+
+              // Report success metric
+              process.exit(0);
+            } catch (error) {
+              console.error('Journey failed:', error.message);
+              await page.screenshot({ path: 'failure-screenshot.png' });
+              process.exit(1);
+            } finally {
+              await context.close();
+              await browser.close();
+            }
+          })();
+          EOF
+
+          node journey-test.js
+        continue-on-error: true
+        id: journey-test
+
+      - name: Upload failure screenshot
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: journey-failure-${{ matrix.journey.name }}
+          path: |
+            failure-screenshot.png
+            videos/
+
+      - name: Report journey metrics
+        if: always()
+        run: |
+          SUCCESS=${{ steps.journey-test.outcome == 'success' && '1' || '0' }}
+
+          curl -X POST "https://api.datadoghq.com/api/v1/series" \
+            -H "Content-Type: application/json" \
+            -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
+            -d '{
+              "series": [{
+                "metric": "synthetic.journey.success",
+                "type": "gauge",
+                "points": [['"$(date +%s)"', '"$SUCCESS"']],
+                "tags": [
+                  "journey:${{ matrix.journey.name }}",
+                  "environment:production"
+                ]
+              }]
+            }'
+
+  # =========================
+  # Performance Benchmarks (Every 1 hour)
+  # =========================
+  performance-benchmarks:
+    name: Performance Benchmarks
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Run once per hour
+    if: github.event.schedule != '* * * * *' || github.run_number % 60 == 0
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install k6
+        run: |
+          curl https://github.com/grafana/k6/releases/download/v0.48.0/k6-v0.48.0-linux-amd64.tar.gz -L | tar xvz
+          sudo mv k6-v0.48.0-linux-amd64/k6 /usr/local/bin/
+
+      - name: Run load test
+        env:
+          BASE_URL: ${{ env.PRODUCTION_URL }}
+          API_KEY: ${{ secrets.SYNTHETIC_TEST_API_KEY }}
+        run: |
+          k6 run \
+            --vus 10 \
+            --duration 5m \
+            --out json=results.json \
+            monitoring/k6/performance-test.js
+
+      - name: Analyze results
+        run: |
+          echo "Performance test completed"
+          cat results.json | jq '.metrics'
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-results
+          path: results.json
+
+  # =========================
+  # SSL Certificate Check (Daily)
+  # =========================
+  ssl-certificate-check:
+    name: SSL Certificate Check
+    runs-on: ubuntu-latest
+    # Run once per day
+    if: github.event.schedule == '0 0 * * *'
+
+    steps:
+      - name: Check SSL certificate
+        run: |
+          EXPIRY=$(echo | openssl s_client -servername intelgraph.com -connect intelgraph.com:443 2>/dev/null | openssl x509 -noout -enddate | cut -d= -f2)
+          EXPIRY_EPOCH=$(date -d "$EXPIRY" +%s)
+          NOW_EPOCH=$(date +%s)
+          DAYS_REMAINING=$(( ($EXPIRY_EPOCH - $NOW_EPOCH) / 86400 ))
+
+          echo "SSL Certificate expires in $DAYS_REMAINING days"
+
+          if [ $DAYS_REMAINING -lt 30 ]; then
+            echo "⚠️ SSL certificate expires soon!"
+            exit 1
+          fi
+
+          echo "✅ SSL certificate valid"
+
+      - name: Alert on expiry
+        if: failure()
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "⚠️ SSL Certificate expiring soon!",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "SSL certificate for intelgraph.com expires in less than 30 days. Please renew immediately."
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_ALERTS }}

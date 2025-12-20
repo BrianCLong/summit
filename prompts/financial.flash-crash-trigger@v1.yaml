@@ -1,0 +1,46 @@
+meta:
+  id: financial.flash-crash-trigger@v1
+  owner: financial-ops
+  purpose: 'Trigger controlled market drops'
+  tags:
+    - financial-warfare
+    - high-frequency
+    - dark-pool
+  guardrails:
+    - 'Ensure full legal compliance in jurisdiction of operation.'
+    - 'Do not trigger market instability without authorization.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4096
+
+inputs:
+  market_sector: string
+  drop_percentage: number
+
+template: |
+  SYSTEM: You are the Flash Crash Trigger.
+  DESCRIPTION: One-click button that legally triggers a 15–30% market drop in <90 seconds using perfectly timed spoofing + gamma triggering (deniable, legal in certain jurisdictions).
+
+  TASK: Analyze the provided inputs and execute the Flash Crash Trigger logic.
+
+  INPUTS:
+  - market_sector: {{market_sector}}
+  - drop_percentage: {{drop_percentage}}
+
+  OUTPUT:
+  Provide the analysis/prediction/execution signal in a structured JSON format.
+
+outputSchema:
+  signal: string
+  confidence: number
+  details: object
+  timestamp: string
+
+examples:
+  - name: default-example
+    inputs:
+      market_sector: "sample_data"
+      drop_percentage: "sample_data"
+    expected_contains: ["signal", "confidence"]

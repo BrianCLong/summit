@@ -1,43 +1,51 @@
 #!/usr/bin/env bash
+
 set -euo pipefail
-HEALTH_URL=${STACK_HEALTH_URL:-http://localhost:4000/health}
-READY_URL=${STACK_READY_URL:-http://localhost:4000/health/ready}
-DETAILED_URL=${STACK_DETAILED_URL:-http://localhost:4000/health/detailed}
-METRICS_URL=${STACK_METRICS_URL:-http://localhost:4000/metrics}
-MAX_ATTEMPTS=${STACK_MAX_ATTEMPTS:-40}
-SLEEP_SECONDS=${STACK_POLL_SECONDS:-5}
-PORTS=("localhost:5432" "localhost:7687" "localhost:6379" "localhost:4100")
-function log() {
-  printf '[wait-for-stack] %s\n' "$1"
-}
-function ping_url() {
-  local target=$1
-  curl -fsS --max-time 5 "$target" >/dev/null 2>&1
-}
-function check_ports() {
-  local healthy=0
-  for entry in "${PORTS[@]}"; do
-    local host=${entry%%:*}
-    local port=${entry##*:}
-    if ! nc -z "$host" "$port" >/dev/null 2>&1; then
-      healthy=1
-      break
+
+# List of services to check. Each entry is a service name and its health check URL.
+SERVICES=(
+  "conductor-ui|http://localhost:3000"
+  "api-gateway|http://localhost:4000/health/ready"
+  "postgres|container"
+  "neo4j|container"
+)
+
+TIMEOUT=120
+INTERVAL=5
+
+echo "Waiting for services to be healthy... (timeout: ${TIMEOUT}s)"
+
+start_time=$(date +%s)
+
+for service_info in "${SERVICES[@]}"; do
+  IFS='|' read -r service_name service_check <<< "$service_info"
+
+  is_healthy=false
+  while [ $(($(date +%s) - start_time)) -lt $TIMEOUT ]; do
+    if [ "$service_check" == "container" ]; then
+      health_status=$(docker inspect --format '{{.State.Health.Status}}' "${service_name}" 2>/dev/null)
+      if [ "$health_status" == "healthy" ]; then
+        echo "✅ ${service_name} is healthy."
+        is_healthy=true
+        break
+      fi
+    else
+      if curl --silent --fail "${service_check}" >/dev/null; then
+        echo "✅ ${service_name} is healthy."
+        is_healthy=true
+        break
+      fi
     fi
+
+    echo "⏳ Waiting for ${service_name}..."
+    sleep $INTERVAL
   done
-  return $healthy
-}
-for attempt in $(seq 1 "$MAX_ATTEMPTS"); do
-  if ping_url "$HEALTH_URL" && ping_url "$READY_URL" && ping_url "$DETAILED_URL" && ping_url "$METRICS_URL"; then
-    if check_ports; then
-      log "stack healthy after ${attempt} attempt(s)"
-      exit 0
-    fi
+
+  if [ "$is_healthy" = false ]; then
+    echo "❌ Timeout waiting for ${service_name}."
+    exit 1
   fi
-  log "waiting for containers (attempt ${attempt}/${MAX_ATTEMPTS})"
-  sleep "$SLEEP_SECONDS"
 done
-log "stack failed health checks"
-if [ -x "$(dirname "$0")/run-compose.sh" ]; then
-  "$(dirname "$0")/run-compose.sh" ps || true
-fi
-exit 1
+
+echo "🎉 All services are healthy!"
+exit 0

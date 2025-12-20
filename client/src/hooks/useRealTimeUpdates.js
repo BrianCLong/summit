@@ -69,12 +69,7 @@ const LIVE_AI_INSIGHTS = gql`
   }
 `;
 
-/**
- * Custom hook for real-time graph updates.
- * Simulates receiving live updates about graph entities and relationships.
- *
- * @returns An object containing live updates, connected users, and connection status.
- */
+// Custom hook for real-time graph updates
 export function useRealTimeGraph() {
   const [liveUpdates, setLiveUpdates] = useState([]);
   const [connectedUsers, setConnectedUsers] = useState([]);
@@ -173,12 +168,7 @@ export function useRealTimeGraph() {
   };
 }
 
-/**
- * Custom hook for AI insights.
- * Simulates receiving AI-generated insights and alerts.
- *
- * @returns An array of recent AI insights.
- */
+// Custom hook for AI insights
 export function useAIInsights() {
   const [insights, setInsights] = useState([]);
 
@@ -242,13 +232,7 @@ export function useAIInsights() {
   return insights;
 }
 
-/**
- * Custom hook for investigation collaboration.
- * Simulates real-time updates on collaborator activities within an investigation.
- *
- * @param investigationId - The ID of the investigation to track.
- * @returns An object containing the list of collaborators and recent activity log.
- */
+// Custom hook for investigation collaboration
 export function useInvestigationCollab(investigationId) {
   const [collaborators, setCollaborators] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);

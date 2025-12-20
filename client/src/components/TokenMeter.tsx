@@ -31,21 +31,6 @@ interface TokenCountResult {
   };
 }
 
-/**
- * A React component that displays token usage and cost estimates in real-time.
- * It debounces API calls to avoid overloading the backend.
- *
- * @param props - The component props.
- * @param props.provider - The LLM provider (optional).
- * @param props.model - The model name.
- * @param props.text - The prompt text.
- * @param props.completion - The completion text (optional).
- * @param props.showCost - Whether to display estimated cost (default: true).
- * @param props.showWarnings - Whether to display budget warnings (default: true).
- * @param props.className - Additional CSS classes.
- * @param props.onBudgetChange - Callback for budget status changes.
- * @returns The rendered TokenMeter component.
- */
 export function TokenMeter({
   provider,
   model,
@@ -207,12 +192,7 @@ export function TokenMeter({
 }
 
 /**
- * Simplified token meter for basic use cases.
- *
- * @param props - The component props.
- * @param props.text - The prompt text.
- * @param props.model - The model name (default: 'gpt-4o-mini').
- * @returns The rendered SimpleTokenMeter component.
+ * Simplified token meter for basic use cases
  */
 export function SimpleTokenMeter({
   text,
@@ -233,14 +213,7 @@ export function SimpleTokenMeter({
 }
 
 /**
- * Token meter with budget enforcement for critical operations.
- * Triggers a callback if the budget action is 'block'.
- *
- * @param props - The component props.
- * @param props.text - The prompt text.
- * @param props.model - The model name.
- * @param props.onBlock - Callback invoked when budget blocks the request.
- * @returns The rendered TokenMeterWithEnforcement component.
+ * Token meter with budget enforcement for critical operations
  */
 export function TokenMeterWithEnforcement({
   text,

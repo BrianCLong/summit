@@ -1,14 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
 import $ from 'jquery';
-
-/**
- * A sidebar component that displays entities impacted by changes in specific files.
- * Fetches impacted entities from the RepoGraph API and allows filtering.
- *
- * @param props - The component props.
- * @param props.files - An array of file paths to check for impact.
- * @returns The rendered RepoGraphSidebar component.
- */
 export default function RepoGraphSidebar({ files }: { files: string[] }) {
   const [imp, setImp] = useState<string[]>([]);
   const handlerBoundRef = useRef(false);

@@ -4,9 +4,6 @@
  */
 
 // Performance monitoring and optimization utilities
-/**
- * Monitors performance metrics of the canvas, specifically FPS and memory usage.
- */
 export class CanvasPerformanceMonitor {
   constructor(options = {}) {
     this.targetFps = options.targetFps || 55;
@@ -22,9 +19,6 @@ export class CanvasPerformanceMonitor {
     this.rafId = null;
   }
 
-  /**
-   * Starts monitoring performance.
-   */
   start() {
     if (this.isRunning) return;
     this.isRunning = true;
@@ -33,9 +27,6 @@ export class CanvasPerformanceMonitor {
     this.rafId = requestAnimationFrame(() => this.tick());
   }
 
-  /**
-   * Stops monitoring performance.
-   */
   stop() {
     if (!this.isRunning) return;
     this.isRunning = false;
@@ -92,9 +83,6 @@ export class CanvasPerformanceMonitor {
 }
 
 // Level-of-Detail (LOD) system for performance optimization
-/**
- * Manages the Level-of-Detail (LOD) for rendering the graph based on performance.
- */
 export class LODManager {
   constructor() {
     this.thresholds = {
@@ -109,14 +97,6 @@ export class LODManager {
   }
 
   // Automatically adjust LOD based on performance
-  /**
-   * Adapts the LOD level based on the current FPS and node/edge counts.
-   *
-   * @param fps - The current frames per second.
-   * @param nodeCount - The number of nodes currently rendered.
-   * @param edgeCount - The number of edges currently rendered.
-   * @returns The new LOD level.
-   */
   adaptToPerformance(fps, nodeCount, edgeCount) {
     if (!this.adaptiveMode) return this.currentLevel;
 
@@ -150,14 +130,6 @@ export class LODManager {
   }
 
   // Filter data based on current LOD level
-  /**
-   * Filters the graph data based on the current LOD level configuration.
-   *
-   * @param nodes - The array of graph nodes.
-   * @param edges - The array of graph edges.
-   * @param level - The LOD level to apply (optional).
-   * @returns An object containing the filtered nodes, edges, and metadata.
-   */
   filterGraphData(nodes, edges, level = this.currentLevel) {
     const config = this.getLevelConfig(level);
 
@@ -214,17 +186,7 @@ export class LODManager {
 }
 
 // Cytoscape performance optimizations
-/**
- * Utility class for optimizing Cytoscape configuration and layouts.
- */
 export class CytoscapeOptimizer {
-  /**
-   * Generates an optimized Cytoscape configuration based on graph size.
-   *
-   * @param nodeCount - The number of nodes.
-   * @param edgeCount - The number of edges.
-   * @returns A partial Cytoscape configuration object.
-   */
   static getOptimizedConfig(nodeCount, edgeCount) {
     const isLargeGraph = nodeCount > 1000 || edgeCount > 2000;
 
@@ -256,13 +218,6 @@ export class CytoscapeOptimizer {
     };
   }
 
-  /**
-   * Generates an optimized layout configuration.
-   *
-   * @param nodeCount - The number of nodes.
-   * @param layoutName - The name of the layout algorithm (default: 'fcose').
-   * @returns A layout configuration object.
-   */
   static getOptimizedLayoutConfig(nodeCount, layoutName = 'fcose') {
     const isLargeGraph = nodeCount > 1000;
 
@@ -306,9 +261,6 @@ export class CytoscapeOptimizer {
 }
 
 // Performance testing utilities
-/**
- * Utility class for testing performance metrics.
- */
 export class PerformanceTester {
   constructor() {
     this.tests = new Map();
@@ -341,13 +293,6 @@ export class PerformanceTester {
   }
 
   // Test graph rendering performance
-  /**
-   * Tests the rendering performance of a Cytoscape instance.
-   *
-   * @param cyInstance - The Cytoscape instance.
-   * @param iterations - The number of test iterations (default: 10).
-   * @returns An object containing test results (average, min, max duration).
-   */
   async testRenderingPerformance(cyInstance, iterations = 10) {
     const results = [];
 

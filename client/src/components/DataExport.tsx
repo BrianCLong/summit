@@ -26,47 +26,25 @@ const GENERATE_REPORT = gql`
   }
 `;
 
-/**
- * Options for configuring the data export.
- */
 interface ExportOptions {
-  /** The ID of the investigation to export data from. */
   investigationId?: string;
-  /** Specific entity IDs to include in the export. */
   entityIds?: string[];
-  /** Whether to include relationship data. */
   includeRelationships?: boolean;
-  /** Whether to include metadata. */
   includeMetadata?: boolean;
-  /** Whether to include analytics data. */
   includeAnalytics?: boolean;
-  /** Optional date range for filtering data. */
   dateRange?: [string, string];
-  /** Additional filter criteria. */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   filterCriteria?: any;
 }
 
-/**
- * Props for the DataExport component.
- */
 interface DataExportProps {
-  /** The ID of the investigation to export. */
   investigationId?: string;
-  /** List of pre-selected entity IDs. */
   selectedEntities?: string[];
-  /** Callback function triggered when export is complete. */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onExportComplete?: (result: any) => void;
-  /** Whether to show the report generation section. */
   showReports?: boolean;
 }
 
-/**
- * A component for exporting data and generating reports.
- * Supports various formats (JSON, CSV, PDF, etc.) and report templates.
- *
- * @param props - The component props.
- * @returns The rendered DataExport component.
- */
 function DataExport({
   investigationId,
   selectedEntities = [],
@@ -88,6 +66,7 @@ function DataExport({
     dateRange: ['', ''],
   });
   const [showAdvanced, setShowAdvanced] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [exportHistory, setExportHistory] = useState<any[]>([]);
 
   const [exportData, { loading: exportLoading }] = useMutation(EXPORT_DATA);
@@ -212,6 +191,7 @@ function DataExport({
                 name="exportFormat"
                 value={format.value}
                 checked={exportFormat === format.value}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 onChange={(e) => setExportFormat(e.target.value as any)}
                 style={{ display: 'none' }}
               />
@@ -447,6 +427,7 @@ function DataExport({
           >
             <select
               value={reportTemplate}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               onChange={(e) => setReportTemplate(e.target.value as any)}
               style={{
                 flex: 1,

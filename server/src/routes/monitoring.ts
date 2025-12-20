@@ -3,7 +3,16 @@
  */
 import express, { Request, Response } from 'express';
 import { z } from 'zod';
-import { register, webVitalValue } from '../monitoring/metrics.js';
+import {
+  register,
+  webVitalValue,
+  goldenPathStepTotal,
+  uiErrorBoundaryCatchTotal,
+  maestroDeploymentsTotal,
+  maestroPrLeadTimeHours,
+  maestroChangeFailureRate,
+  maestroMttrHours,
+} from '../monitoring/metrics.js';
 import {
   performHealthCheck,
   getCachedHealthStatus,
@@ -19,15 +28,40 @@ import {
   recordBusinessEvent,
   type BusinessMetricEvent,
 } from '../monitoring/businessMetrics.js';
+import { requirePermission } from '../middleware/auth.js';
 
 const router = express.Router();
 router.use(express.json());
 
 /**
- * Prometheus metrics endpoint
- * GET /metrics
+ * @openapi
+ * /monitoring/metrics:
+ *   get:
+ *     tags:
+ *       - Monitoring
+ *     summary: Prometheus metrics endpoint
+ *     description: Returns Prometheus metrics for the application.
+ *     responses:
+ *       200:
+ *         description: Metrics data
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: "# HELP process_cpu_user_seconds_total Total user CPU time spent in seconds.\n# TYPE process_cpu_user_seconds_total counter\nprocess_cpu_user_seconds_total 0.12\n"
+ *       500:
+ *         description: Failed to collect metrics
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                 details:
+ *                   type: string
  */
-router.get('/metrics', async (req: Request, res: Response) => {
+router.get('/metrics', requirePermission('system:metrics'), async (req: Request, res: Response) => {
   try {
     res.set('Content-Type', register.contentType);
     const metrics = await register.metrics();
@@ -41,8 +75,26 @@ router.get('/metrics', async (req: Request, res: Response) => {
 });
 
 /**
- * Comprehensive health check endpoint
- * GET /health
+ * @openapi
+ * /monitoring/health:
+ *   get:
+ *     tags:
+ *       - Monitoring
+ *     summary: Comprehensive health check
+ *     description: Performs a full health check of the system including dependencies.
+ *     responses:
+ *       200:
+ *         description: System is healthy
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   enum: [healthy, unhealthy]
+ *       503:
+ *         description: System is unhealthy
  */
 router.get('/health', async (req: Request, res: Response) => {
   try {
@@ -59,8 +111,26 @@ router.get('/health', async (req: Request, res: Response) => {
 });
 
 /**
- * Quick health check (cached)
- * GET /health/quick
+ * @openapi
+ * /monitoring/health/quick:
+ *   get:
+ *     tags:
+ *       - Monitoring
+ *     summary: Quick health check (cached)
+ *     description: Returns the cached health status of the system.
+ *     responses:
+ *       200:
+ *         description: System is healthy
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   enum: [healthy, unhealthy]
+ *       503:
+ *         description: System is unhealthy
  */
 router.get('/health/quick', (req: Request, res: Response) => {
   try {
@@ -77,8 +147,18 @@ router.get('/health/quick', (req: Request, res: Response) => {
 });
 
 /**
- * Kubernetes liveness probe
- * GET /health/live
+ * @openapi
+ * /monitoring/health/live:
+ *   get:
+ *     tags:
+ *       - Monitoring
+ *     summary: Kubernetes liveness probe
+ *     description: Checks if the application is alive.
+ *     responses:
+ *       200:
+ *         description: Application is alive
+ *       503:
+ *         description: Application is not alive
  */
 router.get('/health/live', async (req: Request, res: Response) => {
   try {
@@ -94,8 +174,18 @@ router.get('/health/live', async (req: Request, res: Response) => {
 });
 
 /**
- * Kubernetes readiness probe
- * GET /health/ready
+ * @openapi
+ * /monitoring/health/ready:
+ *   get:
+ *     tags:
+ *       - Monitoring
+ *     summary: Kubernetes readiness probe
+ *     description: Checks if the application is ready to serve traffic.
+ *     responses:
+ *       200:
+ *         description: Application is ready
+ *       503:
+ *         description: Application is not ready
  */
 router.get('/health/ready', async (req: Request, res: Response) => {
   try {
@@ -112,8 +202,29 @@ router.get('/health/ready', async (req: Request, res: Response) => {
 });
 
 /**
- * System information endpoint
- * GET /health/info
+ * @openapi
+ * /monitoring/health/info:
+ *   get:
+ *     tags:
+ *       - Monitoring
+ *     summary: System information endpoint
+ *     description: Returns information about the system environment and resources.
+ *     responses:
+ *       200:
+ *         description: System information
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 service:
+ *                   type: string
+ *                 version:
+ *                   type: string
+ *                 environment:
+ *                   type: string
+ *                 uptime:
+ *                   type: number
  */
 router.get('/health/info', (req: Request, res: Response) => {
   const info = {
@@ -223,6 +334,48 @@ const businessMetricSchema = z.object({
   metadata: z.record(z.any()).optional(),
 });
 
+/**
+ * @openapi
+ * /monitoring/metrics/business:
+ *   post:
+ *     tags:
+ *       - Monitoring
+ *     summary: Record business metrics
+ *     description: Records a business-related metric event.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - type
+ *             properties:
+ *               type:
+ *                 type: string
+ *                 enum: [user_signup, api_call, revenue]
+ *               tenant:
+ *                 type: string
+ *               plan:
+ *                 type: string
+ *               service:
+ *                 type: string
+ *               route:
+ *                 type: string
+ *               statusCode:
+ *                 type: number
+ *               amount:
+ *                 type: number
+ *               currency:
+ *                 type: string
+ *               metadata:
+ *                 type: object
+ *     responses:
+ *       202:
+ *         description: Metric recorded
+ *       400:
+ *         description: Invalid payload
+ */
 router.post('/metrics/business', (req: Request, res: Response) => {
   try {
     const payload = businessMetricSchema.parse(req.body) as BusinessMetricEvent;
@@ -240,8 +393,33 @@ router.post('/metrics/business', (req: Request, res: Response) => {
 });
 
 /**
- * Collect Web Vitals metrics from clients
- * POST /web-vitals
+ * @openapi
+ * /monitoring/web-vitals:
+ *   post:
+ *     tags:
+ *       - Monitoring
+ *     summary: Collect Web Vitals metrics
+ *     description: Endpoint for collecting Web Vitals metrics from frontend clients.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               value:
+ *                 type: number
+ *               id:
+ *                 type: string
+ *     responses:
+ *       204:
+ *         description: Metric recorded successfully
+ *       400:
+ *         description: Invalid payload
+ *       500:
+ *         description: Failed to record metric
  */
 router.post('/web-vitals', (req: Request, res: Response) => {
   const { name, value, id } = req.body || {};
@@ -256,6 +434,167 @@ router.post('/web-vitals', (req: Request, res: Response) => {
     res
       .status(500)
       .json({ error: 'Failed to record web vital', details: error.message });
+  }
+});
+
+/**
+ * @openapi
+ * /monitoring/telemetry/events:
+ *   post:
+ *     tags:
+ *       - Monitoring
+ *     summary: Record telemetry events
+ *     description: Endpoint for recording general telemetry events.
+ *     parameters:
+ *       - in: header
+ *         name: x-tenant-id
+ *         schema:
+ *           type: string
+ *         description: The tenant ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - event
+ *             properties:
+ *               event:
+ *                 type: string
+ *               labels:
+ *                 type: object
+ *     responses:
+ *       202:
+ *         description: Event accepted
+ *       400:
+ *         description: Event name is required
+ *       500:
+ *         description: Failed to record event
+ */
+router.post('/telemetry/events', (req: Request, res: Response) => {
+  const { event, labels } = req.body;
+  const tenantId =
+    (req.headers['x-tenant-id'] as string) || labels?.tenantId || 'unknown';
+
+  if (!event) {
+    return res.status(400).json({ error: 'Event name is required' });
+  }
+
+  try {
+    // Handle golden path events
+    if (event === 'golden_path_step') {
+      goldenPathStepTotal.inc({
+        step: labels?.step || 'unknown',
+        status: labels?.status || 'success',
+        tenant_id: tenantId,
+      });
+    } else if (event === 'ui_error_boundary') {
+      uiErrorBoundaryCatchTotal.inc({
+        component: labels?.component || 'unknown',
+        tenant_id: tenantId,
+      });
+      // Log full error details for debugging (the metric only tracks counts)
+      console.error('🚨 UI Error Boundary Caught Exception:', {
+        component: labels?.component,
+        message: labels?.message,
+        stack: labels?.stack,
+        tenantId,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    res.status(202).json({ status: 'accepted' });
+  } catch (error: any) {
+    res
+      .status(500)
+      .json({ error: 'Failed to record event', details: error.message });
+  }
+});
+
+/**
+ * @openapi
+ * /monitoring/telemetry/dora:
+ *   post:
+ *     tags:
+ *       - Monitoring
+ *     summary: DORA Metrics Webhook
+ *     description: Allows external CI/CD systems to push DORA metrics.
+ *     parameters:
+ *       - in: header
+ *         name: x-tenant-id
+ *         schema:
+ *           type: string
+ *         description: The tenant ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - metric
+ *             properties:
+ *               metric:
+ *                 type: string
+ *                 enum: [deployment, lead_time, change_failure_rate, mttr]
+ *               value:
+ *                 type: number
+ *               labels:
+ *                 type: object
+ *                 properties:
+ *                   environment:
+ *                     type: string
+ *                   status:
+ *                     type: string
+ *     responses:
+ *       202:
+ *         description: Metric accepted
+ *       400:
+ *         description: Invalid metric or payload
+ *       500:
+ *         description: Failed to record metric
+ */
+router.post('/telemetry/dora', (req: Request, res: Response) => {
+  const { metric, value, labels } = req.body;
+  const tenantId = (req.headers['x-tenant-id'] as string) || 'unknown';
+
+  if (!metric) {
+    return res.status(400).json({ error: 'Metric name is required' });
+  }
+
+  try {
+    switch (metric) {
+      case 'deployment':
+        maestroDeploymentsTotal.inc({
+          environment: labels?.environment || 'production',
+          status: labels?.status || 'success',
+        });
+        break;
+      case 'lead_time':
+        if (typeof value === 'number') {
+          maestroPrLeadTimeHours.observe(value);
+        }
+        break;
+      case 'change_failure_rate':
+        if (typeof value === 'number') {
+          maestroChangeFailureRate.set(value);
+        }
+        break;
+      case 'mttr':
+        if (typeof value === 'number') {
+          maestroMttrHours.observe(value);
+        }
+        break;
+      default:
+        return res.status(400).json({ error: 'Unknown DORA metric' });
+    }
+
+    res.status(202).json({ status: 'accepted' });
+  } catch (error: any) {
+    res
+      .status(500)
+      .json({ error: 'Failed to record DORA metric', details: error.message });
   }
 });
 

@@ -12,30 +12,12 @@ import {
   ListItem,
   ListItemText,
 } from '@mui/material';
-import Grid from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid';
 
-/**
- * Represents a pipeline definition.
- */
 type Pipeline = { id: string; name: string; spec: unknown };
-
-/**
- * Represents the response for policy hints.
- */
 type HintResponse = { hints?: string[] } | { error?: string };
-
-/**
- * Represents a suggestion from the AI Copilot.
- */
 type CopilotSuggestion = Record<string, unknown> | string | null;
 
-/**
- * A page component for managing visual pipelines.
- * Allows creating, editing, and viewing pipelines.
- * Includes features for policy hinting and AI Copilot suggestions.
- *
- * @returns The rendered VisualPipelines component.
- */
 export default function VisualPipelines() {
   const [pipelines, setPipelines] = useState<Pipeline[]>([]);
   const [name, setName] = useState('My Pipeline');

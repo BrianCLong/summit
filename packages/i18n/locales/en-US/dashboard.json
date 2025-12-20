@@ -1,0 +1,48 @@
+{
+  "title": "Dashboard",
+  "overview": "Overview",
+  "stats": {
+    "activeInvestigations": "Active Investigations",
+    "totalEntities": "Total Entities",
+    "relationships": "Relationships",
+    "alerts": "Active Alerts",
+    "users": "Active Users",
+    "recentActivity": "Recent Activity"
+  },
+  "investigations": {
+    "title": "Investigations",
+    "new": "New Investigation",
+    "active": "Active",
+    "completed": "Completed",
+    "archived": "Archived",
+    "status": "Status",
+    "created": "Created",
+    "updated": "Last Updated",
+    "assignedTo": "Assigned To",
+    "priority": "Priority",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low"
+  },
+  "recentActivity": {
+    "title": "Recent Activity",
+    "entityAdded": "Entity added to {investigation}",
+    "relationshipCreated": "Relationship created in {investigation}",
+    "investigationCreated": "Investigation created: {name}",
+    "investigationUpdated": "Investigation updated: {name}",
+    "noActivity": "No recent activity"
+  },
+  "quickActions": {
+    "title": "Quick Actions",
+    "newInvestigation": "New Investigation",
+    "searchEntities": "Search Entities",
+    "openCopilot": "Open AI Copilot",
+    "viewReports": "View Reports"
+  },
+  "widgets": {
+    "threatLevel": "Threat Level",
+    "networkHealth": "Network Health",
+    "systemStatus": "System Status",
+    "performance": "Performance"
+  }
+}

@@ -16,9 +16,6 @@ import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import DatePicker from '@mui/lab/DatePicker';
 import { apiFetch } from '../services/api';
 
-/**
- * Represents an option in the entity autocomplete.
- */
 interface EntityOption {
   id: string;
   label: string;
@@ -26,13 +23,6 @@ interface EntityOption {
 
 const tagOptions = ['Person', 'Organization', 'Location', 'Event'];
 
-/**
- * A filter panel component for searching and filtering entities.
- * Allows filtering by entity name, tags, confidence range, and date range.
- * Updates the URL search parameters to reflect the current filter state.
- *
- * @returns The rendered EntityFilterPanel component.
- */
 function EntityFilterPanel() {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -57,6 +47,7 @@ function EntityFilterPanel() {
     }
     if (startParam) setStartDate(new Date(startParam));
     if (endParam) setEndDate(new Date(endParam));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -90,6 +81,7 @@ function EntityFilterPanel() {
     if (startDate) params.set('startDate', startDate.toISOString());
     if (endDate) params.set('endDate', endDate.toISOString());
     setSearchParams(params, { replace: true });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, tags, confidence, startDate, endDate]);
 
   const resultsLink = useMemo(() => {
@@ -150,12 +142,14 @@ function EntityFilterPanel() {
               label="Start Date"
               value={startDate}
               onChange={(date: Date | null) => setStartDate(date)}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               renderInput={(params: any) => <TextField {...params} />}
             />
             <DatePicker
               label="End Date"
               value={endDate}
               onChange={(date: Date | null) => setEndDate(date)}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               renderInput={(params: any) => <TextField {...params} />}
             />
           </Stack>

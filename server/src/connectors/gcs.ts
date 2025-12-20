@@ -118,22 +118,12 @@ export interface ListOptions {
   versions?: boolean;
 }
 
-/**
- * Connector for interacting with Google Cloud Storage (GCS).
- * Supports upload, download, listing, and deletion of objects with observability.
- */
 export class GCSConnector extends EventEmitter {
   private storage: Storage;
   private bucket: Bucket;
   private config: GCSConnectorConfig;
   private tenantId: string;
 
-  /**
-   * Initializes the GCS connector.
-   *
-   * @param tenantId - The tenant identifier for multi-tenancy.
-   * @param config - Configuration object for GCS connection.
-   */
   constructor(tenantId: string, config: GCSConnectorConfig) {
     super();
     this.tenantId = tenantId;
@@ -158,14 +148,6 @@ export class GCSConnector extends EventEmitter {
     this.emit('connected', { tenantId, bucket: config.bucketName });
   }
 
-  /**
-   * Uploads an object to the GCS bucket.
-   *
-   * @param objectName - The name of the object (file) to upload.
-   * @param data - The data content (Buffer, Readable stream, or string).
-   * @param options - Optional upload configuration (metadata, content type, etc.).
-   * @returns Promise resolving to the uploaded object's metadata.
-   */
   async uploadObject(
     objectName: string,
     data: Buffer | Readable | string,
@@ -274,13 +256,6 @@ export class GCSConnector extends EventEmitter {
     });
   }
 
-  /**
-   * Downloads an object from GCS.
-   *
-   * @param objectName - The name of the object to download.
-   * @param options - Download options (validation, decompression, range).
-   * @returns Promise resolving to the file content as a Buffer.
-   */
   async downloadObject(
     objectName: string,
     options: DownloadOptions = {},
@@ -362,12 +337,55 @@ export class GCSConnector extends EventEmitter {
     });
   }
 
-  /**
-   * Deletes an object from the GCS bucket.
-   *
-   * @param objectName - The name of the object to delete.
-   * @returns Promise resolving when deletion is complete.
-   */
+  async downloadStream(
+    objectName: string,
+    options: DownloadOptions = {},
+  ): Promise<Readable> {
+    return tracer.startActiveSpan('gcs.download_stream', async (span: any) => {
+      span.setAttributes({
+        tenant_id: this.tenantId,
+        bucket: this.config.bucketName,
+        object_name: objectName,
+      });
+
+      try {
+        const file = this.bucket.file(objectName);
+        const [exists] = await file.exists();
+        if (!exists) {
+          throw new Error(`Object ${objectName} not found`);
+        }
+
+        const stream = file.createReadStream({
+          validation: options.validation !== false,
+          decompress: options.decompress !== false,
+          start: options.start,
+          end: options.end,
+        });
+
+        gcsOperations.inc({
+          tenant_id: this.tenantId,
+          operation: 'download_stream',
+          bucket: this.config.bucketName,
+          result: 'success',
+        });
+
+        return stream;
+      } catch (error) {
+        span.recordException(error as Error);
+        span.setStatus({ code: 2, message: (error as Error).message });
+        gcsOperations.inc({
+          tenant_id: this.tenantId,
+          operation: 'download_stream',
+          bucket: this.config.bucketName,
+          result: 'error',
+        });
+        throw error;
+      } finally {
+        span.end();
+      }
+    });
+  }
+
   async deleteObject(objectName: string): Promise<void> {
     return tracer.startActiveSpan('gcs.delete_object', async (span: any) => {
       span.setAttributes({
@@ -411,12 +429,6 @@ export class GCSConnector extends EventEmitter {
     });
   }
 
-  /**
-   * Retrieves metadata for a specific object.
-   *
-   * @param objectName - The name of the object.
-   * @returns Promise resolving to the object's metadata.
-   */
   async getObjectMetadata(objectName: string): Promise<GCSObjectMetadata> {
     return tracer.startActiveSpan('gcs.get_metadata', async (span: any) => {
       span.setAttributes({
@@ -460,12 +472,6 @@ export class GCSConnector extends EventEmitter {
     });
   }
 
-  /**
-   * Lists objects in the bucket based on filter options.
-   *
-   * @param options - Filtering options (prefix, delimiter, maxResults, pageToken).
-   * @returns Promise resolving to a list of objects and an optional nextPageToken.
-   */
   async listObjects(
     options: ListOptions = {},
   ): Promise<{ objects: GCSObjectMetadata[]; nextPageToken?: string }> {
@@ -527,13 +533,6 @@ export class GCSConnector extends EventEmitter {
     });
   }
 
-  /**
-   * Copies an object within the bucket or to another object location.
-   *
-   * @param sourceObject - Source object name.
-   * @param destinationObject - Destination object name.
-   * @returns Promise resolving when copy is complete.
-   */
   async copyObject(
     sourceObject: string,
     destinationObject: string,
@@ -587,14 +586,6 @@ export class GCSConnector extends EventEmitter {
     });
   }
 
-  /**
-   * Generates a signed URL for temporary access to an object.
-   *
-   * @param objectName - The object name.
-   * @param action - The action allowed (read, write, delete).
-   * @param expiresIn - Expiration time in seconds (default: 3600).
-   * @returns The signed URL string.
-   */
   async generateSignedUrl(
     objectName: string,
     action: 'read' | 'write' | 'delete',
@@ -668,19 +659,12 @@ export class GCSConnector extends EventEmitter {
     return this.mapGCSMetadata(metadata);
   }
 
-  /**
-   * Disconnects the connector and cleans up resources.
-   */
   async disconnect(): Promise<void> {
     gcsConnections.dec({ tenant_id: this.tenantId });
     this.emit('disconnected', { tenantId: this.tenantId });
   }
 
-  /**
-   * Performs a health check on the GCS connection.
-   *
-   * @returns Health status object.
-   */
+  // Health check method
   async healthCheck(): Promise<{
     healthy: boolean;
     latency?: number;
@@ -702,12 +686,7 @@ export class GCSConnector extends EventEmitter {
     }
   }
 
-  /**
-   * Deletes multiple objects in a batch operation.
-   *
-   * @param objectNames - Array of object names to delete.
-   * @returns Promise resolving when all deletions are complete.
-   */
+  // Batch operations
   async batchDelete(objectNames: string[]): Promise<void> {
     return tracer.startActiveSpan('gcs.batch_delete', async (span: any) => {
       span.setAttributes({

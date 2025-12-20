@@ -4,12 +4,6 @@ import WargameOptimizer from './WargameOptimizer';
 import SentimentVolatility from './SentimentVolatility';
 import StegoAnalyzer from './StegoAnalyzer';
 
-/**
- * The main dashboard for Strategic Intelligence.
- * Aggregates multiple intelligence components: Threat Correlation, Wargame Optimizer, Sentiment Volatility, and Steganographic Analyzer.
- *
- * @returns The rendered StrategicIntelligenceDashboard component.
- */
 const StrategicIntelligenceDashboard: React.FC = () => {
   return (
     <div className="strategic-intelligence-dashboard p-4">

@@ -2,9 +2,6 @@
 import React, { useState, useCallback } from 'react';
 import Toast, { ToastProps } from './Toast';
 
-/**
- * Interface defining the methods available in the Toast context.
- */
 interface ToastContextType {
   addToast: (toast: Omit<ToastProps, 'id' | 'onDismiss'>) => string;
   removeToast: (id: string) => void;
@@ -17,12 +14,6 @@ interface ToastContextType {
 
 export const ToastContext = React.createContext<ToastContextType | null>(null);
 
-/**
- * Hook to access the Toast context.
- * Must be used within a ToastProvider.
- *
- * @returns The ToastContextType with methods to manage toasts.
- */
 export const useToast = (): ToastContextType => {
   const context = React.useContext(ToastContext);
   if (!context) {
@@ -37,15 +28,6 @@ interface ToastProviderProps {
   position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
 }
 
-/**
- * Provider component for the Toast notification system.
- * Manages the state of active toasts and renders the toast container.
- *
- * @param props - The component props.
- * @param props.children - The child components.
- * @param props.maxToasts - Maximum number of visible toasts (default: 5).
- * @param props.position - Screen position for the toast container (default: 'top-right').
- */
 export const ToastProvider: React.FC<ToastProviderProps> = ({
   children,
   maxToasts = 5,
@@ -133,12 +115,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
   );
 };
 
-/**
- * Convenience hook providing helper methods for common toast types (success, error, warning, info).
- * Wraps `useToast` for simpler usage.
- *
- * @returns An object with `success`, `error`, `warning`, and `info` functions.
- */
+// Convenience hooks for common toast types
 export const useToastHelpers = () => {
   const { addToast } = useToast();
 

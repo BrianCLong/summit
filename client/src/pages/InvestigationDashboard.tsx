@@ -7,9 +7,6 @@ import 'react-resizable/css/styles.css';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
-/**
- * Tile for displaying investigation metadata.
- */
 const InvestigationMetadataTile: React.FC = () => (
   <Paper sx={{ p: 2, height: '100%' }}>
     <Typography variant="h6" gutterBottom>
@@ -21,9 +18,6 @@ const InvestigationMetadataTile: React.FC = () => (
   </Paper>
 );
 
-/**
- * Tile for displaying entity activity over time.
- */
 const EntityActivityTile: React.FC = () => (
   <Paper sx={{ p: 2, height: '100%' }}>
     <Typography variant="h6" gutterBottom>
@@ -35,9 +29,6 @@ const EntityActivityTile: React.FC = () => (
   </Paper>
 );
 
-/**
- * Tile for displaying a list of entities.
- */
 const EntitiesTile: React.FC = () => (
   <Paper sx={{ p: 2, height: '100%' }}>
     <Typography variant="h6" gutterBottom>
@@ -49,9 +40,6 @@ const EntitiesTile: React.FC = () => (
   </Paper>
 );
 
-/**
- * Tile for displaying a relationship density heatmap.
- */
 const RelationshipDensityHeatmapTile: React.FC = () => (
   <Paper sx={{ p: 2, height: '100%' }}>
     <Typography variant="h6" gutterBottom>
@@ -72,12 +60,6 @@ const defaultLayouts: Layouts = {
   ],
 };
 
-/**
- * A dashboard page for investigations, utilizing a responsive grid layout.
- * It organizes various visualization tiles (metadata, timeline, entities, heatmap).
- *
- * @returns The rendered InvestigationDashboard component.
- */
 const InvestigationDashboard: React.FC = () => {
   return (
     <ResponsiveGridLayout

@@ -1,3 +1,4 @@
+ 
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Box,
@@ -13,9 +14,6 @@ import {
 import ChatIcon from '@mui/icons-material/Chat';
 import { io, Socket } from 'socket.io-client';
 
-/**
- * Represents a chat message in the Copilot interface.
- */
 interface Message {
   from: 'user' | 'ai';
   text: string;
@@ -24,9 +22,6 @@ interface Message {
 /**
  * CopilotDrawer provides a lightweight chat interface that
  * streams messages from an AI endpoint via Socket.IO.
- * It allows users to open a drawer and interact with the AI copilot.
- *
- * @returns The rendered CopilotDrawer component.
  */
 const CopilotDrawer: React.FC = () => {
   const [open, setOpen] = useState(false);

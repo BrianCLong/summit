@@ -80,16 +80,9 @@ const KMSConfigSchema = z.object({
     .optional(),
 });
 
-/**
- * Service for managing data residency configurations and enforcing encryption requirements.
- * Supports multiple KMS providers and customer-managed keys.
- */
 export class DataResidencyService {
   private kmsProviders: Map<string, any> = new Map();
 
-  /**
-   * Initializes the DataResidencyService and its KMS providers based on environment configuration.
-   */
   constructor() {
     this.initializeKMSProviders();
   }
@@ -128,13 +121,6 @@ export class DataResidencyService {
     });
   }
 
-  /**
-   * Configures data residency settings for a specific tenant.
-   *
-   * @param tenantId - The tenant ID.
-   * @param config - The residency configuration.
-   * @returns The configuration ID.
-   */
   async configureDataResidency(
     tenantId: string,
     config: ResidencyConfig,
@@ -208,13 +194,6 @@ export class DataResidencyService {
     }
   }
 
-  /**
-   * Configures Key Management Service (KMS) for a tenant.
-   *
-   * @param tenantId - The tenant ID.
-   * @param config - The KMS configuration details.
-   * @returns The KMS configuration ID.
-   */
   async configureKMS(tenantId: string, config: KMSConfig): Promise<string> {
     const span = otelService.createSpan('data-residency.configure-kms');
 
@@ -287,14 +266,6 @@ export class DataResidencyService {
     }
   }
 
-  /**
-   * Encrypts data according to tenant residency and KMS configuration.
-   *
-   * @param tenantId - The tenant ID.
-   * @param data - The raw data string to encrypt.
-   * @param dataClassification - Classification level of the data.
-   * @returns An object containing the encrypted data, metadata, and compliance status.
-   */
   async encryptData(
     tenantId: string,
     data: string,
@@ -387,14 +358,6 @@ export class DataResidencyService {
     }
   }
 
-  /**
-   * Decrypts data using the tenant's configured KMS.
-   *
-   * @param tenantId - The tenant ID.
-   * @param encryptedData - The encrypted data string.
-   * @param encryptionMetadata - Metadata required for decryption.
-   * @returns The decrypted data string.
-   */
   async decryptData(
     tenantId: string,
     encryptedData: string,
@@ -464,15 +427,6 @@ export class DataResidencyService {
     }
   }
 
-  /**
-   * Checks if a data transfer between regions is compliant with residency policies.
-   *
-   * @param tenantId - The tenant ID.
-   * @param sourceRegion - The source region.
-   * @param targetRegion - The destination region.
-   * @param dataClassification - Classification of the data being transferred.
-   * @returns An object describing compliance status and required controls.
-   */
   async checkDataTransferCompliance(
     tenantId: string,
     sourceRegion: string,
@@ -549,12 +503,6 @@ export class DataResidencyService {
     }
   }
 
-  /**
-   * Generates a report on data residency compliance for a tenant.
-   *
-   * @param tenantId - The tenant ID.
-   * @returns A comprehensive residency report.
-   */
   async generateResidencyReport(tenantId: string): Promise<any> {
     const span = otelService.createSpan('data-residency.generate-report');
 

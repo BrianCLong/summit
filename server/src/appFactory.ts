@@ -4,23 +4,12 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import config from './config/index.js';
 import logger from './utils/logger.js';
+import { auditLogDashboard } from './logging/structuredLogger.js';
 
-/**
- * Options for creating the Express application.
- */
 interface AppOptions {
-  /** If true, creates a lightweight app without additional middleware (e.g., for testing). */
   lightweight?: boolean;
 }
 
-/**
- * Creates and configures an Express application.
- * Sets up basic security headers (Helmet), CORS, JSON/URL-encoded parsing, and request logging.
- * Adds a standard health check endpoint at `/health`.
- *
- * @param options - Configuration options for the app.
- * @returns The configured Express application instance.
- */
 function createApp({ lightweight = false }: AppOptions = {}) {
   const app = express();
   app.disable('x-powered-by');
@@ -53,6 +42,10 @@ function createApp({ lightweight = false }: AppOptions = {}) {
       environment: config.env,
       version: '1.0.0',
     });
+  });
+
+  app.get('/observability/logs/dashboard', (req, res) => {
+    res.status(200).json(auditLogDashboard.getDashboardSnapshot());
   });
 
   if (lightweight) return app;

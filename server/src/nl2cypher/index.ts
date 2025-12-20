@@ -7,14 +7,6 @@ export interface TranslationResult {
   estimatedCost: number;
 }
 
-/**
- * Translates a natural language query into a Cypher query string.
- * Currently supports basic "find [Label]" and "count [Label]" patterns with optional property filters.
- *
- * @param prompt - The natural language query string.
- * @returns A TranslationResult containing the Cypher query, AST, rationale, and estimated cost.
- * @throws Error if the query pattern is unsupported.
- */
 export function nl2cypher(prompt: string): TranslationResult {
   const text = prompt.trim();
   const find =

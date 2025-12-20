@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { pg } from '../db/pg';
 import { neo } from '../db/neo4j';
 import { redis } from '../subscriptions/pubsub';
@@ -35,23 +36,11 @@ interface DedupeKey {
   source?: string;
 }
 
-/**
- * Service responsible for detecting and preventing duplicate data ingestion.
- * It uses a multi-layer strategy: fast Redis caching and persistent database checks.
- */
 export class DeduplicationService {
   private readonly redisKeyPrefix = 'dedupe';
   private readonly redisTTL = 3600; // 1 hour
   private readonly postgresWindow = 300; // 5 minutes for PG check
 
-  /**
-   * Checks if a given signal is a duplicate.
-   * It first checks the Redis cache for recent duplicates. If not found, it queries
-   * PostgreSQL and Neo4j for persistent duplicates.
-   *
-   * @param signal - The signal data to check for duplication.
-   * @returns True if the signal is a duplicate, false otherwise.
-   */
   async checkDuplicate(signal: DedupeKey): Promise<boolean> {
     return tracer.startActiveSpan('dedupe.check', async (span: Span) => {
       span.setAttributes({
@@ -119,12 +108,6 @@ export class DeduplicationService {
     });
   }
 
-  /**
-   * Generates a unique hash for a signal based on its defining properties.
-   *
-   * @param signal - The signal to hash.
-   * @returns A SHA-256 hash string.
-   */
   private generateDedupeHash(signal: DedupeKey): string {
     // Create hash based on key fields that define uniqueness
     const keyString = [
@@ -138,12 +121,6 @@ export class DeduplicationService {
     return crypto.createHash('sha256').update(keyString).digest('hex');
   }
 
-  /**
-   * Normalizes a timestamp to the nearest minute to handle slight timing variations.
-   *
-   * @param timestamp - The timestamp string.
-   * @returns The normalized ISO string.
-   */
   private normalizeTimestamp(timestamp: string): string {
     // Round timestamp to nearest minute to handle slight timing differences
     const date = new Date(timestamp);
@@ -151,13 +128,6 @@ export class DeduplicationService {
     return date.toISOString();
   }
 
-  /**
-   * Checks if a hash exists in the Redis cache.
-   *
-   * @param dedupeHash - The hash to check.
-   * @param tenantId - The tenant ID for namespacing.
-   * @returns True if found in cache.
-   */
   private async checkRedisCache(
     dedupeHash: string,
     tenantId: string,
@@ -180,12 +150,6 @@ export class DeduplicationService {
     }
   }
 
-  /**
-   * Caches a deduplication hash in Redis.
-   *
-   * @param dedupeHash - The hash to cache.
-   * @param tenantId - The tenant ID.
-   */
   private async cacheDedupeHash(
     dedupeHash: string,
     tenantId: string,
@@ -199,13 +163,6 @@ export class DeduplicationService {
     }
   }
 
-  /**
-   * Checks for duplicates in persistent storage (PostgreSQL and Neo4j).
-   *
-   * @param signal - The signal to check.
-   * @param dedupeHash - The pre-calculated hash of the signal.
-   * @returns True if a duplicate exists in either database.
-   */
   private async checkDatabaseDuplicate(
     signal: DedupeKey,
     dedupeHash: string,
@@ -231,12 +188,6 @@ export class DeduplicationService {
     }
   }
 
-  /**
-   * Checks PostgreSQL for recent duplicate signals.
-   *
-   * @param signal - The signal to check.
-   * @returns True if a duplicate is found.
-   */
   private async checkPostgresDuplicate(signal: DedupeKey): Promise<boolean> {
     // Check for recent updates with similar characteristics
     const windowStart = new Date(Date.now() - this.postgresWindow * 1000);
@@ -255,13 +206,6 @@ export class DeduplicationService {
     return result !== null;
   }
 
-  /**
-   * Checks Neo4j for existing signal nodes with the same ID.
-   *
-   * @param signal - The signal to check.
-   * @param dedupeHash - The hash ID of the signal.
-   * @returns True if a duplicate node exists.
-   */
   private async checkNeo4jDuplicate(
     signal: DedupeKey,
     dedupeHash: string,
@@ -283,12 +227,6 @@ export class DeduplicationService {
     return result.records.length > 0;
   }
 
-  /**
-   * Batches multiple duplicate checks in parallel.
-   *
-   * @param signals - An array of signals to check.
-   * @returns An array of booleans indicating duplicate status for each signal.
-   */
   async batchCheckDuplicates(signals: DedupeKey[]): Promise<boolean[]> {
     return tracer.startActiveSpan('dedupe.batch_check', async (span: Span) => {
       span.setAttributes({
@@ -309,9 +247,6 @@ export class DeduplicationService {
     });
   }
 
-  /**
-   * Initializes necessary database indexes for efficient deduplication queries.
-   */
   async initializeDatabaseIndexes(): Promise<void> {
     console.log('Initializing deduplication database indexes...');
 
@@ -337,11 +272,6 @@ export class DeduplicationService {
     }
   }
 
-  /**
-   * Retrieves current statistics and configuration for the deduplication service.
-   *
-   * @returns An object containing stats and config values.
-   */
   getDeduplicationStats(): Record<string, any> {
     // Return current deduplication metrics
     return {

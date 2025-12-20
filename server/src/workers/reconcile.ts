@@ -51,8 +51,7 @@ interface ReconcileWorkerOptions {
 }
 
 /**
- * Manages the reconciliation of estimated vs. actual token usage.
- * Uses a queue (currently mocked) to process reconciliation jobs asynchronously.
+ * Reconciliation Queue Manager
  */
 export class ReconcileManager {
   // private queue: Queue<ReconcileJobData>;
@@ -69,10 +68,6 @@ export class ReconcileManager {
     lastProcessed: new Date(),
   };
 
-  /**
-   * Initializes the ReconcileManager.
-   * @param options - Configuration options for the worker.
-   */
   constructor(private options: ReconcileWorkerOptions = {}) {
     const redisConnection = {
       host: process.env.REDIS_HOST || 'localhost',
@@ -185,10 +180,7 @@ export class ReconcileManager {
   // }
 
   /**
-   * Calculates job priority based on cost and recency.
-   *
-   * @param data - The reconciliation job data.
-   * @returns The calculated priority score.
+   * Calculate job priority (higher number = higher priority)
    */
   private calculatePriority(data: ReconcileJobData): number {
     let priority = 0;
@@ -206,10 +198,7 @@ export class ReconcileManager {
   }
 
   /**
-   * Calculates a processing delay for the job.
-   *
-   * @param data - The reconciliation job data.
-   * @returns The delay in milliseconds.
+   * Calculate job delay based on data
    */
   private calculateDelay(data: ReconcileJobData): number {
     // Immediate processing for high-value operations
@@ -309,14 +298,7 @@ export class ReconcileManager {
   // }
 
   /**
-   * Fetches the actual usage data for a given provider and model.
-   * Currently simulates this behavior using enhanced estimation as a fallback.
-   *
-   * @param provider - The AI provider name.
-   * @param model - The model name.
-   * @param correlationId - The correlation ID for the request.
-   * @param originalPayload - The original request payload.
-   * @returns The actual usage metrics or null if fetch failed.
+   * Fetch actual usage from provider APIs
    */
   private async fetchActualUsage(
     provider: string,
@@ -360,11 +342,7 @@ export class ReconcileManager {
   }
 
   /**
-   * Fetches OpenAI usage stats (mocked via estimation).
-   *
-   * @param correlationId - The correlation ID.
-   * @param originalPayload - The original payload.
-   * @returns Usage metrics.
+   * OpenAI usage reconciliation
    */
   private async fetchOpenAIUsage(
     correlationId: string,
@@ -397,11 +375,7 @@ export class ReconcileManager {
   }
 
   /**
-   * Fetches Anthropic usage stats (mocked via estimation).
-   *
-   * @param correlationId - The correlation ID.
-   * @param originalPayload - The original payload.
-   * @returns Usage metrics.
+   * Anthropic usage reconciliation
    */
   private async fetchAnthropicUsage(
     correlationId: string,
@@ -433,11 +407,7 @@ export class ReconcileManager {
   }
 
   /**
-   * Fetches Gemini usage stats (mocked via estimation).
-   *
-   * @param correlationId - The correlation ID.
-   * @param originalPayload - The original payload.
-   * @returns Usage metrics.
+   * Google Gemini usage reconciliation
    */
   private async fetchGeminiUsage(
     correlationId: string,
@@ -469,12 +439,7 @@ export class ReconcileManager {
   }
 
   /**
-   * Enhances the estimation using more detailed logic if actual usage is unavailable.
-   *
-   * @param provider - The provider name.
-   * @param model - The model name.
-   * @param payload - The request payload.
-   * @returns Enhanced usage estimates.
+   * Enhanced estimation for reconciliation
    */
   private async enhanceEstimation(
     provider: string,
@@ -558,10 +523,7 @@ export class ReconcileManager {
 let globalReconcileManager: ReconcileManager | null = null;
 
 /**
- * Gets or creates the global ReconcileManager instance.
- *
- * @param options - Optional configuration.
- * @returns The ReconcileManager instance.
+ * Get global reconciliation manager
  */
 export function getReconcileManager(
   options?: ReconcileWorkerOptions,
@@ -587,28 +549,24 @@ export function getReconcileManager(
 // }
 
 /**
- * Starts the reconciliation worker.
- * Sets up periodic cleanup and logging.
- *
- * @param options - Optional configuration.
- * @returns The started ReconcileManager.
+ * Start reconciliation worker (called from server startup)
  */
-export function startReconcileWorker(options?: ReconcileWorkerOptions): ReconcileManager {
-  const manager = getReconcileManager(options);
+// export function startReconcileWorker(options?: ReconcileWorkerOptions): ReconcileManager {
+//   const manager = getReconcileManager(options);
 
-  // Setup periodic cleanup
-  setInterval(async () => {
-    try {
-      // await manager.cleanOldJobs();
-    } catch (error) {
-      logger.error('Periodic reconciliation cleanup failed', { error });
-    }
-  }, 6 * 60 * 60 * 1000); // Every 6 hours
+//   // Setup periodic cleanup
+//   setInterval(async () => {
+//     try {
+//       await manager.cleanOldJobs();
+//     } catch (error) {
+//       logger.error('Periodic reconciliation cleanup failed', { error });
+//     }
+//   }, 6 * 60 * 60 * 1000); // Every 6 hours
 
-  logger.info('Reconciliation worker started', {
-    concurrency: options?.concurrency || 5,
-    maxRetries: options?.maxRetries || 5
-  });
+//   logger.info('Reconciliation worker started', {
+//     concurrency: options?.concurrency || 5,
+//     maxRetries: options?.maxRetries || 5
+//   });
 
-  return manager;
-}
+//   return manager;
+// }

@@ -25,11 +25,6 @@ function readRetentionDays(): { riskDays: number; evidenceDays: number } {
   }
 }
 
-/**
- * Executes a single run of the data retention cleanup process.
- * Reads retention policies (from file or env) and deletes old risk signals and evidence bundles
- * that have exceeded their retention period.
- */
 export async function runRetentionOnce() {
   const { riskDays, evidenceDays } = readRetentionDays();
   await pg.write(
@@ -43,12 +38,6 @@ export async function runRetentionOnce() {
 }
 
 let timer: any;
-
-/**
- * Starts the retention worker.
- * Runs periodically based on `RETENTION_WORKER_INTERVAL_MS` (default 24 hours).
- * Checks `ENABLE_RETENTION_WORKER` env var to decide whether to start.
- */
 export function startRetentionWorker() {
   if (process.env.ENABLE_RETENTION_WORKER !== 'true') return;
   const intervalMs = Number(
@@ -60,9 +49,6 @@ export function startRetentionWorker() {
   tick();
 }
 
-/**
- * Stops the retention worker if it is running.
- */
 export function stopRetentionWorker() {
   if (timer) clearInterval(timer);
 }

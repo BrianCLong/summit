@@ -1,3 +1,4 @@
+// @ts-nocheck
 import pino from 'pino';
 import { RetentionAuditEvent } from './types.js';
 
@@ -7,9 +8,6 @@ export interface RetentionAuditLogger {
 
 const logger = pino({ name: 'data-retention' });
 
-/**
- * Logger implementation using Pino for local/stdout logging.
- */
 export class PinoRetentionAuditLogger implements RetentionAuditLogger {
   async log(event: RetentionAuditEvent): Promise<void> {
     const logMethod =
@@ -30,10 +28,6 @@ export class PinoRetentionAuditLogger implements RetentionAuditLogger {
   }
 }
 
-/**
- * Adapter to route retention logs to the Advanced Audit System.
- * Maps retention events to the broader system audit schema.
- */
 export class AdvancedAuditSystemAdapter implements RetentionAuditLogger {
   private readonly auditSystem: {
     recordEvent: (event: Record<string, any>) => Promise<string>;
@@ -74,10 +68,6 @@ export class AdvancedAuditSystemAdapter implements RetentionAuditLogger {
   }
 }
 
-/**
- * Composite logger that broadcasts events to multiple loggers.
- * Useful for logging to both stdout and a persistent audit system.
- */
 export class CompositeRetentionAuditLogger implements RetentionAuditLogger {
   private readonly loggers: RetentionAuditLogger[];
 

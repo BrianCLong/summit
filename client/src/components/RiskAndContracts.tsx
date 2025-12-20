@@ -1,12 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
 import $ from 'jquery';
-
-/**
- * A dashboard component displaying a risk heatmap and current service level contracts.
- * Fetches data from multiple API endpoints concurrently.
- *
- * @returns The rendered RiskAndContracts component.
- */
 export default function RiskAndContracts() {
   const [h, setH] = useState<string>('');
   const [c, setC] = useState<any>(null);

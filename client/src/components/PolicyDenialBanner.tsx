@@ -23,9 +23,6 @@ import {
 import { useMutation, useQuery } from '@apollo/client';
 import { SUBMIT_POLICY_APPEAL, GET_APPEAL_STATUS } from '../graphql/appeals';
 
-/**
- * Represents the structured appeal path for a denied request.
- */
 interface AppealPath {
   available: boolean;
   appealId?: string;
@@ -37,9 +34,6 @@ interface AppealPath {
   statusUrl?: string;
 }
 
-/**
- * Represents the policy decision details.
- */
 interface PolicyDecision {
   allowed: boolean;
   policy: string;
@@ -54,9 +48,6 @@ interface PolicyDecision {
   };
 }
 
-/**
- * Props for the PolicyDenialBanner component.
- */
 interface PolicyDenialBannerProps {
   decision: PolicyDecision;
   onRetry?: () => void;
@@ -64,13 +55,6 @@ interface PolicyDenialBannerProps {
   className?: string;
 }
 
-/**
- * A banner component that informs the user of a policy denial.
- * It provides details about the denial reason, potential alternatives, and an integrated appeal process.
- *
- * @param props - The component props.
- * @returns The rendered PolicyDenialBanner component.
- */
 const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
   decision,
   onRetry,

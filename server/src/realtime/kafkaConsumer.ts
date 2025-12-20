@@ -13,11 +13,6 @@ const KAFKA_GROUP_ID = 'wargame-dashboard-consumer-group';
 let consumer: Consumer | null = null;
 const wargameResolver = new WargameResolver(); // Instantiate the resolver
 
-/**
- * Starts the Kafka consumer to listen for crisis scenario triggers.
- * Upon receiving a message, it parses the payload and triggers a war-game simulation
- * using the WargameResolver.
- */
 export const startKafkaConsumer = async () => {
   if (process.env.NODE_ENV === 'production' && !KAFKA_BROKERS[0]) {
     console.warn(
@@ -95,9 +90,6 @@ export const startKafkaConsumer = async () => {
   }
 };
 
-/**
- * Stops the Kafka consumer and disconnects from the broker.
- */
 export const stopKafkaConsumer = async () => {
   if (consumer) {
     console.log('Kafka Consumer: Disconnecting...');

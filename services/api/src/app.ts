@@ -24,6 +24,7 @@ import { tenantMiddleware } from './middleware/tenant.js';
 import { auditMiddleware } from './middleware/audit.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
 import { logger } from './utils/logger.js';
+import { metricsContentType, renderMetrics } from './observability/rateLimitMetrics.js';
 import { ingestRouter } from './routes/ingest.js';
 import { copilotRouter } from './routes/copilot.js';
 import { adminRouter } from './routes/admin.js';
@@ -31,6 +32,12 @@ import { casesRouter } from './routes/cases.js';
 import { evidenceRouter } from './routes/evidence.js';
 import { analyticsExtRouter } from './routes/analytics_ext.js';
 import { triageRouter } from './routes/triage.js';
+import { actionsPreflightRouter } from './routes/actions/preflight.js';
+import { swaggerRouter } from './docs/swagger.js';
+import { graphqlDocsRouter } from './docs/graphql-docs.js';
+import { validateRequest } from './middleware/openapi-validator.js';
+import { versionMiddleware } from './versioning/version-middleware.js';
+import { versioningRouter } from './routes/versioning.js';
 
 export async function createApp() {
   const app = express();
@@ -60,6 +67,14 @@ export async function createApp() {
   app.use(compression());
   app.use(json({ limit: '10mb' }));
 
+  // API Version detection and validation
+  app.use(versionMiddleware);
+
+  // OpenAPI request validation (optional - only for /api routes)
+  if (process.env.ENABLE_API_VALIDATION === 'true') {
+    app.use(validateRequest);
+  }
+
   // Health check endpoint
   app.get('/health', (req, res) => {
     res.json({
@@ -70,29 +85,40 @@ export async function createApp() {
   });
 
   // Metrics endpoint for monitoring
-  app.get('/metrics', (req, res) => {
-    // TODO: Implement Prometheus metrics
-    res.json({
-      uptime: process.uptime(),
-      memory: process.memoryUsage(),
-      timestamp: new Date().toISOString(),
-    });
+  app.get('/metrics', async (_req, res) => {
+    try {
+      const metrics = await renderMetrics();
+      res.setHeader('Content-Type', metricsContentType);
+      res.send(metrics);
+    } catch (error) {
+      logger.error({ error }, 'Failed to render metrics');
+      res.status(503).json({ error: 'metrics_unavailable' });
+    }
   });
 
+  // API Documentation (Swagger/OpenAPI)
+  app.use('/api/docs', swaggerRouter);
+  app.use('/api/docs', graphqlDocsRouter);
+
+  // API Versioning endpoints
+  app.use('/api/versioning', versioningRouter);
+
   // Ingest wizard API (scaffold)
-  app.use('/ingest', ingestRouter);
+  app.use('/api/ingest', ingestRouter);
   // Copilot utility
-  app.use('/copilot', copilotRouter);
+  app.use('/api/copilot', copilotRouter);
   // Admin console
-  app.use('/admin', adminRouter);
+  app.use('/api/admin', adminRouter);
   // Cases
-  app.use('/cases', casesRouter);
+  app.use('/api/cases', casesRouter);
   // Evidence
-  app.use('/evidence', evidenceRouter);
+  app.use('/api/evidence', evidenceRouter);
   // Analytics expansion
-  app.use('/analytics', analyticsExtRouter);
+  app.use('/api/analytics', analyticsExtRouter);
   // Triage queue
-  app.use('/triage', triageRouter);
+  app.use('/api/triage', triageRouter);
+  // Actions preflight (policy simulation)
+  app.use('/api/actions', actionsPreflightRouter);
 
   // Create Apollo Server
   const server = new ApolloServer({
@@ -143,18 +169,23 @@ export async function createApp() {
   }
 
   // Apply GraphQL middleware with authentication and tenant isolation
-  app.post('/graphql', persistedGuard);
-  app.use(
-    '/graphql',
-    graphGuard,
-    rateLimitMiddleware,
-    authMiddleware,
-    tenantMiddleware,
-    auditMiddleware,
-    expressMiddleware(server, {
-      context: createContext,
-    }),
-  );
+  // Support both versioned and unversioned endpoints
+  const graphqlPaths = ['/graphql', '/v1/graphql', '/v2/graphql'];
+
+  for (const path of graphqlPaths) {
+    app.post(path, persistedGuard);
+    app.use(
+      path,
+      graphGuard,
+      rateLimitMiddleware,
+      authMiddleware,
+      tenantMiddleware,
+      auditMiddleware,
+      expressMiddleware(server, {
+        context: createContext,
+      }),
+    );
+  }
 
   return app;
 }

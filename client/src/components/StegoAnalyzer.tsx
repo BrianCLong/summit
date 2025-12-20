@@ -14,14 +14,8 @@ const ANALYZE_STEGO_MUTATION = gql`
   }
 `;
 
-/**
- * Represents a risk matrix as a 2D array of numbers.
- */
 type RiskMatrix = number[][];
 
-/**
- * Represents the result of a steganographic analysis.
- */
 type AnalyzeStegoResult = {
   risk_matrix?: RiskMatrix | null;
   recommendations?: string[] | null;
@@ -47,14 +41,6 @@ type MatrixCell = {
   col: number;
 };
 
-/**
- * A D3.js visualization for the risk matrix.
- * Displays the matrix as a heatmap.
- *
- * @param props - The component props.
- * @param props.matrix - The risk matrix data to visualize.
- * @returns The rendered MatrixGraph component.
- */
 const MatrixGraph: React.FC<{ matrix: RiskMatrix }> = ({ matrix }) => {
   const ref = useRef<HTMLDivElement | null>(null);
 
@@ -130,12 +116,6 @@ const MatrixGraph: React.FC<{ matrix: RiskMatrix }> = ({ matrix }) => {
   return <div ref={ref} className="relative" />;
 };
 
-/**
- * A component for analyzing media for steganography.
- * Allows users to input media data and parameters, execute a GraphQL mutation, and visualize the risk matrix.
- *
- * @returns The rendered StegoAnalyzer component.
- */
 const StegoAnalyzer: React.FC = () => {
   const [mediaData, setMediaData] = useState('');
   const [stegoParams, setStegoParams] = useState('');

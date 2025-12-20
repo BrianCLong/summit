@@ -132,22 +132,12 @@ export interface ListOptions {
   includeMetadata?: boolean;
 }
 
-/**
- * Connector for interacting with Azure Blob Storage.
- * Supports upload, download, listing, and management of blobs with observability.
- */
 export class AzureConnector extends EventEmitter {
   private blobServiceClient: any;
   private containerClient: ContainerClient;
   private config: AzureConnectorConfig;
   private tenantId: string;
 
-  /**
-   * Initializes the Azure connector.
-   *
-   * @param tenantId - The tenant identifier.
-   * @param config - Configuration object for Azure connection.
-   */
   constructor(tenantId: string, config: AzureConnectorConfig) {
     super();
     this.tenantId = tenantId;
@@ -196,14 +186,6 @@ export class AzureConnector extends EventEmitter {
     }
   }
 
-  /**
-   * Uploads a blob to the Azure container.
-   *
-   * @param blobName - The name of the blob to upload.
-   * @param data - The data content (Buffer, Readable stream, or string).
-   * @param options - Optional upload configuration.
-   * @returns Promise resolving to the uploaded blob's metadata.
-   */
   async uploadBlob(
     blobName: string,
     data: Buffer | Readable | string,
@@ -309,13 +291,6 @@ export class AzureConnector extends EventEmitter {
     });
   }
 
-  /**
-   * Downloads a blob from the Azure container.
-   *
-   * @param blobName - The name of the blob to download.
-   * @param options - Download options (range, retry settings).
-   * @returns Promise resolving to the blob content as a Buffer.
-   */
   async downloadBlob(
     blobName: string,
     options: DownloadOptions = {},
@@ -411,13 +386,6 @@ export class AzureConnector extends EventEmitter {
     });
   }
 
-  /**
-   * Deletes a blob from the Azure container.
-   *
-   * @param blobName - The name of the blob to delete.
-   * @param options - Deletion options (snapshot handling).
-   * @returns Promise resolving when deletion is complete.
-   */
   async deleteBlob(
     blobName: string,
     options: { deleteSnapshots?: 'include' | 'only' } = {},
@@ -469,12 +437,6 @@ export class AzureConnector extends EventEmitter {
     });
   }
 
-  /**
-   * Retrieves metadata for a specific blob.
-   *
-   * @param blobName - The name of the blob.
-   * @returns Promise resolving to the blob's metadata.
-   */
   async getBlobMetadata(blobName: string): Promise<AzureBlobMetadata> {
     return tracer.startActiveSpan('azure.get_metadata', async (span: any) => {
       span.setAttributes?.({
@@ -519,12 +481,6 @@ export class AzureConnector extends EventEmitter {
     });
   }
 
-  /**
-   * Lists blobs in the container.
-   *
-   * @param options - List options (prefix, maxResults, continuationToken).
-   * @returns Promise resolving to a list of blobs and an optional continuation token.
-   */
   async listBlobs(
     options: ListOptions = {},
   ): Promise<{ blobs: AzureBlobMetadata[]; continuationToken?: string }> {
@@ -598,14 +554,6 @@ export class AzureConnector extends EventEmitter {
     });
   }
 
-  /**
-   * Copies a blob from a source URL or another blob.
-   *
-   * @param sourceBlob - The name of the source blob.
-   * @param destinationBlob - The name of the destination blob.
-   * @param sourceUrl - Optional direct URL to the source if cross-account copy.
-   * @returns Promise resolving when the copy operation completes.
-   */
   async copyBlob(
     sourceBlob: string,
     destinationBlob: string,
@@ -672,14 +620,6 @@ export class AzureConnector extends EventEmitter {
     });
   }
 
-  /**
-   * Generates a Shared Access Signature (SAS) URL for a blob.
-   *
-   * @param blobName - The name of the blob.
-   * @param permissions - The permissions granted (e.g., 'r' for read).
-   * @param expiresIn - Expiration time in seconds.
-   * @returns The SAS URL.
-   */
   async generateSasUrl(
     blobName: string,
     permissions: string = 'r',
@@ -749,13 +689,6 @@ export class AzureConnector extends EventEmitter {
     );
   }
 
-  /**
-   * Sets the access tier of a blob.
-   *
-   * @param blobName - The name of the blob.
-   * @param tier - The new access tier ('Hot', 'Cool', 'Archive').
-   * @returns Promise resolving when the tier is updated.
-   */
   async setAccessTier(
     blobName: string,
     tier: 'Hot' | 'Cool' | 'Archive',
@@ -845,19 +778,12 @@ export class AzureConnector extends EventEmitter {
     };
   }
 
-  /**
-   * Disconnects the connector.
-   */
   async disconnect(): Promise<void> {
     azureConnections.dec({ tenant_id: this.tenantId });
     this.emit('disconnected', { tenantId: this.tenantId });
   }
 
-  /**
-   * Checks the health of the Azure Blob Storage connection.
-   *
-   * @returns Health status object.
-   */
+  // Health check method
   async healthCheck(): Promise<{
     healthy: boolean;
     latency?: number;
@@ -879,12 +805,7 @@ export class AzureConnector extends EventEmitter {
     }
   }
 
-  /**
-   * Deletes multiple blobs in a batch operation.
-   *
-   * @param blobNames - Array of blob names to delete.
-   * @returns Promise resolving when deletion is complete.
-   */
+  // Batch operations
   async batchDelete(blobNames: string[]): Promise<void> {
     return tracer.startActiveSpan('azure.batch_delete', async (span: any) => {
       span.setAttributes?.({

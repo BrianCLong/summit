@@ -12,7 +12,7 @@ import {
   Typography,
   Button,
 } from '@mui/material';
-import Grid from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid';
 import {
   CheckCircle,
   Error as ErrorIcon,
@@ -22,9 +22,6 @@ import {
   Build,
 } from '@mui/icons-material';
 
-/**
- * Represents release information.
- */
 interface ReleaseInfo {
   version: string;
   buildDate: string;
@@ -34,18 +31,12 @@ interface ReleaseInfo {
   ready: boolean;
 }
 
-/**
- * Represents a validation result for a deployment component.
- */
 interface ValidationResult {
   component: string;
   status: 'pass' | 'fail' | 'warning';
   message: string;
 }
 
-/**
- * Represents the status of a deployment.
- */
 interface DeploymentStatus {
   validated: boolean;
   sbomGenerated: boolean;
@@ -54,12 +45,6 @@ interface DeploymentStatus {
   validations: ValidationResult[];
 }
 
-/**
- * A dashboard component for tracking the status of a GA release.
- * Displays release information, deployment validation status, and allows SBOM generation.
- *
- * @returns The rendered GAReleaseStatus component.
- */
 const GAReleaseStatus: React.FC = () => {
   const [releaseInfo, setReleaseInfo] = useState<ReleaseInfo | null>(null);
   const [deploymentStatus, setDeploymentStatus] =
@@ -107,6 +92,7 @@ const GAReleaseStatus: React.FC = () => {
         // Refresh status after SBOM generation
         fetchReleaseData();
       }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err: unknown) {
       setError('Failed to generate SBOM');
     }

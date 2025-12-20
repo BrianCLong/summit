@@ -50,22 +50,9 @@ const FIELD_METADATA: Record<string, FieldMetadata> = {
   tenantId: { type: 'string' },
 };
 
-/**
- * Service responsible for redacting sensitive information from data objects.
- * Supports PII, financial, sensitive data redaction and basic k-anonymity.
- */
 export class RedactionService {
   private readonly defaultMask = '[REDACTED]';
 
-  /**
-   * Redacts sensitive fields from an object based on the provided policy.
-   *
-   * @param obj - The object to redact.
-   * @param policy - The redaction policy defining rules and constraints.
-   * @param tenantId - The tenant ID for metrics.
-   * @param context - Optional context for logging/tracing.
-   * @returns The redacted object.
-   */
   async redactObject(
     obj: any,
     policy: RedactionPolicy,
@@ -309,14 +296,6 @@ export class RedactionService {
     return value;
   }
 
-  /**
-   * Redacts sensitive data from a GraphQL response object.
-   *
-   * @param response - The GraphQL response.
-   * @param policy - The redaction policy.
-   * @param tenantId - The tenant ID.
-   * @returns The redacted response.
-   */
   async redactGraphQLResponse(
     response: any,
     policy: RedactionPolicy,
@@ -332,13 +311,6 @@ export class RedactionService {
     };
   }
 
-  /**
-   * Creates a new redaction policy configuration.
-   *
-   * @param rules - Array of rules to apply ('pii', 'financial', 'sensitive', 'k_anon').
-   * @param options - Optional settings like kAnonThreshold, allowedFields, redactionMask.
-   * @returns A configured RedactionPolicy object.
-   */
   createRedactionPolicy(
     rules: RedactionRule[],
     options?: {
@@ -355,11 +327,6 @@ export class RedactionService {
     };
   }
 
-  /**
-   * Retrieves statistics about the redaction service.
-   *
-   * @returns Stats object.
-   */
   getRedactionStats(): Record<string, any> {
     return {
       supportedRules: ['pii', 'financial', 'sensitive', 'k_anon'],

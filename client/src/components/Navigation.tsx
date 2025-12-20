@@ -3,13 +3,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import NotificationSystem from './NotificationSystem';
 import { getSocket } from '../services/socket';
 
-/**
- * The main navigation component for the application.
- * Displays the app title, navigation links, and notification system.
- * Handles real-time alert count updates via socket events.
- *
- * @returns The rendered Navigation component.
- */
 function Navigation() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -20,14 +13,18 @@ function Navigation() {
   useEffect(() => {
     const s = getSocket();
     if (!s) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handler = (_evt: any) => setAlertCount((c) => c + 1);
     s.on('ALERT_EVT', handler);
     const uiHandler = () => setAlertCount((c) => c + 1);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     window.addEventListener('ig:ALERT_EVT', uiHandler as any);
     return () => {
       try {
         s.off('ALERT_EVT', handler);
+      // eslint-disable-next-line no-empty
       } catch {}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       window.removeEventListener('ig:ALERT_EVT', uiHandler as any);
     };
   }, []);

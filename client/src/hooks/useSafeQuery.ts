@@ -1,15 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 
-/**
- * A wrapper for executing queries safely, with support for mocking in development/test environments.
- *
- * @param options - The configuration options for the query.
- * @param options.queryKey - A unique key identifying the query, used for metrics/logging.
- * @param options.fetcher - An optional async function to fetch the data.
- * @param options.mock - Optional mock data to return in DEV/test environments.
- * @param options.deps - An array of dependencies that trigger the query to re-run when changed.
- * @returns An object containing the query data, loading state, and error state.
- */
+// Minimal safe query wrapper. In production, generated hooks should be used.
+// While codegen is pending, this wrapper can return mocked data in DEV/tests.
+
 export function useSafeQuery<T = any>({
   queryKey,
   fetcher,

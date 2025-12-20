@@ -41,14 +41,6 @@ const ACTION_COLORS = {
   exported: 'warning',
 } as const;
 
-/**
- * Displays a live stream of user activities in the system.
- * Fetches activity data via GraphQL and renders a scrollable list.
- *
- * @param props - The component props.
- * @param props.filters - Optional filters for activity types and targets.
- * @param props.maxItems - Maximum number of items to display (default: 50).
- */
 export function ActivityFeed({ filters, maxItems = 50 }: ActivityFeedProps) {
   // Fallback to a lightweight query with polling; replace with subscription when available
   const { data, loading } = useQuery(ACTIVITY_FEED_QUERY, {

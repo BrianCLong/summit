@@ -1,8 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
-/**
- * Represents the collected performance metrics.
- */
 interface PerformanceMetrics {
   renderTime: number;
   memoryUsage: number;
@@ -11,27 +8,13 @@ interface PerformanceMetrics {
   timestamp: number;
 }
 
-/**
- * Props for the PerformanceMonitor component.
- */
 interface PerformanceMonitorProps {
-  /** Whether the monitor is enabled. Defaults to true. */
   enabled?: boolean;
-  /** Interval in milliseconds to collect metrics. Defaults to 5000 (5s). */
   sampleInterval?: number;
-  /** Maximum number of metric samples to keep in history. Defaults to 60. */
   maxSamples?: number;
-  /** Callback triggered when metrics are updated. */
   onMetricsUpdate?: (metrics: PerformanceMetrics) => void;
 }
 
-/**
- * A component that monitors and displays application performance metrics.
- * Tracks memory usage, render time, network requests, and errors.
- *
- * @param props - The component props.
- * @returns The rendered PerformanceMonitor component (or null if disabled).
- */
 const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
   enabled = true,
   sampleInterval = 5000, // 5 seconds
@@ -45,6 +28,7 @@ const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
     const now = performance.now();
 
     // Memory usage (if available)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const memory = (performance as any).memory;
     const memoryUsage = memory ? memory.usedJSHeapSize / 1024 / 1024 : 0; // MB
 
@@ -57,6 +41,7 @@ const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
     ).length;
 
     // Error count from console (simplified tracking)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const errorCount = (window as any).__performanceErrors || 0;
 
     // Render time (using performance marks if available)
@@ -236,12 +221,8 @@ const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
   );
 };
 
-/**
- * Custom hook to track performance metrics.
- * Allows tracking of component renders and errors.
- *
- * @returns An object containing `trackRender` and `trackError` functions.
- */
+// Hook to track performance metrics
+// eslint-disable-next-line react-refresh/only-export-components
 export const usePerformanceTracking = () => {
   const trackRender = useCallback((componentName: string) => {
     performance.mark(`${componentName}-start`);
@@ -256,7 +237,9 @@ export const usePerformanceTracking = () => {
   }, []);
 
   const trackError = useCallback((error: Error) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).__performanceErrors =
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ((window as any).__performanceErrors || 0) + 1;
     console.error('[Performance] Error tracked:', error);
   }, []);

@@ -12,12 +12,6 @@ const CORRELATE_THREATS_MUTATION = gql`
   }
 `;
 
-/**
- * A component for correlating threat data from OSINT sources.
- * Allows users to input OSINT data, execute a GraphQL mutation, and visualize the correlations using Cytoscape.js.
- *
- * @returns The rendered ThreatCorrelation component.
- */
 const ThreatCorrelation: React.FC = () => {
   const [osintData, setOsintData] = useState('');
   const [correlateThreats, { data, loading, error }] = useMutation(

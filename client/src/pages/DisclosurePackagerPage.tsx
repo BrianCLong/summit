@@ -34,11 +34,10 @@ import {
   getDisclosureJob,
   listDisclosureJobs,
   sendDisclosureAnalyticsEvent,
+  createRuntimeEvidenceBundle,
+  RuntimeEvidenceBundle,
 } from '../services/disclosures';
 
-/**
- * Available artifact options for disclosure export.
- */
 const artifactOptions: Array<{
   key: DisclosureArtifact;
   label: string;
@@ -83,13 +82,6 @@ const fromLocalInputValue = (value: string) => {
   return date.toISOString();
 };
 
-/**
- * A page component for packaging and exporting disclosure bundles.
- * Allows users to select artifacts, define timeframes, and generate immutable audit bundles.
- * Monitors job status and provides download links upon completion.
- *
- * @returns The rendered DisclosurePackagerPage component.
- */
 const DisclosurePackagerPage: React.FC = () => {
   const [tenantId, setTenantId] = useState('default');
   const [startTime, setStartTime] = useState(
@@ -102,7 +94,9 @@ const DisclosurePackagerPage: React.FC = () => {
   const [callbackUrl, setCallbackUrl] = useState('');
   const [jobs, setJobs] = useState<DisclosureJob[]>([]);
   const [activeJob, setActiveJob] = useState<DisclosureJob | null>(null);
+  const [runtimeBundle, setRuntimeBundle] = useState<RuntimeEvidenceBundle | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRuntimeLoading, setIsRuntimeLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const pollingRef = useRef<number | null>(null);
 
@@ -236,6 +230,28 @@ const DisclosurePackagerPage: React.FC = () => {
     }
   };
 
+  const handleRuntimeBundle = async () => {
+    setIsRuntimeLoading(true);
+    setError(null);
+
+    try {
+      const bundle = await createRuntimeEvidenceBundle({
+        tenantId,
+        startTime: fromLocalInputValue(startTime),
+        endTime: fromLocalInputValue(endTime),
+      });
+      setRuntimeBundle(bundle);
+    } catch (runtimeError: unknown) {
+      const message =
+        runtimeError instanceof Error
+          ? runtimeError.message
+          : 'Failed to build runtime tarball';
+      setError(message);
+    } finally {
+      setIsRuntimeLoading(false);
+    }
+  };
+
   const latestJobs = useMemo(() => jobs.slice(0, 5), [jobs]);
 
   return (
@@ -342,29 +358,99 @@ const DisclosurePackagerPage: React.FC = () => {
                     </Stack>
                   </Box>
 
-                  <Stack direction="row" spacing={2} alignItems="center">
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      disabled={isSubmitting || selectedArtifacts.length === 0}
-                    >
-                      Launch export
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outlined"
-                      startIcon={<RefreshIcon />}
-                      onClick={() => refreshJobs(tenantId)}
-                      disabled={isSubmitting}
-                    >
-                      Refresh status
-                    </Button>
-                    <Tooltip title="SLO: p95 export under 2 minutes for 10k events; ≥99% success rate.">
-                      <InfoIcon color="action" />
-                    </Tooltip>
+                  <Stack spacing={1.5}>
+                    <Stack direction="row" spacing={2} alignItems="center">
+                      <Button
+                        type="submit"
+                        variant="contained"
+                        disabled={isSubmitting || selectedArtifacts.length === 0}
+                      >
+                        Launch export
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outlined"
+                        startIcon={<RefreshIcon />}
+                        onClick={() => refreshJobs(tenantId)}
+                        disabled={isSubmitting}
+                      >
+                        Refresh status
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="text"
+                        startIcon={<DownloadIcon />}
+                        onClick={handleRuntimeBundle}
+                        disabled={isSubmitting || isRuntimeLoading}
+                      >
+                        Runtime tarball (optional)
+                      </Button>
+                      <Tooltip title="SLO: p95 export under 2 minutes for 10k events; ≥99% success rate.">
+                        <InfoIcon color="action" />
+                      </Tooltip>
+                    </Stack>
+                    {isRuntimeLoading && <LinearProgress sx={{ maxWidth: 240 }} />}
                   </Stack>
 
                   {error && <Alert severity="error">{error}</Alert>}
+                  {runtimeBundle && (
+                    <Alert severity="success">
+                      Runtime evidence tarball ready. SHA256:{' '}
+                      <code>{runtimeBundle.sha256}</code>{' '}
+                      {runtimeBundle.downloadUrl && (
+                        <Link
+                          href={runtimeBundle.downloadUrl}
+                          underline="hover"
+                          sx={{ ml: 0.5 }}
+                        >
+                          Download
+                        </Link>
+                      )}
+                      <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+                        {runtimeBundle.downloadUrl && (
+                          <Button
+                            size="small"
+                            component={Link}
+                            href={runtimeBundle.downloadUrl}
+                            startIcon={<DownloadIcon />}
+                          >
+                            Tarball
+                          </Button>
+                        )}
+                        {runtimeBundle.manifestUrl && (
+                          <Button
+                            size="small"
+                            component={Link}
+                            href={runtimeBundle.manifestUrl}
+                            startIcon={<DownloadIcon />}
+                          >
+                            Manifest
+                          </Button>
+                        )}
+                        {runtimeBundle.checksumsUrl && (
+                          <Button
+                            size="small"
+                            component={Link}
+                            href={runtimeBundle.checksumsUrl}
+                            startIcon={<DownloadIcon />}
+                          >
+                            Checksums
+                          </Button>
+                        )}
+                      </Stack>
+                      <Typography variant="body2" component="div">
+                        Audit events: {runtimeBundle.counts.auditEvents} • Policy
+                        decisions: {runtimeBundle.counts.policyDecisions} • SBOM
+                        refs: {runtimeBundle.counts.sbomRefs} • Provenance refs:{' '}
+                        {runtimeBundle.counts.provenanceRefs}
+                      </Typography>
+                      {runtimeBundle.deployedVersion && (
+                        <Typography variant="body2" color="text.secondary">
+                          Deployed version: {runtimeBundle.deployedVersion}
+                        </Typography>
+                      )}
+                    </Alert>
+                  )}
                 </Stack>
               </CardContent>
             </Card>

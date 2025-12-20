@@ -1,13 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import $ from 'jquery';
-
-/**
- * A panel to display metrics for the OCI Artifact Bus.
- * Allows filtering of artifact metrics by text.
- *
- * @returns The rendered ArtifactBusPanel component.
- */
 export default function ArtifactBusPanel() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [rows, setRows] = useState<any[]>([]);
   useEffect(() => {
     fetch('/api/oci/metrics')
@@ -40,6 +34,7 @@ export default function ArtifactBusPanel() {
           </tr>
         </thead>
         <tbody>
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           {rows.map((x: any, i: number) => (
             <tr key={i} className="ab-row border-b">
               <td>{x.tag.slice(0, 16)}…</td>

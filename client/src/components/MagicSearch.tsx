@@ -10,11 +10,9 @@ import {
   ListItemText,
 } from '@mui/material';
 
-/**
- * Represents a parsed GraphQL query and its variables.
- */
 interface ParsedQuery {
   query: DocumentNode;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   variables: Record<string, any>;
 }
 
@@ -24,13 +22,6 @@ const RELATION_SUGGESTIONS = ['linked to', 'associated with', 'targets'];
 
 const EXAMPLE = 'Show all APT actors linked to finance-themed targets';
 
-/**
- * Parses a natural language query into a GraphQL query.
- * Currently supports a specific pattern for demo purposes.
- *
- * @param text - The natural language query text.
- * @returns A ParsedQuery object or null if the pattern doesn't match.
- */
 function parseNaturalQuery(text: string): ParsedQuery | null {
   const m = /show all (.+) linked to (.+)-themed targets/i.exec(text);
   if (m) {
@@ -50,16 +41,11 @@ function parseNaturalQuery(text: string): ParsedQuery | null {
   return null;
 }
 
-/**
- * A component that allows users to search using natural language.
- * It translates natural language input into GraphQL queries and displays the results.
- *
- * @returns The rendered MagicSearch component.
- */
 export default function MagicSearch() {
   const client = useApolloClient();
   const [input, setInput] = useState('');
   const [graphql, setGraphql] = useState('');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [results, setResults] = useState<any[]>([]);
   const options = [...ENTITY_SUGGESTIONS, ...RELATION_SUGGESTIONS];
 

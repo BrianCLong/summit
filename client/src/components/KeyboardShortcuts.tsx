@@ -1,38 +1,18 @@
 import React, { useEffect, useCallback } from 'react';
 
-/**
- * Represents a keyboard shortcut action.
- */
 interface ShortcutAction {
-  /** Array of key combinations that trigger the action (e.g., ['ctrl+k']). */
   keys: string[];
-  /** Description of the action for display in help. */
   description: string;
-  /** Function to execute when the shortcut is triggered. */
   action: () => void;
-  /** Category of the shortcut (e.g., 'Navigation', 'Graph'). */
   category?: string;
-  /** Whether the shortcut is global (works everywhere). */
   global?: boolean;
 }
 
-/**
- * Props for the KeyboardShortcuts component.
- */
 interface KeyboardShortcutsProps {
-  /** Array of shortcut definitions. */
   shortcuts: ShortcutAction[];
-  /** Whether shortcuts are currently active (default: true). */
   enabled?: boolean;
 }
 
-/**
- * A component that listens for global keyboard shortcuts and executes registered actions.
- * Does not render any visible UI itself.
- *
- * @param shortcuts - Array of shortcut definitions.
- * @param enabled - Whether shortcuts are currently active (default: true).
- */
 const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({
   shortcuts,
   enabled = true,
@@ -97,13 +77,8 @@ const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({
   return null; // This component doesn't render anything
 };
 
-/**
- * Custom hook to manage keyboard shortcuts within a component.
- * Automatically handles adding and removing event listeners.
- *
- * @param shortcuts - Array of shortcut definitions.
- * @param enabled - Whether shortcuts are currently active.
- */
+// Hook for managing keyboard shortcuts
+// eslint-disable-next-line react-refresh/only-export-components
 export const useKeyboardShortcuts = (
   shortcuts: ShortcutAction[],
   enabled = true,
@@ -158,12 +133,8 @@ export const useKeyboardShortcuts = (
   }, [shortcuts, enabled]);
 };
 
-/**
- * Formats a key combination string into a user-friendly display format (e.g., "ctrl+k" -> "⌘K").
- *
- * @param keys - The key combination string.
- * @returns The formatted string.
- */
+// Utility function to format key combinations for display
+// eslint-disable-next-line react-refresh/only-export-components
 export const formatKeyCombo = (keys: string): string => {
   return keys
     .split('+')
@@ -203,15 +174,6 @@ interface ShortcutsHelpProps {
   onClose: () => void;
 }
 
-/**
- * A modal component that displays a list of available keyboard shortcuts.
- *
- * @param props - The component props.
- * @param props.shortcuts - The list of shortcuts to display.
- * @param props.isVisible - Whether the help modal is visible.
- * @param props.onClose - Callback to close the modal.
- * @returns The rendered ShortcutsHelp component.
- */
 export const ShortcutsHelp: React.FC<ShortcutsHelpProps> = ({
   shortcuts,
   isVisible,
@@ -290,6 +252,7 @@ export const ShortcutsHelp: React.FC<ShortcutsHelpProps> = ({
 };
 
 // Default shortcuts for the application
+// eslint-disable-next-line react-refresh/only-export-components
 export const defaultShortcuts: ShortcutAction[] = [
   // Global Navigation
   {

@@ -2,14 +2,6 @@ import React from 'react';
 import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
 
-/**
- * A styled button component that follows the IntelGraph theme.
- *
- * @param props - The component props.
- * @param props.children - The button content.
- * @param props['aria-label'] - The accessibility label.
- * @returns The rendered IntelGraphButton component.
- */
 function IntelGraphButton({ children, 'aria-label': ariaLabel, ...props }) {
   const theme = useTheme();
   const computedAria =

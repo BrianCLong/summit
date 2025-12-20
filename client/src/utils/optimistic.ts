@@ -1,8 +1,5 @@
 import { useCallback, useRef } from 'react';
 
-/**
- * Interface representing the optimistic state.
- */
 export interface OptimisticState<T> {
   version: number;
   data: T;
@@ -10,14 +7,7 @@ export interface OptimisticState<T> {
 }
 
 /**
- * Basic optimistic update with rollback on error.
- * Executes an update function immediately, then runs an async operation.
- * If the async operation fails, the rollback function is called.
- *
- * @param update - The synchronous optimistic update function.
- * @param rollback - The function to rollback changes on failure.
- * @param run - The async operation (e.g., API call).
- * @returns A promise resolving to the result of the async operation.
+ * Basic optimistic update with rollback on error
  */
 export function withOptimism<T>(
   update: () => void,
@@ -41,11 +31,7 @@ export function withOptimism<T>(
 }
 
 /**
- * Hook for managing optimistic state with conflict detection.
- *
- * @param initialData - The initial data state.
- * @param serverVersion - The initial server version (optional).
- * @returns An object containing the current state and methods to update, commit, or rollback.
+ * Hook for managing optimistic state with conflict detection
  */
 export function useOptimisticState<T>(initialData: T, serverVersion?: number) {
   const stateRef = useRef<OptimisticState<T>>({
@@ -113,13 +99,6 @@ export interface OptimisticComment {
   isOptimistic?: boolean;
 }
 
-/**
- * Creates an optimistic comment object.
- *
- * @param content - The comment content.
- * @param currentUser - The user creating the comment.
- * @returns An OptimisticComment object with a temporary ID.
- */
 export function createOptimisticComment(
   content: string,
   currentUser: { id: string; displayName: string },
@@ -147,14 +126,6 @@ export interface OptimisticEvidence {
   isOptimistic?: boolean;
 }
 
-/**
- * Creates an optimistic evidence object.
- *
- * @param name - The name of the evidence file.
- * @param type - The MIME type of the file.
- * @param uploadedBy - The ID of the user uploading the evidence.
- * @returns An OptimisticEvidence object with 'uploading' status.
- */
 export function createOptimisticEvidence(
   name: string,
   type: string,

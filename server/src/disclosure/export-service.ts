@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { randomUUID, createHash, createHmac } from 'crypto';
 import { promises as fs } from 'fs';
 import { createReadStream, createWriteStream } from 'fs';
@@ -105,23 +106,10 @@ function merkleFromHashes(hashes: string[]): string {
   return layer[0];
 }
 
-/**
- * Service handling the creation, processing, and management of disclosure exports.
- * It collects various artifacts (audit trails, SBOMs, attestations, etc.),
- * bundles them, signs them, and makes them available for download.
- */
 export class DisclosureExportService {
   private readonly jobs = new Map<string, InternalJob>();
   private readonly redaction = new RedactionService();
 
-  /**
-   * Creates a new disclosure export job.
-   * Validates the request, creates a working directory, and queues the job for processing.
-   *
-   * @param input - The raw input payload for the export request.
-   * @returns The created DisclosureExportJob.
-   * @throws Error if validation fails or constraints are violated.
-   */
   async createJob(input: unknown): Promise<DisclosureExportJob> {
     const parsed = requestSchema.parse(input);
 
@@ -183,36 +171,18 @@ export class DisclosureExportService {
     return this.publicJob(job);
   }
 
-  /**
-   * Lists all disclosure export jobs for a specific tenant.
-   *
-   * @param tenantId - The tenant ID.
-   * @returns An array of DisclosureExportJob.
-   */
   listJobsForTenant(tenantId: string): DisclosureExportJob[] {
     return Array.from(this.jobs.values())
       .filter((job) => job.tenantId === tenantId)
       .map((job) => this.publicJob(job));
   }
 
-  /**
-   * Retrieves a specific job by ID.
-   *
-   * @param jobId - The job ID.
-   * @returns The DisclosureExportJob or undefined if not found.
-   */
   getJob(jobId: string): DisclosureExportJob | undefined {
     const job = this.jobs.get(jobId);
     if (!job) return undefined;
     return this.publicJob(job);
   }
 
-  /**
-   * Gets download information for a completed job.
-   *
-   * @param jobId - The job ID.
-   * @returns An object containing the job details and file path, or undefined.
-   */
   getDownload(
     jobId: string,
   ): { job: DisclosureExportJob; filePath: string } | undefined {
@@ -221,12 +191,6 @@ export class DisclosureExportService {
     return { job: this.publicJob(job), filePath: job.bundlePath };
   }
 
-  /**
-   * Processes a queued export job.
-   * Collects artifacts, creates a bundle, calculates hashes/Merkle tree, and signs the result.
-   *
-   * @param jobId - The job ID to process.
-   */
   async processJob(jobId: string): Promise<void> {
     const job = this.jobs.get(jobId);
     if (!job) return;

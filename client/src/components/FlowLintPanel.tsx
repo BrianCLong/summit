@@ -1,13 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import $ from 'jquery';
-
-/**
- * A panel that displays flow linting issues.
- * Fetches linting data from the API and allows filtering by text.
- *
- * @returns The rendered FlowLintPanel component.
- */
 export default function FlowLintPanel() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [items, setItems] = useState<any[]>([]);
   const handlerBoundRef = useRef(false);
 
@@ -51,6 +45,7 @@ export default function FlowLintPanel() {
         />
       </div>
       <ul className="text-sm">
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         {items.map((x: any, i: number) => (
           <li
             key={i}

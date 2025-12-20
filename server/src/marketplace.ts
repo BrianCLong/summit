@@ -9,15 +9,6 @@ function exec(bin: string, args: string[]) {
   );
 }
 
-/**
- * Installs a plugin step from a container registry (using ORAS).
- * Verifies the signature of the artifact before installing.
- *
- * @param name - The name of the plugin/step.
- * @param version - The version tag.
- * @returns A promise resolving to the path of the installed WASM file.
- * @throws Error if signature verification fails or if the download fails.
- */
 export async function installStep(name: string, version: string) {
   const offline = (process.env.OFFLINE || 'false').toLowerCase() === 'true';
   const pluginsDir = path.join(process.cwd(), 'plugins');

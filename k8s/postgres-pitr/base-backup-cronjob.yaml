@@ -1,0 +1,130 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-base-backup
+  namespace: summit
+  labels:
+    app: postgres-pitr
+    component: base-backup
+spec:
+  # Run daily at 2 AM UTC
+  schedule: "0 2 * * *"
+  successfulJobsHistoryLimit: 7
+  failedJobsHistoryLimit: 7
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    metadata:
+      labels:
+        app: postgres-pitr
+        component: base-backup
+    spec:
+      backoffLimit: 3
+      activeDeadlineSeconds: 3600  # 1 hour timeout
+      template:
+        metadata:
+          labels:
+            app: postgres-pitr
+            component: base-backup
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: postgres-backup
+          containers:
+          - name: base-backup
+            image: summit/postgres-pitr:latest
+            command:
+            - /usr/local/bin/base-backup.sh
+            env:
+            - name: PGHOST
+              value: postgres-primary.summit.svc.cluster.local
+            - name: PGPORT
+              value: "5432"
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: username
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: password
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: s3-credentials
+                  key: access-key-id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: s3-credentials
+                  key: secret-access-key
+            - name: WALG_S3_PREFIX
+              value: "s3://summit-wal-archives/postgres"
+            - name: AWS_REGION
+              value: "us-west-2"
+            volumeMounts:
+            - name: walg-config
+              mountPath: /etc/wal-g.d
+              readOnly: true
+            resources:
+              requests:
+                cpu: 500m
+                memory: 512Mi
+              limits:
+                cpu: 2000m
+                memory: 2Gi
+          volumes:
+          - name: walg-config
+            configMap:
+              name: walg-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: walg-config
+  namespace: summit
+data:
+  walg.json: |
+    {
+      "WALG_S3_PREFIX": "s3://summit-wal-archives/postgres",
+      "WALG_COMPRESSION_METHOD": "lz4",
+      "WALG_DELTA_MAX_STEPS": 7,
+      "WALG_UPLOAD_CONCURRENCY": 4,
+      "WALG_DOWNLOAD_CONCURRENCY": 4,
+      "AWS_REGION": "us-west-2",
+      "WALG_S3_STORAGE_CLASS": "STANDARD_IA",
+      "WALG_S3_SSE": "AES256"
+    }
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: postgres-backup
+  namespace: summit
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: postgres-backup
+  namespace: summit
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list"]
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: postgres-backup
+  namespace: summit
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: postgres-backup
+subjects:
+- kind: ServiceAccount
+  name: postgres-backup
+  namespace: summit

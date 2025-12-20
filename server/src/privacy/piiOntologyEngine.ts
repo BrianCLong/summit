@@ -666,10 +666,6 @@ class ComplianceValidator {
   }
 }
 
-/**
- * Core engine for PII classification and management.
- * Integrates pattern detection, contextual analysis, regulatory mapping, and lineage tracking.
- */
 export class PiiOntologyEngine {
   private readonly detector = new PatternDetector();
   private readonly classifier = new ContextualClassifier();
@@ -679,10 +675,6 @@ export class PiiOntologyEngine {
   private readonly validator = new ComplianceValidator(this.mapper);
   private readonly config: Required<PiiOntologyConfig>;
 
-  /**
-   * Initializes the PiiOntologyEngine with optional configuration.
-   * @param config - Configuration options for thresholds and enrichment.
-   */
   constructor(config: PiiOntologyConfig = {}) {
     this.config = {
       detectionThreshold: config.detectionThreshold ?? 0.55,
@@ -692,27 +684,14 @@ export class PiiOntologyEngine {
     this.enricher = new MetadataEnricher(this.config.enrichment);
   }
 
-  /**
-   * Registers a new pattern definition for PII detection.
-   * @param pattern - The pattern definition.
-   */
   registerPattern(pattern: PatternDefinition): void {
     this.detector.registerPattern(pattern);
   }
 
-  /**
-   * Trains the detector with sample data to improve classification accuracy.
-   * @param samples - Array of training samples.
-   */
   train(samples: TrainingSample[]): void {
     this.detector.train(samples);
   }
 
-  /**
-   * Processes a batch of data records to classify and enrich PII information.
-   * @param records - Array of data records to process.
-   * @returns A classification report containing identified entities and summary stats.
-   */
   async processRecords(records: DataRecord[]): Promise<ClassificationReport> {
     const entities: PIIEntity[] = [];
     const categoryCounts: Record<PIICategory, number> = {
@@ -827,21 +806,10 @@ export class PiiOntologyEngine {
     };
   }
 
-  /**
-   * Retrieves the lineage record for a specific entity ID.
-   * @param entityId - The ID of the PII entity.
-   * @returns The lineage record if found.
-   */
   getLineage(entityId: string): LineageRecord | undefined {
     return this.lineage.get(entityId);
   }
 
-  /**
-   * Validates the classified entities against specific regulatory frameworks.
-   * @param entities - The list of PII entities.
-   * @param frameworks - The frameworks to validate against.
-   * @returns Validation results.
-   */
   validateAgainstFrameworks(
     entities: PIIEntity[],
     frameworks: RegulatoryFramework[],

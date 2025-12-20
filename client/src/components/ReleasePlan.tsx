@@ -1,11 +1,4 @@
 import React, { useEffect, useState } from 'react';
-
-/**
- * A component that displays the upcoming release train plan.
- * Fetches the queue of planned items from the API.
- *
- * @returns The rendered ReleasePlan component.
- */
 export default function ReleasePlan() {
   const [rows, setRows] = useState<string[]>([]);
   useEffect(() => {

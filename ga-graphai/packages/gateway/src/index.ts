@@ -1,4 +1,5 @@
 import { createHash, createHmac } from 'node:crypto';
+import { performance } from 'node:perf_hooks';
 import type {
   EvidenceBundle,
   LedgerEntry,
@@ -72,7 +73,9 @@ import type {
 import type { ValueNode } from 'graphql';
 import {
   GraphQLBoolean,
+  GraphQLError,
   GraphQLEnumType,
+  GraphQLID,
   GraphQLInputObjectType,
   GraphQLInt,
   GraphQLList,
@@ -96,6 +99,12 @@ import type {
 import { PolicyEngine, buildDefaultPolicyEngine } from 'policy';
 import { ProvenanceLedger } from 'prov-ledger';
 import { WorkcellRuntime } from 'workcell-runtime';
+import type { GraphQLRateLimiterOptions } from './graphql-cost.js';
+import { GraphQLRateLimiter } from './graphql-cost.js';
+import type {
+  GraphNode,
+  OrchestrationKnowledgeGraph,
+} from '@ga-graphai/knowledge-graph';
 
 function parseJsonLiteral(ast: ValueNode): unknown {
   switch (ast.kind) {
@@ -130,10 +139,106 @@ const GraphQLJSON = new GraphQLScalarType({
   parseLiteral: parseJsonLiteral,
 });
 
+const GraphNodeType = new GraphQLObjectType({
+  name: 'GraphNode',
+  fields: {
+    id: { type: new GraphQLNonNull(GraphQLID) },
+    type: { type: new GraphQLNonNull(GraphQLString) },
+    data: { type: new GraphQLNonNull(GraphQLJSON) },
+  },
+});
+
+const ServiceContextType = new GraphQLObjectType({
+  name: 'ServiceContext',
+  fields: {
+    service: { type: GraphQLJSON },
+    environments: { type: new GraphQLList(GraphQLJSON) },
+    incidents: { type: new GraphQLList(GraphQLJSON) },
+    policies: { type: new GraphQLList(GraphQLJSON) },
+    pipelines: { type: new GraphQLList(GraphQLJSON) },
+    risk: { type: GraphQLJSON },
+  },
+});
+
+interface KnowledgeGraphLoaders {
+  nodeLoader: SimpleDataLoader<string, GraphNode | null>;
+}
+
+class SimpleDataLoader<K, V> {
+  private readonly cache = new Map<K, Promise<V>>();
+  private pending: K[] = [];
+  private readonly callbacks = new Map<K, { resolve: (value: V) => void; reject: (error: unknown) => void }[]>();
+  private scheduled = false;
+
+  constructor(
+    private readonly batchLoadFn: (keys: readonly K[]) => Promise<readonly V[]>,
+  ) {}
+
+  load(key: K): Promise<V> {
+    const cached = this.cache.get(key);
+    if (cached) {
+      return cached;
+    }
+
+    const promise = new Promise<V>((resolve, reject) => {
+      this.pending.push(key);
+      const callbacks = this.callbacks.get(key) ?? [];
+      callbacks.push({ resolve, reject });
+      this.callbacks.set(key, callbacks);
+      if (!this.scheduled) {
+        this.scheduled = true;
+        queueMicrotask(() => this.dispatch());
+      }
+    });
+
+    this.cache.set(key, promise);
+    return promise;
+  }
+
+  async loadMany(keys: readonly K[]): Promise<V[]> {
+    return Promise.all(keys.map((key) => this.load(key)));
+  }
+
+  private async dispatch() {
+    this.scheduled = false;
+    const keys = Array.from(new Set(this.pending));
+    this.pending = [];
+
+    try {
+      const values = await this.batchLoadFn(keys);
+      keys.forEach((key, index) => {
+        const callbacks = this.callbacks.get(key) ?? [];
+        const value = values[index];
+        callbacks.forEach(({ resolve }) => resolve(value));
+        this.cache.set(key, Promise.resolve(value));
+        this.callbacks.delete(key);
+      });
+    } catch (error) {
+      keys.forEach((key) => {
+        const callbacks = this.callbacks.get(key) ?? [];
+        callbacks.forEach(({ reject }) => reject(error));
+      });
+    }
+  }
+}
+
 interface GatewayContext {
   policy: PolicyEngine;
   ledger: ProvenanceLedger;
   workcell: WorkcellRuntime;
+  knowledgeGraph?: OrchestrationKnowledgeGraph;
+  loaders?: KnowledgeGraphLoaders;
+}
+
+interface CacheClientLike {
+  get(key: string): Promise<string | null> | string | null;
+  setEx(key: string, ttlSeconds: number, value: string): Promise<unknown> | unknown;
+}
+
+interface KnowledgeGraphOptions {
+  knowledgeGraph: OrchestrationKnowledgeGraph;
+  cacheClient?: CacheClientLike;
+  cacheTtlSeconds?: number;
 }
 
 const PolicyEffectEnum = new GraphQLEnumType({
@@ -386,6 +491,61 @@ function buildSchema(): GraphQLSchema {
         resolve: (_source, _args, context: GatewayContext): WorkOrderResult[] =>
           context.workcell.listOrders(),
       },
+      graphNode: {
+        type: GraphNodeType,
+        args: { id: { type: new GraphQLNonNull(GraphQLID) } },
+        resolve: async (
+          _source,
+          args: { id: string },
+          context: GatewayContext,
+        ) => {
+          if (!context.loaders?.nodeLoader) {
+            throw new GraphQLError('KNOWLEDGE_GRAPH_NOT_CONFIGURED', {
+              extensions: { code: 'KNOWLEDGE_GRAPH_NOT_CONFIGURED' },
+            });
+          }
+          return (await context.loaders.nodeLoader.load(args.id)) ?? null;
+        },
+      },
+      graphNodes: {
+        type: new GraphQLNonNull(
+          new GraphQLList(new GraphQLNonNull(GraphNodeType)),
+        ),
+        args: {
+          ids: {
+            type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID))),
+          },
+        },
+        resolve: async (
+          _source,
+          args: { ids: string[] },
+          context: GatewayContext,
+        ) => {
+          if (!context.loaders?.nodeLoader) {
+            throw new GraphQLError('KNOWLEDGE_GRAPH_NOT_CONFIGURED', {
+              extensions: { code: 'KNOWLEDGE_GRAPH_NOT_CONFIGURED' },
+            });
+          }
+          const nodes = await context.loaders.nodeLoader.loadMany(args.ids);
+          return nodes.filter((node): node is GraphNode => node !== null);
+        },
+      },
+      serviceContext: {
+        type: ServiceContextType,
+        args: { serviceId: { type: new GraphQLNonNull(GraphQLString) } },
+        resolve: (
+          _source,
+          args: { serviceId: string },
+          context: GatewayContext,
+        ) => {
+          if (!context.knowledgeGraph) {
+            throw new GraphQLError('KNOWLEDGE_GRAPH_NOT_CONFIGURED', {
+              extensions: { code: 'KNOWLEDGE_GRAPH_NOT_CONFIGURED' },
+            });
+          }
+          return context.knowledgeGraph.queryService?.(args.serviceId) ?? null;
+        },
+      },
     },
   });
 
@@ -501,10 +661,21 @@ export interface GatewayWorkcellOptions {
   agents?: WorkcellAgentDefinition[];
 }
 
+export interface GatewayCostGuardOptions extends GraphQLRateLimiterOptions {
+  enabled?: boolean;
+  defaultTenantId?: string;
+}
+
+export interface GatewayExecutionOptions {
+  tenantId?: string;
+}
+
 export interface GatewayOptions {
   rules?: PolicyRule[];
   seedEntries?: LedgerFactInput[];
   workcell?: GatewayWorkcellOptions;
+  costGuard?: GatewayCostGuardOptions;
+  knowledgeGraph?: KnowledgeGraphOptions;
 }
 
 export class GatewayRuntime {
@@ -512,6 +683,12 @@ export class GatewayRuntime {
   private readonly ledger: ProvenanceLedger;
   private readonly schema: GraphQLSchema;
   private readonly workcell: WorkcellRuntime;
+  private readonly costGuardOptions?: GatewayCostGuardOptions;
+  private readonly rateLimiter?: GraphQLRateLimiter;
+  private readonly defaultTenantId: string;
+  private readonly knowledgeGraphOptions?: KnowledgeGraphOptions;
+  private readonly cacheClient?: CacheClientLike;
+  private readonly cacheTtlSeconds: number;
 
   constructor(options: GatewayOptions = {}) {
     this.policy = options.rules
@@ -529,6 +706,11 @@ export class GatewayRuntime {
       tools: options.workcell?.tools,
       agents: options.workcell?.agents,
     });
+    this.costGuardOptions = options.costGuard;
+    this.defaultTenantId = this.costGuardOptions?.defaultTenantId ?? 'public';
+    this.knowledgeGraphOptions = options.knowledgeGraph;
+    this.cacheClient = this.knowledgeGraphOptions?.cacheClient;
+    this.cacheTtlSeconds = this.knowledgeGraphOptions?.cacheTtlSeconds ?? 300;
     if (!options.workcell?.tools || options.workcell.tools.length === 0) {
       this.workcell.registerTool({
         name: 'analysis',
@@ -548,9 +730,123 @@ export class GatewayRuntime {
       });
     }
     this.schema = buildSchema();
+    if (this.costGuardOptions?.enabled !== false) {
+      const { enabled: _enabled, defaultTenantId: _defaultTenantId, ...rateLimiterOptions } =
+        this.costGuardOptions ?? {};
+      this.rateLimiter = new GraphQLRateLimiter(this.schema, rateLimiterOptions);
+    }
   }
 
-  async execute(source: string, variableValues?: Record<string, unknown>) {
+  private buildKnowledgeGraphLoaders(): KnowledgeGraphLoaders | undefined {
+    const knowledgeGraph = this.knowledgeGraphOptions?.knowledgeGraph;
+    if (!knowledgeGraph) {
+      return undefined;
+    }
+    const cache = this.cacheClient;
+    const ttl = this.cacheTtlSeconds;
+    const cacheKey = (id: string) => `kg:node:${id}`;
+
+    const nodeLoader = new SimpleDataLoader<string, GraphNode | null>(async (ids) => {
+      const cachedResults = await Promise.all(
+        ids.map(async (id) => {
+          if (!cache) {
+            return null;
+          }
+          const cached = await cache.get(cacheKey(id));
+          if (!cached) {
+            return null;
+          }
+          try {
+            return JSON.parse(cached) as GraphNode;
+          } catch {
+            return null;
+          }
+        }),
+      );
+
+      const results: (GraphNode | null)[] = [];
+      const missingIds: string[] = [];
+      cachedResults.forEach((node, index) => {
+        if (node) {
+          results[index] = node;
+        } else {
+          results[index] = null;
+          missingIds.push(ids[index]);
+        }
+      });
+
+      if (missingIds.length > 0) {
+        const fetched = await Promise.all(
+          missingIds.map((id) =>
+            Promise.resolve(knowledgeGraph.getNode(id)).then((node) => node ?? null),
+          ),
+        );
+        let fetchIndex = 0;
+        for (let i = 0; i < results.length; i += 1) {
+          if (results[i] === null) {
+            const node = fetched[fetchIndex] ?? null;
+            results[i] = node;
+            if (node && cache) {
+              void cache.setEx(cacheKey(ids[i]), ttl, JSON.stringify(node));
+            }
+            fetchIndex += 1;
+          }
+        }
+      }
+
+      return results;
+    });
+
+    return { nodeLoader };
+  }
+
+  async execute(
+    source: string,
+    variableValues?: Record<string, unknown>,
+    options?: GatewayExecutionOptions,
+  ) {
+    const tenantId = options?.tenantId ?? this.defaultTenantId;
+    const loaders = this.buildKnowledgeGraphLoaders();
+    const guard = this.rateLimiter;
+    if (guard) {
+      const evaluation = guard.beginExecution(source, tenantId);
+      if (evaluation.decision.action === 'kill' || evaluation.decision.action === 'throttle') {
+        return {
+          data: null,
+          errors: [
+            new GraphQLError(evaluation.decision.reason, {
+              extensions: {
+                code:
+                  evaluation.decision.action === 'kill'
+                    ? 'COST_GUARD_KILL'
+                    : 'COST_GUARD_THROTTLE',
+                retryAfterMs: evaluation.decision.nextCheckMs,
+                metrics: evaluation.decision.metrics,
+                plan: evaluation.plan,
+              },
+            }),
+          ],
+        };
+      }
+      const startedAt = performance.now();
+      try {
+        return await graphql({
+          schema: this.schema,
+          source,
+          variableValues,
+          contextValue: {
+            policy: this.policy,
+            ledger: this.ledger,
+            workcell: this.workcell,
+            knowledgeGraph: this.knowledgeGraphOptions?.knowledgeGraph,
+            loaders,
+          },
+        });
+      } finally {
+        evaluation.release?.(performance.now() - startedAt);
+      }
+    }
+
     return graphql({
       schema: this.schema,
       source,
@@ -559,6 +855,8 @@ export class GatewayRuntime {
         policy: this.policy,
         ledger: this.ledger,
         workcell: this.workcell,
+        knowledgeGraph: this.knowledgeGraphOptions?.knowledgeGraph,
+        loaders,
       },
     });
   }
@@ -1561,6 +1859,7 @@ function parseScopes(input: unknown): string[] {
 // ============================================================================
 
 export { TicketNormalizer, NormalizationOptions } from './normalization.js';
+export { GraphQLCostAnalyzer, GraphQLRateLimiter } from './graphql-cost.js';
 export {
   AcceptanceCriteriaSynthesizer,
   AcceptanceCriteriaVerifier,
@@ -1590,3 +1889,15 @@ export { CounterfactualShadowingCoordinator } from './cooperation/counterfactual
 export { CausalChallengeGamesCoordinator } from './cooperation/causalChallengeGames.js';
 export { CrossEntropySwapCoordinator } from './cooperation/crossEntropySwaps.js';
 export { ProofOfUsefulWorkbookCoordinator } from './cooperation/proofOfUsefulWorkbook.js';
+export {
+  FederatedGateway,
+  type GatewayExecutionResult,
+} from './federation/gateway.js';
+export { composeServices } from './federation/composition.js';
+export type {
+  EntityResolver,
+  FederationCompositionResult,
+  FederationServiceDefinition,
+  ResolverEntry,
+  ResolverMap,
+} from './federation/types.js';

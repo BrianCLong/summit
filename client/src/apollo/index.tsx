@@ -1,25 +1,42 @@
 import React, { useEffect, useState } from 'react';
-import { ApolloClient, ApolloProvider, NormalizedCacheObject } from '@apollo/client';
+import {
+  ApolloProvider,
+  ApolloClient,
+  NormalizedCacheObject,
+} from '@apollo/client';
+import { CircularProgress, Box } from '@mui/material';
 import { createApolloClient } from './createApolloClient';
 
-/**
- * A higher-order component (HOC) or wrapper that provides the Apollo Client context to its children.
- * This ensures that all components within the tree can access GraphQL data via Apollo hooks.
- * It initializes the Apollo Client asynchronously.
- *
- * @param props - The component props.
- * @param props.children - The child components to wrap with the Apollo Provider.
- * @returns The ApolloProvider component wrapping the children, or null while initializing.
- */
-export function WithApollo({ children }: { children: React.ReactNode }) {
-  const [client, setClient] = useState<ApolloClient<NormalizedCacheObject> | null>(null);
+export function WithApollo({ children }: { children: React.ReactNode | React.ReactNode[] }) {
+  const [client, setClient] =
+    useState<ApolloClient<NormalizedCacheObject> | null>(null);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    createApolloClient().then(setClient);
+    createApolloClient().then(setClient).catch(setError);
   }, []);
 
+  if (error) {
+    return (
+      <Box sx={{ p: 2, textAlign: 'center' }}>
+        <div>Error initializing Apollo Client: {error.message}</div>
+      </Box>
+    );
+  }
+
   if (!client) {
-    return null; // or a loading spinner
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
   }
 
   return <ApolloProvider client={client}>{children}</ApolloProvider>;

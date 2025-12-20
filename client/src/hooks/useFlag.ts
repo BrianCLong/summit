@@ -1,8 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
 
-/**
- * Configuration interface for a feature flag.
- */
 interface FlagConfig {
   [key: string]: {
     enabled: boolean;
@@ -16,9 +13,7 @@ interface FlagConfig {
   };
 }
 
-/**
- * Default feature flags configuration.
- */
+// Default feature flags configuration
 const DEFAULT_FLAGS: FlagConfig = {
   'realtime-presence': {
     enabled: true,
@@ -30,6 +25,27 @@ const DEFAULT_FLAGS: FlagConfig = {
   'graph-streaming': {
     enabled: true,
     rollout: 80,
+    conditions: {
+      env: ['development', 'staging', 'production'],
+    },
+  },
+  'graph-lod': {
+    enabled: true,
+    rollout: 100,
+    conditions: {
+      env: ['development', 'staging', 'production'],
+    },
+  },
+  'graph-lod-aggregation': {
+    enabled: true,
+    rollout: 100,
+    conditions: {
+      env: ['development', 'staging', 'production'],
+    },
+  },
+  'graph-lod-benchmark': {
+    enabled: import.meta.env.DEV ?? true,
+    rollout: 100,
     conditions: {
       env: ['development', 'staging', 'production'],
     },
@@ -94,9 +110,6 @@ const DEFAULT_FLAGS: FlagConfig = {
   },
 };
 
-/**
- * Context for feature flag evaluation.
- */
 interface UserContext {
   userId?: string;
   tenantId?: string;
@@ -105,11 +118,7 @@ interface UserContext {
 }
 
 /**
- * Feature flag hook with env/tenant/role fallback.
- *
- * @param flagKey - The key of the feature flag to check.
- * @param context - The user context for conditional evaluation.
- * @returns `true` if the feature is enabled, `false` otherwise.
+ * Feature flag hook with env/tenant/role fallback
  */
 export function useFlag(flagKey: string, context?: UserContext): boolean {
   const [dynamicFlags, setDynamicFlags] = useState<FlagConfig>({});
@@ -181,10 +190,7 @@ export function useFlag(flagKey: string, context?: UserContext): boolean {
 }
 
 /**
- * Hook to get all available flags with their status.
- *
- * @param context - The user context for conditional evaluation.
- * @returns A record where keys are flag names and values are booleans indicating enabled status.
+ * Hook to get all available flags with their status
  */
 export function useFlags(context?: UserContext): Record<string, boolean> {
   const [dynamicFlags] = useState<FlagConfig>({});
@@ -202,17 +208,9 @@ export function useFlags(context?: UserContext): Record<string, boolean> {
 }
 
 /**
- * Hook for updating feature flags (admin use).
- *
- * @returns An object containing the `updateFlag` function.
+ * Hook for updating feature flags (admin use)
  */
 export function useFlagUpdater() {
-  /**
-   * Updates a feature flag configuration.
-   *
-   * @param flagKey - The key of the flag to update.
-   * @param config - The new configuration properties to merge.
-   */
   const updateFlag = (flagKey: string, config: Partial<FlagConfig[string]>) => {
     const storedFlags = localStorage.getItem('feature-flags');
     let flags: FlagConfig = {};
@@ -235,12 +233,7 @@ export function useFlagUpdater() {
   return { updateFlag };
 }
 
-/**
- * Simple hash function for consistent bucketing.
- *
- * @param str - The string to hash.
- * @returns A 32-bit integer hash.
- */
+// Simple hash function for consistent bucketing
 function hashString(str: string): number {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {

@@ -10,6 +10,7 @@ import mysql from 'mysql2/promise';
 type MySQLPool = any;
 import { Counter, Histogram, Gauge } from 'prom-client';
 import { EventEmitter } from 'events';
+import { Readable } from 'stream';
 
 const tracer = {
   startActiveSpan: async (
@@ -131,33 +132,18 @@ export interface SchemaInfo {
   }>;
 }
 
-/**
- * Connector for JDBC-compliant databases (PostgreSQL and MySQL).
- * Handles connection pooling, query execution, schema introspection, and metrics collection.
- */
 export class JDBCConnector extends EventEmitter {
   private config: JDBCConfig;
   private tenantId: string;
   private pool: Pool | MySQLPool | null = null;
   private connected = false;
 
-  /**
-   * Initializes the JDBC connector.
-   *
-   * @param tenantId - The tenant identifier.
-   * @param config - Configuration for the database connection.
-   */
   constructor(tenantId: string, config: JDBCConfig) {
     super();
     this.tenantId = tenantId;
     this.config = config;
   }
 
-  /**
-   * Establishes a connection pool to the database.
-   *
-   * @returns Promise resolving when connected.
-   */
   async connect(): Promise<void> {
     return tracer.startActiveSpan('jdbc.connect', async (span: any) => {
       span.setAttributes?.({
@@ -252,14 +238,6 @@ export class JDBCConnector extends EventEmitter {
     }
   }
 
-  /**
-   * Executes a SQL query against the connected database.
-   *
-   * @param sql - The SQL statement to execute.
-   * @param params - Array of parameters for the query.
-   * @param options - Query execution options (timeout, isolation level, etc.).
-   * @returns Promise resolving to the query result.
-   */
   async query(
     sql: string,
     params: any[] = [],
@@ -335,6 +313,90 @@ export class JDBCConnector extends EventEmitter {
         throw error;
       } finally {
         span.end?.();
+      }
+    });
+  }
+
+  /**
+   * Stream query results.
+   * Returns a standard Node.js Readable stream.
+   *
+   * For PostgreSQL: Wraps pg-cursor in a Readable stream.
+   * For MySQL: Returns the native stream.
+   */
+  async queryStream(
+    sql: string,
+    params: any[] = [],
+    options: QueryOptions = {},
+  ): Promise<Readable> {
+    return tracer.startActiveSpan('jdbc.query_stream', async (span: any) => {
+      span.setAttributes?.({
+        tenant_id: this.tenantId,
+        database_type: this.config.type,
+        sql_length: sql.length,
+        stream: true,
+      });
+
+      if (!this.connected || !this.pool) {
+        throw new Error('Database not connected');
+      }
+
+      try {
+        if (this.config.type === 'postgresql') {
+          const client = await (this.pool as Pool).connect();
+          const Cursor = await import('pg-cursor').then((m) => m.default || m);
+          const cursor = client.query(new Cursor(sql, params));
+          const fetchSize = options.fetchSize || 100;
+
+          // Wrap Cursor in Readable
+          const stream = new Readable({
+            objectMode: true,
+            read() {
+              cursor.read(
+                fetchSize,
+                (err: Error | null, rows: any[]) => {
+                  if (err) {
+                    this.destroy(err);
+                    return;
+                  }
+                  if (!rows || rows.length === 0) {
+                    this.push(null);
+                  } else {
+                    rows.forEach((row: any) => this.push(row));
+                  }
+                },
+              );
+            },
+            destroy(err, callback) {
+              cursor.close(() => {
+                client.release();
+                callback(err);
+              });
+            },
+          });
+
+          return stream;
+        } else if (this.config.type === 'mysql') {
+          const connection = await (this.pool as MySQLPool).getConnection();
+          const stream = connection.connection
+            .query(sql, params)
+            .stream({ highWaterMark: options.fetchSize || 100 });
+
+          stream.on('end', () => {
+            connection.release();
+          });
+
+          stream.on('error', () => {
+            connection.release();
+          });
+
+          return stream;
+        } else {
+          throw new Error('Unsupported database type for streaming');
+        }
+      } catch (error) {
+        span.recordException?.(error as Error);
+        throw error;
       }
     });
   }
@@ -418,14 +480,6 @@ export class JDBCConnector extends EventEmitter {
     }
   }
 
-  /**
-   * Executes multiple queries in a batch.
-   *
-   * @param sqls - Array of SQL statements.
-   * @param paramSets - Array of parameter arrays corresponding to each SQL statement.
-   * @param options - Query execution options.
-   * @returns Promise resolving to batch execution results.
-   */
   async batchExecute(
     sqls: string[],
     paramSets: any[][],
@@ -515,12 +569,6 @@ export class JDBCConnector extends EventEmitter {
     });
   }
 
-  /**
-   * Retrieves schema information (tables, columns, indexes).
-   *
-   * @param schemaName - The schema or database name to inspect.
-   * @returns Promise resolving to the schema information.
-   */
   async getSchemaInfo(schemaName?: string): Promise<SchemaInfo> {
     return tracer.startActiveSpan('jdbc.get_schema_info', async (span: any) => {
       span.setAttributes?.({
@@ -726,11 +774,6 @@ export class JDBCConnector extends EventEmitter {
     return typeMap[type] || `unknown(${type})`;
   }
 
-  /**
-   * Tests the database connection validity and latency.
-   *
-   * @returns Object containing connection status and latency.
-   */
   async testConnection(): Promise<{
     connected: boolean;
     latency?: number;
@@ -758,9 +801,6 @@ export class JDBCConnector extends EventEmitter {
     }
   }
 
-  /**
-   * Disconnects the database client pool.
-   */
   async disconnect(): Promise<void> {
     if (this.pool) {
       if (this.config.type === 'postgresql') {

@@ -18,14 +18,6 @@ const metrics = {
   cacheEviction: { inc: () => {} }, // Placeholder
 };
 
-/**
- * Wraps an asynchronous function with Redis caching.
- *
- * @param key - The cache key.
- * @param ttl - The time-to-live in seconds.
- * @param fn - The function to memoize.
- * @returns A new function that returns cached data if available, or fetches and caches it.
- */
 export const cached =
   (key: string, ttl: number, fn: () => Promise<any>) => async () => {
     const hit = await redisClient.get(key);

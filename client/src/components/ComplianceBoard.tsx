@@ -1,24 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import $ from 'jquery';
 
-/**
- * Represents a compliance control item.
- */
 interface ComplianceControl {
-  /** The unique identifier for the control. */
   id: string;
-  /** The current status of the control (e.g., 'compliant', 'non-compliant'). */
   status: string;
-  /** The URI linking to evidence for the control. */
   evidenceUri: string;
 }
 
-/**
- * A dashboard component that displays a list of compliance controls.
- * Allows filtering controls by text.
- *
- * @returns The rendered ComplianceBoard component.
- */
 export default function ComplianceBoard() {
   const [rows, setRows] = useState<ComplianceControl[]>([]);
   useEffect(() => {

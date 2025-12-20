@@ -1,11 +1,3 @@
-/**
- * Exports a Cytoscape instance to an SVG string.
- * Renders nodes as circles and edges as paths.
- *
- * @param cy - The Cytoscape instance.
- * @param options - Configuration options (e.g., padding).
- * @returns The SVG string representation of the graph.
- */
 export function exportCyToSvg(cy, options = {}) {
   if (!cy) return '';
   const padding = options.padding || 20;
@@ -64,12 +56,6 @@ export function exportCyToSvg(cy, options = {}) {
   return svg;
 }
 
-/**
- * Initiates a download of the given SVG string.
- *
- * @param svgString - The SVG content to download.
- * @param filename - The filename for the downloaded file (default: `graph-{timestamp}.svg`).
- */
 export function downloadSvg(svgString, filename = `graph-${Date.now()}.svg`) {
   const blob = new Blob([svgString], { type: 'image/svg+xml' });
   const url = URL.createObjectURL(blob);

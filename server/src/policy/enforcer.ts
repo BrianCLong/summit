@@ -1,6 +1,11 @@
 import { trace, Span } from '@opentelemetry/api';
 import { Counter, Histogram } from 'prom-client';
 import { redis } from '../subscriptions/pubsub';
+import {
+  SecurityEvent,
+  ZeroTrustAuditLogger,
+  createZeroTrustAuditLogger,
+} from '../../security/zero-trust/siem/audit-logger';
 
 const tracer = trace.getTracer('policy-enforcer', '24.2.0');
 
@@ -24,6 +29,18 @@ const purposeViolations = new Counter({
   labelNames: ['tenant_id', 'required_purpose', 'provided_purpose'],
 });
 
+const reasonViolations = new Counter({
+  name: 'reason_violations_total',
+  help: 'Total reason-for-access violations',
+  labelNames: ['tenant_id', 'action', 'violation_type'],
+});
+
+const selectorExpansionViolations = new Counter({
+  name: 'selector_expansion_violations_total',
+  help: 'Total selector expansion threshold violations',
+  labelNames: ['tenant_id', 'query_type'],
+});
+
 export type Purpose =
   | 'investigation'
   | 'benchmarking'
@@ -37,9 +54,16 @@ interface PolicyContext {
   action: Action;
   resource?: string;
   purpose?: Purpose;
+  reasonForAccess?: string; // User-provided justification for data access
   clientIP?: string;
   userAgent?: string;
   timestamp?: Date;
+  // Query scope metadata for selector minimization
+  queryMetadata?: {
+    initialSelectors?: number;
+    expandedSelectors?: number;
+    recordsAccessed?: number;
+  };
 }
 
 interface PolicyDecision {
@@ -68,6 +92,11 @@ export class PolicyEnforcer {
   private readonly cachePrefix = 'policy_cache';
   private readonly defaultTTL = 300; // 5 minutes
   private readonly provenanceLog: ProvenanceEntry[] = [];
+  private readonly auditLogger: ZeroTrustAuditLogger;
+
+  constructor(auditLogger: ZeroTrustAuditLogger = createZeroTrustAuditLogger()) {
+    this.auditLogger = auditLogger;
+  }
 
   async enforce(context: PolicyContext): Promise<PolicyDecision> {
     return tracer.startActiveSpan('policy.enforce', async (span: Span) => {
@@ -170,6 +199,149 @@ export class PolicyEnforcer {
     return this.enforce(context);
   }
 
+  /**
+   * Validate reason-for-access requirement
+   * Ensures users provide meaningful justification for data access
+   */
+  async validateReasonForAccess(context: PolicyContext): Promise<PolicyDecision> {
+    const requiresReason = this.shouldRequireReason(context);
+
+    if (!requiresReason) {
+      // Reason not required, continue with normal enforcement
+      return this.enforce(context);
+    }
+
+    // Reason is required
+    if (!context.reasonForAccess || context.reasonForAccess.trim().length === 0) {
+      reasonViolations.inc({
+        tenant_id: context.tenantId,
+        action: context.action,
+        violation_type: 'missing',
+      });
+
+      return {
+        allow: false,
+        reason: 'Reason for access is required for this operation',
+        auditRequired: true,
+      };
+    }
+
+    // Validate reason quality
+    const validationResult = this.validateReasonQuality(context.reasonForAccess);
+    if (!validationResult.valid) {
+      reasonViolations.inc({
+        tenant_id: context.tenantId,
+        action: context.action,
+        violation_type: 'invalid',
+      });
+
+      return {
+        allow: false,
+        reason: `Invalid reason for access: ${validationResult.errors.join(', ')}`,
+        auditRequired: true,
+      };
+    }
+
+    // Reason is valid, continue with normal enforcement
+    return this.enforce(context);
+  }
+
+  /**
+   * Determine if reason-for-access is required based on context
+   */
+  private shouldRequireReason(context: PolicyContext): boolean {
+    // Always require reason for sensitive operations
+    if (context.action === 'delete') {
+      return true;
+    }
+
+    // Require reason for broad read operations
+    if (context.action === 'read' && context.queryMetadata) {
+      const expansionRatio =
+        (context.queryMetadata.expandedSelectors || 0) /
+        Math.max(context.queryMetadata.initialSelectors || 1, 1);
+
+      // Require reason if expansion ratio exceeds threshold (e.g., 5x)
+      if (expansionRatio > 5.0) {
+        return true;
+      }
+
+      // Require reason if accessing many records
+      if ((context.queryMetadata.recordsAccessed || 0) > 10000) {
+        return true;
+      }
+    }
+
+    // Require reason for sensitive resources
+    if (context.resource && context.resource.includes('sensitive')) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Validate the quality of the provided reason
+   */
+  private validateReasonQuality(reason: string): { valid: boolean; errors: string[] } {
+    const errors: string[] = [];
+
+    // Minimum length check
+    if (reason.length < 10) {
+      errors.push('reason must be at least 10 characters');
+    }
+
+    // Check for generic/placeholder reasons
+    const genericReasons = ['test', 'debug', 'checking', 'n/a', 'none', 'testing', 'just checking'];
+    const lowerReason = reason.toLowerCase();
+    if (genericReasons.some((generic) => lowerReason.includes(generic) && lowerReason.length < 20)) {
+      errors.push('reason appears to be generic or placeholder');
+    }
+
+    // Check for minimum word count (at least 3 words)
+    const wordCount = reason.trim().split(/\s+/).length;
+    if (wordCount < 3) {
+      errors.push('reason must contain at least 3 words');
+    }
+
+    return {
+      valid: errors.length === 0,
+      errors,
+    };
+  }
+
+  /**
+   * Validate selector expansion and trigger alerts for over-broad queries
+   */
+  async validateSelectorExpansion(
+    context: PolicyContext,
+    maxExpansionRatio: number = 10.0,
+  ): Promise<PolicyDecision> {
+    if (!context.queryMetadata) {
+      // No query metadata, can't validate
+      return this.enforce(context);
+    }
+
+    const { initialSelectors = 1, expandedSelectors = 1 } = context.queryMetadata;
+    const expansionRatio = expandedSelectors / Math.max(initialSelectors, 1);
+
+    if (expansionRatio > maxExpansionRatio) {
+      selectorExpansionViolations.inc({
+        tenant_id: context.tenantId,
+        query_type: context.resource || 'unknown',
+      });
+
+      return {
+        allow: false,
+        reason: `Query expansion ratio ${expansionRatio.toFixed(2)} exceeds maximum allowed ${maxExpansionRatio}`,
+        auditRequired: true,
+      };
+    }
+
+    // Expansion is within limits, continue with normal enforcement
+    return this.enforce(context);
+  }
+
   private async evaluatePolicy(
     context: PolicyContext,
   ): Promise<PolicyDecision> {
@@ -266,12 +438,92 @@ export class PolicyEnforcer {
     // In-memory for now - in production would write to audit database
     this.provenanceLog.push(entry);
 
+    try {
+      await this.emitDecisionEvent(entry, context, decision);
+    } catch (error) {
+      console.error('Policy audit bus publish failed:', error);
+    }
+
     // Keep only last 10000 entries in memory
     if (this.provenanceLog.length > 10000) {
       this.provenanceLog.splice(0, 1000);
     }
 
     console.log('Policy provenance:', JSON.stringify(entry));
+  }
+
+  private async emitDecisionEvent(
+    entry: ProvenanceEntry,
+    context: PolicyContext,
+    decision: PolicyDecision,
+  ): Promise<void> {
+    const event: SecurityEvent = {
+      id: entry.id,
+      timestamp: entry.timestamp.getTime(),
+      eventType: 'policy_decision',
+      severity: decision.allow ? 'informational' : 'medium',
+      source: {
+        type: 'application',
+        component: 'policy-enforcer',
+        hostname: process.env.HOSTNAME || 'unknown',
+      },
+      actor: {
+        type: 'user',
+        id: context.userId || 'anonymous',
+      },
+      action: {
+        type: context.action,
+        method: 'policy.enforce',
+        parameters: {
+          resource: context.resource,
+          purpose: context.purpose,
+          tenantId: context.tenantId,
+          reasonForAccess: context.reasonForAccess,
+        },
+      },
+      resource: {
+        type: 'resource',
+        id: context.resource || 'unspecified',
+        classification: context.resource?.includes('sensitive')
+          ? 'restricted'
+          : 'internal',
+        owner: context.tenantId,
+      },
+      outcome: {
+        result: decision.allow ? 'success' : 'denied',
+        reason: decision.reason,
+        policyViolations: decision.requiredPurpose
+          ? [`purpose_required:${decision.requiredPurpose}`]
+          : undefined,
+      },
+      context: {
+        sourceIp: context.clientIP || 'unknown',
+        requestId: entry.id,
+        correlationId: context.reasonForAccess,
+      },
+      zeroTrust: {
+        trustScore: decision.allow ? 85 : 20,
+        identityVerified: Boolean(context.userId),
+        deviceTrusted: true,
+        sessionFresh: true,
+        mfaVerified: false,
+        policyDecision: decision.allow ? 'allow' : 'deny',
+        enforcementPoint: 'policy-enforcer',
+      },
+      compliance: {
+        frameworks: ['NIST-800-53', 'FedRAMP'],
+        controls: ['AC-3', 'AC-6', 'AU-2'],
+        retentionRequired: true,
+        auditRequired: true,
+      },
+      rawData: {
+        auditRequired: decision.auditRequired ?? false,
+        ttlSeconds: decision.ttlSeconds,
+        queryMetadata: context.queryMetadata,
+      },
+    };
+
+    await this.auditLogger.logSecurityEvent(event);
   }
 
   getProvenanceLog(tenantId?: string, limit: number = 100): ProvenanceEntry[] {

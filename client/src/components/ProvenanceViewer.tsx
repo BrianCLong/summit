@@ -1,14 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import $ from 'jquery';
-
-/**
- * A component to view the provenance chain of a specific tag.
- * Fetches and displays the stages and status (OK/FAIL) of the provenance chain.
- *
- * @param props - The component props.
- * @param props.tag - The tag identifier to fetch provenance for.
- * @returns The rendered ProvenanceViewer component.
- */
 export default function ProvenanceViewer({ tag }: { tag: string }) {
   const [chain, setChain] = useState<any[]>([]);
   useEffect(() => {

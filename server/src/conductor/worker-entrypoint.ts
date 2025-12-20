@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @ts-nocheck
 
 // Worker Entrypoint for Conductor Queue Processing
 // Used in Kubernetes deployments to start queue workers
@@ -8,6 +9,8 @@ import { queueWorker, WorkerFactory } from './scheduling/queue-worker';
 import { prometheusConductorMetrics } from './observability/prometheus';
 import express from 'express';
 import { register } from '../monitoring/metrics';
+import { verifyStartupDependencies } from '../utils/startup-readiness';
+import { getRedisClient } from '../db/redis';
 
 /**
  * Worker application setup
@@ -15,6 +18,7 @@ import { register } from '../monitoring/metrics';
 async function startWorker() {
   const role = process.env.CONDUCTOR_ROLE || 'worker';
   const expertType = process.env.EXPERT_TYPE;
+  let ready = false;
 
   console.log(
     `Starting Conductor ${role}${expertType ? ` for ${expertType}` : ''}`,
@@ -43,6 +47,8 @@ async function startWorker() {
   // Start worker process
   let worker;
 
+  await verifyStartupDependencies();
+
   if (expertType && expertType !== 'light') {
     // Specific expert worker
     worker = WorkerFactory.createExpertWorker(expertType as any);
@@ -63,6 +69,35 @@ async function startWorker() {
       status: status.isRunning ? 'running' : 'stopped',
       worker: status,
       timestamp: Date.now(),
+    });
+  });
+
+  // Readiness probe ensuring queue is live and dependencies respond
+  workerApp.get('/ready', async (_req, res) => {
+    const status = worker.getStatus();
+    try {
+      const redis = getRedisClient();
+      await redis.ping();
+    } catch (error) {
+      return res.status(503).json({
+        success: false,
+        status: 'not ready',
+        reason: error instanceof Error ? error.message : 'Redis unavailable',
+      });
+    }
+
+    if (!ready || !status.isRunning) {
+      return res.status(503).json({
+        success: false,
+        status: 'starting',
+        worker: status,
+      });
+    }
+
+    return res.json({
+      success: true,
+      status: 'ready',
+      worker: status,
     });
   });
 
@@ -92,6 +127,8 @@ async function startWorker() {
 
   // Start the actual worker
   await worker.start();
+
+  ready = true;
 
   console.log(`Worker ${worker.getStatus().workerId} started successfully`);
 

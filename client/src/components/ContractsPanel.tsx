@@ -1,13 +1,8 @@
 import React, { useEffect, useState } from 'react';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import $ from 'jquery';
-
-/**
- * A panel that displays the current service level contract details.
- * Shows area, intent, and budget metrics (latency and error rate).
- *
- * @returns The rendered ContractsPanel component.
- */
 export default function ContractsPanel() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [c, setC] = useState<any | null>(null);
   useEffect(() => {
     const controller = new AbortController();

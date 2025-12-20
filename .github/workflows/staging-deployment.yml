@@ -1,0 +1,132 @@
+name: Staging Deployment Pipeline
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+  id-token: write
+
+env:
+  STAGING_APP: companyos-stage
+  PRODUCTION_APP: companyos-prod
+  REGISTRY: ghcr.io
+
+concurrency:
+  group: staging-deploy-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  metadata:
+    name: Prepare release metadata
+    runs-on: ubuntu-latest
+    outputs:
+      image-tag: ${{ steps.tag.outputs.image_tag }}
+    steps:
+      - name: Compute image tag
+        id: tag
+        run: |
+          SHORT_SHA="${GITHUB_SHA::7}"
+          echo "image_tag=${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+          echo "Using image tag ${SHORT_SHA}" >> "$GITHUB_STEP_SUMMARY"
+
+  deploy-staging:
+    name: Deploy to staging and run synthetic checks
+    runs-on: ubuntu-latest
+    needs: metadata
+    environment:
+      name: staging
+      url: https://console.stage.topicality.co
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ArgoCD CLI
+        uses: int128/setup-argocd@v1
+
+      - name: Authenticate to ArgoCD
+        env:
+          ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
+          ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
+        run: |
+          if [[ -z "${ARGOCD_SERVER}" || -z "${ARGOCD_AUTH_TOKEN}" ]]; then
+            echo "❌ Missing ArgoCD credentials" >&2
+            exit 1
+          fi
+          argocd login "${ARGOCD_SERVER}" \
+            --grpc-web \
+            --auth-token "${ARGOCD_AUTH_TOKEN}"
+
+      - name: Update staging image tags
+        run: |
+          argocd app set "${{ env.STAGING_APP }}" \
+            --helm-set intelgraph-api.image.tag=${{ needs.metadata.outputs.image-tag }} \
+            --helm-set companyos-console.image.tag=${{ needs.metadata.outputs.image-tag }} \
+            --helm-set mc-runner.image.tag=${{ needs.metadata.outputs.image-tag }}
+
+      - name: Sync staging environment
+        run: |
+          argocd app sync "${{ env.STAGING_APP }}" --retry-limit 3 --prune
+
+      - name: Wait for healthy staging deployment
+        run: |
+          argocd app wait "${{ env.STAGING_APP }}" --timeout 600 --health
+
+      - name: Run staging synthetic validation
+        env:
+          API_BASE: https://api.stage.topicality.co
+          DEMO_TENANT: demo
+          TEST_TIMEOUT: 15
+        run: |
+          chmod +x ops/post-deploy-smoke-tests.sh
+          ./ops/post-deploy-smoke-tests.sh
+
+      - name: Capture rollout status
+        run: |
+          argocd app get "${{ env.STAGING_APP }}" >> "$GITHUB_STEP_SUMMARY"
+
+  promote-production:
+    name: Promote artefacts to production
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    if: ${{ needs.deploy-staging.result == 'success' }}
+    environment:
+      name: production
+      url: https://console.topicality.co
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ArgoCD CLI
+        uses: int128/setup-argocd@v1
+
+      - name: Authenticate to ArgoCD
+        env:
+          ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
+          ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
+        run: |
+          argocd login "${ARGOCD_SERVER}" \
+            --grpc-web \
+            --auth-token "${ARGOCD_AUTH_TOKEN}"
+
+      - name: Update production image tags
+        run: |
+          argocd app set "${{ env.PRODUCTION_APP }}" \
+            --helm-set intelgraph-api.image.tag=${{ needs.metadata.outputs.image-tag }} \
+            --helm-set companyos-console.image.tag=${{ needs.metadata.outputs.image-tag }} \
+            --helm-set mc-runner.image.tag=${{ needs.metadata.outputs.image-tag }}
+
+      - name: Sync production environment (canary)
+        run: |
+          argocd app sync "${{ env.PRODUCTION_APP }}" --retry-limit 3 --prune
+
+      - name: Verify production health
+        run: |
+          argocd app wait "${{ env.PRODUCTION_APP }}" --timeout 900 --health
+
+      - name: Post-promotion validation summary
+        run: |
+          echo "## Production deployment summary" >> "$GITHUB_STEP_SUMMARY"
+          argocd app history "${{ env.PRODUCTION_APP }}" | head -n 20 >> "$GITHUB_STEP_SUMMARY"

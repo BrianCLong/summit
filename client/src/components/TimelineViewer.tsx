@@ -20,40 +20,22 @@ const EVENTS_QUERY = gql`
   }
 `;
 
-/**
- * Represents an entity within an investigation.
- */
 type InvestigationEntity = {
   id: string;
   type: string;
   createdAt: string;
 };
 
-/**
- * Represents the result of the timeline events query.
- */
 type TimelineQueryResult = {
   entities?: InvestigationEntity[];
   relationships?: InvestigationEntity[];
 };
 
-/**
- * Props for the TimelineViewer component.
- */
 interface TimelineViewerProps {
-  /** The ID of the investigation to visualize. */
   investigationId: string;
-  /** Callback when an item on the timeline is selected. */
   onSelect?: (item: DataItem) => void;
 }
 
-/**
- * A component that visualizes investigation events (entities and relationships) on an interactive timeline.
- * Uses vis-timeline for rendering.
- *
- * @param props - The component props.
- * @returns The rendered TimelineViewer component.
- */
 const TimelineViewer: React.FC<TimelineViewerProps> = ({
   investigationId,
   onSelect,

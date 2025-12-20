@@ -1,23 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-/**
- * Represents a command item in the palette.
- */
-type Item = {
-  /** Unique identifier for the command. */
-  id: string;
-  /** Display label for the command. */
-  label: string;
-  /** Function to execute when the command is selected. */
-  action: () => void;
-};
+type Item = { id: string; label: string; action: () => void };
 
-/**
- * A command palette component that opens with Ctrl/Meta + Shift + P.
- * Allows users to quickly execute commands like opening Copilot.
- *
- * @returns The rendered CommandPalette component, or null if not open.
- */
 export default function CommandPalette() {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');

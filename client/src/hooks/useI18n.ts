@@ -1,8 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
 
-/**
- * Supported locales (ISO 639-1 + ISO 3166-1 alpha-2).
- */
 export type Locale =
   | 'en-US' // English (United States)
   | 'en-GB' // English (United Kingdom)
@@ -35,90 +32,14 @@ export type Locale =
   | 'al-AL' // Albanian (Albania)
   | 'me-ME'; // Montenegrin (Montenegro)
 
-/**
- * Interface for localization messages.
- * Can be nested to support namespaced keys (e.g., "common.error").
- */
 interface Messages {
   [key: string]: string | Messages;
 }
 
-/**
- * Base English messages.
- */
-const EN_MESSAGES: Messages = {
-  common: {
-    loading: 'Loading...',
-    error: 'Error',
-    success: 'Success',
-    cancel: 'Cancel',
-    save: 'Save',
-    edit: 'Edit',
-    delete: 'Delete',
-    search: 'Search',
-    filter: 'Filter',
-    export: 'Export',
-    refresh: 'Refresh',
-    close: 'Close',
-    yes: 'Yes',
-    no: 'No',
-  },
-  navigation: {
-    dashboard: 'Dashboard',
-    investigations: 'Investigations',
-    graphWorkbench: 'Graph Workbench',
-    reports: 'Reports',
-    settings: 'Settings',
-  },
-  presence: {
-    active: 'active',
-    away: 'away',
-    busy: 'busy',
-    offline: 'offline',
-    usersOnline: '{count} users online',
-  },
-  graph: {
-    nodes: 'Nodes',
-    edges: 'Edges',
-    paths: 'Paths',
-    neighbors: 'Neighbors',
-    streaming: 'Streaming',
-    findPaths: 'Find Paths',
-    shortestPaths: 'Shortest Paths',
-    pathLength: 'Path Length',
-  },
-  search: {
-    powerSearch: 'Power Search',
-    savedSearches: 'Saved Searches',
-    bulkActions: 'Bulk Actions',
-    queryBuilder: 'Query Builder',
-    addFilter: 'Add Filter',
-    clearFilters: 'Clear Filters',
-  },
-  reports: {
-    generateReport: 'Generate Report',
-    executiveSummary: 'Executive Summary',
-    forensicsReport: 'Forensics Report',
-    reportTemplate: 'Report Template',
-    exportFormat: 'Export Format',
-  },
-  performance: {
-    fps: 'FPS',
-    performance: 'Performance',
-    budget: 'Budget',
-    lighthouse: 'Lighthouse',
-  },
-  dates: {
-    today: 'Today',
-    yesterday: 'Yesterday',
-    lastWeek: 'Last Week',
-    lastMonth: 'Last Month',
-  },
-};
+// Cache for loaded messages
+const messageCache: Record<string, Messages> = {};
 
-/**
- * Locale configurations.
- */
+// Locale configurations
 const LOCALE_CONFIGS: Record<
   Locale,
   {
@@ -311,9 +232,39 @@ const LOCALE_CONFIGS: Record<
 };
 
 /**
- * i18n hook with NATO locale support.
- *
- * @returns An object containing locale state, translation function (t), and formatting utilities.
+ * Load messages for a specific locale
+ */
+async function loadMessages(locale: Locale): Promise<Messages> {
+  // Return cached messages if available
+  if (messageCache[locale]) {
+    return messageCache[locale];
+  }
+
+  try {
+    // Dynamically import the locale file
+    const messages = await import(`../locales/${locale}.json`);
+    messageCache[locale] = messages.default || messages;
+    return messageCache[locale];
+  } catch (error) {
+    console.warn(`Failed to load locale ${locale}, falling back to en-US`, error);
+
+    // Try to load en-US as fallback
+    if (locale !== 'en-US' && !messageCache['en-US']) {
+      try {
+        const fallback = await import(`../locales/en-US.json`);
+        messageCache['en-US'] = fallback.default || fallback;
+      } catch (fallbackError) {
+        console.error('Failed to load fallback locale en-US', fallbackError);
+        messageCache['en-US'] = {};
+      }
+    }
+
+    return messageCache['en-US'] || {};
+  }
+}
+
+/**
+ * i18n hook with NATO locale support
  */
 export function useI18n() {
   const [locale, setLocale] = useState<Locale>(() => {
@@ -321,33 +272,34 @@ export function useI18n() {
     return stored && stored in LOCALE_CONFIGS ? stored : 'en-US';
   });
 
-  const [messages, setMessages] = useState<Messages>(EN_MESSAGES);
+  const [messages, setMessages] = useState<Messages>({});
+  const [isLoading, setIsLoading] = useState(true);
 
   // Load messages for current locale
   useEffect(() => {
-    if (locale === 'en-US') {
-      setMessages(EN_MESSAGES);
-      return;
-    }
+    let mounted = true;
 
-    // In production, these would be loaded dynamically
-    // For now, we'll fall back to English
-    setMessages(EN_MESSAGES);
+    setIsLoading(true);
+    loadMessages(locale).then((loadedMessages) => {
+      if (mounted) {
+        setMessages(loadedMessages);
+        setIsLoading(false);
+      }
+    });
+
+    return () => {
+      mounted = false;
+    };
   }, [locale]);
 
   // Persist locale preference
   useEffect(() => {
     localStorage.setItem('locale', locale);
+    // Update HTML lang attribute for accessibility
+    document.documentElement.lang = locale;
   }, [locale]);
 
   const t = useMemo(() => {
-    /**
-     * Translates a key to the current locale.
-     *
-     * @param key - The translation key (e.g., "common.success").
-     * @param params - Optional parameters for interpolation.
-     * @returns The translated string, or the key if not found.
-     */
     return (key: string, params?: Record<string, any>): string => {
       const keys = key.split('.');
       let value: any = messages;
@@ -374,12 +326,6 @@ export function useI18n() {
 
   const formatDate = useMemo(() => {
     const config = LOCALE_CONFIGS[locale];
-    /**
-     * Formats a date according to the current locale.
-     *
-     * @param date - The date to format (Date object or string).
-     * @returns The formatted date string.
-     */
     return (date: Date | string): string => {
       const d = typeof date === 'string' ? new Date(date) : date;
       return d.toLocaleDateString(locale, {
@@ -392,25 +338,12 @@ export function useI18n() {
 
   const formatNumber = useMemo(() => {
     const config = LOCALE_CONFIGS[locale];
-    /**
-     * Formats a number according to the current locale.
-     *
-     * @param num - The number to format.
-     * @returns The formatted number string.
-     */
     return (num: number): string => {
       return num.toLocaleString(locale, config.numberFormat);
     };
   }, [locale]);
 
   const formatCurrency = useMemo(() => {
-    /**
-     * Formats a currency amount according to the current locale.
-     *
-     * @param amount - The amount to format.
-     * @param currency - The currency code (default: 'EUR').
-     * @returns The formatted currency string.
-     */
     return (amount: number, currency = 'EUR'): string => {
       return amount.toLocaleString(locale, {
         style: 'currency',
@@ -426,6 +359,7 @@ export function useI18n() {
     formatDate,
     formatNumber,
     formatCurrency,
+    isLoading,
     availableLocales: Object.entries(LOCALE_CONFIGS).map(([code, config]) => ({
       code: code as Locale,
       name: config.name,

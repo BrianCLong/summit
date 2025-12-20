@@ -1,0 +1,39 @@
+name: Helm - Chart Validation
+on:
+  push:
+    branches: [main, develop]
+    paths: ['charts/**']
+  pull_request:
+    branches: [main, develop]
+    paths: ['charts/**']
+permissions:
+  contents: read
+jobs:
+  helm-lint:
+    name: Helm Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+        with:
+          version: 'v3.14.0'
+      - name: Lint charts
+        run: |
+          for chart in charts/*/Chart.yaml; do
+            chart_dir=$(dirname "$chart")
+            echo "Linting $(basename $chart_dir)"
+            helm lint "$chart_dir" --strict
+          done
+  helm-template:
+    name: Template Validation
+    runs-on: ubuntu-latest
+    needs: helm-lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+      - name: Render templates
+        run: |
+          for chart in charts/*/Chart.yaml; do
+            chart_dir=$(dirname "$chart")
+            helm template test "$chart_dir" --debug
+          done
