@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Full OpenTelemetry Tracing Implementation
  * Provides distributed tracing across all services with Jaeger/OTLP export

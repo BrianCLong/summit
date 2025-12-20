@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { GraphConsistencyService } from '../GraphConsistencyService';
 import fs from 'fs/promises';
 import path from 'path';

@@ -9,6 +9,9 @@ on:
     # Run security scan daily at 2 AM UTC
     - cron: '0 2 * * *'
 
+env:
+  SERVICE_NAME: summit-platform
+
 jobs:
   dependency-scan:
     name: Dependency Vulnerability Scan
@@ -33,16 +36,45 @@ jobs:
       - name: Run pnpm audit
         # Blocking on high severity vulnerabilities
         run: pnpm audit --audit-level=high
-        continue-on-error: false
+        continue-on-error: true
 
       - name: Run npm audit (JSON output)
         run: pnpm audit --json > audit-report.json || true
 
+      - name: Generate vulnerability report
+        run: |
+          node .github/scripts/audit-gate.js audit-report.json
+        env:
+          SERVICE_NAME: ${{ env.SERVICE_NAME }}
+          VULN_REPORT_PATH: vuln_report.${{ env.SERVICE_NAME }}.json
+          AUDIT_ARTIFACTS_DIR: artifacts/security/${{ env.SERVICE_NAME }}
+          MAX_AUDIT_SEVERITY: high
+          ENFORCE_AUDIT_EXIT: false
+
+      - name: Upload vulnerability artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vuln-report-${{ env.SERVICE_NAME }}
+          path: |
+            vuln_report.${{ env.SERVICE_NAME }}.json
+            artifacts/security/${{ env.SERVICE_NAME }}/
+
       - name: Upload audit report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: dependency-audit-report
           path: audit-report.json
+
+      - name: Enforce vulnerability gate
+        run: |
+          blocked=$(jq '.decision.blocked // 0' vuln_report.${SERVICE_NAME}.json)
+          waived=$(jq '.waiver.applied // false' vuln_report.${SERVICE_NAME}.json)
+          if [ "$blocked" -gt 0 ] && [ "$waived" != "true" ]; then
+            echo "High severity vulnerabilities detected without an approved waiver"
+            exit 1
+          fi
 
   secret-scan:
     name: Secret Scanning
