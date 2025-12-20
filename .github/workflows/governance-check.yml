@@ -1,0 +1,52 @@
+name: Governance Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, labeled, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  enforcement:
+    name: Enforce Governance Tiers
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required for git diff
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run Governance Check
+        run: node scripts/ci/governance-check.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_EVENT_PATH: ${{ github.event_path }}
+          GITHUB_BASE_REF: ${{ github.base_ref }}
+          GITHUB_HEAD_REF: ${{ github.head_ref }}
+
+  audit-log:
+    name: Audit Governance Decision
+    runs-on: ubuntu-latest
+    if: always()
+    needs: enforcement
+    steps:
+      - name: Generate Audit Record
+        run: |
+          echo "Timestamp: $(date -u)" > audit.log
+          echo "Workflow: Governance Check" >> audit.log
+          echo "Result: ${{ needs.enforcement.result }}" >> audit.log
+          echo "Repo: ${{ github.repository }}" >> audit.log
+          echo "PR: ${{ github.event.number }}" >> audit.log
+
+      - name: Upload Audit Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: governance-audit-log
+          path: audit.log

@@ -1,0 +1,41 @@
+{
+  "intelgraph": {
+    "trafficStages": [10, 50],
+    "featureFlags": ["intelgraph.canary.enabled"],
+    "namespaces": {
+      "staging": "intelgraph-staging",
+      "production": "intelgraph-prod"
+    },
+    "release": "server",
+    "chart": "./charts/server",
+    "service": "intelgraph-service",
+    "namespacePrefix": "intelgraph",
+    "host": "api.intelgraph.io"
+  },
+  "maestro": {
+    "trafficStages": [5, 25, 50],
+    "featureFlags": ["maestro.canary.enabled"],
+    "namespaces": {
+      "staging": "maestro-staging",
+      "production": "maestro-prod"
+    },
+    "release": "intelgraph-maestro",
+    "chart": "./charts/intelgraph-maestro",
+    "service": "maestro-service",
+    "namespacePrefix": "maestro",
+    "host": "maestro.intelgraph.ai"
+  },
+  "companyos": {
+    "trafficStages": [5, 20, 50],
+    "featureFlags": ["companyos.canary.enabled"],
+    "namespaces": {
+      "staging": "companyos-staging",
+      "production": "companyos-prod"
+    },
+    "release": "companyos",
+    "chart": "./charts/companyos",
+    "service": "companyos-service",
+    "namespacePrefix": "companyos",
+    "host": "api.summit.com"
+  }
+}
