@@ -26,7 +26,8 @@ export interface Run {
   executor_id?: string;
   created_at: Date;
   updated_at: Date;
-  tenant_id: string; // Added tenant_id
+  tenant_id: string;
+  idempotency_key?: string;
 }
 
 export interface RunCreateInput {
@@ -34,7 +35,8 @@ export interface RunCreateInput {
   pipeline_name: string;
   input_params?: any;
   executor_id?: string;
-  tenant_id: string; // Added tenant_id
+  tenant_id: string;
+  idempotency_key?: string;
 }
 
 export interface RunUpdateInput {
@@ -52,7 +54,8 @@ class RunsRepo {
     const query = `
       SELECT id, pipeline_id, pipeline_name as pipeline, status, started_at, 
              completed_at, duration_ms, cost, input_params, output_data, 
-             error_message, executor_id, created_at, updated_at, tenant_id
+             error_message, executor_id, created_at, updated_at, tenant_id,
+             idempotency_key
       FROM runs 
       WHERE tenant_id = $1
       ORDER BY created_at DESC 
@@ -66,7 +69,8 @@ class RunsRepo {
     const query = `
       SELECT id, pipeline_id, pipeline_name as pipeline, status, started_at, 
              completed_at, duration_ms, cost, input_params, output_data, 
-             error_message, executor_id, created_at, updated_at, tenant_id
+             error_message, executor_id, created_at, updated_at, tenant_id,
+             idempotency_key
       FROM runs 
       WHERE id = $1 AND tenant_id = $2
     `;
@@ -75,23 +79,61 @@ class RunsRepo {
   }
 
   async create(data: RunCreateInput): Promise<Run> {
+    // Idempotency check
+    if (data.idempotency_key) {
+      const existingQuery = `
+        SELECT id, pipeline_id, pipeline_name as pipeline, status, started_at,
+               completed_at, duration_ms, cost, input_params, output_data,
+               error_message, executor_id, created_at, updated_at, tenant_id,
+               idempotency_key
+        FROM runs
+        WHERE tenant_id = $1 AND idempotency_key = $2
+      `;
+      const existing = await getPool().query(existingQuery, [data.tenant_id, data.idempotency_key]);
+      if (existing.rows.length > 0) {
+        return existing.rows[0];
+      }
+    }
+
     const id = uuidv4();
     const query = `
-      INSERT INTO runs (id, pipeline_id, pipeline_name, input_params, executor_id, tenant_id)
-      VALUES ($1, $2, $3, $4, $5, $6)
+      INSERT INTO runs (id, pipeline_id, pipeline_name, input_params, executor_id, tenant_id, idempotency_key)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING id, pipeline_id, pipeline_name as pipeline, status, started_at, 
                 completed_at, duration_ms, cost, input_params, output_data, 
-                error_message, executor_id, created_at, updated_at, tenant_id
+                error_message, executor_id, created_at, updated_at, tenant_id,
+                idempotency_key
     `;
-    const result = await getPool().query(query, [
-      id,
-      data.pipeline_id,
-      data.pipeline_name,
-      JSON.stringify(data.input_params || {}),
-      data.executor_id,
-      data.tenant_id,
-    ]);
-    return result.rows[0];
+    try {
+      const result = await getPool().query(query, [
+        id,
+        data.pipeline_id,
+        data.pipeline_name,
+        JSON.stringify(data.input_params || {}),
+        data.executor_id,
+        data.tenant_id,
+        data.idempotency_key,
+      ]);
+      return result.rows[0];
+    } catch (error: any) {
+      // Check for unique constraint violation on idempotency_key
+      // Postgres error code 23505 is unique_violation
+      if (data.idempotency_key && error.code === '23505' && error.constraint === 'idx_runs_idempotency') {
+         const existingQuery = `
+            SELECT id, pipeline_id, pipeline_name as pipeline, status, started_at,
+                   completed_at, duration_ms, cost, input_params, output_data,
+                   error_message, executor_id, created_at, updated_at, tenant_id,
+                   idempotency_key
+            FROM runs
+            WHERE tenant_id = $1 AND idempotency_key = $2
+          `;
+          const existing = await getPool().query(existingQuery, [data.tenant_id, data.idempotency_key]);
+          if (existing.rows.length > 0) {
+            return existing.rows[0];
+          }
+      }
+      throw error;
+    }
   }
 
   async update(
@@ -140,7 +182,8 @@ class RunsRepo {
       WHERE id = $${paramCount} AND tenant_id = $${paramCount + 1}
       RETURNING id, pipeline_id, pipeline_name as pipeline, status, started_at, 
                 completed_at, duration_ms, cost, input_params, output_data, 
-                error_message, executor_id, created_at, updated_at, tenant_id
+                error_message, executor_id, created_at, updated_at, tenant_id,
+                idempotency_key
     `;
     values.push(id);
     values.push(tenantId);
@@ -163,7 +206,8 @@ class RunsRepo {
     const query = `
       SELECT id, pipeline_id, pipeline_name as pipeline, status, started_at, 
              completed_at, duration_ms, cost, input_params, output_data, 
-             error_message, executor_id, created_at, updated_at, tenant_id
+             error_message, executor_id, created_at, updated_at, tenant_id,
+             idempotency_key
       FROM runs 
       WHERE pipeline_id = $1 AND tenant_id = $2
       ORDER BY created_at DESC 

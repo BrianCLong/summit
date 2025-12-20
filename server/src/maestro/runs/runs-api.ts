@@ -24,6 +24,7 @@ const RunCreateSchema = z.object({
   pipeline_name: z.string().min(1).max(128),
   input_params: z.record(z.any()).optional(),
   executor_id: z.string().uuid().optional(),
+  idempotency_key: z.string().optional(),
 });
 
 const RunUpdateSchema = z.object({
@@ -54,6 +55,7 @@ router.get('/runs', requirePermission('run:read'), async (req, res) => {
       status: run.status,
       durationMs: run.duration_ms || 0,
       cost: run.cost,
+      idempotencyKey: run.idempotency_key,
     }));
 
     res.json({ items: formattedItems });
@@ -110,7 +112,17 @@ router.post('/runs', requirePermission('run:create'), async (req, res) => {
       status: run.status,
       durationMs: run.duration_ms || 0,
       cost: run.cost,
+      idempotencyKey: run.idempotency_key,
     };
+
+    // If idempotency key matched an existing run, we return 200 OK instead of 201 Created
+    if (validation.data.idempotency_key && run.idempotency_key === validation.data.idempotency_key) {
+        const isNew = run.created_at.getTime() > Date.now() - 1000; // simple heuristic
+        if (!isNew) {
+             res.status(200).json(formattedRun);
+             return;
+        }
+    }
 
     res.status(201).json(formattedRun);
   } catch (error) {
@@ -199,6 +211,7 @@ router.get(
         status: run.status,
         durationMs: run.duration_ms || 0,
         cost: run.cost,
+        idempotencyKey: run.idempotency_key,
       }));
 
       res.json({ items: formattedRuns });

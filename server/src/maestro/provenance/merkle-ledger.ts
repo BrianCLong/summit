@@ -1,6 +1,7 @@
 import { createHash } from 'crypto';
 import { getPostgresPool } from '../../db/postgres.js';
 import { otelService } from '../../middleware/observability/otel-tracing.js';
+import { intelGraphService } from './intel-graph.js';
 
 interface Evidence {
   id: string;
@@ -194,6 +195,11 @@ export class ProvenanceLedger {
         ],
       );
 
+      // Push to IntelGraph (Neo4j)
+      await intelGraphService.pushEvidence(evidence).catch(err => {
+          console.error('Failed to push evidence to IntelGraph:', err);
+      });
+
       // Update or create Merkle tree for this run
       await this.updateMerkleTree(evidence.runId);
 
@@ -366,6 +372,11 @@ export class ProvenanceLedger {
         claim.timestamp,
       ],
     );
+
+    // Push to IntelGraph
+    await intelGraphService.pushClaim(claim).catch(err => {
+        console.error('Failed to push claim to IntelGraph:', err);
+    });
 
     // Check for contradictions
     await this.detectContradictions(claim.id);
