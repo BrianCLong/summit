@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const DB_MANAGER = path.resolve(__dirname, 'db_manager.ts');
+const MANAGED_MIGRATE = path.resolve(__dirname, 'managed-migrate.ts');
 
 function runCommand(cmd: string) {
     try {
@@ -23,8 +23,9 @@ async function ciDryRun() {
 
     // We assume the DB is available (e.g., service container in CI).
     // The dry-run command in db_manager handles the transaction rollback logic.
+    // We use the new managed-migrate script which supports 'test' (dry-run).
 
-    const cmd = `npx tsx ${DB_MANAGER} dry-run`;
+    const cmd = `npx tsx ${MANAGED_MIGRATE} test`;
     runCommand(cmd);
 
     console.log('✅ CI Dry-Run Passed: Migrations can be applied and rolled back safely.');
