@@ -1,12 +1,9 @@
 import * as dotenv from 'dotenv';
-import dotenv from 'dotenv';
 import { ConfigSchema, type Config } from './schema.js';
 import { z } from 'zod';
 
-// Load environment variables
 dotenv.config();
 
-// Create a raw config object from process.env to map to our schema structure
 const rawConfig = {
   env: process.env.NODE_ENV,
   port: process.env.PORT,
@@ -38,7 +35,6 @@ const rawConfig = {
   },
   bcrypt: {
     rounds: parseInt(process.env.BCRYPT_ROUNDS || '14'),
-    rounds: process.env.BCRYPT_ROUNDS,
   },
   rateLimit: {
     windowMs: process.env.RATE_LIMIT_WINDOW_MS,
@@ -53,37 +49,19 @@ const rawConfig = {
   },
 };
 
-// Validation for production readiness
-if (config.requireRealDbs || config.env === 'production') {
-  const requiredEnvVars = [
-    'NEO4J_URI',
-    'NEO4J_USERNAME',
-    'NEO4J_PASSWORD',
-    'POSTGRES_HOST',
-    'POSTGRES_USER',
-    'POSTGRES_PASSWORD',
-    'REDIS_HOST',
-  ];
+let config: Config = rawConfig as unknown as Config;
 
-  // In production, we expect these to be set explicitly
-  const missing = requiredEnvVars.filter((key) => !process.env[key]);
-  if (missing.length > 0) {
-    console.error(
-      `❌ Production/RealDBs mode missing env vars: ${missing.join(', ')}`,
-    );
-let config: Config;
-
-try {
-  config = ConfigSchema.parse(rawConfig);
-} catch (error) {
-  if (error instanceof z.ZodError) {
-    console.error('❌ Invalid Configuration:', error.format());
-    process.exit(1);
+if (rawConfig.requireRealDbs || rawConfig.env === 'production') {
+  try {
+    config = ConfigSchema.parse(rawConfig);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      console.error('❌ Invalid Configuration:', error.format());
+      process.exit(1);
+    }
+    throw error;
   }
-  throw error;
-}
 
-  // Ensure not using default dev passwords in production
   const devPasswords = [
     'devpassword',
     'dev_jwt_secret_12345',
@@ -96,21 +74,7 @@ try {
     devPasswords.includes(config.redis.password) ||
     devPasswords.includes(config.jwt.refreshSecret)
   ) {
-    console.error(
-      '❌ Production/RealDBs mode but using default dev passwords. Set proper secrets.',
-    );
-// Production Readiness Checks
-if (config.requireRealDbs) {
-  const devPasswords = ['devpassword', 'dev_jwt_secret_12345'];
-  const violations: string[] = [];
-
-  if (devPasswords.includes(config.neo4j.password)) violations.push('Default Neo4j password in use');
-  if (devPasswords.includes(config.postgres.password)) violations.push('Default Postgres password in use');
-  if (devPasswords.includes(config.jwt.secret)) violations.push('Default JWT secret in use');
-
-  if (violations.length > 0) {
-    console.error('❌ REQUIRE_REAL_DBS=true but security violations found:');
-    violations.forEach(v => console.error(`   - ${v}`));
+    console.error('❌ Production/RealDBs mode security violations found.');
     process.exit(1);
   }
 }

@@ -5,6 +5,7 @@ import { getPostgresPool } from '../db/postgres.js';
 import pino from 'pino';
 import { randomUUID } from 'node:crypto';
 import { createLoaders, Loaders } from '../graphql/loaders.js';
+import { extractTenantContext } from '../security/tenantContext.js';
 
 const logger = pino();
 export const JWT_SECRET =
@@ -24,6 +25,7 @@ interface AuthContext {
   isAuthenticated: boolean;
   requestId: string;
   loaders: Loaders;
+  tenantContext?: any;
 }
 
 export const getContext = async ({
@@ -38,7 +40,15 @@ export const getContext = async ({
     // If user is already attached by middleware (e.g. for GraphQL route)
     if (req.user) {
          logger.info({ requestId, userId: req.user.id }, 'Authenticated request (middleware)');
-         return { user: req.user, isAuthenticated: true, requestId, loaders };
+         return {
+           user: req.user,
+           isAuthenticated: true,
+           requestId,
+           loaders,
+           tenantContext:
+             (req as any).tenantContext ||
+             extractTenantContext(req as any, { strict: false }),
+         };
     }
 
     const token = extractToken(req);
@@ -49,7 +59,15 @@ export const getContext = async ({
 
     const user = await verifyToken(token);
     logger.info({ requestId, userId: user.id }, 'Authenticated request');
-    return { user, isAuthenticated: true, requestId, loaders };
+    return {
+      user,
+      isAuthenticated: true,
+      requestId,
+      loaders,
+      tenantContext:
+        (req as any).tenantContext ||
+        extractTenantContext(req as any, { strict: false }),
+    };
   } catch (error) {
     logger.warn(
       { requestId, error: (error as Error).message },

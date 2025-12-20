@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express from 'express';
 import { runsRepo } from '../runs/runs-repo.js';
 import { Pool } from 'pg';

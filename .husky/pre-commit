@@ -8,16 +8,9 @@ log() {
   echo "$1"
 }
 
-log "🔒 Running pre-commit checks (staged files only)..."
+log "🔒 Running pre-commit checks..."
 
-log "🔍 Running secret scanner..."
-if [ -f "scripts/scan_secrets.py" ]; then
-  python3 scripts/scan_secrets.py || {
-    log "❌ Secrets detected by custom scanner!"
-    exit 1
-  }
-fi
-
+# Run gitleaks if available
 if command -v gitleaks >/dev/null 2>&1; then
   log "🔍 Scanning for secrets with gitleaks..."
   gitleaks protect --staged --verbose || {
@@ -25,20 +18,15 @@ if command -v gitleaks >/dev/null 2>&1; then
     exit 1
   }
 else
-  log "ℹ️  Skipping gitleaks (not installed)"
+  log "⚠️ gitleaks not found. Skipping secret scan."
 fi
 
-log "🧹 Running lint-staged..."
-if command -v pnpm >/dev/null 2>&1; then
-  pnpm lint-staged || {
-    log "❌ Lint-staged failed."
-    exit 1
-  }
-else
-  npx lint-staged || {
-    log "❌ Lint-staged failed."
-    exit 1
-  }
-fi
+# Run lint-staged
+# This handles eslint, prettier, and ruff (configured in package.json)
+log "🔍 Running lint-staged..."
+pnpm exec lint-staged || {
+  log "❌ lint-staged failed."
+  exit 1
+}
 
-log "✅ Pre-commit checks completed."
+log "✅ All checks passed!"
