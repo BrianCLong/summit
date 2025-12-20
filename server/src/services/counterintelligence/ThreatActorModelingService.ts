@@ -6,8 +6,10 @@
  */
 
 import { randomUUID } from 'crypto';
-import pino from 'pino';
+// @ts-ignore
+import { default as pino } from 'pino';
 
+// @ts-ignore
 const logger = pino({ name: 'ThreatActorModelingService' });
 
 // Threat Actor Profile Types
@@ -317,7 +319,7 @@ export class ThreatActorModelingService {
   async matchBehaviorToActors(observations: BehaviorObservation[]): Promise<BehaviorMatch[]> {
     const matches: BehaviorMatch[] = [];
 
-    for (const [actorId, actor] of this.actors) {
+    for (const [actorId, actor] of Array.from(this.actors)) {
       const ttpsOverlap = this.calculateTTPOverlap(observations, actor.ttps);
       const temporalAlignment = this.calculateTemporalAlignment(observations, actor.temporalBehavior);
       const infrastructureOverlap = this.calculateInfrastructureOverlap(observations, actor.networkFingerprint);
@@ -580,9 +582,9 @@ export class ThreatActorModelingService {
     patternMatches: PatternMatch[];
   }): number {
     return (factors.ttpsOverlap * 0.35 +
-            factors.temporalAlignment * 0.25 +
-            factors.infrastructureOverlap * 0.25 +
-            (factors.patternMatches.length > 0 ? 0.15 : 0));
+      factors.temporalAlignment * 0.25 +
+      factors.infrastructureOverlap * 0.25 +
+      (factors.patternMatches.length > 0 ? 0.15 : 0));
   }
 
   private generateRecommendation(confidence: number, actor: ThreatActorProfile): string {
@@ -789,7 +791,7 @@ class BehaviorGraph {
 interface GraphNode {
   id: string;
   type: 'ACTOR' | 'BEHAVIOR' | 'TTP' | 'INFRASTRUCTURE';
-  properties: Record<string, unknown>;
+  properties: any;
 }
 
 interface GraphEdge {

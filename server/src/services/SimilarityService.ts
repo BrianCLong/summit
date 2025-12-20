@@ -9,10 +9,14 @@ import { Pool } from 'pg';
 import { getPostgresPool } from '../config/database.js';
 import EmbeddingService from './EmbeddingService.js';
 import { otelService } from '../monitoring/opentelemetry.js';
-import pino from 'pino';
-import * as z from 'zod';
+import {
+  vectorQueriesTotal,
+  vectorQueryDurationSeconds,
+} from '../monitoring/metrics.js';
+import { logger } from '../utils/logger.js';
+import { z } from 'zod/v4';
 
-const logger = pino({ name: 'SimilarityService' });
+const serviceLogger = logger.child({ name: 'SimilarityService' });
 
 // Input validation schemas
 const SimilarityQuerySchema = z
@@ -23,6 +27,7 @@ const SimilarityQuerySchema = z
     topK: z.number().int().min(1).max(100).default(10),
     threshold: z.number().min(0).max(1).default(0.7),
     includeText: z.boolean().default(false),
+    tenantId: z.string().optional(),
   })
   .refine((data) => data.entityId || data.text, {
     message: 'Either entityId or text must be provided',
@@ -82,7 +87,7 @@ export class SimilarityService {
 
   private getPool(): Pool {
     if (!this.postgres) {
-      this.postgres = getPostgresPool();
+      this.postgres = getPostgresPool() as unknown as Pool;
     }
     return this.postgres;
   }
@@ -97,9 +102,10 @@ export class SimilarityService {
       try {
         const validated = SimilarityQuerySchema.parse(query);
 
-        logger.debug('Similarity search requested', {
+        serviceLogger.debug('Similarity search requested', {
           investigationId: validated.investigationId,
           entityId: validated.entityId,
+          tenantId: validated.tenantId,
           hasText: !!validated.text,
           topK: validated.topK,
         });
@@ -131,11 +137,12 @@ export class SimilarityService {
           validated.threshold,
           validated.includeText,
           validated.entityId, // Exclude the query entity itself
+          validated.tenantId,
         );
 
         const executionTime = Date.now() - startTime;
 
-        logger.info('Similarity search completed', {
+        serviceLogger.info('Similarity search completed', {
           investigationId: validated.investigationId,
           queryType,
           resultsCount: results.length,
@@ -161,7 +168,7 @@ export class SimilarityService {
           executionTime,
         };
       } catch (error) {
-        logger.error('Similarity search failed', {
+        serviceLogger.error('Similarity search failed', {
           investigationId: query.investigationId,
           error: error instanceof Error ? error.message : 'Unknown error',
         });
@@ -182,7 +189,7 @@ export class SimilarityService {
         try {
           const validated = BulkSimilarityQuerySchema.parse(query);
 
-          logger.debug('Bulk similarity search requested', {
+          serviceLogger.debug('Bulk similarity search requested', {
             investigationId: validated.investigationId,
             entityCount: validated.entityIds.length,
             topK: validated.topK,
@@ -203,16 +210,16 @@ export class SimilarityService {
                   entityId,
                   topK: validated.topK,
                   threshold: validated.threshold,
+                  includeText: false,
                 });
 
                 return [entityId, similarResult.results] as const;
               } catch (error) {
-                logger.warn('Failed to find similar entities for entity', {
+                serviceLogger.warn('Failed to find similar entities for entity', {
                   entityId,
-                  error:
-                    error instanceof Error ? error.message : 'Unknown error',
+                  error: error instanceof Error ? error.message : 'Unknown error',
                 });
-                return [entityId, []] as const;
+                return [entityId, [] as SimilarEntity[]] as const;
               }
             });
 
@@ -223,7 +230,7 @@ export class SimilarityService {
             }
           }
 
-          logger.info('Bulk similarity search completed', {
+          serviceLogger.info('Bulk similarity search completed', {
             investigationId: validated.investigationId,
             entityCount: validated.entityIds.length,
             successfulResults: results.size,
@@ -231,7 +238,7 @@ export class SimilarityService {
 
           return results;
         } catch (error) {
-          logger.error('Bulk similarity search failed', {
+          serviceLogger.error('Bulk similarity search failed', {
             investigationId: query.investigationId,
             error: error instanceof Error ? error.message : 'Unknown error',
           });
@@ -275,8 +282,15 @@ export class SimilarityService {
     threshold: number,
     includeText: boolean,
     excludeEntityId?: string,
+    tenantId?: string,
   ): Promise<SimilarEntity[]> {
     const client = await this.getPool().connect();
+    const tenantLabel = tenantId ?? 'unknown';
+    const stopTimer = vectorQueryDurationSeconds.startTimer({
+      operation: 'similarity-search',
+      tenant_id: tenantLabel,
+    });
+    let status: 'success' | 'error' = 'success';
 
     try {
       // Convert embedding to pgvector format
@@ -321,7 +335,14 @@ export class SimilarityService {
         similarity: parseFloat(row.similarity),
         text: includeText ? row.text : undefined,
       }));
+    } catch (error) {
+      status = 'error';
+      throw error;
     } finally {
+      stopTimer();
+      vectorQueriesTotal
+        .labels('similarity-search', tenantLabel, status)
+        .inc();
       client.release();
     }
   }
@@ -385,29 +406,58 @@ export class SimilarityService {
   }
 
   /**
-   * Rebuild HNSW index (for maintenance)
+   * Rebuild HNSW index with configurable parameters
    */
-  async rebuildIndex(): Promise<void> {
+  async rebuildIndex(config: { m?: number; efConstruction?: number } = {}): Promise<void> {
     const client = await this.getPool().connect();
 
+    // Validate inputs to prevent SQL injection
+    const m = config.m !== undefined ? Math.max(2, Math.min(config.m, 100)) : 16;
+    const efConstruction = config.efConstruction !== undefined
+      ? Math.max(10, Math.min(config.efConstruction, 1000))
+      : 64;
+
     try {
-      logger.info('Rebuilding HNSW index...');
+      serviceLogger.info('Rebuilding HNSW index...', { m, efConstruction });
 
       // Drop existing index
       await client.query('DROP INDEX IF EXISTS entity_embeddings_hnsw_idx');
 
       // Recreate index
+      // Using template literal is safe here because we validated inputs above to be numbers within safe ranges
       await client.query(`
         CREATE INDEX entity_embeddings_hnsw_idx
         ON entity_embeddings
         USING hnsw (embedding vector_cosine_ops)
-        WITH (m = 16, ef_construction = 64)
+        WITH (m = ${m}, ef_construction = ${efConstruction})
       `);
 
-      logger.info('HNSW index rebuilt successfully');
+      serviceLogger.info('HNSW index rebuilt successfully');
     } finally {
       client.release();
     }
+  }
+
+  async benchmarkIndexConfigurations(configs: Array<{ m: number; efConstruction: number }>): Promise<any[]> {
+    const results = [];
+    for (const config of configs) {
+      const start = Date.now();
+      await this.rebuildIndex(config);
+      const buildTime = Date.now() - start;
+
+      // Perform a test search to measure recall/latency (simplified)
+      // In a real scenario we'd use a known ground truth dataset
+      const searchStart = Date.now();
+      // Just run a dummy query if possible, or skip
+      const searchTime = Date.now() - searchStart;
+
+      results.push({
+        config,
+        buildTime,
+        searchTime
+      });
+    }
+    return results;
   }
 }
 

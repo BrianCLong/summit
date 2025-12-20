@@ -6,8 +6,10 @@
  */
 
 import { randomUUID } from 'crypto';
-import pino from 'pino';
+// @ts-ignore
+import { default as pino } from 'pino';
 
+// @ts-ignore
 const logger = pino({ name: 'DeceptionDetectionEngine' });
 
 // Core Types
@@ -456,7 +458,7 @@ export class DeceptionDetectionEngine {
       signals,
       correlations,
       overallCoordination: this.calculateOverallCoordination(correlations),
-      platforms: [...new Set(signals.map(s => s.platform))],
+      platforms: Array.from(new Set(signals.map(s => s.platform))),
       timespan: {
         start: new Date(Math.min(...signals.map(s => s.timestamp.getTime()))),
         end: new Date(Math.max(...signals.map(s => s.timestamp.getTime()))),
@@ -655,7 +657,7 @@ export class DeceptionDetectionEngine {
 
   private async identifyNarrative(content: ContentInput, analysis: ContentAnalysis): Promise<Narrative | undefined> {
     // Find matching narrative by theme/content similarity
-    for (const narrative of this.narratives.values()) {
+    for (const narrative of Array.from(this.narratives.values())) {
       const similarity = this.calculateNarrativeSimilarity(content, narrative);
       if (similarity > 0.7) {
         return narrative;
@@ -671,7 +673,7 @@ export class DeceptionDetectionEngine {
   private async checkNetworkInvolvement(content: ContentInput): Promise<CoordinatedNetwork | undefined> {
     if (!content.authorId) return undefined;
 
-    for (const network of this.networks.values()) {
+    for (const network of Array.from(this.networks.values())) {
       if (network.accounts.some(a => a.accountId === content.authorId)) {
         return network;
       }
@@ -917,7 +919,7 @@ export class DeceptionDetectionEngine {
   private analyzeNetworkBehavior(cluster: AccountInput[]): NetworkBehavior {
     return {
       coordinationScore: 0.8,
-      activityPattern: 'COORDINATED',
+      activityPattern: 'SYNCHRONIZED',
       contentSimilarity: 0.9,
       engagementPattern: 'synchronized',
       platformGaming: [],
