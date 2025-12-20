@@ -73,19 +73,39 @@ function loadBackup(inputPath, passphrase) {
     const decrypted = decryptSerialized(raw, passphrase);
     return JSON.parse(decrypted);
   }
+  if (raw.kind !== 'ig-backup') {
+    throw new Error('Unsupported backup kind. Expected ig-backup or ig-backup-encrypted.');
+  }
   return raw;
 }
 
 function validateBackup(backup) {
+  if (backup.version !== 1) {
+    throw new Error(`Unsupported backup version: ${backup.version}`);
+  }
   const recalculated = hashPayload(backup.data);
   if (recalculated !== backup.checksum) {
     throw new Error('Backup checksum mismatch; data may be corrupted or tampered with.');
+  }
+  const metadataCounts = backup.counts || {};
+  if (
+    metadataCounts.cases !== undefined &&
+    metadataCounts.objects !== undefined &&
+    (metadataCounts.cases !== backup.data.cases.length || metadataCounts.objects !== backup.data.objects.length)
+  ) {
+    throw new Error('Backup metadata counts do not align with payload contents.');
   }
 }
 
 function restoreBackup({ dbPath, inputPath, passphrase, caseIds = [], dryRun = false }) {
   const backup = loadBackup(inputPath, passphrase);
   validateBackup(backup);
+  if (caseIds.length) {
+    const missingRequested = caseIds.filter((id) => !backup.data.cases.some((c) => c.id === id));
+    if (missingRequested.length) {
+      throw new Error(`Requested case IDs not found in backup: ${missingRequested.join(', ')}`);
+    }
+  }
   const selected = selectDataForCases(backup.data, caseIds);
   const restorePayload = {
     cases: selected.cases,
@@ -114,6 +134,9 @@ function restoreBackup({ dbPath, inputPath, passphrase, caseIds = [], dryRun = f
   });
   if (missingHashes.length) {
     throw new Error(`Hash mismatch detected for cases: ${missingHashes.map((m) => m.caseId).join(', ')}`);
+  }
+  if (!summary.filtered && summary.checksum !== summary.expectedChecksum) {
+    throw new Error('Restored payload checksum does not match backup checksum.');
   }
   return summary;
 }

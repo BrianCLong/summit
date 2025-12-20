@@ -95,11 +95,14 @@ function main() {
             dryRun: options.dryRun,
             filtered: Boolean(options.caseIds.length),
           },
-          null,
-          2,
-        ),
-      );
-    } else {
+        null,
+        2,
+      ),
+    );
+  } else {
+      if (!options.inputPath) {
+        throw new Error('Restore requires --input to specify the backup file.');
+      }
       const restorePassphrase =
         options.passphraseFile || process.env.IG_BACKUP_PASSPHRASE
           ? resolvePassphrase(options)

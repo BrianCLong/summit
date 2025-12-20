@@ -136,3 +136,70 @@ test('dry-run restore does not mutate target database', () => {
   assert.ok(summary.dryRun);
   assert.ok(!fs.existsSync(restoreDb));
 });
+
+test('dry-run create skips writing backup file but returns metadata', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ig-backup-'));
+  const dbPath = path.join(dir, 'db.json');
+  const backupPath = path.join(dir, 'backup.json');
+
+  seedDatabase(dbPath);
+  const result = createBackup({
+    dbPath,
+    outputPath: backupPath,
+    passphrase: 'ignored',
+    encrypt: true,
+    dryRun: true,
+  });
+
+  assert.ok(!result.saved);
+  assert.strictEqual(result.backup.counts.cases, 2);
+  assert.strictEqual(result.backup.counts.objects, 3);
+  assert.ok(!fs.existsSync(backupPath));
+});
+
+test('restore rejects requests for unknown case IDs', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ig-backup-'));
+  const dbPath = path.join(dir, 'db.json');
+  const backupPath = path.join(dir, 'backup.json');
+
+  seedDatabase(dbPath);
+  createBackup({
+    dbPath,
+    outputPath: backupPath,
+    passphrase: null,
+    encrypt: false,
+  });
+
+  assert.throws(() => {
+    restoreBackup({
+      dbPath: path.join(dir, 'restored.json'),
+      inputPath: backupPath,
+      caseIds: ['CASE-3'],
+    });
+  });
+});
+
+test('restore fails when backup metadata counts are tampered', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ig-backup-'));
+  const dbPath = path.join(dir, 'db.json');
+  const backupPath = path.join(dir, 'backup.json');
+
+  seedDatabase(dbPath);
+  createBackup({
+    dbPath,
+    outputPath: backupPath,
+    passphrase: null,
+    encrypt: false,
+  });
+
+  const tampered = JSON.parse(fs.readFileSync(backupPath, 'utf8'));
+  tampered.counts.cases = 999;
+  fs.writeFileSync(backupPath, JSON.stringify(tampered, null, 2));
+
+  assert.throws(() => {
+    restoreBackup({
+      dbPath: path.join(dir, 'restored.json'),
+      inputPath: backupPath,
+    });
+  });
+});
