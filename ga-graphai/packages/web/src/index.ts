@@ -4,3 +4,4 @@ export * from './tri-pane.js';
 export * from './mc-health.js';
 export * from './dx-guidance.js';
 export * from './collaboration.js';
+export * from './components/graph/ProgressiveGraph.js';
