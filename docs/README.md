@@ -27,6 +27,10 @@ Use this page as the fast path to the docs you need. The golden path details liv
 - **[COMPLIANCE.md](COMPLIANCE.md)** and **[DATA_RETENTION_POLICY.md](DATA_RETENTION_POLICY.md)** – Compliance, retention, and auditing references.
 - **[CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md)** – Expected behavior and reporting channels.
 
+## Communications
+
+- **[Communications Playbook](./communications/communications-playbook-execution-layer.md)** - The canonical communications standard for Summit/Intelgraph.
+
 ## Product & Architecture References
 
 - **[RFI_CAPABILITIES_SUMMARY.md](RFI_CAPABILITIES_SUMMARY.md)** – RFI-ready capabilities summary with metrics and differentiators.

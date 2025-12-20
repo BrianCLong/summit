@@ -31,7 +31,9 @@
 ## 🛠 Developer Onboarding (Deployable-First)
 
 - **Golden path = `make bootstrap && make up && make smoke`**. Fresh clones must go green before you write code.
+- **CLI**: Use `npm run summitctl` for standard development workflows.
 - `./start.sh [--ai]` wraps the golden path on laptops and CI. It fails fast if health probes do not respond.
+- `summit init` (from the `cli` package) is the default automation entrypoint for developers and mirrors the golden path with structured JSON output when `--json` is provided.
 - The golden workflow we must defend end to end: **Investigation → Entities → Relationships → Copilot → Results** using the seeded dataset in `data/golden-path/demo-investigation.json`.
 - **New developers:** See [docs/ONBOARDING.md](docs/ONBOARDING.md) for your 30-minute quickstart guide.
 
