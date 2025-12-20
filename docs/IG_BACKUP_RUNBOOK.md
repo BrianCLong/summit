@@ -6,7 +6,7 @@ This runbook documents the `ig backup` workflow that ships with the monorepo. Th
 
 - **Encryption on by default.** The CLI requires `IG_BACKUP_PASSPHRASE` or `--passphrase-file` unless you explicitly opt out with `--no-encrypt`.
 - **No secrets are printed.** Only counts, hashes, and file paths are logged; passphrases are never echoed.
-- **Integrity enforced.** Every backup stores payload-wide and per-case hashes; restores fail fast on any mismatch and report whether checksums match.
+- **Integrity enforced.** Every backup stores payload-wide and per-case hashes that include case references; restores fail fast on any mismatch and report whether checksums match.
 
 ## Commands
 
@@ -40,7 +40,7 @@ Key flags:
 
 ## Validation and integrity checks
 
-- Backups include SHA-256 hashes for the entire payload plus per-case hashes of the case record and linked objects.
+- Backups include SHA-256 hashes for the entire payload plus per-case hashes of the case record, linked objects, and case reference lists.
 - During restore, hashes must match; otherwise the command fails with `checksum` or `Hash mismatch` errors.
 - Successful restores report `checksum`, `expectedChecksum`, and `checksumMatches`; full restores should return identical values.
 
@@ -54,6 +54,6 @@ node --test tools/ig-backup/index.test.js
 
 ## Expected outcomes
 
-- **Counts match:** restored `cases` and `objects` totals equal the backup (or the subset when `--case` is used).
+- **Counts match:** restored `cases`, `objects`, and `caseRefs` totals equal the backup (or the subset when `--case` is used).
 - **Hashes match:** the reported `checksum` equals `expectedChecksum` for full restores; per-case hashes are preserved during partial restores.
 - **Secrets remain hidden:** passphrases are read from files or environment variables and never printed to stdout.

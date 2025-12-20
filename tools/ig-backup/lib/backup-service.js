@@ -16,10 +16,14 @@ function buildCaseRefs(cases, objects) {
   }));
 }
 
-function computeCaseHashes(cases, objects) {
+function computeCaseHashes(cases, objects, caseRefs = []) {
   return cases.map((entry) => ({
     caseId: entry.id,
-    hash: hashPayload({ case: entry, objects: objects.filter((obj) => obj.caseId === entry.id) }),
+    hash: hashPayload({
+      case: entry,
+      objects: objects.filter((obj) => obj.caseId === entry.id),
+      caseRefs: caseRefs.filter((ref) => ref.caseId === entry.id),
+    }),
   }));
 }
 
@@ -44,7 +48,7 @@ function createBackup({ dbPath, outputPath, passphrase, encrypt = true, caseIds 
     caseRefs,
   };
   const checksum = hashPayload(payload);
-  const caseHashes = computeCaseHashes(payload.cases, payload.objects);
+  const caseHashes = computeCaseHashes(payload.cases, payload.objects, payload.caseRefs);
   const backup = {
     kind: 'ig-backup',
     version: 1,
@@ -53,6 +57,7 @@ function createBackup({ dbPath, outputPath, passphrase, encrypt = true, caseIds 
     counts: {
       cases: payload.cases.length,
       objects: payload.objects.length,
+      caseRefs: payload.caseRefs.length,
     },
     hashes: {
       cases: caseHashes,
@@ -103,13 +108,18 @@ function restoreBackup({ dbPath, inputPath, passphrase, caseIds = [], dryRun = f
     caseRefs: selected.caseRefs.length ? selected.caseRefs : buildCaseRefs(selected.cases, selected.objects),
   };
   const restoreChecksum = hashPayload(restorePayload);
-  const caseHashes = computeCaseHashes(restorePayload.cases, restorePayload.objects);
+  const caseHashes = computeCaseHashes(
+    restorePayload.cases,
+    restorePayload.objects,
+    restorePayload.caseRefs,
+  );
   const summary = {
     dryRun,
     filtered: Boolean(caseIds?.length),
     counts: {
       cases: restorePayload.cases.length,
       objects: restorePayload.objects.length,
+      caseRefs: restorePayload.caseRefs.length,
     },
     checksum: restoreChecksum,
     expectedChecksum: backup.checksum,
