@@ -10,8 +10,9 @@ groups:
           severity: warning
           service: maestro
         annotations:
-          summary: "Maestro UI p95 latency above 350ms"
-          description: "p95 latency over last 10m is {{ $value | printf "%.3f" }}s"
+          summary: Maestro UI p95 latency above 350ms
+          description: 'p95 latency over last 10m is {{ $value | printf "%.3f" }}s'
+          runbook_url: https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md
 
       - alert: MaestroAPIHealthDegraded
         expr: |
@@ -23,8 +24,9 @@ groups:
           severity: critical
           service: maestro
         annotations:
-          summary: "API health endpoint 5xx > 2%"
-          description: "5xx ratio {{ $value | printf "%.2f" }} over 5m on /api/maestro/v1/health"
+          summary: API health endpoint 5xx > 2%
+          description: '5xx ratio {{ $value | printf "%.2f" }} over 5m on /api/maestro/v1/health'
+          runbook_url: https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md
 
       - alert: MaestroErrorRateHigh
         expr: |
@@ -36,8 +38,9 @@ groups:
           severity: warning
           service: maestro
         annotations:
-          summary: "Maestro error rate > 5%"
-          description: "HTTP 5xx ratio over last 10m is {{ $value | printf "%.2f" }}"
+          summary: Maestro error rate > 5%
+          description: 'HTTP 5xx ratio over last 10m is {{ $value | printf "%.2f" }}'
+          runbook_url: https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md
 
   - name: maestro-burn
     interval: 30s
@@ -54,6 +57,6 @@ groups:
           severity: critical
           service: maestro
         annotations:
-          summary: "SLO burn >4x on Maestro"
-          description: "5xx over total >4% for 10m (approx 4x burn)"
-
+          summary: SLO burn >4x on Maestro
+          description: '5xx over total >4% for 10m (approx 4x burn)'
+          runbook_url: https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md

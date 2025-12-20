@@ -1,0 +1,29 @@
+{{- if .Values.resourceQuota.enabled }}
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: {{ include "umbrella.fullname" . }}-quota
+  namespace: {{ .Values.namespace }}
+spec:
+  hard:
+{{- toYaml .Values.resourceQuota.hard | nindent 4 }}
+---
+{{- end }}
+{{- if .Values.limitRange.enabled }}
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: {{ include "umbrella.fullname" . }}-limits
+  namespace: {{ .Values.namespace }}
+spec:
+  limits:
+    - default:
+{{- toYaml .Values.limitRange.default | nindent 8 }}
+      defaultRequest:
+{{- toYaml .Values.limitRange.defaultRequest | nindent 8 }}
+      max:
+{{- toYaml .Values.limitRange.max | nindent 8 }}
+      min:
+{{- toYaml .Values.limitRange.min | nindent 8 }}
+      type: Container
+{{- end }}

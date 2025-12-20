@@ -1,8 +1,8 @@
 {
+  "preview_day_usd": 3,
   "max_image_mb": {
     "gateway": 180,
     "web": 220,
     "services/*": 200
-  },
-  "preview_day_usd": 3
+  }
 }

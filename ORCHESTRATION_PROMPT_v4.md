@@ -23,8 +23,11 @@ PILOT_TENANTS=t1,t2
 GA_FLAGS=search,realtime,reports
 BUDGETS.preview_day_usd=3
 BUDGETS.max_image_mb=gateway:180,web:220,services/*:200
-OIDC_ISSUER=https://auth.intelgraph.io   SCIM_BASEURL=https://api.intelgraph.io/scim/v2
-RTO=30m   RPO=5m   HEADROOM_TARGET=0.20
+OIDC_ISSUER=https://auth.intelgraph.io
+SCIM_BASEURL=https://api.intelgraph.io/scim/v2
+RTO=30m
+RPO=5m
+HEADROOM_TARGET=0.20
 ```
 
 ## 2) Required End-State Outputs
@@ -448,7 +451,3 @@ Emit OTEL spans + JSON logs with release/env/tenant/trace_id/sha.
   "evidence_signed": true
 }
 ```
-
----
-
-**End — v4 ULTRA orchestration prompt.**

@@ -75,7 +75,6 @@ jobs:
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
-    needs: [static-checks] # Optional: remove dependency if you want parallelism at cost of compute
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -115,26 +114,8 @@ jobs:
   smoke-tests:
     name: Smoke Tests (Golden Path)
     runs-on: ubuntu-latest
-    needs: [static-checks]
     timeout-minutes: 20
     steps:
-
-  # P0 Readiness Check (Virtual Gate)
-  p0-readiness:
-    name: P0 Readiness Gate
-    runs-on: ubuntu-latest
-    needs: [static-checks, unit-tests, smoke-tests]
-    if: always()
-    steps:
-      - name: Evaluate Gates
-        run: |
-          # Verify all needed jobs succeeded
-          if [ "${{ needs.static-checks.result }}" != "success" ]; then echo "Static Checks Failed"; exit 1; fi
-          if [ "${{ needs.unit-tests.result }}" != "success" ]; then echo "Unit Tests Failed"; exit 1; fi
-          if [ "${{ needs.smoke-tests.result }}" != "success" ]; then echo "Smoke Tests Failed"; exit 1; fi
-
-          echo "✅ P0 Readiness Gate Passed: Static Analysis, Unit Tests, and Golden Path Smoke Tests are green."
-          echo "Next steps: Supply Chain & Policy checks are enforced via separate workflows."
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4

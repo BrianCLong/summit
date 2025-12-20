@@ -187,6 +187,14 @@ jobs:
             --service api \
             --verify-only
 
+  sbom:
+    name: Attach SBOM
+    needs: security_scans
+    uses: ./.github/workflows/reusable/sbom.yml
+    with:
+      service: platform-sre
+    secrets: inherit
+
   rollback:
     name: Auto rollback
     runs-on: ubuntu-latest

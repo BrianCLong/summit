@@ -25,9 +25,5 @@ COPY . .
 ENV NODE_ENV=production
 ENV PORT=4000
 EXPOSE 4000
-
-# Hardening: Run as non-root user
-USER node
-
 # Run directly from source for demonstration
 CMD ["npx", "tsx", "src/index.ts"]
