@@ -18,6 +18,10 @@ env:
   SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
   SLO_ENVIRONMENT: production
   ROLLBACK_EVENT: slo-breach
+  BURN_RATE_FAST_THRESHOLD: 14.4
+  BURN_RATE_SLOW_THRESHOLD: 6
+  BURN_RATE_FAST_WINDOW: 5m
+  BURN_RATE_SLOW_WINDOW: 1h
 
 jobs:
   error-budget-check:
@@ -27,7 +31,6 @@ jobs:
     outputs:
       alert-needed: ${{ steps.report.outputs.alert-needed }}
       failing-slos: ${{ steps.evaluate.outputs.failing_slos }}
-      burning-slos: ${{ steps.evaluate.outputs.burning_slos }}
       rollback-target: ${{ steps.deployment.outputs.rollback_target }}
       deployment-sha: ${{ steps.deployment.outputs.current_sha }}
       responsible-engineer: ${{ steps.deployment.outputs.responsible_engineer }}
@@ -50,7 +53,7 @@ jobs:
           python3 - <<'PY'
           import json
           import os
-          import sys
+          import re
           import urllib.parse
           import urllib.request
 
@@ -58,6 +61,10 @@ jobs:
 
           prom_url = os.environ.get("PROMETHEUS_URL", "").rstrip("/")
           prom_token = os.environ.get("PROMETHEUS_TOKEN")
+          fast_window = os.environ.get("BURN_RATE_FAST_WINDOW", "5m")
+          slow_window = os.environ.get("BURN_RATE_SLOW_WINDOW", "1h")
+          fast_threshold = float(os.environ.get("BURN_RATE_FAST_THRESHOLD", "14.4"))
+          slow_threshold = float(os.environ.get("BURN_RATE_SLOW_THRESHOLD", "6"))
 
           with open("slo-config.yaml", "r", encoding="utf-8") as handle:
             slo_config = yaml.safe_load(handle)
@@ -66,47 +73,74 @@ jobs:
           if prom_token:
             headers["Authorization"] = f"Bearer {prom_token}"
 
+          def apply_window(query: str, window: str) -> str:
+            return re.sub(r"\[\d+[smhdwy]\]", f"[{window}]", query)
+
+          def run_query(query: str):
+            params = urllib.parse.urlencode({"query": query})
+            request = urllib.request.Request(
+              f"{prom_url}/api/v1/query?{params}", headers=headers
+            )
+            with urllib.request.urlopen(request, timeout=20) as response:
+              payload = json.load(response)
+            vector = payload.get("data", {}).get("result", [])
+            if not vector:
+              return None
+            return float(vector[0]["value"][1])
+
+          def normalize_value(raw):
+            if raw is None:
+              return None
+            return float(raw) * 100 if float(raw) <= 1 else float(raw)
+
+          def compute_burn(value, target):
+            if value is None:
+              return None
+            ratio = value / 100
+            error_budget = 1 - (target / 100)
+            if error_budget <= 0:
+              return None
+            error_rate = max(0.0, 1 - ratio)
+            return error_rate / error_budget
+
           results = []
           failing = []
-          burning = []
           for objective in slo_config.get("spec", {}).get("objectives", []):
             name = objective.get("name", "unnamed")
             target = float(objective.get("target", 0))
-            burn_threshold = float(objective.get("burnRateThreshold", 2.0))
             query = objective.get("sli", {}).get("query", "")
-            measured = None
-            numeric_value = None
-            status = "unknown"
+            status = "unavailable"
             source = prom_url or "manual-input"
+            window_values = {}
+            burn_rates = {}
 
             if prom_url and query:
-              try:
-                params = urllib.parse.urlencode({"query": query})
-                request = urllib.request.Request(
-                  f"{prom_url}/api/v1/query?{params}", headers=headers
-                )
-                with urllib.request.urlopen(request, timeout=20) as response:
-                  payload = json.load(response)
-                vector = payload.get("data", {}).get("result", [])
-                if vector:
-                  raw_value = float(vector[0]["value"][1])
-                  measured = raw_value * 100 if raw_value <= 1 else raw_value
-                  numeric_value = measured
-                  status = "breach" if measured < target else "ok"
-                else:
-                  status = "unavailable"
-              except Exception as exc:  # noqa: BLE001
-                status = f"unavailable ({exc.__class__.__name__})"
-            else:
-              status = "unavailable"
+              for label, window in {"fast": fast_window, "slow": slow_window}.items():
+                try:
+                  raw_value = run_query(apply_window(query, window))
+                  value = normalize_value(raw_value)
+                  window_values[label] = value
+                  burn_rates[label] = compute_burn(value, target)
+                except Exception as exc:  # noqa: BLE001
+                  window_values[label] = None
+                  burn_rates[label] = f"unavailable ({exc.__class__.__name__})"
 
-            burn_rate = None
-            if isinstance(numeric_value, (int, float)):
-              error_budget = max(1e-6, 100 - target)
-              error_rate = max(0.0, 100 - min(100.0, numeric_value))
-              burn_rate = error_rate / error_budget
-              if burn_rate >= burn_threshold:
-                burning.append(name)
+            measured = window_values.get("fast")
+            burn_fast = burn_rates.get("fast")
+            burn_slow = burn_rates.get("slow")
+
+            burn_fast_value = burn_fast if isinstance(burn_fast, (int, float)) else None
+            burn_slow_value = burn_slow if isinstance(burn_slow, (int, float)) else None
+
+            burn_breach = (
+              (burn_fast_value is not None and burn_fast_value > fast_threshold)
+              or (burn_slow_value is not None and burn_slow_value > slow_threshold)
+            )
+
+            if measured is None:
+              status = "unavailable"
+            else:
+              status = "breach" if (measured < target or burn_breach) else "ok"
 
             display_value = measured if measured is not None else "n/a"
             results.append(
@@ -115,11 +149,10 @@ jobs:
                 "target": target,
                 "value": display_value,
                 "status": status,
+                "burn_rate_fast": burn_fast,
+                "burn_rate_slow": burn_slow,
                 "query": query,
                 "source": source,
-                "burn_rate": burn_rate,
-                "burn_threshold": burn_threshold,
-                "burn_violation": burn_rate is not None and burn_rate >= burn_threshold,
               }
             )
 
@@ -133,7 +166,6 @@ jobs:
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
             output.write(f"breach={str(breached).lower()}\n")
             output.write(f"failing_slos={'|'.join(failing)}\n")
-            output.write(f"burning_slos={'|'.join(burning)}\n")
           PY
 
       - name: Resolve deployment context
@@ -186,45 +218,47 @@ jobs:
             slo_results = json.load(handle)
 
           breached = any(item.get("status") == "breach" for item in slo_results)
-          burning = any(item.get("burn_violation") for item in slo_results)
+
+          fast_label = "5m burn"
+          slow_label = "1h burn"
+
+          def fmt_burn(value):
+            if value is None:
+              return "n/a"
+            if isinstance(value, str):
+              return value
+            return f"{value:.1f}x"
 
           lines = [
             "# 📊 Error Budget Status Report",
             f"**Timestamp:** {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}",
             "",
             "## Service Level Objectives",
-            "| Metric | Current | Target | Status | Burn | Source |",
-            "|--------|---------|--------|--------|------|--------|",
+            "| Metric | Current | Target | Fast Burn | Slow Burn | Status | Source |",
+            "|--------|---------|--------|-----------|-----------|--------|--------|",
           ]
 
           for item in slo_results:
             status = item.get("status")
-            burn_violation = item.get("burn_violation")
             status_icon = "❌ BREACH" if status == "breach" else "✅ OK" if status == "ok" else "⚠️ unavailable"
-            if burn_violation and status != "breach":
-              status_icon = "⚠️ BURN"
             value = item.get("value", "n/a")
-            burn_rate = item.get("burn_rate")
-            burn_threshold = item.get("burn_threshold", "n/a")
-            burn_display = f"{burn_rate:.2f}x" if isinstance(burn_rate, (int, float)) else "n/a"
-            threshold_display = f"{burn_threshold}" if isinstance(burn_threshold, (int, float)) else "n/a"
+            burn_fast = item.get("burn_rate_fast")
+            burn_slow = item.get("burn_rate_slow")
             lines.append(
-              f"| {item.get('name')} | {value} | ≥ {item.get('target')} | {status_icon} | {burn_display} (>{threshold_display}) | {item.get('source')} |"
+              f"| {item.get('name')} | {value} | ≥ {item.get('target')} | {fmt_burn(burn_fast)} | {fmt_burn(burn_slow)} | {status_icon} | {item.get('source')} |"
             )
 
-          if breached or burning:
+          if breached:
             lines.append("")
             lines.append("## Actions Required")
-            if breached:
-              lines.append("- 🚨 One or more SLOs breached. Automatic rollback will be triggered.")
-            if burning:
-              lines.append("- 🔥 Error budget burn rate is above threshold. Treat as an early warning and investigate before exhaustion.")
+            lines.append("- 🚨 One or more SLOs breached. Automatic rollback will be triggered.")
+            lines.append("- 🔥 Burn rate breach detected; verify fast (5m) < 14.4x and slow (1h) < 6x error budget.")
 
           with open("error-budget-report.md", "w", encoding="utf-8") as handle:
             handle.write("\n".join(lines))
 
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
-            output.write(f"alert-needed={str(breached or burning).lower()}\n")
+            output.write(f"alert-needed={str(breached).lower()}\n")
           PY
 
       - name: Create or Update Issue
@@ -234,13 +268,11 @@ jobs:
           RESPONSIBLE: ${{ steps.deployment.outputs.responsible_engineer }}
           DEPLOYMENT_SHA: ${{ steps.deployment.outputs.current_sha }}
           FAILING_SLOS: ${{ steps.evaluate.outputs.failing_slos }}
-          BURNING_SLOS: ${{ steps.evaluate.outputs.burning_slos }}
         with:
           script: |
             const fs = require('fs');
             const report = fs.readFileSync('error-budget-report.md', 'utf8');
             const failingSlos = (process.env.FAILING_SLOS || '').split('|').filter(Boolean);
-            const burningSlos = (process.env.BURNING_SLOS || '').split('|').filter(Boolean);
             const assignees = process.env.RESPONSIBLE ? [process.env.RESPONSIBLE] : [];
 
             const issues = await github.rest.issues.listForRepo({
@@ -251,7 +283,7 @@ jobs:
             });
 
             const latestDeployment = process.env.DEPLOYMENT_SHA || 'unavailable';
-            const body = `${report}\n\n**Failing SLOs:** ${failingSlos.join(', ') || 'unknown'}\n**Burn-rate alerts:** ${burningSlos.join(', ') || 'none'}\n**Latest deployment:** ${latestDeployment}`;
+            const body = `${report}\n\n**Failing SLOs:** ${failingSlos.join(', ') || 'unknown'}\n**Latest deployment:** ${latestDeployment}`;
 
             if (issues.data.length > 0) {
               await github.rest.issues.createComment({
@@ -278,7 +310,6 @@ jobs:
           DEPLOYMENT_SHA: ${{ steps.deployment.outputs.current_sha }}
           ROLLBACK_TARGET: ${{ steps.deployment.outputs.rollback_target }}
           FAILING_SLOS: ${{ steps.evaluate.outputs.failing_slos }}
-          BURNING_SLOS: ${{ steps.evaluate.outputs.burning_slos }}
         run: |
           set -euo pipefail
 
@@ -288,7 +319,6 @@ jobs:
           fi
 
           FAILING_SLOS="${FAILING_SLOS:-}"
-          BURNING_SLOS="${BURNING_SLOS:-}"
           RESPONSIBLE_HANDLE=${RESPONSIBLE:-on-call}
 
           curl -X POST "${SLACK_WEBHOOK}" \
@@ -301,7 +331,6 @@ jobs:
                   \"title\": \"SLO Breach\",\
                   \"fields\": [\
                     {\"title\": \"Failing SLOs\", \"value\": \"${FAILING_SLOS:-unknown}\", \"short\": false},\
-                    {\"title\": \"Burn-rate Alerts\", \"value\": \"${BURNING_SLOS:-none}\", \"short\": false},\
                     {\"title\": \"Latest Deployment\", \"value\": \"${DEPLOYMENT_SHA:-unknown}\", \"short\": true},\
                     {\"title\": \"Rollback Target\", \"value\": \"${ROLLBACK_TARGET:-pending}\", \"short\": true},\
                     {\"title\": \"Responsible Engineer\", \"value\": \"${RESPONSIBLE_HANDLE}\", \"short\": true}\

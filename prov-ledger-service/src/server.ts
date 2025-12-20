@@ -8,10 +8,26 @@ import {
   getProvenance,
   recordTransform,
   getEvidence,
+  getClaim,
 } from './ledger';
+import {
+  issueReceipt,
+  getReceipt,
+  listReceipts,
+  redactReceipt,
+} from './receipts';
+import { assembleReceiptBundle } from './export/receiptBundle';
+import { RedactionRule, verifyReceiptSignature } from '@intelgraph/provenance';
 import tar from 'tar-stream';
 import { createGzip } from 'zlib';
 import pino from 'pino';
+import { finished } from 'stream/promises';
+import {
+  assembleExportBundle,
+  PolicyDecisionRecord,
+  ReceiptRecord,
+  RedactionRules,
+} from './export/bundleAssembler';
 // Note: In production, this would import from the actual OPA client service
 // For now, we'll create a simplified local version
 
@@ -179,6 +195,26 @@ const claimSchema = z.object({
   text: z.string(),
   confidence: z.number(),
   links: z.array(z.string()).default([]),
+  caseId: z.string().optional(),
+  actor: z
+    .object({
+      id: z.string(),
+      role: z.string(),
+      tenantId: z.string().optional(),
+    })
+    .optional(),
+  pipeline: z
+    .object({
+      stage: z.string().optional(),
+      runId: z.string().optional(),
+      taskId: z.string().optional(),
+      step: z.string().optional(),
+    })
+    .optional(),
+  metadata: z.record(z.any()).optional(),
+  redactions: z
+    .array(z.object({ path: z.string(), reason: z.string() }))
+    .optional(),
 });
 
 app.post('/claims', async (req, reply) => {
@@ -189,10 +225,36 @@ app.post('/claims', async (req, reply) => {
     confidence: body.confidence,
     links: body.links,
   });
-  reply.send({ claimId: claim.id });
+
+  const manifest = buildManifest([claim.id]);
+  const receipt = await issueReceipt(manifest, {
+    caseId: body.caseId ?? claim.id,
+    claimIds: [claim.id],
+    actor: body.actor ?? { id: 'system', role: 'system' },
+    pipeline: body.pipeline,
+    metadata: body.metadata,
+    redactions: body.redactions,
+  });
+
+  reply.send({
+    claimId: claim.id,
+    receiptId: receipt.id,
+    receiptValid: verifyReceiptSignature(receipt),
+  });
 });
 
 const exportSchema = z.object({ claimId: z.array(z.string()) });
+
+const redactionSchema = z.object({
+  path: z.string(),
+  reason: z.string(),
+});
+
+const receiptExportSchema = z.object({
+  receiptIds: z.array(z.string()),
+  includeProvenance: z.boolean().default(false),
+  redactions: z.array(redactionSchema).optional(),
+});
 
 // Get provenance chain for evidence or claim
 app.get('/prov/evidence/:id', async (req, reply) => {
@@ -223,6 +285,44 @@ app.post('/prov/transform', async (req, reply) => {
   reply.send({ transformId: transform.id });
 });
 
+app.get('/receipts/:id', async (req, reply) => {
+  const { id } = req.params as { id: string };
+  const receipt = getReceipt(id);
+  if (!receipt) {
+    reply.status(404).send({ error: 'Receipt not found' });
+    return;
+  }
+
+  const { redact } = (req.query ?? {}) as { redact?: string };
+  const result = redact === 'true' ? redactReceipt(receipt) : receipt;
+
+  reply.send({
+    receipt: result,
+    valid: verifyReceiptSignature(receipt),
+  });
+});
+
+app.post('/receipts/export', async (req, reply) => {
+  const body = receiptExportSchema.parse(req.body);
+  const receipts = listReceipts(body.receiptIds);
+
+  if (receipts.length === 0) {
+    reply.status(404).send({ error: 'Receipts not found' });
+    return;
+  }
+
+  const stream = assembleReceiptBundle({
+    receipts,
+    redactions: body.redactions as RedactionRule[] | undefined,
+    includeProvenance: body.includeProvenance,
+    provenanceFetcher: (id: string) => getProvenance(id),
+  });
+
+  reply.header('Content-Type', 'application/gzip');
+  reply.header('Content-Disposition', 'attachment; filename="receipts-bundle.tgz"');
+  reply.send(stream);
+});
+
 // Enhanced export schema with policy context
 const enhancedExportSchema = z.object({
   claimId: z.array(z.string()),
@@ -235,6 +335,37 @@ const enhancedExportSchema = z.object({
     approvals: z.array(z.string()).optional(),
     step_up_verified: z.boolean().optional(),
   }),
+  receipts: z
+    .array(
+      z.object({
+        id: z.string(),
+        subject: z.string(),
+        type: z.string(),
+        issuedAt: z.string(),
+        actor: z.string().optional(),
+        payload: z.record(z.any()),
+      }),
+    )
+    .optional(),
+  policyDecisions: z
+    .array(
+      z.object({
+        id: z.string(),
+        decision: z.enum(['allow', 'deny', 'review']),
+        rationale: z.string(),
+        policy: z.string(),
+        createdAt: z.string(),
+        attributes: z.record(z.any()).optional(),
+      }),
+    )
+    .optional(),
+  redaction: z
+    .object({
+      allowReceiptIds: z.array(z.string()).optional(),
+      redactFields: z.array(z.string()).optional(),
+      maskFields: z.array(z.string()).optional(),
+    })
+    .optional(),
 });
 
 // Export with enhanced policy enforcement
@@ -250,8 +381,9 @@ app.post('/prov/export/:caseId', async (req, reply) => {
       action: 'export',
       dataset: {
         sources: manifest.claims.map((claim) => {
-          // Get evidence for this claim to extract license info
-          const evidence = getEvidence(claim.id);
+          const storedClaim = getClaim(claim.id);
+          const firstEvidenceId = storedClaim?.evidenceIds?.[0];
+          const evidence = firstEvidenceId ? getEvidence(firstEvidenceId) : null;
           return {
             id: claim.id,
             license: evidence?.licenseId || 'UNKNOWN',
@@ -290,44 +422,55 @@ app.post('/prov/export/:caseId', async (req, reply) => {
     }
 
     // Enhanced manifest with provenance chains
-    const enhancedManifest = {
-      ...manifest,
-      caseId,
-      generatedAt: new Date().toISOString(),
-      version: '1.0.0',
-      provenance: {
-        evidenceChains: manifest.claims.map((claim) => ({
-          claimId: claim.id,
-          evidence: getProvenance(claim.id),
-        })),
-      },
-    };
-
-    const pack = tar.pack();
-    pack.entry(
-      { name: 'manifest.json' },
-      JSON.stringify(enhancedManifest, null, 2),
-    );
-
-    // Add individual evidence files
+    const evidenceAttachments: Record<string, any> = {};
     for (const claim of manifest.claims) {
       const provenance = getProvenance(claim.id);
       if (provenance) {
-        pack.entry(
-          { name: `evidence/${claim.id}.json` },
-          JSON.stringify(provenance, null, 2),
-        );
+        evidenceAttachments[`evidence/${claim.id}.json`] = provenance;
       }
     }
 
-    pack.finalize();
+    const { stream, metadata, manifest: bundleManifest } =
+      assembleExportBundle({
+        manifest: {
+          ...manifest,
+          caseId,
+          generatedAt: new Date().toISOString(),
+          version: '1.0.0',
+          provenance: {
+            evidenceChains: manifest.claims.map((claim) => ({
+              claimId: claim.id,
+              evidence: getProvenance(claim.id),
+            })),
+          },
+        },
+        receipts: (body.receipts as ReceiptRecord[] | undefined) ?? [],
+        policyDecisions:
+          (body.policyDecisions as PolicyDecisionRecord[] | undefined) ?? [],
+        redaction: (body.redaction as RedactionRules | undefined) ?? undefined,
+        attachments: evidenceAttachments,
+      });
 
     reply.header('Content-Type', 'application/gzip');
     reply.header(
       'Content-Disposition',
       `attachment; filename="case-${caseId}-bundle.tgz"`,
     );
-    reply.send(pack.pipe(createGzip()));
+    reply.header(
+      'X-Redaction-Applied',
+      metadata.redaction.applied ? 'true' : 'false',
+    );
+    reply.header(
+      'X-Receipt-Count',
+      metadata.counts.receipts.toString(),
+    );
+    const chunks: Buffer[] = [];
+    stream.on('data', (chunk) =>
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)),
+    );
+    stream.on('error', (err) => app.log.error({ err }, 'bundle stream error'));
+    await finished(stream);
+    reply.send(Buffer.concat(chunks));
   } catch (error) {
     app.log.error({ error, caseId }, 'Export generation failed');
     reply.status(500).send({ error: 'Export generation failed' });

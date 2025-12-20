@@ -3,6 +3,8 @@ package main
 import (
 	"bytes"
 	"context"
+	"crypto/ed25519"
+	"encoding/hex"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -137,11 +139,13 @@ func handleAudit(ctx context.Context, client *http.Client, host string, args []s
 		defer resp.Body.Close()
 		io.Copy(os.Stdout, resp.Body)
 	case "verify":
-		eventsResp := mustRequest(ctx, client, http.MethodGet, host+"/audit/events", nil)
-		defer eventsResp.Body.Close()
-		var events []audit.Event
-		if err := json.NewDecoder(eventsResp.Body).Decode(&events); err != nil {
-			fmt.Fprintf(os.Stderr, "failed to decode events: %v\n", err)
+		exportResp := mustRequest(ctx, client, http.MethodGet, host+"/audit/export", nil)
+		defer exportResp.Body.Close()
+		var bundle struct {
+			Records []audit.ExportEvent `json:"records"`
+		}
+		if err := json.NewDecoder(exportResp.Body).Decode(&bundle); err != nil {
+			fmt.Fprintf(os.Stderr, "failed to decode export bundle: %v\n", err)
 			os.Exit(1)
 		}
 		keyResp := mustRequest(ctx, client, http.MethodGet, host+"/audit/public-key", nil)
@@ -153,23 +157,45 @@ func handleAudit(ctx context.Context, client *http.Client, host string, args []s
 			fmt.Fprintf(os.Stderr, "failed to decode public key: %v\n", err)
 			os.Exit(1)
 		}
-		allValid := true
-		for _, evt := range events {
-			ok, err := audit.VerifyWithPublicKey(keyPayload.PublicKey, evt)
-			if err != nil || !ok {
-				fmt.Printf("event %s failed verification: %v\n", evt.ID, err)
-				allValid = false
-			} else {
-				fmt.Printf("event %s signature verified\n", evt.ID)
-			}
-		}
-		if !allValid {
+		if err := verifyExportChain(keyPayload.PublicKey, bundle.Records); err != nil {
+			fmt.Fprintln(os.Stderr, err.Error())
 			os.Exit(1)
 		}
+		fmt.Fprintf(os.Stdout, "verified %d audit events\n", len(bundle.Records))
 	default:
 		fmt.Fprintf(os.Stderr, "unknown audit subcommand %q\n", args[0])
 		os.Exit(1)
 	}
+}
+
+func verifyExportChain(pubKey string, records []audit.ExportEvent) error {
+	decoded, err := hex.DecodeString(pubKey)
+	if err != nil {
+		return fmt.Errorf("invalid public key: %w", err)
+	}
+	pub := ed25519.PublicKey(decoded)
+
+	var prevHash string
+	for idx, record := range records {
+		if idx == 0 && record.PrevHash != "" {
+			return fmt.Errorf("chain start mismatch for %s", record.ID)
+		}
+		if idx > 0 && record.PrevHash != prevHash {
+			return fmt.Errorf("chain break at %s: expected prevHash %s, got %s", record.ID, prevHash, record.PrevHash)
+		}
+		sig, err := hex.DecodeString(record.Signature)
+		if err != nil {
+			return fmt.Errorf("invalid signature encoding for %s: %w", record.ID, err)
+		}
+		if record.EventHash == "" {
+			return fmt.Errorf("missing event hash for %s", record.ID)
+		}
+		if !ed25519.Verify(pub, []byte(record.EventHash), sig) {
+			return fmt.Errorf("signature mismatch for %s", record.ID)
+		}
+		prevHash = record.EventHash
+	}
+	return nil
 }
 
 func splitCSV(in string) []string {
