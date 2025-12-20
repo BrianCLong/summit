@@ -5,6 +5,8 @@ type NodeId = u64;
 type ServiceId = u64;
 
 #[derive(Debug)]
+struct PredictiveAnalyzer;
+#[derive(Debug)]
 struct AdaptiveRouter;
 #[derive(Debug)]
 struct CostAwareBalancer;
@@ -23,15 +25,9 @@ pub struct NodeMetrics {
     cost: f64,
 }
 impl NodeMetrics {
-    fn can_host_service(&self, _service: &ServiceId) -> bool {
-        true
-    }
-    fn current_load(&self) -> f64 {
-        self.load
-    }
-    fn operational_cost(&self) -> f64 {
-        self.cost
-    }
+    fn can_host_service(&self, _service: &ServiceId) -> bool { true }
+    fn current_load(&self) -> f64 { self.load }
+    fn operational_cost(&self) -> f64 { self.cost }
 }
 
 #[derive(Debug, Default)]
@@ -39,12 +35,9 @@ pub struct ServiceMetrics;
 #[derive(Debug)]
 struct NetworkMetricsCollector;
 impl NetworkMetricsCollector {
-    fn latency_to_node(&self, _node: &NodeId) -> f64 {
-        0.0
-    }
+    fn latency_to_node(&self, _node: &NodeId) -> f64 { 0.0 }
 }
 
-#[derive(Debug)]
 pub struct RealTimeMetricsCollector {
     node_metrics: DashMap<NodeId, NodeMetrics>,
     service_metrics: DashMap<ServiceId, ServiceMetrics>,
@@ -55,15 +48,12 @@ impl RealTimeMetricsCollector {
     pub fn get_optimal_node_for_service(&self, service: ServiceId) -> Option<NodeId> {
         self.service_metrics.get(&service)?;
 
-        self.node_metrics
-            .iter()
+        self.node_metrics.iter()
             .filter(|node| node.value().can_host_service(&service))
             .min_by(|a, b| {
                 let a_score = self.calculate_score(a.key(), a.value());
                 let b_score = self.calculate_score(b.key(), b.value());
-                a_score
-                    .partial_cmp(&b_score)
-                    .unwrap_or(std::cmp::Ordering::Equal)
+                a_score.partial_cmp(&b_score).unwrap_or(std::cmp::Ordering::Equal)
             })
             .map(|node| *node.key())
     }
@@ -80,41 +70,28 @@ impl RealTimeMetricsCollector {
 #[derive(Debug)]
 struct TimeSeriesAnalyzer;
 impl TimeSeriesAnalyzer {
-    async fn analyze_patterns(&self, _service: ServiceId) -> Option<()> {
-        Some(())
-    }
+    async fn analyze_patterns(&self, _service: ServiceId) -> Option<()> { Some(()) }
 }
 
 #[derive(Debug)]
 struct PatternRecognizer;
 impl PatternRecognizer {
-    async fn recognize_trends(&self, _service: ServiceId) -> Option<()> {
-        Some(())
-    }
+    async fn recognize_trends(&self, _service: ServiceId) -> Option<()> { Some(()) }
 }
 
 #[derive(Debug)]
 struct CapacityPlanner;
 impl CapacityPlanner {
-    fn predict_peak(&self, _historical: (), _trends: ()) -> f64 {
-        0.0
-    }
-    fn recommend_scaling_strategy(&self) -> ScalingStrategy {
-        ScalingStrategy
-    }
+    fn predict_peak(&self, _historical: (), _trends: ()) -> f64 { 0.0 }
+    fn recommend_scaling_strategy(&self) {}
 }
-
-#[derive(Debug, Clone, Copy)]
-pub struct ScalingStrategy;
 
 #[derive(Debug)]
 pub struct TrafficPrediction {
     expected_peak: f64,
     confidence_interval: f64,
-    recommended_scaling: ScalingStrategy,
 }
 
-#[derive(Debug)]
 pub struct PredictiveAnalyzer {
     time_series_analyzer: TimeSeriesAnalyzer,
     pattern_recognizer: PatternRecognizer,
@@ -127,9 +104,10 @@ impl PredictiveAnalyzer {
         let current_trends = self.pattern_recognizer.recognize_trends(service).await?;
 
         Some(TrafficPrediction {
-            expected_peak: self
-                .capacity_planner
-                .predict_peak(historical_patterns, current_trends),
+            expected_peak: self.capacity_planner.predict_peak(
+                historical_patterns,
+                current_trends,
+            ),
             recommended_scaling: self.capacity_planner.recommend_scaling_strategy(),
             confidence_interval: self.calculate_confidence(),
         })

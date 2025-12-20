@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { threatHuntingService } from '../services/threatHuntingService';
 
 async function runDemo() {

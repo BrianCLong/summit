@@ -1,5 +1,5 @@
-use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{Duration, Instant};
+use std::sync::atomic::{AtomicU64, Ordering};
 
 // Mocked types for compilation
 #[derive(Debug)]
@@ -114,10 +114,7 @@ pub struct DiagnosticSnapshotter {
 }
 
 impl DiagnosticSnapshotter {
-    pub async fn capture_diagnostic_snapshot(
-        &self,
-        _trigger: SnapshotTrigger,
-    ) -> DiagnosticSnapshot {
+    pub async fn capture_diagnostic_snapshot(&self, _trigger: SnapshotTrigger) -> DiagnosticSnapshot {
         let snapshot = DiagnosticSnapshot {
             timestamp: Instant::now(),
             system_state: self.state_capture.capture_system_state().await,

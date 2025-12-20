@@ -1,8 +1,7 @@
-use jsonschema::JSONSchema;
+use std::collections::{BTreeMap, HashMap};
+use jsonschema::{JSONSchema, error::ValidationErrorKind};
 use semver::Version;
 use serde_json::Value;
-use std::collections::{BTreeMap, HashMap};
-use std::fmt;
 use thiserror::Error;
 
 // Mocked types for compilation
@@ -32,10 +31,14 @@ pub struct JsonSchemaValidator {
 #[derive(Debug, Error)]
 pub enum ConfigValidationError {
     #[error("Schema violation for key '{key}': {error}")]
-    SchemaViolation { key: String, error: String },
+    SchemaViolation {
+        key: String,
+        error: Box<ValidationErrorKind>,
+    },
     #[error("Custom validation failed: {0}")]
     Custom(String),
 }
+
 
 impl JsonSchemaValidator {
     pub fn validate_config(&self, config: &Value) -> Result<(), ConfigValidationError> {
@@ -45,7 +48,7 @@ impl JsonSchemaValidator {
                     let first_error = e.into_iter().next().unwrap();
                     ConfigValidationError::SchemaViolation {
                         key: key.clone(),
-                        error: first_error.to_string(),
+                        error: Box::new(first_error.kind),
                     }
                 })?;
             }
@@ -78,23 +81,6 @@ struct ConfigVersionTracker;
 pub struct ConfigMigrationEngine {
     migrations: BTreeMap<Version, Box<dyn ConfigMigration>>,
     version_tracker: ConfigVersionTracker,
-}
-
-impl fmt::Debug for JsonSchemaValidator {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("JsonSchemaValidator")
-            .field("schemas", &self.schemas.keys().collect::<Vec<_>>())
-            .field("custom_validators", &self.custom_validators.len())
-            .finish()
-    }
-}
-
-impl fmt::Debug for ConfigMigrationEngine {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("ConfigMigrationEngine")
-            .field("migrations", &self.migrations.len())
-            .finish()
-    }
 }
 
 impl ConfigMigrationEngine {

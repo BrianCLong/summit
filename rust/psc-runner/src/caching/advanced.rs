@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use lru::LruCache;
 
 // Mocked types for compilation
@@ -10,9 +11,7 @@ struct SsdCache<K, V> {
 }
 
 impl<K, V> SsdCache<K, V> {
-    async fn get(&self, _key: &K) -> Option<V> {
-        None
-    }
+    async fn get(&self, _key: &K) -> Option<V> { None }
     async fn put(&self, _key: K, _value: V) {}
 }
 
@@ -23,9 +22,7 @@ struct DistributedCache<K, V> {
 }
 
 impl<K, V> DistributedCache<K, V> {
-    async fn get(&self, _key: &K) -> Option<V> {
-        None
-    }
+    async fn get(&self, _key: &K) -> Option<V> { None }
 }
 
 #[derive(Debug, Clone)]
@@ -41,8 +38,8 @@ pub struct AdvancedCacheSystem {
 }
 
 pub struct MultiTierCache {
-    l1_cache: LruCache<Key, Value>,         // In-memory, fast, small
-    l2_cache: SsdCache<Key, Value>,         // SSD-backed, medium speed
+    l1_cache: LruCache<Key, Value>,      // In-memory, fast, small
+    l2_cache: SsdCache<Key, Value>,      // SSD-backed, medium speed
     l3_cache: DistributedCache<Key, Value>, // Network cache, large capacity
 }
 
@@ -98,6 +95,7 @@ struct Cache;
 impl Cache {
     async fn prefetch(&self, _key: Key, _value: Value) {}
 }
+
 
 pub struct PredictiveLoader {
     access_pattern_analyzer: PatternAnalyzer,
