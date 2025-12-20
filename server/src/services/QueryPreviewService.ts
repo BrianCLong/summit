@@ -17,14 +17,7 @@ import { logger } from '../utils/logger.js';
 import { metrics } from '../observability/metrics.js';
 import { NlToCypherService } from '../ai/nl-to-cypher/nl-to-cypher.service.js';
 import { GlassBoxRunService } from './GlassBoxRunService.js';
-import { QueryResultCache } from './queryResultCache.js';
-import {
-  decodeCursor,
-  encodeCursor,
-  wrapCypherWithPagination,
-  wrapSqlWithPagination,
-} from './pagination.js';
-import { previewStreamHub } from './previewStreamHub.js';
+import { QueryResultCache, type QueryResultPayload } from './queryResultCache.js';
 
 export type QueryLanguage = 'cypher' | 'sql';
 
@@ -481,6 +474,12 @@ export class QueryPreviewService {
       let hasMore = false;
       let streamedBatches = 0;
       const executionStartedAt = Date.now();
+      let payload: QueryResultPayload | undefined;
+      const signature = this.queryCache.buildSignature(
+        preview.language,
+        queryToExecute,
+        preview.parameters,
+      );
 
       const streamingCached = await this.queryCache.getStreamingPartial(
         signature,
@@ -490,160 +489,69 @@ export class QueryPreviewService {
         warnings.push('Using streaming cache while full query executes');
       }
 
-      const cachedResult = await this.queryCache.getResult(
-        signature,
-        preview.tenantId,
-      );
-
-      const publishBatch = (
-        cursorOffset: number,
-        batch: unknown[],
-        candidateNext?: number | null,
-        batchWarnings?: string[],
-      ) => {
-        if (!streamTopic) return;
-        previewStreamHub.publish(preview.id, {
-          previewId: preview.id,
-          batch,
-          cursor: encodeCursor(cursorOffset),
-          nextCursor:
-            candidateNext !== undefined && candidateNext !== null
-              ? encodeCursor(candidateNext)
-              : null,
-          warnings: batchWarnings,
-        });
-      };
-
-      const persistStreamingPartial = async (rows: unknown[]) => {
-        await this.queryCache.setStreamingPartial(
-          signature,
-          rows,
-          preview.tenantId,
-        );
-      };
-
-      if (cachedResult && cachedResult.rows.length > initialCursor && !input.dryRun) {
-        cached = true;
-        cacheTier = cachedResult.tier;
-        const slice = cachedResult.rows.slice(
-          initialCursor,
-          initialCursor + pageSize,
-        );
-        results = slice;
-        rowCount = slice.length;
-        hasMore = initialCursor + slice.length < cachedResult.rows.length;
-        nextCursor = hasMore ? initialCursor + slice.length : undefined;
-        warnings.push(...cachedResult.warnings, 'Served from read-through cache');
-        if (streamTopic) {
-          streamedBatches += 1;
-          publishBatch(initialCursor, slice, nextCursor, cachedResult.warnings);
-          await persistStreamingPartial(slice);
-        }
-      } else if (input.dryRun) {
+      if (input.dryRun) {
         results = [{ message: 'Dry run - query validated but not executed' }];
         rowCount = results.length;
         warnings.push('Dry run mode - no data was accessed');
+        payload = {
+          rows: results,
+          warnings: [...warnings],
+          executionTimeMs: Date.now() - executionStartedAt,
+        };
       } else {
-        const executePage = async (cursorOffset: number) => {
-          if (preview.language === 'cypher') {
-            return this.executeCypher(
+        const { payload: cachedOrLoaded, fromCache, tier } = await this.queryCache.readThrough(
+          signature,
+          preview.tenantId,
+          async () => {
+            if (preview.language === 'cypher') {
+              const execResult = await this.executeCypher(
+                queryToExecute,
+                preview.parameters,
+                {
+                  maxRows: input.maxRows || 100,
+                  timeout: input.timeout || 30000,
+                }
+              );
+              return {
+                rows: execResult.records,
+                warnings: execResult.warnings,
+                executionTimeMs: Date.now() - executionStartedAt,
+              };
+            }
+
+            const execResult = await this.executeSql(
               queryToExecute,
-              preview.parameters,
               {
                 maxRows: input.maxRows || 100,
                 timeout: input.timeout || 30000,
-                cursor: cursorOffset,
-                batchSize: pageSize,
-                streamObserver: streamTopic
-                  ? (payload) =>
-                      publishBatch(
-                        cursorOffset,
-                        payload.batch,
-                        payload.nextCursor ?? null,
-                        payload.warnings,
-                      )
-                  : undefined,
               }
             );
-          }
-          return this.executeSql(
-            queryToExecute,
-            {
-              maxRows: input.maxRows || 100,
-              timeout: input.timeout || 30000,
-              cursor: cursorOffset,
-              batchSize: pageSize,
-              streamObserver: streamTopic
-                ? (payload) =>
-                    publishBatch(
-                      cursorOffset,
-                      payload.batch,
-                      payload.nextCursor ?? null,
-                      payload.warnings,
-                    )
-                : undefined,
-            }
-          );
-        };
 
-        if (streamTopic) {
-          this.activeStreams.add(preview.id);
-          let cursorOffset = initialCursor;
-          while (true) {
-            const execResult = await executePage(cursorOffset);
-            const batch = execResult.records.slice(0, pageSize);
-            if (batch.length > 0) {
-              results = results.concat(batch);
-              rowCount = results.length;
-              streamedBatches += 1;
-              await persistStreamingPartial(
-                results.slice(-this.queryCache.getPartialLimit()),
-              );
-            }
-            warnings.push(...execResult.warnings);
-            hasMore = execResult.hasMore ?? Boolean(execResult.nextCursor);
-            nextCursor = execResult.nextCursor;
-            const maxRows = input.maxRows ?? Infinity;
-            const reachedCap = results.length >= maxRows;
-            if (!hasMore || reachedCap) {
-              break;
-            }
-            cursorOffset = execResult.nextCursor ?? cursorOffset + batch.length;
-          }
-          if (input.maxRows && results.length > input.maxRows) {
-            results = results.slice(0, input.maxRows);
-            rowCount = results.length;
-            hasMore = true;
-            nextCursor = nextCursor ?? initialCursor + results.length;
-          }
-        } else {
-          const execResult = await executePage(initialCursor);
-          results = execResult.records;
-          rowCount = execResult.records.length;
-          warnings.push(...execResult.warnings);
-          hasMore = execResult.hasMore ?? Boolean(execResult.nextCursor);
-          nextCursor = execResult.nextCursor;
-          await persistStreamingPartial(
-            results.slice(0, this.queryCache.getPartialLimit()),
-          );
-        }
-
-        await this.queryCache.setResult(
-          signature,
-          {
-            rows: results,
-            warnings,
-            executionTimeMs: Date.now() - executionStartedAt,
+            return {
+              rows: execResult.rows,
+              warnings: execResult.warnings,
+              executionTimeMs: Date.now() - executionStartedAt,
+            };
           },
-          preview.tenantId,
+          { primeStreaming: true }
         );
+
+        cached = fromCache;
+        cacheTier = tier;
+        payload = cachedOrLoaded;
+        results = cachedOrLoaded.rows;
+        rowCount = cachedOrLoaded.rows.length;
+        warnings.push(...cachedOrLoaded.warnings);
+        if (fromCache) {
+          warnings.push('Served from read-through cache');
+        }
       }
 
       const executionTimeMs = cached
-        ? cachedResult?.executionTimeMs ?? Date.now() - startTime
+        ? payload?.executionTimeMs ?? Date.now() - startTime
         : Date.now() - executionStartedAt;
 
-      const hitRate = this.queryCache.getHitRate();
+      const hitRate = this.queryCache.getHitRate('result');
       if (!cached && hitRate < 0.3) {
         logger.warn(
           { signature, hitRate },

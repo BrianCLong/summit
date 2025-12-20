@@ -11,6 +11,7 @@ type CliOptions = {
   policyPaths: string[];
   sbomPaths: string[];
   provenancePaths: string[];
+  deployedVersion?: string;
 };
 
 function parseArgs(argv: string[]): CliOptions {
@@ -53,6 +54,10 @@ function parseArgs(argv: string[]): CliOptions {
         options.provenancePaths.push(argv[i + 1]);
         i += 1;
         break;
+      case '--version':
+        options.deployedVersion = argv[i + 1];
+        i += 1;
+        break;
       default:
         // ignore unknown flags to keep CLI lightweight
         break;
@@ -66,7 +71,9 @@ async function main() {
   const options = parseArgs(process.argv.slice(2));
 
   if (!options.tenantId) {
-    console.error('Usage: runtime-evidence-bundle --tenant <tenant-id> [--start ISO] [--end ISO]');
+    console.error(
+      'Usage: runtime-evidence-bundle --tenant <tenant-id> [--start ISO] [--end ISO] [--version <deployed-version>]',
+    );
     console.error(
       'Optional: --audit <path> --policy <path> --sbom <path> --provenance <path> (flags can repeat).',
     );
@@ -83,11 +90,8 @@ async function main() {
     provenancePaths: options.provenancePaths.length
       ? options.provenancePaths
       : undefined,
+    deployedVersion: options.deployedVersion,
   });
-
-  const workingDir = path.dirname(bundle.bundlePath);
-  const checksumsPath = path.join(workingDir, 'checksums.txt');
-  const manifestPath = path.join(workingDir, 'manifest.json');
 
   const summary = {
     bundleId: bundle.id,
@@ -95,10 +99,11 @@ async function main() {
     bundlePath: bundle.bundlePath,
     sha256: bundle.sha256,
     expiresAt: bundle.expiresAt,
+    deployedVersion: bundle.deployedVersion,
     warnings: bundle.warnings,
     counts: bundle.counts,
-    checksumsPath,
-    manifestPath,
+    checksumsPath: bundle.checksumsPath,
+    manifestPath: bundle.manifestPath,
   };
 
   process.stdout.write(JSON.stringify(summary, null, 2) + '\n');

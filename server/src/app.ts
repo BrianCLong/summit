@@ -49,6 +49,7 @@ import webhookRouter from './routes/webhooks.js';
 import { webhookWorker } from './webhooks/webhook.worker.js';
 import supportTicketsRouter from './routes/support-tickets.js';
 import ticketLinksRouter from './routes/ticket-links.js';
+import tenantContextMiddleware from './middleware/tenantContext.js';
 import { auroraRouter } from './routes/aurora.js';
 import { oracleRouter } from './routes/oracle.js';
 import { phantomLimbRouter } from './routes/phantom_limb.js';
@@ -63,6 +64,7 @@ import qafRouter from './routes/qaf.js';
 import siemPlatformRouter from './routes/siem-platform.js';
 import maestroRouter from './routes/maestro.js';
 import caseRouter from './routes/cases.js';
+import tenantsRouter from './routes/tenants.js';
 import { SummitInvestigate } from './services/SummitInvestigate.js';
 import osintRouter from './routes/osint.js';
 import edgeOpsRouter from './routes/edge-ops.js';
@@ -79,6 +81,7 @@ import queryPreviewStreamRouter from './routes/query-preview-stream.js';
 import commandConsoleRouter from './routes/internal/command-console.js';
 import searchV1Router from './routes/search-v1.js';
 import dataGovernanceRouter from './routes/data-governance-routes.js';
+import tenantBillingRouter from './routes/tenants/billing.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -196,6 +199,9 @@ export const createApp = async () => {
     next();
   });
 
+  // Resolve and enforce tenant context for API and GraphQL surfaces
+  app.use(['/api', '/graphql'], tenantContextMiddleware());
+
   // Telemetry middleware
   app.use((req, res, next) => {
     snapshotter.trackRequest(req);
@@ -281,6 +287,7 @@ export const createApp = async () => {
   app.use('/api/qaf', qafRouter);
   app.use('/api/siem-platform', siemPlatformRouter);
   app.use('/api/maestro', maestroRouter);
+  app.use('/api/tenants', tenantsRouter);
   app.use('/api/actions', actionsRouter);
   app.use('/api/osint', osintRouter);
   app.use('/api/edge', edgeOpsRouter);
@@ -288,6 +295,7 @@ export const createApp = async () => {
   app.use('/api', adminSmokeRouter);
   app.use('/api/scenarios', scenarioRouter);
   app.use('/api/costs', resourceCostsRouter);
+  app.use('/api/tenants/:tenantId/billing', tenantBillingRouter);
   app.use('/api/internal/command-console', commandConsoleRouter);
   app.use('/api/query-replay', queryReplayRouter);
   app.use('/api', queryPreviewStreamRouter);
