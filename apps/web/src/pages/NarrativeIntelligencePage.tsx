@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Title, Text, Metric, Flex, Grid, Badge } from '@tremor/react';
 import { ErrorBoundary } from '@/components/error';
+import { cn } from '@/lib/utils';
 
 interface NarrativeIntelligencePageProps { className?: string }
 
-export const NarrativeIntelligencePage: React.FC<NarrativeIntelligencePageProps> = () => {
+export const NarrativeIntelligencePage: React.FC<NarrativeIntelligencePageProps> = ({ className }) => {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any>(null);
 
@@ -35,10 +36,10 @@ export const NarrativeIntelligencePage: React.FC<NarrativeIntelligencePageProps>
     }, 1000);
   }, []);
 
-  if (loading) return <div className="p-6">Loading Narrative Intelligence...</div>;
+  if (loading) return <div className={cn("p-6", className)}>Loading Narrative Intelligence...</div>;
 
   return (
-    <div className="p-6 space-y-6 bg-slate-50 min-h-screen">
+    <div className={cn("p-6 space-y-6 bg-slate-50 min-h-screen", className)}>
       <div className="flex justify-between items-center">
         <div>
             <Title>Narrative Intelligence & Influence Operations</Title>
