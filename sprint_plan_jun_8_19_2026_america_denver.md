@@ -1,55 +1,53 @@
-# Sprint Plan — Jun 8–19, 2026 (America/Denver)
+# Sprint 13 — Privacy-Safe Analytics & Control (Jun 8–19, 2026, America/Denver)
 
-> **Context:** Post‑GA stabilization sprint following the GA Launch. Emphasis on lowering toil, enforcing governance, and preparing the platform for enterprise rollouts.
+> **Theme:** “Learn across tenants without leaking across tenants.” Build a privacy-safe analytics layer, prove isolation, and ship BYOK control knobs with governance receipts.
 
 ---
 
 ## 1) Sprint Goal (SMART)
 
-Reduce toil and risk after launch while unblocking enterprise rollouts by establishing SLA/SLO operating rhythms, strengthening security and access governance, laying multi‑region resilience groundwork, tuning cost/performance, and closing top‑priority customer issues — completed by **Jun 19, 2026**.
+By **Jun 19, 2026**, deliver cross-tenant analytics that stay aggregate-only, ship isolation detection with a Switchboard dashboard, and enable customer-managed keys (BYOK) for evidence/object storage—each gated by policy, metered for commercialization, and producing receipts.
 
 **Key outcomes**
 
-- SLA dashboard with per‑tenant error budgets, p95s, pager hygiene metrics, and weekly exports.
-- Access reviews with attest/revoke flows, audit trails, and evidence packs.
-- Token rotation assist with leak detection and suppression; last‑used/IP surfaced.
-- Active‑passive DR blueprint with ADR, diagram, and POC synthetic cutover demo.
-- Query cost guardrails with explain hints, banding, and per‑plan caps plus humane recovery guidance.
-- Production cache hit‑rate and queue depth within targets with alarms and rollback plans.
-- Top 10 P0/P1 customer bugs resolved with repro, tests, verification, and release notes.
-- Docs/help hotfixes and billing accuracy reconciliation with anomalies ticketed.
+- Privacy guardrails block unsafe analytics (k-anonymity thresholds, low-cardinality dimension blocks, time-bucketing) and emit receipts.
+- Aggregated insights live for activation funnel, tenant health cohorts, SLO compliance, and COGS (plus “You vs. cohort” benchmarks for Enterprise).
+- Analytics API (`POST /analytics/query`) accepts strict schemas and returns only aggregates.
+- Isolation Health dashboard surfaces cross-tenant access attempts, denial types, and anomaly spikes with runbook links.
+- BYOK encrypts evidence/object storage artifacts and receipt payloads with tenant KMS keys; rotation supported for new writes.
+- Governance receipts and quarterly evidence exports (“Trust Report”) include analytics and isolation proofs.
+- BYOK entitlement metered with invoice-ready line items.
 
 ---
 
 ## 2) Success Metrics & Verification
 
-- **SLA/SLO operations:** Weekly SLA report generated automatically; pager hygiene metrics tracked (ack/resolve SLO, alert noise trend). _Verify:_ Dashboard tiles + exported PDF/HTML.
-- **Access governance:** 100% of tenants have completed quarterly access reviews with attest/revoke evidence. _Verify:_ Audit trail and downloadable evidence pack.
-- **Token safety:** All targeted tokens rotated without downtime; leak scanner coverage ≥ 95% of diagnostic/log scopes. _Verify:_ Rotation wizard logs; scanner findings + suppression audit.
-- **Resilience:** DR POC cutover meets success criteria (RPO/RTO targets for metadata/objects). _Verify:_ POC demo runbook + recording.
-- **Cost guardrails:** Expensive queries are cost‑banded; cap enforcement + retry guidance reduce blocked query rate by ≥ 30% week‑over‑week. _Verify:_ Cost‑cap alerts; telemetry on block/override.
-- **Performance/toil:** Cache hit‑rate meets target on golden set; queue depth within SLA with alarms < threshold noise. _Verify:_ Observability panels + alarms.
-- **Quality:** Top 10 P0/P1 bugs closed with tests; docs/help 404 count = 0; billing reconciliation variance within tolerance and anomalies ticketed. _Verify:_ Closure log; docs fix report; billing reconciliation report.
+- **Privacy guardrails:** ≥ 99% of analytics requests that violate thresholds are denied with rationale; no tenant-identifying fields in responses. _Verify:_ Decision logs + sampled receipts.
+- **Aggregation safety:** Minimum cohort size enforced (k ≥ 10) and low-cardinality dimensions auto-rejected. _Verify:_ Unit tests + policy evaluation traces.
+- **Analytics readiness:** Activation funnel, tenant health, SLO trends, and COGS aggregates available behind API + dashboard cards. _Verify:_ API responses and dashboard snapshots.
+- **Isolation detection:** 100% of policy denials and RLS/object-prefix violations logged with actor/time/IP (where available). _Verify:_ Isolation Health dashboard + alert feed.
+- **BYOK encryption:** New evidence/object artifacts and receipt payloads use customer KMS keys; rotation path live for new writes. _Verify:_ Key usage logs + encryption headers/receipts.
+- **Governance receipts:** Every analytics query and BYOK lifecycle action emits a receipt with schema hash and decision trail. _Verify:_ Receipt store entries + digest checks.
+- **Commercialization:** BYOK add-on metered per enabled tenant; invoice line item generated. _Verify:_ Billing export sample.
 
 ---
 
 ## 3) Scope
 
-**Must‑have (commit):**
+**Must-have (commit):**
 
-- **SLA Dashboard & Pager Hygiene (Weeklies):** Tiles for per‑tenant error budgets/p95s; paging health (ack/resolve); runbook links; weekly PDF/HTML export.
-- **Access Reviews (Quarterly) + Admin Audit Pack:** Reviewer UI + CSV export; attest/revoke with audit trail; evidence pack exportable.
-- **API Token Rotation Assist + Secrets Scanner:** One‑click rotate; last‑used/IP surfaced; scanner flags patterns; suppression list supported.
-- **Active‑Passive DR Blueprint (Design + POC):** ADR with diagram and success criteria; POC demo with synthetic cutover.
-- **Query Cost Guardrails & Explain Surfacing:** Cost estimate banding; per‑plan caps; humane error + retry guidance; explain hints.
-- **Graph Cache & Queue Tuning (Prod Profiles):** Hit‑rate ≥ target on golden set; queue alarms; rollback plan.
-- **Top 10 Customer Bugs (P0/P1):** Repro → test → verification; release notes; owners assigned.
-- **Docs & In‑Product Help Hotfixes:** 404 fixes; search pins updated; telemetry reviewed.
-- **Billing Accuracy Audit (True‑Up):** Reconciliation job + report; anomalies ticketed; sample invoices signed off.
+- **Privacy Guardrails:** Implement aggregation policy (k-min thresholds, low-cardinality dimension deny list, time bucketing); deny + receipt on violation.
+- **Analytics Data Products:** Activation funnel, tenant health cohorts, SLO compliance trends, COGS aggregates, and Enterprise “You vs. cohort” benchmarks with safe bucketing.
+- **Analytics API:** `POST /analytics/query` schema validation (measures, dimensions, time range), aggregate-only outputs, policy gating + receipts.
+- **Isolation Proofing:** Instrument policy denials, datastore RLS, and object-prefix violations; correlate to actor/IP/time; alerts into Isolation Health dashboard with top denied actions and spikes.
+- **BYOK v0:** Tenant-scoped KMS key references (per region) encrypt object storage artifacts and receipt payload blobs; rotation for new writes; lifecycle (configure → validate → enable → rotate → disable) with dual control and receipts.
+- **Governance & Exports:** Analytics receipts include schema hash, privacy decision, and result digest; Quarterly Trust Report export bundles analytics aggregates, isolation snapshots, DR evidence pointers, and selective disclosure proofs.
+- **Commercialization:** Entitlement check for BYOK add-on; metering and invoice line item generation.
 
 **Stretch:**
 
-- **Feature‑Flag Cleanup & Deprecation Notices:** Remove stale flags; add deprecation ribbons for two legacy endpoints; changelog entry; safe migrations documented.
+- **Backfill encryption for historical artifacts** (opt-in) post-rotation.
+- **Basic differential privacy noise** for select metrics where thresholds are tight.
 
 ---
 
@@ -58,8 +56,8 @@ Reduce toil and risk after launch while unblocking enterprise rollouts by establ
 - Capacity: **~40–42 pts** (stretch optional).
 - Ceremonies (America/Denver):
   - **Sprint Planning:** Mon Jun 8, 09:30–11:00
-  - **Stand‑up:** Daily 09:15–09:30
-  - **Mid‑sprint Refinement:** Thu Jun 11, 14:00–14:45
+  - **Stand-up:** Daily 09:15–09:30
+  - **Mid-sprint Refinement:** Thu Jun 11, 14:00–14:45
   - **Sprint Review:** Fri Jun 19, 10:00–11:00
   - **Retro:** Fri Jun 19, 11:15–12:00
 
@@ -67,28 +65,30 @@ Reduce toil and risk after launch while unblocking enterprise rollouts by establ
 
 ## 5) Backlog (Ready for Sprint)
 
-| ID       | Title                                           | Owner      | Est | Dependencies | Acceptance Criteria (summary)                |
-| -------- | ----------------------------------------------- | ---------- | --: | ------------ | -------------------------------------------- |
-| STAB-101 | SLA Dashboard & Pager Hygiene                   | Ops        |   5 | —            | Tiles, weekly export, runbook links          |
-| SEC-111  | Access Reviews + Admin Audit Pack               | BE+FE      |   5 | —            | Attest/revoke; CSV; evidence export          |
-| SEC-121  | Token Rotation Assist + Secrets Scanner         | BE         |   5 | —            | Rotate wizard; last-used/IP; leak alerts     |
-| OPS-131  | DR Blueprint ADR + POC                          | Arch+Ops   |   5 | —            | ADR + demo; success criteria                 |
-| QRY-141  | Query Cost Caps & Explain                       | BE+FE      |   5 | —            | Banding; caps; humane guidance               |
-| OPS-151  | Cache & Queue Tuning (Prod)                     | Ops        |   5 | —            | Hit-rate target; alarms; rollback            |
-| FIX-161  | Top-10 Customer Bugs (P0/P1)                    | Eng        |   8 | —            | Repro→test→verify; notes                     |
-| DOC-171  | Docs/Help Hotfixes (GA Feedback)                | PM+TW      |   3 | —            | 404=0; pins updated; telemetry reviewed      |
-| FIN-181  | Billing Accuracy True-Up                        | BE+Finance |   3 | —            | Reconcile report; anomalies ticketed         |
-| OPS-191  | Feature-Flag Cleanup & Deprecations *(Stretch)* | BE         |   3 | —            | Remove stale; deprecation ribbons; changelog |
+| ID         | Title                                             | Owner         | Est | Dependencies | Acceptance Criteria (summary)                          |
+| ---------- | ------------------------------------------------- | ------------- | --: | ------------ | ------------------------------------------------------ |
+| ANA-201    | Privacy Guardrails & Receipts                     | BE+Policy     |   5 | —            | k-min + low-cardinality rules; time buckets; receipts  |
+| ANA-211    | Analytics Data Products (Funnel/Health/SLO/COGS)  | Data+BE       |   5 | ANA-201      | Aggregates only; cohort thresholds; benchmark buckets  |
+| ANA-221    | Analytics API (`POST /analytics/query`)           | BE+API        |   5 | ANA-201      | Schema validation; policy gating; aggregated output    |
+| ISO-231    | Isolation Detection & Correlation                 | BE+SecOps     |   5 | —            | Denial/RLS/object violations logged with actor/IP/time |
+| ISO-241    | Isolation Health Dashboard                        | FE+SecOps     |   5 | ISO-231      | Rates, top denied actions, spikes, runbook links       |
+| BYOK-251   | KMS Integration for Evidence & Receipts           | BE+Platform   |   5 | —            | Encrypt new artifacts/payloads with tenant keys        |
+| BYOK-261   | BYOK Lifecycle (Enable/Rotate/Disable) + Receipts | BE+Platform   |   5 | BYOK-251     | Validate, dual-control, rotation for new writes        |
+| GOV-271    | Governance Receipts & Trust Report Export         | BE+Docs       |   4 | ANA-221      | Schema hash; privacy decisions; quarterly bundle       |
+| COM-281    | BYOK Entitlement, Metering, Invoice Line Item     | BE+Finance    |   3 | BYOK-251     | Entitlement gate; metering; invoice sample             |
+| ANA-291*   | Stretch: Opt-in Backfill Encryption/DP            | BE+Data       |   3 | BYOK-251     | Backfill tooling or DP noise flag with guardrails      |
 
-> **Planned:** 39–42 pts with stretch optional.
+> **Planned:** 42 pts with stretch optional.
 
 ---
 
 ## 6) Dependencies & Assumptions
 
-- Prod-like stage + prod environments with canary + auto‑rollback available.
-- Feature flags: `slaDashV1`, `accessReviewPack`, `tokenRotateAssist`, `drBlueprintPOC`, `queryCostCaps`, `cacheQueueTuning`, `bugfixP0P1`, `docsHotfixes`, `billingTrueUp`, `flagCleanup` (stretch).
-- Test data: synthetic heavy queries, token leak fixtures, sample tenants (Free/Pro/Ent), failover sandboxes.
+- KMS access in staging with test keys; per-region key references stored securely.
+- Policy engine available for analytics guardrails and entitlement checks.
+- Isolation logging hooks in policy layer, datastore RLS, and object storage gateway.
+- Synthetic datasets for benchmarks and leak testing; cohort sizes that meet k-min.
+- Feature flags: `analyticsGuardrails`, `analyticsApi`, `isolationHealth`, `byokV0`, `trustReport`, `byokMetering`, `analyticsDP` (stretch).
 
 ---
 
@@ -96,53 +96,55 @@ Reduce toil and risk after launch while unblocking enterprise rollouts by establ
 
 **Functional:**
 
-- SLA dashboard tiles & weekly export; pager hygiene metrics.
-- Access review generation; attest/revoke with audit + CSV export.
-- Token rotation wizard; scanner detection/suppression; last‑used/IP surfaced.
-- DR POC cutover demo; success criteria documented.
-- Query cost estimates, cap blocks, and explain hints; admin caps per plan.
-- Cache/queue thresholds; alarms; rollback.
-- Validate fixes for each P0/P1; docs/help hotfixes; billing reconciliation report.
+- Validate guardrail denials for sub-threshold cohorts, low-cardinality dimensions, and non-bucketed time ranges (receipt generated with rationale).
+- Verify aggregates for funnel/health/SLO/COGS and Enterprise benchmark buckets return no tenant identifiers.
+- API contract tests for `POST /analytics/query` (schema validation, policy gating, aggregate-only response).
+- Isolation detection emits correlated events; dashboard shows rates/top actions/anomalies with links.
+- BYOK encrypts new evidence objects and receipt payloads; rotation paths succeed; lifecycle emits receipts.
+- Entitlement blocks BYOK without add-on; metering records enabled tenants; invoice export contains line item.
+- Trust Report export bundles analytics aggregates, isolation snapshots, DR evidence pointers, and proofs.
 
-**E2E:** Admin rotates a token → analyst triggers an expensive query → cost cap blocks with guidance → fix query → PASS → access review exported → DR POC cutover demo succeeds.
+**E2E:** Enterprise tenant with BYOK enabled → upload evidence/export receipt encrypted with tenant key → run safe analytics query (activation funnel by week) → denied unsafe query (small cohort) with rationale → Isolation Health dashboard shows attempted violations → export Trust Report bundle.
 
-**Non‑functional:**
+**Non-functional:**
 
-- Cache hit‑rate and queue depth within targets; alert noise under budget; reconciliation anomalies < tolerance.
+- Guardrail and receipt paths add <50ms median overhead to analytics requests.
+- BYOK encryption/rotation does not exceed storage SLA; alert noise tolerable on isolation signals.
 
 ---
 
 ## 8) Risks & Mitigations
 
-- **Alert fatigue** → pager hygiene visuals + thresholds tuning; weekly ops retro.
-- **Cost caps over‑blocking** → guidance + override with audit; track false‑positive rate.
-- **DR scope creep** → POC time‑box + ADR sign‑off; defer active‑active to future sprint.
-- **Scanner false positives** → suppression lists + CI tests on patterns.
-- **Billing mismatches** → automated diff + sampling; finance sign‑off gate.
+- **Re-identification risk** if thresholds misconfigured → enforce defaults, block overrides without approval, add policy tests.
+- **Performance regression** from guardrails/encryption → cache policy decisions; parallelize receipt writes; profile hot paths.
+- **Key misconfiguration** → validation step with dry-run encrypt + dual-control approval; fallback to platform key with alert.
+- **False positives in isolation alerts** → rate-limit noisy actors; tunable severity; weekly review.
+- **Commercialization gaps** → finance sign-off on metering schema and invoice sample before GA.
 
 ---
 
 ## 9) Reporting Artifacts (produce this sprint)
 
-- SLA weekly report, DR blueprint ADR + POC demo, cost‑cap rollout notes, cache/queue tuning report, P0/P1 closure log, docs fix report, billing true‑up reconciliation, burndown/throughput, SLO snapshots.
+- Privacy guardrail policy doc + receipt examples
+- Analytics API schema + sample queries/responses
+- Isolation Health dashboard snapshot + alert playbook
+- BYOK lifecycle runbook + key usage logs
+- Sample invoice export showing BYOK add-on
+- Quarterly Trust Report bundle (aggregates + isolation + DR evidence pointers)
 
 ---
 
 ## 10) Demo Script (review)
 
-1. Open **SLA Dashboard** → show error budgets & weekly export.
-2. Generate **Access Review Pack** → attest/revoke a stale user → export evidence.
-3. Run **Token Rotation Assist** → verify last‑used/IP; rotate without downtime.
-4. Trigger **Expensive Query** → see cost band + explain; hit cap → follow guidance → succeed.
-5. Walk the **DR POC** cutover; confirm success criteria met.
-6. Show **Cache/Queue Tuning** panels before/after.
-7. Review **Top‑10 Bug Fixes** with repro → test → verification.
-8. Present **Billing True‑Up** report and outcomes.
-9. *(Stretch)* Show **Flag Cleanup** diff and deprecation ribbon.
+1. Enable BYOK for a tenant (dual control) and show receipt.
+2. Export an evidence bundle and verify encryption with the tenant key.
+3. Run analytics query: “Activation funnel by week” → allowed; show receipt with schema hash.
+4. Attempt unsafe query with too-small cohort → denied with privacy rationale.
+5. Show Isolation Health dashboard (attempt rates, top denied actions, anomaly spike) with runbook link.
+6. Export Quarterly Trust Report bundle with analytics + isolation snapshots.
 
 ---
 
 ## 11) Outcome of this sprint
 
-A calmer, sturdier post‑GA platform: clear SLAs, verifiable access governance, safer tokens, guardrails on runaway queries, tuned caches/queues, a DR path taking shape, top customer pains retired, and billing confidence restored—ready to pursue active‑active and enterprise expansions next.
-
+Platform delivers privacy-safe analytics without tenant leakage, surfaces and curbs cross-tenant attempts, and gives enterprises BYOK control with receipts and billing hooks—laying the foundation for safer benchmarks and enterprise-grade trust.
