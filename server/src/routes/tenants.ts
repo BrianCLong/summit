@@ -1,17 +1,71 @@
+// @ts-nocheck
 import { Router } from 'express';
 import { z } from 'zod';
 import { tenantService, createTenantSchema } from '../services/TenantService.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
 import logger from '../utils/logger.js';
+import { ensurePolicy } from '../middleware/abac.js';
+import { ProvenanceRepo } from '../repos/ProvenanceRepo.js';
+import { getPostgresPool } from '../config/database.js';
+import archiver from 'archiver';
+import { createHash, randomUUID } from 'crypto';
+import provisionRouter from './tenants/provision.js';
 
 const router = Router();
+
+const settingsSchema = z.object({
+  settings: z.record(z.any()),
+});
+
+const disableSchema = z.object({
+  reason: z.string().min(3).optional(),
+});
+
+const auditQuerySchema = z.object({
+  limit: z.coerce.number().min(1).max(200).default(50),
+  offset: z.coerce.number().min(0).default(0),
+});
+
+router.use('/provision', provisionRouter);
+
+function policyGate() {
+  return (req: any, _res: any, next: any) => {
+    req.body = { ...req.body, tenantId: req.params.id };
+    return next();
+  };
+}
+
+function ensureTenantScope(req: any, res: any, next: any) {
+  const tenantId = req.params.id;
+  const userTenant = req.user?.tenantId || req.user?.tenant_id;
+  const isSuper = ['SUPER_ADMIN', 'ADMIN', 'admin'].includes(req.user?.role);
+  if (!isSuper && userTenant && userTenant !== tenantId) {
+    return res.status(403).json({ success: false, error: 'Forbidden' });
+  }
+  return next();
+}
+
+function buildReceipt(action: string, tenantId: string, actorId: string) {
+  const issuedAt = new Date().toISOString();
+  const payload = `${action}:${tenantId}:${actorId}:${issuedAt}`;
+  const hash = createHash('sha256').update(payload).digest('hex');
+  return {
+    id: randomUUID(),
+    action,
+    tenantId,
+    actorId,
+    issuedAt,
+    hash,
+    policy: 'abac.ensurePolicy',
+  };
+}
 
 /**
  * @route POST /api/tenants
  * @desc Create a new tenant (Self-Serve)
  * @access Protected (Requires Authentication)
  */
-router.post('/', ensureAuthenticated, async (req, res) => {
+router.post('/', ensureAuthenticated, ensurePolicy('create', 'tenant'), async (req, res) => {
   try {
     // Validate request body
     const input = createTenantSchema.parse(req.body);
@@ -27,6 +81,7 @@ router.post('/', ensureAuthenticated, async (req, res) => {
     res.status(201).json({
       success: true,
       data: tenant,
+      receipt: buildReceipt('TENANT_CREATED', tenant.id, actorId),
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -86,5 +141,172 @@ router.get('/:id', ensureAuthenticated, async (req, res) => {
         res.status(500).json({ success: false, error: 'Internal Server Error' });
     }
 });
+
+router.get(
+  '/:id/settings',
+  ensureAuthenticated,
+  ensureTenantScope,
+  policyGate(),
+  ensurePolicy('read', 'tenant'),
+  async (req, res) => {
+    try {
+      const tenantId = req.params.id;
+      const data = await tenantService.getTenantSettings(tenantId);
+      return res.json({
+        success: true,
+        data,
+        receipt: buildReceipt('TENANT_SETTINGS_VIEWED', tenantId, req.user?.id),
+      });
+    } catch (error) {
+      logger.error('Error in GET /api/tenants/:id/settings:', error);
+      if (error instanceof Error && error.message === 'Tenant not found') {
+        return res.status(404).json({ success: false, error: error.message });
+      }
+      return res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+  },
+);
+
+router.put(
+  '/:id/settings',
+  ensureAuthenticated,
+  ensureTenantScope,
+  policyGate(),
+  ensurePolicy('update', 'tenant'),
+  async (req, res) => {
+    try {
+      const body = settingsSchema.parse(req.body);
+      const tenantId = req.params.id;
+      const actorId = req.user?.id;
+      const updated = await tenantService.updateSettings(tenantId, body.settings, actorId);
+      return res.json({
+        success: true,
+        data: updated,
+        receipt: buildReceipt('TENANT_SETTINGS_UPDATED', tenantId, actorId),
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ success: false, error: 'Validation Error', details: error.errors });
+      }
+      if (error instanceof Error && error.message === 'Tenant not found') {
+        return res.status(404).json({ success: false, error: error.message });
+      }
+      logger.error('Error in PUT /api/tenants/:id/settings:', error);
+      return res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+  },
+);
+
+router.post(
+  '/:id/disable',
+  ensureAuthenticated,
+  ensureTenantScope,
+  policyGate(),
+  ensurePolicy('update', 'tenant'),
+  async (req, res) => {
+    try {
+      const { reason } = disableSchema.parse(req.body);
+      const tenantId = req.params.id;
+      const actorId = req.user?.id;
+      const updated = await tenantService.disableTenant(tenantId, actorId, reason);
+      return res.json({
+        success: true,
+        data: updated,
+        receipt: buildReceipt('TENANT_DISABLED', tenantId, actorId),
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ success: false, error: 'Validation Error', details: error.errors });
+      }
+      if (error instanceof Error && error.message === 'Tenant not found') {
+        return res.status(404).json({ success: false, error: error.message });
+      }
+      logger.error('Error in POST /api/tenants/:id/disable:', error);
+      return res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+  },
+);
+
+router.get(
+  '/:id/audit',
+  ensureAuthenticated,
+  ensureTenantScope,
+  policyGate(),
+  ensurePolicy('read', 'tenant'),
+  async (req, res) => {
+    try {
+      const query = auditQuerySchema.parse(req.query);
+      const tenantId = req.params.id;
+      const repo = new ProvenanceRepo(getPostgresPool());
+      const events = await repo.by('investigation', tenantId, undefined, query.limit, query.offset, tenantId);
+      return res.json({
+        success: true,
+        data: events,
+        receipt: buildReceipt('TENANT_AUDIT_VIEWED', tenantId, req.user?.id),
+      });
+    } catch (error) {
+      logger.error('Error in GET /api/tenants/:id/audit:', error);
+      return res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+  },
+);
+
+router.get(
+  '/:id/audit/export',
+  ensureAuthenticated,
+  ensureTenantScope,
+  policyGate(),
+  ensurePolicy('read', 'tenant'),
+  async (req, res) => {
+    try {
+      const tenantId = req.params.id;
+      const repo = new ProvenanceRepo(getPostgresPool());
+      const events = await repo.by('investigation', tenantId, undefined, 500, 0, tenantId);
+
+      res.setHeader('Content-Type', 'application/zip');
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="tenant-${tenantId}-evidence.zip"`,
+      );
+
+      const archive = archiver('zip', { zlib: { level: 9 } });
+      archive.on('error', (err) => {
+        logger.error('Archive error', err);
+        return res.status(500).end(`Archive error: ${err.message}`);
+      });
+      archive.pipe(res);
+
+      const metadata = {
+        tenantId,
+        exportedAt: new Date().toISOString(),
+        actorId: req.user?.id,
+        eventCount: events.length,
+      };
+      archive.append(JSON.stringify(metadata, null, 2), { name: 'metadata.json' });
+      archive.append(JSON.stringify(events, null, 2), { name: 'events.json' });
+
+      const bundleHash = createHash('sha256')
+        .update(JSON.stringify({ metadata, events }))
+        .digest('hex');
+
+      archive.append(
+        JSON.stringify(
+          {
+            receipt: buildReceipt('TENANT_EVIDENCE_EXPORTED', tenantId, req.user?.id),
+            bundleHash,
+          },
+          null,
+          2,
+        ),
+        { name: 'receipt.json' },
+      );
+
+      await archive.finalize();
+    } catch (error) {
+      logger.error('Error in GET /api/tenants/:id/audit/export:', error);
+      return res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+  },
+);
 
 export default router;

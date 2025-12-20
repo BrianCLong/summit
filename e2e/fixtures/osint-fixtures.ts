@@ -1,13 +1,13 @@
 import { test as base, expect } from '@playwright/test';
 
-// Define custom types
-export type OsintFixtures = {
+// Define custom types if needed
+type OsintFixtures = {
   mockWikipedia: () => Promise<void>;
   mockOsintFeeds: () => Promise<void>;
   createEntity: (data: any) => Promise<any>;
 };
 
-export const osintFixtures = {
+export const test = base.extend<OsintFixtures>({
   mockWikipedia: async ({ page }, use) => {
     await use(async () => {
       await page.route('https://en.wikipedia.org/w/api.php*', async (route) => {
@@ -67,7 +67,6 @@ export const osintFixtures = {
       return await response.json();
     });
   },
-};
+});
 
-export const test = base.extend<OsintFixtures>(osintFixtures);
 export { expect };

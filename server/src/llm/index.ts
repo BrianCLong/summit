@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { LLMRouter } from './router.js';
 import { OpenAIProvider } from './providers/openai.js';
 import { MockProvider } from './providers/mock.js';

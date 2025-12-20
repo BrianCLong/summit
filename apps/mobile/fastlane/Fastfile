@@ -1,0 +1,24 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Push a new release build to the App Store"
+  lane :release do
+    build_app(workspace: "IntelGraph.xcworkspace", scheme: "IntelGraph")
+    upload_to_app_store
+  end
+
+  desc "Push a new beta build to TestFlight"
+  lane :beta do
+    increment_build_number
+    build_app(workspace: "IntelGraph.xcworkspace", scheme: "IntelGraph")
+    upload_to_testflight
+  end
+end
+
+platform :android do
+  desc "Deploy a new version to the Google Play"
+  lane :deploy do
+    gradle(task: "clean bundleRelease")
+    upload_to_play_store
+  end
+end

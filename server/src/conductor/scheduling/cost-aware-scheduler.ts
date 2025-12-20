@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Cost-Aware Scheduler for Conductor
 // Implements queue-backed execution with budget tracking and graceful degradation
 

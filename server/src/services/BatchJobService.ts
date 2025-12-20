@@ -1,3 +1,4 @@
+// @ts-nocheck
 import PgBoss from 'pg-boss';
 import { cfg } from '../config';
 

@@ -230,7 +230,6 @@ export class DigitalTwinService {
    * @param filter - Optional filter
    * @returns GeoJSON FeatureCollection
    */
-  async exportToGeoJSON(filter?: AssetQueryFilter): Promise<any> {
   async exportToGeoJSON(filter?: AssetQueryFilter): Promise<GeoJSONFeatureCollection> {
     const assets = filter ? await this.queryAssets(filter) : Array.from(this.assets.values());
 
@@ -239,7 +238,6 @@ export class DigitalTwinService {
       features: assets.map((asset) => ({
         type: 'Feature' as const,
         id: asset.id,
-        geometry: asset.geometry as any,
         geometry: asset.geometry,
         properties: {
           name: asset.name,

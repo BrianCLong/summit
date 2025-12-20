@@ -1,0 +1,52 @@
+{
+  "name": "tenant-isolation-journey",
+  "description": "Validates tenant-scoped endpoints honor isolation and block cross-tenant access",
+  "steps": [
+    {
+      "name": "same-tenant read succeeds",
+      "request": {
+        "method": "GET",
+        "url": "${TENANT_API_URL}/tenants/${TENANT_ID}/cases",
+        "headers": {
+          "Authorization": "Bearer ${TENANT_TOKEN}",
+          "X-Tenant-ID": "${TENANT_ID}"
+        }
+      },
+      "assertions": [
+        { "type": "status", "value": 200 },
+        { "type": "jsonBody", "path": "$.tenantId", "value": "${TENANT_ID}" }
+      ]
+    },
+    {
+      "name": "cross-tenant attempt is denied",
+      "request": {
+        "method": "GET",
+        "url": "${TENANT_API_URL}/tenants/${TENANT_ID}/cases",
+        "headers": {
+          "Authorization": "Bearer ${TENANT_TOKEN}",
+          "X-Tenant-ID": "${FOREIGN_TENANT_ID}"
+        }
+      },
+      "assertions": [
+        { "type": "status", "value": 403 },
+        { "type": "jsonBody", "path": "$.reason", "value": "cross-tenant access denied" }
+      ]
+    },
+    {
+      "name": "metering endpoint scoped to tenant",
+      "request": {
+        "method": "GET",
+        "url": "${TENANT_API_URL}/tenants/${TENANT_ID}/metering/usage",
+        "headers": {
+          "Authorization": "Bearer ${TENANT_TOKEN}",
+          "X-Tenant-ID": "${TENANT_ID}"
+        }
+      },
+      "assertions": [
+        { "type": "status", "value": 200 },
+        { "type": "jsonBody", "path": "$.tenantId", "value": "${TENANT_ID}" },
+        { "type": "jsonBody", "path": "$.records[0].tenantId", "value": "${TENANT_ID}" }
+      ]
+    }
+  ]
+}

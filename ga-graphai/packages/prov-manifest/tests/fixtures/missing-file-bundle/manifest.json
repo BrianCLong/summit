@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "1.0.0",
+  "bundleId": "bundle-missing",
+  "createdAt": "2025-01-01T00:00:00Z",
+  "documents": [
+    {
+      "id": "primary-report",
+      "path": "report.pdf",
+      "sha256": "ff1f019de329f60b7e2c729f0eefb7619a6c8fa6e20923b7c9d1de756562e4e2"
+    }
+  ]
+}
