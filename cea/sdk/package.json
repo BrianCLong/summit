@@ -1,6 +1,6 @@
 {
   "name": "@summit/cea-sdk",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "description": "TypeScript SDK for the consent-aware experiment allocator",
   "type": "module",
   "main": "dist/index.js",
@@ -15,7 +15,7 @@
     "allocator"
   ],
   "author": "Summit Platform",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "devDependencies": {
     "typescript": "^5.4.0"
   }

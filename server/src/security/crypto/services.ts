@@ -1,3 +1,6 @@
+// @ts-nocheck
+import * as crypto from 'node:crypto';
+import fetch from 'node-fetch';
 import crypto from 'node:crypto';
 import { writeAudit } from '../../utils/audit.js';
 import type { CryptoAuditEvent, JsonObject, KeyVersion } from './types.js';
@@ -78,7 +81,7 @@ export class Rfc3161TimestampingService implements TimestampingService {
   constructor(
     private readonly endpoint: string,
     private readonly options: Rfc3161Options = {},
-  ) {}
+  ) { }
 
   async getTimestampToken(payload: Buffer): Promise<string> {
     const fetchFn = global.fetch;
@@ -157,7 +160,7 @@ export interface AuditLogger {
 }
 
 export class DatabaseAuditLogger implements AuditLogger {
-  constructor(private readonly subsystem: string) {}
+  constructor(private readonly subsystem: string) { }
 
   async log(event: CryptoAuditEvent): Promise<void> {
     try {

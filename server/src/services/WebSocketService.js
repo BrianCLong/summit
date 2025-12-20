@@ -1,6 +1,7 @@
 const { Server } = require('socket.io');
 const logger = require('../utils/logger');
 const AuthService = require('./AuthService');
+const { operationLog } = require('./operationLog');
 
 const MAX_OPS_PER_SEC = 100;
 
@@ -82,7 +83,24 @@ class WebSocketService {
       cursor: null,
     });
     socket.processedOps = new Set();
-    socket.rateState = { count: 0, ts: Date.now() };
+
+    // Check concurrent connection limit
+    if (this.userSessions.size > 10000) { // Global limit example
+        socket.disconnect(true);
+        this.logger.warn(`Global connection limit reached, disconnecting ${userId}`);
+        return;
+    }
+
+    // Per-user connection limit (e.g. 5 tabs max)
+    const userConnections = this.connectedUsers.get(userId)?.size || 0;
+    if (userConnections > 5) {
+        socket.emit('error', { message: 'Too many active connections' });
+        socket.disconnect(true);
+        this.logger.warn(`User ${userId} exceeded connection limit`);
+        return;
+    }
+
+    socket.rateState = { tokens: 100, lastRefill: Date.now() }; // Token bucket init
 
     // Update presence
     this.updateUserPresence(userId, {
@@ -189,6 +207,18 @@ class WebSocketService {
 
     socket.on('collab:batch', (batch) => {
       this.handleCollabBatch(socket, batch);
+    });
+
+    socket.on('collab:history', (data) => {
+      this.handleCollabHistory(socket, data);
+    });
+
+    socket.on('collab:undo', (data) => {
+      this.handleCollabUndo(socket, data);
+    });
+
+    socket.on('collab:redo', (data) => {
+      this.handleCollabRedo(socket, data);
     });
 
     // Analysis results sharing
@@ -487,11 +517,20 @@ class WebSocketService {
 
   isRateLimited(socket) {
     const now = Date.now();
-    if (now - socket.rateState.ts > 1000) {
-      socket.rateState = { count: 0, ts: now };
+    const refillRate = MAX_OPS_PER_SEC; // Tokens per second
+    const capacity = MAX_OPS_PER_SEC * 2; // Burst size
+
+    // Refill
+    const elapsed = (now - socket.rateState.lastRefill) / 1000;
+    const added = elapsed * refillRate;
+    socket.rateState.tokens = Math.min(capacity, socket.rateState.tokens + added);
+    socket.rateState.lastRefill = now;
+
+    if (socket.rateState.tokens >= 1) {
+        socket.rateState.tokens -= 1;
+        return false;
     }
-    socket.rateState.count += 1;
-    return socket.rateState.count > MAX_OPS_PER_SEC;
+    return true;
   }
 
   handleCollabBatch(socket, batch = []) {
@@ -499,21 +538,93 @@ class WebSocketService {
       socket.emit('rate_limited');
       return;
     }
-    batch.forEach((op) => {
-      if (socket.processedOps.has(op.opId)) return;
-      socket.processedOps.add(op.opId);
-      this.io.to(socket.id).emit('op:ack', {
-        opId: op.opId,
-        serverReceivedAt: Date.now(),
+
+    const session = this.userSessions.get(socket.id);
+    const investigationId =
+      session?.currentInvestigation || batch[0]?.payload?.investigationId;
+
+    if (!investigationId) {
+      socket.emit('error', {
+        message: 'Investigation ID required for collaborative operations',
       });
-      if (op.event && op.payload) {
-        socket.broadcast.emit(op.event, {
-          ...op.payload,
-          opId: op.opId,
-          seq: op.seq,
-        });
-      }
+      return;
+    }
+
+    const recorded = operationLog.recordBatch(
+      investigationId,
+      socket.id,
+      session?.userId,
+      batch,
+    );
+
+    recorded.forEach((entry) => {
+      if (socket.processedOps.has(entry.opId)) return;
+      socket.processedOps.add(entry.opId);
+      socket.emit('op:ack', {
+        opId: entry.opId,
+        serverReceivedAt: Date.now(),
+        version: entry.version,
+      });
+      this.io
+        .to(`investigation:${investigationId}`)
+        .emit('collab:op', entry);
     });
+  }
+
+  handleCollabHistory(socket, data = {}) {
+    const session = this.userSessions.get(socket.id);
+    const investigationId = data.investigationId || session?.currentInvestigation;
+
+    if (!investigationId) {
+      socket.emit('error', {
+        message: 'Investigation ID required to fetch collaboration history',
+      });
+      return;
+    }
+
+    const history = operationLog.getHistory(investigationId);
+    socket.emit('collab:history', {
+      investigationId,
+      ...history,
+    });
+  }
+
+  handleCollabUndo(socket, data = {}) {
+    const session = this.userSessions.get(socket.id);
+    const investigationId = data.investigationId || session?.currentInvestigation;
+    if (!investigationId) return;
+
+    const result = operationLog.undo(investigationId, socket.id, session?.userId);
+    if (!result) {
+      socket.emit('collab:noop', {
+        reason: 'no_undo_available',
+        investigationId,
+      });
+      return;
+    }
+
+    this.io
+      .to(`investigation:${investigationId}`)
+      .emit('collab:op', result.revert);
+  }
+
+  handleCollabRedo(socket, data = {}) {
+    const session = this.userSessions.get(socket.id);
+    const investigationId = data.investigationId || session?.currentInvestigation;
+    if (!investigationId) return;
+
+    const result = operationLog.redo(investigationId, socket.id, session?.userId);
+    if (!result) {
+      socket.emit('collab:noop', {
+        reason: 'no_redo_available',
+        investigationId,
+      });
+      return;
+    }
+
+    this.io
+      .to(`investigation:${investigationId}`)
+      .emit('collab:op', result.reapplied);
   }
 
   // Investigation room handlers

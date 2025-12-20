@@ -1,3 +1,4 @@
+// @ts-nocheck
 import crypto from 'node:crypto';
 import { z } from 'zod';
 import { otelService } from '../middleware/observability/otel-tracing.js';

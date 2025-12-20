@@ -10,8 +10,8 @@ declare const Buffer: any;
 declare type Buffer = any;
 
 declare namespace NodeJS {
-  interface Timeout {}
-  interface ReadableStream {}
+  interface Timeout { }
+  interface ReadableStream { }
 }
 
 declare interface Console {
@@ -140,26 +140,13 @@ declare module 'bullmq' {
   }
   export type Job<T = any> = any;
 }
-declare module 'zod' {
-  const anyExport: any;
-  export = anyExport;
-}
-declare module 'pino' {
-  const anyExport: any;
-  export = anyExport;
-}
-declare module 'pino-http' {
-  const anyExport: any;
-  export = anyExport;
-}
+
+
 declare module 'neo4j-driver' {
   const anyExport: any;
   export = anyExport;
 }
-declare module 'uuid' {
-  const anyExport: any;
-  export = anyExport;
-}
+
 declare module 'prom-client' {
   export class Registry {
     registerMetric(metric: any): void;
@@ -280,3 +267,12 @@ declare module 'events' {
 declare type JobsOptions = any;
 declare type RedisClientType = any;
 declare type Job = any;
+
+
+
+declare module 'html-escaper' {
+  export function escape(str: string): string;
+  export function unescape(str: string): string;
+}
+
+

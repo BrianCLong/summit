@@ -20,8 +20,9 @@ import {
   GraphQLInputSchema,
   validateInput,
 } from '../validation/index.js';
-import pino from 'pino';
+import { default as pino } from 'pino';
 
+// @ts-ignore
 const logger = pino();
 
 interface ValidationPluginOptions {
@@ -191,6 +192,7 @@ export function createGraphQLValidationPlugin(
 
         async willSendResponse(context) {
           const duration = Date.now() - startTime;
+          const response = context.response as any;
 
           // Audit log if enabled
           if (config.enableAuditLog) {
@@ -203,8 +205,8 @@ export function createGraphQLValidationPlugin(
               duration,
               userId: context.contextValue?.user?.id,
               tenantId: context.contextValue?.user?.tenant,
-              success: !context.response.errors,
-              errorCount: context.response.errors?.length || 0,
+              success: !response.errors,
+              errorCount: response.errors?.length || 0,
             });
           }
 

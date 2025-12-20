@@ -1,0 +1,11 @@
+query,calls,total_exec_time,rows
+"SELECT id, tenant_id, kind, labels, props, created_at, updated_at, created_by FROM entities WHERE tenant_id=$1 AND kind=$2 ORDER BY created_at DESC LIMIT $3",30,8.534212000000002,600
+"SELECT id, tenant_id, kind, labels, props, created_at, updated_at, created_by FROM entities WHERE id = ANY(ARRAY(SELECT id FROM entities WHERE tenant_id=$1 ORDER BY random() LIMIT $2)) AND tenant_id=$3",30,65.51451899999999,150
+"SELECT id, tenant_id, src_id, dst_id, type, props, created_at, updated_at, created_by FROM relationships WHERE tenant_id=$1 AND src_id = (SELECT id FROM entities WHERE tenant_id=$2 ORDER BY random() LIMIT $3) ORDER BY created_at DESC LIMIT $4",30,65.915464,30
+"SELECT id, tenant_id, src_id, dst_id, type, props, created_at, updated_at, created_by FROM relationships WHERE tenant_id=$1 AND type=$2 ORDER BY created_at DESC LIMIT $3",30,56.66067399999999,1500
+"SELECT id, tenant_id, kind, labels, props, created_at, updated_at, created_by FROM entities WHERE id = (SELECT id FROM entities WHERE tenant_id=$1 ORDER BY random() LIMIT $2) AND tenant_id=$3",30,77.55037300000001,30
+"SELECT id, tenant_id, kind, labels, props, created_at, updated_at, created_by FROM entities WHERE tenant_id=$1 ORDER BY created_at DESC LIMIT $2",30,6.9149650000000005,600
+"SELECT id, tenant_id, status, created_at, updated_at FROM investigations WHERE tenant_id=$1 AND status=$2 ORDER BY created_at DESC LIMIT $3",30,7.136690999999999,600
+SELECT COUNT(*) FROM relationships WHERE tenant_id=$1 AND src_id = (SELECT id FROM entities WHERE tenant_id=$2 ORDER BY random() LIMIT $3),30,83.019489,30
+SELECT COUNT(*) FROM relationships WHERE tenant_id=$1 AND dst_id = (SELECT id FROM entities WHERE tenant_id=$2 ORDER BY random() LIMIT $3),30,93.160588,30
+"SELECT id, tenant_id, src_id, dst_id, type, props, created_at, updated_at, created_by FROM relationships WHERE tenant_id=$1 AND dst_id = (SELECT id FROM entities WHERE tenant_id=$2 ORDER BY random() LIMIT $3) ORDER BY created_at DESC LIMIT $4",30,88.18567099999999,30

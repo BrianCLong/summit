@@ -1,4 +1,5 @@
 import { FeatureStore } from '../risk/FeatureStore';
+import { describe, it, expect } from '@jest/globals';
 
 describe('FeatureStore', () => {
   it('returns default features', async () => {

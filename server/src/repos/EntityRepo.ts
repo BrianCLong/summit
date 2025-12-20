@@ -8,6 +8,11 @@ import { Pool, PoolClient } from 'pg';
 import { Driver, Session } from 'neo4j-driver';
 import { randomUUID as uuidv4 } from 'crypto';
 import logger from '../config/logger.js';
+import {
+  appendTenantFilter,
+  assertTenantMatch,
+  resolveTenantId,
+} from '../tenancy/tenantScope.js';
 
 const repoLogger = logger.child({ name: 'EntityRepo' });
 
@@ -31,6 +36,7 @@ export interface EntityInput {
 
 export interface EntityUpdateInput {
   id: string;
+  tenantId: string;
   labels?: string[];
   props?: Record<string, any>;
 }
@@ -46,6 +52,9 @@ interface EntityRow {
   created_by: string;
 }
 
+const ENTITY_COLUMNS =
+  'id, tenant_id, kind, labels, props, created_at, updated_at, created_by';
+
 export class EntityRepo {
   constructor(
     private pg: Pool,
@@ -56,6 +65,7 @@ export class EntityRepo {
    * Create new entity with dual-write to PG (canonical) + Neo4j (graph)
    */
   async create(input: EntityInput, userId: string): Promise<Entity> {
+    const tenantId = resolveTenantId(input.tenantId, 'entity.create');
     const id = uuidv4();
     const client = await this.pg.connect();
 
@@ -66,10 +76,10 @@ export class EntityRepo {
       const { rows } = (await client.query(
         `INSERT INTO entities (id, tenant_id, kind, labels, props, created_by)
          VALUES ($1, $2, $3, $4, $5, $6)
-         RETURNING *`,
+         RETURNING ${ENTITY_COLUMNS}`,
         [
           id,
-          input.tenantId,
+          tenantId,
           input.kind,
           input.labels || [],
           JSON.stringify(input.props || {}),
@@ -120,15 +130,16 @@ export class EntityRepo {
   /**
    * Update entity with dual-write
    */
-  async update(input: EntityUpdateInput, tenantId: string): Promise<Entity | null> {
+  async update(input: EntityUpdateInput): Promise<Entity | null> {
+    const tenantId = resolveTenantId(input.tenantId, 'entity.update');
     const client = await this.pg.connect();
 
     try {
       await client.query('BEGIN');
 
       const updateFields: string[] = [];
-      const params: any[] = [input.id, tenantId];
-      let paramIndex = 3;
+      const params: any[] = [input.id];
+      let paramIndex = 2;
 
       if (input.labels !== undefined) {
         updateFields.push(`labels = $${paramIndex}`);
@@ -144,10 +155,15 @@ export class EntityRepo {
 
       updateFields.push(`updated_at = now()`);
 
+      const tenantParamIndex = paramIndex;
+      params.push(tenantId);
+
       const { rows } = (await client.query(
-        `UPDATE entities SET ${updateFields.join(', ')}
-         WHERE id = $1 AND tenant_id = $2
-         RETURNING *`,
+        appendTenantFilter(
+          `UPDATE entities SET ${updateFields.join(', ')}
+           WHERE id = $1`,
+          tenantParamIndex,
+        ),
         params,
       )) as { rows: EntityRow[] };
 
@@ -157,6 +173,7 @@ export class EntityRepo {
       }
 
       const entity = rows[0];
+      assertTenantMatch(entity.tenant_id, tenantId, 'entity');
 
       // Outbox event for Neo4j sync
       await client.query(
@@ -200,29 +217,35 @@ export class EntityRepo {
    * Delete entity with dual-write
    */
   async delete(id: string, tenantId: string): Promise<boolean> {
+    const scopedTenantId = resolveTenantId(tenantId, 'entity.delete');
     const client = await this.pg.connect();
 
     try {
       await client.query('BEGIN');
 
-      const { rowCount } = await client.query(
-        `DELETE FROM entities WHERE id = $1 AND tenant_id = $2`,
-        [id, tenantId],
+      const { rows } = await client.query(
+        `DELETE FROM entities WHERE id = $1 AND tenant_id = $2 RETURNING tenant_id`,
+        [id, scopedTenantId],
       );
 
-      if (rowCount && rowCount > 0) {
+      if (rows.length > 0) {
+        assertTenantMatch(rows[0].tenant_id, scopedTenantId, 'entity');
         // Outbox event for Neo4j cleanup
         await client.query(
           `INSERT INTO outbox_events (id, topic, payload)
            VALUES ($1, $2, $3)`,
-          [uuidv4(), 'entity.delete', JSON.stringify({ id })],
+          [
+            uuidv4(),
+            'entity.delete',
+            JSON.stringify({ id, tenantId: scopedTenantId }),
+          ],
         );
 
         await client.query('COMMIT');
 
         // Best effort Neo4j delete
         try {
-          await this.deleteNeo4jNode(id, tenantId);
+          await this.deleteNeo4jNode(id);
         } catch (neo4jError) {
           repoLogger.warn(
             { entityId: id, error: neo4jError },
@@ -246,17 +269,22 @@ export class EntityRepo {
   /**
    * Find entity by ID
    */
-  async findById(id: string, tenantId?: string): Promise<Entity | null> {
-    const params = [id];
-    let query = `SELECT * FROM entities WHERE id = $1`;
+  async findById(id: string, tenantId: string): Promise<Entity | null> {
+    const scopedTenantId = resolveTenantId(tenantId, 'entity.findById');
+    const { rows } = (await this.pg.query(
+      appendTenantFilter(
+        `SELECT ${ENTITY_COLUMNS} FROM entities WHERE id = $1`,
+        2,
+      ),
+      [id, scopedTenantId],
+    )) as { rows: EntityRow[] };
 
-    if (tenantId) {
-      query += ` AND tenant_id = $2`;
-      params.push(tenantId);
+    if (!rows[0]) {
+      return null;
     }
 
-    const { rows } = (await this.pg.query(query, params)) as { rows: EntityRow[] };
-    return rows[0] ? this.mapRow(rows[0]) : null;
+    assertTenantMatch(rows[0].tenant_id, scopedTenantId, 'entity');
+    return this.mapRow(rows[0]);
   }
 
   /**
@@ -275,8 +303,9 @@ export class EntityRepo {
     limit?: number;
     offset?: number;
   }): Promise<Entity[]> {
-    const params: any[] = [tenantId];
-    let query = `SELECT * FROM entities WHERE tenant_id = $1`;
+    const scopedTenantId = resolveTenantId(tenantId, 'entity.search');
+    const params: any[] = [scopedTenantId];
+    let query = `SELECT ${ENTITY_COLUMNS} FROM entities WHERE tenant_id = $1`;
     let paramIndex = 2;
 
     if (kind) {
@@ -295,7 +324,10 @@ export class EntityRepo {
     params.push(Math.min(limit, 1000), offset); // Cap at 1000 for safety
 
     const { rows } = (await this.pg.query(query, params)) as { rows: EntityRow[] };
-    return rows.map(this.mapRow);
+    return rows.map((row) => {
+      assertTenantMatch(row.tenant_id, scopedTenantId, 'entity');
+      return this.mapRow(row);
+    });
   }
 
   /**
@@ -303,20 +335,23 @@ export class EntityRepo {
    */
   async batchByIds(
     ids: readonly string[],
-    tenantId?: string,
+    tenantId: string,
   ): Promise<(Entity | null)[]> {
     if (ids.length === 0) return [];
 
-    const params: any[] = [ids];
-    let query = `SELECT * FROM entities WHERE id = ANY($1)`;
-
-    if (tenantId) {
-      query += ` AND tenant_id = $2`;
-      params.push(tenantId);
-    }
+    const scopedTenantId = resolveTenantId(tenantId, 'entity.batchByIds');
+    const params: any[] = [ids, scopedTenantId];
+    const query = appendTenantFilter(
+      `SELECT ${ENTITY_COLUMNS} FROM entities WHERE id = ANY($1)`,
+      2,
+    );
 
     const { rows } = (await this.pg.query(query, params)) as { rows: EntityRow[] };
-    const entitiesMap = new Map(rows.map((row) => [row.id, this.mapRow(row)]));
+    const scopedEntities = rows.map((row) => {
+      assertTenantMatch(row.tenant_id, scopedTenantId, 'entity');
+      return this.mapRow(row);
+    });
+    const entitiesMap = new Map(scopedEntities.map((entity) => [entity.id, entity]));
 
     return ids.map((id) => entitiesMap.get(id) || null);
   }
@@ -360,16 +395,16 @@ export class EntityRepo {
   /**
    * Delete entity node from Neo4j
    */
-  private async deleteNeo4jNode(id: string, tenantId?: string): Promise<void> {
+  private async deleteNeo4jNode(id: string): Promise<void> {
     const session = this.neo4j.session();
-    const query = tenantId
-      ? `MATCH (e:Entity {id: $id, tenantId: $tenantId}) DETACH DELETE e`
-      : `MATCH (e:Entity {id: $id}) DETACH DELETE e`;
-    const params = tenantId ? { id, tenantId } : { id };
 
     try {
       await session.executeWrite(async (tx) => {
-        await tx.run(query, params);
+        await tx.run(
+          `MATCH (e:Entity {id: $id})
+           DETACH DELETE e`,
+          { id },
+        );
       });
     } finally {
       await session.close();

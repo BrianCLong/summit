@@ -1,195 +1,168 @@
 # Sprint Plan — Feb 16–27, 2026 (America/Denver)
 
-> **Context:** Fourth sprint of 2026. U.S. **Presidents’ Day (Mon Feb 16)** reduces capacity. Goal: push assistance + automation safely while controlling cost and improving investigation context.
+**Sprint Name:** "Enterprise Readiness: Compliance Packs + Residency + Identity Hardening"
+
+**Sprint Goal:** Make Summit convincingly enterprise-deployable: compliance-ready starter artifacts, enforced data residency posture, hardened adapters, and mature identity/access workflows without regressing provenance or unit economics.
 
 ---
 
-## 1) Sprint Goal (SMART)
+## Sprint Backlog (stories, AC, estimate)
 
-Release **Policy Intelligence v1.5** (proactive guardrails + example‑based explanations), **Graph UI v2.3** (risk overlays, control gap analysis, scenario sharing), **SOAR v2.1** (GA hardening + cost dashboard + quota governance), and **Intel v5.3** (disagreement clustering, reviewer routing v2, federation 35–40%) to achieve **MTTC P50 ≤ 7.5 min / P90 ≤ 18 min** and **auto‑approved low‑risk actions ≥ 45%** with **false‑allow = 0** — **by Feb 27, 2026**.
+1. **Compliance Pack v1 — SOC2/ISO/PCI-Lite Mapping** — *5 pts*  
+   Map SOC 2 TSC and ISO 27001 controls to OPA policies, receipts/provenance, access logs, SDLC artifacts, DR drills, and PCI-lite posture doc for hosted path.  
+   **AC:** Mappings published as docs-as-code; references to evidence locations are actionable; starter PCI-lite posture doc checked in; links from Trust/Docs entrypoint.
 
-**Key outcomes**
+2. **Evidence Collector Jobs — Signed Bundles** — *8 pts*  
+   Scheduled job packages access review snapshots, KMS key rotation pointers, policy/config change history, and Switchboard incident summaries into signed bundles.  
+   **AC:** Cron + on-demand trigger; bundle manifest with signatures; receipts stored; retry/idempotent; export API documented.
 
-- Policy assistant proactively suggests guardrails pre‑merge; explanations include concrete examples and expected blast radius.
-- Graph highlights control gaps and overlays risk on saved scenarios; analysts can **share scenarios** with permissions.
-- SOAR v2.1 delivers cost visibility (per action/vendor), **quota policies** with budgets/alerts, and resiliency hardening.
-- Intel improves precision with disagreement clustering and smarter reviewer routing; partner federation expanded to **35–40% sample** (guarded).
+3. **Compliance Posture Dashboard** — *5 pts*  
+   Dashboard surfaces privileged ops volume, policy denials, dual-control adherence, key rotation age, and retention/purge events.  
+   **AC:** Tiles fed by existing telemetry; dual-control and purge signals visible; alert thresholds configurable; demo-ready view.
 
----
+4. **Region Tags as Policy Inputs** — *5 pts*  
+   Tenant `region_tag` becomes first-class ABAC input; cross-region writes denied.  
+   **AC:** Policy tests include allow/deny by region; receipts show decision context; regression suite updated.
 
-## 2) Success Metrics & Verification
+5. **Storage Sharding Rules v0** — *3 pts*  
+   Partition object storage paths/buckets by region+tenant; document DB partition strategy.  
+   **AC:** Prefixing rules implemented/configurable; runbook + diagrams committed; smoke test proves correct placement.
 
-- **Incident response:** MTTC **P50 ≤ 7.5 min**, **P90 ≤ 18 min** (7‑day rolling).  
-  _Verify:_ Incident dashboard; weekly export.
-- **Policy assistant effectiveness:** Suggestion acceptance **≥ 68%**; backtest AUC **≥ 0.84**; **0** critical authz escapes.  
-  _Verify:_ Telemetry; CI gate logs; audit.
-- **Automation adoption & safety:** **≥ 45%** of eligible actions auto‑approved (low‑risk); **false‑allow = 0** in prod.  
-  _Verify:_ SOAR logs; simulation reports.
-- **Graph adoption:** **≥ 78%** of P1/P2 investigations use scenarios/overlays; recommended controls exported in **≥ 55%** of those.  
-  _Verify:_ UI telemetry; ticket linkage.
-- **Intel quality:** κ **≥ 0.84**; Brier **≤ 0.13**; override rate **≤ 7%**.  
-  _Verify:_ Eval reports; sampling.
-- **Cost governance:** Cost per automated action reported for **≥ 90%** of actions; budget breach alerts **= 0**.  
-  _Verify:_ Cost dashboard; alert logs.
+6. **Retention Classes & Purge Enforcement Hardening** — *5 pts*  
+   Automate purge schedules per tenant retention profile; sign purge manifests.  
+   **AC:** Manifests signed and queryable/exportable; failure alerts; audit trail retained.
 
----
+7. **SCIM Provisioning v1 (Create/Update/Deprovision)** — *5 pts*  
+   SCIM flows create/update/deprovision users/groups with group→ABAC/role mapping and receipts.  
+   **AC:** Contract tests green; receipts stored; error handling for drift; dry-run toggle for tenants.
 
-## 3) Scope
+8. **Role Catalog v1 (Least-Privilege)** — *3 pts*  
+   Ship enterprise default roles: Tenant Admin, Security Admin, Auditor (read-only), Billing Admin, Operator, Developer.  
+   **AC:** Catalog published; regression tests validate least-privilege; dual-control for privileged changes enforced.
 
-**Must‑have (commit):**
+9. **Access Review Export + Dual-Control Signoff (MVP)** — *5 pts*  
+   Quarterly access review export with users, roles, last activity, and privileged actions; signoff requires dual-control with rationale.  
+   **AC:** Export downloadable; signoff receipts stored; rationale mandatory; audit log entries emitted.
 
-- **Policy Intelligence v1.5:** proactive guardrail suggestions inline; example‑based risk explanations; drift‑prevention ruleset tuned; exception workflow; audit + kill‑switch.
-- **Graph UI v2.3:** risk overlays (exposure, asset criticality, control gaps); scenario sharing with permissions; control gap analysis with remediation templates; performance tuning.
-- **SOAR v2.1:** cost dashboard v1 (per action/vendor/tenant); quota governance (per‑tenant/per‑action with budgets + alerts); runner/queue resiliency polish; blue/green auto‑rollback checks.
-- **Intel v5.3:** disagreement clustering to surface hard cases; reviewer routing v2 (expertise + load + history); federation expansion to **35–40%** sample with isolation and cost caps; calibration monitoring.
-- **Operational analytics:** exec snapshot including MTTC, auto‑approve %, cost/tenant, graph adoption, assistant acceptance.
+10. **Notary Adapter Reliability (Retry + DLQ + Replay)** — *5 pts*  
+    Implement retry strategy, idempotency, DLQ, and replay tooling for receipts/evidence notarization; add contract tests.  
+    **AC:** Retries bounded with backoff; idempotent keys; DLQ replay script; contract tests pass.
 
-**Stretch:**
+11. **Storage Adapter Resilience (Multipart + Checksums)** — *3 pts*  
+    Ensure multipart uploads, checksum validation, and consistent prefixing by tenant/region; add partial-outage runbook.  
+    **AC:** Checksums enforced; partial outage runbook merged; synthetic probe covers multipart path.
 
-- **Responder Copilot v0.5.1 (alpha):** guided next steps combining assistant + scenario overlays (read‑only).
-- **SOAR dry‑run simulator:** per‑playbook cost/impact preview.
-- **Graph remediation plans:** bulk export to SOAR tickets for top 3 gaps.
+12. **Identity Adapter Robustness (OIDC Claims + Skew)** — *3 pts*  
+    Normalize OIDC claims, enforce tenant-bound tokens, and handle clock skew; add incident runbook + synthetics.  
+    **AC:** Claim normalization documented; skew tolerance tested; synthetics scheduled; runbook published.
 
-**Out‑of‑scope:**
-
-- Destructive automation default‑on; cross‑tenant playbooks; mobile clients; customer‑visible ABAC editor changes.
-
----
-
-## 4) Team & Capacity (holiday‑adjusted)
-
-- **Working days:** 9 (holiday Mon Feb 16).
-- **Focus factor:** 0.8.
-- **Nominal ~50 pts → Commit ≈ **36 pts** (+ up to 6 pts stretch).**
+*Total forecast: 55 pts (stretch accounted via buffer for dashboard polish + adapter synthetics).*  
+**Capacity:** ~55 pts.
 
 ---
 
-## 5) Backlog (Ready for Sprint)
+## Definition of Done (DoD)
 
-### Epic BD — Policy Intelligence v1.5 — **12 pts**
+- Compliance pack docs versioned, linked from Trust/Docs entrypoint, and demo-ready.
+- Evidence collector produces signed bundles via schedule and on-demand; receipts stored; export flow documented.
+- Data residency policy tests include cross-region denial cases; storage prefixing validated per tenant/region.
+- SCIM contract tests + integration tests green; role catalog enforced; dual-control receipts captured for privileged changes.
+- Dashboards/alerts + runbooks updated for SCIM failures, residency violations, purge failures, notary/storage outages.
+- Helm/Terraform values documented for residency, SCIM, and evidence jobs (no hardcoded secrets/defaults).
 
-- **BD1 — Proactive guardrails + UI** (5 pts)  
-  _AC:_ pre‑merge suggestions; one‑click apply; acceptance telemetry.
-- **BD2 — Example‑based explanations** (4 pts)  
-  _AC:_ past incident links; blast radius preview; copy reviewed.
-- **BD3 — Drift‑prevention tuning + exceptions** (3 pts)  
-  _AC:_ reduce false blocks; exception flow with audit.
+## Definition of Ready (DoR)
 
-### Epic BE — Graph UI v2.3 — **10 pts**
-
-- **BE1 — Risk overlays & control gaps** (4 pts)  
-  _AC:_ exposure/criticality; missing controls; tooltips; export.
-- **BE2 — Scenario sharing & perms** (4 pts)  
-  _AC:_ share with team; permissions respected; audit trail.
-- **BE3 — Performance/UX polish** (2 pts)  
-  _AC:_ faster load; freshness banner; PNG/CSV export.
-
-### Epic BF — SOAR v2.1 — **12 pts**
-
-- **BF1 — Cost dashboard v1** (4 pts)  
-  _AC:_ per‑action/vendor/tenant; budgets; alerts.
-- **BF2 — Quota governance** (4 pts)  
-  _AC:_ per‑tenant/action limits; breach handling; reports.
-- **BF3 — Resiliency polish + blue/green auto‑rollback** (4 pts)  
-  _AC:_ health checks; safe rollback; chaos tests.
-
-### Epic BG — Intel v5.3 — **6 pts**
-
-- **BG1 — Disagreement clustering + routing v2** (3 pts)  
-  _AC:_ cluster hard cases; route to expert; SLA.
-- **BG2 — Federation 35–40%** (3 pts)  
-  _AC:_ isolation; PII filters; budget caps; canary → GA.
-
-### Epic BH — Operational Analytics & Enablement — **2 pts**
-
-- **BH1 — Exec snapshot + dashboards** (2 pts)  
-  _AC:_ weekly PDF/email; KPIs; drill‑downs.
-
-> **Planned:** 42 pts total — **commit 36 pts**, hold 4 pts buffer; + up to 6 pts stretch.
+- Each story has explicit AC, dependencies, and rollback plan; policy/adapter changes have test matrices and sample payloads.
+- Test data: tenants per region, SCIM fixtures (groups/roles), purge manifest samples, synthetic incidents for dashboard signals.
+- Feature flags/rollouts defined per tenant/region; observability hooks pre-identified.
 
 ---
 
-## 6) Dependencies & Assumptions
+## Capacity & Calendar
 
-- CI gate active; approver groups defined; policy catalogs current.
-- Graph identity/asset data fresh ≤ 24h; permission model enforced.
-- Queue store supports idempotency; autoscaling quotas approved; cost telemetry sources wired.
-- Partner legal/privacy approvals current; budget alerts set.
-
----
-
-## 7) Timeline & Ceremonies (MT)
-
-- **Tue Feb 17** — Planning & Kickoff; governance review (30m).
-- **Fri Feb 20** — Mid‑sprint demo/checkpoint (30m).
-- **Wed Feb 25** — Grooming for next sprint (45m).
-- **Fri Feb 27** — Demo (45m) + Retro (45m) + Release cut.
+- **Capacity:** ~55 pts (team + reliability guardrails).  
+- **Ceremonies:**
+  - Sprint Planning: Mon Feb 16, 09:30–11:00
+  - Daily Stand-up: 09:15–09:30
+  - Mid-sprint Refinement: Thu Feb 19, 14:00–14:45
+  - Sprint Review: Fri Feb 27, 10:00–11:00
+  - Retro: Fri Feb 27, 11:15–12:00
 
 ---
 
-## 8) Definition of Ready (DoR)
+## Environments, Flags, Data
 
-- Policies/catalogs documented; datasets ready; flags/telemetry named.
-- Cost telemetry mapped; quota policies reviewed; rollback plans drafted.
-
-## 9) Definition of Done (DoD)
-
-- Tests pass; dashboards live; audits wired; approvals enforced.
-- Runbooks updated; enablement notes posted; rollback verified.
+- **Envs:** dev → stage (region-partitioned buckets/DB schemas) with canary + auto-rollback; residency policy gate enabled in stage.
+- **Flags:** `compliancePackV1`, `evidenceCollectorJobs`, `complianceDashboard`, `regionTagPolicy`, `storageShardingV0`, `retentionPurgeHardening`, `scimProvisioningV1`, `roleCatalogV1`, `accessReviewMvp`, `notaryReliability`, `storageAdapterResilience`, `identityAdapterRobustness`.
+- **Test Data:** Region-tagged tenants, SCIM payload fixtures (users/groups/roles), purge manifest samples, notary replay seeds, storage multipart fixtures, OIDC token variants (clock skew, missing claims).
 
 ---
 
-## 10) QA & Validation Plan
+## QA Plan
 
-- **Policy:** A/B acceptance; backtests; CI gate simulation; human review of top 20 guardrails.
-- **Graph:** overlay correctness sampling; scenario sharing permission tests; control gap export to ticket/SOAR.
-- **SOAR:** quota breach simulations; blue/green rollback drill; chaos on queues/runners; cost accuracy sampling.
-- **Intel:** κ monitoring; override rate; reviewer SLA; budget/cost alerts.
+**Functional:**
+- Control mappings link to evidence locations; PCI-lite doc accessible.
+- Evidence collector: scheduled + on-demand bundles signed; manifests verifiable.
+- Dashboard: privileged ops volume, denials, dual-control adherence, key rotation age, retention/purge signals.
+- Region-tag policies enforce cross-region denial; receipts show decision inputs.
+- Storage sharding + retention purge flows place/write/read in correct region; manifests signed.
+- SCIM create/update/deprovision with group→role mapping; receipts stored; dry-run toggle.
+- Role catalog + dual-control enforcement; access review export/signoff workflow.
+- Notary retries/DLQ/replay and contract tests; storage adapter multipart + checksum; identity adapter claim normalization + skew tolerance with synthetics.
 
----
+**E2E:** SCIM provision users/groups → assign roles → attempt cross-region write (denied with receipt) → run access review export + dual-control signoff → generate compliance evidence bundle (SBOM/SLSA, DR drill, purge manifests, key-rotation pointers) → view compliance posture dashboard.
 
-## 11) Risk Register (RAID)
-
-| Risk                                  | Prob. | Impact | Owner | Mitigation                                  |
-| ------------------------------------- | ----- | -----: | ----- | ------------------------------------------- |
-| Guardrails block legitimate changes   | Med   |    Med | BD3   | Previews; exception path; audit             |
-| Scenario sharing leaks data           | Low   |   High | BE2   | Permissions; redaction; audit               |
-| Cost telemetry inaccuracies           | Med   |    Med | BF1   | Reconciliation sampling; thresholds; alerts |
-| Quota policies hinder urgent response | Low   |   High | BF2   | Break‑glass; escalation; monitoring         |
-| Federation privacy/cost issues        | Low   |    Med | BG2   | Isolation; PII filters; budget caps         |
-
----
-
-## 12) Communications & Status
-
-- **Channels:** #sprint‑room (daily), #analyst‑ops (enablement), Exec update (Fri).
-- **Reports:** Burnup; MTTC; assistant acceptance; auto‑approve rate; graph adoption; κ/Brier; SOAR cost.
+**Non-functional:**
+- Residency and adapter synthetics green; retry budgets respected; alerting for SCIM/residency/notary/storage failures.
+- Coverage for new policy/tests ≥80%; SLO/error budget impact tracked.
 
 ---
 
-## 13) Compliance/Security Guardrails
+## Risks & Mitigations
 
-- Signed policy changes; immutable audit; least privilege.
-- No PII in model features; encryption in transit/at rest; retention limits.
-- SOAR destructive steps always HITL; reasons required; blue/green rollouts.
-
----
-
-## 14) Release & Rollback
-
-- **Staged rollout:** Internal cohort → all analysts → selected tenants (if applicable).
-- **Rollback:** Disable guardrails; hide overlays/sharing; revert to Queues v1; scale runners to baseline; pin intel to v5.2.
-- **Docs:** Release notes; analyst changelog; change tickets.
+- **Residency enforcement false positives** → explicit allowlists for control-plane ops; shadow mode first with receipts.
+- **Evidence bundle drift** → schema + signature validation in CI; replayable fixtures.
+- **SCIM/provider variance** → claim normalization matrix + contract tests; dry-run flag per tenant.
+- **Notary/storage retries amplifying load** → bounded backoff + DLQ; replay tooling with rate limits.
+- **Dual-control friction** → clear copy + delegation rules; audit receipts easy to export.
 
 ---
 
-## 15) Next Sprint Seeds (Mar 2–13, 2026)
+## Reporting Artifacts (produce this sprint)
 
-- **Policy v1.6:** proactive prevention GA; change‑risk simulation at submit.
-- **Graph v2.4:** scenario templates; control rollout tracking; exposure KPI pages.
-- **SOAR v2.2:** dry‑run simulator GA; cost dashboard v1.1; quota policies by risk.
-- **Intel v5.4:** semi‑supervised improvements; partner federation 50% target (guarded).
+- Control mapping docs; PCI-lite posture doc; evidence bundle manifests with signatures; residency policy test report; SCIM + adapter contract test reports; dashboard snapshot; runbooks for SCIM failures, residency violations, purge failures, notary/storage outages.
 
 ---
 
-_Prepared by: Covert Insights — last updated Sep 11, 2025 (America/Denver)._
+## Demo Script (live)
+
+1. Provision users/groups via **SCIM** → roles/attributes applied with receipts.
+2. Attempt cross-region write → denied by policy; receipt shows region_tag decision.
+3. Run **access review export** + dual-control signoff with rationale.
+4. Generate **compliance evidence bundle** (SBOM/SLSA, DR drill, purge manifests, key-rotation pointers) and verify signature.
+5. Show **compliance posture dashboard** + alerts for residency/SCIM/notary/storage signals.
+
+---
+
+## Jira-ready ticket matrix (copy/paste)
+
+| ID      | Title                                            | Owner  | Est | Dependencies | Acceptance Criteria (summary)                           |
+| ------- | ------------------------------------------------ | ------ | --: | ------------ | ------------------------------------------------------- |
+| CMP-201 | Compliance Pack v1 (SOC2/ISO/PCI-lite mapping)   | Docs+BE|   5 | —            | Docs-as-code mapping; PCI-lite posture doc; links live  |
+| CMP-202 | Evidence Collector Jobs (signed bundles)         | BE     |   8 | CMP-201      | Cron + on-demand; signed manifests; receipts; export API|
+| CMP-203 | Compliance Posture Dashboard                     | FE+Data|   5 | CMP-201      | Tiles for privileged ops/denials/dual-control/keys/purge|
+| RES-211 | Region Tags as Policy Inputs                     | BE     |   5 | CMP-202      | ABAC tests pass; receipts show region_tag decisions      |
+| RES-212 | Storage Sharding Rules v0                        | BE+Ops |   3 | RES-211      | Region+tenant prefixing; doc + smoke test                |
+| RES-213 | Retention Classes & Purge Enforcement Hardening  | BE+Ops |   5 | RES-212      | Signed purge manifests; alerts; audit trail              |
+| IDN-221 | SCIM Provisioning v1                             | BE     |   5 | RES-211      | Create/update/deprovision; mapping; receipts; contract tests |
+| IDN-222 | Role Catalog v1 (least-privilege)                | BE+Sec |   3 | IDN-221      | Catalog published; LP regression; dual-control enforced   |
+| IDN-223 | Access Review Export + Dual-Control Signoff      | FE+BE  |   5 | IDN-222      | Export + rationale; receipts; audit entries              |
+| ADP-231 | Notary Adapter Reliability (retry+DLQ+replay)    | BE+Ops |   5 | CMP-202      | Bounded retries; idempotent keys; DLQ+replay; contracts  |
+| ADP-232 | Storage Adapter Resilience (multipart+checksums) | BE+Ops |   3 | RES-212      | Checksums enforced; synthetics; outage runbook           |
+| ADP-233 | Identity Adapter Robustness (OIDC claims+skew)   | BE+Ops |   3 | IDN-221      | Claim normalization; skew tolerance; synthetics; runbook |
+
+---
+
+## Outcome of this sprint
+
+We ship an enterprise-ready posture: compliance packs and evidence automation, enforced data residency, hardened adapters, and mature identity/access workflows with dual-control and receipts—keeping provenance intact while meeting deployment expectations for regulated tenants.

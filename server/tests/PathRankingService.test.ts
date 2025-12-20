@@ -1,7 +1,8 @@
-const { rankPaths } = require('../src/services/PathRankingService');
+import { describe, it, expect } from '@jest/globals';
+import { rankPaths } from '../src/services/PathRankingService';
 
 describe('PathRankingService', () => {
-  test('v2 ranking improves top1 path alignment', () => {
+  it('v2 ranking improves top1 path alignment', () => {
     const paths = [
       { from: 'A', to: 'B', relId: 'r1', type: 'WEAK' },
       { from: 'A', to: 'C', relId: 'r2', type: 'STRONG' },

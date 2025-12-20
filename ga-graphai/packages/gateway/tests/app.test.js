@@ -79,3 +79,61 @@ test('metrics endpoint exposes Prometheus data after a call', async () => {
   assert.equal(metrics.status, 200);
   assert.ok(metrics.text.includes('ai_call_latency_ms'));
 });
+
+test('chaos endpoint reports disabled by default in safe envs', async () => {
+  const { app } = createApp({ environment: 'staging' });
+  const response = await request(app).get('/internal/chaos');
+  assert.equal(response.status, 200);
+  assert.equal(response.body.enabled, false);
+  assert.equal(response.body.safeEnvironment, true);
+});
+
+test('chaos injection can short-circuit LLM calls when enabled', async () => {
+  const { app } = createApp({ environment: 'staging' });
+  await request(app)
+    .post('/internal/chaos')
+    .send({ enabled: true, errorRate: 1 });
+
+  const response = await request(app)
+    .post('/v1/generate')
+    .set('x-tenant', 'acme-corp')
+    .set('x-purpose', 'investigation')
+    .send({ objective: 'trigger chaos' });
+
+  assert.equal(response.status, 500);
+  assert.equal(response.body.error, 'CHAOS_INJECTED');
+  assert.equal(response.body.service, 'llm');
+});
+
+test('production keeps chaos controls unreachable', async () => {
+  const { app } = createApp({ environment: 'production' });
+  const statusRes = await request(app).get('/internal/chaos');
+  assert.equal(statusRes.status, 404);
+
+  const response = await request(app)
+    .post('/v1/generate')
+    .set('x-tenant', 'acme-corp')
+    .set('x-purpose', 'investigation')
+    .send({ objective: 'should bypass chaos' });
+
+  assert.equal(response.status, 200);
+  assert.ok(response.body.content);
+});
+
+test('blocks overly expensive GraphQL queries using cost analysis', async () => {
+  const { app } = createApp({ graphqlCostLimit: 10 });
+  const query = `
+    query { 
+      models { id family license modality ctx local description }
+    }
+  `;
+  const response = await request(app)
+    .post('/graphql')
+    .set('x-tenant', 'acme-corp')
+    .set('x-purpose', 'investigation')
+    .send({ query });
+
+  assert.equal(response.status, 422);
+  assert.equal(response.body.errors?.[0]?.message, 'QUERY_COST_EXCEEDED');
+  assert.equal(response.body.errors?.[0]?.extensions?.code, 'QUERY_COST_EXCEEDED');
+});

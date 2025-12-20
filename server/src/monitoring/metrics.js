@@ -6,13 +6,6 @@ import * as client from 'prom-client';
 // Create a Registry which registers the metrics
 const register = new client.Registry();
 
-// Check if metrics are already registered to avoid duplicates during testing/hot-reload
-const getOrRegister = (name, type, config) => {
-  const existing = client.register.getSingleMetric(name);
-  if (existing) return existing;
-  return new type(config);
-};
-
 // Add default metrics (CPU, memory, event loop lag, etc.)
 client.collectDefaultMetrics({
   register,
@@ -23,124 +16,124 @@ client.collectDefaultMetrics({
 // Custom Application Metrics
 
 // HTTP Request metrics
-const httpRequestDuration = getOrRegister('http_request_duration_seconds', client.Histogram, {
+const httpRequestDuration = new client.Histogram({
   name: 'http_request_duration_seconds',
   help: 'Duration of HTTP requests in seconds',
   labelNames: ['method', 'route', 'status_code'],
   buckets: [0.1, 0.5, 1, 2, 5, 10],
 });
 
-const httpRequestsTotal = getOrRegister('http_requests_total', client.Counter, {
+const httpRequestsTotal = new client.Counter({
   name: 'http_requests_total',
   help: 'Total number of HTTP requests',
   labelNames: ['method', 'route', 'status_code'],
 });
 
 // Business KPIs exposed as first-class metrics for the control plane
-const businessUserSignupsTotal = getOrRegister('business_user_signups_total', client.Counter, {
+const businessUserSignupsTotal = new client.Counter({
   name: 'business_user_signups_total',
   help: 'Total number of customer or workspace signups',
   labelNames: ['tenant', 'plan'],
 });
 
-const businessApiCallsTotal = getOrRegister('business_api_calls_total', client.Counter, {
+const businessApiCallsTotal = new client.Counter({
   name: 'business_api_calls_total',
   help: 'API calls attributed to customer activity and billing',
   labelNames: ['service', 'route', 'status_code', 'tenant'],
 });
 
-const businessRevenueTotal = getOrRegister('business_revenue_total', client.Counter, {
+const businessRevenueTotal = new client.Counter({
   name: 'business_revenue_total',
   help: "Recognized revenue amounts in the system's reporting currency",
   labelNames: ['tenant', 'currency'],
 });
 
 // GraphQL metrics
-const graphqlRequestDuration = getOrRegister('graphql_request_duration_seconds', client.Histogram, {
+const graphqlRequestDuration = new client.Histogram({
   name: 'graphql_request_duration_seconds',
   help: 'Duration of GraphQL requests in seconds',
   labelNames: ['operation', 'operation_type'],
   buckets: [0.1, 0.5, 1, 2, 5, 10],
 });
 
-const graphqlRequestsTotal = getOrRegister('graphql_requests_total', client.Counter, {
+const graphqlRequestsTotal = new client.Counter({
   name: 'graphql_requests_total',
   help: 'Total number of GraphQL requests',
   labelNames: ['operation', 'operation_type', 'status'],
 });
 
-const graphqlErrors = getOrRegister('graphql_errors_total', client.Counter, {
+const graphqlErrors = new client.Counter({
   name: 'graphql_errors_total',
   help: 'Total number of GraphQL errors',
   labelNames: ['operation', 'error_type'],
 });
 
 // Tenant isolation violations
-const tenantScopeViolationsTotal = getOrRegister('tenant_scope_violations_total', client.Counter, {
+const tenantScopeViolationsTotal = new client.Counter({
   name: 'tenant_scope_violations_total',
   help: 'Total number of tenant scope violations',
 });
 
 // Database metrics
-const dbConnectionsActive = getOrRegister('db_connections_active', client.Gauge, {
+const dbConnectionsActive = new client.Gauge({
   name: 'db_connections_active',
   help: 'Number of active database connections',
   labelNames: ['database'],
 });
 
-const dbQueryDuration = getOrRegister('db_query_duration_seconds', client.Histogram, {
+const dbQueryDuration = new client.Histogram({
   name: 'db_query_duration_seconds',
   help: 'Duration of database queries in seconds',
   labelNames: ['database', 'operation'],
   buckets: [0.01, 0.05, 0.1, 0.5, 1, 2, 5],
 });
 
-const dbQueriesTotal = getOrRegister('db_queries_total', client.Counter, {
+const dbQueriesTotal = new client.Counter({
   name: 'db_queries_total',
   help: 'Total number of database queries',
   labelNames: ['database', 'operation', 'status'],
 });
 
 // AI/ML Processing metrics
-const aiJobsQueued = getOrRegister('ai_jobs_queued', client.Gauge, {
+const aiJobsQueued = new client.Gauge({
   name: 'ai_jobs_queued',
   help: 'Number of AI/ML jobs in queue',
   labelNames: ['job_type'],
 });
 
-const aiJobsProcessing = getOrRegister('ai_jobs_processing', client.Gauge, {
+const aiJobsProcessing = new client.Gauge({
   name: 'ai_jobs_processing',
   help: 'Number of AI/ML jobs currently processing',
   labelNames: ['job_type'],
 });
 
-const aiJobDuration = getOrRegister('ai_job_duration_seconds', client.Histogram, {
+const aiJobDuration = new client.Histogram({
   name: 'ai_job_duration_seconds',
   help: 'Duration of AI/ML job processing in seconds',
   labelNames: ['job_type', 'status'],
   buckets: [1, 5, 10, 30, 60, 300, 600],
 });
 
-const aiJobsTotal = getOrRegister('ai_jobs_total', client.Counter, {
+const aiJobsTotal = new client.Counter({
   name: 'ai_jobs_total',
   help: 'Total number of AI/ML jobs processed',
   labelNames: ['job_type', 'status'],
 });
 
 // Graph operations metrics
-const graphNodesTotal = getOrRegister('graph_nodes_total', client.Gauge, {
+const graphNodesTotal = new client.Gauge({
   name: 'graph_nodes_total',
   help: 'Total number of nodes in the graph',
   labelNames: ['investigation_id'],
 });
 
-const graphEdgesTotal = getOrRegister('graph_edges_total', client.Gauge, {
+const graphEdgesTotal = new client.Gauge({
   name: 'graph_edges_total',
   help: 'Total number of edges in the graph',
   labelNames: ['investigation_id'],
 });
 
-const graphOperationDuration = getOrRegister('graph_operation_duration_seconds', client.Histogram, {
+const graphOperationDuration = new client.Histogram({
   name: 'graph_operation_duration_seconds',
   help: 'Duration of graph operations in seconds',
   labelNames: ['operation', 'investigation_id'],
@@ -148,251 +141,243 @@ const graphOperationDuration = getOrRegister('graph_operation_duration_seconds',
 });
 
 // WebSocket metrics
-const websocketConnections = getOrRegister('websocket_connections_active', client.Gauge, {
+const websocketConnections = new client.Gauge({
   name: 'websocket_connections_active',
   help: 'Number of active WebSocket connections',
 });
 
-const websocketMessages = getOrRegister('websocket_messages_total', client.Counter, {
+const websocketMessages = new client.Counter({
   name: 'websocket_messages_total',
   help: 'Total number of WebSocket messages',
   labelNames: ['direction', 'event_type'],
 });
 
 // Investigation metrics
-const investigationsActive = getOrRegister('investigations_active', client.Gauge, {
+const investigationsActive = new client.Gauge({
   name: 'investigations_active',
   help: 'Number of active investigations',
 });
 
-const investigationOperations = getOrRegister('investigation_operations_total', client.Counter, {
+const investigationOperations = new client.Counter({
   name: 'investigation_operations_total',
   help: 'Total number of investigation operations',
   labelNames: ['operation', 'user_id'],
 });
 
 // Error tracking
-const applicationErrors = getOrRegister('application_errors_total', client.Counter, {
+const applicationErrors = new client.Counter({
   name: 'application_errors_total',
   help: 'Total number of application errors',
   labelNames: ['module', 'error_type', 'severity'],
 });
 
 // Memory usage for specific components
-const memoryUsage = getOrRegister('application_memory_usage_bytes', client.Gauge, {
+const memoryUsage = new client.Gauge({
   name: 'application_memory_usage_bytes',
   help: 'Memory usage by application component',
   labelNames: ['component'],
 });
 
 // Pipeline SLI metrics (labels: source, pipeline, env)
-const pipelineUptimeRatio = getOrRegister('pipeline_uptime_ratio', client.Gauge, {
+const pipelineUptimeRatio = new client.Gauge({
   name: 'pipeline_uptime_ratio',
   help: 'Pipeline availability ratio (0..1) over current window',
   labelNames: ['source', 'pipeline', 'env'],
 });
-const pipelineFreshnessSeconds = getOrRegister('pipeline_freshness_seconds', client.Gauge, {
+const pipelineFreshnessSeconds = new client.Gauge({
   name: 'pipeline_freshness_seconds',
   help: 'Freshness (seconds) from source event to load completion',
   labelNames: ['source', 'pipeline', 'env'],
 });
-const pipelineCompletenessRatio = getOrRegister('pipeline_completeness_ratio', client.Gauge, {
+const pipelineCompletenessRatio = new client.Gauge({
   name: 'pipeline_completeness_ratio',
   help: 'Data completeness ratio (0..1) expected vs actual',
   labelNames: ['source', 'pipeline', 'env'],
 });
-const pipelineCorrectnessRatio = getOrRegister('pipeline_correctness_ratio', client.Gauge, {
+const pipelineCorrectnessRatio = new client.Gauge({
   name: 'pipeline_correctness_ratio',
   help: 'Validation pass rate ratio (0..1)',
   labelNames: ['source', 'pipeline', 'env'],
 });
-const pipelineLatencySeconds = getOrRegister('pipeline_latency_seconds', client.Histogram, {
+const pipelineLatencySeconds = new client.Histogram({
   name: 'pipeline_latency_seconds',
   help: 'End-to-end processing latency seconds',
   labelNames: ['source', 'pipeline', 'env'],
   buckets: [5, 15, 30, 60, 120, 300, 600, 1200],
 });
 
-// Register all metrics if not already registered
-const registerMetricSafe = (metric) => {
-  try {
-    register.registerMetric(metric);
-  } catch (e) {
-    // Ignore registration errors if metric already exists in registry
-  }
-};
-
-registerMetricSafe(httpRequestDuration);
-registerMetricSafe(httpRequestsTotal);
-registerMetricSafe(graphqlRequestDuration);
-registerMetricSafe(graphqlRequestsTotal);
-registerMetricSafe(graphqlErrors);
-registerMetricSafe(tenantScopeViolationsTotal);
-registerMetricSafe(dbConnectionsActive);
-registerMetricSafe(dbQueryDuration);
-registerMetricSafe(dbQueriesTotal);
-registerMetricSafe(aiJobsQueued);
-registerMetricSafe(aiJobsProcessing);
-registerMetricSafe(aiJobDuration);
-registerMetricSafe(aiJobsTotal);
-registerMetricSafe(graphNodesTotal);
-registerMetricSafe(graphEdgesTotal);
-registerMetricSafe(graphOperationDuration);
-registerMetricSafe(websocketConnections);
-registerMetricSafe(websocketMessages);
-registerMetricSafe(investigationsActive);
-registerMetricSafe(investigationOperations);
-registerMetricSafe(applicationErrors);
-registerMetricSafe(memoryUsage);
-registerMetricSafe(pipelineUptimeRatio);
-registerMetricSafe(pipelineFreshnessSeconds);
-registerMetricSafe(pipelineCompletenessRatio);
-registerMetricSafe(pipelineCorrectnessRatio);
-registerMetricSafe(pipelineLatencySeconds);
+// Register all metrics
+register.registerMetric(httpRequestDuration);
+register.registerMetric(httpRequestsTotal);
+register.registerMetric(graphqlRequestDuration);
+register.registerMetric(graphqlRequestsTotal);
+register.registerMetric(graphqlErrors);
+register.registerMetric(tenantScopeViolationsTotal);
+register.registerMetric(dbConnectionsActive);
+register.registerMetric(dbQueryDuration);
+register.registerMetric(dbQueriesTotal);
+register.registerMetric(aiJobsQueued);
+register.registerMetric(aiJobsProcessing);
+register.registerMetric(aiJobDuration);
+register.registerMetric(aiJobsTotal);
+register.registerMetric(graphNodesTotal);
+register.registerMetric(graphEdgesTotal);
+register.registerMetric(graphOperationDuration);
+register.registerMetric(websocketConnections);
+register.registerMetric(websocketMessages);
+register.registerMetric(investigationsActive);
+register.registerMetric(investigationOperations);
+register.registerMetric(applicationErrors);
+register.registerMetric(memoryUsage);
+register.registerMetric(pipelineUptimeRatio);
+register.registerMetric(pipelineFreshnessSeconds);
+register.registerMetric(pipelineCompletenessRatio);
+register.registerMetric(pipelineCorrectnessRatio);
+register.registerMetric(pipelineLatencySeconds);
 
 // GraphRAG metrics for schema validation and caching
-const graphragSchemaFailuresTotal = getOrRegister('graphrag_schema_failures_total', client.Counter, {
+const graphragSchemaFailuresTotal = new client.Counter({
   name: 'graphrag_schema_failures_total',
   help: 'Total number of GraphRAG schema validation failures',
 });
-const graphragCacheHitRatio = getOrRegister('graphrag_cache_hit_ratio', client.Gauge, {
+const graphragCacheHitRatio = new client.Gauge({
   name: 'graphrag_cache_hit_ratio',
   help: 'Ratio of GraphRAG cache hits to total requests',
 });
-registerMetricSafe(graphragSchemaFailuresTotal);
-registerMetricSafe(graphragCacheHitRatio);
-const pbacDecisionsTotal = getOrRegister('pbac_decisions_total', client.Counter, {
+register.registerMetric(graphragSchemaFailuresTotal);
+register.registerMetric(graphragCacheHitRatio);
+const pbacDecisionsTotal = new client.Counter({
   name: 'pbac_decisions_total',
   help: 'Total PBAC access decisions',
   labelNames: ['decision'],
 });
-registerMetricSafe(pbacDecisionsTotal);
+register.registerMetric(pbacDecisionsTotal);
 
-const admissionDecisionsTotal = getOrRegister('admission_decisions_total', client.Counter, {
+const admissionDecisionsTotal = new client.Counter({
   name: 'admission_decisions_total',
   help: 'Total admission control decisions',
   labelNames: ['decision', 'policy'],
 });
-registerMetricSafe(admissionDecisionsTotal);
+register.registerMetric(admissionDecisionsTotal);
 
 // Docling service metrics
-const doclingInferenceDuration = getOrRegister('docling_inference_duration_seconds', client.Histogram, {
+const doclingInferenceDuration = new client.Histogram({
   name: 'docling_inference_duration_seconds',
   help: 'Docling document inference duration in seconds',
   labelNames: ['model', 'status'],
   buckets: [0.1, 0.5, 1, 2, 5, 10, 30, 60],
 });
-registerMetricSafe(doclingInferenceDuration);
+register.registerMetric(doclingInferenceDuration);
 
-const doclingInferenceTotal = getOrRegister('docling_inference_total', client.Counter, {
+const doclingInferenceTotal = new client.Counter({
   name: 'docling_inference_total',
   help: 'Total Docling inference requests',
   labelNames: ['model', 'status'],
 });
-registerMetricSafe(doclingInferenceTotal);
+register.registerMetric(doclingInferenceTotal);
 
-const doclingCharactersProcessed = getOrRegister('docling_characters_processed_total', client.Counter, {
+const doclingCharactersProcessed = new client.Counter({
   name: 'docling_characters_processed_total',
   help: 'Total characters processed by Docling',
   labelNames: ['model'],
 });
-registerMetricSafe(doclingCharactersProcessed);
+register.registerMetric(doclingCharactersProcessed);
 
-const doclingCostUsd = getOrRegister('docling_cost_usd_total', client.Counter, {
+const doclingCostUsd = new client.Counter({
   name: 'docling_cost_usd_total',
   help: 'Total cost in USD for Docling processing',
   labelNames: ['model'],
 });
-registerMetricSafe(doclingCostUsd);
+register.registerMetric(doclingCostUsd);
 
 // New domain metrics
-const graphExpandRequestsTotal = getOrRegister('graph_expand_requests_total', client.Counter, {
+const graphExpandRequestsTotal = new client.Counter({
   name: 'graph_expand_requests_total',
   help: 'Total expandNeighbors requests',
   labelNames: ['cached'],
 });
-const aiRequestTotal = getOrRegister('ai_request_total', client.Counter, {
+const aiRequestTotal = new client.Counter({
   name: 'ai_request_total',
   help: 'AI request events',
   labelNames: ['status'],
 });
-const resolverLatencyMs = getOrRegister('resolver_latency_ms', client.Histogram, {
+const resolverLatencyMs = new client.Histogram({
   name: 'resolver_latency_ms',
   help: 'Resolver latency in ms',
   labelNames: ['operation'],
   buckets: [5, 10, 25, 50, 100, 200, 400, 800, 1600],
 });
 
-const neighborhoodCacheHitRatio = getOrRegister('neighborhood_cache_hit_ratio', client.Gauge, {
+const neighborhoodCacheHitRatio = new client.Gauge({
   name: 'neighborhood_cache_hit_ratio',
   help: 'Neighborhood cache hit ratio',
 });
 
-const neighborhoodCacheLatencyMs = getOrRegister('neighborhood_cache_latency_ms', client.Histogram, {
+const neighborhoodCacheLatencyMs = new client.Histogram({
   name: 'neighborhood_cache_latency_ms',
   help: 'Neighborhood cache lookup latency in ms',
   buckets: [1, 5, 10, 25, 50, 100, 250, 500, 1000],
 });
 
 // Enhanced GraphQL resolver metrics
-const graphqlResolverDurationSeconds = getOrRegister('graphql_resolver_duration_seconds', client.Histogram, {
+const graphqlResolverDurationSeconds = new client.Histogram({
   name: 'graphql_resolver_duration_seconds',
   help: 'Duration of GraphQL resolver execution in seconds',
   labelNames: ['resolver_name', 'field_name', 'type_name', 'status'],
   buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 2, 5],
 });
 
-const graphqlResolverErrorsTotal = getOrRegister('graphql_resolver_errors_total', client.Counter, {
+const graphqlResolverErrorsTotal = new client.Counter({
   name: 'graphql_resolver_errors_total',
   help: 'Total number of GraphQL resolver errors',
   labelNames: ['resolver_name', 'field_name', 'type_name', 'error_type'],
 });
 
-const graphqlResolverCallsTotal = getOrRegister('graphql_resolver_calls_total', client.Counter, {
+const graphqlResolverCallsTotal = new client.Counter({
   name: 'graphql_resolver_calls_total',
   help: 'Total number of GraphQL resolver calls',
   labelNames: ['resolver_name', 'field_name', 'type_name'],
 });
 // Web Vitals metrics reported from clients
-const webVitalValue = getOrRegister('web_vital_value', client.Gauge, {
+const webVitalValue = new client.Gauge({
   name: 'web_vital_value',
   help: 'Latest reported Web Vitals values',
   labelNames: ['metric', 'id'],
 });
 
 // Real-time updates metrics
-const realtimeConflictsTotal = getOrRegister('realtime_conflicts_total', client.Counter, {
+const realtimeConflictsTotal = new client.Counter({
   name: 'realtime_conflicts_total',
   help: 'Total number of real-time update conflicts (LWW)',
 });
 
-const idempotentHitsTotal = getOrRegister('idempotent_hits_total', client.Counter, {
+const idempotentHitsTotal = new client.Counter({
   name: 'idempotent_hits_total',
   help: 'Total number of idempotent mutation hits',
 });
 
 // Auto-remediation execution tracking
-const serviceAutoRemediationsTotal = getOrRegister('service_auto_remediations_total', client.Counter, {
+const serviceAutoRemediationsTotal = new client.Counter({
   name: 'service_auto_remediations_total',
   help: 'Total number of automated remediation actions executed',
   labelNames: ['service', 'action', 'result'],
 });
 
-registerMetricSafe(graphExpandRequestsTotal);
-registerMetricSafe(aiRequestTotal);
-registerMetricSafe(resolverLatencyMs);
-registerMetricSafe(neighborhoodCacheHitRatio);
-registerMetricSafe(neighborhoodCacheLatencyMs);
-registerMetricSafe(graphqlResolverDurationSeconds);
-registerMetricSafe(graphqlResolverErrorsTotal);
-registerMetricSafe(graphqlResolverCallsTotal);
-registerMetricSafe(webVitalValue);
-registerMetricSafe(realtimeConflictsTotal);
-registerMetricSafe(idempotentHitsTotal);
-registerMetricSafe(businessUserSignupsTotal);
-registerMetricSafe(businessApiCallsTotal);
-registerMetricSafe(businessRevenueTotal);
-registerMetricSafe(serviceAutoRemediationsTotal);
+register.registerMetric(graphExpandRequestsTotal);
+register.registerMetric(aiRequestTotal);
+register.registerMetric(resolverLatencyMs);
+register.registerMetric(neighborhoodCacheHitRatio);
+register.registerMetric(neighborhoodCacheLatencyMs);
+register.registerMetric(graphqlResolverDurationSeconds);
+register.registerMetric(graphqlResolverErrorsTotal);
+register.registerMetric(graphqlResolverCallsTotal);
+register.registerMetric(webVitalValue);
+register.registerMetric(realtimeConflictsTotal);
+register.registerMetric(idempotentHitsTotal);
+register.registerMetric(businessUserSignupsTotal);
+register.registerMetric(businessApiCallsTotal);
+register.registerMetric(businessRevenueTotal);
+register.registerMetric(serviceAutoRemediationsTotal);
 
 const metrics = {
   graphExpandRequestsTotal,

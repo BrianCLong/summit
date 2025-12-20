@@ -39,7 +39,9 @@ services:
       - summit
 
   neo4j:
-    image: neo4j:5.24.0-community
+    image: neo4j:latest
+    image: neo4j:5.24
+    image: neo4j:5-community
     container_name: summit-neo4j
     restart: unless-stopped
     environment:
@@ -90,8 +92,8 @@ services:
     healthcheck:
       test: ['CMD-SHELL', 'curl -f -u elastic:${ELASTICSEARCH_PASSWORD:-devpassword} http://localhost:9200/_cluster/health || exit 1']
       interval: 15s
-      timeout: 10s
-      retries: 10
+      timeout: 30s
+      retries: 20
     networks:
       - summit
     labels:
@@ -140,8 +142,8 @@ services:
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:4000/health/ready']
       interval: 15s
-      timeout: 10s
-      retries: 10
+      timeout: 30s
+      retries: 20
     networks:
       - summit
     labels:
@@ -176,6 +178,29 @@ services:
       - 'prometheus.job=summit_gateway'
       - 'prometheus.port=4100'
 
+  slo-exporter:
+    build:
+      context: ./apps/slo-exporter
+      dockerfile: Dockerfile
+    container_name: summit-slo-exporter
+    restart: unless-stopped
+    environment:
+      PORT: 9092
+      PROMETHEUS_URL: http://prometheus:9090
+      API_URL: http://api:4000
+    ports:
+      - '9092:9092'
+    depends_on:
+      prometheus:
+        condition: service_started
+      api:
+        condition: service_healthy
+    networks:
+      - summit
+    labels:
+      - 'prometheus.job=slo_exporter'
+      - 'prometheus.port=9092'
+
   web:
     build:
       context: ./client
@@ -204,8 +229,12 @@ services:
 
   websocket-server:
     build:
-      context: ./services/websocket-server
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Dockerfile.services
+      args:
+        SERVICE_PATH: services/websocket-server
+    command: node dist/index.js
+      dockerfile: services/websocket-server/Dockerfile
     container_name: summit-websocket-server
     restart: unless-stopped
     env_file:
@@ -244,7 +273,7 @@ services:
       - 'prometheus.port=9001'
 
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v2.54.1
     container_name: summit-prometheus
     restart: unless-stopped
     volumes:
@@ -345,8 +374,12 @@ services:
 
   ai-sandbox:
     build:
-      context: ./services/ai-sandbox
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Dockerfile.services
+      args:
+        SERVICE_PATH: services/ai-sandbox
+    command: node dist/index.js
+      dockerfile: services/ai-sandbox/Dockerfile
     container_name: summit-ai-sandbox
     restart: unless-stopped
     environment:
@@ -372,6 +405,35 @@ services:
     labels:
       - 'prometheus.job=summit_ai_sandbox'
       - 'prometheus.port=4020'
+
+  agentic-mesh-evaluation:
+    build:
+      context: ./services/agentic-mesh-evaluation
+      dockerfile: Dockerfile
+    container_name: summit-agentic-mesh-evaluation
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 4200
+      HOST: 0.0.0.0
+      REDIS_URL: redis://redis:6379
+      LOG_LEVEL: info
+    ports:
+      - '4200:4200'
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'node', '-e', 'require("http").get("http://localhost:4200/health", (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})']
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    networks:
+      - summit
+    labels:
+      - 'prometheus.job=agentic_mesh_evaluation'
+      - 'prometheus.port=4200'
+      - 'prometheus.path=/metrics'
 
 volumes:
   postgres_data:
