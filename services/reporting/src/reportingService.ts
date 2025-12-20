@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import express from 'express';
+import { checkAuthz } from '../../lib/authz';
 
 const templatesDir = path.join(process.cwd(), 'templates', 'reports');
 
@@ -53,6 +54,40 @@ export function renderReport(
 }
 
 export const router = express.Router();
+
+router.use(async (req, res, next) => {
+  const action = req.method === 'GET' ? 'graph:query' : 'report:export';
+  const decision = await checkAuthz({
+    subject: {
+      id: req.header('x-subject-id') || 'anonymous',
+      roles: (req.header('x-roles') || '').split(',').filter(Boolean),
+      tenant: req.header('x-tenant') || 'unknown',
+      clearance: req.header('x-clearance') || 'internal',
+      mfa: req.header('x-mfa') || 'unknown',
+    },
+    resource: {
+      type: 'report',
+      id: req.header('x-resource-id') || 'report',
+      tenant: req.header('x-tenant') || 'unknown',
+      classification: req.header('x-resource-classification') || 'internal',
+    },
+    action,
+    context: {
+      env: req.header('x-env') || 'dev',
+      request_ip: req.ip,
+      time: new Date().toISOString(),
+      risk: req.header('x-risk') || 'elevated',
+      reason: req.header('x-reason') || 'report access',
+      warrant_id: req.header('x-warrant-id') || undefined,
+    },
+  });
+
+  if (!decision.allow) {
+    return res.status(403).json({ error: 'forbidden', reasons: decision.deny });
+  }
+
+  return next();
+});
 
 router.get('/reports/templates', (_req, res) => {
   res.json(listTemplates());

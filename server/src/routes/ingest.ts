@@ -9,15 +9,13 @@ import rateLimit from 'express-rate-limit';
 import { IngestService } from '../services/IngestService.js';
 import { verifyTenantAccess } from '../services/opa-client.js';
 import logger from '../config/logger.js';
-import {
-  AsyncIngestDispatcher,
-  PgAsyncIngestRepository,
-} from '../ingest/async-pipeline.js';
+import { tenantIsolationGuard } from '../tenancy/TenantIsolationGuard.js';
+import { requireTenantContext } from '../security/tenantContext.js';
+import { TenantContext } from '../tenancy/types.js';
+import { queryWithTenantContext } from '../db/tenant.js';
 
 const ingestRouter = Router();
 const ingestLogger = logger.child({ name: 'IngestAPI' });
-const asyncIngestEnabled = process.env.ASYNC_INGEST === '1';
-let asyncDispatcher: AsyncIngestDispatcher | null = null;
 
 // Rate limiting: max 100 requests per 15 minutes per IP
 const ingestLimiter = rateLimit({
@@ -79,6 +77,39 @@ ingestRouter.post(
         });
       }
 
+      const tenantContext =
+        ((req as any).tenant as TenantContext | undefined) ||
+        requireTenantContext(req);
+
+      const policyDecision = tenantIsolationGuard.evaluatePolicy(
+        tenantContext,
+        { action: 'ingest:write', resourceTenantId: tenantId },
+      );
+
+      if (!policyDecision.allowed) {
+        return res
+          .status(policyDecision.status || 403)
+          .json({ error: 'Forbidden', message: policyDecision.reason });
+      }
+
+      const capDecision =
+        await tenantIsolationGuard.enforceIngestionCap(tenantContext);
+      res.setHeader('X-Tenant-Ingest-Limit', String(capDecision.limit));
+      res.setHeader(
+        'X-Tenant-Ingest-Reset',
+        String(Math.ceil(capDecision.reset / 1000)),
+      );
+      if (capDecision.warning) {
+        res.setHeader('Warning', capDecision.warning);
+      }
+
+      if (!capDecision.allowed) {
+        return res.status(capDecision.status || 429).json({
+          error: 'IngestionQuotaExceeded',
+          message: capDecision.reason,
+        });
+      }
+
       // Validate entity count limits
       const MAX_ENTITIES_PER_REQUEST = 10000;
       if (entities.length > MAX_ENTITIES_PER_REQUEST) {
@@ -97,42 +128,7 @@ ingestRouter.post(
         relationshipsCount: relationships.length,
       }, 'Processing ingest request');
 
-      // Async pipeline short-circuit
-      if (asyncIngestEnabled) {
-        const idempotencyKey =
-          (req.headers['x-idempotency-key'] as string) || req.body.idempotencyKey;
-
-        asyncDispatcher =
-          asyncDispatcher ||
-          new AsyncIngestDispatcher(
-            new PgAsyncIngestRepository(req.app.get('pg') as any),
-          );
-
-        const asyncResult = await asyncDispatcher.enqueue(
-          {
-            tenantId,
-            sourceType,
-            sourceId,
-            entities,
-            relationships,
-            userId: user.id,
-          },
-          idempotencyKey,
-        );
-
-        return res.status(202).json({
-          jobId: asyncResult.jobId,
-          status: asyncResult.status,
-          duplicate: asyncResult.duplicate,
-          payloadHash: asyncResult.payloadHash,
-          metadata: {
-            submittedAt: new Date().toISOString(),
-            async: true,
-          },
-        });
-      }
-
-      // Perform ingest (synchronous path)
+      // Perform ingest
       const ingestService = new IngestService(
         (req.app.get('pg') as any),
         (req.app.get('neo4j') as any),
@@ -201,6 +197,9 @@ ingestRouter.get(
     try {
       const { provenanceId } = req.params;
       const user = (req as any).user;
+      const tenantContext =
+        ((req as any).tenant as TenantContext | undefined) ||
+        requireTenantContext(req);
 
       if (!user) {
         return res.status(401).json({ error: 'Unauthorized' });
@@ -208,51 +207,18 @@ ingestRouter.get(
 
       // Query provenance record
       const pg = req.app.get('pg') as any;
-      const { rows } = await pg.query(
+      const { rows } = await queryWithTenantContext(
+        pg,
+        tenantContext,
         `SELECT * FROM provenance_records WHERE id = $1`,
         [provenanceId],
       );
 
       if (rows.length === 0) {
-        if (asyncIngestEnabled) {
-          const asyncPg = req.app.get('pg') as any;
-          const asyncJob = await asyncPg.query(
-            `SELECT id, tenant_id, status, attempts, last_error, payload_hash
-               FROM ingest_async_jobs
-              WHERE id = $1`,
-            [provenanceId],
-          );
-
-          if (asyncJob.rows.length === 0) {
-            return res.status(404).json({
-              error: 'Not found',
-              message: 'Provenance record not found',
-            });
-          }
-
-          const job = asyncJob.rows[0];
-
-          try {
-            await verifyTenantAccess(user, job.tenant_id, 'entity:read');
-          } catch {
-            return res.status(403).json({ error: 'Forbidden' });
-          }
-
-          return res.json({
-            provenanceId: job.id,
-            tenantId: job.tenant_id,
-            status: job.status,
-            attempts: job.attempts,
-            lastError: job.last_error,
-            payloadHash: job.payload_hash,
-            metadata: { async: true },
-          });
-        } else {
-          return res.status(404).json({
-            error: 'Not found',
-            message: 'Provenance record not found',
-          });
-        }
+        return res.status(404).json({
+          error: 'Not found',
+          message: 'Provenance record not found',
+        });
       }
 
       const record = rows[0];
