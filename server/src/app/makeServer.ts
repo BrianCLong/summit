@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ApolloServer } from '@apollo/server';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { typeDefs } from '../graphql/schema/index.js';

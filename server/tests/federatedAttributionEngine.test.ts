@@ -1,3 +1,4 @@
+import { describe, it, expect } from '@jest/globals';
 import {
   AnalyticsConnector,
   AttributionResult,
@@ -75,7 +76,7 @@ describe('FederatedAttributionEngine', () => {
     constructor(
       public readonly id: string,
       public readonly name: string,
-    ) {}
+    ) { }
 
     async sendAttribution(payload: {
       connectorId: string;

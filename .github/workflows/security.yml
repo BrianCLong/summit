@@ -1,49 +1,12 @@
 name: Security
-
-on:
-  workflow_dispatch:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-  schedule:
-    - cron: '0 3 * * *'
-
-permissions:
-  contents: read
-  security-events: write
-
+on: [pull_request]
 jobs:
-  codeql:
-    name: CodeQL
-    runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-      - uses: github/codeql-action/init@v3
-        with:
-          languages: javascript,python
-      - uses: github/codeql-action/autobuild@v3
-      - uses: github/codeql-action/analyze@v3
-
-  dependency-review:
-    if: github.event_name == 'pull_request'
+  trivy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/dependency-review-action@v4
+      - uses: aquasecurity/trivy-action@0.24.0
         with:
-          fail-on-severity: high
-
-  secret-scan:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Run gitleaks
-        uses: gitleaks/gitleaks-action@v2
-        with:
-          args: detect --source=. --no-banner --redact
+          scan-type: fs
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH

@@ -85,3 +85,14 @@ class SentimentRequest(BaseModel):
     node_id: str
     node_label: str
     text: str
+
+
+class OSINTEnrichmentRequest(BaseModel):
+    ip: str
+    actor_name: str
+
+# --- Mining Schemas ---
+class MiningRequest(BaseModel):
+    text: str
+    source_id: str | None = None
+    language: str | None = "en"

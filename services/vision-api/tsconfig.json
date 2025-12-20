@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "composite": true,
+    "declarationMap": true,
+    "esModuleInterop": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts"],
+  "references": [
+    { "path": "../../packages/computer-vision" },
+    { "path": "../../packages/object-detection" },
+    { "path": "../../packages/face-analysis" },
+    { "path": "../../packages/ocr" },
+    { "path": "../../packages/satellite-imagery" },
+    { "path": "../../packages/video-analysis" },
+    { "path": "../../packages/image-forensics" }
+  ]
+}

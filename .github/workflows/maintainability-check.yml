@@ -1,0 +1,319 @@
+name: Maintainability Metrics Check
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  schedule:
+    # Run weekly on Sunday at 2 AM UTC
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+
+concurrency:
+  group: maintainability-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  # Job 1: ESLint Complexity Check
+  eslint-complexity:
+    name: ESLint Complexity Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.14.x'
+          cache: 'pnpm'
+
+      - name: Enable Corepack
+        run: |
+          corepack enable || true
+          corepack prepare pnpm@9.12.3 --activate || true
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile=false
+
+      - name: Install ESLint plugins for complexity
+        run: |
+          pnpm add -D -w eslint-plugin-complexity eslint-plugin-sonarjs
+
+      - name: Run ESLint with complexity rules
+        id: eslint
+        continue-on-error: true
+        run: |
+          pnpm exec eslint \
+            --config .eslintrc.complexity.cjs \
+            --format json \
+            --output-file eslint-report.json \
+            "server/src/**/*.{js,ts}" \
+            "client/src/**/*.{js,jsx,ts,tsx}" \
+            "apps/**/src/**/*.{js,jsx,ts,tsx}" \
+            "packages/**/src/**/*.{js,ts}" \
+            || true
+
+      - name: Generate complexity report
+        if: always()
+        run: |
+          node -e "
+          const fs = require('fs');
+          const report = JSON.parse(fs.readFileSync('eslint-report.json', 'utf8'));
+
+          const complexityIssues = report.filter(file => file.errorCount > 0 || file.warningCount > 0);
+          const totalErrors = report.reduce((sum, f) => sum + f.errorCount, 0);
+          const totalWarnings = report.reduce((sum, f) => sum + f.warningCount, 0);
+
+          console.log('# ESLint Complexity Report\n');
+          console.log(\`**Total Errors:** \${totalErrors}\`);
+          console.log(\`**Total Warnings:** \${totalWarnings}\n\`);
+
+          if (complexityIssues.length > 0) {
+            console.log('## Files with Issues\n');
+            complexityIssues.slice(0, 20).forEach(file => {
+              console.log(\`### \${file.filePath}\`);
+              console.log(\`- Errors: \${file.errorCount}\`);
+              console.log(\`- Warnings: \${file.warningCount}\n\`);
+            });
+          }
+          " | tee complexity-report.md
+
+      - name: Upload ESLint report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eslint-complexity-report
+          path: |
+            eslint-report.json
+            complexity-report.md
+          retention-days: 30
+
+  # Job 2: Code Metrics Analysis
+  code-metrics:
+    name: Code Metrics Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.14.x'
+
+      - name: Install analysis tools
+        run: |
+          npm install -g cloc complexity-report jscpd
+
+      - name: Generate Lines of Code report
+        run: |
+          cloc \
+            --exclude-dir=node_modules,dist,build,coverage,.turbo,archive \
+            --json \
+            --out=cloc-report.json \
+            server/src client/src apps packages services
+
+          echo "# Lines of Code Report" > metrics-report.md
+          echo "" >> metrics-report.md
+          cloc \
+            --exclude-dir=node_modules,dist,build,coverage,.turbo,archive \
+            --md \
+            server/src client/src apps packages services >> metrics-report.md
+
+      - name: Detect code duplication
+        continue-on-error: true
+        run: |
+          jscpd \
+            --min-lines 10 \
+            --min-tokens 50 \
+            --format "javascript,typescript" \
+            --reporters "json,html,console" \
+            --output "./jscpd-report" \
+            --ignore "**/*.test.ts,**/*.test.js,**/*.spec.ts,**/*.spec.js,**/node_modules/**,**/dist/**,**/build/**" \
+            server/src client/src apps packages services || true
+
+      - name: Find large files
+        run: |
+          echo "" >> metrics-report.md
+          echo "# Large Files (> 500 lines)" >> metrics-report.md
+          echo "" >> metrics-report.md
+          echo "| File | Lines |" >> metrics-report.md
+          echo "|------|-------|" >> metrics-report.md
+
+          find server/src client/src apps packages services \
+            -type f \( -name "*.ts" -o -name "*.js" -o -name "*.tsx" -o -name "*.jsx" \) \
+            -not -path "*/node_modules/*" \
+            -not -path "*/dist/*" \
+            -not -path "*/build/*" \
+            -not -path "*/.turbo/*" \
+            -exec wc -l {} \; | \
+            sort -rn | \
+            awk '$1 > 500 {print "| " $2 " | " $1 " |"}' | \
+            head -50 >> metrics-report.md || true
+
+      - name: Count TODO/FIXME comments
+        run: |
+          echo "" >> metrics-report.md
+          echo "# Technical Debt (TODO/FIXME)" >> metrics-report.md
+          echo "" >> metrics-report.md
+
+          TODO_COUNT=$(grep -r "TODO" server/src client/src apps packages services \
+            --include="*.ts" --include="*.js" --include="*.tsx" --include="*.jsx" \
+            --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=build 2>/dev/null | wc -l || echo 0)
+
+          FIXME_COUNT=$(grep -r "FIXME" server/src client/src apps packages services \
+            --include="*.ts" --include="*.js" --include="*.tsx" --include="*.jsx" \
+            --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=build 2>/dev/null | wc -l || echo 0)
+
+          echo "- **TODO comments:** $TODO_COUNT" >> metrics-report.md
+          echo "- **FIXME comments:** $FIXME_COUNT" >> metrics-report.md
+          echo "- **Total debt markers:** $((TODO_COUNT + FIXME_COUNT))" >> metrics-report.md
+
+      - name: Upload metrics reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-metrics-report
+          path: |
+            metrics-report.md
+            cloc-report.json
+            jscpd-report/
+          retention-days: 30
+
+  # Job 3: SonarQube Analysis
+  sonarqube:
+    name: SonarQube Analysis
+    runs-on: ubuntu-latest
+    # Only run on main branch or when SONAR_TOKEN is available
+    if: github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && vars.SONAR_HOST_URL != '')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.14.x'
+          cache: 'pnpm'
+
+      - name: Enable Corepack
+        run: |
+          corepack enable || true
+          corepack prepare pnpm@9.12.3 --activate || true
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile=false
+
+      - name: Run tests with coverage
+        continue-on-error: true
+        run: |
+          pnpm run test:ci --coverage || true
+
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL || 'https://sonarcloud.io' }}
+        with:
+          args: >
+            -Dsonar.projectKey=${{ github.repository_owner }}_${{ github.event.repository.name }}
+            -Dsonar.organization=${{ github.repository_owner }}
+            -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
+            -Dsonar.pullrequest.branch=${{ github.head_ref }}
+            -Dsonar.pullrequest.base=${{ github.base_ref }}
+
+      - name: SonarQube Quality Gate check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL || 'https://sonarcloud.io' }}
+
+  # Job 4: Generate Weekly Maintainability Report
+  weekly-report:
+    name: Generate Maintainability Trend Report
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    needs: [eslint-complexity, code-metrics]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: reports/
+
+      - name: Generate trend report
+        run: |
+          REPORT_DATE=$(date +"%Y-%m-%d")
+          REPORT_FILE="reports/maintainability-report-${REPORT_DATE}.md"
+
+          cat > "$REPORT_FILE" << 'EOF'
+          # Maintainability Trend Report
+
+          **Generated:** $(date +"%Y-%m-%d %H:%M:%S UTC")
+          **Branch:** ${{ github.ref_name }}
+          **Commit:** ${{ github.sha }}
+
+          ## Executive Summary
+
+          This report tracks maintainability metrics over time to identify trends and areas for improvement.
+
+          ## Metrics Summary
+
+          EOF
+
+          # Append ESLint report if available
+          if [ -f "reports/eslint-complexity-report/complexity-report.md" ]; then
+            cat reports/eslint-complexity-report/complexity-report.md >> "$REPORT_FILE"
+          fi
+
+          # Append metrics report if available
+          if [ -f "reports/code-metrics-report/metrics-report.md" ]; then
+            cat reports/code-metrics-report/metrics-report.md >> "$REPORT_FILE"
+          fi
+
+          echo "" >> "$REPORT_FILE"
+          echo "## Recommendations" >> "$REPORT_FILE"
+          echo "" >> "$REPORT_FILE"
+          echo "1. **Refactor files over 1000 lines** - Break into smaller, focused modules" >> "$REPORT_FILE"
+          echo "2. **Address God Objects** - Classes with 50+ methods should be split" >> "$REPORT_FILE"
+          echo "3. **Reduce cyclomatic complexity** - Functions over 15 should be simplified" >> "$REPORT_FILE"
+          echo "4. **Eliminate code duplication** - DRY principle violations should be resolved" >> "$REPORT_FILE"
+          echo "5. **Reduce technical debt** - Address TODO/FIXME comments systematically" >> "$REPORT_FILE"
+
+      - name: Upload weekly report
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-maintainability-report
+          path: reports/maintainability-report-*.md
+          retention-days: 90
+
+      - name: Create issue with report (optional)
+        if: github.event_name == 'schedule'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const reportFiles = fs.readdirSync('reports').filter(f => f.startsWith('maintainability-report-'));
+
+            if (reportFiles.length > 0) {
+              const reportContent = fs.readFileSync(`reports/${reportFiles[0]}`, 'utf8');
+
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `Weekly Maintainability Report - ${new Date().toISOString().split('T')[0]}`,
+                body: reportContent,
+                labels: ['maintainability', 'metrics', 'automated']
+              });
+            }

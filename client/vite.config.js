@@ -2,47 +2,33 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
-import { VitePWA } from 'vite-plugin-pwa';
-import { ViteImageOptimizer } from 'vite-plugin-image-optimizer';
 
 export default defineConfig({
   plugins: [
-    react(),
+    react({
+      // Ensure JSX is handled even in .js files
+      include: "**/*.{jsx,tsx,js,ts}",
+      babel: {
+        parserOpts: {
+          plugins: ['decorators-legacy', 'classProperties']
+        }
+      }
+    }),
     visualizer({
+      filename: './dist/stats.html',
       open: false,
-      filename: 'bundle-analysis.html',
       gzipSize: true,
       brotliSize: true,
     }),
-    VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
-      manifest: {
-        name: 'IntelGraph Platform',
-        short_name: 'IntelGraph',
-        description: 'Next-generation intelligence analysis platform',
-        theme_color: '#ffffff',
-        icons: [
-          {
-            src: 'pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png',
-          },
-          {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-          },
-        ],
-      },
-    }),
-    ViteImageOptimizer(),
   ],
+  esbuild: {
+    loader: 'tsx',
+    include: /src\/.*\.(js|jsx|ts|tsx)$/, // Apply to all JS/TS files in src
+    exclude: [],
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@app': path.resolve(__dirname, '../src'),
-      '@ui': path.resolve(__dirname, './src'),
     },
   },
   server: {
@@ -66,6 +52,72 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'apollo-vendor': ['@apollo/client', 'graphql', 'graphql-ws'],
+          'mui-vendor': [
+            '@mui/material',
+            '@mui/icons-material',
+            '@mui/lab',
+            '@mui/x-data-grid',
+            '@emotion/react',
+            '@emotion/styled',
+          ],
+          'state-vendor': ['@reduxjs/toolkit', 'react-redux'],
+          'graph-vendor': [
+            'cytoscape',
+            'cytoscape-cola',
+            'cytoscape-dagre',
+            'cytoscape-fcose',
+            'cytoscape-cose-bilkent',
+            'cytoscape-popper',
+            'cytoscape-qtip',
+            'cytoscape-edgehandles',
+            'cytoscape-context-menus',
+            'cytoscape-grid-guide',
+            'cytoscape-navigator',
+            'cytoscape-panzoom',
+          ],
+          'd3-vendor': ['d3', 'd3-force', 'd3-selection'],
+          'map-vendor': ['leaflet', 'react-leaflet'],
+          'timeline-vendor': ['vis-timeline'],
+          'utils-vendor': ['lodash', 'date-fns', 'uuid', 'zod', 'fuse.js'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    },
+  },
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      '@apollo/client',
+      '@mui/material',
+      '@reduxjs/toolkit',
+    ],
+    exclude: [
+      'cytoscape',
+      'd3',
+      'leaflet',
+      'vis-timeline',
+    ],
+    esbuildOptions: {
+        loader: {
+            '.js': 'jsx',
+            '.ts': 'tsx',
+            '.tsx': 'tsx',
+        },
+    },
   },
   test: {
     globals: true,

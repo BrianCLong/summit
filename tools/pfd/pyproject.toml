@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pfd"
+version = "0.1.0"
+description = "Pipeline Flakiness Detector"
+authors = [{name = "Summit Autogen", email = "summit@example.com"}]
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[project.entry-points."pytest11"]
+pfd = "pfd.pytest_plugin"
+
+[tool.pytest.ini_options]
+addopts = "-q"

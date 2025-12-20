@@ -1,4 +1,4 @@
-import crypto from 'node:crypto';
+import * as crypto from 'node:crypto';
 import type { ChainValidationResult } from './types.js';
 
 function normalizeDn(dn: string): string {

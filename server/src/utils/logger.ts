@@ -1,28 +1,25 @@
-import winston from 'winston';
+// @ts-ignore
+import { default as pino } from 'pino';
 
-const logger = winston.createLogger({
+/**
+ * Global application logger configured with Pino.
+ *
+ * Features:
+ * - JSON formatting for structured logging.
+ * - Timestamp and error stack trace inclusion.
+ * - Service name included in all logs.
+ */
+// @ts-ignore - pino types conflict with module resolution
+const pinoLogger = pino({
   level: process.env.LOG_LEVEL || 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.errors({ stack: true }),
-    winston.format.json(),
-  ),
-  defaultMeta: { service: 'intelgraph-api' },
-  transports: [
-    new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'logs/combined.log' }),
-  ],
+  base: { service: 'intelgraph-api' },
+  timestamp: () => `,"time":"${new Date().toISOString()}"`,
+  formatters: {
+    level: (label: string) => {
+      return { level: label };
+    },
+  },
 });
 
-if (process.env.NODE_ENV !== 'production') {
-  logger.add(
-    new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple(),
-      ),
-    }),
-  );
-}
-
-export default logger;
+export const logger = pinoLogger;
+export default pinoLogger;

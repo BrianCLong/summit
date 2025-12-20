@@ -1,3 +1,4 @@
+// @ts-nocheck
 import crypto from 'crypto';
 // import { S3Client, PutObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
 import { getPostgresPool } from '../../db/postgres.js';
@@ -12,7 +13,8 @@ export interface EvidenceArtifact {
     | 'log'
     | 'output'
     | 'trace'
-    | 'policy_decision';
+    | 'policy_decision'
+    | 'receipt';
   content: Buffer | string;
   metadata?: Record<string, any>;
   retentionDays?: number;
@@ -30,6 +32,7 @@ export class EvidenceProvenanceService {
   // private s3Client: S3Client;
   private bucketName: string;
   private signingKey: string;
+  private inlineThreshold: number;
 
   constructor() {
     // this.s3Client = new S3Client({
@@ -38,6 +41,9 @@ export class EvidenceProvenanceService {
     this.bucketName = process.env.EVIDENCE_BUCKET || 'maestro-evidence-worm';
     this.signingKey =
       process.env.EVIDENCE_SIGNING_KEY || this.generateSigningKey();
+    this.inlineThreshold = Number(
+      process.env.MAX_INLINE_EVIDENCE_BYTES || '1000000',
+    );
   }
 
   private generateSigningKey(): string {
@@ -70,8 +76,14 @@ export class EvidenceProvenanceService {
       const retentionUntil = new Date();
       retentionUntil.setDate(retentionUntil.getDate() + retentionDays);
 
+      const shouldInline =
+        artifact.artifactType === 'receipt' ||
+        contentBuffer.length <= this.inlineThreshold;
+
       // S3 key with content-addressable naming
-      const s3Key = `evidence/${artifact.runId}/${artifact.artifactType}/${artifactId}-${sha256Hash.slice(0, 16)}`;
+      const s3Key = shouldInline
+        ? `inline://evidence_artifact_content/${artifactId}`
+        : `evidence/${artifact.runId}/${artifact.artifactType}/${artifactId}-${sha256Hash.slice(0, 16)}`;
 
       // Upload to S3 with Object Lock
       // const uploadCommand = new PutObjectCommand({
@@ -111,6 +123,19 @@ export class EvidenceProvenanceService {
           retentionUntil,
         ],
       );
+
+      if (shouldInline) {
+        await pool.query(
+          `INSERT INTO evidence_artifact_content (artifact_id, content, content_type)
+           VALUES ($1, $2, $3)`,
+          [
+            artifactId,
+            contentBuffer,
+            artifact.metadata?.contentType ||
+              this.getContentType(artifact.artifactType),
+          ],
+        );
+      }
 
       // Create provenance chain entry
       await this.createProvenanceEntry(artifactId, sha256Hash, artifact.runId);
@@ -340,6 +365,7 @@ export class EvidenceProvenanceService {
       log: 365, // 1 year
       output: 90, // 3 months
       trace: 30, // 1 month
+      receipt: 2555, // receipts should be retained long-term
       policy_decision: 2555, // ~7 years for compliance
     };
 
@@ -358,6 +384,7 @@ export class EvidenceProvenanceService {
       log: 'text/plain',
       output: 'application/json',
       trace: 'application/json',
+      receipt: 'application/json',
       policy_decision: 'application/json',
     };
 

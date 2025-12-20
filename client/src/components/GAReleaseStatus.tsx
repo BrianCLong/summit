@@ -12,7 +12,7 @@ import {
   Typography,
   Button,
 } from '@mui/material';
-import Grid from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid';
 import {
   CheckCircle,
   Error as ErrorIcon,
@@ -92,6 +92,7 @@ const GAReleaseStatus: React.FC = () => {
         // Refresh status after SBOM generation
         fetchReleaseData();
       }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err: unknown) {
       setError('Failed to generate SBOM');
     }

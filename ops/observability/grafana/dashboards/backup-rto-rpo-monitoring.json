@@ -1,0 +1,309 @@
+{
+  "dashboard": {
+    "title": "Backup & Disaster Recovery - RTO/RPO Monitoring",
+    "tags": ["backup", "disaster-recovery", "rto", "rpo"],
+    "timezone": "utc",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "RTO (Recovery Time Objective) - Current vs Target",
+        "type": "gauge",
+        "gridPos": {"x": 0, "y": 0, "w": 8, "h": 8},
+        "targets": [
+          {
+            "expr": "dr_rto_actual_seconds",
+            "legendFormat": "Actual RTO (seconds)",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "orientation": "auto",
+          "showThresholdLabels": true,
+          "showThresholdMarkers": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "min": 0,
+            "max": 14400,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 10800},
+                {"color": "red", "value": 14400}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "RPO (Recovery Point Objective) - Current vs Target",
+        "type": "gauge",
+        "gridPos": {"x": 8, "y": 0, "w": 8, "h": 8},
+        "targets": [
+          {
+            "expr": "dr_rpo_actual_seconds",
+            "legendFormat": "{{database}} RPO (seconds)",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "orientation": "auto",
+          "showThresholdLabels": true,
+          "showThresholdMarkers": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "min": 0,
+            "max": 900,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 600},
+                {"color": "red", "value": 900}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Backup Success Rate (24h)",
+        "type": "stat",
+        "gridPos": {"x": 16, "y": 0, "w": 8, "h": 8},
+        "targets": [
+          {
+            "expr": "100 * (sum(rate(postgres_base_backup_success_total[24h])) / (sum(rate(postgres_base_backup_success_total[24h])) + sum(rate(postgres_base_backup_failure_total[24h]))))",
+            "legendFormat": "Postgres Backup Success %",
+            "refId": "A"
+          },
+          {
+            "expr": "100 * (sum(rate(neo4j_backup_success_total[24h])) / (sum(rate(neo4j_backup_success_total[24h])) + sum(rate(neo4j_backup_failure_total[24h]))))",
+            "legendFormat": "Neo4j Backup Success %",
+            "refId": "B"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value",
+          "orientation": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 95},
+                {"color": "green", "value": 98}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Backup Duration Trends",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 8, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "postgres_base_backup_duration_seconds",
+            "legendFormat": "PostgreSQL Backup Duration",
+            "refId": "A"
+          },
+          {
+            "expr": "neo4j_backup_duration_seconds{backup_type=\"full\"}",
+            "legendFormat": "Neo4j Full Backup Duration",
+            "refId": "B"
+          },
+          {
+            "expr": "neo4j_backup_duration_seconds{backup_type=\"incremental\"}",
+            "legendFormat": "Neo4j Incremental Backup Duration",
+            "refId": "C"
+          },
+          {
+            "expr": "file_backup_duration_seconds",
+            "legendFormat": "File Backup Duration",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 10
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Backup Size Trends",
+        "type": "timeseries",
+        "gridPos": {"x": 12, "y": 8, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "postgres_base_backup_size_bytes",
+            "legendFormat": "PostgreSQL Backup Size",
+            "refId": "A"
+          },
+          {
+            "expr": "neo4j_backup_size_bytes{backup_type=\"full\"}",
+            "legendFormat": "Neo4j Full Backup Size",
+            "refId": "B"
+          },
+          {
+            "expr": "neo4j_backup_size_bytes{backup_type=\"incremental\"}",
+            "legendFormat": "Neo4j Incremental Backup Size",
+            "refId": "C"
+          },
+          {
+            "expr": "file_backup_size_bytes",
+            "legendFormat": "File Backup Size",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "bytes",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 10
+            }
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "WAL Archive Lag (PostgreSQL)",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 16, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "intelgraph_dr_rpo_actual_seconds{database=\"postgres\"}",
+            "legendFormat": "WAL Archive Lag",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 180},
+                {"color": "red", "value": 300}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Recovery Attempts & Success Rate",
+        "type": "timeseries",
+        "gridPos": {"x": 12, "y": 16, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(rate(dr_recovery_attempts_total{status=\"success\"}[1h]))",
+            "legendFormat": "Successful Recoveries",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(rate(dr_recovery_attempts_total{status=\"failure\"}[1h]))",
+            "legendFormat": "Failed Recoveries",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops",
+            "custom": {
+              "drawStyle": "bars",
+              "lineInterpolation": "linear"
+            }
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "Backup Encryption Status",
+        "type": "stat",
+        "gridPos": {"x": 0, "y": 24, "w": 8, "h": 6},
+        "targets": [
+          {
+            "expr": "backup_encryption_files_total",
+            "legendFormat": "Files Encrypted",
+            "refId": "A"
+          },
+          {
+            "expr": "backup_encryption_failures_total",
+            "legendFormat": "Encryption Failures",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "color": {"mode": "thresholds"}
+          }
+        }
+      },
+      {
+        "id": 9,
+        "title": "Last Successful Backup Timestamps",
+        "type": "stat",
+        "gridPos": {"x": 8, "y": 24, "w": 16, "h": 6},
+        "targets": [
+          {
+            "expr": "postgres_base_backup_last_success_timestamp",
+            "legendFormat": "PostgreSQL Last Backup",
+            "refId": "A"
+          },
+          {
+            "expr": "neo4j_backup_last_success_timestamp",
+            "legendFormat": "Neo4j Last Backup",
+            "refId": "B"
+          },
+          {
+            "expr": "file_backup_last_success_timestamp",
+            "legendFormat": "Files Last Backup",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "dateTimeFromNow",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 86400},
+                {"color": "red", "value": 172800}
+              ]
+            }
+          }
+        }
+      }
+    ]
+  }
+}

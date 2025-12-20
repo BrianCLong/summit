@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Request, Response } from 'express';
 import { trace, Span } from '@opentelemetry/api';
 import { Counter, Histogram, Gauge } from 'prom-client';

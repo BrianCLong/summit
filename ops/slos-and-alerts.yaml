@@ -10,6 +10,54 @@ data:
   slos.yaml: |
     # Service Level Objectives for Safe Mutations
     slos:
+      - name: "intelgraph-api-availability"
+        description: "IntelGraph API success rate ≥ 99.9% (error budget 0.1%)"
+        sli_query: 'sum(rate(http_requests_total{service="intelgraph-api",status!~"5.."}[5m])) /
+          sum(rate(http_requests_total{service="intelgraph-api"}[5m])))'
+        objective: 0.999
+        unit: "ratio"
+        warning_threshold: 0.995
+        critical_threshold: 0.99
+        evaluation_window: "5m"
+        alert_duration: "5m"
+        burn_rates:
+          - window: "5m"
+            threshold: 14.4
+          - window: "1h"
+            threshold: 6
+          - window: "6h"
+            threshold: 2
+        pagerduty_service: sre-primary
+
+      - name: "intelgraph-ingest-success"
+        description: "Streaming ingest success ≥ 99.5% (error budget 0.5%)"
+        sli_query: 'sum(rate(ingest_success_total[5m])) /
+          sum(rate(ingest_attempts_total[5m])))'
+        objective: 0.995
+        unit: "ratio"
+        warning_threshold: 0.99
+        critical_threshold: 0.985
+        evaluation_window: "5m"
+        alert_duration: "10m"
+        burn_rates:
+          - window: "5m"
+            threshold: 8
+          - window: "1h"
+            threshold: 4
+          - window: "6h"
+            threshold: 1.5
+        pagerduty_service: sre-primary
+
+      - name: "intelgraph-cost-guardrail"
+        description: "Monthly platform spend must remain ≤ 80% of budget"
+        sli_query: 'intelgraph_monthly_spend_usd / intelgraph_monthly_budget_usd'
+        objective: 0.8
+        unit: "ratio"
+        warning_threshold: 0.8
+        critical_threshold: 0.9
+        evaluation_window: "1d"
+        alert_duration: "15m"
+
       - name: "budget-guard-latency"
         description: "Budget guard latency p95 ≤ 30ms per mutation"
         sli_query: 'histogram_quantile(0.95, rate(mutation_latency_ms_bucket{stage="budget"}[5m]))'
@@ -50,11 +98,185 @@ data:
         evaluation_window: "30d"
         alert_duration: "5m"
 
+      - name: "agent-workload-latency"
+        description: "Agent workload queue p95 ≤ 2s while draining prioritized jobs"
+        sli_query: 'histogram_quantile(0.95, rate(agent_workload_queue_wait_seconds_bucket[5m]))'
+        objective: 2
+        unit: "seconds"
+        warning_threshold: 3
+        critical_threshold: 4
+        evaluation_window: "5m"
+        alert_duration: "10m"
+        burn_rates:
+          - window: "5m"
+            threshold: 8
+          - window: "1h"
+            threshold: 4
+        pagerduty_service: sre-primary
+
+      - name: "agent-cost-burn"
+        description: "Agent workload cost pressure ratio ≤ 0.85 of budget"
+        sli_query: 'max(agent_queue_scaling_score)'
+        objective: 0.85
+        unit: "ratio"
+        warning_threshold: 0.85
+        critical_threshold: 1
+        evaluation_window: "15m"
+        alert_duration: "15m"
+        burn_rates:
+          - window: "15m"
+            threshold: 6
+          - window: "6h"
+            threshold: 2
+        pagerduty_service: sre-primary
+
+      - name: "agent-adaptive-efficiency"
+        description: "Composite latency + cost pressure should remain ≤ 2.0 (1.0 each) for adaptive scaling"
+        sli_query: 'max_over_time(agent_queue_slo_pressure{queue="agent-default"}[5m]) + max_over_time(agent_queue_cost_pressure{queue="agent-default"}[5m])'
+        objective: 2
+        unit: "ratio"
+        warning_threshold: 2.2
+        critical_threshold: 2.5
+        evaluation_window: "10m"
+        alert_duration: "10m"
+        burn_rates:
+          - window: "10m"
+            threshold: 4
+          - window: "1h"
+            threshold: 2
+        pagerduty_service: sre-primary
+
   alerts.yaml: |
     # Prometheus Alert Rules for Safe Mutations
     groups:
       - name: intelgraph_safe_mutations
         rules:
+          # Platform SLO burn alerts
+          - alert: APIErrorBudgetFastBurn
+            expr: |
+              (1 - (sum(rate(http_requests_total{service="intelgraph-api",status!~"5.."}[5m])) /
+                sum(rate(http_requests_total{service="intelgraph-api"}[5m])))) / 0.001 > 14.4
+            for: 5m
+            labels:
+              severity: critical
+              service: intelgraph-api
+              slo: intelgraph-api-availability
+              pagerduty_service: sre-primary
+            annotations:
+              summary: "API error budget burning too fast (5m window)"
+              description: "IntelGraph API burn rate >14.4x. Auto-rollback triggered in pipeline."
+              runbook_url: "https://docs.intelgraph.dev/runbooks/observability-sre"
+
+          - alert: APIErrorBudgetSlowBurn
+            expr: |
+              (1 - (sum(rate(http_requests_total{service="intelgraph-api",status!~"5.."}[1h])) /
+                sum(rate(http_requests_total{service="intelgraph-api"}[1h])))) / 0.001 > 6
+            for: 15m
+            labels:
+              severity: warning
+              service: intelgraph-api
+              slo: intelgraph-api-availability
+              pagerduty_service: sre-primary
+            annotations:
+              summary: "API error budget sustained burn (1h window)"
+              description: "IntelGraph API error budget consuming >6x over 1h. Investigate before budget exhaustion."
+              runbook_url: "https://docs.intelgraph.dev/runbooks/observability-sre"
+
+          - alert: IngestErrorBudgetFastBurn
+            expr: |
+              (1 - (sum(rate(ingest_success_total[5m])) /
+                sum(rate(ingest_attempts_total[5m])))) / 0.005 > 8
+            for: 10m
+            labels:
+              severity: critical
+              service: intelgraph-ingest
+              slo: intelgraph-ingest-success
+              pagerduty_service: sre-primary
+            annotations:
+              summary: "Ingest error budget fast burn"
+              description: "Streaming ingest burn rate >8x (5m). Canary rollback recommended."
+              runbook_url: "https://docs.intelgraph.dev/runbooks/observability-sre"
+
+          - alert: IngestErrorBudgetSlowBurn
+            expr: |
+              (1 - (sum(rate(ingest_success_total[1h])) /
+                sum(rate(ingest_attempts_total[1h])))) / 0.005 > 4
+            for: 20m
+            labels:
+              severity: warning
+              service: intelgraph-ingest
+              slo: intelgraph-ingest-success
+              pagerduty_service: sre-primary
+            annotations:
+              summary: "Ingest error budget sustained burn"
+              description: "Ingest pipeline burning >4x budget over 1h. Address backlog or pause deploys."
+              runbook_url: "https://docs.intelgraph.dev/runbooks/observability-sre"
+
+          - alert: PlatformCostGuardrailWarning
+            expr: (intelgraph_monthly_spend_usd / intelgraph_monthly_budget_usd) > 0.8
+            for: 15m
+            labels:
+              severity: warning
+              service: finops
+              slo: intelgraph-cost-guardrail
+              pagerduty_service: sre-primary
+            annotations:
+              summary: "Platform costs exceeded 80% of budget"
+              description: "FinOps data shows {{ $value | humanizePercentage }} of monthly budget used. Coordinate feature flags."
+              runbook_url: "https://docs.intelgraph.dev/runbooks/observability-sre#finops-guardrail"
+
+          - alert: PlatformCostGuardrailCritical
+            expr: (intelgraph_monthly_spend_usd / intelgraph_monthly_budget_usd) > 0.9
+            for: 5m
+            labels:
+              severity: critical
+              service: finops
+              slo: intelgraph-cost-guardrail
+              pagerduty_service: sre-primary
+            annotations:
+              summary: "Platform costs exceeded 90% of budget"
+              description: "Monthly spend is {{ $value | humanizePercentage }} of budget. Freeze deploys and trigger cost rollback."
+              runbook_url: "https://docs.intelgraph.dev/runbooks/observability-sre#finops-guardrail"
+
+          - alert: AgentWorkloadLatencySLOBreach
+            expr: histogram_quantile(0.95, rate(agent_workload_queue_wait_seconds_bucket[5m])) > 3
+            for: 10m
+            labels:
+              severity: warning
+              service: agent-workload-queue
+              component: keda
+              slo: agent-workload-latency
+            annotations:
+              summary: "Agent workload queue latency breaching SLO"
+              description: "p95 queue wait exceeded 3s for 10m. Trigger adaptive scale-up or reprioritize traffic."
+              runbook_url: "https://docs.intelgraph.dev/runbooks/agent-queue-latency"
+
+          - alert: AgentCostPressureHigh
+            expr: max(agent_queue_scaling_score) > 0.85
+            for: 15m
+            labels:
+              severity: warning
+              service: agent-workload-queue
+              component: finops
+              slo: agent-cost-burn
+            annotations:
+              summary: "Agent workload cost pressure elevated"
+              description: "Cost pressure score above 0.85; bias scaling toward efficiency and engage FinOps."
+              runbook_url: "https://docs.intelgraph.dev/runbooks/agent-cost-guardrails"
+
+          - alert: AgentAdaptiveScaleRecommended
+            expr: max_over_time(agent_queue_slo_pressure[5m]) > 1 and max_over_time(agent_queue_cost_pressure[5m]) < 1
+            for: 10m
+            labels:
+              severity: info
+              service: agent-workload-queue
+              component: keda
+              slo: agent-adaptive-efficiency
+            annotations:
+              summary: "Agent queue SLO burn with headroom to scale"
+              description: "Latency/backlog pressure >1 while cost pressure <1. Recommend temporarily raising max replicas or step function scaling via KEDA policies."
+              runbook_url: "https://docs.intelgraph.dev/runbooks/agent-queue-latency"
+
           # SLO-1: Budget Guard Latency
           - alert: BudgetGuardLatencyWarning
             expr: histogram_quantile(0.95, rate(mutation_latency_ms_bucket{stage="budget"}[5m])) > 60
@@ -298,6 +520,61 @@ data:
                 "legendFormat": "PQ Violations/sec"
               }
             ]
+          },
+          {
+            "title": "Agent Workload Cost vs Latency",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "histogram_quantile(0.95, rate(agent_workload_queue_wait_seconds_bucket[5m]))",
+                "legendFormat": "p95 queue wait (s)"
+              },
+              {
+                "expr": "max(agent_queue_scaling_score)",
+                "legendFormat": "cost pressure"
+              },
+              {
+                "expr": "avg_over_time(agent_workload_queue_length[5m])",
+                "legendFormat": "queue depth"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "thresholds": {
+                  "steps": [
+                    {"color": "green", "value": 0},
+                    {"color": "yellow", "value": 2},
+                    {"color": "red", "value": 3}
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "title": "Adaptive Scaling Target",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "max(agent_queue_desired_replicas)",
+                "legendFormat": "desired replicas"
+              },
+              {
+                "expr": "max(agent_queue_cost_pressure)",
+                "legendFormat": "cost pressure"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "none",
+                "thresholds": {
+                  "steps": [
+                    {"color": "green", "value": 0},
+                    {"color": "yellow", "value": 0.85},
+                    {"color": "red", "value": 1}
+                  ]
+                }
+              }
+            }
           }
         ]
       }

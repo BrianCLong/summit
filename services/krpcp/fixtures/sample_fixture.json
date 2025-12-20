@@ -1,0 +1,58 @@
+{
+  "keys": [
+    {
+      "id": "kms-root",
+      "kind": "kms",
+      "materialVersion": 1,
+      "targetVersion": 2
+    },
+    {
+      "id": "hsm-primary",
+      "kind": "hsm",
+      "materialVersion": 12,
+      "targetVersion": 13
+    },
+    {
+      "id": "envelope-app",
+      "kind": "envelope",
+      "parents": ["kms-root"],
+      "materialVersion": 21,
+      "targetVersion": 22
+    },
+    {
+      "id": "split-master",
+      "kind": "split",
+      "parts": ["split-part-a", "split-part-b"],
+      "materialVersion": 4,
+      "targetVersion": 5
+    },
+    {
+      "id": "split-part-a",
+      "kind": "split-part",
+      "parents": ["hsm-primary"],
+      "materialVersion": 101,
+      "targetVersion": 102
+    },
+    {
+      "id": "split-part-b",
+      "kind": "split-part",
+      "parents": ["hsm-primary"],
+      "materialVersion": 201,
+      "targetVersion": 202
+    }
+  ],
+  "assets": [
+    {
+      "id": "ledger-db",
+      "keyRefs": ["envelope-app"]
+    },
+    {
+      "id": "archives",
+      "keyRefs": ["kms-root"]
+    },
+    {
+      "id": "countersign-store",
+      "keyRefs": ["split-master"]
+    }
+  ]
+}
