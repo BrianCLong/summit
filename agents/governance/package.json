@@ -74,7 +74,7 @@
     "intelgraph"
   ],
   "author": "IntelGraph Team",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "dependencies": {},
   "devDependencies": {
     "@types/node": "^20.10.0",

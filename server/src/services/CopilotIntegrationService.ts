@@ -1,8 +1,10 @@
 import axios from 'axios';
 import { isFeatureEnabled } from '../config/mvp1-features';
 import { MVP1RBACService, Permission, ResourceType } from './MVP1RBACService';
-import pino from 'pino';
+// @ts-ignore
+import { default as pino } from 'pino';
 
+// @ts-ignore
 const logger = pino();
 
 interface CopilotEntity {

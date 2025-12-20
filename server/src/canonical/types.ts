@@ -6,6 +6,8 @@
  * - Transaction time: when facts were recorded in system (observedAt/recordedAt)
  */
 
+import { PolicyLabels } from './policy';
+
 export interface BitemporalFields {
   /** When this version became valid in the real world */
   validFrom: Date;
@@ -18,58 +20,6 @@ export interface BitemporalFields {
 
   /** When this record was created in the database */
   recordedAt: Date;
-}
-
-/**
- * Policy & Governance Labels
- * Align with Council Wishbook
- */
-export enum SensitivityLevel {
-  PUBLIC = 'PUBLIC',
-  INTERNAL = 'INTERNAL',
-  CONFIDENTIAL = 'CONFIDENTIAL',
-  RESTRICTED = 'RESTRICTED',
-  TOP_SECRET = 'TOP_SECRET'
-}
-
-export enum ClearanceLevel {
-  PUBLIC = 'PUBLIC',
-  AUTHORIZED = 'AUTHORIZED',
-  CONFIDENTIAL = 'CONFIDENTIAL',
-  SECRET = 'SECRET',
-  TOP_SECRET = 'TOP_SECRET'
-}
-
-export enum RetentionClass {
-  TRANSIENT = 'TRANSIENT',
-  SHORT_TERM = 'SHORT_TERM',
-  MEDIUM_TERM = 'MEDIUM_TERM',
-  LONG_TERM = 'LONG_TERM',
-  PERMANENT = 'PERMANENT',
-  LEGAL_HOLD = 'LEGAL_HOLD'
-}
-
-export interface PolicyLabels {
-  /** Origin of the data */
-  origin: string;
-
-  /** Sensitivity level */
-  sensitivity: SensitivityLevel;
-
-  /** Required clearance to view */
-  clearance: ClearanceLevel;
-
-  /** Legal basis for processing */
-  legalBasis: string;
-
-  /** Need-to-know categories (OR logic) */
-  needToKnow: string[];
-
-  /** Purpose limitations (what this can be used for) */
-  purposeLimitation: string[];
-
-  /** Data retention classification */
-  retentionClass: RetentionClass;
 }
 
 export interface BaseCanonicalEntity extends BitemporalFields {
@@ -91,8 +41,8 @@ export interface BaseCanonicalEntity extends BitemporalFields {
   /** Provenance tracking */
   provenanceId: string;
 
-  /** Policy labels for governance */
-  policyLabels: PolicyLabels;
+  /** Policy and Governance labels */
+  policy?: PolicyLabels;
 }
 
 export interface EntityVersion<T> {

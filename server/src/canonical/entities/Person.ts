@@ -125,7 +125,7 @@ export interface CanonicalPerson extends BaseCanonicalEntity, CanonicalEntityMet
  */
 export function createPerson(
   data: Omit<CanonicalPerson, keyof BaseCanonicalEntity | 'entityType' | 'schemaVersion'>,
-  baseFields: Omit<BaseCanonicalEntity, 'provenanceId' | 'entityType' | 'schemaVersion'>,
+  baseFields: Omit<BaseCanonicalEntity, 'provenanceId'>,
   provenanceId: string,
 ): CanonicalPerson {
   return {

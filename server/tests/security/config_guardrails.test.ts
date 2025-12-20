@@ -9,7 +9,7 @@ const mockExit = jest.spyOn(process, 'exit').mockImplementation((code) => {
 const mockConsoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 
 describe('Production Security Guardrails', () => {
-  const originalEnv = process.env;
+  const originalEnv = { ...process.env };
 
   beforeEach(() => {
     jest.resetModules();
@@ -19,14 +19,21 @@ describe('Production Security Guardrails', () => {
   });
 
   afterAll(() => {
-    process.env = originalEnv;
+    process.env = { ...originalEnv };
     mockExit.mockRestore();
     mockConsoleError.mockRestore();
   });
 
   const loadConfig = async () => {
-    // We use dynamic import to re-evaluate the IIFE in config.ts
-    await import('../../src/config.ts');
+    if (jest.isolateModulesAsync) {
+      await jest.isolateModulesAsync(async () => {
+        await import('../../src/config.ts');
+      });
+    } else {
+      jest.isolateModules(() => {
+        return import('../../src/config.ts');
+      });
+    }
   };
 
   it('should pass in development mode with weak secrets', async () => {

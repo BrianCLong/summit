@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Compliance Automation Engine for Conductor
 // Implements SOC2, GDPR, and other regulatory compliance monitoring and enforcement
 

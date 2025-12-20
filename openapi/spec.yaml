@@ -69,6 +69,12 @@ tags:
     description: Administrative operations (users, tenants, audit)
   - name: Health
     description: Health check and monitoring endpoints
+  - name: Versioning
+    description: API versioning, compatibility, and migration information
+  - name: Policy
+    description: Policy bundle lifecycle, simulations, and drift reporting
+  - name: Signing
+    description: Signing and attestation services for policy and provenance
 
 security:
   - BearerAuth: []
@@ -379,6 +385,177 @@ components:
           items:
             type: string
           description: List of problematic fields (for validation errors)
+
+    PolicyBundle:
+      type: object
+      required:
+        - id
+        - version
+        - digest
+        - signerKeyId
+        - status
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the bundle
+          example: bundle-prod-authz
+        version:
+          type: string
+          description: SemVer identifier for the bundle
+          example: 2025.12.03
+        digest:
+          type: string
+          description: SHA256 digest of the bundle tarball
+          example: sha256:012345abcdef
+        signerKeyId:
+          type: string
+          description: Signing key identifier used to attest the bundle
+          example: opa-signer-dev
+        status:
+          type: string
+          enum: [staging, active, deprecated]
+          description: Promotion status of the bundle
+        activatedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the bundle was activated
+        rules:
+          type: array
+          items:
+            type: object
+            properties:
+              package:
+                type: string
+              decision:
+                type: string
+              coverage:
+                type: number
+                format: float
+            required: [package, decision]
+          description: Summary of rules contained in the bundle
+        targetEnvironments:
+          type: array
+          items:
+            type: string
+          description: Environments where the bundle should be distributed
+
+    PolicySimulationRequest:
+      type: object
+      required:
+        - input
+      properties:
+        input:
+          type: object
+          description: Structured input passed to the policy decision point
+        bundleVersion:
+          type: string
+          description: Override bundle version used for simulation
+          example: 2025.12.03
+        trace:
+          type: boolean
+          description: Enable decision tracing
+          default: false
+        strictValidation:
+          type: boolean
+          description: Enforce schema validation during simulation
+          default: true
+
+    DecisionTrace:
+      type: object
+      properties:
+        package:
+          type: string
+        rule:
+          type: string
+        outcome:
+          type: string
+        metrics:
+          type: object
+          additionalProperties: true
+
+    PolicySimulationResult:
+      type: object
+      required:
+        - decision
+      properties:
+        decision:
+          type: string
+          enum: [allow, deny, dry-run]
+          description: Final decision from the simulated bundle
+        bundle:
+          $ref: '#/components/schemas/PolicyBundle'
+        trace:
+          type: array
+          items:
+            $ref: '#/components/schemas/DecisionTrace'
+        warnings:
+          type: array
+          items:
+            type: string
+        validation:
+          type: object
+          properties:
+            passed:
+              type: boolean
+            errors:
+              type: array
+              items:
+                type: string
+
+    SignerAttestationRequest:
+      type: object
+      required:
+        - artifactId
+        - artifactDigest
+        - policyVersion
+      properties:
+        artifactId:
+          type: string
+          description: Stable identifier for the artifact being attested
+          example: policy-bundle-prod
+        artifactDigest:
+          type: string
+          description: Content digest for integrity verification
+          example: sha256:abcdef012345
+        policyVersion:
+          type: string
+          description: Policy bundle version associated with the attestation
+        tenant:
+          type: string
+          description: Tenant or workspace identifier
+          example: acme-co
+        ttlSeconds:
+          type: integer
+          description: Optional TTL for the attestation token
+          example: 3600
+
+    SignerAttestationResponse:
+      type: object
+      required:
+        - attestationId
+        - status
+        - signature
+        - signerKeyId
+      properties:
+        attestationId:
+          type: string
+          description: Identifier for the issued attestation
+          example: attest-123
+        status:
+          type: string
+          enum: [issued, pending, rejected]
+        signature:
+          type: string
+          description: Detached signature over the artifact digest
+        signerKeyId:
+          type: string
+          description: Signing key identifier
+        issuedAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
 
 paths:
   # Health & Monitoring
@@ -1632,3 +1809,528 @@ paths:
           description: Forbidden - requires user:read permission
         '500':
           description: Internal server error
+
+  # Versioning API
+  /api/versioning/versions:
+    get:
+      summary: List all API versions
+      description: Returns all available API versions (current, latest, active, deprecated)
+      operationId: listApiVersions
+      tags:
+        - Versioning
+      security: []
+      responses:
+        '200':
+          description: List of API versions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  current:
+                    type: string
+                    description: Current default version
+                    example: "1.0.0"
+                  latest:
+                    type: string
+                    description: Latest available version
+                    example: "2.0.0"
+                  active:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        version:
+                          type: string
+                        status:
+                          type: string
+                          enum: [active, stable, deprecated, sunset]
+                        releaseDate:
+                          type: string
+                          format: date
+                        description:
+                          type: string
+                        breaking:
+                          type: boolean
+                  deprecated:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        version:
+                          type: string
+                        deprecationDate:
+                          type: string
+                          format: date
+                        sunsetDate:
+                          type: string
+                          format: date
+                        description:
+                          type: string
+
+  /api/versioning/versions/{version}:
+    get:
+      summary: Get version details
+      description: Returns detailed information about a specific API version
+      operationId: getVersionDetails
+      tags:
+        - Versioning
+      security: []
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Version identifier (e.g., "1.0.0" or "2.0.0")
+          example: "1.0.0"
+      responses:
+        '200':
+          description: Version details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version:
+                    type: string
+                  status:
+                    type: string
+                  releaseDate:
+                    type: string
+                    format: date
+                  deprecationDate:
+                    type: string
+                    format: date
+                  sunsetDate:
+                    type: string
+                    format: date
+                  description:
+                    type: string
+                  breaking:
+                    type: boolean
+                  changelog:
+                    type: array
+                    items:
+                      type: object
+        '404':
+          description: Version not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/versioning/compatibility:
+    get:
+      summary: Get compatibility matrix
+      description: Returns version compatibility matrix across all API versions
+      operationId: getCompatibilityMatrix
+      tags:
+        - Versioning
+      security: []
+      responses:
+        '200':
+          description: Compatibility matrix
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: object
+                  additionalProperties:
+                    type: object
+                    properties:
+                      compatible:
+                        type: boolean
+                      autoMigrate:
+                        type: boolean
+                      warnings:
+                        type: array
+                        items:
+                          type: string
+
+  /api/versioning/compatibility/{from}/{to}:
+    get:
+      summary: Get compatibility between versions
+      description: Returns compatibility information between two specific versions
+      operationId: getVersionCompatibility
+      tags:
+        - Versioning
+      security: []
+      parameters:
+        - name: from
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Source version
+          example: "1.0.0"
+        - name: to
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Target version
+          example: "2.0.0"
+      responses:
+        '200':
+          description: Compatibility information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  from:
+                    type: string
+                  to:
+                    type: string
+                  compatible:
+                    type: boolean
+                  autoMigrate:
+                    type: boolean
+                  warnings:
+                    type: array
+                    items:
+                      type: string
+        '404':
+          description: One or both versions not found
+
+  /api/versioning/changelog:
+    get:
+      summary: Get full changelog
+      description: Returns complete changelog across all API versions
+      operationId: getFullChangelog
+      tags:
+        - Versioning
+      security: []
+      parameters:
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [markdown, json]
+            default: markdown
+          description: Response format
+      responses:
+        '200':
+          description: Full changelog
+          content:
+            text/markdown:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    version:
+                      type: string
+                    changelog:
+                      type: array
+                      items:
+                        type: object
+
+  /api/versioning/changelog/{version}:
+    get:
+      summary: Get version changelog
+      description: Returns changelog for a specific version
+      operationId: getVersionChangelog
+      tags:
+        - Versioning
+      security: []
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Version identifier
+          example: "2.0.0"
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [json, markdown, html]
+            default: json
+          description: Response format
+      responses:
+        '200':
+          description: Version changelog
+          content:
+            application/json:
+              schema:
+                type: object
+            text/markdown:
+              schema:
+                type: string
+            text/html:
+              schema:
+                type: string
+        '404':
+          description: Version not found
+
+  /api/versioning/docs/{version}:
+    get:
+      summary: Get version documentation
+      description: Returns API documentation for a specific version
+      operationId: getVersionDocumentation
+      tags:
+        - Versioning
+      security: []
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Version identifier
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [json, markdown]
+            default: json
+          description: Response format
+      responses:
+        '200':
+          description: Version documentation
+          content:
+            application/json:
+              schema:
+                type: object
+            text/markdown:
+              schema:
+                type: string
+        '404':
+          description: Documentation not found
+
+  /api/versioning/openapi/{version}:
+    get:
+      summary: Get version OpenAPI spec
+      description: Returns OpenAPI specification for a specific API version
+      operationId: getVersionOpenAPI
+      tags:
+        - Versioning
+      security: []
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Version identifier
+          example: "1.0.0"
+      responses:
+        '200':
+          description: OpenAPI specification
+          content:
+            application/json:
+              schema:
+                type: object
+                description: OpenAPI 3.0 specification object
+        '404':
+          description: Version not found
+
+  /api/versioning/migration/{from}/{to}:
+    get:
+      summary: Get migration guide
+      description: Returns migration guide between two API versions
+      operationId: getMigrationGuide
+      tags:
+        - Versioning
+      security: []
+      parameters:
+        - name: from
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Source version
+        - name: to
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Target version
+      responses:
+        '200':
+          description: Migration guide
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  fromVersion:
+                    type: string
+                  toVersion:
+                    type: string
+                  steps:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        title:
+                          type: string
+                        description:
+                          type: string
+                        breaking:
+                          type: boolean
+                  examples:
+                    type: array
+                    items:
+                      type: object
+        '404':
+          description: Migration guide not found
+
+  /api/versioning/breaking-changes/{version}:
+    get:
+      summary: Get breaking changes
+      description: Returns list of breaking changes for a specific version
+      operationId: getBreakingChanges
+      tags:
+        - Versioning
+      security: []
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Version identifier
+      responses:
+        '200':
+          description: Breaking changes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version:
+                    type: string
+                  breakingChanges:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        description:
+                          type: string
+                        impact:
+                          type: string
+                        migration:
+                          type: string
+        '404':
+          description: Version not found
+
+  /api/versioning/status:
+    get:
+      summary: Get versioning status
+      description: Returns overall API versioning status and statistics
+      operationId: getVersioningStatus
+      tags:
+        - Versioning
+      security: []
+      responses:
+        '200':
+          description: Versioning status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalVersions:
+                    type: integer
+                  activeVersions:
+                    type: integer
+                  deprecatedVersions:
+                    type: integer
+                  currentDefault:
+                    type: string
+                  latestVersion:
+                    type: string
+                  supportedVersions:
+                    type: array
+                    items:
+                      type: string
+
+  # Policy bundles
+  /api/policy/bundles:
+    get:
+      summary: List policy bundles
+      description: Returns the latest policy bundles and their signing metadata
+      operationId: listPolicyBundles
+      tags:
+        - Policy
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Bundles retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PolicyBundle'
+
+  /api/policy/simulations:
+    post:
+      summary: Simulate a policy decision
+      description: Evaluate a policy bundle using supplied input and optionally record a trace
+      operationId: simulatePolicy
+      tags:
+        - Policy
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolicySimulationRequest'
+      responses:
+        '200':
+          description: Simulation completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicySimulationResult'
+        '400':
+          description: Invalid simulation input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # Signing service
+  /api/signing/attestations:
+    post:
+      summary: Issue an attestation for a signed artifact
+      description: Generates a detached signature and metadata for a policy bundle or artifact
+      operationId: createAttestation
+      tags:
+        - Signing
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignerAttestationRequest'
+      responses:
+        '201':
+          description: Attestation issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignerAttestationResponse'
+        '400':
+          description: Invalid attestation request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'

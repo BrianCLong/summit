@@ -9,15 +9,38 @@ import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types';
 export interface CanonicalAuthority extends BaseCanonicalEntity, CanonicalEntityMetadata {
   entityType: 'Authority';
 
-  /** Name */
+  /** Name of the authority */
   name: string;
 
-  /** Jurisdiction */
+  /** Jurisdiction (country, state, international) */
   jurisdiction: string;
 
-  /** Authority Type */
-  authorityType: string;
+  /** Type of authority (court, law_enforcement, regulator, tribunal) */
+  type: string;
 
-  /** Additional properties */
+  /** Website or reference URL */
+  url?: string;
+
+  /** Contact information */
+  contact?: {
+    address?: string;
+    email?: string;
+    phone?: string;
+  };
+
   properties: Record<string, any>;
+}
+
+export function createAuthority(
+  data: Omit<CanonicalAuthority, keyof BaseCanonicalEntity | 'entityType' | 'schemaVersion'>,
+  baseFields: Omit<BaseCanonicalEntity, 'provenanceId'>,
+  provenanceId: string,
+): CanonicalAuthority {
+  return {
+    ...baseFields,
+    ...data,
+    entityType: 'Authority',
+    schemaVersion: '1.0.0',
+    provenanceId,
+  };
 }

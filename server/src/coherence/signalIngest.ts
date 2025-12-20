@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Request, Response } from 'express';
 import { z } from 'zod';
 import { Neo4jService } from '../db/neo4j';

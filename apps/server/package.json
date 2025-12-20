@@ -1,7 +1,7 @@
 {
   "name": "apps-server",
   "private": true,
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "IntelGraph GraphQL Server",
   "main": "src/index.ts",
   "scripts": {
@@ -10,17 +10,32 @@
     "dev": "ts-node src/index.ts"
   },
   "dependencies": {
-    "apollo-server": "^3.13.0",
-    "graphql": "^16.12.0",
-    "express": "^5.2.0",
-    "body-parser": "^2.2.0",
+    "@apollo/server": "^4.11.1",
     "axios": "^1.7.2",
-    "uuid": "^13.0.0"
+    "body-parser": "^2.2.0",
+    "connect-redis": "^8.0.1",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "express-session": "^1.18.1",
+    "graphql": "^16.12.0",
+    "helmet": "^7.2.0",
+    "ioredis": "^5.4.2",
+    "node-vault": "^0.10.9",
+    "rate-limit-redis": "^4.0.0",
+    "uuid": "^13.0.0",
+    "validator": "^13.12.0"
   },
   "devDependencies": {
-    "@types/express": "^5.0.3",
+    "@types/connect-redis": "^0.0.22",
+    "@types/cookie-parser": "^1.4.8",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/express-session": "^1.17.12",
+    "@types/helmet": "^4.0.0",
     "@types/node": "^24.10.1",
     "@types/uuid": "^11.0.0",
+    "@types/validator": "^13.11.10",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },

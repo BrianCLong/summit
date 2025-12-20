@@ -1,5 +1,22 @@
 import React, { useRef, useEffect, useState } from 'react'
 import * as d3 from 'd3'
+// Tree-shaken D3 imports for better bundle size
+import { select } from 'd3-selection'
+import {
+  forceSimulation,
+  forceLink,
+  forceManyBody,
+  forceCenter,
+  forceCollide,
+  forceRadial,
+  forceY,
+  forceX,
+  type Simulation,
+  type SimulationNodeDatum,
+  type SimulationLinkDatum,
+} from 'd3-force'
+import { zoom } from 'd3-zoom'
+import { drag } from 'd3-drag'
 import { cn } from '@/lib/utils'
 import type { Entity, Relationship, GraphLayout } from '@/types'
 
@@ -14,7 +31,7 @@ interface GraphCanvasProps {
   className?: string
 }
 
-interface GraphNode extends d3.SimulationNodeDatum {
+interface GraphNode extends SimulationNodeDatum {
   id: string
   entity: Entity
   x?: number
@@ -23,7 +40,7 @@ interface GraphNode extends d3.SimulationNodeDatum {
   fy?: number | null
 }
 
-interface GraphLink extends d3.SimulationLinkDatum<GraphNode> {
+interface GraphLink extends SimulationLinkDatum<GraphNode> {
   id: string
   relationship: Relationship
   source: GraphNode
@@ -82,9 +99,9 @@ export function GraphCanvas({
   }, [])
 
   useEffect(() => {
-    if (!svgRef.current || entities.length === 0) return
+    if (!svgRef.current || entities.length === 0) {return}
 
-    const svg = d3.select(svgRef.current)
+    const svg = select(svgRef.current)
     svg.selectAll('*').remove()
 
     const { width, height } = dimensions
@@ -115,10 +132,14 @@ export function GraphCanvas({
       case 'force':
         simulation = d3
           .forceSimulation(nodes)
+    let simulation: Simulation<GraphNode, GraphLink>
+
+    switch (layout.type) {
+      case 'force':
+        simulation = forceSimulation(nodes)
           .force(
             'link',
-            d3
-              .forceLink<GraphNode, GraphLink>(links)
+            forceLink<GraphNode, GraphLink>(links)
               .id(d => d.id)
               .distance(100)
           )
@@ -130,45 +151,82 @@ export function GraphCanvas({
       case 'radial':
         simulation = d3
           .forceSimulation(nodes)
+          .force('charge', forceManyBody().strength(-300))
+          .force('center', forceCenter(width / 2, height / 2))
+          .force('collision', forceCollide().radius(30))
+        break
+
+      case 'radial':
+        simulation = forceSimulation(nodes)
           .force(
             'link',
-            d3
-              .forceLink<GraphNode, GraphLink>(links)
+            forceLink<GraphNode, GraphLink>(links)
               .id(d => d.id)
               .distance(80)
           )
           .force('charge', d3.forceManyBody().strength(-200))
           .force('radial', d3.forceRadial(150, width / 2, height / 2))
+          .force('charge', d3.forceManyBody().strength(-200))
+          .force('radial', d3.forceRadial(150, width / 2, height / 2))
+          .force('charge', d3.forceManyBody().strength(-200))
+          .force('radial', d3.forceRadial(150, width / 2, height / 2))
+          .force('charge', d3.forceManyBody().strength(-200))
+          .force('radial', d3.forceRadial(150, width / 2, height / 2))
+          .force('charge', d3.forceManyBody().strength(-200))
+          .force('radial', d3.forceRadial(150, width / 2, height / 2))
+          .force('charge', d3.forceManyBody().strength(-200))
+          .force('radial', d3.forceRadial(150, width / 2, height / 2))
+          .force('charge', d3.forceManyBody().strength(-200))
+          .force('radial', d3.forceRadial(150, width / 2, height / 2))
+          .force('charge', d3.forceManyBody().strength(-200))
+          .force('radial', d3.forceRadial(150, width / 2, height / 2))
+          .force('charge', forceManyBody().strength(-200))
+          .force('radial', forceRadial(150, width / 2, height / 2))
         break
 
       case 'hierarchic':
         // Simple hierarchical layout - in a real app you'd use dagre or similar
         simulation = d3
           .forceSimulation(nodes)
+        simulation = d3
+          .forceSimulation(nodes)
+        simulation = d3
+          .forceSimulation(nodes)
+        simulation = d3
+          .forceSimulation(nodes)
+        simulation = d3
+          .forceSimulation(nodes)
+        simulation = d3
+          .forceSimulation(nodes)
+        simulation = d3
+          .forceSimulation(nodes)
+        simulation = d3
+          .forceSimulation(nodes)
+        simulation = forceSimulation(nodes)
           .force(
             'link',
-            d3
-              .forceLink<GraphNode, GraphLink>(links)
+            forceLink<GraphNode, GraphLink>(links)
               .id(d => d.id)
               .distance(60)
           )
-          .force('charge', d3.forceManyBody().strength(-100))
+          .force('charge', forceManyBody().strength(-100))
           .force(
             'y',
-            d3.forceY().y(d => (d.index || 0) * 80 + 100)
+            forceY<GraphNode>().y(d => (d.index || 0) * 80 + 100)
           )
-          .force('x', d3.forceX(width / 2))
+          .force('x', forceX(width / 2))
         break
 
       default:
         simulation = d3
           .forceSimulation(nodes)
+        simulation = forceSimulation(nodes)
           .force(
             'link',
-            d3.forceLink<GraphNode, GraphLink>(links).id(d => d.id)
+            forceLink<GraphNode, GraphLink>(links).id(d => d.id)
           )
-          .force('charge', d3.forceManyBody())
-          .force('center', d3.forceCenter(width / 2, height / 2))
+          .force('charge', forceManyBody())
+          .force('center', forceCenter(width / 2, height / 2))
     }
 
     // Create container groups
@@ -177,14 +235,13 @@ export function GraphCanvas({
     const nodesGroup = container.append('g').attr('class', 'nodes')
 
     // Add zoom behavior
-    const zoom = d3
-      .zoom<SVGSVGElement, unknown>()
+    const zoomBehavior = zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.1, 4])
       .on('zoom', event => {
         container.attr('transform', event.transform)
       })
 
-    svg.call(zoom)
+    svg.call(zoomBehavior)
 
     // Draw links
     const link = linksGroup
@@ -250,10 +307,9 @@ export function GraphCanvas({
       .attr('class', 'node')
       .style('cursor', 'pointer')
       .call(
-        d3
-          .drag<SVGGElement, GraphNode>()
+        drag<SVGGElement, GraphNode>()
           .on('start', (event, d) => {
-            if (!event.active) simulation.alphaTarget(0.3).restart()
+            if (!event.active) {simulation.alphaTarget(0.3).restart()}
             d.fx = d.x
             d.fy = d.y
           })
@@ -262,7 +318,7 @@ export function GraphCanvas({
             d.fy = event.y
           })
           .on('end', (event, d) => {
-            if (!event.active) simulation.alphaTarget(0)
+            if (!event.active) {simulation.alphaTarget(0)}
             d.fx = null
             d.fy = null
           })
@@ -302,7 +358,7 @@ export function GraphCanvas({
       .style('pointer-events', 'none')
       .text(d =>
         d.entity.name.length > 15
-          ? d.entity.name.slice(0, 15) + '...'
+          ? `${d.entity.name.slice(0, 15)  }...`
           : d.entity.name
       )
 
@@ -324,7 +380,7 @@ export function GraphCanvas({
 
     // Hover effects
     node.on('mouseenter', function (event, d) {
-      d3.select(this)
+      select(this)
         .select('circle')
         .transition()
         .duration(200)
@@ -337,7 +393,7 @@ export function GraphCanvas({
     })
 
     node.on('mouseleave', function (event, d) {
-      d3.select(this)
+      select(this)
         .select('circle')
         .transition()
         .duration(200)
@@ -395,6 +451,22 @@ export function GraphCanvas({
       {/* Graph controls overlay */}
       <div className="absolute top-4 right-4 flex flex-col gap-2">
         <div className="bg-background/90 backdrop-blur-sm border rounded-lg p-2 shadow-sm">
+          <div className="text-xs font-medium text-muted-foreground mb-1">
+            Graph Info
+          <div className="text-xs font-medium text-muted-foreground mb-1">
+            Graph Info
+          <div className="text-xs font-medium text-muted-foreground mb-1">
+            Graph Info
+          <div className="text-xs font-medium text-muted-foreground mb-1">
+            Graph Info
+          <div className="text-xs font-medium text-muted-foreground mb-1">
+            Graph Info
+          <div className="text-xs font-medium text-muted-foreground mb-1">
+            Graph Info
+          <div className="text-xs font-medium text-muted-foreground mb-1">
+            Graph Info
+          <div className="text-xs font-medium text-muted-foreground mb-1">
+            Graph Info
           <div className="flex justify-between items-center mb-1 gap-2">
             <div className="text-xs font-medium text-muted-foreground">
               Graph Info

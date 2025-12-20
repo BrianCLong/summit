@@ -1,35 +1,75 @@
 /**
  * Canonical Entity: License
  *
- * Represents a license or permit
+ * Represents a license or permit with bitemporal tracking
  */
 
-import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types';
+import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.js';
+
+export interface LicenseIssuer {
+  /** Issuing authority name */
+  name: string;
+
+  /** Issuing authority ID */
+  authorityId?: string;
+
+  /** Jurisdiction */
+  jurisdiction?: string;
+
+  /** Country */
+  country?: string;
+}
 
 export interface CanonicalLicense extends BaseCanonicalEntity, CanonicalEntityMetadata {
   entityType: 'License';
 
   /** License number */
-  number: string;
+  licenseNumber: string;
 
-  /** Type */
+  /** License type */
   licenseType: string;
 
-  /** Issued by (Authority ID) */
-  issuerId?: string;
+  /** License category */
+  category?: string;
 
-  /** Issued to (Entity ID) */
+  /** Holder entity ID */
   holderId?: string;
 
+  /** Holder name */
+  holderName?: string;
+
+  /** Issuer information */
+  issuer: LicenseIssuer;
+
   /** Issue date */
-  issuedAt?: Date;
+  issuedDate?: Date;
 
   /** Expiry date */
-  expiresAt?: Date;
+  expiryDate?: Date;
 
-  /** Status */
-  status?: string;
+  /** Current status */
+  status: 'active' | 'expired' | 'suspended' | 'revoked' | 'pending';
+
+  /** Restrictions or conditions */
+  restrictions?: string[];
 
   /** Additional properties */
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
+}
+
+/**
+ * Create a new License entity
+ */
+export function createLicense(
+  data: Omit<CanonicalLicense, keyof BaseCanonicalEntity | 'entityType' | 'schemaVersion'>,
+  baseFields: Omit<BaseCanonicalEntity, 'provenanceId'>,
+  provenanceId: string,
+): CanonicalLicense {
+  return {
+    ...baseFields,
+    ...data,
+    entityType: 'License',
+    schemaVersion: '1.0.0',
+    provenanceId,
+  };
 }

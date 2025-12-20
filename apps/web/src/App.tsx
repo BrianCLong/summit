@@ -5,7 +5,7 @@ import {
   Route,
   Navigate,
 } from 'react-router-dom'
-import { ApolloProvider } from '@apollo/client'
+import { ApolloProvider } from '@apollo/client/react'
 import { TooltipProvider } from '@/components/ui/Tooltip'
 import { Layout } from '@/components/Layout'
 
@@ -30,26 +30,49 @@ const DataSourcesPage = React.lazy(() => import('@/pages/DataSourcesPage'))
 const ModelsPage = React.lazy(() => import('@/pages/ModelsPage'))
 const ReportsPage = React.lazy(() => import('@/pages/ReportsPage'))
 const AdminPage = React.lazy(() => import('@/pages/AdminPage'))
+const ConsistencyDashboard = React.lazy(() => import('@/pages/admin/ConsistencyDashboard').then(m => ({ default: m.ConsistencyDashboard })))
 const HelpPage = React.lazy(() => import('@/pages/HelpPage'))
 const ChangelogPage = React.lazy(() => import('@/pages/ChangelogPage'))
+const InternalCommandDashboard = React.lazy(() => import('@/pages/internal/InternalCommandDashboard'))
 const SignInPage = React.lazy(() => import('@/pages/SignInPage'))
+const SignupPage = React.lazy(() => import('@/pages/SignupPage'))
+const VerifyEmailPage = React.lazy(() => import('@/pages/VerifyEmailPage'))
 const AccessDeniedPage = React.lazy(() => import('@/pages/AccessDeniedPage'))
 const TriPanePage = React.lazy(() => import('@/pages/TriPanePage'))
+const GeoIntPane = React.lazy(() => import('@/panes/GeoIntPane').then(module => ({ default: module.GeoIntPane })))
+const NarrativeIntelligencePage = React.lazy(() => import('@/pages/NarrativeIntelligencePage'))
 
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ErrorBoundary, NotFound } from '@/components/error'
+import Explain from '@/components/Explain'
+import { CommandStatusProvider } from '@/features/internal-command/CommandStatusProvider'
 
 function App() {
+  const [showPalette, setShowPalette] = React.useState(false);
+  const [showExplain, setShowExplain] = React.useState(false);
+
+  React.useEffect(()=>{
+    const onKey=(e:KeyboardEvent)=>{
+      if((e.key==='k' || e.key==='K') && (e.ctrlKey||e.metaKey)){
+        e.preventDefault();
+        setShowPalette(true);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return ()=>window.removeEventListener('keydown', onKey);
+  },[]);
+
   return (
     <ApolloProvider client={apolloClient}>
       <SocketProvider>
         <TooltipProvider>
           <AuthProvider>
             <SearchProvider>
-              <Router>
-                <ErrorBoundary>
+              <CommandStatusProvider>
+                <Router>
+                  <ErrorBoundary>
                   <React.Suspense
                     fallback={
                       <div className="flex h-screen items-center justify-center">
@@ -62,9 +85,24 @@ function App() {
                       </div>
                     }
                   >
+                    {/* Explain overlay stub */}
+                    {showPalette && (
+                       <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" onClick={()=>setShowPalette(false)}>
+                         <div className="bg-white p-4 rounded shadow-lg w-96" onClick={e=>e.stopPropagation()}>
+                           <input type="text" placeholder="Command..." className="w-full border p-2 mb-2" autoFocus />
+                           <button onClick={()=>{ setShowPalette(false); setShowExplain(true); }} className="block w-full text-left p-2 hover:bg-gray-100">
+                             Explain this view
+                           </button>
+                         </div>
+                       </div>
+                    )}
+                    {showExplain && <Explain facts={["Linked via shared IP (1.2.3.4)", "Match score: 0.98"]} />}
+
                     <Routes>
                       {/* Auth routes */}
                     <Route path="/signin" element={<SignInPage />} />
+                    <Route path="/signup" element={<SignupPage />} />
+                    <Route path="/verify-email" element={<VerifyEmailPage />} />
                     <Route
                       path="/access-denied"
                       element={<AccessDeniedPage />}
@@ -79,6 +117,16 @@ function App() {
                       <Route
                         path="analysis/tri-pane"
                         element={<TriPanePage />}
+                      />
+                      <Route
+                        path="geoint"
+                        element={<GeoIntPane />}
+                      />
+
+                      {/* Narrative Intelligence */}
+                      <Route
+                        path="analysis/narrative"
+                        element={<NarrativeIntelligencePage />}
                       />
 
                       {/* Alerts */}
@@ -98,6 +146,10 @@ function App() {
                         path="dashboards/supply-chain"
                         element={<SupplyChainDashboard />}
                       />
+                      <Route
+                        path="internal/command"
+                        element={<InternalCommandDashboard />}
+                      />
 
                       {/* Data & Models */}
                       <Route
@@ -109,6 +161,7 @@ function App() {
 
                       {/* Admin */}
                       <Route path="admin/*" element={<AdminPage />} />
+                      <Route path="admin/consistency" element={<ConsistencyDashboard />} />
 
                       {/* Support */}
                       <Route path="help" element={<HelpPage />} />
@@ -121,6 +174,7 @@ function App() {
                   </React.Suspense>
                 </ErrorBoundary>
               </Router>
+              </CommandStatusProvider>
             </SearchProvider>
           </AuthProvider>
         </TooltipProvider>

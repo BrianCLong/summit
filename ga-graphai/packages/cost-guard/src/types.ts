@@ -5,7 +5,23 @@ export interface TenantBudgetProfile {
   concurrencyLimit: number;
 }
 
-export type CostCategory = 'infrastructure' | 'inference' | 'storage';
+export interface WorkloadQueueSignal {
+  queueDepth: number;
+  p95LatencyMs: number;
+  costPerJobUsd: number;
+  budgetConsumptionRatio?: number;
+  saturationRatio?: number;
+}
+
+export type QueueScalingAction = 'scale_up' | 'scale_down' | 'hold';
+
+export interface QueueScalingDecision {
+  action: QueueScalingAction;
+  score: number;
+  recommendedReplicas: number;
+  reason: string;
+  inputs: WorkloadQueueSignal;
+}
 
 export interface QueryPlanSummary {
   estimatedRru: number;
@@ -21,41 +37,6 @@ export interface PlanBudgetInput {
   profile?: TenantBudgetProfile;
   activeQueries: number;
   recentLatencyP95: number;
-}
-
-export interface BudgetThreshold {
-  limit: number;
-  alertThreshold: number;
-}
-
-export interface BudgetPolicy {
-  categories: Record<CostCategory, BudgetThreshold>;
-  anomalyStdDevTolerance: number;
-  historyWindow: number;
-  throttleOnBreach: boolean;
-}
-
-export interface SpendObservation {
-  category: CostCategory;
-  serviceId: string;
-  feature: string;
-  cost: number;
-  timestamp: number;
-}
-
-export interface BudgetAlert {
-  category: CostCategory;
-  serviceId: string;
-  feature: string;
-  utilization: number;
-  status: 'ok' | 'alert' | 'breach';
-  action: CostGuardAction;
-  reason: string;
-  anomalies: string[];
-  totals: {
-    categorySpend: number;
-    featureSpend: number;
-  };
 }
 
 export type CostGuardAction = 'allow' | 'throttle' | 'kill';
@@ -86,6 +67,31 @@ export interface WorkloadSample {
   throughputPerNode: number;
 }
 
+export interface QueueRuntimeSignals {
+  queueName: string;
+  backlog: number;
+  inflight: number;
+  arrivalRatePerSecond: number;
+  serviceRatePerSecondPerWorker: number;
+  observedP95LatencyMs: number;
+  costPerJobUsd: number;
+  spendRatePerMinuteUsd: number;
+}
+
+export interface QueueSloConfig {
+  targetP95Ms: number;
+  maxCostPerMinuteUsd: number;
+  backlogTargetSeconds: number;
+  minReplicas: number;
+  maxReplicas: number;
+  scaleStep: number;
+  stabilizationSeconds: number;
+  maxScaleStep?: number;
+  errorBudgetMinutes?: number;
+  latencyBurnThreshold?: number;
+  costBurnThreshold?: number;
+}
+
 export interface ClusterNodeState {
   nodeId: string;
   cpuUtilization: number;
@@ -109,6 +115,60 @@ export interface ScalingDecision {
   confidence: number;
   loadIndex: number;
   forecast: ScalingForecast;
+}
+
+export interface QueueScalingTelemetry {
+  latencyPressure: number;
+  backlogPressure: number;
+  costPressure: number;
+  backlogSeconds: number;
+  sloTargetSeconds: number;
+  sloBurnRate: number;
+  costBurnRate: number;
+  adaptiveScaleStep: number;
+}
+
+export interface QueueScalingDecision {
+  action: ScalingAction;
+  recommendedReplicas: number;
+  reason: string;
+  telemetry: QueueScalingTelemetry;
+  kedaMetric: {
+    metricName: string;
+    labels: Record<string, string>;
+    value: number;
+    query: string;
+  };
+  alerts: QueueAlertConfig;
+}
+
+export interface KedaTrigger {
+  type: string;
+  metadata: Record<string, string>;
+  authenticationRef?: { name: string };
+}
+
+export interface KedaScaledObjectSpec {
+  apiVersion: string;
+  kind: 'ScaledObject';
+  metadata: { name: string; namespace: string; labels?: Record<string, string> };
+  spec: {
+    scaleTargetRef: { name: string };
+    pollingInterval?: number;
+    cooldownPeriod?: number;
+    minReplicaCount?: number;
+    maxReplicaCount?: number;
+    fallback?: { failureThreshold: number; replicas: number };
+    advanced?: { horizontalPodAutoscalerConfig?: Record<string, unknown> };
+    triggers: KedaTrigger[];
+  };
+}
+
+export interface QueueAlertConfig {
+  fastBurnRateQuery: string;
+  slowBurnRateQuery: string;
+  costAnomalyQuery: string;
+  labels: Record<string, string>;
 }
 
 export interface WorkloadAllocation {

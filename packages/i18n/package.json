@@ -1,5 +1,5 @@
 {
-  "name": "@intelgraph/i18n",
+  "name": "@summit/i18n",
   "version": "1.0.0",
   "description": "Comprehensive internationalization system for Summit/IntelGraph platform",
   "type": "module",

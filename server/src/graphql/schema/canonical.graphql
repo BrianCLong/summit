@@ -64,85 +64,6 @@ type PolicyLabels {
   retentionClass: RetentionClass!
 }
 
-input PolicyLabelsInput {
-  origin: String!
-  sensitivity: SensitivityLevel!
-  clearance: ClearanceLevel!
-  legalBasis: String!
-  needToKnow: [String!]!
-  purposeLimitation: [String!]!
-  retentionClass: RetentionClass!
-}
-
-# Bitemporal Fields
-type TemporalFields {
-  validFrom: DateTime!
-  validTo: DateTime
-  observedAt: DateTime!
-  recordedAt: DateTime!
-}
-
-# Base Entity Interface
-interface CanonicalEntity {
-  id: ID!
-  tenantId: String!
-  entityType: CanonicalEntityType!
-  policyLabels: PolicyLabels!
-  temporal: TemporalFields!
-  properties: JSON
-}
-
-# Concrete Entity Types (Simplified for schema brevity, mapped to JSON where complex)
-type Person implements CanonicalEntity {
-  id: ID!
-  tenantId: String!
-  entityType: CanonicalEntityType!
-  policyLabels: PolicyLabels!
-  temporal: TemporalFields!
-  name: JSON!
-  identifiers: JSON
-  demographics: JSON
-  status: String
-  properties: JSON
-}
-
-type Organization implements CanonicalEntity {
-  id: ID!
-  tenantId: String!
-  entityType: CanonicalEntityType!
-  policyLabels: PolicyLabels!
-  temporal: TemporalFields!
-  name: String!
-  registration: JSON
-  orgType: String
-  properties: JSON
-}
-
-type Claim implements CanonicalEntity {
-  id: ID!
-  tenantId: String!
-  entityType: CanonicalEntityType!
-  policyLabels: PolicyLabels!
-  temporal: TemporalFields!
-  statement: String!
-  claimType: String!
-  subjects: JSON!
-  sources: JSON!
-  verification: JSON
-  relatedClaims: JSON
-  properties: JSON
-}
-
-# Generic fallback for other types
-type GenericEntity implements CanonicalEntity {
-  id: ID!
-  tenantId: String!
-  entityType: CanonicalEntityType!
-  policyLabels: PolicyLabels!
-  temporal: TemporalFields!
-  properties: JSON
-}
-
 # Provenance
 enum VerificationStatus {
   UNVERIFIED
@@ -159,88 +80,258 @@ enum ProvenanceAction {
   MERGE
   SPLIT
   VALIDATE
-  REGISTER_CLAIM
-  CREATE_UPDATE_ENTITY
-  CREATE_RELATIONSHIP
 }
 
-type ProvenanceEntry {
+type ProvenanceAssertion {
+  id: ID!
+  timestamp: DateTime!
+  actor: String!
+  action: ProvenanceAction!
+  input: [String!]!
+  output: [String!]!
+  method: String!
+  parameters: JSON
+  modelVersion: String
+  confidence: Float!
+  evidence: [String!]
+}
+
+type ProvenanceChain {
+  sourceId: String!
+  assertions: [ProvenanceAssertion!]!
+  verificationStatus: VerificationStatus!
+  trustScore: Float!
+}
+
+# Extended relationship types
+enum ExtendedRelationshipType {
+  # Evidence & provenance
+  SUPPORTS
+  CONTRADICTS
+  DERIVED_FROM
+  CITES
+
+  # Authority & governance
+  AUTHORIZED_BY
+  GOVERNED_BY
+  REQUIRES
+
+  # Temporal sequences
+  PRECEDES
+  FOLLOWS
+  CONCURRENT_WITH
+
+  # Hypothesis relationships
+  EXPLAINS
+  ALTERNATIVE_TO
+  REFUTES
+}
+
+# Entity Resolution Types
+type ERMatchScore {
+  candidateId: ID!
+  entityAId: ID!
+  entityBId: ID!
+  overallScore: Float!
+  method: String!
+  features: [ERFeatureScore!]!
+  confidence: Float!
+  riskScore: Float!
+  modelVersion: String!
+  timestamp: DateTime!
+}
+
+type ERFeatureScore {
+  feature: String!
+  score: Float!
+  weight: Float!
+  explanation: String!
+  evidence: JSON
+}
+
+enum ERDecisionType {
+  MERGE
+  NO_MERGE
+  DEFER
+  SPLIT
+}
+
+type ERDecision {
+  id: ID!
+  matchScore: ERMatchScore!
+  decision: ERDecisionType!
+  decisionMethod: String!
+  decidedBy: String
+  decidedAt: DateTime!
+  notes: String
+  reviewRequired: Boolean!
+  entityType: CanonicalEntityType!
+  audit: ERDecisionAudit!
+}
+
+type ERDecisionAudit {
+  traceId: String!
+  reviewedBy: [String!]
+  approvedBy: String
+  dissent: String
+}
+
+enum ERReviewStatus {
+  PENDING
+  IN_REVIEW
+  DECIDED
+  ESCALATED
+}
+
+enum ERPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+type ERReviewQueueItem {
+  id: ID!
+  matchScore: ERMatchScore!
+  status: ERReviewStatus!
+  priority: ERPriority!
+  assignedTo: String
+  dueAt: DateTime
+  createdAt: DateTime!
+  entityASnapshot: JSON!
+  entityBSnapshot: JSON!
+  conflictingAttributes: [String!]!
+  sharedRelationships: Int!
+}
+
+type ERPrecisionMetrics {
+  entityType: CanonicalEntityType!
+  totalDecisions: Int!
+  mergeDecisions: Int!
+  noMergeDecisions: Int!
+  uncertainDecisions: Int!
+  precision: Float!
+  avgMergeConfidence: Float!
+  avgRiskScore: Float!
+  reviewsRequired: Int!
+  modelVersion: String!
+  lastUpdated: DateTime!
+}
+
+type ResolutionMetadata {
+  method: String!
+  algorithm: String!
+  features: [String!]!
+  threshold: Float!
+  confidence: Float!
+}
+
+type ResolutionEvidence {
+  type: String!
+  strength: Float!
+  details: JSON!
+}
+
+type AttributeConflict {
+  attribute: String!
+  values: [ConflictValue!]!
+  resolution: String!
+  resolvedValue: JSON
+}
+
+type ConflictValue {
+  entityId: ID!
+  value: JSON!
+  confidence: Float!
+}
+
+type ClusterAudit {
+  createdAt: DateTime!
+  lastUpdated: DateTime!
+  reviewedBy: String
+  approvedBy: String
+  version: Int!
+  revertible: Boolean!
+  revertedFrom: ID
+}
+
+type ResolutionCluster {
   id: ID!
   tenantId: String!
-  sequenceNumber: String!
-  previousHash: String!
-  currentHash: String!
-  timestamp: DateTime!
-  actionType: String!
-  resourceType: String!
-  resourceId: String!
-  actorId: String!
-  actorType: String!
-  payload: JSON
-  metadata: JSON
-  signature: String
-}
-
-type LedgerVerification {
-  valid: Boolean!
-  totalEntries: Int!
-  brokenChains: Int!
-  invalidHashes: Int!
-  verificationTime: Float!
+  entityIds: [ID!]!
+  canonicalEntity: Entity!
+  resolution: ResolutionMetadata!
+  evidence: [ResolutionEvidence!]!
+  conflicts: [AttributeConflict!]!
+  audit: ClusterAudit!
 }
 
 # Queries
 extend type Query {
-  # Graph Core
-  canonicalEntity(id: ID!, asOf: DateTime): CanonicalEntity
-
-  # Provenance Ledger
-  provenanceEntries(
-    resourceId: ID
-    actionType: String
+  # ER review queue
+  erReviewQueue(
+    status: ERReviewStatus
+    entityType: CanonicalEntityType
+    assignedTo: String
     limit: Int = 50
-  ): [ProvenanceEntry!]!
+    offset: Int = 0
+  ): [ERReviewQueueItem!]!
 
-  verifyLedgerIntegrity: LedgerVerification!
+  # ER decision history
+  erDecisions(
+    entityId: ID
+    entityType: CanonicalEntityType
+    fromDate: DateTime
+    toDate: DateTime
+    limit: Int = 100
+  ): [ERDecision!]!
 
-  exportLedger(format: String): String!
+  # ER metrics
+  erPrecisionMetrics(
+    entityType: CanonicalEntityType
+    modelVersion: String
+  ): ERPrecisionMetrics!
+
+  # Resolution clusters
+  resolutionCluster(id: ID!): ResolutionCluster
+  resolutionClusters(
+    entityType: CanonicalEntityType
+    minSize: Int
+    limit: Int = 50
+  ): [ResolutionCluster!]!
 }
 
 # Mutations
 extend type Mutation {
-  # Graph Core
-  createCanonicalEntity(
-    entityType: CanonicalEntityType!
-    data: JSON!
-    policyLabels: PolicyLabelsInput!
-  ): CanonicalEntity!
+  # ER review actions
+  erReviewDecide(
+    reviewItemId: ID!
+    decision: ERDecisionType!
+    notes: String
+  ): ERDecision!
 
-  updateCanonicalEntity(
-    id: ID!
-    data: JSON!
-    policyLabels: PolicyLabelsInput
-  ): CanonicalEntity!
+  # Manual ER triggering
+  erResolvePair(
+    entityAId: ID!
+    entityBId: ID!
+  ): ERMatchScore!
 
-  createRelationship(
-    fromId: ID!
-    toId: ID!
-    relationType: String!
-    properties: JSON
-  ): JSON!
+  # Cluster management
+  erMergeEntities(
+    masterEntityId: ID!
+    duplicateEntityIds: [ID!]!
+    notes: String
+  ): ResolutionCluster!
 
-  # Claims
-  registerClaim(
-    statement: String!
-    subjects: JSON!
-    sources: JSON!
-    policyLabels: PolicyLabelsInput!
-    relatedClaims: JSON
-  ): Claim!
+  erSplitCluster(
+    clusterId: ID!
+    entityIdsToSplit: [ID!]!
+    reason: String!
+  ): [ResolutionCluster!]!
 
-  linkEvidenceToClaim(
-    claimId: ID!
-    evidenceId: ID!
-    weight: Float!
-    description: String!
-  ): JSON!
+  # Revert merge
+  erRevertMerge(
+    clusterId: ID!
+    reason: String!
+  ): [Entity!]!
 }

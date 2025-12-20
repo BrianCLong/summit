@@ -12,7 +12,8 @@
  * @module validation/ApiValidationLayer
  */
 
-import { z, ZodError, ZodSchema, ZodType } from 'zod';
+import { z } from 'zod/v4';
+import type { ZodSchema, ZodType } from 'zod/v4';
 import { Request, Response, NextFunction } from 'express';
 import { ValidationError } from '../errors/ErrorHandlingFramework.js';
 
@@ -55,13 +56,12 @@ export interface ValidationOptions {
 /**
  * UUID validation
  */
-export const zodUUID = z.string().uuid({ message: 'Invalid UUID format' });
+export const zodUUID = z.uuid({ message: 'Invalid UUID format' });
 
 /**
  * Email validation with additional checks
  */
 export const zodEmail = z
-  .string()
   .email({ message: 'Invalid email format' })
   .min(5, { message: 'Email must be at least 5 characters' })
   .max(254, { message: 'Email must not exceed 254 characters' })
@@ -228,7 +228,7 @@ export const EntityCreateSchema = z.object({
     .max(5000, { message: 'Description too long' })
     .optional()
     .transform((s) => s?.trim()),
-  properties: z.record(z.unknown()).optional().default({}),
+  properties: z.record(z.string(), z.unknown()).optional().default({}),
   investigationId: zodUUID.optional(),
   tags: z.array(z.string().max(50)).max(20).optional().default([]),
   confidence: z.number().min(0).max(1).optional().default(0.5),
@@ -249,7 +249,7 @@ export const RelationshipCreateSchema = z.object({
   type: RelationshipType,
   sourceId: zodUUID,
   targetId: zodUUID,
-  properties: z.record(z.unknown()).optional().default({}),
+  properties: z.record(z.string(), z.unknown()).optional().default({}),
   confidence: z.number().min(0).max(1).optional().default(0.5),
   startDate: z.coerce.date().optional(),
   endDate: z.coerce.date().optional(),
@@ -286,7 +286,7 @@ export const GraphQLQuerySchema = z.object({
     .string()
     .min(1, { message: 'Query is required' })
     .max(50000, { message: 'Query too large' }),
-  variables: z.record(z.unknown()).optional(),
+  variables: z.record(z.string(), z.unknown()).optional(),
   operationName: z.string().max(200).optional(),
 });
 
@@ -319,7 +319,7 @@ export const AIAnalysisSchema = z.object({
     'SUMMARIZATION',
     'SENTIMENT_ANALYSIS',
   ]),
-  parameters: z.record(z.unknown()).optional(),
+  parameters: z.record(z.string(), z.unknown()).optional(),
   priority: z.enum(['LOW', 'NORMAL', 'HIGH']).optional().default('NORMAL'),
 });
 
@@ -383,13 +383,13 @@ export function sanitizeObject<T extends Record<string, unknown>>(obj: T): T {
 /**
  * Format Zod errors into standardized format
  */
-function formatZodErrors(error: ZodError): Array<{
+function formatZodErrors(error: z.ZodError): Array<{
   field: string;
   message: string;
   code: string;
   value?: unknown;
 }> {
-  return error.errors.map((err) => ({
+  return error.issues.map((err) => ({
     field: err.path.join('.') || 'root',
     message: err.message,
     code: err.code,
@@ -413,10 +413,10 @@ export function validate<T>(
     const result = schema.parse(sanitizedData);
     return { success: true, data: result };
   } catch (error) {
-    if (error instanceof ZodError) {
+    if (error instanceof z.ZodError) {
       return {
         success: false,
-        errors: formatZodErrors(error),
+        errors: formatZodErrors(error as z.ZodError),
       };
     }
     throw error;
@@ -523,7 +523,7 @@ export class GraphQLInputValidator {
       };
     }
 
-    return validate(schema, input, { sanitize: true });
+    return validate(schema, input, { sanitize: true }) as ValidationResult<T>;
   }
 
   /**
