@@ -139,6 +139,56 @@ export interface GraphSnapshot {
   nodes: GraphNode[];
   edges: GraphEdge[];
   serviceRisk: Record<string, ServiceRiskProfile>;
+  sandbox?: boolean;
+  namespace?: string;
+  warnings?: string[];
+  stats?: {
+    nodes: number;
+    edges: number;
+    services: number;
+    incidents: number;
+    pipelines: number;
+    environments: number;
+    policies: number;
+    costSignals: number;
+    durationMs?: number;
+  };
+  telemetry?: {
+    refreshDurationMs?: number;
+    lastQueryDurationMs?: number;
+    traceId?: string;
+  };
+}
+
+export interface StructuredLogger {
+  info?(event: string, payload?: Record<string, unknown>): void;
+  warn?(event: string, payload?: Record<string, unknown>): void;
+  error?(event: string, payload?: Record<string, unknown>): void;
+}
+
+export interface MetricsRecorder {
+  observe?(metric: string, value: number, attributes?: Record<string, string | number>): void;
+  increment?(metric: string, value?: number, attributes?: Record<string, string | number>): void;
+}
+
+export interface TraceSpan {
+  end(attributes?: Record<string, unknown>): void;
+  recordException?(error: unknown): void;
+}
+
+export interface Tracer {
+  startSpan(name: string, attributes?: Record<string, unknown>): TraceSpan | undefined;
+}
+
+export interface KnowledgeGraphOptions {
+  sandboxMode?: boolean;
+  namespace?: string;
+  requireConfirmation?: boolean;
+  confirmationProvided?: boolean;
+  mutationThreshold?: number;
+  logger?: StructuredLogger;
+  metrics?: MetricsRecorder;
+  tracer?: Tracer;
 }
 
 interface GraphState {
@@ -170,6 +220,8 @@ function edgeId(from: string, type: RelationshipType, to: string): string {
 export class OrchestrationKnowledgeGraph {
   private readonly events: StructuredEventEmitter;
 
+  private readonly options: KnowledgeGraphOptions;
+
   private readonly state: GraphState = {
     nodes: new Map(),
     edges: new Map(),
@@ -189,8 +241,17 @@ export class OrchestrationKnowledgeGraph {
   private costSignalConnectors: CostSignalConnector[] = [];
   private version = 0;
 
-  constructor(events = new StructuredEventEmitter()) {
-    this.events = events;
+  constructor(
+    events: StructuredEventEmitter | KnowledgeGraphOptions = new StructuredEventEmitter(),
+    options: KnowledgeGraphOptions = {},
+  ) {
+    if (events instanceof StructuredEventEmitter) {
+      this.events = events;
+      this.options = options;
+    } else {
+      this.events = new StructuredEventEmitter();
+      this.options = events ?? {};
+    }
   }
 
   registerPipelineConnector(connector: PipelineConnector): void {
@@ -218,6 +279,21 @@ export class OrchestrationKnowledgeGraph {
   }
 
   async refresh(): Promise<GraphSnapshot> {
+    if (this.options.requireConfirmation && !this.options.confirmationProvided) {
+      throw new Error('Graph refresh confirmation required but not provided');
+    }
+
+    const previousState = this.cloneState();
+    const startedAt = Date.now();
+    const span = this.startSpan('intelgraph.kg.refresh', {
+      namespace: this.namespace(),
+      sandbox: Boolean(this.options.sandboxMode),
+    });
+    this.logInfo('intelgraph.kg.refresh.start', {
+      namespace: this.namespace(),
+      sandbox: Boolean(this.options.sandboxMode),
+    });
+
     await Promise.all([
       this.ingestServices(),
       this.ingestEnvironments(),
@@ -227,27 +303,115 @@ export class OrchestrationKnowledgeGraph {
       this.ingestCostSignals(),
     ]);
     this.rebuildGraph();
+
+    const durationMs = Date.now() - startedAt;
     this.version += 1;
-    return this.snapshot();
+
+    const snapshot = this.snapshot(durationMs);
+    const mutationDelta =
+      Math.abs(snapshot.nodes.length - previousState.nodes.size) +
+      Math.abs(snapshot.edges.length - previousState.edges.size);
+
+    if (this.options.mutationThreshold !== undefined && mutationDelta > this.options.mutationThreshold) {
+      this.restoreState(previousState);
+      const error = new Error(
+        `Refusing to mutate graph by ${mutationDelta} elements without confirmation`,
+      );
+      this.logWarn('intelgraph.kg.refresh.blocked', {
+        namespace: this.namespace(),
+        mutationDelta,
+        threshold: this.options.mutationThreshold,
+      });
+      span?.recordException?.(error);
+      span?.end({ error: error.message });
+      throw error;
+    }
+
+    this.metricsObserve('intelgraph_kg_refresh_duration_ms', durationMs, {
+      namespace: snapshot.namespace,
+    });
+    this.metricsObserve('intelgraph_kg_nodes_total', snapshot.nodes.length, {
+      namespace: snapshot.namespace,
+    });
+    this.metricsObserve('intelgraph_kg_edges_total', snapshot.edges.length, {
+      namespace: snapshot.namespace,
+    });
+    this.logInfo('intelgraph.kg.refresh.completed', {
+      namespace: snapshot.namespace,
+      durationMs,
+      nodeCount: snapshot.nodes.length,
+      edgeCount: snapshot.edges.length,
+      sandbox: snapshot.sandbox,
+    });
+    span?.end({
+      durationMs,
+      nodeCount: snapshot.nodes.length,
+      edgeCount: snapshot.edges.length,
+      namespace: snapshot.namespace,
+    });
+    return snapshot;
   }
 
-  snapshot(): GraphSnapshot {
+  snapshot(durationMs?: number): GraphSnapshot {
     const nodes = Array.from(this.state.nodes.values());
     const edges = Array.from(this.state.edges.values());
     const serviceRisk = this.calculateServiceRisk();
+    const warnings = this.options.sandboxMode
+      ? ['Sandbox mode active: graph mutations isolated']
+      : undefined;
+    const namespace = this.namespace();
+    if (warnings) {
+      this.logWarn('intelgraph.kg.sandbox', { namespace });
+    }
     return {
       generatedAt: new Date().toISOString(),
       version: this.version,
       nodes,
       edges,
       serviceRisk,
+      sandbox: this.options.sandboxMode,
+      namespace,
+      warnings,
+      stats: {
+        nodes: nodes.length,
+        edges: edges.length,
+        services: this.state.services.size,
+        incidents: this.state.incidents.size,
+        pipelines: this.state.pipelines.size,
+        environments: this.state.environments.size,
+        policies: this.state.policies.size,
+        costSignals: this.state.costSignals.size,
+        durationMs,
+      },
+      telemetry: {
+        refreshDurationMs: durationMs,
+      },
     };
+  }
+
+  getNode(id: string): GraphNode | undefined {
+    return this.state.nodes.get(id);
+  }
+
+  getNodes(ids: string[]): GraphNode[] {
+    return ids
+      .map((id) => this.state.nodes.get(id))
+      .filter((node): node is GraphNode => Boolean(node));
   }
 
   queryService(serviceId: string) {
     const startedAt = Date.now();
+    const span = this.startSpan('intelgraph.kg.query.service', {
+      serviceId,
+      namespace: this.namespace(),
+    });
+    this.logInfo('intelgraph.kg.query.start', {
+      serviceId,
+      namespace: this.namespace(),
+    });
     const service = this.state.services.get(serviceId);
     if (!service) {
+      span?.end({ found: false });
       return undefined;
     }
     const environments = Array.from(this.state.environments.values()).filter(
@@ -285,37 +449,126 @@ export class OrchestrationKnowledgeGraph {
       incidentCount: incidents.length,
     });
 
+    this.metricsObserve('intelgraph_kg_query_duration_ms', durationMs, {
+      namespace: this.namespace(),
+      queryType: 'service',
+    });
+    this.metricsIncrement('intelgraph_kg_queries_total', 1, {
+      namespace: this.namespace(),
+      queryType: 'service',
+    });
+    this.logInfo('intelgraph.kg.query.completed', {
+      serviceId,
+      durationMs,
+      resultCount,
+      incidentCount: incidents.length,
+      riskScore: snapshot.risk?.score ?? 0,
+    });
+    span?.end({ durationMs, resultCount, risk: snapshot.risk?.score });
+
     return snapshot;
+  }
+
+  private namespace(): string {
+    if (this.options.namespace) {
+      return this.options.namespace;
+    }
+    return this.options.sandboxMode ? 'intelgraph-sandbox' : 'intelgraph';
+  }
+
+  private cloneState(): GraphState {
+    return {
+      nodes: new Map(this.state.nodes),
+      edges: new Map(this.state.edges),
+      pipelines: new Map(this.state.pipelines),
+      services: new Map(this.state.services),
+      environments: new Map(this.state.environments),
+      incidents: new Map(this.state.incidents),
+      policies: new Map(this.state.policies),
+      costSignals: new Map(this.state.costSignals),
+    };
+  }
+
+  private restoreState(snapshot: GraphState): void {
+    this.state.nodes.clear();
+    this.state.edges.clear();
+    this.state.pipelines.clear();
+    this.state.services.clear();
+    this.state.environments.clear();
+    this.state.incidents.clear();
+    this.state.policies.clear();
+    this.state.costSignals.clear();
+
+    snapshot.nodes.forEach((value, key) => this.state.nodes.set(key, value));
+    snapshot.edges.forEach((value, key) => this.state.edges.set(key, value));
+    snapshot.pipelines.forEach((value, key) => this.state.pipelines.set(key, value));
+    snapshot.services.forEach((value, key) => this.state.services.set(key, value));
+    snapshot.environments.forEach((value, key) => this.state.environments.set(key, value));
+    snapshot.incidents.forEach((value, key) => this.state.incidents.set(key, value));
+    snapshot.policies.forEach((value, key) => this.state.policies.set(key, value));
+    snapshot.costSignals.forEach((value, key) => this.state.costSignals.set(key, value));
   }
 
   private async ingestServices(): Promise<void> {
     if (this.serviceConnectors.length === 0) {
       return;
     }
+    const startedAt = Date.now();
+    const span = this.startSpan('intelgraph.kg.ingest.services', {
+      connectors: this.serviceConnectors.length,
+    });
     const results = await Promise.all(
       this.serviceConnectors.map((connector) => connector.loadServices()),
     );
     for (const record of results.flat()) {
       this.state.services.set(record.id, record);
     }
+    const durationMs = Date.now() - startedAt;
+    this.logInfo('intelgraph.kg.ingest.services', {
+      durationMs,
+      count: this.state.services.size,
+    });
+    this.metricsObserve('intelgraph_kg_ingest_services_ms', durationMs, {
+      connectors: this.serviceConnectors.length,
+    });
+    this.metricsIncrement('intelgraph_kg_services_total', this.state.services.size);
+    span?.end({ durationMs, count: this.state.services.size });
   }
 
   private async ingestEnvironments(): Promise<void> {
     if (this.environmentConnectors.length === 0) {
       return;
     }
+    const startedAt = Date.now();
+    const span = this.startSpan('intelgraph.kg.ingest.environments', {
+      connectors: this.environmentConnectors.length,
+    });
     const results = await Promise.all(
       this.environmentConnectors.map((connector) => connector.loadEnvironments()),
     );
     for (const record of results.flat()) {
       this.state.environments.set(record.id, record);
     }
+    const durationMs = Date.now() - startedAt;
+    this.logInfo('intelgraph.kg.ingest.environments', {
+      durationMs,
+      count: this.state.environments.size,
+    });
+    this.metricsObserve('intelgraph_kg_ingest_environments_ms', durationMs, {
+      connectors: this.environmentConnectors.length,
+    });
+    this.metricsIncrement('intelgraph_kg_environments_total', this.state.environments.size);
+    span?.end({ durationMs, count: this.state.environments.size });
   }
 
   private async ingestPipelines(): Promise<void> {
     if (this.pipelineConnectors.length === 0) {
       return;
     }
+    const startedAt = Date.now();
+    const span = this.startSpan('intelgraph.kg.ingest.pipelines', {
+      connectors: this.pipelineConnectors.length,
+    });
     const results = await Promise.all(
       this.pipelineConnectors.map((connector) => connector.loadPipelines()),
     );
@@ -329,36 +582,78 @@ export class OrchestrationKnowledgeGraph {
         });
       }
     }
+    const durationMs = Date.now() - startedAt;
+    this.logInfo('intelgraph.kg.ingest.pipelines', {
+      durationMs,
+      pipelines: this.state.pipelines.size,
+    });
+    this.metricsObserve('intelgraph_kg_ingest_pipelines_ms', durationMs, {
+      connectors: this.pipelineConnectors.length,
+    });
+    this.metricsIncrement('intelgraph_kg_pipelines_total', this.state.pipelines.size);
+    span?.end({ durationMs, pipelines: this.state.pipelines.size });
   }
 
   private async ingestIncidents(): Promise<void> {
     if (this.incidentConnectors.length === 0) {
       return;
     }
+    const startedAt = Date.now();
+    const span = this.startSpan('intelgraph.kg.ingest.incidents', {
+      connectors: this.incidentConnectors.length,
+    });
     const results = await Promise.all(
       this.incidentConnectors.map((connector) => connector.loadIncidents()),
     );
     for (const incident of results.flat()) {
       this.state.incidents.set(incident.id, incident);
     }
+    const durationMs = Date.now() - startedAt;
+    this.logInfo('intelgraph.kg.ingest.incidents', {
+      durationMs,
+      incidents: this.state.incidents.size,
+    });
+    this.metricsObserve('intelgraph_kg_ingest_incidents_ms', durationMs, {
+      connectors: this.incidentConnectors.length,
+    });
+    this.metricsIncrement('intelgraph_kg_incidents_total', this.state.incidents.size);
+    span?.end({ durationMs, incidents: this.state.incidents.size });
   }
 
   private async ingestPolicies(): Promise<void> {
     if (this.policyConnectors.length === 0) {
       return;
     }
+    const startedAt = Date.now();
+    const span = this.startSpan('intelgraph.kg.ingest.policies', {
+      connectors: this.policyConnectors.length,
+    });
     const results = await Promise.all(
       this.policyConnectors.map((connector) => connector.loadPolicies()),
     );
     for (const policy of results.flat()) {
       this.state.policies.set(policy.id, policy);
     }
+    const durationMs = Date.now() - startedAt;
+    this.logInfo('intelgraph.kg.ingest.policies', {
+      durationMs,
+      policies: this.state.policies.size,
+    });
+    this.metricsObserve('intelgraph_kg_ingest_policies_ms', durationMs, {
+      connectors: this.policyConnectors.length,
+    });
+    this.metricsIncrement('intelgraph_kg_policies_total', this.state.policies.size);
+    span?.end({ durationMs, policies: this.state.policies.size });
   }
 
   private async ingestCostSignals(): Promise<void> {
     if (this.costSignalConnectors.length === 0) {
       return;
     }
+    const startedAt = Date.now();
+    const span = this.startSpan('intelgraph.kg.ingest.costSignals', {
+      connectors: this.costSignalConnectors.length,
+    });
     const results = await Promise.all(
       this.costSignalConnectors.map((connector) => connector.loadCostSignals()),
     );
@@ -366,6 +661,16 @@ export class OrchestrationKnowledgeGraph {
       const id = `${signal.serviceId}:${signal.timeBucket}`;
       this.state.costSignals.set(id, signal);
     }
+    const durationMs = Date.now() - startedAt;
+    this.logInfo('intelgraph.kg.ingest.costSignals', {
+      durationMs,
+      costSignals: this.state.costSignals.size,
+    });
+    this.metricsObserve('intelgraph_kg_ingest_cost_signals_ms', durationMs, {
+      connectors: this.costSignalConnectors.length,
+    });
+    this.metricsIncrement('intelgraph_kg_cost_signals_total', this.state.costSignals.size);
+    span?.end({ durationMs, costSignals: this.state.costSignals.size });
   }
 
   private rebuildGraph(): void {
@@ -548,6 +853,34 @@ export class OrchestrationKnowledgeGraph {
     }
 
     return risk;
+  }
+
+  private logInfo(event: string, payload: Record<string, unknown>): void {
+    this.options.logger?.info?.(event, payload);
+  }
+
+  private logWarn(event: string, payload: Record<string, unknown>): void {
+    this.options.logger?.warn?.(event, payload);
+  }
+
+  private metricsObserve(
+    metric: string,
+    value: number,
+    attributes?: Record<string, string | number>,
+  ): void {
+    this.options.metrics?.observe?.(metric, value, attributes);
+  }
+
+  private metricsIncrement(
+    metric: string,
+    value = 1,
+    attributes?: Record<string, string | number>,
+  ): void {
+    this.options.metrics?.increment?.(metric, value, attributes);
+  }
+
+  private startSpan(name: string, attributes?: Record<string, unknown>): TraceSpan | undefined {
+    return this.options.tracer?.startSpan?.(name, attributes);
   }
 }
 

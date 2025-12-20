@@ -102,7 +102,8 @@
     "react-native-performance": "^5.1.0",
     "axios": "^1.11.0",
     "date-fns": "^4.1.0",
-    "uuid": "^11.0.5"
+    "uuid": "^11.0.5",
+    "@intelgraph/mobile-sdk": "workspace:*"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",

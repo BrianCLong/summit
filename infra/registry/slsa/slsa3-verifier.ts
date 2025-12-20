@@ -14,10 +14,9 @@
  */
 
 import { createHash, createVerify } from 'crypto';
-import { existsSync, readFileSync, writeFileSync } from 'fs';
-import { join } from 'path';
-
-import { emitVerificationTelemetry } from '../observability.js';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { dirname, join } from 'path';
+import { DependencyTrackClient } from './dependency-track-client';
 
 // ============================================================================
 // Types & Interfaces
@@ -81,6 +80,9 @@ export interface SLSAVerificationResult {
   source?: SourceInfo;
   buildInfo?: BuildInfo;
   violations: SLSAViolation[];
+  cacheHit?: boolean;
+  provenanceCacheKey?: string;
+  dependencyTrackToken?: string;
   timestamp: Date;
   verificationDuration: number;
 }
@@ -123,6 +125,13 @@ export interface SLSAVerifierConfig {
   cacheDir: string;
   timeout: number;
   rekorUrl: string;
+  provenanceCachePath: string;
+  provenanceCacheTtlMs: number;
+  dependencyTrackUrl?: string;
+  dependencyTrackApiKey?: string;
+  dependencyTrackProjectName?: string;
+  dependencyTrackProjectVersion?: string;
+  dependencyTrackAutoCreate?: boolean;
 }
 
 export interface TrustedBuilder {
@@ -130,6 +139,15 @@ export interface TrustedBuilder {
   name: string;
   slsaLevel: number;
   patterns: string[];
+}
+
+export interface ProvenanceCacheEntry {
+  fingerprint: string;
+  imageRef: string;
+  digest: string;
+  slsaLevel: number;
+  builderId?: string;
+  timestamp: string;
 }
 
 // ============================================================================
@@ -176,6 +194,8 @@ const DEFAULT_CONFIG: SLSAVerifierConfig = {
   cacheDir: '/var/cache/slsa',
   timeout: 60000,
   rekorUrl: 'https://rekor.sigstore.dev',
+  provenanceCachePath: '/var/cache/slsa/provenance-cache.json',
+  provenanceCacheTtlMs: 6 * 60 * 60 * 1000,
 };
 
 // ============================================================================
@@ -187,14 +207,42 @@ export class SLSA3Verifier {
   private verificationCache: Map<string, SLSAVerificationResult>;
 
   constructor(config: Partial<SLSAVerifierConfig> = {}) {
-    this.config = { ...DEFAULT_CONFIG, ...config };
+    this.config = {
+      ...DEFAULT_CONFIG,
+      ...config,
+      provenanceCachePath:
+        config.provenanceCachePath ||
+        join(
+          config.cacheDir ?? DEFAULT_CONFIG.cacheDir,
+          'provenance-cache.json'
+        ),
+    };
     this.verificationCache = new Map();
+    this.ensureCacheDir();
+  }
+
+  private ensureCacheDir(): void {
+    if (!existsSync(this.config.cacheDir)) {
+      mkdirSync(this.config.cacheDir, { recursive: true });
+    }
+
+    const cacheDir = dirname(this.config.provenanceCachePath);
+    if (!existsSync(cacheDir)) {
+      mkdirSync(cacheDir, { recursive: true });
+    }
   }
 
   /**
    * Verify SLSA provenance for an image
    */
-  async verifyProvenance(imageRef: string): Promise<SLSAVerificationResult> {
+  async verifyProvenance(
+    imageRef: string,
+    options: {
+      sbom?: string;
+      dependencyTrackProjectName?: string;
+      dependencyTrackProjectVersion?: string;
+    } = {}
+  ): Promise<SLSAVerificationResult> {
     const startTime = Date.now();
     const violations: SLSAViolation[] = [];
 
@@ -203,6 +251,22 @@ export class SLSA3Verifier {
     const cached = this.verificationCache.get(cacheKey);
     if (cached && this.isCacheValid(cached)) {
       return cached;
+    }
+
+    const persistedCache = this.getPersistedCacheEntry(imageRef);
+    if (persistedCache && persistedCache.slsaLevel >= this.config.requiredLevel) {
+      const cachedResult = this.buildCachedResult(
+        persistedCache,
+        startTime,
+        persistedCache.fingerprint
+      );
+
+      const exportedToken = await this.exportSbomIfConfigured(options.sbom, options);
+      if (exportedToken) {
+        cachedResult.dependencyTrackToken = exportedToken;
+      }
+
+      return cachedResult;
     }
 
     // Fetch provenance attestation
@@ -218,6 +282,27 @@ export class SLSA3Verifier {
 
     // Extract digest
     const digest = provenance.subject?.[0]?.digest?.sha256 || '';
+
+    const fingerprint = this.computeProvenanceFingerprint(provenance);
+    const cachedByFingerprint = this.getPersistedCacheEntry(fingerprint, true);
+    if (
+      cachedByFingerprint &&
+      cachedByFingerprint.slsaLevel >= this.config.requiredLevel
+    ) {
+      const cachedResult = this.buildCachedResult(
+        cachedByFingerprint,
+        startTime,
+        fingerprint
+      );
+      cachedResult.provenance = provenance;
+
+      const exportedToken = await this.exportSbomIfConfigured(options.sbom, options);
+      if (exportedToken) {
+        cachedResult.dependencyTrackToken = exportedToken;
+      }
+
+      return cachedResult;
+    }
 
     // Verify builder trust
     const builderInfo = this.verifyBuilder(provenance, violations);
@@ -244,10 +329,6 @@ export class SLSA3Verifier {
     const verified =
       violations.filter((v) => v.severity === 'critical').length === 0;
 
-    const sbomHash = provenance
-      ? this.extractSbomDigest(provenance)
-      : undefined;
-
     const result: SLSAVerificationResult = {
       verified,
       slsaLevel,
@@ -258,32 +339,28 @@ export class SLSA3Verifier {
       source: sourceInfo,
       buildInfo,
       violations,
+      cacheHit: false,
+      provenanceCacheKey: fingerprint,
       timestamp: new Date(),
       verificationDuration: Date.now() - startTime,
     };
 
-    emitVerificationTelemetry({
-      stage: 'verify',
-      actor: builderInfo?.id || sourceInfo?.repository,
-      imageRef,
-      commit: sourceInfo?.commit,
-      digest,
-      sbomHash,
-      policyOutcome: {
-        allowed: verified,
-        summary: verified ? 'slsa-policy-pass' : 'slsa-policy-block',
-        violations: violations.map((v) => `${v.code}:${v.message}`),
-      },
-      metadata: {
-        slsaLevel,
-        builder: builderInfo,
-        source: sourceInfo,
-      },
-    });
-
     // Cache successful results
     if (verified) {
       this.verificationCache.set(cacheKey, result);
+      this.persistProvenanceCache({
+        fingerprint,
+        imageRef,
+        digest,
+        slsaLevel,
+        builderId: builderInfo?.id,
+        timestamp: result.timestamp.toISOString(),
+      });
+    }
+
+    const exportedToken = await this.exportSbomIfConfigured(options.sbom, options);
+    if (exportedToken) {
+      result.dependencyTrackToken = exportedToken;
     }
 
     return result;
@@ -665,31 +742,6 @@ export class SLSA3Verifier {
   }
 
   /**
-   * Extract SBOM digest from provenance byproducts or resolved dependencies
-   */
-  private extractSbomDigest(
-    provenance: SLSAProvenanceV1,
-  ): string | undefined {
-    const byproducts = provenance.predicate.runDetails.byproducts || [];
-    const sbomByproduct = byproducts.find((item) => {
-      const uri = item.uri?.toLowerCase() || '';
-      const mediaType = item.mediaType?.toLowerCase() || '';
-      return uri.includes('sbom') || mediaType.includes('sbom');
-    });
-
-    if (sbomByproduct?.digest?.sha256) {
-      return sbomByproduct.digest.sha256;
-    }
-
-    const resolved = provenance.predicate.buildDefinition.resolvedDependencies || [];
-    const sbomDependency = resolved.find((dep) =>
-      dep.uri?.toLowerCase().includes('sbom'),
-    );
-
-    return sbomDependency?.digest?.sha256;
-  }
-
-  /**
    * Pattern matching helper
    */
   private matchPattern(value: string, pattern: string): boolean {
@@ -697,6 +749,141 @@ export class SLSA3Verifier {
       '^' + pattern.replace(/\*/g, '.*').replace(/\?/g, '.') + '$'
     );
     return regex.test(value);
+  }
+
+  private computeProvenanceFingerprint(provenance: SLSAProvenanceV1): string {
+    const hash = createHash('sha256');
+    hash.update(JSON.stringify(provenance.subject || []));
+    hash.update(JSON.stringify(provenance.predicate.buildDefinition || {}));
+    hash.update(JSON.stringify(provenance.predicate.runDetails || {}));
+    return hash.digest('hex');
+  }
+
+  private getPersistedCacheEntry(
+    key: string,
+    matchByFingerprint = false
+  ): (ProvenanceCacheEntry & { fingerprint: string }) | undefined {
+    if (!existsSync(this.config.provenanceCachePath)) {
+      return undefined;
+    }
+
+    try {
+      const content = readFileSync(this.config.provenanceCachePath, 'utf-8');
+      const entries: ProvenanceCacheEntry[] = JSON.parse(content);
+      const entry = entries.find((candidate) =>
+        matchByFingerprint
+          ? candidate.fingerprint === key
+          : candidate.imageRef === key
+      );
+
+      if (!entry) {
+        return undefined;
+      }
+
+      const age = Date.now() - new Date(entry.timestamp).getTime();
+      if (age > this.config.provenanceCacheTtlMs) {
+        return undefined;
+      }
+
+      return { ...entry };
+    } catch {
+      return undefined;
+    }
+  }
+
+  private persistProvenanceCache(entry: ProvenanceCacheEntry): void {
+    try {
+      mkdirSync(dirname(this.config.provenanceCachePath), { recursive: true });
+      const entries: ProvenanceCacheEntry[] = existsSync(
+        this.config.provenanceCachePath
+      )
+        ? JSON.parse(readFileSync(this.config.provenanceCachePath, 'utf-8'))
+        : [];
+
+      const withoutCurrent = entries.filter(
+        (e) => e.fingerprint !== entry.fingerprint && e.imageRef !== entry.imageRef
+      );
+
+      withoutCurrent.push(entry);
+
+      writeFileSync(
+        this.config.provenanceCachePath,
+        JSON.stringify(withoutCurrent, null, 2)
+      );
+    } catch (err) {
+      console.warn(
+        `Failed to persist provenance cache: ${err instanceof Error ? err.message : String(err)}`
+      );
+    }
+  }
+
+  private buildCachedResult(
+    entry: ProvenanceCacheEntry,
+    startTime: number,
+    fingerprint?: string
+  ): SLSAVerificationResult {
+    const meetsLevel = entry.slsaLevel >= this.config.requiredLevel;
+    const violations: SLSAViolation[] = [];
+
+    if (!meetsLevel) {
+      violations.push({
+        code: 'INSUFFICIENT_SLSA_LEVEL',
+        severity: 'critical',
+        message: `Cached provenance achieved L${entry.slsaLevel}, requires L${this.config.requiredLevel}`,
+        requirement: `SLSA L${this.config.requiredLevel}`,
+      });
+    }
+
+    return {
+      verified: meetsLevel,
+      slsaLevel: entry.slsaLevel as 0 | 1 | 2 | 3 | 4,
+      imageRef: entry.imageRef,
+      digest: entry.digest,
+      builder: entry.builderId
+        ? { id: entry.builderId, trusted: true, slsaLevel: entry.slsaLevel }
+        : undefined,
+      source: undefined,
+      buildInfo: undefined,
+      violations,
+      cacheHit: true,
+      provenanceCacheKey: fingerprint || entry.fingerprint,
+      timestamp: new Date(),
+      verificationDuration: Date.now() - startTime,
+    };
+  }
+
+  private async exportSbomIfConfigured(
+    sbom: string | undefined,
+    options: {
+      dependencyTrackProjectName?: string;
+      dependencyTrackProjectVersion?: string;
+    }
+  ): Promise<string | undefined> {
+    if (
+      !sbom ||
+      !this.config.dependencyTrackUrl ||
+      !this.config.dependencyTrackApiKey
+    ) {
+      return undefined;
+    }
+
+    const client = new DependencyTrackClient({
+      url: this.config.dependencyTrackUrl,
+      apiKey: this.config.dependencyTrackApiKey,
+    });
+
+    return client.uploadBom({
+      sbom,
+      projectName:
+        options.dependencyTrackProjectName ||
+        this.config.dependencyTrackProjectName ||
+        'intelgraph-registry',
+      projectVersion:
+        options.dependencyTrackProjectVersion ||
+        this.config.dependencyTrackProjectVersion ||
+        'latest',
+      autoCreate: this.config.dependencyTrackAutoCreate ?? true,
+    });
   }
 
   /**

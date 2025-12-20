@@ -1,0 +1,38 @@
+# Default RTO/RPO targets and service-specific overrides for disaster recovery
+# RTO: Recovery Time Objective (max acceptable downtime)
+# RPO: Recovery Point Objective (max acceptable data loss)
+
+_defaults:
+  rto_minutes: 30
+  rpo_minutes: 5
+  notes: "Apply to all services unless overridden; aligns with Epic 09 DR policy."
+
+services:
+  api-gateway:
+    rto_minutes: 20
+    rpo_minutes: 5
+    notes: "Front-door routing and auth must lead recovery; leverage replicated ingress and cached JWKS."
+  intelgraph-web:
+    rto_minutes: 25
+    rpo_minutes: 5
+    notes: "User-facing console; acceptable brief read-only mode during failover."
+  postgres:
+    rto_minutes: 30
+    rpo_minutes: 5
+    notes: "PITR via WAL + nightly full backups; enforce write freeze before region flip."
+  neo4j:
+    rto_minutes: 35
+    rpo_minutes: 10
+    notes: "Graph store allows slightly longer RTO due to rebuild checks; tx log replay kept under 10m."
+  redis:
+    rto_minutes: 15
+    rpo_minutes: 2
+    notes: "Cache/session store restored from 15m snapshots; permit cold start for non-persistent keys."
+  typesense:
+    rto_minutes: 30
+    rpo_minutes: 10
+    notes: "Index snapshots daily + schema export; rebuild permitted for stale secondary indexes."
+  background-workers:
+    rto_minutes: 45
+    rpo_minutes: 10
+    notes: "Non-critical analytics/exports paused during DR; resume after primary data-plane validated."
