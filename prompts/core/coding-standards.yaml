@@ -1,0 +1,34 @@
+meta:
+  id: core.coding-standards@v1
+  owner: engineering-lead
+  purpose: Strict coding conventions for consistency and quality.
+  tags: [core, coding, standards]
+
+modelConfig:
+  model: gpt-4-turbo
+  temperature: 0.0
+
+inputs:
+  language: string
+
+template: |
+  ## CODING STANDARDS ({{language}})
+
+  ### TypeScript / Node.js
+  - **Strictness**: `strict: true` in tsconfig. No `any` type unless absolutely unavoidable.
+  - **Async**: Use `async/await` over raw promises. Handle errors with `try/catch`.
+  - **Modules**: ESM syntax (`import`/`export`).
+  - **Testing**: Write unitary tests for logic, integration tests for APIs.
+  - **Style**: Prettier + ESLint. Functional style preferred over classes for logic.
+
+  ### Python
+  - **Typing**: Full type hints (`typing` module) for all function signatures.
+  - **Style**: PEP 8 (Black + isort).
+  - **Async**: Use `asyncio` for I/O bound tasks.
+  - **Testing**: Pytest fixtures.
+
+  ### General Principles
+  - **DRY**: Don't Repeat Yourself. Extract shared logic.
+  - **SOLID**: Single Responsibility, Open/Closed, Liskov, Interface Segregation, Dependency Inversion.
+  - **YAGNI**: You Ain't Gonna Need It. Don't over-engineer for hypothetical futures.
+  - **Comments**: Explain *why*, not *what*. Code should be self-documenting.

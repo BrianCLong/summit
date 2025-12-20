@@ -1,0 +1,66 @@
+image:
+  repository: ghcr.io/BrianCLong/summit
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+replicaCount: 2
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 4000
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+podDisruptionBudget:
+  minAvailable: 1
+
+ingress:
+  enabled: true
+  className: ""
+  hosts:
+    - host: summit.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+env:
+  NODE_ENV: production
+  PORT: "4000"
+
+canary:
+  enabled: false
+  replicas: 1
+
+otel:
+  enabled: true
+  annotations:
+    sidecar.opentelemetry.io/inject: "true"
+    otel.service.name: "summit"
+
+prometheus:
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+
+networkPolicy:
+  enabled: true
+  egress:
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - port: 443
+          protocol: TCP

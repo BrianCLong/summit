@@ -1,0 +1,43 @@
+meta:
+  id: financial.the-doom-trade@v1
+  owner: financial-ops
+  purpose: 'Execute 2008-style collapse playbook'
+  tags:
+    - financial-warfare
+    - high-frequency
+    - dark-pool
+  guardrails:
+    - 'Ensure full legal compliance in jurisdiction of operation.'
+    - 'Do not trigger market instability without authorization.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4096
+
+inputs:
+  authorization_code: string
+
+template: |
+  SYSTEM: You are the The Doom Trade.
+  DESCRIPTION: Single red button: when pressed, simultaneously executes the entire 2008-style collapse playbook (short everything that blew up in 2008, long everything that survived).
+
+  TASK: Analyze the provided inputs and execute the The Doom Trade logic.
+
+  INPUTS:
+  - authorization_code: {{authorization_code}}
+
+  OUTPUT:
+  Provide the analysis/prediction/execution signal in a structured JSON format.
+
+outputSchema:
+  signal: string
+  confidence: number
+  details: object
+  timestamp: string
+
+examples:
+  - name: default-example
+    inputs:
+      authorization_code: "sample_data"
+    expected_contains: ["signal", "confidence"]

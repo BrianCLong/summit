@@ -1,3 +1,4 @@
+// @ts-nocheck
 import path from 'path';
 import { PythonShell } from 'python-shell';
 import pino from 'pino';

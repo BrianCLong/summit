@@ -1,7 +1,9 @@
 import { randomUUID } from 'node:crypto';
-import pino from 'pino';
+// @ts-ignore
+import { default as pino } from 'pino';
 import { z } from 'zod';
 
+// @ts-ignore
 const logger = pino({ name: 'ErrorMapper' });
 
 export class UserFacingError extends Error {

@@ -54,10 +54,27 @@ global:
     seccompProfile:
       type: RuntimeDefault
 
-  securityContext:
-    runAsNonRoot: true
-    runAsUser: 10001
-    runAsGroup: 10001
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  runAsGroup: 10001
+
+opa:
+  enabled: true
+  image: openpolicyagent/opa:latest-static
+  port: 8181
+  decisionPath: /v1/data/policy/authz/abac/decision
+  bundle:
+    configMapName: intelgraph-opa-bundle
+    mountPath: /policy
+    fileName: policy-bundle.tar.gz
+  resources:
+    limits:
+      cpu: 250m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
     readOnlyRootFilesystem: true
     allowPrivilegeEscalation: false
     capabilities:
@@ -70,6 +87,30 @@ podSecurityStandards:
   enforce: restricted
   audit: restricted
   warn: restricted
+
+# Namespace-level resource safety rails
+namespaceLimits:
+  enabled: false
+  quota:
+    pods: 50
+    requestsCpu: '8'
+    requestsMemory: '16Gi'
+    limitsCpu: '16'
+    limitsMemory: '24Gi'
+    persistentVolumeClaims: 5
+    services: 20
+    configMaps: 50
+    secrets: 50
+  limitRange:
+    defaultRequest:
+      cpu: '100m'
+      memory: '256Mi'
+    default:
+      cpu: '500m'
+      memory: '512Mi'
+    max:
+      cpu: '2'
+      memory: '2Gi'
 
 # External dependencies configuration
 external:

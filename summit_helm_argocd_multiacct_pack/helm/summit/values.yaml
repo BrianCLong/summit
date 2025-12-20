@@ -1,14 +1,69 @@
+replicaCount: 2
+
+namespace:
+  create: true
+  name: ""
+  labels: {}
+  annotations: {}
+
 image:
   repository: REPLACE_REGISTRY/summit
   tag: latest
   pullPolicy: IfNotPresent
 
-replicaCount: 2
+imagePullSecrets: []
+
+serviceAccount:
+  create: true
+  name: ""
+  automountServiceAccountToken: false
+  annotations: {}
+
+rbac:
+  create: true
+  ops:
+    create: true
+    serviceAccountName: ""
+    rules:
+      - apiGroups: [""]
+        resources: ["pods", "services", "configmaps", "secrets"]
+        verbs: ["get", "list", "watch"]
+      - apiGroups: ["apps"]
+        resources: ["deployments", "replicasets"]
+        verbs: ["get", "list", "watch"]
+  ci:
+    create: true
+    serviceAccountName: ""
+    rules:
+      - apiGroups: ["apps"]
+        resources: ["deployments"]
+        verbs: ["get", "list", "watch", "update", "patch"]
+      - apiGroups: [""]
+        resources: ["configmaps"]
+        verbs: ["create", "update", "patch"]
 
 service:
   type: ClusterIP
   port: 80
   targetPort: 8080
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: summit.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          servicePort: 80
+  tls:
+    enabled: true
+    secretName: summit-tls
+    clusterIssuer: letsencrypt-prod
+    dnsNames:
+      - summit.example.com
 
 resources:
   requests:
@@ -22,13 +77,54 @@ securityContext:
   runAsNonRoot: true
   readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
+  runAsUser: 1000
+  runAsGroup: 1000
+  seccompProfile: RuntimeDefault
+
+podSecurity:
+  enabled: true
+  enforce: restricted
+  warn: restricted
+  audit: restricted
+  version: latest
 
 podAnnotations: {}
 podLabels: {}
 
+mesh:
+  enabled: true
+  peerAuthentication:
+    mtlsMode: STRICT
+  destinationRule:
+    host: ""
+
 env: []
 # - name: NODE_ENV
 #   value: "production"
+
+externalSecrets:
+  enabled: false
+  secretStore:
+    create: true
+    name: summit-secrets
+    provider: aws
+    region: us-east-1
+    roleArn: ""
+  refreshInterval: 1h
+  target:
+    name: summit-app-secrets
+    creationPolicy: Owner
+  data: []
+  # - secretKey: DATABASE_PASSWORD
+  #   remoteRef:
+  #     key: prod/summit/app
+  #     property: databasePassword
+
+auditLogging:
+  enabled: true
+  retentionDays: 30
+  maxFileSizeMiB: 100
+  maxBackups: 10
 
 livenessProbe:
   httpGet:

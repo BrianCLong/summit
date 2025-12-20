@@ -1,0 +1,44 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: tenant-restore-smoke
+  labels:
+    drill: tenant-restore
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: tenant-restore-smoke
+          image: alpine:3.19
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -euo pipefail
+              apk add --no-cache bash coreutils
+              TENANT="${TENANT:-demo}"
+              BACKUP_PATH="${BACKUP_PATH:-/tmp/backups/${TENANT}}"
+              mkdir -p "${BACKUP_PATH}"
+              echo '{"environment":"dev","tenant":"'"${TENANT}"'"}' > "${BACKUP_PATH}/backup-metadata.json"
+              touch "${BACKUP_PATH}/postgres.dump" "${BACKUP_PATH}/neo4j.dump" "${BACKUP_PATH}/redis.rdb"
+              SKIP_VERIFICATION=true DRY_RUN=true FORCE=true \
+                /scripts/db/restore.sh \
+                  --env=dev \
+                  --backup-path="${BACKUP_PATH}" \
+                  --tenant="${TENANT}" \
+                  --datastores=postgres,neo4j,redis \
+                  --dry-run \
+                  --skip-verification \
+                  --force
+          volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+              readOnly: true
+      volumes:
+        - name: scripts
+          configMap:
+            name: summit-scripts
+            items:
+              - key: restore.sh
+                path: db/restore.sh
