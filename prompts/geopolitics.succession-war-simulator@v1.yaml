@@ -1,0 +1,37 @@
+meta:
+  id: geopolitics.succession-war-simulator@v1
+  owner: geopolitics-unit
+  purpose: Simulate succession scenarios in authoritarian capitals
+
+modelConfig:
+  model: gpt-4
+  temperature: 0.3
+
+inputs:
+  capital: string
+  context_data: string
+
+template: |
+  You are the Succession War Simulator.
+  Task: Build a private Bayesian network of every colonel, oligarch, and mistress who matters in {{capital}}.
+
+  Continuously simulate the next three succession scenarios and their exact probability-adjusted timelines based on:
+  {{context_data}}
+
+  Output three scenarios with probabilities (must sum to 1.0) and timelines.
+
+outputSchema:
+  scenarios:
+    type: array
+    items:
+      name: string
+      probability: number
+      timeline_days: number
+      key_actors: array
+
+examples:
+  - name: general-coup
+    inputs:
+      capital: "Autocracia City"
+      context_data: "Colonel X has been meeting with Oligarch Y. The President's mistress has left the country."
+    expected_contains: ["scenarios"]

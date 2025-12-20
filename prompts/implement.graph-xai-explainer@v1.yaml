@@ -1,0 +1,705 @@
+meta:
+  id: implement.graph-xai-explainer@v1
+  owner: 'intelgraph-advisory-committee'
+  purpose: 'Build counterfactual explainability API for graph analytics with path rationales and minimal flip analysis'
+  tags: ['xai', 'explainability', 'counterfactual', 'graph-analysis', 'interpretability']
+  guardrails:
+    - 'All explanations must cite provenance IDs'
+    - 'Counterfactuals must be minimal (smallest change set)'
+    - 'Saliency scores must be normalized [0, 1]'
+    - 'Explanations must be human-readable and actionable'
+    - 'Include confidence intervals for probabilistic explanations'
+
+modelConfig:
+  model: 'claude-sonnet-4-5'
+  temperature: 0.2
+  maxTokens: 8000
+
+inputs:
+  explanation_methods: string
+  ui_framework: string
+  notebook_format: string
+
+template: |
+  You are implementing the **Graph-XAI Counterfactual Explainer** for IntelGraph.
+
+  ## Objective
+
+  Build an explainability API that provides counterfactual reasoning, path rationales, and saliency analysis for scored nodes, edges, anomalies, and ML model predictions in graph analytics.
+
+  ## Target Paths
+
+  Create the following directory structure:
+
+  ```
+  services/graph-xai/
+    ├── src/
+    │   ├── api/
+    │   │   └── ExplainController.ts
+    │   ├── explainers/
+    │   │   ├── CounterfactualExplainer.ts
+    │   │   ├── PathRationaleExplainer.ts
+    │   │   ├── SaliencyExplainer.ts
+    │   │   ├── AnomalyExplainer.ts
+    │   │   └── ModelExplainer.ts
+    │   ├── algorithms/
+    │   │   ├── MinimalFlip.ts
+    │   │   ├── ShapleyValue.ts
+    │   │   ├── GNNExplainer.ts
+    │   │   └── AttentionWeights.ts
+    │   ├── provenance/
+    │   │   ├── ProvenanceLinker.ts
+    │   │   └── CitationGenerator.ts
+    │   └── rendering/
+    │       ├── TextualExplanation.ts
+    │       └── VisualExplanation.ts
+    ├── notebooks/
+    │   ├── examples/
+    │   │   ├── 01-fraud-detection-explanation.{{notebook_format}}
+    │   │   ├── 02-anomaly-rationale.{{notebook_format}}
+    │   │   └── 03-recommendation-saliency.{{notebook_format}}
+    │   └── README.md
+    ├── tests/
+    │   ├── unit/
+    │   ├── integration/
+    │   └── contract/
+    └── README.md
+
+  apps/analyst-console/
+    ├── src/
+    │   └── panels/
+    │       ├── ExplainView.tsx
+    │       ├── CounterfactualCard.tsx
+    │       ├── SaliencyHeatmap.tsx
+    │       └── ProvenanceCitation.tsx
+    └── tests/
+  ```
+
+  ## Explanation Methods: {{explanation_methods}}
+
+  ### 1. Counterfactual Explanations
+
+  **Goal:** Answer "What is the minimal change to reverse this decision/score?"
+
+  **CounterfactualExplainer.ts:**
+
+  ```typescript
+  interface CounterfactualExplanation {
+    original: {
+      nodeId: string;
+      score: number;
+      label: string;
+      features: Record<string, any>;
+    };
+    counterfactual: {
+      score: number;
+      label: string;
+      changes: FeatureChange[];
+    };
+    minimality: number; // Number of changes
+    plausibility: number; // [0, 1] how realistic
+    actionability: string[]; // Steps to achieve
+    provenanceIds: string[]; // Linked evidence
+  }
+
+  interface FeatureChange {
+    feature: string;
+    originalValue: any;
+    newValue: any;
+    impact: number; // Contribution to score change
+  }
+
+  async function explainCounterfactual(
+    nodeId: string,
+    targetScore: number,
+    options: ExplainOptions
+  ): Promise<CounterfactualExplanation> {
+    // 1. Get current node and features
+    const node = await neo4j.getNode(nodeId);
+    const features = extractFeatures(node);
+
+    // 2. Search for minimal change set
+    const changes = await findMinimalFlips(features, targetScore, options);
+
+    // 3. Validate plausibility
+    const plausibility = assessPlausibility(changes, node);
+
+    // 4. Generate actionable steps
+    const actions = generateActions(changes);
+
+    // 5. Link to provenance
+    const provenanceIds = await linkProvenance(changes);
+
+    return {
+      original: { nodeId, score: node.score, label: node.label, features },
+      counterfactual: { score: targetScore, label: flipLabel(node.label), changes },
+      minimality: changes.length,
+      plausibility,
+      actionability: actions,
+      provenanceIds,
+    };
+  }
+  ```
+
+  **Minimal Flip Algorithm:**
+
+  ```typescript
+  async function findMinimalFlips(
+    features: Features,
+    targetScore: number,
+    options: ExplainOptions
+  ): Promise<FeatureChange[]> {
+    const changes: FeatureChange[] = [];
+    let currentScore = computeScore(features);
+
+    // Greedy search: flip features one by one
+    while (Math.abs(currentScore - targetScore) > options.threshold) {
+      const candidates = generateCandidateFlips(features, changes);
+
+      // Sort by impact (highest first)
+      candidates.sort((a, b) => b.impact - a.impact);
+
+      const bestFlip = candidates[0];
+      changes.push(bestFlip);
+      features = applyFlip(features, bestFlip);
+      currentScore = computeScore(features);
+
+      if (changes.length > options.maxFlips) break;
+    }
+
+    return changes;
+  }
+  ```
+
+  ### 2. Path Rationale Explanations
+
+  **Goal:** Explain why a path/connection is important
+
+  **PathRationaleExplainer.ts:**
+
+  ```typescript
+  interface PathRationale {
+    pathId: string;
+    nodes: NodeRationale[];
+    edges: EdgeRationale[];
+    overallImportance: number;
+    explanation: string;
+    alternatives: AlternativePath[];
+    provenanceIds: string[];
+  }
+
+  interface NodeRationale {
+    nodeId: string;
+    importance: number; // [0, 1]
+    reason: string;
+    features: FeatureImportance[];
+  }
+
+  interface EdgeRationale {
+    edgeId: string;
+    importance: number;
+    reason: string;
+    strength: number;
+  }
+
+  async function explainPath(
+    pathId: string,
+    options: ExplainOptions
+  ): Promise<PathRationale> {
+    // 1. Retrieve path
+    const path = await neo4j.getPath(pathId);
+
+    // 2. Compute node importance (Shapley values or attention weights)
+    const nodeImportance = await computeNodeImportance(path);
+
+    // 3. Compute edge importance
+    const edgeImportance = await computeEdgeImportance(path);
+
+    // 4. Generate textual explanation
+    const explanation = generatePathExplanation(path, nodeImportance, edgeImportance);
+
+    // 5. Find alternative paths for comparison
+    const alternatives = await findAlternativePaths(path);
+
+    // 6. Link provenance
+    const provenanceIds = await linkPathProvenance(path);
+
+    return {
+      pathId,
+      nodes: nodeImportance,
+      edges: edgeImportance,
+      overallImportance: computeOverallImportance(nodeImportance, edgeImportance),
+      explanation,
+      alternatives,
+      provenanceIds,
+    };
+  }
+  ```
+
+  ### 3. Saliency / Feature Importance
+
+  **Goal:** Which features/edges contributed most to a score/decision?
+
+  **SaliencyExplainer.ts:**
+
+  ```typescript
+  interface SaliencyExplanation {
+    nodeId: string;
+    score: number;
+    featureImportance: FeatureImportance[];
+    neighborImportance: NeighborImportance[];
+    visualization: SaliencyMap;
+    provenanceIds: string[];
+  }
+
+  interface FeatureImportance {
+    feature: string;
+    value: any;
+    importance: number; // [0, 1]
+    direction: 'positive' | 'negative'; // Increases or decreases score
+    confidence: number;
+  }
+
+  interface NeighborImportance {
+    neighborId: string;
+    relationshipType: string;
+    importance: number;
+    explanation: string;
+  }
+
+  async function explainSaliency(
+    nodeId: string,
+    modelId: string,
+    options: ExplainOptions
+  ): Promise<SaliencyExplanation> {
+    // 1. Get node and its neighborhood
+    const node = await neo4j.getNode(nodeId);
+    const neighbors = await neo4j.getNeighbors(nodeId);
+
+    // 2. Compute feature importance (SHAP, LIME, or gradients)
+    const featureImportance = await computeShapValues(node, modelId);
+
+    // 3. Compute neighbor importance (attention weights or edge masking)
+    const neighborImportance = await computeNeighborImportance(node, neighbors, modelId);
+
+    // 4. Generate saliency map for visualization
+    const visualization = generateSaliencyMap(featureImportance, neighborImportance);
+
+    // 5. Link provenance
+    const provenanceIds = await linkSaliencyProvenance(node, modelId);
+
+    return {
+      nodeId,
+      score: node.score,
+      featureImportance,
+      neighborImportance,
+      visualization,
+      provenanceIds,
+    };
+  }
+  ```
+
+  ### 4. Anomaly Explanations
+
+  **Goal:** Why is this node/edge anomalous?
+
+  **AnomalyExplainer.ts:**
+
+  ```typescript
+  interface AnomalyExplanation {
+    entityId: string;
+    anomalyScore: number;
+    normalRange: { min: number; max: number };
+    deviations: Deviation[];
+    similarNormalEntities: Entity[];
+    explanation: string;
+    provenanceIds: string[];
+  }
+
+  interface Deviation {
+    feature: string;
+    actualValue: any;
+    expectedValue: any;
+    deviation: number; // Standard deviations from mean
+    contribution: number; // To anomaly score
+  }
+
+  async function explainAnomaly(
+    entityId: string,
+    options: ExplainOptions
+  ): Promise<AnomalyExplanation> {
+    // 1. Get anomalous entity
+    const entity = await neo4j.getNode(entityId);
+
+    // 2. Compute expected (normal) distribution
+    const normalDistribution = await computeNormalDistribution(entity.type);
+
+    // 3. Identify deviations
+    const deviations = identifyDeviations(entity, normalDistribution);
+
+    // 4. Find similar but normal entities for contrast
+    const similarNormal = await findSimilarNormalEntities(entity);
+
+    // 5. Generate explanation
+    const explanation = generateAnomalyExplanation(deviations, similarNormal);
+
+    // 6. Link provenance
+    const provenanceIds = await linkAnomalyProvenance(entity);
+
+    return {
+      entityId,
+      anomalyScore: entity.anomalyScore,
+      normalRange: normalDistribution.range,
+      deviations,
+      similarNormalEntities: similarNormal,
+      explanation,
+      provenanceIds,
+    };
+  }
+  ```
+
+  ## Frontend UI ({{ui_framework}})
+
+  ### ExplainView.tsx
+
+  ```tsx
+  <ExplainView entityId={selectedNodeId}>
+    <Tabs>
+      <Tab label="Counterfactual">
+        <CounterfactualCard
+          explanation={counterfactualExplanation}
+          onApplyChange={handleApplyChange}
+        />
+      </Tab>
+
+      <Tab label="Feature Importance">
+        <SaliencyHeatmap
+          features={saliencyExplanation.featureImportance}
+          neighbors={saliencyExplanation.neighborImportance}
+        />
+      </Tab>
+
+      <Tab label="Path Rationale">
+        <PathRationaleView
+          rationale={pathRationale}
+          onSelectAlternative={handleSelectAlternativePath}
+        />
+      </Tab>
+
+      <Tab label="Provenance">
+        <ProvenanceCitation
+          provenanceIds={explanation.provenanceIds}
+          onViewEvidence={handleViewEvidence}
+        />
+      </Tab>
+    </Tabs>
+  </ExplainView>
+  ```
+
+  ### Counterfactual Card
+
+  ```tsx
+  <CounterfactualCard explanation={explanation}>
+    <Typography variant="h6">
+      To flip from {explanation.original.label} to {explanation.counterfactual.label}:
+    </Typography>
+
+    <List>
+      {explanation.counterfactual.changes.map(change => (
+        <ListItem key={change.feature}>
+          <ListItemText
+            primary={`Change ${change.feature}`}
+            secondary={`${change.originalValue} → ${change.newValue} (impact: ${change.impact.toFixed(2)})`}
+          />
+        </ListItem>
+      ))}
+    </List>
+
+    <Alert severity="info">
+      Minimality: {explanation.minimality} changes
+      <br />
+      Plausibility: {(explanation.plausibility * 100).toFixed(1)}%
+    </Alert>
+
+    <Typography variant="subtitle2">Actionable Steps:</Typography>
+    <ol>
+      {explanation.actionability.map(action => (
+        <li key={action}>{action}</li>
+      ))}
+    </ol>
+
+    <Button onClick={() => onApplyChange(explanation)}>
+      Apply Changes
+    </Button>
+  </CounterfactualCard>
+  ```
+
+  ### Saliency Heatmap
+
+  ```tsx
+  <SaliencyHeatmap features={features}>
+    <BarChart
+      data={features.map(f => ({
+        name: f.feature,
+        importance: f.importance,
+        direction: f.direction,
+      }))}
+      xAxis="feature"
+      yAxis="importance"
+      colorBy="direction"
+    />
+
+    <Table>
+      <TableHead>
+        <TableRow>
+          <TableCell>Feature</TableCell>
+          <TableCell>Value</TableCell>
+          <TableCell>Importance</TableCell>
+          <TableCell>Direction</TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {features.map(f => (
+          <TableRow key={f.feature}>
+            <TableCell>{f.feature}</TableCell>
+            <TableCell>{f.value}</TableCell>
+            <TableCell>
+              <LinearProgress variant="determinate" value={f.importance * 100} />
+            </TableCell>
+            <TableCell>
+              <Chip
+                label={f.direction}
+                color={f.direction === 'positive' ? 'success' : 'error'}
+              />
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  </SaliencyHeatmap>
+  ```
+
+  ## API Endpoints
+
+  ### POST /api/explain/counterfactual
+
+  **Request:**
+  ```json
+  {
+    "nodeId": "node_123",
+    "targetScore": 0.1,
+    "options": {
+      "maxFlips": 5,
+      "threshold": 0.05
+    }
+  }
+  ```
+
+  **Response:**
+  ```json
+  {
+    "original": { "nodeId": "node_123", "score": 0.92, "label": "fraud" },
+    "counterfactual": {
+      "score": 0.08,
+      "label": "legitimate",
+      "changes": [
+        { "feature": "transaction_amount", "originalValue": 10000, "newValue": 500, "impact": 0.45 },
+        { "feature": "velocity", "originalValue": 50, "newValue": 5, "impact": 0.39 }
+      ]
+    },
+    "minimality": 2,
+    "plausibility": 0.87,
+    "actionability": [
+      "Reduce transaction amount from $10,000 to $500",
+      "Lower transaction velocity from 50/day to 5/day"
+    ],
+    "provenanceIds": ["prov_001", "prov_002"]
+  }
+  ```
+
+  ### POST /api/explain/saliency
+
+  **Request:**
+  ```json
+  {
+    "nodeId": "node_456",
+    "modelId": "fraud_detector_v2"
+  }
+  ```
+
+  **Response:**
+  ```json
+  {
+    "nodeId": "node_456",
+    "score": 0.92,
+    "featureImportance": [
+      { "feature": "transaction_amount", "value": 10000, "importance": 0.45, "direction": "positive" },
+      { "feature": "velocity", "value": 50, "importance": 0.39, "direction": "positive" },
+      { "feature": "account_age_days", "value": 7, "importance": 0.16, "direction": "positive" }
+    ],
+    "neighborImportance": [
+      { "neighborId": "merchant_789", "relationshipType": "TRANSACTED_WITH", "importance": 0.72 }
+    ],
+    "provenanceIds": ["prov_003"]
+  }
+  ```
+
+  ## Notebooks ({{notebook_format}})
+
+  ### 01-fraud-detection-explanation.{{notebook_format}}
+
+  ```python
+  # Fraud Detection Counterfactual Analysis
+
+  from graph_xai import CounterfactualExplainer
+
+  # Load flagged transaction
+  tx_id = "tx_12345"
+  explainer = CounterfactualExplainer()
+
+  # Generate explanation
+  explanation = explainer.explain(tx_id, target_score=0.1)
+
+  print(f"Original Score: {explanation.original.score}")
+  print(f"Counterfactual Score: {explanation.counterfactual.score}")
+  print(f"Minimal Changes: {explanation.minimality}")
+
+  for change in explanation.counterfactual.changes:
+      print(f"  {change.feature}: {change.originalValue} → {change.newValue} (impact: {change.impact})")
+
+  # Visualize
+  explainer.plot_counterfactual(explanation)
+  ```
+
+  ### 02-anomaly-rationale.{{notebook_format}}
+
+  ```python
+  # Anomaly Detection Rationale
+
+  from graph_xai import AnomalyExplainer
+
+  # Load anomalous entity
+  entity_id = "entity_999"
+  explainer = AnomalyExplainer()
+
+  # Explain anomaly
+  explanation = explainer.explain(entity_id)
+
+  print(f"Anomaly Score: {explanation.anomalyScore}")
+  print(f"Normal Range: {explanation.normalRange}")
+
+  for deviation in explanation.deviations:
+      print(f"  {deviation.feature}: {deviation.actualValue} (expected: {deviation.expectedValue})")
+      print(f"    Deviation: {deviation.deviation} std, Contribution: {deviation.contribution}")
+
+  # Compare to similar normal entities
+  explainer.plot_comparison(explanation, explanation.similarNormalEntities)
+  ```
+
+  ### 03-recommendation-saliency.{{notebook_format}}
+
+  ```python
+  # Graph Recommendation Saliency
+
+  from graph_xai import SaliencyExplainer
+
+  # Load recommended item
+  item_id = "item_555"
+  model_id = "gnn_recommender_v3"
+  explainer = SaliencyExplainer()
+
+  # Compute saliency
+  explanation = explainer.explain(item_id, model_id)
+
+  print(f"Recommendation Score: {explanation.score}")
+  print("Feature Importance:")
+  for feat in explanation.featureImportance:
+      print(f"  {feat.feature}: {feat.importance} ({feat.direction})")
+
+  print("Neighbor Importance:")
+  for neighbor in explanation.neighborImportance:
+      print(f"  {neighbor.neighborId} ({neighbor.relationshipType}): {neighbor.importance}")
+
+  # Visualize saliency map
+  explainer.plot_saliency(explanation)
+  ```
+
+  ## Testing Requirements
+
+  ### Contract Tests
+
+  - All explanations include `provenanceIds`
+  - Counterfactual minimality is verified (no redundant changes)
+  - Saliency scores sum to ≤1.0
+  - Confidence intervals provided for probabilistic methods
+
+  ### Unit Tests
+
+  - Minimal flip algorithm finds smallest change set
+  - Shapley value computation is correct
+  - Plausibility scoring rejects impossible changes
+  - Provenance linking traces back to evidence
+
+  ### Integration Tests
+
+  - End-to-end: node → counterfactual → UI display
+  - Anomaly explanation with real anomalies
+  - Path rationale with multi-hop paths
+
+  ## Documentation
+
+  ### README.md
+
+  - Explanation methods overview
+  - Algorithm references (SHAP, LIME, GNNExplainer)
+  - API documentation
+  - Notebook usage guide
+  - Provenance linking explanation
+
+  ## Acceptance Criteria
+
+  **Done When:**
+
+  - [ ] Counterfactual API finds minimal change sets (≤5 flips)
+  - [ ] Path rationale explains node/edge importance
+  - [ ] Saliency scores normalized to [0, 1]
+  - [ ] All explanations cite provenance IDs
+  - [ ] UI displays counterfactuals, saliency, and rationales inline
+  - [ ] 3 example notebooks execute without errors
+  - [ ] Contract tests verify explanation validity
+  - [ ] Operators can cite "why" and view minimal counterfactuals
+  - [ ] Unit test coverage ≥80%
+  - [ ] API documentation complete
+
+  ## Follow IntelGraph Conventions
+
+  - Use TypeScript for service and {{ui_framework}} for UI
+  - Follow CLAUDE.md coding standards
+  - Add to pnpm workspace
+  - Include golden path smoke test
+
+  Remember: **Explainability builds trust.** Every decision must be auditable and understandable.
+
+examples:
+  - name: 'shap-react-jupyter'
+    inputs:
+      explanation_methods: 'SHAP, Counterfactual'
+      ui_framework: 'React'
+      notebook_format: 'ipynb'
+    expected_contains:
+      - 'SHAP'
+      - 'Counterfactual'
+      - 'React'
+      - 'ipynb'
+      - 'provenance'
+
+  - name: 'lime-vue-rmarkdown'
+    inputs:
+      explanation_methods: 'LIME, GNNExplainer'
+      ui_framework: 'Vue'
+      notebook_format: 'Rmd'
+    expected_contains:
+      - 'LIME'
+      - 'GNNExplainer'
+      - 'Vue'
+      - 'minimal flip'

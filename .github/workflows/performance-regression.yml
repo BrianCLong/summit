@@ -1,0 +1,454 @@
+name: ⚡ Performance Regression Testing
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '**.ts'
+      - '**.tsx'
+      - '**.js'
+      - '**.jsx'
+      - '**/package.json'
+      - 'pnpm-lock.yaml'
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+env:
+  NODE_VERSION: '20.x'
+  PNPM_VERSION: '9'
+
+jobs:
+  bundle-size-check:
+    name: 📦 Bundle Size Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build for production
+        run: pnpm build
+
+      - name: Analyze bundle size
+        id: analyze
+        run: |
+          echo "📦 Analyzing bundle size..."
+
+          # Install bundlesize
+          npm install -g bundlesize
+
+          # Find build output directories
+          BUILD_DIRS=$(find . -type d -name "dist" -o -name "build" | grep -v node_modules || echo "")
+
+          if [[ -z "$BUILD_DIRS" ]]; then
+            echo "No build directories found"
+            exit 0
+          fi
+
+          # Analyze each build directory
+          TOTAL_SIZE=0
+          BUNDLE_INFO=""
+
+          while IFS= read -r dir; do
+            if [[ -d "$dir" ]]; then
+              # Calculate directory size
+              SIZE=$(du -sb "$dir" | cut -f1)
+              SIZE_MB=$(echo "scale=2; $SIZE / 1024 / 1024" | bc)
+              TOTAL_SIZE=$((TOTAL_SIZE + SIZE))
+
+              BUNDLE_INFO="$BUNDLE_INFO\n- \`$dir\`: ${SIZE_MB} MB"
+
+              # Find largest files
+              LARGE_FILES=$(find "$dir" -type f -size +500k -exec ls -lh {} \; | awk '{print $5, $9}' | sort -rh | head -5)
+              if [[ -n "$LARGE_FILES" ]]; then
+                BUNDLE_INFO="$BUNDLE_INFO\n  **Large files:**"
+                while IFS= read -r file_info; do
+                  BUNDLE_INFO="$BUNDLE_INFO\n  - $file_info"
+                done <<< "$LARGE_FILES"
+              fi
+            fi
+          done <<< "$BUILD_DIRS"
+
+          TOTAL_MB=$(echo "scale=2; $TOTAL_SIZE / 1024 / 1024" | bc)
+          echo "total_size_mb=$TOTAL_MB" >> $GITHUB_OUTPUT
+          echo -e "$BUNDLE_INFO" > /tmp/bundle_info.txt
+
+          echo "✅ Total bundle size: ${TOTAL_MB} MB"
+
+      - name: Compare with base branch
+        if: github.event_name == 'pull_request'
+        id: compare
+        run: |
+          echo "📊 Comparing with base branch..."
+
+          # Checkout base branch
+          git fetch origin ${{ github.base_ref }}
+          git checkout origin/${{ github.base_ref }}
+
+          # Install and build base
+          pnpm install --frozen-lockfile
+          pnpm build
+
+          # Calculate base size
+          BASE_SIZE=0
+          BUILD_DIRS=$(find . -type d -name "dist" -o -name "build" | grep -v node_modules || echo "")
+
+          while IFS= read -r dir; do
+            if [[ -d "$dir" ]]; then
+              SIZE=$(du -sb "$dir" | cut -f1)
+              BASE_SIZE=$((BASE_SIZE + SIZE))
+            fi
+          done <<< "$BUILD_DIRS"
+
+          BASE_MB=$(echo "scale=2; $BASE_SIZE / 1024 / 1024" | bc)
+          echo "base_size_mb=$BASE_MB" >> $GITHUB_OUTPUT
+
+          # Calculate difference
+          CURRENT_MB="${{ steps.analyze.outputs.total_size_mb }}"
+          DIFF=$(echo "scale=2; $CURRENT_MB - $BASE_MB" | bc)
+          PERCENT=$(echo "scale=2; ($DIFF / $BASE_MB) * 100" | bc 2>/dev/null || echo "0")
+
+          echo "size_diff_mb=$DIFF" >> $GITHUB_OUTPUT
+          echo "size_diff_percent=$PERCENT" >> $GITHUB_OUTPUT
+
+          echo "📊 Bundle size comparison:"
+          echo "  Base: ${BASE_MB} MB"
+          echo "  Current: ${CURRENT_MB} MB"
+          echo "  Diff: ${DIFF} MB (${PERCENT}%)"
+
+          # Check threshold (warn if >5% increase)
+          if (( $(echo "$PERCENT > 5" | bc -l) )); then
+            echo "size_warning=true" >> $GITHUB_OUTPUT
+            echo "⚠️ Bundle size increased by more than 5%"
+          else
+            echo "size_warning=false" >> $GITHUB_OUTPUT
+          fi
+
+  build-performance:
+    name: 🏗️ Build Performance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Measure build time
+        id: build_time
+        run: |
+          echo "⏱️ Measuring build time..."
+
+          # Clean previous builds
+          pnpm exec turbo run build --force
+
+          # Measure build time
+          START_TIME=$(date +%s)
+          pnpm build
+          END_TIME=$(date +%s)
+
+          BUILD_TIME=$((END_TIME - START_TIME))
+          echo "build_time_seconds=$BUILD_TIME" >> $GITHUB_OUTPUT
+
+          echo "✅ Build completed in ${BUILD_TIME} seconds"
+
+      - name: Measure typecheck time
+        id: typecheck_time
+        run: |
+          echo "⏱️ Measuring typecheck time..."
+
+          START_TIME=$(date +%s)
+          pnpm typecheck
+          END_TIME=$(date +%s)
+
+          TYPECHECK_TIME=$((END_TIME - START_TIME))
+          echo "typecheck_time_seconds=$TYPECHECK_TIME" >> $GITHUB_OUTPUT
+
+          echo "✅ Typecheck completed in ${TYPECHECK_TIME} seconds"
+
+      - name: Measure test time
+        id: test_time
+        run: |
+          echo "⏱️ Measuring test time..."
+
+          START_TIME=$(date +%s)
+          pnpm test || true
+          END_TIME=$(date +%s)
+
+          TEST_TIME=$((END_TIME - START_TIME))
+          echo "test_time_seconds=$TEST_TIME" >> $GITHUB_OUTPUT
+
+          echo "✅ Tests completed in ${TEST_TIME} seconds"
+
+      - name: Save baseline metrics
+        run: |
+          cat > performance-metrics.json << EOF
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "commit": "${{ github.sha }}",
+            "build_time": ${{ steps.build_time.outputs.build_time_seconds }},
+            "typecheck_time": ${{ steps.typecheck_time.outputs.typecheck_time_seconds }},
+            "test_time": ${{ steps.test_time.outputs.test_time_seconds }}
+          }
+          EOF
+
+      - name: Upload performance metrics
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-metrics
+          path: performance-metrics.json
+
+  runtime-performance:
+    name: 🚀 Runtime Performance
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build application
+        run: pnpm build
+
+      - name: Start services
+        run: |
+          echo "🚀 Starting services..."
+          docker-compose -f docker-compose.dev.yml up -d
+
+          # Wait for services to be ready
+          timeout 180 bash -c 'until curl -f http://localhost:4000/health; do echo "Waiting for API..."; sleep 5; done'
+          timeout 180 bash -c 'until curl -f http://localhost:3000; do echo "Waiting for web..."; sleep 5; done'
+
+      - name: Install k6 for load testing
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install k6
+
+      - name: Run performance tests
+        id: perf_tests
+        run: |
+          echo "⚡ Running performance tests..."
+
+          # Create k6 test script
+          cat > perf-test.js << 'EOF'
+          import http from 'k6/http';
+          import { check, sleep } from 'k6';
+          import { Trend, Rate } from 'k6/metrics';
+
+          const responseTimes = new Trend('response_times');
+          const errorRate = new Rate('error_rate');
+
+          export const options = {
+            stages: [
+              { duration: '30s', target: 10 },  // Ramp up to 10 users
+              { duration: '1m', target: 10 },   // Stay at 10 users
+              { duration: '30s', target: 0 },   // Ramp down
+            ],
+            thresholds: {
+              'http_req_duration': ['p(95)<500'],  // 95% of requests must complete below 500ms
+              'http_req_failed': ['rate<0.1'],     // Error rate must be below 10%
+            },
+          };
+
+          export default function () {
+            // Health check endpoint
+            const healthRes = http.get('http://localhost:4000/health');
+            check(healthRes, {
+              'health check status is 200': (r) => r.status === 200,
+            });
+            responseTimes.add(healthRes.timings.duration);
+            errorRate.add(healthRes.status !== 200);
+
+            sleep(1);
+
+            // GraphQL endpoint (if available)
+            const graphqlRes = http.post(
+              'http://localhost:4000/graphql',
+              JSON.stringify({
+                query: '{ __typename }',
+              }),
+              {
+                headers: { 'Content-Type': 'application/json' },
+              }
+            );
+
+            check(graphqlRes, {
+              'graphql status is 200': (r) => r.status === 200,
+            });
+            responseTimes.add(graphqlRes.timings.duration);
+            errorRate.add(graphqlRes.status !== 200);
+
+            sleep(1);
+          }
+          EOF
+
+          # Run k6 test
+          k6 run --out json=perf-results.json perf-test.js
+
+          # Extract key metrics
+          P95=$(jq -r 'select(.type=="Point" and .metric=="http_req_duration") | .data.value' perf-results.json | sort -n | awk '{a[NR]=$1} END {print a[int(NR*0.95)]}')
+          P99=$(jq -r 'select(.type=="Point" and .metric=="http_req_duration") | .data.value' perf-results.json | sort -n | awk '{a[NR]=$1} END {print a[int(NR*0.99)]}')
+          AVG=$(jq -r 'select(.type=="Point" and .metric=="http_req_duration") | .data.value' perf-results.json | awk '{sum+=$1; count++} END {print sum/count}')
+
+          echo "p95_ms=$P95" >> $GITHUB_OUTPUT
+          echo "p99_ms=$P99" >> $GITHUB_OUTPUT
+          echo "avg_ms=$AVG" >> $GITHUB_OUTPUT
+
+          echo "📊 Performance results:"
+          echo "  Average: ${AVG}ms"
+          echo "  P95: ${P95}ms"
+          echo "  P99: ${P99}ms"
+
+      - name: Upload k6 results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-results
+          path: perf-results.json
+
+      - name: Cleanup
+        if: always()
+        run: docker-compose -f docker-compose.dev.yml down -v
+
+  performance-summary:
+    name: 📊 Performance Summary
+    needs: [bundle-size-check, build-performance, runtime-performance]
+    if: always() && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post performance summary
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            let comment = `## ⚡ Performance Analysis\n\n`;
+
+            // Bundle Size
+            const totalSize = '${{ needs.bundle-size-check.outputs.total_size_mb }}' || 'N/A';
+            const sizeWarning = '${{ needs.bundle-size-check.outputs.size_warning }}' === 'true';
+
+            comment += `### 📦 Bundle Size\n`;
+            comment += `**Total Size**: ${totalSize} MB\n\n`;
+
+            if (sizeWarning) {
+              const sizeDiff = '${{ needs.bundle-size-check.outputs.size_diff_mb }}' || '0';
+              const percentDiff = '${{ needs.bundle-size-check.outputs.size_diff_percent }}' || '0';
+              comment += `⚠️ **Warning**: Bundle size increased by ${sizeDiff} MB (${percentDiff}%)\n\n`;
+            } else {
+              comment += `✅ Bundle size is acceptable\n\n`;
+            }
+
+            // Build Performance
+            const buildTime = '${{ needs.build-performance.outputs.build_time_seconds }}' || 'N/A';
+            const typecheckTime = '${{ needs.build-performance.outputs.typecheck_time_seconds }}' || 'N/A';
+            const testTime = '${{ needs.build-performance.outputs.test_time_seconds }}' || 'N/A';
+
+            comment += `### 🏗️ Build Performance\n`;
+            comment += `- **Build time**: ${buildTime}s\n`;
+            comment += `- **Typecheck time**: ${typecheckTime}s\n`;
+            comment += `- **Test time**: ${testTime}s\n\n`;
+
+            // Runtime Performance
+            const p95 = '${{ needs.runtime-performance.outputs.p95_ms }}' || 'N/A';
+            const p99 = '${{ needs.runtime-performance.outputs.p99_ms }}' || 'N/A';
+            const avg = '${{ needs.runtime-performance.outputs.avg_ms }}' || 'N/A';
+
+            comment += `### 🚀 Runtime Performance\n`;
+            comment += `- **Average response time**: ${avg}ms\n`;
+            comment += `- **P95 response time**: ${p95}ms\n`;
+            comment += `- **P99 response time**: ${p99}ms\n\n`;
+
+            if (parseFloat(p95) > 500) {
+              comment += `⚠️ **Warning**: P95 response time exceeds 500ms threshold\n\n`;
+            } else {
+              comment += `✅ Response times are within acceptable range\n\n`;
+            }
+
+            comment += `---\n`;
+            comment += `<sub>💡 **Performance targets**: P95 < 500ms, Bundle growth < 5%, Build time minimal</sub>\n`;
+
+            // Find existing comment
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.data.find(c =>
+              c.user.type === 'Bot' && c.body.includes('Performance Analysis')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: comment,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment,
+              });
+            }

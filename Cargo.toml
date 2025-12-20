@@ -1,0 +1,12 @@
+[workspace]
+members = [
+    "ibrs",
+    "bindings/ibrs-node",
+    "rust/summit_enterprise"
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+license = "MIT"
+repository = "https://example.com/summit"

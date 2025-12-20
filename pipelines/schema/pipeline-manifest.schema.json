@@ -1,0 +1,300 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.intelgraph.io/schemas/pipeline-manifest/v1",
+  "title": "Summit Pipeline Manifest",
+  "description": "Canonical schema for defining orchestrated pipelines across Airflow, Maestro, and local runners",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "properties": {
+    "apiVersion": {
+      "type": "string",
+      "enum": ["summit.io/v1"],
+      "description": "API version of the manifest schema"
+    },
+    "kind": {
+      "type": "string",
+      "enum": ["Pipeline"],
+      "description": "Resource type - always 'Pipeline'"
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+          "description": "Pipeline name (DNS-compatible)"
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description"
+        },
+        "owners": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Team or individual owners (email, team slug)"
+        },
+        "tags": {
+          "type": "object",
+          "additionalProperties": {"type": "string"},
+          "description": "Key-value tags for categorization"
+        },
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {"type": "string"},
+          "description": "Non-identifying metadata (docs URLs, runbook links)"
+        }
+      }
+    },
+    "spec": {
+      "type": "object",
+      "required": ["tasks"],
+      "properties": {
+        "schedule": {
+          "type": "object",
+          "properties": {
+            "cron": {
+              "type": "string",
+              "description": "Cron expression (e.g., '0 2 * * *')"
+            },
+            "timezone": {
+              "type": "string",
+              "default": "UTC",
+              "description": "IANA timezone for cron evaluation"
+            },
+            "enabled": {
+              "type": "boolean",
+              "default": true,
+              "description": "Whether scheduling is active"
+            }
+          }
+        },
+        "triggers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["webhook", "dataset", "manual", "pipeline"],
+                "description": "Trigger type"
+              },
+              "config": {
+                "type": "object",
+                "description": "Type-specific trigger configuration"
+              }
+            }
+          }
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "namespace"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Dataset name"
+              },
+              "namespace": {
+                "type": "string",
+                "description": "Dataset namespace (e.g., 's3://bucket/path')"
+              },
+              "facets": {
+                "type": "object",
+                "description": "OpenLineage dataset facets (schema, quality)"
+              }
+            }
+          },
+          "description": "Input datasets for lineage tracking"
+        },
+        "outputs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "namespace"],
+            "properties": {
+              "name": {"type": "string"},
+              "namespace": {"type": "string"},
+              "facets": {"type": "object"}
+            }
+          },
+          "description": "Output datasets for lineage tracking"
+        },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "type"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9_-]+$",
+                "description": "Unique task identifier within pipeline"
+              },
+              "name": {
+                "type": "string",
+                "description": "Human-readable task name"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["python", "bash", "node", "docker", "airflow-operator", "custom"],
+                "description": "Task executor type"
+              },
+              "depends_on": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Task IDs this task depends on"
+              },
+              "code": {
+                "type": "object",
+                "properties": {
+                  "module": {
+                    "type": "string",
+                    "description": "Python module path (e.g., 'src.jobs.ingest_cisa')"
+                  },
+                  "function": {
+                    "type": "string",
+                    "description": "Function name to invoke"
+                  },
+                  "script": {
+                    "type": "string",
+                    "description": "Path to script file"
+                  },
+                  "command": {
+                    "type": "string",
+                    "description": "Inline command to execute"
+                  },
+                  "image": {
+                    "type": "string",
+                    "description": "Docker image for containerized tasks"
+                  }
+                },
+                "description": "Code execution configuration"
+              },
+              "params": {
+                "type": "object",
+                "description": "Task parameters passed to code"
+              },
+              "env": {
+                "type": "object",
+                "additionalProperties": {"type": "string"},
+                "description": "Environment variables"
+              },
+              "retry": {
+                "type": "object",
+                "properties": {
+                  "attempts": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 3
+                  },
+                  "delay": {
+                    "type": "string",
+                    "pattern": "^[0-9]+(s|m|h)$",
+                    "default": "5m",
+                    "description": "Delay between retries (e.g., '5m', '30s')"
+                  },
+                  "backoff": {
+                    "type": "string",
+                    "enum": ["fixed", "exponential"],
+                    "default": "exponential"
+                  }
+                }
+              },
+              "timeout": {
+                "type": "string",
+                "pattern": "^[0-9]+(s|m|h)$",
+                "description": "Task timeout (e.g., '30m', '2h')"
+              },
+              "resources": {
+                "type": "object",
+                "properties": {
+                  "cpu": {"type": "string"},
+                  "memory": {"type": "string"},
+                  "gpu": {"type": "integer"}
+                }
+              }
+            }
+          }
+        },
+        "governance": {
+          "type": "object",
+          "properties": {
+            "budget": {
+              "type": "object",
+              "properties": {
+                "hard_cap_usd": {"type": "number"},
+                "per_run_usd": {"type": "number"}
+              }
+            },
+            "slo": {
+              "type": "object",
+              "properties": {
+                "latency_p95_ms": {"type": "number"},
+                "success_rate_percent": {"type": "number"}
+              }
+            },
+            "policies": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "OPA policy references"
+            }
+          }
+        },
+        "observability": {
+          "type": "object",
+          "properties": {
+            "openlineage": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "namespace": {
+                  "type": "string",
+                  "description": "OpenLineage namespace for this pipeline"
+                }
+              }
+            },
+            "alerts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "condition": {"type": "string"},
+                  "channels": {
+                    "type": "array",
+                    "items": {"type": "string"}
+                  }
+                }
+              }
+            }
+          }
+        },
+        "execution": {
+          "type": "object",
+          "properties": {
+            "runtime": {
+              "type": "string",
+              "enum": ["airflow", "maestro", "local", "docker"],
+              "default": "maestro",
+              "description": "Preferred execution runtime"
+            },
+            "concurrency": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Max concurrent task executions"
+            },
+            "catchup": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether to backfill missed runs (Airflow)"
+            }
+          }
+        }
+      }
+    }
+  }
+}

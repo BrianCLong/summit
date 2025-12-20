@@ -1,0 +1,103 @@
+# CISA KEV (Known Exploited Vulnerabilities) Connector Manifest
+# Version: 1.0.0
+
+# === Core Metadata ===
+name: cisa-kev
+display_name: "CISA Known Exploited Vulnerabilities Catalog"
+description: "Connector for CISA's Known Exploited Vulnerabilities (KEV) catalog - a authoritative source of vulnerabilities actively exploited in the wild"
+version: "1.0.0"
+author: "IntelGraph Data Intake Team"
+license: "MIT"
+
+# === Connector Type ===
+ingestion_type: batch
+supported_formats:
+  - json
+
+# === Data Source Configuration ===
+source:
+  type: api
+  authentication:
+    type: none
+    required_credentials: []
+  base_url: "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
+  documentation_url: "https://www.cisa.gov/known-exploited-vulnerabilities-catalog"
+
+# === Rate Limiting ===
+# CISA KEV is updated daily, no aggressive rate limiting needed
+rate_limit:
+  enabled: false
+  type: per_source
+  requests_per_second: 1
+  burst_size: 5
+  backoff_strategy: exponential
+  max_retries: 3
+
+# === Schema & Mapping ===
+schema_mapping_file: schema_mapping.py
+entity_types:
+  - Vulnerability
+relationship_types: []
+
+# === Testing ===
+sample_data_file: sample.json
+golden_tests:
+  enabled: true
+  test_cases:
+    - name: basic_ingestion
+      input: __tests__/golden/input/sample_kev.json
+      expected: __tests__/golden/expected/entities.json
+    - name: full_catalog
+      input: __tests__/golden/input/full_catalog.json
+      expected: __tests__/golden/expected/full_entities.json
+    - name: ransomware_filter
+      input: __tests__/golden/input/ransomware_sample.json
+      expected: __tests__/golden/expected/ransomware_entities.json
+
+# === Compliance & Governance ===
+compliance:
+  pii_detection: true
+  pii_fields: []  # No PII expected in CVE data
+  license_check: true
+  data_classification: public
+  retention_days: 365
+  data_source_license: "US Government - Public Domain"
+  terms_of_service: "https://www.cisa.gov/privacy-policy"
+
+# === Observability ===
+observability:
+  metrics_enabled: true
+  sli_targets:
+    availability: 0.99          # 99% success rate
+    latency_p95_ms: 10000       # 95th percentile < 10s (external API)
+    throughput_min: 1000        # Min records/min
+    data_freshness_hours: 24    # Data should be < 24 hours old
+  slo_window_days: 30
+  alert_on_slo_breach: true
+
+# === Resource Limits ===
+resources:
+  max_concurrent_requests: 1    # Single API call for full catalog
+  batch_size: 100               # Process 100 vulnerabilities per batch
+  timeout_seconds: 30
+  memory_limit_mb: 256
+
+# === Dependencies ===
+dependencies:
+  python: ">=3.11"
+  packages:
+    - httpx>=0.27.0
+    - pydantic>=2.0.0
+
+# === Metadata ===
+metadata:
+  category: security
+  tags:
+    - cve
+    - vulnerability
+    - security
+    - cisa
+    - ransomware
+  update_frequency: daily
+  data_volume_estimate: "1000-2000 vulnerabilities"
+  maintainer: "data-intake-team@intelgraph.io"

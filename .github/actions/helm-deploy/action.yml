@@ -3,9 +3,36 @@ inputs:
   chart: { required: true }
   namespace: { required: true }
   values: { required: false }
+  image: { required: true, description: 'Container image (tag or digest) to verify before deployment' }
+  cosign_public_key: { required: false, description: 'Optional cosign public key for verification' }
 runs:
   using: 'composite'
   steps:
+    - uses: sigstore/cosign-installer@v3
+      with:
+        cosign-release: 'v2.2.4'
+
+    - name: Verify image attestation
+      shell: bash
+      env:
+        COSIGN_EXPERIMENTAL: '1'
+      run: |
+        set -euo pipefail
+        if [ -z "${{ inputs.image }}" ]; then
+          echo "An image reference is required for attestation verification."
+          exit 1
+        fi
+
+        VERIFY_ARGS=()
+        if [ -n "${{ inputs.cosign_public_key }}" ]; then
+          VERIFY_ARGS+=(--key "${{ inputs.cosign_public_key }}")
+        else
+          VERIFY_ARGS+=(--certificate-identity "https://github.com/${{ github.repository }}")
+          VERIFY_ARGS+=(--certificate-oidc-issuer "https://token.actions.githubusercontent.com")
+        fi
+
+        cosign verify-attestation --type spdxjson "${VERIFY_ARGS[@]}" "${{ inputs.image }}"
+
     - uses: azure/setup-helm@v4
     - run: |
         helm upgrade --install $(basename ${{ inputs.chart }}) ${{ inputs.chart }} \

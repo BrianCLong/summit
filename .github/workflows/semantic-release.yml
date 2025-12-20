@@ -1,0 +1,227 @@
+# Semantic Release Workflow
+#
+# This is the canonical release workflow for the Summit/IntelGraph platform.
+# It uses semantic-release to automatically:
+#   - Analyze commits since the last release
+#   - Determine the next version number
+#   - Generate release notes and update CHANGELOG.md
+#   - Create a git tag and GitHub Release
+#   - Build and upload release artifacts
+#
+# For documentation, see: docs/ops/release-process.md
+#
+# Trigger:
+#   - Automatically on push to main/beta/alpha branches
+#   - Manually via workflow_dispatch
+#
+name: Semantic Release
+
+on:
+  push:
+    branches:
+      - main
+      - beta
+      - alpha
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (no actual release)'
+        required: false
+        default: 'false'
+        type: boolean
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  packages: write
+  id-token: write
+
+jobs:
+  release:
+    name: Semantic Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      new-release-published: ${{ steps.semantic.outputs.new-release-published }}
+      new-release-version: ${{ steps.semantic.outputs.new-release-version }}
+      new-release-git-tag: ${{ steps.semantic.outputs.new-release-git-tag }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-
+
+      - name: Cache Turbo
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-turbo-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build workspace
+        run: pnpm build
+
+      - name: Run tests
+        run: pnpm test
+        continue-on-error: false
+
+      - name: Run linter
+        run: pnpm lint
+        continue-on-error: false
+
+      - name: Semantic Release
+        id: semantic
+        uses: cycjimmy/semantic-release-action@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        with:
+          dry_run: ${{ inputs.dry_run || 'false' }}
+          extra_plugins: |
+            @semantic-release/changelog@6
+            @semantic-release/git@10
+            @semantic-release/exec@6
+            conventional-changelog-conventionalcommits@7
+
+      - name: Create release bundle
+        if: steps.semantic.outputs.new-release-published == 'true'
+        run: |
+          VERSION=${{ steps.semantic.outputs.new-release-version }}
+          mkdir -p release-bundle
+
+          # Include compose files that exist
+          for f in docker-compose.yml docker-compose.dev.yml docker-compose.ai.yml; do
+            [ -f "$f" ] && cp "$f" release-bundle/
+          done
+
+          # Include Dockerfile if exists
+          [ -f Dockerfile ] && cp Dockerfile release-bundle/
+
+          # Include scripts directory
+          [ -d scripts ] && cp -r scripts release-bundle/
+
+          # Include helm charts if they exist
+          [ -d helm ] && cp -r helm release-bundle/
+
+          # Include configuration samples
+          [ -f .env.example ] && cp .env.example release-bundle/
+          [ -f .env.production.sample ] && cp .env.production.sample release-bundle/
+
+          # Include documentation
+          [ -f README.md ] && cp README.md release-bundle/
+          [ -f CHANGELOG.md ] && cp CHANGELOG.md release-bundle/
+          [ -f RELEASE_NOTES.md ] && cp RELEASE_NOTES.md release-bundle/
+
+          # Include Makefile
+          [ -f Makefile ] && cp Makefile release-bundle/
+
+          # Include observability configs
+          [ -d observability ] && cp -r observability release-bundle/
+
+          # Create tarball
+          tar -czf summit-${VERSION}.tgz -C release-bundle .
+
+          echo "Created release bundle: summit-${VERSION}.tgz"
+          echo "Contents:"
+          tar -tzf summit-${VERSION}.tgz
+
+      - name: Upload release artifact
+        if: steps.semantic.outputs.new-release-published == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-bundle-${{ steps.semantic.outputs.new-release-version }}
+          path: summit-${{ steps.semantic.outputs.new-release-version }}.tgz
+          retention-days: 90
+
+      - name: Notify Slack
+        if: steps.semantic.outputs.new-release-published == 'true' && env.SLACK_WEBHOOK_URL != ''
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "New release published: v${{ steps.semantic.outputs.new-release-version }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*New Release Published*\n\n*Version:* `${{ steps.semantic.outputs.new-release-version }}`\n*Tag:* `${{ steps.semantic.outputs.new-release-git-tag }}`\n*Branch:* `${{ github.ref_name }}`"
+                  }
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Release"
+                      },
+                      "url": "${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ steps.semantic.outputs.new-release-git-tag }}"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+      - name: Summary
+        run: |
+          if [ "${{ steps.semantic.outputs.new-release-published }}" == "true" ]; then
+            echo "## Release Summary" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Version:** \`${{ steps.semantic.outputs.new-release-version }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "**Tag:** \`${{ steps.semantic.outputs.new-release-git-tag }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "**Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+            echo "- [ ] Verify staging deployment" >> $GITHUB_STEP_SUMMARY
+            echo "- [ ] Run smoke tests" >> $GITHUB_STEP_SUMMARY
+            echo "- [ ] Deploy to production (manual approval required)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## No Release Created" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "No commits since last release warranted a new version." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "To trigger a release, merge commits with types: \`feat\`, \`fix\`, \`perf\`, \`refactor\`, or \`revert\`." >> $GITHUB_STEP_SUMMARY
+          fi
+
+  trigger-staging-deployment:
+    name: Trigger Staging Deployment
+    needs: release
+    if: needs.release.outputs.new-release-published == 'true' && github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/deploy-staging.yml
+    with:
+      version: ${{ needs.release.outputs.new-release-version }}
+      environment: staging
+    secrets: inherit

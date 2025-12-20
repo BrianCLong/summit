@@ -1,5 +1,5 @@
 image:
-  repository: <AWS_ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com/summit-company/core-intelgraph-api
+  repository: summit/api
   tag: latest
   pullPolicy: IfNotPresent
 

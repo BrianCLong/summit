@@ -1,0 +1,195 @@
+name: Graph Performance Benchmarks
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'server/src/services/GraphRAGService.ts'
+      - 'server/src/services/GraphAnalyticsService.js'
+      - 'server/src/services/PathRankingService.ts'
+      - 'server/src/repos/EntityRepo.ts'
+      - 'server/src/repos/RelationshipRepo.ts'
+      - 'server/src/db/neo4j.ts'
+      - 'server/src/ai/nl-to-cypher/**'
+      - 'benchmarks/graph/**'
+      - 'docker-compose.neo4j.yml'
+      - '.github/workflows/graph-benchmark.yml'
+  workflow_dispatch:
+    inputs:
+      size:
+        description: 'Dataset size(s)'
+        required: false
+        default: 'small,medium'
+      scenarios:
+        description: 'Scenario group'
+        required: false
+        default: 'ci'
+
+concurrency:
+  group: graph-benchmark-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      neo4j:
+        image: neo4j:5.22-community
+        env:
+          NEO4J_AUTH: neo4j/testtest1
+          NEO4J_server_memory_heap_initial__size: 256m
+          NEO4J_server_memory_heap_max__size: 512m
+          NEO4J_dbms_memory_pagecache_size: 256m
+        ports:
+          - 7474:7474
+          - 7687:7687
+        options: >-
+          --health-cmd "cypher-shell -a bolt://localhost:7687 -u neo4j -p testtest1 'RETURN 1' || exit 1"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 60
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install benchmark dependencies
+        run: npm ci
+        working-directory: benchmarks/graph
+
+      - name: Wait for Neo4j to be ready
+        run: |
+          echo "Waiting for Neo4j to be ready..."
+          timeout 120 bash -c 'until nc -z localhost 7687; do sleep 1; done'
+          echo "Neo4j is ready!"
+
+      - name: Run graph benchmarks
+        id: benchmark
+        run: |
+          SIZE="${{ github.event.inputs.size || 'small,medium' }}"
+          SCENARIOS="${{ github.event.inputs.scenarios || 'ci' }}"
+
+          npm run bench:ci -- \
+            --size "$SIZE" \
+            --scenarios "$SCENARIOS" \
+            --iterations 50 \
+            --warmup 5 \
+            --budget-check \
+            --neo4j-uri bolt://localhost:7687 \
+            --neo4j-user neo4j \
+            --neo4j-password testtest1
+        working-directory: benchmarks/graph
+        continue-on-error: true
+
+      - name: Generate benchmark report
+        if: always()
+        run: npm run report
+        working-directory: benchmarks/graph
+
+      - name: Upload benchmark results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: graph-benchmark-results
+          path: |
+            benchmarks/graph/reports/*.json
+            benchmarks/graph/reports/*.md
+            benchmarks/graph/reports/*.html
+          retention-days: 30
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            // Read the markdown report
+            const reportPath = path.join(process.env.GITHUB_WORKSPACE, 'benchmarks/graph/reports/report.md');
+
+            if (!fs.existsSync(reportPath)) {
+              console.log('Report not found, skipping comment');
+              return;
+            }
+
+            let report = fs.readFileSync(reportPath, 'utf8');
+
+            // Truncate if too long (GitHub comment limit)
+            if (report.length > 60000) {
+              report = report.substring(0, 60000) + '\n\n... (truncated, see full report in artifacts)';
+            }
+
+            const comment = `## 📊 Graph Performance Benchmark Results\n\n${report}\n\n---\n*Benchmark ran on commit ${context.sha.substring(0, 7)}*`;
+
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existingComment = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('Graph Performance Benchmark Results')
+            );
+
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: comment
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment
+              });
+            }
+
+      - name: Check benchmark status
+        if: steps.benchmark.outcome == 'failure'
+        run: |
+          echo "::error::Graph benchmarks exceeded performance budgets!"
+          echo "Review the benchmark report for details on which queries regressed."
+          exit 1
+
+  baseline-update:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: benchmark
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download benchmark results
+        uses: actions/download-artifact@v4
+        with:
+          name: graph-benchmark-results
+          path: benchmarks/graph/reports
+
+      - name: Update baseline
+        run: |
+          # Store the latest results as baseline for regression detection
+          cp benchmarks/graph/reports/latest.json benchmarks/graph/reports/baseline.json
+          echo "Baseline updated at $(date)" >> benchmarks/graph/reports/baseline.log
+
+      - name: Commit baseline update
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update graph benchmark baseline [skip ci]"
+          file_pattern: benchmarks/graph/reports/baseline.*

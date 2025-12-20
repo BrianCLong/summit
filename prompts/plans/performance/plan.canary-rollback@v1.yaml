@@ -1,0 +1,222 @@
+meta:
+  id: plan.canary-rollback@v1
+  owner: 'platform-engineering'
+  purpose: 'Implement canary deployments and quick rollback for safer releases'
+  tags:
+    - deployment
+    - canary
+    - rollback
+    - feature-flags
+    - safety
+  guardrails:
+    - 'Canary must receive representative traffic'
+    - 'Rollback must complete in < 2 minutes'
+    - 'Metrics guardrails must prevent bad deploys'
+    - 'Feature flags must have kill switches'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  target_service: string
+  deployment_platform: string
+  current_strategy: string
+  traffic_patterns: string
+  rollback_requirements: string
+
+template: |
+  You are a Release Engineer implementing canary deployments for Summit/IntelGraph.
+
+  **Objective:** Safer releases with canaries and quick rollback.
+
+  **Target Service:**
+  {{target_service}}
+
+  **Deployment Platform:**
+  {{deployment_platform}}
+
+  **Current Strategy:**
+  {{current_strategy}}
+
+  **Traffic Patterns:**
+  {{traffic_patterns}}
+
+  **Rollback Requirements:**
+  {{rollback_requirements}}
+
+  ## Deliverables
+
+  ### 1. Canary Rollout Plan
+  ```yaml
+  canary:
+    stages:
+      - name: smoke
+        traffic_percent: 1%
+        duration: 5m
+        success_criteria:
+          - error_rate < 0.1%
+          - p99_latency < baseline * 1.1
+
+      - name: canary
+        traffic_percent: 10%
+        duration: 15m
+        success_criteria:
+          - error_rate < 0.5%
+          - p99_latency < baseline * 1.2
+          - no critical alerts
+
+      - name: rollout
+        traffic_percent: 50%
+        duration: 30m
+        success_criteria:
+          - error_rate < 1%
+          - comparable to baseline
+
+      - name: full
+        traffic_percent: 100%
+        duration: continuous
+        success_criteria:
+          - meets SLOs
+  ```
+
+  ### 2. Rollback Procedure
+  ```yaml
+  rollback:
+    triggers:
+      automatic:
+        - error_rate > 5%
+        - p99_latency > 2x baseline
+        - critical alert fired
+        - health check failures > 3
+
+      manual:
+        - operator decision
+        - customer report
+        - security concern
+
+    procedure:
+      - name: immediate_rollback
+        steps:
+          1. Route 100% traffic to stable version
+          2. Scale down canary pods
+          3. Notify on-call and stakeholders
+          4. Preserve logs and metrics for analysis
+        target_duration: < 60 seconds
+
+      - name: gradual_rollback
+        steps:
+          1. Reduce canary traffic to 0%
+          2. Monitor stable version health
+          3. Terminate canary pods
+          4. Post-incident analysis
+        target_duration: < 5 minutes
+  ```
+
+  ### 3. Metrics Guardrails
+  ```yaml
+  guardrails:
+    - name: error_rate
+      query: sum(rate(errors[5m])) / sum(rate(requests[5m]))
+      threshold: 5%
+      action: auto_rollback
+
+    - name: latency_p99
+      query: histogram_quantile(0.99, rate(latency_bucket[5m]))
+      threshold: 2x baseline
+      action: auto_rollback
+
+    - name: saturation
+      query: avg(cpu_utilization)
+      threshold: 90%
+      action: pause_rollout
+
+    - name: traffic_anomaly
+      query: abs(rate(requests[5m]) - rate(requests[5m] offset 1h)) / rate(requests[5m] offset 1h)
+      threshold: 50%
+      action: alert_and_pause
+  ```
+
+  ### 4. Feature Flag Integration
+  ```yaml
+  feature_flags:
+    service: LaunchDarkly | Unleash | custom
+    flags:
+      - name: new_feature_enabled
+        default: false
+        rollout:
+          - segment: internal_users
+            percentage: 100%
+          - segment: beta_users
+            percentage: 50%
+          - segment: all_users
+            percentage: 0%
+        kill_switch: true
+
+    integration:
+      - canary_stage uses flags for gradual enable
+      - rollback disables flags immediately
+      - flags persist across deployments
+  ```
+
+  ### 5. Kubernetes/Argo Rollouts Config
+  ```yaml
+  apiVersion: argoproj.io/v1alpha1
+  kind: Rollout
+  metadata:
+    name: api-server
+  spec:
+    replicas: 10
+    strategy:
+      canary:
+        steps:
+          - setWeight: 10
+          - pause: {duration: 15m}
+          - setWeight: 50
+          - pause: {duration: 30m}
+          - setWeight: 100
+        analysis:
+          templates:
+            - templateName: success-rate
+          startingStep: 1
+        trafficRouting:
+          istio:
+            virtualService:
+              name: api-server-vsvc
+  ```
+
+  ### 6. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] Canary deployment works in staging
+  - [ ] Rollback completes in < 2 minutes
+  - [ ] Metrics guardrails prevent bad deploys
+  - [ ] Feature flags integrate with canary
+  - [ ] Runbook documents all procedures
+
+  ## Rollback Plan
+  - Canary strategy is opt-in per service
+  - Fall back to rolling deploy if issues
+  - Emergency kubectl commands documented
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'api-server-canary'
+    inputs:
+      target_service: 'api-server'
+      deployment_platform: 'Kubernetes with Argo Rollouts'
+      current_strategy: 'Rolling update, 25% max unavailable'
+      traffic_patterns: '1000 req/min average, 3000 peak'
+      rollback_requirements: '< 2 minute rollback, zero data loss'
+    expected_contains:
+      - 'canary stages'
+      - 'Rollback Procedure'
+      - 'Metrics Guardrails'
+      - 'Feature Flag'

@@ -1,0 +1,327 @@
+name: Deploy to Staging
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version to deploy'
+        required: true
+        type: string
+      environment:
+        description: 'Target environment'
+        required: true
+        type: string
+        default: 'staging'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to deploy (leave empty for latest)'
+        required: false
+        type: string
+      skip-tests:
+        description: 'Skip smoke tests'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  id-token: write
+  contents: read
+  packages: write
+  deployments: write
+
+env:
+  AWS_REGION: us-east-1
+  ENVIRONMENT: staging
+  NAMESPACE: intelgraph-staging
+  CLUSTER_NAME: intelgraph-staging
+
+jobs:
+  prepare:
+    name: Prepare Deployment
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      image-tag: ${{ steps.version.outputs.image-tag }}
+      deployment-id: ${{ steps.deployment.outputs.deployment_id }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            VERSION="${{ inputs.version }}"
+          else
+            VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
+          fi
+          IMAGE_TAG="${VERSION}-${GITHUB_SHA:0:7}"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "image-tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+          echo "Deploying version: ${VERSION} (${IMAGE_TAG})"
+
+      - name: Create deployment
+        id: deployment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const deployment = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.sha,
+              environment: 'staging',
+              description: 'Deploy version ${{ steps.version.outputs.version }} to staging',
+              auto_merge: false,
+              required_contexts: []
+            });
+            core.setOutput('deployment_id', deployment.data.id);
+            return deployment.data.id;
+
+  build-images:
+    name: Build & Push Docker Images
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - name: api
+            dockerfile: deploy/docker/Dockerfile.api
+            context: .
+          - name: web
+            dockerfile: deploy/docker/Dockerfile.web
+            context: .
+          - name: worker
+            dockerfile: Dockerfile
+            context: .
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push ${{ matrix.service.name }}
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.service.context }}
+          file: ${{ matrix.service.dockerfile }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/${{ matrix.service.name }}:${{ needs.prepare.outputs.image-tag }}
+            ghcr.io/${{ github.repository }}/${{ matrix.service.name }}:staging
+            ${{ steps.ecr.outputs.registry }}/intelgraph/${{ matrix.service.name }}:${{ needs.prepare.outputs.image-tag }}
+            ${{ steps.ecr.outputs.registry }}/intelgraph/${{ matrix.service.name }}:staging
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VERSION=${{ needs.prepare.outputs.version }}
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+            VCS_REF=${{ github.sha }}
+          labels: |
+            org.opencontainers.image.title=${{ matrix.service.name }}
+            org.opencontainers.image.description=IntelGraph ${{ matrix.service.name }} service
+            org.opencontainers.image.version=${{ needs.prepare.outputs.version }}
+            org.opencontainers.image.created=${{ github.event.head_commit.timestamp }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+
+  deploy:
+    name: Deploy to Staging
+    needs: [prepare, build-images]
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://staging.intelgraph.io
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --name ${{ env.CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'v3.13.0'
+
+      - name: Ensure namespace exists
+        run: |
+          kubectl create namespace ${{ env.NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
+          kubectl label namespace ${{ env.NAMESPACE }} environment=staging --overwrite
+
+      - name: Create/update secrets
+        run: |
+          kubectl -n ${{ env.NAMESPACE }} create secret generic app-secrets \
+            --from-literal=database-url="${{ secrets.STAGING_DATABASE_URL }}" \
+            --from-literal=redis-url="${{ secrets.STAGING_REDIS_URL }}" \
+            --from-literal=neo4j-uri="${{ secrets.STAGING_NEO4J_URI }}" \
+            --from-literal=neo4j-password="${{ secrets.STAGING_NEO4J_PASSWORD }}" \
+            --from-literal=jwt-secret="${{ secrets.STAGING_JWT_SECRET }}" \
+            --from-literal=api-key="${{ secrets.STAGING_API_KEY }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Deploy with Helm (Blue-Green)
+        run: |
+          chmod +x scripts/blue-green-deploy.sh
+          scripts/blue-green-deploy.sh staging ${{ needs.prepare.outputs.image-tag }}
+
+      - name: Wait for deployment
+        run: |
+          kubectl -n ${{ env.NAMESPACE }} rollout status deployment/api --timeout=10m
+          kubectl -n ${{ env.NAMESPACE }} rollout status deployment/web --timeout=10m
+
+      - name: Update deployment status (in progress)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: ${{ needs.prepare.outputs.deployment-id }},
+              state: 'in_progress',
+              description: 'Deployment in progress',
+              environment_url: 'https://staging.intelgraph.io'
+            });
+
+  health-check:
+    name: Health Checks
+    needs: [prepare, deploy]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --name ${{ env.CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      - name: Run health checks
+        run: |
+          chmod +x scripts/health-check.sh
+          STAGING_URL=https://staging.intelgraph.io scripts/health-check.sh
+
+      - name: Run smoke tests
+        if: ${{ !inputs.skip-tests }}
+        run: |
+          chmod +x scripts/smoke-tests.sh
+          STAGING_URL=https://staging.intelgraph.io scripts/smoke-tests.sh
+
+  update-status:
+    name: Update Deployment Status
+    needs: [prepare, deploy, health-check]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Update deployment status (success)
+        if: needs.health-check.result == 'success'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: ${{ needs.prepare.outputs.deployment-id }},
+              state: 'success',
+              description: 'Deployment successful',
+              environment_url: 'https://staging.intelgraph.io'
+            });
+
+      - name: Update deployment status (failure)
+        if: needs.health-check.result != 'success'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: ${{ needs.prepare.outputs.deployment-id }},
+              state: 'failure',
+              description: 'Deployment failed',
+              environment_url: 'https://staging.intelgraph.io'
+            });
+
+      - name: Notify Slack (success)
+        if: needs.health-check.result == 'success'
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "✅ Staging deployment successful",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Staging Deployment Successful* ✅\n\n*Version:* `${{ needs.prepare.outputs.version }}`\n*Environment:* `staging`\n*URL:* https://staging.intelgraph.io"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+      - name: Notify Slack (failure)
+        if: needs.health-check.result != 'success'
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "❌ Staging deployment failed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Staging Deployment Failed* ❌\n\n*Version:* `${{ needs.prepare.outputs.version }}`\n*Environment:* `staging`"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+      - name: Rollback on failure
+        if: needs.health-check.result != 'success'
+        run: |
+          echo "Deployment failed, initiating rollback..."
+          chmod +x scripts/rollback-deployment.sh
+          scripts/rollback-deployment.sh staging

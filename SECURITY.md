@@ -1,5 +1,13 @@
 # Security Policy
 
-- Report vulnerabilities via GitHub Security Advisories or by contacting the security team at `security@intelgraph.example`.
-- We aim to acknowledge reports within 48 hours and resolve critical vulnerabilities within 7 days.
-- All secrets are rotated on a 90-day schedule.
+## Reporting Vulnerabilities
+- Please report suspected vulnerabilities via security@intelgraph.example.com or the private security issue template.
+- Include reproduction steps, affected versions, and potential impact. Do not share exploits publicly until a fix is released.
+
+## Supported Versions
+- The `main` branch and the latest tagged release receive security fixes.
+- Older releases may receive fixes on a best-effort basis for 90 days after a new minor release.
+
+## Secrets Policy
+- Never commit real secrets or credentials. Use environment variables and `.env.example` patterns instead.
+- Rotate any credentials that may have been exposed and notify the security team immediately.
