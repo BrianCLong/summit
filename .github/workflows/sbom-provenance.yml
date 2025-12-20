@@ -21,7 +21,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Restore provenance cache
+        id: provenance-cache
+        uses: actions/cache@v4
+        with:
+          path: .provenance-cache
+          key: sbom-provenance-${{ inputs.image-digest }}
+
+      - name: Evaluate provenance cache
+        id: cache-state
+        run: |
+          set -euo pipefail
+          if [ "${{ steps.provenance-cache.outputs.cache-hit }}" = "true" ] \
+            && [ -f .provenance-cache/metadata.json ] \
+            && jq -e --arg digest "${{ inputs.image-digest }}" '.digest == $digest' \
+              .provenance-cache/metadata.json >/dev/null; then
+            echo "use-cache=true" >>"$GITHUB_OUTPUT"
+            cp .provenance-cache/sbom.spdx.json sbom.spdx.json 2>/dev/null || true
+            cp .provenance-cache/rekor-uuids.txt rekor-uuids.txt 2>/dev/null || true
+            cp .provenance-cache/cosign.bundle.json cosign.bundle.json 2>/dev/null || true
+          else
+            echo "use-cache=false" >>"$GITHUB_OUTPUT"
+          fi
+
       - name: Generate SBOM
+        if: steps.cache-state.outputs.use-cache != 'true'
         uses: anchore/sbom-action@v0
         with:
           image: ${{ inputs.image-name }}@${{ inputs.image-digest }}
@@ -31,7 +55,17 @@ jobs:
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3.5.0
 
+      - name: Prepare registry authentication
+        if: steps.cache-state.outputs.use-cache != 'true'
+        id: registry-auth
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Log in to Registry
+        if: steps.cache-state.outputs.use-cache == 'true'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -39,20 +73,113 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Sign Image (Keyless)
+        if: steps.cache-state.outputs.use-cache != 'true'
+        id: cosign-sign
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+          MANAGED_COSIGN_KEY: ${{ secrets.COSIGN_MANAGED_KEY }}
+          MANAGED_COSIGN_PUB: ${{ secrets.COSIGN_MANAGED_PUBLIC_KEY }}
         run: |
-          cosign sign --yes \
-            -a "repo=${{ github.repository }}" \
-            -a "workflow=${{ github.workflow }}" \
-            ${{ inputs.image-name }}@${{ inputs.image-digest }}
+          set -euo pipefail
+          image="${{ inputs.image-name }}@${{ inputs.image-digest }}"
+          bundle_file="cosign.bundle.json"
+
+          annotate=("-a" "repo=${{ github.repository }}" "-a" "workflow=${{ github.workflow }}")
+          base_args=(--yes --rekor-url https://rekor.sigstore.dev --bundle "$bundle_file")
+
+          echo "Attempting keyless signing..."
+          if cosign sign --keyless "${base_args[@]}" "${annotate[@]}" "$image"; then
+            echo "mode=keyless" >>"$GITHUB_OUTPUT"
+          elif [ -n "${MANAGED_COSIGN_KEY:-}" ]; then
+            echo "Keyless signing failed; attempting managed key fallback." >&2
+            cosign sign --key "$MANAGED_COSIGN_KEY" "${base_args[@]}" "${annotate[@]}" "$image"
+            echo "mode=managed" >>"$GITHUB_OUTPUT"
+          else
+            echo "Keyless signing failed and no managed key configured." >&2
+            exit 1
+          fi
+          echo "bundle-path=$bundle_file" >>"$GITHUB_OUTPUT"
 
       - name: Attest SBOM
+        if: steps.cache-state.outputs.use-cache != 'true'
         run: |
           cosign attest --yes \
+            --rekor-url https://rekor.sigstore.dev \
             --predicate sbom.spdx.json \
             --type spdx \
             ${{ inputs.image-name }}@${{ inputs.image-digest }}
 
+      - name: Capture Rekor UUIDs
+        id: rekor-uuid
+        env:
+          MANAGED_COSIGN_PUB: ${{ secrets.COSIGN_MANAGED_PUBLIC_KEY }}
+        run: |
+          set -euo pipefail
+          image="${{ inputs.image-name }}@${{ inputs.image-digest }}"
+          verify_args=(--output json "$image")
+          if [ "${{ steps.cosign-sign.outputs.mode }}" = "managed" ] && [ -n "${MANAGED_COSIGN_PUB:-}" ]; then
+            verify_args=(--key "$MANAGED_COSIGN_PUB" --output json "$image")
+          fi
+
+          if [ "${{ steps.cache-state.outputs.use-cache }}" != "true" ] || [ ! -s rekor-uuids.txt ]; then
+            cosign verify "${verify_args[@]}" >cosign-verify.json
+            jq -r '.critical.tlogEntries[]?.uuid' cosign-verify.json | paste -sd ',' - >rekor-uuids.txt
+          fi
+
+          if [ -s rekor-uuids.txt ]; then
+            echo "rekor_uuids=$(cat rekor-uuids.txt)" >>"$GITHUB_OUTPUT"
+          else
+            echo "rekor_uuids=unknown" >>"$GITHUB_OUTPUT"
+          fi
+
+      - name: Save provenance cache
+        if: steps.cache-state.outputs.use-cache != 'true'
+        run: |
+          set -euo pipefail
+          mkdir -p .provenance-cache
+          cp sbom.spdx.json .provenance-cache/
+          cp cosign.bundle.json .provenance-cache/
+          cp rekor-uuids.txt .provenance-cache/
+          jq -n --arg digest "${{ inputs.image-digest }}" --arg image "${{ inputs.image-name }}" \
+            '{digest:$digest,image:$image,generated_at:now}' > .provenance-cache/metadata.json
+
+      - name: Upload signing artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-provenance-${{ github.run_id }}
+          path: |
+            sbom.spdx.json
+            cosign.bundle.json
+            rekor-uuids.txt
+          if-no-files-found: warn
+
+      - name: Export SBOM to Dependency-Track (optional)
+        if: ${{ secrets.DEPENDENCYTRACK_API_KEY != '' && (vars.DEPENDENCYTRACK_HOST != '' || secrets.DEPENDENCYTRACK_HOST != '') }}
+        env:
+          DEPENDENCYTRACK_API_KEY: ${{ secrets.DEPENDENCYTRACK_API_KEY }}
+          DEPENDENCYTRACK_HOST: ${{ vars.DEPENDENCYTRACK_HOST || secrets.DEPENDENCYTRACK_HOST }}
+        run: |
+          set -euo pipefail
+          api_host="${DEPENDENCYTRACK_HOST%/}"
+          curl -sSf -X POST "${api_host}/api/v1/bom" \
+            -H "X-Api-Key: ${DEPENDENCYTRACK_API_KEY}" \
+            -H "accept: application/json" \
+            -H "Content-Type: multipart/form-data" \
+            -F "projectName=${{ inputs.image-name }}" \
+            -F "autoCreate=true" \
+            -F "bom=@sbom.spdx.json;type=application/json" \
+            -o dependency-track-response.json
+
+      - name: Upload Dependency-Track response
+        if: ${{ secrets.DEPENDENCYTRACK_API_KEY != '' && (vars.DEPENDENCYTRACK_HOST != '' || secrets.DEPENDENCYTRACK_HOST != '') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-track-${{ github.run_id }}
+          path: dependency-track-response.json
+          if-no-files-found: warn
+
       - name: Generate SLSA Provenance
+        if: steps.cache-state.outputs.use-cache != 'true'
         uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.0.0
         with:
           image: ${{ inputs.image-name }}
