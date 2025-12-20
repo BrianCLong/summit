@@ -1,0 +1,11 @@
+{
+  "name": "@summit/policy-types",
+  "version": "1.0.0",
+  "description": "Shared policy request/decision types for Summit services",
+  "type": "module",
+  "private": true,
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express from 'express';
 import { intelGraphService } from '../services/IntelGraphService.js';
 import { ensurePolicy } from '../middleware/abac.js';

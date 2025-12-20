@@ -1,0 +1,52 @@
+name: Conventional Commit & PR Title Lint
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+
+permissions:
+  pull-requests: read
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR title for Conventional Commits
+        uses: amannn/action-semantic-pull-request@v5
+        with:
+          types: |-
+            build
+            chore
+            ci
+            docs
+            feat
+            fix
+            perf
+            refactor
+            revert
+            style
+            test
+          requireScope: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Fail on TODO or WIP labels
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const labels = context.payload.pull_request.labels.map(l => l.name.toLowerCase());
+            const forbidden = ['wip', 'todo'];
+            if (forbidden.some(f => labels.includes(f))) {
+              core.setFailed('PR blocked: remove WIP/TODO labels.');
+            }
+      - name: Verify checklist completion
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const body = context.payload.pull_request.body || '';
+            const unchecked = body.match(/\- \[ \]/g) || [];
+            if (unchecked.length > 0) {
+              core.setFailed('PR template has unchecked items. Complete required checkboxes.');
+            }

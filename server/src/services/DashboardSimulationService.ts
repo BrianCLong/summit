@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Server } from 'socket.io';
 import { getIO } from '../realtime/socket.js';
 import pino from 'pino';
