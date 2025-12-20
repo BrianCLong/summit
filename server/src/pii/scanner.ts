@@ -55,50 +55,66 @@ const stableStringify = (input: unknown): string => {
 const fingerprint = (value: unknown): string =>
   crypto.createHash('sha256').update(stableStringify(value)).digest('hex');
 
-const flattenRecord = (
+const walkRecord = function* (
   value: unknown,
   schemaFields: SchemaFieldMetadata[] | undefined,
-  path: string[] = [],
-): FlattenedField[] => {
-  if (value === null || value === undefined) {
-    return [];
-  }
-  if (
-    typeof value === 'string' ||
-    typeof value === 'number' ||
-    typeof value === 'boolean'
-  ) {
-    const fieldName = path[path.length - 1];
+  root: string,
+): Generator<FlattenedField> {
+  const stack: Array<{ path: string[]; value: unknown }> = [
+    { path: [root], value },
+  ];
+
+  while (stack.length > 0) {
+    const current = stack.pop();
+    if (!current) continue;
+    const currentValue = current.value;
+    const fieldName = current.path[current.path.length - 1];
     const schemaField = schemaFields?.find(
       (field) => field.fieldName === fieldName,
     );
-    return [
-      {
-        path,
-        value: String(value),
+
+    if (
+      currentValue === null ||
+      currentValue === undefined ||
+      currentValue === ''
+    ) {
+      continue;
+    }
+
+    if (
+      typeof currentValue === 'string' ||
+      typeof currentValue === 'number' ||
+      typeof currentValue === 'boolean'
+    ) {
+      yield {
+        path: current.path,
+        value: String(currentValue),
         schemaField,
-      },
-    ];
+      };
+      continue;
+    }
+
+    if (Array.isArray(currentValue)) {
+      for (let i = currentValue.length - 1; i >= 0; i -= 1) {
+        stack.push({
+          path: [...current.path, String(i)],
+          value: currentValue[i],
+        });
+      }
+      continue;
+    }
+
+    if (typeof currentValue === 'object') {
+      const entries = Object.entries(currentValue as Record<string, unknown>);
+      for (let i = entries.length - 1; i >= 0; i -= 1) {
+        const [key, nested] = entries[i];
+        stack.push({
+          path: [...current.path, key],
+          value: nested,
+        });
+      }
+    }
   }
-  if (Array.isArray(value)) {
-    return value.flatMap((item, index) =>
-      flattenRecord(item, schemaFields, [...path, String(index)]),
-    );
-  }
-  if (typeof value === 'object') {
-    return Object.entries(value as Record<string, unknown>).flatMap(
-      ([key, nested]) => {
-        const schemaField = schemaFields?.find(
-          (field) => field.fieldName === key,
-        );
-        if (schemaField) {
-          return flattenRecord(nested, schemaFields, [...path, key]);
-        }
-        return flattenRecord(nested, schemaFields, [...path, key]);
-      },
-    );
-  }
-  return [];
 };
 
 export class BulkScanner {
@@ -178,11 +194,13 @@ export class BulkScanner {
       };
     }
 
-    const flattened = flattenRecord(record.value, record.schema?.fields ?? [], [
-      record.tableName ?? record.schema?.name ?? 'record',
-    ]);
     const detections: ClassifiedEntity[] = [];
-    for (const field of flattened) {
+    const rootPath = record.tableName ?? record.schema?.name ?? 'record';
+    for (const field of walkRecord(
+      record.value,
+      record.schema?.fields ?? [],
+      rootPath,
+    )) {
       const classification = await this.engine.classify(
         field.value,
         {

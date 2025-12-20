@@ -3,7 +3,7 @@
 # Production-hardened with minimal attack surface
 
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:20-alpine@sha256:be8d32d651b3e0c9c2b28fdc1d3888408125d703232013cff955344d052027e5 AS builder
 
 # Install build dependencies
 RUN apk add --no-cache \
@@ -30,7 +30,7 @@ RUN cd server && npm run build
 RUN cd conductor-ui && npm run build
 
 # Production stage
-FROM node:20-alpine AS production
+FROM node:20-alpine@sha256:be8d32d651b3e0c9c2b28fdc1d3888408125d703232013cff955344d052027e5 AS production
 
 # Security: Create non-root user
 RUN addgroup -g 1001 -S maestro && \
@@ -91,7 +91,7 @@ LABEL org.opencontainers.image.title="Maestro Conductor" \
       org.opencontainers.image.vendor="IntelGraph" \
       org.opencontainers.image.source="https://github.com/brianclong/intelgraph" \
       org.opencontainers.image.documentation="https://github.com/brianclong/intelgraph/blob/main/README.md" \
-      org.opencontainers.image.licenses="MIT"
+      org.opencontainers.image.licenses="Proprietary"
 
 # Expose port
 EXPOSE 8080

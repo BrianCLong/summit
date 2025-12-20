@@ -1,201 +1,41 @@
-# Preview Environment Configuration for IntelGraph
-# Optimized for resource efficiency and rapid deployment
+# Preview environment overrides
+components:
+  api:
+    replicas: 1
+    requests:
+      cpu: 300m
+      memory: 512Mi
+    limits:
+      cpu: 700m
+      memory: 1Gi
+  web:
+    replicas: 1
+    requests:
+      cpu: 150m
+      memory: 256Mi
+    limits:
+      cpu: 300m
+      memory: 512Mi
+  worker:
+    replicas: 0
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
 
-# Application configuration
-app:
-  name: intelgraph
-  version: preview
+storage:
+  pvc_gib: 5
 
-# Container images
-image:
-  server:
-    repository: ghcr.io/brianclong/summit/server
-    tag: preview
-    pullPolicy: Always
-  client:
-    repository: ghcr.io/brianclong/summit/client
-    tag: preview
-    pullPolicy: Always
+networking:
+  load_balancers: 1
 
-# Resource allocation (lightweight for preview)
-resources:
-  requests:
-    cpu: 100m
-    memory: 256Mi
-  limits:
-    cpu: 500m
-    memory: 1Gi
-
-# Scaling configuration
-replicaCount: 1
-autoscaling:
-  enabled: false
-
-# Service configuration
-service:
-  type: ClusterIP
-  ports:
-    http: 80
-    graphql: 4000
-    metrics: 9090
-
-# Ingress configuration
-ingress:
-  enabled: true
-  className: nginx
+preview:
+  public: false
+  idle_minutes: 30
+  ingressClass: internal
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
-    nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
-    cert-manager.io/cluster-issuer: 'letsencrypt-prod'
-  host: preview.intelgraph.dev
-  tls:
-    enabled: true
-    secretName: intelgraph-preview-tls
-
-# Environment configuration
-env:
-  NODE_ENV: preview
-  LOG_LEVEL: info
-  # Database URLs will be injected via --set flags in workflow
-
-# Security context
-securityContext:
-  runAsNonRoot: true
-  runAsUser: 1000
-  fsGroup: 1000
-  allowPrivilegeEscalation: false
-  capabilities:
-    drop:
-      - ALL
-
-# Pod security context
-podSecurityContext:
-  seccompProfile:
-    type: RuntimeDefault
-
-# Health checks
-health:
-  enabled: true
-  path: /health
-  port: 4000
-  initialDelaySeconds: 30
-  periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 3
-
-# Readiness probe
-readiness:
-  enabled: true
-  path: /health
-  port: 4000
-  initialDelaySeconds: 15
-  periodSeconds: 5
-  timeoutSeconds: 3
-  failureThreshold: 3
-
-# Service Monitor for Prometheus
-serviceMonitor:
-  enabled: true
-  interval: 30s
-  path: /metrics
-  labels:
-    app: intelgraph
-    environment: preview
-
-# NetworkPolicy for security
-networkPolicy:
-  enabled: true
-  policyTypes:
-    - Ingress
-    - Egress
-  ingress:
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              name: ingress-nginx
-      ports:
-        - protocol: TCP
-          port: 4000
-  egress:
-    - to: []
-      ports:
-        - protocol: TCP
-          port: 443 # HTTPS
-        - protocol: TCP
-          port: 5432 # PostgreSQL
-        - protocol: TCP
-          port: 6379 # Redis
-        - protocol: TCP
-          port: 7687 # Neo4j
-
-# PodDisruptionBudget
-podDisruptionBudget:
-  enabled: false # Not needed for single replica
-
-# ConfigMap for application configuration
-configMap:
-  enabled: true
-  data:
-    CORS_ORIGINS: '*'
-    OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4317'
-    PROMETHEUS_METRICS_ENABLED: 'true'
-
-# Annotations for pods
-podAnnotations:
-  prometheus.io/scrape: 'true'
-  prometheus.io/port: '9090'
-  prometheus.io/path: '/metrics'
-
-# Labels for all resources
-labels:
-  app.kubernetes.io/name: intelgraph
-  app.kubernetes.io/component: web-app
-  app.kubernetes.io/part-of: intelgraph-platform
-  environment: preview
-
-# Node selector for preview workloads
-nodeSelector:
-  kubernetes.io/arch: amd64
-  node-type: standard
-
-# Tolerations
-tolerations: []
-
-# Affinity rules
-affinity:
-  podAntiAffinity:
-    preferredDuringSchedulingIgnoredDuringExecution:
-      - weight: 100
-        podAffinityTerm:
-          labelSelector:
-            matchExpressions:
-              - key: app.kubernetes.io/name
-                operator: In
-                values:
-                  - intelgraph
-          topologyKey: kubernetes.io/hostname
-
-# Persistent volumes (disabled for preview)
-persistence:
-  enabled: false
-
-# External dependencies configuration
-dependencies:
-  postgresql:
-    enabled: false # Use external managed instance
-  redis:
-    enabled: false # Use external managed instance
-  neo4j:
-    enabled: false # Use external managed instance
-
-# Backup configuration (disabled for preview)
-backup:
-  enabled: false
-
-# Monitoring and alerting
-monitoring:
-  enabled: true
-  dashboards:
-    enabled: true
-  alerts:
-    enabled: false # Disable alerts for preview environments
+    owner: "${OWNER}"
+    branch: "${BRANCH}"
+    repo: "${REPO}"

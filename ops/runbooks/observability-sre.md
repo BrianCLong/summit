@@ -4,6 +4,12 @@
 
 This runbook guides on-call engineers through diagnosing and resolving SLO, cost, and telemetry regressions surfaced by the platform SRE pipeline, Grafana dashboards, and Prometheus burn alerts.
 
+## Automation quicklinks
+
+- Generate alert-specific runbooks and JSON payloads: `python ops/observability-ci/scripts/generate_alert_runbooks.py`
+- One-click remediation for any generated alert: `./ops/observability-ci/scripts/one-click-remediation.sh "<AlertName>"`
+- CI guardrails for PagerDuty/on-call paths: GitHub workflow `incident-automation`
+
 ## Quick Decision Tree
 
 1. **Pager triggers?**
@@ -107,6 +113,26 @@ This runbook guides on-call engineers through diagnosing and resolving SLO, cost
 - If Prometheus scrape failing, run `kubectl logs deploy/otel-collector -n monitoring | rg scrape_configs` for errors.
 
 **Exit Criteria**: Collector ready, metrics exporting to Prometheus and ELK within 5 minutes.
+
+## GraphQL Latency Buckets & SLO Tuning
+
+**When to use**: Burn-rate alert `GraphQLErrorBudgetBurn` firing or Grafana shows p95 >500ms for gateway GraphQL traffic.
+
+**Buckets**:
+
+- Histograms are emitted as `gateway_graphql_latency` with buckets `[50, 100, 200, 400, 800, 1600, 3200]` ms. If p95 routinely sits at bucket edges, adjust buckets in `ga-graphai/packages/gateway/src/metrics.js` and redeploy.
+- Keep at least two buckets below the p95 target to preserve resolution for regressions.
+
+**SLOs**:
+
+1. Default latency objective: p95 <500ms over 10m windows.
+2. Update Prometheus alert threshold in `ops/prometheus/alerts/burnrate.yaml` if the product team changes the SLO. Keep a 10m `for` to avoid flapping.
+3. Validate in staging with k6 smoke (`ops/k6/day3-smoke.js`) ensuring `http_req_duration` p95 <500ms and no burn alert triggers.
+
+**Checks**:
+
+- `promtool test rules ops/prometheus/alerts/burnrate.yaml` after edits.
+- `kubectl logs deploy/gateway -n platform-prod | rg gateway_graphql_latency -n | tail -n 5` to verify metric emission.
 
 ## FinOps Guardrail
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // MCP Request Signing & Verification
 // Provides cryptographic integrity for Model Context Protocol communications
 

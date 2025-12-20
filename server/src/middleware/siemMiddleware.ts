@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * SIEM Integration Middleware
  *

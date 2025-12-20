@@ -1,12 +1,16 @@
 module.exports = {
-  preset: 'ts-jest/presets/default-esm',
-  extensionsToTreatAsEsm: ['.ts'],
-  globals: {
-    'ts-jest': {
-      useESM: true,
-    },
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
+  transform: {
+    '^.+\\.[tj]sx?$': [
+      'ts-jest',
+      {
+        useESM: true,
+        tsconfig: 'tsconfig.test.json',
+      },
+    ],
   },
-  testEnvironment: 'jsdom',
   roots: ['server', 'client', 'packages', 'services', 'tests'],
   modulePathIgnorePatterns: [
     '<rootDir>/dist/',
@@ -39,7 +43,6 @@ module.exports = {
     '!**/salvage/**',
     '!**/pull/**',
   ],
-  // Coverage thresholds - PR quality gate enforcement
   coverageThreshold: {
     global: {
       branches: 80,
@@ -47,7 +50,6 @@ module.exports = {
       lines: 80,
       statements: 80,
     },
-    // Critical paths require 85% coverage
     './server/src/middleware/**/*.ts': {
       branches: 85,
       functions: 85,
@@ -74,31 +76,13 @@ module.exports = {
     '^@server/(.*)$': '<rootDir>/server/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
   },
-  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$))'],
-  // Coverage thresholds - enforced globally
-  coverageThreshold: {
-    global: {
-      branches: 50,
-      functions: 50,
-      lines: 50,
-      statements: 50,
-    },
-    // Stricter thresholds for security-critical services
-    './server/src/security/**/*.ts': {
-      branches: 80,
-      functions: 80,
-      lines: 80,
-      statements: 80,
-    },
-    './server/src/services/AuthService.ts': {
-      branches: 80,
-      functions: 80,
-      lines: 80,
-      statements: 80,
-    },
-  },
-  // Test timeout
+  transformIgnorePatterns: [
+    'node_modules/(?!(.*\\.mjs$))',
+    '<rootDir>/.disabled/',
+    '<rootDir>/apps/.mobile-native-disabled/',
+    '<rootDir>/apps/.desktop-electron-disabled/',
+  ],
   testTimeout: 30000,
-  // Setup files
   setupFilesAfterEnv: ['<rootDir>/tests/utils/jest-setup.ts'],
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
 };
