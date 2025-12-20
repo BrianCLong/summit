@@ -17,6 +17,7 @@
 | 09 | [Testing Strategy](./09-testing-strategy.md) | `/testing-strategy` | Jest + Pact + Playwright + k6 + chaos testing |
 | 10 | [Cost Guardrails](./10-cost-guardrails.md) | `/cost-guardrails` | Usage metering + budgets + alerts + cost dashboard |
 | 11 | [Threat Model](./11-threat-model-privacy.md) | `/threat-model` | STRIDE analysis + DFDs + privacy design + key management |
+| 12 | [Multi-Agent Release](./12-multi-agent-release-orchestration.md) | `/release-orchestration` | 17 agents × 9 phases → GA with SLO gates + rollback |
 
 ---
 
@@ -100,6 +101,30 @@
 
 ---
 
+### 🚀 GA Release Orchestration
+
+```bash
+# Complete multi-phase release with policy gates
+/release-orchestration
+
+# Phases executed:
+# P0: Readiness - required checks, supply chain, container hardening
+# P1: Gates - SLO gates, perf baselines, PR previews
+# P2: Data Safety - migrations, dual-write, pgBouncer
+# P3: Security - OPA policies, step-up auth, decision logging
+# P4: Product GA - realtime, search, reporting, ingest
+# P5: DR/Chaos - backup verification, failover drills
+# P6: Release Train - canary deploy, evidence collection
+# P7: Alert Hygiene - runbook coverage, noise reduction
+# P8: GA Flip - KPI review, regression tracking
+```
+
+**Sub-agents**: 17 specialized agents (CI/CD, DevOps, Observability, Security, etc.)
+**Deliverables**: Signed evidence pack, release notes, green dashboards, GA flags
+**Rollback**: Auto-rollback on SLO breach within 5 minutes
+
+---
+
 ## SLO Quick Reference
 
 | Service/Operation | p95 Target | p99 Target | Throughput Target |
@@ -164,6 +189,13 @@
 - Create signed export bundles
 - Document chain-of-custody
 
+### "We're coordinating a major release"
+→ **Prompts**: 12 (Multi-Agent Release), 08 (CI/CD), 09 (Testing)
+- Orchestrate 17 agents across 9 phases
+- Policy-gated canary with auto-rollback
+- Signed evidence pack with SBOMs and attestations
+- DR/chaos drills with RTO≤30m/RPO≤5m targets
+
 ---
 
 ## Testing Coverage by Prompt
@@ -181,6 +213,7 @@
 | 09 - Testing | ✅ | ✅ | ✅ | ✅ | ✅ |
 | 10 - Cost | ✅ | ✅ | - | ✅ | - |
 | 11 - Threat Model | - | - | - | - | - |
+| 12 - Multi-Agent Release | - | ✅ | ✅ | ✅ | ✅ |
 
 ---
 
@@ -219,6 +252,14 @@
 - Runbooks
 - Configuration guides
 - Testing guides
+
+### Release Artifacts (Prompt 12)
+- Signed evidence pack (SBOM + attestations per image)
+- Release notes with commit range
+- SLO/probe graphs and perf headroom reports
+- Migration plans + shadow parity status
+- Chaos/DR drill outputs with timestamps
+- Alert hygiene snapshot and regression issues
 
 ---
 

@@ -3,11 +3,10 @@ import crypto from 'node:crypto';
 import { performance } from 'node:perf_hooks';
 import { Pool, QueryConfig, QueryResult, PoolClient } from 'pg';
 import * as dotenv from 'dotenv';
-import { tenantRouter, TenantRoute } from './tenantRouter';
 
 dotenv.config();
-import { dbConfig } from './config';
-import baseLogger from '../config/logger';
+import { dbConfig } from './config.js';
+import baseLogger from '../config/logger.js';
 
 type QueryInput = string | QueryConfig<any>;
 
@@ -15,8 +14,6 @@ interface QueryOptions {
   forceWrite?: boolean;
   timeoutMs?: number;
   label?: string;
-  tenantId?: string;
-  partitionKey?: string;
 }
 
 type QueryExecutor = <T = any>(
@@ -51,6 +48,7 @@ export interface ManagedPostgresPool {
   healthCheck: () => Promise<PoolHealthSnapshot[]>;
   slowQueryInsights: () => SlowQueryInsight[];
   pool: Pool;
+  queryCaptureSnapshot?: () => QueryCaptureSnapshot;
 }
 
 interface SlowQueryInsight {
@@ -64,6 +62,13 @@ interface SlowQueryInsight {
 type CircuitState = 'closed' | 'half-open' | 'open';
 
 const logger = baseLogger.child({ name: 'postgres-pool' });
+
+const QUERY_CAPTURE_ENABLED = process.env.DB_QUERY_CAPTURE === '1';
+const QUERY_CAPTURE_INTERVAL_MS = parseInt(
+  process.env.DB_QUERY_CAPTURE_INTERVAL_MS ?? '30000',
+  10,
+);
+const QUERY_CAPTURE_MAX_SAMPLES = 200;
 
 const CIRCUIT_BREAKER_FAILURE_THRESHOLD = 5;
 const CIRCUIT_BREAKER_COOLDOWN_MS = 30000;
@@ -239,11 +244,40 @@ const slowQueryStats = new Map<
   { count: number; totalDuration: number; maxDuration: number; pool: string }
 >();
 
+interface QueryCaptureAccumulator {
+  sql: string;
+  label: string;
+  pool: string;
+  count: number;
+  totalDurationMs: number;
+  maxDurationMs: number;
+  samples: number[];
+}
+
+interface QueryCaptureSnapshotEntry {
+  key: string;
+  sql: string;
+  pool: string;
+  label: string;
+  count: number;
+  totalDurationMs: number;
+  maxDurationMs: number;
+  avgDurationMs: number;
+  p95DurationMs: number;
+}
+
+interface QueryCaptureSnapshot {
+  topByTotalTime: QueryCaptureSnapshotEntry[];
+  topByP95: QueryCaptureSnapshotEntry[];
+}
+
+const queryCapture = new Map<string, QueryCaptureAccumulator>();
+let queryCaptureTimer: NodeJS.Timeout | null = null;
+
 let writePoolWrapper: PoolWrapper | null = null;
 let readPoolWrappers: PoolWrapper[] = [];
 let managedPool: ManagedPostgresPool | null = null;
 let readReplicaCursor = 0;
-const partitionPoolWrappers = new Map<string, PoolWrapper>();
 
 const transientErrorCodes = new Set([
   '57P01', // admin_shutdown
@@ -351,6 +385,18 @@ function initializePools(): void {
     return;
   }
 
+  if (QUERY_CAPTURE_ENABLED && !queryCaptureTimer) {
+    queryCaptureTimer = setInterval(() => {
+      logQueryCaptureSnapshot('interval');
+    }, QUERY_CAPTURE_INTERVAL_MS);
+    // Keep the process from hanging on shutdown in capture mode
+    queryCaptureTimer.unref?.();
+    logger.info(
+      { intervalMs: QUERY_CAPTURE_INTERVAL_MS },
+      'DB query capture enabled',
+    );
+  }
+
   writePoolWrapper = createPool(
     'write-primary',
     'write',
@@ -367,11 +413,6 @@ function initializePools(): void {
       dbConfig.readPoolSize
   );
   readPoolWrappers = [readPool];
-
-  tenantRouter.configure({
-    writePool: writePoolWrapper.pool,
-    readPool: readPool.pool,
-  });
 
   managedPool = createManagedPool(writePoolWrapper, readPoolWrappers);
 }
@@ -399,50 +440,35 @@ function createManagedPool(
     };
   }
 
-  const query: QueryExecutor = async (queryInput, params, options = {}) => {
-    const route = await resolveRoute(options);
-    const pools = pickRoutePools(route, writePool, readPools);
-    return executeManagedQuery({
+  const query: QueryExecutor = (queryInput, params, options = {}) =>
+    executeManagedQuery({
       queryInput,
       params,
       options,
       desiredType: 'auto',
-      writePool: pools.write,
-      readPools: pools.reads,
-      route,
-      schema: pools.schema,
+      writePool,
+      readPools,
     });
-  };
 
-  const read: QueryExecutor = async (queryInput, params, options = {}) => {
-    const route = await resolveRoute(options);
-    const pools = pickRoutePools(route, writePool, readPools);
-    return executeManagedQuery({
+  const read: QueryExecutor = (queryInput, params, options = {}) =>
+    executeManagedQuery({
       queryInput,
       params,
       options: { ...options, forceWrite: false },
       desiredType: 'read',
-      writePool: pools.write,
-      readPools: pools.reads,
-      route,
-      schema: pools.schema,
+      writePool,
+      readPools,
     });
-  };
 
-  const write: QueryExecutor = async (queryInput, params, options = {}) => {
-    const route = await resolveRoute(options);
-    const pools = pickRoutePools(route, writePool, readPools);
-    return executeManagedQuery({
+  const write: QueryExecutor = (queryInput, params, options = {}) =>
+    executeManagedQuery({
       queryInput,
       params,
       options: { ...options, forceWrite: true },
       desiredType: 'write',
-      writePool: pools.write,
-      readPools: pools.reads,
-      route,
-      schema: pools.schema,
+      writePool,
+      readPools,
     });
-  };
 
   const connect = async (): Promise<PoolClient> => {
     return writePool.pool.connect();
@@ -464,6 +490,11 @@ function createManagedPool(
   };
 
   const end = async (): Promise<void> => {
+    logQueryCaptureSnapshot('shutdown');
+    if (queryCaptureTimer) {
+      clearInterval(queryCaptureTimer);
+      queryCaptureTimer = null;
+    }
     await Promise.all([
       writePool.pool.end(),
       ...readPools.map((wrapper) => wrapper.pool.end()),
@@ -549,94 +580,8 @@ function createManagedPool(
     on,
     healthCheck,
     slowQueryInsights,
+    queryCaptureSnapshot: snapshotQueryCapture,
     pool: writePool.pool,
-  };
-}
-
-async function resolveRoute(
-  options: QueryOptions,
-): Promise<TenantRoute | null> {
-  if (!options?.tenantId || !tenantRouter.isEnabled()) {
-    return null;
-  }
-
-  try {
-    return await tenantRouter.resolve(options.tenantId);
-  } catch (error) {
-    logger.warn(
-      { tenantId: options.tenantId, err: error },
-      'Failed to resolve tenant route, falling back to primary pool',
-    );
-    return null;
-  }
-}
-
-function wrapPoolForPartition(
-  partitionKey: string,
-  type: 'write' | 'read',
-  pool: Pool,
-  defaults: { write: PoolWrapper; reads: PoolWrapper[] },
-): PoolWrapper {
-  if (type === 'write' && pool === defaults.write.pool) {
-    return defaults.write;
-  }
-
-  const existingRead =
-    type === 'read'
-      ? defaults.reads.find((wrapper) => wrapper.pool === pool)
-      : null;
-  if (existingRead) {
-    return existingRead;
-  }
-
-  const cacheKey = `${partitionKey}:${type}`;
-  const cached = partitionPoolWrappers.get(cacheKey);
-  if (cached && cached.pool === pool) {
-    return cached;
-  }
-
-  const wrapper: PoolWrapper = {
-    name: `${type}-${partitionKey}`,
-    type,
-    pool,
-    circuitBreaker: new CircuitBreaker(
-      `${type}-${partitionKey}`,
-      CIRCUIT_BREAKER_FAILURE_THRESHOLD,
-      CIRCUIT_BREAKER_COOLDOWN_MS,
-    ),
-  };
-
-  partitionPoolWrappers.set(cacheKey, wrapper);
-  return wrapper;
-}
-
-function pickRoutePools(
-  route: TenantRoute | null,
-  writePool: PoolWrapper,
-  readPools: PoolWrapper[],
-): { write: PoolWrapper; reads: PoolWrapper[]; schema?: string | null } {
-  if (!route) {
-    return { write: writePool, reads: readPools, schema: null };
-  }
-
-  const defaults = { write: writePool, reads: readPools };
-  const writeWrapper = wrapPoolForPartition(
-    route.partitionKey,
-    'write',
-    route.writePool,
-    defaults,
-  );
-  const readWrapper = wrapPoolForPartition(
-    route.partitionKey,
-    'read',
-    route.readPool || route.writePool,
-    defaults,
-  );
-
-  return {
-    write: writeWrapper,
-    reads: readWrapper ? [readWrapper] : readPools,
-    schema: route.schema,
   };
 }
 
@@ -647,8 +592,6 @@ async function executeManagedQuery({
   desiredType,
   writePool,
   readPools,
-  route,
-  schema,
 }: {
   queryInput: QueryInput;
   params?: any[];
@@ -656,8 +599,6 @@ async function executeManagedQuery({
   desiredType: 'auto' | 'read' | 'write';
   writePool: PoolWrapper;
   readPools: PoolWrapper[];
-  route?: TenantRoute | null;
-  schema?: string | null;
 }): Promise<QueryResult<any>> {
   const normalized = normalizeQuery(queryInput, params);
   const queryType =
@@ -678,13 +619,7 @@ async function executeManagedQuery({
     }
 
     try {
-      return await executeWithRetry(
-        candidate,
-        normalized,
-        timeoutMs,
-        label,
-        schema,
-      );
+      return await executeWithRetry(candidate, normalized, timeoutMs, label);
     } catch (error) {
       lastError = error as Error;
 
@@ -702,7 +637,6 @@ async function executeWithRetry(
   normalizedQuery: { text: string; values: any[]; name: string },
   timeoutMs: number,
   label: string,
-  schema?: string | null,
 ): Promise<QueryResult<any>> {
   let attempt = 0;
   let delay = 40; // Base delay
@@ -711,14 +645,7 @@ async function executeWithRetry(
     try {
         const client = await wrapper.pool.connect();
         try {
-            return await executeQueryOnClient(
-              client,
-              normalizedQuery,
-              wrapper,
-              label,
-              timeoutMs,
-              schema,
-            );
+            return await executeQueryOnClient(client, normalizedQuery, wrapper, label, timeoutMs);
         } finally {
             client.release();
         }
@@ -745,72 +672,45 @@ async function executeQueryOnClient(
   normalizedQuery: { text: string; values: any[]; name: string },
   wrapper: PoolWrapper,
   label: string,
-  timeoutMs: number,
-  schema?: string | null,
+  timeoutMs: number
 ): Promise<QueryResult<any>> {
   const start = performance.now();
-  const resetSearchPath = await maybeSetSearchPath(client, schema);
 
   // Set statement timeout
   // Note: It's better to set this per session or query if possible,
   // but pg driver doesn't support query-level timeout natively without separate command or cancel.
   // Using simplified approach here.
 
-  try {
-    const result = await client.query({
-      text: normalizedQuery.text,
-      values: normalizedQuery.values,
-      name: normalizedQuery.name,
-    });
+  const result = await client.query({
+    text: normalizedQuery.text,
+    values: normalizedQuery.values,
+    name: normalizedQuery.name,
+  });
 
-    const duration = performance.now() - start;
+  const duration = performance.now() - start;
 
-    if (duration >= dbConfig.slowQueryThresholdMs) {
-      recordSlowQuery(
-        normalizedQuery.name,
-        duration,
-        wrapper.name,
-        normalizedQuery.text,
-      );
-    }
-
-    logger.debug(
-      {
-        pool: wrapper.name,
-        label,
-        durationMs: duration,
-        rows: result.rowCount ?? 0,
-      },
-      'PostgreSQL query executed',
+  if (duration >= dbConfig.slowQueryThresholdMs) {
+    recordSlowQuery(
+      normalizedQuery.name,
+      duration,
+      wrapper.name,
+      normalizedQuery.text,
     );
-
-    return result;
-  } finally {
-    await resetSearchPath();
-  }
-}
-
-function quoteIdentifier(identifier: string): string {
-  return `"${identifier.replace(/"/g, '""')}"`;
-}
-
-async function maybeSetSearchPath(
-  client: PoolClient,
-  schema?: string | null,
-): Promise<() => Promise<void>> {
-  if (!schema) {
-    return async () => {};
   }
 
-  const searchPath = `${quoteIdentifier(schema)}, public`;
-  await client.query(`SET search_path TO ${searchPath}`);
-  return async () => {
-    try {
-      await client.query('RESET search_path');
-    } catch {
-      // Reset failures should not block release
-    }
-  };
+  recordQueryCapture(normalizedQuery, duration, wrapper.name, label);
+
+  logger.debug(
+    {
+      pool: wrapper.name,
+      label,
+      durationMs: duration,
+      rows: result.rowCount ?? 0,
+    },
+    'PostgreSQL query executed',
+  );
+
+  return result;
 }
 
 // Validation and Lifetime check
@@ -1037,6 +937,83 @@ function delayAsync(duration: number): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, duration);
   });
+}
+
+function percentile(values: number[], p: number): number {
+  if (values.length === 0) return 0;
+  const sorted = [...values].sort((a, b) => a - b);
+  const idx = Math.min(sorted.length - 1, Math.floor(sorted.length * p));
+  return sorted[idx];
+}
+
+function recordQueryCapture(
+  normalizedQuery: { text: string; name: string },
+  duration: number,
+  poolName: string,
+  label: string,
+): void {
+  if (!QUERY_CAPTURE_ENABLED) return;
+
+  const key = normalizedQuery.name || getPreparedStatementName(normalizedQuery.text);
+  const existing = queryCapture.get(key) ?? {
+    sql: normalizedQuery.text.slice(0, 1000),
+    label,
+    pool: poolName,
+    count: 0,
+    totalDurationMs: 0,
+    maxDurationMs: 0,
+    samples: [],
+  };
+
+  existing.count += 1;
+  existing.totalDurationMs += duration;
+  existing.maxDurationMs = Math.max(existing.maxDurationMs, duration);
+
+  if (existing.samples.length < QUERY_CAPTURE_MAX_SAMPLES) {
+    existing.samples.push(duration);
+  } else {
+    const idx = Math.floor(Math.random() * existing.count);
+    if (idx < QUERY_CAPTURE_MAX_SAMPLES) {
+      existing.samples[idx] = duration;
+    }
+  }
+
+  queryCapture.set(key, existing);
+}
+
+function snapshotQueryCapture(): QueryCaptureSnapshot {
+  const entries: QueryCaptureSnapshotEntry[] = Array.from(
+    queryCapture.entries(),
+  ).map(([key, entry]) => ({
+    key,
+    sql: entry.sql,
+    pool: entry.pool,
+    label: entry.label,
+    count: entry.count,
+    totalDurationMs: entry.totalDurationMs,
+    maxDurationMs: entry.maxDurationMs,
+    avgDurationMs: entry.totalDurationMs / Math.max(entry.count, 1),
+    p95DurationMs: percentile(entry.samples, 0.95),
+  }));
+
+  const topByTotalTime = [...entries]
+    .sort((a, b) => b.totalDurationMs - a.totalDurationMs)
+    .slice(0, 20);
+  const topByP95 = [...entries]
+    .sort((a, b) => b.p95DurationMs - a.p95DurationMs)
+    .slice(0, 20);
+
+  return { topByTotalTime, topByP95 };
+}
+
+function logQueryCaptureSnapshot(reason: string): void {
+  if (!QUERY_CAPTURE_ENABLED || queryCapture.size === 0) return;
+
+  const snapshot = snapshotQueryCapture();
+  logger.info(
+    { reason, queryCapture: snapshot },
+    'DB query capture snapshot (top queries by total time and p95)',
+  );
 }
 
 export function getPostgresPool(): ManagedPostgresPool {

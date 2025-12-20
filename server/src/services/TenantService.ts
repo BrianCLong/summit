@@ -1,23 +1,16 @@
 // @ts-nocheck
 import { z } from 'zod';
 import { getPostgresPool } from '../config/database.js';
-import { randomUUID } from 'crypto';
+import { randomUUID, createHash } from 'crypto';
 import logger from '../utils/logger.js';
 import { provenanceLedger } from '../provenance/ledger.js';
 import { QuotaManager } from '../lib/resources/quota-manager.js';
-import { tenantRouter } from '../db/tenantRouter.js';
 
 // Input Validation Schema
 export const createTenantSchema = z.object({
   name: z.string().min(2).max(100),
   slug: z.string().min(3).max(50).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
   residency: z.enum(['US', 'EU']),
-  partitionKey: z
-    .string()
-    .min(2)
-    .max(64)
-    .regex(/^[a-z0-9_-]+$/, 'Partition key must be alphanumeric, dash, or underscore')
-    .optional(),
 });
 
 export type CreateTenantInput = z.infer<typeof createTenantSchema>;
@@ -32,7 +25,6 @@ export interface Tenant {
   config: Record<string, any>;
   settings: Record<string, any>;
   createdBy: string | null;
-  partitionKey?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -96,18 +88,11 @@ export class TenantService {
 
       // 4. Create Tenant in DB
       const tenantId = randomUUID();
-      const partitionKey = tenantRouter.isEnabled()
-        ? await tenantRouter.assignTenantToPartition(
-            client,
-            tenantId,
-            validated.partitionKey,
-          )
-        : null;
       const insertQuery = `
         INSERT INTO tenants (
-          id, name, slug, residency, tier, status, config, settings, created_by, partition_key
+          id, name, slug, residency, tier, status, config, settings, created_by
         ) VALUES (
-          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
+          $1, $2, $3, $4, $5, $6, $7, $8, $9
         ) RETURNING *
       `;
 
@@ -120,8 +105,7 @@ export class TenantService {
         defaults.status,
         defaults.config,
         defaults.settings,
-        actorId,
-        partitionKey,
+        actorId
       ]);
 
       const tenant = this.mapRowToTenant(result.rows[0]);
@@ -188,6 +172,130 @@ export class TenantService {
     return this.mapRowToTenant(result.rows[0]);
   }
 
+  async updateSettings(
+    tenantId: string,
+    settings: Record<string, any>,
+    actorId: string,
+  ): Promise<Tenant> {
+    const pool = getPostgresPool();
+    const client = await pool.connect();
+
+    try {
+      await client.query('BEGIN');
+      const existing = await client.query('SELECT * FROM tenants WHERE id = $1', [tenantId]);
+      if (!existing.rowCount) {
+        throw new Error('Tenant not found');
+      }
+
+      const mergedSettings = {
+        ...(existing.rows[0].settings || {}),
+        ...settings,
+      };
+
+      const result = await client.query(
+        'UPDATE tenants SET settings = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
+        [mergedSettings, tenantId],
+      );
+
+      const tenant = this.mapRowToTenant(result.rows[0]);
+
+      await provenanceLedger.appendEntry({
+        action: 'TENANT_SETTINGS_UPDATED',
+        actor: { id: actorId, role: 'admin' },
+        metadata: {
+          tenantId,
+          updatedKeys: Object.keys(settings),
+          settingsHash: createHash('sha256')
+            .update(JSON.stringify(mergedSettings))
+            .digest('hex'),
+        },
+        artifacts: [],
+      });
+
+      await client.query('COMMIT');
+      return tenant;
+    } catch (error) {
+      await client.query('ROLLBACK');
+      logger.error('Failed to update tenant settings', error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async disableTenant(
+    tenantId: string,
+    actorId: string,
+    reason?: string,
+  ): Promise<Tenant> {
+    const pool = getPostgresPool();
+    const client = await pool.connect();
+
+    try {
+      await client.query('BEGIN');
+      const existing = await client.query('SELECT * FROM tenants WHERE id = $1', [tenantId]);
+      if (!existing.rowCount) {
+        throw new Error('Tenant not found');
+      }
+
+      const current = this.mapRowToTenant(existing.rows[0]);
+      if (current.status === 'disabled') {
+        await client.query('ROLLBACK');
+        return current;
+      }
+
+      const enrichedConfig = {
+        ...(current.config || {}),
+        lifecycle: {
+          ...(current.config?.lifecycle || {}),
+          disabledAt: new Date().toISOString(),
+          reason,
+          actorId,
+        },
+      };
+
+      const result = await client.query(
+        'UPDATE tenants SET status = $1, config = $2, updated_at = NOW() WHERE id = $3 RETURNING *',
+        ['disabled', enrichedConfig, tenantId],
+      );
+
+      const tenant = this.mapRowToTenant(result.rows[0]);
+
+      await provenanceLedger.appendEntry({
+        action: 'TENANT_DISABLED',
+        actor: { id: actorId, role: 'admin' },
+        metadata: {
+          tenantId,
+          previousStatus: current.status,
+          reason,
+        },
+        artifacts: [],
+      });
+
+      await client.query('COMMIT');
+      return tenant;
+    } catch (error) {
+      await client.query('ROLLBACK');
+      logger.error('Failed to disable tenant', error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async getTenantSettings(id: string): Promise<Pick<Tenant, 'id' | 'settings' | 'config' | 'status'>> {
+    const tenant = await this.getTenant(id);
+    if (!tenant) {
+      throw new Error('Tenant not found');
+    }
+    return {
+      id: tenant.id,
+      settings: tenant.settings,
+      config: tenant.config,
+      status: tenant.status,
+    };
+  }
+
   private mapRowToTenant(row: any): Tenant {
     return {
       id: row.id,
@@ -199,7 +307,6 @@ export class TenantService {
       config: row.config,
       settings: row.settings,
       createdBy: row.created_by,
-      partitionKey: row.partition_key,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
     };

@@ -1,0 +1,56 @@
+name: Website CI
+
+on:
+  pull_request:
+    paths:
+      - "website/**"
+  push:
+    branches: ["main"]
+    paths:
+      - "website/**"
+
+jobs:
+  website:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: website
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: website/pnpm-lock.yaml
+
+      - name: Install
+        run: pnpm install --frozen-lockfile=false
+
+      - name: Set env
+        run: |
+          echo "NEXT_PUBLIC_SITE_URL=https://topicality.co" >> $GITHUB_ENV
+          echo "NEXT_PUBLIC_ANALYTICS_MODE=firstparty" >> $GITHUB_ENV
+          echo "NEXT_PUBLIC_ANALYTICS_ENDPOINT=/api/analytics" >> $GITHUB_ENV
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+      - name: Install Playwright Browsers
+        run: pnpm dlx playwright install --with-deps chromium
+
+      - name: E2E
+        run: pnpm e2e

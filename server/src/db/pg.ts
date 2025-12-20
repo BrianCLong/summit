@@ -1,10 +1,20 @@
-// @ts-nocheck
-import { Pool, PoolClient } from 'pg';
+import { Pool } from 'pg';
 import { trace, Span } from '@opentelemetry/api';
 import { Counter, Histogram, register } from 'prom-client';
-import { tenantRouter, TenantRoute } from './tenantRouter';
 
 const tracer = trace.getTracer('maestro-postgres', '24.3.0');
+
+const toInt = (value: string | undefined, fallback: number): number => {
+  const parsed = Number.parseInt(value || '', 10);
+  return Number.isNaN(parsed) ? fallback : parsed;
+};
+
+const writePoolSize = toInt(process.env.PG_WRITE_POOL_SIZE, 20);
+const readPoolSize = toInt(process.env.PG_READ_POOL_SIZE, 30);
+const idleTimeoutMs = toInt(process.env.PG_IDLE_TIMEOUT_MS, 30000);
+const connectionTimeoutMs = toInt(process.env.PG_CONNECTION_TIMEOUT_MS, 5000);
+const maxUses = toInt(process.env.PG_POOL_MAX_USES, 5000);
+const statementTimeoutMs = toInt(process.env.PG_STATEMENT_TIMEOUT_MS, 0);
 
 // Region-aware database metrics
 const dbConnectionsActive =
@@ -28,17 +38,6 @@ const dbQueryDuration =
     buckets: [0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5],
   });
 
-const dbPartitionQueryDuration =
-  (register.getSingleMetric(
-    'db_query_partition_duration_seconds',
-  ) as Histogram<string>) ||
-  new Histogram({
-    name: 'db_query_partition_duration_seconds',
-    help: 'Database query duration with partition context',
-    labelNames: ['partition_key', 'tenant_id', 'pool_type', 'operation'],
-    buckets: [0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5],
-  });
-
 const dbReplicationLag =
   (register.getSingleMetric(
     'db_replication_lag_seconds',
@@ -57,9 +56,14 @@ const writePool = new Pool({
     process.env.NODE_ENV === 'production'
       ? { rejectUnauthorized: true }
       : false,
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000,
+  max: writePoolSize,
+  idleTimeoutMillis: idleTimeoutMs,
+  connectionTimeoutMillis,
+  maxUses,
+  keepAlive: true,
+  ...(statementTimeoutMs > 0
+    ? { statement_timeout: statementTimeoutMs }
+    : {}),
   application_name: `maestro-write-${process.env.CURRENT_REGION || 'unknown'}`,
 });
 
@@ -69,13 +73,16 @@ const readPool = new Pool({
     process.env.NODE_ENV === 'production'
       ? { rejectUnauthorized: true }
       : false,
-  max: 30, // More read connections
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000,
+  max: readPoolSize, // More read connections
+  idleTimeoutMillis: idleTimeoutMs,
+  connectionTimeoutMillis,
+  maxUses,
+  keepAlive: true,
+  ...(statementTimeoutMs > 0
+    ? { statement_timeout: statementTimeoutMs }
+    : {}),
   application_name: `maestro-read-${process.env.CURRENT_REGION || 'unknown'}`,
 });
-
-tenantRouter.configure({ writePool, readPool });
 
 // Legacy pool for backward compatibility
 export const pool = writePool;
@@ -84,7 +91,6 @@ export const pool = writePool;
 function getPoolForQuery(
   query: string,
   forceWrite: boolean = false,
-  route?: TenantRoute | null,
 ): { pool: Pool; poolType: string } {
   const operation = query.trim().split(' ')[0].toLowerCase();
   const isWriteOperation = [
@@ -97,20 +103,14 @@ function getPoolForQuery(
     'truncate',
   ].includes(operation);
 
-  const routeWrite = route?.writePool;
-  const routeRead = route?.readPool;
-
   if (
     forceWrite ||
     isWriteOperation ||
     process.env.READ_ONLY_REGION !== 'true'
   ) {
-    return { pool: routeWrite || writePool, poolType: 'write' };
+    return { pool: writePool, poolType: 'write' };
   } else {
-    return {
-      pool: routeRead || routeWrite || readPool,
-      poolType: routeRead ? 'read' : 'write',
-    };
+    return { pool: readPool, poolType: 'read' };
   }
 }
 
@@ -129,19 +129,12 @@ async function _executeQuery(
 ) {
   return tracer.startActiveSpan(spanName, async (span: Span) => {
     const operation = query.split(' ')[0].toLowerCase();
-    const route =
-      options?.tenantId && tenantRouter.isEnabled()
-        ? await tenantRouter.resolve(options?.tenantId)
-        : null;
     const { pool: selectedPool, poolType } = options.poolType
       ? {
-          pool:
-            options.poolType === 'read'
-              ? route?.readPool || readPool
-              : route?.writePool || writePool,
+          pool: options.poolType === 'read' ? readPool : writePool,
           poolType: options.poolType,
         }
-      : getPoolForQuery(query, options?.forceWrite, route);
+      : getPoolForQuery(query, options?.forceWrite);
     const currentRegion = process.env.CURRENT_REGION || 'unknown';
 
     span.setAttributes({
@@ -151,7 +144,6 @@ async function _executeQuery(
       'db.pool_type': poolType,
       'db.region': currentRegion,
       tenant_id: options?.tenantId || 'unknown',
-      partition_key: route?.partitionKey || 'default',
     });
 
     const scopedQuery = validateAndScopeQuery(
@@ -168,48 +160,29 @@ async function _executeQuery(
         tenant_id: options?.tenantId || 'unknown',
       });
 
-      const client = await selectedPool.connect();
-      let resetSearchPath: () => Promise<void> = async () => {};
-      try {
-        resetSearchPath = await applySearchPath(client, route);
-        const result = await client.query(
-          scopedQuery.query,
-          scopedQuery.params,
-        );
+      const result = await selectedPool.query(
+        scopedQuery.query,
+        scopedQuery.params,
+      );
 
-        const duration = (Date.now() - startTime) / 1000;
-        dbQueryDuration.observe(
-          {
-            region: currentRegion,
-            pool_type: poolType,
-            operation,
-            tenant_id: options?.tenantId || 'unknown',
-          },
-          duration,
-        );
-        if (route) {
-          dbPartitionQueryDuration.observe(
-            {
-              partition_key: route.partitionKey,
-              tenant_id: options?.tenantId || 'unknown',
-              pool_type: poolType,
-              operation,
-            },
-            duration,
-          );
-        }
+      const duration = (Date.now() - startTime) / 1000;
+      dbQueryDuration.observe(
+        {
+          region: currentRegion,
+          pool_type: poolType,
+          operation,
+          tenant_id: options?.tenantId || 'unknown',
+        },
+        duration,
+      );
 
-        span.setAttributes({
-          'db.rows_affected': result.rowCount || 0,
-          'db.tenant_scoped': scopedQuery.wasScoped,
-          'db.query_duration': duration,
-        });
+      span.setAttributes({
+        'db.rows_affected': result.rowCount || 0,
+        'db.tenant_scoped': scopedQuery.wasScoped,
+        'db.query_duration': duration,
+      });
 
-        return returnMany ? result.rows : result.rows[0] || null;
-      } finally {
-        await resetSearchPath();
-        client.release();
-      }
+      return returnMany ? result.rows : result.rows[0] || null;
     } catch (error) {
       span.recordException(error as Error);
       span.setStatus({ code: 2, message: (error as Error).message });
@@ -424,29 +397,6 @@ function validateAndScopeQuery(
     `Unable to auto-scope query for table ${affectedTable}: ${query}`,
   );
   return { query, params, wasScoped: false };
-}
-
-function quoteIdentifier(identifier: string): string {
-  return `"${identifier.replace(/"/g, '""')}"`;
-}
-
-async function applySearchPath(
-  client: PoolClient,
-  route?: TenantRoute | null,
-): Promise<() => Promise<void>> {
-  if (!route?.schema) {
-    return async () => {};
-  }
-
-  const searchPath = `${quoteIdentifier(route.schema)}, public`;
-  await client.query(`SET search_path TO ${searchPath}`);
-  return async () => {
-    try {
-      await client.query('RESET search_path');
-    } catch {
-      // If RESET fails, we still release the connection
-    }
-  };
 }
 
 function scopeSelectQuery(
