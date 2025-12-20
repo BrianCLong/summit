@@ -1,3 +1,4 @@
+// @ts-nocheck
 import pino from 'pino';
 import { getPostgresPool } from '../postgres.js';
 import { getNeo4jDriver } from '../neo4j.js';

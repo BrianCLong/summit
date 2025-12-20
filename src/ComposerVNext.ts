@@ -18,12 +18,14 @@ import {
   SBOMGenerator,
   ProvenanceConfig,
 } from './supply-chain/SBOMGenerator.js';
+import { ProvenanceCache } from './supply-chain/ProvenanceCache.js';
 import {
   BuildTelemetry,
   createBuildTelemetry,
 } from './observability/BuildTelemetry.js';
 import { performance } from 'perf_hooks';
 import crypto from 'crypto';
+import path from 'path';
 
 export interface ComposerConfig {
   projectName: string;
@@ -444,12 +446,31 @@ export class ComposerVNext {
     console.log('📋 Generating supply chain artifacts...');
 
     try {
+      const provenanceCache = new ProvenanceCache({
+        cacheFile: path.resolve('dist/.provenance-cache.json'),
+        artifactPath: './dist/index.js',
+        attestationPath: './dist/index.js.attestation.json',
+        inputs: ['package.json', 'package-lock.json', 'tsconfig.json', 'src'],
+      });
+
+      const cacheStatus = await provenanceCache.validate();
+      if (cacheStatus.cacheHit) {
+        console.log(
+          '♻️  Provenance cache hit; skipping regeneration of SBOM and attestations',
+        );
+        return;
+      }
+      if (cacheStatus.reason) {
+        console.log(`ℹ️  Provenance cache miss: ${cacheStatus.reason}`);
+      }
+
       // Generate SBOM
       const sbomResult = await this.sbomGenerator.generateSBOM({
         projectPath: process.cwd(),
         outputFormat: 'spdx-json',
         includeDevDependencies: false,
         includeTransitive: true,
+        dependencyTrack: { autoPublish: true },
       });
 
       console.log(`✅ SBOM generated: ${sbomResult.componentCount} components`);
@@ -472,13 +493,20 @@ export class ComposerVNext {
       console.log('✅ Provenance attestation generated');
 
       // Sign attestation
-      await this.sbomGenerator.signProvenance(
+      const signingResult = await this.sbomGenerator.signProvenance(
         provenanceResult.attestationPath,
         {
-          method: 'local',
-          keyPath: process.env.SIGNING_KEY_PATH,
+          preferKeyless: true,
+          managedKeyPath: process.env.SIGNING_KEY_PATH,
+          managedKeyId: process.env.SIGNING_KEY_ID,
+          rekorOutputPath: path.resolve('dist/rekor-entries.json'),
         },
       );
+
+      const cacheRecord = await provenanceCache.snapshot({
+        rekorEntryUUID: signingResult.rekorEntryUUID,
+      });
+      await provenanceCache.persist(cacheRecord);
 
       console.log('🔐 Artifacts signed');
     } catch (error) {

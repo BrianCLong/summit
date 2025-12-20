@@ -1,0 +1,28 @@
+{
+  "$schema": "https://summit.dev/schemas/agent-budget-manifest.schema.json",
+  "schemaVersion": "2025-02-15",
+  "agentId": "predictive",
+  "owner": "Agent Control Systems",
+  "description": "Predictive modeling agent tuned for bounded inference cost and limited concurrent runs.",
+  "deterministicLimits": {
+    "maxTokens": 70000,
+    "maxCallsPerRun": 28,
+    "maxWallClockMs": 180000,
+    "maxConcurrentRuns": 2,
+    "maxDailyRuns": 200,
+    "maxNetworkKB": 3072
+  },
+  "risk": {
+    "inherent": 6,
+    "controlBaseline": 3,
+    "residual": 3,
+    "riskTier": "medium",
+    "riskCeiling": 6,
+    "gates": ["lint", "typecheck"]
+  },
+  "telemetry": {
+    "auditLogPath": "agents/audit/logs/agent-audit.log",
+    "emitBudgetEvents": true,
+    "sampleRate": 1
+  }
+}

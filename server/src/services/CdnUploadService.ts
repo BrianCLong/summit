@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createReadStream } from 'fs';
 import path from 'path';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';

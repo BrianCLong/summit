@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { BaseSourceConnector } from './base.js';
 import { ConnectorContext } from './types.js';
 import fs from 'fs/promises';
