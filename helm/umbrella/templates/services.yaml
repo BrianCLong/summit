@@ -1,0 +1,50 @@
+{{- range $name, $service := .Values.services }}
+{{- $ctx := dict "root" $ "name" $name "service" $service -}}
+{{- $active := $service.blueGreen.activeColor | default "blue" -}}
+{{- $inactive := ternary "green" "blue" (eq $active "blue") -}}
+{{ include "summit.service.deployment" (merge $ctx (dict "color" $active)) }}
+{{- if $service.blueGreen.enabled | default false }}
+---
+{{ include "summit.service.deployment" (merge $ctx (dict "color" $inactive)) }}
+---
+{{ include "summit.service.colorService" (merge $ctx (dict "color" $active)) }}
+---
+{{ include "summit.service.colorService" (merge $ctx (dict "color" $inactive)) }}
+{{- end }}
+---
+{{ include "summit.service.service" $ctx }}
+{{- if $service.hpa }}
+---
+{{ include "summit.service.hpa" $ctx }}
+{{- end }}
+{{- if $service.ingress.enabled | default false }}
+---
+{{ include "summit.service.ingress" $ctx }}
+{{- end }}
+{{- $ext := include "summit.service.externalsecret" $ctx }}
+{{- if $ext }}
+---
+{{ $ext }}
+{{- end }}
+{{- $np := include "summit.service.networkPolicies" $ctx }}
+{{- if $np }}
+---
+{{ $np }}
+{{- end }}
+{{- $dr := include "summit.service.destinationRule" $ctx }}
+{{- if $dr }}
+---
+{{ $dr }}
+{{- end }}
+{{- $pa := include "summit.service.peerAuth" $ctx }}
+{{- if $pa }}
+---
+{{ $pa }}
+{{- end }}
+{{- $job := include "summit.service.promotionJob" $ctx }}
+{{- if $job }}
+---
+{{ $job }}
+{{- end }}
+---
+{{- end }}
