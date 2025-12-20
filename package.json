@@ -112,7 +112,10 @@
     "security:audit:fix": "pnpm audit --fix",
     "security:lint": "eslint --config .eslintrc.security.cjs 'server/src/**/*.{js,ts}' --max-warnings 0",
     "security:scan": "pnpm run security:audit && pnpm run security:lint",
-    "security:outdated": "pnpm outdated"
+    "security:outdated": "pnpm outdated",
+    "sbom:gen": "pnpm run sbom:gen:server && pnpm run sbom:gen:client",
+    "sbom:gen:server": "cd server && npx @cyclonedx/cdxgen -o sbom.server.cdx.json --spec-version 1.5",
+    "sbom:gen:client": "cd client && npx @cyclonedx/cdxgen -o sbom.client.cdx.json --spec-version 1.5"
   },
   "keywords": [
     "intelligence-analysis",
