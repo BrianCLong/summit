@@ -1,90 +1,115 @@
-import { Router } from 'express';
-import type { PreflightApprover, PreflightRequest } from '@summit/policy-types';
+import express from 'express';
+import { ensureAuthenticated } from '../middleware/auth.js';
 import {
-  ActionPolicyError,
-  actionPolicyService,
+  ActionPolicyService,
+  calculateRequestHash,
 } from '../services/ActionPolicyService.js';
-import { logger } from '../utils/logger.js';
+import type { PreflightRequest } from '../../../packages/policy-audit/src/types';
 
-interface ExecuteRequestBody {
-  preflight_id?: string;
-  request?: PreflightRequest;
-  approvers?: PreflightApprover[];
-}
+const router = express.Router();
+const actionPolicyService = new ActionPolicyService();
 
-function handleError(error: unknown, res: any) {
-  if (error instanceof ActionPolicyError) {
-    return res.status(error.status).json({
-      error: error.code,
-      message: error.message,
-      details: error.details,
+router.use(express.json());
+
+const buildRequest = (req: express.Request): PreflightRequest => {
+  const user = (req as any).user || {};
+  const action = String(req.body.action || '').toUpperCase();
+
+  return {
+    action,
+    actor: {
+      id: user.sub || user.id || 'anonymous',
+      role: user.role,
+      tenantId: user.tenantId || user.tenant_id,
+    },
+    resource: req.body.resource,
+    payload: req.body.payload,
+    approvers: Array.isArray(req.body.approvers)
+      ? req.body.approvers.map((id: unknown) => String(id))
+      : undefined,
+  };
+};
+
+router.post('/preflight', ensureAuthenticated, async (req, res, next) => {
+  try {
+    const request = buildRequest(req);
+    if (!request.action) {
+      return res.status(400).json({ error: 'action is required' });
+    }
+
+    const result = await actionPolicyService.preflight(request, {
+      correlationId: req.correlationId,
+      ip: req.ip,
+      userAgent: req.get('user-agent') || undefined,
     });
+
+    return res.status(result.decision.allow ? 200 : 403).json({
+      preflight_id: result.preflightId,
+      decision: result.decision,
+      request_hash: result.requestHash,
+      correlation_id: req.correlationId,
+    });
+  } catch (error) {
+    next(error);
   }
+});
 
-  logger.error({ err: error }, 'Unhandled error in actions router');
-  return res.status(500).json({
-    error: 'internal_error',
-    message: 'Unexpected error while evaluating action policy',
-  });
-}
-
-export function buildActionsRouter(service = actionPolicyService) {
-  const router = Router();
-
-  router.post('/preflight', async (req, res) => {
-    try {
-      const request = req.body as PreflightRequest;
-      const decision = await service.runPreflight(request, {
-        correlationId: req.correlationId,
-        ip: req.ip,
-        userAgent: req.get('user-agent') || undefined,
-      });
-
-      const responseBody = {
-        preflight_id: decision.preflightId,
-        correlation_id: req.correlationId,
-        decision: {
-          allow: decision.allow,
-          reason: decision.reason,
-          obligations: decision.obligations,
-          expires_at: decision.expiresAt.toISOString(),
-        },
-        request_hash: decision.requestHash,
-      };
-
-      return res.status(decision.allow ? 200 : 403).json(responseBody);
-    } catch (error) {
-      return handleError(error, res);
+router.post('/execute', ensureAuthenticated, async (req, res, next) => {
+  try {
+    const preflightId = req.body.preflight_id as string | undefined;
+    if (!preflightId) {
+      return res
+        .status(428)
+        .json({ error: 'preflight_id is required to execute this action' });
     }
-  });
 
-  router.post('/execute', async (req, res) => {
-    try {
-      const { preflight_id, request, approvers } =
-        (req.body as ExecuteRequestBody) || {};
-
-      const decision = await service.assertExecutable(
-        preflight_id as string,
-        request as PreflightRequest,
-        approvers,
-      );
-
-      return res.status(200).json({
-        status: 'ok',
-        preflight_id: decision.preflightId,
-        correlation_id: req.correlationId,
-        decision: {
-          allow: decision.allow,
-          reason: decision.reason,
-          obligations: decision.obligations,
-        },
-      });
-    } catch (error) {
-      return handleError(error, res);
+    const request = buildRequest(req);
+    if (!request.action) {
+      return res.status(400).json({ error: 'action is required' });
     }
-  });
 
-  return router;
-}
+    const validation = await actionPolicyService.validateExecution(
+      preflightId,
+      request,
+    );
 
-export default buildActionsRouter();
+    switch (validation.status) {
+      case 'missing':
+        return res.status(404).json({ error: 'preflight decision not found' });
+      case 'expired':
+        return res.status(410).json({
+          error: 'preflight decision expired',
+          expires_at: validation.expiresAt,
+        });
+      case 'hash_mismatch':
+        return res.status(409).json({
+          error: 'request does not match preflight hash',
+          expected: validation.expected,
+          actual: validation.actual,
+        });
+      case 'blocked':
+        return res.status(403).json({
+          error: validation.reason || 'policy obligations not met',
+          obligation: validation.obligation,
+        });
+      case 'ok':
+        return res.status(200).json({
+          ok: true,
+          correlation_id: req.correlationId,
+          request_hash: validation.requestHash,
+          decision: validation.decision,
+        });
+      default:
+        return res.status(500).json({ error: 'unknown preflight validation state' });
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/hash', ensureAuthenticated, (req, res) => {
+  const request = buildRequest(req);
+  return res.json({ request_hash: calculateRequestHash(request) });
+});
+
+export const actionsRouter = router;

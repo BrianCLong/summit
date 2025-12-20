@@ -1,84 +1,204 @@
 import express from 'express';
 import request from 'supertest';
-import { buildActionsRouter } from '../actions.js';
-import { ActionPolicyError } from '../../services/ActionPolicyService.js';
+import nock from 'nock';
+import { actionsRouter } from '../actions.js';
+import { calculateRequestHash } from '../../services/ActionPolicyService.js';
+import type { PreflightRequest } from '../../../../packages/policy-audit/src/types';
+import { getPostgresPool } from '../../db/postgres.js';
 
-const baseDecision = {
-  allow: true,
-  reason: 'allow',
-  obligations: [],
-  requestHash: 'hash-1',
-  preflightId: 'pf-1',
-  expiresAt: new Date(Date.now() + 1000),
-  request: {
-    action: 'DELETE_ACCOUNT',
-    subject: { id: 'user-1' },
-  },
-};
+jest.mock('../../db/postgres.js', () => ({
+  getPostgresPool: jest.fn(),
+}));
 
-function buildApp(serviceOverrides: Partial<any> = {}) {
-  const router = buildActionsRouter({
-    runPreflight: jest.fn().mockResolvedValue({
-      ...baseDecision,
-      ...serviceOverrides.preflightResult,
-    }),
-    assertExecutable:
-      serviceOverrides.assertExecutable ||
-      jest.fn().mockResolvedValue({
-        ...baseDecision,
-        ...serviceOverrides.executeResult,
-      }),
-  } as any);
+jest.mock('../../middleware/auth.js', () => ({
+  ensureAuthenticated: (_req: any, _res: any, next: any) => next(),
+}));
 
+const mockGetPostgresPool = getPostgresPool as jest.MockedFunction<
+  typeof getPostgresPool
+>;
+
+const buildApp = () => {
   const app = express();
-  app.use(express.json());
-  app.use((req: any, _res, next) => {
-    req.correlationId = 'corr-test';
+  app.use((req, _res, next) => {
+    // Inject a deterministic correlation ID for assertions.
+    (req as any).correlationId = 'corr-test';
+    // Provide an authenticated user.
+    (req as any).user = {
+      id: 'user-1',
+      role: 'ADMIN',
+      tenantId: 'tenant-1',
+    };
     next();
   });
-  app.use('/actions', router);
+  app.use('/api/actions', actionsRouter);
   return app;
-}
+};
 
 describe('actions router', () => {
-  it('returns preflight decision details', async () => {
-    const app = buildApp();
-
-    const res = await request(app)
-      .post('/actions/preflight')
-      .send(baseDecision.request);
-
-    expect(res.status).toBe(200);
-    expect(res.body.preflight_id).toBeDefined();
-    expect(res.body.request_hash).toBe(baseDecision.requestHash);
-    expect(res.body.decision.obligations).toEqual([]);
+  beforeEach(() => {
+    jest.clearAllMocks();
+    nock.cleanAll();
   });
 
-  it('propagates deny responses with 403', async () => {
-    const app = buildApp({
-      preflightResult: { allow: false, reason: 'deny' },
-    });
+  it('approves preflight when dual-control obligations are satisfied', async () => {
+    const query = jest.fn().mockResolvedValue({ rows: [] });
+    mockGetPostgresPool.mockReturnValue({ query } as any);
 
+    nock('http://localhost:8181')
+      .post('/v1/data/actions/decision')
+      .reply(200, {
+        result: {
+          allow: true,
+          reason: 'dual_control_satisfied',
+          obligations: [{ type: 'dual_control', satisfied: true }],
+          expires_at: '2099-01-01T00:00:00Z',
+        },
+      });
+
+    const app = buildApp();
     const res = await request(app)
-      .post('/actions/preflight')
-      .send(baseDecision.request);
+      .post('/api/actions/preflight')
+      .send({
+        action: 'EXPORT_CASE',
+        approvers: ['approver-a', 'approver-b'],
+        payload: { id: 'case-1' },
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body.decision.obligations[0].satisfied).toBe(true);
+    expect(res.body.preflight_id).toBeDefined();
+    expect(query).toHaveBeenCalledTimes(1);
+  });
+
+  it('denies preflight when approvers overlap and dual-control is unmet', async () => {
+    const query = jest.fn().mockResolvedValue({ rows: [] });
+    mockGetPostgresPool.mockReturnValue({ query } as any);
+
+    nock('http://localhost:8181')
+      .post('/v1/data/actions/decision')
+      .reply(200, {
+        result: {
+          allow: false,
+          reason: 'dual_control_required',
+          obligations: [{ type: 'dual_control', satisfied: false }],
+        },
+      });
+
+    const app = buildApp();
+    const res = await request(app)
+      .post('/api/actions/preflight')
+      .send({
+        action: 'DELETE_CASE',
+        approvers: ['approver-a', 'approver-a'],
+      });
 
     expect(res.status).toBe(403);
     expect(res.body.decision.allow).toBe(false);
+    expect(query).toHaveBeenCalledTimes(1);
   });
 
-  it('returns errors from execution guard with the provided status', async () => {
-    const app = buildApp({
-      assertExecutable: jest.fn().mockRejectedValue(
-        new ActionPolicyError('missing preflight', 'preflight_missing', 404),
-      ),
+  it('enforces preflight hash and expiry before executing', async () => {
+    const query = jest.fn();
+    const preflightRequest: PreflightRequest = {
+      action: 'ROTATE_KEYS',
+      actor: { id: 'user-1', tenantId: 'tenant-1' },
+      payload: { scope: 'tenant' },
+      approvers: ['approver-a', 'approver-b'],
+    };
+    const requestHash = calculateRequestHash(preflightRequest);
+    query.mockResolvedValueOnce({
+      rows: [
+        {
+          decision_id: 'pf-123',
+          policy_name: 'actions',
+          decision: 'ALLOW',
+          resource_id: requestHash,
+          reason: JSON.stringify({
+            reason: 'dual_control_satisfied',
+            obligations: [{ type: 'dual_control', satisfied: true }],
+            requestHash,
+            expiresAt: '2099-01-01T00:00:00Z',
+          }),
+        },
+      ],
     });
+    mockGetPostgresPool.mockReturnValue({ query } as any);
 
+    const app = buildApp();
     const res = await request(app)
-      .post('/actions/execute')
-      .send({ preflight_id: 'unknown', request: baseDecision.request });
+      .post('/api/actions/execute')
+      .send({
+        preflight_id: 'pf-123',
+        action: 'ROTATE_KEYS',
+        payload: { scope: 'tenant' },
+        approvers: ['approver-a', 'approver-b'],
+      });
 
-    expect(res.status).toBe(404);
-    expect(res.body.error).toBe('preflight_missing');
+    expect(res.status).toBe(200);
+    expect(res.body.request_hash).toBe(requestHash);
+  });
+
+  it('rejects execution when the preflight window has expired', async () => {
+    const query = jest.fn().mockResolvedValue({
+      rows: [
+        {
+          decision_id: 'pf-expired',
+          policy_name: 'actions',
+          decision: 'ALLOW',
+          resource_id: 'stale-hash',
+          reason: JSON.stringify({
+            reason: 'dual_control_satisfied',
+            obligations: [{ type: 'dual_control', satisfied: true }],
+            requestHash: 'stale-hash',
+            expiresAt: '2000-01-01T00:00:00Z',
+          }),
+        },
+      ],
+    });
+    mockGetPostgresPool.mockReturnValue({ query } as any);
+
+    const app = buildApp();
+    const res = await request(app)
+      .post('/api/actions/execute')
+      .send({
+        preflight_id: 'pf-expired',
+        action: 'EXPORT_CASE',
+      });
+
+    expect(res.status).toBe(410);
+    expect(res.body.error).toMatch(/expired/);
+  });
+
+  it('rejects execution when the request hash differs from the preflight record', async () => {
+    const query = jest.fn().mockResolvedValue({
+      rows: [
+        {
+          decision_id: 'pf-hash',
+          policy_name: 'actions',
+          decision: 'ALLOW',
+          resource_id: 'expected-hash',
+          reason: JSON.stringify({
+            reason: 'dual_control_satisfied',
+            obligations: [{ type: 'dual_control', satisfied: true }],
+            requestHash: 'expected-hash',
+            expiresAt: '2099-01-01T00:00:00Z',
+          }),
+        },
+      ],
+    });
+    mockGetPostgresPool.mockReturnValue({ query } as any);
+
+    const app = buildApp();
+    const res = await request(app)
+      .post('/api/actions/execute')
+      .send({
+        preflight_id: 'pf-hash',
+        action: 'EXPORT_CASE',
+        payload: { scope: 'different' },
+      });
+
+    expect(res.status).toBe(409);
+    expect(res.body.error).toMatch(/hash/);
   });
 });

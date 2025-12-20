@@ -1,0 +1,268 @@
+name: 💾 Automated Database Backups
+
+on:
+  schedule:
+    # Nightly at 2 AM UTC (7 PM MST / 8 PM MDT)
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      backup_type:
+        description: 'Backup type'
+        required: true
+        default: 'full'
+        type: choice
+        options:
+          - full
+          - incremental
+      retention_days:
+        description: 'Retention period (days)'
+        required: false
+        default: '30'
+
+permissions:
+  contents: read
+  actions: write
+
+env:
+  BACKUP_RETENTION_DAYS: 30
+  BACKUP_PATH: backups
+
+jobs:
+  backup-databases:
+    name: Backup Neo4j & Postgres
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: backup_test
+          POSTGRES_DB: intelgraph_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      
+      neo4j:
+        image: neo4j:5.13-enterprise
+        env:
+          NEO4J_AUTH: neo4j/backup_test_password
+          NEO4J_ACCEPT_LICENSE_AGREEMENT: 'yes'
+        ports: ['7474:7474', '7687:7687']
+        options: >-
+          --health-cmd="cypher-shell -u neo4j -p backup_test_password 'RETURN 1'"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set backup timestamp
+        id: timestamp
+        run: |
+          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+          echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
+          echo "date=$(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_OUTPUT
+      
+      - name: Create backup directory
+        run: |
+          mkdir -p ${{ env.BACKUP_PATH }}/${{ steps.timestamp.outputs.timestamp }}
+          echo "Backup directory: ${{ env.BACKUP_PATH }}/${{ steps.timestamp.outputs.timestamp }}"
+      
+      - name: Backup Postgres database
+        run: |
+          echo "🔵 Starting Postgres backup..."
+          docker exec ${{ job.services.postgres.id }} pg_dump \
+            -U postgres \
+            -d intelgraph_test \
+            -F c \
+            -f /tmp/postgres_backup.dump
+          
+          docker cp ${{ job.services.postgres.id }}:/tmp/postgres_backup.dump \
+            ${{ env.BACKUP_PATH }}/${{ steps.timestamp.outputs.timestamp }}/postgres.dump
+          
+          # Generate checksum
+          sha256sum ${{ env.BACKUP_PATH }}/${{ steps.timestamp.outputs.timestamp }}/postgres.dump \
+            > ${{ env.BACKUP_PATH }}/${{ steps.timestamp.outputs.timestamp }}/postgres.dump.sha256
+          
+          echo "✅ Postgres backup completed"
+      
+      - name: Backup Neo4j database
+        run: |
+          echo "🟫 Starting Neo4j backup..."
+          docker exec ${{ job.services.neo4j.id }} neo4j-admin database dump \
+            --to-path=/tmp/backups \
+            neo4j
+          
+          docker cp ${{ job.services.neo4j.id }}:/tmp/backups/neo4j.dump \
+            ${{ env.BACKUP_PATH }}/${{ steps.timestamp.outputs.timestamp }}/neo4j.dump
+          
+          # Generate checksum
+          sha256sum ${{ env.BACKUP_PATH }}/${{ steps.timestamp.outputs.timestamp }}/neo4j.dump \
+            > ${{ env.BACKUP_PATH }}/${{ steps.timestamp.outputs.timestamp }}/neo4j.dump.sha256
+          
+          echo "✅ Neo4j backup completed"
+      
+      - name: Verify backup integrity
+        run: |
+          echo "🔍 Verifying backup integrity..."
+          
+          # Verify Postgres dump
+          if [ -f "${{ env.BACKUP_PATH }}/${{ steps.timestamp.outputs.timestamp }}/postgres.dump" ]; then
+            SIZE=$(stat -f%z "${{ env.BACKUP_PATH }}/${{ steps.timestamp.outputs.timestamp }}/postgres.dump" 2>/dev/null || stat -c%s "${{ env.BACKUP_PATH }}/${{ steps.timestamp.outputs.timestamp }}/postgres.dump")
+            if [ "$SIZE" -gt 1000 ]; then
+              echo "✅ Postgres backup verified: ${SIZE} bytes"
+            else
+              echo "❌ Postgres backup too small: ${SIZE} bytes"
+              exit 1
+            fi
+          else
+            echo "❌ Postgres backup file not found"
+            exit 1
+          fi
+          
+          # Verify Neo4j dump
+          if [ -f "${{ env.BACKUP_PATH }}/${{ steps.timestamp.outputs.timestamp }}/neo4j.dump" ]; then
+            SIZE=$(stat -f%z "${{ env.BACKUP_PATH }}/${{ steps.timestamp.outputs.timestamp }}/neo4j.dump" 2>/dev/null || stat -c%s "${{ env.BACKUP_PATH }}/${{ steps.timestamp.outputs.timestamp }}/neo4j.dump")
+            if [ "$SIZE" -gt 1000 ]; then
+              echo "✅ Neo4j backup verified: ${SIZE} bytes"
+            else
+              echo "❌ Neo4j backup too small: ${SIZE} bytes"
+              exit 1
+            fi
+          else
+            echo "❌ Neo4j backup file not found"
+            exit 1
+          fi
+          
+          # Verify checksums
+          cd ${{ env.BACKUP_PATH }}/${{ steps.timestamp.outputs.timestamp }}
+          sha256sum -c postgres.dump.sha256
+          sha256sum -c neo4j.dump.sha256
+          
+          echo "✅ All integrity checks passed"
+      
+      - name: Generate backup manifest
+        run: |
+          cat > ${{ env.BACKUP_PATH }}/${{ steps.timestamp.outputs.timestamp }}/manifest.json <<EOF
+          {
+            "timestamp": "${{ steps.timestamp.outputs.timestamp }}",
+            "date": "${{ steps.timestamp.outputs.date }}",
+            "backup_type": "${{ github.event.inputs.backup_type || 'scheduled' }}",
+            "databases": {
+              "postgres": {
+                "file": "postgres.dump",
+                "checksum_file": "postgres.dump.sha256",
+                "size_bytes": $(stat -c%s ${{ env.BACKUP_PATH }}/${{ steps.timestamp.outputs.timestamp }}/postgres.dump || echo 0)
+              },
+              "neo4j": {
+                "file": "neo4j.dump",
+                "checksum_file": "neo4j.dump.sha256",
+                "size_bytes": $(stat -c%s ${{ env.BACKUP_PATH }}/${{ steps.timestamp.outputs.timestamp }}/neo4j.dump || echo 0)
+              }
+            },
+            "workflow_run": "${{ github.run_id }}",
+            "workflow_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          }
+          EOF
+          
+          echo "📄 Backup manifest generated"
+          cat ${{ env.BACKUP_PATH }}/${{ steps.timestamp.outputs.timestamp }}/manifest.json
+      
+      - name: Compress backup archives
+        run: |
+          echo "🗃️ Compressing backup archives..."
+          cd ${{ env.BACKUP_PATH }}
+          tar -czf ${{ steps.timestamp.outputs.timestamp }}.tar.gz ${{ steps.timestamp.outputs.timestamp }}/
+          
+          SIZE=$(stat -f%z "${{ steps.timestamp.outputs.timestamp }}.tar.gz" 2>/dev/null || stat -c%s "${{ steps.timestamp.outputs.timestamp }}.tar.gz")
+          echo "✅ Compressed archive: ${SIZE} bytes"
+      
+      - name: Upload backup artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: database-backup-${{ steps.timestamp.outputs.timestamp }}
+          path: |
+            ${{ env.BACKUP_PATH }}/${{ steps.timestamp.outputs.timestamp }}.tar.gz
+            ${{ env.BACKUP_PATH }}/${{ steps.timestamp.outputs.timestamp }}/manifest.json
+          retention-days: ${{ github.event.inputs.retention_days || env.BACKUP_RETENTION_DAYS }}
+          compression-level: 9
+      
+      - name: Generate backup summary
+        if: always()
+        run: |
+          echo "# 💾 Database Backup Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Timestamp**: ${{ steps.timestamp.outputs.date }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Backup ID**: \`${{ steps.timestamp.outputs.timestamp }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Retention**: ${{ github.event.inputs.retention_days || env.BACKUP_RETENTION_DAYS }} days" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Databases Backed Up" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Database | Status | Size |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|--------|------|" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f "${{ env.BACKUP_PATH }}/${{ steps.timestamp.outputs.timestamp }}/postgres.dump" ]; then
+            SIZE=$(stat -f%z "${{ env.BACKUP_PATH }}/${{ steps.timestamp.outputs.timestamp }}/postgres.dump" 2>/dev/null || stat -c%s "${{ env.BACKUP_PATH }}/${{ steps.timestamp.outputs.timestamp }}/postgres.dump")
+            echo "| PostgreSQL | ✅ Success | $(numfmt --to=iec-i --suffix=B $SIZE 2>/dev/null || echo "${SIZE} bytes") |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| PostgreSQL | ❌ Failed | N/A |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ -f "${{ env.BACKUP_PATH }}/${{ steps.timestamp.outputs.timestamp }}/neo4j.dump" ]; then
+            SIZE=$(stat -f%z "${{ env.BACKUP_PATH }}/${{ steps.timestamp.outputs.timestamp }}/neo4j.dump" 2>/dev/null || stat -c%s "${{ env.BACKUP_PATH }}/${{ steps.timestamp.outputs.timestamp }}/neo4j.dump")
+            echo "| Neo4j | ✅ Success | $(numfmt --to=iec-i --suffix=B $SIZE 2>/dev/null || echo "${SIZE} bytes") |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Neo4j | ❌ Failed | N/A |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 [Download Artifacts](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+  
+  cleanup-old-backups:
+    name: Cleanup Old Backup Artifacts
+    runs-on: ubuntu-latest
+    needs: backup-databases
+    if: github.event_name == 'schedule'
+    
+    steps:
+      - name: Delete old artifacts
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const retentionDays = ${{ env.BACKUP_RETENTION_DAYS }};
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
+            
+            const artifacts = await github.rest.actions.listArtifactsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100
+            });
+            
+            let deletedCount = 0;
+            for (const artifact of artifacts.data.artifacts) {
+              if (artifact.name.startsWith('database-backup-')) {
+                const createdAt = new Date(artifact.created_at);
+                if (createdAt < cutoffDate) {
+                  await github.rest.actions.deleteArtifact({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    artifact_id: artifact.id
+                  });
+                  console.log(`Deleted old backup artifact: ${artifact.name}`);
+                  deletedCount++;
+                }
+              }
+            }
+            
+            console.log(`🗑️ Cleaned up ${deletedCount} old backup artifacts`);
+            core.summary
+              .addHeading('🗑️ Backup Cleanup')
+              .addRaw(`Deleted ${deletedCount} backup artifacts older than ${retentionDays} days`)
+              .write();

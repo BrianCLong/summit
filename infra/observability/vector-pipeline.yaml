@@ -1,0 +1,34 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vector-agent-config
+  namespace: observability
+  labels:
+    app.kubernetes.io/name: vector
+    app.kubernetes.io/component: logging
+    app.kubernetes.io/part-of: observability
+data:
+  vector.toml: |
+    [sources.kubernetes_logs]
+    type = "kubernetes_logs"
+    ignore_older_secs = 600
+
+    [transforms.enrich_correlation]
+    type = "remap"
+    inputs = ["kubernetes_logs"]
+    source = <<'VRL'
+      .correlation_id = .kubernetes.pod_annotations["otel.correlation/id"] ?? .kubernetes.pod_labels["correlation_id"] ?? .headers["x-correlation-id"]
+      .trace_id = .attributes.trace_id ?? .correlation_id
+      .service_name = .kubernetes.pod_labels["app.kubernetes.io/name"]
+      .mesh = .kubernetes.pod_labels["istio.io/rev"] ?? "istio"
+    VRL
+
+    [sinks.loki]
+    type = "loki"
+    inputs = ["enrich_correlation"]
+    endpoint = "http://loki:3100"
+    encoding.codec = "json"
+    labels.job = "kubernetes-logs"
+    labels.correlation_id = "{{ correlation_id }}"
+    labels.service = "{{ service_name }}"
+    labels.mesh = "{{ mesh }}"

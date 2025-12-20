@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { z } from 'zod';
 import { getPostgresPool } from '../config/database.js';
-import { randomUUID } from 'crypto';
+import { randomUUID, createHash } from 'crypto';
 import logger from '../utils/logger.js';
 import { provenanceLedger } from '../provenance/ledger.js';
 import { QuotaManager } from '../lib/resources/quota-manager.js';
@@ -170,6 +170,130 @@ export class TenantService {
 
     if (result.rows.length === 0) return null;
     return this.mapRowToTenant(result.rows[0]);
+  }
+
+  async updateSettings(
+    tenantId: string,
+    settings: Record<string, any>,
+    actorId: string,
+  ): Promise<Tenant> {
+    const pool = getPostgresPool();
+    const client = await pool.connect();
+
+    try {
+      await client.query('BEGIN');
+      const existing = await client.query('SELECT * FROM tenants WHERE id = $1', [tenantId]);
+      if (!existing.rowCount) {
+        throw new Error('Tenant not found');
+      }
+
+      const mergedSettings = {
+        ...(existing.rows[0].settings || {}),
+        ...settings,
+      };
+
+      const result = await client.query(
+        'UPDATE tenants SET settings = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
+        [mergedSettings, tenantId],
+      );
+
+      const tenant = this.mapRowToTenant(result.rows[0]);
+
+      await provenanceLedger.appendEntry({
+        action: 'TENANT_SETTINGS_UPDATED',
+        actor: { id: actorId, role: 'admin' },
+        metadata: {
+          tenantId,
+          updatedKeys: Object.keys(settings),
+          settingsHash: createHash('sha256')
+            .update(JSON.stringify(mergedSettings))
+            .digest('hex'),
+        },
+        artifacts: [],
+      });
+
+      await client.query('COMMIT');
+      return tenant;
+    } catch (error) {
+      await client.query('ROLLBACK');
+      logger.error('Failed to update tenant settings', error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async disableTenant(
+    tenantId: string,
+    actorId: string,
+    reason?: string,
+  ): Promise<Tenant> {
+    const pool = getPostgresPool();
+    const client = await pool.connect();
+
+    try {
+      await client.query('BEGIN');
+      const existing = await client.query('SELECT * FROM tenants WHERE id = $1', [tenantId]);
+      if (!existing.rowCount) {
+        throw new Error('Tenant not found');
+      }
+
+      const current = this.mapRowToTenant(existing.rows[0]);
+      if (current.status === 'disabled') {
+        await client.query('ROLLBACK');
+        return current;
+      }
+
+      const enrichedConfig = {
+        ...(current.config || {}),
+        lifecycle: {
+          ...(current.config?.lifecycle || {}),
+          disabledAt: new Date().toISOString(),
+          reason,
+          actorId,
+        },
+      };
+
+      const result = await client.query(
+        'UPDATE tenants SET status = $1, config = $2, updated_at = NOW() WHERE id = $3 RETURNING *',
+        ['disabled', enrichedConfig, tenantId],
+      );
+
+      const tenant = this.mapRowToTenant(result.rows[0]);
+
+      await provenanceLedger.appendEntry({
+        action: 'TENANT_DISABLED',
+        actor: { id: actorId, role: 'admin' },
+        metadata: {
+          tenantId,
+          previousStatus: current.status,
+          reason,
+        },
+        artifacts: [],
+      });
+
+      await client.query('COMMIT');
+      return tenant;
+    } catch (error) {
+      await client.query('ROLLBACK');
+      logger.error('Failed to disable tenant', error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async getTenantSettings(id: string): Promise<Pick<Tenant, 'id' | 'settings' | 'config' | 'status'>> {
+    const tenant = await this.getTenant(id);
+    if (!tenant) {
+      throw new Error('Tenant not found');
+    }
+    return {
+      id: tenant.id,
+      settings: tenant.settings,
+      config: tenant.config,
+      status: tenant.status,
+    };
   }
 
   private mapRowToTenant(row: any): Tenant {

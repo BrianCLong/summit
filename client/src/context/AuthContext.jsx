@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useMemo, useCallback } from 'react';
 import { useQuery } from '@apollo/client';
+import { useSelector } from 'react-redux';
 import { CURRENT_USER } from '../graphql/user.gql.js';
 import {
   hasCapability,
@@ -8,10 +9,13 @@ import {
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
+  const authState = useSelector((state) => state.auth);
   const { data, loading } = useQuery(CURRENT_USER, {
     fetchPolicy: 'cache-first',
   });
-  const user = data?.me;
+  const graphUser = data?.me;
+  const user = graphUser || authState?.user;
+  const isLoading = loading && !user && !authState?.isAuthenticated;
 
   // Memoize hasRole function to prevent recreation on every render
   const hasRole = useCallback((role) => user?.role === role, [user]);
@@ -24,8 +28,8 @@ export function AuthProvider({ children }) {
 
   // Memoize the context value to prevent unnecessary re-renders of consumers
   const value = useMemo(
-    () => ({ user, loading, hasRole, hasPermission }),
-    [user, loading, hasRole, hasPermission]
+    () => ({ user, loading: isLoading, hasRole, hasPermission }),
+    [user, isLoading, hasRole, hasPermission]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

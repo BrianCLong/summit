@@ -3,7 +3,6 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "node",
-    "baseUrl": ".",
     "rootDir": ".",
     "outDir": "./dist",
     "esModuleInterop": true,
@@ -17,10 +16,7 @@
     "resolveJsonModule": true,
     "sourceMap": true,
     "lib": ["ES2022"],
-    "types": ["node", "jest"],
-    "paths": {
-      "@summit/policy-types": ["../packages/policy-types/src"]
-    }
+    "types": ["node", "jest"]
   },
   "ts-node": {
     "esm": true

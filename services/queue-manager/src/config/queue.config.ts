@@ -51,4 +51,5 @@ export const workerOptions: WorkerOptions = {
   lockDuration: 30000, // 30 seconds
   maxStalledCount: 1,
   stalledInterval: 30000,
+  connection: defaultQueueConfig.redis,
 };

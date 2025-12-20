@@ -1,0 +1,19 @@
+{
+  "name": "reference-webhook-sink",
+  "version": "0.1.0",
+  "description": "Reference webhook sink adapter for Summit",
+  "entrypoint": "index.ts",
+  "capabilities": ["webhook"],
+  "requiredPermissions": ["adapter:webhook:emit"],
+  "claims": [],
+  "compatibility": { "companyOs": ">=0.1.0" },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "endpoint": { "type": "string" },
+      "authHeader": { "type": "string" }
+    },
+    "required": ["endpoint"]
+  },
+  "signature": "placeholder-signature"
+}
