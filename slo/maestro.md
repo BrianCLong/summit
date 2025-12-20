@@ -1,34 +1,25 @@
 # Maestro API SLOs
 
-This document captures the Service Level Objectives for the Maestro orchestration API. It focuses on the high-traffic endpoints surfaced in `maestro-orchestration-api.yaml`, tying each objective to a concrete SLI and PromQL query that can be evaluated by the CI/CD gates.
+This document defines the production Service Level Objectives (SLOs) for the Maestro control-plane API exposed at `/api/maestro/v1`. The SLOs below target the customer-facing orchestration endpoints that gate end-to-end Maestro runs.
 
-## Scope
+## Endpoint scope
 
-- API base path: `/api/maestro/v1`
-- Core endpoints: `/runs`, `/runs/{runId}`, `/pipelines`, `/budgets/tenant`, `/alertcenter/events`
-- Metrics: `maestro_api_requests_total`, `maestro_api_request_duration_seconds_bucket` (both with `path` and `status` labels)
+- `GET /runs`, `GET /runs/{id}` — list and detail views for orchestration runs.
+- `POST /runs` — create a new Maestro run.
+- `GET /pipelines`, `GET /pipelines/{id}` — pipeline catalog access.
+- `POST /pipelines/{id}/executions` — kick off a pipeline execution.
 
 ## Objectives and SLIs
 
-| Endpoint | Objective | SLI Type | PromQL (5m rate windows) |
+| Endpoint(s) | SLI (Prometheus) | Objective | Notes |
 | --- | --- | --- | --- |
-| `/runs` & `/runs/{runId}` | 99.9% availability, 95% of calls under 450ms | Availability | `1 - (sum by (path) (rate(maestro_api_requests_total{path=~"/runs(|/[^/]+)",status=~"5.."}[5m])) / sum by (path) (rate(maestro_api_requests_total{path=~"/runs(|/[^/]+)"}[5m])))` |
-| | | Latency (p95) | `histogram_quantile(0.95, sum by (le) (rate(maestro_api_request_duration_seconds_bucket{path=~"/runs(|/[^/]+)"}[5m])))` |
-| `/pipelines` | 99.5% availability, 95% of calls under 400ms | Availability | `1 - (sum(rate(maestro_api_requests_total{path="/pipelines",status=~"5.."}[5m])) / sum(rate(maestro_api_requests_total{path="/pipelines"}[5m])))` |
-| | | Latency (p95) | `histogram_quantile(0.95, sum by (le) (rate(maestro_api_request_duration_seconds_bucket{path="/pipelines"}[5m])))` |
-| `/budgets/tenant` | 99.9% availability, 95% of calls under 300ms | Availability | `1 - (sum(rate(maestro_api_requests_total{path="/budgets/tenant",status=~"5.."}[5m])) / sum(rate(maestro_api_requests_total{path="/budgets/tenant"}[5m])))` |
-| | | Latency (p95) | `histogram_quantile(0.95, sum by (le) (rate(maestro_api_request_duration_seconds_bucket{path="/budgets/tenant"}[5m])))` |
-| `/alertcenter/events` | 99.0% availability, 95% of calls under 600ms | Availability | `1 - (sum(rate(maestro_api_requests_total{path="/alertcenter/events",status=~"5.."}[5m])) / sum(rate(maestro_api_requests_total{path="/alertcenter/events"}[5m])))` |
-| | | Latency (p95) | `histogram_quantile(0.95, sum by (le) (rate(maestro_api_request_duration_seconds_bucket{path="/alertcenter/events"}[5m])))` |
+| All Maestro API paths | `sum(rate(http_requests_total{service="maestro-api",path=~"/api/maestro/v1/.*",code!~"5.."}[5m])) / sum(rate(http_requests_total{service="maestro-api",path=~"/api/maestro/v1/.*"}[5m]))` | 99.9% availability, 30d window | Aligns with the repo-wide `maestro-api` availability objective; tracked by `error-budget-monitoring.yml` for burn-rate breaches. |
+| Read APIs (`GET /runs`, `GET /runs/{id}`, `GET /pipelines`, `GET /pipelines/{id}`) | `histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service="maestro-api",path=~"/api/maestro/v1/(runs|pipelines).*"}[5m])) by (le,path))` | p95 < 300ms, 30d window; ≥99% of requests meet the target | Ensures control-plane reads stay responsive for the UI and routing layer. |
+| Mutating APIs (`POST /runs`, `POST /pipelines/{id}/executions`) | `sum(rate(http_requests_total{service="maestro-api",path=~"/api/maestro/v1/(runs|pipelines/.*/executions)",code!~"5.."}[5m])) / sum(rate(http_requests_total{service="maestro-api",path=~"/api/maestro/v1/(runs|pipelines/.*/executions)"}[5m]))` | 99.5% success ratio, 30d window | Captures orchestration writes that block new executions; burn-rate alerts trigger when fast (5m) > 14.4x or slow (1h) > 6x budget. |
+| Run creation latency (`POST /runs`) | `histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service="maestro-api",path="/api/maestro/v1/runs"}[5m])) by (le))` | p95 < 400ms, 30d window; ≥99% compliance | Guards request-to-accept timing for workflow fan-out. |
 
-## Burn-rate policy
+## Alert routing
 
-- Error-budget burn rate alerts fire when the short-window burn rate exceeds **2.0×** the allowed budget for any endpoint above.
-- The same threshold is enforced in CI (`.github/workflows/route-slo-gate.yml`) and in continuous monitoring (`.github/workflows/error-budget-monitoring.yml`) so the gate and runtime alerts stay consistent.
-- Burn rate is calculated as:  
-  `burn_rate = (1 - success_ratio) / (1 - objective)`
-
-## Operational hooks
-
-- CI gate: `route-slo-gate` queries the per-route ratios above and fails the run if latency, error ratio, or burn rate exceeds the objective.
-- Runtime monitoring: `error-budget-monitoring` publishes a Markdown report and opens/updates incidents when an objective is breached or burn rate crosses the 2.0× threshold. Both the issue body and Slack notification include the failing endpoint names for quick triage.
+- **Fast burn-rate gate:** The route SLO gate workflow fails if the 5m burn rate exceeds 14.4× the allowed error budget for any Maestro endpoint.
+- **Slow burn-rate gate:** The scheduled error-budget monitor files an issue/Slack alert if the 1h burn rate exceeds 6× budget or if availability drops below its objective.
+- **Artifacts:** Both workflows attach burn-rate context to their logs and markdown reports so on-call can correlate breaches with recent Maestro deployments.

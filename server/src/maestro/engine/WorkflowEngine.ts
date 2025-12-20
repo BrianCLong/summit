@@ -1,4 +1,6 @@
 import { randomUUID } from 'crypto';
+import { metrics } from '../../observability/metrics.js';
+import logger from '../../utils/logger.js';
 
 export interface WorkflowDefinition {
   id: string;
@@ -21,6 +23,7 @@ export interface WorkflowStep {
 
 export interface WorkflowContext {
   runId: string;
+  tenantId: string;
   inputs: Record<string, any>;
   steps: Record<string, any>; // Stores output of each step by ID
 }
@@ -59,40 +62,79 @@ export class WorkflowEngine {
 
   async execute(
     definition: WorkflowDefinition,
-    inputs: Record<string, any>
+    inputs: Record<string, any>,
+    tenantId: string = 'default'
   ): Promise<any> {
     const context: WorkflowContext = {
       runId: randomUUID(),
+      tenantId,
       inputs,
       steps: {},
     };
+    const startTime = Date.now();
 
-    console.log(`[WorkflowEngine] Starting workflow ${definition.id} (${context.runId})`);
+    logger.info({ workflowId: definition.id, runId: context.runId, tenantId }, 'Starting workflow');
 
-    for (const step of definition.steps) {
-      console.log(`[WorkflowEngine] Executing step: ${step.id} (${step.tool})`);
+    try {
+      for (const step of definition.steps) {
+        logger.debug({ stepId: step.id, tool: step.tool, runId: context.runId }, 'Executing step');
+        const stepStartTime = Date.now();
 
-      const tool = this.registry.get(step.tool);
-      if (!tool) {
-        throw new Error(`Tool not found: ${step.tool}`);
+        const tool = this.registry.get(step.tool);
+        if (!tool) {
+          throw new Error(`Tool not found: ${step.tool}`);
+        }
+
+        // 1. Resolve Parameters
+        const resolvedParams = this.resolveParams(step.params, context);
+
+        // 2. Execute
+        try {
+          const result = await tool.execute(resolvedParams, context);
+          context.steps[step.id] = { output: result, status: 'completed' };
+
+          // Record Job (Step) Metrics
+          if (metrics.maestroJobExecutionDurationSeconds) {
+            metrics.maestroJobExecutionDurationSeconds.observe(
+              { job_type: step.tool, status: 'success', tenant_id: tenantId },
+              (Date.now() - stepStartTime) / 1000
+            );
+          }
+        } catch (err: any) {
+          logger.error({ stepId: step.id, error: err.message, runId: context.runId }, 'Step failed');
+          context.steps[step.id] = { error: err.message, status: 'failed' };
+
+          // Record Job (Step) Metrics
+          if (metrics.maestroJobExecutionDurationSeconds) {
+            metrics.maestroJobExecutionDurationSeconds.observe(
+              { job_type: step.tool, status: 'failed', tenant_id: tenantId },
+              (Date.now() - stepStartTime) / 1000
+            );
+          }
+          throw err; // Stop execution on failure for now
+        }
       }
 
-      // 1. Resolve Parameters
-      const resolvedParams = this.resolveParams(step.params, context);
-
-      // 2. Execute
-      try {
-        const result = await tool.execute(resolvedParams, context);
-        context.steps[step.id] = { output: result, status: 'completed' };
-      } catch (err: any) {
-        console.error(`[WorkflowEngine] Step ${step.id} failed:`, err);
-        context.steps[step.id] = { error: err.message, status: 'failed' };
-        throw err; // Stop execution on failure for now
+      // Record DAG (Workflow) Metrics
+      if (metrics.maestroDagExecutionDurationSeconds) {
+        metrics.maestroDagExecutionDurationSeconds.observe(
+          { dag_id: definition.id, status: 'success', tenant_id: tenantId },
+          (Date.now() - startTime) / 1000
+        );
       }
+
+      logger.info({ workflowId: definition.id, runId: context.runId }, 'Workflow completed');
+      return context.steps;
+    } catch (error) {
+       // Record DAG (Workflow) Metrics
+       if (metrics.maestroDagExecutionDurationSeconds) {
+        metrics.maestroDagExecutionDurationSeconds.observe(
+          { dag_id: definition.id, status: 'failed', tenant_id: tenantId },
+          (Date.now() - startTime) / 1000
+        );
+      }
+      throw error;
     }
-
-    console.log(`[WorkflowEngine] Workflow completed.`);
-    return context.steps;
   }
 
   /**
