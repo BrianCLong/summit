@@ -1,0 +1,24 @@
+# Catalog of critical indexes with ownership and evidence links
+postgres:
+  - name: idx_cases_tenant_created_at
+    table: cases
+    columns: [tenant_id, created_at]
+    owner: data-platform
+    purpose: accelerate tenant-scoped case listings
+    evidence: https://grafana.example.com/d/slow-queries
+    status: present
+  - name: idx_audit_events_tenant_created_at
+    table: audit_events
+    columns: [tenant_id, created_at]
+    owner: security
+    purpose: time-bounded audit trail lookups
+    evidence: https://grafana.example.com/d/audit-throughput
+    status: present
+neo4j:
+  - name: person_identity_btree
+    label: Person
+    properties: [identity]
+    owner: knowledge-graph
+    purpose: ensure unique identity lookups
+    evidence: https://grafana.example.com/d/neo4j-latency
+    status: present

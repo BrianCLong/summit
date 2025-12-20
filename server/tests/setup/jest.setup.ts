@@ -4,6 +4,7 @@
  * Provides common test utilities and matchers
  */
 
+// @ts-nocheck
 import 'jest-extended';
 
 // Mock ioredis globally - using a simple mock implementation since module resolution fails
@@ -46,7 +47,7 @@ jest.mock('pg', () => {
   class MockPool extends EventEmitter {
     connect() {
       return Promise.resolve({
-        query: jest.fn<any>().mockResolvedValue({ rows: [] }),
+        query: jest.fn().mockResolvedValue({ rows: [] }),
         release: jest.fn(),
       });
     }
