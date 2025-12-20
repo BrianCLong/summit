@@ -1,7 +1,8 @@
 export type FeatureKey =
   | 'maestro.newRunConsole'
   | 'dashboard.realtime'
-  | 'ui.searchSessions';
+  | 'ui.annotationsV1'
+  | 'ui.mapClustering';
 
 export interface WebConfig {
   apiBaseUrl: string;
@@ -53,7 +54,8 @@ const config: WebConfig = {
   features: {
     'maestro.newRunConsole': getEnv('VITE_ENABLE_NEW_MAESTRO_RUN_CONSOLE') === 'true',
     'dashboard.realtime': getEnv('VITE_ENABLE_REALTIME_DASHBOARD') === 'true',
-    'ui.searchSessions': getEnv('VITE_ENABLE_SEARCH_SESSIONS', 'true') === 'true',
+    'ui.annotationsV1': getEnv('VITE_ENABLE_UI_ANNOTATIONS_V1') === 'true',
+    'ui.mapClustering': getEnv('VITE_ENABLE_MAP_CLUSTERING') === 'true',
   },
   integrations: {
     github: {

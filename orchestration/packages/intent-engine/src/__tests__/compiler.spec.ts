@@ -46,4 +46,18 @@ describe('intent engine compiler', () => {
     expect(ir.retry.maxAttempts).toBe(7);
     expect(ir.retry.baseMs).toBe(1000);
   });
+
+  it('propagates top-level inputs into the IR', () => {
+    const ir = compileToIR({
+      apiVersion: 'chronos.v1',
+      kind: 'Workflow',
+      metadata: { name: 'inputs-demo', namespace: 'demo' },
+      spec: {
+        inputs: { foo: 'bar', tenants: ['t1', 't2'] },
+        tasks: [{ id: 'single', uses: 'noop' }],
+      },
+    });
+
+    expect(ir.inputs).toEqual({ foo: 'bar', tenants: ['t1', 't2'] });
+  });
 });
