@@ -15,6 +15,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useAuth } from '../../context/AuthContext.jsx';
+import { PartnerBillingPanel } from './billing/PartnerBillingPanel';
 
 interface Receipt {
   id: string;
@@ -269,6 +270,10 @@ export default function PartnerConsolePage() {
               </Button>
             </CardActions>
           </Card>
+        </Grid>
+
+        <Grid item xs={12}>
+          <PartnerBillingPanel tenantId={tenantId} />
         </Grid>
 
         <Grid item xs={12}>

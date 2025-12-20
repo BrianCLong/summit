@@ -25,6 +25,11 @@ import type {
   IntegrityIssue,
   BrokenLink,
 } from '../core/types.js';
+import {
+  GENESIS_HASH,
+  calculateEventHash,
+  calculateChainHash,
+} from '../core/hash-utils.js';
 
 /**
  * Immutable audit store with cryptographic integrity guarantees
@@ -37,8 +42,7 @@ export class ImmutableAuditStore extends EventEmitter {
   private initialized: boolean = false;
 
   // Genesis hash for the start of the chain
-  private static readonly GENESIS_HASH =
-    '0000000000000000000000000000000000000000000000000000000000000000';
+  private static readonly GENESIS_HASH = GENESIS_HASH;
 
   constructor(pool: Pool, config: BlackBoxServiceConfig) {
     super();
@@ -195,6 +199,17 @@ export class ImmutableAuditStore extends EventEmitter {
       event.createdAt = new Date();
     }
 
+    // Reject mutations by preventing overwrites of existing events
+    const existing = await client.query('SELECT 1 FROM audit_events WHERE id = $1', [
+      event.id,
+    ]);
+
+    if (existing.rowCount > 0) {
+      throw new Error(
+        `Append-only constraint violated: event ${event.id} already exists`,
+      );
+    }
+
     const baseSequence = state?.currentSequence ?? this.currentSequence;
     const nextSequence = baseSequence + 1n;
     const previousHash =
@@ -247,34 +262,7 @@ export class ImmutableAuditStore extends EventEmitter {
    * Calculate SHA-256 hash of an audit event
    */
   calculateEventHash(event: AuditEvent): string {
-    // Create a deterministic representation of the event
-    const hashableData = {
-      id: event.id,
-      eventType: event.eventType,
-      level: event.level,
-      timestamp: event.timestamp instanceof Date
-        ? event.timestamp.toISOString()
-        : event.timestamp,
-      correlationId: event.correlationId,
-      tenantId: event.tenantId,
-      serviceId: event.serviceId,
-      serviceName: event.serviceName,
-      environment: event.environment,
-      userId: event.userId,
-      resourceType: event.resourceType,
-      resourceId: event.resourceId,
-      action: event.action,
-      outcome: event.outcome,
-      message: event.message,
-      details: event.details,
-      complianceRelevant: event.complianceRelevant,
-      complianceFrameworks: event.complianceFrameworks,
-    };
-
-    // Sort keys for deterministic hashing
-    const sortedJson = JSON.stringify(hashableData, Object.keys(hashableData).sort());
-
-    return createHash('sha256').update(sortedJson).digest('hex');
+    return calculateEventHash(event);
   }
 
   /**
@@ -285,8 +273,7 @@ export class ImmutableAuditStore extends EventEmitter {
     previousHash: string,
     sequence: bigint,
   ): string {
-    const data = `${eventHash}:${previousHash}:${sequence.toString()}`;
-    return createHash('sha256').update(data).digest('hex');
+    return calculateChainHash(eventHash, previousHash, sequence);
   }
 
   /**
@@ -628,6 +615,7 @@ export class ImmutableAuditStore extends EventEmitter {
       resourceIds?: string[];
       limit?: number;
       offset?: number;
+      sortDirection?: 'asc' | 'desc';
     },
   ): Promise<{ events: AuditEvent[]; total: number }> {
     const conditions: string[] = [];
@@ -682,10 +670,14 @@ export class ImmutableAuditStore extends EventEmitter {
     // Get events with pagination
     const limit = query.limit || 100;
     const offset = query.offset || 0;
+    const sortDirection =
+      query.sortDirection && query.sortDirection.toLowerCase() === 'asc'
+        ? 'ASC'
+        : 'DESC';
 
     const eventsResult = await this.pool.query(
       `SELECT * FROM audit_events ${whereClause}
-       ORDER BY timestamp DESC, sequence_number DESC
+       ORDER BY timestamp ${sortDirection}, sequence_number ${sortDirection}
        LIMIT $${paramIndex++} OFFSET $${paramIndex++}`,
       [...params, limit, offset],
     );
