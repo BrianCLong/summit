@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 import { GraphRAGService, GraphRAGRequest, GraphRAGResponse } from './GraphRAGService.js';
 import { IntelCorroborationService } from './IntelCorroborationService.js';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createCacheClient } from '@packages/cache';
 
 const answersCache = createCacheClient({

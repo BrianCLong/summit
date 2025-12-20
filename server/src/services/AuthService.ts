@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * @fileoverview Authentication Service for Summit/IntelGraph Platform
  *

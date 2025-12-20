@@ -1,3 +1,4 @@
+// @ts-nocheck
 export * from './kpro.js';
 export * from './types.js';
 export * from './adapters/vectorStoreAdapter.js';

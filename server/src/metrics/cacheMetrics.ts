@@ -1,4 +1,4 @@
-import { Counter, Gauge } from 'prom-client';
+import { Counter, Gauge, Histogram } from 'prom-client';
 import { registry } from './registry.js';
 
 export const cacheHits = new Counter({
@@ -29,6 +29,14 @@ export const cacheInvalidations = new Counter({
   registers: [registry],
 });
 
+export const cacheLatencySeconds = new Histogram({
+  name: 'cache_latency_seconds',
+  help: 'Latency of cache lookups in seconds',
+  labelNames: ['op', 'result', 'tenant'] as const,
+  buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.25, 0.5, 1, 2],
+  registers: [registry],
+});
+
 export const cacheLocalSize = new Gauge({
   name: 'cache_local_entries',
   help: 'Entries in in-memory fallback cache',
@@ -40,6 +48,13 @@ export const cacheEvictions = new Counter({
   name: 'cache_evictions_total',
   help: 'Cache evictions',
   labelNames: ['store', 'reason'] as const,
+  registers: [registry],
+});
+
+export const cacheBypassTotal = new Counter({
+  name: 'cache_bypass_total',
+  help: 'Cache bypass reasons',
+  labelNames: ['op', 'reason', 'tenant'] as const,
   registers: [registry],
 });
 
