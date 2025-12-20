@@ -17,6 +17,7 @@ import { logger } from '../utils/logger.js';
 import { metrics } from '../observability/metrics.js';
 import { NlToCypherService } from '../ai/nl-to-cypher/nl-to-cypher.service.js';
 import { GlassBoxRunService } from './GlassBoxRunService.js';
+import { QueryResultCache, type QueryResultPayload } from './queryResultCache.js';
 
 export type QueryLanguage = 'cypher' | 'sql';
 
@@ -105,15 +106,27 @@ export type ExecutePreviewInput = {
   dryRun?: boolean;
   maxRows?: number;
   timeout?: number;
+  cursor?: string | null;
+  batchSize?: number;
+  stream?: boolean;
 };
 
 export type ExecutePreviewResult = {
   runId: string;
   query: string;
-  results: unknown;
+  results: unknown[];
   rowCount: number;
   executionTimeMs: number;
   warnings: string[];
+  cached?: boolean;
+  cacheTier?: 'ram' | 'flash';
+  partialResults?: unknown[];
+  partialCacheHit?: boolean;
+  signature?: string;
+  nextCursor?: string | null;
+  hasMore?: boolean;
+  streamingChannel?: string;
+  streamedBatches?: number;
 };
 
 export class QueryPreviewService {
@@ -125,6 +138,8 @@ export class QueryPreviewService {
   private cacheEnabled: boolean;
   private cacheTTL: number = 600; // 10 minutes
   private previewTTL: number = 3600; // 1 hour
+  private queryCache: QueryResultCache;
+  private activeStreams: Set<string> = new Set();
 
   constructor(
     pool: Pool,
@@ -139,6 +154,12 @@ export class QueryPreviewService {
     this.glassBoxService = glassBoxService;
     this.redis = redis || null;
     this.cacheEnabled = !!redis;
+    this.queryCache = new QueryResultCache(this.redis, {
+      ttlSeconds: this.cacheTTL,
+      streamingTtlSeconds: 20,
+      maxEntries: 2000,
+      partialLimit: 20,
+    });
   }
 
   /**
@@ -217,14 +238,14 @@ export class QueryPreviewService {
     const costEstimate = this.estimateCypherCost(scopedQuery);
 
     // Assess risk
-    const riskAssessment = translationResult.policyRisk
+    const riskAssessment: RiskAssessment = translationResult.policyRisk
       ? {
-          level: translationResult.policyRisk.riskLevel as 'low' | 'medium' | 'high',
-          concerns: translationResult.policyRisk.concerns || [],
-          piiFields: translationResult.policyRisk.piiFields || [],
-          mutationDetected: translationResult.policyRisk.mutationDetected || false,
-          recommendedActions: translationResult.policyRisk.recommendedActions || [],
-        }
+        level: translationResult.policyRisk.riskLevel as 'low' | 'medium' | 'high',
+        concerns: translationResult.policyRisk.risks || [],
+        piiFields: [], // Not returned by service yet
+        mutationDetected: translationResult.policyRisk.sensitiveOperations.length > 0,
+        recommendedActions: [], // Not returned by service yet
+      }
       : this.assessCypherRisk(scopedQuery);
 
     // Determine execution policy
@@ -246,16 +267,16 @@ export class QueryPreviewService {
       },
       language: 'cypher',
       generatedQuery: scopedQuery,
-      queryExplanation: translationResult.explanation || this.explainCypher(scopedQuery),
+      queryExplanation: this.explainCypher(scopedQuery), // Service doesn't provide explanation yet
       costEstimate,
       riskAssessment,
-      syntacticallyValid: translationResult.isValid !== false,
-      validationErrors: translationResult.validationErrors || [],
+      syntacticallyValid: translationResult.validation.isValid !== false,
+      validationErrors: translationResult.validation.syntaxErrors || [],
       canExecute,
       requiresApproval,
       sandboxOnly,
       modelUsed: 'nl-to-cypher-v1',
-      confidence: translationResult.confidence || 0.85,
+      confidence: 0.85, // Service doesn't provide confidence yet
       generatedAt: new Date(),
       expiresAt: new Date(Date.now() + this.previewTTL * 1000),
       executed: false,
@@ -410,6 +431,13 @@ export class QueryPreviewService {
     const queryToExecute = input.useEditedQuery && preview.editedQuery
       ? preview.editedQuery
       : preview.generatedQuery;
+    const signature = this.buildSignature(
+      preview,
+      Boolean(input.useEditedQuery && preview.editedQuery),
+    );
+    const initialCursor = decodeCursor(input.cursor);
+    const pageSize = Math.max(1, input.batchSize ?? input.maxRows ?? 100);
+    const streamTopic = input.stream ? preview.id : undefined;
 
     // Create glass-box run
     const run = await this.glassBoxService.createRun({
@@ -437,43 +465,99 @@ export class QueryPreviewService {
         input: { query: queryToExecute, dryRun: input.dryRun },
       });
 
-      let results: unknown;
-      let rowCount: number = 0;
       const warnings: string[] = [];
+      let results: unknown[] = [];
+      let rowCount: number = 0;
+      let cached = false;
+      let cacheTier: 'ram' | 'flash' | undefined;
+      let nextCursor: number | undefined;
+      let hasMore = false;
+      let streamedBatches = 0;
+      const executionStartedAt = Date.now();
+      let payload: QueryResultPayload | undefined;
+      const signature = this.queryCache.buildSignature(
+        preview.language,
+        queryToExecute,
+        preview.parameters,
+      );
+
+      const streamingCached = await this.queryCache.getStreamingPartial(
+        signature,
+        preview.tenantId,
+      );
+      if (streamingCached) {
+        warnings.push('Using streaming cache while full query executes');
+      }
 
       if (input.dryRun) {
-        // Dry run - validate but don't execute
-        results = { message: 'Dry run - query validated but not executed' };
+        results = [{ message: 'Dry run - query validated but not executed' }];
+        rowCount = results.length;
         warnings.push('Dry run mode - no data was accessed');
+        payload = {
+          rows: results,
+          warnings: [...warnings],
+          executionTimeMs: Date.now() - executionStartedAt,
+        };
       } else {
-        // Execute query
-        if (preview.language === 'cypher') {
-          const execResult = await this.executeCypher(
-            queryToExecute,
-            preview.parameters,
-            {
-              maxRows: input.maxRows || 100,
-              timeout: input.timeout || 30000,
+        const { payload: cachedOrLoaded, fromCache, tier } = await this.queryCache.readThrough(
+          signature,
+          preview.tenantId,
+          async () => {
+            if (preview.language === 'cypher') {
+              const execResult = await this.executeCypher(
+                queryToExecute,
+                preview.parameters,
+                {
+                  maxRows: input.maxRows || 100,
+                  timeout: input.timeout || 30000,
+                }
+              );
+              return {
+                rows: execResult.records,
+                warnings: execResult.warnings,
+                executionTimeMs: Date.now() - executionStartedAt,
+              };
             }
-          );
-          results = execResult.records;
-          rowCount = execResult.records.length;
-          warnings.push(...execResult.warnings);
-        } else {
-          const execResult = await this.executeSql(
-            queryToExecute,
-            {
-              maxRows: input.maxRows || 100,
-              timeout: input.timeout || 30000,
-            }
-          );
-          results = execResult.rows;
-          rowCount = execResult.rows.length;
-          warnings.push(...execResult.warnings);
+
+            const execResult = await this.executeSql(
+              queryToExecute,
+              {
+                maxRows: input.maxRows || 100,
+                timeout: input.timeout || 30000,
+              }
+            );
+
+            return {
+              rows: execResult.rows,
+              warnings: execResult.warnings,
+              executionTimeMs: Date.now() - executionStartedAt,
+            };
+          },
+          { primeStreaming: true }
+        );
+
+        cached = fromCache;
+        cacheTier = tier;
+        payload = cachedOrLoaded;
+        results = cachedOrLoaded.rows;
+        rowCount = cachedOrLoaded.rows.length;
+        warnings.push(...cachedOrLoaded.warnings);
+        if (fromCache) {
+          warnings.push('Served from read-through cache');
         }
       }
 
-      const executionTimeMs = Date.now() - startTime;
+      const executionTimeMs = cached
+        ? payload?.executionTimeMs ?? Date.now() - startTime
+        : Date.now() - executionStartedAt;
+
+      const hitRate = this.queryCache.getHitRate('result');
+      if (!cached && hitRate < 0.3) {
+        logger.warn(
+          { signature, hitRate },
+          'Query cache hit rate below target during load validation',
+        );
+      }
 
       // Complete step
       await this.glassBoxService.completeStep(run.id, stepId, {
@@ -511,6 +595,18 @@ export class QueryPreviewService {
         dryRun: input.dryRun,
       }, 'Executed query preview');
 
+      if (streamTopic) {
+        previewStreamHub.publish(preview.id, {
+          previewId: preview.id,
+          batch: [],
+          cursor: encodeCursor(nextCursor ?? initialCursor),
+          nextCursor: nextCursor ? encodeCursor(nextCursor) : null,
+          complete: true,
+          warnings,
+        });
+        this.activeStreams.delete(preview.id);
+      }
+
       return {
         runId: run.id,
         query: queryToExecute,
@@ -518,6 +614,16 @@ export class QueryPreviewService {
         rowCount,
         executionTimeMs,
         warnings,
+        cached,
+        cacheTier,
+        partialResults:
+          streamingCached?.rows ?? results.slice(0, this.queryCache.getPartialLimit()),
+        partialCacheHit: Boolean(streamingCached),
+        signature,
+        nextCursor: nextCursor !== undefined ? encodeCursor(nextCursor) : null,
+        hasMore,
+        streamingChannel: streamTopic,
+        streamedBatches: streamTopic ? streamedBatches : undefined,
       };
     } catch (error) {
       await this.glassBoxService.updateStatus(run.id, 'failed', undefined, String(error));
@@ -535,6 +641,10 @@ export class QueryPreviewService {
       }, 'Failed to execute query preview');
 
       throw error;
+    } finally {
+      if (streamTopic) {
+        this.activeStreams.delete(preview.id);
+      }
     }
   }
 
@@ -743,30 +853,59 @@ export class QueryPreviewService {
   private async executeCypher(
     query: string,
     parameters: Record<string, unknown>,
-    options: { maxRows: number; timeout: number }
-  ): Promise<{ records: any[]; warnings: string[] }> {
+    options: {
+      maxRows: number;
+      timeout: number;
+      cursor?: number;
+      batchSize?: number;
+      streamObserver?: (payload: {
+        batch: unknown[];
+        nextCursor?: number | null;
+        warnings?: string[];
+      }) => void;
+    }
+  ): Promise<{
+    records: any[];
+    rows?: any[];
+    warnings: string[];
+    nextCursor?: number;
+    hasMore?: boolean;
+  }> {
     const session = this.neo4jDriver.session();
     const warnings: string[] = [];
+    const skip = options.cursor ?? 0;
+    const limit = Math.min(options.batchSize ?? options.maxRows, options.maxRows);
 
     try {
-      // Add LIMIT if not present
-      let finalQuery = query;
-      if (!query.includes('LIMIT')) {
-        finalQuery += ` LIMIT ${options.maxRows}`;
-        warnings.push(`Added LIMIT ${options.maxRows} to query`);
-      }
-
-      const result = await session.run(finalQuery, parameters, {
+      const finalQuery = wrapCypherWithPagination(query);
+      const result = await session.run(finalQuery, {
+        ...parameters,
+        skip,
+        limitPlusOne: limit + 1,
+      }, {
         timeout: options.timeout,
       });
 
-      const records = result.records.map(record => record.toObject());
+      const mapped = result.records.map(record => record.toObject());
+      const hasMore = mapped.length > limit;
+      const records = hasMore ? mapped.slice(0, limit) : mapped;
+      const nextCursor = hasMore ? skip + limit : undefined;
 
-      if (records.length === options.maxRows) {
+      if (hasMore) {
         warnings.push('Result set limited - more rows may be available');
+      } else {
+        warnings.push('Pagination applied with server-side LIMIT/SKIP');
       }
 
-      return { records, warnings };
+      if (options.streamObserver) {
+        options.streamObserver({
+          batch: records,
+          nextCursor,
+          warnings,
+        });
+      }
+
+      return { records, rows: records, warnings, nextCursor, hasMore };
     } finally {
       await session.close();
     }
@@ -777,24 +916,81 @@ export class QueryPreviewService {
    */
   private async executeSql(
     query: string,
-    options: { maxRows: number; timeout: number }
-  ): Promise<{ rows: any[]; warnings: string[] }> {
+    options: {
+      maxRows: number;
+      timeout: number;
+      cursor?: number;
+      batchSize?: number;
+      streamObserver?: (payload: {
+        batch: unknown[];
+        nextCursor?: number | null;
+        warnings?: string[];
+      }) => void;
+    }
+  ): Promise<{
+    rows: any[];
+    records: any[];
+    warnings: string[];
+    nextCursor?: number;
+    hasMore?: boolean;
+  }> {
     const warnings: string[] = [];
+    const offset = options.cursor ?? 0;
+    const limit = Math.min(options.batchSize ?? options.maxRows, options.maxRows);
 
-    // Add LIMIT if not present
-    let finalQuery = query;
-    if (!query.toUpperCase().includes('LIMIT')) {
-      finalQuery += ` LIMIT ${options.maxRows}`;
-      warnings.push(`Added LIMIT ${options.maxRows} to query`);
-    }
+    const finalQuery = wrapSqlWithPagination(query);
+    const result = await this.pool.query(finalQuery, [offset, limit + 1]);
 
-    const result = await this.pool.query(finalQuery);
+    const hasMore = result.rows.length > limit;
+    const rows = hasMore ? result.rows.slice(0, limit) : result.rows;
+    const nextCursor = hasMore ? offset + limit : undefined;
 
-    if (result.rows.length === options.maxRows) {
+    if (hasMore) {
       warnings.push('Result set limited - more rows may be available');
+    } else {
+      warnings.push('Pagination applied with server-side LIMIT/OFFSET');
     }
 
-    return { rows: result.rows, warnings };
+    if (options.streamObserver) {
+      options.streamObserver({
+        batch: rows,
+        nextCursor,
+        warnings,
+      });
+    }
+
+    return { rows, records: rows, warnings, nextCursor, hasMore };
+  }
+
+  private buildSignature(
+    preview: QueryPreview,
+    useEditedQuery: boolean,
+  ): string {
+    const query = useEditedQuery && preview.editedQuery
+      ? preview.editedQuery
+      : preview.generatedQuery;
+    return this.queryCache.buildSignature(
+      preview.language,
+      query,
+      preview.parameters,
+    );
+  }
+
+  async getStreamingPartial(
+    previewId: string,
+    useEditedQuery = false,
+  ): Promise<{ rows: unknown[]; tier: 'ram' | 'flash'; signature: string } | null> {
+    const preview = await this.getPreview(previewId);
+    if (!preview) return null;
+    const signature = this.buildSignature(preview, useEditedQuery);
+    const cached = await this.queryCache.getStreamingPartial(
+      signature,
+      preview.tenantId,
+    );
+    if (!cached) {
+      return null;
+    }
+    return { ...cached, signature };
   }
 
   /**

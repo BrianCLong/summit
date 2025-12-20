@@ -76,6 +76,11 @@ export class QueueManagerAPI {
       '/api/queues/:name/jobs/:jobId',
       this.removeJob.bind(this),
     );
+    this.app.get('/api/dead-letter', this.listDeadLetters.bind(this));
+    this.app.post(
+      '/api/dead-letter/:jobId/requeue',
+      this.requeueDeadLetter.bind(this),
+    );
 
     // Workflow endpoints
     this.app.post('/api/workflows', this.executeWorkflow.bind(this));
@@ -263,6 +268,36 @@ export class QueueManagerAPI {
       });
     } catch (error) {
       this.logger.error('Error getting dashboard metrics', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+
+  private async listDeadLetters(req: Request, res: Response): Promise<void> {
+    try {
+      const { query, start, end } = req.query;
+      const jobs = await this.queueManager.listDeadLetterJobs(
+        query as string | undefined,
+        start ? parseInt(start as string, 10) : 0,
+        end ? parseInt(end as string, 10) : 100,
+      );
+      res.json({ jobs });
+    } catch (error) {
+      this.logger.error('Error listing dead-letter jobs', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+
+  private async requeueDeadLetter(req: Request, res: Response): Promise<void> {
+    try {
+      const { jobId } = req.params;
+      const job = await this.queueManager.requeueFromDeadLetter(jobId);
+      res.json({
+        message: `Job ${jobId} requeued to ${job.queueName}`,
+        jobId: job.id,
+        queue: job.queueName,
+      });
+    } catch (error) {
+      this.logger.error(`Error requeuing dead-letter job ${req.params.jobId}`, error);
       res.status(500).json({ error: 'Internal server error' });
     }
   }

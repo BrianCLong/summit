@@ -20,6 +20,24 @@ import {
   verifyManifest,
 } from '../../canonical';
 import migrate from '../../migrations/021_canonical_entities_bitemporal';
+import { BaseCanonicalEntity } from '../../canonical/types';
+
+// Define generic PersonEntity for testing
+interface PersonEntity extends BaseCanonicalEntity {
+  name: {
+    full: string;
+    given: string;
+    middle?: string;
+    family: string;
+  };
+  occupations: string[];
+  identifiers: any[];
+  demographics: any;
+  affiliations: any[];
+  classifications: any[];
+  metadata: Record<string, any>;
+  properties: Record<string, any>;
+}
 
 describe('Canonical Entities Integration', () => {
   let pool: Pool;
@@ -184,13 +202,13 @@ describe('Canonical Entities Integration', () => {
     console.log('✓ Time-travel query (before knowledge): No entities found');
 
     // Query: What do we know now?
-    const now = await snapshotAtTime(
+    const now = (await snapshotAtTime(
       pool,
       'Person',
       tenantId,
       new Date('2020-06-01'), // Valid at this time
       new Date(), // And we know now
-    );
+    )) as PersonEntity[];
 
     expect(now).toHaveLength(1);
     expect(now[0].name.full).toBe('Alice Johnson');
@@ -256,7 +274,7 @@ describe('Canonical Entities Integration', () => {
     console.log(`✓ Found ${history.length} versions in history`);
 
     // Verify the progression
-    const sorted = history.sort((a, b) => a.version - b.version);
+    const sorted = (history as PersonEntity[]).sort((a, b) => a.version - b.version);
     expect(sorted[0].occupations).toContain('Software Engineer');
     expect(sorted[1].occupations).toContain('Staff Software Engineer');
     console.log('✓ History shows progression from Engineer to Staff Engineer');
@@ -278,7 +296,7 @@ describe('Canonical Entities Integration', () => {
           middle: 'Marie',
           family: 'Johnson',
         },
-      },
+      } as any,
       userId,
       provenanceId,
     );
@@ -286,13 +304,13 @@ describe('Canonical Entities Integration', () => {
     console.log('✓ Retroactive correction applied');
 
     // Query to verify correction
-    const corrected = await snapshotAtTime(
+    const corrected = (await snapshotAtTime(
       pool,
       'Person',
       tenantId,
       new Date('2020-06-01'), // Valid at this past time
       new Date(), // But with current knowledge
-    );
+    )) as PersonEntity[];
 
     expect(corrected[0].name.middle).toBe('Marie');
     console.log('✓ Correction visible in current knowledge');
@@ -315,7 +333,6 @@ describe('Canonical Entities Integration', () => {
     console.log(`✓ Exported ${subgraph.entities.length} entities`);
     console.log(`✓ Exported ${subgraph.relationships.length} relationships`);
     console.log(`✓ Exported ${subgraph.provenance.chains.length} provenance chains`);
-
     // ============ Step 8: Validate Export ============
     console.log('\nStep 8: Validating export...');
 

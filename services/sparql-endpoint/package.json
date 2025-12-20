@@ -13,7 +13,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ga-graphai/knowledge-graph": "workspace:*",
+    "@intelgraph/knowledge-graph": "workspace:*",
     "@intelgraph/semantic-analysis": "workspace:*",
     "express": "^5.0.1",
     "neo4j-driver": "6.0.1",
@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "typescript": "^5.9.3",
-    "tsx": "^4.21.0",
+    "tsx": "^5.0.0",
     "@types/express": "^5.0.0",
     "@types/cors": "^2.8.17",
     "jest": "^30.2.0",

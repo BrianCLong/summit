@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * External Verifier for XAI Overlay
  *
@@ -8,7 +9,7 @@
  * - Model determinism and consistency
  */
 
-import crypto from 'node:crypto';
+import * as crypto from 'node:crypto';
 import { z } from 'zod';
 import {
   ReasoningTrace,

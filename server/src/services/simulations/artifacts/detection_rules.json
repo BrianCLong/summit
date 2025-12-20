@@ -1,0 +1,14 @@
+[
+  {
+    "ruleId": "SIGMA-001",
+    "title": "Suspicious PowerShell Download",
+    "severity": "high",
+    "query": "CommandLine=\"*downloadstring*\" AND CommandLine=\"*http*\""
+  },
+  {
+    "ruleId": "SIGMA-002",
+    "title": "Okta Login from Rare IP",
+    "severity": "medium",
+    "query": "event.type=\"user.session.start\" AND security_context.as.organization.name!=\"CORP_ISP\""
+  }
+]
