@@ -6,9 +6,7 @@
       "@app/*": ["src/*"],
       "@ui/*": ["client/src/*"],
       "@server/*": ["server/src/*"],
-      "@client/*": ["client/src/*"],
-      "@intelgraph/*": ["packages/*/src"],
-      "@intelgraph/etl-assistant": ["types/shims/etl-assistant.d.ts"]
+      "@client/*": ["client/src/*"]
     }
   },
   "references": [

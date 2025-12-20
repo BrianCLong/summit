@@ -20,9 +20,7 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "baseUrl": ".",
     "paths": {
-      "zod/v4": ["types/shims/zod-v4.d.ts"],
-      "@intelgraph/*": ["packages/*/src"],
-      "@intelgraph/etl-assistant": ["types/shims/etl-assistant.d.ts"]
+      "zod/v4": ["types/shims/zod-v4.d.ts"]
     }
   },
   "exclude": ["**/dist", "**/build", "**/.turbo", "**/.next"]

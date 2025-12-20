@@ -37,8 +37,7 @@ export abstract class BaseConnector implements Connector {
   /**
    * Override this method to perform custom initialization
    */
-  protected async onInitialize(config: ConnectorConfig): Promise<void> {
-    void config;
+  protected async onInitialize(_config: ConnectorConfig): Promise<void> {
     // Default: no-op
   }
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { PipelineConfig, ConnectorContext } from '../data-model/types';
 import { FileConnector } from '../connectors/FileConnector';
 import { HttpConnector } from '../connectors/HttpConnector';

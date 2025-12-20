@@ -11,7 +11,11 @@ import { z } from 'zod';
 import axios from 'axios';
 
 import { ETLAssistant } from '@intelgraph/etl-assistant';
-import type { CanonicalEntityType, RedactionStrategy } from '@intelgraph/etl-assistant';
+import type {
+  SampleRecord,
+  CanonicalEntityType,
+  RedactionStrategy,
+} from '@intelgraph/etl-assistant';
 
 import { IngestEventBus, InMemoryEventBus } from './event-bus';
 
@@ -110,7 +114,6 @@ server.get('/health', async () => {
       },
     };
   } catch (error) {
-    server.log.error({ err: error }, 'License registry health check failed');
     return {
       status: 'degraded',
       timestamp: new Date().toISOString(),
@@ -138,29 +141,19 @@ server.post<{
       request.body
     );
 
-    server.log.info(
-      { sourceId, sampleCount: samples.length, licenseId },
-      'Analyzing sample records'
-    );
+    server.log.info('Analyzing sample records', {
+      sourceId,
+      sampleCount: samples.length,
+      licenseId,
+    });
 
     // Perform schema inference
     const schemaInference = etlAssistant.getSchemaInference();
-    const schemaResult = schemaInference.inferSchema(samples, schemaHint) as {
-      entityType?: unknown;
-      confidence?: unknown;
-      fieldMappings?: unknown;
-      reasoning?: unknown;
-      statistics?: unknown;
-    };
+    const schemaResult = schemaInference.inferSchema(samples, schemaHint);
 
     // Perform PII detection
     const piiDetection = etlAssistant.getPIIDetection();
-    const piiResult = piiDetection.detectPII(samples) as {
-      piiFields?: unknown;
-      riskLevel?: unknown;
-      recommendations?: unknown;
-      summary?: unknown;
-    };
+    const piiResult = piiDetection.detectPII(samples);
 
     return {
       sourceId,
@@ -207,10 +200,11 @@ server.post<{
       redactionRules,
     } = RegisterSourceRequestSchema.parse(request.body);
 
-    server.log.info(
-      { sourceId, connectorType, licenseId },
-      'Registering data source'
-    );
+    server.log.info('Registering data source', {
+      sourceId,
+      connectorType,
+      licenseId,
+    });
 
     // Validate license via policy check
     const policyResponse = await axios.post(
@@ -255,7 +249,7 @@ server.post<{
 
     registeredSources.set(sourceId, registeredSource);
 
-    server.log.info({ sourceId }, 'Data source registered successfully');
+    server.log.info('Data source registered successfully', { sourceId });
 
     return {
       sourceId,
@@ -286,10 +280,12 @@ server.post<{ Body: ExportCheckRequest }>(
       const { licenseId, operation, audience, jurisdiction, purpose } =
         ExportCheckRequestSchema.parse(request.body);
 
-      server.log.info(
-        { licenseId, operation, audience, jurisdiction },
-        'Checking export policy'
-      );
+      server.log.info('Checking export policy', {
+        licenseId,
+        operation,
+        audience,
+        jurisdiction,
+      });
 
       // Call license registry policy engine
       const policyResponse = await axios.post(

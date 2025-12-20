@@ -266,7 +266,6 @@ export class S3BucketConnector extends PullConnector {
               parseNdjson,
               context,
               (entity) => {
-                void entity;
                 entitiesProcessed++;
               }
             );
