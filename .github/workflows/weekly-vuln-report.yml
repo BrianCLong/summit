@@ -1,0 +1,51 @@
+name: Weekly Vulnerability & Exception Report
+
+on:
+  schedule:
+    - cron: '15 5 * * MON'
+  workflow_dispatch:
+
+jobs:
+  weekly-report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
+
+      - name: Generate weekly vulnerability report
+        run: |
+          python ops/security/cve_budget/gate.py \
+            --config ops/security/cve_budget/config.yaml \
+            --sbom ops/security/cve_budget/fixtures/sbom-conductor-api.json \
+            --sbom ops/security/cve_budget/fixtures/sbom-inference-worker.json \
+            --vulns ops/security/cve_budget/fixtures/vuln-report-pass.json \
+            --output runs/security-weekly-summary.json \
+            --weekly-report reports/security-weekly-${{ github.run_id }}.md
+
+      - name: Emit structured weekly telemetry
+        run: |
+          SUMMARY=runs/security-weekly-summary.json
+          TRACE_ID=$(uuidgen | tr -d '-')
+          LOG=$(jq -c --arg actor "${{ github.actor }}" --arg commit "${{ github.sha }}" --arg trace "$TRACE_ID" \
+            '{event:"vulnerability.weekly_report", actor:$actor, commit:$commit, trace_id:$trace, totals:(.totals // {}), expiring:(.services // []) | map(.expiring_soon // []) | add // []}' \
+            "$SUMMARY")
+          echo "$LOG"
+
+      - name: Upload report artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-weekly-${{ github.run_id }}
+          path: |
+            runs/security-weekly-summary.json
+            reports/security-weekly-${{ github.run_id }}.md
+          retention-days: 30

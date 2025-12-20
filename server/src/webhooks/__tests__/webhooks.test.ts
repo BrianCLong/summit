@@ -3,8 +3,13 @@ import axios from 'axios';
 import { WebhookService, backoffForAttempt, processDelivery } from '../service';
 import { DeliveryStatus, WebhookEventType } from '../types';
 import { signPayload, verifySignature } from '../signature';
+import { recordDeliveryMetric } from '../metrics';
 
 jest.mock('bullmq');
+
+jest.mock('../metrics', () => ({
+  recordDeliveryMetric: jest.fn(),
+}));
 
 const mockQueueAdd = jest.fn();
 
@@ -105,6 +110,39 @@ describe('WebhookService', () => {
     );
     expect(backoffForAttempt(3)).toBe(8000);
   });
+
+  it('reuses in-flight deliveries for matching idempotency keys', async () => {
+    mockRepository.getSubscriptionsForEvent.mockResolvedValue([
+      {
+        id: 'sub-77',
+        target_url: 'https://hooks.example.net',
+        secret: 'secret',
+        tenant_id: 'tenant-99',
+      },
+    ]);
+
+    mockRepository.findDeliveryByKey.mockResolvedValue({
+      id: 'delivery-existing',
+      status: DeliveryStatus.PENDING,
+    });
+
+    const service = new WebhookService(mockRepository as any, axios as any);
+    const jobs = await service.enqueueEvent(
+      'tenant-99',
+      WebhookEventType.EXPORT_READY,
+      { id: 'file-1' },
+      'idempo-key',
+    );
+
+    expect(jobs).toHaveLength(1);
+    expect(mockRepository.createDelivery).not.toHaveBeenCalled();
+    expect(mockQueueAdd).toHaveBeenCalledWith(
+      'webhooks',
+      'deliver-webhook',
+      expect.objectContaining({ deliveryId: 'delivery-existing' }),
+      expect.any(Object),
+    );
+  });
 });
 
 describe('processDelivery', () => {
@@ -155,6 +193,79 @@ describe('processDelivery', () => {
       expect.stringContaining('Non-success status'),
       true,
       undefined,
+    );
+  });
+
+  it('records retry metadata and metrics when delivery fails but is retryable', async () => {
+    jest.spyOn(axios, 'post').mockResolvedValue({ status: 500, data: {} });
+
+    const job = {
+      deliveryId: 'd2',
+      tenantId: 'tenant',
+      subscriptionId: 'sub',
+      eventType: WebhookEventType.CASE_CREATED,
+      targetUrl: 'https://target.example.com',
+      secret: 'secret',
+      payload: { caseId: 'abc' },
+      idempotencyKey: 'retry-key',
+    } as any;
+
+    await expect(
+      processDelivery(job, 1, repository as any, axios as any),
+    ).rejects.toThrow('Non-success status 500');
+
+    expect(repository.recordAttempt).toHaveBeenCalledWith(
+      'tenant',
+      'd2',
+      2,
+      DeliveryStatus.FAILED,
+      undefined,
+      undefined,
+      expect.stringContaining('Non-success status'),
+      expect.any(Number),
+    );
+
+    const [, , , , , nextAttemptAt] =
+      (repository.markFailure as jest.Mock).mock.calls[0];
+
+    expect(repository.markFailure).toHaveBeenCalledWith(
+      'tenant',
+      'd2',
+      2,
+      expect.stringContaining('Non-success status'),
+      false,
+      expect.any(Date),
+    );
+
+    expect((nextAttemptAt as Date).getTime()).toBeGreaterThan(Date.now());
+    expect(recordDeliveryMetric).toHaveBeenCalledWith(
+      WebhookEventType.CASE_CREATED,
+      'failure',
+    );
+  });
+
+  it('records success metrics and marks deliveries complete', async () => {
+    jest.spyOn(axios, 'post').mockResolvedValue({ status: 201, data: { ok: true } });
+
+    const job = {
+      deliveryId: 'd3',
+      tenantId: 'tenant',
+      subscriptionId: 'sub',
+      eventType: WebhookEventType.EXPORT_READY,
+      targetUrl: 'https://target.example.com',
+      secret: 'secret',
+      payload: { exportId: 'xyz' },
+      idempotencyKey: 'ok',
+    } as any;
+
+    const result = await processDelivery(job, 0, repository as any, axios as any);
+
+    expect(result).toBe('delivered');
+    expect(repository.markSuccess).toHaveBeenCalledWith('tenant', 'd3', 1);
+    expect(recordDeliveryMetric).toHaveBeenCalledWith(
+      WebhookEventType.EXPORT_READY,
+      'success',
+      expect.any(Number),
     );
   });
 });

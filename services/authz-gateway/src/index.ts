@@ -1,5 +1,4 @@
 import express from 'express';
-import type { ClientRequest } from 'http';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import pino from 'pino';
 import pinoHttp from 'pino-http';
@@ -242,6 +241,9 @@ export async function createApp(): Promise<express.Application> {
         if (message === 'request_already_approved') {
           return res.status(409).json({ error: message });
         }
+        if (message === 'request_expired') {
+          return res.status(410).json({ error: message });
+        }
         return res.status(400).json({ error: message });
       }
     },
@@ -318,7 +320,7 @@ export async function createApp(): Promise<express.Application> {
       target: upstream,
       changeOrigin: true,
       pathRewrite: { '^/protected': '' },
-      onProxyReq: (proxyReq: ClientRequest) => {
+      onProxyReq: (proxyReq) => {
         injectTraceContext(proxyReq);
       },
     } as any),

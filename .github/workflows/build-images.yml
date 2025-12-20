@@ -178,9 +178,24 @@ jobs:
           category: trivy-${{ matrix.component.name }}
 
       - name: Cosign sign (keyless)
+        if: steps.dockerfile-check.outputs.exists == 'true'
+        id: cosign-sign
         env:
           COSIGN_EXPERIMENTAL: '1'
-        run: cosign sign ghcr.io/${{ env.IMAGE_NAME }}/${{ matrix.component.name }}:${{ github.sha }}
+        run: |
+          IMAGE_REF=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.component.name }}@${{ steps.build.outputs.digest }}
+          cosign sign --yes "$IMAGE_REF"
+          echo "ref=$IMAGE_REF" >> "$GITHUB_OUTPUT"
+
+      - name: Attach SBOM attestation (cosign)
+        if: steps.dockerfile-check.outputs.exists == 'true'
+        env:
+          COSIGN_EXPERIMENTAL: '1'
+        run: |
+          cosign attest --yes \
+            --predicate sbom-${{ matrix.component.name }}.spdx.json \
+            --type spdxjson \
+            ${{ steps.cosign-sign.outputs.ref }}
 
       - name: Verify image signature
         if: steps.dockerfile-check.outputs.exists == 'true'
@@ -190,7 +205,18 @@ jobs:
           cosign verify \
             --certificate-identity-regexp "https://github.com/${{ github.repository }}/.github/workflows/" \
             --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.component.name }}@${{ steps.build.outputs.digest }}
+            ${{ steps.cosign-sign.outputs.ref }}
+
+      - name: Verify SBOM attestation
+        if: steps.dockerfile-check.outputs.exists == 'true'
+        env:
+          COSIGN_EXPERIMENTAL: 1
+        run: |
+          cosign verify-attestation \
+            --type spdxjson \
+            --certificate-identity-regexp "https://github.com/${{ github.repository }}/.github/workflows/" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+            ${{ steps.cosign-sign.outputs.ref }}
 
       - name: Upload SBOM artifacts
         if: steps.dockerfile-check.outputs.exists == 'true'

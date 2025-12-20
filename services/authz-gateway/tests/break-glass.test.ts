@@ -26,15 +26,21 @@ function cleanupLogs() {
 
 async function bootstrap({
   ttlSeconds = '60',
-  opaResult = { result: { allow: true, reason: 'allow', obligations: [] } },
-}: { ttlSeconds?: string; opaResult?: Record<string, unknown> } = {}) {
+  opaDecision,
+}: {
+  ttlSeconds?: string;
+  opaDecision?: unknown;
+} = {}) {
   cleanupLogs();
   jest.resetModules();
   process.env.BREAK_GLASS_TTL_SECONDS = ttlSeconds;
-  let decision = opaResult;
   const opa = express();
   opa.use(express.json());
-  opa.post('/v1/data/summit/abac/decision', (_req, res) => res.json(decision));
+  opa.post('/v1/data/summit/abac/decision', (_req, res) =>
+    res.json({
+      result: opaDecision ?? { allow: true, reason: 'allow', obligations: [] },
+    }),
+  );
   const opaServer = opa.listen(0);
   const opaPort = (opaServer.address() as AddressInfo).port;
   process.env.OPA_URL = `http://localhost:${opaPort}/v1/data/summit/abac/decision`;
@@ -48,19 +54,8 @@ async function bootstrap({
   const { createApp } = await import('../src/index');
   const { stopObservability } = await import('../src/observability');
   const { sessionManager } = await import('../src/session');
-  const { breakGlassManager } = await import('../src/break-glass');
   const app = await createApp();
-  return {
-    app,
-    opaServer,
-    upstreamServer,
-    stopObservability,
-    sessionManager,
-    breakGlassManager,
-    setDecision: (nextDecision: Record<string, unknown>) => {
-      decision = nextDecision;
-    },
-  };
+  return { app, opaServer, upstreamServer, stopObservability, sessionManager };
 }
 
 async function teardown(
@@ -133,6 +128,8 @@ describe('break glass access', () => {
 
     expect(approvalRes.status).toBe(200);
     expect(approvalRes.body.scope).toContain('break_glass:elevated');
+    expect(approvalRes.body.singleUse).toBe(true);
+    expect(approvalRes.body.immutableExpiry).toBe(true);
 
     const protectedRes = await request(app)
       .get('/protected/data')
@@ -148,75 +145,15 @@ describe('break glass access', () => {
 
     expect(reuseRes.status).toBe(401);
 
+    await expect(
+      sessionManager.elevateSession(approvalRes.body.sid, {
+        extendSeconds: 60,
+      }),
+    ).rejects.toThrow('session_not_extendable');
+
     const auditLog = fs.readFileSync(auditLogPath, 'utf8');
     expect(auditLog).toMatch(/break_glass/);
 
-    await teardown([opaServer, upstreamServer], stopObservability);
-  });
-
-  it('enforces OPA decisions even when using an elevated break-glass token', async () => {
-    const {
-      app,
-      opaServer,
-      upstreamServer,
-      stopObservability,
-      sessionManager,
-      breakGlassManager,
-      setDecision,
-    } = await bootstrap();
-
-    const loginRes = await request(app)
-      .post('/auth/login')
-      .send({ username: 'alice', password: 'password123' });
-    const baseToken = loginRes.body.token;
-
-    const requestRes = await request(app)
-      .post('/access/break-glass/request')
-      .set('Authorization', `Bearer ${baseToken}`)
-      .send({ justification: 'deny path', ticketId: 'INC-66' });
-
-    const { session } = await sessionManager.validate(baseToken);
-    const elevatedToken = await sessionManager.elevateSession(session.sid, {
-      acr: 'loa2',
-      amr: ['mfa'],
-    });
-
-    const approvalRes = await request(app)
-      .post('/access/break-glass/approve')
-      .set('Authorization', `Bearer ${elevatedToken}`)
-      .send({ requestId: requestRes.body.requestId });
-
-    expect(approvalRes.status).toBe(200);
-
-    setDecision({
-      result: { allow: false, reason: 'opa_policy_denied', obligations: [] },
-    });
-
-    const deniedRes = await request(app)
-      .get('/protected/data')
-      .set('Authorization', `Bearer ${approvalRes.body.token}`)
-      .set('x-resource-id', 'dataset-alpha');
-
-    expect(deniedRes.status).toBe(403);
-    const events = fs
-      .readFileSync(breakGlassEventsPath, 'utf8')
-      .trim()
-      .split('\n')
-      .map((line) => JSON.parse(line));
-    const usageEvent = events.find((event) => event.type === 'usage');
-    expect(usageEvent).toBeDefined();
-    expect(usageEvent.detail.allowed).toBe(false);
-    const auditEntries = fs
-      .readFileSync(auditLogPath, 'utf8')
-      .trim()
-      .split('\n')
-      .map((line) => JSON.parse(line));
-    const deniedAudit = auditEntries.find(
-      (entry) => entry.action === 'dataset:read',
-    );
-    expect(deniedAudit.breakGlass.requestId).toBe(requestRes.body.requestId);
-
-    breakGlassManager.sweepExpiredApprovals();
     await teardown([opaServer, upstreamServer], stopObservability);
   });
 
@@ -262,6 +199,125 @@ describe('break glass access', () => {
 
     const events = fs.readFileSync(breakGlassEventsPath, 'utf8');
     expect(events).toMatch(/expiry/);
+    await teardown([opaServer, upstreamServer], stopObservability);
+  });
+
+  it('enforces ABAC/OPA decisions and emits audit trail during break-glass usage', async () => {
+    const {
+      app,
+      opaServer,
+      upstreamServer,
+      stopObservability,
+      sessionManager,
+    } = await bootstrap({
+      ttlSeconds: '10',
+      opaDecision: { allow: false, reason: 'policy_denied' },
+    });
+
+    const loginRes = await request(app)
+      .post('/auth/login')
+      .send({ username: 'alice', password: 'password123' });
+    const baseToken = loginRes.body.token;
+
+    const requestRes = await request(app)
+      .post('/access/break-glass/request')
+      .set('Authorization', `Bearer ${baseToken}`)
+      .send({ justification: 'zero trust drill', ticketId: 'INC-77' });
+
+    const { session } = await sessionManager.validate(baseToken);
+    const elevatedToken = await sessionManager.elevateSession(session.sid, {
+      acr: 'loa2',
+      amr: ['mfa'],
+    });
+
+    const approvalRes = await request(app)
+      .post('/access/break-glass/approve')
+      .set('Authorization', `Bearer ${elevatedToken}`)
+      .send({ requestId: requestRes.body.requestId });
+
+    expect(approvalRes.status).toBe(200);
+
+    const protectedRes = await request(app)
+      .get('/protected/data')
+      .set('Authorization', `Bearer ${approvalRes.body.token}`)
+      .set('x-resource-id', 'dataset-alpha');
+
+    expect(protectedRes.status).toBe(403);
+    expect(protectedRes.body.reason).toBe('policy_denied');
+
+    const events = fs
+      .readFileSync(breakGlassEventsPath, 'utf8')
+      .trim()
+      .split('\n');
+    expect(
+      events.filter((line) => line.includes('"type":"request"')).length,
+    ).toBe(1);
+    expect(
+      events.filter((line) => line.includes('"type":"approval"')).length,
+    ).toBe(1);
+    expect(
+      events.filter((line) => line.includes('"type":"usage"')).length,
+    ).toBe(1);
+
+    const auditLog = fs.readFileSync(auditLogPath, 'utf8');
+    expect(auditLog).toMatch(/policy_denied/);
+
+    await teardown([opaServer, upstreamServer], stopObservability);
+  });
+
+  it('prevents re-approval once a break-glass grant expires', async () => {
+    const {
+      app,
+      opaServer,
+      upstreamServer,
+      stopObservability,
+      sessionManager,
+    } = await bootstrap({ ttlSeconds: '2' });
+
+    const loginRes = await request(app)
+      .post('/auth/login')
+      .send({ username: 'alice', password: 'password123' });
+    const baseToken = loginRes.body.token;
+
+    const requestRes = await request(app)
+      .post('/access/break-glass/request')
+      .set('Authorization', `Bearer ${baseToken}`)
+      .send({ justification: 'contain incident', ticketId: 'INC-401' });
+
+    const { session } = await sessionManager.validate(baseToken);
+    const elevatedToken = await sessionManager.elevateSession(session.sid, {
+      acr: 'loa2',
+      amr: ['mfa'],
+    });
+
+    const approvalRes = await request(app)
+      .post('/access/break-glass/approve')
+      .set('Authorization', `Bearer ${elevatedToken}`)
+      .send({ requestId: requestRes.body.requestId });
+
+    expect(approvalRes.status).toBe(200);
+
+    const state = JSON.parse(fs.readFileSync(breakGlassStatePath, 'utf8')) as {
+      requests: Record<string, { sid: string }>;
+    };
+    const sid = state.requests[requestRes.body.requestId].sid;
+    sessionManager.expire(sid);
+
+    await expect(
+      sessionManager.validate(approvalRes.body.token),
+    ).rejects.toThrow('session_expired');
+
+    const secondApproval = await request(app)
+      .post('/access/break-glass/approve')
+      .set('Authorization', `Bearer ${elevatedToken}`)
+      .send({ requestId: requestRes.body.requestId });
+
+    expect(secondApproval.status).toBe(410);
+    expect(secondApproval.body.error).toBe('request_expired');
+
+    const events = fs.readFileSync(breakGlassEventsPath, 'utf8');
+    expect(events).toMatch(/expiry/);
+
     await teardown([opaServer, upstreamServer], stopObservability);
   });
 });

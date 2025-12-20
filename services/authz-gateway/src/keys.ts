@@ -1,4 +1,4 @@
-import { generateKeyPair, exportJWK, type JWK } from 'jose/node/cjs';
+import { generateKeyPair, exportJWK, type JWK } from 'jose';
 
 let privateKey: CryptoKey;
 let publicKey: CryptoKey;

@@ -29,6 +29,7 @@ import { Button } from '@/components/ui/Button'
 import { GraphCanvas } from '@/graphs/GraphCanvas'
 import { TimelineRail } from '@/components/panels/TimelineRail'
 import { MapPane } from './MapPane'
+import AnnotationPanel from '@/features/annotations/AnnotationPanel'
 import { useCollaboration } from '@/lib/yjs/useCollaboration'
 import { useGraphSync } from '@/lib/yjs/useGraphSync'
 import { CollaborationPanel } from '@/components/CollaborationPanel'
@@ -36,6 +37,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import type { Entity, TimelineEvent } from '@/types'
 import type { TriPaneShellProps, TriPaneSyncState, TimeWindow } from './types'
 import { useSnapshotHandler } from '@/features/snapshots'
+import { isFeatureEnabled } from '@/config'
 
 /**
  * Main TriPaneShell component
@@ -79,6 +81,11 @@ export function TriPaneShell({
   )
   const [pinnedTools, setPinnedTools] = useState<string[]>([])
   const [densityMode, setDensityMode] = useState<'comfortable' | 'compact'>('comfortable')
+  const [annotationContext, setAnnotationContext] = useState<{
+    entity?: Entity
+    timelineEvent?: TimelineEvent
+    locationId?: string
+  }>({})
 
   // Snapshot integration
   useSnapshotHandler(
@@ -150,8 +157,6 @@ export function TriPaneShell({
       filteredTimelineEvents.map(e => e.entityId).filter(Boolean) as string[]
     )
 
-    const filteredEntities = entities.filter(entity => {
-      if (relevantEntityIds.has(entity.id)) {return true}
     const filteredEntities = currentEntities.filter(entity => {
       if (relevantEntityIds.has(entity.id)) return true
 
@@ -189,6 +194,7 @@ export function TriPaneShell({
   // Handle entity selection from graph
   const handleEntitySelect = useCallback(
     (entity: Entity) => {
+      setAnnotationContext(prev => ({ ...prev, entity }))
       setSyncState(prev => ({
         ...prev,
         graph: {
@@ -228,6 +234,7 @@ export function TriPaneShell({
         }
       }
 
+      setAnnotationContext(prev => ({ ...prev, timelineEvent: event }))
       setSyncState(prev => ({
         ...prev,
         timeline: {
@@ -245,6 +252,7 @@ export function TriPaneShell({
   // Handle map location selection
   const handleLocationSelect = useCallback(
     (locationId: string) => {
+      setAnnotationContext(prev => ({ ...prev, locationId }))
       setSyncState(prev => ({
         ...prev,
         map: {
@@ -516,6 +524,22 @@ export function TriPaneShell({
           </Card>
         </div>
       </div>
+
+      {isFeatureEnabled('ui.annotationsV1') && (
+        <div className="grid grid-cols-12 gap-4 min-h-[260px]">
+          <div className="col-span-12 lg:col-span-5">
+            <AnnotationPanel
+              context={{
+                entity: annotationContext.entity,
+                timelineEvent: annotationContext.timelineEvent,
+                location: filteredData.geospatialEvents.find(
+                  loc => loc.id === annotationContext.locationId
+                ),
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       <CollaborationPanel users={users} isConnected={isConnected} isSynced={isSynced} />
 

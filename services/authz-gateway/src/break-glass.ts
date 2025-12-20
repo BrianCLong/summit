@@ -20,6 +20,7 @@ export interface BreakGlassRequestRecord {
   expiresAt?: string;
   sid?: string;
   usageCount?: number;
+  consumedAt?: string;
 }
 
 interface BreakGlassState {
@@ -74,11 +75,11 @@ function emitEvent(event: BreakGlassEvent) {
 class BreakGlassManager {
   private state: BreakGlassState;
   private ttlSeconds: number;
-  private sweepTimer?: NodeJS.Timeout;
 
   constructor(ttlSeconds: number) {
     this.state = readState();
     this.ttlSeconds = ttlSeconds;
+    this.pruneExpired();
     sessionManager.setHooks({
       onBreakGlassExpired: (session) => {
         if (session.sid) {
@@ -86,7 +87,6 @@ class BreakGlassManager {
         }
       },
     });
-    this.startExpirySweep();
   }
 
   createRequest(
@@ -118,6 +118,7 @@ class BreakGlassManager {
       ticketId,
       justification,
       ts: requestedAt,
+      detail: { scope },
     });
     log({
       subject: subjectId,
@@ -135,14 +136,10 @@ class BreakGlassManager {
     if (!record) {
       throw new Error('request_not_found');
     }
-    if (record.status === 'expired') {
-      throw new Error('request_expired');
-    }
     if (record.status === 'approved') {
       throw new Error('request_already_approved');
     }
-    if (record.expiresAt && this.isPast(record.expiresAt)) {
-      this.markExpired(record);
+    if (record.status === 'expired') {
       throw new Error('request_expired');
     }
     const issuedAt = nowIso();
@@ -172,6 +169,8 @@ class BreakGlassManager {
     record.approvedBy = approverId;
     record.expiresAt = breakGlass.expiresAt;
     record.sid = sid;
+    record.immutableExpiry = true;
+    record.singleUse = true;
     this.state.requests[requestId] = record;
     writeState(this.state);
     emitEvent({
@@ -182,7 +181,12 @@ class BreakGlassManager {
       justification: record.justification,
       ts: issuedAt,
       actor: approverId,
-      detail: { expiresAt: breakGlass.expiresAt },
+      detail: {
+        expiresAt: breakGlass.expiresAt,
+        sid,
+        immutableExpiry: true,
+        singleUse: true,
+      },
     });
     log({
       subject: record.subjectId,
@@ -193,7 +197,14 @@ class BreakGlassManager {
       reason: 'break_glass',
       breakGlass,
     });
-    return { token, expiresAt: breakGlass.expiresAt, scope: record.scope };
+    return {
+      token,
+      expiresAt: breakGlass.expiresAt,
+      scope: record.scope,
+      sid,
+      immutableExpiry: true,
+      singleUse: true,
+    };
   }
 
   recordUsage(
@@ -210,6 +221,7 @@ class BreakGlassManager {
       return;
     }
     record.usageCount = (record.usageCount || 0) + 1;
+    record.consumedAt = record.consumedAt || nowIso();
     this.state.requests[record.id] = record;
     writeState(this.state);
     emitEvent({
@@ -224,6 +236,7 @@ class BreakGlassManager {
         resource: details.resource,
         tenantId: details.tenantId,
         allowed: details.allowed,
+        expiresAt: record.expiresAt,
       },
     });
     log({
@@ -251,19 +264,6 @@ class BreakGlassManager {
     if (!record || record.status === 'expired') {
       return;
     }
-    if (record.sid) {
-      sessionManager.expire(record.sid);
-    }
-    this.markExpired(record);
-  }
-
-  private findRequestBySid(sid: string) {
-    return Object.values(this.state.requests).find(
-      (request) => request.sid === sid,
-    );
-  }
-
-  private markExpired(record: BreakGlassRequestRecord) {
     record.status = 'expired';
     this.state.requests[record.id] = record;
     writeState(this.state);
@@ -295,25 +295,54 @@ class BreakGlassManager {
     });
   }
 
-  private isPast(dateIso: string) {
-    return new Date(dateIso).getTime() <= Date.now();
+  private findRequestBySid(sid: string) {
+    return Object.values(this.state.requests).find(
+      (request) => request.sid === sid,
+    );
   }
 
-  private startExpirySweep() {
-    this.sweepTimer = setInterval(() => {
-      this.sweepExpiredApprovals();
-    }, 5000);
-    this.sweepTimer.unref();
-  }
-
-  sweepExpiredApprovals() {
-    Object.values(this.state.requests)
-      .filter((request) => request.status === 'approved' && request.expiresAt)
-      .forEach((request) => {
-        if (request.expiresAt && this.isPast(request.expiresAt)) {
-          this.markExpired(request);
+  private pruneExpired() {
+    const nowSeconds = Math.floor(Date.now() / 1000);
+    let updated = false;
+    Object.values(this.state.requests).forEach((record) => {
+      if (record.status === 'approved' && record.expiresAt) {
+        const expiresAtSeconds = Math.floor(
+          new Date(record.expiresAt).getTime() / 1000,
+        );
+        if (expiresAtSeconds < nowSeconds) {
+          record.status = 'expired';
+          updated = true;
+          emitEvent({
+            type: 'expiry',
+            requestId: record.id,
+            subjectId: record.subjectId,
+            ticketId: record.ticketId,
+            justification: record.justification,
+            ts: nowIso(),
+            detail: { reason: 'startup_prune' },
+          });
+          log({
+            subject: record.subjectId,
+            action: 'break_glass_expired',
+            resource: 'break_glass',
+            tenantId: 'system',
+            allowed: false,
+            reason: 'break_glass_expired',
+            breakGlass: {
+              requestId: record.id,
+              ticketId: record.ticketId,
+              justification: record.justification,
+              issuedAt: record.approvedAt || record.requestedAt,
+              expiresAt: record.expiresAt,
+              approverId: record.approvedBy || 'unknown',
+            },
+          });
         }
-      });
+      }
+    });
+    if (updated) {
+      writeState(this.state);
+    }
   }
 }
 

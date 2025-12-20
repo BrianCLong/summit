@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { SignJWT, jwtVerify, type JWTPayload } from 'jose/node/cjs';
+import { SignJWT, jwtVerify, type JWTPayload } from 'jose';
 import { getPrivateKey, getPublicKey } from './keys';
 import type { BreakGlassMetadata } from './types';
 

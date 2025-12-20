@@ -24,6 +24,10 @@ jobs:
   deploy-prod:
     runs-on: ubuntu-latest
     environment: prod
+    permissions:
+      contents: read
+      packages: read
+      id-token: write
 
     steps:
       - name: Checkout repository
@@ -73,12 +77,35 @@ PY
         with:
           version: 'v3.11.1'
 
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: 'v2.2.4'
+
       - name: Create Kubeconfig
         run: |
           set -euo pipefail
           mkdir -p ~/.kube
           echo "${{ secrets.KUBECONFIG_PROD_B64 }}" | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
+
+      - name: Verify image signature and attestation
+        env:
+          COSIGN_EXPERIMENTAL: '1'
+          IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.image_tag }}
+          COSIGN_PUBLIC_KEY: ${{ secrets.COSIGN_PUBLIC_KEY }}
+        run: |
+          set -euo pipefail
+          VERIFY_FLAGS=()
+          if [ -n "${COSIGN_PUBLIC_KEY:-}" ]; then
+            VERIFY_FLAGS+=(--key "$COSIGN_PUBLIC_KEY")
+          else
+            VERIFY_FLAGS+=(--certificate-identity "https://github.com/${{ github.repository }}")
+            VERIFY_FLAGS+=(--certificate-oidc-issuer "https://token.actions.githubusercontent.com")
+          fi
+
+          cosign verify "${VERIFY_FLAGS[@]}" "$IMAGE"
+          cosign verify-attestation --type spdxjson "${VERIFY_FLAGS[@]}" "$IMAGE"
 
       - name: Deploy to Prod
         env:

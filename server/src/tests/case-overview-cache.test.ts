@@ -1,4 +1,4 @@
-import { Pool } from 'pg';
+import { Pool, QueryResult } from 'pg';
 import { getPostgresPool } from '../db/postgres.js';
 import { CaseOverviewService } from '../cases/overview/CaseOverviewService.js';
 import { CaseOverviewCacheRepo } from '../repos/CaseOverviewCacheRepo.js';
@@ -7,12 +7,12 @@ const TENANT_ID = 'tenant-overview-cache';
 const USER_ID = 'case-overview-tester';
 
 async function seedCase(pg: Pool): Promise<string> {
-  const { rows } = await pg.query<{ id: string }>(
+  const { rows } = (await pg.query(
     `INSERT INTO maestro.cases (id, tenant_id, title, status, created_by)
      VALUES (gen_random_uuid(), $1, 'Overview Case', 'open', $2)
      RETURNING id`,
     [TENANT_ID, USER_ID],
-  );
+  )) as QueryResult<{ id: string }>;
 
   const caseId = rows[0].id;
 
@@ -113,7 +113,7 @@ describe('CaseOverviewService cache', () => {
 
   it('rebuilds cache entries via rebuildAll', async () => {
     const rebuildCaseId = await seedCase(pg);
-    await repo.delete(rebuildCaseId);
+    await repo.delete(rebuildCaseId, TENANT_ID);
 
     const rebuiltCount = await service.rebuildAll(10);
     expect(rebuiltCount).toBeGreaterThan(0);
@@ -125,11 +125,27 @@ describe('CaseOverviewService cache', () => {
   });
 
   it('invalidates cache safely and repopulates on demand', async () => {
-    await service.invalidate(caseId);
+    await service.invalidate(caseId, TENANT_ID);
     const afterInvalidate = await repo.get(caseId, TENANT_ID);
     expect(afterInvalidate).toBeNull();
 
     const repopulated = await service.getOverview(caseId, TENANT_ID);
     expect(repopulated.cache.status).toBe('miss');
+  });
+
+  it('marks entries stale for event-driven refresh and processes them via refreshStale', async () => {
+    const initial = await service.getOverview(caseId, TENANT_ID);
+    await service.markStale(caseId, TENANT_ID);
+
+    const staleTargets = await repo.listCasesNeedingRefresh();
+    expect(staleTargets.some((target) => target.caseId === caseId)).toBe(true);
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    const refreshedCount = await service.refreshStale();
+    expect(refreshedCount).toBeGreaterThan(0);
+
+    const refreshed = await repo.get(caseId, TENANT_ID);
+    expect(refreshed?.refreshedAt.getTime()).toBeGreaterThan(initial.refreshedAt.getTime());
+    expect(refreshed?.refreshStatus).toBe('fresh');
   });
 });
