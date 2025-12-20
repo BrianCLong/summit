@@ -5,6 +5,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { randomUUID } from 'crypto';
+import { trace } from '@opentelemetry/api';
 import { getTracer } from '../observability/tracer.js';
 import { correlationStorage } from '../config/logger.js';
 
@@ -46,8 +47,16 @@ export function correlationIdMiddleware(
 
   // Get OpenTelemetry trace/span IDs if available
   const tracer = getTracer();
-  req.traceId = tracer.getTraceId() || '';
-  req.spanId = tracer.getSpanId() || '';
+  const activeSpan = trace.getActiveSpan();
+  req.traceId = activeSpan?.spanContext().traceId || tracer.getTraceId() || '';
+  req.spanId = activeSpan?.spanContext().spanId || tracer.getSpanId() || '';
+
+  // Fallback: honor upstream traceparent header for structured logging when no span is active
+  if (!req.traceId && typeof req.headers['traceparent'] === 'string') {
+    const [, inboundTraceId, inboundSpanId] = (req.headers['traceparent'] as string).split('-');
+    req.traceId = inboundTraceId || req.traceId;
+    req.spanId = inboundSpanId || req.spanId;
+  }
 
   const tenantId = (req.headers[TENANT_ID_HEADER] as string) || (req as any).user?.tenant_id || 'unknown';
 

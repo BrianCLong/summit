@@ -1,0 +1,107 @@
+# yaml-language-server: $schema=./schemas/data-paths.schema.json
+
+dataPaths:
+  - id: maestro-n8n-trigger
+    system: maestro
+    path: /v1/data/maestro/integrations/n8n/trigger
+    description: n8n trigger policy for Maestro automation workflows
+    tags:
+      - maestro
+      - workflow
+      - automation
+      - opa
+      - enforcement
+    sources:
+      - server/src/integrations/n8n-policy.ts
+      - server/src/routes/admin.ts
+
+  - id: intelgraph-authz
+    system: intelgraph
+    path: /v1/data/intelgraph/authz
+    description: Core IntelGraph ABAC decision path used across services
+    tags:
+      - intelgraph
+      - authz
+      - abac
+      - opa
+    sources:
+      - services/api/src/graphql/abac.ts
+      - server/src/conductor/governance/policy-simulator.ts
+      - server/src/services/governance/PolicyEngine.ts
+
+  - id: intelgraph-export-decision
+    system: intelgraph
+    path: /v1/data/intelgraph/policy/export/enhanced/decision
+    description: Export and egress guardrail evaluation for IntelGraph datasets
+    tags:
+      - intelgraph
+      - export
+      - governance
+      - opa
+    sources:
+      - server/src/services/opa-client.ts
+
+  - id: intelgraph-web-orchestration
+    system: intelgraph
+    path: /v1/data/intelgraph/conductor/web_orchestration_allowed
+    description: Web orchestration allowlist for IntelGraph conductor workflows
+    tags:
+      - intelgraph
+      - orchestration
+      - conductor
+      - opa
+    sources:
+      - server/src/conductor/web-orchestration/web-orchestrator.ts
+
+  - id: intelgraph-crdt-conflict-resolution
+    system: intelgraph
+    path: /v1/data/intelgraph/crdt/resolve
+    description: CRDT conflict resolution policy for edge synchronization
+    tags:
+      - intelgraph
+      - consistency
+      - crdt
+      - opa
+    sources:
+      - server/src/conductor/edge/crdt-conflict-resolver.ts
+
+  - id: companyos-customer-decision
+    system: companyos
+    path: /v1/data/companyos/authz/customer/decision
+    description: Customer-level authorization checks for CompanyOS APIs
+    tags:
+      - companyos
+      - authz
+      - customer
+      - opa
+    sources:
+      - companyos/services/companyos-api/src/authz/opa-client.ts
+      - companyos/services/companyos-api/src/services/opa.service.ts
+      - companyos/services/companyos-api/docker-compose.yml
+
+  - id: companyos-disclosure-export
+    system: companyos
+    path: /v1/data/companyos/authz/disclosure_export/decision
+    description: Disclosure export enforcement for CompanyOS evidence handling
+    tags:
+      - companyos
+      - authz
+      - export
+      - opa
+    sources:
+      - companyos/src/authz/disclosure-export.ts
+      - companyos/services/companyos-api/src/authz/opa-disclosure.ts
+
+  - id: companyos-authz-allow
+    system: companyos
+    path: /v1/data/companyos/authz/allow
+    description: Legacy allow check for CompanyOS policy adapters and templates
+    tags:
+      - companyos
+      - authz
+      - legacy
+      - opa
+    sources:
+      - templates/golden-path-service/src/config.ts
+      - docker/docker-compose.companyos.yml
+      - companyos/templates/new-service/src/middleware/auth.ts

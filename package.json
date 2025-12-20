@@ -6,19 +6,21 @@
   "scripts": {
     "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
     "cleanup": "chmod +x scripts/cleanup-repository.sh && scripts/cleanup-repository.sh",
-    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
+    "dev": "pnpm --parallel --filter \"./server\" --filter \"./client\" dev",
     "server:dev": "cd server && npm run dev",
     "client:dev": "cd client && npm run dev",
     "docker:dev": "docker-compose -f docker-compose.dev.yml up",
     "docker:prod": "docker-compose up",
-    "test": "jest --runInBand",
-    "test:server": "cd server && npm test",
-    "test:client": "cd client && npm test",
+    "test": "pnpm test",
+    "test:connector-contracts": "CONNECTOR_CONTRACTS=1 jest --config tests/connector-contracts/jest.config.cjs",
+    "test:server": "pnpm --filter server test",
+    "test:client": "pnpm --filter client test",
     "test:e2e": "npx playwright test",
     "test:smoke": "npm run test:smoke:backend && npm run test:smoke:frontend",
     "test:smoke:backend": "cd server && npm run test:smoke",
     "test:smoke:frontend": "cd client && npm run test:smoke",
     "test:quick": "turbo run test --filter='!*integration*' --filter='!*e2e*' --cache-dir=.turbo -- --testPathPattern='(sample|mathUtils|stringUtils)\\.test' --maxWorkers=2 --bail || echo 'Quick tests passed or jest not configured'",
+    "policy:test": "bash ./scripts/policy-test.sh",
     "test:unit": "npm run test",
     "test:integration": "cd server && npm run test:integration",
     "build": "npm run build:client && npm run build:server",
@@ -42,6 +44,7 @@
     "db:migrate:neo4j": "npx ts-node --esm scripts/migrate.ts",
     "health": "chmod +x scripts/health-check.sh && scripts/health-check.sh",
     "install:pm": "node scripts/select-pm.js",
+    "summitctl": "cd tools/summitctl && npm run start --",
     "e2e": "playwright test",
     "graphql:schema:check": "graphql-inspector diff packages/graphql/schema.graphql origin/main:packages/graphql/schema.graphql --fail-on-breaking",
     "graphql:codegen": "graphql-codegen",
@@ -51,13 +54,13 @@
     "db:knex:migrate": "knex migrate:latest --knexfile packages/db/knex/knexfile.cjs",
     "db:knex:rollback": "knex migrate:rollback --knexfile packages/db/knex/knexfile.cjs",
     "db:neo4j:migrate": "node scripts/neo4j-migrate.js",
+    "adapters:pack": "node --experimental-strip-types adapters/reference/packaging.ts",
     "changeset": "changeset",
     "release": "changeset version && changeset publish",
+    "sdk:generate": "pnpm --filter @intelgraph/sdk generate",
     "precommit": "lint-staged",
     "db:prisma:diff": "prisma migrate diff --from-url $DATABASE_URL --to-schema-datamodel prisma/schema.prisma",
-    "db:knex:smoke": "knex migrate:down && knex migrate:up",
-    "adapter-sdk:build": "pnpm --filter @intelgraph/adapter-sdk build",
-    "adapter-sdk:test": "pnpm --filter @intelgraph/adapter-sdk adapter:test"
+    "db:knex:smoke": "knex migrate:down && knex migrate:up"
   },
   "keywords": [
     "intelligence-analysis",
@@ -71,16 +74,29 @@
   ],
   "author": "IntelGraph Team",
   "license": "MIT",
+  "packageManager": "pnpm@9.12.0",
   "engines": {
-    "node": ">=18.18 <20",
-    "npm": ">=8.0.0"
+    "node": ">=20.19.0 <21",
+    "npm": ">=8.0.0",
+    "pnpm": "^9.12.0"
   },
-  "packageManager": "pnpm@10.24.0",
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
     "@eslint/compat": "^2.0.0",
     "@eslint/js": "^9.33.0",
+    "@graphql-codegen/cli": "^6.1.0",
+    "@graphql-codegen/typescript": "^5.0.7",
+    "@graphql-codegen/typescript-operations": "^4.6.1",
+    "@graphql-codegen/typescript-react-apollo": "^4.3.4",
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.67.3",
+    "@opentelemetry/exporter-prometheus": "^0.208.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.208.0",
+    "@opentelemetry/resources": "^2.2.0",
+    "@opentelemetry/sdk-metrics": "^2.2.0",
+    "@opentelemetry/sdk-node": "^0.208.0",
+    "@opentelemetry/semantic-conventions": "^1.38.0",
     "@playwright/test": "^1.54.2",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "10.0.1",
@@ -101,8 +117,10 @@
     "lint-staged": "^16.1.5",
     "markdownlint-cli": "^0.45.0",
     "prettier": "^3.6.2",
+    "prom-client": "^15.1.3",
     "semantic-release": "^24.2.7",
     "ts-jest": "^29.2.6",
+    "tsx": "^4.21.0",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.50.0"
   },
@@ -112,7 +130,8 @@
       "prettier -w"
     ],
     "*.py": [
-      "pre-commit run -a --hook-stage pre-commit"
+      "ruff check --fix",
+      "ruff format"
     ],
     "*.graphql": [
       "graphql-schema-linter"
@@ -160,10 +179,5 @@
     "redis": "^5.8.1",
     "ws": "^8.18.3"
   },
-  "private": true,
-  "workspaces": [
-    "packages/*",
-    "client",
-    "server"
-  ]
+  "private": true
 }

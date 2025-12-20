@@ -1,0 +1,32 @@
+{{- if and .Values.global.hpa .Values.global.hpa.enabled }}
+{{- range .Values.global.hpa.workloads }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Values.global.namespace | default $.Release.Namespace }}
+spec:
+  scaleTargetRef:
+{{ toYaml .targetRef | indent 4 }}
+  minReplicas: {{ default $.Values.global.hpa.defaults.minReplicas .minReplicas }}
+  maxReplicas: {{ default $.Values.global.hpa.defaults.maxReplicas .maxReplicas }}
+  metrics:
+{{- if .metrics }}
+{{ toYaml .metrics | indent 4 }}
+{{- else }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ $.Values.global.hpa.defaults.cpu.averageUtilization }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ $.Values.global.hpa.defaults.memory.averageUtilization }}
+{{- end }}
+---
+{{- end }}
+{{- end }}
