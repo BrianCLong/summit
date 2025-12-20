@@ -203,22 +203,40 @@ PY
           echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
 
-      - name: Verify signatures and attestations
+      - name: Verify signatures, digests, and attestations
+        id: verify-artifacts
         env:
           IMAGE_SERVER: ${{ env.REGISTRY }}/${{ github.repository }}/server:${{ inputs.version }}
           IMAGE_CLIENT: ${{ env.REGISTRY }}/${{ github.repository }}/client:${{ inputs.version }}
         run: |
           set -euo pipefail
-          for image in "${IMAGE_SERVER}" "${IMAGE_CLIENT}"; do
-            cosign verify "$image"
-            cosign verify-attestation --type slsaprovenance "$image"
-            cosign verify-attestation --type spdx "$image"
-          done
+
+          verify_and_pin() {
+            local image="$1"
+            local name="$2"
+
+            verification=$(cosign verify --output json "$image")
+            digest=$(echo "$verification" | jq -r '.[0].critical.image["docker-manifest-digest"]')
+
+            if [ -z "$digest" ] || [ "$digest" = "null" ]; then
+              echo "❌ Unable to resolve digest after verification for $image" >&2
+              exit 1
+            fi
+
+            pinned="${image%@*}@${digest}"
+            echo "${name}-pinned=${pinned}" >> "$GITHUB_OUTPUT"
+
+            cosign verify-attestation --type slsaprovenance "$pinned"
+            cosign verify-attestation --type spdx "$pinned"
+          }
+
+          verify_and_pin "$IMAGE_SERVER" server
+          verify_and_pin "$IMAGE_CLIENT" client
 
       - name: Download SBOM attestations
         env:
-          IMAGE_SERVER: ${{ env.REGISTRY }}/${{ github.repository }}/server:${{ inputs.version }}
-          IMAGE_CLIENT: ${{ env.REGISTRY }}/${{ github.repository }}/client:${{ inputs.version }}
+          IMAGE_SERVER: ${{ steps.verify-artifacts.outputs.server-pinned }}
+          IMAGE_CLIENT: ${{ steps.verify-artifacts.outputs.client-pinned }}
         run: |
           set -euo pipefail
           for image in "$IMAGE_SERVER" "$IMAGE_CLIENT"; do
@@ -230,22 +248,14 @@ PY
       - name: Enforce SBOM policy with Conftest
         run: |
           for sbom in *sbom.json; do
-            conftest test "$sbom" \
-              --policy .ci/policies/deps.rego \
-              --data .security/deps/policy.yaml
+            conftest test "$sbom" -p policy/sbom_policy.rego
           done
 
-        - name: Abort promotion on guard failure
-          if: failure()
-          run: |
-            NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
-            ./scripts/rollback-deployment.sh canary-abort --namespace ${NAMESPACE} || true
-
-        - name: Abort canary on guard failure
-          if: failure()
-          run: |
-            NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
-            ./scripts/rollback-deployment.sh canary-abort --namespace ${NAMESPACE} || true
+      - name: Abort canary on guard failure
+        if: failure()
+        run: |
+          NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+          ./scripts/rollback-deployment.sh canary-abort --namespace ${NAMESPACE} || true
 
       - name: Deploy canary
         run: |
@@ -318,36 +328,52 @@ PY
           echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
 
-      - name: Verify signatures and attestations
-        env:
-          IMAGE_SERVER: ${{ env.REGISTRY }}/${{ github.repository }}/server:${{ inputs.version }}
-          IMAGE_CLIENT: ${{ env.REGISTRY }}/${{ github.repository }}/client:${{ inputs.version }}
-        run: |
-          set -euo pipefail
-          for image in "${IMAGE_SERVER}" "${IMAGE_CLIENT}"; do
-            cosign verify "$image"
-            cosign verify-attestation --type slsaprovenance "$image"
-            cosign verify-attestation --type spdx "$image"
-          done
+        - name: Verify signatures, digests, and attestations
+          id: verify-promote-artifacts
+          env:
+            IMAGE_SERVER: ${{ env.REGISTRY }}/${{ github.repository }}/server:${{ inputs.version }}
+            IMAGE_CLIENT: ${{ env.REGISTRY }}/${{ github.repository }}/client:${{ inputs.version }}
+          run: |
+            set -euo pipefail
 
-      - name: Download SBOM attestations
-        env:
-          IMAGE_SERVER: ${{ env.REGISTRY }}/${{ github.repository }}/server:${{ inputs.version }}
-          IMAGE_CLIENT: ${{ env.REGISTRY }}/${{ github.repository }}/client:${{ inputs.version }}
-        run: |
-          set -euo pipefail
-          for image in "$IMAGE_SERVER" "$IMAGE_CLIENT"; do
-            target=$(echo "$image" | sed 's/[:\/]/-/g')
-            cosign download attestation --predicate-type spdx "$image" > "${target}-att.json"
-            cat "${target}-att.json" | jq -r '.attestations[0].payload' | base64 -d | jq -r '.predicate' > "${target}-sbom.json"
-          done
+            verify_and_pin() {
+              local image="$1"
+              local name="$2"
+
+              verification=$(cosign verify --output json "$image")
+              digest=$(echo "$verification" | jq -r '.[0].critical.image["docker-manifest-digest"]')
+
+              if [ -z "$digest" ] || [ "$digest" = "null" ]; then
+                echo "❌ Unable to resolve digest after verification for $image" >&2
+                exit 1
+              fi
+
+              pinned="${image%@*}@${digest}"
+              echo "${name}-pinned=${pinned}" >> "$GITHUB_OUTPUT"
+
+              cosign verify-attestation --type slsaprovenance "$pinned"
+              cosign verify-attestation --type spdx "$pinned"
+            }
+
+            verify_and_pin "$IMAGE_SERVER" server
+            verify_and_pin "$IMAGE_CLIENT" client
+
+        - name: Download SBOM attestations
+          env:
+            IMAGE_SERVER: ${{ steps.verify-promote-artifacts.outputs.server-pinned }}
+            IMAGE_CLIENT: ${{ steps.verify-promote-artifacts.outputs.client-pinned }}
+          run: |
+            set -euo pipefail
+            for image in "$IMAGE_SERVER" "$IMAGE_CLIENT"; do
+              target=$(echo "$image" | sed 's/[:\/]/-/g')
+              cosign download attestation --predicate-type spdx "$image" > "${target}-att.json"
+              cat "${target}-att.json" | jq -r '.attestations[0].payload' | base64 -d | jq -r '.predicate' > "${target}-sbom.json"
+            done
 
       - name: Enforce SBOM policy with Conftest
         run: |
           for sbom in *sbom.json; do
-            conftest test "$sbom" \
-              --policy .ci/policies/deps.rego \
-              --data .security/deps/policy.yaml
+            conftest test "$sbom" -p policy/sbom_policy.rego
           done
 
       - name: Pre-promote health check (SLO Gate)

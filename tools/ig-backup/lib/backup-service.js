@@ -3,6 +3,19 @@ const path = require('node:path');
 const { hashPayload, encryptSerialized, decryptSerialized } = require('./crypto');
 const { readDatabase, writeDatabase } = require('./storage');
 
+function assertInputPath(inputPath) {
+  if (!inputPath) {
+    throw new Error('The --input flag is required for restore operations.');
+  }
+}
+
+function computeCaseHashes(cases, objects) {
+  return cases.map((entry) => ({
+    caseId: entry.id,
+    hash: hashPayload({ case: entry, objects: objects.filter((obj) => obj.caseId === entry.id) }),
+  }));
+}
+
 function buildCaseRefs(cases, objects) {
   return cases.map((entry) => ({
     caseId: entry.id,
@@ -10,10 +23,13 @@ function buildCaseRefs(cases, objects) {
   }));
 }
 
-function computeCaseHashes(cases, objects) {
-  return cases.map((entry) => ({
-    caseId: entry.id,
-    hash: hashPayload({ case: entry, objects: objects.filter((obj) => obj.caseId === entry.id) }),
+function computeCaseRefHashes(caseRefs) {
+  return caseRefs.map((entry) => ({
+    caseId: entry.caseId,
+    hash: hashPayload({
+      caseId: entry.caseId,
+      objectIds: entry.objectIds,
+    }),
   }));
 }
 
@@ -32,6 +48,8 @@ function createBackup({ dbPath, outputPath, passphrase, encrypt = true, caseIds 
   const normalizedRefs = snapshot.caseRefs.length ? snapshot.caseRefs : buildCaseRefs(snapshot.cases, snapshot.objects);
   const selected = selectDataForCases({ ...snapshot, caseRefs: normalizedRefs }, caseIds);
   const caseRefs = selected.caseRefs.length ? selected.caseRefs : buildCaseRefs(selected.cases, selected.objects);
+  const caseRefsHash = hashPayload(caseRefs);
+  const caseRefHashes = computeCaseRefHashes(caseRefs);
   const payload = {
     cases: selected.cases,
     objects: selected.objects,
@@ -50,6 +68,8 @@ function createBackup({ dbPath, outputPath, passphrase, encrypt = true, caseIds 
     },
     hashes: {
       cases: caseHashes,
+      caseRefs: caseRefHashes,
+      caseRefsAggregate: caseRefsHash,
       payload: checksum,
     },
     data: payload,
@@ -65,6 +85,7 @@ function createBackup({ dbPath, outputPath, passphrase, encrypt = true, caseIds 
 }
 
 function loadBackup(inputPath, passphrase) {
+  assertInputPath(inputPath);
   const raw = JSON.parse(fs.readFileSync(inputPath, 'utf8'));
   if (raw.kind === 'ig-backup-encrypted') {
     if (!passphrase) {
@@ -77,6 +98,9 @@ function loadBackup(inputPath, passphrase) {
 }
 
 function validateBackup(backup) {
+  if (backup.kind !== 'ig-backup') {
+    throw new Error('Invalid backup format. Expected ig-backup payload.');
+  }
   const recalculated = hashPayload(backup.data);
   if (recalculated !== backup.checksum) {
     throw new Error('Backup checksum mismatch; data may be corrupted or tampered with.');
@@ -86,7 +110,13 @@ function validateBackup(backup) {
 function restoreBackup({ dbPath, inputPath, passphrase, caseIds = [], dryRun = false }) {
   const backup = loadBackup(inputPath, passphrase);
   validateBackup(backup);
-  const selected = selectDataForCases(backup.data, caseIds);
+  const hydratedBackupRefs = backup.data.caseRefs.length
+    ? backup.data.caseRefs
+    : buildCaseRefs(backup.data.cases, backup.data.objects);
+  const backupCaseRefHashes = backup.hashes?.caseRefs ?? computeCaseRefHashes(hydratedBackupRefs);
+  const backupCaseRefsAggregate =
+    backup.hashes?.caseRefsAggregate ?? hashPayload(hydratedBackupRefs);
+  const selected = selectDataForCases({ ...backup.data, caseRefs: hydratedBackupRefs }, caseIds);
   const restorePayload = {
     cases: selected.cases,
     objects: selected.objects,
@@ -94,6 +124,8 @@ function restoreBackup({ dbPath, inputPath, passphrase, caseIds = [], dryRun = f
   };
   const restoreChecksum = hashPayload(restorePayload);
   const caseHashes = computeCaseHashes(restorePayload.cases, restorePayload.objects);
+  const caseRefHashes = computeCaseRefHashes(restorePayload.caseRefs);
+  const caseRefsAggregate = hashPayload(restorePayload.caseRefs);
   const summary = {
     dryRun,
     filtered: Boolean(caseIds?.length),
@@ -103,7 +135,11 @@ function restoreBackup({ dbPath, inputPath, passphrase, caseIds = [], dryRun = f
     },
     checksum: restoreChecksum,
     expectedChecksum: backup.checksum,
+    checksumMatches: restoreChecksum === backup.checksum,
     caseHashes,
+    caseRefHashes,
+    caseRefsAggregate,
+    expectedCaseRefsAggregate: backupCaseRefsAggregate,
   };
   if (!dryRun) {
     writeDatabase(dbPath, restorePayload);
@@ -114,6 +150,16 @@ function restoreBackup({ dbPath, inputPath, passphrase, caseIds = [], dryRun = f
   });
   if (missingHashes.length) {
     throw new Error(`Hash mismatch detected for cases: ${missingHashes.map((m) => m.caseId).join(', ')}`);
+  }
+  const missingCaseRefHashes = caseRefHashes.filter((entry) => {
+    const expected = backupCaseRefHashes.find((item) => item.caseId === entry.caseId);
+    return !expected || expected.hash !== entry.hash;
+  });
+  if (missingCaseRefHashes.length) {
+    throw new Error(`Reference hash mismatch for cases: ${missingCaseRefHashes.map((m) => m.caseId).join(', ')}`);
+  }
+  if (!summary.filtered && backupCaseRefsAggregate && caseRefsAggregate !== backupCaseRefsAggregate) {
+    throw new Error('Reference checksum mismatch; critical object references diverged from backup.');
   }
   return summary;
 }

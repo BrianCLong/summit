@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
@@ -51,6 +51,8 @@ import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import ProtectedRoute from './components/common/ProtectedRoute.jsx';
 import LoginPage from './components/auth/LoginPage.jsx';
 import ErrorBoundary from './components/ErrorBoundary.tsx';
+import RouteAnnouncer from './components/a11y/RouteAnnouncer';
+import { useFeatureFlag } from './hooks/useFeatureFlag';
 
 // Lazy load heavy components for better initial load performance
 const InteractiveGraphExplorer = React.lazy(() =>
@@ -87,13 +89,16 @@ const AdminDashboard = React.lazy(() =>
   import('./components/admin/AdminDashboard')
 );
 const ApprovalsPage = React.lazy(() =>
-  import('./features/approvals/ApprovalsPage')
+  import('./switchboard/approvals/ApprovalsExperience')
 );
 const PartnerConsolePage = React.lazy(() =>
   import('./pages/partner-console/PartnerConsolePage')
 );
+const AlertingPage = React.lazy(() =>
+  import('./pages/AlertingPage')
+);
 
-import { MilitaryTech } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
+import { MilitaryTech, Notifications } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import { Security } from '@mui/icons-material';
 
 // Navigation items
@@ -132,6 +137,7 @@ const navigationItems = [
     icon: <MilitaryTech />,
     roles: [ADMIN],
   },
+  { path: '/alerting', label: 'Alerting', icon: <Notifications />, roles: [ADMIN] },
 ];
 
 // Connection Status Component
@@ -655,6 +661,23 @@ function NotFoundPage() {
 // Main Layout Component
 function MainLayout() {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
+  const mainRef = useRef(null);
+  const a11yGuardrailsEnabled = useFeatureFlag('ui.a11yGuardrails');
+
+  const routeLabels = useMemo(
+    () =>
+      navigationItems.reduce(
+        (acc, item) => {
+          acc[item.path] = item.label;
+          return acc;
+        },
+        {
+          '/': 'Home',
+          '/login': 'Login',
+        },
+      ),
+    [],
+  );
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -664,7 +687,15 @@ function MainLayout() {
         onClose={() => setDrawerOpen(false)}
       />
 
-      <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8 }}>
+      <Box
+        component="main"
+        role="main"
+        tabIndex={a11yGuardrailsEnabled ? -1 : undefined}
+        ref={mainRef}
+        data-testid="primary-content"
+        sx={{ flexGrow: 1, p: 3, mt: 8 }}
+      >
+        <RouteAnnouncer mainRef={mainRef} routeLabels={routeLabels} />
         <React.Suspense
           fallback={
             <Box sx={{ width: '100%', mt: 2 }}>
@@ -707,6 +738,7 @@ function MainLayout() {
                   path="/wargame-dashboard"
                   element={<ExecutiveDashboard />}
                 />
+                <Route path="/alerting" element={<AlertingPage />} />
               </Route>
               <Route path="*" element={<NotFoundPage />} />
             </Route>
