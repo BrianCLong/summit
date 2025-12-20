@@ -1,3 +1,4 @@
+// @ts-nocheck
 const express = require('express');
 const { ensureAuthenticated } = require('../middleware/auth');
 const GeointService = require('../services/GeointService');

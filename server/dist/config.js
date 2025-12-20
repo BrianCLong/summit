@@ -1,38 +1,140 @@
-import 'dotenv/config';
-import { z } from 'zod';
-const Env = z
-    .object({
-    NODE_ENV: z.string().default('development'),
-    PORT: z.coerce.number().default(4000),
-    DATABASE_URL: z.string().min(1),
-    NEO4J_URI: z.string().min(1),
-    NEO4J_USER: z.string().min(1),
-    NEO4J_PASSWORD: z.string().min(1),
-    REDIS_HOST: z.string().default('localhost'),
-    REDIS_PORT: z.coerce.number().default(6379),
-    JWT_SECRET: z.string().min(32),
-    JWT_REFRESH_SECRET: z.string().min(32),
-    CORS_ORIGIN: z.string().default('http://localhost:3000'),
-})
-    .passthrough(); // Allow extra env vars
-export const cfg = (() => {
-    const parsed = Env.safeParse(process.env);
-    if (!parsed.success) {
-        // Don't leak secrets; show keys only
-        console.error('[STARTUP] Environment validation failed:', parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`));
-        process.exit(1);
+// @ts-nocheck
+import * as fs from 'fs';
+import * as path from 'path';
+import * as yaml from 'js-yaml';
+import { SchemaValidator } from './lib/config/schema-validator';
+import { MigrationEngine, MigrationError } from './lib/config/migration-engine';
+import { ConfigWatcher } from './lib/config/config-watcher';
+import { SecretManager } from './lib/secrets/secret-manager';
+import { FeatureFlagService } from './lib/config/feature-flags';
+const CONFIG_FILE_PATH = path.join(__dirname, '../config/app.yaml');
+const MIGRATIONS_DIR = path.join(__dirname, '../config/migrations');
+const MIGRATION_HISTORY_FILE = path.join(__dirname, '../.migration_history.json');
+class ConfigManager {
+    config;
+    validator;
+    migrationEngine;
+    watcher;
+    secretManager;
+    featureFlags;
+    environment;
+    constructor() {
+        this.environment = process.env.APP_ENV || process.env.NODE_ENV || 'development';
+        this.secretManager = new SecretManager();
+        this.validator = new SchemaValidator(this.secretManager);
+        this.migrationEngine = new MigrationEngine(MIGRATIONS_DIR, MIGRATION_HISTORY_FILE);
+        this.config = this.loadConfig();
+        this.watcher = new ConfigWatcher(CONFIG_FILE_PATH, 'app', this.validator, (newConfig) => {
+            this.config = this.processConfig(newConfig);
+        });
     }
-    const env = parsed.data;
-    const present = Object.keys(env).length;
-    if (env.NODE_ENV !== 'production') {
-        console.log(`[STARTUP] Environment validated (${present} keys)`);
+    loadConfig() {
+        try {
+            const loadedConfig = this.readRawConfig();
+            const finalConfig = this.processConfig(loadedConfig);
+            console.log('Configuration loaded and validated successfully.');
+            return finalConfig;
+        }
+        catch (error) {
+            if (error instanceof MigrationError) {
+                console.error('A migration failed. The configuration has been rolled back to a safe state.');
+                console.error('Please resolve the failed migration and restart the application.');
+            }
+            else {
+                console.error('Failed to load configuration:', error.message);
+            }
+            process.exit(1);
+            throw new Error('Configuration failed to load.');
+        }
     }
-    return env;
-})();
-// Derived URLs for convenience
-export const dbUrls = {
-    redis: `redis://${cfg.REDIS_HOST}:${cfg.REDIS_PORT}`,
-    postgres: cfg.DATABASE_URL,
-    neo4j: cfg.NEO4J_URI,
-};
+    readRawConfig() {
+        if (!fs.existsSync(CONFIG_FILE_PATH)) {
+            throw new Error(`Configuration file not found at ${CONFIG_FILE_PATH}`);
+        }
+        const configString = fs.readFileSync(CONFIG_FILE_PATH, 'utf8');
+        return yaml.load(configString);
+    }
+    processConfig(loadedConfig) {
+        const migratedConfig = this.migrateConfig(loadedConfig);
+        const environmentApplied = this.applyEnvironmentOverrides(migratedConfig);
+        this.applySecretOptions(environmentApplied);
+        const validated = this.validator.validate(environmentApplied, 'app');
+        this.featureFlags = new FeatureFlagService(validated.features, this.environment);
+        return validated;
+    }
+    migrateConfig(config) {
+        const migratedConfig = this.migrationEngine.migrate(config);
+        if (migratedConfig.version > (config.version || 0)) {
+            console.log('Successfully migrated configuration. Writing new configuration to file...');
+            fs.writeFileSync(CONFIG_FILE_PATH, yaml.dump(migratedConfig), 'utf8');
+        }
+        return migratedConfig;
+    }
+    applyEnvironmentOverrides(config) {
+        const overrides = config.environments?.[this.environment] || {};
+        const fileOverrides = this.readEnvironmentFile();
+        const merged = this.deepMerge(config, overrides, fileOverrides);
+        delete merged.environments;
+        return merged;
+    }
+    readEnvironmentFile() {
+        const envConfigPath = path.join(__dirname, '../config/environments', `${this.environment}.yaml`);
+        if (!fs.existsSync(envConfigPath)) {
+            return {};
+        }
+        const envConfigString = fs.readFileSync(envConfigPath, 'utf8');
+        return yaml.load(envConfigString) || {};
+    }
+    deepMerge(...configs) {
+        return configs.reduce((acc, current) => {
+            Object.entries(current || {}).forEach(([key, value]) => {
+                if (Array.isArray(value)) {
+                    acc[key] = [...value];
+                }
+                else if (value && typeof value === 'object') {
+                    acc[key] = this.deepMerge(acc[key] || {}, value);
+                }
+                else if (value !== undefined) {
+                    acc[key] = value;
+                }
+            });
+            return acc;
+        }, {});
+    }
+    applySecretOptions(config) {
+        const secrets = config.security?.secrets;
+        if (!secrets)
+            return;
+        const rotationIntervalSeconds = secrets.rotation?.enabled === false ? 0 : secrets.rotation?.intervalSeconds;
+        this.secretManager.updateOptions({
+            cacheTtlSeconds: secrets.cacheTtlSeconds,
+            rotationIntervalSeconds,
+            auditLogPath: secrets.auditLogPath,
+            encryptionKeyEnv: secrets.encryptionKeyEnv,
+            providerPreference: secrets.providerPreference,
+            vaultConfig: secrets.vault,
+            awsConfig: secrets.aws,
+            fileBasePath: secrets.fileBasePath,
+        });
+        this.validator.configureSecrets({
+            cacheTtlSeconds: secrets.cacheTtlSeconds,
+            rotationIntervalSeconds,
+            auditLogPath: secrets.auditLogPath,
+            encryptionKeyEnv: secrets.encryptionKeyEnv,
+            providerPreference: secrets.providerPreference,
+            vaultConfig: secrets.vault,
+            awsConfig: secrets.aws,
+            fileBasePath: secrets.fileBasePath,
+        });
+    }
+    getConfig() {
+        return this.config;
+    }
+    getFeatureFlags() {
+        return this.featureFlags || new FeatureFlagService(this.config?.features, this.environment);
+    }
+}
+const configManager = new ConfigManager();
+export const getConfig = () => configManager.getConfig();
+export const getFeatureFlags = () => configManager.getFeatureFlags();
 //# sourceMappingURL=config.js.map
