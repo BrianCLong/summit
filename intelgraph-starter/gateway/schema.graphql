@@ -1,0 +1,66 @@
+type Entity {
+  id: ID!
+  type: String!
+  name: String!
+  description: String
+  labels: [String!]!
+  createdAt: String
+  updatedAt: String
+}
+
+type Relationship {
+  id: ID!
+  type: String!
+  sourceId: ID!
+  targetId: ID!
+  confidence: Float
+  createdAt: String
+}
+
+type Provenance {
+  id: ID!
+  entityId: ID!
+  source: String!
+  actor: String!
+  action: String!
+  timestamp: String!
+  notes: String
+}
+
+type Query {
+  ping: String!
+  entities(type: String): [Entity!]!
+  relationships(type: String): [Relationship!]!
+}
+
+type Mutation {
+  upsertEntity(input: EntityInput!): Entity!
+  upsertRelationship(input: RelationshipInput!): Relationship!
+  recordProvenance(input: ProvenanceInput!): Provenance!
+  uploadObject(path: String!, bucket: String): String!
+}
+
+input EntityInput {
+  id: ID
+  type: String!
+  name: String!
+  description: String
+  labels: [String!]
+}
+
+input RelationshipInput {
+  id: ID
+  type: String!
+  sourceId: ID!
+  targetId: ID!
+  confidence: Float
+}
+
+input ProvenanceInput {
+  entityId: ID!
+  source: String!
+  actor: String!
+  action: String!
+  timestamp: String
+  notes: String
+}

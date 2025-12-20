@@ -43,6 +43,9 @@ interface RelationshipRow {
   created_by: string;
 }
 
+const RELATIONSHIP_COLUMNS =
+  'id, tenant_id, src_id, dst_id, type, props, created_at, updated_at, created_by';
+
 export class RelationshipRepo {
   constructor(
     private pg: Pool,
@@ -193,7 +196,7 @@ export class RelationshipRepo {
    */
   async findById(id: string, tenantId?: string): Promise<Relationship | null> {
     const params = [id];
-    let query = `SELECT * FROM relationships WHERE id = $1`;
+    let query = `SELECT ${RELATIONSHIP_COLUMNS} FROM relationships WHERE id = $1`;
 
     if (tenantId) {
       query += ` AND tenant_id = $2`;
@@ -215,7 +218,7 @@ export class RelationshipRepo {
   ): Promise<Relationship[]> {
     if (direction === 'outgoing') {
       const { rows } = (await this.pg.query(
-        `SELECT * FROM relationships
+        `SELECT ${RELATIONSHIP_COLUMNS} FROM relationships
          WHERE tenant_id = $1 AND src_id = $2
          ORDER BY created_at DESC`,
         [tenantId, entityId],
@@ -225,7 +228,7 @@ export class RelationshipRepo {
 
     if (direction === 'incoming') {
       const { rows } = (await this.pg.query(
-        `SELECT * FROM relationships
+        `SELECT ${RELATIONSHIP_COLUMNS} FROM relationships
          WHERE tenant_id = $1 AND dst_id = $2
          ORDER BY created_at DESC`,
         [tenantId, entityId],
@@ -236,12 +239,12 @@ export class RelationshipRepo {
     // OPTIMIZED: Use UNION ALL instead of OR clause
     // This allows PostgreSQL to use separate index scans (5-20x faster)
     const { rows } = (await this.pg.query(
-      `SELECT * FROM relationships
+      `SELECT ${RELATIONSHIP_COLUMNS} FROM relationships
        WHERE tenant_id = $1 AND src_id = $2
 
        UNION ALL
 
-       SELECT * FROM relationships
+       SELECT ${RELATIONSHIP_COLUMNS} FROM relationships
        WHERE tenant_id = $1 AND dst_id = $2
 
        ORDER BY created_at DESC`,
@@ -275,7 +278,7 @@ export class RelationshipRepo {
     offset?: number;
   }): Promise<Relationship[]> {
     const params: any[] = [tenantId];
-    let query = `SELECT * FROM relationships WHERE tenant_id = $1`;
+    let query = `SELECT ${RELATIONSHIP_COLUMNS} FROM relationships WHERE tenant_id = $1`;
     let paramIndex = 2;
 
     if (type) {

@@ -1,28 +1,28 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-usage() {
-  echo "Usage: $0 <sbom_path> <output_prefix>" >&2
-  exit 1
-}
+TARGET=${1:-.}
+SERVICE_NAME=${2:-workspace}
+OUTPUT_DIR=${3:-artifacts/scans}
 
-if [[ $# -lt 2 ]]; then
-  usage
-fi
-
-SBOM=$1
-OUTPUT_PREFIX=$2
-
-JSON_OUT="${OUTPUT_PREFIX}.json"
-SARIF_OUT="${OUTPUT_PREFIX}.sarif"
+mkdir -p "${OUTPUT_DIR}"
+JSON_PATH="${OUTPUT_DIR}/${SERVICE_NAME}-osv.json"
+SARIF_PATH="${OUTPUT_DIR}/${SERVICE_NAME}-osv.sarif"
 
 if ! command -v osv-scanner >/dev/null 2>&1; then
-  echo "osv-scanner is required on PATH" >&2
-  exit 1
+  echo "Installing osv-scanner..."
+  OSV_VERSION="v1.7.4"
+  curl -sSfL "https://github.com/google/osv-scanner/releases/download/${OSV_VERSION}/osv-scanner_${OSV_VERSION#v}_linux_amd64" -o /tmp/osv-scanner
+  sudo install /tmp/osv-scanner /usr/local/bin/osv-scanner
 fi
 
-echo "Scanning ${SBOM} with osv-scanner" >&2
-osv-scanner --format json --sbom "${SBOM}" > "${JSON_OUT}"
-osv-scanner --format sarif --sbom "${SBOM}" > "${SARIF_OUT}"
+echo "Running osv-scanner for ${TARGET}";
+osv-scanner --format json --output "${JSON_PATH}" --recursive "${TARGET}" || true
+osv-scanner --format sarif --output "${SARIF_PATH}" --recursive "${TARGET}" || true
 
-echo "OSV scanner reports written to ${JSON_OUT} and ${SARIF_OUT}" >&2
+if [ -n "${GITHUB_OUTPUT:-}" ]; then
+  echo "json=${JSON_PATH}" >> "${GITHUB_OUTPUT}"
+  echo "sarif=${SARIF_PATH}" >> "${GITHUB_OUTPUT}"
+fi
+
+echo "${JSON_PATH}"

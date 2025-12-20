@@ -1,29 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-usage() {
-  echo "Usage: $0 <source> <service_name> <sha> [output_dir]" >&2
-  exit 1
-}
+SERVICE_NAME=${1:-workspace}
+TARGET=${2:-.}
+OUTPUT_DIR=${SBOM_DIR:-artifacts/sbom}
+SHA=${GITHUB_SHA:-$(git rev-parse --short HEAD)}
+OUTPUT_PATH="${OUTPUT_DIR}/${SERVICE_NAME}-${SHA}.spdx.json"
 
-if [[ $# -lt 3 ]]; then
-  usage
-fi
-
-SOURCE=$1
-SERVICE_NAME=$2
-COMMIT_SHA=$3
-OUTPUT_DIR=${4:-artifacts/sbom}
-
-mkdir -p "$OUTPUT_DIR"
-OUTPUT_FILE="$OUTPUT_DIR/${SERVICE_NAME}-${COMMIT_SHA}.spdx.json"
+mkdir -p "${OUTPUT_DIR}"
 
 if ! command -v syft >/dev/null 2>&1; then
-  echo "syft is required on PATH" >&2
-  exit 1
+  echo "Installing syft..."
+  curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sudo sh -s -- -b /usr/local/bin >/dev/null
 fi
 
-echo "Generating SBOM for ${SOURCE} -> ${OUTPUT_FILE}" >&2
-syft "${SOURCE}" -o spdx-json --file "${OUTPUT_FILE}"
+echo "Generating SPDX SBOM for ${TARGET} -> ${OUTPUT_PATH}"
+syft "${TARGET}" -o spdx-json > "${OUTPUT_PATH}"
 
-echo "SBOM written to ${OUTPUT_FILE}"
+if [ -n "${GITHUB_OUTPUT:-}" ]; then
+  echo "sbom_path=${OUTPUT_PATH}" >> "${GITHUB_OUTPUT}"
+fi
+
+echo "${OUTPUT_PATH}"

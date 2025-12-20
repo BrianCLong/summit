@@ -1,46 +1,47 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-usage() {
-  echo "Usage: $0 <artifact> <predicate> <attestation_output_prefix>" >&2
-  exit 1
-}
+ARTIFACT=${1:?"Artifact to attest is required"}
+SERVICE_NAME=${2:-workspace}
+OUTPUT_DIR=${3:-artifacts/attestations}
+SHA=${GITHUB_SHA:-$(git rev-parse --short HEAD)}
 
-if [[ $# -lt 3 ]]; then
-  usage
-fi
+mkdir -p "${OUTPUT_DIR}"
+ATTEST_PATH="${OUTPUT_DIR}/${SERVICE_NAME}-${SHA}.slsa.json"
+DIGEST=$(sha256sum "${ARTIFACT}" | awk '{print $1}')
 
-ARTIFACT=$1
-PREDICATE=$2
-OUTPUT_PREFIX=$3
-ATTESTATION_PAYLOAD="${OUTPUT_PREFIX}.json"
-
-if ! command -v cosign >/dev/null 2>&1; then
-  echo "cosign is required on PATH" >&2
-  exit 1
-fi
-
-if [[ ! -f "$PREDICATE" ]]; then
-  echo "Predicate file $PREDICATE missing" >&2
-  exit 1
-fi
-
-cat > "$ATTESTATION_PAYLOAD" <<EOF2
+cat > "${ATTEST_PATH}" <<JSON
 {
-  "predicateType": "https://slsa.dev/provenance/v1",
+  "_type": "https://in-toto.io/Statement/v0.1",
   "subject": [
     {
-      "name": "${ARTIFACT}",
+      "name": "${SERVICE_NAME}",
       "digest": {
-        "sha256": "$(sha256sum "${ARTIFACT}" | awk '{print $1}')"
+        "sha256": "${DIGEST}"
       }
     }
   ],
-  "predicate": $(cat "$PREDICATE")
+  "predicateType": "https://slsa.dev/provenance/v1",
+  "predicate": {
+    "buildType": "https://github.com/slsa-framework/slsa-github-generator",
+    "builder": {
+      "id": "https://github.com/${GITHUB_REPOSITORY:-unknown}"
+    },
+    "buildConfig": {
+      "artifact": "${ARTIFACT}",
+      "commit": "${GITHUB_SHA:-unknown}",
+      "runner": "github-actions"
+    },
+    "metadata": {
+      "invocationId": "${GITHUB_RUN_ID:-local}",
+      "startedOn": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+    }
+  }
 }
-EOF2
+JSON
 
-echo "Signing attestation payload for ${ARTIFACT}" >&2
-COSIGN_EXPERIMENTAL=1 cosign sign-blob --yes --tlog-upload=true --key cosign.key --output-signature "${OUTPUT_PREFIX}.sig" --output-certificate "${OUTPUT_PREFIX}.cert" "${ATTESTATION_PAYLOAD}"
+if [ -n "${GITHUB_OUTPUT:-}" ]; then
+  echo "attestation=${ATTEST_PATH}" >> "${GITHUB_OUTPUT}"
+fi
 
-echo "Attestation generated: ${ATTESTATION_PAYLOAD}" >&2
+echo "${ATTEST_PATH}"
