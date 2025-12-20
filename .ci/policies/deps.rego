@@ -33,12 +33,20 @@ version_matches(version, regex) {
   re_match(regex, tostring(version))
 }
 
+override_metadata_valid(override) {
+  override.ticket
+  trim(override.ticket) != ""
+  override.justification
+  trim(override.justification) != ""
+  not expired(override.expires)
+}
+
 allow_override(pkg, rule) {
   some override
   override := policy.allow_overrides[_]
+  override_metadata_valid(override)
   override.package == pkg.name
   version_matches(pkg.versionInfo, override.version_regex)
-  not expired(override.expires)
   rule_is_covered(rule, override)
 }
 
@@ -68,6 +76,12 @@ expired(ts) {
 
 not_expired(ts) {
   not expired(ts)
+}
+
+violation[msg] {
+  override := policy.allow_overrides[_]
+  not override_metadata_valid(override)
+  msg := sprintf("override for %s missing required metadata (ticket/justification) or expired", [override.package])
 }
 
 violation[msg] {

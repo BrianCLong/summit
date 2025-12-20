@@ -13,9 +13,16 @@ import {
 } from '../graph/types';
 import { getDriver, runCypher } from '../graph/neo4j';
 import logger from '../utils/logger';
+import { cacheService } from './cacheService';
 
 export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
   private static instance: Neo4jGraphAnalyticsService;
+
+  // Protected dependencies for testing override
+  protected deps = {
+    getDriver,
+    runCypher
+  };
 
   public static getInstance(): Neo4jGraphAnalyticsService {
     if (!Neo4jGraphAnalyticsService.instance) {
@@ -42,56 +49,59 @@ export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
     maxDepth?: number;
   }): Promise<PathResult | null> {
     const { tenantId, from, to, maxDepth = 6 } = params;
+    const cacheKey = `graph:shortestPath:${tenantId}:${from}:${to}:${maxDepth}`;
 
-    const cypher = `
-      MATCH (start:Entity {id: $from, tenantId: $tenantId}), (end:Entity {id: $to, tenantId: $tenantId})
-      MATCH p = shortestPath((start)-[*..${maxDepth}]-(end))
-      RETURN p
-    `;
+    return cacheService.getOrSet(cacheKey, async () => {
+      const cypher = `
+        MATCH (start:Entity {id: $from, tenantId: $tenantId}), (end:Entity {id: $to, tenantId: $tenantId})
+        MATCH p = shortestPath((start)-[*..${maxDepth}]-(end))
+        RETURN p
+      `;
 
-    try {
-      const session = getDriver().session();
       try {
-        const result = await session.run(cypher, { from, to, tenantId });
-        if (result.records.length === 0) return null;
+        const session = this.deps.getDriver().session();
+        try {
+          const result = await session.run(cypher, { from, to, tenantId });
+          if (result.records.length === 0) return null;
 
-        const path = result.records[0].get('p');
-        const nodes: Entity[] = [];
-        const edges: Edge[] = [];
+          const path = result.records[0].get('p');
+          const nodes: Entity[] = [];
+          const edges: Edge[] = [];
 
-        path.segments.forEach((seg: any) => {
-           const startNode = seg.start.properties;
-           const endNode = seg.end.properties;
-           const rel = seg.relationship.properties;
+          path.segments.forEach((seg: any) => {
+             const startNode = seg.start.properties;
+             const endNode = seg.end.properties;
+             const rel = seg.relationship.properties;
 
-           const mapNode = (n: any) : Entity => ({
-               ...n,
-               attributes: typeof n.attributes === 'string' ? JSON.parse(n.attributes) : n.attributes || {},
-               metadata: typeof n.metadata === 'string' ? JSON.parse(n.metadata) : n.metadata || {}
-           });
+             const mapNode = (n: any) : Entity => ({
+                 ...n,
+                 attributes: typeof n.attributes === 'string' ? JSON.parse(n.attributes) : n.attributes || {},
+                 metadata: typeof n.metadata === 'string' ? JSON.parse(n.metadata) : n.metadata || {}
+             });
 
-           const mapEdge = (r: any, fromId: string, toId: string, type: string) : Edge => ({
-               ...r,
-               fromEntityId: fromId,
-               toEntityId: toId,
-               type: type,
-               attributes: typeof r.attributes === 'string' ? JSON.parse(r.attributes) : r.attributes || {},
-               metadata: typeof r.metadata === 'string' ? JSON.parse(r.metadata) : r.metadata || {}
-           });
+             const mapEdge = (r: any, fromId: string, toId: string, type: string) : Edge => ({
+                 ...r,
+                 fromEntityId: fromId,
+                 toEntityId: toId,
+                 type: type,
+                 attributes: typeof r.attributes === 'string' ? JSON.parse(r.attributes) : r.attributes || {},
+                 metadata: typeof r.metadata === 'string' ? JSON.parse(r.metadata) : r.metadata || {}
+             });
 
-           if (!nodes.find(n => n.id === startNode.id)) nodes.push(mapNode(startNode));
-           if (!nodes.find(n => n.id === endNode.id)) nodes.push(mapNode(endNode));
-           if (!edges.find(e => e.id === rel.id)) edges.push(mapEdge(rel, startNode.id, endNode.id, seg.relationship.type));
-        });
+             if (!nodes.find(n => n.id === startNode.id)) nodes.push(mapNode(startNode));
+             if (!nodes.find(n => n.id === endNode.id)) nodes.push(mapNode(endNode));
+             if (!edges.find(e => e.id === rel.id)) edges.push(mapEdge(rel, startNode.id, endNode.id, seg.relationship.type));
+          });
 
-        return { nodes, edges, cost: path.length };
-      } finally {
-        await session.close();
+          return { nodes, edges, cost: path.length };
+        } finally {
+          await session.close();
+        }
+      } catch (error) {
+        logger.error('Error finding shortest path', { error, params });
+        throw error;
       }
-    } catch (error) {
-      logger.error('Error finding shortest path', { error, params });
-      throw error;
-    }
+    }, 60 * 5); // 5 min cache
   }
 
   async kHopNeighborhood(params: {
@@ -100,42 +110,47 @@ export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
     depth: number;
   }): Promise<Subgraph> {
     const { tenantId, seedIds, depth } = params;
-    const safeDepth = Math.min(depth, 3);
+    const sortedSeedIds = [...seedIds].sort().join(',');
+    const cacheKey = `graph:kHop:${tenantId}:${sortedSeedIds}:${depth}`;
 
-    const cypher = `
-      MATCH (start:Entity {tenantId: $tenantId})
-      WHERE start.id IN $seedIds
-      MATCH (start)-[r*0..${safeDepth}]-(end:Entity {tenantId: $tenantId})
-      UNWIND r as rel
-      WITH collect(distinct start) + collect(distinct end) as nodes, collect(distinct rel) as rels
-      UNWIND nodes as n
-      WITH collect(distinct n) as uniqueNodes, rels
-      RETURN
-        [n in uniqueNodes | n { .* }] as nodes,
-        [r in rels | r { .*, type: type(r), fromEntityId: startNode(r).id, toEntityId: endNode(r).id }] as edges
-    `;
+    return cacheService.getOrSet(cacheKey, async () => {
+      const safeDepth = Math.min(depth, 3);
 
-    const result = await runCypher<{ nodes: any[], edges: any[] }>(cypher, { tenantId, seedIds });
-    if (result.length === 0) return { nodes: [], edges: [] };
+      const cypher = `
+        MATCH (start:Entity {tenantId: $tenantId})
+        WHERE start.id IN $seedIds
+        MATCH (start)-[r*0..${safeDepth}]-(end:Entity {tenantId: $tenantId})
+        UNWIND r as rel
+        WITH collect(distinct start) + collect(distinct end) as nodes, collect(distinct rel) as rels
+        UNWIND nodes as n
+        WITH collect(distinct n) as uniqueNodes, rels
+        RETURN
+          [n in uniqueNodes | n { .* }] as nodes,
+          [r in rels | r { .*, type: type(r), fromEntityId: startNode(r).id, toEntityId: endNode(r).id }] as edges
+      `;
 
-    const row = result[0];
+      const result = await this.deps.runCypher<{ nodes: any[], edges: any[] }>(cypher, { tenantId, seedIds });
+      if (result.length === 0) return { nodes: [], edges: [] };
 
-    const mapEntity = (n: any): Entity => ({
-        ...n,
-         attributes: typeof n.attributes === 'string' ? JSON.parse(n.attributes) : n.attributes || {},
-         metadata: typeof n.metadata === 'string' ? JSON.parse(n.metadata) : n.metadata || {}
-    });
+      const row = result[0];
 
-    const mapEdge = (r: any): Edge => ({
-        ...r,
-         attributes: typeof r.attributes === 'string' ? JSON.parse(r.attributes) : r.attributes || {},
-         metadata: typeof r.metadata === 'string' ? JSON.parse(r.metadata) : r.metadata || {}
-    });
+      const mapEntity = (n: any): Entity => ({
+          ...n,
+           attributes: typeof n.attributes === 'string' ? JSON.parse(n.attributes) : n.attributes || {},
+           metadata: typeof n.metadata === 'string' ? JSON.parse(n.metadata) : n.metadata || {}
+      });
 
-    return {
-        nodes: row.nodes.map(mapEntity),
-        edges: row.edges.map(mapEdge)
-    };
+      const mapEdge = (r: any): Edge => ({
+          ...r,
+           attributes: typeof r.attributes === 'string' ? JSON.parse(r.attributes) : r.attributes || {},
+           metadata: typeof r.metadata === 'string' ? JSON.parse(r.metadata) : r.metadata || {}
+      });
+
+      return {
+          nodes: row.nodes.map(mapEntity),
+          edges: row.edges.map(mapEdge)
+      };
+    }, 60 * 10); // 10 min cache
   }
 
   async centrality(params: {
@@ -155,7 +170,7 @@ export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
          ORDER BY score DESC
          LIMIT 100
        `;
-       const result = await runCypher<{entityId: string, score: number}>(cypher, {
+       const result = await this.deps.runCypher<{entityId: string, score: number}>(cypher, {
            tenantId,
            investigationId: scope.investigationId,
            collectionId: scope.collectionId
@@ -195,7 +210,7 @@ export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
        `;
 
        try {
-           const result = await runCypher<{entityId: string, score: number}>(cypher, {
+           const result = await this.deps.runCypher<{entityId: string, score: number}>(cypher, {
                tenantId,
                investigationId: scope.investigationId,
                collectionId: scope.collectionId
@@ -260,7 +275,7 @@ export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
         // We will perform a simple client-side aggregation to form clusters.
 
         try {
-            const result = await runCypher<{id1: string, id2: string, weight: number}>(cypher, {
+            const result = await this.deps.runCypher<{id1: string, id2: string, weight: number}>(cypher, {
                 tenantId,
                 investigationId: scope.investigationId,
                 collectionId: scope.collectionId
@@ -326,7 +341,7 @@ export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
             LIMIT 50
         `;
 
-        const result = await runCypher<{entityId: string, score: number}>(cypher, {
+        const result = await this.deps.runCypher<{entityId: string, score: number}>(cypher, {
              tenantId,
              investigationId: scope.investigationId,
              collectionId: scope.collectionId

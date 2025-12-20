@@ -9,6 +9,7 @@ import { ProvenanceRepo } from '../repos/ProvenanceRepo.js';
 import { getPostgresPool } from '../config/database.js';
 import archiver from 'archiver';
 import { createHash, randomUUID } from 'crypto';
+import provisionRouter from './tenants/provision.js';
 
 const router = Router();
 
@@ -24,6 +25,8 @@ const auditQuerySchema = z.object({
   limit: z.coerce.number().min(1).max(200).default(50),
   offset: z.coerce.number().min(0).default(0),
 });
+
+router.use('/provision', provisionRouter);
 
 function policyGate() {
   return (req: any, _res: any, next: any) => {

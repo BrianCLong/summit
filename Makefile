@@ -58,7 +58,7 @@ sbom:   ## Generate CycloneDX SBOM
 
 # ---- IntelGraph S25 Merge Orchestrator (Legacy/Specific) ---------------------
 
-SHELL := /usr/bin/env bash
+SHELL := /bin/bash
 .ONESHELL:
 .SHELLFLAGS := -eo pipefail -c
 MAKEFLAGS += --no-builtin-rules
@@ -136,3 +136,30 @@ prereqs:
 	@command -v pnpm >/dev/null 2>&1 || { echo "pnpm not found"; exit 1; }
 	@node -v | grep -q "v$(NODE_VERSION)" || echo "WARN: Node version differs from $(NODE_VERSION)"
 	@mkdir -p "$(STATE_DIR)"
+
+# Secrets management golden path
+secrets/bootstrap:
+	@echo "Generating org age key if missing and aligning .sops.yaml"
+	@[ -f .security/keys/age-org.pub ] || age-keygen -o .security/keys/age-org.key && age-keygen -y .security/keys/age-org.key > .security/keys/age-org.pub
+	@echo "Update .sops.yaml recipients as needed. Private key must stay in security/key-vault."
+
+secrets/encrypt:
+	@if [ -z "${path}" ]; then echo "usage: make secrets/encrypt path=secrets/envs/dev/foo.enc.yaml"; exit 1; fi
+	@sops --encrypt --in-place ${path}
+
+secrets/decrypt:
+	@if [ -z "${path}" ]; then echo "usage: make secrets/decrypt path=secrets/envs/dev/foo.enc.yaml"; exit 1; fi
+	@tmpfile=$$(mktemp); sops -d ${path} > $$tmpfile && echo "Decrypted to $$tmpfile" && trap "shred -u $$tmpfile" EXIT && ${EDITOR:-vi} $$tmpfile
+
+secrets/rotate:
+	@if [ -z "${name}" ]; then echo "usage: make secrets/rotate name=FOO_KEY"; exit 1; fi
+	@echo "Generating blue/green value for ${name}" && echo "${name}_v2=$$(openssl rand -hex 24)" > /tmp/${name}.rotation
+	@echo "Remember to flip consumers to _v2 and clean up _v1 post-cutover"
+
+secrets/lint:
+	@echo "Running SOPS validation"
+	@find secrets/envs -name '*.enc.yaml' -print0 | xargs -0 -I{} sops --verify {}
+	@echo "Running leak scan"
+	@.ci/scripts/secrets/leak_scan.sh
+	@echo "Running OPA checks"
+	@conftest test --policy .ci/policies --namespace secrets --all-namespaces
