@@ -29,6 +29,7 @@ type FrameHandle = number | undefined;
 const DEFAULT_BATCH_SIZE = 80;
 const DEFAULT_FRAME_BUDGET = 18;
 const LOD_THRESHOLD = 320;
+const MAX_VISIBLE_NODES_COMPACT = 1100;
 const MAX_BATCH_SIZE = 320;
 const MAX_VISIBLE_EDGES_COMPACT = 3200;
 const FRAME_OVERRUN_MULTIPLIER = 2.5;
@@ -68,7 +69,12 @@ export function ProgressiveGraph({
   );
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const lodModeRef = useRef<'detailed' | 'compact'>(lodMode);
   const frameRef = useRef<FrameHandle>();
+
+  useEffect(() => {
+    lodModeRef.current = lodMode;
+  }, [lodMode]);
 
   useEffect(() => {
     setSelectedId((current) =>
@@ -80,8 +86,10 @@ export function ProgressiveGraph({
   }, [nodes]);
 
   useEffect(() => {
+    const initialLod = nodes.length > LOD_THRESHOLD ? 'compact' : 'detailed';
     setRenderedCount(Math.min(initialBatchSize, nodes.length));
-    setLodMode(nodes.length > LOD_THRESHOLD ? 'compact' : 'detailed');
+    setLodMode(initialLod);
+    lodModeRef.current = initialLod;
 
     let cancelled = false;
     let currentCount = Math.min(initialBatchSize, nodes.length);
@@ -111,7 +119,17 @@ export function ProgressiveGraph({
           elapsed > frameBudgetMs * FRAME_OVERRUN_MULTIPLIER);
 
       if (shouldCompact) {
+        lodModeRef.current = 'compact';
         setLodMode('compact');
+      }
+
+      const hittingCompactCeiling =
+        lodModeRef.current === 'compact' &&
+        currentCount >= Math.min(nodes.length, MAX_VISIBLE_NODES_COMPACT) &&
+        nodes.length > MAX_VISIBLE_NODES_COMPACT;
+
+      if (hittingCompactCeiling) {
+        currentCount = nodes.length;
       }
 
       setRenderedCount(currentCount);
@@ -131,8 +149,26 @@ export function ProgressiveGraph({
   }, [nodes, initialBatchSize, frameBudgetMs, onRenderComplete]);
 
   const visibleNodes = useMemo(() => {
-    return nodes.slice(0, renderedCount);
-  }, [nodes, renderedCount]);
+    const progressiveNodes = nodes.slice(0, renderedCount);
+
+    if (
+      lodMode === 'compact' &&
+      progressiveNodes.length > MAX_VISIBLE_NODES_COMPACT
+    ) {
+      const stride = Math.ceil(
+        progressiveNodes.length / MAX_VISIBLE_NODES_COMPACT,
+      );
+      return progressiveNodes
+        .filter((_, index) => index % stride === 0)
+        .slice(0, MAX_VISIBLE_NODES_COMPACT);
+    }
+
+    return progressiveNodes;
+  }, [nodes, renderedCount, lodMode]);
+
+  const elidedCount = useMemo(() => {
+    return Math.max(nodes.length - visibleNodes.length, 0);
+  }, [nodes.length, visibleNodes.length]);
 
   const nodeById = useMemo(() => {
     const lookup = new Map<string, GraphNode>();
@@ -180,6 +216,9 @@ export function ProgressiveGraph({
       role="region"
       aria-label="Progressive graph"
       aria-busy={renderedCount < nodes.length}
+      data-visible-count={visibleNodes.length}
+      data-elided-count={elidedCount}
+      data-lod={lodMode}
       style={{ position: 'relative', width: '100%', height: '100%' }}
     >
       <svg
