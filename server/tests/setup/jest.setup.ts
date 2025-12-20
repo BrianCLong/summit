@@ -1,9 +1,12 @@
+// @ts-nocheck
 /**
  * Jest Global Setup Configuration
  * Provides common test utilities and matchers
  */
 
+// @ts-nocheck
 import 'jest-extended';
+
 // Mock ioredis globally - using a simple mock implementation since module resolution fails
 jest.mock('ioredis', () => {
   const EventEmitter = require('events');

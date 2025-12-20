@@ -1,0 +1,84 @@
+type AlertRule {
+  id: ID!
+  name: String!
+  metric: String!
+  threshold: Float!
+  operator: String!
+  durationSeconds: Int!
+  severity: String!
+  notificationChannelId: ID!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type AlertHistory {
+  id: ID!
+  rule: AlertRule!
+  triggeredAt: String!
+  value: Float!
+  acknowledged: Boolean!
+  resolvedAt: String
+}
+
+type NotificationChannel {
+  id: ID!
+  name: String!
+  type: String!
+  config: String! # JSON string
+  createdAt: String!
+  updatedAt: String!
+}
+
+input CreateAlertRuleInput {
+  name: String!
+  metric: String!
+  threshold: Float!
+  operator: String!
+  durationSeconds: Int!
+  severity: String!
+  notificationChannelId: ID!
+}
+
+input UpdateAlertRuleInput {
+  id: ID!
+  name: String
+  metric: String
+  threshold: Float
+  operator: String
+  durationSeconds: Int
+  severity: String
+  notificationChannelId: ID
+}
+
+input CreateNotificationChannelInput {
+  name: String!
+  type: String!
+  config: String! # JSON string
+}
+
+input UpdateNotificationChannelInput {
+  id: ID!
+  name: String
+  type: String
+  config: String # JSON string
+}
+
+type Query {
+  alertRules: [AlertRule!]!
+  alertRule(id: ID!): AlertRule
+  alertHistory(ruleId: ID, limit: Int, offset: Int): [AlertHistory!]!
+  notificationChannels: [NotificationChannel!]!
+  notificationChannel(id: ID!): NotificationChannel
+}
+
+type Mutation {
+  createAlertRule(input: CreateAlertRuleInput!): AlertRule!
+  updateAlertRule(input: UpdateAlertRuleInput!): AlertRule!
+  deleteAlertRule(id: ID!): Boolean!
+
+  createNotificationChannel(input: CreateNotificationChannelInput!): NotificationChannel!
+  updateNotificationChannel(input: UpdateNotificationChannelInput!): NotificationChannel!
+  deleteNotificationChannel(id: ID!): Boolean!
+
+  acknowledgeAlert(historyId: ID!): AlertHistory!
+}

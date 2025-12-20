@@ -89,18 +89,43 @@ const entityResolvers = {
           query += ') WHERE n.tenantId = $tenantId';
 
           if (q) {
-            // Optimization: Prefer index usage if possible.
-            // `CONTAINS` is slow without a fulltext index.
-            // If fulltext index exists, use: CALL db.index.fulltext.queryNodes("entity_idx", $q) ...
-            // Falling back to existing logic but adding comments for optimization
+            // Optimized search using Fulltext Index if available, falling back to CONTAINS
+            // Note: 'entity_fulltext_idx' must be created via migration
+            try {
+              // We construct a separate query for fulltext search to get IDs, then MATCH
+              // This is often more performant than complex WHERE clauses if the index is large
+              const fulltextQuery = `
+                CALL db.index.fulltext.queryNodes("entity_fulltext_idx", $q) YIELD node, score
+                WHERE node.tenantId = $tenantId
+                ${type ? `AND $type IN labels(node)` : ''}
+                RETURN node SKIP $offset LIMIT $limit
+              `;
 
-            // Note: Efficient `CONTAINS` requires specific index setup or fulltext search.
-            query +=
-              ' AND (ANY(prop IN keys(n) WHERE toString(n[prop]) CONTAINS $q))';
-            params.q = q;
+              // Try to execute fulltext search
+              const result = await session.run(fulltextQuery, { ...params, q, type, offset: neo4j.int(offset), limit: neo4j.int(limit) });
+               return result.records.map((record) => {
+                const entity = record.get('node');
+                return {
+                  id: entity.properties.id,
+                  type: entity.labels[0],
+                  props: entity.properties,
+                  createdAt: entity.properties.createdAt,
+                  updatedAt: entity.properties.updatedAt,
+                };
+              });
+
+            } catch (err) {
+               // Fallback if index doesn't exist or other error
+               logger.warn({ err }, 'Fulltext search failed, falling back to legacy CONTAINS search');
+
+               // Revert to building the legacy query
+               query += ' AND (ANY(prop IN keys(n) WHERE toString(n[prop]) CONTAINS $q))';
+               params.q = q;
+               query += ' RETURN n SKIP $offset LIMIT $limit';
+            }
+          } else {
+             query += ' RETURN n SKIP $offset LIMIT $limit';
           }
-
-          query += ' RETURN n SKIP $offset LIMIT $limit';
           params.limit = neo4j.int(limit);
           params.offset = neo4j.int(offset);
 
@@ -185,13 +210,11 @@ const entityResolvers = {
             paramIndex++;
           }
           if (props) {
-            // This is a simplified example. Real JSONB querying would be more complex.
-            // Assuming props is a flat object and we're checking for existence of keys/values.
-            for (const key in props) {
-              pgQuery += ` AND e.props->>'${key}' = $${paramIndex}`;
-              pgQueryParams.push(props[key]);
-              paramIndex++;
-            }
+            // Optimized: Use JSONB containment operator (@>) which uses GIN index
+            // props input is expected to be a JSON object subset
+            pgQuery += ` AND e.props @> $${paramIndex}`;
+            pgQueryParams.push(JSON.stringify(props));
+            paramIndex++;
           }
         }
 
