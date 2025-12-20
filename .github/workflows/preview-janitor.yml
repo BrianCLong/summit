@@ -1,15 +1,59 @@
 name: Preview Janitor
+
 on:
   schedule:
-    - cron: '0 3 * * *'
+    - cron: '*/15 * * * *'
   workflow_dispatch: {}
+
 jobs:
   janitor:
     runs-on: ubuntu-latest
     steps:
-      - uses: azure/setup-kubectl@v4
-      - run: |
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: v1.29.0
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.0
+
+      - name: Configure kubeconfig
+        run: |
           mkdir -p ~/.kube && echo "${KUBECONFIG_DATA}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
         env:
           KUBECONFIG_DATA: ${{ secrets.KUBECONFIG_DEV_B64 }}
-      - run: bash scripts/preview-janitor.sh 7
+
+      - name: Sweep stale previews
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          NOW=$(date -u +%s)
+          kubectl get ns -l env=preview -o json | jq -r '.items[] | [.metadata.name, (.metadata.labels.pr // ""), (.metadata.annotations.created_at // ""), (.metadata.labels.ttl_hours // "24"), (.metadata.labels.owner // "")] | @tsv' > namespaces.tsv
+          touch report.md
+          while IFS=$'\t' read -r NS PR CREATED TTL OWNER; do
+            [ -z "$NS" ] && continue
+            CREATED_TS=$(date -d "$CREATED" +%s 2>/dev/null || echo 0)
+            EXPIRY=$((CREATED_TS + TTL*3600))
+            if [ $NOW -lt $EXPIRY ]; then
+              continue
+            fi
+            echo "- ${NS} (PR ${PR}) exceeded TTL ${TTL}h; tearing down" >> report.md
+            kubectl cordon node --all || true
+            kubectl scale deploy --all --replicas=0 -n ${NS} || true
+            helm uninstall intelgraph-pr-${PR} --namespace ${NS} --ignore-not-found || true
+            kubectl delete namespace ${NS} --ignore-not-found --timeout=120s || true
+            if [ -n "$PR" ]; then
+              gh pr comment ${PR} --body "⏱️ Preview ${NS} exceeded TTL (${TTL}h) and was removed by janitor." || true
+            fi
+          done < namespaces.tsv
+          if [ -s report.md ]; then
+            echo "## TTL cleanup" && cat report.md
+          else
+            echo "No stale previews found"
+          fi

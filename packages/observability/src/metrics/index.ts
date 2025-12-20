@@ -25,7 +25,7 @@ import type { ServiceConfig, ServiceArchetype } from '../types/index.js';
 export const registry = new Registry();
 
 /** Standard histogram buckets for different operation types */
-export const HISTOGRAM_BUCKETS: Record<string, number[]> = {
+export const HISTOGRAM_BUCKETS = {
   /** HTTP request latencies (milliseconds as seconds) */
   http: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10],
   /** Database query latencies */
@@ -38,9 +38,7 @@ export const HISTOGRAM_BUCKETS: Record<string, number[]> = {
   external: [0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10, 30],
   /** ML inference */
   ml: [0.1, 0.25, 0.5, 1, 2.5, 5, 10, 30, 60],
-  /** Ingestion pipeline */
-  ingestion: [0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10, 30, 60],
-};
+} as const;
 
 // =============================================================================
 // STANDARD METRICS (Required for ALL services)
@@ -207,62 +205,12 @@ export const mlModelLoadTime = new Gauge({
 });
 
 /**
- * LLM Metrics - Required for services invoking LLMs
- */
-export const llmInvocationsTotal = new Counter({
-  name: 'llm_invocations_total',
-  help: 'Total number of LLM invocations',
-  labelNames: ['service', 'model', 'provider', 'status'],
-  registers: [registry],
-});
-
-export const llmInvocationDuration = new Histogram({
-  name: 'llm_invocation_duration_seconds',
-  help: 'LLM invocation duration in seconds',
-  labelNames: ['service', 'model', 'provider'],
-  buckets: HISTOGRAM_BUCKETS.ml,
-  registers: [registry],
-});
-
-export const llmTokensTotal = new Counter({
-  name: 'llm_tokens_total',
-  help: 'Total LLM tokens by type',
-  labelNames: ['service', 'model', 'provider', 'token_type'],
-  registers: [registry],
-});
-
-/**
  * Business Metrics - Custom per service
  */
 export const businessEventsTotal = new Counter({
   name: 'business_events_total',
   help: 'Total business events by type',
   labelNames: ['service', 'event_type', 'status'],
-  registers: [registry],
-});
-
-/**
- * Ingestion Metrics - Required for ingestion/data pipeline services
- */
-export const ingestionRecordsProcessed = new Counter({
-  name: 'ingestion_records_processed_total',
-  help: 'Records processed per pipeline stage',
-  labelNames: ['service', 'pipeline', 'stage', 'status'],
-  registers: [registry],
-});
-
-export const ingestionBatchDuration = new Histogram({
-  name: 'ingestion_batch_duration_seconds',
-  help: 'Ingestion batch duration in seconds',
-  labelNames: ['service', 'pipeline', 'stage'],
-  buckets: HISTOGRAM_BUCKETS.ingestion,
-  registers: [registry],
-});
-
-export const ingestionThroughputRate = new Gauge({
-  name: 'ingestion_throughput_records_per_second',
-  help: 'Observed throughput per ingestion batch',
-  labelNames: ['service', 'pipeline', 'stage'],
   registers: [registry],
 });
 
@@ -449,48 +397,6 @@ export function recordGraphQLOperation(
 }
 
 /**
- * Record an LLM invocation
- */
-export function recordLlmInvocation(
-  model: string,
-  provider: string,
-  status: 'success' | 'error',
-  durationSeconds: number,
-  tokensGenerated: number | undefined,
-  service: string,
-): void {
-  llmInvocationsTotal.labels({ service, model, provider, status }).inc();
-  llmInvocationDuration.labels({ service, model, provider }).observe(durationSeconds);
-
-  if (tokensGenerated && tokensGenerated > 0) {
-    llmTokensTotal
-      .labels({ service, model, provider, token_type: 'output' })
-      .inc(tokensGenerated);
-  }
-}
-
-/**
- * Record ingestion throughput for a pipeline stage
- */
-export function recordIngestionThroughput(
-  pipeline: string,
-  stage: string,
-  processed: number,
-  durationSeconds: number,
-  status: 'success' | 'error',
-  service: string,
-): void {
-  ingestionRecordsProcessed.labels({ service, pipeline, stage, status }).inc(processed);
-  ingestionBatchDuration.labels({ service, pipeline, stage }).observe(durationSeconds);
-
-  if (durationSeconds > 0) {
-    ingestionThroughputRate
-      .labels({ service, pipeline, stage })
-      .set(processed / durationSeconds);
-  }
-}
-
-/**
  * Get metrics in Prometheus format
  */
 export async function getMetrics(): Promise<string> {
@@ -527,8 +433,6 @@ export function getRequiredMetrics(archetype: ServiceArchetype): string[] {
         'graphql_errors_total',
         'db_queries_total',
         'db_query_duration_seconds',
-        'llm_invocations_total',
-        'llm_invocation_duration_seconds',
       ];
 
     case 'gateway-service':
@@ -559,9 +463,6 @@ export function getRequiredMetrics(archetype: ServiceArchetype): string[] {
         'db_queries_total',
         'db_query_duration_seconds',
         'business_events_total',
-        'ingestion_records_processed_total',
-        'ingestion_batch_duration_seconds',
-        'ingestion_throughput_records_per_second',
       ];
 
     case 'storage-service':
@@ -581,9 +482,6 @@ export function getRequiredMetrics(archetype: ServiceArchetype): string[] {
         'ml_inference_total',
         'ml_inference_duration_seconds',
         'ml_model_load_time_seconds',
-        'llm_invocations_total',
-        'llm_invocation_duration_seconds',
-        'llm_tokens_total',
       ];
 
     default:

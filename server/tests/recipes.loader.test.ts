@@ -20,7 +20,7 @@ describe('Recipe Loader', () => {
     it('should return list of YAML files from recipes directory', async () => {
       mockFs.readdirSync.mockReturnValue([
         'recipe1.yaml',
-        'recipe2.yml', 
+        'recipe2.yml',
         'not-a-recipe.txt',
         'config.json',
         'recipe3.yaml'
@@ -94,7 +94,6 @@ steps:
       };
 
       // Mock the dynamic import
-      const originalImport = await import;
       global.import = jest.fn().mockResolvedValue({ default: mockYAML.default });
 
       const recipe = await loadRecipe('test-recipe.yaml');
@@ -187,10 +186,10 @@ steps:
     it('should work end-to-end for listing and loading recipes', async () => {
       // Setup list operation
       mockFs.readdirSync.mockReturnValue(['recipe1.yaml', 'recipe2.yml'] as any);
-      
+
       // Setup load operation
       mockFs.readFileSync.mockReturnValue('name: Recipe 1\ndescription: First recipe');
-      
+
       const mockYAML = {
         default: {
           parse: jest.fn().mockReturnValue({
@@ -199,7 +198,7 @@ steps:
           })
         }
       };
-      
+
       global.import = jest.fn().mockResolvedValue(mockYAML);
 
       // List recipes

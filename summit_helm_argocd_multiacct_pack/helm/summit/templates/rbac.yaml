@@ -1,0 +1,50 @@
+{{- $namespace := default .Release.Namespace .Values.namespace.name }}
+{{- if and .Values.rbac.create .Values.rbac.ops.create }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "summit.name" . }}-ops
+  namespace: {{ $namespace }}
+rules:
+  {{- toYaml .Values.rbac.ops.rules | nindent 2 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "summit.name" . }}-ops-binding
+  namespace: {{ $namespace }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "summit.rbacServiceAccountName" (dict "name" .Values.rbac.ops.serviceAccountName "suffix" "ops" "root" .) }}
+    namespace: {{ $namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "summit.name" . }}-ops
+---
+{{- end }}
+
+{{- if and .Values.rbac.create .Values.rbac.ci.create }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "summit.name" . }}-ci
+  namespace: {{ $namespace }}
+rules:
+  {{- toYaml .Values.rbac.ci.rules | nindent 2 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "summit.name" . }}-ci-binding
+  namespace: {{ $namespace }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "summit.rbacServiceAccountName" (dict "name" .Values.rbac.ci.serviceAccountName "suffix" "ci" "root" .) }}
+    namespace: {{ $namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "summit.name" . }}-ci
+---
+{{- end }}
