@@ -1,7 +1,29 @@
-services:
-  web:
-    objective: 99.9
-    window: 30d
+slos:
+  - name: "Application Latency"
+    service: "intelgraph-api"
+    objective: 99.0
+    window: "30d"
     indicator:
-      errors: sum(rate(http_requests_total{code=~"5..",job="web"}[5m]))
-      total: sum(rate(http_requests_total{job="web"}[5m]))
+      type: "histogram_percentile"
+      metric: "http_request_duration_seconds"
+      percentile: 0.95
+      threshold: 1.0
+
+  - name: "GraphQL Availability"
+    service: "intelgraph-api"
+    objective: 99.9
+    window: "30d"
+    indicator:
+      type: "error_rate"
+      numerator: "sum(rate(graphql_errors_total[5m]))"
+      denominator: "sum(rate(graphql_requests_total[5m]))"
+      threshold: 0.01
+
+  - name: "Business Availability"
+    service: "intelgraph-business"
+    objective: 99.5
+    window: "30d"
+    indicator:
+      type: "synthetic"
+      check: "business_flow"
+      success_rate: 0.995

@@ -86,10 +86,12 @@ Generated: **${now} (UTC)**
 
 `;
             const totalUsers = Object.keys(byUser).length;
-            const sum = Object.values(byUser).reduce((a,b)=>{
-              chat:a.chat+b.chat,
-              accepted:a.accepted+(b.suggestionsAccepted||0),
-              shown:a.shown+(b.suggestionsShown||0)
+            const sum = Object.values(byUser).reduce((a,b)=> {
+              return {
+                chat: a.chat + b.chat,
+                accepted: a.accepted + (b.suggestionsAccepted || 0),
+                shown: a.shown + (b.suggestionsShown || 0)
+              };
             }, {chat:0,accepted:0,shown:0});
             const acceptRate = sum.shown ? (sum.accepted/sum.shown*100).toFixed(1) : 'n/a';
 

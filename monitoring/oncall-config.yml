@@ -1,0 +1,522 @@
+# On-Call Rotation and Incident Management Configuration
+# Supports PagerDuty and Opsgenie integrations
+
+# ====================
+# PAGERDUTY Configuration
+# ====================
+pagerduty:
+  enabled: true
+  api_key: ${PAGERDUTY_API_KEY}
+  integration_key: ${PAGERDUTY_INTEGRATION_KEY}
+
+  # Service Configuration
+  services:
+    - name: IntelGraph API
+      service_id: ${PAGERDUTY_SERVICE_ID_API}
+      escalation_policy: platform-team-escalation
+      urgency: high
+      auto_resolve_timeout: 14400  # 4 hours
+      acknowledgement_timeout: 1800  # 30 minutes
+
+    - name: IntelGraph Database
+      service_id: ${PAGERDUTY_SERVICE_ID_DB}
+      escalation_policy: platform-team-escalation
+      urgency: high
+      auto_resolve_timeout: 14400
+
+    - name: IntelGraph Workers
+      service_id: ${PAGERDUTY_SERVICE_ID_WORKERS}
+      escalation_policy: platform-team-escalation
+      urgency: high
+
+  # Escalation Policies
+  escalation_policies:
+    - name: platform-team-escalation
+      id: ${PAGERDUTY_ESCALATION_POLICY_ID}
+      num_loops: 3
+      levels:
+        - level: 1
+          escalation_delay_minutes: 0
+          targets:
+            - type: schedule
+              id: ${PAGERDUTY_SCHEDULE_PRIMARY}
+              name: Primary On-Call
+
+        - level: 2
+          escalation_delay_minutes: 15
+          targets:
+            - type: schedule
+              id: ${PAGERDUTY_SCHEDULE_SECONDARY}
+              name: Secondary On-Call
+
+        - level: 3
+          escalation_delay_minutes: 30
+          targets:
+            - type: user
+              id: ${PAGERDUTY_USER_ENGINEERING_MANAGER}
+              name: Engineering Manager
+
+        - level: 4
+          escalation_delay_minutes: 60
+          targets:
+            - type: user
+              id: ${PAGERDUTY_USER_VP_ENG}
+              name: VP Engineering
+
+  # Schedules
+  schedules:
+    - name: Primary On-Call
+      id: ${PAGERDUTY_SCHEDULE_PRIMARY}
+      time_zone: America/New_York
+      description: Primary on-call rotation for platform team
+
+      # Weekly rotation starting Monday 9 AM
+      layers:
+        - name: Weekly Rotation
+          start: "2024-01-01T09:00:00-05:00"
+          rotation_virtual_start: "2024-01-01T09:00:00-05:00"
+          rotation_type: weekly
+          rotation_turn_length: 1  # 1 week per person
+
+          # Rotation order
+          users:
+            - user_id: ${PAGERDUTY_USER_1}
+              name: Engineer 1
+            - user_id: ${PAGERDUTY_USER_2}
+              name: Engineer 2
+            - user_id: ${PAGERDUTY_USER_3}
+              name: Engineer 3
+            - user_id: ${PAGERDUTY_USER_4}
+              name: Engineer 4
+
+          # Restrictions (only during business hours for non-critical)
+          restrictions:
+            - type: daily_restriction
+              duration_seconds: 28800  # 8 hours
+              start_time_of_day: "09:00:00"
+              start_day_of_week: 1  # Monday
+
+    - name: Secondary On-Call
+      id: ${PAGERDUTY_SCHEDULE_SECONDARY}
+      time_zone: America/New_York
+      description: Secondary/backup on-call rotation
+
+      layers:
+        - name: Weekly Rotation
+          start: "2024-01-01T09:00:00-05:00"
+          rotation_type: weekly
+          rotation_turn_length: 1
+
+          users:
+            - user_id: ${PAGERDUTY_USER_5}
+              name: Senior Engineer 1
+            - user_id: ${PAGERDUTY_USER_6}
+              name: Senior Engineer 2
+
+  # Notification Rules
+  notification_rules:
+    critical:
+      urgency: high
+      methods:
+        - type: phone_call
+          delay_minutes: 0
+        - type: sms
+          delay_minutes: 0
+        - type: push_notification
+          delay_minutes: 0
+        - type: email
+          delay_minutes: 0
+
+    warning:
+      urgency: low
+      methods:
+        - type: push_notification
+          delay_minutes: 0
+        - type: email
+          delay_minutes: 5
+
+  # Incident Settings
+  incident_settings:
+    # Automatically create incidents for critical alerts
+    auto_create_incidents: true
+
+    # Automatically resolve incidents when alert clears
+    auto_resolve: true
+
+    # Time to acknowledge before escalation
+    acknowledgement_timeout: 900  # 15 minutes
+
+    # Incident priority mapping
+    priority_mapping:
+      P0: severity=critical
+      P1: severity=error
+      P2: severity=warning
+      P3: severity=info
+
+  # Webhooks
+  webhooks:
+    - name: incident.triggered
+      endpoint: https://api.intelgraph.com/webhooks/pagerduty/triggered
+      events:
+        - incident.triggered
+        - incident.acknowledged
+        - incident.resolved
+
+# ====================
+# OPSGENIE Configuration
+# ====================
+opsgenie:
+  enabled: true
+  api_key: ${OPSGENIE_API_KEY}
+  api_url: https://api.opsgenie.com/v2
+
+  # Teams
+  teams:
+    - name: Platform Team
+      id: ${OPSGENIE_TEAM_PLATFORM}
+      description: Platform engineering team
+
+    - name: Data Team
+      id: ${OPSGENIE_TEAM_DATA}
+      description: Data engineering team
+
+  # Schedules
+  schedules:
+    - name: Platform Primary On-Call
+      id: ${OPSGENIE_SCHEDULE_PRIMARY}
+      timezone: America/New_York
+      enabled: true
+
+      # Rotation
+      rotations:
+        - name: Weekly Rotation
+          type: weekly
+          length: 1
+          startDate: "2024-01-01T09:00:00Z"
+
+          participants:
+            - type: user
+              username: engineer1@intelgraph.com
+            - type: user
+              username: engineer2@intelgraph.com
+            - type: user
+              username: engineer3@intelgraph.com
+            - type: user
+              username: engineer4@intelgraph.com
+
+    - name: Platform Secondary On-Call
+      id: ${OPSGENIE_SCHEDULE_SECONDARY}
+      timezone: America/New_York
+      enabled: true
+
+      rotations:
+        - name: Bi-Weekly Rotation
+          type: weekly
+          length: 2
+          startDate: "2024-01-01T09:00:00Z"
+
+          participants:
+            - type: user
+              username: senior1@intelgraph.com
+            - type: user
+              username: senior2@intelgraph.com
+
+  # Escalation Policies
+  escalations:
+    - name: Platform Critical Escalation
+      id: ${OPSGENIE_ESCALATION_CRITICAL}
+      rules:
+        - condition: if-not-acked
+          delay: 0  # Immediately
+          notify:
+            - type: schedule
+              name: Platform Primary On-Call
+
+        - condition: if-not-acked
+          delay: 15  # 15 minutes
+          notify:
+            - type: schedule
+              name: Platform Secondary On-Call
+
+        - condition: if-not-acked
+          delay: 30  # 30 minutes
+          notify:
+            - type: user
+              username: engineering-manager@intelgraph.com
+
+        - condition: if-not-acked
+          delay: 60  # 60 minutes
+          notify:
+            - type: user
+              username: vp-engineering@intelgraph.com
+
+  # Alert Policies
+  alert_policies:
+    - name: Critical Alerts
+      enabled: true
+      filter:
+        conditions:
+          - field: priority
+            operation: equals
+            expectedValue: P0
+
+      actions:
+        - type: create_alert
+          priority: P1
+          tags:
+            - critical
+            - auto-escalated
+
+        - type: add_note
+          note: "Critical alert detected - immediate attention required"
+
+        - type: escalate
+          escalation: Platform Critical Escalation
+
+    - name: Business Hours Suppression
+      enabled: true
+      filter:
+        conditions:
+          - field: priority
+            operation: equals
+            expectedValue: P3
+
+      timeRestrictions:
+        type: time-of-day
+        restrictions:
+          - startDay: monday
+            startHour: 18
+            startMin: 0
+            endDay: tuesday
+            endHour: 9
+            endMin: 0
+
+      actions:
+        - type: suppress
+          duration: 12h
+
+  # Notification Settings
+  notifications:
+    # Critical alerts
+    critical:
+      channels:
+        - type: voice
+          delay: 0
+        - type: sms
+          delay: 0
+        - type: push
+          delay: 0
+        - type: email
+          delay: 0
+
+      # Repeat notifications if not acknowledged
+      repeat:
+        enabled: true
+        interval: 5  # Every 5 minutes
+        count: 3  # Up to 3 times
+
+    # Warning alerts
+    warning:
+      channels:
+        - type: push
+          delay: 0
+        - type: email
+          delay: 5
+
+  # Integrations
+  integrations:
+    - name: Prometheus
+      type: prometheus
+      enabled: true
+      api_key: ${OPSGENIE_INTEGRATION_PROMETHEUS}
+
+    - name: Datadog
+      type: datadog
+      enabled: true
+      api_key: ${OPSGENIE_INTEGRATION_DATADOG}
+
+    - name: Slack
+      type: slack
+      enabled: true
+      webhook_url: ${SLACK_WEBHOOK_URL}
+      channel: "#alerts-critical"
+
+# ====================
+# Alertmanager Integration
+# ====================
+alertmanager_integration:
+  # Route critical alerts to PagerDuty
+  routes:
+    - match:
+        severity: critical
+      receiver: pagerduty-critical
+      group_wait: 0s
+      group_interval: 5m
+      repeat_interval: 5m
+
+    - match:
+        severity: warning
+      receiver: opsgenie-warning
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 30m
+
+  receivers:
+    - name: pagerduty-critical
+      pagerduty_configs:
+        - service_key: ${PAGERDUTY_INTEGRATION_KEY}
+          severity: critical
+          description: |
+            {{ range .Alerts }}
+            *Alert:* {{ .Labels.alertname }}
+            *Summary:* {{ .Annotations.summary }}
+            *Description:* {{ .Annotations.description }}
+            {{ end }}
+          details:
+            severity: "{{ .CommonLabels.severity }}"
+            instance: "{{ .CommonLabels.instance }}"
+            service: "{{ .CommonLabels.service }}"
+            runbook: "{{ .CommonAnnotations.runbook }}"
+
+    - name: opsgenie-warning
+      opsgenie_configs:
+        - api_key: ${OPSGENIE_API_KEY}
+          priority: P2
+          message: |
+            {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}
+          description: |
+            {{ range .Alerts }}{{ .Annotations.description }}{{ end }}
+          tags: "monitoring,warning,{{ .CommonLabels.service }}"
+
+# ====================
+# On-Call Best Practices
+# ====================
+oncall_guidelines:
+  # Handoff Procedure
+  handoff:
+    - Review open incidents
+    - Check monitoring dashboards
+    - Review recent changes/deployments
+    - Verify escalation paths
+    - Test alerting (send test page)
+    - Update on-call doc with any notes
+
+  # Response Time SLAs
+  response_sla:
+    P0: 5 minutes   # Critical - immediate response
+    P1: 15 minutes  # High - quick response
+    P2: 1 hour      # Medium - respond during business hours
+    P3: 1 day       # Low - next business day
+
+  # Escalation Criteria
+  escalation_when:
+    - Unable to resolve within SLA
+    - Requires specialized knowledge
+    - Multiple systems affected
+    - Data loss or breach suspected
+    - Need management decision
+
+  # Incident Commander Rotation
+  incident_commander:
+    - Primary on-call is default IC
+    - IC can delegate but remains accountable
+    - IC responsibilities:
+      - Create incident channel
+      - Coordinate response
+      - Communicate status
+      - Conduct post-mortem
+
+# ====================
+# Slack Integration
+# ====================
+slack_integration:
+  enabled: true
+  workspace: intelgraph.slack.com
+  bot_token: ${SLACK_BOT_TOKEN}
+
+  # Alert Channels
+  channels:
+    critical: "#alerts-critical"
+    warning: "#alerts-warning"
+    info: "#monitoring"
+    incidents: "#incident-response"
+
+  # Alert Formatting
+  message_format:
+    critical: |
+      🚨 *CRITICAL ALERT*
+
+      *Alert:* {{ .Labels.alertname }}
+      *Severity:* {{ .Labels.severity }}
+      *Service:* {{ .Labels.service }}
+
+      *Summary:* {{ .Annotations.summary }}
+      *Description:* {{ .Annotations.description }}
+
+      *Runbook:* {{ .Annotations.runbook }}
+      *Dashboard:* https://grafana.intelgraph.com
+
+      <!channel>
+
+    warning: |
+      ⚠️ *WARNING ALERT*
+
+      *Alert:* {{ .Labels.alertname }}
+      *Service:* {{ .Labels.service }}
+
+      *Summary:* {{ .Annotations.summary }}
+
+      *Dashboard:* https://grafana.intelgraph.com
+
+  # Commands
+  slash_commands:
+    - command: /oncall
+      description: Show current on-call engineer
+      url: https://api.intelgraph.com/slack/oncall
+
+    - command: /incident
+      description: Create incident channel
+      url: https://api.intelgraph.com/slack/incident
+
+    - command: /page
+      description: Page on-call engineer
+      url: https://api.intelgraph.com/slack/page
+
+# ====================
+# Status Page Integration
+# ====================
+status_page:
+  enabled: true
+  provider: statuspage.io
+  page_id: ${STATUSPAGE_PAGE_ID}
+  api_key: ${STATUSPAGE_API_KEY}
+
+  # Component Mapping
+  components:
+    - name: API
+      id: ${STATUSPAGE_COMPONENT_API}
+      alert_mapping:
+        - ServiceDown
+        - HighErrorRateCritical
+
+    - name: Web Application
+      id: ${STATUSPAGE_COMPONENT_WEB}
+      alert_mapping:
+        - WebAppDown
+        - HighResponseTimeP95
+
+    - name: Database
+      id: ${STATUSPAGE_COMPONENT_DB}
+      alert_mapping:
+        - PostgreSQLDown
+        - Neo4jDown
+
+  # Auto-update status based on alerts
+  auto_update: true
+
+  # Status mapping
+  status_mapping:
+    operational: "All systems operational"
+    degraded_performance: "Service experiencing degraded performance"
+    partial_outage: "Service experiencing partial outage"
+    major_outage: "Service experiencing major outage"

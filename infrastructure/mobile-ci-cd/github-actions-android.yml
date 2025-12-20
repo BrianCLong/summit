@@ -1,0 +1,191 @@
+# .github/workflows/mobile-android.yml
+name: Android Build and Deploy
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'apps/mobile-native/**'
+      - '.github/workflows/mobile-android.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/mobile-native/**'
+  release:
+    types: [published]
+
+jobs:
+  lint-and-test:
+    name: Lint and Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run linter
+        run: pnpm --filter @intelgraph/mobile-native lint
+
+      - name: Run type check
+        run: pnpm --filter @intelgraph/mobile-native typecheck
+
+      - name: Run tests
+        run: pnpm --filter @intelgraph/mobile-native test
+
+  build:
+    name: Build Android App
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+    if: github.event_name != 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+
+      - name: Cache Gradle
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Decode Keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          echo $ANDROID_KEYSTORE_BASE64 | base64 --decode > android/app/release.keystore
+
+      - name: Build AAB
+        env:
+          MYAPP_UPLOAD_STORE_FILE: release.keystore
+          MYAPP_UPLOAD_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          MYAPP_UPLOAD_STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          MYAPP_UPLOAD_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          cd apps/mobile-native/android
+          ./gradlew bundleRelease
+
+      - name: Upload AAB
+        uses: actions/upload-artifact@v3
+        with:
+          name: android-app
+          path: apps/mobile-native/android/app/build/outputs/bundle/release/app-release.aab
+
+      - name: Build APK
+        env:
+          MYAPP_UPLOAD_STORE_FILE: release.keystore
+          MYAPP_UPLOAD_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          MYAPP_UPLOAD_STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          MYAPP_UPLOAD_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          cd apps/mobile-native/android
+          ./gradlew assembleRelease
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: android-apk
+          path: apps/mobile-native/android/app/build/outputs/apk/release/app-release.apk
+
+  deploy-internal:
+    name: Deploy to Internal Testing
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download AAB
+        uses: actions/download-artifact@v3
+        with:
+          name: android-app
+          path: build/
+
+      - name: Setup Google Play Service Account
+        env:
+          PLAY_STORE_CREDENTIALS: ${{ secrets.PLAY_STORE_CREDENTIALS }}
+        run: |
+          echo $PLAY_STORE_CREDENTIALS | base64 --decode > service-account.json
+
+      - name: Upload to Internal Testing
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJson: service-account.json
+          packageName: com.intelgraph.mobile
+          releaseFiles: build/app-release.aab
+          track: internal
+          status: completed
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'release'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download AAB
+        uses: actions/download-artifact@v3
+        with:
+          name: android-app
+          path: build/
+
+      - name: Setup Google Play Service Account
+        env:
+          PLAY_STORE_CREDENTIALS: ${{ secrets.PLAY_STORE_CREDENTIALS }}
+        run: |
+          echo $PLAY_STORE_CREDENTIALS | base64 --decode > service-account.json
+
+      - name: Upload to Production
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJson: service-account.json
+          packageName: com.intelgraph.mobile
+          releaseFiles: build/app-release.aab
+          track: production
+          status: completed
+          inAppUpdatePriority: 2
+          userFraction: 0.1
+          whatsNewDirectory: whatsnew/
+
+      - name: Notify Sentry
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: intelgraph
+          SENTRY_PROJECT: mobile-android
+        run: |
+          curl -sL https://sentry.io/get-cli/ | bash
+          sentry-cli releases new ${{ github.ref_name }}
+          sentry-cli releases set-commits ${{ github.ref_name }} --auto
+          sentry-cli releases finalize ${{ github.ref_name }}

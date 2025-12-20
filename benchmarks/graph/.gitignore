@@ -1,0 +1,19 @@
+# Benchmark reports (large, frequently changing)
+reports/*.json
+reports/*.html
+reports/*.md
+
+# Keep baseline for regression detection
+!reports/baseline.json
+
+# Node modules
+node_modules/
+package-lock.json
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db

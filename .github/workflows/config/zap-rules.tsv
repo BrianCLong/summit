@@ -1,0 +1,117 @@
+# ZAP Scanning Rule Configuration
+# Format: ID	THRESHOLD	[INSTANCE_ID]
+#
+# Threshold values: OFF, DEFAULT, LOW, MEDIUM, HIGH
+#
+# OWASP Top 10 2021 Coverage
+
+# A01:2021 – Broken Access Control
+10006	WARN	# Bypassing of security filter/constraint
+10008	WARN	# User enumeration
+
+# A02:2021 – Cryptographic Failures
+10015	WARN	# Incomplete or no cache-control HTTP header set
+10016	WARN	# Web browser XSS protection not enabled
+10017	WARN	# Cross-domain JavaScript source file inclusion
+10019	WARN	# Content-Type header missing
+10020	WARN	# X-Frame-Options header missing/misconfigured
+10021	WARN	# X-Content-Type-Options header missing
+10023	WARN	# Information disclosure - debug error messages
+10024	WARN	# Information disclosure - sensitive information in URL
+10025	WARN	# Information disclosure - sensitive information in HTTP referrer header
+10026	WARN	# HTTP Parameter Override
+10027	WARN	# Information disclosure - suspicious comments
+10028	WARN	# Open redirect
+10029	WARN	# Cookie poisoning
+10030	WARN	# User controllable charset
+10031	WARN	# User controllable HTML element attribute (potential XSS)
+
+# A03:2021 – Injection
+40012	WARN	# Cross-site scripting (reflected)
+40014	WARN	# Cross-site scripting (persistent)
+40016	WARN	# Cross-site scripting (DOM-based)
+40018	WARN	# SQL injection
+40019	WARN	# SQL injection - MySQL
+40020	WARN	# SQL injection - Hypersonic SQL
+40021	WARN	# SQL injection - Oracle
+40022	WARN	# SQL injection - PostgreSQL
+40023	WARN	# Possible username enumeration
+40024	WARN	# SQL injection - SQLite
+40025	WARN	# Remote OS command injection
+40027	WARN	# SQL injection - MsSQL
+40028	WARN	# CRLF injection
+40029	WARN	# XPath injection
+
+# A04:2021 – Insecure Design
+90011	WARN	# Charset mismatch
+90022	WARN	# Application error disclosure
+
+# A05:2021 – Security Misconfiguration
+10035	WARN	# Strict-Transport-Security header missing
+10036	WARN	# HTTP server response header
+10037	WARN	# Server leaks information via "X-Powered-By" HTTP response header
+10038	WARN	# Content Security Policy (CSP) header missing
+10039	WARN	# X-Backend-Server header information leak
+10040	WARN	# Secure pages include mixed content
+10041	WARN	# HTTP to HTTPS insecure transition in form post
+10042	WARN	# HTTPS to HTTP insecure transition in form post
+10043	WARN	# User controllable JavaScript event (XSS)
+10044	WARN	# Big redirect detected (potential DoS)
+10045	WARN	# Source code disclosure - /WEB-INF folder
+10047	WARN	# HTTPS content available via HTTP
+10048	WARN	# Remote code execution - shell shock
+10049	WARN	# Content cacheability
+10050	WARN	# Retrieved from cache
+10051	WARN	# Relative path confusion
+10052	WARN	# X-ChromeLogger-Data header information leak
+10053	WARN	# Apache Range Header DoS (CVE-2011-3192)
+10054	WARN	# Cookie without SameSite attribute
+10055	WARN	# CSP Scanner
+10056	WARN	# X-Debug-Token information leak
+10057	WARN	# Username hash found
+10061	WARN	# X-AspNet-Version response header
+10062	WARN	# PII disclosure
+10063	WARN	# Permissions Policy header missing
+10095	WARN	# Backup file disclosure
+10096	WARN	# Timestamp disclosure
+10097	WARN	# Hash disclosure
+10098	WARN	# Cross-domain misconfiguration
+10099	WARN	# Source code disclosure
+10102	WARN	# Insufficient site isolation against Spectre
+
+# A06:2021 – Vulnerable and Outdated Components
+10109	WARN	# Vulnerable JavaScript library
+10110	WARN	# Dangerous JS library
+90033	WARN	# Loosely scoped cookie
+
+# A07:2021 – Identification and Authentication Failures
+10010	WARN	# Cookie no HttpOnly flag
+10011	WARN	# Cookie without Secure flag
+10017	WARN	# Cross-domain JavaScript source file inclusion
+10032	WARN	# Viewstate scanner
+10058	WARN	# GET for POST
+10059	WARN	# X-Content-Type-Options header missing
+10060	WARN	# User agent fuzzer
+10070	WARN	# CORS header
+10094	WARN	# Base64 disclosure
+10104	WARN	# User agent fuzzer
+10105	WARN	# Weak authentication method
+
+# A08:2021 – Software and Data Integrity Failures
+90004	WARN	# Insufficient site isolation
+
+# A09:2021 – Security Logging and Monitoring Failures
+# (Detected through penetration testing, not automated scanning)
+
+# A10:2021 – Server-Side Request Forgery (SSRF)
+90026	WARN	# SSRF
+
+# False Positive Suppressions (adjust as needed)
+# 10015	OFF	# If cache-control is intentionally not set for certain endpoints
+
+# Additional Security Checks
+0	WARN	# Directory browsing
+2	WARN	# Private IP disclosure
+3	WARN	# Session ID in URL rewrite
+50000	WARN	# Script active scan rules
+50001	WARN	# Script passive scan rules

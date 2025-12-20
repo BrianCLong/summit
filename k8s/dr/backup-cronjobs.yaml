@@ -1,0 +1,568 @@
+# Automated Backup CronJobs for Summit/IntelGraph Platform
+#
+# Implements scheduled backups with automatic verification and alerting
+#
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: intelgraph-backup
+  labels:
+    app.kubernetes.io/component: backup
+    app.kubernetes.io/part-of: intelgraph
+---
+# ConfigMap for backup scripts
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backup-scripts
+  namespace: intelgraph-backup
+data:
+  backup.sh: |
+    #!/bin/bash
+    set -euo pipefail
+
+    TIMESTAMP=$(date -u +"%Y-%m-%dT%H-%M-%SZ")
+    BACKUP_TYPE="${BACKUP_TYPE:-full}"
+    COMPONENT="${COMPONENT:-all}"
+
+    echo "Starting $BACKUP_TYPE backup for $COMPONENT at $TIMESTAMP"
+
+    # Run the backup script
+    /scripts/backup_prod.sh --type "$BACKUP_TYPE" --component "$COMPONENT" --verify
+
+    exit_code=$?
+
+    if [ $exit_code -eq 0 ]; then
+        echo "Backup completed successfully"
+        # Push success metric
+        curl -X POST "${PROMETHEUS_PUSHGATEWAY}/metrics/job/backup-cronjob" \
+          --data-binary "backup_cronjob_success{component=\"$COMPONENT\",type=\"$BACKUP_TYPE\"} 1"
+    else
+        echo "Backup failed with exit code $exit_code"
+        curl -X POST "${PROMETHEUS_PUSHGATEWAY}/metrics/job/backup-cronjob" \
+          --data-binary "backup_cronjob_success{component=\"$COMPONENT\",type=\"$BACKUP_TYPE\"} 0"
+    fi
+
+    exit $exit_code
+
+  verify.sh: |
+    #!/bin/bash
+    set -euo pipefail
+
+    echo "Starting backup verification..."
+
+    # Run verification script
+    /scripts/backup-verification.sh --type "${VERIFICATION_TYPE:-full}" --max-age 24
+
+    exit_code=$?
+
+    if [ $exit_code -eq 0 ]; then
+        echo "Verification completed successfully"
+        curl -X POST "${PROMETHEUS_PUSHGATEWAY}/metrics/job/backup-verify" \
+          --data-binary "backup_verification_success 1"
+    else
+        echo "Verification failed"
+        curl -X POST "${PROMETHEUS_PUSHGATEWAY}/metrics/job/backup-verify" \
+          --data-binary "backup_verification_success 0"
+    fi
+
+    exit $exit_code
+
+  restore-test.sh: |
+    #!/bin/bash
+    set -euo pipefail
+
+    echo "Starting restore test..."
+    TIMESTAMP=$(date -u +"%Y-%m-%dT%H-%M-%SZ")
+
+    # Create isolated test namespace
+    TEST_NS="restore-test-$(date +%s)"
+    kubectl create namespace "$TEST_NS"
+
+    # Deploy test database
+    kubectl apply -f /manifests/test-postgres.yaml -n "$TEST_NS"
+    kubectl wait --for=condition=ready pod -l app=test-postgres -n "$TEST_NS" --timeout=300s
+
+    # Download latest backup
+    aws s3 cp "s3://${BACKUP_BUCKET}/postgresql/full/latest/" /tmp/backup/ --recursive
+
+    # Decrypt and restore
+    /scripts/decrypt.sh /tmp/backup/*.enc /tmp/restore.dump
+
+    kubectl exec -n "$TEST_NS" test-postgres-0 -- \
+      pg_restore -U postgres -d testdb /tmp/restore.dump
+
+    # Verify data integrity
+    RECORD_COUNT=$(kubectl exec -n "$TEST_NS" test-postgres-0 -- \
+      psql -U postgres -d testdb -t -c "SELECT COUNT(*) FROM entities;" | tr -d ' ')
+
+    if [ "$RECORD_COUNT" -gt 0 ]; then
+        echo "Restore test PASSED: $RECORD_COUNT records restored"
+        RESULT=1
+    else
+        echo "Restore test FAILED: No records found"
+        RESULT=0
+    fi
+
+    # Cleanup
+    kubectl delete namespace "$TEST_NS" --wait=false
+    rm -rf /tmp/backup /tmp/restore.dump
+
+    # Push metrics
+    curl -X POST "${PROMETHEUS_PUSHGATEWAY}/metrics/job/backup-restore-test" \
+      --data-binary "backup_restore_test_success $RESULT"
+
+    [ $RESULT -eq 1 ] && exit 0 || exit 1
+---
+# Daily Full Backup - All Components
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: daily-full-backup
+  namespace: intelgraph-backup
+  labels:
+    app: backup
+    backup-type: full
+    schedule: daily
+spec:
+  schedule: "0 2 * * *"  # Daily at 02:00 UTC
+  timeZone: "UTC"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 7
+  failedJobsHistoryLimit: 3
+  startingDeadlineSeconds: 3600
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 7200  # 2 hour timeout
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app: backup
+            backup-type: full
+        spec:
+          serviceAccountName: backup-sa
+          restartPolicy: OnFailure
+          containers:
+            - name: backup
+              image: intelgraph/backup-tools:latest
+              imagePullPolicy: Always
+              command: ["/bin/bash", "/scripts/backup.sh"]
+              env:
+                - name: BACKUP_TYPE
+                  value: "full"
+                - name: COMPONENT
+                  value: "all"
+                - name: ENVIRONMENT
+                  value: "production"
+                - name: BACKUP_BUCKET
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: backup-bucket
+                - name: KMS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-credentials
+                      key: kms-key-id
+                - name: PG_HOST
+                  value: "postgresql-primary.intelgraph-db.svc"
+                - name: PG_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgresql-credentials
+                      key: password
+                - name: PROMETHEUS_PUSHGATEWAY
+                  value: "http://prometheus-pushgateway.monitoring:9091"
+                - name: SLACK_WEBHOOK_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-notifications
+                      key: slack-webhook
+              resources:
+                requests:
+                  cpu: "500m"
+                  memory: "1Gi"
+                limits:
+                  cpu: "2000m"
+                  memory: "4Gi"
+              volumeMounts:
+                - name: scripts
+                  mountPath: /scripts
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: scripts
+              configMap:
+                name: backup-scripts
+                defaultMode: 0755
+            - name: tmp
+              emptyDir:
+                sizeLimit: 50Gi
+---
+# Hourly Incremental Backup - PostgreSQL
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hourly-postgres-incremental
+  namespace: intelgraph-backup
+  labels:
+    app: backup
+    backup-type: incremental
+    schedule: hourly
+    component: postgresql
+spec:
+  schedule: "0 */4 * * *"  # Every 4 hours
+  timeZone: "UTC"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 6
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 1800  # 30 minute timeout
+      backoffLimit: 1
+      template:
+        spec:
+          serviceAccountName: backup-sa
+          restartPolicy: OnFailure
+          containers:
+            - name: backup
+              image: intelgraph/backup-tools:latest
+              command: ["/bin/bash", "/scripts/backup.sh"]
+              env:
+                - name: BACKUP_TYPE
+                  value: "incremental"
+                - name: COMPONENT
+                  value: "postgresql"
+                - name: ENVIRONMENT
+                  value: "production"
+                - name: BACKUP_BUCKET
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: backup-bucket
+                - name: PG_HOST
+                  value: "postgresql-primary.intelgraph-db.svc"
+                - name: PG_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgresql-credentials
+                      key: password
+                - name: PROMETHEUS_PUSHGATEWAY
+                  value: "http://prometheus-pushgateway.monitoring:9091"
+              resources:
+                requests:
+                  cpu: "250m"
+                  memory: "512Mi"
+                limits:
+                  cpu: "1000m"
+                  memory: "2Gi"
+              volumeMounts:
+                - name: scripts
+                  mountPath: /scripts
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: scripts
+              configMap:
+                name: backup-scripts
+                defaultMode: 0755
+            - name: tmp
+              emptyDir:
+                sizeLimit: 20Gi
+---
+# Daily Backup Verification
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: daily-backup-verification
+  namespace: intelgraph-backup
+  labels:
+    app: backup-verify
+    schedule: daily
+spec:
+  schedule: "0 6 * * *"  # Daily at 06:00 UTC (after backups complete)
+  timeZone: "UTC"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 7
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 3600
+      backoffLimit: 1
+      template:
+        spec:
+          serviceAccountName: backup-sa
+          restartPolicy: OnFailure
+          containers:
+            - name: verify
+              image: intelgraph/backup-tools:latest
+              command: ["/bin/bash", "/scripts/verify.sh"]
+              env:
+                - name: VERIFICATION_TYPE
+                  value: "full"
+                - name: NAMESPACE
+                  value: "intelgraph-db"
+                - name: PROMETHEUS_PUSHGATEWAY
+                  value: "http://prometheus-pushgateway.monitoring:9091"
+              resources:
+                requests:
+                  cpu: "250m"
+                  memory: "512Mi"
+                limits:
+                  cpu: "1000m"
+                  memory: "2Gi"
+              volumeMounts:
+                - name: scripts
+                  mountPath: /scripts
+          volumes:
+            - name: scripts
+              configMap:
+                name: backup-scripts
+                defaultMode: 0755
+---
+# Weekly Restore Test
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: weekly-restore-test
+  namespace: intelgraph-backup
+  labels:
+    app: restore-test
+    schedule: weekly
+spec:
+  schedule: "0 8 * * 0"  # Sunday at 08:00 UTC
+  timeZone: "UTC"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 4
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 7200
+      backoffLimit: 1
+      template:
+        spec:
+          serviceAccountName: backup-sa
+          restartPolicy: OnFailure
+          containers:
+            - name: restore-test
+              image: intelgraph/backup-tools:latest
+              command: ["/bin/bash", "/scripts/restore-test.sh"]
+              env:
+                - name: BACKUP_BUCKET
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: backup-bucket
+                - name: PROMETHEUS_PUSHGATEWAY
+                  value: "http://prometheus-pushgateway.monitoring:9091"
+              resources:
+                requests:
+                  cpu: "500m"
+                  memory: "1Gi"
+                limits:
+                  cpu: "2000m"
+                  memory: "4Gi"
+              volumeMounts:
+                - name: scripts
+                  mountPath: /scripts
+                - name: manifests
+                  mountPath: /manifests
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: scripts
+              configMap:
+                name: backup-scripts
+                defaultMode: 0755
+            - name: manifests
+              configMap:
+                name: restore-test-manifests
+            - name: tmp
+              emptyDir:
+                sizeLimit: 50Gi
+---
+# Hourly Redis Backup
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hourly-redis-backup
+  namespace: intelgraph-backup
+  labels:
+    app: backup
+    backup-type: rdb
+    schedule: hourly
+    component: redis
+spec:
+  schedule: "30 * * * *"  # Every hour at :30
+  timeZone: "UTC"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 24
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 600
+      backoffLimit: 1
+      template:
+        spec:
+          serviceAccountName: backup-sa
+          restartPolicy: OnFailure
+          containers:
+            - name: backup
+              image: intelgraph/backup-tools:latest
+              command: ["/bin/bash", "/scripts/backup.sh"]
+              env:
+                - name: BACKUP_TYPE
+                  value: "full"
+                - name: COMPONENT
+                  value: "redis"
+                - name: BACKUP_BUCKET
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: backup-bucket
+                - name: REDIS_HOST
+                  value: "redis-master.intelgraph-db.svc"
+                - name: PROMETHEUS_PUSHGATEWAY
+                  value: "http://prometheus-pushgateway.monitoring:9091"
+              resources:
+                requests:
+                  cpu: "100m"
+                  memory: "256Mi"
+                limits:
+                  cpu: "500m"
+                  memory: "1Gi"
+              volumeMounts:
+                - name: scripts
+                  mountPath: /scripts
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: scripts
+              configMap:
+                name: backup-scripts
+                defaultMode: 0755
+            - name: tmp
+              emptyDir:
+                sizeLimit: 5Gi
+---
+# ServiceAccount for backup jobs
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: backup-sa
+  namespace: intelgraph-backup
+---
+# RBAC for backup ServiceAccount
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: backup-role
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/exec", "pods/log", "namespaces"]
+    verbs: ["get", "list", "watch", "create", "delete"]
+  - apiGroups: [""]
+    resources: ["configmaps", "secrets"]
+    verbs: ["get", "list"]
+  - apiGroups: ["apps"]
+    resources: ["statefulsets", "deployments"]
+    verbs: ["get", "list"]
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: backup-role-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: backup-role
+subjects:
+  - kind: ServiceAccount
+    name: backup-sa
+    namespace: intelgraph-backup
+---
+# ConfigMap for backup configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backup-config
+  namespace: intelgraph-backup
+data:
+  backup-bucket: "intelgraph-backups-production"
+  retention-daily-days: "30"
+  retention-weekly-days: "90"
+  retention-monthly-days: "365"
+---
+# Prometheus monitoring rules for backups
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: backup-alerts
+  namespace: monitoring
+  labels:
+    prometheus: main
+spec:
+  groups:
+    - name: backup-alerts
+      rules:
+        - alert: BackupJobFailed
+          expr: |
+            kube_job_status_failed{namespace="intelgraph-backup"} > 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Backup job failed"
+            description: "Backup job {{ $labels.job_name }} has failed"
+
+        - alert: BackupNotRunRecently
+          expr: |
+            time() - backup_cronjob_last_success_timestamp{component="all"} > 90000
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Full backup has not run in 25 hours"
+            description: "The daily full backup has not completed successfully in over 25 hours"
+
+        - alert: BackupVerificationFailed
+          expr: backup_verification_success == 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Backup verification failed"
+            description: "The daily backup verification job has failed"
+
+        - alert: RestoreTestFailed
+          expr: backup_restore_test_success == 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Restore test failed"
+            description: "The weekly restore test has failed - DR capability may be compromised"
+
+        - alert: BackupSizeTooSmall
+          expr: |
+            backup_size_bytes{component="postgresql"} < 1000000
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Backup size suspiciously small"
+            description: "PostgreSQL backup is smaller than expected, possible incomplete backup"
+
+        - alert: BackupDurationTooLong
+          expr: |
+            backup_duration_seconds{component="postgresql"} > 3600
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Backup taking too long"
+            description: "PostgreSQL backup is taking longer than 1 hour"

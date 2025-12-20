@@ -1,0 +1,179 @@
+# Data Protection Impact Assessment
+# CISA Known Exploited Vulnerabilities Connector
+
+assessment:
+  connector_name: "cisa-kev"
+  version: "1.0.0"
+  assessment_date: "2025-11-20"
+  assessor: "Data Governance Team"
+  review_date: "2026-11-20"
+
+# === Data Categories ===
+data_categories:
+  - category: vulnerability_data
+    present: true
+    fields:
+      - cve_id
+      - vendor_project
+      - product
+      - vulnerability_name
+      - short_description
+      - required_action
+    classification: public
+    sensitivity: low
+
+  - category: personal_identifiable_information
+    present: false
+    fields: []
+    classification: n/a
+    sensitivity: n/a
+
+  - category: sensitive_personal_data
+    present: false
+    fields: []
+    classification: n/a
+    sensitivity: n/a
+
+  - category: telemetry
+    present: true
+    fields:
+      - ingestion_timestamp
+      - connector_version
+    classification: internal
+    sensitivity: low
+
+# === Lawful Basis ===
+lawful_basis:
+  primary: legitimate_interest
+  description: "Processing publicly available vulnerability data for security and threat intelligence purposes"
+  documentation: "CISA KEV catalog is public domain US Government data, freely available for security research and protection"
+  consent_required: false
+  data_subject_rights: n/a  # No personal data
+
+# === Purpose & Use ===
+purpose:
+  primary: "Ingest known exploited vulnerabilities for security monitoring and threat intelligence"
+  secondary:
+    - "Enable vulnerability risk assessment"
+    - "Support incident response prioritization"
+    - "Track ransomware-associated vulnerabilities"
+  data_minimization: "Only collect vulnerability metadata, no personal data"
+  retention_justification: "Retain for historical analysis and trend identification"
+
+# === Risk Analysis ===
+risk_analysis:
+  - risk: unauthorized_disclosure
+    likelihood: very_low
+    impact: low
+    rationale: "Data is already public domain"
+    mitigation: "Standard access controls"
+
+  - risk: data_manipulation
+    likelihood: low
+    impact: medium
+    rationale: "Modified vulnerability data could mislead security teams"
+    mitigation: "Data integrity checks, source verification, immutable audit logs"
+
+  - risk: availability_loss
+    likelihood: low
+    impact: medium
+    rationale: "Inability to ingest vulnerability data reduces threat awareness"
+    mitigation: "Caching, retry logic, fallback sources"
+
+  - risk: excessive_collection
+    likelihood: very_low
+    impact: very_low
+    rationale: "Only collecting public vulnerability metadata"
+    mitigation: "Minimal data collection per spec"
+
+# === Mitigations ===
+mitigations:
+  - "Data source is US Government public domain (no license restrictions)"
+  - "No PII collection or processing"
+  - "Data encrypted in transit (TLS 1.3)"
+  - "Data encrypted at rest (AES-256)"
+  - "Access restricted to authorized personnel via RBAC"
+  - "Audit logging enabled for all ingestion operations"
+  - "Data integrity validation via checksums"
+  - "Source verification (official CISA domain)"
+  - "Immutable audit trail"
+
+# === Security Controls ===
+security_controls:
+  encryption_in_transit: true
+  encryption_at_rest: true
+  access_control: rbac
+  audit_logging: true
+  data_validation: true
+  source_verification: true
+  anomaly_detection: true
+
+# === Retention & Deletion ===
+retention:
+  default_days: 365
+  justification: "Retain for historical vulnerability trend analysis"
+  legal_hold_supported: false  # No legal hold needed for public data
+  deletion_method: secure_wipe
+  backup_retention_days: 90
+  anonymization_required: false  # No personal data
+
+# === Cross-Border Transfers ===
+cross_border_transfers:
+  applicable: false
+  jurisdictions: []
+  legal_basis: n/a
+  safeguards: n/a
+
+# === Data Subject Rights ===
+data_subject_rights:
+  applicable: false  # No personal data
+  right_to_access: n/a
+  right_to_rectification: n/a
+  right_to_erasure: n/a
+  right_to_portability: n/a
+  right_to_object: n/a
+
+# === Third-Party Sharing ===
+third_party_sharing:
+  enabled: false
+  recipients: []
+  purpose: n/a
+  legal_basis: n/a
+
+# === Monitoring & Review ===
+monitoring:
+  periodic_review: quarterly
+  automated_checks: true
+  compliance_reporting: true
+  incident_response_plan: true
+
+# === Approvals ===
+approvals:
+  - role: dpo
+    name: "Data Protection Officer"
+    email: "dpo@intelgraph.io"
+    date: "2025-11-20"
+    approved: true
+    comments: "No PII, public domain data, low risk"
+
+  - role: security
+    name: "Security Team Lead"
+    email: "security@intelgraph.io"
+    date: "2025-11-20"
+    approved: true
+    comments: "Standard security controls sufficient"
+
+  - role: legal
+    name: "Legal Counsel"
+    email: "legal@intelgraph.io"
+    date: "2025-11-20"
+    approved: true
+    comments: "Public domain, no licensing concerns"
+
+# === Notes ===
+notes: |
+  CISA KEV catalog is US Government public domain data. No personal information
+  is collected. Primary risk is data integrity - ensuring vulnerability data
+  is not manipulated. Standard security controls are sufficient.
+
+  Review quarterly or when connector is significantly modified.

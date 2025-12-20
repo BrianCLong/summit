@@ -1,0 +1,37 @@
+{
+  "name": "baseline-policy",
+  "version": "2024-08-15",
+  "description": "Hardened snapshot catching RU canaries and bumping baseline latency.",
+  "default_decision": "allow",
+  "base_latency_ms": 3,
+  "rules": [
+    {
+      "id": "rule-ru-deny",
+      "description": "Block RU-originated submissions",
+      "match": {
+        "country": "RU"
+      },
+      "decision": "deny",
+      "latency_ms": 6
+    },
+    {
+      "id": "rule-payment-redact",
+      "description": "Redact payment content regardless of country",
+      "match": {
+        "content_type": "payment"
+      },
+      "decision": "redact",
+      "latency_ms": 5
+    },
+    {
+      "id": "rule-us-image-transform",
+      "description": "Transform US image uploads",
+      "match": {
+        "content_type": "image",
+        "country": "US"
+      },
+      "decision": "transform",
+      "latency_ms": 3
+    }
+  ]
+}

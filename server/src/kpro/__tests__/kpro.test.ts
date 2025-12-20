@@ -10,6 +10,7 @@ import {
 import { JsonlAuditLog } from '../audit/auditLog.js';
 import { InMemoryCacheInvalidator } from '../cache/cacheInvalidator.js';
 import type { VectorStoreAdapter } from '../adapters/vectorStoreAdapter.js';
+import { describe, it, test, expect } from '@jest/globals';
 import type {
   DocumentRecord,
   ForgetRequest,

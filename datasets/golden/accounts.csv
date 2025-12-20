@@ -1,0 +1,4 @@
+account_id,platform,status,created_at,last_auth_at,risk_score,pii_level,purpose_tags,owner_person_id,org_id,provenance_ref
+ACCT-9001,Okta,active,2024-07-11T12:00:00Z,2025-09-01T15:10:00Z,0.02,restricted,security-monitoring|operations,P-0001,ORG-100,s3csv/accounts/2025-09-01T15:30:00Z
+ACCT-9002,Github,active,2023-03-18T09:00:00Z,2025-09-01T16:00:00Z,0.05,internal,operations|analytics,P-0002,ORG-100,s3csv/accounts/2025-09-01T15:30:00Z
+ACCT-9003,Jira,disabled,2022-11-02T08:30:00Z,2025-08-15T10:00:00Z,0.20,restricted,security-monitoring|operations,P-0003,ORG-200,s3csv/accounts/2025-09-01T15:30:00Z

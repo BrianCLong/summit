@@ -1,0 +1,4 @@
+person_id,org_id,assigned_at,role,purpose_tags,provenance_ref
+P-0001,ORG-100,2022-05-01T08:00:00Z,SOC Analyst,operations|security-monitoring,s3csv/relationships/2025-09-01T15:30:00Z
+P-0002,ORG-100,2021-11-15T09:30:00Z,DevOps Lead,operations|analytics,s3csv/relationships/2025-09-01T15:30:00Z
+P-0003,ORG-200,2020-02-10T10:15:00Z,Regional Manager,operations|compliance,s3csv/relationships/2025-09-01T15:30:00Z

@@ -23,7 +23,7 @@ info:
 
     ## GraphQL Integration
     This API also exposes a GraphQL endpoint at `/graphql` for more flexible querying.
-  version: 2.1.0
+  version: 2.2.0
   contact:
     name: IntelGraph Support
     email: support@intelgraph.ai
@@ -441,6 +441,98 @@ paths:
               schema:
                 $ref: '#/components/schemas/Relationship'
 
+  /graphs/{graphId}/insights:
+    get:
+      tags: [Graph Analytics]
+      summary: Get AI insights for graph
+      description: Retrieve the latest AI-generated insights, risks, and coverage metrics for a graph
+      parameters:
+        - name: graphId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+          description: Maximum number of insights to return
+        - name: severity
+          in: query
+          schema:
+            type: string
+            enum: [low, medium, high, critical]
+          description: Filter insights by severity
+      responses:
+        '200':
+          description: Graph insights retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphInsightsResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /graphs/{graphId}/exports:
+    post:
+      tags: [Graph Analytics]
+      summary: Request graph export
+      description: Export graph data as a file with optional filters
+      parameters:
+        - name: graphId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GraphExportRequest'
+      responses:
+        '202':
+          description: Export job accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphExportJob'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /graphs/{graphId}/exports/{exportId}:
+    get:
+      tags: [Graph Analytics]
+      summary: Get graph export status
+      description: Retrieve the status and download link for a graph export job
+      parameters:
+        - name: graphId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: exportId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Export job status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphExportJob'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
   # AI Enhancement Endpoints
   /ai/analyze:
     post:
@@ -682,6 +774,18 @@ components:
         updatedAt:
           type: string
           format: date-time
+        status:
+          type: string
+          enum: [draft, active, archived]
+          default: active
+        insightCount:
+          type: integer
+          description: Number of active AI insights associated with the graph
+          example: 12
+        lastAnalyzedAt:
+          type: string
+          format: date-time
+          description: Timestamp of the most recent AI analysis
         owner:
           type: object
           properties:
@@ -722,6 +826,49 @@ components:
                 averageDegree:
                   type: number
                   format: float
+            governance:
+              $ref: '#/components/schemas/GraphGovernance'
+
+    GraphGovernance:
+      type: object
+      properties:
+        sensitivity:
+          type: string
+          enum: [public, internal, restricted, confidential]
+          default: internal
+        retentionPolicy:
+          type: object
+          properties:
+            retentionDays:
+              type: integer
+              minimum: 0
+              description: Number of days to retain graph data
+            legalHold:
+              type: boolean
+              default: false
+        pii:
+          type: boolean
+          description: Indicates whether the graph contains PII that requires masking
+        complianceTags:
+          type: array
+          items:
+            type: string
+          example: ['gdpr', 'cmmc']
+        dataQuality:
+          type: object
+          properties:
+            completeness:
+              type: number
+              format: float
+              minimum: 0
+              maximum: 1
+            freshness:
+              type: string
+              format: date-time
+              description: Timestamp of the most recent data refresh
+            lineageReference:
+              type: string
+              description: External lineage reference for auditing
 
     CreateGraphRequest:
       type: object
@@ -803,6 +950,12 @@ components:
         updatedAt:
           type: string
           format: date-time
+        labels:
+          type: array
+          items:
+            type: string
+          description: Domain-specific labels applied to the entity
+          example: ['VIP', 'watchlist']
 
     CreateEntityRequest:
       type: object
@@ -910,6 +1063,12 @@ components:
     AnalysisResult:
       type: object
       properties:
+        jobId:
+          type: string
+          format: uuid
+        summary:
+          type: string
+          example: 'Community detection identified 4 cohesive clusters with high internal density.'
         analysisType:
           type: string
           example: 'community_detection'
@@ -928,12 +1087,177 @@ components:
                 format: float
               description:
                 type: string
+        coverage:
+          $ref: '#/components/schemas/GraphCoverage'
+        qualityScore:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
         executionTime:
           type: number
           format: float
         createdAt:
           type: string
           format: date-time
+
+    GraphCoverage:
+      type: object
+      properties:
+        nodesAnalyzed:
+          type: integer
+          example: 1280
+        relationshipsAnalyzed:
+          type: integer
+          example: 3400
+        completeness:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          example: 0.91
+        freshness:
+          type: string
+          format: date-time
+          description: Timestamp representing freshness of the underlying graph data
+
+    GraphInsightEntityRef:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+        score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+
+    GraphInsight:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          example: 'Coordinated activity between high-risk accounts'
+        summary:
+          type: string
+          example: 'Detected a tightly connected cluster of high-risk accounts sharing devices and network infrastructure.'
+        severity:
+          type: string
+          enum: [low, medium, high, critical]
+        confidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+        tags:
+          type: array
+          items:
+            type: string
+          example: ['fraud', 'network', 'priority']
+        relatedEntities:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphInsightEntityRef'
+        remediation:
+          type: string
+          example: 'Quarantine devices and rerun enrichment checks on linked accounts.'
+        generatedAt:
+          type: string
+          format: date-time
+
+    GraphInsightsResponse:
+      type: object
+      properties:
+        graphId:
+          type: string
+          format: uuid
+        insights:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphInsight'
+        coverage:
+          $ref: '#/components/schemas/GraphCoverage'
+        generatedAt:
+          type: string
+          format: date-time
+
+    GraphExportFilters:
+      type: object
+      properties:
+        entityTypes:
+          type: array
+          items:
+            type: string
+        relationshipTypes:
+          type: array
+          items:
+            type: string
+        timeRange:
+          type: object
+          properties:
+            start:
+              type: string
+              format: date-time
+            end:
+              type: string
+              format: date-time
+
+    GraphExportRequest:
+      type: object
+      required: [format]
+      properties:
+        format:
+          type: string
+          enum: [csv, json, parquet]
+        includeProperties:
+          type: boolean
+          default: true
+        filters:
+          $ref: '#/components/schemas/GraphExportFilters'
+        notificationEmail:
+          type: string
+          format: email
+          description: Optional email to notify when the export is ready
+
+    GraphExportJob:
+      type: object
+      properties:
+        exportId:
+          type: string
+          format: uuid
+        graphId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [pending, running, completed, failed]
+        format:
+          type: string
+          enum: [csv, json, parquet]
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        downloadUrl:
+          type: string
+          format: uri
+        expiresAt:
+          type: string
+          format: date-time
+        recordCount:
+          type: integer
+        filters:
+          $ref: '#/components/schemas/GraphExportFilters'
+        message:
+          type: string
 
     JobStatus:
       type: object

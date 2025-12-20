@@ -1,0 +1,108 @@
+{
+  "subplans": [
+    {
+      "silo": "Eu",
+      "source_alias": "c",
+      "dataset": "customers",
+      "pushed_projections": [
+        "customer_id",
+        "loyalty_tier"
+      ],
+      "pushed_filters": []
+    },
+    {
+      "silo": "Us",
+      "source_alias": "o",
+      "dataset": "orders",
+      "pushed_projections": [
+        "amount",
+        "customer_id",
+        "order_id",
+        "region"
+      ],
+      "pushed_filters": [
+        {
+          "table": "o",
+          "column": "region",
+          "op": "Eq",
+          "value": {
+            "String": "US"
+          }
+        }
+      ]
+    }
+  ],
+  "coordinator": {
+    "join_strategy": {
+      "Broadcast": {
+        "build": "c"
+      }
+    },
+    "output_projections": [
+      {
+        "table": "o",
+        "column": "order_id",
+        "alias": "order_id"
+      },
+      {
+        "table": "o",
+        "column": "amount",
+        "alias": "order_amount"
+      },
+      {
+        "table": "c",
+        "column": "loyalty_tier",
+        "alias": "tier"
+      }
+    ]
+  },
+  "compliance": {
+    "events": [
+      {
+        "policy_id": "policy::residency::us",
+        "silo": "Us",
+        "message": "dataset orders pinned to silo us respecting residency"
+      },
+      {
+        "policy_id": "policy::egress::orders",
+        "silo": "Us",
+        "message": "column amount authorized for transfer"
+      },
+      {
+        "policy_id": "policy::egress::orders",
+        "silo": "Us",
+        "message": "column customer_id authorized for transfer"
+      },
+      {
+        "policy_id": "policy::egress::orders",
+        "silo": "Us",
+        "message": "column order_id authorized for transfer"
+      },
+      {
+        "policy_id": "policy::egress::orders",
+        "silo": "Us",
+        "message": "column region authorized for transfer"
+      },
+      {
+        "policy_id": "policy::residency::eu",
+        "silo": "Eu",
+        "message": "dataset customers pinned to silo eu respecting residency"
+      },
+      {
+        "policy_id": "policy::egress::customers",
+        "silo": "Eu",
+        "message": "column customer_id authorized for transfer"
+      },
+      {
+        "policy_id": "policy::egress::customers",
+        "silo": "Eu",
+        "message": "column loyalty_tier authorized for transfer"
+      },
+      {
+        "policy_id": "policy::join-strategy",
+        "silo": null,
+        "message": "join o(us) <> c(eu) planned as Broadcast { build: \"c\" }"
+      }
+    ]
+  }
+}
