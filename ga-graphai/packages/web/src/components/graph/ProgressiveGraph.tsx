@@ -20,6 +20,8 @@ export interface ProgressiveGraphProps {
   edges: GraphEdge[];
   initialBatchSize?: number;
   frameBudgetMs?: number;
+  streaming?: boolean;
+  streamingLabel?: string;
   onHoverNode?: (id: string | null) => void;
   onSelectNode?: (id: string) => void;
   onRenderComplete?: (elapsedMs: number) => void;
@@ -60,6 +62,8 @@ export function ProgressiveGraph({
   onHoverNode,
   onSelectNode,
   onRenderComplete,
+  streaming = false,
+  streamingLabel = 'Streaming results…',
 }: ProgressiveGraphProps): JSX.Element {
   const [renderedCount, setRenderedCount] = useState(() =>
     Math.min(initialBatchSize, nodes.length),
@@ -71,10 +75,16 @@ export function ProgressiveGraph({
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const lodModeRef = useRef<'detailed' | 'compact'>(lodMode);
   const frameRef = useRef<FrameHandle>();
+  const previousNodeCount = useRef(nodes.length);
+  const renderedCountRef = useRef(renderedCount);
 
   useEffect(() => {
     lodModeRef.current = lodMode;
   }, [lodMode]);
+
+  useEffect(() => {
+    renderedCountRef.current = renderedCount;
+  }, [renderedCount]);
 
   useEffect(() => {
     setSelectedId((current) =>
@@ -87,12 +97,16 @@ export function ProgressiveGraph({
 
   useEffect(() => {
     const initialLod = nodes.length > LOD_THRESHOLD ? 'compact' : 'detailed';
-    setRenderedCount(Math.min(initialBatchSize, nodes.length));
+    const growingStream = streaming && nodes.length >= previousNodeCount.current;
+    const startingCount = growingStream
+      ? Math.min(nodes.length, Math.max(renderedCountRef.current, previousNodeCount.current))
+      : Math.min(initialBatchSize, nodes.length);
+    setRenderedCount(startingCount);
     setLodMode(initialLod);
     lodModeRef.current = initialLod;
 
     let cancelled = false;
-    let currentCount = Math.min(initialBatchSize, nodes.length);
+    let currentCount = startingCount;
     let batchSize = Math.max(initialBatchSize, 1);
     const start = performance.now();
 
@@ -142,11 +156,12 @@ export function ProgressiveGraph({
     };
 
     frameRef.current = scheduleFrame(step);
+    previousNodeCount.current = nodes.length;
     return () => {
       cancelled = true;
       cancelFrame(frameRef.current);
     };
-  }, [nodes, initialBatchSize, frameBudgetMs, onRenderComplete]);
+  }, [nodes, streaming, initialBatchSize, frameBudgetMs, onRenderComplete]);
 
   const visibleNodes = useMemo(() => {
     const progressiveNodes = nodes.slice(0, renderedCount);
@@ -215,10 +230,11 @@ export function ProgressiveGraph({
     <div
       role="region"
       aria-label="Progressive graph"
-      aria-busy={renderedCount < nodes.length}
+      aria-busy={streaming || renderedCount < nodes.length}
       data-visible-count={visibleNodes.length}
       data-elided-count={elidedCount}
       data-lod={lodMode}
+      data-streaming={streaming || undefined}
       style={{ position: 'relative', width: '100%', height: '100%' }}
     >
       <svg
@@ -290,6 +306,24 @@ export function ProgressiveGraph({
             {nodeLabel(node, index)}
           </button>
         ))}
+        {streaming ? (
+          <div
+            data-streaming-indicator
+            style={{
+              position: 'absolute',
+              right: 12,
+              bottom: 12,
+              padding: '6px 10px',
+              background: '#0f172a',
+              color: '#e2e8f0',
+              borderRadius: 6,
+              fontSize: 12,
+              boxShadow: '0 4px 12px rgba(15, 23, 42, 0.2)',
+            }}
+          >
+            {streamingLabel}
+          </div>
+        ) : null}
       </div>
     </div>
   );
