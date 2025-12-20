@@ -406,12 +406,49 @@ const DisclosurePackagerPage: React.FC = () => {
                           Download
                         </Link>
                       )}
+                      <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+                        {runtimeBundle.downloadUrl && (
+                          <Button
+                            size="small"
+                            component={Link}
+                            href={runtimeBundle.downloadUrl}
+                            startIcon={<DownloadIcon />}
+                          >
+                            Tarball
+                          </Button>
+                        )}
+                        {runtimeBundle.manifestUrl && (
+                          <Button
+                            size="small"
+                            component={Link}
+                            href={runtimeBundle.manifestUrl}
+                            startIcon={<DownloadIcon />}
+                          >
+                            Manifest
+                          </Button>
+                        )}
+                        {runtimeBundle.checksumsUrl && (
+                          <Button
+                            size="small"
+                            component={Link}
+                            href={runtimeBundle.checksumsUrl}
+                            startIcon={<DownloadIcon />}
+                          >
+                            Checksums
+                          </Button>
+                        )}
+                      </Stack>
                       <Typography variant="body2" component="div">
                         Audit events: {runtimeBundle.counts.auditEvents} • Policy
                         decisions: {runtimeBundle.counts.policyDecisions} • SBOM
                         refs: {runtimeBundle.counts.sbomRefs} • Provenance refs:{' '}
                         {runtimeBundle.counts.provenanceRefs}
                       </Typography>
+                      {runtimeBundle.deployedVersion && (
+                        <Typography variant="body2" color="text.secondary">
+                          Deployed version: {runtimeBundle.deployedVersion}
+                        </Typography>
+                      )}
                     </Alert>
                   )}
                 </Stack>

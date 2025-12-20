@@ -140,14 +140,20 @@ router.post('/runtime-bundle', async (req, res) => {
       policyPaths: req.body?.policyPaths,
       sbomPaths: req.body?.sbomPaths,
       provenancePaths: req.body?.provenancePaths,
+      deployedVersion: req.body?.deployedVersion,
     });
 
-    const downloadUrl = `${req.protocol}://${req.get('host')}${req.baseUrl}/runtime-bundle/${bundle.id}/download`;
+    const base = `${req.protocol}://${req.get('host')}${req.baseUrl}/runtime-bundle/${bundle.id}`;
+    const downloadUrl = `${base}/download`;
+    const manifestUrl = `${base}/manifest`;
+    const checksumsUrl = `${base}/checksums`;
 
     return res.status(201).json({
       bundle: {
         ...bundle,
         downloadUrl,
+        manifestUrl,
+        checksumsUrl,
       },
     });
   } catch (error: any) {
@@ -184,6 +190,58 @@ router.get('/runtime-bundle/:bundleId/download', async (req, res) => {
   }
 
   return res.download(bundle.bundlePath, `runtime-evidence-${bundle.id}.tar.gz`);
+});
+
+router.get('/runtime-bundle/:bundleId/manifest', async (req, res) => {
+  const tenantHeader = resolveTenant(req);
+  if (!tenantHeader) {
+    return res.status(400).json({ error: 'tenant_required' });
+  }
+
+  const bundle = runtimeEvidenceService.getBundle(req.params.bundleId);
+  if (!bundle) {
+    return res.status(404).json({ error: 'not_found' });
+  }
+
+  if (bundle.tenantId !== tenantHeader) {
+    return res.status(403).json({ error: 'tenant_mismatch' });
+  }
+
+  const exists = await fs
+    .access(bundle.manifestPath)
+    .then(() => true)
+    .catch(() => false);
+  if (!exists) {
+    return res.status(410).json({ error: 'bundle_missing' });
+  }
+
+  return res.download(bundle.manifestPath, `runtime-evidence-${bundle.id}-manifest.json`);
+});
+
+router.get('/runtime-bundle/:bundleId/checksums', async (req, res) => {
+  const tenantHeader = resolveTenant(req);
+  if (!tenantHeader) {
+    return res.status(400).json({ error: 'tenant_required' });
+  }
+
+  const bundle = runtimeEvidenceService.getBundle(req.params.bundleId);
+  if (!bundle) {
+    return res.status(404).json({ error: 'not_found' });
+  }
+
+  if (bundle.tenantId !== tenantHeader) {
+    return res.status(403).json({ error: 'tenant_mismatch' });
+  }
+
+  const exists = await fs
+    .access(bundle.checksumsPath)
+    .then(() => true)
+    .catch(() => false);
+  if (!exists) {
+    return res.status(410).json({ error: 'bundle_missing' });
+  }
+
+  return res.download(bundle.checksumsPath, `runtime-evidence-${bundle.id}-checksums.txt`);
 });
 
 export default router;
