@@ -28,6 +28,7 @@
   "dependencies": {
     "@apollo/server": "^5.0.0",
     "@as-integrations/express4": "^1.1.2",
+    "@aws-sdk/client-glue": "^3.956.0",
     "@bull-board/api": "^6.12.0",
     "@bull-board/express": "^5.11.2",
     "@graphql-tools/schema": "^10.0.25",
@@ -75,6 +76,7 @@
     "joi": "^17.13.3",
     "json2csv": "^5.0.7",
     "jsonwebtoken": "^9.0.2",
+    "kafkajs": "^2.2.4",
     "lodash": "^4.17.21",
     "morgan": "^1.10.0",
     "natural": "^6.12.0",
