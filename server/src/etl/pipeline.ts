@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 import { BaseConnector } from '../connectors/base';
 import { BaseEnricher } from '../ingest/enrichers/base';

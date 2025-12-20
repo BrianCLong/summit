@@ -10,8 +10,8 @@
 
 import { spawn } from 'child_process';
 import { createHash } from 'crypto';
-import { existsSync, readFileSync, writeFileSync } from 'fs';
-import { join } from 'path';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { dirname, join } from 'path';
 
 // ============================================================================
 // Types & Interfaces
@@ -23,6 +23,8 @@ export interface CosignVerificationResult {
   digest: string;
   signatures: SignatureInfo[];
   attestations: AttestationInfo[];
+  rekorEntries: RekorEntryInfo[];
+  usedManagedFallback?: boolean;
   timestamp: Date;
   verificationDuration: number;
   errors: VerificationError[];
@@ -34,7 +36,9 @@ export interface SignatureInfo {
   subject?: string;
   signedAt: Date;
   payload: Record<string, unknown>;
+  verificationMode: 'keyless' | 'key';
   certificateChain?: string[];
+  rekorEntry?: RekorEntryInfo;
 }
 
 export interface AttestationInfo {
@@ -52,6 +56,8 @@ export interface VerificationError {
 export interface VerificationPolicy {
   requireSignature: boolean;
   requireKeyless: boolean;
+  allowManagedFallback: boolean;
+  preferKeyless: boolean;
   trustedIssuers: string[];
   trustedSubjects: string[];
   trustedKeyRefs: string[];
@@ -72,6 +78,15 @@ export interface CosignConfig {
   tufRoot?: string;
   rekorUrl: string;
   fulcioUrl: string;
+  managedKeyRef?: string;
+  rekorUuidStorePath?: string;
+}
+
+export interface RekorEntryInfo {
+  uuid?: string;
+  logIndex?: number;
+  integratedTime?: number;
+  url?: string;
 }
 
 // ============================================================================
@@ -87,11 +102,14 @@ const DEFAULT_CONFIG: CosignConfig = {
   offline: false,
   rekorUrl: 'https://rekor.sigstore.dev',
   fulcioUrl: 'https://fulcio.sigstore.dev',
+  rekorUuidStorePath: '/var/cache/cosign/rekor-entries.json',
 };
 
 const DEFAULT_POLICY: VerificationPolicy = {
   requireSignature: true,
-  requireKeyless: false,
+  requireKeyless: true,
+  allowManagedFallback: true,
+  preferKeyless: true,
   trustedIssuers: [
     'https://accounts.google.com',
     'https://token.actions.githubusercontent.com',
@@ -118,8 +136,22 @@ export class CosignVerifier {
     config: Partial<CosignConfig> = {},
     policy: Partial<VerificationPolicy> = {}
   ) {
-    this.config = { ...DEFAULT_CONFIG, ...config };
-    this.policy = { ...DEFAULT_POLICY, ...policy };
+    this.config = {
+      ...DEFAULT_CONFIG,
+      ...config,
+      rekorUuidStorePath:
+        config.rekorUuidStorePath ||
+        join(config.cacheDir ?? DEFAULT_CONFIG.cacheDir, 'rekor-entries.json'),
+    };
+    this.policy = {
+      ...DEFAULT_POLICY,
+      ...policy,
+      trustedKeyRefs: [
+        ...DEFAULT_POLICY.trustedKeyRefs,
+        ...(policy.trustedKeyRefs || []),
+        ...(config.managedKeyRef ? [config.managedKeyRef] : []),
+      ],
+    };
     this.verificationCache = new Map();
 
     this.validateConfig();
@@ -133,6 +165,8 @@ export class CosignVerifier {
     const errors: VerificationError[] = [];
     const signatures: SignatureInfo[] = [];
     const attestations: AttestationInfo[] = [];
+    const rekorEntries: RekorEntryInfo[] = [];
+    let usedManagedFallback = false;
 
     // Check cache first
     const cacheKey = this.getCacheKey(imageRef);
@@ -158,6 +192,17 @@ export class CosignVerifier {
       const sigResult = await this.verifySignatures(imageRef, digest);
       signatures.push(...sigResult.signatures);
       errors.push(...sigResult.errors);
+      rekorEntries.push(...sigResult.rekorEntries);
+      usedManagedFallback = sigResult.usedManagedFallback;
+
+      if (sigResult.usedManagedFallback) {
+        errors.push({
+          code: 'KEYLESS_FALLBACK_USED',
+          message:
+            'Keyless verification was unavailable; used managed key fallback',
+          recoverable: true,
+        });
+      }
     }
 
     // Verify attestations
@@ -179,6 +224,10 @@ export class CosignVerifier {
       digest,
       signatures,
       attestations,
+      rekorEntries,
+      usedManagedFallback: this.policy.allowManagedFallback
+        ? usedManagedFallback
+        : false,
       timestamp: new Date(),
       verificationDuration: Date.now() - startTime,
       errors,
@@ -187,6 +236,9 @@ export class CosignVerifier {
     // Cache successful results
     if (verified) {
       this.verificationCache.set(cacheKey, result);
+      if (rekorEntries.length > 0) {
+        this.persistRekorEntries(imageRef, digest, rekorEntries);
+      }
     }
 
     return result;
@@ -197,10 +249,18 @@ export class CosignVerifier {
    */
   private async verifySignatures(
     imageRef: string,
-    digest: string
-  ): Promise<{ signatures: SignatureInfo[]; errors: VerificationError[] }> {
+    _digest: string
+  ): Promise<{
+    signatures: SignatureInfo[];
+    errors: VerificationError[];
+    rekorEntries: RekorEntryInfo[];
+    usedManagedFallback: boolean;
+  }> {
     const signatures: SignatureInfo[] = [];
     const errors: VerificationError[] = [];
+    const rekorEntries: RekorEntryInfo[] = [];
+    let keylessVerified = false;
+    let managedFallbackUsed = false;
 
     try {
       // Try keyless verification first
@@ -212,20 +272,33 @@ export class CosignVerifier {
           });
 
           if (result.success && result.signatures) {
+            keylessVerified = true;
             signatures.push(...result.signatures);
+            if (result.rekorEntries) {
+              rekorEntries.push(...result.rekorEntries);
+            }
           }
         }
       }
 
-      // Try key-based verification
-      for (const keyRef of this.policy.trustedKeyRefs) {
-        const result = await this.runCosignVerify(imageRef, {
-          keyless: false,
-          keyRef,
-        });
+      // Try key-based verification as managed fallback
+      if (
+        (!keylessVerified || this.policy.allowManagedFallback) &&
+        this.policy.trustedKeyRefs.length > 0
+      ) {
+        for (const keyRef of this.policy.trustedKeyRefs) {
+          const result = await this.runCosignVerify(imageRef, {
+            keyless: false,
+            keyRef,
+          });
 
-        if (result.success && result.signatures) {
-          signatures.push(...result.signatures);
+          if (result.success && result.signatures) {
+            managedFallbackUsed = true;
+            signatures.push(...result.signatures);
+            if (result.rekorEntries) {
+              rekorEntries.push(...result.rekorEntries);
+            }
+          }
         }
       }
 
@@ -233,6 +306,16 @@ export class CosignVerifier {
         errors.push({
           code: 'NO_VALID_SIGNATURES',
           message: `No valid signatures found for image: ${imageRef}`,
+          recoverable: false,
+        });
+      } else if (
+        this.policy.requireKeyless &&
+        !keylessVerified &&
+        !this.policy.allowManagedFallback
+      ) {
+        errors.push({
+          code: 'KEYLESS_REQUIRED',
+          message: 'Keyless verification required but no valid keyless signature found',
           recoverable: false,
         });
       }
@@ -244,7 +327,7 @@ export class CosignVerifier {
       });
     }
 
-    return { signatures, errors };
+    return { signatures, errors, rekorEntries, usedManagedFallback: managedFallbackUsed };
   }
 
   /**
@@ -301,7 +384,11 @@ export class CosignVerifier {
       keyRef?: string;
       issuer?: string;
     }
-  ): Promise<{ success: boolean; signatures?: SignatureInfo[] }> {
+  ): Promise<{
+    success: boolean;
+    signatures?: SignatureInfo[];
+    rekorEntries?: RekorEntryInfo[];
+  }> {
     const args = ['verify', '--output=json'];
 
     if (options.keyless) {
@@ -317,9 +404,7 @@ export class CosignVerifier {
       args.push('--offline');
     }
 
-    if (this.config.rekorUrl !== DEFAULT_CONFIG.rekorUrl) {
-      args.push(`--rekor-url=${this.config.rekorUrl}`);
-    }
+    args.push(`--rekor-url=${this.config.rekorUrl}`);
 
     args.push(imageRef);
 
@@ -348,10 +433,13 @@ export class CosignVerifier {
         if (code === 0) {
           try {
             const output = JSON.parse(stdout);
-            const signatures = this.parseSignatures(output);
-            resolve({ success: true, signatures });
+            const { signatures, rekorEntries } = this.parseSignatures(
+              output,
+              options.keyless ? 'keyless' : 'key'
+            );
+            resolve({ success: true, signatures, rekorEntries });
           } catch {
-            resolve({ success: true, signatures: [] });
+            resolve({ success: true, signatures: [], rekorEntries: [] });
           }
         } else {
           console.error(`Cosign verification failed: ${stderr}`);
@@ -469,24 +557,78 @@ export class CosignVerifier {
   /**
    * Parse signature information from cosign output
    */
-  private parseSignatures(output: unknown): SignatureInfo[] {
+  private parseSignatures(
+    output: unknown,
+    verificationMode: 'keyless' | 'key'
+  ): { signatures: SignatureInfo[]; rekorEntries: RekorEntryInfo[] } {
     const signatures: SignatureInfo[] = [];
+    const rekorEntries: RekorEntryInfo[] = [];
 
     if (Array.isArray(output)) {
       for (const entry of output) {
         if (entry.critical?.identity?.['docker-reference']) {
-          signatures.push({
+          const rekorEntry = this.parseRekorBundle(entry.optional?.Bundle || entry.bundle);
+          const signature: SignatureInfo = {
             keyId: entry.critical?.identity?.['docker-reference'] || 'unknown',
             issuer: entry.optional?.Issuer,
             subject: entry.optional?.Subject,
-            signedAt: new Date(entry.optional?.['Bundle']?.SignedEntryTimestamp || Date.now()),
+            signedAt: new Date(
+              entry.optional?.['Bundle']?.SignedEntryTimestamp || Date.now()
+            ),
             payload: entry,
-          });
+            verificationMode,
+            rekorEntry,
+          };
+
+          signatures.push(signature);
+
+          if (rekorEntry) {
+            rekorEntries.push(rekorEntry);
+          }
         }
       }
     }
 
-    return signatures;
+    return { signatures, rekorEntries };
+  }
+
+  private parseRekorBundle(bundle?: Record<string, unknown>): RekorEntryInfo | undefined {
+    if (!bundle) return undefined;
+    const payload = (bundle as Record<string, any>).Payload || (bundle as Record<string, any>).payload;
+    const entry: RekorEntryInfo = {};
+
+    if (payload?.logIndex || payload?.logIndex === 0) {
+      entry.logIndex = payload.logIndex;
+    }
+    if (payload?.integratedTime) {
+      entry.integratedTime = payload.integratedTime;
+    }
+
+    const logId = payload?.logID || payload?.uuid;
+    if (typeof logId === 'string') {
+      entry.uuid = logId;
+    } else if (logId?.uuid) {
+      entry.uuid = logId.uuid;
+    }
+
+    if (!entry.uuid && typeof payload?.body === 'string') {
+      try {
+        const decoded = JSON.parse(
+          Buffer.from(payload.body, 'base64').toString('utf-8')
+        );
+        entry.uuid = decoded?.logID?.uuid || decoded?.logID;
+        entry.logIndex = decoded?.logIndex ?? entry.logIndex;
+        entry.integratedTime = decoded?.integratedTime ?? entry.integratedTime;
+      } catch {
+        // Ignore decoding errors
+      }
+    }
+
+    if (entry.uuid) {
+      entry.url = `${this.config.rekorUrl}/api/v1/log/entries/${entry.uuid}`;
+    }
+
+    return Object.keys(entry).length > 0 ? entry : undefined;
   }
 
   /**
@@ -519,6 +661,8 @@ export class CosignVerifier {
       digest,
       signatures: [],
       attestations: [],
+      rekorEntries: [],
+      usedManagedFallback: false,
       timestamp: new Date(),
       verificationDuration: Date.now() - startTime,
       errors,
@@ -534,6 +678,19 @@ export class CosignVerifier {
         `Cosign binary not found at ${this.config.cosignBinaryPath}. ` +
           'Verification will fail until cosign is installed.'
       );
+    }
+
+    if (!existsSync(this.config.cacheDir)) {
+      mkdirSync(this.config.cacheDir, { recursive: true });
+    }
+
+    const rekorDir = dirname(
+      this.config.rekorUuidStorePath ||
+        join(this.config.cacheDir, 'rekor-entries.json')
+    );
+
+    if (!existsSync(rekorDir)) {
+      mkdirSync(rekorDir, { recursive: true });
     }
   }
 
@@ -552,6 +709,7 @@ export class CosignVerifier {
         verified: r.verified,
         signatures: r.signatures.length,
         attestations: r.attestations.length,
+        rekorEntries: r.rekorEntries.length,
         errors: r.errors,
       })),
     };
@@ -563,6 +721,41 @@ export class CosignVerifier {
     writeFileSync(reportPath, JSON.stringify(report, null, 2));
 
     return reportPath;
+  }
+
+  private persistRekorEntries(
+    imageRef: string,
+    digest: string,
+    entries: RekorEntryInfo[]
+  ): void {
+    if (!this.config.rekorUuidStorePath) {
+      return;
+    }
+
+    try {
+      mkdirSync(dirname(this.config.rekorUuidStorePath), { recursive: true });
+
+      const storePath = this.config.rekorUuidStorePath;
+      const record = {
+        imageRef,
+        digest,
+        entries,
+        timestamp: new Date().toISOString(),
+      };
+
+      const existing: Array<typeof record> = existsSync(storePath)
+        ? JSON.parse(readFileSync(storePath, 'utf-8'))
+        : [];
+
+      const deduped = existing.filter((e) => e.imageRef !== imageRef);
+      deduped.push(record);
+
+      writeFileSync(storePath, JSON.stringify(deduped, null, 2));
+    } catch (err) {
+      console.warn(
+        `Failed to persist Rekor UUIDs: ${err instanceof Error ? err.message : String(err)}`
+      );
+    }
   }
 }
 

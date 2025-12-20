@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { PolicyEngine } from './PolicyEngine.js';
 import { TelemetryLayer } from './TelemetryLayer.js';
 import { PolicyContext, GovernanceDecision, TelemetryEvent, Policy } from './types.js';

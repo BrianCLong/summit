@@ -106,8 +106,12 @@ func (e *Engine) handleS3(ctx context.Context, cfg config.Config, pol config.Pol
 	if e.ObjectStore == nil {
 		return TargetResult{}, fmt.Errorf("object store not configured")
 	}
-	identifier := fmt.Sprintf("s3://%s/%s", target.Config.Bucket, target.Config.Prefix)
-	expired, err := e.ObjectStore.ListExpired(ctx, target.Config.Bucket, target.Config.Prefix, target.Cutoff.Unix())
+	prefix, err := storage.EnforceTenantPrefix(target.Config.Prefix, target.Config.Tenant)
+	if err != nil {
+		return TargetResult{}, fmt.Errorf("tenant prefix enforcement failed: %w", err)
+	}
+	identifier := fmt.Sprintf("s3://%s/%s", target.Config.Bucket, prefix)
+	expired, err := e.ObjectStore.ListExpired(ctx, target.Config.Bucket, prefix, target.Cutoff.Unix())
 	if err != nil {
 		return TargetResult{}, fmt.Errorf("list expired objects: %w", err)
 	}
@@ -126,7 +130,7 @@ func (e *Engine) handleS3(ctx context.Context, cfg config.Config, pol config.Pol
 		if days < 1 {
 			days = 1
 		}
-		if err := e.ObjectStore.PlanLifecycle(ctx, target.Config.Bucket, target.Config.Prefix, days); err != nil {
+		if err := e.ObjectStore.PlanLifecycle(ctx, target.Config.Bucket, prefix, days); err != nil {
 			return TargetResult{}, fmt.Errorf("plan lifecycle: %w", err)
 		}
 	}

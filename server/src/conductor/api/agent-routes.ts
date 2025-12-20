@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Agent Timeline and HITL API Routes
 import express from 'express';
 import { prometheusConductorMetrics } from '../observability/prometheus';

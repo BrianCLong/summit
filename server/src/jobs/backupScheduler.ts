@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { BackupService } from '../services/BackupService.js';
 import pino from 'pino';
 

@@ -1,0 +1,136 @@
+name: Org Vulnerability Weekly Report
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  security-events: read
+
+jobs:
+  weekly-report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate org-level vulnerability report
+        id: generate-report
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const org = context.repo.owner;
+
+            async function fetchDependabotAlerts() {
+              const alerts = await github.paginate(
+                'GET /orgs/{org}/dependabot/alerts',
+                { org, per_page: 100, state: 'open', sort: 'updated' }
+              );
+              return alerts.map(alert => ({
+                severity: alert.security_advisory?.severity || 'unknown',
+                created_at: alert.created_at,
+              }));
+            }
+
+            function loadExpiringExceptions() {
+              const allowlistPath = path.join(process.cwd(), '.github', 'audit-allowlist.json');
+              if (!fs.existsSync(allowlistPath)) {
+                core.warning('Allowlist file not found; skipping exception check');
+                return [];
+              }
+              const data = JSON.parse(fs.readFileSync(allowlistPath, 'utf8'));
+              const advisories = Array.isArray(data.advisories) ? data.advisories : [];
+              const now = new Date();
+              const threshold = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+              return advisories
+                .filter(entry => entry.expires && new Date(entry.expires) <= threshold)
+                .map(entry => ({ id: entry.id, expires: entry.expires, severity: entry.severity || 'unknown' }));
+            }
+
+            const alerts = await fetchDependabotAlerts();
+            const summary = alerts.reduce(
+              (acc, alert) => {
+                const sev = alert.severity.toLowerCase();
+                if (sev === 'critical') acc.critical += 1;
+                else if (sev === 'high') acc.high += 1;
+                else acc.other += 1;
+                acc.total += 1;
+                return acc;
+              },
+              { critical: 0, high: 0, other: 0, total: 0 }
+            );
+
+            const expiring = loadExpiringExceptions();
+            const today = new Date().toISOString().split('T')[0];
+            const expiringList = expiring
+              .map(entry => `${entry.id} (sev: ${entry.severity}, expires ${entry.expires})`)
+              .join('\n');
+
+            const tableRow = `| ${today} | ${summary.critical} | ${summary.high} | ${summary.total} | ${expiringList || '—'} |`;
+            core.setOutput('table-row', tableRow);
+            core.setOutput('expiring-count', expiring.length);
+            core.setOutput('critical-count', summary.critical);
+            core.setOutput('high-count', summary.high);
+
+            return tableRow;
+
+      - name: Upsert weekly vulnerability trend issue
+        uses: actions/github-script@v7
+        env:
+          TABLE_ROW: ${{ steps.generate-report.outputs.table-row }}
+          CRITICAL_COUNT: ${{ steps.generate-report.outputs.critical-count }}
+          HIGH_COUNT: ${{ steps.generate-report.outputs.high-count }}
+          EXPIRING_COUNT: ${{ steps.generate-report.outputs.expiring-count }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const title = 'Security: Org vulnerability weekly trend';
+            const labels = ['security', 'weekly-report', 'vulnerability'];
+            const tableHeader = '| Date | Critical | High | Open alerts | Exceptions expiring ≤14d |\n|---|---|---|---|---|';
+            const row = process.env.TABLE_ROW;
+
+            const existing = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: labels.join(','),
+            });
+            const match = existing.find(issue => issue.title === title);
+
+            if (match) {
+              const body = match.body && match.body.includes(tableHeader)
+                ? match.body
+                : `${tableHeader}\n`;
+              const newBody = body.includes(row)
+                ? body
+                : `${body}\n${row}`.trim();
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: match.number,
+                body: newBody,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                labels,
+                body: `${tableHeader}\n${row}`,
+              });
+            }
+
+            const summary = [
+              `Critical: ${process.env.CRITICAL_COUNT || 0}`,
+              `High: ${process.env.HIGH_COUNT || 0}`,
+              `Exceptions expiring soon: ${process.env.EXPIRING_COUNT || 0}`,
+            ].join(' | ');
+            core.summary.addHeading('Org vulnerability weekly report');
+            core.summary.addRaw(summary);
+            await core.summary.write();

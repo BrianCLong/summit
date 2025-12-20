@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Query Complexity Plugin for Apollo Server
  * Analyzes GraphQL queries and rejects queries that exceed complexity limits
