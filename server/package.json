@@ -15,6 +15,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
+    "case-overview-cache": "ts-node src/scripts/case-overview-cache.ts",
     "migrate": "ts-node scripts/migrate.ts up",
     "migrate:persistence": "node scripts/migrate-persistence.js",
     "worker:outbox": "node scripts/outbox-worker.js",
