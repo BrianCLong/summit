@@ -104,6 +104,16 @@ const startServer = async () => {
   // Graceful shutdown
   const shutdown = async (sig: NodeJS.Signals) => {
     logger.info(`Shutting down. Signal: ${sig}`);
+
+    // Stop Job Manager
+    try {
+      const { jobManager } = await import('./jobs/job.manager.js');
+      await jobManager.close();
+      logger.info('Job Manager closed');
+    } catch (err) {
+      logger.error('Error closing Job Manager', err);
+    }
+
     wss.close();
     io.close(); // Close Socket.IO server
     if (stopKafkaConsumer) await stopKafkaConsumer(); // WAR-GAMED SIMULATION - Stop Kafka Consumer

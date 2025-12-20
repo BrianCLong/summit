@@ -32,6 +32,8 @@ import webhookRouter from './routes/webhooks.js';
 import { webhookWorker } from './webhooks/webhook.worker.js';
 import supportTicketsRouter from './routes/support-tickets.js';
 import ticketLinksRouter from './routes/ticket-links.js';
+import { jobManager } from './jobs/job.manager.js';
+import { setupBullBoard } from './queue/queue.dashboard.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -99,6 +101,11 @@ export const createApp = async () => {
   app.use('/api/support', supportTicketsRouter);
   app.use('/api', ticketLinksRouter);
   app.get('/metrics', metricsRoute);
+
+  // Job Queue Dashboard
+  const dashboardAdapter = setupBullBoard(jobManager.getAllQueues());
+  app.use('/admin/queues', dashboardAdapter.getRouter());
+
   app.use(
     rateLimit({
       windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 60_000),
