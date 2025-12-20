@@ -78,7 +78,11 @@ export class WebhookRepository {
   ): Promise<void> {
     await pg.write(
       `UPDATE webhook_deliveries
-       SET status = $1, attempt_count = $2, last_error = NULL, updated_at = NOW()
+       SET status = $1,
+           attempt_count = $2,
+           last_error = NULL,
+           next_attempt_at = NULL,
+           updated_at = NOW()
        WHERE id = $3 AND tenant_id = $4`,
       [DeliveryStatus.SUCCEEDED, attemptCount, deliveryId, tenantId],
       { tenantId },

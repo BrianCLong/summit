@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 import logger from '../utils/logger';
 import { addJob, queueRegistry, QueueName } from '../queues/config';
-import { recordDeliveryMetric } from './metrics';
+import * as deliveryMetrics from './metrics';
 import { webhookRepository, WebhookRepository } from './repository';
 import { signPayload } from './signature';
 import {
@@ -149,7 +149,11 @@ export async function processDelivery(
 
     if (response.status >= 200 && response.status < 300) {
       await repository.markSuccess(job.tenantId, job.deliveryId, attemptNumber);
-      recordDeliveryMetric(job.eventType, 'success', (Date.now() - started) / 1000);
+      deliveryMetrics.recordDeliveryMetric(
+        job.eventType,
+        'success',
+        (Date.now() - started) / 1000,
+      );
       return 'delivered';
     }
 
@@ -158,6 +162,7 @@ export async function processDelivery(
     const poison = attemptNumber >= MAX_ATTEMPTS;
     const backoffMs = backoffForAttempt(attemptNumber);
     const errorMessage = error?.message || 'Webhook delivery failed';
+    const durationSeconds = (Date.now() - started) / 1000;
 
     await repository.recordAttempt(
       job.tenantId,
@@ -179,7 +184,11 @@ export async function processDelivery(
       poison ? undefined : new Date(Date.now() + backoffMs),
     );
 
-    recordDeliveryMetric(job.eventType, poison ? 'poison' : 'failure');
+    deliveryMetrics.recordDeliveryMetric(
+      job.eventType,
+      poison ? 'poison' : 'failure',
+      durationSeconds,
+    );
 
     if (poison) {
       logger.error('Webhook delivery poisoned, moving to dead letter', {
