@@ -1,6 +1,7 @@
 import { MMKV } from 'react-native-mmkv';
 import { DB_CONFIG } from '@/config';
 import type { Entity, Investigation, OSINTAlert, GEOINTFeature } from '@/types';
+import * as OfflineService from './OfflineService';
 
 // Initialize MMKV storage instances
 const entityStorage = new MMKV({ id: 'entities' });
@@ -16,6 +17,8 @@ const metaStorage = new MMKV({ id: 'metadata' });
 export const saveEntity = (entity: Entity): void => {
   entityStorage.set(entity.id, JSON.stringify(entity));
   updateEntityIndex(entity);
+  // Async persist to WatermelonDB
+  OfflineService.saveEntity(entity).catch(console.error);
 };
 
 export const saveEntities = (entities: Entity[]): void => {
@@ -23,6 +26,7 @@ export const saveEntities = (entities: Entity[]): void => {
     entityStorage.set(entity.id, JSON.stringify(entity));
     updateEntityIndex(entity);
   });
+  OfflineService.saveEntities(entities).catch(console.error);
 };
 
 export const getEntity = (id: string): Entity | null => {
@@ -54,11 +58,13 @@ export const deleteEntity = (id: string): void => {
   if (entity) {
     entityStorage.delete(id);
     removeFromEntityIndex(entity);
+    OfflineService.deleteEntity(id).catch(console.error);
   }
 };
 
 export const clearEntities = (): void => {
   entityStorage.clearAll();
+  OfflineService.clearEntities().catch(console.error);
 };
 
 // Entity index for fast lookups by type
@@ -98,12 +104,14 @@ export const getEntitiesByType = (type: string): Entity[] => {
 
 export const saveInvestigation = (investigation: Investigation): void => {
   investigationStorage.set(investigation.id, JSON.stringify(investigation));
+  OfflineService.saveInvestigation(investigation).catch(console.error);
 };
 
 export const saveInvestigations = (investigations: Investigation[]): void => {
   investigations.forEach((inv) => {
     investigationStorage.set(inv.id, JSON.stringify(inv));
   });
+  OfflineService.saveInvestigations(investigations).catch(console.error);
 };
 
 export const getInvestigation = (id: string): Investigation | null => {
@@ -130,10 +138,12 @@ export const getAllInvestigations = (): Investigation[] => {
 
 export const deleteInvestigation = (id: string): void => {
   investigationStorage.delete(id);
+  OfflineService.deleteInvestigation(id).catch(console.error);
 };
 
 export const clearInvestigations = (): void => {
   investigationStorage.clearAll();
+  OfflineService.clearInvestigations().catch(console.error);
 };
 
 // ============================================
@@ -142,12 +152,14 @@ export const clearInvestigations = (): void => {
 
 export const saveAlert = (alert: OSINTAlert): void => {
   alertStorage.set(alert.id, JSON.stringify(alert));
+  OfflineService.saveAlert(alert).catch(console.error);
 };
 
 export const saveAlerts = (alerts: OSINTAlert[]): void => {
   alerts.forEach((alert) => {
     alertStorage.set(alert.id, JSON.stringify(alert));
   });
+  OfflineService.saveAlerts(alerts).catch(console.error);
 };
 
 export const getAlert = (id: string): OSINTAlert | null => {
@@ -184,15 +196,18 @@ export const markAlertAsRead = (id: string): void => {
   if (alert) {
     alert.isRead = true;
     saveAlert(alert);
+    OfflineService.markAlertAsRead(id).catch(console.error);
   }
 };
 
 export const deleteAlert = (id: string): void => {
   alertStorage.delete(id);
+  OfflineService.deleteAlert(id).catch(console.error);
 };
 
 export const clearAlerts = (): void => {
   alertStorage.clearAll();
+  OfflineService.clearAlerts().catch(console.error);
 };
 
 // ============================================
@@ -201,12 +216,14 @@ export const clearAlerts = (): void => {
 
 export const saveGEOINTFeature = (feature: GEOINTFeature): void => {
   geointStorage.set(feature.id, JSON.stringify(feature));
+  OfflineService.saveGEOINTFeature(feature).catch(console.error);
 };
 
 export const saveGEOINTFeatures = (features: GEOINTFeature[]): void => {
   features.forEach((feature) => {
     geointStorage.set(feature.id, JSON.stringify(feature));
   });
+  OfflineService.saveGEOINTFeatures(features).catch(console.error);
 };
 
 export const getGEOINTFeature = (id: string): GEOINTFeature | null => {
@@ -248,6 +265,7 @@ export const getGEOINTFeaturesInBounds = (
 
 export const clearGEOINTFeatures = (): void => {
   geointStorage.clearAll();
+  OfflineService.clearGEOINTFeatures().catch(console.error);
 };
 
 // ============================================
@@ -280,6 +298,7 @@ export const clearAllData = (): void => {
   alertStorage.clearAll();
   geointStorage.clearAll();
   metaStorage.clearAll();
+  OfflineService.clearAllData().catch(console.error);
 };
 
 export const getStorageSize = (): { entities: number; investigations: number; alerts: number; geoint: number } => {
@@ -289,4 +308,19 @@ export const getStorageSize = (): { entities: number; investigations: number; al
     alerts: alertStorage.getAllKeys().length,
     geoint: geointStorage.getAllKeys().length,
   };
+};
+
+export const hydrateFromOffline = async (): Promise<void> => {
+  try {
+    const entities = await OfflineService.getAllEntities();
+    saveEntities(entities as any);
+
+    const alerts = await OfflineService.getAllAlerts();
+    saveAlerts(alerts as any);
+
+    // ... hydrate other collections
+    console.log('[DatabaseService] Hydrated from Offline Database');
+  } catch (error) {
+    console.error('[DatabaseService] Hydration failed', error);
+  }
 };
