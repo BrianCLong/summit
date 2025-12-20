@@ -23,8 +23,8 @@ const repoRoot = path.resolve(__dirname, '..');
 const defaultDataset = path.join(
   repoRoot,
   'data',
-  'quickstart',
-  'quickstart-investigation.json',
+  'golden-path',
+  'demo-investigation.json',
 );
 const config = {
   apiBaseUrl: defaultApiBase,

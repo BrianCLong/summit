@@ -17,6 +17,9 @@ PROMETHEUS_URL="${PROMETHEUS_URL:-http://prometheus.monitoring.svc.cluster.local
 CANARY_STAGES=(10 50 100)
 STAGE_DURATION_MINUTES=30
 SLO_CHECK_INTERVAL=30  # seconds
+if [ -n "${CANARY_STAGES_CSV:-}" ]; then
+    IFS=',' read -r -a CANARY_STAGES <<< "${CANARY_STAGES_CSV}"
+fi
 
 echo "🚀 IntelGraph Production Canary Deployment"
 echo "=========================================="

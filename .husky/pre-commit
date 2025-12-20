@@ -10,31 +10,23 @@ log() {
 
 log "🔒 Running pre-commit checks..."
 
-# Run gitleaks
+# Run gitleaks if available
 if command -v gitleaks >/dev/null 2>&1; then
-  log "🔍 Scanning for secrets..."
+  log "🔍 Scanning for secrets with gitleaks..."
   gitleaks protect --staged --verbose || {
-    log "❌ Secret detected!"
+    log "❌ Secret detected by gitleaks!"
     exit 1
   }
+else
+  log "⚠️ gitleaks not found. Skipping secret scan."
 fi
 
 # Run lint-staged
+# This handles eslint, prettier, and ruff (configured in package.json)
 log "🔍 Running lint-staged..."
 pnpm exec lint-staged || {
-  log "❌ Lint-staged failed."
+  log "❌ lint-staged failed."
   exit 1
 }
-
-# Run screenshots (robust)
-log "📸 Generating screenshots..."
-CMD="npx tsx server/scripts/generate-screenshots.ts"
-
-# Use timeout if available, otherwise rely on script's internal timeout
-if command -v timeout >/dev/null 2>&1; then
-  timeout 35s $CMD >> "$LOG_FILE" 2>&1 || log "⚠️ Screenshot generation failed (check logs)"
-else
-  $CMD >> "$LOG_FILE" 2>&1 || log "⚠️ Screenshot generation failed (check logs)"
-fi
 
 log "✅ All checks passed!"

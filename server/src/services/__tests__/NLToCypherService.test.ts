@@ -16,18 +16,18 @@ import LLMService from '../LLMService';
 import { LLMGuardrailsService } from '../../security/llm-guardrails';
 
 // Mock dependencies
-const mockNeo4jDriver = {
-  session: jest.fn(() => ({
+const mockNeo4jDriver: any = {
+  session: jest.fn().mockReturnValue({
     run: jest.fn(),
     close: jest.fn(),
-  })),
+  }),
 };
 
-const mockLLMService = {
+const mockLLMService: any = {
   complete: jest.fn(),
 };
 
-const mockGuardrails = {
+const mockGuardrails: any = {
   validateInput: jest.fn(),
 };
 
@@ -55,7 +55,7 @@ describe('NLToCypherService', () => {
     it('should translate simple natural language query to Cypher', async () => {
       // Mock investigation schema
       const mockSession = {
-        run: jest.fn()
+        run: (jest.fn() as any)
           .mockResolvedValueOnce({
             records: [
               { get: (key: string) => (key === 'entityType' ? 'Person' : 10) },
@@ -104,7 +104,7 @@ describe('NLToCypherService', () => {
     it('should block dangerous queries', async () => {
       // Mock schema
       const mockSession = {
-        run: jest.fn().mockResolvedValue({ records: [] }),
+        run: (jest.fn() as any).mockResolvedValue({ records: [] }),
         close: jest.fn(),
       };
       mockNeo4jDriver.session.mockReturnValue(mockSession);
@@ -149,7 +149,7 @@ describe('NLToCypherService', () => {
 
     it('should warn about complex queries', async () => {
       const mockSession = {
-        run: jest.fn()
+        run: (jest.fn() as any)
           .mockResolvedValueOnce({ records: [] })
           .mockResolvedValueOnce({ records: [] })
           .mockResolvedValueOnce({
@@ -184,7 +184,7 @@ describe('NLToCypherService', () => {
 
     it('should provide cost estimates', async () => {
       const mockSession = {
-        run: jest.fn()
+        run: (jest.fn() as any)
           .mockResolvedValueOnce({ records: [] })
           .mockResolvedValueOnce({ records: [] })
           .mockResolvedValueOnce({
@@ -219,7 +219,7 @@ describe('NLToCypherService', () => {
   describe('executeQuery', () => {
     it('should execute validated Cypher and return results', async () => {
       const mockSession = {
-        run: jest.fn().mockResolvedValue({
+        run: (jest.fn() as any).mockResolvedValue({
           records: [
             {
               keys: ['p'],
@@ -260,7 +260,7 @@ describe('NLToCypherService', () => {
 
     it('should extract entity citations from results', async () => {
       const mockSession = {
-        run: jest.fn().mockResolvedValue({
+        run: (jest.fn() as any).mockResolvedValue({
           records: [
             {
               keys: ['e'],
@@ -294,7 +294,7 @@ describe('NLToCypherService', () => {
     it('should complete full preview -> execute flow', async () => {
       // Setup: Schema query mocks
       const mockSession = {
-        run: jest.fn()
+        run: (jest.fn() as any)
           .mockResolvedValueOnce({ records: [] }) // Entity types
           .mockResolvedValueOnce({ records: [] }) // Rel types
           .mockResolvedValueOnce({

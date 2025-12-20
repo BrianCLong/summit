@@ -1,7 +1,7 @@
 import { ApolloServerPlugin, GraphQLRequestListener } from '@apollo/server';
 import { GraphQLSchema, GraphQLField, GraphQLObjectType, getNamedType, isObjectType } from 'graphql';
 import { parse, visit, FieldNode } from 'graphql';
-import { logger } from '../../lib/logger';
+import { logger } from '../../config/logger.js';
 
 export interface DeprecationPluginConfig {
   /** Log deprecated field usage (default: true) */

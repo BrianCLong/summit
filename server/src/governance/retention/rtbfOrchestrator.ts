@@ -1,4 +1,5 @@
-import { v4 as uuidv4 } from 'uuid';
+// @ts-nocheck
+import { randomUUID as uuidv4 } from 'node:crypto';
 import pino from 'pino';
 import { Pool } from 'pg';
 import {

@@ -7,6 +7,7 @@
 import { Queue, Worker, Job } from 'bullmq';
 import { v4 as uuidv4 } from 'uuid';
 import pino from 'pino';
+import { Counter, Gauge, Histogram, Registry } from 'prom-client';
 import type {
   BatchJob,
   BatchJobStatus,
@@ -26,6 +27,7 @@ export interface BatchProcessorConfig {
   redisPassword?: string;
   concurrency: number;
   queueName: string;
+  progressUpdateInterval?: number;
 }
 
 export interface SubmitBatchInput {
@@ -45,7 +47,36 @@ const DEFAULT_CONFIG: BatchProcessorConfig = {
   redisPort: 6379,
   concurrency: 5,
   queueName: 'er-batch-jobs',
+  progressUpdateInterval: 25,
 };
+
+const metricsRegistry = new Registry();
+
+const jobDurationHistogram = new Histogram({
+  name: 'er_batch_job_duration_seconds',
+  help: 'Time spent processing a batch job',
+  buckets: [0.1, 1, 5, 15, 30, 60, 120, 300, 600],
+  registers: [metricsRegistry],
+});
+
+const processedRecordsCounter = new Counter({
+  name: 'er_batch_records_processed_total',
+  help: 'Total records processed by the batch processor',
+  labelNames: ['decision'],
+  registers: [metricsRegistry],
+});
+
+const recordErrorCounter = new Counter({
+  name: 'er_batch_record_errors_total',
+  help: 'Total records that failed to process',
+  registers: [metricsRegistry],
+});
+
+const activeJobsGauge = new Gauge({
+  name: 'er_batch_active_jobs',
+  help: 'Number of batch jobs currently in progress',
+  registers: [metricsRegistry],
+});
 
 export class BatchProcessor {
   private config: BatchProcessorConfig;
@@ -178,6 +209,9 @@ export class BatchProcessor {
     if (!job) {
       // Try to load from database
       job = await this.loadJob(jobId);
+      if (job) {
+        this.jobStore.set(jobId, job);
+      }
     }
 
     return job ?? null;
@@ -263,10 +297,20 @@ export class BatchProcessor {
       records: Array<{ recordId: string; attributes: Record<string, unknown> }>;
     };
 
-    const job = this.jobStore.get(jobId);
+    let job = this.jobStore.get(jobId);
+    if (!job) {
+      job = await this.loadJob(jobId);
+      if (job) {
+        this.jobStore.set(jobId, job);
+      }
+    }
     if (!job) {
       throw new Error(`Job ${jobId} not found`);
     }
+
+    const progressInterval = Math.max(this.config.progressUpdateInterval ?? 25, 1);
+    const endTimer = jobDurationHistogram.startTimer();
+    activeJobsGauge.inc();
 
     // Update status to running
     job.status = 'RUNNING';
@@ -301,23 +345,32 @@ export class BatchProcessor {
 
         try {
           const result = await this.processRecord(job, record);
-          await this.persistResult(result);
 
-          // Update job progress
-          job.processedRecords++;
-          if (result.clusterId && result.decision === 'AUTO_MERGE') {
-            job.mergedRecords++;
-          }
-          if (result.decision === 'CANDIDATE') {
-            job.reviewRequired++;
-          }
-          if (!result.clusterId && result.decision !== 'AUTO_NO_MATCH') {
-            job.newClusters++;
-          }
+          // Update job progress in a single transaction with the result write
+          await getDatabase().transaction(async (client) => {
+            await this.persistResult(result, client);
+
+            job.processedRecords++;
+            if (result.clusterId && result.decision === 'AUTO_MERGE') {
+              job.mergedRecords++;
+            }
+            if (result.decision === 'CANDIDATE') {
+              job.reviewRequired++;
+            }
+            if (!result.clusterId && result.decision !== 'AUTO_NO_MATCH') {
+              job.newClusters++;
+            }
+
+            await this.persistJob(job, client);
+          });
+
+          processedRecordsCounter.inc({ decision: result.decision });
 
           // Update progress periodically
-          if (job.processedRecords % 100 === 0) {
-            await this.persistJob(job);
+          if (
+            job.totalRecords > 0 &&
+            (job.processedRecords % progressInterval === 0 || job.processedRecords === job.totalRecords)
+          ) {
             await bullJob.updateProgress(
               Math.round((job.processedRecords / job.totalRecords) * 100)
             );
@@ -330,7 +383,15 @@ export class BatchProcessor {
             error: error instanceof Error ? error.message : String(error),
             timestamp: new Date().toISOString(),
           });
+          recordErrorCounter.inc();
         }
+      }
+
+      if (job.status === 'CANCELLED') {
+        job.completedAt = new Date().toISOString();
+        await this.persistJob(job);
+        logger.info({ jobId, processedRecords: job.processedRecords }, 'Batch job cancelled before completion');
+        return;
       }
 
       // Mark as completed
@@ -386,6 +447,10 @@ export class BatchProcessor {
       });
 
       throw error;
+    } finally {
+      activeJobsGauge.dec();
+      endTimer();
+      this.jobStore.delete(jobId);
     }
   }
 
@@ -425,9 +490,10 @@ export class BatchProcessor {
     };
   }
 
-  private async persistJob(job: BatchJob): Promise<void> {
+  private async persistJob(job: BatchJob, client?: import('pg').PoolClient): Promise<void> {
     const db = getDatabase();
-    await db.execute(
+    const executor = client ? client.query.bind(client) : db.execute.bind(db);
+    await executor(
       `INSERT INTO er_batch_jobs (
         job_id, tenant_id, entity_type, dataset_ref, status,
         total_records, processed_records, merged_records, new_clusters,
@@ -467,9 +533,13 @@ export class BatchProcessor {
     );
   }
 
-  private async persistResult(result: BatchResult): Promise<void> {
+  private async persistResult(
+    result: BatchResult,
+    client?: import('pg').PoolClient
+  ): Promise<void> {
     const db = getDatabase();
-    await db.execute(
+    const executor = client ? client.query.bind(client) : db.execute.bind(db);
+    await executor(
       `INSERT INTO er_batch_results (
         job_id, record_id, node_id, cluster_id, decision, score,
         matched_with_node_id, review_id, processing_time_ms, timestamp

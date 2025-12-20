@@ -1,0 +1,178 @@
+name: supply-chain-gates
+
+on:
+  pull_request:
+  release:
+    types: [created, published, released]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+  security-events: write
+
+env:
+  ARTIFACT_RETENTION_DAYS: 400
+  SBOM_DIR: artifacts/sbom
+  SCAN_DIR: artifacts/scans
+  ATTEST_DIR: artifacts/attestations
+  SIGN_DIR: artifacts/signatures
+  PACKAGE_DIR: artifacts/packages
+
+jobs:
+  supply-chain-gates:
+    name: supply-chain-gates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Prepare directories
+        run: |
+          mkdir -p "$SBOM_DIR" "$SCAN_DIR" "$ATTEST_DIR" "$SIGN_DIR" "$PACKAGE_DIR"
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3.5.0
+        with:
+          cosign-release: 'v2.4.0'
+
+      - name: Build images/packages
+        id: build
+        env:
+          DOCKER_BUILDKIT: 1
+        run: |
+          set -euo pipefail
+          mkdir -p "$PACKAGE_DIR"
+          if [ -f Dockerfile ]; then
+            echo "Dockerfile detected; building supply chain image"
+            docker build -t summit-supply-chain:"${GITHUB_SHA}" .
+            docker save summit-supply-chain:"${GITHUB_SHA}" > "$PACKAGE_DIR/supply-chain-${GITHUB_SHA}.tar"
+            echo "build_target=oci-archive:$PACKAGE_DIR/supply-chain-${GITHUB_SHA}.tar" >> "$GITHUB_OUTPUT"
+            echo "service_name=summit" >> "$GITHUB_OUTPUT"
+          else
+            echo "No Dockerfile detected; archiving workspace for SBOM generation"
+            git archive --format=tar --output "$PACKAGE_DIR/source-${GITHUB_SHA}.tar" HEAD
+            echo "build_target=." >> "$GITHUB_OUTPUT"
+            echo "package_archive=$PACKAGE_DIR/source-${GITHUB_SHA}.tar" >> "$GITHUB_OUTPUT"
+            echo "service_name=workspace" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate SBOM (Syft)
+        id: sbom
+        run: |
+          set -euo pipefail
+          target="${{ steps.build.outputs.build_target }}"
+          service="${{ steps.build.outputs.service_name }}"
+          if [ -z "$target" ]; then
+            target="."
+          fi
+          SBOM_PATH=$(.ci/scripts/sbom/generate_syft.sh "$service" "$target")
+          echo "sbom_path=$SBOM_PATH" >> "$GITHUB_OUTPUT"
+
+      - name: Grype vulnerability scan
+        id: grype
+        run: |
+          set -euo pipefail
+          ./.ci/scripts/sbom/scan_grype.sh "${{ steps.sbom.outputs.sbom_path }}" "${{ steps.build.outputs.service_name }}"
+
+      - name: OSV vulnerability scan
+        id: osv
+        run: |
+          set -euo pipefail
+          target_path="${{ steps.build.outputs.package_archive }}"
+          if [ -z "$target_path" ]; then
+            target_path="."
+          fi
+          ./.ci/scripts/sbom/scan_osv.sh "$target_path" "${{ steps.build.outputs.service_name }}"
+
+      - name: Upload Grype SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ steps.grype.outputs.sarif }}
+
+      - name: Upload OSV SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ steps.osv.outputs.sarif }}
+
+      - name: Diff against budget
+        id: budget
+        run: |
+          set -euo pipefail
+          python .ci/scripts/sbom/diff_budget.py \
+            --report "${{ steps.grype.outputs.json }}" \
+            --budget .maestro/ci_budget.json \
+            --output-json "$SCAN_DIR/diff-budget.json" \
+            | tee "$SCAN_DIR/diff-budget.txt"
+          echo "summary_file=$SCAN_DIR/diff-budget.txt" >> "$GITHUB_OUTPUT"
+          echo "summary_json=$SCAN_DIR/diff-budget.json" >> "$GITHUB_OUTPUT"
+
+      - name: Emit SLSA attestation
+        id: attest
+        run: |
+          set -euo pipefail
+          ATTEST_PATH=$(.ci/scripts/attest/attest_slsa.sh "${{ steps.sbom.outputs.sbom_path }}" "${{ steps.build.outputs.service_name }}")
+          echo "attestation=$ATTEST_PATH" >> "$GITHUB_OUTPUT"
+
+      - name: Sign SBOM and attestation (cosign)
+        id: sign
+        env:
+          COSIGN_EXPERIMENTAL: 1
+        run: |
+          set -euo pipefail
+          ./.ci/scripts/signing/cosign_sign_verify.sh "${{ steps.sbom.outputs.sbom_path }}" "$SIGN_DIR" "${{ steps.attest.outputs.attestation }}"
+
+      - name: Upload SBOM and signatures
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-and-signatures
+          path: |
+            ${{ steps.sbom.outputs.sbom_path }}
+            ${{ env.SIGN_DIR }}/*
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+
+      - name: Upload scan results
+        uses: actions/upload-artifact@v4
+        with:
+          name: vulnerability-reports
+          path: |
+            ${{ steps.grype.outputs.json }}
+            ${{ steps.grype.outputs.sarif }}
+            ${{ steps.osv.outputs.json }}
+            ${{ steps.osv.outputs.sarif }}
+            ${{ steps.budget.outputs.summary_file }}
+            ${{ steps.budget.outputs.summary_json }}
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+
+      - name: Upload attestations
+        uses: actions/upload-artifact@v4
+        with:
+          name: attestations
+          path: |
+            ${{ steps.attest.outputs.attestation }}
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+
+      - name: Post PR summary
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const summary = fs.readFileSync('${{ steps.budget.outputs.summary_file }}', 'utf8');
+            const { context, github } = require('@actions/github');
+            const serverUrl = process.env.GITHUB_SERVER_URL || 'https://github.com';
+            const repository = process.env.GITHUB_REPOSITORY;
+            const runUrl = `${serverUrl}/${repository}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+            const rekorIndex = '${{ steps.sign.outputs.tlog_index }}';
+            const sbomPath = '${{ steps.sbom.outputs.sbom_path }}';
+            const attestPath = '${{ steps.attest.outputs.attestation }}';
+            const body = `### Supply chain gates\n${summary}\n\nArtifacts:\n- SBOM: ${sbomPath}\n- Attestation: ${attestPath}\n- Rekor: ${rekorIndex ? `https://search.sigstore.dev/?logIndex=${rekorIndex}` : 'pending'}\n- Run artifacts: ${runUrl}`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });

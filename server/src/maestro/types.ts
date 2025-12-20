@@ -7,7 +7,7 @@ export interface UserRef {
 export interface AgentRef {
   id: string;
   name: string;
-  kind: 'llm' | 'tool' | 'workflow';
+  kind: 'llm' | 'tool' | 'workflow' | 'graph-engine';
   modelId?: string;        // e.g. "openai:gpt-4.1"
   toolName?: string;       // e.g. "bash-shell"
 }
@@ -25,7 +25,7 @@ export interface Task {
   parentTaskId?: string;
   status: TaskStatus;
   agent: AgentRef;
-  kind: 'plan' | 'action' | 'subworkflow';
+  kind: 'plan' | 'action' | 'subworkflow' | 'graph.analysis';
   description: string;
   input: Record<string, unknown>;
   output?: Record<string, unknown>;
@@ -55,6 +55,9 @@ export interface CostSample {
   currency: 'USD';
   cost: number;
   createdAt: string;
+  feature?: string;
+  tenantId?: string;
+  environment?: string;
 }
 
 export interface RunCostSummary {

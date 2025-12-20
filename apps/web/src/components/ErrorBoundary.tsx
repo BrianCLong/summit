@@ -1,85 +1,84 @@
-import React from 'react';
+import React, { Component, ErrorInfo, ReactNode } from 'react'
+import { AlertTriangle, RefreshCcw, Home } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
-interface ErrorBoundaryProps {
-  children: React.ReactNode;
-  fallback?: React.ReactNode;
-  componentName?: string;
-  onReset?: () => void;
+interface Props {
+  children: ReactNode
+  fallback?: ReactNode
 }
 
-interface ErrorBoundaryState {
-  hasError: boolean;
-  error: Error | null;
-  errorInfo: React.ErrorInfo | null;
+interface State {
+  hasError: boolean
+  error: Error | null
+  errorInfo: ErrorInfo | null
 }
 
-/**
- * Production-grade Error Boundary
- * catches errors in React component tree, logs to Sentry (mock), and displays fallback UI
- */
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-    this.state = { hasError: false, error: null, errorInfo: null };
+export class ErrorBoundary extends Component<Props, State> {
+  public state: State = {
+    hasError: false,
+    error: null,
+    errorInfo: null,
   }
 
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { hasError: true, error, errorInfo: null };
+  public static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error, errorInfo: null }
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    this.setState({
-      error,
-      errorInfo
-    });
-
-    // Log to Sentry or Analytics
-    console.error('ErrorBoundary caught error:', error, errorInfo);
-
-    // In a real implementation, we would call Sentry.captureException(error, { extra: errorInfo });
-    // This is mocked for now as per instructions.
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('Uncaught error:', error, errorInfo)
+    this.setState({ error, errorInfo })
+    // Log to monitoring service (e.g. Sentry/OpenTelemetry)
   }
 
-  handleRetry = () => {
-    this.props.onReset?.();
-    this.setState({ hasError: false, error: null, errorInfo: null });
-  };
+  private handleRetry = () => {
+    this.setState({ hasError: false, error: null, errorInfo: null })
+    window.location.reload()
+  }
 
-  render() {
+  private handleHome = () => {
+    window.location.href = '/'
+  }
+
+  public render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
-        return this.props.fallback;
+        return this.props.fallback
       }
 
       return (
-        <div className="p-6 m-4 border border-red-200 bg-red-50 rounded-lg shadow-sm">
-          <div className="flex flex-col items-center text-center">
-            <h2 className="text-xl font-semibold text-red-800 mb-2">
-              Something went wrong
-            </h2>
-            <p className="text-red-600 mb-4 max-w-md">
-              {this.props.componentName
-                ? `An error occurred in the ${this.props.componentName} component.`
-                : 'An unexpected error occurred while rendering this component.'}
-            </p>
-            {this.state.error && (
-                <pre className="text-xs text-left bg-white p-2 rounded border border-red-100 mb-4 w-full overflow-auto max-h-32">
-                    {this.state.error.message}
-                </pre>
-            )}
-            <button
-              onClick={this.handleRetry}
-              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-            >
-              Try Again
-            </button>
+        <div className="flex h-screen w-full flex-col items-center justify-center bg-background p-4 text-center">
+          <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-red-100">
+            <AlertTriangle className="h-10 w-10 text-red-600" />
           </div>
+          <h1 className="mb-2 text-2xl font-bold tracking-tight">
+            Something went wrong
+          </h1>
+          <p className="mb-8 max-w-md text-muted-foreground">
+            We encountered an unexpected error. Our team has been notified.
+            Please try refreshing the page.
+          </p>
+
+          <div className="flex gap-4">
+            <Button variant="outline" onClick={this.handleHome}>
+              <Home className="mr-2 h-4 w-4" />
+              Go Home
+            </Button>
+            <Button onClick={this.handleRetry}>
+              <RefreshCcw className="mr-2 h-4 w-4" />
+              Reload Page
+            </Button>
+          </div>
+
+          {process.env.NODE_ENV === 'development' && this.state.error && (
+            <div className="mt-8 max-h-64 w-full max-w-2xl overflow-auto rounded-md bg-slate-950 p-4 text-left font-mono text-xs text-slate-50">
+              <p className="font-bold text-red-400">{this.state.error.toString()}</p>
+              <pre className="mt-2">{this.state.errorInfo?.componentStack}</pre>
+            </div>
+          )}
         </div>
-      );
+      )
     }
 
-    return this.props.children;
+    return this.props.children
   }
 }
-
-export default ErrorBoundary;

@@ -1,4 +1,4 @@
-import crypto from 'node:crypto';
+import * as crypto from 'node:crypto';
 import { CertificateValidator } from './certificates.js';
 import { InMemoryKeyStore, KeyManager, type KeyStore } from './keyStore.js';
 import {

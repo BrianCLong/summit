@@ -10,7 +10,7 @@
  */
 
 import { Driver, Session } from 'neo4j-driver';
-import pino from 'pino';
+import logger from '../../utils/logger.js';
 import {
   TraversalConfig,
   TraversalResult,
@@ -22,7 +22,7 @@ import {
   GraphEdgeSchema,
 } from './types.js';
 
-const logger = pino({ name: 'GraphTraversalAlgorithms' });
+const serviceLogger = logger.child({ name: 'GraphTraversalAlgorithms' });
 
 export interface TraversalContext {
   investigationId: string;
@@ -32,7 +32,7 @@ export interface TraversalContext {
 }
 
 export class GraphTraversalAlgorithms {
-  constructor(private driver: Driver) {}
+  constructor(private driver: Driver) { }
 
   /**
    * Execute traversal based on configured strategy
@@ -43,7 +43,7 @@ export class GraphTraversalAlgorithms {
   ): Promise<TraversalResult> {
     const startTime = Date.now();
 
-    logger.info({
+    serviceLogger.info({
       strategy: config.strategy,
       focusNodes: context.focusNodeIds.length,
       maxHops: config.maxHops,
@@ -79,7 +79,7 @@ export class GraphTraversalAlgorithms {
 
     result.executionTimeMs = Date.now() - startTime;
 
-    logger.info({
+    serviceLogger.info({
       strategy: config.strategy,
       nodesFound: result.nodes.length,
       edgesFound: result.edges.length,
@@ -151,7 +151,7 @@ export class GraphTraversalAlgorithms {
 
       const nodes = this.parseNodes(pprResult.records);
       const edges = this.parseEdges(edgesResult.records);
-      const scores = new Map(
+      const scores = new Map<string, number>(
         pprResult.records.map(r => [r.get('id'), r.get('score')]),
       );
 
@@ -216,7 +216,7 @@ export class GraphTraversalAlgorithms {
       `, { nodeIds });
 
       const edges = this.parseEdges(edgesResult.records);
-      const scores = new Map(
+      const scores = new Map<string, number>(
         result.records.map(r => [r.get('id'), r.get('score')]),
       );
 
@@ -387,7 +387,7 @@ export class GraphTraversalAlgorithms {
       `, { nodeIds });
 
       const edges = this.parseEdges(edgesResult.records);
-      const scores = new Map(
+      const scores = new Map<string, number>(
         result.records.map(r => [r.get('id'), r.get('score')]),
       );
 
@@ -486,7 +486,7 @@ export class GraphTraversalAlgorithms {
       `, { nodeIds });
 
       const edges = this.parseEdges(edgesResult.records);
-      const scores = new Map(
+      const scores = new Map<string, number>(
         result.records.map(r => [r.get('id'), r.get('score')]),
       );
 

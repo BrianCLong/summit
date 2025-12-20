@@ -153,6 +153,7 @@ export class CacheVersionManager {
    * Load versions from Redis
    */
   private async loadVersions(): Promise<void> {
+    if (!this.redis) return;
     if (!this.redis) {return;}
 
     try {

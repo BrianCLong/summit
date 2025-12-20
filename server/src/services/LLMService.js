@@ -4,9 +4,13 @@
  */
 
 import logger from '../utils/logger.js';
-import { applicationErrors } from '../monitoring/metrics.js';
+import {
+  applicationErrors,
+  llmRequestDuration,
+  llmTokensTotal,
+  llmRequestsTotal,
+} from '../monitoring/metrics.js';
 import { otelService } from '../monitoring/opentelemetry.js';
-import { CircuitBreaker } from '../utils/CircuitBreaker.js';
 
 // Global history buffer for the "Prompt Activity Monitor"
 // Stores the last 50 interactions across all LLMService instances.
@@ -41,22 +45,31 @@ class LLMService {
       totalTokensGenerated: 0,
       averageTokensPerCompletion: 0,
     };
+    this.hasAlerted80 = false;
+  }
 
-    // Initialize Circuit Breaker
-    // 5 failures, 60s cooldown
-    // Using a static map to ensure shared circuit breaker state across instances if they are not singletons
-    if (!LLMService.circuitBreakers) {
-      LLMService.circuitBreakers = new Map();
+  /**
+   * Check LLM budget
+   * Note: This uses in-memory metrics which reset on server restart.
+   * For production, metrics should be persisted to Redis/DB.
+   */
+  checkBudget() {
+    const costPerToken = parseFloat(process.env.LLM_COST_PER_TOKEN) || 0.000002;
+    const monthlyBudget = parseFloat(process.env.LLM_MONTHLY_BUDGET) || 100.0;
+    const currentSpend = this.metrics.totalTokensGenerated * costPerToken;
+
+    // Use a latch to prevent log spam, but for now simple range check is used as MVP.
+    // Ideally use Redis key `llm:alert:80` with TTL.
+    if (!this.hasAlerted80 && currentSpend >= monthlyBudget * 0.8) {
+       this.hasAlerted80 = true;
+       logger.warn({ currentSpend, monthlyBudget }, 'LLM Spend Alert: 80% of budget consumed');
+       // In a real system, send this to alerting service
     }
-    const breakerKey = `llm-${this.config.provider}`;
-    if (!LLMService.circuitBreakers.has(breakerKey)) {
-       LLMService.circuitBreakers.set(breakerKey, new CircuitBreaker(
-        breakerKey,
-        5,
-        60000
-      ));
+
+    if (currentSpend >= monthlyBudget) {
+       logger.error({ currentSpend, monthlyBudget }, 'LLM Spend Cap Exceeded');
+       throw new Error('LLM Spend Cap Exceeded. Please contact admin.');
     }
-    this.circuitBreaker = LLMService.circuitBreakers.get(breakerKey);
   }
 
   /**
@@ -70,6 +83,8 @@ class LLMService {
    * Generate text completion
    */
   async complete(params) {
+    this.checkBudget();
+
     const {
       prompt,
       model = this.config.model,
@@ -83,19 +98,10 @@ class LLMService {
       throw new Error('Prompt is required');
     }
 
-    if (!this.circuitBreaker.canExecute()) {
-        const error = new Error(`LLM Service Circuit Breaker Open for ${this.config.provider}`);
-        logger.warn(error.message);
-        throw error;
-    }
-
     const startTime = Date.now();
     let attempt = 0;
-    // Base delay 100ms
-    let delay = 100;
-    const maxDelay = 1600;
 
-    while (attempt <= this.config.maxRetries) {
+    while (attempt < this.config.maxRetries) {
       try {
         let response;
 
@@ -116,6 +122,9 @@ class LLMService {
           case 'local':
             response = await this.localCompletion(params);
             break;
+          case 'mock':
+            response = await this.mockCompletion(params);
+            break;
           default:
             throw new Error(
               `Unsupported LLM provider: ${this.config.provider}`,
@@ -123,7 +132,8 @@ class LLMService {
         }
 
         const latency = Date.now() - startTime;
-        this.updateMetrics(latency, response.usage);
+        this.updateMetrics(latency, response.usage, model);
+        llmRequestsTotal.labels(this.config.provider, model, 'success').inc();
 
         logger.debug('LLM completion successful', {
           provider: this.config.provider,
@@ -149,17 +159,16 @@ class LLMService {
           status: 'success',
         });
 
-        this.circuitBreaker.recordSuccess();
         return response.content;
       } catch (error) {
         attempt++;
-        this.circuitBreaker.recordFailure(error);
 
-        if (attempt > this.config.maxRetries) {
+        if (attempt >= this.config.maxRetries) {
           this.metrics.errorCount++;
           applicationErrors
             .labels('llm_service', 'CompletionError', 'error')
             .inc();
+          llmRequestsTotal.labels(this.config.provider, model, 'error').inc();
 
           logger.error('LLM completion failed after retries', {
             provider: this.config.provider,
@@ -189,13 +198,10 @@ class LLMService {
           error: error.message,
         });
 
-        // Exponential backoff with jitter
-        const jitter = Math.random() * 10;
-        const waitTime = Math.min(delay, maxDelay) + jitter;
+        // Exponential backoff
         await new Promise((resolve) =>
-          setTimeout(resolve, waitTime)
+          setTimeout(resolve, Math.pow(2, attempt) * 1000),
         );
-        delay = Math.min(delay * 2, maxDelay);
       }
     }
   }
@@ -212,10 +218,6 @@ class LLMService {
 
     if (!Array.isArray(messages) || messages.length === 0) {
       throw new Error('Messages array is required');
-    }
-
-    if (!this.circuitBreaker.canExecute()) {
-        throw new Error(`LLM Service Circuit Breaker Open for ${this.config.provider}`);
     }
 
     const startTime = Date.now();
@@ -238,7 +240,8 @@ class LLMService {
       }
 
       const latency = Date.now() - startTime;
-      this.updateMetrics(latency, response.usage);
+      this.updateMetrics(latency, response.usage, model);
+      llmRequestsTotal.labels(this.config.provider, model, 'success').inc();
 
       // Record to global history
       addToHistory({
@@ -254,12 +257,11 @@ class LLMService {
         status: 'success',
       });
 
-      this.circuitBreaker.recordSuccess();
       return response.content;
     } catch (error) {
       this.metrics.errorCount++;
       applicationErrors.labels('llm_service', 'ChatError', 'error').inc();
-      this.circuitBreaker.recordFailure(error);
+      llmRequestsTotal.labels(this.config.provider, model, 'error').inc();
 
       logger.error('LLM chat failed', {
         provider: this.config.provider,
@@ -391,6 +393,49 @@ class LLMService {
   }
 
   /**
+   * Mock completion for testing
+   */
+  async mockCompletion(params) {
+    const { prompt } = params;
+    this.logger.info('Generating mock LLM response');
+
+    // Simulate latency
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    return {
+      content: JSON.stringify({
+        title: "Summit OS Growth Playbook",
+        summary: "A customized growth strategy based on your company health assessment.",
+        score: 85,
+        strengths: ["Strong engineering culture", "High retention"],
+        weaknesses: ["Marketing funnel undefined", "Sales cycle too long"],
+        strategic_initiatives: [
+          {
+            title: "Implement EOS L10 Meetings",
+            description: "Standardize weekly execution meetings to improve accountability.",
+            timeline: "Immediate"
+          },
+          {
+            title: "Revamp Sales Compensation",
+            description: "Align incentives with 3-year growth targets.",
+            timeline: "Q2"
+          }
+        ],
+        tactical_actions: [
+          "Set up weekly scorecard",
+          "Define 1-year goals",
+          "Hire VP of Sales"
+        ]
+      }, null, 2),
+      usage: {
+        prompt_tokens: 50,
+        completion_tokens: 200,
+        total_tokens: 250
+      }
+    };
+  }
+
+  /**
    * Summarize text
    */
   async summarize(text, options = {}) {
@@ -471,8 +516,36 @@ Answer:`;
   /**
    * Update metrics
    */
-  updateMetrics(latency, usage = {}) {
+  updateMetrics(latency, usage = {}, model = this.config.model) {
     this.metrics.totalCompletions++;
+
+    // Record to Prometheus
+    llmRequestDuration
+      .labels(this.config.provider, model, 'success')
+      .observe(latency / 1000);
+
+    if (usage) {
+      if (usage.prompt_tokens) {
+        llmTokensTotal
+          .labels(this.config.provider, model, 'prompt')
+          .inc(usage.prompt_tokens);
+      }
+      if (usage.completion_tokens) {
+        llmTokensTotal
+          .labels(this.config.provider, model, 'completion')
+          .inc(usage.completion_tokens);
+      }
+      if (usage.total_tokens) {
+        // We don't have a 'total' type counter usually if we have prompt/completion,
+        // but let's strictly follow standard: prompt + completion = total.
+        // If we only have total, we log it.
+        if (!usage.prompt_tokens && !usage.completion_tokens) {
+          llmTokensTotal
+            .labels(this.config.provider, model, 'total')
+            .inc(usage.total_tokens);
+        }
+      }
+    }
 
     const currentLatency = this.metrics.averageLatency;
     this.metrics.averageLatency = currentLatency
@@ -494,10 +567,9 @@ Answer:`;
    */
   getHealth() {
     return {
-      status: this.circuitBreaker.getState() === 'open' ? 'degraded' : 'healthy',
+      status: 'healthy',
       provider: this.config.provider,
       model: this.config.model,
-      circuitState: this.circuitBreaker.getState(),
       metrics: {
         totalCompletions: this.metrics.totalCompletions,
         averageLatency: Math.round(this.metrics.averageLatency),

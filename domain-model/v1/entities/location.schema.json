@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "./location.schema.json",
+  "title": "Location (Canonical v1)",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "../base.schema.json#/$defs/Identifier" },
+    "schemaVersion": { "const": "v1" },
+    "entityType": { "const": "Location" },
+    "name": { "type": "string" },
+    "address": { "type": "string" },
+    "country": { "type": "string" },
+    "geo": { "$ref": "../base.schema.json#/$defs/GeoPoint" },
+    "metadata": { "$ref": "../base.schema.json#/$defs/EntityMetadata" },
+    "external": {
+      "type": "array",
+      "items": { "$ref": "../base.schema.json#/$defs/ExternalReference" }
+    }
+  },
+  "required": ["id", "schemaVersion", "entityType", "name"],
+  "additionalProperties": false
+}

@@ -1,6 +1,11 @@
 import { trace, Span } from '@opentelemetry/api';
 import { Counter, Histogram } from 'prom-client';
 import { redis } from '../subscriptions/pubsub';
+import {
+  SecurityEvent,
+  ZeroTrustAuditLogger,
+  createZeroTrustAuditLogger,
+} from '../../security/zero-trust/siem/audit-logger';
 
 const tracer = trace.getTracer('policy-enforcer', '24.2.0');
 
@@ -87,6 +92,11 @@ export class PolicyEnforcer {
   private readonly cachePrefix = 'policy_cache';
   private readonly defaultTTL = 300; // 5 minutes
   private readonly provenanceLog: ProvenanceEntry[] = [];
+  private readonly auditLogger: ZeroTrustAuditLogger;
+
+  constructor(auditLogger: ZeroTrustAuditLogger = createZeroTrustAuditLogger()) {
+    this.auditLogger = auditLogger;
+  }
 
   async enforce(context: PolicyContext): Promise<PolicyDecision> {
     return tracer.startActiveSpan('policy.enforce', async (span: Span) => {
@@ -428,12 +438,92 @@ export class PolicyEnforcer {
     // In-memory for now - in production would write to audit database
     this.provenanceLog.push(entry);
 
+    try {
+      await this.emitDecisionEvent(entry, context, decision);
+    } catch (error) {
+      console.error('Policy audit bus publish failed:', error);
+    }
+
     // Keep only last 10000 entries in memory
     if (this.provenanceLog.length > 10000) {
       this.provenanceLog.splice(0, 1000);
     }
 
     console.log('Policy provenance:', JSON.stringify(entry));
+  }
+
+  private async emitDecisionEvent(
+    entry: ProvenanceEntry,
+    context: PolicyContext,
+    decision: PolicyDecision,
+  ): Promise<void> {
+    const event: SecurityEvent = {
+      id: entry.id,
+      timestamp: entry.timestamp.getTime(),
+      eventType: 'policy_decision',
+      severity: decision.allow ? 'informational' : 'medium',
+      source: {
+        type: 'application',
+        component: 'policy-enforcer',
+        hostname: process.env.HOSTNAME || 'unknown',
+      },
+      actor: {
+        type: 'user',
+        id: context.userId || 'anonymous',
+      },
+      action: {
+        type: context.action,
+        method: 'policy.enforce',
+        parameters: {
+          resource: context.resource,
+          purpose: context.purpose,
+          tenantId: context.tenantId,
+          reasonForAccess: context.reasonForAccess,
+        },
+      },
+      resource: {
+        type: 'resource',
+        id: context.resource || 'unspecified',
+        classification: context.resource?.includes('sensitive')
+          ? 'restricted'
+          : 'internal',
+        owner: context.tenantId,
+      },
+      outcome: {
+        result: decision.allow ? 'success' : 'denied',
+        reason: decision.reason,
+        policyViolations: decision.requiredPurpose
+          ? [`purpose_required:${decision.requiredPurpose}`]
+          : undefined,
+      },
+      context: {
+        sourceIp: context.clientIP || 'unknown',
+        requestId: entry.id,
+        correlationId: context.reasonForAccess,
+      },
+      zeroTrust: {
+        trustScore: decision.allow ? 85 : 20,
+        identityVerified: Boolean(context.userId),
+        deviceTrusted: true,
+        sessionFresh: true,
+        mfaVerified: false,
+        policyDecision: decision.allow ? 'allow' : 'deny',
+        enforcementPoint: 'policy-enforcer',
+      },
+      compliance: {
+        frameworks: ['NIST-800-53', 'FedRAMP'],
+        controls: ['AC-3', 'AC-6', 'AU-2'],
+        retentionRequired: true,
+        auditRequired: true,
+      },
+      rawData: {
+        auditRequired: decision.auditRequired ?? false,
+        ttlSeconds: decision.ttlSeconds,
+        queryMetadata: context.queryMetadata,
+      },
+    };
+
+    await this.auditLogger.logSecurityEvent(event);
   }
 
   getProvenanceLog(tenantId?: string, limit: number = 100): ProvenanceEntry[] {

@@ -6,42 +6,146 @@ on:
       image_tag:
         description: 'Image Tag to deploy (SHA)'
         required: true
+      service:
+        description: 'Target platform to deploy'
+        required: true
+        type: choice
+        options:
+          - maestro
+          - intelgraph
+          - companyos
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  CANARY_CONFIG_PATH: summit_release_env_pack/k8s/canary/canary-stage-config.json
 
 jobs:
   deploy-prod:
     runs-on: ubuntu-latest
     environment: prod
+    permissions:
+      contents: read
+      packages: read
+      id-token: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Load canary service config
+        id: canary-config
+        env:
+          SERVICE_KEY: ${{ inputs.service }}
+          TARGET_ENV: production
+        run: |
+          python - <<'PY'
+import json, os, pathlib, sys
+
+config_path = pathlib.Path(os.environ["CANARY_CONFIG_PATH"])
+if not config_path.exists():
+    sys.exit(f"Missing canary config at {config_path}")
+
+service = os.environ["SERVICE_KEY"]
+target_env = os.environ["TARGET_ENV"]
+data = json.loads(config_path.read_text())
+service_cfg = data.get("services", {}).get(service)
+if not service_cfg:
+    sys.exit(f"Service '{service}' not defined in {config_path}")
+
+namespace = service_cfg.get("namespaces", {}).get(target_env)
+host = service_cfg.get("hosts", {}).get(target_env)
+chart = service_cfg.get("chart", "charts/server")
+release = service_cfg.get("release", service)
+weights = service_cfg.get("trafficWeights", [])
+flag = service_cfg.get("featureFlag", f"{service}_canary_enabled")
+service_name = service_cfg.get("serviceName", f"{service}-service")
+
+output = pathlib.Path(os.environ["GITHUB_OUTPUT"])
+with output.open("a") as fh:
+    fh.write(f"namespace={namespace}\n")
+    fh.write(f"host={host}\n")
+    fh.write(f"chart={chart}\n")
+    fh.write(f"release={release}\n")
+    fh.write(f"weights={','.join(map(str, weights))}\n")
+    fh.write(f"feature_flag={flag}\n")
+    fh.write(f"service_name={service_name}\n")
+PY
 
       - name: Set up Helm
         uses: azure/setup-helm@v4
         with:
           version: 'v3.11.1'
 
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: 'v2.2.4'
+
       - name: Create Kubeconfig
         run: |
+          set -euo pipefail
           mkdir -p ~/.kube
           echo "${{ secrets.KUBECONFIG_PROD_B64 }}" | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
 
+      - name: Verify image signature and attestation
+        env:
+          COSIGN_EXPERIMENTAL: '1'
+          IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.image_tag }}
+          COSIGN_PUBLIC_KEY: ${{ secrets.COSIGN_PUBLIC_KEY }}
+        run: |
+          set -euo pipefail
+          VERIFY_FLAGS=()
+          if [ -n "${COSIGN_PUBLIC_KEY:-}" ]; then
+            VERIFY_FLAGS+=(--key "$COSIGN_PUBLIC_KEY")
+          else
+            VERIFY_FLAGS+=(--certificate-identity "https://github.com/${{ github.repository }}")
+            VERIFY_FLAGS+=(--certificate-oidc-issuer "https://token.actions.githubusercontent.com")
+          fi
+
+          cosign verify "${VERIFY_FLAGS[@]}" "$IMAGE"
+          cosign verify-attestation --type spdxjson "${VERIFY_FLAGS[@]}" "$IMAGE"
+
       - name: Deploy to Prod
         env:
-          NAMESPACE: prod
-          HOST: api.intelgraph.io
+          NAMESPACE: ${{ steps.canary-config.outputs.namespace }}
+          HOST: ${{ steps.canary-config.outputs.host }}
+          CHART: ${{ steps.canary-config.outputs.chart }}
+          RELEASE: ${{ steps.canary-config.outputs.release }}
+          WEIGHTS: ${{ steps.canary-config.outputs.weights }}
+          FEATURE_FLAG: ${{ steps.canary-config.outputs.feature_flag }}
         run: |
+          set -euo pipefail
+          echo "Deploying service '${{ inputs.service }}' to namespace ${NAMESPACE}"
+          echo "Traffic plan: ${WEIGHTS:-default chart steps}"
+
           # The chart has Argo Rollouts enabled, so 'helm upgrade' applies the Rollout object.
           # Argo Rollouts controller handles the steps (10% -> 50% -> 100%).
-          helm upgrade --install server ./charts/server \
+          helm upgrade --install "${RELEASE}" "./${CHART}" \
             --namespace $NAMESPACE \
             --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} \
             --set image.tag=${{ inputs.image_tag }} \
             --set ingress.hosts[0].host=$HOST \
             --set ingress.tls[0].hosts[0]=$HOST \
+            --set-string canary.featureFlag=$FEATURE_FLAG \
+            --set "canary.weights={${WEIGHTS}}" \
+            --atomic \
+            --timeout 10m \
             --wait
+
+      - name: Verify rollout health
+        env:
+          NAMESPACE: ${{ steps.canary-config.outputs.namespace }}
+          RELEASE: ${{ steps.canary-config.outputs.release }}
+        run: |
+          set -euo pipefail
+          release=$RELEASE
+          if kubectl -n "$NAMESPACE" get deployment "$release" >/dev/null 2>&1; then
+            kubectl -n "$NAMESPACE" rollout status deployment "$release" --timeout=5m
+          elif kubectl -n "$NAMESPACE" get statefulset "$release" >/dev/null 2>&1; then
+            kubectl -n "$NAMESPACE" rollout status statefulset "$release" --timeout=5m
+          else
+            echo "::warning::No deployment or statefulset named $release; checking pods by label"
+            kubectl -n "$NAMESPACE" wait --for=condition=Ready pod -l app.kubernetes.io/name=$release --timeout=5m
+          fi

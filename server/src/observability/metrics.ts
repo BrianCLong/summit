@@ -21,7 +21,15 @@ import {
   intelgraphGlassBoxRunDurationMs as glassBoxRunDurationMs,
   intelgraphGlassBoxCacheHits as glassBoxCacheHits,
   intelgraphCacheHits as cacheHits,
-  intelgraphCacheMisses as cacheMisses
+  intelgraphCacheMisses as cacheMisses,
+  copilotApiRequestTotal,
+  copilotApiRequestDurationMs,
+  // Maestro Metrics
+  maestroDagExecutionDurationSeconds,
+  maestroJobExecutionDurationSeconds,
+  // LLM Metrics
+  llmTokensTotal,
+  llmRequestDuration
 } from '../monitoring/metrics.js';
 
 export { registry };
@@ -42,7 +50,13 @@ export {
   glassBoxRunDurationMs,
   glassBoxCacheHits,
   cacheHits,
-  cacheMisses
+  cacheMisses,
+  copilotApiRequestTotal,
+  copilotApiRequestDurationMs,
+  maestroDagExecutionDurationSeconds,
+  maestroJobExecutionDurationSeconds,
+  llmTokensTotal,
+  llmRequestDuration
 };
 
 export const metrics = {
@@ -62,4 +76,10 @@ export const metrics = {
   glassBoxCacheHits,
   cacheHits,
   cacheMisses,
+  copilotApiRequestTotal,
+  copilotApiRequestDurationMs,
+  maestroDagExecutionDurationSeconds,
+  maestroJobExecutionDurationSeconds,
+  llmTokensTotal,
+  llmRequestDuration
 };

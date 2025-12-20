@@ -1,182 +1,213 @@
-# 4TH-ORDER ENTERPRISE SUPERLAYER
+# 4th-Order Enterprise Superlayer
 
-Every implementation, regardless of agent, MUST consider these overarching principles.
+Every implementation, regardless of agent, MUST adhere to these enterprise-level constraints.
 
-## GOVERNANCE
-
-### Maintainability
-- Code should be easier to change than it was before
-- Reduce cognitive load for future developers
-- Improve discoverability of functionality
-- Clear separation of concerns
-- Explicit over implicit
-
-### Auditability
-- All changes traceable to requirements
-- Comprehensive logging at boundaries
-- Structured events for analysis
-- Clear data lineage
-- Change history preserved
-
-### Policy Compliance
-- Legal requirements embedded
-- Security policies enforced
-- Data governance rules applied
-- Privacy requirements met
-- Regulatory compliance maintained
+This layer governs ALL subordinate prompts.
 
 ---
 
-## OPERATIONS
+## Governance
 
-### Reliability
+All code changes must:
+
+- Strengthen long-term maintainability
+- Improve auditability and provenance
+- Embed policy compliance (legal, security, data governance)
+- Support future regulatory requirements
+- Enable organizational knowledge transfer
+
+### Compliance Checkpoints
+
+- [ ] Data classification labels applied
+- [ ] Audit logging implemented
+- [ ] Policy hooks present
+- [ ] Provenance chain maintained
+- [ ] Retention policies respected
+
+---
+
+## Operations
+
+All changes must:
+
 - Reduce future operational load
-- Lower Mean Time To Recovery (MTTR)
-- Increase system resilience
-- Graceful degradation
-- Circuit breakers and bulkheads
+- Lower MTTR (Mean Time To Recovery)
+- Increase system reliability
+- Improve incident response capability
+- Support capacity planning
 
-### Observability
-- Structured logging with context
-- Distributed tracing
-- Metrics at all boundaries
-- Health checks and readiness probes
-- SLI/SLO tracking
+### Operational Excellence Criteria
 
-### Scalability
-- Horizontal scaling support
-- Resource efficiency
-- Performance under load
-- Cost optimization
-- Capacity planning data
-
----
-
-## SECURITY
-
-### Defense in Depth
-- Multiple security layers
-- Zero trust architecture
-- Principle of least privilege
-- Secure by default
-- Fail securely
-
-### Data Protection
-- Encryption at rest and in transit
-- PII/PHI handling
-- Data retention policies
-- Secure data disposal
-- Access control and audit
-
-### Threat Mitigation
-- Input validation
-- Output encoding
-- SQL injection prevention
-- XSS prevention
-- CSRF protection
-- Rate limiting
-- DDoS mitigation
-
----
-
-## ARCHITECTURE
-
-### Coupling Reduction
-- Loose coupling between services
-- Interface-based design
-- Dependency injection
-- Event-driven where appropriate
-- Minimize shared state
-
-### Coherence Improvement
-- Consistent patterns
-- Clear boundaries
-- Unified error handling
-- Standard logging format
-- Shared vocabulary
-
-### Drift Prevention
-- Align with existing patterns
-- Document deviations
-- Refactor toward standards
-- Remove obsolete code
-- Keep dependencies current
-
-### Module Clarity
-- Single responsibility
-- Clear interfaces
-- Documented contracts
-- Testable in isolation
-- Understandable purpose
-
----
-
-## ORGANIZATIONAL EFFECTIVENESS
-
-### Developer Experience
-- Clear documentation
-- Helpful error messages
-- Fast feedback loops
-- Easy local development
-- Comprehensive examples
-
-### Knowledge Transfer
-- Self-documenting code
-- Architecture Decision Records
-- Runbooks for operations
-- Troubleshooting guides
-- Learning resources
-
-### Velocity Sustainability
-- Technical debt management
-- Continuous refactoring
-- Test coverage maintenance
-- CI/CD reliability
-- Deployment confidence
-
----
-
-## IMPLEMENTATION CHECKLIST
-
-Before considering any task complete, verify:
-
-### Governance
-- [ ] Code is more maintainable than before
-- [ ] Changes are fully auditable
-- [ ] All policies complied with
-- [ ] Documentation complete
-- [ ] Knowledge captured
-
-### Operations
-- [ ] Reliability improved or maintained
-- [ ] Full observability instrumented
-- [ ] Scalability considered
-- [ ] Resource usage optimized
+- [ ] Health checks implemented
+- [ ] Graceful degradation supported
 - [ ] Runbooks updated
-
-### Security
-- [ ] Multiple security layers
-- [ ] Data protection verified
-- [ ] Threats mitigated
-- [ ] Security review passed
-- [ ] Penetration testing considered
-
-### Architecture
-- [ ] Coupling reduced
-- [ ] Coherence improved
-- [ ] No architectural drift
-- [ ] Module boundaries clear
-- [ ] Patterns followed
-
-### Organization
-- [ ] Developer experience improved
-- [ ] Knowledge transfer artifacts created
-- [ ] Velocity sustained or improved
-- [ ] Team confidence increased
-- [ ] Future changes easier
+- [ ] Alerts configured
+- [ ] SLIs/SLOs defined
 
 ---
 
-This layer governs ALL subordinate prompts and ALL agent outputs.
+## Security
 
-**Failure to consider 4th-order implications is delivery failure, regardless of technical correctness.**
+All implementations must:
+
+- Leverage systemic, not superficial, security
+- Harden interfaces and boundaries
+- Treat logs, events, and metrics as security artifacts
+- Implement defense in depth
+- Follow principle of least privilege
+
+### Security Validation
+
+- [ ] Input validation at boundaries
+- [ ] Output encoding applied
+- [ ] Authentication verified
+- [ ] Authorization enforced
+- [ ] Secrets management compliant
+- [ ] No sensitive data in logs
+
+---
+
+## Architecture
+
+All changes must:
+
+- Reduce coupling between modules
+- Increase cohesion within modules
+- Remove architectural drift
+- Improve module clarity
+- Support evolutionary architecture
+
+### Architecture Quality Gates
+
+- [ ] Interface contracts stable
+- [ ] Dependency direction correct
+- [ ] Abstraction levels appropriate
+- [ ] Bounded contexts respected
+- [ ] API versioning maintained
+
+---
+
+## Organizational Effectiveness
+
+All implementations must:
+
+- Reduce cognitive load for new developers
+- Improve discovery of modules and responsibilities
+- Ensure feature velocity improves over time
+- Support team autonomy
+- Enable parallel development
+
+### Developer Experience Metrics
+
+- [ ] Documentation current
+- [ ] Examples provided
+- [ ] Error messages helpful
+- [ ] Debug paths clear
+- [ ] Onboarding friction reduced
+
+---
+
+## Quality Dimensions
+
+### Code Quality
+
+```
+Maintainability = Readability + Testability + Modifiability
+```
+
+- Clean code principles applied
+- Single responsibility adhered to
+- DRY without over-abstraction
+- YAGNI enforced
+
+### Test Quality
+
+```
+Confidence = Coverage × Relevance × Determinism
+```
+
+- Unit tests for logic
+- Integration tests for boundaries
+- E2E tests for critical paths
+- No flaky tests
+
+### Documentation Quality
+
+```
+Usefulness = Accuracy × Discoverability × Timeliness
+```
+
+- README current
+- API docs generated
+- Architecture decisions recorded (ADRs)
+- Runbooks maintained
+
+---
+
+## Enterprise Integration Points
+
+### Provenance & SBOM
+
+All builds must:
+
+- Generate Software Bill of Materials
+- Sign artifacts
+- Maintain build provenance
+- Support SLSA Level 3
+
+### Observability Stack
+
+All services must:
+
+- Export metrics (Prometheus format)
+- Emit structured logs (JSON)
+- Propagate trace context (OpenTelemetry)
+- Expose health endpoints
+
+### Policy Engine
+
+All access decisions must:
+
+- Pass through OPA evaluation
+- Log authorization decisions
+- Support policy versioning
+- Enable policy simulation
+
+---
+
+## Enforcement
+
+This 4th-order layer is enforced through:
+
+1. **Automated checks** - CI/CD gates
+2. **Code review** - Human validation
+3. **Architecture review** - Design validation
+4. **Security review** - Threat modeling
+5. **Operations review** - Runbook validation
+
+No code ships without satisfying all four orders of requirements.
+
+---
+
+## Hierarchy
+
+```
+┌─────────────────────────────────────────────┐
+│  4th Order: Enterprise Governance           │
+│  ┌───────────────────────────────────────┐  │
+│  │  3rd Order: Architecture/Ecosystem    │  │
+│  │  ┌─────────────────────────────────┐  │  │
+│  │  │  2nd Order: Implied Requirements│  │  │
+│  │  │  ┌───────────────────────────┐  │  │  │
+│  │  │  │  1st Order: Explicit Reqs │  │  │  │
+│  │  │  └───────────────────────────┘  │  │  │
+│  │  └─────────────────────────────────┘  │  │
+│  └───────────────────────────────────────┘  │
+└─────────────────────────────────────────────┘
+```
+
+Each inner layer must satisfy all outer layers.
+
+---
+
+This superlayer applies to ALL agent outputs, regardless of which specialized agent generated the code.

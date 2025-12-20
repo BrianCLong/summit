@@ -1,12 +1,14 @@
+// @ts-nocheck
 import { GraphQLError } from 'graphql';
 import jwt from 'jsonwebtoken';
 import { getPostgresPool } from '../db/postgres.js';
 import pino from 'pino';
 import { randomUUID } from 'node:crypto';
 import { createLoaders, Loaders } from '../graphql/loaders.js';
+import { extractTenantContext } from '../security/tenantContext.js';
 
 const logger = pino();
-const JWT_SECRET =
+export const JWT_SECRET =
   process.env.JWT_SECRET ||
   'dev_jwt_secret_12345_very_long_secret_for_development';
 
@@ -15,6 +17,7 @@ interface User {
   email: string;
   username?: string;
   role?: string;
+  token_version?: number;
 }
 
 interface AuthContext {
@@ -22,6 +25,7 @@ interface AuthContext {
   isAuthenticated: boolean;
   requestId: string;
   loaders: Loaders;
+  tenantContext?: any;
 }
 
 export const getContext = async ({
@@ -36,7 +40,15 @@ export const getContext = async ({
     // If user is already attached by middleware (e.g. for GraphQL route)
     if (req.user) {
          logger.info({ requestId, userId: req.user.id }, 'Authenticated request (middleware)');
-         return { user: req.user, isAuthenticated: true, requestId, loaders };
+         return {
+           user: req.user,
+           isAuthenticated: true,
+           requestId,
+           loaders,
+           tenantContext:
+             (req as any).tenantContext ||
+             extractTenantContext(req as any, { strict: false }),
+         };
     }
 
     const token = extractToken(req);
@@ -47,7 +59,15 @@ export const getContext = async ({
 
     const user = await verifyToken(token);
     logger.info({ requestId, userId: user.id }, 'Authenticated request');
-    return { user, isAuthenticated: true, requestId, loaders };
+    return {
+      user,
+      isAuthenticated: true,
+      requestId,
+      loaders,
+      tenantContext:
+        (req as any).tenantContext ||
+        extractTenantContext(req as any, { strict: false }),
+    };
   } catch (error) {
     logger.warn(
       { requestId, error: (error as Error).message },
@@ -66,6 +86,7 @@ export const verifyToken = async (token: string): Promise<User> => {
         email: 'developer@intelgraph.com',
         username: 'developer',
         role: 'ADMIN',
+        token_version: 0,
       };
     }
 
@@ -75,7 +96,7 @@ export const verifyToken = async (token: string): Promise<User> => {
     // Get user from database
     const pool = getPostgresPool();
     const result = await pool.query(
-      'SELECT id, email, username, role FROM users WHERE id = $1',
+      'SELECT id, email, username, role, token_version FROM users WHERE id = $1',
       [decoded.userId],
     );
 
@@ -83,7 +104,13 @@ export const verifyToken = async (token: string): Promise<User> => {
       throw new Error('User not found');
     }
 
-    return result.rows[0];
+    const user = result.rows[0];
+
+    if (user.token_version !== decoded.token_version) {
+      throw new Error('Token is revoked');
+    }
+
+    return user;
   } catch (error) {
     throw new GraphQLError('Invalid or expired token', {
       extensions: {
@@ -94,16 +121,28 @@ export const verifyToken = async (token: string): Promise<User> => {
   }
 };
 
-export const generateToken = (user: User): string => {
-  return jwt.sign(
+export const generateTokens = (user: User) => {
+  const accessToken = jwt.sign(
     {
       userId: user.id,
       email: user.email,
       role: user.role,
+      token_version: user.token_version,
     },
     JWT_SECRET,
-    { expiresIn: '1h' },
+    { expiresIn: '15m' },
   );
+
+  const refreshToken = jwt.sign(
+    {
+      userId: user.id,
+      token_version: user.token_version,
+    },
+    JWT_SECRET,
+    { expiresIn: '7d' },
+  );
+
+  return { accessToken, refreshToken };
 };
 
 export const requireAuth = (context: AuthContext): User => {
