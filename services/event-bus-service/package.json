@@ -16,6 +16,7 @@
     "@intelgraph/cqrs": "workspace:*",
     "@intelgraph/messaging": "workspace:*",
     "@intelgraph/event-streaming": "workspace:*",
+    "express": "^5.0.1",
     "express": "^5.2.0",
     "pino": "^9.0.0",
     "pino-http": "^10.0.0",

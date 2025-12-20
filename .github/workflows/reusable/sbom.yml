@@ -1,32 +1,101 @@
-name: sbom
+name: Reusable SBOM
 
 on:
   workflow_call:
+    inputs:
+      service:
+        description: Service identifier used for SBOM naming (sbom.<service>.json).
+        required: true
+        type: string
+      working-directory:
+        description: Relative path to the service root to scan.
+        required: false
+        default: .
+        type: string
     secrets:
       NODE_AUTH_TOKEN:
         required: false
 
 permissions:
   contents: read
-  id-token: write
 
 jobs:
   sbom:
-    name: sbom
+    name: Generate SBOM
     runs-on: ubuntu-latest
+    outputs:
+      sbom-path: ${{ steps.generate.outputs.sbom-path }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Generate SPDX SBOM
-        uses: anchore/sbom-action@v0
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          path: .
-          output-file: sbom.spdx.json
+          node-version: 20
+          cache: pnpm
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Install Syft
+        uses: anchore/sbom-action/download-syft@v0
+
+      - name: Generate SPDX SBOM
+        id: generate
+        env:
+          SERVICE_NAME: ${{ inputs.service }}
+          SERVICE_PATH: ${{ inputs.working-directory }}
+        run: |
+          set -eo pipefail
+          mkdir -p artifacts/sbom
+
+          pnpm dlx ts-node --esm - <<'EOF'
+          import fs from 'node:fs/promises';
+          import path from 'node:path';
+          import { createSBOMGenerator } from './.github/scanners/sbom-generator.ts';
+
+          const service = process.env.SERVICE_NAME;
+          const targetPath = process.env.SERVICE_PATH || '.';
+
+          if (!service) {
+            console.error('SERVICE_NAME is required for SBOM generation.');
+            process.exit(1);
+          }
+
+          const generator = createSBOMGenerator();
+          const outputPath = path.join(process.cwd(), 'artifacts', 'sbom', `sbom.${service}.json`);
+
+          const result = await generator.generateSBOM({
+            target: path.resolve(targetPath),
+            outputPath,
+            format: 'spdx-json',
+            excludePatterns: [
+              '**/node_modules/.cache/**',
+              '**/dist/**',
+              '**/.git/**',
+              '**/coverage/**',
+            ],
+          });
+
+          if (!result.success || !result.sbomPath) {
+            console.error('SBOM generation failed', result.errors);
+            process.exit(1);
+          }
+
+          await fs.mkdir(path.dirname(outputPath), { recursive: true });
+          console.log(`SBOM written to ${result.sbomPath}`);
+
+          if (process.env.GITHUB_OUTPUT) {
+            await fs.appendFile(process.env.GITHUB_OUTPUT, `sbom-path=${result.sbomPath}\n`);
+          }
+          EOF
 
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sbom-spdx
-          path: sbom.spdx.json
-          retention-days: 7
+          name: sbom-${{ inputs.service }}
+          path: artifacts/sbom/sbom.${{ inputs.service }}.json
+          retention-days: 30

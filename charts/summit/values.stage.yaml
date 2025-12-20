@@ -1,0 +1,6 @@
+image:
+  repository: ghcr.io/BrianCLong/summit
+  tag: stage
+ingress:
+  hosts:
+    - host: summit-stage.example.com

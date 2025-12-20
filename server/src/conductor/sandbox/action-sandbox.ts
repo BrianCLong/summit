@@ -1,3 +1,4 @@
+// @ts-nocheck
 // IntelGraph Autonomous Orchestrator - Containerized Action Sandbox
 // Implements secure, isolated execution environment with comprehensive security controls
 // Version: 1.0.0

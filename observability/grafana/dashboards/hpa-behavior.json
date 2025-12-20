@@ -1,0 +1,94 @@
+{
+  "title": "HPA & KEDA Behavior",
+  "timezone": "utc",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Replica count",
+      "targets": [
+        {
+          "expr": "kube_deployment_status_replicas{deployment=~\".*web.*\"}",
+          "legendFormat": "{{deployment}} replicas"
+        }
+      ],
+      "id": 1
+    },
+    {
+      "type": "timeseries",
+      "title": "CPU utilization",
+      "targets": [
+        {
+          "expr": "avg by (deployment) (rate(container_cpu_usage_seconds_total{container!='',deployment=~\".*web.*\"}[2m]))",
+          "legendFormat": "{{deployment}} cpu"
+        }
+      ],
+      "id": 2
+    },
+    {
+      "type": "timeseries",
+      "title": "Queue depth",
+      "targets": [
+        {
+          "expr": "web_queue_depth",
+          "legendFormat": "web queue"
+        },
+        {
+          "expr": "kafka_consumergroup_lag{consumergroup=~\"intelgraph-perf\"}",
+          "legendFormat": "consumer lag"
+        }
+      ],
+      "id": 3
+    },
+    {
+      "type": "timeseries",
+      "title": "Scale decisions",
+      "targets": [
+        {
+          "expr": "kube_hpa_status_current_replicas{hpa=~\".*web.*\"}",
+          "legendFormat": "web current"
+        },
+        {
+          "expr": "kube_hpa_status_desired_replicas{hpa=~\".*web.*\"}",
+          "legendFormat": "web desired"
+        }
+      ],
+      "id": 4
+    },
+    {
+      "type": "timeseries",
+      "title": "Agent queue latency & cost signals",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(agent_workload_queue_wait_seconds_bucket[5m]))",
+          "legendFormat": "p95 queue wait (s)"
+        },
+        {
+          "expr": "max_over_time(agent_queue_slo_pressure{queue=\"agent-default\"}[5m])",
+          "legendFormat": "SLO pressure"
+        },
+        {
+          "expr": "max_over_time(agent_queue_cost_pressure{queue=\"agent-default\"}[5m])",
+          "legendFormat": "Cost pressure"
+        }
+      ],
+      "id": 5
+    },
+    {
+      "type": "timeseries",
+      "title": "Agent queue desired vs actual replicas",
+      "targets": [
+        {
+          "expr": "max(agent_queue_desired_replicas)",
+          "legendFormat": "Desired replicas (signal)"
+        },
+        {
+          "expr": "kube_deployment_status_replicas{deployment=~\"agent-worker|agent-workload-runner\"}",
+          "legendFormat": "{{deployment}} replicas"
+        }
+      ],
+      "id": 6
+    }
+  ],
+  "schemaVersion": 37,
+  "version": 1
+}

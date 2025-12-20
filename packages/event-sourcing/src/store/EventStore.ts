@@ -103,6 +103,7 @@ export class EventStore {
     events: DomainEvent[],
     expectedVersion?: number
   ): Promise<void> {
+    if (events.length === 0) return;
     if (events.length === 0) {return;}
 
     const client = await this.pool.connect();

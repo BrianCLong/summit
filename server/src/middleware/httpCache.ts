@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import etag from 'etag';
+import config from '../config/index.js';
 
 /**
  * Middleware to handle ETag generation and 304 Not Modified responses for GET requests.
@@ -10,12 +11,33 @@ export const httpCacheMiddleware = (req: Request, res: Response, next: NextFunct
   if (req.method !== 'GET') {
     // For non-GET, we might want to disable caching explicitly
     res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('Pragma', 'no-cache');
     return next();
   }
 
-  // Default Cache-Control for API
-  // public, max-age=0, must-revalidate is good for fresh content that needs validation
-  res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+  const staleWhileRevalidate = config.cache.staleWhileRevalidateSeconds;
+  const browserTtl = Math.max(config.cdn.browserTtlSeconds, 0);
+  const edgeTtl = Math.max(config.cdn.edgeTtlSeconds, browserTtl);
+
+  res.setHeader(
+    'Cache-Control',
+    `public, max-age=${browserTtl}, stale-while-revalidate=${staleWhileRevalidate}`,
+  );
+
+  if (config.cdn.enabled) {
+    const surrogateKey = `${config.cdn.surrogateKeyNamespace} ${
+      req.baseUrl || req.path
+    }`.trim();
+    res.setHeader(
+      'CDN-Cache-Control',
+      `max-age=${edgeTtl}, stale-while-revalidate=${staleWhileRevalidate}`,
+    );
+    res.setHeader(
+      'Surrogate-Control',
+      `max-age=${edgeTtl}, stale-while-revalidate=${staleWhileRevalidate}`,
+    );
+    res.setHeader('Surrogate-Key', surrogateKey);
+  }
 
   // Intercept response to generate ETag
   const originalSend = res.send;

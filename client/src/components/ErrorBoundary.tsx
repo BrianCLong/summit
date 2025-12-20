@@ -21,25 +21,38 @@ class ErrorBoundary extends React.Component<Props, State> {
   public componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('ErrorBoundary caught error:', error, errorInfo);
 
-    // Log to backend
-    // We use a fire-and-forget approach here to not block the UI
-    fetch('/telemetry/events', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        // Attempt to extract tenant ID if available in localStorage
-        'x-tenant-id': localStorage.getItem('tenantId') || 'unknown'
+    const payload = JSON.stringify({
+      event: 'ui_error_boundary',
+      labels: {
+        component: this.props.componentName || 'unknown',
+        message: error.message,
+        tenantId: localStorage.getItem('tenantId') || 'unknown',
+        // Truncate stack if too long
+        stack: errorInfo.componentStack?.substring(0, 1000),
       },
-      body: JSON.stringify({
-        event: 'ui_error_boundary',
-        labels: {
-          component: this.props.componentName || 'unknown',
-          message: error.message,
-          // Truncate stack if too long
-          stack: errorInfo.componentStack?.substring(0, 1000)
-        }
-      })
-    }).catch(e => console.error('Failed to report error to backend:', e));
+    });
+
+    try {
+      const url = '/monitoring/telemetry/events';
+      if (navigator.sendBeacon) {
+        const blob = new Blob([payload], { type: 'application/json' });
+        navigator.sendBeacon(url, blob);
+      } else {
+        fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            // Attempt to extract tenant ID if available in localStorage
+            'x-tenant-id': localStorage.getItem('tenantId') || 'unknown',
+          },
+          body: payload,
+          keepalive: true,
+          mode: 'cors',
+        }).catch((e) => console.error('Failed to report error to backend:', e));
+      }
+    } catch (telemetryError) {
+      console.error('Failed to initiate telemetry send:', telemetryError);
+    }
   }
 
   public render() {

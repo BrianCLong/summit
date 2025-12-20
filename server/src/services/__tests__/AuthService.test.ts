@@ -14,15 +14,17 @@ import { jest } from '@jest/globals';
 import AuthService from '../AuthService';
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
-import type { Pool, PoolClient } from 'pg';
+import type { Pool } from 'pg';
+import { getPostgresPool } from '../../config/database.js';
 
 // Mock dependencies
 jest.mock('argon2');
 jest.mock('jsonwebtoken');
-jest.mock('../config/database.js', () => ({
+jest.mock('../../config/database.js', () => ({
   getPostgresPool: jest.fn(() => mockPool),
 }));
-jest.mock('../config/index.js', () => ({
+jest.mock('../../config/index.js', () => ({
+  __esModule: true,
   default: {
     jwt: {
       secret: 'test-secret-key',
@@ -32,7 +34,7 @@ jest.mock('../config/index.js', () => ({
 }));
 
 let mockPool: jest.Mocked<Pool>;
-let mockClient: jest.Mocked<PoolClient>;
+let mockClient: any;
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -49,9 +51,11 @@ describe('AuthService', () => {
 
     // Mock PostgreSQL pool
     mockPool = {
-      connect: jest.fn().mockResolvedValue(mockClient),
+      connect: (jest.fn() as any).mockResolvedValue(mockClient),
       query: jest.fn(),
     } as any;
+
+    (getPostgresPool as jest.Mock).mockReturnValue(mockPool);
 
     authService = new AuthService();
   });
@@ -72,8 +76,8 @@ describe('AuthService', () => {
       const mockToken = 'jwt-token-123';
       const mockRefreshToken = 'refresh-token-456';
 
-      (argon2.hash as jest.Mock).mockResolvedValue(mockHashedPassword);
-      (jwt.sign as jest.Mock).mockReturnValue(mockToken);
+      (argon2.hash as any).mockResolvedValue(mockHashedPassword);
+      (jwt.sign as any).mockReturnValue(mockToken);
 
       mockClient.query.mockResolvedValueOnce(undefined); // BEGIN
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // Check existing user
@@ -128,8 +132,8 @@ describe('AuthService', () => {
       };
 
       const mockHashedPassword = '$argon2id$v=19$m=65536$...';
-      (argon2.hash as jest.Mock).mockResolvedValue(mockHashedPassword);
-      (jwt.sign as jest.Mock).mockReturnValue('jwt-token');
+      (argon2.hash as any).mockResolvedValue(mockHashedPassword);
+      (jwt.sign as any).mockReturnValue('jwt-token');
 
       mockClient.query.mockResolvedValueOnce(undefined); // BEGIN
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // Check existing user
@@ -155,7 +159,7 @@ describe('AuthService', () => {
     });
 
     it('should rollback on database error', async () => {
-      (argon2.hash as jest.Mock).mockResolvedValue('hashed-password');
+      (argon2.hash as any).mockResolvedValue('hashed-password');
 
       mockClient.query.mockResolvedValueOnce(undefined); // BEGIN
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // Check existing user
@@ -170,8 +174,8 @@ describe('AuthService', () => {
 
     it('should hash password using argon2', async () => {
       const mockHashedPassword = '$argon2id$v=19$m=65536$...';
-      (argon2.hash as jest.Mock).mockResolvedValue(mockHashedPassword);
-      (jwt.sign as jest.Mock).mockReturnValue('jwt-token');
+      (argon2.hash as any).mockResolvedValue(mockHashedPassword);
+      (jwt.sign as any).mockReturnValue('jwt-token');
 
       mockClient.query.mockResolvedValueOnce(undefined); // BEGIN
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // Check existing user
@@ -215,8 +219,8 @@ describe('AuthService', () => {
       mockClient.query.mockResolvedValueOnce(undefined); // Update last_login
       mockClient.query.mockResolvedValueOnce(undefined); // Insert session
 
-      (argon2.verify as jest.Mock).mockResolvedValue(true);
-      (jwt.sign as jest.Mock).mockReturnValue('jwt-token');
+      (argon2.verify as any).mockResolvedValue(true);
+      (jwt.sign as any).mockReturnValue('jwt-token');
 
       const result = await authService.login(mockEmail, mockPassword);
 
@@ -266,7 +270,7 @@ describe('AuthService', () => {
       };
 
       mockClient.query.mockResolvedValueOnce({ rows: [mockUser] });
-      (argon2.verify as jest.Mock).mockResolvedValue(false);
+      (argon2.verify as any).mockResolvedValue(false);
 
       await expect(authService.login(mockEmail, mockPassword)).rejects.toThrow(
         'Invalid credentials',
@@ -287,8 +291,8 @@ describe('AuthService', () => {
       mockClient.query.mockResolvedValueOnce(undefined); // Update last_login
       mockClient.query.mockResolvedValueOnce(undefined); // Insert session
 
-      (argon2.verify as jest.Mock).mockResolvedValue(true);
-      (jwt.sign as jest.Mock).mockReturnValue('jwt-token');
+      (argon2.verify as any).mockResolvedValue(true);
+      (jwt.sign as any).mockReturnValue('jwt-token');
 
       await authService.login(mockEmail, mockPassword);
 
@@ -312,8 +316,8 @@ describe('AuthService', () => {
       mockClient.query.mockResolvedValueOnce(undefined); // Update last_login
       mockClient.query.mockResolvedValueOnce(undefined); // Insert session
 
-      (argon2.verify as jest.Mock).mockResolvedValue(true);
-      (jwt.sign as jest.Mock).mockReturnValue('jwt-token');
+      (argon2.verify as any).mockResolvedValue(true);
+      (jwt.sign as any).mockReturnValue('jwt-token');
 
       const result = await authService.login(mockEmail, mockPassword);
 
@@ -343,7 +347,8 @@ describe('AuthService', () => {
         created_at: new Date(),
       };
 
-      (jwt.verify as jest.Mock).mockReturnValue(mockPayload);
+      (jwt.verify as any).mockReturnValue(mockPayload);
+      (mockPool.query as jest.Mock).mockResolvedValue({ rows: [] } as any);
       mockClient.query.mockResolvedValue({ rows: [mockUser] } as any);
 
       const result = await authService.verifyToken(mockToken);
@@ -357,7 +362,7 @@ describe('AuthService', () => {
     it('should return null for invalid token', async () => {
       const mockToken = 'invalid-token';
 
-      (jwt.verify as jest.Mock).mockImplementation(() => {
+      (jwt.verify as any).mockImplementation(() => {
         throw new Error('Invalid token');
       });
 
@@ -380,7 +385,7 @@ describe('AuthService', () => {
         role: 'ANALYST',
       };
 
-      (jwt.verify as jest.Mock).mockReturnValue(mockPayload);
+      (jwt.verify as any).mockReturnValue(mockPayload);
       mockClient.query.mockResolvedValue({ rows: [] } as any);
 
       const result = await authService.verifyToken(mockToken);
@@ -403,7 +408,7 @@ describe('AuthService', () => {
         created_at: new Date(),
       };
 
-      (jwt.verify as jest.Mock).mockReturnValue(mockPayload);
+      (jwt.verify as any).mockReturnValue(mockPayload);
       mockClient.query.mockResolvedValue({ rows: [mockUser] } as any);
 
       const result = await authService.verifyToken(mockToken);
@@ -560,8 +565,8 @@ describe('AuthService', () => {
       };
 
       mockClient.query.mockResolvedValue({ rows: [mockUser] });
-      (argon2.verify as jest.Mock).mockResolvedValue(true);
-      (jwt.sign as jest.Mock).mockReturnValue('jwt-token');
+      (argon2.verify as any).mockResolvedValue(true);
+      (jwt.sign as any).mockReturnValue('jwt-token');
 
       const loginPromises = Array.from({ length: 5 }, () =>
         authService.login('test@example.com', 'password'),
@@ -603,7 +608,8 @@ describe('AuthService', () => {
         created_at: new Date(),
       };
 
-      (jwt.verify as jest.Mock).mockReturnValue(mockPayload);
+      (jwt.verify as any).mockReturnValue(mockPayload);
+      (mockPool.query as jest.Mock).mockResolvedValue({ rows: [] } as any);
       mockClient.query.mockResolvedValue({ rows: [mockUser] } as any);
 
       const result = await authService.verifyToken(mockToken);

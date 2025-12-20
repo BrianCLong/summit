@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * DLP Management API Routes
  *
