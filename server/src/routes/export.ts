@@ -2,6 +2,7 @@ import { Router } from 'express';
 import crypto from 'crypto';
 import { getPostgresPool } from '../db/postgres.js';
 import { ProvenanceRepo, ProvenanceFilter } from '../repos/ProvenanceRepo.js';
+import { tenantHeader } from '../middleware/tenantHeader.js';
 
 function sign(params: Record<string, string>, secret: string) {
   const base = Object.keys(params)
@@ -13,7 +14,43 @@ function sign(params: Record<string, string>, secret: string) {
 
 function verify(params: Record<string, string>, sig: string, secret: string) {
   const expected = sign(params, secret);
-  return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(sig));
+  const expectedBuf = Buffer.from(expected);
+  const sigBuf = Buffer.from(sig);
+  if (expectedBuf.length !== sigBuf.length) return false;
+  try {
+    return crypto.timingSafeEqual(expectedBuf, sigBuf);
+  } catch {
+    return false;
+  }
+}
+
+function redactForeignTenantIdentifiers(value: any, tenantId: string): any {
+  if (Array.isArray(value)) {
+    return value.map((item) => redactForeignTenantIdentifiers(item, tenantId));
+  }
+  if (value && typeof value === 'object') {
+    return Object.entries(value).reduce((acc, [key, val]) => {
+      const normalizedKey = key.toLowerCase();
+      if (
+        typeof val === 'string' &&
+        normalizedKey.includes('tenant') &&
+        val !== tenantId
+      ) {
+        acc[key] = '[redacted:foreign-tenant]';
+        return acc;
+      }
+      acc[key] = redactForeignTenantIdentifiers(val, tenantId);
+      return acc;
+    }, {} as any);
+  }
+  if (
+    typeof value === 'string' &&
+    value.startsWith('tenant-') &&
+    value !== tenantId
+  ) {
+    return '[redacted:foreign-tenant]';
+  }
+  return value;
 }
 
 // Optional Redis cache/ratelimit
@@ -24,6 +61,8 @@ try {
 } catch {}
 
 export const exportRouter = Router();
+
+exportRouter.use(tenantHeader());
 
 exportRouter.get('/provenance', async (req, res) => {
   try {
@@ -107,13 +146,20 @@ exportRouter.get('/provenance', async (req, res) => {
       } catch {}
     }
 
-    const rows = await repo.by(scope as any, id, filter, first, offset);
+    const rows = await repo.by(scope as any, id, filter, first, offset, tenant);
+
+    const scopedRows = rows
+      .filter((row: any) => !row.tenantId || row.tenantId === tenant)
+      .map((row: any) => ({
+        ...row,
+        metadata: redactForeignTenantIdentifiers(row.metadata, tenant),
+      }));
 
     if (format === 'csv') {
       res.setHeader('Content-Type', 'text/csv');
-      res.setHeader('X-Row-Count', String(rows.length));
+      res.setHeader('X-Row-Count', String(scopedRows.length));
       res.write('id,kind,createdAt,reasonCode\n');
-      for (const r of rows) {
+      for (const r of scopedRows) {
         const line = `${r.id || ''},${r.kind || ''},${new Date(r.createdAt || Date.now()).toISOString()},${
           (r.metadata && (r.metadata.reasonCode || r.metadata.reason_code)) ||
           ''
@@ -123,7 +169,7 @@ exportRouter.get('/provenance', async (req, res) => {
       return res.end();
     }
 
-    const payload = { count: rows.length, data: rows };
+    const payload = { count: scopedRows.length, data: scopedRows };
     if (redis && format === 'json') {
       try {
         await redis.setex(cacheKey, 60, JSON.stringify(payload));

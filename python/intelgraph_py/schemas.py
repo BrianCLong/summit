@@ -90,3 +90,9 @@ class SentimentRequest(BaseModel):
 class OSINTEnrichmentRequest(BaseModel):
     ip: str
     actor_name: str
+
+# --- Mining Schemas ---
+class MiningRequest(BaseModel):
+    text: str
+    source_id: str | None = None
+    language: str | None = "en"

@@ -182,48 +182,14 @@ failureThreshold: {{ $probe.failureThreshold }}
 Volume mounts
 */}}
 {{- define "intelgraph.volumeMounts" -}}
-{{- $mounts := list -}}
-{{- if .Values.common.volumeMounts }}
-  {{- $mounts = concat $mounts .Values.common.volumeMounts -}}
-{{- end }}
-{{- if and .Values.hardening.enabled .Values.hardening.writablePaths }}
-  {{- range .Values.hardening.writablePaths }}
-    {{- $mount := dict "name" .name "mountPath" .mountPath -}}
-    {{- if .readOnly }}
-      {{- $_ := set $mount "readOnly" .readOnly -}}
-    {{- end }}
-    {{- if .subPath }}
-      {{- $_ := set $mount "subPath" .subPath -}}
-    {{- end }}
-    {{- $mounts = append $mounts $mount -}}
-  {{- end }}
-{{- end }}
-{{- toYaml $mounts }}
+{{- toYaml .Values.common.volumeMounts }}
 {{- end }}
 
 {{/*
 Volumes
 */}}
 {{- define "intelgraph.volumes" -}}
-{{- $volumes := list -}}
-{{- if .Values.common.volumes }}
-  {{- $volumes = concat $volumes .Values.common.volumes -}}
-{{- end }}
-{{- if and .Values.hardening.enabled .Values.hardening.writablePaths }}
-  {{- range .Values.hardening.writablePaths }}
-    {{- $volume := dict "name" .name -}}
-    {{- if eq .type "memory" }}
-      {{- $_ := set $volume "emptyDir" (dict "medium" "Memory") -}}
-    {{- else }}
-      {{- $_ := set $volume "emptyDir" (dict) -}}
-    {{- end }}
-    {{- if .sizeLimit }}
-      {{- $_ := set $volume.emptyDir "sizeLimit" .sizeLimit -}}
-    {{- end }}
-    {{- $volumes = append $volumes $volume -}}
-  {{- end }}
-{{- end }}
-{{- toYaml $volumes }}
+{{- toYaml .Values.common.volumes }}
 {{- end }}
 
 {{/*

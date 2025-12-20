@@ -1,0 +1,58 @@
+name: Runbook Drill
+
+on:
+  schedule:
+    - cron: '0 10 1 * *' # Monthly, on the 1st at 10am
+  workflow_dispatch:
+
+jobs:
+  drill-initiation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install pyyaml
+
+      - name: Select Alerts for Drill
+        id: select-alerts
+        run: |
+            # Simplistic selection: pick 3 random alerts from catalog
+            python -c 'import yaml, random, os; catalog = yaml.safe_load(open("observability/alerts/catalog.yaml")); alerts = ",".join([a["id"] for a in random.sample(catalog, min(len(catalog), 3))]);  with open(os.environ["GITHUB_OUTPUT"], "a") as f: f.write(f"alerts={alerts}\n")'
+
+      - name: Create Drill Issue
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const alerts = "${{ steps.select-alerts.outputs.alerts }}".split(',');
+            const body = `
+            # Monthly Runbook Drill
+
+            Time to test our runbooks!
+
+            **Selected Alerts:**
+            ${alerts.map(a => `- [ ] **${a}**: Follow runbook and report findings.`).join('\n')}
+
+            **Instructions:**
+            1. Simulate the alert or review the runbook steps mentally if simulation is risky.
+            2. Verify link validity.
+            3. Check if diagnostics are up to date.
+            4. Comment on this issue with "Evidence Pack" (screenshots, timings).
+            5. Create PRs for any gaps found.
+
+            cc @sre/observability
+            `;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Runbook Drill: ${new Date().toISOString().split('T')[0]}`,
+              body: body,
+              labels: ['runbook-drill']
+            });

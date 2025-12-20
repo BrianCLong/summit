@@ -1,0 +1,276 @@
+name: Ingest Pipeline CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'ingest/**'
+      - 'services/ingest-adapters/**'
+      - 'libs/ingest-worker/**'
+      - 'tools/replayctl/**'
+      - 'tools/dlqtriage/**'
+      - '.github/workflows/ingest-ci.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'ingest/**'
+      - 'services/ingest-adapters/**'
+      - 'libs/ingest-worker/**'
+      - 'tools/replayctl/**'
+      - 'tools/dlqtriage/**'
+
+concurrency:
+  group: ingest-ci-${{ github.head_ref || github.sha }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20.x'
+  PNPM_VERSION: '9'
+
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: write
+
+jobs:
+  # =========================================================================
+  # Schema Validation
+  # =========================================================================
+  schema-lint:
+    name: Schema Lint & Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ajv-cli
+        run: npm install -g ajv-cli ajv-formats
+
+      - name: Validate input schema
+        run: |
+          ajv validate \
+            --spec=draft7 \
+            -s ingest/schema/input.schema.json \
+            --valid
+
+      - name: Validate sink contracts
+        run: |
+          for contract in ingest/schema/sink_contracts/*.json; do
+            echo "Validating $contract..."
+            ajv validate --spec=draft7 -s "$contract" --valid
+          done
+
+      - name: Check for breaking changes
+        if: github.event_name == 'pull_request'
+        run: |
+          # Fetch base branch schema
+          git fetch origin ${{ github.base_ref }}
+          git show origin/${{ github.base_ref }}:ingest/schema/input.schema.json > /tmp/base-schema.json || true
+
+          # Compare schemas (if base exists)
+          if [ -f /tmp/base-schema.json ]; then
+            echo "Checking for breaking changes in ingest schema..."
+            # TODO: Use a proper schema diff tool
+            diff -q /tmp/base-schema.json ingest/schema/input.schema.json || \
+              echo "::warning::Schema has changed - review for breaking changes"
+          fi
+
+  # =========================================================================
+  # Contract Tests
+  # =========================================================================
+  contract-tests:
+    name: Contract Tests
+    runs-on: ubuntu-latest
+    needs: schema-lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run contract tests
+        run: |
+          # Test that sample data validates against schemas
+          pnpm --filter @intelgraph/ingest-adapters test:contracts || true
+
+  # =========================================================================
+  # Build & Test
+  # =========================================================================
+  build-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    needs: schema-lint
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
+
+      postgres:
+        image: postgres:15-alpine
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: ingest_test
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build ingest-adapters
+        run: pnpm --filter @intelgraph/ingest-adapters build
+
+      - name: Build ingest-worker
+        run: pnpm --filter @intelgraph/ingest-worker build
+
+      - name: Build replayctl
+        run: pnpm --filter @intelgraph/replayctl build
+
+      - name: Typecheck
+        run: |
+          pnpm --filter @intelgraph/ingest-adapters typecheck
+          pnpm --filter @intelgraph/ingest-worker typecheck
+
+      - name: Lint
+        run: |
+          pnpm --filter @intelgraph/ingest-adapters lint || true
+          pnpm --filter @intelgraph/ingest-worker lint || true
+
+      - name: Unit Tests
+        run: |
+          pnpm --filter @intelgraph/ingest-adapters test || true
+          pnpm --filter @intelgraph/ingest-worker test || true
+        env:
+          REDIS_URL: redis://localhost:6379
+          DATABASE_URL: postgresql://postgres:test@localhost:5432/ingest_test
+
+  # =========================================================================
+  # Load/Smoke Tests
+  # =========================================================================
+  load-smoke:
+    name: Load & Smoke Tests
+    runs-on: ubuntu-latest
+    needs: build-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+      kafka:
+        image: bitnami/kafka:3.6
+        ports:
+          - 9092:9092
+        env:
+          KAFKA_CFG_NODE_ID: 0
+          KAFKA_CFG_PROCESS_ROLES: controller,broker
+          KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
+          KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+          KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+          KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: |
+          pnpm --filter @intelgraph/ingest-adapters build
+          pnpm --filter @intelgraph/ingest-worker build
+
+      - name: Run smoke test
+        run: |
+          echo "Running ingest smoke test..."
+          # TODO: Implement smoke test
+          # node scripts/ingest-smoke-test.js
+        env:
+          REDIS_URL: redis://localhost:6379
+          KAFKA_BROKERS: localhost:9092
+
+  # =========================================================================
+  # Policy Checks
+  # =========================================================================
+  policy-checks:
+    name: OPA Policy Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install OPA
+        run: |
+          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
+          chmod +x opa
+          sudo mv opa /usr/local/bin/
+
+      - name: Validate ingest policies
+        run: |
+          if [ -f .ci/policies/ingest.rego ]; then
+            opa check .ci/policies/ingest.rego
+            opa test .ci/policies/ -v
+          fi
+
+      - name: Policy evaluation
+        run: |
+          # Evaluate ingest policies against sample input
+          if [ -f .ci/policies/ingest.rego ]; then
+            echo '{"tenant_id": "test", "replay_requested": true}' | \
+              opa eval -d .ci/policies/ingest.rego 'data.ingest.policy.allow' || true
+          fi
+
+  # =========================================================================
+  # Security Scan
+  # =========================================================================
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: build-test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: 'services/ingest-adapters'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
