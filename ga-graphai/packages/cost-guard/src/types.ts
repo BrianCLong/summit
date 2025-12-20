@@ -5,6 +5,24 @@ export interface TenantBudgetProfile {
   concurrencyLimit: number;
 }
 
+export interface WorkloadQueueSignal {
+  queueDepth: number;
+  p95LatencyMs: number;
+  costPerJobUsd: number;
+  budgetConsumptionRatio?: number;
+  saturationRatio?: number;
+}
+
+export type QueueScalingAction = 'scale_up' | 'scale_down' | 'hold';
+
+export interface QueueScalingDecision {
+  action: QueueScalingAction;
+  score: number;
+  recommendedReplicas: number;
+  reason: string;
+  inputs: WorkloadQueueSignal;
+}
+
 export interface QueryPlanSummary {
   estimatedRru: number;
   estimatedLatencyMs: number;

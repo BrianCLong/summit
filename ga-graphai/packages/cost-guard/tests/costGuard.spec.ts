@@ -69,6 +69,31 @@ describe('CostGuard', () => {
     guard.release(record.queryId);
     expect(guard.metrics.activeSlowQueries).toBe(0);
   });
+
+  it('produces adaptive queue scaling signals that blend cost and latency', () => {
+    const guard = new CostGuard({ ...DEFAULT_PROFILE, maxLatencyMs: 1200 });
+    const hotSignal = guard.evaluateQueueScaling({
+      queueDepth: 28,
+      p95LatencyMs: 1800,
+      costPerJobUsd: 0.42,
+      budgetConsumptionRatio: 0.65,
+      saturationRatio: 0.9,
+    });
+
+    expect(hotSignal.action).toBe('scale_up');
+    expect(hotSignal.recommendedReplicas).toBeGreaterThan(guard.metrics.kills + 1);
+
+    const idleSignal = guard.evaluateQueueScaling({
+      queueDepth: 0,
+      p95LatencyMs: 120,
+      costPerJobUsd: 0.55,
+      budgetConsumptionRatio: 0.92,
+      saturationRatio: 0.1,
+    });
+
+    expect(idleSignal.action).toBe('scale_down');
+    expect(idleSignal.score).toBeLessThan(0.4);
+  });
 });
 
 describe('ResourceOptimizationEngine', () => {
