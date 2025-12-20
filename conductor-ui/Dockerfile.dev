@@ -9,7 +9,8 @@ RUN apk add --no-cache git
 COPY package*.json ./
 
 # Install dependencies with dev tools
-RUN npm ci
+RUN npm install -g pnpm
+RUN pnpm install
 
 # Expose port
 EXPOSE 3000

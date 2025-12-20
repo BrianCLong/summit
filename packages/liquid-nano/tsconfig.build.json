@@ -6,7 +6,9 @@
     "declaration": true,
     "declarationMap": true,
     "emitDeclarationOnly": false,
-    "sourceMap": true
+    "sourceMap": true,
+    "noEmit": true,
+    "module": "NodeNext"
   },
   "include": ["src"],
   "exclude": ["__tests__"]

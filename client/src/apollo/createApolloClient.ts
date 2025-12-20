@@ -30,7 +30,7 @@ const refreshToken = async () => {
     return accessToken;
   } catch (error) {
     localStorage.removeItem('token');
-    // Handle refresh failure (e.g., redirect to login)
+    window.location.href = '/login';
     return null;
   }
 };

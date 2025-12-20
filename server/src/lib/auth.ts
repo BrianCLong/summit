@@ -103,7 +103,7 @@ export const generateRefreshToken = (user: User): string => {
   return jwt.sign(
     {
       userId: user.id,
-      // Refresh token does not need email/role
+      token_version: user.token_version,
     },
     REFRESH_TOKEN_SECRET,
     { expiresIn: '7d' },

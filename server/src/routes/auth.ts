@@ -35,7 +35,9 @@ router.post('/refresh_token', async (req, res) => {
     ]);
     const user = UserSchema.parse(result.rows[0]);
 
-    // In a real app, you'd check a token version/blocklist here
+    if (user.token_version !== payload.token_version) {
+      return res.status(401).send({ ok: false, accessToken: '' });
+    }
 
     return res.send({ ok: true, accessToken: generateAccessToken(user) });
   } catch (err) {
