@@ -1,6 +1,4 @@
 {
-  "status": "placeholder",
-  "generatedBy": "scripts/docs/capture_screenshots.sh",
-  "lastUpdated": "2025-12-19T19:47:02Z",
-  "notes": "Playwright will replace placeholder PNGs when UI and Grafana endpoints are reachable."
+  "status": "skipped",
+  "reason": "server_down"
 }
