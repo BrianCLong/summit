@@ -1,0 +1,274 @@
+apiVersion: chronos.v1
+kind: Workflow
+metadata:
+  name: mvp3-ga-release-train
+  namespace: release-train
+spec:
+  inputs:
+    repo: summit-2025.09.23.1710
+    targetVersion: v3.0.0
+    windowUtc: '2025-10-15 02:00 -> 04:00'
+    oncall:
+      - '@sre'
+      - '@platform'
+      - '@security'
+    pilotTenants:
+      - t1
+      - t2
+    gaFlags:
+      - search
+      - realtime
+      - reports
+    budgets:
+      previewDayUsd: 3
+      maxImageMb:
+        gateway: 180
+        web: 220
+        services: 200
+    oidcIssuer: 'https://idp.example.com'
+    scimBaseUrl: 'https://scim.example.com'
+    rto: 30m
+    rpo: 5m
+  tasks:
+    - id: p0-a2-required-checks
+      uses: agent.a2.plan-apply
+      with:
+        phase: P0
+        op: PLAN+APPLY
+        scope:
+          env: dev
+          services:
+            - '*'
+        checks:
+          - slo-gates
+          - migration-gate
+          - supply-chain
+          - performance-gate
+          - policy-ci
+    - id: p0-a5-supply-chain
+      uses: agent.a5.supply-chain
+      needs:
+        - p0-a2-required-checks
+      with:
+        phase: P0
+        op: APPLY
+        scope:
+          env: dev
+          services:
+            - '*'
+        artifacts:
+          - sbom
+          - slsa
+          - cosign-verify
+        policy:
+          verifyAtDeploy: true
+    - id: p0-a3-hardening
+      uses: agent.a3.container-hardening
+      needs:
+        - p0-a5-supply-chain
+      with:
+        phase: P0
+        op: APPLY
+        scope:
+          env: dev
+          services:
+            - gateway
+            - web
+            - services/*
+        constraints:
+          runAsNonRoot: true
+          readOnlyFs: true
+          seccomp: default
+          appArmor: default
+          imageBudgetsMb:
+            gateway: 180
+            web: 220
+            services: 200
+    - id: p1-a4-golden-paths
+      uses: agent.a4.observability
+      needs:
+        - p0-a3-hardening
+      with:
+        phase: P1
+        op: APPLY
+        scope:
+          env: stage
+          services:
+            - '*'
+        probes:
+          - golden-path
+          - synthetic-probes
+        dashboards:
+          - slo
+          - perf-baseline
+    - id: p1-a11-perf-baseline
+      uses: agent.a11.performance
+      needs:
+        - p1-a4-golden-paths
+      with:
+        phase: P1
+        op: RUN
+        scope:
+          env: stage
+          services:
+            - gateway
+            - api
+        headroomTarget: 0.2
+        tool: k6
+        outputs:
+          gate: performance-gate
+    - id: p2-a6-migrations
+      uses: agent.a6.schema
+      needs:
+        - p1-a11-perf-baseline
+      with:
+        phase: P2
+        op: RUN
+        scope:
+          env: stage
+          services:
+            - postgres
+            - neo4j
+        strategy: expand-backfill-cutover-contract
+        parity: shadow
+        rollback: tested
+    - id: p2-a7-data-plane
+      uses: agent.a7.data-plane
+      needs:
+        - p2-a6-migrations
+      with:
+        phase: P2
+        op: APPLY
+        scope:
+          env: stage
+          services:
+            - postgres
+            - redis
+            - typesense
+        controls:
+          pgbouncer: enabled
+          rls: enforced
+          indexCatalog: exported
+          slowQueryLint: true
+    - id: p3-a9-authz
+      uses: agent.a9.authz-compliance
+      needs:
+        - p2-a7-data-plane
+      with:
+        phase: P3
+        op: APPLY
+        scope:
+          env: stage
+          services:
+            - gateway
+            - api
+        obligations:
+          stepUp: webauthn
+          reasonForAccess: required
+          auditChain: hash
+    - id: p3-identity-sidecar
+      uses: agent.identity.sidecar
+      needs:
+        - p3-a9-authz
+      with:
+        phase: P3
+        op: VERIFY
+        scope:
+          env: stage
+          services:
+            - identity
+        checks:
+          - oidc
+          - webauthn
+          - scim
+        outcomes:
+          decisionLogs: collected
+          denyMetrics: recorded
+    - id: p4-runtime-ga
+      uses: agent.a12-15.product-ga
+      needs:
+        - p3-identity-sidecar
+      with:
+        phase: P4
+        op: APPLY
+        scope:
+          env: stage
+          services:
+            - realtime
+            - reports
+            - search
+            - ingest
+        targets:
+          realtime: resume
+          reports: deterministic
+          search: alias-swap
+          ingest: backpressure
+        lagSloSeconds: 60
+    - id: p5-a10-drill
+      uses: agent.a10.dr-bcp
+      needs:
+        - p4-runtime-ga
+      with:
+        phase: P5
+        op: RUN
+        scope:
+          env: stage
+          services:
+            - postgres
+            - redis
+            - neo4j
+        objectives:
+          rto: 30m
+          rpo: 5m
+        evidence:
+          - failover
+          - cutback
+    - id: p5-a16-chaos
+      uses: agent.a16.chaos
+      needs:
+        - p5-a10-drill
+      with:
+        phase: P5
+        op: RUN
+        scope:
+          env: stage
+          services:
+            - gateway
+            - api
+        drill:
+          recoveryMinutes: 5
+          autoRollback: true
+    - id: p6-a1-release-train
+      uses: agent.a1.release-train
+      needs:
+        - p5-a16-chaos
+      with:
+        phase: P6
+        op: PROMOTE
+        scope:
+          env: prod
+          services:
+            - '*'
+        canary: [10, 50, 100]
+        requiredGates:
+          - slo
+          - perf
+          - supply_chain
+          - migrations
+          - policy
+        outputs:
+          evidence: artifacts/release/v3.0.0/evidence.zip
+          releaseNotes: release_notes/v3.0.0.md
+    - id: p8-a1-kpi-check
+      uses: agent.a1.kpi-post-ga
+      needs:
+        - p6-a1-release-train
+      with:
+        phase: P8
+        op: VERIFY
+        scope:
+          env: prod
+          services:
+            - '*'
+        schedule: '+24h'
+        regressionTickets: auto-filed

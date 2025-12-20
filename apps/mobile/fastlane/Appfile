@@ -1,0 +1,4 @@
+app_identifier("com.intelgraph.mobile")
+apple_id("dev@intelgraph.com")
+itc_team_id("12345678")
+team_id("87654321")

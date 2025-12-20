@@ -1,0 +1,73 @@
+{
+  "dashboard": {
+    "title": "Adapters - Dead Letter Queue",
+    "tags": ["intelgraph", "adapters", "dlq"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "DLQ Depth",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum by (adapter) (adapter_dlq_messages_total)",
+            "legendFormat": "{{adapter}} depth",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
+      },
+      {
+        "id": 2,
+        "title": "Oldest Message Age (minutes)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "max by (adapter) (adapter_dlq_oldest_age_seconds) / 60",
+            "legendFormat": "{{adapter}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
+      },
+      {
+        "id": 3,
+        "title": "Ingest vs Replay",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum by (adapter) (rate(adapter_dlq_incoming_total[5m]))",
+            "legendFormat": "{{adapter}} incoming",
+            "refId": "A"
+          },
+          {
+            "expr": "sum by (adapter) (rate(adapter_dlq_replayed_total[5m]))",
+            "legendFormat": "{{adapter}} replayed",
+            "refId": "B"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 }
+      },
+      {
+        "id": 4,
+        "title": "Replay Success vs Failures",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum by (adapter) (rate(adapter_dlq_replay_outcomes_total{outcome=\"success\"}[5m]))",
+            "legendFormat": "{{adapter}} success",
+            "refId": "A"
+          },
+          {
+            "expr": "sum by (adapter) (rate(adapter_dlq_replay_outcomes_total{outcome=\"failed\"}[5m]))",
+            "legendFormat": "{{adapter}} failed",
+            "refId": "B"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 }
+      }
+    ],
+    "refresh": "15s",
+    "time": { "from": "now-6h", "to": "now" }
+  }
+}
