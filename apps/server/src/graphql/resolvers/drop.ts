@@ -2,6 +2,8 @@ import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs/promises';
 import path from 'path';
 import axios from 'axios';
+import { validateAndSanitizeDropInput } from '../../security/validation.js';
+import { securityLogger } from '../../observability/securityLogger.js';
 
 const QUARANTINE_DIR =
   process.env.QUARANTINE_DIR || path.join(process.cwd(), 'quarantine');
@@ -12,20 +14,19 @@ const LAC_URL = process.env.LAC_URL || 'http://localhost:7103'; // Assuming LAC 
 fs.mkdir(QUARANTINE_DIR, { recursive: true }).catch(console.error);
 
 export const dropResolvers = {
+  Query: {
+    health: () => 'ok',
+  },
   Mutation: {
-    submitDrop: async (
-      _: any,
-      { input }: { input: { payload: string; metadata?: string } },
-    ) => {
+    submitDrop: async (_: any, { input }: { input: { payload: string; metadata?: string } }) => {
       const dropId = uuidv4();
       const quarantinePath = path.join(QUARANTINE_DIR, `${dropId}.drop`);
 
       try {
+        const sanitized = validateAndSanitizeDropInput(input);
+
         // 1. Store raw payload in quarantine
-        await fs.writeFile(
-          quarantinePath,
-          Buffer.from(input.payload, 'base64'),
-        );
+        await fs.writeFile(quarantinePath, sanitized.payload);
 
         let status = 'QUARANTINED';
         let reason = 'Stored in quarantine, awaiting verification.';
@@ -65,9 +66,20 @@ export const dropResolvers = {
           // Reason already set based on failures
         }
 
+        securityLogger.logEvent('drop_submission', {
+          level: 'info',
+          id: dropId,
+          status,
+          metadataKeys: sanitized.metadata ? Object.keys(sanitized.metadata) : [],
+        });
+
         return { id: dropId, status, reason };
       } catch (error: any) {
-        console.error(`Error submitting drop ${dropId}:`, error);
+        securityLogger.logEvent('drop_submission', {
+          level: 'error',
+          id: dropId,
+          message: error?.message,
+        });
         return {
           id: dropId,
           status: 'QUARANTINED',

@@ -1,0 +1,77 @@
+name: Branch Hygiene
+
+on:
+  schedule:
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  stale-prs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close stale PRs
+        uses: actions/stale@v9
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          days-before-stale: 30
+          days-before-close: 7
+          exempt-pr-labels: 'release/**,hotfix/**'
+          stale-pr-message: |
+            This pull request has been marked stale after 30 days of inactivity. Please comment or push updates to keep it open.
+          close-pr-message: |
+            Closing due to inactivity. Reopen if still needed.
+          operations-per-run: 200
+      - name: Prune merged branches
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const branches = await github.paginate(github.rest.repos.listBranches, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100,
+            });
+            for (const branch of branches) {
+              if (branch.protected) continue;
+              const ref = branch.name;
+              try {
+                const commits = await github.rest.repos.listCommits({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  sha: ref,
+                  per_page: 1,
+                });
+                const commitSha = commits.data[0]?.sha;
+                const isMerged = commitSha && (await github.rest.repos.compareCommits({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  base: 'main',
+                  head: commitSha,
+                })).data.status === 'identical';
+                if (isMerged) {
+                  await github.rest.git.deleteRef({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    ref: `heads/${ref}`,
+                  });
+                }
+              } catch (error) {
+                core.warning(`Skip branch ${ref}: ${error.message}`);
+              }
+            }
+      - name: Post summary comment
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: 1,
+              body: 'Weekly hygiene run completed: stale PRs processed and merged branches pruned.'
+            });

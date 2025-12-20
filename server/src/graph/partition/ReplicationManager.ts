@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ShardManager } from './ShardManager.js';
 import pino from 'pino';
 

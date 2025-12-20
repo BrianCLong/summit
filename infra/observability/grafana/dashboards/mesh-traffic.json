@@ -1,0 +1,37 @@
+{
+  "title": "Service Mesh Traffic",
+  "schemaVersion": 39,
+  "version": 1,
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Request volume",
+      "targets": [
+        {
+          "expr": "sum(rate(istio_requests_total{reporter=\"destination\"}[5m])) by (destination_service_name)"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 0}
+    },
+    {
+      "type": "timeseries",
+      "title": "Success rate",
+      "targets": [
+        {
+          "expr": "(sum(rate(istio_requests_total{response_code!~\"5..\",reporter=\"destination\"}[5m])) by (destination_service_name)) / (sum(rate(istio_requests_total{reporter=\"destination\"}[5m])) by (destination_service_name))"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8}
+    },
+    {
+      "type": "timeseries",
+      "title": "Latency p95",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(istio_request_duration_seconds_bucket{reporter=\"destination\"}[5m])) by (le, destination_service_name))"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 16}
+    }
+  ]
+}

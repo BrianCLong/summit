@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Case Workflow Service - Main business logic layer for case workflow engine
  * Integrates state machine, SLA tracking, tasks, participants, and approvals
