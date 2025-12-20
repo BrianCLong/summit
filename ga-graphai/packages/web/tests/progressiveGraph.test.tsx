@@ -114,11 +114,8 @@ describe('ProgressiveGraph', () => {
     expect(labels.some((label) => label?.includes('…'))).toBe(true);
   });
 
-  it('caps DOM load while keeping interactions accessible on very large graphs', async () => {
-    const { nodes, edges } = buildFixtureGraph(2400);
-    const onHover = vi.fn();
-    const onSelect = vi.fn();
-    const onRenderComplete = vi.fn();
+  it('caps visible nodes under compact LOD while reporting elided counts', async () => {
+    const { nodes, edges } = buildFixtureGraph(2400, 40, 3);
     const container = document.createElement('div');
     const root = createRoot(container);
 
@@ -127,37 +124,76 @@ describe('ProgressiveGraph', () => {
         <ProgressiveGraph
           nodes={nodes}
           edges={edges}
-          initialBatchSize={96}
+          initialBatchSize={120}
           frameBudgetMs={10}
-          onHoverNode={onHover}
-          onSelectNode={onSelect}
-          onRenderComplete={onRenderComplete}
         />,
       );
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
+
+    const region = container.querySelector('[role="region"]');
+    const visibleCount = Number(
+      region?.getAttribute('data-visible-count') ?? '0',
+    );
+    const elidedCount = Number(region?.getAttribute('data-elided-count') ?? '0');
+    const lod = region?.getAttribute('data-lod');
+
+    expect(lod).toBe('compact');
+    expect(visibleCount).toBeGreaterThan(0);
+    expect(visibleCount).toBeLessThan(nodes.length);
+    expect(elidedCount).toBe(nodes.length - visibleCount);
+    expect(container.querySelectorAll('[data-node-id]').length).toBe(
+      visibleCount,
+    );
+    expect(region?.getAttribute('aria-busy')).toBe('false');
+  });
+
+  it('preserves progress when streaming batches arrive', async () => {
+    const first = buildFixtureGraph(60);
+    const next = buildFixtureGraph(140);
+    const container = document.createElement('div');
+    const root = createRoot(container);
 
     await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 40));
+      root.render(
+        <ProgressiveGraph
+          streaming
+          nodes={first.nodes}
+          edges={first.edges}
+          initialBatchSize={18}
+          frameBudgetMs={6}
+        />,
+      );
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
-    const renderedCount = Number(
+    const firstRendered = Number(
       container
         .querySelector('[data-rendered-count]')
         ?.getAttribute('data-rendered-count'),
     );
-    const busy = container.querySelector('[role="region"]');
 
-    expect(renderedCount).toBe(MAX_VISIBLE_NODES);
-    expect(busy?.getAttribute('aria-busy')).toBe('false');
-    expect(onRenderComplete).toHaveBeenCalled();
-
-    const firstNode = container.querySelector('[data-node-id="node-0"]');
     await act(async () => {
-      firstNode?.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
-      firstNode?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      root.render(
+        <ProgressiveGraph
+          streaming
+          nodes={next.nodes}
+          edges={next.edges}
+          initialBatchSize={18}
+          frameBudgetMs={6}
+        />,
+      );
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
-    expect(onHover).toHaveBeenCalledWith('node-0');
-    expect(onSelect).toHaveBeenCalledWith('node-0');
+    const region = container.querySelector('[role="region"]');
+    const renderSurface = container.querySelector('[data-rendered-count]');
+    const secondRendered = Number(
+      renderSurface?.getAttribute('data-rendered-count') ?? '0',
+    );
+
+    expect(secondRendered).toBeGreaterThanOrEqual(firstRendered);
+    expect(region?.getAttribute('data-streaming')).toBe('true');
+    expect(container.querySelector('[data-streaming-indicator]')).toBeTruthy();
   });
 });

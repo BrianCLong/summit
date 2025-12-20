@@ -64,6 +64,13 @@ export type GraphRAGQueryResponse = {
   // Execution metadata
   runId: string;
   executionTimeMs: number;
+  rows?: unknown[];
+  partialResults?: unknown[];
+  rowCount?: number;
+  nextCursor?: string | null;
+  hasMore?: boolean;
+  streamingChannel?: string;
+  streamedBatches?: number;
   subgraphSize?: {
     nodeCount: number;
     edgeCount: number;
@@ -77,6 +84,9 @@ export type ExecutePreviewRequest = {
   dryRun?: boolean;
   maxRows?: number;
   timeout?: number;
+  cursor?: string | null;
+  batchSize?: number;
+  stream?: boolean;
 };
 
 export class GraphRAGQueryService {
@@ -349,6 +359,9 @@ export class GraphRAGQueryService {
       dryRun: request.dryRun,
       maxRows: request.maxRows,
       timeout: request.timeout,
+      cursor: request.cursor,
+      batchSize: request.batchSize,
+      stream: request.stream,
     });
 
     // If dry run, return empty response
@@ -397,6 +410,13 @@ export class GraphRAGQueryService {
         requiresApproval: preview.requiresApproval,
       },
       runId: execResult.runId,
+      rows: execResult.results,
+      partialResults: execResult.partialResults,
+      rowCount: execResult.rowCount,
+      nextCursor: execResult.nextCursor,
+      hasMore: execResult.hasMore,
+      streamingChannel: execResult.streamingChannel,
+      streamedBatches: execResult.streamedBatches,
       executionTimeMs: Date.now() - startTime,
     };
 

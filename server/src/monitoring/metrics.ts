@@ -93,6 +93,19 @@ export const dbQueriesTotal = new client.Counter({
   labelNames: ['database', 'operation', 'status'],
 });
 
+export const vectorQueryDurationSeconds = new client.Histogram({
+  name: 'vector_query_duration_seconds',
+  help: 'Latency of pgvector operations in seconds',
+  labelNames: ['operation', 'tenant_id'],
+  buckets: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2, 5],
+});
+
+export const vectorQueriesTotal = new client.Counter({
+  name: 'vector_queries_total',
+  help: 'Total pgvector operations by outcome',
+  labelNames: ['operation', 'tenant_id', 'status'],
+});
+
 // AI/ML Processing metrics
 export const aiJobsQueued = new client.Gauge({
   name: 'ai_jobs_queued',
@@ -251,6 +264,8 @@ register.registerMetric(tenantScopeViolationsTotal);
 register.registerMetric(dbConnectionsActive);
 register.registerMetric(dbQueryDuration);
 register.registerMetric(dbQueriesTotal);
+register.registerMetric(vectorQueryDurationSeconds);
+register.registerMetric(vectorQueriesTotal);
 register.registerMetric(aiJobsQueued);
 register.registerMetric(aiJobsProcessing);
 register.registerMetric(aiJobDuration);

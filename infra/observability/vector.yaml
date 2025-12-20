@@ -9,6 +9,10 @@ metadata:
 
 data:
   vector.toml: |
+    [api]
+      enabled = true
+      address = "0.0.0.0:8686"
+
     [sources.kubernetes_logs]
       type = "kubernetes_logs"
       auto_partial_merge = true
@@ -23,6 +27,8 @@ data:
         .trace_id = coalesce!(.trace_id, .headers["x-b3-traceid"], .headers["traceparent"])
         .service = .kubernetes.pod_labels."app.kubernetes.io/name"
         .namespace = .kubernetes.namespace_name
+        .retention_class = coalesce!(.retention_class, .kubernetes.pod_annotations."retention-class", "application")
+        .pii_tags = coalesce!(.pii_tags, .kubernetes.pod_annotations."pii-tags")
 VRL
 
     [sinks.loki]
@@ -32,6 +38,8 @@ VRL
       labels.cluster = "summit"
       labels.service = "{{ service }}"
       labels.namespace = "{{ namespace }}"
+      labels.correlation_id = "{{ correlation_id }}"
+      labels.retention_class = "{{ retention_class }}"
       encoding.codec = "json"
 
     [sinks.otel]
@@ -42,6 +50,14 @@ VRL
       tls.enabled = false
       resource.attributes.service = "{{ service }}"
       resource.attributes.namespace = "{{ namespace }}"
+      resource.attributes.correlation_id = "{{ correlation_id }}"
+
+    [sinks.prometheus]
+      type = "prometheus_exporter"
+      inputs = ["kubernetes_logs"]
+      address = "0.0.0.0:9598"
+      buckets = [0.1, 0.25, 0.5, 1.0, 2.5, 5, 10]
+
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -60,6 +76,9 @@ spec:
       labels:
         app.kubernetes.io/name: vector
         app.kubernetes.io/component: logging
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8686"
     spec:
       serviceAccountName: vector
       tolerations:
@@ -73,6 +92,11 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
+          ports:
+            - name: api
+              containerPort: 8686
+            - name: prom
+              containerPort: 9598
           volumeMounts:
             - name: config
               mountPath: /etc/vector
@@ -80,6 +104,25 @@ spec:
         - name: config
           configMap:
             name: vector-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vector
+  namespace: observability
+  labels:
+    app.kubernetes.io/name: vector
+    app.kubernetes.io/component: logging
+spec:
+  selector:
+    app.kubernetes.io/name: vector
+  ports:
+    - name: api
+      port: 8686
+      targetPort: api
+    - name: prom
+      port: 9598
+      targetPort: prom
 ---
 apiVersion: v1
 kind: ServiceAccount
