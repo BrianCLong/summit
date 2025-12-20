@@ -29,6 +29,56 @@
       },
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum by (result) (rate(policy_decisions_total[5m]))",
+          "legendFormat": "{{result}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Policy decisions by result",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -38,49 +88,46 @@
                 "value": null
               },
               {
+                "color": "orange",
+                "value": 5
+              },
+              {
                 "color": "red",
-                "value": 1
+                "value": 10
               }
             ]
           },
-          "unit": "ops"
+          "unit": "percent"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
+        "h": 6,
         "w": 6,
         "x": 0,
-        "y": 0
+        "y": 8
       },
-      "id": 1,
+      "id": 2,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
+        "justifyMode": "center",
+        "orientation": "horizontal",
         "reduceOptions": {
           "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
         },
+        "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "sum(rate(policy_decisions_total{tenant_id=~\"$tenant\",action=~\"$action\"}[$__rate_interval]))",
-          "legendFormat": "Decisions/min",
-          "range": true,
+          "expr": "(sum(rate(policy_decisions_total{result=\"deny\"}[5m])) / clamp_min(sum(rate(policy_decisions_total[5m])), 1)) * 100",
           "refId": "A"
         }
       ],
-      "title": "Policy decision throughput",
+      "title": "Deny rate (5m %)",
       "type": "stat"
     },
     {
@@ -95,23 +142,9 @@
           },
           "custom": {
             "drawStyle": "line",
-            "lineInterpolation": "smooth",
+            "lineInterpolation": "linear",
             "lineWidth": 2,
             "spanNulls": true
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 0.1
-              }
-            ]
           },
           "unit": "ms"
         },
@@ -119,11 +152,11 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 9,
-        "x": 6,
+        "w": 12,
+        "x": 12,
         "y": 0
       },
-      "id": 2,
+      "id": 3,
       "options": {
         "legend": {
           "calcs": [],
@@ -137,84 +170,18 @@
       },
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "histogram_quantile(0.95, sum by (le) (rate(policy_decision_latency_ms_bucket{cached=~\"$cache\"}[$__rate_interval])))",
-          "legendFormat": "p95 latency ($cache)",
-          "range": true,
+          "expr": "histogram_quantile(0.50, sum(rate(policy_decision_latency_ms_bucket[5m])) by (le))",
+          "legendFormat": "p50",
           "refId": "A"
-        }
-      ],
-      "title": "p95 policy decision latency",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "percentage",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 75
-              },
-              {
-                "color": "green",
-                "value": 90
-              }
-            ]
-          },
-          "unit": "percent"
         },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 15,
-        "y": 0
-      },
-      "id": 3,
-      "options": {
-        "displayMode": "lcd",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": ["lastNotNull"],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true
-      },
-      "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "sum(rate(policy_decision_latency_ms_count{cached=\"true\"}[$__rate_interval])) / clamp_min(sum(rate(policy_decision_latency_ms_count[$__rate_interval])), 1) * 100",
-          "legendFormat": "Cache hit %",
-          "range": true,
-          "refId": "A"
+          "expr": "histogram_quantile(0.95, sum(rate(policy_decision_latency_ms_bucket[5m])) by (le))",
+          "legendFormat": "p95",
+          "refId": "B"
         }
       ],
-      "title": "Policy cache hit ratio",
-      "type": "bargauge"
+      "title": "Policy decision latency",
+      "type": "timeseries"
     },
     {
       "datasource": {
@@ -226,62 +193,56 @@
           "color": {
             "mode": "palette-classic"
           },
-          "custom": {
-            "drawStyle": "bars",
-            "lineInterpolation": "stepBefore",
-            "spanNulls": true
-          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "red",
                 "value": null
               },
               {
-                "color": "red",
-                "value": 0.05
+                "color": "orange",
+                "value": 85
+              },
+              {
+                "color": "green",
+                "value": 95
               }
             ]
           },
-          "unit": "percentunit"
+          "unit": "percent"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 9,
-        "x": 0,
-        "y": 4
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 8
       },
       "id": 4,
       "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom"
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
         },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
+        "text": {},
+        "textMode": "auto"
       },
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "sum(rate(policy_decisions_total{tenant_id=~\"$tenant\",action=~\"$action\",result=\"deny\"}[$__rate_interval])) / clamp_min(sum(rate(policy_decisions_total{tenant_id=~\"$tenant\",action=~\"$action\"}[$__rate_interval])), 1)",
-          "legendFormat": "Deny ratio",
-          "range": true,
+          "expr": "(sum(rate(policy_decision_latency_ms_count{cached=\"true\"}[5m])) / clamp_min(sum(rate(policy_decision_latency_ms_count[5m])), 1)) * 100",
           "refId": "A"
         }
       ],
-      "title": "Deny ratio by action",
-      "type": "timeseries"
+      "title": "Cache hit ratio (5m %)",
+      "type": "stat"
     },
     {
       "datasource": {
@@ -296,31 +257,16 @@
           "custom": {
             "drawStyle": "line",
             "lineInterpolation": "linear",
-            "lineWidth": 1,
+            "lineWidth": 2,
             "spanNulls": true
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 1
-              }
-            ]
-          },
-          "unit": "short"
+          }
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 9,
-        "x": 9,
+        "h": 6,
+        "w": 12,
+        "x": 12,
         "y": 8
       },
       "id": 5,
@@ -337,42 +283,12 @@
       },
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "sum by (required_purpose, provided_purpose) (rate(purpose_violations_total{tenant_id=~\"$tenant\"}[$__rate_interval]))",
-          "legendFormat": "Purpose {{required_purpose}}/{{provided_purpose}}",
-          "range": true,
+          "expr": "topk(5, sum(rate(policy_decisions_total{result=\"deny\"}[5m])) by (tenant_id))",
+          "legendFormat": "{{tenant_id}}",
           "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "sum by (violation_type) (rate(reason_violations_total{tenant_id=~\"$tenant\"}[$__rate_interval]))",
-          "hide": false,
-          "legendFormat": "Reason {{violation_type}}",
-          "range": true,
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "sum by (query_type) (rate(selector_expansion_violations_total{tenant_id=~\"$tenant\"}[$__rate_interval]))",
-          "hide": false,
-          "legendFormat": "Selector {{query_type}}",
-          "range": true,
-          "refId": "C"
         }
       ],
-      "title": "Policy guardrail violations",
+      "title": "Top tenants by denies (5m)",
       "type": "timeseries"
     },
     {
@@ -382,135 +298,197 @@
       },
       "fieldConfig": {
         "defaults": {
-          "custom": {
-            "align": "auto",
-            "displayMode": "color-text"
+          "color": {
+            "mode": "palette-classic"
           },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 5
-              }
-            ]
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "spanNulls": true
           }
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 6,
+        "h": 7,
+        "w": 12,
         "x": 0,
-        "y": 12
+        "y": 14
       },
       "id": 6,
       "options": {
-        "footer": {
-          "fields": "",
-          "reducer": ["sum"],
-          "show": false
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
         },
-        "showHeader": true,
-        "sortBy": [
-          {
-            "desc": true,
-            "displayName": "Value"
-          }
-        ]
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "topk(5, sum by (tenant_id, action) (rate(policy_decisions_total{tenant_id=~\"$tenant\",action=~\"$action\",result=\"deny\"}[$__rate_interval])) )",
-          "format": "table",
-          "instant": true,
-          "legendFormat": "{{tenant_id}} {{action}}",
-          "range": false,
+          "expr": "sum by (tenant_id, required_purpose) (rate(purpose_violations_total[5m]))",
+          "legendFormat": "{{tenant_id}} - {{required_purpose}}",
           "refId": "A"
         }
       ],
-      "title": "Top deny sources",
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {},
-            "indexByName": {},
-            "renameByName": {
-              "Value": "Denies/min"
-            }
+      "title": "Purpose violations",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "spanNulls": true
           }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 14
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum by (violation_type) (rate(reason_violations_total[5m]))",
+          "legendFormat": "{{violation_type}}",
+          "refId": "A"
         }
       ],
-      "type": "table"
+      "title": "Reason-for-access violations",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 21
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum by (query_type) (rate(selector_expansion_violations_total[5m]))",
+          "legendFormat": "{{query_type}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Selector expansion violations",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 21
+      },
+      "id": 9,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "expr": "rate(policy_evaluations_total[5m])",
+          "legendFormat": "evaluations/sec",
+          "refId": "A"
+        }
+      ],
+      "title": "Policy evaluation throughput",
+      "type": "timeseries"
     }
   ],
   "refresh": "30s",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["policy", "authz"],
+  "tags": ["intelgraph", "policy", "governance"],
   "templating": {
-    "list": [
-      {
-        "current": {
-          "selected": false,
-          "text": "All",
-          "value": ".*"
-        },
-        "hide": 0,
-        "label": "Tenant",
-        "name": "tenant",
-        "options": [],
-        "query": "label_values(policy_decisions_total, tenant_id)",
-        "regex": "",
-        "skipUrlSync": false,
-        "type": "query"
-      },
-      {
-        "current": {
-          "selected": false,
-          "text": "All",
-          "value": ".*"
-        },
-        "hide": 0,
-        "label": "Action",
-        "name": "action",
-        "options": [],
-        "query": "label_values(policy_decisions_total, action)",
-        "regex": "",
-        "skipUrlSync": false,
-        "type": "query"
-      },
-      {
-        "current": {
-          "selected": false,
-          "text": ".*",
-          "value": ".*"
-        },
-        "hide": 0,
-        "label": "Cache",
-        "name": "cache",
-        "options": [],
-        "query": "label_values(policy_decision_latency_ms_bucket, cached)",
-        "regex": "",
-        "skipUrlSync": false,
-        "type": "query"
-      }
-    ]
+    "list": []
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-3h",
     "to": "now"
   },
   "timepicker": {},

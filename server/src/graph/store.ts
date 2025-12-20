@@ -38,7 +38,11 @@ export class GraphStore {
       sourceRefsStr: JSON.stringify(node.sourceRefs || [])
     };
 
-    await runCypher(query, params);
+    await runCypher(query, params, {
+      tenantId: node.tenantId,
+      caseId: (node as any)?.caseId,
+      write: true,
+    });
   }
 
   /**
@@ -73,7 +77,11 @@ export class GraphStore {
       sourceRefsStr: JSON.stringify(edge.sourceRefs || [])
     };
 
-    await runCypher(query, params);
+    await runCypher(query, params, {
+      tenantId: edge.tenantId,
+      caseId: (edge as any)?.caseId,
+      write: true,
+    });
   }
 
   /**
@@ -84,7 +92,7 @@ export class GraphStore {
       MATCH (n:GraphNode { globalId: $globalId, tenantId: $tenantId })
       RETURN n
     `;
-    const results = await runCypher(query, { globalId, tenantId });
+    const results = await runCypher(query, { globalId, tenantId }, { tenantId });
     if (results.length === 0) return null;
 
     const record = results[0].n.properties;
@@ -123,7 +131,7 @@ export class GraphStore {
       MATCH (n:GraphNode { globalId: $globalId, tenantId: $tenantId })-[r${typeClause}*1..${depth}]-(m)
       RETURN m, r
     `;
-    return await runCypher(query, { globalId, tenantId });
+    return await runCypher(query, { globalId, tenantId }, { tenantId });
   }
 
   /**
@@ -141,7 +149,7 @@ export class GraphStore {
       WHERE n.attributes.${attribute} = $value
       RETURN n
     `;
-    const results = await runCypher(query, { tenantId, value });
+    const results = await runCypher(query, { tenantId, value }, { tenantId });
     if (results.length === 0) return null;
     return this.mapNeo4jToEntity(results[0].n.properties);
   }
@@ -149,7 +157,11 @@ export class GraphStore {
   /**
    * Expose raw Cypher execution for internal engines like CKP.
    */
-  async runCypher<T = any>(cypher: string, params: Record<string, any>): Promise<T[]> {
-    return runCypher<T>(cypher, params);
+  async runCypher<T = any>(
+    cypher: string,
+    params: Record<string, any>,
+    options: { tenantId?: string; caseId?: string; permissionsHash?: string; cacheTtlSeconds?: number; bypassCache?: boolean; write?: boolean } = {},
+  ): Promise<T[]> {
+    return runCypher<T>(cypher, params, options);
   }
 }

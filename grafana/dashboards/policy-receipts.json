@@ -29,6 +29,122 @@
       },
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "expr": "rate(provenance_writes_total[5m])",
+          "legendFormat": "receipts/sec",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(export_requests_total[5m])",
+          "legendFormat": "export requests/sec",
+          "refId": "B"
+        }
+      ],
+      "title": "Receipt throughput",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 95
+              },
+              {
+                "color": "green",
+                "value": 99
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 8
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "(sum(rate(provenance_writes_total[5m])) / clamp_min(sum(rate(policy_decisions_total[5m])), 1)) * 100",
+          "refId": "A"
+        }
+      ],
+      "title": "Receipt coverage vs policy decisions",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -38,49 +154,45 @@
                 "value": null
               },
               {
+                "color": "orange",
+                "value": 20
+              },
+              {
                 "color": "red",
-                "value": 1
+                "value": 50
               }
             ]
-          },
-          "unit": "ops"
+          }
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
+        "h": 6,
         "w": 6,
-        "x": 0,
-        "y": 0
+        "x": 6,
+        "y": 8
       },
-      "id": 10,
+      "id": 3,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
+        "justifyMode": "center",
+        "orientation": "horizontal",
         "reduceOptions": {
           "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
         },
+        "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "sum(rate(provenance_writes_total[$__rate_interval]))",
-          "legendFormat": "Receipts/min",
-          "range": true,
+          "expr": "clamp_min(sum(increase(policy_decisions_total[15m])) - sum(increase(provenance_writes_total[15m])), 0)",
           "refId": "A"
         }
       ],
-      "title": "Provenance receipts emitted",
+      "title": "Decision receipts missing (15m)",
       "type": "stat"
     },
     {
@@ -95,35 +207,21 @@
           },
           "custom": {
             "drawStyle": "line",
-            "lineInterpolation": "smooth",
+            "lineInterpolation": "linear",
             "lineWidth": 2,
             "spanNulls": true
           },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 0.95
-              }
-            ]
-          },
-          "unit": "percentunit"
+          "unit": "ms"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 8,
-        "w": 9,
-        "x": 6,
+        "w": 12,
+        "x": 12,
         "y": 0
       },
-      "id": 11,
+      "id": 4,
       "options": {
         "legend": {
           "calcs": [],
@@ -137,18 +235,69 @@
       },
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "sum(rate(evidence_registrations_total[$__rate_interval])) / clamp_min(sum(rate(provenance_writes_total[$__rate_interval])), 1)",
-          "legendFormat": "Anchoring success",
-          "range": true,
+          "expr": "histogram_quantile(0.50, sum(rate(policy_decision_time_ms_bucket[5m])) by (le))",
+          "legendFormat": "p50",
           "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(policy_decision_time_ms_bucket[5m])) by (le))",
+          "legendFormat": "p95",
+          "refId": "B"
         }
       ],
-      "title": "Receipt anchoring success rate",
+      "title": "Decision receipt generation latency",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "bars",
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 14
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "expr": "rate(export_blocks_total[5m])",
+          "legendFormat": "blocked exports/sec",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(export_requests_total[5m])",
+          "legendFormat": "export requests/sec",
+          "refId": "B"
+        }
+      ],
+      "title": "Policy receipts blocked vs requested",
       "type": "timeseries"
     },
     {
@@ -163,35 +312,20 @@
           },
           "custom": {
             "drawStyle": "line",
-            "lineInterpolation": "stepAfter",
+            "lineInterpolation": "linear",
             "lineWidth": 2,
             "spanNulls": true
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 1
-              }
-            ]
-          },
-          "unit": "ms"
+          }
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 9,
-        "x": 15,
-        "y": 0
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 14
       },
-      "id": 12,
+      "id": 6,
       "options": {
         "legend": {
           "calcs": [],
@@ -205,223 +339,34 @@
       },
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "histogram_quantile(0.95, sum by (le) (rate(connector_latency_ms_bucket{connector=~\"$connector\"}[$__rate_interval])))",
-          "legendFormat": "p95 $connector",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Receipt/ledger connector latency",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "percentage",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 5
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 0,
-        "y": 8
-      },
-      "id": 13,
-      "options": {
-        "displayMode": "lcd",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": ["lastNotNull"],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true
-      },
-      "pluginVersion": "11.0.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "increase(export_blocks_total[$__rate_interval])",
-          "legendFormat": "Blocked exports",
-          "range": true,
+          "expr": "sum by (result) (rate(policy_decisions_total[5m]))",
+          "legendFormat": "{{result}}",
           "refId": "A"
         },
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "increase(export_requests_total[$__rate_interval])",
-          "hide": false,
-          "legendFormat": "Export requests",
-          "range": true,
+          "expr": "rate(policy_evaluations_total[5m])",
+          "legendFormat": "evaluations/sec",
           "refId": "B"
         }
       ],
-      "title": "Receipt/export blockers",
-      "type": "bargauge"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "align": "auto",
-            "displayMode": "auto"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 1
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 8
-      },
-      "id": 14,
-      "options": {
-        "footer": {
-          "fields": "",
-          "reducer": ["sum"],
-          "show": false
-        },
-        "showHeader": true,
-        "sortBy": [
-          {
-            "desc": true,
-            "displayName": "Value"
-          }
-        ]
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "topk(5, sum by (tenant_id) (rate(provenance_writes_total{tenant_id=~\"$tenant\"}[$__rate_interval])))",
-          "format": "table",
-          "instant": true,
-          "legendFormat": "{{tenant_id}}",
-          "range": false,
-          "refId": "A"
-        }
-      ],
-      "title": "Top tenants emitting receipts",
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {},
-            "indexByName": {},
-            "renameByName": {
-              "Value": "Receipts/min"
-            }
-          }
-        }
-      ],
-      "type": "table"
+      "title": "Decision flow context",
+      "type": "timeseries"
     }
   ],
   "refresh": "30s",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["receipts", "provenance"],
+  "tags": ["intelgraph", "policy", "receipts"],
   "templating": {
-    "list": [
-      {
-        "current": {
-          "selected": false,
-          "text": "All",
-          "value": ".*"
-        },
-        "hide": 0,
-        "label": "Tenant",
-        "name": "tenant",
-        "options": [],
-        "query": "label_values(provenance_writes_total, tenant_id)",
-        "regex": "",
-        "skipUrlSync": false,
-        "type": "query"
-      },
-      {
-        "current": {
-          "selected": false,
-          "text": "provenance|ledger|receipt",
-          "value": "provenance|ledger|receipt"
-        },
-        "hide": 0,
-        "label": "Connector",
-        "name": "connector",
-        "options": [],
-        "query": "label_values(connector_latency_ms_bucket, connector)",
-        "regex": "",
-        "skipUrlSync": false,
-        "type": "query"
-      }
-    ]
+    "list": []
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-3h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Policy Receipts",
+  "title": "Policy Decision Receipts",
   "uid": "policy-receipts",
   "version": 1,
   "weekStart": ""

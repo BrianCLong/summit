@@ -2,6 +2,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { metrics } from '../observability/metrics.js';
 import { runsRepo } from './runs/runs-repo.js';
 import {
   HealthSnapshot,
