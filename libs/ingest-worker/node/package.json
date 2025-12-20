@@ -1,0 +1,76 @@
+{
+  "name": "@intelgraph/ingest-worker",
+  "version": "1.0.0",
+  "description": "Ingest worker library with backpressure, retry, circuit breaker, and idempotency",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./backpressure": {
+      "types": "./dist/backpressure.d.ts",
+      "import": "./dist/backpressure.js"
+    },
+    "./retry": {
+      "types": "./dist/retry.d.ts",
+      "import": "./dist/retry.js"
+    },
+    "./circuit-breaker": {
+      "types": "./dist/circuit-breaker.d.ts",
+      "import": "./dist/circuit-breaker.js"
+    },
+    "./idempotency": {
+      "types": "./dist/idempotency.d.ts",
+      "import": "./dist/idempotency.js"
+    },
+    "./rate-limiter": {
+      "types": "./dist/rate-limiter.d.ts",
+      "import": "./dist/rate-limiter.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "^1.7.0",
+    "ioredis": "^5.3.2",
+    "pg": "^8.11.3",
+    "pino": "^8.16.2"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.11",
+    "@types/node": "^20.10.5",
+    "@types/pg": "^8.10.9",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "eslint": "^8.56.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.3.3"
+  },
+  "peerDependencies": {
+    "ioredis": ">=5.0.0",
+    "pg": ">=8.0.0"
+  },
+  "engines": {
+    "node": ">=18.18.0"
+  },
+  "keywords": [
+    "ingest",
+    "worker",
+    "backpressure",
+    "retry",
+    "circuit-breaker",
+    "idempotency",
+    "rate-limiter"
+  ]
+}
