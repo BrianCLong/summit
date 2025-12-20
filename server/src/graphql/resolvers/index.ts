@@ -2,6 +2,7 @@ import entityResolvers from './entity';
 import relationshipResolvers from './relationship';
 import userResolvers from './user';
 import investigationResolvers from './investigation';
+import { osintResolvers } from '../osint/resolvers.js';
 import { WargameResolver } from '../../resolvers/WargameResolver.js'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import evidenceResolvers from './evidence.js';
 import evidenceOkResolvers from './evidenceOk.js';
@@ -20,6 +21,7 @@ const wargameResolver = new WargameResolver(); // WAR-GAMED SIMULATION - FOR DEC
 
 const resolvers = {
   Query: {
+    ...osintResolvers.Query,
     ...entityResolvers.Query,
     ...userResolvers.Query,
     ...investigationResolvers.Query,
@@ -45,6 +47,7 @@ const resolvers = {
       wargameResolver.getAllCrisisScenarios.bind(wargameResolver),
   },
   Mutation: {
+    ...osintResolvers.Mutation,
     ...entityResolvers.Mutation,
     ...relationshipResolvers.Mutation,
     ...userResolvers.Mutation,

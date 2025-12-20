@@ -81,6 +81,7 @@ const DisclosurePackagerPage = React.lazy(() =>
 const OrchestratorDashboard = React.lazy(() =>
   import('./features/orchestrator/OrchestratorDashboard')
 );
+const OsintStudio = React.lazy(() => import('./features/osint/OsintStudio'));
 
 import { MilitaryTech } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import { Security } from '@mui/icons-material';
@@ -113,6 +114,7 @@ const navigationItems = [
     icon: <MilitaryTech />,
     roles: [ADMIN],
   },
+  { path: '/osint', label: 'OSINT Studio', icon: <Search /> },
 ];
 
 // Connection Status Component
@@ -663,6 +665,7 @@ function MainLayout() {
               <Route path="/investigations" element={<InvestigationsPage />} />
               <Route path="/graph" element={<GraphExplorerPage />} />
               <Route path="/copilot" element={<CopilotPage />} />
+              <Route path="/osint" element={<OsintStudio />} />
               <Route path="/orchestrator" element={<OrchestratorPage />} />
               <Route path="/threats" element={<ThreatsPage />} />
               <Route path="/disclosures" element={<DisclosurePackagerPage />} />

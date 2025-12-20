@@ -1,0 +1,10 @@
+fastapi
+pydantic
+uvicorn
+python-dotenv
+requests
+ipqualityscore
+ipinfo
+transformers
+torch
+sentencepiece
