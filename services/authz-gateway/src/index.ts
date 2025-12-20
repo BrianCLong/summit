@@ -1,5 +1,6 @@
-import express from 'express';
+import express, { type ErrorRequestHandler } from 'express';
 import { createProxyMiddleware } from 'http-proxy-middleware';
+import helmet from 'helmet';
 import pino from 'pino';
 import pinoHttp from 'pino-http';
 import { initKeys, getPublicJwk } from './keys';
@@ -21,6 +22,17 @@ import { sessionManager } from './session';
 import { requireServiceAuth } from './service-auth';
 import { breakGlassManager } from './break-glass';
 
+const jsonErrorHandler: ErrorRequestHandler = (err, _req, res, next) => {
+  const typedError = err as { type?: string };
+  if (typedError?.type === 'entity.too.large') {
+    return res.status(413).json({ error: 'payload_too_large' });
+  }
+  if (err instanceof SyntaxError) {
+    return res.status(400).json({ error: 'invalid_json' });
+  }
+  return next(err);
+};
+
 export async function createApp(): Promise<express.Application> {
   await initKeys();
   await startObservability();
@@ -34,9 +46,17 @@ export async function createApp(): Promise<express.Application> {
     .filter(Boolean);
 
   const app: express.Application = express();
+  app.disable('x-powered-by');
+  app.use(helmet());
   app.use(tracingContextMiddleware);
   app.use(pinoHttp());
-  app.use(express.json());
+  app.use(
+    express.json({
+      limit: '1mb',
+      type: ['application/json', 'application/*+json'],
+    }),
+  );
+  app.use(jsonErrorHandler);
   app.use(requestMetricsMiddleware);
 
   app.get('/metrics', metricsHandler);

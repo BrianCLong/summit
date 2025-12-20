@@ -112,6 +112,23 @@ afterAll(async () => {
 });
 
 describe('security', () => {
+  it('applies secure default headers', async () => {
+    const app = await createApp();
+    const res = await request(app).get('/metrics');
+    expect(res.headers['x-dns-prefetch-control']).toBe('off');
+    expect(res.headers['x-frame-options']).toBe('SAMEORIGIN');
+  });
+
+  it('limits JSON payload size', async () => {
+    const app = await createApp();
+    const oversizedUsername = 'a'.repeat(1_100_000);
+    const res = await request(app)
+      .post('/auth/login')
+      .send({ username: oversizedUsername, password: 'password123' });
+    expect(res.status).toBe(413);
+    expect(res.body.error).toBe('payload_too_large');
+  });
+
   it('rejects tampered token', async () => {
     const app = await createApp();
     const loginRes = await request(app)
