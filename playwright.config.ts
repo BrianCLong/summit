@@ -11,6 +11,7 @@ export default defineConfig({
     'e2e/golden-path.spec.ts',
     'e2e/osint/**/*.spec.ts',
     'e2e/**/*.a11y.spec.ts',
+    'e2e/tests/**/*.spec.ts',
     'tests/e2e/**/*.spec.ts',
     'tests/performance.spec.ts',
     'e2e/simple.spec.ts',

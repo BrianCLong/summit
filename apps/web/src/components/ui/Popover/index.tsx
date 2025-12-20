@@ -1,17 +1,17 @@
 import * as React from 'react'
-import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'
+import * as PopoverPrimitive from '@radix-ui/react-popover'
 import { cn } from '@/lib/utils'
 
-const Popover = DropdownMenuPrimitive.Root
+const Popover = PopoverPrimitive.Root
 
-const PopoverTrigger = DropdownMenuPrimitive.Trigger
+const PopoverTrigger = PopoverPrimitive.Trigger
 
 const PopoverContent = React.forwardRef<
-  React.ElementRef<typeof DropdownMenuPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
+  React.ElementRef<typeof PopoverPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>
 >(({ className, align = 'center', sideOffset = 4, ...props }, ref) => (
-  <DropdownMenuPrimitive.Portal>
-    <DropdownMenuPrimitive.Content
+  <PopoverPrimitive.Portal>
+    <PopoverPrimitive.Content
       ref={ref}
       align={align}
       sideOffset={sideOffset}
@@ -21,8 +21,8 @@ const PopoverContent = React.forwardRef<
       )}
       {...props}
     />
-  </DropdownMenuPrimitive.Portal>
+  </PopoverPrimitive.Portal>
 ))
-PopoverContent.displayName = DropdownMenuPrimitive.Content.displayName
+PopoverContent.displayName = PopoverPrimitive.Content.displayName
 
 export { Popover, PopoverTrigger, PopoverContent }

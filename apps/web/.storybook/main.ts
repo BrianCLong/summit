@@ -1,6 +1,4 @@
 import type { StorybookConfig } from '@storybook/react-vite'
-import autoprefixer from 'autoprefixer'
-import tailwindcss from '@tailwindcss/postcss'
 
 const config: StorybookConfig = {
   stories: ['../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
@@ -27,15 +25,6 @@ const config: StorybookConfig = {
         prop.parent ? !/node_modules/.test(prop.parent.fileName) : true,
     },
   },
-  viteFinal: async baseConfig => ({
-    ...baseConfig,
-    css: {
-      ...baseConfig.css,
-      postcss: {
-        plugins: [tailwindcss(), autoprefixer()],
-      },
-    },
-  }),
 }
 
 export default config

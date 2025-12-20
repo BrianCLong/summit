@@ -83,11 +83,15 @@ export class AttributeService {
     return { ...idpSchema };
   }
 
-  getDecisionContext(currentAcr: string): DecisionContext {
+  getDecisionContext(
+    currentAcr: string,
+    overrides: Partial<DecisionContext> = {},
+  ): DecisionContext {
     return {
       protectedActions: this.listProtectedActions(),
       requestTime: new Date(this.now()).toISOString(),
       currentAcr,
+      ...overrides,
     };
   }
 

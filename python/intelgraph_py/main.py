@@ -4,8 +4,10 @@ from sqlalchemy.orm import Session
 from intelgraph_py.celery_app import celery_app
 from intelgraph_py.database import create_db_tables, get_engine, get_session_local
 from intelgraph_py.models import AlertLog, Schedule, Subscription
+from intelgraph_py.services.mining_service import MiningService
 from intelgraph_py.schemas import (
     AlertLogInDB,
+    MiningRequest,
     OSINTEnrichmentRequest,
     ScheduleCreate,
     ScheduleInDB,
@@ -62,6 +64,17 @@ def analyze_sentiment_endpoint(request: SentimentRequest):
 def trigger_osint_enrichment(request: OSINTEnrichmentRequest):
     task = enrich_ip_task.delay(request.ip, request.actor_name)
     return {"task_id": task.id}
+
+
+@app.post("/mining/extract")
+def extract_content(request: MiningRequest):
+    """
+    Extracts entities and relationships from unstructured text.
+    Performs entity resolution and prepares for graph ingestion.
+    """
+    service = MiningService.get_instance()
+    result = service.mine_content(request.text, {"source_id": request.source_id})
+    return result
 
 
 # --- Schedule Management Endpoints ---
