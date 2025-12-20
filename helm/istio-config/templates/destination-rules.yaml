@@ -1,0 +1,14 @@
+{{- range .Values.destinationRules }}
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ include "istio-config.fullname" $ }}-{{ .host }}
+  namespace: {{ $.Release.Namespace }}
+spec:
+  host: {{ .host }}
+  {{- with .trafficPolicy }}
+  trafficPolicy:
+{{ toYaml . | indent 4 }}
+  {{- end }}
+---
+{{- end }}

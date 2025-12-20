@@ -91,6 +91,12 @@ jobs:
       - name: Install Syft
         uses: anchore/sbom-action/download-syft@v0.17.1
 
+      - name: Install Conftest
+        run: |
+          curl -sSL -o conftest.tar.gz https://github.com/open-policy-agent/conftest/releases/download/v0.52.0/conftest_0.52.0_Linux_x86_64.tar.gz
+          tar -xzf conftest.tar.gz conftest
+          sudo mv conftest /usr/local/bin/conftest
+
       - name: Install Trivy
         run: |
           sudo apt-get update
@@ -141,16 +147,18 @@ jobs:
           provenance: true
           sbom: true
 
-      - name: Capture image reference
-        if: steps.dockerfile-check.outputs.exists == 'true'
-        id: image-ref
-        run: echo "image_ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.component.name }}@${{ steps.build.outputs.digest }}" >> $GITHUB_OUTPUT
-
       - name: Generate SBOM with Syft
         if: steps.dockerfile-check.outputs.exists == 'true'
         run: |
           syft ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.component.name }}:latest -o spdx-json=sbom-${{ matrix.component.name }}.spdx.json
           syft ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.component.name }}:latest -o cyclonedx-json=sbom-${{ matrix.component.name }}.cyclonedx.json
+
+      - name: Validate SBOM against dependency policy
+        if: steps.dockerfile-check.outputs.exists == 'true'
+        run: |
+          conftest test sbom-${{ matrix.component.name }}.spdx.json \
+            --policy .ci/policies/deps.rego \
+            --data .security/deps/policy.yaml
 
       - name: Scan image with Trivy
         if: steps.dockerfile-check.outputs.exists == 'true'
@@ -171,11 +179,15 @@ jobs:
 
       - name: Cosign sign (keyless)
         if: steps.dockerfile-check.outputs.exists == 'true'
+        id: cosign-sign
         env:
           COSIGN_EXPERIMENTAL: '1'
-        run: cosign sign --yes ${{ steps.image-ref.outputs.image_ref }}
+        run: |
+          IMAGE_REF=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.component.name }}@${{ steps.build.outputs.digest }}
+          cosign sign --yes "$IMAGE_REF"
+          echo "ref=$IMAGE_REF" >> "$GITHUB_OUTPUT"
 
-      - name: Attach SBOM attestation
+      - name: Attach SBOM attestation (cosign)
         if: steps.dockerfile-check.outputs.exists == 'true'
         env:
           COSIGN_EXPERIMENTAL: '1'
@@ -183,7 +195,7 @@ jobs:
           cosign attest --yes \
             --predicate sbom-${{ matrix.component.name }}.spdx.json \
             --type spdxjson \
-            ${{ steps.image-ref.outputs.image_ref }}
+            ${{ steps.cosign-sign.outputs.ref }}
 
       - name: Verify image signature
         if: steps.dockerfile-check.outputs.exists == 'true'
@@ -193,7 +205,7 @@ jobs:
           cosign verify \
             --certificate-identity-regexp "https://github.com/${{ github.repository }}/.github/workflows/" \
             --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
-            ${{ steps.image-ref.outputs.image_ref }}
+            ${{ steps.cosign-sign.outputs.ref }}
 
       - name: Verify SBOM attestation
         if: steps.dockerfile-check.outputs.exists == 'true'
@@ -204,7 +216,7 @@ jobs:
             --type spdxjson \
             --certificate-identity-regexp "https://github.com/${{ github.repository }}/.github/workflows/" \
             --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
-            ${{ steps.image-ref.outputs.image_ref }}
+            ${{ steps.cosign-sign.outputs.ref }}
 
       - name: Upload SBOM artifacts
         if: steps.dockerfile-check.outputs.exists == 'true'

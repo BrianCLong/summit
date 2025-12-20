@@ -20,15 +20,11 @@ jobs:
     permissions:
       contents: read
       id-token: write
-      packages: write
+      packages: read
     steps:
       - uses: actions/checkout@v4
       - uses: azure/setup-kubectl@v4
       - uses: azure/setup-helm@v4
-      - name: Install Cosign
-        uses: sigstore/cosign-installer@v3
-        with:
-          cosign-release: 'v2.2.4'
       - name: Kubeconfig
         run: |
           mkdir -p ~/.kube
@@ -36,25 +32,30 @@ jobs:
         env:
           KUBECONFIG_DATA: ${{ secrets.KUBECONFIG_PROD_B64 }}
 
-      - name: Migration gate
-        run: bash scripts/migration-gate.sh prod
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: 'v2.2.4'
 
       - name: Sign and attest release image
         env:
           COSIGN_EXPERIMENTAL: '1'
+          IMAGE: ${{ env.IMAGE_REPOSITORY }}:${{ inputs.image }}
         run: |
-          IMAGE_REF=${IMAGE_REPOSITORY}:${{ inputs.image }}
-          cosign sign --yes "${IMAGE_REF}"
-          cat > deploy-attestation.json <<EOF
+          set -euo pipefail
+          cosign sign --yes "$IMAGE"
+          cat > /tmp/deploy-attestation.json <<'EOF'
           {
             "environment": "prod",
-            "release": "${{ env.RELEASE }}",
-            "image": "${IMAGE_REF}",
-            "trigger": "deploy-prod",
-            "run_id": "${{ github.run_id }}"
+            "workflow": "${{ github.workflow }}",
+            "imageTag": "${{ inputs.image }}",
+            "commit": "${{ github.sha }}"
           }
           EOF
-          cosign attest --yes --predicate deploy-attestation.json --type intelgraph.deployment "${IMAGE_REF}"
+          cosign attest --yes --predicate /tmp/deploy-attestation.json --type intoto "$IMAGE"
+
+      - name: Migration gate
+        run: bash scripts/migration-gate.sh prod
 
       - name: Canary 10%
         run: |

@@ -12,9 +12,11 @@ export const ensurePolicy = (action: string, resource: string) => {
 
       // Simulate OPA Policy Check
       // Policy: 'admin' can do anything. 'user' can read/write own tenant.
+      const normalizedRole = (user.role || '').toString().toLowerCase();
       const allowed =
-        user.role === 'admin' ||
-        (user.tenant_id && req.body.tenantId === user.tenant_id);
+        normalizedRole === 'admin' ||
+        (user.tenant_id && req.body.tenantId === user.tenant_id) ||
+        (user.tenantId && req.body.tenantId === user.tenantId);
 
       if (!allowed) {
         return res.status(403).json({ error: 'Access Denied by Policy' });

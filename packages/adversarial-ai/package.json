@@ -1,0 +1,25 @@
+{
+  "name": "@intelgraph/adversarial-ai",
+  "version": "1.0.0",
+  "description": "Adversarial machine learning and AI robustness testing",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts"
+  },
+  "keywords": [
+    "adversarial-ml",
+    "ai-security",
+    "robustness-testing",
+    "attack-generation"
+  ],
+  "author": "IntelGraph",
+  "license": "PROPRIETARY",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  }
+}

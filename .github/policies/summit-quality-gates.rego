@@ -20,9 +20,17 @@ AUTHORIZED_USERS := {
 
 CRITICAL_PATHS := {
     ".github/workflows/",
+    ".github/policies/",
+    "helm/",
+    "infra/helm/",
+    "db/migrations/",
+    "ops/db/",
+    "RUNBOOKS/",
+    "docs/runbooks/",
+    "server/src/conductor/auth/",
+    "server/src/conductor/api/",
     "charts/ig-platform/values.yaml",
     "services/*/migrations/",
-    "RUNBOOKS/",
     "tools/backup/",
     "tools/deployment/"
 }
@@ -67,6 +75,11 @@ all_quality_gates_pass if {
     input.quality_gates.helm == true
 }
 
+all_quality_gates_pass if {
+    has_database_changes
+    input.quality_gates.migrations == true
+}
+
 # High risk PRs must pass E2E tests
 all_quality_gates_pass if {
     input.analysis.risk_level == "HIGH"
@@ -89,6 +102,36 @@ authorized_user if {
 has_helm_changes if {
     some file in input.changed_files
     startswith(file, "charts/")
+}
+
+has_helm_changes if {
+    some file in input.changed_files
+    startswith(file, "helm/")
+}
+
+has_helm_changes if {
+    some file in input.changed_files
+    startswith(file, "infra/helm/")
+}
+
+has_database_changes if {
+    some file in input.changed_files
+    startswith(file, "db/migrations/")
+}
+
+has_database_changes if {
+    some file in input.changed_files
+    startswith(file, "db/seeds/")
+}
+
+has_database_changes if {
+    some file in input.changed_files
+    startswith(file, "server/src/migrations/")
+}
+
+has_database_changes if {
+    some file in input.changed_files
+    startswith(file, "ops/db/")
 }
 
 has_database_changes if {
@@ -169,6 +212,18 @@ requirements[req] {
 }
 
 requirements[req] {
+    has_helm_changes
+    input.quality_gates.helm != true
+    req := "Helm lint must pass for Helm chart changes"
+}
+
+requirements[req] {
+    has_database_changes
+    input.quality_gates.migrations != true
+    req := "DB migration gate must pass for database changes"
+}
+
+requirements[req] {
     input.quality_gates.security == false
     req := "Security scan must pass before merge"
 }
@@ -246,7 +301,7 @@ decision := {
 }
 
 confidence_score := score if {
-    total_gates := 7
+    total_gates := 8
     passed_gates := count([gate | input.quality_gates[gate] == true])
     score := (passed_gates / total_gates) * 100
 }
