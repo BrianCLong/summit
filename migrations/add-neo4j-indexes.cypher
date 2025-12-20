@@ -16,7 +16,10 @@ CREATE INDEX idx_entity_canonical IF NOT EXISTS FOR (e:Entity) ON (e.canonicalId
 
 // Composite indexes for common query patterns
 CREATE INDEX idx_entity_tenant_type IF NOT EXISTS FOR (e:Entity) ON (e.tenantId, e.type);
+CREATE INDEX idx_entity_tenant_type_status IF NOT EXISTS FOR (e:Entity) ON (e.tenantId, e.type, e.status);
 CREATE INDEX idx_entity_tenant_created IF NOT EXISTS FOR (e:Entity) ON (e.tenantId, e.createdAt);
+CREATE INDEX idx_entity_tenant_investigation IF NOT EXISTS FOR (e:Entity) ON (e.tenantId, e.investigationId);
+CREATE INDEX idx_entity_tenant_collection IF NOT EXISTS FOR (e:Entity) ON (e.tenantId, e.collectionId);
 CREATE INDEX idx_entity_type_confidence IF NOT EXISTS FOR (e:Entity) ON (e.type, e.confidence);
 
 // Temporal indexes for bitemporal queries
@@ -36,9 +39,18 @@ CREATE INDEX idx_relationship_type IF NOT EXISTS FOR ()-[r:RELATED_TO]-() ON (r.
 CREATE INDEX idx_relationship_tenant IF NOT EXISTS FOR ()-[r:RELATED_TO]-() ON (r.tenantId);
 CREATE INDEX idx_relationship_created IF NOT EXISTS FOR ()-[r:RELATED_TO]-() ON (r.createdAt);
 CREATE INDEX idx_relationship_confidence IF NOT EXISTS FOR ()-[r:RELATED_TO]-() ON (r.confidence);
+CREATE INDEX idx_relationship_weight IF NOT EXISTS FOR ()-[r:RELATED_TO]-() ON (r.weight);
 
 // Composite relationship indexes
 CREATE INDEX idx_relationship_tenant_type IF NOT EXISTS FOR ()-[r:RELATED_TO]-() ON (r.tenantId, r.type);
+CREATE INDEX idx_relationship_tenant_investigation IF NOT EXISTS FOR ()-[r:RELATED_TO]-() ON (r.tenantId, r.investigationId);
+
+// Relationship indexes for RELATIONSHIP edges (used by APOC traversals)
+CREATE INDEX idx_rel_type IF NOT EXISTS FOR ()-[r:RELATIONSHIP]-() ON (r.type);
+CREATE INDEX idx_rel_tenant_type_since IF NOT EXISTS FOR ()-[r:RELATIONSHIP]-() ON (r.tenantId, r.type, r.since);
+CREATE INDEX idx_rel_confidence IF NOT EXISTS FOR ()-[r:RELATIONSHIP]-() ON (r.confidence);
+CREATE INDEX idx_rel_weight IF NOT EXISTS FOR ()-[r:RELATIONSHIP]-() ON (r.weight);
+CREATE INDEX idx_rel_tenant_investigation IF NOT EXISTS FOR ()-[r:RELATIONSHIP]-() ON (r.tenantId, r.investigationId);
 
 // Temporal relationship indexes
 CREATE INDEX idx_relationship_valid_from IF NOT EXISTS FOR ()-[r:RELATED_TO]-() ON (r.validFrom);
@@ -53,6 +65,7 @@ CREATE INDEX idx_investigation_status IF NOT EXISTS FOR (i:Investigation) ON (i.
 CREATE INDEX idx_investigation_tenant IF NOT EXISTS FOR (i:Investigation) ON (i.tenantId);
 CREATE INDEX idx_investigation_priority IF NOT EXISTS FOR (i:Investigation) ON (i.priority);
 CREATE INDEX idx_investigation_created IF NOT EXISTS FOR (i:Investigation) ON (i.createdAt);
+CREATE INDEX idx_investigation_tenant_created IF NOT EXISTS FOR (i:Investigation) ON (i.tenantId, i.createdAt);
 
 // Composite investigation indexes
 CREATE INDEX idx_investigation_tenant_status IF NOT EXISTS FOR (i:Investigation) ON (i.tenantId, i.status);

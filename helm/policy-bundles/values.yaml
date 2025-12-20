@@ -1,0 +1,22 @@
+registry:
+  url: https://policies.example.com
+  credentialsSecret: ''
+
+bundles:
+  - name: baseline-controls
+    revision: v1.0.0
+    path: bundles/baseline-controls.tar.gz
+    checksum: sha256:aaabbbccc
+    labels:
+      tier: baseline
+  - name: privileged-access
+    revision: v0.2.1
+    path: bundles/privileged-access.tar.gz
+    checksum: sha256:dddeeefff
+    labels:
+      tier: restricted
+
+configMap:
+  annotations: {}
+
+serviceAccountName: ''
