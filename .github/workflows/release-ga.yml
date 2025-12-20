@@ -1,8 +1,16 @@
 name: release-ga
+
 on:
   workflow_dispatch:
   push:
     tags: ['v*']
+
+env:
+  SBOM_PATH: artifacts/sbom/release-${{ github.sha }}.spdx.json
+  VULN_DIR: artifacts/vulns
+  ATTESTATION_PATH: attestations/release-${{ github.sha }}.intoto.jsonl
+  BUDGETS: .maestro/ci_budget.json
+
 jobs:
   build_sign_provenance:
     runs-on: ubuntu-latest
@@ -10,82 +18,103 @@ jobs:
       id-token: write
       contents: write
       actions: read
+      security-events: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
       - name: Install supply chain tooling
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y jq
+          sudo apt-get install -y jq python3-pip
+          pip3 install --user --upgrade pip
           COSIGN_VERSION="v2.4.0"
           curl -sSL -o cosign.tgz "https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-amd64.tar.gz"
           tar -xzf cosign.tgz cosign && sudo mv cosign /usr/local/bin/
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sudo sh -s -- -b /usr/local/bin
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sudo sh -s -- -b /usr/local/bin
+          curl -sSfL https://github.com/google/osv-scanner/releases/download/v1.7.3/osv-scanner_1.7.3_linux_amd64.tar.gz | sudo tar -xz -C /usr/local/bin osv-scanner
           curl -sSfL https://github.com/open-policy-agent/conftest/releases/download/v0.56.0/conftest_0.56.0_Linux_x86_64.tar.gz | sudo tar -xz -C /usr/local/bin conftest
-      - run: npm ci && npm run build && npm test
-      - name: Generate SBOM (CycloneDX)
-        run: npx @cyclonedx/cyclonedx-npm --output-file sbom.json
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm test -- --runInBand
+
       - name: Generate SBOM (SPDX)
-        run: syft dir:. -o spdx-json=sbom.spdx.json
+        run: |
+          mkdir -p artifacts/sbom
+          .ci/scripts/sbom/generate_syft.sh . "${SBOM_PATH}"
+
       - name: Build container
         run: docker build -t ghcr.io/intelgraph/platform:${GITHUB_REF_NAME} .
+
+      - name: Scan container SBOM (Grype)
+        run: |
+          mkdir -p "${VULN_DIR}"
+          .ci/scripts/sbom/scan_grype.sh "${SBOM_PATH}" "${VULN_DIR}/grype.json" "${VULN_DIR}/grype.sarif"
+
+      - name: Scan container SBOM (OSV)
+        run: |
+          .ci/scripts/sbom/scan_osv.sh "${SBOM_PATH}" "${VULN_DIR}/osv.json" "${VULN_DIR}/osv.sarif"
+
+      - name: Baseline from origin/main
+        run: |
+          git fetch origin main --depth=2
+          git worktree add /tmp/main origin/main
+          .ci/scripts/sbom/generate_syft.sh /tmp/main "${VULN_DIR}/baseline.sbom.spdx.json"
+          .ci/scripts/sbom/scan_grype.sh "${VULN_DIR}/baseline.sbom.spdx.json" "${VULN_DIR}/baseline.grype.json" "${VULN_DIR}/baseline.grype.sarif"
+
+      - name: Enforce SBOM diff budget or exception
+        env:
+          EXCEPTION_PATH: artifacts/exceptions/${{ github.sha }}.json
+        run: |
+          python .ci/scripts/sbom/diff_budget.py "${VULN_DIR}/baseline.grype.json" "${VULN_DIR}/grype.json" "${BUDGETS}" --exception "${EXCEPTION_PATH}" --summary "${VULN_DIR}/budget-summary.json"
+
+      - name: Conftest policy enforcement
+        run: |
+          conftest test "${SBOM_PATH}" -p .ci/policies -i json --combine
+
+      - name: SLSA provenance
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        run: |
+          mkdir -p attestations
+          .ci/scripts/attest/attest_slsa.sh "${SBOM_PATH}" "platform-image" "${ATTESTATION_PATH}"
+
       - name: Cosign sign & attest
         env:
-          COSIGN_EXPERIMENTAL: '1'
+          COSIGN_EXPERIMENTAL: "1"
         run: |
           cosign sign ghcr.io/intelgraph/platform:${GITHUB_REF_NAME}
-          cosign attest --predicate sbom.json --type cyclonedx ghcr.io/intelgraph/platform:${GITHUB_REF_NAME}
-          cosign attest --predicate sbom.spdx.json --type spdx ghcr.io/intelgraph/platform:${GITHUB_REF_NAME}
-      - name: SLSA provenance
-        uses: slsa-framework/slsa-github-generator/actions/generator@v2
-        with:
-          artifact_path: 'dist/**'
+          cosign attest --predicate "${SBOM_PATH}" --type spdx ghcr.io/intelgraph/platform:${GITHUB_REF_NAME}
+          cosign attest --predicate "${ATTESTATION_PATH}" --type slsaprovenance ghcr.io/intelgraph/platform:${GITHUB_REF_NAME}
+
       - name: Verify signatures and attestations
         id: cosign-verify
         env:
           IMAGE: ghcr.io/intelgraph/platform:${GITHUB_REF_NAME}
+          COSIGN_EXPERIMENTAL: "1"
         run: |
           set -euo pipefail
           verification=$(cosign verify --output json "${IMAGE}")
           digest=$(echo "${verification}" | jq -r '.[0].critical.image["docker-manifest-digest"]')
-
           if [ -z "${digest}" ] || [ "${digest}" = "null" ]; then
             echo "❌ Unable to resolve digest after verification for ${IMAGE}" >&2
             exit 1
           fi
-
           IMAGE_PINNED="${IMAGE%@*}@${digest}"
           echo "pinned=${IMAGE_PINNED}" >> "$GITHUB_OUTPUT"
           echo "digest=${digest}" >> "$GITHUB_OUTPUT"
-
           cosign verify-attestation --type slsaprovenance "${IMAGE_PINNED}"
           cosign verify-attestation --type spdx "${IMAGE_PINNED}"
-      - name: Enforce SBOM diff budget or exception
-        env:
-          SBOM_BASELINE: .github/sbom-baseline.spdx.json
-          SBOM_CURRENT: sbom.spdx.json
-          BUDGET_PERCENT: 5
-          SBOM_DIFF_EXCEPTION: ${{ secrets.SBOM_DIFF_EXCEPTION != '' && secrets.SBOM_DIFF_EXCEPTION || 'false' }}
-        run: |
-          if [ ! -f "${SBOM_CURRENT}" ]; then
-            echo "Current SBOM missing"; exit 1
-          fi
 
-          if [ -f "${SBOM_BASELINE}" ]; then
-            baseline_packages=$(jq '.packages | length' "${SBOM_BASELINE}")
-            current_packages=$(jq '.packages | length' "${SBOM_CURRENT}")
-            allowed=$((baseline_packages + (baseline_packages * BUDGET_PERCENT / 100)))
-            if [ "${current_packages}" -gt "${allowed}" ]; then
-              echo "SBOM diff exceeds budget (${current_packages} vs ${allowed})";
-              exit 1
-            fi
-            echo "✅ SBOM diff within ${BUDGET_PERCENT}% budget"
-          else
-            if [ "${SBOM_DIFF_EXCEPTION}" != "true" ]; then
-              echo "SBOM baseline missing and no approved exception provided";
-              exit 1
-            fi
-            echo "⚠️ Proceeding with approved SBOM diff exception"
-          fi
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: "${VULN_DIR}/grype.sarif"
+
       - name: Attach Rekor proof to release notes
         env:
           IMAGE_PINNED: ${{ steps.cosign-verify.outputs.pinned }}
@@ -98,6 +127,7 @@ jobs:
           echo "Rekor Entry: ${TRIANGULATED}" >> release-notes.md
           cosign verify "${IMAGE_PINNED}" --output-certificate rekor-cert.pem --output-signature rekor.sig
           echo "Certificate and signature artifacts emitted for transparency." >> release-notes.md
+
       - name: Upload release notes
         uses: actions/upload-artifact@v4
         with:

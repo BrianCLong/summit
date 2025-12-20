@@ -1,26 +1,28 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SBOM_PATH=${1:?"SBOM path is required"}
-SERVICE_NAME=${2:-workspace}
-OUTPUT_DIR=${3:-artifacts/scans}
+usage() {
+  echo "Usage: $0 <target> <report_json> <report_sarif>" >&2
+  exit 1
+}
 
-mkdir -p "${OUTPUT_DIR}"
-JSON_PATH="${OUTPUT_DIR}/${SERVICE_NAME}-grype.json"
-SARIF_PATH="${OUTPUT_DIR}/${SERVICE_NAME}-grype.sarif"
+if [[ $# -lt 3 ]]; then
+  usage
+fi
+
+TARGET="$1"
+REPORT_JSON="$2"
+REPORT_SARIF="$3"
+
+mkdir -p "$(dirname "${REPORT_JSON}")" "$(dirname "${REPORT_SARIF}")"
 
 if ! command -v grype >/dev/null 2>&1; then
-  echo "Installing grype..."
-  curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sudo sh -s -- -b /usr/local/bin >/dev/null
+  echo "grype is required but not installed" >&2
+  exit 1
 fi
 
-echo "Running grype scan on SBOM ${SBOM_PATH}";
-grype "sbom:${SBOM_PATH}" -o json > "${JSON_PATH}"
-grype "sbom:${SBOM_PATH}" -o sarif > "${SARIF_PATH}"
+echo "[scan] running grype on ${TARGET}" >&2
+grype "${TARGET}" -o json > "${REPORT_JSON}"
+grype "${TARGET}" -o sarif > "${REPORT_SARIF}"
 
-if [ -n "${GITHUB_OUTPUT:-}" ]; then
-  echo "json=${JSON_PATH}" >> "${GITHUB_OUTPUT}"
-  echo "sarif=${SARIF_PATH}" >> "${GITHUB_OUTPUT}"
-fi
-
-echo "${JSON_PATH}"
+echo "[scan] grype reports ready: ${REPORT_JSON}, ${REPORT_SARIF}" >&2

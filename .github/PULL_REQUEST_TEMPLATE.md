@@ -19,8 +19,9 @@
 ## Security/Compliance
 - [ ] Secrets via sealed-secrets
 - [ ] SBOM attached; SAST/SCA clean
-- [ ] Supply chain checks passed (signing, provenance, SBOM)
+- [ ] Supply chain checks passed (signing, provenance, SBOM, policy)
 - Exception ID/reference (if applicable):
+- Rekor UUID(s) and attestation links:
 
 ## Verification
 - [ ] Smoke checks
@@ -40,3 +41,4 @@
 - [ ] Documentation updated
 - [ ] OPA policies verified
 - [ ] Grafana dashboards updated if applicable
+- [ ] Exceptions uploaded to `artifacts/exceptions/<sha>.json` when used

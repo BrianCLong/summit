@@ -1,123 +1,112 @@
 {
-  "title": "Security — Vulnerability Trends & Exceptions",
-  "tags": ["security", "vulnerability", "exceptions", "trend"],
-  "timezone": "browser",
+  "title": "Supply Chain — Vulnerability Budget & Exceptions",
+  "tags": ["security", "vulnerability", "sbom", "grype", "osv", "exceptions"],
   "schemaVersion": 39,
-  "version": 1,
+  "version": 2,
+  "timezone": "browser",
   "panels": [
     {
       "id": 1,
       "title": "Critical & High Vulnerabilities (open)",
       "type": "timeseries",
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 0},
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": {"mode": "palette-classic"},
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 1 },
-              { "color": "red", "value": 5 }
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 1},
+              {"color": "red", "value": 5}
             ]
           }
         }
       },
-      "targets": [
-        {
-          "expr": "sum(security_vulnerability_info{status=\"open\", severity=\"critical\"})",
-          "legendFormat": "Critical"
-        },
-        {
-          "expr": "sum(security_vulnerability_info{status=\"open\", severity=\"high\"})",
-          "legendFormat": "High"
-        }
-      ],
       "options": {
-        "legend": { "displayMode": "list", "placement": "bottom" },
-        "tooltip": { "mode": "single" },
+        "legend": {"displayMode": "list", "placement": "bottom"},
+        "tooltip": {"mode": "single"},
         "showPoints": "never"
       },
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 }
+      "targets": [
+        {"expr": "sum(security_vulnerability_info{severity=\"critical\",status=\"open\"})", "legendFormat": "Critical"},
+        {"expr": "sum(security_vulnerability_info{severity=\"high\",status=\"open\"})", "legendFormat": "High"}
+      ]
     },
     {
       "id": 2,
-      "title": "Exception Debt Burn-down",
-      "type": "timeseries",
+      "title": "Budget Utilization by Severity",
+      "type": "bargauge",
+      "gridPos": {"h": 7, "w": 24, "x": 0, "y": 8},
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": {"mode": "thresholds"},
           "thresholds": {
-            "mode": "absolute",
+            "mode": "percentage",
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 1 },
-              { "color": "red", "value": 3 }
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 70},
+              {"color": "orange", "value": 90},
+              {"color": "red", "value": 100}
             ]
           },
-          "unit": "none"
+          "unit": "percent"
         }
       },
+      "options": {"displayMode": "basic", "orientation": "horizontal"},
       "targets": [
-        {
-          "expr": "sum(security_vulnerability_info{status=\"exception\", severity=\"critical\"})",
-          "legendFormat": "Critical exceptions"
-        },
-        {
-          "expr": "sum(security_vulnerability_info{status=\"exception\", severity=\"high\"})",
-          "legendFormat": "High exceptions"
-        }
-      ],
-      "options": {
-        "legend": { "displayMode": "list", "placement": "bottom" },
-        "tooltip": { "mode": "single" },
-        "showPoints": "never"
-      },
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 }
+        {"expr": "(sum(security_vulnerability_info{severity=\"critical\",status=\"open\"}) / clamp_max(security_budget_limit{severity=\"critical\"},1)) * 100", "legendFormat": "Critical"},
+        {"expr": "(sum(security_vulnerability_info{severity=\"high\",status=\"open\"}) / clamp_max(security_budget_limit{severity=\"high\"},1)) * 100", "legendFormat": "High"},
+        {"expr": "(sum(security_vulnerability_info{severity=\"medium\",status=\"open\"}) / clamp_max(security_budget_limit{severity=\"medium\"},1)) * 100", "legendFormat": "Medium"},
+        {"expr": "(sum(security_vulnerability_info{severity=\"low\",status=\"open\"}) / clamp_max(security_budget_limit{severity=\"low\"},1)) * 100", "legendFormat": "Low"}
+      ]
     },
     {
       "id": 3,
-      "title": "Critical Vuln Alert",
-      "type": "stat",
+      "title": "Exceptions burn-down",
+      "type": "timeseries",
+      "gridPos": {"h": 7, "w": 24, "x": 0, "y": 15},
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "red", "value": 1 },
-              { "color": "orange", "value": 0.1 },
-              { "color": "green", "value": 0 }
-            ]
-          },
-          "mappings": [],
-          "unit": "none"
+          "color": {"mode": "palette-classic"},
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 5}]}
         }
       },
-      "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
-        "orientation": "horizontal",
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "center"
-      },
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "single"}},
       "targets": [
-        {
-          "expr": "sum(security_vulnerability_info{status=\"open\", severity=\"critical\"})",
-          "legendFormat": "Critical open"
-        }
+        {"expr": "sum(security_vulnerability_exception_count)", "legendFormat": "Active exceptions"},
+        {"expr": "sum(security_exception_days_to_expiry)", "legendFormat": "Days to expiry"}
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Deployment guard status",
+      "type": "stat",
+      "gridPos": {"h": 5, "w": 12, "x": 0, "y": 22},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": 1}, {"color": "red", "value": 0}]}}},
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "auto"},
+      "targets": [
+        {"expr": "min(supply_chain_gate_status{gate=\"deploy\"})", "legendFormat": "deploy gate"}
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Critical vuln alert",
+      "type": "stat",
+      "gridPos": {"h": 5, "w": 12, "x": 12, "y": 22},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": 1}, {"color": "yellow", "value": 0.1}, {"color": "green", "value": 0}]}}},
+      "options": {"colorMode": "value", "graphMode": "none", "justifyMode": "auto"},
+      "targets": [
+        {"expr": "sum(security_vulnerability_info{severity=\"critical\",status=\"open\"})", "legendFormat": "critical open"}
       ],
-      "gridPos": { "h": 5, "w": 24, "x": 0, "y": 16 },
       "alert": {
         "name": "Critical vulnerabilities present",
+        "frequency": "1m",
         "conditions": [
-          {
-            "evaluator": { "type": "gt", "params": [0] },
-            "query": { "params": ["A", "5m", "now"] }
-          }
+          {"evaluator": {"type": "gt", "params": [0]}, "query": {"params": ["A", "5m", "now"]}}
         ],
-        "noDataState": "no_data",
         "executionErrorState": "alerting",
-        "frequency": "1m"
+        "noDataState": "no_data"
       }
     }
   ]

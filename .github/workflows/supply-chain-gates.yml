@@ -2,177 +2,114 @@ name: supply-chain-gates
 
 on:
   pull_request:
-  release:
-    types: [created, published, released]
+    branches: ["main", "develop", "release/*"]
+  push:
+    branches: ["main", "release/*"]
   workflow_dispatch: {}
 
-permissions:
-  contents: read
-  id-token: write
-  pull-requests: write
-  security-events: write
-
 env:
-  ARTIFACT_RETENTION_DAYS: 400
-  SBOM_DIR: artifacts/sbom
-  SCAN_DIR: artifacts/scans
-  ATTEST_DIR: artifacts/attestations
-  SIGN_DIR: artifacts/signatures
-  PACKAGE_DIR: artifacts/packages
+  SBOM_PATH: artifacts/sbom/repo-${{ github.sha }}.spdx.json
+  VULN_DIR: artifacts/vulns
+  ATTESTATION_PATH: attestations/repo-${{ github.sha }}.intoto.jsonl
+  BUDGETS: .maestro/ci_budget.json
 
 jobs:
-  supply-chain-gates:
-    name: supply-chain-gates
+  supply-chain:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      security-events: write
+      actions: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 2
 
-      - name: Prepare directories
+      - name: Install supply chain toolchain
         run: |
-          mkdir -p "$SBOM_DIR" "$SCAN_DIR" "$ATTEST_DIR" "$SIGN_DIR" "$PACKAGE_DIR"
+          sudo apt-get update -y
+          sudo apt-get install -y jq python3-pip
+          pip3 install --user --upgrade pip
+          COSIGN_VERSION="v2.4.0"
+          curl -sSL -o cosign.tgz "https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-amd64.tar.gz"
+          tar -xzf cosign.tgz cosign && sudo mv cosign /usr/local/bin/
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sudo sh -s -- -b /usr/local/bin
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sudo sh -s -- -b /usr/local/bin
+          curl -sSfL https://github.com/google/osv-scanner/releases/download/v1.7.3/osv-scanner_1.7.3_linux_amd64.tar.gz | sudo tar -xz -C /usr/local/bin osv-scanner
+          curl -sSfL https://github.com/open-policy-agent/conftest/releases/download/v0.56.0/conftest_0.56.0_Linux_x86_64.tar.gz | sudo tar -xz -C /usr/local/bin conftest
 
-      - name: Install cosign
-        uses: sigstore/cosign-installer@v3.5.0
-        with:
-          cosign-release: 'v2.4.0'
+      - name: Generate SBOM
+        run: |
+          mkdir -p artifacts/sbom
+          .ci/scripts/sbom/generate_syft.sh . "${SBOM_PATH}"
 
-      - name: Build images/packages
-        id: build
+      - name: Vulnerability scanning (Grype)
+        run: |
+          mkdir -p "${VULN_DIR}"
+          .ci/scripts/sbom/scan_grype.sh "${SBOM_PATH}" "${VULN_DIR}/grype.json" "${VULN_DIR}/grype.sarif"
+
+      - name: Vulnerability scanning (OSV)
+        run: |
+          .ci/scripts/sbom/scan_osv.sh "${SBOM_PATH}" "${VULN_DIR}/osv.json" "${VULN_DIR}/osv.sarif"
+
+      - name: Generate baseline from origin/main
+        run: |
+          git fetch origin main --depth=2
+          git worktree add /tmp/main origin/main
+          .ci/scripts/sbom/generate_syft.sh /tmp/main "${VULN_DIR}/baseline.sbom.spdx.json"
+          .ci/scripts/sbom/scan_grype.sh "${VULN_DIR}/baseline.sbom.spdx.json" "${VULN_DIR}/baseline.grype.json" "${VULN_DIR}/baseline.grype.sarif"
+
+      - name: Enforce diff budget
+        run: |
+          python .ci/scripts/sbom/diff_budget.py "${VULN_DIR}/baseline.grype.json" "${VULN_DIR}/grype.json" "${BUDGETS}" --summary "${VULN_DIR}/budget-summary.json"
+
+      - name: Attest provenance
         env:
-          DOCKER_BUILDKIT: 1
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
         run: |
-          set -euo pipefail
-          mkdir -p "$PACKAGE_DIR"
-          if [ -f Dockerfile ]; then
-            echo "Dockerfile detected; building supply chain image"
-            docker build -t summit-supply-chain:"${GITHUB_SHA}" .
-            docker save summit-supply-chain:"${GITHUB_SHA}" > "$PACKAGE_DIR/supply-chain-${GITHUB_SHA}.tar"
-            echo "build_target=oci-archive:$PACKAGE_DIR/supply-chain-${GITHUB_SHA}.tar" >> "$GITHUB_OUTPUT"
-            echo "service_name=summit" >> "$GITHUB_OUTPUT"
-          else
-            echo "No Dockerfile detected; archiving workspace for SBOM generation"
-            git archive --format=tar --output "$PACKAGE_DIR/source-${GITHUB_SHA}.tar" HEAD
-            echo "build_target=." >> "$GITHUB_OUTPUT"
-            echo "package_archive=$PACKAGE_DIR/source-${GITHUB_SHA}.tar" >> "$GITHUB_OUTPUT"
-            echo "service_name=workspace" >> "$GITHUB_OUTPUT"
-          fi
+          mkdir -p attestations
+          .ci/scripts/attest/attest_slsa.sh "${SBOM_PATH}" "repo-sbom" "${ATTESTATION_PATH}"
 
-      - name: Generate SBOM (Syft)
-        id: sbom
+      - name: Sign and verify SBOM
+        env:
+          COSIGN_EXPERIMENTAL: "1"
         run: |
-          set -euo pipefail
-          target="${{ steps.build.outputs.build_target }}"
-          service="${{ steps.build.outputs.service_name }}"
-          if [ -z "$target" ]; then
-            target="."
-          fi
-          SBOM_PATH=$(.ci/scripts/sbom/generate_syft.sh "$service" "$target")
-          echo "sbom_path=$SBOM_PATH" >> "$GITHUB_OUTPUT"
+          cosign sign-blob --yes --output-signature artifacts/sbom.sig --output-certificate artifacts/sbom.cert "${SBOM_PATH}"
+          cosign verify-blob --certificate artifacts/sbom.cert --signature artifacts/sbom.sig "${SBOM_PATH}"
 
-      - name: Grype vulnerability scan
-        id: grype
+      - name: Policy enforcement
         run: |
-          set -euo pipefail
-          ./.ci/scripts/sbom/scan_grype.sh "${{ steps.sbom.outputs.sbom_path }}" "${{ steps.build.outputs.service_name }}"
+          conftest test "${SBOM_PATH}" -p .ci/policies -i json --combine
 
-      - name: OSV vulnerability scan
-        id: osv
-        run: |
-          set -euo pipefail
-          target_path="${{ steps.build.outputs.package_archive }}"
-          if [ -z "$target_path" ]; then
-            target_path="."
-          fi
-          ./.ci/scripts/sbom/scan_osv.sh "$target_path" "${{ steps.build.outputs.service_name }}"
-
-      - name: Upload Grype SARIF
+      - name: Upload SARIF
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: ${{ steps.grype.outputs.sarif }}
+          sarif_file: "${VULN_DIR}/grype.sarif"
 
-      - name: Upload OSV SARIF
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: ${{ steps.osv.outputs.sarif }}
-
-      - name: Diff against budget
-        id: budget
-        run: |
-          set -euo pipefail
-          python .ci/scripts/sbom/diff_budget.py \
-            --report "${{ steps.grype.outputs.json }}" \
-            --budget .maestro/ci_budget.json \
-            --output-json "$SCAN_DIR/diff-budget.json" \
-            | tee "$SCAN_DIR/diff-budget.txt"
-          echo "summary_file=$SCAN_DIR/diff-budget.txt" >> "$GITHUB_OUTPUT"
-          echo "summary_json=$SCAN_DIR/diff-budget.json" >> "$GITHUB_OUTPUT"
-
-      - name: Emit SLSA attestation
-        id: attest
-        run: |
-          set -euo pipefail
-          ATTEST_PATH=$(.ci/scripts/attest/attest_slsa.sh "${{ steps.sbom.outputs.sbom_path }}" "${{ steps.build.outputs.service_name }}")
-          echo "attestation=$ATTEST_PATH" >> "$GITHUB_OUTPUT"
-
-      - name: Sign SBOM and attestation (cosign)
-        id: sign
-        env:
-          COSIGN_EXPERIMENTAL: 1
-        run: |
-          set -euo pipefail
-          ./.ci/scripts/signing/cosign_sign_verify.sh "${{ steps.sbom.outputs.sbom_path }}" "$SIGN_DIR" "${{ steps.attest.outputs.attestation }}"
-
-      - name: Upload SBOM and signatures
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: sbom-and-signatures
+          name: supply-chain-artifacts
           path: |
-            ${{ steps.sbom.outputs.sbom_path }}
-            ${{ env.SIGN_DIR }}/*
-          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+            ${SBOM_PATH}
+            ${VULN_DIR}
+            ${ATTESTATION_PATH}
+            artifacts/sbom.sig
+            artifacts/sbom.cert
 
-      - name: Upload scan results
-        uses: actions/upload-artifact@v4
-        with:
-          name: vulnerability-reports
-          path: |
-            ${{ steps.grype.outputs.json }}
-            ${{ steps.grype.outputs.sarif }}
-            ${{ steps.osv.outputs.json }}
-            ${{ steps.osv.outputs.sarif }}
-            ${{ steps.budget.outputs.summary_file }}
-            ${{ steps.budget.outputs.summary_json }}
-          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
-
-      - name: Upload attestations
-        uses: actions/upload-artifact@v4
-        with:
-          name: attestations
-          path: |
-            ${{ steps.attest.outputs.attestation }}
-          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
-
-      - name: Post PR summary
+      - name: PR summary comment
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
+        uses: marocchino/sticky-pull-request-comment@v2
         with:
-          script: |
-            const fs = require('fs');
-            const summary = fs.readFileSync('${{ steps.budget.outputs.summary_file }}', 'utf8');
-            const { context, github } = require('@actions/github');
-            const serverUrl = process.env.GITHUB_SERVER_URL || 'https://github.com';
-            const repository = process.env.GITHUB_REPOSITORY;
-            const runUrl = `${serverUrl}/${repository}/actions/runs/${process.env.GITHUB_RUN_ID}`;
-            const rekorIndex = '${{ steps.sign.outputs.tlog_index }}';
-            const sbomPath = '${{ steps.sbom.outputs.sbom_path }}';
-            const attestPath = '${{ steps.attest.outputs.attestation }}';
-            const body = `### Supply chain gates\n${summary}\n\nArtifacts:\n- SBOM: ${sbomPath}\n- Attestation: ${attestPath}\n- Rekor: ${rekorIndex ? `https://search.sigstore.dev/?logIndex=${rekorIndex}` : 'pending'}\n- Run artifacts: ${runUrl}`;
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body,
-            });
+          recreate: true
+          message: |
+            ## Supply chain summary
+            - SBOM: `${SBOM_PATH}`
+            - Grype: `${VULN_DIR}/grype.json`
+            - OSV: `${VULN_DIR}/osv.json`
+            - Budget: `${VULN_DIR}/budget-summary.json`
+            - Attestation: `${ATTESTATION_PATH}`
+            - Signatures: `artifacts/sbom.sig`

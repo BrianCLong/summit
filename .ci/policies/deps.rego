@@ -1,112 +1,62 @@
-package deps.policy
+package deps
 
 import future.keywords.if
 
-policy := data.policy
-
-licenses(pkg) = result {
-  raw := [pkg.licenseConcluded, pkg.licenseDeclared][_]
-  raw != null
-  raw != ""
-  lowered := lower(raw)
-  cleaned := re_replace("[()]", "", lowered)
-  tokens := split(replace(replace(cleaned, " and ", " | "), " or ", " | "), "|")
-  result := {trim(token) | token := tokens[_]; trim(token) != ""}
-}
-
-licenses(pkg) = {} {
-  not pkg.licenseConcluded
-  not pkg.licenseDeclared
-}
-
-version_matches(version, regex) {
-  not regex
-}
-
-version_matches(version, regex) {
-  regex == ""
-}
-
-version_matches(version, regex) {
-  regex != ""
-  version != null
-  re_match(regex, tostring(version))
-}
-
-override_metadata_valid(override) {
-  override.ticket
-  trim(override.ticket) != ""
-  override.justification
-  trim(override.justification) != ""
-  not expired(override.expires)
-}
-
-allow_override(pkg, rule) {
-  some override
-  override := policy.allow_overrides[_]
-  override_metadata_valid(override)
-  override.package == pkg.name
-  version_matches(pkg.versionInfo, override.version_regex)
-  rule_is_covered(rule, override)
-}
-
-rule_is_covered(rule, override) {
-  not rule.cve
-  not override.cve
-}
-
-rule_is_covered(rule, override) {
-  rule.cve
-  override.cve == rule.cve
-}
-
-expired(ts) {
-  ts == null
-}
-
-expired(ts) {
-  ts == ""
-}
-
-expired(ts) {
-  parsed := time.parse_rfc3339(ts)
+allowed_override(pkg) {
+  policy := input.policy.allow.overrides[_]
+  pkg.name == policy.name
+  pkg.version == policy.version
+  parsed := time.parse_rfc3339(policy.expires)
   now := time.now_ns()
-  parsed <= now
+  parsed*1000000 > now
 }
 
-not_expired(ts) {
-  not expired(ts)
+license_denied(pkg) {
+  pkg.license != null
+  policy := input.policy.deny.licenses[_]
+  pkg.license == policy
 }
 
-violation[msg] {
-  override := policy.allow_overrides[_]
-  not override_metadata_valid(override)
-  msg := sprintf("override for %s missing required metadata (ticket/justification) or expired", [override.package])
+package_denied(pkg) {
+  policy := input.policy.deny.packages[_]
+  pkg.name == policy.name
+  not allowed_override(pkg)
+  (policy.version == null) or (pkg.version == policy.version)
 }
 
-violation[msg] {
-  pkg := input.packages[_]
-  disallowed := policy.disallowed_licenses[_]
-  license := licenses(pkg)[_]
-  lower(disallowed) == license
-  not allow_override(pkg, {"license": disallowed})
-  msg := sprintf("disallowed license %s on %s@%s", [disallowed, pkg.name, pkg.versionInfo])
+cve_denied(pkg) {
+  vuln := pkg.vulnerabilities[_]
+  policy := input.policy.deny.cves[_]
+  vuln.id == policy
+  not allowed_override(pkg)
 }
 
-violation[msg] {
-  pkg := input.packages[_]
-  entry := policy.denylist.packages[_]
-  pkg.name == entry.name
-  version_matches(pkg.versionInfo, entry.version_regex)
-  not allow_override(pkg, entry)
-  msg := sprintf("dependency %s@%s blocked: %s", [pkg.name, pkg.versionInfo, entry.reason])
+deny[msg] {
+  pkg := input.sbom.packages[_]
+  license_denied(pkg)
+  msg := sprintf("license %s is denied for %s", [pkg.license, pkg.name])
 }
 
-violation[msg] {
-  pkg := input.packages[_]
-  entry := policy.denylist.cves[_]
-  pkg.name == entry.package
-  version_matches(pkg.versionInfo, entry.version_regex)
-  not allow_override(pkg, entry)
-  msg := sprintf("dependency %s@%s blocked for %s: %s", [pkg.name, pkg.versionInfo, entry.id, entry.reason])
+deny[msg] {
+  pkg := input.sbom.packages[_]
+  package_denied(pkg)
+  ver := ""
+  pkg.version != null
+  ver := sprintf(" version %s", [pkg.version])
+  msg := sprintf("package %s denied%s", [pkg.name, ver])
+}
+
+deny[msg] {
+  pkg := input.sbom.packages[_]
+  cve_denied(pkg)
+  msg := sprintf("package %s contains denied vulnerability", [pkg.name])
+}
+
+warn[msg] {
+  pkg := input.sbom.packages[_]
+  allowed_override(pkg)
+  override := input.policy.allow.overrides[_]
+  override.name == pkg.name
+  override.version == pkg.version
+  msg := sprintf("override applied for %s %s (ticket %s)", [pkg.name, pkg.version, override.ticket])
 }

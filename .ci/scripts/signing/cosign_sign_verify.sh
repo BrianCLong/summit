@@ -1,42 +1,36 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ARTIFACT=${1:?"Artifact path required"}
-OUTPUT_DIR=${2:-artifacts/signatures}
-ATTESTATION=${3:-}
-COSIGN_BIN=${COSIGN_BIN:-cosign}
+usage() {
+  echo "Usage: $0 <image> <attestation>" >&2
+  exit 1
+}
 
-mkdir -p "${OUTPUT_DIR}"
-SIG_PATH="${OUTPUT_DIR}/$(basename "${ARTIFACT}").sig"
-LOG_PATH="${OUTPUT_DIR}/$(basename "${ARTIFACT}").cosign.log"
-
-export COSIGN_EXPERIMENTAL=${COSIGN_EXPERIMENTAL:-1}
-
-if ! command -v "${COSIGN_BIN}" >/dev/null 2>&1; then
-  echo "Installing cosign..."
-  curl -sSfL https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64 -o /tmp/cosign
-  sudo install /tmp/cosign /usr/local/bin/cosign
+if [[ $# -lt 2 ]]; then
+  usage
 fi
 
-echo "Signing ${ARTIFACT} with cosign"
-"${COSIGN_BIN}" sign-blob --yes "${ARTIFACT}" --output-signature "${SIG_PATH}" 2>&1 | tee "${LOG_PATH}"
-"${COSIGN_BIN}" verify-blob --signature "${SIG_PATH}" "${ARTIFACT}"
+IMAGE="$1"
+ATTESTATION="$2"
 
-ATTEST_SIG=""
-if [ -n "${ATTESTATION}" ] && [ -f "${ATTESTATION}" ]; then
-  ATTEST_SIG="${OUTPUT_DIR}/$(basename "${ATTESTATION}").sig"
-  echo "Signing attestation ${ATTESTATION}"
-  "${COSIGN_BIN}" sign-blob --yes "${ATTESTATION}" --output-signature "${ATTEST_SIG}" 2>&1 | tee -a "${LOG_PATH}"
-  "${COSIGN_BIN}" verify-blob --signature "${ATTEST_SIG}" "${ATTESTATION}"
+if ! command -v cosign >/dev/null 2>&1; then
+  echo "cosign is required" >&2
+  exit 1
 fi
 
-TLOG_INDEX=$(grep -oE 'tlog entry created with index: [0-9]+' "${LOG_PATH}" | awk '{print $NF}' | tail -n 1)
+echo "[sign] signing ${IMAGE}" >&2
+COSIGN_EXPERIMENTAL=1 cosign sign "${IMAGE}"
 
-if [ -n "${GITHUB_OUTPUT:-}" ]; then
-  echo "signature=${SIG_PATH}" >> "${GITHUB_OUTPUT}"
-  echo "attestation_signature=${ATTEST_SIG}" >> "${GITHUB_OUTPUT}"
-  echo "tlog_index=${TLOG_INDEX}" >> "${GITHUB_OUTPUT}"
-  echo "log=${LOG_PATH}" >> "${GITHUB_OUTPUT}"
-fi
+echo "[sign] attaching attestation" >&2
+COSIGN_EXPERIMENTAL=1 cosign attest --predicate "${ATTESTATION}" --type slsaprovenance "${IMAGE}"
 
-echo "${SIG_PATH}"
+PINNED=$(cosign verify --output json "${IMAGE}" | jq -r '.[0].critical.image["docker-manifest-digest"]')
+PINNED_IMAGE="${IMAGE%@*}@${PINNED}"
+
+echo "pinned=${PINNED_IMAGE}" >> "$GITHUB_OUTPUT"
+echo "digest=${PINNED}" >> "$GITHUB_OUTPUT"
+
+echo "[verify] verifying signatures and attestations for ${PINNED_IMAGE}" >&2
+COSIGN_EXPERIMENTAL=1 cosign verify "${PINNED_IMAGE}"
+COSIGN_EXPERIMENTAL=1 cosign verify-attestation --type slsaprovenance "${PINNED_IMAGE}"
+COSIGN_EXPERIMENTAL=1 cosign verify-attestation --type spdx "${PINNED_IMAGE}" || true

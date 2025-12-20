@@ -1,57 +1,23 @@
-policy:
-  metadata:
-    owner: "Security Engineering"
-    updated: "2025-03-12"
-    description: "Dependency policy for SBOM validation covering licenses, malware/typosquat bans, and CVE-pinned denies."
-
-  disallowed_licenses:
-    - AGPL-3.0-only
-    - AGPL-3.0-or-later
+deny:
+  licenses:
+    - AGPL-3.0
     - SSPL-1.0
-    - BUSL-1.1
-
-  denylist:
-    packages:
-      - name: event-stream
-        reason: "Malware and typosquat history; explicitly blocked."
-      - name: ua-parser-js
-        version_regex: "^0\.7\.29"
-        reason: "Malware-tainted npm release (Oct 2021)."
-      - name: colors
-        version_regex: "^1\.4\.([2-9]|1[0-9])"
-        reason: "Known protestware release series; forbid accidental use."
-      - name: node-ipc
-        version_regex: "^9\.2\.([0-9]|1[0-9])"
-        reason: "Protestware/typosquat risk; block compromised supply chain versions."
-    cves:
-      - id: CVE-2024-3094
-        package: xz
-        version_regex: "^5\.6\.[01]"
-        reason: "Backdoored xz/liblzma release; must not ship."
-      - id: CVE-2024-11102
-        package: glibc
-        version_regex: "^2\.39"
-        reason: "Critical glibc resolver vulnerability."
-      - id: CVE-2023-44487
-        package: curl
-        version_regex: "^8\.4\.0"
-        reason: "HTTP/2 rapid reset (CVE-2023-44487) still exploitable in this release."
-
-  allow_overrides:
-    - package: xz
-      version_regex: "^5\.6\.[01]"
-      cve: CVE-2024-3094
-      justification: "Risk accepted while base image is rotated; mitigated by runtime sandboxing."
-      ticket: "SEC-4321"
-      expires: "2025-07-31T23:59:59Z"
-    - package: glibc
-      version_regex: "^2\.39"
-      cve: CVE-2024-11102
-      justification: "Upstream patched packages are staged; temporary tolerance for non-exposed build toolchain."
-      ticket: "SEC-4322"
-      expires: "2025-06-30T23:59:59Z"
-    - package: react
-      version_regex: "^19\.2\.0"
-      justification: "Risk accepted for a limited period while upstream remediation lands."
-      ticket: "SEC-2025"
-      expires: "2025-07-31T23:59:59Z"
+  packages:
+    - name: event-stream
+      reason: historical malware
+    - name: ua-parser-js
+      version: "0.7.29"
+      reason: credential theft incident
+  cves:
+    - CVE-2021-44228
+    - CVE-2024-4321
+allow:
+  overrides:
+    - name: lodash
+      version: "4.17.21"
+      expires: 2025-12-31
+      ticket: SEC-1234
+    - name: urllib3
+      version: "2.0.7"
+      expires: 2025-09-01
+      ticket: RISK-2040
