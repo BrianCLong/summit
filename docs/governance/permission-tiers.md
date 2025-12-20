@@ -1,33 +1,85 @@
-# Permission Tiers
+# Agent Permission Tiers
 
-This matrix defines the graduated control levels for agent and human activity. Each tier balances velocity with governance, ensuring sensitive actions receive proportionate oversight.
+This document defines the **Canonical Permission Tiers** for all automated agents, coding assistants (Codex/Jules), and bot accounts operating within the Summit repository.
 
-## Tier Overview
-- **Tier 1 – Informational:** Read-only queries and documentation lookups; no data mutation; minimal risk.
-- **Tier 2 – Controlled Contribution:** Low-risk edits (docs, templates) in non-production scopes with automatic rollback available.
-- **Tier 3 – Production-Adjacent:** Changes that touch staging/pre-production data, configuration flags, or limited-scope automations.
-- **Tier 4 – Mission Critical:** Production systems, security controls, CI/CD, governance records, or any action with material customer impact.
+**Authority**: This standard is enforced by the Governance Control Plane. Violations result in automatic PR rejection and potential token revocation.
 
-## Approval Matrix
-| Tier | Example Actions | Required Approvals | Evidence Required |
-| --- | --- | --- | --- |
-| 1 | Knowledge retrieval, read-only dashboards | None beyond run ticket | Run log with correlation ID |
-| 2 | Documentation edits, template updates, non-prod data fixes | Agent Owner | Change record + diff link |
-| 3 | Feature flag flips in staging, model eval runs with pre-prod data | Agent Owner + Approver | Dry-run results, rollback plan, signed approval |
-| 4 | Production config changes, CI/CD pipeline updates, governance doc changes, security policy edits | Agent Owner + Approver + Governance Steward (separation of duties) | Full audit trail, on-call notification, rollback proof, impact assessment |
+## Tier 0: Read-Only (Analyst Agents)
 
-## Control Expectations by Tier
-- **Logging:** All tiers require structured logs; Tier-3+ must include full prompt/tool traceability and immutable storage.
-- **Separation of Duties:** Mandatory for Tier-3 and Tier-4. Approver must differ from Operator.
-- **Change Windows:** Tier-4 actions allowed only within approved windows with on-call coverage.
-- **Testing:** Tier-2+ requires automated checks when available; Tier-3+ must show dry-run or canary proof.
-- **Data Boundaries:** Tier-3+ must document datasets accessed, residency constraints, and masking/redaction applied.
-- **Kill Switches:** Tier-3+ runs require a clearly documented rollback or feature toggle.
+**Scope**: Safe, non-invasive analysis and reporting.
+**Role**: `agent:tier-0`
 
-## Mapping to Repository Paths
-- **Tier 1–2:** General documentation and templates outside governance/security scope.
-- **Tier 3:** Staging configurations and pre-production automation.
-- **Tier 4:** `.github/` (CI/CD and policy), `docs/governance/` (canonical governance), and `docs/security/` (security controls). Ownership is enforced via CODEOWNERS.
+| Allowed Paths | Allowed Operations | Prohibited Actions |
+| :--- | :--- | :--- |
+| `docs/` | `read` | No write access |
+| `scripts/analysis/` | `read` | No execution of production scripts |
+| `server/src/` | `read` | No code modification |
+| `.github/workflows/` | `read` | No workflow triggering |
 
-## Escalation
-Any ambiguity in tier assignment defaults to the higher tier. If a run encounters unexpected data access, treat it as Tier-4 and follow the incident process in `agent-incident-response.md`.
+**Artifacts**:
+
+- Analysis Reports (posted as PR comments)
+- Metrics (posted to telemetry endpoints)
+
+## Tier 1: Documentation Only (Scribe Agents)
+
+**Scope**: Documentation updates, fix typos, grammar, and non-functional content.
+**Role**: `agent:tier-1`
+
+| Allowed Paths | Allowed Operations | Prohibited Actions |
+| :--- | :--- | :--- |
+| `docs/**/*.md` | `create`, `update` | Modifying `docs/governance/` |
+| `*.md` (root) | `update` | Modifying `CONTRIBUTING.md` |
+| `AGENTS.md` | `read` | Editing instructions |
+
+**Requires**:
+
+- PR Label: `agent:docs-only`
+
+## Tier 2: Feature Coder (Builder Agents)
+
+**Scope**: Isolated feature development within safe boundaries.
+**Role**: `agent:tier-2`
+
+| Allowed Paths | Allowed Operations | Prohibited Actions |
+| :--- | :--- | :--- |
+| `packages/*` | `create`, `update`, `delete` | Modifying `packages/shared-core` |
+| `apps/web/src/*` | `create`, `update` | Modifying `auth` or `billing` modules |
+| `server/src/services/*` | `create`, `update` | Modifying `server/src/infra/` |
+
+**Requires**:
+
+- PR Label: `agent:feature`
+- Pre-merge Review: Human Owner required
+
+## Tier 3: Core Coder (Architect Agents)
+
+**Scope**: Core system logic, infrastructure, and cross-cutting concerns.
+**Role**: `agent:tier-3`
+
+| Allowed Paths | Allowed Operations | Prohibited Actions |
+| :--- | :--- | :--- |
+| `server/src/**` | `all` | Direct push to `main` |
+| `infra/**` | `create`, `update` | Deleting production resources |
+| `.github/workflows/*` | `read` | Modifying CI/CD pipelines |
+
+**Requires**:
+
+- PR Label: `agent:core`
+- Pre-merge Review: 2x Human Owners (including 1x Governance Lead)
+
+## Tier 4: System & Governance (Omnipotent Agents)
+
+**Scope**: CI/CD, Governance Rules, Security Policies, Release Management.
+**Role**: `agent:tier-4` (e.g., Jules, ReleaseBots)
+
+| Allowed Paths | Allowed Operations | Prohibited Actions |
+| :--- | :--- | :--- |
+| `.github/**` | `all` | None (subject to Audit) |
+| `docs/governance/**` | `all` | Violation of `CONSTITUTION.md` |
+| `policy/**` | `all` | Weakening security gates |
+
+**Requires**:
+
+- PR Label: `agent:system`
+- **Strict Audit**: All actions must be logged to `provenanceLedger`.

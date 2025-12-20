@@ -1,59 +1,66 @@
-# Agent Operations Framework
+# Agent Operations Specification (AgentOps)
 
-This document is the canonical operating procedure for AI and human agents working within the Jules governance framework. It codifies how agents are provisioned, run, monitored, and retired so that every execution remains auditable, reversible, and aligned to Tier-4 controls.
+**Status**: Authoritative
+**Enforcement**: CI/CD Policy Gates
 
-## Objectives
-- Provide a single source of truth for day-to-day agent operations.
-- Ensure actions are bounded by explicit permissions, logged with provenance, and recoverable through change management.
-- Standardize coordination across engineering, security, and governance stakeholders.
+This document defines the operational standards for all AI agents (Codex, Jules, specialized bots) working in the Summit repository.
 
-## Roles and Responsibilities
-- **Agent Owner:** Accountable for outcomes, safety, and alignment to mandates; maintains runbooks and validation suites.
-- **Operator:** Executes runs, monitors health signals, and halts activity on any policy breach.
-- **Approver:** Grants execution approval for Tier-3+ scopes; verifies safeguards and rollbacks are in place.
-- **Governance Steward:** Confirms compliance with the Constitution, Rulebook, and Permission Tiers; ensures evidence is captured.
-- **Incident Commander (on-call):** Leads incident response for any agent-caused impact (see `agent-incident-response.md`).
+## 1. Codex & Agent Execution Rules
 
-## Operating Lifecycle
-1. **Request:** Define scope, inputs, data boundaries, and success criteria; map to a Permission Tier.
-2. **Plan:** Select model/tooling, risk mitigations, and observability. For Tier-3+ include rollback plan and dry-run proof.
-3. **Approval:** Obtain documented approval per `permission-tiers.md` before execution. Attach evidence to the change record.
-4. **Execute:** Run in the least-privilege context with immutable logging enabled. Prefer pre-production environments first.
-5. **Validate:** Compare outputs against acceptance criteria; perform policy and safety checks (PII, data residency, redaction).
-6. **Publish:** Promote results through change management, ensuring artifacts are versioned and reproducible.
-7. **Retire:** Close the run record, archive logs/telemetry, and update lessons-learned in the service inventory.
+All AI agents must adhere to the following execution lifecycle:
 
-## Guardrails and Controls
-- **Least Privilege:** Every agent must operate with the minimal permissions necessary, scoped by data domain and time-bound tokens.
-- **Provenance:** Capture full input/output traces, model versions, prompts, and tool calls. Store in tamper-evident audit storage.
-- **Safety Filters:** Enforce content and policy filters on ingress/egress, including PII redaction, classification, and DLP checks.
-- **Separation of Duties:** Approver and Operator cannot be the same person for Tier-3+ runs.
-- **Change Windows:** Tier-4 changes restricted to approved windows with on-call coverage and rollback readiness.
-- **Data Residency:** Respect dataset residency and contractual constraints; document any cross-region access.
+### 1.1 Initialization
 
-## Execution Checklist
-- [ ] Scope mapped to Permission Tier and noted in the run ticket.
-- [ ] Dependencies validated (model versions, connectors, credentials) with expirations documented.
-- [ ] Observability configured: traces, metrics, structured logs with correlation IDs.
-- [ ] Dry-run executed in pre-production with expected vs. actual comparison.
-- [ ] Rollback/kill-switch tested; owners and on-call rotations notified.
-- [ ] Security review completed for new tools or plugins.
-- [ ] Post-run validation and evidence archived.
+* **Identity**: Agents must identify their **Permission Tier** (see [Permission Tiers](permission-tiers.md)).
+* **Mandate**: Agents must link their work to a specific **Ticket ID** or **Prompt ID**.
+* **Plan**: Before executing changes, agents must output a **Structured Plan** (using `set_plan` tool where available).
 
-## Change Management
-- **Records:** Every run must reference a ticket/change request capturing scope, risk rating, approvals, and links to artifacts.
-- **Versioning:** Store prompts, code, and configuration in version control; tag releases with semantic versions.
-- **Rollbacks:** Maintain reversible migrations, configuration snapshots, and feature toggles for rapid disablement.
-- **Approvals:** Follow the matrix in `permission-tiers.md` for who must approve and how evidence is logged.
+### 1.2 Execution Constraints
 
-## Observability and Reporting
-- **Health Signals:** Monitor latency, error rate, tool-call failure rate, and guardrail hits per run.
-- **Anomalies:** Auto-page on unusual access patterns, elevated redaction counts, or divergence from baseline output quality.
-- **Run Reports:** Summaries must include scope, duration, data touched, deviations, mitigations, and approvals.
-- **Escalation:** Any policy breach triggers the workflow in `agent-incident-response.md`.
+* **Atomic PRs**: One task = One PR. Do not mix refactors with features.
+* **Test-Driven**: Logic changes must include new or updated tests.
+* **Verification**: Agents must verify every file write by reading it back.
+* **Pre-Commit**: Agents must run the equivalent of local pre-commit hooks (linting, type-checking) before submission.
 
-## Continuous Improvement
-- Conduct quarterly retros on agent incidents, near-misses, and false positives.
-- Update playbooks to reflect new tools or governance requirements.
-- Validate detectors and guardrails against adversarial inputs and drift scenarios.
-- Track and publish KPIs: change success rate, MTTR for agent faults, and guardrail coverage.
+### 1.3 Automatic Rejection Criteria
+
+The **Agentic Control Plane** will automatically reject PRs if:
+
+* The PR touches files outside the agent's **Permission Tier**.
+* The PR lacks a linked Issue/Ticket.
+* Tests fail in the `agentic-lifecycle` workflow.
+* Documentation is missing for public API changes.
+
+## 2. CI Enforcement Mapping
+
+This section maps Governance Rules to Technical Enforcement Workflows.
+
+| Governance Rule | Enforcing Workflow | Trigger | Action on Fail |
+| :--- | :--- | :--- | :--- |
+| **Tier Compliance** | `agentic-policy-check.yml` | `pull_request` | Block Merge + Comment |
+| **Test Coverage** | `pr-quality-gate.yml` | `pull_request` | Block Merge |
+| **Security Scan** | `agentic-lifecycle.yml` | `push` | Block Merge + Alert Security |
+| **Evidence Bundle** | `soc2-evidence.yml` | `pull_request` | Block Merge (if missing artifacts) |
+
+### 2.1 Label Gating
+
+* `agent:approved`: Required for Tier 2+ agents to merge. Added by human reviewer or Tier 4 agent.
+* `governance:reviewed`: Required for changes to `docs/governance/`.
+* `security:signed-off`: Required for changes to `policy/` or `auth` modules.
+
+## 3. Audit & Provenance
+
+* **Action Logs**: Every agent action (file write, shell command) should be logged in the PR description or a dedicated `AGENT_LOG.md` file in the PR.
+* **Decision Records**: If an agent makes an architectural decision, it must produce an ADR (Architecture Decision Record) in `docs/adr/`.
+* **Provenance**: All build artifacts must be signed (enforced by `slsa-attestation.yml`).
+
+## 4. Human-in-the-Loop
+
+* **Tier 0-1**: Can be auto-merged if `docs-deploy` passes.
+* **Tier 2**: Requires 1 Human Reviewer.
+* **Tier 3**: Requires 2 Human Reviewers (1 Code Owner).
+* **Tier 4**: Requires Consensus (Quorum) or Emergency Break-glass approval.
+
+---
+
+**Violation of these rules will result in the agent's immediate suspension via the [Kill-Switch Protocol](agent-incident-response.md).**

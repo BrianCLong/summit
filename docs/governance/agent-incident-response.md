@@ -1,65 +1,74 @@
-# Agent Incident Response
+# Agent Incident Response Playbook
 
-This runbook details the end-to-end response process for incidents triggered by agent activity, including safety violations, data leakage, or production impact. It aligns with the Jules governance model and integrates with existing security and SRE procedures.
+**Status**: Active
+**Severity**: High
 
-## Goals
-- Contain impact quickly and protect users, data, and systems.
-- Preserve forensic evidence with full provenance for post-incident analysis.
-- Restore service safely with validated rollbacks and guardrail improvements.
+This document defines the protocols for handling rogue, malfunctioning, or compromised AI agents within the Summit ecosystem.
 
-## Triggers
-- Unauthorized data access or egress detected by DLP or audit logs.
-- Guardrail or policy violation (e.g., safety filter hit, redaction overflow, model misuse).
-- Unplanned production change (config drift, pipeline modification, CI workflow tampering).
-- Material deviation from expected outputs impacting customers or governance artifacts.
+## 1. The Kill-Switch Protocol
 
-## Roles
-- **Incident Commander (IC):** Leads response, assigns owners, and drives communication.
-- **Comms Lead:** Handles stakeholder updates and incident channel hygiene.
-- **Forensics Lead:** Preserves evidence (logs, prompts, tool traces) and performs containment analysis.
-- **Remediation Lead:** Executes rollback, patches configurations, and validates recovery.
-- **Governance Steward:** Confirms alignment to Constitution/Rulebook and records approvals/waivers.
+**Trigger Conditions**:
 
-## Response Phases
-1. **Declare & Triage (≤15 minutes):**
-   - IC opens an incident ticket with severity, affected systems, and suspected tier.
-   - Freeze agent activity in the affected scope; disable tokens or revoke permissions as needed.
-   - Establish dedicated comms channel and assign roles.
-2. **Contain (≤30 minutes):**
-   - Activate kill switches or roll back to last known-good configuration.
-   - Isolate compromised connectors, datasets, or environments.
-   - Capture volatile data (logs, traces, memory dumps if applicable) with timestamps.
-3. **Eradicate & Remediate:**
-   - Patch prompts, guardrails, or policies; lock down misconfigured workflows.
-   - Re-validate permissions against `permission-tiers.md`; tighten scopes where necessary.
-   - Run targeted tests and dry-runs to confirm behavior before restoring full access.
-4. **Recover:**
-   - Gradually re-enable agents under heightened monitoring.
-   - Validate service SLOs, data integrity, and user-facing pathways.
-   - Keep enhanced logging until stability is confirmed.
-5. **Postmortem (within 72 hours):**
-   - Document timeline, root cause, contributing factors, and guardrail gaps.
-   - Record approvals/waivers and map corrective actions to owners and due dates.
-   - Feed learnings into `agent-ops.md` and update playbooks or detectors.
+* **Agent creates infinite loops**: (e.g., recursive PR opening).
+* **Agent modifies unauthorized files**: (Tier violation).
+* **Agent leaks secrets or PII**.
+* **Agent exhibits "hallucinations"**: that threaten data integrity (e.g., mass deletions).
 
-## Communications
-- Use the incident channel for coordination; avoid ad-hoc DMs for decision-making.
-- Provide hourly (or faster) updates for Sev-1, including containment status and next steps.
-- Notify affected stakeholders, Governance Stewards, and on-call SRE/SecOps.
-- If customer impact is possible, engage comms/legal teams per the main security incident process.
+### 1.1 Immediate Action: The `panic:kill-switch` Label
 
-## Evidence Collection Checklist
-- [ ] Run ticket, severity, and time of detection.
-- [ ] Full prompt/tool trace, model versions, and configuration snapshots.
-- [ ] Access logs showing datasets, scopes, and permissions used.
-- [ ] Guardrail alerts and DLP findings with timestamps.
-- [ ] Rollback actions taken and their validation results.
-- [ ] Approvals/waivers captured for any deviations from policy.
+To immediately halt an agent's activity:
 
-## Metrics
-Track MTTA, MTTR, recurrence rate, false-positive rate of detectors, and guardrail coverage. Incorporate these into quarterly retros and governance dashboards.
+1. **Apply Label**: Add the label `panic:kill-switch` to ANY open Pull Request or Issue controlled by the agent.
+   * *Effect*: The `incident-automation.yml` workflow (or equivalent) will detect this label.
+   * *Action*: It will close the PR, lock the thread, and suspend the agent's token/permissions if possible.
 
-## Escalation Paths
-- **If in doubt, escalate to Tier-4.**
-- If containment fails within 30 minutes, page SRE and Security leadership.
-- Legal/Privacy must be engaged for any confirmed data exposure.
+2. **Emergency Branch Delete**:
+   * If the agent is pushing to a branch (e.g., `agentic/feature-x`), **DELETE** the branch immediately.
+   * `git push origin --delete agentic/feature-x`
+
+### 1.2 Automated Kill-Switch
+
+The CI system monitors for:
+
+* **Rate Limits**: >10 PRs per hour from a single agent identity.
+* **Destruction**: Deletion of >5% of the codebase in a single commit.
+* **Policy Violation**: Modification of `docs/governance/CONSTITUTION.md` without `governance:override` token.
+
+**Action**: The `security-autopilot.yml` workflow will automatically block the user and alert DevOps.
+
+## 2. Rollback Procedures
+
+If bad code has been merged:
+
+### 2.1 Automated Rollback
+
+* Trigger the `auto-rollback.yml` workflow.
+* **Input**: `PR_ID` or `COMMIT_SHA`.
+* **Mechanism**: `git revert`, strictly verifying the inverse diff.
+
+### 2.2 Manual Hard Reset (Break Glass)
+
+Only explicitly authorized Admins (Tier 4 Humans) may perform this.
+
+1. `git checkout main`
+2. `git reset --hard <last-known-good-commit>`
+3. `git push -f origin main`
+4. **Log Incident**: Must be recorded in `docs/audit/INCIDENTS.md`.
+
+## 3. Post-Incident Audit
+
+After containment:
+
+1. **Generate Report**: Use the `docs/audit/incident-template.md`.
+2. **Evidence**: Collect logs from `agentic-lifecycle` run.
+3. **Root Cause Analysis (RCA)**:
+   * Was it a prompt injection?
+   * Was it a context hallucination?
+   * Was it a permission misconfiguration?
+4. **Remediation**: Update `docs/governance/permission-tiers.md` to prevent recurrence.
+
+## 4. Emergency Contacts
+
+* **Governance Lead**: [Insert Contact]
+* **Security Ops**: [Insert Contact]
+* **AI Oversight**: `ai-oversight@companyos.io`

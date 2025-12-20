@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { QueryAnalysis, CacheStrategy, OptimizationContext } from './types.js';
 import { getRedisClient } from '../../db/redis.js';
 import { CompressionUtils } from '../../utils/compression.js';

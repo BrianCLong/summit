@@ -3,8 +3,8 @@ import {
   LegalHoldOrchestrator,
   InMemoryLegalHoldRepository,
 } from '../src/cases/legal-hold/orchestrator';
+import { describe, it, test, expect, beforeEach, jest } from '@jest/globals';
 import {
-import { describe, it, test, expect, beforeEach } from '@jest/globals';
   ChainOfCustodyAdapter,
   EDiscoveryCollectionRequest,
   EDiscoveryCollectionResult,

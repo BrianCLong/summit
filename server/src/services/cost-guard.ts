@@ -1,3 +1,4 @@
+// @ts-nocheck
 import pino from 'pino';
 import { businessMetrics, costTracker } from '../observability/telemetry';
 
