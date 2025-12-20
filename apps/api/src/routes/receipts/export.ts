@@ -1,67 +1,46 @@
+import { Request, Response, Router } from 'express';
 import {
-  assembleReceiptBundle,
-  type BundleAssemblyInput,
-} from '../../../../../prov-ledger-service/src/export';
+  assembleExportBundle,
+  ExportBundleInput,
+  ReceiptRecord,
+  PolicyDecisionRecord,
+  RedactionRules,
+} from '../../../../prov-ledger-service/src/export/bundleAssembler';
+import { Manifest } from '../../../../prov-ledger-service/src/ledger';
 
-export interface RequestLike {
-  body?: BundleAssemblyInput;
-}
+const router = Router();
 
-export interface ResponseLike {
-  status(code: number): this;
-  setHeader(name: string, value: string): this | void;
-  json(body: unknown): void;
-  send(body: unknown): void;
-}
-
-function validatePayload(body?: BundleAssemblyInput): asserts body is BundleAssemblyInput {
-  if (!body || !Array.isArray(body.receipts) || body.receipts.length === 0) {
-    throw new Error('At least one receipt is required for export');
+function parsePayload(body: any): ExportBundleInput {
+  const manifest = body.manifest as Manifest | undefined;
+  if (!manifest) {
+    throw new Error('manifest_required');
   }
-  if (!Array.isArray(body.policyDecisions)) {
-    throw new Error('policyDecisions must be an array');
-  }
-}
 
-export function buildReceiptExportHandler(
-  deps = { assembleBundle: assembleReceiptBundle },
-) {
-  return async function exportReceipts(req: RequestLike, res: ResponseLike) {
-    try {
-      validatePayload(req.body);
-
-      const assembly = await deps.assembleBundle(req.body);
-
-      res.setHeader?.('Content-Type', 'application/gzip');
-      res.setHeader?.(
-        'Content-Disposition',
-        'attachment; filename="receipts-export.tgz"',
-      );
-      res.setHeader?.('X-Manifest-Id', assembly.manifest.id);
-
-      res.status(200);
-      res.send(assembly.bundle);
-
-      return assembly.manifest;
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : 'Export generation failed';
-      res.status(message.includes('required') ? 400 : 500);
-
-      if ('json' in res && typeof res.json === 'function') {
-        res.json({
-          error: 'Failed to generate receipt export',
-          detail: message,
-        });
-      } else {
-        res.send({
-          error: 'Failed to generate receipt export',
-          detail: message,
-        });
-      }
-      return null;
-    }
+  return {
+    manifest,
+    receipts: (body.receipts as ReceiptRecord[] | undefined) ?? [],
+    policyDecisions:
+      (body.policyDecisions as PolicyDecisionRecord[] | undefined) ?? [],
+    redaction: (body.redaction as RedactionRules | undefined) ?? undefined,
   };
 }
 
-export const exportReceiptsHandler = buildReceiptExportHandler();
+router.post('/receipts/export', async (req: Request, res: Response) => {
+  try {
+    const payload = parsePayload(req.body);
+    const { stream, metadata } = assembleExportBundle(payload);
+
+    res.setHeader('Content-Type', 'application/gzip');
+    res.setHeader(
+      'X-Redaction-Applied',
+      metadata.redaction.applied ? 'true' : 'false',
+    );
+    stream.pipe(res);
+  } catch (error) {
+    res.status(400).json({
+      error: error instanceof Error ? error.message : 'export_failed',
+    });
+  }
+});
+
+export default router;

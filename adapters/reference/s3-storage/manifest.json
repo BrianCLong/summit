@@ -1,0 +1,20 @@
+{
+  "name": "reference-s3-storage",
+  "version": "0.1.0",
+  "description": "Reference S3-compatible storage adapter",
+  "entrypoint": "index.ts",
+  "capabilities": ["export"],
+  "requiredPermissions": ["adapter:storage:write"],
+  "claims": ["storage:s3"],
+  "compatibility": { "companyOs": ">=0.1.0" },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "bucket": { "type": "string" },
+      "region": { "type": "string" },
+      "endpoint": { "type": "string" }
+    },
+    "required": ["bucket"]
+  },
+  "signature": "placeholder-signature"
+}

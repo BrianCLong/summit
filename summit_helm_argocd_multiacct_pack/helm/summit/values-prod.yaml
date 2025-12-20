@@ -1,7 +1,34 @@
 replicaCount: 3
-image:
-  tag: latest
 
-provenance:
-  # Populate with production Ed25519 public keys for provenance verification
-  publicKeys: []
+namespace:
+  name: summit-prod
+  labels:
+    istio-injection: enabled
+
+image:
+  tag: stable
+
+serviceAccount:
+  name: summit-prod-app
+
+rbac:
+  ops:
+    serviceAccountName: summit-prod-ops
+  ci:
+    serviceAccountName: summit-prod-ci
+
+ingress:
+  hosts:
+    - host: summit.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          servicePort: 80
+  tls:
+    secretName: summit-prod-tls
+    clusterIssuer: letsencrypt-prod
+    dnsNames:
+      - summit.example.com
+
+auditLogging:
+  retentionDays: 30
