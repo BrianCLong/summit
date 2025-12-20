@@ -12,6 +12,7 @@
     "test:jest": "node node_modules/jest/bin/jest.js --config jest.config.cjs",
     "test:vitest": "vitest",
     "test:e2e": "playwright test",
+    "test:a11y": "playwright test tests/e2e/a11y-smoke.spec.ts",
     "test:golden-path": "playwright test golden-path-ci-gate.spec.ts",
     "test:coverage": "jest --coverage",
     "lint": "eslint src",
