@@ -44,6 +44,7 @@ const NarrativeIntelligencePage = React.lazy(() => import('@/pages/NarrativeInte
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { SnapshotProvider } from '@/features/snapshots/SnapshotContext'
 import { ErrorBoundary, NotFound } from '@/components/error'
 import Explain from '@/components/Explain'
 
@@ -68,6 +69,7 @@ function App() {
         <TooltipProvider>
           <AuthProvider>
             <SearchProvider>
+              <SnapshotProvider>
               <Router>
                 <ErrorBoundary>
                   <React.Suspense
@@ -167,6 +169,7 @@ function App() {
                   </React.Suspense>
                 </ErrorBoundary>
               </Router>
+              </SnapshotProvider>
             </SearchProvider>
           </AuthProvider>
         </TooltipProvider>
