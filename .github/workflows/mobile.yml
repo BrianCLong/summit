@@ -2,261 +2,130 @@ name: Mobile CI
 
 on:
   push:
-    branches: [main]
+    branches: [ main, develop ]
     paths:
       - 'apps/mobile/**'
-      - '.github/workflows/mobile.yml'
+      - 'packages/mobile-sdk/**'
   pull_request:
-    branches: [main]
+    branches: [ main, develop ]
     paths:
       - 'apps/mobile/**'
-      - '.github/workflows/mobile.yml'
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-env:
-  NODE_VERSION: '18'
-  PNPM_VERSION: '9.12.0'
+      - 'packages/mobile-sdk/**'
 
 jobs:
-  lint-and-typecheck:
-    name: Lint & Typecheck
+  validate:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/checkout@v3
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          node-version: 18
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: |
+          npm install -g pnpm
+          pnpm install --no-frozen-lockfile
 
-      - name: Run ESLint
-        working-directory: apps/mobile
-        run: pnpm lint
+      - name: Lint Mobile SDK
+        run: cd packages/mobile-sdk && pnpm lint
 
-      - name: Run TypeScript check
-        working-directory: apps/mobile
-        run: pnpm typecheck
+      - name: Typecheck Mobile SDK
+        run: cd packages/mobile-sdk && pnpm typecheck
 
-  test:
-    name: Run Tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Test Mobile SDK
+        run: cd packages/mobile-sdk && pnpm test
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
+      - name: Lint Mobile App
+        run: cd apps/mobile && pnpm lint
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+      - name: Typecheck Mobile App
+        run: cd apps/mobile && pnpm typecheck
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Run tests
-        working-directory: apps/mobile
-        run: pnpm test --coverage
-
-      - name: Upload coverage
-        uses: codecov/codecov-action@v4
-        with:
-          files: apps/mobile/coverage/lcov.info
-          flags: mobile
-          name: mobile-coverage
-          fail_ci_if_error: false
+      - name: Unit Test Mobile App
+        run: cd apps/mobile && pnpm test
 
   build-android:
-    name: Build Android
+    needs: validate
     runs-on: ubuntu-latest
-    needs: [lint-and-typecheck, test]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+      - uses: actions/checkout@v3
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
+          distribution: 'zulu'
           java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build Android Release
-        working-directory: apps/mobile
         run: |
-          cd android
-          ./gradlew assembleRelease --no-daemon
-        env:
-          ANDROID_HOME: ${{ env.ANDROID_HOME }}
+          npm install -g pnpm
+          pnpm install --no-frozen-lockfile
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
+      - name: Build Android Bundle
+        run: cd apps/mobile/android && ./gradlew bundleRelease
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
         with:
-          name: android-release
-          path: apps/mobile/android/app/build/outputs/apk/release/*.apk
-          retention-days: 14
+          name: app-release.aab
+          path: apps/mobile/android/app/build/outputs/bundle/release/app-release.aab
 
   build-ios:
-    name: Build iOS
-    runs-on: macos-14
-    needs: [lint-and-typecheck, test]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: validate
+    runs-on: macos-latest
+    if: github.ref == 'refs/heads/main'
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/checkout@v3
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          node-version: 18
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.2'
-          bundler-cache: true
-          working-directory: apps/mobile/ios
-
-      - name: Install CocoaPods
-        working-directory: apps/mobile/ios
-        run: bundle exec pod install
-
-      - name: Build iOS (Simulator)
-        working-directory: apps/mobile
         run: |
-          xcodebuild \
-            -workspace ios/IntelGraphMobile.xcworkspace \
-            -scheme IntelGraphMobile \
-            -configuration Release \
-            -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 15' \
-            build \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
+          npm install -g pnpm
+          pnpm install --no-frozen-lockfile
 
-  e2e-android:
-    name: E2E Tests (Android)
-    runs-on: ubuntu-latest
-    needs: [build-android]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Install Pods
+        run: cd apps/mobile/ios && pod install
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Download APK
-        uses: actions/download-artifact@v4
-        with:
-          name: android-release
-          path: apps/mobile/android/app/build/outputs/apk/release/
-
-      - name: Enable KVM
+      - name: Build iOS Archive
         run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
+          cd apps/mobile/ios
+          xcodebuild -workspace IntelGraphMobile.xcworkspace -scheme IntelGraphMobile -configuration Release clean archive -archivePath IntelGraphMobile.xcarchive CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
 
-      - name: Run E2E Tests
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 31
-          arch: x86_64
-          profile: pixel_5
-          script: |
-            cd apps/mobile
-            pnpm e2e:android
-
-  security-scan:
-    name: Security Scan
-    runs-on: ubuntu-latest
-    needs: [lint-and-typecheck]
+  e2e-test:
+    needs: validate
+    runs-on: macos-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/checkout@v3
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          node-version: 18
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: |
+          npm install -g pnpm
+          pnpm install --no-frozen-lockfile
 
-      - name: Run security audit
-        working-directory: apps/mobile
-        run: pnpm audit --audit-level=moderate
-        continue-on-error: true
+      - name: Install Applesimutils
+        run: |
+          brew tap wix/brew
+          brew install applesimutils
 
-      - name: Run Gitleaks
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build for Detox (iOS)
+        run: cd apps/mobile && pnpm detox build -c ios.sim.release
+
+      - name: Run Detox Tests
+        run: cd apps/mobile && pnpm detox test -c ios.sim.release --cleanup

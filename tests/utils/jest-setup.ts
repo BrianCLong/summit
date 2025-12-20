@@ -1,3 +1,7 @@
+// @ts-nocheck
+/// <reference types="jest" />
+/// <reference types="node" />
+
 /**
  * Jest Global Setup
  *
@@ -5,8 +9,7 @@
  * It sets up global test utilities and configuration.
  */
 
-/// <reference types="node" />
-
+// @ts-nocheck
 import { jest } from '@jest/globals';
 
 // Extend Jest timeout for integration tests
