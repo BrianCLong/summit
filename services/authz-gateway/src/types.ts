@@ -19,18 +19,13 @@ export interface ResourceAttributes {
   residency: string;
   classification: string;
   tags: string[];
-  adapterId?: string;
-  capabilities?: string[];
-  claims?: Record<string, unknown>;
-  requiredPermissions?: string[];
 }
 
 export interface DecisionContext {
   protectedActions: string[];
   requestTime: string;
   currentAcr: string;
-  adapterId?: string;
-  retries?: number;
+  breakGlass?: BreakGlassMetadata;
 }
 
 export interface ElevationContext {
@@ -67,4 +62,13 @@ export interface AuthorizationDecision {
   allowed: boolean;
   reason: string;
   obligations: DecisionObligation[];
+}
+
+export interface BreakGlassMetadata {
+  requestId: string;
+  ticketId: string;
+  justification: string;
+  issuedAt: string;
+  expiresAt: string;
+  approverId: string;
 }

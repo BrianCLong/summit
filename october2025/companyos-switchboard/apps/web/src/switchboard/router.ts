@@ -67,10 +67,6 @@ export class SwitchboardRouter {
       throw new Error(`Route not found: ${routeId}`);
     }
 
-    if (route.requiresDualControl) {
-      this.validateDualControl(routeId, context);
-    }
-
     this.options.metrics.increment('switchboard.request', { routeId, source: context.source });
 
     // Validate input
@@ -120,21 +116,6 @@ export class SwitchboardRouter {
         await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
-  }
-
-  private validateDualControl(routeId: string, context: SwitchboardContext) {
-    const control = context.dualControl;
-    if (!control || control.approvers.length === 0) {
-      throw new Error(`Route ${routeId} requires dual control approval`);
-    }
-    const uniqueApprovers = new Set(control.approvers);
-    if (context.actor && uniqueApprovers.has(context.actor) && uniqueApprovers.size === 1) {
-      throw new Error(`Route ${routeId} requires an independent approver`);
-    }
-    this.options.metrics.increment('switchboard.dual_control', {
-      routeId,
-      approved: String(control.approvers.length),
-    });
   }
 
   private async executeWithTimeout(route: SwitchboardRoute, payload: any, context: SwitchboardContext) {

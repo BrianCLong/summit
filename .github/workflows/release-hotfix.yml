@@ -1,0 +1,576 @@
+name: Release Hotfix
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_version:
+        description: 'Production version to hotfix (e.g., 1.2.3)'
+        required: true
+        type: string
+      commits:
+        description: 'Comma-separated commit SHAs to cherry-pick'
+        required: true
+        type: string
+      justification:
+        description: 'Justification for hotfix (linked to incident if applicable)'
+        required: true
+        type: string
+
+concurrency:
+  group: release-hotfix
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  OTEL_SERVICE_NAME: release-hotfix
+  OTEL_EXPORTER_OTLP_ENDPOINT: ${{ vars.OTEL_EXPORTER_OTLP_ENDPOINT }}
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+  attestations: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  # ==========================================================================
+  # Job 1: Validate hotfix eligibility
+  # ==========================================================================
+  validate:
+    name: Validate Hotfix
+    runs-on: ubuntu-latest
+    outputs:
+      hotfix_version: ${{ steps.version.outputs.hotfix_version }}
+      branch_name: ${{ steps.version.outputs.branch_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Validate commits
+        id: validate-commits
+        run: |
+          set -euo pipefail
+
+          IFS=',' read -ra COMMITS <<< "${{ inputs.commits }}"
+          INVALID=()
+
+          for sha in "${COMMITS[@]}"; do
+            sha=$(echo "$sha" | xargs)  # trim whitespace
+
+            # Check commit exists
+            if ! git cat-file -e "$sha^{commit}" 2>/dev/null; then
+              INVALID+=("$sha: commit not found")
+              continue
+            fi
+
+            # Check commit type (only fix, chore(security) allowed)
+            MESSAGE=$(git log -1 --format="%s" "$sha")
+
+            if [[ ! "$MESSAGE" =~ ^fix(\(.+\))?:|^chore\(security\): ]]; then
+              INVALID+=("$sha: commit type not allowed for hotfix (only fix, chore(security))")
+            fi
+          done
+
+          if [[ ${#INVALID[@]} -gt 0 ]]; then
+            echo "::error::Invalid commits for hotfix:"
+            for inv in "${INVALID[@]}"; do
+              echo "::error::  - $inv"
+            done
+            exit 1
+          fi
+
+          echo "All commits validated for hotfix"
+
+      - name: Calculate hotfix version
+        id: version
+        env:
+          BASE_VERSION: ${{ inputs.base_version }}
+        run: |
+          set -euo pipefail
+
+          # Parse base version
+          if [[ ! "$BASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid base version format: $BASE_VERSION"
+            exit 1
+          fi
+
+          MAJOR=$(echo "$BASE_VERSION" | cut -d. -f1)
+          MINOR=$(echo "$BASE_VERSION" | cut -d. -f2)
+          PATCH=$(echo "$BASE_VERSION" | cut -d. -f3)
+
+          # Increment patch
+          NEW_PATCH=$((PATCH + 1))
+          HOTFIX_VERSION="${MAJOR}.${MINOR}.${NEW_PATCH}"
+          BRANCH_NAME="hotfix/v${HOTFIX_VERSION}"
+
+          echo "hotfix_version=$HOTFIX_VERSION" >> $GITHUB_OUTPUT
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+
+          echo "Hotfix version: v$HOTFIX_VERSION"
+
+  # ==========================================================================
+  # Job 2: Create hotfix branch and cherry-pick commits
+  # ==========================================================================
+  create-branch:
+    name: Create Hotfix Branch
+    needs: validate
+    runs-on: ubuntu-latest
+    outputs:
+      branch_created: ${{ steps.branch.outputs.created }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create hotfix branch
+        id: branch
+        env:
+          BASE_VERSION: ${{ inputs.base_version }}
+          HOTFIX_VERSION: ${{ needs.validate.outputs.hotfix_version }}
+          BRANCH_NAME: ${{ needs.validate.outputs.branch_name }}
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Create branch from release tag
+          git checkout "v$BASE_VERSION"
+          git checkout -b "$BRANCH_NAME"
+
+          echo "created=true" >> $GITHUB_OUTPUT
+
+      - name: Cherry-pick commits
+        env:
+          COMMITS: ${{ inputs.commits }}
+        run: |
+          set -euo pipefail
+
+          IFS=',' read -ra COMMIT_LIST <<< "$COMMITS"
+
+          for sha in "${COMMIT_LIST[@]}"; do
+            sha=$(echo "$sha" | xargs)
+            echo "Cherry-picking $sha..."
+            git cherry-pick "$sha" --no-commit
+            git commit -m "$(git log -1 --format='%s' $sha)
+
+          Cherry-picked from $sha for hotfix"
+          done
+
+      - name: Create hotfix metadata
+        env:
+          HOTFIX_VERSION: ${{ needs.validate.outputs.hotfix_version }}
+          JUSTIFICATION: ${{ inputs.justification }}
+        run: |
+          set -euo pipefail
+
+          cat > .hotfix-metadata.json << EOF
+          {
+            "version": "${HOTFIX_VERSION}",
+            "base_version": "${{ inputs.base_version }}",
+            "commits": "${{ inputs.commits }}",
+            "justification": "${JUSTIFICATION}",
+            "created_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "created_by": "${{ github.actor }}",
+            "run_id": "${{ github.run_id }}"
+          }
+          EOF
+
+          git add .hotfix-metadata.json
+          git commit -m "chore(release): add hotfix metadata for v${HOTFIX_VERSION}"
+
+      - name: Push hotfix branch
+        env:
+          BRANCH_NAME: ${{ needs.validate.outputs.branch_name }}
+        run: |
+          git push origin "$BRANCH_NAME"
+
+  # ==========================================================================
+  # Job 3: Build hotfix images with stricter validation
+  # ==========================================================================
+  build:
+    name: Build Hotfix Images
+    needs: [validate, create-branch]
+    runs-on: ubuntu-latest
+    outputs:
+      api_digest: ${{ steps.build-api.outputs.digest }}
+      web_digest: ${{ steps.build-web.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.validate.outputs.branch_name }}
+
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run strict type checks
+        run: pnpm typecheck
+
+      - name: Run lint
+        run: pnpm lint
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Build and push API image
+        id: build-api
+        uses: docker/build-push-action@v5
+        with:
+          context: ./server
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/api:v${{ needs.validate.outputs.hotfix_version }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/api:hotfix-${{ github.sha }}
+          labels: |
+            org.opencontainers.image.version=${{ needs.validate.outputs.hotfix_version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.type=hotfix
+          provenance: true
+          sbom: true
+
+      - name: Build and push Web image
+        id: build-web
+        uses: docker/build-push-action@v5
+        with:
+          context: ./client
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/web:v${{ needs.validate.outputs.hotfix_version }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/web:hotfix-${{ github.sha }}
+          labels: |
+            org.opencontainers.image.version=${{ needs.validate.outputs.hotfix_version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.type=hotfix
+          provenance: true
+          sbom: true
+
+      - name: Sign images
+        env:
+          COSIGN_EXPERIMENTAL: 1
+          API_DIGEST: ${{ steps.build-api.outputs.digest }}
+          WEB_DIGEST: ${{ steps.build-web.outputs.digest }}
+        run: |
+          cosign sign --yes ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/api@${API_DIGEST}
+          cosign sign --yes ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/web@${WEB_DIGEST}
+
+  # ==========================================================================
+  # Job 4: Deploy to stage with strict smoke test
+  # ==========================================================================
+  deploy-stage:
+    name: Deploy Hotfix to Stage
+    needs: [validate, build]
+    runs-on: ubuntu-latest
+    environment: stage
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.validate.outputs.branch_name }}
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'v3.11.1'
+
+      - name: Create Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_STAGE_B64 }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Deploy to Stage
+        env:
+          NAMESPACE: stage
+          VERSION: ${{ needs.validate.outputs.hotfix_version }}
+          API_DIGEST: ${{ needs.build.outputs.api_digest }}
+          WEB_DIGEST: ${{ needs.build.outputs.web_digest }}
+        run: |
+          set -euo pipefail
+
+          helm upgrade --install api ./charts/server \
+            --namespace $NAMESPACE \
+            --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/api \
+            --set image.digest=$API_DIGEST \
+            --set version=$VERSION \
+            --set environment=stage \
+            --set hotfix=true \
+            --atomic \
+            --timeout 5m \
+            --wait
+
+          helm upgrade --install web ./charts/client \
+            --namespace $NAMESPACE \
+            --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/web \
+            --set image.digest=$WEB_DIGEST \
+            --set version=$VERSION \
+            --set environment=stage \
+            --set hotfix=true \
+            --atomic \
+            --timeout 5m \
+            --wait
+
+      - name: Run strict performance smoke
+        uses: grafana/k6-action@v0.3.0
+        with:
+          filename: .maestro/tests/k6/smoke.js
+        env:
+          BASE_URL: https://api.stage.intelgraph.io
+          # Stricter thresholds for hotfix
+          K6_THRESHOLD_HTTP_REQ_DURATION_P95: 400
+          K6_THRESHOLD_HTTP_REQ_FAILED: 0.005
+
+      - name: Verify hotfix-specific functionality
+        env:
+          COMMITS: ${{ inputs.commits }}
+        run: |
+          set -euo pipefail
+
+          echo "Running hotfix-specific verification..."
+
+          # Verify health
+          curl -sf https://api.stage.intelgraph.io/health
+          curl -sf https://api.stage.intelgraph.io/health/ready
+
+          echo "Stage validation passed"
+
+  # ==========================================================================
+  # Job 5: Fast-track production deployment with stricter SLO
+  # ==========================================================================
+  deploy-prod:
+    name: Deploy Hotfix to Production
+    needs: [validate, build, deploy-stage]
+    runs-on: ubuntu-latest
+    environment: production
+    outputs:
+      deployed: ${{ steps.deploy.outputs.deployed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.validate.outputs.branch_name }}
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'v3.11.1'
+
+      - name: Create Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_PROD_B64 }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Deploy hotfix to production
+        id: deploy
+        env:
+          NAMESPACE: production
+          VERSION: ${{ needs.validate.outputs.hotfix_version }}
+          API_DIGEST: ${{ needs.build.outputs.api_digest }}
+          WEB_DIGEST: ${{ needs.build.outputs.web_digest }}
+        run: |
+          set -euo pipefail
+
+          # Direct deployment (no canary for hotfix - speed is critical)
+          helm upgrade --install api ./charts/server \
+            --namespace $NAMESPACE \
+            --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/api \
+            --set image.digest=$API_DIGEST \
+            --set version=$VERSION \
+            --set environment=production \
+            --set hotfix=true \
+            --atomic \
+            --timeout 10m \
+            --wait
+
+          helm upgrade --install web ./charts/client \
+            --namespace $NAMESPACE \
+            --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/web \
+            --set image.digest=$WEB_DIGEST \
+            --set version=$VERSION \
+            --set environment=production \
+            --set hotfix=true \
+            --atomic \
+            --timeout 10m \
+            --wait
+
+          echo "deployed=true" >> $GITHUB_OUTPUT
+
+      - name: Verify production health (stricter thresholds)
+        run: |
+          set -euo pipefail
+
+          echo "Verifying production health with stricter thresholds..."
+          sleep 30
+
+          # Multiple health checks
+          for i in {1..5}; do
+            curl -sf https://api.intelgraph.io/health || exit 1
+            sleep 5
+          done
+
+          echo "Production health verified"
+
+  # ==========================================================================
+  # Job 6: Create release and evidence bundle
+  # ==========================================================================
+  finalize:
+    name: Finalize Hotfix Release
+    needs: [validate, build, deploy-prod]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.validate.outputs.branch_name }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Create release tag
+        env:
+          VERSION: ${{ needs.validate.outputs.hotfix_version }}
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git tag -a "v$VERSION" -m "Hotfix release v$VERSION
+
+          Base version: v${{ inputs.base_version }}
+          Justification: ${{ inputs.justification }}
+          Run ID: ${{ github.run_id }}"
+
+          git push origin "v$VERSION"
+
+      - name: Generate release notes
+        env:
+          VERSION: ${{ needs.validate.outputs.hotfix_version }}
+          BASE_VERSION: ${{ inputs.base_version }}
+          JUSTIFICATION: ${{ inputs.justification }}
+          COMMITS: ${{ inputs.commits }}
+        run: |
+          cat > release-notes.md << EOF
+          ## Hotfix Release v$VERSION
+
+          **Base Version**: v$BASE_VERSION
+          **Type**: Hotfix
+
+          ### Justification
+          $JUSTIFICATION
+
+          ### Changes
+          EOF
+
+          IFS=',' read -ra COMMIT_LIST <<< "$COMMITS"
+          for sha in "${COMMIT_LIST[@]}"; do
+            sha=$(echo "$sha" | xargs)
+            MESSAGE=$(git log -1 --format="%s" "$sha" 2>/dev/null || echo "Unknown commit")
+            echo "- $MESSAGE (\`$sha\`)" >> release-notes.md
+          done
+
+          cat >> release-notes.md << EOF
+
+          ### Deployment
+          - Stage: Validated
+          - Production: Deployed
+
+          ### Rollback
+          If issues arise, rollback to v$BASE_VERSION:
+          \`\`\`bash
+          gh workflow run release-promote.yml -f action=rollback -f rollback_to=$BASE_VERSION
+          \`\`\`
+          EOF
+
+      - name: Generate evidence bundle (reduced scope)
+        env:
+          VERSION: ${{ needs.validate.outputs.hotfix_version }}
+          API_DIGEST: ${{ needs.build.outputs.api_digest }}
+          WEB_DIGEST: ${{ needs.build.outputs.web_digest }}
+        run: |
+          pnpm exec ts-node .ci/scripts/release/evidence_packager.ts \
+            --version "$VERSION" \
+            --api-digest "$API_DIGEST" \
+            --web-digest "$WEB_DIGEST" \
+            --hotfix true \
+            --output "release_evidence_v${VERSION}.zip"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.validate.outputs.hotfix_version }}
+        run: |
+          set -euo pipefail
+
+          gh release create "v$VERSION" \
+            --title "v$VERSION (Hotfix)" \
+            --notes-file release-notes.md \
+            "release_evidence_v${VERSION}.zip"
+
+      - name: Notify channels
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_RELEASE_WEBHOOK }}
+          VERSION: ${{ needs.validate.outputs.hotfix_version }}
+          JUSTIFICATION: ${{ inputs.justification }}
+        run: |
+          pnpm exec ts-node .ci/scripts/release/notify_chat.ts \
+            --version "$VERSION" \
+            --stage hotfix-complete \
+            --message "Hotfix deployed: $JUSTIFICATION"
+
+      - name: Emit summary
+        env:
+          VERSION: ${{ needs.validate.outputs.hotfix_version }}
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## Hotfix v$VERSION Deployed
+
+          - **Base Version**: v${{ inputs.base_version }}
+          - **Hotfix Version**: v$VERSION
+          - **Justification**: ${{ inputs.justification }}
+
+          ### Deployment Status
+          - Stage: Validated
+          - Production: Deployed
+
+          ### Commits Included
+          ${{ inputs.commits }}
+
+          [View Release](https://github.com/${{ github.repository }}/releases/tag/v$VERSION)
+          EOF

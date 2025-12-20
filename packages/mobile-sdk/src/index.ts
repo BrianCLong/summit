@@ -1,9 +1,5 @@
-/**
- * IntelGraph Mobile SDK
- * Shared utilities and services for mobile and cross-platform applications
- */
-
-export * from './offline';
 export * from './auth';
+export * from './offline';
 export * from './storage';
+export * from './db';
 export * from './types';

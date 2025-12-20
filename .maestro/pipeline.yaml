@@ -4,24 +4,191 @@ pipeline:
   environment: development
   budgets: { hard_cap_usd: 25.00 }
   steps:
+    # ==========================================================================
+    # Build & Validation Phase
+    # ==========================================================================
     - id: setup-toolchains
       run: just setup && pnpm -v && python -V
+
     - id: build-all
       run: just build-all
+
     - id: sbom-and-scan
       run: just sbom && just trivy
+
     - id: slo-burn-check
       run: just slo-check
       when: event == "push" || event == "pull_request"
+
     - id: migration-gate
       run: just migration-gate
       when: files_changed("migrations/**")
+
+    - id: perf-gate
+      run: just perf-check --headroom-threshold 20
+      when: event == "push" || event == "pull_request"
+
+    - id: supply-chain-gate
+      run: just supply-chain-verify
+      when: event == "push"
+
+    # ==========================================================================
+    # Release Train Phase (Weekly or Manual Trigger)
+    # ==========================================================================
+    - id: release-train-eligibility
+      run: |
+        python3 .ci/scripts/release/semver_calc.py \
+          --last-tag $(git describe --tags --abbrev=0 2>/dev/null || echo v0.0.0) \
+          --output json > version-calc.json
+        cat version-calc.json
+      when: event == "schedule" || (event == "workflow_dispatch" && input.workflow == "release-train")
+
+    - id: release-train-cut
+      run: |
+        VERSION=$(jq -r '.rc_version' version-calc.json)
+        git checkout -b "release/v${VERSION}"
+        git push origin "release/v${VERSION}"
+      when: step_succeeded("release-train-eligibility")
+
+    - id: release-notes-generate
+      run: |
+        VERSION=$(jq -r '.rc_version' version-calc.json)
+        LAST_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo v0.0.0)
+        pnpm exec ts-node .ci/scripts/release/generate_notes.ts \
+          --last-tag "$LAST_TAG" \
+          --version "$VERSION" \
+          --bump-type "$(jq -r '.bump_type' version-calc.json)" \
+          --output release-notes.md
+      when: step_succeeded("release-train-cut")
+
+    # ==========================================================================
+    # Canary Deployment Phase
+    # ==========================================================================
     - id: canary-deploy
       run: just deploy --strategy=canary --weight=10
       when: branch == "main" || tag != ""
+
     - id: canary-analyze
       run: just canary-analyze --budget .maestro/ci_budget.json
       when: step_succeeded("canary-deploy")
+
+    - id: canary-promote-50
+      run: just deploy --strategy=canary --weight=50
+      when: step_succeeded("canary-analyze") && canary_slo_passed
+
+    - id: canary-analyze-50
+      run: just canary-analyze --budget .maestro/ci_budget.json --weight 50
+      when: step_succeeded("canary-promote-50")
+
+    - id: canary-promote-100
+      run: just deploy --strategy=stable --weight=100
+      when: step_succeeded("canary-analyze-50") && canary_slo_passed
+
     - id: promote-or-rollback
       run: just promote || just rollback
-      when: step_succeeded("canary-analyze")
+      when: step_succeeded("canary-analyze") && !step_succeeded("canary-promote-100")
+
+    # ==========================================================================
+    # Evidence Bundle Phase (Post-Promotion)
+    # ==========================================================================
+    - id: evidence-collect
+      run: |
+        VERSION=$(jq -r '.version' version-calc.json 2>/dev/null || git describe --tags)
+        API_DIGEST=$(docker manifest inspect ghcr.io/$GITHUB_REPOSITORY/api:$VERSION 2>/dev/null | jq -r '.config.digest' || echo "")
+        WEB_DIGEST=$(docker manifest inspect ghcr.io/$GITHUB_REPOSITORY/web:$VERSION 2>/dev/null | jq -r '.config.digest' || echo "")
+
+        pnpm exec ts-node .ci/scripts/release/evidence_packager.ts \
+          --version "$VERSION" \
+          --api-digest "$API_DIGEST" \
+          --web-digest "$WEB_DIGEST" \
+          --output "release_evidence_v${VERSION}.zip"
+      when: step_succeeded("canary-promote-100") || tag =~ "^v[0-9]+\\.[0-9]+\\.[0-9]+$"
+
+    - id: evidence-sign
+      run: |
+        VERSION=$(jq -r '.version' version-calc.json 2>/dev/null || git describe --tags)
+        cosign sign-blob --yes \
+          --output-signature "release_evidence_v${VERSION}.zip.sig" \
+          --output-certificate "release_evidence_v${VERSION}.zip.crt" \
+          "release_evidence_v${VERSION}.zip"
+      when: step_succeeded("evidence-collect")
+
+    - id: evidence-upload
+      run: |
+        VERSION=$(jq -r '.version' version-calc.json 2>/dev/null || git describe --tags)
+        gh release upload "v${VERSION}" \
+          "release_evidence_v${VERSION}.zip" \
+          "release_evidence_v${VERSION}.zip.sig" \
+          "release_evidence_v${VERSION}.zip.crt" \
+          --clobber
+      when: step_succeeded("evidence-sign")
+
+    # ==========================================================================
+    # Post-Release KPI Check (+24h)
+    # ==========================================================================
+    - id: kpi-check-schedule
+      run: |
+        VERSION=$(jq -r '.version' version-calc.json 2>/dev/null || git describe --tags)
+        echo "Scheduling KPI check for v${VERSION} in 24 hours"
+        # This would typically create a scheduled workflow or cron job
+      when: step_succeeded("evidence-upload")
+
+    - id: kpi-compare
+      run: |
+        VERSION=${RELEASE_VERSION:-$(git describe --tags)}
+        python3 .ci/scripts/release/kpi_compare.py \
+          --version "$VERSION" \
+          --create-issues \
+          --output github
+      when: event == "schedule" && input.type == "kpi-check"
+
+    # ==========================================================================
+    # Notification Phase
+    # ==========================================================================
+    - id: notify-release
+      run: |
+        VERSION=$(jq -r '.version' version-calc.json 2>/dev/null || git describe --tags)
+        STAGE=${RELEASE_STAGE:-"complete"}
+        pnpm exec ts-node .ci/scripts/release/notify_chat.ts \
+          --version "$VERSION" \
+          --stage "$STAGE"
+      when: step_succeeded("evidence-upload") || step_succeeded("promote-or-rollback")
+
+# ==========================================================================
+# Policy Gates
+# ==========================================================================
+policies:
+  - path: .ci/policies/release.rego
+    enforce: true
+    actions:
+      - promote
+      - rollback
+      - hotfix
+
+# ==========================================================================
+# Freeze Windows
+# ==========================================================================
+freeze_windows:
+  - name: weekends
+    start: "FRI 17:00 UTC"
+    end: "MON 09:00 UTC"
+  - name: holidays
+    file: .maestro/freeze_windows.json
+
+# ==========================================================================
+# Notifications
+# ==========================================================================
+notifications:
+  slack:
+    channel: "#releases"
+    events:
+      - release-train-cut
+      - canary-deploy
+      - canary-promote-100
+      - rollback
+      - kpi-regression
+  pagerduty:
+    service: release-oncall
+    events:
+      - rollback
+      - slo-breach

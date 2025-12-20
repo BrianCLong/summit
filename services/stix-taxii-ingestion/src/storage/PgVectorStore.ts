@@ -35,6 +35,7 @@ export interface IOCRecord {
   stix_id: StixId;
   stix_type: string;
   value: string;
+  tenant_id: string;
   pattern?: string;
   pattern_type?: string;
   name?: string;
@@ -122,6 +123,7 @@ export class PgVectorStore {
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
           stix_id TEXT NOT NULL UNIQUE,
           stix_type TEXT NOT NULL,
+          tenant_id TEXT NOT NULL DEFAULT 'default',
           value TEXT,
           pattern TEXT,
           pattern_type TEXT,
@@ -153,7 +155,9 @@ export class PgVectorStore {
 
       // Create indexes
       await client.query(`
+        ALTER TABLE stix_iocs ADD COLUMN IF NOT EXISTS tenant_id TEXT NOT NULL DEFAULT 'default';
         CREATE INDEX IF NOT EXISTS idx_stix_iocs_stix_type ON stix_iocs(stix_type);
+        CREATE INDEX IF NOT EXISTS idx_stix_iocs_tenant ON stix_iocs(tenant_id);
         CREATE INDEX IF NOT EXISTS idx_stix_iocs_feed_id ON stix_iocs(feed_id);
         CREATE INDEX IF NOT EXISTS idx_stix_iocs_ingested_at ON stix_iocs(ingested_at);
         CREATE INDEX IF NOT EXISTS idx_stix_iocs_valid_from ON stix_iocs(valid_from);
@@ -205,15 +209,16 @@ export class PgVectorStore {
     await this.ensureInitialized();
 
     const record = this.objectToRecord(object, metadata, embedding);
+    await this.assertStorageBudget(record.tenant_id, record, metadata.planTier);
 
     const result = await this.pool.query<{ id: string }>(
       `
       INSERT INTO stix_iocs (
-        stix_id, stix_type, value, pattern, pattern_type, name, description,
+        stix_id, stix_type, tenant_id, value, pattern, pattern_type, name, description,
         confidence, severity, valid_from, valid_until, labels, external_references,
         raw_object, embedding, feed_id, feed_name, ingested_at, created_at, modified_at
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21
       )
       ON CONFLICT (stix_id) DO UPDATE SET
         raw_object = EXCLUDED.raw_object,
@@ -225,6 +230,7 @@ export class PgVectorStore {
       [
         record.stix_id,
         record.stix_type,
+        record.tenant_id,
         record.value,
         record.pattern,
         record.pattern_type,
@@ -260,7 +266,6 @@ export class PgVectorStore {
     }>
   ): Promise<{ stored: number; errors: Array<{ id: string; error: string }> }> {
     await this.ensureInitialized();
-
     const result = { stored: 0, errors: [] as Array<{ id: string; error: string }> };
     const client = await this.pool.connect();
 
@@ -270,15 +275,16 @@ export class PgVectorStore {
       for (const { object, metadata, embedding } of objects) {
         try {
           const record = this.objectToRecord(object, metadata, embedding);
+          await this.assertStorageBudget(record.tenant_id, record, metadata.planTier, client);
 
           await client.query(
             `
             INSERT INTO stix_iocs (
-              stix_id, stix_type, value, pattern, pattern_type, name, description,
+              stix_id, stix_type, tenant_id, value, pattern, pattern_type, name, description,
               confidence, severity, valid_from, valid_until, labels, external_references,
               raw_object, embedding, feed_id, feed_name, ingested_at, created_at, modified_at
             ) VALUES (
-              $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20
+              $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21
             )
             ON CONFLICT (stix_id) DO UPDATE SET
               raw_object = EXCLUDED.raw_object,
@@ -289,6 +295,7 @@ export class PgVectorStore {
             [
               record.stix_id,
               record.stix_type,
+              record.tenant_id,
               record.value,
               record.pattern,
               record.pattern_type,
@@ -656,6 +663,49 @@ export class PgVectorStore {
     }
   }
 
+  private getTenantStorageLimit(tenantId: string, plan?: string): number {
+    const fromEnv = process.env.STIX_TENANT_LIMIT_BYTES;
+    if (fromEnv) return Number(fromEnv);
+    if (plan === 'ENTERPRISE') return 500_000_000_000; // 500 GB
+    if (plan === 'PRO') return 150_000_000_000; // 150 GB
+    if (plan === 'STARTER') return 50_000_000_000; // 50 GB
+    if (tenantId.startsWith('ent-')) return 300_000_000_000;
+    if (tenantId.startsWith('pro-')) return 100_000_000_000;
+    return 10_000_000_000; // default 10 GB
+  }
+
+  private estimateRecordBytes(record: Omit<IOCRecord, 'id'>, embedding?: number[]) {
+    const base = Buffer.byteLength(JSON.stringify(record.raw_object), 'utf8');
+    const embeddingBytes = embedding ? embedding.length * 8 : 0;
+    return base + embeddingBytes + 256; // padding for indexes/overhead
+  }
+
+  private async assertStorageBudget(
+    tenantId: string,
+    record: Omit<IOCRecord, 'id'>,
+    planTier?: string,
+    client?: PoolClient,
+  ): Promise<void> {
+    const limit = this.getTenantStorageLimit(tenantId, planTier);
+    const poolClient = client || (await this.pool.connect());
+    try {
+      const { rows } = await poolClient.query<{ bytes: string | number }>(
+        `SELECT COALESCE(SUM(pg_column_size(m.*)::bigint),0) AS bytes FROM stix_iocs m WHERE tenant_id = $1`,
+        [tenantId],
+      );
+      const current = Number(rows[0]?.bytes || 0);
+      const projected = current + this.estimateRecordBytes(record);
+      if (projected > limit) {
+        logger.warn({ tenantId, projected, limit }, 'Tenant storage quota exceeded for STIX ingestion');
+        throw new Error('tenant_storage_quota_exceeded');
+      }
+    } finally {
+      if (!client) {
+        poolClient.release();
+      }
+    }
+  }
+
   private objectToRecord(
     object: StixObject,
     metadata: IngestionMetadata,
@@ -703,6 +753,7 @@ export class PgVectorStore {
     return {
       stix_id: object.id,
       stix_type: object.type,
+      tenant_id: metadata.tenantId || 'default',
       value: value || common.name || '',
       pattern,
       pattern_type: patternType,

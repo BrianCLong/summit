@@ -19,20 +19,16 @@ import type { AuthenticatedRequest } from './middleware';
 import type { ResourceAttributes } from './types';
 import { sessionManager } from './session';
 import { requireServiceAuth } from './service-auth';
-import {
-  buildAdapterResource,
-  getAdapterManifest,
-  missingAdapterPermissions,
-} from './adapter-capabilities';
-import { emitDecisionReceipt } from '../../../packages/prov-ledger/src/receipt';
-import type { ProvenanceManifest } from '../../../packages/prov-ledger/src/primitives';
+import { breakGlassManager } from './break-glass';
 
 export async function createApp(): Promise<express.Application> {
   await initKeys();
   await startObservability();
   const attributeService = new AttributeService();
   const stepUpManager = new StepUpManager();
-  const trustedServices = (process.env.SERVICE_AUTH_CALLERS || 'api-gateway,maestro')
+  const trustedServices = (
+    process.env.SERVICE_AUTH_CALLERS || 'api-gateway,maestro'
+  )
     .split(',')
     .map((v) => v.trim())
     .filter(Boolean);
@@ -187,86 +183,68 @@ export async function createApp(): Promise<express.Application> {
   );
 
   app.post(
-    '/adapters/:id/simulate',
-    requireServiceAuth({
-      audience: 'authz-gateway',
-      allowedServices: trustedServices,
-      requiredScopes: ['abac:simulate'],
+    '/access/break-glass/request',
+    requireAuth(attributeService, {
+      action: 'break-glass:request',
     }),
-    async (req, res) => {
+    (req: AuthenticatedRequest, res) => {
+      const justification = String(req.body?.justification || '').trim();
+      const ticketId = String(req.body?.ticketId || '').trim();
+      if (!justification || !ticketId) {
+        return res
+          .status(400)
+          .json({ error: 'justification_and_ticket_required' });
+      }
+      const scope = Array.isArray(req.body?.scope)
+        ? req.body.scope.map(String).filter(Boolean)
+        : ['break_glass:elevated'];
       try {
-        const adapterId = String(req.params.id || '').trim();
-        if (!adapterId) {
-          return res.status(400).json({ error: 'adapter_id_required' });
-        }
-        const adapter = getAdapterManifest(adapterId);
-        if (!adapter) {
-          return res.status(404).json({ error: 'adapter_not_found' });
-        }
-        const subjectId = req.body?.subjectId;
-        if (!subjectId) {
-          return res.status(400).json({ error: 'subject_id_required' });
-        }
-        const subject = await attributeService.getSubjectAttributes(subjectId);
-        const missing = missingAdapterPermissions(subject, adapter);
-        if (missing.length > 0) {
-          return res
-            .status(403)
-            .json({ error: 'missing_permissions', missing });
-        }
-
-        const resource = buildAdapterResource(
-          adapter,
-          subject,
-          req.body?.resource as Partial<ResourceAttributes> | undefined,
+        const record = breakGlassManager.createRequest(
+          String(req.user?.sub || ''),
+          justification,
+          ticketId,
+          scope,
         );
-        const retries =
-          typeof req.body?.retries === 'number' && req.body.retries >= 0
-            ? req.body.retries
-            : 0;
-        const decision = await authorize({
-          subject,
-          resource,
-          action: req.body?.action || 'adapter:invoke',
-          context: {
-            ...attributeService.getDecisionContext(
-              String(req.body?.context?.currentAcr || 'loa1'),
-            ),
-            adapterId,
-            retries,
-          },
-        });
-
-        const manifest: ProvenanceManifest = {
-          artifactId: `adapter:${adapterId}`,
-          steps: [],
-        };
-        const { receipt } = emitDecisionReceipt({
-          manifest,
-          adapterId,
-          action: req.body?.action || 'adapter:invoke',
-          decision: decision.allowed ? 'allow' : 'deny',
-          subject,
-          resource,
-          context: req.body?.context || {},
-          retries,
-          obligations: decision.obligations,
-        });
-
-        res.json({
-          allow: decision.allowed,
-          reason: decision.reason,
-          obligations: decision.obligations,
-          adapter: {
-            id: adapter.id,
-            requiredPermissions: adapter.requiredPermissions,
-            claims: adapter.claims,
-            capabilities: adapter.capabilities || [],
-          },
-          receipt,
+        return res.status(201).json({
+          requestId: record.id,
+          status: record.status,
+          scope: record.scope,
         });
       } catch (error) {
-        res.status(400).json({ error: (error as Error).message });
+        return res.status(400).json({ error: (error as Error).message });
+      }
+    },
+  );
+
+  app.post(
+    '/access/break-glass/approve',
+    requireAuth(attributeService, {
+      action: 'break-glass:approve',
+      requiredAcr: 'loa2',
+    }),
+    async (req: AuthenticatedRequest, res) => {
+      const requestId = String(req.body?.requestId || '').trim();
+      if (!requestId) {
+        return res.status(400).json({ error: 'request_id_required' });
+      }
+      try {
+        const approval = await breakGlassManager.approve(
+          requestId,
+          String(req.user?.sub || ''),
+        );
+        return res.json(approval);
+      } catch (error) {
+        const message = (error as Error).message;
+        if (message === 'request_not_found') {
+          return res.status(404).json({ error: message });
+        }
+        if (message === 'request_already_approved') {
+          return res.status(409).json({ error: message });
+        }
+        if (message === 'request_expired') {
+          return res.status(410).json({ error: message });
+        }
+        return res.status(400).json({ error: message });
       }
     },
   );
@@ -281,15 +259,12 @@ export async function createApp(): Promise<express.Application> {
       try {
         const userId = String(req.user?.sub || '');
         const sessionId = String(req.user?.sid || '');
-        if (!sessionId) {
-          return res.status(400).json({ error: 'session_missing' });
-        }
         const challenge = stepUpManager.createChallenge(userId, {
           sessionId,
-          requestedAction: 'step-up:challenge',
-          resourceId: req.resourceAttributes?.id,
+          requestedAction: String(req.body?.action || 'step-up:challenge'),
+          resourceId: req.body?.resourceId,
+          classification: req.body?.classification,
           tenantId: req.subjectAttributes?.tenantId,
-          classification: req.resourceAttributes?.classification,
           currentAcr: String(req.user?.acr || 'loa1'),
         });
         res.json(challenge);
@@ -312,7 +287,6 @@ export async function createApp(): Promise<express.Application> {
         if (!credentialId || !signature || !challenge) {
           return res.status(400).json({ error: 'missing_challenge_payload' });
         }
-        const sessionId = String(req.user?.sid || '');
         stepUpManager.verifyResponse(
           userId,
           {
@@ -320,7 +294,7 @@ export async function createApp(): Promise<express.Application> {
             signature,
             challenge,
           },
-          sessionId,
+          String(req.user?.sid || ''),
         );
         const sid = String(req.user?.sid || '');
         const token = await sessionManager.elevateSession(sid, {
@@ -346,8 +320,7 @@ export async function createApp(): Promise<express.Application> {
       target: upstream,
       changeOrigin: true,
       pathRewrite: { '^/protected': '' },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      onProxyReq: (proxyReq: any) => {
+      onProxyReq: (proxyReq) => {
         injectTraceContext(proxyReq);
       },
     } as any),

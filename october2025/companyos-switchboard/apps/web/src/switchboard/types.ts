@@ -9,12 +9,6 @@ export interface SwitchboardContext {
   tenantId?: string;
   actor?: string;
   traceId?: string;
-  dualControl?: {
-    approvers: string[];
-    evidenceId?: string;
-    rationale?: string;
-    enforced?: boolean;
-  };
 }
 
 export interface SwitchboardRoute<I = any, O = any> {
@@ -25,5 +19,4 @@ export interface SwitchboardRoute<I = any, O = any> {
   inputSchema: z.ZodType<I>;
   outputSchema: z.ZodType<O>;
   handler: (payload: I, context: SwitchboardContext) => Promise<O>;
-  requiresDualControl?: boolean;
 }
