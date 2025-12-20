@@ -42,7 +42,7 @@ export class CaseOverviewService {
       const staleDeadline = new Date(cached.expiresAt.getTime() + this.staleWhileRevalidateMs);
       if (now <= staleDeadline) {
         this.triggerRevalidation(cacheKey, caseId, tenantId);
-        return this.decorate(cached, 'stale');
+        return this.decorate({ ...cached, refreshStatus: 'revalidating' }, 'stale');
       }
     }
 
@@ -72,8 +72,8 @@ export class CaseOverviewService {
     return promise;
   }
 
-  async invalidate(caseId: string): Promise<void> {
-    await this.cacheRepo.delete(caseId);
+  async invalidate(caseId: string, tenantId: string): Promise<void> {
+    await this.cacheRepo.delete(caseId, tenantId);
   }
 
   async rebuildAll(limit = 500): Promise<number> {
@@ -82,6 +82,18 @@ export class CaseOverviewService {
       await this.refresh(entry.caseId, entry.tenantId);
     }
     return cases.length;
+  }
+
+  async refreshStale(limit = 50): Promise<number> {
+    const targets = await this.cacheRepo.listCasesNeedingRefresh(limit);
+    for (const target of targets) {
+      await this.refresh(target.caseId, target.tenantId);
+    }
+    return targets.length;
+  }
+
+  async markStale(caseId: string, tenantId: string): Promise<void> {
+    await this.cacheRepo.markStale(caseId, tenantId);
   }
 
   private async triggerRevalidation(cacheKey: string, caseId: string, tenantId: string) {
