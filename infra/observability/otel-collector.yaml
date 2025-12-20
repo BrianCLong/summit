@@ -3,7 +3,13 @@ receivers:
     protocols:
       grpc:
       http:
-
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: otel-collector
+          scrape_interval: 15s
+          static_configs:
+            - targets: ['0.0.0.0:8888']
 processors:
   batch:
     send_batch_size: 1000
@@ -12,28 +18,92 @@ processors:
     limit_mib: 256
     spike_limit_mib: 64
     check_interval: 5s
-
+  k8sattributes:
+    auth_type: serviceAccount
+    extract:
+      metadata: [namespace, pod, container, cluster, node]
+      labels:
+        - tag_name: workload
+          key: app.kubernetes.io/name
+    filter:
+      node_from_env_var: K8S_NODE_NAME
+    pod_association:
+      - sources:
+          - from: resource_attribute
+            name: k8s.pod.ip
+  resource:
+    attributes:
+      - key: deployment.environment
+        value: production
+        action: upsert
+      - key: mesh.correlation_id
+        from_attribute: baggage.correlation-id
+        action: upsert
+  attributes/correlation:
+    actions:
+      - key: correlation_id
+        from_attribute: http.request.header.x-correlation-id
+        action: insert
+      - key: correlation_id
+        from_attribute: grpc.metadata.correlation-id
+        action: insert
+      - key: correlation_id
+        from_attribute: resource.correlation_id
+        action: insert
+      - key: service.mesh.trace_id
+        from_attribute: trace_id
+        action: upsert
+  tail_sampling:
+    decision_wait: 30s
+    policies:
+      - name: errors
+        type: status_code
+        status_code: {status_codes: [ERROR]}
+      - name: slow_requests
+        type: latency
+        latency: {threshold_ms: 750}
 exporters:
   loki:
     endpoint: http://loki:3100/loki/api/v1/push
+    labels:
+      tenant: default
   tempo:
     endpoint: http://tempo:4317
   prometheus:
     endpoint: 0.0.0.0:8889
     resource_to_telemetry_conversion:
       enabled: true
-
+  prometheusremotewrite:
+    endpoint: http://prometheus:9090/api/v1/write
+    tls:
+      insecure: true
+  otlphttp/mesh:
+    endpoint: http://otel-gateway.observability.svc.cluster.local:4318
+    headers:
+      x-otlp-mesh: summit
+  debug:
+    verbosity: basic
 service:
+  telemetry:
+    logs:
+      level: info
+  extensions: [health_check, pprof, zpages]
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [memory_limiter, batch]
-      exporters: [tempo]
+      processors: [memory_limiter, k8sattributes, attributes/correlation, tail_sampling, batch]
+      exporters: [tempo, otlphttp/mesh]
     metrics:
-      receivers: [otlp]
-      processors: [memory_limiter, batch]
-      exporters: [prometheus]
+      receivers: [otlp, prometheus]
+      processors: [memory_limiter, k8sattributes, resource, batch]
+      exporters: [prometheus, prometheusremotewrite]
     logs:
       receivers: [otlp]
-      processors: [memory_limiter, batch]
-      exporters: [loki]
+      processors: [memory_limiter, k8sattributes, attributes/correlation, batch]
+      exporters: [loki, otlphttp/mesh]
+extensions:
+  health_check:
+  pprof:
+    endpoint: :1777
+  zpages:
+    endpoint: :55679
