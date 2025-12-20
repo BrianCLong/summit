@@ -30,6 +30,8 @@ const DEFAULT_BATCH_SIZE = 80;
 const DEFAULT_FRAME_BUDGET = 18;
 const LOD_THRESHOLD = 320;
 const MAX_BATCH_SIZE = 320;
+const EDGE_MULTIPLIER_CAP = 3;
+const MIN_COMPACT_BATCH = 8;
 
 function scheduleFrame(fn: () => void): FrameHandle {
   if (typeof requestAnimationFrame !== 'undefined') {
@@ -66,37 +68,51 @@ export function ProgressiveGraph({
   );
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [isRendering, setIsRendering] = useState(nodes.length > 0);
   const frameRef = useRef<FrameHandle>();
 
   useEffect(() => {
     setRenderedCount(Math.min(initialBatchSize, nodes.length));
     setLodMode(nodes.length > LOD_THRESHOLD ? 'compact' : 'detailed');
+    setIsRendering(nodes.length > 0);
 
     let cancelled = false;
     let currentCount = Math.min(initialBatchSize, nodes.length);
     let batchSize = initialBatchSize;
+    let currentLod: 'detailed' | 'compact' =
+      nodes.length > LOD_THRESHOLD ? 'compact' : 'detailed';
     const start = performance.now();
 
     const step = () => {
       if (cancelled) return;
-      const elapsed = performance.now() - start;
-      const nextBatch = Math.min(batchSize * 1.5, MAX_BATCH_SIZE);
-      batchSize = Math.max(Math.round(nextBatch), 1);
-      currentCount = Math.min(currentCount + batchSize, nodes.length);
-      setRenderedCount(currentCount);
+      const frameStart = performance.now();
+      let advanced = false;
 
-      if (elapsed > frameBudgetMs && nodes.length > LOD_THRESHOLD) {
-        // Switch to compact mode and fast-forward to finish to keep DOM/canvas load capped
-        setLodMode('compact');
-        currentCount = nodes.length;
-        setRenderedCount(currentCount);
-        onRenderComplete?.(performance.now() - start);
-        return;
+      while (
+        currentCount < nodes.length &&
+        performance.now() - frameStart < frameBudgetMs
+      ) {
+        const nextBatch = Math.min(batchSize * 1.4, MAX_BATCH_SIZE);
+        batchSize = Math.max(
+          Math.round(nextBatch),
+          currentLod === 'compact' ? MIN_COMPACT_BATCH : 1,
+        );
+        currentCount = Math.min(currentCount + batchSize, nodes.length);
+        advanced = true;
       }
+
+      if (!advanced && nodes.length > LOD_THRESHOLD && currentLod === 'detailed') {
+        currentLod = 'compact';
+        setLodMode(currentLod);
+        batchSize = Math.max(Math.round(initialBatchSize * 0.75), MIN_COMPACT_BATCH);
+      }
+
+      setRenderedCount(currentCount);
 
       if (currentCount < nodes.length) {
         frameRef.current = scheduleFrame(step);
       } else {
+        setIsRendering(false);
         onRenderComplete?.(performance.now() - start);
       }
     };
@@ -105,6 +121,7 @@ export function ProgressiveGraph({
     return () => {
       cancelled = true;
       cancelFrame(frameRef.current);
+      setIsRendering(false);
     };
   }, [nodes, initialBatchSize, frameBudgetMs, onRenderComplete]);
 
@@ -112,15 +129,35 @@ export function ProgressiveGraph({
     return nodes.slice(0, renderedCount);
   }, [nodes, renderedCount]);
 
+  const nodeLookup = useMemo(() => {
+    return new Map(nodes.map((node) => [node.id, node]));
+  }, [nodes]);
+
   const visibleNodeIds = useMemo(() => {
     return new Set(visibleNodes.map((node) => node.id));
   }, [visibleNodes]);
 
   const visibleEdges = useMemo(() => {
-    return edges.filter(
+    const eligible = edges.filter(
       (edge) => visibleNodeIds.has(edge.from) && visibleNodeIds.has(edge.to),
     );
-  }, [edges, visibleNodeIds]);
+    if (lodMode === 'compact') {
+      const cap = Math.min(
+        eligible.length,
+        Math.max(visibleNodes.length * EDGE_MULTIPLIER_CAP, LOD_THRESHOLD),
+      );
+      return eligible.slice(0, cap);
+    }
+    return eligible;
+  }, [edges, visibleNodeIds, lodMode, visibleNodes.length]);
+
+  const progressLabel = useMemo(() => {
+    const total = nodes.length || 1;
+    const percent = Math.min(100, Math.round((renderedCount / total) * 100));
+    return `${renderedCount} of ${nodes.length} nodes rendered (${percent}%)`;
+  }, [nodes.length, renderedCount]);
+
+  const ariaBusy = isRendering && renderedCount < nodes.length;
 
   const handleHover = (id: string | null) => {
     setHoveredId(id);
@@ -143,8 +180,26 @@ export function ProgressiveGraph({
     <div
       role="region"
       aria-label="Progressive graph"
+      aria-busy={ariaBusy}
+      data-render-progress={renderedCount}
+      data-lod={lodMode}
       style={{ position: 'relative', width: '100%', height: '100%' }}
     >
+      <span
+        aria-live="polite"
+        style={{
+          position: 'absolute',
+          width: 1,
+          height: 1,
+          padding: 0,
+          margin: -1,
+          overflow: 'hidden',
+          clip: 'rect(0, 0, 0, 0)',
+          border: 0,
+        }}
+      >
+        {progressLabel}
+      </span>
       <svg
         aria-hidden="true"
         width="100%"
@@ -152,8 +207,8 @@ export function ProgressiveGraph({
         style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
       >
         {visibleEdges.map((edge) => {
-          const from = nodes.find((node) => node.id === edge.from);
-          const to = nodes.find((node) => node.id === edge.to);
+          const from = nodeLookup.get(edge.from);
+          const to = nodeLookup.get(edge.to);
           if (!from || !to) return null;
           return (
             <line
@@ -172,7 +227,6 @@ export function ProgressiveGraph({
         aria-live="polite"
         style={{ position: 'absolute', inset: 0 }}
         data-rendered-count={renderedCount}
-        data-lod={lodMode}
       >
         {visibleNodes.map((node, index) => (
           <button

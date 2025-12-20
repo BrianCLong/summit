@@ -2,28 +2,13 @@ import { act } from 'react-dom/test-utils';
 import { createRoot } from 'react-dom/client';
 import { describe, expect, it, vi } from 'vitest';
 import { performance } from 'node:perf_hooks';
-import { ProgressiveGraph, type GraphEdge, type GraphNode } from '../src/index.js';
-
-function buildFixtureGraph(count: number): { nodes: GraphNode[]; edges: GraphEdge[] } {
-  const nodes: GraphNode[] = Array.from({ length: count }, (_, index) => ({
-    id: `node-${index}`,
-    label: `Node ${index}`,
-    x: (index % 25) * 18,
-    y: Math.floor(index / 25) * 18,
-  }));
-
-  const edges: GraphEdge[] = nodes.slice(1).map((node, index) => ({
-    id: `edge-${index}`,
-    from: nodes[index].id,
-    to: node.id,
-  }));
-
-  return { nodes, edges };
-}
+import { ProgressiveGraph } from '../src/index.js';
+import { buildFixtureGraph } from './helpers/graphFixtures.js';
 
 describe('ProgressiveGraph', () => {
   it('progressively reveals batches while keeping hover/select responsive', async () => {
-    const { nodes, edges } = buildFixtureGraph(180);
+    vi.useFakeTimers();
+    const { nodes, edges } = buildFixtureGraph(240);
     const onHover = vi.fn();
     const onSelect = vi.fn();
     const container = document.createElement('div');
@@ -35,37 +20,39 @@ describe('ProgressiveGraph', () => {
           nodes={nodes}
           edges={edges}
           initialBatchSize={24}
+          frameBudgetMs={6}
           onHoverNode={onHover}
           onSelectNode={onSelect}
         />,
       );
-      await Promise.resolve();
     });
-
-    const renderedBatch = container.querySelectorAll('[data-node-id]').length;
-    expect(renderedBatch).toBeGreaterThanOrEqual(24);
-    expect(renderedBatch).toBeLessThan(nodes.length);
 
     const firstNode = container.querySelector('[data-node-id="node-0"]');
     expect(firstNode).toBeTruthy();
+    expect(container.querySelector('[aria-busy="true"]')).toBeTruthy();
 
     await act(async () => {
       firstNode?.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+      firstNode?.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
     });
+
     expect(onHover).toHaveBeenCalledWith('node-0');
+    expect(onSelect).toHaveBeenCalledWith('node-0');
 
     await act(async () => {
-      firstNode?.dispatchEvent(
-        new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }),
-      );
+      vi.runAllTimers();
     });
-    expect(onSelect).toHaveBeenCalledWith('node-0');
+    await act(async () => Promise.resolve());
+
+    expect(container.querySelector('[aria-busy="true"]')).toBeNull();
+    vi.useRealTimers();
   });
 
   it('completes rendering under the performance budget for a dense fixture', async () => {
     const { nodes, edges } = buildFixtureGraph(720);
     const container = document.createElement('div');
     const root = createRoot(container);
+    const budgetMs = 140;
     let renderDuration = 0;
 
     await act(async () => {
@@ -84,12 +71,42 @@ describe('ProgressiveGraph', () => {
           />,
         );
       });
-      await Promise.resolve();
       renderDuration = renderDuration || performance.now() - start;
     });
 
     expect(renderDuration).toBeGreaterThan(0);
-    expect(renderDuration).toBeLessThan(140);
+    expect(renderDuration).toBeLessThan(budgetMs);
+    expect(container.querySelectorAll('[data-node-id]').length).toBe(nodes.length);
+  });
+
+  it('meets the benchmark budget for the maximum fixture graph', async () => {
+    const { nodes, edges } = buildFixtureGraph(960);
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    const budgetMs = 120;
+    let renderDuration = 0;
+
+    await act(async () => {
+      const start = performance.now();
+      await new Promise<void>((resolve) => {
+        root.render(
+          <ProgressiveGraph
+            nodes={nodes}
+            edges={edges}
+            frameBudgetMs={10}
+            initialBatchSize={64}
+            onRenderComplete={(elapsed) => {
+              renderDuration = elapsed;
+              resolve();
+            }}
+          />,
+        );
+      });
+      renderDuration = renderDuration || performance.now() - start;
+    });
+
+    expect(renderDuration).toBeGreaterThan(0);
+    expect(renderDuration).toBeLessThanOrEqual(budgetMs);
     expect(container.querySelectorAll('[data-node-id]').length).toBe(nodes.length);
   });
 
