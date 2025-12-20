@@ -21,17 +21,7 @@ on:
           - '5'
           - '10'
           - '20'
-          - '25'
           - '50'
-      application:
-        description: 'Target platform/application'
-        required: true
-        type: choice
-        default: intelgraph
-        options:
-          - intelgraph
-          - maestro
-          - companyos
       environment:
         description: 'Target environment'
         required: true
@@ -39,6 +29,14 @@ on:
         options:
           - 'staging'
           - 'production'
+      service:
+        description: 'Target service'
+        required: true
+        type: choice
+        options:
+          - 'maestro'
+          - 'intelgraph'
+          - 'companyos'
       action:
         description: 'Canary action to perform'
         required: true
@@ -50,10 +48,10 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  CANARY_CONFIG_PATH: summit_release_env_pack/k8s/optional/argo-rollouts/canary-traffic-config.json
+  CANARY_CONFIG_PATH: summit_release_env_pack/k8s/canary/canary-stage-config.json
 
 concurrency:
-  group: canary-${{ inputs.environment }}-${{ inputs.application }}
+  group: canary-${{ inputs.environment }}
   cancel-in-progress: false
 
 jobs:
@@ -62,13 +60,21 @@ jobs:
     outputs:
       version-valid: ${{ steps.validate.outputs.version-valid }}
       namespace: ${{ steps.validate.outputs.namespace }}
-      traffic-stages: ${{ steps.validate.outputs.traffic-stages }}
-      feature-flag: ${{ steps.validate.outputs.feature-flag }}
       release: ${{ steps.validate.outputs.release }}
+      feature-flag: ${{ steps.validate.outputs.feature-flag }}
+      weights: ${{ steps.validate.outputs.weights }}
+      service-name: ${{ steps.validate.outputs.service-name }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Validate inputs
         id: validate
         run: |
+          SERVICE="${{ inputs.service }}"
+          TARGET_ENV="${{ inputs.environment }}"
+          export SERVICE TARGET_ENV
+
           # Validate version format
           if [[ "${{ inputs.version }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "version-valid=true" >> $GITHUB_OUTPUT
@@ -78,38 +84,41 @@ jobs:
             exit 1
           fi
 
-          CONFIG="${{ env.CANARY_CONFIG_PATH }}"
-          if [ ! -f "$CONFIG" ]; then
-            echo "❌ Canary config not found at $CONFIG"
-            exit 1
-          fi
+          python - <<'PY'
+import json, os, pathlib, sys
 
-          APP="${{ inputs.application }}"
-          ENVIRONMENT="${{ inputs.environment }}"
+config_path = pathlib.Path(os.environ["CANARY_CONFIG_PATH"])
+if not config_path.exists():
+    sys.exit(f"Missing canary config at {config_path}")
 
-          if ! jq -e --arg app "$APP" '.[$app]' "$CONFIG" >/tmp/canary-profile.json; then
-            echo "❌ No canary profile found for ${APP}"
-            exit 1
-          fi
+service = os.environ.get("SERVICE")
+target_env = os.environ.get("TARGET_ENV")
+data = json.loads(config_path.read_text())
+service_cfg = data.get("services", {}).get(service)
+if not service_cfg:
+    sys.exit(f"Service '{service}' not found in {config_path}")
 
-          NAMESPACE=$(jq -r --arg env "$ENVIRONMENT" '.namespaces[$env]' /tmp/canary-profile.json)
-          if [ -z "$NAMESPACE" ] || [ "$NAMESPACE" = "null" ]; then
-            echo "❌ Namespace not defined for ${APP}/${ENVIRONMENT}"
-            exit 1
-          fi
-          echo "namespace=${NAMESPACE}" >> $GITHUB_OUTPUT
+namespaces = service_cfg.get("namespaces", {})
+namespace = namespaces.get("production" if target_env == "production" else "staging")
+feature_flag = service_cfg.get("featureFlag", f"{service}_canary_enabled")
+release = service_cfg.get("release", service)
+weights = service_cfg.get("trafficWeights", [])
+service_name = service_cfg.get("serviceName", f"{service}-service")
 
-          STAGES=$(jq -r '.trafficStages | join(",")' /tmp/canary-profile.json)
-          echo "traffic-stages=${STAGES}" >> $GITHUB_OUTPUT
+if not namespace:
+    sys.exit(f"No namespace configured for env '{target_env}' in {config_path}")
 
-          FEATURE_FLAG=$(jq -r '.featureFlags[0]' /tmp/canary-profile.json)
-          echo "feature-flag=${FEATURE_FLAG}" >> $GITHUB_OUTPUT
+with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
+    fh.write(f"namespace={namespace}\n")
+    fh.write(f"release={release}\n")
+    fh.write(f"feature-flag={feature_flag}\n")
+    fh.write(f"weights={','.join(map(str, weights))}\n")
+    fh.write(f"service-name={service_name}\n")
+PY
 
-          RELEASE=$(jq -r '.release' /tmp/canary-profile.json)
-          echo "release=${RELEASE}" >> $GITHUB_OUTPUT
-
-          if ! echo "$STAGES" | tr ',' '\n' | grep -qx "${{ inputs.canary_percentage }}"; then
-            echo "❌ Canary percentage ${{ inputs.canary_percentage }} is not allowed for ${APP} (allowed: ${STAGES})"
+          # Validate canary percentage
+          if [ "${{ inputs.canary_percentage }}" -gt 50 ]; then
+            echo "❌ Canary percentage cannot exceed 50%"
             exit 1
           fi
 
@@ -132,16 +141,6 @@ jobs:
           mkdir -p ~/.kube
           echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
-
-      - name: Record canary plan
-        run: |
-          cat <<'EOF' >> "$GITHUB_STEP_SUMMARY"
-### Canary plan
-- Application: ${{ inputs.application }}
-- Namespace: ${{ needs.validate-inputs.outputs.namespace }}
-- Traffic stages: ${{ needs.validate-inputs.outputs.traffic-stages }}% → 100%
-- Feature flag: ${{ needs.validate-inputs.outputs.feature-flag }}
-EOF
 
       - name: Verify cluster connectivity
         run: |
@@ -184,6 +183,15 @@ EOF
         with:
           version: v3.14.0
 
+      - name: Install cosign and conftest
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y jq
+          COSIGN_VERSION="v2.4.0"
+          curl -sSL -o cosign.tgz "https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-amd64.tar.gz"
+          tar -xzf cosign.tgz cosign && sudo mv cosign /usr/local/bin/
+          curl -sSfL https://github.com/open-policy-agent/conftest/releases/download/v0.56.0/conftest_0.56.0_Linux_x86_64.tar.gz | sudo tar -xz -C /usr/local/bin conftest
+
       - name: Setup kubectl
         uses: azure/setup-kubectl@v3
         with:
@@ -195,13 +203,69 @@ EOF
           echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
 
+      - name: Verify signatures, digests, and attestations
+        id: verify-artifacts
+        env:
+          IMAGE_SERVER: ${{ env.REGISTRY }}/${{ github.repository }}/server:${{ inputs.version }}
+          IMAGE_CLIENT: ${{ env.REGISTRY }}/${{ github.repository }}/client:${{ inputs.version }}
+        run: |
+          set -euo pipefail
+
+          verify_and_pin() {
+            local image="$1"
+            local name="$2"
+
+            verification=$(cosign verify --output json "$image")
+            digest=$(echo "$verification" | jq -r '.[0].critical.image["docker-manifest-digest"]')
+
+            if [ -z "$digest" ] || [ "$digest" = "null" ]; then
+              echo "❌ Unable to resolve digest after verification for $image" >&2
+              exit 1
+            fi
+
+            pinned="${image%@*}@${digest}"
+            echo "${name}-pinned=${pinned}" >> "$GITHUB_OUTPUT"
+
+            cosign verify-attestation --type slsaprovenance "$pinned"
+            cosign verify-attestation --type spdx "$pinned"
+          }
+
+          verify_and_pin "$IMAGE_SERVER" server
+          verify_and_pin "$IMAGE_CLIENT" client
+
+      - name: Download SBOM attestations
+        env:
+          IMAGE_SERVER: ${{ steps.verify-artifacts.outputs.server-pinned }}
+          IMAGE_CLIENT: ${{ steps.verify-artifacts.outputs.client-pinned }}
+        run: |
+          set -euo pipefail
+          for image in "$IMAGE_SERVER" "$IMAGE_CLIENT"; do
+            target=$(echo "$image" | sed 's/[:\/]/-/g')
+            cosign download attestation --predicate-type spdx "$image" > "${target}-att.json"
+            cat "${target}-att.json" | jq -r '.attestations[0].payload' | base64 -d | jq -r '.predicate' > "${target}-sbom.json"
+          done
+
+      - name: Enforce SBOM policy with Conftest
+        run: |
+          for sbom in *sbom.json; do
+            conftest test "$sbom" -p policy/sbom_policy.rego
+          done
+
+      - name: Abort canary on guard failure
+        if: failure()
+        run: |
+          NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+          ./scripts/rollback-deployment.sh canary-abort --namespace ${NAMESPACE} || true
+
       - name: Deploy canary
         run: |
           NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+          RELEASE="${{ needs.validate-inputs.outputs.release }}"
 
-          ./scripts/rollback-deployment.sh canary-deploy ${{ inputs.version }} \
+          RELEASE_NAME="${RELEASE}" NAMESPACE="${NAMESPACE}" \
+            ./scripts/rollback-deployment.sh canary-deploy ${{ inputs.version }} \
             --namespace ${NAMESPACE} \
-            --release ${{ needs.validate-inputs.outputs.release }} \
+            --release ${RELEASE} \
             --canary-percent ${{ inputs.canary_percentage }}
 
       - name: Run canary health checks (SLO Gate)
@@ -225,6 +289,7 @@ EOF
       - name: Update deployment status
         run: |
           echo "🚀 Canary deployment successful!"
+          echo "Service: ${{ inputs.service }}"
           echo "Version: ${{ inputs.version }}"
           echo "Traffic: ${{ inputs.canary_percentage }}%"
           echo "Environment: ${{ inputs.environment }}"
@@ -248,11 +313,68 @@ EOF
         with:
           version: v3.14.0
 
+      - name: Install cosign and conftest
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y jq
+          COSIGN_VERSION="v2.4.0"
+          curl -sSL -o cosign.tgz "https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-amd64.tar.gz"
+          tar -xzf cosign.tgz cosign && sudo mv cosign /usr/local/bin/
+          curl -sSfL https://github.com/open-policy-agent/conftest/releases/download/v0.56.0/conftest_0.56.0_Linux_x86_64.tar.gz | sudo tar -xz -C /usr/local/bin conftest
+
       - name: Configure kubeconfig
         run: |
           mkdir -p ~/.kube
           echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
+
+        - name: Verify signatures, digests, and attestations
+          id: verify-promote-artifacts
+          env:
+            IMAGE_SERVER: ${{ env.REGISTRY }}/${{ github.repository }}/server:${{ inputs.version }}
+            IMAGE_CLIENT: ${{ env.REGISTRY }}/${{ github.repository }}/client:${{ inputs.version }}
+          run: |
+            set -euo pipefail
+
+            verify_and_pin() {
+              local image="$1"
+              local name="$2"
+
+              verification=$(cosign verify --output json "$image")
+              digest=$(echo "$verification" | jq -r '.[0].critical.image["docker-manifest-digest"]')
+
+              if [ -z "$digest" ] || [ "$digest" = "null" ]; then
+                echo "❌ Unable to resolve digest after verification for $image" >&2
+                exit 1
+              fi
+
+              pinned="${image%@*}@${digest}"
+              echo "${name}-pinned=${pinned}" >> "$GITHUB_OUTPUT"
+
+              cosign verify-attestation --type slsaprovenance "$pinned"
+              cosign verify-attestation --type spdx "$pinned"
+            }
+
+            verify_and_pin "$IMAGE_SERVER" server
+            verify_and_pin "$IMAGE_CLIENT" client
+
+        - name: Download SBOM attestations
+          env:
+            IMAGE_SERVER: ${{ steps.verify-promote-artifacts.outputs.server-pinned }}
+            IMAGE_CLIENT: ${{ steps.verify-promote-artifacts.outputs.client-pinned }}
+          run: |
+            set -euo pipefail
+            for image in "$IMAGE_SERVER" "$IMAGE_CLIENT"; do
+              target=$(echo "$image" | sed 's/[:\/]/-/g')
+              cosign download attestation --predicate-type spdx "$image" > "${target}-att.json"
+              cat "${target}-att.json" | jq -r '.attestations[0].payload' | base64 -d | jq -r '.predicate' > "${target}-sbom.json"
+            done
+
+      - name: Enforce SBOM policy with Conftest
+        run: |
+          for sbom in *sbom.json; do
+            conftest test "$sbom" -p policy/sbom_policy.rego
+          done
 
       - name: Pre-promote health check (SLO Gate)
         run: |
@@ -276,7 +398,7 @@ EOF
           NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
           RELEASE="${{ needs.validate-inputs.outputs.release }}"
 
-          ./scripts/rollback-deployment.sh canary-promote --namespace ${NAMESPACE} --release ${RELEASE}
+          RELEASE_NAME="${RELEASE}" ./scripts/rollback-deployment.sh canary-promote --namespace ${NAMESPACE}
 
       - name: Post-promotion verification
         run: |
@@ -294,6 +416,7 @@ EOF
           echo "✅ Canary promoted to production!"
           echo "Version: ${{ inputs.version }}"
           echo "Traffic: 100%"
+          echo "Service: ${{ inputs.service }}"
           echo "Environment: ${{ inputs.environment }}"
 
   abort-canary:
@@ -326,7 +449,7 @@ EOF
           NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
           RELEASE="${{ needs.validate-inputs.outputs.release }}"
 
-          ./scripts/rollback-deployment.sh canary-abort --namespace ${NAMESPACE} --release ${RELEASE}
+          RELEASE_NAME="${RELEASE}" ./scripts/rollback-deployment.sh canary-abort --namespace ${NAMESPACE}
 
       - name: Verify abort and rollback
         run: |
@@ -348,12 +471,13 @@ EOF
       - name: Update deployment status
         run: |
           echo "🔄 Canary aborted and rolled back!"
+          echo "Service: ${{ inputs.service }}"
           echo "Environment: ${{ inputs.environment }}"
           echo "Status: Stable deployment restored"
 
   notify-teams:
     if: always()
-    needs: [validate-inputs, deploy-canary, promote-canary, abort-canary]
+    needs: [deploy-canary, promote-canary, abort-canary]
     runs-on: ubuntu-latest
     steps:
       - name: Determine status
@@ -404,8 +528,8 @@ EOF
                   value: '${{ inputs.environment }}',
                   short: true
                 }, {
-                  title: 'Application',
-                  value: '${{ inputs.application }}',
+                  title: 'Service',
+                  value: '${{ inputs.service }}',
                   short: true
                 }, {
                   title: 'Version',
@@ -414,10 +538,6 @@ EOF
                 }, {
                   title: 'Action',
                   value: '${{ inputs.action }}',
-                  short: true
-                }, {
-                  title: 'Feature flag',
-                  value: '${{ needs.validate-inputs.outputs.feature-flag }}',
                   short: true
                 }, {
                   title: 'Workflow',

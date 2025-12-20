@@ -14,20 +14,12 @@ IMAGE_TAG="${IMAGE_TAG:-latest}"
 PROMETHEUS_URL="${PROMETHEUS_URL:-http://prometheus.monitoring.svc.cluster.local:9090}"
 
 # Canary stages configuration
-if [ -n "${CANARY_STAGE_WEIGHTS:-}" ]; then
-    IFS=',' read -ra CANARY_STAGES <<< "${CANARY_STAGE_WEIGHTS}"
-else
-    CANARY_STAGES=(10 50 100)
-fi
-
-# Ensure we always finalize at 100% even if the supplied plan omits it
-if [ "${CANARY_STAGES[-1]}" != "100" ]; then
-    CANARY_STAGES+=("100")
-fi
-
-FEATURE_FLAG_KEY="${CANARY_FEATURE_FLAG:-}"
+CANARY_STAGES=(10 50 100)
 STAGE_DURATION_MINUTES=30
 SLO_CHECK_INTERVAL=30  # seconds
+if [ -n "${CANARY_STAGES_CSV:-}" ]; then
+    IFS=',' read -r -a CANARY_STAGES <<< "${CANARY_STAGES_CSV}"
+fi
 
 echo "🚀 IntelGraph Production Canary Deployment"
 echo "=========================================="
@@ -35,9 +27,6 @@ echo "Namespace: $NAMESPACE"
 echo "Release: $RELEASE_NAME"
 echo "Image Tag: $IMAGE_TAG"
 echo "Stages: ${CANARY_STAGES[*]}%"
-if [ -n "$FEATURE_FLAG_KEY" ]; then
-    echo "Feature Flag: ${FEATURE_FLAG_KEY}"
-fi
 echo "Stage Duration: ${STAGE_DURATION_MINUTES} minutes"
 
 # Function to check SLO compliance

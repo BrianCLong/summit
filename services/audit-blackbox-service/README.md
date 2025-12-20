@@ -121,7 +121,19 @@ pnpm test
 
 # Run with coverage
 pnpm test:coverage
+
+# Chain verification (CLI)
+pnpm verify:chain -- --from "2024-01-01T00:00:00Z" --to "2024-01-02T00:00:00Z"
 ```
+
+### Export Events
+
+- **GET `/audit/export?from&to&page&pageSize`**
+  - Returns a paginated bundle with a manifest (range, checksum, pagination),
+    schema summary, verification report, and sanitized events (no PII) that
+    include `eventHash` and `prevHash` for independent verification.
+- **POST `/audit/export`** remains available for bulk report generation
+  (`json`/`csv`).
 
 ## API Reference
 
