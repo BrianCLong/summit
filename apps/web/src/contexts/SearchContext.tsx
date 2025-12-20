@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useCallback } from 'react'
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useMemo,
+} from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 
 interface SearchContextType {
@@ -60,17 +66,21 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     { enableOnContentEditable: true }
   )
 
-  const value = {
-    isOpen,
-    query,
-    setQuery,
-    openSearch,
-    closeSearch,
-    results,
-    setResults,
-    loading,
-    setLoading,
-  }
+  // Memoize the context value to prevent unnecessary re-renders of consumers
+  const value = useMemo(
+    () => ({
+      isOpen,
+      query,
+      setQuery,
+      openSearch,
+      closeSearch,
+      results,
+      setResults,
+      loading,
+      setLoading,
+    }),
+    [isOpen, query, openSearch, closeSearch, results, loading]
+  )
 
   return (
     <SearchContext.Provider value={value}>{children}</SearchContext.Provider>

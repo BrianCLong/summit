@@ -1,0 +1,38 @@
+name: Regression Report
+description: Report a bug that appeared after a specific change
+title: "[Regression]: "
+labels: ["type/regression", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A regression is a bug that broke a feature that was previously working.
+  - type: input
+    id: last-working-version
+    attributes:
+      label: Last Working Version
+      description: What was the last version where this feature worked?
+      placeholder: v0.9.0
+    validations:
+      required: true
+  - type: input
+    id: broken-version
+    attributes:
+      label: Broken Version
+      description: In what version did you notice the break?
+      placeholder: v1.0.0
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe the regression.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+    validations:
+      required: true

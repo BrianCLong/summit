@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "neo4j.fullname" . }}-discovery
+  labels:
+    {{- include "neo4j.labels" . | nindent 4 }}
+    app.kubernetes.io/component: discovery
+  annotations:
+    replication.summit.sh/global-role: discovery
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  selector:
+    {{- include "neo4j.matchLabels" (dict "root" . "component" "core") | nindent 4 }}
+  ports:
+    - name: discovery
+      port: {{ .Values.service.discovery.port }}
+      targetPort: discovery
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "neo4j.fullname" . }}-bolt
+  labels:
+    {{- include "neo4j.labels" . | nindent 4 }}
+    app.kubernetes.io/component: routing
+  annotations:
+    replication.summit.sh/global-role: router
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "neo4j.matchLabels" (dict "root" . "component" "core") | nindent 4 }}
+  ports:
+    - name: bolt
+      port: {{ .Values.service.bolt.port }}
+      targetPort: bolt
+    - name: http
+      port: {{ .Values.service.http.port }}
+      targetPort: http

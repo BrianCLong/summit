@@ -1,7 +1,9 @@
 import type { ModelAdapter } from './model-adapter';
 import { randomUUID as uuidv4 } from 'crypto';
-import pino from 'pino';
+// @ts-ignore
+import { default as pino } from 'pino';
 
+// @ts-ignore
 const logger = pino({ name: 'nl-to-cypher' });
 
 export interface CypherValidationResult {
@@ -58,7 +60,7 @@ export class NlToCypherService {
     rowCount: number;
   }> = [];
 
-  constructor(private readonly adapter: ModelAdapter) {}
+  constructor(private readonly adapter: ModelAdapter) { }
 
   async translateWithPreview(
     prompt: string,

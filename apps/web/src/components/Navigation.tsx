@@ -78,6 +78,13 @@ const navItems: NavItem[] = [
     action: 'read',
   },
   {
+    name: 'Internal Command',
+    href: '/internal/command',
+    icon: Command as React.ComponentType<{ className?: string }>,
+    resource: 'dashboards',
+    action: 'read',
+  },
+  {
     name: 'Data Sources',
     href: '/data/sources',
     icon: Database as React.ComponentType<{ className?: string }>,
@@ -177,6 +184,7 @@ export function Navigation({ user }: NavigationProps) {
           variant="outline"
           className="w-full justify-start text-muted-foreground"
           onClick={openSearch}
+          aria-label="Search (Command+K)"
         >
           <Command className="h-4 w-4 mr-2" />
           Search...
@@ -196,14 +204,14 @@ export function Navigation({ user }: NavigationProps) {
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2 mt-6">
           Dashboards
         </div>
-        {navItems.slice(3, 5).map(item => (
+        {navItems.slice(3, 6).map(item => (
           <NavItemComponent key={item.href} item={item} />
         ))}
 
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2 mt-6">
           Platform
         </div>
-        {navItems.slice(5).map(item => (
+        {navItems.slice(6).map(item => (
           <NavItemComponent key={item.href} item={item} />
         ))}
       </div>
@@ -235,6 +243,7 @@ export function Navigation({ user }: NavigationProps) {
             size="sm"
             className="w-full justify-start text-muted-foreground"
             onClick={logout}
+            aria-label="Sign Out"
           >
             <LogOut className="h-4 w-4 mr-2" />
             Sign Out

@@ -1,0 +1,250 @@
+name: Security - Comprehensive Scanning
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  schedule:
+    # Run security scans daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  codeql-analysis:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ['javascript', 'typescript', 'python']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-extended,security-and-quality
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
+
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: critical
+          deny-licenses: GPL-2.0, GPL-3.0
+          comment-summary-in-pr: always
+
+  secret-scanning:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Gitleaks Scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+
+      - name: TruffleHog Scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified
+        continue-on-error: true
+
+  vulnerability-scan:
+    name: Vulnerability Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner (filesystem)
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-fs-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          exit-code: '0'
+
+      - name: Run Trivy vulnerability scanner (config)
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: 'config'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-config-results.sarif'
+          exit-code: '0'
+
+      - name: Upload Trivy results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-fs-results.sarif'
+          category: 'trivy-filesystem'
+
+      - name: Upload Trivy config results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-config-results.sarif'
+          category: 'trivy-config'
+
+      - name: Check vulnerability budget
+        run: |
+          echo "🔍 Checking vulnerability budget (0 criticals allowed)"
+          
+          # Parse SARIF and count criticals
+          CRITICAL_COUNT=$(jq '[.runs[].results[] | select(.level == "error")] | length' trivy-fs-results.sarif || echo "0")
+          
+          echo "Critical vulnerabilities found: $CRITICAL_COUNT"
+          
+          if [ "$CRITICAL_COUNT" -gt 0 ]; then
+            echo "❌ Vulnerability budget exceeded: $CRITICAL_COUNT critical vulnerabilities found"
+            echo "::error::Found $CRITICAL_COUNT critical vulnerabilities. Policy requires 0 criticals."
+            exit 1
+          else
+            echo "✅ Vulnerability budget met: 0 critical vulnerabilities"
+          fi
+
+  npm-audit:
+    name: NPM Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: '9.12.0'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run pnpm audit
+        run: |
+          pnpm audit --audit-level=high --json > audit-report.json || true
+          
+          # Check for critical/high vulnerabilities
+          CRITICAL_HIGH=$(jq '[.advisories[] | select(.severity == "critical" or .severity == "high")] | length' audit-report.json || echo "0")
+          
+          if [ "$CRITICAL_HIGH" -gt 0 ]; then
+            echo "::warning::Found $CRITICAL_HIGH critical/high npm vulnerabilities"
+          fi
+
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-report
+          path: audit-report.json
+          retention-days: 30
+
+  sbom-generation:
+    name: SBOM Generation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate SBOM with Syft (SPDX)
+        uses: anchore/sbom-action@v0.17.1
+        with:
+          path: .
+          format: spdx-json
+          output-file: sbom-spdx.json
+
+      - name: Generate SBOM with Syft (CycloneDX)
+        uses: anchore/sbom-action@v0.17.1
+        with:
+          path: .
+          format: cyclonedx-json
+          output-file: sbom-cyclonedx.json
+
+      - name: Upload SBOMs
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-reports-${{ github.sha }}
+          path: |
+            sbom-spdx.json
+            sbom-cyclonedx.json
+          retention-days: 90
+
+      - name: Publish SBOM to GitHub
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "📦 Publishing SBOM..."
+          # Add logic to publish SBOM to dependency track or similar
+          echo "SBOM published for commit ${{ github.sha }}"
+
+  security-policy-check:
+    name: Security Policy Enforcement
+    runs-on: ubuntu-latest
+    needs: [codeql-analysis, secret-scanning, vulnerability-scan]
+    if: always()
+    steps:
+      - name: Evaluate security gates
+        run: |
+          echo "🔐 Evaluating security policy gates..."
+          
+          codeql_status="${{ needs.codeql-analysis.result }}"
+          secrets_status="${{ needs.secret-scanning.result }}"
+          vuln_status="${{ needs.vulnerability-scan.result }}"
+          
+          echo "## Security Gates Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Gate | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| CodeQL Analysis | $codeql_status |" >> $GITHUB_STEP_SUMMARY
+          echo "| Secret Scanning | $secrets_status |" >> $GITHUB_STEP_SUMMARY
+          echo "| Vulnerability Scan | $vuln_status |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Fail if any security gate failed
+          if [[ "$codeql_status" != "success" ]] || [[ "$secrets_status" != "success" ]] || [[ "$vuln_status" != "success" ]]; then
+            echo "❌ Security policy check failed"
+            echo "::error::One or more security gates failed"
+            exit 1
+          fi
+          
+          echo "✅ All security gates passed"

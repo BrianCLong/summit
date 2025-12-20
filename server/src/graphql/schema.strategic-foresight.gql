@@ -1,0 +1,181 @@
+"""
+Strategic Foresight AI Suite - GraphQL Schema
+
+Provides predictive analytics, scenario planning, and strategic recommendations
+for government and enterprise decision-makers.
+"""
+
+enum TrendType {
+  MARKET
+  TECHNOLOGY
+  REGULATORY
+  GEOPOLITICAL
+  COMPETITIVE
+}
+
+enum ThreatLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum TimeHorizon {
+  SHORT_TERM
+  MEDIUM_TERM
+  LONG_TERM
+}
+
+"""Predicted market or technology trend"""
+type TrendPrediction {
+  trendId: ID!
+  trendType: TrendType!
+  title: String!
+  description: String!
+  confidence: Float!
+  impactScore: Float!
+  timeHorizon: TimeHorizon!
+  keyDrivers: [String!]!
+  affectedSectors: [String!]!
+  recommendedActions: [String!]!
+  evidenceSources: [String!]!
+}
+
+"""Identified competitive threat"""
+type CompetitiveThreat {
+  threatId: ID!
+  competitor: String!
+  threatLevel: ThreatLevel!
+  threatType: String!
+  description: String!
+  confidence: Float!
+  timeToImpact: String!
+  indicators: [String!]!
+  countermeasures: [String!]!
+  affectedCapabilities: [String!]!
+}
+
+"""Partnership opportunity"""
+type PartnershipOpportunity {
+  opportunityId: ID!
+  partner: String!
+  opportunityType: String!
+  strategicFitScore: Float!
+  synergyAreas: [String!]!
+  potentialValue: String!
+  riskFactors: [String!]!
+  recommendedApproach: String!
+  timeSensitivity: String!
+}
+
+"""Strategic scenario for planning"""
+type Scenario {
+  scenarioId: ID!
+  name: String!
+  description: String!
+  probability: Float!
+  impactAssessment: ScenarioImpact!
+  keyAssumptions: [String!]!
+  triggerEvents: [String!]!
+  recommendedPreparations: [String!]!
+  opportunities: [String!]!
+  risks: [String!]!
+}
+
+type ScenarioImpact {
+  revenueGrowth: Float!
+  marketShare: Float!
+  competitivePosition: Float!
+}
+
+"""Prescriptive strategic recommendation"""
+type StrategicRecommendation {
+  recommendationId: ID!
+  title: String!
+  description: String!
+  priority: Int!
+  confidence: Float!
+  expectedOutcome: String!
+  resourcesRequired: [String!]!
+  timeline: String!
+  successMetrics: [String!]!
+  dependencies: [String!]!
+}
+
+"""Pivot opportunity analysis"""
+type PivotOpportunity {
+  pivotId: ID!
+  direction: String!
+  description: String!
+  feasibilityScore: Float!
+  marketPotential: String!
+  capabilityGap: [String!]!
+  timeline: String!
+  risks: [String!]!
+  successFactors: [String!]!
+}
+
+"""Comprehensive foresight analysis result"""
+type ForesightAnalysis {
+  analysisId: ID!
+  generatedAt: String!
+  domain: String!
+  trends: [TrendPrediction!]!
+  threats: [CompetitiveThreat!]!
+  partnerships: [PartnershipOpportunity!]!
+  scenarios: [Scenario!]!
+  recommendations: [StrategicRecommendation!]!
+  executiveSummary: String!
+  processingTimeMs: Float!
+}
+
+input ForesightAnalysisInput {
+  domain: String!
+  focusAreas: [String!]
+  competitors: [String!]
+  timeHorizon: TimeHorizon = MEDIUM_TERM
+  scenarioCount: Int = 3
+  includePartnerships: Boolean = true
+}
+
+input MarketSignalInput {
+  domain: String!
+  indicators: [String!]
+  entities: [String!]
+  timeHorizon: TimeHorizon = MEDIUM_TERM
+}
+
+input ScenarioInput {
+  baseConditions: String!
+  variables: [String!]!
+  constraints: [String!]
+  timeHorizon: TimeHorizon = MEDIUM_TERM
+  scenarioCount: Int = 3
+}
+
+input PivotAnalysisInput {
+  currentPosition: String!
+  capabilities: [String!]!
+  marketSignals: [String!]!
+  constraints: [String!]
+}
+
+extend type Query {
+  """Perform comprehensive strategic foresight analysis"""
+  strategicForesight(input: ForesightAnalysisInput!): ForesightAnalysis!
+
+  """Get market trend predictions"""
+  marketTrends(input: MarketSignalInput!): [TrendPrediction!]!
+
+  """Identify competitive threats"""
+  competitiveThreats(competitors: [String!]!, domain: String!): [CompetitiveThreat!]!
+
+  """Find partnership opportunities"""
+  partnershipOpportunities(domain: String!, capabilities: [String!]): [PartnershipOpportunity!]!
+
+  """Generate strategic scenarios"""
+  strategicScenarios(input: ScenarioInput!): [Scenario!]!
+
+  """Analyze pivot opportunities"""
+  pivotOpportunities(input: PivotAnalysisInput!): [PivotOpportunity!]!
+}

@@ -1,0 +1,43 @@
+meta:
+  id: financial.corporate-buyback-blackout@v1
+  owner: financial-ops
+  purpose: 'Predict forced buyback halts'
+  tags:
+    - financial-warfare
+    - high-frequency
+    - dark-pool
+  guardrails:
+    - 'Ensure full legal compliance in jurisdiction of operation.'
+    - 'Do not trigger market instability without authorization.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4096
+
+inputs:
+  insider_trading_filings: string
+
+template: |
+  SYSTEM: You are the Corporate Buyback Blackout Arbitrage.
+  DESCRIPTION: Predicts exact stocks that will be forced to halt buybacks due to insider trading windows → shorts them 72 hours before the halt is announced.
+
+  TASK: Analyze the provided inputs and execute the Corporate Buyback Blackout Arbitrage logic.
+
+  INPUTS:
+  - insider_trading_filings: {{insider_trading_filings}}
+
+  OUTPUT:
+  Provide the analysis/prediction/execution signal in a structured JSON format.
+
+outputSchema:
+  signal: string
+  confidence: number
+  details: object
+  timestamp: string
+
+examples:
+  - name: default-example
+    inputs:
+      insider_trading_filings: "sample_data"
+    expected_contains: ["signal", "confidence"]

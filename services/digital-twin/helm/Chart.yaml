@@ -1,0 +1,17 @@
+apiVersion: v2
+name: digital-twin
+description: Digital Twin Platform for Summit/IntelGraph
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - digital-twin
+  - simulation
+  - intelgraph
+maintainers:
+  - name: IntelGraph Team
+dependencies:
+  - name: common
+    version: "1.x.x"
+    repository: "file://../../../helm/charts/common"
+    condition: common.enabled

@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import DOMPurify from 'dompurify';
 import {
   Box,
   Card,
@@ -189,8 +188,9 @@ function ChatMessage({ message, isUser, isLoading }) {
                   '& em': { fontStyle: 'italic' },
                 }}
                 dangerouslySetInnerHTML={{
-                  __html: DOMPurify.sanitize(
-                    message.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'),
+                  __html: message.replace(
+                    /\*\*(.*?)\*\*/g,
+                    '<strong>$1</strong>',
                   ),
                 }}
               />

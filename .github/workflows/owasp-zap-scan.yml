@@ -1,0 +1,340 @@
+name: OWASP ZAP Security Scan
+
+on:
+  # Run on pull requests
+  pull_request:
+    branches: [main, develop]
+
+  # Run on push to main
+  push:
+    branches: [main]
+
+  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      scan_type:
+        description: 'Type of scan to perform'
+        required: true
+        default: 'baseline'
+        type: choice
+        options:
+          - baseline
+          - full
+          - api
+
+  # Weekly scheduled scan
+  schedule:
+    - cron: '0 2 * * 0' # Every Sunday at 2 AM UTC
+
+permissions:
+  contents: read
+  security-events: write
+  issues: write
+
+jobs:
+  zap-baseline-scan:
+    name: ZAP Baseline Scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.scan_type == 'baseline')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build application
+        run: npm run build --if-present
+        continue-on-error: true
+
+      - name: Start test server
+        run: |
+          npm start &
+          sleep 30
+          curl -f http://localhost:4000/health || echo "Health check failed"
+        continue-on-error: true
+
+      - name: ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: 'http://localhost:4000'
+          rules_file_name: '.github/workflows/config/zap-rules.tsv'
+          cmd_options: '-a -j -l WARN'
+          allow_issue_writing: true
+          fail_action: ${{ github.event_name == 'pull_request' }}
+          artifact_name: 'zap-baseline-report'
+
+      - name: Upload ZAP Baseline Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zap-baseline-report
+          path: |
+            report_html.html
+            report_json.json
+            report_md.md
+          retention-days: 30
+
+  zap-api-scan:
+    name: ZAP API Scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.scan_type == 'api')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build application
+        run: npm run build --if-present
+        continue-on-error: true
+
+      - name: Start test server
+        run: |
+          npm start &
+          sleep 30
+
+      - name: Generate OpenAPI spec
+        run: |
+          curl http://localhost:4000/api/docs/json > openapi.json || echo '{}' > openapi.json
+        continue-on-error: true
+
+      - name: ZAP API Scan
+        uses: zaproxy/action-api-scan@v0.7.0
+        with:
+          target: 'http://localhost:4000'
+          format: 'openapi'
+          api_spec: 'openapi.json'
+          cmd_options: '-a -j -l WARN'
+          allow_issue_writing: true
+          fail_action: false
+          artifact_name: 'zap-api-report'
+
+      - name: Upload ZAP API Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zap-api-report
+          path: |
+            report_html.html
+            report_json.json
+            report_md.md
+          retention-days: 30
+
+  zap-full-scan:
+    name: ZAP Full Scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.scan_type == 'full')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build application
+        run: npm run build --if-present
+        continue-on-error: true
+
+      - name: Start test server
+        run: |
+          npm start &
+          sleep 30
+
+      - name: ZAP Full Scan
+        uses: zaproxy/action-full-scan@v0.10.0
+        with:
+          target: 'http://localhost:4000'
+          rules_file_name: '.github/workflows/config/zap-rules.tsv'
+          cmd_options: '-a -j -l WARN'
+          allow_issue_writing: true
+          fail_action: false
+          artifact_name: 'zap-full-report'
+
+      - name: Upload ZAP Full Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zap-full-report
+          path: |
+            report_html.html
+            report_json.json
+            report_md.md
+          retention-days: 90
+
+      - name: Create issue if vulnerabilities found
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let reportContent = 'ZAP Full Scan found security vulnerabilities.';
+
+            try {
+              const report = fs.readFileSync('report_md.md', 'utf8');
+              reportContent = report;
+            } catch (error) {
+              console.log('Could not read markdown report');
+            }
+
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🔐 OWASP ZAP Security Scan Found Vulnerabilities',
+              body: reportContent,
+              labels: ['security', 'owasp-zap', 'vulnerability']
+            });
+
+  graphql-security-scan:
+    name: GraphQL Security Scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'schedule'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build application
+        run: npm run build --if-present
+        continue-on-error: true
+
+      - name: Start test server
+        run: |
+          npm start &
+          sleep 30
+
+      - name: Test GraphQL endpoint
+        run: |
+          curl -X POST http://localhost:4000/graphql \
+            -H "Content-Type: application/json" \
+            -d '{"query":"{ __typename }"}' || echo "GraphQL endpoint not ready"
+        continue-on-error: true
+
+      - name: GraphQL Security Tests
+        run: |
+          # Test for introspection (should be disabled in production)
+          echo "Testing GraphQL introspection..."
+          curl -X POST http://localhost:4000/graphql \
+            -H "Content-Type: application/json" \
+            -d '{"query":"{ __schema { types { name } } }"}' \
+            > graphql-introspection.json
+
+          # Test for query depth limiting
+          echo "Testing GraphQL query depth limiting..."
+          curl -X POST http://localhost:4000/graphql \
+            -H "Content-Type: application/json" \
+            -d '{"query":"{ a { b { c { d { e { f { g { h { i { j { k } } } } } } } } } } }"}' \
+            > graphql-depth.json
+
+          # Check results
+          if grep -q "__schema" graphql-introspection.json; then
+            echo "::warning::GraphQL introspection is enabled. This should be disabled in production."
+          fi
+        continue-on-error: true
+
+      - name: Upload GraphQL test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: graphql-security-tests
+          path: |
+            graphql-*.json
+          retention-days: 30
+
+  security-headers-check:
+    name: Security Headers Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build and start server
+        run: |
+          npm run build --if-present
+          npm start &
+          sleep 30
+        continue-on-error: true
+
+      - name: Check Security Headers
+        run: |
+          echo "Checking security headers..."
+
+          # Check for required OWASP security headers
+          RESPONSE=$(curl -sI http://localhost:4000/)
+
+          echo "::group::Response Headers"
+          echo "$RESPONSE"
+          echo "::endgroup::"
+
+          MISSING_HEADERS=""
+
+          # Check for required headers
+          if ! echo "$RESPONSE" | grep -qi "Strict-Transport-Security"; then
+            MISSING_HEADERS="$MISSING_HEADERS\n- Strict-Transport-Security (HSTS)"
+          fi
+
+          if ! echo "$RESPONSE" | grep -qi "X-Content-Type-Options"; then
+            MISSING_HEADERS="$MISSING_HEADERS\n- X-Content-Type-Options"
+          fi
+
+          if ! echo "$RESPONSE" | grep -qi "X-Frame-Options"; then
+            MISSING_HEADERS="$MISSING_HEADERS\n- X-Frame-Options"
+          fi
+
+          if ! echo "$RESPONSE" | grep -qi "Content-Security-Policy"; then
+            MISSING_HEADERS="$MISSING_HEADERS\n- Content-Security-Policy"
+          fi
+
+          if ! echo "$RESPONSE" | grep -qi "Permissions-Policy"; then
+            MISSING_HEADERS="$MISSING_HEADERS\n- Permissions-Policy"
+          fi
+
+          if [ -n "$MISSING_HEADERS" ]; then
+            echo "::warning::Missing security headers:$MISSING_HEADERS"
+          else
+            echo "✅ All required security headers are present"
+          fi
+        continue-on-error: true

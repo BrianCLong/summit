@@ -1,6 +1,6 @@
 {
   "name": "intelgraph-platform",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics",
   "main": "server/server.js",
   "scripts": {
@@ -41,7 +41,7 @@
     "investigation"
   ],
   "author": "IntelGraph Team",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=8.0.0"

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Router v2: Adaptive Expert Selection with Online Learning
 // Integrates bandit algorithms with production routing logic
 

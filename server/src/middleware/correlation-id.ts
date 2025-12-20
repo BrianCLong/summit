@@ -1,0 +1,133 @@
+/**
+ * Correlation ID Middleware
+ * Ensures every request has a unique ID for tracking across logs, metrics, and traces
+ */
+
+import { Request, Response, NextFunction } from 'express';
+import { randomUUID } from 'crypto';
+import { trace } from '@opentelemetry/api';
+import { getTracer } from '../observability/tracer.js';
+import { correlationStorage } from '../config/logger.js';
+
+// Extend Express Request type to include correlation IDs
+declare global {
+  namespace Express {
+    interface Request {
+      correlationId: string;
+      traceId: string;
+      spanId: string;
+    }
+  }
+}
+
+export const CORRELATION_ID_HEADER = 'x-correlation-id';
+export const REQUEST_ID_HEADER = 'x-request-id';
+export const TENANT_ID_HEADER = 'x-tenant-id';
+
+/**
+ * Correlation ID middleware
+ * - Generates or extracts correlation ID from request headers
+ * - Adds OpenTelemetry trace/span IDs to request
+ * - Injects IDs into response headers for client-side correlation
+ * - Uses AsyncLocalStorage to propagate context to logger
+ */
+export function correlationIdMiddleware(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void {
+  // Generate or extract correlation ID
+  const correlationId =
+    (req.headers[CORRELATION_ID_HEADER] as string) ||
+    (req.headers[REQUEST_ID_HEADER] as string) ||
+    randomUUID();
+
+  // Attach to request object
+  req.correlationId = correlationId;
+
+  // Get OpenTelemetry trace/span IDs if available
+  const tracer = getTracer();
+  const activeSpan = trace.getActiveSpan();
+  req.traceId = activeSpan?.spanContext().traceId || tracer.getTraceId() || '';
+  req.spanId = activeSpan?.spanContext().spanId || tracer.getSpanId() || '';
+
+  // Fallback: honor upstream traceparent header for structured logging when no span is active
+  if (!req.traceId && typeof req.headers['traceparent'] === 'string') {
+    const [, inboundTraceId, inboundSpanId] = (req.headers['traceparent'] as string).split('-');
+    req.traceId = inboundTraceId || req.traceId;
+    req.spanId = inboundSpanId || req.spanId;
+  }
+
+  const tenantId = (req.headers[TENANT_ID_HEADER] as string) || (req as any).user?.tenant_id || 'unknown';
+
+  // Add to current span if available
+  if (req.traceId) {
+    tracer.setAttribute('correlation.id', correlationId);
+    tracer.setAttribute('correlation.request_id', correlationId);
+    if (tenantId !== 'unknown') {
+        tracer.setAttribute('tenant.id', tenantId);
+    }
+  }
+
+  // Inject correlation ID into response headers
+  res.setHeader(CORRELATION_ID_HEADER, correlationId);
+  res.setHeader(REQUEST_ID_HEADER, correlationId);
+
+  // Add trace ID to response if available (for debugging)
+  if (req.traceId) {
+    res.setHeader('x-trace-id', req.traceId);
+  }
+
+  // Setup AsyncLocalStorage context
+  const store = new Map<string, string>();
+  store.set('correlationId', correlationId);
+  store.set('requestId', correlationId);
+  store.set('traceId', req.traceId);
+  store.set('tenantId', tenantId);
+
+  if ((req as any).user) {
+      store.set('principalId', (req as any).user.sub || (req as any).user.id);
+  }
+
+  correlationStorage.run(store, () => {
+      next();
+  });
+}
+
+/**
+ * Get correlation context from request
+ * Use this in loggers and metrics to ensure consistent labeling
+ */
+export function getCorrelationContext(req: Request): {
+  correlationId: string;
+  traceId: string;
+  spanId: string;
+  userId?: string;
+  tenantId?: string;
+} {
+  return {
+    correlationId: req.correlationId,
+    traceId: req.traceId,
+    spanId: req.spanId,
+    userId: (req as any).user?.sub || (req as any).user?.id,
+    tenantId: (req as any).user?.tenant_id || (req as any).tenant_id,
+  };
+}
+
+/**
+ * Extract user context for observability
+ */
+export function getUserContext(req: Request): {
+  userId?: string;
+  userEmail?: string;
+  tenantId?: string;
+  role?: string;
+} {
+  const user = (req as any).user;
+  return {
+    userId: user?.sub || user?.id,
+    userEmail: user?.email,
+    tenantId: user?.tenant_id,
+    role: user?.role,
+  };
+}

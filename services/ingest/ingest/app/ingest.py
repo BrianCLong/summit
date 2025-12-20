@@ -12,6 +12,11 @@ from .models import EventEnvelope, IngestJobRequest, JobStatus
 from .pii import apply_redaction, detect_pii
 from .redis_stream import RedisStream
 
+try:  # Lazy import to keep ingest lightweight when ML stack is absent in tests
+    from ml.app.pipelines import PostgresPreprocessingPipeline
+except Exception:  # pragma: no cover - optional dependency in minimal setups
+    PostgresPreprocessingPipeline = None  # type: ignore[assignment]
+
 
 async def _load_source(req: IngestJobRequest) -> str:
     if req.source.startswith("http://") or req.source.startswith("https://"):
@@ -37,10 +42,37 @@ def _iter_records(req: IngestJobRequest, raw: str) -> Iterator[Dict[str, Any]]:
 
 
 async def run_job(job_id: str, req: IngestJobRequest, stream: RedisStream) -> JobStatus:
-    raw = await _load_source(req)
     pii_summary: Dict[str, int] = defaultdict(int)
     processed = 0
-    for record in _iter_records(req, raw):
+    quality_insights: Dict[str, Any] | None = None
+
+    if req.source_type == "postgres":
+        if PostgresPreprocessingPipeline is None:  # pragma: no cover - fallback when ML package unavailable
+            raise RuntimeError("Postgres preprocessing pipeline is unavailable in this environment")
+        if req.postgres is None:
+            raise ValueError("postgresOptions must be provided for postgres source type")
+        pipeline = PostgresPreprocessingPipeline(
+            connection_uri=req.source,
+            table=req.postgres.table,
+            query=req.postgres.query,
+            index_column=req.postgres.index_column,
+            npartitions=req.postgres.npartitions,
+            feature_columns=req.postgres.feature_columns,
+        )
+        result = pipeline.run()
+        quality_insights = result.quality_insights
+
+        def _postgres_iter() -> Iterator[Dict[str, Any]]:
+            for partition in result.dataframe.to_delayed():
+                for row in partition.compute().to_dict(orient="records"):
+                    yield row
+
+        records = _postgres_iter()
+    else:
+        raw = await _load_source(req)
+        records = _iter_records(req, raw)
+
+    for record in records:
         mapped: Dict[str, str] = {}
         for src, canon in req.schema_map.items():
             if src in record and record[src] not in (None, ""):
@@ -63,6 +95,7 @@ async def run_job(job_id: str, req: IngestJobRequest, stream: RedisStream) -> Jo
         status="completed",
         processed=processed,
         piiSummary=dict(pii_summary),
+        qualityInsights=quality_insights,
     )
     await stream.set_job(job_id, status.model_dump())
     return status

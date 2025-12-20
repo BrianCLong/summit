@@ -1,0 +1,368 @@
+---
+# Chaos Engineering Experiments for IntelGraph
+# Uses Chaos Mesh for Kubernetes-based chaos testing
+# https://chaos-mesh.org/
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: chaos-testing
+
+---
+# ServiceAccount for chaos experiments
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: chaos-controller
+  namespace: chaos-testing
+
+---
+# ClusterRole for chaos experiments
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: chaos-controller
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "services", "endpoints"]
+    verbs: ["get", "list", "delete"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "statefulsets"]
+    verbs: ["get", "list", "patch"]
+  - apiGroups: ["chaos-mesh.org"]
+    resources: ["*"]
+    verbs: ["*"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: chaos-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: chaos-controller
+subjects:
+  - kind: ServiceAccount
+    name: chaos-controller
+    namespace: chaos-testing
+
+---
+# Experiment 1: Pod Kill - API Server
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: api-server-pod-kill
+  namespace: chaos-testing
+  labels:
+    experiment: pod-kill
+    target: api-server
+spec:
+  action: pod-kill
+  mode: one
+  selector:
+    namespaces:
+      - default
+    labelSelectors:
+      app: intelgraph-server
+  scheduler:
+    cron: "@weekly"  # Run weekly as part of chaos drill
+  duration: "30s"
+
+---
+# Experiment 2: Pod Kill - Database (PostgreSQL)
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: postgres-pod-kill
+  namespace: chaos-testing
+  labels:
+    experiment: pod-kill
+    target: postgres
+spec:
+  action: pod-failure
+  mode: one
+  selector:
+    namespaces:
+      - default
+    labelSelectors:
+      app: postgres
+  scheduler:
+    cron: "0 2 1 * *"  # Monthly at 2 AM on the 1st
+  duration: "2m"
+
+---
+# Experiment 3: Pod Kill - Neo4j
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: neo4j-pod-kill
+  namespace: chaos-testing
+  labels:
+    experiment: pod-kill
+    target: neo4j
+spec:
+  action: pod-kill
+  mode: one
+  selector:
+    namespaces:
+      - default
+    labelSelectors:
+      app: neo4j
+  scheduler:
+    cron: "0 3 1 * *"  # Monthly at 3 AM on the 1st
+  duration: "1m"
+
+---
+# Experiment 4: Network Chaos - Partition
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: api-db-network-partition
+  namespace: chaos-testing
+  labels:
+    experiment: network-partition
+    target: api-db
+spec:
+  action: partition
+  mode: one
+  selector:
+    namespaces:
+      - default
+    labelSelectors:
+      app: intelgraph-server
+  direction: to
+  target:
+    mode: one
+    selector:
+      namespaces:
+        - default
+      labelSelectors:
+        app: postgres
+  scheduler:
+    cron: "0 4 1 * *"  # Monthly at 4 AM on the 1st
+  duration: "1m"
+
+---
+# Experiment 5: Network Chaos - Latency Injection
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: api-network-latency
+  namespace: chaos-testing
+  labels:
+    experiment: network-latency
+    target: api
+spec:
+  action: delay
+  mode: all
+  selector:
+    namespaces:
+      - default
+    labelSelectors:
+      app: intelgraph-server
+  delay:
+    latency: "100ms"
+    correlation: "50"
+    jitter: "10ms"
+  scheduler:
+    cron: "0 5 1 * *"  # Monthly at 5 AM on the 1st
+  duration: "5m"
+
+---
+# Experiment 6: IO Chaos - Disk Failure
+apiVersion: chaos-mesh.org/v1alpha1
+kind: IOChaos
+metadata:
+  name: postgres-disk-failure
+  namespace: chaos-testing
+  labels:
+    experiment: io-chaos
+    target: postgres
+spec:
+  action: fault
+  mode: one
+  selector:
+    namespaces:
+      - default
+    labelSelectors:
+      app: postgres
+  volumePath: /var/lib/postgresql/data
+  path: /var/lib/postgresql/data/**/*
+  percent: 10
+  errno: 5  # EIO (I/O error)
+  scheduler:
+    cron: "0 6 1 * *"  # Monthly at 6 AM on the 1st
+  duration: "2m"
+
+---
+# Experiment 7: Stress Test - CPU
+apiVersion: chaos-mesh.org/v1alpha1
+kind: StressChaos
+metadata:
+  name: api-cpu-stress
+  namespace: chaos-testing
+  labels:
+    experiment: stress-test
+    target: api
+spec:
+  mode: one
+  selector:
+    namespaces:
+      - default
+    labelSelectors:
+      app: intelgraph-server
+  stressors:
+    cpu:
+      workers: 2
+      load: 80
+  scheduler:
+    cron: "0 7 1 * *"  # Monthly at 7 AM on the 1st
+  duration: "3m"
+
+---
+# Experiment 8: Stress Test - Memory
+apiVersion: chaos-mesh.org/v1alpha1
+kind: StressChaos
+metadata:
+  name: api-memory-stress
+  namespace: chaos-testing
+  labels:
+    experiment: stress-test
+    target: api
+spec:
+  mode: one
+  selector:
+    namespaces:
+      - default
+    labelSelectors:
+      app: intelgraph-server
+  stressors:
+    memory:
+      workers: 4
+      size: "1GB"
+  scheduler:
+    cron: "0 8 1 * *"  # Monthly at 8 AM on the 1st
+  duration: "2m"
+
+---
+# Experiment 9: Redis Broker Kill
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: redis-broker-kill
+  namespace: chaos-testing
+  labels:
+    experiment: broker-kill
+    target: redis
+spec:
+  action: pod-kill
+  mode: one
+  selector:
+    namespaces:
+      - default
+    labelSelectors:
+      app: redis
+  scheduler:
+    cron: "0 9 1 * *"  # Monthly at 9 AM on the 1st
+  duration: "30s"
+
+---
+# Experiment 10: Time Chaos - Clock Skew
+apiVersion: chaos-mesh.org/v1alpha1
+kind: TimeChaos
+metadata:
+  name: api-time-skew
+  namespace: chaos-testing
+  labels:
+    experiment: time-chaos
+    target: api
+spec:
+  mode: one
+  selector:
+    namespaces:
+      - default
+    labelSelectors:
+      app: intelgraph-server
+  timeOffset: "-10m"
+  scheduler:
+    cron: "0 10 1 * *"  # Monthly at 10 AM on the 1st
+  duration: "5m"
+
+---
+# Chaos Workflow - Full Monthly Drill
+apiVersion: chaos-mesh.org/v1alpha1
+kind: Workflow
+metadata:
+  name: monthly-chaos-drill
+  namespace: chaos-testing
+spec:
+  entry: entry
+  templates:
+    - name: entry
+      templateType: Serial
+      children:
+        - chaos-1-pod-kill
+        - chaos-2-network-partition
+        - chaos-3-io-failure
+        - chaos-4-stress-test
+        - chaos-5-recovery-validation
+
+    - name: chaos-1-pod-kill
+      templateType: Task
+      deadline: 5m
+      task:
+        chaos: api-server-pod-kill
+
+    - name: chaos-2-network-partition
+      templateType: Task
+      deadline: 3m
+      task:
+        chaos: api-db-network-partition
+
+    - name: chaos-3-io-failure
+      templateType: Task
+      deadline: 4m
+      task:
+        chaos: postgres-disk-failure
+
+    - name: chaos-4-stress-test
+      templateType: Parallel
+      children:
+        - stress-cpu
+        - stress-memory
+
+    - name: stress-cpu
+      templateType: Task
+      deadline: 5m
+      task:
+        chaos: api-cpu-stress
+
+    - name: stress-memory
+      templateType: Task
+      deadline: 5m
+      task:
+        chaos: api-memory-stress
+
+    - name: chaos-5-recovery-validation
+      templateType: Task
+      deadline: 10m
+      task:
+        container:
+          name: validation
+          image: curlimages/curl:latest
+          command:
+            - sh
+            - -c
+            - |
+              echo "Validating system recovery..."
+              for i in {1..30}; do
+                if curl -f -s http://intelgraph-server:4000/health > /dev/null; then
+                  echo "Health check passed"
+                  exit 0
+                fi
+                echo "Attempt $i failed, retrying..."
+                sleep 10
+              done
+              echo "Health check failed after 30 attempts"
+              exit 1

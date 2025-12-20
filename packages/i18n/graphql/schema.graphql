@@ -1,0 +1,201 @@
+"""
+User language preferences schema extension
+
+Add this to your GraphQL schema to support user language preferences.
+"""
+
+# Supported locale codes
+enum Locale {
+  # English variants
+  EN_US # English (United States)
+  EN_GB # English (United Kingdom)
+
+  # Western European
+  FR_FR # French
+  DE_DE # German
+  ES_ES # Spanish
+  IT_IT # Italian
+  PT_PT # Portuguese
+  NL_NL # Dutch
+
+  # Nordic
+  DA_DK # Danish
+  NO_NO # Norwegian
+  SV_SE # Swedish
+  FI_FI # Finnish
+  IS_IS # Icelandic
+
+  # Central European
+  PL_PL # Polish
+  CS_CZ # Czech
+  SK_SK # Slovak
+  HU_HU # Hungarian
+
+  # Eastern & Southern European
+  RO_RO # Romanian
+  BG_BG # Bulgarian
+  HR_HR # Croatian
+  SL_SI # Slovenian
+  ET_EE # Estonian
+  LV_LV # Latvian
+  LT_LT # Lithuanian
+  MT_MT # Maltese
+  TR_TR # Turkish
+  EL_GR # Greek
+  MK_MK # Macedonian
+  AL_AL # Albanian
+  ME_ME # Montenegrin
+
+  # RTL Languages
+  AR_SA # Arabic (Saudi Arabia)
+  AR_EG # Arabic (Egypt)
+  HE_IL # Hebrew
+  FA_IR # Persian/Farsi
+  UR_PK # Urdu
+
+  # Asian
+  ZH_CN # Chinese (Simplified)
+  ZH_TW # Chinese (Traditional)
+  JA_JP # Japanese
+  KO_KR # Korean
+}
+
+"""
+User preferences including i18n settings
+"""
+type UserPreferences {
+  """Current user interface language"""
+  locale: Locale!
+
+  """User interface theme"""
+  theme: String
+
+  """User timezone"""
+  timezone: String
+
+  """Date format preference"""
+  dateFormat: String
+
+  """Number format preference"""
+  numberFormat: String
+
+  """Currency preference"""
+  currency: String
+}
+
+"""
+Input for updating user preferences
+"""
+input UserPreferencesInput {
+  """User interface language"""
+  locale: Locale
+
+  """User interface theme"""
+  theme: String
+
+  """User timezone"""
+  timezone: String
+
+  """Date format preference"""
+  dateFormat: String
+
+  """Number format preference"""
+  numberFormat: String
+
+  """Currency preference"""
+  currency: String
+}
+
+"""
+Extend User type with preferences
+"""
+extend type User {
+  """User preferences including locale"""
+  preferences: UserPreferences!
+}
+
+"""
+Mutations for updating user preferences
+"""
+extend type Mutation {
+  """
+  Update user preferences including language
+
+  Example:
+    mutation {
+      updateUserPreferences(
+        userId: "user-123"
+        preferences: { locale: ES_ES }
+      ) {
+        id
+        preferences {
+          locale
+        }
+      }
+    }
+  """
+  updateUserPreferences(
+    userId: ID!
+    preferences: UserPreferencesInput!
+  ): User!
+
+  """
+  Shorthand mutation for updating just the locale
+
+  Example:
+    mutation {
+      updateUserLocale(userId: "user-123", locale: FR_FR) {
+        id
+        preferences {
+          locale
+        }
+      }
+    }
+  """
+  updateUserLocale(userId: ID!, locale: Locale!): User!
+}
+
+"""
+Queries for preferences
+"""
+extend type Query {
+  """Get user preferences"""
+  userPreferences(userId: ID!): UserPreferences
+
+  """Get all supported locales with metadata"""
+  supportedLocales: [LocaleInfo!]!
+}
+
+"""
+Locale information and metadata
+"""
+type LocaleInfo {
+  """Locale code (e.g., en-US)"""
+  code: String!
+
+  """Display name in the target language"""
+  name: String!
+
+  """Display name in English"""
+  englishName: String!
+
+  """Flag emoji"""
+  flag: String!
+
+  """Text direction"""
+  direction: TextDirection!
+
+  """Is this locale fully translated?"""
+  fullyTranslated: Boolean!
+
+  """Translation coverage percentage"""
+  coverage: Float!
+}
+
+"""
+Text direction
+"""
+enum TextDirection {
+  LTR
+  RTL
+}
