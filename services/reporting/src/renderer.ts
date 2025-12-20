@@ -35,18 +35,31 @@ export async function renderPdf(html: string, options: RenderOptions = {}): Prom
   page.setDefaultTimeout(options.timeout || 30000);
 
   try {
-    // Block external resources
+    // Block external resources - Strict Allowlist
     await page.route('**', (route) => {
       const url = route.request().url();
       try {
         const u = new URL(url);
-        if (u.protocol.startsWith('http') && u.hostname !== 'localhost' && u.hostname !== '127.0.0.1') {
-          return route.abort();
+
+        // Allow local schemes
+        if (['file:', 'data:', 'blob:', 'about:'].includes(u.protocol)) {
+          return route.continue();
         }
+
+        // Allow localhost for local API calls or assets
+        if (['http:', 'https:'].includes(u.protocol)) {
+           if (u.hostname === 'localhost' || u.hostname === '127.0.0.1') {
+             return route.continue();
+           }
+        }
+
+        // Default deny
+        console.warn(`Blocked external resource: ${url}`);
+        return route.abort();
       } catch (e) {
-        // invalid url, maybe data:, ignore
+        // Invalid URL -> Block
+        return route.abort();
       }
-      return route.continue();
     });
 
     await page.setContent(html, { waitUntil: 'networkidle' });
