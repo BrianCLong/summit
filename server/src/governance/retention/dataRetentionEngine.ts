@@ -224,6 +224,11 @@ export class DataRetentionEngine {
   async purgeDataset(
     datasetId: string,
     trigger: 'manual' | 'scheduler' | 'compliance' = 'manual',
+    options: {
+      runId?: string;
+      resolvedPolicy?: any;
+      dryRun?: boolean;
+    } = {},
   ): Promise<void> {
     const record = this.repository.getRecord(datasetId);
     if (!record) {
@@ -251,13 +256,17 @@ export class DataRetentionEngine {
     await this.performPostgresPurge(record);
     await this.performNeo4jPurge(record);
 
+    if (options.dryRun) {
+      return;
+    }
+
     await this.auditLogger.log({
       event: 'purge.executed',
       datasetId,
       policyId: record.policy.templateId,
       severity: 'info',
       message: `Dataset purged via ${trigger}`,
-      metadata: { trigger },
+      metadata: { trigger, runId: options.runId, resolved: options.resolvedPolicy },
       timestamp: new Date(),
     });
   }

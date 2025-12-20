@@ -1,6 +1,7 @@
 # Helm lint and validation
 
 ## Where charts live
+
 Charts with a `Chart.yaml` live in multiple locations and are picked up automatically by the CI workflow:
 
 - Core services in `helm/` (ai-service, ai-service-platform, client, intelgraph, neo4j, nlp-service, osint-service, postgres, predictive-suite, redis, server, summit, tenant, worker-python).
@@ -15,6 +16,7 @@ Charts with a `Chart.yaml` live in multiple locations and are picked up automati
 - Ledger variants in `prov-ledger/infra/helm/prov-ledger/`, `prov_ledger/infra/helm/prov-ledger/`, and `sprint-kits/proof-first-core-ga/charts/` (prov-ledger, er-service, cost-guard).
 
 ## CI workflow expectations
+
 The workflow at `.github/workflows/helm-lint-validate.yml` runs on pull requests that touch Helm content and can be launched manually. It:
 
 1. Installs Helm with caching for downloaded chart data.
@@ -23,7 +25,17 @@ The workflow at `.github/workflows/helm-lint-validate.yml` runs on pull requests
 4. Renders each chart with `helm template ... --include-crds` and pipes the output through `kubeconform` for schema validation with `-strict`.
 5. Optionally provisions a Kind cluster (`run_kind_smoke` input) and installs the `helm/redis` chart as a smoke test.
 
+## Governance and promotion pipeline
+
+Use `.github/workflows/helm-governance.yml` when you need full validation, policy gates, and release-style promotion:
+
+- **Lint and templates**: Runs `ct lint` against all charts under `helm/`, renders manifests for default plus `values.dev.yaml`, `values.stage.yaml`, and `values.prod.yaml` combinations, and validates the output with `kubeconform -strict`.
+- **Policy enforcement**: Downloads rendered manifests and applies both OPA (`conftest` with `policy/conftest/helm-ci`) and Kyverno rules (`policy/kyverno`, `policies/kyverno`).
+- **Integration smoke**: Creates a Kind cluster, installs `helm/summit` with CI defaults, then promotes a new image tag using `values.dev.yaml` to exercise blue/green upgrade semantics and captures the active image/annotations for smoke verification.
+- **Artifacts**: Publishes rendered manifests plus packaged docs (`helm/*/README*`) and monitoring dashboards (`monitoring/dashboards`, `monitoring/grafana`) for downstream inspection.
+
 ## Sample values for CI
+
 The workflow uses `helm/ci-values.yaml` to provide deterministic defaults when linting and templating:
 
 ```yaml
