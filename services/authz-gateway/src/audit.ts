@@ -1,5 +1,7 @@
 import { appendFileSync } from 'fs';
 
+import type { BreakGlassMetadata } from './types';
+
 export interface AuditEntry {
   subject: string;
   action: string;
@@ -7,12 +9,11 @@ export interface AuditEntry {
   tenantId: string;
   allowed: boolean;
   reason: string;
-  details?: Record<string, unknown>;
+  breakGlass?: BreakGlassMetadata;
+  event?: string;
 }
-
-const auditLogPath = process.env.AUDIT_LOG_PATH || 'audit.log';
 
 export function log(entry: AuditEntry) {
   const record = { ...entry, ts: new Date().toISOString() };
-  appendFileSync(auditLogPath, JSON.stringify(record) + '\n');
+  appendFileSync('audit.log', JSON.stringify(record) + '\n');
 }

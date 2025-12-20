@@ -40,9 +40,7 @@ export function resetOidcCache() {
   cachedJwksUri = null;
 }
 
-export function assertMfa(
-  payload: JWTPayload & { acr?: string; amr?: string[] },
-) {
+export function assertMfa(payload: JWTPayload & { acr?: string; amr?: string[] }) {
   const requireMfa =
     process.env.STAGING_REQUIRE_MFA === 'true' ||
     process.env.REQUIRE_MFA === 'true' ||

@@ -13,9 +13,7 @@ export interface ApiCallEvent {
   error?: string;
 }
 
-function eventLogPath() {
-  return process.env.API_EVENT_LOG || 'api-events.log';
-}
+const eventLogPath = process.env.API_EVENT_LOG || 'api-events.log';
 
 export function createTraceId(): string {
   return crypto.randomUUID();
@@ -28,6 +26,6 @@ export function emitApiCallEvent(event: ApiCallEvent): string {
     traceId,
     ts: new Date().toISOString(),
   };
-  appendFileSync(eventLogPath(), JSON.stringify(record) + '\n');
+  appendFileSync(eventLogPath, JSON.stringify(record) + '\n');
   return traceId;
 }

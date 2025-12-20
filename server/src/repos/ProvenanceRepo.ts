@@ -91,14 +91,46 @@ export class ProvenanceRepo {
       r.old_values ||
       (r.note ? { note: r.note } : {});
     const kind = r.action || r.resource_type || r.source || 'event';
+    const tenantId =
+      r.tenant_id ||
+      (metadata && typeof metadata === 'object' && metadata.tenantId) ||
+      (metadata && typeof metadata === 'object' && metadata.tenant_id) ||
+      null;
+    const normalizedMetadata =
+      metadata && typeof metadata === 'object'
+        ? { ...metadata, ...(tenantId ? { tenantId } : {}) }
+        : metadata;
     return {
       id: r.id,
       kind,
+      tenantId: tenantId || undefined,
       createdAt:
         createdAt instanceof Date
           ? createdAt.toISOString()
           : new Date(createdAt).toISOString(),
-      metadata,
+      metadata: normalizedMetadata,
+    };
+  }
+
+  private appendTenantScope(
+    where: string,
+    params: any[],
+    tenantId?: string | null,
+  ) {
+    if (!tenantId) return { where, params };
+    const scopedParams = [...params, tenantId];
+    const tenantWhere = where
+      ? `${where} AND tenant_id = $${scopedParams.length}`
+      : `WHERE tenant_id = $${scopedParams.length}`;
+    return { where: tenantWhere, params: scopedParams };
+  }
+
+  private withPaging(params: any[], first: number, offset: number) {
+    const limitIndex = params.length + 1;
+    const offsetIndex = params.length + 2;
+    return {
+      clause: ` LIMIT $${limitIndex} OFFSET $${offsetIndex}`,
+      params: [...params, first, offset],
     };
   }
 
@@ -113,27 +145,66 @@ export class ProvenanceRepo {
     const client = await this.pg.connect();
     try {
       const { where, params } = this.buildWhere(scope, id, filter);
+      const queries: Array<{ sql: string; params: any[] }> = [];
 
-      // Prefer audit_events if present; fallback to provenance
-      const baseLimit = ` LIMIT $${params.push(first)} OFFSET $${params.push(offset)}`;
-      const sqls: string[] = [];
+      const addQuery = (
+        baseSql: string,
+        orderBy: string,
+        scoped: boolean,
+      ) => {
+        const scopedWhere = scoped
+          ? this.appendTenantScope(where, params, tenantId)
+          : { where, params };
+        const { clause, params: withPaging } = this.withPaging(
+          scopedWhere.params,
+          first,
+          offset,
+        );
+        queries.push({
+          sql: `${baseSql} ${scopedWhere.where} ${orderBy}${clause}`,
+          params: withPaging,
+        });
+      };
+
       if (tenantId) {
-        sqls.push(
-          `SELECT id, action, target_type, target_id, metadata, created_at FROM audit_events ${where} AND tenant_id = $${params.push(tenantId)} ORDER BY COALESCE(created_at, NOW()) DESC${baseLimit}`,
-          `SELECT id, action, resource_type, resource_id, resource_data, old_values, new_values, investigation_id, timestamp FROM audit_events ${where} AND tenant_id = $${params.push(tenantId)} ORDER BY COALESCE(timestamp, NOW()) DESC${baseLimit}`,
+        addQuery(
+          'SELECT id, action, target_type, target_id, metadata, created_at, tenant_id FROM audit_events',
+          'ORDER BY COALESCE(created_at, NOW()) DESC',
+          true,
+        );
+        addQuery(
+          'SELECT id, action, resource_type, resource_id, resource_data, old_values, new_values, investigation_id, timestamp, tenant_id FROM audit_events',
+          'ORDER BY COALESCE(timestamp, NOW()) DESC',
+          true,
+        );
+        addQuery(
+          'SELECT id, source, subject_type, subject_id, note, created_at, tenant_id FROM provenance',
+          'ORDER BY created_at DESC',
+          true,
+        );
+      } else {
+        addQuery(
+          'SELECT id, action, target_type, target_id, metadata, created_at FROM audit_events',
+          'ORDER BY COALESCE(created_at, NOW()) DESC',
+          false,
+        );
+        addQuery(
+          'SELECT id, action, resource_type, resource_id, resource_data, old_values, new_values, investigation_id, timestamp FROM audit_events',
+          'ORDER BY COALESCE(timestamp, NOW()) DESC',
+          false,
+        );
+        addQuery(
+          'SELECT id, source, subject_type, subject_id, note, created_at FROM provenance',
+          'ORDER BY created_at DESC',
+          false,
         );
       }
-      // Non-tenant filtered fallbacks
-      sqls.push(
-        `SELECT id, action, target_type, target_id, metadata, created_at FROM audit_events ${where} ORDER BY COALESCE(created_at, NOW()) DESC${baseLimit}`,
-        `SELECT id, action, resource_type, resource_id, resource_data, old_values, new_values, investigation_id, timestamp FROM audit_events ${where} ORDER BY COALESCE(timestamp, NOW()) DESC${baseLimit}`,
-        `SELECT id, source, subject_type, subject_id, note, created_at FROM provenance ${where} ORDER BY created_at DESC${baseLimit}`,
-      );
 
-      for (const sql of sqls) {
+      for (const { sql, params: queryParams } of queries) {
         try {
-          const res = await client.query(sql, params);
-          if (res?.rows) return res.rows.map(this.mapRow);
+          const res = await client.query(sql, queryParams);
+          const mapped = res?.rows?.map(this.mapRow) ?? [];
+          if (mapped.length) return mapped;
         } catch (e: any) {
           // try next shape
           continue;

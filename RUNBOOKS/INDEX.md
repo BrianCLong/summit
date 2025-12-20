@@ -25,12 +25,6 @@ Quick reference for operational procedures and incident response.
 - [Incident Auto-Reweighter](./incident-auto-reweighter.md) - MC Platform QAM service
 - [Rollback Procedures](./rollback.yaml)
 - [Chaos Drill](./chaos-drill.yaml)
-- **Incident Readiness Pack**
-  - [Ingestion Pipeline Stuck](./ingestion-stuck.md)
-  - [Query Latency Spike](./query-latency-spike.md)
-  - [Authentication Outage](./auth-outage.md)
-  - [Connector Rate Limit Storm](./connector-rate-limit-storm.md)
-  - [Export Failure](./export-failure.md)
 
 ### Intelligence Operations
 

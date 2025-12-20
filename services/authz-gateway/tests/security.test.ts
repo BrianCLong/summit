@@ -8,8 +8,6 @@ import { stopObservability } from '../src/observability';
 import type { Server } from 'http';
 import type { AddressInfo } from 'net';
 import { sessionManager } from '../src/session';
-import { SignJWT } from 'jose';
-import { getPrivateKey } from '../src/keys';
 
 let opaServer: Server;
 let upstreamServer: Server;
@@ -27,7 +25,7 @@ function signChallenge(challenge: string) {
   return signer.sign(privateKey).toString('base64url');
 }
 
-async function performStepUp(app: express.Application, token: string) {
+async function performStepUp(app: express.Express, token: string) {
   const challengeRes = await request(app)
     .post('/auth/webauthn/challenge')
     .set('Authorization', `Bearer ${token}`)
@@ -133,11 +131,9 @@ describe('security', () => {
     const loginRes = await request(app)
       .post('/auth/login')
       .send({ username: 'alice', password: 'password123' });
-    const sid = (
-      await request(app)
-        .post('/auth/introspect')
-        .send({ token: loginRes.body.token })
-    ).body.sid as string;
+    const sid = (await request(app)
+      .post('/auth/introspect')
+      .send({ token: loginRes.body.token })).body.sid as string;
     sessionManager.expire(String(sid));
     const token = loginRes.body.token;
     const res = await request(app)

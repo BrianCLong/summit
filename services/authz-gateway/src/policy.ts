@@ -18,42 +18,38 @@ function normalizeAllow(value: unknown): boolean | null {
   if (typeof value === 'boolean') {
     return value;
   }
-  if (value === null || value === undefined) {
-    return null;
-  }
   if (typeof value === 'string') {
-    const normalized = value.trim().toLowerCase();
-    if (normalized === 'true') {
+    const lowered = value.trim().toLowerCase();
+    if (lowered === 'true') {
       return true;
     }
-    if (normalized === 'false') {
+    if (lowered === 'false') {
       return false;
     }
-    if (normalized.length === 0) {
-      return Boolean(value);
-    }
-    if (!/[a-z]/i.test(normalized)) {
-      return true;
-    }
-    return false;
   }
   if (typeof value === 'number') {
-    return value !== 0;
+    if (value === 1) {
+      return true;
+    }
+    if (value === 0) {
+      return false;
+    }
   }
-  return Boolean(value);
+  return null;
 }
 
 function normalizeObligations(value: unknown): DecisionObligation[] {
   if (!Array.isArray(value)) {
     return [];
   }
-  return value.filter(
-    (candidate): candidate is DecisionObligation =>
-      typeof candidate === 'object' &&
-      candidate !== null &&
-      typeof (candidate as { type?: unknown }).type === 'string' &&
-      (candidate as { type: string }).type.length > 0,
-  );
+
+  return value.filter((obligation): obligation is DecisionObligation => {
+    if (typeof obligation !== 'object' || obligation === null) {
+      return false;
+    }
+    const candidate = obligation as Partial<DecisionObligation>;
+    return typeof candidate.type === 'string' && candidate.type.length > 0;
+  });
 }
 
 export async function authorize(
@@ -69,14 +65,6 @@ export async function authorize(
       return {
         allowed: result,
         reason: result ? 'allow' : 'deny',
-        obligations: [],
-      };
-    }
-    if (typeof result === 'number' || typeof result === 'string') {
-      const allowed = normalizeAllow(result);
-      return {
-        allowed: allowed ?? false,
-        reason: allowed ? 'allow' : 'deny',
         obligations: [],
       };
     }

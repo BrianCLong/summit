@@ -126,11 +126,12 @@ export interface GraphAnalyticsService {
   centrality(params: {
     tenantId: TenantId;
     scope: GraphScope;
-    algorithm: 'degree' | 'betweenness' | 'eigenvector';
+    algorithm: 'degree' | 'betweenness' | 'eigenvector' | 'pageRank';
   }): Promise<CentralityResult[]>;
   communities(params: {
     tenantId: TenantId;
     scope: GraphScope;
+    algorithm?: 'wcc' | 'louvain' | 'labelPropagation';
   }): Promise<CommunityResult[]>;
   detectAnomalies(params: {
     tenantId: TenantId;

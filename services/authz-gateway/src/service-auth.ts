@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
+import { SignJWT, jwtVerify } from 'jose';
 import pino from 'pino';
 
 export interface ServicePrincipal {
@@ -22,22 +23,12 @@ export interface VerifyOptions {
 }
 
 const encoder = new TextEncoder();
-const defaultIssuer =
-  process.env.SERVICE_AUTH_ISSUER || 'summit-service-issuer';
-const sharedSecret =
-  process.env.SERVICE_AUTH_SHARED_SECRET || 'dev-service-shared-secret';
+const defaultIssuer = process.env.SERVICE_AUTH_ISSUER || 'summit-service-issuer';
+const sharedSecret = process.env.SERVICE_AUTH_SHARED_SECRET || 'dev-service-shared-secret';
 const defaultKeyId = process.env.SERVICE_AUTH_KEY_ID || 'v1-dev';
-let josePromise: Promise<typeof import('jose')> | null = null;
 
 function getSecret() {
   return encoder.encode(sharedSecret);
-}
-
-async function loadJose() {
-  if (!josePromise) {
-    josePromise = import('jose');
-  }
-  return josePromise;
 }
 
 export async function issueServiceToken({
@@ -48,7 +39,6 @@ export async function issueServiceToken({
   keyId = defaultKeyId,
   serviceId,
 }: ServiceTokenOptions & { serviceId: string }): Promise<string> {
-  const { SignJWT } = await loadJose();
   const now = Math.floor(Date.now() / 1000);
   return new SignJWT({ scp: scopes })
     .setProtectedHeader({ alg: 'HS256', kid: keyId })
@@ -64,7 +54,6 @@ export async function verifyServiceToken(
   token: string,
   { audience, allowedServices, requiredScopes = [] }: VerifyOptions,
 ): Promise<ServicePrincipal> {
-  const { jwtVerify } = await loadJose();
   const { payload, protectedHeader } = await jwtVerify(token, getSecret(), {
     audience,
     issuer: defaultIssuer,
@@ -103,18 +92,11 @@ export function requireServiceAuth({
 }: VerifyOptions & { headerName?: string }) {
   const logger = pino();
   return async (req: Request, res: Response, next: NextFunction) => {
-    const allowBypass =
-      process.env.NODE_ENV === 'test' && req.path?.includes('introspect');
     const rawToken =
-      req.headers[headerName] ||
-      req.headers['x-service-jwt'] ||
-      req.headers['X-Service-JWT'];
+      req.headers[headerName] || req.headers['x-service-jwt'] || req.headers['X-Service-JWT'];
     const token = Array.isArray(rawToken) ? rawToken[0] : rawToken;
 
     if (!token || typeof token !== 'string') {
-      if (allowBypass) {
-        return next();
-      }
       req.log?.warn?.({
         service_aud: audience,
         service_error: 'missing_service_token',
@@ -130,9 +112,7 @@ export function requireServiceAuth({
         requiredScopes,
       });
 
-      (
-        req as Request & { servicePrincipal?: ServicePrincipal }
-      ).servicePrincipal = principal;
+      (req as Request & { servicePrincipal?: ServicePrincipal }).servicePrincipal = principal;
       req.log?.info?.({
         service_aud: audience,
         service_sub: principal.serviceId,
@@ -140,9 +120,6 @@ export function requireServiceAuth({
       });
       return next();
     } catch (error) {
-      if (allowBypass) {
-        return next();
-      }
       logger.warn({
         service_aud: audience,
         service_error: (error as Error).message,

@@ -32,8 +32,7 @@ export function lookupApiClient(apiKey: string): ApiClient | null {
   if (!record || record.revoked) {
     return null;
   }
-  const { hashedKey, ...client } = record;
-  void hashedKey;
+  const { hashedKey: _hashedKey, ...client } = record;
   return client;
 }
 

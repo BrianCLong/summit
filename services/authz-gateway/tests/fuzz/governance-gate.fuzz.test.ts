@@ -15,10 +15,7 @@ import { SignJWT } from 'jose';
 import path from 'path';
 import { mkdirSync, writeFileSync } from 'fs';
 import { createCoverageMap } from 'istanbul-lib-coverage';
-import type {
-  CoverageMapData,
-  CoverageSummaryData,
-} from 'istanbul-lib-coverage';
+import type { CoverageSummaryData } from 'istanbul-lib-coverage';
 
 import * as policy from '../../src/policy';
 import { requireAuth, type AuthenticatedRequest } from '../../src/middleware';
@@ -123,37 +120,8 @@ function resolveAllow(result: unknown): boolean {
   if (typeof result === 'boolean') {
     return result;
   }
-  if (typeof result === 'string') {
-    const normalized = result.trim().toLowerCase();
-    if (normalized === 'true') return true;
-    if (normalized === 'false') return false;
-    if (normalized.length === 0) return false;
-    if (!/[a-z]/i.test(normalized)) return true;
-    return false;
-  }
-  if (typeof result === 'number') {
-    return result !== 0;
-  }
   if (result && typeof result === 'object' && !Array.isArray(result)) {
-    const allowValue = (result as { allow?: unknown }).allow;
-    if (typeof allowValue === 'boolean') {
-      return allowValue;
-    }
-    if (typeof allowValue === 'string') {
-      const normalized = allowValue.trim().toLowerCase();
-      if (normalized === 'true') return true;
-      if (normalized === 'false') return false;
-      if (normalized.length === 0) return Boolean(allowValue);
-      if (!/[a-z]/i.test(normalized)) return true;
-      return false;
-    }
-    if (typeof allowValue === 'number') {
-      return allowValue !== 0;
-    }
-    if (allowValue === null || allowValue === undefined) {
-      return false;
-    }
-    return Boolean(allowValue);
+    return Boolean((result as { allow?: unknown }).allow);
   }
   return false;
 }
@@ -182,13 +150,7 @@ function resolveObligations(result: unknown): DecisionObligation[] {
     !Array.isArray(result) &&
     Array.isArray((result as { obligations?: unknown }).obligations)
   ) {
-    return (result as { obligations: DecisionObligation[] }).obligations.filter(
-      (candidate) =>
-        typeof candidate === 'object' &&
-        candidate !== null &&
-        typeof (candidate as { type?: unknown }).type === 'string' &&
-        (candidate as { type: string }).type.length > 0,
-    );
+    return (result as { obligations: DecisionObligation[] }).obligations;
   }
   return [];
 }
@@ -279,17 +241,13 @@ describe('governance gate fuzzing', () => {
       return;
     }
 
-    const map = createCoverageMap(
-      (coverage || {}) as CoverageMapData | undefined,
-    );
+    const map = createCoverageMap(coverage);
     const targetFiles = [
       'services/authz-gateway/src/middleware.ts',
       'services/authz-gateway/src/policy.ts',
     ];
     for (const file of targetFiles) {
-      const match = map
-        .files()
-        .find((candidate: string) => candidate.endsWith(file));
+      const match = map.files().find((candidate) => candidate.endsWith(file));
       if (!match) {
         continue;
       }
