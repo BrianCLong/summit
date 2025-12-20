@@ -1,63 +1,71 @@
 # Summit Kubernetes Deployment Guide
 
-## Overview
-This guide describes the production-ready Helm umbrella chart in `helm/summit` and the per-service charts for `server`, `client`, `ai-service`, and `worker-python`. It also covers namespace safeguards, service mesh, ExternalSecrets, network policies, HPAs, health probes, and the blue/green promotion workflow.
+This guide describes the production-ready Summit deployment bundle under `infra/helm/summit-platform`. The umbrella chart wires mesh defaults, ingress/TLS, autoscaling, quotas, external secrets, and network policies around the core platform services (intelgraph, gateway, web, analytics, redis, postgres, neo4j).
 
-## Prerequisites
-- Kubernetes 1.27+
-- cert-manager installed for TLS certificates
-- external-secrets.io configured with a `ClusterSecretStore` named `summit-secrets`
-- Istio installed with an ingress gateway reachable for your hostnames
-- Helm 3.14+
+## Chart layout
 
-## Installing the umbrella chart
+- `infra/helm/summit-platform/Chart.yaml`: umbrella chart pulling local service charts as dependencies.
+- `infra/helm/summit-platform/values.yaml`: opinionated defaults for mesh, ingress, blue/green routing, HPAs, quotas, and ExternalSecrets.
+- `infra/helm/summit-platform/templates/mesh.yaml`: namespace labeling for sidecar injection plus `PeerAuthentication` for STRICT mTLS.
+- `infra/helm/summit-platform/templates/ingress.yaml`: Istio/ingress class with cert-manager annotations and TLS termination.
+- `infra/helm/summit-platform/templates/resourcequota.yaml` and `limitrange.yaml`: namespace guardrails.
+- `infra/helm/summit-platform/templates/hpa.yaml`: autoscalers for each workload defined in `.Values.global.hpa.workloads`.
+- `infra/helm/summit-platform/templates/networkpolicies.yaml`: default ingress/egress allowlists.
+- `infra/helm/summit-platform/templates/externalsecret.yaml`: secrets materialized from External Secrets Operator.
+- `infra/helm/summit-platform/templates/bluegreen-service.yaml`: active/preview services keyed on color labels for blue/green promotion.
+
+## Installation
+
+1. Preinstall cluster prerequisites: Istio (or your mesh of choice), cert-manager, External Secrets Operator, and the Prometheus Operator CRDs.
+2. Create a namespace (or allow Helm to create it) and label it for sidecar injection if using Istio.
+3. Prepare an overlay values file (see examples) and install:
+
 ```bash
-# From repo root
-helm dependency update helm/summit
-helm upgrade --install summit helm/summit \
-  --namespace summit \
-  --create-namespace \
-  -f helm/summit/values.yaml
+helm dep up infra/helm/summit-platform
+helm upgrade --install summit infra/helm/summit-platform -n summit --create-namespace -f my-values.yaml
 ```
 
-Override images, tags, and environment variables per service with `--set` or a custom values file. The umbrella chart feeds values into the subcharts (`server`, `client`, `ai-service`, `worker-python`, `istio-config`).
+## Values overview
 
-### Common overrides
-- **Images:** `server.image.tag`, `client.image.tag`, `ai-service.image.tag`, `worker-python.image.tag`
-- **Replicas and HPAs:** `*.replicaCount`, `*.hpa.*` for CPU/memory thresholds and custom metrics
-- **Ingress:** `*.ingress.hosts[0].host`, `*.ingress.tls.secretName`, `common.ingress.className`
-- **Mesh:** `mesh.*` and `istio-config.*` to switch injection or mTLS mode
-- **Secrets:** `externalSecrets.storeRef.*` and `externalSecrets.manifests[*]` to map secret keys
+`values.yaml` ships with secure defaults:
 
-## Namespace protections
-`helm/summit/templates/namespace-resources.yaml` installs a `LimitRange` and `ResourceQuota` using `namespaceResources.*` to enforce default requests/limits and cap overall compute and PVC consumption. Adjust values to match cluster guardrails.
+- **Mesh**: sidecar injection enabled and `PeerAuthentication` STRICT mTLS.
+- **Ingress**: Istio ingress class, TLS secret `summit-tls`, and cert-manager ClusterIssuer `letsencrypt-prod`.
+- **Quotas/Limits**: `ResourceQuota` for CPU/memory, pod/PVC caps; `LimitRange` defaults/requests/min/max for containers.
+- **HPAs**: autoscaling definitions for `intelgraph-api`, `gateway`, and `web` with CPU/memory utilization targets.
+- **NetworkPolicies**: ingress allowlists for mesh traffic and observability, plus an egress policy restricting traffic to mTLS namespaces and Postgres.
+- **ExternalSecrets**: sample mappings for database and OIDC credentials using `ClusterSecretStore summit-vault`.
+- **Blue/Green**: active (`blue`) and preview (`green`) services for `web`, `gateway`, and `intelgraph-api` keyed by `rollout.summit.dev/color`.
 
-## Health probes
-Each service exposes liveness, readiness, and optional startup probes. Paths and timing are configurable under `*.probes.*` in values. Default probe paths are `/healthz` for APIs and `/` for the web client.
+You can add or override workloads under `global.hpa.workloads` and `global.blueGreen.services` to align with additional services.
 
-## Horizontal Pod Autoscaling
-HPAs are enabled by default for the four services and watch CPU + memory utilization. Custom pod metrics can be appended under `server.hpa.customMetrics` (e.g., `cypher_query_rate`) or similar lists if you add bespoke metrics to other charts. Set `minReplicas`/`maxReplicas` and utilization thresholds per service to match SLOs.
+## Blue/green deployment flow
 
-## Ingress and TLS
-Ingress objects are created per service with `cert-manager.io/cluster-issuer` annotations. Provide the hosts and TLS secret names under `*.ingress.*`. The sample values assume Istio ingress, but you can switch to NGINX or other controllers via `className`.
+1. Deploy the inactive color by setting pod template labels (e.g., `rollout.summit.dev/color=green`) on the target workload.
+2. Validate via the `-preview` service rendered by `bluegreen-service.yaml`.
+3. Promote by flipping `global.blueGreen.activeColor` to the validated color and running `helm upgrade`; the chart rewires the stable service selectors accordingly.
 
-## Service mesh
-The `istio-config` dependency labels the namespace for sidecar injection, applies mesh-wide `PeerAuthentication` for STRICT mTLS, and provisions per-service `DestinationRule` entries. Override `istio-config.destinationRules` to tune subsets or TLS modes. Pods also set `sidecar.istio.io/inject` to true by default.
+## Health, scaling, and security controls
 
-## External secrets
-`helm/summit/templates/externalsecrets.yaml` wires critical secrets (Neo4j, Postgres, JWT, AI API keys) from the configured `ClusterSecretStore`. Update `externalSecrets.manifests` if your secret keys differ or additional services need credentials.
+- **Probes**: configure liveness/readiness/startup probes within the underlying service charts; the umbrella chart does not override them.
+- **Autoscaling**: extend or override metrics per workload via `.Values.global.hpa.workloads[].metrics` using the autoscaling/v2 API schema.
+- **Quotas/limits**: tune `global.resourceQuota.hard` and `global.limitRange.*` to match your cluster sizing.
+- **Network policies**: add additional ingress/egress items to the respective lists to grant least-privilege traffic between tiers.
+- **TLS**: replace `global.ingress.tls.secretName` and `issuerRef` to use your PKI; mesh mTLS is enforced through `PeerAuthentication`.
 
-## Network policies
-A namespace-wide default deny policy is installed with optional allowances for ingress/egress namespaces via `networkPolicies.ingressNamespaces` and `networkPolicies.egressNamespaces`. Service-specific policies can be tightened further through the child charts (e.g., `server.networkPolicy.*`).
+## Secrets management
 
-## Blue/Green strategy
-Deploy color-coded services using the `blueGreen.*` values on each chart. Services select pods by `release-color`. To promote a new color:
-1. Deploy the new color by setting `*.blueGreen.selectorColor` to `green` in an override file and upgrading the release.
-2. Validate traffic on the preview Service `<service>-green`.
-3. Promote by running the Helm upgrade again with `blueGreen.selectorColor` pointing to the desired color. The hook job (`bluegreen-promotion-job.yaml`) patches the stable Service selector automatically when enabled.
+Enable External Secrets Operator and populate your secret backend with the referenced keys (e.g., `summit/database`, `summit/oidc`). The chart materializes Kubernetes `Secret`s named after the `global.externalSecrets.secrets[].name` entries and can be mounted by downstream workloads.
+
+## Observability hooks
+
+- HPAs use resource metrics by default; mesh ensures request/trace correlation through Envoy sidecars.
+- ServiceMonitors and alerting rules live under `infra/observability/`; apply them after the chart install to capture agent metrics, mesh health, and profiling pipelines.
 
 ## Troubleshooting
-- **Pods Pending**: Check `kubectl describe quota` for LimitRange/ResourceQuota violations; adjust `namespaceResources` or per-pod resources.
-- **TLS errors**: Ensure cert-manager ClusterIssuer exists and DNS resolves to the ingress gateway.
-- **Sidecar missing**: Verify namespace label `istio-injection=enabled` and `istio-config` chart installation.
-- **Secrets missing**: Confirm ExternalSecrets status and that `summit-secrets` store contains the expected keys.
+
+- **Pods Pending**: increase quota/limit ranges or adjust requested resources to fit node capacity.
+- **Cert issues**: check `cert-manager` events and verify DNS matches `global.ingress.hosts`.
+- **Secrets missing**: confirm External Secrets Operator has permissions to reach the configured `ClusterSecretStore` and that remote keys exist.
+- **Mesh traffic blocked**: ensure namespace labels and NetworkPolicies allow ingress from the mesh namespace; verify mTLS modes across workloads.
+- **Blue/green traffic**: inspect rendered services (`kubectl -n summit get svc -l rollout.summit.dev/role`) to confirm which color is active.

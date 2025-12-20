@@ -80,9 +80,15 @@ export interface ServerToClientEvents {
 
   // Broadcast events
   'broadcast': (data: { event: string; payload: unknown }) => void;
+
+  // Collaboration events
+  'collaboration:cursor_update': (data: { connectionId: string; userId: string; x: number; y: number; username?: string }) => void;
 }
 
 export interface ClientToServerEvents {
+  // Collaboration events
+  'collaboration:cursor_move': (data: { room: string; x: number; y: number; username?: string }) => void;
+
   // Presence events
   'presence:heartbeat': (data: { status?: PresenceStatus }) => void;
   'presence:status': (data: { status: PresenceStatus; metadata?: unknown }) => void;

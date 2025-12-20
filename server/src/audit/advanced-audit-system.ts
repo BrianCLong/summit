@@ -13,6 +13,7 @@ import { z } from 'zod';
 import { sign, verify } from 'jsonwebtoken';
 import { getPostgresPool, getRedisClient } from '../config/database.js';
 import logger from '../utils/logger.js';
+import { AuditTimelineRollupService } from './AuditTimelineRollupService.js';
 
 // Core audit event types
 export type AuditEventType =
@@ -186,6 +187,7 @@ export class AdvancedAuditSystem extends EventEmitter {
   // Caching
   private eventBuffer: AuditEvent[] = [];
   private flushInterval: NodeJS.Timeout;
+  private rollupService: AuditTimelineRollupService;
 
   private static instance: AdvancedAuditSystem;
 
@@ -201,6 +203,7 @@ export class AdvancedAuditSystem extends EventEmitter {
     this.db = db;
     this.redis = redis;
     this.logger = logger;
+    this.rollupService = new AuditTimelineRollupService(db);
     this.signingKey = signingKey;
     this.encryptionKey = encryptionKey;
 
@@ -408,6 +411,32 @@ export class AdvancedAuditSystem extends EventEmitter {
       );
       throw error;
     }
+  }
+
+  /**
+   * Materialize rollup tables for timeline views (resumable + observable)
+   */
+  async refreshTimelineRollups(options: { from?: Date; to?: Date } = {}) {
+    return this.rollupService.refreshRollups(options);
+  }
+
+  /**
+   * Read timeline buckets, switching to rollups when TIMELINE_ROLLUPS_V1=1
+   */
+  async getTimelineBuckets(
+    rangeStart: Date,
+    rangeEnd: Date,
+    granularity: 'day' | 'week' = 'day',
+    filters: { tenantId?: string; eventTypes?: string[]; levels?: string[] } = {},
+  ) {
+    return this.rollupService.getTimelineBuckets({
+      rangeStart,
+      rangeEnd,
+      granularity,
+      tenantId: filters.tenantId,
+      eventTypes: filters.eventTypes,
+      levels: filters.levels,
+    });
   }
 
   /**

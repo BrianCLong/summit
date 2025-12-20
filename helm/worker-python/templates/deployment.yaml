@@ -1,50 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "worker-python.fullname" . }}
-  labels:
-    {{- include "worker-python.labels" . | nindent 4 }}
-    release-color: {{ .Values.blueGreen.selectorColor | default "blue" }}
+  name: { { include "worker-python.fullname" . } }
+  labels: { { - include "worker-python.labels" . | nindent 4 } }
 spec:
-  replicas: {{ .Values.replicas | default 1 }}
+  replicas: { { .Values.replicas | default 1 } }
   selector:
-    matchLabels:
-      {{- include "worker-python.selectorLabels" . | nindent 6 }}
-      release-color: {{ .Values.blueGreen.selectorColor | default "blue" }}
+    matchLabels: { { - include "worker-python.selectorLabels" . | nindent 6 } }
   template:
     metadata:
-      labels:
-        {{- include "worker-python.selectorLabels" . | nindent 8 }}
-        release-color: {{ .Values.blueGreen.selectorColor | default "blue" }}
-      annotations:
-        sidecar.istio.io/inject: {{ .Values.istio.enabled | default true | quote }}
+      labels: { { - include "worker-python.selectorLabels" . | nindent 8 } }
     spec:
-      serviceAccountName: {{ include "worker-python.fullname" . }}
+      serviceAccountName: { { include "worker-python.fullname" . } }
       containers:
         - name: worker
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          env:
-            {{- toYaml .Values.env | nindent 12 }}
+          image: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
+          imagePullPolicy: { { .Values.image.pullPolicy } }
+          env: { { - toYaml .Values.env | nindent 12 } }
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-          readinessProbe:
-            httpGet:
-              path: {{ .Values.probes.readiness.path }}
-              port: http
-            initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds }}
-            periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
-          livenessProbe:
-            httpGet:
-              path: {{ .Values.probes.liveness.path }}
-              port: http
-            initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
-            periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
-          {{- if .Values.probes.startup.enabled }}
-          startupProbe:
-            httpGet:
-              path: {{ .Values.probes.startup.path }}
-              port: http
-            failureThreshold: {{ .Values.probes.startup.failureThreshold }}
-            periodSeconds: {{ .Values.probes.startup.periodSeconds }}
-          {{- end }}
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 1
+              memory: 512Mi

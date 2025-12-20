@@ -28,13 +28,4 @@ spec:
             matchLabels:
               name: {{ . }}
 {{- end }}
-    {{- range .Values.networkPolicy.egressFQDNs }}
-    - to:
-        - ipBlock:
-            cidr: 0.0.0.0/0
-      ports:
-        - port: 443
-          protocol: TCP
-      # Guard rails: restrict via DNS policy controllers (e.g., Cilium) for {{ . }}
-    {{- end }}
 {{- end }}

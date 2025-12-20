@@ -1,58 +1,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "client.fullname" . }}
+  name: { { include "client.fullname" . } }
   labels:
-    app.kubernetes.io/name: {{ include "client.name" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    release-color: {{ default "blue" .Values.blueGreen.selectorColor }}
+    app.kubernetes.io/name: { { include "client.name" . } }
+    app.kubernetes.io/instance: { { .Release.Name } }
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: { { .Values.replicaCount } }
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "client.name" . }}
-      app.kubernetes.io/instance: {{ .Release.Name }}
-      release-color: {{ default "blue" .Values.blueGreen.selectorColor }}
+      app.kubernetes.io/name: { { include "client.name" . } }
+      app.kubernetes.io/instance: { { .Release.Name } }
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ include "client.name" . }}
-        app.kubernetes.io/instance: {{ .Release.Name }}
-        release-color: {{ default "blue" .Values.blueGreen.selectorColor }}
-      annotations:
-        sidecar.istio.io/inject: {{ .Values.istio.enabled | default true | quote }}
-        {{- with .Values.podAnnotations }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
+        app.kubernetes.io/name: { { include "client.name" . } }
+        app.kubernetes.io/instance: { { .Release.Name } }
+      annotations: { { - toYaml .Values.podAnnotations | nindent 8 } }
     spec:
       containers:
         - name: client
-          image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: '{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}'
+          imagePullPolicy: { { .Values.image.pullPolicy } }
           ports:
             - name: http
               containerPort: 80
-          env:
-            {{- toYaml .Values.env | nindent 12 }}
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-          readinessProbe:
-            httpGet:
-              path: {{ .Values.probes.readiness.path }}
-              port: http
-            initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds }}
-            periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
-          livenessProbe:
-            httpGet:
-              path: {{ .Values.probes.liveness.path }}
-              port: http
-            initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
-            periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
-          {{- if .Values.probes.startup.enabled }}
-          startupProbe:
-            httpGet:
-              path: {{ .Values.probes.startup.path }}
-              port: http
-            failureThreshold: {{ .Values.probes.startup.failureThreshold }}
-            periodSeconds: {{ .Values.probes.startup.periodSeconds }}
-          {{- end }}
+          env: { { - toYaml .Values.env | nindent 12 } }
+          resources: { { - toYaml .Values.resources | nindent 12 } }

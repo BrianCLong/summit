@@ -6,6 +6,8 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: '0 9 * * 1' # Weekly visibility into strict SLOs
 
 jobs:
   k6-smoke:
@@ -21,6 +23,9 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
+
+      - name: Syntax check mock Maestro server
+        run: node --check scripts/ci/mock-maestro-server.mjs
 
       - name: Enable corepack
         run: corepack enable
@@ -49,8 +54,53 @@ jobs:
 
       - name: Run K6 Smoke
         run: |
-          k6 run -e TARGET_HOST=http://localhost:3000 tests/perf/smoke.js
+          BASE_URL=http://localhost:3000 SLO_MODE=mock k6 run tests/k6-smoke.js
+
+      - name: Run K6 GraphQL SLO (mock mode)
+        run: |
+          BASE_URL=http://localhost:3000 SLO_MODE=mock k6 run tests/k6-graphql-slo.js
+
+      - name: Upload K6 artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-mock-results
+          path: |
+            smoke-test-results.json
+            graphql-slo-results.json
+          if-no-files-found: warn
 
       - name: Tear down
         if: always()
         run: make down || true
+
+  k6-strict:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'pull_request' && secrets.STAGING_BASE_URL != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup K6
+        uses: grafana/setup-k6-action@v1
+
+      - name: Run K6 Smoke (strict mode)
+        env:
+          BASE_URL: ${{ secrets.STAGING_BASE_URL }}
+          SLO_MODE: strict
+        run: k6 run tests/k6-smoke.js
+
+      - name: Run K6 GraphQL SLO (strict mode)
+        env:
+          BASE_URL: ${{ secrets.STAGING_BASE_URL }}
+          SLO_MODE: strict
+        run: k6 run tests/k6-graphql-slo.js
+
+      - name: Upload strict artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-strict-results
+          path: |
+            smoke-test-results.json
+            graphql-slo-results.json
+          if-no-files-found: warn

@@ -3,14 +3,7 @@ image:
   tag: ''
   pullPolicy: IfNotPresent
 
-replicaCount: 2
-
-istio:
-  enabled: true
-
-blueGreen:
-  enabled: true
-  selectorColor: blue
+replicaCount: 1
 
 service:
   type: ClusterIP
@@ -20,43 +13,61 @@ env: []
 
 resources:
   requests:
-    cpu: 250m
-    memory: 256Mi
+    cpu: 200m
+    memory: 512Mi
   limits:
-    cpu: 750m
-    memory: 768Mi
-
-probes:
-  liveness:
-    path: /healthz
-    initialDelaySeconds: 20
-    periodSeconds: 10
-  readiness:
-    path: /healthz
-    initialDelaySeconds: 10
-    periodSeconds: 10
-  startup:
-    enabled: true
-    path: /healthz
-    failureThreshold: 30
-    periodSeconds: 5
+    cpu: 2000m
+    memory: 4Gi
 
 ingress:
-  enabled: true
-  className: istio
-  hosts:
-    - host: ai.example.com
-      paths:
-        - path: /
-          pathType: Prefix
-  tls:
-    enabled: true
-    secretName: ai-service-tls
-    clusterIssuer: letsencrypt-prod
+  enabled: false
 
 hpa:
   enabled: true
-  minReplicas: 2
-  maxReplicas: 8
+  minReplicas: 1
+  maxReplicas: 5
   targetCPUUtilizationPercentage: 70
-  targetMemoryUtilizationPercentage: 75
+  targetMemoryUtilizationPercentage: 80
+  targetGPUUtilizationPercentage: null
+
+networkPolicy:
+  enabled: true
+  allowNamespaces: []
+
+keda:
+  enabled: false
+  redisAddress: redis-master.redis.svc:6379
+  queueName: intelgraph
+  queueLength: 50
+
+istio:
+  enabled: true
+
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  portName: http
+
+pdb:
+  enabled: true
+  minAvailable: 1
+
+# Example GPU scheduling configuration
+# nodeSelector:
+#   accelerator: nvidia-tesla-k80
+# tolerations:
+#   - key: nvidia.com/gpu
+#     operator: Exists
+#     effect: NoSchedule
+# affinity:
+#   nodeAffinity:
+#     requiredDuringSchedulingIgnoredDuringExecution:
+#       nodeSelectorTerms:
+#         - matchExpressions:
+#             - key: accelerator
+#               operator: In
+#               values:
+#                 - nvidia-tesla-k80
+nodeSelector: {}
+tolerations: []
+affinity: {}
