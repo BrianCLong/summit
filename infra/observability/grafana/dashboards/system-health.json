@@ -1,0 +1,37 @@
+{
+  "title": "System Health Overview",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "API p99 latency",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job=\"intelgraph-api\"}[5m])) by (le))"
+        }
+      ],
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0}
+    },
+    {
+      "type": "stat",
+      "title": "API error rate",
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{job=\"intelgraph-api\",code=~\"5..\"}[5m])) / sum(rate(http_requests_total{job=\"intelgraph-api\"}[5m]))"
+        }
+      ],
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0}
+    },
+    {
+      "type": "timeseries",
+      "title": "Collector throughput",
+      "targets": [
+        {"expr": "sum(rate(otelcol_receiver_accepted_spans[5m]))"},
+        {"expr": "sum(rate(otelcol_receiver_refused_spans[5m]))"}
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4}
+    }
+  ]
+}

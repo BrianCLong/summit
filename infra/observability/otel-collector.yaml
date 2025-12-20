@@ -5,35 +5,79 @@ receivers:
       http:
 
 processors:
-  batch:
-    send_batch_size: 1000
-    timeout: 10s
   memory_limiter:
-    limit_mib: 256
-    spike_limit_mib: 64
+    limit_mib: 512
+    spike_limit_mib: 128
     check_interval: 5s
+  k8sattributes:
+    extract:
+      metadata: [k8s.pod.name, k8s.namespace.name, k8s.node.name, k8s.pod.uid, k8s.deployment.name]
+      labels:
+        - tag: mesh.istio.sidecar
+          key: sidecar.istio.io/inject
+    pod_association:
+      - sources: [pod_ip]
+      - sources: [resource_attribute: k8s.pod.ip]
+  attributes:
+    actions:
+      - key: correlation.id
+        from_context: http.request.header.x-correlation-id
+        action: insert
+      - key: correlation.id
+        from_attribute: trace_id
+        action: insert
+      - key: service.mesh
+        value: istio
+        action: insert
+  resource:
+    attributes:
+      - key: deployment.environment
+        value: production
+        action: upsert
+  batch:
+    send_batch_size: 1024
+    timeout: 10s
+
+connectors:
+  spanmetrics:
+    metrics_exporter: prometheus
 
 exporters:
   loki:
     endpoint: http://loki:3100/loki/api/v1/push
+    labels:
+      resource:
+        k8s_pod: k8s.pod.name
+        k8s_ns: k8s.namespace.name
+      attributes:
+        correlation_id: correlation.id
+        service: service.name
   tempo:
     endpoint: http://tempo:4317
+    tls:
+      insecure: true
   prometheus:
     endpoint: 0.0.0.0:8889
     resource_to_telemetry_conversion:
       enabled: true
+    enable_open_metrics: true
 
 service:
+  telemetry:
+    logs:
+      level: info
+    metrics:
+      address: 0.0.0.0:8888
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [memory_limiter, batch]
-      exporters: [tempo]
+      processors: [memory_limiter, k8sattributes, attributes, resource, batch]
+      exporters: [tempo, spanmetrics]
     metrics:
-      receivers: [otlp]
-      processors: [memory_limiter, batch]
+      receivers: [otlp, spanmetrics]
+      processors: [memory_limiter, k8sattributes, resource, batch]
       exporters: [prometheus]
     logs:
       receivers: [otlp]
-      processors: [memory_limiter, batch]
+      processors: [memory_limiter, k8sattributes, attributes, resource, batch]
       exporters: [loki]

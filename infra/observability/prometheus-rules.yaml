@@ -36,6 +36,15 @@ spec:
             summary: 'IntelGraph API CPU saturation is high'
             description: 'IntelGraph API CPU utilization is consistently above 80% for 10 minutes, indicating potential saturation.'
 
+        - alert: HpaThrashing
+          expr: changes(kube_horizontalpodautoscaler_status_current_replicas[15m]) > 5
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: 'HPA thrashing detected'
+            description: 'Horizontal Pod Autoscaler for {{ $labels.horizontalpodautoscaler }} is thrashing (scaling more than 5 times in 15 minutes).'
+
         - alert: CertExpirySoon
           expr: probe_ssl_earliest_cert_expiry_days{job="blackbox-exporter"} < 7
           for: 24h
@@ -45,11 +54,47 @@ spec:
             summary: 'SSL certificate for {{ $labels.instance }} expires soon'
             description: 'SSL certificate for {{ $labels.instance }} will expire in less than 7 days.'
 
-        - alert: HpaThrashing
-          expr: changes(kube_horizontalpodautoscaler_status_current_replicas[15m]) > 5
-          for: 5m
+        - alert: AgentFailuresElevated
+          expr: sum(rate(agent_failure_total[10m])) by (agent) / (sum(rate(agent_success_total[10m])) by (agent) + 0.0001) > 0.1
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: 'Agent failure rate exceeds 10%'
+            description: 'Agent {{ $labels.agent }} is failing more than 10% of runs over the last 10 minutes.'
+
+        - alert: AgentCostSpike
+          expr: sum(rate(agent_cost_usd[5m])) by (agent) > 5
+          for: 15m
           labels:
             severity: warning
           annotations:
-            summary: 'HPA thrashing detected'
-            description: 'Horizontal Pod Autoscaler for {{ $labels.horizontalpodautoscaler }} is thrashing (scaling more than 5 times in 15 minutes).'
+            summary: 'Agent cost spending spike detected'
+            description: 'Agent {{ $labels.agent }} is spending more than $5/min for 15 minutes.'
+
+        - alert: MeshErrorBudgetBurn
+          expr: (sum(rate(istio_requests_total{reporter="destination",response_code!~"2.."}[5m])) by (destination_service_name)) / (sum(rate(istio_requests_total{reporter="destination"}[5m])) by (destination_service_name)) > 0.02
+          for: 15m
+          labels:
+            severity: critical
+          annotations:
+            summary: 'Mesh error budget burn detected'
+            description: 'Destination service {{ $labels.destination_service_name }} is exceeding 2% error budget over 15 minutes.'
+
+        - alert: CollectorQueueBackpressure
+          expr: sum(otelcol_exporter_queue_size) by (exporter) > 10000
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: 'OpenTelemetry collector experiencing queue pressure'
+            description: 'Collector exporter queue for {{ $labels.exporter }} has more than 10k items for 10 minutes.'
+
+        - alert: AuditTrailIngestionStall
+          expr: rate(audit_events_ingested_total[10m]) < 1
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: 'Audit trail ingestion stalled'
+            description: 'Audit events ingestion is below 1 event per minute for 10 minutes; check pipeline health.'
