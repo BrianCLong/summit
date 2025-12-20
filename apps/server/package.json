@@ -21,7 +21,7 @@
     "graphql": "^16.12.0",
     "helmet": "^7.2.0",
     "ioredis": "^5.4.2",
-    "node-vault": "^1.2.2",
+    "node-vault": "^0.10.9",
     "rate-limit-redis": "^4.0.0",
     "uuid": "^13.0.0",
     "validator": "^13.12.0"

@@ -1,5 +1,12 @@
 chart-dirs:
   - helm
+  - charts
+  - infra/helm
+  - deploy/helm
+  - templates/golden-path-platform/helm
+  - v24_modules
+  - sprint-kits
+  - summit-company_extended/infra/helm
 chart-repos:
   - stable=https://charts.helm.sh/stable
 validate-maintainers: false

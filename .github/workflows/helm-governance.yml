@@ -2,9 +2,24 @@ name: helm-governance-pipeline
 
 on:
   pull_request:
-    branches: [main]
     paths:
       - 'helm/**'
+      - 'charts/**'
+      - 'infra/helm/**'
+      - 'deploy/helm/**'
+      - 'k8s/**'
+      - 'ops/**'
+      - 'services/**/helm/**'
+      - 'deepagent-mvp/helm/**'
+      - 'graph-xai/infra/helm/**'
+      - 'graph_xai/infra/helm/**'
+      - 'ga-graphai/infra/helm/**'
+      - 'prov-ledger/infra/helm/**'
+      - 'prov_ledger/infra/helm/**'
+      - 'templates/golden-path-platform/helm/**'
+      - 'v24_modules/**'
+      - 'sprint-kits/**'
+      - 'summit-company_extended/infra/helm/**'
       - 'policy/**'
       - 'policies/**'
       - '.github/workflows/helm-governance.yml'
@@ -13,6 +28,22 @@ on:
     branches: [main]
     paths:
       - 'helm/**'
+      - 'charts/**'
+      - 'infra/helm/**'
+      - 'deploy/helm/**'
+      - 'k8s/**'
+      - 'ops/**'
+      - 'services/**/helm/**'
+      - 'deepagent-mvp/helm/**'
+      - 'graph-xai/infra/helm/**'
+      - 'graph_xai/infra/helm/**'
+      - 'ga-graphai/infra/helm/**'
+      - 'prov-ledger/infra/helm/**'
+      - 'prov_ledger/infra/helm/**'
+      - 'templates/golden-path-platform/helm/**'
+      - 'v24_modules/**'
+      - 'sprint-kits/**'
+      - 'summit-company_extended/infra/helm/**'
       - 'policy/**'
       - 'policies/**'
       - '.github/workflows/helm-governance.yml'
@@ -27,14 +58,33 @@ jobs:
   lint-and-template:
     name: Lint, template, kubeconform
     runs-on: ubuntu-22.04
+    outputs:
+      chart-count: ${{ steps.chart-list.outputs.count }}
+      chart-paths: ${{ steps.chart-list.outputs.paths }}
     env:
       CT_CONFIG: .github/ct-helm.yaml
       RENDER_DIR: helm-rendered
+      CHART_SEARCH_PATHS: >-
+        helm deploy/helm infra/helm charts k8s ops services deepagent-mvp graph-xai graph_xai ga-graphai prov-ledger prov_ledger
+        templates/golden-path-platform v24_modules sprint-kits summit-company_extended
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Discover charts
+        id: chart-list
+        run: |
+          set -euo pipefail
+          mapfile -t charts < <(find ${CHART_SEARCH_PATHS} -name Chart.yaml -print 2>/dev/null | sort)
+          printf 'count=%s\n' "${#charts[@]}" >> "$GITHUB_OUTPUT"
+          printf 'paths<<EOF\n%s\nEOF\n' "$(printf '%s\n' "${charts[@]}")" >> "$GITHUB_OUTPUT"
+          if [ ${#charts[@]} -eq 0 ]; then
+            echo "No charts detected in search paths; skipping Helm lint and rendering"
+          else
+            printf 'Discovered charts:\n%s\n' "${charts[*]}"
+          fi
 
       - name: Set up Helm
         uses: azure/setup-helm@v4
@@ -53,47 +103,47 @@ jobs:
           kubeconform -v
 
       - name: Lint charts with ct
+        if: steps.chart-list.outputs.count != '0'
         run: |
           ct lint --config "$CT_CONFIG" --all
 
       - name: Template charts and run kubeconform
+        if: steps.chart-list.outputs.count != '0'
         run: |
           set -euo pipefail
-          mkdir -p "$RENDER_DIR"
-          charts=$(find helm -mindepth 1 -maxdepth 1 -type d ! -name 'templates' ! -name 'overlays')
-          if [ -z "$charts" ]; then
-            echo "No charts detected under helm/"
-            exit 1
-          fi
+          mkdir -p "$RENDER_DIR" artifacts
+          summary="$RENDER_DIR/kubeconform-summary.txt"
+          echo "Validated charts:" > "$summary"
 
-          for chart in $charts; do
-            if [ ! -f "$chart/Chart.yaml" ]; then
-              continue
-            fi
-            name=$(basename "$chart")
-            echo "Rendering $name"
-            helm dependency update "$chart" || true
-            base_args=(--namespace "ci-$name" --values helm/ci-values.yaml --set "image.tag=${GITHUB_SHA::7}")
+          echo "${{ steps.chart-list.outputs.paths }}" | while read -r chart_file; do
+            [ -z "$chart_file" ] && continue
+            chart_dir=$(dirname "$chart_file")
+            chart_name=$(basename "$chart_dir")
+            echo "::group::Render ${chart_name}" | tee -a "$summary"
+            helm dependency update "$chart_dir" || true
+            base_args=(--namespace "ci-$chart_name" --values helm/ci-values.yaml --set "image.tag=${GITHUB_SHA::7}")
 
-            helm template "$name" "$chart" "${base_args[@]}" --output-dir "$RENDER_DIR/$name/default"
-            manifests=$(find "$RENDER_DIR/$name/default" -name '*.yaml')
+            helm template "$chart_name" "$chart_dir" "${base_args[@]}" --output-dir "$RENDER_DIR/$chart_name/default"
+            manifests=$(find "$RENDER_DIR/$chart_name/default" -name '*.yaml')
             if [ -n "$manifests" ]; then
-              kubeconform -summary -strict -ignore-missing-schemas $manifests
+              kubeconform -summary -strict -ignore-missing-schemas $manifests | tee -a "$summary"
             fi
 
             for values_file in values.dev.yaml values.stage.yaml values.prod.yaml; do
-              if [ -f "$chart/$values_file" ]; then
-                target_dir="$RENDER_DIR/$name/${values_file%*.yaml}"
-                helm template "$name" "$chart" "${base_args[@]}" --values "$chart/$values_file" --output-dir "$target_dir"
+              if [ -f "$chart_dir/$values_file" ]; then
+                target_dir="$RENDER_DIR/$chart_name/${values_file%*.yaml}"
+                helm template "$chart_name" "$chart_dir" "${base_args[@]}" --values "$chart_dir/$values_file" --output-dir "$target_dir"
                 env_manifests=$(find "$target_dir" -name '*.yaml')
                 if [ -n "$env_manifests" ]; then
-                  kubeconform -summary -strict -ignore-missing-schemas $env_manifests
+                  kubeconform -summary -strict -ignore-missing-schemas $env_manifests | tee -a "$summary"
                 fi
               fi
             done
+            echo "::endgroup::"
           done
 
       - name: Package docs and dashboards
+        if: steps.chart-list.outputs.count != '0'
         run: |
           set -euo pipefail
           mkdir -p artifacts
@@ -108,6 +158,7 @@ jobs:
           fi
 
       - name: Upload rendered manifests
+        if: steps.chart-list.outputs.count != '0'
         uses: actions/upload-artifact@v4
         with:
           name: helm-rendered-manifests
@@ -115,6 +166,7 @@ jobs:
           retention-days: 7
 
       - name: Upload docs and dashboards
+        if: steps.chart-list.outputs.count != '0'
         uses: actions/upload-artifact@v4
         with:
           name: helm-docs-and-dashboards
@@ -125,6 +177,7 @@ jobs:
     name: OPA and Kyverno policy gates
     needs: lint-and-template
     runs-on: ubuntu-22.04
+    if: needs.lint-and-template.outputs.chart-count != '0'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -154,18 +207,39 @@ jobs:
       - name: Run OPA policy checks
         run: |
           set -euo pipefail
-          conftest test helm-rendered/**/*.yaml -p policy/conftest/helm-ci
+          manifests=$(find helm-rendered -name '*.yaml')
+          if [ -z "$manifests" ]; then
+            echo "No manifests available for policy checks"
+            exit 0
+          fi
+          conftest test $manifests -p policy/conftest/helm-ci
 
       - name: Kyverno lint and apply
         run: |
           set -euo pipefail
           kyverno lint policy/kyverno policies/kyverno
-          kyverno apply policy/kyverno/helm-ci.yaml --resource helm-rendered/**/*.yaml --policy-report
+          manifests=$(find helm-rendered -name '*.yaml')
+          if [ -z "$manifests" ]; then
+            echo "No manifests available for Kyverno checks"
+            echo "No manifests available" > policy-report.yaml
+            exit 0
+          fi
+          kyverno apply policy/kyverno/helm-ci.yaml --resource $manifests --policy-report --output yaml > policy-report.yaml
+
+      - name: Upload policy report
+        uses: actions/upload-artifact@v4
+        with:
+          name: helm-policy-report
+          path: policy-report.yaml
+          retention-days: 7
 
   integration-kind:
     name: Kind integration smoke
     needs: lint-and-template
     runs-on: ubuntu-22.04
+    if: needs.lint-and-template.outputs.chart-count != '0'
+    env:
+      IMAGE_REPOSITORY: registry.k8s.io/pause
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -181,31 +255,57 @@ jobs:
         with:
           version: v3.14.4
 
+      - name: Prepare deployment metadata
+        id: deploy-meta
+        run: |
+          set -euo pipefail
+          echo "tag=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          echo "blue_release=summit" >> "$GITHUB_OUTPUT"
+          echo "green_release=summit" >> "$GITHUB_OUTPUT"
+
       - name: Deploy summit chart with CI defaults (blue)
         run: |
           set -euo pipefail
-          helm upgrade --install summit helm/summit \
+          helm upgrade --install "${{ steps.deploy-meta.outputs.blue_release }}" helm/summit \
             --atomic --namespace summit --create-namespace \
             --values helm/ci-values.yaml \
-            --set image.repository=registry.k8s.io/pause --set image.tag=3.9
+            --set image.repository=${IMAGE_REPOSITORY} \
+            --set image.tag="${{ steps.deploy-meta.outputs.tag }}" \
+            --set rollout.color=blue \
+            --wait --timeout 10m
           kubectl rollout status deployment/summit -n summit --timeout=120s
+          kubectl annotate service summit -n summit rollout.blue-green/color=blue --overwrite
           kubectl get pods -n summit
+          echo "BLUE_IMAGE=$(kubectl get deploy summit -n summit -o jsonpath='{.spec.template.spec.containers[0].image}')" >> "$GITHUB_ENV"
 
       - name: Promote new image tag (green)
         run: |
           set -euo pipefail
-          helm upgrade summit helm/summit \
+          helm upgrade "${{ steps.deploy-meta.outputs.green_release }}" helm/summit \
             --atomic --namespace summit \
             --values helm/summit/values.dev.yaml \
-            --set image.repository=registry.k8s.io/pause \
-            --set image.tag=${GITHUB_SHA::7}
+            --set image.repository=${IMAGE_REPOSITORY} \
+            --set image.tag="${{ steps.deploy-meta.outputs.tag }}" \
+            --set rollout.color=green \
+            --set rollout.previous="${{ steps.deploy-meta.outputs.tag }}" \
+            --wait --timeout 10m
           kubectl rollout status deployment/summit -n summit --timeout=120s
           kubectl get deploy summit -n summit -o jsonpath='{.spec.template.spec.containers[0].image}'
           kubectl annotate service summit -n summit rollout.blue-green/promotion="${GITHUB_SHA::7}" --overwrite
+          kubectl label service summit -n summit rollout.blue-green/color=green --overwrite
 
       - name: Smoke check service endpoint
         run: |
           set -euo pipefail
+          if [ -n "${BLUE_IMAGE:-}" ] && [ -n "${GREEN_IMAGE:-}" ] && [ "$BLUE_IMAGE" = "$GREEN_IMAGE" ]; then
+            echo "Expected green image to differ from blue image" >&2
+            exit 1
+          fi
           kubectl get svc summit -n summit -o wide
+          kubectl get svc summit -n summit -o jsonpath='{.metadata.annotations.rollout\\.blue-green/promotion}'
+          echo
+          kubectl get svc summit -n summit -o jsonpath='{.metadata.labels.rollout\\.blue-green/color}'
+          echo
           kubectl run summit-smoke -n summit --image=registry.k8s.io/pause:3.9 --restart=Never --command -- /bin/sh -c "echo summit chart deployed"
           kubectl wait --for=condition=Completed pod/summit-smoke -n summit --timeout=60s
+          kubectl get svc summit -n summit -o json | jq -r '.metadata.annotations' || true

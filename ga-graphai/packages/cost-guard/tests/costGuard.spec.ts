@@ -215,6 +215,8 @@ describe('ResourceOptimizationEngine', () => {
     expect(decision.recommendedReplicas).toBeGreaterThan(3);
     expect(decision.telemetry.latencyPressure).toBeGreaterThan(1);
     expect(decision.kedaMetric.metricName).toBe('agent_queue_slo_pressure');
+    expect(decision.telemetry.sloBurnRate).toBeGreaterThan(1);
+    expect(decision.alerts.fastBurnRateQuery).toContain('agent_queue_slo_pressure');
   });
 
   it('scales down when cost pressure dominates and performance is healthy', () => {
@@ -238,5 +240,49 @@ describe('ResourceOptimizationEngine', () => {
     expect(decision.recommendedReplicas).toBeLessThan(10);
     expect(decision.telemetry.costPressure).toBeGreaterThan(1);
     expect(decision.telemetry.latencyPressure).toBeLessThan(1);
+    expect(decision.telemetry.costBurnRate).toBeGreaterThanOrEqual(
+      decision.telemetry.costPressure,
+    );
+  });
+
+  it('produces KEDA scaled object and alert config for queues', () => {
+    const engine = new ResourceOptimizationEngine();
+    const decision = engine.recommendQueueAutoscaling(
+      4,
+      {
+        queueName: 'agent-priority',
+        backlog: 120,
+        inflight: 14,
+        arrivalRatePerSecond: 4,
+        serviceRatePerSecondPerWorker: 1.1,
+        observedP95LatencyMs: 2100,
+        costPerJobUsd: 0.15,
+        spendRatePerMinuteUsd: 14,
+      },
+      {
+        ...DEFAULT_QUEUE_SLO,
+        targetP95Ms: 1300,
+        backlogTargetSeconds: 80,
+        latencyBurnThreshold: 1.1,
+        costBurnThreshold: 1.2,
+      },
+    );
+
+    const scaledObject = engine.buildKedaScaledObject(
+      'agent-priority',
+      'worker-agent',
+      'workloads',
+      decision,
+    );
+
+    expect(scaledObject.metadata.name).toBe('worker-agent-keda');
+    expect(scaledObject.spec.scaleTargetRef.name).toBe('worker-agent');
+    expect(scaledObject.spec.triggers).toHaveLength(2);
+    expect(scaledObject.spec.triggers[0].metadata.query).toContain(
+      'agent_queue_slo_pressure',
+    );
+    expect(decision.alerts.costAnomalyQuery).toContain(
+      'agent_queue_cost_pressure',
+    );
   });
 });

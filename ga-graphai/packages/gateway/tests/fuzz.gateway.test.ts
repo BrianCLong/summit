@@ -37,46 +37,15 @@ const basePropertySettings = Object.freeze({
   numRuns: 36,
   interruptAfterTimeLimit: 5500,
   markInterruptAsFailure: true,
-});
-
-const deterministicSettings = (seed: number) => ({ ...basePropertySettings, seed });
-
-const aiContextHeaders = fc.record({
-  tenant: fc.oneof(fc.constant('fuzz-tenant'), fc.string({ maxLength: 24 }), fc.constant('')),
-  purpose: fc.oneof(
-    fc.constantFrom(...allowedPurposes),
-    fc
-      .string({ maxLength: 24 })
-      .filter((candidate) => !allowedPurposes.has(candidate)),
-  ),
-  caseId: fc.option(fc.string({ maxLength: 18 }), { nil: undefined }),
-  environment: fc.option(fc.constantFrom('dev', 'staging', 'qa', 'prod'), { nil: undefined }),
-  retention: fc.option(fc.string({ maxLength: 24 }), { nil: undefined }),
-  allowPaid: fc.boolean(),
-});
-
-function applyHeaders(
-  builder: request.Test,
-  headers: fc.TypeOf<typeof aiContextHeaders>,
-): request.Test {
-  if (headers.tenant !== undefined) {
-    builder.set('x-tenant', headers.tenant);
-  }
-  if (headers.purpose !== undefined) {
-    builder.set('x-purpose', headers.purpose);
-  }
-  if (headers.caseId) {
-    builder.set('x-case', headers.caseId);
-  }
-  if (headers.environment) {
-    builder.set('x-env', headers.environment);
-  }
-  if (headers.retention) {
-    builder.set('x-retention', headers.retention);
-  }
-  builder.set('x-allow-paid', headers.allowPaid ? 'true' : 'false');
-  return builder;
-}
+  logger: (message: string) => {
+    if (process.env.CI) {
+      // Preserve deterministic reproduction details in CI logs.
+      // fast-check already shrinks on failure; this keeps the seed/path visible.
+      // eslint-disable-next-line no-console
+      console.log(`[fast-check] ${message}`);
+    }
+  },
+};
 
 describe('gateway fuzz safety', () => {
   const { app } = createApp({ environment: 'test' });
@@ -243,6 +212,59 @@ describe('gateway fuzz safety', () => {
         },
       ),
       deterministicSettings(202504),
+    );
+  });
+
+  it('keeps model listing params and headers bounded and sanitized under fuzzing', async () => {
+    await fc.assert(
+      fc.asyncProperty(
+        fc.record({
+          local: fc.option(fc.boolean(), { nil: undefined }),
+          modality: fc.oneof(
+            fc.stringOf(fc.constantFrom('a', 'b', 'c', '.', '/', '-'), {
+              maxLength: 12,
+            }),
+            fc.constant(undefined),
+          ),
+          family: fc.option(fc.string({ maxLength: 18 }), { nil: undefined }),
+          license: fc.option(fc.string({ maxLength: 14 }), { nil: undefined }),
+          purpose: fc.oneof(
+            fc.constantFrom(...allowedPurposes),
+            fc
+              .string({ maxLength: 24 })
+              .filter((candidate) => !allowedPurposes.has(candidate)),
+          ),
+          tenant: fc.string({ minLength: 1, maxLength: 24 }),
+        }),
+        async (sample) => {
+          const response = await request(app)
+            .get('/v1/models')
+            .query({
+              local:
+                sample.local === undefined ? undefined : sample.local ? 'true' : 'false',
+              modality: sample.modality ?? undefined,
+              family: sample.family ?? undefined,
+              license: sample.license ?? undefined,
+            })
+            .set('x-tenant', sample.tenant)
+            .set('x-purpose', sample.purpose);
+
+          expect(response.status).toBeLessThan(500);
+          if (!allowedPurposes.has(sample.purpose)) {
+            expect(response.status).toBe(403);
+            return;
+          }
+
+          expect(response.status).toBe(200);
+          expect(response.body).toHaveProperty('models');
+          expect(JSON.stringify(response.body)).not.toContain('..');
+        },
+      ),
+      {
+        ...propertySettings,
+        seed: 987123,
+        interruptAfterTimeLimit: 4000,
+      },
     );
   });
 
