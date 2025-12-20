@@ -16,10 +16,27 @@ import {
 } from '@mui/material';
 import Slide from '@mui/material/Slide';
 
+/**
+ * Transition component for the dialog.
+ */
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
+/**
+ * A modal component for previewing and committing decisions.
+ * It shows the proposed changes, policy check results, and allows applying the changes (dry-run or real).
+ *
+ * @param props - The component props.
+ * @param props.open - Whether the modal is open.
+ * @param props.onClose - Callback to close the modal.
+ * @param props.intent - The intent of the decision.
+ * @param props.scope - The scope of the decision (accounts, teams).
+ * @param props.proposal - The proposed changes.
+ * @param props.allowApply - Whether applying changes is allowed.
+ * @param props.onApplied - Callback when changes are applied.
+ * @returns The rendered DecisionPreviewModal component.
+ */
 export default function DecisionPreviewModal({
   open,
   onClose,

@@ -12,6 +12,13 @@ interface UserSocket extends Socket {
 
 let ioInstance: Server | null = null;
 
+/**
+ * Initializes the Socket.IO server for real-time collaboration.
+ * Sets up authentication, CORS, and namespaces.
+ *
+ * @param httpServer - The HTTP server instance to attach to.
+ * @returns The initialized Socket.IO server instance.
+ */
 export function initSocket(httpServer: any): Server {
   const io = new Server(httpServer, {
     cors: {
@@ -104,6 +111,11 @@ export function initSocket(httpServer: any): Server {
   return io;
 }
 
+/**
+ * Retrieves the initialized Socket.IO server instance.
+ *
+ * @returns The Socket.IO server or null if not initialized.
+ */
 export function getIO(): Server | null {
   return ioInstance;
 }

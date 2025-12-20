@@ -9,28 +9,58 @@ import {
   RetentionSchedule,
 } from './types.js';
 
+/**
+ * Repository for persisting data retention records.
+ * Maintains an in-memory cache and synchronizes with the database.
+ */
 export class DataRetentionRepository {
   private readonly pool: Pool;
   private readonly logger = pino({ name: 'data-retention-repository' });
   private readonly records = new Map<string, RetentionRecord>();
 
+  /**
+   * Initializes the repository.
+   * @param pool - The database connection pool.
+   */
   constructor(pool: Pool) {
     this.pool = pool;
   }
 
+  /**
+   * Retrieves all retention records currently in memory.
+   * @returns An array of RetentionRecords.
+   */
   getAllRecords(): RetentionRecord[] {
     return Array.from(this.records.values());
   }
 
+  /**
+   * Retrieves a specific retention record by dataset ID.
+   * @param datasetId - The ID of the dataset.
+   * @returns The RetentionRecord if found.
+   */
   getRecord(datasetId: string): RetentionRecord | undefined {
     return this.records.get(datasetId);
   }
 
+  /**
+   * Creates or updates a retention record.
+   * Updates both the in-memory cache and the persistent store.
+   *
+   * @param record - The record to upsert.
+   */
   async upsertRecord(record: RetentionRecord): Promise<void> {
     this.records.set(record.metadata.datasetId, record);
     await this.persistRecord(record);
   }
 
+  /**
+   * Updates the applied policy for a dataset.
+   *
+   * @param datasetId - The ID of the dataset.
+   * @param policy - The new policy to apply.
+   * @throws Error if the dataset is unknown.
+   */
   async updatePolicy(
     datasetId: string,
     policy: AppliedRetentionPolicy,
@@ -45,6 +75,12 @@ export class DataRetentionRepository {
     await this.persistRecord(record);
   }
 
+  /**
+   * Updates the metadata for a dataset.
+   *
+   * @param datasetId - The ID of the dataset.
+   * @param metadata - The new metadata.
+   */
   async updateMetadata(
     datasetId: string,
     metadata: DatasetMetadata,
@@ -59,6 +95,12 @@ export class DataRetentionRepository {
     await this.persistRecord(record);
   }
 
+  /**
+   * Sets or clears a legal hold on a dataset.
+   *
+   * @param datasetId - The ID of the dataset.
+   * @param legalHold - The legal hold configuration (or undefined to clear).
+   */
   async setLegalHold(datasetId: string, legalHold?: LegalHold): Promise<void> {
     const record = this.records.get(datasetId);
     if (!record) {
@@ -70,6 +112,12 @@ export class DataRetentionRepository {
     await this.persistRecord(record);
   }
 
+  /**
+   * Sets or clears the retention schedule for a dataset.
+   *
+   * @param datasetId - The ID of the dataset.
+   * @param schedule - The schedule configuration (or undefined to clear).
+   */
   async setSchedule(
     datasetId: string,
     schedule?: RetentionSchedule,
@@ -83,6 +131,12 @@ export class DataRetentionRepository {
     await this.persistRecord(record);
   }
 
+  /**
+   * Appends an archival event to the history of a dataset.
+   *
+   * @param datasetId - The ID of the dataset.
+   * @param workflow - The archival workflow event.
+   */
   async appendArchivalEvent(
     datasetId: string,
     workflow: ArchivalWorkflow,

@@ -18,10 +18,18 @@ import type {
 const cloneResponse = (response: DSARResponse): DSARResponse =>
   JSON.parse(JSON.stringify(response)) as DSARResponse;
 
+/**
+ * Orchestrates Data Subject Access Requests (DSAR) fulfillment across multiple connectors.
+ * Handles export, rectification, and deletion requests, generating cryptographic proofs and audit logs.
+ */
 export class DataSubjectFulfillmentEngine {
   private readonly connectors: Map<string, DSARConnector> = new Map();
   private readonly cache: Map<string, DSARResponse> = new Map();
 
+  /**
+   * Initializes the DSAR engine with options and connectors.
+   * @param options - Configuration including connectors, storage, signer, and identity verifier.
+   */
   constructor(private readonly options: DataSubjectFulfillmentOptions) {
     options.connectors.forEach((connector) => {
       if (this.connectors.has(connector.name)) {
@@ -31,6 +39,14 @@ export class DataSubjectFulfillmentEngine {
     });
   }
 
+  /**
+   * Executes a DSAR request.
+   * Verifies identity, checks for cached responses (idempotency), and delegates to specific handlers.
+   *
+   * @param request - The DSAR request payload.
+   * @returns A promise resolving to the DSAR response.
+   * @throws Error if identity verification fails or operation is unsupported.
+   */
   async execute(request: DSARRequest): Promise<DSARResponse> {
     const verification = await this.options.identityVerifier.verify(request);
     if (!verification.verified) {
@@ -254,6 +270,11 @@ export class DataSubjectFulfillmentEngine {
   }
 }
 
+/**
+ * Registers a connector with a DSAR engine instance.
+ * @param engine - The engine to register with.
+ * @param connector - The connector to register.
+ */
 export const registerConnector = (
   engine: DataSubjectFulfillmentEngine,
   connector: DSARConnector,

@@ -3,6 +3,17 @@ import fetch from 'node-fetch';
 import { Pool } from 'pg';
 const pg = new Pool({ connectionString: process.env.DATABASE_URL });
 
+/**
+ * Opens a new incident in the database and notifies external services (PagerDuty, OpsGenie, Slack).
+ *
+ * @param params - The incident details.
+ * @param params.runbook - The runbook associated with the incident.
+ * @param params.tenant - The tenant ID.
+ * @param params.severity - The severity level of the incident.
+ * @param params.reason - The reason for the incident.
+ * @param params.details - Additional details about the incident.
+ * @returns The ID of the newly created incident.
+ */
 export async function openIncident({
   runbook,
   tenant,
@@ -52,6 +63,12 @@ export async function openIncident({
   return id;
 }
 
+/**
+ * Closes an existing incident.
+ * Updates the incident status to 'CLOSED' and sets the closed_at timestamp.
+ *
+ * @param id - The ID of the incident to close.
+ */
 export async function closeIncident(id: string) {
   await pg.query(
     `UPDATE incidents SET status='CLOSED', closed_at=now() WHERE id=$1`,

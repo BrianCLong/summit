@@ -2,6 +2,15 @@ import crypto from 'crypto';
 import { promises as fs } from 'fs';
 import path from 'path';
 
+/**
+ * Captures a golden dataset (artifacts) for a run.
+ * Saves the artifacts and their SHA256 hash to a file.
+ *
+ * @param runId - The ID of the run.
+ * @param artifacts - The artifacts to capture.
+ * @param dir - The directory to save the golden file (default: 'goldens').
+ * @returns An object containing the file path and SHA hash.
+ */
 export async function captureGolden(
   runId: string,
   artifacts: Record<string, any>,
@@ -15,6 +24,16 @@ export async function captureGolden(
   return { file, sha };
 }
 
+/**
+ * Compares the actual artifacts of a run against a stored golden dataset.
+ * Supports numeric tolerances for fuzzy comparison.
+ *
+ * @param runId - The ID of the run.
+ * @param actual - The actual artifacts to compare.
+ * @param dir - The directory containing the golden file (default: 'goldens').
+ * @param tolerances - A map of property names to numeric tolerance values.
+ * @returns An object indicating success (ok) and a list of differences (diffs).
+ */
 export async function compareToGolden(
   runId: string,
   actual: Record<string, any>,

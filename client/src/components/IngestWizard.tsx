@@ -1,7 +1,16 @@
 import React, { useEffect, useState } from 'react';
 
+/**
+ * Represents a data connector.
+ */
 type Connector = { id: string; name: string };
 
+/**
+ * A wizard component for configuring and starting data ingestion jobs.
+ * Allows selecting a connector, configuring it via JSON or a form, validating the configuration (dry run), and monitoring progress.
+ *
+ * @returns The rendered IngestWizard component.
+ */
 export default function IngestWizard() {
   const api = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000';
   const [connectors, setConnectors] = useState<Connector[]>([]);

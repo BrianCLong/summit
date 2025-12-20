@@ -14,10 +14,20 @@ export interface ExperimentConfig {
   };
 }
 
+/**
+ * Manages A/B tests and feature experiments.
+ * Handles configuration loading, deterministic variant assignment, and exposure logging.
+ */
 export class ExperimentManager {
   private experiments: ExperimentConfig[] = [];
   private logPath: string;
 
+  /**
+   * Initializes the ExperimentManager.
+   *
+   * @param configPath - Path to the YAML experiment configuration file.
+   * @param logFile - Path to the exposure log file.
+   */
   constructor(
     private configPath = path.join(process.cwd(), 'config', 'experiments.yaml'),
     logFile = path.join(process.cwd(), 'experiment-exposures.log'),
@@ -32,6 +42,14 @@ export class ExperimentManager {
     this.experiments = parsed.experiments || [];
   }
 
+  /**
+   * Deterministically assigns a user to an experiment variant.
+   * Uses a consistent hash of the experiment ID and user ID.
+   *
+   * @param experimentId - The ID of the experiment.
+   * @param userId - The ID of the user.
+   * @returns The assigned variant name, or null if the experiment is not found.
+   */
   getVariant(experimentId: string, userId: string): string | null {
     const exp = this.experiments.find((e) => e.id === experimentId);
     if (!exp) return null;
@@ -48,6 +66,15 @@ export class ExperimentManager {
     return null;
   }
 
+  /**
+   * Logs an exposure event for an experiment.
+   * Records the assignment and any immediate metrics.
+   *
+   * @param experimentId - The experiment ID.
+   * @param userId - The user ID.
+   * @param variant - The assigned variant.
+   * @param metrics - Key-value pairs of relevant metrics at exposure time.
+   */
   logExposure(
     experimentId: string,
     userId: string,

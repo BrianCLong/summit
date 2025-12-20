@@ -1,5 +1,15 @@
 import CircuitBreaker from 'opossum';
 
+/**
+ * Wraps an asynchronous function with a circuit breaker.
+ *
+ * @template TArgs - The types of the arguments to the function.
+ * @template TRes - The return type of the function.
+ * @param fn - The asynchronous function to wrap.
+ * @param name - A name for the circuit breaker, used for logging.
+ * @param opts - Configuration options for the circuit breaker (timeout, error thresholds, etc.).
+ * @returns The configured CircuitBreaker instance.
+ */
 export function breaker<TArgs extends any[], TRes>(
   fn: (...args: TArgs) => Promise<TRes>,
   name: string,

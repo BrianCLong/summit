@@ -5,6 +5,14 @@ import {
   pickCheapestEligible,
 } from './conductor/scheduling/pools.js';
 
+/**
+ * Analyzes a runbook and provides recommendations for optimizing resource allocation.
+ * It suggests the cheapest eligible compute pools for each step in the runbook.
+ *
+ * @param params - The parameters for the advisor.
+ * @param params.runbookYaml - The runbook definition in YAML format.
+ * @returns An object containing the estimated savings and a list of recommendations.
+ */
 export async function advise({ runbookYaml }: { runbookYaml: string }) {
   const rb: any = YAML.parse(runbookYaml);
   const pools = await listPools();

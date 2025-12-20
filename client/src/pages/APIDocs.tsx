@@ -1,6 +1,13 @@
 import React, { useMemo } from 'react';
 import { Box, Typography } from '@mui/material';
 
+/**
+ * Page component that displays the API documentation.
+ * Embeds the OpenAPI documentation in an iframe.
+ * Handles adjusting the server origin for development environments (port 4000 vs 3000).
+ *
+ * @returns The rendered APIDocs page.
+ */
 export default function APIDocs() {
   const src = useMemo(() => {
     const origin = window.location.origin;

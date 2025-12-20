@@ -1,6 +1,15 @@
 import { Pool } from 'pg';
 const pg = new Pool({ connectionString: process.env.DATABASE_URL });
 
+/**
+ * Selects the best variant for a given runbook step using a multi-armed bandit strategy (Thompson Sampling).
+ *
+ * @param runbook - The ID of the runbook.
+ * @param stepId - The ID of the step within the runbook.
+ * @param variants - An array of variant objects, each having a `key`.
+ * @param rewardPrior - The prior alpha and beta parameters for the Beta distribution (default: { alpha: 1, beta: 1 }).
+ * @returns The key of the selected variant.
+ */
 export async function pickVariant(
   runbook: string,
   stepId: string,
@@ -33,6 +42,15 @@ export async function pickVariant(
   return best;
 }
 
+/**
+ * Updates the bandit state for a variant based on the received reward.
+ * Uses an upsert operation to initialize or update the alpha, beta, reward sum, and pull count.
+ *
+ * @param runbook - The ID of the runbook.
+ * @param stepId - The ID of the step.
+ * @param variantKey - The key of the variant to update.
+ * @param reward - The reward value (typically 0 or 1).
+ */
 export async function updateVariant(
   runbook: string,
   stepId: string,

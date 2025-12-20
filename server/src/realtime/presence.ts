@@ -18,6 +18,12 @@ function broadcast(workspaceId: string, socket: Socket) {
   socket.emit('presence:update', list);
 }
 
+/**
+ * Registers presence handlers for a socket connection.
+ * Tracks user presence (online/offline status) within a workspace and broadcasts updates.
+ *
+ * @param socket - The connected Socket.IO socket.
+ */
 export function registerPresenceHandlers(socket: Socket) {
   const user = (socket as any).user;
   const workspaceId = socket.handshake.auth?.workspaceId;

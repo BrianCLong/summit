@@ -46,14 +46,29 @@ interface EntityRow {
   created_by: string;
 }
 
+/**
+ * Repository for managing entities with dual-write consistency.
+ * Writes to PostgreSQL as the system of record and synchronizes to Neo4j for graph capabilities.
+ */
 export class EntityRepo {
+  /**
+   * Initializes the repository with database connections.
+   *
+   * @param pg - PostgreSQL connection pool.
+   * @param neo4j - Neo4j driver instance.
+   */
   constructor(
     private pg: Pool,
     private neo4j: Driver,
   ) {}
 
   /**
-   * Create new entity with dual-write to PG (canonical) + Neo4j (graph)
+   * Creates a new entity.
+   * Persists to PostgreSQL within a transaction, queues a sync event, and attempts a direct write to Neo4j.
+   *
+   * @param input - The entity data to create.
+   * @param userId - The ID of the user creating the entity.
+   * @returns The created entity.
    */
   async create(input: EntityInput, userId: string): Promise<Entity> {
     const id = uuidv4();
@@ -118,7 +133,11 @@ export class EntityRepo {
   }
 
   /**
-   * Update entity with dual-write
+   * Updates an existing entity.
+   * Modifies PostgreSQL and synchronizes changes to Neo4j.
+   *
+   * @param input - The update payload containing ID and fields to change.
+   * @returns The updated entity or null if not found.
    */
   async update(input: EntityUpdateInput): Promise<Entity | null> {
     const client = await this.pg.connect();
@@ -197,7 +216,11 @@ export class EntityRepo {
   }
 
   /**
-   * Delete entity with dual-write
+   * Deletes an entity by ID.
+   * Removes from PostgreSQL and queues a deletion for Neo4j.
+   *
+   * @param id - The entity ID.
+   * @returns True if an entity was deleted, false otherwise.
    */
   async delete(id: string): Promise<boolean> {
     const client = await this.pg.connect();
@@ -244,7 +267,11 @@ export class EntityRepo {
   }
 
   /**
-   * Find entity by ID
+   * Finds an entity by its ID.
+   *
+   * @param id - The entity ID.
+   * @param tenantId - Optional tenant ID for multi-tenant scoping.
+   * @returns The entity if found, otherwise null.
    */
   async findById(id: string, tenantId?: string): Promise<Entity | null> {
     const params = [id];
@@ -260,7 +287,10 @@ export class EntityRepo {
   }
 
   /**
-   * Search entities with filters
+   * Searches for entities based on criteria.
+   *
+   * @param criteria - Search filters (kind, props) and pagination options.
+   * @returns An array of matching entities.
    */
   async search({
     tenantId,
@@ -299,7 +329,12 @@ export class EntityRepo {
   }
 
   /**
-   * Batch load entities by IDs (for DataLoader)
+   * Batches entity retrieval by a list of IDs.
+   * Useful for GraphQL DataLoaders to avoid N+1 query problems.
+   *
+   * @param ids - List of entity IDs.
+   * @param tenantId - Optional tenant ID.
+   * @returns An array of entities or nulls corresponding to the input IDs.
    */
   async batchByIds(
     ids: readonly string[],
@@ -322,7 +357,8 @@ export class EntityRepo {
   }
 
   /**
-   * Upsert entity node in Neo4j (idempotent)
+   * Upserts an entity node into Neo4j.
+   * Used for syncing changes from PostgreSQL.
    */
   private async upsertNeo4jNode({
     id,
@@ -358,7 +394,7 @@ export class EntityRepo {
   }
 
   /**
-   * Delete entity node from Neo4j
+   * Deletes an entity node from Neo4j.
    */
   private async deleteNeo4jNode(id: string): Promise<void> {
     const session = this.neo4j.session();
@@ -377,7 +413,7 @@ export class EntityRepo {
   }
 
   /**
-   * Map database row to domain object
+   * Maps a raw database row to the Entity domain object.
    */
   private mapRow(row: EntityRow): Entity {
     return {

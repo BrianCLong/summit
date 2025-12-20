@@ -48,6 +48,14 @@ const traverse = (value: unknown, cb: TraverseCallback): void => {
   }
 };
 
+/**
+ * Applies a set of redaction rules to connector data.
+ *
+ * @param connector - The connector name (to filter rules).
+ * @param input - The data to redact.
+ * @param rules - The list of redaction rules.
+ * @returns An object containing the redacted data and a list of applied rules.
+ */
 export const applyConnectorRedactions = <T = unknown>(
   connector: string,
   input: T,
@@ -69,6 +77,15 @@ export const applyConnectorRedactions = <T = unknown>(
   return { data: working as T, applied };
 };
 
+/**
+ * Creates a redaction rule that masks specific fields in the data.
+ *
+ * @param connector - The connector name this rule applies to.
+ * @param fields - The list of field names to mask.
+ * @param mask - The mask string (default: '[REDACTED]').
+ * @param description - Description of the rule.
+ * @returns A RedactionRule object.
+ */
 export const createFieldMaskRule = (
   connector: string,
   fields: string[],

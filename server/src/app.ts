@@ -26,6 +26,12 @@ import { startTrustWorker } from './workers/trustScoreWorker.js';
 import { startRetentionWorker } from './workers/retentionWorker.js';
 import { cfg } from './config.js';
 
+/**
+ * Creates and configures the main Express application.
+ * Sets up middleware, routes, GraphQL server (Apollo), and background workers.
+ *
+ * @returns A promise that resolves to the configured Express application.
+ */
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);

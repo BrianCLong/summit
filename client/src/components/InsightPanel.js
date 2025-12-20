@@ -125,6 +125,14 @@ const mockApiCall = (endpoint, params) => {
   });
 };
 
+/**
+ * Component for displaying sentiment analysis results.
+ *
+ * @param props - The component props.
+ * @param props.sentiment - The sentiment data object.
+ * @param props.loading - Whether the sentiment data is loading.
+ * @returns The rendered SentimentDisplay component.
+ */
 const SentimentDisplay = ({ sentiment, loading }) => {
   if (loading) {
     return <Skeleton variant="rectangular" height={100} />;
@@ -218,6 +226,15 @@ const SentimentDisplay = ({ sentiment, loading }) => {
   );
 };
 
+/**
+ * Component for displaying predicted links.
+ *
+ * @param props - The component props.
+ * @param props.predictions - The array of link predictions.
+ * @param props.loading - Whether the predictions are loading.
+ * @param props.onLinkSelect - Callback when a link is selected.
+ * @returns The rendered LinkPredictions component.
+ */
 const LinkPredictions = ({ predictions, loading, onLinkSelect }) => {
   if (loading) {
     return <Skeleton variant="rectangular" height={150} />;
@@ -280,6 +297,15 @@ const LinkPredictions = ({ predictions, loading, onLinkSelect }) => {
   );
 };
 
+/**
+ * Component for displaying AI-generated insights and summaries.
+ *
+ * @param props - The component props.
+ * @param props.summary - The AI summary object.
+ * @param props.loading - Whether the summary is loading.
+ * @param props.onFeedback - Callback for user feedback on insights.
+ * @returns The rendered AISummary component.
+ */
 const AISummary = ({ summary, loading, onFeedback }) => {
   if (loading) {
     return <Skeleton variant="rectangular" height={200} />;
@@ -374,6 +400,16 @@ const AISummary = ({ summary, loading, onFeedback }) => {
   );
 };
 
+/**
+ * The main InsightPanel component.
+ * Displays AI-powered insights, sentiment analysis, and link predictions for a selected entity.
+ *
+ * @param props - The component props.
+ * @param props.selectedEntity - The currently selected entity.
+ * @param props.onClose - Callback to close the panel.
+ * @param props.onLinkSelect - Callback when a link is selected.
+ * @returns The rendered InsightPanel component.
+ */
 const InsightPanel = ({ selectedEntity, onClose, onLinkSelect }) => {
   const dispatch = useDispatch();
 
@@ -433,6 +469,13 @@ const InsightPanel = ({ selectedEntity, onClose, onLinkSelect }) => {
     }
   }, [selectedEntity]);
 
+  // Fix loading variable access
+  const loading = {
+    sentiment: loadingSentiment,
+    predictions: loadingPredictions,
+    summary: loadingSummary,
+  };
+
   const isLoading = loadingSentiment || loadingPredictions || loadingSummary;
   const error = errorSentiment || errorPredictions || errorSummary;
 
@@ -474,6 +517,11 @@ const InsightPanel = ({ selectedEntity, onClose, onLinkSelect }) => {
     } catch (error) {
       console.error('Error sending feedback:', error);
     }
+  };
+
+  const loadAllInsights = () => {
+    // Re-fetch logic would go here or by invalidating queries
+    console.log('Refreshing insights...');
   };
 
   const handleRefresh = () => {

@@ -1,9 +1,21 @@
 import React, { useMemo, useState } from 'react';
 
+/**
+ * Props for the ExportAuditBundleButton component.
+ * Can either provide an `incidentId` or an `investigationId`.
+ */
 type Props =
   | { incidentId: string; investigationId?: never }
   | { incidentId?: never; investigationId: string };
 
+/**
+ * A button component that triggers the download of an audit bundle.
+ * Supports exporting audit bundles for either an incident or an investigation.
+ * The export includes IDs, hashes, and metadata, excluding sensitive payloads.
+ *
+ * @param props - The component props.
+ * @returns The rendered ExportAuditBundleButton component.
+ */
 export default function ExportAuditBundleButton(props: Props) {
   const [loading, setLoading] = useState(false);
   const { href, label } = useMemo(() => {

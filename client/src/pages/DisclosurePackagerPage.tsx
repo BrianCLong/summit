@@ -36,6 +36,9 @@ import {
   sendDisclosureAnalyticsEvent,
 } from '../services/disclosures';
 
+/**
+ * Available artifact options for disclosure export.
+ */
 const artifactOptions: Array<{
   key: DisclosureArtifact;
   label: string;
@@ -80,6 +83,13 @@ const fromLocalInputValue = (value: string) => {
   return date.toISOString();
 };
 
+/**
+ * A page component for packaging and exporting disclosure bundles.
+ * Allows users to select artifacts, define timeframes, and generate immutable audit bundles.
+ * Monitors job status and provides download links upon completion.
+ *
+ * @returns The rendered DisclosurePackagerPage component.
+ */
 const DisclosurePackagerPage: React.FC = () => {
   const [tenantId, setTenantId] = useState('default');
   const [startTime, setStartTime] = useState(

@@ -12,10 +12,20 @@ interface GraphOperation {
   ts: number;
 }
 
+/**
+ * A simple Last-Write-Wins (LWW) CRDT for collaborative graph editing.
+ * Supports concurrent edits to nodes and edges by resolving conflicts using timestamps.
+ */
 class GraphCRDT {
   private nodes = new Map<string, { ts: number; data: any }>();
   private edges = new Map<string, { ts: number; data: any }>();
 
+  /**
+   * Applies an operation to the graph.
+   *
+   * @param op - The operation to apply (set or delete).
+   * @returns True if the operation was applied (i.e., it was newer), false otherwise.
+   */
   apply(op: GraphOperation): boolean {
     const store = op.kind === 'node' ? this.nodes : this.edges;
     const existing = store.get(op.id);
@@ -52,6 +62,12 @@ const pub = new Redis(redisOptions);
 const sub = pub.duplicate();
 let ioRef: Namespace | null = null;
 
+/**
+ * Initializes graph synchronization.
+ * Subscribes to Redis channels for graph operations and broadcasts updates to Socket.IO clients.
+ *
+ * @param ns - The Socket.IO namespace for graph events.
+ */
 export function initGraphSync(ns: Namespace) {
   ioRef = ns;
   sub.psubscribe('graph:op:*');
@@ -67,6 +83,12 @@ export function initGraphSync(ns: Namespace) {
   sub.on('error', (err) => logger.error({ err }, 'Redis sub error'));
 }
 
+/**
+ * Registers socket handlers for incoming graph operations from clients.
+ * Applies operations locally and publishes them to Redis for synchronization.
+ *
+ * @param socket - The connected Socket.IO socket.
+ */
 export function registerGraphHandlers(socket: Socket) {
   socket.on(
     'graph:op',

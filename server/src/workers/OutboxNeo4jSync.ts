@@ -20,10 +20,26 @@ interface OutboxEvent {
   last_error?: string;
 }
 
+/**
+ * Worker responsible for synchronizing data from the PostgreSQL Outbox table to Neo4j.
+ * This ensures eventual consistency between the relational and graph databases.
+ * It supports batching, retries, and backoff strategies.
+ */
 export class OutboxNeo4jSync {
   private isRunning = false;
   private intervalId?: NodeJS.Timeout;
 
+  /**
+   * Initializes the OutboxNeo4jSync worker.
+   *
+   * @param pg - PostgreSQL connection pool.
+   * @param neo4j - Neo4j driver instance.
+   * @param config - Configuration options for the worker.
+   * @param config.batchSize - Number of events to process in a single batch (default: 100).
+   * @param config.intervalMs - Polling interval in milliseconds (default: 2000).
+   * @param config.maxRetries - Maximum number of retry attempts for failed events (default: 10).
+   * @param config.backoffMultiplier - Multiplier for exponential backoff (default: 2).
+   */
   constructor(
     private pg: Pool,
     private neo4j: Driver,
@@ -44,7 +60,8 @@ export class OutboxNeo4jSync {
   }
 
   /**
-   * Start the outbox worker
+   * Starts the outbox processing worker.
+   * It sets up a periodic interval to process batches of events.
    */
   start(): void {
     if (this.isRunning) {
@@ -63,7 +80,8 @@ export class OutboxNeo4jSync {
   }
 
   /**
-   * Stop the outbox worker
+   * Stops the outbox processing worker.
+   * Clears the processing interval.
    */
   stop(): void {
     if (!this.isRunning) {
@@ -81,7 +99,8 @@ export class OutboxNeo4jSync {
   }
 
   /**
-   * Process a single batch of outbox events
+   * Processes a single batch of outbox events.
+   * Fetches unprocessed events from the database, locking them for processing.
    */
   async processOutboxBatch(): Promise<void> {
     const client = await this.pg.connect();
@@ -115,7 +134,11 @@ export class OutboxNeo4jSync {
   }
 
   /**
-   * Process a single outbox event
+   * Processes a single outbox event by delegating to the appropriate handler based on topic.
+   * Updates the event status in the database upon success or failure.
+   *
+   * @param client - The database client.
+   * @param event - The outbox event to process.
    */
   private async processEvent(client: any, event: OutboxEvent): Promise<void> {
     const eventLogger = workerLogger.child({
@@ -187,7 +210,10 @@ export class OutboxNeo4jSync {
   }
 
   /**
-   * Handle entity upsert event
+   * Handles 'entity.upsert' events.
+   * Fetches the latest entity data from PG and updates/creates the corresponding node in Neo4j.
+   *
+   * @param payload - The event payload containing the entity ID.
    */
   private async handleEntityUpsert(payload: any): Promise<void> {
     const { id, tenantId } = payload;
@@ -234,7 +260,10 @@ export class OutboxNeo4jSync {
   }
 
   /**
-   * Handle entity delete event
+   * Handles 'entity.delete' events.
+   * Removes the corresponding node from Neo4j.
+   *
+   * @param payload - The event payload containing the entity ID.
    */
   private async handleEntityDelete(payload: any): Promise<void> {
     const { id } = payload;
@@ -254,7 +283,11 @@ export class OutboxNeo4jSync {
   }
 
   /**
-   * Handle relationship upsert event
+   * Handles 'relationship.upsert' events.
+   * Fetches relationship data from PG and updates/creates the relationship in Neo4j.
+   * Ensures source and destination nodes exist before creating the relationship.
+   *
+   * @param payload - The event payload containing the relationship ID.
    */
   private async handleRelationshipUpsert(payload: any): Promise<void> {
     const { id, tenantId } = payload;
@@ -310,7 +343,10 @@ export class OutboxNeo4jSync {
   }
 
   /**
-   * Handle relationship delete event
+   * Handles 'relationship.delete' events.
+   * Removes the relationship from Neo4j.
+   *
+   * @param payload - The event payload containing the relationship ID.
    */
   private async handleRelationshipDelete(payload: any): Promise<void> {
     const { id } = payload;
@@ -330,7 +366,9 @@ export class OutboxNeo4jSync {
   }
 
   /**
-   * Get outbox statistics
+   * Retrieves statistics about the outbox queue.
+   *
+   * @returns An object containing pending, failed, and processed counts.
    */
   async getStats(): Promise<{
     pending: number;
@@ -354,7 +392,10 @@ export class OutboxNeo4jSync {
   }
 
   /**
-   * Clean up old processed events
+   * Cleans up processed events older than a specified number of days.
+   *
+   * @param olderThanDays - The age threshold in days (default: 7).
+   * @returns The number of deleted rows.
    */
   async cleanup(olderThanDays = 7): Promise<number> {
     const { rowCount } = await this.pg.query(

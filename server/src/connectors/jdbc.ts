@@ -131,18 +131,33 @@ export interface SchemaInfo {
   }>;
 }
 
+/**
+ * Connector for JDBC-compliant databases (PostgreSQL and MySQL).
+ * Handles connection pooling, query execution, schema introspection, and metrics collection.
+ */
 export class JDBCConnector extends EventEmitter {
   private config: JDBCConfig;
   private tenantId: string;
   private pool: Pool | MySQLPool | null = null;
   private connected = false;
 
+  /**
+   * Initializes the JDBC connector.
+   *
+   * @param tenantId - The tenant identifier.
+   * @param config - Configuration for the database connection.
+   */
   constructor(tenantId: string, config: JDBCConfig) {
     super();
     this.tenantId = tenantId;
     this.config = config;
   }
 
+  /**
+   * Establishes a connection pool to the database.
+   *
+   * @returns Promise resolving when connected.
+   */
   async connect(): Promise<void> {
     return tracer.startActiveSpan('jdbc.connect', async (span: any) => {
       span.setAttributes?.({
@@ -237,6 +252,14 @@ export class JDBCConnector extends EventEmitter {
     }
   }
 
+  /**
+   * Executes a SQL query against the connected database.
+   *
+   * @param sql - The SQL statement to execute.
+   * @param params - Array of parameters for the query.
+   * @param options - Query execution options (timeout, isolation level, etc.).
+   * @returns Promise resolving to the query result.
+   */
   async query(
     sql: string,
     params: any[] = [],
@@ -395,6 +418,14 @@ export class JDBCConnector extends EventEmitter {
     }
   }
 
+  /**
+   * Executes multiple queries in a batch.
+   *
+   * @param sqls - Array of SQL statements.
+   * @param paramSets - Array of parameter arrays corresponding to each SQL statement.
+   * @param options - Query execution options.
+   * @returns Promise resolving to batch execution results.
+   */
   async batchExecute(
     sqls: string[],
     paramSets: any[][],
@@ -484,6 +515,12 @@ export class JDBCConnector extends EventEmitter {
     });
   }
 
+  /**
+   * Retrieves schema information (tables, columns, indexes).
+   *
+   * @param schemaName - The schema or database name to inspect.
+   * @returns Promise resolving to the schema information.
+   */
   async getSchemaInfo(schemaName?: string): Promise<SchemaInfo> {
     return tracer.startActiveSpan('jdbc.get_schema_info', async (span: any) => {
       span.setAttributes?.({
@@ -689,6 +726,11 @@ export class JDBCConnector extends EventEmitter {
     return typeMap[type] || `unknown(${type})`;
   }
 
+  /**
+   * Tests the database connection validity and latency.
+   *
+   * @returns Object containing connection status and latency.
+   */
   async testConnection(): Promise<{
     connected: boolean;
     latency?: number;
@@ -716,6 +758,9 @@ export class JDBCConnector extends EventEmitter {
     }
   }
 
+  /**
+   * Disconnects the database client pool.
+   */
   async disconnect(): Promise<void> {
     if (this.pool) {
       if (this.config.type === 'postgresql') {

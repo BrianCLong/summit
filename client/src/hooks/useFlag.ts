@@ -1,5 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 
+/**
+ * Configuration interface for a feature flag.
+ */
 interface FlagConfig {
   [key: string]: {
     enabled: boolean;
@@ -13,7 +16,9 @@ interface FlagConfig {
   };
 }
 
-// Default feature flags configuration
+/**
+ * Default feature flags configuration.
+ */
 const DEFAULT_FLAGS: FlagConfig = {
   'realtime-presence': {
     enabled: true,
@@ -89,6 +94,9 @@ const DEFAULT_FLAGS: FlagConfig = {
   },
 };
 
+/**
+ * Context for feature flag evaluation.
+ */
 interface UserContext {
   userId?: string;
   tenantId?: string;
@@ -97,7 +105,11 @@ interface UserContext {
 }
 
 /**
- * Feature flag hook with env/tenant/role fallback
+ * Feature flag hook with env/tenant/role fallback.
+ *
+ * @param flagKey - The key of the feature flag to check.
+ * @param context - The user context for conditional evaluation.
+ * @returns `true` if the feature is enabled, `false` otherwise.
  */
 export function useFlag(flagKey: string, context?: UserContext): boolean {
   const [dynamicFlags, setDynamicFlags] = useState<FlagConfig>({});
@@ -169,7 +181,10 @@ export function useFlag(flagKey: string, context?: UserContext): boolean {
 }
 
 /**
- * Hook to get all available flags with their status
+ * Hook to get all available flags with their status.
+ *
+ * @param context - The user context for conditional evaluation.
+ * @returns A record where keys are flag names and values are booleans indicating enabled status.
  */
 export function useFlags(context?: UserContext): Record<string, boolean> {
   const [dynamicFlags] = useState<FlagConfig>({});
@@ -187,9 +202,17 @@ export function useFlags(context?: UserContext): Record<string, boolean> {
 }
 
 /**
- * Hook for updating feature flags (admin use)
+ * Hook for updating feature flags (admin use).
+ *
+ * @returns An object containing the `updateFlag` function.
  */
 export function useFlagUpdater() {
+  /**
+   * Updates a feature flag configuration.
+   *
+   * @param flagKey - The key of the flag to update.
+   * @param config - The new configuration properties to merge.
+   */
   const updateFlag = (flagKey: string, config: Partial<FlagConfig[string]>) => {
     const storedFlags = localStorage.getItem('feature-flags');
     let flags: FlagConfig = {};
@@ -212,7 +235,12 @@ export function useFlagUpdater() {
   return { updateFlag };
 }
 
-// Simple hash function for consistent bucketing
+/**
+ * Simple hash function for consistent bucketing.
+ *
+ * @param str - The string to hash.
+ * @returns A 32-bit integer hash.
+ */
 function hashString(str: string): number {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {

@@ -9,8 +9,8 @@ import { useEffect } from 'react';
 // } from '../generated/graphql.js';
 
 /**
- * Hook to prefetch critical dashboard data on route enter
- * Eliminates "panel pop-in" by warming the cache
+ * Hook to prefetch critical dashboard data on route enter.
+ * Eliminates "panel pop-in" by warming the cache.
  */
 export function useDashboardPrefetch() {
   // TODO: Re-enable when GraphQL schema is available
@@ -23,7 +23,9 @@ export function useDashboardPrefetch() {
 }
 
 /**
- * Hook to prefetch graph workbench data for a specific investigation
+ * Hook to prefetch graph workbench data for a specific investigation.
+ *
+ * @param investigationId - The ID of the investigation to prefetch data for.
  */
 export function useGraphWorkbenchPrefetch(investigationId?: string) {
   // TODO: Re-enable when GraphQL schema is available
@@ -37,7 +39,7 @@ export function useGraphWorkbenchPrefetch(investigationId?: string) {
 }
 
 /**
- * Hook for intelligent cache warming based on user behavior
+ * Hook for intelligent cache warming based on user behavior.
  */
 export function useIntelligentPrefetch() {
   // TODO: Re-enable when GraphQL schema is available

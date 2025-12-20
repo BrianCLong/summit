@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import $ from 'jquery';
 
+/**
+ * Represents a candidate suggestion from the AI.
+ */
 interface Candidate {
   id: string;
   type: string;
@@ -10,6 +13,14 @@ interface Candidate {
   explain: Record<string, unknown>;
 }
 
+/**
+ * A component for reviewing and providing feedback on AI-generated insights (candidates).
+ * Displays a list of candidates and allows the user to approve or decline them with a reason.
+ *
+ * @param props - The component props.
+ * @param props.runId - The ID of the AI run to fetch candidates for.
+ * @returns The rendered InsightStudio component.
+ */
 export default function InsightStudio({ runId }: { runId: string }) {
   const [cands, setCands] = useState<Candidate[]>([]);
   const [sel, setSel] = useState<Candidate | null>(null);

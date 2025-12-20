@@ -125,10 +125,16 @@ export const TokenCountSchema = z
   .nonnegative('Token count cannot be negative')
   .max(2000000, 'Token count too high (max 2M tokens)');
 
-// Business rule validators
+/**
+ * Validator for enforcing business rules logic, such as entity limits, permissions, and status transitions.
+ */
 export class BusinessRuleValidator {
   /**
-   * Validates entity creation against business rules
+   * Validates entity creation against business rules like max limits and restricted kinds.
+   *
+   * @param entity - The entity object to validate.
+   * @param context - The execution context containing user and limits info.
+   * @returns An object with valid status and any error messages.
    */
   static validateEntityCreation(
     entity: any,
@@ -168,7 +174,11 @@ export class BusinessRuleValidator {
   }
 
   /**
-   * Validates relationship creation against business rules
+   * Validates relationship creation, preventing circular dependencies or unauthorized high-confidence links.
+   *
+   * @param relationship - The relationship object.
+   * @param context - The execution context.
+   * @returns Validation result.
    */
   static validateRelationshipCreation(
     relationship: any,
@@ -201,7 +211,12 @@ export class BusinessRuleValidator {
   }
 
   /**
-   * Validates investigation operations
+   * Validates investigation operations like status updates and limits.
+   *
+   * @param investigation - The investigation object.
+   * @param operation - The operation type ('create', 'update').
+   * @param context - The execution context.
+   * @returns Validation result.
    */
   static validateInvestigationOperation(
     investigation: any,
@@ -239,7 +254,11 @@ export class BusinessRuleValidator {
   }
 
   /**
-   * Validates token usage against budgets and limits
+   * Validates token usage against configured budgets.
+   *
+   * @param tokens - The number of tokens to be consumed.
+   * @param context - The context containing usage stats and budgets.
+   * @returns Validation result.
    */
   static validateTokenUsage(
     tokens: number,
@@ -271,7 +290,12 @@ export class BusinessRuleValidator {
   }
 
   /**
-   * Validates bulk operations
+   * Validates bulk operations for size limits and rate limiting.
+   *
+   * @param items - The items being processed in bulk.
+   * @param operation - The operation type.
+   * @param context - The execution context.
+   * @returns Validation result.
    */
   static validateBulkOperation(
     items: any[],
@@ -310,12 +334,20 @@ export class BusinessRuleValidator {
   }
 }
 
-// Rate limiting validators
+/**
+ * Validator for managing operation rate limits.
+ */
 export class RateLimitValidator {
   private static operations: Map<string, number[]> = new Map();
 
   /**
-   * Check rate limit for a specific operation
+   * Checks if an operation is allowed under the rate limit.
+   * Uses a sliding window algorithm.
+   *
+   * @param key - Unique identifier for the rate limit bucket (e.g., user ID or API key).
+   * @param maxOperations - Maximum allowed operations in the window.
+   * @param windowMs - Time window in milliseconds.
+   * @returns Object indicating allowed status and reset time.
    */
   static checkRateLimit(
     key: string,
@@ -345,7 +377,11 @@ export class RateLimitValidator {
   }
 
   /**
-   * Get rate limit status
+   * Retrieves the current status of a rate limit bucket.
+   *
+   * @param key - The rate limit key.
+   * @param windowMs - The time window.
+   * @returns Stats about current usage.
    */
   static getRateLimitStatus(key: string, windowMs: number) {
     const now = Date.now();
@@ -363,10 +399,15 @@ export class RateLimitValidator {
   }
 }
 
-// Security validators
+/**
+ * Validator for security concerns like injection attacks and permissions.
+ */
 export class SecurityValidator {
   /**
-   * Validate input for potential security issues
+   * Scans input for potential security threats like SQL injection, Cypher injection, or XSS.
+   *
+   * @param input - The input data to validate.
+   * @returns Validation result with any detected threats.
    */
   static validateInput(input: any): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
@@ -416,7 +457,14 @@ export class SecurityValidator {
   }
 
   /**
-   * Validate user permissions for operation
+   * Validates that a user has the necessary permissions for an operation.
+   * Enforces tenant isolation.
+   *
+   * @param user - The user object containing permissions and tenant ID.
+   * @param operation - The operation being performed.
+   * @param resource - The resource being accessed.
+   * @param context - Optional context for tenant checks.
+   * @returns Validation result.
    */
   static validatePermissions(
     user: any,

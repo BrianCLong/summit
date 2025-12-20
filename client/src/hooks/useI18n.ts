@@ -1,5 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 
+/**
+ * Supported locales (ISO 639-1 + ISO 3166-1 alpha-2).
+ */
 export type Locale =
   | 'en-US' // English (United States)
   | 'en-GB' // English (United Kingdom)
@@ -32,11 +35,17 @@ export type Locale =
   | 'al-AL' // Albanian (Albania)
   | 'me-ME'; // Montenegrin (Montenegro)
 
+/**
+ * Interface for localization messages.
+ * Can be nested to support namespaced keys (e.g., "common.error").
+ */
 interface Messages {
   [key: string]: string | Messages;
 }
 
-// Base English messages
+/**
+ * Base English messages.
+ */
 const EN_MESSAGES: Messages = {
   common: {
     loading: 'Loading...',
@@ -107,7 +116,9 @@ const EN_MESSAGES: Messages = {
   },
 };
 
-// Locale configurations
+/**
+ * Locale configurations.
+ */
 const LOCALE_CONFIGS: Record<
   Locale,
   {
@@ -300,7 +311,9 @@ const LOCALE_CONFIGS: Record<
 };
 
 /**
- * i18n hook with NATO locale support
+ * i18n hook with NATO locale support.
+ *
+ * @returns An object containing locale state, translation function (t), and formatting utilities.
  */
 export function useI18n() {
   const [locale, setLocale] = useState<Locale>(() => {
@@ -328,6 +341,13 @@ export function useI18n() {
   }, [locale]);
 
   const t = useMemo(() => {
+    /**
+     * Translates a key to the current locale.
+     *
+     * @param key - The translation key (e.g., "common.success").
+     * @param params - Optional parameters for interpolation.
+     * @returns The translated string, or the key if not found.
+     */
     return (key: string, params?: Record<string, any>): string => {
       const keys = key.split('.');
       let value: any = messages;
@@ -354,6 +374,12 @@ export function useI18n() {
 
   const formatDate = useMemo(() => {
     const config = LOCALE_CONFIGS[locale];
+    /**
+     * Formats a date according to the current locale.
+     *
+     * @param date - The date to format (Date object or string).
+     * @returns The formatted date string.
+     */
     return (date: Date | string): string => {
       const d = typeof date === 'string' ? new Date(date) : date;
       return d.toLocaleDateString(locale, {
@@ -366,12 +392,25 @@ export function useI18n() {
 
   const formatNumber = useMemo(() => {
     const config = LOCALE_CONFIGS[locale];
+    /**
+     * Formats a number according to the current locale.
+     *
+     * @param num - The number to format.
+     * @returns The formatted number string.
+     */
     return (num: number): string => {
       return num.toLocaleString(locale, config.numberFormat);
     };
   }, [locale]);
 
   const formatCurrency = useMemo(() => {
+    /**
+     * Formats a currency amount according to the current locale.
+     *
+     * @param amount - The amount to format.
+     * @param currency - The currency code (default: 'EUR').
+     * @returns The formatted currency string.
+     */
     return (amount: number, currency = 'EUR'): string => {
       return amount.toLocaleString(locale, {
         style: 'currency',

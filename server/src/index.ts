@@ -18,6 +18,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logger: pino.Logger = pino();
 
+/**
+ * Starts the application server.
+ * Initializes the database connections, WebSocket server, GraphQL server, and other services.
+ * Handles graceful shutdown.
+ */
 const startServer = async () => {
   // Optional Kafka consumer import - only when AI services enabled
   let startKafkaConsumer: any = null;

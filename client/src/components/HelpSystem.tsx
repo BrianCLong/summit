@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import DOMPurify from 'dompurify';
 
+/**
+ * Represents a help topic.
+ */
 interface HelpTopic {
   id: string;
   title: string;
@@ -9,12 +12,23 @@ interface HelpTopic {
   keywords: string[];
 }
 
+/**
+ * Props for the HelpSystem component.
+ */
 interface HelpSystemProps {
   isVisible: boolean;
   onClose: () => void;
   initialTopic?: string;
 }
 
+/**
+ * A comprehensive help system component that displays documentation topics.
+ * Supports searching, categorization, and keyboard shortcuts.
+ * Content is rendered as simple markdown-like text.
+ *
+ * @param props - The component props.
+ * @returns The rendered HelpSystem component.
+ */
 const HelpSystem: React.FC<HelpSystemProps> = ({
   isVisible,
   onClose,
@@ -357,7 +371,7 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
         IntelGraph includes advanced enterprise features for large-scale intelligence operations.
 
         ## Collaboration (Alt+1)
-        - **Real-time Workspace**: Live cursors, annotations, and shared editing
+        - **Real-time Collaboration**: Live cursors, annotations, and shared editing
         - **Team Presence**: See who's online and what they're working on
         - **Workspace Sharing**: Share investigations with team members
         - **Activity Feed**: Track all team activities and changes
@@ -577,7 +591,12 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
   );
 };
 
-// Hook to easily trigger help system
+/**
+ * Hook providing access to the Help System.
+ * Returns functions to show/hide help and a HelpComponent to render in the app tree.
+ *
+ * @returns An object containing { isVisible, showHelp, hideHelp, HelpComponent }.
+ */
 export const useHelpSystem = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [initialTopic, setInitialTopic] = useState<string | undefined>();

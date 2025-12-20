@@ -1,5 +1,15 @@
 import crypto from 'crypto';
 
+/**
+ * Verifies a Stripe webhook signature.
+ * Checks if the payload signature matches the provided header using the secret.
+ *
+ * @param payload - The raw webhook payload.
+ * @param header - The `stripe-signature` header value.
+ * @param secret - The webhook signing secret.
+ * @returns An object containing the timestamp and a validity flag.
+ * @throws Error if the signature is invalid.
+ */
 export function verifyStripeSig(
   payload: string,
   header: string,
@@ -16,6 +26,18 @@ export function verifyStripeSig(
   return { ts: Number(t), ok: true };
 }
 
+/**
+ * Handles a Stripe webhook event.
+ * Processes payment success and refund events to update orders, entitlements, and transparency logs.
+ *
+ * @param evt - The parsed Stripe event object.
+ * @param deps - Dependencies for order, entitlement, and transparency management.
+ * @param deps.orders - Service for managing orders.
+ * @param deps.entitlements - Service for managing entitlements.
+ * @param deps.transparency - Service for appending transparency logs.
+ * @param deps.idempotency - Optional set for idempotency checks.
+ * @returns A result object indicating if the event was handled or skipped.
+ */
 export async function handleWebhook(
   evt: any,
   deps: {

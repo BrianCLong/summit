@@ -31,6 +31,9 @@ import {
   Refresh,
 } from '@mui/icons-material';
 
+/**
+ * Represents an MCP server registration.
+ */
 type Server = {
   id: string;
   name: string;
@@ -39,6 +42,12 @@ type Server = {
   tags: string[];
 };
 
+/**
+ * Page component for managing the registry of Model Context Protocol (MCP) servers.
+ * Allows viewing, adding, and deleting MCP servers.
+ *
+ * @returns The rendered MCPRegistry component.
+ */
 export default function MCPRegistry() {
   const [servers, setServers] = useState<Server[]>([]);
   const [loading, setLoading] = useState(false);

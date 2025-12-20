@@ -166,6 +166,10 @@ const AuditEventSchema = z.object({
   complianceFrameworks: z.array(z.string()),
 });
 
+/**
+ * Advanced Audit System responsible for immutable logging of system events.
+ * Provides features for compliance reporting, forensic analysis, and tamper-evident logging.
+ */
 export class AdvancedAuditSystem extends EventEmitter {
   private db: Pool;
   private redis: Redis;
@@ -184,6 +188,15 @@ export class AdvancedAuditSystem extends EventEmitter {
   private eventBuffer: AuditEvent[] = [];
   private flushInterval: NodeJS.Timeout;
 
+  /**
+   * Initializes the AdvancedAuditSystem.
+   *
+   * @param db - PostgreSQL pool for persistent storage.
+   * @param redis - Redis client for real-time alerting and caching.
+   * @param logger - Logger instance.
+   * @param signingKey - Key used for signing audit logs (integrity).
+   * @param encryptionKey - Key used for encrypting sensitive audit data (confidentiality).
+   */
   constructor(
     db: Pool,
     redis: Redis,
@@ -223,7 +236,12 @@ export class AdvancedAuditSystem extends EventEmitter {
   }
 
   /**
-   * Record an audit event
+   * Records an audit event.
+   * Validates, enriches, hashes, signs, and buffers the event for storage.
+   *
+   * @param eventData - The partial event data to record.
+   * @returns The ID of the recorded event.
+   * @throws Error if event validation fails.
    */
   async recordEvent(eventData: Partial<AuditEvent>): Promise<string> {
     try {
@@ -296,7 +314,10 @@ export class AdvancedAuditSystem extends EventEmitter {
   }
 
   /**
-   * Query audit events with advanced filtering
+   * Queries stored audit events based on filters.
+   *
+   * @param query - The filter criteria (time range, types, actors, etc.).
+   * @returns A list of matching audit events.
    */
   async queryEvents(query: AuditQuery): Promise<AuditEvent[]> {
     try {
@@ -381,7 +402,12 @@ export class AdvancedAuditSystem extends EventEmitter {
   }
 
   /**
-   * Generate compliance report
+   * Generates a compliance report for a specific framework and time period.
+   *
+   * @param framework - The compliance framework (e.g., GDPR, SOC2).
+   * @param startDate - Start date of the report period.
+   * @param endDate - End date of the report period.
+   * @returns A structured compliance report.
    */
   async generateComplianceReport(
     framework: ComplianceFramework,
@@ -453,7 +479,11 @@ export class AdvancedAuditSystem extends EventEmitter {
   }
 
   /**
-   * Perform forensic analysis on a correlation ID
+   * Performs forensic analysis on events related to a specific correlation ID.
+   * Reconstructs timelines, identifies actors, and detects anomalies.
+   *
+   * @param correlationId - The correlation ID to analyze.
+   * @returns A forensic analysis report.
    */
   async performForensicAnalysis(
     correlationId: string,
@@ -559,7 +589,12 @@ export class AdvancedAuditSystem extends EventEmitter {
   }
 
   /**
-   * Verify audit trail integrity
+   * Verifies the cryptographic integrity of the audit trail for a given period.
+   * Checks hash chains and signatures to detect tampering.
+   *
+   * @param startDate - Start date for verification.
+   * @param endDate - End date for verification.
+   * @returns Validation results including any invalid events.
    */
   async verifyIntegrity(
     startDate?: Date,

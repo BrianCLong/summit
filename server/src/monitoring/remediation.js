@@ -6,10 +6,24 @@ const COOLDOWN_MS = 5 * 60 * 1000;
 const lastExecution = new Map();
 const registry = new Map();
 
+/**
+ * Generates a cache key for rate limiting remediation actions.
+ *
+ * @param service - The name of the service.
+ * @param action - The name of the remediation action.
+ * @returns A string key.
+ */
 function getCooldownKey(service, action) {
   return `${service}:${action}`;
 }
 
+/**
+ * Registers a remediation handler for a specific service.
+ *
+ * @param service - The service name to target (e.g., 'database').
+ * @param actionName - A unique name for the remediation action.
+ * @param handler - The async function to execute when remediation is triggered.
+ */
 export function registerRemediationHandler(service, actionName, handler) {
   const key = service.toLowerCase();
   if (!registry.has(key)) {
@@ -19,6 +33,14 @@ export function registerRemediationHandler(service, actionName, handler) {
   registry.get(key).push({ name: actionName, execute: handler });
 }
 
+/**
+ * Executes a remediation action and tracks its success/failure metrics.
+ *
+ * @param service - The service name.
+ * @param actionName - The action name.
+ * @param action - The action function.
+ * @param context - Contextual data passed to the action.
+ */
 async function executeWithMetrics(service, actionName, action, context) {
   const metricLabels = { service, action: actionName, result: 'success' };
   try {
@@ -42,6 +64,12 @@ async function executeWithMetrics(service, actionName, action, context) {
   }
 }
 
+/**
+ * Evaluates the health status of services and triggers registered remediation handlers for failing checks.
+ * Honors a cooldown period to prevent flapping.
+ *
+ * @param healthStatus - The health status object containing checks for various services.
+ */
 export async function evaluateHealthForRemediation(healthStatus) {
   if (!healthStatus || healthStatus.status === 'healthy') {
     return;

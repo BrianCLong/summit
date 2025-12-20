@@ -22,6 +22,13 @@ const OPTIMIZE_WARGAME_MUTATION = gql`
   }
 `;
 
+/**
+ * A component for optimizing wargame scenarios based on simulation logs.
+ * Allows users to input simulation logs in JSON format, execute a GraphQL mutation,
+ * and visualize the optimization results using D3.js.
+ *
+ * @returns The rendered WargameOptimizer component.
+ */
 const WargameOptimizer: React.FC = () => {
   const [logsData, setLogsData] = useState('');
   const [optimizeWargame, { data, loading, error }] = useMutation(

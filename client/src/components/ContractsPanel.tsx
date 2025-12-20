@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import $ from 'jquery';
+
+/**
+ * A panel that displays the current service level contract details.
+ * Shows area, intent, and budget metrics (latency and error rate).
+ *
+ * @returns The rendered ContractsPanel component.
+ */
 export default function ContractsPanel() {
   const [c, setC] = useState<any | null>(null);
   useEffect(() => {

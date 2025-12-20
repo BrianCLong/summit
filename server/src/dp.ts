@@ -1,3 +1,6 @@
+/**
+ * Configuration for differential privacy mechanisms.
+ */
 export type DpConfig = {
   epsilon: number;
   delta?: number;
@@ -16,6 +19,13 @@ function randomNormal(mu = 0, sigma = 1) {
   );
 }
 
+/**
+ * Generates random noise for differential privacy.
+ * Supports Laplace and Gaussian mechanisms.
+ *
+ * @param cfg - The differential privacy configuration.
+ * @returns The generated noise value.
+ */
 export function dpNoise(cfg: DpConfig) {
   if (cfg.mechanism === 'laplace') {
     const b = cfg.sensitivity / cfg.epsilon;
@@ -27,6 +37,13 @@ export function dpNoise(cfg: DpConfig) {
   return randomNormal(0, sigma);
 }
 
+/**
+ * Applies differential privacy noise to a count.
+ *
+ * @param count - The original count.
+ * @param cfg - The differential privacy configuration.
+ * @returns The noisy count.
+ */
 export function applyDp(count: number, cfg: DpConfig) {
   return count + dpNoise(cfg);
 }

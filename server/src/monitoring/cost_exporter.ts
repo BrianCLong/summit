@@ -15,6 +15,13 @@ const R = {
   egr: parseFloat(process.env.RATE_EGRESS_GB_USD || '0.09'),
 };
 
+/**
+ * Starts a periodic job to export cost metrics to Prometheus.
+ * It aggregates usage data (CPU, GPU, memory, egress) from the database since the last watermark
+ * and updates Prometheus counters with the calculated cost in USD.
+ *
+ * @param intervalMs - The interval in milliseconds at which to run the export job (default: 60000ms).
+ */
 export function startCostExporter(intervalMs = 60000) {
   setInterval(async () => {
     const {

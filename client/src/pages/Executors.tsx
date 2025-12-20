@@ -14,6 +14,9 @@ import {
   ListItemText,
 } from '@mui/material';
 
+/**
+ * Represents an executor node.
+ */
 type Exec = {
   id: string;
   name: string;
@@ -23,6 +26,12 @@ type Exec = {
   status: string;
 };
 
+/**
+ * A page component for managing executors (compute pools).
+ * Allows viewing existing executors and registering new ones.
+ *
+ * @returns The rendered ExecutorsPage component.
+ */
 export default function ExecutorsPage() {
   const [list, setList] = useState<Exec[]>([]);
   const [name, setName] = useState('pool-1');

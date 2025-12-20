@@ -11,6 +11,12 @@ const ANALYZE_SENTIMENT_VOLATILITY_MUTATION = gql`
   }
 `;
 
+/**
+ * A component for analyzing sentiment volatility based on JSON input.
+ * Allows users to input signal data, execute a GraphQL mutation, and visualize the results using D3.js.
+ *
+ * @returns The rendered SentimentVolatility component.
+ */
 const SentimentVolatility: React.FC = () => {
   const [signalsData, setSignalsData] = useState('');
   const [analyzeSentimentVolatility, { data, loading, error }] = useMutation(

@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import $ from 'jquery';
+
+/**
+ * A panel to display metrics for the OCI Artifact Bus.
+ * Allows filtering of artifact metrics by text.
+ *
+ * @returns The rendered ArtifactBusPanel component.
+ */
 export default function ArtifactBusPanel() {
   const [rows, setRows] = useState<any[]>([]);
   useEffect(() => {

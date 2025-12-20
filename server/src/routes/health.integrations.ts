@@ -1,5 +1,11 @@
 import { Router } from 'express';
 
+/**
+ * Creates an Express router for checking the health of external integrations.
+ * Checks connectivity and authentication for GitHub, Jira, and Maestro GraphQL endpoints.
+ *
+ * @returns An Express Router with a `/health/integrations` GET endpoint.
+ */
 export function healthIntegrationsRouter() {
   const r = Router();
 

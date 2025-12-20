@@ -34,6 +34,10 @@ interface EmbeddingRecord {
   updated_at: Date;
 }
 
+/**
+ * Worker responsible for processing entity embeddings.
+ * It uses a queue to handle embedding generation and upserting into a PostgreSQL database with vector support.
+ */
 export class EmbeddingUpsertWorker {
   private worker: Worker | null = null;
   private queue: Queue | null = null;
@@ -47,6 +51,10 @@ export class EmbeddingUpsertWorker {
     retryAttempts: number;
   };
 
+  /**
+   * Initializes the EmbeddingUpsertWorker.
+   * Sets up database pools, services, and configuration from environment variables.
+   */
   constructor() {
     this.postgres = getPostgresPool();
     this.embeddingService = new EmbeddingService();
@@ -61,7 +69,8 @@ export class EmbeddingUpsertWorker {
   }
 
   /**
-   * Start the embedding upsert worker
+   * Starts the worker and initializes the queue.
+   * It sets up event listeners and ensures the database schema exists.
    */
   async start(): Promise<void> {
     try {
@@ -130,7 +139,7 @@ export class EmbeddingUpsertWorker {
   }
 
   /**
-   * Stop the worker gracefully
+   * Gracefully stops the worker, closing connections and queues.
    */
   async stop(): Promise<void> {
     try {
@@ -146,7 +155,9 @@ export class EmbeddingUpsertWorker {
   }
 
   /**
-   * Add entity embedding job to queue
+   * Adds a new job to the queue for processing an entity embedding.
+   *
+   * @param data - The job data containing entity details.
    */
   async addEntityEmbeddingJob(data: EntityEmbeddingJobData): Promise<void> {
     if (!this.queue) {
@@ -180,7 +191,10 @@ export class EmbeddingUpsertWorker {
   }
 
   /**
-   * Process individual embedding job
+   * Processes a single embedding job from the queue.
+   * Generates the embedding and upserts it into the database.
+   *
+   * @param job - The job instance to process.
    */
   private async processEmbeddingJob(
     job: Job<EntityEmbeddingJobData>,
@@ -251,7 +265,10 @@ export class EmbeddingUpsertWorker {
   }
 
   /**
-   * Upsert embedding to PostgreSQL with pgvector
+   * Upserts an embedding record into the PostgreSQL database.
+   * Uses pgvector format for storing the embedding vector.
+   *
+   * @param record - The embedding record to upsert.
    */
   private async upsertEmbedding(record: EmbeddingRecord): Promise<void> {
     const client = await this.postgres.connect();
@@ -292,7 +309,9 @@ export class EmbeddingUpsertWorker {
   }
 
   /**
-   * Delete embedding from database
+   * Deletes an embedding record from the database.
+   *
+   * @param entityId - The ID of the entity whose embedding should be deleted.
    */
   private async deleteEmbedding(entityId: string): Promise<void> {
     const client = await this.postgres.connect();
@@ -309,7 +328,8 @@ export class EmbeddingUpsertWorker {
   }
 
   /**
-   * Ensure HNSW index exists for fast similarity search
+   * Ensures that the HNSW index for vector similarity search exists.
+   * Also creates the table and other necessary indexes if they don't exist.
    */
   private async ensureHNSWIndex(): Promise<void> {
     const client = await this.postgres.connect();
@@ -362,7 +382,9 @@ export class EmbeddingUpsertWorker {
   }
 
   /**
-   * Get worker statistics
+   * Retrieves current statistics about the worker and its queue.
+   *
+   * @returns An object containing queue counts and worker health status.
    */
   async getStats(): Promise<{
     active: number;
@@ -416,7 +438,10 @@ export class EmbeddingUpsertWorker {
   }
 
   /**
-   * Bulk process existing entities (for backfilling)
+   * Initiates a backfill process for missing embeddings.
+   * Fetches entities without embeddings and queues them for processing.
+   *
+   * @param investigationId - Optional investigation ID to filter the backfill.
    */
   async backfillEmbeddings(investigationId?: string): Promise<void> {
     logger.info('Starting embedding backfill', { investigationId });

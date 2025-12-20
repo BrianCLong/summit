@@ -9,6 +9,16 @@ interface ConflictBannerProps {
   onDismiss?: () => void;
 }
 
+/**
+ * Displays a prominent warning banner when a data conflict is detected.
+ * Provides options to refresh content or dismiss the warning.
+ *
+ * @param props - The component props.
+ * @param props.visible - Whether the banner is visible.
+ * @param props.message - The conflict message to display.
+ * @param props.onRefresh - Callback function to refresh content.
+ * @param props.onDismiss - Optional callback to dismiss the banner.
+ */
 export function ConflictBanner({
   visible,
   message = 'This content has been updated by another user. Your changes may conflict.',

@@ -18,6 +18,9 @@ const NOTIFICATION_SUBSCRIPTION = gql`
   }
 `;
 
+/**
+ * Represents a system notification.
+ */
 interface Notification {
   id: string;
   type:
@@ -36,12 +39,22 @@ interface Notification {
   expiresAt?: string;
 }
 
+/**
+ * Props for the NotificationSystem component.
+ */
 interface NotificationSystemProps {
   position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
   maxNotifications?: number;
   autoHideDuration?: number;
 }
 
+/**
+ * A notification system component that displays real-time notifications.
+ * It subscribes to GraphQL notification updates and displays toast notifications.
+ *
+ * @param props - The component props.
+ * @returns The rendered NotificationSystem component.
+ */
 function NotificationSystem({
   position = 'top-right',
   maxNotifications = 5,

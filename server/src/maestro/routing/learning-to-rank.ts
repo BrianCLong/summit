@@ -63,18 +63,29 @@ interface TrainingExample {
   timestamp: Date;
 }
 
+/**
+ * A router implementation that uses a Learning-to-Rank approach to select the best model
+ * for a given query based on features like complexity, cost, and urgency.
+ * It also includes fairness metrics to ensure diversity in model selection.
+ */
 export class LearningToRankRouter {
   private models: Map<string, ModelCandidate> = new Map();
   private trainingData: TrainingExample[] = [];
   private weights: Map<string, number> = new Map();
   private fairnessTracker: Map<string, number> = new Map();
 
+  /**
+   * Initializes the router, loads weights, models, and training data.
+   */
   constructor() {
     this.initializeWeights();
     this.loadModels();
     this.loadTrainingData();
   }
 
+  /**
+   * Initializes the feature weights with default values.
+   */
   private initializeWeights() {
     // Initial feature weights (will be learned over time)
     this.weights.set('complexity', 0.25);
@@ -84,6 +95,13 @@ export class LearningToRankRouter {
     this.weights.set('context', 0.1);
   }
 
+  /**
+   * Routes a query to the most appropriate model based on its features and fairness constraints.
+   *
+   * @param features - The features of the query (complexity, urgency, etc.).
+   * @param tenantId - The ID of the tenant making the request.
+   * @returns A RouteDecision object containing the selected model and explanation.
+   */
   async routeQuery(
     features: QueryFeatures,
     tenantId: string,
@@ -147,6 +165,13 @@ export class LearningToRankRouter {
     }
   }
 
+  /**
+   * Calculates a score for a model based on the query features and current weights.
+   *
+   * @param model - The model candidate to score.
+   * @param features - The features of the query.
+   * @returns A score between 0 and 1.
+   */
   private scoreModel(model: ModelCandidate, features: QueryFeatures): number {
     let score = 0;
 
@@ -185,6 +210,13 @@ export class LearningToRankRouter {
     return Math.max(0, Math.min(1, score)); // Clamp to 0-1
   }
 
+  /**
+   * Calculates how well a model's capabilities fit the query complexity.
+   *
+   * @param model - The model candidate.
+   * @param complexity - The complexity score of the query.
+   * @returns A fit score between 0 and 1.
+   */
   private getComplexityFit(model: ModelCandidate, complexity: number): number {
     // Simple heuristic: match model capability to task complexity
     const modelCapability = model.qualityScore; // Assume quality correlates with capability
@@ -201,6 +233,13 @@ export class LearningToRankRouter {
     }
   }
 
+  /**
+   * Calculates a bonus score if the model supports the required domains.
+   *
+   * @param model - The model candidate.
+   * @param domains - The list of domains involved in the query.
+   * @returns A bonus score.
+   */
   private getDomainBonus(model: ModelCandidate, domains: string[]): number {
     let bonus = 0;
     for (const domain of domains) {
@@ -211,6 +250,13 @@ export class LearningToRankRouter {
     return Math.min(bonus, 0.3); // Cap at 30% bonus
   }
 
+  /**
+   * Generates a human-readable explanation for the score assigned to a model.
+   *
+   * @param model - The model candidate.
+   * @param features - The features of the query.
+   * @returns A string explanation.
+   */
   private explainScore(model: ModelCandidate, features: QueryFeatures): string {
     const factors: string[] = [];
 
@@ -235,6 +281,14 @@ export class LearningToRankRouter {
       : 'Balanced selection based on overall fit';
   }
 
+  /**
+   * Adjusts model scores based on fairness criteria to ensure diversity and representation.
+   *
+   * @param scoredCandidates - The list of scored model candidates.
+   * @param tenantId - The tenant ID.
+   * @param features - The query features.
+   * @returns The list of candidates with adjusted scores.
+   */
   private async applyFairnessAdjustments(
     scoredCandidates: Array<{
       model: ModelCandidate;
@@ -281,6 +335,12 @@ export class LearningToRankRouter {
     });
   }
 
+  /**
+   * Calculates fairness metrics for the tenant's recent model selections.
+   *
+   * @param tenantId - The tenant ID.
+   * @returns A FairnessMetrics object.
+   */
   private async calculateFairnessMetrics(
     tenantId: string,
   ): Promise<FairnessMetrics> {
@@ -342,6 +402,14 @@ export class LearningToRankRouter {
     };
   }
 
+  /**
+   * Generates an explanation panel detailing why a model was selected.
+   *
+   * @param selected - The selected model and its details.
+   * @param alternatives - The top alternative models.
+   * @param features - The query features.
+   * @returns An ExplanationPanel object.
+   */
   private generateExplanationPanel(
     selected: { model: ModelCandidate; score: number; reasoning: string },
     alternatives: Array<{
@@ -409,6 +477,13 @@ export class LearningToRankRouter {
     };
   }
 
+  /**
+   * Compares two models and returns a description of the tradeoffs.
+   *
+   * @param selected - The selected model.
+   * @param alternative - The alternative model.
+   * @returns A string describing the tradeoffs.
+   */
   private compareModels(
     selected: ModelCandidate,
     alternative: ModelCandidate,
@@ -438,12 +513,25 @@ export class LearningToRankRouter {
       : 'Similar performance profile';
   }
 
+  /**
+   * Updates the internal tracking of model selection counts for fairness calculations.
+   *
+   * @param modelId - The selected model ID.
+   * @param tenantId - The tenant ID.
+   */
   private updateFairnessTracking(modelId: string, tenantId: string): void {
     const key = `${tenantId}:${modelId}`;
     const current = this.fairnessTracker.get(key) || 0;
     this.fairnessTracker.set(key, current + 1);
   }
 
+  /**
+   * Logs a routing decision to the database for future analysis and training.
+   *
+   * @param modelId - The selected model ID.
+   * @param features - The query features.
+   * @param tenantId - The tenant ID.
+   */
   private async logDecision(
     modelId: string,
     features: QueryFeatures,
@@ -462,6 +550,13 @@ export class LearningToRankRouter {
     }
   }
 
+  /**
+   * Retrieves recent model selections for a tenant.
+   *
+   * @param tenantId - The tenant ID.
+   * @param limit - The maximum number of records to retrieve.
+   * @returns An array of selection objects with provider and model names.
+   */
   private async getRecentSelections(
     tenantId: string,
     limit: number,
@@ -488,6 +583,11 @@ export class LearningToRankRouter {
     }
   }
 
+  /**
+   * Returns a list of unique providers from the loaded models.
+   *
+   * @returns An array of provider names.
+   */
   private getUniqueProviders(): string[] {
     const providers = new Set<string>();
     for (const model of this.models.values()) {
@@ -496,6 +596,9 @@ export class LearningToRankRouter {
     return Array.from(providers);
   }
 
+  /**
+   * Loads model definitions into the router.
+   */
   private async loadModels(): Promise<void> {
     // Initialize with some example models
     const models: ModelCandidate[] = [
@@ -542,12 +645,20 @@ export class LearningToRankRouter {
     }
   }
 
+  /**
+   * Loads initial training data.
+   */
   private async loadTrainingData(): Promise<void> {
     // In production, this would load from database
     // For now, we'll start with empty training data
     this.trainingData = [];
   }
 
+  /**
+   * Updates the model with feedback from a routing decision.
+   *
+   * @param feedback - The training example containing the decision and its outcome.
+   */
   async trainFromFeedback(feedback: TrainingExample): Promise<void> {
     this.trainingData.push(feedback);
 
@@ -567,6 +678,12 @@ export class LearningToRankRouter {
     await this.saveWeights();
   }
 
+  /**
+   * Adjusts feature weights based on feedback.
+   *
+   * @param features - The features involved in the decision.
+   * @param factor - The factor to adjust weights by.
+   */
   private adjustWeights(features: QueryFeatures, factor: number): void {
     // Adjust weights based on which features were emphasized
     if (features.costSensitivity > 0.7) {
@@ -594,6 +711,9 @@ export class LearningToRankRouter {
     }
   }
 
+  /**
+   * Saves the current weights to the database.
+   */
   private async saveWeights(): Promise<void> {
     try {
       const pool = getPostgresPool();

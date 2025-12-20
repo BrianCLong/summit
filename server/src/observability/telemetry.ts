@@ -5,7 +5,12 @@ const SERVICE_NAME = process.env.SERVICE_NAME || 'intelgraph-server';
 const SERVICE_VERSION = process.env.SERVICE_VERSION || '1.0.0';
 const DEPLOYMENT_ENVIRONMENT = process.env.NODE_ENV || 'development';
 
-// No-op telemetry initializer
+/**
+ * Initializes telemetry services (tracing, metrics).
+ * Currently a no-op as telemetry is disabled/mocked in this environment.
+ *
+ * @returns An object with start and shutdown methods.
+ */
 export function initializeTelemetry(): { start: () => Promise<void>; shutdown: () => Promise<void> } {
   logger.info('Telemetry disabled (no-op).');
   return {
@@ -125,6 +130,14 @@ export const tracer = {
   }),
 };
 
+/**
+ * Creates a new telemetry span and executes the provided function within its context.
+ *
+ * @param _name - The name of the span.
+ * @param fn - The function to execute.
+ * @param _attributes - Optional attributes to add to the span.
+ * @returns The result of the executed function.
+ */
 export function createSpan<T>(
   _name: string,
   fn: (span: any) => Promise<T> | T,
@@ -293,13 +306,27 @@ class Neo4jSlowQueryKiller implements SlowQueryKiller {
 
 export const slowQueryKiller = new Neo4jSlowQueryKiller();
 
-// Express middleware for request tracing
+/**
+ * Express middleware for request tracing.
+ * Currently a no-op.
+ *
+ * @returns A middleware function.
+ */
 export function tracingMiddleware() { return (_req: any, _res: any, next: any) => next(); }
 
-// Utility to add custom attributes to current span
+/**
+ * Adds custom attributes to the current active span.
+ * Currently a no-op.
+ *
+ * @param _attributes - The attributes to add.
+ */
 export function addSpanAttributes(_attributes: Record<string, string | number | boolean>): void { /* no-op */ }
 
-// Health check for observability services
+/**
+ * Performs a health check on observability services.
+ *
+ * @returns A promise resolving to the health status of metrics, tracing, and cost tracking.
+ */
 export async function checkObservabilityHealth(): Promise<{
   metrics: boolean;
   tracing: boolean;

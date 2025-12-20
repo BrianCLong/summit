@@ -22,6 +22,10 @@ const clone = <T>(value: T): T => {
 const cloneRows = (rows: PostgresRow[]): PostgresRow[] =>
   rows.map((row) => ({ ...row, data: clone(row.data) }));
 
+/**
+ * In-memory mock for a PostgreSQL connector.
+ * Simulates database operations for DSAR testing and local development.
+ */
 export class InMemoryPostgresConnector implements DSARConnector<PostgresRow[]> {
   public readonly name = 'postgres';
   private rows: PostgresRow[];
@@ -116,6 +120,10 @@ const cloneDocuments = (
 ): ElasticsearchDocument[] =>
   documents.map((doc) => ({ ...doc, body: clone(doc.body) }));
 
+/**
+ * In-memory mock for an Elasticsearch connector.
+ * Simulates search index operations for DSAR testing.
+ */
 export class InMemoryElasticsearchConnector
   implements DSARConnector<ElasticsearchDocument[]>
 {
@@ -198,6 +206,10 @@ export class InMemoryElasticsearchConnector
   }
 }
 
+/**
+ * In-memory mock for Kafka event logging.
+ * Stores published events in an array for verification.
+ */
 export class InMemoryKafkaEventLog implements KafkaEventLog {
   private events: Record<string, unknown>[] = [];
 
@@ -213,6 +225,10 @@ export class InMemoryKafkaEventLog implements KafkaEventLog {
   }
 }
 
+/**
+ * In-memory mock for S3 object storage.
+ * Stores objects in a map using keys.
+ */
 export class InMemoryS3Storage implements ExportStorage {
   private readonly bucket: Map<string, string> = new Map();
 

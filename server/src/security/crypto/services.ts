@@ -3,12 +3,39 @@ import fetch from 'node-fetch';
 import { writeAudit } from '../../utils/audit.js';
 import type { CryptoAuditEvent, JsonObject, KeyVersion } from './types.js';
 
+/**
+ * Interface for a Hardware Security Module (HSM) or equivalent service.
+ * Handles signing operations and public key export.
+ */
 export interface HardwareSecurityModule {
+  /**
+   * Signs the data using the private key associated with the provided key version.
+   * @param data - The data to sign.
+   * @param key - The key version containing the signing material.
+   * @returns The signature as a buffer.
+   */
   sign(data: Buffer, key: KeyVersion): Promise<Buffer>;
+
+  /**
+   * Exports the public key for the given key version.
+   * @param key - The key version.
+   * @returns The public key in PEM format.
+   */
   exportPublicKey(key: KeyVersion): Promise<string>;
 }
 
+/**
+ * Software-based implementation of an HSM.
+ * Performs cryptographic operations in-memory using Node.js crypto.
+ */
 export class SoftwareHSM implements HardwareSecurityModule {
+  /**
+   * Signs the data using the private key from the KeyVersion.
+   * Supports RSA_SHA256, ECDSA_P256_SHA256, ECDSA_P384_SHA384, and EdDSA_ED25519.
+   * @param data - The data to sign.
+   * @param key - The key version containing the private key PEM.
+   * @returns The signature buffer.
+   */
   async sign(data: Buffer, key: KeyVersion): Promise<Buffer> {
     if (!key.privateKeyPem) {
       throw new Error(
@@ -49,6 +76,11 @@ export class SoftwareHSM implements HardwareSecurityModule {
     }
   }
 
+  /**
+   * Exports the public key in PEM format.
+   * @param key - The key version.
+   * @returns The public key PEM string.
+   */
   async exportPublicKey(key: KeyVersion): Promise<string> {
     if (key.publicKeyPem) {
       return key.publicKeyPem;
@@ -64,8 +96,24 @@ export class SoftwareHSM implements HardwareSecurityModule {
   }
 }
 
+/**
+ * Interface for a timestamping service.
+ * Provides tokens to prove the existence of data at a specific time.
+ */
 export interface TimestampingService {
+  /**
+   * Requests a timestamp token for the given payload.
+   * @param payload - The data to timestamp.
+   * @returns A base64 encoded timestamp token.
+   */
   getTimestampToken(payload: Buffer): Promise<string>;
+
+  /**
+   * Verifies a timestamp token against the payload.
+   * @param payload - The original data.
+   * @param token - The timestamp token.
+   * @returns True if valid.
+   */
   verify?(payload: Buffer, token: string): Promise<boolean>;
 }
 
@@ -75,12 +123,21 @@ export interface Rfc3161Options {
   verifyEndpoint?: string;
 }
 
+/**
+ * Implementation of a Timestamping Service compliant with RFC 3161.
+ * Communicates with an external timestamping authority via HTTP.
+ */
 export class Rfc3161TimestampingService implements TimestampingService {
   constructor(
     private readonly endpoint: string,
     private readonly options: Rfc3161Options = {},
   ) {}
 
+  /**
+   * Fetches a timestamp token from the remote service.
+   * @param payload - The data buffer.
+   * @returns The timestamp token string.
+   */
   async getTimestampToken(payload: Buffer): Promise<string> {
     const response = await fetch(this.endpoint, {
       method: 'POST',
@@ -116,6 +173,12 @@ export class Rfc3161TimestampingService implements TimestampingService {
     return buffer.toString('base64');
   }
 
+  /**
+   * Verifies the timestamp token, optionally checking with the remote service.
+   * @param payload - The data buffer.
+   * @param token - The token string.
+   * @returns Validation result boolean.
+   */
   async verify(payload: Buffer, token: string): Promise<boolean> {
     if (!this.options.verifyEndpoint) {
       // Best-effort validation by ensuring token decodes
@@ -149,13 +212,27 @@ export class Rfc3161TimestampingService implements TimestampingService {
   }
 }
 
+/**
+ * Interface for logging cryptographic audit events.
+ */
 export interface AuditLogger {
+  /**
+   * Logs a cryptographic event.
+   * @param event - The event details.
+   */
   log(event: CryptoAuditEvent): Promise<void>;
 }
 
+/**
+ * Audit logger implementation that writes to the database via the global audit utility.
+ */
 export class DatabaseAuditLogger implements AuditLogger {
   constructor(private readonly subsystem: string) {}
 
+  /**
+   * Logs a crypto audit event.
+   * @param event - The event to log.
+   */
   async log(event: CryptoAuditEvent): Promise<void> {
     try {
       const resourceId = `${event.keyId}:${event.keyVersion ?? 'unknown'}`;

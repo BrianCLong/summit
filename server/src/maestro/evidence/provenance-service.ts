@@ -26,11 +26,18 @@ export interface ProvenanceChain {
   timestamp: string;
 }
 
+/**
+ * Service responsible for storing and verifying evidence artifacts with WORM (Write Once Read Many) compliance.
+ * It manages the storage of artifacts, creates cryptographic provenance chains, and verifies the integrity of stored evidence.
+ */
 export class EvidenceProvenanceService {
   // private s3Client: S3Client;
   private bucketName: string;
   private signingKey: string;
 
+  /**
+   * Initializes the service, sets up the S3 client configuration and signing keys.
+   */
   constructor() {
     // this.s3Client = new S3Client({
     //   region: process.env.AWS_REGION || 'us-east-1',
@@ -40,13 +47,24 @@ export class EvidenceProvenanceService {
       process.env.EVIDENCE_SIGNING_KEY || this.generateSigningKey();
   }
 
+  /**
+   * Generates a random signing key.
+   * In a production environment, this should be replaced with a key from a secure key management service (e.g., AWS KMS).
+   *
+   * @returns A hex string representing the signing key.
+   */
   private generateSigningKey(): string {
     // In production, this should be from AWS KMS or similar
     return crypto.randomBytes(32).toString('hex');
   }
 
   /**
-   * Store evidence artifact with WORM compliance
+   * Stores an evidence artifact with WORM compliance.
+   * It uploads the artifact to S3 (mocked), records metadata in the database, and creates a provenance chain entry.
+   *
+   * @param artifact - The evidence artifact to store.
+   * @returns The ID of the stored artifact.
+   * @throws Error if storage fails.
    */
   async storeEvidence(artifact: EvidenceArtifact): Promise<string> {
     const span = otelService.createSpan('evidence.store');
@@ -132,7 +150,12 @@ export class EvidenceProvenanceService {
   }
 
   /**
-   * Create cryptographic provenance chain entry
+   * Creates a cryptographic provenance chain entry for a new artifact.
+   * It links the new artifact to the previous one in the chain using a hash.
+   *
+   * @param artifactId - The ID of the new artifact.
+   * @param currentHash - The hash of the new artifact.
+   * @param runId - The run ID associated with the artifact.
    */
   private async createProvenanceEntry(
     artifactId: string,
@@ -175,7 +198,11 @@ export class EvidenceProvenanceService {
   }
 
   /**
-   * Verify evidence integrity and provenance chain
+   * Verifies the integrity and provenance chain of a stored artifact.
+   * It checks if the artifact exists, its hash matches, and the signature in the provenance chain is valid.
+   *
+   * @param artifactId - The ID of the artifact to verify.
+   * @returns An object containing the validity status and details.
    */
   async verifyEvidence(artifactId: string): Promise<{
     valid: boolean;
@@ -282,7 +309,11 @@ export class EvidenceProvenanceService {
   }
 
   /**
-   * Generate SBOM (Software Bill of Materials) evidence
+   * Generates a Software Bill of Materials (SBOM) and stores it as evidence.
+   *
+   * @param runId - The run ID associated with the SBOM.
+   * @param dependencies - The list of dependencies to include in the SBOM.
+   * @returns The ID of the stored SBOM artifact.
    */
   async generateSBOMEvidence(
     runId: string,
@@ -331,7 +362,10 @@ export class EvidenceProvenanceService {
   }
 
   /**
-   * Get retention policy for artifact type
+   * Gets the default retention period (in days) for a given artifact type.
+   *
+   * @param artifactType - The type of the artifact.
+   * @returns The number of days to retain the artifact.
    */
   private getDefaultRetentionDays(artifactType: string): number {
     const retentionPolicies = {
@@ -349,7 +383,10 @@ export class EvidenceProvenanceService {
   }
 
   /**
-   * Get appropriate content type for artifact
+   * Gets the MIME type for a given artifact type.
+   *
+   * @param artifactType - The type of the artifact.
+   * @returns The MIME type string.
    */
   private getContentType(artifactType: string): string {
     const contentTypes = {
@@ -368,7 +405,10 @@ export class EvidenceProvenanceService {
   }
 
   /**
-   * List evidence artifacts for a run
+   * Lists all evidence artifacts associated with a specific run.
+   *
+   * @param runId - The run ID to list evidence for.
+   * @returns An array of evidence artifact records.
    */
   async listEvidenceForRun(runId: string): Promise<any[]> {
     const pool = getPostgresPool();

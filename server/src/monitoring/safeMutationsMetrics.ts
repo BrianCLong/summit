@@ -217,11 +217,11 @@ export class SafeMutationTracing {
 }
 
 /**
- * Metrics collection utilities
+ * Metrics collection utilities for tracking safe mutation events.
  */
 export class SafeMutationMetrics {
   /**
-   * Record a budget denial
+   * Record a budget denial event.
    */
   static recordBudgetDenial(
     reason: 'token_ceiling' | 'cap_usd',
@@ -248,7 +248,7 @@ export class SafeMutationMetrics {
   }
 
   /**
-   * Record token estimation accuracy
+   * Record token estimation accuracy by comparing actual vs estimated tokens.
    */
   static recordTokenEstimationAccuracy(
     provider: string,
@@ -264,7 +264,7 @@ export class SafeMutationMetrics {
   }
 
   /**
-   * Record rollback event
+   * Record a rollback event.
    */
   static recordRollback(
     reason: 'mutation_failed' | 'manual_rollback' | 'compensation_failure',
@@ -283,7 +283,7 @@ export class SafeMutationMetrics {
   }
 
   /**
-   * Record mutation latency
+   * Record the latency of a mutation.
    */
   static recordMutationLatency(
     mutation: string,
@@ -297,7 +297,7 @@ export class SafeMutationMetrics {
   }
 
   /**
-   * Record rate limit hit
+   * Record a rate limit hit.
    */
   static recordRateLimitHit(
     tenant: string,
@@ -308,28 +308,28 @@ export class SafeMutationMetrics {
   }
 
   /**
-   * Update active token buckets count
+   * Update the count of active token buckets.
    */
   static updateActiveTokenBuckets(count: number, bucketType: string): void {
     activeTokenBuckets.labels({ bucket_type: bucketType }).set(count);
   }
 
   /**
-   * Update compensation log size
+   * Update the size of the compensation log.
    */
   static updateCompensationLogSize(count: number, status: string): void {
     compensationLogSize.labels({ status }).set(count);
   }
 
   /**
-   * Record token cache performance
+   * Record the hit rate of the token cache.
    */
   static recordTokenCacheHit(hitRate: number): void {
     tokenCacheHitRate.observe(hitRate);
   }
 
   /**
-   * Record budget usage ratio
+   * Record the ratio of used budget to total budget.
    */
   static recordBudgetUsage(
     tenant: string,
@@ -342,7 +342,7 @@ export class SafeMutationMetrics {
   }
 
   /**
-   * Get current metrics snapshot for debugging
+   * Get current metrics snapshot for debugging.
    */
   static async getMetricsSnapshot(): Promise<{
     budgetDenials: number;
@@ -370,7 +370,7 @@ export class SafeMutationMetrics {
   }
 
   /**
-   * Health check for metrics system
+   * Health check for metrics system to ensure all metrics are registered correctly.
    */
   static async healthCheck(): Promise<{
     healthy: boolean;
@@ -471,19 +471,23 @@ export async function getPrometheusMetrics(): Promise<string> {
 }
 
 /**
- * Background job to collect periodic metrics
+ * Background job to collect periodic metrics from various sources.
  */
 export class MetricsCollector {
   private intervalId: NodeJS.Timeout | null = null;
   private collectionIntervalMs: number;
 
+  /**
+   * Initializes the metrics collector.
+   * @param collectionIntervalMs - Interval in milliseconds (default: 60000ms).
+   */
   constructor(collectionIntervalMs: number = 60000) {
     // Default: 1 minute
     this.collectionIntervalMs = collectionIntervalMs;
   }
 
   /**
-   * Start periodic metrics collection
+   * Start periodic metrics collection.
    */
   start(): void {
     if (this.intervalId) return;
@@ -502,7 +506,7 @@ export class MetricsCollector {
   }
 
   /**
-   * Stop periodic metrics collection
+   * Stop periodic metrics collection.
    */
   stop(): void {
     if (this.intervalId) {
@@ -513,7 +517,7 @@ export class MetricsCollector {
   }
 
   /**
-   * Collect current system metrics
+   * Collect current system metrics.
    */
   private async collectMetrics(): Promise<void> {
     // This would integrate with your Redis, Neo4j, and other systems
@@ -542,6 +546,11 @@ export class MetricsCollector {
 // Global metrics collector instance
 let globalMetricsCollector: MetricsCollector | null = null;
 
+/**
+ * Starts the global metrics collection service.
+ * @param intervalMs - Optional interval in milliseconds.
+ * @returns The active MetricsCollector instance.
+ */
 export function startMetricsCollection(intervalMs?: number): MetricsCollector {
   if (!globalMetricsCollector) {
     globalMetricsCollector = new MetricsCollector(intervalMs);
@@ -551,6 +560,9 @@ export function startMetricsCollection(intervalMs?: number): MetricsCollector {
   return globalMetricsCollector;
 }
 
+/**
+ * Stops the global metrics collection service.
+ */
 export function stopMetricsCollection(): void {
   if (globalMetricsCollector) {
     globalMetricsCollector.stop();

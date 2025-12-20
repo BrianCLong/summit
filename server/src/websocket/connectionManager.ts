@@ -154,6 +154,10 @@ const enum TimerType {
 
 const READY_STATE_OPEN = 1;
 
+/**
+ * Represents a single managed WebSocket connection.
+ * Handles queuing, rate limiting, reconnection logic, and state transitions.
+ */
 export class ManagedConnection {
   private readonly options: Required<ManagedConnectionOptions>;
   private readonly metrics: ConnectionMetrics;
@@ -171,6 +175,15 @@ export class ManagedConnection {
   private readonly onStateChange: () => void;
   private connectStartedAt = Date.now();
 
+  /**
+   * Initializes a new ManagedConnection.
+   *
+   * @param ws - The raw WebSocket object.
+   * @param context - Metadata context for the connection.
+   * @param options - Configuration options.
+   * @param metrics - Metrics collection object.
+   * @param onStateChange - Callback triggered when connection state changes.
+   */
   constructor(
     ws: any,
     context: ManagedConnectionContext,
@@ -499,6 +512,11 @@ export class ManagedConnection {
 
 export interface ConnectionPoolOptions extends ManagedConnectionOptions {}
 
+/**
+ * Manages a pool of WebSocket connections.
+ * Provides centralized control over multiple connections, including broadcasting,
+ * metrics aggregation, and lifecycle management (e.g., idle timeout cleanup).
+ */
 export class WebSocketConnectionPool {
   private readonly connections = new Map<string, ManagedConnection>();
   private readonly metrics: ConnectionMetrics;

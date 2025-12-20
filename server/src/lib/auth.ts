@@ -22,6 +22,14 @@ interface AuthContext {
   requestId: string;
 }
 
+/**
+ * Extracts authentication context from the request headers.
+ * Handles JWT token extraction and verification.
+ *
+ * @param param0 - The request object wrapper.
+ * @param param0.req - The incoming HTTP request.
+ * @returns A promise resolving to the AuthContext.
+ */
 export const getContext = async ({
   req,
 }: {
@@ -47,6 +55,14 @@ export const getContext = async ({
   }
 };
 
+/**
+ * Verifies a JWT token and retrieves the associated user.
+ * Supports a dev bypass token in development environments.
+ *
+ * @param token - The JWT string to verify.
+ * @returns A promise resolving to the User object.
+ * @throws GraphQLError if the token is invalid or expired.
+ */
 export const verifyToken = async (token: string): Promise<User> => {
   try {
     // For development, accept a simple test token
@@ -84,6 +100,12 @@ export const verifyToken = async (token: string): Promise<User> => {
   }
 };
 
+/**
+ * Generates a JWT for a user.
+ *
+ * @param user - The user object to generate a token for.
+ * @returns A signed JWT string.
+ */
 export const generateToken = (user: User): string => {
   return jwt.sign(
     {
@@ -96,6 +118,14 @@ export const generateToken = (user: User): string => {
   );
 };
 
+/**
+ * Enforces authentication requirements for a context.
+ * Throws an error if the user is not authenticated.
+ *
+ * @param context - The authentication context.
+ * @returns The authenticated User object.
+ * @throws GraphQLError if not authenticated.
+ */
 export const requireAuth = (context: AuthContext): User => {
   if (!context.isAuthenticated || !context.user) {
     throw new GraphQLError('Authentication required', {
@@ -108,6 +138,15 @@ export const requireAuth = (context: AuthContext): User => {
   return context.user;
 };
 
+/**
+ * Enforces role-based access control.
+ * Throws an error if the user lacks the required role (or isn't ADMIN).
+ *
+ * @param context - The authentication context.
+ * @param requiredRole - The role required to access the resource.
+ * @returns The authenticated User object.
+ * @throws GraphQLError if permissions are insufficient.
+ */
 export const requireRole = (
   context: AuthContext,
   requiredRole: string,

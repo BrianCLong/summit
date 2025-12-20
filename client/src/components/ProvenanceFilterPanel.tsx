@@ -1,7 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import { gql, useMutation } from '@apollo/client';
 
+/**
+ * Props for the ProvenanceFilterPanel component.
+ */
 type Props = {
+  /** Callback triggered when the filter is applied. */
   onApply: (filter: {
     reasonCodeIn?: string[];
     kindIn?: string[];
@@ -10,6 +14,7 @@ type Props = {
     to?: string;
     contains?: string;
   }) => void;
+  /** Initial filter state. */
   initial?: {
     reasonCodeIn?: string[];
     kindIn?: string[];
@@ -18,7 +23,9 @@ type Props = {
     to?: string;
     contains?: string;
   };
+  /** Scope of the provenance (incident or investigation). */
   scope?: 'incident' | 'investigation';
+  /** ID of the scoped item. */
   id?: string;
 };
 
@@ -41,6 +48,14 @@ const KNOWN_KINDS = [
 ];
 const KNOWN_SOURCES = ['graphrag', 'soar', 'connector', 'system'];
 
+/**
+ * A filter panel for provenance events.
+ * Allows filtering by reason code, kind, source, text content, and date range.
+ * Supports exporting filtered data to CSV/JSON and copying the filter query as cURL.
+ *
+ * @param props - The component props.
+ * @returns The rendered ProvenanceFilterPanel component.
+ */
 export default function ProvenanceFilterPanel({
   onApply,
   initial,
@@ -283,6 +298,9 @@ export default function ProvenanceFilterPanel({
   );
 }
 
+/**
+ * A helper button component to copy the cURL command.
+ */
 function CopyCurlButton({
   scope,
   id,

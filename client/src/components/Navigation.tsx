@@ -3,6 +3,13 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import NotificationSystem from './NotificationSystem';
 import { getSocket } from '../services/socket';
 
+/**
+ * The main navigation component for the application.
+ * Displays the app title, navigation links, and notification system.
+ * Handles real-time alert count updates via socket events.
+ *
+ * @returns The rendered Navigation component.
+ */
 function Navigation() {
   const navigate = useNavigate();
   const location = useLocation();

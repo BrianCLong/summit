@@ -50,11 +50,23 @@ interface InvestigationRow {
   created_by: string;
 }
 
+/**
+ * Repository for managing investigations.
+ * Provides CRUD operations for investigation entities stored in PostgreSQL.
+ */
 export class InvestigationRepo {
+  /**
+   * Initializes the InvestigationRepo.
+   * @param pg - The PostgreSQL connection pool.
+   */
   constructor(private pg: Pool) {}
 
   /**
-   * Create new investigation
+   * Creates a new investigation record.
+   *
+   * @param input - The investigation details.
+   * @param userId - The ID of the user creating the investigation.
+   * @returns The created Investigation object.
    */
   async create(
     input: InvestigationInput,
@@ -81,7 +93,10 @@ export class InvestigationRepo {
   }
 
   /**
-   * Update investigation
+   * Updates an existing investigation.
+   *
+   * @param input - The fields to update, including the investigation ID.
+   * @returns The updated Investigation object, or null if not found.
    */
   async update(input: InvestigationUpdateInput): Promise<Investigation | null> {
     const updateFields: string[] = [];
@@ -129,7 +144,11 @@ export class InvestigationRepo {
   }
 
   /**
-   * Delete investigation (cascade to related entities)
+   * Deletes an investigation by ID.
+   * Uses a transaction for potential future cascading deletions.
+   *
+   * @param id - The investigation ID.
+   * @returns True if deletion was successful, false otherwise.
    */
   async delete(id: string): Promise<boolean> {
     const client = await this.pg.connect();
@@ -155,7 +174,11 @@ export class InvestigationRepo {
   }
 
   /**
-   * Find investigation by ID
+   * Finds an investigation by its ID.
+   *
+   * @param id - The investigation ID.
+   * @param tenantId - Optional tenant ID to scope the query.
+   * @returns The Investigation object if found, or null.
    */
   async findById(id: string, tenantId?: string): Promise<Investigation | null> {
     const params = [id];
@@ -171,7 +194,14 @@ export class InvestigationRepo {
   }
 
   /**
-   * List investigations with filters
+   * Lists investigations based on filter criteria.
+   *
+   * @param options - Filtering and pagination options.
+   * @param options.tenantId - The tenant ID (required).
+   * @param options.status - Optional status filter.
+   * @param options.limit - Maximum number of results to return.
+   * @param options.offset - Number of results to skip.
+   * @returns An array of Investigation objects.
    */
   async list({
     tenantId,
@@ -202,7 +232,12 @@ export class InvestigationRepo {
   }
 
   /**
-   * Get investigation statistics
+   * Retrieves statistics for a specific investigation.
+   * Counts entities and relationships associated with the investigation.
+   *
+   * @param investigationId - The investigation ID.
+   * @param tenantId - The tenant ID.
+   * @returns An object containing entity and relationship counts.
    */
   async getStats(
     investigationId: string,
@@ -237,7 +272,12 @@ export class InvestigationRepo {
   }
 
   /**
-   * Batch load investigations by IDs (for DataLoader)
+   * Batches retrieval of investigations by a list of IDs.
+   * Optimizes database access for DataLoader patterns.
+   *
+   * @param ids - The list of investigation IDs.
+   * @param tenantId - Optional tenant ID.
+   * @returns An array of Investigation objects or nulls.
    */
   async batchByIds(
     ids: readonly string[],
@@ -262,7 +302,10 @@ export class InvestigationRepo {
   }
 
   /**
-   * Map database row to domain object
+   * Maps a database row to an Investigation domain object.
+   *
+   * @param row - The database row.
+   * @returns The Investigation object.
    */
   private mapRow(row: InvestigationRow): Investigation {
     return {

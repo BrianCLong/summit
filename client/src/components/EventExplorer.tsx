@@ -1,17 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import $ from 'jquery';
 
+/**
+ * Represents a partition in the event stream.
+ */
 interface Partition {
   id: string;
   offset: number;
   lag: number;
 }
 
+/**
+ * Represents the statistics for the event stream.
+ */
 interface EventStats {
   lag: number;
   partitions: Partition[];
 }
 
+/**
+ * A component for exploring event stream statistics.
+ * Displays partitions, offsets, and lag, and allows pausing/resuming the event stream.
+ *
+ * @param props - The component props.
+ * @param props.sourceId - The ID of the event source to explore.
+ * @returns The rendered EventExplorer component.
+ */
 export default function EventExplorer({ sourceId }: { sourceId: string }) {
   const [stats, setStats] = useState<EventStats>({ lag: 0, partitions: [] });
   useEffect(() => {

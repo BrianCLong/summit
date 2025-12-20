@@ -477,6 +477,12 @@ const resolvers = {
   },
 };
 
+/**
+ * Starts the live server instance.
+ * Sets up Express app, Apollo Server, WebSocket server, and health endpoints.
+ *
+ * @returns A promise that resolves when the server is ready.
+ */
 async function startLiveServer() {
   const app = express();
   const httpServer = createServer(app);

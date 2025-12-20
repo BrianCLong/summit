@@ -56,6 +56,9 @@ const ENTITY_UPDATED = gql`
   }
 `;
 
+/**
+ * Represents an entity in the graph.
+ */
 type Entity = {
   id: string;
   type: string;
@@ -65,12 +68,21 @@ type Entity = {
   updatedAt?: string;
 };
 
+/**
+ * Props for the EntityDrawer component.
+ */
 type EntityDrawerProps = {
+  /** The ID of the entity to display. */
   entityId: string | null;
+  /** Whether the drawer is open. */
   open: boolean;
+  /** Callback to close the drawer. */
   onClose: () => void;
 };
 
+/**
+ * Helper component to display a diff row for a property.
+ */
 function DiffRow({
   label,
   oldValue,
@@ -103,6 +115,13 @@ function DiffRow({
   );
 }
 
+/**
+ * A drawer component for viewing and editing entity details.
+ * Supports real-time updates via GraphQL subscriptions and visual diffs for changes.
+ *
+ * @param props - The component props.
+ * @returns The rendered EntityDrawer component.
+ */
 export default function EntityDrawer({
   entityId,
   open,

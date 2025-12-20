@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
+/**
+ * Represents the collected performance metrics.
+ */
 interface PerformanceMetrics {
   renderTime: number;
   memoryUsage: number;
@@ -8,13 +11,27 @@ interface PerformanceMetrics {
   timestamp: number;
 }
 
+/**
+ * Props for the PerformanceMonitor component.
+ */
 interface PerformanceMonitorProps {
+  /** Whether the monitor is enabled. Defaults to true. */
   enabled?: boolean;
+  /** Interval in milliseconds to collect metrics. Defaults to 5000 (5s). */
   sampleInterval?: number;
+  /** Maximum number of metric samples to keep in history. Defaults to 60. */
   maxSamples?: number;
+  /** Callback triggered when metrics are updated. */
   onMetricsUpdate?: (metrics: PerformanceMetrics) => void;
 }
 
+/**
+ * A component that monitors and displays application performance metrics.
+ * Tracks memory usage, render time, network requests, and errors.
+ *
+ * @param props - The component props.
+ * @returns The rendered PerformanceMonitor component (or null if disabled).
+ */
 const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
   enabled = true,
   sampleInterval = 5000, // 5 seconds
@@ -219,7 +236,12 @@ const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
   );
 };
 
-// Hook to track performance metrics
+/**
+ * Custom hook to track performance metrics.
+ * Allows tracking of component renders and errors.
+ *
+ * @returns An object containing `trackRender` and `trackError` functions.
+ */
 export const usePerformanceTracking = () => {
   const trackRender = useCallback((componentName: string) => {
     performance.mark(`${componentName}-start`);

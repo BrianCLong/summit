@@ -31,6 +31,13 @@ function logExperiment(
 
 const llm = new MockLLM(); // swap with real adapter(s)
 
+/**
+ * Mounts the AI Assistant routes and optional Socket.IO handlers.
+ * Configures endpoints for streaming responses via HTTP (chunked or SSE) and WebSockets.
+ *
+ * @param app - The Express application instance.
+ * @param io - Optional Socket.IO server instance.
+ */
 export function mountAssistant(app: Express, io?: any) {
   const write = (res: Response, obj: any) =>
     res.write(JSON.stringify(obj) + '\n');

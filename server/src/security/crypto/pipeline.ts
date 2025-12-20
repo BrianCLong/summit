@@ -32,6 +32,10 @@ export interface CryptoPipelineOptions {
   defaultKeyId?: string;
 }
 
+/**
+ * A robust cryptographic pipeline for signing and verification operations.
+ * It integrates key management, certificate validation, HSM access, timestamping, and audit logging.
+ */
 export class CryptoPipeline {
   private readonly keyManager: KeyManager;
   private readonly certificateValidator: CertificateValidator;
@@ -40,6 +44,10 @@ export class CryptoPipeline {
   private readonly auditLogger?: AuditLogger;
   private readonly defaultKeyId?: string;
 
+  /**
+   * Initializes the CryptoPipeline.
+   * @param options - Configuration options for the pipeline's components.
+   */
   constructor(options: CryptoPipelineOptions = {}) {
     this.keyManager = new KeyManager(
       options.keyStore ?? new InMemoryKeyStore(),
@@ -53,10 +61,20 @@ export class CryptoPipeline {
     this.defaultKeyId = options.defaultKeyId;
   }
 
+  /**
+   * Registers a new key version in the key manager.
+   * @param key - The key version to register.
+   */
   async registerKeyVersion(key: KeyVersion): Promise<void> {
     await this.keyManager.registerKeyVersion(key);
   }
 
+  /**
+   * Rotates a key, creating a new version.
+   * @param keyId - The ID of the key to rotate.
+   * @param key - Properties for the new key version.
+   * @returns The newly created key version.
+   */
   async rotateKey(
     keyId: string,
     key: Omit<
@@ -79,6 +97,14 @@ export class CryptoPipeline {
     return next;
   }
 
+  /**
+   * Signs a payload using a specified key or the default key.
+   * Optionally includes a timestamp token.
+   * @param payload - The data to sign.
+   * @param keyId - The ID of the key to use (optional if defaultKeyId is set).
+   * @param options - Signing options.
+   * @returns A bundle containing the signature and metadata.
+   */
   async signPayload(
     payload: Buffer | string,
     keyId?: string,
@@ -124,6 +150,14 @@ export class CryptoPipeline {
     return bundle;
   }
 
+  /**
+   * Verifies a signature bundle against a payload.
+   * Checks key validity, certificate chain, and timestamp if present.
+   * @param payload - The original data.
+   * @param bundle - The signature bundle to verify.
+   * @param context - Context options for verification (e.g., expected key ID).
+   * @returns The result of the verification.
+   */
   async verifySignature(
     payload: Buffer | string,
     bundle: SignatureBundle,
@@ -237,6 +271,14 @@ export class CryptoPipeline {
     return result;
   }
 
+  /**
+   * Helper method to verify signature based on algorithm type.
+   * @param algorithm - The signing algorithm used.
+   * @param payload - The data that was signed.
+   * @param signature - The signature buffer.
+   * @param publicKey - The public key PEM string.
+   * @returns True if valid, false otherwise.
+   */
   private verifyWithAlgorithm(
     algorithm: SigningAlgorithm,
     payload: Buffer,
@@ -280,6 +322,10 @@ export class CryptoPipeline {
     }
   }
 
+  /**
+   * Logs an audit event.
+   * @param event - The event to log.
+   */
   private async logAudit(
     event: Parameters<AuditLogger['log']>[0],
   ): Promise<void> {
@@ -305,6 +351,12 @@ export interface DefaultPipelineOptions {
   trustAnchorsEnv?: string;
 }
 
+/**
+ * Factory function to create a default CryptoPipeline initialized from environment variables.
+ * Reads 'CRYPTO_SIGNING_KEYS' env var for key definitions.
+ * @param options - Configuration options.
+ * @returns A configured CryptoPipeline instance or null if configuration is missing.
+ */
 export async function createDefaultCryptoPipeline(
   options: DefaultPipelineOptions = {},
 ): Promise<CryptoPipeline | null> {

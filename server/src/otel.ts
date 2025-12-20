@@ -26,6 +26,10 @@ export const sdk: any = {
 
 let started = false;
 
+/**
+ * Starts the OpenTelemetry SDK (currently a no-op implementation).
+ * Logs initialization status and sets up graceful shutdown.
+ */
 export async function startOtel(): Promise<void> {
   if (started) return;
   started = true;
@@ -51,16 +55,33 @@ export async function startOtel(): Promise<void> {
   }
 }
 
+/**
+ * Checks if OpenTelemetry has been started.
+ *
+ * @returns `true` if started, `false` otherwise.
+ */
 export function isOtelStarted() {
   return started;
 }
 
 // Health check span for validation (no-op)
+/**
+ * Creates a no-op health check span.
+ *
+ * @param _spanName - The name of the span.
+ * @returns A dummy span object with `end` and `setAttributes` methods.
+ */
 export function createHealthSpan(_spanName: string = 'health-check') {
   return { end: () => {}, setAttributes: (_: any) => {} };
 }
 
 // Export tracer for manual instrumentation (no-op)
+/**
+ * Gets a no-op tracer for manual instrumentation.
+ *
+ * @param _name - The name of the tracer.
+ * @returns A dummy tracer object with a `startSpan` method.
+ */
 export function getTracer(_name: string = 'intelgraph') {
   return {
     startSpan: (_n: string, _o?: any) => ({
@@ -71,6 +92,11 @@ export function getTracer(_name: string = 'intelgraph') {
 }
 
 // Environment validation
+/**
+ * Validates the OpenTelemetry configuration.
+ *
+ * @returns Always returns `false` as OTel is disabled/no-op.
+ */
 export function validateOtelConfig(): boolean {
   return false;
 }

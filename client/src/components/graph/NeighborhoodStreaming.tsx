@@ -12,12 +12,18 @@ import {
 } from '@mui/material';
 import { PlayArrow, Stop, ExpandMore, NetworkCheck } from '@mui/icons-material';
 
+/**
+ * Represents a node in the streaming graph.
+ */
 type StreamNode = {
   id: string;
   type: string;
   confidence: number;
 };
 
+/**
+ * Represents an edge in the streaming graph.
+ */
 type StreamEdge = {
   id: string;
   source: string;
@@ -26,13 +32,27 @@ type StreamEdge = {
   weight: number;
 };
 
+/**
+ * Props for the NeighborhoodStreaming component.
+ */
 interface NeighborhoodStreamingProps {
+  /** The ID of the node to stream neighbors for. */
   nodeId: string;
+  /** Callback function called when new nodes and edges are received. */
   onNodesReceived: (nodes: StreamNode[], edges: StreamEdge[]) => void;
+  /** The maximum depth to traverse. Defaults to 2. */
   maxDepth?: number;
+  /** The maximum number of items per batch. Defaults to 50. */
   batchLimit?: number;
 }
 
+/**
+ * A component that simulates streaming neighborhood data for a graph node.
+ * It visualizes the streaming progress and allows starting/stopping the stream.
+ *
+ * @param props - The component props.
+ * @returns The rendered NeighborhoodStreaming component.
+ */
 export function NeighborhoodStreaming({
   nodeId,
   onNodesReceived,
@@ -107,12 +127,20 @@ export function NeighborhoodStreaming({
     return () => clearInterval(interval);
   }, [batchLimit, isStreaming, maxDepth, nodeId, onNodesReceived]);
 
+  /**
+   * Starts the streaming process.
+   * Resets the stream stats and progress.
+   */
   const startStreaming = useCallback(() => {
     setIsStreaming(true);
     setStreamStats({ nodesReceived: 0, edgesReceived: 0, batchesProcessed: 0 });
     setProgress(null);
   }, []);
 
+  /**
+   * Stops the streaming process.
+   * Resets the progress.
+   */
   const stopStreaming = useCallback(() => {
     setIsStreaming(false);
     setProgress(null);

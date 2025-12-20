@@ -1,5 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
 import $ from 'jquery';
+
+/**
+ * A dashboard component for monitoring tasks in the Hyper-Parallel Orchestrator (TGO).
+ * Fetches metrics from the TGO API and displays them in a filterable table.
+ *
+ * @returns The rendered TgoDashboard component.
+ */
 export default function TgoDashboard() {
   const [rows, setRows] = useState<any[]>([]);
   const handlerBoundRef = useRef(false);

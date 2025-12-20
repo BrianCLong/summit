@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import $ from 'jquery';
+
+/**
+ * A dashboard component for monitoring Swarm Build Mesh tasks.
+ * Fetches metrics from the TGO API and displays them in a filterable table.
+ *
+ * @returns The rendered SwarmDash component.
+ */
 export default function SwarmDash() {
   const [rows, setRows] = useState<any[]>([]);
   useEffect(() => {

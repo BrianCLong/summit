@@ -125,6 +125,17 @@ const FORENSICS_TEMPLATE = {
   ],
 };
 
+/**
+ * Modal dialog for selecting a report template and configuring report generation options.
+ * Allows users to choose between templates like 'Executive Summary' or 'Forensics Report',
+ * customize sections, and select output format.
+ *
+ * @param props - The component props.
+ * @param props.open - Whether the dialog is open.
+ * @param props.onClose - Callback to close the dialog.
+ * @param props.investigationId - The ID of the investigation to report on (optional).
+ * @param props.selectionData - Specific data selection to include in report (optional).
+ */
 export function ReportTemplateSelector({
   open,
   onClose,

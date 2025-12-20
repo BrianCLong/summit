@@ -1,6 +1,15 @@
 import { useEffect, useRef } from 'react';
 import $ from 'jquery';
 
+/**
+ * Hook to enable "hold-to-talk" functionality on a button element.
+ * Triggers callbacks when the user presses and releases the button (mouse or touch).
+ * Uses jQuery for event binding.
+ *
+ * @param onStart - Callback function invoked when the user starts holding the button.
+ * @param onEnd - Callback function invoked when the user releases the button.
+ * @returns A ref to attach to the button element.
+ */
 export function useHoldToTalk(onStart: () => void, onEnd: () => void) {
   const ref = useRef<HTMLButtonElement | null>(null);
   useEffect(() => {

@@ -47,6 +47,9 @@ const UPDATE_INVESTIGATION = gql`
   }
 `;
 
+/**
+ * Represents an investigation object.
+ */
 interface Investigation {
   id: string;
   name: string;
@@ -63,11 +66,22 @@ interface Investigation {
   metadata?: any;
 }
 
+/**
+ * Props for the InvestigationManager component.
+ */
 interface InvestigationManagerProps {
   onInvestigationSelect?: (investigation: Investigation) => void;
   currentInvestigationId?: string;
 }
 
+/**
+ * A comprehensive investigation management component.
+ * Allows creating, viewing, editing, filtering, and selecting investigations.
+ * Supports both grid and list views.
+ *
+ * @param props - The component props.
+ * @returns The rendered InvestigationManager component.
+ */
 function InvestigationManager({
   onInvestigationSelect,
   currentInvestigationId,

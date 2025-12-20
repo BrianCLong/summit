@@ -16,6 +16,9 @@ import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import DatePicker from '@mui/lab/DatePicker';
 import { apiFetch } from '../services/api';
 
+/**
+ * Represents an option in the entity autocomplete.
+ */
 interface EntityOption {
   id: string;
   label: string;
@@ -23,6 +26,13 @@ interface EntityOption {
 
 const tagOptions = ['Person', 'Organization', 'Location', 'Event'];
 
+/**
+ * A filter panel component for searching and filtering entities.
+ * Allows filtering by entity name, tags, confidence range, and date range.
+ * Updates the URL search parameters to reflect the current filter state.
+ *
+ * @returns The rendered EntityFilterPanel component.
+ */
 function EntityFilterPanel() {
   const [searchParams, setSearchParams] = useSearchParams();
 

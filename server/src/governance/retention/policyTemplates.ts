@@ -81,12 +81,24 @@ export const POLICY_TEMPLATE_LIBRARY: RetentionPolicyTemplate[] = [
   },
 ];
 
+/**
+ * Retrieves a retention policy template by its unique ID.
+ * @param templateId - The ID of the template.
+ * @returns The template if found, otherwise undefined.
+ */
 export function getPolicyTemplateById(
   templateId: string,
 ): RetentionPolicyTemplate | undefined {
   return POLICY_TEMPLATE_LIBRARY.find((template) => template.id === templateId);
 }
 
+/**
+ * Resolves the data classification level for a dataset based on its metadata.
+ * Determines if data is regulated, restricted, internal, or public.
+ *
+ * @param metadata - The metadata of the dataset.
+ * @returns An object with the classification level and the rationale for the decision.
+ */
 export function resolveClassification(metadata: DatasetMetadata): {
   level: DataClassificationLevel;
   rationale: string[];
@@ -136,6 +148,13 @@ export function resolveClassification(metadata: DatasetMetadata): {
   return { level, rationale };
 }
 
+/**
+ * Selects the most appropriate retention policy template for a dataset.
+ * Uses classification logic to find a matching template.
+ *
+ * @param metadata - The dataset metadata.
+ * @returns The selected template and the rationale.
+ */
 export function selectTemplateForDataset(metadata: DatasetMetadata): {
   template: RetentionPolicyTemplate;
   rationale: string[];

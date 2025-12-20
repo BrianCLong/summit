@@ -94,9 +94,16 @@ const BatchEvaluationSchema = z.object({
   sloIds: z.array(z.string()).optional(),
 });
 
+/**
+ * Platform for evaluating the quality of model outputs.
+ * Supports single and batch evaluations, SLO management, and reporting.
+ */
 export class QualityEvaluationPlatform {
   private evaluators: Map<string, any> = new Map();
 
+  /**
+   * Initializes the platform and registers evaluators.
+   */
   constructor() {
     this.initializeEvaluators();
   }
@@ -152,6 +159,13 @@ export class QualityEvaluationPlatform {
     });
   }
 
+  /**
+   * Creates a new Semantic Service Level Objective (SLO).
+   *
+   * @param tenantId - The tenant ID.
+   * @param sloConfig - The SLO configuration object.
+   * @returns The ID of the created SLO.
+   */
   async createSemanticSLO(tenantId: string, sloConfig: any): Promise<string> {
     const span = otelService.createSpan('quality-evaluation.create-slo');
 
@@ -211,6 +225,13 @@ export class QualityEvaluationPlatform {
     }
   }
 
+  /**
+   * Evaluates a single input/output pair against configured metrics.
+   *
+   * @param tenantId - The tenant ID.
+   * @param request - The evaluation request details.
+   * @returns The evaluation result containing scores and violations.
+   */
   async evaluateSingle(
     tenantId: string,
     request: any,
@@ -302,6 +323,13 @@ export class QualityEvaluationPlatform {
     }
   }
 
+  /**
+   * Runs a batch evaluation on a dataset.
+   *
+   * @param tenantId - The tenant ID.
+   * @param request - The batch evaluation request.
+   * @returns A summary of the batch evaluation results.
+   */
   async evaluateBatch(
     tenantId: string,
     request: any,
@@ -384,6 +412,15 @@ export class QualityEvaluationPlatform {
     }
   }
 
+  /**
+   * Generates a comprehensive quality report for a model over a time range.
+   * Includes overall score, SLO compliance, aggregated metrics, and recommendations.
+   *
+   * @param tenantId - The tenant ID.
+   * @param modelId - The model ID.
+   * @param timeRangeHours - The lookback period in hours (default: 24).
+   * @returns The generated QualityReport.
+   */
   async generateQualityReport(
     tenantId: string,
     modelId: string,
@@ -479,6 +516,13 @@ export class QualityEvaluationPlatform {
     }
   }
 
+  /**
+   * Retrieves the SLO dashboard data for a tenant.
+   * Includes active SLOs, recent violations, and health status.
+   *
+   * @param tenantId - The tenant ID.
+   * @returns Dashboard data object.
+   */
   async getSLODashboard(tenantId: string): Promise<any> {
     const span = otelService.createSpan('quality-evaluation.slo-dashboard');
 

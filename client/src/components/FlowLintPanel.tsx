@@ -1,5 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
 import $ from 'jquery';
+
+/**
+ * A panel that displays flow linting issues.
+ * Fetches linting data from the API and allows filtering by text.
+ *
+ * @returns The rendered FlowLintPanel component.
+ */
 export default function FlowLintPanel() {
   const [items, setItems] = useState<any[]>([]);
   const handlerBoundRef = useRef(false);

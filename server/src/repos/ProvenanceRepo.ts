@@ -9,9 +9,22 @@ export type ProvenanceFilter = {
   contains?: string;
 };
 
+/**
+ * Repository for accessing provenance and audit trail data.
+ * Supports querying across multiple legacy schema versions (audit_events v1/v2, provenance).
+ */
 export class ProvenanceRepo {
   constructor(private pg: Pool) {}
 
+  /**
+   * Builds the WHERE clause and parameters for querying provenance data.
+   * Handles complex filtering logic across multiple schema variations.
+   *
+   * @param scope - The scope of the query ('incident' or 'investigation').
+   * @param id - The ID of the target entity.
+   * @param filter - Optional filters for refining the results.
+   * @returns An object containing the WHERE clause string and the array of parameters.
+   */
   private buildWhere(
     scope: 'incident' | 'investigation',
     id: string,
@@ -81,6 +94,13 @@ export class ProvenanceRepo {
     };
   }
 
+  /**
+   * Normalizes a raw database row into a standard API response shape.
+   * Handles variations in column names across different schema versions.
+   *
+   * @param r - The raw database row.
+   * @returns A normalized object with id, kind, createdAt, and metadata.
+   */
   private mapRow(r: any) {
     // Normalize to API shape
     const createdAt = r.created_at || r.timestamp || new Date();
@@ -102,6 +122,18 @@ export class ProvenanceRepo {
     };
   }
 
+  /**
+   * Retrieves provenance records associated with a specific incident or investigation.
+   * Queries multiple potential tables (audit_events, provenance) to find relevant records.
+   *
+   * @param scope - The context scope ('incident' or 'investigation').
+   * @param id - The unique identifier of the entity.
+   * @param filter - Optional filters.
+   * @param first - Limit for pagination (default: 1000).
+   * @param offset - Offset for pagination (default: 0).
+   * @param tenantId - Optional tenant ID to scope the query.
+   * @returns A list of normalized provenance records.
+   */
   async by(
     scope: 'incident' | 'investigation',
     id: string,

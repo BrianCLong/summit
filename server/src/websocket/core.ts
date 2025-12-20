@@ -36,6 +36,10 @@ interface WebSocketMessage {
   id?: string;
 }
 
+/**
+ * Core WebSocket service using uWebSockets.js for high performance.
+ * Manages connections, authentication (JWT), pub/sub via Redis, and OPA-based authorization.
+ */
 export class WebSocketCore {
   private app: uWS.App;
   private redis: Redis;
@@ -46,6 +50,10 @@ export class WebSocketCore {
   private readonly MAX_BACKPRESSURE = 64 * 1024; // 64KB
   private readonly TOPIC_PREFIX = 'maestro:';
 
+  /**
+   * Initializes the WebSocketCore.
+   * Sets up Redis connections, connection pool, and the uWS app.
+   */
   constructor() {
     this.JWT_SECRET = process.env.JWT_SECRET || 'dev-secret';
     this.redis = new Redis({
@@ -76,6 +84,12 @@ export class WebSocketCore {
     this.createApp();
   }
 
+  /**
+   * Verifies the JWT token from the connection request.
+   *
+   * @param token - The JWT string.
+   * @returns The decoded claims or null if invalid.
+   */
   private verifyJWT(token: string): WebSocketClaims | null {
     try {
       const decoded = jwt.verify(token, this.JWT_SECRET) as any;
@@ -93,6 +107,13 @@ export class WebSocketCore {
     }
   }
 
+  /**
+   * Checks if the requested operation is allowed by OPA policy.
+   *
+   * @param claims - User claims from the JWT.
+   * @param message - The WebSocket message containing the action.
+   * @returns True if allowed, false otherwise.
+   */
   private async opaAllow(
     claims: WebSocketClaims,
     message: WebSocketMessage,
@@ -163,6 +184,12 @@ export class WebSocketCore {
     }
   }
 
+  /**
+   * Extracts service mesh routing headers from the request.
+   *
+   * @param req - The uWS HTTP request.
+   * @returns The route string or undefined.
+   */
   private getServiceMeshRoute(req: uWS.HttpRequest): string | undefined {
     const headers = [
       'x-service-mesh-route',
@@ -181,6 +208,9 @@ export class WebSocketCore {
     return undefined;
   }
 
+  /**
+   * Creates and configures the uWebSockets.js app.
+   */
   private createApp() {
     this.app = uWS.App({
       // SSL configuration if needed
@@ -379,6 +409,12 @@ export class WebSocketCore {
     });
   }
 
+  /**
+   * Handles parsed WebSocket messages based on their type.
+   *
+   * @param connection - The sender's connection object.
+   * @param msg - The parsed message object.
+   */
   private async handleMessage(
     connection: WebSocketConnection,
     msg: WebSocketMessage,
@@ -532,6 +568,11 @@ export class WebSocketCore {
     }
   }
 
+  /**
+   * Starts the WebSocket server listening on the specified port.
+   *
+   * @param port - The port number to listen on (default: 9001).
+   */
   public listen(port: number = 9001) {
     this.app.listen(port, (token) => {
       if (token) {
@@ -542,10 +583,22 @@ export class WebSocketCore {
     });
   }
 
+  /**
+   * Notifies all connected clients of a pending server restart.
+   *
+   * @param reason - The reason for the restart (default: 'maintenance').
+   */
   public notifyServerRestart(reason = 'maintenance'): void {
     this.connectionPool.handleServerRestart(reason);
   }
 
+  /**
+   * Publishes a system message to a specific topic for a tenant.
+   *
+   * @param tenantId - The tenant ID.
+   * @param topic - The topic name.
+   * @param payload - The message payload.
+   */
   public async publishToTopic(tenantId: string, topic: string, payload: any) {
     const tenantTopic = `${tenantId}.${topic}`;
     const message = {
@@ -562,6 +615,11 @@ export class WebSocketCore {
     );
   }
 
+  /**
+   * Retrieves current connection statistics.
+   *
+   * @returns An object containing total connections, connections per tenant, and detailed states.
+   */
   public getConnectionStats() {
     const poolStats = this.connectionPool.getStats();
     return {

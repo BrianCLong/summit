@@ -8,6 +8,13 @@ import {
 
 const pg = new Pool({ connectionString: process.env.DATABASE_URL });
 
+/**
+ * Enqueues a retraction request for a specific subject.
+ *
+ * @param subject - The subject to retract (e.g., an entity ID).
+ * @param reason - The reason for the retraction.
+ * @returns The newly created retraction record.
+ */
 export async function enqueueRetraction(subject: string, reason: string) {
   const {
     rows: [r],
@@ -18,6 +25,11 @@ export async function enqueueRetraction(subject: string, reason: string) {
   return r;
 }
 
+/**
+ * Processes queued retraction requests.
+ * Finds affected bundles, re-bundles them with redacted information, and updates the database.
+ * Updates metrics for processing status, duration, and SLA breaches.
+ */
 export async function processRetractionsOnce() {
   const { rows } = await pg.query(
     `SELECT id, subject, created_at FROM retraction WHERE status='QUEUED' LIMIT 10`,

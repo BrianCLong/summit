@@ -52,6 +52,10 @@ export interface ComplianceReportSummary {
   details: ComplianceReportRow[];
 }
 
+/**
+ * The core engine for managing data retention policies, schedules, and executions.
+ * Orchestrates classification, policy application, purging, legal holds, and reporting across PostgreSQL and Neo4j.
+ */
 export class DataRetentionEngine {
   private readonly logger = pino({ name: 'data-retention-engine' });
   private readonly pool: Pool;
@@ -63,6 +67,11 @@ export class DataRetentionEngine {
     params?: Record<string, any>,
   ) => Promise<any>;
 
+  /**
+   * Initializes the DataRetentionEngine.
+   *
+   * @param options - Configuration options including database pool and optional overrides for dependencies.
+   */
   constructor(options: DataRetentionEngineOptions) {
     this.pool = options.pool;
     this.repository =
@@ -72,14 +81,28 @@ export class DataRetentionEngine {
     this.cypherRunner = options.runCypher ?? runCypher;
   }
 
+  /**
+   * Lists all available policy templates.
+   * @returns An array of PolicyTemplate objects.
+   */
   listPolicyTemplates() {
     return POLICY_TEMPLATE_LIBRARY;
   }
 
+  /**
+   * Retrieves a retention record for a specific dataset.
+   * @param datasetId - The ID of the dataset.
+   * @returns The RetentionRecord if found, otherwise undefined.
+   */
   getRecord(datasetId: string): RetentionRecord | undefined {
     return this.repository.getRecord(datasetId);
   }
 
+  /**
+   * Classifies a dataset based on its metadata to recommend a retention policy.
+   * @param metadata - The metadata of the dataset.
+   * @returns A ClassificationResult containing the recommended level and template.
+   */
   classifyDataset(metadata: DatasetMetadata): ClassificationResult {
     const { level, rationale } = resolveClassification(metadata);
     const templateSelection = selectTemplateForDataset(metadata);
@@ -90,6 +113,14 @@ export class DataRetentionEngine {
     };
   }
 
+  /**
+   * Registers a new dataset under retention management.
+   * Automatically selects and applies a policy template based on metadata.
+   *
+   * @param metadata - The dataset metadata.
+   * @param appliedBy - The user or system applying the registration.
+   * @returns The created RetentionRecord.
+   */
   async registerDataset(
     metadata: DatasetMetadata,
     appliedBy: string,
@@ -132,6 +163,13 @@ export class DataRetentionEngine {
     return record;
   }
 
+  /**
+   * Applies a custom retention policy or overrides to an existing dataset.
+   *
+   * @param datasetId - The ID of the dataset.
+   * @param overrides - The partial policy to apply as an override.
+   * @returns The updated AppliedRetentionPolicy.
+   */
   async applyCustomPolicy(
     datasetId: string,
     overrides: Partial<AppliedRetentionPolicy>,
@@ -178,6 +216,13 @@ export class DataRetentionEngine {
     return policy;
   }
 
+  /**
+   * Schedules automatic purging for a dataset.
+   *
+   * @param datasetId - The ID of the dataset.
+   * @param intervalMs - The purge interval in milliseconds.
+   * @returns The created RetentionSchedule.
+   */
   async schedulePurge(
     datasetId: string,
     intervalMs: number,
@@ -220,6 +265,13 @@ export class DataRetentionEngine {
     return schedule;
   }
 
+  /**
+   * Executes a purge operation for a dataset, deleting expired data.
+   * Respects active legal holds.
+   *
+   * @param datasetId - The ID of the dataset to purge.
+   * @param trigger - The source of the purge request ('manual', 'scheduler', 'compliance').
+   */
   async purgeDataset(
     datasetId: string,
     trigger: 'manual' | 'scheduler' | 'compliance' = 'manual',
@@ -261,6 +313,12 @@ export class DataRetentionEngine {
     });
   }
 
+  /**
+   * Applies a legal hold to a dataset, preventing automated purging.
+   *
+   * @param datasetId - The ID of the dataset.
+   * @param legalHold - The legal hold configuration.
+   */
   async applyLegalHold(datasetId: string, legalHold: LegalHold): Promise<void> {
     const record = this.repository.getRecord(datasetId);
     if (!record) {
@@ -284,6 +342,12 @@ export class DataRetentionEngine {
     });
   }
 
+  /**
+   * Releases a legal hold from a dataset, allowing normal retention operations to resume.
+   *
+   * @param datasetId - The ID of the dataset.
+   * @param releasedBy - The user releasing the hold.
+   */
   async releaseLegalHold(datasetId: string, releasedBy: string): Promise<void> {
     const record = this.repository.getRecord(datasetId);
     if (!record?.legalHold) {
@@ -303,6 +367,15 @@ export class DataRetentionEngine {
     });
   }
 
+  /**
+   * Initiates an archival workflow for a dataset.
+   * Moves data to long-term storage (simulated) and updates records.
+   *
+   * @param datasetId - The ID of the dataset.
+   * @param initiatedBy - The user initiating the archive.
+   * @param targetLocation - The destination for the archive.
+   * @returns The created ArchivalWorkflow object.
+   */
   async archiveDataset(
     datasetId: string,
     initiatedBy: string,
@@ -347,6 +420,13 @@ export class DataRetentionEngine {
     return workflow;
   }
 
+  /**
+   * Generates a compliance report summarizing retention status for a given period.
+   *
+   * @param start - Start date of the reporting period.
+   * @param end - End date of the reporting period.
+   * @returns A ComplianceReportSummary object.
+   */
   generateComplianceReport(start: Date, end: Date): ComplianceReportSummary {
     const records = this.repository.getAllRecords();
     const rows: ComplianceReportRow[] = records.map((record) => {

@@ -43,14 +43,31 @@ interface RelationshipRow {
   created_by: string;
 }
 
+/**
+ * Repository for managing relationships between entities.
+ * Implements dual-write consistency between PostgreSQL (system of record) and Neo4j (graph query engine).
+ */
 export class RelationshipRepo {
+  /**
+   * Initializes the repository with database connections.
+   *
+   * @param pg - The PostgreSQL connection pool.
+   * @param neo4j - The Neo4j driver instance.
+   */
   constructor(
     private pg: Pool,
     private neo4j: Driver,
   ) {}
 
   /**
-   * Create new relationship with dual-write
+   * Creates a new relationship.
+   * Performs a transactional insert into PostgreSQL and queues an event for Neo4j synchronization.
+   * Also attempts a direct write to Neo4j for immediate consistency.
+   *
+   * @param input - The relationship data to create.
+   * @param userId - The ID of the user creating the relationship.
+   * @returns The created relationship.
+   * @throws Error if source or destination entities do not exist.
    */
   async create(
     input: RelationshipInput,
@@ -142,7 +159,11 @@ export class RelationshipRepo {
   }
 
   /**
-   * Delete relationship with dual-write
+   * Deletes a relationship by ID.
+   * Removes from PostgreSQL and queues a delete event for Neo4j.
+   *
+   * @param id - The ID of the relationship to delete.
+   * @returns True if a relationship was deleted, false otherwise.
    */
   async delete(id: string): Promise<boolean> {
     const client = await this.pg.connect();
@@ -189,7 +210,11 @@ export class RelationshipRepo {
   }
 
   /**
-   * Find relationship by ID
+   * Finds a relationship by its ID.
+   *
+   * @param id - The relationship ID.
+   * @param tenantId - Optional tenant ID for scoping.
+   * @returns The relationship if found, or null.
    */
   async findById(id: string, tenantId?: string): Promise<Relationship | null> {
     const params = [id];
@@ -205,7 +230,12 @@ export class RelationshipRepo {
   }
 
   /**
-   * Find relationships for an entity
+   * Finds all relationships connected to a specific entity.
+   *
+   * @param entityId - The entity ID.
+   * @param tenantId - The tenant ID.
+   * @param direction - Direction of relationships to fetch ('incoming', 'outgoing', or 'both').
+   * @returns An array of relationships.
    */
   async findByEntityId(
     entityId: string,
@@ -230,7 +260,10 @@ export class RelationshipRepo {
   }
 
   /**
-   * Search relationships with filters
+   * Searches for relationships matching specific criteria.
+   *
+   * @param criteria - Search criteria including tenantId, type, source/destination IDs.
+   * @returns An array of matching relationships.
    */
   async search({
     tenantId,
@@ -277,7 +310,12 @@ export class RelationshipRepo {
   }
 
   /**
-   * Get relationship count for an entity (for graph analysis)
+   * Gets the count of incoming and outgoing relationships for an entity.
+   * Useful for graph metrics and analysis.
+   *
+   * @param entityId - The entity ID.
+   * @param tenantId - The tenant ID.
+   * @returns An object with 'incoming' and 'outgoing' counts.
    */
   async getEntityRelationshipCount(
     entityId: string,
@@ -299,7 +337,8 @@ export class RelationshipRepo {
   }
 
   /**
-   * Upsert relationship in Neo4j (idempotent)
+   * Upserts a relationship into Neo4j.
+   * This is an idempotent operation that ensures the relationship exists with current properties.
    */
   private async upsertNeo4jRelationship({
     id,
@@ -337,7 +376,7 @@ export class RelationshipRepo {
   }
 
   /**
-   * Delete relationship from Neo4j
+   * Deletes a relationship from Neo4j by ID.
    */
   private async deleteNeo4jRelationship(id: string): Promise<void> {
     const session = this.neo4j.session();
@@ -356,7 +395,7 @@ export class RelationshipRepo {
   }
 
   /**
-   * Map database row to domain object
+   * Maps a database row to the Relationship domain object.
    */
   private mapRow(row: RelationshipRow): Relationship {
     return {

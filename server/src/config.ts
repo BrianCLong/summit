@@ -18,6 +18,10 @@ const Env = z
   })
   .passthrough(); // Allow extra env vars
 
+/**
+ * Parses and validates environment variables using Zod.
+ * Exits the process if validation fails or if insecure configurations are detected in production.
+ */
 export const cfg = (() => {
   const parsed = Env.safeParse(process.env);
   if (!parsed.success) {
@@ -84,7 +88,9 @@ export const cfg = (() => {
   return env;
 })();
 
-// Derived URLs for convenience
+/**
+ * Derived database connection strings for Redis, Postgres, and Neo4j.
+ */
 export const dbUrls = {
   redis: `redis://${cfg.REDIS_HOST}:${cfg.REDIS_PORT}`,
   postgres: cfg.DATABASE_URL,

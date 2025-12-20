@@ -1,6 +1,15 @@
 import { Pool } from 'pg';
 const pg = new Pool({ connectionString: process.env.DATABASE_URL });
 
+/**
+ * Computes the burn rate for a Service Level Objective (SLO).
+ * Checks latency, success rate, and cost against defined policies.
+ *
+ * @param runbook - The runbook ID.
+ * @param tenant - The tenant ID.
+ * @param window - The time window for calculation (default: '24h').
+ * @returns An object containing the metrics and the calculated burn rate.
+ */
 export async function computeBurn(
   runbook: string,
   tenant: string,
@@ -32,6 +41,12 @@ export async function computeBurn(
   return { p95, successRatePct: sr, costPerRunUsd: cost, burnRate: burn };
 }
 
+/**
+ * Determines if constrained mode should be enabled based on the burn rate.
+ *
+ * @param burn - The current burn rate.
+ * @returns `true` if the burn rate is >= 0.5, `false` otherwise.
+ */
 export function constrainedMode(burn: number) {
   return burn >= 0.5;
 }

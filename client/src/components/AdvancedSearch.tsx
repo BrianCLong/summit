@@ -20,19 +20,39 @@ const SEARCH_ENTITIES = gql`
   }
 `;
 
+/**
+ * Search filters interface.
+ */
 interface SearchFilters {
+  /** List of entity types to include in the search (e.g., 'person', 'organization'). */
   entityTypes: string[];
+  /** Range of confidence scores to include (0-100). */
   confidenceRange: [number, number];
+  /** Date range for the search (start date, end date). */
   dateRange: [string, string];
+  /** List of investigation IDs to filter by. */
   investigations: string[];
 }
 
+/**
+ * Props for the AdvancedSearch component.
+ */
 interface AdvancedSearchProps {
+  /** Callback function triggered when a search result is selected. */
   onResultSelect?: (result: any) => void;
+  /** Placeholder text for the search input. */
   placeholder?: string;
+  /** Whether to show the filters panel. Defaults to true. */
   showFilters?: boolean;
 }
 
+/**
+ * A comprehensive search component with advanced filtering capabilities.
+ * Supports searching entities, investigations, and actions with filters for entity type, confidence, and date range.
+ *
+ * @param props - The component props.
+ * @returns The rendered AdvancedSearch component.
+ */
 function AdvancedSearch({
   onResultSelect,
   placeholder = 'Search entities, investigations, or actions...',

@@ -22,6 +22,9 @@ import {
   Build,
 } from '@mui/icons-material';
 
+/**
+ * Represents release information.
+ */
 interface ReleaseInfo {
   version: string;
   buildDate: string;
@@ -31,12 +34,18 @@ interface ReleaseInfo {
   ready: boolean;
 }
 
+/**
+ * Represents a validation result for a deployment component.
+ */
 interface ValidationResult {
   component: string;
   status: 'pass' | 'fail' | 'warning';
   message: string;
 }
 
+/**
+ * Represents the status of a deployment.
+ */
 interface DeploymentStatus {
   validated: boolean;
   sbomGenerated: boolean;
@@ -45,6 +54,12 @@ interface DeploymentStatus {
   validations: ValidationResult[];
 }
 
+/**
+ * A dashboard component for tracking the status of a GA release.
+ * Displays release information, deployment validation status, and allows SBOM generation.
+ *
+ * @returns The rendered GAReleaseStatus component.
+ */
 const GAReleaseStatus: React.FC = () => {
   const [releaseInfo, setReleaseInfo] = useState<ReleaseInfo | null>(null);
   const [deploymentStatus, setDeploymentStatus] =

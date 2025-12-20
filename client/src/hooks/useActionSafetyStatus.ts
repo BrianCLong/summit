@@ -1,5 +1,11 @@
 import { useState, useEffect } from 'react';
 
+/**
+ * A hook to fetch the safety status of a specific action.
+ *
+ * @param actionId - The ID of the action to check.
+ * @returns An object containing the safety status, loading state, and any error.
+ */
 export const useActionSafetyStatus = (actionId: string) => {
   const [status, setStatus] = useState<{
     status: string;

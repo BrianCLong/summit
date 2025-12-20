@@ -1,6 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import $ from 'jquery';
 
+/**
+ * Represents an attested node in the trust system.
+ */
 interface AttestedNode {
   node_id: string;
   provider: string;
@@ -8,18 +11,31 @@ interface AttestedNode {
   verified: boolean;
 }
 
+/**
+ * Represents a Data Loss Prevention (DLP) finding.
+ */
 interface DlpFinding {
   kind: string;
   severity: string;
   stepId: string;
 }
 
+/**
+ * Represents a Differential Privacy (DP) budget.
+ */
 interface DpBudget {
   tenant: string;
   dataset: string;
   remaining: number;
 }
 
+/**
+ * A dashboard component for monitoring trust and security metrics.
+ * Displays attested nodes, DLP incidents, and DP budgets.
+ * Connects to a server-sent events stream for real-time updates.
+ *
+ * @returns The rendered TrustBoard component.
+ */
 export default function TrustBoard() {
   const [rows, setRows] = useState<AttestedNode[]>([]);
   const [dlp, setDlp] = useState<DlpFinding[]>([]);

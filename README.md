@@ -314,8 +314,8 @@ This executes focused Jest suites for the engine core and REST endpoints while k
 │                 │    │                 │    │                 │
 │ • Investigation │    │ • Authentication│    │ • Graph Data    │
 │ • Graph Viz     │    │ • CRUD Ops      │    │ • Relationships │
-│ • Real-time UI  │    │ • Subscriptions │    │ • Analytics     │
-│ • Material-UI   │    │ • Rate Limiting │    │ • Constraints   │
+│ • Real-time UI  │    │ • Subscriptions │    │ • Rate Limiting │
+│ • Material-UI   │    │ • Rate Limiting │    │ • Analytics     │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 
                        ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
@@ -1027,4 +1027,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Summit Platform** - Next-Generation Intelligence Analysis
+**Summit Platform** - Next-Gen Intelligence Analysis

@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
+/**
+ * Represents a node in the graph.
+ */
 interface GraphNode {
   id: string;
   type: string;
@@ -10,6 +13,9 @@ interface GraphNode {
   confidence?: number;
 }
 
+/**
+ * Represents an edge in the graph.
+ */
 interface GraphEdge {
   id: string;
   source: string;
@@ -19,6 +25,9 @@ interface GraphEdge {
   confidence?: number;
 }
 
+/**
+ * Props for the GraphPreview component.
+ */
 interface GraphPreviewProps {
   width?: number;
   height?: number;
@@ -29,6 +38,13 @@ interface GraphPreviewProps {
   title?: string;
 }
 
+/**
+ * A canvas-based component for visualizing a preview of a graph.
+ * Features simple physics simulation for node layout and basic interactivity.
+ *
+ * @param props - The component props.
+ * @returns The rendered GraphPreview component.
+ */
 function GraphPreview({
   width = 400,
   height = 300,

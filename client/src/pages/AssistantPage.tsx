@@ -2,6 +2,13 @@ import React from 'react';
 import EnhancedAIAssistant from '@/components/ai-enhanced/EnhancedAIAssistant';
 import { makeAssistantTransport } from '@/lib/assistant/factory';
 
+/**
+ * Page component for the AI Assistant interface.
+ * Configures the transport layer for the assistant based on environment variables.
+ * Renders the EnhancedAIAssistant component.
+ *
+ * @returns The rendered AssistantPage component.
+ */
 export default function AssistantPage() {
   const mode = (import.meta as any).env?.VITE_ASSISTANT_TRANSPORT ?? 'fetch';
   const transport = React.useMemo(

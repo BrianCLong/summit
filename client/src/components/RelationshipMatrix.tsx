@@ -2,16 +2,30 @@ import React from 'react';
 import { Box, Tooltip, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
+/**
+ * Represents the count of relationships between two entity types.
+ */
 interface RelationshipCount {
   fromType: string;
   toType: string;
   count: number;
 }
 
+/**
+ * Props for the RelationshipMatrix component.
+ */
 interface RelationshipMatrixProps {
   data: RelationshipCount[];
 }
 
+/**
+ * A component that displays a heat map matrix of relationships between entity types.
+ * Rows represent the source type, and columns represent the target type.
+ * Clicking a cell navigates to a filtered relationship view.
+ *
+ * @param props - The component props.
+ * @returns The rendered RelationshipMatrix component.
+ */
 const RelationshipMatrix: React.FC<RelationshipMatrixProps> = ({ data }) => {
   const navigate = useNavigate();
 

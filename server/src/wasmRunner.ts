@@ -1,13 +1,30 @@
 import { promises as fs } from 'fs';
 import { WASI } from 'wasi';
 
+/**
+ * Capabilities configuration for the WASM runner.
+ */
 type WasmCaps = {
+  /** Enable network access (not fully implemented in this MVP). */
   network?: boolean;
+  /** Enable filesystem access (preopens '/'). */
   fs?: boolean;
+  /** Max CPU time in milliseconds. */
   cpuMs?: number;
+  /** Max memory usage in megabytes. */
   memMb?: number;
 };
 
+/**
+ * Runs a WebAssembly module (WASM) as a step in a workflow.
+ * Uses WASI for system interface and enforces resource limits (CPU, memory).
+ *
+ * @param wasmPath - The path to the .wasm file.
+ * @param input - The input data to pass to the module.
+ * @param caps - The capabilities to grant to the module.
+ * @returns The JSON output from the module.
+ * @throws Error if the module times out, runs out of memory, or lacks required exports.
+ */
 export async function runWasmStep(
   wasmPath: string,
   input: unknown,

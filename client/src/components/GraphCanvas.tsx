@@ -1,4 +1,3 @@
- 
 import React, { useEffect, useRef } from 'react';
 import cytoscape, { ElementDefinition } from 'cytoscape';
 import $ from 'jquery';
@@ -12,6 +11,8 @@ import { io, Socket } from 'socket.io-client';
  * jQuery interactions plus live updates via Socket.IO.
  * It manages basic drag events and listens for backend
  * node/edge additions, dispatching them into Redux.
+ *
+ * @returns The rendered GraphCanvas component.
  */
 const GraphCanvas: React.FC = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);

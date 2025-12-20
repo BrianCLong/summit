@@ -12,6 +12,14 @@ interface PresencePillProps {
   platformWide?: boolean;
 }
 
+/**
+ * Displays active users present in a specific context (case or platform-wide).
+ * Uses avatars and an overflow counter to show who is currently online.
+ *
+ * @param props - The component props.
+ * @param props.caseId - The ID of the case context (optional).
+ * @param props.platformWide - Whether to show presence for the entire platform (default: false).
+ */
 export function PresencePill({
   caseId,
   platformWide = false,

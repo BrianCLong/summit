@@ -55,15 +55,31 @@ interface TrustCenterReport {
   createdAt: Date;
 }
 
+/**
+ * Service for generating audit exports, compliance reports, and SLSA attestations.
+ * Acts as the central hub for trust and transparency operations.
+ */
 export class TrustCenterService {
   private readonly signingKey: string;
   private readonly timestampService?: string;
 
+  /**
+   * Initializes the TrustCenterService.
+   * Sets up signing keys and optional timestamp service URL.
+   */
   constructor() {
     this.signingKey = process.env.TRUST_CENTER_SIGNING_KEY || '';
     this.timestampService = process.env.TIMESTAMP_SERVICE_URL; // Optional 3rd-party timestamping
   }
 
+  /**
+   * Initiates the creation of an audit export report.
+   * Returns a report ID immediately and processes the generation asynchronously.
+   *
+   * @param request - The audit export request details.
+   * @param userId - The ID of the user requesting the export.
+   * @returns The unique ID of the report being generated.
+   */
   async createAuditExport(
     request: AuditExportRequest,
     userId: string,
@@ -104,6 +120,13 @@ export class TrustCenterService {
     }
   }
 
+  /**
+   * Generates the audit export data asynchronously and saves it to storage.
+   * Handles different formats (JSON, CSV, PDF) and signs the output.
+   *
+   * @param reportId - The ID of the report to generate.
+   * @param request - The request details.
+   */
   private async generateAuditExportAsync(
     reportId: string,
     request: AuditExportRequest,
@@ -182,6 +205,12 @@ export class TrustCenterService {
     }
   }
 
+  /**
+   * Collects raw audit data from various sources based on the request criteria.
+   *
+   * @param request - The audit export request.
+   * @returns The collected audit data object.
+   */
   private async collectAuditData(request: AuditExportRequest): Promise<any> {
     const pool = getPostgresPool();
     const auditData: any = {
@@ -255,6 +284,13 @@ export class TrustCenterService {
     return auditData;
   }
 
+  /**
+   * Generates a Supply-chain Levels for Software Artifacts (SLSA) attestation for a specific run.
+   *
+   * @param runId - The ID of the run.
+   * @param tenantId - The tenant ID.
+   * @returns The generated SLSA attestation object.
+   */
   async generateSLSAAttestation(
     runId: string,
     tenantId: string,
@@ -374,6 +410,13 @@ export class TrustCenterService {
     }
   }
 
+  /**
+   * Generates a Software Bill of Materials (SBOM) for a run.
+   * Includes models and MCP servers used.
+   *
+   * @param runId - The ID of the run.
+   * @returns The generated SBOM object.
+   */
   async generateSBOMReport(runId: string): Promise<any> {
     const span = otelService.createSpan('trust_center.generate_sbom');
 
@@ -459,6 +502,14 @@ export class TrustCenterService {
     }
   }
 
+  /**
+   * Checks compliance status against a specific framework (SOC2, ISO27001, etc.).
+   * Currently returns mock data for demonstration.
+   *
+   * @param tenantId - The tenant ID.
+   * @param framework - The compliance framework to check against.
+   * @returns An object detailing compliance status.
+   */
   async checkComplianceStatus(
     tenantId: string,
     framework: 'SOC2' | 'ISO27001' | 'HIPAA' | 'PCI',
@@ -523,6 +574,12 @@ export class TrustCenterService {
     };
   }
 
+  /**
+   * Signs content using the configured signing key.
+   *
+   * @param content - The content string to sign.
+   * @returns The base64 encoded signature.
+   */
   private signContent(content: string): string {
     if (!this.signingKey) {
       return 'UNSIGNED';
@@ -533,6 +590,12 @@ export class TrustCenterService {
     return sign.sign(this.signingKey, 'base64');
   }
 
+  /**
+   * Converts structured audit data into a CSV string.
+   *
+   * @param data - The audit data object.
+   * @returns A CSV formatted string.
+   */
   private convertToCSV(data: any): string {
     // Simple CSV conversion for audit data
     const lines: string[] = [];
@@ -558,17 +621,31 @@ export class TrustCenterService {
           `${row.created_at},${row.run_id},${row.selected_model},${JSON.parse(row.candidates || '[]').length},${row.override_reason || ''}`,
         );
       });
+      lines.push('');
     }
 
     return lines.join('\n');
   }
 
+  /**
+   * Generates a PDF report from audit data.
+   * Currently returns a text placeholder.
+   *
+   * @param data - The audit data.
+   * @returns A promise resolving to the PDF content (or text placeholder).
+   */
   private async generatePDFReport(data: any): Promise<string> {
     // In production, use a PDF library like Puppeteer or PDFKit
     // For now, return a simple text representation
     return `MAESTRO AUDIT REPORT\n\nGenerated: ${new Date().toISOString()}\n\nTenant: ${data.metadata.tenantId}\n\nTime Range: ${data.metadata.timeRange.start} to ${data.metadata.timeRange.end}\n\n[PDF content would be rendered here with charts and tables]`;
   }
 
+  /**
+   * Submits content hash to a third-party timestamping service.
+   *
+   * @param content - The content to timestamp.
+   * @param reportId - The report ID associated with the content.
+   */
   private async submitToTimestampService(
     content: string,
     reportId: string,
@@ -585,6 +662,14 @@ export class TrustCenterService {
     }
   }
 
+  /**
+   * Generates a comprehensive audit report covering multiple aspects (policy, evidence, metrics, compliance).
+   * Saves the report to the database and returns it in the requested format.
+   *
+   * @param tenantId - The tenant ID.
+   * @param options - Configuration options for the report.
+   * @returns The report data or formatted output.
+   */
   async generateComprehensiveAuditReport(
     tenantId: string,
     options: {
@@ -720,6 +805,9 @@ export class TrustCenterService {
     }
   }
 
+  /**
+   * Calculates the overall risk level based on policy denials, evidence integrity, and compliance status.
+   */
   private calculateRiskLevel(
     auditSections: any,
     complianceResults: any[],
@@ -748,6 +836,9 @@ export class TrustCenterService {
     return 'low';
   }
 
+  /**
+   * Generates actionable recommendations based on audit findings.
+   */
   private generateRecommendations(
     auditSections: any,
     complianceResults: any[],
@@ -805,6 +896,9 @@ export class TrustCenterService {
     return recommendations;
   }
 
+  /**
+   * Helper to gather all relevant audit data sections from the database.
+   */
   private async gatherAuditSections(
     tenantId: string,
     startDate: string,
@@ -860,6 +954,9 @@ export class TrustCenterService {
     return sections;
   }
 
+  /**
+   * Converts a comprehensive report to CSV format.
+   */
   private convertToCSVEnhanced(data: any): string {
     const lines: string[] = [];
 
@@ -942,6 +1039,9 @@ export class TrustCenterService {
     return lines.join('\n');
   }
 
+  /**
+   * Converts a comprehensive report to a formatted PDF buffer.
+   */
   private async convertToPDFEnhanced(data: any): Promise<Buffer> {
     const content = `
 INTELGRAPH COMPREHENSIVE AUDIT REPORT

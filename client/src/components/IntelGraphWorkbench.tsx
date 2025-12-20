@@ -45,6 +45,9 @@ import {
 } from '@mui/material';
 
 // ---- Types ----
+/**
+ * Represents a node in the graph.
+ */
 type GraphNode = {
   id: string;
   label?: string;
@@ -61,6 +64,9 @@ type GraphNode = {
   [k: string]: any;
 };
 
+/**
+ * Represents an edge (link) in the graph.
+ */
 type GraphLink = {
   source: string | GraphNode;
   target: string | GraphNode;
@@ -70,7 +76,14 @@ type GraphLink = {
   [k: string]: any;
 };
 
+/**
+ * Represents the graph data structure.
+ */
 type GraphData = { nodes: GraphNode[]; links: GraphLink[] };
+
+/**
+ * Available layout options for the graph.
+ */
 type LayoutOption = 'force' | 'dagre' | 'radial';
 
 // ---- Utilities ----
@@ -86,6 +99,10 @@ const palette = [
   '#22c55e',
   '#06b6d4',
 ];
+
+/**
+ * Groups array elements by a key.
+ */
 const groupBy = <T, K extends string | number>(
   arr: T[],
   key: (item: T) => K,
@@ -99,6 +116,10 @@ const groupBy = <T, K extends string | number>(
 const by = <T,>(arr: T[], key: (t: T) => string | number) =>
   groupBy(arr, key);
 
+/**
+ * Computes Louvain-like communities for the graph nodes.
+ * A simple disjoint-set based implementation for community detection.
+ */
 function louvainLikeCommunities(data: GraphData): Record<string, string> {
   const parent: Record<string, string> = {};
   const find = (x: string): string =>
@@ -119,6 +140,9 @@ function louvainLikeCommunities(data: GraphData): Record<string, string> {
   return res;
 }
 
+/**
+ * Computes the degree of each node in the graph.
+ */
 function computeDegrees(data: GraphData): Record<string, number> {
   const deg: Record<string, number> = {};
   data.nodes.forEach((node) => (deg[node.id] = 0));
@@ -226,7 +250,13 @@ const mock: GraphData = {
   ],
 };
 
-// Main component
+/**
+ * A sophisticated graph analysis and visualization component.
+ * Integrates ForceGraph2D for network visualization and DeckGL/MapLibre for geospatial analysis.
+ * Supports filtering, layout switching, inspection, and data fetching via GraphQL.
+ *
+ * @returns The IntelGraphWorkbench component.
+ */
 export function IntelGraphWorkbench() {
   const fgRef = useRef<any>(null);
   const [graphData, setGraphData] = useState<GraphData>({

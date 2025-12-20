@@ -41,6 +41,10 @@ interface JWTPayload {
   scopes?: string[];
 }
 
+/**
+ * Manages JWT security features including key rotation, token signing,
+ * verification with replay protection, and JWKS exposure.
+ */
 class JWTSecurityManager {
   private config: JWTConfig;
   private redis: any;
@@ -52,6 +56,10 @@ class JWTSecurityManager {
     this.redis = createClient({ url: config.redisUrl });
   }
 
+  /**
+   * Initializes the security manager.
+   * Connects to Redis, loads the current key, and schedules key rotation.
+   */
   async initialize(): Promise<void> {
     console.log('🔐 Initializing JWT Security Manager...');
 
@@ -199,7 +207,12 @@ class JWTSecurityManager {
   }
 
   /**
-   * Sign a JWT with the current key
+   * Signs a JWT payload with the current signing key.
+   * Adds standard claims (iss, aud, iat, exp, jti) and the key ID (kid) header.
+   *
+   * @param payload - The partial payload to sign.
+   * @returns The signed JWT string.
+   * @throws Error if no current key is available.
    */
   async signToken(payload: Partial<JWTPayload>): Promise<string> {
     if (!this.currentKey) {
@@ -232,7 +245,12 @@ class JWTSecurityManager {
   }
 
   /**
-   * Verify and validate JWT with replay protection
+   * Verifies a JWT token.
+   * Validates the signature using the correct key (based on kid), checks claims, and prevents replay attacks via JTI.
+   *
+   * @param token - The JWT string to verify.
+   * @returns The decoded payload if valid.
+   * @throws Error if verification fails.
    */
   async verifyToken(token: string): Promise<JWTPayload> {
     try {
@@ -318,7 +336,9 @@ class JWTSecurityManager {
   }
 
   /**
-   * Get public keys for external verification (JWKS endpoint)
+   * Gets public keys formatted for JWKS (JSON Web Key Set) usage.
+   *
+   * @returns An array of public key objects.
    */
   async getPublicKeys(): Promise<any[]> {
     const keys = [];
@@ -364,7 +384,9 @@ class JWTSecurityManager {
   }
 
   /**
-   * Health check for JWT security
+   * Checks the health status of the JWT security manager.
+   *
+   * @returns An object describing health status (healthy, degraded, unhealthy) and details.
    */
   async healthCheck(): Promise<{
     status: 'healthy' | 'degraded' | 'unhealthy';
@@ -399,7 +421,7 @@ class JWTSecurityManager {
   }
 
   /**
-   * Graceful shutdown
+   * Gracefully shuts down the manager, closing the Redis connection.
    */
   async shutdown(): Promise<void> {
     console.log('🛑 Shutting down JWT Security Manager...');
@@ -410,7 +432,12 @@ class JWTSecurityManager {
   }
 }
 
-// Factory function for creating JWT security manager
+/**
+ * Factory function to create a JWT Security Manager instance with default configuration.
+ *
+ * @param config - Optional configuration overrides.
+ * @returns A new JWTSecurityManager instance.
+ */
 export function createJWTSecurityManager(
   config: Partial<JWTConfig>,
 ): JWTSecurityManager {
