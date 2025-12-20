@@ -31,6 +31,7 @@ permissions:
 
 env:
   COSIGN_EXPERIMENTAL: '1'
+  SBOM_EXCLUDES: "**/node_modules/.cache/** **/dist/** **/.git/** **/coverage/**"
 
 jobs:
   sbom-generate:
@@ -66,6 +67,18 @@ jobs:
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3
 
+      - name: Validate exclusion patterns
+        run: |
+          for pattern in $SBOM_EXCLUDES; do
+            case "$pattern" in
+              *maestro*|*platform-sre*|*companyos*|*supply-chain*)
+                echo "::error::Exclusion pattern $pattern overlaps a target service path"
+                exit 1
+                ;;
+            esac
+          done
+          echo "SBOM exclusions verified for maestro, platform-sre, companyos, and supply-chain targets."
+
       - name: Generate SBOM with Syft
         id: syft
         run: |
@@ -77,9 +90,7 @@ jobs:
             -o cyclonedx-json \
             --file "$SBOM_PATH" \
             --scope all-layers \
-            --exclude '**/node_modules/.cache/**' \
-            --exclude '**/dist/**' \
-            --exclude '**/.git/**'
+            $(for pattern in $SBOM_EXCLUDES; do printf -- "--exclude %s " "$pattern"; done)
 
           # Calculate digest
           DIGEST=$(sha256sum "$SBOM_PATH" | cut -d' ' -f1)

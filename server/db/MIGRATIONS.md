@@ -55,6 +55,12 @@ npm run db:restore -- --restore /tmp/db.sql
 npm run db:migrate:test
 ```
 
+## Online migration toolkit (expand/contract helpers)
+- Helpers live in `src/db/online-migrations` (expand/contract phases, dual-writes, backfills, parity checks).
+- Managed migration `202604150001_online_migration_toolkit.up.sql` seeds the tracking tables and adds the example column used by `runExampleDisplayNameMigration`.
+- Templates and docs: `server/templates/online-migration/expand-contract.template.ts` and `docs/online-migration-toolkit.md`.
+- Metrics are exposed via the `migrationMetricsRegistry` Prometheus registry (`online_migration_*` series).
+
 ## Adding migrations
 1. Add paired files under `db/managed-migrations` following `YYYYMMDDHHMM_name.up.sql`/`down.sql`.
 2. Keep changes additive to preserve zero-downtime.

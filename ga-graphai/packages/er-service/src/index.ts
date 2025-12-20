@@ -1,4 +1,4 @@
-import { createHash, randomUUID } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 import type {
   AuditEntry,
   CandidateRequest,
@@ -8,8 +8,33 @@ import type {
   ExplainResponse,
   MergeRecord,
   MergeRequest,
-  FeatureContribution,
 } from './types.js';
+
+export interface StructuredLogger {
+  info?(event: string, payload?: Record<string, unknown>): void;
+  warn?(event: string, payload?: Record<string, unknown>): void;
+  error?(event: string, payload?: Record<string, unknown>): void;
+}
+
+export interface MetricsRecorder {
+  observe?(metric: string, value: number, attributes?: Record<string, string | number>): void;
+  increment?(metric: string, value?: number, attributes?: Record<string, string | number>): void;
+}
+
+export interface TraceSpan {
+  end(attributes?: Record<string, unknown>): void;
+  recordException?(error: unknown): void;
+}
+
+export interface Tracer {
+  startSpan(name: string, attributes?: Record<string, unknown>): TraceSpan | undefined;
+}
+
+export interface ObservabilityOptions {
+  logger?: StructuredLogger;
+  metrics?: MetricsRecorder;
+  tracer?: Tracer;
+}
 
 function tokenize(text: string): string[] {
   return text
@@ -84,7 +109,6 @@ function propertyOverlap(a: EntityRecord, b: EntityRecord): number {
 function buildCandidateScore(
   entity: EntityRecord,
   candidate: EntityRecord,
-  seed: string,
 ): CandidateScore {
   const nameTokensA = tokenize(entity.name);
   const nameTokensB = tokenize(candidate.name);
@@ -112,26 +136,6 @@ function buildCandidateScore(
     features.semanticSimilarity * 0.2 +
     features.phoneticSimilarity * 0.05 +
     features.editDistance * 0.05;
-  const weightMap: Record<keyof CandidateScore['features'], number> = {
-    nameSimilarity: 0.35,
-    typeMatch: 0.2,
-    propertyOverlap: 0.15,
-    semanticSimilarity: 0.2,
-    phoneticSimilarity: 0.05,
-    editDistance: 0.05,
-  };
-  const contributions: FeatureContribution[] = Object.entries(features)
-    .map(([feature, value]) => ({
-      feature: feature as keyof CandidateScore['features'],
-      weight: weightMap[feature as keyof CandidateScore['features']],
-      value: typeof value === 'boolean' ? (value ? 1 : 0) : value,
-      contribution:
-        weightMap[feature as keyof CandidateScore['features']] *
-        (typeof value === 'boolean' ? (value ? 1 : 0) : value),
-      rank: 0,
-    }))
-    .sort((a, b) => b.contribution - a.contribution)
-    .map((item, index) => ({ ...item, rank: index + 1 }));
   const rationale = [
     `Name similarity ${(features.nameSimilarity * 100).toFixed(1)}%`,
     `Type ${features.typeMatch ? 'matches' : 'differs'}`,
@@ -150,16 +154,7 @@ function buildCandidateScore(
     score: Number(score.toFixed(3)),
     features,
     rationale,
-    contributions,
-    seed,
   };
-}
-
-function stableRequestId(seed: string, entityId: string): string {
-  const hash = createHash('sha256');
-  hash.update(seed);
-  hash.update(entityId);
-  return hash.digest('hex').slice(0, 24);
 }
 
 export class EntityResolutionService {
@@ -167,7 +162,14 @@ export class EntityResolutionService {
   private readonly explanations = new Map<string, ExplainResponse>();
   private readonly auditLog: AuditEntry[] = [];
 
-  constructor(private readonly clock: () => Date = () => new Date()) {}
+  private readonly observability: ObservabilityOptions;
+
+  constructor(
+    private readonly clock: () => Date = () => new Date(),
+    observability: ObservabilityOptions = {},
+  ) {
+    this.observability = observability;
+  }
 
   getAuditLog(): readonly AuditEntry[] {
     return this.auditLog;
@@ -178,24 +180,48 @@ export class EntityResolutionService {
   }
 
   candidates(request: CandidateRequest): CandidateResponse {
+    const startedAt = Date.now();
+    const span = this.startSpan('intelgraph.entities.candidates', {
+      tenantId: request.tenantId,
+      entityId: request.entity.id,
+    });
     const topK = request.topK ?? 5;
-    const seed = request.seed ?? 'er-default-seed';
-    const requestId = stableRequestId(seed, request.entity.id);
     const population = request.population.filter(
       (candidate) => candidate.tenantId === request.tenantId,
     );
     const scored = population
       .filter((candidate) => candidate.id !== request.entity.id)
-      .map((candidate) => buildCandidateScore(request.entity, candidate, seed))
+      .map((candidate) => buildCandidateScore(request.entity, candidate))
       .sort((a, b) => b.score - a.score)
       .slice(0, topK);
+    const durationMs = Date.now() - startedAt;
+    this.logInfo('intelgraph.entities.candidates', {
+      tenantId: request.tenantId,
+      entityId: request.entity.id,
+      durationMs,
+      candidates: scored.length,
+      topScore: scored[0]?.score,
+    });
+    this.metricsObserve('intelgraph_er_candidates_ms', durationMs, {
+      tenantId: request.tenantId,
+    });
+    this.metricsIncrement('intelgraph_er_candidates_total', 1, {
+      tenantId: request.tenantId,
+    });
+    span?.end({ durationMs, candidateCount: scored.length, topScore: scored[0]?.score });
     return {
-      requestId,
+      requestId: randomUUID(),
       candidates: scored,
     };
   }
 
   merge(request: MergeRequest, featureSource: CandidateScore): MergeRecord {
+    const startedAt = Date.now();
+    const span = this.startSpan('intelgraph.entities.merge', {
+      tenantId: request.tenantId,
+      primaryId: request.primaryId,
+      duplicateId: request.duplicateId,
+    });
     const mergeId = randomUUID();
     const record: MergeRecord = {
       mergeId,
@@ -221,25 +247,43 @@ export class EntityResolutionService {
     this.explanations.set(mergeId, {
       mergeId,
       features: featureSource.features,
-      contributions: featureSource.contributions,
       rationale: [
         ...featureSource.rationale,
         `Final score ${featureSource.score}`,
       ],
       policyTags: request.policyTags,
       createdAt: record.mergedAt,
-      score: featureSource.score,
-      seed: featureSource.seed,
     });
+    const durationMs = Date.now() - startedAt;
+    this.logInfo('intelgraph.entities.merge', {
+      tenantId: request.tenantId,
+      mergeId,
+      durationMs,
+      policyTags: request.policyTags,
+    });
+    this.metricsIncrement('intelgraph_er_merges_total', 1, {
+      tenantId: request.tenantId,
+    });
+    this.metricsObserve('intelgraph_er_merge_ms', durationMs, {
+      tenantId: request.tenantId,
+    });
+    span?.end({ durationMs, mergeId });
     return record;
   }
 
   revertMerge(mergeId: string, actor: string, reason: string): void {
+    const startedAt = Date.now();
+    const span = this.startSpan('intelgraph.entities.merge.revert', {
+      mergeId,
+      actor,
+    });
     const record = this.merges.get(mergeId);
     if (!record) {
+      span?.recordException?.(`Merge ${mergeId} not found`);
       throw new Error(`Merge ${mergeId} not found`);
     }
     if (!record.reversible) {
+      span?.recordException?.(`Merge ${mergeId} is locked`);
       throw new Error(`Merge ${mergeId} is locked`);
     }
     this.merges.delete(mergeId);
@@ -252,6 +296,15 @@ export class EntityResolutionService {
       reason,
       createdAt: this.clock().toISOString(),
     });
+    const durationMs = Date.now() - startedAt;
+    this.logInfo('intelgraph.entities.merge.revert', {
+      mergeId,
+      actor,
+      durationMs,
+    });
+    this.metricsIncrement('intelgraph_er_reverts_total');
+    this.metricsObserve('intelgraph_er_revert_ms', durationMs);
+    span?.end({ durationMs });
   }
 
   explain(mergeId: string): ExplainResponse {
@@ -259,32 +312,35 @@ export class EntityResolutionService {
     if (!explanation) {
       throw new Error(`Explanation for merge ${mergeId} not found`);
     }
+    this.logInfo('intelgraph.entities.merge.explain', {
+      mergeId,
+      featureCount: Object.keys(explanation.features).length,
+    });
     return explanation;
   }
 
-  explainPair(
-    entity: EntityRecord,
-    candidate: EntityRecord,
-    tenantId: string,
-    seed = 'er-default-seed',
-  ): ExplainResponse {
-    if (entity.tenantId !== tenantId || candidate.tenantId !== tenantId) {
-      throw new Error('Tenant mismatch for explanation');
-    }
-    const candidateScore = buildCandidateScore(entity, candidate, seed);
-    return {
-      mergeId: `${entity.id}:${candidate.id}`,
-      features: candidateScore.features,
-      contributions: candidateScore.contributions,
-      rationale: [
-        ...candidateScore.rationale,
-        `Final score ${candidateScore.score}`,
-      ],
-      policyTags: [],
-      createdAt: this.clock().toISOString(),
-      score: candidateScore.score,
-      seed,
-    };
+  private logInfo(event: string, payload: Record<string, unknown>): void {
+    this.observability.logger?.info?.(event, payload);
+  }
+
+  private metricsObserve(
+    metric: string,
+    value: number,
+    attributes?: Record<string, string | number>,
+  ): void {
+    this.observability.metrics?.observe?.(metric, value, attributes);
+  }
+
+  private metricsIncrement(
+    metric: string,
+    value = 1,
+    attributes?: Record<string, string | number>,
+  ): void {
+    this.observability.metrics?.increment?.(metric, value, attributes);
+  }
+
+  private startSpan(name: string, attributes?: Record<string, unknown>): TraceSpan | undefined {
+    return this.observability.tracer?.startSpan?.(name, attributes);
   }
 }
 
@@ -297,10 +353,4 @@ export type {
   ExplainResponse,
   MergeRecord,
   MergeRequest,
-  FeatureContribution,
-  AdjudicationDecision,
-  AdjudicationDecisionInput,
-  AdjudicationQuery,
 } from './types.js';
-
-export { AdjudicationQueue } from './adjudicationQueue.js';

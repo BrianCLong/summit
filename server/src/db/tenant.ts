@@ -8,10 +8,7 @@
 import { ManagedPostgresPool } from './postgres.js';
 // @ts-ignore
 import { QueryResult } from 'pg';
-
-interface TenantContext {
-  tenantId: string;
-}
+import { TenantContext } from '../tenancy/types.js';
 
 /**
  * Wraps a query to enforce tenant isolation.
@@ -125,4 +122,19 @@ export const queryForTenant = async (
 ): Promise<QueryResult> => {
   const scoped = withTenant(query, params, tenantId);
   return pool.query(scoped.text, scoped.values);
+};
+
+/**
+ * Enforce tenant context at the DB boundary.
+ */
+export const queryWithTenantContext = async (
+  pool: ManagedPostgresPool,
+  context: TenantContext,
+  query: string,
+  params: any[] = [],
+): Promise<QueryResult> => {
+  if (!context?.tenantId) {
+    throw new Error('Tenant context is required for tenant-scoped queries');
+  }
+  return queryForTenant(pool, context.tenantId, query, params);
 };

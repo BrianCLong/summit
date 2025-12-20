@@ -19,8 +19,6 @@ export interface CandidateScore {
     editDistance: number;
   };
   rationale: string[];
-  contributions: FeatureContribution[];
-  seed: string;
 }
 
 export interface CandidateResponse {
@@ -34,7 +32,6 @@ export interface CandidateRequest {
   population: EntityRecord[];
   topK?: number;
   policyTags?: string[];
-  seed?: string;
 }
 
 export interface MergeRequest {
@@ -61,12 +58,9 @@ export interface MergeRecord {
 export interface ExplainResponse {
   mergeId: string;
   features: CandidateScore['features'];
-  contributions: FeatureContribution[];
   rationale: string[];
   policyTags: string[];
   createdAt: string;
-  score: number;
-  seed: string;
 }
 
 export interface AuditEntry {
@@ -77,35 +71,4 @@ export interface AuditEntry {
   target: string;
   reason: string;
   createdAt: string;
-}
-
-export interface FeatureContribution {
-  feature: keyof CandidateScore['features'];
-  weight: number;
-  value: number;
-  contribution: number;
-  rank: number;
-}
-
-export interface AdjudicationDecisionInput {
-  tenantId: string;
-  actor: string;
-  action: 'merge' | 'split';
-  reason: string;
-  targetId: string;
-  payload?: Record<string, unknown>;
-}
-
-export interface AdjudicationDecision extends AdjudicationDecisionInput {
-  id: string;
-  status: 'queued' | 'resolved';
-  createdAt: string;
-  resolvedAt?: string;
-  resolutionNote?: string;
-}
-
-export interface AdjudicationQuery {
-  tenantId?: string;
-  status?: AdjudicationDecision['status'];
-  action?: AdjudicationDecision['action'];
 }

@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   EntityResolutionService,
   type CandidateScore,
@@ -25,9 +25,6 @@ describe('EntityResolutionService', () => {
     });
     expect(candidates[0].entityId).toBe('p-2');
     expect(candidates[0].score).toBeGreaterThan(0.8);
-    expect(candidates[0].seed).toBe('er-default-seed');
-    expect(candidates[0].contributions[0].feature).toBe('nameSimilarity');
-    expect(candidates[0].contributions[0].weight).toBeGreaterThan(0);
   });
 
   it('merges duplicates and supports explain + revert', () => {
@@ -55,8 +52,6 @@ describe('EntityResolutionService', () => {
     const explanation = service.explain(merge.mergeId);
     expect(explanation.features.nameSimilarity).toBeGreaterThan(0.7);
     expect(explanation.policyTags).toContain('er:manual-review');
-    expect(explanation.contributions[0].rank).toBe(1);
-    expect(explanation.seed).toBe(top.seed);
     service.revertMerge(
       merge.mergeId,
       'lead@example.com',
@@ -69,28 +64,66 @@ describe('EntityResolutionService', () => {
     expect(events[1].event).toBe('revert');
   });
 
-  it('returns deterministic explanations for a pair', () => {
+  it('emits structured observability for entity extraction workflows', () => {
+    const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() };
+    const metrics = { observe: vi.fn(), increment: vi.fn() };
+    const spans: { name: string; end: ReturnType<typeof vi.fn> }[] = [];
+    const tracer = {
+      startSpan: vi.fn((name: string) => {
+        const end = vi.fn();
+        const span = { name, end, recordException: vi.fn() };
+        spans.push({ name, end });
+        return span;
+      }),
+    };
+
     const service = new EntityResolutionService(
-      () => new Date('2024-03-03T12:00:00Z'),
+      () => new Date('2024-03-03T00:00:00Z'),
+      { logger, metrics, tracer },
     );
-    const alice = fixture.entities[0];
-    const alyce = fixture.entities[1];
-    const explainA = service.explainPair(
-      alice,
-      alyce,
-      fixture.tenantId,
-      'seed-123',
+
+    const { candidates } = service.candidates({
+      tenantId: fixture.tenantId,
+      entity: fixture.entities[0],
+      population: fixture.entities,
+      topK: 2,
+    });
+
+    const merge = service.merge(
+      {
+        tenantId: fixture.tenantId,
+        primaryId: fixture.entities[0].id,
+        duplicateId: candidates[0].entityId,
+        actor: 'observer@example.com',
+        reason: 'Consolidation',
+        policyTags: ['er:observed'],
+      },
+      candidates[0],
     );
-    const explainB = service.explainPair(
-      alice,
-      alyce,
-      fixture.tenantId,
-      'seed-123',
+
+    expect(logger.info).toHaveBeenCalledWith(
+      'intelgraph.entities.candidates',
+      expect.objectContaining({
+        entityId: fixture.entities[0].id,
+        candidates: 2,
+      }),
     );
-    expect(explainA.seed).toBe('seed-123');
-    expect(explainA.score).toBeCloseTo(explainB.score);
-    expect(explainA.contributions.map((c) => c.contribution)).toEqual(
-      explainB.contributions.map((c) => c.contribution),
+    expect(metrics.observe).toHaveBeenCalledWith(
+      'intelgraph_er_candidates_ms',
+      expect.any(Number),
+      expect.objectContaining({ tenantId: fixture.tenantId }),
     );
+    expect(metrics.increment).toHaveBeenCalledWith(
+      'intelgraph_er_merges_total',
+      1,
+      expect.objectContaining({ tenantId: fixture.tenantId }),
+    );
+    expect(tracer.startSpan).toHaveBeenCalledWith(
+      'intelgraph.entities.merge',
+      expect.objectContaining({ tenantId: fixture.tenantId }),
+    );
+    expect(spans.some((span) => span.end.mock.calls.length > 0)).toBe(true);
+
+    service.revertMerge(merge.mergeId, 'observer@example.com', 'test revert');
   });
 });
