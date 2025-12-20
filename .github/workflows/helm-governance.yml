@@ -4,19 +4,19 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'helm/**'
-      - 'policy/**'
-      - 'policies/**'
-      - '.github/workflows/helm-governance.yml'
-      - '.github/ct-helm.yaml'
+      - "helm/**"
+      - "policy/**"
+      - "policies/**"
+      - ".github/workflows/helm-governance.yml"
+      - ".github/ct-helm.yaml"
   push:
     branches: [main]
     paths:
-      - 'helm/**'
-      - 'policy/**'
-      - 'policies/**'
-      - '.github/workflows/helm-governance.yml'
-      - '.github/ct-helm.yaml'
+      - "helm/**"
+      - "policy/**"
+      - "policies/**"
+      - ".github/workflows/helm-governance.yml"
+      - ".github/ct-helm.yaml"
   workflow_dispatch:
 
 permissions:
@@ -30,6 +30,7 @@ jobs:
     env:
       CT_CONFIG: .github/ct-helm.yaml
       RENDER_DIR: helm-rendered
+      IMAGE_REPOSITORY: registry.k8s.io/pause
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -73,7 +74,13 @@ jobs:
             name=$(basename "$chart")
             echo "Rendering $name"
             helm dependency update "$chart" || true
-            base_args=(--namespace "ci-$name" --values helm/ci-values.yaml --set "image.tag=${GITHUB_SHA::7}")
+            base_args=(
+              --namespace "ci-$name"
+              --values helm/ci-values.yaml
+              --set "image.repository=${IMAGE_REPOSITORY}"
+              --set "image.tag=${GITHUB_SHA::7}"
+              --include-crds
+            )
 
             helm template "$name" "$chart" "${base_args[@]}" --output-dir "$RENDER_DIR/$name/default"
             manifests=$(find "$RENDER_DIR/$name/default" -name '*.yaml')
@@ -166,6 +173,10 @@ jobs:
     name: Kind integration smoke
     needs: lint-and-template
     runs-on: ubuntu-22.04
+    env:
+      IMAGE_REPOSITORY: registry.k8s.io/pause
+      BASE_TAG: 3.9
+      PROMOTE_TAG: ${{ github.sha }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -187,25 +198,37 @@ jobs:
           helm upgrade --install summit helm/summit \
             --atomic --namespace summit --create-namespace \
             --values helm/ci-values.yaml \
-            --set image.repository=registry.k8s.io/pause --set image.tag=3.9
+            --set image.repository=${IMAGE_REPOSITORY} \
+            --set image.tag=${BASE_TAG}
           kubectl rollout status deployment/summit -n summit --timeout=120s
           kubectl get pods -n summit
+          echo "BLUE_IMAGE=$(kubectl get deploy summit -n summit -o jsonpath='{.spec.template.spec.containers[0].image}')" >> "$GITHUB_ENV"
 
       - name: Promote new image tag (green)
         run: |
           set -euo pipefail
+          SHORT_TAG=${PROMOTE_TAG:0:12}
           helm upgrade summit helm/summit \
             --atomic --namespace summit \
             --values helm/summit/values.dev.yaml \
-            --set image.repository=registry.k8s.io/pause \
-            --set image.tag=${GITHUB_SHA::7}
+            --set image.repository=${IMAGE_REPOSITORY} \
+            --set image.tag=${SHORT_TAG}
           kubectl rollout status deployment/summit -n summit --timeout=120s
-          kubectl get deploy summit -n summit -o jsonpath='{.spec.template.spec.containers[0].image}'
-          kubectl annotate service summit -n summit rollout.blue-green/promotion="${GITHUB_SHA::7}" --overwrite
+          GREEN_IMAGE=$(kubectl get deploy summit -n summit -o jsonpath='{.spec.template.spec.containers[0].image}')
+          echo "GREEN_IMAGE=${GREEN_IMAGE}" >> "$GITHUB_ENV"
+          kubectl annotate service summit -n summit \
+            rollout.blue-green/promotion="${SHORT_TAG}" \
+            rollout.blue-green/color="green" \
+            --overwrite
 
       - name: Smoke check service endpoint
         run: |
           set -euo pipefail
+          if [ -n "${BLUE_IMAGE:-}" ] && [ -n "${GREEN_IMAGE:-}" ] && [ "$BLUE_IMAGE" = "$GREEN_IMAGE" ]; then
+            echo "Expected green image to differ from blue image" >&2
+            exit 1
+          fi
           kubectl get svc summit -n summit -o wide
           kubectl run summit-smoke -n summit --image=registry.k8s.io/pause:3.9 --restart=Never --command -- /bin/sh -c "echo summit chart deployed"
           kubectl wait --for=condition=Completed pod/summit-smoke -n summit --timeout=60s
+          kubectl get svc summit -n summit -o json | jq -r '.metadata.annotations' || true
