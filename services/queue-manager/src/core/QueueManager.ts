@@ -1,5 +1,6 @@
+import { randomUUID } from 'crypto';
 import { Queue, Worker, Job, QueueEvents } from 'bullmq';
-import IORedis from 'ioredis';
+import IORedis, { type RedisOptions } from 'ioredis';
 import { defaultQueueConfig, workerOptions } from '../config/queue.config.js';
 import {
   QueueJobOptions,
@@ -11,6 +12,8 @@ import {
 import { Logger } from '../utils/logger.js';
 import { MetricsCollector } from '../monitoring/MetricsCollector.js';
 import { RateLimiter } from '../utils/RateLimiter.js';
+import { LeaseManager, LeaseRenewal, LeaseHandle } from './LeaseManager.js';
+import { FatalJobError, LeaseExpiredError, isFatalError } from './errors.js';
 
 export type JobProcessor<T = any, R = any> = (
   job: Job<T>,
@@ -26,16 +29,27 @@ export class QueueManager {
   private metrics: MetricsCollector;
   private rateLimiters: Map<string, RateLimiter> = new Map();
   private deadLetterQueue: Queue;
+  private leaseManager?: LeaseManager;
+  private leaseEnabled: boolean;
+  private leaseDurationMs: number;
+  private leaseRenewIntervalMs: number;
 
   constructor() {
-    this.connection = new IORedis(defaultQueueConfig.redis);
+    this.connection = new IORedis(defaultQueueConfig.redis as RedisOptions);
     this.logger = new Logger('QueueManager');
     this.metrics = new MetricsCollector();
+    this.leaseEnabled = process.env.LEASED_JOBS === '1';
+    this.leaseDurationMs = workerOptions.lockDuration ?? 30000;
+    this.leaseRenewIntervalMs = Math.max(1000, Math.floor(this.leaseDurationMs * 0.6));
 
     // Initialize dead letter queue
     this.deadLetterQueue = new Queue('dead-letter-queue', {
       connection: this.connection,
     });
+
+    if (this.leaseEnabled) {
+      this.leaseManager = new LeaseManager(this.connection, new Logger('LeaseManager'));
+    }
   }
 
   /**
@@ -65,7 +79,9 @@ export class QueueManager {
     // Set up rate limiter if configured
     if (options.rateLimit || defaultQueueConfig.rateLimits[name]) {
       const limit = options.rateLimit || defaultQueueConfig.rateLimits[name];
-      this.rateLimiters.set(name, new RateLimiter(limit.max, limit.duration));
+      if (limit) {
+        this.rateLimiters.set(name, new RateLimiter(limit.max, limit.duration));
+      }
     }
 
     // Set up queue events for monitoring
@@ -112,49 +128,7 @@ export class QueueManager {
 
     const worker = new Worker<T, R>(
       queueName,
-      async (job: Job<T>) => {
-        const startTime = Date.now();
-
-        try {
-          // Check rate limit
-          const rateLimiter = this.rateLimiters.get(queueName);
-          if (rateLimiter && !rateLimiter.tryAcquire()) {
-            throw new Error('Rate limit exceeded');
-          }
-
-          this.logger.info(`Processing job ${job.id} from queue ${queueName}`);
-          this.metrics.recordJobStart(queueName);
-
-          const result = await processor(job);
-
-          const processingTime = Date.now() - startTime;
-          this.metrics.recordJobComplete(queueName, processingTime);
-          this.logger.info(
-            `Job ${job.id} completed in ${processingTime}ms`,
-          );
-
-          // Handle job chaining
-          if (job.opts.chainTo) {
-            await this.handleJobChaining(job);
-          }
-
-          return result;
-        } catch (error) {
-          const processingTime = Date.now() - startTime;
-          this.metrics.recordJobFailed(queueName, processingTime);
-          this.logger.error(
-            `Job ${job.id} failed after ${processingTime}ms`,
-            error,
-          );
-
-          // Move to dead letter queue if max retries exceeded
-          if (job.attemptsMade >= (job.opts.attempts || 3)) {
-            await this.moveToDeadLetterQueue(job, error);
-          }
-
-          throw error;
-        }
-      },
+      this.buildProcessor(queueName, processor),
       {
         ...workerOptions,
         connection: this.connection,
@@ -292,6 +266,59 @@ export class QueueManager {
   }
 
   /**
+   * List jobs currently in the dead-letter queue
+   */
+  async listDeadLetterJobs(
+    query?: string,
+    start: number = 0,
+    end: number = 100,
+  ): Promise<Array<DeadLetterJobData & { jobId: string }>> {
+    const jobs = await this.deadLetterQueue.getJobs(['waiting', 'active'], start, end);
+    return jobs
+      .map((job) => ({
+        jobId: job.id!,
+        ...(job.data as DeadLetterJobData),
+      }))
+      .filter((entry) => {
+        if (!query) return true;
+        const haystack = JSON.stringify(entry).toLowerCase();
+        return haystack.includes(query.toLowerCase());
+      });
+  }
+
+  /**
+   * Requeue a job from the dead-letter queue back to its original queue.
+   */
+  async requeueFromDeadLetter(jobId: string): Promise<Job> {
+    const dlqJob = await this.deadLetterQueue.getJob(jobId);
+    if (!dlqJob) {
+      throw new Error(`Dead-letter job ${jobId} not found`);
+    }
+
+    const payload = dlqJob.data as DeadLetterJobData;
+    const targetQueue = this.queues.get(payload.originalQueue);
+
+    if (!targetQueue) {
+      throw new Error(
+        `Original queue ${payload.originalQueue} is not registered, cannot requeue dead-letter job`,
+      );
+    }
+
+    const requeued = await targetQueue.add(
+      payload.originalName || 'requeued-job',
+      payload.originalData,
+      {
+        jobId: `requeue:${payload.originalJobId}`,
+      },
+    );
+
+    this.metrics.recordJobAdded(payload.originalQueue);
+    await dlqJob.remove();
+    this.logger.info(`Job ${payload.originalJobId} requeued from DLQ to ${payload.originalQueue}`);
+    return requeued;
+  }
+
+  /**
    * Pause a queue
    */
   async pauseQueue(queueName: string): Promise<void> {
@@ -414,12 +441,98 @@ export class QueueManager {
 
   // Private helper methods
 
+  private buildProcessor<T, R>(
+    queueName: string,
+    processor: JobProcessor<T, R>,
+  ): (job: Job<T>) => Promise<R> {
+    return async (job: Job<T>) => {
+      const startTime = Date.now();
+      const rateLimiter = this.rateLimiters.get(queueName);
+      let lease: LeaseHandle | null = null;
+      let renewal: LeaseRenewal | null = null;
+
+      try {
+        if (this.leaseEnabled && this.leaseManager) {
+          lease = await this.leaseManager.acquire(
+            job.id ?? job.opts.jobId ?? randomUUID(),
+            queueName,
+            this.leaseDurationMs,
+          );
+          renewal = this.leaseManager.startRenewal(lease, this.leaseRenewIntervalMs);
+        }
+
+        if (rateLimiter && !rateLimiter.tryAcquire()) {
+          throw new Error('Rate limit exceeded');
+        }
+
+        this.logger.info(`Processing job ${job.id} from queue ${queueName}`);
+        this.metrics.recordJobStart(queueName);
+
+        const result = await processor(job);
+
+        if (renewal) {
+          await renewal.stop();
+        }
+        if (lease) {
+          await this.leaseManager?.release(lease);
+        }
+
+        const processingTime = Date.now() - startTime;
+        this.metrics.recordJobComplete(queueName, processingTime);
+        this.logger.info(`Job ${job.id} completed in ${processingTime}ms`);
+
+        // Handle job chaining
+        const chainTo = (job.opts as QueueJobOptions).chainTo;
+        if (chainTo) {
+          await this.handleJobChaining(job);
+        }
+
+        return result;
+      } catch (error) {
+        let caughtError: any = error;
+        if (renewal) {
+          try {
+            await renewal.stop();
+          } catch (leaseError) {
+            caughtError = leaseError;
+          }
+        }
+        if (lease) {
+          await this.leaseManager?.release(lease);
+        }
+
+        const processingTime = Date.now() - startTime;
+        this.metrics.recordJobFailed(queueName, processingTime);
+        this.logger.error(`Job ${job.id} failed after ${processingTime}ms`, caughtError);
+
+        const attemptsConfigured =
+          job.opts.attempts ?? defaultQueueConfig.defaultJobOptions?.attempts ?? 1;
+        const attemptsMade = job.attemptsMade + 1;
+        const leaseExpired = caughtError instanceof LeaseExpiredError;
+        const fatalError = isFatalError(caughtError);
+        const shouldDeadLetter = fatalError || attemptsMade >= attemptsConfigured;
+
+        if (leaseExpired) {
+          this.metrics.recordLeaseExpired(queueName);
+        }
+
+        if (!shouldDeadLetter) {
+          this.metrics.recordJobRetry(queueName);
+        } else {
+          await this.moveToDeadLetterQueue(job, caughtError);
+        }
+
+        throw caughtError;
+      }
+    };
+  }
+
   private convertPriorityToNumber(priority: JobPriority): number {
     return priority as number;
   }
 
   private async handleJobChaining(job: Job): Promise<void> {
-    const chainTo = job.opts.chainTo as QueueJobOptions['chainTo'];
+    const chainTo = (job.opts as QueueJobOptions).chainTo;
     if (!chainTo || chainTo.length === 0) {
       return;
     }
@@ -478,17 +591,22 @@ export class QueueManager {
     const deadLetterData: DeadLetterJobData = {
       originalQueue: job.queueName,
       originalJobId: job.id!,
+      originalName: job.name,
       originalData: job.data,
       failureReason: error.message || String(error),
       failedAt: new Date(),
-      attemptsMade: job.attemptsMade,
+      attemptsMade: job.attemptsMade + 1,
+      errorStack: error?.stack,
+      fatal: isFatalError(error),
     };
 
     await this.deadLetterQueue.add('failed-job', deadLetterData, {
+      jobId: `dlq:${job.id}`,
       removeOnComplete: false,
       removeOnFail: false,
     });
 
+    this.metrics.recordDeadLetter(job.queueName);
     this.logger.warn(
       `Job ${job.id} moved to dead letter queue after ${job.attemptsMade} attempts`,
     );

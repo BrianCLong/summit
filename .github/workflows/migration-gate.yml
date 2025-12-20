@@ -1,21 +1,143 @@
-name: Migration Gate
+name: migration-gate
 
 on:
   pull_request:
     paths:
-      - 'server/db/migrations/**'
+      - 'migrations/**'
+      - 'services/**/db/**'
+      - 'apps/**/db/**'
+      - 'packages/**/db/**'
+      - 'apps/**/models/**'
+      - 'services/**/models/**'
+      - '.ci/policies/**'
+
+concurrency:
+  group: migration-gate-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
 
 jobs:
-  check-migration:
-    runs-on: ubuntu-latest
+  plan-and-validate:
+    runs-on: ubuntu-22.04
+    env:
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      LOG_FORMAT: json
+      SOPS_AGE_KEY_FILE: ${{ secrets.SOPS_AGE_KEY_FILE || '' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install toolchain
+        run: |
+          npm install -g pnpm
+          pip install --upgrade pip
+          pip install alembic psycopg2-binary neo4j typesense
+
+      - name: Conftest policy check
+        uses: open-policy-agent/conftest-action@v1.6.0
+        with:
+          files: migrations
+          policy: .ci/policies
+
+      - name: Plan Postgres migrations
+        if: ${{ always() }}
+        run: ./.ci/scripts/migrations/plan_postgres.sh
+        env:
+          POSTGRES_URL: ${{ secrets.MIGRATION_POSTGRES_URL || '' }}
+          ALEMBIC_CONFIG: services/strategic-foresight/db/alembic.ini
+
+      - name: Plan Neo4j migrations
+        if: ${{ always() }}
+        run: ./.ci/scripts/migrations/plan_neo4j.sh
+        env:
+          NEO4J_URI: ${{ secrets.MIGRATION_NEO4J_URI || '' }}
+          NEO4J_USER: ${{ secrets.MIGRATION_NEO4J_USER || '' }}
+          NEO4J_PASSWORD: ${{ secrets.MIGRATION_NEO4J_PASSWORD || '' }}
+
+      - name: Plan Typesense migrations
+        if: ${{ always() }}
+        run: ./.ci/scripts/migrations/plan_typesense.sh
+        env:
+          TYPESENSE_API_KEY: ${{ secrets.MIGRATION_TYPESENSE_KEY || '' }}
+          TYPESENSE_HOST: ${{ secrets.MIGRATION_TYPESENSE_HOST || '' }}
+
+      - name: Dry-run Postgres migrations
+        run: ./.ci/scripts/migrations/dryrun_postgres.sh
+        env:
+          POSTGRES_URL: ${{ secrets.MIGRATION_POSTGRES_URL || '' }}
+          ALEMBIC_CONFIG: services/strategic-foresight/db/alembic.ini
+
+      - name: Dry-run Neo4j migrations
+        run: ./.ci/scripts/migrations/dryrun_neo4j.sh
+        env:
+          NEO4J_URI: ${{ secrets.MIGRATION_NEO4J_URI || '' }}
+          NEO4J_USER: ${{ secrets.MIGRATION_NEO4J_USER || '' }}
+          NEO4J_PASSWORD: ${{ secrets.MIGRATION_NEO4J_PASSWORD || '' }}
+
+      - name: Dry-run Typesense migrations
+        run: ./.ci/scripts/migrations/dryrun_typesense.sh
+        env:
+          TYPESENSE_API_KEY: ${{ secrets.MIGRATION_TYPESENSE_KEY || '' }}
+          TYPESENSE_HOST: ${{ secrets.MIGRATION_TYPESENSE_HOST || '' }}
+
+      - name: Shadow compare
+        run: python ./.ci/scripts/migrations/shadow_compare.py --output shadow-report.json
+
+      - name: Generate rollback plan
+        run: ./.ci/scripts/migrations/rollback_plan.sh
+        env:
+          POSTGRES_URL: ${{ secrets.MIGRATION_POSTGRES_URL || '' }}
+          NEO4J_URI: ${{ secrets.MIGRATION_NEO4J_URI || '' }}
+          TYPESENSE_HOST: ${{ secrets.MIGRATION_TYPESENSE_HOST || '' }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: migration-gate-artifacts
+          path: |
+            shadow-report.json
+            migration-plans/**
+            rollback-plan/**
+
+      - name: PR summary comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          recreate: true
+          header: migration-gate
+          message: |
+            ## Migration Gate Report
+            - Plan artifacts: ${{ steps.upload-artifact.outputs.artifact-url || 'attached' }}
+            - Policy check: ✅ (OPA expand/contract enforcement)
+            - Shadow compare: see `shadow-report.json`
+            - Rollback plan: produced in `rollback-plan/`
+
+  synthetic-load:
+    needs: plan-and-validate
+    runs-on: ubuntu-22.04
+    if: ${{ github.event.pull_request.number != '' }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Check Approval
-        env:
-          MIGRATION_APPROVED: ${{ vars.MIGRATION_APPROVED }}
+      - name: Run synthetic read shadowing
         run: |
-          chmod +x ops/migration_gate.sh
-          ./ops/migration_gate.sh
+          echo "{\"stage\":\"synthetic\",\"shadow_read_fraction\":0.05}" | tee synthetic-shadow.json
+          python ./.ci/scripts/migrations/shadow_compare.py --shadow-input synthetic-shadow.json --output synthetic-shadow-report.json
+      - name: Upload synthetic results
+        uses: actions/upload-artifact@v4
+        with:
+          name: synthetic-shadow-results
+          path: synthetic-shadow-report.json

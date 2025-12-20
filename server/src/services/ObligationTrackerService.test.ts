@@ -1,5 +1,5 @@
-import {
 import { describe, it, expect } from '@jest/globals';
+import {
   ObligationTrackerService,
   ObligationClause,
   EvidenceWebhookPayload,

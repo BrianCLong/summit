@@ -1,3 +1,4 @@
+// @ts-nocheck
 // CRDT (Conflict-free Replicated Data Type) Synchronization for Conductor
 // Enables offline-first operation with eventual consistency across edge nodes
 

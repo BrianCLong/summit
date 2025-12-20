@@ -67,6 +67,9 @@ k6 run tests/k6/api-performance.js --env STAGING_URL=https://staging-api.intelgr
 # - http_req_duration{p95} < 350ms
 # - http_req_duration{path3hop,p95} < 1200ms
 # - http_req_failed < 0.02
+
+# Smoke read/write (optional, low-volume)
+k6 run tests/k6/api-rw-smoke.js --env STAGING_URL=https://staging-api.intelgraph.topicality.co --vus 1 --duration 2m
 ```
 
 ### 2. OPA Policy Validation
@@ -100,6 +103,9 @@ curl https://staging-grafana.intelgraph.topicality.co/api/dashboards/search
 
 # Alerts configured
 curl https://staging-prometheus.intelgraph.topicality.co/api/v1/rules
+
+# Error budget live check
+curl https://staging-prometheus.intelgraph.topicality.co/api/v1/query --data-urlencode 'query=rate(http_requests_total{service="intelgraph-gateway",status=~"5.."}[5m])'
 ```
 
 ## Evidence Artifacts to Attach
@@ -132,6 +138,7 @@ gh release upload v0.1.0 evidence-bundle/*.{json,html,txt}
 - [ ] Canary deployment completed without rollback
 - [ ] No SLO breaches during deployment window
 - [ ] All validation tests passing
+- [ ] Error budget consumption <2% during and after canary
 
 ### ✅ Observability Operational
 
@@ -139,6 +146,7 @@ gh release upload v0.1.0 evidence-bundle/*.{json,html,txt}
 - [ ] Grafana dashboards displaying real-time metrics
 - [ ] Prometheus alerts configured and firing correctly
 - [ ] Jaeger traces searchable with proper metadata
+- [ ] Alert routing verified (PagerDuty/email/webhook targets)
 
 ### ✅ Security Compliance
 

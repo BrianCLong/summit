@@ -1,0 +1,15 @@
+{
+  "id": "evt-basic-webhook",
+  "type": "webhook.trigger",
+  "payload": {
+    "url": "https://example.test/webhook",
+    "method": "POST",
+    "body": {
+      "ping": true
+    }
+  },
+  "metadata": {
+    "source": "adapter-sdk-contract-harness",
+    "traceId": "trace-basic-001"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://summit.dev/schemas/agent-budget-manifest.schema.json",
+  "schemaVersion": "2025-02-15",
+  "agentId": "executor",
+  "owner": "Agent Control Systems",
+  "description": "Execution harness with strict runtime and network caps to keep job orchestration deterministic.",
+  "deterministicLimits": {
+    "maxTokens": 60000,
+    "maxCallsPerRun": 30,
+    "maxWallClockMs": 180000,
+    "maxConcurrentRuns": 3,
+    "maxDailyRuns": 360,
+    "maxNetworkKB": 2048
+  },
+  "risk": {
+    "inherent": 5,
+    "controlBaseline": 3,
+    "residual": 2,
+    "riskTier": "low",
+    "riskCeiling": 5,
+    "gates": ["lint", "runtime-budget"]
+  },
+  "telemetry": {
+    "auditLogPath": "agents/audit/logs/agent-audit.log",
+    "emitBudgetEvents": true,
+    "sampleRate": 1
+  }
+}
