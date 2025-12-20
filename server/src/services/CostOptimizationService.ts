@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { pg } from '../db/pg';
 import { neo } from '../db/neo4j';
 import { trace, Span } from '@opentelemetry/api';

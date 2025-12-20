@@ -1,0 +1,19 @@
+{
+  "exportId": "6c7a8bb0-f84c-4d9e-a7e4-8184c3469411",
+  "graphId": "2c1f6b0e-3a6d-4d6a-9c2a-4a927e7c5bb1",
+  "status": "completed",
+  "format": "csv",
+  "createdAt": "2025-01-15T11:35:00Z",
+  "completedAt": "2025-01-15T11:37:12Z",
+  "downloadUrl": "https://api.intelgraph.ai/v2/exports/6c7a8bb0-f84c-4d9e-a7e4-8184c3469411/download",
+  "expiresAt": "2025-01-16T11:37:12Z",
+  "recordCount": 420,
+  "filters": {
+    "entityTypes": ["Account", "Device"],
+    "relationshipTypes": ["USES"],
+    "timeRange": {
+      "start": "2024-12-01T00:00:00Z",
+      "end": "2025-01-15T00:00:00Z"
+    }
+  }
+}

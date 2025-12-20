@@ -26,25 +26,18 @@ import { cn } from '@/lib/utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
+import { GraphCanvas } from '@/graphs/GraphCanvas'
 import { TimelineRail } from '@/components/panels/TimelineRail'
+import { MapPane } from './MapPane'
+import AnnotationPanel from '@/features/annotations/AnnotationPanel'
 import { useCollaboration } from '@/lib/yjs/useCollaboration'
 import { useGraphSync } from '@/lib/yjs/useGraphSync'
-
-// Lazy load heavy visualization components
-const GraphCanvas = React.lazy(() =>
-  import('@/graphs/GraphCanvas').then(module => ({
-    default: module.GraphCanvas,
-  }))
-)
-const MapPane = React.lazy(() =>
-  import('./MapPane').then(module => ({ default: module.MapPane }))
-)
-
 import { CollaborationPanel } from '@/components/CollaborationPanel'
 import { useAuth } from '@/contexts/AuthContext'
 import type { Entity, TimelineEvent } from '@/types'
 import type { TriPaneShellProps, TriPaneSyncState, TimeWindow } from './types'
 import { useSnapshotHandler } from '@/features/snapshots'
+import { isFeatureEnabled } from '@/config'
 
 /**
  * Main TriPaneShell component
@@ -88,6 +81,11 @@ export function TriPaneShell({
   )
   const [pinnedTools, setPinnedTools] = useState<string[]>([])
   const [densityMode, setDensityMode] = useState<'comfortable' | 'compact'>('comfortable')
+  const [annotationContext, setAnnotationContext] = useState<{
+    entity?: Entity
+    timelineEvent?: TimelineEvent
+    locationId?: string
+  }>({})
 
   // Snapshot integration
   useSnapshotHandler(
@@ -143,13 +141,13 @@ export function TriPaneShell({
     const { start, end } = syncState.globalTimeWindow
 
     // Filter timeline events
-    const filteredTimelineEvents = (timelineEvents || []).filter(event => {
+    const filteredTimelineEvents = timelineEvents.filter(event => {
       const eventTime = new Date(event.timestamp)
       return eventTime >= start && eventTime <= end
     })
 
     // Filter geospatial events
-    const filteredGeospatialEvents = (geospatialEvents || []).filter(event => {
+    const filteredGeospatialEvents = geospatialEvents.filter(event => {
       const eventTime = new Date(event.timestamp)
       return eventTime >= start && eventTime <= end
     })
@@ -196,6 +194,7 @@ export function TriPaneShell({
   // Handle entity selection from graph
   const handleEntitySelect = useCallback(
     (entity: Entity) => {
+      setAnnotationContext(prev => ({ ...prev, entity }))
       setSyncState(prev => ({
         ...prev,
         graph: {
@@ -235,6 +234,7 @@ export function TriPaneShell({
         }
       }
 
+      setAnnotationContext(prev => ({ ...prev, timelineEvent: event }))
       setSyncState(prev => ({
         ...prev,
         timeline: {
@@ -252,6 +252,7 @@ export function TriPaneShell({
   // Handle map location selection
   const handleLocationSelect = useCallback(
     (locationId: string) => {
+      setAnnotationContext(prev => ({ ...prev, locationId }))
       setSyncState(prev => ({
         ...prev,
         map: {
@@ -370,7 +371,7 @@ export function TriPaneShell({
               title="Total events"
             >
               <Clock className="h-3 w-3" />
-              {filteredData?.timelineEvents?.length || 0}
+              {filteredData.timelineEvents.length}
             </Badge>
             <Badge
               variant="outline"
@@ -378,7 +379,7 @@ export function TriPaneShell({
               title="Total locations"
             >
               <MapPin className="h-3 w-3" />
-              {filteredData?.geospatialEvents?.length || 0}
+              {filteredData.geospatialEvents.length}
             </Badge>
           </div>
         </div>
@@ -480,28 +481,18 @@ export function TriPaneShell({
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0 flex-1 min-h-0">
-              <React.Suspense
-                fallback={
-                  <div className="flex h-full items-center justify-center text-muted-foreground">
-                    Loading Graph...
-                  </div>
-                }
-              >
-                <GraphCanvas
-                  entities={filteredData.entities.map(entity => ({
-                    ...entity,
-                    confidence: showProvenance ? entity.confidence : 1.0,
-                  }))}
-                  relationships={filteredData.relationships}
-                  layout={syncState.graph.layout}
-                  onEntitySelect={handleEntitySelect}
-                  onNodeDragEnd={(node, pos) =>
-                    updateEntityPosition(node.id, pos.x, pos.y)
-                  }
-                  selectedEntityId={syncState.graph.selectedEntityId}
-                  className="h-full"
-                />
-              </React.Suspense>
+              <GraphCanvas
+                entities={filteredData.entities.map(entity => ({
+                  ...entity,
+                  confidence: showProvenance ? entity.confidence : 1.0,
+                }))}
+                relationships={filteredData.relationships}
+                layout={syncState.graph.layout}
+                onEntitySelect={handleEntitySelect}
+                onNodeDragEnd={(node, pos) => updateEntityPosition(node.id, pos.x, pos.y)}
+                selectedEntityId={syncState.graph.selectedEntityId}
+                className="h-full"
+              />
             </CardContent>
           </Card>
         </div>
@@ -521,26 +512,34 @@ export function TriPaneShell({
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0 flex-1 min-h-0">
-              <React.Suspense
-                fallback={
-                  <div className="flex h-full items-center justify-center text-muted-foreground">
-                    Loading Map...
-                  </div>
-                }
-              >
-                <MapPane
-                  locations={filteredData.geospatialEvents}
-                  center={syncState.map.center}
-                  zoom={syncState.map.zoom}
-                  selectedLocationId={syncState.map.selectedLocationId}
-                  onLocationSelect={handleLocationSelect}
-                  className="h-full"
-                />
-              </React.Suspense>
+              <MapPane
+                locations={filteredData.geospatialEvents}
+                center={syncState.map.center}
+                zoom={syncState.map.zoom}
+                selectedLocationId={syncState.map.selectedLocationId}
+                onLocationSelect={handleLocationSelect}
+                className="h-full"
+              />
             </CardContent>
           </Card>
         </div>
       </div>
+
+      {isFeatureEnabled('ui.annotationsV1') && (
+        <div className="grid grid-cols-12 gap-4 min-h-[260px]">
+          <div className="col-span-12 lg:col-span-5">
+            <AnnotationPanel
+              context={{
+                entity: annotationContext.entity,
+                timelineEvent: annotationContext.timelineEvent,
+                location: filteredData.geospatialEvents.find(
+                  loc => loc.id === annotationContext.locationId
+                ),
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       <CollaborationPanel users={users} isConnected={isConnected} isSynced={isSynced} />
 
