@@ -9,8 +9,8 @@ metadata:
 spec:
   scaleTargetRef:
     name: agent-worker
-  pollingInterval: 30
-  cooldownPeriod: 180
+  pollingInterval: 15
+  cooldownPeriod: 150
   minReplicaCount: 2
   maxReplicaCount: 50
   advanced:
@@ -29,6 +29,9 @@ spec:
             - type: Percent
               value: 50
               periodSeconds: 120
+  fallback:
+    failureThreshold: 3
+    replicaCount: 6
   triggers:
     - type: prometheus
       metadata:
@@ -36,6 +39,13 @@ spec:
         metricName: agent_queue_slo_pressure
         query: |
           max_over_time(agent_queue_slo_pressure{queue="agent-default"}[2m])
+        threshold: "1"
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus.monitoring:9090
+        metricName: agent_workload_latency_burn
+        query: |
+          histogram_quantile(0.95, rate(agent_workload_queue_wait_seconds_bucket[5m])) / 2
         threshold: "1"
     - type: prometheus
       metadata:

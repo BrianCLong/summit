@@ -41,41 +41,42 @@ vi.mock('react-leaflet', () => {
   };
 });
 
-const seedWorkspace = () => {
-  const seededEntities: Entity[] = [
-    {
-      id: '1',
-      type: 'Person',
-      label: 'Alpha',
-      lat: 40.7128,
-      lng: -74.006,
-      description: 'Entity near NYC',
-    },
-    {
-      id: '2',
-      type: 'Location',
-      label: 'Beta',
-      lat: 40.713,
-      lng: -74.005,
-      description: 'Close to Alpha',
-    },
-    {
-      id: '3',
-      type: 'Event',
-      label: 'Gamma',
-      lat: 40.71,
-      lng: -74.02,
-      description: 'Cluster mate',
-    },
-    {
-      id: '4',
-      type: 'Person',
-      label: 'Delta',
-      lat: 34.0522,
-      lng: -118.2437,
-      description: 'Los Angeles',
-    },
-  ];
+const seedWorkspace = (overrides?: Entity[]) => {
+  const seededEntities: Entity[] =
+    overrides ?? [
+      {
+        id: '1',
+        type: 'Person',
+        label: 'Alpha',
+        lat: 40.7128,
+        lng: -74.006,
+        description: 'Entity near NYC',
+      },
+      {
+        id: '2',
+        type: 'Location',
+        label: 'Beta',
+        lat: 40.713,
+        lng: -74.005,
+        description: 'Close to Alpha',
+      },
+      {
+        id: '3',
+        type: 'Event',
+        label: 'Gamma',
+        lat: 40.71,
+        lng: -74.02,
+        description: 'Cluster mate',
+      },
+      {
+        id: '4',
+        type: 'Person',
+        label: 'Delta',
+        lat: 34.0522,
+        lng: -118.2437,
+        description: 'Los Angeles',
+      },
+    ];
 
   const { setGraphData, clearSelection } = useWorkspaceStore.getState();
   setGraphData(seededEntities, []);
@@ -124,11 +125,46 @@ describe('MapPane clustering controls', () => {
 
     const leaflet = await import('react-leaflet');
     await act(async () => {
-      leaflet.__setZoom(12);
+      leaflet.__setZoom(13);
     });
 
     const expandedMarkers = screen.getAllByTestId('circle-marker');
     expect(expandedMarkers.length).toBe(4);
+  });
+
+  it('paginates rendered markers without mutating the workspace store', async () => {
+    vi.stubEnv('VITE_ENABLE_MAP_CLUSTERING', 'true');
+
+    const manyEntities: Entity[] = Array.from({ length: 60 }).map((_, index) => ({
+      id: `ent-${index}`,
+      type: 'Location',
+      label: `Point ${index}`,
+      lat: 10 + index * 0.01,
+      lng: 20 + index * 0.01,
+      description: 'Generated marker',
+    }));
+
+    seedWorkspace(manyEntities);
+
+    await renderPane();
+
+    expect(useWorkspaceStore.getState().entities).toHaveLength(60);
+
+    const toggle = screen.getByTestId('clustering-toggle');
+    await userEvent.click(toggle);
+
+    const pageIndicator = screen.getByTestId('page-indicator');
+    expect(pageIndicator).toHaveTextContent('Page 1 / 2');
+
+    const markersPageOne = screen.getAllByTestId('circle-marker');
+    expect(markersPageOne.length).toBe(50);
+
+    const next = screen.getByTestId('page-next');
+    await userEvent.click(next);
+
+    const markersPageTwo = screen.getAllByTestId('circle-marker');
+    expect(markersPageTwo.length).toBe(10);
+    expect(screen.getByTestId('page-indicator')).toHaveTextContent('Page 2 / 2');
   });
 
   it('hides clustering controls when the feature flag is disabled', async () => {
@@ -136,6 +172,7 @@ describe('MapPane clustering controls', () => {
     await renderPane();
 
     expect(screen.queryByTestId('clustering-toggle')).toBeNull();
+    expect(screen.queryByTestId('page-indicator')).toBeNull();
     const markers = screen.getAllByTestId('circle-marker');
     expect(markers.length).toBe(4);
   });

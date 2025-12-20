@@ -1,0 +1,40 @@
+{
+  "title": "Access Audit",
+  "panels": [
+    {
+      "title": "Top Actions",
+      "type": "bargauge",
+      "targets": [
+        { "expr": "sum(rate(audit_events_total[5m])) by (action)" }
+      ]
+    },
+    {
+      "title": "Restricted Reads",
+      "type": "graph",
+      "targets": [
+        { "expr": "sum(rate(audit_events_total{classification='restricted', action='read'}[5m]))" }
+      ]
+    },
+    {
+      "title": "Impersonations",
+      "type": "stat",
+      "targets": [
+        { "expr": "sum(increase(audit_events_total{action='impersonate'}[1h]))" }
+      ]
+    },
+    {
+      "title": "RFA Denials",
+      "type": "table",
+      "targets": [
+        { "expr": "audit_rfa_denials_total" }
+      ]
+    },
+    {
+      "title": "Step-Up Failures",
+      "type": "graph",
+      "targets": [
+        { "expr": "rate(audit_step_up_failures_total[5m])" }
+      ]
+    }
+  ]
+}

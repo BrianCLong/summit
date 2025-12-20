@@ -33,11 +33,18 @@ const allowedPurposes = new Set([
   'demo',
 ]);
 
-const propertySettings = {
-  seed: 133742,
-  numRuns: 32,
-  interruptAfterTimeLimit: 6000,
+const basePropertySettings = Object.freeze({
+  numRuns: 36,
+  interruptAfterTimeLimit: 5500,
   markInterruptAsFailure: true,
+  logger: (message: string) => {
+    if (process.env.CI) {
+      // Preserve deterministic reproduction details in CI logs.
+      // fast-check already shrinks on failure; this keeps the seed/path visible.
+      // eslint-disable-next-line no-console
+      console.log(`[fast-check] ${message}`);
+    }
+  },
 };
 
 describe('gateway fuzz safety', () => {
@@ -48,13 +55,8 @@ describe('gateway fuzz safety', () => {
       fc.asyncProperty(
         fc.constantFrom('plan', 'generate'),
         fc.record({
+          headers: aiContextHeaders,
           objective: fc.string({ maxLength: 72 }),
-          purpose: fc.oneof(
-            fc.constantFrom(...allowedPurposes),
-            fc
-              .string({ maxLength: 24 })
-              .filter((candidate) => !allowedPurposes.has(candidate)),
-          ),
           traversal: fc.stringOf(fc.constantFrom('.', '/', '-', '_'), {
             minLength: 1,
             maxLength: 12,
@@ -91,22 +93,34 @@ describe('gateway fuzz safety', () => {
                   },
                 };
 
-          const response = await request(app)
-            .post('/graphql')
-            .set('x-tenant', 'fuzz-tenant')
-            .set('x-purpose', sample.purpose)
-            .send({ query, variables });
+          const response = await applyHeaders(
+            request(app).post('/graphql'),
+            sample.headers,
+          ).send({ query, variables });
+
+          const missingTenant = !sample.headers.tenant;
+          const invalidPurpose =
+            sample.headers.purpose !== undefined &&
+            !allowedPurposes.has(sample.headers.purpose);
 
           expect(response.status).toBeLessThan(500);
-          if (!allowedPurposes.has(sample.purpose)) {
-            expect(response.status).toBe(403);
+
+          if (missingTenant) {
+            expect(response.status).toBe(400);
+            return;
           }
+
+          if (invalidPurpose) {
+            expect(response.status).toBe(403);
+            return;
+          }
+
           if (operation === 'generate' && sample.toolSchemaJson === '{"tools":[') {
             expect(response.status).toBe(400);
           }
         },
       ),
-      propertySettings,
+      deterministicSettings(133742),
     );
   });
 
@@ -115,25 +129,28 @@ describe('gateway fuzz safety', () => {
       fc.asyncProperty(
         fc.constantFrom('/v1/plan', '/v1/generate'),
         fc.record({
+          headers: aiContextHeaders,
           objective: fc.option(fc.string({ maxLength: 96 }), { nil: undefined }),
-          purpose: fc.oneof(
-            fc.constantFrom(...allowedPurposes),
-            fc
-              .string({ maxLength: 24 })
-              .filter((candidate) => !allowedPurposes.has(candidate)),
-          ),
-          allowPaid: fc.boolean(),
         }),
         async (endpoint, sample) => {
-          const response = await request(app)
-            .post(endpoint)
-            .set('x-tenant', 'fuzz-tenant')
-            .set('x-purpose', sample.purpose)
-            .set('x-allow-paid', sample.allowPaid ? 'true' : 'false')
-            .send({ objective: sample.objective ?? '' });
+          const response = await applyHeaders(
+            request(app).post(endpoint),
+            sample.headers,
+          ).send({ objective: sample.objective ?? '' });
+
+          const missingTenant = !sample.headers.tenant;
+          const invalidPurpose =
+            sample.headers.purpose !== undefined &&
+            !allowedPurposes.has(sample.headers.purpose);
 
           expect(response.status).toBeLessThan(500);
-          if (!allowedPurposes.has(sample.purpose)) {
+
+          if (missingTenant) {
+            expect(response.status).toBe(400);
+            return;
+          }
+
+          if (invalidPurpose) {
             expect(response.status).toBe(403);
             return;
           }
@@ -145,7 +162,109 @@ describe('gateway fuzz safety', () => {
           }
         },
       ),
-      propertySettings,
+      deterministicSettings(933742),
+    );
+  });
+
+  it('keeps query parameter filters bounded for model discovery', async () => {
+    await fc.assert(
+      fc.asyncProperty(
+        fc.record({
+          headers: aiContextHeaders,
+          query: fc.record({
+            local: fc.option(fc.boolean(), { nil: undefined }),
+            modality: fc.option(fc.string({ maxLength: 16 }), { nil: undefined }),
+            family: fc.option(fc.string({ maxLength: 16 }), { nil: undefined }),
+            license: fc.option(fc.string({ maxLength: 16 }), { nil: undefined }),
+          }),
+        }),
+        async (sample) => {
+          const response = await applyHeaders(
+            request(app)
+              .get('/v1/models')
+              .query({
+                local: sample.query.local === undefined ? undefined : String(sample.query.local),
+                modality: sample.query.modality,
+                family: sample.query.family,
+                license: sample.query.license,
+              }),
+            sample.headers,
+          );
+
+          const missingTenant = !sample.headers.tenant;
+          const invalidPurpose =
+            sample.headers.purpose !== undefined &&
+            !allowedPurposes.has(sample.headers.purpose);
+
+          expect(response.status).toBeLessThan(500);
+
+          if (missingTenant) {
+            expect(response.status).toBe(400);
+            return;
+          }
+
+          if (invalidPurpose) {
+            expect(response.status).toBe(403);
+            return;
+          }
+
+          expect(Array.isArray(response.body?.models)).toBe(true);
+        },
+      ),
+      deterministicSettings(202504),
+    );
+  });
+
+  it('keeps model listing params and headers bounded and sanitized under fuzzing', async () => {
+    await fc.assert(
+      fc.asyncProperty(
+        fc.record({
+          local: fc.option(fc.boolean(), { nil: undefined }),
+          modality: fc.oneof(
+            fc.stringOf(fc.constantFrom('a', 'b', 'c', '.', '/', '-'), {
+              maxLength: 12,
+            }),
+            fc.constant(undefined),
+          ),
+          family: fc.option(fc.string({ maxLength: 18 }), { nil: undefined }),
+          license: fc.option(fc.string({ maxLength: 14 }), { nil: undefined }),
+          purpose: fc.oneof(
+            fc.constantFrom(...allowedPurposes),
+            fc
+              .string({ maxLength: 24 })
+              .filter((candidate) => !allowedPurposes.has(candidate)),
+          ),
+          tenant: fc.string({ minLength: 1, maxLength: 24 }),
+        }),
+        async (sample) => {
+          const response = await request(app)
+            .get('/v1/models')
+            .query({
+              local:
+                sample.local === undefined ? undefined : sample.local ? 'true' : 'false',
+              modality: sample.modality ?? undefined,
+              family: sample.family ?? undefined,
+              license: sample.license ?? undefined,
+            })
+            .set('x-tenant', sample.tenant)
+            .set('x-purpose', sample.purpose);
+
+          expect(response.status).toBeLessThan(500);
+          if (!allowedPurposes.has(sample.purpose)) {
+            expect(response.status).toBe(403);
+            return;
+          }
+
+          expect(response.status).toBe(200);
+          expect(response.body).toHaveProperty('models');
+          expect(JSON.stringify(response.body)).not.toContain('..');
+        },
+      ),
+      {
+        ...propertySettings,
+        seed: 987123,
+        interruptAfterTimeLimit: 4000,
+      },
     );
   });
 
@@ -169,7 +288,7 @@ describe('gateway fuzz safety', () => {
           expect(response.status).toBeLessThan(500);
         },
       ),
-      { ...propertySettings, seed: 424242 },
+      deterministicSettings(424242),
     );
   });
 });

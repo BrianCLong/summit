@@ -790,6 +790,9 @@ export class AppendOnlyAuditLog {
   private readonly ids = new Set<string>();
 
   append(event: AuditEventInput): AuditLogEvent {
+    if ('previousHash' in event || 'eventHash' in event) {
+      throw new Error('Append-only audit log rejects client-supplied hash fields');
+    }
     if (this.ids.has(event.id)) {
       throw new Error('Append-only audit log rejects mutations to existing events');
     }

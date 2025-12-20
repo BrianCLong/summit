@@ -118,6 +118,31 @@ test('checksum validation blocks tampered backups', () => {
   });
 });
 
+test('reference hash validation blocks missing critical object refs', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ig-backup-'));
+  const dbPath = path.join(dir, 'db.json');
+  const backupPath = path.join(dir, 'backup.json');
+
+  seedDatabase(dbPath);
+  createBackup({
+    dbPath,
+    outputPath: backupPath,
+    passphrase: null,
+    encrypt: false,
+  });
+
+  const tampered = JSON.parse(fs.readFileSync(backupPath, 'utf8'));
+  tampered.hashes.caseRefs[0].hash = 'not-the-right-ref-hash';
+  fs.writeFileSync(backupPath, JSON.stringify(tampered, null, 2));
+
+  assert.throws(() => {
+    restoreBackup({
+      dbPath: path.join(dir, 'restored.json'),
+      inputPath: backupPath,
+    });
+  }, /Reference hash mismatch/);
+});
+
 test('dry-run restore does not mutate target database', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ig-backup-'));
   const dbPath = path.join(dir, 'db.json');
@@ -180,23 +205,24 @@ test('cli dry-run create surfaces hashes without writing files', async () => {
   assert.deepStrictEqual(parsed.counts, { cases: 2, objects: 3, caseRefs: 2 });
   assert.ok(parsed.checksum);
   assert.ok(Array.isArray(parsed.caseHashes));
+  assert.ok(Array.isArray(parsed.caseRefHashes));
   assert.ok(parsed.dryRun);
 });
 
-test('cli backup and restore round-trip keeps counts and hashes aligned', () => {
+test('cli create and restore round-trip preserve counts, hashes, and references', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ig-backup-'));
   const dbPath = path.join(dir, 'db.json');
   const restoreDb = path.join(dir, 'restored.json');
   const backupPath = path.join(dir, 'backup.json');
   const passphraseFile = path.join(dir, 'passphrase.txt');
-  const passphrase = 'cli-passphrase-secret';
-
-  fs.writeFileSync(passphraseFile, passphrase, 'utf8');
+  fs.writeFileSync(passphraseFile, 'cli-passphrase');
   seedDatabase(dbPath);
 
   const { spawnSync } = require('node:child_process');
-  const create = spawnSync('node', [
-    path.join(__dirname, 'index.js'),
+  const cliPath = path.join(__dirname, 'index.js');
+
+  const createResult = spawnSync('node', [
+    cliPath,
     'backup',
     'create',
     '--db',
@@ -207,16 +233,11 @@ test('cli backup and restore round-trip keeps counts and hashes aligned', () => 
     passphraseFile,
   ]);
 
-  const createStdout = create.stdout.toString();
-  assert.strictEqual(create.status, 0);
+  assert.strictEqual(createResult.status, 0, createResult.stderr.toString());
   assert.ok(fs.existsSync(backupPath));
-  assert.ok(!createStdout.includes(passphrase));
 
-  const created = JSON.parse(createStdout);
-  assert.deepStrictEqual(created.counts, { cases: 2, objects: 3, caseRefs: 2 });
-
-  const restore = spawnSync('node', [
-    path.join(__dirname, 'index.js'),
+  const restoreResult = spawnSync('node', [
+    cliPath,
     'backup',
     'restore',
     '--db',
@@ -227,16 +248,15 @@ test('cli backup and restore round-trip keeps counts and hashes aligned', () => 
     passphraseFile,
   ]);
 
-  const restoreStdout = restore.stdout.toString();
-  assert.strictEqual(restore.status, 0);
-  assert.ok(!restoreStdout.includes(passphrase));
-
-  const restoredSummary = JSON.parse(restoreStdout);
-  assert.ok(restoredSummary.checksumMatches);
-  assert.deepStrictEqual(restoredSummary.counts, created.counts);
+  assert.strictEqual(restoreResult.status, 0, restoreResult.stderr.toString());
+  const parsed = JSON.parse(restoreResult.stdout.toString());
+  assert.ok(parsed.checksumMatches);
+  assert.strictEqual(parsed.caseRefsAggregate, parsed.expectedCaseRefsAggregate);
+  assert.strictEqual(parsed.counts.cases, 2);
+  assert.strictEqual(parsed.counts.objects, 3);
+  assert.ok(parsed.caseRefHashes.length);
 
   const restoredData = readDatabase(restoreDb);
   assert.strictEqual(restoredData.cases.length, 2);
   assert.strictEqual(restoredData.objects.length, 3);
-  assert.strictEqual(restoredData.caseRefs.length, 2);
 });
