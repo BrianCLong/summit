@@ -2,7 +2,7 @@ import { pg } from '../db/pg.js';
 // import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
 import { webhookQueue } from './webhook.queue.js';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 export interface WebhookConfig {
   id: string;
@@ -50,11 +50,7 @@ export const CreateWebhookSchema = z.object({
   secret: z.string().optional(), // If not provided, one will be generated
 });
 
-export type CreateWebhookInput = {
-  url: string;
-  event_types: string[];
-  secret?: string;
-};
+export type CreateWebhookInput = z.infer<typeof CreateWebhookSchema>;
 
 export const UpdateWebhookSchema = z.object({
   url: z.string().url().optional(),
@@ -63,9 +59,7 @@ export const UpdateWebhookSchema = z.object({
   secret: z.string().optional(),
 });
 
-export type UpdateWebhookInput = Partial<CreateWebhookInput> & {
-  is_active?: boolean;
-};
+export type UpdateWebhookInput = z.infer<typeof UpdateWebhookSchema>;
 
 export class WebhookService {
   /**

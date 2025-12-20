@@ -53,6 +53,40 @@
         }
       ],
       "id": 4
+    },
+    {
+      "type": "timeseries",
+      "title": "Agent queue latency & cost signals",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(agent_workload_queue_wait_seconds_bucket[5m]))",
+          "legendFormat": "p95 queue wait (s)"
+        },
+        {
+          "expr": "max_over_time(agent_queue_slo_pressure{queue=\"agent-default\"}[5m])",
+          "legendFormat": "SLO pressure"
+        },
+        {
+          "expr": "max_over_time(agent_queue_cost_pressure{queue=\"agent-default\"}[5m])",
+          "legendFormat": "Cost pressure"
+        }
+      ],
+      "id": 5
+    },
+    {
+      "type": "timeseries",
+      "title": "Agent queue desired vs actual replicas",
+      "targets": [
+        {
+          "expr": "max(agent_queue_desired_replicas)",
+          "legendFormat": "Desired replicas (signal)"
+        },
+        {
+          "expr": "kube_deployment_status_replicas{deployment=~\"agent-worker|agent-workload-runner\"}",
+          "legendFormat": "{{deployment}} replicas"
+        }
+      ],
+      "id": 6
     }
   ],
   "schemaVersion": 37,

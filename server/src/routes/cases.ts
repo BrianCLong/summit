@@ -13,6 +13,16 @@ import { goldenPathStepTotal } from '../monitoring/metrics.js';
 import logger from '../config/logger.js';
 
 const routeLogger = logger.child({ name: 'CaseRoutes' });
+const overviewService = new CaseOverviewService(getPostgresPool(), {
+  ttlMs: Number.isFinite(Number(process.env.CASE_OVERVIEW_CACHE_TTL_MS))
+    ? Number(process.env.CASE_OVERVIEW_CACHE_TTL_MS)
+    : undefined,
+  staleWhileRevalidateMs: Number.isFinite(
+    Number(process.env.CASE_OVERVIEW_CACHE_SWR_MS),
+  )
+    ? Number(process.env.CASE_OVERVIEW_CACHE_SWR_MS)
+    : undefined,
+});
 
 export const caseRouter = Router();
 
@@ -98,7 +108,6 @@ caseRouter.get('/:id/overview', async (req, res) => {
       return res.status(404).json({ error: 'case_not_found' });
     }
 
-    const overviewService = new CaseOverviewService(pg);
     const overview = await overviewService.getOverview(id, tenantId);
 
     routeLogger.info(
