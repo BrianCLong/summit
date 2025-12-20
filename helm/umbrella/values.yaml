@@ -10,6 +10,8 @@ defaults:
     limits:
       cpu: 1
       memory: 1Gi
+  namespaceLabels:
+    istio-injection: "enabled"
   service:
     type: ClusterIP
     port: 80
@@ -52,6 +54,7 @@ defaults:
           target:
             type: Utilization
             averageUtilization: 75
+    extraMetrics: []
   mesh:
     enabled: true
     annotations:
@@ -76,8 +79,10 @@ defaults:
       name: summit-vault
   networkPolicy:
     enabled: true
-    allowNamespaces:
-      - {}
+    ingressFrom:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: summit
     allowIstioIngress: true
     egress:
       - to:
@@ -148,13 +153,6 @@ workloads:
             remoteRef:
               key: summit/database
               property: url
-    networkPolicy:
-      ingress:
-        - from:
-            - podSelector: {matchLabels: {istio: ingressgateway}}
-          ports:
-            - port: 80
-              protocol: TCP
   client:
     enabled: true
     image:

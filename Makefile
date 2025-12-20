@@ -58,7 +58,7 @@ sbom:   ## Generate CycloneDX SBOM
 
 # ---- IntelGraph S25 Merge Orchestrator (Legacy/Specific) ---------------------
 
-SHELL := /usr/bin/env bash
+SHELL := /bin/bash
 .ONESHELL:
 .SHELLFLAGS := -eo pipefail -c
 MAKEFLAGS += --no-builtin-rules
@@ -131,11 +131,11 @@ dupescans:
 	@bash scripts/check_dupe_patches.sh $(BASE_BRANCH) $(CONSOLIDATION)
 
 prereqs:
-        @command -v git >/dev/null 2>&1 || { echo "git not found"; exit 1; }
-        @command -v gh  >/dev/null 2>&1 || { echo "gh (GitHub CLI) not found"; exit 1; }
-        @command -v pnpm >/dev/null 2>&1 || { echo "pnpm not found"; exit 1; }
-        @node -v | grep -q "v$(NODE_VERSION)" || echo "WARN: Node version differs from $(NODE_VERSION)"
-        @mkdir -p "$(STATE_DIR)"
+	@command -v git >/dev/null 2>&1 || { echo "git not found"; exit 1; }
+	@command -v gh  >/dev/null 2>&1 || { echo "gh (GitHub CLI) not found"; exit 1; }
+	@command -v pnpm >/dev/null 2>&1 || { echo "pnpm not found"; exit 1; }
+	@node -v | grep -q "v$(NODE_VERSION)" || echo "WARN: Node version differs from $(NODE_VERSION)"
+	@mkdir -p "$(STATE_DIR)"
 
 # Secrets management golden path
 secrets/bootstrap:

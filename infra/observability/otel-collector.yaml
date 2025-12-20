@@ -1,109 +1,281 @@
-receivers:
-  otlp:
-    protocols:
-      grpc:
-      http:
-  prometheus:
-    config:
-      scrape_configs:
-        - job_name: otel-collector
-          scrape_interval: 15s
-          static_configs:
-            - targets: ['0.0.0.0:8888']
-processors:
-  batch:
-    send_batch_size: 1000
-    timeout: 10s
-  memory_limiter:
-    limit_mib: 256
-    spike_limit_mib: 64
-    check_interval: 5s
-  k8sattributes:
-    auth_type: serviceAccount
-    extract:
-      metadata: [namespace, pod, container, cluster, node]
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: observability
+  labels:
+    app.kubernetes.io/name: observability
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: otel-collector
+  namespace: observability
+  labels:
+    app.kubernetes.io/name: otel-collector
+    app.kubernetes.io/component: telemetry
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+  namespace: observability
+  labels:
+    app.kubernetes.io/name: otel-collector
+    app.kubernetes.io/component: telemetry
+    app.kubernetes.io/part-of: summit-observability
+  annotations:
+    description: OpenTelemetry Collector configuration for traces/metrics/logs with correlation propagation.
+data:
+  otel-collector-config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+          http:
+            cors:
+              allowed_origins: ["*"]
+      prometheus:
+        config:
+          scrape_configs:
+            - job_name: otel-collector
+              scrape_interval: 15s
+              static_configs:
+                - targets: ['0.0.0.0:8888']
+    processors:
+      batch:
+        send_batch_size: 1000
+        timeout: 10s
+      memory_limiter:
+        limit_mib: 512
+        spike_limit_mib: 128
+        check_interval: 5s
+      k8sattributes:
+        auth_type: serviceAccount
+        extract:
+          metadata: [namespace, pod, container, cluster, node]
+          labels:
+            - tag_name: workload
+              key: app.kubernetes.io/name
+        filter:
+          node_from_env_var: K8S_NODE_NAME
+        pod_association:
+          - sources:
+              - from: resource_attribute
+                name: k8s.pod.ip
+      resource:
+        attributes:
+          - key: deployment.environment
+            value: production
+            action: upsert
+          - key: mesh.correlation_id
+            from_attribute: baggage.correlation-id
+            action: upsert
+      attributes/correlation:
+        actions:
+          - key: correlation_id
+            from_attribute: http.request.header.x-correlation-id
+            action: insert
+          - key: correlation_id
+            from_attribute: grpc.metadata.correlation-id
+            action: insert
+          - key: correlation_id
+            from_attribute: resource.correlation_id
+            action: insert
+          - key: service.mesh.trace_id
+            from_attribute: trace_id
+            action: upsert
+      transform/correlation-defaults:
+        error_mode: ignore
+        log_statements:
+          - context: resource
+            statements:
+              - set(attributes["correlation_id"], attributes["correlation_id"] ?? attributes["mesh.correlation_id"])
+              - set(attributes["retention_class"], attributes["retention_class"] ?? "application")
+              - set(attributes["pii_tags"], attributes["pii_tags"] ?? attributes["k8s.pod.annotations.pii-tags"])
+      tail_sampling:
+        decision_wait: 30s
+        policies:
+          - name: errors
+            type: status_code
+            status_code:
+              status_codes: [ERROR]
+          - name: slow_requests
+            type: latency
+            latency:
+              threshold_ms: 750
+          - name: audit
+            type: attribute
+            attribute:
+              key: retention_class
+              values: [audit]
+    connectors:
+      spanmetrics:
+        metrics_flush_interval: 30s
+        metrics_expiration: 5m
+        latency_histogram:
+          buckets: [10ms, 50ms, 100ms, 250ms, 500ms, 1000ms, 2500ms]
+        dimensions:
+          - name: http.method
+          - name: http.route
+          - name: service.name
+          - name: correlation_id
+      servicegraph:
+        latency_histogram_buckets: [5ms, 10ms, 25ms, 50ms, 100ms, 250ms, 500ms, 1000ms]
+        dimensions:
+          - name: correlation_id
+      logs_to_metric/audit:
+        metrics_flush_interval: 30s
+        rules:
+          - name: audit_events_total
+            description: Count of audit trail events shipped via OTLP logs
+            unit: "1"
+            conditions:
+              - attributes["retention_class"] == "audit"
+            attributes:
+              - key: actor
+                value: attributes["actor"]
+              - key: action
+                value: attributes["action"]
+              - key: result
+                value: attributes["result"]
+    exporters:
+      loki:
+        endpoint: http://loki:3100/loki/api/v1/push
+        labels:
+          tenant: default
+      tempo:
+        endpoint: http://tempo:4317
+      prometheus:
+        endpoint: 0.0.0.0:8889
+        resource_to_telemetry_conversion:
+          enabled: true
+      prometheusremotewrite:
+        endpoint: http://prometheus:9090/api/v1/write
+        tls:
+          insecure: true
+      otlphttp/mesh:
+        endpoint: http://otel-gateway.observability.svc.cluster.local:4318
+        headers:
+          x-otlp-mesh: summit
+      debug:
+        verbosity: basic
+    service:
+      telemetry:
+        logs:
+          level: info
+      extensions: [health_check, pprof, zpages]
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, k8sattributes, attributes/correlation, transform/correlation-defaults, tail_sampling, batch]
+          exporters: [tempo, spanmetrics, servicegraph, otlphttp/mesh]
+        metrics:
+          receivers: [otlp, prometheus, spanmetrics, servicegraph, logs_to_metric/audit]
+          processors: [memory_limiter, k8sattributes, resource, batch]
+          exporters: [prometheus, prometheusremotewrite]
+        logs:
+          receivers: [otlp]
+          processors: [memory_limiter, k8sattributes, attributes/correlation, transform/correlation-defaults, batch]
+          exporters: [loki, logs_to_metric/audit, otlphttp/mesh]
+    extensions:
+      health_check: {}
+      pprof:
+        endpoint: :1777
+      zpages:
+        endpoint: :55679
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector
+  namespace: observability
+  labels:
+    app.kubernetes.io/name: otel-collector
+    app.kubernetes.io/component: telemetry
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: otel-collector
+  template:
+    metadata:
       labels:
-        - tag_name: workload
-          key: app.kubernetes.io/name
-    filter:
-      node_from_env_var: K8S_NODE_NAME
-    pod_association:
-      - sources:
-          - from: resource_attribute
-            name: k8s.pod.ip
-  resource:
-    attributes:
-      - key: deployment.environment
-        value: production
-        action: upsert
-      - key: mesh.correlation_id
-        from_attribute: baggage.correlation-id
-        action: upsert
-  attributes/correlation:
-    actions:
-      - key: correlation_id
-        from_attribute: http.request.header.x-correlation-id
-        action: insert
-      - key: correlation_id
-        from_attribute: grpc.metadata.correlation-id
-        action: insert
-      - key: correlation_id
-        from_attribute: resource.correlation_id
-        action: insert
-      - key: service.mesh.trace_id
-        from_attribute: trace_id
-        action: upsert
-  tail_sampling:
-    decision_wait: 30s
-    policies:
-      - name: errors
-        type: status_code
-        status_code: {status_codes: [ERROR]}
-      - name: slow_requests
-        type: latency
-        latency: {threshold_ms: 750}
-exporters:
-  loki:
-    endpoint: http://loki:3100/loki/api/v1/push
-    labels:
-      tenant: default
-  tempo:
-    endpoint: http://tempo:4317
-  prometheus:
-    endpoint: 0.0.0.0:8889
-    resource_to_telemetry_conversion:
-      enabled: true
-  prometheusremotewrite:
-    endpoint: http://prometheus:9090/api/v1/write
-    tls:
-      insecure: true
-  otlphttp/mesh:
-    endpoint: http://otel-gateway.observability.svc.cluster.local:4318
-    headers:
-      x-otlp-mesh: summit
-  debug:
-    verbosity: basic
-service:
-  telemetry:
-    logs:
-      level: info
-  extensions: [health_check, pprof, zpages]
-  pipelines:
-    traces:
-      receivers: [otlp]
-      processors: [memory_limiter, k8sattributes, attributes/correlation, tail_sampling, batch]
-      exporters: [tempo, otlphttp/mesh]
-    metrics:
-      receivers: [otlp, prometheus]
-      processors: [memory_limiter, k8sattributes, resource, batch]
-      exporters: [prometheus, prometheusremotewrite]
-    logs:
-      receivers: [otlp]
-      processors: [memory_limiter, k8sattributes, attributes/correlation, batch]
-      exporters: [loki, otlphttp/mesh]
-extensions:
-  health_check:
-  pprof:
-    endpoint: :1777
-  zpages:
-    endpoint: :55679
+        app.kubernetes.io/name: otel-collector
+        app.kubernetes.io/component: telemetry
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8888"
+    spec:
+      serviceAccountName: otel-collector
+      containers:
+        - name: otel-collector
+          image: otel/opentelemetry-collector-contrib:0.102.0
+          imagePullPolicy: IfNotPresent
+          args: ["--config=/etc/otel-collector/otel-collector-config.yaml"]
+          env:
+            - name: K8S_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          ports:
+            - name: otlp-grpc
+              containerPort: 4317
+            - name: otlp-http
+              containerPort: 4318
+            - name: metrics
+              containerPort: 8888
+            - name: prom
+              containerPort: 8889
+            - name: healthz
+              containerPort: 13133
+            - name: pprof
+              containerPort: 1777
+            - name: zpages
+              containerPort: 55679
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 13133
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 13133
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          volumeMounts:
+            - name: otel-config
+              mountPath: /etc/otel-collector
+      volumes:
+        - name: otel-config
+          configMap:
+            name: otel-collector-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+  namespace: observability
+  labels:
+    app.kubernetes.io/name: otel-collector
+    app.kubernetes.io/component: telemetry
+spec:
+  selector:
+    app.kubernetes.io/name: otel-collector
+  ports:
+    - name: otlp-grpc
+      port: 4317
+      targetPort: otlp-grpc
+    - name: otlp-http
+      port: 4318
+      targetPort: otlp-http
+    - name: metrics
+      port: 8888
+      targetPort: metrics
+    - name: prom
+      port: 8889
+      targetPort: prom
+    - name: healthz
+      port: 13133
+      targetPort: healthz

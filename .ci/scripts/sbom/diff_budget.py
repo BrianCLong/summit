@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
-"""SBOM vulnerability delta/budget enforcement.
+"""Compare SBOM vulnerability deltas against budgets and risk exceptions.
 
-Compares the current vulnerability report against the baseline from
-`origin/main` (last green), enforces severity budgets from
-`.maestro/ci_budget.json`, and respects risk-acceptance exceptions.
+This script compares the current SBOM vulnerability report with the last green
+baseline on ``origin/main`` and enforces per-severity budgets defined in
+``.maestro/ci_budget.json``. It also supports a dual-approval risk acceptance
+workflow using signed exception files under ``artifacts/exceptions/<sha>.json``
+and surfaces impending expiry alerts.
 """
+
 import argparse
 import datetime as dt
 import json
@@ -24,8 +27,13 @@ class BudgetError(Exception):
 
 
 def load_json(path: Path) -> dict:
-    with path.open("r", encoding="utf-8") as handle:
-        return json.load(handle)
+    """Load JSON from disk with a helpful error on failure."""
+
+    try:
+        with path.open("r", encoding="utf-8") as handle:
+            return json.load(handle)
+    except FileNotFoundError as exc:
+        raise FileNotFoundError(f"File not found: {path}") from exc
 
 
 def parse_args() -> argparse.Namespace:
@@ -139,10 +147,7 @@ def count_by_severity(vulns: Iterable[dict]) -> Dict[str, int]:
 
 def load_budgets(path: Path) -> Dict[str, int]:
     data = load_json(path)
-    budgets = (
-        data.get("security", {})
-        .get("sbomSeverityBudget", {})
-    )
+    budgets = data.get("security", {}).get("sbomSeverityBudget", {})
     merged = {**DEFAULT_BUDGET, **{k.lower(): v for k, v in budgets.items()}}
     return merged
 
@@ -305,7 +310,12 @@ def main():
     current_counts = count_by_severity(filtered_current)
     deltas = delta_counts(current_counts, baseline_counts)
 
-    budgets = load_budgets(Path(args.budget))
+    try:
+        budgets = load_budgets(Path(args.budget))
+    except FileNotFoundError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        sys.exit(1)
+
     ok, errors = evaluate(deltas, budgets)
 
     print(format_summary(baseline_counts, current_counts, deltas, alerts))

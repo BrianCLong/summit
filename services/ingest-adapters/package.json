@@ -39,7 +39,7 @@
     "kafkajs": "^2.2.4",
     "p-limit": "^5.0.0",
     "papaparse": "^5.4.1",
-    "parquetjs-lite": "^0.0.3",
+    "parquetjs-lite": "^0.8.7",
     "pino": "^8.16.2",
     "pino-http": "^8.6.0",
     "ssh2-sftp-client": "^9.1.0",
