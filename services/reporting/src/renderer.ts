@@ -10,6 +10,8 @@ export interface RenderOptions {
   margin?: { top: string; right: string; bottom: string; left: string };
   timeout?: number;
   redaction?: boolean;
+  locale?: string;
+  timezone?: string;
 }
 
 export async function getBrowser() {
@@ -23,7 +25,10 @@ export async function getBrowser() {
 
 export async function renderPdf(html: string, options: RenderOptions = {}): Promise<Buffer> {
   const browser = await getBrowser();
-  const context = await browser.newContext();
+  const context = await browser.newContext({
+    locale: options.locale || 'en-US',
+    timezoneId: options.timezone || 'UTC',
+  });
   const page = await context.newPage();
 
   // Set timeout
@@ -33,8 +38,13 @@ export async function renderPdf(html: string, options: RenderOptions = {}): Prom
     // Block external resources
     await page.route('**', (route) => {
       const url = route.request().url();
-      if (url.startsWith('http') && !url.includes('localhost')) {
-        return route.abort();
+      try {
+        const u = new URL(url);
+        if (u.protocol.startsWith('http') && u.hostname !== 'localhost' && u.hostname !== '127.0.0.1') {
+          return route.abort();
+        }
+      } catch (e) {
+        // invalid url, maybe data:, ignore
       }
       return route.continue();
     });
@@ -50,19 +60,17 @@ export async function renderPdf(html: string, options: RenderOptions = {}): Prom
             color: transparent !important;
             background: black !important;
             user-select: none !important;
+            border: none !important;
           }
         `;
         document.head.appendChild(style);
 
-        // ensure text is removed from accessibility tree if possible,
-        // or just covered. The vector rectangle approach is simulated by CSS background.
-        // For true redaction, we might need more aggressive DOM manipulation.
+        // Remove text content from accessibility tree but keep layout
         document.querySelectorAll('.redact').forEach(el => {
-           el.innerHTML = ''; // aggressive removal
-           (el as HTMLElement).style.backgroundColor = 'black';
-           (el as HTMLElement).style.width = '100%';
-           (el as HTMLElement).style.height = '1em'; // approximated
-           (el as HTMLElement).style.display = 'inline-block';
+           el.setAttribute('aria-hidden', 'true');
+           // We rely on CSS color:transparent to hide text.
+           // The background:black creates the black box.
+           // This preserves layout exactly.
         });
       });
     }

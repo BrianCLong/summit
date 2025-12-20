@@ -40,7 +40,28 @@ router.get('/v1/reports/jobs/:id', async (req, res) => {
     return res.status(404).json({ error: 'Job not found' });
   }
   const state = await job.getState();
-  res.json({ id: job.id, state, result: job.returnvalue });
+
+  if (state === 'completed') {
+    return res.json({
+      id: job.id,
+      state,
+      result: {
+        url: job.returnvalue.url,
+        provenance: job.returnvalue.provenance,
+        size: job.returnvalue.size,
+      }
+    });
+  }
+
+  if (state === 'failed') {
+    return res.json({
+      id: job.id,
+      state,
+      error: job.failedReason,
+    });
+  }
+
+  res.json({ id: job.id, state, progress: job.progress });
 });
 
 export default router;

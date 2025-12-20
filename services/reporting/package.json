@@ -16,17 +16,16 @@
     "handlebars": "^4.7.8",
     "playwright": "1.41.1",
     "prom-client": "^15.1.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "pdf-lib": "^1.17.1",
+    "@aws-sdk/client-s3": "^3.400.0",
+    "@aws-sdk/s3-request-presigner": "^3.400.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
     "@types/fs-extra": "^11.0.4",
-    "@types/handlebars": "^4.0.40",
+    "@types/handlebars": "^4.1.0",
     "@types/node": "^20.11.5",
-    "@types/react": "^18.2.48",
-    "@types/react-dom": "^18.2.18",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   }
