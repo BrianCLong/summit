@@ -9,6 +9,15 @@ spec:
   groups:
     - name: companyos.rules
       rules:
+        - alert: OtelCollectorDown
+          expr: up{job="otel-collector"} == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: 'OpenTelemetry Collector is unreachable'
+            description: 'No healthy otel-collector pods; traces/metrics/logs are not ingesting.'
+
         - alert: HighApiLatency
           expr: histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job="intelgraph-api"}[5m])) by (le)) > 0.5
           for: 5m
@@ -72,6 +81,15 @@ spec:
             summary: 'Agent runtime cost spike detected'
             description: 'Total runtime cost increased more than $50 over 30m; validate workloads and budgets.'
 
+        - alert: AgentLatencySLOViolation
+          expr: histogram_quantile(0.95, sum(rate(agent_request_duration_seconds_bucket[5m])) by (le)) > 1
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: 'Agent p95 latency above 1s'
+            description: 'Agent runtimes are breaching latency SLO; check downstream dependencies and scaling.'
+
         - alert: MeshErrorBudgetBurn
           expr: (sum(rate(istio_requests_total{response_code=~"5.."}[5m])) / sum(rate(istio_requests_total[5m]))) > 0.02
           for: 15m
@@ -90,6 +108,15 @@ spec:
             summary: 'Correlation coverage degrading'
             description: 'More than 5% of requests missing correlation IDs; check gateways and instrumentation.'
 
+        - alert: VectorLogshipErrors
+          expr: rate(vector_errors_total[5m]) > 0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: 'Vector is failing to ship logs'
+            description: 'Vector is reporting pipeline errors; check Loki/OTLP connectivity and node health.'
+
         - alert: ProfilingIngestStall
           expr: rate(pyroscope_samples_ingested_total[10m]) == 0
           for: 10m
@@ -98,3 +125,21 @@ spec:
           annotations:
             summary: 'Continuous profiling ingestion halted'
             description: 'No profiling samples ingested for 10 minutes; check Pyroscope/Parca agents and endpoints.'
+
+        - alert: AuditTrailMissing
+          expr: rate(audit_events_total[10m]) == 0
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: 'Audit events are not arriving'
+            description: 'No audit trail events observed in the last 10 minutes; validate OTLP log pipeline and retention class labels.'
+
+        - alert: TargetScrapeMissing
+          expr: (sum by (job) (up == 0)) > 0
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: 'One or more Prometheus scrape targets are down'
+            description: 'Prometheus reports missing scrape targets; inspect ServiceMonitor/PodMonitor coverage and endpoints.'
