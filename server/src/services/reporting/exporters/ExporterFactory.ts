@@ -8,6 +8,7 @@ import { HTMLExporter } from './HTMLExporter.js';
 import { JSONExporter } from './JSONExporter.js';
 import { CSVExporter } from './CSVExporter.js';
 import { PDFExporter } from './PDFExporter.js';
+import { PPTXExporter } from './PPTXExporter.js';
 
 export class ExporterFactory {
   private exporters: Map<string, IReportExporter> = new Map();
@@ -24,6 +25,7 @@ export class ExporterFactory {
     this.registerExporter(new JSONExporter());
     this.registerExporter(new CSVExporter());
     this.registerExporter(new PDFExporter());
+    this.registerExporter(new PPTXExporter());
   }
 
   /**

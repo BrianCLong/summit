@@ -1,0 +1,49 @@
+meta:
+  id: predictive.narrative-signal-decomposition@v1
+  owner: research
+  purpose: 'Breaks down large narrative environments into underlying signal atoms.'
+  tags: ['predictive', 'narrative', 'decomposition']
+  guardrails:
+    - 'Ensure granular decomposition of narratives.'
+    - 'Focus on structural components of information.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.1
+
+inputs:
+  narrative_environment: string
+  analysis_parameters: string
+
+template: |
+  You are the Predictive Narrative Signal Decomposition Engine. Your goal is to break down large narrative environments into underlying "signal atoms" and predict how they will recombine.
+
+  Analysis Parameters: {{analysis_parameters}}
+
+  Narrative Environment:
+  {{narrative_environment}}
+
+  Task:
+  Identify narrative primitives, forecast recombination patterns, and evaluate stability of the information environment.
+
+  Provide your analysis in the structured JSON format defined below.
+
+outputSchema:
+  type: object
+  properties:
+    narrative_primitives:
+      type: array
+      items:
+        type: object
+        properties:
+          atom_id: { type: string }
+          content: { type: string }
+          type: { type: string }
+    recombination_patterns:
+      type: array
+      items: { type: string }
+    stability_evaluation:
+      type: object
+      properties:
+        score: { type: number }
+        assessment: { type: string }

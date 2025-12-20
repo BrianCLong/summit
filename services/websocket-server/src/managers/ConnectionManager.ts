@@ -3,7 +3,8 @@
  * Tracks all active WebSocket connections and their metadata
  */
 
-import { AuthenticatedSocket, ConnectionMetadata, PresenceStatus } from '../types/index.js';
+import { Socket } from 'socket.io';
+import { ConnectionMetadata, PresenceStatus } from '../types/index.js';
 import { logger } from '../utils/logger.js';
 import { EventEmitter } from 'events';
 
@@ -15,37 +16,37 @@ export class ConnectionManager extends EventEmitter {
   /**
    * Register a new connection
    */
-  public register(socket: AuthenticatedSocket): void {
+  public register(socket: Socket): void {
     const metadata: ConnectionMetadata = {
-      id: socket.connectionId,
-      userId: socket.user.userId,
-      tenantId: socket.tenantId,
-      connectedAt: socket.connectedAt,
+      id: socket.data.connectionId,
+      userId: socket.data.user.userId,
+      tenantId: socket.data.tenantId,
+      connectedAt: socket.data.connectedAt,
       lastActivity: Date.now(),
       rooms: new Set<string>(),
       presence: 'online',
       metadata: {},
     };
 
-    this.connections.set(socket.connectionId, metadata);
+    this.connections.set(socket.data.connectionId, metadata);
 
     // Track by user
-    if (!this.userToConnections.has(socket.user.userId)) {
-      this.userToConnections.set(socket.user.userId, new Set());
+    if (!this.userToConnections.has(socket.data.user.userId)) {
+      this.userToConnections.set(socket.data.user.userId, new Set());
     }
-    this.userToConnections.get(socket.user.userId)!.add(socket.connectionId);
+    this.userToConnections.get(socket.data.user.userId)!.add(socket.data.connectionId);
 
     // Track by tenant
-    if (!this.tenantToConnections.has(socket.tenantId)) {
-      this.tenantToConnections.set(socket.tenantId, new Set());
+    if (!this.tenantToConnections.has(socket.data.tenantId)) {
+      this.tenantToConnections.set(socket.data.tenantId, new Set());
     }
-    this.tenantToConnections.get(socket.tenantId)!.add(socket.connectionId);
+    this.tenantToConnections.get(socket.data.tenantId)!.add(socket.data.connectionId);
 
     logger.info(
       {
-        connectionId: socket.connectionId,
-        userId: socket.user.userId,
-        tenantId: socket.tenantId,
+        connectionId: socket.data.connectionId,
+        userId: socket.data.user.userId,
+        tenantId: socket.data.tenantId,
         totalConnections: this.connections.size,
       },
       'Connection registered'

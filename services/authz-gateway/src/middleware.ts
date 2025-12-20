@@ -4,6 +4,7 @@ import pino from 'pino';
 import { authorize } from './policy';
 import { log } from './audit';
 import { sessionManager } from './session';
+import { breakGlassManager } from './break-glass';
 import type { AttributeService } from './attribute-service';
 import type {
   AuthorizationInput,
@@ -78,7 +79,7 @@ export function requireAuth(
     }
     try {
       const token = auth.replace('Bearer ', '');
-      const { payload } = await sessionManager.validate(token);
+      const { payload } = await sessionManager.validate(token, { consume: true });
       if (options.requiredAcr && payload.acr !== options.requiredAcr) {
         return res
           .status(401)
@@ -102,6 +103,11 @@ export function requireAuth(
           action: options.action,
           context: attributeService.getDecisionContext(
             String(payload.acr || 'loa1'),
+            payload.breakGlass
+              ? {
+                  breakGlass: payload.breakGlass as AuthorizationInput['context']['breakGlass'],
+                }
+              : {},
           ),
         };
         const decision = await authorize(input);
@@ -112,7 +118,18 @@ export function requireAuth(
           tenantId: subject.tenantId,
           allowed: decision.allowed,
           reason: decision.reason,
+          breakGlass: (payload as { breakGlass?: unknown }).breakGlass as
+            | undefined
+            | AuthorizationInput['context']['breakGlass'],
         });
+        if (payload.breakGlass) {
+          breakGlassManager.recordUsage(String(payload.sid || ''), {
+            action: options.action,
+            resource: resource.id,
+            tenantId: subject.tenantId,
+            allowed: decision.allowed,
+          });
+        }
         if (!decision.allowed) {
           if (decision.obligations.length > 0) {
             req.obligations = decision.obligations;

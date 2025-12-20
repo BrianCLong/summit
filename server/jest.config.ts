@@ -1,12 +1,12 @@
 import type { Config } from 'jest';
 
 const config: Config = {
-  // Preset removed to avoid resolution issues
+  preset: 'ts-jest',
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
   setupFilesAfterEnv: [
     '<rootDir>/tests/setup/jest.setup.js',
-    // Removed jest-extended to avoid installation issues
+    'jest-extended/all',
   ],
   testMatch: [
     '<rootDir>/tests/**/*.test.ts',
@@ -27,10 +27,10 @@ const config: Config = {
   },
   transform: {
     '^.+\\.[tj]sx?$': [
-      'ts-jest', // Use ts-jest transformer directly
+      'ts-jest',
       {
         useESM: true,
-        tsconfig: 'tsconfig.test.json',
+        tsconfig: 'tsconfig.json',
       },
     ],
   },

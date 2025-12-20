@@ -91,7 +91,7 @@ LABEL org.opencontainers.image.title="Maestro Conductor" \
       org.opencontainers.image.vendor="IntelGraph" \
       org.opencontainers.image.source="https://github.com/brianclong/intelgraph" \
       org.opencontainers.image.documentation="https://github.com/brianclong/intelgraph/blob/main/README.md" \
-      org.opencontainers.image.licenses="MIT"
+      org.opencontainers.image.licenses="Proprietary"
 
 # Expose port
 EXPOSE 8080

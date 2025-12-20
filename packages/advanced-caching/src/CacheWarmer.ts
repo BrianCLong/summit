@@ -104,6 +104,7 @@ export class CacheWarmer {
    * Schedule periodic cache warming
    */
   private scheduleWarming(name: string, strategy: WarmingStrategy): void {
+    if (!strategy.schedule) return;
     if (!strategy.schedule) {return;}
 
     const job = new CronJob(
@@ -218,6 +219,7 @@ export class CacheWarmer {
         ([name, strategy]) => ({
           name,
           keyCount: strategy.keys.length,
+          scheduled: !!strategy.schedule,
           scheduled: Boolean(strategy.schedule),
           priority: strategy.priority,
         })

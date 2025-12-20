@@ -1,0 +1,44 @@
+/** @type {import('jest').Config} */
+module.exports = {
+  roots: [
+    "<rootDir>/apps",
+    "<rootDir>/packages",
+    "<rootDir>/services",
+    "<rootDir>/server",
+    "<rootDir>/client",
+    "<rootDir>/gateway"
+  ],
+
+  // These are REGEX, not globs — keep them simple & safe
+  testPathIgnorePatterns: [
+    "/node_modules/",
+    "<rootDir>/(?:archive|archive_\\d+|archive-[^/]+)/",
+    "<rootDir>/archive_20250926/",
+    "<rootDir>/(?:conductor-ui|intelgraph|ga-graphai)/",
+    "/_salvage[^/]*/",
+    "/pull/[^/]+/head/"
+  ],
+  modulePathIgnorePatterns: [
+    "<rootDir>/(?:archive|archive_\\d+|archive-[^/]+)/",
+    "<rootDir>/archive_20250926/",
+    "<rootDir>/(?:conductor-ui|intelgraph|ga-graphai)/",
+    "/_salvage[^/]*/",
+    "/pull/[^/]+/head/"
+  ],
+
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1'
+  },
+
+  // Keep pnpm workspace symlinks happy; disable watchman to avoid conflict
+  haste: { enableSymlinks: true },
+  watchman: false,
+
+  transform: {
+    '^.+\\.(t|j)sx?$': ['@swc/jest', { jsc: { target: 'es2020' } }],
+  },
+  transformIgnorePatterns: ['/node_modules/'],
+
+  testEnvironment: 'node',
+  passWithNoTests: true,
+};

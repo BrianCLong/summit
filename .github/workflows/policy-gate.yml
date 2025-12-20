@@ -8,6 +8,9 @@ permissions:
   contents: read
   security-events: write
 
+env:
+  SERVICE_NAME: summit-platform
+
 jobs:
   trufflehog:
     runs-on: ubuntu-latest
@@ -34,3 +37,121 @@ jobs:
       - uses: pnpm/action-setup@v4
       - run: pnpm install --frozen-lockfile
       - run: pnpm audit --audit-level=high || true
+      - run: pnpm audit --json > audit-report.json || true
+      - name: Generate vulnerability report
+        run: |
+          node .github/scripts/audit-gate.js audit-report.json
+        env:
+          SERVICE_NAME: ${{ env.SERVICE_NAME }}
+          VULN_REPORT_PATH: vuln_report.${{ env.SERVICE_NAME }}.json
+          AUDIT_ARTIFACTS_DIR: artifacts/security/${{ env.SERVICE_NAME }}
+          MAX_AUDIT_SEVERITY: high
+          ENFORCE_AUDIT_EXIT: false
+      - name: Upload vulnerability artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vuln-report-${{ env.SERVICE_NAME }}
+          path: |
+            vuln_report.${{ env.SERVICE_NAME }}.json
+            artifacts/security/${{ env.SERVICE_NAME }}/
+
+  opa-policy-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: latest
+
+      - name: OPA Test
+        run: opa test policy/rego/ -v
+
+      - name: OPA Check
+        run: opa check policy/rego/
+
+      - name: OPA Eval Access Control
+        # Verify core access control policy evaluates successfully
+        run: |
+          opa eval -d policy/rego/ 'data.access_control' > /dev/null
+
+      - name: OPA Eval Conductor
+        # Verify conductor policy evaluates successfully
+        run: |
+          opa eval -d policy/rego/ 'data.conductor' > /dev/null
+
+      - name: OPA Eval Governance
+        # Verify governance policy evaluates successfully
+        run: |
+          opa eval -d policy/rego/ 'data.governance' > /dev/null
+
+  opa-quality-gate:
+    runs-on: ubuntu-latest
+    needs: [npm-audit]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download vulnerability report
+        uses: actions/download-artifact@v4
+        with:
+          name: vuln-report-${{ env.SERVICE_NAME }}
+          path: security-artifacts
+
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: latest
+
+      - name: Build quality gate input
+        run: |
+          report="security-artifacts/vuln_report.${SERVICE_NAME}.json"
+          blocked=$(jq '.decision.blocked // 0' "$report")
+          waived=$(jq '.waiver.applied // false' "$report")
+          critical=$(jq '.summary.critical // 0' "$report")
+          security_gate=true
+
+          if [ "$blocked" -gt 0 ] && [ "$waived" != "true" ]; then
+            security_gate=false
+          fi
+
+          cat > opa-input.json <<'EOF'
+          {
+            "pr": { "draft": false, "mergeable": true, "author": "platform-team" },
+            "quality_gates": {
+              "build": true,
+              "typecheck": true,
+              "lint": true,
+              "tests": true,
+              "security": false,
+              "helm": true,
+              "e2e": true,
+              "format": true
+            },
+            "analysis": { "risk_level": "LOW", "additions": 0, "deletions": 0, "complexity": 0 },
+            "changed_files": [],
+            "file_contents": {},
+            "security_scan": { "critical_count": 0 },
+            "migration_review_approved": true,
+            "api_diff": { "breaking_changes": 0 },
+            "schema_diff": { "breaking_changes": 0 }
+          }
+EOF
+          security_value=$( [ "$security_gate" = "true" ] && echo "true" || echo "false" )
+          jq \
+            --argjson security "$security_value" \
+            --argjson critical "$critical" \
+            '.quality_gates.security = $security | .security_scan.critical_count = $critical' \
+            opa-input.json > opa-input.tmp && mv opa-input.tmp opa-input.json
+
+      - name: Evaluate summit quality gates
+        run: |
+          opa eval --format json --data .github/policies/summit-quality-gates.rego --input opa-input.json 'data.summit.quality.decision' > decision.json
+          jq '.result[0].expressions[0].value' decision.json > gate.json
+          jq '.' gate.json
+          approved=$(jq -r '.approved' gate.json)
+          if [ "$approved" != "true" ]; then
+            echo "Quality gate failed per summit-quality-gates.rego"
+            exit 1
+          fi

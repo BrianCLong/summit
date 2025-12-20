@@ -1,3 +1,6 @@
+import { describe, it, expect, beforeEach } from 'vitest';
+import { PaymentProcessor } from '../payments/PaymentProcessor.js';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { PaymentProcessor } from '../payments/PaymentProcessor';
 
 describe('PaymentProcessor', () => {

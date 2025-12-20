@@ -168,6 +168,7 @@ export class MatchingEngine {
       matches.push({
         skill: required,
         required: true,
+        matched: !!skill,
         matched: Boolean(skill),
         level: skill?.level || 'none',
         gap: skill ? 0 : 3,
@@ -180,6 +181,7 @@ export class MatchingEngine {
       matches.push({
         skill: preferred,
         required: false,
+        matched: !!skill,
         matched: Boolean(skill),
         level: skill?.level || 'none',
         gap: skill ? 0 : 2,
@@ -190,6 +192,7 @@ export class MatchingEngine {
   }
 
   private evaluateSignals(signals: TalentSignal[]): number {
+    if (signals.length === 0) return 0;
     if (signals.length === 0) {return 0;}
 
     const weightedSum = signals.reduce((sum, signal) => {
@@ -200,6 +203,7 @@ export class MatchingEngine {
   }
 
   private calculateSkillScore(matches: SkillMatch[]): number {
+    if (matches.length === 0) return 50;
     if (matches.length === 0) {return 50;}
 
     const requiredMatches = matches.filter((m) => m.required);

@@ -1,12 +1,64 @@
-# ---- IntelGraph S25 Merge Orchestrator ---------------------------------------
-# Usage:
-#   make merge-s25          # end-to-end (idempotent)
-#   make merge-s25.resume   # resume from saved state
-#   make merge-s25.clean    # delete temp branches/state
-#   make pr-release         # force (re)open final release PR only
-# ------------------------------------------------------------------------------
+# Summit Platform Makefile
+# Standardized commands for Development and Operations
 
-SHELL := /usr/bin/env bash
+.PHONY: up down restart logs shell clean
+.PHONY: dev test lint build format ci
+.PHONY: db-migrate db-seed sbom k6
+.PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release provenance ci-check prereqs contracts policy-sim rerere dupescans
+
+COMPOSE_DEV_FILE ?= docker-compose.dev.yaml
+SHELL_SERVICE ?= gateway
+
+# --- Docker Compose Controls ---
+
+up:     ## Run dev stack
+	docker compose -f $(COMPOSE_DEV_FILE) up --build -d
+
+down:   ## Stop dev stack
+	docker compose -f $(COMPOSE_DEV_FILE) down -v
+
+restart: down up
+
+logs:
+	docker compose -f $(COMPOSE_DEV_FILE) logs -f
+
+shell:
+	docker compose -f $(COMPOSE_DEV_FILE) exec $(SHELL_SERVICE) /bin/sh
+
+clean:
+	docker system prune -f
+	rm -rf dist build coverage
+	@rm -rf "$(STATE_DIR)"
+	@git branch -D tmp/pr-* 2>/dev/null || true
+
+# --- Development Workflow ---
+
+dev:
+	pnpm run dev
+
+test:   ## Run unit tests (node+python)
+	pnpm -w run test:unit || true && pytest -q || true
+
+lint:   ## Lint js/ts
+	pnpm -w exec eslint . || true
+
+format: ## Format code
+	pnpm -w exec prettier -w . || true
+
+build:  ## Build all images
+	docker compose -f $(COMPOSE_DEV_FILE) build
+
+ci: lint test
+
+k6:     ## Perf smoke (TARGET=http://host:port make k6)
+	./ops/k6/smoke.sh
+
+sbom:   ## Generate CycloneDX SBOM
+	@pnpm cyclonedx-npm --output-format JSON --output-file sbom.json
+
+# ---- IntelGraph S25 Merge Orchestrator (Legacy/Specific) ---------------------
+
+SHELL := /bin/bash
 .ONESHELL:
 .SHELLFLAGS := -eo pipefail -c
 MAKEFLAGS += --no-builtin-rules
@@ -22,10 +74,7 @@ STACK_REBRAND     ?= stack/rebrand-docs
 PR_TARGETS        ?= 1279 1261 1260 1259
 STATE_DIR         ?= .merge-evidence
 STATE_FILE        ?= $(STATE_DIR)/state.json
-
 NODE_VERSION      ?= 20
-
-.PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release sbom provenance ci-check prereqs contracts policy-sim rerere dupescans
 
 merge-s25: prereqs
 	@./scripts/merge_s25.sh \
@@ -46,10 +95,7 @@ merge-s25.resume: prereqs
 	  --resume \
 	  --node "$(NODE_VERSION)"
 
-merge-s25.clean:
-	@echo "Cleaning state and temp branches…"
-	@rm -rf "$(STATE_DIR)"
-	@git branch -D tmp/pr-* 2>/dev/null || true
+merge-s25.clean: clean
 
 pr-release:
 	@./scripts/merge_s25.sh \
@@ -59,9 +105,6 @@ pr-release:
 	  --open-release-only \
 	  --state "$(STATE_FILE)" \
 	  --node "$(NODE_VERSION)"
-
-sbom:
-	@pnpm cyclonedx-npm --output-format JSON --output-file sbom.json
 
 provenance:
 	@node .ci/gen-provenance.js > provenance.json && node .ci/verify-provenance.js provenance.json
@@ -93,3 +136,30 @@ prereqs:
 	@command -v pnpm >/dev/null 2>&1 || { echo "pnpm not found"; exit 1; }
 	@node -v | grep -q "v$(NODE_VERSION)" || echo "WARN: Node version differs from $(NODE_VERSION)"
 	@mkdir -p "$(STATE_DIR)"
+
+# Secrets management golden path
+secrets/bootstrap:
+	@echo "Generating org age key if missing and aligning .sops.yaml"
+	@[ -f .security/keys/age-org.pub ] || age-keygen -o .security/keys/age-org.key && age-keygen -y .security/keys/age-org.key > .security/keys/age-org.pub
+	@echo "Update .sops.yaml recipients as needed. Private key must stay in security/key-vault."
+
+secrets/encrypt:
+	@if [ -z "${path}" ]; then echo "usage: make secrets/encrypt path=secrets/envs/dev/foo.enc.yaml"; exit 1; fi
+	@sops --encrypt --in-place ${path}
+
+secrets/decrypt:
+	@if [ -z "${path}" ]; then echo "usage: make secrets/decrypt path=secrets/envs/dev/foo.enc.yaml"; exit 1; fi
+	@tmpfile=$$(mktemp); sops -d ${path} > $$tmpfile && echo "Decrypted to $$tmpfile" && trap "shred -u $$tmpfile" EXIT && ${EDITOR:-vi} $$tmpfile
+
+secrets/rotate:
+	@if [ -z "${name}" ]; then echo "usage: make secrets/rotate name=FOO_KEY"; exit 1; fi
+	@echo "Generating blue/green value for ${name}" && echo "${name}_v2=$$(openssl rand -hex 24)" > /tmp/${name}.rotation
+	@echo "Remember to flip consumers to _v2 and clean up _v1 post-cutover"
+
+secrets/lint:
+	@echo "Running SOPS validation"
+	@find secrets/envs -name '*.enc.yaml' -print0 | xargs -0 -I{} sops --verify {}
+	@echo "Running leak scan"
+	@.ci/scripts/secrets/leak_scan.sh
+	@echo "Running OPA checks"
+	@conftest test --policy .ci/policies --namespace secrets --all-namespaces

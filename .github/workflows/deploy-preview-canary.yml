@@ -14,10 +14,21 @@ jobs:
     permissions:
       contents: read
       packages: write
+      id-token: write
+    outputs:
+      image-ref: ${{ steps.cosign-sign.outputs.image_ref }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: 'v2.2.4'
+
+      - name: Install Syft
+        uses: anchore/sbom-action/download-syft@v0.17.1
 
       - name: Log in to the Container registry
         uses: docker/login-action@v3
@@ -27,11 +38,32 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push Docker image
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: ./server
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          provenance: true
+          sbom: true
+
+      - name: Generate SBOM
+        env:
+          IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+        run: syft "$IMAGE" -o spdx-json=sbom-preview.spdx.json
+
+      - name: Cosign sign and attest image
+        id: cosign-sign
+        env:
+          COSIGN_EXPERIMENTAL: '1'
+          IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          set -euo pipefail
+          IMAGE_REF="${IMAGE}@${DIGEST}"
+          cosign sign --yes "$IMAGE_REF"
+          cosign attest --yes --predicate sbom-preview.spdx.json --type spdxjson "$IMAGE_REF"
+          echo "image_ref=$IMAGE_REF" >> "$GITHUB_OUTPUT"
 
   deploy-preview:
     needs: build-and-push
@@ -44,6 +76,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: 'v2.2.4'
+
       - name: Set up Helm
         uses: azure/setup-helm@v4
         with:
@@ -51,15 +88,35 @@ jobs:
 
       - name: Create Kubeconfig
         run: |
+          set -euo pipefail
           mkdir -p ~/.kube
           echo "${{ secrets.KUBECONFIG_DEV_B64 }}" | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
+
+      - name: Verify image signature and attestation
+        env:
+          COSIGN_EXPERIMENTAL: '1'
+          IMAGE: ${{ needs.build-and-push.outputs.image-ref }}
+          COSIGN_PUBLIC_KEY: ${{ secrets.COSIGN_PUBLIC_KEY }}
+        run: |
+          set -euo pipefail
+          VERIFY_FLAGS=()
+          if [ -n "${COSIGN_PUBLIC_KEY:-}" ]; then
+            VERIFY_FLAGS+=(--key "$COSIGN_PUBLIC_KEY")
+          else
+            VERIFY_FLAGS+=(--certificate-identity "https://github.com/${{ github.repository }}")
+            VERIFY_FLAGS+=(--certificate-oidc-issuer "https://token.actions.githubusercontent.com")
+          fi
+
+          cosign verify "${VERIFY_FLAGS[@]}" "$IMAGE"
+          cosign verify-attestation --type spdxjson "${VERIFY_FLAGS[@]}" "$IMAGE"
 
       - name: Deploy to Preview Namespace
         env:
           NAMESPACE: pr-${{ github.event.pull_request.number }}
           HOST: pr-${{ github.event.pull_request.number }}.dev.intelgraph.io
         run: |
+          set -euo pipefail
           kubectl create namespace $NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
           helm upgrade --install server ./charts/server \
             --namespace $NAMESPACE \
@@ -67,7 +124,24 @@ jobs:
             --set image.tag=${{ github.sha }} \
             --set ingress.hosts[0].host=$HOST \
             --set ingress.tls[0].hosts[0]=$HOST \
+            --atomic \
+            --timeout 10m \
             --wait
+
+      - name: Verify rollout health
+        env:
+          NAMESPACE: pr-${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          release=server
+          if kubectl -n "$NAMESPACE" get deployment "$release" >/dev/null 2>&1; then
+            kubectl -n "$NAMESPACE" rollout status deployment "$release" --timeout=5m
+          elif kubectl -n "$NAMESPACE" get statefulset "$release" >/dev/null 2>&1; then
+            kubectl -n "$NAMESPACE" rollout status statefulset "$release" --timeout=5m
+          else
+            echo "::warning::No deployment or statefulset named $release; checking pods by label"
+            kubectl -n "$NAMESPACE" wait --for=condition=Ready pod -l app.kubernetes.io/name=$release --timeout=5m
+          fi
 
       - name: Comment PR
         uses: tholman/github-action-comment-search-replace@v1

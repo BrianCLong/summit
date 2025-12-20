@@ -164,6 +164,7 @@ export class MultiTierCache {
 
       span.setAttributes({
         ttl,
+        hasMetadata: !!options?.tags || !!options?.dependencies,
         hasMetadata: Boolean(options?.tags) || Boolean(options?.dependencies),
       });
 
@@ -325,6 +326,7 @@ export class MultiTierCache {
   // Private methods
 
   private setL1<T>(key: string, value: T, options?: CacheOptions): void {
+    if (!this.l1Cache) return;
     if (!this.l1Cache) {return;}
 
     const ttl = options?.ttl || this.config.l1?.ttl || 300;
@@ -343,6 +345,10 @@ export class MultiTierCache {
   }
 
   private async getFromL2<T>(key: string): Promise<T | null> {
+    if (!this.l2Redis) return null;
+
+    const data = await this.l2Redis.getBuffer(this.getL2Key(key));
+    if (!data) return null;
     if (!this.l2Redis) {return null;}
 
     const data = await this.l2Redis.getBuffer(this.getL2Key(key));
@@ -369,6 +375,7 @@ export class MultiTierCache {
     entry: CacheEntry<T>,
     ttl: number
   ): Promise<void> {
+    if (!this.l2Redis) return;
     if (!this.l2Redis) {return;}
 
     try {

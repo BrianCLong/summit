@@ -1,4 +1,5 @@
 ## Summary
+
 [What/why]
 
 ## Canary Plan
@@ -18,18 +19,22 @@
 ## Security/Compliance
 - [ ] Secrets via sealed-secrets
 - [ ] SBOM attached; SAST/SCA clean
+- [ ] Supply chain checks passed (signing, provenance, SBOM)
+- Exception ID/reference (if applicable):
 
 ## Verification
 - [ ] Smoke checks
 - [ ] Golden path e2e: ingest → resolve → runbook → report
 
 ## 🧠 Copilot Review Tasks
+
 - [ ] `/explain-changes`
 - [ ] `/generate-tests`
 - [ ] `/risk-callouts`
 - [ ] `/summarize-diff`
 
 ## ✅ Checklist
+
 - [ ] Code compiles & passes CI
 - [ ] Tests added/updated
 - [ ] Documentation updated
