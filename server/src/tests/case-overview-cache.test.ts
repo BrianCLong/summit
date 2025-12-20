@@ -2,6 +2,7 @@ import { Pool } from 'pg';
 import { getPostgresPool } from '../db/postgres.js';
 import { CaseOverviewService } from '../cases/overview/CaseOverviewService.js';
 import { CaseOverviewCacheRepo } from '../repos/CaseOverviewCacheRepo.js';
+import { CaseOverviewRefreshJob } from '../cases/overview/CaseOverviewRefreshJob.js';
 
 const TENANT_ID = 'tenant-overview-cache';
 const USER_ID = 'case-overview-tester';
@@ -122,6 +123,22 @@ describe('CaseOverviewService cache', () => {
     expect(rebuilt).toBeDefined();
 
     await cleanupCase(pg, rebuildCaseId);
+  });
+
+  it('refreshes expired entries via refresh job without double-counting hits', async () => {
+    const initial = await service.getOverview(caseId, TENANT_ID);
+    await pg.query(`UPDATE maestro.case_overview_cache SET expires_at = NOW() - interval '5 minutes' WHERE case_id = $1`, [caseId]);
+
+    const job = new CaseOverviewRefreshJob(pg, { ttlMs: 200, staleWhileRevalidateMs: 200 });
+    const result = await job.run();
+
+    expect(result.attempted).toBeGreaterThan(0);
+    expect(result.refreshed).toBeGreaterThan(0);
+
+    const refreshed = await repo.get(caseId, TENANT_ID);
+    expect(refreshed?.refreshedAt.getTime()).toBeGreaterThanOrEqual(initial.refreshedAt.getTime());
+    expect(refreshed?.hitCount).toBeGreaterThanOrEqual(0);
+    expect(refreshed?.expiresAt.getTime()).toBeGreaterThan(Date.now());
   });
 
   it('invalidates cache safely and repopulates on demand', async () => {

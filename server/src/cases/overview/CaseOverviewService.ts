@@ -34,13 +34,18 @@ export class CaseOverviewService {
     const now = new Date();
 
     if (cached) {
-      await this.cacheRepo.recordHit(caseId, tenantId);
-      if (cached.expiresAt > now) {
+      const isFresh = cached.expiresAt > now;
+      const staleDeadline = new Date(
+        cached.expiresAt.getTime() + this.staleWhileRevalidateMs,
+      );
+
+      if (isFresh) {
+        await this.cacheRepo.recordHit(caseId, tenantId);
         return this.decorate(cached, 'fresh');
       }
 
-      const staleDeadline = new Date(cached.expiresAt.getTime() + this.staleWhileRevalidateMs);
       if (now <= staleDeadline) {
+        await this.cacheRepo.recordHit(caseId, tenantId);
         this.triggerRevalidation(cacheKey, caseId, tenantId);
         return this.decorate(cached, 'stale');
       }
