@@ -89,6 +89,9 @@ const AdminDashboard = React.lazy(() =>
 const ApprovalsPage = React.lazy(() =>
   import('./features/approvals/ApprovalsPage')
 );
+const PartnerConsolePage = React.lazy(() =>
+  import('./pages/partner-console/PartnerConsolePage')
+);
 
 import { MilitaryTech } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import { Security } from '@mui/icons-material';
@@ -114,6 +117,7 @@ const navigationItems = [
   { path: '/geoint', label: 'GeoInt Map', icon: <Map /> },
   { path: '/reports', label: 'Reports', icon: <Assessment /> },
   { path: '/system', label: 'System', icon: <Settings />, roles: [ADMIN] },
+  { path: '/partner-console', label: 'Partner Console', icon: <Settings />, roles: [ADMIN] },
   {
     path: '/admin/osint-feeds',
     label: 'OSINT Feeds',
@@ -690,6 +694,9 @@ function MainLayout() {
               <Route path="/access-intel" element={<AccessIntelPage />} />
               <Route path="/geoint" element={<InvestigationsPage />} />
               <Route path="/reports" element={<InvestigationsPage />} />
+              <Route element={<ProtectedRoute roles={[ADMIN]} />}>
+                <Route path="/partner-console" element={<PartnerConsolePage />} />
+              </Route>
               <Route element={<ProtectedRoute roles={APPROVER_ROLES} />}>
                 <Route path="/approvals" element={<ApprovalsPage />} />
               </Route>
