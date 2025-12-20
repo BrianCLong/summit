@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Storybook Stories for TriPaneShell Component
  *

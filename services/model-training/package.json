@@ -11,9 +11,9 @@
     "express": "^5.2.0",
     "zod": "^4.1.12",
     "body-parser": "^1.20.2",
-    "@summit/forecasting": "workspace:*",
-    "@summit/predictive-models": "workspace:*",
-    "@summit/feature-engineering": "workspace:*"
+    "@intelgraph/forecasting": "workspace:*",
+    "@intelgraph/predictive-models": "workspace:*",
+    "@intelgraph/feature-engineering": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.9.3",

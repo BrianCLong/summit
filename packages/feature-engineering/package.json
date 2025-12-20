@@ -1,5 +1,5 @@
 {
-  "name": "@summit/feature-engineering",
+  "name": "@intelgraph/feature-engineering",
   "version": "2.0.0",
   "private": true,
   "type": "module",

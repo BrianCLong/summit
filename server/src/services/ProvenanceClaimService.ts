@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { pool } from '../db/pg';
+import { pool } from '../db/pg.js';
 import { provenanceLedger } from '../provenance/ledger';
 import * as crypto from 'crypto';
 

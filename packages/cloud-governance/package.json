@@ -1,5 +1,5 @@
 {
-  "name": "@summit/cloud-governance",
+  "name": "@intelgraph/cloud-governance",
   "version": "1.0.0",
   "description": "Cloud governance, security, and compliance for data lakehouse",
   "main": "dist/index.js",
@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@summit/lakehouse": "workspace:*",
+    "@intelgraph/lakehouse": "workspace:*",
     "zod": "^4.1.12",
     "pino": "^10.1.0",
     "uuid": "^13.0.0"

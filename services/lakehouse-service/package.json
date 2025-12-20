@@ -1,5 +1,5 @@
 {
-  "name": "@summit/lakehouse-service",
+  "name": "@intelgraph/lakehouse-service",
   "version": "1.0.0",
   "description": "Lakehouse service providing REST API for data operations",
   "main": "dist/index.js",
@@ -11,10 +11,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@summit/lakehouse": "workspace:*",
-    "@summit/object-storage": "workspace:*",
-    "@summit/unified-analytics": "workspace:*",
-    "@summit/cloud-governance": "workspace:*",
+    "@intelgraph/lakehouse": "workspace:*",
+    "@intelgraph/object-storage": "workspace:*",
+    "@intelgraph/unified-analytics": "workspace:*",
+    "@intelgraph/cloud-governance": "workspace:*",
     "express": "^5.2.0",
     "cors": "^2.8.5",
     "helmet": "^8.1.0",

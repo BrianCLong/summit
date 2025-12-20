@@ -1,5 +1,5 @@
 {
-  "name": "@summit/predictive-models",
+  "name": "@intelgraph/predictive-models",
   "version": "2.0.0",
   "private": true,
   "type": "module",

@@ -1,4 +1,3 @@
-// @ts-nocheck
 // client/src/components/alerts/AlertsDashboard.tsx
 import React from 'react';
 
@@ -22,6 +21,10 @@ const AlertsDashboard: React.FC = () => {
   // In a real implementation, this would use a GraphQL query to fetch data
   const alertHistory = mockAlertHistory;
 
+  const handleAcknowledge = () => {
+    window.alert('Acknowledging alert...');
+  };
+
   return (
     <div>
       <h2>Alerts Dashboard</h2>
@@ -36,15 +39,15 @@ const AlertsDashboard: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {alertHistory.map((alert) => (
-            <tr key={alert.id}>
-              <td>{alert.rule.name}</td>
-              <td>{new Date(alert.triggeredAt).toLocaleString()}</td>
-              <td>{alert.value}</td>
-              <td>{alert.acknowledged ? 'Acknowledged' : 'New'}</td>
+          {alertHistory.map((alertItem) => (
+            <tr key={alertItem.id}>
+              <td>{alertItem.rule.name}</td>
+              <td>{new Date(alertItem.triggeredAt).toLocaleString()}</td>
+              <td>{alertItem.value}</td>
+              <td>{alertItem.acknowledged ? 'Acknowledged' : 'New'}</td>
               <td>
-                {!alert.acknowledged && (
-                  <button onClick={() => alert('Acknowledging alert...')}>
+                {!alertItem.acknowledged && (
+                  <button onClick={handleAcknowledge}>
                     Acknowledge
                   </button>
                 )}

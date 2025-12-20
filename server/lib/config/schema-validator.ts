@@ -9,7 +9,7 @@ const __dirname = path.dirname(__filename);
 
 export class SchemaValidator {
   private ajv: Ajv;
-  private schemas: Map<string, any> = new Map();
+  private schemas: Map<string, unknown> = new Map();
 
   constructor() {
     this.ajv = new Ajv({ allErrors: true });
@@ -27,7 +27,7 @@ export class SchemaValidator {
     }
   }
 
-  public validate(config: any, schemaName: string): void {
+  public validate(config: unknown, schemaName: string): void {
     const interpolatedConfig = this.interpolate(config);
     const resolvedConfig = this.resolveSecrets(interpolatedConfig);
 
@@ -41,7 +41,7 @@ export class SchemaValidator {
     }
   }
 
-  private interpolate(config: any): any {
+  private interpolate(config: unknown): unknown {
     const configString = JSON.stringify(config);
     const interpolatedString = configString.replace(/\${(.*?)}/g, (_, envVar) => {
       const value = process.env[envVar];
@@ -50,10 +50,10 @@ export class SchemaValidator {
       }
       return value;
     });
-    return JSON.parse(interpolatedString);
+    return JSON.parse(interpolatedString) as unknown;
   }
 
-  private resolveSecrets(config: any): any {
+  private resolveSecrets(config: unknown): unknown {
     const configString = JSON.stringify(config);
     const resolvedString = configString.replace(/"aws-ssm:(.*?)"/g, (_, secretPath) => {
       // In a real implementation, you would fetch this from AWS SSM.
@@ -61,7 +61,7 @@ export class SchemaValidator {
       console.log(`Resolving secret from AWS SSM: ${secretPath}`);
       return `"resolved-${secretPath.split('/').pop()}"`;
     });
-    return JSON.parse(resolvedString);
+    return JSON.parse(resolvedString) as unknown;
   }
 
   private formatErrors(errors: ErrorObject[] | null | undefined): string {

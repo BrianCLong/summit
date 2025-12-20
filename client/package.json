@@ -64,7 +64,7 @@
     "react-speech-recognition": "^4.0.1",
     "react-syntax-highlighter": "^16.1.0",
     "react-virtualized": "^9.22.6",
-    "reactflow": "^11.12.0",
+    "reactflow": "*",
     "socket.io-client": "^4.8.1",
     "typescript": "^5.9.3",
     "uuid": "^9.0.1",

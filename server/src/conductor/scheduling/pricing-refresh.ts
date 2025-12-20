@@ -46,16 +46,16 @@ export async function refreshPricing(
   try {
     const rawSignals = await provider.fetch();
     const providerInvalid = Array.isArray(
-      (rawSignals as any).__invalidPools,
+      (rawSignals as Record<string, PricingSignal> & { __invalidPools?: unknown[] }).__invalidPools,
     )
-      ? (rawSignals as any).__invalidPools.length
+      ? (rawSignals as Record<string, PricingSignal> & { __invalidPools: unknown[] }).__invalidPools.length
       : 0;
 
     const { signals, invalid } = sanitizePricingSignals(rawSignals);
     skippedPools += invalid.length + providerInvalid;
 
-    const { rows } = await pool.query('SELECT id FROM pool_registry');
-    const knownPools = new Set<string>(rows.map((r: any) => r.id));
+    const { rows } = await pool.query<{ id: string }>('SELECT id FROM pool_registry');
+    const knownPools = new Set<string>(rows.map((r) => r.id));
 
     const entries: Array<[string, PricingSignal]> = [];
     for (const [poolId, signal] of Object.entries(signals)) {
@@ -67,7 +67,7 @@ export async function refreshPricing(
     }
 
     if (entries.length) {
-      const values: any[] = [];
+      const values: (string | number | Date)[] = [];
       const placeholders = entries.map(([poolId, signal], idx) => {
         const base = idx * 5;
         values.push(

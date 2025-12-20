@@ -1,5 +1,5 @@
 {
-  "name": "@summit/reference-data",
+  "name": "@intelgraph/reference-data",
   "version": "1.0.0",
   "description": "Reference data management with code lists, lookups, and versioning",
   "main": "dist/index.js",
@@ -12,7 +12,7 @@
   },
   "keywords": ["reference-data", "code-lists", "lookups", "versioning", "mdm"],
   "dependencies": {
-    "@summit/mdm-core": "workspace:*",
+    "@intelgraph/mdm-core": "workspace:*",
     "zod": "^3.22.4",
     "uuid": "^11.0.3",
     "date-fns": "^4.1.0"

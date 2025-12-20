@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Progress } from '@/components/ui/progress';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 
 export const PrivacyBudgetDisplay = () => {
   const [budget, setBudget] = useState<{ remaining: number; total: number }>({ remaining: 10, total: 10 });

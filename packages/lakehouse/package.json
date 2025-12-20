@@ -1,5 +1,5 @@
 {
-  "name": "@summit/lakehouse",
+  "name": "@intelgraph/lakehouse",
   "version": "1.0.0",
   "description": "Data Lakehouse implementation with Delta Lake, Iceberg, and Hudi support",
   "main": "dist/index.js",

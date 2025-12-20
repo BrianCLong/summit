@@ -1,4 +1,3 @@
-// @ts-nocheck
 // client/src/components/alerts/AlertRuleForm.tsx
 import React, { useState } from 'react';
 import {
@@ -10,6 +9,7 @@ import {
   InputLabel,
   Box,
   Typography,
+  SelectChangeEvent,
 } from '@mui/material';
 
 // Placeholder for the AlertRule type
@@ -42,9 +42,14 @@ const AlertRuleForm: React.FC<AlertRuleFormProps> = ({ rule, onSubmit }) => {
     }
   );
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name as string]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSelectChange = (e: SelectChangeEvent<string>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -85,7 +90,7 @@ const AlertRuleForm: React.FC<AlertRuleFormProps> = ({ rule, onSubmit }) => {
           <Select
             name="operator"
             value={formData.operator}
-            onChange={handleChange}
+            onChange={handleSelectChange}
           >
             <MenuItem value=">">&gt;</MenuItem>
             <MenuItem value="<">&lt;</MenuItem>
@@ -107,7 +112,7 @@ const AlertRuleForm: React.FC<AlertRuleFormProps> = ({ rule, onSubmit }) => {
           <Select
             name="severity"
             value={formData.severity}
-            onChange={handleChange}
+            onChange={handleSelectChange}
           >
             <MenuItem value="info">Info</MenuItem>
             <MenuItem value="warning">Warning</MenuItem>

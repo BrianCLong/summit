@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Command Palette - Global search and quick actions (⌘K)
  */

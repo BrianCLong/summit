@@ -1,5 +1,5 @@
 {
-  "name": "@summit/prov-ledger-extensions",
+  "name": "@intelgraph/prov-ledger-extensions",
   "version": "2.0.0",
   "description": "Enhanced provenance tracking extensions for Summit Platform",
   "main": "dist/index.js",

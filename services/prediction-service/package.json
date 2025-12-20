@@ -12,9 +12,9 @@
     "express": "^5.2.0",
     "zod": "^4.1.12",
     "body-parser": "^1.20.2",
-    "@summit/forecasting": "workspace:*",
-    "@summit/predictive-models": "workspace:*",
-    "@summit/risk-scoring": "workspace:*"
+    "@intelgraph/forecasting": "workspace:*",
+    "@intelgraph/predictive-models": "workspace:*",
+    "@intelgraph/risk-scoring": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.9.3",

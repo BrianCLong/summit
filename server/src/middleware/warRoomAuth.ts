@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { GraphQLError } from 'graphql';
+import { db } from '../db.js'; // Assuming a db connection utility exists
 
 // In a real-world scenario, this would involve a database lookup
 // to check the user's role for a specific War Room.
@@ -14,8 +15,6 @@ export const checkAuth = (context: any) => {
     });
   }
 };
-
-import { db } from '../db'; // Assuming a db connection utility exists
 
 export const checkWarRoomAdmin = async (context: any, warRoomId: number) => {
   checkAuth(context);

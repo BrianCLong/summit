@@ -1,5 +1,5 @@
 {
-  "name": "@summit/time-series",
+  "name": "@intelgraph/time-series",
   "version": "2.0.0",
   "private": true,
   "type": "module",

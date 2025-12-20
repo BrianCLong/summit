@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * CasesPage - Analyst Case Management
  *

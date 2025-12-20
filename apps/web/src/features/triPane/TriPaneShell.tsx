@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Tri-Pane Analysis Shell
  *

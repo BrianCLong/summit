@@ -1,5 +1,5 @@
 {
-  "name": "@summit/olap-engine",
+  "name": "@intelgraph/olap-engine",
   "version": "1.0.0",
   "description": "OLAP engine for analytical queries",
   "version": "2.0.0",

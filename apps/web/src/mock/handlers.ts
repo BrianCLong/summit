@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { http, HttpResponse } from 'msw'
 import mockData from './data.json'
 

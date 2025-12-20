@@ -1,5 +1,5 @@
 {
-  "name": "@summit/rarl",
+  "name": "@intelgraph/rarl",
   "version": "2.0.0",
   "description": "Risk-adaptive rate limiter SDK",
   "main": "dist/index.js",

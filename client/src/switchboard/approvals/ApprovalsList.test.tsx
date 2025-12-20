@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,11 +12,11 @@ const createFetchResponse = (data: unknown, ok = true) =>
 
 describe('ApprovalsList', () => {
   beforeEach(() => {
-    vi.resetAllMocks();
+    jest.resetAllMocks();
   });
 
   it('shows loading state while fetching', () => {
-    global.fetch = vi.fn(
+    global.fetch = jest.fn(
       () =>
         new Promise(() => {
           // Never resolve to keep loading visible for assertion
@@ -30,7 +29,7 @@ describe('ApprovalsList', () => {
   });
 
   it('renders empty state when no approvals are returned', async () => {
-    global.fetch = vi.fn(() => createFetchResponse([])) as unknown as typeof fetch;
+    global.fetch = jest.fn(() => createFetchResponse([])) as unknown as typeof fetch;
 
     render(<ApprovalsList />);
 
@@ -40,7 +39,7 @@ describe('ApprovalsList', () => {
   });
 
   it('renders error state when the queue fails to load', async () => {
-    global.fetch = vi.fn(() => createFetchResponse('Service unavailable', false)) as
+    global.fetch = jest.fn(() => createFetchResponse('Service unavailable', false)) as
       | undefined
       | typeof fetch;
 
@@ -63,7 +62,7 @@ describe('ApprovalsList', () => {
       },
     ];
 
-    global.fetch = vi.fn(() => createFetchResponse(queue)) as unknown as typeof fetch;
+    global.fetch = jest.fn(() => createFetchResponse(queue)) as unknown as typeof fetch;
 
     render(<ApprovalsList />);
 

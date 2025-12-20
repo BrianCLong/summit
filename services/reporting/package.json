@@ -1,5 +1,5 @@
 {
-  "name": "@summit/reporting-service",
+  "name": "@intelgraph/reporting-service",
   "version": "1.0.0",
   "private": true,
   "type": "module",

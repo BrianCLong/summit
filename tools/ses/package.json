@@ -1,5 +1,5 @@
 {
-  "name": "@summit/ses",
+  "name": "@intelgraph/ses",
   "version": "2.0.0",
   "description": "Schema Evolution Simulator (SES) for what-if planning and migrations",
   "type": "module",

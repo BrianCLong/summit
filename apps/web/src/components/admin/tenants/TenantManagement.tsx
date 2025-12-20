@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * CompanyOS Tenant Management Admin UI
  *

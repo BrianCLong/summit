@@ -1,5 +1,5 @@
 {
-  "name": "@summit/cloud-platform",
+  "name": "@intelgraph/cloud-platform",
   "version": "1.0.0",
   "description": "Multi-cloud infrastructure for Summit data lakehouse platform",
   "main": "dist/index.js",

@@ -1,9 +1,11 @@
 // @ts-nocheck
+import { Pool, PoolClient } from 'pg';
+
 export class JobsRepo {
-  constructor(private pool: any) {}
-  async insert(tenantId: string, row: any) {
+  constructor(private pool: Pool) {}
+  async insert(tenantId: string, row: { id: string; kind: string; status: string; createdAt: Date; meta?: Record<string, unknown> }) {
     const q = `INSERT INTO ai_jobs (id, tenant_id, kind, status, created_at, meta) VALUES ($1,$2,$3,$4,$5,$6)`;
-    await this.withTenant(tenantId, (client: any) =>
+    await this.withTenant(tenantId, (client) =>
       client.query(q, [
         row.id,
         tenantId,
@@ -15,15 +17,15 @@ export class JobsRepo {
     );
   }
 
-  async update(tenantId: string, id: string, patch: any) {
+  async update(tenantId: string, id: string, patch: { status?: string; finishedAt?: Date; error?: string }) {
     const q = `UPDATE ai_jobs SET status=COALESCE($3,status), finished_at=COALESCE($4,finished_at), error=COALESCE($5,error) WHERE id=$1 AND tenant_id=$2`;
-    await this.withTenant(tenantId, (client: any) =>
+    await this.withTenant(tenantId, (client) =>
       client.query(q, [id, tenantId, patch.status, patch.finishedAt, patch.error]),
     );
   }
 
   async findById(tenantId: string, id: string) {
-    const { rows } = await this.withTenant(tenantId, (client: any) =>
+    const { rows } = await this.withTenant(tenantId, (client) =>
       client.query(`SELECT * FROM ai_jobs WHERE id=$1 AND tenant_id=$2`, [
         id,
         tenantId,
@@ -34,7 +36,7 @@ export class JobsRepo {
 
   private async withTenant<T>(
     tenantId: string,
-    fn: (client: any) => Promise<T>,
+    fn: (client: PoolClient) => Promise<T>,
   ): Promise<T> {
     const client = await this.pool.connect();
     try {

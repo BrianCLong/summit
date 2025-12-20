@@ -50,7 +50,7 @@ function normalizeTenant(tenantId?: string | null) {
   return tenantId;
 }
 
-function mapRow(row: any): CapacityReservation {
+function mapRow(row: { reservation_id: string; tenant_id: string | null; pool_id: string; compute_units: number | string; start_at: Date | string; end_at: Date | string; status: CapacityReservationStatus }): CapacityReservation {
   return {
     reservationId: row.reservation_id,
     tenantId: row.tenant_id,
@@ -69,9 +69,9 @@ async function refreshActiveGauge() {
     );
     const count = Number(rows?.[0]?.count || 0);
     capacityActiveReservationsGauge.set(count);
-  } catch (error) {
+  } catch (error: unknown) {
     logger.warn('⚠️ Failed to refresh capacity reservation gauge', {
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 }

@@ -55,12 +55,13 @@ router.post(
         startAt: reservation.startAt,
         endAt: reservation.endAt,
       });
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logger.error('❌ Capacity reservation failed', {
-        error: error.message,
+        error: errorMessage,
         poolId: req.body?.poolId,
       });
-      return res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: errorMessage });
     }
   },
 );
@@ -86,12 +87,13 @@ router.post(
       });
 
       return res.json({ released: true });
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logger.error('❌ Capacity reservation release failed', {
-        error: error.message,
+        error: errorMessage,
         reservationId: req.body?.reservationId,
       });
-      return res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: errorMessage });
     }
   },
 );
@@ -110,11 +112,12 @@ router.get(
         includeExpired,
       });
       return res.json({ reservations });
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logger.error('❌ Failed to list capacity reservations', {
-        error: error.message,
+        error: errorMessage,
       });
-      return res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: errorMessage });
     }
   },
 );

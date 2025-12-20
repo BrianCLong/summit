@@ -1,9 +1,8 @@
-// @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 
-const visuallyHidden = {
+const visuallyHidden: React.CSSProperties = {
   position: 'absolute',
   width: '1px',
   height: '1px',

@@ -74,7 +74,7 @@ class ScenarioService extends EventEmitter {
   async addModification(
     scenarioId: string,
     type: ModificationType,
-    data: any,
+    data: unknown,
     targetId?: string,
     userId: string = 'system'
   ): Promise<InvestigationScenario> {
@@ -135,9 +135,9 @@ class ScenarioService extends EventEmitter {
    */
   resolveState(
     scenarioId: string,
-    baseEntities: any[],
-    baseRelationships: any[],
-    baseTimeline: any[]
+    baseEntities: Array<{ id: string; [key: string]: unknown }>,
+    baseRelationships: Array<{ id: string; source: string; target: string; [key: string]: unknown }>,
+    baseTimeline: Array<{ id: string; [key: string]: unknown }>
   ): ScenarioResult {
     const scenario = this.scenarios.get(scenarioId);
     if (!scenario) {

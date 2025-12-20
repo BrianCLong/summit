@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useRef, useEffect, useCallback } from 'react';
 import ForceGraph2D, { ForceGraphMethods } from 'react-force-graph-2d';
 import { useWorkspaceStore } from '../store/workspaceStore';

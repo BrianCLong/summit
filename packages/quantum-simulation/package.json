@@ -1,5 +1,5 @@
 {
-  "name": "@summit/quantum-simulation",
+  "name": "@intelgraph/quantum-simulation",
   "version": "2.0.0",
   "description": "Quantum algorithm simulation and circuit design for Summit",
   "main": "dist/index.js",

@@ -200,5 +200,3 @@ export class CaseOverviewService {
     };
   }
 }
-
-const overviewLogger = logger.child({ name: 'CaseOverviewService' });

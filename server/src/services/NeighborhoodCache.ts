@@ -7,14 +7,12 @@
  */
 
 import Redis from 'ioredis';
-// @ts-ignore
-import { default as pino } from 'pino';
+import pino from 'pino';
 import {
   TenantContext,
   TenantValidator,
 } from '../middleware/tenantValidator.js';
 
-// @ts-ignore
 const logger = pino({ name: 'neighborhoodCache' });
 
 export interface NeighborhoodData {

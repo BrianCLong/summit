@@ -1,5 +1,5 @@
 {
-  "name": "@summit/predictive-graph-intelligence",
+  "name": "@intelgraph/predictive-graph-intelligence",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "zod": "^4.1.12",
-    "@summit/graph-algorithms": "workspace:*"
+    "@intelgraph/graph-algorithms": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",

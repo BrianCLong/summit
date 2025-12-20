@@ -1,5 +1,5 @@
 {
-  "name": "@summit/dprs-cli",
+  "name": "@intelgraph/dprs-cli",
   "version": "2.0.0",
   "description": "CLI for the Differential Privacy Release Scheduler",
   "private": true,

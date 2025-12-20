@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { getRedisClient } from '../db/redis.js';
 import pino from 'pino';
-import { z } from 'zod/v4';
+import { z } from 'zod';
 
 const logger = pino();
 

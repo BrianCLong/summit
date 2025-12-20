@@ -1,5 +1,5 @@
 {
-  "name": "@summit/fhem-client",
+  "name": "@intelgraph/fhem-client",
   "version": "0.1.0",
   "description": "TypeScript client for the FHE micro-analytics service",
   "type": "module",

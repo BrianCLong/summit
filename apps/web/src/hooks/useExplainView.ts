@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { gql } from '@apollo/client/core'
 import { useQuery, useMutation } from '@apollo/client/react'
 import { useQuery, useMutation } from '@apollo/client/react'

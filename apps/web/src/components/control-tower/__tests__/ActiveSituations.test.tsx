@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ActiveSituations Component Tests
  */

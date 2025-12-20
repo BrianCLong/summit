@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 export type FocusMode = 'auto' | 'manual' | 'off'

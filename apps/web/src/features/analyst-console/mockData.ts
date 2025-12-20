@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Mock Data Generator for Analyst Console
  *

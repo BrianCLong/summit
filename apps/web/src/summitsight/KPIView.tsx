@@ -1,6 +1,6 @@
 import React from 'react';
 import { KPIStatus } from './types';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { ArrowUpIcon, ArrowDownIcon, MinusIcon } from 'lucide-react';
 
 interface KPIViewProps {

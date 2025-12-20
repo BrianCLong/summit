@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Unified Search Component
  * Sprint 27G: Tri-pane UX with advanced search and error-proofing

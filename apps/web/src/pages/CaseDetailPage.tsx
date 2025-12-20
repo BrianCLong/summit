@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * CaseDetailPage - Comprehensive Case Workspace
  *

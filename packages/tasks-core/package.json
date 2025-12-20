@@ -1,5 +1,5 @@
 {
-  "name": "@summit/maestro-tasks-core",
+  "name": "@intelgraph/maestro-tasks-core",
   "version": "2.0.0",
   "description": "Reference tasks & connectors for Summit Maestro",
   "license": "UNLICENSED",
@@ -19,7 +19,7 @@
     "prepublishOnly": "npm run clean && npm run build && npm test"
   },
   "dependencies": {
-    "@summit/maestro-sdk": "workspace:*",
+    "@intelgraph/maestro-sdk": "workspace:*",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "yaml": "^2.5.0",

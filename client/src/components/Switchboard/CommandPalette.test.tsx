@@ -1,11 +1,10 @@
-// @ts-nocheck
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import CommandPalette from './CommandPalette';
 
 describe('CommandPalette', () => {
   it('filters commands based on user input', () => {
-    const handleCommandSelect = vi.fn();
+    const handleCommandSelect = jest.fn();
     render(
       <CommandPalette
         open={true}

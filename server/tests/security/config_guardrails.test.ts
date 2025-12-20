@@ -1,5 +1,4 @@
 // @ts-nocheck
-
 import { jest } from '@jest/globals';
 
 // We need to mock process.exit before importing config

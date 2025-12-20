@@ -1,5 +1,5 @@
 {
-  "name": "@summit/shared",
+  "name": "@intelgraph/shared",
   "version": "1.0.0",
   "description": "Shared utilities and types for Summit platform",
   "main": "dist/index.js",

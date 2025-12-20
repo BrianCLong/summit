@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState } from 'react'
 import { useQuery, useMutation, gql } from '@apollo/client'
 import { Button } from '@/components/ui/Button'

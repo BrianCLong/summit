@@ -1,5 +1,5 @@
 {
-  "name": "@summit/admin-cli",
+  "name": "@intelgraph/admin-cli",
   "version": "1.0.0",
   "description": "Unified Admin & SRE CLI for IntelGraph platform operations",
   "type": "module",

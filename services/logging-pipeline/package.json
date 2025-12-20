@@ -1,5 +1,5 @@
 {
-  "name": "@summit/logging-pipeline",
+  "name": "@intelgraph/logging-pipeline",
   "version": "1.0.0",
   "description": "Unified audit event ingestion pipeline with backpressure handling",
   "type": "module",

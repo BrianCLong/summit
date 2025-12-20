@@ -1,5 +1,5 @@
 {
-  "name": "@summit/post-quantum-crypto",
+  "name": "@intelgraph/post-quantum-crypto",
   "version": "2.0.0",
   "description": "NIST post-quantum cryptography implementation for Summit",
   "main": "dist/index.js",

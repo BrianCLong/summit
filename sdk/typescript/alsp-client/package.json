@@ -1,5 +1,5 @@
 {
-  "name": "@summit/alsp-client",
+  "name": "@intelgraph/alsp-client",
   "version": "0.1.0",
   "description": "TypeScript client and verifier for the ALSP audit log proofs",
   "type": "module",

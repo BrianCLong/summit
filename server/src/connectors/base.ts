@@ -1,5 +1,4 @@
 // @ts-nocheck
-
 import { EventEmitter } from 'events';
 import { Readable } from 'stream';
 import {
@@ -8,14 +7,14 @@ import {
   ConnectorHealth,
   ConnectorMetrics,
   IngestionEvent
-} from './types';
-import logger from '../config/logger';
+} from './types.js';
+import logger from '../config/logger.js';
 
 export abstract class BaseConnector extends EventEmitter {
   protected config: ConnectorConfig;
   protected metrics: ConnectorMetrics;
   protected isConnected: boolean = false;
-  protected logger: any;
+  protected logger: ReturnType<typeof logger.child>;
 
   constructor(config: ConnectorConfig) {
     super();

@@ -1,5 +1,5 @@
 {
-  "name": "@summit/acx",
+  "name": "@intelgraph/acx",
   "version": "2.0.0",
   "description": "Adaptive Consent Experience SDK for web, iOS, and Android",
   "type": "module",

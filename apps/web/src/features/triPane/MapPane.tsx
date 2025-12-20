@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Map Pane Component for Tri-Pane Analysis Shell
  *

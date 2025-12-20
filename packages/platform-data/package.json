@@ -1,5 +1,5 @@
 {
-  "name": "@summit/platform-data",
+  "name": "@intelgraph/platform-data",
   "version": "1.0.0",
   "description": "Data lineage, mock data factory, and privacy utilities (P36-40)",
   "type": "module",

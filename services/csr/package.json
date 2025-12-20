@@ -1,5 +1,5 @@
 {
-  "name": "@summit/csr",
+  "name": "@intelgraph/csr",
   "version": "2.0.0",
   "private": true,
   "description": "Consent State Reconciler service",

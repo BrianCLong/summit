@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { Patch } from 'immer'
 

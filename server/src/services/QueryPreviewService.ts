@@ -436,7 +436,7 @@ export class QueryPreviewService {
       preview,
       Boolean(input.useEditedQuery && preview.editedQuery),
     );
-    const initialCursor = decodeCursor(input.cursor);
+    const initialCursor = this.decodeCursor(input.cursor);
     const pageSize = Math.max(1, input.batchSize ?? input.maxRows ?? 100);
     const streamTopic = input.stream ? preview.id : undefined;
 
@@ -597,11 +597,11 @@ export class QueryPreviewService {
       }, 'Executed query preview');
 
       if (streamTopic) {
-        previewStreamHub.publish(preview.id, {
+        (this as any).previewStreamHub.publish(preview.id, {
           previewId: preview.id,
           batch: [],
-          cursor: encodeCursor(nextCursor ?? initialCursor),
-          nextCursor: nextCursor ? encodeCursor(nextCursor) : null,
+          cursor: this.encodeCursor(nextCursor ?? initialCursor),
+          nextCursor: nextCursor ? this.encodeCursor(nextCursor) : null,
           complete: true,
           warnings,
         });
@@ -621,7 +621,7 @@ export class QueryPreviewService {
           streamingCached?.rows ?? results.slice(0, this.queryCache.getPartialLimit()),
         partialCacheHit: Boolean(streamingCached),
         signature,
-        nextCursor: nextCursor !== undefined ? encodeCursor(nextCursor) : null,
+        nextCursor: nextCursor !== undefined ? this.encodeCursor(nextCursor) : null,
         hasMore,
         streamingChannel: streamTopic,
         streamedBatches: streamTopic ? streamedBatches : undefined,
@@ -939,7 +939,7 @@ export class QueryPreviewService {
     const offset = options.cursor ?? 0;
     const limit = Math.min(options.batchSize ?? options.maxRows, options.maxRows);
 
-    const finalQuery = wrapSqlWithPagination(query);
+    const finalQuery = this.wrapSqlWithPagination(query);
     const result = await this.pool.query(finalQuery, [offset, limit + 1]);
 
     const hasMore = result.rows.length > limit;
@@ -1074,5 +1074,26 @@ export class QueryPreviewService {
       createdAt: new Date(row.created_at),
       updatedAt: new Date(row.updated_at),
     };
+  }
+
+  private wrapCypherWithPagination(query: string): string {
+    return `${query.replace(/;?\s*$/, '')} SKIP $skip LIMIT $limitPlusOne`;
+  }
+
+  private wrapSqlWithPagination(query: string): string {
+    return `${query.replace(/;?\s*$/, '')} OFFSET $1 LIMIT $2`;
+  }
+
+  private decodeCursor(cursor: string | null | undefined): number {
+    if (!cursor) return 0;
+    try {
+      return parseInt(Buffer.from(cursor, 'base64').toString('utf8'), 10) || 0;
+    } catch {
+      return 0;
+    }
+  }
+
+  private encodeCursor(offset: number): string {
+    return Buffer.from(String(offset)).toString('base64');
   }
 }

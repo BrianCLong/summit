@@ -1,5 +1,5 @@
 {
-  "name": "@summit/apm-sdk",
+  "name": "@intelgraph/apm-sdk",
   "version": "2.0.0",
   "description": "TypeScript SDK for the Access Path Minimizer planner.",
   "type": "module",

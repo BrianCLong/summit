@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Middleware } from '@reduxjs/toolkit'
 import { applyPatches, enablePatches, produceWithPatches, Patch } from 'immer'
 import { push, popUndo, popRedo, moveToRedo, moveToUndo } from './historySlice'

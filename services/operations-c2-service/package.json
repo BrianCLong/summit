@@ -1,5 +1,5 @@
 {
-  "name": "@summit/operations-c2-service",
+  "name": "@intelgraph/operations-c2-service",
   "version": "2.0.0",
   "description": "Intelligence operations command and control backend service",
   "main": "src/index.js",

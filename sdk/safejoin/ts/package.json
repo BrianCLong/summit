@@ -1,5 +1,5 @@
 {
-  "name": "@summit/safejoin",
+  "name": "@intelgraph/safejoin",
   "version": "2.0.0",
   "description": "TypeScript SDK for the SafeJoin PSI engine",
   "main": "dist/index.js",

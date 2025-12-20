@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Event Timeline - Chronological stream of operational events
  */

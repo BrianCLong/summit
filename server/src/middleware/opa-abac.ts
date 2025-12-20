@@ -3,9 +3,9 @@ import { Request, Response, NextFunction } from 'express';
 import { AuthenticationError, ForbiddenError } from 'apollo-server-express';
 import { verify, JwtPayload } from 'jsonwebtoken';
 import axios from 'axios';
-import { trace, context } from '@opentelemetry/api';
-import { logger } from '../utils/logger';
-import type { User, OPAClient as IOPAClient } from '../graphql/intelgraph/types';
+import { trace } from '@opentelemetry/api';
+import { logger } from '../utils/logger.js';
+import type { User, OPAClient as IOPAClient } from '../graphql/intelgraph/types.js';
 
 const tracer = trace.getTracer('intelgraph-opa-abac');
 

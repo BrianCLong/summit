@@ -1,5 +1,5 @@
 {
-  "name": "@summit/pbs-dashboard",
+  "name": "@intelgraph/pbs-dashboard",
   "version": "2.0.0",
   "type": "module",
   "description": "Static dashboard generator for PBS backtest reports",

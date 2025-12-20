@@ -1,8 +1,8 @@
 import React from 'react';
 import { ShieldCheck, ShieldAlert, FileSearch } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/Dialog';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
 
 interface ProvenanceBadgeProps {
   status: 'verified' | 'unverified' | 'tampered';

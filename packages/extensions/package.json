@@ -1,19 +1,16 @@
 {
   "name": "@intelgraph/extensions",
-  "version": "1.0.0",
-  "description": "Extension system for IntelGraph platform",
+  "version": "2.0.0",
+  "description": "Unified extension framework for IntelGraph",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "name": "@summit/extensions",
-  "version": "2.0.0",
-  "description": "Unified extension framework for Summit",
-  "type": "module",
   "scripts": {
     "build": "tsc",
     "test": "jest"
   },
   "devDependencies": {
-    "typescript": "^5.3.3"
+    "typescript": "^5.9.3"
   },
   "dependencies": {}
 }

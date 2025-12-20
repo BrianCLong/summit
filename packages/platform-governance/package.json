@@ -1,5 +1,5 @@
 {
-  "name": "@summit/platform-governance",
+  "name": "@intelgraph/platform-governance",
   "version": "1.0.0",
   "description": "Policy engine and governance utilities (P46-47)",
   "type": "module",

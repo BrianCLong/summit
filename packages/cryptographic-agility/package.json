@@ -1,5 +1,5 @@
 {
-  "name": "@summit/cryptographic-agility",
+  "name": "@intelgraph/cryptographic-agility",
   "version": "2.0.0",
   "description": "Cryptographic agility framework for seamless algorithm transitions",
   "main": "dist/index.js",
@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@summit/post-quantum-crypto": "workspace:*",
+    "@intelgraph/post-quantum-crypto": "workspace:*",
     "@noble/hashes": "^1.3.3"
   },
   "devDependencies": {

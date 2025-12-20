@@ -1,5 +1,5 @@
 {
-  "name": "@summit/agentic-mesh-evaluation",
+  "name": "@intelgraph/agentic-mesh-evaluation",
   "version": "1.0.0",
   "description": "Comprehensive Agentic Mesh Evaluation System - Distributed AI Agent Coordination & Performance Analysis",
   "main": "dist/index.js",

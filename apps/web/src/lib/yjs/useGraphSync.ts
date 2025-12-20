@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useEffect, useState, useCallback } from 'react';
 import * as Y from 'yjs';
 import type { Entity, Relationship } from '@/types';

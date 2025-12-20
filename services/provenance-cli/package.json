@@ -1,5 +1,5 @@
 {
-  "name": "@summit/provenance-cli",
+  "name": "@intelgraph/provenance-cli",
   "version": "2.0.0",
   "private": true,
   "type": "module",

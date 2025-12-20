@@ -1,5 +1,5 @@
 {
-  "name": "@summit/ai-sandbox",
+  "name": "@intelgraph/ai-sandbox",
   "version": "2.0.0",
   "description": "Secure AI experimentation sandbox for government AI system testing and validation",
   "type": "module",

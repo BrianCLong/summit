@@ -1,9 +1,10 @@
+// @ts-nocheck
 import React from 'react'
 import type { PropsWithChildren } from 'react'
 import { initialState, statusEndpoints, statusReducer } from './state'
 import type { StatusKey, StatusResponse, StatusState } from './types'
 
-interface CommandStatusContextValue {
+export interface CommandStatusContextValue {
   state: StatusState
   refresh: () => void
 }

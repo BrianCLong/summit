@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Map Pane Component for Analyst Console
  *

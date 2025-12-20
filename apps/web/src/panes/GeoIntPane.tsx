@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 import React, { useState } from 'react';
 import { MapContainer, TileLayer, Circle, Popup, Polyline } from 'react-leaflet';

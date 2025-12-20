@@ -1,5 +1,5 @@
 {
-  "name": "@summit/quantum-optimization",
+  "name": "@intelgraph/quantum-optimization",
   "version": "2.0.0",
   "description": "Quantum-inspired optimization algorithms for Summit",
   "main": "dist/index.js",
@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@summit/quantum-simulation": "workspace:*",
+    "@intelgraph/quantum-simulation": "workspace:*",
     "mathjs": "^12.0.0"
   },
   "devDependencies": {

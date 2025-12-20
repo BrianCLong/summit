@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { Pool } from 'pg';
-import logger from '../../../config/logger';
-import { CaseDashboardMetrics } from '../types';
+import logger from '../../../config/logger.js';
+import { CaseDashboardMetrics } from '../types.js';
 
 const repoLogger = logger.child({ name: 'CaseDashboardReadModelRepo' });
 
@@ -24,7 +24,7 @@ export class CaseDashboardReadModelRepo {
     tenantId: string,
     caseIds?: string[],
   ): Promise<Map<string, CaseDashboardMetrics>> {
-    const params: any[] = [tenantId];
+    const params: (string | string[])[] = [tenantId];
     let query = `
       SELECT
         case_id,

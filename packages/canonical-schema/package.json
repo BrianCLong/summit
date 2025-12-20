@@ -1,5 +1,5 @@
 {
-  "name": "@summit/canonical-schema",
+  "name": "@intelgraph/canonical-schema",
   "version": "2.0.0",
   "description": "Canonical graph schema and entity resolution types for Summit",
   "main": "dist/index.js",

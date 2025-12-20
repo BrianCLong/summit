@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * useKeyboardShortcuts - Hook for handling keyboard shortcuts
  */

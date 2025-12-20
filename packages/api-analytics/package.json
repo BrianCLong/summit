@@ -1,5 +1,5 @@
 {
-  "name": "@summit/api-analytics",
+  "name": "@intelgraph/api-analytics",
   "version": "1.0.0",
   "description": "API monitoring, analytics, and performance tracking",
   "type": "module",

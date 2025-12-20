@@ -1,5 +1,5 @@
 {
-  "name": "@summit/audit-blackbox-service",
+  "name": "@intelgraph/audit-blackbox-service",
   "version": "1.0.0",
   "description": "Immutable audit flight recorder with tamper-evident storage for IntelGraph",
   "type": "module",

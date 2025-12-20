@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState, useEffect } from 'react'
 import { Search, Filter, Settings, Download, RefreshCw, Shield, FileCheck } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'

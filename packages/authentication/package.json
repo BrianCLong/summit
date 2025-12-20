@@ -1,5 +1,5 @@
 {
-  "name": "@summit/authentication",
+  "name": "@intelgraph/authentication",
   "version": "1.0.0",
   "description": "Enterprise authentication and authorization with OAuth 2.0, JWT, API keys, and mTLS",
   "type": "module",

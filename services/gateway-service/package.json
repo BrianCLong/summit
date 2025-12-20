@@ -1,5 +1,5 @@
 {
-  "name": "@summit/gateway-service",
+  "name": "@intelgraph/gateway-service",
   "version": "1.0.0",
   "description": "Summit API Gateway Service - Main orchestration service",
   "type": "module",
@@ -13,11 +13,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@summit/api-gateway": "workspace:*",
-    "@summit/authentication": "workspace:*",
-    "@summit/rate-limiting": "workspace:*",
-    "@summit/api-management": "workspace:*",
-    "@summit/api-analytics": "workspace:*",
+    "@intelgraph/api-gateway": "workspace:*",
+    "@intelgraph/authentication": "workspace:*",
+    "@intelgraph/rate-limiting": "workspace:*",
+    "@intelgraph/api-management": "workspace:*",
+    "@intelgraph/api-analytics": "workspace:*",
     "express": "^5.2.0",
     "dotenv": "^17.2.3",
     "pino": "^8.17.0",

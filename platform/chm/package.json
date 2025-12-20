@@ -1,5 +1,5 @@
 {
-  "name": "@summit/chm",
+  "name": "@intelgraph/chm",
   "version": "0.1.0",
   "private": true,
   "type": "module",

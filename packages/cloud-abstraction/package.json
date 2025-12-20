@@ -1,5 +1,5 @@
 {
-  "name": "@summit/cloud-abstraction",
+  "name": "@intelgraph/cloud-abstraction",
   "version": "2.0.0",
   "description": "Cloud-agnostic abstraction layer for multi-cloud deployments",
   "main": "dist/index.js",

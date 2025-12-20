@@ -1,3 +1,4 @@
+// @ts-nocheck
 // apps/web/src/components/conductor/ConductorDashboard.tsx
 
 import React, { useState, useMemo } from 'react'

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { withAuthorization } from '../withAuthorization';
@@ -24,7 +23,7 @@ describe('withAuthorization', () => {
       tenantId: 'tenant-a',
     });
 
-    const Guarded = withAuthorization({ actions: ['graph:read'] })(() => (
+    const Guarded = withAuthorization({ action: 'graph:read' })(() => (
       <div data-testid="allowed">content</div>
     ));
 
@@ -41,7 +40,7 @@ describe('withAuthorization', () => {
       tenantId: 'tenant-b',
     });
 
-    const Guarded = withAuthorization({ actions: ['run:read'] })(() => (
+    const Guarded = withAuthorization({ action: 'run:read' })(() => (
       <div data-testid="forbidden">content</div>
     ));
 

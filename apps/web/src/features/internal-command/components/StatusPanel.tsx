@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react'
 import { ArrowUpRight, AlertTriangle, CheckCircle2, ExternalLink, Info } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'

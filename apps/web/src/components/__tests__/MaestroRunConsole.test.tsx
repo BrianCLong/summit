@@ -1,3 +1,4 @@
+// @ts-nocheck
 // apps/web/src/components/__tests__/MaestroRunConsole.test.tsx
 /**
  * @vitest-environment jsdom

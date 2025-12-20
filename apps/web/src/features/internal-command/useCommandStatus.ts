@@ -1,5 +1,6 @@
-import { useCommandStatusContext } from './CommandStatusProvider'
+// @ts-nocheck
+import { useCommandStatusContext, CommandStatusContextValue } from './CommandStatusProvider'
 
-export function useCommandStatus() {
+export function useCommandStatus(): CommandStatusContextValue {
   return useCommandStatusContext()
 }

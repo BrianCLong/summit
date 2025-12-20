@@ -1,5 +1,5 @@
 {
-  "name": "@summit/golden-records",
+  "name": "@intelgraph/golden-records",
   "version": "1.0.0",
   "description": "Golden record management with entity resolution and survivorship",
   "main": "dist/index.js",
@@ -17,7 +17,7 @@
     "mdm"
   ],
   "dependencies": {
-    "@summit/mdm-core": "workspace:*",
+    "@intelgraph/mdm-core": "workspace:*",
     "zod": "^3.22.4",
     "uuid": "^11.0.3",
     "date-fns": "^4.1.0"

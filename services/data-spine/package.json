@@ -1,5 +1,5 @@
 {
-  "name": "@summit/data-spine",
+  "name": "@intelgraph/data-spine",
   "version": "2.0.0",
   "description": "Data spine schema registry, residency enforcement, and lineage sink",
   "main": "src/index.js",

@@ -1,5 +1,5 @@
 {
-  "name": "@summit/dlc-client",
+  "name": "@intelgraph/dlc-client",
   "version": "0.1.0",
   "description": "TypeScript client for the Data Lease Controller service",
   "main": "dist/index.js",

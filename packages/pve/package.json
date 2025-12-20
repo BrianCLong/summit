@@ -1,5 +1,5 @@
 {
-  "name": "@summit/pve",
+  "name": "@intelgraph/pve",
   "version": "0.1.0",
   "description": "Policy Validation Engine - OPA-driven governance and invariant enforcement for Summit",
   "main": "dist/index.js",

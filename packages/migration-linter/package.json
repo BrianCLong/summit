@@ -1,5 +1,5 @@
 {
-  "name": "@summit/migration-linter",
+  "name": "@intelgraph/migration-linter",
   "version": "0.1.0",
   "description": "Static linter for SQL and ORM migrations enforcing backward-compatible patterns",
   "type": "module",

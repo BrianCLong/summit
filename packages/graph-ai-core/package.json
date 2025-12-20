@@ -1,5 +1,5 @@
 {
-  "name": "@summit/graph-ai-core",
+  "name": "@intelgraph/graph-ai-core",
   "version": "1.0.0",
   "description": "Graph AI core functionality",
   "main": "dist/index.js",

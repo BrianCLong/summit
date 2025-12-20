@@ -1,5 +1,5 @@
 {
-  "name": "@summit/etl-service",
+  "name": "@intelgraph/etl-service",
   "version": "2.0.0",
   "description": "Comprehensive ETL/ELT service with data pipeline management API",
   "main": "dist/index.js",

@@ -1,5 +1,5 @@
 {
-  "name": "@summit/risk-scoring",
+  "name": "@intelgraph/risk-scoring",
   "version": "2.0.0",
   "private": true,
   "type": "module",

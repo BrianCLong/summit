@@ -1,5 +1,5 @@
 {
-  "name": "@summit/mdm-stewardship",
+  "name": "@intelgraph/mdm-stewardship",
   "version": "1.0.0",
   "description": "Data stewardship workflows and approval processes for MDM",
   "main": "dist/index.js",
@@ -12,7 +12,7 @@
   },
   "keywords": ["stewardship", "workflow", "approval", "mdm"],
   "dependencies": {
-    "@summit/mdm-core": "workspace:*",
+    "@intelgraph/mdm-core": "workspace:*",
     "zod": "^3.22.4",
     "uuid": "^11.0.3"
   },

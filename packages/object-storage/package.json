@@ -1,5 +1,5 @@
 {
-  "name": "@summit/object-storage",
+  "name": "@intelgraph/object-storage",
   "version": "1.0.0",
   "description": "Multi-cloud object storage management for data lakehouse",
   "main": "dist/index.js",
@@ -11,7 +11,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@summit/cloud-platform": "workspace:*",
+    "@intelgraph/cloud-platform": "workspace:*",
     "zod": "^4.1.12",
     "pino": "^10.1.0"
   },

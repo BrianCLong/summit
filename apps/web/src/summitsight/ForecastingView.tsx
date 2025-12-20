@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Forecast } from './types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area } from 'recharts';
 
 interface ForecastingViewProps {

@@ -1,5 +1,5 @@
 {
-  "name": "@summit/hierarchy-management",
+  "name": "@intelgraph/hierarchy-management",
   "version": "1.0.0",
   "description": "Hierarchical data management for organizational, product, and location hierarchies",
   "main": "dist/index.js",
@@ -12,7 +12,7 @@
   },
   "keywords": ["hierarchy", "organizational", "product-taxonomy", "mdm"],
   "dependencies": {
-    "@summit/mdm-core": "workspace:*",
+    "@intelgraph/mdm-core": "workspace:*",
     "zod": "^3.22.4",
     "uuid": "^11.0.3"
   },

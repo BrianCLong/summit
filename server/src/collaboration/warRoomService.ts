@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { db } from '../db'; // Assuming a db connection utility exists
+import { db } from '../db.js'; // Assuming a db connection utility exists
 
 export class WarRoomService {
   async createWarRoom(name: string, createdBy: number) {

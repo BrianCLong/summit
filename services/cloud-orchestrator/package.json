@@ -1,5 +1,5 @@
 {
-  "name": "@summit/cloud-orchestrator",
+  "name": "@intelgraph/cloud-orchestrator",
   "version": "2.0.0",
   "description": "Unified multi-cloud deployment orchestration service",
   "main": "dist/index.js",
@@ -11,7 +11,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@summit/cloud-abstraction": "workspace:*",
+    "@intelgraph/cloud-abstraction": "workspace:*",
     "express": "^4.18.2",
     "zod": "^3.22.0",
     "winston": "^3.11.0",

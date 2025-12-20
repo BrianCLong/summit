@@ -4,7 +4,7 @@ import path from 'path';
 import pino from 'pino';
 import { ExtractionEngineConfig } from '../types.js';
 
-const logger = (pino as any)({ name: 'ObjectDetectionEngine' });
+const logger = pino({ name: 'ObjectDetectionEngine' });
 
 export interface DetectionResult {
   className: string;
@@ -357,7 +357,7 @@ export class ObjectDetectionEngine {
    * Parse detection results from Python script
    */
   private parseDetectionResults(
-    results: any,
+    results: { detections?: Array<{ class_name: string; class_id: number; confidence: number; bbox: number[]; features?: number[] }> },
     model: string,
   ): DetectionResult[] {
     const detections: DetectionResult[] = [];
@@ -386,7 +386,7 @@ export class ObjectDetectionEngine {
    * Parse video detection results
    */
   private parseVideoDetectionResults(
-    results: any,
+    results: { frames?: Array<{ frame_number: number; timestamp: number; detections?: Array<{ class_name: string; class_id: number; confidence: number; bbox: number[]; features?: number[] }> }> },
     model: string,
   ): { frame: number; timestamp: number; detections: DetectionResult[] }[] {
     const frameResults: {
@@ -437,7 +437,7 @@ export class ObjectDetectionEngine {
    */
   private async runFeatureExtraction(
     imagePath: string,
-    boundingBox: any,
+    boundingBox: DetectionResult['boundingBox'],
   ): Promise<number[]> {
     return new Promise((resolve, reject) => {
       const pythonScript = path.join(
@@ -642,7 +642,7 @@ export class ObjectDetectionEngine {
   /**
    * Calculate Intersection over Union (IoU) for bounding boxes
    */
-  private calculateIoU(box1: any, box2: any): number {
+  private calculateIoU(box1: DetectionResult['boundingBox'], box2: DetectionResult['boundingBox']): number {
     const x1 = Math.max(box1.x, box2.x);
     const y1 = Math.max(box1.y, box2.y);
     const x2 = Math.min(box1.x + box1.width, box2.x + box2.width);

@@ -1,5 +1,5 @@
 {
-  "name": "@summit/plugin-host",
+  "name": "@intelgraph/plugin-host",
   "version": "1.0.0",
   "description": "Plugin host service for managing plugin runtime and execution",
   "main": "dist/index.js",
@@ -17,7 +17,7 @@
   "author": "IntelGraph Team",
   "license": "MIT",
   "dependencies": {
-    "@summit/plugin-system": "workspace:*",
+    "@intelgraph/plugin-system": "workspace:*",
     "express": "^4.18.2",
     "cors": "^2.8.5",
     "helmet": "^7.1.0",

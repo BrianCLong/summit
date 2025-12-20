@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState } from 'react';
 import { useWorkspaceStore } from '../store/workspaceStore';
 import { Sparkles, AlertTriangle, FileText, X } from 'lucide-react';

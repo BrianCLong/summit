@@ -1,5 +1,5 @@
 {
-  "name": "@summit/self-upgrading-infrastructure",
+  "name": "@intelgraph/self-upgrading-infrastructure",
   "version": "2.0.0",
   "description": "Self-upgrading digital infrastructure that senses market trends, competitive threats, and regulatory changes",
   "type": "module",

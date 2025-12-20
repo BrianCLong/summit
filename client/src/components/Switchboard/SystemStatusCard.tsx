@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 import React from 'react';
 import {
@@ -12,7 +11,7 @@ import {
 import { ShowChart as Activity } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { SystemStatus } from './types';
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 
 interface SystemStatusCardProps {
   status: SystemStatus;
@@ -45,14 +44,14 @@ export default function SystemStatusCard({ status }: SystemStatusCardProps) {
           </Typography>
           <Box className="flex gap-2 mt-4">
             {status.docsLink && (
-              <Link href={status.docsLink} passHref>
-                <Button component="a" variant="outlined" size="small">Docs</Button>
-              </Link>
+              <Button component={Link} to={status.docsLink} variant="outlined" size="small">
+                Docs
+              </Button>
             )}
             {status.logsLink && (
-              <Link href={status.logsLink} passHref>
-                <Button component="a" variant="outlined" size="small">Logs</Button>
-              </Link>
+              <Button component={Link} to={status.logsLink} variant="outlined" size="small">
+                Logs
+              </Button>
             )}
             {status.actions?.map((action) => (
               <Button key={action.id} variant="contained" size="small">

@@ -1,5 +1,5 @@
 {
-  "name": "@summit/geopolitical-analysis",
+  "name": "@intelgraph/geopolitical-analysis",
   "version": "1.0.0",
   "description": "Geopolitical risk analysis, indicators, and scenario modeling for IntelGraph",
   "main": "dist/index.js",
@@ -26,7 +26,7 @@
   "author": "Summit/IntelGraph Team",
   "license": "MIT",
   "dependencies": {
-    "@summit/risk-scoring": "workspace:*",
+    "@intelgraph/risk-scoring": "workspace:*",
     "@intelgraph/geospatial": "workspace:*",
     "zod": "^4.1.12",
     "date-fns": "^4.1.0"

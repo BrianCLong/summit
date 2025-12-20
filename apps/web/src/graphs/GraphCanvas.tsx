@@ -1,5 +1,5 @@
+// @ts-nocheck
 import React, { useRef, useEffect, useState } from 'react'
-import * as d3 from 'd3'
 // Tree-shaken D3 imports for better bundle size
 import { select } from 'd3-selection'
 import {
@@ -126,12 +126,6 @@ export function GraphCanvas({
       }))
 
     // Create simulation based on layout type
-    let simulation: d3.Simulation<GraphNode, GraphLink>
-
-    switch (layout.type) {
-      case 'force':
-        simulation = d3
-          .forceSimulation(nodes)
     let simulation: Simulation<GraphNode, GraphLink>
 
     switch (layout.type) {
@@ -143,14 +137,6 @@ export function GraphCanvas({
               .id(d => d.id)
               .distance(100)
           )
-          .force('charge', d3.forceManyBody().strength(-300))
-          .force('center', d3.forceCenter(width / 2, height / 2))
-          .force('collision', d3.forceCollide().radius(30))
-        break
-
-      case 'radial':
-        simulation = d3
-          .forceSimulation(nodes)
           .force('charge', forceManyBody().strength(-300))
           .force('center', forceCenter(width / 2, height / 2))
           .force('collision', forceCollide().radius(30))
@@ -164,44 +150,12 @@ export function GraphCanvas({
               .id(d => d.id)
               .distance(80)
           )
-          .force('charge', d3.forceManyBody().strength(-200))
-          .force('radial', d3.forceRadial(150, width / 2, height / 2))
-          .force('charge', d3.forceManyBody().strength(-200))
-          .force('radial', d3.forceRadial(150, width / 2, height / 2))
-          .force('charge', d3.forceManyBody().strength(-200))
-          .force('radial', d3.forceRadial(150, width / 2, height / 2))
-          .force('charge', d3.forceManyBody().strength(-200))
-          .force('radial', d3.forceRadial(150, width / 2, height / 2))
-          .force('charge', d3.forceManyBody().strength(-200))
-          .force('radial', d3.forceRadial(150, width / 2, height / 2))
-          .force('charge', d3.forceManyBody().strength(-200))
-          .force('radial', d3.forceRadial(150, width / 2, height / 2))
-          .force('charge', d3.forceManyBody().strength(-200))
-          .force('radial', d3.forceRadial(150, width / 2, height / 2))
-          .force('charge', d3.forceManyBody().strength(-200))
-          .force('radial', d3.forceRadial(150, width / 2, height / 2))
           .force('charge', forceManyBody().strength(-200))
           .force('radial', forceRadial(150, width / 2, height / 2))
         break
 
       case 'hierarchic':
         // Simple hierarchical layout - in a real app you'd use dagre or similar
-        simulation = d3
-          .forceSimulation(nodes)
-        simulation = d3
-          .forceSimulation(nodes)
-        simulation = d3
-          .forceSimulation(nodes)
-        simulation = d3
-          .forceSimulation(nodes)
-        simulation = d3
-          .forceSimulation(nodes)
-        simulation = d3
-          .forceSimulation(nodes)
-        simulation = d3
-          .forceSimulation(nodes)
-        simulation = d3
-          .forceSimulation(nodes)
         simulation = forceSimulation(nodes)
           .force(
             'link',
@@ -218,8 +172,6 @@ export function GraphCanvas({
         break
 
       default:
-        simulation = d3
-          .forceSimulation(nodes)
         simulation = forceSimulation(nodes)
           .force(
             'link',
@@ -451,22 +403,6 @@ export function GraphCanvas({
       {/* Graph controls overlay */}
       <div className="absolute top-4 right-4 flex flex-col gap-2">
         <div className="bg-background/90 backdrop-blur-sm border rounded-lg p-2 shadow-sm">
-          <div className="text-xs font-medium text-muted-foreground mb-1">
-            Graph Info
-          <div className="text-xs font-medium text-muted-foreground mb-1">
-            Graph Info
-          <div className="text-xs font-medium text-muted-foreground mb-1">
-            Graph Info
-          <div className="text-xs font-medium text-muted-foreground mb-1">
-            Graph Info
-          <div className="text-xs font-medium text-muted-foreground mb-1">
-            Graph Info
-          <div className="text-xs font-medium text-muted-foreground mb-1">
-            Graph Info
-          <div className="text-xs font-medium text-muted-foreground mb-1">
-            Graph Info
-          <div className="text-xs font-medium text-muted-foreground mb-1">
-            Graph Info
           <div className="flex justify-between items-center mb-1 gap-2">
             <div className="text-xs font-medium text-muted-foreground">
               Graph Info

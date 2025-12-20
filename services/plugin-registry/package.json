@@ -1,5 +1,5 @@
 {
-  "name": "@summit/plugin-registry",
+  "name": "@intelgraph/plugin-registry",
   "version": "2.0.0",
   "description": "Plugin registry and catalog service",
   "main": "dist/index.js",
@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@summit/plugin-system": "workspace:*",
+    "@intelgraph/plugin-system": "workspace:*",
     "express": "^4.18.2",
     "express-rate-limit": "^7.1.5",
     "pg": "^8.11.3",

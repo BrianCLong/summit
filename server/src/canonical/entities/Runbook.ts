@@ -5,7 +5,7 @@
  * Represents an operational runbook or procedure
  */
 
-import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types';
+import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.js';
 
 export interface CanonicalRunbook extends BaseCanonicalEntity, CanonicalEntityMetadata {
   entityType: 'Runbook';
@@ -30,5 +30,5 @@ export interface CanonicalRunbook extends BaseCanonicalEntity, CanonicalEntityMe
   }[];
 
   /** Additional properties */
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
 }

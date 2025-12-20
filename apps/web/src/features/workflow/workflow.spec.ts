@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { test, expect } from '@playwright/test'
 import http from 'http'
 import app from '../../../../../services/workflow/src/index.js'

@@ -1,5 +1,5 @@
 {
-  "name": "@summit/acc-sdk",
+  "name": "@intelgraph/acc-sdk",
   "version": "2.0.0",
   "type": "module",
   "main": "dist/index.js",

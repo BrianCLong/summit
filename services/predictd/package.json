@@ -12,7 +12,7 @@
     "express": "^5.2.0",
     "zod": "^4.1.12",
     "body-parser": "^1.20.2",
-    "@summit/predictive-graph-intelligence": "workspace:*"
+    "@intelgraph/predictive-graph-intelligence": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.9.3",

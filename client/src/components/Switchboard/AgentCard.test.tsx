@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import AgentCard from './AgentCard';
@@ -10,7 +9,7 @@ describe('AgentCard', () => {
   ];
 
   it('renders the agent card with all elements', () => {
-    const handleChat = vi.fn();
+    const handleChat = jest.fn();
     render(<AgentCard agents={mockAgents} onChat={handleChat} />);
 
     expect(screen.getByText('Test Agent 1')).toBeInTheDocument();

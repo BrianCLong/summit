@@ -1,5 +1,5 @@
 {
-  "name": "@summit/mdm-governance",
+  "name": "@intelgraph/mdm-governance",
   "version": "1.0.0",
   "description": "MDM governance and compliance framework",
   "main": "dist/index.js",
@@ -12,7 +12,7 @@
   },
   "keywords": ["governance", "compliance", "audit", "mdm"],
   "dependencies": {
-    "@summit/mdm-core": "workspace:*",
+    "@intelgraph/mdm-core": "workspace:*",
     "zod": "^3.22.4",
     "uuid": "^11.0.3"
   },

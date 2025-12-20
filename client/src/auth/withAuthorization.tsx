@@ -23,7 +23,7 @@ type WithAuthorizationOptions<P> = {
   loadingFallback?: React.ReactNode;
 };
 
-const normalizeAction = (action?: string | null) => {
+const normalizeAction = (action?: string | null): string | null => {
   if (!action) return null;
   const normalized = normalizePermission(action);
   if (normalized) return normalized;

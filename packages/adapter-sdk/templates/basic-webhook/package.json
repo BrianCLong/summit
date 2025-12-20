@@ -12,7 +12,7 @@
     "package": "pnpm run build"
   },
   "dependencies": {
-    "@intelgraph/adapter-sdk": "^0.1.0"
+    "@intelgraph/adapter-sdk": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.17.6",

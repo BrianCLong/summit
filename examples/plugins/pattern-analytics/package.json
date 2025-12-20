@@ -12,7 +12,7 @@
   "author": "IntelGraph Team",
   "license": "MIT",
   "dependencies": {
-    "@summit/plugin-system": "workspace:*"
+    "@intelgraph/plugin-system": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.3.3"

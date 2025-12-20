@@ -1,5 +1,5 @@
 {
-  "name": "@summit/analytics-service",
+  "name": "@intelgraph/analytics-service",
   "version": "1.0.0",
   "description": "Analytics service for advanced analytics and reporting",
   "main": "dist/index.js",

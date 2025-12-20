@@ -5,9 +5,16 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { AlertCircle, CheckCircle, Clock, TrendingUp, GitBranch, Activity } from 'lucide-react';
+import { AlertCircle, CheckCircle, Clock, GitBranch, Activity, ArrowUpRight } from 'lucide-react';
+// Note: TrendingUp was renamed to ArrowUpRight in newer versions of lucide-react
+const TrendingUp = ArrowUpRight;
+
+// Import shadcn/ui components
+const Card = ({ className = '', children, ...props }: any) => <div className={`rounded-lg border bg-card text-card-foreground shadow-sm ${className}`} {...props}>{children}</div>;
+const CardHeader = ({ className = '', children, ...props }: any) => <div className={`flex flex-col space-y-1.5 p-6 ${className}`} {...props}>{children}</div>;
+const CardTitle = ({ className = '', children, ...props }: any) => <h3 className={`text-2xl font-semibold leading-none tracking-tight ${className}`} {...props}>{children}</h3>;
+const CardContent = ({ className = '', children, ...props }: any) => <div className={`p-6 pt-0 ${className}`} {...props}>{children}</div>;
+const Badge = ({ variant = 'default', className = '', children, ...props }: any) => <div className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${className}`} {...props}>{children}</div>;
 
 interface Incident {
   id: string;

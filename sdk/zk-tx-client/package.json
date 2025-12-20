@@ -1,5 +1,5 @@
 {
-  "name": "@summit/zk-tx-client",
+  "name": "@intelgraph/zk-tx-client",
   "version": "2.0.0",
   "type": "module",
   "main": "dist/index.js",

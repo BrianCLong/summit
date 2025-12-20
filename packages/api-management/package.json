@@ -1,5 +1,5 @@
 {
-  "name": "@summit/api-management",
+  "name": "@intelgraph/api-management",
   "version": "1.0.0",
   "description": "API lifecycle management, versioning, and transformation",
   "type": "module",

@@ -8,9 +8,9 @@ import {
   WorkerOptions,
 } from 'bullmq';
 import Redis from 'ioredis';
-import { logger } from '../utils/logger';
-import { PolicyGuard } from './policyGuard';
-import { Budget } from '../ai/llmBudget';
+import { logger } from '../utils/logger.js';
+import { PolicyGuard } from './policyGuard.js';
+import { Budget } from '../ai/llmBudget.js';
 
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 

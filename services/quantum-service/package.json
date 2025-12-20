@@ -1,5 +1,5 @@
 {
-  "name": "@summit/quantum-service",
+  "name": "@intelgraph/quantum-service",
   "version": "2.0.0",
   "description": "Quantum computing simulation and hardware integration service",
   "main": "dist/index.js",
@@ -10,9 +10,9 @@
     "test": "jest"
   },
   "dependencies": {
-    "@summit/quantum-simulation": "workspace:*",
-    "@summit/quantum-optimization": "workspace:*",
-    "@summit/quantum-ml": "workspace:*",
+    "@intelgraph/quantum-simulation": "workspace:*",
+    "@intelgraph/quantum-optimization": "workspace:*",
+    "@intelgraph/quantum-ml": "workspace:*",
     "express": "^4.18.2",
     "@types/express": "^4.17.17"
   },

@@ -1,5 +1,5 @@
 {
-  "name": "@summit/sdpwa",
+  "name": "@intelgraph/sdpwa",
   "version": "2.0.0",
   "description": "TypeScript bindings for the SDPWA streaming differential privacy window aggregator",
   "type": "module",

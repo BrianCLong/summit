@@ -1,5 +1,5 @@
 {
-  "name": "@summit/command-console",
+  "name": "@intelgraph/command-console",
   "version": "0.1.0",
   "private": true,
   "type": "module",

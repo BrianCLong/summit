@@ -1,5 +1,5 @@
 {
-  "name": "@summit/jira-integration",
+  "name": "@intelgraph/jira-integration",
   "version": "2.0.0",
   "description": "PerfTrace Jira automation toolkit with workflow, field mapping, and audit logging.",
   "type": "module",

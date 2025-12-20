@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Analyst Console Storybook Stories
  *

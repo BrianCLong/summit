@@ -1,5 +1,5 @@
 {
-  "name": "@summit/cloud-platform-service",
+  "name": "@intelgraph/cloud-platform-service",
   "version": "1.0.0",
   "description": "Cloud platform service for multi-cloud management",
   "main": "dist/index.js",
@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@summit/cloud-platform": "workspace:*",
+    "@intelgraph/cloud-platform": "workspace:*",
     "express": "^5.2.0",
     "cors": "^2.8.5",
     "helmet": "^8.1.0",

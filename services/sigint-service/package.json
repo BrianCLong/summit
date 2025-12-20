@@ -1,5 +1,5 @@
 {
-  "name": "@summit/sigint-service",
+  "name": "@intelgraph/sigint-service",
   "version": "1.0.0",
   "description": "SIGINT Processing Service - Training Framework",
   "main": "dist/index.js",
@@ -11,12 +11,12 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@summit/sigint-collector": "workspace:*",
-    "@summit/rf-processor": "workspace:*",
-    "@summit/comint-analyzer": "workspace:*",
-    "@summit/network-interceptor": "workspace:*",
-    "@summit/cryptanalysis-engine": "workspace:*",
-    "@summit/geolocation-engine": "workspace:*",
+    "@intelgraph/sigint-collector": "workspace:*",
+    "@intelgraph/rf-processor": "workspace:*",
+    "@intelgraph/comint-analyzer": "workspace:*",
+    "@intelgraph/network-interceptor": "workspace:*",
+    "@intelgraph/cryptanalysis-engine": "workspace:*",
+    "@intelgraph/geolocation-engine": "workspace:*",
     "express": "^4.18.2",
     "uuid": "^9.0.0",
     "zod": "^3.22.4"

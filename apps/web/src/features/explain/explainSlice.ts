@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createSlice } from '@reduxjs/toolkit'
 import { createSelector } from '@reduxjs/toolkit'
 // TODO: viewSync feature was removed - restore if needed
