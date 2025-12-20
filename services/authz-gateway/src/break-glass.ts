@@ -20,6 +20,7 @@ export interface BreakGlassRequestRecord {
   expiresAt?: string;
   sid?: string;
   usageCount?: number;
+  consumedAt?: string;
 }
 
 interface BreakGlassState {
@@ -88,7 +89,12 @@ class BreakGlassManager {
     });
   }
 
-  createRequest(subjectId: string, justification: string, ticketId: string, scope: string[] = ['break_glass:elevated']): BreakGlassRequestRecord {
+  createRequest(
+    subjectId: string,
+    justification: string,
+    ticketId: string,
+    scope: string[] = ['break_glass:elevated'],
+  ): BreakGlassRequestRecord {
     if (!justification || !ticketId) {
       throw new Error('justification_and_ticket_required');
     }
@@ -132,6 +138,9 @@ class BreakGlassManager {
     }
     if (record.status === 'approved') {
       throw new Error('request_already_approved');
+    }
+    if (record.status === 'expired') {
+      throw new Error('request_expired');
     }
     const issuedAt = nowIso();
     const expiresAtSeconds = Math.floor(Date.now() / 1000) + this.ttlSeconds;
@@ -186,13 +195,19 @@ class BreakGlassManager {
 
   recordUsage(
     sid: string,
-    details: { action: string; resource: string; tenantId: string; allowed: boolean },
+    details: {
+      action: string;
+      resource: string;
+      tenantId: string;
+      allowed: boolean;
+    },
   ) {
     const record = this.findRequestBySid(sid);
     if (!record) {
       return;
     }
     record.usageCount = (record.usageCount || 0) + 1;
+    record.consumedAt = record.consumedAt || nowIso();
     this.state.requests[record.id] = record;
     writeState(this.state);
     emitEvent({
@@ -267,7 +282,9 @@ class BreakGlassManager {
   }
 
   private findRequestBySid(sid: string) {
-    return Object.values(this.state.requests).find((request) => request.sid === sid);
+    return Object.values(this.state.requests).find(
+      (request) => request.sid === sid,
+    );
   }
 
   private pruneExpired() {
@@ -275,7 +292,9 @@ class BreakGlassManager {
     let updated = false;
     Object.values(this.state.requests).forEach((record) => {
       if (record.status === 'approved' && record.expiresAt) {
-        const expiresAtSeconds = Math.floor(new Date(record.expiresAt).getTime() / 1000);
+        const expiresAtSeconds = Math.floor(
+          new Date(record.expiresAt).getTime() / 1000,
+        );
         if (expiresAtSeconds < nowSeconds) {
           record.status = 'expired';
           updated = true;
