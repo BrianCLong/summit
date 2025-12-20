@@ -21,6 +21,21 @@ interface ThreatHeatmapCell {
   incidentCount?: number;
 }
 
+interface GeoPointResult extends GeoPoint {
+  id: string;
+  type: string;
+  name?: string;
+}
+
+interface ClusterPoint {
+  id: string;
+  label: string;
+  latitude: number;
+  longitude: number;
+  count: number;
+  members: GeoPointResult[];
+}
+
 interface ThreatActor {
   id: string;
   name: string;
@@ -70,6 +85,60 @@ interface ViewshedResult {
   visibleArea: number;
   visibleCells: Array<{ latitude: number; longitude: number; distance: number }>;
 }
+
+const resolveClusteringFeatureFlag = (): boolean => {
+  const viteFlag = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_GEOINT_CLUSTERING_FEATURE) as
+    | string
+    | undefined;
+  const nodeFlag = typeof process !== 'undefined' ? process.env?.GEOINT_CLUSTERING_FEATURE : undefined;
+  const value = viteFlag ?? nodeFlag;
+
+  if (typeof value === 'string') {
+    const normalized = value.toLowerCase();
+    if (['false', 'disabled', '0', 'off'].includes(normalized)) return false;
+    if (['true', 'enabled', '1', 'on'].includes(normalized)) return true;
+  }
+
+  return true;
+};
+
+const clusterPoints = (points: GeoPointResult[], zoomLevel: number): Array<GeoPointResult | ClusterPoint> => {
+  const bucketSize = Math.max(1, 12 - Math.round(zoomLevel));
+  const bucketKey = (lat: number, lon: number) => `${Math.round(lat * bucketSize) / bucketSize}|${Math.round(lon * bucketSize) / bucketSize}`;
+
+  const buckets = points.reduce<Record<string, ClusterPoint>>((acc, point) => {
+    const key = bucketKey(point.latitude, point.longitude);
+    const existing = acc[key];
+
+    if (!existing) {
+      acc[key] = {
+        id: `cluster-${key}`,
+        label: point.name || point.id,
+        latitude: point.latitude,
+        longitude: point.longitude,
+        count: 1,
+        members: [point],
+      };
+      return acc;
+    }
+
+    acc[key] = {
+      ...existing,
+      count: existing.count + 1,
+      members: [...existing.members, point],
+      latitude: (existing.latitude * existing.count + point.latitude) / (existing.count + 1),
+      longitude: (existing.longitude * existing.count + point.longitude) / (existing.count + 1),
+      label: `${existing.count + 1} points`,
+    };
+
+    return acc;
+  }, {});
+
+  const clustered = Object.values(buckets);
+  const shouldCluster = clustered.some((cluster) => cluster.count > 1);
+
+  return shouldCluster ? clustered : points;
+};
 
 // ============================================================================
 // Hooks
@@ -197,6 +266,56 @@ export function useTerrainAnalysis() {
   }, []);
 
   return { viewshed, loading, analyzeViewshed };
+}
+
+/**
+ * Fetch geo points for the current bounding box with deterministic ordering
+ */
+export function useGeoPoints(
+  bounds: { minLon: number; minLat: number; maxLon: number; maxLat: number } | null,
+  pageSize: number = 500
+) {
+  const [points, setPoints] = useState<GeoPointResult[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchPoints = useCallback(async () => {
+    if (!bounds) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const bboxParam = `${bounds.minLon},${bounds.minLat},${bounds.maxLon},${bounds.maxLat}`;
+      const response = await fetch(`/geo/points?bbox=${bboxParam}&limit=${pageSize}&offset=0`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const orderedPoints = (data.points || []) as GeoPointResult[];
+
+      const sorted = orderedPoints.slice().sort((a, b) =>
+        a.latitude - b.latitude ||
+        a.longitude - b.longitude ||
+        (a.name || '').localeCompare(b.name || '') ||
+        a.id.localeCompare(b.id)
+      );
+
+      setPoints(sorted);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to fetch geo points'));
+    } finally {
+      setLoading(false);
+    }
+  }, [bounds, pageSize]);
+
+  useEffect(() => {
+    fetchPoints();
+  }, [fetchPoints]);
+
+  return { points, loading, error, refresh: fetchPoints };
 }
 
 // ============================================================================
@@ -600,10 +719,48 @@ export const GEOINTDashboard: React.FC<{
   const [selectedIOC, setSelectedIOC] = useState<IOC | null>(null);
   const [expandedActor, setExpandedActor] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'threats' | 'iocs' | 'fusion'>('threats');
+  const [clusteringEnabled, setClusteringEnabled] = useState(resolveClusteringFeatureFlag());
+  const [zoomLevel, setZoomLevel] = useState(5);
+  const [pointsPage, setPointsPage] = useState(1);
+  const pointsPageSize = 10;
 
   const { threatActors, iocs, heatmap, loading, error, lastUpdated, refresh } = useThreatData(bounds);
   const { result: fusionResult, loading: fusionLoading, executeFusion } = useFusionAnalysis();
   const { viewshed, loading: terrainLoading, analyzeViewshed } = useTerrainAnalysis();
+  const {
+    points,
+    loading: pointsLoading,
+    error: pointsError,
+    refresh: refreshGeoPoints,
+  } = useGeoPoints(bounds);
+
+  const clusteringFeatureEnabled = useMemo(() => resolveClusteringFeatureFlag(), []);
+  const clusteringExpanded = clusteringFeatureEnabled && clusteringEnabled && zoomLevel >= 8;
+  const effectiveClustering = clusteringFeatureEnabled && clusteringEnabled && !clusteringExpanded;
+
+  const renderablePoints = useMemo(() => {
+    if (!points.length) return [] as Array<GeoPointResult | ClusterPoint>;
+    return effectiveClustering ? clusterPoints(points, zoomLevel) : points;
+  }, [points, effectiveClustering, zoomLevel]);
+
+  const totalPages = Math.max(1, Math.ceil(Math.max(renderablePoints.length, 1) / pointsPageSize));
+
+  useEffect(() => {
+    setPointsPage((previous) => Math.min(previous, totalPages));
+  }, [totalPages]);
+
+  useEffect(() => {
+    setPointsPage(1);
+  }, [renderablePoints]);
+
+  const paginatedPoints = useMemo(() => {
+    const safePage = Math.min(pointsPage, totalPages);
+    const start = (safePage - 1) * pointsPageSize;
+    return renderablePoints.slice(start, start + pointsPageSize);
+  }, [renderablePoints, pointsPage, totalPages, pointsPageSize]);
+
+  const currentPage = Math.min(pointsPage, totalPages);
+  const isClusterPoint = (point: GeoPointResult | ClusterPoint): point is ClusterPoint => 'members' in point;
 
   const handleRunFusion = useCallback(() => {
     executeFusion({
@@ -742,17 +899,136 @@ export const GEOINTDashboard: React.FC<{
         {/* Map Area (placeholder) */}
         <main className="flex-1 relative">
           <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
-            <div className="text-center">
-              <p className="text-gray-500 text-lg mb-2">
-                Map Visualization Area
-              </p>
+            <div className="text-center space-y-2">
+              <p className="text-gray-500 text-lg">Map Visualization Area</p>
               <p className="text-gray-400 text-sm">
                 Bounds: {bounds.minLat.toFixed(2)}°N - {bounds.maxLat.toFixed(2)}°N,{' '}
                 {bounds.minLon.toFixed(2)}°W - {bounds.maxLon.toFixed(2)}°W
               </p>
-              <p className="text-gray-400 text-sm mt-2">
-                {heatmap.length} threat heatmap cells loaded
-              </p>
+              <p className="text-gray-400 text-sm">{heatmap.length} threat heatmap cells loaded</p>
+              <p className="text-gray-500 text-sm">{points.length} geo points loaded</p>
+            </div>
+          </div>
+
+          {/* Clustering and point controls */}
+          <div className="absolute top-4 left-4 w-80 space-y-3">
+            {clusteringFeatureEnabled && (
+              <div className="bg-white rounded-lg shadow p-3 space-y-3" aria-label="clustering-controls">
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-800">
+                    <input
+                      type="checkbox"
+                      checked={clusteringEnabled}
+                      onChange={(e) => setClusteringEnabled(e.target.checked)}
+                    />
+                    Enable clustering
+                  </label>
+                  <span className="text-[11px] text-gray-500">Feature flag</span>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                    <span>Zoom level</span>
+                    <span>{zoomLevel.toFixed(0)}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={1}
+                    max={12}
+                    value={zoomLevel}
+                    onChange={(e) => setZoomLevel(parseInt(e.target.value, 10))}
+                    className="w-full"
+                    aria-label="Zoom level"
+                  />
+                  {clusteringExpanded && (
+                    <p className="text-[11px] text-amber-700 mt-1" role="status">
+                      Clusters expanded automatically at high zoom.
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div className="bg-white rounded-lg shadow p-3 space-y-2" aria-label="rendered-points">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-semibold text-gray-900">Rendered Points ({renderablePoints.length})</h4>
+                <button
+                  className="text-xs text-blue-600 hover:text-blue-800"
+                  onClick={() => {
+                    setPointsPage(1);
+                    refreshGeoPoints();
+                  }}
+                  disabled={pointsLoading}
+                >
+                  {pointsLoading ? 'Refreshing...' : 'Refresh'}
+                </button>
+              </div>
+
+              {pointsError && (
+                <div className="p-2 rounded bg-red-50 text-red-700 text-xs">{pointsError.message}</div>
+              )}
+
+              {pointsLoading && !pointsError && (
+                <p className="text-xs text-gray-500">Loading points…</p>
+              )}
+
+              {!pointsLoading && paginatedPoints.length === 0 && (
+                <p className="text-xs text-gray-500">No points available for this view.</p>
+              )}
+
+              {!pointsLoading && paginatedPoints.length > 0 && (
+                <ul className="divide-y divide-gray-100 text-sm" aria-label="point-list">
+                  {paginatedPoints.map((point) => (
+                    <li key={isClusterPoint(point) ? point.id : point.id} className="py-2">
+                      {isClusterPoint(point) ? (
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-semibold">Cluster of {point.count} points</p>
+                            <p className="text-xs text-gray-500">
+                              Centered near {point.latitude.toFixed(2)}, {point.longitude.toFixed(2)}
+                            </p>
+                          </div>
+                          <span className="text-[11px] bg-blue-50 text-blue-700 px-2 py-1 rounded">
+                            Zoom in to expand
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-semibold">{point.name || point.id}</p>
+                            <p className="text-xs text-gray-500">
+                              {point.latitude.toFixed(2)}, {point.longitude.toFixed(2)} • {point.type}
+                            </p>
+                          </div>
+                          {point.id === selectedIOC?.id && (
+                            <span className="text-[11px] text-green-700 bg-green-50 px-2 py-1 rounded">Selected</span>
+                          )}
+                        </div>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <div className="flex items-center justify-between pt-2 text-xs text-gray-600">
+                <button
+                  className="px-2 py-1 border rounded disabled:opacity-50"
+                  onClick={() => setPointsPage((page) => Math.max(1, page - 1))}
+                  disabled={currentPage <= 1}
+                >
+                  Previous
+                </button>
+                <span>
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  className="px-2 py-1 border rounded disabled:opacity-50"
+                  onClick={() => setPointsPage((page) => Math.min(totalPages, page + 1))}
+                  disabled={currentPage >= totalPages}
+                >
+                  Next
+                </button>
+              </div>
             </div>
           </div>
 
