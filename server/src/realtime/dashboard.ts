@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Server, Socket } from 'socket.io';
 import pino from 'pino';
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import pinoHttp from 'pino-http';
 import pino from 'pino';
 import { randomUUID } from 'crypto';

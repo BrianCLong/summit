@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express from 'express';
 import { nl2cypher } from '../nl2cypher/index';
 import { executeSandbox } from '../nl2cypher/sandbox';

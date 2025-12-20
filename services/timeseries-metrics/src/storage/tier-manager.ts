@@ -250,6 +250,12 @@ export class StorageTierManager {
 
     const client = await this.pool.connect();
     try {
+      // Enforce per-tenant storage quotas before writing
+      const estimatedBytesByTenant = this.estimateBytesByTenant(requests);
+      for (const [tenantId, bytes] of estimatedBytesByTenant.entries()) {
+        await this.assertStorageQuota(client, tenantId, bytes);
+      }
+
       const values = requests.map((req, i) => {
         const offset = i * 5;
         return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5})`;
@@ -313,6 +319,62 @@ export class StorageTierManager {
     }
 
     return results;
+  }
+
+  /**
+   * Estimate storage footprint for incoming writes (rough heuristic).
+   */
+  private estimateBytesByTenant(requests: WriteRequest[]): Map<string, number> {
+    const totals = new Map<string, number>();
+    for (const req of requests) {
+      const labelsSize = Buffer.byteLength(JSON.stringify(req.labels || {}), 'utf8');
+      // Rough estimate: timestamp(8) + value(8) + metric name + labels
+      const estimate =
+        16 + Buffer.byteLength(req.metricName, 'utf8') + labelsSize + 32; // pad for JSON overhead
+      const current = totals.get(req.tenantId) || 0;
+      totals.set(req.tenantId, current + estimate);
+    }
+    return totals;
+  }
+
+  private getTenantStorageLimit(tenantId: string): number {
+    // Allow overrides via environment; otherwise align to a conservative default
+    const envLimit = process.env.TIMESERIES_TENANT_LIMIT_BYTES;
+    if (envLimit) return Number(envLimit);
+    // Simple tiering by tenant prefix (demo heuristic)
+    if (tenantId.startsWith('ent-')) return 200_000_000_000; // 200 GB
+    if (tenantId.startsWith('pro-')) return 50_000_000_000; // 50 GB
+    return 10_000_000_000; // 10 GB default
+  }
+
+  private async assertStorageQuota(
+    client: PoolClient,
+    tenantId: string,
+    additionalBytes: number,
+  ): Promise<void> {
+    const limit = this.getTenantStorageLimit(tenantId);
+    const { rows } = await client.query<{ bytes: string | number }>(
+      `
+      WITH usage AS (
+        SELECT COALESCE(SUM(pg_column_size(m.*)), 0) AS bytes FROM metrics_hot m WHERE tenant_id = $1
+        UNION ALL
+        SELECT COALESCE(SUM(pg_column_size(m.*)), 0) AS bytes FROM metrics_warm m WHERE tenant_id = $1
+        UNION ALL
+        SELECT COALESCE(SUM(pg_column_size(m.*)), 0) AS bytes FROM metrics_cold m WHERE tenant_id = $1
+      )
+      SELECT COALESCE(SUM(bytes), 0) AS bytes FROM usage
+    `,
+      [tenantId],
+    );
+    const current = Number(rows[0]?.bytes || 0);
+    const projected = current + additionalBytes;
+    if (projected > limit) {
+      this.logger.warn(
+        { tenantId, projected, limit },
+        'Tenant storage quota exceeded for metrics write',
+      );
+      throw new Error('tenant_storage_quota_exceeded');
+    }
   }
 
   /**
