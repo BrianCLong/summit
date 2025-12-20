@@ -151,16 +151,11 @@ declare module 'prom-client' {
   export class Registry {
     registerMetric(metric: any): void;
     metrics(): Promise<string>;
-    getSingleMetric(name: string): any;
-    removeSingleMetric(name: string): void;
-    resetMetrics(): void;
-    getMetricsAsJSON(): Promise<any[]>;
     [key: string]: any;
   }
   export class Counter<T = any> {
     constructor(opts: any);
     inc(...args: any[]): void;
-    reset(): void;
     [key: string]: any;
   }
   export class Gauge<T = any> {
@@ -168,20 +163,11 @@ declare module 'prom-client' {
     inc(...args: any[]): void;
     dec(...args: any[]): void;
     set(...args: any[]): void;
-    reset(): void;
     [key: string]: any;
   }
   export class Histogram<T = any> {
     constructor(opts: any);
     observe(...args: any[]): void;
-    reset(): void;
-    [key: string]: any;
-  }
-  export class Summary<T = any> {
-    constructor(opts: any);
-    observe(...args: any[]): void;
-    reset(): void;
-    labels(...args: any[]): any;
     [key: string]: any;
   }
   export const register: Registry;
@@ -288,4 +274,5 @@ declare module 'html-escaper' {
   export function escape(str: string): string;
   export function unescape(str: string): string;
 }
+
 

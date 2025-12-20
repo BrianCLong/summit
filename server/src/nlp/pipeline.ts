@@ -4,12 +4,15 @@ import fs from 'fs';
 import { ContextDisambiguator } from './resolution';
 import { ImplicitRelationshipExtractor } from './relationships';
 import { TransformerInferenceService } from './transformers';
+import { GraphUpdater } from './graph_updater';
 
 export interface RawDocument {
   id?: string;
   source: 'http' | 'kafka' | 'file';
   payload: Record<string, unknown>;
   receivedAt?: string;
+  tenantId?: string; // Tenant Context
+  language?: string;
 }
 
 export interface ProcessedDocument {
@@ -17,6 +20,7 @@ export interface ProcessedDocument {
   normalized: Record<string, unknown>;
   context: string;
   annotations: Record<string, unknown>;
+  entities: Array<{ canonicalName: string; aliases: string[]; type: string; confidence: number }>;
   relationships: Array<{
     subject: string;
     object: string;
@@ -53,34 +57,39 @@ export class TextIngestionPipeline {
   private inference: TransformerInferenceService;
   private disambiguator: ContextDisambiguator;
   private relationshipExtractor: ImplicitRelationshipExtractor;
+  private graphUpdater: GraphUpdater;
 
   constructor(options: { modelName?: string } = {}) {
     this.kafka = new KafkaMessageParser();
     this.inference = new TransformerInferenceService({ modelName: options.modelName });
     this.disambiguator = new ContextDisambiguator();
     this.relationshipExtractor = new ImplicitRelationshipExtractor();
+    this.graphUpdater = new GraphUpdater();
   }
 
-  async ingestHttp(payload: Record<string, unknown>): Promise<RawDocument> {
+  async ingestHttp(payload: Record<string, unknown>, tenantId: string = 'default', language: string = 'en'): Promise<RawDocument> {
     return {
       id: uuid(),
       source: 'http',
       payload: normalizePayload(payload),
       receivedAt: new Date().toISOString(),
+      tenantId,
+      language
     };
   }
 
-  async ingestKafka(raw: Buffer): Promise<RawDocument> {
+  async ingestKafka(raw: Buffer, tenantId: string = 'default'): Promise<RawDocument> {
     const parsed = this.kafka.parseMessage(raw);
     return {
       id: uuid(),
       source: 'kafka',
       payload: normalizePayload(parsed),
       receivedAt: new Date().toISOString(),
+      tenantId
     };
   }
 
-  async ingestFile(filePath: string): Promise<RawDocument[]> {
+  async ingestFile(filePath: string, tenantId: string = 'default'): Promise<RawDocument[]> {
     const content = fs.readFileSync(filePath, 'utf-8');
     const rows = content
       .split('\n')
@@ -91,22 +100,44 @@ export class TextIngestionPipeline {
       source: 'file',
       payload: { text: line },
       receivedAt: new Date().toISOString(),
+      tenantId
     }));
   }
 
   async process(doc: RawDocument): Promise<ProcessedDocument> {
     const normalized = normalizePayload(doc.payload);
     const context = this.inference.toContextString(normalized);
-    const coref = await this.disambiguator.resolve(context);
-    const relationships = this.relationshipExtractor.extract(context, coref);
 
-    const annotations = await this.inference.annotate({ context, coref });
+    // 1. NER & Initial Parsing (Python Script via TransformerInferenceService)
+    const annotations = await this.inference.annotate({ context, coref: {}, language: doc.language }); // coref passed empty initially
+
+    const entities = (annotations.entities as Array<{ text: string; label: string; confidence: number }>) || [];
+    const structuredRelationships = (annotations.relationships as Array<{ subject: string; object: string; predicate: string; confidence?: number; provenance?: string }>) || [];
+
+    // 2. Clustering & Resolution
+    const clusteredEntities = this.disambiguator.clusterEntities(entities);
+
+    // 3. Disambiguation (using clusters)
+    // Pass known entities if any found in annotation to help resolution
+    const coref = await this.disambiguator.resolve(context, clusteredEntities);
+
+    // 4. Enhanced Relationship Extraction (Merging Structured + Implicit)
+    const relationships = this.relationshipExtractor.extract(context, coref, structuredRelationships);
+
+    // 5. Update Knowledge Graph
+    if (doc.tenantId) {
+       // Ensure graphUpdater is ready/available (mock safe)
+       if (this.graphUpdater && typeof this.graphUpdater.updateGraph === 'function') {
+         await this.graphUpdater.updateGraph(doc.tenantId, clusteredEntities, relationships, doc.id || 'unknown');
+       }
+    }
 
     return {
       id: doc.id || uuid(),
       normalized,
       context,
       annotations,
+      entities: clusteredEntities,
       relationships,
     };
   }

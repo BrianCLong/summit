@@ -4,18 +4,18 @@
  */
 
 import { Router, Request, Response } from 'express';
-import { trace, SpanStatusCode } from '@opentelemetry/api';
 import { body, validationResult } from 'express-validator';
 import rateLimit from 'express-rate-limit';
 import { IngestService } from '../services/IngestService.js';
 import { verifyTenantAccess } from '../services/opa-client.js';
 import logger from '../config/logger.js';
-import { recordEndpointResult } from '../observability/reliability-metrics';
+import { tenantIsolationGuard } from '../tenancy/TenantIsolationGuard.js';
+import { requireTenantContext } from '../security/tenantContext.js';
+import { TenantContext } from '../tenancy/types.js';
+import { queryWithTenantContext } from '../db/tenant.js';
 
 const ingestRouter = Router();
 const ingestLogger = logger.child({ name: 'IngestAPI' });
-const tracer = trace.getTracer('intelgraph-server.reliability');
-let ingestInFlight = 0;
 
 // Rate limiting: max 100 requests per 15 minutes per IP
 const ingestLimiter = rateLimit({
@@ -44,44 +44,23 @@ ingestRouter.post(
     body('relationships').isArray().optional(),
   ],
   async (req: Request, res: Response) => {
-    const startTime = process.hrtime.bigint();
-    const span = tracer.startSpan('http.ingest', {
-      attributes: {
-        'http.method': 'POST',
-        'http.route': '/api/v1/ingest',
-      },
-    });
-    ingestInFlight += 1;
-
-    let statusCode = 500;
-    let tenantId: string | undefined = req.body?.tenantId;
-    let entityCount = Array.isArray(req.body?.entities) ? req.body.entities.length : 0;
-    let relationshipCount = Array.isArray(req.body?.relationships)
-      ? req.body.relationships.length
-      : 0;
+    const startTime = Date.now();
 
     try {
       // Validate request
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        statusCode = 400;
         return res.status(400).json({
           error: 'Validation failed',
           details: errors.array(),
         });
       }
 
-      const { tenantId: validatedTenantId, sourceType, sourceId, entities, relationships = [] } =
-        req.body;
-
-      tenantId = validatedTenantId;
-      entityCount = entities.length;
-      relationshipCount = relationships.length;
+      const { tenantId, sourceType, sourceId, entities, relationships = [] } = req.body;
 
       // Authenticate user (from JWT middleware)
       const user = (req as any).user;
       if (!user) {
-        statusCode = 401;
         return res.status(401).json({
           error: 'Unauthorized',
           message: 'Valid JWT token required',
@@ -90,19 +69,50 @@ ingestRouter.post(
 
       // Authorize tenant access
       try {
-        await verifyTenantAccess(user, validatedTenantId, 'ingest:write');
+        await verifyTenantAccess(user, tenantId, 'ingest:write');
       } catch (authError: any) {
-        statusCode = 403;
         return res.status(403).json({
           error: 'Forbidden',
           message: authError.message,
         });
       }
 
+      const tenantContext =
+        ((req as any).tenant as TenantContext | undefined) ||
+        requireTenantContext(req);
+
+      const policyDecision = tenantIsolationGuard.evaluatePolicy(
+        tenantContext,
+        { action: 'ingest:write', resourceTenantId: tenantId },
+      );
+
+      if (!policyDecision.allowed) {
+        return res
+          .status(policyDecision.status || 403)
+          .json({ error: 'Forbidden', message: policyDecision.reason });
+      }
+
+      const capDecision =
+        await tenantIsolationGuard.enforceIngestionCap(tenantContext);
+      res.setHeader('X-Tenant-Ingest-Limit', String(capDecision.limit));
+      res.setHeader(
+        'X-Tenant-Ingest-Reset',
+        String(Math.ceil(capDecision.reset / 1000)),
+      );
+      if (capDecision.warning) {
+        res.setHeader('Warning', capDecision.warning);
+      }
+
+      if (!capDecision.allowed) {
+        return res.status(capDecision.status || 429).json({
+          error: 'IngestionQuotaExceeded',
+          message: capDecision.reason,
+        });
+      }
+
       // Validate entity count limits
       const MAX_ENTITIES_PER_REQUEST = 10000;
       if (entities.length > MAX_ENTITIES_PER_REQUEST) {
-        statusCode = 413;
         return res.status(413).json({
           error: 'Payload too large',
           message: `Maximum ${MAX_ENTITIES_PER_REQUEST} entities per request`,
@@ -111,7 +121,7 @@ ingestRouter.post(
       }
 
       ingestLogger.info({
-        tenantId: validatedTenantId,
+        tenantId,
         userId: user.id,
         sourceType,
         entitiesCount: entities.length,
@@ -125,7 +135,7 @@ ingestRouter.post(
       );
 
       const result = await ingestService.ingest({
-        tenantId: validatedTenantId,
+        tenantId,
         sourceType,
         sourceId,
         entities,
@@ -133,20 +143,19 @@ ingestRouter.post(
         userId: user.id,
       });
 
-      const durationMs = Number(process.hrtime.bigint() - startTime) / 1e6;
-      statusCode = result.success ? 200 : 207;
+      const duration = Date.now() - startTime;
 
       ingestLogger.info({
-        tenantId: validatedTenantId,
+        tenantId,
         userId: user.id,
         provenanceId: result.provenanceId,
         entitiesCreated: result.entitiesCreated,
         entitiesUpdated: result.entitiesUpdated,
-        duration: durationMs,
+        duration,
       }, 'Ingest completed');
 
       // Return success response
-      res.status(statusCode).json({
+      res.status(result.success ? 200 : 207).json({
         success: result.success,
         provenanceId: result.provenanceId,
         summary: {
@@ -157,7 +166,7 @@ ingestRouter.post(
         },
         errors: result.errors.length > 0 ? result.errors : undefined,
         metadata: {
-          duration: durationMs,
+          duration,
           timestamp: new Date().toISOString(),
         },
       });
@@ -168,38 +177,12 @@ ingestRouter.post(
         body: req.body,
       }, 'Ingest request failed');
 
-      statusCode = 500;
-      res.status(statusCode).json({
+      res.status(500).json({
         error: 'Internal server error',
         message: process.env.NODE_ENV === 'production'
           ? 'Ingest failed'
           : error.message,
       });
-    }
-    finally {
-      ingestInFlight = Math.max(ingestInFlight - 1, 0);
-      const durationSeconds = Number(process.hrtime.bigint() - startTime) / 1e9;
-      recordEndpointResult({
-        endpoint: 'ingest',
-        statusCode,
-        durationSeconds,
-        tenantId,
-        queueDepth: ingestInFlight,
-      });
-
-      span.setAttributes({
-        'http.status_code': statusCode,
-        'tenant.id': tenantId ?? 'unknown',
-        'ingest.entity_count': entityCount,
-        'ingest.relationship_count': relationshipCount,
-        'ingest.in_flight': ingestInFlight,
-      });
-
-      if (statusCode >= 400) {
-        span.setStatus({ code: SpanStatusCode.ERROR });
-      }
-
-      span.end();
     }
   },
 );
@@ -214,6 +197,9 @@ ingestRouter.get(
     try {
       const { provenanceId } = req.params;
       const user = (req as any).user;
+      const tenantContext =
+        ((req as any).tenant as TenantContext | undefined) ||
+        requireTenantContext(req);
 
       if (!user) {
         return res.status(401).json({ error: 'Unauthorized' });
@@ -221,7 +207,9 @@ ingestRouter.get(
 
       // Query provenance record
       const pg = req.app.get('pg') as any;
-      const { rows } = await pg.query(
+      const { rows } = await queryWithTenantContext(
+        pg,
+        tenantContext,
         `SELECT * FROM provenance_records WHERE id = $1`,
         [provenanceId],
       );

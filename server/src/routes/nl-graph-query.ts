@@ -5,21 +5,14 @@
  */
 
 import express, { Request, Response } from 'express';
-import { trace, SpanStatusCode } from '@opentelemetry/api';
 import { body, validationResult } from 'express-validator';
 import rateLimit from 'express-rate-limit';
 import pino from 'pino';
 import { getNlGraphQueryService } from '../ai/nl-graph-query/index.js';
 import type { CompileRequest, SchemaContext } from '../ai/nl-graph-query/index.js';
-import {
-  incrementTenantBudgetHit,
-  recordEndpointResult,
-} from '../observability/reliability-metrics';
 
 const logger = pino({ name: 'nl-graph-query-routes' });
 const router = express.Router();
-const tracer = trace.getTracer('intelgraph-server.reliability');
-let graphQueryInFlight = 0;
 
 // Rate limiting for NL query compilation (moderate limits)
 const nlQueryRateLimit = rateLimit({
@@ -91,6 +84,22 @@ const validateCompileRequest = [
     .withMessage('verbose must be a boolean'),
 ];
 
+// Helper function to handle validation errors
+const handleValidationErrors = (
+  req: Request,
+  res: Response,
+  next: Function,
+) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      error: 'Validation failed',
+      details: errors.array(),
+    });
+  }
+  next();
+};
+
 /**
  * POST /ai/nl-graph-query/compile
  * Compile a natural language prompt into a Cypher query
@@ -133,31 +142,12 @@ const validateCompileRequest = [
 router.post(
   '/compile',
   validateCompileRequest,
+  handleValidationErrors,
   async (req: Request, res: Response) => {
-    const startTime = process.hrtime.bigint();
-    const span = tracer.startSpan('graph.query.compile', {
-      attributes: {
-        'http.method': 'POST',
-        'http.route': '/ai/nl-graph-query/compile',
-      },
-    });
-    graphQueryInFlight += 1;
-    let statusCode = 500;
-    let tenantId: string | undefined = req.body?.schemaContext?.tenantId;
+    const startTime = Date.now();
 
     try {
       const { prompt, schemaContext, parameters, verbose } = req.body;
-
-      const validation = validationResult(req);
-      if (!validation.isEmpty()) {
-        statusCode = 400;
-        const details = validation.array();
-        span.setAttribute('validation_error.count', details.length);
-        return res.status(statusCode).json({
-          error: 'Validation failed',
-          details,
-        });
-      }
 
       logger.info(
         {
@@ -170,9 +160,6 @@ router.post(
         'NL query compilation request received',
       );
 
-      tenantId = schemaContext?.tenantId;
-      incrementTenantBudgetHit('graph_query', tenantId);
-
       const compileRequest: CompileRequest = {
         prompt,
         schemaContext: schemaContext as SchemaContext,
@@ -183,12 +170,11 @@ router.post(
       const service = getNlGraphQueryService();
       const result = await service.compile(compileRequest);
 
-      const responseTime = Number(process.hrtime.bigint() - startTime) / 1e6;
+      const responseTime = Date.now() - startTime;
 
       // Check if result is an error
       if ('code' in result) {
         // CompileError
-        statusCode = 400;
         logger.warn(
           {
             errorCode: result.code,
@@ -216,7 +202,6 @@ router.post(
         'Query compilation successful with explanation payload',
       );
 
-      statusCode = 200;
       return res.status(200).json({
         ...result,
         metadata: {
@@ -230,7 +215,7 @@ router.post(
         },
       });
     } catch (error) {
-      const responseTime = Number(process.hrtime.bigint() - startTime) / 1e6;
+      const responseTime = Date.now() - startTime;
 
       logger.error(
         {
@@ -241,7 +226,6 @@ router.post(
         'Unexpected error in compile endpoint',
       );
 
-      statusCode = 500;
       return res.status(500).json({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'An unexpected error occurred during query compilation',
@@ -251,30 +235,6 @@ router.post(
         ],
         originalPrompt: req.body.prompt || '',
       });
-    }
-    finally {
-      graphQueryInFlight = Math.max(graphQueryInFlight - 1, 0);
-      const durationSeconds = Number(process.hrtime.bigint() - startTime) / 1e9;
-      recordEndpointResult({
-        endpoint: 'graph_query',
-        statusCode,
-        durationSeconds,
-        tenantId,
-        queueDepth: graphQueryInFlight,
-      });
-
-      span.setAttributes({
-        'http.status_code': statusCode,
-        'tenant.id': tenantId ?? 'unknown',
-        'nl_graph_query.in_flight': graphQueryInFlight,
-        'nl_graph_query.prompt_length': req.body?.prompt?.length || 0,
-      });
-
-      if (statusCode >= 400) {
-        span.setStatus({ code: SpanStatusCode.ERROR });
-      }
-
-      span.end();
     }
   },
 );

@@ -5,18 +5,11 @@
  */
 
 import { Router, Request, Response, NextFunction } from 'express';
-import { trace, SpanStatusCode } from '@opentelemetry/api';
 import { z } from 'zod';
 import logger from '../utils/logger.js';
 import { getGraphRagService, UserContext, GraphRagRequest } from '../services/graphrag/index.js';
-import {
-  incrementTenantBudgetHit,
-  recordEndpointResult,
-} from '../observability/reliability-metrics';
 
 const router = Router();
-const tracer = trace.getTracer('intelgraph-server.reliability');
-let ragInFlight = 0;
 
 // Request validation schema
 const AnswerRequestSchema = z.object({
@@ -73,23 +66,10 @@ function extractUserContext(req: Request): UserContext {
 router.post(
   '/answer',
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const startTime = process.hrtime.bigint();
-    const span = tracer.startSpan('rag.answer', {
-      attributes: {
-        'http.method': 'POST',
-        'http.route': '/graphrag/answer',
-      },
-    });
-    ragInFlight += 1;
-    let statusCode = 500;
-    let tenantId: string | undefined;
-    let questionLength = 0;
-
     try {
       // Validate request body
       const parseResult = AnswerRequestSchema.safeParse(req.body);
       if (!parseResult.success) {
-        statusCode = 400;
         res.status(400).json({
           error: 'Validation error',
           details: parseResult.error.errors,
@@ -98,11 +78,9 @@ router.post(
       }
 
       const { caseId, question } = parseResult.data;
-      questionLength = question.length;
 
       // Extract user context from authenticated request
       const userContext = extractUserContext(req);
-      tenantId = userContext.tenantId;
 
       logger.info({
         message: 'GraphRAG answer request received',
@@ -110,8 +88,6 @@ router.post(
         userId: userContext.userId,
         questionLength: question.length,
       });
-
-      incrementTenantBudgetHit('rag', tenantId);
 
       // Build GraphRAG request
       const graphRagRequest: GraphRagRequest = {
@@ -127,8 +103,7 @@ router.post(
       // Apply response limits
       const limitedResponse = applyResponseLimits(response);
 
-      statusCode = 200;
-      res.status(statusCode).json(limitedResponse);
+      res.json(limitedResponse);
     } catch (error) {
       logger.error({
         message: 'GraphRAG answer request failed',
@@ -136,7 +111,6 @@ router.post(
       });
 
       if (error instanceof z.ZodError) {
-        statusCode = 400;
         res.status(400).json({
           error: 'Validation error',
           details: error.errors,
@@ -144,32 +118,7 @@ router.post(
         return;
       }
 
-      statusCode = 500;
       next(error);
-    }
-    finally {
-      ragInFlight = Math.max(ragInFlight - 1, 0);
-      const durationSeconds = Number(process.hrtime.bigint() - startTime) / 1e9;
-      recordEndpointResult({
-        endpoint: 'rag',
-        statusCode,
-        durationSeconds,
-        tenantId,
-        queueDepth: ragInFlight,
-      });
-
-      span.setAttributes({
-        'http.status_code': statusCode,
-        'tenant.id': tenantId ?? 'unknown',
-        'graphrag.question_length': questionLength,
-        'graphrag.in_flight': ragInFlight,
-      });
-
-      if (statusCode >= 400) {
-        span.setStatus({ code: SpanStatusCode.ERROR });
-      }
-
-      span.end();
     }
   },
 );

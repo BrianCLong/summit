@@ -1,0 +1,21 @@
+{
+  "manifestVersion": "1.0",
+  "bundleId": "bundle-hash",
+  "generatedAt": "2024-01-01T00:00:00Z",
+  "assets": [
+    {
+      "id": "report",
+      "path": "report.txt",
+      "mediaType": "text/plain",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "transforms": [
+        {
+          "type": "html",
+          "input": "report.txt",
+          "output": "report.html",
+          "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        }
+      ]
+    }
+  ]
+}
