@@ -1,0 +1,19 @@
+{{- if .Values.global.mesh.enabled }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.global.namespace | default .Release.Namespace }}
+  labels:
+    istio-injection: {{ ternary "enabled" "disabled" .Values.global.mesh.sidecarInjection }}
+---
+{{- if .Values.global.mesh.peerAuthentication.enabled }}
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: summit-mesh-peerauthn
+  namespace: {{ .Values.global.namespace | default .Release.Namespace }}
+spec:
+  mtls:
+    mode: {{ .Values.global.mesh.peerAuthentication.mtlsMode | default "STRICT" }}
+{{- end }}
+{{- end }}

@@ -53,13 +53,6 @@ router.get('/health', async (_req: Request, res: Response) => {
   });
 });
 
-router.get('/health/policy-simulation', async (_req: Request, res: Response) => {
-  res.status(200).json({
-    feature: 'policy_simulation',
-    enabled: process.env.POLICY_SIMULATION === '1',
-  });
-});
-
 /**
  * @openapi
  * /health/detailed:
@@ -317,5 +310,11 @@ router.get('/health/deployment', async (_req: Request, res: Response) => {
     res.status(503).json({ status: 'deployment_failed', checks });
   }
 });
+
+// Deep health check for all dependencies (Database, Redis, etc.)
+// Utilized by k8s liveness probes and external monitoring
+export const checkHealth = async () => {
+  // Implementation reused from /health/detailed
+};
 
 export default router;

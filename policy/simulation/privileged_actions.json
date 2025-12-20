@@ -1,0 +1,133 @@
+{
+  "scenarios": [
+    {
+      "id": "purge_requires_dual_control",
+      "input": {
+        "subject": {
+          "id": "sam",
+          "tenantId": "tenantA",
+          "roles": ["incident-responder"],
+          "entitlements": [],
+          "residency": "us",
+          "clearance": "top-secret",
+          "loa": "loa1",
+          "riskScore": 5,
+          "groups": [],
+          "metadata": {
+            "email": "sam@example.com"
+          }
+        },
+        "resource": {
+          "id": "dataset-omega",
+          "tenantId": "tenantA",
+          "residency": "us",
+          "classification": "top-secret",
+          "tags": ["pii", "privileged"]
+        },
+        "action": "dataset:purge",
+        "context": {
+          "protectedActions": [
+            "dataset:purge",
+            "dataset:reclassify",
+            "dataset:break-glass",
+            "policy:publish"
+          ],
+          "requestTime": "2025-01-07T12:00:00Z",
+          "currentAcr": "loa1",
+          "dualControlApprovals": []
+        }
+      },
+      "expected": {
+        "allow": false,
+        "reason": "dual_control_required",
+        "obligations": ["dual_control", "step_up"]
+      }
+    },
+    {
+      "id": "purge_with_dual_control_and_step_up",
+      "input": {
+        "subject": {
+          "id": "sam",
+          "tenantId": "tenantA",
+          "roles": ["incident-responder"],
+          "entitlements": [],
+          "residency": "us",
+          "clearance": "top-secret",
+          "loa": "loa2",
+          "riskScore": 4,
+          "groups": [],
+          "metadata": {
+            "email": "sam@example.com"
+          }
+        },
+        "resource": {
+          "id": "dataset-omega",
+          "tenantId": "tenantA",
+          "residency": "us",
+          "classification": "top-secret",
+          "tags": ["pii", "privileged"]
+        },
+        "action": "dataset:purge",
+        "context": {
+          "protectedActions": [
+            "dataset:purge",
+            "dataset:reclassify",
+            "dataset:break-glass",
+            "policy:publish"
+          ],
+          "requestTime": "2025-01-07T12:00:00Z",
+          "currentAcr": "loa2",
+          "dualControlApprovals": ["approver-one", "approver-two"]
+        }
+      },
+      "expected": {
+        "allow": true,
+        "reason": "allow",
+        "obligations": []
+      }
+    },
+    {
+      "id": "break_glass_requires_two_external_approvals",
+      "input": {
+        "subject": {
+          "id": "case-owner",
+          "tenantId": "tenantA",
+          "roles": ["admin"],
+          "entitlements": [],
+          "residency": "us",
+          "clearance": "top-secret",
+          "loa": "loa2",
+          "riskScore": 7,
+          "groups": [],
+          "metadata": {
+            "email": "owner@example.com"
+          }
+        },
+        "resource": {
+          "id": "dataset-omega",
+          "tenantId": "tenantA",
+          "residency": "us",
+          "classification": "top-secret",
+          "tags": ["break-glass", "privileged"]
+        },
+        "action": "dataset:break-glass",
+        "context": {
+          "protectedActions": [
+            "dataset:purge",
+            "dataset:reclassify",
+            "dataset:break-glass",
+            "policy:publish"
+          ],
+          "requestTime": "2025-01-07T12:00:00Z",
+          "currentAcr": "loa2",
+          "dualControlApprovals": ["case-owner", "approver-one"]
+        }
+      },
+      "expected": {
+        "allow": false,
+        "reason": "dual_control_required",
+        "obligations": ["dual_control"]
+      }
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "title": "Redis Overview",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Latency p95",
+      "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(db_query_latency_seconds_bucket{store='redis'}[5m])) by (le))" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Evictions",
+      "targets": [{ "expr": "increase(redis_evictions_total[5m])" }]
+    }
+  ]
+}
