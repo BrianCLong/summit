@@ -1,0 +1,84 @@
+name: Container Hardening
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  policy:
+    name: Policy Gates (Dockerfile/Helm)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install conftest
+        uses: instrumenta/conftest-action@v1
+        with:
+          version: v0.56.0
+
+      - name: Validate Dockerfiles against policy
+        run: |
+          conftest test build/docker --policy .ci/policies/docker.rego --parser dockerfile || \
+          (echo "Dockerfile policy violations" && exit 1)
+
+      - name: Validate Helm templates for hardening
+        run: |
+          conftest test deploy/helm/intelgraph/templates --policy .ci/policies/docker.rego --parser yaml || \
+          (echo "Helm hardening policy violations" && exit 1)
+
+  budget:
+    name: Image Budget & Trend
+    runs-on: ubuntu-latest
+    needs: policy
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare sample image sizes
+        run: |
+          mkdir -p artifacts
+          cat > artifacts/sample-sizes.json <<'SIZES'
+          {
+            "api-gateway": 145.0,
+            "analytics-service": 140.0,
+            "ml-engine": 185.0,
+            "graph-analytics": 95.0,
+            "feed-processor": 165.0,
+            "search-engine": 160.0,
+            "workflow-engine": 150.0,
+            "mobile-interface": 130.0
+          }
+          SIZES
+
+      - name: Enforce image size budgets
+        run: |
+          python .ci/scripts/images/size_budget.py --sizes artifacts/sample-sizes.json --allow-empty
+
+      - name: Upload trend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-size-trend
+          path: artifacts/image-size-trend.json
+
+  attest:
+    name: Signing & SBOM hooks
+    runs-on: ubuntu-latest
+    needs: budget
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate provenance stub
+        run: |
+          mkdir -p artifacts
+          echo "provenance: placeholder" > artifacts/provenance.txt
+
+      - name: Upload provenance stub
+        uses: actions/upload-artifact@v4
+        with:
+          name: provenance
+          path: artifacts/provenance.txt

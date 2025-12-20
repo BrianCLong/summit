@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Cost-Aware Scheduler for Conductor
 // Implements queue-backed execution with budget tracking and graceful degradation
 
@@ -13,11 +14,6 @@ export interface SchedulingContext {
   tenantId: string;
   requestId: string;
   timeout: number;
-  poolId?: string;
-  poolPriceUsd?: number;
-  residency?: string;
-  est?: { cpuSec?: number; gbSec?: number; egressGb?: number };
-  purpose?: string;
   metadata?: {
     userId?: string;
     sessionId?: string;

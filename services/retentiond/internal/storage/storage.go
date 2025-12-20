@@ -1,6 +1,11 @@
 package storage
 
-import "context"
+import (
+	"context"
+	"fmt"
+	"path"
+	"strings"
+)
 
 // Object represents an item stored in object storage.
 type Object struct {
@@ -26,4 +31,19 @@ type Database interface {
 // Row holds primary key identifiers for expired rows.
 type Row struct {
 	Keys map[string]string
+}
+
+// EnforceTenantPrefix ensures an object storage prefix is namespaced by a tenant.
+func EnforceTenantPrefix(prefix, tenant string) (string, error) {
+	if tenant == "" {
+		return "", fmt.Errorf("tenant must be provided for object storage prefixes")
+	}
+	cleanPrefix := strings.TrimPrefix(prefix, "/")
+	if cleanPrefix == "" {
+		return path.Join(tenant, "/"), nil
+	}
+	if strings.HasPrefix(cleanPrefix, tenant+"/") || cleanPrefix == tenant {
+		return cleanPrefix, nil
+	}
+	return path.Join(tenant, cleanPrefix), nil
 }

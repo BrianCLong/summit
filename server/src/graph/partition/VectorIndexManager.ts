@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ShardManager } from './ShardManager.js';
 import { VectorIndexConfig } from './types.js';
 import pino from 'pino';

@@ -1,9 +1,9 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { GraphStore } from '../store.js';
-import { runCypher } from '../neo4j.js';
+import { GraphStore } from '../store';
+import { runCypher } from '../neo4j';
 
 // Mock neo4j
-jest.mock('../neo4j.js', () => ({
+jest.mock('../neo4j', () => ({
   runCypher: jest.fn(),
   getDriver: jest.fn()
 }));
@@ -24,7 +24,9 @@ describe('GraphStore', () => {
       attributes: { name: 'Alice' }
     };
 
-    (runCypher as jest.Mock).mockResolvedValue([]);
+    const mockedRunCypher = runCypher as unknown as jest.Mock;
+    // @ts-expect-error lenient test mock setup
+    mockedRunCypher.mockResolvedValue([]);
 
     await store.upsertNode(node);
 
@@ -34,7 +36,8 @@ describe('GraphStore', () => {
         globalId: 'user-123',
         tenantId: 'tenant-a',
         attributes: { name: 'Alice' }
-      })
+      }),
+      expect.objectContaining({ tenantId: 'tenant-a', write: true })
     );
   });
 });

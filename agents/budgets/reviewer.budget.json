@@ -1,0 +1,28 @@
+{
+  "$schema": "https://summit.dev/schemas/agent-budget-manifest.schema.json",
+  "schemaVersion": "2025-02-15",
+  "agentId": "reviewer",
+  "owner": "Agent Control Systems",
+  "description": "Review and critique agent with light budgets to ensure deterministic feedback loops.",
+  "deterministicLimits": {
+    "maxTokens": 40000,
+    "maxCallsPerRun": 18,
+    "maxWallClockMs": 120000,
+    "maxConcurrentRuns": 2,
+    "maxDailyRuns": 300,
+    "maxNetworkKB": 1024
+  },
+  "risk": {
+    "inherent": 4,
+    "controlBaseline": 2,
+    "residual": 2,
+    "riskTier": "low",
+    "riskCeiling": 5,
+    "gates": ["lint", "typecheck"]
+  },
+  "telemetry": {
+    "auditLogPath": "agents/audit/logs/agent-audit.log",
+    "emitBudgetEvents": true,
+    "sampleRate": 1
+  }
+}

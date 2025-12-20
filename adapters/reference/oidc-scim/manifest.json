@@ -1,0 +1,20 @@
+{
+  "name": "reference-oidc-scim",
+  "version": "0.1.0",
+  "description": "Reference OIDC/SCIM identity connector",
+  "entrypoint": "index.ts",
+  "capabilities": ["identity"],
+  "requiredPermissions": ["adapter:identity:sync"],
+  "claims": ["oidc", "scim"],
+  "compatibility": { "companyOs": ">=0.1.0" },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "issuer": { "type": "string" },
+      "clientId": { "type": "string" },
+      "scimEndpoint": { "type": "string" }
+    },
+    "required": ["issuer", "clientId", "scimEndpoint"]
+  },
+  "signature": "placeholder-signature"
+}

@@ -1,0 +1,27 @@
+{
+  "_meta": {
+    "owner": "data-platform",
+    "risk": "medium",
+    "backfill_required": true,
+    "estimated_runtime": "6m",
+    "reversible": true,
+    "flags": {
+      "dual_write": true,
+      "shadow_read": true,
+      "cutover_enabled": false
+    }
+  },
+  "collection": {
+    "name": "cases_shadow",
+    "fields": [
+      {"name": "id", "type": "string", "facet": false},
+      {"name": "title", "type": "string"},
+      {"name": "updated_at", "type": "int64"}
+    ],
+    "default_sorting_field": "updated_at"
+  },
+  "alias": {
+    "name": "cases_active",
+    "collection_name": "cases_shadow"
+  }
+}

@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { GET_GRAPH_DATA } from '../graphql/graphData.js';
-import client from '../services/apollo.js'; // Import the Apollo Client instance
+import { GET_GRAPH_DATA } from '../../graphql/graphData.gql.js';
+import { apolloClient as client } from '../../services/apollo.js'; // Import the Apollo Client instance
 
 // Async thunk for fetching graph data
 export const fetchGraphData = createAsyncThunk(
@@ -426,3 +426,36 @@ const graphSlice = createSlice({
     },
   },
 });
+
+export const {
+  setGraphData,
+  addNode,
+  addEdge,
+  removeNode,
+  removeEdge,
+  updateNode,
+  setSelectedNode,
+  setSelectedEdge,
+  setLayout,
+  toggleFeature,
+  undo,
+  redo,
+  addCluster,
+  removeCluster,
+  toggleClusterExpansion,
+  setSearchTerm,
+  setNodeTypeColor,
+  deleteNode,
+  deleteEdge,
+  setSelectedNodes,
+  setSelectedEdges,
+  setPathSourceNode,
+  setPathTargetNode,
+  setFoundPath,
+  setLoading,
+  setErrorMessage,
+  setNodeTypeFilter,
+  setMinConfidenceFilter,
+} = graphSlice.actions;
+
+export default graphSlice;
