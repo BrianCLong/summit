@@ -1,0 +1,33 @@
+name: index-advisor
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch: {}
+
+jobs:
+  suggest-indexes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install psycopg[binary] pyyaml
+      - name: Generate suggestions
+        env:
+          PG_URL: ${{ secrets.PG_ADVISOR_URL }}
+        run: |
+          python .ci/scripts/db/slow_query_lint.py --advisor --output /tmp/index_suggestions.yaml
+      - name: Open PR
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "chore: weekly index advisor suggestions"
+          title: "chore: weekly index advisor suggestions"
+          body: |
+            Automated suggestions based on pg_stat_statements and usage telemetry.
+          branch: chore/index-advisor-${{ github.run_number }}
+          add-paths: /tmp/index_suggestions.yaml

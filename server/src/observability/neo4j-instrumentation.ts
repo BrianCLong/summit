@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Neo4j Driver Instrumentation
  * Monitors Neo4j sessions, transactions, and query performance

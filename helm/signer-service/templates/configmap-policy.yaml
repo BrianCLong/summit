@@ -1,0 +1,15 @@
+{{- if .Values.policyBundle.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "signer-service.fullname" . }}-bundle
+  labels:
+    app.kubernetes.io/name: {{ include "signer-service.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+data:
+  manifest.yaml: |
+    bundle: {{ .Values.policyBundle.name }}
+    uri: {{ .Values.policyBundle.uri }}
+    signature: {{ .Values.policyBundle.signature }}
+    refreshInterval: {{ .Values.policyBundle.refreshInterval }}
+{{- end }}

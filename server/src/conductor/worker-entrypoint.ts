@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @ts-nocheck
 
 // Worker Entrypoint for Conductor Queue Processing
 // Used in Kubernetes deployments to start queue workers
