@@ -30,6 +30,7 @@ import { Button } from '@/components/ui/Button'
 import { GraphCanvas } from '@/graphs/GraphCanvas'
 import { TimelineRail } from '@/components/panels/TimelineRail'
 import { MapPane } from './MapPane'
+import { CrossDomainTransferButton } from '@/features/security/CrossDomainTransferButton'
 import type { Entity, TimelineEvent } from '@/types'
 import type { TriPaneShellProps, TriPaneSyncState, TimeWindow } from './types'
 
@@ -367,6 +368,15 @@ export function TriPaneShell({
               <Download className="h-4 w-4" />
               <span className="ml-1">Export</span>
             </Button>
+          )}
+          {syncState.graph.selectedEntityId && (
+            <CrossDomainTransferButton
+              entityId={syncState.graph.selectedEntityId}
+              currentDomain="high-side" // Hardcoded for demo/MVP
+              onTransferComplete={() => {
+                // Ideally refresh data
+              }}
+            />
           )}
         </div>
       </div>
