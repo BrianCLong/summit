@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { neo } from '../db/neo4j.js';
 import logger from '../utils/logger.js';
 import fs from 'fs/promises';

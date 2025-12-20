@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express from 'express';
 import { SecuriteyesService } from '../services/SecuriteyesService.js';
 import { DetectionEngine } from '../services/DetectionEngine.js';

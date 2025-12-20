@@ -1,0 +1,53 @@
+name: Check Large Files
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+
+jobs:
+  check-large-files:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for large files
+        run: |
+          # Maximum file size in bytes (50MB)
+          MAX_SIZE=52428800
+          
+          # Get list of files in this commit/PR
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})
+          else
+            FILES=$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }})
+          fi
+          
+          LARGE_FILES=""
+          
+          # Check each file
+          for FILE in $FILES; do
+            if [ -f "$FILE" ]; then
+              SIZE=$(stat -c%s "$FILE" 2>/dev/null || stat -f%z "$FILE" 2>/dev/null)
+              if [ $SIZE -gt $MAX_SIZE ]; then
+                SIZE_MB=$((SIZE / 1048576))
+                LARGE_FILES="$LARGE_FILES\n$FILE ($SIZE_MB MB)"
+                echo "::error file=$FILE::File exceeds 50MB limit (size: $SIZE_MB MB)"
+              fi
+            fi
+          done
+          
+          if [ -n "$LARGE_FILES" ]; then
+            echo "::error::Large files detected (>50MB):"
+            echo -e "$LARGE_FILES"
+            echo ""
+            echo "Please use Git LFS for large binary files."
+            echo "See README.md for instructions on using Git LFS."
+            exit 1
+          fi
+          
+          echo "✅ No large files detected (all files < 50MB)"

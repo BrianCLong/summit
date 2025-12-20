@@ -19,12 +19,12 @@ module.exports = {
     '/playwright-tests/',
   ],
   moduleNameMapper: {
+    '^../../config/logger(\\.js)?$': '<rootDir>/src/config/__mocks__/logger.ts',
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
-    '^\\.\\/jwt-rotation\\.js$': '<rootDir>/src/conductor/auth/jwt-rotation.ts',
-    '^\\.\\.\\/jwt-rotation\\.js$': '<rootDir>/src/conductor/auth/jwt-rotation.ts',
-    '^\\.\\.\\/\\.\\.\\/config\\/logger\\.js$': '<rootDir>/src/config/logger.ts',
+    '^(\\.{1,2}/.*)\\.js$': '$1',
   },
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   transform: {
     '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
   },

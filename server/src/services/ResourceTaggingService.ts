@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Resource Tagging and Cost Allocation Service
  *

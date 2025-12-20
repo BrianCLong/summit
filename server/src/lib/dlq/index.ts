@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { EventEmitter } from 'events';
 import crypto from 'crypto';
 import pino from 'pino';

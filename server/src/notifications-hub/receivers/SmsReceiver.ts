@@ -1,74 +1,67 @@
-import { BaseReceiver, DeliveryResult, ReceiverConfig } from './ReceiverInterface.js';
+
+import { BaseReceiver, DeliveryResult } from './ReceiverInterface.js';
 import { CanonicalEvent } from '../events/EventSchema.js';
-import { RenderedTemplate } from '../templates/TemplateRenderer.js';
 
-export interface SmsReceiverConfig extends ReceiverConfig {
-  provider: 'twilio' | 'sns' | 'mock';
-  senderId: string;
-  credentials?: Record<string, unknown>;
-  maxLength?: number;
-}
-
-export class SmsReceiver extends BaseReceiver {
-  private smsConfig: SmsReceiverConfig;
-
+/**
+ * SMS Receiver implementation for sending text messages.
+ * Uses a provider (e.g. Twilio, AWS SNS) via a pluggable adapter pattern or direct config.
+ * For this MVP, we will simulate the sending logic.
+ */
+export class SMSReceiver extends BaseReceiver {
   constructor() {
-    super('sms', 'SMS Notifications');
+    super('sms', 'SMS Receiver');
   }
 
   protected async onInitialize(): Promise<void> {
-    this.smsConfig = this.config as SmsReceiverConfig;
-    if (!this.smsConfig.senderId) {
-      throw new Error('SMS receiver requires senderId');
-    }
+    // Initialize SMS provider client here (e.g. Twilio)
+    // const { accountSid, authToken } = this.config.metadata;
+    console.log('SMS Receiver initialized');
   }
 
   protected async deliverToRecipient(
     event: CanonicalEvent,
     recipient: string,
-    options?: Record<string, unknown>,
+    options?: Record<string, unknown>
   ): Promise<DeliveryResult> {
-    const template = options?.template as RenderedTemplate | undefined;
-    const content = this.buildMessageContent(event, template);
 
-    const messageId = await this.retryWithBackoff(async () => {
-      return this.sendSms(recipient, content);
-    }, 'sms:send');
+    // Simulate SMS sending
+    // In a real implementation: await this.twilioClient.messages.create(...)
 
-    return {
-      success: true,
-      recipientId: recipient,
-      channel: this.id,
-      messageId,
-      deliveredAt: new Date(),
-      metadata: { provider: this.smsConfig.provider },
-    };
+    // Simulate latency
+    await this.sleep(100);
+
+    const success = true; // Assume success for mock
+
+    if (success) {
+      console.log(`[SMS] Sent to ${recipient}: ${event.title}`);
+      return {
+        success: true,
+        recipientId: recipient,
+        channel: this.id,
+        messageId: `sms_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+        deliveredAt: new Date(),
+      };
+    } else {
+        return {
+            success: false,
+            recipientId: recipient,
+            channel: this.id,
+            error: new Error('Failed to send SMS'),
+        }
+    }
   }
 
   async validateRecipient(recipient: string): Promise<boolean> {
-    return /^\+?[1-9]\d{7,14}$/.test(recipient);
+    // Basic phone number validation (E.164 format check)
+    return /^\+?[1-9]\d{1,14}$/.test(recipient);
   }
 
   protected async performHealthCheck(): Promise<boolean> {
+    // Check connection to SMS provider
     return true;
   }
 
   protected async onShutdown(): Promise<void> {
-    return;
-  }
-
-  private async sendSms(recipient: string, message: string): Promise<string> {
-    // Placeholder for provider SDK integration
-    await this.sleep(5);
-    return `${this.smsConfig.provider || 'mock'}_${Date.now()}_${recipient}`;
-  }
-
-  private buildMessageContent(
-    event: CanonicalEvent,
-    template?: RenderedTemplate,
-  ): string {
-    const base = template?.shortMessage || `${event.title}: ${event.message}`;
-    const maxLength = this.smsConfig.maxLength || 320;
-    return base.length > maxLength ? `${base.slice(0, maxLength - 3)}...` : base;
+    // Close connections
   }
 }

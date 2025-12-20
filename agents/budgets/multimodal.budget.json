@@ -1,0 +1,28 @@
+{
+  "$schema": "https://summit.dev/schemas/agent-budget-manifest.schema.json",
+  "schemaVersion": "2025-02-15",
+  "agentId": "multimodal",
+  "owner": "Agent Control Systems",
+  "description": "Multimodal perception agent with explicit egress and runtime limits for predictable performance.",
+  "deterministicLimits": {
+    "maxTokens": 160000,
+    "maxCallsPerRun": 50,
+    "maxWallClockMs": 300000,
+    "maxConcurrentRuns": 2,
+    "maxDailyRuns": 120,
+    "maxNetworkKB": 6144
+  },
+  "risk": {
+    "inherent": 7,
+    "controlBaseline": 3,
+    "residual": 4,
+    "riskTier": "high",
+    "riskCeiling": 6,
+    "gates": ["lint", "typecheck", "budget-validation"]
+  },
+  "telemetry": {
+    "auditLogPath": "agents/audit/logs/agent-audit.log",
+    "emitBudgetEvents": true,
+    "sampleRate": 1
+  }
+}
