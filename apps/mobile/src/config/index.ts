@@ -50,6 +50,7 @@ export const MAP_CONFIG = {
   defaultZoom: 10,
   clusterRadius: 50,
   maxClusterZoom: 14,
+  renderedPointsPageSize: 200,
   mapboxAccessToken: Config.MAPBOX_ACCESS_TOKEN || '',
   styles: {
     satellite: 'mapbox://styles/mapbox/satellite-streets-v12',
@@ -77,6 +78,7 @@ export const FEATURES = {
   enableRealTimeUpdates: true,
   enableAnalytics: !__DEV__,
   enableCrashReporting: !__DEV__,
+  enableGEOINTClustering: true,
 } as const;
 
 // Cache Configuration

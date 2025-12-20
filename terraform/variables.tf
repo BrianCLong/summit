@@ -1,35 +1,39 @@
-variable "environment" {
+variable "region" {
+  description = "AWS region for deployments"
   type        = string
-  description = "Deployment environment"
+  default     = "us-east-1"
+}
+
+variable "environment" {
+  description = "Environment name used for tagging and naming"
+  type        = string
   default     = "dev"
 }
 
-variable "policy_bundle_bucket" {
-  type        = string
-  description = "S3 bucket for policy bundles"
-  default     = "intelgraph-policy-bundles"
+variable "tags" {
+  description = "Common tags applied to provisioned resources"
+  type        = map(string)
+  default     = {}
 }
 
-variable "policy_bundle_source" {
-  type        = string
-  description = "Source URI for the promoted bundle"
-  default     = "s3://opa-bundles/maestro/v4/maestro-policy-bundle.tgz"
+variable "kms_keys" {
+  description = "Map of KMS key configurations keyed by a friendly name"
+  type = map(object({
+    description              = optional(string)
+    enable_key_rotation      = optional(bool, true)
+    deletion_window_in_days  = optional(number, 30)
+    key_admin_arns           = optional(list(string), [])
+    key_user_arns            = optional(list(string), [])
+    aliases                  = optional(list(string), [])
+    policy                   = optional(string)
+  }))
+  default = {}
 }
 
-variable "policy_bundle_checksum" {
-  type        = string
-  description = "Checksum for the promoted bundle"
-  default     = ""
-}
-
-variable "dashboard_bucket" {
-  type        = string
-  description = "S3 bucket for Grafana dashboards"
-  default     = "intelgraph-grafana"
-}
-
-variable "alert_topic_arn" {
-  type        = string
-  description = "SNS topic for alerts"
-  default     = ""
+variable "dashboards" {
+  description = "Map of CloudWatch dashboards to manage"
+  type = map(object({
+    body = string
+  }))
+  default = {}
 }

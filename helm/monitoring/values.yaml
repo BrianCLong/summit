@@ -21,229 +21,58 @@ grafana:
           "title": "IntelGraph API Overview",
           "version": 1
         }
-      signer-service.json: |
+      signer-overview.json: |
         {
-          "annotations": {
-            "list": [
-              {
-                "builtIn": 1,
-                "datasource": {
-                  "type": "grafana",
-                  "uid": "-- Grafana --"
-                },
-                "enable": true,
-                "hide": true,
-                "iconColor": "rgba(0, 211, 255, 1)",
-                "name": "Annotations & Alerts",
-                "type": "dashboard"
-              }
-            ]
-          },
-          "editable": true,
-          "fiscalYearStartMonth": 0,
-          "graphTooltip": 0,
-          "id": null,
-          "links": [],
-          "liveNow": false,
+          "annotations": {"list": []},
+          "title": "Signer Service Overview",
+          "schemaVersion": 38,
+          "refresh": "30s",
           "panels": [
             {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "color": {
-                    "mode": "thresholds"
-                  },
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "color": "red",
-                        "value": null
-                      },
-                      {
-                        "color": "yellow",
-                        "value": 0.995
-                      },
-                      {
-                        "color": "green",
-                        "value": 0.999
-                      }
-                    ]
-                  },
-                  "unit": "percentunit"
-                },
-                "overrides": []
-              },
-              "gridPos": {
-                "h": 6,
-                "w": 8,
-                "x": 0,
-                "y": 0
-              },
-              "id": 1,
-              "options": {
-                "orientation": "auto",
-                "reduceOptions": {
-                  "calcs": [
-                    "lastNotNull"
-                  ],
-                  "fields": "",
-                  "values": false
-                },
-                "showThresholdLabels": true,
-                "showThresholdMarkers": true
-              },
-              "pluginVersion": "10.2.2",
+              "type": "graph",
+              "title": "Request Rate",
               "targets": [
-                {
-                  "datasource": {
-                    "type": "prometheus",
-                    "uid": "${DS_PROMETHEUS}"
-                  },
-                  "editorMode": "code",
-                  "expr": "1 - (signer_attestation_failures_total / signer_attestation_requests_total)",
-                  "interval": "",
-                  "legendFormat": "success-rate",
-                  "range": true,
-                  "refId": "A"
-                }
-              ],
-              "title": "Attestation success rate",
-              "type": "gauge"
+                {"expr": "sum(rate(http_requests_total{service=\"signer-service\"}[5m]))"}
+              ]
             },
             {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "custom": {},
-                  "unit": "ms"
-                },
-                "overrides": []
-              },
-              "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 0,
-                "y": 6
-              },
-              "id": 2,
-              "options": {
-                "legend": {
-                  "calcs": [
-                    "p50",
-                    "p95"
-                  ],
-                  "displayMode": "list",
-                  "placement": "bottom"
-                },
-                "tooltip": {
-                  "mode": "single",
-                  "sort": "desc"
-                }
-              },
+              "type": "graph",
+              "title": "Error Ratio",
               "targets": [
-                {
-                  "datasource": {
-                    "type": "prometheus",
-                    "uid": "${DS_PROMETHEUS}"
-                  },
-                  "editorMode": "code",
-                  "expr": "histogram_quantile(0.95, sum(rate(signer_attestation_latency_seconds_bucket[5m])) by (le)) * 1000",
-                  "legendFormat": "p95 latency",
-                  "range": true,
-                  "refId": "A"
-                },
-                {
-                  "datasource": {
-                    "type": "prometheus",
-                    "uid": "${DS_PROMETHEUS}"
-                  },
-                  "editorMode": "code",
-                  "expr": "sum(rate(signer_attestation_latency_seconds_sum[5m])) / sum(rate(signer_attestation_latency_seconds_count[5m])) * 1000",
-                  "legendFormat": "avg latency",
-                  "range": true,
-                  "refId": "B"
-                }
-              ],
-              "title": "Latency (ms)",
-              "type": "timeseries"
+                {"expr": "sum(rate(http_requests_total{service=\"signer-service\",status=~\"5..\"}[5m])) / sum(rate(http_requests_total{service=\"signer-service\"}[5m]))"}
+              ]
             },
             {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "short"
-                },
-                "overrides": []
-              },
-              "gridPos": {
-                "h": 6,
-                "w": 12,
-                "x": 0,
-                "y": 14
-              },
-              "id": 3,
-              "options": {
-                "showHeader": true
-              },
+              "type": "stat",
+              "title": "Bundle Freshness",
               "targets": [
-                {
-                  "datasource": {
-                    "type": "prometheus",
-                    "uid": "${DS_PROMETHEUS}"
-                  },
-                  "editorMode": "code",
-                  "expr": "signer_active_key_info",
-                  "format": "table",
-                  "instant": true,
-                  "legendFormat": "{{key_version}}",
-                  "range": false,
-                  "refId": "A"
-                }
-              ],
-              "title": "Active key rotation",
-              "transformations": [
-                {
-                  "id": "organize",
-                  "options": {
-                    "excludeByName": {
-                      "Time": true
-                    },
-                    "indexByName": {},
-                    "renameByName": {
-                      "Value": "expires_in_seconds"
-                    }
-                  }
-                }
-              ],
-              "type": "table"
+                {"expr": "max(opa_bundle_downloads_successful{bundle=\"access-control\"})"}
+              ]
             }
           ],
+          "version": 1
+        }
+      policy-bundles.json: |
+        {
+          "annotations": {"list": []},
+          "title": "Policy Bundles",
           "schemaVersion": 38,
-          "style": "dark",
-          "tags": [
-            "signer",
-            "attestation"
+          "panels": [
+            {
+              "type": "stat",
+              "title": "Bundle Downloads (5m)",
+              "targets": [
+                {"expr": "sum(increase(opa_bundle_downloads_successful[5m]))"}
+              ]
+            },
+            {
+              "type": "graph",
+              "title": "Bundle Download Latency",
+              "targets": [
+                {"expr": "histogram_quantile(0.9, sum(rate(opa_bundle_download_duration_seconds_bucket[5m])) by (le))"}
+              ]
+            }
           ],
-          "templating": {
-            "list": []
-          },
-          "time": {
-            "from": "now-1h",
-            "to": "now"
-          },
-          "timezone": "utc",
-          "title": "Signer Service Reliability",
-          "uid": "signer-service",
           "version": 1
         }
 alertmanager:
@@ -262,3 +91,36 @@ prometheus:
     podMonitorSelectorNilUsesHelmValues: false
     ruleSelectorNilUsesHelmValues: false
     scrapeInterval: 30s
+  additionalPrometheusRulesMap:
+    signer-service:
+      groups:
+        - name: signer-service.rules
+          rules:
+            - alert: SignerServiceDown
+              expr: sum(up{service=\"signer-service\"}) == 0
+              for: 5m
+              labels:
+                severity: critical
+              annotations:
+                summary: Signer service is not reporting as up
+                description: No healthy signer-service pods detected for 5 minutes.
+            - alert: SignerHighErrorRate
+              expr: sum(rate(http_requests_total{service=\"signer-service\",status=~\"5..\"}[5m])) / sum(rate(http_requests_total{service=\"signer-service\"}[5m])) > 0.05
+              for: 10m
+              labels:
+                severity: warning
+              annotations:
+                summary: Elevated error ratio on signer-service
+                description: Error ratio above 5% over the last 10 minutes.
+    policy-bundles:
+      groups:
+        - name: policy-bundles.rules
+          rules:
+            - alert: PolicyBundleStale
+              expr: max(time() - opa_bundle_download_last_success_timestamp_seconds) > 900
+              for: 5m
+              labels:
+                severity: warning
+              annotations:
+                summary: Policy bundles have not refreshed in the last 15 minutes
+                description: Verify policy registry availability and bundle webhook status.

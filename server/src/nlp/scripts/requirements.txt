@@ -1,0 +1,2 @@
+spacy>=3.7.0
+en-core-web-sm

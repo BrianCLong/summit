@@ -3,15 +3,13 @@ kind: Service
 metadata:
   name: {{ include "signer-service.fullname" . }}
   labels:
-    app.kubernetes.io/name: {{ include "signer-service.name" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "signer-service.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   selector:
-    app.kubernetes.io/name: {{ include "signer-service.name" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "signer-service.labels" . | nindent 4 }}
   ports:
     - name: http
       port: {{ .Values.service.port }}
-      protocol: TCP
       targetPort: http
+      protocol: TCP

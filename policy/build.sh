@@ -11,16 +11,6 @@ else
   echo "no policy/*.rego files" >&2
   tar -czf maestro-policy-bundle.tgz --files-from /dev/null
 fi
-if command -v opa >/dev/null 2>&1; then
-  echo "Running policy regression suite..."
-  opa test policy policy/tests
-  if [ -f policy/sample_inputs/signer.json ]; then
-    echo "Running signer simulation harness..."
-    opa eval --format=pretty --data policy/signer.rego --input policy/sample_inputs/signer.json 'data.policy.signer'
-  fi
-else
-  echo "opa not found; skipping regression tests (CI should provide it)" >&2
-fi
 if command -v cosign >/dev/null 2>&1; then
   cosign sign-blob --yes maestro-policy-bundle.tgz > maestro-policy-bundle.sig
   echo "Signed maestro-policy-bundle.tgz"

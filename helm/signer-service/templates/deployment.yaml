@@ -3,48 +3,104 @@ kind: Deployment
 metadata:
   name: {{ include "signer-service.fullname" . }}
   labels:
-    app.kubernetes.io/name: {{ include "signer-service.name" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/component: signer
+    {{- include "signer-service.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "signer-service.name" . }}
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- include "signer-service.labels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ include "signer-service.name" . }}
-        app.kubernetes.io/instance: {{ .Release.Name }}
+        {{- include "signer-service.labels" . | nindent 8 }}
     spec:
       containers:
-        - name: signer
+        - name: signer-service
           image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
+              protocol: TCP
           env:
-            - name: POLICY_BUNDLE_URI
-              value: {{ .Values.policyBundle.uri | quote }}
-            - name: POLICY_BUNDLE_SIGNATURE
-              value: {{ .Values.policyBundle.signature | quote }}
-            - name: POLICY_BUNDLE_REFRESH_INTERVAL
-              value: {{ .Values.policyBundle.refreshInterval | quote }}
-            - name: DASHBOARD_PATH
-              value: {{ .Values.dashboardProvisioning.path | quote }}
+            - name: SIGNER_LOG_LEVEL
+              value: {{ .Values.config.logLevel | quote }}
+            - name: SIGNER_KMS_KEY_ID
+              value: {{ .Values.config.kmsKeyId | quote }}
+            - name: SIGNER_POLICY_BUNDLE_CONFIG
+              value: {{ .Values.policyBundles.configPath | quote }}
+            - name: SIGNER_POLICY_REFRESH_INTERVAL
+              value: {{ .Values.policyBundles.refreshInterval | quote }}
+            - name: SIGNER_HEALTH_PATH
+              value: {{ .Values.config.healthCheckPath | quote }}
+            - name: SIGNER_POLICY_BUNDLES_ENABLED
+              value: {{ ternary "true" "false" .Values.policyBundles.enabled | quote }}
+            {{- if and .Values.signingKey.enabled .Values.signingKey.secretName }}
+            - name: SIGNER_KEY_PATH
+              value: {{ printf "%s/%s" .Values.signingKey.mountPath "signing-key.pem" | quote }}
+            {{- end }}
+            {{- if .Values.env }}
+            {{- toYaml .Values.env | nindent 12 }}
+            {{- end }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.config.healthCheckPath }}
+              port: http
+            periodSeconds: 10
+            initialDelaySeconds: 5
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.config.healthCheckPath }}
+              port: http
+            periodSeconds: 15
+            initialDelaySeconds: 15
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-      {{- with .Values.nodeSelector }}
+          volumeMounts:
+            {{- if and .Values.signingKey.enabled .Values.signingKey.secretName }}
+            - name: signer-key
+              mountPath: {{ .Values.signingKey.mountPath }}
+              readOnly: true
+            {{- end }}
+            {{- if and .Values.policyBundles.enabled (.Values.policyBundles.bundles | len | gt 0) }}
+            - name: policy-bundles
+              mountPath: {{ dir .Values.policyBundles.configPath }}
+              readOnly: true
+            {{- end }}
+      {{- if and .Values.signingKey.enabled .Values.signingKey.secretName }}
+      volumes:
+        - name: signer-key
+          secret:
+            secretName: {{ .Values.signingKey.secretName }}
+            items:
+              - key: {{ .Values.signingKey.secretKey }}
+                path: signing-key.pem
+        {{- if and .Values.policyBundles.enabled (.Values.policyBundles.bundles | len | gt 0) }}
+        - name: policy-bundles
+          configMap:
+            name: {{ include "signer-service.policyBundlesName" . }}
+            items:
+              - key: bundles.yaml
+                path: bundles.yaml
+        {{- end }}
+      {{- else if and .Values.policyBundles.enabled (.Values.policyBundles.bundles | len | gt 0) }}
+      volumes:
+        - name: policy-bundles
+          configMap:
+            name: {{ include "signer-service.policyBundlesName" . }}
+            items:
+              - key: bundles.yaml
+                path: bundles.yaml
+      {{- end }}
+      {{- if .Values.nodeSelector }}
       nodeSelector:
-        {{- toYaml . | nindent 8 }}
+        {{- toYaml .Values.nodeSelector | nindent 8 }}
       {{- end }}
-      {{- with .Values.tolerations }}
+      {{- if .Values.tolerations }}
       tolerations:
-        {{- toYaml . | nindent 8 }}
+        {{- toYaml .Values.tolerations | nindent 8 }}
       {{- end }}
-      {{- with .Values.affinity }}
+      {{- if .Values.affinity }}
       affinity:
-        {{- toYaml . | nindent 8 }}
+        {{- toYaml .Values.affinity | nindent 8 }}
       {{- end }}

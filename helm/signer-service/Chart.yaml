@@ -1,6 +1,6 @@
 apiVersion: v2
 name: signer-service
-description: Lightweight attestation signer deployment
+description: Stateless signer and attestation service
 version: 0.1.0
-appVersion: "0.1.0"
+appVersion: "1.0.0"
 type: application

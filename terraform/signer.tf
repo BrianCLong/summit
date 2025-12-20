@@ -1,11 +1,8 @@
-module "signer_service" {
-  source                 = "./modules/signer-service"
-  environment            = var.environment
-  signer_name            = "mc-platform-signer"
-  policy_bundle_bucket   = var.policy_bundle_bucket
-  policy_bundle_source   = var.policy_bundle_source
-  policy_bundle_checksum = var.policy_bundle_checksum
-  dashboard_bucket       = var.dashboard_bucket
-  signer_dashboard_json  = file("${path.module}/../grafana/dashboards/signer-service.json")
-  alert_topic_arn        = var.alert_topic_arn
+module "policy_signer" {
+  source          = "./modules/policy_signer"
+  image           = "<ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/intelgraph/signer:latest"
+  bundle_url      = "https://artifacts.intelgraph.dev/policy/maestro-policy-bundle.tgz"
+  signer_key_id   = "opa-signer-dev"
+  alerts_version  = "v0.3.9"
+  dashboards_path = "grafana/dashboards"
 }
