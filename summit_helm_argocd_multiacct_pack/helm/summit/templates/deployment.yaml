@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "summit.name" . }}
+  namespace: {{ default .Release.Namespace .Values.namespace.name }}
   labels:
     {{- include "summit.labels" . | nindent 4 }}
 spec:
@@ -19,10 +20,24 @@ spec:
       {{- with .Values.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- end }}
     spec:
+      serviceAccountName: {{ include "summit.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
+      imagePullSecrets:
+        {{- if .Values.imagePullSecrets }}
+        {{- range .Values.imagePullSecrets }}
+        - name: {{ . }}
+        {{- end }}
+        {{- else }}
+        []
+        {{- end }}
       securityContext:
         runAsNonRoot: {{ .Values.securityContext.runAsNonRoot }}
+        runAsUser: {{ .Values.securityContext.runAsUser }}
+        runAsGroup: {{ .Values.securityContext.runAsGroup }}
+        seccompProfile:
+          type: {{ .Values.securityContext.seccompProfile | quote }}
       containers:
         - name: app
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -30,6 +45,7 @@ spec:
           ports:
             - name: http
               containerPort: {{ .Values.service.targetPort }}
+          {{- include "summit.validateNoInlineSecrets" (dict "env" .Values.env) }}
           env:
           {{- if .Values.env }}
           {{- toYaml .Values.env | nindent 12 }}

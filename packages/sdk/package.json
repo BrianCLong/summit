@@ -4,9 +4,8 @@
   "version": "2.0.0",
   "type": "module",
   "scripts": {
-    "build": "echo skip"
-  },
-  "dependencies": {
-    "zod": "^4.2.1"
+    "build": "tsc -p tsconfig.json --noEmit",
+    "generate": "pnpm dlx openapi-typescript-codegen --input ../../openapi/intelgraph-core-api.yaml --output src/generated --client fetch --useOptions --exportSchemas true --indent 2 --name IntelGraphCoreClient",
+    "test": "jest --config jest.config.cjs"
   }
 }
