@@ -169,6 +169,8 @@ class BreakGlassManager {
     record.approvedBy = approverId;
     record.expiresAt = breakGlass.expiresAt;
     record.sid = sid;
+    record.immutableExpiry = true;
+    record.singleUse = true;
     this.state.requests[requestId] = record;
     writeState(this.state);
     emitEvent({
@@ -179,7 +181,12 @@ class BreakGlassManager {
       justification: record.justification,
       ts: issuedAt,
       actor: approverId,
-      detail: { expiresAt: breakGlass.expiresAt },
+      detail: {
+        expiresAt: breakGlass.expiresAt,
+        sid,
+        immutableExpiry: true,
+        singleUse: true,
+      },
     });
     log({
       subject: record.subjectId,
@@ -190,7 +197,14 @@ class BreakGlassManager {
       reason: 'break_glass',
       breakGlass,
     });
-    return { token, expiresAt: breakGlass.expiresAt, scope: record.scope };
+    return {
+      token,
+      expiresAt: breakGlass.expiresAt,
+      scope: record.scope,
+      sid,
+      immutableExpiry: true,
+      singleUse: true,
+    };
   }
 
   recordUsage(

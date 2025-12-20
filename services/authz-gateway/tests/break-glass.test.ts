@@ -128,6 +128,8 @@ describe('break glass access', () => {
 
     expect(approvalRes.status).toBe(200);
     expect(approvalRes.body.scope).toContain('break_glass:elevated');
+    expect(approvalRes.body.singleUse).toBe(true);
+    expect(approvalRes.body.immutableExpiry).toBe(true);
 
     const protectedRes = await request(app)
       .get('/protected/data')
@@ -142,6 +144,12 @@ describe('break glass access', () => {
       .set('x-resource-id', 'dataset-alpha');
 
     expect(reuseRes.status).toBe(401);
+
+    await expect(
+      sessionManager.elevateSession(approvalRes.body.sid, {
+        extendSeconds: 60,
+      }),
+    ).rejects.toThrow('session_not_extendable');
 
     const auditLog = fs.readFileSync(auditLogPath, 'utf8');
     expect(auditLog).toMatch(/break_glass/);
