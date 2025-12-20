@@ -1,0 +1,158 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://intelgraph.example.com/schemas/release-metadata.schema.yaml
+title: Release Metadata
+description: Canonical metadata for IntelGraph release trains and evidence bundles.
+type: object
+required:
+  - schema_version
+  - generated_at
+  - release
+  - evidence
+properties:
+  schema_version:
+    type: string
+    description: Version of this metadata schema.
+  generated_at:
+    type: string
+    format: date-time
+    description: UTC timestamp when the metadata file was generated.
+  release:
+    type: object
+    required:
+      - train_id
+      - version
+      - tag
+      - commit
+      - branch
+      - pipeline_run_id
+    properties:
+      train_id:
+        type: string
+        description: Release train identifier (e.g., 2025.09-wk3).
+      version:
+        type: string
+        pattern: ^v?\d+\.\d+\.\d+(-[A-Za-z0-9_.-]+)?$
+        description: Semantic version for the release.
+      tag:
+        type: string
+        description: Git tag associated with the release.
+      commit:
+        type: string
+        pattern: ^[0-9a-f]{7,40}$
+        description: Git commit SHA for the release build.
+      branch:
+        type: string
+        description: Source branch for the release train.
+      pipeline_run_id:
+        type: string
+        description: GitHub Actions run ID that produced the evidence bundle.
+      release_notes:
+        type: string
+        description: Release notes captured at publish time.
+  artifacts:
+    type: array
+    description: Primary artifacts delivered with the release.
+    items:
+      type: object
+      required:
+        - name
+        - type
+        - location
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          description: artifact type (image, helm-chart, binary, manifest)
+        location:
+          type: string
+          description: URI or path where the artifact can be retrieved.
+        digest:
+          type: string
+          description: SHA or other digest for integrity.
+        signature:
+          type: string
+          description: Path or URI to signature or attestation.
+  evidence:
+    type: object
+    required:
+      - bundle_path
+      - bundle_sha256
+      - files
+    properties:
+      bundle_path:
+        type: string
+        description: Path or filename for the bundled evidence archive.
+      bundle_sha256:
+        type: string
+        pattern: ^[A-Fa-f0-9]{64}$
+        description: SHA256 checksum of the evidence archive.
+      bundle_signature:
+        type: string
+        description: Path to the signature file for the evidence archive.
+      sbom:
+        type: array
+        items:
+          type: object
+          required:
+            - path
+            - sha256
+          properties:
+            path:
+              type: string
+            sha256:
+              type: string
+              pattern: ^[A-Fa-f0-9]{64}$
+            format:
+              type: string
+              description: SBOM format (e.g., spdx-json).
+      tests:
+        type: array
+        items:
+          type: object
+          required:
+            - name
+            - status
+          properties:
+            name:
+              type: string
+            status:
+              type: string
+              enum:
+                - passed
+                - failed
+                - skipped
+                - unknown
+            report:
+              type: string
+              description: Path to test report if available.
+      files:
+        type: array
+        items:
+          type: object
+          required:
+            - path
+            - sha256
+          properties:
+            path:
+              type: string
+            description: File path relative to the evidence bundle root.
+            sha256:
+              type: string
+              pattern: ^[A-Fa-f0-9]{64}$
+            description:
+              type: string
+  provenance:
+    type: object
+    description: Build provenance and attestation references.
+    properties:
+      slsa_provenance:
+        type: string
+        description: Path or URI to SLSA provenance statement.
+      signing:
+        type: object
+        properties:
+          signer:
+            type: string
+          certificate:
+            type: string

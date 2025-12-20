@@ -15,6 +15,17 @@ export type PoolCost = {
   egress_gb_usd: number;
 };
 
+const safeNum = (value: unknown): number => {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
+};
+
+const safeEst = (value: unknown): number => {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 0) return 0;
+  return n;
+};
+
 export async function listPools(): Promise<PoolInfo[]> {
   const { rows } = await pg.query(
     'SELECT id, region, labels, capacity FROM pool_registry',
@@ -31,19 +42,6 @@ export async function currentPricing(): Promise<Record<string, PoolCost>> {
   return m;
 }
 
-export function estimatePoolPrice(
-  cost: PoolCost | undefined,
-  est: { cpuSec?: number; gbSec?: number; egressGb?: number },
-  discount = 1,
-) {
-  if (!cost) return null;
-  const base =
-    (est.cpuSec || 0) * Number(cost.cpu_sec_usd) +
-    (est.gbSec || 0) * Number(cost.gb_sec_usd) +
-    (est.egressGb || 0) * Number(cost.egress_gb_usd);
-  return base * discount;
-}
-
 export function pickCheapestEligible(
   candidates: PoolInfo[],
   costs: Record<string, PoolCost>,
@@ -57,9 +55,26 @@ export function pickCheapestEligible(
       !p.region.toLowerCase().startsWith(residency.toLowerCase())
     )
       continue;
-    const price = estimatePoolPrice(costs[p.id], est);
-    if (price === null) continue;
-    if (!best || price < best.price) best = { id: p.id, price };
+    const c = costs[p.id];
+    if (!c) continue;
+
+    const cpuSec = safeEst(est.cpuSec);
+    const gbSec = safeEst(est.gbSec);
+    const egressGb = safeEst(est.egressGb);
+
+    const cpuUsd = safeNum(c.cpu_sec_usd);
+    const gbUsd = safeNum(c.gb_sec_usd);
+    const egressUsd = safeNum(c.egress_gb_usd);
+
+    const price =
+      cpuSec * cpuUsd + gbSec * gbUsd + egressGb * egressUsd;
+
+    if (
+      !best ||
+      price < best.price ||
+      (price === best.price && p.id.localeCompare(best.id) < 0)
+    )
+      best = { id: p.id, price };
   }
   return best;
 }

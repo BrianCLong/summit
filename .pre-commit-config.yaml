@@ -43,3 +43,9 @@ repos:
         entry: bash -c 'if git grep -n "console\\.error(" -- tests server/src/tests | grep -v node_modules; then echo "::error::console.error found in tests — use assertions/throws"; exit 1; fi'
         language: system
         pass_filenames: false
+      - id: sops-encrypt-secrets
+        name: enforce sops encryption for secrets
+        entry: bash -c 'for f in "$@"; do if [[ "$f" == secrets/envs/* && "$f" != *.enc.yaml ]]; then echo "::error::$f must be encrypted with sops and end with .enc.yaml"; exit 1; fi; done'
+        language: system
+        pass_filenames: true
+        files: ^secrets/

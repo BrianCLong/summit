@@ -1,0 +1,6 @@
+{
+  "id": "job789",
+  "connector": "twitter",
+  "status": "running",
+  "progress": 45
+}

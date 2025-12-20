@@ -1,5 +1,7 @@
 import { appendFileSync } from 'fs';
 
+import type { BreakGlassMetadata } from './types';
+
 export interface AuditEntry {
   subject: string;
   action: string;
@@ -7,6 +9,8 @@ export interface AuditEntry {
   tenantId: string;
   allowed: boolean;
   reason: string;
+  breakGlass?: BreakGlassMetadata;
+  event?: string;
 }
 
 export function log(entry: AuditEntry) {

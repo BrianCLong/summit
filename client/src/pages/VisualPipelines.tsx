@@ -12,7 +12,7 @@ import {
   ListItem,
   ListItemText,
 } from '@mui/material';
-import Grid from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid';
 
 type Pipeline = { id: string; name: string; spec: unknown };
 type HintResponse = { hints?: string[] } | { error?: string };

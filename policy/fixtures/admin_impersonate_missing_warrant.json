@@ -1,0 +1,24 @@
+{
+  "subject": {
+    "id": "admin-1",
+    "tenant": "t1",
+    "roles": ["admin"],
+    "clearance": "restricted",
+    "mfa": "password"
+  },
+  "resource": {
+    "type": "tenant",
+    "id": "t2",
+    "tenant": "t2",
+    "classification": "restricted"
+  },
+  "action": "tenant:impersonate",
+  "context": {
+    "env": "prod",
+    "request_ip": "10.0.0.5",
+    "time": "2025-01-05T04:00:00Z",
+    "risk": "high",
+    "reason": "missing warrant scenario",
+    "approvers": []
+  }
+}

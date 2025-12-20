@@ -1,34 +1,27 @@
 // server/orchestration/capacity-futures-mock.ts
-// Thin wrapper around the conductor capacity futures implementation for legacy callers.
 
-import {
-  releaseReservation,
-  reserveCapacity as conductorReserveCapacity,
-} from '../src/conductor/scheduling/capacity-futures.js';
-
+// Mock function to simulate reserving off-peak compute capacity.
 export async function reserveCapacity(options: {
   durationHours: number;
   computeUnits: number;
-  poolId?: string;
-  tenantId?: string;
 }): Promise<{ reservationId: string; costEstimate: number }> {
-  const startAt = new Date();
-  const endAt = new Date(
-    startAt.getTime() + Math.max(1, options.durationHours) * 60 * 60 * 1000,
+  console.log(
+    `Reserving ${options.computeUnits} units for ${options.durationHours} hours...`,
   );
-  const result = await conductorReserveCapacity({
-    poolId: options.poolId || 'mock-pool',
-    computeUnits: options.computeUnits,
-    startAt,
-    endAt,
-    tenantId: options.tenantId,
-  });
+  await new Promise((res) => setTimeout(res, 200));
+  const cost = options.computeUnits * options.durationHours * 0.03; // Mock cost
   return {
-    reservationId: result.reservationId,
-    costEstimate: result.costEstimate,
+    reservationId: `res-${Math.random().toString(36).substring(2, 9)}`,
+    costEstimate: cost,
   };
 }
 
+// Mock function to simulate releasing reserved capacity.
 export async function releaseCapacity(reservationId: string): Promise<boolean> {
-  return releaseReservation(reservationId);
+  console.log(`Releasing reservation ${reservationId}...`);
+  await new Promise((res) => setTimeout(res, 50));
+  return true;
 }
+
+// Example usage:
+// reserveCapacity({ durationHours: 1, computeUnits: 10 }).then(res => console.log('Reserved:', res));
