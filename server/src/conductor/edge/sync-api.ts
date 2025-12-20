@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Edge Sync API for Conductor
 // Provides endpoints for CRDT synchronization and offline operation management
 

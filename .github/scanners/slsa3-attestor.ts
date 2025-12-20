@@ -71,6 +71,14 @@ export class SLSA3Attestor {
    */
   async generateProvenance(options: AttestationOptions): Promise<AttestationResult> {
     const startTime = new Date();
+    const artifactName = path.basename(options.artifactPath);
+    const defaultOutput = path.join(
+      'artifacts',
+      'provenance',
+      `${artifactName}.provenance.json`
+    );
+    const shouldSign =
+      options.signWithCosign ?? this.config.cosign.keylessEnabled ?? false;
 
     try {
       // Calculate artifact digest
@@ -130,16 +138,16 @@ export class SLSA3Attestor {
       };
 
       // Output path
-      const outputPath =
-        options.outputPath || `${options.artifactPath}.provenance.json`;
+      const outputPath = options.outputPath || defaultOutput;
+      await fs.mkdir(path.dirname(outputPath), { recursive: true });
 
       // Sign with Cosign if requested
-      if (options.signWithCosign) {
+      if (shouldSign) {
         const signResult = await this.signProvenance(envelope, outputPath);
         if (!signResult.success) {
           return {
             success: false,
-            subject: path.basename(options.artifactPath),
+            subject: artifactName,
             digest,
             builder: provenance.predicate.runDetails.builder.id,
             timestamp: startTime.toISOString(),
@@ -158,7 +166,7 @@ export class SLSA3Attestor {
         success: true,
         attestationId: provenance.predicate.runDetails.metadata.invocationId,
         bundlePath: outputPath,
-        subject: path.basename(options.artifactPath),
+        subject: artifactName,
         digest,
         builder: provenance.predicate.runDetails.builder.id,
         timestamp: startTime.toISOString(),
@@ -166,7 +174,7 @@ export class SLSA3Attestor {
     } catch (error: unknown) {
       return {
         success: false,
-        subject: path.basename(options.artifactPath),
+        subject: artifactName,
         digest: '',
         builder: options.builderId || 'unknown',
         timestamp: startTime.toISOString(),

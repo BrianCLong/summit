@@ -1,0 +1,67 @@
+# Governance Label Taxonomy
+# Canonical definition for CI enforcement.
+
+labels:
+  # ---------------------------------------------------------------------------
+  # Tier Labels (Mutually Exclusive)
+  # Defines the trust level required for the PR.
+  # ---------------------------------------------------------------------------
+  - name: "agent:tier-0"
+    color: "c5def5"
+    description: "Documentation and assets. Low risk. Auto-merge allowed."
+
+  - name: "agent:tier-1"
+    color: "bfd4f2"
+    description: "Frontend, tests, scripts. Moderate risk. Requires 1 peer review."
+
+  - name: "agent:tier-2"
+    color: "1f6feb"
+    description: "Server code, DB, packages. High risk. Requires Code Owner review."
+
+  - name: "agent:tier-3"
+    color: "b60205"
+    description: "Auth, Billing, Crypto. Critical risk. Requires Security review."
+
+  - name: "agent:tier-4"
+    color: "000000"
+    description: "Governance, Policy, CI. Existential risk. Requires Admin approval."
+
+  # ---------------------------------------------------------------------------
+  # Area Labels (Scoped)
+  # Identifies the domain of the change.
+  # ---------------------------------------------------------------------------
+  - name: "area:client"
+    color: "79c0ff"
+    description: "Frontend and client-side code."
+
+  - name: "area:server"
+    color: "f9c0ff"
+    description: "Backend services and API."
+
+  - name: "area:docs"
+    color: "c2e0c6"
+    description: "Documentation only."
+
+  - name: "area:infra"
+    color: "d4c5f9"
+    description: "Infrastructure, Terraform, Docker."
+
+  - name: "area:ci"
+    color: "fbca04"
+    description: "GitHub Actions and CI scripts."
+
+  - name: "area:policy"
+    color: "d93f0b"
+    description: "OPA policies and governance specs."
+
+  # ---------------------------------------------------------------------------
+  # Risk Labels (Auxiliary)
+  # ---------------------------------------------------------------------------
+  - name: "risk:low"
+    color: "0e8a16"
+  - name: "risk:medium"
+    color: "fbca04"
+  - name: "risk:high"
+    color: "d93f0b"
+  - name: "risk:release-blocking"
+    color: "b60205"

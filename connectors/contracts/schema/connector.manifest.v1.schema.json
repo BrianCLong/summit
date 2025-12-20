@@ -1,0 +1,220 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://intelgraph.dev/schemas/connector-manifest.v1.json",
+  "title": "Connector Manifest v1",
+  "description": "Schema for connector contract manifests and golden IO fixtures",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "connectorId",
+    "name",
+    "description",
+    "source",
+    "auth",
+    "rateLimits",
+    "license",
+    "pii",
+    "mapping",
+    "fixtures",
+    "contracts"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional schema override for IDEs"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "enum": ["v1"],
+      "description": "Version of the connector manifest contract"
+    },
+    "connectorId": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Machine friendly connector id"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Connector semantic version"
+    },
+    "owner": {
+      "type": "string",
+      "description": "Team or individual accountable for the connector"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": ["type", "endpoint", "contentType"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["http", "file", "stream", "database", "queue"]
+        },
+        "endpoint": {
+          "type": "string",
+          "description": "Base URL or path that the connector pulls from"
+        },
+        "contentType": {
+          "type": "string",
+          "enum": ["json", "csv", "parquet", "ndjson", "xml"]
+        },
+        "owner": {
+          "type": "string",
+          "description": "Owner of the upstream data source"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "auth": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["none", "apiKey", "bearer", "basic", "oauth2"]
+        },
+        "scopes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "header": {
+          "type": "string",
+          "description": "Header used for auth (when applicable)"
+        }
+      }
+    },
+    "rateLimits": {
+      "type": "object",
+      "required": ["requestsPerMinute"],
+      "properties": {
+        "requestsPerMinute": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "burst": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "concurrency": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "license": {
+      "type": "object",
+      "required": ["classification", "terms"],
+      "properties": {
+        "classification": {
+          "type": "string",
+          "enum": ["open-source", "internal", "restricted"]
+        },
+        "terms": {
+          "type": "string",
+          "description": "Short form TOS/license indicator"
+        },
+        "blockedUses": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "obligations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "pii": {
+      "type": "object",
+      "required": ["fields"],
+      "properties": {
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["field", "category", "policy"],
+            "properties": {
+              "field": { "type": "string" },
+              "category": {
+                "type": "string",
+                "enum": ["none", "low", "medium", "high"]
+              },
+              "policy": {
+                "type": "string",
+                "enum": ["passthrough", "mask", "drop"]
+              },
+              "comment": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "mapping": {
+      "type": "object",
+      "required": ["handler", "hints"],
+      "properties": {
+        "handler": {
+          "type": "string",
+          "description": "Path to the mapping handler module"
+        },
+        "hints": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["source", "targetType", "idField"],
+            "properties": {
+              "source": { "type": "string" },
+              "targetType": { "type": "string" },
+              "idField": { "type": "string" },
+              "nameField": { "type": "string" },
+              "provenanceTag": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "fixtures": {
+      "type": "object",
+      "required": ["sample", "golden"],
+      "properties": {
+        "sample": { "type": "string" },
+        "golden": { "type": "string" },
+        "description": { "type": "string" }
+      }
+    },
+    "contracts": {
+      "type": "object",
+      "required": ["snapshotVersion", "generatedAt", "outputSchemaVersion"],
+      "properties": {
+        "snapshotVersion": { "type": "string" },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "outputSchemaVersion": { "type": "string" }
+      }
+    }
+  }
+}
