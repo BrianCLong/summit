@@ -1,0 +1,69 @@
+---
+description: React component conventions
+globs:
+  - "**/*.tsx"
+  - "**/components/**/*"
+  - "client/**/*"
+alwaysApply: false
+---
+
+# React Conventions
+
+## Component Style
+
+- Prefer functional components over class components
+- Use TypeScript interfaces for props
+- Use Material-UI (MUI) components
+- Use Apollo Client for GraphQL
+
+## File Naming
+
+- PascalCase for component files: `EntityCard.tsx`
+- camelCase for hooks: `useGraphData.ts`
+- Index files for exports: `index.ts`
+
+## Example Component
+
+```typescript
+import React from 'react';
+import { Card, CardContent, Typography } from '@mui/material';
+
+interface EntityCardProps {
+  entity: {
+    id: string;
+    name: string;
+    type: string;
+  };
+}
+
+export const EntityCard: React.FC<EntityCardProps> = ({ entity }) => {
+  return (
+    <Card>
+      <CardContent>
+        <Typography variant="h5">{entity.name}</Typography>
+        <Typography color="textSecondary">{entity.type}</Typography>
+      </CardContent>
+    </Card>
+  );
+};
+```
+
+## Hooks
+
+- Prefix custom hooks with `use`
+- Handle loading and error states
+- Clean up effects properly
+
+```typescript
+export function useEntity(id: string) {
+  const { data, loading, error } = useQuery(GET_ENTITY, {
+    variables: { id },
+  });
+
+  return {
+    entity: data?.entity,
+    loading,
+    error,
+  };
+}
+```

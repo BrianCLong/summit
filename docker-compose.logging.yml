@@ -1,0 +1,103 @@
+# Docker Compose configuration for ELK Stack (Elasticsearch, Logstash, Kibana)
+# Issue: #11813 - Structured Logging with ELK/OpenTelemetry
+#
+# Usage:
+#   docker-compose -f docker-compose.logging.yml up
+#   or
+#   docker-compose -f docker-compose.dev.yml -f docker-compose.logging.yml up
+
+version: '3.9'
+
+services:
+  # Elasticsearch - Log storage and search
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: intelgraph-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+      - xpack.security.enrollment.enabled=false
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    networks:
+      - intelgraph-logging
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Logstash - Log ingestion and processing
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.11.0
+    container_name: intelgraph-logstash
+    volumes:
+      - ./infra/logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - ./infra/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./logs:/logs:ro
+    ports:
+      - "5044:5044"  # Beats input
+      - "5000:5000/tcp"  # TCP input
+      - "5000:5000/udp"  # UDP input
+      - "9600:9600"  # Logstash monitoring API
+    environment:
+      - "LS_JAVA_OPTS=-Xmx256m -Xms256m"
+    networks:
+      - intelgraph-logging
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  # Kibana - Log visualization and analytics
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    container_name: intelgraph-kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    networks:
+      - intelgraph-logging
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5601/api/status || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Filebeat - Log shipping (optional, for file-based log collection)
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.11.0
+    container_name: intelgraph-filebeat
+    user: root
+    volumes:
+      - ./infra/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./logs:/logs:ro
+      - filebeat-data:/usr/share/filebeat/data
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command: filebeat -e -strict.perms=false
+    networks:
+      - intelgraph-logging
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      logstash:
+        condition: service_started
+
+volumes:
+  elasticsearch-data:
+    driver: local
+  filebeat-data:
+    driver: local
+
+networks:
+  intelgraph-logging:
+    driver: bridge

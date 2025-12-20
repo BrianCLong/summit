@@ -1,0 +1,30 @@
+{
+  "topic": "zero_trust.policy_decision",
+  "auditId": "audit-1730757600000-42",
+  "decisionId": "dec-9af2",
+  "sequence": 42,
+  "checksum": "9c6b53a4e0ed8a7c1be4d0c2f6a8c4e5",
+  "timestamp": "2025-02-05T15:00:00.000Z",
+  "policyDecision": "deny",
+  "actor": {
+    "type": "user",
+    "id": "analyst-77",
+    "roles": ["investigator"],
+    "spiffeId": "spiffe://intelgraph.local/ns/ops/sa/analyst-77"
+  },
+  "resource": {
+    "type": "investigation",
+    "id": "case-48291",
+    "classification": "secret"
+  },
+  "outcome": {
+    "result": "denied",
+    "reason": "trust score below policy threshold",
+    "policyViolations": ["ZT-OPA-403"]
+  },
+  "context": {
+    "sourceIp": "10.0.14.27",
+    "requestId": "dec-9af2",
+    "correlationId": "cor-1730757600000-bus-sample"
+  }
+}

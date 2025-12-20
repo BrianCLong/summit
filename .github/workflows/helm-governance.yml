@@ -1,0 +1,211 @@
+name: helm-governance-pipeline
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'helm/**'
+      - 'policy/**'
+      - 'policies/**'
+      - '.github/workflows/helm-governance.yml'
+      - '.github/ct-helm.yaml'
+  push:
+    branches: [main]
+    paths:
+      - 'helm/**'
+      - 'policy/**'
+      - 'policies/**'
+      - '.github/workflows/helm-governance.yml'
+      - '.github/ct-helm.yaml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  lint-and-template:
+    name: Lint, template, kubeconform
+    runs-on: ubuntu-22.04
+    env:
+      CT_CONFIG: .github/ct-helm.yaml
+      RENDER_DIR: helm-rendered
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.4
+
+      - name: Install chart-testing
+        uses: helm/chart-testing-action@v2.6.1
+
+      - name: Install kubeconform
+        run: |
+          set -euo pipefail
+          curl -L https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz -o kubeconform.tar.gz
+          tar -xzf kubeconform.tar.gz kubeconform
+          sudo mv kubeconform /usr/local/bin/
+          kubeconform -v
+
+      - name: Lint charts with ct
+        run: |
+          ct lint --config "$CT_CONFIG" --all
+
+      - name: Template charts and run kubeconform
+        run: |
+          set -euo pipefail
+          mkdir -p "$RENDER_DIR"
+          charts=$(find helm -mindepth 1 -maxdepth 1 -type d ! -name 'templates' ! -name 'overlays')
+          if [ -z "$charts" ]; then
+            echo "No charts detected under helm/"
+            exit 1
+          fi
+
+          for chart in $charts; do
+            if [ ! -f "$chart/Chart.yaml" ]; then
+              continue
+            fi
+            name=$(basename "$chart")
+            echo "Rendering $name"
+            helm dependency update "$chart" || true
+            base_args=(--namespace "ci-$name" --values helm/ci-values.yaml --set "image.tag=${GITHUB_SHA::7}")
+
+            helm template "$name" "$chart" "${base_args[@]}" --output-dir "$RENDER_DIR/$name/default"
+            manifests=$(find "$RENDER_DIR/$name/default" -name '*.yaml')
+            if [ -n "$manifests" ]; then
+              kubeconform -summary -strict -ignore-missing-schemas $manifests
+            fi
+
+            for values_file in values.dev.yaml values.stage.yaml values.prod.yaml; do
+              if [ -f "$chart/$values_file" ]; then
+                target_dir="$RENDER_DIR/$name/${values_file%*.yaml}"
+                helm template "$name" "$chart" "${base_args[@]}" --values "$chart/$values_file" --output-dir "$target_dir"
+                env_manifests=$(find "$target_dir" -name '*.yaml')
+                if [ -n "$env_manifests" ]; then
+                  kubeconform -summary -strict -ignore-missing-schemas $env_manifests
+                fi
+              fi
+            done
+          done
+
+      - name: Package docs and dashboards
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          shopt -s nullglob
+          docs=(helm/README.md helm/*/README*.md)
+          bundles=(monitoring/dashboards monitoring/grafana)
+          if [ ${#docs[@]} -eq 0 ] && [ ${#bundles[@]} -eq 0 ]; then
+            echo "No docs or dashboards found to archive" > artifacts/helm-docs-and-dashboards.txt
+            tar -czf artifacts/helm-docs-and-dashboards.tgz artifacts/helm-docs-and-dashboards.txt
+          else
+            tar -czf artifacts/helm-docs-and-dashboards.tgz "${docs[@]}" "${bundles[@]}" --ignore-failed-read
+          fi
+
+      - name: Upload rendered manifests
+        uses: actions/upload-artifact@v4
+        with:
+          name: helm-rendered-manifests
+          path: ${{ env.RENDER_DIR }}
+          retention-days: 7
+
+      - name: Upload docs and dashboards
+        uses: actions/upload-artifact@v4
+        with:
+          name: helm-docs-and-dashboards
+          path: artifacts/helm-docs-and-dashboards.tgz
+          retention-days: 7
+
+  policy-checks:
+    name: OPA and Kyverno policy gates
+    needs: lint-and-template
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download rendered manifests
+        uses: actions/download-artifact@v4
+        with:
+          name: helm-rendered-manifests
+          path: helm-rendered
+
+      - name: Install conftest (OPA)
+        run: |
+          set -euo pipefail
+          curl -L https://github.com/open-policy-agent/conftest/releases/download/v0.55.0/conftest_0.55.0_Linux_x86_64.tar.gz -o conftest.tar.gz
+          tar -xzf conftest.tar.gz
+          sudo mv conftest /usr/local/bin/
+          conftest --version
+
+      - name: Install Kyverno CLI
+        run: |
+          set -euo pipefail
+          curl -L https://github.com/kyverno/kyverno/releases/download/v1.12.6/kyverno-cli_v1.12.6_linux_x86_64.tar.gz -o kyverno.tar.gz
+          tar -xzf kyverno.tar.gz kyverno
+          sudo mv kyverno /usr/local/bin/
+          kyverno version --client
+
+      - name: Run OPA policy checks
+        run: |
+          set -euo pipefail
+          conftest test helm-rendered/**/*.yaml -p policy/conftest/helm-ci
+
+      - name: Kyverno lint and apply
+        run: |
+          set -euo pipefail
+          kyverno lint policy/kyverno policies/kyverno
+          kyverno apply policy/kyverno/helm-ci.yaml --resource helm-rendered/**/*.yaml --policy-report
+
+  integration-kind:
+    name: Kind integration smoke
+    needs: lint-and-template
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.10.0
+        with:
+          version: v0.22.0
+          node_image: kindest/node:v1.29.2
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.4
+
+      - name: Deploy summit chart with CI defaults (blue)
+        run: |
+          set -euo pipefail
+          helm upgrade --install summit helm/summit \
+            --atomic --namespace summit --create-namespace \
+            --values helm/ci-values.yaml \
+            --set image.repository=registry.k8s.io/pause --set image.tag=3.9
+          kubectl rollout status deployment/summit -n summit --timeout=120s
+          kubectl get pods -n summit
+
+      - name: Promote new image tag (green)
+        run: |
+          set -euo pipefail
+          helm upgrade summit helm/summit \
+            --atomic --namespace summit \
+            --values helm/summit/values.dev.yaml \
+            --set image.repository=registry.k8s.io/pause \
+            --set image.tag=${GITHUB_SHA::7}
+          kubectl rollout status deployment/summit -n summit --timeout=120s
+          kubectl get deploy summit -n summit -o jsonpath='{.spec.template.spec.containers[0].image}'
+          kubectl annotate service summit -n summit rollout.blue-green/promotion="${GITHUB_SHA::7}" --overwrite
+
+      - name: Smoke check service endpoint
+        run: |
+          set -euo pipefail
+          kubectl get svc summit -n summit -o wide
+          kubectl run summit-smoke -n summit --image=registry.k8s.io/pause:3.9 --restart=Never --command -- /bin/sh -c "echo summit chart deployed"
+          kubectl wait --for=condition=Completed pod/summit-smoke -n summit --timeout=60s

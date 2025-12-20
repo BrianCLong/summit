@@ -1,0 +1,190 @@
+meta:
+  id: plan.resource-budgeting@v1
+  owner: 'platform-engineering'
+  purpose: 'Define resource quotas and budgets to prevent runaway consumption'
+  tags:
+    - performance
+    - resources
+    - kubernetes
+    - capacity
+    - cost
+  guardrails:
+    - 'Budgets must prevent service disruption'
+    - 'Autoscaling limits must be defined'
+    - 'Cost implications must be documented'
+    - 'Overcommit ratios must be justified'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  services: string
+  current_usage: string
+  infrastructure_limits: string
+  cost_constraints: string
+  scaling_requirements: string
+
+template: |
+  You are an Infrastructure Architect defining resource budgets for Summit/IntelGraph.
+
+  **Objective:** Define quotas to prevent runaway resource consumption.
+
+  **Services:**
+  {{services}}
+
+  **Current Usage:**
+  {{current_usage}}
+
+  **Infrastructure Limits:**
+  {{infrastructure_limits}}
+
+  **Cost Constraints:**
+  {{cost_constraints}}
+
+  **Scaling Requirements:**
+  {{scaling_requirements}}
+
+  ## Deliverables
+
+  ### 1. Resource Budgets Document
+  ```yaml
+  budgets:
+    total:
+      cpu: [cores]
+      memory: [GB]
+      storage: [GB]
+      monthly_cost: [$]
+
+    per_service:
+      api-server:
+        cpu:
+          request: 500m
+          limit: 2000m
+        memory:
+          request: 512Mi
+          limit: 2Gi
+        replicas:
+          min: 2
+          max: 10
+        cost_allocation: 30%
+  ```
+
+  ### 2. Per-Service Resource Specifications
+  | Service | CPU Request | CPU Limit | Mem Request | Mem Limit | Min Pods | Max Pods |
+  |---------|-------------|-----------|-------------|-----------|----------|----------|
+  | api | 500m | 2000m | 512Mi | 2Gi | 2 | 10 |
+  | graph-engine | 1000m | 4000m | 1Gi | 4Gi | 1 | 5 |
+  | worker | 250m | 1000m | 256Mi | 1Gi | 1 | 20 |
+
+  ### 3. Autoscaling Configuration
+  ```yaml
+  autoscaling:
+    api-server:
+      metrics:
+        - type: Resource
+          resource:
+            name: cpu
+            target:
+              type: Utilization
+              averageUtilization: 70
+        - type: Resource
+          resource:
+            name: memory
+            target:
+              type: Utilization
+              averageUtilization: 80
+      behavior:
+        scaleUp:
+          stabilizationWindowSeconds: 60
+          policies:
+            - type: Percent
+              value: 100
+              periodSeconds: 60
+        scaleDown:
+          stabilizationWindowSeconds: 300
+          policies:
+            - type: Percent
+              value: 10
+              periodSeconds: 60
+  ```
+
+  ### 4. Kubernetes/Compose Manifests
+  ```yaml
+  # Example k8s ResourceQuota
+  apiVersion: v1
+  kind: ResourceQuota
+  metadata:
+    name: summit-quota
+    namespace: summit
+  spec:
+    hard:
+      requests.cpu: "20"
+      requests.memory: 40Gi
+      limits.cpu: "50"
+      limits.memory: 100Gi
+      pods: "100"
+
+  # Example LimitRange
+  apiVersion: v1
+  kind: LimitRange
+  metadata:
+    name: summit-limits
+    namespace: summit
+  spec:
+    limits:
+      - type: Container
+        default:
+          cpu: "1"
+          memory: 1Gi
+        defaultRequest:
+          cpu: 100m
+          memory: 256Mi
+        max:
+          cpu: "4"
+          memory: 8Gi
+  ```
+
+  ### 5. Cost Allocation
+  | Service Category | CPU % | Memory % | Storage % | Est. Monthly Cost |
+  |------------------|-------|----------|-----------|-------------------|
+  | API Layer | 30% | 25% | 10% | $X |
+  | Graph Engine | 40% | 45% | 30% | $Y |
+  | Workers | 20% | 20% | 10% | $Z |
+  | Observability | 10% | 10% | 50% | $W |
+
+  ### 6. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] All services have defined resource limits
+  - [ ] Quotas enforced in staging/production
+  - [ ] Autoscaling tested under load
+  - [ ] Cost projections documented
+  - [ ] Alert on quota exhaustion
+
+  ## Rollback Plan
+  - Remove limits if causing OOM/throttling
+  - Increase quotas with approval
+  - Document emergency override process
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'summit-resource-budget'
+    inputs:
+      services: 'API Server, Graph Engine, ML Worker, Redis, Neo4j, PostgreSQL'
+      current_usage: 'CPU: 8 cores avg, Memory: 32GB avg, spikes to 64GB'
+      infrastructure_limits: 'Cluster: 100 cores, 400GB RAM, $10k/month budget'
+      cost_constraints: 'Max $8k/month for compute, $2k for storage'
+      scaling_requirements: 'Handle 10x traffic spikes, 99.9% availability'
+    expected_contains:
+      - 'budgets'
+      - 'ResourceQuota'
+      - 'Autoscaling'
+      - 'Cost Allocation'

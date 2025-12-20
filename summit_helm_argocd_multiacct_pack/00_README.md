@@ -10,6 +10,7 @@ Contents:
 - **Terraform**: multi‑account ECR, OIDC roles, optional replication
 - **GitHub Actions**: cross‑account promotion (manifest copy) and ArgoCD deploy
 - **Docs** on patterns and setup
+- **Security**: hardening and validation checklist in `docs/SECURITY_PREP.md`
 
 Next steps:
 

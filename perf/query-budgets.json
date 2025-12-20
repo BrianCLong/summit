@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "workload": "seed-default",
+  "budgets": [
+    {
+      "id": "cases-by-tenant",
+      "description": "List active cases for seeded tenant workloads",
+      "query": "select id, status, created_at from cases where tenant_id = $1 and status = $2 order by created_at desc limit $3",
+      "maxMeanTimeMs": 40,
+      "maxTotalTimeShare": 0.35,
+      "maxCalls": 400
+    },
+    {
+      "id": "audit-feed",
+      "description": "Audit feed fetch with date cursor",
+      "query": "select tenant_id, actor, action, created_at from audit_log where tenant_id = $1 and created_at > $2 order by created_at desc limit $3",
+      "maxMeanTimeMs": 55,
+      "maxTotalTimeShare": 0.25,
+      "maxCalls": 300
+    },
+    {
+      "id": "case-update",
+      "description": "Status updates issued during seed runs",
+      "query": "update cases set status = $1, updated_at = now() where id = $2",
+      "maxMeanTimeMs": 35,
+      "maxTotalTimeShare": 0.2,
+      "maxCalls": 500
+    }
+  ]
+}

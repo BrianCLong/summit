@@ -1,7 +1,9 @@
 import express from 'express';
+import { promises as fs } from 'fs';
 import { z } from 'zod';
 import { disclosureExportService } from '../disclosure/export-service.js';
 import { disclosureMetrics } from '../metrics/disclosureMetrics.js';
+import { runtimeEvidenceService } from '../disclosure/runtime-evidence.js';
 
 const router = express.Router();
 router.use(express.json());
@@ -114,6 +116,74 @@ router.get('/export/:jobId/download', (req, res) => {
   }
 
   return res.download(download.filePath, `disclosure-${download.job.id}.zip`);
+});
+
+router.post('/runtime-bundle', async (req, res) => {
+  const tenantHeader = resolveTenant(req);
+  const bodyTenant = req.body?.tenantId as string | undefined;
+
+  if (!tenantHeader && !bodyTenant) {
+    return res.status(400).json({ error: 'tenant_required' });
+  }
+
+  const effectiveTenant = bodyTenant ?? (tenantHeader as string);
+  if (tenantHeader && tenantHeader !== effectiveTenant) {
+    return res.status(403).json({ error: 'tenant_mismatch' });
+  }
+
+  try {
+    const bundle = await runtimeEvidenceService.createBundle({
+      tenantId: effectiveTenant,
+      startTime: req.body?.startTime,
+      endTime: req.body?.endTime,
+      auditPaths: req.body?.auditPaths,
+      policyPaths: req.body?.policyPaths,
+      sbomPaths: req.body?.sbomPaths,
+      provenancePaths: req.body?.provenancePaths,
+    });
+
+    const downloadUrl = `${req.protocol}://${req.get('host')}${req.baseUrl}/runtime-bundle/${bundle.id}/download`;
+
+    return res.status(201).json({
+      bundle: {
+        ...bundle,
+        downloadUrl,
+      },
+    });
+  } catch (error: any) {
+    const status = error?.message === 'invalid_date' ? 400 : 500;
+    return res.status(status).json({
+      error: 'runtime_bundle_failed',
+      message: error?.message ?? 'unknown_error',
+    });
+  }
+});
+
+router.get('/runtime-bundle/:bundleId/download', async (req, res) => {
+  const tenantHeader = resolveTenant(req);
+  if (!tenantHeader) {
+    return res.status(400).json({ error: 'tenant_required' });
+  }
+
+  const bundle = runtimeEvidenceService.getBundle(req.params.bundleId);
+  if (!bundle) {
+    return res.status(404).json({ error: 'not_found' });
+  }
+
+  if (bundle.tenantId !== tenantHeader) {
+    return res.status(403).json({ error: 'tenant_mismatch' });
+  }
+
+  const exists = await fs
+    .access(bundle.bundlePath)
+    .then(() => true)
+    .catch(() => false);
+
+  if (!exists) {
+    return res.status(410).json({ error: 'bundle_missing' });
+  }
+
+  return res.download(bundle.bundlePath, `runtime-evidence-${bundle.id}.tar.gz`);
 });
 
 export default router;

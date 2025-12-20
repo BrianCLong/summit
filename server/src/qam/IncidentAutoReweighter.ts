@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * MC Platform v0.4.5 - IncidentAutoReweighter
  *

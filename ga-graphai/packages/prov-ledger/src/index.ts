@@ -1,4 +1,5 @@
 import { createHash, createHmac, randomUUID } from 'node:crypto';
+import { Router } from 'express';
 import type {
   EvidenceBundle,
   LedgerEntry,
@@ -35,8 +36,12 @@ import {
   collectEvidencePointers,
   normalizeWorkflow,
 } from 'common-types';
+import type { ExportManifest } from './manifest.js';
+import { createExportManifest, verifyManifest } from './manifest.js';
+import { computeLedgerHash } from './quantum-safe-ledger.js';
 
 export * from './mul-ledger';
+export * from './quantum-safe-ledger';
 
 // ============================================================================
 // SIMPLE PROVENANCE LEDGER - From HEAD
@@ -615,6 +620,294 @@ function parseSeverity(value: unknown): AuditSeverity | undefined {
     default:
       return undefined;
   }
+}
+
+interface ChainVerificationReport {
+  ok: boolean;
+  headHash?: string;
+  reasons: string[];
+}
+
+interface AuditExportPage {
+  cursor: number;
+  pageSize: number;
+  total: number;
+  nextCursor?: number;
+  from?: string;
+  to?: string;
+}
+
+export interface AuditExportBundle {
+  page: AuditExportPage;
+  events: AuditLogEvent[];
+  evidence: EvidenceBundle;
+  manifest: ExportManifest;
+  schema: Record<string, unknown>;
+  verification: {
+    chain: ChainVerificationReport;
+    manifest: ReturnType<typeof verifyManifest>;
+  };
+}
+
+type AuditEventInput = Omit<
+  AuditLogEvent,
+  'timestamp' | 'previousHash' | 'eventHash'
+> & { timestamp?: string };
+
+function sanitizeMetadata(
+  metadata: Record<string, unknown> | undefined,
+): Record<string, unknown> {
+  if (!metadata) {
+    return {};
+  }
+  const sanitized: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(metadata)) {
+    const lowerKey = key.toLowerCase();
+    if (
+      lowerKey.includes('email') ||
+      lowerKey.includes('ssn') ||
+      lowerKey.includes('phone') ||
+      lowerKey.includes('pii')
+    ) {
+      sanitized[key] = '[REDACTED]';
+      continue;
+    }
+    if (typeof value === 'string' && value.includes('@')) {
+      sanitized[key] = '[REDACTED]';
+      continue;
+    }
+    sanitized[key] = value;
+  }
+  return sanitized;
+}
+
+function toLedgerEntryFromAudit(
+  event: AuditEventInput,
+  previousHash?: string,
+): LedgerEntry {
+  const timestamp = normaliseTimestamp(event.timestamp);
+  const correlationIds = uniqueValues(event.correlationIds);
+  const payload = {
+    ...sanitizeMetadata(event.metadata),
+    system: event.system,
+    severity: event.severity,
+    correlationIds,
+  };
+  const entry: LedgerEntry = {
+    id: event.id,
+    category: event.category ?? 'audit',
+    actor: event.actor,
+    action: event.action,
+    resource: event.resource,
+    payload,
+    timestamp,
+    previousHash,
+    hash: '',
+  };
+  entry.hash = computeLedgerHash(entry, timestamp, previousHash);
+  return entry;
+}
+
+function ledgerEntryToAuditEvent(entry: LedgerEntry): AuditLogEvent {
+  const payload = { ...entry.payload };
+  const system =
+    typeof payload.system === 'string' && payload.system.length > 0
+      ? (payload.system as string)
+      : entry.resource;
+  if (payload.system) {
+    delete (payload as Record<string, unknown>).system;
+  }
+  const severity = parseSeverity(payload.severity);
+  if (payload.severity) {
+    delete (payload as Record<string, unknown>).severity;
+  }
+  const correlationIds = toStringArray(payload.correlationIds);
+  if (payload.correlationIds) {
+    delete (payload as Record<string, unknown>).correlationIds;
+  }
+
+  return {
+    id: entry.id,
+    timestamp: entry.timestamp,
+    actor: entry.actor,
+    action: entry.action,
+    resource: entry.resource,
+    system,
+    category: entry.category,
+    severity,
+    metadata: Object.keys(payload).length ? payload : undefined,
+    correlationIds: uniqueValues(correlationIds),
+    previousHash: entry.previousHash,
+    eventHash: entry.hash,
+  };
+}
+
+function verifyEvidenceChain(
+  entries: readonly LedgerEntry[],
+  anchor?: string,
+): ChainVerificationReport {
+  const reasons: string[] = [];
+  let previous = anchor;
+  for (const entry of entries) {
+    if (previous !== undefined && entry.previousHash !== previous) {
+      reasons.push(`Previous hash mismatch for ${entry.id}`);
+    }
+    const recalculated = computeLedgerHash(entry, entry.timestamp, entry.previousHash);
+    if (recalculated !== entry.hash) {
+      reasons.push(`Hash mismatch for ${entry.id}`);
+    }
+    previous = entry.hash;
+  }
+  return { ok: reasons.length === 0, headHash: previous, reasons };
+}
+
+function auditExportSchema(): Record<string, unknown> {
+  return {
+    version: '2025-01',
+    piiSafe: true,
+    hashAlgorithm: 'sha256',
+    fields: [
+      'id',
+      'timestamp',
+      'actor',
+      'action',
+      'resource',
+      'system',
+      'category',
+      'severity',
+      'metadata',
+      'correlationIds',
+      'previousHash',
+      'eventHash',
+    ],
+    pagination: 'cursor',
+  };
+}
+
+export class AppendOnlyAuditLog {
+  private readonly entries: LedgerEntry[] = [];
+
+  private readonly ids = new Set<string>();
+
+  append(event: AuditEventInput): AuditLogEvent {
+    if (this.ids.has(event.id)) {
+      throw new Error('Append-only audit log rejects mutations to existing events');
+    }
+
+    const previousHash = this.entries.at(-1)?.hash;
+    const entry = toLedgerEntryFromAudit(event, previousHash);
+
+    this.entries.push(entry);
+    this.ids.add(entry.id);
+
+    return ledgerEntryToAuditEvent(entry);
+  }
+
+  list(): AuditLogEvent[] {
+    return this.entries.map((entry) => ledgerEntryToAuditEvent(entry));
+  }
+
+  verify(): ChainVerificationReport {
+    return verifyEvidenceChain(this.entries);
+  }
+
+  exportBundle(options: {
+    from?: string;
+    to?: string;
+    limit?: number;
+    cursor?: number;
+    caseId?: string;
+  }): AuditExportBundle {
+    const filtered = this.filterRange(options.from, options.to);
+    const total = filtered.length;
+    const limit = options.limit && options.limit > 0 ? options.limit : 100;
+    const cursor = Math.max(0, options.cursor ?? 0);
+    const slice = filtered.slice(cursor, cursor + limit);
+    const anchor = cursor > 0 ? filtered[cursor - 1]?.hash : undefined;
+
+    const evidence: EvidenceBundle = {
+      generatedAt: new Date().toISOString(),
+      headHash: slice.at(-1)?.hash,
+      entries: slice.map((entry) => ({ ...entry })),
+    };
+
+    const manifest = createExportManifest({
+      caseId: options.caseId ?? 'audit-trail',
+      ledger: slice,
+      evidence,
+    });
+
+    const verification = {
+      chain: verifyEvidenceChain(slice, anchor),
+      manifest: verifyManifest(manifest, slice, evidence),
+    };
+
+    const nextCursor = cursor + slice.length < total ? cursor + slice.length : undefined;
+
+    return {
+      page: {
+        cursor,
+        pageSize: limit,
+        total,
+        nextCursor,
+        from: options.from,
+        to: options.to,
+      },
+      events: slice.map((entry) => ledgerEntryToAuditEvent(entry)),
+      evidence,
+      manifest,
+      schema: auditExportSchema(),
+      verification,
+    };
+  }
+
+  private filterRange(from?: string, to?: string): LedgerEntry[] {
+    let data = [...this.entries];
+    if (from) {
+      const fromTs = new Date(from).getTime();
+      data = data.filter((entry) => new Date(entry.timestamp).getTime() >= fromTs);
+    }
+    if (to) {
+      const toTs = new Date(to).getTime();
+      data = data.filter((entry) => new Date(entry.timestamp).getTime() <= toTs);
+    }
+    return data;
+  }
+}
+
+export function createAuditExportRouter(log: AppendOnlyAuditLog): Router {
+  const router = Router();
+
+  router.get('/audit/export', (req, res) => {
+    const limit = req.query.limit ? Number(req.query.limit) : undefined;
+    const cursor = req.query.cursor ? Number(req.query.cursor) : undefined;
+    const from = typeof req.query.from === 'string' ? req.query.from : undefined;
+    const to = typeof req.query.to === 'string' ? req.query.to : undefined;
+    const caseId = typeof req.query.caseId === 'string' ? req.query.caseId : undefined;
+
+    const bundle = log.exportBundle({ from, to, limit, cursor, caseId });
+    res.json(bundle);
+  });
+
+  return router;
+}
+
+export async function runAuditVerifierCli(
+  evidence: EvidenceBundle,
+  manifest: ExportManifest,
+  logger: { log: (...args: unknown[]) => void; error: (...args: unknown[]) => void } = console,
+): Promise<number> {
+  const chain = verifyEvidenceChain(evidence.entries);
+  const manifestReport = verifyManifest(manifest, evidence.entries, evidence);
+
+  if (chain.ok && manifestReport.valid) {
+    logger.log('Audit chain verified');
+    return 0;
+  }
+
+  const reasons = [...chain.reasons, ...manifestReport.reasons];
+  logger.error('Audit verification failed', reasons);
+  return 1;
 }
 
 function toStringArray(value: unknown): string[] | undefined {

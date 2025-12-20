@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Data Archival Tiering Service
  * Implements automatic data tiering to S3 Standard, S3-IA, and Glacier

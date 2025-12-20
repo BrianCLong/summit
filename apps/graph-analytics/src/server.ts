@@ -11,6 +11,7 @@ import { NetworkVisualizationService } from './services/NetworkVisualizationServ
 import { logger } from './utils/logger';
 import { config } from './config';
 import { authenticate, authorize } from './middleware/auth';
+import { geoPoints } from './data/geoPoints';
 
 const app: Application = express();
 const PORT = config.server.port || 4006;
@@ -33,9 +34,27 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // Body parsing middleware
-app.use(compression());
+app.use(compression() as express.RequestHandler);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+const parseBbox = (
+  bbox: string,
+): [number, number, number, number] | null => {
+  const parts = bbox.split(',').map((value) => Number(value));
+
+  if (parts.length !== 4 || parts.some((value) => Number.isNaN(value))) {
+    return null;
+  }
+
+  const [minLng, minLat, maxLng, maxLat] = parts;
+
+  if (minLng > maxLng || minLat > maxLat) {
+    return null;
+  }
+
+  return [minLng, minLat, maxLng, maxLat];
+};
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -46,6 +65,63 @@ app.get('/health', (req, res) => {
     version: process.env.npm_package_version || '1.0.0',
   });
 });
+
+// Geo endpoint for map overlays
+app.get(
+  ['/geo/points', '/api/geo/points'],
+  authenticate,
+  authorize(['user', 'admin']),
+  (req, res) => {
+    const { bbox, limit } = req.query;
+
+    if (!bbox || typeof bbox !== 'string') {
+      return res.status(400).json({
+        error: 'bbox query param is required as minLng,minLat,maxLng,maxLat',
+      });
+    }
+
+    const parsedBbox = parseBbox(bbox);
+
+    if (!parsedBbox) {
+      return res
+        .status(400)
+        .json({ error: 'Invalid bbox format. Expected minLng,minLat,maxLng,maxLat' });
+    }
+
+    const [minLng, minLat, maxLng, maxLat] = parsedBbox;
+    const filteredPoints = geoPoints.filter(
+      (point) =>
+        point.lng >= minLng &&
+        point.lng <= maxLng &&
+        point.lat >= minLat &&
+        point.lat <= maxLat,
+    );
+
+    const parsedLimit = typeof limit === 'string' ? parseInt(limit, 10) : undefined;
+    const limitCap = Number.isFinite(parsedLimit) && parsedLimit && parsedLimit > 0
+      ? Math.min(parsedLimit, 500)
+      : 250;
+
+    const orderedPoints = filteredPoints
+      .slice()
+      .sort((a, b) => {
+        const timeDiff =
+          new Date(b.observedAt).getTime() - new Date(a.observedAt).getTime();
+
+        if (timeDiff !== 0) {
+          return timeDiff;
+        }
+
+        return a.id.localeCompare(b.id);
+      });
+
+    res.json({
+      count: filteredPoints.length,
+      orderedBy: 'observedAt desc, id asc',
+      points: orderedPoints.slice(0, limitCap),
+    });
+  },
+);
 
 // Database connections
 let pgPool: Pool;
@@ -562,17 +638,17 @@ app.get('/api/updates/stream', authorize(['user', 'admin']), (req, res) => {
 
   // Send initial connection
   res.write(
-    'data: {"type": "connected", "timestamp": "' +
-      new Date().toISOString() +
-      '"}\n\n',
+    `data: {"type": "connected", "timestamp": "${ 
+      new Date().toISOString() 
+      }"}\n\n`,
   );
 
   // Set up interval for periodic updates
   const interval = setInterval(() => {
     res.write(
-      'data: {"type": "heartbeat", "timestamp": "' +
-        new Date().toISOString() +
-        '"}\n\n',
+      `data: {"type": "heartbeat", "timestamp": "${ 
+        new Date().toISOString() 
+        }"}\n\n`,
     );
   }, 30000);
 
