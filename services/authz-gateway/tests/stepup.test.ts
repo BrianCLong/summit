@@ -24,11 +24,13 @@ describe('StepUpManager', () => {
       classification: 'confidential',
       tenantId: 'tenantA',
     });
+    const credentialId = challenge.allowCredentials?.[0]?.id;
+    expect(credentialId).toBeDefined();
     const signature = sign(challenge.challenge);
     const elevation = manager.verifyResponse(
       'alice',
       {
-        credentialId: challenge.allowCredentials[0].id,
+        credentialId: String(credentialId),
         challenge: challenge.challenge,
         signature,
       },
@@ -41,7 +43,7 @@ describe('StepUpManager', () => {
       manager.verifyResponse(
         'alice',
         {
-          credentialId: challenge.allowCredentials[0].id,
+          credentialId: String(credentialId),
           challenge: challenge.challenge,
           signature,
         },
@@ -58,12 +60,14 @@ describe('StepUpManager', () => {
       requestedAction: 'dataset:read',
     });
     now += 20;
+    const credentialId = challenge.allowCredentials?.[0]?.id;
+    expect(credentialId).toBeDefined();
     const signature = sign(challenge.challenge);
     expect(() =>
       manager.verifyResponse(
         'alice',
         {
-          credentialId: challenge.allowCredentials[0].id,
+          credentialId: String(credentialId),
           challenge: challenge.challenge,
           signature,
         },
@@ -78,12 +82,14 @@ describe('StepUpManager', () => {
       sessionId: 'session-1',
       requestedAction: 'dataset:read',
     });
+    const credentialId = challenge.allowCredentials?.[0]?.id;
+    expect(credentialId).toBeDefined();
     const signature = sign(challenge.challenge);
     expect(() =>
       manager.verifyResponse(
         'alice',
         {
-          credentialId: challenge.allowCredentials[0].id,
+          credentialId: String(credentialId),
           challenge: challenge.challenge,
           signature,
         },

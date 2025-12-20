@@ -32,6 +32,7 @@ export function lookupApiClient(apiKey: string): ApiClient | null {
   if (!record || record.revoked) {
     return null;
   }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { hashedKey: _hashedKey, ...client } = record;
   return client;
 }

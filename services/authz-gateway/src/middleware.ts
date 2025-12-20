@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import type { JWTPayload } from 'jose';
+import type { JWTPayload } from 'jose/node/cjs';
 import pino from 'pino';
 import { authorize } from './policy';
 import { log } from './audit';
@@ -79,7 +79,9 @@ export function requireAuth(
     }
     try {
       const token = auth.replace('Bearer ', '');
-      const { payload } = await sessionManager.validate(token, { consume: true });
+      const { payload } = await sessionManager.validate(token, {
+        consume: true,
+      });
       if (options.requiredAcr && payload.acr !== options.requiredAcr) {
         return res
           .status(401)
@@ -105,7 +107,8 @@ export function requireAuth(
             String(payload.acr || 'loa1'),
             payload.breakGlass
               ? {
-                  breakGlass: payload.breakGlass as AuthorizationInput['context']['breakGlass'],
+                  breakGlass:
+                    payload.breakGlass as AuthorizationInput['context']['breakGlass'],
                 }
               : {},
           ),

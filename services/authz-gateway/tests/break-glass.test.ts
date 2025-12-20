@@ -5,8 +5,16 @@ import request from 'supertest';
 import type { AddressInfo } from 'net';
 
 const auditLogPath = path.join(__dirname, '..', 'audit.log');
-const breakGlassStatePath = path.join(__dirname, '..', 'break-glass-state.json');
-const breakGlassEventsPath = path.join(__dirname, '..', 'break-glass-events.log');
+const breakGlassStatePath = path.join(
+  __dirname,
+  '..',
+  'break-glass-state.json',
+);
+const breakGlassEventsPath = path.join(
+  __dirname,
+  '..',
+  'break-glass-events.log',
+);
 
 function cleanupLogs() {
   [auditLogPath, breakGlassStatePath, breakGlassEventsPath].forEach((file) => {
@@ -16,15 +24,17 @@ function cleanupLogs() {
   });
 }
 
-async function bootstrap({ ttlSeconds = '60' }: { ttlSeconds?: string } = {}) {
+async function bootstrap({
+  ttlSeconds = '60',
+  opaResult = { result: { allow: true, reason: 'allow', obligations: [] } },
+}: { ttlSeconds?: string; opaResult?: Record<string, unknown> } = {}) {
   cleanupLogs();
   jest.resetModules();
   process.env.BREAK_GLASS_TTL_SECONDS = ttlSeconds;
+  let decision = opaResult;
   const opa = express();
   opa.use(express.json());
-  opa.post('/v1/data/summit/abac/decision', (_req, res) =>
-    res.json({ result: { allow: true, reason: 'allow', obligations: [] } }),
-  );
+  opa.post('/v1/data/summit/abac/decision', (_req, res) => res.json(decision));
   const opaServer = opa.listen(0);
   const opaPort = (opaServer.address() as AddressInfo).port;
   process.env.OPA_URL = `http://localhost:${opaPort}/v1/data/summit/abac/decision`;
@@ -38,8 +48,19 @@ async function bootstrap({ ttlSeconds = '60' }: { ttlSeconds?: string } = {}) {
   const { createApp } = await import('../src/index');
   const { stopObservability } = await import('../src/observability');
   const { sessionManager } = await import('../src/session');
+  const { breakGlassManager } = await import('../src/break-glass');
   const app = await createApp();
-  return { app, opaServer, upstreamServer, stopObservability, sessionManager };
+  return {
+    app,
+    opaServer,
+    upstreamServer,
+    stopObservability,
+    sessionManager,
+    breakGlassManager,
+    setDecision: (nextDecision: Record<string, unknown>) => {
+      decision = nextDecision;
+    },
+  };
 }
 
 async function teardown(
@@ -63,7 +84,8 @@ describe('break glass access', () => {
   });
 
   it('rejects requests without justification', async () => {
-    const { app, opaServer, upstreamServer, stopObservability } = await bootstrap();
+    const { app, opaServer, upstreamServer, stopObservability } =
+      await bootstrap();
     const loginRes = await request(app)
       .post('/auth/login')
       .send({ username: 'alice', password: 'password123' });
@@ -79,8 +101,13 @@ describe('break glass access', () => {
   });
 
   it('issues a short-lived break-glass token, audits usage, and enforces single use', async () => {
-    const { app, opaServer, upstreamServer, stopObservability, sessionManager } =
-      await bootstrap({ ttlSeconds: '5' });
+    const {
+      app,
+      opaServer,
+      upstreamServer,
+      stopObservability,
+      sessionManager,
+    } = await bootstrap({ ttlSeconds: '5' });
 
     const loginRes = await request(app)
       .post('/auth/login')
@@ -127,9 +154,80 @@ describe('break glass access', () => {
     await teardown([opaServer, upstreamServer], stopObservability);
   });
 
+  it('enforces OPA decisions even when using an elevated break-glass token', async () => {
+    const {
+      app,
+      opaServer,
+      upstreamServer,
+      stopObservability,
+      sessionManager,
+      breakGlassManager,
+      setDecision,
+    } = await bootstrap();
+
+    const loginRes = await request(app)
+      .post('/auth/login')
+      .send({ username: 'alice', password: 'password123' });
+    const baseToken = loginRes.body.token;
+
+    const requestRes = await request(app)
+      .post('/access/break-glass/request')
+      .set('Authorization', `Bearer ${baseToken}`)
+      .send({ justification: 'deny path', ticketId: 'INC-66' });
+
+    const { session } = await sessionManager.validate(baseToken);
+    const elevatedToken = await sessionManager.elevateSession(session.sid, {
+      acr: 'loa2',
+      amr: ['mfa'],
+    });
+
+    const approvalRes = await request(app)
+      .post('/access/break-glass/approve')
+      .set('Authorization', `Bearer ${elevatedToken}`)
+      .send({ requestId: requestRes.body.requestId });
+
+    expect(approvalRes.status).toBe(200);
+
+    setDecision({
+      result: { allow: false, reason: 'opa_policy_denied', obligations: [] },
+    });
+
+    const deniedRes = await request(app)
+      .get('/protected/data')
+      .set('Authorization', `Bearer ${approvalRes.body.token}`)
+      .set('x-resource-id', 'dataset-alpha');
+
+    expect(deniedRes.status).toBe(403);
+    const events = fs
+      .readFileSync(breakGlassEventsPath, 'utf8')
+      .trim()
+      .split('\n')
+      .map((line) => JSON.parse(line));
+    const usageEvent = events.find((event) => event.type === 'usage');
+    expect(usageEvent).toBeDefined();
+    expect(usageEvent.detail.allowed).toBe(false);
+    const auditEntries = fs
+      .readFileSync(auditLogPath, 'utf8')
+      .trim()
+      .split('\n')
+      .map((line) => JSON.parse(line));
+    const deniedAudit = auditEntries.find(
+      (entry) => entry.action === 'dataset:read',
+    );
+    expect(deniedAudit.breakGlass.requestId).toBe(requestRes.body.requestId);
+
+    breakGlassManager.sweepExpiredApprovals();
+    await teardown([opaServer, upstreamServer], stopObservability);
+  });
+
   it('expires elevated tokens after the configured TTL', async () => {
-    const { app, opaServer, upstreamServer, stopObservability, sessionManager } =
-      await bootstrap({ ttlSeconds: '1' });
+    const {
+      app,
+      opaServer,
+      upstreamServer,
+      stopObservability,
+      sessionManager,
+    } = await bootstrap({ ttlSeconds: '1' });
 
     const loginRes = await request(app)
       .post('/auth/login')

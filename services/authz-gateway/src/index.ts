@@ -1,4 +1,5 @@
 import express from 'express';
+import type { ClientRequest } from 'http';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import pino from 'pino';
 import pinoHttp from 'pino-http';
@@ -26,7 +27,9 @@ export async function createApp(): Promise<express.Application> {
   await startObservability();
   const attributeService = new AttributeService();
   const stepUpManager = new StepUpManager();
-  const trustedServices = (process.env.SERVICE_AUTH_CALLERS || 'api-gateway,maestro')
+  const trustedServices = (
+    process.env.SERVICE_AUTH_CALLERS || 'api-gateway,maestro'
+  )
     .split(',')
     .map((v) => v.trim())
     .filter(Boolean);
@@ -315,7 +318,7 @@ export async function createApp(): Promise<express.Application> {
       target: upstream,
       changeOrigin: true,
       pathRewrite: { '^/protected': '' },
-      onProxyReq: (proxyReq) => {
+      onProxyReq: (proxyReq: ClientRequest) => {
         injectTraceContext(proxyReq);
       },
     } as any),

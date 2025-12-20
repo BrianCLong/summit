@@ -6,7 +6,7 @@ import crypto from 'crypto';
 import { createApp } from '../src/index';
 import { stopObservability } from '../src/observability';
 import type { AddressInfo } from 'net';
-import { exportJWK, generateKeyPair, SignJWT } from 'jose';
+import { exportJWK, generateKeyPair, SignJWT } from 'jose/node/cjs';
 import { resetOidcCache } from '../src/oidc';
 
 function signChallenge(challenge: string) {

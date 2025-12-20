@@ -11,10 +11,12 @@ import axios from 'axios';
 import express from 'express';
 import request from 'supertest';
 import fc, { type Arbitrary } from 'fast-check';
-import { SignJWT } from 'jose';
+import { SignJWT } from 'jose/node/cjs';
 import path from 'path';
 import { mkdirSync, writeFileSync } from 'fs';
+// @ts-expect-error types missing from package
 import { createCoverageMap } from 'istanbul-lib-coverage';
+// @ts-expect-error types missing from package
 import type { CoverageSummaryData } from 'istanbul-lib-coverage';
 
 import * as policy from '../../src/policy';
@@ -247,7 +249,9 @@ describe('governance gate fuzzing', () => {
       'services/authz-gateway/src/policy.ts',
     ];
     for (const file of targetFiles) {
-      const match = map.files().find((candidate) => candidate.endsWith(file));
+      const match = map
+        .files()
+        .find((candidate: string) => candidate.endsWith(file));
       if (!match) {
         continue;
       }
