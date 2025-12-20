@@ -89,7 +89,7 @@ const AdminDashboard = React.lazy(() =>
   import('./components/admin/AdminDashboard')
 );
 const ApprovalsPage = React.lazy(() =>
-  import('./features/approvals/ApprovalsPage')
+  import('./switchboard/approvals/ApprovalsExperience')
 );
 const PartnerConsolePage = React.lazy(() =>
   import('./pages/partner-console/PartnerConsolePage')
