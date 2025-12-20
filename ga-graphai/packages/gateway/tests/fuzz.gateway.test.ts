@@ -38,6 +38,14 @@ const propertySettings = {
   numRuns: 32,
   interruptAfterTimeLimit: 6000,
   markInterruptAsFailure: true,
+  logger: (message: string) => {
+    if (process.env.CI) {
+      // Preserve deterministic reproduction details in CI logs.
+      // fast-check already shrinks on failure; this keeps the seed/path visible.
+      // eslint-disable-next-line no-console
+      console.log(`[fast-check] ${message}`);
+    }
+  },
 };
 
 describe('gateway fuzz safety', () => {
@@ -146,6 +154,59 @@ describe('gateway fuzz safety', () => {
         },
       ),
       propertySettings,
+    );
+  });
+
+  it('keeps model listing params and headers bounded and sanitized under fuzzing', async () => {
+    await fc.assert(
+      fc.asyncProperty(
+        fc.record({
+          local: fc.option(fc.boolean(), { nil: undefined }),
+          modality: fc.oneof(
+            fc.stringOf(fc.constantFrom('a', 'b', 'c', '.', '/', '-'), {
+              maxLength: 12,
+            }),
+            fc.constant(undefined),
+          ),
+          family: fc.option(fc.string({ maxLength: 18 }), { nil: undefined }),
+          license: fc.option(fc.string({ maxLength: 14 }), { nil: undefined }),
+          purpose: fc.oneof(
+            fc.constantFrom(...allowedPurposes),
+            fc
+              .string({ maxLength: 24 })
+              .filter((candidate) => !allowedPurposes.has(candidate)),
+          ),
+          tenant: fc.string({ minLength: 1, maxLength: 24 }),
+        }),
+        async (sample) => {
+          const response = await request(app)
+            .get('/v1/models')
+            .query({
+              local:
+                sample.local === undefined ? undefined : sample.local ? 'true' : 'false',
+              modality: sample.modality ?? undefined,
+              family: sample.family ?? undefined,
+              license: sample.license ?? undefined,
+            })
+            .set('x-tenant', sample.tenant)
+            .set('x-purpose', sample.purpose);
+
+          expect(response.status).toBeLessThan(500);
+          if (!allowedPurposes.has(sample.purpose)) {
+            expect(response.status).toBe(403);
+            return;
+          }
+
+          expect(response.status).toBe(200);
+          expect(response.body).toHaveProperty('models');
+          expect(JSON.stringify(response.body)).not.toContain('..');
+        },
+      ),
+      {
+        ...propertySettings,
+        seed: 987123,
+        interruptAfterTimeLimit: 4000,
+      },
     );
   });
 
