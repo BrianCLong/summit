@@ -4,7 +4,9 @@
  * @jest-environment node
  */
 
-import { jest, describe, it, expect, beforeEach } from '@jest/globals';
+import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { mkdirSync, rmSync, writeFileSync } from 'fs';
+import { join } from 'path';
 
 // Mock child_process
 jest.mock('child_process', () => ({
@@ -82,14 +84,24 @@ const sampleProvenanceV1: SLSAProvenanceV1 = {
 describe('SLSA3Verifier', () => {
   let verifier: SLSA3Verifier;
   const mockSpawn = spawn as jest.MockedFunction<typeof spawn>;
+  const cacheDir = '/tmp/slsa-test';
+  const cachePath = join(cacheDir, 'provenance-cache.json');
+  const originalFetch = global.fetch;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    rmSync(cacheDir, { recursive: true, force: true });
+    mkdirSync(cacheDir, { recursive: true });
     verifier = new SLSA3Verifier({
       requiredLevel: 3,
-      cacheDir: '/tmp/slsa-test',
+      cacheDir,
+      provenanceCachePath: cachePath,
       timeout: 5000,
     });
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
   });
 
   describe('verifyProvenance', () => {
@@ -290,6 +302,68 @@ describe('SLSA3Verifier', () => {
 
       // spawn should only be called once
       expect(mockSpawn).toHaveBeenCalledTimes(1);
+    });
+
+    it('should short-circuit using persisted provenance cache when unchanged', async () => {
+      const cachedEntry = [
+        {
+          fingerprint: 'cache-key',
+          imageRef: 'ghcr.io/test/image:v1.0.0',
+          digest: 'sha256:cached',
+          slsaLevel: 3,
+          builderId: 'builder',
+          timestamp: new Date().toISOString(),
+        },
+      ];
+
+      writeFileSync(cachePath, JSON.stringify(cachedEntry));
+
+      const result = await verifier.verifyProvenance('ghcr.io/test/image:v1.0.0');
+
+      expect(result.cacheHit).toBe(true);
+      expect(result.verified).toBe(true);
+      expect(mockSpawn).not.toHaveBeenCalled();
+    });
+
+    it('should export SBOMs to Dependency-Track when configured', async () => {
+      const fetchMock = jest.fn().mockResolvedValue({
+        ok: true,
+        status: 202,
+        json: async () => ({ token: 'upload-token' }),
+        text: async () => '',
+      }) as any;
+
+      global.fetch = fetchMock;
+
+      const envelope = JSON.stringify({
+        payload: Buffer.from(JSON.stringify(sampleProvenanceV1)).toString('base64'),
+      });
+
+      mockSpawn.mockReturnValueOnce(
+        createMockProcess(envelope, '', 0) as any
+      );
+
+      const verifierWithExport = new SLSA3Verifier({
+        cacheDir,
+        provenanceCachePath: cachePath,
+        dependencyTrackUrl: 'https://dtrack.local',
+        dependencyTrackApiKey: 'secret-key',
+      });
+
+      const result = await verifierWithExport.verifyProvenance(
+        'ghcr.io/test/image:v1',
+        {
+          sbom: '{"bom": true}',
+          dependencyTrackProjectName: 'intelgraph',
+          dependencyTrackProjectVersion: '1.2.3',
+        }
+      );
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining('/api/v1/bom'),
+        expect.objectContaining({ method: 'PUT' })
+      );
+      expect(result.dependencyTrackToken).toBe('upload-token');
     });
   });
 
