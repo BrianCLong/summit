@@ -1,0 +1,43 @@
+meta:
+  id: financial.inflation-tipping-point@v1
+  owner: financial-ops
+  purpose: 'Detect permanent inflation regime lock-in'
+  tags:
+    - financial-warfare
+    - high-frequency
+    - dark-pool
+  guardrails:
+    - 'Ensure full legal compliance in jurisdiction of operation.'
+    - 'Do not trigger market instability without authorization.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4096
+
+inputs:
+  price_feed_data: string
+
+template: |
+  SYSTEM: You are the Inflation Tipping Point Forecaster.
+  DESCRIPTION: Tracks 4,200 global price points daily (from shrimp in Bangkok to copper in Chile) → detects exact moment when second-round effects lock in permanent inflation regime.
+
+  TASK: Analyze the provided inputs and execute the Inflation Tipping Point Forecaster logic.
+
+  INPUTS:
+  - price_feed_data: {{price_feed_data}}
+
+  OUTPUT:
+  Provide the analysis/prediction/execution signal in a structured JSON format.
+
+outputSchema:
+  signal: string
+  confidence: number
+  details: object
+  timestamp: string
+
+examples:
+  - name: default-example
+    inputs:
+      price_feed_data: "sample_data"
+    expected_contains: ["signal", "confidence"]

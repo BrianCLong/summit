@@ -2,10 +2,311 @@ apiVersion: maestro/v1
 kind: Runbook
 metadata:
   name: dev-bootstrap
-  version: 0.2.0
+  version: 0.3.0
   owner: sre@summit
+  updated: 2025-11-20
   allowList:
-    roles: ['platform-engineer', 'sre']
+    roles: ['platform-engineer', 'sre', 'developer']
+  description: >-
+    Bootstrap local development environment for IntelGraph/Maestro Conductor.
+    Ensures all services start cleanly with docker-compose and validates
+    the golden path before development.
+
 spec:
-  inputs: []
-  workflowRef: dev-bootstrap@0.2.0
+  prerequisites:
+    - name: Docker Desktop
+      version: ">=4.0"
+      description: Container runtime with Compose support
+      check: docker --version && docker compose version
+
+    - name: Node.js
+      version: ">=18"
+      description: JavaScript runtime (20+ recommended)
+      check: node --version
+
+    - name: pnpm
+      version: ">=9"
+      description: Package manager (enable via corepack)
+      check: pnpm --version
+      install: corepack enable && corepack prepare pnpm@latest --activate
+
+    - name: Python
+      version: ">=3.8"
+      description: For AI/ML services and tooling
+      check: python3 --version
+
+    - name: Git
+      version: ">=2.30"
+      description: Version control
+      check: git --version
+
+  inputs:
+    - name: with_ai
+      type: boolean
+      default: false
+      description: Include AI/ML services (kafka, nlp, etc.)
+
+    - name: skip_smoke
+      type: boolean
+      default: false
+      description: Skip smoke tests (debugging only)
+
+  steps:
+    - name: clone_repository
+      description: Clone the summit repository
+      commands:
+        - git clone https://github.com/BrianCLong/summit.git
+        - cd summit
+      validation:
+        - test -d summit/.git
+
+    - name: bootstrap_dependencies
+      description: Install Node.js and Python dependencies
+      commands:
+        - make bootstrap
+      details: |
+        This command will:
+        1. Copy .env.example to .env if not exists
+        2. Enable corepack for pnpm
+        3. Run pnpm install --frozen-lockfile (or fallback to npm)
+        4. Create Python venv and install requirements.txt
+        5. Install dev tooling fallbacks
+      validation:
+        - test -f .env
+        - test -d node_modules
+        - test -f pnpm-lock.yaml
+      duration: 2-5 minutes
+
+    - name: start_core_services
+      description: Start core platform services via docker-compose
+      commands:
+        - make up
+      details: |
+        Starts the following services:
+        - postgres (PostgreSQL 16)
+        - redis (Redis 7)
+        - neo4j (Neo4j 5.8 with APOC + GDS plugins)
+        - opa (Open Policy Agent)
+        - jaeger (Tracing)
+        - otel-collector (OpenTelemetry)
+        - prometheus (Metrics)
+        - grafana (Dashboards)
+        - mock-services (Dev mocks)
+        - migrations (One-time DB setup)
+        - seed-fixtures (Demo data)
+        - api (GraphQL server on :4000)
+        - ui (React frontend on :3000)
+        - worker (BullMQ worker on :4100)
+      validation:
+        - docker ps | grep -q "api"
+        - docker ps | grep -q "postgres"
+        - docker ps | grep -q "neo4j"
+        - curl -sf http://localhost:4000/health
+      duration: 3-8 minutes
+      notes: |
+        The `make up` command uses docker-compose.dev.yml and includes
+        a wait-for-stack.sh script that blocks until health checks pass.
+
+    - name: start_ai_services
+      description: (Optional) Start AI/ML services
+      condition: inputs.with_ai == true
+      commands:
+        - make up-ai
+      details: |
+        Starts additional AI/ML services:
+        - zookeeper (Coordination)
+        - kafka (Event streaming)
+        - ingestion-service (Data pipelines)
+        - nlp-service (NLP with spaCy)
+        - reliability-service (Credibility scoring)
+      validation:
+        - docker ps | grep -q "kafka"
+        - docker ps | grep -q "nlp-service"
+      duration: 2-4 minutes
+
+    - name: run_smoke_tests
+      description: Validate golden path functionality
+      condition: inputs.skip_smoke == false
+      commands:
+        - make smoke
+      details: |
+        Runs the golden path smoke test suite that validates:
+        1. All services are healthy
+        2. GraphQL API is responding
+        3. Database connections work
+        4. Demo investigation workflow completes
+      validation:
+        - curl -sf http://localhost:4000/graphql
+        - curl -sf http://localhost:3000
+      duration: 1-3 minutes
+      notes: |
+        If smoke tests fail, the environment is NOT ready for development.
+        This is the deployable-first mantra - fix issues before coding.
+
+    - name: verify_access_points
+      description: Verify all service access points
+      commands:
+        - echo "Checking service endpoints..."
+        - curl -sf http://localhost:4000/health
+        - curl -sf http://localhost:4000/metrics
+        - curl -sf http://localhost:3000
+        - curl -sf http://localhost:7474
+        - curl -sf http://localhost:9090
+        - curl -sf http://localhost:8080
+      validation:
+        - curl -sf http://localhost:4000/health | jq -e '.status == "ok"'
+      notes: |
+        Access points:
+        - Frontend: http://localhost:3000
+        - GraphQL API: http://localhost:4000/graphql
+        - GraphQL Playground: http://localhost:4000/graphql
+        - Health: http://localhost:4000/health
+        - Metrics: http://localhost:4000/metrics
+        - Neo4j Browser: http://localhost:7474 (neo4j/dev_password)
+        - Prometheus: http://localhost:9090
+        - Grafana: http://localhost:8080 (admin/dev_password)
+        - Jaeger: http://localhost:16686
+
+  troubleshooting:
+    - issue: Port conflicts (EADDRINUSE)
+      solution: |
+        Stop conflicting services or change ports:
+        1. Check: lsof -i :4000 (or :3000, :5432, etc.)
+        2. Kill: kill -9 <PID>
+        3. Or edit docker-compose.yml port mappings
+
+    - issue: PostgreSQL authentication failed
+      solution: |
+        Database credentials mismatch. Verify:
+        1. docker-compose.yml postgres service uses POSTGRES_USER=summit
+        2. All dependent services (api, worker, migrations) also use summit
+        3. .env file matches: POSTGRES_USER=summit
+        4. If issues persist: make down && docker volume rm $(docker volume ls -q | grep postgres) && make up
+
+    - issue: Neo4j plugins not loading
+      solution: |
+        APOC or GDS plugins missing:
+        1. Check logs: docker logs neo4j
+        2. Verify NEO4J_PLUGINS env var in docker-compose.yml
+        3. Force rebuild: docker-compose up --build neo4j
+
+    - issue: Grafana dashboards not appearing
+      solution: |
+        Provisioning directories not mounted correctly:
+        1. Verify paths in docker-compose.yml:
+           - ./observability/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+           - ./observability/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+        2. Check directories exist: ls -la observability/grafana/provisioning/
+        3. Restart grafana: docker-compose restart grafana
+
+    - issue: Services fail health checks
+      solution: |
+        Check logs and dependencies:
+        1. View logs: docker-compose logs <service-name>
+        2. Check dependencies: Ensure postgres, redis, neo4j are healthy first
+        3. Increase retries in healthcheck if slow system
+        4. Wait longer: ./scripts/wait-for-stack.sh takes up to 5 min
+
+    - issue: npm install fails in containers
+      solution: |
+        Node modules installation errors:
+        1. Check Node version matches: docker exec api node --version
+        2. Clear cache: docker-compose down && docker volume prune
+        3. Rebuild: docker-compose up --build --force-recreate
+
+    - issue: Migrations fail
+      solution: |
+        Database migration errors:
+        1. Check migrations service logs: docker logs migrations
+        2. Verify postgres is healthy: docker exec postgres pg_isready
+        3. Verify credentials match in migrations environment
+        4. Reset DB: make down && docker volume rm summit_postgres_data && make up
+
+  validation:
+    success_criteria:
+      - All docker containers in "healthy" or "running" state
+      - curl http://localhost:4000/health returns 200 with status "ok"
+      - curl http://localhost:3000 returns 200 (React app)
+      - curl http://localhost:4000/graphql accepts introspection query
+      - Neo4j browser accessible at http://localhost:7474
+      - Prometheus targets showing "UP" at http://localhost:9090/targets
+      - Grafana dashboards provisioned at http://localhost:8080
+
+    failure_modes:
+      - Container exits with non-zero code
+      - Health check fails after max retries
+      - Port binding errors (EADDRINUSE)
+      - Database connection refused
+      - Volume permission errors
+
+  cleanup:
+    - name: stop_services
+      description: Stop all running services
+      commands:
+        - make down
+      notes: Preserves volumes (data persists)
+
+    - name: clean_volumes
+      description: Stop services and remove all volumes (destructive)
+      commands:
+        - docker-compose down -v
+      warning: This deletes all database data including postgres, neo4j, redis
+
+    - name: prune_system
+      description: Clean up unused Docker resources
+      commands:
+        - docker system prune -f
+        - docker volume prune -f
+      warning: Removes all unused containers, networks, volumes
+
+  references:
+    - name: Main README
+      path: README.md
+      description: Primary platform documentation
+
+    - name: Architecture Map
+      path: ARCHITECTURE_MAP.generated.yaml
+      description: Machine-readable service inventory
+
+    - name: Repository Structure
+      path: REPOSITORY-STRUCTURE.md
+      description: Detailed repo layout and service classification
+
+    - name: Docker Compose
+      path: docker-compose.yml
+      description: Production compose file
+
+    - name: Dev Compose
+      path: docker-compose.dev.yml
+      description: Development compose file (referenced by Makefile)
+
+    - name: Environment Template
+      path: .env.example
+      description: Environment variable reference
+
+    - name: Wait Script
+      path: scripts/wait-for-stack.sh
+      description: Health check waiter script
+
+  slo_targets:
+    bootstrap_time: <10 minutes
+    first_graphql_query: <350ms (p95)
+    ui_load_time: <2 seconds
+    smoke_test_duration: <3 minutes
+
+  notes: |
+    This runbook ensures the "deployable-first" architecture principle:
+    the platform must be runnable end-to-end before any development begins.
+
+    The golden path workflow (Investigation → Entities → Relationships → Copilot)
+    must complete successfully via the smoke tests before making code changes.
+
+    All credentials in docker-compose.yml and .env are DEV-ONLY and must be
+    rotated for staging/production environments.
+
+    For production deployment, see:
+    - RUNBOOKS/deploy-promote.yaml
+    - docs/deployment/
+    - helm/summit/
+
+workflowRef: dev-bootstrap@0.3.0

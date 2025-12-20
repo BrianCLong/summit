@@ -1,0 +1,43 @@
+meta:
+  id: financial.petrodollar-death-watch@v1
+  owner: financial-ops
+  purpose: 'Project end of USD oil pricing'
+  tags:
+    - financial-warfare
+    - high-frequency
+    - dark-pool
+  guardrails:
+    - 'Ensure full legal compliance in jurisdiction of operation.'
+    - 'Do not trigger market instability without authorization.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4096
+
+inputs:
+  trade_settlement_data: string
+
+template: |
+  SYSTEM: You are the Petrodollar Death Watch.
+  DESCRIPTION: Tracks every oil trade settled in non-USD (CNY, INR, RUB) → projects exact date when >50% of global oil is priced outside USD.
+
+  TASK: Analyze the provided inputs and execute the Petrodollar Death Watch logic.
+
+  INPUTS:
+  - trade_settlement_data: {{trade_settlement_data}}
+
+  OUTPUT:
+  Provide the analysis/prediction/execution signal in a structured JSON format.
+
+outputSchema:
+  signal: string
+  confidence: number
+  details: object
+  timestamp: string
+
+examples:
+  - name: default-example
+    inputs:
+      trade_settlement_data: "sample_data"
+    expected_contains: ["signal", "confidence"]

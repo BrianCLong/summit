@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/exporter",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
@@ -10,12 +10,11 @@
     "format": "prettier --check ."
   },
   "dependencies": {
-    "express": "^5.1.0",
+    "express": "^5.2.0",
     "helmet": "^8.1.0",
     "json-stable-stringify": "^1.0.1",
     "jszip": "^3.10.1",
-    "pdf-lib": "^1.17.1",
-    "uuid": "^13.0.0"
+    "pdf-lib": "^1.17.1"
   },
   "devDependencies": {
     "@types/express": "^5.0.3",

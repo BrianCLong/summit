@@ -1,0 +1,50 @@
+{
+  "$schema": "../../schema/connector.manifest.v1.schema.json",
+  "schemaVersion": "v1",
+  "connectorId": "alert-mini",
+  "name": "Alert Mini",
+  "description": "Reference alert connector that exercises provenance chains and snapshot stability on a two-alert fixture.",
+  "version": "1.0.0",
+  "owner": "intelgraph-lab",
+  "tags": ["reference", "alerts", "sample"],
+  "source": {
+    "type": "file",
+    "endpoint": "./fixtures/alerts.json",
+    "contentType": "json",
+    "owner": "detections-lab"
+  },
+  "auth": {
+    "type": "none"
+  },
+  "rateLimits": {
+    "requestsPerMinute": 120,
+    "concurrency": 1
+  },
+  "license": {
+    "classification": "internal",
+    "terms": "demo-only",
+    "blockedUses": ["external redistribution"]
+  },
+  "pii": {
+    "fields": [
+      { "field": "reported_by", "category": "medium", "policy": "mask", "comment": "mask analyst email addresses" }
+    ]
+  },
+  "mapping": {
+    "handler": "./mapper.js",
+    "hints": [
+      { "source": "alerts[].id", "targetType": "Alert", "idField": "id", "nameField": "title", "provenanceTag": "alert-record" },
+      { "source": "assets", "targetType": "Asset", "idField": "asset_id", "nameField": "hostname", "provenanceTag": "asset-record" }
+    ]
+  },
+  "fixtures": {
+    "sample": "./fixtures/alerts.json",
+    "golden": "./fixtures/golden.v1.json",
+    "description": "Alert sample with host targets"
+  },
+  "contracts": {
+    "snapshotVersion": "alerts.v1",
+    "generatedAt": "2025-02-05T00:00:00Z",
+    "outputSchemaVersion": "canonical.v1"
+  }
+}

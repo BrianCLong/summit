@@ -1,0 +1,10 @@
+id,type,name,email
+1,Person,"Alice Johnson",alice.johnson@example.com
+2,Person,"Bob Williams",bob.williams@example.com
+3,Person,"Charlie Brown",charlie.brown@example.com
+4,Org,"Acme Corporation",
+5,Org,"Stark Industries",
+... (lines 1-100000 of generated data)
+100001,Person,"Person 100001",person100001@example.com
+... (lines 100002-200000 of generated data)
+200000,Org,"Org 200000",

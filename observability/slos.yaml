@@ -1,0 +1,18 @@
+slos:
+  - name: api_availability
+    target: 99.9%
+    window: 30d
+    description: "Percentage of non-5xx requests over 30 days"
+    indicator: "1 - (sum(rate(http_requests_total{status_code=~\"5..\"}[30d])) / sum(rate(http_requests_total[30d])))"
+
+  - name: query_latency
+    target: p95 < 500ms
+    window: 7d
+    description: "95th percentile of request duration over 7 days"
+    indicator: "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[7d])) by (le))"
+
+  - name: graph_query_latency
+    target: p95 < 1000ms
+    window: 7d
+    description: "95th percentile of graph query duration"
+    indicator: "histogram_quantile(0.95, sum(rate(graph_operation_duration_seconds_bucket[7d])) by (le))"

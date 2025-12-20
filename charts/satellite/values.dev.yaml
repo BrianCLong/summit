@@ -1,0 +1,125 @@
+# Satellite Development Environment Configuration
+# Golden Path: OTEL + Prometheus + Feature Flags enabled
+
+image:
+  repository: ghcr.io/brianclong/satellite
+  tag: latest
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+# ============================================================================
+# OpenTelemetry - Enabled by Default
+# ============================================================================
+opentelemetry:
+  enabled: true
+  collector:
+    endpoint: "otel-collector.observability.svc.cluster.local:4317"
+  sampling:
+    ratio: 1.0  # 100% sampling in dev
+
+# ============================================================================
+# Prometheus Metrics - Enabled by Default
+# ============================================================================
+metrics:
+  enabled: true
+  port: 9090
+
+serviceMonitor:
+  enabled: true
+  interval: 30s
+
+# ============================================================================
+# Feature Flags - Enabled by Default
+# ============================================================================
+featureFlags:
+  enabled: true
+  provider: flagd
+  defaults:
+    enableEdgeCompute: true
+    enableLocalCache: true
+
+# ============================================================================
+# Application Configuration
+# ============================================================================
+env:
+  - name: NODE_ENV
+    value: 'development'
+  - name: LOG_LEVEL
+    value: 'debug'
+
+  # OTEL Configuration
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: "http://otel-collector.observability.svc.cluster.local:4317"
+  - name: OTEL_SERVICE_NAME
+    value: "satellite"
+  - name: OTEL_RESOURCE_ATTRIBUTES
+    value: "service.namespace=summit,deployment.environment=dev"
+
+  # Feature Flags
+  - name: FEATURE_FLAGS_ENABLED
+    value: "true"
+  - name: FLAGD_HOST
+    value: "flagd.summit.svc.cluster.local"
+
+service:
+  type: ClusterIP
+  port: 8080
+
+# Health probes
+probes:
+  liveness:
+    httpGet:
+      path: /healthz
+      port: 8080
+    initialDelaySeconds: 10
+    periodSeconds: 10
+  readiness:
+    httpGet:
+      path: /ready
+      port: 8080
+    initialDelaySeconds: 5
+    periodSeconds: 5
+
+# Network policy
+networkPolicy:
+  enabled: true
+  ingress:
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 8080
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+      ports:
+        - protocol: TCP
+          port: 9090
+  egress:
+    # OTEL Collector
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: observability
+      ports:
+        - port: 4317
+    # DNS
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+    # HTTPS
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443

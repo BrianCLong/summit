@@ -1,0 +1,223 @@
+{
+  "mcp_command": "execute_pm_orchestration",
+  "generated_at": "2025-11-21T00:00:00Z",
+  "source_roadmap": "CLAUDE_STRATEGIC_ROADMAP.md",
+  "epics": [
+    {
+      "epic_id": "EPIC-001",
+      "name": "Test Coverage Foundation",
+      "priority": "CRITICAL",
+      "estimated_points": 80,
+      "owner_team": "QA/Engineering",
+      "start_date": "2025-11-21",
+      "target_end_date": "2026-02-28",
+      "milestones": [
+        {
+          "id": "MS-001-1",
+          "name": "Security Layer 100% Coverage",
+          "due_date": "2025-12-06",
+          "deliverables": ["server/src/security/__tests__/*.test.ts"]
+        },
+        {
+          "id": "MS-001-2",
+          "name": "Database & Repos 90% Coverage",
+          "due_date": "2025-12-20",
+          "deliverables": ["server/src/repos/__tests__/*.test.ts", "server/src/db/__tests__/*.test.ts"]
+        },
+        {
+          "id": "MS-001-3",
+          "name": "CI Coverage Gates Enforced",
+          "due_date": "2026-01-15",
+          "deliverables": ["jest.config.ts coverage thresholds", ".github/workflows/test.yml"]
+        }
+      ],
+      "pm_tasks": [
+        {
+          "task_type": "jira_ticket",
+          "title": "[EPIC] Test Coverage Foundation - Security Layer",
+          "description": "Achieve 100% test coverage on server/src/security/**/*.ts (9 files)",
+          "labels": ["testing", "security", "critical"],
+          "story_points": 13,
+          "assignee_role": "senior_engineer"
+        },
+        {
+          "task_type": "jira_ticket",
+          "title": "[EPIC] Test Coverage Foundation - Database Layer",
+          "description": "Achieve 90% test coverage on server/src/db/**/*.ts and server/src/repos/**/*.ts",
+          "labels": ["testing", "database", "critical"],
+          "story_points": 21,
+          "assignee_role": "backend_engineer"
+        },
+        {
+          "task_type": "jira_ticket",
+          "title": "[EPIC] Test Coverage Foundation - Services Layer",
+          "description": "Test top 10 critical services including AuthService, ComplianceService, GraphRAGService",
+          "labels": ["testing", "services", "high"],
+          "story_points": 34,
+          "assignee_role": "backend_engineer"
+        },
+        {
+          "task_type": "milestone_setup",
+          "tool": "github_milestones",
+          "milestone_name": "Test Coverage Q4 2025",
+          "due_date": "2025-12-31"
+        },
+        {
+          "task_type": "team_channel",
+          "platform": "slack",
+          "channel_name": "#epic-test-coverage",
+          "purpose": "Coordinate test coverage sprint activities"
+        }
+      ]
+    },
+    {
+      "epic_id": "EPIC-002",
+      "name": "Security & Compliance Hardening",
+      "priority": "CRITICAL",
+      "estimated_points": 65,
+      "owner_team": "Security Team",
+      "start_date": "2025-11-21",
+      "target_end_date": "2026-01-31",
+      "milestones": [
+        {
+          "id": "MS-002-1",
+          "name": "OPA Strict Mode Enabled",
+          "due_date": "2025-12-06",
+          "deliverables": ["policies/intelgraph/abac/allow.rego", "FEATURE_WARRANT_ENFORCEMENT=true"]
+        },
+        {
+          "id": "MS-002-2",
+          "name": "Warrant Lifecycle API Complete",
+          "due_date": "2025-12-20",
+          "deliverables": ["server/src/services/WarrantService.ts", "server/src/routes/warrants.ts"]
+        },
+        {
+          "id": "MS-002-3",
+          "name": "Immutable Audit Storage",
+          "due_date": "2026-01-15",
+          "deliverables": ["S3 Object Lock configuration", "Audit trail integrity verification"]
+        }
+      ],
+      "pm_tasks": [
+        {
+          "task_type": "jira_ticket",
+          "title": "[EPIC] Security Hardening - OPA Strict Mode",
+          "description": "Enable OPA strict mode with warrant enforcement for all tenants",
+          "labels": ["security", "opa", "critical"],
+          "story_points": 13,
+          "assignee_role": "security_engineer"
+        },
+        {
+          "task_type": "jira_ticket",
+          "title": "[EPIC] Security Hardening - Warrant Management",
+          "description": "Complete warrant lifecycle API: create, validate, revoke, usage tracking",
+          "labels": ["security", "compliance", "high"],
+          "story_points": 21,
+          "assignee_role": "backend_engineer"
+        },
+        {
+          "task_type": "jira_ticket",
+          "title": "[EPIC] Security Hardening - HSM Integration",
+          "description": "Integrate hardware security modules for key management",
+          "labels": ["security", "infrastructure", "medium"],
+          "story_points": 13,
+          "assignee_role": "devops_engineer"
+        },
+        {
+          "task_type": "milestone_setup",
+          "tool": "github_milestones",
+          "milestone_name": "Security Hardening Q4 2025",
+          "due_date": "2025-12-31"
+        },
+        {
+          "task_type": "team_channel",
+          "platform": "slack",
+          "channel_name": "#epic-security-hardening",
+          "purpose": "Security hardening coordination and incident response"
+        }
+      ]
+    },
+    {
+      "epic_id": "EPIC-003",
+      "name": "Observability & SRE Excellence",
+      "priority": "CRITICAL",
+      "estimated_points": 55,
+      "owner_team": "Platform Team",
+      "start_date": "2025-11-21",
+      "target_end_date": "2025-12-31",
+      "milestones": [
+        {
+          "id": "MS-003-1",
+          "name": "Grafana SLO Dashboards Complete",
+          "due_date": "2025-11-30",
+          "deliverables": ["observability/grafana/dashboards/*.json"]
+        },
+        {
+          "id": "MS-003-2",
+          "name": "k6 Synthetic Monitoring Active",
+          "due_date": "2025-12-15",
+          "deliverables": ["k6 scripts", "Prometheus alert rules"]
+        },
+        {
+          "id": "MS-003-3",
+          "name": "OpenTelemetry 100% Coverage",
+          "due_date": "2025-12-31",
+          "deliverables": ["All services instrumented with OTEL"]
+        }
+      ],
+      "pm_tasks": [
+        {
+          "task_type": "jira_ticket",
+          "title": "[EPIC] Observability - Grafana SLO Dashboards",
+          "description": "Complete UID-based Grafana dashboards with p95 latency trace exemplars",
+          "labels": ["observability", "grafana", "high"],
+          "story_points": 13,
+          "assignee_role": "sre_engineer"
+        },
+        {
+          "task_type": "jira_ticket",
+          "title": "[EPIC] Observability - k6 Synthetic Monitoring",
+          "description": "Deploy k6 synthetic monitors with <5min alert intervals",
+          "labels": ["observability", "monitoring", "high"],
+          "story_points": 8,
+          "assignee_role": "sre_engineer"
+        },
+        {
+          "task_type": "jira_ticket",
+          "title": "[EPIC] Observability - Cost Attribution",
+          "description": "Implement per-tenant/workflow cost tracking in Prometheus",
+          "labels": ["observability", "cost", "medium"],
+          "story_points": 8,
+          "assignee_role": "backend_engineer"
+        },
+        {
+          "task_type": "milestone_setup",
+          "tool": "github_milestones",
+          "milestone_name": "Observability Q4 2025",
+          "due_date": "2025-12-31"
+        },
+        {
+          "task_type": "team_channel",
+          "platform": "slack",
+          "channel_name": "#epic-observability",
+          "purpose": "SRE coordination and incident management"
+        }
+      ]
+    }
+  ],
+  "integration_config": {
+    "jira": {
+      "project_key": "SUMMIT",
+      "board_type": "scrum",
+      "epic_link_field": "customfield_10008"
+    },
+    "github": {
+      "repo": "BrianCLong/summit",
+      "labels_to_create": ["epic", "critical", "high", "medium", "testing", "security", "observability"]
+    },
+    "slack": {
+      "workspace": "summit-team",
+      "notification_channels": ["#engineering", "#product"]
+    }
+  }
+}
