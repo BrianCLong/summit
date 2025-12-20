@@ -12,6 +12,7 @@ import provenanceResolvers from './provenance.js';
 import supportTicketResolvers from './supportTicket.js';
 import sprint28Resolvers from './sprint28.js';
 import ewResolvers from './electronic-warfare.js';
+import { collaborationResolvers } from './collaboration';
 
 // MC Platform v0.4.0 Transcendent Intelligence Resolvers (DISABLED - incomplete)
 // import { v040Resolvers } from './v040';
@@ -35,6 +36,7 @@ const resolvers = {
     ...(supportTicketResolvers.Query || {}),
     ...(sprint28Resolvers.Query || {}),
     ...(ewResolvers.Query || {}),
+    ...(collaborationResolvers.Query || {}),
     // MC Platform v0.4.0 Transcendent Intelligence (DISABLED)
     // ...(v040Resolvers.Query || {}),
     // MC Platform v0.4.1 Sovereign Safeguards (DISABLED)
@@ -64,6 +66,7 @@ const resolvers = {
     ...(supportTicketResolvers.Mutation || {}),
     ...(sprint28Resolvers.Mutation || {}),
     ...(ewResolvers.Mutation || {}),
+    ...(collaborationResolvers.Mutation || {}),
     // MC Platform v0.4.0 Transcendent Intelligence (DISABLED)
     // ...(v040Resolvers.Mutation || {}),
     // MC Platform v0.4.1 Sovereign Safeguards (DISABLED)
@@ -77,6 +80,10 @@ const resolvers = {
       wargameResolver.deleteCrisisScenario.bind(wargameResolver),
   },
   SupportTicket: supportTicketResolvers.SupportTicket,
+  WarRoom: collaborationResolvers.WarRoom,
+  Subscription: {
+    ...(collaborationResolvers.Subscription || {}),
+  },
 };
 
 export default resolvers;

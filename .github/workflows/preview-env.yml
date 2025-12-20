@@ -4,30 +4,120 @@ permissions:
   contents: read
   pull-requests: write
   packages: write
+  id-token: write
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, closed]
+    types: [opened, synchronize, reopened, labeled, closed]
     paths:
       - 'server/**'
       - 'client/**'
       - 'deploy/**'
       - '.github/workflows/**'
+      - '.ci/**'
+      - '.maestro/ci_budget.json'
+  workflow_dispatch:
+    inputs:
+      action:
+        description: extend or destroy
+        required: true
+        type: choice
+        options: [extend, destroy]
+      pr:
+        description: PR number
+        required: true
+        type: string
 
 env:
   REGISTRY: ghcr.io
-  NAMESPACE_PREFIX: intelgraph-pr
-  PREVIEW_TTL_HOURS: 72
-  GRAFANA_ROOT: https://grafana.preview.intelgraph.dev
-  JAEGER_ROOT: https://jaeger.preview.intelgraph.dev
+  PREVIEW_DEFAULT_TTL: 24
 
 concurrency:
-  group: preview-${{ github.event.number }}
+  group: preview-${{ github.event.number || inputs.pr }}
   cancel-in-progress: true
 
 jobs:
+  context:
+    name: Gather preview context
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    outputs:
+      ttl-hours: ${{ steps.ttl.outputs.ttl_hours }}
+      budget-override: ${{ steps.labels.outputs.override }}
+      hourly-usd: ${{ steps.cost.outputs.hourly_usd }}
+      total-usd: ${{ steps.cost.outputs.total_usd }}
+      budget-usd: ${{ steps.cost.outputs.budget_usd }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install tooling
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml requests
+          curl -L -o opa https://openpolicyagent.org/downloads/v0.65.0/opa_linux_amd64
+          chmod +x opa
+
+      - name: Derive TTL and labels
+        id: ttl
+        run: |
+          TTL=${PREVIEW_DEFAULT_TTL}
+          MAX_TTL=$(python - <<'PY'
+import json
+print(json.load(open('.maestro/ci_budget.json'))['preview_defaults']['max_ttl_hours'])
+PY
+)
+          LABEL_TTL=$(jq -r '[.pull_request.labels[].name | select(test("^ttl_hours[:=]?[0-9]+$"))][0] // ""' "$GITHUB_EVENT_PATH")
+          if [[ "$LABEL_TTL" =~ ([0-9]+) ]]; then TTL=${BASH_REMATCH[1]}; fi
+          if [ $TTL -gt $MAX_TTL ]; then TTL=$MAX_TTL; fi
+          echo "ttl_hours=$TTL" >> $GITHUB_OUTPUT
+          echo "max_ttl=$MAX_TTL" >> $GITHUB_OUTPUT
+
+      - name: Detect override label
+        id: labels
+        run: |
+          if jq -e '.pull_request.labels[].name | contains("preview.budget.override=true")' "$GITHUB_EVENT_PATH" > /dev/null; then
+            echo "override=true" >> $GITHUB_OUTPUT
+          else
+            echo "override=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run OPA policy
+        env:
+          MAX_TTL: ${{ steps.ttl.outputs.max_ttl }}
+        run: |
+          cat > input.json <<'JSON'
+          {
+            "labels": {
+              "owner": "${{ github.actor }}",
+              "repo": "${{ github.repository }}",
+              "branch": "${{ github.head_ref }}",
+              "ttl_hours": "${{ steps.ttl.outputs.ttl_hours }}",
+              "budget_usd": "${{ env.PREVIEW_DEFAULT_TTL }}"
+            },
+            "meta": {"max_ttl_hours": ${MAX_TTL}, "quota_exceeded": false},
+            "pods": {},
+            "services": {}
+          }
+JSON
+          ./opa eval -i input.json -d .ci/policies/preview.rego "data.preview.violation" | tee opa.out
+          if grep -q "\[\]" opa.out; then
+            echo "OPA policy passed"
+          else
+            echo "OPA policy violation" && exit 1
+          fi
+
+      - name: Calculate cost
+        id: cost
+        run: |
+          python .ci/scripts/preview/calc_cost.py deploy/helm/intelgraph/values-preview.yaml .maestro/ci_budget.json --ttl-hours ${{ steps.ttl.outputs.ttl_hours }} $([ "${{ steps.labels.outputs.override }}" == "true" ] && echo "--budget-override") | tee cost.json
+          echo "hourly_usd=$(jq -r '.hourly_usd' cost.json)" >> $GITHUB_OUTPUT
+          echo "total_usd=$(jq -r '.total_usd' cost.json)" >> $GITHUB_OUTPUT
+          echo "budget_usd=$(jq -r '.budget_usd' cost.json)" >> $GITHUB_OUTPUT
+
   build-images:
-    if: github.event.action != 'closed'
+    if: needs.context.result == 'success'
+    needs: context
     runs-on: ubuntu-latest
     outputs:
       server-image: ${{ steps.meta.outputs.server-image }}
@@ -74,12 +164,10 @@ jobs:
           cache-to: type=gha,mode=max
 
   deploy-preview:
-    if: github.event.action != 'closed'
-    needs: build-images
+    if: needs.context.result == 'success'
+    needs: [context, build-images]
     runs-on: ubuntu-latest
-    environment:
-      name: pr-${{ github.event.number }}
-      url: https://pr-${{ github.event.number }}.preview.intelgraph.dev
+    environment: preview
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -101,193 +189,83 @@ jobs:
           chmod 600 ~/.kube/config
 
       - name: Create namespace
+        env:
+          TTL: ${{ needs.context.outputs.ttl-hours }}
         run: |
-          NAMESPACE="${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}"
           PR_NUMBER=${{ github.event.number }}
-          EXPIRY=$(date -u -d "+${PREVIEW_TTL_HOURS} hours" +"%Y-%m-%dT%H:%M:%SZ")
-          REFRESHED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-
+          NAMESPACE="pr-${PR_NUMBER}"
+          CREATED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           kubectl create namespace ${NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
-          kubectl label namespace ${NAMESPACE} pr=${{ github.event.number }} ttl-hours=${{ env.PREVIEW_TTL_HOURS }} owner=${{ github.actor }} managed-by=github-actions --overwrite
-          kubectl annotate namespace ${NAMESPACE} teardown=auto reason=preview-env --overwrite
-
-          kubectl label namespace ${NAMESPACE} \
-            preview.summit.ai/enabled=true \
-            preview.summit.ai/pull-request=${PR_NUMBER} \
-            --overwrite
-
-          kubectl annotate namespace ${NAMESPACE} \
-            preview.summit.ai/expiry="${EXPIRY}" \
-            preview.summit.ai/ttl-hours="${PREVIEW_TTL_HOURS}" \
-            preview.summit.ai/last-refresh="${REFRESHED_AT}" \
-            --overwrite
-
-      - name: Enforce resource guardrails
-        run: |
-          NAMESPACE="${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}"
-          cat <<'EOF' | kubectl apply -n ${NAMESPACE} -f -
-          apiVersion: v1
-          kind: ResourceQuota
-          metadata:
-            name: preview-quota
-          spec:
-            hard:
-              requests.cpu: "2"
-              requests.memory: 4Gi
-              limits.cpu: "4"
-              limits.memory: 8Gi
-              pods: "10"
-          ---
-          apiVersion: v1
-          kind: LimitRange
-          metadata:
-            name: preview-defaults
-          spec:
-            limits:
-              - type: Container
-                default:
-                  cpu: 500m
-                  memory: 512Mi
-                defaultRequest:
-                  cpu: 200m
-                  memory: 256Mi
-                max:
-                  cpu: "1"
-                  memory: 1Gi
-                min:
-                  cpu: 100m
-                  memory: 128Mi
-          EOF
+          kubectl label namespace ${NAMESPACE} env=preview cost-center=intelgraph-preview pr=${PR_NUMBER} owner=${{ github.actor }} repo=${{ github.repository }} branch=${{ github.head_ref }} ttl_hours=${TTL} budget_usd=${{ needs.context.outputs.budget-usd }} --overwrite
+          kubectl annotate namespace ${NAMESPACE} created_at=${CREATED_AT} ttl_hours=${TTL} budget_usd=${{ needs.context.outputs.budget-usd }} --overwrite
 
       - name: Deploy preview environment
+        env:
+          TTL: ${{ needs.context.outputs.ttl-hours }}
         run: |
-          NAMESPACE="${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}"
           PR_NUMBER=${{ github.event.number }}
-
+          NAMESPACE="pr-${PR_NUMBER}"
           helm upgrade --install \
             intelgraph-pr-${PR_NUMBER} \
             ./deploy/helm/intelgraph \
             -f ./deploy/helm/intelgraph/values-preview.yaml \
             --namespace ${NAMESPACE} \
+            --create-namespace \
             --set image.server.repository=${{ env.REGISTRY }}/${{ github.repository }}/server \
             --set image.server.tag=pr-${PR_NUMBER} \
             --set image.client.repository=${{ env.REGISTRY }}/${{ github.repository }}/client \
             --set image.client.tag=pr-${PR_NUMBER} \
-            --set ingress.enabled=true \
-            --set ingress.host=pr-${PR_NUMBER}.preview.intelgraph.dev \
-            --set resources.requests.cpu=100m \
-            --set resources.requests.memory=256Mi \
-            --set resources.limits.cpu=500m \
-            --set resources.limits.memory=1Gi \
-            --set autoscaling.enabled=false \
-            --set replicaCount=1 \
-            --set env.NODE_ENV=preview \
-            --set env.DATABASE_URL="${{ secrets.PREVIEW_DATABASE_URL }}" \
-            --set env.REDIS_URL="${{ secrets.PREVIEW_REDIS_URL }}" \
-            --set env.NEO4J_URI="${{ secrets.PREVIEW_NEO4J_URI }}" \
-            --timeout 10m \
-            --wait
+            --set preview.ttlHours=${TTL} \
+            --set-string preview.annotations.owner=${{ github.actor }} \
+            --set-string preview.annotations.repo=${{ github.repository }} \
+            --wait --timeout 10m
 
       - name: Verify deployment
         run: |
-          NAMESPACE="${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}"
+          NAMESPACE="pr-${{ github.event.number }}"
           kubectl rollout status deployment/intelgraph-pr-${{ github.event.number }} -n ${NAMESPACE} --timeout=300s
 
-  smoke-tests:
-    if: github.event.action != 'closed'
-    needs: deploy-preview
+  update-pr:
+    if: needs.deploy-preview.result == 'success'
+    needs: [context, deploy-preview]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.11.x'
-          cache: 'pnpm'
-
-      - name: Install pnpm
-        run: npm install -g pnpm@9.12.0
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Run smoke tests
-        env:
-          PREVIEW_URL: https://pr-${{ github.event.number }}.preview.intelgraph.dev
+      - name: Install PR tooling
         run: |
-          # Health check
-          curl -f ${PREVIEW_URL}/health --max-time 30 --retry 3 --retry-delay 5
+          python -m pip install --upgrade pip
+          pip install requests
 
-          # GraphQL health
-          curl -f ${PREVIEW_URL}/health/graphql --max-time 30 --retry 3 --retry-delay 5
-
-          # Basic GraphQL query
-          curl -X POST ${PREVIEW_URL}/graphql \
-            -H "Content-Type: application/json" \
-            -d '{"query":"query Health { __typename }"}' \
-            --max-time 30 --retry 3 --retry-delay 5
-
-      - name: Run E2E golden path tests
-        env:
-          PREVIEW_URL: https://pr-${{ github.event.number }}.preview.intelgraph.dev
-        run: |
-          cd client
-          pnpm test:golden-path
-
-  update-pr:
-    if: github.event.action != 'closed'
-    needs: [deploy-preview, smoke-tests]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Update PR with preview URLs
+      - name: Post PR comment
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          PREVIEW_URL="https://pr-${{ github.event.number }}.preview.intelgraph.dev"
-          METRICS_URL="${PREVIEW_URL}/metrics"
-          HEALTH_URL="${PREVIEW_URL}/health"
-          GRAPHQL_URL="${PREVIEW_URL}/graphql"
-          GRAFANA_URL="${{ env.GRAFANA_ROOT }}/d/slo-overview?var-namespace=${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}"
-          JAEGER_URL="${{ env.JAEGER_ROOT }}/search?service=intelgraph&tags=%7B%22k8s.namespace.name%22%3A%22${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}%22%7D"
-
-          cat > pr-comment.md << EOF
-          ## 🚀 Preview Environment Ready
-
-          | Service | URL | Status |
-          |---------|-----|--------|
-          | **Application** | [${PREVIEW_URL}](${PREVIEW_URL}) | ✅ Ready |
-          | **GraphQL Playground** | [${GRAPHQL_URL}](${GRAPHQL_URL}) | ✅ Ready |
-          | **Health Check** | [${HEALTH_URL}](${HEALTH_URL}) | ✅ Healthy |
-          | **Metrics** | [${METRICS_URL}](${METRICS_URL}) | ✅ Active |
-          | **Grafana SLO Dashboard** | [${GRAFANA_URL}](${GRAFANA_URL}) | ✅ Wired |
-          | **Jaeger Traces** | [${JAEGER_URL}](${JAEGER_URL}) | ✅ Live |
-
-          ### 🧪 Test Results
-          - ✅ Smoke tests passed
-          - ✅ Health checks passed
-          - ✅ GraphQL endpoint responsive
-          - ✅ E2E golden path tests passed
-
-          ### 🔧 Environment Details
-          - **Namespace**: ${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}
-          - **Images**:
-            - Server: \`pr-${{ github.event.number }}\`
-            - Client: \`pr-${{ github.event.number }}\`
-          - **Auto-expiry**: ${PREVIEW_TTL_HOURS}h after last refresh
-          - **Auto-teardown**: When PR is closed
-
-          > This preview environment is automatically updated with each push to this PR.
-          EOF
-
-          gh pr comment ${{ github.event.number }} --body-file pr-comment.md
+          PR_NUMBER=${{ github.event.number }}
+          PREVIEW_URL="https://pr-${PR_NUMBER}.preview.intelgraph.dev"
+          GRAFANA_URL="https://grafana.preview.intelgraph.dev/d/preview-fleet?var-namespace=pr-${PR_NUMBER}"
+          JAEGER_URL="https://jaeger.preview.intelgraph.dev/search?namespace=pr-${PR_NUMBER}"
+          python .ci/scripts/preview/pr_comment.py \
+            --repo "${{ github.repository }}" \
+            --pr ${PR_NUMBER} \
+            --namespace "pr-${PR_NUMBER}" \
+            --preview-url "${PREVIEW_URL}" \
+            --grafana-url "${GRAFANA_URL}" \
+            --jaeger-url "${JAEGER_URL}" \
+            --ttl-hours ${{ needs.context.outputs.ttl-hours }} \
+            --budget-usd ${{ needs.context.outputs.budget-usd }} \
+            --hourly-usd ${{ needs.context.outputs.hourly-usd }} \
+            --total-usd ${{ needs.context.outputs.total-usd }} \
+            --extend-url "${{ github.server_url }}/${{ github.repository }}/actions/workflows/preview-env.yml/dispatches" \
+            --destroy-url "${{ github.server_url }}/${{ github.repository }}/actions/workflows/preview-env.yml/dispatches" \
+            --trace-id "preview-${PR_NUMBER}" \
+            --body "Live links plus extend/destroy controls."
 
   teardown:
-    if: github.event.action == 'closed'
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
-    environment:
-      name: pr-${{ github.event.number }}
+    environment: preview
     steps:
       - name: Setup kubectl
         uses: azure/setup-kubectl@v3
@@ -307,49 +285,41 @@ jobs:
 
       - name: Teardown preview environment
         run: |
-          NAMESPACE="${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}"
+          NAMESPACE="pr-${{ github.event.number }}"
           PR_NUMBER=${{ github.event.number }}
-
-          # Remove Helm release
           helm uninstall intelgraph-pr-${PR_NUMBER} --namespace ${NAMESPACE} --ignore-not-found
-
-          # Delete namespace
           kubectl delete namespace ${NAMESPACE} --ignore-not-found --timeout=300s
-
-      - name: Check for leftover resources
-        id: leftovers
-        run: |
-          touch leftovers.txt
-          kubectl get all --all-namespaces -l pr=${{ github.event.number }} -o name > leftovers.txt 2>/dev/null || true
-          COUNT=$(wc -l < leftovers.txt | tr -d ' ')
-          echo "count=${COUNT}" >> $GITHUB_OUTPUT
-
-      - name: Cleanup container images
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Delete PR-specific images
-          gh api --method DELETE \
-            "/orgs/${{ github.repository_owner }}/packages/container/${{ github.repository }}%2Fserver/versions" \
-            --field "tag=pr-${{ github.event.number }}" || true
-
-          gh api --method DELETE \
-            "/orgs/${{ github.repository_owner }}/packages/container/${{ github.repository }}%2Fclient/versions" \
-            --field "tag=pr-${{ github.event.number }}" || true
 
       - name: Comment on PR
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          MESSAGE="🧹 Preview environment teardown completed."
-          MESSAGE+=$"\n- Namespace: `${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}`"
-          MESSAGE+=$"\n- TTL: ${{ env.PREVIEW_TTL_HOURS }}h labels applied to resources (managed-by=github-actions)"
-          if [ "${{ steps.leftovers.outputs.count }}" != "0" ]; then
-            MESSAGE+=$"\n\n⚠️ Detected leftover resources with `pr=${{ github.event.number }}` after teardown. Please inspect and clean manually:"
-            MESSAGE+=$"\n```"
-            cat leftovers.txt >> message_block.txt
-            MESSAGE+=$(cat message_block.txt)
-            MESSAGE+=$"\n```"
+          gh pr comment ${{ github.event.number }} --body "🧹 Preview environment teardown completed."
+
+  dispatch:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: v1.29.0
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Apply action
+        env:
+          ACTION: ${{ inputs.action }}
+          PR: ${{ inputs.pr }}
+        run: |
+          NAMESPACE="pr-${PR}"
+          if [ "$ACTION" = "extend" ]; then
+            kubectl annotate namespace ${NAMESPACE} preview.summit.ai/last-refresh=$(date -u +"%Y-%m-%dT%H:%M:%SZ") --overwrite
+          else
+            helm uninstall intelgraph-pr-${PR} --namespace ${NAMESPACE} --ignore-not-found
+            kubectl delete namespace ${NAMESPACE} --ignore-not-found --timeout=300s
           fi
-          MESSAGE+=$"\n\nCost note: resources are tagged for TTL enforcement; preview images were deleted for this PR."
-          gh pr comment ${{ github.event.number }} --body "$MESSAGE"

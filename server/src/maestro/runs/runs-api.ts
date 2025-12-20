@@ -11,10 +11,12 @@ import {
 import { RequestContext } from '../../middleware/context-binding.js'; // Import RequestContext
 import Redis from 'ioredis'; // Assuming Redis is used for budget control
 import { scheduler } from '../scheduler/Scheduler.js';
+import { maestroAuthzMiddleware } from '../../middleware/maestro-authz.js';
 
 const router = express.Router();
 router.use(express.json());
 router.use(ensureAuthenticated); // Ensure all routes require authentication
+router.use(maestroAuthzMiddleware({ resource: 'runs' }));
 
 // Initialize BudgetAdmissionController (assuming Redis client is available)
 // In a real application, Redis client would be injected or managed globally
