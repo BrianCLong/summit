@@ -4,6 +4,7 @@
  * Provides common test utilities and matchers
  */
 
+// @ts-nocheck
 import 'jest-extended';
 
 // Mock ioredis globally - using a simple mock implementation since module resolution fails
