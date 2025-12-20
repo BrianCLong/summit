@@ -19,7 +19,6 @@ import {
   closePostgresPool,
   __private,
 } from '../postgres';
-import { runWithRlsContext } from '../../security/rlsContext.js';
 import type pg from 'pg';
 
 type Pool = pg.Pool;
@@ -623,50 +622,6 @@ describe('PostgreSQL Pool', () => {
       );
 
       await expect(pool.query('SELECT 1')).rejects.toThrow();
-    });
-  });
-
-  describe('RLS session guardrails', () => {
-    let pool: any;
-
-    beforeEach(() => {
-      pool = getPostgresPool();
-      mockClient.query.mockResolvedValue({ rows: [], rowCount: 0 } as any);
-      (pool.connect as jest.Mock).mockResolvedValue(mockClient);
-    });
-
-    afterEach(() => {
-      delete process.env.RLS_V1;
-      delete process.env.NODE_ENV;
-    });
-
-    it('applies session GUCs when context is present', async () => {
-      process.env.RLS_V1 = '1';
-      process.env.NODE_ENV = 'staging';
-
-      mockClient.query.mockResolvedValueOnce(undefined); // set rls flag
-      mockClient.query.mockResolvedValueOnce(undefined); // set tenant
-      mockClient.query.mockResolvedValueOnce(undefined); // set case
-      mockClient.query.mockResolvedValueOnce({ rows: [], rowCount: 0 }); // query
-
-      await runWithRlsContext(
-        { tenantId: 'tenant-a', caseId: 'case-1', enabled: true },
-        async () => {
-          await pool.query('SELECT * FROM maestro.cases');
-        },
-      );
-
-      expect(mockClient.query).toHaveBeenCalledWith(
-        "SELECT set_config('app.rls_v1', '1', true)",
-      );
-      expect(mockClient.query).toHaveBeenCalledWith(
-        "SELECT set_config('app.current_tenant_id', $1, true)",
-        ['tenant-a'],
-      );
-      expect(mockClient.query).toHaveBeenCalledWith(
-        "SELECT set_config('app.current_case_id', $1, true)",
-        ['case-1'],
-      );
     });
   });
 });

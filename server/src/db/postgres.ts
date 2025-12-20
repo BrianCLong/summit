@@ -1,14 +1,8 @@
 // @ts-nocheck
-import * as crypto from 'node:crypto';
 import crypto from 'node:crypto';
 import { performance } from 'node:perf_hooks';
 import { Pool, QueryConfig, QueryResult, PoolClient } from 'pg';
 import * as dotenv from 'dotenv';
-import {
-  getRlsContext,
-  isRlsFeatureFlagEnabled,
-  recordRlsOverhead,
-} from '../security/rlsContext.js';
 
 dotenv.config();
 import { dbConfig } from './config.js';
@@ -54,6 +48,7 @@ export interface ManagedPostgresPool {
   healthCheck: () => Promise<PoolHealthSnapshot[]>;
   slowQueryInsights: () => SlowQueryInsight[];
   pool: Pool;
+  queryCaptureSnapshot?: () => QueryCaptureSnapshot;
 }
 
 interface SlowQueryInsight {
@@ -67,6 +62,13 @@ interface SlowQueryInsight {
 type CircuitState = 'closed' | 'half-open' | 'open';
 
 const logger = baseLogger.child({ name: 'postgres-pool' });
+
+const QUERY_CAPTURE_ENABLED = process.env.DB_QUERY_CAPTURE === '1';
+const QUERY_CAPTURE_INTERVAL_MS = parseInt(
+  process.env.DB_QUERY_CAPTURE_INTERVAL_MS ?? '30000',
+  10,
+);
+const QUERY_CAPTURE_MAX_SAMPLES = 200;
 
 const CIRCUIT_BREAKER_FAILURE_THRESHOLD = 5;
 const CIRCUIT_BREAKER_COOLDOWN_MS = 30000;
@@ -242,6 +244,36 @@ const slowQueryStats = new Map<
   { count: number; totalDuration: number; maxDuration: number; pool: string }
 >();
 
+interface QueryCaptureAccumulator {
+  sql: string;
+  label: string;
+  pool: string;
+  count: number;
+  totalDurationMs: number;
+  maxDurationMs: number;
+  samples: number[];
+}
+
+interface QueryCaptureSnapshotEntry {
+  key: string;
+  sql: string;
+  pool: string;
+  label: string;
+  count: number;
+  totalDurationMs: number;
+  maxDurationMs: number;
+  avgDurationMs: number;
+  p95DurationMs: number;
+}
+
+interface QueryCaptureSnapshot {
+  topByTotalTime: QueryCaptureSnapshotEntry[];
+  topByP95: QueryCaptureSnapshotEntry[];
+}
+
+const queryCapture = new Map<string, QueryCaptureAccumulator>();
+let queryCaptureTimer: NodeJS.Timeout | null = null;
+
 let writePoolWrapper: PoolWrapper | null = null;
 let readPoolWrappers: PoolWrapper[] = [];
 let managedPool: ManagedPostgresPool | null = null;
@@ -353,6 +385,18 @@ function initializePools(): void {
     return;
   }
 
+  if (QUERY_CAPTURE_ENABLED && !queryCaptureTimer) {
+    queryCaptureTimer = setInterval(() => {
+      logQueryCaptureSnapshot('interval');
+    }, QUERY_CAPTURE_INTERVAL_MS);
+    // Keep the process from hanging on shutdown in capture mode
+    queryCaptureTimer.unref?.();
+    logger.info(
+      { intervalMs: QUERY_CAPTURE_INTERVAL_MS },
+      'DB query capture enabled',
+    );
+  }
+
   writePoolWrapper = createPool(
     'write-primary',
     'write',
@@ -446,6 +490,11 @@ function createManagedPool(
   };
 
   const end = async (): Promise<void> => {
+    logQueryCaptureSnapshot('shutdown');
+    if (queryCaptureTimer) {
+      clearInterval(queryCaptureTimer);
+      queryCaptureTimer = null;
+    }
     await Promise.all([
       writePool.pool.end(),
       ...readPools.map((wrapper) => wrapper.pool.end()),
@@ -531,6 +580,7 @@ function createManagedPool(
     on,
     healthCheck,
     slowQueryInsights,
+    queryCaptureSnapshot: snapshotQueryCapture,
     pool: writePool.pool,
   };
 }
@@ -617,42 +667,6 @@ async function executeWithRetry(
   throw new Error('PostgreSQL query exhausted retries');
 }
 
-async function applyRlsSessionContext(
-  client: PoolClient,
-  label: string,
-): Promise<void> {
-  if (!isRlsFeatureFlagEnabled() || process.env.NODE_ENV !== 'staging') {
-    return;
-  }
-
-  const ctx = getRlsContext();
-  if (!ctx?.enabled || !ctx.tenantId) {
-    return;
-  }
-
-  const start = performance.now();
-  try {
-    await client.query("SELECT set_config('app.rls_v1', '1', true)");
-    await client.query("SELECT set_config('app.current_tenant_id', $1, true)", [
-      ctx.tenantId,
-    ]);
-
-    if (ctx.caseId) {
-      await client.query(
-        "SELECT set_config('app.current_case_id', $1, true)",
-        [ctx.caseId],
-      );
-    }
-
-    recordRlsOverhead(performance.now() - start);
-  } catch (error) {
-    logger.warn(
-      { label, tenantId: ctx.tenantId, err: error },
-      'Unable to apply RLS session context; continuing with app-level filtering',
-    );
-  }
-}
-
 async function executeQueryOnClient(
   client: PoolClient,
   normalizedQuery: { text: string; values: any[]; name: string },
@@ -661,8 +675,6 @@ async function executeQueryOnClient(
   timeoutMs: number
 ): Promise<QueryResult<any>> {
   const start = performance.now();
-
-  await applyRlsSessionContext(client, label);
 
   // Set statement timeout
   // Note: It's better to set this per session or query if possible,
@@ -685,6 +697,8 @@ async function executeQueryOnClient(
       normalizedQuery.text,
     );
   }
+
+  recordQueryCapture(normalizedQuery, duration, wrapper.name, label);
 
   logger.debug(
     {
@@ -923,6 +937,83 @@ function delayAsync(duration: number): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, duration);
   });
+}
+
+function percentile(values: number[], p: number): number {
+  if (values.length === 0) return 0;
+  const sorted = [...values].sort((a, b) => a - b);
+  const idx = Math.min(sorted.length - 1, Math.floor(sorted.length * p));
+  return sorted[idx];
+}
+
+function recordQueryCapture(
+  normalizedQuery: { text: string; name: string },
+  duration: number,
+  poolName: string,
+  label: string,
+): void {
+  if (!QUERY_CAPTURE_ENABLED) return;
+
+  const key = normalizedQuery.name || getPreparedStatementName(normalizedQuery.text);
+  const existing = queryCapture.get(key) ?? {
+    sql: normalizedQuery.text.slice(0, 1000),
+    label,
+    pool: poolName,
+    count: 0,
+    totalDurationMs: 0,
+    maxDurationMs: 0,
+    samples: [],
+  };
+
+  existing.count += 1;
+  existing.totalDurationMs += duration;
+  existing.maxDurationMs = Math.max(existing.maxDurationMs, duration);
+
+  if (existing.samples.length < QUERY_CAPTURE_MAX_SAMPLES) {
+    existing.samples.push(duration);
+  } else {
+    const idx = Math.floor(Math.random() * existing.count);
+    if (idx < QUERY_CAPTURE_MAX_SAMPLES) {
+      existing.samples[idx] = duration;
+    }
+  }
+
+  queryCapture.set(key, existing);
+}
+
+function snapshotQueryCapture(): QueryCaptureSnapshot {
+  const entries: QueryCaptureSnapshotEntry[] = Array.from(
+    queryCapture.entries(),
+  ).map(([key, entry]) => ({
+    key,
+    sql: entry.sql,
+    pool: entry.pool,
+    label: entry.label,
+    count: entry.count,
+    totalDurationMs: entry.totalDurationMs,
+    maxDurationMs: entry.maxDurationMs,
+    avgDurationMs: entry.totalDurationMs / Math.max(entry.count, 1),
+    p95DurationMs: percentile(entry.samples, 0.95),
+  }));
+
+  const topByTotalTime = [...entries]
+    .sort((a, b) => b.totalDurationMs - a.totalDurationMs)
+    .slice(0, 20);
+  const topByP95 = [...entries]
+    .sort((a, b) => b.p95DurationMs - a.p95DurationMs)
+    .slice(0, 20);
+
+  return { topByTotalTime, topByP95 };
+}
+
+function logQueryCaptureSnapshot(reason: string): void {
+  if (!QUERY_CAPTURE_ENABLED || queryCapture.size === 0) return;
+
+  const snapshot = snapshotQueryCapture();
+  logger.info(
+    { reason, queryCapture: snapshot },
+    'DB query capture snapshot (top queries by total time and p95)',
+  );
 }
 
 export function getPostgresPool(): ManagedPostgresPool {

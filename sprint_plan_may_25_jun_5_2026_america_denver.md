@@ -1,212 +1,71 @@
-# Sprint Plan — May 25–Jun 5, 2026 (America/Denver)
+# Sprint 12 — Maturity & Moat: Transparency, Selective Disclosure, and Provable Deletion
 
-> **Sprint Name:** "GA Launch" — Ship General Availability with enterprise-grade reliability, clear packaging, and a tight first-week ops posture.
-
----
-
-## 1) Sprint Goal (SMART)
-
-Deliver a controlled **GA Launch** across **250+ tenants** with staged rollout controls, finalized packaging/pricing, production-ready runbooks, trust signals, and hardened onboarding/billing so that new and existing customers experience reliable service and clear value by **Jun 5, 2026**.
-
-**Key outcomes**
-
-- Launch orchestration with per-component kill-switches and one-click pause for signups/upgrades; rollback tested.
-- Finalized plan matrices (Free/Pro/Ent) with entitlements/contracts, aligned copy, and audited plan changes.
-- Production runbooks, escalation trees, and handoff ritual (daily AM/PM) live and drilled.
-- Public Security & Trust page with attestations/links, request form, and timestamp.
-- SLOs tuned and validated at 250+ tenants with soak test report and rollback simulation.
-- Data Residency v1.2 with cross-region controls, export watermarks, and violation alerts.
-- Onboarding v1.2 (schema auto-detect, faster fixtures, resume banners) improves median TTFV by ≥15%.
-- DLP presets with approver roster/backup and audited fallback path.
-- Billing guardrails (proration, overage notifications, invoice previews) validated with tests and finance sign-off.
+**Sprint window (America/Denver):** Mon May 25, 2026 → Fri Jun 5, 2026  
+**Theme:** "Trust features that are hard to copy"
 
 ---
 
-## 2) Success Metrics & Verification
+## Sprint goal
 
-- **Launch safety:** Kill-switches halt new signups/upgrades within **≤1 minute**; rollback returns steady state in **≤10 minutes**.
-  _Verify:_ Dry-run checklist; live pause simulation; rollback drill log.
-- **Packaging accuracy:** Entitlement contract tests **100% green**; plan change audits present for 100% of modifications.
-  _Verify:_ Automated tests; audit trail sampling; PM/Legal copy review.
-- **Operational readiness:** On-call pages routed correctly; L1/L2 runbooks referenced in incidents; AM/PM handoffs logged daily.
-  _Verify:_ Pager drill; handoff ritual checklist; escalation tree walkthrough.
-- **Trust & security:** Security & Compliance page live with SOC-2-lite, backups, DLP, residency, data deletion/export notes; **Last updated** timestamp present; request form routes to owners.
-  _Verify:_ Live page QA; form submission to inbox/queue; link checker.
-- **Reliability at scale:** Soak test over **250 tenants** with ingest→query→compile→export flow meets p95 targets; alert thresholds tuned; rollback simulation captured.
-  _Verify:_ Soak report artifact; alert noise analysis; rollback drill doc.
-- **Residency compliance:** Cross-region violations trigger alerts with owner; exports show residency watermark and policy ID.
-  _Verify:_ Contract tests for EU↔US cases; alert routing to owner.
-- **Onboarding speed:** Median TTFV improves **≥15%** vs prior sprint; analytics tiles show deltas.
-  _Verify:_ Analytics dashboard tiles; A/B or before/after report.
-- **DLP governance:** Preset rule packs toggle per plan; approver roster availability visible; fallback audited.
-  _Verify:_ UI/API toggles; audit entries; roster rotation log.
-- **Billing correctness:** Proration on mid-cycle plan flips, overage notifications, invoice previews behave as specified; webhook retries succeed.
-  _Verify:_ Automated test suite; finance sign-off report; webhook retry logs.
+Make Summit’s provenance system *provably trustworthy* for auditors and enterprise buyers by strengthening selective disclosure, optional transparency log anchoring, and a deletion workflow that emits verifiable purge manifests end-to-end.
 
 ---
 
-## 3) Scope
+## Target outcomes (measurable)
 
-**Must-have (commit):**
-
-1. **Launch Orchestration & Kill-Switches** — orchestrated flag rollout with per-component kill-switches, automatic rollback, and one-click pause for signups/upgrades (no tenant impact).
-2. **Packaging & Pricing Finalization** — plan matrices (Free/Pro/Ent), entitlements/contracts, in-product copy and compare table alignment, audit on plan changes.
-3. **Production Runbooks & On-Call Battle Rhythm** — publish L1/L2 runbooks, escalation trees, AM/PM handoff ritual; drill completed; correct paging.
-4. **Security & Trust Page + Attestations** — public page with SOC-2-lite/backups/DLP/residency/data deletion/export, evidence links, timestamp, and request form routing.
-5. **SLOs @ 250 Tenants (Launch Soak)** — scripted ingest→query→compile→export across 250 tenants; tuned alerts; soak report; rollback simulation.
-6. **Data Residency v1.2 (Cross-Region Controls)** — hardened cross-region blocking/logging; export watermarks with residency + policy ID; EU↔US contract tests; alerts with owner.
-7. **Onboarding Flow v1.2 (TTFV Polish)** — schema auto-detect, faster fixture load, resume banners; ≥15% median TTFV improvement; analytics tiles.
-8. **DLP Presets & Approver Roster (Enterprise)** — pre-baked rule packs, tenant approver roster with rotation/backup, visibility into availability, audited fallback path.
-9. **Billing Guardrails (Final)** — proration on mid-cycle plan flips, overage notifications, invoice previews; webhook retries; finance sign-off.
-
-**Stretch (time-boxed):**
-
-10. **Outage Game Day (Prod Shadow)** — inject failure in shadow; verify dashboards/alerts/comms; runbook timestamps captured; comms latency < SLA.
-
-**Out-of-scope:**
-
-- New feature areas unrelated to GA launch (e.g., net-new product lines).
-- Major UI redesign outside onboarding/billing/trust pages.
-- Non-launch experimental LLM features.
+1. **Selective disclosure:** Evidence exports redact fields while remaining **cryptographically verifiable** (ship one robust scheme end-to-end).
+2. **Transparency anchoring:** Receipts can be optionally anchored to an **append-only transparency log** with verifiable inclusion proofs.
+3. **Provable deletion:** Tenant purge produces a **verifiable purge manifest** (what was deleted + what remains + why).
+4. **Audit UX:** Switchboard supports **Auditor mode** to verify receipts, inclusion proofs, and purge manifests without admin privileges.
+5. **Operational safety:** Runbooks, dashboards, and failure-mode handling cover log outage, anchor backlog, and purge retries.
 
 ---
 
-## 4) Team & Capacity
+## Scope (what ships)
 
-- **Capacity:** ~40–42 pts (stretch optional).
-- **Ceremonies:**
-  - Sprint Planning: Mon May 25, 09:30–11:00
-  - Daily Stand-up: 09:15–09:30
-  - Mid-sprint Readiness Review: Thu May 28, 14:00–14:45
-  - **Launch Window:** Tue–Thu, Jun 2–4 (canary → ramp)
-  - Sprint Review (GA debrief): Fri Jun 5, 10:00–11:00
-  - Retro: Fri Jun 5, 11:15–12:00
+### Epic A — Selective Disclosure v1 (Evidence Bundles)
+- **A1. Redaction model:** Define disclosure levels (Public / Customer / Auditor / Internal) and apply field-level redaction rules based on policy + requester role.
+- **A2. Verifiable redaction:** Implement a verifiable scheme (e.g., Merkleized JSON/commitment trees); redacted fields replaced with commitments, receipts include root hash; provide `verify` tooling for offline validation.
+- **A3. API + tooling:** `POST /evidence/export?disclosure_level=...`; `summit evidence verify <bundle>` returns pass/fail plus verification coverage.
 
----
+### Epic B — Transparency Log / Anchoring v0
+- **B1. Anchoring adapter:** Periodically anchor receipt batch root hashes, policy bundle version hash, and optional release artifact hashes; store inclusion proofs and anchor references.
+- **B2. Inclusion verification:** `GET /receipts/{id}/proof` returns inclusion proof data + anchor reference; Switchboard displays "Included in log ✅" or "Pending ⏳" with verification.
+- **B3. Backlog handling:** Anchoring worker with retries/DLQ; dashboards for anchor lag, failures, and proof generation time.
 
-## 5) Backlog (Ready for Sprint)
+### Epic C — Provable Deletion v1 (Purge Manifests + Residual Proof)
+- **C1. Purge manifest schema:** Capture tenant id, region tags, invoked retention policy, deleted data categories (objects/rows/indexes/caches/archives), time window, counts, digests of deletion plans, operator approvals/policy decisions, and residuals with rationale.
+- **C2. Deletion plan + execution receipts:** Generate a deletion plan before purge; execute with step-level receipts; produce a signed, exportable final purge manifest.
+- **C3. Verification tooling:** `summit purge verify <manifest>` validates signatures, references receipts, deletion-plan digests vs executed steps, and justifies residuals explicitly.
 
-### GA-LCH-101 — Orchestrated GA Rollout + Kill-Switches — **5 pts**
-- AC: Dry-run passes; one-click pause halts signups/upgrades without affecting current tenants; rollback path validated.
-
-### GA-PKG-111 — Packaging/Pricing Finalization — **5 pts**
-- AC: Contracts/tests for entitlements; plan changes audited; in-product copy and compare table aligned.
-
-### GA-OPS-121 — Prod Runbooks & On-Call Rhythm — **5 pts**
-- AC: Drill completed; pages routed correctly; postmortem template ready; handoff ritual live.
-
-### GA-SEC-131 — Security & Trust Page + Attestations — **5 pts**
-- AC: Public security page with evidence links; request form wired; last updated timestamp present.
-
-### GA-SLO-141 — Soak @ 250 Tenants + Tuning — **6 pts**
-- AC: Soak report artifact; p95s within targets; alert thresholds tuned; rollback simulation completed.
-
-### GA-RES-151 — Residency v1.2 (Watermarks + Alerts) — **3 pts**
-- AC: Export labels include residency watermark + policy ID; EU↔US edge-case tests; violations alert with owner.
-
-### GA-ONB-161 — Onboarding v1.2 (TTFV) — **5 pts**
-- AC: Schema auto-detect; faster fixtures; resume banners; ≥15% median TTFV improvement; analytics deltas visible.
-
-### GA-DLP-171 — DLP Presets & Approver Roster — **5 pts**
-- AC: Rule packs toggle per plan; approver availability shown; fallback path audited.
-
-### GA-BILL-181 — Billing Guardrails (Final) — **3 pts**
-- AC: Proration on mid-cycle plan flips; overage notifications; invoice previews; webhook retries; finance sign-off.
-
-### GA-OPS-191 — Outage Game Day (Stretch) — **3 pts**
-- AC: Shadow failure injected; dashboards/alerts/comms verified; runbook timestamps captured; comms latency < SLA.
-
-> **Planned:** 42 pts total (stretch optional).
+### Epic D — Switchboard Auditor Mode
+- **D1. Read-only auditor role:** Tenant-scoped role with no write access; UI focused on receipts list + verification, inclusion proof verification, evidence bundle export at auditor disclosure level, and purge manifest browsing/verification.
+- **D2. Verification UI:** Upload/paste bundle or manifest → verify → show results and missing elements.
 
 ---
 
-## 6) Dependencies & Assumptions
+## Explicit non-goals
 
-- Flags available: `gaRollout`, `planMatrixFinal`, `runbooksOps`, `securityTrustPage`, `soak250`, `residencyV12`, `onboardingV12`, `dlpPresetsRoster`, `billingFinal`, `gameDayShadow` (stretch).
-- Environments: prod-like stage → prod (gated), canary lanes, EU/US planes.
-- Test data ready: Golden tenants (Free/Pro/Ent), large fixtures, DLP preset packs, webhook/checkout fixtures, residency edge datasets.
-- Observability dashboards and alerting hooks accessible for drills.
-
----
-
-## 7) Risks & Mitigations
-
-- **Launch day regressions** → staged ramp + kill-switches; practiced rollback.
-- **Alert fatigue** → tuned thresholds; suppression windows; pager hygiene checklist.
-- **Residency misroutes** → fail-closed policy; explicit contract tests; owner alerts.
-- **DLP over-blocking** → preview/diff + justification; audited bypass with approver roster.
-- **Proration confusion** → clear invoice preview & email templates; support macro responses.
+- Full legal eDiscovery tooling.
+- Cross-tenant analytics (privacy-safe analytics is separate).
+- Mandatory transparency anchoring for all customers (keep optional per tenant/tier).
 
 ---
 
-## 8) QA Plan
+## Definition of Done (hard gates)
 
-**Functional:**
-- Kill-switches stop signups/upgrades; rollback restores steady state.
-- Entitlements/limits consistent across UI/API/export; audit on change.
-- Trust page links & timestamp; request form routes; no broken links.
-- Residency watermark in exports; violation alerting with owner.
-- Onboarding schema auto-detect; resume banners; faster fixtures.
-- DLP presets selectable; approver roster and fallback audited.
-- Billing proration/overage flows; invoice preview accuracy; webhook retries.
-
-**E2E:** Signup → tenant create → ingest → NL→Cypher preview → export PASS (with residency watermark) → plan upgrade → webhook success → DLP-flagged export requires approval → approval → PASS.
-
-**Non-functional:**
-- Soak @ 250 tenants meets SLO; alert noise below target; incident drill and comms latency measured.
+- Evidence bundles support redaction **and** offline verification.
+- Anchoring pipeline works in staging; inclusion proofs retrievable and verifiable.
+- Purge manifests produced end-to-end, signed, exportable, and verifiable.
+- Auditor mode enforces least-privilege with tenant scoping.
+- Runbooks + dashboards cover anchor lag, verification failures, and purge retries.
 
 ---
 
-## 9) Demo Script (Review)
+## Sprint demo (live)
 
-1. Toggle **GA Rollout** to canary → show kill-switch/pause.
-2. Walk **Onboarding v1.2** → faster ingest via auto-detect → NL→Cypher preview → export **PASS** with residency watermark.
-3. Flip **Plan Upgrade** → verify entitlements & limits.
-4. Trigger **DLP Preset** high-risk export → approver roster flow → approve → export.
-5. Open **Security & Trust** page → evidence links + timestamp.
-6. Show **Soak-250** report + alert drill clips.
-7. Validate **Billing** proration/overage preview; finance sign-off note.
-
----
-
-## 10) Reporting Artifacts (to produce this sprint)
-
-- GA checklist, launch ramp log, soak-250 report, incident/postmortem template, trust page content & links, TTFV delta dashboard, billing validation report, burndown/throughput, SLO snapshots.
-
----
-
-## 11) Definition of Ready (DoR)
-
-- Each story has AC, dependencies, flags, rollback plan, owner, and copy/wires where applicable.
-
----
-
-## 12) Definition of Done (DoD)
-
-- All AC met; GA checklist signed by Eng/PM/Ops/Security.
-- Recorded E2E: signup → tenant create → ingest → NL→Cypher preview → export (DLP pass) → plan upgrade → webhook receipt.
-- Security & compliance: public trust page live; data export/deletion verified; audit trails intact.
-- Observability: GA dashboards (signups, p95s, error budget, incidents, upgrades) live and linked in runbooks.
-
----
-
-## 13) Jira-Ready Ticket Matrix (copy/paste)
-
-| ID          | Title                                   | Owner  | Est | Dependencies | Acceptance Criteria (summary)               |
-| ----------- | --------------------------------------- | ------ | --: | ------------ | ------------------------------------------- |
-| GA-LCH-101  | Orchestrated GA Rollout + Kill-Switches | Ops+BE |   5 | —            | Dry-run; pause signups/upgrades; rollback   |
-| GA-PKG-111  | Packaging/Pricing Finalization          | PM+FE  |   5 | —            | Entitlement contracts; copy aligned; audits |
-| GA-OPS-121  | Prod Runbooks & On-Call Rhythm          | Ops    |   5 | —            | Drill passes; handoff ritual live           |
-| GA-SEC-131  | Security & Trust Page + Attestations    | PM+FE  |   5 | —            | Links to evidence; timestamp; request form  |
-| GA-SLO-141  | Soak @ 250 Tenants + Tuning             | Ops    |   6 | —            | Report; p95s in SLO; rollback sim           |
-| GA-RES-151  | Residency v1.2 (Watermarks + Alerts)    | BE     |   3 | —            | Labels in export; cross-region alerts       |
-| GA-ONB-161  | Onboarding v1.2 (TTFV)                  | FE+BE  |   5 | —            | Auto-detect schema; resume; +15% TTFV       |
-| GA-DLP-171  | DLP Presets & Approver Roster           | FE+BE  |   5 | —            | Rule packs; approvals; fallback             |
-| GA-BILL-181 | Billing Guardrails (Final)              | BE+Ops |   3 | —            | Proration; overage alerts; previews         |
-| GA-OPS-191  | Outage Game Day *(Stretch)*             | Ops    |   3 | GA-OPS-121   | Shadow failure; comms < SLA                 |
-
----
-
-## 14) Outcome of this Sprint
-
-A confident **GA Launch**: controlled rollout, crisp packaging, public trust signals, resilient ops posture, faster onboarding, enforceable data controls, and hardened billing—ready for broad adoption with safety nets firmly in place.
+1. Export an auditor-level evidence bundle (redacted).
+2. Offline verify the bundle → PASS.
+3. Fetch inclusion proof for a receipt → verify anchored ✅.
+4. Run tenant purge workflow → produce purge manifest.
+5. Auditor opens manifest → verifies signatures, step receipts, and residual rationale.

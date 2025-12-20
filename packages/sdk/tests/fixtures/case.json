@@ -1,0 +1,10 @@
+{
+  "ok": true,
+  "case": {
+    "id": "a7b2c3d4",
+    "title": "Suspicious Network Activity Investigation",
+    "status": "open",
+    "evidence": ["e1", "e2", "e3"],
+    "createdAt": "2025-01-15T10:30:00Z"
+  }
+}
