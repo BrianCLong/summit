@@ -6,6 +6,7 @@
   - **Shortest path**: `PROFILE MATCH (a:Entity {id: $fromId, tenantId: $tenantId}), (b:Entity {id: $toId, tenantId: $tenantId}) CALL apoc.algo.dijkstra(a, b, 'RELATIONSHIP>', 'cost') YIELD path RETURN path LIMIT 1`.
   - **Community search**: `PROFILE CALL gds.louvain.stream('communityGraph', { seedProperty: 'tenantId', concurrency: 4 }) YIELD nodeId, communityId RETURN gds.util.asNode(nodeId) AS node, communityId LIMIT 200`.
 - Capture execution stats (db hits, rows, rows per operator) and store snapshots after every release candidate; diff against the previous release to detect regressions.
+- An automated harness (`server/src/db/optimization/analysis.ts`) now captures PROFILE and EXPLAIN plans for the above journeys and writes `analysis-report.json`, including label-cardinality tips for reducing overloaded `:Entity` labels.
 - Keep `EXPLAIN` plans for pull requests to validate that planner heuristics (index usage, join ordering) remain stable when new labels or properties are introduced.
 
 ## Indexing strategy

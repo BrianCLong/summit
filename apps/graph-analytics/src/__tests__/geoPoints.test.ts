@@ -60,6 +60,32 @@ describe('GET /geo/points', () => {
     expect(secondIds).toEqual(expectedOrder);
   });
 
+  it('applies bbox filtering with stable ordering and limits', async () => {
+    const token = createToken('admin');
+    const bbox = '-75,40,-73,41';
+
+    const firstResponse = await request(app)
+      .get('/geo/points')
+      .query({ bbox, limit: 1 })
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+
+    const secondResponse = await request(app)
+      .get('/geo/points')
+      .query({ bbox, limit: 1 })
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+
+    const expected = ['p-nyc-002'];
+
+    expect((firstResponse.body as { points: GeoPoint[] }).points.map((p) => p.id)).toEqual(
+      expected,
+    );
+    expect((secondResponse.body as { points: GeoPoint[] }).points.map((p) => p.id)).toEqual(
+      expected,
+    );
+  });
+
   it('rejects requests without a valid bbox', async () => {
     const token = createToken();
 

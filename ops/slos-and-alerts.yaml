@@ -130,6 +130,22 @@ data:
             threshold: 2
         pagerduty_service: sre-primary
 
+      - name: "agent-adaptive-efficiency"
+        description: "Composite latency + cost pressure should remain ≤ 2.0 (1.0 each) for adaptive scaling"
+        sli_query: 'max_over_time(agent_queue_slo_pressure{queue="agent-default"}[5m]) + max_over_time(agent_queue_cost_pressure{queue="agent-default"}[5m])'
+        objective: 2
+        unit: "ratio"
+        warning_threshold: 2.2
+        critical_threshold: 2.5
+        evaluation_window: "10m"
+        alert_duration: "10m"
+        burn_rates:
+          - window: "10m"
+            threshold: 4
+          - window: "1h"
+            threshold: 2
+        pagerduty_service: sre-primary
+
   alerts.yaml: |
     # Prometheus Alert Rules for Safe Mutations
     groups:
@@ -247,6 +263,19 @@ data:
               summary: "Agent workload cost pressure elevated"
               description: "Cost pressure score above 0.85; bias scaling toward efficiency and engage FinOps."
               runbook_url: "https://docs.intelgraph.dev/runbooks/agent-cost-guardrails"
+
+          - alert: AgentAdaptiveScaleRecommended
+            expr: max_over_time(agent_queue_slo_pressure[5m]) > 1 and max_over_time(agent_queue_cost_pressure[5m]) < 1
+            for: 10m
+            labels:
+              severity: info
+              service: agent-workload-queue
+              component: keda
+              slo: agent-adaptive-efficiency
+            annotations:
+              summary: "Agent queue SLO burn with headroom to scale"
+              description: "Latency/backlog pressure >1 while cost pressure <1. Recommend temporarily raising max replicas or step function scaling via KEDA policies."
+              runbook_url: "https://docs.intelgraph.dev/runbooks/agent-queue-latency"
 
           # SLO-1: Budget Guard Latency
           - alert: BudgetGuardLatencyWarning

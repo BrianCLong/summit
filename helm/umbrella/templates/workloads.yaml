@@ -11,6 +11,7 @@
 {{- $workloadName := include "umbrella.workloadName" (list (printf "%s-%s" $name (default "primary" $colorLabel)) $) -}}
 {{- $serviceName := ternary (printf "%s-%s" $name $colorLabel) $name $blueGreen.enabled -}}
 {{- $resources := include "umbrella.merge" (list $defaults.resources (default dict $cfg.resources)) | fromYaml -}}
+{{- $networkPolicy := default (dict) $cfg.networkPolicy -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -157,6 +158,8 @@ spec:
 ---
 {{- end }}
 {{- if and $cfg.hpa (or $defaults.hpa.enabled $cfg.hpa.enabled) }}
+{{- $hpaMetrics := default $defaults.hpa.metrics $cfg.hpa.metrics -}}
+{{- $extraMetrics := default $defaults.hpa.extraMetrics $cfg.hpa.extraMetrics -}}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -170,7 +173,7 @@ spec:
   minReplicas: {{ default $defaults.hpa.minReplicas $cfg.hpa.minReplicas }}
   maxReplicas: {{ default $defaults.hpa.maxReplicas $cfg.hpa.maxReplicas }}
   metrics:
-{{ toYaml (default $defaults.hpa.metrics $cfg.hpa.metrics) | indent 4 }}
+{{ toYaml (concat $hpaMetrics $extraMetrics) | indent 4 }}
 ---
 {{- end }}
 {{- if and $.Values.defaults.mesh.enabled (not (eq (default true $cfg.mesh.enabled) false)) }}
@@ -198,6 +201,11 @@ spec:
 ---
 {{- end }}
 {{- if and $.Values.defaults.networkPolicy.enabled (or (and $cfg.networkPolicy $cfg.networkPolicy.enabled)) }}
+{{- $allowIstio := default $.Values.defaults.networkPolicy.allowIstioIngress $networkPolicy.allowIstioIngress -}}
+{{- $ingressFrom := default $.Values.defaults.networkPolicy.ingressFrom $networkPolicy.ingressFrom -}}
+{{- if $allowIstio }}
+{{- $ingressFrom = concat $ingressFrom (list (dict "podSelector" (dict "matchLabels" (dict "istio" "ingressgateway")))) -}}
+{{- end }}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -210,16 +218,11 @@ spec:
   policyTypes: [Ingress, Egress]
   ingress:
     - from:
-{{ toYaml (default $.Values.defaults.networkPolicy.allowNamespaces $cfg.networkPolicy.ingress) | indent 8 }}
-      {{- if or $.Values.defaults.networkPolicy.allowIstioIngress (and $cfg.networkPolicy $cfg.networkPolicy.allowIstioIngress) }}
-      - podSelector:
-          matchLabels:
-            istio: ingressgateway
-      {{- end }}
+{{ toYaml $ingressFrom | indent 8 }}
       ports:
         - port: {{ default $defaults.service.port $cfg.service.port }}
   egress:
-{{ toYaml (default $.Values.defaults.networkPolicy.egress $cfg.networkPolicy.egress) | indent 4 }}
+{{ toYaml (default $.Values.defaults.networkPolicy.egress $networkPolicy.egress) | indent 4 }}
 ---
 {{- end }}
 {{- if and $.Values.defaults.externalSecret.enabled $cfg.externalSecrets }}

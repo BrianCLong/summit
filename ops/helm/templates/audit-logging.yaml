@@ -3,6 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: audit-policy
+  namespace: {{ .Release.Namespace }}
   labels:
     summit.dev/component: audit
   annotations:
