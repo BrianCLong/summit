@@ -1,70 +1,84 @@
-# Packaging quickstart for signer, policy bundles, and dashboards
+# Packaging and deployment quickstart
 
-This guide describes how to ship the signer service, distribute policy bundles, and publish dashboards/alerts using the new Helm and Terraform assets.
+This quickstart shows how to ship the signer service alongside policy bundles and monitoring assets using the Helm charts and Terraform modules in this repository.
 
-## Prerequisites
+## Helm: signer service and policy bundles
 
-- Terraform v1.6+ and AWS credentials that allow KMS, S3, CloudWatch, and SNS.
-- Helm 3.10+.
-- Access to the container registry that hosts the signer image.
+1. Populate secrets required by the signer service (for example, a private key named `signer-key`).
+2. Update `helm/values.example.yaml` with registry URLs, bundle revisions, and alert thresholds that match your environment.
+3. Deploy the signer service and policy bundle ConfigMap:
 
-## 1) Provision release infrastructure with Terraform
+   ```bash
+   helm upgrade --install signer-service ./helm/signer-service -f helm/values.example.yaml --namespace security --create-namespace
+   helm upgrade --install policy-bundles ./helm/policy-bundles -f helm/values.example.yaml --namespace security
+   ```
 
-From `/workspace/summit/terraform`:
+4. Apply monitoring overrides (Grafana dashboards and Prometheus alerts) when installing kube-prometheus-stack:
+
+   ```bash
+   helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+   helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
+     -n monitoring --create-namespace \
+     -f helm/monitoring/values.yaml -f helm/values.example.yaml
+   ```
+
+The monitoring values include dashboards for signer health and policy bundle freshness plus alert rules that watch uptime, error ratios, and bundle download recency.
+
+## Terraform: keys and dashboards
+
+Use the new modules under `terraform/modules` to keep KMS keys and dashboards provisioned as code.
+
+```hcl
+variable "region" { default = "us-east-1" }
+variable "environment" { default = "dev" }
+
+locals {
+  common_tags = { Environment = var.environment }
+  signer_keys = {
+    signing = {
+      description             = "Signer service key"
+      enable_key_rotation     = true
+      deletion_window_in_days = 30
+      aliases                 = ["alias/${var.environment}-signer"]
+      key_admin_arns          = ["arn:aws:iam::123456789012:role/admin"]
+      key_user_arns           = ["arn:aws:iam::123456789012:role/signer-app"]
+    }
+  }
+  dashboards = {
+    "signer-health" = {
+      body = file("dashboards/signer-health.json")
+    }
+  }
+}
+
+module "kms_keys" {
+  source    = "./modules/kms"
+  for_each  = local.signer_keys
+  name      = each.key
+  aliases   = each.value.aliases
+  policy    = lookup(each.value, "policy", null)
+  tags      = local.common_tags
+  environment            = var.environment
+  description            = lookup(each.value, "description", null)
+  enable_key_rotation    = lookup(each.value, "enable_key_rotation", true)
+  deletion_window_in_days = lookup(each.value, "deletion_window_in_days", 30)
+  key_admin_arns         = lookup(each.value, "key_admin_arns", [])
+  key_user_arns          = lookup(each.value, "key_user_arns", [])
+}
+
+module "dashboards" {
+  source     = "./modules/observability"
+  dashboards = local.dashboards
+}
+```
+
+Apply with:
 
 ```bash
+cd terraform
 terraform init
-terraform apply \
-  -var="environment=staging" \
-  -var="region=us-east-1" \
-  -var="metrics_namespace=intelgraph"
+terraform plan -var="region=us-east-1" -var="environment=dev"
+terraform apply
 ```
 
-The modules create:
-
-- A KMS key and alias for signer tokens and bundle verification.
-- An encrypted, versioned S3 bucket for policy bundles and exported dashboards.
-- A CloudWatch dashboard plus SNS-backed alarms for signer latency and bundle freshness.
-
-Outputs printed by Terraform include the KMS alias ARN, bucket name, dashboard name, and the alert topic.
-
-## 2) Publish policy bundles and dashboards
-
-1. Package the Rego bundles and dashboards as tarballs (or plain JSON files) and upload them to the provisioned S3 bucket.
-2. Use the KMS key ARN from Terraform when signing bundles so the signer can verify them.
-
-## 3) Deploy the signer service
-
-Install the Helm chart with the provided example values:
-
-```bash
-helm upgrade --install signer ./helm/signer \
-  --namespace intelgraph-system --create-namespace \
-  -f helm/values.example.yaml
-```
-
-- `policyBundles.sources` should point at the S3 objects uploaded in step 2.
-- `SIGNING_KEY_ID` and `KMS_KEY_ARN` should use the Terraform outputs.
-- The ServiceMonitor included in the chart exposes metrics for Prometheus.
-
-## 4) Deploy dashboards and alerting
-
-Apply the monitoring chart to register the Grafana dashboards and Prometheus alerts:
-
-```bash
-helm upgrade --install monitoring ./helm/monitoring \
-  --namespace monitoring \
-  -f helm/values.example.yaml
-```
-
-The chart publishes:
-
-- Grafana dashboards for signer throughput, validation latency, and policy supply-chain health.
-- Prometheus rules for signer availability/validation errors and bundle staleness/signature failures.
-- An Alertmanager config with default and security routes; update the Slack webhook/channel before production.
-
-## 5) Validate the rollout
-
-- Confirm the signer Pods are ready: `kubectl get pods -n intelgraph-system -l app.kubernetes.io/name=signer`.
-- Verify bundles are mounted: `kubectl exec -n intelgraph-system deploy/signer -- cat /etc/policy/bundles.yaml`.
-- Check Grafana for the imported dashboards and ensure alerts wire to the SNS topic from Terraform.
+The KMS module handles rotation, aliasing, and IAM bindings, while the observability module provisions CloudWatch dashboards for the signer and policy bundle telemetry captured by Prometheus.

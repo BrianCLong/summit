@@ -24,6 +24,9 @@ import { getNeo4jDriver } from '../config/database.js';
 // @ts-ignore
 const logger = pino();
 
+const GRAPHIKA_LATENCY_TARGETS = { p95: 400, p99: 750 };
+const DEFAULT_MAX_TRAVERSAL_DEPTH = 3;
+
 export interface Investigation {
   id: string;
   tenantId: string;
@@ -51,6 +54,7 @@ export class CacheWarmingService {
   private neighborhoodCache: NeighborhoodCache;
   private neo4jDriver: any;
   private isWarming = false;
+  private latencySamples: Record<string, number[]> = {};
 
   constructor(
     cacheManager: RedisCacheManager,
@@ -67,6 +71,23 @@ export class CacheWarmingService {
     }
 
     logger.info('Cache Warming Service initialized', { config: this.config });
+  }
+
+  private recordLatency(bucket: string, durationMs: number): void {
+    if (!this.latencySamples[bucket]) {
+      this.latencySamples[bucket] = [];
+    }
+    this.latencySamples[bucket].push(durationMs);
+    if (this.latencySamples[bucket].length > 200) {
+      this.latencySamples[bucket] = this.latencySamples[bucket].slice(-200);
+    }
+  }
+
+  private percentile(values: number[], p: number): number {
+    if (!values.length) return 0;
+    const sorted = [...values].sort((a, b) => a - b);
+    const idx = Math.min(sorted.length - 1, Math.floor(sorted.length * p));
+    return sorted[idx];
   }
 
   /**
@@ -116,6 +137,33 @@ export class CacheWarmingService {
     logger.info('[CACHE WARM] Cron jobs scheduled successfully');
   }
 
+  private async getTopEntitiesByDegree(
+    session: any,
+    investigationId: string,
+    tenantId: string,
+    limit: number,
+  ): Promise<Array<{ id: string; degree: number }>> {
+    const result = await session.run(
+      `
+      MATCH (e:Entity {investigationId: $investigationId, tenantId: $tenantId})-[r]-(m:Entity)
+      WITH e, count(DISTINCT r) AS degree
+      ORDER BY degree DESC
+      LIMIT $topN
+      RETURN e.id AS id, degree
+      `,
+      {
+        investigationId,
+        tenantId,
+        topN: limit,
+      },
+    );
+
+    return result.records.map((record: any) => ({
+      id: record.get('id'),
+      degree: record.get('degree'),
+    }));
+  }
+
   /**
    * Warm top neighborhoods for active investigations
    * This is the most expensive operation, so we limit to top N entities
@@ -138,25 +186,15 @@ export class CacheWarmingService {
         const session = this.neo4jDriver.session();
 
         try {
-          // Get top N entities by degree centrality (most connected entities)
-          const result = await session.run(
-            `
-            MATCH (e:Entity {investigationId: $investigationId, tenantId: $tenantId})-[r]-(m:Entity)
-            WITH e, count(DISTINCT r) AS degree
-            ORDER BY degree DESC
-            LIMIT $topN
-            RETURN e.id AS id, degree
-            `,
-            {
-              investigationId: inv.id,
-              tenantId: inv.tenantId,
-              topN: this.config.neighborhoodTopN,
-            },
+          const topEntities = await this.getTopEntitiesByDegree(
+            session,
+            inv.id,
+            inv.tenantId,
+            this.config.neighborhoodTopN,
           );
 
-          for (const record of result.records) {
-            const entityId = record.get('id');
-            const degree = record.get('degree');
+          for (const { id: entityId, degree } of topEntities) {
+            const spanStart = Date.now();
 
             // Warm 2-hop neighborhood (most common query pattern)
             try {
@@ -173,6 +211,7 @@ export class CacheWarmingService {
                 graph,
               );
 
+              this.recordLatency('entity-expansion', Date.now() - spanStart);
               warmedCount++;
               logger.debug(
                 `[CACHE WARM] Warmed neighborhood for entity ${entityId} (degree: ${degree})`,
@@ -267,6 +306,8 @@ export class CacheWarmingService {
           300, // 5 minute TTL
         );
 
+        await this.warmDashboardViewsForInvestigation(inv);
+
         warmedCount++;
         logger.debug(`[CACHE WARM] Warmed metrics for investigation ${inv.id}`);
       } catch (error) {
@@ -275,6 +316,108 @@ export class CacheWarmingService {
     }
 
     logger.info(`[CACHE WARM] Metrics warming complete: ${warmedCount} investigations`);
+  }
+
+  /**
+   * Warm dashboards (entity expansion, shortest path, community search) for an investigation
+   */
+  private async warmDashboardViewsForInvestigation(inv: Investigation): Promise<void> {
+    const session = this.neo4jDriver.session();
+
+    try {
+      const topEntities = await this.getTopEntitiesByDegree(
+        session,
+        inv.id,
+        inv.tenantId,
+        Math.max(2, this.config.neighborhoodTopN || 10),
+      );
+
+      // Entity expansion cache (2-hop default for dashboards)
+      if (topEntities.length > 0) {
+        const entityId = topEntities[0].id;
+        const start = Date.now();
+        const expansion = await this.expandNeighborhood(entityId, 2, {
+          tenantId: inv.tenantId,
+          investigationId: inv.id,
+        });
+        await this.cacheManager.set(
+          'metrics',
+          `dashboard:expansion:${inv.id}:${entityId}`,
+          expansion,
+          inv.tenantId,
+          300,
+        );
+        this.recordLatency('entity-expansion', Date.now() - start);
+      }
+
+      // Shortest-path cache between two busiest nodes
+      if (topEntities.length > 1) {
+        const fromId = topEntities[0].id;
+        const toId = topEntities[1].id;
+        const start = Date.now();
+        try {
+          const pathResult = await session.run(
+            `
+            PROFILE
+            MATCH (a:Entity {id: $fromId, tenantId: $tenantId}), (b:Entity {id: $toId, tenantId: $tenantId})
+            MATCH p = shortestPath((a)-[*..4]-(b))
+            RETURN p
+            LIMIT 1
+            `,
+            { fromId, toId, tenantId: inv.tenantId },
+          );
+          const path = pathResult.records[0]?.get('p');
+          const summary = pathResult.summary.profile || pathResult.summary.plan;
+          const pathLength = path?.length || 0;
+          const dbHits = summary?.dbHits || 0;
+          await this.cacheManager.set(
+            'metrics',
+            `dashboard:path:${inv.id}:${fromId}:${toId}`,
+            { pathLength, fromId, toId, dbHits },
+            inv.tenantId,
+            300,
+          );
+        } catch (err) {
+          logger.warn({ err }, '[CACHE WARM] Shortest path warm failed');
+        } finally {
+          this.recordLatency('shortest-path', Date.now() - start);
+        }
+      }
+
+      // Community search warm (limited to top 50 communities)
+      const communityStart = Date.now();
+      try {
+        const communityResult = await session.run(
+          `
+          PROFILE
+          CALL gds.louvain.stream('communityGraph', { seedProperty: 'tenantId', concurrency: 4 })
+          YIELD nodeId, communityId
+          RETURN communityId, count(nodeId) AS members
+          ORDER BY members DESC
+          LIMIT 50
+          `,
+        );
+
+        const communities = communityResult.records.map((record: any) => ({
+          communityId: record.get('communityId'),
+          members: record.get('members'),
+        }));
+
+        await this.cacheManager.set(
+          'metrics',
+          `dashboard:communities:${inv.id}`,
+          communities,
+          inv.tenantId,
+          600,
+        );
+      } catch (err) {
+        logger.warn({ err }, '[CACHE WARM] Community cache warm failed');
+      } finally {
+        this.recordLatency('community-search', Date.now() - communityStart);
+      }
+    } finally {
+      await session.close();
+    }
   }
 
   /**
@@ -361,31 +504,60 @@ export class CacheWarmingService {
     context: { tenantId: string; investigationId: string },
   ): Promise<any> {
     const session = this.neo4jDriver.session();
+    const safeRadius = Math.min(radius, DEFAULT_MAX_TRAVERSAL_DEPTH);
+    const maxNodes = 200;
+    const maxRels = 400;
 
     try {
       const result = await session.run(
         `
-        MATCH path = (e:Entity {id: $entityId, tenantId: $tenantId, investigationId: $investigationId})-[*1..${radius}]-(connected:Entity {tenantId: $tenantId, investigationId: $investigationId})
-        WITH e, connected, relationships(path) AS rels
+        MATCH (e:Entity {id: $entityId, tenantId: $tenantId, investigationId: $investigationId})
+        CALL apoc.path.subgraphAll(e, {
+          relationshipFilter: 'RELATED_TO|RELATIONSHIP>',
+          labelFilter: 'Entity',
+          minLevel: 1,
+          maxLevel: $maxLevel,
+          bfs: true,
+          limit: $maxNodes,
+          filterStartNode: true,
+          uniqueness: 'NODE_PATH'
+        }) YIELD nodes, relationships
+        WITH apoc.coll.take(nodes, $maxNodes) AS nodes, apoc.coll.take(relationships, $maxRels) AS rels
+        UNWIND nodes AS connected
         RETURN DISTINCT connected, rels
-        LIMIT 100
+        LIMIT $maxNodes
         `,
         {
           entityId,
           tenantId: context.tenantId,
           investigationId: context.investigationId,
+          maxLevel: safeRadius,
+          maxNodes,
+          maxRels,
         },
       );
 
-      const nodes = [];
-      const edges = [];
+      const nodes: Array<{ id: string }> = [];
+      const nodeIds = new Set<string>();
+      const edges: Array<{ id: string }> = [];
+      const edgeIds = new Set<string>();
 
       for (const record of result.records) {
         const connected = record.get('connected');
-        const rels = record.get('rels');
+        const rels = record.get('rels') || [];
 
-        nodes.push({ id: connected.properties.id });
-        edges.push(...rels.map((r: any) => ({ id: r.identity.toString() })));
+        if (!nodeIds.has(connected.properties.id)) {
+          nodeIds.add(connected.properties.id);
+          nodes.push({ id: connected.properties.id });
+        }
+
+        rels.forEach((r: any) => {
+          const relId = r.identity.toString();
+          if (!edgeIds.has(relId)) {
+            edgeIds.add(relId);
+            edges.push({ id: relId });
+          }
+        });
       }
 
       return { nodes, edges };
@@ -497,10 +669,24 @@ export class CacheWarmingService {
    * Get cache warming statistics
    */
   getStats(): any {
+    const buckets: Record<string, { p95: number; p99: number; meetsGraphika: boolean }> = {};
+
+    Object.entries(this.latencySamples).forEach(([bucket, samples]) => {
+      const p95 = this.percentile(samples, 0.95);
+      const p99 = this.percentile(samples, 0.99);
+      buckets[bucket] = {
+        p95,
+        p99,
+        meetsGraphika: p95 <= GRAPHIKA_LATENCY_TARGETS.p95 && p99 <= GRAPHIKA_LATENCY_TARGETS.p99,
+      };
+    });
+
     return {
       isWarming: this.isWarming,
       config: this.config,
       cacheStats: this.cacheManager.getAllStats(),
+      latency: buckets,
+      targets: GRAPHIKA_LATENCY_TARGETS,
     };
   }
 
