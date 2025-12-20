@@ -13,9 +13,16 @@ import {
 } from '../graph/types';
 import { getDriver, runCypher } from '../graph/neo4j';
 import logger from '../utils/logger';
+import { cacheService } from './cacheService';
 
 export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
   private static instance: Neo4jGraphAnalyticsService;
+
+  // Protected dependencies for testing override
+  protected deps = {
+    getDriver,
+    runCypher
+  };
 
   public static getInstance(): Neo4jGraphAnalyticsService {
     if (!Neo4jGraphAnalyticsService.instance) {
@@ -42,65 +49,59 @@ export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
     maxDepth?: number;
   }): Promise<PathResult | null> {
     const { tenantId, from, to, maxDepth = 6 } = params;
+    const cacheKey = `graph:shortestPath:${tenantId}:${from}:${to}:${maxDepth}`;
 
-    const cypher = `
-      MATCH (start:Entity {id: $from, tenantId: $tenantId}), (end:Entity {id: $to, tenantId: $tenantId})
-      MATCH p = shortestPath((start)-[*..${maxDepth}]-(end))
-      RETURN p
-    `;
+    return cacheService.getOrSet(cacheKey, async () => {
+      const cypher = `
+        MATCH (start:Entity {id: $from, tenantId: $tenantId}), (end:Entity {id: $to, tenantId: $tenantId})
+        MATCH p = shortestPath((start)-[*..${maxDepth}]-(end))
+        RETURN p
+      `;
 
-    try {
-      // Need raw session for Path object handling if we want to parse it manually,
-      // but runCypher returns record objects.
-      // neo4j-driver Path objects are complex.
-      // Let's rely on mapping nodes and relationships from the path.
-
-      const session = getDriver().session();
       try {
-        const result = await session.run(cypher, { from, to, tenantId });
-        if (result.records.length === 0) return null;
+        const session = this.deps.getDriver().session();
+        try {
+          const result = await session.run(cypher, { from, to, tenantId });
+          if (result.records.length === 0) return null;
 
-        const path = result.records[0].get('p');
-        const nodes: Entity[] = [];
-        const edges: Edge[] = [];
+          const path = result.records[0].get('p');
+          const nodes: Entity[] = [];
+          const edges: Edge[] = [];
 
-        // Traverse path segments
-        path.segments.forEach((seg: any) => {
-           // Mapping neo4j node to Entity
-           const startNode = seg.start.properties;
-           const endNode = seg.end.properties;
-           const rel = seg.relationship.properties;
+          path.segments.forEach((seg: any) => {
+             const startNode = seg.start.properties;
+             const endNode = seg.end.properties;
+             const rel = seg.relationship.properties;
 
-           // Ensure we map standard fields and JSON fields
-           const mapNode = (n: any) : Entity => ({
-               ...n,
-               attributes: typeof n.attributes === 'string' ? JSON.parse(n.attributes) : n.attributes || {},
-               metadata: typeof n.metadata === 'string' ? JSON.parse(n.metadata) : n.metadata || {}
-           });
+             const mapNode = (n: any) : Entity => ({
+                 ...n,
+                 attributes: typeof n.attributes === 'string' ? JSON.parse(n.attributes) : n.attributes || {},
+                 metadata: typeof n.metadata === 'string' ? JSON.parse(n.metadata) : n.metadata || {}
+             });
 
-           const mapEdge = (r: any, fromId: string, toId: string, type: string) : Edge => ({
-               ...r,
-               fromEntityId: fromId,
-               toEntityId: toId,
-               type: type,
-               attributes: typeof r.attributes === 'string' ? JSON.parse(r.attributes) : r.attributes || {},
-               metadata: typeof r.metadata === 'string' ? JSON.parse(r.metadata) : r.metadata || {}
-           });
+             const mapEdge = (r: any, fromId: string, toId: string, type: string) : Edge => ({
+                 ...r,
+                 fromEntityId: fromId,
+                 toEntityId: toId,
+                 type: type,
+                 attributes: typeof r.attributes === 'string' ? JSON.parse(r.attributes) : r.attributes || {},
+                 metadata: typeof r.metadata === 'string' ? JSON.parse(r.metadata) : r.metadata || {}
+             });
 
-           // Add unique nodes/edges (simple de-dupe by id)
-           if (!nodes.find(n => n.id === startNode.id)) nodes.push(mapNode(startNode));
-           if (!nodes.find(n => n.id === endNode.id)) nodes.push(mapNode(endNode));
-           if (!edges.find(e => e.id === rel.id)) edges.push(mapEdge(rel, startNode.id, endNode.id, seg.relationship.type));
-        });
+             if (!nodes.find(n => n.id === startNode.id)) nodes.push(mapNode(startNode));
+             if (!nodes.find(n => n.id === endNode.id)) nodes.push(mapNode(endNode));
+             if (!edges.find(e => e.id === rel.id)) edges.push(mapEdge(rel, startNode.id, endNode.id, seg.relationship.type));
+          });
 
-        return { nodes, edges, cost: path.length };
-      } finally {
-        await session.close();
+          return { nodes, edges, cost: path.length };
+        } finally {
+          await session.close();
+        }
+      } catch (error) {
+        logger.error('Error finding shortest path', { error, params });
+        throw error;
       }
-    } catch (error) {
-      logger.error('Error finding shortest path', { error, params });
-      throw error;
-    }
+    }, 60 * 5); // 5 min cache
   }
 
   async kHopNeighborhood(params: {
@@ -109,117 +110,10 @@ export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
     depth: number;
   }): Promise<Subgraph> {
     const { tenantId, seedIds, depth } = params;
+    const sortedSeedIds = [...seedIds].sort().join(',');
+    const cacheKey = `graph:kHop:${tenantId}:${sortedSeedIds}:${depth}`;
 
-    // Safety check for depth
-    const safeDepth = Math.min(depth, 3);
-
-    const cypher = `
-      MATCH (n:Entity {tenantId: $tenantId})
-      WHERE n.id IN $seedIds
-      CALL apoc.path.subgraphAll(n, {
-        maxLevel: $depth,
-        relationshipFilter: '>'
-      })
-      YIELD nodes, relationships
-      RETURN nodes, relationships
-    `;
-
-    // Fallback if APOC is not available:
-    const fallbackCypher = `
-      MATCH (n:Entity {tenantId: $tenantId})
-      WHERE n.id IN $seedIds
-      MATCH p = (n)-[*..${safeDepth}]-(m:Entity {tenantId: $tenantId})
-      WITH collect(p) as paths
-      WITH apoc.coll.toSet([n in nodes(paths) | n]) as nodes,
-           apoc.coll.toSet([r in relationships(paths) | r]) as relationships
-      RETURN nodes, relationships
-    `;
-
-    // MVP without APOC requirement (safest for now)
-    const simpleCypher = `
-      MATCH (n:Entity {tenantId: $tenantId})
-      WHERE n.id IN $seedIds
-      MATCH (n)-[r*..${safeDepth}]-(m:Entity {tenantId: $tenantId})
-      UNWIND r as rel
-      WITH collect(distinct n) + collect(distinct m) as allNodes, collect(distinct rel) as allRels
-      UNWIND allNodes as node
-      RETURN collect(distinct node) as nodes, collect(distinct allRels) as relationships
-    `;
-    // Wait, the above logic is a bit slightly flawed in unwinding/collecting.
-    // Better:
-    const betterCypher = `
-        MATCH (start:Entity {tenantId: $tenantId})
-        WHERE start.id IN $seedIds
-        MATCH path = (start)-[*0..${safeDepth}]-(end:Entity {tenantId: $tenantId})
-        WITH collect(path) as paths
-        WITH [p in paths | nodes(p)] as nodesLists, [p in paths | relationships(p)] as relsLists
-        UNWIND nodesLists as nodeList
-        UNWIND relsLists as relList
-        UNWIND nodeList as n
-        UNWIND relList as r
-        RETURN collect(distinct n) as nodes, collect(distinct r) as relationships
-    `;
-
-    const result = await runCypher<{ nodes: any[], relationships: any[] }>(betterCypher, {
-        tenantId,
-        seedIds,
-    });
-
-    if (result.length === 0) return { nodes: [], edges: [] };
-
-    const rawNodes = result[0].nodes;
-    const rawRels = result[0].relationships;
-
-    // We assume rawNodes/rawRels are Neo4j node/rel objects
-    // But `runCypher` calls `r.toObject()`, so they are plain objects.
-    // Wait, runCypher implementation maps `r.toObject()`.
-    // If we return a list of nodes in a single record, `r.toObject()` on the record returns { nodes: [...], relationships: [...] }
-    // Inside the list, if they are Node objects, `toObject` might not recursively convert them if they are complex types in the library.
-    // But usually `toObject` converts the Record structure. The values inside might still be Node/Relationship objects.
-    // We need to handle that.
-
-    // For now, assuming runCypher return is clean enough or we need to fix it.
-    // Actually, `runCypher` implementation: `return res.records.map((r) => r.toObject())`.
-    // The values inside `r.toObject()` (like `nodes` array) will contain Neo4j Node objects, not plain JS objects unless we manually map them.
-
-    // Let's refine runCypher or handle it here.
-    // Since I can't easily change runCypher across the board safely without checking usage, I will handle conversion here if needed.
-    // But wait, `runCypher` is just a helper. I can use the driver directly for complex mapping.
-
-    const nodes: Entity[] = rawNodes.map((n: any) => ({
-        ...n.properties,
-        attributes: typeof n.properties.attributes === 'string' ? JSON.parse(n.properties.attributes) : n.properties.attributes || {},
-        metadata: typeof n.properties.metadata === 'string' ? JSON.parse(n.properties.metadata) : n.properties.metadata || {}
-    }));
-
-    const edges: Edge[] = rawRels.map((r: any) => ({
-        ...r.properties,
-        // relationships in neo4j driver result usually have start/end/type fields accessible on the object, not in properties.
-        // But if `runCypher` returned them, they might be just the objects.
-        // If we used `collect(distinct r)`, we get Relationship objects.
-        // We need startNodeElementId or similar to link.
-        // BUT, `runCypher` uses `disableLosslessIntegers: true`.
-        // Let's assume we need to fetch fromId and toId differently or use a map projection in Cypher.
-
-        // Better Strategy: Map in Cypher!
-
-        fromEntityId: "unknown", // Placeholder, see Better Strategy below
-        toEntityId: "unknown",
-        type: r.type,
-         attributes: typeof r.properties.attributes === 'string' ? JSON.parse(r.properties.attributes) : r.properties.attributes || {},
-        metadata: typeof r.properties.metadata === 'string' ? JSON.parse(r.properties.metadata) : r.properties.metadata || {}
-    }));
-
-    return { nodes, edges };
-  }
-
-  // Re-implementing kHopNeighborhood with Map Projection for safety and ease
-  async kHopNeighborhoodSafe(params: {
-    tenantId: TenantId;
-    seedIds: EntityId[];
-    depth: number;
-  }): Promise<Subgraph> {
-      const { tenantId, seedIds, depth } = params;
+    return cacheService.getOrSet(cacheKey, async () => {
       const safeDepth = Math.min(depth, 3);
 
       const cypher = `
@@ -235,7 +129,7 @@ export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
           [r in rels | r { .*, type: type(r), fromEntityId: startNode(r).id, toEntityId: endNode(r).id }] as edges
       `;
 
-      const result = await runCypher<{ nodes: any[], edges: any[] }>(cypher, { tenantId, seedIds });
+      const result = await this.deps.runCypher<{ nodes: any[], edges: any[] }>(cypher, { tenantId, seedIds });
       if (result.length === 0) return { nodes: [], edges: [] };
 
       const row = result[0];
@@ -256,12 +150,13 @@ export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
           nodes: row.nodes.map(mapEntity),
           edges: row.edges.map(mapEdge)
       };
+    }, 60 * 10); // 10 min cache
   }
 
   async centrality(params: {
     tenantId: TenantId;
     scope: GraphScope;
-    algorithm: 'degree' | 'betweenness' | 'eigenvector';
+    algorithm: 'degree' | 'betweenness' | 'eigenvector' | 'pageRank';
   }): Promise<CentralityResult[]> {
     const { tenantId, scope, algorithm } = params;
 
@@ -270,12 +165,12 @@ export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
        const cypher = `
          MATCH (n:Entity {tenantId: $tenantId})
          WHERE 1=1 ${this.buildScopeConstraints(scope)}
-         OPTIONAL MATCH (n)-[r]-() // degree is undirected usually, or total degree
+         OPTIONAL MATCH (n)-[r]-()
          RETURN n.id as entityId, count(r) as score
          ORDER BY score DESC
          LIMIT 100
        `;
-       const result = await runCypher<{entityId: string, score: number}>(cypher, {
+       const result = await this.deps.runCypher<{entityId: string, score: number}>(cypher, {
            tenantId,
            investigationId: scope.investigationId,
            collectionId: scope.collectionId
@@ -288,24 +183,138 @@ export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
        }));
     }
 
+    if (algorithm === 'pageRank') {
+       // Optimization: Avoid unbounded neighborhood expansion.
+       // We use a simplified iterative approach restricted to the top connected nodes to avoid O(N^2) blowup.
+
+       const cypher = `
+         MATCH (n:Entity {tenantId: $tenantId})
+         WHERE 1=1 ${this.buildScopeConstraints(scope)}
+         // First, get degree to filter top candidates for influence check
+         OPTIONAL MATCH (n)-[r]-()
+         WITH n, count(r) as degree
+         ORDER BY degree DESC
+         LIMIT 200 // Analyze top 200 nodes only for MVP performance safety
+
+         // Now look at their neighbors' influence (2nd hop)
+         OPTIONAL MATCH (n)-[]-(neighbor)
+         WITH n, degree, neighbor
+         OPTIONAL MATCH (neighbor)-[r2]-()
+         WITH n, degree, neighbor, count(r2) as neighbor_degree
+
+         // Sum neighbor degrees as proxy for influence (PageRank-ish)
+         WITH n, degree, sum(log(neighbor_degree + 1)) as influence_proxy
+         RETURN n.id as entityId, (degree + influence_proxy) as score
+         ORDER BY score DESC
+         LIMIT 100
+       `;
+
+       try {
+           const result = await this.deps.runCypher<{entityId: string, score: number}>(cypher, {
+               tenantId,
+               investigationId: scope.investigationId,
+               collectionId: scope.collectionId
+           });
+
+           return result.map((r, i) => ({
+               entityId: r.entityId,
+               score: Number(r.score),
+               rank: i + 1
+           }));
+       } catch (e) {
+           logger.warn('PageRank calculation failed, falling back to degree', e);
+           return this.centrality({ ...params, algorithm: 'degree' });
+       }
+    }
+
     // Betweenness and Eigenvector require GDS or heavy computation.
-    // For MVP, we throw or return empty if not available, OR implement a simplified approximation/fallback.
-    // Prompt says "where feasible".
+    // For MVP, we throw or return empty if not available.
     return [];
   }
 
   async communities(params: {
     tenantId: TenantId;
     scope: GraphScope;
+    algorithm?: 'wcc' | 'louvain' | 'labelPropagation';
   }): Promise<CommunityResult[]> {
-     const { tenantId, scope } = params;
+     const { tenantId, scope, algorithm = 'wcc' } = params;
 
-     // MVP: Weakly Connected Components (via simple traversal or GDS if available)
-     // A simple "label propagation" approximation in pure Cypher is hard and slow.
-     // We will return a placeholder or use a very simple connected component check for small subgraphs.
+     // MVP: Weakly Connected Components (via simple traversal)
+     // Finding connected components in pure Cypher for a scope.
+     // This constructs a list of node IDs for each component.
 
-     // Let's assume for MVP we just return nothing or a mock if GDS isn't present.
-     // Or we can try to find connected components for the given scope.
+     if (algorithm === 'wcc' || algorithm === 'louvain' || algorithm === 'labelPropagation') {
+        // Label Propagation / Community Detection via Cypher Heuristic
+        // Without GDS, we use a simple "Shared Neighbor Clustering" approach.
+        // Two nodes are in the same community if they share > X neighbors.
+
+        // Optimization: Avoid O(N^2) Cartesian product.
+        // We match actual relationships in the graph first.
+        const cypher = `
+            MATCH (n1:Entity {tenantId: $tenantId})
+            WHERE 1=1 ${this.buildScopeConstraints(scope, 'n1')}
+            MATCH (n1)-[]-(n2:Entity {tenantId: $tenantId})
+            WHERE elementId(n1) < elementId(n2) ${this.buildScopeConstraints(scope, 'n2').replace(/AND n\./g, 'AND n2.')}
+
+            // We consider direct connections as strong evidence for community in this simple heuristic
+            // We can also look for shared neighbors if we want density check
+            WITH n1, n2
+            OPTIONAL MATCH (n1)-[]-(common)-[]-(n2)
+            WITH n1, n2, count(common) as shared
+
+            // Weight = 1 (direct) + shared
+            WITH n1, n2, (1 + shared) as weight
+            WHERE weight > 1 // Filter weak links
+
+            RETURN n1.id as id1, n2.id as id2, weight
+            ORDER BY weight DESC
+            LIMIT 200
+        `;
+
+        // Note: This returns pairs, not full communities.
+        // We will perform a simple client-side aggregation to form clusters.
+
+        try {
+            const result = await this.deps.runCypher<{id1: string, id2: string, weight: number}>(cypher, {
+                tenantId,
+                investigationId: scope.investigationId,
+                collectionId: scope.collectionId
+            });
+
+            // Simple Union-Find to group into communities
+            const parent = new Map<string, string>();
+            const find = (id: string): string => {
+                if (!parent.has(id)) parent.set(id, id);
+                if (parent.get(id) !== id) parent.set(id, find(parent.get(id)!));
+                return parent.get(id)!;
+            };
+            const union = (id1: string, id2: string) => {
+                const root1 = find(id1);
+                const root2 = find(id2);
+                if (root1 !== root2) parent.set(root1, root2);
+            };
+
+            result.forEach(r => union(r.id1, r.id2));
+
+            // Group by root
+            const clusters = new Map<string, string[]>();
+            parent.forEach((_, id) => {
+                const root = find(id);
+                if (!clusters.has(root)) clusters.set(root, []);
+                clusters.get(root)?.push(id);
+            });
+
+            return Array.from(clusters.entries()).map(([root, members]) => ({
+                communityId: root,
+                entityIds: members,
+                size: members.length
+            }));
+
+        } catch (e) {
+            logger.warn('Community detection failed', e);
+            return [];
+        }
+     }
 
      return [];
   }
@@ -332,7 +341,7 @@ export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
             LIMIT 50
         `;
 
-        const result = await runCypher<{entityId: string, score: number}>(cypher, {
+        const result = await this.deps.runCypher<{entityId: string, score: number}>(cypher, {
              tenantId,
              investigationId: scope.investigationId,
              collectionId: scope.collectionId
@@ -349,3 +358,5 @@ export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
     return [];
   }
 }
+
+export default Neo4jGraphAnalyticsService;

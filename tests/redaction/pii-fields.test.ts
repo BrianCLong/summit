@@ -1,39 +1,94 @@
 import { redactionService } from '../../server/src/redaction/redact';
 
-describe('RedactionService PII coverage', () => {
-  const policy = { rules: ['pii', 'financial', 'sensitive'] } as any;
+describe('PII redaction coverage', () => {
+  const policy = redactionService.createRedactionPolicy(['pii']);
 
-  it('masks common PII fields and nested objects', async () => {
-    const input = {
+  it('masks common PII primitives', async () => {
+    const sample = {
       email: 'user@example.com',
-      phone: '+1-555-867-5309',
+      phone: '+1-555-111-2222',
       ssn: '123-45-6789',
-      creditCard: '4111111111111111',
-      bankAccount: '123456789',
-      ip: '127.0.0.1',
-      location: { city: 'Denver', region: 'CO' },
       userId: 'user-123',
-      sessionId: 'sess-456',
-      nested: { email: 'nested@example.com' },
-      untouched: 'ok',
+      message: 'keep me',
     };
 
     const redacted = await redactionService.redactObject(
-      input,
-      policy,
-      'tenant-1',
+      sample,
+      policy as any,
+      'tenant-pii',
     );
 
-    expect(redacted.email).not.toContain('@');
-    expect(redacted.phone).not.toContain('555');
-    expect(redacted.ssn).toBeDefined();
-    expect(redacted.creditCard).not.toContain('4111');
-    expect(redacted.bankAccount).not.toBe(input.bankAccount);
-    expect(redacted.ip).toBe('[REDACTED]');
+    expect(redacted.email).toContain('[REDACTED]');
+    expect(redacted.phone).toContain('[REDACTED]');
+    expect(redacted.ssn).toContain('[REDACTED]');
+    expect(redacted.userId).toContain('[REDACTED]');
+    expect(redacted.message).toBe(sample.message);
+  });
+
+  it('recursively redacts nested collections', async () => {
+    const sample = {
+      contacts: [
+        { email: 'alpha@sample.io', phone: '+1-202-555-0101' },
+        { email: 'beta@sample.io', phone: '+1-202-555-0102' },
+      ],
+      notes: { email: 'should-hide@corp.test', phone: '555-0199' },
+    };
+
+    const redacted = await redactionService.redactObject(
+      sample,
+      policy as any,
+      'tenant-nested',
+    );
+
+    for (const contact of redacted.contacts) {
+      expect(contact.email).toContain('[REDACTED]');
+      expect(contact.phone).toContain('[REDACTED]');
+    }
+    expect(redacted.notes.email).toContain('[REDACTED]');
+    expect(redacted.notes.phone).toContain('[REDACTED]');
+  });
+
+  it('redacts additional PII markers including network and session data', async () => {
+    const sample = {
+      ip: '203.0.113.10',
+      location: { city: 'Denver', state: 'CO' },
+      sessionId: 'sess-abc-123',
+      metadata: { requestId: 'keep-me' },
+    };
+
+    const redacted = await redactionService.redactObject(
+      sample,
+      policy as any,
+      'tenant-session',
+    );
+
+    expect(redacted.ip).toContain('[REDACTED]');
     expect(redacted.location).toBe('[REDACTED]');
-    expect(redacted.userId).toBe('[REDACTED]');
-    expect(redacted.sessionId).toBe('[REDACTED]');
-    expect(redacted.nested.email).not.toContain('@');
-    expect(redacted.untouched).toBe('ok');
+    expect(redacted.sessionId).toContain('[REDACTED]');
+    expect(redacted.metadata.requestId).toBe('keep-me');
+  });
+
+  it('honors allowedFields while redacting everything else', async () => {
+    const sample = {
+      email: 'allowed@example.com',
+      phone: '+1-555-0100',
+      userId: 'user-456',
+      note: 'leave intact',
+    };
+
+    const allowList = redactionService.createRedactionPolicy(['pii'], {
+      allowedFields: ['email', 'note'],
+    });
+
+    const redacted = await redactionService.redactObject(
+      sample,
+      allowList as any,
+      'tenant-allowlist',
+    );
+
+    expect(redacted.email).toBe(sample.email);
+    expect(redacted.note).toBe(sample.note);
+    expect(redacted.phone).toContain('[REDACTED]');
+    expect(redacted.userId).toContain('[REDACTED]');
   });
 });

@@ -18,18 +18,11 @@ jest.mock('../../metrics/disclosureMetrics.js', () => ({
   },
 }));
 
-jest.mock('../../governance/governance-bundle.js', () => ({
-  generateGovernanceBundle: jest.fn(),
-}));
-
 const { disclosureExportService } = jest.requireMock(
   '../../disclosure/export-service.js',
 );
 const { disclosureMetrics } = jest.requireMock(
   '../../metrics/disclosureMetrics.js',
-);
-const { generateGovernanceBundle } = jest.requireMock(
-  '../../governance/governance-bundle.js',
 );
 
 import disclosuresRouter from '../disclosures.js';
@@ -41,50 +34,6 @@ app.use('/disclosures', disclosuresRouter);
 describe('Disclosures routes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  describe('POST /disclosures/governance-bundle', () => {
-    it('generates a governance bundle and returns download links', async () => {
-      const tempDir = fs.mkdtempSync(path.join(process.cwd(), 'tmp-gov-'));
-      const tarPath = path.join(tempDir, 'bundle.tar.gz');
-      const manifestPath = path.join(tempDir, 'manifest.json');
-      const checksumsPath = path.join(tempDir, 'checksums.txt');
-      fs.writeFileSync(tarPath, 'bundle');
-      fs.writeFileSync(manifestPath, '{}');
-      fs.writeFileSync(checksumsPath, 'sha');
-
-      generateGovernanceBundle.mockResolvedValueOnce({
-        id: 'gov-1',
-        tarPath,
-        manifestPath,
-        checksumsPath,
-        sha256: 'abc123',
-        counts: {
-          auditEvents: 2,
-          policyDecisions: 1,
-          sbomRefs: 1,
-          provenanceRefs: 1,
-        },
-        warnings: [],
-        files: [],
-        workspace: tempDir,
-      });
-
-      const response = await request(app)
-        .post('/disclosures/governance-bundle')
-        .set('x-tenant-id', 'tenant-a')
-        .send({
-          tenantId: 'tenant-a',
-          startTime: '2024-01-01T00:00:00Z',
-          endTime: '2024-01-02T00:00:00Z',
-        });
-
-      expect(response.status).toBe(201);
-      expect(response.body.bundle.id).toEqual('gov-1');
-      expect(response.body.bundle.downloadUrl).toContain('gov-1');
-      expect(response.body.bundle.manifestUrl).toContain('gov-1');
-      expect(response.body.bundle.checksumsUrl).toContain('gov-1');
-    });
   });
 
   describe('POST /disclosures/export', () => {
@@ -206,65 +155,6 @@ describe('Disclosures routes', () => {
         'view',
         'tenant-a',
       );
-    });
-  });
-
-  describe('Governance bundle downloads', () => {
-    it('streams governance tarball when bundle exists and tenant matches', async () => {
-      const tempDir = fs.mkdtempSync(path.join(process.cwd(), 'tmp-gov-'));
-      const tarPath = path.join(tempDir, 'bundle.tar.gz');
-      const manifestPath = path.join(tempDir, 'manifest.json');
-      const checksumsPath = path.join(tempDir, 'checksums.txt');
-      fs.writeFileSync(tarPath, 'bundle-data');
-      fs.writeFileSync(manifestPath, '{}');
-      fs.writeFileSync(checksumsPath, 'sha');
-
-      generateGovernanceBundle.mockResolvedValueOnce({
-        id: 'gov-2',
-        tarPath,
-        manifestPath,
-        checksumsPath,
-        sha256: 'abc123',
-        counts: {
-          auditEvents: 1,
-          policyDecisions: 1,
-          sbomRefs: 1,
-          provenanceRefs: 1,
-        },
-        warnings: [],
-        files: [],
-        workspace: tempDir,
-      });
-
-      await request(app)
-        .post('/disclosures/governance-bundle')
-        .set('x-tenant-id', 'tenant-a')
-        .send({
-          tenantId: 'tenant-a',
-          startTime: '2024-01-01T00:00:00Z',
-          endTime: '2024-01-02T00:00:00Z',
-        });
-
-      const download = await request(app)
-        .get('/disclosures/governance-bundle/gov-2/download')
-        .set('x-tenant-id', 'tenant-a');
-
-      expect(download.status).toBe(200);
-      expect(download.headers['content-disposition']).toContain('attachment');
-
-      const manifest = await request(app)
-        .get('/disclosures/governance-bundle/gov-2/manifest')
-        .set('x-tenant-id', 'tenant-a');
-
-      expect(manifest.status).toBe(200);
-
-      const checksums = await request(app)
-        .get('/disclosures/governance-bundle/gov-2/checksums')
-        .set('x-tenant-id', 'tenant-a');
-
-      expect(checksums.status).toBe(200);
-
-      fs.rmSync(tempDir, { recursive: true, force: true });
     });
   });
 });

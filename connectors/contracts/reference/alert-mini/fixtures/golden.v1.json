@@ -1,0 +1,106 @@
+{
+  "snapshotVersion": "alerts.v1",
+  "generatedAt": "2025-02-05T00:00:00Z",
+  "connectorId": "alert-mini",
+  "outputSchemaVersion": "canonical.v1",
+  "entities": [
+    {
+      "id": "srv-1",
+      "type": "Asset",
+      "properties": {
+        "hostname": "core-1",
+        "owner": "core-team"
+      },
+      "source": "detections-lab"
+    },
+    {
+      "id": "srv-2",
+      "type": "Asset",
+      "properties": {
+        "hostname": "edge-2",
+        "owner": "edge-team"
+      },
+      "source": "detections-lab"
+    },
+    {
+      "id": "alert-100",
+      "type": "Alert",
+      "properties": {
+        "title": "Unauthorized SSH",
+        "severity": "medium",
+        "reported_by": "***@example.com",
+        "asset_id": "srv-1",
+        "observed_at": "2025-02-01T08:00:00Z"
+      },
+      "source": "detections-lab"
+    },
+    {
+      "id": "alert-101",
+      "type": "Alert",
+      "properties": {
+        "title": "Unusual data egress",
+        "severity": "high",
+        "reported_by": "***@example.com",
+        "asset_id": "srv-2",
+        "observed_at": "2025-02-01T09:30:00Z"
+      },
+      "source": "detections-lab"
+    }
+  ],
+  "relationships": [
+    {
+      "type": "targets",
+      "source": "alert-100",
+      "target": "srv-1",
+      "properties": {
+        "reason": "Unauthorized SSH"
+      }
+    },
+    {
+      "type": "targets",
+      "source": "alert-101",
+      "target": "srv-2",
+      "properties": {
+        "reason": "Unusual data egress"
+      }
+    }
+  ],
+  "provenance": [
+    {
+      "entityId": "srv-1",
+      "sourceConnector": "alert-mini",
+      "source": "./fixtures/alerts.json",
+      "steps": [
+        { "stage": "fixture", "detail": "connectors/contracts/reference/alert-mini/fixtures/alerts.json" },
+        { "stage": "mapping", "hint": "asset-record" }
+      ]
+    },
+    {
+      "entityId": "srv-2",
+      "sourceConnector": "alert-mini",
+      "source": "./fixtures/alerts.json",
+      "steps": [
+        { "stage": "fixture", "detail": "connectors/contracts/reference/alert-mini/fixtures/alerts.json" },
+        { "stage": "mapping", "hint": "asset-record" }
+      ]
+    },
+    {
+      "entityId": "alert-100",
+      "sourceConnector": "alert-mini",
+      "source": "./fixtures/alerts.json",
+      "steps": [
+        { "stage": "fixture", "detail": "connectors/contracts/reference/alert-mini/fixtures/alerts.json" },
+        { "stage": "mapping", "hint": "alert-record" }
+      ]
+    },
+    {
+      "entityId": "alert-101",
+      "sourceConnector": "alert-mini",
+      "source": "./fixtures/alerts.json",
+      "steps": [
+        { "stage": "fixture", "detail": "connectors/contracts/reference/alert-mini/fixtures/alerts.json" },
+        { "stage": "mapping", "hint": "alert-record" }
+      ]
+    }
+  ]
+}

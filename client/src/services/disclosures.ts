@@ -18,19 +18,22 @@ export interface DisclosureJob {
   error?: string;
 }
 
-export interface GovernanceBundle {
+export interface RuntimeEvidenceBundle {
   id: string;
+  tenantId: string;
   sha256: string;
+  deployedVersion?: string;
   warnings: string[];
+  downloadUrl?: string;
+  manifestUrl?: string;
+  checksumsUrl?: string;
+  expiresAt: string;
   counts: {
     auditEvents: number;
     policyDecisions: number;
     sbomRefs: number;
     provenanceRefs: number;
   };
-  downloadUrl: string;
-  manifestUrl: string;
-  checksumsUrl: string;
 }
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
@@ -117,12 +120,16 @@ export async function sendDisclosureAnalyticsEvent(
   }
 }
 
-export async function createGovernanceBundle(payload: {
+export async function createRuntimeEvidenceBundle(payload: {
   tenantId: string;
-  startTime: string;
-  endTime: string;
-}): Promise<GovernanceBundle> {
-  const response = await fetch(`${API_BASE}/disclosures/governance-bundle`, {
+  startTime?: string;
+  endTime?: string;
+  auditPaths?: string[];
+  policyPaths?: string[];
+  sbomPaths?: string[];
+  provenancePaths?: string[];
+}): Promise<RuntimeEvidenceBundle> {
+  const response = await fetch(`${API_BASE}/disclosures/runtime-bundle`, {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
@@ -131,6 +138,7 @@ export async function createGovernanceBundle(payload: {
     credentials: 'include',
     body: JSON.stringify(payload),
   });
-  const body = await handleResponse<{ bundle: GovernanceBundle }>(response);
+
+  const body = await handleResponse<{ bundle: RuntimeEvidenceBundle }>(response);
   return body.bundle;
 }
