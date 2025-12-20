@@ -1,6 +1,7 @@
 name: rss-news-connector
 description: RSS/Atom news feed connector for threat intelligence and news ingestion
 version: 1.0.0
+author: IntelGraph Team
 ingestion_type: streaming
 supported_formats:
   - rss

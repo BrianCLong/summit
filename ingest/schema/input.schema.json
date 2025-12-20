@@ -1,0 +1,249 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://companyos.example.com/schemas/ingest/input.schema.json",
+  "title": "Ingest Input Envelope v1",
+  "description": "Canonical envelope for all ingest/ETL records. Extends base event envelope with ingest-specific metadata for backpressure, replay, and idempotency.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "event_id": {
+      "description": "Stable, unique identifier for the ingest record (UUIDv4 recommended).",
+      "type": "string",
+      "format": "uuid"
+    },
+    "event_type": {
+      "description": "Fully-qualified event type including domain and version (e.g., ingest.entity.v1).",
+      "type": "string",
+      "pattern": "^ingest\\.[a-z0-9_.]+\\.v[0-9]+$"
+    },
+    "event_version": {
+      "description": "Semantic version for the event payload schema.",
+      "type": "string",
+      "pattern": "^v[0-9]+$"
+    },
+    "occurred_at": {
+      "description": "Timestamp when the source record was created/modified (ISO 8601).",
+      "type": "string",
+      "format": "date-time"
+    },
+    "recorded_at": {
+      "description": "Timestamp when the record was received by the ingest pipeline (ISO 8601).",
+      "type": "string",
+      "format": "date-time"
+    },
+    "tenant_id": {
+      "description": "Tenant that owns the record. Required for multi-tenant isolation.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255
+    },
+    "subject_id": {
+      "description": "Authenticated subject id (user/service) that triggered the ingest; may be null for system-originated events.",
+      "type": ["string", "null"]
+    },
+    "source_service": {
+      "description": "Canonical name of the producing service or adapter (e.g., ingest-adapter-s3).",
+      "type": "string"
+    },
+    "trace_id": {
+      "description": "OpenTelemetry trace identifier for distributed tracing.",
+      "type": ["string", "null"],
+      "pattern": "^[a-f0-9]{32}$"
+    },
+    "span_id": {
+      "description": "OpenTelemetry span identifier for the current operation.",
+      "type": ["string", "null"],
+      "pattern": "^[a-f0-9]{16}$"
+    },
+    "correlation_id": {
+      "description": "Client-provided correlation id for tying related records together.",
+      "type": ["string", "null"]
+    },
+    "region": {
+      "description": "Region or cell in which the record originated.",
+      "type": ["string", "null"]
+    },
+    "ingest": {
+      "description": "Ingest-specific metadata for source tracking and processing.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "description": "Source system identifier (e.g., s3://bucket/path, kafka://topic, https://webhook.example.com).",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "source_type": {
+          "description": "Type of source adapter.",
+          "type": "string",
+          "enum": ["s3", "gcs", "azure_blob", "kafka", "webhook", "sftp", "api", "file"]
+        },
+        "format": {
+          "description": "Input data format.",
+          "type": "string",
+          "enum": ["jsonl", "json", "csv", "parquet", "avro", "xml", "binary"]
+        },
+        "batch_id": {
+          "description": "Identifier for the batch this record belongs to (for chunked file processing).",
+          "type": ["string", "null"]
+        },
+        "batch_sequence": {
+          "description": "Sequence number within the batch (0-indexed).",
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "batch_size": {
+          "description": "Total number of records in the batch.",
+          "type": ["integer", "null"],
+          "minimum": 1
+        },
+        "file_path": {
+          "description": "Original file path or object key for file-based sources.",
+          "type": ["string", "null"]
+        },
+        "file_checksum": {
+          "description": "SHA-256 checksum of the source file.",
+          "type": ["string", "null"],
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "byte_offset": {
+          "description": "Byte offset in the source file (for streaming/chunked reads).",
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "partition": {
+          "description": "Kafka partition or equivalent partitioning key.",
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "offset": {
+          "description": "Kafka offset or equivalent sequence number.",
+          "type": ["integer", "null"],
+          "minimum": 0
+        }
+      },
+      "required": ["source", "source_type", "format"]
+    },
+    "entity": {
+      "description": "Entity identification for routing and deduplication.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "description": "Entity type (e.g., person, organization, document, event).",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "id": {
+          "description": "Entity identifier unique within the tenant and type.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "external_id": {
+          "description": "External system identifier for cross-referencing.",
+          "type": ["string", "null"]
+        }
+      },
+      "required": ["type", "id"]
+    },
+    "revision": {
+      "description": "Revision metadata for exactly-once semantics and conflict resolution.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "number": {
+          "description": "Monotonically increasing revision number (1-based).",
+          "type": "integer",
+          "minimum": 1
+        },
+        "timestamp": {
+          "description": "Timestamp of this revision (ISO 8601).",
+          "type": "string",
+          "format": "date-time"
+        },
+        "previous_hash": {
+          "description": "SHA-256 hash of the previous revision for chain verification.",
+          "type": ["string", "null"],
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": ["number", "timestamp"]
+    },
+    "dedupe_key": {
+      "description": "Computed deduplication key: sha256(tenant_id|source|entity.type|entity.id|revision.number). Used for idempotency.",
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "schema_version": {
+      "description": "Version of the data payload schema for evolution tracking.",
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "data": {
+      "description": "The actual payload to be ingested. Structure depends on entity.type and schema_version.",
+      "type": "object"
+    },
+    "metadata": {
+      "description": "Optional metadata for processing hints and compliance.",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "priority": {
+          "description": "Processing priority (higher = more urgent).",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 50
+        },
+        "ttl_seconds": {
+          "description": "Time-to-live for the record in processing queues.",
+          "type": ["integer", "null"],
+          "minimum": 1
+        },
+        "legal_hold": {
+          "description": "If true, record cannot be deleted during replay/purge operations.",
+          "type": "boolean",
+          "default": false
+        },
+        "classification": {
+          "description": "Data classification level for compliance routing.",
+          "type": ["string", "null"],
+          "enum": [null, "public", "internal", "confidential", "restricted", "top_secret"]
+        },
+        "retention_days": {
+          "description": "Number of days to retain the record.",
+          "type": ["integer", "null"],
+          "minimum": 1
+        },
+        "tags": {
+          "description": "Arbitrary tags for filtering and routing.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "maxItems": 50,
+          "uniqueItems": true
+        }
+      }
+    }
+  },
+  "required": [
+    "event_id",
+    "event_type",
+    "event_version",
+    "occurred_at",
+    "recorded_at",
+    "tenant_id",
+    "source_service",
+    "ingest",
+    "entity",
+    "revision",
+    "dedupe_key",
+    "schema_version",
+    "data"
+  ]
+}

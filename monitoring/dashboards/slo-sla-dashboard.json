@@ -1,0 +1,522 @@
+{
+  "dashboard": {
+    "title": "IntelGraph SLO/SLA Dashboard",
+    "description": "Service Level Objectives and Service Level Agreements tracking for IntelGraph Platform",
+    "tags": ["slo", "sla", "production", "availability"],
+    "timezone": "UTC",
+    "schemaVersion": 27,
+    "version": 1,
+    "refresh": "30s",
+
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        },
+        {
+          "datasource": "Prometheus",
+          "enable": true,
+          "expr": "ALERTS{alertstate=\"firing\"}",
+          "iconColor": "red",
+          "name": "Firing Alerts",
+          "step": "60s",
+          "tagKeys": "alertname,severity",
+          "textFormat": "{{ alertname }}: {{ summary }}",
+          "titleFormat": "Alert"
+        }
+      ]
+    },
+
+    "templating": {
+      "list": [
+        {
+          "name": "datasource",
+          "type": "datasource",
+          "query": "prometheus",
+          "current": {
+            "text": "Prometheus",
+            "value": "Prometheus"
+          }
+        },
+        {
+          "name": "time_window",
+          "type": "custom",
+          "options": [
+            { "text": "1 Hour", "value": "1h" },
+            { "text": "24 Hours", "value": "24h" },
+            { "text": "7 Days", "value": "7d" },
+            { "text": "30 Days", "value": "30d" }
+          ],
+          "current": {
+            "text": "30 Days",
+            "value": "30d"
+          }
+        }
+      ]
+    },
+
+    "panels": [
+      {
+        "title": "SLO Summary",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "(1 - (sum(rate(http_requests_total{status_code=~\"5..\"}[$time_window])) / sum(rate(http_requests_total[$time_window])))) * 100",
+            "legendFormat": "Availability %",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[$time_window])) * 1000",
+            "legendFormat": "P95 Latency (ms)",
+            "refId": "B"
+          },
+          {
+            "expr": "(sum(rate(http_requests_total{status_code=~\"5..\"}[$time_window])) / sum(rate(http_requests_total[$time_window]))) * 100",
+            "legendFormat": "Error Rate %",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "red", "value": null },
+                { "color": "yellow", "value": 99.0 },
+                { "color": "green", "value": 99.9 }
+              ]
+            },
+            "mappings": [],
+            "unit": "percent"
+          }
+        }
+      },
+
+      {
+        "title": "Availability SLO: 99.9% Uptime",
+        "type": "gauge",
+        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 8 },
+        "description": "Target: 99.9% availability (43.8 minutes downtime/month)\nError Budget: 0.1%",
+        "targets": [
+          {
+            "expr": "(1 - (sum(rate(http_requests_total{status_code=~\"5..\"}[$time_window])) / sum(rate(http_requests_total[$time_window])))) * 100",
+            "legendFormat": "Current Availability",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "red", "value": 0 },
+                { "color": "orange", "value": 99.0 },
+                { "color": "yellow", "value": 99.5 },
+                { "color": "green", "value": 99.9 }
+              ]
+            },
+            "min": 98,
+            "max": 100,
+            "unit": "percent",
+            "decimals": 3
+          }
+        },
+        "options": {
+          "showThresholdLabels": true,
+          "showThresholdMarkers": true
+        }
+      },
+
+      {
+        "title": "Latency SLO: P95 < 500ms",
+        "type": "gauge",
+        "gridPos": { "h": 8, "w": 8, "x": 8, "y": 8 },
+        "description": "Target: 95% of requests complete in <500ms\nP99 Target: <1000ms",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[$time_window])) * 1000",
+            "legendFormat": "P95 Latency",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 500 },
+                { "color": "orange", "value": 1000 },
+                { "color": "red", "value": 2000 }
+              ]
+            },
+            "min": 0,
+            "max": 2000,
+            "unit": "ms"
+          }
+        },
+        "options": {
+          "showThresholdLabels": true,
+          "showThresholdMarkers": true
+        }
+      },
+
+      {
+        "title": "Error Rate SLO: < 1%",
+        "type": "gauge",
+        "gridPos": { "h": 8, "w": 8, "x": 16, "y": 8 },
+        "description": "Target: Error rate <1%\nError budget remaining",
+        "targets": [
+          {
+            "expr": "(sum(rate(http_requests_total{status_code=~\"5..\"}[$time_window])) / sum(rate(http_requests_total[$time_window]))) * 100",
+            "legendFormat": "Error Rate",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 0.5 },
+                { "color": "orange", "value": 1.0 },
+                { "color": "red", "value": 2.0 }
+              ]
+            },
+            "min": 0,
+            "max": 5,
+            "unit": "percent",
+            "decimals": 2
+          }
+        },
+        "options": {
+          "showThresholdLabels": true,
+          "showThresholdMarkers": true
+        }
+      },
+
+      {
+        "title": "Error Budget Remaining (30 days)",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+        "description": "99.9% SLO allows 43.8 minutes downtime per month",
+        "targets": [
+          {
+            "expr": "100 - ((sum(rate(http_requests_total{status_code=~\"5..\"}[30d])) / sum(rate(http_requests_total[30d]))) * 100) / 0.1 * 100",
+            "legendFormat": "Error Budget Remaining %",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "red", "value": 0 },
+                { "color": "yellow", "value": 25 },
+                { "color": "green", "value": 50 }
+              ]
+            },
+            "min": 0,
+            "max": 100,
+            "unit": "percent"
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom"
+          }
+        }
+      },
+
+      {
+        "title": "SLO Compliance Over Time",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+        "targets": [
+          {
+            "expr": "(1 - (sum(rate(http_requests_total{status_code=~\"5..\"}[1h])) / sum(rate(http_requests_total[1h])))) * 100",
+            "legendFormat": "Availability %",
+            "refId": "A"
+          },
+          {
+            "expr": "99.9",
+            "legendFormat": "SLO Target (99.9%)",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 99,
+            "max": 100
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "SLO Target (99.9%)" },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "fixed",
+                    "fixedColor": "red"
+                  }
+                },
+                {
+                  "id": "custom.lineStyle",
+                  "value": {
+                    "dash": [10, 10],
+                    "fill": "dash"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+
+      {
+        "title": "Request Volume (Total Requests)",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 6, "x": 0, "y": 24 },
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total[$time_window])) * $time_window",
+            "legendFormat": "Total Requests",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "decimals": 0
+          }
+        }
+      },
+
+      {
+        "title": "Successful Requests",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 6, "x": 6, "y": 24 },
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total{status_code=~\"2..|3..\"}[$time_window])) * $time_window",
+            "legendFormat": "Successful",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "decimals": 0,
+            "color": {
+              "mode": "fixed",
+              "fixedColor": "green"
+            }
+          }
+        }
+      },
+
+      {
+        "title": "Failed Requests",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 6, "x": 12, "y": 24 },
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total{status_code=~\"5..\"}[$time_window])) * $time_window",
+            "legendFormat": "Failed",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "decimals": 0,
+            "color": {
+              "mode": "fixed",
+              "fixedColor": "red"
+            }
+          }
+        }
+      },
+
+      {
+        "title": "MTTR (Mean Time To Recovery)",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 6, "x": 18, "y": 24 },
+        "description": "Target: <5 minutes",
+        "targets": [
+          {
+            "expr": "avg(incident_resolution_time_seconds{severity=\"critical\"}) / 60",
+            "legendFormat": "MTTR (minutes)",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "m",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 5 },
+                { "color": "red", "value": 15 }
+              ]
+            }
+          }
+        }
+      },
+
+      {
+        "title": "Latency Distribution (P50, P95, P99)",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 28 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket[$time_window])) * 1000",
+            "legendFormat": "P50",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[$time_window])) * 1000",
+            "legendFormat": "P95",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[$time_window])) * 1000",
+            "legendFormat": "P99",
+            "refId": "C"
+          },
+          {
+            "expr": "500",
+            "legendFormat": "P95 Target (500ms)",
+            "refId": "D"
+          },
+          {
+            "expr": "1000",
+            "legendFormat": "P99 Target (1000ms)",
+            "refId": "E"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms"
+          }
+        }
+      },
+
+      {
+        "title": "Error Rate by Status Code",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 28 },
+        "targets": [
+          {
+            "expr": "sum by (status_code) (rate(http_requests_total{status_code=~\"5..\"}[$time_window]))",
+            "legendFormat": "{{ status_code }}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps"
+          }
+        }
+      },
+
+      {
+        "title": "SLO Violations (Last 30 Days)",
+        "type": "table",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 36 },
+        "targets": [
+          {
+            "expr": "sum by (alertname, severity) (ALERTS{alertstate=\"firing\", alertname=~\".*SLO.*\"})",
+            "legendFormat": "",
+            "refId": "A",
+            "instant": true
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {},
+              "indexByName": {},
+              "renameByName": {
+                "alertname": "Alert",
+                "severity": "Severity",
+                "Value": "Count"
+              }
+            }
+          }
+        ]
+      },
+
+      {
+        "title": "Uptime Percentage by Service",
+        "type": "bargauge",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 44 },
+        "targets": [
+          {
+            "expr": "(1 - (sum by (service) (rate(http_requests_total{status_code=~\"5..\"}[$time_window])) / sum by (service) (rate(http_requests_total[$time_window])))) * 100",
+            "legendFormat": "{{ service }}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 99,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "red", "value": 99 },
+                { "color": "yellow", "value": 99.5 },
+                { "color": "green", "value": 99.9 }
+              ]
+            }
+          }
+        },
+        "options": {
+          "orientation": "horizontal",
+          "displayMode": "gradient"
+        }
+      },
+
+      {
+        "title": "SLO Incidents Summary",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 44 },
+        "targets": [
+          {
+            "expr": "count(ALERTS{alertstate=\"firing\", severity=\"critical\"})",
+            "legendFormat": "Active Critical Incidents",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(changes(ALERTS{alertstate=\"firing\", severity=\"critical\"}[$time_window])) / 2",
+            "legendFormat": "Total Incidents ($time_window)",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short"
+          }
+        }
+      }
+    ]
+  }
+}

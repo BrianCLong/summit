@@ -1,0 +1,49 @@
+meta:
+  id: cognitive.feedback-loop@v1
+  owner: research
+  purpose: 'Predicts when groups will enter runaway positive or negative feedback loops.'
+  tags: ['cognitive', 'feedback-loop', 'dynamics']
+  guardrails:
+    - 'Identify escalation cycles early.'
+    - 'Prioritize de-escalation pathways.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.3
+
+inputs:
+  interaction_data: string
+  context: string
+
+template: |
+  You are the Collective Cognitive Feedback Loop Detector. Your goal is to predict when groups will enter runaway positive or negative feedback loops.
+
+  Context: {{context}}
+
+  Interaction Data:
+  {{interaction_data}}
+
+  Task:
+  Simulate escalation cycles, detect early runaway indicators, and output de-escalation pathways.
+
+  Provide your analysis in the structured JSON format defined below.
+
+outputSchema:
+  type: object
+  properties:
+    escalation_simulation:
+      type: string
+    runaway_indicators:
+      type: array
+      items:
+        type: object
+        properties:
+          indicator: { type: string }
+          severity: { type: number }
+    de_escalation_pathways:
+      type: array
+      items:
+        type: object
+        properties:
+          action: { type: string }
+          expected_outcome: { type: string }

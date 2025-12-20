@@ -1,0 +1,224 @@
+{
+  "title": "IntelGraph Platform SRE Overview",
+  "description": "Golden signals for API, ingest, database, and cost guardrails",
+  "tags": ["sre", "platform"],
+  "time": {"from": "now-6h", "to": "now"},
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "API Availability (99.9% target)",
+      "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {"color": "red", "value": 0.998},
+              {"color": "orange", "value": 0.999},
+              {"color": "green", "value": null}
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{service=\"intelgraph-api\",status!~\"5..\"}[5m])) / sum(rate(http_requests_total{service=\"intelgraph-api\"}[5m]))",
+          "legendFormat": "API Success"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Ingest Success (99.5% target)",
+      "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {"color": "red", "value": 0.985},
+              {"color": "orange", "value": 0.995},
+              {"color": "green", "value": null}
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(ingest_success_total[5m])) / sum(rate(ingest_attempts_total[5m]))",
+          "legendFormat": "Ingest Success"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Database p95 Latency",
+      "gridPos": {"x": 0, "y": 8, "w": 12, "h": 8},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "orange", "value": 120},
+              {"color": "red", "value": 200}
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(db_query_duration_seconds_bucket{cluster=\"aurora-prod\"}[5m])) by (le)) * 1000",
+          "legendFormat": "Aurora p95"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(redis_latency_seconds_bucket[5m])) by (le)) * 1000",
+          "legendFormat": "Redis p95"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Monthly Spend vs Budget",
+      "gridPos": {"x": 12, "y": 8, "w": 12, "h": 8},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "orange", "value": 0.8},
+              {"color": "red", "value": 0.9}
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "intelgraph_monthly_spend_usd / intelgraph_monthly_budget_usd",
+          "legendFormat": "Spend"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal"
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Agent Queue Cost Pressure",
+      "gridPos": {"x": 0, "y": 16, "w": 12, "h": 8},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "orange", "value": 0.9},
+              {"color": "red", "value": 1}
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "max_over_time(agent_queue_cost_pressure{queue=\"agent-default\"}[5m])",
+          "legendFormat": "Cost pressure ({{queue}})"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Agent Queue SLO Pressure (Latency + Backlog)",
+      "gridPos": {"x": 12, "y": 16, "w": 12, "h": 8},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "orange", "value": 0.95},
+              {"color": "red", "value": 1}
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "max_over_time(agent_queue_slo_pressure{queue=\"agent-default\"}[5m])",
+          "legendFormat": "SLO pressure ({{queue}})"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Agent Queue Latency + Cost vs Scaling",
+      "gridPos": {"x": 0, "y": 24, "w": 12, "h": 8},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "orange", "value": 1},
+              {"color": "red", "value": 1.5}
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(agent_workload_queue_wait_seconds_bucket[5m]))",
+          "legendFormat": "p95 queue wait (s)"
+        },
+        {
+          "expr": "max_over_time(agent_queue_cost_pressure{queue=\"agent-default\"}[5m])",
+          "legendFormat": "Cost pressure"
+        },
+        {
+          "expr": "max_over_time(agent_queue_slo_pressure{queue=\"agent-default\"}[5m])",
+          "legendFormat": "SLO pressure"
+        },
+        {
+          "expr": "max(kube_deployment_status_replicas{deployment=~\"agent-worker|agent-workload-runner\"})",
+          "legendFormat": "Replicas"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Adaptive Scaling Composite",
+      "gridPos": {"x": 12, "y": 24, "w": 12, "h": 8},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 2},
+              {"color": "red", "value": 2.5}
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "max_over_time(agent_queue_slo_pressure{queue=\"agent-default\"}[5m]) + max_over_time(agent_queue_cost_pressure{queue=\"agent-default\"}[5m])",
+          "legendFormat": "Composite pressure"
+        }
+      ]
+    }
+  ]
+}

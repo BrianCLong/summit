@@ -4,6 +4,7 @@
     "outDir": "dist",
     "rootDir": "src",
     "declaration": true,
+    "allowImportingTsExtensions": false,
     "composite": false,
     "strict": true,
     "noImplicitAny": true,
@@ -12,7 +13,8 @@
     "noFallthroughCasesInSwitch": true,
     "useUnknownInCatchVariables": true,
     "exactOptionalPropertyTypes": true,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "types": []
   },
   "include": ["src"]
 }

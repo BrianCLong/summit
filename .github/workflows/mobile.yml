@@ -1,0 +1,131 @@
+name: Mobile CI
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'apps/mobile/**'
+      - 'packages/mobile-sdk/**'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'apps/mobile/**'
+      - 'packages/mobile-sdk/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: |
+          npm install -g pnpm
+          pnpm install --no-frozen-lockfile
+
+      - name: Lint Mobile SDK
+        run: cd packages/mobile-sdk && pnpm lint
+
+      - name: Typecheck Mobile SDK
+        run: cd packages/mobile-sdk && pnpm typecheck
+
+      - name: Test Mobile SDK
+        run: cd packages/mobile-sdk && pnpm test
+
+      - name: Lint Mobile App
+        run: cd apps/mobile && pnpm lint
+
+      - name: Typecheck Mobile App
+        run: cd apps/mobile && pnpm typecheck
+
+      - name: Unit Test Mobile App
+        run: cd apps/mobile && pnpm test
+
+  build-android:
+    needs: validate
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: |
+          npm install -g pnpm
+          pnpm install --no-frozen-lockfile
+
+      - name: Build Android Bundle
+        run: cd apps/mobile/android && ./gradlew bundleRelease
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-release.aab
+          path: apps/mobile/android/app/build/outputs/bundle/release/app-release.aab
+
+  build-ios:
+    needs: validate
+    runs-on: macos-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: |
+          npm install -g pnpm
+          pnpm install --no-frozen-lockfile
+
+      - name: Install Pods
+        run: cd apps/mobile/ios && pod install
+
+      - name: Build iOS Archive
+        run: |
+          cd apps/mobile/ios
+          xcodebuild -workspace IntelGraphMobile.xcworkspace -scheme IntelGraphMobile -configuration Release clean archive -archivePath IntelGraphMobile.xcarchive CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+
+  e2e-test:
+    needs: validate
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: |
+          npm install -g pnpm
+          pnpm install --no-frozen-lockfile
+
+      - name: Install Applesimutils
+        run: |
+          brew tap wix/brew
+          brew install applesimutils
+
+      - name: Build for Detox (iOS)
+        run: cd apps/mobile && pnpm detox build -c ios.sim.release
+
+      - name: Run Detox Tests
+        run: cd apps/mobile && pnpm detox test -c ios.sim.release --cleanup

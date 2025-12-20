@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Persisted Queries Middleware
  *

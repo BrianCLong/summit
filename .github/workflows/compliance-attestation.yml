@@ -1,0 +1,225 @@
+name: SLSA Attestation & Provenance
+
+# Issue #10148: P1 Compliance & Attestation Automation
+# Automated SLSA attestation for build provenance and artifact signatures
+
+on:
+  push:
+    tags:
+      - 'v*'
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+  attestations: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-attest:
+    runs-on: ubuntu-latest
+    outputs:
+      image-digest: ${{ steps.build.outputs.digest }}
+      attestation-id: ${{ steps.attest.outputs.attestation-id }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          format: spdx-json
+          output-file: sbom.spdx.json
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=tag
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-
+      
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+          provenance: true
+          sbom: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Generate SLSA Provenance
+        id: provenance
+        uses: slsa-framework/slsa-github-generator/actions/nodejs/builder@v1.9.0
+        with:
+          node-version: '20'
+      
+      - name: Attest Build Provenance
+        id: attest
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
+      
+      - name: Sign Container Image
+        uses: sigstore/cosign-installer@v3.3.0
+      
+      - name: Sign image with Cosign
+        run: |
+          cosign sign --yes \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
+      
+      - name: Generate Attestation Report
+        run: |
+          cat > attestation-report.json <<EOF
+          {
+            "version": "1.0",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "build": {
+              "image": "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}",
+              "digest": "${{ steps.build.outputs.digest }}",
+              "tag": "${{ github.ref_name }}",
+              "commit": "${{ github.sha }}",
+              "actor": "${{ github.actor }}",
+              "workflow": "${{ github.workflow }}",
+              "run_id": "${{ github.run_id }}"
+            },
+            "attestations": {
+              "slsa_provenance": true,
+              "build_provenance": "${{ steps.attest.outputs.attestation-id }}",
+              "sbom": "sbom.spdx.json",
+              "signature": "cosign"
+            },
+            "compliance": {
+              "slsa_level": "3",
+              "frameworks": ["SOC2", "NIST", "SLSA"]
+            }
+          }
+          EOF
+      
+      - name: Upload Attestation Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: attestation-artifacts-${{ github.sha }}
+          path: |
+            attestation-report.json
+            sbom.spdx.json
+          retention-days: 90
+      
+      - name: Create Release Attestation
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            attestation-report.json
+            sbom.spdx.json
+          body: |
+            ## SLSA Attestation
+            
+            This release includes:
+            - ✅ SLSA Level 3 Provenance
+            - ✅ Signed Container Images (Cosign)
+            - ✅ Software Bill of Materials (SBOM)
+            - ✅ Build Provenance Attestation
+            
+            **Image**: `${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}`
+            
+            **Verification**:
+            ```bash
+            # Verify signature
+            cosign verify ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
+            
+            # Verify attestation
+            cosign verify-attestation ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
+            
+            # Verify SLSA provenance
+            slsa-verifier verify-image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
+            ```
+  
+  compliance-export:
+    needs: build-and-attest
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Download attestation artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: attestation-artifacts-${{ github.sha }}
+      
+      - name: Generate Compliance Evidence
+        run: |
+          mkdir -p compliance-evidence
+          
+          # SOC2 Evidence
+          cat > compliance-evidence/soc2-evidence.json <<EOF
+          {
+            "control": "CC7.2 - System Monitoring",
+            "evidence_type": "Build Attestation",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "artifacts": {
+              "provenance": "${{ needs.build-and-attest.outputs.attestation-id }}",
+              "image_digest": "${{ needs.build-and-attest.outputs.image-digest }}",
+              "sbom": "sbom.spdx.json"
+            },
+            "verification": "Automated SLSA attestation provides cryptographic proof of build integrity"
+          }
+          EOF
+          
+          # NIST Evidence
+          cat > compliance-evidence/nist-evidence.json <<EOF
+          {
+            "control": "SI-7 - Software and Information Integrity",
+            "framework": "NIST 800-53",
+            "evidence_type": "Cryptographic Signatures",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "implementation": {
+              "signature_tool": "Cosign",
+              "attestation": "SLSA Provenance",
+              "sbom": "SPDX Format"
+            }
+          }
+          EOF
+      
+      - name: Archive compliance evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-evidence-${{ github.sha }}
+          path: compliance-evidence/
+          retention-days: 365
+      
+      - name: Notify compliance team
+        run: |
+          echo "Compliance evidence generated for release ${{ github.ref_name }}"
+          echo "Attestation ID: ${{ needs.build-and-attest.outputs.attestation-id }}"
+          echo "Image Digest: ${{ needs.build-and-attest.outputs.image-digest }}"

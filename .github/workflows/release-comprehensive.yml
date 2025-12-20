@@ -1,0 +1,179 @@
+name: Release - Multi-arch Docker & Helm
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  prepare:
+    name: Prepare Release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Get version
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+  build-multiarch:
+    name: Build Multi-arch Images
+    runs-on: ubuntu-latest
+    needs: prepare
+    strategy:
+      matrix:
+        component: [server, client, web]
+        platform: [linux/amd64, linux/arm64]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: ${{ matrix.platform }}
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.component }}:${{ needs.prepare.outputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  sign-images:
+    name: Sign with Cosign
+    runs-on: ubuntu-latest
+    needs: [prepare, build-multiarch]
+    strategy:
+      matrix:
+        component: [server, client, web]
+    steps:
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
+      
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Sign image
+        run: |
+          cosign sign --yes ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.component }}:${{ needs.prepare.outputs.version }}
+
+  generate-sbom:
+    name: Generate SBOM
+    runs-on: ubuntu-latest
+    needs: [prepare, build-multiarch]
+    strategy:
+      matrix:
+        component: [server, client, web]
+    steps:
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0.17.1
+        with:
+          image: ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.component }}:${{ needs.prepare.outputs.version }}
+          format: cyclonedx-json
+          output-file: sbom-${{ matrix.component }}.json
+      
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ matrix.component }}
+          path: sbom-${{ matrix.component }}.json
+
+  package-helm:
+    name: Package Helm Charts
+    runs-on: ubuntu-latest
+    needs: prepare
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.0
+      
+      - name: Package charts
+        run: |
+          mkdir -p /tmp/charts
+          for chart in charts/*/Chart.yaml; do
+            chart_dir=$(dirname "$chart")
+            helm package "$chart_dir" --destination /tmp/charts
+          done
+      
+      - name: Login to GHCR
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ${{ env.REGISTRY }} --username ${{ github.actor }} --password-stdin
+      
+      - name: Push to OCI
+        run: |
+          for chart in /tmp/charts/*.tgz; do
+            helm push "$chart" oci://${{ env.REGISTRY }}/${{ github.repository }}/charts
+          done
+      
+      - name: Upload charts
+        uses: actions/upload-artifact@v4
+        with:
+          name: helm-charts
+          path: /tmp/charts/*.tgz
+
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [prepare, build-multiarch, sign-images, generate-sbom, package-helm]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.prepare.outputs.version }}
+          name: Release v${{ needs.prepare.outputs.version }}
+          files: |
+            helm-charts/*.tgz
+            sbom-*/*.json
+          body: |
+            ## Release v${{ needs.prepare.outputs.version }}
+            
+            ### Docker Images
+            - Server: `${{ env.REGISTRY }}/${{ github.repository }}/server:${{ needs.prepare.outputs.version }}`
+            - Client: `${{ env.REGISTRY }}/${{ github.repository }}/client:${{ needs.prepare.outputs.version }}`
+            - Web: `${{ env.REGISTRY }}/${{ github.repository }}/web:${{ needs.prepare.outputs.version }}`
+            
+            ### Helm Charts
+            Available at: `oci://${{ env.REGISTRY }}/${{ github.repository }}/charts`
+            
+            ### Security
+            - All images signed with Cosign
+            - SBOMs (CycloneDX) attached
+            - Multi-arch: linux/amd64, linux/arm64

@@ -4,7 +4,7 @@
 # Computer Vision
 opencv-python==4.8.1.78
 opencv-contrib-python==4.8.1.78
-Pillow==10.0.1
+Pillow==10.3.0
 scikit-image==0.21.0
 
 # Object Detection and Computer Vision Models
@@ -23,8 +23,7 @@ insightface==0.7.3
 pytesseract==0.3.10
 paddleocr==2.7.3
 easyocr==1.7.0
-paddlepaddle==2.5.1
-
+paddlepaddle==2.6.2
 # Speech Processing
 librosa==0.10.1
 soundfile==0.12.1
@@ -37,7 +36,7 @@ pyannote.audio==3.1.1
 spacy==3.7.2
 transformers==4.53.0
 sentence-transformers==2.2.2
-nltk==3.8.1
+nltk==3.9
 textblob==0.17.1
 langdetect==1.0.9
 polyglot==16.7.4

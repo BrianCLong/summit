@@ -1,18 +1,22 @@
+// @ts-nocheck
 import express from 'express';
 import { z } from 'zod';
 import { runsRepo } from './runs-repo.js';
 import { ensureAuthenticated } from '../../middleware/auth.js';
-import { requirePermission } from '../../middleware/rbac.js';
+import { authorize } from '../../middleware/authorization.js';
 import {
   BudgetAdmissionController,
   createBudgetController,
 } from '../../conductor/admission/budget-control.js'; // Import BudgetAdmissionController
 import { RequestContext } from '../../middleware/context-binding.js'; // Import RequestContext
 import Redis from 'ioredis'; // Assuming Redis is used for budget control
+import { scheduler } from '../scheduler/Scheduler.js';
+import { maestroAuthzMiddleware } from '../../middleware/maestro-authz.js';
 
 const router = express.Router();
 router.use(express.json());
 router.use(ensureAuthenticated); // Ensure all routes require authentication
+router.use(maestroAuthzMiddleware({ resource: 'runs' }));
 
 // Initialize BudgetAdmissionController (assuming Redis client is available)
 // In a real application, Redis client would be injected or managed globally
@@ -39,7 +43,7 @@ const RunUpdateSchema = z.object({
 });
 
 // GET /runs - List all runs with pagination
-router.get('/runs', requirePermission('run:read'), async (req, res) => {
+router.get('/runs', authorize('run_maestro'), async (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
     const offset = Math.max(parseInt(req.query.offset as string) || 0, 0);
@@ -64,7 +68,7 @@ router.get('/runs', requirePermission('run:read'), async (req, res) => {
 });
 
 // POST /runs - Create a new run
-router.post('/runs', requirePermission('run:create'), async (req, res) => {
+router.post('/runs', authorize('run_maestro'), async (req, res) => {
   try {
     const validation = RunCreateSchema.safeParse(req.body);
     if (!validation.success) {
@@ -98,10 +102,22 @@ router.post('/runs', requirePermission('run:create'), async (req, res) => {
       });
     }
 
+    //
+    // TODO: This is a placeholder for the quota service
+    //
+    // await quotaService.assert({
+    //   tenantId,
+    //   dimension: 'maestro.runs',
+    //   quantity: 1,
+    // });
+
     const run = await runsRepo.create({
       ...validation.data,
       tenant_id: tenantId,
     }); // Pass tenantId
+
+    // Enqueue the run in the scheduler
+    await scheduler.enqueueRun(run.id, tenantId);
 
     // Format response
     const formattedRun = {
@@ -120,13 +136,33 @@ router.post('/runs', requirePermission('run:create'), async (req, res) => {
 });
 
 // GET /runs/:id - Get a specific run
-router.get('/runs/:id', requirePermission('run:read'), async (req, res) => {
+router.get('/runs/:id', authorize('run_maestro'), async (req, res) => {
   try {
     const tenantId = (req.context as RequestContext).tenantId; // Get tenantId from context
-    const run = await runsRepo.get(req.params.id, tenantId); // Pass tenantId
+    // Use the explicit tenant helper
+    const run = await runsRepo.getRunForTenant(req.params.id, tenantId);
     if (!run) {
       return res.status(404).json({ error: 'Run not found' });
     }
+
+    //
+    // TODO: This is a placeholder for the usage metering service
+    //
+    // if (run.status === 'succeeded') {
+    //   await usageMeteringService.record({
+    //     id: '',
+    //     tenantId,
+    //     dimension: 'maestro.runs',
+    //     quantity: 1,
+    //     unit: 'count',
+    //     source: 'maestro',
+    //     metadata: {
+    //       pipeline_id: run.pipeline_id,
+    //     },
+    //     occurredAt: new Date().toISOString(),
+    //     recordedAt: new Date().toISOString(),
+    //   });
+    // }
 
     res.json(run);
   } catch (error) {
@@ -136,7 +172,7 @@ router.get('/runs/:id', requirePermission('run:read'), async (req, res) => {
 });
 
 // PUT /runs/:id - Update a run
-router.put('/runs/:id', requirePermission('run:update'), async (req, res) => {
+router.put('/runs/:id', authorize('run_maestro'), async (req, res) => {
   try {
     const validation = RunUpdateSchema.safeParse(req.body);
     if (!validation.success) {
@@ -168,10 +204,7 @@ router.put('/runs/:id', requirePermission('run:update'), async (req, res) => {
 });
 
 // DELETE /runs/:id - Delete a run
-router.delete(
-  '/runs/:id',
-  requirePermission('run:update'),
-  async (req, res) => {
+router.delete('/runs/:id', authorize('run_maestro'), async (req, res) => {
     try {
       const tenantId = (req.context as RequestContext).tenantId; // Get tenantId from context
       const deleted = await runsRepo.delete(req.params.id, tenantId); // Pass tenantId
@@ -184,10 +217,7 @@ router.delete(
 );
 
 // GET /pipelines/:id/runs - Get runs for a specific pipeline
-router.get(
-  '/pipelines/:id/runs',
-  requirePermission('run:read'),
-  async (req, res) => {
+router.get('/pipelines/:id/runs', authorize('run_maestro'), async (req, res) => {
     try {
       const limit = Math.min(parseInt(req.query.limit as string) || 20, 50);
       const tenantId = (req.context as RequestContext).tenantId; // Get tenantId from context

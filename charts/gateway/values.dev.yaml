@@ -1,0 +1,167 @@
+# Gateway Development Environment Configuration
+# Golden Path: OTEL + Prometheus + Feature Flags enabled
+
+image:
+  repository: ghcr.io/brianclong/gateway
+  tag: latest
+  pullPolicy: IfNotPresent
+
+replicaCount: 2
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# ============================================================================
+# OpenTelemetry - Enabled by Default
+# ============================================================================
+opentelemetry:
+  enabled: true
+  collector:
+    endpoint: "otel-collector.observability.svc.cluster.local:4317"
+  sampling:
+    ratio: 1.0  # 100% sampling in dev
+
+# ============================================================================
+# Prometheus Metrics - Enabled by Default
+# ============================================================================
+metrics:
+  enabled: true
+  port: 9090
+
+serviceMonitor:
+  enabled: true
+  interval: 15s
+  path: /metrics
+
+prometheusRule:
+  enabled: true
+  namespace: monitoring
+
+# ============================================================================
+# Feature Flags - Enabled by Default
+# ============================================================================
+featureFlags:
+  enabled: true
+  provider: flagd
+  defaults:
+    enableRateLimiting: false  # Relaxed in dev
+    enableCORS: true
+    enableRequestLogging: true
+
+# ============================================================================
+# Application Configuration
+# ============================================================================
+env:
+  - name: NODE_ENV
+    value: 'development'
+  - name: LOG_LEVEL
+    value: 'debug'
+  - name: PORT
+    value: '8080'
+
+  # OTEL Configuration
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: "http://otel-collector.observability.svc.cluster.local:4317"
+  - name: OTEL_SERVICE_NAME
+    value: "gateway"
+  - name: OTEL_RESOURCE_ATTRIBUTES
+    value: "service.namespace=summit,deployment.environment=dev"
+  - name: OTEL_TRACES_SAMPLER
+    value: "parentbased_traceidratio"
+  - name: OTEL_TRACES_SAMPLER_ARG
+    value: "1.0"
+
+  # Feature Flags
+  - name: FEATURE_FLAGS_ENABLED
+    value: "true"
+  - name: FLAGD_HOST
+    value: "flagd.summit.svc.cluster.local"
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-staging"
+  hosts:
+    - host: gateway-dev.summit.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: gateway-dev-tls
+      hosts:
+        - gateway-dev.summit.local
+
+# Health probes
+probes:
+  liveness:
+    httpGet:
+      path: /healthz
+      port: 8080
+    initialDelaySeconds: 15
+    periodSeconds: 10
+  readiness:
+    httpGet:
+      path: /ready
+      port: 8080
+    initialDelaySeconds: 5
+    periodSeconds: 5
+
+# High availability
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70
+
+# Network policy
+networkPolicy:
+  enabled: true
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8080
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+      ports:
+        - protocol: TCP
+          port: 9090
+  egress:
+    # OTEL Collector
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: observability
+      ports:
+        - port: 4317
+    # Upstream services
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - port: 8080
+        - port: 443
+    # DNS
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53

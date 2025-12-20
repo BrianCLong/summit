@@ -170,6 +170,21 @@ export interface HumanTask {
   createdAt: Date;
 }
 
+/**
+ * Service for managing workflow definitions and executions.
+ * Supports multiple trigger types (event, schedule, manual, webhook, condition),
+ * various step types (action, condition, loop, parallel, delay, human, subprocess),
+ * and comprehensive workflow orchestration with error handling and retries.
+ *
+ * Features:
+ * - Visual workflow designer support with drag-and-drop steps
+ * - Real-time execution tracking with event emissions
+ * - Human-in-the-loop tasks for approval workflows
+ * - Parallel and sequential step execution
+ * - Automatic retry with exponential backoff
+ * - Integration with external services (email, Slack, Jira, APIs, databases, ML)
+ * - Temporal workflow execution with PostgreSQL persistence
+ */
 export class WorkflowService extends EventEmitter {
   private executionQueue = new Map<string, WorkflowExecution>();
   private scheduledTriggers = new Map<string, NodeJS.Timeout>();
@@ -183,6 +198,17 @@ export class WorkflowService extends EventEmitter {
     this.initializeScheduledTriggers();
   }
 
+  /**
+   * Creates a new workflow definition.
+   * Validates the workflow structure, persists it to the database,
+   * and sets up triggers if the workflow is active.
+   *
+   * @param workflow - Workflow definition without system-generated fields
+   * @param userId - The ID of the user creating the workflow
+   * @returns The created workflow with generated ID and timestamps
+   * @throws Error if workflow validation fails or database operation fails
+   * @fires workflow.created - When the workflow is successfully created
+   */
   async createWorkflow(
     workflow: Omit<WorkflowDefinition, 'id' | 'createdAt' | 'updatedAt'>,
     userId: string,
@@ -246,6 +272,21 @@ export class WorkflowService extends EventEmitter {
     }
   }
 
+  /**
+   * Executes a workflow by creating a new execution instance.
+   * Validates that the workflow exists and is active, creates an execution record,
+   * and starts asynchronous workflow processing.
+   *
+   * @param workflowId - The ID of the workflow to execute
+   * @param triggerType - The type of trigger that initiated execution (event, manual, scheduled, etc.)
+   * @param triggerData - Optional data passed from the trigger
+   * @param userId - Optional ID of the user who triggered the execution
+   * @returns The workflow execution object with initial state
+   * @throws Error if workflow not found, not active, or execution creation fails
+   * @fires workflow.execution.started - When execution begins
+   * @fires workflow.execution.completed - When execution completes successfully
+   * @fires workflow.execution.failed - When execution encounters an error
+   */
   async executeWorkflow(
     workflowId: string,
     triggerType: string,
@@ -471,6 +512,38 @@ export class WorkflowService extends EventEmitter {
     return { conditionResult: result };
   }
 
+  private async executeParallelStep(
+    execution: WorkflowExecution,
+    workflow: WorkflowDefinition,
+    step: WorkflowStep,
+  ): Promise<any> {
+    // Execute all child steps in parallel
+    const childSteps = this.findChildSteps(workflow, step);
+
+    if (childSteps.length === 0) {
+      throw new Error('Parallel step must have at least one child step');
+    }
+
+    const promises = childSteps.map((childStep) =>
+      this.executeStep(execution, workflow, childStep).catch((error) => ({
+        error: error.message,
+        stepId: childStep.id,
+      })),
+    );
+
+    const results = await Promise.all(promises);
+
+    // Check if any child step failed
+    const errors = results.filter((r: any) => r.error);
+    if (errors.length > 0) {
+      throw new Error(
+        `${errors.length} parallel step(s) failed: ${errors.map((e: any) => e.error).join(', ')}`,
+      );
+    }
+
+    return { parallelResults: results, completedSteps: childSteps.length };
+  }
+
   private async executeLoopStep(
     execution: WorkflowExecution,
     workflow: WorkflowDefinition,
@@ -632,7 +705,7 @@ export class WorkflowService extends EventEmitter {
       case 'success':
         return !stepResult?.error;
       case 'failure':
-        return !!stepResult?.error;
+        return Boolean(stepResult?.error);
       case 'custom':
         return connection.customCondition
           ? this.evaluateCondition(connection.customCondition, {
@@ -895,6 +968,12 @@ export class WorkflowService extends EventEmitter {
     ]);
   }
 
+  /**
+   * Retrieves a workflow definition by its ID.
+   *
+   * @param id - The unique identifier of the workflow
+   * @returns The workflow definition if found, null otherwise
+   */
   async getWorkflow(id: string): Promise<WorkflowDefinition | null> {
     const query = 'SELECT * FROM workflow_definitions WHERE id = $1';
     const result = await this.pgPool.query(query, [id]);
@@ -919,6 +998,12 @@ export class WorkflowService extends EventEmitter {
     };
   }
 
+  /**
+   * Retrieves a workflow execution by its ID.
+   *
+   * @param id - The unique identifier of the execution
+   * @returns The workflow execution if found, null otherwise
+   */
   async getExecution(id: string): Promise<WorkflowExecution | null> {
     const query = 'SELECT * FROM workflow_executions WHERE id = $1';
     const result = await this.pgPool.query(query, [id]);
@@ -949,7 +1034,7 @@ export class WorkflowService extends EventEmitter {
     workflow: WorkflowDefinition,
   ): Promise<void> {
     for (const trigger of workflow.triggers) {
-      if (!trigger.isEnabled) continue;
+      if (!trigger.isEnabled) {continue;}
 
       switch (trigger.type) {
         case 'schedule':

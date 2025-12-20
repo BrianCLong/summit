@@ -1,0 +1,171 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chaos-drill-config
+  namespace: chaos-testing
+data:
+  chaos-drill.sh: |
+    #!/bin/bash
+    set -e
+    
+    echo "Starting monthly chaos drill..."
+    
+    # Run all chaos experiments
+    kubectl apply -f /config/chaos-experiments.yaml
+    
+    # Wait for completion
+    sleep 300
+    
+    # Collect results
+    kubectl get chaos -n chaos-testing -o json > /reports/chaos-results.json
+    
+    # Send notification
+    curl -X POST "${SLACK_WEBHOOK_URL}" \
+      -H 'Content-Type: application/json' \
+      -d '{"text": "Monthly chaos drill completed. Check results at /reports/chaos-results.json"}'
+    
+    echo "Chaos drill complete"
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: chaos-drill-monthly
+  namespace: chaos-testing
+spec:
+  # Run on the 1st of every month at 2 AM UTC
+  schedule: "0 2 1 * *"
+  timeZone: "UTC"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app: chaos-drill
+        spec:
+          serviceAccountName: chaos-controller
+          restartPolicy: Never
+          containers:
+            - name: chaos-runner
+              image: bitnami/kubectl:latest
+              command:
+                - /bin/bash
+                - /scripts/chaos-drill.sh
+              env:
+                - name: SLACK_WEBHOOK_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: chaos-secrets
+                      key: slack-webhook-url
+                      optional: true
+                - name: PROMETHEUS_URL
+                  value: "http://prometheus:9090"
+                - name: API_URL
+                  value: "http://intelgraph-server:4000"
+              volumeMounts:
+                - name: scripts
+                  mountPath: /scripts
+                - name: config
+                  mountPath: /config
+                - name: reports
+                  mountPath: /reports
+          volumes:
+            - name: scripts
+              configMap:
+                name: chaos-drill-config
+                defaultMode: 0755
+            - name: config
+              configMap:
+                name: chaos-experiments-config
+            - name: reports
+              persistentVolumeClaim:
+                claimName: chaos-reports
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: chaos-reports
+  namespace: chaos-testing
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: standard
+
+---
+# Alert when chaos drill fails
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: chaos-drill-alerts
+  namespace: chaos-testing
+spec:
+  groups:
+    - name: chaos_drills
+      interval: 1m
+      rules:
+        - alert: ChaosDrillFailed
+          expr: |
+            kube_job_status_failed{namespace="chaos-testing",job_name=~"chaos-drill-monthly.*"} > 0
+          for: 5m
+          labels:
+            severity: critical
+            team: sre
+          annotations:
+            summary: "Monthly chaos drill failed"
+            description: "Chaos drill job {{ $labels.job_name }} failed. RTO/RPO requirements may not be met."
+            runbook: "https://github.com/summit/docs/runbooks/chaos-drill-runbooks.md"
+
+        - alert: ChaosDrillNotRun
+          expr: |
+            (time() - kube_job_status_completion_time{namespace="chaos-testing",job_name=~"chaos-drill-monthly.*"}) > (35 * 24 * 3600)
+          for: 1h
+          labels:
+            severity: warning
+            team: sre
+          annotations:
+            summary: "Chaos drill has not run in over 35 days"
+            description: "Monthly chaos drill should run on the 1st of each month."
+
+        - alert: RPOViolated
+          expr: |
+            intelgraph_dr_rpo_actual_seconds > 300
+          for: 5m
+          labels:
+            severity: critical
+            team: sre
+          annotations:
+            summary: "RPO violated (>5 minutes)"
+            description: "Current RPO: {{ $value }}s. Target: ≤300s"
+
+        - alert: RTOViolated
+          expr: |
+            intelgraph_dr_rto_actual_seconds > 3600
+          for: 1m
+          labels:
+            severity: critical
+            team: sre
+          annotations:
+            summary: "RTO violated (>1 hour)"
+            description: "Current RTO: {{ $value }}s. Target: ≤3600s"
+
+        - alert: P95LatencyHigh
+          expr: |
+            histogram_quantile(0.95, 
+              rate(intelgraph_query_latency_seconds_bucket[5m])
+            ) > 1.5
+          for: 5m
+          labels:
+            severity: warning
+            team: backend
+          annotations:
+            summary: "P95 query latency exceeds 1.5s SLO"
+            description: "Current P95: {{ $value }}s. SLO: <1.5s"
