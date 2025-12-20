@@ -1,0 +1,11 @@
+{{- if .Values.prometheus.rules }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "monitoring.fullname" . }}-rules
+  labels:
+    release: {{ .Values.prometheus.release | default "prometheus" }}
+spec:
+  groups:
+{{ toYaml .Values.prometheus.rules | indent 4 }}
+{{- end }}

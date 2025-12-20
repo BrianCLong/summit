@@ -1,22 +1,25 @@
 {
   "name": "@intelgraph/receipt-signer",
   "version": "0.1.0",
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "description": "Receipt KMS-style signer service for provenance receipts.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "clean": "rm -rf dist",
-    "test": "jest --config ../../jest.config.cjs --runTestsByPath services/receipt-signer/tests"
+    "dev": "ts-node src/server.ts",
+    "test": "pnpm run build && jest"
   },
   "dependencies": {
-    "@intelgraph/provenance": "workspace:*",
-    "pino": "^8.16.2"
+    "fastify": "^5.1.0",
+    "pino": "^8.21.0"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.12",
-    "@types/node": "^20.10.0",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^20.17.5",
+    "@types/supertest": "^6.0.3",
     "jest": "^29.7.0",
-    "typescript": "^5.3.3"
+    "supertest": "^6.3.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
   }
 }

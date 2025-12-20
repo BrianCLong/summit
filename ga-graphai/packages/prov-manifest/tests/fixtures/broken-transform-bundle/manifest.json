@@ -1,0 +1,37 @@
+{
+  "manifestVersion": "1.0.0",
+  "bundleId": "bundle-broken",
+  "createdAt": "2025-01-01T00:00:00Z",
+  "documents": [
+    {
+      "id": "primary-report",
+      "path": "report.pdf",
+      "sha256": "ff1f019de329f60b7e2c729f0eefb7619a6c8fa6e20923b7c9d1de756562e4e2",
+      "transforms": ["capture", "redact"],
+      "evidence": ["ev-1"]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-1",
+      "path": "evidence.txt",
+      "sha256": "3c9a0e964140475921f2541815769a511768c9057927f499c3b1d7d65db596eb"
+    }
+  ],
+  "transforms": [
+    {
+      "id": "capture",
+      "description": "capture",
+      "step": 1,
+      "inputId": "ev-1",
+      "outputId": "primary-report"
+    },
+    {
+      "id": "redact",
+      "description": "bad link",
+      "step": 2,
+      "inputId": "missing-output",
+      "outputId": "primary-report"
+    }
+  ]
+}

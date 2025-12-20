@@ -32,7 +32,9 @@ export function MapPane() {
       <div className="grid gap-3 md:grid-cols-2">
         <div className="rounded-lg border border-sand/20 bg-ink/50 p-3">
           <h3 className="font-semibold text-sm">Geofences</h3>
-          <p className="text-xs text-sand/70">Toggle a geofence to lock focus; press again to clear.</p>
+          <p className="text-xs text-sand/70">
+            Toggle a geofence to lock focus; press again to clear. Active window: {timeRange.start}h → {timeRange.end}h.
+          </p>
           <div className="mt-2 flex flex-wrap gap-2" role="list">
             {geofences.map((fence) => {
               const isActive = geofence === fence.id;

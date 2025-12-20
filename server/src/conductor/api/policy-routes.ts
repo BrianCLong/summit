@@ -3,8 +3,91 @@
 import express from 'express';
 import { policyExplainer } from '../router/policy-explainer';
 import { prometheusConductorMetrics } from '../observability/prometheus';
+import { opaPolicyEngine } from '../governance/opa-integration.js';
+import logger from '../../config/logger.js';
 
 const router = express.Router();
+
+async function routingOPAGuard(req, res, next) {
+  const user = (req as any).user || {};
+  const traceId =
+    (req as any).traceId ||
+    (req.headers['x-trace-id'] as string) ||
+    (req.headers['x-correlation-id'] as string) ||
+    (req.headers['x-request-id'] as string) ||
+    '';
+
+  const tenantId =
+    user.tenantId || (req.headers['x-tenant-id'] as string) || 'unknown';
+  const principalId = user.userId || user.sub || 'anonymous';
+  const resource = 'maestro.routing.decision';
+  const resourceAttributes = {
+    runId: req.params.runId,
+    nodeId: req.params.nodeId,
+  };
+
+  try {
+    const decision = await opaPolicyEngine.evaluatePolicy('maestro/authz', {
+      tenantId,
+      userId: principalId,
+      role: user.roles?.[0] || user.role || 'viewer',
+      action: 'read',
+      resource,
+      resourceAttributes,
+      sessionContext: {
+        ipAddress: req.ip,
+        userAgent: req.get('user-agent'),
+        traceId,
+      },
+    });
+
+    logger.info(
+      {
+        event: 'maestro.routing.opaDecision',
+        allow: decision.allow,
+        reason: decision.reason,
+        traceId,
+        tenantId,
+        principalId,
+        resource,
+        resourceAttributes,
+      },
+      'OPA evaluated maestro routing access',
+    );
+
+    if (!decision.allow) {
+      return res.status(403).json({
+        error: 'Forbidden',
+        code: 'OPA_DENY',
+        reason: decision.reason || 'Access denied by policy',
+        traceId,
+        resource,
+      });
+    }
+
+    (req as any).policyDecision = decision;
+    return next();
+  } catch (error: any) {
+    logger.error(
+      {
+        event: 'maestro.routing.opaDecision.error',
+        traceId,
+        tenantId,
+        principalId,
+        resource,
+        resourceAttributes,
+        error: error?.message || String(error),
+      },
+      'OPA evaluation failed for maestro routing access',
+    );
+
+    return res.status(500).json({
+      error: 'OPA evaluation failed',
+      code: 'OPA_ERROR',
+      traceId,
+    });
+  }
+}
 
 /**
  * POST /api/maestro/v1/policies/explain
@@ -216,7 +299,10 @@ router.get('/rules', async (req, res) => {
  * GET /api/maestro/v1/runs/:runId/nodes/:nodeId/routing
  * Get routing decision for a specific run node
  */
-router.get('/runs/:runId/nodes/:nodeId/routing', async (req, res) => {
+router.get(
+  '/runs/:runId/nodes/:nodeId/routing',
+  routingOPAGuard,
+  async (req, res) => {
   try {
     const { runId, nodeId } = req.params;
     const { includeTrace = false } = req.query;
@@ -274,6 +360,7 @@ router.get('/runs/:runId/nodes/:nodeId/routing', async (req, res) => {
       message: error.message,
     });
   }
-});
+  },
+);
 
 export { router as policyRoutes };

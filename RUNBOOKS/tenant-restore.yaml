@@ -1,0 +1,68 @@
+apiVersion: maestro/v1
+kind: Runbook
+metadata:
+  name: tenant-restore
+  version: 0.1.0
+  owner: sre@summit
+  labels:
+    drill: restore
+    scope: tenant
+spec:
+  description: >
+    Validate and execute per-tenant restores using tagged backups. This runbook
+    assumes backups are stored with tenant tags or directories and uses the
+    unified restore script to target a single tenant.
+  prerequisites:
+    - name: Backup identified
+      check: "[[ -n \"${BACKUP_ID:-}\" || -n \"${BACKUP_PATH:-}\" ]]"
+    - name: Tenant provided
+      check: "[[ -n \"${TENANT:-}\" ]]"
+    - name: Access to backup bucket
+      check: "aws s3 ls ${S3_BUCKET:-s3://intelgraph-backups}/ >/dev/null"
+  steps:
+    - name: Select backup
+      action: |
+        export TENANT="${TENANT:?set tenant id}"
+        export RESTORE_ENV="${RESTORE_ENV:-dev}"
+        if [[ -n "${BACKUP_ID:-}" ]]; then
+          echo "Using backup id: ${BACKUP_ID}"
+        else
+          BACKUP_ID=$(aws s3 ls "${S3_BUCKET}/${S3_PREFIX:-summit-backups}/${TENANT}/" | sort | tail -1 | awk '{print $4}')
+          echo "Auto-selected backup id: ${BACKUP_ID}"
+        fi
+    - name: Dry-run restore validation
+      action: |
+        ./scripts/db/restore.sh \
+          --env="${RESTORE_ENV}" \
+          --backup-id="${BACKUP_ID}" \
+          --tenant="${TENANT}" \
+          --datastores=postgres,neo4j \
+          --dry-run \
+          --skip-verification \
+          --force
+    - name: Execute scoped restore
+      action: |
+        CONFIRM_FLAG=""
+        if [[ "${RESTORE_ENV}" == "production" ]]; then
+          CONFIRM_FLAG="--confirm-production"
+        fi
+        ./scripts/db/restore.sh \
+          --env="${RESTORE_ENV}" \
+          --backup-id="${BACKUP_ID}" \
+          --tenant="${TENANT}" \
+          --datastores=postgres,neo4j \
+          --sanitize \
+          ${CONFIRM_FLAG}
+    - name: Post-restore checks
+      action: |
+        PGURL="postgres://${POSTGRES_USER:-summit}:${POSTGRES_PASSWORD:-devpassword}@${POSTGRES_HOST:-localhost}:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-summit_dev}"
+        echo "Verifying tenant data..." && \
+        docker exec "${POSTGRES_CONTAINER:-postgres}" psql "$PGURL" -c "SELECT COUNT(*) FROM tenant_entities WHERE tenant_id='${TENANT}'" || true
+        if [[ "${SKIP_VERIFICATION:-false}" != "true" ]]; then
+          ./scripts/dr/restore_check.sh
+        fi
+  outputs:
+    - name: tenant
+      value: "${TENANT}"
+    - name: backupId
+      value: "${BACKUP_ID}"
