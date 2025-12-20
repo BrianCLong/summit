@@ -210,9 +210,11 @@ PY
         run: |
           set -euo pipefail
           for image in "${IMAGE_SERVER}" "${IMAGE_CLIENT}"; do
-            cosign verify "$image"
-            cosign verify-attestation --type slsaprovenance "$image"
-            cosign verify-attestation --type spdx "$image"
+            echo "Verifying ${image}"
+            cosign verify --output-json "$image" | tee "$(echo "$image" | sed 's/[:\/]/-/g')-verify.json"
+            cosign verify-attestation --type slsaprovenance --output-json "$image" | tee "$(echo "$image" | sed 's/[:\/]/-/g')-slsa.json"
+            cosign verify-attestation --type spdx --output-json "$image" | tee "$(echo "$image" | sed 's/[:\/]/-/g')-spdx.json"
+            jq -e '.[0].critical.image["Docker-manifest-digest"]' "$(echo "$image" | sed 's/[:\/]/-/g')-verify.json" >/dev/null
           done
 
       - name: Download SBOM attestations
@@ -233,17 +235,11 @@ PY
             conftest test "$sbom" -p policy/sbom_policy.rego
           done
 
-        - name: Abort promotion on guard failure
-          if: failure()
-          run: |
-            NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
-            ./scripts/rollback-deployment.sh canary-abort --namespace ${NAMESPACE} || true
-
-        - name: Abort canary on guard failure
-          if: failure()
-          run: |
-            NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
-            ./scripts/rollback-deployment.sh canary-abort --namespace ${NAMESPACE} || true
+      - name: Abort canary on guard failure
+        if: failure()
+        run: |
+          NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+          ./scripts/rollback-deployment.sh canary-abort --namespace ${NAMESPACE} || true
 
       - name: Deploy canary
         run: |
@@ -323,9 +319,11 @@ PY
         run: |
           set -euo pipefail
           for image in "${IMAGE_SERVER}" "${IMAGE_CLIENT}"; do
-            cosign verify "$image"
-            cosign verify-attestation --type slsaprovenance "$image"
-            cosign verify-attestation --type spdx "$image"
+            echo "Verifying ${image}"
+            cosign verify --output-json "$image" | tee "$(echo "$image" | sed 's/[:\/]/-/g')-verify.json"
+            cosign verify-attestation --type slsaprovenance --output-json "$image" | tee "$(echo "$image" | sed 's/[:\/]/-/g')-slsa.json"
+            cosign verify-attestation --type spdx --output-json "$image" | tee "$(echo "$image" | sed 's/[:\/]/-/g')-spdx.json"
+            jq -e '.[0].critical.image["Docker-manifest-digest"]' "$(echo "$image" | sed 's/[:\/]/-/g')-verify.json" >/dev/null
           done
 
       - name: Download SBOM attestations
@@ -345,6 +343,12 @@ PY
           for sbom in *sbom.json; do
             conftest test "$sbom" -p policy/sbom_policy.rego
           done
+
+      - name: Abort promotion on guard failure
+        if: failure()
+        run: |
+          NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+          ./scripts/rollback-deployment.sh canary-abort --namespace ${NAMESPACE} || true
 
       - name: Pre-promote health check (SLO Gate)
         run: |

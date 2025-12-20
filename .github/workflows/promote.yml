@@ -59,9 +59,11 @@ jobs:
         run: |
           set -euo pipefail
           for image in "${IMAGE_SERVER}" "${IMAGE_CLIENT}"; do
-            cosign verify "$image"
-            cosign verify-attestation --type slsaprovenance "$image"
-            cosign verify-attestation --type spdx "$image"
+            echo "Verifying ${image}"
+            cosign verify --output-json "$image" | tee "$(echo "$image" | sed 's/[:\/]/-/g')-verify.json"
+            cosign verify-attestation --type slsaprovenance --output-json "$image" | tee "$(echo "$image" | sed 's/[:\/]/-/g')-slsa.json"
+            cosign verify-attestation --type spdx --output-json "$image" | tee "$(echo "$image" | sed 's/[:\/]/-/g')-spdx.json"
+            jq -e '.[0].critical.image["Docker-manifest-digest"]' "$(echo "$image" | sed 's/[:\/]/-/g')-verify.json" >/dev/null
           done
 
       - name: Download SBOM attestations

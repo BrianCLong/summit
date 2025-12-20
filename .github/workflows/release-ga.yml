@@ -39,50 +39,67 @@ jobs:
         uses: slsa-framework/slsa-github-generator/actions/generator@v2
         with:
           artifact_path: 'dist/**'
-      - name: Verify signatures and attestations
-        env:
-          IMAGE: ghcr.io/intelgraph/platform:${GITHUB_REF_NAME}
-        run: |
-          cosign verify "${IMAGE}"
-          cosign verify-attestation --type slsaprovenance "${IMAGE}"
-          cosign verify-attestation --type spdx "${IMAGE}"
-      - name: Enforce SBOM diff budget or exception
-        env:
-          SBOM_BASELINE: .github/sbom-baseline.spdx.json
-          SBOM_CURRENT: sbom.spdx.json
-          BUDGET_PERCENT: 5
-          SBOM_DIFF_EXCEPTION: ${{ secrets.SBOM_DIFF_EXCEPTION != '' && secrets.SBOM_DIFF_EXCEPTION || 'false' }}
-        run: |
-          if [ ! -f "${SBOM_CURRENT}" ]; then
-            echo "Current SBOM missing"; exit 1
-          fi
+        - name: Verify signatures and attestations
+          env:
+            IMAGE: ghcr.io/intelgraph/platform:${GITHUB_REF_NAME}
+          run: |
+            set -euo pipefail
+            cosign verify --output-json "${IMAGE}" > verify.json
+            cosign verify-attestation --type slsaprovenance --output-json "${IMAGE}" > verify-slsa.json
+            cosign verify-attestation --type spdx --output-json "${IMAGE}" > verify-spdx.json
+            jq -e '.[0].critical.image["Docker-manifest-digest"]' verify.json >/dev/null
+            jq -e '.attestations[0].predicateType' verify-slsa.json >/dev/null
+            jq -e '.attestations[0].predicateType' verify-spdx.json >/dev/null
+        - name: Enforce SBOM diff budget or exception
+          env:
+            SBOM_BASELINE: .github/sbom-baseline.spdx.json
+            SBOM_CURRENT: sbom.spdx.json
+            BUDGET_PERCENT: 5
+            SBOM_DIFF_EXCEPTION: ${{ secrets.SBOM_DIFF_EXCEPTION }}
+          run: |
+            set -euo pipefail
+            if [ ! -f "${SBOM_CURRENT}" ]; then
+              echo "Current SBOM missing"; exit 1
+            fi
 
-          if [ -f "${SBOM_BASELINE}" ]; then
-            baseline_packages=$(jq '.packages | length' "${SBOM_BASELINE}")
-            current_packages=$(jq '.packages | length' "${SBOM_CURRENT}")
-            allowed=$((baseline_packages + (baseline_packages * BUDGET_PERCENT / 100)))
-            if [ "${current_packages}" -gt "${allowed}" ]; then
-              echo "SBOM diff exceeds budget (${current_packages} vs ${allowed})";
-              exit 1
+            exception_flag=${SBOM_DIFF_EXCEPTION:-false}
+
+            if [ -f "${SBOM_BASELINE}" ]; then
+              baseline_packages=$(jq '.packages | length' "${SBOM_BASELINE}")
+              current_packages=$(jq '.packages | length' "${SBOM_CURRENT}")
+              allowed=$((baseline_packages + (baseline_packages * BUDGET_PERCENT / 100)))
+              if [ "${current_packages}" -gt "${allowed}" ]; then
+                echo "SBOM diff exceeds budget (${current_packages} vs ${allowed})";
+                exit 1
+              fi
+              echo "✅ SBOM diff within ${BUDGET_PERCENT}% budget"
+            else
+              if [ "${exception_flag}" != "true" ]; then
+                echo "SBOM baseline missing and no approved exception provided";
+                exit 1
+              fi
+              echo "⚠️ Proceeding with approved SBOM diff exception"
             fi
-            echo "✅ SBOM diff within ${BUDGET_PERCENT}% budget"
-          else
-            if [ "${SBOM_DIFF_EXCEPTION}" != "true" ]; then
-              echo "SBOM baseline missing and no approved exception provided";
-              exit 1
-            fi
-            echo "⚠️ Proceeding with approved SBOM diff exception"
-          fi
-      - name: Attach Rekor proof to release notes
-        env:
-          IMAGE: ghcr.io/intelgraph/platform:${GITHUB_REF_NAME}
-        run: |
-          TRIANGULATED=$(cosign triangulate "${IMAGE}")
-          printf "# Rekor Transparency Log\n\n" > release-notes.md
-          echo "Image: ${IMAGE}" >> release-notes.md
-          echo "Rekor Entry: ${TRIANGULATED}" >> release-notes.md
-          cosign verify "${IMAGE}" --output-certificate rekor-cert.pem --output-signature rekor.sig
-          echo "Certificate and signature artifacts emitted for transparency." >> release-notes.md
+        - name: Attach Rekor proof to release notes
+          env:
+            IMAGE: ghcr.io/intelgraph/platform:${GITHUB_REF_NAME}
+          run: |
+            set -euo pipefail
+            TRIANGULATED=$(cosign triangulate "${IMAGE}")
+            IMAGE_LOG_INDEX=$(jq -r '.[0].bundle.Payload.logIndex // "unknown"' verify.json)
+            SLSA_LOG_INDEX=$(jq -r '.attestations[0].bundle.Payload.logIndex // "unknown"' verify-slsa.json)
+            SPDX_LOG_INDEX=$(jq -r '.attestations[0].bundle.Payload.logIndex // "unknown"' verify-spdx.json)
+
+            printf "# Rekor Transparency Log\n\n" > release-notes.md
+            {
+              echo "Image: ${IMAGE}"
+              echo "Rekor Entry (signature): ${TRIANGULATED} (logIndex: ${IMAGE_LOG_INDEX})"
+              echo "Rekor Entry (slsa): ${SLSA_LOG_INDEX}"
+              echo "Rekor Entry (spdx): ${SPDX_LOG_INDEX}"
+            } >> release-notes.md
+
+            cosign verify "${IMAGE}" --output-certificate rekor-cert.pem --output-signature rekor.sig
+            echo "Certificate and signature artifacts emitted for transparency." >> release-notes.md
       - name: Upload release notes
         uses: actions/upload-artifact@v4
         with:
