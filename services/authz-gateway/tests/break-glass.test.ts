@@ -264,4 +264,60 @@ describe('break glass access', () => {
 
     await teardown([opaServer, upstreamServer], stopObservability);
   });
+
+  it('prevents re-approval once a break-glass grant expires', async () => {
+    const {
+      app,
+      opaServer,
+      upstreamServer,
+      stopObservability,
+      sessionManager,
+    } = await bootstrap({ ttlSeconds: '2' });
+
+    const loginRes = await request(app)
+      .post('/auth/login')
+      .send({ username: 'alice', password: 'password123' });
+    const baseToken = loginRes.body.token;
+
+    const requestRes = await request(app)
+      .post('/access/break-glass/request')
+      .set('Authorization', `Bearer ${baseToken}`)
+      .send({ justification: 'contain incident', ticketId: 'INC-401' });
+
+    const { session } = await sessionManager.validate(baseToken);
+    const elevatedToken = await sessionManager.elevateSession(session.sid, {
+      acr: 'loa2',
+      amr: ['mfa'],
+    });
+
+    const approvalRes = await request(app)
+      .post('/access/break-glass/approve')
+      .set('Authorization', `Bearer ${elevatedToken}`)
+      .send({ requestId: requestRes.body.requestId });
+
+    expect(approvalRes.status).toBe(200);
+
+    const state = JSON.parse(fs.readFileSync(breakGlassStatePath, 'utf8')) as {
+      requests: Record<string, { sid: string }>;
+    };
+    const sid = state.requests[requestRes.body.requestId].sid;
+    sessionManager.expire(sid);
+
+    await expect(
+      sessionManager.validate(approvalRes.body.token),
+    ).rejects.toThrow('session_expired');
+
+    const secondApproval = await request(app)
+      .post('/access/break-glass/approve')
+      .set('Authorization', `Bearer ${elevatedToken}`)
+      .send({ requestId: requestRes.body.requestId });
+
+    expect(secondApproval.status).toBe(410);
+    expect(secondApproval.body.error).toBe('request_expired');
+
+    const events = fs.readFileSync(breakGlassEventsPath, 'utf8');
+    expect(events).toMatch(/expiry/);
+
+    await teardown([opaServer, upstreamServer], stopObservability);
+  });
 });

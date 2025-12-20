@@ -20,8 +20,7 @@ export interface BreakGlassRequestRecord {
   expiresAt?: string;
   sid?: string;
   usageCount?: number;
-  immutableExpiry?: boolean;
-  singleUse?: boolean;
+  consumedAt?: string;
 }
 
 interface BreakGlassState {
@@ -140,6 +139,9 @@ class BreakGlassManager {
     if (record.status === 'approved') {
       throw new Error('request_already_approved');
     }
+    if (record.status === 'expired') {
+      throw new Error('request_expired');
+    }
     const issuedAt = nowIso();
     const expiresAtSeconds = Math.floor(Date.now() / 1000) + this.ttlSeconds;
     const breakGlass: BreakGlassMetadata = {
@@ -219,6 +221,7 @@ class BreakGlassManager {
       return;
     }
     record.usageCount = (record.usageCount || 0) + 1;
+    record.consumedAt = record.consumedAt || nowIso();
     this.state.requests[record.id] = record;
     writeState(this.state);
     emitEvent({

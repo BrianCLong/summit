@@ -1,0 +1,50 @@
+apiVersion: maestro/v1
+kind: Runbook
+metadata:
+  name: cross-region-failover
+  version: 0.1.0
+  owner: sre@summit
+  labels:
+    drill: failover
+    scope: multi-region
+spec:
+  description: |
+    Simulate cross-region failover using tenant-tagged backups and DR routing.
+    Validates backup presence, promotes DR routing, and triggers smoke checks.
+  prerequisites:
+    - name: DR kubecontext set
+      check: "kubectl config current-context | grep -q dr"
+    - name: Backup bucket reachable
+      check: "aws s3 ls ${DR_BACKUP_BUCKET:-s3://intelgraph-backups-dr}/ >/dev/null"
+  steps:
+    - name: Identify latest tenant backup
+      action: |
+        export TENANT="${TENANT:?set tenant id}"
+        export BACKUP_KEY=$(aws s3 ls "${DR_BACKUP_BUCKET:-s3://intelgraph-backups-dr}/${TENANT}/" --recursive | sort | tail -1 | awk '{print $4}')
+        echo "Selected backup key: ${BACKUP_KEY}"
+    - name: Restore databases in DR
+      action: |
+        aws s3 cp "${DR_BACKUP_BUCKET:-s3://intelgraph-backups-dr}/${BACKUP_KEY}" /tmp/dr-backup.tar.gz
+        mkdir -p /tmp/dr-backup && tar -xzf /tmp/dr-backup.tar.gz -C /tmp/dr-backup
+        ./scripts/db/restore.sh \
+          --env=dr_rehearsal \
+          --backup-path=/tmp/dr-backup \
+          --tenant="${TENANT}" \
+          --datastores=postgres,neo4j \
+          --sanitize \
+          --skip-verification \
+          --force
+    - name: Shift traffic to DR region
+      action: |
+        terraform -chdir=infra/dr init -input=false
+        terraform -chdir=infra/dr apply -auto-approve
+        kubectl annotate service api --overwrite failover.summit.ai/active=true
+    - name: Validate services in DR
+      action: |
+        kubectl -n default wait --for=condition=available deployment/gateway --timeout=300s
+        make smoke || ./ops/k6/smoke.sh
+  outputs:
+    - name: tenant
+      value: "${TENANT}"
+    - name: backupKey
+      value: "${BACKUP_KEY}"

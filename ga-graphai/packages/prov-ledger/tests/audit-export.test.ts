@@ -49,11 +49,47 @@ describe('Audit export API + verifier', () => {
     app.use(createAuditExportRouter(log));
   });
 
+  it('returns chained hashes on append and refuses mutations', () => {
+    const ledger = new AppendOnlyAuditLog();
+    const first = ledger.append({
+      id: 'e-1',
+      actor: 'system',
+      action: 'create',
+      resource: 'dataset:1',
+      system: 'audit',
+      category: 'ingest',
+    });
+
+    const second = ledger.append({
+      id: 'e-2',
+      actor: 'system',
+      action: 'update',
+      resource: 'dataset:1',
+      system: 'audit',
+      category: 'ingest',
+    });
+
+    expect(first.previousHash).toBeUndefined();
+    expect(first.eventHash).toBeDefined();
+    expect(second.previousHash).toBe(first.eventHash);
+    expect(second.eventHash).toBeDefined();
+
+    expect(() =>
+      ledger.append({
+        ...second,
+        id: first.id,
+      } as any),
+    ).toThrow(/append-only audit log rejects/i);
+  });
+
   it('includes hash chain data and verifies clean exports', async () => {
     const response = await request(app).get('/audit/export?limit=2');
     expect(response.status).toBe(200);
     expect(response.body.events[0].eventHash).toBeDefined();
     expect(response.body.events[0].previousHash).toBeUndefined();
+    expect(response.body.events[1].previousHash).toBe(
+      response.body.events[0].eventHash,
+    );
     expect(response.body.verification.chain.ok).toBe(true);
 
     const exitCode = await runAuditVerifierCli(
@@ -76,6 +112,18 @@ describe('Audit export API + verifier', () => {
     expect(exitCode).toBe(1);
   });
 
+  it('rejects attempts to mutate previously appended events', () => {
+    expect(() =>
+      log.append({
+        id: 'evt-1',
+        actor: 'alice',
+        action: 'download',
+        resource: 'secret-report.pdf',
+        system: 'content',
+      }),
+    ).toThrow('Append-only audit log rejects mutations to existing events');
+  });
+
   it('paginates deterministically and redacts PII', async () => {
     const firstPage = await request(app).get('/audit/export?limit=2');
     expect(firstPage.body.page.pageSize).toBe(2);
@@ -95,5 +143,28 @@ describe('Audit export API + verifier', () => {
       ...secondPage.body.evidence.entries,
     ];
     expect(JSON.stringify(combined)).not.toContain('alice@example.com');
+  });
+
+  it('respects from/to boundaries and keeps pagination stable', async () => {
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const now = new Date().toISOString();
+
+    log.append({
+      id: 'evt-4',
+      actor: 'carol',
+      action: 'read',
+      resource: 'handbook',
+      system: 'knowledge',
+      timestamp: yesterday,
+    });
+
+    const fromNow = await request(app).get(`/audit/export?from=${now}`);
+    expect(fromNow.body.page.total).toBe(3);
+    expect(fromNow.body.events.find((evt: any) => evt.id === 'evt-4')).toBeUndefined();
+
+    const full = await request(app).get('/audit/export?limit=2&cursor=2&from=' + yesterday);
+    expect(full.body.page.cursor).toBe(2);
+    expect(full.body.page.total).toBe(4);
+    expect(full.body.verification.chain.ok).toBe(true);
   });
 });

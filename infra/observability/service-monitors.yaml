@@ -37,6 +37,8 @@ spec:
           targetLabel: instance
         - sourceLabels: [__meta_kubernetes_namespace]
           targetLabel: namespace
+        - sourceLabels: [__meta_kubernetes_pod_node_name]
+          targetLabel: node
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
@@ -53,11 +55,37 @@ spec:
         - action: replace
           sourceLabels: [pod]
           targetLabel: runtime
+        - action: replace
+          sourceLabels: [namespace]
+          targetLabel: namespace
   selector:
     matchLabels:
       app.kubernetes.io/component: agent-runtime
   namespaceSelector:
     matchNames: [agents]
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: vector
+  labels:
+    release: prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: vector
+  namespaceSelector:
+    matchNames: [observability]
+  endpoints:
+    - port: prom
+      interval: 30s
+      scheme: http
+      path: /metrics
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_namespace]
+          targetLabel: namespace
+        - sourceLabels: [__meta_kubernetes_pod_node_name]
+          targetLabel: node
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
@@ -75,3 +103,47 @@ spec:
       app.kubernetes.io/name: pyroscope
   namespaceSelector:
     matchNames: [observability]
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: gateway
+  labels:
+    release: prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gateway
+  namespaceSelector:
+    matchNames: [default, summit]
+  endpoints:
+    - port: http
+      interval: 15s
+      path: /metrics
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_namespace]
+          targetLabel: namespace
+        - sourceLabels: [__meta_kubernetes_pod_name]
+          targetLabel: pod
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: web
+  labels:
+    release: prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: web
+  namespaceSelector:
+    matchNames: [default, summit]
+  endpoints:
+    - port: http
+      interval: 30s
+      path: /metrics
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_namespace]
+          targetLabel: namespace
+        - sourceLabels: [__meta_kubernetes_pod_name]
+          targetLabel: pod
