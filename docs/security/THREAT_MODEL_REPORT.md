@@ -1,0 +1,3423 @@
+# Automated STRIDE Threat Model Report
+
+**Generated:** Fri Dec 19 08:08:01 UTC 2025
+
+## Summary
+- **Endpoints Analyzed:** 698
+- **Data Stores Identified:** 97
+- **Potential Threats Detected:** 1135
+
+## Identified Threats
+
+### Spoofing
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /metrics`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /search/evidence`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health/detailed`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /metrics`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET *`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET *`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /ping`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health/conductor`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /test`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /limited`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /api/users/:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /api/export`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /api/copilot/query`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /v1/approvals`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /v1/schedules`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /v1/schedules`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `PATCH /v1/schedules/:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /route`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /reward`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /workflows`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /workflows`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /execute/:workflowId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /executions/:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /recipes`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /recipes/:name`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /export`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /:evidenceId/download`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /:evidenceId/verify`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /:evidenceId/artifacts`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /:evidenceId/artifacts/:artifactId/download`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /metrics`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /backends`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /spans`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /runs/:runId/agents/timeline`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /runs/:runId/hitl/:checkpointId/approve`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /runs/:runId/hitl/:checkpointId/block`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /runs/:runId/hitl/:checkpointId/edit`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /runs/:runId/hitl/pending`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /runs/:runId/agents/simulate`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /auth/user`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /auth/jwks`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /explain`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /simulate`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /rules`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /runs/:runId/nodes/:nodeId/routing`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /status`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /metrics`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /partners`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /partners/:code`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /partners/:code/health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /sessions`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /sessions/:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /sessions/:id/messages`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /languages`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /audit`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /echo`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /echo`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /status/:tenantId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /configuration`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /missions`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /missions/:tenantId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /activity/:tenantId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /narratives/:tenantId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /tenants/:tenantId/nodes`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /nodes`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /tasks`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /tasks/:taskId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /slo`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /simulate`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /experiments/:id/results`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /runs/:id/mcp/sessions`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `DELETE /runs/:id/mcp/sessions/:sid`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /runs/:id/mcp/sessions`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /servers`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /servers`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /servers/:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `PUT /servers/:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `DELETE /servers/:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /servers/:id/health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health-alias/:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /runs/:id/mcp/invocations`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /email/track/open/:messageId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /email/track/click/:messageId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /email/unsubscribe`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /email/preferences`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /cost-metrics`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /performance-metrics`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /slo-metrics`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /slow-queries`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /alerts`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /observability`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /observability-error`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /dashboard`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /vulnerabilities`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /vulnerabilities/:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /vulnerabilities/import`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /sboms`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /sboms/:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /sboms`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /scans`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /scans`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /compliance-report`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /trends`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /policy-violations`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /api/simulation/entities`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /csp`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /csp`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /status`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /start`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /:streamId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /tickets`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /quotas/:tenantId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /quotas/:tenantId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /usage/:tenantId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /budget/:tenantId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /run-simulation`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /timeline/:runId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /publish`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /metrics`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /circuit-breakers`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /bulkheads`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /circuit-breakers/:name/reset`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /circuit-breakers/:name/trip`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /dashboard`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /test/:pattern`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /vendors`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /vendors/:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /vendors`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /vendors/:id/sbom`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /vendors/:id/contract`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /vendors/:id/risk`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /metrics`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health/quick`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health/live`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health/ready`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health/info`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health/database`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health/neo4j`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health/redis`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health/ml`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health/system`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /metrics/business`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /web-vitals`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /telemetry/events`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /telemetry/dora`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /plan`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /run`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /sign-manifest`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /invoices`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /invoices/generate`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /graph`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /agent-actions`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /compress`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /status`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /certifications`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /slo`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /packs`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /packs/:packId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /packs/:packId/controls`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /controls`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /controls/:controlId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /controls/:controlId/evidence`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /evidence/request`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /evidence/request/:requestId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /evidence/packages/:packageId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /reports/generate`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /reports/:reportId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /controls/:controlId/assess`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /questionnaire/caiq`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /export/oscal`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /metrics`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /status`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /gates`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /trends/:metric`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /dashboard`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /designate-threat`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /delegate-authority`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /status/:threatId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /prioritize`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /dashboard`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /ingest`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health/detailed`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health/ready`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health/live`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health/deployment`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `PATCH /:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `DELETE /:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /:id/deliveries`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /trigger-test`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /Users`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /Users`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /Users/:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `PUT /Users/:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `DELETE /Users/:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /install`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /stream`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /recent`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /alerts`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /tasks`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /tasks/:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /metrics`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /honeypots`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /tokens`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /events`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /intelligence`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /slos`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /evaluate-single`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /evaluate-batch`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /reports/:modelId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /slo-dashboard`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /metrics/supported`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /benchmarks`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /collections`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /collections`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /documents/upload`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /documents/:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /retrieve`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /rag/answer`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /state`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /arm`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /analytics`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /export`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /export`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /export/:jobId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /export/:jobId/download`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /reference`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /json`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /chat`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /render-prompt`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /resolve-batch`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /quality/metrics`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /run`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /:jobId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /list`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /execute`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /status/:runId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /replay/:runId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /analysts`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /reconstitute`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /query/:ghostId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /sync`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /runbooks/:family/:name/versions`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /recipes`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /recipes/run`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /pipelines/:key/run`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /pipelines`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /search/retrieve`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /search/context`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /dlq`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /evaluate`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /query`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /history/:investigationId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /run/:runId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /replay/:runId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /capabilities`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /plan`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /plan`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /residency`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /residency`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /invoice`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /:runbook/:stepId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /stats`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /sensitive-count`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /configure-residency`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /configure-kms`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /encrypt`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /decrypt`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /check-transfer-compliance`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /report`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /supported-regions`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /data-classifications`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /policy/packs/:packId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /policy/packs/:packId/attestation`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /evidence`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `PUT /:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `DELETE /:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /tickets`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /tickets`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /tickets/:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `PATCH /tickets/:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `DELETE /tickets/:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /tickets/:id/comments`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /tickets/:id/comments`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /ingest`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /alerts`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /events`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /compliance/report`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /spawn`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /telemetry`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /scan`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /patterns`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /cache/clear`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET pg`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET neo4j`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET pg`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /nl-to-cypher`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /ingest`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /confirmations`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /confirmations/:targetId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /dashboard`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /scan`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /ingest`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /emitters`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /signals`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /scan`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /drill`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /telemetry/abuse`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /forecast/:entityId/activity`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /forecast/:entityId/metric`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /candidates`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /merge`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /split`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /explain`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /models/status`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /capabilities`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /job-status/:jobId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /adversary/generate`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /synthetics`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /initiate`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /synthetics/:syntheticId/activity`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /recommend`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /fabricate`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /job/:jobId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /implants`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /handshake/:implantId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /cortex-overlay`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /graphql/cost-preview`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /honeypots`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /interactions`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /profiles`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /threat-intel`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /:id/approve`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /:id/reject`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /simulations`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /simulations`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /simulations/batch`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /simulations/:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /simulations/:id/tick`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /simulations/:id/events`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /simulations/:id/shock`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /simulations/:id/actions`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `DELETE /simulations/:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /spawn`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /decisions`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /claims`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /decisions/:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /elite-fracture`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /succession-sim`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /nuclear-breakout`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /color-revolution`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /food-riots`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /naval-blockade`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /alliance-spiral`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /leader-health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /water-war`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /diaspora-threat`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /election-theft`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /sanctions-escape`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /arctic-claim`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /dedollarization`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /coup-proofness`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /genocide-warning`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /mineral-chokepoint`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /taiwan-invasion`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /power-transition`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /false-flag`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /nuclear-winter`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /red-button`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /final-question`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /ai/webhook`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /info`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /status`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /generate-sbom`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /preflight`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /event`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /stats`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /transfer`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /domains`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /export`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /export/simulate`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /export/status/:requestId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /nl2cypher`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /nl2cypher/diff`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /sandbox/execute`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /playbook`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /signup`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /login`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /verify-email`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /resend-verification`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /tickets/:provider/:externalId/links`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /openapi.yaml`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /openapi.json`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /redoc`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /runs`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /runs/:runId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /runs/:runId/tasks`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /tasks/:taskId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /licenses`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /licenses/:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /sources`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /sources/:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /transforms`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /transforms/:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /evidence`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /evidence/:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /claims`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /claims/:id`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /claims`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /chain/:itemId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /export`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /ingest`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /audit/verify`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /cases/:id/transition`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /cases/:id/available-transitions`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /cases/:id/tasks`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /cases/:id/tasks`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `PUT /tasks/:id/assign`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `PUT /tasks/:id/complete`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /cases/:id/tasks/overdue`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /cases/:id/participants`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /cases/:id/participants`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `DELETE /cases/:caseId/participants/:userId/:roleId`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /cases/:id/approvals`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /approvals/:id/vote`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /approvals/pending`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /cases/:id/slas`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /cases/:id/slas/summary`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /roles`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /summary`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /plan`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /export`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /entities`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `POST /maestro/runs`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /admin/users`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /taxii2/`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /taxii2/api/`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /cti/health`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+- **Component:** `GET /cti/info`
+  - **Issue:** Endpoint appears to lack authentication middleware.
+  - **Mitigation:** Ensure `ensureAuthenticated` or similar middleware is applied.
+
+### Tampering
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /metrics`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /search/evidence`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /health/detailed`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /metrics`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /ping`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /limited`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /workflows`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /workflows`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /execute/:workflowId`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /executions/:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /recipes`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /recipes/:name`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /export`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /:evidenceId/download`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /:evidenceId/verify`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /:evidenceId/artifacts`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /:evidenceId/artifacts/:artifactId/download`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /metrics`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /backends`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /spans`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /runs/:runId/agents/timeline`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /runs/:runId/hitl/:checkpointId/approve`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /runs/:runId/hitl/:checkpointId/block`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /runs/:runId/hitl/:checkpointId/edit`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /runs/:runId/hitl/pending`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /runs/:runId/agents/simulate`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /auth/user`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /auth/jwks`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /explain`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /simulate`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /rules`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /runs/:runId/nodes/:nodeId/routing`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /status`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /metrics`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /partners`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /partners/:code`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /partners/:code/health`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /sessions`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /sessions/:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /sessions/:id/messages`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /languages`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /audit`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /echo`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /echo`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /tenants/:tenantId/nodes`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /nodes`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /tasks`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /tasks/:taskId`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /slo`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /simulate`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /experiments/:id/results`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /runs/:id/mcp/sessions`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `DELETE /runs/:id/mcp/sessions/:sid`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /runs/:id/mcp/sessions`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /runs/:id/mcp/invocations`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /recipes`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /cost-metrics`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /performance-metrics`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /slo-metrics`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /slow-queries`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /alerts`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /observability`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /observability-error`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /dashboard`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /vulnerabilities`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /vulnerabilities/:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /vulnerabilities/import`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /sboms`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /sboms/:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /sboms`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /scans`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /scans`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /compliance-report`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /trends`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /policy-violations`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /api/simulation/entities`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /csp`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /csp`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /simulate`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /start`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /:streamId`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /tickets`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /quotas/:tenantId`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /quotas/:tenantId`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /usage/:tenantId`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /budget/:tenantId`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /run-simulation`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /timeline/:runId`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /publish`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /spread`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /metrics`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /circuit-breakers`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /bulkheads`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /circuit-breakers/:name/reset`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /circuit-breakers/:name/trip`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /dashboard`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /test/:pattern`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /vendors`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /vendors/:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /vendors`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /vendors/:id/sbom`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /vendors/:id/contract`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /vendors/:id/risk`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /plan`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /run`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /analyze`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /sign-manifest`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /validate`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /invoices`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /invoices/generate`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /graph`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /agent-actions`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /compress`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /metrics`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /status`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /gates`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /trends/:metric`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /dashboard`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /designate-threat`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /delegate-authority`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /status/:threatId`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /prioritize`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /dashboard`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /ingest`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /health/detailed`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /health/ready`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /health/live`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /health/deployment`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /reports`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /check/:investigationId`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /repair/:investigationId`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `DELETE /:id/participants/:userId`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /:id/history`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /:id/conflicts`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /Users`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /Users`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /Users/:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `PUT /Users/:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `DELETE /Users/:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /install`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /request`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /github/:owner/:repo/issues`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /slack/channels`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /stream`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /recent`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /alerts`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /ingest/external`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /prior-art/search`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /prior-art/cluster`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /invention/generate`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /competitors/market-map`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /foresight/simulate`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /foresight/opportunities`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /actions`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /playbooks`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /playbooks`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /playbooks/:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /playbooks/:id/run`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /runs`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /honeypots`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /tokens`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /events`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /intelligence`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /collections`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /collections`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /documents/upload`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /documents/:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /retrieve`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /rag/answer`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /agents`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /agents`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /agents/:id/heartbeat`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /negotiations`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /negotiations`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /negotiations/:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /negotiations/:id/proposals`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /state`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /arm`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /reference`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /json`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /chat`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /render-prompt`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /resolve-batch`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /quality/metrics`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /list`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /execute`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /status/:runId`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /replay/:runId`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /analysts`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /reconstitute`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /query/:ghostId`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /sync`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /runbooks/:family/:name/versions`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /analyze`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /pipelines/:key/run`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /pipelines`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /search/retrieve`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /search/context`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /dlq`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /traces`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /active`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /export`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /metrics`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /config`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /evaluate`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /plan`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /plan`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /residency`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /residency`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /invoice`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /:runbook/:stepId`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /public-key`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /stats`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /sensitive-count`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /detect/:campaignId`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /narrative/:id/timeline`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /narrative/:id/network`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /policy/packs/:packId`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /policy/packs/:packId/attestation`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /evidence`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `PUT /:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `DELETE /:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /generate`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /tickets`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /tickets`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /tickets/:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `PATCH /tickets/:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `DELETE /tickets/:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /tickets/:id/comments`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /tickets/:id/comments`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /ingest`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /alerts`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /events`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /compliance/report`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /spawn`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /telemetry`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /scan`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /policies`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /policies/:filename`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /evaluate`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /validate`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /providers`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /query`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /nl-to-cypher`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /train`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /suggest-links`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /ingest`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /confirmations`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /confirmations/:targetId`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /dashboard`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /scan`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /prioritize`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /score/:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /queue`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /drill`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /telemetry/abuse`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /forecast/:entityId/activity`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /forecast/:entityId/metric`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /candidates`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /merge`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /split`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /explain`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /synthetics`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /initiate`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /synthetics/:syntheticId/activity`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /query`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /test`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /retrieve`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /rag-context`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /fabricate`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /job/:jobId`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /implants`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /handshake/:implantId`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /cortex-overlay`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /graphql/cost-preview`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /:id/approve`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /:id/reject`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /schemas`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /schemas/latest`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /schemas/:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /vocabularies`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /vocabularies`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /changes`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /changes`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /changes/:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /changes/:id/impact`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /changes/:id/review`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /changes/:id/merge`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /runs`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /runs/:runId`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /runs`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /templates`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /templates`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /spawn`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /entities/search`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /entities/:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /entities/:id/neighbors`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /patterns/search`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /analytics/shortest-path`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /analytics/centrality`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /analytics/anomalies`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /sessions`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /sessions`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /sessions/:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `PUT /sessions/:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /verification/submit`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /verification/:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /fusion/timeline`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /fusion/hypotheses`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /deepfake/scan`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /simulation/run`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /elite-fracture`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /succession-sim`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /nuclear-breakout`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /color-revolution`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /food-riots`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /naval-blockade`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /alliance-spiral`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /leader-health`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /water-war`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /diaspora-threat`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /election-theft`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /sanctions-escape`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /arctic-claim`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /dedollarization`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /coup-proofness`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /genocide-warning`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /mineral-chokepoint`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /taiwan-invasion`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /power-transition`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /false-flag`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /nuclear-winter`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /red-button`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /final-question`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /ai/webhook`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /tag`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /info`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /status`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /generate-sbom`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /preflight`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /event`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /stats`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /transfer`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /domains`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /nl2cypher`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /nl2cypher/diff`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /sandbox/execute`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /playbook`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `PUT /:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `DELETE /:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /signup`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /login`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /verify-email`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /resend-verification`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /events`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /dashboard/stats`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /campaigns`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /actors`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /incidents`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /incidents/:id/evidence`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /risk/profiles/:principalId`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /risk/high`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /playbooks`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /playbooks/:id/execute`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /deception-assets`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /jobs/run-graph-detection`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /time-series`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /clusters`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /kpi`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /kpi/:id/status`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /kpi/:id/history`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /exec-dashboard/:role`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /warroom`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /forecast/:kpiId`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /correlation`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /threats`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /scan`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /threats/:id/resolve`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /tickets/:provider/:externalId/links`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /openapi.yaml`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /openapi.json`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /redoc`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /runs`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /runs/:runId`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /runs/:runId/tasks`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /tasks/:taskId`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /instances`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /instances/:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /capabilities`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /licenses`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /licenses/:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /sources`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /sources/:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /transforms`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /transforms/:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /evidence`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /evidence/:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /claims`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /claims/:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /claims`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /chain/:itemId`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /export`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /ingest`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /audit/verify`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /health`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /cases/:id/transition`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /cases/:id/available-transitions`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /cases/:id/tasks`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /cases/:id/tasks`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `PUT /tasks/:id/assign`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `PUT /tasks/:id/complete`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /cases/:id/tasks/overdue`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /cases/:id/participants`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /cases/:id/participants`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `DELETE /cases/:caseId/participants/:userId/:roleId`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /cases/:id/approvals`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /approvals/:id/vote`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /approvals/pending`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /cases/:id/slas`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /cases/:id/slas/summary`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /roles`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /summary`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /plan`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /export`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /entities`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /maestro/runs`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /admin/users`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /tenants`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /tenants`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /tenants/current`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `GET /api-keys`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `POST /api-keys`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+- **Component:** `DELETE /api-keys/:id`
+  - **Issue:** Endpoint appears to lack explicit input validation (Zod/Joi).
+  - **Mitigation:** Implement strict input validation using Zod schemas.
+
+### Information Disclosure
+- **Component:** `Data Store: multi-backend-repository.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: consul-repository.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: repository.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: postgres-repository.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: tenant_repository.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: feedback.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: trustRiskRepo.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: doclingRepository.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: evidenceRepo.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: doclingGraphRepository.ts (Neo4j)`
+  - **Issue:** Potential for unauthorized access to Neo4j data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: SigIntRepository.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: chunkStore.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: vectorStoreAdapter.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: sandbox-executor.service.ts (Neo4j)`
+  - **Issue:** Potential for unauthorized access to Neo4j data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: store.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: eventRepository.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: sessionRepository.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: pageRepository.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: memoryRepositories.test.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: cypher-sandbox.ts (Neo4j)`
+  - **Issue:** Potential for unauthorized access to Neo4j data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: metadataStore.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: dbMetrics.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: store.memory.js (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: store.postgres.js (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: sandbox.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: action-sandbox.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: evidence-store.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: report-executor.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: ParticipantRepo.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: ApprovalRepo.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: TaskRepo.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: GraphStore.ts (Neo4j)`
+  - **Issue:** Potential for unauthorized access to Neo4j data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: ReportingService.js (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: AnalystFeedbackService.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: ReportService.js (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: ConsistencyStore.ts (Redis)`
+  - **Issue:** Potential for unauthorized access to Redis data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: GraphConsistencyReporter.ts (Neo4j)`
+  - **Issue:** Potential for unauthorized access to Neo4j data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: CaseGraphRepository.ts (Neo4j)`
+  - **Issue:** Potential for unauthorized access to Neo4j data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: EvidenceRepository.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: ReportMetrics.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: ReportTemplateRegistry.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: ReportServiceV2.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: Report.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: ReportRequestValidator.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: IReportExporter.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: store.ts (Neo4j)`
+  - **Issue:** Potential for unauthorized access to Neo4j data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: store.test.ts (Neo4j)`
+  - **Issue:** Potential for unauthorized access to Neo4j data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: ReportController.js (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: UserRepository.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: graph-store.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: KnowledgeRepository.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: event-store-memory.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: event-store-postgres.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: generate_esg_report.js (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: generate_retention_report.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: sandbox.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: runs-repo.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: tasks-repo.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: feedback-service.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: feedback.test.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: pipelines-repo.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: sessions-store.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: MCPServersRepo.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: executors-repo.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: keyStore.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: reporting.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: reportRoutes.js (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: sandbox.ts (Neo4j)`
+  - **Issue:** Potential for unauthorized access to Neo4j data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: RegulatoryReportingService.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: version-store.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: reporting.test.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: FeatureStore.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: FairnessReport.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: jdbc.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: jdbc-placeholder.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: repository.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: AuditAccessLogRepo.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: ProvenanceRepo.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: ProductIncrementRepo.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: CaseRepo.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: RelationshipRepo.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: EntityRepo.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: InvestigationRepo.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: StrategicPlanRepo.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: ProductIncrementRepo.test.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: InvestigationRepo.test.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: EntityRepo.test.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: RelationshipRepo.test.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: reportingService.test.js (Neo4j)`
+  - **Issue:** Potential for unauthorized access to Neo4j data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: reportService.test.js (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: sandbox.test.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: AuditAccessLogRepo.test.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: risk_features_store.test.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: CaseRepo.test.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: TenantRepository.test.ts (PostgreSQL)`
+  - **Issue:** Potential for unauthorized access to PostgreSQL data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: ReportRequestValidator.test.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+- **Component:** `Data Store: ReportServiceV2.test.ts (Unknown)`
+  - **Issue:** Potential for unauthorized access to Unknown data.
+  - **Mitigation:** Verify encryption at rest and transit. Audit access controls.
+
+### Denial of Service
+- **Component:** `Data Store: multi-backend-repository.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: consul-repository.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: repository.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: postgres-repository.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: tenant_repository.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: feedback.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: trustRiskRepo.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: doclingRepository.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: evidenceRepo.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: doclingGraphRepository.ts (Neo4j)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: SigIntRepository.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: chunkStore.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: vectorStoreAdapter.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: sandbox-executor.service.ts (Neo4j)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: store.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: eventRepository.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: sessionRepository.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: pageRepository.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: memoryRepositories.test.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: cypher-sandbox.ts (Neo4j)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: metadataStore.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: dbMetrics.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: store.memory.js (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: store.postgres.js (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: sandbox.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: action-sandbox.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: evidence-store.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: report-executor.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: ParticipantRepo.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: ApprovalRepo.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: TaskRepo.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: GraphStore.ts (Neo4j)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: ReportingService.js (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: AnalystFeedbackService.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: ReportService.js (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: ConsistencyStore.ts (Redis)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: GraphConsistencyReporter.ts (Neo4j)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: CaseGraphRepository.ts (Neo4j)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: EvidenceRepository.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: ReportMetrics.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: ReportTemplateRegistry.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: ReportServiceV2.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: Report.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: ReportRequestValidator.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: IReportExporter.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: store.ts (Neo4j)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: store.test.ts (Neo4j)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: ReportController.js (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: UserRepository.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: graph-store.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: KnowledgeRepository.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: event-store-memory.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: event-store-postgres.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: generate_esg_report.js (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: generate_retention_report.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: sandbox.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: runs-repo.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: tasks-repo.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: feedback-service.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: feedback.test.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: pipelines-repo.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: sessions-store.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: MCPServersRepo.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: executors-repo.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: keyStore.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: reporting.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: reportRoutes.js (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: sandbox.ts (Neo4j)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: RegulatoryReportingService.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: version-store.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: reporting.test.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: FeatureStore.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: FairnessReport.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: jdbc.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: jdbc-placeholder.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: repository.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: AuditAccessLogRepo.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: ProvenanceRepo.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: ProductIncrementRepo.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: CaseRepo.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: RelationshipRepo.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: EntityRepo.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: InvestigationRepo.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: StrategicPlanRepo.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: ProductIncrementRepo.test.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: InvestigationRepo.test.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: EntityRepo.test.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: RelationshipRepo.test.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: reportingService.test.js (Neo4j)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: reportService.test.js (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: sandbox.test.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: AuditAccessLogRepo.test.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: risk_features_store.test.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: CaseRepo.test.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: TenantRepository.test.ts (PostgreSQL)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: ReportRequestValidator.test.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.
+- **Component:** `Data Store: ReportServiceV2.test.ts (Unknown)`
+  - **Issue:** Resource exhaustion if queries are not optimized or rate-limited.
+  - **Mitigation:** Implement connection pooling, timeouts, and query cost limits.

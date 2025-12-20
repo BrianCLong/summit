@@ -75,6 +75,16 @@ Quick lookup guide for common tasks and patterns.
 - Troubleshooting issues
 - Finding monitoring endpoints
 
+### 4. **docs/multi-tenant-control-plane.md** (new)
+Operational blueprint for delivering a production-ready multi-tenant control plane with GraphRAG hardening, policy enforcement, observability guardrails, and rainbow deployment strategy.
+
+**Covers:**
+- Control plane/core service decomposition
+- GraphRAG safety + performance practices
+- Policy isolation, governance, and audit logging
+- Alerting and runbook expectations (MTTR <5 minutes)
+- Deployment safety (rings/canary/shadow) and rollback triggers
+
 ## Quick Navigation
 
 ### I want to understand...
@@ -92,6 +102,11 @@ Quick lookup guide for common tasks and patterns.
 - **Query the database** → QUICK_REFERENCE.md (Database Querying)
 - **Test my code** → VISUALIZATION_DEVELOPMENT_GUIDE.md (Testing Pattern) or QUICK_REFERENCE.md (Testing)
 - **Deploy to production** → QUICK_REFERENCE.md (Release & Deployment)
+- **Price-aware orchestration overview** → docs/architecture/ADR-051-Price-Aware-Orchestration.md
+- **Operate price-aware routing (runbook)** → docs/runbooks/price-aware-orchestration.md
+
+### Licensing and distribution
+- **Understand the proprietary licensing model and release obligations** → docs/licensing/PROPRIETARY_LICENSING_GUIDE.md
 
 ## Key Statistics
 
@@ -246,4 +261,3 @@ For specific questions:
 - Architecture questions → ARCHITECTURE_SUMMARY.md (most detailed)
 - Development questions → VISUALIZATION_DEVELOPMENT_GUIDE.md (practical)
 - Quick lookup → QUICK_REFERENCE.md (fast answers)
-

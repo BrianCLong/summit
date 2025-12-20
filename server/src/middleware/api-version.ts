@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { logger } from '../lib/logger';
+import { logger } from '../config/logger.js';
 
 export interface VersionedRequest extends Request {
   apiVersion: {
@@ -78,8 +78,8 @@ export function requireVersion(minVersion: string) {
     const current = versionedReq.apiVersion;
 
     if (current.major < required.major ||
-        (current.major === required.major && current.minor < required.minor) ||
-        (current.major === required.major && current.minor === required.minor && current.patch < required.patch)) {
+      (current.major === required.major && current.minor < required.minor) ||
+      (current.major === required.major && current.minor === required.minor && current.patch < required.patch)) {
       return res.status(400).json({
         error: 'API version too old',
         required: minVersion,

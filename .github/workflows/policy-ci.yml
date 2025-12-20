@@ -1,19 +1,47 @@
-name: Policy Tests
+name: Policy CI
 
 on:
-  pull_request:
   push:
-    branches: [main]
+    paths:
+      - 'policy/**'
+      - '.ci/policies/**'
+      - '.ci/scripts/opa/**'
+  pull_request:
+    paths:
+      - 'policy/**'
+      - '.ci/policies/**'
+      - '.ci/scripts/opa/**'
 
 jobs:
-  conftest:
+  opa:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install Conftest
+      - name: Set up OPA
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: latest
+      - name: Format check
         run: |
-          curl -L https://github.com/open-policy-agent/conftest/releases/download/v0.53.0/conftest_0.53.0_Linux_x86_64.tar.gz | tar xz
-          sudo mv conftest /usr/local/bin/
-      - name: Run policy unit tests
-        working-directory: server/policies
-        run: conftest test --all-namespaces --output table .
+          opa fmt --diff policy
+      - name: Run policy tests with coverage
+        run: |
+          opa test policy/authz policy/common policy/tests -v --coverage --threshold 90 --format=json > opa-coverage.json
+          opa test .ci/policies -v
+      - name: Validate sample inputs against schema
+        run: |
+          python -m pip install --quiet jsonschema
+          python - <<'PY'
+import json
+from pathlib import Path
+from jsonschema import validate
+schema = json.loads(Path('policy/schema/input.schema.json').read_text())
+for fixture in Path('policy/fixtures').glob('*.json'):
+    data = json.loads(fixture.read_text())
+    validate(data, schema)
+PY
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: opa-coverage
+          path: opa-coverage.json

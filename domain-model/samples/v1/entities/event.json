@@ -1,0 +1,14 @@
+{
+  "id": "event-501",
+  "schemaVersion": "v1",
+  "entityType": "Event",
+  "name": "Credential Leak Investigation",
+  "category": "security-incident",
+  "occurredAt": "2025-02-01T13:30:00Z",
+  "locationId": "loc-1",
+  "metadata": {
+    "schemaVersion": "v1",
+    "sourceSystem": "siem",
+    "ingestedAt": "2025-02-01T14:00:00Z"
+  }
+}

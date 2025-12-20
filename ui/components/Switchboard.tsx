@@ -38,6 +38,30 @@ type Tile = {
   desc: string;
 };
 
+type Approval = {
+  id: string;
+  requester: string;
+  change: string;
+  system: string;
+  status: 'pending' | 'approved' | 'denied';
+  policy: string;
+};
+
+type TimelineEntry = {
+  id: string;
+  actor: string;
+  action: string;
+  target: string;
+  ts: string;
+};
+
+type GraphSlice = {
+  person: string;
+  role: string;
+  system: string;
+  approvedChange: string;
+};
+
 const agents: Agent[] = [
   { id: 'maestro', name: 'Maestro Conductor', tags: ['router', 'exec'] },
   { id: 'codex', name: 'CodeGen Codex', tags: ['dev', 'test'] },
@@ -55,6 +79,64 @@ const tiles: Tile[] = [
   { id: 'incidents', title: 'Incidents', metric: '0', desc: 'No active' },
   { id: 'deploys', title: 'Deploys', metric: '3', desc: 'prod canary live' },
   { id: 'cost', title: 'LLM Spend', metric: '$42', desc: '24h window' },
+];
+
+const approvals: Approval[] = [
+  {
+    id: 'ap-01',
+    requester: 'A. Rivera',
+    change: 'Rollout feature flag: risk-guard',
+    system: 'Switchboard API',
+    status: 'pending',
+    policy: 'opa.high-risk.mfa + vp-signoff',
+  },
+  {
+    id: 'ap-02',
+    requester: 'J. Chen',
+    change: 'Rotate webhook secret',
+    system: 'Event Bus',
+    status: 'approved',
+    policy: 'security-approver',
+  },
+];
+
+const timeline: TimelineEntry[] = [
+  {
+    id: 'tl-01',
+    actor: 'Security Bot',
+    action: 'OPA decision',
+    target: 'risk-guard rollout → allow-with-mfa',
+    ts: '08:13',
+  },
+  {
+    id: 'tl-02',
+    actor: 'V. Patel',
+    action: 'Approved',
+    target: 'Webhook secret rotation',
+    ts: '08:02',
+  },
+  {
+    id: 'tl-03',
+    actor: 'Runbook',
+    action: 'Receipt emitted',
+    target: 'Change CH-4421',
+    ts: '07:59',
+  },
+];
+
+const graphSlice: GraphSlice[] = [
+  {
+    person: 'A. Rivera',
+    role: 'Security Approver',
+    system: 'Switchboard API',
+    approvedChange: 'Rollout feature flag: risk-guard',
+  },
+  {
+    person: 'J. Chen',
+    role: 'VP Engineering',
+    system: 'Event Bus',
+    approvedChange: 'Rotate webhook secret',
+  },
 ];
 
 export default function Switchboard() {
@@ -146,6 +228,84 @@ export default function Switchboard() {
                 Start Local Meeting
               </Button>
             )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Approvals Inbox</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {approvals.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-start justify-between rounded-xl border p-3"
+              >
+                <div>
+                  <p className="font-semibold">{item.change}</p>
+                  <p className="text-sm opacity-80">
+                    {item.requester} → {item.system}
+                  </p>
+                  <p className="text-xs opacity-70">Policy: {item.policy}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                      item.status === 'approved'
+                        ? 'bg-green-100 text-green-800'
+                        : item.status === 'pending'
+                          ? 'bg-amber-100 text-amber-800'
+                          : 'bg-red-100 text-red-800'
+                    }`}
+                  >
+                    {item.status}
+                  </span>
+                  <Button size="sm" variant="secondary">
+                    Review
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Timeline</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {timeline.map((entry) => (
+              <div
+                key={entry.id}
+                className="flex items-start justify-between rounded-xl bg-muted/60 p-3"
+              >
+                <div>
+                  <p className="font-semibold">{entry.action}</p>
+                  <p className="text-sm opacity-80">{entry.target}</p>
+                  <p className="text-xs opacity-70">{entry.actor}</p>
+                </div>
+                <span className="text-xs opacity-70">{entry.ts}</span>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Graph Slice: Who approved what?</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-2">
+            {graphSlice.map((row) => (
+              <div
+                key={`${row.person}-${row.system}`}
+                className="rounded-xl border p-3 text-sm"
+              >
+                <p className="font-semibold">{row.person}</p>
+                <p className="opacity-80">Role: {row.role}</p>
+                <p className="opacity-80">System: {row.system}</p>
+                <p className="opacity-70">Approved: {row.approvedChange}</p>
+              </div>
+            ))}
           </CardContent>
         </Card>
       </main>

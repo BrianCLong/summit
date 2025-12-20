@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.local/streaming/event-log.schema.json",
+  "title": "Summit Streaming Event Envelope",
+  "type": "object",
+  "required": ["eventId", "name", "version", "occurredAt", "receivedAt", "partitionKey", "payload"],
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "description": "Globally unique identifier for the event (usually UUIDv4)."
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^summit\\.[a-z0-9_.-]+$",
+      "description": "Reverse-DNS style event name (e.g., summit.intelligence.decision.v1)."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$",
+      "description": "Schema version for the event payload."
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Event time supplied by the producer."
+    },
+    "receivedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Time the gateway accepted the event."
+    },
+    "partitionKey": {
+      "type": "string",
+      "description": "Deterministic key used for ordering and idempotency."
+    },
+    "correlationId": {
+      "type": "string",
+      "description": "Correlation identifier for tracing and workflow joins."
+    },
+    "traceId": {
+      "type": "string",
+      "description": "Lower-level trace/span reference."
+    },
+    "actor": {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string", "enum": ["user", "service", "device"] },
+        "source": { "type": "string" }
+      }
+    },
+    "context": {
+      "type": "object",
+      "properties": {
+        "service": { "type": "string" },
+        "environment": { "type": "string" },
+        "region": { "type": "string" }
+      }
+    },
+    "lineage": {
+      "type": "object",
+      "properties": {
+        "runId": { "type": "string" },
+        "parents": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "featureVersion": { "type": "string" }
+      }
+    },
+    "payload": {
+      "type": "object",
+      "description": "Domain-specific body; validated separately by the event name + version."
+    }
+  },
+  "additionalProperties": false
+}
