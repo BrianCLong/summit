@@ -1,0 +1,80 @@
+# Label-based reviewer pools and request counts
+matrix:
+  infra:
+    reviewers:
+      - platform/devops
+      - platform/infra
+    approvals:
+      small: 2
+      medium: 2
+      large: 3
+  cicd:
+    reviewers:
+      - platform/cicd
+    approvals:
+      small: 1
+      medium: 2
+      large: 2
+  security:
+    reviewers:
+      - sec/appsec
+    approvals:
+      small: 2
+      medium: 2
+      large: 3
+  data:
+    reviewers:
+      - data/platform
+    approvals:
+      small: 2
+      medium: 2
+      large: 3
+  services-graph:
+    reviewers:
+      - svc/graph
+    approvals:
+      small: 1
+      medium: 2
+      large: 2
+  services-api:
+    reviewers:
+      - svc/api
+    approvals:
+      small: 1
+      medium: 2
+      large: 2
+  services-ingest:
+    reviewers:
+      - svc/ingest
+    approvals:
+      small: 1
+      medium: 2
+      large: 2
+  web:
+    reviewers:
+      - ui/web
+    approvals:
+      small: 1
+      medium: 2
+      large: 2
+  gateway:
+    reviewers:
+      - platform/gateway
+    approvals:
+      small: 1
+      medium: 2
+      large: 2
+  observability:
+    reviewers:
+      - sre/observability
+    approvals:
+      small: 1
+      medium: 2
+      large: 2
+  default:
+    reviewers:
+      - platform/maintainers
+    approvals:
+      small: 1
+      medium: 1
+      large: 2

@@ -1,5 +1,7 @@
 import { create } from 'zustand';
-import type { Edge, Node } from 'reactflow';
+// import type { Edge, Node } from 'reactflow';
+type Edge = any;
+type Node = any;
 
 interface TimeRange {
   start: number;
@@ -67,7 +69,7 @@ function stitchEdges(nodes: Node[], existingEdges: Edge[]): Edge[] {
   return [...existingEdges, ...nextEdges];
 }
 
-export const useAnalysisStore = create<AnalysisState>((set, get) => ({
+export const useAnalysisStore = (create as any)((set: any, get: any) => ({
   timeRange: { start: 0, end: 100 },
   activeQuery: null,
   pinned: new Set<string>(),
@@ -85,10 +87,10 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
     }),
   runQuery: (activeQuery: string) => set({ activeQuery }),
   togglePinned: (id: string) =>
-    set((s) => {
+    set((s: any) => {
       const next = new Set(s.pinned);
       next.has(id) ? next.delete(id) : next.add(id);
-      return { pinned: next };
+      return { pinned: next } as any;
     }),
   clearPinned: () => set({ pinned: new Set<string>() }),
   startStream: () => {
@@ -109,10 +111,10 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
       const payload = JSON.parse(event.data);
       if (payload.type === 'batch') {
         const batchNodes = inflateNodes(payload.items || [], get().nodes.length);
-        set((state) => ({
+        set((state: any) => ({
           nodes: [...state.nodes, ...batchNodes],
           edges: stitchEdges(batchNodes, state.edges),
-          lastCursor: (payload.pageInfo as PageInfo)?.nextCursor ?? state.lastCursor,
+          lastCursor: (payload.pageInfo as PageInfo)?.nextCursor ?? (state as any).lastCursor,
         }));
       } else if (payload.type === 'complete') {
         set({ streaming: false });

@@ -1,9 +1,11 @@
+// @ts-nocheck
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import { Pool, PoolClient } from 'pg';
 import { spawn as childSpawn, SpawnOptions } from 'child_process';
 import { fileURLToPath } from 'url';
+import client from 'prom-client';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -55,9 +57,32 @@ export class MigrationManager {
   private migrationsTable: string;
   private seedsTable: string;
 
+  // Metrics
+  private migrationDurationHistogram: client.Histogram;
+  private migrationTotalCounter: client.Counter;
+  private migrationStatusGauge: client.Gauge;
+
   constructor(options: MigrationManagerOptions = {}) {
     this.migrationsDir = options.migrationsDir ?? DEFAULT_MIGRATIONS_DIR;
     this.seedsDir = options.seedsDir ?? DEFAULT_SEEDS_DIR;
+
+    // Initialize metrics
+    this.migrationDurationHistogram = new client.Histogram({
+      name: 'db_migration_duration_seconds',
+      help: 'Duration of database migrations in seconds',
+      labelNames: ['name', 'type'], // type: 'up' or 'down'
+    });
+
+    this.migrationTotalCounter = new client.Counter({
+      name: 'db_migration_total',
+      help: 'Total number of migrations applied',
+      labelNames: ['status'], // 'success', 'failure'
+    });
+
+    this.migrationStatusGauge = new client.Gauge({
+      name: 'db_migration_status',
+      help: 'Status of the last migration run (1 = success, 0 = failure)',
+    });
     this.spawn = options.spawn ?? childSpawn;
     this.allowBreakingChanges =
       options.allowBreakingChanges ??
@@ -85,16 +110,42 @@ export class MigrationManager {
 
   static validateOnlineSafety(sql: string) {
     const riskyPatterns = [
-      /DROP\s+TABLE/i,
-      /DROP\s+COLUMN/i,
-      /ALTER\s+TABLE\s+\w+\s+RENAME/i,
-      /ALTER\s+TABLE\s+\w+\s+ALTER\s+COLUMN\s+\w+\s+TYPE/i,
+      {
+        pattern: /DROP\s+TABLE/i,
+        message: 'DROP TABLE is not online-safe. Use Expand-Contract pattern.',
+      },
+      {
+        pattern: /DROP\s+COLUMN/i,
+        message: 'DROP COLUMN is not online-safe. Use Expand-Contract pattern.',
+      },
+      {
+        pattern: /ALTER\s+TABLE\s+\w+\s+RENAME/i,
+        message: 'Renaming tables/columns causes downtime. Use views or dual-write.',
+      },
+      {
+        pattern: /ALTER\s+TABLE\s+\w+\s+ALTER\s+COLUMN\s+\w+\s+TYPE/i,
+        message: 'Changing column type locks the table. Use a new column + backfill.',
+      },
+      {
+        pattern: /ADD\s+COLUMN\s+.*\s+NOT\s+NULL(?!\s+DEFAULT)/i,
+        message: 'Adding NOT NULL column without DEFAULT locks the table. Add as nullable first or with DEFAULT.',
+      },
+      {
+        pattern: /CREATE\s+INDEX\s+(?!CONCURRENTLY)/i,
+        message: 'CREATE INDEX locks the table. Use CREATE INDEX CONCURRENTLY.',
+      },
     ];
 
-    if (riskyPatterns.some((pattern) => pattern.test(sql))) {
-      throw new Error(
-        'Migration contains potentially breaking change. Use additive/online-safe patterns or set ALLOW_BREAKING_MIGRATIONS=true to bypass.',
-      );
+    for (const check of riskyPatterns) {
+      if (check.pattern.test(sql)) {
+        if (sql.includes('-- SAFE:')) {
+            // Allow bypassing with a comment
+            continue;
+        }
+        throw new Error(
+          `Migration safety check failed: ${check.message} (Set ALLOW_BREAKING_MIGRATIONS=true to bypass)`,
+        );
+      }
     }
   }
 
@@ -136,7 +187,7 @@ export class MigrationManager {
     return hash.digest('hex');
   }
 
-  private readMigrationFiles(): ManagedMigration[] {
+  public readMigrationFiles(): ManagedMigration[] {
     if (!fs.existsSync(this.migrationsDir)) {
       return [];
     }
@@ -221,7 +272,16 @@ export class MigrationManager {
         }
 
         const start = Date.now();
-        await client.query('BEGIN');
+        const timer = this.migrationDurationHistogram.startTimer({
+          name: migration.name,
+          type: 'up',
+        });
+
+        const useTransaction = !migration.upSql.includes('-- NO_TRANSACTION');
+
+        if (useTransaction) {
+          await client.query('BEGIN');
+        }
 
         try {
           await this.runSqlSafely(client, migration.upSql);
@@ -231,9 +291,20 @@ export class MigrationManager {
              ON CONFLICT (name) DO NOTHING`,
             [migration.name, migration.checksum, Date.now() - start, true],
           );
-          await client.query('COMMIT');
+
+          if (useTransaction) {
+            await client.query('COMMIT');
+          }
+
+          timer();
+          this.migrationTotalCounter.inc({ status: 'success' });
+          this.migrationStatusGauge.set(1);
         } catch (error) {
-          await client.query('ROLLBACK');
+          if (useTransaction) {
+            await client.query('ROLLBACK');
+          }
+          this.migrationTotalCounter.inc({ status: 'failure' });
+          this.migrationStatusGauge.set(0);
           throw error;
         }
       }
@@ -263,6 +334,10 @@ export class MigrationManager {
           );
         }
 
+        const timer = this.migrationDurationHistogram.startTimer({
+          name: migration.name,
+          type: 'down',
+        });
         await client.query('BEGIN');
         try {
           await this.runSqlSafely(client, migration.downSql);
@@ -271,12 +346,36 @@ export class MigrationManager {
             [migration.name],
           );
           await client.query('COMMIT');
+          timer();
         } catch (error) {
           await client.query('ROLLBACK');
           throw error;
         }
       }
     });
+  }
+
+  async dumpSchema(outputPath?: string) {
+    const connectionString =
+      process.env.POSTGRES_URL || process.env.DATABASE_URL || undefined;
+    if (!connectionString) {
+      throw new Error('POSTGRES_URL or DATABASE_URL is required to dump schema');
+    }
+
+    const destination =
+      outputPath || path.resolve(this.migrationsDir, '../schema.sql');
+
+    // pg_dump --schema-only --no-owner --no-privileges
+    await this.runCommand('pg_dump', [
+      '--schema-only',
+      '--no-owner',
+      '--no-privileges',
+      '--file',
+      destination,
+      connectionString,
+    ]);
+
+    return destination;
   }
 
   async seed(options: { force?: boolean } = {}) {

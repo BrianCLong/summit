@@ -1,0 +1,10 @@
+{{- if .Values.sidecarInjection.enabled }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Release.Namespace }}
+  labels:
+    {{ .Values.sidecarInjection.namespaceLabel }}: "enabled"
+  annotations:
+    helm.sh/resource-policy: keep
+{{- end }}

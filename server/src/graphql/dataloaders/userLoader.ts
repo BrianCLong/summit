@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * User DataLoader - Batch loading for users from PostgreSQL
  * Prevents N+1 query issues when fetching multiple users

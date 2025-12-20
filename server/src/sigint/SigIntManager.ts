@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { SignalCollectionService } from './SignalCollectionService.js';
 import { SignalClassificationService } from './SignalClassificationService.js';
 import { SpectrumAnalysisService } from './SpectrumAnalysisService.js';

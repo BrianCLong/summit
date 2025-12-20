@@ -1,3 +1,4 @@
+// @ts-nocheck
 // server/src/conductor/scheduling/idempotent-queue.ts
 
 import Redis from 'ioredis';

@@ -8,12 +8,8 @@ module.exports = {
       {
         useESM: true,
         tsconfig: 'tsconfig.test.json',
-        diagnostics: false,
       },
     ],
-  },
-  haste: {
-    throwOnModuleCollision: false,
   },
   roots: ['server', 'client', 'packages', 'services', 'tests'],
   modulePathIgnorePatterns: [

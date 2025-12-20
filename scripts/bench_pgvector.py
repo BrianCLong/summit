@@ -5,12 +5,15 @@ Benchmark pgvector HNSW parameters across embedding dimensions.
 The script seeds synthetic embeddings for multiple tenants, builds HNSW
 indexes with different `m` and `ef_construction` settings, and measures
 query latency at various `ef_search` levels. Results are printed in a
-compact table for quick comparison.
+compact table and can optionally be exported to JSON or CSV for offline analysis.
 """
 
 import argparse
+import csv
+import json
 import math
 import os
+from pathlib import Path
 import random
 import statistics
 import time
@@ -23,6 +26,8 @@ DEFAULT_EMBEDDING_SIZES = [384, 768, 1536]
 DEFAULT_M_VALUES = [8, 16, 32]
 DEFAULT_EF_CONSTRUCTION = [100, 200, 400]
 DEFAULT_EF_SEARCH = [50, 100, 200]
+DEFAULT_SAMPLES = 15
+DEFAULT_WARMUP = 3
 
 
 def vector_literal(values: Sequence[float]) -> str:
@@ -73,7 +78,8 @@ def seed_embeddings(conn, dimension: int, rows: int, tenants: int) -> None:
     conn.commit()
 
 
-def build_index(conn, m: int, ef_construction: int) -> None:
+def build_index(conn, m: int, ef_construction: int) -> float:
+    started = time.perf_counter()
     with conn.cursor() as cur:
         cur.execute("DROP INDEX IF EXISTS bench_entity_embeddings_hnsw;")
         cur.execute(
@@ -85,11 +91,33 @@ def build_index(conn, m: int, ef_construction: int) -> None:
             """
         )
     conn.commit()
+    return (time.perf_counter() - started) * 1000
 
 
-def measure_latency(conn, dimension: int, ef_search: int, samples: int = 10) -> Tuple[float, float]:
+def warm_up(cur, dimension: int, ef_search: int, repeats: int) -> None:
+    for _ in range(repeats):
+        probe = [random.random() for _ in range(dimension)]
+        cur.execute("BEGIN;")
+        cur.execute("SET LOCAL hnsw.ef_search = %s;", (ef_search,))
+        cur.execute(
+            """
+            SELECT id
+            FROM bench_entity_embeddings
+            ORDER BY embedding <=> %s
+            LIMIT 5;
+            """,
+            (vector_literal(probe),),
+        )
+        cur.execute("COMMIT;")
+
+
+def measure_latency(
+    conn, dimension: int, ef_search: int, samples: int, warmups: int
+) -> Tuple[float, float]:
     timings: List[float] = []
     with conn.cursor() as cur:
+        if warmups:
+            warm_up(cur, dimension, ef_search, warmups)
         for _ in range(samples):
             probe = [random.random() for _ in range(dimension)]
             cur.execute("BEGIN;")
@@ -117,6 +145,8 @@ def run_benchmarks(
     ef_search_values: Iterable[int],
     rows: int,
     tenants: int,
+    samples: int,
+    warmups: int,
 ) -> Dict[int, List[Dict[str, float]]]:
     results: Dict[int, List[Dict[str, float]]] = {}
     for dimension in dimensions:
@@ -125,17 +155,24 @@ def run_benchmarks(
 
         for m in m_values:
             for ef_construction in ef_construction_values:
-                build_index(conn, m, ef_construction)
+                build_ms = build_index(conn, m, ef_construction)
                 for ef_search in ef_search_values:
-                    avg_ms, p99_ms = measure_latency(conn, dimension, ef_search)
+                    avg_ms, p99_ms = measure_latency(
+                        conn, dimension, ef_search, samples, warmups
+                    )
                     dimension_results.append(
                         {
                             "dimension": dimension,
                             "m": m,
                             "ef_construction": ef_construction,
                             "ef_search": ef_search,
+                            "build_ms": build_ms,
                             "avg_ms": avg_ms,
                             "p99_ms": p99_ms,
+                            "samples": samples,
+                            "warmups": warmups,
+                            "rows": rows,
+                            "tenants": tenants,
                         }
                     )
         results[dimension] = dimension_results
@@ -144,16 +181,65 @@ def run_benchmarks(
 
 def print_results(results: Dict[int, List[Dict[str, float]]]) -> None:
     print("\nHNSW Parameter Benchmarks")
-    print("dimension | m  | ef_construction | ef_search | avg_ms | p99_ms")
-    print("----------|----|-----------------|-----------|--------|-------")
+    print(
+        "dimension | m  | ef_construction | ef_search | build_ms | avg_ms | p99_ms | samples"
+    )
+    print(
+        "----------|----|-----------------|-----------|----------|--------|--------|--------"
+    )
     for dimension, measurements in results.items():
         for row in sorted(
             measurements,
             key=lambda r: (r["dimension"], r["m"], r["ef_construction"], r["ef_search"]),
         ):
             print(
-                f"{dimension:<9} | {row['m']:<2} | {row['ef_construction']:<15} | {row['ef_search']:<9} | {row['avg_ms']:.2f} | {row['p99_ms']:.2f}"
+                f"{dimension:<9} | {row['m']:<2} | {row['ef_construction']:<15} | {row['ef_search']:<9} | {row['build_ms']:.1f} | {row['avg_ms']:.2f} | {row['p99_ms']:.2f} | {row['samples']}"
             )
+
+
+def write_json(results: Dict[int, List[Dict[str, float]]], path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(results, indent=2))
+
+
+def write_csv(results: Dict[int, List[Dict[str, float]]], path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    flat_rows = [
+        {
+            "dimension": row["dimension"],
+            "m": row["m"],
+            "ef_construction": row["ef_construction"],
+            "ef_search": row["ef_search"],
+            "build_ms": f"{row['build_ms']:.1f}",
+            "avg_ms": f"{row['avg_ms']:.2f}",
+            "p99_ms": f"{row['p99_ms']:.2f}",
+            "samples": row["samples"],
+            "warmups": row["warmups"],
+            "rows": row["rows"],
+            "tenants": row["tenants"],
+        }
+        for dimension_rows in results.values()
+        for row in dimension_rows
+    ]
+    with path.open("w", newline="") as csvfile:
+        writer = csv.DictWriter(
+            csvfile,
+            fieldnames=[
+                "dimension",
+                "m",
+                "ef_construction",
+                "ef_search",
+                "build_ms",
+                "avg_ms",
+                "p99_ms",
+                "samples",
+                "warmups",
+                "rows",
+                "tenants",
+            ],
+        )
+        writer.writeheader()
+        writer.writerows(flat_rows)
 
 
 def parse_args() -> argparse.Namespace:
@@ -189,12 +275,42 @@ def parse_args() -> argparse.Namespace:
         default=",".join(str(v) for v in DEFAULT_EF_SEARCH),
         help="Comma-separated ef_search values",
     )
+    parser.add_argument(
+        "--samples",
+        type=int,
+        default=DEFAULT_SAMPLES,
+        help="Number of latency samples per parameter combo",
+    )
+    parser.add_argument(
+        "--warmup",
+        type=int,
+        default=DEFAULT_WARMUP,
+        help="Warmup queries to prime buffers before sampling",
+    )
+    parser.add_argument(
+        "--output-json",
+        type=Path,
+        help="Optional path to write raw benchmark results as JSON",
+    )
+    parser.add_argument(
+        "--output-csv",
+        type=Path,
+        help="Optional path to write raw benchmark results as CSV",
+    )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        help="Optional random seed for reproducible benchmark runs",
+    )
     return parser.parse_args()
 
 
 if __name__ == "__main__":
-    random.seed()
     args = parse_args()
+    if args.seed is not None:
+        random.seed(args.seed)
+    else:
+        random.seed()
     conn = psycopg2.connect(args.dsn)
     conn.autocommit = True
 
@@ -212,7 +328,13 @@ if __name__ == "__main__":
             ef_search_values,
             args.rows,
             args.tenants,
+            args.samples,
+            args.warmup,
         )
         print_results(results)
+        if args.output_json:
+            write_json(results, args.output_json)
+        if args.output_csv:
+            write_csv(results, args.output_csv)
     finally:
         conn.close()
