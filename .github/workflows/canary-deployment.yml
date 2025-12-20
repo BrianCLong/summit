@@ -29,6 +29,14 @@ on:
         options:
           - 'staging'
           - 'production'
+      service:
+        description: 'Target service'
+        required: true
+        type: choice
+        options:
+          - 'maestro'
+          - 'intelgraph'
+          - 'companyos'
       action:
         description: 'Canary action to perform'
         required: true
@@ -40,6 +48,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
+  CANARY_CONFIG_PATH: summit_release_env_pack/k8s/canary/canary-stage-config.json
 
 concurrency:
   group: canary-${{ inputs.environment }}
@@ -51,10 +60,21 @@ jobs:
     outputs:
       version-valid: ${{ steps.validate.outputs.version-valid }}
       namespace: ${{ steps.validate.outputs.namespace }}
+      release: ${{ steps.validate.outputs.release }}
+      feature-flag: ${{ steps.validate.outputs.feature-flag }}
+      weights: ${{ steps.validate.outputs.weights }}
+      service-name: ${{ steps.validate.outputs.service-name }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Validate inputs
         id: validate
         run: |
+          SERVICE="${{ inputs.service }}"
+          TARGET_ENV="${{ inputs.environment }}"
+          export SERVICE TARGET_ENV
+
           # Validate version format
           if [[ "${{ inputs.version }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "version-valid=true" >> $GITHUB_OUTPUT
@@ -64,12 +84,37 @@ jobs:
             exit 1
           fi
 
-          # Set namespace based on environment
-          if [ "${{ inputs.environment }}" = "production" ]; then
-            echo "namespace=intelgraph-prod" >> $GITHUB_OUTPUT
-          else
-            echo "namespace=intelgraph-staging" >> $GITHUB_OUTPUT
-          fi
+          python - <<'PY'
+import json, os, pathlib, sys
+
+config_path = pathlib.Path(os.environ["CANARY_CONFIG_PATH"])
+if not config_path.exists():
+    sys.exit(f"Missing canary config at {config_path}")
+
+service = os.environ.get("SERVICE")
+target_env = os.environ.get("TARGET_ENV")
+data = json.loads(config_path.read_text())
+service_cfg = data.get("services", {}).get(service)
+if not service_cfg:
+    sys.exit(f"Service '{service}' not found in {config_path}")
+
+namespaces = service_cfg.get("namespaces", {})
+namespace = namespaces.get("production" if target_env == "production" else "staging")
+feature_flag = service_cfg.get("featureFlag", f"{service}_canary_enabled")
+release = service_cfg.get("release", service)
+weights = service_cfg.get("trafficWeights", [])
+service_name = service_cfg.get("serviceName", f"{service}-service")
+
+if not namespace:
+    sys.exit(f"No namespace configured for env '{target_env}' in {config_path}")
+
+with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
+    fh.write(f"namespace={namespace}\n")
+    fh.write(f"release={release}\n")
+    fh.write(f"feature-flag={feature_flag}\n")
+    fh.write(f"weights={','.join(map(str, weights))}\n")
+    fh.write(f"service-name={service_name}\n")
+PY
 
           # Validate canary percentage
           if [ "${{ inputs.canary_percentage }}" -gt 50 ]; then
@@ -105,13 +150,14 @@ jobs:
       - name: Check current deployment health
         run: |
           NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+          RELEASE="${{ needs.validate-inputs.outputs.release }}"
 
           # Check if main deployment is healthy
-          kubectl get deployment intelgraph -n ${NAMESPACE}
-          kubectl rollout status deployment/intelgraph -n ${NAMESPACE} --timeout=60s
+          kubectl get deployment "${RELEASE}" -n ${NAMESPACE}
+          kubectl rollout status deployment/"${RELEASE}" -n ${NAMESPACE} --timeout=60s
 
           # Check if canary already exists
-          if kubectl get deployment intelgraph-canary -n ${NAMESPACE} 2>/dev/null; then
+          if kubectl get deployment "${RELEASE}"-canary -n ${NAMESPACE} 2>/dev/null; then
             echo "⚠️ Canary deployment already exists!"
             echo "Please promote or abort existing canary before deploying new one"
             exit 1
@@ -137,6 +183,15 @@ jobs:
         with:
           version: v3.14.0
 
+      - name: Install cosign and conftest
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y jq
+          COSIGN_VERSION="v2.4.0"
+          curl -sSL -o cosign.tgz "https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-amd64.tar.gz"
+          tar -xzf cosign.tgz cosign && sudo mv cosign /usr/local/bin/
+          curl -sSfL https://github.com/open-policy-agent/conftest/releases/download/v0.56.0/conftest_0.56.0_Linux_x86_64.tar.gz | sudo tar -xz -C /usr/local/bin conftest
+
       - name: Setup kubectl
         uses: azure/setup-kubectl@v3
         with:
@@ -148,20 +203,78 @@ jobs:
           echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
 
+      - name: Verify signatures, digests, and attestations
+        id: verify-artifacts
+        env:
+          IMAGE_SERVER: ${{ env.REGISTRY }}/${{ github.repository }}/server:${{ inputs.version }}
+          IMAGE_CLIENT: ${{ env.REGISTRY }}/${{ github.repository }}/client:${{ inputs.version }}
+        run: |
+          set -euo pipefail
+
+          verify_and_pin() {
+            local image="$1"
+            local name="$2"
+
+            verification=$(cosign verify --output json "$image")
+            digest=$(echo "$verification" | jq -r '.[0].critical.image["docker-manifest-digest"]')
+
+            if [ -z "$digest" ] || [ "$digest" = "null" ]; then
+              echo "❌ Unable to resolve digest after verification for $image" >&2
+              exit 1
+            fi
+
+            pinned="${image%@*}@${digest}"
+            echo "${name}-pinned=${pinned}" >> "$GITHUB_OUTPUT"
+
+            cosign verify-attestation --type slsaprovenance "$pinned"
+            cosign verify-attestation --type spdx "$pinned"
+          }
+
+          verify_and_pin "$IMAGE_SERVER" server
+          verify_and_pin "$IMAGE_CLIENT" client
+
+      - name: Download SBOM attestations
+        env:
+          IMAGE_SERVER: ${{ steps.verify-artifacts.outputs.server-pinned }}
+          IMAGE_CLIENT: ${{ steps.verify-artifacts.outputs.client-pinned }}
+        run: |
+          set -euo pipefail
+          for image in "$IMAGE_SERVER" "$IMAGE_CLIENT"; do
+            target=$(echo "$image" | sed 's/[:\/]/-/g')
+            cosign download attestation --predicate-type spdx "$image" > "${target}-att.json"
+            cat "${target}-att.json" | jq -r '.attestations[0].payload' | base64 -d | jq -r '.predicate' > "${target}-sbom.json"
+          done
+
+      - name: Enforce SBOM policy with Conftest
+        run: |
+          for sbom in *sbom.json; do
+            conftest test "$sbom" -p policy/sbom_policy.rego
+          done
+
+      - name: Abort canary on guard failure
+        if: failure()
+        run: |
+          NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+          ./scripts/rollback-deployment.sh canary-abort --namespace ${NAMESPACE} || true
+
       - name: Deploy canary
         run: |
           NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+          RELEASE="${{ needs.validate-inputs.outputs.release }}"
 
-          ./scripts/rollback-deployment.sh canary-deploy ${{ inputs.version }} \
+          RELEASE_NAME="${RELEASE}" NAMESPACE="${NAMESPACE}" \
+            ./scripts/rollback-deployment.sh canary-deploy ${{ inputs.version }} \
             --namespace ${NAMESPACE} \
+            --release ${RELEASE} \
             --canary-percent ${{ inputs.canary_percentage }}
 
       - name: Run canary health checks (SLO Gate)
         run: |
           NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+          RELEASE="${{ needs.validate-inputs.outputs.release }}"
 
           # Wait for canary to be ready
-          kubectl rollout status deployment/intelgraph-canary -n ${NAMESPACE} --timeout=300s
+          kubectl rollout status deployment/"${RELEASE}"-canary -n ${NAMESPACE} --timeout=300s
 
           # Run comprehensive health checks
           ./scripts/rollback-deployment.sh health-check --namespace ${NAMESPACE}
@@ -176,6 +289,7 @@ jobs:
       - name: Update deployment status
         run: |
           echo "🚀 Canary deployment successful!"
+          echo "Service: ${{ inputs.service }}"
           echo "Version: ${{ inputs.version }}"
           echo "Traffic: ${{ inputs.canary_percentage }}%"
           echo "Environment: ${{ inputs.environment }}"
@@ -199,19 +313,77 @@ jobs:
         with:
           version: v3.14.0
 
+      - name: Install cosign and conftest
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y jq
+          COSIGN_VERSION="v2.4.0"
+          curl -sSL -o cosign.tgz "https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-amd64.tar.gz"
+          tar -xzf cosign.tgz cosign && sudo mv cosign /usr/local/bin/
+          curl -sSfL https://github.com/open-policy-agent/conftest/releases/download/v0.56.0/conftest_0.56.0_Linux_x86_64.tar.gz | sudo tar -xz -C /usr/local/bin conftest
+
       - name: Configure kubeconfig
         run: |
           mkdir -p ~/.kube
           echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
 
+        - name: Verify signatures, digests, and attestations
+          id: verify-promote-artifacts
+          env:
+            IMAGE_SERVER: ${{ env.REGISTRY }}/${{ github.repository }}/server:${{ inputs.version }}
+            IMAGE_CLIENT: ${{ env.REGISTRY }}/${{ github.repository }}/client:${{ inputs.version }}
+          run: |
+            set -euo pipefail
+
+            verify_and_pin() {
+              local image="$1"
+              local name="$2"
+
+              verification=$(cosign verify --output json "$image")
+              digest=$(echo "$verification" | jq -r '.[0].critical.image["docker-manifest-digest"]')
+
+              if [ -z "$digest" ] || [ "$digest" = "null" ]; then
+                echo "❌ Unable to resolve digest after verification for $image" >&2
+                exit 1
+              fi
+
+              pinned="${image%@*}@${digest}"
+              echo "${name}-pinned=${pinned}" >> "$GITHUB_OUTPUT"
+
+              cosign verify-attestation --type slsaprovenance "$pinned"
+              cosign verify-attestation --type spdx "$pinned"
+            }
+
+            verify_and_pin "$IMAGE_SERVER" server
+            verify_and_pin "$IMAGE_CLIENT" client
+
+        - name: Download SBOM attestations
+          env:
+            IMAGE_SERVER: ${{ steps.verify-promote-artifacts.outputs.server-pinned }}
+            IMAGE_CLIENT: ${{ steps.verify-promote-artifacts.outputs.client-pinned }}
+          run: |
+            set -euo pipefail
+            for image in "$IMAGE_SERVER" "$IMAGE_CLIENT"; do
+              target=$(echo "$image" | sed 's/[:\/]/-/g')
+              cosign download attestation --predicate-type spdx "$image" > "${target}-att.json"
+              cat "${target}-att.json" | jq -r '.attestations[0].payload' | base64 -d | jq -r '.predicate' > "${target}-sbom.json"
+            done
+
+      - name: Enforce SBOM policy with Conftest
+        run: |
+          for sbom in *sbom.json; do
+            conftest test "$sbom" -p policy/sbom_policy.rego
+          done
+
       - name: Pre-promote health check (SLO Gate)
         run: |
           NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+          RELEASE="${{ needs.validate-inputs.outputs.release }}"
 
           # Verify canary exists and is healthy
-          kubectl get deployment intelgraph-canary -n ${NAMESPACE}
-          kubectl rollout status deployment/intelgraph-canary -n ${NAMESPACE} --timeout=60s
+          kubectl get deployment "${RELEASE}"-canary -n ${NAMESPACE}
+          kubectl rollout status deployment/"${RELEASE}"-canary -n ${NAMESPACE} --timeout=60s
 
           # Run health checks
           ./scripts/rollback-deployment.sh health-check --namespace ${NAMESPACE}
@@ -224,15 +396,17 @@ jobs:
       - name: Promote canary to production
         run: |
           NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+          RELEASE="${{ needs.validate-inputs.outputs.release }}"
 
-          ./scripts/rollback-deployment.sh canary-promote --namespace ${NAMESPACE}
+          RELEASE_NAME="${RELEASE}" ./scripts/rollback-deployment.sh canary-promote --namespace ${NAMESPACE}
 
       - name: Post-promotion verification
         run: |
           NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+          RELEASE="${{ needs.validate-inputs.outputs.release }}"
 
           # Verify promotion
-          kubectl rollout status deployment/intelgraph -n ${NAMESPACE} --timeout=300s
+          kubectl rollout status deployment/"${RELEASE}" -n ${NAMESPACE} --timeout=300s
 
           # Final health check
           ./scripts/rollback-deployment.sh health-check --namespace ${NAMESPACE}
@@ -242,6 +416,7 @@ jobs:
           echo "✅ Canary promoted to production!"
           echo "Version: ${{ inputs.version }}"
           echo "Traffic: 100%"
+          echo "Service: ${{ inputs.service }}"
           echo "Environment: ${{ inputs.environment }}"
 
   abort-canary:
@@ -272,21 +447,23 @@ jobs:
       - name: Abort canary deployment
         run: |
           NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+          RELEASE="${{ needs.validate-inputs.outputs.release }}"
 
-          ./scripts/rollback-deployment.sh canary-abort --namespace ${NAMESPACE}
+          RELEASE_NAME="${RELEASE}" ./scripts/rollback-deployment.sh canary-abort --namespace ${NAMESPACE}
 
       - name: Verify abort and rollback
         run: |
           NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+          RELEASE="${{ needs.validate-inputs.outputs.release }}"
 
           # Verify canary is removed
-          if kubectl get deployment intelgraph-canary -n ${NAMESPACE} 2>/dev/null; then
+          if kubectl get deployment "${RELEASE}"-canary -n ${NAMESPACE} 2>/dev/null; then
             echo "❌ Canary deployment still exists!"
             exit 1
           fi
 
           # Verify stable deployment is healthy
-          kubectl rollout status deployment/intelgraph -n ${NAMESPACE} --timeout=300s
+          kubectl rollout status deployment/"${RELEASE}" -n ${NAMESPACE} --timeout=300s
 
           # Health check
           ./scripts/rollback-deployment.sh health-check --namespace ${NAMESPACE}
@@ -294,6 +471,7 @@ jobs:
       - name: Update deployment status
         run: |
           echo "🔄 Canary aborted and rolled back!"
+          echo "Service: ${{ inputs.service }}"
           echo "Environment: ${{ inputs.environment }}"
           echo "Status: Stable deployment restored"
 
@@ -348,6 +526,10 @@ jobs:
                 }, {
                   title: 'Environment',
                   value: '${{ inputs.environment }}',
+                  short: true
+                }, {
+                  title: 'Service',
+                  value: '${{ inputs.service }}',
                   short: true
                 }, {
                   title: 'Version',

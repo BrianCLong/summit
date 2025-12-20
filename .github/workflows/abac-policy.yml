@@ -5,6 +5,9 @@ on:
     paths:
       - 'policy/abac/**'
       - 'policy/tests/**'
+      - 'server/config/data-paths.yaml'
+      - 'server/config/schemas/data-paths.schema.json'
+      - '.github/policies/**'
       - 'services/authz-gateway/**'
   push:
     branches:
@@ -12,6 +15,9 @@ on:
     paths:
       - 'policy/abac/**'
       - 'policy/tests/**'
+      - 'server/config/data-paths.yaml'
+      - 'server/config/schemas/data-paths.schema.json'
+      - '.github/policies/**'
 
 jobs:
   opa:
@@ -29,6 +35,19 @@ jobs:
       - name: Run policy unit tests with coverage
         run: |
           opa test policy/abac policy/tests -v --coverage --format json > opa-coverage.json
+      - name: Validate OPA data path tags
+        run: |
+          python -m pip install pyyaml --quiet
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import yaml
+
+          data = yaml.safe_load(Path("server/config/data-paths.yaml").read_text())
+          Path("server/config/data-paths.json").write_text(json.dumps(data))
+          PY
+          opa eval --fail-defined --data .github/policies --input server/config/data-paths.json "data.summit.datapaths.violations[_]"
+          rm server/config/data-paths.json
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
         with:
