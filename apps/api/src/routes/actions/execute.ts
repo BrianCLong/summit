@@ -1,212 +1,108 @@
-import { randomUUID, createHash } from 'crypto';
-import { Router, type Request, type Response } from 'express';
-
-export type ActionRejectionReason =
-  | 'preflight_not_found'
-  | 'preflight_expired'
-  | 'input_hash_mismatch'
-  | 'preflight_denied';
-
-export type ActionExecutionEvent =
-  | {
-      type: 'action.execution.accepted';
-      preflightId: string;
-      traceId: string;
-      receiptId: string;
-      inputsHash: string;
-      decisionContext?: Record<string, unknown>;
-      timestamp: string;
-    }
-  | {
-      type: 'action.execution.rejected';
-      preflightId: string;
-      traceId: string;
-      receiptId: string;
-      reason: ActionRejectionReason;
-      timestamp: string;
-    };
-
-export interface PreflightDecision {
-  id: string;
-  inputHash: string;
-  expiresAt: Date;
-  status: 'allow' | 'deny';
-  context?: Record<string, unknown>;
-}
-
-export interface PolicyDecisionStore {
-  get(preflightId: string): Promise<PreflightDecision | undefined>;
-  markExecuted?(preflightId: string, receiptId: string): Promise<void>;
-}
-
-export interface ActionEventPublisher {
-  publish(event: ActionExecutionEvent): Promise<void> | void;
-}
-
-export interface ExecuteDependencies {
-  policyDecisionStore: PolicyDecisionStore;
-  eventPublisher?: ActionEventPublisher;
-  now?: () => Date;
-}
+import crypto from 'node:crypto';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import { resolveCorrelationId } from '../../lib/correlation.js';
+import { hashExecutionInput } from '../../lib/hash.js';
+import {
+  type PolicyDecisionStore,
+  type PreflightRecord,
+  type ExecutionRecord,
+} from '../../services/PolicyDecisionStore.js';
+import { type EventPublisher } from '../../services/EventPublisher.js';
 
 interface ExecuteRequestBody {
   preflight_id?: string;
-  inputs?: unknown;
+  action?: string;
+  input?: unknown;
 }
 
-const stableStringify = (value: unknown): string => {
-  if (value === null || typeof value !== 'object') {
-    return JSON.stringify(value);
+const isExpired = (preflight: PreflightRecord): boolean => {
+  if (!preflight.expiresAt) {
+    return false;
   }
-
-  if (Array.isArray(value)) {
-    return `[${value.map(stableStringify).join(',')}]`;
-  }
-
-  const sorted = Object.entries(value as Record<string, unknown>).sort(([a], [b]) =>
-    a.localeCompare(b),
-  );
-
-  return `{${sorted.map(([k, v]) => `${JSON.stringify(k)}:${stableStringify(v)}`).join(',')}}`;
+  return new Date(preflight.expiresAt).getTime() <= Date.now();
 };
 
-export const computeInputHash = (inputs: unknown): string => {
-  return createHash('sha256').update(stableStringify(inputs)).digest('hex');
-};
+const buildExecutionRecord = (
+  correlationId: string,
+): ExecutionRecord => ({
+  executionId: `exec_${crypto.randomUUID()}`,
+  correlationId,
+  executedAt: new Date().toISOString(),
+});
 
-const publishEvent = async (
-  publisher: ExecuteDependencies['eventPublisher'],
-  event: ActionExecutionEvent,
-) => {
-  if (!publisher) return;
-  await publisher.publish(event);
-};
-
-const respondWithError = (
-  res: Response,
-  statusCode: number,
-  error: ActionRejectionReason,
-  correlation: { traceId: string; receiptId: string; preflightId?: string },
-) => {
-  res.locals.correlation_ids = correlation;
-  return res.status(statusCode).json({
-    error,
-    trace_id: correlation.traceId,
-    receipt_id: correlation.receiptId,
-    preflight_id: correlation.preflightId ?? null,
-  });
-};
-
-export const createExecuteRouter = (deps: ExecuteDependencies): Router => {
+export const createExecuteRouter = (
+  store: PolicyDecisionStore,
+  events: EventPublisher,
+): Router => {
   const router = Router();
 
   router.post(
-    '/actions/execute',
-    async (
-      req: Request<unknown, unknown, ExecuteRequestBody>,
-      res: Response,
-    ) => {
-      const { preflight_id, inputs } = req.body ?? {};
-      const nowProvider = deps.now ?? (() => new Date());
+    '/execute',
+    async (req: Request<unknown, unknown, ExecuteRequestBody>, res: Response) => {
+      const correlationId = resolveCorrelationId(req, res);
+      const { preflight_id: preflightId, action, input } = req.body ?? {};
 
-      if (!preflight_id) {
-        return respondWithError(res, 400, 'preflight_not_found', {
-          traceId: randomUUID(),
-          receiptId: randomUUID(),
+      if (!preflightId || typeof preflightId !== 'string') {
+        return res.status(400).json({
+          error: 'invalid_preflight_id',
+          message: 'preflight_id is required',
+          correlation_id: correlationId,
         });
       }
 
-      const traceId =
-        (req.headers['x-trace-id'] as string | undefined) || randomUUID();
-      const receiptId = randomUUID();
-      const correlation = { traceId, receiptId, preflightId: preflight_id };
-
-      const preflightDecision = await deps.policyDecisionStore.get(
-        preflight_id,
-      );
-
-      if (!preflightDecision) {
-        await publishEvent(deps.eventPublisher, {
-          type: 'action.execution.rejected',
-          preflightId: preflight_id,
-          traceId,
-          receiptId,
-          reason: 'preflight_not_found',
-          timestamp: nowProvider().toISOString(),
+      if (typeof input === 'undefined') {
+        return res.status(400).json({
+          error: 'invalid_input',
+          message: 'input payload is required',
+          correlation_id: correlationId,
         });
-
-        return respondWithError(res, 404, 'preflight_not_found', correlation);
       }
 
-      const now = nowProvider();
-      const expiration =
-        preflightDecision.expiresAt instanceof Date
-          ? preflightDecision.expiresAt
-          : new Date(preflightDecision.expiresAt);
+      const preflight = await store.getPreflight(preflightId);
 
-      if (expiration.getTime() <= now.getTime()) {
-        await publishEvent(deps.eventPublisher, {
-          type: 'action.execution.rejected',
-          preflightId: preflightDecision.id,
-          traceId,
-          receiptId,
-          reason: 'preflight_expired',
-          timestamp: now.toISOString(),
+      if (!preflight) {
+        return res.status(404).json({
+          error: 'preflight_not_found',
+          correlation_id: correlationId,
         });
-
-        return respondWithError(res, 410, 'preflight_expired', correlation);
       }
 
-      const computedHash = computeInputHash(inputs);
-      if (computedHash !== preflightDecision.inputHash) {
-        await publishEvent(deps.eventPublisher, {
-          type: 'action.execution.rejected',
-          preflightId: preflightDecision.id,
-          traceId,
-          receiptId,
-          reason: 'input_hash_mismatch',
-          timestamp: now.toISOString(),
+      if (isExpired(preflight)) {
+        return res.status(410).json({
+          error: 'preflight_expired',
+          correlation_id: correlationId,
         });
-
-        return respondWithError(res, 400, 'input_hash_mismatch', correlation);
       }
 
-      if (preflightDecision.status !== 'allow') {
-        await publishEvent(deps.eventPublisher, {
-          type: 'action.execution.rejected',
-          preflightId: preflightDecision.id,
-          traceId,
-          receiptId,
-          reason: 'preflight_denied',
-          timestamp: now.toISOString(),
-        });
-        return respondWithError(res, 403, 'preflight_denied', correlation);
-      }
-
-      res.locals.correlation_ids = correlation;
-
-      await publishEvent(deps.eventPublisher, {
-        type: 'action.execution.accepted',
-        preflightId: preflightDecision.id,
-        traceId,
-        receiptId,
-        inputsHash: computedHash,
-        decisionContext: preflightDecision.context,
-        timestamp: now.toISOString(),
+      const expectedHash = preflight.inputHash;
+      const candidateHash = hashExecutionInput({
+        action: action ?? preflight.action,
+        input: input as any,
       });
 
-      if (deps.policyDecisionStore.markExecuted) {
-        await deps.policyDecisionStore.markExecuted(
-          preflightDecision.id,
-          receiptId,
-        );
+      if (expectedHash !== candidateHash) {
+        return res.status(400).json({
+          error: 'preflight_hash_mismatch',
+          correlation_id: correlationId,
+        });
       }
 
-      return res.status(202).json({
+      const execution = buildExecutionRecord(correlationId);
+      await store.recordExecution(preflightId, execution);
+
+      events.publish({
+        type: 'action.executed',
+        preflightId,
+        correlationId,
+        action: action ?? preflight.action,
+        payload: input,
+      });
+
+      return res.status(200).json({
         status: 'accepted',
-        preflight_id: preflightDecision.id,
-        trace_id: traceId,
-        receipt_id: receiptId,
+        execution_id: execution.executionId,
+        correlation_id: correlationId,
       });
     },
   );

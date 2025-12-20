@@ -4,6 +4,18 @@ import { Counter, Histogram, register } from 'prom-client';
 
 const tracer = trace.getTracer('maestro-postgres', '24.3.0');
 
+const toInt = (value: string | undefined, fallback: number): number => {
+  const parsed = Number.parseInt(value || '', 10);
+  return Number.isNaN(parsed) ? fallback : parsed;
+};
+
+const writePoolSize = toInt(process.env.PG_WRITE_POOL_SIZE, 20);
+const readPoolSize = toInt(process.env.PG_READ_POOL_SIZE, 30);
+const idleTimeoutMs = toInt(process.env.PG_IDLE_TIMEOUT_MS, 30000);
+const connectionTimeoutMs = toInt(process.env.PG_CONNECTION_TIMEOUT_MS, 5000);
+const maxUses = toInt(process.env.PG_POOL_MAX_USES, 5000);
+const statementTimeoutMs = toInt(process.env.PG_STATEMENT_TIMEOUT_MS, 0);
+
 // Region-aware database metrics
 const dbConnectionsActive =
   (register.getSingleMetric(
@@ -44,9 +56,14 @@ const writePool = new Pool({
     process.env.NODE_ENV === 'production'
       ? { rejectUnauthorized: true }
       : false,
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000,
+  max: writePoolSize,
+  idleTimeoutMillis: idleTimeoutMs,
+  connectionTimeoutMillis,
+  maxUses,
+  keepAlive: true,
+  ...(statementTimeoutMs > 0
+    ? { statement_timeout: statementTimeoutMs }
+    : {}),
   application_name: `maestro-write-${process.env.CURRENT_REGION || 'unknown'}`,
 });
 
@@ -56,9 +73,14 @@ const readPool = new Pool({
     process.env.NODE_ENV === 'production'
       ? { rejectUnauthorized: true }
       : false,
-  max: 30, // More read connections
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000,
+  max: readPoolSize, // More read connections
+  idleTimeoutMillis: idleTimeoutMs,
+  connectionTimeoutMillis,
+  maxUses,
+  keepAlive: true,
+  ...(statementTimeoutMs > 0
+    ? { statement_timeout: statementTimeoutMs }
+    : {}),
   application_name: `maestro-read-${process.env.CURRENT_REGION || 'unknown'}`,
 });
 

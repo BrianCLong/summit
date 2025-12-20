@@ -1,0 +1,27 @@
+{{- if .Values.resourceConstraints.limitRange.enabled }}
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: {{ printf "%s-defaults" .Release.Name }}
+spec:
+  limits:
+    - type: Container
+      defaultRequest:
+        cpu: {{ .Values.resourceConstraints.limitRange.defaults.requests.cpu }}
+        memory: {{ .Values.resourceConstraints.limitRange.defaults.requests.memory }}
+      default:
+        cpu: {{ .Values.resourceConstraints.limitRange.defaults.limits.cpu }}
+        memory: {{ .Values.resourceConstraints.limitRange.defaults.limits.memory }}
+{{- end }}
+---
+{{- if .Values.resourceConstraints.resourceQuota.enabled }}
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: {{ printf "%s-budget" .Release.Name }}
+spec:
+  hard:
+    {{- range $k, $v := .Values.resourceConstraints.resourceQuota.quotas }}
+    {{ $k }}: {{ $v | quote }}
+    {{- end }}
+{{- end }}
