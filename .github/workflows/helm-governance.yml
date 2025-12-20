@@ -276,6 +276,7 @@ jobs:
           kubectl rollout status deployment/summit -n summit --timeout=120s
           kubectl annotate service summit -n summit rollout.blue-green/color=blue --overwrite
           kubectl get pods -n summit
+          echo "BLUE_IMAGE=$(kubectl get deploy summit -n summit -o jsonpath='{.spec.template.spec.containers[0].image}')" >> "$GITHUB_ENV"
 
       - name: Promote new image tag (green)
         run: |
@@ -296,6 +297,10 @@ jobs:
       - name: Smoke check service endpoint
         run: |
           set -euo pipefail
+          if [ -n "${BLUE_IMAGE:-}" ] && [ -n "${GREEN_IMAGE:-}" ] && [ "$BLUE_IMAGE" = "$GREEN_IMAGE" ]; then
+            echo "Expected green image to differ from blue image" >&2
+            exit 1
+          fi
           kubectl get svc summit -n summit -o wide
           kubectl get svc summit -n summit -o jsonpath='{.metadata.annotations.rollout\\.blue-green/promotion}'
           echo
@@ -303,3 +308,4 @@ jobs:
           echo
           kubectl run summit-smoke -n summit --image=registry.k8s.io/pause:3.9 --restart=Never --command -- /bin/sh -c "echo summit chart deployed"
           kubectl wait --for=condition=Completed pod/summit-smoke -n summit --timeout=60s
+          kubectl get svc summit -n summit -o json | jq -r '.metadata.annotations' || true
