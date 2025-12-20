@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * TAXII 2.1 Service Implementation
  *

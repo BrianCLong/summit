@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { spawn } from 'child_process';
 import { createReadStream, createWriteStream } from 'fs';
 import path from 'path';

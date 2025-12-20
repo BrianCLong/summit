@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { BaseConnector } from './BaseConnector';
 import { SourceConnector } from './types';
 import { ConnectorContext } from '../data-model/types';

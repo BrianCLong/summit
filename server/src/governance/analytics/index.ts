@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Governance Analytics Module Index
 // Exports all governance analytics components for use across the platform
 

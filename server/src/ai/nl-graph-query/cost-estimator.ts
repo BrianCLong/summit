@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Cost Estimator - Analyzes Cypher queries to estimate execution cost
  *

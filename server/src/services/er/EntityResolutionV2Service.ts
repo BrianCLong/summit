@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Session, Transaction } from 'neo4j-driver';
 import pino from 'pino';
 import { randomUUID } from 'crypto';

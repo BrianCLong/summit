@@ -1,0 +1,28 @@
+{
+  "$schema": "https://summit.dev/schemas/agent-budget-manifest.schema.json",
+  "schemaVersion": "2025-02-15",
+  "agentId": "jules",
+  "owner": "Agent Control Systems",
+  "description": "Jules orchestration assistant with balanced reasoning and networking ceilings for guided tasks.",
+  "deterministicLimits": {
+    "maxTokens": 80000,
+    "maxCallsPerRun": 30,
+    "maxWallClockMs": 180000,
+    "maxConcurrentRuns": 2,
+    "maxDailyRuns": 180,
+    "maxNetworkKB": 3072
+  },
+  "risk": {
+    "inherent": 5,
+    "controlBaseline": 3,
+    "residual": 3,
+    "riskTier": "medium",
+    "riskCeiling": 6,
+    "gates": ["lint", "smoke"]
+  },
+  "telemetry": {
+    "auditLogPath": "agents/audit/logs/agent-audit.log",
+    "emitBudgetEvents": true,
+    "sampleRate": 1
+  }
+}

@@ -19,7 +19,7 @@ const stream = {
     process.stdout.write(msg);
   },
 };
-import { cfg } from '../config.js';
+import { cfg } from '../config';
 import { AsyncLocalStorage } from 'async_hooks';
 
 // AsyncLocalStorage for correlation ID propagation
@@ -42,16 +42,17 @@ const REDACT_PATHS = [
   'user.phone',
 ];
 
+// Standard logging context
 export interface SummitLogContext {
   correlationId?: string;
   tenantId?: string;
   principalId?: string;
-  principalKind?: 'user' | 'api_key' | 'service_account' | 'system';
+  principalKind?: "user" | "api_key" | "service_account" | "system";
   service: string;
   subsystem?: string;
   requestId?: string;
   runId?: string;
-  severity?: 'debug' | 'info' | 'warn' | 'error';
+  severity?: "debug" | "info" | "warn" | "error";
   message?: string;
   [key: string]: any;
 }

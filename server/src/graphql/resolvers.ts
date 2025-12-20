@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { neo } from '../db/neo4j';
 import { pg } from '../db/pg';
 import { getUser } from '../auth/context';

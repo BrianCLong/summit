@@ -14,9 +14,16 @@ export type PoolCost = {
   gb_sec_usd: number;
   egress_gb_usd: number;
 };
-export type CapacityReservation = {
-  pool_id: string;
-  reserved_units: number;
+
+const safeNum = (value: unknown): number => {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
+};
+
+const safeEst = (value: unknown): number => {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 0) return 0;
+  return n;
 };
 
 export async function listPools(): Promise<PoolInfo[]> {
@@ -35,31 +42,11 @@ export async function currentPricing(): Promise<Record<string, PoolCost>> {
   return m;
 }
 
-let capacityFuturesHealthy = true;
-
-export async function listCapacityReservations(): Promise<
-  Record<string, number>
-> {
-  if (!capacityFuturesHealthy) return {};
-  try {
-    const { rows } = await pg.query<CapacityReservation>(
-      'SELECT pool_id, reserved_units FROM capacity_futures',
-    );
-    const reservations: Record<string, number> = {};
-    for (const r of rows) reservations[r.pool_id] = Number(r.reserved_units);
-    return reservations;
-  } catch {
-    capacityFuturesHealthy = false;
-    return {};
-  }
-}
-
 export function pickCheapestEligible(
   candidates: PoolInfo[],
   costs: Record<string, PoolCost>,
   est: { cpuSec?: number; gbSec?: number; egressGb?: number },
   residency?: string,
-  reservations: Record<string, number> = {},
 ) {
   let best: { id: string; price: number } | null = null;
   for (const p of candidates) {
@@ -70,16 +57,24 @@ export function pickCheapestEligible(
       continue;
     const c = costs[p.id];
     if (!c) continue;
-    const reservationBoost = reservations[p.id] || 0;
-    const reservationDiscount =
-      reservationBoost > 0 ? Math.min(reservationBoost * 0.01, 0.25) : 0;
+
+    const cpuSec = safeEst(est.cpuSec);
+    const gbSec = safeEst(est.gbSec);
+    const egressGb = safeEst(est.egressGb);
+
+    const cpuUsd = safeNum(c.cpu_sec_usd);
+    const gbUsd = safeNum(c.gb_sec_usd);
+    const egressUsd = safeNum(c.egress_gb_usd);
+
     const price =
-      (est.cpuSec || 0) * Number(c.cpu_sec_usd) +
-      (est.gbSec || 0) * Number(c.gb_sec_usd) +
-      (est.egressGb || 0) * Number(c.egress_gb_usd);
-    const adjusted = price * (1 - reservationDiscount);
-    if (!best || price < best.price) best = { id: p.id, price };
-    if (!best || adjusted < best.price) best = { id: p.id, price: adjusted };
+      cpuSec * cpuUsd + gbSec * gbUsd + egressGb * egressUsd;
+
+    if (
+      !best ||
+      price < best.price ||
+      (price === best.price && p.id.localeCompare(best.id) < 0)
+    )
+      best = { id: p.id, price };
   }
   return best;
 }
