@@ -34,7 +34,13 @@ const getZoomPrecision = (zoom: number) => {
   return 0;
 };
 
+const NO_CLUSTERING_ZOOM = 13;
+
 const clusterMarkers = (entities: MarkerEntity[], zoom: number): RenderableMarker[] => {
+  if (zoom >= NO_CLUSTERING_ZOOM) {
+    return [...entities];
+  }
+
   const precision = getZoomPrecision(zoom);
   const clusterMap = new Map<string, {
     latSum: number;
