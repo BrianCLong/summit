@@ -5,12 +5,9 @@ on:
     paths:
       - 'policy/abac/**'
       - 'policy/tests/**'
+      - 'server/config/data-paths.yaml'
+      - 'server/config/schemas/data-paths.schema.json'
       - '.github/policies/**'
-      - 'server/config/app.yaml'
-      - 'server/config/schemas/app.schema.json'
-      - 'services/maestro*/**'
-      - 'services/intelgraph*/**'
-      - 'services/companyos*/**'
       - 'services/authz-gateway/**'
   push:
     branches:
@@ -18,12 +15,9 @@ on:
     paths:
       - 'policy/abac/**'
       - 'policy/tests/**'
+      - 'server/config/data-paths.yaml'
+      - 'server/config/schemas/data-paths.schema.json'
       - '.github/policies/**'
-      - 'server/config/app.yaml'
-      - 'server/config/schemas/app.schema.json'
-      - 'services/maestro*/**'
-      - 'services/intelgraph*/**'
-      - 'services/companyos*/**'
 
 jobs:
   opa:
@@ -36,17 +30,24 @@ jobs:
           curl -L -o opa https://openpolicyagent.org/downloads/v0.64.1/opa_linux_amd64_static
           chmod +x opa
           sudo mv opa /usr/local/bin/opa
-      - name: Validate data path tags
-        run: |
-          opa eval --format raw \
-            --data .github/policies \
-            --input server/config/app.yaml \
-            "data.summit.policies.datapaths.ok" | grep -qx 'true'
       - name: Check formatting
         run: opa fmt policy/abac/abac.rego --diff
       - name: Run policy unit tests with coverage
         run: |
           opa test policy/abac policy/tests -v --coverage --format json > opa-coverage.json
+      - name: Validate OPA data path tags
+        run: |
+          python -m pip install pyyaml --quiet
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import yaml
+
+          data = yaml.safe_load(Path("server/config/data-paths.yaml").read_text())
+          Path("server/config/data-paths.json").write_text(json.dumps(data))
+          PY
+          opa eval --fail-defined --data .github/policies --input server/config/data-paths.json "data.summit.datapaths.violations[_]"
+          rm server/config/data-paths.json
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
         with:

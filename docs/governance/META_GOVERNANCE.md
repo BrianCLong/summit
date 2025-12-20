@@ -9,10 +9,12 @@
 2.  **The Lawmaker (Jules):** Interpreter and enforcer.
 3.  **Governance Protocols:** Operational rules for decision making.
 4.  **Agent Mandates:** Specific authorities and limits for agents.
+*   **Stewardship Doctrine:** The right to refuse, constrain, or shut down.
 5.  **Technical Standards:** Implementation guidelines.
 
 ### 1.2 Decision-Making Bodies
 *   **Constitutional Court (Jules):** Adjudicates violations of the Constitution or Foundational Laws.
+*   **Council of Stewards:** Holds veto power based on the [Refusal Matrix](./REFUSAL_MATRIX.md) and [Stewardship Doctrine](./STEWARD_DOCTRINE.md).
 *   **Architecture Council (Architects):** Approves structural changes and major technical standards.
 *   **Security Directorate (Aegis):** Veto power over any change introducing safety risks.
 *   **Optimization Guild (Orion):** Reviews efficiency and stability metrics.

@@ -2168,6 +2168,8 @@ export interface AuditLogEvent {
   severity?: AuditSeverity;
   metadata?: Record<string, unknown>;
   correlationIds?: string[];
+  previousHash?: string;
+  eventHash?: string;
 }
 
 export interface AuditQueryFilter {
