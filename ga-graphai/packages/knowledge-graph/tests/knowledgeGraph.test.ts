@@ -169,6 +169,63 @@ describe('OrchestrationKnowledgeGraph', () => {
     );
   });
 
+  it('records observability signals and distributed tracing for refresh and query', async () => {
+    const logger = {
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    };
+    const metrics = {
+      observe: vi.fn(),
+      increment: vi.fn(),
+    };
+    const spans: { name: string; end: ReturnType<typeof vi.fn> }[] = [];
+    const tracer = {
+      startSpan: vi.fn((name: string) => {
+        const end = vi.fn();
+        const span = { name, end, recordException: vi.fn() };
+        spans.push({ name, end });
+        return span;
+      }),
+    };
+
+    graph = new OrchestrationKnowledgeGraph(emitter, {
+      logger,
+      metrics,
+      tracer,
+    });
+
+    graph.registerPipelineConnector(pipelineConnector);
+    graph.registerServiceConnector(serviceConnector);
+    graph.registerEnvironmentConnector(environmentConnector);
+    graph.registerIncidentConnector(incidentConnector);
+    graph.registerPolicyConnector(policyConnector);
+    graph.registerCostSignalConnector(costConnector);
+
+    await graph.refresh();
+    graph.queryService('svc-api');
+
+    expect(logger.info).toHaveBeenCalledWith(
+      'intelgraph.kg.refresh.completed',
+      expect.objectContaining({ nodeCount: expect.any(Number) }),
+    );
+    expect(metrics.observe).toHaveBeenCalledWith(
+      'intelgraph_kg_refresh_duration_ms',
+      expect.any(Number),
+      expect.objectContaining({ namespace: 'intelgraph' }),
+    );
+    expect(metrics.increment).toHaveBeenCalledWith(
+      'intelgraph_kg_queries_total',
+      1,
+      expect.objectContaining({ queryType: 'service' }),
+    );
+    expect(tracer.startSpan).toHaveBeenCalledWith(
+      'intelgraph.kg.refresh',
+      expect.objectContaining({ namespace: 'intelgraph' }),
+    );
+    expect(spans.some((span) => span.end.mock.calls.length > 0)).toBe(true);
+  });
+
   it('returns undefined for unknown service', () => {
     expect(graph.queryService('unknown')).toBeUndefined();
   });
