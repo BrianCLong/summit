@@ -58,3 +58,11 @@ jobs:
               labels: ['release-train', 'cadence:weekly', 'hygiene']
             });
             core.info(`Opened ${title}`);
+
+  sbom:
+    name: Publish SBOM snapshot
+    needs: open-weekly-issue
+    uses: ./.github/workflows/reusable/sbom.yml
+    with:
+      service: release-train
+    secrets: inherit

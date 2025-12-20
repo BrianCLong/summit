@@ -1,26 +1,20 @@
 {
   "name": "@intelgraph/receipt-worker",
   "version": "0.1.0",
-  "description": "Receipt queue consumer with retry/backoff handling, DLQ routing, and Prometheus metrics.",
-  "type": "module",
+  "description": "Background worker for processing provenance receipts with DLQ and metrics.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "test": "jest",
-    "typecheck": "tsc --noEmit"
+    "build": "tsc -p tsconfig.json",
+    "test": "pnpm run build && jest"
   },
   "dependencies": {
-    "prom-client": "^15.1.0"
+    "@intelgraph/provenance": "workspace:*"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
-    "@types/node": "^24.10.1",
+    "@types/node": "^20.17.5",
     "jest": "^29.7.0",
-    "ts-jest": "^29.1.1",
-    "tsx": "^4.7.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.7.3"
   }
 }

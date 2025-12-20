@@ -1,0 +1,57 @@
+{
+  "id": "audit-sample-001",
+  "timestamp": "2025-02-25T12:00:00.000Z",
+  "eventType": "policy_decision",
+  "severity": "informational",
+  "source": {
+    "type": "application",
+    "component": "trust-propagation-controller",
+    "hostname": "cluster-a"
+  },
+  "actor": {
+    "type": "service",
+    "id": "spiffe://primary.intelgraph.io/ns/mesh/sa/propagator"
+  },
+  "action": {
+    "type": "trust_evaluation",
+    "parameters": {
+      "targetCluster": "secondary-cluster",
+      "correlationId": "corr-1234"
+    }
+  },
+  "resource": {
+    "type": "service",
+    "id": "analytics-api",
+    "name": "secondary-cluster",
+    "classification": "internal"
+  },
+  "outcome": {
+    "result": "success",
+    "reason": "trust score meets threshold"
+  },
+  "context": {
+    "requestId": "audit-sample-001",
+    "correlationId": "corr-1234",
+    "sourceIp": "10.0.0.12"
+  },
+  "zeroTrust": {
+    "trustScore": 85,
+    "identityVerified": true,
+    "deviceTrusted": true,
+    "sessionFresh": true,
+    "mfaVerified": true,
+    "policyDecision": "allow",
+    "enforcementPoint": "trust-propagation"
+  },
+  "compliance": {
+    "frameworks": ["NIST-800-53", "FedRAMP"],
+    "controls": ["AC-3", "AC-6", "AU-2"],
+    "retentionRequired": true,
+    "auditRequired": true
+  },
+  "rawData": {
+    "trustScore": 85,
+    "targetService": "analytics-api",
+    "reason": "trust score meets threshold"
+  }
+}

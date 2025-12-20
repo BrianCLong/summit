@@ -1,0 +1,23 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ include "intelgraph.fullname" . }}-ingest-consumer
+  labels:
+    app.kubernetes.io/name: {{ include "intelgraph.name" . }}
+    app.kubernetes.io/component: ingest-consumer
+spec:
+  scaleTargetRef:
+    name: {{ include "intelgraph.fullname" . }}-ingest-consumer
+  cooldownPeriod: 120
+  pollingInterval: 30
+  minReplicaCount: {{ .Values.ingestConsumer.minReplicas | default 2 }}
+  maxReplicaCount: {{ .Values.ingestConsumer.maxReplicas | default 20 }}
+  triggers:
+    - type: kafka
+      metadata:
+        bootstrapServers: {{ .Values.kafka.bootstrapServers | quote }}
+        consumerGroup: {{ .Values.ingestConsumer.group | default "intelgraph-perf" | quote }}
+        topic: {{ .Values.ingestConsumer.topic | default "ingest-events" | quote }}
+        lagThreshold: {{ .Values.ingestConsumer.lagThreshold | default "500" | quote }}
+      authenticationRef:
+        name: {{ .Values.kafka.authRef | default "kafka-auth" | quote }}

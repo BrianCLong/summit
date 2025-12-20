@@ -1,13 +1,16 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "types": ["node", "jest"]
+    "outDir": "dist",
+    "rootDir": "src",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "allowImportingTsExtensions": false,
+    "baseUrl": ".",
+    "types": ["jest"],
+    "paths": {
+      "@intelgraph/provenance": ["../../packages/provenance/dist"]
+    }
   },
-  "include": ["src/**/*", "__tests__/**/*"],
-  "exclude": ["dist", "node_modules"]
+  "include": ["src"]
 }
