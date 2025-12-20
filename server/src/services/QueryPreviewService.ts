@@ -17,7 +17,7 @@ import { logger } from '../utils/logger.js';
 import { metrics } from '../observability/metrics.js';
 import { NlToCypherService } from '../ai/nl-to-cypher/nl-to-cypher.service.js';
 import { GlassBoxRunService } from './GlassBoxRunService.js';
-import { QueryResultCache } from './queryResultCache.js';
+import { QueryResultCache, type QueryResultPayload } from './queryResultCache.js';
 
 export type QueryLanguage = 'cypher' | 'sql';
 
@@ -456,6 +456,7 @@ export class QueryPreviewService {
       let cached = false;
       let cacheTier: 'ram' | 'flash' | undefined;
       const executionStartedAt = Date.now();
+      let payload: QueryResultPayload | undefined;
       const signature = this.queryCache.buildSignature(
         preview.language,
         queryToExecute,
@@ -470,78 +471,68 @@ export class QueryPreviewService {
         warnings.push('Using streaming cache while full query executes');
       }
 
-      const cachedResult = await this.queryCache.getResult(
-        signature,
-        preview.tenantId,
-      );
-
-      if (cachedResult) {
-        cached = true;
-        cacheTier = cachedResult.tier;
-        results = cachedResult.rows;
-        rowCount = cachedResult.rows.length;
-        warnings.push(...cachedResult.warnings, 'Served from read-through cache');
-      } else if (input.dryRun) {
+      if (input.dryRun) {
         results = [{ message: 'Dry run - query validated but not executed' }];
         warnings.push('Dry run mode - no data was accessed');
-      } else if (preview.language === 'cypher') {
-        const execResult = await this.executeCypher(
-          queryToExecute,
-          preview.parameters,
-          {
-            maxRows: input.maxRows || 100,
-            timeout: input.timeout || 30000,
-          }
-        );
-        results = execResult.records;
-        rowCount = execResult.records.length;
-        warnings.push(...execResult.warnings);
-        await this.queryCache.setResult(
-          signature,
-          {
-            rows: execResult.records,
-            warnings: execResult.warnings,
-            executionTimeMs: Date.now() - executionStartedAt,
-          },
-          preview.tenantId,
-        );
-        await this.queryCache.setStreamingPartial(
-          signature,
-          execResult.records,
-          preview.tenantId,
-        );
+        payload = {
+          rows: results,
+          warnings: [...warnings],
+          executionTimeMs: Date.now() - executionStartedAt,
+        };
       } else {
-        const execResult = await this.executeSql(
-          queryToExecute,
-          {
-            maxRows: input.maxRows || 100,
-            timeout: input.timeout || 30000,
-          }
-        );
-        results = execResult.rows;
-        rowCount = execResult.rows.length;
-        warnings.push(...execResult.warnings);
-        await this.queryCache.setResult(
+        const { payload: cachedOrLoaded, fromCache, tier } = await this.queryCache.readThrough(
           signature,
-          {
-            rows: execResult.rows,
-            warnings: execResult.warnings,
-            executionTimeMs: Date.now() - executionStartedAt,
+          preview.tenantId,
+          async () => {
+            if (preview.language === 'cypher') {
+              const execResult = await this.executeCypher(
+                queryToExecute,
+                preview.parameters,
+                {
+                  maxRows: input.maxRows || 100,
+                  timeout: input.timeout || 30000,
+                }
+              );
+              return {
+                rows: execResult.records,
+                warnings: execResult.warnings,
+                executionTimeMs: Date.now() - executionStartedAt,
+              };
+            }
+
+            const execResult = await this.executeSql(
+              queryToExecute,
+              {
+                maxRows: input.maxRows || 100,
+                timeout: input.timeout || 30000,
+              }
+            );
+
+            return {
+              rows: execResult.rows,
+              warnings: execResult.warnings,
+              executionTimeMs: Date.now() - executionStartedAt,
+            };
           },
-          preview.tenantId,
+          { primeStreaming: true }
         );
-        await this.queryCache.setStreamingPartial(
-          signature,
-          execResult.rows,
-          preview.tenantId,
-        );
+
+        cached = fromCache;
+        cacheTier = tier;
+        payload = cachedOrLoaded;
+        results = cachedOrLoaded.rows;
+        rowCount = cachedOrLoaded.rows.length;
+        warnings.push(...cachedOrLoaded.warnings);
+        if (fromCache) {
+          warnings.push('Served from read-through cache');
+        }
       }
 
       const executionTimeMs = cached
-        ? cachedResult?.executionTimeMs ?? Date.now() - startTime
+        ? payload?.executionTimeMs ?? Date.now() - startTime
         : Date.now() - executionStartedAt;
 
-      const hitRate = this.queryCache.getHitRate();
+      const hitRate = this.queryCache.getHitRate('result');
       if (!cached && hitRate < 0.3) {
         logger.warn(
           { signature, hitRate },
