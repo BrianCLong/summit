@@ -45,6 +45,8 @@ interface CaseOverviewCacheRow {
   refresh_status: RefreshStatus;
   hit_count: number;
   miss_count: number;
+  last_hit_at?: Date | null;
+  last_miss_at?: Date | null;
 }
 
 export class CaseOverviewCacheRepo {
@@ -74,7 +76,7 @@ export class CaseOverviewCacheRepo {
         $7, $8, $9, $10, $11, $12,
         $13, COALESCE($14, 0), COALESCE($15, 0)
       )
-      ON CONFLICT (case_id) DO UPDATE SET
+      ON CONFLICT (case_id, tenant_id) DO UPDATE SET
         entity_count = EXCLUDED.entity_count,
         task_count = EXCLUDED.task_count,
         open_task_count = EXCLUDED.open_task_count,
@@ -130,8 +132,17 @@ export class CaseOverviewCacheRepo {
     );
   }
 
-  async delete(caseId: string): Promise<void> {
-    await this.pg.query(`DELETE FROM maestro.case_overview_cache WHERE case_id = $1`, [caseId]);
+  async markStale(caseId: string, tenantId: string): Promise<void> {
+    await this.pg.query(
+      `UPDATE maestro.case_overview_cache
+       SET refresh_status = 'stale', expires_at = NOW()
+       WHERE case_id = $1 AND tenant_id = $2`,
+      [caseId, tenantId],
+    );
+  }
+
+  async delete(caseId: string, tenantId: string): Promise<void> {
+    await this.pg.query(`DELETE FROM maestro.case_overview_cache WHERE case_id = $1 AND tenant_id = $2`, [caseId, tenantId]);
   }
 
   async listCasesNeedingRefresh(limit = 50): Promise<{ caseId: string; tenantId: string }[]> {
@@ -178,7 +189,7 @@ export class CaseOverviewCacheRepo {
       refreshStatus: row.refresh_status,
       hitCount: row.hit_count,
       missCount: row.miss_count,
-      stale: row.expires_at < new Date(),
+      stale: row.expires_at < new Date() || row.refresh_status === 'stale',
     };
   }
 }

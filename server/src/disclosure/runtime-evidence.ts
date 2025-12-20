@@ -13,13 +13,17 @@ type RuntimeEvidenceOptions = {
   policyPaths?: string[];
   sbomPaths?: string[];
   provenancePaths?: string[];
+  deployedVersion?: string;
 };
 
 type RuntimeEvidenceBundle = {
   id: string;
   tenantId: string;
   bundlePath: string;
+  manifestPath: string;
+  checksumsPath: string;
   sha256: string;
+  deployedVersion?: string;
   warnings: string[];
   counts: {
     auditEvents: number;
@@ -54,6 +58,22 @@ const DEFAULT_PROVENANCE_PATHS = [
   'provenance/bundle-summary.md',
   'prov-ledger/manifest.json',
 ];
+
+async function resolveDeployedVersion(): Promise<string | undefined> {
+  const envVersion =
+    process.env.DEPLOYED_VERSION ||
+    process.env.RELEASE_VERSION ||
+    process.env.BUILD_VERSION;
+  if (envVersion) return envVersion;
+
+  try {
+    const pkgPath = path.resolve('package.json');
+    const pkg = JSON.parse(await fs.readFile(pkgPath, 'utf8'));
+    return typeof pkg.version === 'string' ? pkg.version : undefined;
+  } catch (error) {
+    return undefined;
+  }
+}
 
 function parseDate(input?: string): Date | undefined {
   if (!input) return undefined;
@@ -190,6 +210,7 @@ class RuntimeEvidenceService {
     const startTime = parseDate(options.startTime);
     const endTime = parseDate(options.endTime);
     const tenantId = options.tenantId;
+    const deployedVersion = options.deployedVersion || (await resolveDeployedVersion());
 
     const workingDir = path.join(
       os.tmpdir(),
@@ -255,6 +276,7 @@ class RuntimeEvidenceService {
       },
       warnings,
       generatedAt: new Date().toISOString(),
+      deployedVersion,
     };
 
     const manifestPath = path.join(workingDir, 'manifest.json');
@@ -305,7 +327,10 @@ class RuntimeEvidenceService {
       id: randomUUID(),
       tenantId,
       bundlePath,
+      manifestPath,
+      checksumsPath,
       sha256: sha256Hash,
+      deployedVersion,
       warnings,
       counts: manifest.counts,
       expiresAt: new Date(Date.now() + this.ttlMs).toISOString(),
@@ -326,7 +351,8 @@ class RuntimeEvidenceService {
     for (const [id, bundle] of this.bundles.entries()) {
       if (new Date(bundle.expiresAt).getTime() < now) {
         this.bundles.delete(id);
-        fs.rm(bundle.bundlePath, { force: true }).catch(() => undefined);
+        const workingDir = path.dirname(bundle.bundlePath);
+        fs.rm(workingDir, { recursive: true, force: true }).catch(() => undefined);
       }
     }
   }

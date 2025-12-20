@@ -1,37 +1,92 @@
 {
-  "title": "System Health Overview",
-  "schemaVersion": 39,
-  "version": 1,
-  "refresh": "30s",
+  "title": "Mesh & System Health",
+  "description": "Golden signals for API, mesh traffic, resource utilization, collectors, and logging",
   "panels": [
     {
-      "type": "stat",
-      "title": "API p99 latency",
+      "type": "graph",
+      "title": "API Latency p99",
+      "gridPos": { "w": 12, "h": 8, "x": 0, "y": 0 },
       "targets": [
         {
-          "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job=\"intelgraph-api\"}[5m])) by (le))"
+          "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job=\"intelgraph-api\"}[5m])) by (le))",
+          "legendFormat": "api p99"
         }
-      ],
-      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0}
+      ]
     },
     {
-      "type": "stat",
-      "title": "API error rate",
+      "type": "graph",
+      "title": "Mesh Error Rate",
+      "gridPos": { "w": 12, "h": 8, "x": 12, "y": 0 },
       "targets": [
         {
-          "expr": "sum(rate(http_requests_total{job=\"intelgraph-api\",code=~\"5..\"}[5m])) / sum(rate(http_requests_total{job=\"intelgraph-api\"}[5m]))"
+          "expr": "sum(rate(istio_requests_total{response_code=~\"5..\"}[5m])) / sum(rate(istio_requests_total[5m]))",
+          "legendFormat": "5xx rate"
         }
-      ],
-      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0}
+      ]
     },
     {
-      "type": "timeseries",
-      "title": "Collector throughput",
+      "type": "graph",
+      "title": "Collector & Vector Uptime",
+      "gridPos": { "w": 12, "h": 8, "x": 0, "y": 8 },
       "targets": [
-        {"expr": "sum(rate(otelcol_receiver_accepted_spans[5m]))"},
-        {"expr": "sum(rate(otelcol_receiver_refused_spans[5m]))"}
-      ],
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4}
+        { "expr": "avg(up{job=\"otel-collector\"})", "legendFormat": "otel-collector" },
+        { "expr": "avg(up{job=\"vector\"})", "legendFormat": "vector" }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "CPU Utilization (Agents Namespace)",
+      "gridPos": { "w": 12, "h": 8, "x": 12, "y": 8 },
+      "targets": [
+        {
+          "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"agents\", container!~\"POD|\"}[5m]))",
+          "legendFormat": "agents cpu"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Memory Utilization (Agents Namespace)",
+      "gridPos": { "w": 12, "h": 8, "x": 0, "y": 16 },
+      "targets": [
+        {
+          "expr": "sum(container_memory_working_set_bytes{namespace=\"agents\", container!~\"POD|\"})",
+          "legendFormat": "agents memory"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Log Shipping Throughput",
+      "gridPos": { "w": 12, "h": 8, "x": 12, "y": 16 },
+      "targets": [
+        {
+          "expr": "sum(rate(vector_processed_events_total{component_kind=\"sink\"}[5m]))",
+          "legendFormat": "events/s"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Profiling Samples",
+      "gridPos": { "w": 12, "h": 8, "x": 0, "y": 24 },
+      "targets": [
+        {
+          "expr": "sum(rate(pyroscope_samples_ingested_total[5m]))",
+          "legendFormat": "pyroscope"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Audit Event Rate",
+      "gridPos": { "w": 12, "h": 8, "x": 12, "y": 24 },
+      "targets": [
+        {
+          "expr": "rate(audit_events_total[5m])",
+          "legendFormat": "audit"
+        }
+      ]
     }
   ]
 }

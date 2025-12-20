@@ -22,8 +22,11 @@ export interface RuntimeEvidenceBundle {
   id: string;
   tenantId: string;
   sha256: string;
+  deployedVersion?: string;
   warnings: string[];
   downloadUrl?: string;
+  manifestUrl?: string;
+  checksumsUrl?: string;
   expiresAt: string;
   counts: {
     auditEvents: number;
