@@ -10,6 +10,7 @@ import {
 import Redis from 'ioredis';
 import { logger } from '../utils/logger';
 import { PolicyGuard } from './policyGuard';
+import { deriveActionType } from './taskPolicyGate';
 import { Budget } from '../ai/llmBudget';
 import { systemMonitor } from '../src/lib/system-monitor';
 
@@ -42,6 +43,9 @@ export type AgentTask = {
   context: Record<string, any>;
   parentTaskId?: string;
   dependencies?: string[];
+  action?: 'READ' | 'WRITE' | 'DEPLOY' | 'OTHER';
+  reasonForAccess?: string;
+  idempotencyKey?: string;
   metadata: {
     actor: string;
     timestamp: string;
@@ -70,6 +74,8 @@ class MaestroOrchestrator {
   }
 
   async enqueueTask(task: AgentTask): Promise<string> {
+    const normalizedTask = this.normalizeTask(task);
+
     // 1. System Health Check (Backpressure)
     const health = systemMonitor.getHealth();
     if (health.isOverloaded) {
@@ -84,13 +90,13 @@ class MaestroOrchestrator {
     }
 
     // Pre-flight policy check
-    const policyResult = await this.policyGuard.checkPolicy(task);
+    const policyResult = await this.policyGuard.checkPolicy(normalizedTask);
     if (!policyResult.allowed) {
       throw new Error(`Task blocked by policy: ${policyResult.reason}`);
     }
 
-    const job = await maestroQueue.add(task.kind, task, {
-      jobId: `${task.kind}-${task.repo}-${Date.now()}`,
+    const job = await maestroQueue.add(normalizedTask.kind, normalizedTask, {
+      jobId: `${normalizedTask.kind}-${normalizedTask.repo}-${Date.now()}`,
     });
 
     logger.info('Task enqueued', {
@@ -116,6 +122,26 @@ class MaestroOrchestrator {
     }
 
     return taskIds;
+  }
+
+  private normalizeTask(task: AgentTask): AgentTask {
+    const action = task.action || deriveActionType(task);
+    const reasonForAccess =
+      task.reasonForAccess ||
+      (task.context as any)?.reasonForAccess ||
+      (task.context as any)?.reason_for_access;
+    const environment = task.context?.environment || process.env.NODE_ENV || 'development';
+
+    return {
+      ...task,
+      action,
+      reasonForAccess,
+      context: {
+        ...task.context,
+        environment,
+        reasonForAccess,
+      },
+    };
   }
 
   private initializeWorkers() {
@@ -179,11 +205,12 @@ class MaestroOrchestrator {
   ) {
     return async (job: Job<T>): Promise<TaskResult> => {
       const startTime = Date.now();
-      const budget = new Budget(job.data.budgetUSD);
+      const normalizedTask = this.normalizeTask(job.data);
+      const budget = new Budget(normalizedTask.budgetUSD);
 
       try {
         // Policy guard
-        const policyResult = await this.policyGuard.checkPolicy(job.data);
+        const policyResult = await this.policyGuard.checkPolicy(normalizedTask);
         if (!policyResult.allowed) {
           throw new Error(`Policy violation: ${policyResult.reason}`);
         }
@@ -194,17 +221,18 @@ class MaestroOrchestrator {
         }
 
         // Wait for dependencies
-        if (job.data.dependencies?.length) {
-          await this.waitForDependencies(job.data.dependencies);
+        if (normalizedTask.dependencies?.length) {
+          await this.waitForDependencies(normalizedTask.dependencies);
         }
 
         logger.info('Starting agent task', {
           taskId: job.id,
-          kind: job.data.kind,
+          kind: normalizedTask.kind,
           budget: budget.maxUSD,
+          action: deriveActionType(normalizedTask),
         });
 
-        const result = await handler(job);
+        const result = await handler({ ...job, data: normalizedTask });
         const duration = Date.now() - startTime;
 
         // Update task result with guardrail metadata

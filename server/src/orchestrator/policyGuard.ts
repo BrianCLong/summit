@@ -1,13 +1,18 @@
 import { logger } from '../utils/logger';
 import { AgentTask } from './maestro';
+import { TaskActionType, TaskPolicyGate, deriveActionType } from './taskPolicyGate';
 
 export interface PolicyResult {
   allowed: boolean;
   reason?: string;
   confidence: number;
+  policyVersion?: string;
+  latencyMs?: number;
+  actionType?: TaskActionType;
 }
 
 export class PolicyGuard {
+  private opaGate: TaskPolicyGate;
   private policies: PolicyRule[] = [
     // Budget policies
     {
@@ -50,12 +55,58 @@ export class PolicyGuard {
     },
   ];
 
+  constructor(opaGate = new TaskPolicyGate()) {
+    this.opaGate = opaGate;
+  }
+
   async checkPolicy(task: AgentTask): Promise<PolicyResult> {
+    const actionType = deriveActionType(task);
+
     logger.debug('Running policy checks', {
       taskKind: task.kind,
       repo: task.repo,
+      actionType,
     });
 
+    const localCheck = await this.evaluateLocalPolicies(task);
+    if (!localCheck.allowed) {
+      return localCheck;
+    }
+
+    if (actionType === 'WRITE' || actionType === 'DEPLOY') {
+      const opaDecision = await this.opaGate.evaluate(task, actionType);
+
+      if (!opaDecision.allowed) {
+        return {
+          allowed: false,
+          reason: `OPA denial: ${opaDecision.reason}`,
+          confidence: 1.0,
+          policyVersion: opaDecision.policyVersion,
+          latencyMs: opaDecision.latencyMs,
+          actionType,
+        };
+      }
+
+      return {
+        allowed: true,
+        reason: 'OPA allow',
+        confidence: 1.0,
+        policyVersion: opaDecision.policyVersion,
+        latencyMs: opaDecision.latencyMs,
+        actionType,
+      };
+    }
+
+    logger.debug('All policy checks passed', { task: task.kind });
+
+    return {
+      allowed: true,
+      confidence: 0.95,
+      actionType,
+    };
+  }
+
+  private async evaluateLocalPolicies(task: AgentTask): Promise<PolicyResult> {
     for (const policy of this.policies) {
       try {
         const allowed = await policy.check(task);
@@ -87,8 +138,6 @@ export class PolicyGuard {
         };
       }
     }
-
-    logger.debug('All policy checks passed', { task: task.kind });
 
     return {
       allowed: true,

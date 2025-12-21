@@ -1,4 +1,7 @@
 // @ts-nocheck
+import fs from 'fs';
+import path from 'path';
+import os from 'os';
 import { runManager } from '../../orchestrator/runManager';
 import { recordRunInIntelGraph } from '../../orchestrator/intelGraphIntegration';
 import { AgentTask, maestro } from '../../orchestrator/maestro';
@@ -27,6 +30,23 @@ jest.mock('ioredis', () => {
   }));
 });
 
+const evaluateMock = jest.fn().mockResolvedValue({
+  allowed: true,
+  reason: 'allow',
+  policyVersion: 'test',
+  latencyMs: 1,
+});
+
+jest.mock('../../src/orchestrator/taskPolicyGate', () => {
+  const actual = jest.requireActual('../../src/orchestrator/taskPolicyGate');
+  return {
+    ...actual,
+    TaskPolicyGate: jest.fn().mockImplementation(() => ({
+      evaluate: evaluateMock,
+    })),
+  };
+});
+
 // Mock IntelGraph integration
 jest.mock('../../orchestrator/intelGraphIntegration', () => ({
   recordRunInIntelGraph: jest.fn(),
@@ -35,6 +55,12 @@ jest.mock('../../orchestrator/intelGraphIntegration', () => ({
 describe('Maestro Orchestrator & RunManager', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    evaluateMock.mockResolvedValue({
+      allowed: true,
+      reason: 'allow',
+      policyVersion: 'test',
+      latencyMs: 1,
+    });
     // Reset runManager state if possible, or we rely on unique IDs
     // Since RunManager is a singleton with private state, we can't easily reset it without exposing a method.
     // For now, we rely on unique IDs.
@@ -150,5 +176,44 @@ describe('Maestro Orchestrator & RunManager', () => {
     const updatedRun = await runManager.getRun(run.id);
     expect(updatedRun?.artifacts).toHaveLength(1);
     expect(updatedRun?.artifacts[0].name).toBe('README.md');
+  });
+
+  it('denies tasks when OPA blocks a WRITE action and records audit trail', async () => {
+    const auditPath = path.join(os.tmpdir(), 'maestro-policy-audit.log');
+    process.env.MAESTRO_POLICY_AUDIT_PATH = auditPath;
+    if (fs.existsSync(auditPath)) {
+      fs.unlinkSync(auditPath);
+    }
+
+    evaluateMock.mockResolvedValueOnce({
+      allowed: false,
+      reason: 'reason_for_access_required',
+      policyVersion: 'v1.0.0',
+      latencyMs: 2,
+    });
+
+    const task: AgentTask = {
+      kind: 'implement',
+      repo: 'policy-repo',
+      issue: 'policy-issue',
+      budgetUSD: 5,
+      context: {},
+      metadata: {
+        actor: 'auditor',
+        timestamp: new Date().toISOString(),
+        sprint_version: 'v1',
+      },
+    };
+
+    await expect(maestro.enqueueTask(task)).rejects.toThrow(/Policy/);
+
+    const auditLines = fs.readFileSync(auditPath, 'utf-8')
+      .trim()
+      .split('\n')
+      .filter(Boolean);
+    const event = JSON.parse(auditLines[auditLines.length - 1]);
+    expect(event.allowed).toBe(false);
+    expect(event.reason).toContain('reason_for_access_required');
+    expect(event.policyVersion).toBe('v1.0.0');
   });
 });
