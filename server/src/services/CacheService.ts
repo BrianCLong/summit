@@ -3,6 +3,7 @@ import { PrometheusMetrics } from '../utils/metrics.js';
 import { cfg } from '../config.js';
 import pino from 'pino';
 
+// @ts-ignore
 const logger = pino();
 
 export class CacheService {

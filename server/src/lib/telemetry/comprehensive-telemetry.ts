@@ -67,6 +67,14 @@ class ComprehensiveTelemetry {
     metrics.httpRequestDuration.observe(attributes as any, duration);
   }
 
+  public incrementActiveConnections() {
+    this.activeConnections.add(1);
+  }
+
+  public decrementActiveConnections() {
+    this.activeConnections.add(-1);
+  }
+
   public onMetric(listener: (metricName: string, value: number) => void) {
     // No-op or reimplement if critical
   }

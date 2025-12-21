@@ -2,6 +2,7 @@ import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import { promises as fs } from 'fs';
 
+// @ts-ignore
 const ajv = new Ajv({ allErrors: true, strict: true });
 addFormats(ajv);
 
@@ -18,6 +19,7 @@ export async function validateArtifact(
     : {
         ok: false as const,
         errors: (validate.errors || []).map(
+          // @ts-ignore
           (e) => `${e.instancePath} ${e.message}`,
         ),
       };

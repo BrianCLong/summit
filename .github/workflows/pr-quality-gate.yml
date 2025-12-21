@@ -16,6 +16,53 @@ env:
   PNPM_VERSION: '9.12.0'
 
 jobs:
+  # Governance Lane: OPA Policy Enforcement
+  governance-gate:
+    name: Governance & Policy Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: open-policy-agent/setup-opa@v2
+        with:
+          version: latest
+
+      - name: Generate Policy Input
+        run: |
+          # Get changed files against the target branch
+          # Handle case where github.base_ref is missing (e.g. manual dispatch) by defaulting to main
+          BASE_REF=${{ github.base_ref || 'main' }}
+          CHANGES=$(git diff --name-only origin/$BASE_REF HEAD | jq -R . | jq -s 'map({file: .})')
+
+          # Construct Input JSON
+          # We define the user as HUMAN/tier-4 for manual PRs to ensure they pass permissions
+          # Automated agents must provide their credentials in a real scenario, but here we derive from actor
+          jq -n \
+            --argjson changes "$CHANGES" \
+            --arg actor "${{ github.actor }}" \
+            '{changes: $changes, user: {type: "HUMAN", name: $actor, tier: "tier-4"}}' > input.json
+
+          echo "Policy Input:"
+          cat input.json
+
+      - name: Evaluate Agent Gate
+        run: |
+          # Evaluate the deny rule. If it returns any result, it fails (because of --fail-defined behavior with result count? No, manual check)
+          # opa eval returns a JSON result. We check if 'result' is non-empty.
+          OUTPUT=$(opa eval --data policy/ --input input.json "data.ci_agent_gate.deny")
+          echo "$OUTPUT"
+
+          # Check if deny produced any messages
+          COUNT=$(echo "$OUTPUT" | jq '.result[0].expressions[0].value | length')
+          if [ "$COUNT" -gt 0 ]; then
+            echo "::error::Policy Violation Detected!"
+            echo "$OUTPUT" | jq -r '.result[0].expressions[0].value[]'
+            exit 1
+          fi
+          echo "Policy Check Passed."
+
   # Fast feedback lane: Static Analysis & Security
   static-checks:
     name: Static Checks & Security

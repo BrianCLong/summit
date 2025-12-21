@@ -1,4 +1,3 @@
-// @ts-nocheck
 import 'dotenv/config';
 import express from 'express';
 import { ApolloServer } from '@apollo/server';
@@ -7,6 +6,7 @@ import { makeExecutableSchema } from '@graphql-tools/schema';
 import { applyMiddleware } from 'graphql-middleware';
 import cors from 'cors';
 import helmet from 'helmet';
+import pino from 'pino';
 import pinoHttp from 'pino-http';
 import { logger as appLogger } from './config/logger.js';
 import { telemetry } from './lib/telemetry/comprehensive-telemetry.js';
@@ -92,6 +92,7 @@ export const createApp = async () => {
   await tracer.initialize();
 
   const app = express();
+  // @ts-ignore
   const logger = pino();
 
   const isProduction = cfg.NODE_ENV === 'production';
@@ -242,21 +243,6 @@ export const createApp = async () => {
       return advancedRateLimiter.middleware()(req, res, next);
   });
 
-  // Admin Rate Limit Dashboard Endpoint
-  // Requires authentication and admin role (simplified check for now)
-  app.get('/api/admin/rate-limits/:userId', authenticateToken, async (req, res) => {
-    const user = (req as any).user;
-    if (!user || user.role !== 'admin') {
-         res.status(403).json({ error: 'Forbidden' });
-         return;
-    }
-    try {
-      const status = await advancedRateLimiter.getStatus(req.params.userId);
-      res.json(status);
-    } catch (err) {
-      res.status(500).json({ error: 'Failed to fetch rate limit status' });
-    }
-  });
 
   // Authentication routes (exempt from global auth middleware)
   app.use('/auth', authRouter);
@@ -320,7 +306,7 @@ export const createApp = async () => {
   // Simple LLM stub
   const llmClient = {
     callCompletion: async (prompt: string, model: string) => `[Stub LLM Response] for: ${prompt}`
-  };
+  } as any;
 
   const maestro = new Maestro(igClient, costMeter, llmClient, {
     defaultPlannerAgent: 'openai:gpt-4.1',
@@ -471,6 +457,22 @@ export const createApp = async () => {
           }
           next();
         };
+
+  // Admin Rate Limit Dashboard Endpoint
+  // Requires authentication and admin role (simplified check for now)
+  app.get('/api/admin/rate-limits/:userId', authenticateToken, async (req, res) => {
+    const user = (req as any).user;
+    if (!user || user.role !== 'admin') {
+         res.status(403).json({ error: 'Forbidden' });
+         return;
+    }
+    try {
+      const status = await advancedRateLimiter.getStatus(req.params.userId);
+      res.json(status);
+    } catch (err) {
+      res.status(500).json({ error: 'Failed to fetch rate limit status' });
+    }
+  });
 
   app.use(
     '/graphql',

@@ -2,7 +2,7 @@
 # Standardized commands for Development and Operations
 
 .PHONY: up down restart logs shell clean
-.PHONY: dev test lint build format ci
+.PHONY: dev test lint build format ci bootstrap smoke
 .PHONY: db-migrate db-seed sbom k6
 .PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release provenance ci-check prereqs contracts policy-sim rerere dupescans
 
@@ -32,6 +32,13 @@ clean:
 	@git branch -D tmp/pr-* 2>/dev/null || true
 
 # --- Development Workflow ---
+
+bootstrap:
+	pnpm install
+	npm run setup
+
+smoke:
+	npm run test:smoke
 
 dev:
 	pnpm run dev

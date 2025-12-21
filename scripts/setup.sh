@@ -75,13 +75,13 @@ install_dependencies() {
     
     # Root dependencies
     log_info "Installing root dependencies..."
-    npm install
+    npm install --ignore-scripts
     
     # Server dependencies
     if [ -d "server" ]; then
         log_info "Installing server dependencies..."
         cd server
-        npm install
+        npm install --ignore-scripts
         cd ..
     fi
     
@@ -89,7 +89,7 @@ install_dependencies() {
     if [ -d "client" ]; then
         log_info "Installing client dependencies..."
         cd client
-        npm install
+        npm install --ignore-scripts
         cd ..
     fi
     

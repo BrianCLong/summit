@@ -1,8 +1,7 @@
-// @ts-nocheck
 import http from 'http';
 import express from 'express';
 import { GraphQLError } from 'graphql';
-import { useServer } from 'graphql-ws/lib/use/ws';
+import { useServer } from 'graphql-ws/lib/use/ws.js';
 import { WebSocketServer } from 'ws';
 import { randomUUID } from 'node:crypto';
 import pino from 'pino';
@@ -27,7 +26,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 import { bootstrapSecrets } from './bootstrap-secrets.js';
 import { logger } from './config/logger.js';
-import { logConfigSummary } from './config/index.js';
 
 const startServer = async () => {
   const sdk = initializeOTel();
@@ -49,9 +47,6 @@ const startServer = async () => {
 
   // 1. Load Secrets (Environment or Vault)
   await bootstrapSecrets();
-
-  // Log Config
-  logConfigSummary();
 
   const app = await createApp();
   const schema = makeExecutableSchema({ typeDefs, resolvers });
