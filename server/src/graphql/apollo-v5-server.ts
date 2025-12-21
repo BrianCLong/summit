@@ -33,6 +33,7 @@ import { createPerformanceMonitoringPlugin } from './plugins/performanceMonitori
 import { createCircuitBreakerPlugin } from './plugins/circuitBreakerPlugin.js';
 import resolverMetricsPlugin from './plugins/resolverMetrics.js';
 import depthLimit from 'graphql-depth-limit';
+import { recordEndpointResult } from '../observability/reliability-metrics.js';
 
 // Enhanced context type for Apollo v5
 export interface GraphQLContext {
@@ -173,7 +174,8 @@ export function createApolloV5Server(
 
       // Custom telemetry plugin
       {
-        async requestDidStart() {
+        async requestDidStart(requestContext) {
+          const start = process.hrtime();
           return {
             async didResolveOperation(requestContext) {
               const operationName = requestContext.request.operationName;
@@ -200,10 +202,25 @@ export function createApolloV5Server(
             async willSendResponse(requestContext) {
               const { response } = requestContext;
               const body = response.body as any;
+              const hasErrors = !!(body.singleResult?.errors?.length || (body.kind === 'single' && body.singleResult?.errors?.length));
+
+              const [seconds, nanoseconds] = process.hrtime(start);
+              const duration = seconds + nanoseconds / 1e9;
+
+              const tenantId = requestContext.contextValue?.user?.tenantId || 'unknown';
+
+              recordEndpointResult({
+                endpoint: 'graph_query',
+                statusCode: hasErrors ? 500 : 200,
+                durationSeconds: duration,
+                tenantId
+              });
+
               logger.info(
                 {
                   operationName: requestContext.request.operationName,
-                  hasErrors: !!(body.singleResult?.errors?.length || (body.kind === 'single' && body.singleResult?.errors?.length)),
+                  hasErrors,
+                  duration,
                 },
                 'GraphQL operation completed',
               );

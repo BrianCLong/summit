@@ -4,6 +4,7 @@ import express from 'express';
 import { replayGuard, webhookRatelimit } from '../middleware/webhook-guard.js';
 import AuthService from '../services/AuthService.js';
 import { rateLimitMiddleware } from '../middleware/rateLimit.js';
+import { recordEndpointResult } from '../observability/reliability-metrics.js';
 
 const router = Router();
 const authService = new AuthService();
@@ -43,15 +44,58 @@ router.post('/signup', rateLimitMiddleware, asyncHandler(async (req, res) => {
  * @access Public
  */
 router.post('/login', rateLimitMiddleware, asyncHandler(async (req, res) => {
+  const start = process.hrtime();
   const { email, password } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password are required' });
+  try {
+    if (!email || !password) {
+      recordEndpointResult({
+        endpoint: 'login',
+        statusCode: 400,
+        durationSeconds: 0,
+        tenantId: 'unknown',
+      });
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    const result = await authService.login(email, password, req.ip, req.get('User-Agent'));
+
+    const [seconds, nanoseconds] = process.hrtime(start);
+    const duration = seconds + nanoseconds / 1e9;
+
+    recordEndpointResult({
+      endpoint: 'login',
+      statusCode: 200,
+      durationSeconds: duration,
+      tenantId: result.user?.tenantId,
+    });
+
+    return res.json(result);
+  } catch (err: any) {
+    const [seconds, nanoseconds] = process.hrtime(start);
+    const duration = seconds + nanoseconds / 1e9;
+
+    // Determine status code from error if possible, default to 500
+    // Don't treat 4xx errors (client errors) as reliability failures if possible,
+    // but the recordEndpointResult logic classifies them.
+    // However, for Auth, 401/400 are common and not system errors.
+
+    let statusCode = err.statusCode || 500;
+
+    // Check for common auth errors that might not have statusCode set
+    if (err.message === 'Invalid credentials' || err.message === 'User not found') {
+        statusCode = 401;
+    }
+
+    recordEndpointResult({
+      endpoint: 'login',
+      statusCode: statusCode,
+      durationSeconds: duration,
+      tenantId: 'unknown',
+    });
+
+    throw err;
   }
-
-  const result = await authService.login(email, password, req.ip, req.get('User-Agent'));
-
-  return res.json(result);
 }));
 
 /**

@@ -26,9 +26,33 @@ const smokeUptimePct = new client.Gauge({
   help: 'Percentage of successful health probes in the last window',
 });
 
+const loginP95 = new client.Gauge({
+    name: 'login_p95_ms',
+    help: '95th percentile of Login request duration in milliseconds',
+});
+
+const maestroRunP95 = new client.Gauge({
+    name: 'maestro_run_p95_ms',
+    help: '95th percentile of Maestro Run creation duration in milliseconds',
+});
+
+const loginErrorRate = new client.Gauge({
+    name: 'login_error_rate',
+    help: 'Rate of Login errors (errors / total requests)',
+});
+
+const maestroRunErrorRate = new client.Gauge({
+    name: 'maestro_run_error_rate',
+    help: 'Rate of Maestro Run creation errors (errors / total requests)',
+});
+
 register.registerMetric(graphqlP95);
 register.registerMetric(graphqlErrorRate);
 register.registerMetric(smokeUptimePct);
+register.registerMetric(loginP95);
+register.registerMetric(maestroRunP95);
+register.registerMetric(loginErrorRate);
+register.registerMetric(maestroRunErrorRate);
 
 // Probing Logic
 let probeHistory: boolean[] = [];
@@ -63,9 +87,26 @@ async function updateMetrics() {
     const p95Query = 'histogram_quantile(0.95, sum(rate(graphql_request_duration_seconds_bucket[5m])) by (le))';
     const errorRateQuery = 'sum(rate(graphql_errors_total[5m])) / sum(rate(graphql_requests_total[5m]))';
 
-    const [p95Res, errRes] = await Promise.all([
+    // Tier 0 Journeys Queries
+    const loginP95Query = 'histogram_quantile(0.95, sum(rate(reliability_request_duration_seconds_bucket{endpoint="login"}[5m])) by (le))';
+    const maestroRunP95Query = 'histogram_quantile(0.95, sum(rate(reliability_request_duration_seconds_bucket{endpoint="maestro_execution"}[5m])) by (le))';
+
+    // Error Rates
+    // Assuming reliability_request_errors_total has labels {endpoint="..."}
+    // And assuming we can calculate total requests from the histogram count or a separate counter
+    // Usually histogram_count tracks total requests.
+    // reliability_request_duration_seconds_count{endpoint="..."}
+
+    const loginErrorRateQuery = 'sum(rate(reliability_request_errors_total{endpoint="login"}[5m])) / sum(rate(reliability_request_duration_seconds_count{endpoint="login"}[5m]))';
+    const maestroErrorRateQuery = 'sum(rate(reliability_request_errors_total{endpoint="maestro_execution"}[5m])) / sum(rate(reliability_request_duration_seconds_count{endpoint="maestro_execution"}[5m]))';
+
+    const [p95Res, errRes, loginRes, maestroRes, loginErrRes, maestroErrRes] = await Promise.all([
         axios.get(`${PROMETHEUS_URL}/api/v1/query`, { params: { query: p95Query } }),
-        axios.get(`${PROMETHEUS_URL}/api/v1/query`, { params: { query: errorRateQuery } })
+        axios.get(`${PROMETHEUS_URL}/api/v1/query`, { params: { query: errorRateQuery } }),
+        axios.get(`${PROMETHEUS_URL}/api/v1/query`, { params: { query: loginP95Query } }),
+        axios.get(`${PROMETHEUS_URL}/api/v1/query`, { params: { query: maestroRunP95Query } }),
+        axios.get(`${PROMETHEUS_URL}/api/v1/query`, { params: { query: loginErrorRateQuery } }),
+        axios.get(`${PROMETHEUS_URL}/api/v1/query`, { params: { query: maestroErrorRateQuery } })
     ]);
 
     if (p95Res.data?.data?.result?.length > 0) {
@@ -79,6 +120,34 @@ async function updateMetrics() {
         const val = parseFloat(errRes.data.data.result[0].value[1]);
         if (!isNaN(val)) {
              graphqlErrorRate.set(val * 100); // Convert to percentage
+        }
+    }
+
+    if (loginRes.data?.data?.result?.length > 0) {
+        const val = parseFloat(loginRes.data.data.result[0].value[1]);
+        if (!isNaN(val)) {
+            loginP95.set(val * 1000);
+        }
+    }
+
+    if (maestroRes.data?.data?.result?.length > 0) {
+        const val = parseFloat(maestroRes.data.data.result[0].value[1]);
+        if (!isNaN(val)) {
+            maestroRunP95.set(val * 1000);
+        }
+    }
+
+    if (loginErrRes.data?.data?.result?.length > 0) {
+        const val = parseFloat(loginErrRes.data.data.result[0].value[1]);
+        if (!isNaN(val)) {
+            loginErrorRate.set(val * 100);
+        }
+    }
+
+    if (maestroErrRes.data?.data?.result?.length > 0) {
+        const val = parseFloat(maestroErrRes.data.data.result[0].value[1]);
+        if (!isNaN(val)) {
+            maestroRunErrorRate.set(val * 100);
         }
     }
 
