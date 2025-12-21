@@ -1,6 +1,7 @@
 import { Pool } from 'pg';
 import { randomUUID as uuidv4 } from 'crypto';
 import { getPostgresPool } from '../../config/database.js';
+import { MaestroRunStateTransitionSchema } from '../../validators/invariants.js';
 
 let pool: Pool | null = null;
 
@@ -133,6 +134,21 @@ class RunsRepo {
     }
 
     if (sets.length === 0) return this.get(id, tenantId);
+
+    // Validate state transition if status is being updated
+    if (data.status) {
+      const currentRun = await this.get(id, tenantId);
+      if (currentRun) {
+        try {
+          MaestroRunStateTransitionSchema.parse({
+            currentStatus: currentRun.status,
+            newStatus: data.status
+          });
+        } catch (error: any) {
+          throw new Error(`Invalid run state transition: ${error.message}`);
+        }
+      }
+    }
 
     const query = `
       UPDATE runs 

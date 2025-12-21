@@ -5,6 +5,7 @@ import { randomUUID, createHash } from 'crypto';
 import logger from '../utils/logger.js';
 import { provenanceLedger } from '../provenance/ledger.js';
 import { QuotaManager } from '../lib/resources/quota-manager.js';
+import { OrganizationStateTransitionSchema } from '../validators/invariants.js';
 
 // Input Validation Schema
 export const createTenantSchema = z.object({
@@ -187,6 +188,13 @@ export class TenantService {
         throw new Error('Tenant not found');
       }
 
+      const tenantData = this.mapRowToTenant(existing.rows[0]);
+
+      // Invariant: Residency is immutable
+      if (settings.residency && settings.residency !== tenantData.residency) {
+          throw new Error('Residency is immutable');
+      }
+
       const mergedSettings = {
         ...(existing.rows[0].settings || {}),
         ...settings,
@@ -228,6 +236,15 @@ export class TenantService {
     actorId: string,
     reason?: string,
   ): Promise<Tenant> {
+    return this.updateStatus(tenantId, 'disabled', actorId, reason);
+  }
+
+  async updateStatus(
+      tenantId: string,
+      status: 'active' | 'suspended' | 'disabled' | 'archived',
+      actorId: string,
+      reason?: string
+  ): Promise<Tenant> {
     const pool = getPostgresPool();
     const client = await pool.connect();
 
@@ -239,7 +256,17 @@ export class TenantService {
       }
 
       const current = this.mapRowToTenant(existing.rows[0]);
-      if (current.status === 'disabled') {
+
+      try {
+        OrganizationStateTransitionSchema.parse({
+            currentStatus: current.status,
+            newStatus: status
+        });
+      } catch (e: any) {
+          throw new Error(`Invalid status transition from ${current.status} to ${status}`);
+      }
+
+      if (current.status === status) {
         await client.query('ROLLBACK');
         return current;
       }
@@ -256,17 +283,18 @@ export class TenantService {
 
       const result = await client.query(
         'UPDATE tenants SET status = $1, config = $2, updated_at = NOW() WHERE id = $3 RETURNING *',
-        ['disabled', enrichedConfig, tenantId],
+        [status, enrichedConfig, tenantId],
       );
 
       const tenant = this.mapRowToTenant(result.rows[0]);
 
       await provenanceLedger.appendEntry({
-        action: 'TENANT_DISABLED',
+        action: `TENANT_STATUS_UPDATED`,
         actor: { id: actorId, role: 'admin' },
         metadata: {
           tenantId,
           previousStatus: current.status,
+          newStatus: status,
           reason,
         },
         artifacts: [],
@@ -276,7 +304,7 @@ export class TenantService {
       return tenant;
     } catch (error) {
       await client.query('ROLLBACK');
-      logger.error('Failed to disable tenant', error);
+      logger.error('Failed to update tenant status', error);
       throw error;
     } finally {
       client.release();

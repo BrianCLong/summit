@@ -49,6 +49,7 @@ import { SECRETS } from '../config/secretRefs.js';
 // @ts-ignore - pg type imports
 import { Pool, PoolClient } from 'pg';
 import { metrics } from '../observability/metrics.js';
+import { UserStateTransitionSchema, UserStatusSchema } from '../validators/invariants.js';
 
 /**
  * User registration data payload
@@ -386,6 +387,11 @@ export class AuthService {
         throw new Error('Invalid credentials');
       }
 
+      // Ensure user is active (invariant check)
+      if (!user.is_active) {
+         throw new Error('User account is not active');
+      }
+
       await client.query(
         'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1',
         [user.id],
@@ -690,6 +696,48 @@ export class AuthService {
     if (!userPermissions) return false;
     if (userPermissions.includes('*')) return true; // Admin or super role
     return userPermissions.includes(permission);
+  }
+
+  /**
+   * Update user status with invariant validation
+   */
+  async updateUserStatus(userId: string, newStatus: z.infer<typeof UserStatusSchema>): Promise<void> {
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      const userResult = await client.query('SELECT * FROM users WHERE id = $1', [userId]);
+      if (userResult.rows.length === 0) {
+        throw new Error('User not found');
+      }
+
+      const user = userResult.rows[0];
+      // Map boolean is_active to status enum for legacy compat
+      const currentStatus = user.is_active ? 'active' : 'deactivated';
+
+      // If we are just toggling boolean, map back
+      // Note: This is a partial implementation as the DB schema uses is_active (boolean)
+      // instead of a full status enum. We map 'active' -> true, others -> false.
+      // But we still validate the transition logic.
+
+      try {
+        UserStateTransitionSchema.parse({
+          currentStatus,
+          newStatus
+        });
+      } catch (e: any) {
+        throw new Error(`Invalid user state transition: ${e.message}`);
+      }
+
+      const isActive = newStatus === 'active';
+      await client.query('UPDATE users SET is_active = $1 WHERE id = $2', [isActive, userId]);
+
+      await client.query('COMMIT');
+    } catch (e) {
+      await client.query('ROLLBACK');
+      throw e;
+    } finally {
+      client.release();
+    }
   }
 
   /**
