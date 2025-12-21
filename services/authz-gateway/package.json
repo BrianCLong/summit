@@ -10,7 +10,9 @@
     "lint": "eslint \"src/**/*.ts\" \"tests/**/*.ts\"",
     "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
     "test": "jest --coverage",
-    "test:fuzz": "jest --runTestsByPath tests/fuzz/governance-gate.fuzz.test.ts --coverage"
+    "test:fuzz": "jest --runTestsByPath tests/fuzz/governance-gate.fuzz.test.ts --coverage",
+    "phase1:gate": "ts-node src/security/phase1-cli.ts",
+    "phase1:build-artifacts": "npm run build && node dist/security/phase1-cli.js"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",
