@@ -1,0 +1,7 @@
+{
+  "rules": [
+    { "operation": "policy.explain", "effect": "allow", "reason": "standard explain endpoint" },
+    { "operation": "graph.write", "effect": "deny", "reason": "write operations must be peer reviewed" },
+    { "operation": "graph.schema", "effect": "deny", "reason": "schema mutations disabled at edge" }
+  ]
+}

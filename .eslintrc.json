@@ -1,8 +1,1 @@
-{
-  "root": true,
-  "env": { "node": true, "es2021": true, "jest": true, "browser": true },
-  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "prettier"],
-  "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint", "security"],
-  "rules": { "no-eval": "error", "@typescript-eslint/no-explicit-any": "warn" }
-}
+{ "extends": ["eslint:recommended"], "parserOptions": { "ecmaVersion": 2022, "sourceType": "module" }, "env": { "node": true, "jest": true } }
