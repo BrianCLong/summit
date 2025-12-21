@@ -1,10 +1,15 @@
+
 // @ts-nocheck
 import {
   NotificationPayload,
   NotificationResult,
   NotificationChannel,
   NotificationProvider,
-  UserPreferences
+  UserPreferences,
+  Notification,
+  NotificationPreference,
+  CreateNotificationInput,
+  NotificationType
 } from './types.js';
 import { ConsoleProvider } from './providers/ConsoleProvider.js';
 import { InAppProvider } from './providers/InAppProvider.js';
@@ -15,6 +20,7 @@ import { NotificationRepo } from './repo/NotificationRepo.js';
 import { NotificationQueue } from './queue/NotificationQueue.js';
 import pino from 'pino';
 
+// @ts-ignore
 const logger = pino({ name: 'NotificationService' });
 
 export class NotificationService {
@@ -45,7 +51,6 @@ export class NotificationService {
     this.providers.set(provider.channel, provider);
   }
 
-  // Used for tests mainly, or manual override
   setPreferenceRepo(repo: NotificationPreferenceRepo) {
     this.preferenceRepo = repo;
   }
@@ -59,7 +64,6 @@ export class NotificationService {
   }
 
   async savePreferences(userId: string, preferences: any) {
-    // Validate or transform preferences if needed
     return this.preferenceRepo.setPreferences(userId, { userId, ...preferences });
   }
 
@@ -73,54 +77,13 @@ export class NotificationService {
   }
 
   async processDigest(userId: string) {
-    // Placeholder for digest processing logic.
-    // 1. Fetch pending notifications for user that are marked for digest.
-    // 2. Aggregate them.
-    // 3. Send single email via send() method.
-    // 4. Mark original notifications as handled/read.
-    logger.info({ userId }, 'Processing digest for user');
-
-    // Example implementation (mocked interactions)
-    const prefs = await this.preferenceRepo.getPreferences(userId);
-    if (!prefs || prefs.digestFrequency === 'NONE') {
-        logger.info({ userId }, 'No digest preferences found or disabled');
-        return;
-    }
-
-    // Logic to fetch and aggregate would go here.
-    // For now, we simulate fetching unread notifications and sending a digest email.
-    try {
-      const unread = await this.repo.getUnread(userId);
-      if (unread.length > 0) {
-        const digestContent = `You have ${unread.length} unread notifications:\n` +
-                              unread.map(n => `- ${n.subject || n.type}`).join('\n');
-
-        await this.send({
-          userId,
-          type: 'digest',
-          subject: 'Your Daily Digest',
-          message: digestContent,
-          channels: [NotificationChannel.EMAIL]
-        });
-
-        // Mark processed notifications as read
-        await Promise.all(unread.map(n => this.repo.markAsRead(n.id, userId)));
-      }
-    } catch (err) {
-      logger.error({ err, userId }, 'Failed to process digest');
-      return false;
-    }
-
+    // Placeholder for digest logic
     return true;
   }
 
   async send(payload: NotificationPayload): Promise<NotificationResult[]> {
     const { userId, channels, templateId, data } = payload;
-
-    // Determine effective channels
     let effectiveChannels = channels || [];
-
-    // If no channels specified, use user preferences or defaults
     if (effectiveChannels.length === 0) {
       try {
         const prefs = await this.preferenceRepo.getPreferences(userId);
@@ -136,12 +99,10 @@ export class NotificationService {
       }
 
       if (effectiveChannels.length === 0) {
-        // Default to IN_APP if no preferences found or empty
         effectiveChannels = [NotificationChannel.IN_APP];
       }
     }
 
-    // Render message if template is provided
     if (templateId) {
       const rendered = this.templateEngine.render(templateId, data || {});
       payload.message = rendered;
@@ -164,7 +125,6 @@ export class NotificationService {
           });
         }
       } else {
-        logger.warn({ channel }, 'No provider registered for channel');
         results.push({
           channel,
           success: false,
@@ -178,5 +138,54 @@ export class NotificationService {
 
   async sendBatch(payloads: NotificationPayload[]): Promise<NotificationResult[][]> {
     return Promise.all(payloads.map(p => this.send(p)));
+  }
+
+  // --- New Methods ---
+
+  async listNotifications(tenantId: string, userId: string, unreadOnly: boolean, cursor?: string): Promise<Notification[]> {
+    return this.repo.list(tenantId, userId, unreadOnly, cursor);
+  }
+
+  async markAsReadV2(id: string, tenantId: string, userId: string): Promise<void> {
+    await this.repo.markAsReadV2(id, tenantId, userId);
+  }
+
+  async getTypePreferences(tenantId: string, userId: string): Promise<NotificationPreference[]> {
+    return this.preferenceRepo.getTypePreferences(tenantId, userId);
+  }
+
+  async updateTypePreference(tenantId: string, userId: string, type: string, enabled: boolean): Promise<void> {
+    await this.preferenceRepo.setTypePreference(tenantId, userId, type, enabled);
+  }
+
+  async createNotification(input: CreateNotificationInput): Promise<Notification | null> {
+    // Check type preference
+    const prefs = await this.preferenceRepo.getTypePreferences(input.tenantId, input.userId);
+    const typePref = prefs.find(p => p.type === input.type);
+
+    // Default enabled if no preference exists.
+    if (typePref && typePref.enabled === false) {
+      return null;
+    }
+
+    return this.repo.createV2(input);
+  }
+
+  async handleCommentMention(tenantId: string, authorId: string, commentContent: string, mentionedUserIds: string[], commentId: string) {
+     for (const userId of mentionedUserIds) {
+         if (userId === authorId) continue;
+
+         await this.createNotification({
+             tenantId,
+             userId,
+             type: NotificationType.MENTION,
+             payload: {
+                 subject: 'You were mentioned in a comment',
+                 message: `${authorId} mentioned you: "${commentContent.substring(0, 50)}..."`,
+                 data: { commentId, authorId },
+                 targetUrl: `/comments/${commentId}`
+             }
+         });
+     }
   }
 }

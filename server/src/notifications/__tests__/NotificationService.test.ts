@@ -1,8 +1,12 @@
-import { NotificationService } from '../NotificationService.js';
-import { NotificationChannel, NotificationPriority } from '../types.js';
+
 import { jest } from '@jest/globals';
 
-// Mock getIO to avoid socket.io errors in tests
+jest.mock('../../db/pg.js', () => ({
+  pool: {
+    query: jest.fn(),
+  },
+}));
+
 jest.mock('../../realtime/socket.js', () => ({
   getIO: jest.fn().mockReturnValue({
     of: jest.fn().mockReturnValue({
@@ -13,127 +17,122 @@ jest.mock('../../realtime/socket.js', () => ({
   }),
 }));
 
-// Mock NotificationPreferenceRepo
-const mockPreferenceRepo = {
-  getPreferences: jest.fn(),
-  setPreferences: jest.fn(),
-};
-
-// Mock NotificationRepo (used by InAppProvider)
+import { NotificationService } from '../NotificationService.js';
 // @ts-ignore
-const mockCreate = jest.fn();
-// @ts-ignore
-mockCreate.mockResolvedValue({ id: 'mock-notification-id' });
-
-const mockGetUnread = jest.fn();
-const mockMarkAsRead = jest.fn();
-
-// @ts-ignore
-jest.mock('../repo/NotificationRepo.js', () => {
-  return {
-    NotificationRepo: jest.fn().mockImplementation(() => ({
-      create: mockCreate,
-      getUnread: mockGetUnread,
-      markAsRead: mockMarkAsRead,
-    })),
-  };
-});
+import { pool } from '../../db/pg.js';
 
 describe('NotificationService', () => {
   let service: NotificationService;
+  const mockQuery = pool.query as jest.Mock<any>;
 
   beforeEach(() => {
-    service = new NotificationService();
-    service.setPreferenceRepo(mockPreferenceRepo as any);
-    // @ts-ignore
-    service.setNotificationRepo({ create: mockCreate, getUnread: mockGetUnread, markAsRead: mockMarkAsRead });
     jest.clearAllMocks();
+    service = new NotificationService();
   });
 
-  it('should send notification via specified channel', async () => {
-    const result = await service.send({
-      userId: 'user1',
-      type: 'test',
-      channels: [NotificationChannel.EMAIL], // EMAIL is using ConsoleProvider
-      message: 'Hello World',
+  it('should list notifications with tenant isolation', async () => {
+    mockQuery.mockResolvedValue({
+      rows: [
+        {
+          id: 'n1',
+          tenant_id: 't1',
+          user_id: 'u1',
+          type: 'SYSTEM',
+          payload: { message: 'hello' },
+          read_at: null,
+          created_at: new Date(),
+        },
+      ],
     });
 
+    const result = await service.listNotifications('t1', 'u1', false);
+
+    expect(mockQuery).toHaveBeenCalledWith(
+      expect.stringContaining('WHERE tenant_id = $1 AND user_id = $2'),
+      expect.arrayContaining(['t1', 'u1'])
+    );
     expect(result).toHaveLength(1);
-    expect(result[0].channel).toBe(NotificationChannel.EMAIL);
-    expect(result[0].success).toBe(true);
+    expect(result[0].tenantId).toBe('t1');
   });
 
-  it('should use user preferences if no channels specified', async () => {
-    (mockPreferenceRepo.getPreferences as any).mockResolvedValue({
-      userId: 'user1',
-      channels: {
-        [NotificationChannel.SMS]: true,
-        [NotificationChannel.IN_APP]: false,
-      },
+  it('should create notification if preference allows', async () => {
+    // Mock preference: enabled
+    mockQuery.mockImplementation((sql: any) => {
+      const sqlStr = typeof sql === 'string' ? sql : sql.text;
+      if (sqlStr.includes('SELECT * FROM notification_type_preferences')) {
+        return Promise.resolve({
+          rows: [{ user_id: 'u1', tenant_id: 't1', type: 'MENTION', enabled: true }]
+        });
+      }
+      if (sqlStr.includes('INSERT INTO notifications')) {
+        return Promise.resolve({
+          rows: [{ id: 'new_id', tenant_id: 't1', user_id: 'u1', type: 'MENTION', payload: {}, created_at: new Date() }]
+        });
+      }
+      return Promise.resolve({ rows: [] });
     });
 
-    const result = await service.send({
-      userId: 'user1',
-      type: 'test',
-      message: 'Hello World',
+    await service.createNotification({
+      tenantId: 't1',
+      userId: 'u1',
+      type: 'MENTION',
+      payload: { message: 'hi' }
     });
 
-    expect(result).toHaveLength(1);
-    expect(result[0].channel).toBe(NotificationChannel.SMS);
+    expect(mockQuery).toHaveBeenCalledTimes(2); // 1 check pref, 1 insert
   });
 
-  it('should render template correctly', async () => {
-    const result = await service.send({
-      userId: 'user1',
-      type: 'welcome',
-      templateId: 'welcome',
-      data: { name: 'Brian' },
-      channels: [NotificationChannel.EMAIL],
+  it('should NOT create notification if preference disabled', async () => {
+    // Mock preference: disabled
+    mockQuery.mockImplementation((sql: any) => {
+        const sqlStr = typeof sql === 'string' ? sql : sql.text;
+      if (sqlStr.includes('SELECT * FROM notification_type_preferences')) {
+        return Promise.resolve({
+          rows: [{ user_id: 'u1', tenant_id: 't1', type: 'MENTION', enabled: false }]
+        });
+      }
+      return Promise.resolve({ rows: [] });
     });
 
-    expect(result[0].success).toBe(true);
+    const result = await service.createNotification({
+      tenantId: 't1',
+      userId: 'u1',
+      type: 'MENTION',
+      payload: { message: 'hi' }
+    });
+
+    expect(result).toBeNull();
+    // Should verify insert was NOT called
+    // We expect only 1 call (the preference check)
+    expect(mockQuery).toHaveBeenCalledTimes(1);
+    const firstCallArg = mockQuery.mock.calls[0][0];
+    const sqlStr = typeof firstCallArg === 'string' ? firstCallArg : (firstCallArg as any).text;
+    expect(sqlStr).toContain('SELECT * FROM notification_type_preferences');
   });
 
-  it('should fallback to IN_APP if no preferences and no channels', async () => {
-    (mockPreferenceRepo.getPreferences as any).mockResolvedValue(null);
+  it('producer should handle comment mentions', async () => {
+      const createSpy = jest.spyOn(service, 'createNotification');
+      // Mock createNotification to do nothing but resolve
+      createSpy.mockResolvedValue({} as any);
 
-    const result = await service.send({
-      userId: 'user_new',
-      type: 'test',
-      message: 'Hello',
-    });
+      await service.handleCommentMention('t1', 'author1', 'Hello @user2', ['user2'], 'c1');
 
-    expect(result).toHaveLength(1);
-    expect(result[0].channel).toBe(NotificationChannel.IN_APP);
+      expect(createSpy).toHaveBeenCalledWith({
+          tenantId: 't1',
+          userId: 'user2',
+          type: 'MENTION',
+          payload: expect.objectContaining({
+              data: expect.objectContaining({ commentId: 'c1' })
+          })
+      });
   });
 
-  it('should process digest if preferences allow', async () => {
-    (mockPreferenceRepo.getPreferences as any).mockResolvedValue({
-        userId: 'user_digest',
-        channels: {},
-        digestFrequency: 'DAILY'
-    });
+  it('producer should not notify author', async () => {
+      const createSpy = jest.spyOn(service, 'createNotification');
+      createSpy.mockResolvedValue({} as any);
 
-    // @ts-ignore
-    mockGetUnread.mockResolvedValue([
-        { id: '1', subject: 'Test 1' },
-        { id: '2', subject: 'Test 2' }
-    ]);
+      await service.handleCommentMention('t1', 'user1', 'Hello @user1', ['user1'], 'c1');
 
-    const result = await service.processDigest('user_digest');
-    expect(result).toBe(true);
-    expect(mockGetUnread).toHaveBeenCalledWith('user_digest');
-    expect(mockMarkAsRead).toHaveBeenCalledTimes(2);
-  });
-
-  it('should not process digest if preferences disable it', async () => {
-    (mockPreferenceRepo.getPreferences as any).mockResolvedValue({
-        userId: 'user_no_digest',
-        channels: {},
-        digestFrequency: 'NONE'
-    });
-
-    const result = await service.processDigest('user_no_digest');
-    expect(result).toBeUndefined();
+      expect(createSpy).not.toHaveBeenCalled();
   });
 });

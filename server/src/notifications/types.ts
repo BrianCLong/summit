@@ -30,6 +30,7 @@ export interface NotificationPayload {
   message?: string; // Raw message if no template
   templateId?: string;
   data?: Record<string, any>; // Variables for template
+  tenantId?: string; // Added for compatibility
 }
 
 export interface NotificationResult {
@@ -56,4 +57,47 @@ export interface UserPreferences {
     [key in NotificationChannel]?: boolean;
   };
   digestFrequency?: DigestFrequency;
+}
+
+// --- New Types ---
+
+export enum NotificationType {
+  MENTION = 'MENTION',
+  EXPORT_READY = 'EXPORT_READY',
+  ACCESS_REVIEW = 'ACCESS_REVIEW',
+  SYSTEM = 'SYSTEM',
+}
+
+export interface Notification {
+  id: string;
+  tenantId: string;
+  userId: string;
+  type: NotificationType | string;
+  payload: {
+      subject?: string;
+      message?: string;
+      data?: Record<string, any>;
+      targetUrl?: string;
+  };
+  readAt: Date | null;
+  createdAt: Date;
+}
+
+export interface NotificationPreference {
+  userId: string;
+  tenantId: string;
+  type: NotificationType | string;
+  enabled: boolean;
+}
+
+export interface CreateNotificationInput {
+  tenantId: string;
+  userId: string;
+  type: NotificationType | string;
+  payload: {
+      subject?: string;
+      message?: string;
+      data?: Record<string, any>;
+      targetUrl?: string;
+  };
 }
