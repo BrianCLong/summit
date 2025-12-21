@@ -14,10 +14,14 @@ import {
   ExtensionContext,
   ExtensionLogger,
   ExtensionAPI,
-  ExtensionActivation,
 } from './types.js';
 import { ExtensionRegistry } from './registry.js';
 import { PolicyEnforcer } from './policy/enforcer.js';
+import { CompatibilityChecker } from './compatibility.js';
+import { StaticPolicyValidator } from './policy/static-validator.js';
+import { SandboxRunner, SandboxActivationHandle } from './sandbox/sandbox-runner.js';
+import { ExtensionObservability } from './observability.js';
+import { ExtensionHealthMonitor } from './health.js';
 
 export interface LoaderOptions {
   extensionDirs: string[];
@@ -26,6 +30,9 @@ export interface LoaderOptions {
   api?: Partial<ExtensionAPI>;
   policyEnforcer?: PolicyEnforcer;
   autoLoad?: boolean;
+  dependencyAllowList?: string[];
+  dependencyDenyList?: string[];
+  platformVersion?: string;
 }
 
 export class ExtensionLoader {
@@ -34,10 +41,24 @@ export class ExtensionLoader {
     api?: Partial<ExtensionAPI>;
     policyEnforcer?: PolicyEnforcer;
   };
-  private activations = new Map<string, ExtensionActivation>();
+  private activations = new Map<string, SandboxActivationHandle>();
+  private compatibility: CompatibilityChecker;
+  private staticValidator: StaticPolicyValidator;
+  private sandbox: SandboxRunner;
+  private observability: ExtensionObservability;
+  private healthMonitor: ExtensionHealthMonitor;
 
   constructor(options: LoaderOptions) {
     this.registry = new ExtensionRegistry();
+    this.observability = new ExtensionObservability();
+    this.compatibility = new CompatibilityChecker({
+      platformVersion: options.platformVersion || process.env.SUMMIT_VERSION || '1.0.0',
+      supportedBackwardsMajorVersions: 1,
+    });
+    this.staticValidator = new StaticPolicyValidator({
+      dependencyAllowList: options.dependencyAllowList,
+      dependencyDenyList: options.dependencyDenyList,
+    });
     this.options = {
       extensionDirs: options.extensionDirs,
       configPath: options.configPath || path.join(process.cwd(), '.summit/extensions/config'),
@@ -46,6 +67,8 @@ export class ExtensionLoader {
       api: options.api,
       policyEnforcer: options.policyEnforcer,
     };
+    this.sandbox = new SandboxRunner(this.observability);
+    this.healthMonitor = new ExtensionHealthMonitor(this.registry, this.observability);
   }
 
   /**
@@ -111,6 +134,7 @@ export class ExtensionLoader {
       try {
         await this.loadExtension(ext);
       } catch (err) {
+        this.healthMonitor.recordFailure(ext.manifest.name);
         this.registry.markFailed(
           ext.manifest.name,
           err instanceof Error ? err.message : String(err)
@@ -129,6 +153,12 @@ export class ExtensionLoader {
    */
   private async loadExtension(ext: Extension): Promise<void> {
     const { manifest, path: extensionPath } = ext;
+
+    // Compatibility window enforcement
+    this.compatibility.validate(manifest);
+
+    // Static policy validation
+    await this.staticValidator.validate(manifest, extensionPath);
 
     // Check policy
     if (this.options.policyEnforcer) {
@@ -155,45 +185,12 @@ export class ExtensionLoader {
     }
 
     const modulePath = path.join(extensionPath, mainEntrypoint.path);
-    const module = await import(modulePath);
-
-    // Get the exported activation function or class
     const exportName = mainEntrypoint.export || 'default';
-    const exported = module[exportName];
-
-    if (!exported) {
-      throw new Error(
-        `Extension ${manifest.name} does not export '${exportName}' from ${mainEntrypoint.path}`
-      );
-    }
-
-    // Activate the extension
-    let activation: ExtensionActivation = {};
-
-    if (typeof exported === 'function') {
-      // Function entrypoint
-      if (exported.prototype && exported.prototype.constructor === exported) {
-        // Class constructor
-        const instance = new exported();
-        if (typeof instance.activate === 'function') {
-          activation = await instance.activate(context);
-        }
-      } else {
-        // Plain function
-        activation = await exported(context);
-      }
-    } else if (typeof exported.activate === 'function') {
-      // Object with activate method
-      activation = await exported.activate(context);
-    } else {
-      throw new Error(
-        `Extension ${manifest.name} entrypoint must be a function or have an activate() method`
-      );
-    }
+    const activation = await this.sandbox.run(manifest, modulePath, exportName, context);
 
     // Store activation and mark as loaded
     this.activations.set(manifest.name, activation);
-    this.registry.markLoaded(manifest.name, module, config);
+    this.registry.markLoaded(manifest.name, activation.exports, config);
   }
 
   /**
@@ -224,10 +221,23 @@ export class ExtensionLoader {
     const prefix = `[ext:${extensionName}]`;
 
     return {
-      info: (msg, ...args) => console.info(prefix, msg, ...args),
-      warn: (msg, ...args) => console.warn(prefix, msg, ...args),
-      error: (msg, ...args) => console.error(prefix, msg, ...args),
-      debug: (msg, ...args) => console.debug(prefix, msg, ...args),
+      info: (msg, ...args) => {
+        this.observability.recordLog(extensionName, 'info', msg, ...args);
+        console.info(prefix, msg, ...args);
+      },
+      warn: (msg, ...args) => {
+        this.observability.recordLog(extensionName, 'warn', msg, ...args);
+        console.warn(prefix, msg, ...args);
+      },
+      error: (msg, ...args) => {
+        this.observability.recordLog(extensionName, 'error', msg, ...args);
+        console.error(prefix, msg, ...args);
+        this.healthMonitor.recordFailure(extensionName);
+      },
+      debug: (msg, ...args) => {
+        this.observability.recordLog(extensionName, 'debug', msg, ...args);
+        console.debug(prefix, msg, ...args);
+      },
     };
   }
 
