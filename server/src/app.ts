@@ -78,6 +78,7 @@ import resourceCostsRouter from './routes/resource-costs.js';
 import queryReplayRouter from './routes/query-replay.js';
 import streamRouter from './routes/stream.js'; // Added import
 import queryPreviewStreamRouter from './routes/query-preview-stream.js';
+import activationRouter from './routes/activation.js';
 import commandConsoleRouter from './routes/internal/command-console.js';
 import searchV1Router from './routes/search-v1.js';
 import dataGovernanceRouter from './routes/data-governance-routes.js';
@@ -270,6 +271,7 @@ export const createApp = async () => {
   app.use('/disclosures', disclosuresRouter);
   app.use('/rbac', rbacRouter);
   app.use('/api/billing', billingRouter);
+  app.use('/api/activation', activationRouter);
   app.use('/api/er', entityResolutionRouter);
   app.use('/api/workspaces', workspaceRouter);
   app.use('/api/webhooks', webhookRouter);
