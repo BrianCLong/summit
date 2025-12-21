@@ -17,6 +17,7 @@ import {
 } from './metrics.js';
 import { InMemoryLedger, buildEvidencePayload } from 'prov-ledger';
 import { ChaosEngine, ChaosError } from './chaos.js';
+import { CpuProfiler } from './profiler.js';
 
 const ALLOWED_PURPOSES = new Set([
   'investigation',
@@ -145,6 +146,9 @@ export function createApp(options = {}) {
         process.env.NODE_ENV ??
         'development',
     });
+  const profiler = new CpuProfiler({
+    outputDir: options.profileOutputDir,
+  });
 
   function formatGraphqlError(error, res) {
     if (error.originalError instanceof PolicyError) {
@@ -179,6 +183,21 @@ export function createApp(options = {}) {
     app.post('/internal/chaos', (req, res) => {
       const snapshot = chaos.updateConfig(req.body ?? {});
       res.json(snapshot);
+    });
+
+    app.post('/internal/profile', async (req, res) => {
+      const durationMs = Number(req.body?.durationMs ?? 15000);
+      const label = req.body?.label ?? 'gateway';
+      try {
+        const payload = await profiler.capture(
+          label,
+          Number.isFinite(durationMs) && durationMs > 0 ? durationMs : 15000,
+        );
+        res.json(payload);
+      } catch (error) {
+        const status = error?.message === 'PROFILE_IN_PROGRESS' ? 429 : 500;
+        res.status(status).json({ error: error?.message ?? 'PROFILE_FAILED' });
+      }
     });
   } else {
     app.all('/internal/chaos', (_req, res) => {

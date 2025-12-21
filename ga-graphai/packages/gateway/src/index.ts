@@ -105,6 +105,8 @@ import type {
   GraphNode,
   OrchestrationKnowledgeGraph,
 } from '@ga-graphai/knowledge-graph';
+import { buildCacheClient } from './cache.js';
+import type { CacheClientLike } from './cache.js';
 
 function parseJsonLiteral(ast: ValueNode): unknown {
   switch (ast.kind) {
@@ -228,11 +230,6 @@ interface GatewayContext {
   workcell: WorkcellRuntime;
   knowledgeGraph?: OrchestrationKnowledgeGraph;
   loaders?: KnowledgeGraphLoaders;
-}
-
-interface CacheClientLike {
-  get(key: string): Promise<string | null> | string | null;
-  setEx(key: string, ttlSeconds: number, value: string): Promise<unknown> | unknown;
 }
 
 interface KnowledgeGraphOptions {
@@ -709,8 +706,14 @@ export class GatewayRuntime {
     this.costGuardOptions = options.costGuard;
     this.defaultTenantId = this.costGuardOptions?.defaultTenantId ?? 'public';
     this.knowledgeGraphOptions = options.knowledgeGraph;
-    this.cacheClient = this.knowledgeGraphOptions?.cacheClient;
     this.cacheTtlSeconds = this.knowledgeGraphOptions?.cacheTtlSeconds ?? 300;
+    this.cacheClient = this.knowledgeGraphOptions?.knowledgeGraph
+      ? buildCacheClient(
+          this.knowledgeGraphOptions.cacheClient,
+          'knowledge-graph',
+          this.cacheTtlSeconds,
+        )
+      : undefined;
     if (!options.workcell?.tools || options.workcell.tools.length === 0) {
       this.workcell.registerTool({
         name: 'analysis',

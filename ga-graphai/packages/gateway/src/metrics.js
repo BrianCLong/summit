@@ -46,6 +46,21 @@ export class MetricsRecorder {
 export const registry = new client.Registry();
 client.collectDefaultMetrics({ register: registry });
 
+export const cacheOperations = new client.Counter({
+  name: 'gateway_cache_operations_total',
+  help: 'Cache operations by cache name, operation, and result',
+  labelNames: ['cache', 'operation', 'result'],
+  registers: [registry],
+});
+
+export const cacheLatency = new client.Histogram({
+  name: 'gateway_cache_latency_ms',
+  help: 'Latency for cache operations (milliseconds)',
+  buckets: [1, 2, 5, 10, 25, 50, 100, 250, 500, 1000],
+  labelNames: ['cache', 'operation', 'result'],
+  registers: [registry],
+});
+
 export const aiCallLatency = new client.Histogram({
   name: 'ai_call_latency_ms',
   help: 'Latency for AI calls handled by the gateway (milliseconds)',
@@ -106,4 +121,11 @@ export function timeGraphqlRequest(route = 'graphql') {
     }
     stopTimer({ route, status });
   };
+}
+
+export function observeCache({ cache, operation, result, durationMs }) {
+  cacheOperations.inc({ cache, operation, result });
+  if (Number.isFinite(durationMs)) {
+    cacheLatency.observe({ cache, operation, result }, durationMs);
+  }
 }

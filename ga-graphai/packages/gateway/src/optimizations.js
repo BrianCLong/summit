@@ -1,4 +1,7 @@
+import { performance } from 'node:perf_hooks';
+
 import { ZERO_SPEND_OPTIMIZATIONS, buildMemoCacheKey } from 'common-types';
+import { observeCache } from './metrics.js';
 
 const EFFECTS = {
   [ZERO_SPEND_OPTIMIZATIONS.KV_CACHE]: {
@@ -26,15 +29,35 @@ export class OptimizationManager {
       return { hit: false };
     }
     const key = buildMemoCacheKey(task.promptHash, task.policyVersion);
+    const start = performance.now();
     if (this.memoCache.has(key)) {
+      observeCache({
+        cache: 'ai-memo',
+        operation: 'get',
+        result: 'hit',
+        durationMs: performance.now() - start,
+      });
       return { hit: true, key, value: this.memoCache.get(key) };
     }
+    observeCache({
+      cache: 'ai-memo',
+      operation: 'get',
+      result: 'miss',
+      durationMs: performance.now() - start,
+    });
     return { hit: false, key };
   }
 
   cacheStore(key, value) {
     if (key) {
+      const start = performance.now();
       this.memoCache.set(key, value);
+      observeCache({
+        cache: 'ai-memo',
+        operation: 'set',
+        result: 'ok',
+        durationMs: performance.now() - start,
+      });
     }
   }
 
