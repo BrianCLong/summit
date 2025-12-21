@@ -169,7 +169,7 @@
     ]
   },
   "dependencies": {
-    "axios": "^1.11.0",
+    "axios": "^1.13.2",
     "cross-env": "^10.0.0",
     "docx": "^9.5.1",
     "dotenv": "^17.2.1",

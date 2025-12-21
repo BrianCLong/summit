@@ -262,49 +262,6 @@ router.get('/:id/deliveries', async (req, res) => {
   }
 });
 
-/**
- * @openapi
- * /api/webhooks/trigger-test:
- *   post:
- *     tags:
- *       - Webhooks
- *     summary: Trigger test event
- *     description: Trigger a test webhook event.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - eventType
- *               - payload
- *             properties:
- *               eventType:
- *                 type: string
- *               payload:
- *                 type: object
- *     responses:
- *       200:
- *         description: Event triggered
- *       400:
- *         description: Missing parameters
- *       500:
- *         description: Internal server error
- */
-router.post('/trigger-test', async (req, res) => {
-    try {
-        const tenantId = getTenantId(req);
-        const { eventType, payload } = req.body;
-        if (!eventType || !payload) {
-            return res.status(400).json({ error: 'eventType and payload required'});
-        }
-        await webhookService.triggerEvent(tenantId, eventType, payload);
-        res.json({ message: 'Event triggered' });
-    } catch (error: any) {
-        res.status(500).json({ error: error.message });
-    }
-});
 
 // --- Existing Webhook Routes (GitHub, Jira, Lifecycle) ---
 
