@@ -23,6 +23,9 @@
 
 This index provides a comprehensive catalog of all sprint planning documentation across the Summit/IntelGraph project. Sprints are organized into multiple streams to support parallel development across different capabilities, teams, and timelines.
 
+### Current Sprint (N+7)
+- **Sprint N+7 — Partner Scale + 10-Customer Funnel + Claim-Chart Conversion + Revenue QA** (`SPRINT_N+7_PARTNER_SCALE.md`): Scale partner distribution, run a 10-customer eval funnel with single-command provisioning, deliver claim-chart conversions, and lock Revenue QA + reporting.
+
 ### Sprint Statistics
 
 | Metric | Count |
