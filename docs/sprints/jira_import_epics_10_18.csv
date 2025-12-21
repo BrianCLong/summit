@@ -1,0 +1,109 @@
+Issue Type,Summary,Description,Epic Link,Labels,Component,Owner,Dependencies,Acceptance Criteria
+Epic,Epic 10 — Advanced Connectors + Bidirectional Sync,enterprise connectors + safe delta sync + controlled “push-back” writes.,Epic 10 — Advanced Connectors + Bidirectional Sync,Epic-10,,,,
+Story,M365 connector (Exchange/SharePoint/Teams),,Epic 10 — Advanced Connectors + Bidirectional Sync,Epic-10,,Integrations,Auth framework + data model mapping,Read-only ingest works for each service; least-privilege scopes documented; audit logs for each call.
+Story,Google Workspace connector (Gmail/Drive),,Epic 10 — Advanced Connectors + Bidirectional Sync,Epic-10,,Integrations,OAuth + token storage/rotation,Supports user OAuth + domain-wide delegation; delta sync; attachment ingest policy-gated.
+Story,Slack/Discord connectors,,Epic 10 — Advanced Connectors + Bidirectional Sync,Epic-10,,Integrations,Message/event schema + rate-limit handling,Threads/files/reactions ingested; PII policy rules applied; backfill + incremental modes.
+Story,GitHub/GitLab connectors,,Epic 10 — Advanced Connectors + Bidirectional Sync,Epic-10,,Integrations,Identity model + repo artifact schema,Issues/PRs/commits/users ingest; webhook optional; provenance retained for each artifact.
+Story,SIEM connectors (Splunk/Elastic/Sentinel) + query templates,,Epic 10 — Advanced Connectors + Bidirectional Sync,Epic-10,,Integrations + SecEng,Query runner + secret vault,Template library ships; queries run with least privilege; results mapped to canonical events.
+Story,Push-back sync framework (write tags/annotations back),,Epic 10 — Advanced Connectors + Bidirectional Sync,Epic-10,,Platform,Policy engine + audit ledger,Only approved write targets; per-connector capability matrix; every write is auditable + reversible.
+Story,Incremental delta sync + watermarking for every connector,,Epic 10 — Advanced Connectors + Bidirectional Sync,Epic-10,,Data Eng,Connector SDK contract,Watermark stored per tenant/source; idempotent replays; no duplicates across restarts.
+Story,"Connector health scoring (auth expiry, lag, error rate, drift)",,Epic 10 — Advanced Connectors + Bidirectional Sync,Epic-10,,SRE,Telemetry + error taxonomy,Health score surfaced in UI/API; alert thresholds; drill-down to root error classes.
+Story,Tenant-specific field mapping profiles + presets,,Epic 10 — Advanced Connectors + Bidirectional Sync,Epic-10,,Data Eng + UX,Schema registry + mapping UI,Profiles versioned; diffable; rollback supported; preset library for common sources.
+Story,Secrets rotation workflow + alerting,,Epic 10 — Advanced Connectors + Bidirectional Sync,Epic-10,,Security + Platform,Secret store integration,Scheduled rotation; failure alerts; no downtime rotations; audit trail for rotations.
+Story,Connector certification kit (conformance + performance targets),,Epic 10 — Advanced Connectors + Bidirectional Sync,Epic-10,,QA,SDK + golden datasets,Automated test harness; minimum p95/throughput targets; published checklist for new connectors.
+Epic,Epic 11 — Watchlists + Alerting + Triage Automation,meaningful alerts with low noise; fast triage; defensible explainability.,Epic 11 — Watchlists + Alerting + Triage Automation,Epic-11,,,,
+Story,Watchlist model (entities/patterns/geo/time/keywords/motifs),,Epic 11 — Watchlists + Alerting + Triage Automation,Epic-11,,Product + Graph Eng,Canonical entities + graph motifs spec,Versioned watchlists; RBAC/ABAC enforced; supports time/geo constraints.
+Story,Alert rules engine (threshold/anomaly/new link/reappearance),,Epic 11 — Watchlists + Alerting + Triage Automation,Epic-11,,Platform,Metrics + event stream,Rule types implemented; deterministic evaluation; test fixtures for each rule.
+Story,Dedupe + suppression (cooldowns/correlation),,Epic 11 — Watchlists + Alerting + Triage Automation,Epic-11,,Platform,Alert IDs + fingerprinting,Duplicate rate reduced; suppression reasons logged; analyst can override with justification.
+Story,Triage queue UI (severity/assignment/SLA/quick actions),,Epic 11 — Watchlists + Alerting + Triage Automation,Epic-11,,UX/App,Alert API + auth,Queue filters; assignment; SLA timers; action history.
+Story,Alert-to-case conversion + templated checklists,,Epic 11 — Watchlists + Alerting + Triage Automation,Epic-11,,Product Ops + App,Case model,One-click conversion; checklist templates; provenance links carried into case.
+Story,Enrichment on alert fire (snapshot/paths/similar cases),,Epic 11 — Watchlists + Alerting + Triage Automation,Epic-11,,AI/ML + Graph Eng,Similarity service + pathfinding,Snapshot attached; top paths generated within budget; similarity links explainable.
+Story,"Alert explainability pane (why fired, inputs, evidence anchors)",,Epic 11 — Watchlists + Alerting + Triage Automation,Epic-11,,App + AI/ML,Evidence anchors + rule engine traces,Shows rule evaluation steps; cites evidence; exportable reasoning.
+Story,Multi-channel notifications (email/webhook/Slack) w/ policy gates,,Epic 11 — Watchlists + Alerting + Triage Automation,Epic-11,,Platform,Notification service + policy rules,Per-tenant routing; payload minimization; opt-in; delivery logs.
+Story,"Playbooks (semi-automated, human-in-loop)",,Epic 11 — Watchlists + Alerting + Triage Automation,Epic-11,,Product + Platform,Tooling API + permissions,Playbook runs produce auditable steps; requires approvals where needed; safe defaults.
+Story,Metrics dashboard (MTTA/MTTR/false positives/top rules),,Epic 11 — Watchlists + Alerting + Triage Automation,Epic-11,,Analytics + UX,Alert lifecycle instrumentation,Dashboard ships; tenant filters; weekly report export.
+Story,On-call runbooks + taxonomy standard,,Epic 11 — Watchlists + Alerting + Triage Automation,Epic-11,,SRE + Product Ops,Error taxonomy + alert classes,Runbooks complete; escalation paths; taxonomy enforced in UI.
+Epic,Epic 12 — Temporal Graph + Event Sequencing (V2),event-first reasoning; sequence queries; performant time slicing.,Epic 12 — Temporal Graph + Event Sequencing (V2),Epic-12,,,,
+Story,Event-first ingest lane,,Epic 12 — Temporal Graph + Event Sequencing (V2),Epic-12,,Data Eng + Graph Eng,Ontology,Events primary; participants linked; bitemporal fields supported.
+Story,"Sequence query helpers (A→B within X, exclusions)",,Epic 12 — Temporal Graph + Event Sequencing (V2),Epic-12,,Graph Eng,Query layer,API supports common patterns; tested on fixtures; UI examples.
+Story,Temporal joins (rolling windows/sessionization),,Epic 12 — Temporal Graph + Event Sequencing (V2),Epic-12,,Graph Eng,Time indexes,Window joins correct; configurable; perf within p95 target.
+Story,Before/after diff viewer (entity state changes),,Epic 12 — Temporal Graph + Event Sequencing (V2),Epic-12,,UX/App,Bitemporal data,Diff highlights fields/edges; cites evidence; exportable.
+Story,Time-bounded ER,,Epic 12 — Temporal Graph + Event Sequencing (V2),Epic-12,,AI/ML + Graph Eng,ER engine,Merge/split respects time; adjudication UI supports period adjustments.
+Story,Evidence decay functions (configurable),,Epic 12 — Temporal Graph + Event Sequencing (V2),Epic-12,,AI/ML,Scoring framework,Decay profiles; explainable; can be disabled per case.
+Story,Timeline clustering (bursts/campaigns/phases),,Epic 12 — Temporal Graph + Event Sequencing (V2),Epic-12,,AI/ML,Event store,Clusters stable; parameters logged; analyst override.
+Story,Event attribution fields (actor/capability/intent/confidence) w provenance,,Epic 12 — Temporal Graph + Event Sequencing (V2),Epic-12,,Product + Graph Eng,Claim ledger,Attribution is a claim; confidence required; provenance mandatory.
+Story,Recurring pattern detector (rhythms/signatures),,Epic 12 — Temporal Graph + Event Sequencing (V2),Epic-12,,AI/ML,Temporal joins,Detects repeat motifs; low false positives; explainability included.
+Story,Exportable “event chain” exhibits,,Epic 12 — Temporal Graph + Event Sequencing (V2),Epic-12,,App,Report studio,Exhibit renders; includes citations; respects redactions.
+Story,High-cardinality time performance tuning,,Epic 12 — Temporal Graph + Event Sequencing (V2),Epic-12,,SRE + Graph Eng,Observability,Index/materialization plan; benchmarks; regression gate.
+Epic,"Epic 13 — Knowledge Ops: Data Quality, Stewardship, Governance at Scale",measurable trust; stewardship workflows; lineage & retention you can defend.,"Epic 13 — Knowledge Ops: Data Quality, Stewardship, Governance at Scale",Epic-13,,,,
+Story,DQ dimensions + scoring,,"Epic 13 — Knowledge Ops: Data Quality, Stewardship, Governance at Scale",Epic-13,,Data Gov,,Score formula defined; surfaced per dataset; documented.
+Story,Automated validations per entity type,,"Epic 13 — Knowledge Ops: Data Quality, Stewardship, Governance at Scale",Epic-13,,Data Eng,,Rule library; failures quarantined; exceptions tracked.
+Story,Drift anomaly detection (schema/volume/distribution),,"Epic 13 — Knowledge Ops: Data Quality, Stewardship, Governance at Scale",Epic-13,,Platform + ML,,Alerts on drift; baseline learning; review workflow.
+Story,Stewardship console,,"Epic 13 — Knowledge Ops: Data Quality, Stewardship, Governance at Scale",Epic-13,,UX/App,,"Issue list, owners, status; remediation tasks; audit."
+Story,Controlled vocab + synonyms + localization,,"Epic 13 — Knowledge Ops: Data Quality, Stewardship, Governance at Scale",Epic-13,,Product + Data Gov,,Managed vocab store; synonym versioning; locale switching.
+Story,Golden record locking + dispute workflow,,"Epic 13 — Knowledge Ops: Data Quality, Stewardship, Governance at Scale",Epic-13,,Graph Eng + Product,,Lock rules; dispute queue; reversible with audit.
+Story,Lineage graph views,,"Epic 13 — Knowledge Ops: Data Quality, Stewardship, Governance at Scale",Epic-13,,Platform,,Source→transform→claim→output visible; clickable evidence anchors.
+Story,Retention simulation + sign-off,,"Epic 13 — Knowledge Ops: Data Quality, Stewardship, Governance at Scale",Epic-13,,GRC,,“What would delete” preview; approvals; legal hold overrides.
+Story,Trust tiers (untrusted/verified/authoritative),,"Epic 13 — Knowledge Ops: Data Quality, Stewardship, Governance at Scale",Epic-13,,Data Gov,,Tiering rules; affects UI/AI weighting; explained to analysts.
+Story,Governance playbook,,"Epic 13 — Knowledge Ops: Data Quality, Stewardship, Governance at Scale",Epic-13,,GRC + Docs,,Roles/cadences/escalations published; adopted in onboarding.
+Story,Quarterly governance audit checklist + evidence capture,,"Epic 13 — Knowledge Ops: Data Quality, Stewardship, Governance at Scale",Epic-13,,GRC,,Checklist plus evidence templates; stored immutably.
+Epic,Epic 14 — Counterintelligence: Deception/Poisoning/Integrity Defenses,detect manipulation; quarantine; keep models and analysts honest.,Epic 14 — Counterintelligence: Deception/Poisoning/Integrity Defenses,Epic-14,,,,
+Story,Poison signals (dup bursts/near-dup media/implausible geo-time),,Epic 14 — Counterintelligence: Deception/Poisoning/Integrity Defenses,Epic-14,,SecEng + ML,,Signals computed; thresholds configurable; explainability.
+Story,Source reliability scoring,,Epic 14 — Counterintelligence: Deception/Poisoning/Integrity Defenses,Epic-14,,ML,,Scoring features logged; analyst override; drift monitoring.
+Story,Content authenticity checks (basic heuristics),,Epic 14 — Counterintelligence: Deception/Poisoning/Integrity Defenses,Epic-14,,SecEng,,Flags manip indicators; never “certifies truth”; stored as claims.
+Story,Contradiction map UI,,Epic 14 — Counterintelligence: Deception/Poisoning/Integrity Defenses,Epic-14,,UX/App,,Shows mutually exclusive claims; links evidence; supports notes.
+Story,Deception hypothesis templates,,Epic 14 — Counterintelligence: Deception/Poisoning/Integrity Defenses,Epic-14,,Product,,Template library; prompts for disconfirming evidence; dissent support.
+Story,Quarantine + review pipeline,,Epic 14 — Counterintelligence: Deception/Poisoning/Integrity Defenses,Epic-14,,Platform,,Suspicious batches isolated; approval gates; recovery path.
+Story,Integrity notes required for high-impact conclusions,,Epic 14 — Counterintelligence: Deception/Poisoning/Integrity Defenses,Epic-14,,Product + GRC,,Enforced fields; audit; report includes notes when applicable.
+Story,Red-team harness for poisoning tests,,Epic 14 — Counterintelligence: Deception/Poisoning/Integrity Defenses,Epic-14,,Security + QA,,Repeatable scenarios; CI safety gates; regression trend.
+Story,Model-side defenses (retrieval filtering/citation-only/adversarial tests),,Epic 14 — Counterintelligence: Deception/Poisoning/Integrity Defenses,Epic-14,,AI/ML,,Prompt-injection suite; blocked patterns; measurable improvement.
+Story,Integrity score on briefs,,Epic 14 — Counterintelligence: Deception/Poisoning/Integrity Defenses,Epic-14,,AI/ML + Product,,Score components visible; cannot be gamed trivially; stored with brief.
+Story,Integrity dashboards,,Epic 14 — Counterintelligence: Deception/Poisoning/Integrity Defenses,Epic-14,,Analytics + UX,,"Shows attempts, blocks, approvals; per-tenant trends."
+Epic,Epic 15 — Simulation & Influence Propagation (Decision Support),"scenario comparison with explicit assumptions, reproducibility, and caveats.",Epic 15 — Simulation & Influence Propagation (Decision Support),Epic-15,,,,
+Story,Define simulation primitives,,Epic 15 — Simulation & Influence Propagation (Decision Support),Epic-15,,Product + ML,,Formal spec; maps to graph objects; documented.
+Story,Propagation models (contagion/threshold/weighted),,Epic 15 — Simulation & Influence Propagation (Decision Support),Epic-15,,ML,,Implemented + unit tested; parameter logging.
+Story,"Intervention library (generic, defensive framing)",,Epic 15 — Simulation & Influence Propagation (Decision Support),Epic-15,,Product,,Library available; no operational wrongdoing guidance; policy-reviewed.
+Story,Scenario workspace (assumptions/priors/constraints/logs),,Epic 15 — Simulation & Influence Propagation (Decision Support),Epic-15,,UX/App,,Immutable logs; reproducible run config; export.
+Story,Sensitivity analysis,,Epic 15 — Simulation & Influence Propagation (Decision Support),Epic-15,,ML,,Identifies top drivers; visualization; stored outputs.
+Story,Monte Carlo with reproducible seeds + audit,,Epic 15 — Simulation & Influence Propagation (Decision Support),Epic-15,,ML + Platform,,Seeded runs; job queue; results traceable.
+Story,COA comparison UI,,Epic 15 — Simulation & Influence Propagation (Decision Support),Epic-15,,UX/App,,Side-by-side; uncertainty displayed; costs/risks editable.
+Story,Guardrails (prevent actionable wrongdoing),,Epic 15 — Simulation & Influence Propagation (Decision Support),Epic-15,,GRC + Security,,Policy checks; denials are explainable; audit events.
+Story,Simulation-to-report export,,Epic 15 — Simulation & Influence Propagation (Decision Support),Epic-15,,App,,Includes inputs/assumptions/limits; citations; redaction safe.
+Story,Performance controls,,Epic 15 — Simulation & Influence Propagation (Decision Support),Epic-15,,SRE,,"Budgets, cancellation, quotas; predictable runtime."
+Story,Validation suite with synthetic ground truth,,Epic 15 — Simulation & Influence Propagation (Decision Support),Epic-15,,QA + ML,,Benchmarks; fails builds on regressions.
+Epic,"Epic 16 — Marketplace + Extensibility (SDK, Plugins, Templates)",safe extensibility without supply-chain panic.,"Epic 16 — Marketplace + Extensibility (SDK, Plugins, Templates)",Epic-16,,,,
+Story,SDK for connectors/enrichers/analytics modules,,"Epic 16 — Marketplace + Extensibility (SDK, Plugins, Templates)",Epic-16,,Platform,,Typed contracts; examples; versioning policy.
+Story,Plugin sandbox (scopes + limits),,"Epic 16 — Marketplace + Extensibility (SDK, Plugins, Templates)",Epic-16,,Security + Platform,,Resource quotas; network/file restrictions; explicit permissions.
+Story,Signing + verification,,"Epic 16 — Marketplace + Extensibility (SDK, Plugins, Templates)",Epic-16,,Security,,Signed artifacts required; verification enforced at install.
+Story,Template gallery,,"Epic 16 — Marketplace + Extensibility (SDK, Plugins, Templates)",Epic-16,,UX/App,,Browse/install; previews; version pinning.
+Story,Admin controls (allow/deny/version/audit),,"Epic 16 — Marketplace + Extensibility (SDK, Plugins, Templates)",Epic-16,,Platform,,Full control plane; immutable logs.
+Story,Plugin CI harness,,"Epic 16 — Marketplace + Extensibility (SDK, Plugins, Templates)",Epic-16,,QA,,Lint/tests/perf/security scans; publish gate.
+Story,UI install/upgrade/rollback,,"Epic 16 — Marketplace + Extensibility (SDK, Plugins, Templates)",Epic-16,,UX/App,,One-click rollback; safe migrations; health checks.
+Story,Plugin telemetry (health + usage),,"Epic 16 — Marketplace + Extensibility (SDK, Plugins, Templates)",Epic-16,,SRE,,Crash/error metrics; opt-in controls; per-tenant view.
+Story,Reference plugins,,"Epic 16 — Marketplace + Extensibility (SDK, Plugins, Templates)",Epic-16,,Platform + ML,,"At least 3: custom NER, scoring, exporter; production-quality."
+Story,Developer docs site,,"Epic 16 — Marketplace + Extensibility (SDK, Plugins, Templates)",Epic-16,,Docs,,End-to-end tutorial; API references; troubleshooting.
+Story,Governance process for contributions,,"Epic 16 — Marketplace + Extensibility (SDK, Plugins, Templates)",Epic-16,,GRC + Product,,Review criteria; security review; deprecation policy.
+Epic,Epic 17 — Multi-Org Collaboration + Controlled Sharing,share intelligence without oversharing; reversible access; verifiable provenance.,Epic 17 — Multi-Org Collaboration + Controlled Sharing,Epic-17,,,,
+Story,"Compartmented sharing (packs, expiry)",,Epic 17 — Multi-Org Collaboration + Controlled Sharing,Epic-17,,Platform + Security,,Object-level selection; expiry enforced; audit.
+Story,Minimal disclosure export mode,,Epic 17 — Multi-Org Collaboration + Controlled Sharing,Epic-17,,GRC + App,,Field minimization; policy-based; disclosure preview.
+Story,Cross-tenant federation (pseudonymous IDs),,Epic 17 — Multi-Org Collaboration + Controlled Sharing,Epic-17,,Platform,,Opt-in; mapping keys protected; collision handling.
+Story,Secure contact channels (audited messaging),,Epic 17 — Multi-Org Collaboration + Controlled Sharing,Epic-17,,App,,Encrypted; retention rules; export controls.
+Story,Shared watchlists + DP options where feasible,,Epic 17 — Multi-Org Collaboration + Controlled Sharing,Epic-17,,ML + Product,,Aggregated sharing; privacy budget documented; clear limitations.
+Story,Partner trust profiles,,Epic 17 — Multi-Org Collaboration + Controlled Sharing,Epic-17,,GRC,,"Constraints enforced (retention, fields, use); visible in UI."
+Story,External sharing approvals (legal + security),,Epic 17 — Multi-Org Collaboration + Controlled Sharing,Epic-17,,GRC + Security,,Workflow with sign-off; recorded rationale; time-boxed approvals.
+Story,Watermarking + recipient tagging,,Epic 17 — Multi-Org Collaboration + Controlled Sharing,Epic-17,,Platform,,Watermarks on exports; recipient metadata stored; tamper-evident.
+Story,Revocation mechanics,,Epic 17 — Multi-Org Collaboration + Controlled Sharing,Epic-17,,Platform + Security,,Access termination logged; tokens revoked; downstream audit.
+Story,Interop formats (STIX/JSON-LD/signed manifests),,Epic 17 — Multi-Org Collaboration + Controlled Sharing,Epic-17,,Integrations,,Round-trip tests; signatures verify; schema documented.
+Story,Tabletop exercise end-to-end,,Epic 17 — Multi-Org Collaboration + Controlled Sharing,Epic-17,,Product Ops,,Scenario report; gaps tracked; remediations assigned.
+Epic,"Epic 18 — UX Excellence: Analyst Flow, Speed, Cognitive Load",analysts move faster with fewer mistakes; measurable UX performance.,"Epic 18 — UX Excellence: Analyst Flow, Speed, Cognitive Load",Epic-18,,,,
+Story,Task-based UX benchmark (top 10 workflows),,"Epic 18 — UX Excellence: Analyst Flow, Speed, Cognitive Load",Epic-18,,UX Research,,Baseline metrics captured; pain map; prioritized backlog.
+Story,Universal command palette,,"Epic 18 — UX Excellence: Analyst Flow, Speed, Cognitive Load",Epic-18,,App,,Search + actions; permission-aware; keyboard-first.
+Story,Investigation trails (auto-captured; replay/share),,"Epic 18 — UX Excellence: Analyst Flow, Speed, Cognitive Load",Epic-18,,App,,Steps recorded; shareable within compartment; exportable.
+Story,Bulk operations UI,,"Epic 18 — UX Excellence: Analyst Flow, Speed, Cognitive Load",Epic-18,,App,,Bulk tag/merge/redact/move; undo; audit reasons.
+Story,Smart defaults + validation,,"Epic 18 — UX Excellence: Analyst Flow, Speed, Cognitive Load",Epic-18,,App,,Fewer required fields where safe; clear errors; reduces rework.
+Story,Keyboard-first + accessibility (WCAG),,"Epic 18 — UX Excellence: Analyst Flow, Speed, Cognitive Load",Epic-18,,UX/App,,Focus states; ARIA; audited against WCAG targets.
+Story,Focus mode for briefs (cited facts/unknowns/dissent),,"Epic 18 — UX Excellence: Analyst Flow, Speed, Cognitive Load",Epic-18,,App + Product,,Only evidence-backed statements; dissent section; caveats enforced.
+Story,Large-graph rendering optimizations (LOD/progressive expansion),,"Epic 18 — UX Excellence: Analyst Flow, Speed, Cognitive Load",Epic-18,,App + Graph Eng,,Smooth interaction at target node counts; no browser crashes.
+Story,Onboarding (guided tours + synthetic cases),,"Epic 18 — UX Excellence: Analyst Flow, Speed, Cognitive Load",Epic-18,,Enablement,,New user completes guided scenario; measurable learning outcomes.
+Story,Personal productivity (saved filters/pins/reminders),,"Epic 18 — UX Excellence: Analyst Flow, Speed, Cognitive Load",Epic-18,,App,,Cross-device persistence; permission safe; fast retrieval.
+Story,UX performance budgets enforced in CI,,"Epic 18 — UX Excellence: Analyst Flow, Speed, Cognitive Load",Epic-18,,SRE + App,,Budgets defined; automated checks; release blocked on regressions.
