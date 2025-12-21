@@ -53,6 +53,20 @@ export {
   type GatewayConfig,
 } from './gateway.js';
 
+// Multi-region governance
+export {
+  MultiRegionGovernance,
+  getMultiRegionGovernance,
+  TARGET_REGIONS,
+  SERVICE_PLACEMENT,
+  TIER_OBJECTIVES,
+  type DataFieldResidency,
+  type RegionCode,
+  type ResidencyTag,
+  type ServiceTier,
+  type TierObjective,
+} from './multi-region-governance.js';
+
 // Resilience
 export {
   CircuitBreaker,
