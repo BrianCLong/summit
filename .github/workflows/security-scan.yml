@@ -143,9 +143,73 @@ jobs:
         with:
           args: --severity-threshold=high
 
+  cve-budget:
+    name: SBOM CVE Budget Gate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Generate CycloneDX SBOM
+        run: npx @cyclonedx/cyclonedx-npm --output-file sbom.json --output-format JSON
+
+      - name: Capture service name from SBOM
+        id: sbom_meta
+        run: |
+          service_name=$(jq -r '.metadata.component.name // .name // env.SERVICE_NAME' sbom.json)
+          echo "service_name=${service_name}" >> "$GITHUB_OUTPUT"
+
+      - name: Trivy SBOM scan (CRITICAL/HIGH)
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: 'sbom'
+          input: sbom.json
+          severity: 'CRITICAL,HIGH'
+          format: 'json'
+          output: trivy-report.json
+          ignore-unfixed: true
+
+      - name: Build CVE budget vulnerability report
+        run: |
+          node .github/scripts/trivy-to-cve-budget.js \
+            trivy-report.json \
+            "${{ steps.sbom_meta.outputs.service_name }}" \
+            sbom.json \
+            vuln_report.${{ steps.sbom_meta.outputs.service_name }}.json
+
+      - name: Enforce CVE budgets and attestations
+        run: |
+          python ops/security/cve_budget/gate.py \
+            --config ops/security/cve_budget/config.yaml \
+            --sbom sbom.json \
+            --vulns vuln_report.${{ steps.sbom_meta.outputs.service_name }}.json \
+            --output cve_budget_summary.json
+
+      - name: Upload CVE budget artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cve-budget-${{ steps.sbom_meta.outputs.service_name }}
+          path: |
+            sbom.json
+            trivy-report.json
+            vuln_report.${{ steps.sbom_meta.outputs.service_name }}.json
+            cve_budget_summary.json
+
   security-report:
     name: Generate Security Report
-    needs: [dependency-scan, secret-scan, security-linting]
+    needs: [dependency-scan, secret-scan, security-linting, cve-budget]
     runs-on: ubuntu-latest
     if: always()
 
@@ -167,5 +231,6 @@ jobs:
           echo "- Dependency Scan: ${{ needs.dependency-scan.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- Secret Scan: ${{ needs.secret-scan.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- Security Linting: ${{ needs.security-linting.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- CVE Budget Gate: ${{ needs.cve-budget.result }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Note:** CodeQL Analysis runs in a separate workflow." >> $GITHUB_STEP_SUMMARY
