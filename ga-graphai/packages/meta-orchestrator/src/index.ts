@@ -21,6 +21,15 @@ import type {
   SelfHealingPolicy,
   StageFallbackStrategy,
   StageExecutionGuardrail,
+  CapabilityMatrix,
+  FairnessPolicy,
+  ModuleDecisionPolicy,
+  MetaOrchestratorPlugin,
+  MetaOrchestratorPluginContext,
+  SessionArchiveDescriptor,
+  UrgencyLevel,
+  CostSensitivity,
+  GovernanceEvent,
 } from '@ga-graphai/common-types';
 import {
   buildReplayEnvironment,
@@ -94,6 +103,16 @@ export interface MetaOrchestratorOptions {
   rewardWeights?: PlannerRewardWeights;
   selfHealing?: SelfHealingPolicy;
   events?: StructuredEventEmitter;
+  capabilityMatrix?: CapabilityMatrix;
+  decisionPolicies?: ModuleDecisionPolicy[];
+  fairness?: FairnessPolicy;
+  plugins?: MetaOrchestratorPlugin[];
+  sessionArchive?: {
+    owner?: string;
+    scope?: string;
+    labels?: string[];
+    persist?: (descriptor: unknown) => Promise<void> | void;
+  };
 }
 
 const DEFAULT_WEIGHTS: PlannerRewardWeights = {
@@ -173,6 +192,230 @@ export class TemplateReasoningModel implements ReasoningModel {
   }
 }
 
+interface CapabilityScore {
+  provider: string;
+  region: string;
+  capability: string;
+  performance: number;
+  latency: number;
+  cost: number;
+  composite: number;
+  rationale: string[];
+}
+
+class CapabilityMatrixEvaluator {
+  private readonly matrix?: CapabilityMatrix;
+
+  constructor(matrix?: CapabilityMatrix) {
+    this.matrix = matrix;
+  }
+
+  score(capability: string, provider: string, region: string): CapabilityScore | null {
+    if (!this.matrix) {
+      return null;
+    }
+    const candidates = this.matrix.entries.filter(
+      (entry) => entry.capability === capability,
+    );
+    if (candidates.length === 0) {
+      return null;
+    }
+    const matched =
+      candidates.find(
+        (entry) => entry.provider === provider && entry.region === region,
+      ) ?? candidates.find((entry) => entry.provider === provider) ?? candidates[0];
+    const throughputMax = Math.max(...candidates.map((entry) => entry.throughputPerMinute));
+    const latencyMin = Math.min(...candidates.map((entry) => entry.latencyMs));
+    const costMin = Math.min(...candidates.map((entry) => entry.costPerUnit));
+    const performance = throughputMax === 0 ? 0 : matched.throughputPerMinute / throughputMax;
+    const latency = matched.latencyMs === 0 ? 1 : clamp(latencyMin / matched.latencyMs, 0, 1);
+    const cost = matched.costPerUnit === 0 ? 1 : clamp(costMin / matched.costPerUnit, 0, 1);
+    const composite = (performance + latency + cost) / 3;
+    return {
+      provider: matched.provider,
+      region: matched.region,
+      capability: matched.capability,
+      performance,
+      latency,
+      cost,
+      composite,
+      rationale: [
+        `throughput=${matched.throughputPerMinute} (normalized ${performance.toFixed(2)})`,
+        `latency=${matched.latencyMs}ms (normalized ${latency.toFixed(2)})`,
+        `cost=${matched.costPerUnit} (normalized ${cost.toFixed(2)})`,
+      ],
+    };
+  }
+}
+
+interface PolicyDecision {
+  module: string;
+  reason: string;
+  policyId: string;
+  confidence: number;
+}
+
+class DecisionTreePolicyEngine {
+  private readonly policies: ModuleDecisionPolicy[];
+
+  constructor(policies: ModuleDecisionPolicy[]) {
+    this.policies = policies;
+  }
+
+  evaluate(context: {
+    dataType: string;
+    urgency: UrgencyLevel;
+    costSensitivity: CostSensitivity;
+    capability?: string;
+  }): PolicyDecision | null {
+    const matches = this.policies
+      .filter((policy) =>
+        policy.dataTypes.includes(context.dataType) || policy.dataTypes.includes('*'),
+      )
+      .filter((policy) => policy.urgencies.includes(context.urgency))
+      .filter((policy) => policy.costSensitivity === context.costSensitivity);
+    if (matches.length === 0) {
+      return null;
+    }
+    const preferred = matches[0];
+    const module = preferred.preferredModules[0];
+    const reason = preferred.rationale ?? 'policy matched on data profile';
+    return {
+      module,
+      reason,
+      policyId: preferred.id,
+      confidence: 0.75 + preferred.preferredModules.length * 0.02,
+    };
+  }
+}
+
+class FairnessMonitor {
+  private readonly counts = new Map<string, number>();
+  private readonly policy?: FairnessPolicy;
+
+  constructor(policy?: FairnessPolicy) {
+    this.policy = policy;
+  }
+
+  record(provider: string): void {
+    const current = this.counts.get(provider) ?? 0;
+    this.counts.set(provider, current + 1);
+  }
+
+  metrics(totalStages: number): {
+    diversity: number;
+    dominanceRatio: number;
+    compliant: boolean;
+  } {
+    const diversity = this.counts.size === 0 || totalStages === 0
+      ? 0
+      : this.counts.size / totalStages;
+    const maxShare = Math.max(...Array.from(this.counts.values()), 0);
+    const dominanceRatio = totalStages === 0 ? 0 : maxShare / totalStages;
+    const required = this.policy?.minDiversityRatio ?? 0;
+    return {
+      diversity,
+      dominanceRatio,
+      compliant: diversity >= required,
+    };
+  }
+
+  applyMitigations(score: number, provider: string): number {
+    if (!this.policy || !this.policy.mitigations) {
+      return score;
+    }
+    let adjusted = score;
+    for (const mitigation of this.policy.mitigations) {
+      if (mitigation.signal === 'diversity' && (this.counts.get(provider) ?? 0) > 0) {
+        adjusted *= 0.98;
+      }
+      if (mitigation.signal === 'cost' && mitigation.correctiveAction === 'penalize') {
+        adjusted *= 0.99;
+      }
+    }
+    return adjusted;
+  }
+}
+
+class GovernanceTrail {
+  private readonly events: GovernanceEvent[] = [];
+
+  record(event: Omit<GovernanceEvent, 'id' | 'timestamp'> & { id?: string; timestamp?: string }): GovernanceEvent {
+    const normalized: GovernanceEvent = {
+      ...event,
+      id: event.id ?? randomUUID(),
+      timestamp: event.timestamp ?? nowIso(),
+    };
+    this.events.push(normalized);
+    return normalized;
+  }
+
+  flush(): GovernanceEvent[] {
+    return [...this.events];
+  }
+}
+
+class SessionArchiver {
+  private readonly persist: (descriptor: unknown) => Promise<void> | void;
+
+  constructor(persist?: (descriptor: unknown) => Promise<void> | void) {
+    this.persist = persist ?? persistReplayDescriptor;
+  }
+
+  async archive(options: {
+    plan: ExplainablePlan;
+    outcome: ExecutionOutcome;
+    owner: string;
+    scope: string;
+    labels?: string[];
+  }): Promise<SessionArchiveDescriptor> {
+    const environment = buildReplayEnvironment();
+    const descriptor = createReplayDescriptor({
+      service: 'maestro-conductor',
+      flow: 'meta-orchestrator',
+      request: {
+        path: 'meta-orchestrator',
+        method: 'EXECUTE',
+        metadata: sanitizePayload({ plan: options.plan, outcome: options.outcome }),
+      },
+      environment,
+      classification: 'meta-routing',
+    });
+    const archive: SessionArchiveDescriptor = {
+      id: descriptor.id,
+      createdAt: descriptor.createdAt,
+      owner: options.owner,
+      scope: options.scope,
+      labels: options.labels,
+      checksum: descriptor.checksum,
+    };
+    await this.persist(descriptor);
+    return archive;
+  }
+}
+
+class PluginManager {
+  private readonly plugins: MetaOrchestratorPlugin[];
+
+  constructor(plugins: MetaOrchestratorPlugin[]) {
+    this.plugins = plugins;
+  }
+
+  async run<K extends keyof MetaOrchestratorPlugin>(
+    hook: K,
+    context: MetaOrchestratorPluginContext,
+  ): Promise<void> {
+    for (const plugin of this.plugins) {
+      const candidate = plugin[hook];
+      if (typeof candidate === 'function') {
+        await (candidate as (context: MetaOrchestratorPluginContext) => Promise<void> | void)(
+          context,
+        );
+      }
+    }
+  }
+}
+
 class ActiveRewardShaper {
   private weights: PlannerRewardWeights;
 
@@ -236,19 +479,35 @@ interface CandidateScore {
   capability: string;
   score: number;
   breakdown: Record<string, number>;
+  capabilityScore?: CapabilityScore | null;
+  policy?: PolicyDecision | null;
   decision: PlannerDecision;
 }
 
 export class HybridSymbolicLLMPlanner {
   private readonly providers: CloudProviderDescriptor[];
   private readonly reasoningModel: ReasoningModel;
+  private readonly capabilityEvaluator?: CapabilityMatrixEvaluator;
+  private readonly decisionEngine?: DecisionTreePolicyEngine;
+  private readonly fairnessMonitor?: FairnessMonitor;
+  private readonly governance?: GovernanceTrail;
 
   constructor(
     providers: CloudProviderDescriptor[],
-    reasoningModel?: ReasoningModel,
+    options?: {
+      reasoningModel?: ReasoningModel;
+      capabilityEvaluator?: CapabilityMatrixEvaluator;
+      decisionEngine?: DecisionTreePolicyEngine;
+      fairnessMonitor?: FairnessMonitor;
+      governance?: GovernanceTrail;
+    },
   ) {
     this.providers = providers;
-    this.reasoningModel = reasoningModel ?? new TemplateReasoningModel();
+    this.reasoningModel = options?.reasoningModel ?? new TemplateReasoningModel();
+    this.capabilityEvaluator = options?.capabilityEvaluator;
+    this.decisionEngine = options?.decisionEngine;
+    this.fairnessMonitor = options?.fairnessMonitor;
+    this.governance = options?.governance;
   }
 
   async plan(
@@ -259,10 +518,17 @@ export class HybridSymbolicLLMPlanner {
   ): Promise<ExplainablePlan> {
     const steps: ExplainablePlanStep[] = [];
     for (const stage of stages) {
+      const policyDecision = this.decisionEngine?.evaluate({
+        dataType: stage.dataType ?? 'generic',
+        urgency: stage.urgency ?? 'medium',
+        costSensitivity: stage.costSensitivity ?? 'medium',
+        capability: stage.requiredCapabilities[0],
+      });
       const candidates = this.scoreCandidates(
         stage,
         observation.pricing,
         weights,
+        policyDecision ?? undefined,
       );
       if (candidates.length === 0) {
         throw new Error(`no feasible providers for stage ${stage.id}`);
@@ -274,7 +540,32 @@ export class HybridSymbolicLLMPlanner {
         stage,
         primary,
         fallbacks,
+        policyDecision ?? undefined,
       );
+      this.fairnessMonitor?.record(primary.decision.provider);
+      if (policyDecision) {
+        this.governance?.record({
+          kind: 'selection',
+          summary: `Applied decision-tree policy ${policyDecision.policyId}`,
+          details: {
+            stageId: stage.id,
+            provider: primary.decision.provider,
+            policy: policyDecision,
+          },
+        });
+      }
+      if (primary.capabilityScore) {
+        this.governance?.record({
+          kind: 'explanation',
+          summary: 'Capability matrix influenced selection',
+          details: {
+            stageId: stage.id,
+            capability: primary.capabilityScore.capability,
+            provider: primary.capabilityScore.provider,
+            rationale: primary.capabilityScore.rationale,
+          },
+        });
+      }
       steps.push({
         stageId: stage.id,
         primary: primary.decision,
@@ -299,6 +590,7 @@ export class HybridSymbolicLLMPlanner {
     stage: PipelineStageDefinition,
     pricing: PricingSignal[],
     weights: PlannerRewardWeights,
+    policyDecision?: PolicyDecision,
   ): CandidateScore[] {
     const capabilities = stage.requiredCapabilities;
     const normalizedThroughput = normalize(
@@ -332,12 +624,29 @@ export class HybridSymbolicLLMPlanner {
       const reliabilityScore = normalizedReliability[index] || 0;
       const costScore = price === 0 ? 1 : clamp(1 / price, 0, 1);
       const sustainabilityScore = provider.sustainabilityScore ?? 0.5;
-      const aggregate =
+      const breakdown: Record<string, number> = {
+        throughput: throughputScore,
+        reliability: reliabilityScore,
+        cost: costScore,
+        compliance,
+        sustainability: sustainabilityScore,
+      };
+      let aggregate =
         weights.throughput * throughputScore +
         weights.reliability * reliabilityScore +
         weights.cost * costScore +
         weights.compliance * compliance +
         (weights.sustainability ?? 0) * sustainabilityScore;
+      const capabilityScore = this.capabilityEvaluator?.score(capability, provider.name, region);
+      if (capabilityScore) {
+        breakdown.capabilityMatrix = capabilityScore.composite;
+        aggregate = aggregate * 0.7 + capabilityScore.composite * 0.3;
+      }
+      if (policyDecision && policyDecision.module === provider.name) {
+        breakdown.policy = policyDecision.confidence;
+        aggregate += 0.05;
+      }
+      aggregate = this.fairnessMonitor?.applyMitigations(aggregate, provider.name) ?? aggregate;
       const decision: PlannerDecision = {
         provider: provider.name,
         region,
@@ -354,14 +663,9 @@ export class HybridSymbolicLLMPlanner {
           region,
           capability,
           score: aggregate,
-          breakdown: {
-            throughput: throughputScore,
-            reliability: reliabilityScore,
-            cost: costScore,
-            compliance,
-            sustainability: sustainabilityScore,
-            aggregate,
-          },
+          breakdown: { ...breakdown, aggregate },
+          capabilityScore,
+          policy: policyDecision,
           decision,
         },
       ];
@@ -372,6 +676,7 @@ export class HybridSymbolicLLMPlanner {
     stage: PipelineStageDefinition,
     primary: CandidateScore,
     fallbacks: CandidateScore[],
+    policyDecision?: PolicyDecision,
   ): Promise<PlannerExplanation> {
     const narrative = await this.reasoningModel.generateNarrative({
       stage,
@@ -387,6 +692,14 @@ export class HybridSymbolicLLMPlanner {
       constraints.push(
         `error rate <= ${stage.guardrail.maxErrorRate} with recovery ${stage.guardrail.recoveryTimeoutSeconds}s`,
       );
+    }
+    if (primary.capabilityScore) {
+      constraints.push(
+        `capability matrix composite ${(primary.capabilityScore.composite * 100).toFixed(1)}%`,
+      );
+    }
+    if (policyDecision) {
+      constraints.push(`policy ${policyDecision.policyId}: ${policyDecision.reason}`);
     }
     return {
       stageId: stage.id,
@@ -407,16 +720,39 @@ export class MetaOrchestrator {
   private readonly rewardShaper: ActiveRewardShaper;
   private readonly selfHealing: SelfHealingPolicy;
   private readonly events: StructuredEventEmitter;
+  private readonly capabilityEvaluator: CapabilityMatrixEvaluator;
+  private readonly decisionEngine: DecisionTreePolicyEngine;
+  private readonly fairnessMonitor: FairnessMonitor;
+  private readonly governance: GovernanceTrail;
+  private readonly pluginManager: PluginManager;
+  private readonly sessionArchiver?: SessionArchiver;
+  private readonly archiveOwner?: string;
+  private readonly archiveScope?: string;
+  private readonly sessionArchiveLabels?: string[];
 
   constructor(options: MetaOrchestratorOptions) {
     this.pipelineId = options.pipelineId;
     this.pricingFeed = options.pricingFeed;
     this.execution = options.execution;
     this.auditSink = options.auditSink;
-    this.planner = new HybridSymbolicLLMPlanner(
-      options.providers,
-      options.reasoningModel,
-    );
+    this.capabilityEvaluator = new CapabilityMatrixEvaluator(options.capabilityMatrix);
+    this.decisionEngine = new DecisionTreePolicyEngine(options.decisionPolicies ?? []);
+    this.fairnessMonitor = new FairnessMonitor(options.fairness);
+    this.governance = new GovernanceTrail();
+    this.pluginManager = new PluginManager(options.plugins ?? []);
+    this.sessionArchiver = options.sessionArchive
+      ? new SessionArchiver(options.sessionArchive.persist)
+      : undefined;
+    this.archiveOwner = options.sessionArchive?.owner ?? 'maestro';
+    this.archiveScope = options.sessionArchive?.scope ?? options.pipelineId;
+    this.sessionArchiveLabels = options.sessionArchive?.labels;
+    this.planner = new HybridSymbolicLLMPlanner(options.providers, {
+      reasoningModel: options.reasoningModel,
+      capabilityEvaluator: this.capabilityEvaluator,
+      decisionEngine: this.decisionEngine,
+      fairnessMonitor: this.fairnessMonitor,
+      governance: this.governance,
+    });
     this.rewardShaper = new ActiveRewardShaper(
       options.rewardWeights ?? DEFAULT_WEIGHTS,
     );
@@ -432,18 +768,35 @@ export class MetaOrchestrator {
       observation?.pricing ?? (await this.pricingFeed.getPricingSignals());
     const rewardSignals = observation?.rewards ?? [];
     const weights = this.rewardShaper.update(rewardSignals, stages);
+    await this.pluginManager.run('beforePlan', {
+      pipelineId: this.pipelineId,
+      metadata: { stages },
+    });
     const plan = await this.planner.plan(
       this.pipelineId,
       stages,
       { pricing, rewards: rewardSignals },
       weights,
     );
+    const fairness = this.fairnessMonitor.metrics(plan.steps.length);
+    plan.metadata.fairness = fairness;
+    plan.metadata.governance = this.governance.flush();
     await this.auditSink.record({
       id: `${this.pipelineId}:${Date.now()}:plan`,
       timestamp: nowIso(),
       category: 'plan',
       summary: 'Hybrid planner generated explainable plan',
-      data: plan,
+      data: { plan, fairness },
+    });
+    this.governance.record({
+      kind: 'fairness',
+      summary: 'Recorded fairness snapshot for plan',
+      details: fairness,
+    });
+    await this.pluginManager.run('afterPlan', {
+      pipelineId: this.pipelineId,
+      plan,
+      metadata: { fairness },
     });
     return plan;
   }
@@ -498,9 +851,21 @@ export class MetaOrchestrator {
         if (!stage) {
           throw new Error(`unknown stage ${step.stageId}`);
         }
+        await this.pluginManager.run('beforeStage', {
+          pipelineId: this.pipelineId,
+          stage,
+          plan,
+          metadata: planMetadata,
+        });
         const executionResult = await this.runStage(stage, step, planMetadata);
         trace.push(executionResult.traceEntry);
         rewards.push(executionResult.rewardSignal);
+        await this.pluginManager.run('afterStage', {
+          pipelineId: this.pipelineId,
+          stage,
+          plan,
+          metadata: { traceEntry: executionResult.traceEntry },
+        });
       }
 
       const updatedWeights = this.rewardShaper.update(rewards, stages);
@@ -543,6 +908,36 @@ export class MetaOrchestrator {
         },
         { correlationId, traceId },
       );
+
+      if (this.sessionArchiver) {
+        const archive = await this.sessionArchiver.archive({
+          plan,
+          outcome,
+          owner: this.archiveOwner ?? 'maestro',
+          scope: this.archiveScope ?? this.pipelineId,
+          labels: this.sessionArchiveLabels,
+        });
+        this.governance.record({
+          kind: 'archive',
+          summary: 'Archived orchestrator session for replay',
+          details: archive,
+        });
+      }
+
+      await this.pluginManager.run('afterExecution', {
+        pipelineId: this.pipelineId,
+        plan,
+        outcome,
+        metadata: planMetadata,
+      });
+
+      await this.auditSink.record({
+        id: `${this.pipelineId}:${Date.now()}:governance`,
+        timestamp: nowIso(),
+        category: 'plan',
+        summary: 'Governance snapshot recorded',
+        data: { events: this.governance.flush() },
+      });
 
       return outcome;
     } catch (error) {
