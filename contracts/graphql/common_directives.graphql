@@ -1,0 +1,1 @@
+directive @requiresAuthority(role: String = "DisclosureApprover") on FIELD_DEFINITION

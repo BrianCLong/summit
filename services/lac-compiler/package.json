@@ -1,0 +1,16 @@
+{
+  "name": "@summit/lac-compiler",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -b",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "graphql": "^16.8.1",
+    "tar-stream": "^3.1.7"
+  }
+}

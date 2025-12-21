@@ -3,6 +3,9 @@
   "version": "2.0.0",
   "description": "Provenance and claims ledger service",
   "main": "dist/index.js",
+  "bin": {
+    "prov-verify": "bin/prov-verify.ts"
+  },
   "scripts": {
     "build": "npx tsc",
     "dev": "tsx watch src/index.ts",

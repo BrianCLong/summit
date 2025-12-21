@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Edge Conflicts</title></head>
+<body>
+  <h1>Conflicts</h1>
+  <div id="list"></div>
+  <script>
+    function render(conflicts){
+      const target = document.getElementById('list');
+      if(!conflicts || conflicts.length === 0){
+        target.textContent = 'No conflicts';
+        return;
+      }
+      const ul = document.createElement('ul');
+      conflicts.forEach(c => {
+        const li = document.createElement('li');
+        li.textContent = `${c.key}: expected ${c.expected}, observed ${c.actual}`;
+        ul.appendChild(li);
+      });
+      target.replaceChildren(ul);
+    }
+    const seed = window.conflicts || JSON.parse(localStorage.getItem('edge-conflicts') || '[]');
+    render(seed);
+  </script>
+</body>
+</html>
