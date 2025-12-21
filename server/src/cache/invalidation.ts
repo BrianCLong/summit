@@ -14,6 +14,14 @@ async function broadcastInvalidation(patterns: string[]) {
   } catch { }
 }
 
+function resolveIndexKey(pattern: string): string {
+  const [prefix, rest] = String(pattern).split(':');
+  if (prefix === 'tag') {
+    return `idx:tag:${rest ?? ''}`;
+  }
+  return rest && rest !== '*' ? `idx:${prefix}:${rest}` : `idx:${prefix}`;
+}
+
 async function performInvalidation(redis: any, patterns: string[]): Promise<void> {
   if (!redis) {
     flushLocalCache();
@@ -22,11 +30,7 @@ async function performInvalidation(redis: any, patterns: string[]): Promise<void
 
   const toDelete = new Set<string>();
   for (const pat of patterns || []) {
-    const [prefix, rest] = String(pat).split(':');
-    const idxKey =
-      prefix === 'tag'
-        ? `idx:tag:${rest}`
-        : rest && rest !== '*' ? `idx:${prefix}:${rest}` : `idx:${prefix}`;
+    const idxKey = resolveIndexKey(pat);
     try {
       const members = await redis.sMembers(idxKey);
       for (const k of members || []) toDelete.add(k);
@@ -78,4 +82,13 @@ export async function emitInvalidation(
   } finally {
     flushLocalCache(); // ensure local fallback cache is cleared as well
   }
+}
+
+export async function invalidateTags(tags: string[], tenant?: string): Promise<void> {
+  if (!Array.isArray(tags) || tags.length === 0) return;
+  const patterns = tags.flatMap((tag) => {
+    const base = `tag:${tag}`;
+    return tenant ? [base, `${base}:${tenant}`] : [base];
+  });
+  await emitInvalidation(patterns, tenant);
 }
