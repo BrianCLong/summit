@@ -31,6 +31,7 @@ def verify_bundle(path: str) -> tuple[bool, list[str]]:
 
 
 def main() -> int:
+    # Entry point for provctl
     parser = argparse.ArgumentParser(description="Verify provenance bundle")
     parser.add_argument("bundle", help="Path to bundle JSON")
     args = parser.parse_args()

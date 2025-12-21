@@ -20,6 +20,7 @@ def _merkle_root(hashes: list[str]) -> str:
 
 
 def build_bundle(claim_ids: list[str]) -> dict:
+    # TODO: Implement chunking for large bundles. Max bundle size TBD.
     entries: list[dict] = []
     bundle_claims: list[dict] = []
     bundle_evidence: dict[str, dict] = {}
