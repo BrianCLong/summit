@@ -83,10 +83,15 @@ export interface ServerToClientEvents {
 
   // Collaboration events
   'collaboration:cursor_update': (data: { connectionId: string; userId: string; x: number; y: number; username?: string }) => void;
+  'collab:sync': (data: { room: string; buffer: Uint8Array }) => void;
+  'collab:update': (data: { room: string; update: Uint8Array }) => void;
 }
 
 export interface ClientToServerEvents {
   // Collaboration events
+  'collab:join': (data: { room: string }) => void;
+  'collab:sync': (data: { room: string; buffer: Uint8Array }) => void;
+  'collab:update': (data: { room: string; update: Uint8Array }) => void;
   'collaboration:cursor_move': (data: { room: string; x: number; y: number; username?: string }) => void;
 
   // Presence events
