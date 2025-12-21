@@ -82,6 +82,7 @@ import commandConsoleRouter from './routes/internal/command-console.js';
 import searchV1Router from './routes/search-v1.js';
 import dataGovernanceRouter from './routes/data-governance-routes.js';
 import tenantBillingRouter from './routes/tenants/billing.js';
+import selfServeRouter from './routes/self-serve-evals.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -288,6 +289,7 @@ export const createApp = async () => {
   app.use('/api/siem-platform', siemPlatformRouter);
   app.use('/api/maestro', maestroRouter);
   app.use('/api/tenants', tenantsRouter);
+  app.use('/api/self-serve', selfServeRouter);
   app.use('/api/actions', actionsRouter);
   app.use('/api/osint', osintRouter);
   app.use('/api/edge', edgeOpsRouter);
