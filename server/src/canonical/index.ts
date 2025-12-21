@@ -6,25 +6,30 @@
  */
 
 // Core types
-export * from './types';
-export * from './provenance';
-export * from './policy';
+export * from './types.js';
+export * from './provenance.js';
+export * from './policy.js';
 
 // Entity schemas
-export * from './entities/Person';
-export * from './entities/Organization';
-export * from './entities/Asset';
-export * from './entities/Location';
-export * from './entities/Event';
-export * from './entities/Document';
-export * from './entities/Claim';
-export * from './entities/Case';
-export * from './entities/Infrastructure';
-export * from './entities/Financial';
-export * from './entities/Intelligence';
-export * from './entities/Legal';
+export * from './entities/Person.js';
+export * from './entities/Organization.js';
+export * from './entities/Asset.js';
+export * from './entities/Location.js';
+export * from './entities/Event.js';
+export * from './entities/Document.js';
+export * from './entities/Claim.js';
+export * from './entities/Case.js';
+export * from './entities/Infrastructure.js';
+export * from './entities/Financial.js';
+export * from './entities/Legal.js';
+
+// New Identity Entities
+export * from './entities/User.js';
+export * from './entities/ServiceAccount.js';
+export * from './entities/Integration.js';
+export * from './entities/Session.js';
 
 // Helpers and utilities
-export * from './helpers';
-export * from './queryPack';
-export * from './export';
+export * from './helpers.js';
+export * from './queryPack.js';
+export * from './export.js';
