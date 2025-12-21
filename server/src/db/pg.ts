@@ -13,7 +13,7 @@ const toInt = (value: string | undefined, fallback: number): number => {
 const writePoolSize = toInt(process.env.PG_WRITE_POOL_SIZE, 20);
 const readPoolSize = toInt(process.env.PG_READ_POOL_SIZE, 30);
 const idleTimeoutMs = toInt(process.env.PG_IDLE_TIMEOUT_MS, 30000);
-const connectionTimeoutMs = toInt(process.env.PG_CONNECTION_TIMEOUT_MS, 5000);
+const connectionTimeoutMillis = toInt(process.env.PG_CONNECTION_TIMEOUT_MS, 5000);
 const maxUses = toInt(process.env.PG_POOL_MAX_USES, 5000);
 const statementTimeoutMs = toInt(process.env.PG_STATEMENT_TIMEOUT_MS, 0);
 

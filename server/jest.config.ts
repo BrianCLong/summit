@@ -12,6 +12,7 @@ const config: Config = {
     '<rootDir>/tests/**/*.test.ts',
     '<rootDir>/src/tests/**/*.test.ts',
     '<rootDir>/src/**/__tests__/**/*.test.ts',
+    '<rootDir>/src/comms/**/*.test.ts',
   ],
   testPathIgnorePatterns: [
     '/node_modules/',
