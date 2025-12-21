@@ -5,9 +5,14 @@ import type {
   PlanBudgetInput,
   ResourceOptimizationConfig,
   QueueScalingDecision,
+  ArbiterConfig,
+  ArbiterDecision,
+  ConsentContext,
+  SloTelemetrySnapshot,
+  WorkloadRequestProfile,
+  ArbiterAction,
   ScalingDecision,
   QueueRuntimeSignals,
-  QueueScalingDecision,
   QueueSloConfig,
   SlowQueryRecord,
   TenantBudgetProfile,
@@ -203,6 +208,210 @@ const DEFAULT_QUEUE_SLO: QueueSloConfig = {
   latencyBurnThreshold: 1.2,
   costBurnThreshold: 1.05,
 };
+
+const DEFAULT_ARBITER_CONFIG: ArbiterConfig = {
+  readLatencyTargetMs: 350,
+  writeLatencyTargetMs: 700,
+  ingestLatencyTargetMs: 100,
+  maxErrorRate: 0.01,
+  costBudgetPerMillionUsd: 2,
+  costAlertThreshold: 0.8,
+  maxRru: 250,
+  dpEpsilonCeiling: 1.0,
+  offPeakWindowUtc: { startHour: 1, endHour: 5 },
+};
+
+export class AdaptiveCostSafetyArbiter {
+  private readonly config: ArbiterConfig;
+
+  constructor(config?: Partial<ArbiterConfig>) {
+    this.config = { ...DEFAULT_ARBITER_CONFIG, ...config };
+  }
+
+  evaluate(
+    request: WorkloadRequestProfile,
+    consent: ConsentContext,
+    telemetry: SloTelemetrySnapshot,
+  ): ArbiterDecision {
+    const consentViolation = this.validateConsent(consent);
+    if (consentViolation) {
+      return this.buildDecision('deny', consentViolation, request, consent, telemetry, 0);
+    }
+
+    const latencyTarget =
+      request.kind === 'write'
+        ? this.config.writeLatencyTargetMs
+        : this.config.readLatencyTargetMs;
+    const latencyPressure =
+      latencyTarget === 0 ? 0 : request.expectedLatencyMs / latencyTarget;
+    const observedPressure =
+      latencyTarget === 0 ? 0 : telemetry.apiLatencyP95Ms / latencyTarget;
+    const ingestPressure =
+      this.config.ingestLatencyTargetMs === 0
+        ? 0
+        : telemetry.ingestLatencyP95Ms / this.config.ingestLatencyTargetMs;
+
+    const perCallBudget = this.config.costBudgetPerMillionUsd / 1_000_000;
+    const projectedCostPressure =
+      perCallBudget === 0 ? 0 : request.estimatedCostUsd / perCallBudget;
+    const budgetBurn =
+      this.config.costBudgetPerMillionUsd === 0
+        ? 0
+        : telemetry.costPerMillionRequestsUsd / this.config.costBudgetPerMillionUsd;
+
+    const rruPressure = request.estimatedRru / Math.max(1, this.config.maxRru);
+    const dpPressure = this.computeDpPressure(request);
+    const maxPressure = Math.max(
+      latencyPressure,
+      observedPressure,
+      ingestPressure,
+      projectedCostPressure,
+      budgetBurn,
+      rruPressure,
+      dpPressure,
+    );
+
+    if (dpPressure > 1) {
+      return this.buildDecision(
+        'throttle',
+        `Differential privacy epsilon must be ≤ ${this.config.dpEpsilonCeiling}.`,
+        request,
+        consent,
+        telemetry,
+        15 * 60 * 1000,
+        this.config.dpEpsilonCeiling,
+      );
+    }
+
+    if (rruPressure > 1.5 || projectedCostPressure > 1.2) {
+      return this.buildDecision(
+        'reroute',
+        'Workload exceeds budget guardrails; defer to off-peak window with throttling.',
+        request,
+        consent,
+        telemetry,
+        10 * 60 * 1000,
+        undefined,
+        this.config.offPeakWindowUtc,
+      );
+    }
+
+    if (
+      request.operation === 'bulk-export' &&
+      (budgetBurn >= this.config.costAlertThreshold || observedPressure > 1.05)
+    ) {
+      return this.buildDecision(
+        'defer',
+        'Bulk export gated to protect SLO and cost budget; reschedule during off-peak.',
+        request,
+        consent,
+        telemetry,
+        20 * 60 * 1000,
+        undefined,
+        request.preferredWindowUtc ?? this.config.offPeakWindowUtc,
+      );
+    }
+
+    if (
+      telemetry.apiErrorRate > this.config.maxErrorRate ||
+      observedPressure > 1.2 ||
+      latencyPressure > 1.2
+    ) {
+      return this.buildDecision(
+        'throttle',
+        'Live SLO burn detected; throttling request until latency/error rate recovers.',
+        request,
+        consent,
+        telemetry,
+        5 * 60 * 1000,
+      );
+    }
+
+    if (maxPressure > this.config.costAlertThreshold) {
+      return this.buildDecision(
+        'throttle',
+        'Pressure approaching guardrails; applying soft throttle with rapid review.',
+        request,
+        consent,
+        telemetry,
+        2 * 60 * 1000,
+      );
+    }
+
+    return this.buildDecision(
+      'allow',
+      'Request within cost, SLO, and consent guardrails.',
+      request,
+      consent,
+      telemetry,
+      60 * 1000,
+    );
+  }
+
+  private validateConsent(consent: ConsentContext): string | null {
+    if (consent.revoked && !consent.breakGlass) {
+      return 'Consent revoked; request denied unless break-glass policy applied.';
+    }
+    if (!consent.consented && !consent.breakGlass) {
+      return 'Consent missing for requested purpose; deny by default.';
+    }
+    if (
+      consent.consentedPurposes &&
+      consent.consentedPurposes.length > 0 &&
+      !consent.consentedPurposes.includes(consent.purpose) &&
+      !consent.breakGlass
+    ) {
+      return 'Purpose not authorized under consent scope.';
+    }
+    return null;
+  }
+
+  private computeDpPressure(request: WorkloadRequestProfile): number {
+    if (!request.usesDifferentialPrivacy) {
+      return 0;
+    }
+    const epsilon = request.dpEpsilon ?? Number.POSITIVE_INFINITY;
+    return epsilon / this.config.dpEpsilonCeiling;
+  }
+
+  private buildDecision(
+    action: ArbiterAction,
+    reason: string,
+    request: WorkloadRequestProfile,
+    consent: ConsentContext,
+    telemetry: SloTelemetrySnapshot,
+    nextReviewMs: number,
+    requiredDpEpsilon?: number,
+    targetWindowUtc?: { startHour: number; endHour: number },
+  ): ArbiterDecision {
+    return {
+      action,
+      reason,
+      nextReviewMs,
+      targetWindowUtc,
+      requiredDpEpsilon,
+      audit: {
+        tenantId: request.tenantId,
+        action,
+        reason,
+        timestamp: Date.now(),
+        telemetry,
+        consent,
+        request: {
+          operation: request.operation,
+          kind: request.kind,
+          estimatedCostUsd: request.estimatedCostUsd,
+          estimatedRru: request.estimatedRru,
+          expectedLatencyMs: request.expectedLatencyMs,
+          dataSensitivity: request.dataSensitivity,
+          usesDifferentialPrivacy: request.usesDifferentialPrivacy,
+          dpEpsilon: request.dpEpsilon,
+          burstScore: request.burstScore,
+        },
+      },
+    };
+  }
+}
 
 export class ResourceOptimizationEngine {
   private readonly config: ResourceOptimizationConfig;
@@ -646,11 +855,15 @@ export class ResourceOptimizationEngine {
   }
 }
 
-export { DEFAULT_OPTIMIZATION_CONFIG, DEFAULT_QUEUE_SLO };
+export { DEFAULT_OPTIMIZATION_CONFIG, DEFAULT_QUEUE_SLO, DEFAULT_ARBITER_CONFIG };
 export type {
   ClusterNodeState,
   CostGuardDecision,
   PlanBudgetInput,
+  ArbiterAction,
+  ArbiterConfig,
+  ArbiterDecision,
+  ConsentContext,
   ResourceOptimizationConfig,
   ScalingDecision,
   QueueRuntimeSignals,
@@ -663,4 +876,6 @@ export type {
   WorkloadBalancingPlan,
   WorkloadQueueSignal,
   WorkloadSample,
+  SloTelemetrySnapshot,
+  WorkloadRequestProfile,
 } from './types.js';

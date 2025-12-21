@@ -5,6 +5,104 @@ export interface TenantBudgetProfile {
   concurrencyLimit: number;
 }
 
+export type DataSensitivity = 'phi' | 'limited' | 'deid';
+
+export type RequestPurpose =
+  | 'treatment'
+  | 'payment'
+  | 'operations'
+  | 'research'
+  | 'marketing';
+
+export interface ConsentContext {
+  purpose: RequestPurpose;
+  consented: boolean;
+  breakGlass: boolean;
+  revoked?: boolean;
+  consentedPurposes?: RequestPurpose[];
+}
+
+export interface SloTelemetrySnapshot {
+  apiLatencyP95Ms: number;
+  apiErrorRate: number;
+  ingestLatencyP95Ms: number;
+  costPerMillionRequestsUsd: number;
+  ingestThroughputPerPod?: number;
+  timestamp?: number;
+}
+
+export type OperationKind = 'read' | 'write';
+
+export type WorkloadOperation =
+  | 'graphql'
+  | 'bulk-export'
+  | 'ingest'
+  | 'cds-hook';
+
+export interface WorkloadRequestProfile {
+  tenantId: string;
+  operation: WorkloadOperation;
+  kind?: OperationKind;
+  estimatedCostUsd: number;
+  estimatedRru: number;
+  expectedLatencyMs: number;
+  usesDifferentialPrivacy?: boolean;
+  dpEpsilon?: number;
+  dpDelta?: number;
+  dataSensitivity: DataSensitivity;
+  burstScore?: number;
+  preferredWindowUtc?: { startHour: number; endHour: number };
+}
+
+export interface ArbiterConfig {
+  readLatencyTargetMs: number;
+  writeLatencyTargetMs: number;
+  ingestLatencyTargetMs: number;
+  maxErrorRate: number;
+  costBudgetPerMillionUsd: number;
+  costAlertThreshold: number;
+  maxRru: number;
+  dpEpsilonCeiling: number;
+  offPeakWindowUtc: { startHour: number; endHour: number };
+}
+
+export type ArbiterAction =
+  | 'allow'
+  | 'throttle'
+  | 'defer'
+  | 'reroute'
+  | 'deny';
+
+export interface ArbiterAuditRecord {
+  tenantId: string;
+  action: ArbiterAction;
+  reason: string;
+  timestamp: number;
+  telemetry: SloTelemetrySnapshot;
+  request: Pick<
+    WorkloadRequestProfile,
+    | 'operation'
+    | 'kind'
+    | 'estimatedCostUsd'
+    | 'estimatedRru'
+    | 'expectedLatencyMs'
+    | 'dataSensitivity'
+    | 'usesDifferentialPrivacy'
+    | 'dpEpsilon'
+    | 'burstScore'
+  >;
+  consent: ConsentContext;
+}
+
+export interface ArbiterDecision {
+  action: ArbiterAction;
+  reason: string;
+  nextReviewMs: number;
+  targetWindowUtc?: { startHour: number; endHour: number };
+  requiredDpEpsilon?: number;
+  audit: ArbiterAuditRecord;
+}
+
 export interface WorkloadQueueSignal {
   queueDepth: number;
   p95LatencyMs: number;

@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
+  AdaptiveCostSafetyArbiter,
   CostGuard,
+  DEFAULT_ARBITER_CONFIG,
   DEFAULT_OPTIMIZATION_CONFIG,
   DEFAULT_PROFILE,
   DEFAULT_QUEUE_SLO,
@@ -94,6 +96,100 @@ describe('CostGuard', () => {
 
     expect(idleSignal.action).toBe('scale_down');
     expect(idleSignal.score).toBeLessThan(0.4);
+  });
+});
+
+describe('AdaptiveCostSafetyArbiter', () => {
+  const baseRequest = {
+    tenantId: 'tenant-hcls',
+    operation: 'graphql' as const,
+    kind: 'read' as const,
+    estimatedCostUsd: 0.0000015,
+    estimatedRru: 40,
+    expectedLatencyMs: 220,
+    dataSensitivity: 'phi' as const,
+  };
+
+  const baseConsent = {
+    purpose: 'treatment' as const,
+    consented: true,
+    breakGlass: false,
+  };
+
+  const baseTelemetry = {
+    apiLatencyP95Ms: 240,
+    apiErrorRate: 0.002,
+    ingestLatencyP95Ms: 70,
+    costPerMillionRequestsUsd: DEFAULT_ARBITER_CONFIG.costBudgetPerMillionUsd * 0.4,
+  };
+
+  it('allows requests that are within cost, SLO, and consent guardrails', () => {
+    const arbiter = new AdaptiveCostSafetyArbiter();
+    const decision = arbiter.evaluate(baseRequest, baseConsent, baseTelemetry);
+
+    expect(decision.action).toBe('allow');
+    expect(decision.audit.telemetry.apiLatencyP95Ms).toBe(baseTelemetry.apiLatencyP95Ms);
+    expect(decision.audit.consent.purpose).toBe('treatment');
+  });
+
+  it('denies when consent is revoked and break-glass is not used', () => {
+    const arbiter = new AdaptiveCostSafetyArbiter();
+    const decision = arbiter.evaluate(
+      baseRequest,
+      { ...baseConsent, revoked: true },
+      baseTelemetry,
+    );
+
+    expect(decision.action).toBe('deny');
+    expect(decision.reason).toContain('revoked');
+    expect(decision.audit.consent.revoked).toBe(true);
+  });
+
+  it('throttles when latency and error pressure breach guardrails', () => {
+    const arbiter = new AdaptiveCostSafetyArbiter();
+    const decision = arbiter.evaluate(
+      { ...baseRequest, expectedLatencyMs: 900 },
+      baseConsent,
+      { ...baseTelemetry, apiLatencyP95Ms: 900, apiErrorRate: 0.04 },
+    );
+
+    expect(decision.action).toBe('throttle');
+    expect(decision.nextReviewMs).toBeGreaterThan(0);
+  });
+
+  it('defers bulk exports when cost or SLO burn exceeds thresholds', () => {
+    const arbiter = new AdaptiveCostSafetyArbiter();
+    const decision = arbiter.evaluate(
+      {
+        ...baseRequest,
+        operation: 'bulk-export',
+        estimatedCostUsd: 0.01,
+        estimatedRru: 260,
+        expectedLatencyMs: 1800,
+      },
+      baseConsent,
+      { ...baseTelemetry, costPerMillionRequestsUsd: DEFAULT_ARBITER_CONFIG.costBudgetPerMillionUsd * 1.1 },
+    );
+
+    expect(['defer', 'reroute']).toContain(decision.action);
+    expect(decision.targetWindowUtc).toBeDefined();
+  });
+
+  it('enforces differential privacy epsilon ceilings', () => {
+    const arbiter = new AdaptiveCostSafetyArbiter({ dpEpsilonCeiling: 0.5 });
+    const decision = arbiter.evaluate(
+      {
+        ...baseRequest,
+        usesDifferentialPrivacy: true,
+        dpEpsilon: 0.9,
+        dataSensitivity: 'phi',
+      },
+      baseConsent,
+      baseTelemetry,
+    );
+
+    expect(decision.action).toBe('throttle');
+    expect(decision.requiredDpEpsilon).toBe(0.5);
   });
 });
 
