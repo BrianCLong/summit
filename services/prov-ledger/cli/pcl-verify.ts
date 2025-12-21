@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { createHash } from 'crypto';
+import { createHash, verify } from 'crypto';
 import fs from 'fs';
 
 interface Manifest {
@@ -15,6 +15,8 @@ interface LedgerEntry {
   data: any;
   previousHash: string | null;
   hash: string;
+  signature: string;
+  publicKey: string;
 }
 
 // Canonical JSON stringify (must match server implementation)
@@ -39,6 +41,22 @@ function canonicalJSON(obj: any): string {
 
 function calculateHash(entry: { type: string, data: any, previousHash: string | null }): string {
   return createHash('sha256').update(canonicalJSON(entry)).digest('hex');
+}
+
+function computeMerkleRoot(hashes: string[]): string {
+  if (hashes.length === 0) return '';
+  let level = [...hashes];
+  while (level.length > 1) {
+    const next: string[] = [];
+    for (let i = 0; i < level.length; i += 2) {
+      const left = level[i];
+      const right = level[i + 1] ?? left;
+      const combined = Buffer.concat([Buffer.from(left, 'hex'), Buffer.from(right, 'hex')]);
+      next.push(createHash('sha256').update(combined).digest('hex'));
+    }
+    level = next;
+  }
+  return level[0];
 }
 
 async function verifyManifest(manifestPath: string) {
@@ -75,13 +93,20 @@ async function verifyManifest(manifestPath: string) {
          break;
       }
 
+      const isValidSignature = verify(null, Buffer.from(entry.hash, 'hex'), entry.publicKey, Buffer.from(entry.signature, 'base64'));
+      if (!isValidSignature) {
+        console.error(`[FAIL] Invalid signature for ${entry.id}`);
+        allValid = false;
+        break;
+      }
+
       previousHash = entry.hash;
     }
 
     if (manifest.entries.length > 0) {
-        const lastHash = manifest.entries[manifest.entries.length - 1].hash;
-        if (lastHash !== manifest.merkleRoot) {
-             console.error(`[FAIL] Merkle Root mismatch. Last Hash: ${lastHash}, Root: ${manifest.merkleRoot}`);
+        const recomputedRoot = computeMerkleRoot(manifest.entries.map(entry => entry.hash));
+        if (recomputedRoot !== manifest.merkleRoot) {
+             console.error(`[FAIL] Merkle Root mismatch. Recomputed: ${recomputedRoot}, Root: ${manifest.merkleRoot}`);
              allValid = false;
         }
     }

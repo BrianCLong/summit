@@ -3,6 +3,9 @@ import { calculateHash } from '../utils/hash.js';
 import { Pool } from 'pg';
 import crypto from 'crypto';
 import { newDb } from 'pg-mem';
+import { defaultSigner } from '../utils/ed25519.js';
+import { merkleRoot } from '../utils/merkle.js';
+import { eventBus } from '../utils/events.js';
 
 export class LedgerService {
   private static instance: LedgerService;
@@ -36,11 +39,19 @@ export class LedgerService {
         data JSONB NOT NULL,
         previous_hash TEXT,
         hash TEXT NOT NULL,
+        signature TEXT NOT NULL,
+        public_key TEXT NOT NULL,
         timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         seq SERIAL
       );
 
       CREATE INDEX IF NOT EXISTS idx_ledger_seq ON ledger_entries(seq);
+    `);
+
+    await this.pool.query(`
+      ALTER TABLE ledger_entries
+      ADD COLUMN IF NOT EXISTS signature TEXT DEFAULT '' NOT NULL,
+      ADD COLUMN IF NOT EXISTS public_key TEXT DEFAULT '' NOT NULL;
     `);
   }
 
@@ -62,7 +73,7 @@ export class LedgerService {
     return res.rows[0];
   }
 
-  private async appendEntry(type: 'evidence' | 'transform' | 'claim', id: string, data: any): Promise<string> {
+  private async appendEntry(type: 'evidence' | 'transform' | 'claim', id: string, data: any): Promise<LedgerEntry> {
     const previousEntry = await this.getPreviousEntry();
     const previousHash = previousEntry ? previousEntry.hash : null;
 
@@ -74,13 +85,16 @@ export class LedgerService {
     };
 
     const hash = calculateHash(entryPayload);
+    const signature = defaultSigner.sign(hash);
+    const publicKey = defaultSigner.getPublicKey();
 
     await this.pool.query(
-      'INSERT INTO ledger_entries (id, type, data, previous_hash, hash) VALUES ($1, $2, $3, $4, $5)',
-      [id, type, JSON.stringify(data), previousHash, hash]
+      'INSERT INTO ledger_entries (id, type, data, previous_hash, hash, signature, public_key) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+      [id, type, JSON.stringify(data), previousHash, hash, signature, publicKey]
     );
 
-    return hash;
+    const entry: LedgerEntry = { id, type, data, previousHash, hash, signature, publicKey };
+    return entry;
   }
 
   public async registerEvidence(req: { source: string, url?: string, blob?: string, license?: string, hash: string }): Promise<string> {
@@ -91,7 +105,8 @@ export class LedgerService {
       timestamp: new Date().toISOString()
     };
 
-    await this.appendEntry('evidence', evidenceId, evidence);
+    const entry = await this.appendEntry('evidence', evidenceId, evidence);
+    eventBus.emit('claims.v1.created', { evidenceId, hash: entry.hash, signature: entry.signature });
     return evidenceId;
   }
 
@@ -103,7 +118,8 @@ export class LedgerService {
       timestamp: new Date().toISOString()
     };
 
-    await this.appendEntry('transform', transformId, transform);
+    const entry = await this.appendEntry('transform', transformId, transform);
+    eventBus.emit('claims.v1.created', { transformId, hash: entry.hash, signature: entry.signature });
     return transformId;
   }
 
@@ -115,7 +131,8 @@ export class LedgerService {
       timestamp: new Date().toISOString()
     };
 
-    await this.appendEntry('claim', claimId, claim);
+    const entry = await this.appendEntry('claim', claimId, claim);
+    eventBus.emit('claims.v1.created', { claimId, hash: entry.hash, signature: entry.signature });
     return claimId;
   }
 
@@ -130,15 +147,21 @@ export class LedgerService {
       type: row.type,
       data: row.data,
       previousHash: row.previous_hash,
-      hash: row.hash
+      hash: row.hash,
+      signature: row.signature,
+      publicKey: row.public_key,
     }));
 
-    const merkleRoot = entries[entries.length - 1].hash;
+    const merkle = merkleRoot(entries.map(e => e.hash));
+    const deterministicBundleId = bundleId || `bundle_${merkle.slice(0, 12)}`;
 
-    return {
-      bundleId,
-      merkleRoot,
-      entries
+    const manifest: Manifest = {
+      bundleId: deterministicBundleId,
+      merkleRoot: merkle,
+      entries,
     };
+
+    eventBus.emit('manifests.v1.emitted', manifest);
+    return manifest;
   }
 }

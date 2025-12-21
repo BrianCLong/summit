@@ -35,6 +35,8 @@ export interface LedgerEntry {
   data: Evidence | Transform | Claim;
   previousHash: string | null;
   hash: string; // Hash of (previousHash + type + data)
+  signature: string; // Ed25519 signature over the hash
+  publicKey: string; // public key used for the signature
 }
 
 export interface Manifest {
