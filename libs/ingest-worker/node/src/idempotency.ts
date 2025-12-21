@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Idempotency Store
  *
@@ -132,7 +131,7 @@ export class PostgresIdempotencyStore implements IdempotencyStore {
        WHERE dedupe_key = $1 AND expires_at > NOW()`,
       [key]
     );
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   async set(key: string, metadata?: Record<string, unknown>): Promise<void> {
@@ -182,10 +181,10 @@ export class PostgresIdempotencyStore implements IdempotencyStore {
         [key, metadata ? JSON.stringify(metadata) : null, expiresAt]
       );
 
-      return result.rowCount > 0;
+      return (result.rowCount ?? 0) > 0;
     } catch (error) {
       // Check if it's a duplicate key error
-      if ((error as any).code === '23505') {
+      if (error && typeof error === 'object' && 'code' in error && error.code === '23505') {
         return false;
       }
       throw error;

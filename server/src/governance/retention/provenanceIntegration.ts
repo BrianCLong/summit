@@ -1,4 +1,3 @@
-// @ts-nocheck
 import crypto from 'crypto';
 import pino from 'pino';
 import { Pool } from 'pg';

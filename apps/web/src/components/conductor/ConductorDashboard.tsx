@@ -1,4 +1,3 @@
-// @ts-nocheck
 // apps/web/src/components/conductor/ConductorDashboard.tsx
 
 import React, { useState, useMemo } from 'react'
@@ -73,7 +72,7 @@ export const ConductorDashboard: React.FC = () => {
 
   // Calculate overall system health score
   const systemHealthScore = useMemo(() => {
-    if (!metrics) {return 0}
+    if (!metrics) return 0
 
     const weights = {
       routing: 0.25,

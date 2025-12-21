@@ -74,10 +74,11 @@ export class PolicyGuard {
             confidence: policy.severity === 'critical' ? 1.0 : 0.8,
           };
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Policy check failed', {
           policy: policy.name,
-          error: error.message,
+          error: errorMessage,
         });
 
         return {
@@ -161,7 +162,8 @@ export class PolicyGuard {
     // If data residency is specified, ensure it's compliant
     if (context.dataResidency) {
       const allowedRegions = ['US', 'EU', 'GLOBAL'];
-      return allowedRegions.includes(context.dataResidency);
+      const dataResidency = String(context.dataResidency);
+      return allowedRegions.includes(dataResidency);
     }
 
     // Default to allowed if no residency specified

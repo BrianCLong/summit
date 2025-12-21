@@ -1,7 +1,5 @@
-// @ts-nocheck
-
-import { BaseConnector } from '../base';
-import { ConnectorConfig, ConnectorSchema } from '../types';
+import { BaseConnector } from '../base.js';
+import { ConnectorConfig, ConnectorSchema } from '../types.js';
 import { Readable } from 'stream';
 import axios from 'axios';
 
@@ -38,11 +36,12 @@ export class RSSConnector extends BaseConnector {
               { name: 'pubDate', type: 'string', nullable: true },
               { name: 'content', type: 'string', nullable: true },
               { name: 'guid', type: 'string', nullable: true }
-          ]
+          ],
+          version: 1
       };
   }
 
-  async readStream(options?: any): Promise<Readable> {
+  async readStream(options?: Record<string, unknown>): Promise<Readable> {
       const stream = new Readable({ objectMode: true, read() {} });
       // In real implementation, use rss-parser
       // const Parser = require('rss-parser');

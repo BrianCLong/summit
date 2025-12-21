@@ -1,7 +1,7 @@
-// @ts-nocheck
 import { pool } from '../db/pg.js';
-import { provenanceLedger } from '../provenance/ledger';
-import * as crypto from 'crypto';
+import { provenanceLedger } from '../provenance/ledger.js';
+import crypto from 'crypto';
+import type { PoolClient } from 'pg';
 
 export interface EvidenceInput {
   evidence_hash: string;
@@ -197,7 +197,7 @@ export class ProvenanceClaimService {
     }
   }
 
-  private async linkClaimToEvidenceInternal(client: any, input: ClaimEvidenceLinkInput) {
+  private async linkClaimToEvidenceInternal(client: PoolClient, input: ClaimEvidenceLinkInput) {
     // Check if exists
     const check = await client.query(
       `SELECT id FROM claim_evidence_links WHERE claim_id=$1 AND evidence_id=$2 AND relation_type=$3`,
@@ -252,7 +252,7 @@ export class ProvenanceClaimService {
       );
       const claims = claimsRes.rows;
 
-      const items = claims.map((c: any) => ({
+      const items = claims.map((c: Record<string, unknown>) => ({
         id: c.id,
         type: 'claim',
         hash: c.content_hash,
@@ -260,7 +260,7 @@ export class ProvenanceClaimService {
       }));
 
       // Calculate Merkle Root
-      const hashes = items.map((i: any) => i.hash).sort();
+      const hashes = items.map((i: Record<string, unknown>) => i.hash as string).sort();
       const merkleRoot = this.computeMerkleRoot(hashes);
       const bundleId = `bundle-${crypto.randomUUID()}`;
 

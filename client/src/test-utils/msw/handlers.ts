@@ -1,10 +1,9 @@
-// @ts-nocheck
 import { graphql } from 'msw';
 
 // MSW GraphQL handlers for testing
 export const handlers = [
   // ServerStats query
-  graphql.query('ServerStats', (req: any, res: any, ctx: any) => {
+  graphql.query('ServerStats', (req, res, ctx) => {
     return res(ctx.data({
 
         serverStats: {
@@ -23,7 +22,7 @@ export const handlers = [
   }),
 
   // Investigations query
-  graphql.query('Investigations', (req: any, res: any, ctx: any) => {
+  graphql.query('Investigations', (req, res, ctx) => {
     return res(ctx.data({
         getInvestigations: [
           {
@@ -49,7 +48,7 @@ export const handlers = [
   }),
 
   // GraphData query for Graph Workbench
-  graphql.query('GW_GraphData', (req: any, res: any, ctx: any) => {
+  graphql.query('GW_GraphData', (req, res, ctx) => {
     return res(
       ctx.data({
         graphData: {
@@ -114,7 +113,7 @@ export const handlers = [
   }),
 
   // SearchEntities query
-  graphql.query('GW_SearchEntities', (req: any, res: any, ctx: any) => {
+  graphql.query('GW_SearchEntities', (req, res, ctx) => {
     return res(ctx.data({
       searchEntities: [
           {
@@ -132,11 +131,11 @@ export const handlers = [
   }),
 
   // EntityDetails query
-  graphql.query('GW_EntityDetails', (req: any, res: any, ctx: any) => {
+  graphql.query('GW_EntityDetails', (req, res, ctx) => {
     const { variables } = req;
     return res(ctx.data({
         getEntityDetails: {
-          id: (variables as any).entityId,
+          id: variables.entityId,
           type: 'Person',
           label: 'Entity Details',
           description: 'Detailed entity information',
@@ -158,7 +157,7 @@ export const handlers = [
   }),
 
   // Health check
-  graphql.query('HealthCheck', (req: any, res: any, ctx: any) => {
+  graphql.query('HealthCheck', (req, res, ctx) => {
     return res(ctx.data({
         health: 'OK',
 
@@ -166,11 +165,11 @@ export const handlers = [
   }),
 
   // Threat Analysis
-  graphql.query('ThreatAnalysis', (req: any, res: any, ctx: any) => {
+  graphql.query('ThreatAnalysis', (req, res, ctx) => {
     const { variables } = req;
     return res(ctx.data({
       threatAnalysis: {
-          entityId: (variables as any).entityId,
+          entityId: variables.entityId,
           riskScore: 0.85,
           threatLevel: 'HIGH',
           mitreAttacks: [
@@ -203,7 +202,7 @@ export const handlers = [
   }),
 
   // Timeline Events
-  graphql.query('TimelineEvents', (req: any, res: any, ctx: any) => {
+  graphql.query('TimelineEvents', (req, res, ctx) => {
     return res(
       ctx.data({
         timelineEvents: [
@@ -223,11 +222,11 @@ export const handlers = [
   }),
 
   // Entity Enrichment
-  graphql.query('EntityEnrichment', (req: any, res: any, ctx: any) => {
+  graphql.query('EntityEnrichment', (req, res, ctx) => {
     const { variables } = req;
     return res(ctx.data({
         entityEnrichment: {
-          entityId: (variables as any).entityId,
+          entityId: variables.entityId,
           externalSources: [
             {
               source: 'VirusTotal',

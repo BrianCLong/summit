@@ -1,9 +1,8 @@
-// @ts-nocheck
 /**
  * GraphRAG Service Tests
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import {
   EvidenceFirstGraphRagService,
   createGraphRagService,

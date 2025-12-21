@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { provenanceLedger } from '../provenance/ledger';
 import { ModelMetadata, ModelVersion } from './types';
 import { logger } from '../config/logger';

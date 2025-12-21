@@ -1,4 +1,3 @@
-// @ts-nocheck
 import rateLimit, { type Store, type Options, type IncrementResponse } from 'express-rate-limit';
 import type { Redis } from 'ioredis';
 import { getRedisClient } from '../config/database.js';

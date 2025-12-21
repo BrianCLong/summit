@@ -1,16 +1,15 @@
-// @ts-nocheck
-import { IntelGraphService, intelGraphService } from '../IntelGraphService';
-import { provenanceLedger } from '../../provenance/ledger';
-import { getDriver } from '../../graph/neo4j';
+import { IntelGraphService, intelGraphService } from '../IntelGraphService.js';
+import { provenanceLedger } from '../../provenance/ledger.js';
+import { getDriver } from '../../graph/neo4j.js';
 
 // Mock dependencies
-jest.mock('../../graph/neo4j', () => ({
+jest.mock('../../graph/neo4j.js', () => ({
   getDriver: jest.fn(),
 }));
 
-jest.mock('../../provenance/ledger', () => ({
+jest.mock('../../provenance/ledger.js', () => ({
   provenanceLedger: {
-    appendEntry: jest.fn(),
+    appendEntry: jest.fn<() => Promise<any>>(),
   },
 }));
 
@@ -18,7 +17,7 @@ jest.mock('../../provenance/ledger', () => ({
 const mockUUID = 'test-uuid-1234';
 const mockClaimUUID = 'claim-uuid-5678';
 jest.mock('crypto', () => ({
-  randomUUID: jest.fn().mockImplementation(() => 'generated-uuid'),
+  randomUUID: jest.fn<() => string>().mockImplementation(() => 'generated-uuid'),
 }));
 
 describe('IntelGraphService', () => {
@@ -29,17 +28,17 @@ describe('IntelGraphService', () => {
     jest.clearAllMocks();
 
     mockTx = {
-      run: jest.fn(),
+      run: jest.fn<() => Promise<any>>(),
     };
 
     mockSession = {
-      executeWrite: jest.fn((callback) => callback(mockTx)),
-      run: jest.fn(),
-      close: jest.fn(),
+      executeWrite: jest.fn<(callback: (tx: any) => Promise<any>) => Promise<any>>((callback) => callback(mockTx)),
+      run: jest.fn<() => Promise<any>>(),
+      close: jest.fn<() => Promise<void>>(),
     };
 
     (getDriver as jest.Mock).mockReturnValue({
-      session: jest.fn(() => mockSession),
+      session: jest.fn<() => any>(() => mockSession),
     });
 
     (provenanceLedger.appendEntry as jest.Mock).mockResolvedValue({

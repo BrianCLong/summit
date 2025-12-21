@@ -1,5 +1,4 @@
-// @ts-nocheck
-import { SlaEnforcer } from '../privacy/dp/SlaEnforcer';
+import { SlaEnforcer } from '../privacy/dp/SlaEnforcer.js';
 import { describe, it, expect } from '@jest/globals';
 
 describe('SlaEnforcer', () => {

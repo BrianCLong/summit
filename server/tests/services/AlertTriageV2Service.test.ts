@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import { describe, expect, it, jest, beforeEach, afterEach } from '@jest/globals';
 import { AlertTriageV2Service, TriageScore } from '../../src/services/AlertTriageV2Service';
 

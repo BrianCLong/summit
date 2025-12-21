@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Cross-Border Assistant Gateway
  *

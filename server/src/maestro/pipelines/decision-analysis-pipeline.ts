@@ -1,4 +1,3 @@
-// @ts-nocheck
 // server/src/maestro/pipelines/decision-analysis-pipeline.ts
 import { randomUUID } from 'crypto';
 import { IntelGraphService } from '../../services/IntelGraphService';

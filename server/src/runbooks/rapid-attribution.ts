@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Runbook R1: Rapid Attribution for Threat Intelligence
  *

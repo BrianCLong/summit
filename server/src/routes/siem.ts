@@ -1,11 +1,17 @@
-// @ts-nocheck
 /**
  * SIEM Management API Routes
  *
  * REST endpoints for managing SIEM integrations, providers, and event monitoring.
  */
 
-import { Router, Request, Response } from 'express';
+import { Router, type Request, type Response } from 'express';
+
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id?: string;
+    tenantId?: string;
+  };
+}
 import { siemService } from '../services/SIEMService.js';
 import { authMiddleware } from '../middleware/auth.js';
 import { rbacMiddleware } from '../middleware/withAuthAndPolicy.js';
@@ -58,7 +64,7 @@ router.get(
       logger.error('Failed to list SIEM providers', {
         component: 'SIEMRoutes',
         error: err.message,
-        userId: (req as any).user?.id,
+        userId: (req as AuthenticatedRequest).user?.id,
       });
       throw new AppError('Failed to retrieve SIEM providers', 500);
     }
@@ -99,7 +105,7 @@ router.get(
         component: 'SIEMRoutes',
         error: err.message,
         providerId: req.params.id,
-        userId: (req as any).user?.id,
+        userId: (req as AuthenticatedRequest).user?.id,
       });
       throw new AppError('Failed to retrieve SIEM provider', 500);
     }
@@ -144,8 +150,8 @@ router.put(
       logger.info('SIEM provider updated', {
         component: 'SIEMRoutes',
         providerId,
-        updatedBy: (req as any).user?.id,
-        tenantId: (req as any).user?.tenantId,
+        updatedBy: (req as AuthenticatedRequest).user?.id,
+        tenantId: (req as AuthenticatedRequest).user?.tenantId,
         changes: Object.keys(updates),
       });
 
@@ -163,7 +169,7 @@ router.put(
         component: 'SIEMRoutes',
         error: err.message,
         providerId: req.params.id,
-        userId: (req as any).user?.id,
+        userId: (req as AuthenticatedRequest).user?.id,
       });
       throw new AppError('Failed to update SIEM provider', 500);
     }
@@ -190,8 +196,8 @@ router.post(
       logger.info('Testing SIEM provider connectivity', {
         component: 'SIEMRoutes',
         providerId,
-        testedBy: (req as any).user?.id,
-        tenantId: (req as any).user?.tenantId,
+        testedBy: (req as AuthenticatedRequest).user?.id,
+        tenantId: (req as AuthenticatedRequest).user?.tenantId,
       });
 
       const testResult = await siemService.testProvider(providerId);
@@ -210,7 +216,7 @@ router.post(
         component: 'SIEMRoutes',
         error: err.message,
         providerId: req.params.id,
-        userId: (req as any).user?.id,
+        userId: (req as AuthenticatedRequest).user?.id,
       });
       throw new AppError('Failed to test SIEM provider', 500);
     }
@@ -246,13 +252,13 @@ router.post(
         source: req.body.source,
         message: req.body.message,
         details: req.body.details || {},
-        userId: (req as any).user?.id,
-        tenantId: (req as any).user?.tenantId,
+        userId: (req as AuthenticatedRequest).user?.id,
+        tenantId: (req as AuthenticatedRequest).user?.tenantId,
         ipAddress: req.ip,
         userAgent: req.get('User-Agent'),
         tags: req.body.tags || ['manual'],
         rawData: {
-          createdBy: (req as any).user?.id,
+          createdBy: (req as AuthenticatedRequest).user?.id,
           createdAt: new Date(),
           manual: true,
         },
@@ -264,8 +270,8 @@ router.post(
         component: 'SIEMRoutes',
         eventType: event.eventType,
         severity: event.severity,
-        sentBy: (req as any).user?.id,
-        tenantId: (req as any).user?.tenantId,
+        sentBy: (req as AuthenticatedRequest).user?.id,
+        tenantId: (req as AuthenticatedRequest).user?.tenantId,
       });
 
       res.json({
@@ -283,7 +289,7 @@ router.post(
       logger.error('Failed to send manual SIEM event', {
         component: 'SIEMRoutes',
         error: err.message,
-        userId: (req as any).user?.id,
+        userId: (req as AuthenticatedRequest).user?.id,
       });
       throw new AppError('Failed to send SIEM event', 500);
     }
@@ -332,7 +338,7 @@ router.get(
       logger.error('Failed to get SIEM status', {
         component: 'SIEMRoutes',
         error: err.message,
-        userId: (req as any).user?.id,
+        userId: (req as AuthenticatedRequest).user?.id,
       });
       throw new AppError('Failed to retrieve SIEM status', 500);
     }
@@ -420,7 +426,7 @@ router.get(
       logger.error('Failed to get SIEM metrics', {
         component: 'SIEMRoutes',
         error: err.message,
-        userId: (req as any).user?.id,
+        userId: (req as AuthenticatedRequest).user?.id,
       });
       throw new AppError('Failed to retrieve SIEM metrics', 500);
     }
@@ -454,8 +460,8 @@ router.post(
         severity: req.body.severity,
         category: req.body.category || 'security',
         indicators: req.body.indicators || [],
-        createdBy: (req as any).user?.id,
-        tenantId: (req as any).user?.tenantId,
+        createdBy: (req as AuthenticatedRequest).user?.id,
+        tenantId: (req as AuthenticatedRequest).user?.tenantId,
       };
 
       // Create SIEM event for the alert
@@ -472,8 +478,8 @@ router.post(
           indicators: alert.indicators,
           alertId: `alert-${Date.now()}`,
         },
-        userId: (req as any).user?.id,
-        tenantId: (req as any).user?.tenantId,
+        userId: (req as AuthenticatedRequest).user?.id,
+        tenantId: (req as AuthenticatedRequest).user?.tenantId,
         ipAddress: req.ip,
         userAgent: req.get('User-Agent'),
         tags: ['security', 'alert', 'manual'],
@@ -485,8 +491,8 @@ router.post(
         component: 'SIEMRoutes',
         alertTitle: alert.title,
         severity: alert.severity,
-        createdBy: (req as any).user?.id,
-        tenantId: (req as any).user?.tenantId,
+        createdBy: (req as AuthenticatedRequest).user?.id,
+        tenantId: (req as AuthenticatedRequest).user?.tenantId,
       });
 
       res.json({
@@ -503,7 +509,7 @@ router.post(
       logger.error('Failed to create security alert', {
         component: 'SIEMRoutes',
         error: err.message,
-        userId: (req as any).user?.id,
+        userId: (req as AuthenticatedRequest).user?.id,
       });
       throw new AppError('Failed to create security alert', 500);
     }

@@ -1,10 +1,13 @@
-// @ts-nocheck
 import React, { useRef, useEffect, useCallback } from 'react';
 import ForceGraph2D, { ForceGraphMethods } from 'react-force-graph-2d';
 import { useWorkspaceStore } from '../store/workspaceStore';
 
+interface GraphWrapperProps {
+  children: (width: number, height: number) => React.ReactNode;
+}
+
 // Simple wrapper to handle resize if hook doesn't exist
-const GraphWrapper = ({ children }: { children: (width: number, height: number) => React.ReactNode }) => {
+const GraphWrapper = ({ children }: GraphWrapperProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = React.useState({ width: 0, height: 0 });
 

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState } from 'react';
 import {
   Box,
@@ -570,7 +569,7 @@ export default function InvestigationDetail() {
 
             <Grid container spacing={2}>
               {investigation.evidence.map((evidence) => (
-                <Grid item xs={12} key={evidence.id}>
+                <Grid xs={12} key={evidence.id}>
                   <Card variant="outlined" sx={{ borderRadius: 2 }}>
                     <CardContent>
                       <Stack
@@ -700,7 +699,7 @@ export default function InvestigationDetail() {
 
             <Grid container spacing={2}>
               {investigation.entities.map((entity) => (
-                <Grid item xs={12} sm={6} md={4} key={entity.id}>
+                <Grid xs={12} sm={6} md={4} key={entity.id}>
                   <Card variant="outlined" sx={{ borderRadius: 2 }}>
                     <CardContent>
                       <Stack direction="row" alignItems="center" spacing={2}>
@@ -925,7 +924,7 @@ export default function InvestigationDetail() {
             </Typography>
 
             <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
+              <Grid xs={12} md={6}>
                 <Card variant="outlined" sx={{ borderRadius: 2 }}>
                   <CardContent>
                     <Typography variant="subtitle1" gutterBottom>
@@ -977,7 +976,7 @@ export default function InvestigationDetail() {
                 </Card>
               </Grid>
 
-              <Grid item xs={12} md={6}>
+              <Grid xs={12} md={6}>
                 <Card variant="outlined" sx={{ borderRadius: 2 }}>
                   <CardContent>
                     <Typography variant="subtitle1" gutterBottom>

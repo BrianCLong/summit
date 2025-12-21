@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { z } from 'zod';
 
 // Zod v4 compatibility types

@@ -1,5 +1,4 @@
-// @ts-nocheck
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { createSelector } from '@reduxjs/toolkit'
 // TODO: viewSync feature was removed - restore if needed
 // import { selectActiveQuery } from '../viewSync/viewSyncSlice'
@@ -25,15 +24,15 @@ const slice = createSlice({
     close: s => {
       s.open = false
     },
-    setPolicy: (s, a) => {
-      s.policy = a.payload as PolicyItem[]
+    setPolicy: (s, a: PayloadAction<PolicyItem[]>) => {
+      s.policy = a.payload
     },
   },
 })
 export const { open, close, setPolicy } = slice.actions
 export default slice.reducer
 
-export const selectExplain = (st: any) => st.explain as ExplainState
+export const selectExplain = (st: { explain: ExplainState }) => st.explain
 // TODO: Re-enable when viewSync feature is restored
 // export const selectExplainModel = createSelector(
 //   [selectActiveQuery, selectExplain],

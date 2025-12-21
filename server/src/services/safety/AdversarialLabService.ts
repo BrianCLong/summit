@@ -1,4 +1,3 @@
-// @ts-nocheck
 import pino from 'pino';
 
 const log = pino({ name: 'AdversarialLab' });

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Relationship DataLoader - Batch loading for relationships from Neo4j
  * Prevents N+1 query issues when fetching multiple relationships

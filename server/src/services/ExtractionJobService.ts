@@ -1,9 +1,8 @@
-// @ts-nocheck
-import { Queue, Worker, Job, QueueEvents } from 'bullmq';
-import { Pool } from 'pg';
+import type { Queue, Worker, Job, QueueEvents } from 'bullmq';
+import type { Pool } from 'pg';
 import { randomUUID as uuidv4 } from 'node:crypto';
 import pino from 'pino';
-import IORedis from 'ioredis';
+import type IORedis from 'ioredis';
 import { ProcessingStatus } from './MultimodalDataService.js';
 import { ExtractionEngine } from '../ai/ExtractionEngine.js';
 import OCREngine from '../ai/engines/OCREngine.js';
@@ -91,10 +90,10 @@ export interface MethodPerformance {
 
 export class ExtractionJobService {
   private db: Pool;
-  private redis: IORedis;
-  private extractionQueue: Queue;
-  private extractionWorker: Worker;
-  private queueEvents: QueueEvents;
+  private redis: any;
+  private extractionQueue: any;
+  private extractionWorker: any;
+  private queueEvents: any;
   private extractionEngine: ExtractionEngine;
   private ocrEngine: OCREngine;
   private objectDetectionEngine: ObjectDetectionEngine;
@@ -448,7 +447,7 @@ export class ExtractionJobService {
             `Completed extraction method ${method}: ${result.entities.length} entities, ${methodDuration}ms`,
           );
         } catch (methodError) {
-          const errorMsg = `Failed extraction method ${method}: ${methodError.message}`;
+          const errorMsg = `Failed extraction method ${method}: ${methodError instanceof Error ? methodError.message : String(methodError)}`;
           allErrors.push(errorMsg);
           logger.warn(errorMsg);
         }
@@ -492,7 +491,7 @@ export class ExtractionJobService {
       );
     } catch (error) {
       const duration = Date.now() - startTime;
-      const errorMsg = error.message || 'Unknown error';
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
 
       await this.updateJobStatus(
         jobId,
@@ -715,7 +714,7 @@ export class ExtractionJobService {
       return entities;
     } catch (error) {
       logger.error('OCR extraction failed:', error);
-      throw new Error(`OCR extraction failed: ${error.message}`);
+      throw new Error(`OCR extraction failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -766,7 +765,7 @@ export class ExtractionJobService {
       return entities;
     } catch (error) {
       logger.error('Object detection failed:', error);
-      throw new Error(`Object detection failed: ${error.message}`);
+      throw new Error(`Object detection failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -845,7 +844,7 @@ export class ExtractionJobService {
           } catch (parseError) {
             reject(
               new Error(
-                `Failed to parse speech-to-text results: ${parseError.message}`,
+                `Failed to parse speech-to-text results: ${parseError instanceof Error ? parseError.message : String(parseError)}`,
               ),
             );
           }
@@ -855,7 +854,7 @@ export class ExtractionJobService {
       });
 
       python.on('error', (error) => {
-        reject(new Error(`Failed to run speech-to-text: ${error.message}`));
+        reject(new Error(`Failed to run speech-to-text: ${error instanceof Error ? error.message : String(error)}`));
       });
     });
   }
@@ -929,7 +928,7 @@ export class ExtractionJobService {
           } catch (parseError) {
             reject(
               new Error(
-                `Failed to parse face detection results: ${parseError.message}`,
+                `Failed to parse face detection results: ${parseError instanceof Error ? parseError.message : String(parseError)}`,
               ),
             );
           }
@@ -939,7 +938,7 @@ export class ExtractionJobService {
       });
 
       python.on('error', (error) => {
-        reject(new Error(`Failed to run face detection: ${error.message}`));
+        reject(new Error(`Failed to run face detection: ${error instanceof Error ? error.message : String(error)}`));
       });
     });
   }
@@ -965,7 +964,7 @@ export class ExtractionJobService {
       try {
         textContent = fs.readFileSync(filePath, 'utf8');
       } catch (error) {
-        reject(new Error(`Failed to read text file: ${error.message}`));
+        reject(new Error(`Failed to read text file: ${error instanceof Error ? error.message : String(error)}`));
         return;
       }
 
@@ -1031,7 +1030,7 @@ export class ExtractionJobService {
           } catch (parseError) {
             reject(
               new Error(
-                `Failed to parse text analysis results: ${parseError.message}`,
+                `Failed to parse text analysis results: ${parseError instanceof Error ? parseError.message : String(parseError)}`,
               ),
             );
           }
@@ -1041,7 +1040,7 @@ export class ExtractionJobService {
       });
 
       python.on('error', (error) => {
-        reject(new Error(`Failed to run text analysis: ${error.message}`));
+        reject(new Error(`Failed to run text analysis: ${error instanceof Error ? error.message : String(error)}`));
       });
     });
   }
@@ -1097,7 +1096,7 @@ export class ExtractionJobService {
         await this.db.query(query, values);
         savedCount++;
       } catch (error) {
-        logger.warn(`Failed to save entity: ${error.message}`);
+        logger.warn(`Failed to save entity: ${error instanceof Error ? error.message : String(error)}`);
       }
     }
 

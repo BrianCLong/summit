@@ -1,4 +1,3 @@
-// @ts-nocheck
 import Redis from 'ioredis';
 import pino from 'pino';
 
@@ -20,11 +19,11 @@ const metrics = {
 };
 
 export const cached =
-  (key: string, ttl: number, fn: () => Promise<any>) => async () => {
+  <T>(key: string, ttl: number, fn: () => Promise<T>) => async (): Promise<T> => {
     const hit = await redisClient.get(key);
     if (hit) {
       metrics.cacheHit.inc();
-      return JSON.parse(hit);
+      return JSON.parse(hit) as T;
     }
     const val = await fn();
     await redisClient.setex(key, ttl, JSON.stringify(val));

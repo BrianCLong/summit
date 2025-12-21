@@ -1,9 +1,7 @@
-// @ts-nocheck
 import { Pool } from 'pg';
 import EmbeddingService from './EmbeddingService.js';
 import { synonymService } from './SynonymService.js';
-// @ts-ignore
-import { default as pino } from 'pino';
+import pino from 'pino';
 
 // Manual interface to match what search.ts expects if we return raw rows,
 // but we defined SemanticSearchResult.
@@ -53,7 +51,7 @@ export interface SemanticSearchOptions {
 export default class SemanticSearchService {
   private embeddingService: EmbeddingService;
   private logger = pino({ name: 'SemanticSearchService' });
-  private pool: Pool | null;
+  private pool: Pool | null = null;
   private readonly ownsPool: boolean;
   private readonly poolFactory: () => Pool;
   private readonly healthCheckIntervalMs: number;
@@ -110,7 +108,7 @@ export default class SemanticSearchService {
   }
 
   // Deprecated indexDocument for backward compatibility
-  async indexDocument(doc: any) {
+  async indexDocument(doc: { id?: string; text?: string }) {
     this.logger.warn("indexDocument is deprecated in SemanticSearchService. Use specific indexing methods.");
     if (doc.id && doc.text) {
       await this.indexCase(doc.id, doc.text);
@@ -118,7 +116,7 @@ export default class SemanticSearchService {
   }
 
   // Deprecated search method for backward compatibility
-  async search(query: string, filters: any = {}, limit = 10): Promise<any[]> {
+  async search(query: string, filters: Record<string, unknown> = {}, limit = 10): Promise<Array<{ id: string; text: string; score: number; metadata: { status: string; date: Date } }>> {
     this.logger.warn("search() is deprecated in SemanticSearchService. Use searchCases() or update usage.");
     const results = await this.searchCases(query, {
       status: undefined,
@@ -216,13 +214,13 @@ export default class SemanticSearchService {
 
         const res = await client.query(sql, params);
 
-        return res.rows.map(r => ({
-          id: r.id,
-          title: r.title,
-          status: r.status,
-          created_at: r.created_at,
-          similarity: parseFloat(r.similarity),
-          score: parseFloat(r.similarity)
+        return res.rows.map((r: Record<string, unknown>) => ({
+          id: r.id as string,
+          title: r.title as string,
+          status: r.status as string,
+          created_at: r.created_at as Date,
+          similarity: parseFloat(r.similarity as string),
+          score: parseFloat(r.similarity as string)
         }));
       } finally {
         client.release();

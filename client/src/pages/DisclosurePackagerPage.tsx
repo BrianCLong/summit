@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, {
   useCallback,
   useEffect,
@@ -270,7 +269,7 @@ const DisclosurePackagerPage: React.FC = () => {
         </Box>
 
         <Grid container spacing={3} component="form" onSubmit={handleSubmit}>
-          <Grid item xs={12} md={7}>
+          <Grid xs={12} md={7}>
             <Card variant="outlined">
               <CardContent>
                 <Stack spacing={3}>
@@ -279,7 +278,7 @@ const DisclosurePackagerPage: React.FC = () => {
                       Timeframe & tenant
                     </Typography>
                     <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
+                      <Grid xs={12} sm={6}>
                         <TextField
                           label="Start"
                           type="datetime-local"
@@ -290,7 +289,7 @@ const DisclosurePackagerPage: React.FC = () => {
                           InputLabelProps={{ shrink: true }}
                         />
                       </Grid>
-                      <Grid item xs={12} sm={6}>
+                      <Grid xs={12} sm={6}>
                         <TextField
                           label="End"
                           type="datetime-local"
@@ -301,7 +300,7 @@ const DisclosurePackagerPage: React.FC = () => {
                           InputLabelProps={{ shrink: true }}
                         />
                       </Grid>
-                      <Grid item xs={12} sm={6}>
+                      <Grid xs={12} sm={6}>
                         <TextField
                           label="Tenant ID"
                           value={tenantId}
@@ -311,7 +310,7 @@ const DisclosurePackagerPage: React.FC = () => {
                           helperText="Tenant isolation enforced on every export request."
                         />
                       </Grid>
-                      <Grid item xs={12} sm={6}>
+                      <Grid xs={12} sm={6}>
                         <TextField
                           label="Completion webhook (optional)"
                           placeholder="https://example.com/webhooks/disclosures"
@@ -456,7 +455,7 @@ const DisclosurePackagerPage: React.FC = () => {
             </Card>
           </Grid>
 
-          <Grid item xs={12} md={5}>
+          <Grid xs={12} md={5}>
             <Stack spacing={3}>
               <Card variant="outlined">
                 <CardContent>

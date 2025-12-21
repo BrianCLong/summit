@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Gauge, Counter } from 'prom-client';
 import { getOrRegisterMetric } from '../utils/metrics';
 

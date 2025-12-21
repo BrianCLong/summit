@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { EpistemicStatus, RiskClassification } from '../types.js';
 
 export interface EvidenceBundle {
@@ -15,7 +14,7 @@ export interface EpistemicConflict {
   nodeId: string;
   property: string;
   values: {
-    value: any;
+    value: unknown;
     source: string;
     confidence: number;
     timestamp: string;
@@ -37,7 +36,7 @@ export class EvidenceService {
    * Resolves conflicts between sources.
    * Simple Last-Write-Wins or Trusted-Source-Wins logic.
    */
-  resolveConflict(conflict: EpistemicConflict): any {
+  resolveConflict(conflict: EpistemicConflict): unknown {
     // 1. Prefer 'maestro' or 'internal' sources
     const trusted = conflict.values.find(v => v.source === 'maestro');
     if (trusted) return trusted.value;

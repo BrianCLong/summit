@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * V24 Global Coherence Ecosystem - Main Integration Module
  *

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
@@ -372,7 +371,7 @@ export class CommandConsoleService {
     return { gaGateFailures: gaFailures, policyDenials, killSwitchActivations };
   }
 
-  private readJsonIfExists(pathsToTry: string[]): any | null {
+  private readJsonIfExists(pathsToTry: string[]): Record<string, unknown> | null {
     for (const p of pathsToTry) {
       if (fs.existsSync(p)) {
         try {

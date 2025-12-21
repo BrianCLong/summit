@@ -1,4 +1,3 @@
-// @ts-nocheck
 import logger from '../../config/logger.js';
 import {
   featureFlagEnabledGauge,

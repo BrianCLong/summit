@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Guardrail Abstraction
  *
@@ -10,11 +9,11 @@ export interface GuardResult<T> {
   allowed: boolean;
   data: T; // The (possibly transformed/sanitized) data
   reason?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface Guard<T> {
-  validate(data: T, context?: any): Promise<GuardResult<T>>;
+  validate(data: T, context?: unknown): Promise<GuardResult<T>>;
 }
 
 export class GuardrailPipeline<TInput, TOutput> {
@@ -43,16 +42,19 @@ export class GuardrailPipeline<TInput, TOutput> {
   async execute(
     input: TInput,
     executor: (input: TInput) => Promise<TOutput>,
-    context?: any
+    context?: unknown
   ): Promise<TOutput> {
     // Input Guards
     let currentInput = input;
     for (const guard of this.inputGuards) {
       const result = await guard.validate(currentInput, context);
       if (!result.allowed) {
-        const error = new Error(`Guardrail blocked input: ${result.reason}`);
-        (error as any).code = 'GUARDRAIL_VIOLATION';
-        (error as any).metadata = result.metadata;
+        const error = new Error(`Guardrail blocked input: ${result.reason}`) as Error & {
+          code: string;
+          metadata?: Record<string, unknown>;
+        };
+        error.code = 'GUARDRAIL_VIOLATION';
+        error.metadata = result.metadata;
         throw error;
       }
       currentInput = result.data;
@@ -66,9 +68,12 @@ export class GuardrailPipeline<TInput, TOutput> {
     for (const guard of this.outputGuards) {
       const result = await guard.validate(currentOutput, context);
       if (!result.allowed) {
-        const error = new Error(`Guardrail blocked output: ${result.reason}`);
-        (error as any).code = 'GUARDRAIL_VIOLATION';
-        (error as any).metadata = result.metadata;
+        const error = new Error(`Guardrail blocked output: ${result.reason}`) as Error & {
+          code: string;
+          metadata?: Record<string, unknown>;
+        };
+        error.code = 'GUARDRAIL_VIOLATION';
+        error.metadata = result.metadata;
         throw error;
       }
       currentOutput = result.data;

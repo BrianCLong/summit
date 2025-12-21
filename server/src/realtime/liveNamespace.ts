@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Server } from 'socket.io';
 import { createAdapter } from '@socket.io/redis-adapter';
 import { getRedisClient } from '../db/redis.js';
@@ -27,7 +26,6 @@ export function mountLiveNamespace(io: Server): void {
         | undefined;
       if (!token || !workspaceId) return next(new Error('UNAUTHORIZED'));
       const user = await verifyToken(token);
-      // @ts-ignore – attach user for handlers
       socket.data.user = user;
       socket.join(workspaceId);
       next();
@@ -40,20 +38,20 @@ export function mountLiveNamespace(io: Server): void {
     const workspaceId = socket.handshake.auth?.workspaceId as string;
     logger.info({ workspaceId }, 'live:connected');
 
-    socket.on('presence:update', (presence) => {
+    socket.on('presence:update', (presence: any): void => {
       presence.updatedAt = new Date().toISOString();
       nsp.to(workspaceId).emit('presence:update', presence);
     });
 
-    socket.on('graph:ops', (ops) => {
+    socket.on('graph:ops', (ops: any): void => {
       nsp.to(workspaceId).emit('graph:commit', ops);
     });
 
-    socket.on('comment:add', (comment) => {
+    socket.on('comment:add', (comment: any): void => {
       nsp.to(workspaceId).emit('comment:new', comment);
     });
 
-    socket.on('disconnect', (reason) => {
+    socket.on('disconnect', (reason: string): void => {
       logger.info({ workspaceId, reason }, 'live:disconnected');
     });
   });

@@ -1,22 +1,8 @@
-// @ts-nocheck
-import { createRequire } from 'module';
-// @ts-ignore
-const require = createRequire(import.meta.url);
-const RelationshipService = require('./RelationshipService.js');
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const RelationshipService = require('./RelationshipService.js');
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const RelationshipService = require('./RelationshipService.js');
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const RelationshipService = require('./RelationshipService.js');
 import { RelationshipService } from './RelationshipService.js';
 import EmbeddingService from './EmbeddingService.js';
 import { getNeo4jDriver } from '../config/database.js';
 import logger from '../utils/logger.js';
-import { Driver, Session } from 'neo4j-driver';
+import type { Driver } from 'neo4j-driver';
 
 export interface PredictionOptions {
   threshold?: number;
@@ -186,7 +172,7 @@ export class PredictiveRelationshipService {
   /**
    * Generates embedding for an entity and updates it in Neo4j
    */
-  async generateAndStoreEmbedding(entityId: string, entityProps: any): Promise<number[]> {
+  async generateAndStoreEmbedding(entityId: string, entityProps: Record<string, unknown>): Promise<number[]> {
     const textParts = [];
     if (entityProps.text) textParts.push(entityProps.text);
     if (entityProps.description) textParts.push(entityProps.description);

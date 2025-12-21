@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Auto-Remediation Hooks
  * Implements automated response actions for threat hunting findings

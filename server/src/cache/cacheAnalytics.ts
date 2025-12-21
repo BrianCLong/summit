@@ -1,4 +1,3 @@
-// @ts-nocheck
 import config from '../config/index.js';
 import { getRedisClient } from '../config/database.js';
 import {
@@ -11,13 +10,29 @@ import {
 import { getWarmerStats } from './warmers.js';
 import { getLocalCacheStats } from './responseCache.js';
 
-function sumMetric(metric: any): number {
-  if (!metric?.values?.length) return 0;
-  return metric.values.reduce((acc: number, v: any) => acc + (v.value || 0), 0);
+interface MetricValue {
+  value?: number;
 }
 
-async function getRedisInfo() {
-  const client: any = getRedisClient();
+interface Metric {
+  values?: MetricValue[];
+}
+
+function sumMetric(metric: Metric | undefined): number {
+  if (!metric?.values?.length) return 0;
+  return metric.values.reduce((acc: number, v: MetricValue) => acc + (v.value || 0), 0);
+}
+
+interface RedisInfo {
+  connected: boolean;
+  mode?: 'cluster' | 'single' | 'disabled';
+  usedMemory?: number;
+  connectedClients?: number;
+  error?: string;
+}
+
+async function getRedisInfo(): Promise<RedisInfo> {
+  const client = getRedisClient();
   if (!client) {
     return { connected: false, mode: 'disabled' };
   }

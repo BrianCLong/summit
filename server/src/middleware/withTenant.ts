@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Tenant Isolation Middleware
  *

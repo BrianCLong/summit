@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Proof-of-Non-Collection (PNC) Report Service
  *
@@ -21,6 +20,8 @@ import { advancedAuditSystem } from '../audit/advanced-audit-system.js';
 import crypto from 'crypto';
 import fs from 'fs/promises';
 import path from 'path';
+import type { Pool } from 'pg';
+import type { RedisClientType } from 'redis';
 
 // ============================================================================
 // Types and Interfaces
@@ -47,9 +48,9 @@ export interface PNCReport {
   samplingMethod: 'random' | 'stratified' | 'systematic';
 
   // Results
-  nonCollectionAssertions: Record<string, any>;
+  nonCollectionAssertions: Record<string, unknown>;
   violationsDetected: number;
-  violationDetails: any[];
+  violationDetails: unknown[];
 
   // Cryptographic proof
   reportHash?: string;
@@ -84,7 +85,7 @@ export interface PNCAuditSample {
 
   // Evidence
   verificationMethod: string;
-  evidence: Record<string, any>;
+  evidence: Record<string, unknown>;
 }
 
 export interface DataCategory {
@@ -152,8 +153,8 @@ const DATA_CATEGORIES: DataCategory[] = [
 
 export class ProofOfNonCollectionService {
   private circuitBreaker: CircuitBreaker;
-  private redis: any;
-  private postgres: any;
+  private redis: RedisClientType | null = null;
+  private postgres: Pool | null = null;
 
   // Configuration
   private readonly REPORTS_DIR = process.env.PNC_REPORTS_DIR || '/var/lib/summit/pnc-reports';
@@ -175,7 +176,9 @@ export class ProofOfNonCollectionService {
       this.redis = await getRedisClient();
       this.postgres = getPostgresPool();
     } catch (error) {
-      logger.error('Failed to initialize ProofOfNonCollectionService connections', { error });
+      logger.error('Failed to initialize ProofOfNonCollectionService connections', {
+        error: error instanceof Error ? error.message : String(error)
+      });
       throw error;
     }
   }
@@ -184,7 +187,9 @@ export class ProofOfNonCollectionService {
     try {
       await fs.mkdir(this.REPORTS_DIR, { recursive: true });
     } catch (error) {
-      logger.error('Failed to create PNC reports directory', { error });
+      logger.error('Failed to create PNC reports directory', {
+        error: error instanceof Error ? error.message : String(error)
+      });
     }
   }
 

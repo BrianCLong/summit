@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Theme System Type Definitions
  * Complete type safety for Material-UI theme customization

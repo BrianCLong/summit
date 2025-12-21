@@ -3,9 +3,9 @@
  * Implements append-only event logging with tamper-proof integrity
  */
 
-import { Pool } from 'pg';
+import type { Pool } from 'pg';
 import { randomUUID, createHash } from 'crypto';
-import logger from '../config/logger';
+import logger from '../config/logger.js';
 
 const serviceLogger = logger.child({ name: 'EventSourcingService' });
 type PoolClientLike = Awaited<ReturnType<Pool['connect']>>;

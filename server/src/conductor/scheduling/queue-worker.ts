@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Queue Worker for Processing Scheduled Tasks
 // Implements worker processes that consume tasks from Redis queues
 

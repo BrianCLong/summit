@@ -1,8 +1,6 @@
-// @ts-nocheck
 import { OpenAI } from 'openai';
 import logger from '../utils/logger.js';
 import { tracer } from '../observability/tracing.js';
-import { applicationErrors } from '../monitoring/metrics.js';
 import { metrics as prometheusMetrics } from '../observability/metrics.js';
 
 export interface LLMConfig {
@@ -27,6 +25,7 @@ export interface CompletionOptions {
   temperature?: number;
   maxTokens?: number;
   responseFormat?: 'json' | 'text';
+  prompt?: string;
 }
 
 export interface ChatMessage {
@@ -108,7 +107,7 @@ export class LLMService {
         }
 
         return response.text;
-      } catch (error: any) {
+      } catch (error) {
         this.metrics.errorCount++;
         // Record failure latency/count if needed
         if (prometheusMetrics.llmRequestDuration) {
@@ -121,7 +120,7 @@ export class LLMService {
         logger.error('LLM request failed', {
           provider,
           model,
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
         });
         throw error;
       }
@@ -170,7 +169,7 @@ export class LLMService {
 
         return text;
 
-      } catch (error: any) {
+      } catch (error) {
         this.metrics.errorCount++;
         if (prometheusMetrics.llmRequestDuration) {
           prometheusMetrics.llmRequestDuration.observe({
@@ -182,7 +181,7 @@ export class LLMService {
         logger.error('LLM chat request failed', {
           provider,
           model,
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
         });
         throw error;
       }
@@ -192,8 +191,14 @@ export class LLMService {
   /**
    * OpenAI implementation
    */
-  private async callOpenAI(prompt: string, options: CompletionOptions) {
-    const body: any = {
+  private async callOpenAI(prompt: string, options: CompletionOptions): Promise<{ text: string; usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number }; provider: string }> {
+    const body: {
+      model: string;
+      messages: { role: string; content: string }[];
+      temperature: number;
+      max_tokens?: number;
+      response_format?: { type: string };
+    } = {
       model: options.model || this.config.defaultModel,
       messages: [{ role: 'user', content: prompt }],
       temperature: options.temperature || this.config.temperature,
@@ -216,25 +221,25 @@ export class LLMService {
   /**
    * Anthropic implementation (placeholder)
    */
-  private async callAnthropic(prompt: string, options: CompletionOptions): Promise<any> {
+  private async callAnthropic(_prompt: string, _options: CompletionOptions): Promise<{ text: string; usage?: unknown; provider: string }> {
     throw new Error('Anthropic provider not implemented');
   }
 
   /**
    * Google implementation (placeholder)
    */
-  private async callGoogle(prompt: string, options: CompletionOptions): Promise<any> {
+  private async callGoogle(_prompt: string, _options: CompletionOptions): Promise<{ text: string; usage?: unknown; provider: string }> {
     throw new Error('Google provider not implemented');
   }
 
   /**
    * Ollama implementation (placeholder)
    */
-  private async callOllama(prompt: string, options: CompletionOptions): Promise<any> {
+  private async callOllama(_prompt: string, _options: CompletionOptions): Promise<{ text: string; usage?: unknown; provider: string }> {
     throw new Error('Ollama provider not implemented');
   }
 
-  private updateMetrics(latency: number, usage: any, provider: string = 'openai', model: string = 'unknown') {
+  private updateMetrics(latency: number, usage: { total_tokens?: number; prompt_tokens?: number; completion_tokens?: number } | undefined, provider: string = 'openai', model: string = 'unknown'): void {
     this.metrics.totalRequests++;
     this.metrics.totalTokens += usage?.total_tokens || 0;
     this.metrics.averageLatency =

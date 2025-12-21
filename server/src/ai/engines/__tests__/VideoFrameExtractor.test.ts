@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { VideoFrameExtractor } from '../VideoFrameExtractor';
 import ffmpeg from 'fluent-ffmpeg';
 import fs from 'fs/promises';

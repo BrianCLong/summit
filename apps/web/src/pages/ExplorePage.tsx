@@ -1,8 +1,6 @@
-// @ts-nocheck
 import React, { useState, useEffect } from 'react'
-import { Search, Filter, Settings, Download, RefreshCw, Shield, FileCheck } from 'lucide-react'
+import { Search, Filter, Settings, Download, RefreshCw, Shield, FileCheck, History } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
-import { Search, Filter, Settings, Download, RefreshCw, History } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { SearchBar } from '@/components/ui/SearchBar'
 import { EntityDrawer } from '@/components/panels/EntityDrawer'
@@ -23,7 +21,7 @@ import type {
   GraphLayout,
 } from '@/types'
 
-export default function ExplorePage() {
+export default function ExplorePage(): React.ReactElement {
   // GraphQL hooks
   const {
     data: entitiesData,

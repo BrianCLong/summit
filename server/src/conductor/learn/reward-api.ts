@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Reward API for Online Learning Router
 // Collects feedback signals to improve expert routing decisions
 

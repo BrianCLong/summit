@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { DefensivePsyOpsService } from '../../src/services/DefensivePsyOpsService';
 import { EventEmitter } from 'events';
 import { createRequire } from 'module';

@@ -1,5 +1,4 @@
-// @ts-nocheck
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import {
   EvidenceFirstGraphRagService,
 } from '../../services/graphrag/service.js';

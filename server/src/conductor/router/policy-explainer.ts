@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Policy Explanation Service for Router Decisions
 // Provides detailed explanations of routing decisions and policy enforcement
 

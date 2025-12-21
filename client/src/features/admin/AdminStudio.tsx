@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import OverridesPanel from './OverridesPanel';
 import CostExplorer from './CostExplorer';
@@ -444,9 +443,9 @@ kubectl set env deployment/intelgraph-api PQ_BYPASS=1
                   <label style={{ display: 'flex', flexDirection: 'column' }}>
                     <span style={{ fontWeight: 600 }}>MODEL_PROVIDER</span>
                     <select
-                      value={cfg.MODEL_PROVIDER || 'openai'}
+                      value={cfg?.MODEL_PROVIDER || 'openai'}
                       onChange={(e) =>
-                        setCfg({ ...cfg, MODEL_PROVIDER: e.target.value })
+                        cfg && setCfg({ ...cfg, MODEL_PROVIDER: e.target.value })
                       }
                     >
                       <option value="openai">OpenAI</option>
@@ -459,9 +458,9 @@ kubectl set env deployment/intelgraph-api PQ_BYPASS=1
                   <label style={{ display: 'flex', flexDirection: 'column' }}>
                     <span style={{ fontWeight: 600 }}>MODEL_NAME</span>
                     <input
-                      value={cfg.MODEL_NAME || ''}
+                      value={cfg?.MODEL_NAME || ''}
                       onChange={(e) =>
-                        setCfg({ ...cfg, MODEL_NAME: e.target.value })
+                        cfg && setCfg({ ...cfg, MODEL_NAME: e.target.value })
                       }
                       placeholder="e.g., gpt-4-turbo-preview"
                     />
@@ -475,9 +474,9 @@ kubectl set env deployment/intelgraph-api PQ_BYPASS=1
                       step="0.1"
                       min="0"
                       max="1"
-                      value={cfg.TEMPERATURE ?? 0.2}
+                      value={cfg?.TEMPERATURE ?? 0.2}
                       onChange={(e) =>
-                        setCfg({ ...cfg, TEMPERATURE: Number(e.target.value) })
+                        cfg && setCfg({ ...cfg, TEMPERATURE: Number(e.target.value) })
                       }
                     />
                   </label>
@@ -488,9 +487,9 @@ kubectl set env deployment/intelgraph-api PQ_BYPASS=1
                       step="0.1"
                       min="0"
                       max="1"
-                      value={cfg.TOP_P ?? 1.0}
+                      value={cfg?.TOP_P ?? 1.0}
                       onChange={(e) =>
-                        setCfg({ ...cfg, TOP_P: Number(e.target.value) })
+                        cfg && setCfg({ ...cfg, TOP_P: Number(e.target.value) })
                       }
                     />
                   </label>
@@ -500,9 +499,9 @@ kubectl set env deployment/intelgraph-api PQ_BYPASS=1
                       type="number"
                       min="1"
                       max="100000"
-                      value={cfg.MAX_TOKENS ?? 4096}
+                      value={cfg?.MAX_TOKENS ?? 4096}
                       onChange={(e) =>
-                        setCfg({ ...cfg, MAX_TOKENS: Number(e.target.value) })
+                        cfg && setCfg({ ...cfg, MAX_TOKENS: Number(e.target.value) })
                       }
                     />
                   </label>
@@ -512,9 +511,9 @@ kubectl set env deployment/intelgraph-api PQ_BYPASS=1
                       type="number"
                       step="0.01"
                       min="0"
-                      value={cfg.BUDGET_CAP_USD ?? 10}
+                      value={cfg?.BUDGET_CAP_USD ?? 10}
                       onChange={(e) =>
-                        setCfg({
+                        cfg && setCfg({
                           ...cfg,
                           BUDGET_CAP_USD: Number(e.target.value),
                         })
@@ -530,31 +529,31 @@ kubectl set env deployment/intelgraph-api PQ_BYPASS=1
                     maxWidth: 720,
                   }}
                 >
-                  {Object.keys(cfg || {}).map((k) => (
+                  {cfg && Object.keys(cfg).map((k) => (
                     <label
                       key={k}
                       style={{ display: 'flex', flexDirection: 'column' }}
                     >
                       <span style={{ fontWeight: 600 }}>{k}</span>
-                      {typeof cfg[k] === 'boolean' ? (
+                      {typeof (cfg as any)[k] === 'boolean' ? (
                         <input
                           type="checkbox"
-                          checked={!!cfg[k]}
+                          checked={!!(cfg as any)[k]}
                           onChange={(e) =>
                             setCfg({
                               ...cfg,
-                              [k]: e.target.checked as (typeof cfg)[string],
-                            })
+                              [k]: e.target.checked,
+                            } as Config)
                           }
                         />
                       ) : (
                         <input
-                          value={String(cfg[k])}
+                          value={String((cfg as any)[k])}
                           onChange={(e) =>
                             setCfg({
                               ...cfg,
-                              [k]: (e.target.value as unknown) as (typeof cfg)[string],
-                            })
+                              [k]: e.target.value,
+                            } as Config)
                           }
                         />
                       )}
@@ -621,7 +620,7 @@ kubectl set env deployment/intelgraph-api PQ_BYPASS=1
               checked={!!cfg?.TEMPORAL_ENABLED}
               onChange={async (e) => {
                 const enabled = e.target.checked;
-                setCfg({ ...cfg, TEMPORAL_ENABLED: enabled });
+                cfg && setCfg({ ...cfg, TEMPORAL_ENABLED: enabled });
                 await fetch('/api/admin/temporal/toggle', {
                   method: 'POST',
                   headers: { 'content-type': 'application/json' },

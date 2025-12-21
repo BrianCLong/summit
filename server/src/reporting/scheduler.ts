@@ -1,4 +1,3 @@
-// @ts-nocheck
 import cron, { ScheduledTask } from 'node-cron';
 import { AccessContext, ScheduledReportJob } from './types';
 import { ReportingService } from './service';

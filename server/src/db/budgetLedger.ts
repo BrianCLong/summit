@@ -1,11 +1,10 @@
-// @ts-nocheck
 /**
  * Budget Ledger: Postgres-backed FinOps spending tracker
  * Source of truth for tenant budgets and detailed audit trail
  */
 
 import { Pool, PoolClient } from 'pg';
-import logger from '../utils/logger';
+import logger from '../utils/logger.js';
 
 export interface TenantBudget {
   tenantId: string;

@@ -1,6 +1,5 @@
-// @ts-nocheck
-
-import express from 'express';
+import express, { Response } from 'express';
+import type { AuthenticatedRequest } from './types.js';
 import { IngestionService } from '../aurelius/services/IngestionService';
 import { InventionService } from '../aurelius/services/InventionService';
 import { PriorArtService } from '../aurelius/services/PriorArtService';
@@ -15,91 +14,91 @@ router.use(ensureAuthenticated);
 router.use(tenantContext);
 
 // --- IP Harvesting ---
-router.post('/ingest/external', async (req, res) => {
+router.post('/ingest/external', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { source, query } = req.body;
     const result = await IngestionService.getInstance().ingestExternal(
       source,
       query,
-      (req as any).user.tenantId
+      req.user?.tenantId
     );
     res.json(result);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
 });
 
 // --- Prior Art ---
-router.post('/prior-art/search', async (req, res) => {
+router.post('/prior-art/search', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { query } = req.body;
     const result = await PriorArtService.getInstance().findSimilar(
       query,
-      (req as any).user.tenantId
+      req.user?.tenantId
     );
     res.json(result);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
 });
 
-router.post('/prior-art/cluster', async (req, res) => {
+router.post('/prior-art/cluster', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    await PriorArtService.getInstance().clusterPatents((req as any).user.tenantId);
+    await PriorArtService.getInstance().clusterPatents(req.user?.tenantId);
     res.json({ status: 'Clustering started' });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
 });
 
 // --- Invention Engine ---
-router.post('/invention/generate', async (req, res) => {
+router.post('/invention/generate', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { concepts, problem } = req.body;
     const result = await InventionService.getInstance().generateInvention(
       concepts,
       problem,
-      (req as any).user.tenantId
+      req.user?.tenantId
     );
     res.json(result);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
 });
 
 // --- Competitive Intelligence ---
-router.get('/competitors/market-map', async (req, res) => {
+router.get('/competitors/market-map', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const result = await CompetitiveIntelligenceService.getInstance().getMarketMap(
-      (req as any).user.tenantId
+      req.user?.tenantId
     );
     res.json(result);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
 });
 
 // --- Foresight ---
-router.post('/foresight/simulate', async (req, res) => {
+router.post('/foresight/simulate', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { scenarioName, parameters } = req.body;
     const result = await ForesightService.getInstance().runSimulation(
       scenarioName,
       parameters,
-      (req as any).user.tenantId
+      req.user?.tenantId
     );
     res.json(result);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
 });
 
-router.post('/foresight/opportunities', async (req, res) => {
+router.post('/foresight/opportunities', async (req: AuthenticatedRequest, res: Response) => {
     try {
-        await ForesightService.getInstance().generateOpportunities((req as any).user.tenantId);
+        await ForesightService.getInstance().generateOpportunities(req.user?.tenantId);
         res.json({ status: 'Opportunity mapping started' });
-    } catch (err: any) {
-        res.status(500).json({ error: err.message });
+    } catch (err) {
+        res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
     }
 });
 

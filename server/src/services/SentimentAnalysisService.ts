@@ -1,4 +1,3 @@
-// @ts-nocheck
 import Sentiment from 'sentiment';
 import natural from 'natural';
 import logger from '../utils/logger.js';

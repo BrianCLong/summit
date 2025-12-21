@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * NL Graph Query Copilot Service
  *

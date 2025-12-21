@@ -1,4 +1,3 @@
-// @ts-nocheck
 import DataLoader from 'dataloader';
 import { getPostgresPool, getNeo4jDriver } from '../config/database.js';
 import { createSupportTicketLoader, SupportTicketComment } from './dataloaders/supportTicketLoader.js';

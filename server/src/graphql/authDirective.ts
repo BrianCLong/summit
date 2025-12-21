@@ -1,7 +1,7 @@
-// @ts-nocheck
 import { mapSchema, getDirective, MapperKind } from '@graphql-tools/utils';
 import { defaultFieldResolver, GraphQLSchema, GraphQLError } from 'graphql';
 import AuthService from '../services/AuthService.js';
+import type { GraphQLContext } from './apollo-v5-server.js';
 
 const authService = new AuthService();
 
@@ -13,7 +13,7 @@ export function authDirectiveTransformer(schema: GraphQLSchema, directiveName = 
         const { requires } = authDirective;
         if (requires) {
           const { resolve = defaultFieldResolver } = fieldConfig;
-          fieldConfig.resolve = async function (source, args, context, info) {
+          fieldConfig.resolve = async function (source: any, args: any, context: GraphQLContext, info: any) {
             const user = context.user;
             if (!user) {
               throw new GraphQLError('Not authenticated', {

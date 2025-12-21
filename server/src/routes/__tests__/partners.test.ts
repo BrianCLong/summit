@@ -1,7 +1,6 @@
-// @ts-nocheck
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import request from 'supertest';
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import partnerRouter from '../partners.js';
 import { apiKeyService } from '../../services/ApiKeyService.js';
 import { partnerService } from '../../services/PartnerService.js';
@@ -31,8 +30,8 @@ jest.mock('../../db/pg.js', () => ({
 const app = express();
 app.use(express.json());
 // Mock auth middleware
-app.use((req: any, res, next) => {
-    req.user = { id: 'test-user', tenantId: 'test-tenant' };
+app.use((req: Request, res: Response, next: NextFunction) => {
+    (req as any).user = { id: 'test-user', tenantId: 'test-tenant' };
     next();
 });
 app.use('/api/partners', partnerRouter);

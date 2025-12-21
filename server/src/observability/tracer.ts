@@ -1,19 +1,11 @@
-// @ts-nocheck
 /**
  * OpenTelemetry Distributed Tracing for IntelGraph Server
  * Provides end-to-end visibility across all service operations
  */
 
-// @ts-ignore
 import { NodeSDK } from '@opentelemetry/sdk-node';
-import * as OpenTelemetryResources from '@opentelemetry/resources';
-// @ts-ignore
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
-// @ts-ignore
-import { resourceFromAttributes } from '@opentelemetry/resources';
-// import { Resource } from '@opentelemetry/resources/build/src/Resource.js';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+import { Resource } from '@opentelemetry/resources';
+import { SEMRESATTRS_SERVICE_NAME, SEMRESATTRS_SERVICE_VERSION, SEMRESATTRS_DEPLOYMENT_ENVIRONMENT, SEMRESATTRS_SERVICE_NAMESPACE } from '@opentelemetry/semantic-conventions';
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
@@ -22,19 +14,17 @@ import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentation
 import {
   trace,
   context,
-  // @ts-ignore
   propagation,
   SpanStatusCode,
   SpanKind,
   Span,
-  // @ts-ignore
   Context,
 } from '@opentelemetry/api';
+import type { Attributes } from '@opentelemetry/api';
 import { cfg } from '../config.js';
-// @ts-ignore
-import { default as pino } from 'pino';
+import pino from 'pino';
 
-const logger = (pino as any)({ name: 'otel-tracer' });
+const logger = pino({ name: 'otel-tracer' });
 
 export interface TracingConfig {
   serviceName: string;
@@ -49,7 +39,7 @@ export interface TracingConfig {
 
 export class IntelGraphTracer {
   private sdk: NodeSDK | null = null;
-  private tracer: any;
+  private tracer: ReturnType<typeof trace.getTracer>;
   private initialized = false;
 
   constructor(private config: TracingConfig) {
@@ -67,14 +57,12 @@ export class IntelGraphTracer {
 
     try {
       // Create resource with service metadata
-      const resource = resourceFromAttributes({
-        [SemanticResourceAttributes.SERVICE_NAME]: this.config.serviceName,
-        [SemanticResourceAttributes.SERVICE_VERSION]: this.config.serviceVersion,
-        [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]:
-          this.config.environment,
-        [SemanticResourceAttributes.SERVICE_NAMESPACE]: 'intelgraph',
+      const resource = new Resource({
+        [SEMRESATTRS_SERVICE_NAME]: this.config.serviceName,
+        [SEMRESATTRS_SERVICE_VERSION]: this.config.serviceVersion,
+        [SEMRESATTRS_DEPLOYMENT_ENVIRONMENT]: this.config.environment,
+        [SEMRESATTRS_SERVICE_NAMESPACE]: 'intelgraph',
       });
-      const resource = {};
 
       // Configure Exporters
       // Priority: OTLP > Jaeger
@@ -153,12 +141,12 @@ export class IntelGraphTracer {
   startSpan(
     name: string,
     options?: {
-      kind?: any;
-      attributes?: Record<string, any>;
-      parent?: Span | any;
+      kind?: SpanKind;
+      attributes?: Attributes;
+      parent?: Span | Context;
     },
   ): Span {
-    const spanOptions: any = {
+    const spanOptions = {
       kind: options?.kind || SpanKind.INTERNAL,
       attributes: options?.attributes || {},
     };
@@ -181,8 +169,8 @@ export class IntelGraphTracer {
     name: string,
     fn: (span: Span) => Promise<T>,
     options?: {
-      kind?: any;
-      attributes?: Record<string, any>;
+      kind?: SpanKind;
+      attributes?: Attributes;
     },
   ): Promise<T> {
     const span = this.startSpan(name, options);
@@ -212,7 +200,7 @@ export class IntelGraphTracer {
   }
 
   // Add event to current span
-  addEvent(name: string, attributes?: Record<string, any>): void {
+  addEvent(name: string, attributes?: Attributes): void {
     const span = this.getCurrentSpan();
     if (span) {
       span.addEvent(name, attributes);
@@ -220,7 +208,7 @@ export class IntelGraphTracer {
   }
 
   // Set attribute on current span
-  setAttribute(key: string, value: any): void {
+  setAttribute(key: string, value: string | number | boolean): void {
     const span = this.getCurrentSpan();
     if (span) {
       span.setAttribute(key, value);
@@ -240,12 +228,12 @@ export class IntelGraphTracer {
   }
 
   // Extract trace context from headers
-  extractContext(headers: Record<string, any>): Context {
+  extractContext(headers: Record<string, string | string[] | undefined>): Context {
     return propagation.extract(context.active(), headers);
   }
 
   // Inject trace context into headers
-  injectContext(headers: Record<string, any>): void {
+  injectContext(headers: Record<string, string | string[] | undefined>): void {
     propagation.inject(context.active(), headers);
   }
 
@@ -314,7 +302,7 @@ export class IntelGraphTracer {
     serviceName: string,
     methodName: string,
     fn: () => Promise<T>,
-    parameters?: Record<string, any>,
+    parameters?: Record<string, unknown>,
   ): Promise<T> {
     return this.withSpan(
       `${serviceName}.${methodName}`,
@@ -369,14 +357,14 @@ export function getTracer(): IntelGraphTracer {
 // Decorator for automatic method tracing
 export function traced(operationName?: string) {
   return function (
-    target: any,
+    target: unknown,
     propertyKey: string,
     descriptor: PropertyDescriptor,
   ) {
     const originalMethod = descriptor.value;
-    const traceName = operationName || `${target.constructor.name}.${propertyKey}`;
+    const traceName = operationName || `${(target as { constructor: { name: string } }).constructor.name}.${propertyKey}`;
 
-    descriptor.value = async function (...args: any[]) {
+    descriptor.value = async function (this: unknown, ...args: unknown[]) {
       const tracer = getTracer();
       return tracer.withSpan(traceName, async () => {
         return originalMethod.apply(this, args);

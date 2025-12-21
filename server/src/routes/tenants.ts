@@ -1,5 +1,4 @@
-// @ts-nocheck
-import { Router } from 'express';
+import { Router, type Request, type Response, type NextFunction } from 'express';
 import { z } from 'zod';
 import { tenantService, createTenantSchema } from '../services/TenantService.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
@@ -10,6 +9,15 @@ import { getPostgresPool } from '../config/database.js';
 import archiver from 'archiver';
 import { createHash, randomUUID } from 'crypto';
 import provisionRouter from './tenants/provision.js';
+
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id?: string;
+    tenantId?: string;
+    tenant_id?: string;
+    role?: string;
+  };
+}
 
 const router = Router();
 
@@ -29,20 +37,23 @@ const auditQuerySchema = z.object({
 router.use('/provision', provisionRouter);
 
 function policyGate() {
-  return (req: any, _res: any, next: any) => {
+  return (req: Request, _res: Response, next: NextFunction): void => {
+    const authReq = req as AuthenticatedRequest;
     req.body = { ...req.body, tenantId: req.params.id };
-    return next();
+    next();
   };
 }
 
-function ensureTenantScope(req: any, res: any, next: any) {
+function ensureTenantScope(req: Request, res: Response, next: NextFunction): void {
+  const authReq = req as AuthenticatedRequest;
   const tenantId = req.params.id;
-  const userTenant = req.user?.tenantId || req.user?.tenant_id;
-  const isSuper = ['SUPER_ADMIN', 'ADMIN', 'admin'].includes(req.user?.role);
+  const userTenant = authReq.user?.tenantId || authReq.user?.tenant_id;
+  const isSuper = ['SUPER_ADMIN', 'ADMIN', 'admin'].includes(authReq.user?.role || '');
   if (!isSuper && userTenant && userTenant !== tenantId) {
-    return res.status(403).json({ success: false, error: 'Forbidden' });
+    res.status(403).json({ success: false, error: 'Forbidden' });
+    return;
   }
-  return next();
+  next();
 }
 
 function buildReceipt(action: string, tenantId: string, actorId: string) {
@@ -65,13 +76,14 @@ function buildReceipt(action: string, tenantId: string, actorId: string) {
  * @desc Create a new tenant (Self-Serve)
  * @access Protected (Requires Authentication)
  */
-router.post('/', ensureAuthenticated, ensurePolicy('create', 'tenant'), async (req, res) => {
+router.post('/', ensureAuthenticated, ensurePolicy('create', 'tenant'), async (req: Request, res: Response) => {
   try {
+    const authReq = req as AuthenticatedRequest;
     // Validate request body
     const input = createTenantSchema.parse(req.body);
 
     // Get actor from authenticated user
-    const actorId = req.user?.id;
+    const actorId = authReq.user?.id;
     if (!actorId) {
         return res.status(401).json({ success: false, error: 'Unauthorized: No user ID found' });
     }
@@ -110,8 +122,9 @@ router.post('/', ensureAuthenticated, ensurePolicy('create', 'tenant'), async (r
  * @desc Get tenant details
  * @access Protected
  */
-router.get('/:id', ensureAuthenticated, async (req, res) => {
+router.get('/:id', ensureAuthenticated, async (req: Request, res: Response) => {
     try {
+        const authReq = req as AuthenticatedRequest;
         const tenantId = req.params.id;
         const tenant = await tenantService.getTenant(tenantId);
 
@@ -119,8 +132,8 @@ router.get('/:id', ensureAuthenticated, async (req, res) => {
             return res.status(404).json({ success: false, error: 'Tenant not found' });
         }
 
-        const userId = req.user?.id;
-        const userTenantId = req.user?.tenantId || req.user?.tenant_id; // Check both standard props
+        const userId = authReq.user?.id;
+        const userTenantId = authReq.user?.tenantId || authReq.user?.tenant_id; // Check both standard props
 
         // Authorization:
         // 1. User is the creator of the tenant
@@ -128,7 +141,7 @@ router.get('/:id', ensureAuthenticated, async (req, res) => {
         // 3. User is a platform super-admin
         const isCreator = tenant.createdBy === userId;
         const isMember = userTenantId === tenant.id;
-        const isSuperAdmin = req.user?.role === 'SUPER_ADMIN';
+        const isSuperAdmin = authReq.user?.role === 'SUPER_ADMIN';
 
         if (!isCreator && !isMember && !isSuperAdmin) {
             logger.warn(`Access denied for user ${userId} to tenant ${tenantId}`);
@@ -148,14 +161,15 @@ router.get(
   ensureTenantScope,
   policyGate(),
   ensurePolicy('read', 'tenant'),
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     try {
+      const authReq = req as AuthenticatedRequest;
       const tenantId = req.params.id;
       const data = await tenantService.getTenantSettings(tenantId);
       return res.json({
         success: true,
         data,
-        receipt: buildReceipt('TENANT_SETTINGS_VIEWED', tenantId, req.user?.id),
+        receipt: buildReceipt('TENANT_SETTINGS_VIEWED', tenantId, authReq.user?.id || 'unknown'),
       });
     } catch (error) {
       logger.error('Error in GET /api/tenants/:id/settings:', error);
@@ -173,11 +187,12 @@ router.put(
   ensureTenantScope,
   policyGate(),
   ensurePolicy('update', 'tenant'),
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     try {
+      const authReq = req as AuthenticatedRequest;
       const body = settingsSchema.parse(req.body);
       const tenantId = req.params.id;
-      const actorId = req.user?.id;
+      const actorId = authReq.user?.id || 'unknown';
       const updated = await tenantService.updateSettings(tenantId, body.settings, actorId);
       return res.json({
         success: true,
@@ -203,11 +218,12 @@ router.post(
   ensureTenantScope,
   policyGate(),
   ensurePolicy('update', 'tenant'),
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     try {
+      const authReq = req as AuthenticatedRequest;
       const { reason } = disableSchema.parse(req.body);
       const tenantId = req.params.id;
-      const actorId = req.user?.id;
+      const actorId = authReq.user?.id || 'unknown';
       const updated = await tenantService.disableTenant(tenantId, actorId, reason);
       return res.json({
         success: true,
@@ -233,8 +249,9 @@ router.get(
   ensureTenantScope,
   policyGate(),
   ensurePolicy('read', 'tenant'),
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     try {
+      const authReq = req as AuthenticatedRequest;
       const query = auditQuerySchema.parse(req.query);
       const tenantId = req.params.id;
       const repo = new ProvenanceRepo(getPostgresPool());
@@ -242,7 +259,7 @@ router.get(
       return res.json({
         success: true,
         data: events,
-        receipt: buildReceipt('TENANT_AUDIT_VIEWED', tenantId, req.user?.id),
+        receipt: buildReceipt('TENANT_AUDIT_VIEWED', tenantId, authReq.user?.id || 'unknown'),
       });
     } catch (error) {
       logger.error('Error in GET /api/tenants/:id/audit:', error);
@@ -257,8 +274,9 @@ router.get(
   ensureTenantScope,
   policyGate(),
   ensurePolicy('read', 'tenant'),
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     try {
+      const authReq = req as AuthenticatedRequest;
       const tenantId = req.params.id;
       const repo = new ProvenanceRepo(getPostgresPool());
       const events = await repo.by('investigation', tenantId, undefined, 500, 0, tenantId);
@@ -272,14 +290,15 @@ router.get(
       const archive = archiver('zip', { zlib: { level: 9 } });
       archive.on('error', (err) => {
         logger.error('Archive error', err);
-        return res.status(500).end(`Archive error: ${err.message}`);
+        res.status(500).end(`Archive error: ${err.message}`);
       });
       archive.pipe(res);
 
+      const actorId = authReq.user?.id || 'unknown';
       const metadata = {
         tenantId,
         exportedAt: new Date().toISOString(),
-        actorId: req.user?.id,
+        actorId,
         eventCount: events.length,
       };
       archive.append(JSON.stringify(metadata, null, 2), { name: 'metadata.json' });
@@ -292,7 +311,7 @@ router.get(
       archive.append(
         JSON.stringify(
           {
-            receipt: buildReceipt('TENANT_EVIDENCE_EXPORTED', tenantId, req.user?.id),
+            receipt: buildReceipt('TENANT_EVIDENCE_EXPORTED', tenantId, actorId),
             bundleHash,
           },
           null,

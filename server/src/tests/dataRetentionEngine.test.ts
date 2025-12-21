@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Pool } from 'pg';
 import { DataRetentionEngine } from '../governance/retention/dataRetentionEngine.js';
 import { RetentionScheduler } from '../governance/retention/scheduler.js';
@@ -6,7 +5,7 @@ import { DatasetMetadata, LegalHold } from '../governance/retention/types.js';
 import { RetentionAuditLogger } from '../governance/retention/auditLogger.js';
 import { jest, describe, it, test, expect } from '@jest/globals';
 
-function createMockPool() {
+function createMockPool(): Pool {
   return {
     query: jest.fn().mockResolvedValue({ rows: [], rowCount: 0 }),
   } as unknown as Pool;

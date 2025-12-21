@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
   approveApproval,
   createApproval,
@@ -14,11 +13,11 @@ import {
 const approvalsStore: any[] = [];
 
 jest.mock('../../db/postgres.js', () => {
-  const buildResponse = (rows: any[]) => ({ rows });
+  const buildResponse = (rows: any[]): { rows: any[] } => ({ rows });
 
   return {
     getPostgresPool: () => ({
-      query: jest.fn(async (text: string, params: any[] = []) => {
+      query: jest.fn<(text: string, params?: any[]) => Promise<{ rows: any[] }>>(async (text: string, params: any[] = []) => {
         if (text.startsWith('INSERT INTO approvals')) {
           const approval = {
             id: `app-${approvalsStore.length + 1}`,

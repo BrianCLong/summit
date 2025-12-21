@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Multi-Region Failover with Data Replication
 // Provides automated failover capabilities across multiple geographic regions
 

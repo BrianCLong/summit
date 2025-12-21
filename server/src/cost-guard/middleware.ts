@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Cost Guard Middleware
  *
@@ -41,8 +40,8 @@ export interface CostGuardOptions {
   onBudgetExceeded?: (context: CostGuardContext, reason: string) => void;
   onRateLimited?: (context: CostGuardContext) => void;
   skipPaths?: string[];
-  extractTenantId?: (req: Request) => string;
-  extractUserId?: (req: Request) => string;
+  extractTenantId?: (req: Request) => string | undefined;
+  extractUserId?: (req: Request) => string | undefined;
 }
 
 export class CostGuardError extends Error {
@@ -70,12 +69,16 @@ export class CostGuardError extends Error {
  * Express middleware for cost guard
  * Checks cost allowance before allowing requests to proceed
  */
-export function costGuardMiddleware(options: CostGuardOptions = {}): (req: Request, res: Response, next: NextFunction) => Promise<void> {
+export function costGuardMiddleware(
+  options: CostGuardOptions = {},
+): (req: Request, res: Response, next: NextFunction) => Promise<void> {
   const {
     enabled = true,
     skipPaths = ['/health', '/metrics', '/ready'],
-    extractTenantId = (req) => req.headers['x-tenant-id'] as string || 'default',
-    extractUserId = (req) => req.headers['x-user-id'] as string || 'anonymous',
+    extractTenantId = (req) =>
+      (req.headers['x-tenant-id'] as string | undefined) || 'default',
+    extractUserId = (req) =>
+      (req.headers['x-user-id'] as string | undefined) || 'anonymous',
     onBudgetExceeded,
     onRateLimited,
   } = options;
@@ -86,7 +89,7 @@ export function costGuardMiddleware(options: CostGuardOptions = {}): (req: Reque
     }
 
     // Skip health check and metrics endpoints
-    if (skipPaths.some(path => req.path.startsWith(path))) {
+    if (skipPaths.some((path) => req.path.startsWith(path))) {
       return next();
     }
 
@@ -155,8 +158,14 @@ export function costGuardMiddleware(options: CostGuardOptions = {}): (req: Reque
 
         // Add rate limit headers
         res.set('X-RateLimit-Cost', 'true');
-        res.set('X-RateLimit-Budget-Remaining', costCheck.budgetRemaining.toFixed(4));
-        res.set('X-RateLimit-Utilization', (costCheck.budgetUtilization * 100).toFixed(2));
+        res.set(
+          'X-RateLimit-Budget-Remaining',
+          costCheck.budgetRemaining.toFixed(4),
+        );
+        res.set(
+          'X-RateLimit-Utilization',
+          ((costCheck.budgetUtilization ?? 0) * 100).toFixed(2),
+        );
       }
 
       // Attach cost context to request for later recording
@@ -322,13 +331,26 @@ export async function withCostGuard<T>(
  *   },
  * };
  */
-export function withCostGuardResolver<TArgs = any, TResult = any>(
-  resolver: (parent: any, args: TArgs, context: any, info: any) => Promise<TResult>,
-  options: { operation: string; complexity?: number } = { operation: 'graphql_query' },
+export function withCostGuardResolver<TArgs = unknown, TResult = unknown>(
+  resolver: (
+    parent: unknown,
+    args: TArgs,
+    context: unknown,
+    info: unknown,
+  ) => Promise<TResult>,
+  options: { operation: string; complexity?: number } = {
+    operation: 'graphql_query',
+  },
 ) {
-  return async (parent: any, args: TArgs, context: any, info: any): Promise<TResult> => {
-    const tenantId = context.tenantId || 'default';
-    const userId = context.user?.id || 'anonymous';
+  return async (
+    parent: unknown,
+    args: TArgs,
+    context: unknown,
+    info: unknown,
+  ): Promise<TResult> => {
+    const ctx = context as { tenantId?: string; user?: { id?: string } };
+    const tenantId = ctx.tenantId || 'default';
+    const userId = ctx.user?.id || 'anonymous';
 
     const costContext: CostGuardContext = {
       tenantId,
@@ -336,9 +358,11 @@ export function withCostGuardResolver<TArgs = any, TResult = any>(
       operation: options.operation,
       complexity: options.complexity,
       metadata: {
-        fieldName: info.fieldName,
-        operationType: info.operation?.operation,
-        parentType: info.parentType?.name,
+        fieldName: (info as { fieldName?: string }).fieldName,
+        operationType: (info as { operation?: { operation?: string } }).operation
+          ?.operation,
+        parentType: (info as { parentType?: { name?: string } }).parentType
+          ?.name,
       },
     };
 

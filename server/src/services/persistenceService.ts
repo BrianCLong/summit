@@ -1,5 +1,4 @@
-// @ts-nocheck
-import { cacheService } from './cacheService';
+import { cacheService } from './cacheService.js';
 
 export interface Investigation {
   id: string;
@@ -10,7 +9,7 @@ export interface Investigation {
   updatedAt: string;
   nodeCount: number;
   edgeCount: number;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }
 
 export interface GraphEntity {
@@ -18,7 +17,7 @@ export interface GraphEntity {
   type: string;
   label: string;
   description?: string;
-  properties: any;
+  properties: Record<string, unknown>;
   confidence: number;
   source: string;
   investigationId?: string;
@@ -37,7 +36,7 @@ export interface GraphRelationship {
   type: string;
   label: string;
   description?: string;
-  properties: any;
+  properties: Record<string, unknown>;
   confidence: number;
   source: string;
   fromEntityId: string;
@@ -178,7 +177,7 @@ class PersistenceService {
     this.investigations.set(newInvestigation.id, newInvestigation);
 
     // Invalidate cache
-    await cacheService.delete('investigations:all');
+    await cacheService.del('investigations:all');
 
     console.log(`[PERSISTENCE] Created investigation: ${newInvestigation.id}`);
     return newInvestigation;
@@ -255,9 +254,9 @@ class PersistenceService {
     this.entities.set(newEntity.id, newEntity);
 
     // Invalidate relevant caches
-    await cacheService.delete('entities:all');
+    await cacheService.del('entities:all');
     if (newEntity.investigationId) {
-      await cacheService.delete(
+      await cacheService.del(
         `entities:investigation:${newEntity.investigationId}`,
       );
     }
@@ -307,7 +306,6 @@ class PersistenceService {
       relationships: {
         total: this.relationships.size,
       },
-      cache: cacheService.getStats(),
     };
 
     return stats;

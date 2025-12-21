@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { writeAudit } from '../utils/audit.js';
 import logger from '../utils/logger.js';
 
@@ -6,14 +5,16 @@ import logger from '../utils/logger.js';
 export interface Principal {
   id: string;
   role: string;
-  [key: string]: any;
+  tenantId?: string;
+  email?: string;
+  [key: string]: unknown;
 }
 
 export interface ResourceRef {
   id?: string;
   type?: string;
   tenantId?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface PolicyContext {
@@ -99,11 +100,11 @@ export const policyService = PolicyService.getInstance();
 interface PolicySpec {
   action: string;
   getResource?: (
-    parent: any,
-    args: any,
-    context: any,
-    info: any,
-  ) => Promise<any> | any;
+    parent: unknown,
+    args: unknown,
+    context: unknown,
+    info: unknown,
+  ) => Promise<unknown> | unknown;
 }
 
 export class PolicyError extends Error {
@@ -125,46 +126,48 @@ export class PolicyError extends Error {
   }
 }
 
-export function withPolicy<T extends (...args: any[]) => any>(
+export function withPolicy<T extends (...args: unknown[]) => unknown>(
   resolver: T,
   spec: PolicySpec,
 ): T {
-  return (async (parent: any, args: any, context: any, info: any) => {
-    const user = context.user || {};
+  return (async (parent: unknown, args: unknown, context: unknown, info: unknown) => {
+    const ctx = context as Record<string, unknown>;
+    const user = (ctx.user || {}) as Record<string, unknown>;
     const resource = spec.getResource
-      ? await spec.getResource(parent, args, context, info)
+      ? ((await spec.getResource(parent, args, context, info)) as Record<string, unknown>)
       : {};
 
-    const ctx: PolicyContext = {
-        principal: user,
+    const policyContext: PolicyContext = {
+        principal: user as Principal,
         resource,
         action: spec.action,
         environment: {
-            ip: context.req?.ip,
-            userAgent: context.req?.headers?.['user-agent'],
+            ip: (ctx.req as Record<string, unknown>)?.ip as string | undefined,
+            userAgent: ((ctx.req as Record<string, unknown>)?.headers as Record<string, unknown>)?.['user-agent'] as string | undefined,
             time: new Date().toISOString()
         }
     };
 
-    const decision = await policyService.evaluate(ctx);
+    const decision = await policyService.evaluate(policyContext);
 
-    const requestId = context?.req?.id || context.requestId;
-    const traceId = context?.traceId;
+    const requestId = (ctx.req as Record<string, unknown>)?.id || ctx.requestId;
+    const traceId = ctx.traceId;
+    const infoObj = info as Record<string, unknown>;
 
     // Use the existing writeAudit utility if available, or update it later
     try {
         await writeAudit({
-        userId: user.id,
-        userEmail: user.email,
-        tenantId: user.tenantId || resource?.tenantId,
+        userId: user.id as string | undefined,
+        userEmail: user.email as string | undefined,
+        tenantId: (user.tenantId || resource?.tenantId) as string | undefined,
         action: spec.action,
-        resourceType: info?.fieldName,
-        resourceId: resource?.id,
+        resourceType: infoObj?.fieldName as string | undefined,
+        resourceId: resource?.id as string | undefined,
         details: {
             decision: decision.allow ? 'allow' : 'deny',
             reason: decision.reason,
-            requestId,
-            traceId,
+            requestId: requestId as string | undefined,
+            traceId: traceId as string | undefined,
         },
         success: decision.allow,
         errorMessage: decision.reason
@@ -174,7 +177,7 @@ export function withPolicy<T extends (...args: any[]) => any>(
         logger.error('Audit write failed', e);
     }
 
-    context.reasonForAccess = spec.action;
+    ctx.reasonForAccess = spec.action;
     if (!decision.allow) {
       throw new PolicyError({
         code: 'POLICY_DENIED',

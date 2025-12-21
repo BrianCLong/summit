@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * GraphQL @budget directive - Enforces token and cost limits at the resolver level
  * Provides deterministic budget enforcement with comprehensive telemetry
@@ -8,6 +7,7 @@ import {
   defaultFieldResolver,
   GraphQLField,
   GraphQLFieldResolver,
+  GraphQLSchema,
 } from 'graphql';
 import { mapSchema, getDirective, MapperKind } from '@graphql-tools/utils';
 import {
@@ -39,16 +39,18 @@ interface BudgetDirectiveArgs {
   model?: string;
 }
 
+interface PromptPayload {
+  messages?: Array<{ role: string; content: string }>;
+  input?: string | object;
+  tools?: unknown[];
+}
+
 interface SafePromptBuilder {
   (
     fieldName: string,
-    args: any,
-    ctx: any,
-  ): {
-    messages?: any[];
-    input?: string | object;
-    tools?: any[];
-  };
+    args: Record<string, unknown>,
+    ctx: GraphQLContextWithBudget,
+  ): PromptPayload;
 }
 
 interface GraphQLContextWithBudget {
@@ -70,27 +72,41 @@ interface GraphQLContextWithBudget {
   audit?: {
     log: (event: any) => Promise<void>;
   };
-  __budget?: any;
-  span?: any;
+  __budget?: {
+    totalTokens: number;
+    totalUSD: number;
+    provider: string;
+    model: string;
+  };
+  span?: {
+    spanName: string;
+    attributes: Record<string, unknown>;
+    setAttributes: (attrs: Record<string, unknown>) => void;
+    end: () => void;
+  };
 }
 
 /**
  * Default prompt builder - extracts relevant input from GraphQL args
  */
-function defaultPromptBuilder(fieldName: string, args: any, ctx: any) {
+function defaultPromptBuilder(
+  fieldName: string,
+  args: Record<string, unknown>,
+  ctx: GraphQLContextWithBudget,
+): PromptPayload {
   // Extract common patterns from mutation arguments
-  const input = args.input || args;
-  const messages = [];
+  const input = (args.input as Record<string, unknown>) || args;
+  const messages: Array<{ role: string; content: string }> = [];
 
   // Build contextual messages based on mutation type
-  if (input.prompt) {
+  if (typeof input.prompt === 'string') {
     messages.push({ role: 'user', content: input.prompt });
-  } else if (input.description || input.content) {
+  } else if (typeof input.description === 'string' || typeof input.content === 'string') {
     messages.push({
       role: 'user',
-      content: input.description || input.content,
+      content: (input.description || input.content) as string,
     });
-  } else if (input.query) {
+  } else if (typeof input.query === 'string') {
     messages.push({ role: 'user', content: input.query });
   } else {
     // Generic serialization for complex inputs
@@ -106,14 +122,14 @@ function defaultPromptBuilder(fieldName: string, args: any, ctx: any) {
  */
 async function withOTEL<T>(
   spanName: string,
-  fn: (span: any) => Promise<T>,
+  fn: (span: NonNullable<GraphQLContextWithBudget['span']>) => Promise<T>,
   ctx?: GraphQLContextWithBudget,
 ): Promise<T> {
   // Simple span simulation - in production, use actual OTEL
-  const span = {
+  const span: NonNullable<GraphQLContextWithBudget['span']> = {
     spanName,
-    attributes: {} as Record<string, any>,
-    setAttributes: (attrs: Record<string, any>) => {
+    attributes: {} as Record<string, unknown>,
+    setAttributes: (attrs: Record<string, unknown>) => {
       Object.assign(span.attributes, attrs);
     },
     end: () => {
@@ -152,10 +168,9 @@ export function budgetDirective(directiveName = 'budget') {
     ) on FIELD_DEFINITION
   `;
 
-  const transformer = (schema: any) =>
+  const transformer = (schema: GraphQLSchema) =>
     mapSchema(schema, {
-      // @ts-ignore - FieldMapper type incompatibility
-      [MapperKind.OBJECT_FIELD]: (fieldConfig: GraphQLField<any, any>) => {
+      [MapperKind.OBJECT_FIELD]: (fieldConfig: GraphQLField<unknown, GraphQLContextWithBudget>) => {
         const directive = getDirective(
           schema,
           fieldConfig,
@@ -168,9 +183,9 @@ export function budgetDirective(directiveName = 'budget') {
 
         // Create the budget-enforced resolver
         const budgetEnforcedResolver: GraphQLFieldResolver<
-          any,
+          unknown,
           GraphQLContextWithBudget,
-          any
+          Record<string, unknown>
         > = async (source, args, context, info) => {
           return withOTEL(
             `graphql.budget.${info.fieldName}`,
@@ -372,7 +387,7 @@ export function budgetDirective(directiveName = 'budget') {
  * Helper to create budget-aware GraphQL context
  */
 export function createBudgetContext(
-  baseContext: any,
+  baseContext: Partial<GraphQLContextWithBudget>,
 ): GraphQLContextWithBudget {
   return {
     ...baseContext,

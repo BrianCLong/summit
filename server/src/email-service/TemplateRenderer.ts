@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Template Renderer
  *
@@ -24,7 +23,7 @@ export class TemplateRenderer {
    */
   async render(
     template: EmailTemplate,
-    variables: Record<string, any>,
+    variables: Record<string, unknown>,
   ): Promise<RenderedTemplate> {
     // Validate required variables
     this.validateVariables(template.variables, variables);
@@ -71,7 +70,7 @@ export class TemplateRenderer {
    */
   private async renderMJML(
     mjmlContent: string,
-    variables: Record<string, any>,
+    variables: Record<string, unknown>,
   ): Promise<string> {
     // Interpolate variables in MJML
     const interpolatedMjml = this.interpolate(mjmlContent, variables);
@@ -97,7 +96,7 @@ export class TemplateRenderer {
    */
   private async renderReactEmail(
     componentCode: string,
-    variables: Record<string, any>,
+    variables: Record<string, unknown>,
   ): Promise<string> {
     // This is a simplified implementation
     // In production, you'd want to properly evaluate the React component
@@ -105,7 +104,8 @@ export class TemplateRenderer {
     try {
       // Note: This is a basic implementation
       // A full implementation would require dynamic component loading
-      const html = renderReactEmail(componentCode as any, variables);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const html = renderReactEmail(componentCode as any, variables as any);
       return html;
     } catch (error) {
       throw new Error(
@@ -119,7 +119,7 @@ export class TemplateRenderer {
    */
   private interpolate(
     template: string,
-    variables: Record<string, any>,
+    variables: Record<string, unknown>,
   ): string {
     return template.replace(/\{\{([^}]+)\}\}/g, (match, path) => {
       const value = this.getNestedValue(variables, path.trim());
@@ -149,8 +149,8 @@ export class TemplateRenderer {
   /**
    * Get nested value from object using dot notation
    */
-  private getNestedValue(obj: any, path: string): any {
-    return path.split('.').reduce((current, key) => current?.[key], obj);
+  private getNestedValue(obj: unknown, path: string): unknown {
+    return path.split('.').reduce((current: any, key) => current?.[key], obj);
   }
 
   /**
@@ -158,7 +158,7 @@ export class TemplateRenderer {
    */
   private validateVariables(
     templateVars: TemplateVariable[],
-    providedVars: Record<string, any>,
+    providedVars: Record<string, unknown>,
   ): void {
     const missing: string[] = [];
 
@@ -187,15 +187,15 @@ export class TemplateRenderer {
   /**
    * Set nested value in object using dot notation
    */
-  private setNestedValue(obj: any, path: string, value: any): void {
+  private setNestedValue(obj: Record<string, unknown>, path: string, value: unknown): void {
     const keys = path.split('.');
     const lastKey = keys.pop()!;
-    const target = keys.reduce((current, key) => {
+    const target = keys.reduce((current: any, key) => {
       if (!(key in current)) {
         current[key] = {};
       }
       return current[key];
-    }, obj);
+    }, obj as any);
     target[lastKey] = value;
   }
 }

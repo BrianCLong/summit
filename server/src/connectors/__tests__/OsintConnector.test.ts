@@ -1,14 +1,13 @@
-// @ts-nocheck
-import { describe, it, expect, jest } from '@jest/globals';
+import { describe, it, expect } from '@jest/globals';
 import { OsintConnector } from '../implementations/OsintConnector.js';
-import { OsintSourceType } from '../types.js';
+import { OsintSourceType, OsintSourceConfig } from '../types.js';
 import pino from 'pino';
 
 describe('OsintConnector', () => {
   const logger = pino({ level: 'silent' });
 
   it('should initialize with correct config', () => {
-    const config = {
+    const config: OsintSourceConfig = {
       id: 'test-source',
       name: 'test-social',
       type: 'osint',
@@ -21,7 +20,7 @@ describe('OsintConnector', () => {
   });
 
   it('should fetch a batch of mock records', async () => {
-    const config = {
+    const config: OsintSourceConfig = {
       id: 'test-source',
       name: 'test-social',
       type: 'osint',
@@ -38,7 +37,7 @@ describe('OsintConnector', () => {
   });
 
   it('should stream records', async () => {
-    const config = {
+    const config: OsintSourceConfig = {
       id: 'test-source',
       name: 'test-web',
       type: 'osint',

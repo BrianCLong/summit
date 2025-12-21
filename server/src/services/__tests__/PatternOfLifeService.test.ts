@@ -1,7 +1,5 @@
-// @ts-nocheck
-
-import { PatternOfLifeService } from '../PatternOfLifeService';
-import { ProvenanceEntry } from '../../provenance/ledger';
+import { PatternOfLifeService } from '../PatternOfLifeService.js';
+import { ProvenanceEntry } from '../../provenance/ledger.js';
 
 describe('PatternOfLifeService', () => {
   let service: PatternOfLifeService;

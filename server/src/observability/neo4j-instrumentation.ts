@@ -1,10 +1,10 @@
-// @ts-nocheck
 /**
  * Neo4j Driver Instrumentation
  * Monitors Neo4j sessions, transactions, and query performance
  */
 
-import neo4j, { Driver, Session } from 'neo4j-driver';
+import neo4j from 'neo4j-driver';
+import type { Driver, Session } from 'neo4j-driver';
 import {
   neo4jSessionsActive,
   neo4jTransactionDuration,
@@ -16,7 +16,7 @@ import {
   neo4jQueryLatencyMs,
 } from '../metrics/neo4jMetrics.js';
 import { getTracer } from './tracer.js';
-import { SpanKind } from './tracer.js';
+import { SpanKind } from '@opentelemetry/api';
 import pino from 'pino';
 
 const logger = pino({ name: 'neo4j-instrumentation' });
@@ -31,6 +31,7 @@ export function instrumentNeo4jDriver(driver: Driver): Driver {
   // Wrap session creation
   const originalSession = driver.session.bind(driver);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (driver as any).session = function (config?: any): Session {
     const session = originalSession(config);
     const mode = config?.defaultAccessMode === neo4j.session.WRITE ? 'write' : 'read';
@@ -52,6 +53,7 @@ export function instrumentNeo4jDriver(driver: Driver): Driver {
 
     // Wrap session run method with metrics
     const originalRun = session.run.bind(session);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     session.run = async function (query: string, parameters?: any) {
       const operation = extractCypherOperation(query);
       const startTime = Date.now();
@@ -130,6 +132,7 @@ function wrapTransactionMethods(session: Session, mode: string): void {
   // Wrap readTransaction
   const originalReadTransaction = session.readTransaction?.bind(session);
   if (originalReadTransaction) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     session.readTransaction = async function (transactionWork: any) {
       const startTime = Date.now();
       try {
@@ -148,6 +151,7 @@ function wrapTransactionMethods(session: Session, mode: string): void {
   // Wrap writeTransaction
   const originalWriteTransaction = session.writeTransaction?.bind(session);
   if (originalWriteTransaction) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     session.writeTransaction = async function (transactionWork: any) {
       const startTime = Date.now();
       try {

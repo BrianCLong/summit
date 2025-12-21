@@ -1,4 +1,3 @@
-// @ts-nocheck
 // server/src/conductor/admission/budget-ladder.ts
 
 import { Pool } from 'pg';

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Pool, PoolClient, QueryResult } from 'pg';
 import { getPostgresPool } from '../config/database.js';
 import { TenantId } from '../types/identity.js';

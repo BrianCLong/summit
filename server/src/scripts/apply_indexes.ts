@@ -1,12 +1,11 @@
-// @ts-nocheck
-
-import { createIndexManager, IndexDefinition } from '../db/indexManager.js';
+import type { IndexDefinition } from '../db/indexManager.js';
+import { createIndexManager } from '../db/indexManager.js';
 import GraphIndexAdvisorService from '../services/GraphIndexAdvisorService.js';
 import pino from 'pino';
 
 const logger = pino({ name: 'apply-indexes' });
 
-async function applyRecommendedIndexes() {
+async function applyRecommendedIndexes(): Promise<void> {
   const tenantId = 'default'; // Default tenant for now
   const indexManager = createIndexManager(tenantId);
   const advisor = GraphIndexAdvisorService.getInstance();
@@ -36,7 +35,7 @@ async function applyRecommendedIndexes() {
       try {
         await indexManager.createIndex(def);
         logger.info(`Applied index: ${def.name}`);
-      } catch (err) {
+      } catch (err: unknown) {
         logger.error({ err, def }, 'Failed to apply index');
       }
     }
@@ -59,8 +58,9 @@ async function applyRecommendedIndexes() {
         // We should check if it exists first or suppress error.
         await indexManager.createIndex(def);
         logger.info(`Applied common index: ${def.name}`);
-      } catch (err: any) {
-        if (err.message && err.message.includes('already exists')) {
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : '';
+        if (errorMessage && errorMessage.includes('already exists')) {
              logger.info(`Index ${def.name} already exists.`);
         } else {
              logger.error({ err, def }, 'Failed to apply common index');
@@ -70,7 +70,7 @@ async function applyRecommendedIndexes() {
 
     logger.info('Index application complete.');
 
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Error applying indexes', error);
   } finally {
     indexManager.cleanup();

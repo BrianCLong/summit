@@ -1,5 +1,4 @@
-// @ts-nocheck
-import { Kind, visit, ValidationContext, ASTNode, GraphQLError } from 'graphql';
+import { ValidationContext, GraphQLError, OperationDefinitionNode, SelectionSetNode } from 'graphql';
 
 export function depthLimit(maxDepth: number = 10) {
   return (context: ValidationContext) => {
@@ -8,7 +7,7 @@ export function depthLimit(maxDepth: number = 10) {
 
     return {
       OperationDefinition: {
-        enter(node) {
+        enter(node: OperationDefinitionNode) {
           if (node.name && node.name.value) {
             operationName = node.name.value;
           }
@@ -18,7 +17,7 @@ export function depthLimit(maxDepth: number = 10) {
         },
       },
       SelectionSet: {
-        enter() {
+        enter(_node: SelectionSetNode) {
           currentDepth++;
           if (currentDepth > maxDepth) {
             context.reportError(

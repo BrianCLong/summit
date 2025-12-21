@@ -1,9 +1,9 @@
-// @ts-nocheck
 /**
  * Case Workflow Integration Tests
  * Tests complete case lifecycle with workflow, tasks, SLAs, and approvals
  */
 
+import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import { Pool } from 'pg';
 import { CaseWorkflowService } from '../cases/workflow/index.js';
 import { getPostgresPool } from '../db/postgres.js';

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { RoutingPolicy, ProviderAdapter, LLMRequest } from '../types.js';
 
 export class CostControlPolicy implements RoutingPolicy {

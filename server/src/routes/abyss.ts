@@ -1,8 +1,6 @@
-// @ts-nocheck
 // server/src/routes/abyss.ts
-import { Router } from 'express';
-import { abyssService } from '../abyss/AbyssService';
-import { NextFunction, Request, Response } from 'express';
+import { Router, NextFunction, Request, Response } from 'express';
+import { abyssService } from '../abyss/AbyssService.js';
 
 const router = Router();
 
@@ -46,11 +44,11 @@ const extremeAuth = (req: Request, res: Response, next: NextFunction) => {
  *       403:
  *         description: Forbidden.
  */
-router.get('/state', extremeAuth, async (req, res, next) => {
+router.get('/state', extremeAuth, async (req: Request, res: Response, next: NextFunction) => {
     try {
         const state = await abyssService.getProtocolState();
         res.json(state);
-    } catch (error) {
+    } catch (error: any) {
         next(error);
     }
 });
@@ -76,11 +74,11 @@ router.get('/state', extremeAuth, async (req, res, next) => {
  *       409:
  *         description: The protocol is not in a state that can be armed.
  */
-router.post('/arm', extremeAuth, async (req, res, next) => {
+router.post('/arm', extremeAuth, async (req: Request, res: Response, next: NextFunction) => {
     try {
         const state = await abyssService.armFinalProtocol();
         res.status(200).json(state);
-    } catch (error) {
+    } catch (error: any) {
         // Use a 409 Conflict status if the state is wrong
         res.status(409).json({ message: error.message });
     }

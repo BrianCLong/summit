@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Router v2: Online Learning with Thompson Sampling and LinUCB
 // Reduces cost/latency while improving answer quality through contextual bandits
 

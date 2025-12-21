@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { configureStore } from '@reduxjs/toolkit'
 import focusReducer from '../features/focusMode/focusSlice'
 import historyReducer from '../features/history/historySlice'

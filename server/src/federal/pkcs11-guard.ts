@@ -1,13 +1,12 @@
-// @ts-nocheck
 import * as pkcs11 from 'pkcs11js';
 import * as crypto from 'node:crypto';
 import { otelService } from '../middleware/observability/otel-tracing.js';
 
 // Type declarations for pkcs11js (not fully typed in the package)
-type PKCS11 = any;
-type Slot = any;
-type Session = any;
-type Handle = any;
+type PKCS11 = unknown;
+type Slot = unknown;
+type Session = unknown;
+type Handle = unknown;
 
 // PKCS#11 Guard for Federal/Gov Pack - CloudHSM with strict mechanism allowlist
 export type AllowedMech = 'AES_GCM_256' | 'ECDSA_P384' | 'RSA_PSS_4096';
@@ -20,7 +19,7 @@ const ALLOWLIST: Record<
   AllowedMech,
   {
     mech: number;
-    guard?: (params: any) => void;
+    guard?: (params: Record<string, unknown> | undefined) => void;
     description: string;
   }
 > = {
@@ -65,7 +64,7 @@ export interface PKCS11Context {
   p11: PKCS11;
   slot: Slot;
   session: Session;
-  tokenInfo: any;
+  tokenInfo: Record<string, unknown>;
   mechanisms: number[];
 }
 
@@ -205,8 +204,8 @@ export function assertMechanismsSupported(ctx: PKCS11Context): AllowedMech[] {
  */
 export function enforceMech(
   name: AllowedMech,
-  params?: any,
-): { mechanism: number; parameter?: any } {
+  params?: Record<string, unknown>,
+): { mechanism: number; parameter?: Record<string, unknown> } {
   const def = ALLOWLIST[name];
   if (!def) {
     throw new Error(`Mechanism '${name}' not in allowlist`);

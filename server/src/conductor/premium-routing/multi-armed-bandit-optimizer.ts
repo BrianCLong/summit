@@ -1,4 +1,3 @@
-// @ts-nocheck
 // server/src/conductor/premium-routing/multi-armed-bandit-optimizer.ts
 
 import { Pool } from 'pg';

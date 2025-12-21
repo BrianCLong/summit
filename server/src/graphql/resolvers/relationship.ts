@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { getNeo4jDriver } from '../../db/neo4j.js';
 import { randomUUID } from 'node:crypto';
 import pino from 'pino';
@@ -10,6 +9,7 @@ import {
   tenantEvent,
 } from '../subscriptions.js';
 import { requireTenant } from '../../middleware/withTenant.js';
+import type { GraphQLContext } from '../apollo-v5-server.js';
 
 const logger = pino();
 const driver = getNeo4jDriver();
@@ -17,11 +17,11 @@ const driver = getNeo4jDriver();
 const relationshipResolvers = {
   Mutation: {
     createRelationship: async (
-      _: any,
+      _: unknown,
       {
         input,
       }: { input: { from: string; to: string; type: string; props: any } },
-      context: any,
+      context: GraphQLContext,
     ) => {
       const session = driver.session();
       try {
@@ -61,13 +61,14 @@ const relationshipResolvers = {
         return relationship;
       } catch (error) {
         logger.error({ error, input }, 'Error creating relationship');
-        throw new Error(`Failed to create relationship: ${error.message}`);
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        throw new Error(`Failed to create relationship: ${message}`);
       } finally {
         await session.close();
       }
     },
     updateRelationship: async (
-      _: any,
+      _: unknown,
       {
         id,
         input,
@@ -77,7 +78,7 @@ const relationshipResolvers = {
         input: { type?: string; props?: any };
         lastSeenTimestamp: string;
       },
-      context: any,
+      context: GraphQLContext,
     ) => {
       const session = driver.session();
       try {

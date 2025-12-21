@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Chat Receiver for sending notifications to chat platforms
  *

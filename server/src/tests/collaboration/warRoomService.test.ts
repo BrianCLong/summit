@@ -1,13 +1,14 @@
-// @ts-nocheck
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
+
 // Mock the db module
-jest.mock('../../db', () => ({
+jest.mock('../../db.js', () => ({
   db: {
     query: jest.fn(),
   },
 }));
 
-import { warRoomService } from '../../collaboration/warRoomService';
-import { db } from '../../db';
+import { warRoomService } from '../../collaboration/warRoomService.js';
+import { db } from '../../db.js';
 
 describe('WarRoomService', () => {
   afterEach(() => {

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { Patch } from 'immer'
 
@@ -35,10 +34,10 @@ const slice = createSlice({
       s.undo.push(a.payload)
     },
     popUndo(s) {
-      return (s.undo.pop() ?? null) as any
+      s.undo.pop()
     },
     popRedo(s) {
-      return (s.redo.pop() ?? null) as any
+      s.redo.pop()
     },
   },
 })

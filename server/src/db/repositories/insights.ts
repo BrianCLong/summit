@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Pool, PoolClient } from 'pg';
 
 export class InsightsRepo {

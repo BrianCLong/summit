@@ -1,4 +1,3 @@
-// @ts-nocheck
 import type {
   ApolloServerPlugin,
   GraphQLRequestListener,
@@ -8,6 +7,8 @@ import axios from 'axios';
 import _ from 'lodash';
 import { provenanceLedger } from '../../provenance/ledger.js';
 import { getAuditSystem } from '../../audit/advanced-audit-system.js';
+import type { GraphQLContext } from '../apollo-v5-server.js';
+
 const { isEqual } = _;
 
 const ELASTIC_URL = process.env.ELASTICSEARCH_URL;
@@ -28,8 +29,8 @@ const anonymize = (value: unknown): any => {
   return '[redacted]';
 };
 
-const auditLoggerPlugin: ApolloServerPlugin = {
-  async requestDidStart(): Promise<GraphQLRequestListener<any>> {
+const auditLoggerPlugin: ApolloServerPlugin<GraphQLContext> = {
+  async requestDidStart(): Promise<GraphQLRequestListener<GraphQLContext>> {
     const start = new Date();
     return {
       async willSendResponse(ctx) {
@@ -123,14 +124,6 @@ const auditLoggerPlugin: ApolloServerPlugin = {
             actorType: userId ? 'user' : 'system',
             payload: logEntry,
             metadata: {
-              requestId: ctx.request.http?.headers.get('x-request-id') || undefined,
-              correlationId: ctx.request.http?.headers.get('x-correlation-id') || undefined,
-              requestId: ctx.request.http?.headers.get('x-request-id') || undefined,
-              correlationId: ctx.request.http?.headers.get('x-correlation-id') || undefined,
-              requestId: ctx.request.http?.headers.get('x-request-id') || undefined,
-              correlationId: ctx.request.http?.headers.get('x-correlation-id') || undefined,
-              requestId: ctx.request.http?.headers.get('x-request-id') || undefined,
-              correlationId: ctx.request.http?.headers.get('x-correlation-id') || undefined,
               requestId,
               correlationId,
             },

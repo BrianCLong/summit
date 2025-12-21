@@ -1,10 +1,9 @@
-// @ts-nocheck
 import pino from 'pino';
 
 const logger = pino({ name: 'GlobalMeshService' });
 
 export class GlobalMeshService {
-  static async sync(data: any): Promise<void> {
+  static async sync(data: unknown): Promise<void> {
     // Prompt 42: 7 ms Global Latency Mesh
     // Simulation of LEO relay sync
     const start = process.hrtime();

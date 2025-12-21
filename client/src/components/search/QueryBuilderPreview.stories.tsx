@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useEffect, useMemo } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { MockedProvider } from '@apollo/client/testing';

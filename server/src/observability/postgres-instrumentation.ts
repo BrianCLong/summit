@@ -1,10 +1,9 @@
-// @ts-nocheck
 /**
  * PostgreSQL Connection Pool Instrumentation
  * Monitors pool health, connection metrics, and query performance
  */
 
-import { Pool } from 'pg';
+import type { Pool } from 'pg';
 import {
   dbConnectionPoolActive,
   dbConnectionPoolIdle,
@@ -16,7 +15,7 @@ import {
 } from './enhanced-metrics.js';
 import { dbQueryDuration, dbQueriesTotal } from '../monitoring/metrics.js';
 import { getTracer } from './tracer.js';
-import { SpanKind } from './tracer.js';
+import { SpanKind } from '@opentelemetry/api';
 import pino from 'pino';
 
 const logger = pino({ name: 'postgres-instrumentation' });
@@ -99,6 +98,7 @@ export function instrumentPostgresPool(pool: Pool, poolName: string = 'default')
   // Wrap query method with metrics and tracing
   const originalQuery = pool.query.bind(pool);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   pool.query = async function (queryTextOrConfig: any, values?: any, callback?: any) {
     const queryText =
       typeof queryTextOrConfig === 'string' ? queryTextOrConfig : queryTextOrConfig.text;

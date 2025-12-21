@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Request, Response, NextFunction } from 'express';
 import AuthService from '../services/AuthService.js';
 import { getAuditSystem } from '../audit/advanced-audit-system.js';

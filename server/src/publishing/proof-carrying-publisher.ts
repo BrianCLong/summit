@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Proof-Carrying Publisher
  *

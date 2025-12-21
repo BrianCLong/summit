@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { neo } from '../neo4j.js';
 
 type FragmentGraphInput = {

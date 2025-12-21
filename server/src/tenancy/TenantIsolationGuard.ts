@@ -1,4 +1,3 @@
-// @ts-nocheck
 import pino from 'pino';
 import { RateLimitResult, rateLimiter } from '../services/RateLimiter.js';
 import {

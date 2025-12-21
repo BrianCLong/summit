@@ -1,11 +1,10 @@
-// @ts-nocheck
 /**
  * Elasticsearch Audit Service
  * Provides log aggregation, full-text search, and analytics for audit data
  */
 
-import { Client } from '@elastic/elasticsearch';
-import { Pool } from 'pg';
+import type { Client } from '@elastic/elasticsearch';
+import type { Pool } from 'pg';
 import logger from '../config/logger.js';
 
 const serviceLogger = logger.child({ name: 'ElasticsearchAuditService' });

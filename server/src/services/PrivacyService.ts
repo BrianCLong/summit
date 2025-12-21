@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Privacy Service - Data Subject Rights & Privacy Orchestration
  *
@@ -12,8 +11,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import { EventEmitter } from 'events';
 import { provenanceLedger } from '../provenance/ledger.js';
-import { PIIType } from '../pii/types.js';
 import { pool } from '../db/pg.js';
+import logger from '../utils/logger.js';
 
 export enum DSARType {
   ACCESS = 'ACCESS',           // Right of Access
@@ -40,7 +39,7 @@ export interface DSARRequest {
   subjectId: string; // The data subject (usually same as userId)
   type: DSARType;
   status: DSARStatus;
-  details: Record<string, any>;
+  details: Record<string, unknown>;
   submittedAt: Date;
   completedAt?: Date;
   deadline: Date; // Regulatory deadline (e.g., 30 days for GDPR)
@@ -57,7 +56,7 @@ export interface PrivacyEvidence {
     resourceId?: string;
     status: 'success' | 'failed' | 'skipped';
     timestamp: Date;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }[];
   summary: string;
   generatedAt: Date;
@@ -72,7 +71,9 @@ export class PrivacyService extends EventEmitter {
     super();
     // Start initialization but don't block constructor
     this.ensureInitialized().catch(err => {
-        console.error('Failed to initialize PrivacyService:', err);
+        logger.error('Failed to initialize PrivacyService:', {
+            error: err instanceof Error ? err.message : String(err)
+        });
     });
   }
 
@@ -133,7 +134,9 @@ export class PrivacyService extends EventEmitter {
         await pool.query(createRequestsTable);
         await pool.query(createEvidenceTable);
     } catch (error) {
-        console.warn('Failed to initialize privacy tables (might already exist or permission issue)', error);
+        logger.warn('Failed to initialize privacy tables (might already exist or permission issue)', {
+            error: error instanceof Error ? error.message : String(error)
+        });
     }
   }
 
@@ -144,7 +147,7 @@ export class PrivacyService extends EventEmitter {
     tenantId: string,
     userId: string,
     type: DSARType,
-    details: Record<string, any> = {}
+    details: Record<string, unknown> = {}
   ): Promise<DSARRequest> {
     await this.ensureInitialized();
     const id = uuidv4();
@@ -215,21 +218,21 @@ export class PrivacyService extends EventEmitter {
     return this.mapRowToRequest(result.rows[0]);
   }
 
-  private mapRowToRequest(row: any): DSARRequest {
+  private mapRowToRequest(row: Record<string, unknown>): DSARRequest {
       return {
-          id: row.id,
-          tenantId: row.tenant_id,
-          userId: row.user_id,
-          subjectId: row.subject_id,
+          id: row.id as string,
+          tenantId: row.tenant_id as string,
+          userId: row.user_id as string,
+          subjectId: row.subject_id as string,
           type: row.type as DSARType,
           status: row.status as DSARStatus,
-          details: row.details,
-          submittedAt: row.submitted_at,
-          completedAt: row.completed_at,
-          deadline: row.deadline,
-          verificationToken: row.verification_token,
-          rejectionReason: row.rejection_reason,
-          evidenceId: row.evidence_id
+          details: row.details as Record<string, unknown>,
+          submittedAt: new Date(row.submitted_at as string),
+          completedAt: row.completed_at ? new Date(row.completed_at as string) : undefined,
+          deadline: new Date(row.deadline as string),
+          verificationToken: row.verification_token as string | undefined,
+          rejectionReason: row.rejection_reason as string | undefined,
+          evidenceId: row.evidence_id as string | undefined
       };
   }
 
@@ -248,7 +251,7 @@ export class PrivacyService extends EventEmitter {
    */
   private async updateRequestStatus(id: string, status: DSARStatus, extra: Partial<DSARRequest> = {}): Promise<void> {
       let query = `UPDATE privacy_dsar_requests SET status = $2`;
-      const params: any[] = [id, status];
+      const params: unknown[] = [id, status];
       let idx = 3;
 
       if (extra.completedAt) {
@@ -298,8 +301,10 @@ export class PrivacyService extends EventEmitter {
       });
 
       this.executeRequest(requestId).catch(err => {
-        console.error(`DSAR execution failed for ${requestId}:`, err);
-        this.failRequest(requestId, err.message);
+        logger.error(`DSAR execution failed for ${requestId}:`, {
+            error: err instanceof Error ? err.message : String(err)
+        });
+        this.failRequest(requestId, err instanceof Error ? err.message : String(err));
       });
     }
   }
@@ -405,7 +410,7 @@ export class PrivacyService extends EventEmitter {
 
     // Simulation - in production this would call external services
     // Logging simulated action for clarity
-    console.log(`[SIMULATION] Executing Data Export for subject ${request.subjectId}`);
+    logger.info(`[SIMULATION] Executing Data Export for subject ${request.subjectId}`);
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     return {
@@ -426,7 +431,7 @@ export class PrivacyService extends EventEmitter {
     // 3. Verify deletion
 
     // Simulation
-    console.log(`[SIMULATION] Executing PII Deletion for subject ${request.subjectId}`);
+    logger.info(`[SIMULATION] Executing PII Deletion for subject ${request.subjectId}`);
     await new Promise(resolve => setTimeout(resolve, 1500));
 
     return {
@@ -475,12 +480,12 @@ export class PrivacyService extends EventEmitter {
 
     if (result.rows.length === 0) return undefined;
 
-    const row = result.rows[0];
+    const row = result.rows[0] as Record<string, unknown>;
     return {
-        requestId: row.request_id,
-        summary: row.summary,
-        actions: row.actions,
-        generatedAt: row.generated_at
+        requestId: row.request_id as string,
+        summary: row.summary as string,
+        actions: row.actions as PrivacyEvidence['actions'],
+        generatedAt: new Date(row.generated_at as string)
     };
   }
 }

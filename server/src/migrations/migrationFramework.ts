@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Maestro Conductor v24.3.0 - Zero Downtime Migration Framework
 // Epic E17: Schema Evolution - Advanced migration system with rollback support
 
@@ -459,6 +458,7 @@ export class MigrationFramework extends EventEmitter {
   private async executeSQLInBatches(
     sql: string,
     execution: MigrationExecution,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     client: any,
     batchSize: number,
   ): Promise<void> {

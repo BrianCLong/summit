@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Enhanced Worker Template for IntelGraph Platform
  * Replaces corrupted workers with BullMQ + Zod schemas + OTEL spans

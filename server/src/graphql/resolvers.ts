@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { neo } from '../db/neo4j';
 import { pg } from '../db/pg';
 import { getUser } from '../auth/context';
@@ -9,6 +8,7 @@ import { gqlDuration, subscriptionFanoutLatency } from '../metrics';
 import { makePubSub } from '../subscriptions/pubsub';
 import Redis from 'ioredis';
 import { CausalGraphService } from '../services/CausalGraphService';
+import type { GraphQLContext } from './apollo-v5-server.js';
 
 const COHERENCE_EVENTS = 'COHERENCE_EVENTS';
 
@@ -19,7 +19,7 @@ const redisClient = process.env.REDIS_URL
 export const resolvers = {
   DateTime: new (require('graphql-iso-date').GraphQLDateTime)(),
   Query: {
-    async tenantCoherence(_: any, { tenantId }: any, ctx: any) {
+    async tenantCoherence(_: unknown, { tenantId }: { tenantId: string }, ctx: GraphQLContext) {
       const end = gqlDuration.startTimer({ operation: 'tenantCoherence' });
       try {
         const user = getUser(ctx);

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * MC Platform v0.4.1 Sovereign Safeguards Resolvers
  * Independent verification, containment, lawful interoperability, and reversible autonomy

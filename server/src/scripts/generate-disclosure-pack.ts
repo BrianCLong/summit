@@ -1,8 +1,8 @@
-// @ts-nocheck
 // server/src/scripts/generate-disclosure-pack.ts
 import fs from 'fs/promises';
 import path from 'path';
-import { DecisionAnalysisPipeline, DecisionAnalysisInput } from '../maestro/pipelines/decision-analysis-pipeline';
+import type { DecisionAnalysisInput, DecisionAnalysisResult } from '../maestro/pipelines/decision-analysis-pipeline.js';
+import { DecisionAnalysisPipeline } from '../maestro/pipelines/decision-analysis-pipeline.js';
 import { fileURLToPath } from 'url';
 
 // Helper to get __dirname in ESM
@@ -14,7 +14,7 @@ const __dirname = path.dirname(__filename);
  * @param result - The result from the DecisionAnalysisPipeline.
  * @returns A string containing the markdown report.
  */
-function generateMarkdown(result: import('../maestro/pipelines/decision-analysis-pipeline').DecisionAnalysisResult): string {
+function generateMarkdown(result: DecisionAnalysisResult): string {
   const { decision, referencedClaims, artifacts } = result;
 
   let md = `# Disclosure Pack: Decision Analysis\n\n`;
@@ -61,7 +61,7 @@ function generateMarkdown(result: import('../maestro/pipelines/decision-analysis
 /**
  * Main function to run a pipeline and generate a disclosure pack.
  */
-async function main() {
+async function main(): Promise<void> {
   console.log('Starting Decision Analysis Pipeline to generate artifacts...');
 
   // Mock input for the pipeline
@@ -92,7 +92,7 @@ async function main() {
   console.log(`>> Output written to: ${outputPath}`);
 }
 
-main().catch(error => {
+main().catch((error: unknown) => {
   console.error('Failed to generate disclosure pack:', error);
   process.exit(1);
 });

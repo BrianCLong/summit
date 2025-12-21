@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { trace, Span } from '@opentelemetry/api';
 import { Counter, Histogram } from 'prom-client';
 import { redis } from '../subscriptions/pubsub';

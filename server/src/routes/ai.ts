@@ -1,10 +1,10 @@
-// @ts-nocheck
 /**
  * AI API Endpoints for IntelGraph
  * Provides endpoints for link prediction, sentiment analysis, and AI-powered insights
  */
 
-import express, { Request, Response } from 'express';
+import express, { Response, NextFunction } from 'express';
+import type { AuthenticatedRequest } from './types.js';
 import { body, query, validationResult } from 'express-validator';
 import pino from 'pino';
 import EntityLinkingService from '../services/EntityLinkingService.js';
@@ -43,15 +43,14 @@ const videoAnalysisQueue = new Queue('videoAnalysisQueue', {
   },
 });
 
-const buildBackgroundKey = (req: Request, scope: string) => {
-  // @ts-ignore - req.user is injected by auth middleware when available
+const buildBackgroundKey = (req: AuthenticatedRequest, scope: string) => {
   const user = req.user;
   if (user) return `user:${user.id || user.sub}:${scope}`;
   return `ip:${req.ip}:${scope}`;
 };
 
 const enforceBackgroundThrottle = async (
-  req: Request,
+  req: AuthenticatedRequest,
   scope: string,
 ): Promise<void> => {
   const key = buildBackgroundKey(req, scope);
@@ -144,8 +143,7 @@ const aiRateLimit = createRateLimitMiddleware({
   scope: 'ai',
   windowMs: cfg.AI_RATE_LIMIT_WINDOW_MS,
   max: cfg.AI_RATE_LIMIT_MAX_REQUESTS,
-  keyGenerator: (req) => {
-    // @ts-ignore - req.user is injected by auth middleware when available
+  keyGenerator: (req: AuthenticatedRequest) => {
     const user = req.user;
     if (user) return `user:${user.id || user.sub}`;
     return `ip:${req.ip}`;
@@ -208,9 +206,9 @@ const validateExtractVideo = [
 
 // Helper function to handle validation errors
 const handleValidationErrors = (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
-  next: Function,
+  next: NextFunction,
 ) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -258,7 +256,7 @@ router.post(
   '/predict-links',
   validatePredictLinks,
   handleValidationErrors,
-  async (req: Request, res: Response) => {
+  async (req: AuthenticatedRequest, res: Response) => {
     try {
       const startTime = Date.now();
       const { entityId, topK = 10, investigationId } = req.body;
@@ -340,7 +338,7 @@ router.post(
   '/analyze-sentiment',
   validateSentiment,
   handleValidationErrors,
-  async (req: Request, res: Response) => {
+  async (req: AuthenticatedRequest, res: Response) => {
     try {
       const startTime = Date.now();
       const { entityId, text, entityData } = req.body;
@@ -428,7 +426,7 @@ router.post(
   '/generate-summary',
   validateAISummary,
   handleValidationErrors,
-  async (req: Request, res: Response) => {
+  async (req: AuthenticatedRequest, res: Response) => {
     try {
       const startTime = Date.now();
       const { entityId, entityData, includeContext = true } = req.body;
@@ -485,7 +483,7 @@ router.post(
  *       500:
  *         description: Internal server error
  */
-router.get('/models/status', async (req: Request, res: Response) => {
+router.get('/models/status', async (req: AuthenticatedRequest, res: Response) => {
   try {
     // TODO: Replace with actual model health checks
     const modelStatus = {
@@ -545,7 +543,7 @@ router.get('/models/status', async (req: Request, res: Response) => {
  *       500:
  *         description: Internal server error
  */
-router.get('/capabilities', async (req: Request, res: Response) => {
+router.get('/capabilities', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const capabilities = {
       linkPrediction: {
@@ -642,7 +640,7 @@ router.post(
   '/extract-video',
   validateExtractVideo,
   handleValidationErrors,
-  async (req: Request, res: Response) => {
+  async (req: AuthenticatedRequest, res: Response) => {
     const { mediaPath, mediaType, extractionMethods, options } = req.body;
     const jobId = randomUUID(); // Generate a unique job ID
 
@@ -670,23 +668,23 @@ router.post(
         message:
           'Video analysis job submitted successfully. Use /api/ai/job-status/:jobId to track progress.',
       });
-    } catch (error: any) {
+    } catch (error) {
       logger.error(
-        `Error submitting video analysis job: ${error.message}`,
+        `Error submitting video analysis job: ${error instanceof Error ? error.message : String(error)}`,
         error,
       );
 
-      if (error?.status === 429) {
+      if (error && typeof error === 'object' && 'status' in error && error.status === 429) {
         res.status(429).json({
           error: 'Too many video analysis requests',
-          retryAfter: error.retryAfter,
+          retryAfter: 'retryAfter' in error ? error.retryAfter : undefined,
         });
         return;
       }
 
       res.status(500).json({
         error: 'Failed to submit video analysis job',
-        message: error.message,
+        message: error instanceof Error ? error.message : String(error),
       });
     }
   },
@@ -714,7 +712,7 @@ router.post(
  *       500:
  *         description: Internal server error
  */
-router.get('/job-status/:jobId', async (req: Request, res: Response) => {
+router.get('/job-status/:jobId', async (req: AuthenticatedRequest, res: Response) => {
   const { jobId } = req.params;
   try {
     const job = await videoAnalysisQueue.getJob(jobId);
@@ -742,9 +740,9 @@ router.get('/job-status/:jobId', async (req: Request, res: Response) => {
         ? new Date(job.finishedOn).toISOString()
         : undefined,
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error(
-      `Error getting job status for ${jobId}: ${error.message}`,
+      `Error getting job status for ${jobId}: ${error instanceof Error ? error.message : String(error)}`,
       error,
     );
     res.status(500).json({
@@ -831,7 +829,7 @@ router.post(
   '/feedback',
   validateFeedback,
   handleValidationErrors,
-  async (req: Request, res: Response) => {
+  async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { insight, feedbackType, user, timestamp, originalPrediction } =
         req.body;
@@ -858,14 +856,14 @@ router.post(
         success: true,
         message: 'Feedback received successfully and queued for processing',
       });
-    } catch (error: any) {
+    } catch (error) {
       logger.error(
-        `Error processing feedback: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Error processing feedback: ${error instanceof Error ? error.message : String(error)}`,
       );
-      if (error?.status === 429) {
+      if (error && typeof error === 'object' && 'status' in error && error.status === 429) {
         res.status(429).json({
           error: 'Too many feedback events submitted',
-          retryAfter: error.retryAfter,
+          retryAfter: 'retryAfter' in error ? error.retryAfter : undefined,
         });
         return;
       }
@@ -919,7 +917,7 @@ router.post(
   '/feedback/deception',
   validateDeceptionFeedback,
   handleValidationErrors,
-  async (req: Request, res: Response) => {
+  async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { text, label, user, timestamp, deceptionScore } = req.body;
       await enforceBackgroundThrottle(req, 'ai-feedback');
@@ -931,14 +929,14 @@ router.post(
         originalPrediction: { deceptionScore },
       });
       res.status(200).json({ success: true, message: 'Feedback received' });
-    } catch (error: any) {
+    } catch (error) {
       logger.error(
-        `Error processing deception feedback: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Error processing deception feedback: ${error instanceof Error ? error.message : String(error)}`,
       );
-      if (error?.status === 429) {
+      if (error && typeof error === 'object' && 'status' in error && error.status === 429) {
         res.status(429).json({
           error: 'Too many deception feedback events submitted',
-          retryAfter: error.retryAfter,
+          retryAfter: 'retryAfter' in error ? error.retryAfter : undefined,
         });
         return;
       }
@@ -1134,7 +1132,7 @@ const adversaryService = new AdversaryAgentService();
  *       500:
  *         description: Internal server error
  */
-router.post('/adversary/generate', async (req: Request, res: Response) => {
+router.post('/adversary/generate', async (req: AuthenticatedRequest, res: Response) => {
   const { context, temperature, persistence } = req.body || {};
   if (!context) {
     return res.status(400).json({ error: 'context is required' });
@@ -1145,8 +1143,8 @@ router.post('/adversary/generate', async (req: Request, res: Response) => {
       persistence,
     });
     res.json({ ttps: chain });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
 });
 

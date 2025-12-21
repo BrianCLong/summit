@@ -1,7 +1,7 @@
-// @ts-nocheck
-import { PrismaClient } from '@prisma/client';
-import winston, { Logger } from 'winston';
-import { Redis } from 'ioredis';
+import type { PrismaClient } from '@prisma/client';
+import type winston from 'winston';
+import type { Logger } from 'winston';
+import type { Redis } from 'ioredis';
 
 export interface MTTTMetrics {
   p50_seconds: number;
@@ -186,7 +186,7 @@ export class AnalystDashboardService {
     } catch (error) {
       this.logger.error('Failed to calculate MTTT metrics', {
         timeRange,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -297,7 +297,7 @@ export class AnalystDashboardService {
     } catch (error) {
       this.logger.error('Failed to calculate FP metrics', {
         timeRange,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Namespace, Socket } from 'socket.io';
 import Redis from 'ioredis';
 import pino from 'pino';
@@ -47,7 +46,7 @@ class GraphCRDT {
 
 const graphs = new Map<string, { crdt: GraphCRDT; clock: number }>();
 
-function getGraph(graphId: string) {
+function getGraph(graphId: string): { crdt: GraphCRDT; clock: number } {
   let entry = graphs.get(graphId);
   if (!entry) {
     entry = { crdt: new GraphCRDT(), clock: 0 };
@@ -66,10 +65,10 @@ const pub = new Redis(redisOptions);
 const sub = pub.duplicate();
 let ioRef: Namespace | null = null;
 
-export function initGraphSync(ns: Namespace) {
+export function initGraphSync(ns: Namespace): void {
   ioRef = ns;
   sub.psubscribe('graph:op:*');
-  sub.on('pmessage', (_pattern, channel, message) => {
+  sub.on('pmessage', (_pattern: string, channel: string, message: string): void => {
     const graphId = channel.split(':')[2];
     const op: GraphOperation = JSON.parse(message);
     const entry = getGraph(graphId);

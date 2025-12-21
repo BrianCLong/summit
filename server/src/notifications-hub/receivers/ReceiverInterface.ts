@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Receiver Interface for Notification Channels
  *

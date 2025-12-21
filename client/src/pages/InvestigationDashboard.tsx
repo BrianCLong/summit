@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import { Paper, Typography } from '@mui/material';
 import { Responsive, WidthProvider, Layouts } from 'react-grid-layout';

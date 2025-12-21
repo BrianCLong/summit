@@ -1,7 +1,7 @@
-// @ts-nocheck
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import { GCSBatchConnector } from '../gcs-ingest.js';
 import { Readable } from 'stream';
+import type { ConnectorContext } from '@intelgraph/connector-sdk';
 
 // Mock GCSConnector
 const mockGCSConnectorInstance = {
@@ -18,7 +18,7 @@ jest.mock('../gcs.js', () => {
 
 describe('GCSBatchConnector', () => {
   let connector: GCSBatchConnector;
-  let mockContext: any;
+  let mockContext: Partial<ConnectorContext>;
 
   beforeEach(() => {
     connector = new GCSBatchConnector();
@@ -80,11 +80,11 @@ describe('GCSBatchConnector', () => {
     const stream = Readable.from([Buffer.from(jsonContent)]);
     mockGCSConnectorInstance.downloadStream.mockResolvedValue(stream);
 
-    await connector.pull(mockContext);
+    await connector.pull(mockContext as ConnectorContext);
 
     expect(mockGCSConnectorInstance.listObjects).toHaveBeenCalled();
     expect(mockGCSConnectorInstance.downloadStream).toHaveBeenCalledWith('data.json');
-    expect(mockContext.emitter.emitEntity).toHaveBeenCalledWith(expect.objectContaining({
+    expect(mockContext.emitter!.emitEntity).toHaveBeenCalledWith(expect.objectContaining({
       props: { id: 1, name: 'Alice' },
       type: 'Document', // Default
     }));
@@ -105,11 +105,11 @@ describe('GCSBatchConnector', () => {
     });
 
     // Mock state store to return existing etag
-    mockContext.stateStore.get.mockResolvedValue('123');
+    mockContext.stateStore!.get.mockResolvedValue('123');
 
-    await connector.pull(mockContext);
+    await connector.pull(mockContext as ConnectorContext);
 
     expect(mockGCSConnectorInstance.downloadStream).not.toHaveBeenCalled();
-    expect(mockContext.emitter.emitEntity).not.toHaveBeenCalled();
+    expect(mockContext.emitter!.emitEntity).not.toHaveBeenCalled();
   });
 });

@@ -1,5 +1,4 @@
-// @ts-nocheck
-import { Queue, Worker, Job } from 'bullmq';
+import { Queue, Worker, type Job } from 'bullmq';
 import { OsintConnector } from '../connectors/implementations/OsintConnector.js';
 import { OsintSourceType, OsintRecord, IngestionEvent } from '../connectors/types.js';
 import { provenanceLedger } from '../provenance/ledger.js';

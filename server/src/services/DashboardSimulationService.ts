@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Server } from 'socket.io';
 import { getIO } from '../realtime/socket.js';
 import pino from 'pino';
@@ -57,7 +56,7 @@ class DashboardSimulationService {
         }
 
       } catch (err) {
-        logger.error({ err }, 'Error in dashboard simulation');
+        logger.error({ err: err instanceof Error ? err.message : String(err) }, 'Error in dashboard simulation');
       }
     }, 2000); // Update every 2 seconds
   }

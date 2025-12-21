@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { z } from 'zod';
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
@@ -69,7 +68,7 @@ interface BreakGlassSession {
   actions: {
     timestamp: Date;
     action: string;
-    details: any;
+    details: Record<string, unknown>;
     justification: string;
   }[];
   status: 'active' | 'completed' | 'aborted';
@@ -109,7 +108,7 @@ export class AirGapService {
   private config: z.infer<typeof AirGapConfigSchema>;
   private manifest: AirGapManifest | null = null;
   private activeBreakGlass: Map<string, BreakGlassSession> = new Map();
-  private offlineRegistry: Map<string, any> = new Map();
+  private offlineRegistry: Map<string, Record<string, unknown>> = new Map();
 
   constructor(config?: Partial<z.infer<typeof AirGapConfigSchema>>) {
     this.config = AirGapConfigSchema.parse({
@@ -123,7 +122,7 @@ export class AirGapService {
     }
   }
 
-  private async initializeAirGapEnvironment() {
+  private async initializeAirGapEnvironment(): Promise<void> {
     const span = otelService.createSpan('airgap.initialize');
 
     try {
@@ -487,7 +486,7 @@ export class AirGapService {
     return results;
   }
 
-  private async validateComponentPolicy(component: any): Promise<boolean> {
+  private async validateComponentPolicy(component: Record<string, unknown>): Promise<boolean> {
     // In production, validate against OPA policies
     // For now, basic checks
     const suspiciousPatterns = [
@@ -501,7 +500,7 @@ export class AirGapService {
 
     try {
       // This is a simplified check - in production, use proper static analysis
-      const componentName = component.name.toLowerCase();
+      const componentName = (component.name as string).toLowerCase();
 
       for (const pattern of suspiciousPatterns) {
         if (new RegExp(pattern).test(componentName)) {
@@ -514,7 +513,7 @@ export class AirGapService {
 
       return true;
     } catch (error) {
-      console.error(`Policy validation failed for ${component.name}:`, error);
+      console.error(`Policy validation failed for ${component.name as string}:`, error);
       return false;
     }
   }
@@ -600,7 +599,7 @@ export class AirGapService {
         );
       }
 
-      const sessionId = `breakglass-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const sessionId = `breakglass-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 
       const session: BreakGlassSession = {
         sessionId,
@@ -658,7 +657,7 @@ export class AirGapService {
   async recordBreakGlassAction(
     sessionId: string,
     action: string,
-    details: any,
+    details: Record<string, unknown>,
     justification: string,
   ): Promise<boolean> {
     const session = this.activeBreakGlass.get(sessionId);

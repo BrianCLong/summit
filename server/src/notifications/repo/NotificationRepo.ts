@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { pool } from '../../db/pg.js';
 import { NotificationPayload, NotificationStatus, NotificationPriority } from '../types.js';
 import pino from 'pino';

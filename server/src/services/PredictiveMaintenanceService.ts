@@ -1,18 +1,17 @@
-// @ts-nocheck
 /**
  * Predictive Maintenance Service
  * ML-based failure prediction, scheduling optimization, and cost-benefit analysis
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import {
+import type {
   DigitalTwinAsset,
   MaintenancePrediction,
   CostBenefitAnalysis,
   SensorReading,
-  HealthStatus,
-  AssetType,
-} from '../types/digitalTwin';
+} from '../types/digitalTwin.js';
+import { AssetType } from '../types/digitalTwin.js';
+import logger from '../utils/logger.js';
 
 /**
  * Maintenance schedule entry
@@ -142,7 +141,9 @@ export class PredictiveMaintenanceService {
         const prediction = await this.predictFailure(asset, history);
         predictions.push(prediction);
       } catch (error) {
-        console.error(`Failed to predict for asset ${asset.id}:`, error);
+        logger.error(`Failed to predict for asset ${asset.id}:`, {
+          error: error instanceof Error ? error.message : String(error)
+        });
       }
     }
 

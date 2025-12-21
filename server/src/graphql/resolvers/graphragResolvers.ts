@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * GraphRAG GraphQL Resolvers (TypeScript)
  * Provides GraphQL interface for explainable GraphRAG operations

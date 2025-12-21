@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { neo } from '../../db/neo4j.js';
 import { Run } from '../runs/runs-repo.js';
 

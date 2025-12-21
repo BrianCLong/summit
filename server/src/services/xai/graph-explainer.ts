@@ -1,4 +1,3 @@
-// @ts-nocheck
 import crypto from 'crypto';
 import logger from '../../utils/logger.js';
 

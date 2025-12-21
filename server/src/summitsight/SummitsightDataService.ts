@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Pool } from 'pg';
 import { getPostgresPool } from '../../config/database';
 import {
@@ -67,7 +66,7 @@ export class SummitsightDataService {
 
   async getKPIDefinitions(category?: string): Promise<KPIDefinition[]> {
     let query = `SELECT * FROM summitsight_kpi_registry`;
-    const params: any[] = [];
+    const params: string[] = [];
     if (category) {
       query += ` WHERE category = $1`;
       params.push(category);
@@ -81,7 +80,7 @@ export class SummitsightDataService {
       SELECT * FROM summitsight_kpi_values
       WHERE kpi_id = $1 AND period = $2
     `;
-    const params: any[] = [kpiId, period];
+    const params: (string | number)[] = [kpiId, period];
     let idx = 3;
 
     if (tenantId) {
@@ -116,7 +115,7 @@ export class SummitsightDataService {
 
   async getForecasts(kpiId: string, tenantId?: string): Promise<Forecast[]> {
     let query = `SELECT * FROM summitsight_forecasts WHERE kpi_id = $1`;
-    const params: any[] = [kpiId];
+    const params: string[] = [kpiId];
     if (tenantId) {
       query += ` AND tenant_id = $2`;
       params.push(tenantId);

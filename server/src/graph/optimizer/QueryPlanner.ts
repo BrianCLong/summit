@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { QueryAnalysis, QueryIntent, OptimizationContext, QueryPlan, TraversalStrategy } from './types.js';
 import { TraversalOptimizer } from './TraversalOptimizer.js';
 import { QueryAnalyzer } from './QueryAnalyzer.js';
@@ -16,7 +15,7 @@ export class QueryPlanner {
    * If the query is a raw string, it analyzes it.
    * If the context specifies an intent, it generates a new query using TraversalOptimizer.
    */
-  public plan(query: string, params: any, context: OptimizationContext): QueryPlan {
+  public plan(query: string, params: Record<string, unknown>, context: OptimizationContext): QueryPlan {
     // 1. Analyze the input query
     const analysis = this.analyzer.analyze(query, context);
 
@@ -99,7 +98,7 @@ export class QueryPlanner {
     }
   }
 
-  private generateExecutionHints(strategy: TraversalStrategy | undefined, estimatedRows: number): any[] {
+  private generateExecutionHints(strategy: TraversalStrategy | undefined, estimatedRows: number): Array<{ type: string; value: string; description: string }> {
       const hints = [];
       if (estimatedRows > 10000) {
           hints.push({

@@ -1,9 +1,8 @@
-// @ts-nocheck
-
-import { BaseConnector } from '../base';
-import { ConnectorConfig, ConnectorSchema } from '../types';
+import { BaseConnector } from '../base.js';
+import { ConnectorConfig, ConnectorSchema } from '../types.js';
 import { Readable } from 'stream';
 import axios from 'axios';
+import { parse } from 'csv-parse';
 
 // Specifically for OFAC SDN or similar lists
 export class SanctionsListConnector extends BaseConnector {
@@ -46,20 +45,20 @@ export class SanctionsListConnector extends BaseConnector {
               { name: 'Vess_flag', type: 'string', nullable: true },
               { name: 'Vess_owner', type: 'string', nullable: true },
               { name: 'Remarks', type: 'string', nullable: true }
-          ]
+          ],
+          version: 1
       };
   }
 
-  async readStream(options?: any): Promise<Readable> {
+  async readStream(options?: Record<string, unknown>): Promise<Readable> {
       const stream = new Readable({ objectMode: true, read() {} });
-      const { parse } = require('csv-parse');
 
       setImmediate(async () => {
           try {
             const response = await axios.get(this.url, { responseType: 'stream' });
             const parser = response.data.pipe(parse({ columns: true, relax_quotes: true }));
 
-            parser.on('data', (record: any) => {
+            parser.on('data', (record: Record<string, unknown>) => {
                 stream.push(this.wrapEvent(record));
                 this.metrics.recordsProcessed++;
             });

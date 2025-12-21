@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { getNeo4jDriver } from '../config/database.js';
 import logger from '../utils/logger.js';
 
@@ -7,7 +6,7 @@ export interface CausalNode {
   label: string;
   type: string;
   confidence?: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface CausalEdge {

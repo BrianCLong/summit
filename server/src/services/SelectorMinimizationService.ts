@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Selector Minimization Service
  *
@@ -146,8 +145,8 @@ export interface TripwireViolation {
 
 export class SelectorMinimizationService {
   private circuitBreaker: CircuitBreaker;
-  private redis: any;
-  private postgres: any;
+  private redis: Awaited<ReturnType<typeof getRedisClient>>;
+  private postgres: ReturnType<typeof getPostgresPool>;
 
   // Cache keys
   private readonly BASELINE_CACHE_PREFIX = 'selector:baseline:';
@@ -160,6 +159,9 @@ export class SelectorMinimizationService {
 
   constructor() {
     this.circuitBreaker = new CircuitBreaker({});
+    // Initialize with placeholder values - will be set in initializeConnections
+    this.redis = null as unknown as Awaited<ReturnType<typeof getRedisClient>>;
+    this.postgres = null as unknown as ReturnType<typeof getPostgresPool>;
 
     this.initializeConnections();
   }
@@ -169,7 +171,8 @@ export class SelectorMinimizationService {
       this.redis = await getRedisClient();
       this.postgres = getPostgresPool();
     } catch (error) {
-      logger.error('Failed to initialize SelectorMinimizationService connections', { error });
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Failed to initialize SelectorMinimizationService connections', { error: errorMessage });
       throw error;
     }
   }
@@ -810,7 +813,7 @@ export class SelectorMinimizationService {
   /**
    * Map database row to metrics object
    */
-  private mapRowToMetrics(row: any): QueryScopeMetrics {
+  private mapRowToMetrics(row: Record<string, unknown>): QueryScopeMetrics {
     return {
       id: row.id,
       tenantId: row.tenant_id,
@@ -844,7 +847,7 @@ export class SelectorMinimizationService {
   /**
    * Map database row to alert object
    */
-  private mapRowToAlert(row: any): SelectorMinimizationAlert {
+  private mapRowToAlert(row: Record<string, unknown>): SelectorMinimizationAlert {
     return {
       id: row.id,
       tenantId: row.tenant_id,

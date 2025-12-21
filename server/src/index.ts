@@ -1,4 +1,3 @@
-// @ts-nocheck
 import http from 'http';
 import express from 'express';
 import { GraphQLError } from 'graphql';

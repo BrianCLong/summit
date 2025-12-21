@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 
 // Use require to bypass potential ESM/TS import issues in test environment

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { EvidenceAccessService } from '../evidence-access.service.js';
 
 const baseEvidence = {
@@ -12,7 +11,7 @@ const baseEvidence = {
 };
 
 describe('EvidenceAccessService signed URLs', () => {
-  const auditLogger = { recordEvent: jest.fn().mockResolvedValue('audit-1') };
+  const auditLogger = { recordEvent: jest.fn<() => Promise<string>>().mockResolvedValue('audit-1') };
 
   beforeEach(() => {
     auditLogger.recordEvent.mockClear();
@@ -76,7 +75,7 @@ describe('EvidenceAccessService signed URLs', () => {
 });
 
 describe('EvidenceAccessService tiered lifecycle', () => {
-  const auditLogger = { recordEvent: jest.fn().mockResolvedValue('audit-2') };
+  const auditLogger = { recordEvent: jest.fn<() => Promise<string>>().mockResolvedValue('audit-2') };
 
   test('moves evidence to cold tier after threshold while preserving access', async () => {
     const service = new EvidenceAccessService({

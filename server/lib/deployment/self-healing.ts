@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Mock external services for demonstration
 const mockProcessMonitor = {
   getMemoryUsage: async (pid: number): Promise<number> => {
@@ -57,8 +56,8 @@ export class SelfHealing {
     if (!await mockProcessMonitor.isResponsive(this.config.pid)) {
       this.unresponsiveStreak++;
       console.warn(`Process is unresponsive. Streak: ${this.unresponsiveStreak}`);
-      if (this.unresponsiveStreak * 15 > this.unresponsiveTimeout) {
-        console.error(`Process has been unresponsive for over ${this.unresponsiveTimeout}s. Triggering restart.`);
+      if (this.unresponsiveStreak * 15 > this.config.unresponsiveTimeout) {
+        console.error(`Process has been unresponsive for over ${this.config.unresponsiveTimeout}s. Triggering restart.`);
         await this.heal('unresponsive_process');
         this.unresponsiveStreak = 0;
       }

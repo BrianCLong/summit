@@ -1,12 +1,11 @@
-// @ts-nocheck
-import { AIResolvers } from '../resolvers/ai';
+import { AIResolvers } from '../resolvers/ai.js';
 import { randomUUID as uuid } from 'node:crypto';
 import { jest, describe, it, test, expect, beforeEach, afterEach } from '@jest/globals';
 
 // Mock dependencies
 jest.mock('axios');
 jest.mock('jsonwebtoken');
-jest.mock('../realtime/pubsub');
+jest.mock('../realtime/pubsub.js');
 
 const mockAxios = require('axios');
 const mockJwt = require('jsonwebtoken');

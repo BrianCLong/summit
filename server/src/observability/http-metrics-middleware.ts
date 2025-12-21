@@ -1,4 +1,3 @@
-// @ts-nocheck
 import type { NextFunction, Request, Response } from 'express';
 import {
   httpRequestDurationSeconds,
@@ -50,4 +49,3 @@ export function httpMetricsMiddleware(
 
   next();
 }
-

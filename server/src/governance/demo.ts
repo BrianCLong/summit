@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { governance, Policy, PolicyContext } from './index.js';
 import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';

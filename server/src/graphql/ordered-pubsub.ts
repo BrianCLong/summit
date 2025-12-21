@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { PubSub } from 'graphql-subscriptions';
 import pino from 'pino';
 

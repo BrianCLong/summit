@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { pg } from '../db/pg.js';
 import crypto from 'crypto';
 

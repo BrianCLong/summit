@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * GitHub Actions OIDC Integration
  *

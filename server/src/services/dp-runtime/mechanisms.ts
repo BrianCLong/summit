@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Redis } from 'ioredis';
 
 // Basic interface for DP mechanism

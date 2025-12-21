@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { warRoomService } from '../../collaboration/warRoomService';
 import { collaborationService } from '../../services/collaborationService'; // for pubsub
 import { checkAuth, checkWarRoomAdmin } from '../../middleware/warRoomAuth';

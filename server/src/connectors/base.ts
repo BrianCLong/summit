@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { EventEmitter } from 'events';
 import { Readable } from 'stream';
 import {
@@ -9,6 +8,24 @@ import {
   IngestionEvent
 } from './types.js';
 import logger from '../config/logger.js';
+import { ConnectorContext } from '../data-model/types.js';
+
+export interface SourceConnector {
+  fetchBatch(
+    ctx: ConnectorContext,
+    cursor?: string | null
+  ): Promise<{
+    records: any[];
+    nextCursor?: string | null;
+  }>;
+}
+
+export abstract class BaseSourceConnector {
+  protected handleError(ctx: ConnectorContext, error: unknown): void {
+    const err = error instanceof Error ? error : new Error(String(error));
+    ctx.logger.error({ error: err }, 'Connector operation failed');
+  }
+}
 
 export abstract class BaseConnector extends EventEmitter {
   protected config: ConnectorConfig;

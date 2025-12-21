@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { randomUUID } from 'node:crypto';
 import { WebSocket } from 'ws';
 import pino from 'pino';

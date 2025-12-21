@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Request, Response, NextFunction } from 'express';
 import { provenanceLedger } from '../provenance/ledger.js';
 import logger from '../config/logger.js';

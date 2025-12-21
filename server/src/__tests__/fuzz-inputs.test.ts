@@ -1,4 +1,3 @@
-// @ts-nocheck
 declare module 'validator';
 declare module 'html-escaper';
 declare module 'isomorphic-dompurify';

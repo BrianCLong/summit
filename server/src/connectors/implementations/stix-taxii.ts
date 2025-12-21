@@ -1,7 +1,5 @@
-// @ts-nocheck
-
-import { BaseConnector } from '../base';
-import { ConnectorConfig, ConnectorSchema } from '../types';
+import { BaseConnector } from '../base.js';
+import { ConnectorConfig, ConnectorSchema } from '../types.js';
 import { Readable } from 'stream';
 import axios from 'axios';
 
@@ -50,11 +48,12 @@ export class STIXConnector extends BaseConnector {
               { name: 'id', type: 'string', nullable: false },
               { name: 'spec_version', type: 'string', nullable: false },
               { name: 'objects', type: 'array', nullable: false }
-          ]
+          ],
+          version: 1
       };
   }
 
-  async readStream(options?: any): Promise<Readable> {
+  async readStream(options?: Record<string, unknown>): Promise<Readable> {
       const stream = new Readable({ objectMode: true, read() {} });
 
       setImmediate(async () => {
@@ -63,8 +62,8 @@ export class STIXConnector extends BaseConnector {
             const response = await axios.get(this.url);
             const bundle = response.data;
 
-            if (bundle.objects && Array.isArray(bundle.objects)) {
-                for (const object of bundle.objects) {
+            if ((bundle as Record<string, unknown>).objects && Array.isArray((bundle as Record<string, unknown>).objects)) {
+                for (const object of (bundle as Record<string, unknown>).objects as unknown[]) {
                     stream.push(this.wrapEvent(object));
                     this.metrics.recordsProcessed++;
                 }

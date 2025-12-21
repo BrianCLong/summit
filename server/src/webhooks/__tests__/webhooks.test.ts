@@ -1,4 +1,3 @@
-// @ts-nocheck
 import axios from 'axios';
 import { WebhookService, backoffForAttempt, processDelivery } from '../service';
 import { DeliveryStatus, WebhookEventType } from '../types';

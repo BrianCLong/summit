@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createWriteStream, createReadStream, promises as fs } from 'fs';
 import { pipeline } from 'stream/promises';
 import { createHash, randomUUID } from 'crypto';

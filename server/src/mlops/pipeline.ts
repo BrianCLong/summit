@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { modelRegistry } from './registry';
 import { featureStore } from './feature_store';
 import { logger } from '../config/logger';

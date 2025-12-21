@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Logger } from 'pino';
 import { v4 as uuidv4 } from 'uuid';
 import { PipelineConfig } from '../data-model/types.js';
@@ -14,7 +13,7 @@ import { InMemoryStateStore } from '../connectors/base.js';
 export class PipelineOrchestrator {
   constructor(private logger: Logger) {}
 
-  async runPipeline(pipeline: PipelineConfig) {
+  async runPipeline(pipeline: PipelineConfig): Promise<void> {
     const runId = uuidv4();
     this.logger.info({ pipeline: pipeline.key, runId }, 'Starting pipeline run');
 

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * SMTP Email Provider
  *
@@ -67,7 +66,7 @@ export class SMTPProvider extends EmailProvider {
           filename: att.filename,
           content: att.content,
           contentType: att.contentType,
-          encoding: att.encoding as any,
+          encoding: att.encoding,
           cid: att.cid,
         })),
         headers: {
@@ -133,9 +132,9 @@ export class SMTPProvider extends EmailProvider {
     }
     if (Array.isArray(message.to)) {
       const first = message.to[0];
-      return typeof first === 'string' ? first : first.email;
+      return typeof first === 'string' ? first : (first as { email: string }).email;
     }
-    return (message.to as any).email;
+    return (message.to as { email: string }).email;
   }
 
   private getPriority(priority?: 'high' | 'normal' | 'low'): string {

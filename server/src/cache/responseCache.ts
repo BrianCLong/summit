@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { getRedisClient } from '../config/database.js';
 import crypto from 'node:crypto';
 import {
@@ -99,8 +98,8 @@ class RedisTier implements CacheTier {
 const l1 = new MemoryTier();
 const l2 = new RedisTier();
 
-export function getLocalCacheStats() {
-  return { size: (l1 as any).cache?.size ?? 0 };
+export function getLocalCacheStats(): { size: number } {
+  return { size: (l1 as unknown as { cache: Map<string, unknown> }).cache?.size ?? 0 };
 }
 
 /**
@@ -140,7 +139,7 @@ export async function getCachedJson<T>(
  */
 export async function setCachedJson(
   key: string,
-  payload: any,
+  payload: unknown,
   options: { ttlSeconds?: number; indexPrefixes?: string[] } = {}
 ): Promise<void> {
   const ttl = options.ttlSeconds ?? 60;
@@ -162,7 +161,7 @@ export async function setCachedJson(
  */
 export async function cacheQueryResult<T>(
   query: string,
-  params: any,
+  params: unknown,
   fetcher: () => Promise<T>,
   options: { ttlSec?: number; tenant?: string } = {}
 ): Promise<T> {
@@ -190,7 +189,7 @@ export async function invalidateCache(tag: string, tenantId?: string) {
 }
 
 export async function cached<T>(
-  keyParts: any[],
+  keyParts: unknown[],
   ttlOrOptions: number | { ttlSec?: number; tags?: string[]; op?: string; swrSec?: number },
   fetcher: () => Promise<T>,
   opOverride?: string,

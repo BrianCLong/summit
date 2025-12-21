@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Request, Response, NextFunction } from 'express';
 import { AuthenticationError, ForbiddenError } from 'apollo-server-express';
 import { verify, JwtPayload } from 'jsonwebtoken';

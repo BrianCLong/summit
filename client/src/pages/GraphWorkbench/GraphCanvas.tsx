@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useEffect, useRef, useState } from 'react';
 import $ from 'jquery';
 import cytoscape from 'cytoscape';
@@ -25,9 +24,9 @@ export default function GraphCanvas() {
     if (!containerRef.current) return;
 
     // Convert GraphQL data to Cytoscape elements
-    let elements: any[] = [];
+    let elements: cytoscape.ElementDefinition[] = [];
     if (data?.graphData) {
-      const nodes = data.graphData.nodes.map((node) => ({
+      const nodes = data.graphData.nodes.map((node: any) => ({
         data: {
           id: node.id,
           label: node.label,
@@ -36,7 +35,7 @@ export default function GraphCanvas() {
         },
       }));
 
-      const edges = data.graphData.edges.map((edge) => ({
+      const edges = data.graphData.edges.map((edge: any) => ({
         data: {
           id: edge.id,
           source: edge.fromEntityId,
@@ -95,7 +94,7 @@ export default function GraphCanvas() {
       const node = cy
         .$('node')
         .find(
-          (n: any) =>
+          (n) =>
             n.renderedBoundingBox().x1 < e.offsetX &&
             n.renderedBoundingBox().x2 > e.offsetX &&
             n.renderedBoundingBox().y1 < e.offsetY &&
@@ -111,7 +110,7 @@ export default function GraphCanvas() {
     let startX = 0;
     let startY = 0;
     let $marquee: JQuery | null = null;
-    $container.on('mousedown', (e: any) => {
+    $container.on('mousedown', (e: JQuery.MouseDownEvent) => {
       if (e.button !== 0 || e.shiftKey !== true) return; // hold Shift to lasso
       lasso = true;
       startX = e.pageX;
@@ -129,7 +128,7 @@ export default function GraphCanvas() {
         })
         .appendTo('body');
     });
-    $container.on('mousemove', (e: any) => {
+    $container.on('mousemove', (e: JQuery.MouseMoveEvent) => {
       if (!lasso || !$marquee) return;
       const x = Math.min(e.pageX, startX);
       const y = Math.min(e.pageY, startY);
@@ -137,7 +136,7 @@ export default function GraphCanvas() {
       const h = Math.abs(e.pageY - startY);
       $marquee.css({ left: x, top: y, width: w, height: h });
     });
-    $container.on('mouseup', (e: any) => {
+    $container.on('mouseup', (e: JQuery.MouseUpEvent) => {
       if (!lasso) return;
       lasso = false;
       if ($marquee) {
@@ -295,11 +294,13 @@ export default function GraphCanvas() {
           size="small"
           variant="outlined"
           onClick={() => {
-            const url = (cyRef.current as any)?.png();
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'graph.png';
-            a.click();
+            if (cyRef.current) {
+              const url = cyRef.current.png();
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'graph.png';
+              a.click();
+            }
           }}
         >
           Export PNG

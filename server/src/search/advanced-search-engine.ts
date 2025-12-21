@@ -1,4 +1,3 @@
-// @ts-nocheck
 import natural from 'natural';
 
 export type FacetFilter = Record<string, string[]>;
@@ -65,7 +64,9 @@ export type SearchResponse = {
   };
 };
 
-type Token = { type: 'TERM'; field?: string; value: string } | { type: 'OP'; op: 'AND' | 'OR' | 'NOT' };
+type Token =
+  | { type: 'TERM'; field?: string; value: string }
+  | { type: 'OP'; op: 'AND' | 'OR' | 'NOT' };
 
 type Embedder = { embed(text: string): number[] };
 
@@ -404,15 +405,16 @@ function tokenize(text: string) {
 
 function parseDsl(input: string): Token[] {
   const raw = input.match(/"[^"]+"|\S+/g) ?? [];
-  return raw.map((part) => {
-    if (['AND', 'OR', 'NOT'].includes(part.toUpperCase())) {
-      return { type: 'OP', op: part.toUpperCase() as Token['op'] } as Token;
+  return raw.map((part): Token => {
+    const upper = part.toUpperCase();
+    if (upper === 'AND' || upper === 'OR' || upper === 'NOT') {
+      return { type: 'OP', op: upper as 'AND' | 'OR' | 'NOT' };
     }
     if (part.includes(':')) {
       const [field, value] = part.split(':');
-      return { type: 'TERM', field, value: value.replace(/\"/g, '') } as Token;
+      return { type: 'TERM', field, value: value.replace(/"/g, '') };
     }
-    return { type: 'TERM', value: part.replace(/\"/g, '') } as Token;
+    return { type: 'TERM', value: part.replace(/"/g, '') };
   });
 }
 

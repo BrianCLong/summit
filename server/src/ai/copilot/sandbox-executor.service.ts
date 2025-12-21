@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Sandbox Query Executor Service
  *

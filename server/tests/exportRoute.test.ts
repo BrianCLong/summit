@@ -1,15 +1,13 @@
-// @ts-nocheck
 import request from 'supertest';
 import { createApp } from '../src/app.js';
 import { describe, test, expect, beforeAll } from '@jest/globals';
+import crypto from 'crypto';
 
-function sign(params: Record<string, string>, secret: string) {
+function sign(params: Record<string, string>, secret: string): string {
   const base = Object.keys(params)
     .sort()
     .map((k) => `${k}=${params[k]}`)
     .join('&');
-  // @ts-ignore
-  const crypto = require('crypto');
   return crypto.createHmac('sha256', secret).update(base).digest('hex');
 }
 

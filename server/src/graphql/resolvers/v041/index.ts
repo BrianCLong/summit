@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * MC Platform v0.4.1 Sovereign Safeguards Resolver Integration
  * Exports all v0.4.1 sovereign safeguards resolvers

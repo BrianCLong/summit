@@ -1,9 +1,8 @@
-// @ts-nocheck
 import type { IResolvers } from '@graphql-tools/utils';
-import { getPostgresPool } from '../config/database';
-import { getNeo4jDriver } from '../config/database';
-import { resolveEntities } from '../services/HybridEntityResolutionService';
-import logger from '../config/logger';
+import { getPostgresPool } from '../config/database.js';
+import { getNeo4jDriver } from '../config/database.js';
+import { resolveEntities } from '../services/HybridEntityResolutionService.js';
+import logger from '../config/logger.js';
 
 const log = logger.child({ name: 'ERResolvers' });
 

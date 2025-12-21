@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Forensics Logger Tests
  */
@@ -18,42 +17,42 @@ jest.mock('ioredis', () => {
   const streams = new Map<string, Array<[string, string[]]>>();
   let idCounter = 0;
 
-  return jest.fn().mockImplementation(() => ({
-    connect: jest.fn().mockResolvedValue(undefined),
-    quit: jest.fn().mockResolvedValue(undefined),
-    ping: jest.fn().mockResolvedValue('PONG'),
-    xgroup: jest.fn().mockResolvedValue('OK'),
-    xadd: jest.fn((stream: string, ...args: any[]) => {
+  return jest.fn<() => any>().mockImplementation(() => ({
+    connect: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
+    quit: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
+    ping: jest.fn<() => Promise<string>>().mockResolvedValue('PONG'),
+    xgroup: jest.fn<() => Promise<string>>().mockResolvedValue('OK'),
+    xadd: jest.fn<(stream: string, ...args: any[]) => Promise<string>>((stream: string, ...args: any[]) => {
       if (!streams.has(stream)) streams.set(stream, []);
       const id = `${Date.now()}-${idCounter++}`;
       const fields = args.slice(args.indexOf('*') + 1);
       streams.get(stream)!.push([id, fields]);
       return Promise.resolve(id);
     }),
-    xrange: jest.fn((stream: string, start: string, end: string, ...args: any[]) => {
+    xrange: jest.fn<(stream: string, start: string, end: string, ...args: any[]) => Promise<Array<[string, string[]]>>>((stream: string, start: string, end: string, ...args: any[]) => {
       const entries = streams.get(stream) || [];
       const count = args.includes('COUNT') ? args[args.indexOf('COUNT') + 1] : entries.length;
       return Promise.resolve(entries.slice(0, count));
     }),
-    xrevrange: jest.fn((stream: string, start: string, end: string, ...args: any[]) => {
+    xrevrange: jest.fn<(stream: string, start: string, end: string, ...args: any[]) => Promise<Array<[string, string[]]>>>((stream: string, start: string, end: string, ...args: any[]) => {
       const entries = streams.get(stream) || [];
       const count = args.includes('COUNT') ? args[args.indexOf('COUNT') + 1] : entries.length;
       return Promise.resolve([...entries].reverse().slice(0, count));
     }),
-    xreadgroup: jest.fn().mockResolvedValue([]),
-    xack: jest.fn().mockResolvedValue(1),
-    xinfo: jest.fn().mockResolvedValue([
+    xreadgroup: jest.fn<() => Promise<any[]>>().mockResolvedValue([]),
+    xack: jest.fn<() => Promise<number>>().mockResolvedValue(1),
+    xinfo: jest.fn<() => Promise<any[]>>().mockResolvedValue([
       'length', 10,
       'first-entry', ['123-0', ['data', 'test']],
       'last-entry', ['456-0', ['data', 'test']],
       'groups', 1,
       'last-generated-id', '456-0'
     ]),
-    pipeline: jest.fn(() => ({
-      xadd: jest.fn().mockReturnThis(),
-      exec: jest.fn().mockResolvedValue([]),
+    pipeline: jest.fn<() => any>(() => ({
+      xadd: jest.fn<() => any>().mockReturnThis(),
+      exec: jest.fn<() => Promise<any[]>>().mockResolvedValue([]),
     })),
-    on: jest.fn(),
+    on: jest.fn<(event: string, listener: (...args: any[]) => void) => void>(),
   }));
 });
 
@@ -187,7 +186,7 @@ describe('ForensicsLogger', () => {
       await logger.logAuthentication(testActor, 'action2', 'success');
 
       // Allow event emission
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise<void>(resolve => setTimeout(resolve, 10));
 
       expect(events.length).toBe(2);
       expect(events[0].previousHash).toBe('GENESIS');
@@ -206,7 +205,7 @@ describe('ForensicsLogger', () => {
       await logger.logAuthentication(testActor, 'test-action', 'success');
 
       // Allow event emission
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise<void>(resolve => setTimeout(resolve, 10));
 
       expect(receivedEvents.length).toBe(1);
       expect(receivedEvents[0].action).toBe('test-action');
@@ -254,7 +253,7 @@ describe('ForensicsLogger', () => {
       await logger.logAuthentication(testActor, 'action2', 'success');
       await logger.logAuthentication(testActor, 'action3', 'success');
 
-      const result = await logger.verifyChainIntegrity(undefined, 100);
+      const result = await logger.verifyChainIntegrity(undefined as any, 100);
 
       expect(result.valid).toBe(true);
       expect(result.eventsChecked).toBeGreaterThanOrEqual(0);
@@ -330,7 +329,7 @@ describe('ForensicsLogger', () => {
       await logger.logSecurityEvent(testActor, 'warning-event', 'warning');
       await logger.logSecurityEvent(testActor, 'critical-event', 'critical');
 
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise<void>(resolve => setTimeout(resolve, 10));
 
       expect(events.find(e => e.severity === 'info')).toBeDefined();
       expect(events.find(e => e.severity === 'warning')).toBeDefined();
@@ -349,7 +348,7 @@ describe('ForensicsLogger', () => {
         'view'
       );
 
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise<void>(resolve => setTimeout(resolve, 10));
 
       expect(events.length).toBe(1);
       expect(events[0].severity).toBe('notice');

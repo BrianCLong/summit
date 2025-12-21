@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { defaultWorkspacePresets, WORKSPACE_STORAGE_VERSION } from './presets'
 import type {
   LegacyWorkspaceLayoutV1,

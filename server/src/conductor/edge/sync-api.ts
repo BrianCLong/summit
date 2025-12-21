@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Edge Sync API for Conductor
 // Provides endpoints for CRDT synchronization and offline operation management
 
@@ -10,7 +9,7 @@ import {
   SyncResponse,
 } from './crdt-sync';
 import { prometheusConductorMetrics } from '../observability/prometheus';
-import crypto from 'crypto';
+import { randomUUID } from 'crypto';
 
 export const syncRouter = express.Router();
 
@@ -46,7 +45,7 @@ syncRouter.post('/nodes/register', async (req, res) => {
 
   try {
     const registration: NodeRegistration = req.body;
-    const nodeId = (req.headers['x-node-id'] as string) || crypto.randomUUID();
+    const nodeId = (req.headers['x-node-id'] as string) || randomUUID();
 
     if (
       !registration.instanceId ||

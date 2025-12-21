@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { gql } from 'graphql-tag';
 import { coreTypeDefs } from '../schema.core.js';
 import copilotModule from '../schema.copilot.js';
@@ -11,8 +10,6 @@ import evidenceTypeDefs from '../schema.evidence.js';
 import evidenceOkTypeDefs from '../schema.evidenceOk.js';
 import trustRiskTypeDefs from '../schema.trust-risk.js';
 import provenanceTypeDefs from '../schema.provenance.js';
-import * as fs from 'fs';
-import * as path from 'path';
 import { sprint28TypeDefs } from './sprint28.js';
 import fs from 'fs';
 import path from 'path';

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import nunjucks from 'nunjucks';
 import { ReportContext, ReportRenderResult, ReportTemplate } from './types';
 

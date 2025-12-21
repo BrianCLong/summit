@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { verify } from 'jsonwebtoken';
 import { Logger } from 'pino';
 import {

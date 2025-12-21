@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Input Sanitization Utilities
  *
@@ -16,7 +15,6 @@
 
 import validator from 'validator';
 import { escape as htmlEscape } from 'html-escaper';
-// @ts-ignore
 import DOMPurify from 'isomorphic-dompurify';
 
 /**
@@ -36,10 +34,23 @@ export function sanitizeString(input: string): string {
   return sanitized;
 }
 
+interface DOMPurifyConfig {
+  ALLOWED_TAGS: string[];
+  ALLOWED_ATTR?: string[];
+  ALLOW_DATA_ATTR?: boolean;
+  FORBID_TAGS?: string[];
+  FORBID_ATTR?: string[];
+  SANITIZE_DOM?: boolean;
+  WHOLE_DOCUMENT?: boolean;
+  RETURN_DOM?: boolean;
+  RETURN_DOM_FRAGMENT?: boolean;
+  RETURN_TRUSTED_TYPE?: boolean;
+}
+
 /**
  * DOMPurify configuration for different sanitization modes
  */
-const DOMPURIFY_CONFIGS = {
+const DOMPURIFY_CONFIGS: Record<'standard' | 'strict' | 'rich', DOMPurifyConfig> = {
   // Standard safe HTML with limited tags
   standard: {
     ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'span'],
@@ -72,7 +83,7 @@ const DOMPURIFY_CONFIGS = {
     FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur'],
     SANITIZE_DOM: true,
   },
-} as const;
+};
 
 /**
  * Comprehensive HTML sanitization using DOMPurify with defense-in-depth
@@ -128,14 +139,14 @@ export function sanitizeHTML(
   if (useDOMPurify) {
     // Build config from options or use preset
     const baseConfig = DOMPURIFY_CONFIGS[mode];
-    const config: any = {
+    const config: DOMPurifyConfig = {
       ...baseConfig,
       ...(allowedTags && { ALLOWED_TAGS: allowedTags }),
       ...(allowedAttributes && { ALLOWED_ATTR: Object.values(allowedAttributes).flat() }),
     };
 
     // Add hooks for additional security
-    DOMPurify.addHook('uponSanitizeAttribute', (node, data) => {
+    DOMPurify.addHook('uponSanitizeAttribute', (node: Element, data: { attrName: string; attrValue: string; keepAttr: boolean }) => {
       // Block javascript: and data: URLs in href/src
       if (['href', 'src', 'action', 'formaction'].includes(data.attrName)) {
         const value = data.attrValue.toLowerCase().trim();
@@ -151,7 +162,7 @@ export function sanitizeHTML(
       }
     });
 
-    DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+    DOMPurify.addHook('afterSanitizeAttributes', (node: Element) => {
       // Set target="_blank" links to have rel="noopener noreferrer"
       if (node.tagName === 'A' && node.hasAttribute('target')) {
         node.setAttribute('rel', 'noopener noreferrer');
@@ -168,7 +179,7 @@ export function sanitizeHTML(
 
   // Fallback: regex-based sanitization (defense-in-depth)
   return sanitizeHTMLRegex(input, {
-    allowedTags: allowedTags || DOMPURIFY_CONFIGS[mode].ALLOWED_TAGS as unknown as string[],
+    allowedTags: allowedTags || DOMPURIFY_CONFIGS[mode].ALLOWED_TAGS,
     allowedAttributes: allowedAttributes || {
       a: ['href', 'title'],
       img: ['src', 'alt', 'title'],
@@ -362,13 +373,13 @@ export function sanitizeURL(url: string, allowedProtocols: string[] = ['http', '
 /**
  * Sanitize file path to prevent path traversal
  */
-export function sanitizeFilePath(path: string, allowedBasePath?: string): string {
-  if (typeof path !== 'string') {
+export function sanitizeFilePath(pathInput: string, allowedBasePath?: string): string {
+  if (typeof pathInput !== 'string') {
     throw new Error('Path must be a string');
   }
 
   // Remove null bytes
-  let sanitized = path.replace(/\0/g, '');
+  let sanitized = pathInput.replace(/\0/g, '');
 
   // Prevent path traversal
   if (sanitized.includes('..') || sanitized.includes('~')) {
@@ -380,7 +391,10 @@ export function sanitizeFilePath(path: string, allowedBasePath?: string): string
 
   // If allowed base path is specified, ensure the path is within it
   if (allowedBasePath) {
-    const { resolve, normalize } = require('path');
+    // Use dynamic require for path module
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const pathModule = require('path');
+    const { resolve, normalize } = pathModule;
     const normalizedBase = normalize(resolve(allowedBasePath));
     const normalizedPath = normalize(resolve(allowedBasePath, sanitized));
 
@@ -449,7 +463,7 @@ export function sanitizeShellInput(input: string): string {
 /**
  * Sanitize NoSQL query input
  */
-export function sanitizeNoSQL(input: any): any {
+export function sanitizeNoSQL(input: unknown): unknown {
   if (typeof input === 'string') {
     // Check for MongoDB operators
     if (input.startsWith('$')) {
@@ -468,9 +482,13 @@ export function sanitizeNoSQL(input: any): any {
     }
 
     // Recursively sanitize nested objects
-    const sanitized: any = Array.isArray(input) ? [] : {};
+    const sanitized: Record<string, unknown> | unknown[] = Array.isArray(input) ? [] : {};
     for (const key in input) {
-      sanitized[key] = sanitizeNoSQL(input[key]);
+      if (Array.isArray(sanitized)) {
+        sanitized.push(sanitizeNoSQL((input as unknown[])[parseInt(key)]));
+      } else {
+        sanitized[key] = sanitizeNoSQL((input as Record<string, unknown>)[key]);
+      }
     }
     return sanitized;
   }
@@ -481,8 +499,8 @@ export function sanitizeNoSQL(input: any): any {
 /**
  * Validate integer input
  */
-export function validateInteger(input: any, min?: number, max?: number): number {
-  const num = parseInt(input, 10);
+export function validateInteger(input: unknown, min?: number, max?: number): number {
+  const num = parseInt(String(input), 10);
 
   if (isNaN(num)) {
     throw new Error('Invalid integer');
@@ -502,8 +520,8 @@ export function validateInteger(input: any, min?: number, max?: number): number 
 /**
  * Validate float input
  */
-export function validateFloat(input: any, min?: number, max?: number): number {
-  const num = parseFloat(input);
+export function validateFloat(input: unknown, min?: number, max?: number): number {
+  const num = parseFloat(String(input));
 
   if (isNaN(num)) {
     throw new Error('Invalid float');
@@ -523,7 +541,7 @@ export function validateFloat(input: any, min?: number, max?: number): number {
 /**
  * Validate boolean input
  */
-export function validateBoolean(input: any): boolean {
+export function validateBoolean(input: unknown): boolean {
   if (typeof input === 'boolean') {
     return input;
   }
@@ -556,9 +574,9 @@ export function validateUUID(input: string, version?: validator.UUIDVersion): st
 /**
  * Sanitize JSON input
  */
-export function sanitizeJSON(input: string): any {
+export function sanitizeJSON(input: string): unknown {
   try {
-    const parsed = JSON.parse(input);
+    const parsed = JSON.parse(input) as Record<string, unknown>;
 
     // Prevent prototype pollution
     if (parsed.__proto__ || parsed.constructor || parsed.prototype) {
@@ -566,15 +584,16 @@ export function sanitizeJSON(input: string): any {
     }
 
     return parsed;
-  } catch (error: any) {
-    throw new Error(`Invalid JSON: ${error.message}`);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    throw new Error(`Invalid JSON: ${errorMessage}`);
   }
 }
 
 /**
  * Sanitize object to remove dangerous properties
  */
-export function sanitizeObject(obj: any): any {
+export function sanitizeObject(obj: unknown): unknown {
   if (typeof obj !== 'object' || obj === null) {
     return obj;
   }
@@ -586,14 +605,15 @@ export function sanitizeObject(obj: any): any {
     return obj.map(item => sanitizeObject(item));
   }
 
-  const sanitized: any = {};
-  for (const key in obj) {
+  const sanitized: Record<string, unknown> = {};
+  const objRecord = obj as Record<string, unknown>;
+  for (const key in objRecord) {
     if (dangerousKeys.includes(key)) {
       continue; // Skip dangerous keys
     }
 
-    if (obj.hasOwnProperty(key)) {
-      sanitized[key] = sanitizeObject(obj[key]);
+    if (Object.prototype.hasOwnProperty.call(objRecord, key)) {
+      sanitized[key] = sanitizeObject(objRecord[key]);
     }
   }
 
@@ -661,7 +681,7 @@ export class InputValidator {
    * @param options - Validation options (minLength, maxLength, pattern).
    * @returns The sanitized string if valid, or null if invalid (errors added to collection).
    */
-  validateString(input: any, fieldName: string, options?: {
+  validateString(input: unknown, fieldName: string, options?: {
     minLength?: number;
     maxLength?: number;
     pattern?: RegExp;
@@ -688,8 +708,9 @@ export class InputValidator {
 
     try {
       return sanitizeString(input);
-    } catch (error: any) {
-      this.addError(`${fieldName}: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.addError(`${fieldName}: ${errorMessage}`);
       return null;
     }
   }
@@ -701,11 +722,12 @@ export class InputValidator {
    * @param fieldName - The name of the field for error messages.
    * @returns The sanitized email if valid, or null if invalid.
    */
-  validateEmail(input: any, fieldName: string): string | null {
+  validateEmail(input: unknown, fieldName: string): string | null {
     try {
-      return sanitizeEmail(input);
-    } catch (error: any) {
-      this.addError(`${fieldName}: ${error.message}`);
+      return sanitizeEmail(String(input));
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.addError(`${fieldName}: ${errorMessage}`);
       return null;
     }
   }
@@ -717,11 +739,12 @@ export class InputValidator {
    * @param fieldName - The name of the field for error messages.
    * @returns The sanitized URL if valid, or null if invalid.
    */
-  validateURL(input: any, fieldName: string): string | null {
+  validateURL(input: unknown, fieldName: string): string | null {
     try {
-      return sanitizeURL(input);
-    } catch (error: any) {
-      this.addError(`${fieldName}: ${error.message}`);
+      return sanitizeURL(String(input));
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.addError(`${fieldName}: ${errorMessage}`);
       return null;
     }
   }
@@ -735,11 +758,12 @@ export class InputValidator {
    * @param max - Maximum allowed value.
    * @returns The validated integer if valid, or null if invalid.
    */
-  validateInteger(input: any, fieldName: string, min?: number, max?: number): number | null {
+  validateInteger(input: unknown, fieldName: string, min?: number, max?: number): number | null {
     try {
       return validateInteger(input, min, max);
-    } catch (error: any) {
-      this.addError(`${fieldName}: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.addError(`${fieldName}: ${errorMessage}`);
       return null;
     }
   }

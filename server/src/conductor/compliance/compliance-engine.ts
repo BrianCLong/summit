@@ -1,8 +1,7 @@
-// @ts-nocheck
 // Compliance Automation Engine for Conductor
 // Implements SOC2, GDPR, and other regulatory compliance monitoring and enforcement
 
-import crypto from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 import { prometheusConductorMetrics } from '../observability/prometheus';
 import Redis from 'ioredis';
 
@@ -507,7 +506,7 @@ export class ComplianceEngine {
         throw new Error(`Framework ${frameworkId} not found`);
       }
 
-      const assessmentId = crypto.randomUUID();
+      const assessmentId = randomUUID();
       const assessment: ComplianceAssessment = {
         id: assessmentId,
         frameworkId,
@@ -642,7 +641,7 @@ export class ComplianceEngine {
 
           if (!testResult.passed) {
             const finding: ComplianceFinding = {
-              id: crypto.randomUUID(),
+              id: randomUUID(),
               assessmentId: '', // Will be set by parent assessment
               requirementId: requirement.id,
               category: 'non_compliance',
@@ -655,7 +654,7 @@ export class ComplianceEngine {
               dueDate: Date.now() + 604800000, // 7 days
               evidence: testResult.evidence,
               remediation: {
-                id: crypto.randomUUID(),
+                id: randomUUID(),
                 findingId: '', // Will be set after finding ID is available
                 title: `Remediate ${control.description}`,
                 description: testResult.recommendation,
@@ -676,7 +675,7 @@ export class ComplianceEngine {
       console.error(`Control test error for ${control.id}:`, error);
 
       const finding: ComplianceFinding = {
-        id: crypto.randomUUID(),
+        id: randomUUID(),
         assessmentId: '',
         requirementId: control.requirementId,
         category: 'weakness',
@@ -689,7 +688,7 @@ export class ComplianceEngine {
         dueDate: Date.now() + 259200000, // 3 days
         evidence: [],
         remediation: {
-          id: crypto.randomUUID(),
+          id: randomUUID(),
           findingId: '',
           title: 'Fix control testing',
           description: 'Resolve control test execution issues',
@@ -767,7 +766,7 @@ export class ComplianceEngine {
 
       if (!evidenceExists) {
         const finding: ComplianceFinding = {
-          id: crypto.randomUUID(),
+          id: randomUUID(),
           assessmentId: '',
           requirementId: evidenceReq.requirementId,
           category: 'gap',
@@ -780,7 +779,7 @@ export class ComplianceEngine {
           dueDate: Date.now() + 1209600000, // 14 days
           evidence: [],
           remediation: {
-            id: crypto.randomUUID(),
+            id: randomUUID(),
             findingId: '',
             title: 'Implement evidence collection',
             description: `Implement automated collection for ${evidenceReq.description}`,

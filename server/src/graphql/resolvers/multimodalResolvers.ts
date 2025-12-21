@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Upload } from 'graphql-upload-ts';
 import { withAuthAndPolicy } from '../../middleware/withAuthAndPolicy.js';
 import { MultimodalDataService } from '../../services/MultimodalDataService.js';

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { EntityRepo } from '../repos/EntityRepo.js';
 import { ABACEngine } from './ABACEngine.js';
 import { ContentInspector } from './ContentInspector.js';

@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import { Pool } from 'pg';
 import Redis from 'ioredis';
 import { pino } from 'pino';

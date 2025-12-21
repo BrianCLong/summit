@@ -1,7 +1,5 @@
-// @ts-nocheck
-
-import { BaseConnector } from '../base';
-import { ConnectorConfig, ConnectorSchema } from '../types';
+import { BaseConnector } from '../base.js';
+import { ConnectorConfig, ConnectorSchema } from '../types.js';
 import { Readable } from 'stream';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -61,9 +59,9 @@ export class CSVConnector extends BaseConnector {
             to: 1 // Read only first row
         }));
 
-        let fields: any[] = [];
+        let fields: { name: string; type: string; nullable: boolean }[] = [];
 
-        parser.on('data', (row) => {
+        parser.on('data', (row: Record<string, unknown>) => {
             fields = Object.keys(row).map(key => ({
                 name: key,
                 type: 'string', // CSV is always string initially
@@ -72,16 +70,16 @@ export class CSVConnector extends BaseConnector {
         });
 
         parser.on('end', () => {
-            resolve({ fields });
+            resolve({ fields, version: 1 });
         });
 
-        parser.on('error', (err) => {
+        parser.on('error', (err: Error) => {
             reject(err);
         });
     });
   }
 
-  async readStream(options?: any): Promise<Readable> {
+  async readStream(options?: Record<string, unknown>): Promise<Readable> {
     const rawStream = this.isS3
          ? this.mockS3Stream()
          : fs.createReadStream(this.filePath);
@@ -94,7 +92,7 @@ export class CSVConnector extends BaseConnector {
 
     const outputStream = new Readable({ objectMode: true, read() {} });
 
-    parser.on('data', (record) => {
+    parser.on('data', (record: Record<string, unknown>) => {
         outputStream.push(this.wrapEvent(record));
         this.metrics.recordsProcessed++;
     });
@@ -103,7 +101,7 @@ export class CSVConnector extends BaseConnector {
         outputStream.push(null);
     });
 
-    parser.on('error', (err) => {
+    parser.on('error', (err: Error) => {
         outputStream.destroy(err);
         this.metrics.errors++;
     });

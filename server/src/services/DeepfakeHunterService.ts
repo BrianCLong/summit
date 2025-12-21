@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import { EventEmitter } from 'events';
 import LLMService from './LLMService.js';
 import logger from '../utils/logger.js';

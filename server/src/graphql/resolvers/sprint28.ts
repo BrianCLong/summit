@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { pg } from '../db/pg';
 import { getContext } from '../auth/context';
 import pino from 'pino';

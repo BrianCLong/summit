@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * @fileoverview Authentication Service for Summit/IntelGraph Platform
  *
@@ -46,8 +45,7 @@ import config from '../config/index.js';
 import logger from '../utils/logger.js';
 import { secretsService } from './SecretsService.js';
 import { SECRETS } from '../config/secretRefs.js';
-// @ts-ignore - pg type imports
-import { Pool, PoolClient } from 'pg';
+import type { Pool, PoolClient } from 'pg';
 import { metrics } from '../observability/metrics.js';
 
 /**
@@ -432,10 +430,9 @@ export class AuthService {
 
     const jwtSecret = await secretsService.getSecret(SECRETS.JWT_SECRET);
 
-    // @ts-ignore - jwt.sign overload mismatch
     const token = jwt.sign(tokenPayload, jwtSecret, {
       expiresIn: config.jwt.expiresIn,
-    });
+    }) as string;
 
     const refreshToken = uuidv4();
     const expiresAt = new Date();

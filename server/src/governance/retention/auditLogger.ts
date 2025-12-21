@@ -1,4 +1,3 @@
-// @ts-nocheck
 import pino from 'pino';
 import { RetentionAuditEvent } from './types.js';
 

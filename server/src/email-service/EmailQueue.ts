@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Email Queue
  *
@@ -96,12 +95,10 @@ export class EmailQueue {
       {
         priority: options?.priority,
         delay: options?.delay,
-        // @ts-ignore - timestamp option exists but not in types
-        timestamp: options?.scheduledFor?.getTime(),
       },
     );
 
-    return job.id!;
+    return job.id ?? '';
   }
 
   /**
@@ -117,11 +114,11 @@ export class EmailQueue {
     const state = await job.getState();
 
     return {
-      id: job.id!,
+      id: job.id ?? '',
       message: job.data,
-      priority: job.opts.priority || 0,
+      priority: job.opts.priority ?? 0,
       attempts: job.attemptsMade,
-      maxAttempts: job.opts.attempts || 3,
+      maxAttempts: job.opts.attempts ?? 3,
       createdAt: new Date(job.timestamp),
       scheduledFor: job.opts.delay
         ? new Date(job.timestamp + job.opts.delay)

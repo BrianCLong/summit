@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   MapContainer,
@@ -35,8 +34,7 @@ const CLUSTERING_FEATURE_ENABLED = isFeatureEnabled('ui.mapClustering');
 
 const MAP_PAGE_SIZE =
   isPositiveInteger(
-    // @ts-ignore - import.meta is available in the browser build
-    typeof import.meta !== 'undefined' ? import.meta.env?.VITE_MAP_MARKER_PAGE_SIZE : undefined,
+    typeof import.meta !== 'undefined' ? (import.meta as { env?: { VITE_MAP_MARKER_PAGE_SIZE?: string } }).env?.VITE_MAP_MARKER_PAGE_SIZE : undefined,
   ) ||
   isPositiveInteger(
     typeof process !== 'undefined' ? process.env?.VITE_MAP_MARKER_PAGE_SIZE : undefined,
@@ -117,15 +115,14 @@ const clusterMarkers = (entities: MarkerEntity[], zoom: number): RenderableMarke
 };
 
 // Component to handle map centering based on selection
-const MapUpdater = ({ selectedIds, entities }: { selectedIds: string[], entities: any[] }) => {
+const MapUpdater = ({ selectedIds, entities }: { selectedIds: string[], entities: MarkerEntity[] }) => {
   const map = useMap();
 
   useEffect(() => {
     if (selectedIds.length > 0) {
       const selectedEntities = entities.filter(e => selectedIds.includes(e.id) && e.lat && e.lng);
       if (selectedEntities.length > 0) {
-        const bounds = selectedEntities.map(e => [e.lat, e.lng]);
-        // @ts-ignore
+        const bounds = selectedEntities.map(e => [e.lat, e.lng] as [number, number]);
         map.fitBounds(bounds, { padding: [50, 50], maxZoom: 13 });
       }
     }

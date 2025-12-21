@@ -1,7 +1,6 @@
-// @ts-nocheck
 import { createHash, randomUUID, sign } from 'crypto';
-import logger from '../../config/logger';
-import { writeAudit } from '../../utils/audit';
+import logger from '../../config/logger.js';
+import { writeAudit } from '../../utils/audit.js';
 import {
   AutomatedPreservationOptions,
   AutomatedPreservationResult,
@@ -25,7 +24,7 @@ import {
   PreservationHoldResult,
   PreservationVerificationResult,
   TamperProofSeal,
-} from './types';
+} from './types.js';
 
 function cloneDeep<T>(value: T): T {
   if (value instanceof Date) {

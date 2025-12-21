@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * IntelGraph GA-Core Streaming Ingest Worker
  * Committee Requirements: PII redaction, real-time processing, observability
@@ -17,8 +16,8 @@ interface IngestMessage {
   source: string;
   timestamp: Date;
   data_type: string;
-  raw_data: any;
-  metadata: Record<string, any>;
+  raw_data: unknown;
+  metadata: Record<string, unknown>;
   priority: number;
   correlation_id?: string;
 }
@@ -28,12 +27,12 @@ interface ProcessedMessage {
   source: string;
   timestamp: Date;
   data_type: string;
-  processed_data: any;
+  processed_data: unknown;
   redaction_applied: boolean;
   pii_fields_removed: string[];
   processing_time_ms: number;
   confidence: number;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 interface PIIRedactionConfig {
@@ -311,8 +310,8 @@ export class StreamingIngestWorker extends EventEmitter {
   }
 
   // Committee requirement: PII redaction implementation
-  private async applyPIIRedaction(data: any): Promise<{
-    processed_data: any;
+  private async applyPIIRedaction(data: unknown): Promise<{
+    processed_data: unknown;
     redaction_applied: boolean;
     pii_fields_removed: string[];
   }> {
@@ -327,7 +326,7 @@ export class StreamingIngestWorker extends EventEmitter {
     const piiFieldsRemoved: string[] = [];
     let redactionApplied = false;
 
-    const processObject = (obj: any, path = ''): any => {
+    const processObject = (obj: unknown, path = ''): unknown => {
       if (typeof obj === 'string') {
         let processedString = obj;
 
@@ -354,7 +353,7 @@ export class StreamingIngestWorker extends EventEmitter {
       }
 
       if (obj && typeof obj === 'object') {
-        const processed: any = {};
+        const processed: Record<string, unknown> = {};
 
         for (const [key, value] of Object.entries(obj)) {
           processed[key] = processObject(value, path ? `${path}.${key}` : key);
@@ -388,22 +387,22 @@ export class StreamingIngestWorker extends EventEmitter {
   }
 
   // Data normalization
-  private async normalizeData(data: any, dataType: string): Promise<any> {
+  private async normalizeData(data: unknown, dataType: string): Promise<unknown> {
     switch (dataType) {
       case 'event':
-        return this.normalizeEventData(data);
+        return this.normalizeEventData(data as Record<string, unknown>);
       case 'entity':
-        return this.normalizeEntityData(data);
+        return this.normalizeEntityData(data as Record<string, unknown>);
       case 'relationship':
-        return this.normalizeRelationshipData(data);
+        return this.normalizeRelationshipData(data as Record<string, unknown>);
       case 'document':
-        return this.normalizeDocumentData(data);
+        return this.normalizeDocumentData(data as Record<string, unknown>);
       default:
         return data;
     }
   }
 
-  private normalizeEventData(data: any): any {
+  private normalizeEventData(data: Record<string, unknown>): Record<string, unknown> {
     return {
       event_id: data.id || crypto.randomUUID(),
       event_type: data.type || 'unknown',
@@ -415,7 +414,7 @@ export class StreamingIngestWorker extends EventEmitter {
     };
   }
 
-  private normalizeEntityData(data: any): any {
+  private normalizeEntityData(data: Record<string, unknown>): Record<string, unknown> {
     return {
       entity_id: data.id || crypto.randomUUID(),
       entity_type: data.type || 'unknown',
@@ -426,7 +425,7 @@ export class StreamingIngestWorker extends EventEmitter {
     };
   }
 
-  private normalizeRelationshipData(data: any): any {
+  private normalizeRelationshipData(data: Record<string, unknown>): Record<string, unknown> {
     return {
       relationship_id: data.id || crypto.randomUUID(),
       source_entity: data.source || data.from,
@@ -438,7 +437,7 @@ export class StreamingIngestWorker extends EventEmitter {
     };
   }
 
-  private normalizeDocumentData(data: any): any {
+  private normalizeDocumentData(data: Record<string, unknown>): Record<string, unknown> {
     return {
       document_id: data.id || crypto.randomUUID(),
       title: data.title || 'Untitled',
@@ -486,7 +485,7 @@ export class StreamingIngestWorker extends EventEmitter {
     return reliabilityMap[source] || 0.3;
   }
 
-  private calculateDataCompleteness(data: any): number {
+  private calculateDataCompleteness(data: unknown): number {
     if (!data || typeof data !== 'object') {
       return 0.2;
     }
@@ -547,7 +546,7 @@ export class StreamingIngestWorker extends EventEmitter {
   }
 
   // Utility methods
-  private hashMessage(message: any): string {
+  private hashMessage(message: Record<string, unknown>): string {
     const normalized = {
       id: message.message_id,
       source: message.source,

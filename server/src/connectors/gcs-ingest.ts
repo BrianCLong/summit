@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
   PullConnector,
   ConnectorContext,
@@ -6,7 +5,7 @@ import {
   ConnectorConfig,
   ConnectorManifest,
   ConnectorEntity,
-} from '@summit/connector-sdk';
+} from '@intelgraph/connector-sdk';
 import { GCSConnector, GCSObjectMetadata } from './gcs.js';
 import pLimit from 'p-limit';
 import { parse } from 'csv-parse';

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * IntelGraph Live Server
  * Simplified production-ready server for immediate deployment

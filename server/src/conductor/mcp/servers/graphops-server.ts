@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 // GraphOps MCP Server
 // Provides graph operations (Cypher queries, algorithms) via MCP protocol
 

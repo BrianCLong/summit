@@ -1,11 +1,10 @@
-// @ts-nocheck
 /**
  * CaseRepo Unit Tests
  * Tests CRUD operations for Case Spaces
  */
 
 import { Pool } from 'pg';
-import { CaseRepo, CaseInput } from '../repos/CaseRepo';
+import { CaseRepo, CaseInput } from '../repos/CaseRepo.js';
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
 describe('CaseRepo', () => {

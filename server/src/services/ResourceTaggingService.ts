@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Resource Tagging and Cost Allocation Service
  *
@@ -7,7 +6,7 @@
  */
 
 import pino from 'pino';
-import { getPostgresPool } from '../db/postgres';
+import { getPostgresPool, type ManagedPostgresPool } from '../db/postgres.js';
 
 const logger = pino({ name: 'resource-tagging' });
 
@@ -40,7 +39,7 @@ export interface ResourceTag {
   category: TagCategory | string;
   key: string;
   value: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface TaggedResource {
@@ -50,7 +49,7 @@ export interface TaggedResource {
   cost?: number;
   timestamp: Date;
   duration?: number; // Duration in milliseconds
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface CostAllocation {
@@ -77,7 +76,7 @@ export interface TaggingPolicy {
 }
 
 export class ResourceTaggingService {
-  private db = getPostgresPool();
+  private db: ManagedPostgresPool = getPostgresPool();
   private tagCache = new Map<string, ResourceTag[]>();
   private cacheTTL = 300000; // 5 minutes
   private defaultPolicy: TaggingPolicy = {

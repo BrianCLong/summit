@@ -1,5 +1,4 @@
-// @ts-nocheck
-import { trace, metrics, SpanStatusCode } from '@opentelemetry/api';
+import { trace, metrics, SpanStatusCode, Counter, Histogram } from '@opentelemetry/api';
 
 /**
  * Maestro Telemetry Helper
@@ -11,8 +10,8 @@ export class MaestroTelemetry {
   private meter = metrics.getMeter('maestro-orchestrator');
 
   // Cache for instruments to avoid recreation overhead
-  private counters: Map<string, any> = new Map();
-  private histograms: Map<string, any> = new Map();
+  private counters: Map<string, Counter> = new Map();
+  private histograms: Map<string, Histogram> = new Map();
 
   private constructor() {}
 
@@ -26,7 +25,7 @@ export class MaestroTelemetry {
   /**
    * Wraps a function execution in a span.
    */
-  public async trace<T>(name: string, attributes: Record<string, any>, fn: () => Promise<T>): Promise<T> {
+  public async trace<T>(name: string, attributes: Record<string, unknown>, fn: () => Promise<T>): Promise<T> {
     return this.tracer.startActiveSpan(name, { attributes }, async (span) => {
       try {
         const result = await fn();
@@ -48,7 +47,7 @@ export class MaestroTelemetry {
   /**
    * Records a counter metric.
    */
-  public recordCounter(name: string, value: number, attributes: Record<string, any> = {}) {
+  public recordCounter(name: string, value: number, attributes: Record<string, unknown> = {}) {
     let counter = this.counters.get(name);
     if (!counter) {
         counter = this.meter.createCounter(name);

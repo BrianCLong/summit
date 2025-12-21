@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { promises as fs } from 'fs';
 import path from 'path';
 import sharp, { type FormatEnum, type OutputInfo } from 'sharp';
@@ -72,7 +71,7 @@ export interface ImageProcessingResult {
   optimizedInfo: OutputInfo;
   thumbnails: ProcessedImage[];
   conversions: ProcessedImage[];
-  exif?: Record<string, any>;
+  exif?: Record<string, unknown>;
   facialRecognition?: FacialRecognitionResult;
 }
 
@@ -287,7 +286,7 @@ export class ImageProcessingPipeline {
 
   private async extractExifData(
     exifBuffer?: Buffer,
-  ): Promise<Record<string, any> | undefined> {
+  ): Promise<Record<string, unknown> | undefined> {
     if (!exifBuffer) return undefined;
 
     try {

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Strategic Plan Repository - Persistence layer for strategic planning
  *
@@ -105,8 +104,8 @@ export class StrategicPlanRepo {
         payload: { name: input.name },
         metadata: {},
       })
-      .catch((err) =>
-        repoLogger.error('Failed to record plan creation', err),
+      .catch((err: unknown) =>
+        repoLogger.error('Failed to record plan creation', err instanceof Error ? err.message : String(err)),
       );
 
     repoLogger.info({ planId: plan.id }, 'Strategic plan created');
@@ -223,8 +222,8 @@ export class StrategicPlanRepo {
         payload: { updates: input },
         metadata: {},
       })
-      .catch((err) =>
-        repoLogger.error('Failed to record plan update', err),
+      .catch((err: unknown) =>
+        repoLogger.error('Failed to record plan update', err instanceof Error ? err.message : String(err)),
       );
 
     return plan;
@@ -255,8 +254,8 @@ export class StrategicPlanRepo {
             payload: {},
             metadata: {},
           })
-          .catch((err) =>
-            repoLogger.error('Failed to record plan deletion', err),
+          .catch((err: unknown) =>
+            repoLogger.error('Failed to record plan deletion', err instanceof Error ? err.message : String(err)),
           );
 
         repoLogger.info({ planId: id }, 'Strategic plan deleted');

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { readFile } from 'node:fs/promises';
 import { z } from 'zod';
 import cloneDeep from 'lodash/cloneDeep.js';

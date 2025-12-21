@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { randomUUID as uuidv4 } from 'crypto';
 import { EventEmitter } from 'events';
 import { RunbookDefinition, RunbookContext, RunbookStep, StepDefinition } from '../lib/types.js';

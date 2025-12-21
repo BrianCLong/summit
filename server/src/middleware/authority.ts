@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * IntelGraph GA-Core Authority Binding Middleware
  * Committee Requirement: Foster & Starkey dissent implementation

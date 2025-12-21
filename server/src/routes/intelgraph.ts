@@ -1,9 +1,9 @@
-// @ts-nocheck
-import express from 'express';
+import express, { Response, NextFunction } from 'express';
 import { intelGraphService } from '../services/IntelGraphService.js';
 import { ensurePolicy } from '../middleware/abac.js';
 import { requireStepUp } from '../auth/webauthn/middleware.js';
 import { z } from 'zod';
+import type { AuthenticatedRequest } from './types.js';
 
 const router = express.Router();
 
@@ -26,7 +26,7 @@ const claimSchema = z.object({
   classification: z.string().optional()
 });
 
-router.post('/decisions', ensurePolicy('create', 'decision'), requireStepUp, async (req, res) => {
+router.post('/decisions', ensurePolicy('create', 'decision'), requireStepUp, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const body = decisionSchema.parse(req.body);
     const { claimIds, evidenceIds, ...decisionData } = body;
@@ -47,7 +47,7 @@ router.post('/decisions', ensurePolicy('create', 'decision'), requireStepUp, asy
   }
 });
 
-router.post('/claims', ensurePolicy('create', 'claim'), async (req, res) => {
+router.post('/claims', ensurePolicy('create', 'claim'), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const body = claimSchema.parse(req.body);
     const claimId = await intelGraphService.createClaim(body);
@@ -61,7 +61,7 @@ router.post('/claims', ensurePolicy('create', 'claim'), async (req, res) => {
   }
 });
 
-router.get('/decisions/:id', async (req, res) => {
+router.get('/decisions/:id', async (req: AuthenticatedRequest, res: Response) => {
     try {
         const result = await intelGraphService.getDecisionWithReceipt(req.params.id);
         if (!result) {

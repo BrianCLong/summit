@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { ReactNode, useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -22,6 +21,7 @@ import {
   ChartBarIcon as ChartBarIconSolid,
   UserIcon as UserIconSolid,
 } from '@heroicons/react/24/solid';
+import type { ComponentType, SVGProps } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useOffline } from '@/hooks/useOffline';
 import { Badge } from '@/components/Badge';
@@ -33,7 +33,14 @@ interface MobileLayoutProps {
   showHeader?: boolean;
 }
 
-const navigationItems = [
+interface NavigationItem {
+  name: string;
+  href: string;
+  icon: ComponentType<SVGProps<SVGSVGElement>>;
+  iconSolid: ComponentType<SVGProps<SVGSVGElement>>;
+}
+
+const navigationItems: NavigationItem[] = [
   {
     name: 'Home',
     href: '/',

@@ -1,14 +1,13 @@
-// @ts-nocheck
 // server/src/routes/resources.ts
 
 import { Router, Request, Response, NextFunction } from 'express';
 import { quotaManager, QuotaMap } from '../lib/resources/quota-manager.js';
 import { budgetTracker } from '../lib/resources/budget-tracker.js';
+import type { AuthenticatedRequest } from './types.js';
 
 const router = Router();
 
-const adminOnly = (req: Request, res: Response, next: NextFunction) => {
-    // @ts-ignore
+const adminOnly = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     if (req.user && req.user.role === 'admin') {
         next();
     } else {

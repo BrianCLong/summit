@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { PrismaClient } from '@prisma/client';
 import winston, { Logger } from 'winston';
 import { Redis } from 'ioredis';
@@ -79,7 +78,7 @@ export class SOARConnectorV1Service {
    */
   async createIncidentTicket(
     alertId: string,
-    alertData: any,
+    alertData: Record<string, unknown>,
     system: 'servicenow' | 'jira' = 'servicenow',
   ): Promise<TicketLink> {
     const operationId = `create_ticket_${alertId}_${Date.now()}`;
@@ -99,7 +98,7 @@ export class SOARConnectorV1Service {
       }
 
       // Create ticket with retry logic
-      let ticketData: any;
+      let ticketData: { id: string; url: string; status: string };
       let attempt = 0;
 
       while (attempt < this.RETRY_ATTEMPTS) {
@@ -119,11 +118,12 @@ export class SOARConnectorV1Service {
             throw error;
           }
 
+          const errorMessage = error instanceof Error ? error.message : String(error);
           this.logger.warn('Ticket creation failed, retrying', {
             alertId,
             system,
             attempt,
-            error: error.message,
+            error: errorMessage,
           });
 
           await this.delay(this.RETRY_DELAY_MS * attempt);
@@ -157,10 +157,11 @@ export class SOARConnectorV1Service {
 
       return ticketLink as TicketLink;
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       this.logger.error('Failed to create incident ticket', {
         alertId,
         system,
-        error: error.message,
+        error: errorMessage,
       });
       throw error;
     }
@@ -169,7 +170,7 @@ export class SOARConnectorV1Service {
   /**
    * Update existing ticket with new information
    */
-  async updateTicket(ticketLinkId: string, updates: any): Promise<void> {
+  async updateTicket(ticketLinkId: string, updates: Record<string, unknown>): Promise<void> {
     try {
       const ticketLink = await this.prisma.ticketLink.findUnique({
         where: { id: ticketLinkId },
@@ -200,9 +201,10 @@ export class SOARConnectorV1Service {
         system: ticketLink.external_system,
       });
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       this.logger.error('Failed to update ticket', {
         ticketLinkId,
-        error: error.message,
+        error: errorMessage,
       });
       throw error;
     }

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Enhanced Sanitization Middleware
  *

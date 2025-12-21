@@ -1,4 +1,3 @@
-// @ts-nocheck
 // API Routes for Policy Explanation and Simulation
 import express from 'express';
 import { policyExplainer } from '../router/policy-explainer';

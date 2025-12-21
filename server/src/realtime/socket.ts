@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Server, Socket } from 'socket.io';
 import { verifyToken as verifyTokenBase } from '../lib/auth.js';
 import pino from 'pino';

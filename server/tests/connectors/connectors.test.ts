@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { GCSConnector } from '../../src/connectors/gcs.js';
 import { JDBCConnector } from '../../src/connectors/jdbc.js';
 import { Readable } from 'stream';

@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import { describe, expect, it, jest, beforeEach, afterEach } from '@jest/globals';
 import { AlertTriageV2Service } from '../../src/services/AlertTriageV2Service';
 // Import types conditionally or mock them locally to avoid build errors in this specific env

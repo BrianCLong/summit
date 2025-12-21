@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Base Adapter Implementation
  *
@@ -23,9 +22,10 @@ import type {
   ErrorHandler,
   DLQReasonCode,
   DLQRecord,
+  RetryConfig,
 } from '../types/index.js';
 import { BackpressureController } from '../lib/backpressure.js';
-import { retry, isRetryableError, classifyError, RetryConfig, DEFAULT_RETRY_CONFIG } from '../lib/retry.js';
+import { retry, isRetryableError, classifyError, DEFAULT_RETRY_CONFIG } from '../lib/retry.js';
 import { computeDedupeKeyFromEnvelope, validateDedupeKey } from '../lib/dedupe.js';
 
 const tracer = trace.getTracer('@intelgraph/ingest-adapters');

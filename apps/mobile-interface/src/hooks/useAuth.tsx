@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
   createContext,
   useContext,
@@ -7,6 +6,7 @@ import {
   ReactNode,
   useCallback,
 } from 'react';
+import type { FC } from 'react';
 import { useRouter } from 'next/router';
 import { apiClient } from '@/services/api';
 import toast from 'react-hot-toast';
@@ -94,9 +94,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Redirect to intended page or dashboard
       const returnUrl = router.query.returnUrl as string;
-      router.push(returnUrl || '/');
-    } catch (error: any) {
-      const message = error.response?.data?.message || 'Sign in failed';
+      await router.push(returnUrl || '/');
+    } catch (error) {
+      const message =
+        (error as { response?: { data?: { message?: string } } }).response
+          ?.data?.message || 'Sign in failed';
       toast.error(message);
       throw error;
     } finally {
@@ -125,8 +127,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const updatedUser = await apiClient.updateProfile(data);
       setUser(updatedUser);
       toast.success('Profile updated successfully');
-    } catch (error: any) {
-      const message = error.response?.data?.message || 'Profile update failed';
+    } catch (error) {
+      const message =
+        (error as { response?: { data?: { message?: string } } }).response
+          ?.data?.message || 'Profile update failed';
       toast.error(message);
       throw error;
     }
@@ -205,15 +209,15 @@ export function useAuth() {
 
 // HOC for protected routes
 export function withAuth<P extends object>(
-  WrappedComponent: React.ComponentType<P>,
-) {
-  return function AuthenticatedComponent(props: P) {
+  WrappedComponent: FC<P>,
+): FC<P> {
+  const AuthenticatedComponent: FC<P> = (props: P) => {
     const { isAuthenticated, isLoading } = useAuth();
     const router = useRouter();
 
     useEffect(() => {
       if (!isLoading && !isAuthenticated) {
-        router.push(
+        void router.push(
           `/auth/signin?returnUrl=${encodeURIComponent(router.asPath)}`,
         );
       }
@@ -236,6 +240,9 @@ export function withAuth<P extends object>(
 
     return <WrappedComponent {...props} />;
   };
+
+  AuthenticatedComponent.displayName = `withAuth(${WrappedComponent.displayName || WrappedComponent.name || 'Component'})`;
+  return AuthenticatedComponent;
 }
 
 // Hook for checking permissions

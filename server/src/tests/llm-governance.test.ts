@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { LLMRouter } from '../llm/router.js';
 import { MockProvider } from '../llm/providers/mock.js';
 import { CostControlPolicy } from '../llm/policies/index.js';
@@ -11,7 +10,7 @@ class FastProvider extends MockProvider {
 
   constructor() {
     super();
-    (this as any).capabilities = [
+    (this as unknown as { capabilities: unknown[] }).capabilities = [
       {
         name: 'mock-fast',
         class: 'fast',

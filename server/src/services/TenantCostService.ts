@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Maestro Conductor v24.4.0 - Cost-per-Tenant Analytics & Monitoring
  * Epic E20: Cost-Aware Scaling & Tenancy Partitioning
@@ -8,10 +7,11 @@
  */
 
 import { EventEmitter } from 'events';
-import { PrometheusMetrics } from '../utils/metrics';
-import logger from '../utils/logger';
-import { tracer, Span } from '../utils/tracing';
-import { DatabaseService } from './DatabaseService';
+import type { Span } from '@opentelemetry/api';
+import { PrometheusMetrics } from '../utils/metrics.js';
+import logger from '../utils/logger.js';
+import { tracer } from '../utils/tracing.js';
+import { DatabaseService } from './DatabaseService.js';
 
 // Cost tracking configuration
 interface TenantCostConfig {
@@ -281,7 +281,9 @@ export class TenantCostService extends EventEmitter {
 
       logger.info('Loaded tenant budgets', { count: budgets.rows.length });
     } catch (error) {
-      logger.error('Failed to load tenant budgets', { error: error.message });
+      logger.error('Failed to load tenant budgets', {
+        error: error instanceof Error ? error.message : String(error)
+      });
     }
   }
 
@@ -366,7 +368,7 @@ export class TenantCostService extends EventEmitter {
         } catch (error) {
           logger.error('Failed to record resource usage', {
             tenantId,
-            error: error.message,
+            error: error instanceof Error ? error.message : String(error),
           });
           span.recordException(error as Error);
         }
@@ -374,7 +376,7 @@ export class TenantCostService extends EventEmitter {
     );
   }
 
-  private updateMetrics(tenantId: string, usage: any): void {
+  private updateMetrics(tenantId: string, usage: Record<string, number>): void {
     const computeCost = (usage.computeUnits || 0) * this.getCostRate('compute');
     const storageCost = (usage.storageGB || 0) * this.getCostRate('storage');
     const networkCost = (usage.networkGB || 0) * this.getCostRate('network');
@@ -474,7 +476,7 @@ export class TenantCostService extends EventEmitter {
           logger.error('Failed to calculate tenant costs', {
             tenantId,
             period,
-            error: error.message,
+            error: error instanceof Error ? error.message : String(error),
           });
           span.recordException(error as Error);
           throw error;
@@ -519,7 +521,7 @@ export class TenantCostService extends EventEmitter {
       [tenantId],
     );
 
-    const metrics: ServiceCostMetrics[] = result.rows.map((row: any) => {
+    const metrics: ServiceCostMetrics[] = result.rows.map((row: Record<string, string>) => {
       // Calculate duration scaling for time-based costs (like storage per hour)
       let durationHours = 1;
       if (period === 'day') durationHours = 24;
@@ -793,7 +795,7 @@ export class TenantCostService extends EventEmitter {
     } catch (error) {
       logger.error('Failed to record alert', {
         alertKey,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -844,7 +846,7 @@ export class TenantCostService extends EventEmitter {
         } catch (error) {
           logger.error('Failed to generate cost forecast', {
             tenantId,
-            error: error.message,
+            error: error instanceof Error ? error.message : String(error),
           });
           throw error;
         }
@@ -891,7 +893,13 @@ export class TenantCostService extends EventEmitter {
     baseCost: TenantCostMetrics,
     slope: number,
     days: number,
-  ): any {
+  ): {
+    total: number;
+    compute: number;
+    storage: number;
+    network: number;
+    apiCalls: number;
+  } {
     const factor = 1 + slope * days;
     return {
       total: baseCost.costs.total * factor,
@@ -955,7 +963,7 @@ export class TenantCostService extends EventEmitter {
   private async generateRecommendations(
     tenantId: string,
     trend: string,
-    prediction: any,
+    prediction: { total: number },
   ): Promise<string[]> {
     const recommendations: string[] = [];
 
@@ -1112,13 +1120,13 @@ export class TenantCostService extends EventEmitter {
         } catch (error) {
           logger.error('Failed to calculate costs for tenant', {
             tenantId: row.tenant_id,
-            error: error.message,
+            error: error instanceof Error ? error.message : String(error),
           });
         }
       }
     } catch (error) {
       logger.error('Failed to calculate all tenant costs', {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -1131,13 +1139,13 @@ export class TenantCostService extends EventEmitter {
         } catch (error) {
           logger.error('Failed to generate forecast for tenant', {
             tenantId,
-            error: error.message,
+            error: error instanceof Error ? error.message : String(error),
           });
         }
       }
     } catch (error) {
       logger.error('Failed to generate all forecasts', {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -1162,7 +1170,10 @@ export class TenantCostService extends EventEmitter {
 
       logger.info('Updated tenant budget', { tenantId });
     } catch (error) {
-      logger.error('Failed to save budget', { tenantId, error: error.message });
+      logger.error('Failed to save budget', {
+        tenantId,
+        error: error instanceof Error ? error.message : String(error)
+      });
     }
   }
 
@@ -1188,7 +1199,7 @@ export class TenantCostService extends EventEmitter {
       tenantId,
       { apiCalls: 1, computeUnits: computeRate > 0 ? computeCost / computeRate : 0 },
       'DoclingService'
-    ).catch(err => logger.error('Failed to record docling usage to DB', err));
+    ).catch((err: unknown) => logger.error('Failed to record docling usage to DB', err));
   }
 
   public getCostCategories(): CostCategory[] {

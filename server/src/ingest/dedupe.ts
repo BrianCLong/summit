@@ -1,7 +1,6 @@
-// @ts-nocheck
-import { pg } from '../db/pg';
-import { neo } from '../db/neo4j';
-import { redis } from '../subscriptions/pubsub';
+import { pg } from '../db/pg.js';
+import { neo } from '../db/neo4j.js';
+import { redis } from '../subscriptions/pubsub.js';
 import { trace, Span } from '@opentelemetry/api';
 import { Counter, Histogram } from 'prom-client';
 import crypto from 'crypto';
@@ -272,7 +271,7 @@ export class DeduplicationService {
     }
   }
 
-  getDeduplicationStats(): Record<string, any> {
+  getDeduplicationStats(): Record<string, unknown> {
     // Return current deduplication metrics
     return {
       redisKeyPrefix: this.redisKeyPrefix,

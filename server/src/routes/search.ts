@@ -1,5 +1,4 @@
-// @ts-nocheck
-import express from 'express';
+import express, { type Request, type Response } from 'express';
 import SemanticSearchService from '../services/SemanticSearchService.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
 import logger from '../utils/logger.js';
@@ -14,7 +13,7 @@ const searchService = new SemanticSearchService();
  * POST /api/search
  * Advanced hybrid search endpoint
  */
-router.post('/', ensureAuthenticated, async (req, res) => {
+router.post('/', ensureAuthenticated, async (req: Request, res: Response) => {
   try {
     const {
       q,
@@ -38,7 +37,7 @@ router.post('/', ensureAuthenticated, async (req, res) => {
  * GET /api/search/autocomplete
  * Search suggestions
  */
-router.get('/autocomplete', ensureAuthenticated, async (req, res) => {
+router.get('/autocomplete', ensureAuthenticated, async (req: Request, res: Response) => {
   try {
     const { q, limit = 5 } = req.query;
 

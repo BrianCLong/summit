@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Document, DocumentChunk } from '../data-model/types.js';
 import { chunkText } from './chunking.js';
 import { v4 as uuidv4 } from 'uuid';

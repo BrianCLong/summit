@@ -1,13 +1,6 @@
-// @ts-nocheck
+import { otelService } from './otel.js';
+import { metrics } from './metrics.js';
+import { logger } from './logger.js';
+import { httpMetricsMiddleware } from './middleware.js';
 
-import { otelService } from './otel';
-import { metrics } from './metrics';
-import { logger } from './logger';
-import { httpMetricsMiddleware } from './middleware';
-
-export {
-  otelService,
-  metrics,
-  logger,
-  httpMetricsMiddleware
-};
+export { otelService, metrics, logger, httpMetricsMiddleware };

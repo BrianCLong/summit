@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { getIO } from '../realtime/socket.js';
 import pino from 'pino';
 import { randomUUID } from 'crypto';
@@ -11,7 +10,7 @@ export interface IntelligenceItem {
   source: string;
   type: 'social' | 'darkweb' | 'news' | 'signal';
   content: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   threatScore: number;
   targetId?: string;
 }

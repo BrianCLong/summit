@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { PlanLimits, PlanTier } from './types.js';
 import fs from 'fs/promises';
 import path from 'path';
@@ -47,9 +46,9 @@ const DEFAULT_STATE: QuotaState = {
     },
   },
   featureAllowlist: {
-    'write_aware_sharding': ['massive-dynamic', 'acme-corp'],
-    'entity_resolution_v1': ['massive-dynamic'],
-  }
+    write_aware_sharding: ['massive-dynamic', 'acme-corp'],
+    entity_resolution_v1: ['massive-dynamic'],
+  },
 };
 
 class QuotaConfigService {
@@ -74,8 +73,9 @@ class QuotaConfigService {
       const data = await fs.readFile(this.storagePath, 'utf-8');
       this.state = JSON.parse(data);
       logger.info('Loaded quota configuration');
-    } catch (error: any) {
-      if (error.code !== 'ENOENT') {
+    } catch (error) {
+      const err = error as { code?: string };
+      if (err.code !== 'ENOENT') {
         logger.error({ err: error }, 'Failed to load quota config, using defaults');
       } else {
         // First run, save defaults
@@ -111,10 +111,13 @@ class QuotaConfigService {
     await this.saveConfig();
   }
 
-  public async setTenantOverride(tenantId: string, limits: Partial<PlanLimits>) {
+  public async setTenantOverride(
+    tenantId: string,
+    limits: Partial<PlanLimits>,
+  ) {
     this.state.tenantOverrides[tenantId] = {
       ...this.state.tenantOverrides[tenantId],
-      ...limits
+      ...limits,
     };
     await this.saveConfig();
   }

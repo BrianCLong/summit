@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { ShardManager } from './ShardManager.js';
 import { PartitionStrategy } from './types.js';
 import { LocalityAwarePartitionStrategy } from './PartitionStrategy.js';
@@ -21,7 +20,7 @@ export class GraphRouter {
     this.strategy = strategy;
   }
 
-  public async execute(query: string, params: any, context: QueryContext) {
+  public async execute(query: string, params: Record<string, unknown>, context: QueryContext) {
     const shardId = this.strategy.resolveShard(context);
     const driver = this.shardManager.getDriver(shardId);
 

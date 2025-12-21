@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * MC Platform v0.4.0 Transcendent Intelligence Resolvers
  * Policy-sandboxed evolution with verifiable meta-optimization

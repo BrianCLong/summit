@@ -1,7 +1,6 @@
-// @ts-nocheck
 import fs from 'fs';
 import path from 'path';
-import type { PoolConfig } from '@types/pg';
+import type { PoolConfig } from 'pg';
 
 export interface TenantDbConfig {
   postgres: PoolConfig;
@@ -23,7 +22,7 @@ const configPath =
 let configs: ConfigMap = {};
 let version = 0;
 
-function loadConfigs() {
+function loadConfigs(): void {
   try {
     const raw = fs.readFileSync(configPath, 'utf-8');
     configs = JSON.parse(raw);

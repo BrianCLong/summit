@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { runsRepo } from '../runs/runs-repo.js';
 import { executorsRepo } from '../executors/executors-repo.js';
 import { pino } from 'pino';

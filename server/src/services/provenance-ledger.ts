@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * IntelGraph GA-Core Provenance Ledger Service
  * Committee Requirements: Hash manifests, immutable disclosure bundles, claim constraints
@@ -16,7 +15,7 @@ interface ProvenanceChain {
   operation_type: string;
   actor_id: string;
   timestamp: Date;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   signature?: string;
 }
 
@@ -73,7 +72,7 @@ export class ProvenanceLedgerService {
   }
 
   // Committee requirement: Content hashing for integrity
-  private generateContentHash(content: any): string {
+  private generateContentHash(content: Record<string, unknown>): string {
     const normalizedContent = JSON.stringify(
       content,
       Object.keys(content).sort(),
@@ -85,7 +84,7 @@ export class ProvenanceLedgerService {
   }
 
   // Committee requirement: Cryptographic signatures for immutability
-  private generateSignature(data: any, privateKey?: string): string {
+  private generateSignature(data: Record<string, unknown>, privateKey?: string): string {
     // In production, use actual cryptographic signing
     const content = JSON.stringify(data, Object.keys(data).sort());
     const hmac = crypto.createHmac(
@@ -458,7 +457,7 @@ export class ProvenanceLedgerService {
     const placeholders = entityIds.map((_, i) => `$${i + 1}`).join(', ');
     const result = await timescaleQuery(
       `
-      SELECT * FROM provenance_chain 
+      SELECT * FROM provenance_chain
       WHERE metadata::jsonb ->> 'claim_id' IN (${placeholders})
       ORDER BY timestamp ASC
     `,
@@ -484,7 +483,7 @@ export class ProvenanceLedgerService {
     time_range?: { start: Date; end: Date };
   }): Promise<ProvenanceChain[]> {
     let whereClause = '1=1';
-    const params: any[] = [];
+    const params: (string | Date)[] = [];
 
     if (filters.actor_id) {
       params.push(filters.actor_id);

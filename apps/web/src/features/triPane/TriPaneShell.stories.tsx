@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Storybook Stories for TriPaneShell Component
  *
@@ -105,7 +104,7 @@ export const Default: Story = {
     geospatialEvents: mockGeospatialEvents,
     showProvenanceOverlay: false,
   },
-  render: args => (
+  render: (args) => (
     <div style={{ height: '100vh', padding: '1rem' }}>
       <TriPaneShell {...args} />
     </div>
@@ -123,7 +122,7 @@ export const WithProvenance: Story = {
     geospatialEvents: mockGeospatialEvents,
     showProvenanceOverlay: true,
   },
-  render: args => (
+  render: (args) => (
     <div style={{ height: '100vh', padding: '1rem' }}>
       <TriPaneShell {...args} />
     </div>
@@ -157,7 +156,7 @@ export const WithTimeFilter: Story = {
       map: { center: [0, 0], zoom: 2 },
     },
   },
-  render: args => (
+  render: (args) => (
     <div style={{ height: '100vh', padding: '1rem' }}>
       <TriPaneShell {...args} />
     </div>
@@ -191,7 +190,7 @@ export const WithSelectedEntity: Story = {
       map: { center: [0, 0], zoom: 2 },
     },
   },
-  render: args => (
+  render: (args) => (
     <div style={{ height: '100vh', padding: '1rem' }}>
       <TriPaneShell {...args} />
     </div>
@@ -217,7 +216,7 @@ export const Empty: Story = {
     geospatialEvents: [],
     showProvenanceOverlay: false,
   },
-  render: args => (
+  render: (args) => (
     <div style={{ height: '100vh', padding: '1rem' }}>
       <TriPaneShell {...args} />
     </div>
@@ -243,7 +242,7 @@ export const SmallDataset: Story = {
     geospatialEvents: generateMockGeospatialEvents(5),
     showProvenanceOverlay: false,
   },
-  render: args => (
+  render: (args) => (
     <div style={{ height: '100vh', padding: '1rem' }}>
       <TriPaneShell {...args} />
     </div>
@@ -268,7 +267,7 @@ export const LargeDataset: Story = {
     geospatialEvents: generateMockGeospatialEvents(50),
     showProvenanceOverlay: false,
   },
-  render: args => (
+  render: (args) => (
     <div style={{ height: '100vh', padding: '1rem' }}>
       <TriPaneShell {...args} />
     </div>
@@ -300,7 +299,7 @@ export const RadialLayout: Story = {
       map: { center: [0, 0], zoom: 2 },
     },
   },
-  render: args => (
+  render: (args) => (
     <div style={{ height: '100vh', padding: '1rem' }}>
       <TriPaneShell {...args} />
     </div>
@@ -331,7 +330,7 @@ export const HierarchicLayout: Story = {
       map: { center: [0, 0], zoom: 2 },
     },
   },
-  render: args => (
+  render: (args) => (
     <div style={{ height: '100vh', padding: '1rem' }}>
       <TriPaneShell {...args} />
     </div>
@@ -357,7 +356,7 @@ export const Playground: Story = {
     geospatialEvents: mockGeospatialEvents,
     showProvenanceOverlay: false,
   },
-  render: args => (
+  render: (args) => (
     <div style={{ height: '100vh', padding: '1rem' }}>
       <TriPaneShell {...args} />
     </div>

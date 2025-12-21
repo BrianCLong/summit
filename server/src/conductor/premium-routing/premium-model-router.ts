@@ -1,4 +1,3 @@
-// @ts-nocheck
 // server/src/conductor/premium-routing/premium-model-router.ts
 
 import { Pool } from 'pg';

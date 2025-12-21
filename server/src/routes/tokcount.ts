@@ -1,17 +1,16 @@
-// @ts-nocheck
 /**
  * Token counting API endpoints
  * Provides real-time token counts and cost estimates for LLM operations
  */
 
-import { Router } from 'express';
+import { Router, type Request, type Response } from 'express';
 import {
   countTokens,
   getModelFamily,
   validateTokenBudget,
-} from '../lib/tokcount';
-import { authMiddleware } from '../middleware/auth';
-import logger from '../utils/logger';
+} from '../lib/tokcount.js';
+import { authMiddleware } from '../middleware/auth.js';
+import logger from '../utils/logger.js';
 
 export const tokcountRouter = Router();
 
@@ -22,7 +21,7 @@ tokcountRouter.use(authMiddleware);
  * POST /api/tokcount
  * Count tokens for a given text and model
  */
-tokcountRouter.post('/api/tokcount', async (req, res) => {
+tokcountRouter.post('/api/tokcount', async (req: Request, res: Response) => {
   try {
     const { provider, model, prompt, completion } = req.body || {};
 
@@ -64,7 +63,7 @@ tokcountRouter.post('/api/tokcount', async (req, res) => {
  * POST /api/tokcount/batch
  * Count tokens for multiple prompts/models in batch
  */
-tokcountRouter.post('/api/tokcount/batch', async (req, res) => {
+tokcountRouter.post('/api/tokcount/batch', async (req: Request, res: Response) => {
   try {
     const { requests } = req.body || {};
 
@@ -140,7 +139,7 @@ tokcountRouter.post('/api/tokcount/batch', async (req, res) => {
  * GET /api/tokcount/models
  * Get supported models and their pricing
  */
-tokcountRouter.get('/api/tokcount/models', (req, res) => {
+tokcountRouter.get('/api/tokcount/models', (req: Request, res: Response) => {
   const models = {
     openai: [
       { name: 'gpt-4o', family: 'openai', inputCost: 0.0025, outputCost: 0.01 },
@@ -209,7 +208,7 @@ tokcountRouter.get('/api/tokcount/models', (req, res) => {
  * GET /api/tokcount/budget
  * Get current token budget configuration
  */
-tokcountRouter.get('/api/tokcount/budget', (req, res) => {
+tokcountRouter.get('/api/tokcount/budget', (req: Request, res: Response) => {
   const budgetLimit = Number(process.env.TOKEN_BUDGET_LIMIT || 120000);
   const warningThreshold = Number(process.env.TOKEN_WARNING_THRESHOLD || 80);
 

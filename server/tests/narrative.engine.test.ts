@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { NarrativeSimulationEngine } from '../src/narrative/engine';
 import { PredictivePsyOpsLayer } from '../src/narrative/psyops-layer';

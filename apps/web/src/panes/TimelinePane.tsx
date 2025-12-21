@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useMemo } from 'react';
 import { ScatterChart, Scatter, XAxis, YAxis, ZAxis, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
 import { useWorkspaceStore } from '../store/workspaceStore';
@@ -23,7 +22,7 @@ export const TimelinePane = () => {
     return new Date(time).toLocaleDateString();
   };
 
-  const handlePointClick = (data: any) => {
+  const handlePointClick = (data: { payload?: { id: string } }) => {
     if (data && data.payload) {
         selectEntity(data.payload.id);
     }

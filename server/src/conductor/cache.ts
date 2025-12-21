@@ -1,8 +1,7 @@
-// @ts-nocheck
 // import { S3Client, PutObjectCommand, GetObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
 import Redis from 'ioredis';
 import { recHit, recMiss, recSet } from '../metrics/cacheMetrics.js';
-import crypto from 'crypto';
+import { createHash } from 'crypto';
 
 type CacheOptions = {
   bucket?: string;
@@ -82,7 +81,7 @@ export class ConductorCache {
             const obj = JSON.parse(key);
             // Canonical JSON stringify
             const canonical = JSON.stringify(obj, Object.keys(obj).sort());
-            return crypto.createHash('sha256').update(canonical).digest('hex');
+            return createHash('sha256').update(canonical).digest('hex');
         }
     } catch {
         // Not JSON
@@ -90,7 +89,7 @@ export class ConductorCache {
 
     // 2. If it's a long string, hash it
     if (key.length > 256) {
-         return crypto.createHash('sha256').update(key).digest('hex');
+         return createHash('sha256').update(key).digest('hex');
     }
 
     return key;

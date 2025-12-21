@@ -1,4 +1,3 @@
-// @ts-nocheck
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -13,7 +12,7 @@ interface AuditEntry {
   userId: string;
   action: string;
   resource: string;
-  details: any;
+  details: Record<string, unknown>;
   classification: string;
   sessionId?: string;
 }

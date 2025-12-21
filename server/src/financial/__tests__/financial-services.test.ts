@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Financial Compliance Module - Test Suite
  *

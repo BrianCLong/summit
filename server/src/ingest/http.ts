@@ -1,13 +1,12 @@
-// @ts-nocheck
 import { Request, Response } from 'express';
 import { trace, Span } from '@opentelemetry/api';
 import { Counter, Histogram, Gauge } from 'prom-client';
-import { redis } from '../subscriptions/pubsub';
-import { pg } from '../db/pg';
-import { neo } from '../db/neo4j';
-import { deduplicationService } from './dedupe';
+import { redis } from '../subscriptions/pubsub.js';
+import { pg } from '../db/pg.js';
+import { neo } from '../db/neo4j.js';
+import { deduplicationService } from './dedupe.js';
 import crypto from 'crypto';
-import { ingestDedupeRate, ingestBacklog } from '../metrics';
+import { ingestDedupeRate, ingestBacklog } from '../metrics.js';
 
 const tracer = trace.getTracer('http-ingest', '24.2.0');
 
@@ -211,8 +210,8 @@ class IngestQueue {
     }
   }
 
-  getQueueStatus() {
-    const status: Record<string, any> = {};
+  getQueueStatus(): Record<string, unknown> {
+    const status: Record<string, unknown> = {};
     for (const [tenantId, queue] of this.queues.entries()) {
       status[tenantId] = {
         queueLength: queue.length,
@@ -226,7 +225,7 @@ class IngestQueue {
 
 const ingestQueue = new IngestQueue();
 
-export async function handleHttpSignal(req: Request, res: Response) {
+export async function handleHttpSignal(req: Request, res: Response): Promise<void> {
   const startTime = Date.now();
   const tenantId = (req.headers['x-tenant-id'] as string) || 'default';
   const idempotencyKey = req.headers['x-idempotency-key'] as string;
@@ -356,7 +355,7 @@ export async function handleHttpSignal(req: Request, res: Response) {
 }
 
 async function validateAndEnrichSignal(
-  signal: any,
+  signal: Record<string, unknown>,
   defaultTenantId: string,
 ): Promise<CoherenceSignal> {
   // Basic validation
@@ -370,14 +369,14 @@ async function validateAndEnrichSignal(
 
   // Enrich with defaults
   const enriched: CoherenceSignal = {
-    tenantId: signal.tenantId || defaultTenantId,
+    tenantId: (signal.tenantId as string) || defaultTenantId,
     type: signal.type,
-    value: signal.value,
-    weight: signal.weight || 1.0,
-    source: signal.source || 'http-ingest',
-    ts: signal.ts || new Date().toISOString(),
-    purpose: signal.purpose || 'investigation',
-    metadata: signal.metadata,
+    value: signal.value as number,
+    weight: (signal.weight as number) || 1.0,
+    source: (signal.source as string) || 'http-ingest',
+    ts: (signal.ts as string) || new Date().toISOString(),
+    purpose: (signal.purpose as string) || 'investigation',
+    metadata: signal.metadata as Record<string, unknown> | undefined,
   };
 
   // Additional validation
@@ -388,7 +387,7 @@ async function validateAndEnrichSignal(
   return enriched;
 }
 
-export function getIngestStatus() {
+export function getIngestStatus(): { queues: Record<string, unknown>; timestamp: string } {
   return {
     queues: ingestQueue.getQueueStatus(),
     timestamp: new Date().toISOString(),

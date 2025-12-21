@@ -1,11 +1,10 @@
-// @ts-nocheck
 /**
  * Ingest Service - Data ingestion with provenance and deduplication
  * Target: ≥1e5 rows/s/worker
  */
 
 import { Pool, PoolClient } from 'pg';
-import { Driver, Session } from 'neo4j-driver';
+import { Driver } from 'neo4j-driver';
 import { createHash } from 'crypto';
 import { randomUUID as uuidv4 } from 'crypto';
 import logger from '../config/logger.js';
@@ -21,13 +20,13 @@ export interface IngestInput {
     externalId?: string;
     kind: string;
     labels: string[];
-    properties: Record<string, any>;
+    properties: Record<string, unknown>;
   }>;
   relationships: Array<{
     fromExternalId: string;
     toExternalId: string;
     relationshipType: string;
-    properties?: Record<string, any>;
+    properties?: Record<string, unknown>;
     confidence: number;
     source?: string;
   }>;
@@ -124,8 +123,9 @@ export class IngestService {
               });
               entitiesCreated++;
             }
-          } catch (error: any) {
-            errors.push(`Entity ${entityInput.externalId}: ${error.message}`);
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            errors.push(`Entity ${entityInput.externalId}: ${errorMessage}`);
             ingestLogger.warn({ error, entityInput }, 'Failed to ingest entity');
           }
         }
@@ -174,9 +174,10 @@ export class IngestService {
             });
             relationshipsCreated++;
           }
-        } catch (error: any) {
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
           errors.push(
-            `Relationship ${relInput.fromExternalId}->${relInput.toExternalId}: ${error.message}`,
+            `Relationship ${relInput.fromExternalId}->${relInput.toExternalId}: ${errorMessage}`,
           );
           ingestLogger.warn({ error, relInput }, 'Failed to ingest relationship');
         }
@@ -257,7 +258,7 @@ export class IngestService {
   private generateStableId(
     tenantId: string,
     kind: string,
-    properties: Record<string, any>,
+    properties: Record<string, unknown>,
   ): string {
     // Define natural keys per entity type
     const naturalKeys: Record<string, string[]> = {
@@ -331,7 +332,7 @@ export class IngestService {
   private async findEntityByStableId(
     client: PoolClient,
     stableId: string,
-  ): Promise<any> {
+  ): Promise<{ id: string } | undefined> {
     const { rows } = await client.query(
       `SELECT * FROM entities WHERE id = $1`,
       [stableId],
@@ -349,7 +350,7 @@ export class IngestService {
       tenantId: string;
       kind: string;
       labels: string[];
-      properties: Record<string, any>;
+      properties: Record<string, unknown>;
       userId: string;
       provenanceId: string;
     },
@@ -378,7 +379,7 @@ export class IngestService {
     data: {
       id: string;
       labels: string[];
-      properties: Record<string, any>;
+      properties: Record<string, unknown>;
       provenanceId: string;
     },
   ): Promise<void> {
@@ -396,7 +397,7 @@ export class IngestService {
   private async findRelationshipById(
     client: PoolClient,
     id: string,
-  ): Promise<any> {
+  ): Promise<{ id: string } | undefined> {
     const { rows } = await client.query(
       `SELECT * FROM relationships WHERE id = $1`,
       [id],
@@ -415,7 +416,7 @@ export class IngestService {
       fromEntityId: string;
       toEntityId: string;
       relationshipType: string;
-      properties: Record<string, any>;
+      properties: Record<string, unknown>;
       confidence: number;
       source: string;
       provenanceId: string;
@@ -447,7 +448,7 @@ export class IngestService {
     client: PoolClient,
     data: {
       id: string;
-      properties?: Record<string, any>;
+      properties?: Record<string, unknown>;
       confidence: number;
       provenanceId: string;
     },

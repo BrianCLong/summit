@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Digital Twin Service
  * Manages digital twin assets with real-time sensor integration and synchronization
@@ -16,7 +15,7 @@ import {
   CreateAssetInput,
   UpdateAssetInput,
   AssetQueryFilter,
-} from '../types/digitalTwin';
+} from '../types/digitalTwin.js';
 
 /**
  * Service for managing digital twin assets

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Comprehensive GraphQL Performance Monitoring Plugin
  * Tracks detailed metrics for query performance, DataLoader usage, and N+1 detection
@@ -7,6 +6,7 @@
 import type { ApolloServerPlugin, GraphQLRequestListener } from '@apollo/server';
 import pino from 'pino';
 import type { DataLoaders } from '../dataloaders/index.js';
+import type { GraphQLContext } from '../apollo-v5-server.js';
 
 const logger = pino();
 

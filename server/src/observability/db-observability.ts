@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { randomUUID } from 'crypto';
 import { getPostgresPool } from '../db/postgres.js';
 import { getAuditSystem } from '../audit/index.js';
@@ -76,13 +75,13 @@ const EXPLAIN_WHITELIST: Record<string, WhitelistedQuery> = {
 };
 
 export class DbObservabilityService {
-  private readonly getPool: () => any;
-  private readonly getAudit: () => any;
+  private readonly getPool: () => unknown;
+  private readonly getAudit: () => unknown;
   private readonly now: () => Date;
 
   constructor(deps?: {
-    getPool?: () => any;
-    getAudit?: () => any;
+    getPool?: () => unknown;
+    getAudit?: () => unknown;
     now?: () => Date;
   }) {
     this.getPool = deps?.getPool ?? getPostgresPool;
@@ -306,11 +305,11 @@ export class DbObservabilityService {
   private async emitTimelineEvent(
     action: string,
     outcome: 'success' | 'failure',
-    details: Record<string, any>,
+    details: Record<string, unknown>,
     context: DbObservabilityContext,
   ) {
     try {
-      const audit = this.getAudit?.();
+      const audit = this.getAudit?.() as { recordEvent?: (event: unknown) => Promise<void> } | undefined;
       if (!audit?.recordEvent) return;
       await audit.recordEvent({
         eventType: 'db_observability',

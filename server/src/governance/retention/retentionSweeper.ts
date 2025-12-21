@@ -1,4 +1,3 @@
-// @ts-nocheck
 import pino from 'pino';
 import { DataRetentionEngine } from './dataRetentionEngine.js';
 import { DataRetentionRepository } from './repository.js';

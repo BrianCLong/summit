@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { z } from 'zod';
 import pino from 'pino';
 import { GraphQLError } from 'graphql';

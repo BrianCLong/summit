@@ -1,4 +1,3 @@
-// @ts-nocheck
 import DataLoader from 'dataloader';
 import { getPostgresPool } from '../../config/database.js';
 import { getRedisClient } from '../../config/database.js';
@@ -25,7 +24,7 @@ const safeRows = <T = unknown>(result: unknown): T[] =>
     : [];
 
 // Helper to revive dates from JSON
-const reviveDates = (key: string, value: any) => {
+const reviveDates = (_key: string, value: unknown): unknown => {
   if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(value)) {
     return new Date(value);
   }

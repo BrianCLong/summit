@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import { Pool } from 'pg';
 import { Driver } from 'neo4j-driver';
 import logger from '../../config/logger.js';
@@ -85,8 +83,8 @@ export class GraphConsistencyService {
       // A more rigorous check would query db.indexes()
       const indexCheck = await session.run(`SHOW INDEXES YIELD name, labelsOrTypes, properties`);
       const indexes = indexCheck.records.map(r => ({
-          labels: r.get('labelsOrTypes'),
-          props: r.get('properties')
+          labels: r.get('labelsOrTypes') as string[],
+          props: r.get('properties') as string[]
       }));
       const hasNodeIndex = indexes.some(i => i.labels && i.labels.includes('Entity') && i.props && i.props.includes('investigationId'));
       const hasRelIndex = indexes.some(i => i.labels && i.labels.includes('RELATIONSHIP') && i.props && i.props.includes('investigationId'));

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { WebTracerProvider } from "@opentelemetry/sdk-trace-web";
 import { ConsoleSpanExporter, BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
 import { Resource } from "@opentelemetry/resources";

@@ -1,4 +1,3 @@
-// @ts-nocheck
 // IntelGraph Autonomous Orchestrator - Policy Engine Integration
 // Implements OPA/Rego policy enforcement for action authorization and safety gates
 // Version: 1.0.0

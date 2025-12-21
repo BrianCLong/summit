@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Queue, Worker, Job } from 'bullmq';
 import Redis from 'ioredis';
 import pino from 'pino';

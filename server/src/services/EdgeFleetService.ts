@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { EventEmitter } from 'events';
 import { randomUUID } from 'crypto';
 import logger from '../config/logger.js';
@@ -183,7 +182,7 @@ export class EdgeFleetService extends EventEmitter {
       return true;
   }
 
-  private async logAction(fleetId: string, action: string, details: any) {
+  private async logAction(fleetId: string, action: string, details: any): Promise<void> {
       try {
         await this.provenanceLedger.appendEntry(
             'SYSTEM', // tenant
@@ -196,7 +195,7 @@ export class EdgeFleetService extends EventEmitter {
             }
         );
       } catch (e) {
-          logger.error('Failed to log to ledger', e);
+          logger.error('Failed to log to ledger', e instanceof Error ? e.message : String(e));
       }
   }
 

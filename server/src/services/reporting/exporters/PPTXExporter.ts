@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * PPTX Report Exporter
  * Generates briefing-ready PPTX decks with slide-per-section summaries

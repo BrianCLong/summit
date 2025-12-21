@@ -1,6 +1,3 @@
-// @ts-nocheck
-import * as crypto from 'node:crypto';
-import * as fs from 'node:fs/promises';
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import { exec } from 'node:child_process';
@@ -47,7 +44,7 @@ const execAsync = promisify(exec);
 
 export class DualNotaryService {
   private config: z.infer<typeof DualNotaryConfigSchema>;
-  private pkcs11Ctx: any = null;
+  private pkcs11Ctx: unknown = null;
 
   constructor(config?: Partial<z.infer<typeof DualNotaryConfigSchema>>) {
     this.config = DualNotaryConfigSchema.parse({
@@ -66,7 +63,7 @@ export class DualNotaryService {
     }
   }
 
-  private async initializeHSM() {
+  private async initializeHSM(): Promise<void> {
     try {
       this.pkcs11Ctx = initPKCS11();
       console.log('✅ Dual notary HSM initialized');

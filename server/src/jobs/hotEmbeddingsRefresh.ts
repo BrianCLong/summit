@@ -1,4 +1,3 @@
-// @ts-nocheck
 import pino from 'pino';
 import { getPostgresPool } from '../db/postgres.js';
 import {

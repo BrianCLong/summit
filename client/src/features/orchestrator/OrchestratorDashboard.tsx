@@ -1,12 +1,11 @@
-// @ts-nocheck
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Alert,
   Box,
   Card,
   CardContent,
   Chip,
   Divider,
-  Grid,
   LinearProgress,
   Stack,
   Typography,
@@ -14,6 +13,7 @@ import {
   Tooltip,
   alpha,
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 import TimelineIcon from '@mui/icons-material/Timeline';
@@ -60,8 +60,7 @@ const presetIcons: Record<string, React.ReactNode> = {
   'rapid-response': <SyncAltIcon fontSize="small" />,
 };
 
-const metricValue = (value: number): string =>
-  `${Math.round(value * 100) / 100}`;
+const metricValue = (value: number): string => `${Math.round(value * 100) / 100}`;
 
 const OrchestratorDashboard: React.FC = () => {
   const orchestrator = useMemo(() => createLaunchableOrchestrator(), []);
@@ -124,7 +123,7 @@ const OrchestratorDashboard: React.FC = () => {
     const reliabilityPercent = Math.round(status.telemetry.reliability * 100);
 
     return (
-      <Grid item xs={12} md={6} lg={4} key={definition.id}>
+      <Grid xs={12} md={6} lg={4} key={definition.id}>
         <Card elevation={3} sx={{ height: '100%' }}>
           <CardContent>
             <Stack
@@ -216,7 +215,7 @@ const OrchestratorDashboard: React.FC = () => {
     <Stack spacing={2}>
       {snapshot.tasks.slice(0, 6).map((record) => (
         <Card
-          key={`${record.task.id}-${record.startedAt}`}
+          key={`${record.task.id} -${record.startedAt} `}
           variant="outlined"
           sx={{
             borderColor:
@@ -256,10 +255,9 @@ const OrchestratorDashboard: React.FC = () => {
             <Grid container spacing={2}>
               {record.results.map((result) => (
                 <Grid
-                  item
                   xs={12}
                   md={6}
-                  key={`${result.moduleId}-${result.action}`}
+                  key={`${result.moduleId} -${result.action} `}
                 >
                   <Stack spacing={0.5}>
                     <Typography variant="body2" fontWeight={600}>
@@ -326,7 +324,7 @@ const OrchestratorDashboard: React.FC = () => {
                     activeTaskId && activeTaskId.startsWith(preset.id),
                   );
                   return (
-                    <Grid item xs={12} md={6} lg={3} key={preset.id}>
+                    <Grid xs={12} md={6} lg={3} key={preset.id}>
                       <Card
                         variant="outlined"
                         sx={{
@@ -344,7 +342,7 @@ const OrchestratorDashboard: React.FC = () => {
                               alignItems="center"
                             >
                               <Chip
-                                icon={preset.icon}
+                                icon={preset.icon as React.ReactElement}
                                 label={preset.name}
                                 variant="outlined"
                               />
@@ -401,4 +399,3 @@ const OrchestratorDashboard: React.FC = () => {
 };
 
 export default OrchestratorDashboard;
-// @ts-nocheck

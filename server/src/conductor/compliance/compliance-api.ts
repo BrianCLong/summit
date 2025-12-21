@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Compliance API for Conductor
 // Provides endpoints for compliance monitoring, assessment, and reporting
 

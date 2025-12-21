@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Automatic Persisted Queries (APQ) Plugin for Apollo Server
  * Implements APQ protocol to reduce network bandwidth and improve caching
@@ -14,6 +13,7 @@ import crypto from 'crypto';
 import pino from 'pino';
 import type { Redis } from 'ioredis';
 import { createCacheClient } from '@packages/cache';
+import type { GraphQLContext } from '../apollo-v5-server.js';
 
 const logger = pino();
 

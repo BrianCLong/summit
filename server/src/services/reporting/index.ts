@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Reporting Service - Public API
  * Main entry point for the refactored reporting service

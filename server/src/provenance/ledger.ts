@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Maestro Conductor v24.4.0 - Provenance Ledger v2 with Hash-Chain
 // Epic E18: Provenance Integrity & Crypto Evidence - Immutable audit trail
 // Updated for Privacy Engine integration

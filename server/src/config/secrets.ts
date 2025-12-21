@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Secrets Management System
  * Handles sensitive configuration with validation and secure defaults
@@ -103,6 +102,10 @@ const INSECURE_DEFAULTS = [
  * Validate environment variables and return typed configuration
  */
 function validateEnvironment(): EnvConfig {
+  // Ensure process.exit is defined
+  if (!process.exit) {
+    throw new Error('process.exit is not available');
+  }
   try {
     const parsed = EnvSchema.parse(process.env);
 
@@ -128,7 +131,7 @@ function validateEnvironment(): EnvConfig {
 /**
  * Validate production security requirements
  */
-function validateProductionSecurity(config: EnvConfig) {
+function validateProductionSecurity(config: EnvConfig): void {
   const issues: string[] = [];
 
   // Check for insecure defaults

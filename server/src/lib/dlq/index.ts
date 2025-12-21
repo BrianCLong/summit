@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { EventEmitter } from 'events';
 import crypto from 'crypto';
 import pino from 'pino';
@@ -6,12 +5,12 @@ import { getPostgresPool } from '../../config/database.js';
 
 const logger = pino();
 
-export interface DLQMessage<T = any> {
+export interface DLQMessage<T = unknown> {
   id: string;
   payload: T;
   error: string;
   timestamp: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   retryCount: number;
 }
 
@@ -35,7 +34,9 @@ export class PostgresDLQ extends EventEmitter implements DeadLetterQueue {
     this.queueName = queueName;
   }
 
-  async enqueue(message: Omit<DLQMessage, 'timestamp' | 'id'> & { id?: string }): Promise<string> {
+  async enqueue(
+    message: Omit<DLQMessage, 'timestamp' | 'id'> & { id?: string },
+  ): Promise<string> {
     const id = message.id || crypto.randomUUID();
     const pool = getPostgresPool();
 
@@ -50,7 +51,7 @@ export class PostgresDLQ extends EventEmitter implements DeadLetterQueue {
       JSON.stringify(message.payload),
       message.error,
       message.retryCount,
-      JSON.stringify(message.metadata || {})
+      JSON.stringify(message.metadata || {}),
     ];
 
     try {
@@ -81,16 +82,19 @@ export class PostgresDLQ extends EventEmitter implements DeadLetterQueue {
 
     try {
       const result = await pool.query(query, [this.queueName, count]);
-      return result.rows.map(row => ({
+      return result.rows.map((row) => ({
         id: row.id,
         payload: row.payload, // pg auto-parses json
         error: row.error,
         retryCount: row.retry_count,
         metadata: row.metadata,
-        timestamp: new Date(row.created_at).getTime()
+        timestamp: new Date(row.created_at).getTime(),
       }));
     } catch (error) {
-      logger.error({ err: error, queue: this.queueName }, 'Failed to dequeue DLQ messages');
+      logger.error(
+        { err: error, queue: this.queueName },
+        'Failed to dequeue DLQ messages',
+      );
       throw error;
     }
   }
@@ -111,14 +115,14 @@ export class PostgresDLQ extends EventEmitter implements DeadLetterQueue {
     // NACK might increment retry count?
     const pool = getPostgresPool();
     try {
-        await pool.query(
-            'UPDATE dlq_messages SET retry_count = retry_count + 1 WHERE id = $1',
-            [messageId]
-        );
-        this.emit('nacked', messageId);
+      await pool.query(
+        'UPDATE dlq_messages SET retry_count = retry_count + 1 WHERE id = $1',
+        [messageId],
+      );
+      this.emit('nacked', messageId);
     } catch (error) {
-        logger.error({ err: error, messageId }, 'Failed to nack DLQ message');
-        throw error;
+      logger.error({ err: error, messageId }, 'Failed to nack DLQ message');
+      throw error;
     }
   }
 
@@ -126,8 +130,8 @@ export class PostgresDLQ extends EventEmitter implements DeadLetterQueue {
     const pool = getPostgresPool();
     try {
       const result = await pool.query(
-          'SELECT COUNT(*) as count FROM dlq_messages WHERE queue_name = $1',
-          [this.queueName]
+        'SELECT COUNT(*) as count FROM dlq_messages WHERE queue_name = $1',
+        [this.queueName],
       );
       return parseInt(result.rows[0].count, 10);
     } catch (error) {
@@ -137,5 +141,5 @@ export class PostgresDLQ extends EventEmitter implements DeadLetterQueue {
 }
 
 export const dlqFactory = (queueName: string) => {
-    return new PostgresDLQ(queueName);
+  return new PostgresDLQ(queueName);
 };

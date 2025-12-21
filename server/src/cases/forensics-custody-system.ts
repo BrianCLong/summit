@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createHash, KeyObject, sign, verify } from 'crypto';
 
 export type HashAlgorithm = 'sha256' | 'sha512';
@@ -11,7 +10,7 @@ export interface EvidenceRecord {
   collectedAt: Date;
   hash: string;
   hashAlgorithm: HashAlgorithm;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface CustodyEventInput {
@@ -19,7 +18,7 @@ export interface CustodyEventInput {
   caseId: string;
   actorId: string;
   action: string;
-  payload?: Record<string, any>;
+  payload?: Record<string, unknown>;
 }
 
 export interface CustodyEventRecord extends CustodyEventInput {
@@ -36,7 +35,7 @@ export interface AccessLogEntry {
   reason: string;
   legalBasis: string;
   at: Date;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 }
 
 export interface IntegrityVerificationResult {
@@ -217,7 +216,7 @@ export class ForensicsCustodySystem {
     collectedBy: string;
     content: Buffer | string;
     hashAlgorithm?: HashAlgorithm;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }): Promise<EvidenceRecord> {
     const existing = await this.repository.getEvidence(input.id);
     if (existing) {
@@ -298,7 +297,7 @@ export class ForensicsCustodySystem {
     actorId: string;
     reason: string;
     legalBasis: string;
-    context?: Record<string, any>;
+    context?: Record<string, unknown>;
   }): Promise<AccessLogEntry> {
     const evidence = await this.getEvidenceOrThrow(entry.evidenceId, entry.caseId);
     const logEntry: AccessLogEntry = {
@@ -462,9 +461,7 @@ export class ForensicsCustodySystem {
     const eventHash = createHash('sha256')
       .update(prevHash + JSON.stringify(payload))
       .digest('hex');
-    // @ts-ignore - crypto.sign() returns Buffer, which has toString(encoding)
-    const signature = sign(null, Buffer.from(eventHash), this.signer.privateKey)
-      .toString('base64');
+    const signature = sign(null, Buffer.from(eventHash), this.signer.privateKey).toString('base64');
     const record: CustodyEventRecord = {
       ...event,
       at,

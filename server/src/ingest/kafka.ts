@@ -1,11 +1,10 @@
-// @ts-nocheck
-import { neo } from '../db/neo4j';
-import { ingestDedupeRate, ingestBacklog } from '../metrics';
+import { neo } from '../db/neo4j.js';
+import { ingestDedupeRate, ingestBacklog } from '../metrics.js';
 
 let kafkaIngestCounter = 0;
 let kafkaDedupeCounter = 0;
 
-export async function startKafkaConsumer() {
+export async function startKafkaConsumer(): Promise<void> {
   console.log(
     'Starting Kafka consumer for coherence.signals.v1 (placeholder).',
   );

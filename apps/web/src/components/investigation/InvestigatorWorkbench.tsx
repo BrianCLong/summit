@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react'
 import { GraphCanvas, GraphCanvasRef } from '@/graphs/GraphCanvas'
 import { Button } from '@/components/ui/Button'

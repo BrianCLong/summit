@@ -1,4 +1,3 @@
-// @ts-nocheck
 // server/src/conductor/compliance/evidence-config.ts
 
 import { EvidenceStorageConfig } from './evidence-store.js';

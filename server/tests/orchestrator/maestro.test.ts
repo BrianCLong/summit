@@ -1,8 +1,6 @@
-// @ts-nocheck
 import { runManager } from '../../orchestrator/runManager';
 import { recordRunInIntelGraph } from '../../orchestrator/intelGraphIntegration';
 import { AgentTask, maestro } from '../../orchestrator/maestro';
-// @ts-ignore
 import { v4 as uuidv4 } from 'uuid';
 
 // Mocking external dependencies

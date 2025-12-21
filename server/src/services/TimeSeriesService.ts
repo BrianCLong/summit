@@ -1,7 +1,6 @@
-// @ts-nocheck
 import { getRedisClient } from '../db/redis.js';
 import pino from 'pino';
-import { z } from 'zod/v4';
+import { z } from 'zod';
 import { alertingService } from './AlertingService.js';
 
 const logger = pino();
@@ -16,7 +15,7 @@ export const TimeSeriesPointSchema = z.object({
 export type TimeSeriesPoint = z.infer<typeof TimeSeriesPointSchema>;
 
 export class TimeSeriesService {
-  private redis: any;
+  private redis: unknown;
   private retentionMs = 24 * 60 * 60 * 1000; // 24 hours default retention
 
   constructor() {

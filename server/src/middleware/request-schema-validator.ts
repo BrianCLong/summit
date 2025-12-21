@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Request, Response, NextFunction } from 'express';
 import Joi, { ObjectSchema } from 'joi';
 import { z } from 'zod';

@@ -1,8 +1,7 @@
-// @ts-nocheck
 // CRDT (Conflict-free Replicated Data Type) Synchronization for Conductor
 // Enables offline-first operation with eventual consistency across edge nodes
 
-import crypto from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 import { prometheusConductorMetrics } from '../observability/prometheus';
 import Redis from 'ioredis';
 
@@ -213,7 +212,7 @@ class ConflictResolver {
 
     return {
       ...baseOp,
-      id: `merged_${crypto.randomUUID()}`,
+      id: `merged_${randomUUID()}`,
       data: mergedData,
       operation: 'merge',
       dependencies: operations.map((op) => op.id),
@@ -379,7 +378,7 @@ export class CRDTSyncEngine {
     operation: Omit<CRDTOperation, 'id' | 'nodeId' | 'lamportClock'>,
   ): Promise<string> {
     // Generate operation ID and assign metadata
-    const operationId = crypto.randomUUID();
+    const operationId = randomUUID();
     this.vectorClock.tick(this.nodeId);
 
     const crdtOperation: CRDTOperation = {
@@ -441,7 +440,7 @@ export class CRDTSyncEngine {
 
       // Create sync request
       const syncRequest: SyncRequest = {
-        requestId: crypto.randomUUID(),
+        requestId: randomUUID(),
         sourceNodeId: this.nodeId,
         targetNodeId,
         vectorClock: this.vectorClock.toObject(),
@@ -774,5 +773,5 @@ class ConflictError extends Error {
 // Export singleton with environment-based node ID
 const nodeId =
   process.env.CRDT_NODE_ID ||
-  `conductor-${crypto.randomUUID().substring(0, 8)}`;
+  `conductor-${randomUUID().substring(0, 8)}`;
 export const crdtSyncEngine = new CRDTSyncEngine(nodeId);

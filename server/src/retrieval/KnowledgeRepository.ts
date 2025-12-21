@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Pool, PoolClient } from 'pg';
 import { KnowledgeObject, EmbeddingRecord, RetrievalQuery, RetrievalResultItem, TenantId, RetrievalQueryKind, KnowledgeObjectKind } from './types.js';
 import logger from '../utils/logger.js';

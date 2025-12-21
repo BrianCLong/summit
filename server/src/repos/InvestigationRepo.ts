@@ -1,10 +1,8 @@
-// @ts-nocheck
 /**
  * Investigation Repository - Production persistence layer
  * Handles investigation/case management with PostgreSQL
  */
 
-// @ts-ignore - pg type imports
 import { Pool, PoolClient } from 'pg';
 import { randomUUID as uuidv4 } from 'crypto';
 import logger from '../config/logger.js';
@@ -100,8 +98,8 @@ export class InvestigationRepo {
         payload: { name: input.name },
         metadata: {},
       })
-      .catch((err) =>
-        repoLogger.error('Failed to record investigation creation', err),
+      .catch((err: unknown) =>
+        repoLogger.error('Failed to record investigation creation', err instanceof Error ? err.message : String(err)),
       );
 
     return investigation;
@@ -172,8 +170,8 @@ export class InvestigationRepo {
           payload: { updates: input },
           metadata: {},
         })
-        .catch((err) =>
-          repoLogger.error('Failed to record investigation update', err),
+        .catch((err: unknown) =>
+          repoLogger.error('Failed to record investigation update', err instanceof Error ? err.message : String(err)),
         );
       return investigation;
     }
@@ -213,8 +211,8 @@ export class InvestigationRepo {
             payload: {},
             metadata: {},
           })
-          .catch((err) =>
-            repoLogger.error('Failed to record investigation deletion', err),
+          .catch((err: unknown) =>
+            repoLogger.error('Failed to record investigation deletion', err instanceof Error ? err.message : String(err)),
           );
         return true;
       }

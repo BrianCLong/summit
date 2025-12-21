@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Enhanced Tenant Validation Middleware
  * Provides comprehensive tenant isolation at API, DB, and cache layers

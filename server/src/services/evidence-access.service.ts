@@ -1,4 +1,3 @@
-// @ts-nocheck
 import crypto from 'crypto';
 import { advancedAuditSystem } from '../audit/index.js';
 import logger from '../utils/logger.js';
@@ -44,7 +43,7 @@ interface EvidenceAccessOptions {
   coldAfterDays?: number;
   signedUrlTtlSeconds?: number;
   signingKey?: string;
-  auditLogger?: { recordEvent: (event: any) => Promise<any> };
+  auditLogger?: { recordEvent: (event: Record<string, unknown>) => Promise<unknown> };
   adapter?: TieredStorageAdapter;
 }
 
@@ -54,7 +53,7 @@ interface EvidenceLike {
   storageUri?: string;
   collected_at?: Date | string;
   created_at?: Date | string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 interface EvidenceAccessContext {
@@ -93,7 +92,7 @@ export class EvidenceAccessService {
   private coldAfterDays: number;
   private signedUrlTtlSeconds: number;
   private signingKey: string;
-  private auditLogger: { recordEvent: (event: any) => Promise<any> };
+  private auditLogger: { recordEvent: (event: Record<string, unknown>) => Promise<unknown> };
   private adapter: TieredStorageAdapter;
 
   constructor(options: EvidenceAccessOptions = {}) {

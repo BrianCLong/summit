@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { describe, expect, it, beforeEach } from 'vitest'
 import { useSearchSessions, SEARCH_SESSION_STORAGE_KEY } from './useSearchSessions'

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState } from 'react';
 import {
   Box,
@@ -42,9 +41,7 @@ import {
   PersonAdd as ImpersonateIcon,
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
-import { gql } from '@apollo/client/core';
-import { useQuery, useMutation } from '@apollo/client/react';
-import { useQuery, useMutation } from '@apollo/client/react';
+import { useQuery, useMutation } from '@apollo/client';
 import { gql } from '@apollo/client';
 import { format } from 'date-fns';
 
@@ -360,7 +357,7 @@ export default function UserManagement() {
     handleMenuClose();
   };
 
-  const users = data?.users?.edges?.map((edge: any) => edge.node) || [];
+  const users = data?.users?.edges?.map((edge: { node: User }) => edge.node) || [];
   const totalCount = data?.users?.totalCount || 0;
 
   return (

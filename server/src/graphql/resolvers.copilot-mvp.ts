@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * GraphQL Resolvers for AI Copilot MVP
  *

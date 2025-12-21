@@ -1,7 +1,7 @@
-// @ts-nocheck
-import express from 'express';
+import express, { Response, NextFunction } from 'express';
 import { MetaOrchestrator } from '../meta-orchestrator/MetaOrchestrator.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
+import type { AuthenticatedRequest } from './types.js';
 
 const router = express.Router();
 const orchestrator = MetaOrchestrator.getInstance();
@@ -47,7 +47,7 @@ router.get('/negotiations', (req, res) => {
     res.json(negotiations);
 });
 
-router.post('/negotiations', async (req, res) => {
+router.post('/negotiations', async (req: AuthenticatedRequest, res: Response) => {
     try {
         const { initiatorId, participantIds, topic, context } = req.body;
         const tenantId = req.user?.tenant_id;
@@ -72,7 +72,7 @@ router.get('/negotiations/:id', (req, res) => {
     res.json(negotiation);
 });
 
-router.post('/negotiations/:id/proposals', async (req, res) => {
+router.post('/negotiations/:id/proposals', async (req: AuthenticatedRequest, res: Response) => {
     try {
         const { id } = req.params;
         const { agentId, content } = req.body;

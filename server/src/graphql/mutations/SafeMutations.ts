@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * IntelGraph Safe Mutations
  * Type-safe, validated mutations for graph operations with audit trails and rollback
@@ -6,9 +5,9 @@
 
 import { z } from 'zod';
 import { randomUUID as uuidv4 } from 'crypto';
-import { getNeo4jDriver, getPostgresPool } from '../../config/database';
-import { validateCustomMetadata } from '../../services/CustomSchemaService';
-import logger from '../../utils/logger';
+import { getNeo4jDriver, getPostgresPool } from '../../config/database.js';
+import { validateCustomMetadata } from '../../services/CustomSchemaService.js';
+import logger from '../../utils/logger.js';
 
 // Validation schemas for IntelGraph operations
 const EntityMutationSchema = z.object({
@@ -154,7 +153,7 @@ async function createAuditLog(
 
     return auditId;
   } catch (auditError) {
-    logger.error('Failed to create audit log:', auditError);
+    logger.error('Failed to create audit log:', auditError instanceof Error ? auditError.message : String(auditError));
     return auditId; // Return ID even if logging failed
   }
 }

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * MC Platform v0.4.0 Resolver Integration
  * Exports all v0.4.0 transcendent intelligence resolvers

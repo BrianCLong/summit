@@ -1,8 +1,7 @@
 import { BehavioralFingerprintService } from './BehavioralFingerprintService.js';
-import { default as pino } from 'pino';
+import pino from 'pino';
 
-// @ts-ignore
-const logger: any = pino();
+const logger = pino();
 
 export interface ERRuleConfig {
   latencyBudgetMs: number;

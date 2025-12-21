@@ -1,7 +1,7 @@
-// @ts-nocheck
 import type { ApolloServerPlugin } from '@apollo/server';
 import { GraphQLError } from 'graphql';
 import pino from 'pino';
+import type { GraphQLContext } from '../apollo-v5-server.js';
 
 const logger = pino();
 
@@ -21,7 +21,7 @@ interface TenantState {
 
 const tenantStates = new Map<string, TenantState>();
 
-export function createCircuitBreakerPlugin(options: CircuitBreakerOptions = {}): ApolloServerPlugin {
+export function createCircuitBreakerPlugin(options: CircuitBreakerOptions = {}): ApolloServerPlugin<GraphQLContext> {
   const {
     failureThreshold = 10,
     resetTimeout = 30000,

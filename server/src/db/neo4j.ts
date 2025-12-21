@@ -1,9 +1,7 @@
-// @ts-nocheck
 import { telemetry } from '../lib/telemetry/comprehensive-telemetry.js';
 import neo4j, { Driver, Session } from 'neo4j-driver';
 import * as dotenv from 'dotenv';
-// @ts-ignore
-import { default as pino } from 'pino';
+import pino from 'pino';
 
 import {
   dbPoolAcquisitionLatency,
@@ -20,8 +18,7 @@ import {
 
 dotenv.config();
 
-// @ts-ignore
-const logger: any = pino();
+const logger = pino();
 
 const NEO4J_URI = process.env.NEO4J_URI || 'bolt://neo4j:7687';
 const NEO4J_USER = process.env.NEO4J_USER || process.env.NEO4J_USERNAME || 'neo4j';

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { context as otContext, propagation, trace } from '@opentelemetry/api';
 import { randomUUID } from 'crypto';
 import { logger } from '../config/logger.js';
@@ -36,7 +35,7 @@ export class OPAFeatureFlagClient {
     const input = this.buildInput(flag, context, evaluationId);
     let enabled = this.failOpen;
     let reason = 'fail-open';
-    let raw: any = null;
+    let raw: Record<string, unknown> | null = null;
     let killSwitchActive = false;
 
     try {
@@ -103,7 +102,7 @@ export class OPAFeatureFlagClient {
     const input = this.buildInput('kill_switch', { ...context, module }, evaluationId);
     let active = false;
     let reason = 'not-configured';
-    let raw: any = null;
+    let raw: Record<string, unknown> | null = null;
 
     try {
       raw = await this.opaClient.evaluateQuery('feature_flags/kill_switch', input);
@@ -173,7 +172,7 @@ export class OPAFeatureFlagClient {
     };
   }
 
-  private audit(event: string, payload: Record<string, any>) {
+  private audit(event: string, payload: Record<string, unknown>) {
     logger.info({ event, ...payload }, 'feature-flags');
   }
 }

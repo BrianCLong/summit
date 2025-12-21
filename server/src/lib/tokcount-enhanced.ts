@@ -1,20 +1,19 @@
-// @ts-nocheck
 /**
  * Enhanced token counting with provider-aware tokenization, pricing registry, and caching
  * Supports precise tokenization, billing rounding, and post-hoc reconciliation
  */
 
 import LRU from 'lru-cache';
-import logger from '../utils/logger';
+import logger from '../utils/logger.js';
 
 export type Provider = 'openai' | 'anthropic' | 'gemini';
 export type Part = 'prompt' | 'completion';
 
 export interface EstimateInput {
   payload: {
-    messages?: any[];
-    input?: string | object;
-    tools?: any[];
+    messages?: Array<{ role?: string; content?: string }>;
+    input?: string | Record<string, unknown>;
+    tools?: Array<Record<string, unknown>>;
     systemPrompt?: string;
     maxTokens?: number;
   };
@@ -114,11 +113,11 @@ const PRICING_REGISTRY: Record<
 /**
  * LRU cache for token count estimates (5-minute TTL, 10k entries max)
  */
-const tokenCache = new LRU({
+const tokenCache = new LRU<string, { tokens: number; method: string; timestamp: number }>({
   max: 10000,
   ttl: 5 * 60 * 1000, // 5 minutes
   updateAgeOnGet: true,
-}) as any;
+});
 
 /**
  * Apply provider-specific billing rounding rules
@@ -146,7 +145,7 @@ function applyBillingRounding(
  * Precise tokenization using provider-specific tokenizers
  */
 async function tokenizePrecise(
-  payload: any,
+  payload: Record<string, unknown>,
   provider: Provider,
   model: string,
 ): Promise<{ prompt: number; method: 'precise' | 'heuristic' }> {
@@ -193,7 +192,7 @@ async function tokenizePrecise(
  * Heuristic tokenization with provider-specific calibration
  */
 function tokenizeHeuristic(
-  payload: any,
+  payload: Record<string, unknown>,
   provider: Provider,
 ): { prompt: number; method: 'heuristic' } {
   const text = serializePayload(payload);
@@ -234,7 +233,7 @@ function tokenizeHeuristic(
 /**
  * Serialize payload to text for tokenization
  */
-function serializePayload(payload: any): string {
+function serializePayload(payload: Record<string, unknown>): string {
   if (typeof payload === 'string') {
     return payload;
   }
@@ -243,7 +242,10 @@ function serializePayload(payload: any): string {
 
   if (payload.messages && Array.isArray(payload.messages)) {
     text += payload.messages
-      .map((msg: any) => `${msg.role || 'user'}: ${msg.content || ''}`)
+      .map((msg: unknown) => {
+        const message = msg as { role?: string; content?: string };
+        return `${message.role || 'user'}: ${message.content || ''}`;
+      })
       .join('\n');
   }
 
@@ -260,7 +262,7 @@ function serializePayload(payload: any): string {
 
   if (payload.tools && Array.isArray(payload.tools)) {
     const toolsText = payload.tools
-      .map((tool: any) => JSON.stringify(tool))
+      .map((tool: unknown) => JSON.stringify(tool))
       .join('\n');
     text += '\nTools: ' + toolsText;
   }
@@ -272,7 +274,7 @@ function serializePayload(payload: any): string {
  * Create cache key for tokenization results
  */
 function createCacheKey(
-  payload: any,
+  payload: Record<string, unknown>,
   provider: Provider,
   model: string,
 ): string {

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import pino from 'pino';
 import fs from 'fs/promises';
 import path from 'path';
@@ -15,7 +14,7 @@ export interface SchemaFieldPolicy {
 export interface SchemaDefinition {
   version: string;
   entities: Record<string, {
-    fields: Record<string, any>;
+    fields: Record<string, unknown>;
     policy: SchemaFieldPolicy[];
   }>;
 }
@@ -50,9 +49,10 @@ export class SchemaCatalogService {
       const data = await fs.readFile(this.storagePath, 'utf-8');
       this.currentSchema = JSON.parse(data);
       logger.info(`Loaded schema version ${this.currentSchema?.version}`);
-    } catch (error: any) {
-      if (error.code !== 'ENOENT') {
-        logger.error({ err: error }, 'Failed to load schema catalog');
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      if ('code' in err && (err as NodeJS.ErrnoException).code !== 'ENOENT') {
+        logger.error({ err }, 'Failed to load schema catalog');
       } else {
         logger.info('No existing schema catalog found.');
       }

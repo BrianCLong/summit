@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Maestro Conductor v24.4.0 - RTBF Dry-Run Mode & Audit Logging
  * Epic E21: RTBF (Right to Be Forgotten) at Scale
@@ -8,11 +7,11 @@
  */
 
 import { EventEmitter } from 'events';
-import { PrometheusMetrics } from '../utils/metrics';
-import logger from '../utils/logger';
-import { tracer, Span } from '../utils/tracing';
-import { DatabaseService } from './DatabaseService';
-import { RTBFJob, RTBFTarget } from './RTBFJobService';
+import { PrometheusMetrics } from '../utils/metrics.js';
+import logger from '../utils/logger.js';
+import { tracer, type Span } from '../utils/tracing.js';
+import { DatabaseService } from './DatabaseService.js';
+import type { RTBFJob, RTBFTarget } from './RTBFJobService.js';
 
 // Audit configuration
 interface RTBFAuditConfig {
@@ -86,8 +85,8 @@ interface RTBFAuditEntry {
 
   // Before/after state
   dataChanges?: {
-    before: Record<string, any>;
-    after: Record<string, any>;
+    before: Record<string, unknown>;
+    after: Record<string, unknown>;
     fieldsModified: string[];
   };
 

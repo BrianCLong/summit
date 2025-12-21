@@ -1,4 +1,3 @@
-// @ts-nocheck
 // server/src/optimization/optimization-manager.ts
 
 import { getNeo4jDriver, getPostgresPool } from '../config/database.js';

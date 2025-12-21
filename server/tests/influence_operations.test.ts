@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { InfluenceOperationsService } from '../src/services/InfluenceOperationsService.js';
 import { CIBDetectionService } from '../src/services/CIBDetectionService.js';

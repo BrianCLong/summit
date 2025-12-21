@@ -1,11 +1,10 @@
-// @ts-nocheck
 import { DeceptionService } from '../DeceptionService.js';
 import { neo } from '../../db/neo4j.js';
 
 // Mock neo4j
 jest.mock('../../db/neo4j.js', () => ({
   neo: {
-    run: jest.fn(),
+    run: jest.fn<() => Promise<any>>(),
   },
 }));
 

@@ -1,5 +1,4 @@
-// @ts-nocheck
-import { Router, Request, Response, RequestHandler } from 'express';
+import { Router, type Request, type Response, type RequestHandler } from 'express';
 import express from 'express';
 import { replayGuard, webhookRatelimit } from '../middleware/webhook-guard.js';
 import AuthService from '../services/AuthService.js';
@@ -9,7 +8,7 @@ const router = Router();
 const authService = new AuthService();
 
 // Type-safe wrapper for async handlers
-const asyncHandler = (fn: (req: Request, res: Response) => Promise<any>): RequestHandler =>
+const asyncHandler = (fn: (req: Request, res: Response) => Promise<void>): RequestHandler =>
   (req, res, next) => {
     Promise.resolve(fn(req, res)).catch(next);
   };

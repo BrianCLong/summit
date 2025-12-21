@@ -1,4 +1,3 @@
-// @ts-nocheck
 import Consul from 'consul';
 import { EventEmitter } from 'events';
 import {
@@ -158,7 +157,7 @@ export class ConsulConfigRepository<TConfig = Record<string, any>>
       options: { key },
     } as any);
 
-    watch.on('change', async (data: any) => {
+    watch.on('change', async (data: { Value?: string }) => {
       if (!data || !data.Value) {
         return;
       }
@@ -343,7 +342,8 @@ export class ConsulConfigRepository<TConfig = Record<string, any>>
       return JSON.parse(result.Value) as T;
     } catch (error) {
       // Key doesn't exist
-      if ((error as any).statusCode === 404) {
+      const err = error as { statusCode?: number };
+      if (err.statusCode === 404) {
         return undefined;
       }
       throw error;

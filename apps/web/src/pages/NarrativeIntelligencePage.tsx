@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useEffect } from 'react';
 import { Card, Title, Text, Metric, Flex, Grid, Badge } from '@tremor/react';
 
@@ -6,7 +5,7 @@ interface NarrativeIntelligencePageProps {}
 
 export const NarrativeIntelligencePage: React.FC<NarrativeIntelligencePageProps> = () => {
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<Record<string, unknown> | null>(null);
 
   useEffect(() => {
     // In a real app, fetch from API

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { logger } from './config/logger.js';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import * as OpenTelemetryResources from '@opentelemetry/resources';
@@ -19,7 +18,7 @@ const resource = new OpenTelemetryResources.Resource({
 
 // Configure Exporter
 // If OTLP_ENDPOINT is set, use OTLP. Else if JAEGER_ENDPOINT, use Jaeger. Else no-op/log.
-let traceExporter: any = undefined;
+let traceExporter: OTLPTraceExporter | JaegerExporter | undefined = undefined;
 
 if (process.env.OTLP_ENDPOINT) {
     traceExporter = new OTLPTraceExporter({

@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Maestro Conductor v24.3.0 - Contract Testing Framework
 // Epic E17: Schema Evolution - API and database contract validation
 

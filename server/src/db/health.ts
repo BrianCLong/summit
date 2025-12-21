@@ -1,4 +1,3 @@
-// @ts-nocheck
 import type { Neo4jHealth } from './neo4j.js';
 import { checkNeo4jHealth } from './neo4j.js';
 import { getPostgresPool } from './postgres.js';

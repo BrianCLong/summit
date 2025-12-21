@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { GraphQLError } from 'graphql';
 import jwt from 'jsonwebtoken';
 import { getPostgresPool } from '../db/postgres.js';
@@ -25,13 +24,28 @@ interface AuthContext {
   isAuthenticated: boolean;
   requestId: string;
   loaders: Loaders;
-  tenantContext?: any;
+  tenantContext?: unknown;
+}
+
+interface RequestWithUser {
+  user?: User;
+  tenantContext?: unknown;
+  headers?: {
+    authorization?: string;
+  };
+}
+
+interface JWTPayload {
+  userId: string;
+  email: string;
+  role?: string;
+  token_version?: number;
 }
 
 export const getContext = async ({
   req,
 }: {
-  req: any;
+  req: RequestWithUser;
 }): Promise<AuthContext> => {
   const requestId = randomUUID();
   const loaders = createLoaders();
@@ -46,8 +60,8 @@ export const getContext = async ({
            requestId,
            loaders,
            tenantContext:
-             (req as any).tenantContext ||
-             extractTenantContext(req as any, { strict: false }),
+             req.tenantContext ||
+             extractTenantContext(req, { strict: false }),
          };
     }
 
@@ -65,8 +79,8 @@ export const getContext = async ({
       requestId,
       loaders,
       tenantContext:
-        (req as any).tenantContext ||
-        extractTenantContext(req as any, { strict: false }),
+        req.tenantContext ||
+        extractTenantContext(req, { strict: false }),
     };
   } catch (error) {
     logger.warn(
@@ -91,7 +105,7 @@ export const verifyToken = async (token: string): Promise<User> => {
     }
 
     // Verify JWT token
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
 
     // Get user from database
     const pool = getPostgresPool();
@@ -104,7 +118,7 @@ export const verifyToken = async (token: string): Promise<User> => {
       throw new Error('User not found');
     }
 
-    const user = result.rows[0];
+    const user = result.rows[0] as User;
 
     if (user.token_version !== decoded.token_version) {
       throw new Error('Token is revoked');
@@ -173,7 +187,7 @@ export const requireRole = (
   return user;
 };
 
-function extractToken(req: any): string | null {
+function extractToken(req: RequestWithUser): string | null {
   const authHeader = req.headers?.authorization;
   if (authHeader?.startsWith('Bearer ')) {
     return authHeader.substring(7);

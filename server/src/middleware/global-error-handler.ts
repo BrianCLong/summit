@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Request, Response, NextFunction } from 'express';
 import pino from 'pino';
 import { cfg } from '../config.js';

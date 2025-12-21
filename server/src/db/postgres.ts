@@ -1,4 +1,3 @@
-// @ts-nocheck
 import crypto from 'node:crypto';
 import { performance } from 'node:perf_hooks';
 import { Pool, QueryConfig, QueryResult, PoolClient } from 'pg';
@@ -7,6 +6,12 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 import { dbConfig } from './config.js';
 import baseLogger from '../config/logger.js';
+
+// Constants for pool monitoring and connection management
+const POOL_MONITOR_INTERVAL_MS = 30000; // 30 seconds
+const WAIT_QUEUE_THRESHOLD = 10; // Number of waiting requests before warning
+const MAX_LIFETIME_MS = 3600000; // 1 hour connection lifetime
+const CONNECTION_LEAK_THRESHOLD_MS = 60000; // 60 seconds before leak warning
 
 type QueryInput = string | QueryConfig<any>;
 
@@ -426,17 +431,20 @@ function createManagedPool(
     logger.warn('ZERO_FOOTPRINT mode active: PostgreSQL queries will not be persisted.');
     const mockExecutor: QueryExecutor = async (queryInput) => {
       logger.debug('Zero-Footprint: Skipping query execution');
-      return { rowCount: 0, rows: [], command: 'MOCK', oid: 0, fields: [] };
+      return { rowCount: 0, rows: [], command: 'MOCK', oid: 0, fields: [] } as QueryResult<any>;
     };
     return {
       query: mockExecutor,
       read: mockExecutor,
       write: mockExecutor,
-      connect: async () => writePool.pool.connect(), // Connect works but does nothing? Or mock client?
+      transaction: async () => ({} as any),
+      withTransaction: async () => ({} as any),
+      connect: async () => writePool.pool.connect(),
       end: async () => {},
       on: () => ({} as any),
       healthCheck: async () => [],
-      slowQueryInsights: () => []
+      slowQueryInsights: () => [],
+      pool: writePool.pool,
     };
   }
 

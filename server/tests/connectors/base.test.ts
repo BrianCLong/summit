@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { BaseConnector } from '../../src/connectors/base';
 import { ConnectorConfig, ConnectorSchema } from '../../src/connectors/types';
 import { Readable } from 'stream';

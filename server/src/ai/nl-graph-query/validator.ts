@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Validator - Validates Cypher queries for syntax and security issues
  */

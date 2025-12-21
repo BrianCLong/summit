@@ -1,8 +1,8 @@
-// @ts-nocheck
 import { getNeo4jDriver } from '../db/neo4j.js';
 import { getPostgresPool } from '../db/postgres.js';
 import { randomUUID as uuidv4 } from 'crypto';
 import { logger } from './logger.js';
+import type { Integer } from 'neo4j-driver';
 
 /**
  * Creates sample data in Neo4j and PostgreSQL for development purposes.
@@ -26,9 +26,15 @@ export async function createSampleData(): Promise<void> {
     await createSampleUsers();
     await createSampleInvestigations();
     logger.info('Sample data created successfully');
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error({ error }, 'Failed to create sample data');
   }
+}
+
+interface EntityData {
+  id: string;
+  type: string;
+  props: Record<string, unknown>;
 }
 
 async function createSampleEntities(): Promise<void> {
@@ -36,7 +42,7 @@ async function createSampleEntities(): Promise<void> {
   const session = driver.session();
 
   try {
-    const entities = [
+    const entities: EntityData[] = [
       {
         id: uuidv4(),
         type: 'PERSON',
@@ -111,6 +117,14 @@ async function createSampleEntities(): Promise<void> {
   }
 }
 
+interface RelationshipData {
+  id: string;
+  from: string;
+  to: string;
+  type: string;
+  props: Record<string, unknown>;
+}
+
 async function createSampleRelationships(): Promise<void> {
   const driver = getNeo4jDriver();
   const session = driver.session();
@@ -123,11 +137,11 @@ async function createSampleRelationships(): Promise<void> {
     const entities = entitiesResult.records.map((r) => r.get('e'));
 
     if (entities.length >= 2) {
-      const relationships = [
+      const relationships: RelationshipData[] = [
         {
           id: uuidv4(),
-          from: entities[0].properties.id,
-          to: entities[1].properties.id,
+          from: String(entities[0].properties.id),
+          to: String(entities[1].properties.id),
           type: 'WORKS_FOR',
           props: {
             position: 'Senior Developer',
@@ -136,8 +150,8 @@ async function createSampleRelationships(): Promise<void> {
         },
         {
           id: uuidv4(),
-          from: entities[1].properties.id,
-          to: entities[2].properties.id,
+          from: String(entities[1].properties.id),
+          to: String(entities[2].properties.id),
           type: 'INVOLVED_IN',
           props: {
             role: 'Primary Suspect',
@@ -170,11 +184,18 @@ async function createSampleRelationships(): Promise<void> {
   }
 }
 
+interface UserData {
+  id: string;
+  email: string;
+  username: string;
+  role: string;
+}
+
 async function createSampleUsers(): Promise<void> {
   const pool = getPostgresPool();
 
   try {
-    const users = [
+    const users: UserData[] = [
       {
         id: uuidv4(),
         email: 'admin@intelgraph.com',
@@ -201,16 +222,23 @@ async function createSampleUsers(): Promise<void> {
     }
 
     logger.info(`Created ${users.length} sample users`);
-  } catch (error) {
+  } catch (error: unknown) {
     logger.debug('Users table may not exist yet, skipping user creation');
   }
+}
+
+interface InvestigationData {
+  id: string;
+  name: string;
+  description: string;
+  status: string;
 }
 
 async function createSampleInvestigations(): Promise<void> {
   const pool = getPostgresPool();
 
   try {
-    const investigations = [
+    const investigations: InvestigationData[] = [
       {
         id: uuidv4(),
         name: 'Corporate Espionage Investigation',
@@ -243,7 +271,7 @@ async function createSampleInvestigations(): Promise<void> {
     }
 
     logger.info(`Created ${investigations.length} sample investigations`);
-  } catch (error) {
+  } catch (error: unknown) {
     logger.debug(
       'Investigations table may not exist yet, skipping investigation creation',
     );

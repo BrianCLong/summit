@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * OPA (Open Policy Agent) Middleware for IntelGraph
  *

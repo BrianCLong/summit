@@ -1,4 +1,3 @@
-// @ts-nocheck
 import type { Meta, StoryObj } from '@storybook/react'
 import { Alert, AlertDescription, AlertTitle } from '../alert'
 import { tokenVar } from '@/theme/tokens'

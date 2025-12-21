@@ -1,10 +1,15 @@
-// @ts-nocheck
-import express, { Request, Response } from 'express';
-import { OSINTPrioritizationService } from '../services/OSINTPrioritizationService';
-import { VeracityScoringService } from '../services/VeracityScoringService';
-import { osintQueue } from '../services/OSINTQueueService';
-import { ensureAuthenticated } from '../middleware/auth'; // Assuming this exists
-import { osintRateLimiter } from '../middleware/osintRateLimiter';
+import express, { type Request, type Response } from 'express';
+import { OSINTPrioritizationService } from '../services/OSINTPrioritizationService.js';
+import { VeracityScoringService } from '../services/VeracityScoringService.js';
+import { osintQueue } from '../services/OSINTQueueService.js';
+import { ensureAuthenticated } from '../middleware/auth.js';
+import { osintRateLimiter } from '../middleware/osintRateLimiter.js';
+
+interface AuthenticatedRequest extends Request {
+  user?: {
+    tenantId?: string;
+  };
+}
 
 const router = express.Router();
 const prioritizationService = new OSINTPrioritizationService();
@@ -15,7 +20,8 @@ router.use(osintRateLimiter);
 // Trigger prioritization cycle
 router.post('/prioritize', ensureAuthenticated, async (req: Request, res: Response) => {
   try {
-    const tenantId = (req as any).user?.tenantId;
+    const authReq = req as AuthenticatedRequest;
+    const tenantId = authReq.user?.tenantId;
     const targets = await prioritizationService.runPrioritizationCycle(tenantId);
     res.json({ success: true, targets, message: `Queued ${targets.length} targets for enrichment` });
   } catch (error: any) {

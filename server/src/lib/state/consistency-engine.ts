@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 // server/src/lib/state/consistency-engine.ts
 
 /**
@@ -32,8 +30,8 @@ export enum ConsistencyLevel {
 /**
  * A simple in-memory store to simulate a database.
  */
-const dataStore: Map<string, any> = new Map();
-const sessionStore: Map<string, Map<string, any>> = new Map();
+const dataStore: Map<string, unknown> = new Map();
+const sessionStore: Map<string, Map<string, unknown>> = new Map();
 
 /**
  * A simple version vector to track causal dependencies.
@@ -69,10 +67,9 @@ export class ConsistencyEngine {
    * @param options The read options.
    * @returns The value associated with the key.
    */
-  public read(key: string, options: ReadOptions): any {
+  public read(key: string, options: ReadOptions): unknown {
     switch (options.consistency) {
       case ConsistencyLevel.Strong:
-      case ConsistencyLevel.Linearizable:
         // In a real system, this would involve a distributed consensus protocol.
         return dataStore.get(key);
       case ConsistencyLevel.Causal:
@@ -99,14 +96,13 @@ export class ConsistencyEngine {
    * @param value The value to write.
    * @param options The write options.
    */
-  public write(key: string, value: any, options: WriteOptions): void {
+  public write(key: string, value: unknown, options: WriteOptions): void {
     const nodeId = 'node1'; // In a real system, this would be the ID of the current node.
     const currentVersion = this.versionVector.get(nodeId) || 0;
     this.versionVector.set(nodeId, currentVersion + 1);
 
     switch (options.consistency) {
       case ConsistencyLevel.Strong:
-      case ConsistencyLevel.Linearizable:
         // In a real system, this would involve a distributed consensus protocol.
         dataStore.set(key, value);
         break;
@@ -120,7 +116,7 @@ export class ConsistencyEngine {
           if (!sessionStore.has(options.sessionId)) {
             sessionStore.set(options.sessionId, new Map());
           }
-          sessionStore.get(options.sessionId).set(key, value);
+          sessionStore.get(options.sessionId)!.set(key, value);
         }
         // Also write to the main store for eventual consistency.
         dataStore.set(key, value);

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Entity DataLoader - Batch loading for entities from Neo4j
  * Prevents N+1 query issues when fetching multiple entities

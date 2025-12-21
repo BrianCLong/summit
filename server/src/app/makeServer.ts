@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { ApolloServer } from '@apollo/server';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { typeDefs } from '../graphql/schema/index.js';
@@ -7,18 +6,29 @@ import { authDirective } from '../graphql/authDirective.js';
 import { getContext } from '../lib/auth.js';
 
 export interface MakeServerOptions {
-  user?: any;
+  user?: {
+    id: string;
+    email: string;
+    role: string;
+    tenant: string;
+    scopes: string[];
+  };
   tenant?: string;
   role?: string;
   scopes?: string[];
   // Provide or augment context for unit tests (in-memory stubs, tenant, etc.)
   context?:
-    | Record<string, any>
-    | ((base: any) => Promise<Record<string, any>> | Record<string, any>);
+    | Record<string, unknown>
+    | ((
+        base: Record<string, unknown>,
+      ) => Promise<Record<string, unknown>> | Record<string, unknown>);
 }
 
 export async function makeGraphServer(opts: MakeServerOptions = {}) {
-  let schema = makeExecutableSchema({ typeDefs, resolvers: resolvers as any });
+  let schema = makeExecutableSchema({
+    typeDefs,
+    resolvers: resolvers as Record<string, unknown>,
+  });
   const { authDirectiveTransformer } = authDirective();
   schema = authDirectiveTransformer(schema);
 
@@ -30,9 +40,11 @@ export async function makeGraphServer(opts: MakeServerOptions = {}) {
 
   return {
     server,
-    createContext: async (_reqRes?: any) => {
+    createContext: async (_reqRes?: unknown) => {
       // Base context via application auth
-      const base = await getContext({ req: { headers: {} } as any });
+      const base = await getContext({
+        req: { headers: {} } as { headers: Record<string, string> },
+      });
       // Inject test user if provided
       const injectedUser =
         opts.user ??

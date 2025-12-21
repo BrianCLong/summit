@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Unit tests for NL-to-Query Service
  *

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * @deprecated Use @intelgraph/feature-flags instead.
  */

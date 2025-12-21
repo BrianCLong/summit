@@ -1,11 +1,18 @@
-// @ts-nocheck
 import type { Request, Response, NextFunction } from 'express';
 import { logger } from '../config/logger.js';
 import { telemetry } from '../lib/telemetry/comprehensive-telemetry.js';
 
 const SECURITY_RELEVANT_CODES = new Set([401, 403, 429, 499, 500, 503]);
 
-export function securityIncidentLogger(req: Request, res: Response, next: NextFunction) {
+interface AuthenticatedRequest extends Request {
+  user?: {
+    sub?: string;
+    id?: string;
+  };
+  sessionId?: string;
+}
+
+export function securityIncidentLogger(req: Request, res: Response, next: NextFunction): void {
   const startedAt = Date.now();
 
   res.on('finish', () => {
@@ -14,13 +21,14 @@ export function securityIncidentLogger(req: Request, res: Response, next: NextFu
     if (!flagged) return;
 
     const durationMs = Date.now() - startedAt;
+    const authReq = req as AuthenticatedRequest;
     const incident = {
       path: req.originalUrl,
       method: req.method,
       status,
       ip: req.ip,
-      user: (req as any).user?.sub || (req as any).user?.id,
-      sessionId: (req as any).sessionId,
+      user: authReq.user?.sub || authReq.user?.id,
+      sessionId: authReq.sessionId,
       durationMs,
     };
 

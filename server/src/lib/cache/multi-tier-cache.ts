@@ -1,4 +1,3 @@
-// @ts-nocheck
 // NOTE: The 'lru-cache' package could not be installed due to a pre-existing
 // dependency conflict in the monorepo (related to @react-native-firebase/app).
 // A simplified, self-contained LRU cache with TTL is implemented here as a workaround
@@ -25,6 +24,7 @@ type RedisClient = Pick<
   | 'subscribe'
   | 'on'
   | 'duplicate'
+  | 'quit'
 >;
 
 interface CacheEntry<V> {
@@ -168,10 +168,10 @@ export class MultiTierCache {
   private readonly defaultTtlSeconds: number;
   private readonly l1FallbackTtlMs: number;
   private readonly cacheEnabled: boolean;
-  private readonly l1Cache: SimpleLRUCache<string, CachePayload<any>>;
+  private readonly l1Cache: SimpleLRUCache<string, CachePayload<unknown>>;
   private readonly redis: RedisClient | null;
   private readonly subscriber: RedisClient | null;
-  private readonly inflight: Map<string, Promise<any>> = new Map();
+  private readonly inflight: Map<string, Promise<unknown>> = new Map();
   private readonly keyTags: Map<string, string[]> = new Map();
   private readonly tagIndex: Map<string, Set<string>> = new Map();
 
@@ -311,13 +311,11 @@ export class MultiTierCache {
   }
 
   async shutdown(): Promise<void> {
-    if (this.subscriber && 'quit' in this.subscriber) {
-      // @ts-ignore - quit is available on ioredis but not in the narrowed type
-      await (this.subscriber as any).quit();
+    if (this.subscriber) {
+      await this.subscriber.quit();
     }
-    if (this.redis && 'quit' in this.redis) {
-      // @ts-ignore - quit is available on ioredis but not in the narrowed type
-      await (this.redis as any).quit();
+    if (this.redis) {
+      await this.redis.quit();
     }
   }
 

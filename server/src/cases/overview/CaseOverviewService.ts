@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Pool } from 'pg';
 import { CaseOverviewCacheRepo, CaseOverviewSnapshot } from '../../repos/CaseOverviewCacheRepo.js';
 import logger from '../../config/logger.js';
@@ -99,7 +98,7 @@ export class CaseOverviewService {
     await this.cacheRepo.markStale(caseId, tenantId);
   }
 
-  private async triggerRevalidation(cacheKey: string, caseId: string, tenantId: string) {
+  private async triggerRevalidation(cacheKey: string, caseId: string, tenantId: string): Promise<void> {
     if (this.inflight.has(cacheKey)) return;
     void this.refresh(caseId, tenantId, cacheKey);
   }

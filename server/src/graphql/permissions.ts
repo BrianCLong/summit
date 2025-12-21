@@ -1,16 +1,15 @@
-// @ts-nocheck
 import { shield, rule, and, or, not, allow } from 'graphql-shield';
-import { GraphQLContext } from './apollo-v5-server.js';
+import type { GraphQLContext } from './apollo-v5-server.js';
 
 // Rules
 const isAuthenticated = rule({ cache: 'contextual' })(
-  async (parent, args, ctx: GraphQLContext, info) => {
+  async (parent: unknown, args: unknown, ctx: GraphQLContext, info: unknown) => {
     return ctx.user !== null && ctx.user !== undefined;
   }
 );
 
 const isAdmin = rule({ cache: 'contextual' })(
-  async (parent, args, ctx: GraphQLContext, info) => {
+  async (parent: unknown, args: unknown, ctx: GraphQLContext, info: unknown) => {
     return ctx.user?.roles?.includes('admin') || false;
   }
 );

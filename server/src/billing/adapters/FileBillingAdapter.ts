@@ -1,4 +1,3 @@
-// @ts-nocheck
 import fs from 'fs';
 import path from 'path';
 import { parse } from 'json2csv';
@@ -63,7 +62,7 @@ export class FileBillingAdapter implements BillingAdapter {
       const headers = lines[0].split(',').map(h => h.replace(/"/g, ''));
       const values = lines[1].split(',').map(v => v.replace(/"/g, ''));
 
-      const report: any = {};
+      const report: Record<string, string> = {};
       headers.forEach((h, i) => {
         report[h] = values[i];
       });

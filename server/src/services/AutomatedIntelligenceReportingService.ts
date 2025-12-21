@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { IntelligenceAnalysisService } from './IntelligenceAnalysisService.js';
 
 interface ThreatPriority {

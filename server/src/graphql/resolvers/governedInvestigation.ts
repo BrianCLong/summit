@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Governed Investigation Resolvers
  *

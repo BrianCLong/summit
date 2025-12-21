@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { EventEmitter } from 'events';
 import { createLogger } from '../config/logger';
 import { LinUCBOptimizer } from './LinUCBOptimizer';

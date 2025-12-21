@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Full OpenTelemetry Tracing Implementation
  * Provides distributed tracing across all services with Jaeger/OTLP export
@@ -19,8 +18,8 @@ import {
   SimpleSpanProcessor,
 } from '@opentelemetry/sdk-trace-node';
 import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
-import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
-import { trace, context, SpanStatusCode, SpanKind } from '@opentelemetry/api';
+import type { Span, Attributes } from '@opentelemetry/api';
+import { trace, SpanStatusCode, SpanKind } from '@opentelemetry/api';
 import logger from '../utils/logger.js';
 
 // Configuration
@@ -122,8 +121,8 @@ export function getTracer(name: string = SERVICE_NAME) {
  */
 export async function withSpan<T>(
   name: string,
-  fn: (span: any) => Promise<T>,
-  attributes?: Record<string, string | number | boolean>
+  fn: (span: Span) => Promise<T>,
+  attributes?: Attributes
 ): Promise<T> {
   const tracer = getTracer();
 
@@ -236,7 +235,7 @@ export function addSpanAttribute(key: string, value: string | number | boolean) 
 /**
  * Record an exception in the current span
  */
-export function recordException(error: Error, attributes?: Record<string, any>) {
+export function recordException(error: Error, attributes?: Attributes) {
   const span = trace.getActiveSpan();
   if (span) {
     span.recordException(error);
@@ -252,4 +251,4 @@ if (OTEL_ENABLED && process.env.NODE_ENV !== 'test') {
   initializeOTel();
 }
 
-export { SpanStatusCode, SpanKind, trace, context };
+export { SpanStatusCode, SpanKind, trace };

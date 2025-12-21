@@ -1,10 +1,19 @@
-// @ts-nocheck
 import helmet from 'helmet';
 import csurf from 'csurf';
 import cookieParser from 'cookie-parser';
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { cfg } from '../config.js';
 import { createRedisRateLimiter } from '../middleware/redisRateLimiter.js';
+
+interface AuthenticatedUser {
+  id?: string;
+  sub?: string;
+}
+
+interface RequestWithUser extends Request {
+  user?: AuthenticatedUser;
+  csrfToken?: () => string;
+}
 
 export const cookieParserMiddleware = cookieParser();
 
@@ -72,7 +81,8 @@ export function createCsrfLayer(skip?: (req: Request) => boolean): {
 
   const tokenRoute: RequestHandler = (req: Request, res: Response) => {
     csrfProtection(req, res, () => {
-      res.status(200).json({ csrfToken: (req as any).csrfToken?.() });
+      const reqWithToken = req as RequestWithUser;
+      res.status(200).json({ csrfToken: reqWithToken.csrfToken?.() });
     });
   };
 
@@ -83,13 +93,13 @@ export function createUserIpRateLimiter(): RequestHandler {
   return createRedisRateLimiter({
     windowMs: cfg.RATE_LIMIT_WINDOW_MS,
     max: (req) => {
-      // @ts-ignore
-      const user = req.user;
+      const reqWithUser = req as RequestWithUser;
+      const user = reqWithUser.user;
       return user ? cfg.RATE_LIMIT_MAX_AUTHENTICATED : cfg.RATE_LIMIT_MAX_REQUESTS;
     },
     keyGenerator: (req) => {
-      // @ts-ignore
-      const user = req.user;
+      const reqWithUser = req as RequestWithUser;
+      const user = reqWithUser.user;
       if (user?.id) return `user:${user.id}`;
       if (user?.sub) return `user:${user.sub}`;
       return `ip:${req.ip}`;

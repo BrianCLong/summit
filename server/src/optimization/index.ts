@@ -1,4 +1,3 @@
-// @ts-nocheck
 // server/src/optimization/index.ts
 
 export { Neo4jQueryOptimizer } from './neo4j-query-optimizer.js';

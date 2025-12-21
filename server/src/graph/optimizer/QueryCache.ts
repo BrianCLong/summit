@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { QueryAnalysis, CacheStrategy, OptimizationContext } from './types.js';
 import { getRedisClient } from '../../db/redis.js';
 import { CompressionUtils } from '../../utils/compression.js';
@@ -36,7 +35,7 @@ export class QueryCache {
     };
   }
 
-  public async get(key: string): Promise<any | null> {
+  public async get(key: string): Promise<unknown | null> {
     try {
       const redis = getRedisClient();
       const cached = await redis.get(key);
@@ -49,7 +48,7 @@ export class QueryCache {
     return null;
   }
 
-  public async set(key: string, value: any, ttl: number): Promise<void> {
+  public async set(key: string, value: unknown, ttl: number): Promise<void> {
     try {
       const redis = getRedisClient();
       const compressed = await CompressionUtils.compressToString(value);
@@ -59,7 +58,7 @@ export class QueryCache {
     }
   }
 
-  public generateKey(query: string, params: any, context: OptimizationContext): string {
+  public generateKey(query: string, params: Record<string, unknown>, context: OptimizationContext): string {
     const hash = crypto.createHash('sha256')
       .update(query + JSON.stringify(params))
       .digest('hex');

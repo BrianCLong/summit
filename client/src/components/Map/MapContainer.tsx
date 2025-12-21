@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Main Map Container Component with Leaflet integration
  */

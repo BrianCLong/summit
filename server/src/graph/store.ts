@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { getDriver, runCypher } from './neo4j.js';
 import { GraphEntity, GraphEdge, EntityType, EdgeType, EpistemicMetadata, SourceReference } from './types.js';
 import { v4 as uuidv4 } from 'uuid';
@@ -40,7 +39,7 @@ export class GraphStore {
 
     await runCypher(query, params, {
       tenantId: node.tenantId,
-      caseId: (node as any)?.caseId,
+      caseId: (node as Record<string, unknown>)?.caseId as string | undefined,
       write: true,
     });
   }
@@ -79,7 +78,7 @@ export class GraphStore {
 
     await runCypher(query, params, {
       tenantId: edge.tenantId,
-      caseId: (edge as any)?.caseId,
+      caseId: (edge as Record<string, unknown>)?.caseId as string | undefined,
       write: true,
     });
   }
@@ -102,7 +101,7 @@ export class GraphStore {
   /**
    * Helper to deserialize Neo4j props back to TS object
    */
-  private mapNeo4jToEntity(props: any): GraphEntity {
+  private mapNeo4jToEntity(props: Record<string, unknown>): GraphEntity {
     return {
       globalId: props.globalId,
       tenantId: props.tenantId,
@@ -118,14 +117,14 @@ export class GraphStore {
           acc[key] = props[key];
         }
         return acc;
-      }, {} as any)
+      }, {} as Record<string, unknown>)
     };
   }
 
   /**
    * Query neighbors
    */
-  async getNeighbors(globalId: string, tenantId: string, edgeTypes: EdgeType[] = [], depth: number = 1): Promise<any[]> {
+  async getNeighbors(globalId: string, tenantId: string, edgeTypes: EdgeType[] = [], depth: number = 1): Promise<unknown[]> {
     const typeClause = edgeTypes.length > 0 ? `:${edgeTypes.join('|')}` : '';
     const query = `
       MATCH (n:GraphNode { globalId: $globalId, tenantId: $tenantId })-[r${typeClause}*1..${depth}]-(m)
@@ -157,9 +156,9 @@ export class GraphStore {
   /**
    * Expose raw Cypher execution for internal engines like CKP.
    */
-  async runCypher<T = any>(
+  async runCypher<T = unknown>(
     cypher: string,
-    params: Record<string, any>,
+    params: Record<string, unknown>,
     options: { tenantId?: string; caseId?: string; permissionsHash?: string; cacheTtlSeconds?: number; bypassCache?: boolean; write?: boolean } = {},
   ): Promise<T[]> {
     return runCypher<T>(cypher, params, options);

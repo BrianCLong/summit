@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useCallback, useEffect, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
@@ -491,7 +490,7 @@ export function EnhancedTriPaneView({
                         const entity = filteredData.entities.find(
                           e => e.id === viewportSync.graph.selectedEntityId
                         )
-                        if (!entity) {return null}
+                        if (!entity) return null
 
                         const connections = filteredData.relationships.filter(
                           r =>

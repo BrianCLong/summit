@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { neo } from '../db/neo4j.js';
 import logger from '../utils/logger.js';
 import { v4 as uuidv4 } from 'uuid';
@@ -15,7 +14,7 @@ export interface InteractionData {
   payload: string;
   method?: string;
   timestamp: Date;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }
 
 export interface AttackerProfile {

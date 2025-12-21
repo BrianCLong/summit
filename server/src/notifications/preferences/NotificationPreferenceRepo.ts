@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { pool } from '../../db/pg.js';
 import { UserPreferences } from '../types.js';
 import pino from 'pino';

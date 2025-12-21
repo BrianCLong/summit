@@ -1,5 +1,6 @@
-// @ts-nocheck
-jest.mock('../../config/logger', () => ({
+import { jest } from '@jest/globals';
+
+jest.mock('../../config/logger.js', () => ({
   __esModule: true,
   default: {
     child: () => ({

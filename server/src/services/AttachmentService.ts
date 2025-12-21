@@ -1,11 +1,14 @@
-// @ts-nocheck
 import { createWriteStream, promises as fs } from 'fs';
 import { pipeline } from 'stream/promises';
 import { createHash } from 'crypto';
 import * as path from 'path';
 import type { Readable } from 'stream';
-// @ts-ignore - provenance.ts is outside rootDir but required for shared functionality
-import { createProvenanceRecord } from '../../../packages/shared/provenance';
+
+export interface ProvenanceRecord {
+  sha256: string;
+  timestamp: Date;
+  [key: string]: unknown;
+}
 
 export interface AttachmentMetadata {
   filename: string;
@@ -15,7 +18,7 @@ export interface AttachmentMetadata {
   uploader?: string;
   licenseId?: string;
   policyTags: string[];
-  provenance: ReturnType<typeof createProvenanceRecord>;
+  provenance: ProvenanceRecord;
 }
 
 export class AttachmentService {
@@ -59,7 +62,12 @@ export class AttachmentService {
     const finalPath = path.join(this.baseDir, sha256);
     await fs.rename(tempPath, finalPath);
     const stats = await fs.stat(finalPath);
-    const provenance = createProvenanceRecord(sha256);
+    const provenance: ProvenanceRecord = {
+      sha256,
+      timestamp: new Date(),
+      uploader,
+      source: 'attachment-service',
+    };
     return {
       filename: path.basename(filename),
       mimeType,

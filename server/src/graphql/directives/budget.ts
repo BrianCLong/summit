@@ -1,6 +1,6 @@
-// @ts-nocheck
-import { GraphQLSchema, defaultFieldResolver } from 'graphql';
+import { GraphQLSchema, defaultFieldResolver, type GraphQLFieldResolver } from 'graphql';
 import { mapSchema, getDirective, MapperKind } from '@graphql-tools/utils';
+import type { GraphQLContext } from '../apollo-v5-server.js';
 
 export function budgetDirective(directiveName = 'budget') {
   return {
@@ -10,11 +10,12 @@ export function budgetDirective(directiveName = 'budget') {
         [MapperKind.OBJECT_FIELD]: (fieldConfig) => {
           const budget = getDirective(schema, fieldConfig, directiveName)?.[0];
           if (budget) {
-            const { resolve = defaultFieldResolver } = fieldConfig as any;
+            const { resolve = defaultFieldResolver } = fieldConfig;
+            const originalResolve = resolve as GraphQLFieldResolver<any, GraphQLContext>;
             (fieldConfig as any).resolve = async (
               source: any,
               args: any,
-              ctx: any,
+              ctx: GraphQLContext,
               info: any,
             ) => {
               const capUSD = Number(budget.capUSD);
@@ -32,7 +33,7 @@ export function budgetDirective(directiveName = 'budget') {
                   auditId: `audit-${Date.now()}`,
                 };
               }
-              return resolve(source, args, ctx, info);
+              return originalResolve(source, args, ctx, info);
             };
             return fieldConfig;
           }

@@ -1,6 +1,5 @@
-// @ts-nocheck
 import { PubSub } from 'graphql-subscriptions';
-// @ts-ignore - RedisPubSub type not exported
+// @ts-expect-error - RedisPubSub type not exported properly
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import Redis from 'ioredis';
 

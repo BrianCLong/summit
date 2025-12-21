@@ -1,10 +1,9 @@
-// @ts-nocheck
 /**
  * Enhanced Observability Metrics
  * Additional metrics for database connection pools, cache performance, and service health
  */
 
-import { Counter, Gauge, Histogram, Registry } from 'prom-client';
+import { Counter, Gauge, Histogram } from 'prom-client';
 import { registry } from '../monitoring/metrics.js';
 
 // ============================================================================

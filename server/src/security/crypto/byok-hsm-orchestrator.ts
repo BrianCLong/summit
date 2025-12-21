@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
   createCipheriv,
   createHash,
@@ -266,7 +265,11 @@ export class ByokHsmOrchestrator {
     return { status: 'healthy', nextRotationAt };
   }
 
-  private async wrapDataKey(dataKey: Buffer, key: KeyVersion) {
+  private async wrapDataKey(dataKey: Buffer, key: KeyVersion): Promise<{
+    wrappedDataKey: string;
+    wrapAuthTag: string;
+    wrapIv: string;
+  }> {
     const publicKey = await this.hsm.exportPublicKey(key);
     const wrappingKey = createHash('sha256').update(publicKey).digest();
     const wrapIv = createHash('sha1')
@@ -285,7 +288,7 @@ export class ByokHsmOrchestrator {
     };
   }
 
-  private validateGuardrails(guardrails: RotationGuardrails) {
+  private validateGuardrails(guardrails: RotationGuardrails): void {
     if (!guardrails.attestationToken || guardrails.attestationToken.length < 16) {
       throw new Error('Guardrail attestation token is missing or too short');
     }
@@ -299,7 +302,7 @@ export class ByokHsmOrchestrator {
     }
   }
 
-  private async logAudit(event: CryptoAuditEvent) {
+  private async logAudit(event: CryptoAuditEvent): Promise<void> {
     if (this.auditLogger) {
       await this.auditLogger.log(event);
     }

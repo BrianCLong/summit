@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { GraphStore } from '../store.js';
 import { EntityResolutionService } from './EntityResolution.js';
 import { FusionPayload } from './types.js';
@@ -29,7 +28,7 @@ export class FusionEngine {
 
       idMap.set(entity.externalId, resolution.globalId);
 
-      const graphNode: any = {
+      const graphNode: Record<string, unknown> = {
         globalId: resolution.globalId,
         tenantId,
         entityType: entity.entityType,

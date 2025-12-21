@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useEffect } from 'react';
 import {
   TextField,
@@ -18,8 +17,15 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 
+interface SimulationInput {
+  crisisType: string;
+  targetAudiences: string[];
+  keyNarratives: string[];
+  adversaryProfiles: string[];
+}
+
 interface ScenarioInputProps {
-  onRunSimulation: (input: any) => void;
+  onRunSimulation: (input: SimulationInput) => void;
   existingScenarios: Array<{
     id: string;
     crisisType: string;

@@ -1,9 +1,8 @@
-// @ts-nocheck
 import React, { useEffect } from 'react'
 import { Box, Typography } from '@mui/material'
 import $ from 'jquery'
 
-export default function GeospatialPanel() {
+export default function GeospatialPanel(): React.ReactElement {
   useEffect(() => {
     $('#map').on('zoom pan', () => {})
   }, [])

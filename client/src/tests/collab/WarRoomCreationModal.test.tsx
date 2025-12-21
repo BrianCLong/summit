@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { MockedProvider } from '@apollo/client/testing';

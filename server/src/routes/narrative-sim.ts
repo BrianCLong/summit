@@ -1,5 +1,4 @@
-// @ts-nocheck
-import express from 'express';
+import express, { Response, NextFunction } from 'express';
 import { z } from 'zod/v4';
 import { randomUUID } from 'node:crypto';
 import { requirePermission } from '../middleware/auth.js';
@@ -14,6 +13,7 @@ import type {
   SimulationConfig,
 } from '../narrative/types.js';
 import { isFeatureEnabled } from '../config/mvp1-features.js';
+import type { AuthenticatedRequest } from './types.js';
 
 const router = express.Router();
 const scenarioSimulator = new ScenarioSimulator();
@@ -205,7 +205,7 @@ router.post('/simulations', (req, res) => {
   }
 });
 
-router.post('/simulations/batch', async (req, res) => {
+router.post('/simulations/batch', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const payload = batchSimulationSchema.parse(req.body ?? {});
 
@@ -258,7 +258,7 @@ router.get('/simulations/:id', (req, res) => {
   res.json(state);
 });
 
-router.post('/simulations/:id/tick', async (req, res) => {
+router.post('/simulations/:id/tick', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { steps } = tickSchema.parse(req.body ?? {});
     const state = await narrativeSimulationManager.tick(req.params.id, steps);

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Pool, PoolClient } from 'pg';
 import { getPostgresPool } from '../config/database.js';
 import logger from '../utils/logger.js';

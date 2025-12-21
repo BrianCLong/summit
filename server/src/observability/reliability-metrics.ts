@@ -1,6 +1,5 @@
-// @ts-nocheck
 import { Counter, Gauge, Histogram, Summary } from 'prom-client';
-import { registry } from '../metrics';
+import { registry } from '../metrics.js';
 
 type ReliabilityEndpoint = 'ingest' | 'graph_query' | 'rag';
 

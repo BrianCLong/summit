@@ -1,8 +1,6 @@
-// @ts-nocheck
-import { Pool } from 'pg';
+import type { Pool } from 'pg';
 import { randomUUID as uuidv4 } from 'node:crypto';
-// @ts-ignore
-import { default as pino } from 'pino';
+import pino from 'pino';
 import {
   MediaUploadService,
   MediaMetadata,
@@ -10,7 +8,6 @@ import {
 } from './MediaUploadService.js';
 import { ExtractionJobService } from './ExtractionJobService.js';
 
-// @ts-ignore
 const logger = pino({ name: 'MultimodalDataService' });
 
 export interface MediaSource {
@@ -211,7 +208,13 @@ export class MultimodalDataService {
   async createMediaSource(
     metadata: MediaMetadata,
     userId?: string,
-    geospatialContext?: any,
+    geospatialContext?: {
+      latitude?: number;
+      longitude?: number;
+      altitude?: number;
+      accuracy?: number;
+      timestamp?: Date;
+    },
   ): Promise<MediaSource> {
     const id = uuidv4();
     const now = new Date();
@@ -305,7 +308,7 @@ export class MultimodalDataService {
         WHERE me.investigation_id = $1
       `;
 
-      const values: any[] = [investigationId];
+      const values: unknown[] = [investigationId];
       let paramCount = 1;
 
       if (filters.mediaType) {
@@ -471,7 +474,7 @@ export class MultimodalDataService {
         WHERE me.investigation_id = $1
       `;
 
-      const values: any[] = [investigationId];
+      const values: unknown[] = [investigationId];
       let paramCount = 1;
 
       if (filters.mediaType) {
@@ -527,7 +530,7 @@ export class MultimodalDataService {
   ): Promise<MultimodalEntity> {
     try {
       const updates: string[] = [];
-      const values: any[] = [];
+      const values: unknown[] = [];
       let paramCount = 0;
 
       if (input.entityType !== undefined) {
@@ -720,7 +723,7 @@ export class MultimodalDataService {
         JOIN multimodal_entities source ON cmm.source_entity_id = source.id
         WHERE source.investigation_id = $1
       `;
-      const values: any[] = [investigationId];
+      const values: unknown[] = [investigationId];
       let paramCount = 1;
 
       if (filters.matchType) {
@@ -765,7 +768,7 @@ export class MultimodalDataService {
     investigationId?: string;
     status?: string;
     limit?: number;
-  }): Promise<any[]> {
+  }): Promise<unknown[]> {
     if (!filters.investigationId) {
         return [];
     }
@@ -778,28 +781,28 @@ export class MultimodalDataService {
   /**
    * Get single extraction job
    */
-  async getExtractionJob(id: string): Promise<any | null> {
+  async getExtractionJob(id: string): Promise<unknown | null> {
     return this.extractionJobService.getExtractionJob(id);
   }
 
   /**
    * Start an extraction job
    */
-  async startExtractionJob(input: any, userId: string): Promise<any> {
+  async startExtractionJob(input: unknown, userId: string): Promise<unknown> {
     return this.extractionJobService.startExtractionJob(input, userId);
   }
 
   /**
    * Cancel an extraction job
    */
-  async cancelExtractionJob(id: string, userId: string): Promise<any> {
+  async cancelExtractionJob(id: string, _userId: string): Promise<unknown> {
     return this.extractionJobService.cancelExtractionJob(id);
   }
 
   /**
    * Validate extraction results
    */
-  async validateExtractionResults(jobId: string): Promise<any> {
+  async validateExtractionResults(_jobId: string): Promise<{ valid: boolean; issues: unknown[] }> {
     return { valid: true, issues: [] };
   }
 
@@ -808,7 +811,7 @@ export class MultimodalDataService {
   /**
    * Perform multimodal search across all entity types
    */
-  async multimodalSearch(input: {
+  async multimodalSearch(_input: {
     query: string;
     mediaTypes?: string[];
     entityTypes?: string[];
@@ -816,7 +819,12 @@ export class MultimodalDataService {
     includeCrossModal?: boolean;
     minConfidence?: number;
     limit?: number;
-  }): Promise<any> {
+  }): Promise<{
+    entities: unknown[];
+    mediaSources: unknown[];
+    crossModalMatches: unknown[];
+    totalResults: number;
+  }> {
     logger.warn('multimodalSearch not yet implemented');
     return {
       entities: [],
@@ -847,7 +855,7 @@ export class MultimodalDataService {
         WHERE me.investigation_id = $1
       `;
 
-      const values: any[] = [investigationId];
+      const values: unknown[] = [investigationId];
       let paramCount = 1;
 
       if (query.text && query.includeText !== false) {
@@ -919,7 +927,17 @@ export class MultimodalDataService {
   /**
    * Get analytics for investigation
    */
-  async getMultimodalAnalytics(investigationId: string): Promise<any> {
+  async getMultimodalAnalytics(_investigationId: string): Promise<{
+    totalMediaSources: number;
+    totalEntities: number;
+    totalCrossModalMatches: number;
+    averageConfidence: number;
+    mediaTypeDistribution: Record<string, unknown>;
+    entityTypeDistribution: Record<string, unknown>;
+    extractionMethodDistribution: Record<string, unknown>;
+    verificationRate: number;
+    qualityScore: number;
+  }> {
     return {
       totalMediaSources: 0,
       totalEntities: 0,
@@ -956,11 +974,11 @@ export class MultimodalDataService {
   /**
    * Find duplicate entities
    */
-  async findDuplicateEntities(filters: {
+  async findDuplicateEntities(_filters: {
     investigationId?: string;
     similarity?: number;
     limit?: number;
-  }): Promise<any[]> {
+  }): Promise<unknown[]> {
     return [];
   }
 
@@ -968,11 +986,15 @@ export class MultimodalDataService {
    * Cleanup duplicate entities
    */
   async cleanupDuplicateEntities(
-    investigationId: string,
-    similarity: number,
-    autoMerge: boolean,
-    userId: string,
-  ): Promise<any> {
+    _investigationId: string,
+    _similarity: number,
+    _autoMerge: boolean,
+    _userId: string,
+  ): Promise<{
+    duplicatesFound: number;
+    entitiesMerged: number;
+    entitiesDeleted: number;
+  }> {
     return {
       duplicatesFound: 0,
       entitiesMerged: 0,
@@ -985,7 +1007,7 @@ export class MultimodalDataService {
   /**
    * Upload a new media source
    */
-  async uploadMediaSource(upload: any, userId: string): Promise<MediaSource> {
+  async uploadMediaSource(upload: unknown, userId: string): Promise<MediaSource> {
     try {
         const metadata = await this.mediaUploadService.uploadMedia(upload, userId);
         return this.createMediaSource(metadata, userId);
@@ -1020,7 +1042,7 @@ export class MultimodalDataService {
    */
   async updateMediaMetadata(
     id: string,
-    metadata: any,
+    metadata: Record<string, unknown>,
     userId: string,
   ): Promise<MediaSource> {
     try {
@@ -1067,8 +1089,16 @@ export class MultimodalDataService {
    * Create a multimodal relationship
    */
   async createMultimodalRelationship(
-    input: any,
-    userId: string,
+    input: {
+      sourceEntityId: string;
+      targetEntityId: string;
+      matchType: string;
+      confidence: number;
+      algorithm: string;
+      explanation?: Record<string, unknown>;
+      similarityScore?: number;
+    },
+    _userId: string,
   ): Promise<CrossModalMatch> {
     const id = uuidv4();
     try {
@@ -1102,7 +1132,11 @@ export class MultimodalDataService {
    */
   async updateMultimodalRelationship(
     id: string,
-    input: any,
+    input: {
+      confidence?: number;
+      explanation?: Record<string, unknown>;
+      similarityScore?: number;
+    },
     userId: string,
   ): Promise<CrossModalMatch> {
     try {
@@ -1160,8 +1194,8 @@ export class MultimodalDataService {
    * Compute semantic clusters
    */
   async computeSemanticClusters(
-    investigationId: string,
-    algorithm?: string,
+    _investigationId: string,
+    _algorithm?: string,
   ): Promise<SemanticCluster[]> {
     logger.warn('computeSemanticClusters not yet implemented');
     return [];
@@ -1183,7 +1217,7 @@ export class MultimodalDataService {
     }
   }
 
-  private mapRowToMediaSource(row: any): MediaSource {
+  private mapRowToMediaSource(row: Record<string, unknown>): MediaSource {
     return {
       id: row.id,
       uri: row.uri,
@@ -1213,7 +1247,7 @@ export class MultimodalDataService {
     };
   }
 
-  private mapRowToMultimodalEntity(row: any): MultimodalEntity {
+  private mapRowToMultimodalEntity(row: Record<string, unknown>): MultimodalEntity {
     return {
       id: row.id,
       investigationId: row.investigation_id,
@@ -1246,7 +1280,7 @@ export class MultimodalDataService {
     };
   }
 
-  private mapRowToCrossModalMatch(row: any): CrossModalMatch {
+  private mapRowToCrossModalMatch(row: Record<string, unknown>): CrossModalMatch {
     return {
       id: row.id,
       sourceEntityId: row.source_entity_id,

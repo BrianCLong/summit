@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * CSV Connector - S3/Local CSV ingestion with mapping support
  * Supports large files (streaming) and parallel processing
@@ -30,13 +29,13 @@ export interface MappingConfig {
 
 export interface EntityMapping {
   kind: string;
-  filter?: Record<string, any>;
+  filter?: Record<string, unknown>;
   idField: string;
   fields: {
     [graphqlField: string]: {
       csvColumn: string;
       transform?: string;
-      default?: any;
+      default?: unknown;
     };
   };
   labels?: string[] | { csvColumn: string };
@@ -198,20 +197,32 @@ export class CSVConnector {
       externalId?: string;
       kind: string;
       labels: string[];
-      properties: Record<string, any>;
+      properties: Record<string, unknown>;
     }>;
     relationships: Array<{
       fromExternalId: string;
       toExternalId: string;
       relationshipType: string;
-      properties?: Record<string, any>;
+      properties?: Record<string, unknown>;
       confidence: number;
       source?: string;
     }>;
   }> {
     return new Promise((resolve, reject) => {
-      const entities: any[] = [];
-      const relationships: any[] = [];
+      const entities: Array<{
+        externalId?: string;
+        kind: string;
+        labels: string[];
+        properties: Record<string, unknown>;
+      }> = [];
+      const relationships: Array<{
+        fromExternalId: string;
+        toExternalId: string;
+        relationshipType: string;
+        properties?: Record<string, unknown>;
+        confidence: number;
+        source?: string;
+      }> = [];
       const seenEntities = new Set<string>();
 
       const parser = parse({
@@ -224,7 +235,7 @@ export class CSVConnector {
       const stream = createReadStream(filePath);
 
       parser.on('readable', () => {
-        let record;
+        let record: Record<string, string> | null;
         while ((record = parser.read()) !== null) {
           try {
             // Process entity mappings
@@ -248,7 +259,7 @@ export class CSVConnector {
               seenEntities.add(entityKey);
 
               // Map properties
-              const properties: Record<string, any> = {};
+              const properties: Record<string, unknown> = {};
               for (const [graphqlField, mapping] of Object.entries(entityMap.fields)) {
                 const value = record[mapping.csvColumn];
                 if (value !== undefined && value !== '') {
@@ -294,7 +305,7 @@ export class CSVConnector {
                   confidence = parseFloat(record[relMap.confidence.csvColumn]) || 1.0;
                 }
 
-                const properties: Record<string, any> = {};
+                const properties: Record<string, unknown> = {};
                 if (relMap.properties) {
                   for (const [key, propMap] of Object.entries(relMap.properties)) {
                     const value = record[propMap.csvColumn];
@@ -337,7 +348,7 @@ export class CSVConnector {
   /**
    * Check if record matches filter criteria
    */
-  private matchesFilter(record: any, filter: Record<string, any>): boolean {
+  private matchesFilter(record: Record<string, string>, filter: Record<string, unknown>): boolean {
     for (const [field, expectedValue] of Object.entries(filter)) {
       if (record[field] !== expectedValue) {
         return false;
@@ -349,7 +360,7 @@ export class CSVConnector {
   /**
    * Apply transformation to value
    */
-  private applyTransform(value: any, transform: string): any {
+  private applyTransform(value: string, transform: string): unknown {
     switch (transform) {
       case 'uppercase':
         return String(value).toUpperCase();

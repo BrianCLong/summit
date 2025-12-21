@@ -1,19 +1,23 @@
-// @ts-nocheck
 // server/src/services/IntelGraphService.test.ts
-import { IntelGraphService } from './IntelGraphService';
-import { getNeo4jDriver } from '../config/database';
+import { IntelGraphService } from './IntelGraphService.js';
+import { getNeo4jDriver } from '../config/database.js';
 import { v4 as uuidv4 } from 'uuid';
 
 // Mock the database driver
-jest.mock('../config/database');
+jest.mock('../config/database.js');
 jest.mock('uuid');
 
 const mockGetNeo4jDriver = getNeo4jDriver as jest.Mock;
 const mockUuidv4 = uuidv4 as jest.Mock;
 
 describe('IntelGraphService', () => {
-  let mockSession;
-  let mockDriver;
+  let mockSession: {
+    run: jest.Mock;
+    close: jest.Mock;
+  };
+  let mockDriver: {
+    session: jest.Mock;
+  };
 
   beforeEach(() => {
     // Reset the service instance before each test to ensure isolation

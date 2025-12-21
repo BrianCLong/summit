@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { DoclingBuildPipeline } from '../docling-build-pipeline';
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 

@@ -1,7 +1,8 @@
-import express from 'express';
+import express, { Response } from 'express';
 import { NotificationService } from '../notifications/NotificationService.js';
 import { MessagingService } from '../messaging/MessagingService.js';
 import { UserPreferences } from '../notifications/types.js';
+import type { AuthenticatedRequest } from './types.js';
 
 const router = express.Router();
 
@@ -16,8 +17,7 @@ const getServices = (req: express.Request) => {
 
 // --- Preferences ---
 
-router.get('/preferences', async (req, res) => {
-  // @ts-ignore
+router.get('/preferences', async (req: AuthenticatedRequest, res: Response) => {
   const userId = req.user?.id; // Assuming auth middleware populates this
   if (!userId) return res.status(401).send('Unauthorized');
 
@@ -31,8 +31,7 @@ router.get('/preferences', async (req, res) => {
   }
 });
 
-router.post('/preferences', async (req, res) => {
-  // @ts-ignore
+router.post('/preferences', async (req: AuthenticatedRequest, res: Response) => {
   const userId = req.user?.id;
   if (!userId) return res.status(401).send('Unauthorized');
 
@@ -49,8 +48,7 @@ router.post('/preferences', async (req, res) => {
 
 // --- Messaging ---
 
-router.post('/messages', async (req, res) => {
-  // @ts-ignore
+router.post('/messages', async (req: AuthenticatedRequest, res: Response) => {
   const userId = req.user?.id;
   if (!userId) return res.status(401).send('Unauthorized');
 
@@ -69,8 +67,7 @@ router.post('/messages', async (req, res) => {
   }
 });
 
-router.get('/messages/:otherUserId', async (req, res) => {
-  // @ts-ignore
+router.get('/messages/:otherUserId', async (req: AuthenticatedRequest, res: Response) => {
   const userId = req.user?.id;
   if (!userId) return res.status(401).send('Unauthorized');
 

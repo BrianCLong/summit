@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Job } from 'pg-boss';
 import { SOC2ComplianceService } from '../../services/SOC2ComplianceService';
 import { SigningService } from '../../services/SigningService';
@@ -10,6 +9,10 @@ import { ComplianceMonitoringService } from '../../services/ComplianceMonitoring
 import { EventSourcingService } from '../../services/EventSourcingService';
 import { UserRepository } from '../../data/UserRepository';
 import { getPostgresPool } from '../../config/database';
+
+interface SOC2JobPayload {
+  [key: string]: unknown;
+}
 
 export const JOB_NAME = 'generate-soc2-evidence';
 
@@ -26,7 +29,7 @@ const storageService = new WormStorageService();
  * Handles the automated generation of SOC2 evidence packets.
  * This job is scheduled to run monthly.
  */
-export default async function handle(job: Job<any>) {
+export default async function handle(job: Job<SOC2JobPayload>) {
   const tracer = getTracer('soc2-evidence-job');
   const parentSpan = tracer.startSpan('generate-soc2-evidence-job');
 

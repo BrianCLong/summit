@@ -1,5 +1,5 @@
-// @ts-nocheck
-import { AdvancedAuditSystem } from '../../audit/advanced-audit-system';
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
+import { AdvancedAuditSystem } from '../../audit/advanced-audit-system.js';
 import { Pool } from 'pg';
 import Redis from 'ioredis';
 import pino from 'pino';

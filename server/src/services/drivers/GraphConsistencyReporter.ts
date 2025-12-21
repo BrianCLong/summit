@@ -1,8 +1,7 @@
-// @ts-nocheck
-import { GraphConsistencyService } from '../GraphConsistencyService';
+import { GraphConsistencyService } from '../GraphConsistencyService.js';
 import fs from 'fs/promises';
 import path from 'path';
-import logger from '../config/logger';
+import logger from '../config/logger.js';
 
 export class GraphConsistencyReporter {
   constructor(private service: GraphConsistencyService = GraphConsistencyService.getInstance()) {}

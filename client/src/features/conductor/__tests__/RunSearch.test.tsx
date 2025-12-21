@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import RunSearch from '../RunSearch';
@@ -6,7 +5,7 @@ import { useAuthorization } from '../../../auth/withAuthorization';
 
 jest.mock('../../../auth/withAuthorization');
 
-const mockedUseAuthorization = useAuthorization as jest.Mock;
+const mockedUseAuthorization = useAuthorization as jest.MockedFunction<typeof useAuthorization>;
 const originalFetch = global.fetch;
 
 describe('RunSearch', () => {
@@ -28,16 +27,17 @@ describe('RunSearch', () => {
     const mockFetch = jest.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve({ data: { searchRuns: [] } }),
-      }),
+      } as Response),
     );
-    global.fetch = mockFetch as any;
+    global.fetch = mockFetch as typeof global.fetch;
 
     render(<RunSearch />);
 
     fireEvent.click(screen.getByTestId('run-search-submit'));
 
     await waitFor(() => expect(mockFetch).toHaveBeenCalled());
-    const body = JSON.parse((mockFetch.mock.calls[0][1] as any).body);
+    const requestInit = mockFetch.mock.calls[0][1] as RequestInit;
+    const body = JSON.parse(requestInit.body as string);
     expect(body.query).toContain('"tenant":"tenant-scope"');
   });
 
@@ -49,7 +49,7 @@ describe('RunSearch', () => {
     });
 
     const mockFetch = jest.fn();
-    global.fetch = mockFetch as any;
+    global.fetch = mockFetch as typeof global.fetch;
 
     render(<RunSearch />);
 

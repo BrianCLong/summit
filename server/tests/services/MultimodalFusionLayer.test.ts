@@ -1,12 +1,11 @@
-// @ts-nocheck
 import MultimodalFusionLayer from '../../src/services/MultimodalFusionLayer.js';
 import { describe, test, expect } from '@jest/globals';
 
 describe('MultimodalFusionLayer', () => {
   const fusionLayer = new MultimodalFusionLayer({ embeddingSize: 16, similarityThreshold: 0.6 });
 
-  test('generates multimodal embeddings with fused confidence', () => {
-    const bundle = fusionLayer.generateEntityEmbeddings(
+  test('generates multimodal embeddings with fused confidence', async () => {
+    const bundle = await fusionLayer.generateEntityEmbeddings(
       {
         id: 'entity-1',
         label: 'Test Entity',
@@ -31,8 +30,8 @@ describe('MultimodalFusionLayer', () => {
     expect(confidence.breakdown.modalities.TEXT).toBeDefined();
   });
 
-  test('infers correlations when embeddings align', () => {
-    const bundle = fusionLayer.generateEntityEmbeddings({ id: 'a', label: 'Alpha', confidence: 0.85 }, []);
+  test('infers correlations when embeddings align', async () => {
+    const bundle = await fusionLayer.generateEntityEmbeddings({ id: 'a', label: 'Alpha', confidence: 0.85 }, []);
     const entityA = {
       id: 'a',
       label: 'Alpha',

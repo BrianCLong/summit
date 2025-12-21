@@ -4,18 +4,17 @@
  * Demonstrates time-travel queries and bitemporal analysis
  */
 
-// @ts-ignore - pg type imports
 import { Pool } from 'pg';
 import {
   snapshotAtTime,
   getEntityHistory,
   getEntitiesInTimeRange,
   temporalDistance,
-} from './helpers';
-import { CanonicalPerson } from './entities/Person';
-import { CanonicalOrganization } from './entities/Organization';
-import { CanonicalCase } from './entities/Case';
-import { BaseCanonicalEntity } from './types';
+} from './helpers.js';
+import { CanonicalPerson } from './entities/Person.js';
+import { CanonicalOrganization } from './entities/Organization.js';
+import { CanonicalCase } from './entities/Case.js';
+import { BaseCanonicalEntity } from './types.js';
 
 /**
  * Query 1: "Show me all people as they were known on January 1, 2024"

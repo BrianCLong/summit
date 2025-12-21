@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { hideBin } from 'yargs/helpers';
 import yargs from 'yargs/yargs';
 import logger from '../config/logger.js';
@@ -6,12 +5,14 @@ import { getPostgresPool } from '../db/postgres.js';
 import { CaseOverviewService } from '../cases/overview/CaseOverviewService.js';
 
 interface CommandArgs {
+  _: (string | number)[];
   limit: number;
   caseId?: string;
   tenantId?: string;
+  $0: string;
 }
 
-async function run() {
+async function run(): Promise<void> {
   const argv = await yargs(hideBin(process.argv))
     .scriptName('case-overview-cache')
     .command<CommandArgs>(

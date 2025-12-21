@@ -1,7 +1,6 @@
-// @ts-nocheck
 // Evidence Export and Provenance API Routes
 import express from 'express';
-import crypto from 'crypto';
+import { createHash, createHmac, randomBytes, randomUUID } from 'crypto';
 import jwt from 'jsonwebtoken';
 import { prometheusConductorMetrics } from '../observability/prometheus';
 import { getPostgresPool } from '../../db/postgres.js';
@@ -72,9 +71,8 @@ router.post(
       const receipt = buildProvenanceReceipt(run, events, artifacts);
       const receiptJson = canonicalStringify(receipt);
       const receiptBuffer = Buffer.from(receiptJson);
-      const artifactId = crypto.randomUUID();
-      const sha256Hash = crypto
-        .createHash('sha256')
+      const artifactId = randomUUID();
+      const sha256Hash = createHash('sha256')
         .update(receiptBuffer)
         .digest('hex');
 
@@ -534,7 +532,7 @@ async function generateEvidenceBundle(
         name: 'execution.log',
         content: `[${new Date().toISOString()}] Starting execution...\n[${new Date().toISOString()}] Completed successfully`,
         contentType: 'text/plain',
-        hash: crypto.createHash('sha256').update('log-content').digest('hex'),
+        hash: createHash('sha256').update('log-content').digest('hex'),
         size: 125,
         timestamp: new Date(),
         metadata: { level: 'info', source: 'maestro-conductor' },
@@ -589,7 +587,7 @@ async function generateEvidenceBundle(
         2,
       ),
       contentType: 'application/json',
-      hash: crypto.createHash('sha256').update('sbom-content').digest('hex'),
+      hash: createHash('sha256').update('sbom-content').digest('hex'),
       size: 512,
       timestamp: new Date(),
       metadata: { format: 'CycloneDX', version: '1.4' },
@@ -640,7 +638,7 @@ async function generateEvidenceBundle(
     signature: undefined,
     hash: undefined,
   });
-  bundle.hash = crypto.createHash('sha256').update(bundleContent).digest('hex');
+  bundle.hash = createHash('sha256').update(bundleContent).digest('hex');
 
   return bundle;
 }

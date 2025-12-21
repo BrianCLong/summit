@@ -1,4 +1,3 @@
-// @ts-nocheck
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -42,7 +41,8 @@ export class SynonymService {
         logger.warn(`Synonym file not found at ${configPath}`);
       }
     } catch (err) {
-      logger.error({ err }, 'Failed to load synonyms');
+      const error = err instanceof Error ? err : new Error(String(err));
+      logger.error({ err: error }, 'Failed to load synonyms');
     }
   }
 

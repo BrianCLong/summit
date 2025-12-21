@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Query Complexity Plugin for Apollo Server
  * Analyzes GraphQL queries and rejects queries that exceed complexity limits
@@ -11,6 +10,7 @@ import { GraphQLError } from 'graphql';
 import pino from 'pino';
 import { rateLimiter } from '../../services/RateLimiter.js';
 import { cfg } from '../../config.js';
+import type { GraphQLContext } from '../apollo-v5-server.js';
 
 const logger = pino();
 
@@ -30,7 +30,7 @@ export interface QueryComplexityOptions {
   /**
    * Function to dynamically adjust max complexity based on user role
    */
-  getMaxComplexityForUser?: (context: any) => number;
+  getMaxComplexityForUser?: (context: GraphQLContext) => number;
 
   /**
    * Whether to enforce complexity limits
@@ -52,7 +52,7 @@ const DEFAULT_MAX_COMPLEXITY = 1000;
  */
 export function createQueryComplexityPlugin(
   options: QueryComplexityOptions = {}
-): ApolloServerPlugin {
+): ApolloServerPlugin<GraphQLContext> {
   const {
     maximumComplexity = DEFAULT_MAX_COMPLEXITY,
     logComplexity = process.env.NODE_ENV !== 'production',
@@ -62,7 +62,7 @@ export function createQueryComplexityPlugin(
   } = options;
 
   return {
-    async requestDidStart(): Promise<GraphQLRequestListener<any>> {
+    async requestDidStart(): Promise<GraphQLRequestListener<GraphQLContext>> {
       return {
         async didResolveOperation({ request, document, schema, contextValue }) {
           try {

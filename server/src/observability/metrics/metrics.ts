@@ -1,6 +1,6 @@
-// @ts-nocheck
 import { registry } from '../metrics.js';
-import { Counter, Histogram, Gauge, Metric } from 'prom-client';
+import { Counter, Histogram, Gauge } from 'prom-client';
+import type { Metric } from 'prom-client';
 
 export interface Metrics {
   incrementCounter(name: string, labels?: Record<string, string>, value?: number): void;

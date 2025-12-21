@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import axios, { AxiosInstance } from 'axios';
 import { regionProbeLatencyMs, regionHealthStatus } from '../../monitoring/metrics.js';
 
@@ -32,7 +30,7 @@ export class MultiRegionProber {
    * Probes all configured regions and returns their health status.
    */
   public async probeAll(): Promise<RegionHealthStatus[]> {
-    const promises = this.regions.map(region => this.probeRegion(region));
+    const promises = this.regions.map((region) => this.probeRegion(region));
     return Promise.all(promises);
   }
 
@@ -42,9 +40,9 @@ export class MultiRegionProber {
   public async probeRegion(region: RegionConfig): Promise<RegionHealthStatus> {
     const start = Date.now();
     try {
-      const response = await this.client.get(region.endpoint, {
+      await this.client.get(region.endpoint, {
         timeout: region.timeoutMs || 5000,
-        validateStatus: (status) => status >= 200 && status < 300
+        validateStatus: (status) => status >= 200 && status < 300,
       });
       const duration = Date.now() - start;
 
@@ -59,8 +57,10 @@ export class MultiRegionProber {
         latencyMs: duration,
         lastChecked: new Date(),
       };
-    } catch (error: any) {
+    } catch (error) {
       const duration = Date.now() - start;
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
 
       // Update Prometheus metrics
       regionProbeLatencyMs.set({ region_id: region.id, region_name: region.name }, duration);
@@ -72,7 +72,7 @@ export class MultiRegionProber {
         isHealthy: false,
         latencyMs: duration,
         lastChecked: new Date(),
-        error: error.message || 'Unknown error',
+        error: errorMessage || 'Unknown error',
       };
     }
   }

@@ -1,4 +1,3 @@
-// @ts-nocheck
 // =============================================
 // File: apps/web/src/lib/maestroApi.ts
 // =============================================
@@ -84,7 +83,7 @@ export class MaestroApi {
 
   constructor(opts: MaestroApiOptions = {}) {
     this.baseUrl =
-      opts.baseUrl || (import.meta as any).env?.VITE_MAESTRO_BASE_URL || ''
+      opts.baseUrl || (import.meta.env as { VITE_MAESTRO_BASE_URL?: string })?.VITE_MAESTRO_BASE_URL || ''
     this.mock = Boolean(opts.mock ?? !this.baseUrl)
   }
 

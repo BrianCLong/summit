@@ -1,13 +1,10 @@
-// @ts-nocheck
 import Redis from 'ioredis';
 import * as dotenv from 'dotenv';
-// @ts-ignore
-import { default as pino } from 'pino';
+import pino from 'pino';
 
 dotenv.config();
 
-// @ts-ignore
-const logger: pino.Logger = pino();
+const logger = pino();
 
 const REDIS_HOST = process.env.REDIS_HOST || 'redis';
 const REDIS_PORT = parseInt(process.env.REDIS_PORT || '6379', 10);
@@ -22,9 +19,9 @@ if (
 }
 const REDIS_PASSWORD = process.env.REDIS_PASSWORD || 'devpassword';
 
-let redisClient: Redis;
+import { telemetry } from '../lib/telemetry/comprehensive-telemetry.js';
 
-import { telemetry } from '../lib/telemetry/comprehensive-telemetry';
+let redisClient: Redis;
 
 export function getRedisClient(): Redis {
   if (!redisClient) {
@@ -119,6 +116,6 @@ export async function closeRedisClient(): Promise<void> {
   if (redisClient) {
     await redisClient.quit();
     logger.info('Redis client closed.');
-    redisClient = null; // Clear the client instance
+    redisClient = null as any; // Clear the client instance
   }
 }

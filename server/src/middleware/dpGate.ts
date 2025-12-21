@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Request, Response, NextFunction } from 'express';
 import { PrivacyBudgetLedger, LaplaceMechanism } from '../services/dp-runtime/mechanisms';
 import { AppError } from '../lib/errors';

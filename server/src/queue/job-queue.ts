@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { EventEmitter } from 'node:events';
 import { JobsOptions, Queue, QueueEvents, QueueScheduler, Worker } from 'bullmq';
 import type { QueueBaseOptions, WorkerOptions, Job } from 'bullmq';

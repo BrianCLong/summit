@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -26,7 +25,55 @@ interface SearchSuggestion {
   id: string;
   text: string;
   type: 'entity' | 'case' | 'recent' | 'suggestion';
-  metadata?: any;
+  metadata?: {
+    type?: string;
+    status?: string;
+  };
+}
+
+// Extend Window interface for speech recognition
+declare global {
+  interface Window {
+    webkitSpeechRecognition: typeof SpeechRecognition;
+    SpeechRecognition: typeof SpeechRecognition;
+  }
+
+  class SpeechRecognition extends EventTarget {
+    continuous: boolean;
+    interimResults: boolean;
+    lang: string;
+    start(): void;
+    stop(): void;
+    abort(): void;
+    onerror: ((this: SpeechRecognition, ev: Event) => void) | null;
+    onend: ((this: SpeechRecognition, ev: Event) => void) | null;
+    onresult:
+      | ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => void)
+      | null;
+    onstart: ((this: SpeechRecognition, ev: Event) => void) | null;
+  }
+
+  interface SpeechRecognitionEvent extends Event {
+    results: SpeechRecognitionResultList;
+  }
+
+  interface SpeechRecognitionResultList {
+    length: number;
+    item(index: number): SpeechRecognitionResult;
+    [index: number]: SpeechRecognitionResult;
+  }
+
+  interface SpeechRecognitionResult {
+    length: number;
+    item(index: number): SpeechRecognitionAlternative;
+    [index: number]: SpeechRecognitionAlternative;
+    isFinal: boolean;
+  }
+
+  interface SpeechRecognitionAlternative {
+    transcript: string;
+    confidence: number;
+  }
 }
 
 export function SearchBar({
@@ -115,7 +162,8 @@ export function SearchBar({
         // Implementation would require additional QR scanning library
         console.log('QR Scanner opened', stream);
       } else {
-        new BarcodeDetector();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        new (window as any).BarcodeDetector();
         // Implementation for native barcode detection
         console.log('Native barcode detector available');
       }

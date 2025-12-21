@@ -1,4 +1,3 @@
-// @ts-nocheck
 // GraphQL Resolvers for MoE Conductor
 // Integrates the Conductor system with GraphQL API
 

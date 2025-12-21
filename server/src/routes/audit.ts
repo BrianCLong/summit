@@ -1,5 +1,5 @@
-// @ts-nocheck
-import { Router } from 'express';
+import { Router, Response } from 'express';
+import type { AuthenticatedRequest } from './types.js';
 import archiver from 'archiver';
 import { getPostgresPool } from '../db/postgres.js';
 import { ProvenanceRepo } from '../repos/ProvenanceRepo.js';
@@ -11,7 +11,7 @@ export const auditRouter = Router();
 
 // --- Legacy Incident/Investigation Audit Routes ---
 
-auditRouter.get('/incidents/:id/audit-bundle.zip', async (req, res) => {
+auditRouter.get('/incidents/:id/audit-bundle.zip', async (req: AuthenticatedRequest, res: Response) => {
   const tenant = String(
     (req.headers['x-tenant-id'] as any) ||
       (req.headers['x-tenant'] as any) ||
@@ -76,7 +76,7 @@ auditRouter.get('/incidents/:id/audit-bundle.zip', async (req, res) => {
   await archive.finalize();
 });
 
-auditRouter.get('/investigations/:id/audit-bundle.zip', async (req, res) => {
+auditRouter.get('/investigations/:id/audit-bundle.zip', async (req: AuthenticatedRequest, res: Response) => {
   const tenant = String(
     (req.headers['x-tenant-id'] as any) ||
       (req.headers['x-tenant'] as any) ||
@@ -152,7 +152,7 @@ auditRouter.get(
   '/',
   ensureAuthenticated,
   requirePermission('audit:read'), // Admin or compliance officer only
-  async (req, res) => {
+  async (req: AuthenticatedRequest, res: Response) => {
     try {
       const {
         startTime,
@@ -176,7 +176,7 @@ auditRouter.get(
         correlationIds: correlationIds ? (correlationIds as string).split(',') : undefined,
         limit: limit ? parseInt(limit as string, 10) : 50,
         offset: offset ? parseInt(offset as string, 10) : 0,
-        tenantIds: [req.user.tenantId || 'system'], // Scoped to tenant
+        tenantIds: [req.user?.tenantId || 'system'], // Scoped to tenant
       });
 
       res.json({ data: events });
@@ -192,7 +192,7 @@ auditRouter.get(
   '/compliance-report',
   ensureAuthenticated,
   requirePermission('audit:report'),
-  async (req, res) => {
+  async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { framework, startTime, endTime } = req.query;
 
@@ -219,7 +219,7 @@ auditRouter.get(
   '/integrity',
   ensureAuthenticated,
   requirePermission('audit:verify'),
-  async (req, res) => {
+  async (req: AuthenticatedRequest, res: Response) => {
     try {
        const { startTime, endTime } = req.query;
 

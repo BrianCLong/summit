@@ -1,4 +1,3 @@
-// @ts-nocheck
 import express from 'express';
 import WebSocket from 'ws';
 import { z } from 'zod';

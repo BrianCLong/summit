@@ -1,12 +1,11 @@
-// @ts-nocheck
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 
 import { metrics } from '@opentelemetry/api';
 
-import { CostSample, RunCostSummary } from './types';
-import { IntelGraphClient } from '../intelgraph/client';
+import { CostSample, RunCostSummary } from './types.js';
+import { IntelGraphClient } from '../intelgraph/client.js';
 
 export interface LLMUsage {
   model: string;

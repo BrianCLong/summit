@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createHash } from 'crypto';
 import { getRedisClient } from '../../config/database.js';
 import { provenanceLedger } from '../../provenance/ledger.js';
@@ -19,7 +18,10 @@ export class TenantLimitEnforcer {
    * Track active seats for a tenant and enforce the seat cap derived from quota tier.
    * Uses Redis sets keyed by day to avoid unbounded growth; falls back to allow when Redis is unavailable.
    */
-  async enforceSeatCap(context: TenantContext, actorId?: string): Promise<SeatCheckResult> {
+  async enforceSeatCap(
+    context: TenantContext,
+    actorId?: string,
+  ): Promise<SeatCheckResult> {
     const quota = QuotaManager.getQuotaForTenant(context.tenantId);
     const redis = getRedisClient();
 
@@ -96,7 +98,7 @@ export class TenantLimitEnforcer {
   private async recordLimitEvent(
     context: Pick<TenantContext, 'tenantId'> & Partial<TenantContext>,
     action: string,
-    payload: Record<string, any>,
+    payload: Record<string, unknown>,
   ) {
     try {
       await provenanceLedger.appendEntry({

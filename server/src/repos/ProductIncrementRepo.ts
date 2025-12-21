@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Product Increment Repository - Production persistence layer
  * Handles product increment/sprint management with PostgreSQL
@@ -11,7 +10,6 @@
  * - Metrics Snapshots
  */
 
-// @ts-ignore - pg type imports
 import { Pool, PoolClient } from 'pg';
 import { randomUUID as uuidv4 } from 'crypto';
 import logger from '../config/logger.js';
@@ -483,8 +481,8 @@ export class ProductIncrementRepo {
         payload: { name: input.name, version: input.version },
         metadata: {},
       })
-      .catch((err) =>
-        repoLogger.error('Failed to record increment creation', err),
+      .catch((err: unknown) =>
+        repoLogger.error('Failed to record increment creation', err instanceof Error ? err.message : String(err)),
       );
 
     return increment;
@@ -560,8 +558,8 @@ export class ProductIncrementRepo {
           payload: { updates: input },
           metadata: {},
         })
-        .catch((err) =>
-          repoLogger.error('Failed to record increment update', err),
+        .catch((err: unknown) =>
+          repoLogger.error('Failed to record increment update', err instanceof Error ? err.message : String(err)),
         );
 
       return increment;
@@ -598,8 +596,8 @@ export class ProductIncrementRepo {
             payload: {},
             metadata: {},
           })
-          .catch((err) =>
-            repoLogger.error('Failed to record increment deletion', err),
+          .catch((err: unknown) =>
+            repoLogger.error('Failed to record increment deletion', err instanceof Error ? err.message : String(err)),
           );
         return true;
       }

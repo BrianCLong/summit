@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Redis } from 'ioredis';
 import * as Y from 'yjs';
 

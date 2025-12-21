@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { defaultFieldResolver, GraphQLSchema } from 'graphql';
 import { getDirective, mapSchema, MapperKind } from '@graphql-tools/utils';
 

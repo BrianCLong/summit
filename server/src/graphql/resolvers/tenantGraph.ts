@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Tenant Graph Slice v0 - Resolvers
  * Multi-tenant graph query API with provenance tracking

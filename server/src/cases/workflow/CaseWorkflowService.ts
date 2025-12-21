@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Case Workflow Service - Main business logic layer for case workflow engine
  * Integrates state machine, SLA tracking, tasks, participants, and approvals
@@ -290,7 +289,7 @@ export class CaseWorkflowService {
   async completeTask(
     taskId: string,
     userId: string,
-    resultData?: Record<string, any>,
+    resultData?: Record<string, unknown>,
   ): Promise<CaseTask | null> {
     const task = await this.taskRepo.completeTask(taskId, userId, resultData);
 
@@ -335,7 +334,7 @@ export class CaseWorkflowService {
   /**
    * Get overdue tasks for a case
    */
-  async getOverdueTasks(caseId: string) {
+  async getOverdueTasks(caseId: string): Promise<CaseTask[]> {
     return this.taskRepo.getOverdueTasks(caseId);
   }
 
@@ -344,7 +343,7 @@ export class CaseWorkflowService {
   /**
    * Add participant to case
    */
-  async addParticipant(input: CaseParticipantInput) {
+  async addParticipant(input: CaseParticipantInput): Promise<unknown> {
     const participant = await this.participantRepo.addParticipant(input);
 
     await this.emitEvent({
@@ -367,7 +366,7 @@ export class CaseWorkflowService {
     userId: string,
     roleId: string,
     removedBy: string,
-  ) {
+  ): Promise<unknown> {
     const participant = await this.participantRepo.removeParticipant(
       caseId,
       userId,
@@ -392,7 +391,7 @@ export class CaseWorkflowService {
   /**
    * Get case participants
    */
-  async getCaseParticipants(caseId: string) {
+  async getCaseParticipants(caseId: string): Promise<unknown[]> {
     return this.participantRepo.getCaseParticipants(caseId);
   }
 
@@ -401,7 +400,7 @@ export class CaseWorkflowService {
   /**
    * Request approval
    */
-  async requestApproval(input: CaseApprovalInput) {
+  async requestApproval(input: CaseApprovalInput): Promise<unknown> {
     const approval = await this.approvalRepo.createApproval(input);
 
     await this.emitEvent({
@@ -419,7 +418,7 @@ export class CaseWorkflowService {
   /**
    * Submit approval vote
    */
-  async submitApprovalVote(input: CaseApprovalVoteInput) {
+  async submitApprovalVote(input: CaseApprovalVoteInput): Promise<unknown> {
     const vote = await this.approvalRepo.submitVote(input);
 
     // Check if approval is complete
@@ -456,7 +455,7 @@ export class CaseWorkflowService {
   /**
    * Get pending approvals for user
    */
-  async getPendingApprovalsForUser(userId: string) {
+  async getPendingApprovalsForUser(userId: string): Promise<unknown[]> {
     return this.approvalRepo.getPendingApprovalsForUser(userId);
   }
 
@@ -465,28 +464,28 @@ export class CaseWorkflowService {
   /**
    * Create SLA
    */
-  async createSLA(input: CaseSLAInput) {
+  async createSLA(input: CaseSLAInput): Promise<unknown> {
     return this.slaTracker.createSLA(input);
   }
 
   /**
    * Get case SLAs
    */
-  async getCaseSLAs(caseId: string) {
+  async getCaseSLAs(caseId: string): Promise<unknown[]> {
     return this.slaTracker.getCaseSLAs(caseId);
   }
 
   /**
    * Get SLA summary
    */
-  async getCaseSLASummary(caseId: string) {
+  async getCaseSLASummary(caseId: string): Promise<unknown> {
     return this.slaTracker.getCaseSLASummary(caseId);
   }
 
   /**
    * Check for breached SLAs (run periodically)
    */
-  async checkBreachedSLAs() {
+  async checkBreachedSLAs(): Promise<unknown[]> {
     const events = await this.slaTracker.checkBreachedSLAs();
 
     for (const event of events) {
@@ -506,7 +505,7 @@ export class CaseWorkflowService {
   /**
    * Check for at-risk SLAs (run periodically)
    */
-  async checkAtRiskSLAs() {
+  async checkAtRiskSLAs(): Promise<unknown[]> {
     const events = await this.slaTracker.checkAtRiskSLAs();
 
     for (const event of events) {
@@ -528,14 +527,14 @@ export class CaseWorkflowService {
   /**
    * Get all roles
    */
-  async listRoles(systemOnly = false) {
+  async listRoles(systemOnly = false): Promise<unknown[]> {
     return this.participantRepo.listRoles(systemOnly);
   }
 
   /**
    * Get role by name
    */
-  async getRoleByName(name: string) {
+  async getRoleByName(name: string): Promise<unknown | null> {
     return this.participantRepo.getRoleByName(name);
   }
 
@@ -544,7 +543,7 @@ export class CaseWorkflowService {
   /**
    * Register an event handler
    */
-  on(eventType: CaseEventType, handler: EventHandler) {
+  on(eventType: CaseEventType, handler: EventHandler): void {
     if (!this.eventHandlers.has(eventType)) {
       this.eventHandlers.set(eventType, []);
     }
@@ -554,7 +553,7 @@ export class CaseWorkflowService {
   /**
    * Emit an event
    */
-  private async emitEvent(event: CaseEvent) {
+  private async emitEvent(event: CaseEvent): Promise<void> {
     const handlers = this.eventHandlers.get(event.type) || [];
 
     serviceLogger.debug(

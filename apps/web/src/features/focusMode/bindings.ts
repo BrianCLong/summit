@@ -1,4 +1,3 @@
-// @ts-nocheck
 import $ from 'jquery'
 import { AppDispatch } from '../../store'
 import { enterFocus, exitFocus, toggleManual } from './focusSlice'

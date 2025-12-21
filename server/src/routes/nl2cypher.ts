@@ -1,14 +1,14 @@
-// @ts-nocheck
-import express from 'express';
+import express, { Response, NextFunction } from 'express';
 import { nl2cypher } from '../nl2cypher/index';
 import { executeSandbox } from '../nl2cypher/sandbox';
 import { diffLines } from 'diff';
 import { trace } from '@opentelemetry/api';
+import type { AuthenticatedRequest } from './types.js';
 
 const router = express.Router();
 const tracer = trace.getTracer('nl2cypher');
 
-router.post('/nl2cypher', async (req, res) => {
+router.post('/nl2cypher', async (req: AuthenticatedRequest, res: Response) => {
   await tracer.startActiveSpan('nl2cypher', async (span) => {
     try {
       const { prompt } = req.body;
@@ -28,7 +28,7 @@ router.post('/nl2cypher/diff', (req, res) => {
   res.json({ diff });
 });
 
-router.post('/sandbox/execute', async (req, res) => {
+router.post('/sandbox/execute', async (req: AuthenticatedRequest, res: Response) => {
   await tracer.startActiveSpan('sandbox', async (span) => {
     try {
       const { cypher } = req.body;

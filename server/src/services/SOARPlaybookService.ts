@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { PrismaClient } from '@prisma/client';
 import winston, { Logger } from 'winston';
 
@@ -49,7 +48,7 @@ export class SOARPlaybookService {
    */
   async executePhishingContainment(
     alertId: string,
-    evidence: any,
+    evidence: Record<string, unknown>,
   ): Promise<PlaybookExecution> {
     const playbook = await this.createPlaybookExecution(
       'phishing-containment-v1.1',
@@ -114,12 +113,13 @@ export class SOARPlaybookService {
       await this.completePlaybookExecution(playbook.id, 'completed');
       return playbook;
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       this.logger.error('Phishing containment playbook failed', {
-        error,
+        error: errorMessage,
         alertId,
       });
       await this.completePlaybookExecution(playbook.id, 'failed', {
-        error: error.message,
+        error: errorMessage,
       });
       throw error;
     }
@@ -130,7 +130,7 @@ export class SOARPlaybookService {
    */
   async executeForcedMFAReset(
     alertId: string,
-    evidence: any,
+    evidence: Record<string, unknown>,
     approverUserId: string,
   ): Promise<PlaybookExecution> {
     const playbook = await this.createPlaybookExecution(

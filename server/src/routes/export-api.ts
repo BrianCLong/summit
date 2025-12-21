@@ -1,10 +1,10 @@
-// @ts-nocheck
 import { Router } from 'express';
 import { z } from 'zod';
 import pino from 'pino';
 import { opaClient } from '../services/opa-client';
 import { businessMetrics, addSpanAttributes } from '../observability/telemetry';
 import { costGuard } from '../services/cost-guard';
+import type { AuthenticatedRequest } from './types.js';
 
 const router = Router();
 const logger = pino({ name: 'export-api' });
@@ -135,7 +135,7 @@ interface SimulationResponse extends ExportResponse {
  *
  * Main export endpoint with full policy evaluation and cost tracking
  */
-router.post('/export', async (req, res) => {
+router.post('/export', async (req: AuthenticatedRequest, res: Response) => {
   const startTime = Date.now();
   const requestId =
     (req.headers['x-request-id'] as string) || `export-${Date.now()}`;
@@ -321,7 +321,7 @@ router.post('/export', async (req, res) => {
  *
  * Policy simulation endpoint for testing what-if scenarios
  */
-router.post('/export/simulate', async (req, res) => {
+router.post('/export/simulate', async (req: AuthenticatedRequest, res: Response) => {
   const requestId =
     (req.headers['x-request-id'] as string) || `sim-${Date.now()}`;
 
@@ -476,7 +476,7 @@ router.post('/export/simulate', async (req, res) => {
  *
  * Check the status of an export request
  */
-router.get('/export/status/:requestId', async (req, res) => {
+router.get('/export/status/:requestId', async (req: AuthenticatedRequest, res: Response) => {
   const { requestId } = req.params;
 
   // Mock status response

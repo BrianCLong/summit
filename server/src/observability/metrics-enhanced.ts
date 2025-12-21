@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Enhanced Prometheus Metrics with Query Latency Heatmaps
  * Provides comprehensive monitoring including P50, P95, P99 latencies
@@ -11,7 +10,7 @@ import {
   Summary,
 } from 'prom-client';
 import logger from '../utils/logger.js';
-import { register as registry } from '../monitoring/metrics.js';
+import { registry } from '../monitoring/metrics.js';
 
 export { registry };
 
@@ -361,7 +360,7 @@ export async function getMetrics(): Promise<string> {
 /**
  * Get metrics as JSON for debugging
  */
-export async function getMetricsJSON(): Promise<any> {
+export async function getMetricsJSON(): Promise<unknown> {
   const metrics = await registry.getMetricsAsJSON();
   return metrics;
 }

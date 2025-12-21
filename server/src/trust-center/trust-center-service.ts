@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { getPostgresPool } from '../db/postgres.js';
 import { otelService } from '../middleware/observability/otel-tracing.js';
 import { provenanceLedger } from '../maestro/provenance/merkle-ledger.js';

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * AuthService Test Suite
  *
@@ -12,7 +11,7 @@
  */
 
 import { jest } from '@jest/globals';
-import AuthService from '../AuthService';
+import AuthService from '../AuthService.js';
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 import type { Pool } from 'pg';
@@ -22,7 +21,7 @@ import { getPostgresPool } from '../../config/database.js';
 jest.mock('argon2');
 jest.mock('jsonwebtoken');
 jest.mock('../../config/database.js', () => ({
-  getPostgresPool: jest.fn(() => mockPool),
+  getPostgresPool: jest.fn<() => Pool>(() => mockPool),
 }));
 jest.mock('../../config/index.js', () => ({
   __esModule: true,

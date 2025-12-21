@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { GraphQLError } from 'graphql';
 import { db } from '../db.js'; // Assuming a db connection utility exists
 
@@ -6,7 +5,15 @@ import { db } from '../db.js'; // Assuming a db connection utility exists
 // to check the user's role for a specific War Room.
 // For this MVP, we will simulate this check.
 
-export const checkAuth = (context: any) => {
+interface GraphQLContext {
+  user?: {
+    id: string;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
+export const checkAuth = (context: GraphQLContext): void => {
   if (!context.user || !context.user.id) {
     throw new GraphQLError('User is not authenticated', {
       extensions: {
@@ -16,9 +23,9 @@ export const checkAuth = (context: any) => {
   }
 };
 
-export const checkWarRoomAdmin = async (context: any, warRoomId: number) => {
+export const checkWarRoomAdmin = async (context: GraphQLContext, warRoomId: number): Promise<void> => {
   checkAuth(context);
-  const userId = context.user.id;
+  const userId = context.user!.id;
 
   const { rows } = await db.query(
     'SELECT role FROM war_room_participants WHERE war_room_id = $1 AND user_id = $2',

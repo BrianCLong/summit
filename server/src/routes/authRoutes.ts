@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Authentication Routes
  *
@@ -15,6 +14,7 @@
  */
 
 import { Router, Request, Response, NextFunction } from 'express';
+import type { AuthenticatedRequest } from './types.js';
 import { AuthService } from '../services/AuthService.js';
 import { PasswordResetService } from '../services/PasswordResetService.js';
 import { authRateLimiter, loginRateLimiter, registerRateLimiter, passwordResetRateLimiter } from '../middleware/authRateLimit.js';
@@ -148,15 +148,15 @@ router.post(
         refreshToken: result.refreshToken,
         expiresIn: result.expiresIn,
       });
-    } catch (error: any) {
+    } catch (error) {
       logger.error({
         message: 'Registration failed',
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         email: req.body.email,
         ip: req.ip,
       });
 
-      if (error.message.includes('already exists')) {
+      if (error instanceof Error && error.message.includes('already exists')) {
         return res.status(409).json({
           error: 'User with this email or username already exists',
           code: 'USER_EXISTS',
@@ -214,10 +214,10 @@ router.post(
         refreshToken: result.refreshToken,
         expiresIn: result.expiresIn,
       });
-    } catch (error: any) {
+    } catch (error) {
       logger.warn({
         message: 'Login failed',
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         email: req.body.email,
         ip: req.ip,
       });
@@ -262,10 +262,10 @@ router.post(
         token: result.token,
         refreshToken: result.refreshToken,
       });
-    } catch (error: any) {
+    } catch (error) {
       logger.error({
         message: 'Token refresh failed',
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         ip: req.ip,
       });
 
@@ -285,26 +285,26 @@ router.post(
 router.post(
   '/logout',
   ensureAuthenticated,
-  async (req: Request, res: Response) => {
+  async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const user = (req as any).user;
+      const user = req.user;
       const token = req.headers.authorization?.replace('Bearer ', '');
 
-      await authService.logout(user.id, token);
+      await authService.logout(user?.id, token);
 
       logger.info({
         message: 'User logged out successfully',
-        userId: user.id,
+        userId: user?.id,
         ip: req.ip,
       });
 
       res.json({
         message: 'Logout successful',
       });
-    } catch (error: any) {
+    } catch (error) {
       logger.error({
         message: 'Logout failed',
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         ip: req.ip,
       });
 
@@ -324,9 +324,9 @@ router.post(
 router.get(
   '/me',
   ensureAuthenticated,
-  async (req: Request, res: Response) => {
+  async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const user = (req as any).user;
+      const user = req.user;
 
       res.json({
         user: {
@@ -343,10 +343,10 @@ router.get(
           updatedAt: user.updatedAt,
         },
       });
-    } catch (error: any) {
+    } catch (error) {
       logger.error({
         message: 'Failed to get user profile',
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         ip: req.ip,
       });
 
@@ -387,10 +387,10 @@ router.post(
       res.json({
         message: 'If an account with that email exists, a password reset link has been sent',
       });
-    } catch (error: any) {
+    } catch (error) {
       logger.error({
         message: 'Password reset request failed',
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         ip: req.ip,
       });
 
@@ -425,14 +425,14 @@ router.post(
       res.json({
         message: 'Password reset successful. Please log in with your new password.',
       });
-    } catch (error: any) {
+    } catch (error) {
       logger.warn({
         message: 'Password reset failed',
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         ip: req.ip,
       });
 
-      if (error.message.includes('expired') || error.message.includes('invalid')) {
+      if (error instanceof Error && (error.message.includes('expired') || error.message.includes('invalid'))) {
         return res.status(400).json({
           error: 'Invalid or expired reset token',
           code: 'INVALID_RESET_TOKEN',
@@ -456,13 +456,13 @@ router.post(
   '/password/change',
   ensureAuthenticated,
   validateBody(changePasswordSchema),
-  async (req: Request, res: Response) => {
+  async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const user = (req as any).user;
+      const user = req.user;
       const { currentPassword, newPassword } = req.body;
 
       await passwordResetService.changePassword(
-        user.id,
+        user?.id,
         currentPassword,
         newPassword
       );
@@ -476,15 +476,15 @@ router.post(
       res.json({
         message: 'Password changed successfully',
       });
-    } catch (error: any) {
+    } catch (error) {
       logger.warn({
         message: 'Password change failed',
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         userId: (req as any).user?.id,
         ip: req.ip,
       });
 
-      if (error.message.includes('incorrect')) {
+      if (error instanceof Error && error.message.includes('incorrect')) {
         return res.status(400).json({
           error: 'Current password is incorrect',
           code: 'INCORRECT_PASSWORD',
@@ -536,7 +536,7 @@ router.get(
           role: user.role,
         },
       });
-    } catch (error: any) {
+    } catch (error) {
       res.status(401).json({
         valid: false,
         error: 'Token verification failed',
@@ -554,10 +554,10 @@ router.get(
 router.post(
   '/revoke-token',
   ensureAuthenticated,
-  async (req: Request, res: Response) => {
+  async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { token } = req.body;
-      const user = (req as any).user;
+      const user = req.user;
 
       if (!token) {
         return res.status(400).json({
@@ -577,10 +577,10 @@ router.post(
       res.json({
         message: 'Token revoked successfully',
       });
-    } catch (error: any) {
+    } catch (error) {
       logger.error({
         message: 'Token revocation failed',
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         ip: req.ip,
       });
 
