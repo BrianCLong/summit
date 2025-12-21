@@ -15,7 +15,8 @@ import { ConnectionManager } from '../managers/ConnectionManager.js';
 import { PresenceManager } from '../managers/PresenceManager.js';
 import { RoomManager } from '../managers/RoomManager.js';
 import { MessagePersistence } from '../managers/MessagePersistence.js';
-import { RateLimiter, wrapHandlerWithRateLimit } from '../middleware/rateLimit.js';
+import { CollabManager } from '../managers/CollabManager.js';
+import { RateLimiter } from '../middleware/rateLimit.js';
 import { logger } from '../utils/logger.js';
 import * as metrics from '../metrics/prometheus.js';
 import { registerPresenceHandlers } from './presence.js';
@@ -29,22 +30,20 @@ export interface HandlerDependencies {
   presenceManager: PresenceManager;
   roomManager: RoomManager;
   messagePersistence: MessagePersistence;
+  collabManager: CollabManager;
   rateLimiter: RateLimiter;
+  isCollabEnabled: boolean;
 }
 
 export function registerEventHandlers(deps: HandlerDependencies): void {
-  const { io, connectionManager, presenceManager, roomManager, messagePersistence, rateLimiter } = deps;
+  const { io, connectionManager, presenceManager, roomManager, messagePersistence, collabManager, rateLimiter, isCollabEnabled } = deps;
 
-  io.on('connection', (socket) => {
   io.on('connection', (socket: any) => {
     const authSocket = socket as AuthenticatedSocket;
     const startTime = Date.now();
 
     logger.info(
       {
-        connectionId: socket.data.connectionId,
-        userId: socket.data.user.userId,
-        tenantId: socket.data.tenantId,
         connectionId: authSocket.connectionId,
         userId: authSocket.user.userId,
         tenantId: authSocket.tenantId,
@@ -53,13 +52,6 @@ export function registerEventHandlers(deps: HandlerDependencies): void {
     );
 
     // Register connection
-    connectionManager.register(socket);
-    metrics.recordConnectionStart(socket.data.tenantId);
-
-    // Send connection established event
-    socket.emit('connection:established', {
-      connectionId: socket.data.connectionId,
-      tenantId: socket.data.tenantId,
     connectionManager.register(authSocket);
     metrics.recordConnectionStart(authSocket.tenantId);
 
@@ -73,7 +65,10 @@ export function registerEventHandlers(deps: HandlerDependencies): void {
     registerPresenceHandlers(authSocket, deps);
     registerRoomHandlers(authSocket, deps);
     registerMessageHandlers(authSocket, deps);
-    registerCollaborationHandlers(authSocket, deps);
+
+    if (isCollabEnabled) {
+      registerCollaborationHandlers(authSocket, deps);
+    }
 
     // Handle disconnection
     authSocket.on('disconnect', async (reason) => {
@@ -81,9 +76,6 @@ export function registerEventHandlers(deps: HandlerDependencies): void {
 
       logger.info(
         {
-          connectionId: socket.data.connectionId,
-          userId: socket.data.user.userId,
-          tenantId: socket.data.tenantId,
           connectionId: authSocket.connectionId,
           userId: authSocket.user.userId,
           tenantId: authSocket.tenantId,
@@ -94,15 +86,6 @@ export function registerEventHandlers(deps: HandlerDependencies): void {
       );
 
       // Unregister connection
-      connectionManager.unregister(socket.data.connectionId);
-
-      // Leave all rooms
-      roomManager.leaveAll(socket.data.connectionId);
-
-      // Remove presence from all rooms where user was active
-      const rooms = roomManager.getSocketRooms(socket.data.connectionId);
-      for (const room of rooms) {
-        await presenceManager.removePresence(room, socket.data.user.userId);
       connectionManager.unregister(authSocket.connectionId);
 
       // Leave all rooms
@@ -119,7 +102,6 @@ export function registerEventHandlers(deps: HandlerDependencies): void {
       }
 
       // Record metrics
-      metrics.recordConnectionEnd(socket.data.tenantId, reason, duration);
       metrics.recordConnectionEnd(authSocket.tenantId, reason, duration);
     });
 
@@ -127,19 +109,12 @@ export function registerEventHandlers(deps: HandlerDependencies): void {
     authSocket.on('error', (error) => {
       logger.error(
         {
-          connectionId: socket.data.connectionId,
           connectionId: authSocket.connectionId,
           error: error.message,
         },
         'Socket error'
       );
 
-      metrics.recordError(socket.data.tenantId, 'socket_error', 'unknown');
-    });
-
-    // Update activity on any event
-    socket.onAny(() => {
-      connectionManager.updateActivity(socket.data.connectionId);
       metrics.recordError(authSocket.tenantId, 'socket_error', 'unknown');
     });
 

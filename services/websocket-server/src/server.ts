@@ -18,12 +18,13 @@ import {
   WebSocketConfig,
 } from './types/index.js';
 import { createAuthMiddleware } from './middleware/auth.js';
-import { createRateLimitMiddleware } from './middleware/rateLimit.js';
-import { AdaptiveRateLimiter } from '../../../lib/streaming/rate-limiter.js';
+import { createRateLimitMiddleware, RateLimiter } from './middleware/rateLimit.js';
 import { ConnectionManager } from './managers/ConnectionManager.js';
 import { PresenceManager } from './managers/PresenceManager.js';
 import { RoomManager } from './managers/RoomManager.js';
 import { MessagePersistence } from './managers/MessagePersistence.js';
+import { CollabManager } from './managers/CollabManager.js';
+import { PostgresPersistence } from './managers/PostgresPersistence.js';
 import { HealthChecker } from './health.js';
 import { registerEventHandlers } from './handlers/index.js';
 import { logger } from './utils/logger.js';
@@ -36,11 +37,13 @@ export class WebSocketServer {
   private redis: Redis;
   private redisSub: Redis;
   private config: WebSocketConfig;
-  private rateLimiter: AdaptiveRateLimiter;
+  private rateLimiter: RateLimiter;
   private connectionManager: ConnectionManager;
   private presenceManager: PresenceManager;
   private roomManager: RoomManager;
   private messagePersistence: MessagePersistence;
+  private collabManager: CollabManager;
+  private postgresPersistence: PostgresPersistence;
   private healthChecker: HealthChecker;
 
   constructor(config: WebSocketConfig) {
@@ -66,10 +69,7 @@ export class WebSocketServer {
     this.redisSub = this.redis.duplicate();
 
     // Initialize managers
-    this.rateLimiter = new AdaptiveRateLimiter({
-      maxTokens: config.rateLimit.burstSize,
-      refillRate: config.rateLimit.messageRatePerSecond,
-    });
+    this.rateLimiter = new RateLimiter(config.rateLimit);
     this.connectionManager = new ConnectionManager();
     this.presenceManager = new PresenceManager(this.redis, config.persistence.ttl);
     this.roomManager = new RoomManager();
@@ -78,6 +78,9 @@ export class WebSocketServer {
       config.persistence.ttl,
       config.persistence.maxMessages
     );
+
+    this.postgresPersistence = new PostgresPersistence(config.postgres.url);
+    this.collabManager = new CollabManager(this.postgresPersistence);
 
     // Setup Socket.IO
     this.io = new Server<
@@ -185,7 +188,9 @@ export class WebSocketServer {
       presenceManager: this.presenceManager,
       roomManager: this.roomManager,
       messagePersistence: this.messagePersistence,
+      collabManager: this.collabManager,
       rateLimiter: this.rateLimiter,
+      isCollabEnabled: this.config.collab.enabled,
     });
   }
 
@@ -209,6 +214,14 @@ export class WebSocketServer {
   }
 
   public async start(): Promise<void> {
+    // Initialize Postgres Persistence
+    try {
+      await this.postgresPersistence.init();
+    } catch (error) {
+      logger.error('Failed to initialize Postgres persistence');
+      throw error;
+    }
+
     return new Promise((resolve, reject) => {
       try {
         this.httpServer.listen(this.config.port, this.config.host, () => {
@@ -261,6 +274,9 @@ export class WebSocketServer {
     // Close Redis connections
     await this.redis.quit();
     await this.redisSub.quit();
+
+    // Close Postgres connection
+    await this.postgresPersistence.close();
 
     // Cleanup rate limiter
     this.rateLimiter.destroy();

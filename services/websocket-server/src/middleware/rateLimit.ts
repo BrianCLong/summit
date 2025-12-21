@@ -3,9 +3,8 @@
  */
 
 import { Socket } from 'socket.io';
-import { AuthenticatedSocket } from '../types/index.js';
+import { AuthenticatedSocket, WebSocketConfig } from '../types/index.js';
 import { logger } from '../utils/logger.js';
-import { AdaptiveRateLimiter } from '../../../../lib/streaming/rate-limiter.js';
 
 interface TokenBucket {
   tokens: number;
@@ -88,66 +87,52 @@ export class RateLimiter {
 
 export function createRateLimitMiddleware(rateLimiter: RateLimiter) {
   return (socket: Socket, next: (err?: Error) => void) => {
-    const key = `connection:${socket.data.tenantId}:${socket.data.user.userId}`;
+    // Check if socket.user exists, if not it might be unauthenticated, but this middleware is usually after auth.
+    // If socket is not authenticated yet, use connectionId or IP.
+    const authSocket = socket as AuthenticatedSocket;
+    const userId = authSocket.user ? authSocket.user.userId : 'anonymous';
+    const tenantId = authSocket.tenantId || 'unknown';
+    const key = `connection:${tenantId}:${userId}`;
 
     if (!rateLimiter.tryConsume(key, 1)) {
       logger.warn(
         {
-          connectionId: socket.data.connectionId,
-          tenantId: socket.data.tenantId,
-          userId: socket.data.user.userId,
-export function createRateLimitMiddleware(rateLimiter: AdaptiveRateLimiter) {
-  return async (socket: AuthenticatedSocket, next: (err?: Error) => void) => {
-    try {
-      await rateLimiter.acquire(`connection:${socket.tenantId}:${socket.user.userId}`);
-      next();
-    } catch (error) {
-      logger.warn(
-        {
-          tenantId: socket.tenantId,
-          userId: socket.user.userId,
-          error,
+          connectionId: authSocket.connectionId,
+          tenantId,
+          userId,
         },
         'Rate limit exceeded for connection'
       );
-      return next(new Error('Rate limit exceeded'));
+      next(new Error('Rate limit exceeded'));
+    } else {
+      next();
     }
   };
 }
 
 export function wrapHandlerWithRateLimit<T extends unknown[]>(
-  socket: Socket,
+  socket: AuthenticatedSocket,
   rateLimiter: RateLimiter,
   handler: (...args: T) => void | Promise<void>
 ): (...args: T) => void {
   return (...args: T) => {
-    const key = `message:${socket.data.tenantId}:${socket.data.user.userId}`;
+    const userId = socket.user ? socket.user.userId : 'anonymous';
+    const tenantId = socket.tenantId || 'unknown';
+    const key = `message:${tenantId}:${userId}`;
 
     if (!rateLimiter.tryConsume(key, 1)) {
       logger.warn(
         {
-          connectionId: socket.data.connectionId,
-          tenantId: socket.data.tenantId,
-          userId: socket.data.user.userId,
+          connectionId: socket.connectionId,
+          tenantId,
+          userId,
           remaining: rateLimiter.getRemainingTokens(key),
         },
         'Message rate limit exceeded'
       );
-
-  socket: AuthenticatedSocket,
-  rateLimiter: AdaptiveRateLimiter,
-  handler: (...args: T) => void | Promise<void>
-): (...args: T) => void {
-  return (...args: T) => {
-    const key = `message:${socket.tenantId}:${socket.user.userId}`;
-    if (rateLimiter.tryAcquireSync(key)) {
-      handler(...args);
+      socket.emit('system:error', { code: 'RATE_LIMIT_EXCEEDED', message: 'Too fast' });
     } else {
-      logger.warn({ key }, 'Message dropped due to rate limit');
-      socket.emit('system:error', {
-        code: 'RATE_LIMIT_EXCEEDED',
-        message: 'Too many messages, please slow down',
-      });
+      handler(...args);
     }
   };
 }

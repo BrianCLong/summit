@@ -38,6 +38,12 @@ const configSchema = z.object({
   PERSISTENCE_TTL: z.string().default('3600').transform(Number),
   PERSISTENCE_MAX_MESSAGES: z.string().default('1000').transform(Number),
 
+  // Postgres
+  POSTGRES_URL: z.string().default('postgresql://postgres:postgres@localhost:5432/intelgraph_dev'),
+
+  // Feature Flags
+  COLLAB_ENABLED: z.string().default('true').transform(v => v === 'true'),
+
   // Clustering
   CLUSTERING_ENABLED: z.string().default('true').transform(v => v === 'true'),
   NODE_ID: z.string().optional(),
@@ -92,6 +98,12 @@ export function loadConfig(): WebSocketConfig {
       enabled: env.PERSISTENCE_ENABLED,
       ttl: env.PERSISTENCE_TTL,
       maxMessages: env.PERSISTENCE_MAX_MESSAGES,
+    },
+    postgres: {
+      url: env.POSTGRES_URL,
+    },
+    collab: {
+      enabled: env.COLLAB_ENABLED,
     },
     clustering: {
       enabled: env.CLUSTERING_ENABLED,

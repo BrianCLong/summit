@@ -3,13 +3,14 @@
  */
 
 import { Socket } from 'socket.io';
+import { AuthenticatedSocket } from '../types/index.js';
 import { HandlerDependencies } from './index.js';
 import { wrapHandlerWithRateLimit } from '../middleware/rateLimit.js';
 import { logger } from '../utils/logger.js';
 import * as metrics from '../metrics/prometheus.js';
 
 export function registerRoomHandlers(
-  socket: Socket,
+  socket: AuthenticatedSocket,
   deps: HandlerDependencies
 ): void {
   const { connectionManager, presenceManager, roomManager, rateLimiter, io } = deps;

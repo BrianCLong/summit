@@ -83,11 +83,15 @@ export interface ServerToClientEvents {
 
   // Collaboration events
   'collaboration:cursor_update': (data: { connectionId: string; userId: string; x: number; y: number; username?: string }) => void;
+  'collab:sync_response': (data: { room: string; payload: Uint8Array | Buffer }) => void;
+  'collab:update': (data: { room: string; payload: Uint8Array | Buffer }) => void;
 }
 
 export interface ClientToServerEvents {
   // Collaboration events
   'collaboration:cursor_move': (data: { room: string; x: number; y: number; username?: string }) => void;
+  'collab:sync': (data: { room: string; payload: Uint8Array | Buffer }) => void;
+  'collab:update': (data: { room: string; payload: Uint8Array | Buffer }) => void;
 
   // Presence events
   'presence:heartbeat': (data: { status?: PresenceStatus }) => void;
@@ -145,6 +149,12 @@ export interface WebSocketConfig {
     enabled: boolean;
     ttl: number;
     maxMessages: number;
+  };
+  postgres: {
+    url: string;
+  };
+  collab: {
+    enabled: boolean;
   };
   clustering: {
     enabled: boolean;

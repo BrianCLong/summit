@@ -4,13 +4,14 @@
 
 import { Socket } from 'socket.io';
 import { PresenceStatus } from '../types/index.js';
+import { AuthenticatedSocket } from '../types/index.js';
 import { HandlerDependencies } from './index.js';
 import { wrapHandlerWithRateLimit } from '../middleware/rateLimit.js';
 import { logger } from '../utils/logger.js';
 import * as metrics from '../metrics/prometheus.js';
 
 export function registerPresenceHandlers(
-  socket: Socket,
+  socket: AuthenticatedSocket,
   deps: HandlerDependencies
 ): void {
   const { connectionManager, presenceManager, roomManager, rateLimiter, io } = deps;
@@ -73,7 +74,6 @@ export function registerPresenceHandlers(
           const rooms = roomManager.getSocketRooms(socket.data.connectionId);
 
           for (const room of rooms) {
-            await presenceManager.updateStatus(room, socket.data.user.userId, status, metadata);
             await presenceManager.updateStatus(room, socket.user.userId, status, validMetadata);
 
             // Broadcast to room
