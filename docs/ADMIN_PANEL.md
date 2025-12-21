@@ -649,7 +649,7 @@ mutation ToggleFeatureFlag($id: ID!, $enabled: Boolean!, $reason: String) {
 
 ### Integration
 
-Feature flags integrate with existing `FeatureFlagService.ts`. Admin UI provides management interface for flags defined in service configuration.
+Feature flags integrate with the shared provider in `server/src/feature-flags/setup.ts`. Admin UI provides management interface for flags defined in the consolidated service configuration.
 
 ---
 

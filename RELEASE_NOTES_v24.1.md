@@ -14,4 +14,4 @@
 
 ## Ops Notes
 
-- Feature flags unchanged; same rollback path as v24.0.0
+- Legacy server-side feature flag stack removed (`flags/store.ts`, `featureFlags/flagsmith.ts`, `services/FeatureFlagService.ts`); initialize flags via `server/src/feature-flags/setup.ts` and `@intelgraph/feature-flags`.

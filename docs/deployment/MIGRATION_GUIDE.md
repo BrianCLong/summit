@@ -153,18 +153,10 @@ curl -X POST https://app.launchdarkly.com/api/v2/flags/default \
 
 ```typescript
 // server/src/app.ts
-import { FeatureFlagService } from './services/FeatureFlagService';
+import { initializeFeatureFlags } from './feature-flags/setup';
 
 // Initialize feature flag service
-const flagService = new FeatureFlagService({
-  provider: process.env.NODE_ENV === 'production' ? 'launchdarkly' : 'local',
-  config: {
-    sdkKey: process.env.LAUNCHDARKLY_SDK_KEY,
-    file: './config/feature-flags.json',
-  },
-});
-
-await flagService.initialize();
+const flagService = await initializeFeatureFlags();
 ```
 
 #### Add Metrics Endpoint

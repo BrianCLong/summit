@@ -47,10 +47,14 @@ gh run watch
 
 ```typescript
 // server/src/api/routes/dashboard.ts
-import { getFeatureFlagService } from '../../services/FeatureFlagService';
+import {
+  initializeFeatureFlags,
+  getFeatureFlagService,
+} from '../../feature-flags/setup';
 
 export async function getDashboard(req, res) {
   const user = req.user;
+  await initializeFeatureFlags();
   const flags = getFeatureFlagService();
 
   // Check if new dashboard is enabled
@@ -115,9 +119,10 @@ gh pr merge --squash
 ```bash
 # 1. Add feature code with flag check
 cat > server/src/features/collaboration.ts << 'EOF'
-import { getFeatureFlagService } from '../services/FeatureFlagService';
+import { initializeFeatureFlags, getFeatureFlagService } from '../feature-flags/setup';
 
 export async function enableCollaboration(user) {
+  await initializeFeatureFlags();
   const flags = getFeatureFlagService();
 
   const enabled = await flags.isEnabled('real-time-collaboration', {

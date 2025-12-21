@@ -29,31 +29,25 @@ cleanup_on_error() {
 
 ### 2. Feature Flags Service with Comprehensive Tests
 
-#### Implementation (`server/src/services/FeatureFlagService.ts`)
-- **Type-safe TypeScript implementation**
-- **Multiple provider support** (LaunchDarkly, local files)
-- **Caching layer** for performance
-- **Gradual rollout support** (percentage-based)
-- **Targeted rollout** (user segment based)
-- **Kill switches** for emergency scenarios
-- **Singleton pattern** for easy access
-- **Graceful degradation** with fallback values
+#### Implementation (`server/src/feature-flags/setup.ts`)
+- **Type-safe TypeScript implementation** provided by `@intelgraph/feature-flags`
+- **Multiple provider support** (LaunchDarkly, Unleash) with Redis caching
+- **Gradual rollout support** (percentage-based) and audience targeting
+- **Kill switches** for emergency scenarios via centralized provider
+- **Metrics-first**: Prometheus integration enabled by default
 
-#### Test Suite (`server/src/services/__tests__/FeatureFlagService.test.ts`)
-- **100+ test cases** covering all scenarios
-- **Unit tests** for all public methods
-- **Integration tests** for provider interactions
-- **Edge case testing** (invalid inputs, timeouts, etc.)
+#### Test Suite (package: `@intelgraph/feature-flags`)
+- **Unit tests** for all public methods and provider behaviors
+- **Integration tests** for LaunchDarkly/Unleash adapters
+- **Edge case testing** (invalid inputs, timeouts, cache failures)
 - **Performance tests** (< 1ms avg evaluation time)
-- **Concurrent evaluation tests**
-- **Mock implementations** for LaunchDarkly
 
 **Coverage:**
-- ✅ Initialization (local & LaunchDarkly)
+- ✅ Initialization (LaunchDarkly & Unleash)
 - ✅ Boolean, string, number, JSON flags
 - ✅ Gradual rollouts (percentage-based)
 - ✅ Targeted rollouts (rule-based)
-- ✅ Caching behavior
+- ✅ Caching behavior & metrics hooks
 - ✅ Kill switches
 - ✅ Error handling
 - ✅ Shutdown/cleanup
@@ -377,10 +371,8 @@ Nice-to-have features for future iterations:
 │   └── blue-green-deploy.sh        # Blue-green deployment
 │
 └── server/src/
-    ├── services/
-    │   ├── FeatureFlagService.ts             # Feature flag service
-    │   └── __tests__/
-    │       └── FeatureFlagService.test.ts   # Comprehensive tests
+    ├── feature-flags/
+    │   └── setup.ts                           # Shared feature flag initialization
     │
     └── middleware/
         └── deployment-metrics.ts              # Prometheus metrics

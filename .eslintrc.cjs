@@ -68,6 +68,27 @@ module.exports = {
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     'no-unused-expressions': 'off',
     '@typescript-eslint/no-unused-expressions': ['error', {}],
+    'no-restricted-imports': [
+      'error',
+      {
+        patterns: [
+          {
+            group: [
+              '../featureFlags/flagsmith',
+              '../featureFlags/flagsmith.*',
+              '../flags/store',
+              '../flags/store.*',
+              '../middleware/flagGate',
+              '../middleware/flagGate.*',
+              '../services/FeatureFlagService',
+              '../services/FeatureFlagService.*',
+            ],
+            message:
+              'Legacy feature-flag modules were removed. Use server/src/feature-flags/setup.ts and @intelgraph/feature-flags.',
+          },
+        ],
+      },
+    ],
   },
   ignorePatterns: ['dist', 'build', 'coverage', 'node_modules'],
 };

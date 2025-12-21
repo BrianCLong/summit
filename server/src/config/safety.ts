@@ -1,4 +1,4 @@
-import type { FeatureFlagService } from '../services/FeatureFlagService.js';
+import type { FeatureFlagService } from '@intelgraph/feature-flags';
 import { logger } from './logger.js';
 
 const GLOBAL_KILL_SWITCH_FLAG_KEY = 'platform.kill-switch.global';

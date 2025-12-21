@@ -2,7 +2,6 @@ import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import { loadRecipe } from '../recipes/loader.js';
-import { isEnabled as flagEnabled } from '../featureFlags/flagsmith.js';
 import crypto from 'crypto';
 
 const router = express.Router();

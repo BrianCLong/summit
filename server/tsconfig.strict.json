@@ -424,7 +424,6 @@
     "src/services/DoclingService.ts",
     "src/services/ElasticsearchAuditService.ts",
     "src/services/ExtractionJobService.ts",
-    "src/services/FeatureFlagService.ts",
     "src/services/GACoremetricsService.ts",
     "src/services/GlassBoxRunService.ts",
     "src/services/GraphIndexAdvisorService.ts",

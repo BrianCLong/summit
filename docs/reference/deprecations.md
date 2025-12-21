@@ -43,6 +43,13 @@ The following features have been **permanently removed** in v24:
 - **Impact**: Deployment scripts need updating
 - **Migration**: Update docker-compose.yml syntax and CLI commands
 
+### Legacy Server Feature Flag Stack
+
+- **Removed**: v24.2
+- **Alternative**: `@intelgraph/feature-flags` via `server/src/feature-flags/setup.ts`
+- **Impact**: Legacy modules (`flags/store.ts`, `middleware/flagGate.ts`, `featureFlags/flagsmith.ts`, `services/FeatureFlagService.ts`) no longer exist; routes and scripts must import from the shared provider.
+- **Migration**: Initialize feature flags with `initializeFeatureFlags()` and read evaluations from `getFeatureFlagService()`.
+
 ## Upcoming Removals
 
 ### v25.0 (Planned Q2 2026)

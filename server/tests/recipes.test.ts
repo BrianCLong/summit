@@ -7,7 +7,6 @@ import { jest } from '@jest/globals';
 
 // Mock dependencies
 jest.mock('../src/recipes/loader.js');
-jest.mock('../src/featureFlags/flagsmith.js');
 jest.mock('fs');
 jest.mock('crypto');
 

@@ -5,13 +5,10 @@ import { jest, describe, it, test, expect, beforeAll, beforeEach } from '@jest/g
 
 // Mock dependencies before importing the app
 jest.mock('../../src/recipes/loader.js');
-jest.mock('../../src/featureFlags/flagsmith.js');
 jest.mock('crypto');
 
 const mockLoadRecipe = require('../../src/recipes/loader.js')
   .loadRecipe as jest.MockedFunction<any>;
-const mockFlagEnabled = require('../../src/featureFlags/flagsmith.js')
-  .isEnabled as jest.MockedFunction<any>;
 const mockCrypto = require('crypto') as jest.Mocked<typeof import('crypto')>;
 
 describe('GraphQL startRecipe Integration Tests', () => {
