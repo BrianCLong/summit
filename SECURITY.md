@@ -11,3 +11,11 @@
 ## Secrets Policy
 - Never commit real secrets or credentials. Use environment variables and `.env.example` patterns instead.
 - Rotate any credentials that may have been exposed and notify the security team immediately.
+
+## Remediation playbook
+1. **Triage quickly**: confirm the report, gather logs, reproduction steps, and affected commit/branch.
+2. **Containment**: revoke exposed credentials, disable compromised tokens, and rotate keys immediately.
+3. **Assessment**: classify severity (CVSS-lite), identify blast radius, and determine affected components.
+4. **Fix and verify**: land a patch on a protected branch, add regression tests, and rerun gitleaks + OSV scanner.
+5. **Release**: cut a patch release or hotfix; notify stakeholders privately; update advisories when public.
+6. **Postmortem**: document timeline, contributing factors, and preventative actions; backlog follow-up work.

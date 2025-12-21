@@ -8,21 +8,35 @@ jobs:
   detect:
     runs-on: ubuntu-latest
     outputs:
-      has_ts: ${{ steps.paths.outputs.ts }}
+      workspaces: ${{ steps.compute.outputs.workspaces }}
+      run_full: ${{ steps.compute.outputs.run_full }}
     steps:
       - uses: actions/checkout@v4
-      - id: paths
-        uses: dorny/paths-filter@v3
         with:
-          filters: |
-            ts:
-              - '**/*.ts'
-              - 'tsconfig*.json'
-              - 'package.json'
-  path-ci:
-    runs-on: ubuntu-latest
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.14.x'
+      - name: Compute affected workspaces
+        id: compute
+        run: |
+          node scripts/ci/detect-affected-workspaces.js > result.json || echo '{"workspaces":[]}' > result.json
+          workspaces=$(cat result.json | jq -c '.workspaces // []')
+          if [ -z "$workspaces" ] || [ "$workspaces" = "[]" ]; then
+            echo "run_full=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_full=false" >> $GITHUB_OUTPUT
+          fi
+          echo "workspaces=${workspaces}" >> $GITHUB_OUTPUT
+
+  scoped-ci:
     needs: detect
-    if: needs.detect.outputs.has_ts == 'true'
+    if: needs.detect.outputs.run_full == 'false'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        workspace: ${{ fromJson(needs.detect.outputs.workspaces) }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -35,8 +49,32 @@ jobs:
         run: |
           corepack enable || true
           corepack prepare pnpm@9.12.3 --activate || true
-          pnpm -v
-      - name: Install
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile=false
+      - name: Lint (affected workspace)
+        run: pnpm --filter "${{ matrix.workspace }}" lint || pnpm lint
+      - name: Typecheck (affected workspace)
+        run: pnpm --filter "${{ matrix.workspace }}" typecheck || pnpm typecheck
+      - name: Test (affected workspace)
+        run: pnpm --filter "${{ matrix.workspace }}" test || pnpm test
+
+  fallback-full:
+    needs: detect
+    if: needs.detect.outputs.run_full == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.14.x'
+          cache: 'pnpm'
+      - name: Enable corepack + pnpm
+        run: |
+          corepack enable || true
+          corepack prepare pnpm@9.12.3 --activate || true
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile=false
       - name: Lint
         run: pnpm run lint || true

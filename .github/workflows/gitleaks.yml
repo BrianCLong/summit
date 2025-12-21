@@ -2,6 +2,8 @@ name: gitleaks
 on:
   pull_request:
   push:
+    branches: [main]
+
 jobs:
   scan:
     runs-on: ubuntu-latest
@@ -9,11 +11,18 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Gitleaks scan
+      - name: Run Gitleaks
         uses: gitleaks/gitleaks-action@v2
-        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
         with:
+          config-path: .gitleaks.toml
           args: --no-banner --redact
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitleaks-report
+          path: gitleaks-report.json
+          if-no-files-found: ignore

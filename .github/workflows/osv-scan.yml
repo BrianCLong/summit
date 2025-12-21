@@ -1,0 +1,15 @@
+name: Dependency vulnerability scan
+on:
+  pull_request:
+  schedule:
+    - cron: '0 6 * * 1'
+
+jobs:
+  osv:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install osv-scanner
+        uses: google/osv-scanner-action@v1
+        with:
+          scan-args: "--recursive ."

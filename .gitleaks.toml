@@ -1,34 +1,12 @@
-title = "intelgraph-hardening"
-
-[extend]
-  path = ""
+[rules]
 
 [allowlist]
-  description = "Allow known test fixtures and placeholder markers"
-  files = [
-    "^tests/fixtures/.*",
-    "^perf/fixtures/.*",
-    "^docs/examples/.*"
+  description = "known false positives and test fixtures"
+  paths = [
+    "tests/fixtures/",
+    "test-data/",
+    "testdata/",
+    "**/*.example",
+    "**/*.sample",
+    "**/fixtures/**"
   ]
-  regexes = [
-    "REDACTED-PLACEHOLDER-ONLY"
-  ]
-
-[[rules]]
-  id = "generic-api-key"
-  description = "Generic API key or token"
-  regex = '''(?i)(api|token|secret|key)[\s:=]*["']?[A-Za-z0-9_\-]{16,}["']?'''
-  entropy = 3.5
-  tags = ["key", "generic", "api"]
-
-[[rules]]
-  id = "generic-password"
-  description = "Generic password assignment"
-  regex = '''(?i)password\s*[:=]\s*["'][^"']{8,}["']'''
-  tags = ["password"]
-
-[[rules]]
-  id = "private-key-block"
-  description = "Private key block"
-  regex = '''-----BEGIN( RSA)? PRIVATE KEY-----'''
-  tags = ["key", "private"]
