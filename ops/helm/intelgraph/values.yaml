@@ -1,0 +1,15 @@
+flags:
+  provLedger: true
+  lac: true
+  nlq: true
+  ingest: true
+  licenseReg: true
+  cases: true
+  reports: true
+  zktx: true
+  fedPlan: true
+  edgeKit: true
+slo:
+  http_p95_ms: 250
+rateLimit:
+  perMinute: 600

@@ -268,6 +268,9 @@ jobs:
         run: make up
       - name: Golden path smoke tests
         run: make smoke
+      - name: SLO gate - prov-ledger p95
+        run: |
+          docker run --rm --network host -v "${PWD}/tests/k6/gates:/scripts" -w /scripts grafana/k6 run prov-ledger.gate.js
       - name: Load Test (k6)
         run: |
           docker run --network host -i grafana/k6 run - < scripts/load-testing/graph-query-load.js || true
