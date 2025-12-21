@@ -1,0 +1,3 @@
+tool,status,notes
+"pnpm outdated","error","ERR_PNPM_FETCH_403 for docx (registry returned 403 Forbidden; no auth configured)"
+"npm audit --production","error","Registry audit endpoint returned 403 Forbidden; unable to retrieve vulnerability data"
