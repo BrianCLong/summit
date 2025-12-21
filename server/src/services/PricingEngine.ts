@@ -54,12 +54,27 @@ export class PricingEngine {
     }
   }
 
+  /**
+   * Retrieves a plan definition by ID.
+   */
+  async getPlanById(planId: string): Promise<Plan | null> {
+      const client = await this.pool.connect();
+      try {
+          const res = await client.query(`SELECT * FROM plans WHERE id = $1`, [planId]);
+          if (res.rows.length === 0) return null;
+          return this.mapRowToPlan(res.rows[0]);
+      } finally {
+          client.release();
+      }
+  }
+
   private mapRowToPlan(row: any): Plan {
     return {
       id: row.id,
       name: row.name,
       description: row.description,
       currency: row.currency,
+      basePrice: row.base_price ? parseFloat(row.base_price) : 0,
       limits: row.limits,
       features: row.features,
       createdAt: row.created_at,
