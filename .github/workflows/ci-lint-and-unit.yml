@@ -1,14 +1,3 @@
-name: CI (Lint & Unit)
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
-jobs:
-  lint-and-unit:
-    runs-on: ubuntu-latest
 name: CI - Lint and Unit
 
 on:
@@ -35,14 +24,11 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           version: 9.12.3
-          version: 9.12.0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20.14.0
-          cache: 'pnpm'
-          node-version: 20
           cache: pnpm
 
       - name: Install dependencies
@@ -54,10 +40,7 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
-      - name: Test
-        run: pnpm test
       - name: Unit tests
         env:
           CI: true
-        run: |
-          pnpm run test:quick
+        run: pnpm test
