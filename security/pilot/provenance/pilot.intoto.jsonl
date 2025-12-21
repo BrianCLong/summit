@@ -1,0 +1,1 @@
+{"_type":"https://in-toto.io/Statement/v0.1","subject":[{"name":"ghcr.io/summit/pilot","digest":{"sha256":"9d13b3c4a2b1d4f996bb77dd2f1373b8e6e0dffcb31d4660b9e6f29a3f2a1e5e"}}],"predicateType":"https://slsa.dev/provenance/v1"}
