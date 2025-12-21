@@ -3,12 +3,12 @@
  * Resolves and links entities across different systems and data sources
  */
 
-import { MatchingEngine } from '@summit/mdm-core';
+import { MatchingEngine } from '@intelgraph/mdm-core';
 import type {
   MatchingConfig,
   MatchResult,
   MatchLevel
-} from '@summit/mdm-core';
+} from '@intelgraph/mdm-core';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface EntityResolutionConfig {

@@ -10,3 +10,4 @@ export * from './quality.js';
 export * from './stewardship.js';
 export * from './hierarchy.js';
 export * from './sync.js';
+export * from './compliance.js';
