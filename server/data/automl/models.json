@@ -1,0 +1,18 @@
+[
+  {
+    "id": "69200ccb-eabe-4a52-a5e3-ab4d31840018",
+    "name": "Entity Classifier",
+    "type": "classification",
+    "description": "Classifies entities into person, organization, location, etc.",
+    "versions": [],
+    "createdAt": "2025-12-21T07:50:14.650Z"
+  },
+  {
+    "id": "6c4ff841-9f0f-49b3-9677-50323eae8982",
+    "name": "Threat Level Predictor",
+    "type": "regression",
+    "description": "Predicts the threat level (0-1) of a given entity.",
+    "versions": [],
+    "createdAt": "2025-12-21T07:50:14.650Z"
+  }
+]
