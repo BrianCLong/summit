@@ -1,0 +1,440 @@
+{
+  "services": [
+    {
+      "name": "identity-api",
+      "tier": "T0",
+      "owners": ["platform-sre", "identity"],
+      "dependencies": [
+        {
+          "name": "postgres-auth",
+          "type": "db",
+          "owner": "data-eng",
+          "criticality": "critical",
+          "timeoutsMs": 800,
+          "retries": 2,
+          "circuitBreaker": {"failureThreshold": 5, "resetSeconds": 30},
+          "bulkhead": {"tenantIsolation": true, "featureIsolation": true, "queueDepthLimit": 100},
+          "gracefulDegradation": {"mode": "read-only tokens with cache warming", "testedAt": "2025-12-05T00:00:00Z"},
+          "cacheStrategy": {"scope": "session-tokens", "ttlSeconds": 300},
+          "sla": {"availability": 99.99, "latencyMsP99": 200},
+          "failStrategy": "fail-closed",
+          "killSwitch": {"present": true, "lastTestedAt": "2025-11-20T00:00:00Z", "coverage": ["authz", "mfa"]},
+          "chaosTests": {"lastSimulatedAt": "2025-11-15T00:00:00Z", "scenario": "primary lag"},
+          "escalation": {"contact": "@data-oncall", "vendorChannel": "pagerduty:data"}
+        },
+        {
+          "name": "redis-session",
+          "type": "cache",
+          "owner": "platform-sre",
+          "criticality": "high",
+          "timeoutsMs": 200,
+          "retries": 3,
+          "circuitBreaker": {"failureThreshold": 10, "resetSeconds": 10},
+          "bulkhead": {"tenantIsolation": true, "featureIsolation": true, "queueDepthLimit": 200},
+          "gracefulDegradation": {"mode": "local LRU fallback", "testedAt": "2025-12-01T00:00:00Z"},
+          "cacheStrategy": {"scope": "session-cache", "ttlSeconds": 120},
+          "sla": {"availability": 99.9, "latencyMsP99": 50},
+          "failStrategy": "fail-open",
+          "killSwitch": {"present": true, "lastTestedAt": "2025-11-22T00:00:00Z", "coverage": ["session"]},
+          "chaosTests": {"lastSimulatedAt": "2025-12-02T00:00:00Z", "scenario": "cache eviction storm"},
+          "escalation": {"contact": "@platform-cache"}
+        },
+        {
+          "name": "oidc-provider",
+          "type": "auth",
+          "owner": "security",
+          "criticality": "critical",
+          "timeoutsMs": 1200,
+          "retries": 2,
+          "circuitBreaker": {"failureThreshold": 3, "resetSeconds": 60},
+          "bulkhead": {"tenantIsolation": true, "featureIsolation": true, "queueDepthLimit": 50},
+          "gracefulDegradation": {"mode": "cached JWKS + grace window", "testedAt": "2025-12-08T00:00:00Z"},
+          "cacheStrategy": {"scope": "jwks", "ttlSeconds": 900},
+          "sla": {"availability": 99.9, "latencyMsP99": 400},
+          "failStrategy": "fail-open",
+          "killSwitch": {"present": true, "lastTestedAt": "2025-12-10T00:00:00Z", "coverage": ["token-issuance"]},
+          "chaosTests": {"lastSimulatedAt": "2025-12-06T00:00:00Z", "scenario": "jwks outage"},
+          "escalation": {"contact": "@security-oncall", "vendorChannel": "slack:oidc"}
+        }
+      ],
+      "backup": {
+        "schedule": "every 5m",
+        "lastBackupAt": "2025-12-21T06:55:00Z",
+        "lastRestoreVerifiedAt": "2025-12-15T00:00:00Z",
+        "restoreDurationMinutes": 10,
+        "dataLossMinutes": 4,
+        "evidencePath": "RUNBOOKS/DR.md"
+      },
+      "runbook": {"path": "RUNBOOKS/DR.md", "roles": ["IC", "Comms", "Ops"], "lastReviewedAt": "2025-11-25T00:00:00Z"},
+      "drEnvironment": {"runnable": true, "smokeCommand": "make dr-up", "lastSmokeAt": "2025-12-12T00:00:00Z"},
+      "drills": [
+        {"type": "restore", "executedAt": "2025-12-10T00:00:00Z", "durationMinutes": 12, "dataLossMinutes": 4, "result": "pass"},
+        {"type": "chaos", "executedAt": "2025-12-05T00:00:00Z", "durationMinutes": 30, "result": "pass"},
+        {"type": "rollback", "executedAt": "2025-11-30T00:00:00Z", "durationMinutes": 15, "result": "pass"},
+        {"type": "gameday", "executedAt": "2025-12-01T00:00:00Z", "durationMinutes": 90, "result": "pass"}
+      ],
+      "capacity": {
+        "peakRps": 1500,
+        "scenarios": ["login surge", "token refresh storm"],
+        "p95LatencyBudgetMs": 250,
+        "throughputBudgetRps": 1400,
+        "autoscaling": {"minReplicas": 3, "maxReplicas": 20, "cooldownSeconds": 120},
+        "backpressure": {"queueCap": 5000, "shedLoadAboveMs": 800, "timeoutMs": 1500},
+        "quotas": {"perTenantRps": 200},
+        "dashboards": ["grafana/auth-latency", "grafana/auth-capacity"],
+        "forecastHorizonDays": 90,
+        "brownoutMode": {"enabled": true, "lastTestedAt": "2025-11-18T00:00:00Z", "strategy": "reduce token ttl"}
+      },
+      "dataIntegrity": {
+        "riskyWritePaths": ["user-create", "mfa-enroll", "password-reset", "policy-update", "session-revoke"],
+        "idempotencyKeys": ["request-id", "user-idempotency-key"],
+        "invariants": ["unique-username", "mfa-bound"],
+        "reconciliationJobs": {"cadence": "hourly", "exceptionQueue": "identity-recon-deadletter"},
+        "eventLog": {"enabled": true, "topics": ["identity-events", "audit-log"]},
+        "outbox": {"enabled": true},
+        "dualControl": {"enabled": true, "scope": ["policy-delete", "user-suspend"]},
+        "quarantine": {"enabled": true, "rules": ["suspicious-ip", "geo-mismatch"]},
+        "integrityChecks": {"restoreHashValidation": true, "recordCounts": true},
+        "correctnessScorecard": {"driftFindings": 0, "mttrMinutes": 20}
+      },
+      "releaseSafety": {
+        "progressiveStages": ["canary 5%", "ramp 25%", "full"],
+        "rollbackTriggers": ["p95>300", "auth-errors>0.5%", "SLO-burn"],
+        "featureFlagGovernance": {"owner": "identity", "expiryDays": 30, "killSwitch": true},
+        "migrationSafety": {"lockBudgetSeconds": 30, "rollbackPlan": "shadow table"},
+        "blastRadiusLabels": ["tenant%", "region%"],
+        "verificationSuites": ["smoke-auth", "synthetic-login"],
+        "releaseMarkers": ["grafana deploy markers", "incident timeline links"],
+        "breakGlass": {"process": "RUNBOOKS/BREAK_GLASS_ACCESS.md", "auditPath": "packages/resilience/data/audit-log.jsonl"},
+        "rollbackDrills": {"frequencyDays": 60, "lastRunAt": "2025-12-03T00:00:00Z"},
+        "changeFailureRate": 0.12
+      },
+      "observability": {
+        "structuredLogging": true,
+        "correlationIds": true,
+        "tracingCoverage": ["login", "token-issue", "policy-eval", "mfa", "logout"],
+        "sloDashboards": ["auth-slo", "latency-burn"],
+        "syntheticMonitors": ["signup", "login", "token-refresh", "password-reset"],
+        "entityTimeline": true,
+        "alertDeepLinks": true,
+        "anomalyDetection": true,
+        "perTenantSignals": true,
+        "mttrMinutes": 25,
+        "mttaMinutes": 5,
+        "timeToInnocenceMinutes": 8,
+        "telemetryCostControls": {"sampling": true, "retentionTiers": true}
+      },
+      "chaos": {
+        "calendar": [
+          {"quarter": "2025Q4", "scenarios": ["db lag", "redis miss storm"], "owner": "platform-sre"}
+        ],
+        "tooling": {"blastRadiusCapPercent": 20, "approvalsRequired": true},
+        "mitigationBacklog": {"openItems": 1, "lastUpdatedAt": "2025-12-12T00:00:00Z"},
+        "killSwitchesVerifiedAt": "2025-12-01T00:00:00Z",
+        "drIncluded": true,
+        "score": 92
+      },
+      "multiRegion": {
+        "strategy": "active-active",
+        "regions": ["us-east-1", "us-west-2"],
+        "healthChecks": true,
+        "replicationLagSeconds": 90,
+        "regionalDashboards": true,
+        "regionalDeployPipelines": true,
+        "failoverDrillAt": "2025-11-28T00:00:00Z",
+        "crossRegionChattyCalls": false,
+        "secretsStandardized": true,
+        "vendorPlan": true,
+        "adr": "adr/multi-region-auth.md"
+      },
+      "governance": {
+        "errorBudgets": [
+          {"journey": "login", "monthlyMinutes": 21.6, "burnedMinutes": 5},
+          {"journey": "token-issue", "monthlyMinutes": 21.6, "burnedMinutes": 3}
+        ],
+        "riskRegister": [
+          {"risk": "redis saturation", "owner": "platform-sre", "mitigationSlaDays": 30, "status": "in-progress"},
+          {"risk": "oidc vendor outage", "owner": "security", "mitigationSlaDays": 45, "status": "open"}
+        ],
+        "postmortemsRequireSystemicFix": true,
+        "reliabilityReleaseCadenceDays": 60,
+        "ownershipComplete": true,
+        "killSwitchRegistryTestDays": 60,
+        "lastAuditAt": "2025-11-30T00:00:00Z",
+        "incentives": true
+      }
+    },
+    {
+      "name": "payments-orchestrator",
+      "tier": "T1",
+      "owners": ["payments", "sre"],
+      "dependencies": [
+        {
+          "name": "postgres-payments",
+          "type": "db",
+          "owner": "data-eng",
+          "criticality": "critical",
+          "timeoutsMs": 900,
+          "retries": 3,
+          "circuitBreaker": {"failureThreshold": 5, "resetSeconds": 20},
+          "bulkhead": {"tenantIsolation": true, "featureIsolation": true, "queueDepthLimit": 120},
+          "gracefulDegradation": {"mode": "queue payments + offline retry", "testedAt": "2025-12-04T00:00:00Z"},
+          "cacheStrategy": {"scope": "pricing", "ttlSeconds": 600},
+          "sla": {"availability": 99.95, "latencyMsP99": 250},
+          "failStrategy": "fail-closed",
+          "killSwitch": {"present": true, "lastTestedAt": "2025-11-25T00:00:00Z", "coverage": ["processor-a", "processor-b"]},
+          "chaosTests": {"lastSimulatedAt": "2025-11-28T00:00:00Z", "scenario": "primary db read stall"},
+          "escalation": {"contact": "@payments-oncall"}
+        },
+        {
+          "name": "processor-a",
+          "type": "external-api",
+          "owner": "payments",
+          "criticality": "high",
+          "timeoutsMs": 1200,
+          "retries": 1,
+          "circuitBreaker": {"failureThreshold": 4, "resetSeconds": 45},
+          "bulkhead": {"tenantIsolation": true, "featureIsolation": true, "queueDepthLimit": 80},
+          "gracefulDegradation": {"mode": "switch to processor-b", "testedAt": "2025-12-07T00:00:00Z"},
+          "cacheStrategy": {"scope": "fx-rates", "ttlSeconds": 900},
+          "sla": {"availability": 99.9, "latencyMsP99": 500},
+          "failStrategy": "fail-open",
+          "killSwitch": {"present": true, "lastTestedAt": "2025-12-02T00:00:00Z", "coverage": ["settlement", "refund"]},
+          "chaosTests": {"lastSimulatedAt": "2025-12-03T00:00:00Z", "scenario": "processor outage"},
+          "escalation": {"contact": "@vendor-liaison"}
+        }
+      ],
+      "backup": {
+        "schedule": "every 30m",
+        "lastBackupAt": "2025-12-21T06:30:00Z",
+        "lastRestoreVerifiedAt": "2025-11-29T00:00:00Z",
+        "restoreDurationMinutes": 45,
+        "dataLossMinutes": 12,
+        "evidencePath": "RUNBOOKS/DR.md"
+      },
+      "runbook": {"path": "RUNBOOKS/DR.md", "roles": ["IC", "Payments Lead", "Comms"], "lastReviewedAt": "2025-11-27T00:00:00Z"},
+      "drEnvironment": {"runnable": true, "smokeCommand": "make dr-up", "lastSmokeAt": "2025-12-11T00:00:00Z"},
+      "drills": [
+        {"type": "restore", "executedAt": "2025-11-30T00:00:00Z", "durationMinutes": 50, "dataLossMinutes": 10, "result": "pass"},
+        {"type": "chaos", "executedAt": "2025-12-04T00:00:00Z", "durationMinutes": 40, "result": "pass"},
+        {"type": "rollback", "executedAt": "2025-12-02T00:00:00Z", "durationMinutes": 20, "result": "pass"}
+      ],
+      "capacity": {
+        "peakRps": 800,
+        "scenarios": ["black friday", "refund wave"],
+        "p95LatencyBudgetMs": 350,
+        "throughputBudgetRps": 700,
+        "autoscaling": {"minReplicas": 4, "maxReplicas": 15, "cooldownSeconds": 180},
+        "backpressure": {"queueCap": 6000, "shedLoadAboveMs": 900, "timeoutMs": 1600},
+        "quotas": {"perTenantRps": 120},
+        "dashboards": ["grafana/payments-capacity"],
+        "forecastHorizonDays": 120,
+        "brownoutMode": {"enabled": true, "lastTestedAt": "2025-12-06T00:00:00Z", "strategy": "defer refunds"}
+      },
+      "dataIntegrity": {
+        "riskyWritePaths": ["charge", "refund", "payout", "dispute", "ledger-adjust"],
+        "idempotencyKeys": ["idempotency-key", "payment-intent"],
+        "invariants": ["ledger-balanced", "duplicate-protection"],
+        "reconciliationJobs": {"cadence": "15m", "exceptionQueue": "payments-recon-deadletter"},
+        "eventLog": {"enabled": true, "topics": ["payments-ledger"]},
+        "outbox": {"enabled": true},
+        "dualControl": {"enabled": true, "scope": ["bulk-refund", "ledger-repair"]},
+        "quarantine": {"enabled": true, "rules": ["chargeback-flag", "fx-mismatch"]},
+        "integrityChecks": {"restoreHashValidation": true, "recordCounts": true},
+        "correctnessScorecard": {"driftFindings": 0, "mttrMinutes": 30}
+      },
+      "releaseSafety": {
+        "progressiveStages": ["canary 5%", "ramp 25%", "ramp 75%", "full"],
+        "rollbackTriggers": ["slo burn", "declines>1%", "latency>400"],
+        "featureFlagGovernance": {"owner": "payments", "expiryDays": 21, "killSwitch": true},
+        "migrationSafety": {"lockBudgetSeconds": 45, "rollbackPlan": "dual writes"},
+        "blastRadiusLabels": ["tenant%", "region%", "processor%"],
+        "verificationSuites": ["smoke-payments", "synthetic-charge"],
+        "releaseMarkers": ["grafana deploy markers"],
+        "breakGlass": {"process": "RUNBOOKS/BREAK_GLASS_ACCESS.md", "auditPath": "packages/resilience/data/audit-log.jsonl"},
+        "rollbackDrills": {"frequencyDays": 75, "lastRunAt": "2025-12-05T00:00:00Z"},
+        "changeFailureRate": 0.18
+      },
+      "observability": {
+        "structuredLogging": true,
+        "correlationIds": true,
+        "tracingCoverage": ["charge", "refund", "payout", "fx", "reconciliation"],
+        "sloDashboards": ["payments-slo"],
+        "syntheticMonitors": ["charge", "refund", "payout", "status"],
+        "entityTimeline": true,
+        "alertDeepLinks": true,
+        "anomalyDetection": true,
+        "perTenantSignals": true,
+        "mttrMinutes": 35,
+        "mttaMinutes": 6,
+        "timeToInnocenceMinutes": 10,
+        "telemetryCostControls": {"sampling": true, "retentionTiers": true}
+      },
+      "chaos": {
+        "calendar": [
+          {"quarter": "2025Q4", "scenarios": ["processor outage", "db stall"], "owner": "payments"}
+        ],
+        "tooling": {"blastRadiusCapPercent": 25, "approvalsRequired": true},
+        "mitigationBacklog": {"openItems": 2, "lastUpdatedAt": "2025-12-08T00:00:00Z"},
+        "killSwitchesVerifiedAt": "2025-12-02T00:00:00Z",
+        "drIncluded": true,
+        "score": 88
+      },
+      "multiRegion": {
+        "strategy": "active-passive",
+        "regions": ["us-east-1", "us-west-2"],
+        "healthChecks": true,
+        "replicationLagSeconds": 180,
+        "regionalDashboards": true,
+        "regionalDeployPipelines": true,
+        "failoverDrillAt": "2025-12-01T00:00:00Z",
+        "crossRegionChattyCalls": false,
+        "secretsStandardized": true,
+        "vendorPlan": true,
+        "adr": "adr/payments-multi-region.md"
+      },
+      "governance": {
+        "errorBudgets": [
+          {"journey": "charge", "monthlyMinutes": 21.6, "burnedMinutes": 8},
+          {"journey": "payout", "monthlyMinutes": 21.6, "burnedMinutes": 6}
+        ],
+        "riskRegister": [
+          {"risk": "processor saturation", "owner": "payments", "mitigationSlaDays": 60, "status": "in-progress"}
+        ],
+        "postmortemsRequireSystemicFix": true,
+        "reliabilityReleaseCadenceDays": 60,
+        "ownershipComplete": true,
+        "killSwitchRegistryTestDays": 60,
+        "lastAuditAt": "2025-12-04T00:00:00Z",
+        "incentives": true
+      }
+    },
+    {
+      "name": "analytics-reports",
+      "tier": "T2",
+      "owners": ["data-platform"],
+      "dependencies": [
+        {
+          "name": "warehouse",
+          "type": "db",
+          "owner": "data-platform",
+          "criticality": "high",
+          "timeoutsMs": 1500,
+          "retries": 3,
+          "circuitBreaker": {"failureThreshold": 6, "resetSeconds": 40},
+          "bulkhead": {"tenantIsolation": true, "featureIsolation": true, "queueDepthLimit": 300},
+          "gracefulDegradation": {"mode": "serve cached reports", "testedAt": "2025-12-03T00:00:00Z"},
+          "cacheStrategy": {"scope": "reports", "ttlSeconds": 86400},
+          "sla": {"availability": 99.5, "latencyMsP99": 800},
+          "failStrategy": "fail-open",
+          "killSwitch": {"present": true, "lastTestedAt": "2025-12-09T00:00:00Z", "coverage": ["heavy-joins"]},
+          "chaosTests": {"lastSimulatedAt": "2025-11-26T00:00:00Z", "scenario": "query backlog"},
+          "escalation": {"contact": "@data-oncall"}
+        }
+      ],
+      "backup": {
+        "schedule": "nightly",
+        "lastBackupAt": "2025-12-20T23:00:00Z",
+        "lastRestoreVerifiedAt": "2025-12-10T00:00:00Z",
+        "restoreDurationMinutes": 120,
+        "dataLossMinutes": 60,
+        "evidencePath": "RUNBOOKS/DR.md"
+      },
+      "runbook": {"path": "RUNBOOKS/DR.md", "roles": ["Data IC", "Ops"], "lastReviewedAt": "2025-12-01T00:00:00Z"},
+      "drEnvironment": {"runnable": true, "smokeCommand": "make dr-up", "lastSmokeAt": "2025-12-05T00:00:00Z"},
+      "drills": [
+        {"type": "restore", "executedAt": "2025-12-09T00:00:00Z", "durationMinutes": 130, "dataLossMinutes": 80, "result": "pass"},
+        {"type": "chaos", "executedAt": "2025-12-06T00:00:00Z", "durationMinutes": 35, "result": "pass"}
+      ],
+      "capacity": {
+        "peakRps": 120,
+        "scenarios": ["end-of-month reporting"],
+        "p95LatencyBudgetMs": 1200,
+        "throughputBudgetRps": 100,
+        "autoscaling": {"minReplicas": 2, "maxReplicas": 8, "cooldownSeconds": 300},
+        "backpressure": {"queueCap": 2000, "shedLoadAboveMs": 1500, "timeoutMs": 2500},
+        "quotas": {"perTenantRps": 20},
+        "dashboards": ["grafana/analytics"],
+        "forecastHorizonDays": 180,
+        "brownoutMode": {"enabled": true, "lastTestedAt": "2025-11-30T00:00:00Z", "strategy": "defer heavy reports"}
+      },
+      "dataIntegrity": {
+        "riskyWritePaths": ["dataset-publish", "dataset-purge", "permissions-update", "metadata-write", "report-snapshot"],
+        "idempotencyKeys": ["dataset-id", "job-id"],
+        "invariants": ["schema-versioned", "permissions-validated"],
+        "reconciliationJobs": {"cadence": "daily", "exceptionQueue": "analytics-recon-deadletter"},
+        "eventLog": {"enabled": true, "topics": ["analytics-events"]},
+        "outbox": {"enabled": true},
+        "dualControl": {"enabled": true, "scope": ["dataset-purge"]},
+        "quarantine": {"enabled": true, "rules": ["schema-drift", "pii-detected"]},
+        "integrityChecks": {"restoreHashValidation": true, "recordCounts": true},
+        "correctnessScorecard": {"driftFindings": 0, "mttrMinutes": 45}
+      },
+      "releaseSafety": {
+        "progressiveStages": ["shadow", "beta 20%", "full"],
+        "rollbackTriggers": ["SLO-burn", "error>2%"],
+        "featureFlagGovernance": {"owner": "data-platform", "expiryDays": 45, "killSwitch": true},
+        "migrationSafety": {"lockBudgetSeconds": 90, "rollbackPlan": "blue-green"},
+        "blastRadiusLabels": ["tenant%"],
+        "verificationSuites": ["analytics-smoke"],
+        "releaseMarkers": ["grafana deploy markers"],
+        "breakGlass": {"process": "RUNBOOKS/BREAK_GLASS_ACCESS.md", "auditPath": "packages/resilience/data/audit-log.jsonl"},
+        "rollbackDrills": {"frequencyDays": 90, "lastRunAt": "2025-11-22T00:00:00Z"},
+        "changeFailureRate": 0.1
+      },
+      "observability": {
+        "structuredLogging": true,
+        "correlationIds": true,
+        "tracingCoverage": ["report-run", "dataset-publish", "permissions-check", "export", "ingest"],
+        "sloDashboards": ["analytics-slo"],
+        "syntheticMonitors": ["report-run", "dataset-publish", "api-health", "ingest"],
+        "entityTimeline": true,
+        "alertDeepLinks": true,
+        "anomalyDetection": true,
+        "perTenantSignals": true,
+        "mttrMinutes": 40,
+        "mttaMinutes": 8,
+        "timeToInnocenceMinutes": 12,
+        "telemetryCostControls": {"sampling": true, "retentionTiers": true}
+      },
+      "chaos": {
+        "calendar": [
+          {"quarter": "2025Q4", "scenarios": ["warehouse slowness", "queue backlog"], "owner": "data-platform"}
+        ],
+        "tooling": {"blastRadiusCapPercent": 15, "approvalsRequired": true},
+        "mitigationBacklog": {"openItems": 0, "lastUpdatedAt": "2025-12-10T00:00:00Z"},
+        "killSwitchesVerifiedAt": "2025-11-29T00:00:00Z",
+        "drIncluded": true,
+        "score": 90
+      },
+      "multiRegion": {
+        "strategy": "active-passive",
+        "regions": ["us-east-1", "us-west-2"],
+        "healthChecks": true,
+        "replicationLagSeconds": 240,
+        "regionalDashboards": true,
+        "regionalDeployPipelines": true,
+        "failoverDrillAt": "2025-12-08T00:00:00Z",
+        "crossRegionChattyCalls": false,
+        "secretsStandardized": true,
+        "vendorPlan": true,
+        "adr": "adr/analytics-multi-region.md"
+      },
+      "governance": {
+        "errorBudgets": [
+          {"journey": "reports", "monthlyMinutes": 480, "burnedMinutes": 120}
+        ],
+        "riskRegister": [
+          {"risk": "warehouse latency", "owner": "data-platform", "mitigationSlaDays": 45, "status": "in-progress"}
+        ],
+        "postmortemsRequireSystemicFix": true,
+        "reliabilityReleaseCadenceDays": 90,
+        "ownershipComplete": true,
+        "killSwitchRegistryTestDays": 45,
+        "lastAuditAt": "2025-12-05T00:00:00Z",
+        "incentives": true
+      }
+    }
+  ],
+  "artifactRegistry": ["RUNBOOKS/DR.md", "RUNBOOKS/BREAK_GLASS_ACCESS.md", "packages/resilience/data/audit-log.jsonl"]
+}

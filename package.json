@@ -60,7 +60,8 @@
     "sdk:generate": "pnpm --filter @intelgraph/sdk generate",
     "precommit": "lint-staged",
     "db:prisma:diff": "prisma migrate diff --from-url $DATABASE_URL --to-schema-datamodel prisma/schema.prisma",
-    "db:knex:smoke": "knex migrate:down && knex migrate:up"
+    "db:knex:smoke": "knex migrate:down && knex migrate:up",
+    "resilience:check": "pnpm --filter @intelgraph/resilience check"
   },
   "keywords": [
     "intelligence-analysis",

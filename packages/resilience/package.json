@@ -1,0 +1,11 @@
+{
+  "name": "@intelgraph/resilience",
+  "version": "0.1.0",
+  "description": "Execution-grade resilience validation engine and audit logger",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "check": "tsx src/cli.ts"
+  },
+  "license": "MIT"
+}
