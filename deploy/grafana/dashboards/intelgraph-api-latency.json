@@ -1,0 +1,8 @@
+{
+  "title": "IntelGraph API — Latency & Errors",
+  "panels": [
+    {"type":"graph","title":"HTTP p95 latency","targets":[{"expr":"histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))"}]},
+    {"type":"graph","title":"HTTP error rate","targets":[{"expr":"sum(rate(http_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m]))"}]}
+  ],
+  "schemaVersion": 38
+}

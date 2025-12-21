@@ -1,0 +1,10 @@
+# Golden contract for Case Spaces (v1)
+scalar JSON
+
+type CaseSpace { id: ID!, name: String!, createdAt: String!, labels: [String!]! }
+
+type AuditEvent { id: ID!, ts: String!, actor: String!, action: String!, subject: String!, details: JSON }
+
+type Query { caseSpace(id: ID!): CaseSpace, auditEvents(caseId: ID!, limit: Int = 50): [AuditEvent!]! }
+
+type Mutation { createCase(name: String!): CaseSpace! }

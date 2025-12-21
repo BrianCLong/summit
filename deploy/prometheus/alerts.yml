@@ -1,0 +1,8 @@
+groups:
+  - name: intelgraph-slo
+    rules:
+      - alert: HighLatencyP95
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 0.5
+        for: 10m
+        labels: { severity: page }
+        annotations: { summary: "p95 latency > 500ms" }

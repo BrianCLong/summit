@@ -1,0 +1,28 @@
+# Golden contract for Graph Analytics API (v1)
+scalar JSON
+
+enum AnalyticsJobKind { SHORTEST_PATH LOUVAIN LEIDEN BETWEENNESS EIGENVECTOR }
+
+type AnalyticsJobTicket { id: ID!, kind: AnalyticsJobKind!, submittedAt: String!, status: String! }
+
+type ShortestPathResult { nodes: [ID!]!, length: Int! }
+
+type CommunityResult { communities: [JSON!]!, modularity: Float }
+
+type CentralityResult { scores: [JSON!]! }
+
+input ShortestPathInput { from: ID!, to: ID!, edgeType: String }
+
+input CommunityInput { resolution: Float, seed: Int }
+
+input CentralityInput { iterations: Int, seed: Int }
+
+union AnalyticsResult = ShortestPathResult | CommunityResult | CentralityResult
+
+type Query { analyticsJob(id: ID!): AnalyticsJobTicket }
+
+type Mutation {
+  startShortestPath(input: ShortestPathInput!): AnalyticsJobTicket!
+  startCommunity(input: CommunityInput!): AnalyticsJobTicket!
+  startCentrality(input: CentralityInput!): AnalyticsJobTicket!
+}
