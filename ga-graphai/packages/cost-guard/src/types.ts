@@ -196,3 +196,142 @@ export interface ResourceOptimizationConfig {
   rebalanceTolerance: number;
   confidenceWindow: number;
 }
+
+export interface ChargebackTagSet {
+  service: string;
+  team: string;
+  tenant: string;
+  tier: string;
+  env: 'prod' | 'staging' | 'dev' | 'preview' | (string & {});
+  budget_owner: string;
+  kill_switch_id: string;
+  ledger_account: string;
+}
+
+export interface TaggableResource {
+  id: string;
+  tags: Partial<ChargebackTagSet>;
+  annotations?: { ttlHours?: number };
+}
+
+export interface ChargebackValidation {
+  isValid: boolean;
+  missing: (keyof ChargebackTagSet)[];
+  violations: string[];
+  normalized: ChargebackTagSet;
+  expiresAt?: Date;
+}
+
+export interface BudgetControl {
+  domainId: string;
+  monthlyBudgetUsd: number;
+  owner?: string;
+  onCallContact?: string;
+}
+
+export interface SpendSnapshot {
+  actualMonthToDateUsd: number;
+  projectedMonthToDateUsd?: number;
+}
+
+export interface BudgetAlert {
+  domainId: string;
+  threshold: 'normal' | '50' | '80' | '100';
+  action: 'track' | 'notify' | 'escalate' | 'freeze';
+  owner: string;
+  onCall: string;
+  message: string;
+  nextCheckMinutes: number;
+  freezeRequired: boolean;
+  projected: number;
+  actual: number;
+  budget: number;
+  varianceUsd: number;
+  variancePct: number;
+}
+
+export interface CostRecord {
+  domainId: string;
+  resourceId: string;
+  amountUsd: number;
+  owner?: string;
+  notes?: string;
+}
+
+export interface CostLedgerInput {
+  currentWeekCosts: CostRecord[];
+  previousWeekCosts: CostRecord[];
+  topN?: number;
+  notes?: string[];
+}
+
+export interface CostLedgerEntry {
+  domainId: string;
+  currentUsd: number;
+  previousUsd: number;
+  deltaUsd: number;
+  deltaPct: number;
+}
+
+export interface CostLedger {
+  generatedAt: Date;
+  entries: CostLedgerEntry[];
+  topMovers: {
+    domainId: string;
+    resourceId: string;
+    deltaUsd: number;
+    deltaPct: number;
+    owner?: string;
+    notes?: string;
+  }[];
+  accuracyTarget: string;
+  notes: string[];
+}
+
+export interface KillSwitchDefinition {
+  id: string;
+  owner: string;
+  description: string;
+  tier: '0' | '1' | '2';
+  lastTestedAt?: Date;
+  testIntervalHours?: number;
+}
+
+export interface KillSwitchValidation {
+  dueForTest: KillSwitchDefinition[];
+  healthy: KillSwitchDefinition[];
+  message: string;
+}
+
+export interface TelemetryPolicy {
+  envRetentionDays: Record<string, number>;
+  traceSampling: Record<string, number>;
+  allowUnstructuredLogs: boolean;
+  maxLabelCardinality: number;
+}
+
+export interface TelemetryPolicyDecision {
+  retentionDays: number;
+  traceSample: number;
+  labels: ChargebackTagSet;
+  violations: string[];
+  maxLabelCardinality: number;
+}
+
+export interface VendorContract {
+  vendor: string;
+  owner: string;
+  monthlyCostUsd: number;
+  renewalDate: Date;
+  utilizationRatio: number;
+  overlapCategory?: string;
+}
+
+export interface VendorRecommendation {
+  vendor: string;
+  owner: string;
+  monthlyCostUsd: number;
+  daysToRenewal: number;
+  recommendation: 'renegotiate' | 'monitor';
+  rationale: string;
+}
