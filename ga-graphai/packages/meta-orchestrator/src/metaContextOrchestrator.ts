@@ -1,4 +1,6 @@
 import { randomUUID } from 'crypto';
+import { performance } from 'node:perf_hooks';
+import { metaOrchestratorTelemetry, MetaRouterTelemetry } from './telemetry.js';
 
 type ContextLayer = 'local' | 'task' | 'world' | 'agent';
 
@@ -121,6 +123,8 @@ class ContextGraph {
 }
 
 export class MetaContextOrchestrator {
+  constructor(private readonly telemetry: MetaRouterTelemetry = metaOrchestratorTelemetry) {}
+
   private readonly graph = new ContextGraph();
   private readonly ledger = new ContextLedger();
 
@@ -142,6 +146,7 @@ export class MetaContextOrchestrator {
       supersededBy: node.supersededBy ?? null,
     };
     const stored = this.graph.upsert(normalized);
+    this.telemetry.recordNode(normalized.kind, normalized.layer);
     this.ledger.record({
       id: randomUUID(),
       kind: normalized.supersedes?.length ? 'supersede' : 'add',
@@ -161,11 +166,13 @@ export class MetaContextOrchestrator {
       timestamp: delta.timestamp ?? nowIso(),
       linkedNodeIds: delta.linkedNodeIds ?? [],
     };
+    this.telemetry.recordDelta(normalized.kind);
     this.ledger.record(normalized);
     return normalized;
   }
 
   assemble(request: ContextAssemblyRequest): ContextPacket {
+    const startedAt = performance.now();
     const includeLayers = request.includeLayers ?? ['local', 'task', 'world', 'agent'];
     const includeKinds = request.includeKinds ?? [];
     const excludeKinds = new Set(request.excludeKinds ?? []);
@@ -181,12 +188,21 @@ export class MetaContextOrchestrator {
 
     this.enforceContract(activeNodes, request.contract, request.strict ?? false);
 
-    return {
+    const assembled: ContextPacket = {
       goal: request.goal,
       assembledAt: nowIso(),
       nodes: activeNodes,
       deltas: this.ledger.all(),
     };
+
+    this.telemetry.recordAssembly(
+      request.goal,
+      activeNodes.length,
+      assembled.deltas.length,
+      performance.now() - startedAt,
+    );
+
+    return assembled;
   }
 
   private enforceContract(
