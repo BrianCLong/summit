@@ -174,9 +174,24 @@ jobs:
   # ==========================================================================
   # Job 3: Create release branch and draft release notes
   # ==========================================================================
+  validate-whitepaper:
+    name: Validate GA Whitepaper
+    needs: preflight
+    if: needs.preflight.outputs.eligible == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Validate GA architecture whitepaper
+        run: node .ci/scripts/validate-whitepaper.js --path=docs/whitepaper/summit-architecture.md
+
   create-release-branch:
     name: Create Release Branch
-    needs: [preflight, version]
+    needs: [preflight, version, validate-whitepaper]
     runs-on: ubuntu-latest
     outputs:
       branch_name: ${{ steps.branch.outputs.branch_name }}
