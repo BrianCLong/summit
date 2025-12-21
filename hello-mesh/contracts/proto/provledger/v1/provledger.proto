@@ -1,0 +1,5 @@
+syntax = "proto3";
+package ig.provledger.v1;
+service ProvLedger { rpc GetManifest(ManifestRequest) returns (ManifestResponse); }
+message ManifestRequest { string claim_id = 1; }
+message ManifestResponse { string claim_id = 1; string merkle_root = 2; }
