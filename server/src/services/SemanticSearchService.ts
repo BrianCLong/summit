@@ -232,4 +232,35 @@ export default class SemanticSearchService {
       return [];
     }
   }
+
+  async searchDocs(query: string, limit = 10) {
+    try {
+      const vector = await this.embeddingService.generateEmbedding({ text: query });
+      const vectorStr = `[${vector.join(',')}]`;
+      const pool = await this.getPool();
+
+      const sql = `
+        SELECT
+          path,
+          title,
+          metadata,
+          1 - (embedding <=> $1::vector) as similarity
+        FROM knowledge_articles
+        WHERE embedding IS NOT NULL
+        ORDER BY similarity DESC
+        LIMIT $2
+      `;
+
+      const res = await pool.query(sql, [vectorStr, limit]);
+      return res.rows.map(r => ({
+        path: r.path,
+        title: r.title,
+        metadata: r.metadata,
+        similarity: parseFloat(r.similarity)
+      }));
+    } catch (err) {
+      this.logger.error({ err }, "Doc search failed");
+      return [];
+    }
+  }
 }
