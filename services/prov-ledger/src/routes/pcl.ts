@@ -1,6 +1,8 @@
 import { FastifyInstance } from 'fastify';
 import { LedgerService } from '../services/LedgerService.js';
 import { z } from 'zod';
+import { cacheRemember } from '../../libs/ops/src/cache.js';
+import { keys } from '../cache-keys.js';
 
 const CreateEvidenceSchema = z.object({
   url: z.string().optional(),
@@ -62,7 +64,9 @@ export default async function pclRoutes(fastify: FastifyInstance) {
 
   fastify.get('/manifest/:bundleId', async (req, reply) => {
     const { bundleId } = req.params as { bundleId: string };
-    const manifest = await ledger.getManifest(bundleId);
+    const manifest = await cacheRemember(keys.manifest(bundleId), 60, () =>
+      ledger.getManifest(bundleId)
+    );
     if (!manifest) {
       return reply.code(404).send({ error: 'Bundle not found' });
     }
