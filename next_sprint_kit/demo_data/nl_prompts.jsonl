@@ -1,0 +1,5 @@
+{"prompt":"Show energy entities communicating with finance entities in the Baltic","expected":"MATCH"}
+{"prompt":"List logistics nodes linked to high-risk investigations","expected":"MATCH"}
+{"prompt":"Find cyber actors funding diplomacy targets","expected":"MATCH"}
+{"prompt":"Surface Sahel investigations with communications over 0.5 weight","expected":"MATCH"}
+{"prompt":"Trace connections between Nordic finance and Pacific energy","expected":"MATCH"}

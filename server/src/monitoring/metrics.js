@@ -206,6 +206,26 @@ const pipelineLatencySeconds = new client.Histogram({
   buckets: [5, 15, 30, 60, 120, 300, 600, 1200],
 });
 
+// NL→Cypher preview observability
+const previewLatencyMs = new client.Histogram({
+  name: 'preview_latency_ms',
+  help: 'Latency of NL to Cypher preview generation in ms',
+  labelNames: ['tenant', 'cache'],
+  buckets: [25, 50, 100, 200, 400, 850, 1500, 3000],
+});
+
+const previewGuardrailBlocksTotal = new client.Counter({
+  name: 'preview_guardrail_blocks_total',
+  help: 'Total guardrail blocks for NL to Cypher previews',
+  labelNames: ['tenant', 'reason'],
+});
+
+const previewAccuracyRatio = new client.Gauge({
+  name: 'preview_accuracy_ratio',
+  help: 'Recorded accuracy ratio for NL to Cypher preview verification bundles',
+  labelNames: ['bundle'],
+});
+
 // Register all metrics
 register.registerMetric(httpRequestDuration);
 register.registerMetric(httpRequestsTotal);
@@ -234,6 +254,9 @@ register.registerMetric(pipelineFreshnessSeconds);
 register.registerMetric(pipelineCompletenessRatio);
 register.registerMetric(pipelineCorrectnessRatio);
 register.registerMetric(pipelineLatencySeconds);
+register.registerMetric(previewLatencyMs);
+register.registerMetric(previewGuardrailBlocksTotal);
+register.registerMetric(previewAccuracyRatio);
 
 // GraphRAG metrics for schema validation and caching
 const graphragSchemaFailuresTotal = new client.Counter({
@@ -388,6 +411,9 @@ const metrics = {
   neighborhoodCacheHitRatio,
   neighborhoodCacheLatencyMs,
   pbacDecisionsTotal,
+  previewLatencyMs,
+  previewGuardrailBlocksTotal,
+  previewAccuracyRatio,
 };
 
 // Update memory usage periodically
@@ -441,6 +467,9 @@ export {
   pipelineCompletenessRatio,
   pipelineCorrectnessRatio,
   pipelineLatencySeconds,
+  previewLatencyMs,
+  previewGuardrailBlocksTotal,
+  previewAccuracyRatio,
   graphqlResolverDurationSeconds,
   graphqlResolverErrorsTotal,
   graphqlResolverCallsTotal,

@@ -1,0 +1,64 @@
+- id: E1
+  name: Authority Compiler & NL→Cypher Preview
+  rationale: Enforce policy-by-default query construction and provide explainable previews to reduce analyst error rates.
+  priority: P0
+  labels: [policy, graph, xai]
+  owner: Search & Knowledge Team
+  dependencies:
+    - policy-registry
+    - neo4j-sandbox
+  acceptance:
+    - Preview returns three policy-compliant Cypher variants under 400 ms median.
+    - Each preview response includes an explainability block referencing applicable policies.
+
+- id: E2
+  name: Provenance Ledger Beta
+  rationale: Capture event-level provenance and export signed verification bundles for R2/R3 demos.
+  priority: P0
+  labels: [provenance, audit, export]
+  owner: Ledger & Compliance
+  dependencies:
+    - postgres
+    - signer-service
+  acceptance:
+    - 95%+ of mutating events recorded with hash chain integrity.
+    - Export API produces signed JSONL bundles with verification manifest.
+
+- id: E3
+  name: SLO Dashboards & Observability
+  rationale: Provide executive-facing SLO and $/insight views with dashboard JSON hooks for reuse.
+  priority: P1
+  labels: [observability, dashboards, finops]
+  owner: Observability Guild
+  dependencies:
+    - otel-collector
+    - grafana
+  acceptance:
+    - Tri-pane flow SLOs visible with error budgets and latency percentiles.
+    - Dashboard JSON export validated for reuse in exec decks.
+
+- id: E4
+  name: Cost Guard Controls
+  rationale: Prevent quota overruns and enforce budget policies during demo and chaos drills.
+  priority: P1
+  labels: [finops, control]
+  owner: FinOps Council
+  dependencies:
+    - billing-metrics
+    - policy-engine
+  acceptance:
+    - 90%+ of cost anomalies flagged within 5 minutes; 80%+ of adversarial attempts blocked.
+    - Runbook shows guardband tuning and alerting thresholds.
+
+- id: E5
+  name: Reliability & Chaos Drills
+  rationale: Validate resilience and rollback playbooks (R1, R2, R3, R9) with demo data reproducibility.
+  priority: P1
+  labels: [reliability, chaos, runbooks]
+  owner: Site Reliability
+  dependencies:
+    - demo-fixtures
+    - chaos-engine
+  acceptance:
+    - Chaos scenarios executed with documented KPIs and failure modes.
+    - Rollback plan validated against demo data fixtures.

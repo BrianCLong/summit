@@ -1,0 +1,16 @@
+```mermaid
+graph TD
+  A[NL Prompt] --> B[Authority Compiler]
+  B --> C[Policy Evaluator]
+  C --> D[Cypher Candidate 1]
+  C --> E[Cypher Candidate 2]
+  C --> F[Cypher Candidate 3]
+  D --> G[Explainability Panel]
+  E --> G
+  F --> G
+  G --> H[Tri-Pane UI]
+  H --> I[Execute Query]
+  I --> J[Provenance Ledger]
+  J --> K[Cost Guard Decisions]
+  K --> L[SLO Dashboard]
+```

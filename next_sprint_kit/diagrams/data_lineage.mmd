@@ -1,0 +1,20 @@
+```mermaid
+sequenceDiagram
+  participant Analyst
+  participant Preview as Preview Service
+  participant Compiler as Authority Compiler
+  participant Neo4j as Neo4j Sandbox
+  participant Ledger as Provenance Ledger
+  participant Cost as Cost Guard
+  participant Grafana as SLO Dashboard
+
+  Analyst->>Preview: POST /preview nl-to-cypher
+  Preview->>Compiler: Normalize intent + fetch policies
+  Compiler-->>Preview: Cypher candidates + explainability
+  Preview->>Neo4j: Execute selected Cypher (read-only)
+  Preview->>Ledger: Emit preview.generated event
+  Preview->>Cost: Send usage metrics
+  Cost-->>Ledger: cost.guard.decided event
+  Ledger-->>Grafana: Metrics + verification status
+  Grafana-->>Analyst: Tri-pane dashboard + JSON hook
+```
