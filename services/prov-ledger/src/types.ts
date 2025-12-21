@@ -1,44 +1,26 @@
-export interface Evidence {
-  evidenceId: string;
-  source: string;
-  url?: string;
-  blob?: string;
-  license?: string;
-  hash: string;
-  timestamp: string;
-}
+export type Lineage = { field: string; source: string };
 
-export interface Transform {
-  transformId: string;
-  inputs: string[];
-  tool: string;
-  params: Record<string, any>;
-  outputs: string[];
-  operatorId: string;
-  timestamp: string;
-}
+export type EvidenceMetadata = {
+  licenseTags: string[];
+  lineage: Lineage[];
+};
 
-export interface Claim {
-  claimId: string;
-  subject: string;
-  predicate: string;
-  object: string;
-  evidenceRefs: string[];
-  confidence: number;
-  licenseId: string;
-  timestamp: string;
-}
-
-export interface LedgerEntry {
+export type Evidence = {
   id: string;
-  type: 'evidence' | 'transform' | 'claim';
-  data: Evidence | Transform | Claim;
-  previousHash: string | null;
-  hash: string; // Hash of (previousHash + type + data)
-}
+  hash: string;
+  metadata: EvidenceMetadata;
+};
 
-export interface Manifest {
-  bundleId: string;
+export type Claim = {
+  id: string;
+  evidenceIds: string[];
+  statement: string;
+};
+
+export type Manifest = {
+  id: string;
   merkleRoot: string;
-  entries: LedgerEntry[];
-}
+  createdAt: string;
+  licenseTags: string[];
+  lineage: Lineage[];
+};

@@ -1,9 +1,12 @@
-/services/prov-ledger/  @team-prov-ledger
-/services/policy-compiler/ @team-lac
-/services/ai-nlq/ @team-nlq
-/services/er-service/ @team-er
-/services/ingest/ @team-ingest
-/apps/ui/ @team-ui
-/apps/gateway/ @team-gateway
-/services/zk-tx/ @team-zk
-/ops/ @team-ops
+# Core areas
+/services/prov-ledger/        @intelgraph/provenance-team
+/gateway/policy-lac/          @intelgraph/policy-team
+/server/ai/nl2cypher/         @intelgraph/ai-team
+/apps/web/ingest-wizard/      @intelgraph/ingest-team
+/services/graph-analytics/    @intelgraph/analytics-team
+/services/cases/              @intelgraph/cases-team
+/services/audit/              @intelgraph/cases-team
+/services/auth/               @intelgraph/platform-auth
+/apps/web/report-studio/      @intelgraph/reporting-team
+/services/disclosure/         @intelgraph/reporting-team
+/services/cost-guard/         @intelgraph/ops-team
