@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { trace, Span } from '@opentelemetry/api';
 import { Counter, Histogram } from 'prom-client';
+import { createHash } from 'crypto';
 import { redis } from '../subscriptions/pubsub';
 import {
   SecurityEvent,
@@ -94,6 +95,10 @@ export class PolicyEnforcer {
   private readonly defaultTTL = 300; // 5 minutes
   private readonly provenanceLog: ProvenanceEntry[] = [];
   private readonly auditLogger: ZeroTrustAuditLogger;
+  private readonly memoryCache = new Map<
+    string,
+    { decision: PolicyDecision; expiresAt: number }
+  >();
 
   constructor(auditLogger: ZeroTrustAuditLogger = createZeroTrustAuditLogger()) {
     this.auditLogger = auditLogger;
@@ -108,14 +113,16 @@ export class PolicyEnforcer {
       });
 
       const startTime = Date.now();
+      const cacheKey = this.buildCacheKey(context);
 
       try {
         // Check cache first
-        const cacheKey = this.buildCacheKey(context);
         const cached = await this.getFromCache(cacheKey);
 
         if (cached) {
-          policyLatency.observe({ cached: 'true' }, Date.now() - startTime);
+          const latency = Date.now() - startTime;
+          policyLatency.observe({ cached: 'true' }, latency);
+          this.logDecision(context, cached, latency, true);
           return cached;
         }
 
@@ -130,7 +137,9 @@ export class PolicyEnforcer {
         // Record provenance
         await this.recordProvenance(context, decision);
 
-        policyLatency.observe({ cached: 'false' }, Date.now() - startTime);
+        const latency = Date.now() - startTime;
+        policyLatency.observe({ cached: 'false' }, latency);
+        this.logDecision(context, decision, latency, false);
         policyDecisions.inc({
           tenant_id: context.tenantId,
           action: context.action,
@@ -385,21 +394,35 @@ export class PolicyEnforcer {
   }
 
   private buildCacheKey(context: PolicyContext): string {
+    const resourceHash = createHash('sha256')
+      .update(context.resource || 'default')
+      .digest('hex');
     const keyParts = [
       context.tenantId,
       context.userId || 'anonymous',
       context.action,
-      context.resource || 'default',
-      context.purpose || 'none',
+      resourceHash,
     ];
     return `${this.cachePrefix}:${keyParts.join(':')}`;
   }
 
   private async getFromCache(key: string): Promise<PolicyDecision | null> {
+    const fromMemory = this.memoryCache.get(key);
+    if (fromMemory && fromMemory.expiresAt > Date.now()) {
+      return fromMemory.decision;
+    }
+    this.memoryCache.delete(key);
+
     try {
       const cached = await redis.get(key);
       if (cached) {
-        return JSON.parse(cached) as PolicyDecision;
+        const decision = JSON.parse(cached) as PolicyDecision;
+        const ttlMs = (decision.ttlSeconds ?? this.defaultTTL) * 1000;
+        this.memoryCache.set(key, {
+          decision,
+          expiresAt: Date.now() + ttlMs,
+        });
+        return decision;
       }
     } catch (error) {
       console.error('Policy cache read error:', error);
@@ -412,6 +435,11 @@ export class PolicyEnforcer {
     decision: PolicyDecision,
     ttl: number,
   ): Promise<void> {
+    this.memoryCache.set(key, {
+      decision,
+      expiresAt: Date.now() + ttl * 1000,
+    });
+
     try {
       await redis.setWithTTL(key, JSON.stringify(decision), ttl);
     } catch (error) {
@@ -549,6 +577,32 @@ export class PolicyEnforcer {
       provenanceEntries: this.provenanceLog.length,
       timestamp: new Date().toISOString(),
     };
+  }
+
+  private logDecision(
+    context: PolicyContext,
+    decision: PolicyDecision,
+    latencyMs: number,
+    cached: boolean,
+  ) {
+    if (process.env.POLICY_DEBUG !== '1') return;
+
+    const payload = {
+      decision: decision.allow ? 'allow' : 'deny',
+      tenant: context.tenantId,
+      subject: context.userId || 'anonymous',
+      action: context.action,
+      resource: context.resource,
+      latencyMs,
+      cached,
+      reason: decision.reason,
+      rulePath: decision.requiredPurpose
+        ? `purpose:${decision.requiredPurpose}`
+        : 'policy:default',
+      timestamp: new Date().toISOString(),
+    };
+
+    console.log('[policy-decision]', JSON.stringify(payload));
   }
 }
 
