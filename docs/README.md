@@ -38,6 +38,7 @@ Use this page as the fast path to the docs you need. The golden path details liv
 - **[DATA_MODEL.md](DATA_MODEL.md)** – Graph schema and storage expectations.
 - **[DEPLOYMENT.md](DEPLOYMENT.md)** and **[README-DEPLOY.md](README-DEPLOY.md)** – Deployment topologies and environment guidance.
 - **[ROADMAP.md](ROADMAP.md)** – Current objectives and sequencing (historical plans live under `docs/archived/`).
+- **[suite_unification_architecture.md](suite_unification_architecture.md)** – Blueprint for unifying modules, contracts, identity, billing, UX shell, and governance into a cohesive suite.
 
 ## Archived & Historical Material
 
