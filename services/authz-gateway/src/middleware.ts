@@ -27,6 +27,10 @@ export interface AuthenticatedRequest extends Request {
   obligations?: DecisionObligation[];
 }
 
+function resourceType(resourceId: string): string {
+  return resourceId.includes(':') ? resourceId.split(':')[0] : 'resource';
+}
+
 async function buildResource(
   attributeService: AttributeService,
   req: Request,
@@ -97,6 +101,7 @@ export function requireAuth(
       );
 
       if (!options.skipAuthorization) {
+        const startedAt = Date.now();
         const input: AuthorizationInput = {
           subject,
           resource,
@@ -111,13 +116,23 @@ export function requireAuth(
           ),
         };
         const decision = await authorize(input);
+        const evaluationMs = Date.now() - startedAt;
         await log({
           subject: String(payload.sub || ''),
           action: options.action,
-          resource: JSON.stringify(resource),
+          resource: resource.id,
+          resourceType: resourceType(resource.id),
+          resourceTenantId: resource.tenantId,
           tenantId: subject.tenantId,
           allowed: decision.allowed,
           reason: decision.reason,
+          roles: subject.roles,
+          attributes: {
+            resource_classification: resource.classification,
+            resource_residency: resource.residency,
+          },
+          evaluationMs,
+          traceId: (req.headers['x-trace-id'] as string | undefined) || undefined,
           breakGlass: (payload as { breakGlass?: unknown }).breakGlass as
             | undefined
             | AuthorizationInput['context']['breakGlass'],

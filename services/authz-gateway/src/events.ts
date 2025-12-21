@@ -10,6 +10,8 @@ export interface ApiCallEvent {
   decision?: string;
   latencyMs: number;
   traceId?: string;
+  correlationId?: string | null;
+  decisionEventId?: string;
   error?: string;
 }
 
@@ -24,6 +26,8 @@ export function emitApiCallEvent(event: ApiCallEvent): string {
   const record = {
     ...event,
     traceId,
+    correlationId: event.correlationId ?? null,
+    decisionEventId: event.decisionEventId ?? null,
     ts: new Date().toISOString(),
   };
   appendFileSync(eventLogPath, JSON.stringify(record) + '\n');

@@ -5,6 +5,7 @@ import pinoHttp from 'pino-http';
 import { initKeys, getPublicJwk } from './keys';
 import { login, introspect, oidcLogin } from './auth';
 import { requireAuth } from './middleware';
+import { emitApiCallEvent, createTraceId } from './events';
 import {
   startObservability,
   metricsHandler,
@@ -20,6 +21,10 @@ import type { ResourceAttributes } from './types';
 import { sessionManager } from './session';
 import { requireServiceAuth } from './service-auth';
 import { breakGlassManager } from './break-glass';
+import { RateLimiter } from './rate-limit';
+import { QuotaManager } from './quota';
+import { lookupApiClient } from './api-keys';
+import { log } from './audit';
 
 export async function createApp(): Promise<express.Application> {
   await initKeys();
@@ -33,6 +38,16 @@ export async function createApp(): Promise<express.Application> {
     .map((v) => v.trim())
     .filter(Boolean);
 
+  const rateLimiter = new RateLimiter({
+    limit: Number(process.env.API_RATE_LIMIT || 1000),
+    windowMs: Number(process.env.API_RATE_WINDOW_MS || 60_000),
+  });
+
+  const quotaManager = new QuotaManager({
+    limit: Number(process.env.API_QUOTA_LIMIT || 10_000),
+    windowMs: Number(process.env.API_QUOTA_WINDOW_MS || 3_600_000),
+  });
+
   const app: express.Application = express();
   app.use(tracingContextMiddleware);
   app.use(pinoHttp());
@@ -40,6 +55,134 @@ export async function createApp(): Promise<express.Application> {
   app.use(requestMetricsMiddleware);
 
   app.get('/metrics', metricsHandler);
+
+  app.post('/v1/companyos/decisions:check', async (req, res) => {
+    const apiKey = String(req.headers['x-api-key'] || '').trim();
+    if (!apiKey) {
+      return res.status(401).json({ error: 'api_key_required' });
+    }
+    const apiClient = lookupApiClient(apiKey);
+    if (!apiClient) {
+      return res.status(401).json({ error: 'invalid_api_key' });
+    }
+
+    const rateStatus = rateLimiter.check(apiClient.keyId);
+    res.setHeader('X-RateLimit-Limit', String(rateStatus.limit));
+    res.setHeader('X-RateLimit-Remaining', String(rateStatus.remaining));
+    res.setHeader('X-RateLimit-Reset', String(rateStatus.reset));
+    if (!rateStatus.allowed) {
+      return res.status(429).json({ error: 'rate_limit_exceeded' });
+    }
+
+    const quotaStatus = quotaManager.consume(apiClient.keyId);
+    res.setHeader('X-Quota-Limit', String(quotaStatus.limit));
+    res.setHeader('X-Quota-Remaining', String(quotaStatus.remaining));
+    res.setHeader('X-Quota-Reset', String(quotaStatus.reset));
+    if (!quotaStatus.allowed) {
+      return res.status(429).json({ error: 'quota_exhausted' });
+    }
+
+    try {
+      const subjectId =
+        req.body?.subject?.id || req.body?.subject_id || apiClient.subjectHint;
+      const action = req.body?.action;
+      if (!subjectId || !action) {
+        return res
+          .status(400)
+          .json({ error: 'subject_id_and_action_required' });
+      }
+
+      const subject = await attributeService.getSubjectAttributes(subjectId);
+      let resource: ResourceAttributes;
+      if (req.body?.resource?.id) {
+        try {
+          const catalogResource = await attributeService.getResourceAttributes(
+            req.body.resource.id,
+          );
+          resource = { ...catalogResource, ...req.body.resource };
+        } catch (error) {
+          resource = {
+            id: req.body.resource.id,
+            tenantId: req.body.resource.tenantId || subject.tenantId,
+            residency: req.body.resource.residency || subject.residency,
+            classification:
+              req.body.resource.classification || subject.clearance,
+            tags: req.body.resource.tags || [],
+          };
+        }
+      } else {
+        resource = {
+          id: req.body?.resource?.id || 'inline',
+          tenantId: req.body?.resource?.tenantId || subject.tenantId,
+          residency: req.body?.resource?.residency || subject.residency,
+          classification:
+            req.body?.resource?.classification || subject.clearance,
+          tags: req.body?.resource?.tags || [],
+        };
+      }
+
+      const evaluationStart = Date.now();
+      const decision = await authorize({
+        subject,
+        resource,
+        action,
+        context: attributeService.getDecisionContext(
+          String(req.body?.context?.currentAcr || 'loa1'),
+        ),
+      });
+      const evaluationMs = Date.now() - evaluationStart;
+
+      const correlationIdHeader = req.headers['x-correlation-id'];
+      const correlationId = Array.isArray(correlationIdHeader)
+        ? correlationIdHeader[0]
+        : correlationIdHeader || null;
+      const traceId = createTraceId();
+      const record = log({
+        subject: subject.id,
+        action,
+        resource: resource.id,
+        resourceType: resource.id.includes(':')
+          ? resource.id.split(':')[0]
+          : 'resource',
+        resourceTenantId: resource.tenantId,
+        tenantId: subject.tenantId,
+        allowed: decision.allowed,
+        reason: decision.reason,
+        roles: subject.roles,
+        attributes: {
+          resource_classification: resource.classification,
+          resource_residency: resource.residency,
+        },
+        evaluationMs,
+        traceId,
+        clientIp: req.ip,
+        flagState: req.body?.flags ?? {},
+        correlationId: correlationId ? String(correlationId) : null,
+      });
+
+      emitApiCallEvent({
+        tenantId: subject.tenantId,
+        clientId: apiClient.clientId,
+        subjectId: subject.id,
+        apiMethod: 'companyos.decisions.check',
+        statusCode: 200,
+        decision: decision.allowed ? 'allow' : 'deny',
+        latencyMs: evaluationMs,
+        traceId,
+        correlationId: correlationId ? String(correlationId) : null,
+        decisionEventId: record.event.event_id,
+      });
+
+      return res.json({
+        allow: decision.allowed,
+        reason: decision.reason,
+        obligations: decision.obligations,
+        trace_id: traceId,
+      });
+    } catch (error) {
+      return res.status(400).json({ error: (error as Error).message });
+    }
+  });
 
   app.post('/auth/login', async (req, res) => {
     try {
