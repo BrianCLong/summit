@@ -91,7 +91,7 @@ export class DbObservabilityService {
 
   async getLockGraph(limit = 25): Promise<{ locks: LockGraphRow[]; summary: string }> {
     const pool = this.getPool();
-    const { rows } = await pool.query(
+    const { rows } = await (pool as any).query(
       `
         SELECT
           waiting.pid AS waiting_pid,
@@ -140,13 +140,13 @@ export class DbObservabilityService {
     const pool = this.getPool();
 
     try {
-      const { rows: extensionRows } = await pool.query(
+      const { rows: extensionRows } = await (pool as any).query(
         `SELECT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_stat_statements') AS enabled`,
       );
       const enabled = Boolean(extensionRows?.[0]?.enabled);
 
       if (enabled) {
-        const { rows } = await pool.query(
+        const { rows } = await (pool as any).query(
           `
             SELECT queryid, query, calls, mean_exec_time, total_exec_time, rows
             FROM pg_stat_statements
@@ -172,8 +172,8 @@ export class DbObservabilityService {
       logger.warn({ err: error }, 'pg_stat_statements not available, falling back to app slow log');
     }
 
-    if (typeof pool.slowQueryInsights === 'function') {
-      const entries = pool.slowQueryInsights().slice(0, limit).map((entry) => ({
+    if (typeof (pool as any).slowQueryInsights === 'function') {
+      const entries = (pool as any).slowQueryInsights().slice(0, limit).map((entry: any) => ({
         query: entry.key,
         calls: entry.executions,
         mean_exec_time: entry.avgDurationMs,
@@ -234,7 +234,7 @@ export class DbObservabilityService {
     });
 
     const pool = this.getPool();
-    const { rows } = await pool.query(
+    const { rows } = await (pool as any).query(
       {
         text: `EXPLAIN (FORMAT JSON) ${entry.sql}`,
         values: parameters,

@@ -324,7 +324,7 @@ export class FaceDetectionEngine {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(new Error(`Failed to spawn face detection: ${error.message}`));
       });
     });
@@ -395,7 +395,7 @@ export class FaceDetectionEngine {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(
           new Error(`Failed to spawn video face detection: ${error.message}`),
         );
@@ -469,7 +469,7 @@ export class FaceDetectionEngine {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(error);
       });
     });
@@ -521,7 +521,7 @@ export class FaceDetectionEngine {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(error);
       });
     });
@@ -574,7 +574,7 @@ export class FaceDetectionEngine {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         logger.warn('Emotion analysis failed, using defaults');
         resolve(this.getDefaultEmotions());
       });

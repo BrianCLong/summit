@@ -7,7 +7,7 @@
  * Usage:
  *   import { securedLLM } from './services/SecuredLLMService.js';
  *
- *   const result = await securedLLM.complete({
+ *   const result = await securedLLM.complete(
  *     prompt: 'User input here',
  *     userId: 'user-123',
  *     tenantId: 'tenant-456',

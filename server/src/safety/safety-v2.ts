@@ -1,6 +1,6 @@
 import { getPostgresPool } from '../db/postgres.js';
 import { otelService } from '../middleware/observability/otel-tracing.js';
-import { z } from 'zod';
+import * as z from 'zod';
 
 // Safety v2 types per Chair's synthesis
 interface ActionRisk {

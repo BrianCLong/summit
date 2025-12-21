@@ -199,7 +199,7 @@ export class AdvancedMLService {
       // Check cache first
       const cacheKey = `ml_inference:${request.model_id}:${JSON.stringify(request).slice(0, 100)}`;
       const cached = await this.cacheService.get(cacheKey);
-      if (cached) {
+      if (cached && typeof cached === 'string') {
         logger.debug('Returning cached ML inference result', {
           modelId: request.model_id,
         });

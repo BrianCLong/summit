@@ -5,7 +5,7 @@ export abstract class BaseConnector {
   protected logger: pino.Logger;
 
   constructor(logger?: pino.Logger) {
-    this.logger = logger || pino({ name: this.constructor.name });
+    this.logger = logger || (pino as any)({ name: this.constructor.name });
   }
 
   protected async withResilience<T>(

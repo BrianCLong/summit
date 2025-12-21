@@ -346,7 +346,7 @@ export class TextAnalysisEngine {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(error);
       });
     });
@@ -404,7 +404,7 @@ export class TextAnalysisEngine {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(error);
       });
     });
@@ -582,7 +582,7 @@ export class TextAnalysisEngine {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(error);
       });
     });

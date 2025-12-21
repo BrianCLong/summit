@@ -258,7 +258,7 @@ export class ObjectDetectionEngine {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(new Error(`Failed to spawn object detection: ${error.message}`));
       });
     });
@@ -344,7 +344,7 @@ export class ObjectDetectionEngine {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(
           new Error(`Failed to spawn video object detection: ${error.message}`),
         );
@@ -478,7 +478,7 @@ export class ObjectDetectionEngine {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(
           new Error(`Failed to spawn feature extraction: ${error.message}`),
         );

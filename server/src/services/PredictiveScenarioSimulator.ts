@@ -64,8 +64,7 @@ export class PredictiveScenarioSimulator extends EventEmitter {
         `;
 
         try {
-            const response = await this.llmService.complete({
-                prompt,
+            const response = await this.llmService.complete(prompt, {
                 temperature: 0.5, // Higher temp for creativity in simulation
                 maxTokens: 2500
             });

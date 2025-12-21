@@ -32,7 +32,7 @@ async function loadSessionSecret(): Promise<string> {
         logger.warn({ error }, 'Vault unavailable for session secret; falling back to env');
       }
 
-      const fallback = process.env.SESSION_SECRET || cfg.SESSION_SECRET;
+      const fallback = process.env.SESSION_SECRET || (cfg.SESSION_SECRET as string);
       if (!fallback || fallback.length < 32) {
         const generated = crypto.randomBytes(48).toString('hex');
         cachedSecret = generated;

@@ -41,3 +41,15 @@ export const backupSize = new Gauge({
   help: 'Size of the backup artifact',
   labelNames: ['type'] as const,
 });
+
+export const dbPoolAcquisitionLatency = new Histogram({
+  name: 'db_pool_acquisition_latency_seconds',
+  help: 'Time taken to acquire a connection from the pool',
+  labelNames: ['database'] as const,
+});
+
+export const dbPoolUsage = new Gauge({
+  name: 'db_pool_usage',
+  help: 'Current usage of the database connection pool',
+  labelNames: ['database'] as const,
+});

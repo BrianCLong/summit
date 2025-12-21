@@ -1,11 +1,25 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import fs from 'fs';
-import path from 'path';
+import * as fs from 'fs';
+import * as path from 'path';
 
 // WORM Storage Service
 // Supports S3 Object Lock in production and local filesystem in development
 
-const s3 = process.env.AWS_S3_BUCKET ? new S3Client({}) : null;
+// Conditional import for AWS SDK (only needed if S3 is configured)
+// @ts-ignore - AWS SDK is optional dependency
+const s3 = process.env.AWS_S3_BUCKET
+  ? (() => {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { S3Client } = require('@aws-sdk/client-s3');
+        return new S3Client({});
+      } catch (err) {
+        console.warn(
+          'AWS SDK not installed. S3 WORM storage unavailable. Install @aws-sdk/client-s3 for S3 support.',
+        );
+        return null;
+      }
+    })()
+  : null;
 const LOCAL_WORM_DIR = path.resolve(process.cwd(), 'worm_storage');
 
 // Ensure local directory exists if we are in local mode
@@ -25,6 +39,8 @@ export async function putLocked(
   if (s3) {
     // S3 Mode (Production)
     const retainUntil = new Date(Date.now() + days * 86400 * 1000);
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { PutObjectCommand } = require('@aws-sdk/client-s3');
     await s3.send(
       new PutObjectCommand({
         Bucket: bucket,

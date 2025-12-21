@@ -3,7 +3,7 @@
 
 import { EventEmitter } from 'events';
 import Redis from 'ioredis';
-import { z } from 'zod';
+import * as z from 'zod';
 import logger from '../../config/logger.js';
 import { prometheusConductorMetrics } from '../observability/prometheus.js';
 import { crdtSyncEngine } from './crdt-sync.js';

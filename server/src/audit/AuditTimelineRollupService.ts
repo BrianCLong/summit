@@ -1,4 +1,5 @@
-import { Pool, PoolClient } from 'pg';
+import { Pool } from 'pg';
+import type { PoolClient } from 'pg';
 import { getPostgresPool } from '../config/database.js';
 import logger from '../utils/logger.js';
 

@@ -2,8 +2,8 @@ import { ApolloServer } from '@apollo/server';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { typeDefs } from '../graphql/schema/index.js';
 import resolvers from '../graphql/resolvers/index.js';
-import { authDirective } from '../graphql/authDirective.js';
-import { getContext } from '../lib/auth.js';
+import { authDirectiveTransformer } from '../graphql/authDirective.js';
+import { getContext, AuthContext } from '../lib/auth.js';
 
 export interface MakeServerOptions {
   user?: {
@@ -20,7 +20,7 @@ export interface MakeServerOptions {
   context?:
     | Record<string, unknown>
     | ((
-        base: Record<string, unknown>,
+        base: AuthContext,
       ) => Promise<Record<string, unknown>> | Record<string, unknown>);
 }
 
@@ -29,7 +29,6 @@ export async function makeGraphServer(opts: MakeServerOptions = {}) {
     typeDefs,
     resolvers: resolvers as Record<string, unknown>,
   });
-  const { authDirectiveTransformer } = authDirective();
   schema = authDirectiveTransformer(schema);
 
   const server = new ApolloServer({

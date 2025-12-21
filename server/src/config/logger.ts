@@ -84,7 +84,7 @@ export const logger = (pino as any)({
     level: (label: string) => {
       return { level: label.toUpperCase() };
     },
-    bindings: (bindings: pino.Bindings) => {
+    bindings: (bindings: any) => {
       return {
         pid: bindings.pid,
         host: bindings.hostname,
@@ -92,9 +92,9 @@ export const logger = (pino as any)({
     },
   },
   serializers: {
-    err: pino.stdSerializers.err,
-    req: pino.stdSerializers.req,
-    res: pino.stdSerializers.res,
+    err: (pino as any).stdSerializers.err,
+    req: (pino as any).stdSerializers.req,
+    res: (pino as any).stdSerializers.res,
   },
   // Remove pino-pretty transport for production readiness
   // In production, logs should be structured JSON for log aggregation

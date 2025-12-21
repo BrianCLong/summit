@@ -1,7 +1,7 @@
 import type { Redis } from 'ioredis';
 import { getRedisClient } from '../db/redis.js';
 import pino from 'pino';
-import { z } from 'zod';
+import * as z from 'zod';
 
 const logger = (pino as any)();
 

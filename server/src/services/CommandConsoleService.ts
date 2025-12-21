@@ -130,7 +130,7 @@ export class CommandConsoleService {
         details.push(
           ...missing.map((item) => ({
             component: item,
-            status: 'fail' as GateStatus,
+            status: 'fail' as const,
             message: `${item} not detected`,
           })),
         );

@@ -474,8 +474,7 @@ export class VerifiableSyncLog {
         const left = currentLevel[i];
         const right = currentLevel[i + 1] || left; // Duplicate if odd
 
-        const combined = crypto
-          .createHash('sha256')
+        const combined = createHash('sha256')
           .update(left + right)
           .digest('hex');
 
@@ -522,8 +521,7 @@ export class VerifiableSyncLog {
   private async verifyHashChain(entry: SyncLogEntry): Promise<boolean> {
     if (entry.sequenceNumber === 1) {
       // Genesis entry
-      const genesisHash = crypto
-        .createHash('sha256')
+      const genesisHash = createHash('sha256')
         .update('genesis')
         .digest('hex');
       return entry.previousHash === genesisHash;

@@ -46,7 +46,7 @@ export interface MitreTechnique {
 
 export class DetectionContentPackV5 {
   private prisma: PrismaClient;
-  private logger: winston.Logger;
+  private logger: Logger;
   private readonly PACK_VERSION = 'v5.0.0';
   private readonly TARGET_FP_RATE = 0.03; // 3% max FP rate
 

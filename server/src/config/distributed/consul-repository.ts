@@ -1,4 +1,5 @@
 import Consul from 'consul';
+import type { Consul as ConsulType } from 'consul';
 import { EventEmitter } from 'events';
 import {
   AppliedState,
@@ -24,10 +25,10 @@ export interface ConsulRepositoryConfig {
 export class ConsulConfigRepository<TConfig = Record<string, any>>
   implements RepositoryWriter<TConfig>
 {
-  private readonly consul: Consul.Consul;
+  private readonly consul: ConsulType;
   private readonly prefix: string;
   private readonly events = new EventEmitter();
-  private readonly watchers = new Map<string, Consul.Watch>();
+  private readonly watchers = new Map<string, any>();
 
   constructor(config: ConsulRepositoryConfig = {}) {
     this.consul = new Consul({

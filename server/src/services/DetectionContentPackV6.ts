@@ -59,7 +59,7 @@ export interface AttackCoverageMap {
 
 export class DetectionContentPackV6Service {
   private prisma: PrismaClient;
-  private logger: winston.Logger;
+  private logger: Logger;
 
   constructor(prisma: PrismaClient, logger: Logger) {
     this.prisma = prisma;

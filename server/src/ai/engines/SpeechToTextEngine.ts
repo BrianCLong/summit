@@ -284,7 +284,7 @@ export class SpeechToTextEngine {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(new Error(`Failed to spawn Whisper: ${error.message}`));
       });
     });
@@ -427,7 +427,7 @@ export class SpeechToTextEngine {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(
           new Error(`Failed to spawn speaker diarization: ${error.message}`),
         );
@@ -507,7 +507,7 @@ export class SpeechToTextEngine {
         }
       });
 
-      ffmpeg.on('error', (error) => {
+      ffmpeg.on('error', (error: Error) => {
         reject(new Error(`FFmpeg error: ${error.message}`));
       });
     });
@@ -570,7 +570,7 @@ export class SpeechToTextEngine {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(error);
       });
     });

@@ -1,4 +1,4 @@
-import nunjucks from 'nunjucks';
+import nunjucks, { Environment } from 'nunjucks';
 import { ReportContext, ReportRenderResult, ReportTemplate } from './types';
 
 const env = new nunjucks.Environment(undefined, {
@@ -24,7 +24,7 @@ env.addFilter('truncate', (value: unknown, length: number) => {
 });
 
 export class TemplateEngine {
-  constructor(private readonly environment: nunjucks.Environment = env) {}
+  constructor(private readonly environment: Environment = env) {}
 
   render(template: ReportTemplate, context: ReportContext): ReportRenderResult {
     const rendered = this.environment.renderString(template.content, context);

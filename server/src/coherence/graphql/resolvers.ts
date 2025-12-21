@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
-import { Neo4jService } from '../../db/neo4j';
+import { getNeo4jDriver } from '../../db/neo4j';
 import { RedisService } from '../../cache/redis';
 import logger from '../../utils/logger';
 import { ActivityFingerprintIndex } from '../intelligence/activityFingerprintIndex';

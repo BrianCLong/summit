@@ -17,7 +17,7 @@ const exportRequestSchema = z.object({
       z.object({
         id: z.string(),
         license: z.string(),
-        owner: z.string().optional(),
+        owner: z.string(),
         classification: z
           .enum(['public', 'internal', 'confidential', 'restricted'])
           .optional(),
@@ -41,7 +41,7 @@ const exportRequestSchema = z.object({
       'admin',
       'compliance-officer',
     ]),
-    user_scopes: z.array(z.string()).optional(),
+    user_scopes: z.array(z.string()).default([]),
     tenant_id: z.string(),
     purpose: z.enum([
       'investigation',
@@ -217,8 +217,11 @@ router.post('/export', async (req: AuthenticatedRequest, res: Response) => {
     // Evaluate export policy via OPA
     const policyDecision = await opaClient.evaluateExportPolicy({
       action: 'export',
-      dataset: exportRequest.dataset,
-      context: exportRequest.context,
+      dataset: exportRequest.dataset as any,
+      context: {
+        ...exportRequest.context,
+        user_scopes: exportRequest.context.user_scopes || [],
+      } as any,
     });
 
     // Generate redactions for sensitive fields
@@ -341,8 +344,11 @@ router.post('/export/simulate', async (req: AuthenticatedRequest, res: Response)
     // Get baseline decision
     const baselineDecision = await opaClient.evaluateExportPolicy({
       action: 'export',
-      dataset: simulateRequest.dataset,
-      context: simulateRequest.context,
+      dataset: simulateRequest.dataset as any,
+      context: {
+        ...simulateRequest.context,
+        user_scopes: simulateRequest.context.user_scopes || [],
+      } as any,
     });
 
     const baseline: ExportResponse['decision'] = {
@@ -377,8 +383,11 @@ router.post('/export/simulate', async (req: AuthenticatedRequest, res: Response)
 
       const scenarioDecision = await opaClient.evaluateExportPolicy({
         action: 'export',
-        dataset: simulateRequest.dataset,
-        context: modifiedContext,
+        dataset: simulateRequest.dataset as any,
+        context: {
+          ...modifiedContext,
+          user_scopes: (modifiedContext as any).user_scopes || simulateRequest.context.user_scopes || [],
+        } as any,
       });
 
       const scenarioResult = {

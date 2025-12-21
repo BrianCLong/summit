@@ -18,7 +18,7 @@
 
 import { EventEmitter } from 'events';
 import { Redis } from 'ioredis';
-import winston from 'winston';
+import winston, { Logger } from 'winston';
 import { randomUUID } from 'crypto';
 
 export interface IncidentEvent {
@@ -96,7 +96,7 @@ export interface ReweightMetrics {
 
 export class IncidentAutoReweighter extends EventEmitter {
   private redis: Redis;
-  private logger: winston.Logger;
+  private logger: Logger;
   private config: ReweightConfig;
   private metrics: ReweightMetrics;
   private activeReweights: Map<string, ActiveReweight> = new Map();
@@ -105,7 +105,7 @@ export class IncidentAutoReweighter extends EventEmitter {
 
   constructor(
     redis: Redis,
-    logger: winston.Logger,
+    logger: Logger,
     config: Partial<ReweightConfig> = {},
   ) {
     super();

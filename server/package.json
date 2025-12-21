@@ -81,6 +81,7 @@
     "joi": "^17.13.3",
     "json2csv": "^5.0.7",
     "jsonwebtoken": "^9.0.2",
+    "jwks-rsa": "^3.1.0",
     "lodash": "^4.17.21",
     "morgan": "^1.10.0",
     "natural": "^6.12.0",

@@ -68,7 +68,7 @@ export interface AlertVolumeMetrics {
 export class AnalystDashboardService {
   private prisma: PrismaClient;
   private redis: Redis;
-  private logger: winston.Logger;
+  private logger: Logger;
   private readonly CACHE_TTL = 300; // 5 minutes
   private readonly BASELINE_MTTT_TARGET = 900; // 15 minutes in seconds
 

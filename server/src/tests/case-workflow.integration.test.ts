@@ -24,7 +24,7 @@ describe('Case Workflow Integration Tests', () => {
     if (!investigatorRole) {
       throw new Error('Investigator role not found - run migrations first');
     }
-    investigatorRoleId = investigatorRole.id;
+    investigatorRoleId = (investigatorRole as any).id;
 
     testUserId = 'test-user-001';
   });
@@ -67,9 +67,9 @@ describe('Case Workflow Integration Tests', () => {
         assignedBy: 'system',
       });
 
-      expect(participant.caseId).toBe(testCaseId);
-      expect(participant.userId).toBe(testUserId);
-      expect(participant.isActive).toBe(true);
+      expect((participant as any).caseId).toBe(testCaseId);
+      expect((participant as any).userId).toBe(testUserId);
+      expect((participant as any).isActive).toBe(true);
 
       // 3. Transition to intake stage
       const transitionResult = await workflowService.transitionStage(
@@ -120,7 +120,7 @@ describe('Case Workflow Integration Tests', () => {
 
       // 6. Get SLA summary
       const slaSummary = await workflowService.getCaseSLASummary(testCaseId);
-      expect(slaSummary.totalSlas).toBeGreaterThan(0);
+      expect((slaSummary as any).totalSlas).toBeGreaterThan(0);
 
       // 7. List tasks
       const tasks = await workflowService.listTasks({ caseId: testCaseId });
@@ -129,7 +129,7 @@ describe('Case Workflow Integration Tests', () => {
       // 8. Get participants
       const participants = await workflowService.getCaseParticipants(testCaseId);
       expect(participants.length).toBe(1);
-      expect(participants[0].userId).toBe(testUserId);
+      expect((participants[0] as any).userId).toBe(testUserId);
     });
 
     it('should handle 4-eyes approval workflow', async () => {
@@ -153,35 +153,35 @@ describe('Case Workflow Integration Tests', () => {
         reason: 'Escalation to law enforcement requires dual approval',
       });
 
-      expect(approval.status).toBe('pending');
-      expect(approval.requiredApprovers).toBe(2);
+      expect((approval as any).status).toBe('pending');
+      expect((approval as any).requiredApprovers).toBe(2);
 
       // 2. First approver votes
       const vote1 = await workflowService.submitApprovalVote({
-        approvalId: approval.id,
+        approvalId: (approval as any).id,
         approverUserId: 'approver-001',
         decision: 'approve',
         reason: 'Evidence supports escalation',
       });
 
-      expect(vote1.decision).toBe('approve');
+      expect((vote1 as any).decision).toBe('approve');
 
       // 3. Check approval status (should still be pending with 1/2 votes)
-      const partialApproval = await workflowService.approvalRepo.getApproval(approval.id);
+      const partialApproval = await workflowService.approvalRepo.getApproval((approval as any).id);
       expect(partialApproval?.status).toBe('pending'); // Not yet approved
 
       // 4. Second approver votes
       const vote2 = await workflowService.submitApprovalVote({
-        approvalId: approval.id,
+        approvalId: (approval as any).id,
         approverUserId: 'approver-002',
         decision: 'approve',
         reason: 'Agreed, escalation warranted',
       });
 
-      expect(vote2.decision).toBe('approve');
+      expect((vote2 as any).decision).toBe('approve');
 
       // 5. Check approval status (should now be approved with 2/2 votes)
-      const completedApproval = await workflowService.approvalRepo.getApproval(approval.id);
+      const completedApproval = await workflowService.approvalRepo.getApproval((approval as any).id);
       expect(completedApproval?.status).toBe('approved');
       expect(completedApproval?.completedAt).toBeDefined();
     });
@@ -233,9 +233,9 @@ describe('Case Workflow Integration Tests', () => {
         targetHours: 168, // 7 days
       });
 
-      expect(sla.caseId).toBe(testCaseId);
-      expect(sla.status).toBe('active');
-      expect(sla.targetHours).toBe(168);
+      expect((sla as any).caseId).toBe(testCaseId);
+      expect((sla as any).status).toBe('active');
+      expect((sla as any).targetHours).toBe(168);
 
       // Get all SLAs for case
       const slas = await workflowService.getCaseSLAs(testCaseId);
@@ -243,8 +243,8 @@ describe('Case Workflow Integration Tests', () => {
 
       // Get SLA summary
       const summary = await workflowService.getCaseSLASummary(testCaseId);
-      expect(summary.totalSlas).toBeGreaterThan(0);
-      expect(summary.activeSlas).toBeGreaterThanOrEqual(0);
+      expect((summary as any).totalSlas).toBeGreaterThan(0);
+      expect((summary as any).activeSlas).toBeGreaterThanOrEqual(0);
     });
 
     it('should detect overdue tasks', async () => {
@@ -273,9 +273,9 @@ describe('Case Workflow Integration Tests', () => {
       const overdueTasks = await workflowService.getOverdueTasks(testCaseId);
       expect(overdueTasks.length).toBeGreaterThan(0);
 
-      const foundOverdueTask = overdueTasks.find((t) => t.taskId === overdueTask.id);
+      const foundOverdueTask = overdueTasks.find((t) => (t as any).taskId === overdueTask.id);
       expect(foundOverdueTask).toBeDefined();
-      expect(foundOverdueTask!.daysOverdue).toBeGreaterThan(0);
+      expect((foundOverdueTask as any)?.daysOverdue).toBeGreaterThan(0);
     });
   });
 
@@ -285,7 +285,7 @@ describe('Case Workflow Integration Tests', () => {
 
       expect(systemRoles.length).toBeGreaterThan(0);
 
-      const roleNames = systemRoles.map((r) => r.name);
+      const roleNames = systemRoles.map((r) => (r as any).name);
       expect(roleNames).toContain('investigator');
       expect(roleNames).toContain('analyst');
       expect(roleNames).toContain('approver');
@@ -295,9 +295,9 @@ describe('Case Workflow Integration Tests', () => {
       const analystRole = await workflowService.getRoleByName('analyst');
 
       expect(analystRole).toBeDefined();
-      expect(analystRole?.name).toBe('analyst');
-      expect(analystRole?.isSystemRole).toBe(true);
-      expect(analystRole?.permissions.length).toBeGreaterThan(0);
+      expect((analystRole as any)?.name).toBe('analyst');
+      expect((analystRole as any)?.isSystemRole).toBe(true);
+      expect((analystRole as any)?.permissions.length).toBeGreaterThan(0);
     });
   });
 

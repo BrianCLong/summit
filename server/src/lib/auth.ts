@@ -11,7 +11,7 @@ export const JWT_SECRET =
   process.env.JWT_SECRET ||
   'dev_jwt_secret_12345_very_long_secret_for_development';
 
-interface User {
+export interface User {
   id: string;
   email: string;
   username?: string;
@@ -19,7 +19,7 @@ interface User {
   token_version?: number;
 }
 
-interface AuthContext {
+export interface AuthContext {
   user?: User;
   isAuthenticated: boolean;
   requestId: string;

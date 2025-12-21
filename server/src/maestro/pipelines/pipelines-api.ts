@@ -20,8 +20,9 @@ const PipelineUpdate = z.object({
 router.get(
   '/pipelines',
   requirePermission('pipeline:read'),
-  async (_req, res) => {
-    const items = await pipelinesRepo.list();
+  async (req, res) => {
+    const tenantId = (req as any).tenant || (req as any).user?.tenantId || 'default';
+    const items = await pipelinesRepo.list(tenantId);
     res.json(items);
   },
 );
@@ -35,9 +36,11 @@ router.post(
       return res
         .status(400)
         .json({ error: 'invalid_input', details: parse.error.issues });
+    const tenantId = (req as any).tenant || (req as any).user?.tenantId || 'default';
     const created = await pipelinesRepo.create(
       parse.data.name,
       parse.data.spec,
+      tenantId,
     );
     res.status(201).json(created);
   },
@@ -47,7 +50,8 @@ router.get(
   '/pipelines/:id',
   requirePermission('pipeline:read'),
   async (req, res) => {
-    const got = await pipelinesRepo.get(req.params.id);
+    const tenantId = (req as any).tenant || (req as any).user?.tenantId || 'default';
+    const got = await pipelinesRepo.get(req.params.id, tenantId);
     if (!got) return res.status(404).json({ error: 'not_found' });
     res.json(got);
   },
@@ -62,7 +66,8 @@ router.put(
       return res
         .status(400)
         .json({ error: 'invalid_input', details: parse.error.issues });
-    const upd = await pipelinesRepo.update(req.params.id, parse.data);
+    const tenantId = (req as any).tenant || (req as any).user?.tenantId || 'default';
+    const upd = await pipelinesRepo.update(req.params.id, parse.data, tenantId);
     if (!upd) return res.status(404).json({ error: 'not_found' });
     res.json(upd);
   },
@@ -72,7 +77,8 @@ router.delete(
   '/pipelines/:id',
   requirePermission('pipeline:update'),
   async (req, res) => {
-    const ok = await pipelinesRepo.delete(req.params.id);
+    const tenantId = (req as any).tenant || (req as any).user?.tenantId || 'default';
+    const ok = await pipelinesRepo.delete(req.params.id, tenantId);
     res.status(ok ? 204 : 404).send();
   },
 );

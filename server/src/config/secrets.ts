@@ -3,7 +3,7 @@
  * Handles sensitive configuration with validation and secure defaults
  */
 
-import { z } from 'zod';
+import * as z from 'zod';
 import crypto from 'crypto';
 
 // Environment validation schema

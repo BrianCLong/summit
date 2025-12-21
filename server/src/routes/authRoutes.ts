@@ -19,7 +19,7 @@ import { AuthService } from '../services/AuthService.js';
 import { PasswordResetService } from '../services/PasswordResetService.js';
 import { authRateLimiter, loginRateLimiter, registerRateLimiter, passwordResetRateLimiter } from '../middleware/authRateLimit.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
-import { z } from 'zod';
+import * as z from 'zod';
 import logger from '../utils/logger.js';
 
 const router = Router();

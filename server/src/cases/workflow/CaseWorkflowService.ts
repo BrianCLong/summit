@@ -10,8 +10,8 @@ import { SLATracker } from './SLATracker.js';
 import { TaskRepo } from './repos/TaskRepo.js';
 import { ParticipantRepo } from './repos/ParticipantRepo.js';
 import { ApprovalRepo } from './repos/ApprovalRepo.js';
-import { CaseRepo } from '../CaseRepo.js';
-import { AuditAccessLogRepo } from '../../repos/AuditAccessLogRepo.js';
+import { CaseRepo } from '../../repos/CaseRepo.js';
+import { AuditAccessLogRepo, type LegalBasis } from '../../repos/AuditAccessLogRepo.js';
 import {
   CaseWithWorkflow,
   CaseTask,
@@ -139,7 +139,7 @@ export class CaseWorkflowService {
   async transitionStage(
     request: WorkflowTransitionRequest,
     auditContext: {
-      legalBasis: string;
+      legalBasis: LegalBasis;
       correlationId?: string;
     },
   ): Promise<WorkflowTransitionResult> {
@@ -335,7 +335,7 @@ export class CaseWorkflowService {
    * Get overdue tasks for a case
    */
   async getOverdueTasks(caseId: string): Promise<CaseTask[]> {
-    return this.taskRepo.getOverdueTasks(caseId);
+    return this.taskRepo.getOverdueTasks(caseId) as Promise<CaseTask[]>;
   }
 
   // ==================== PARTICIPANT MANAGEMENT ====================

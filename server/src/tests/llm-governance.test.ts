@@ -127,7 +127,7 @@ describe('LLM governance router', () => {
     });
 
     const response = await router.route({ ...baseRequest, id: 'policy-ok' });
-    expect(response.ok).toBe(true);
+    expect((response as any).ok).toBe(true);
     expect(response.provider).toBe('mock');
     const usage = costTracker.getUsage('test');
     expect(usage?.promptTokens).toBeGreaterThan(0);
@@ -146,8 +146,8 @@ describe('LLM governance router', () => {
       taskType: 'agent',
       id: 'deny-default',
     });
-    expect(response.ok).toBe(false);
-    expect(response.error).toContain('No matching LLM policy');
+    expect((response as any).ok).toBe(false);
+    expect((response as any).error).toContain('No matching LLM policy');
   });
 
   it('downgrades when the soft cap is exceeded and still routes', async () => {
@@ -184,9 +184,9 @@ describe('LLM governance router', () => {
       modelClass: 'premium',
       id: 'soft-cap',
     });
-    expect(routed.ok).toBe(true);
+    expect((routed as any).ok).toBe(true);
     expect(routed.provider).toBe('mock'); // downgraded to cheaper class
-    expect(routed.policyWarnings?.some((w) => w.toLowerCase().includes('soft cost cap'))).toBe(true);
+    expect((routed as any).policyWarnings?.some((w: string) => w.toLowerCase().includes('soft cost cap'))).toBe(true);
   });
 
   it('blocks when the hard cap would be exceeded', async () => {
@@ -211,8 +211,8 @@ describe('LLM governance router', () => {
       modelClass: 'premium',
       id: 'hard-cap',
     });
-    expect(response.ok).toBe(false);
-    expect(response.error).toContain('hard cost ceiling');
+    expect((response as any).ok).toBe(false);
+    expect((response as any).error).toContain('hard cost ceiling');
   });
 
   it('flags suspicious prompts for exfiltration attempts', async () => {
@@ -229,7 +229,7 @@ describe('LLM governance router', () => {
       id: 'suspicious',
     });
 
-    expect(response.ok).toBe(true);
-    expect(response.securityEvents?.length || 0).toBeGreaterThan(0);
+    expect((response as any).ok).toBe(true);
+    expect((response as any).securityEvents?.length || 0).toBeGreaterThan(0);
   });
 });

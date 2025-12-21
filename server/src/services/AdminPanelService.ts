@@ -275,7 +275,7 @@ export class AdminPanelService {
 
   constructor(pool?: Pool, logger?: pino.Logger) {
     this.pool = (pool || getPostgresPool()) as unknown as Pool;
-    this.logger = logger || pino({ name: 'AdminPanelService' });
+    this.logger = logger || (pino as any)({ name: 'AdminPanelService' });
   }
 
   // ==========================================================================

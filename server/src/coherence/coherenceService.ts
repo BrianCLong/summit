@@ -1,4 +1,4 @@
-import { Neo4jService } from '../db/neo4j';
+import { getNeo4jDriver } from '../db/neo4j';
 import { RedisService } from '../cache/redis';
 import logger from '../utils/logger';
 import { CoherenceSignalIngest } from './signalIngest';

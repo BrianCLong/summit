@@ -5,7 +5,7 @@
  * fraud detection, market data, and regulatory reporting.
  */
 
-import { z } from 'zod';
+import * as z from 'zod';
 
 // ============================================================================
 // COMMON ENUMS

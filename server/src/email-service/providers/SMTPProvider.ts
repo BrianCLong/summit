@@ -4,13 +4,13 @@
  * Sends emails using SMTP with nodemailer
  */
 
-import nodemailer from 'nodemailer';
+import nodemailer, { Transporter, SendMailOptions } from 'nodemailer';
 import { htmlToText } from 'html-to-text';
 import { EmailProvider } from './EmailProvider.js';
 import { EmailMessage, EmailSendResult, EmailProviderConfig } from '../types.js';
 
 export class SMTPProvider extends EmailProvider {
-  private transporter: nodemailer.Transporter | null = null;
+  private transporter: Transporter | null = null;
   private config: EmailProviderConfig;
 
   constructor(config: EmailProviderConfig) {
@@ -53,7 +53,7 @@ export class SMTPProvider extends EmailProvider {
         preserveNewlines: true,
       });
 
-      const mailOptions: nodemailer.SendMailOptions = {
+      const mailOptions: SendMailOptions = {
         from: message.from || this.config.from,
         replyTo: message.replyTo || this.config.replyTo,
         to: message.to,

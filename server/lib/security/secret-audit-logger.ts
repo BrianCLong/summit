@@ -18,7 +18,7 @@ export class SecretAuditLogger {
   constructor(private logPath: string) {
     const directory = path.dirname(logPath);
     fs.mkdirSync(directory, { recursive: true });
-    this.logger = pino({ name: 'secret-audit', level: 'info' }, pino.destination({ dest: logPath, mkdir: true }));
+    this.logger = (pino as any)({ name: 'secret-audit', level: 'info' }, (pino as any).destination({ dest: logPath, mkdir: true }));
   }
 
   record(event: SecretAuditEvent): void {

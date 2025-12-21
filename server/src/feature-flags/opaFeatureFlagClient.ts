@@ -41,7 +41,7 @@ export class OPAFeatureFlagClient {
     try {
       raw = await this.opaClient.evaluateQuery('feature_flags/decision', input);
       enabled = Boolean(raw?.enabled);
-      reason = raw?.reason || 'opa-decision';
+      reason = (raw?.reason as string) || 'opa-decision';
       killSwitchActive = Boolean(raw?.kill_switch_active);
       this.audit('feature_flag_decision', {
         evaluationId,
@@ -107,7 +107,7 @@ export class OPAFeatureFlagClient {
     try {
       raw = await this.opaClient.evaluateQuery('feature_flags/kill_switch', input);
       active = Boolean(raw?.active);
-      reason = raw?.reason || reason;
+      reason = (raw?.reason as string) || reason;
       killSwitchGauge.labels({ module }).set(active ? 1 : 0);
       this.audit('kill_switch_check', {
         evaluationId,

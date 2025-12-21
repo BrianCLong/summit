@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { z } from 'zod';
+import * as z from 'zod';
 import cloneDeep from 'lodash/cloneDeep.js';
 import get from 'lodash/get.js';
 import mergeWith from 'lodash/mergeWith.js';

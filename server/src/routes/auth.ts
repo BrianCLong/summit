@@ -65,7 +65,7 @@ router.post('/verify-email', rateLimitMiddleware, asyncHandler(async (req, res) 
     return res.status(400).json({ error: 'Verification token is required' });
   }
 
-  const result = await authService.verifyEmail(token);
+  const result = await (authService as any).verifyEmail(token);
 
   return res.json({
     success: true,
@@ -86,7 +86,7 @@ router.post('/resend-verification', rateLimitMiddleware, asyncHandler(async (req
     return res.status(400).json({ error: 'Email is required' });
   }
 
-  await authService.resendVerification(email);
+  await (authService as any).resendVerification(email);
 
   return res.json({
     success: true,

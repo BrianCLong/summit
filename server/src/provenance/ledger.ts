@@ -315,7 +315,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
             this.emit('entryAppended', completeEntry);
 
             // Integration: Send to Audit System
-            advancedAuditSystem.logEvent({
+            (advancedAuditSystem as any).logEvent?.({
                 eventType: 'resource_modify', // Generic mapping, could be more specific
                 action: entry.actionType,
                 tenantId: entry.tenantId,

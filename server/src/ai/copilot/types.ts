@@ -22,7 +22,7 @@ export const EntityReferenceSchema = z.object({
   properties: z.record(z.any()).optional(),
 });
 
-export type EntityReference = z.infer<typeof EntityReferenceSchema>;
+export type EntityReference = (typeof EntityReferenceSchema)['_output'];
 
 /**
  * Reference to a relationship in the knowledge graph
@@ -36,7 +36,7 @@ export const RelationshipReferenceSchema = z.object({
   confidence: z.number().min(0).max(1).optional(),
 });
 
-export type RelationshipReference = z.infer<typeof RelationshipReferenceSchema>;
+export type RelationshipReference = (typeof RelationshipReferenceSchema)['_output'];
 
 // ============================================================================
 // Provenance and Citation Types
@@ -54,7 +54,7 @@ export const SourceTypeSchema = z.enum([
   'external_api',
 ]);
 
-export type SourceType = z.infer<typeof SourceTypeSchema>;
+export type SourceType = (typeof SourceTypeSchema)['_output'];
 
 /**
  * A citation referencing a source of information
@@ -80,7 +80,7 @@ export const CitationSchema = z.object({
   wasRedacted: z.boolean().default(false),
 });
 
-export type Citation = z.infer<typeof CitationSchema>;
+export type Citation = (typeof CitationSchema)['_output'];
 
 /**
  * Provenance chain showing how information was derived
@@ -100,7 +100,7 @@ export const ProvenanceSchema = z.object({
   chainConfidence: z.number().min(0).max(1),
 });
 
-export type Provenance = z.infer<typeof ProvenanceSchema>;
+export type Provenance = (typeof ProvenanceSchema)['_output'];
 
 /**
  * A reasoning path explaining how an answer was derived
@@ -120,7 +120,7 @@ export const WhyPathSchema = z.object({
   explanation: z.string().optional(),
 });
 
-export type WhyPath = z.infer<typeof WhyPathSchema>;
+export type WhyPath = (typeof WhyPathSchema)['_output'];
 
 // ============================================================================
 // Query Types
@@ -138,7 +138,7 @@ export const QueryCostEstimateSchema = z.object({
   costDrivers: z.array(z.string()),
 });
 
-export type QueryCostEstimate = z.infer<typeof QueryCostEstimateSchema>;
+export type QueryCostEstimate = (typeof QueryCostEstimateSchema)['_output'];
 
 /**
  * Query refinement suggestion when cost is too high
@@ -154,7 +154,7 @@ export const QueryRefinementSchema = z.object({
   estimatedCostReduction: z.enum(['low', 'medium', 'high']),
 });
 
-export type QueryRefinement = z.infer<typeof QueryRefinementSchema>;
+export type QueryRefinement = (typeof QueryRefinementSchema)['_output'];
 
 /**
  * Compiled query preview (before execution)
@@ -182,7 +182,7 @@ export const QueryPreviewSchema = z.object({
   blockReason: z.string().optional(),
 });
 
-export type QueryPreview = z.infer<typeof QueryPreviewSchema>;
+export type QueryPreview = (typeof QueryPreviewSchema)['_output'];
 
 // ============================================================================
 // Copilot Answer Types
@@ -202,7 +202,7 @@ export const RedactionStatusSchema = z.object({
   uncertaintyAcknowledged: z.boolean(),
 });
 
-export type RedactionStatus = z.infer<typeof RedactionStatusSchema>;
+export type RedactionStatus = (typeof RedactionStatusSchema)['_output'];
 
 /**
  * Guardrail check result
@@ -222,7 +222,7 @@ export const GuardrailCheckSchema = z.object({
   failureReason: z.string().optional(),
 });
 
-export type GuardrailCheck = z.infer<typeof GuardrailCheckSchema>;
+export type GuardrailCheck = (typeof GuardrailCheckSchema)['_output'];
 
 /**
  * Complete copilot answer response
@@ -256,7 +256,7 @@ export const CopilotAnswerSchema = z.object({
   warnings: z.array(z.string()),
 });
 
-export type CopilotAnswer = z.infer<typeof CopilotAnswerSchema>;
+export type CopilotAnswer = (typeof CopilotAnswerSchema)['_output'];
 
 /**
  * Copilot refusal response (when answer cannot be provided)
@@ -284,7 +284,7 @@ export const CopilotRefusalSchema = z.object({
   auditId: z.string(),
 });
 
-export type CopilotRefusal = z.infer<typeof CopilotRefusalSchema>;
+export type CopilotRefusal = (typeof CopilotRefusalSchema)['_output'];
 
 // ============================================================================
 // Request Types
@@ -312,7 +312,7 @@ export const NLQueryRequestSchema = z.object({
   temperature: z.number().min(0).max(1).optional(),
 });
 
-export type NLQueryRequest = z.infer<typeof NLQueryRequestSchema>;
+export type NLQueryRequest = (typeof NLQueryRequestSchema)['_output'];
 
 /**
  * GraphRAG request for retrieval-augmented generation
@@ -340,7 +340,7 @@ export const GraphRAGRequestSchema = z.object({
   includeClaims: z.boolean().default(true),
 });
 
-export type GraphRAGRequest = z.infer<typeof GraphRAGRequestSchema>;
+export type GraphRAGRequest = (typeof GraphRAGRequestSchema)['_output'];
 
 // ============================================================================
 // Audit and Logging Types
@@ -350,7 +350,7 @@ export type GraphRAGRequest = z.infer<typeof GraphRAGRequestSchema>;
  * Risk level for prompts
  */
 export const RiskLevelSchema = z.enum(['low', 'medium', 'high', 'critical']);
-export type RiskLevel = z.infer<typeof RiskLevelSchema>;
+export type RiskLevel = (typeof RiskLevelSchema)['_output'];
 
 /**
  * Risky prompt log entry for red-team review
@@ -380,7 +380,7 @@ export const RiskyPromptLogSchema = z.object({
   requiresReview: z.boolean(),
 });
 
-export type RiskyPromptLog = z.infer<typeof RiskyPromptLogSchema>;
+export type RiskyPromptLog = (typeof RiskyPromptLogSchema)['_output'];
 
 // ============================================================================
 // Response Union Types

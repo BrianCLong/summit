@@ -76,7 +76,7 @@ export class AuditLogPipeline {
 
     this.logger =
       options.logger ??
-      pino({
+      (pino as any)({
         name: 'audit-log-pipeline',
         level: process.env.LOG_LEVEL || 'info',
       });

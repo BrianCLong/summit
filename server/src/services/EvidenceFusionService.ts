@@ -65,8 +65,7 @@ export class EvidenceFusionService extends EventEmitter {
     `;
 
     try {
-      const response = await this.llmService.complete({
-        prompt,
+      const response = await this.llmService.complete(prompt, {
         temperature: 0.2,
         maxTokens: 1500
       });
@@ -97,9 +96,8 @@ export class EvidenceFusionService extends EventEmitter {
       Return a JSON array of Hypothesis objects.
     `;
 
-    try {
-        const response = await this.llmService.complete({
-            prompt,
+    try{
+        const response = await this.llmService.complete(prompt, {
             temperature: 0.4,
             maxTokens: 2000
         });

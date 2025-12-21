@@ -27,7 +27,8 @@ const ensureFinOpsAccess = (req: Request, res: Response, next: NextFunction): vo
   const user = authReq.user;
 
   if (!user) {
-    return res.status(401).json({ error: 'Unauthorized' });
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
   }
 
   // Check for admin or specific finops role
@@ -35,7 +36,8 @@ const ensureFinOpsAccess = (req: Request, res: Response, next: NextFunction): vo
   const allowedRoles = ['admin', 'finops_manager', 'superadmin'];
   if (!allowedRoles.includes(user.role)) {
     logger.warn({ userId: user.id, role: user.role }, 'Access denied to FinOps endpoints');
-    return res.status(403).json({ error: 'Forbidden: Insufficient permissions for FinOps operations' });
+    res.status(403).json({ error: 'Forbidden: Insufficient permissions for FinOps operations' });
+    return;
   }
 
   next();
@@ -68,7 +70,10 @@ router.get('/dashboard', async (req: Request, res: Response) => {
     // Check policies against real metrics
     // Convert resourceMetrics to record<string, number> for evaluation
     const metricsForEval: Record<string, number> = {
-        ...resourceMetrics,
+        cpu_utilization: resourceMetrics.cpu_utilization,
+        memory_utilization: resourceMetrics.memory_utilization,
+        storage_usage_gb: resourceMetrics.storage_usage_gb,
+        network_io: resourceMetrics.network_io,
         current_cost: currentCost,
         budget_utilization: budgetUtilization
     };

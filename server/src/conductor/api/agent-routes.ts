@@ -157,7 +157,7 @@ router.get('/runs/:runId/agents/timeline', async (req, res) => {
       hitlCheckpoints.set(runId, checkpoints);
     }
 
-    prometheusConductorMetrics?.agentTimelineRequests?.inc({
+    (prometheusConductorMetrics as any)?.agentTimelineRequests?.inc({
       status: 'success',
     });
 
@@ -177,7 +177,7 @@ router.get('/runs/:runId/agents/timeline', async (req, res) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    prometheusConductorMetrics?.agentTimelineRequests?.inc({ status: 'error' });
+    (prometheusConductorMetrics as any)?.agentTimelineRequests?.inc({ status: 'error' });
 
     console.error('Agent timeline fetch error:', error);
     res.status(500).json({
@@ -241,7 +241,7 @@ router.post('/runs/:runId/hitl/:checkpointId/approve', async (req, res) => {
 
     agentSteps.set(runId, steps);
 
-    prometheusConductorMetrics?.hitlActionRequests?.inc({
+    (prometheusConductorMetrics as any)?.hitlActionRequests?.inc({
       status: 'success',
       action: 'approve',
     });
@@ -254,7 +254,7 @@ router.post('/runs/:runId/hitl/:checkpointId/approve', async (req, res) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    prometheusConductorMetrics?.hitlActionRequests?.inc({
+    (prometheusConductorMetrics as any)?.hitlActionRequests?.inc({
       status: 'error',
       action: 'approve',
     });
@@ -308,7 +308,7 @@ router.post('/runs/:runId/hitl/:checkpointId/block', async (req, res) => {
 
     agentSteps.set(runId, steps);
 
-    prometheusConductorMetrics?.hitlActionRequests?.inc({
+    (prometheusConductorMetrics as any)?.hitlActionRequests?.inc({
       status: 'success',
       action: 'block',
     });
@@ -322,7 +322,7 @@ router.post('/runs/:runId/hitl/:checkpointId/block', async (req, res) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    prometheusConductorMetrics?.hitlActionRequests?.inc({
+    (prometheusConductorMetrics as any)?.hitlActionRequests?.inc({
       status: 'error',
       action: 'block',
     });
@@ -393,7 +393,7 @@ router.post('/runs/:runId/hitl/:checkpointId/edit', async (req, res) => {
 
     agentSteps.set(runId, steps);
 
-    prometheusConductorMetrics?.hitlActionRequests?.inc({
+    (prometheusConductorMetrics as any)?.hitlActionRequests?.inc({
       status: 'success',
       action: 'edit',
     });
@@ -411,7 +411,7 @@ router.post('/runs/:runId/hitl/:checkpointId/edit', async (req, res) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    prometheusConductorMetrics?.hitlActionRequests?.inc({
+    (prometheusConductorMetrics as any)?.hitlActionRequests?.inc({
       status: 'error',
       action: 'edit',
     });

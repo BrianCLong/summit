@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import Joi, { ObjectSchema } from 'joi';
-import { z } from 'zod';
+import * as z from 'zod';
 import { SanitizationUtils, SecurityValidator } from '../validation/index.js';
 
 export type RequestTarget = 'body' | 'query' | 'params';

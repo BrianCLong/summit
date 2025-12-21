@@ -5,7 +5,7 @@
  * and Redis JTI replay protection
  */
 
-import jwt from 'jsonwebtoken';
+import jwt, { Algorithm } from 'jsonwebtoken';
 import crypto from 'crypto';
 import { createClient } from 'redis';
 
@@ -220,7 +220,7 @@ class JWTSecurityManager {
     } as any;
 
     const token = jwt.sign(fullPayload, this.currentKey.privateKey, {
-      algorithm: this.currentKey.algorithm as jwt.Algorithm,
+      algorithm: this.currentKey.algorithm as Algorithm,
       header: {
         kid: this.currentKey.kid,
         alg: this.currentKey.algorithm,
@@ -255,7 +255,7 @@ class JWTSecurityManager {
 
       // Verify token signature and claims
       const payload = jwt.verify(token, verificationKey.publicKey, {
-        algorithms: [verificationKey.algorithm as jwt.Algorithm],
+        algorithms: [verificationKey.algorithm as Algorithm],
         issuer: this.config.issuer,
         audience: this.config.audience,
       }) as JWTPayload;

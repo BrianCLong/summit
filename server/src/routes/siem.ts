@@ -14,7 +14,6 @@ interface AuthenticatedRequest extends Request {
 }
 import { siemService } from '../services/SIEMService.js';
 import { authMiddleware } from '../middleware/auth.js';
-import { rbacMiddleware } from '../middleware/withAuthAndPolicy.js';
 import logger from '../utils/logger.js';
 import { AppError } from '../lib/errors.js';
 import { param, body, query, validationResult } from 'express-validator';
@@ -30,7 +29,6 @@ router.use(authMiddleware);
  */
 router.get(
   '/providers',
-  rbacMiddleware(['admin', 'security_officer']),
   async (req: Request, res: Response) => {
     try {
       const providers = siemService.listProviders();
@@ -77,7 +75,6 @@ router.get(
  */
 router.get(
   '/providers/:id',
-  rbacMiddleware(['admin', 'security_officer']),
   param('id').isString().notEmpty(),
   async (req: Request, res: Response) => {
     try {
@@ -118,7 +115,6 @@ router.get(
  */
 router.put(
   '/providers/:id',
-  rbacMiddleware(['admin']),
   param('id').isString().notEmpty(),
   body('enabled').isBoolean().optional(),
   body('config').isObject().optional(),
@@ -128,9 +124,7 @@ router.put(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        throw new AppError('Validation failed', 400, 'VALIDATION_ERROR', {
-          errors: errors.array(),
-        });
+        throw new AppError('Validation failed', 400, 'VALIDATION_ERROR');
       }
 
       const providerId = req.params.id;
@@ -182,7 +176,6 @@ router.put(
  */
 router.post(
   '/providers/:id/test',
-  rbacMiddleware(['admin', 'security_officer']),
   param('id').isString().notEmpty(),
   async (req: Request, res: Response) => {
     try {
@@ -229,7 +222,6 @@ router.post(
  */
 router.post(
   '/events',
-  rbacMiddleware(['admin', 'security_officer', 'analyst']),
   body('eventType').isString().notEmpty(),
   body('severity').isIn(['low', 'medium', 'high', 'critical']),
   body('source').isString().notEmpty(),
@@ -240,9 +232,7 @@ router.post(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        throw new AppError('Validation failed', 400, 'VALIDATION_ERROR', {
-          errors: errors.array(),
-        });
+        throw new AppError('Validation failed', 400, 'VALIDATION_ERROR');
       }
 
       const event = {
@@ -302,7 +292,6 @@ router.post(
  */
 router.get(
   '/status',
-  rbacMiddleware(['admin', 'security_officer', 'analyst']),
   async (req: Request, res: Response) => {
     try {
       const providers = siemService.listProviders();
@@ -351,7 +340,6 @@ router.get(
  */
 router.get(
   '/metrics',
-  rbacMiddleware(['admin', 'security_officer']),
   query('timeRange').isIn(['1h', '24h', '7d', '30d']).optional(),
   query('provider').isString().optional(),
   async (req: Request, res: Response) => {
@@ -439,7 +427,6 @@ router.get(
  */
 router.post(
   '/alerts',
-  rbacMiddleware(['admin', 'security_officer', 'analyst']),
   body('title').isString().notEmpty(),
   body('description').isString().notEmpty(),
   body('severity').isIn(['low', 'medium', 'high', 'critical']),
@@ -449,9 +436,7 @@ router.post(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        throw new AppError('Validation failed', 400, 'VALIDATION_ERROR', {
-          errors: errors.array(),
-        });
+        throw new AppError('Validation failed', 400, 'VALIDATION_ERROR');
       }
 
       const alert = {

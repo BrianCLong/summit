@@ -433,8 +433,7 @@ export class GraphRAGService {
     const callLLMAndValidate = async (
       temp: number,
     ): Promise<GraphRAGResponse> => {
-      const rawResponse = await this.llmService.complete({
-        prompt,
+      const rawResponse = await this.llmService.complete(prompt, {
         model:
           request.temperature !== undefined ? this.config.llmModel : undefined,
         maxTokens: request.maxTokens || 1000,

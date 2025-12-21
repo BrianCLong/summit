@@ -247,7 +247,7 @@ export function persistedQueriesMiddleware(
     const { version, sha256Hash } = persistedQuery;
 
     if (version !== 1) {
-      return res.status(400).json({
+      res.status(400).json({
         errors: [
           {
             message: 'Unsupported persisted query version',
@@ -255,10 +255,11 @@ export function persistedQueriesMiddleware(
           },
         ],
       });
+      return;
     }
 
     if (!sha256Hash) {
-      return res.status(400).json({
+      res.status(400).json({
         errors: [
           {
             message: 'Missing persisted query hash',
@@ -266,6 +267,7 @@ export function persistedQueriesMiddleware(
           },
         ],
       });
+      return;
     }
 
     // Try to find the persisted query
@@ -273,7 +275,7 @@ export function persistedQueriesMiddleware(
 
     if (!persistedQueryText) {
       if (!query) {
-        return res.status(400).json({
+        res.status(400).json({
           errors: [
             {
               message: 'Persisted query not found',
@@ -281,6 +283,7 @@ export function persistedQueriesMiddleware(
             },
           ],
         });
+        return;
       }
 
       // Register new persisted query
@@ -292,7 +295,7 @@ export function persistedQueriesMiddleware(
         persistedQueries.set(sha256Hash, query);
         console.log(`Registered new persisted query: ${sha256Hash}`);
       } else {
-        return res.status(400).json({
+        res.status(400).json({
           errors: [
             {
               message: 'Persisted query hash mismatch',
@@ -300,6 +303,7 @@ export function persistedQueriesMiddleware(
             },
           ],
         });
+        return;
       }
     } else {
       // Use the persisted query
@@ -309,7 +313,7 @@ export function persistedQueriesMiddleware(
 
   // Enforce persisted queries if configured
   if (defaultConfig.enforcePersistedQueries && !persistedQuery) {
-    return res.status(400).json({
+    res.status(400).json({
       errors: [
         {
           message: 'Only persisted queries are allowed',
@@ -317,6 +321,7 @@ export function persistedQueriesMiddleware(
         },
       ],
     });
+    return;
   }
 
   next();
@@ -355,7 +360,8 @@ export async function queryCacheMiddleware(
     if (cached) {
       const result = JSON.parse(cached);
       result.extensions = { ...result.extensions, cached: true };
-      return res.json(result);
+      res.json(result);
+      return;
     }
   } catch (error) {
     console.warn('Cache read error:', error);
@@ -392,7 +398,7 @@ export function securityValidationMiddleware(
 
     // Check against whitelist if enabled
     if (defaultConfig.enableQueryWhitelist && !queryWhitelist.has(query)) {
-      return res.status(403).json({
+      res.status(403).json({
         errors: [
           {
             message: 'Query not in whitelist',
@@ -400,6 +406,7 @@ export function securityValidationMiddleware(
           },
         ],
       });
+      return;
     }
 
     next();

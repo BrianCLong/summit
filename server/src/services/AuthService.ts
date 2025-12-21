@@ -391,7 +391,7 @@ export class AuthService {
 
       const { token, refreshToken } = await this.generateTokens(user, client);
 
-      metrics.userLoginsTotal.inc({ tenant_id: tenantId, result: 'success' });
+      (metrics as any).userLoginsTotal?.inc({ tenant_id: tenantId, result: 'success' });
       return {
         user: this.formatUser(user),
         token,
@@ -400,7 +400,7 @@ export class AuthService {
       };
     } catch (error) {
       logger.error('Error logging in user:', error);
-      metrics.userLoginsTotal.inc({ tenant_id: tenantId, result: 'failure' });
+      (metrics as any).userLoginsTotal?.inc({ tenant_id: tenantId, result: 'failure' });
       throw error;
     } finally {
       client.release();
@@ -620,11 +620,11 @@ export class AuthService {
 
       const userData = result.rows[0];
       const tenantId = userData?.tenant_id || 'unknown';
-      metrics.userLogoutsTotal.inc({ tenant_id: tenantId });
+      (metrics as any).userLogoutsTotal?.inc({ tenant_id: tenantId });
 
       if (userData?.last_login) {
         const sessionDuration = (new Date().getTime() - new Date(userData.last_login).getTime()) / 1000;
-        metrics.userSessionDurationSeconds.observe({ tenant_id: tenantId }, sessionDuration);
+        (metrics as any).userSessionDurationSeconds?.observe({ tenant_id: tenantId }, sessionDuration);
       }
 
       // Blacklist current access token if provided

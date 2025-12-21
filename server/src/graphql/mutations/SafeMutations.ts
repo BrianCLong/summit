@@ -3,7 +3,7 @@
  * Type-safe, validated mutations for graph operations with audit trails and rollback
  */
 
-import { z } from 'zod';
+import * as z from 'zod';
 import { randomUUID as uuidv4 } from 'crypto';
 import { getNeo4jDriver, getPostgresPool } from '../../config/database.js';
 import { validateCustomMetadata } from '../../services/CustomSchemaService.js';

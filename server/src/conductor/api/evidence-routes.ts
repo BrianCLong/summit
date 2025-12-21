@@ -1,5 +1,6 @@
 // Evidence Export and Provenance API Routes
 import express from 'express';
+import * as crypto from 'crypto';
 import { createHash, createHmac, randomBytes, randomUUID } from 'crypto';
 import jwt from 'jsonwebtoken';
 import { prometheusConductorMetrics } from '../observability/prometheus';
@@ -14,6 +15,7 @@ import {
 } from '../../maestro/evidence/receipt.js';
 
 const router = express.Router();
+const metrics = prometheusConductorMetrics as any;
 
 const inlineContentKey = (artifactId: string) =>
   `inline://evidence_artifact_content/${artifactId}`;
@@ -214,8 +216,8 @@ router.post('/export', async (req, res) => {
 
     // Track metrics
     const duration = Date.now() - startTime;
-    prometheusConductorMetrics?.evidenceExportLatency?.observe(duration / 1000);
-    prometheusConductorMetrics?.evidenceExportRequests?.inc({
+    metrics?.evidenceExportLatency?.observe(duration / 1000);
+    metrics?.evidenceExportRequests?.inc({
       status: 'success',
       format,
     });
@@ -241,8 +243,8 @@ router.post('/export', async (req, res) => {
     });
   } catch (error) {
     const duration = Date.now() - startTime;
-    prometheusConductorMetrics?.evidenceExportLatency?.observe(duration / 1000);
-    prometheusConductorMetrics?.evidenceExportRequests?.inc({
+    metrics?.evidenceExportLatency?.observe(duration / 1000);
+    metrics?.evidenceExportRequests?.inc({
       status: 'error',
       format: req.body.format || 'json',
     });
@@ -296,12 +298,12 @@ router.get('/:evidenceId/download', async (req, res) => {
         res.json(evidenceBundle);
     }
 
-    prometheusConductorMetrics?.evidenceDownloadRequests?.inc({
+    metrics?.evidenceDownloadRequests?.inc({
       status: 'success',
       format,
     });
   } catch (error) {
-    prometheusConductorMetrics?.evidenceDownloadRequests?.inc({
+    metrics?.evidenceDownloadRequests?.inc({
       status: 'error',
       format: req.query.format || 'json',
     });
@@ -340,7 +342,7 @@ router.post('/:evidenceId/verify', async (req, res) => {
       expectedHash,
     );
 
-    prometheusConductorMetrics?.evidenceVerificationRequests?.inc({
+    metrics?.evidenceVerificationRequests?.inc({
       status: verification.valid ? 'success' : 'failed',
     });
 
@@ -351,7 +353,7 @@ router.post('/:evidenceId/verify', async (req, res) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    prometheusConductorMetrics?.evidenceVerificationRequests?.inc({
+    metrics?.evidenceVerificationRequests?.inc({
       status: 'error',
     });
 

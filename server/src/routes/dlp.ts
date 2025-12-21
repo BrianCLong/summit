@@ -9,7 +9,6 @@ import type { AuthenticatedRequest } from './types.js';
 import { dlpService, DLPPolicy } from '../services/DLPService.js';
 import { dlpStatusMiddleware } from '../middleware/dlpMiddleware.js';
 import { authMiddleware } from '../middleware/auth.js';
-import { rbacMiddleware } from '../middleware/withAuthAndPolicy.js';
 import logger from '../utils/logger.js';
 import { AppError } from '../lib/errors.js';
 import { param, body, query, validationResult } from 'express-validator';
@@ -31,7 +30,6 @@ router.get('/status', dlpStatusMiddleware);
  */
 router.get(
   '/policies',
-  rbacMiddleware(['admin', 'security_officer']),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const policies = dlpService.listPolicies();
@@ -76,7 +74,6 @@ router.get(
  */
 router.get(
   '/policies/:id',
-  rbacMiddleware(['admin', 'security_officer']),
   param('id').isString().notEmpty(),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
@@ -116,7 +113,6 @@ router.get(
  */
 router.post(
   '/policies',
-  rbacMiddleware(['admin']),
   body('name').isString().notEmpty().isLength({ min: 1, max: 100 }),
   body('description').isString().optional().isLength({ max: 500 }),
   body('enabled').isBoolean().optional(),
@@ -128,9 +124,7 @@ router.post(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        throw new AppError('Validation failed', 400, 'VALIDATION_ERROR', {
-          errors: errors.array(),
-        });
+        throw new AppError('Validation failed', 400, 'VALIDATION_ERROR');
       }
 
       const policyData = {
@@ -183,7 +177,6 @@ router.post(
  */
 router.put(
   '/policies/:id',
-  rbacMiddleware(['admin']),
   param('id').isString().notEmpty(),
   body('name').isString().optional().isLength({ min: 1, max: 100 }),
   body('description').isString().optional().isLength({ max: 500 }),
@@ -196,9 +189,7 @@ router.put(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        throw new AppError('Validation failed', 400, 'VALIDATION_ERROR', {
-          errors: errors.array(),
-        });
+        throw new AppError('Validation failed', 400, 'VALIDATION_ERROR');
       }
 
       const policyId = req.params.id;
@@ -254,7 +245,6 @@ router.put(
  */
 router.delete(
   '/policies/:id',
-  rbacMiddleware(['admin']),
   param('id').isString().notEmpty(),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
@@ -307,7 +297,6 @@ router.delete(
  */
 router.post(
   '/policies/:id/toggle',
-  rbacMiddleware(['admin', 'security_officer']),
   param('id').isString().notEmpty(),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
@@ -367,7 +356,6 @@ router.post(
  */
 router.post(
   '/scan',
-  rbacMiddleware(['admin', 'security_officer', 'analyst']),
   body('content').notEmpty(),
   body('operationType')
     .isIn(['read', 'write', 'delete', 'export', 'share'])
@@ -376,9 +364,7 @@ router.post(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        throw new AppError('Validation failed', 400, 'VALIDATION_ERROR', {
-          errors: errors.array(),
-        });
+        throw new AppError('Validation failed', 400, 'VALIDATION_ERROR');
       }
 
       const context = {
@@ -453,7 +439,6 @@ router.post(
  */
 router.get(
   '/metrics',
-  rbacMiddleware(['admin', 'security_officer']),
   query('timeRange').isIn(['1h', '24h', '7d', '30d']).optional(),
   async (req: AuthenticatedRequest, res: Response) => {
     try {

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as z from 'zod';
 
 // Zod v4 compatibility types
 export type ZodType<T = any> = z.ZodType<T>;

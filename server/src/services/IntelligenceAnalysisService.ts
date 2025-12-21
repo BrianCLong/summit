@@ -187,7 +187,7 @@ export class IntelligenceAnalysisService {
 
     Return only the category name.`;
 
-    const category = await this.llmService.complete({ prompt, temperature: 0.0 });
+    const category = await this.llmService.complete(prompt, { temperature: 0.0 });
     return {
       category: category.trim(),
       confidence: 0.9 // Placeholder

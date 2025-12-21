@@ -181,7 +181,7 @@ export class OCREngine {
         }
       });
 
-      tesseract.on('error', (error) => {
+      tesseract.on('error', (error: Error) => {
         reject(new Error(`Failed to spawn tesseract: ${error.message}`));
       });
     });
@@ -240,7 +240,7 @@ export class OCREngine {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(new Error(`Failed to spawn PaddleOCR: ${error.message}`));
       });
     });

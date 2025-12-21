@@ -223,7 +223,8 @@ export class VerificationSwarmService extends EventEmitter {
     `;
 
     try {
-        const response = await this.llmService.complete(prompt, {
+        const response = await this.llmService.complete(
+            prompt,
             temperature: 0.0,
             maxTokens: 500
         });

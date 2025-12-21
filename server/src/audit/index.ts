@@ -1,8 +1,8 @@
 import { Pool } from 'pg';
 import Redis from 'ioredis';
-import { pino } from 'pino';
+import pino from 'pino';
 import { AdvancedAuditSystem } from './advanced-audit-system.js';
-import { cfg, dbUrls } from '../../config.js';
+import { cfg, dbUrls } from '../config.js';
 
 // Create singleton instance
 let instance: AdvancedAuditSystem | null = null;

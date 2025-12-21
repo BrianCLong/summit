@@ -908,23 +908,19 @@ export class CIBudgetService extends EventEmitter {
     // Cost by category
     this.metrics.incrementCounter(
       'ci_cost_total',
-      budget.usage.today.costs.compute,
-      { tenant_id: tenantId, category: 'compute' },
+      { tenant_id: tenantId, category: 'compute', value: budget.usage.today.costs.compute },
     );
     this.metrics.incrementCounter(
       'ci_cost_total',
-      budget.usage.today.costs.storage,
-      { tenant_id: tenantId, category: 'storage' },
+      { tenant_id: tenantId, category: 'storage', value: budget.usage.today.costs.storage },
     );
     this.metrics.incrementCounter(
       'ci_cost_total',
-      budget.usage.today.costs.network,
-      { tenant_id: tenantId, category: 'network' },
+      { tenant_id: tenantId, category: 'network', value: budget.usage.today.costs.network },
     );
     this.metrics.incrementCounter(
       'ci_cost_total',
-      budget.usage.today.costs.actions,
-      { tenant_id: tenantId, category: 'actions' },
+      { tenant_id: tenantId, category: 'actions', value: budget.usage.today.costs.actions },
     );
   }
 

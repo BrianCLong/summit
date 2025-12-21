@@ -169,8 +169,8 @@ export class ByokHsmOrchestrator {
 
     return {
       ciphertext,
-      iv: iv.toString('base64'),
-      authTag: cipher.getAuthTag().toString('base64'),
+      iv: Buffer.from(iv).toString('base64'),
+      authTag: Buffer.from(cipher.getAuthTag()).toString('base64'),
       wrappedDataKey: wrapped.wrappedDataKey,
       wrapAuthTag: wrapped.wrapAuthTag,
       wrapIv: wrapped.wrapIv,
@@ -283,8 +283,8 @@ export class ByokHsmOrchestrator {
 
     return {
       wrappedDataKey,
-      wrapAuthTag: cipher.getAuthTag().toString('base64'),
-      wrapIv: wrapIv.toString('base64'),
+      wrapAuthTag: Buffer.from(cipher.getAuthTag()).toString('base64'),
+      wrapIv: Buffer.from(wrapIv).toString('base64'),
     };
   }
 

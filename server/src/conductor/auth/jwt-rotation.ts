@@ -4,7 +4,7 @@ import { promises as fs } from 'fs';
 import { randomBytes, createHash } from 'crypto';
 import { promisify } from 'util';
 import Redis from 'ioredis';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions, Algorithm, VerifyOptions, JwtPayload } from 'jsonwebtoken';
 import logger from '../../config/logger.js';
 
 interface JWTKeyPair {
@@ -131,7 +131,7 @@ export class JWTRotationManager {
    */
   async signToken(
     payload: object,
-    options: jwt.SignOptions = {},
+    options: SignOptions = {},
   ): Promise<string> {
     if (!this.activeKeyId) {
       throw new Error('No active JWT key available for signing');
@@ -142,8 +142,8 @@ export class JWTRotationManager {
       throw new Error(`Active key ${this.activeKeyId} not found in key store`);
     }
 
-    const signOptions: jwt.SignOptions = {
-      algorithm: activeKey.algorithm as jwt.Algorithm,
+    const signOptions: SignOptions = {
+      algorithm: activeKey.algorithm as Algorithm,
       keyid: activeKey.keyId,
       issuer: process.env.JWT_ISSUER || 'maestro-conductor',
       audience: process.env.JWT_AUDIENCE || 'intelgraph-platform',
@@ -173,7 +173,7 @@ export class JWTRotationManager {
   /**
    * Verify JWT token with any valid key
    */
-  async verifyToken(token: string): Promise<jwt.JwtPayload | string> {
+  async verifyToken(token: string): Promise<JwtPayload | string> {
     const decoded = jwt.decode(token, { complete: true });
     if (!decoded || typeof decoded === 'string') {
       throw new Error('Invalid token format');
@@ -197,8 +197,8 @@ export class JWTRotationManager {
     const verifyKey = this.keys.get(keyId)!;
 
     try {
-      const verifyOptions: jwt.VerifyOptions = {
-        algorithms: [verifyKey.algorithm as jwt.Algorithm],
+      const verifyOptions: VerifyOptions = {
+        algorithms: [verifyKey.algorithm as Algorithm],
         issuer: process.env.JWT_ISSUER || 'maestro-conductor',
         audience: process.env.JWT_AUDIENCE || 'intelgraph-platform',
       };
