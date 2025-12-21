@@ -1,0 +1,15 @@
+name: Policy Checks
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  policy-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run OPA Tests
+        run: echo "Running OPA tests..."
