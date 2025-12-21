@@ -1,0 +1,17 @@
+{
+  "name": "@intelgraph/ops",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "^1.9.0"
+  }
+}

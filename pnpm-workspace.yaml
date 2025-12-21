@@ -1,6 +1,7 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+  - 'libs/*'
   - 'services/*'
   - 'client'
   - 'server'

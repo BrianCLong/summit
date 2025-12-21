@@ -1,0 +1,12 @@
+{
+  "name": "@intelgraph/case-report",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -b"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.7.3"
+  }
+}

@@ -41,6 +41,9 @@
   },
   "type": "module",
   "types": "dist/index.d.ts",
+  "bin": {
+    "prov-verify": "dist/bin/prov-verify.js"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

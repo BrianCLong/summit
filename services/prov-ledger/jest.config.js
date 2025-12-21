@@ -15,6 +15,8 @@ export default {
   },
   testMatch: [
     '<rootDir>/test/**/*.test.ts',
+    '<rootDir>/tests/**/*.spec.ts',
+    '<rootDir>/tests/**/*.test.ts',
     '<rootDir>/src/**/*.test.ts',
   ],
   collectCoverageFrom: [
