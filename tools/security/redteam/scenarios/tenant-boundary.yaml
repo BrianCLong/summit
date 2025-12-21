@@ -1,0 +1,11 @@
+name: tenant-boundary-probe
+host: https://staging.intelgraph.local
+rate_limit_rps: 3
+steps:
+  - description: Access another tenant's graph
+    method: GET
+    path: /api/tenant/other-tenant/graph
+    headers:
+      X-Tenant-Id: other-tenant
+    expect_status: 403
+    expect_body_includes: "tenant isolation"

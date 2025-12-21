@@ -1,0 +1,15 @@
+allowlisted_tools:
+  summarize:
+    scope: read
+  search:
+    scope: read
+  ticket:create:
+    scope: write
+blocked_tools:
+  - shell
+  - filesystem
+sensitive_classes:
+  - pii
+  - secrets
+  - credentials
+  - national_security

@@ -1,0 +1,4 @@
+- id: 10010
+  path: /status
+  justification: informational status page
+  expires: 2025-12-31

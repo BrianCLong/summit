@@ -1,0 +1,30 @@
+name: redteam-harness
+
+on:
+  schedule:
+    - cron: '0 5 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  run-redteam:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r tools/security/redteam/requirements.txt
+      - name: Run scenarios
+        env:
+          REDTEAM_TARGET: https://staging.intelgraph.local
+        run: |
+          python tools/security/redteam/runner.py
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: redteam-evidence
+          path: tools/security/redteam/runs

@@ -1,0 +1,4 @@
+Poison message detected on topic intelgraph.events
+Message moved to DLQ: intelgraph.events.dlq partition 1 offset 42
+Replay command: node tools/security/message-bus/dlq-replay.js --topic intelgraph.events.dlq --limit 1
+Outcome: replay succeeded, consumer processed without side effects

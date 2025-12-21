@@ -1,0 +1,9 @@
+name: export-abuse
+host: https://staging.intelgraph.local
+rate_limit_rps: 2
+steps:
+  - description: Rapid pagination export
+    method: GET
+    path: /api/export?limit=10000&page=1
+    expect_status: 429
+    expect_body_includes: "throttled"

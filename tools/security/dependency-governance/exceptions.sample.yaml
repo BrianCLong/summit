@@ -1,0 +1,14 @@
+- type: license
+  identifier: MPL-2.0
+  package: dev-tool@1.0.0
+  approvedBy: security-lead@example.com
+  ticket: SEC-1234
+  expires: 2099-12-31
+  signature: signed-by-ciso
+- type: cve
+  identifier: "12345"
+  package: core-lib@2.0.0
+  approvedBy: security-lead@example.com
+  ticket: SEC-9876
+  expires: 2099-12-31
+  signature: signed-by-ciso

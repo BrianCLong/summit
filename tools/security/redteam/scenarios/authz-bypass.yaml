@@ -1,0 +1,11 @@
+name: authz-bypass
+host: https://staging.intelgraph.local
+rate_limit_rps: 3
+steps:
+  - description: Tamper JWT to drop scope
+    method: GET
+    path: /api/secure
+    headers:
+      Authorization: "Bearer tampered-token"
+    expect_status: 401
+    expect_body_includes: "invalid scope"

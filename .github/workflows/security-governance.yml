@@ -1,0 +1,43 @@
+name: security-governance
+
+on:
+  pull_request:
+    branches: ["main", "release/**"]
+  workflow_dispatch: {}
+
+jobs:
+  dependency-governance:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.19.0
+      - name: Enable corepack
+        run: corepack enable
+      - name: Install pnpm
+        run: npm install -g pnpm@9.12.0
+      - name: Install workspace deps (frozen)
+        run: pnpm install --frozen-lockfile
+      - name: Dependency governance checks
+        env:
+          INSTALL_CMD: pnpm install --frozen-lockfile
+        run: pnpm dlx tsx tools/security/dependency-governance/run_checks.ts
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-governance-report
+          path: |
+            tools/security/dependency-governance/output/report.json
+            tools/security/dependency-governance/output/report.sarif
+
+  security-artifact-export:
+    needs: dependency-governance
+    if: always()
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Export artifacts to dashboard bucket
+        run: |
+          echo "Simulating export of security artifacts"

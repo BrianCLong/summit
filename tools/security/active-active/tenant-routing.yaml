@@ -1,0 +1,6 @@
+- tenant: gov-west
+  primary_region: us-west-2
+  secondary_region: us-east-1
+- tenant: eu-central
+  primary_region: eu-central-1
+  secondary_region: eu-west-1

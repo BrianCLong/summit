@@ -1,0 +1,6 @@
+- tenant: default
+  max_rps: 50
+  burst: 10
+- tenant: gold
+  max_rps: 100
+  burst: 20

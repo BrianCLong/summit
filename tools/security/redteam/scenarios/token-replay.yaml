@@ -1,0 +1,11 @@
+name: token-replay
+host: https://staging.intelgraph.local
+rate_limit_rps: 1
+steps:
+  - description: Replay expired token
+    method: POST
+    path: /api/session/reuse
+    headers:
+      Authorization: "Bearer expired"
+    expect_status: 401
+    expect_body_includes: "expired"

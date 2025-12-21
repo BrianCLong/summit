@@ -1,0 +1,11 @@
+name: token-replay-misconfig
+host: https://staging.intelgraph.local
+rate_limit_rps: 1
+steps:
+  - description: Replay token when replay detection is disabled
+    method: POST
+    path: /api/session/reuse
+    headers:
+      Authorization: "Bearer expired"
+    expect_status: 200
+    expect_body_includes: "unexpected success"

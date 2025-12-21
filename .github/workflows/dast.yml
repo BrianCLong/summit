@@ -1,0 +1,43 @@
+name: dast
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  pull_request:
+    paths:
+      - 'server/**'
+      - 'api/**'
+  workflow_dispatch: {}
+
+jobs:
+  zap-baseline:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ZAP
+        run: sudo apt-get update && sudo apt-get install -y zaproxy
+      - name: Auth cookie
+        env:
+          DAST_USERNAME: ${{ secrets.DAST_USERNAME }}
+          DAST_PASSWORD: ${{ secrets.DAST_PASSWORD }}
+          DAST_TARGET: ${{ secrets.DAST_TARGET }}
+        run: bash tools/security/dast/login_and_export.sh
+      - name: Baseline scan
+        run: |
+          zap-baseline.py -t ${{ secrets.DAST_TARGET }} \
+            -g tools/security/dast/context.yaml \
+            -P 8081 \
+            -r dast-baseline.html
+      - name: Upload DAST artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dast-baseline
+          path: dast-baseline.html
+
+  incremental:
+    runs-on: ubuntu-22.04
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Incremental scan stub
+        run: echo "Incremental DAST would target changed endpoints"

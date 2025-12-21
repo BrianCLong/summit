@@ -1,0 +1,10 @@
+rules:
+  - id: 10010
+    action: FAIL
+    reason: "Server error response"
+  - id: 20012
+    action: WARN
+    reason: "X-Content-Type missing"
+  - id: 40025
+    action: FAIL
+    reason: "SQL Injection detected"

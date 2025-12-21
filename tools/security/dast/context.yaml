@@ -1,0 +1,9 @@
+context:
+  name: summit-staging
+  urls:
+    - https://staging.intelgraph.local
+  includePaths:
+    - https://staging.intelgraph.local/.*
+  excludePaths:
+    - https://staging.intelgraph.local/logout
+    - https://staging.intelgraph.local/healthz

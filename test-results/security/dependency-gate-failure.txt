@@ -1,0 +1,5 @@
+Sample failing PR output:
+- Denied license detected: package `bad-lib@1.0.0` uses AGPL-3.0
+- Critical CVE CVE-2024-0001 in `vuln-lib@0.1.0`
+- CVE budget exceeded for tier2 services
+Merge blocked until remediation or approved exception (with ticket + expiry).

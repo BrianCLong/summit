@@ -1,0 +1,8 @@
+- tenant: default
+  soft_rows: 1000000
+  hard_rows: 5000000
+  concurrent_heavy: 5
+- tenant: platinum
+  soft_rows: 2000000
+  hard_rows: 8000000
+  concurrent_heavy: 10

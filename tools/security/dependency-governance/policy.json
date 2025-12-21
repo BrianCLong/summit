@@ -1,0 +1,9 @@
+{
+  "allowLicenses": ["MIT", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "ISC", "CC0-1.0"],
+  "denyLicenses": ["GPL-3.0", "AGPL-3.0", "SSPL", "BUSL", "JSON", "Proprietary", "Unknown"],
+  "weakCopyleft": ["MPL-2.0", "LGPL-2.1", "LGPL-3.0"],
+  "lockfiles": ["pnpm-lock.yaml"],
+  "requireFrozenLockfile": true,
+  "pinnedActionBlocklist": ["@main", "@master", "@latest"],
+  "pinnedImageBlocklist": [":latest"]
+}

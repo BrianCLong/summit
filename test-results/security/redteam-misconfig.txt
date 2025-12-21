@@ -1,0 +1,3 @@
+Scenario token-replay-misconfig FAILED
+Reason: replay protection disabled; received 200 instead of 401
+Evidence: tools/security/redteam/runs/<timestamp>/token-replay-misconfig/results.json
