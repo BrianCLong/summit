@@ -16,3 +16,4 @@ fi
 
 cd "$ROOT"
 "$OPA_BIN" test -v policy/abac policy/tests/abac_test.rego policy/simulation
+"$OPA_BIN" test -v policy/revops -d policy/revops/tests/fixtures/config.json

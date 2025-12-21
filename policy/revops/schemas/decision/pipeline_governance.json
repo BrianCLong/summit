@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RevOps Pipeline Governance Decision",
+  "type": "object",
+  "required": ["allowed", "reason", "violations", "risk", "metrics", "handoffs", "flags"],
+  "properties": {
+    "allowed": {"type": "boolean"},
+    "reason": {"type": "string"},
+    "violations": {"type": "array", "items": {"type": "string"}},
+    "required_fields_missing": {"type": "array", "items": {"type": "string"}},
+    "risk": {
+      "type": "object",
+      "required": ["score", "signals"],
+      "properties": {
+        "score": {"type": "number"},
+        "signals": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "required": ["coverage", "velocity_days", "conversion", "slippage"],
+      "properties": {
+        "coverage": {"type": "number"},
+        "velocity_days": {"type": "number"},
+        "conversion": {"type": "object"},
+        "slippage": {"type": "boolean"}
+      }
+    },
+    "handoffs": {
+      "type": "object",
+      "properties": {
+        "gaps": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "flags": {"type": "array", "items": {"type": "string"}}
+  }
+}

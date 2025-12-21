@@ -1,0 +1,113 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RevOps Pipeline Governance Input",
+  "type": "object",
+  "required": ["tenant", "opportunity", "pipeline", "context"],
+  "properties": {
+    "tenant": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {"id": {"type": "string"}}
+    },
+    "context": {
+      "type": "object",
+      "required": ["as_of"],
+      "properties": {"as_of": {"type": "string", "format": "date-time"}}
+    },
+    "opportunity": {
+      "type": "object",
+      "required": ["id", "stage", "owner", "lead_source", "activity", "handoffs"],
+      "properties": {
+        "id": {"type": "string"},
+        "type": {"type": "string", "enum": ["new", "renewal"]},
+        "stage": {"type": "string"},
+        "previous_stage": {"type": "string"},
+        "territory": {"type": "string"},
+        "owner": {
+          "type": "object",
+          "required": ["id", "territory"],
+          "properties": {
+            "id": {"type": "string"},
+            "territory": {"type": "string"}
+          }
+        },
+        "lead_source": {
+          "type": "object",
+          "required": ["original"],
+          "properties": {
+            "original": {"type": "string"},
+            "latest": {"type": "string"}
+          }
+        },
+        "problem_statement": {"type": "string"},
+        "budget": {"type": "number"},
+        "champion": {"type": "string"},
+        "next_step": {"type": "string"},
+        "close_date": {"type": "string", "format": "date-time"},
+        "contract_amount": {"type": "number"},
+        "close_reason": {
+          "type": "object",
+          "properties": {
+            "code": {"type": "string"},
+            "note": {"type": "string"}
+          }
+        },
+        "activity": {
+          "type": "object",
+          "properties": {
+            "last_activity_at": {"type": "string", "format": "date-time"},
+            "next_step": {"type": "string"},
+            "champion": {"type": "string"},
+            "stage_entered_at": {"type": "string", "format": "date-time"}
+          }
+        },
+        "handoffs": {
+          "type": "object",
+          "properties": {
+            "marketing_qualified_at": {"type": "string", "format": "date-time"},
+            "sales_accepted_at": {"type": "string", "format": "date-time"},
+            "sales_to_cs_at": {"type": "string", "format": "date-time"}
+          }
+        },
+        "renewal": {
+          "type": "object",
+          "properties": {
+            "renewal_date": {"type": "string", "format": "date-time"},
+            "current_arr": {"type": "number"},
+            "expansion_triggered": {"type": "boolean"}
+          }
+        }
+      }
+    },
+    "pipeline": {
+      "type": "object",
+      "required": ["quota", "total", "stages", "conversions"],
+      "properties": {
+        "quota": {"type": "number"},
+        "total": {"type": "number"},
+        "stages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["stage", "entered_at"],
+            "properties": {
+              "stage": {"type": "string"},
+              "entered_at": {"type": "string", "format": "date-time"}
+            }
+          }
+        },
+        "conversions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["attempts", "wins"],
+            "properties": {
+              "attempts": {"type": "integer", "minimum": 0},
+              "wins": {"type": "integer", "minimum": 0}
+            }
+          }
+        }
+      }
+    }
+  }
+}

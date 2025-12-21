@@ -113,6 +113,129 @@
     "contracts": [
       {"id": "contract-1", "status": "signed", "region": "US", "term_months": 12, "mrr": 20000, "signatures": [{"role": "buyer", "signed_at": "2025-01-01T00:00:00Z"}], "approvals": ["sales_manager"], "flags": []},
       {"id": "contract-2", "status": "draft", "region": "US", "term_months": 12, "mrr": 20000, "signatures": [], "approvals": [], "flags": []}
-    ]
+    ],
+    "pipeline_cases": {
+      "healthy_new": {
+        "tenant": {"id": "tenant-default"},
+        "context": {"as_of": "2025-01-31T00:00:00Z"},
+        "opportunity": {
+          "id": "opp-1",
+          "type": "new",
+          "stage": "SAO",
+          "previous_stage": "SQL",
+          "territory": "EMEA",
+          "owner": {"id": "ae-1", "territory": "EMEA"},
+          "lead_source": {"original": "webinar", "latest": "field"},
+          "problem_statement": "Need tighter revops controls",
+          "budget": 75000,
+          "champion": "ops lead",
+          "next_step": "security review",
+          "close_date": "2025-03-15T00:00:00Z",
+          "contract_amount": 120000,
+          "activity": {
+            "last_activity_at": "2025-01-30T00:00:00Z",
+            "next_step": "security review",
+            "champion": "ops lead",
+            "stage_entered_at": "2025-01-20T00:00:00Z"
+          },
+          "handoffs": {
+            "marketing_qualified_at": "2025-01-05T00:00:00Z",
+            "sales_accepted_at": "2025-01-06T00:00:00Z",
+            "sales_to_cs_at": "2025-01-10T00:00:00Z"
+          }
+        },
+        "pipeline": {
+          "quota": 400000,
+          "total": 1200000,
+          "stages": [
+            {"stage": "MQL", "entered_at": "2025-01-01T00:00:00Z"},
+            {"stage": "SQL", "entered_at": "2025-01-05T00:00:00Z"},
+            {"stage": "SAO", "entered_at": "2025-01-20T00:00:00Z"}
+          ],
+          "conversions": {
+            "mql_to_sql": {"attempts": 20, "wins": 12},
+            "sql_to_sao": {"attempts": 12, "wins": 8}
+          }
+        }
+      },
+      "closed_without_reason": {
+        "tenant": {"id": "tenant-default"},
+        "context": {"as_of": "2025-02-15T00:00:00Z"},
+        "opportunity": {
+          "id": "opp-2",
+          "type": "new",
+          "stage": "Closed_Lost",
+          "previous_stage": "SAO",
+          "territory": "NA",
+          "owner": {"id": "ae-2", "territory": "NA"},
+          "lead_source": {"original": "partner"},
+          "problem_statement": "",
+          "budget": 0,
+          "champion": "",
+          "next_step": "",
+          "activity": {
+            "last_activity_at": "2024-12-01T00:00:00Z",
+            "next_step": "",
+            "champion": "",
+            "stage_entered_at": "2024-12-01T00:00:00Z"
+          },
+          "handoffs": {}
+        },
+        "pipeline": {
+          "quota": 300000,
+          "total": 300000,
+          "stages": [
+            {"stage": "MQL", "entered_at": "2024-11-01T00:00:00Z"},
+            {"stage": "SQL", "entered_at": "2024-11-05T00:00:00Z"},
+            {"stage": "SAO", "entered_at": "2024-11-20T00:00:00Z"},
+            {"stage": "Closed_Lost", "entered_at": "2024-12-01T00:00:00Z"}
+          ],
+          "conversions": {
+            "mql_to_sql": {"attempts": 10, "wins": 5},
+            "sql_to_sao": {"attempts": 5, "wins": 2}
+          }
+        }
+      },
+      "renewal_conflict": {
+        "tenant": {"id": "tenant-default"},
+        "context": {"as_of": "2025-03-01T00:00:00Z"},
+        "opportunity": {
+          "id": "opp-3",
+          "type": "renewal",
+          "stage": "SQL",
+          "previous_stage": "MQL",
+          "territory": "APAC",
+          "owner": {"id": "ae-3", "territory": "EMEA"},
+          "lead_source": {"original": "cs_upsell"},
+          "champion": "",
+          "next_step": "",
+          "activity": {
+            "last_activity_at": "2025-01-01T00:00:00Z",
+            "next_step": "",
+            "champion": "",
+            "stage_entered_at": "2024-12-01T00:00:00Z"
+          },
+          "handoffs": {
+            "marketing_qualified_at": "2024-11-01T00:00:00Z",
+            "sales_accepted_at": "2024-11-02T00:00:00Z"
+          },
+          "renewal": {
+            "current_arr": 150000,
+            "expansion_triggered": false
+          }
+        },
+        "pipeline": {
+          "quota": 500000,
+          "total": 250000,
+          "stages": [
+            {"stage": "MQL", "entered_at": "2024-10-01T00:00:00Z"},
+            {"stage": "SQL", "entered_at": "2024-12-01T00:00:00Z"}
+          ],
+          "conversions": {
+            "mql_to_sql": {"attempts": 30, "wins": 10}
+          }
+        }
+      }
+    }
   }
 }
