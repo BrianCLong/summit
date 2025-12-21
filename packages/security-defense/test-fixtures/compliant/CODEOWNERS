@@ -1,0 +1,5 @@
+# Sensitive areas
+/iam @security-team
+/deploy @sre-team
+/dns @platform-team
+/authz @app-team

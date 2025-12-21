@@ -1,0 +1,5 @@
+redaction:
+  fields:
+    - password
+    - token
+    - apiKey
