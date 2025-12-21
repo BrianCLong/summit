@@ -6,6 +6,7 @@ import { makeExecutableSchema } from '@graphql-tools/schema';
 import { applyMiddleware } from 'graphql-middleware';
 import cors from 'cors';
 import helmet from 'helmet';
+import pino from 'pino';
 import pinoHttp from 'pino-http';
 import { logger as appLogger } from './config/logger.js';
 import { telemetry } from './lib/telemetry/comprehensive-telemetry.js';
@@ -206,7 +207,7 @@ export const createApp = async () => {
     snapshotter.trackRequest(req);
     const start = process.hrtime();
     telemetry.incrementActiveConnections();
-    telemetry.subsystems.api.requests.add(1);
+    telemetry.subsystems.api.requests.add();
 
     res.on('finish', () => {
       snapshotter.untrackRequest(req);
@@ -220,7 +221,7 @@ export const createApp = async () => {
       telemetry.decrementActiveConnections();
 
       if (res.statusCode >= 500) {
-        telemetry.subsystems.api.errors.add(1);
+        telemetry.subsystems.api.errors.add();
       }
     });
 
@@ -233,6 +234,36 @@ export const createApp = async () => {
 
   // Swagger UI
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+  // Production Authentication - Use proper JWT validation
+  const {
+    productionAuthMiddleware,
+    applyProductionSecurity,
+  } = await import('./config/production-security.js');
+
+  // Apply security middleware based on environment
+  if (cfg.NODE_ENV === 'production') {
+    applyProductionSecurity(app);
+  }
+
+  const authenticateToken =
+    cfg.NODE_ENV === 'production'
+      ? productionAuthMiddleware
+      : (req: Request, res: Response, next: NextFunction) => {
+          // Development mode - relaxed auth for easier testing
+          const authHeader = req.headers['authorization'];
+          const token = authHeader && authHeader.split(' ')[1];
+
+          if (!token) {
+            console.warn('Development: No token provided, allowing request');
+            (req as any).user = {
+              sub: 'dev-user',
+              email: 'dev@intelgraph.local',
+              role: 'admin',
+            };
+          }
+          next();
+        };
 
   // Global Rate Limiting (fallback for unauthenticated or non-specific routes)
   // Note: /graphql has its own rate limiting chain above
@@ -440,36 +471,6 @@ export const createApp = async () => {
     },
   });
   await apollo.start();
-
-  // Production Authentication - Use proper JWT validation
-  const {
-    productionAuthMiddleware,
-    applyProductionSecurity,
-  } = await import('./config/production-security.js');
-
-  // Apply security middleware based on environment
-  if (cfg.NODE_ENV === 'production') {
-    applyProductionSecurity(app);
-  }
-
-  const authenticateToken =
-    cfg.NODE_ENV === 'production'
-      ? productionAuthMiddleware
-      : (req: Request, res: Response, next: NextFunction) => {
-          // Development mode - relaxed auth for easier testing
-          const authHeader = req.headers['authorization'];
-          const token = authHeader && authHeader.split(' ')[1];
-
-          if (!token) {
-            console.warn('Development: No token provided, allowing request');
-            (req as any).user = {
-              sub: 'dev-user',
-              email: 'dev@intelgraph.local',
-              role: 'admin',
-            };
-          }
-          next();
-        };
 
   app.use(
     '/graphql',

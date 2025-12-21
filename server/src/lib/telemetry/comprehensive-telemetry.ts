@@ -27,7 +27,8 @@ class ComprehensiveTelemetry {
 
   // Request/response timing
   public readonly requestDuration: { record: () => void };
-  private activeConnections: { add: () => void };
+  private activeConnections: { add: (value: number) => void };
+  private activeConnectionsCount = 0;
 
   private constructor() {
     // Legacy support: Reuse the OTel service or create a bridged meter
@@ -44,7 +45,7 @@ class ComprehensiveTelemetry {
 
     // Mocks to satisfy type checker while we migrate
     this.requestDuration = { record: () => {} };
-    this.activeConnections = { add: () => {} };
+    this.activeConnections = { add: (value: number) => {} };
     this.subsystems = {
       database: {
         queries: { add: () => {} },
@@ -77,6 +78,16 @@ class ComprehensiveTelemetry {
       attributes as Record<string, string>,
       duration,
     );
+  }
+
+  public incrementActiveConnections() {
+    this.activeConnectionsCount++;
+    this.activeConnections.add(1);
+  }
+
+  public decrementActiveConnections() {
+    this.activeConnectionsCount--;
+    this.activeConnections.add(-1);
   }
 
   public onMetric(_listener: (metricName: string, value: number) => void) {
