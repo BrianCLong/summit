@@ -1783,3 +1783,34 @@ export class PolicyBacktestEngine {
 
 export { analyzeEvidence } from 'common-types';
 export { ConsentStateReconciler } from './consent-reconciler';
+export { ControlCatalog, determineCatalogPath } from './control-catalog';
+export {
+  CiPolicyGateEngine,
+  type GateCheck,
+  type GateEvaluationResult,
+  type GateName,
+  type GatePolicyConfig,
+  type GateSeverity,
+} from './ci-policy-gates';
+export {
+  DataClassificationEnforcer,
+  type ClassificationLevel,
+  type ClassificationResult,
+  type DataAsset,
+} from './data-classification';
+export { ExceptionRegistry, type ExceptionRecord, type Incident } from './exceptions-registry';
+export {
+  EvidencePackGenerator,
+  type EvidenceItem,
+  type EvidencePack,
+  type EvidenceSource,
+  cleanupEvidenceWorkspace,
+  createEvidenceWorkspace,
+  writeEvidenceFile,
+} from './evidence-pack';
+export {
+  RetentionDeletionEngine,
+  type DeletionJob,
+  type DeletionRun,
+  type RetentionPolicy,
+} from './retention-engine';
