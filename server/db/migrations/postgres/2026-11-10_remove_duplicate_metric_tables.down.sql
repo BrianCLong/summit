@@ -1,0 +1,4 @@
+-- This migration removes the summitsight analytics mart and finops cost rollups tables.
+-- The removal is intentional to eliminate shadow marts and consolidate on a single data spine.
+-- Re-creating these tables is not the desired outcome of a rollback.
+-- If these tables are needed again, a new migration should be created.
