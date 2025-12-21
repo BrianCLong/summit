@@ -1,0 +1,6 @@
+jurisdiction: US
+ccpa: true
+data_residency: US
+sectoral_laws:
+  - hipaa
+  - sox

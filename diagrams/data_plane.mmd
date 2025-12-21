@@ -1,0 +1,8 @@
+graph LR
+    A[User Action] --> B[Event Bus]
+    B --> C[Compliance Adapter]
+    C -->|EU Mode| D[EU Storage]
+    C -->|US Mode| E[US Storage]
+    D --> F[Exporter]
+    E --> F
+    F --> G[Artifact]

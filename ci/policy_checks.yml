@@ -1,0 +1,13 @@
+name: Policy-as-Code Enforcement
+
+on: [pull_request]
+
+jobs:
+  opa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: open-policy-agent/setup-opa@v2
+      - name: Run OPA tests
+        run: |
+          opa test policy/opa/... --fail-defined

@@ -1,0 +1,4 @@
+jurisdiction: EU
+gdpr: true
+data_residency: EU
+right_to_be_forgotten: strict

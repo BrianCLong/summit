@@ -1,0 +1,7 @@
+graph TD
+    A[Request] --> B{Policy Enforcement Point}
+    B -->|Check| C[OPA Policy Engine]
+    C -->|Allow| D[Application Logic]
+    C -->|Deny| E[Reject Request]
+    D --> F[Audit Log]
+    F --> G[Evidence Bundle]

@@ -1,0 +1,15 @@
+name: Ethics Guardrails
+
+on: [pull_request]
+
+jobs:
+  ethics:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: open-policy-agent/setup-opa@v2
+      - name: Scan regulator interactions
+        run: |
+          grep -R "regulator" -n . --exclude-dir={.git,node_modules,dist,coverage} | tee interactions.log
+          opa eval -d policy/opa/ethics \
+            -i interactions.log "data.ethics.interaction.deny"

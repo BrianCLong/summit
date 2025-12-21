@@ -1224,3 +1224,18 @@ to their own licenses. See [NOTICE](./NOTICE) and the dependency metadata
 ---
 
 **Summit Platform** - Next-Generation Intelligence Analysis
+
+## ⚖️ Governance & Compliance (New)
+
+**Repo-Ready Regulatory Advantage**
+
+This repository now includes a dedicated compliance layer to turn regulatory rigidity into competitive advantage.
+
+*   [Clean Hands Charter](governance/ethics/CLEAN_HANDS_CHARTER.md)
+*   [Strategy Memo](governance/regulatory/STRATEGY_MEMO.md)
+*   [Architecture](diagrams/architecture.md)
+
+**CI/CD Enforcement:**
+*   **Policy-as-Code:** OPA checks run on every PR.
+*   **Ethics Guardrails:** Automated scans for improper influence.
+*   **Audit Readiness:** Evidence bundles generated automatically on release.

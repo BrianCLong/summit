@@ -1,0 +1,12 @@
+name: Standards Drift Check
+
+on: [pull_request]
+
+jobs:
+  standards:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate schema compatibility
+        run: |
+          npx tsx intelligence/standards_tracker.ts --check

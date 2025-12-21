@@ -1,0 +1,7 @@
+sources:
+  - name: "EU Commission Press Releases"
+    url: "https://ec.europa.eu/commission/press-corner/api/documents"
+    type: "rss"
+  - name: "Federal Register"
+    url: "https://www.federalregister.gov/api/v1/documents.json"
+    type: "api"

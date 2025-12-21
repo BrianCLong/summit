@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "audit_id": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "actor": { "type": "string" },
+    "action": { "type": "string" },
+    "evidence_hash": { "type": "string" }
+  },
+  "required": ["audit_id", "timestamp", "actor", "action", "evidence_hash"]
+}
