@@ -3,8 +3,10 @@
  */
 
 import express from 'express';
-import cors from 'cors';
 import neo4j from 'neo4j-driver';
+import { secureApp } from '../../libs/ops/src/http-secure';
+import { csrfGuard } from '../../libs/ops/src/auth';
+import { log } from '../../libs/ops/src/log';
 import { SPARQLQueryEngine } from './sparql/SPARQLQueryEngine.js';
 
 const app = express();
@@ -22,9 +24,11 @@ const driver = neo4j.driver(
 const queryEngine = new SPARQLQueryEngine(driver);
 
 // Middleware
-app.use(cors());
+secureApp(app);
+app.use(log);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(csrfGuard());
 
 /**
  * SPARQL Query endpoint (GET)

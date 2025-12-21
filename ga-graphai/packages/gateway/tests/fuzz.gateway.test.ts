@@ -4,6 +4,9 @@ import request from 'supertest';
 
 import { createApp } from '../src/app.js';
 
+const csrfToken = 'test-csrf-token';
+process.env.CSRF_TOKEN = csrfToken;
+
 const gqlPlanQuery = `
   query Plan($input: PlanInput!) {
     plan(input: $input) {
@@ -33,6 +36,13 @@ const allowedPurposes = new Set([
   'demo',
 ]);
 
+const aiContextHeaders = fc.record({
+  tenant: fc.option(fc.string({ minLength: 1, maxLength: 24 }), { nil: undefined }),
+  purpose: fc.option(fc.constantFrom(...allowedPurposes, 'unauthorized'), { nil: undefined }),
+  environment: fc.option(fc.constantFrom('dev', 'staging', 'production'), { nil: undefined }),
+  retention: fc.option(fc.string({ maxLength: 24 }), { nil: undefined }),
+});
+
 const basePropertySettings = Object.freeze({
   numRuns: 36,
   interruptAfterTimeLimit: 5500,
@@ -45,7 +55,28 @@ const basePropertySettings = Object.freeze({
       console.log(`[fast-check] ${message}`);
     }
   },
-};
+});
+
+function applyHeaders(builder: request.Test, headers: fc.TypeOf<typeof aiContextHeaders>) {
+  let next = builder.set('x-csrf-token', csrfToken);
+  if (headers.tenant) {
+    next = next.set('x-tenant', headers.tenant);
+  }
+  if (headers.purpose) {
+    next = next.set('x-purpose', headers.purpose);
+  }
+  if (headers.environment) {
+    next = next.set('x-env', headers.environment);
+  }
+  if (headers.retention) {
+    next = next.set('x-retention', headers.retention);
+  }
+  return next;
+}
+
+function deterministicSettings(seed: number) {
+  return { ...basePropertySettings, seed };
+}
 
 describe('gateway fuzz safety', () => {
   const { app } = createApp({ environment: 'test' });
@@ -271,18 +302,19 @@ describe('gateway fuzz safety', () => {
   it('rejects traversal-style paths from reaching privileged endpoints', async () => {
     await fc.assert(
       fc.asyncProperty(
-        fc.array(fc.constantFrom('..', 'v1', 'internal', 'metrics'), {
-          minLength: 1,
-          maxLength: 3,
-        }),
-        async (segments) => {
-          fc.pre(segments.some((segment) => segment.includes('..')));
-          const pathAttempt = `/${segments.join('/')}`;
-          const response = await request(app)
-            .post(pathAttempt)
-            .set('x-tenant', 'fuzz-tenant')
-            .set('x-purpose', 'investigation')
-            .send({ objective: 'traversal-probe' });
+          fc.array(fc.constantFrom('..', 'v1', 'internal', 'metrics'), {
+            minLength: 1,
+            maxLength: 3,
+          }),
+          async (segments) => {
+            fc.pre(segments.some((segment) => segment.includes('..')));
+            const pathAttempt = `/${segments.join('/')}`;
+            const response = await request(app)
+              .post(pathAttempt)
+              .set('x-csrf-token', csrfToken)
+              .set('x-tenant', 'fuzz-tenant')
+              .set('x-purpose', 'investigation')
+              .send({ objective: 'traversal-probe' });
 
           expect(response.status).toBeGreaterThanOrEqual(400);
           expect(response.status).toBeLessThan(500);

@@ -17,6 +17,7 @@ import {
 } from './metrics.js';
 import { InMemoryLedger, buildEvidencePayload } from 'prov-ledger';
 import { ChaosEngine, ChaosError } from './chaos.js';
+import { applyHttpSecurity, csrfGuard, requestLogger } from './security.js';
 
 const ALLOWED_PURPOSES = new Set([
   'investigation',
@@ -167,7 +168,10 @@ export function createApp(options = {}) {
   }
 
   const app = express();
+  applyHttpSecurity(app, options.security);
+  app.use(requestLogger());
   app.use(express.json({ limit: '1mb' }));
+  app.use(csrfGuard({ token: options.csrfToken }));
   app.use(createContextMiddleware(options));
   app.use(chaos.middleware());
 

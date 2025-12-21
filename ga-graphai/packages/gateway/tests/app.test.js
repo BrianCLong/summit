@@ -4,6 +4,13 @@ import request from 'supertest';
 
 import { createApp } from '../src/app.js';
 
+const csrfToken = 'test-csrf-token';
+process.env.CSRF_TOKEN = csrfToken;
+
+function withSecurityHeaders(builder) {
+  return builder.set('x-csrf-token', csrfToken);
+}
+
 test('GraphQL plan returns evidence-backed response', async () => {
   const { app } = createApp();
   const query = `
@@ -17,8 +24,7 @@ test('GraphQL plan returns evidence-backed response', async () => {
       }
     }
   `;
-  const response = await request(app)
-    .post('/graphql')
+  const response = await withSecurityHeaders(request(app).post('/graphql'))
     .set('x-tenant', 'acme-corp')
     .set('x-purpose', 'investigation')
     .send({
@@ -30,11 +36,22 @@ test('GraphQL plan returns evidence-backed response', async () => {
   assert.ok(response.body.data.plan.evidenceId);
 });
 
+test('rejects mutating requests without CSRF token', async () => {
+  const { app } = createApp();
+  const response = await request(app)
+    .post('/v1/plan')
+    .set('x-tenant', 'acme-corp')
+    .set('x-purpose', 'investigation')
+    .send({ objective: 'Missing csrf header' });
+
+  assert.equal(response.status, 419);
+  assert.equal(response.body.error, 'csrf');
+});
+
 test('REST generate falls back to llama when no budget is available', async () => {
   const { app } = createApp();
   const payload = { objective: 'Need premium help', requiresMultimodal: false };
-  const response = await request(app)
-    .post('/v1/generate')
+  const response = await withSecurityHeaders(request(app).post('/v1/generate'))
     .set('x-tenant', 'acme-corp')
     .set('x-purpose', 'investigation')
     .set('x-allow-paid', 'true')
@@ -52,8 +69,7 @@ test('REST generate escalates to paid model when cap allows', async () => {
     requiresMultimodal: false,
     caps: { hardUsd: 0.5 },
   };
-  const response = await request(app)
-    .post('/v1/generate')
+  const response = await withSecurityHeaders(request(app).post('/v1/generate'))
     .set('x-tenant', 'acme-corp')
     .set('x-purpose', 'investigation')
     .set('x-allow-paid', 'true')
@@ -67,8 +83,7 @@ test('REST generate escalates to paid model when cap allows', async () => {
 
 test('metrics endpoint exposes Prometheus data after a call', async () => {
   const { app } = createApp();
-  await request(app)
-    .post('/v1/plan')
+  await withSecurityHeaders(request(app).post('/v1/plan'))
     .set('x-tenant', 'acme-corp')
     .set('x-purpose', 'investigation')
     .send({ objective: 'Observe metrics' });
@@ -90,12 +105,10 @@ test('chaos endpoint reports disabled by default in safe envs', async () => {
 
 test('chaos injection can short-circuit LLM calls when enabled', async () => {
   const { app } = createApp({ environment: 'staging' });
-  await request(app)
-    .post('/internal/chaos')
+  await withSecurityHeaders(request(app).post('/internal/chaos'))
     .send({ enabled: true, errorRate: 1 });
 
-  const response = await request(app)
-    .post('/v1/generate')
+  const response = await withSecurityHeaders(request(app).post('/v1/generate'))
     .set('x-tenant', 'acme-corp')
     .set('x-purpose', 'investigation')
     .send({ objective: 'trigger chaos' });
@@ -110,8 +123,7 @@ test('production keeps chaos controls unreachable', async () => {
   const statusRes = await request(app).get('/internal/chaos');
   assert.equal(statusRes.status, 404);
 
-  const response = await request(app)
-    .post('/v1/generate')
+  const response = await withSecurityHeaders(request(app).post('/v1/generate'))
     .set('x-tenant', 'acme-corp')
     .set('x-purpose', 'investigation')
     .send({ objective: 'should bypass chaos' });
@@ -127,8 +139,7 @@ test('blocks overly expensive GraphQL queries using cost analysis', async () => 
       models { id family license modality ctx local description }
     }
   `;
-  const response = await request(app)
-    .post('/graphql')
+  const response = await withSecurityHeaders(request(app).post('/graphql'))
     .set('x-tenant', 'acme-corp')
     .set('x-purpose', 'investigation')
     .send({ query });

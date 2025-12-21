@@ -5,6 +5,13 @@ import request from 'supertest';
 
 import { createApp } from '../src/app.js';
 
+const csrfToken = 'test-csrf-token';
+process.env.CSRF_TOKEN = csrfToken;
+
+function withSecurityHeaders(builder) {
+  return builder.set('x-csrf-token', csrfToken);
+}
+
 const fixture = JSON.parse(
   readFileSync(new URL('./fixtures/er-golden.json', import.meta.url), 'utf8'),
 );
@@ -18,8 +25,7 @@ function buildApp() {
 
 test('ER candidates endpoint returns deterministic payload', async () => {
   const app = buildApp();
-  const response = await request(app)
-    .post('/er/candidates')
+  const response = await withSecurityHeaders(request(app).post('/er/candidates'))
     .set('x-tenant', fixture.tenantId)
     .set('x-purpose', 'investigation')
     .send({
@@ -38,8 +44,7 @@ test('ER candidates endpoint returns deterministic payload', async () => {
 
 test('ER explain endpoint surfaces contribution ranking', async () => {
   const app = buildApp();
-  const response = await request(app)
-    .post('/er/explain')
+  const response = await withSecurityHeaders(request(app).post('/er/explain'))
     .set('x-tenant', fixture.tenantId)
     .set('x-purpose', 'investigation')
     .send({
@@ -56,8 +61,7 @@ test('ER explain endpoint surfaces contribution ranking', async () => {
 
 test('ER merge + split record adjudication events', async () => {
   const app = buildApp();
-  const mergeResponse = await request(app)
-    .post('/er/merge')
+  const mergeResponse = await withSecurityHeaders(request(app).post('/er/merge'))
     .set('x-tenant', fixture.tenantId)
     .set('x-purpose', 'investigation')
     .send({
@@ -76,8 +80,7 @@ test('ER merge + split record adjudication events', async () => {
   assert.equal(mergeResponse.status, 200);
   const mergeId = mergeResponse.body.merge.mergeId;
   assert.ok(mergeResponse.body.adjudication.id);
-  const splitResponse = await request(app)
-    .post('/er/split')
+  const splitResponse = await withSecurityHeaders(request(app).post('/er/split'))
     .set('x-tenant', fixture.tenantId)
     .set('x-purpose', 'investigation')
     .send({

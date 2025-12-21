@@ -4,10 +4,16 @@ import request from 'supertest';
 
 import { createApp } from '../src/app.js';
 
+const csrfToken = 'test-csrf-token';
+process.env.CSRF_TOKEN = csrfToken;
+
+function withSecurityHeaders(builder) {
+  return builder.set('x-csrf-token', csrfToken);
+}
+
 test('nl query sandbox endpoint returns cypher and estimates', async () => {
   const { app } = createApp({ enableNlQuerySandbox: true });
-  const response = await request(app)
-    .post('/v1/nl-query/sandbox')
+  const response = await withSecurityHeaders(request(app).post('/v1/nl-query/sandbox'))
     .set('x-tenant', 'sandbox-tenant')
     .set('x-purpose', 'investigation')
     .send({
@@ -27,8 +33,7 @@ test('nl query sandbox honors approval flag for deeper traversals', async () => 
     enableNlQuerySandbox: true,
     sandboxMaxDepth: 0,
   });
-  const blocked = await request(app)
-    .post('/v1/nl-query/sandbox')
+  const blocked = await withSecurityHeaders(request(app).post('/v1/nl-query/sandbox'))
     .set('x-tenant', 'sandbox-tenant')
     .set('x-purpose', 'investigation')
     .send({
@@ -43,8 +48,7 @@ test('nl query sandbox honors approval flag for deeper traversals', async () => 
     ),
   );
 
-  const approved = await request(app)
-    .post('/v1/nl-query/sandbox')
+  const approved = await withSecurityHeaders(request(app).post('/v1/nl-query/sandbox'))
     .set('x-tenant', 'sandbox-tenant')
     .set('x-purpose', 'investigation')
     .send({
