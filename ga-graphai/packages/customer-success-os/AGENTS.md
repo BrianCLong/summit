@@ -1,0 +1,3 @@
+- Implement production-ready customer success operating system capabilities.
+- Use 2 spaces for TypeScript.
+- Run `npm test --workspace customer-success-os` after modifications.
