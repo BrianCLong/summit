@@ -1,0 +1,5 @@
+syntax = "proto3";
+package ig.graphrag.v1;
+service GraphRag { rpc BuildGraph(GraphBuildRequest) returns (GraphBuildResponse); }
+message GraphBuildRequest { string document_id = 1; }
+message GraphBuildResponse { string graph_id = 1; }

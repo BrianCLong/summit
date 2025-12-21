@@ -1,0 +1,5 @@
+syntax = "proto3";
+package ig.nlq.v1;
+service NaturalLanguageQuery { rpc Ask(QueryRequest) returns (QueryResponse); }
+message QueryRequest { string query = 1; }
+message QueryResponse { string answer = 1; }

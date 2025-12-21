@@ -1,0 +1,5 @@
+syntax = "proto3";
+package ig.lac.v1;
+service Compiler { rpc Compile(CompileRequest) returns (CompileResponse); }
+message CompileRequest { string source = 1; }
+message CompileResponse { string artifact_url = 1; }

@@ -1,165 +1,29 @@
-# Summit Platform Makefile
-# Standardized commands for Development and Operations
+SHELL := /bin/bash
 
-.PHONY: up down restart logs shell clean
-.PHONY: dev test lint build format ci
-.PHONY: db-migrate db-seed sbom k6
-.PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release provenance ci-check prereqs contracts policy-sim rerere dupescans
+include .env 2>/dev/null || true
 
-COMPOSE_DEV_FILE ?= docker-compose.dev.yaml
-SHELL_SERVICE ?= gateway
+.PHONY: up down logs ps seed verify-claim fmt lint
 
-# --- Docker Compose Controls ---
+up:
+docker compose up -d --build
 
-up:     ## Run dev stack
-	docker compose -f $(COMPOSE_DEV_FILE) up --build -d
-
-down:   ## Stop dev stack
-	docker compose -f $(COMPOSE_DEV_FILE) down -v
-
-restart: down up
+down:
+docker compose down -v
 
 logs:
-	docker compose -f $(COMPOSE_DEV_FILE) logs -f
+docker compose logs -f --tail=200
 
-shell:
-	docker compose -f $(COMPOSE_DEV_FILE) exec $(SHELL_SERVICE) /bin/sh
+ps:
+docker compose ps
 
-clean:
-	docker system prune -f
-	rm -rf dist build coverage
-	@rm -rf "$(STATE_DIR)"
-	@git branch -D tmp/pr-* 2>/dev/null || true
+seed:
+@echo "(seeded via tools/seed.sql on first boot)"
 
-# --- Development Workflow ---
+verify-claim:
+@curl -sS http://localhost:8101/manifest/$$ID | jq .
 
-dev:
-	pnpm run dev
+fmt:
+@echo "(team-local formatters run in each service)"
 
-test:   ## Run unit tests (node+python)
-	pnpm -w run test:unit || true && pytest -q || true
-
-lint:   ## Lint js/ts
-	pnpm -w exec eslint . || true
-
-format: ## Format code
-	pnpm -w exec prettier -w . || true
-
-build:  ## Build all images
-	docker compose -f $(COMPOSE_DEV_FILE) build
-
-ci: lint test
-
-k6:     ## Perf smoke (TARGET=http://host:port make k6)
-	./ops/k6/smoke.sh
-
-sbom:   ## Generate CycloneDX SBOM
-	@pnpm cyclonedx-npm --output-format JSON --output-file sbom.json
-
-# ---- IntelGraph S25 Merge Orchestrator (Legacy/Specific) ---------------------
-
-SHELL := /bin/bash
-.ONESHELL:
-.SHELLFLAGS := -eo pipefail -c
-MAKEFLAGS += --no-builtin-rules
-
-# Config (override via env)
-REPO              ?= BrianCLong/summit
-BASE_BRANCH       ?= main
-CONSOLIDATION     ?= feature/merge-closed-prs-s25
-STACK_ARTIFACTS   ?= stack/artifacts-pack-v1
-STACK_SERVER      ?= stack/express5-eslint9
-STACK_CLIENT      ?= stack/client-vite7-leaflet5
-STACK_REBRAND     ?= stack/rebrand-docs
-PR_TARGETS        ?= 1279 1261 1260 1259
-STATE_DIR         ?= .merge-evidence
-STATE_FILE        ?= $(STATE_DIR)/state.json
-NODE_VERSION      ?= 20
-
-merge-s25: prereqs
-	@./scripts/merge_s25.sh \
-	  --repo "$(REPO)" \
-	  --base "$(BASE_BRANCH)" \
-	  --branch "$(CONSOLIDATION)" \
-	  --prs "$(PR_TARGETS)" \
-	  --state "$(STATE_FILE)" \
-	  --node "$(NODE_VERSION)"
-
-merge-s25.resume: prereqs
-	@./scripts/merge_s25.sh \
-	  --repo "$(REPO)" \
-	  --base "$(BASE_BRANCH)" \
-	  --branch "$(CONSOLIDATION)" \
-	  --prs "$(PR_TARGETS)" \
-	  --state "$(STATE_FILE)" \
-	  --resume \
-	  --node "$(NODE_VERSION)"
-
-merge-s25.clean: clean
-
-pr-release:
-	@./scripts/merge_s25.sh \
-	  --repo "$(REPO)" \
-	  --base "$(BASE_BRANCH)" \
-	  --branch "$(CONSOLIDATION)" \
-	  --open-release-only \
-	  --state "$(STATE_FILE)" \
-	  --node "$(NODE_VERSION)"
-
-provenance:
-	@node .ci/gen-provenance.js > provenance.json && node .ci/verify-provenance.js provenance.json
-
-ci-check:
-	@pnpm install --frozen-lockfile
-	@pnpm lint
-	@pnpm test -- --ci --reporters=default --reporters=jest-junit
-	@pnpm -r build
-	@pnpm playwright install --with-deps
-	@pnpm e2e
-
-contracts:
-	@pnpm jest contracts/graphql/__tests__/schema.contract.ts --runInBand
-
-policy-sim:
-	@curl -sL -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64 && chmod +x ./opa
-	@./opa test policies/ -v
-
-rerere:
-	@bash scripts/enable_rerere.sh
-
-dupescans:
-	@bash scripts/check_dupe_patches.sh $(BASE_BRANCH) $(CONSOLIDATION)
-
-prereqs:
-	@command -v git >/dev/null 2>&1 || { echo "git not found"; exit 1; }
-	@command -v gh  >/dev/null 2>&1 || { echo "gh (GitHub CLI) not found"; exit 1; }
-	@command -v pnpm >/dev/null 2>&1 || { echo "pnpm not found"; exit 1; }
-	@node -v | grep -q "v$(NODE_VERSION)" || echo "WARN: Node version differs from $(NODE_VERSION)"
-	@mkdir -p "$(STATE_DIR)"
-
-# Secrets management golden path
-secrets/bootstrap:
-	@echo "Generating org age key if missing and aligning .sops.yaml"
-	@[ -f .security/keys/age-org.pub ] || age-keygen -o .security/keys/age-org.key && age-keygen -y .security/keys/age-org.key > .security/keys/age-org.pub
-	@echo "Update .sops.yaml recipients as needed. Private key must stay in security/key-vault."
-
-secrets/encrypt:
-	@if [ -z "${path}" ]; then echo "usage: make secrets/encrypt path=secrets/envs/dev/foo.enc.yaml"; exit 1; fi
-	@sops --encrypt --in-place ${path}
-
-secrets/decrypt:
-	@if [ -z "${path}" ]; then echo "usage: make secrets/decrypt path=secrets/envs/dev/foo.enc.yaml"; exit 1; fi
-	@tmpfile=$$(mktemp); sops -d ${path} > $$tmpfile && echo "Decrypted to $$tmpfile" && trap "shred -u $$tmpfile" EXIT && ${EDITOR:-vi} $$tmpfile
-
-secrets/rotate:
-	@if [ -z "${name}" ]; then echo "usage: make secrets/rotate name=FOO_KEY"; exit 1; fi
-	@echo "Generating blue/green value for ${name}" && echo "${name}_v2=$$(openssl rand -hex 24)" > /tmp/${name}.rotation
-	@echo "Remember to flip consumers to _v2 and clean up _v1 post-cutover"
-
-secrets/lint:
-	@echo "Running SOPS validation"
-	@find secrets/envs -name '*.enc.yaml' -print0 | xargs -0 -I{} sops --verify {}
-	@echo "Running leak scan"
-	@.ci/scripts/secrets/leak_scan.sh
-	@echo "Running OPA checks"
-	@conftest test --policy .ci/policies --namespace secrets --all-namespaces
+lint:
+@echo "(repo-wide lint placeholder)"

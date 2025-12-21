@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+WALLET_ID=${1:-demo-wallet}
+TARGET=${WALLET_ENDPOINT:-http://localhost:8106/manifest/$WALLET_ID}
+
+echo "Verifying wallet manifest at ${TARGET}" >&2
+response=$(curl -sSf "$TARGET")
+printf '%s\n' "$response"

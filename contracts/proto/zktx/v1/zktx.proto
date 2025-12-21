@@ -1,0 +1,5 @@
+syntax = "proto3";
+package ig.zktx.v1;
+service ZkTx { rpc Prove(ProveRequest) returns (ProveResponse); }
+message ProveRequest { string transaction_id = 1; }
+message ProveResponse { string proof_id = 1; }
