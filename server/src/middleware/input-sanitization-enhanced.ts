@@ -266,7 +266,7 @@ export const validateFilePath = (
   for (const p of paths) {
     if (typeof p === 'string') {
       // Check for path traversal
-      if (/\.\.\/|\.\.\\\/g.test(p)) {
+      if (/\.\.\/|\.\.\\/g.test(p)) {
         trackError('security', 'PathTraversal');
         logger.warn(
           `Path traversal attempt detected. IP: ${req.ip}, Path: ${req.path}, File Path: ${p}`,

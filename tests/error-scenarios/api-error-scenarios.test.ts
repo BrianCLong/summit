@@ -15,7 +15,7 @@
  * @module tests/error-scenarios
  */
 
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
+import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import {
   ErrorScenarioRunner,
   ErrorInjector,
@@ -34,7 +34,6 @@ const GRAPHQL_URL = `${API_URL}/graphql`;
 // Set RUN_ERROR_SCENARIOS=true to enable these integration tests
 const runIntegrationTests = process.env.RUN_ERROR_SCENARIOS === 'true';
 const describeIntegration = runIntegrationTests ? describe : describe.skip;
-const itIntegration = runIntegrationTests ? it : it.skip;
 
 // Log test status
 if (!runIntegrationTests) {
