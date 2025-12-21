@@ -68,4 +68,41 @@ describe('provenance ledger', () => {
     expect(ledger.list('req-2')).toHaveLength(2);
     expect(ledger.verifyAll('ledger-secret')).toBe(true);
   });
+
+  it('verifies using the ledger secret when none is provided', () => {
+    const ledger = new ProvenanceLedger('internal-secret');
+    ledger.append({
+      reqId: 'req-3',
+      step: 'router',
+      input: { query: 'demo' },
+      output: { decision: 'route-to-gen' },
+      modelId: 'router-v2',
+      ckpt: '2',
+      prompt: 'route',
+      params: { temperature: 0.2 },
+      policy,
+    });
+
+    expect(ledger.verifyAll()).toBe(true);
+  });
+
+  it('detects tampering per-request using the internal secret', () => {
+    const ledger = new ProvenanceLedger('shared-secret');
+    const signed = ledger.append({
+      reqId: 'req-4',
+      step: 'executor',
+      input: { cmd: 'ls' },
+      output: { status: 'ok' },
+      modelId: 'shell',
+      ckpt: '4',
+      prompt: 'execute',
+      params: { safe: true },
+      policy,
+    });
+
+    // Tamper with the signature and ensure verification fails for that request
+    const tampered = { ...signed, signature: `${signed.signature}-tampered` };
+    expect(ledger.verifyFor('req-4')).toBe(true);
+    expect(ledger.verifyRecord(tampered)).toBe(false);
+  });
 });
