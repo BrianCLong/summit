@@ -35,6 +35,7 @@ const FLAG_CATALOG: Record<string, FlagDefinition> = {
     variants: ['control', 'insights-v2'],
   },
   'ui.a11yGuardrails': { type: 'boolean', defaultValue: true },
+  'pilot_dashboard_access': { type: 'boolean', defaultValue: false },
 };
 
 const envOverrides = parseOverrides(import.meta.env.VITE_FEATURE_FLAGS, import.meta.env.PROD);

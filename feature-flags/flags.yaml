@@ -31,3 +31,15 @@ features:
   dark_mode_ui:
     default: true
     owners: [frontend]
+
+  # Beta Program Flags
+  pilot_dashboard_access:
+    default: false
+    owners: [product]
+    allowlist_tenants:
+      - "pilot-tenant-1"
+  beta_advanced_graph:
+    default: false
+    owners: [graph-team]
+    allowlist_tenants:
+      - "pilot-tenant-1"

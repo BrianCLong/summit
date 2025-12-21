@@ -6,6 +6,7 @@ import GraphVisualization from './features/graph/GraphVisualization'; // Import 
 import AnalyticsDashboardPanel from './components/AnalyticsDashboardPanel'; // Import the new panel
 import IngestWizard from './components/IngestWizard';
 import AdminPanel from './components/AdminPanel';
+import PilotDashboard from './components/PilotDashboard';
 import HealthScore from './components/HealthScore/HealthScore';
 import TimelineView from './features/timeline/TimelineView';
 import { useFeatureFlag, useFeatureVariant } from './hooks/useFeatureFlag';
@@ -39,6 +40,9 @@ function TestApp() {
   });
   const orchestratorV2Enabled = useFeatureFlag('ai-orchestrator-v2', {
     userId: 'local-demo-user',
+  });
+  const showPilotDashboard = useFeatureFlag('pilot_dashboard_access', {
+    tenantId: 'pilot-tenant-1',
   });
 
   // Persist relevant graph state to localStorage
@@ -136,6 +140,8 @@ function TestApp() {
             {import.meta.env.VITE_PERF_MODE ? null : (
               <AnalyticsDashboardPanel />
             )}
+            <div style={{ height: 12 }} />
+            {showPilotDashboard && <PilotDashboard tenantId="pilot-tenant-1" />}
             <div style={{ height: 12 }} />
             <HealthScore />
           </div>
