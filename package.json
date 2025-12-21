@@ -54,6 +54,7 @@
     "db:knex:migrate": "knex migrate:latest --knexfile packages/db/knex/knexfile.cjs",
     "db:knex:rollback": "knex migrate:rollback --knexfile packages/db/knex/knexfile.cjs",
     "db:neo4j:migrate": "node scripts/neo4j-migrate.js",
+    "supply-chain:verify": "tsx tools/prov/verify.ts",
     "adapters:pack": "node --experimental-strip-types adapters/reference/packaging.ts",
     "changeset": "changeset",
     "release": "changeset version && changeset publish",
