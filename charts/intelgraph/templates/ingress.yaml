@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: intelgraph
+spec:
+  rules:
+    - host: preview.local
+      http:
+        paths:
+          - path: /policy
+            pathType: Prefix
+            backend:
+              service: { name: policy-lac, port: { number: 80 } }
+          - path: /prov
+            pathType: Prefix
+            backend:
+              service: { name: prov-ledger, port: { number: 80 } }
+          - path: /ai
+            pathType: Prefix
+            backend:
+              service: { name: nl2cypher, port: { number: 80 } }

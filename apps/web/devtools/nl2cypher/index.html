@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+  <body>
+    <input data-testid="nl-input" id="nl" />
+    <button data-testid="btn-generate" id="gen">Generate</button>
+    <pre data-testid="cypher-preview" id="cypher"></pre>
+    <pre data-testid="plan-estimate" id="plan"></pre>
+    <button data-testid="btn-approve" id="approve">Approve</button>
+    <pre data-testid="sandbox-result" id="result"></pre>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+      async function runQuery(text){
+        const resp = await fetch('http://localhost:4020/', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: `mutation($text: String!){ runNlQuery(text: $text){ cypher plan estimate sandboxResult } }`, variables: { text } }) });
+        if(!resp.ok) throw new Error('query failed');
+        const json = await resp.json();
+        return json.data.runNlQuery;
+      }
+      $(function(){
+        $('#gen').on('click', async function(){
+          const text = $('#nl').val();
+          const data = await runQuery(String(text));
+          $('#cypher').text(data.cypher);
+          $('#plan').text(`plan: ${data.plan} | rows ~ ${data.estimate}`);
+          $('#result').text('');
+        });
+        $('#approve').on('click', function(){
+          const preview = $('#plan').text();
+          $('#result').text(`approved with ${preview}`);
+        });
+      });
+    </script>
+  </body>
+</html>

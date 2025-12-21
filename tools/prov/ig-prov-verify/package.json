@@ -1,0 +1,10 @@
+{
+  "name": "ig-prov-verify",
+  "version": "1.0.0",
+  "type": "module",
+  "bin": { "ig-prov-verify": "index.js" },
+  "dependencies": {
+    "keccak": "3.0.4",
+    "merkletreejs": "0.3.11"
+  }
+}

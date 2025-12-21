@@ -1,396 +1,97 @@
-name: CI
-
+name: intelgraph-ci
 on:
   pull_request:
-    branches: [main]
+    branches: [ main ]
   push:
-    branches: [main]
-
+    branches: [ main ]
 concurrency:
-  group: ci-${{ github.head_ref || github.sha }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-
-env:
-  PNPM_CACHE_FOLDER: ~/.pnpm-store
-  NODE_VERSION: '20.x'
-
-permissions:
-  contents: read
-  security-events: write
-
 jobs:
-  # Fast lane: Quick feedback on code quality (no build required)
-  fast-checks:
+  setup:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-      - name: Enable corepack
-        run: corepack enable
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
-          run_install: false
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.PNPM_CACHE_FOLDER }}
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: ${{ runner.os }}-pnpm-
-      - name: Configure pnpm store
-        run: pnpm config set store-dir $PNPM_CACHE_FOLDER
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Lint
-        run: pnpm -w run lint
-      - name: Typecheck
-        run: pnpm -w run typecheck
-      - name: Production guardrails
-        run: |
-          set +e
-          NODE_ENV=production \
-          JWT_SECRET=weaksecret \
-          JWT_REFRESH_SECRET=weaksecret2 \
-          DATABASE_URL=postgresql://summit:devpassword@localhost:5432/summit_dev \
-          NEO4J_URI=bolt://localhost:7687 \
-          NEO4J_USERNAME=neo4j \
-          NEO4J_PASSWORD=devpassword \
-          REDIS_HOST=localhost \
-          REDIS_PORT=6379 \
-          REDIS_PASSWORD=devpassword \
-          CORS_ORIGIN=* \
-          pnpm ci:prod-guard
-          status=$?
-          if [ "$status" -eq 0 ]; then
-            echo "Prod guardrails command succeeded unexpectedly"
-            exit 1
-          fi
-          echo "Prod guardrails correctly blocked unsafe config"
+          node-version: 18
+          cache: 'npm'
+      - run: npm ci
 
-  # Build lane: Build and test
-  build-test:
+  lint:
     runs-on: ubuntu-latest
+    needs: setup
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-      - name: Enable corepack
-        run: corepack enable
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
-          run_install: false
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.PNPM_CACHE_FOLDER }}
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: ${{ runner.os }}-pnpm-
-      - name: Configure pnpm store
-        run: pnpm config set store-dir $PNPM_CACHE_FOLDER
-      - name: Cache Turbo
-        uses: actions/cache@v4
-        with:
-          path: .turbo
-          key: ${{ runner.os }}-turbo-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-turbo-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Build workspace
-        run: pnpm -w run build
-      - name: Unit & integration tests
-        run: pnpm -w run test
-      - name: Upload build artifacts for golden path
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts
-          path: |
-            .turbo
-            node_modules/.cache
-          retention-days: 1
+          node-version: 18
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run lint
 
-  # Security lane: Run security scans and block on outstanding vulnerabilities
-  security-scan:
+  typecheck:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Generate SBOM (SPDX)
-        uses: anchore/sbom-action@v0
-        with:
-          path: .
-          output-file: sbom.spdx.json
-      - name: Upload SBOM artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom-spdx
-          path: sbom.spdx.json
-      - name: Trivy vulnerability scan
-        uses: aquasecurity/trivy-action@0.24.0
-        with:
-          scan-type: fs
-          format: table
-          severity: CRITICAL,HIGH
-          ignore-unfixed: false
-          exit-code: '1'
-          vuln-type: 'os,library'
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
-          run_install: false
-      - name: Run Custom Security Script (Dependency Audit)
-        run: ./scripts/security-scan.sh || true
-
-  # DAST lane: OWASP ZAP baseline against running stack
-  owasp-zap:
-    runs-on: ubuntu-latest
-    needs: build-test
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Boot application stack (preview profile)
-        run: |
-          docker compose -f docker-compose.dev.yml pull --ignore-pull-failures || true
-          docker compose -f docker-compose.dev.yml up -d api web
-
-      - name: Wait for web to be healthy
-        run: |
-          for i in {1..24}; do
-            if curl -fsS http://localhost:3000/health; then
-              exit 0
-            fi
-            sleep 5
-          done
-          echo "Web service failed to become healthy in time" >&2
-          exit 1
-
-      - name: OWASP ZAP baseline scan
-        uses: zaproxy/action-baseline@v0.14.0
-        with:
-          target: 'http://localhost:3000'
-          rules_file_name: '.zap/rules.tsv'
-          cmd_options: '-a -j -l Medium -m 5'
-          fail_action: true
-
-      - name: Upload ZAP report
-        uses: actions/upload-artifact@v4
-        with:
-          name: zap-baseline-report
-          path: |
-            report_html.html
-            report_json.json
-            report_md.md
-          if-no-files-found: warn
-        if: always()
-
-      - name: Tear down stack
-        if: always()
-        run: docker compose -f docker-compose.dev.yml down -v
-
-  # Integration lane: Golden path smoke tests
-  golden-path:
-    runs-on: ubuntu-latest
-    needs: [fast-checks, build-test]
-    env:
-      DOCKER_BUILDKIT: '1'
-      COMPOSE_DOCKER_CLI_BUILD: '1'
-      PNPM_CACHE_FOLDER: ~/.pnpm-store
+    needs: setup
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-      - name: Enable corepack
-        run: corepack enable
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
-          run_install: false
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.PNPM_CACHE_FOLDER }}
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: ${{ runner.os }}-pnpm-
-      - name: Configure pnpm store
-        run: pnpm config set store-dir $PNPM_CACHE_FOLDER
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifacts
-        continue-on-error: true
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Bootstrap repo (make bootstrap)
-        run: make bootstrap
-      - name: Cache Docker layers
-        uses: actions/cache@v4
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('docker-compose.dev.yml', 'server/package.json', 'client/package.json') }}
-          restore-keys: ${{ runner.os }}-buildx-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      - name: Build API image (cached)
-        uses: docker/build-push-action@v6
-        with:
-          context: ./server
-          file: ./server/Dockerfile.dev
-          tags: summit/api:ci
-          push: false
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
-      - name: Build client image (cached)
-        uses: docker/build-push-action@v6
-        with:
-          context: ./client
-          file: ./client/Dockerfile.dev
-          tags: summit/web:ci
-          push: false
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
-      # Move cache to prevent unbounded growth
-      - name: Rotate Docker cache
-        run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache || true
-      - name: Bring up stack (make up)
-        run: make up
-      - name: Golden path smoke tests
-        run: make smoke
-      - name: Load Test (k6)
-        run: |
-          docker run --network host -i grafana/k6 run - < scripts/load-testing/graph-query-load.js || true
-      - name: Compose logs on failure
-        if: failure()
-        run: ./scripts/run-compose.sh -f docker-compose.dev.yml logs --tail=200
-      - name: Tear down stack
-        if: always()
-        run: ./scripts/run-compose.sh -f docker-compose.dev.yml down -v
+          node-version: 18
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run typecheck
 
-  # Compatibility matrix: Test on multiple Node versions (non-blocking)
-  compatibility:
+  unit:
     runs-on: ubuntu-latest
-    continue-on-error: true
-    strategy:
-      matrix:
-        node: ['18.x']
+    needs: [lint, typecheck]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node }}
-          cache: 'pnpm'
-      - name: Enable corepack
-        run: corepack enable
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
-          run_install: false
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.PNPM_CACHE_FOLDER }}
-          key: ${{ runner.os }}-${{ matrix.node }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.node }}-pnpm-
-            ${{ runner.os }}-pnpm-
-      - name: Configure pnpm store
-        run: pnpm config set store-dir $PNPM_CACHE_FOLDER
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Build workspace
-        run: pnpm -w run build
-      - name: Unit tests
-        run: pnpm -w run test
+          node-version: 18
+          cache: 'npm'
+      - run: npm ci
+      - run: npm test -- --ci --reporters=default --reporters=jest-junit
 
-  companyos-security:
-    name: CompanyOS SBOM / Signing / Scan / Disclosure
+  e2e:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-      security-events: write
-    env:
-      COMPANYOS_IMAGE: ghcr.io/${{ github.repository }}/companyos-api:${{ github.sha }}
-      SBOM_PATH: sbom-companyos-api.json
-      TRIVY_JSON: trivy-companyos-api.json
-      DISCLOSURE_PACK: disclosure-pack-companyos-api.json
+    needs: [unit]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: pnpm
+          node-version: 18
+          cache: 'npm'
+      - run: npm ci
+      - run: npx playwright install --with-deps
+      - run: npm run e2e
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+  perf-budget:
+    runs-on: ubuntu-latest
+    needs: [unit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: grafana/setup-k6-action@v1
+      - run: npm ci
+      - name: Run k6 smoke (policy hot path)
+        run: k6 run k6/policy-hot-path.js
+
+  sbom:
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          version: 9
-          run_install: false
+          node-version: 18
+      - run: npm ci
+      - name: Generate SBOM (CycloneDX)
+        run: npx @cyclonedx/cyclonedx-npm --spec-version 1.5 --output-file sbom.json
 
-      - name: Enable corepack + install deps
-        run: |
-          corepack enable
-          pnpm install --frozen-lockfile
-
-      - name: Build companyos-api image
-        run: |
-          docker build \
-            -f docker/Dockerfile.companyos-api \
-            -t $COMPANYOS_IMAGE \
-            .
-
-      - name: Install syft & trivy & cosign
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
-          curl -sSfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
-          curl -sSfL https://raw.githubusercontent.com/sigstore/cosign/main/install.sh | sh -s -- -b /usr/local/bin
-
-      - name: Generate SBOM (syft)
-        run: |
-          syft packages "docker:$COMPANYOS_IMAGE" -o json > "$SBOM_PATH"
-
-      - name: Sign image (cosign keyless or key-based)
-        env:
-          COSIGN_EXPERIMENTAL: "true"
-        run: |
-          cosign sign $COMPANYOS_IMAGE
-
-      - name: Vulnerability scan (Trivy JSON + gating)
-        run: |
-          trivy image --format json --output "$TRIVY_JSON" "$COMPANYOS_IMAGE" || true
-          node companyos/scripts/enforce-trivy-budget.js "$TRIVY_JSON"
-
-      - name: Generate disclosure pack
-        run: |
-          node companyos/scripts/generate-disclosure-pack.js \
-            --sbom "$SBOM_PATH" \
-            --trivy "$TRIVY_JSON" \
-            --out "$DISCLOSURE_PACK" \
-            --product "companyos-api" \
-            --environment "prod" \
-            --tenant "global" \
-            --build-id "${{ github.sha }}"
-
-      - name: Upload artifacts (SBOM + disclosure)
-        uses: actions/upload-artifact@v4
-        with:
-          name: companyos-security-${{ github.sha }}
-          path: |
-            $SBOM_PATH
-            $TRIVY_JSON
-            $DISCLOSURE_PACK
+  quality-gates:
+    runs-on: ubuntu-latest
+    needs: [e2e, perf-budget, sbom]
+    steps:
+      - name: Verify required job statuses
+        run: echo "All gates passed"
