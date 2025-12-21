@@ -1,0 +1,21 @@
+{
+  "version": "v1",
+  "rules": [
+    {
+      "id": "allow-read-low",
+      "effect": "allow",
+      "actions": ["graph:read"],
+      "resources": ["node:*", "edge:*"],
+      "conditions": { "sensitivityAtMost": "S2" },
+      "reason": "Read allowed under S2 or lower"
+    },
+    {
+      "id": "deny-export-missing-purpose",
+      "effect": "deny",
+      "actions": ["export:bundle"],
+      "resources": ["case:*"],
+      "conditions": { "purpose": ["press", "court", "partner"] },
+      "reason": "Export requires declared audience purpose"
+    }
+  ]
+}
