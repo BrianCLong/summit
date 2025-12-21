@@ -25,6 +25,11 @@ OPA/Rego packages:
 - `summit.access` – access control for governance actions
 - `summit.shared` – shared helpers
 
+### Legal & IP
+
+- **IP Register**: `docs/legal/IP_REGISTER.yaml` tracks core assets.
+- **Due Diligence**: `docs/legal/IP_PLAYBOOK.md` defines audit and M&A readiness procedures.
+
 ### CI Workflow
 
 `.github/workflows/governance.yml` runs on PRs and selected branches:
