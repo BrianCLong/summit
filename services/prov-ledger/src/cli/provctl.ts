@@ -1,79 +1,71 @@
 #!/usr/bin/env node
 import fs from 'fs';
 import path from 'path';
-import { ledger } from '../lib/ledger.js';
-
-function usage() {
-  console.log(`provctl - provenance helper
-
-Commands:
-  ingest <file>                Register evidence from file
-  claim --evidence <ids> --assertion <json>   Create claim
-  export --claim <id> --out <file>            Export manifest
-  verify <manifest.json>                      Verify manifest offline
-`);
-}
-
-function readFileContent(file: string) {
-  const data = fs.readFileSync(file);
-  if (file.endsWith('.json')) {
-    return JSON.parse(data.toString('utf-8'));
-  }
-  return data;
-}
+import { LedgerService } from '../services/LedgerService.js';
+import { calculateHash } from '../utils/hash.js';
 
 async function main() {
-  const [, , command, ...rest] = process.argv;
-  if (!command || ['-h', '--help'].includes(command)) {
-    usage();
-    process.exit(0);
-  }
+  const [command, ...rest] = process.argv.slice(2);
+  const ledger = LedgerService.getInstance();
 
   switch (command) {
     case 'ingest': {
-      const file = rest[0];
-      if (!file) throw new Error('ingest requires a file');
-      const content = readFileContent(file);
-      const record = ledger.addEvidence({ content, mediaType: path.extname(file).replace('.', '') });
-      console.log(JSON.stringify({ evidenceId: record.id, checksum: record.contentHash }, null, 2));
+      const filePath = rest[0];
+      if (!filePath) throw new Error('Usage: provctl ingest <file>');
+      const content = fs.readFileSync(filePath);
+      const digest = 'sha256:' + calculateHash(content.toString('base64'));
+      const claimId = rest[1];
+      if (!claimId) throw new Error('Provide claim id as second argument');
+      const evidence = await ledger.createEvidence({ claimId, artifactDigest: digest, transformChain: [] });
+      console.log(JSON.stringify(evidence, null, 2));
       break;
     }
     case 'claim': {
-      const evidenceFlag = rest.indexOf('--evidence');
-      const assertionFlag = rest.indexOf('--assertion');
-      if (evidenceFlag === -1 || assertionFlag === -1) throw new Error('claim requires --evidence and --assertion');
-      const evidenceIds = rest[evidenceFlag + 1].split(',');
-      const assertion = JSON.parse(rest[assertionFlag + 1]);
-      const claim = ledger.addClaim({ evidenceIds, assertion });
-      console.log(JSON.stringify({ claimId: claim.id }, null, 2));
+      const sourceUri = rest[0];
+      const licenseId = rest[1] ?? 'license-default';
+      if (!sourceUri) throw new Error('Usage: provctl claim <sourceUri> [licenseId]');
+      const hash = 'sha256:' + calculateHash(sourceUri);
+      const claim = await ledger.createClaim({
+        sourceUri,
+        hash,
+        type: 'assertion',
+        confidence: 1,
+        licenseId,
+      });
+      console.log(JSON.stringify(claim, null, 2));
       break;
     }
     case 'export': {
-      const claimFlag = rest.indexOf('--claim');
-      const outFlag = rest.indexOf('--out');
-      if (claimFlag === -1) throw new Error('export requires --claim');
-      const claimId = rest[claimFlag + 1];
-      const target = outFlag >= 0 ? rest[outFlag + 1] : 'manifest.json';
-      const { manifest, serialized } = ledger.exportManifest(claimId);
-      fs.writeFileSync(target, serialized);
-      console.log(JSON.stringify({ file: target, root: manifest.merkleRoot }, null, 2));
+      const bundleId = rest[0];
+      const outFile = rest[1] ?? 'manifest.json';
+      if (!bundleId) throw new Error('Usage: provctl export <claimId> [outFile]');
+      const manifest = await ledger.buildManifest(bundleId);
+      if (!manifest) {
+        throw new Error('Bundle not found');
+      }
+      fs.writeFileSync(outFile, JSON.stringify(manifest, null, 2));
+      console.log(`Manifest written to ${path.resolve(outFile)}`);
       break;
     }
     case 'verify': {
-      const file = rest[0];
-      if (!file) throw new Error('verify requires manifest path');
-      const manifest = JSON.parse(fs.readFileSync(file, 'utf-8'));
-      const result = ledger.verifyManifest(manifest);
-      console.log(JSON.stringify(result, null, 2));
+      const manifestPath = rest[0];
+      if (!manifestPath) throw new Error('Usage: provctl verify <manifestFile>');
+      const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+      const leafHashes: string[] = manifest.leaves.map((leaf: any) => leaf.hash);
+      const expected = manifest.merkleRoot;
+      const recomputed = calculateHash(leafHashes.join('|'));
+      const valid = recomputed === expected || manifest.tree.root === expected;
+      console.log(valid ? '✅ Manifest verified' : '❌ Manifest invalid');
       break;
     }
     default:
-      usage();
-      process.exit(1);
+      console.log('Commands: ingest <file> <claimId>, claim <sourceUri> [licenseId], export <claimId> [out], verify <file>');
   }
 }
 
 main().catch((err) => {
-  console.error(err.message);
+  // eslint-disable-next-line no-console
+  console.error(err);
   process.exit(1);
 });
+

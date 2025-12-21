@@ -1,44 +1,63 @@
-export interface Evidence {
-  evidenceId: string;
-  source: string;
-  url?: string;
-  blob?: string;
-  license?: string;
+export interface ClaimInput {
+  sourceUri: string;
   hash: string;
-  timestamp: string;
-}
-
-export interface Transform {
-  transformId: string;
-  inputs: string[];
-  tool: string;
-  params: Record<string, any>;
-  outputs: string[];
-  operatorId: string;
-  timestamp: string;
-}
-
-export interface Claim {
-  claimId: string;
-  subject: string;
-  predicate: string;
-  object: string;
-  evidenceRefs: string[];
+  type: string;
   confidence: number;
   licenseId: string;
-  timestamp: string;
 }
 
-export interface LedgerEntry {
+export interface Claim extends ClaimInput {
   id: string;
-  type: 'evidence' | 'transform' | 'claim';
-  data: Evidence | Transform | Claim;
-  previousHash: string | null;
-  hash: string; // Hash of (previousHash + type + data)
+  createdAt: string;
+}
+
+export interface EvidenceInput {
+  claimId: string;
+  artifactDigest: string;
+  transformChain?: TransformStep[];
+}
+
+export interface TransformStep {
+  transformType: string;
+  actorId: string;
+  timestamp: string;
+  config?: Record<string, unknown>;
+}
+
+export interface Evidence {
+  id: string;
+  claimId: string;
+  artifactDigest: string;
+  transformChain: TransformStep[];
+  createdAt: string;
+}
+
+export interface ProvenanceInput {
+  claimId: string;
+  transforms: string[];
+  sources: string[];
+  lineage: Record<string, unknown>;
+}
+
+export interface ProvenanceChain extends ProvenanceInput {
+  id: string;
+  createdAt: string;
+}
+
+export interface ManifestLeaf {
+  type: 'claim' | 'evidence' | 'ledger';
+  hash: string;
+  refId?: string;
 }
 
 export interface Manifest {
   bundleId: string;
+  version: string;
+  generatedAt: string;
   merkleRoot: string;
-  entries: LedgerEntry[];
+  leaves: ManifestLeaf[];
+  tree: { root: string; levels: string[][] };
+  claim: Claim;
+  evidence: Evidence[];
 }
+

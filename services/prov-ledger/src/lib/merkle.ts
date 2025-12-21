@@ -1,47 +1,34 @@
-import { sha256, canonicalStringify } from './canonical.js';
-
-export interface MerkleLeaf {
-  id: string;
-  type: string;
-  hash: string;
-  signature?: string;
-  prevHash?: string;
-}
+import crypto from 'crypto';
 
 export interface MerkleTree {
   root: string;
-  layers: string[][];
-  leaves: MerkleLeaf[];
+  levels: string[][];
 }
 
-export function buildMerkleTree(leaves: MerkleLeaf[]): MerkleTree {
-  const sortedLeaves = [...leaves].sort((a, b) => `${a.type}:${a.id}`.localeCompare(`${b.type}:${b.id}`));
-  const initialLayer = sortedLeaves.map((leaf) => sha256(`${leaf.type}:${leaf.id}:${leaf.hash}`));
-  const layers: string[][] = [initialLayer];
-
-  let current = initialLayer;
-  while (current.length > 1) {
-    const next: string[] = [];
-    for (let i = 0; i < current.length; i += 2) {
-      const left = current[i];
-      const right = i + 1 < current.length ? current[i + 1] : left;
-      next.push(sha256(`${left}|${right}`));
-    }
-    layers.push(next);
-    current = next;
+export function buildMerkleTree(leaves: string[]): MerkleTree {
+  if (leaves.length === 0) {
+    return { root: '', levels: [] };
   }
 
-  return {
-    root: current[0] || sha256(''),
-    layers,
-    leaves: sortedLeaves,
-  };
+  let level = [...leaves];
+  const levels: string[][] = [level];
+
+  while (level.length > 1) {
+    const nextLevel: string[] = [];
+    for (let i = 0; i < level.length; i += 2) {
+      const left = level[i];
+      const right = level[i + 1] ?? left;
+      nextLevel.push(crypto.createHash('sha256').update(left + right).digest('hex'));
+    }
+    levels.push(nextLevel);
+    level = nextLevel;
+  }
+
+  return { root: level[0], levels };
 }
 
-export function renderTree(tree: MerkleTree): string {
-  return canonicalStringify({
-    root: tree.root,
-    layers: tree.layers,
-    leaves: tree.leaves.map((leaf) => ({ id: leaf.id, type: leaf.type, hash: leaf.hash })),
-  });
+export function verifyMerkleRoot(leaves: string[], expectedRoot: string): boolean {
+  const tree = buildMerkleTree(leaves);
+  return tree.root === expectedRoot;
 }
+
