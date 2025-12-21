@@ -103,7 +103,7 @@ export class CopilotService {
     this.config = config;
 
     // Initialize services
-    this.nlQueryService = createNLQueryService();
+    this.nlQueryService = createNLQueryService({});
     this.sandboxExecutor = createSandboxExecutor(config.neo4jDriver);
     this.graphRAGService = createGraphRAGProvenanceService(
       config.neo4jDriver,

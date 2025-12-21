@@ -1,0 +1,178 @@
+
+> intelgraph-client@2.0.0 typecheck /Users/brianlong/Developer/summit/client
+> tsc -p tsconfig.strict.json --noEmit
+
+src/components/Map/GeospatialDashboard.tsx(37,15): error TS2709: Cannot use namespace 'GeoPoint' as a type.
+src/components/Map/GeospatialDashboard.tsx(44,15): error TS2709: Cannot use namespace 'GeoPoint' as a type.
+src/components/Map/GeospatialDashboard.tsx(48,15): error TS2709: Cannot use namespace 'FeatureCollection' as a type.
+src/components/Map/GeospatialDashboard.tsx(50,15): error TS2709: Cannot use namespace 'GeoPoint' as a type.
+src/components/Map/layers/GeoJSONLayer.tsx(11,9): error TS2709: Cannot use namespace 'FeatureCollection' as a type.
+src/components/Map/layers/GeoJSONLayer.tsx(11,29): error TS2709: Cannot use namespace 'Feature' as a type.
+src/components/Map/layers/GeoJSONLayer.tsx(12,13): error TS2694: Namespace '"leaflet"' has no exported member 'PathOptions'.
+src/components/Map/layers/GeoJSONLayer.tsx(12,39): error TS2709: Cannot use namespace 'Feature' as a type.
+src/components/Map/layers/GeoJSONLayer.tsx(12,53): error TS2694: Namespace '"leaflet"' has no exported member 'PathOptions'.
+src/components/Map/layers/GeoJSONLayer.tsx(13,30): error TS2709: Cannot use namespace 'Feature' as a type.
+src/components/Map/layers/GeoJSONLayer.tsx(14,29): error TS2709: Cannot use namespace 'Feature' as a type.
+src/components/Map/layers/GeoJSONLayer.tsx(14,47): error TS2694: Namespace '"leaflet"' has no exported member 'Layer'.
+src/components/Map/layers/GeoJSONLayer.tsx(15,28): error TS2709: Cannot use namespace 'Feature' as a type.
+src/components/Map/layers/GeoJSONLayer.tsx(15,47): error TS2694: Namespace '"leaflet"' has no exported member 'LatLng'.
+src/components/Map/layers/GeoJSONLayer.tsx(15,60): error TS2694: Namespace '"leaflet"' has no exported member 'Layer'.
+src/components/Map/layers/GeoJSONLayer.tsx(16,22): error TS2709: Cannot use namespace 'Feature' as a type.
+src/components/Map/layers/GeoJSONLayer.tsx(31,29): error TS2694: Namespace '"leaflet"' has no exported member 'GeoJSON'.
+src/components/Map/layers/GeoJSONLayer.tsx(36,27): error TS2694: Namespace '"leaflet"' has no exported member 'PathOptions'.
+src/components/Map/layers/GeoJSONLayer.tsx(46,23): error TS7006: Parameter 'feature' implicitly has an 'any' type.
+src/components/Map/layers/GeoJSONLayer.tsx(46,32): error TS7006: Parameter 'layer' implicitly has an 'any' type.
+src/components/Map/layers/GeoJSONLayer.tsx(88,27): error TS2694: Namespace '"leaflet"' has no exported member 'PathOptions'.
+src/components/Map/layers/GeoJSONLayer.tsx(97,23): error TS7006: Parameter 'feature' implicitly has an 'any' type.
+src/components/Map/layers/GeoJSONLayer.tsx(97,32): error TS7006: Parameter 'layer' implicitly has an 'any' type.
+src/components/Map/layers/GeoJSONLayer.tsx(126,9): error TS2709: Cannot use namespace 'FeatureCollection' as a type.
+src/components/Map/layers/GeoJSONLayer.tsx(129,30): error TS2709: Cannot use namespace 'Feature' as a type.
+src/components/Map/layers/GeoJSONLayer.tsx(138,28): error TS2709: Cannot use namespace 'Feature' as a type.
+src/components/Map/layers/GeoJSONLayer.tsx(138,40): error TS2694: Namespace '"leaflet"' has no exported member 'PathOptions'.
+src/components/Map/layers/GeoJSONLayer.tsx(155,35): error TS2709: Cannot use namespace 'Feature' as a type.
+src/components/Map/layers/GeoJSONLayer.tsx(155,53): error TS2694: Namespace '"leaflet"' has no exported member 'Layer'.
+src/components/Map/layers/GeoJSONLayer.tsx(159,19): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/components/Map/layers/GeoJSONLayer.tsx(167,18): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/components/Map/layers/HeatmapLayer.tsx(17,31): error TS2304: Cannot find name 'Layer'.
+src/components/Map/layers/HeatmapLayer.tsx(32,39): error TS2709: Cannot use namespace 'GeoPoint' as a type.
+src/components/Map/layers/HeatmapLayer.tsx(73,13): error TS2339: Property 'latitude' does not exist on type 'HeatmapPoint'.
+src/components/Map/layers/HeatmapLayer.tsx(74,13): error TS2339: Property 'longitude' does not exist on type 'HeatmapPoint'.
+src/components/Map/layers/HeatmapLayer.tsx(92,30): error TS2339: Property 'remove' does not exist on type 'HeatLayer'.
+src/components/Map/layers/HeatmapLayer.tsx(103,13): error TS2339: Property 'latitude' does not exist on type 'HeatmapPoint'.
+src/components/Map/layers/HeatmapLayer.tsx(104,13): error TS2339: Property 'longitude' does not exist on type 'HeatmapPoint'.
+src/components/Map/layers/MarkerLayer.tsx(11,13): error TS2709: Cannot use namespace 'GeoPoint' as a type.
+src/components/Map/layers/MarkerLayer.tsx(13,12): error TS2694: Namespace '"leaflet"' has no exported member 'Icon'.
+src/components/Map/layers/MarkerLayer.tsx(17,26): error TS2709: Cannot use namespace 'GeoPoint' as a type.
+src/components/Map/layers/MarkerLayer.tsx(33,30): error TS2694: Namespace '"leaflet"' has no exported member 'Marker'.
+src/components/Map/layers/MarkerLayer.tsx(63,29): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/components/Map/layers/MarkerLayer.tsx(92,15): error TS2709: Cannot use namespace 'GeoPoint' as a type.
+src/components/Map/layers/MarkerLayer.tsx(109,34): error TS2694: Namespace '"leaflet"' has no exported member 'LayerGroup'.
+src/components/Map/MapContainer.tsx(12,12): error TS2709: Cannot use namespace 'GeoPoint' as a type.
+src/components/Map/MapContainer.tsx(18,24): error TS2694: Namespace '"leaflet"' has no exported member 'Map'.
+src/components/Map/MapContainer.tsx(19,23): error TS2694: Namespace '"leaflet"' has no exported member 'LeafletMouseEvent'.
+src/components/Map/MapContainer.tsx(38,35): error TS2694: Namespace '"leaflet"' has no exported member 'Map'.
+src/components/Map/MapContainer.tsx(115,49): error TS2694: Namespace '"leaflet"' has no exported member 'Map'.
+src/components/search/QueryBuilderPreview.stories.tsx(9,14): error TS2709: Cannot use namespace 'StoryObj' as a type.
+src/components/search/QueryBuilderPreview.stories.tsx(11,13): error TS2709: Cannot use namespace 'Meta' as a type.
+src/features/link-analysis/LinkAnalysisCanvas.stories.tsx(4,13): error TS2709: Cannot use namespace 'Meta' as a type.
+src/features/link-analysis/LinkAnalysisCanvas.stories.tsx(10,23): error TS2709: Cannot use namespace 'StoryObj' as a type.
+src/features/maestro/pages/Pipelines.tsx(59,22): error TS2709: Cannot use namespace 'ListRowRenderer' as a type.
+src/features/wargame/ScenarioInput.tsx(92,35): error TS2339: Property 'simulationParameters' does not exist on type '{ id: string; crisisType: string; targetAudiences: string[]; keyNarratives: string[]; adversaryProfiles: string[]; createdAt: string; }'.
+src/features/workflows/Editor.tsx(41,14): error TS2709: Cannot use namespace 'Connection' as a type.
+src/pages/DisclosurePackagerPage.tsx(272,12): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
+    Property 'component' is missing in type '{ children: Element; xs: number; md: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
+  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
+    Type '{ children: Element; xs: number; md: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+      Property 'xs' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+src/pages/DisclosurePackagerPage.tsx(281,24): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
+    Property 'component' is missing in type '{ children: Element; xs: number; sm: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
+  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
+    Type '{ children: Element; xs: number; sm: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+      Property 'xs' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+src/pages/DisclosurePackagerPage.tsx(292,24): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
+    Property 'component' is missing in type '{ children: Element; xs: number; sm: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
+  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
+    Type '{ children: Element; xs: number; sm: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+      Property 'xs' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+src/pages/DisclosurePackagerPage.tsx(303,24): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
+    Property 'component' is missing in type '{ children: Element; xs: number; sm: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
+  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
+    Type '{ children: Element; xs: number; sm: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+      Property 'xs' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+src/pages/DisclosurePackagerPage.tsx(313,24): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
+    Property 'component' is missing in type '{ children: Element; xs: number; sm: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
+  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
+    Type '{ children: Element; xs: number; sm: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+      Property 'xs' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+src/pages/DisclosurePackagerPage.tsx(458,12): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
+    Property 'component' is missing in type '{ children: Element; xs: number; md: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
+  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
+    Type '{ children: Element; xs: number; md: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+      Property 'xs' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+src/pages/Executors.tsx(67,10): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
+    Property 'component' is missing in type '{ children: Element; xs: number; md: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
+  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
+    Type '{ children: Element; xs: number; md: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+      Property 'xs' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+src/pages/Executors.tsx(111,10): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
+    Property 'component' is missing in type '{ children: Element; xs: number; md: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
+  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
+    Type '{ children: Element; xs: number; md: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+      Property 'xs' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+src/pages/GraphWorkbench/GraphCanvas.tsx(96,10): error TS2339: Property 'find' does not exist on type 'CollectionReturnValue'.
+src/pages/GraphWorkbench/GraphCanvas.tsx(97,12): error TS7006: Parameter 'n' implicitly has an 'any' type.
+src/pages/GraphWorkbench/GraphCanvas.tsx(224,44): error TS2339: Property 'message' does not exist on type 'never'.
+src/pages/Hunting/HuntList.tsx(277,51): error TS2339: Property 'value' does not exist on type 'never'.
+src/pages/InvestigationDashboard.tsx(53,23): error TS2709: Cannot use namespace 'Layouts' as a type.
+src/pages/Investigations/InvestigationDetail.tsx(572,18): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
+    Property 'component' is missing in type '{ children: Element; xs: number; key: string; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
+  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
+    Type '{ children: Element; xs: number; key: string; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+      Property 'xs' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+src/pages/Investigations/InvestigationDetail.tsx(702,18): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
+    Property 'component' is missing in type '{ children: Element; xs: number; sm: number; md: number; key: string; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
+  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
+    Type '{ children: Element; xs: number; sm: number; md: number; key: string; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+      Property 'xs' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+src/pages/Investigations/InvestigationDetail.tsx(927,16): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
+    Property 'component' is missing in type '{ children: Element; xs: number; md: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
+  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
+    Type '{ children: Element; xs: number; md: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+      Property 'xs' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+src/pages/Investigations/InvestigationDetail.tsx(979,16): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
+    Property 'component' is missing in type '{ children: Element; xs: number; md: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
+  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
+    Type '{ children: Element; xs: number; md: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+      Property 'xs' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+src/pages/Investigations/InvestigationList.tsx(33,46): error TS2783: 'id' is specified more than once, so this usage will be overwritten.
+src/routes/OsintHealth.tsx(1,25): error TS2307: Cannot find module '../routes/osint-health-legacy' or its corresponding type declarations.
+src/routes/Workspaces.tsx(56,12): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
+    Property 'component' is missing in type '{ children: Element; xs: number; md: number; key: string; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
+  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
+    Type '{ children: Element; xs: number; md: number; key: string; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+      Property 'xs' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+src/test-utils/msw/handlers.ts(6,33): error TS7006: Parameter 'req' implicitly has an 'any' type.
+src/test-utils/msw/handlers.ts(6,38): error TS7006: Parameter 'res' implicitly has an 'any' type.
+src/test-utils/msw/handlers.ts(6,43): error TS7006: Parameter 'ctx' implicitly has an 'any' type.
+src/test-utils/msw/handlers.ts(25,36): error TS7006: Parameter 'req' implicitly has an 'any' type.
+src/test-utils/msw/handlers.ts(25,41): error TS7006: Parameter 'res' implicitly has an 'any' type.
+src/test-utils/msw/handlers.ts(25,46): error TS7006: Parameter 'ctx' implicitly has an 'any' type.
+src/test-utils/msw/handlers.ts(51,34): error TS7006: Parameter 'req' implicitly has an 'any' type.
+src/test-utils/msw/handlers.ts(51,39): error TS7006: Parameter 'res' implicitly has an 'any' type.
+src/test-utils/msw/handlers.ts(51,44): error TS7006: Parameter 'ctx' implicitly has an 'any' type.
+src/test-utils/msw/handlers.ts(116,39): error TS7006: Parameter 'req' implicitly has an 'any' type.
+src/test-utils/msw/handlers.ts(116,44): error TS7006: Parameter 'res' implicitly has an 'any' type.
+src/test-utils/msw/handlers.ts(116,49): error TS7006: Parameter 'ctx' implicitly has an 'any' type.
+src/test-utils/msw/handlers.ts(134,38): error TS7006: Parameter 'req' implicitly has an 'any' type.
+src/test-utils/msw/handlers.ts(134,43): error TS7006: Parameter 'res' implicitly has an 'any' type.
+src/test-utils/msw/handlers.ts(134,48): error TS7006: Parameter 'ctx' implicitly has an 'any' type.
+src/test-utils/msw/handlers.ts(160,33): error TS7006: Parameter 'req' implicitly has an 'any' type.
+src/test-utils/msw/handlers.ts(160,38): error TS7006: Parameter 'res' implicitly has an 'any' type.
+src/test-utils/msw/handlers.ts(160,43): error TS7006: Parameter 'ctx' implicitly has an 'any' type.
+src/test-utils/msw/handlers.ts(168,36): error TS7006: Parameter 'req' implicitly has an 'any' type.
+src/test-utils/msw/handlers.ts(168,41): error TS7006: Parameter 'res' implicitly has an 'any' type.
+src/test-utils/msw/handlers.ts(168,46): error TS7006: Parameter 'ctx' implicitly has an 'any' type.
+src/test-utils/msw/handlers.ts(205,36): error TS7006: Parameter 'req' implicitly has an 'any' type.
+src/test-utils/msw/handlers.ts(205,41): error TS7006: Parameter 'res' implicitly has an 'any' type.
+src/test-utils/msw/handlers.ts(205,46): error TS7006: Parameter 'ctx' implicitly has an 'any' type.
+src/test-utils/msw/handlers.ts(225,38): error TS7006: Parameter 'req' implicitly has an 'any' type.
+src/test-utils/msw/handlers.ts(225,43): error TS7006: Parameter 'res' implicitly has an 'any' type.
+src/test-utils/msw/handlers.ts(225,48): error TS7006: Parameter 'ctx' implicitly has an 'any' type.
+src/tests/collab/WarRoomCreationModal.test.tsx(7,7): error TS7034: Variable 'mocks' implicitly has type 'any[]' in some locations where its type cannot be determined.
+src/tests/collab/WarRoomCreationModal.test.tsx(15,30): error TS7005: Variable 'mocks' implicitly has an 'any[]' type.
+/Users/brianlong/Developer/summit/client:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  intelgraph-client@2.0.0 typecheck: `tsc -p tsconfig.strict.json --noEmit`
+Exit status 2

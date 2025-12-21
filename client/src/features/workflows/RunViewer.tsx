@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import ReactFlow, {
-  Node,
-  Edge,
+  Node as FlowNode,
+  Edge as FlowEdge,
   Controls,
   Background,
   useNodesState,
@@ -217,7 +217,7 @@ export default function RunViewer() {
     };
 
     // Create nodes with positions
-    const flowNodes: Node[] = runData.steps.map((step, index) => {
+    const flowNodes: any[] = runData.steps.map((step, index) => {
       const level = levels.get(step.id) || 0;
       const levelSteps = levelGroups.get(level) || [];
       const indexInLevel = levelSteps.indexOf(step.id);
@@ -242,7 +242,7 @@ export default function RunViewer() {
     });
 
     // Create edges
-    const flowEdges: Edge[] = [];
+    const flowEdges: any[] = [];
     runData.steps.forEach((step) => {
       step.parents.forEach((parentId) => {
         flowEdges.push({

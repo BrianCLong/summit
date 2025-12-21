@@ -562,7 +562,7 @@ export const multimodalResolvers = {
       );
 
       return await multimodalService.createMultimodalRelationship(
-        args.input,
+        args.input as any,
         context.user.id,
       );
     },

@@ -138,9 +138,6 @@ export function VirtualizedListTable<T>({
           itemSize={rowHeight}
           itemData={itemData}
           overscanCount={overscan}
-          outerElementType="div"
-          innerElementType="div"
-          className="relative"
         >
           {RowRenderer}
         </List>

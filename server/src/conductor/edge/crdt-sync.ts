@@ -408,7 +408,7 @@ export class CRDTSyncEngine {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'crdt_operation_applied',
-      true,
+      { success: true },
     );
 
     console.log(`Operation ${operationId} applied locally`);
@@ -475,9 +475,9 @@ export class CRDTSyncEngine {
     } catch (error) {
       console.error(`Sync with ${targetNodeId} failed:`, error);
       prometheusConductorMetrics.recordOperationalEvent(
-        'crdt_sync_error',
-        false,
-      );
+      'crdt_sync_error',
+      { success: false },
+    );
       throw error;
     }
   }

@@ -524,60 +524,60 @@ export interface TRACETrade {
 // ZOD SCHEMAS FOR VALIDATION
 // ============================================================================
 
-export const TradeSchema = z.object({
-  tradeId: z.string().uuid(),
-  orderId: z.string().uuid().optional(),
-  tenantId: z.string().uuid(),
-  accountId: z.string(),
-  traderId: z.string(),
-  symbol: z.string().min(1).max(20),
-  side: z.enum(['buy', 'sell']),
-  quantity: z.number().positive(),
-  price: z.number().positive(),
-  executionTime: z.date(),
-  venue: z.string(),
-  orderType: z.enum(['market', 'limit', 'stop', 'stop_limit']),
-  status: z.enum(['pending', 'filled', 'partial', 'cancelled', 'rejected']),
-  commission: z.number().nonnegative().optional(),
-  fees: z.number().nonnegative().optional(),
-  currency: z.string().length(3),
-  assetClass: z.enum(['equity', 'fixed_income', 'derivative', 'fx', 'commodity', 'crypto']),
-  metadata: z.record(z.unknown()).optional(),
+export const TradeSchema = (z as any).object({
+  tradeId: (z as any).string().uuid(),
+  orderId: (z as any).string().uuid().optional(),
+  tenantId: (z as any).string().uuid(),
+  accountId: (z as any).string(),
+  traderId: (z as any).string(),
+  symbol: (z as any).string().min(1).max(20),
+  side: (z as any).enum(['buy', 'sell']),
+  quantity: (z as any).number().positive(),
+  price: (z as any).number().positive(),
+  executionTime: (z as any).date(),
+  venue: (z as any).string(),
+  orderType: (z as any).enum(['market', 'limit', 'stop', 'stop_limit']),
+  status: (z as any).enum(['pending', 'filled', 'partial', 'cancelled', 'rejected']),
+  commission: (z as any).number().nonnegative().optional(),
+  fees: (z as any).number().nonnegative().optional(),
+  currency: (z as any).string().length(3),
+  assetClass: (z as any).enum(['equity', 'fixed_income', 'derivative', 'fx', 'commodity', 'crypto']),
+  metadata: (z as any).record((z as any).unknown()).optional(),
 });
 
-export const SurveillanceAlertSchema = z.object({
-  alertId: z.string().uuid(),
-  tenantId: z.string().uuid(),
-  alertType: z.enum([
+export const SurveillanceAlertSchema = (z as any).object({
+  alertId: (z as any).string().uuid(),
+  tenantId: (z as any).string().uuid(),
+  alertType: (z as any).enum([
     'wash_trading', 'layering', 'spoofing', 'front_running', 'insider_trading',
     'market_manipulation', 'restricted_list_violation', 'position_limit_breach',
     'unusual_volume', 'price_manipulation', 'best_execution_failure',
     'unauthorized_trading', 'communication_flag'
   ]),
-  severity: z.enum(['low', 'medium', 'high', 'critical']),
-  status: z.enum(['open', 'acknowledged', 'investigating', 'escalated', 'resolved', 'false_positive']),
-  title: z.string().min(1).max(500),
-  description: z.string(),
-  detectedAt: z.date(),
-  confidence: z.number().min(0).max(1),
+  severity: (z as any).enum(['low', 'medium', 'high', 'critical']),
+  status: (z as any).enum(['open', 'acknowledged', 'investigating', 'escalated', 'resolved', 'false_positive']),
+  title: (z as any).string().min(1).max(500),
+  description: (z as any).string(),
+  detectedAt: (z as any).date(),
+  confidence: (z as any).number().min(0).max(1),
 });
 
-export const FraudAlertSchema = z.object({
-  alertId: z.string().uuid(),
-  tenantId: z.string().uuid(),
-  alertType: z.enum([
+export const FraudAlertSchema = (z as any).object({
+  alertId: (z as any).string().uuid(),
+  tenantId: (z as any).string().uuid(),
+  alertType: (z as any).enum([
     'suspicious_transaction', 'structuring', 'velocity_anomaly', 'geographic_anomaly',
     'behavior_change', 'identity_fraud', 'account_takeover', 'money_laundering',
     'sanctions_hit', 'pep_match', 'adverse_media', 'unusual_pattern'
   ]),
-  severity: z.enum(['low', 'medium', 'high', 'critical']),
-  status: z.enum(['open', 'acknowledged', 'investigating', 'escalated', 'resolved', 'false_positive']),
-  riskScore: z.number().min(0).max(100),
-  title: z.string().min(1).max(500),
-  description: z.string(),
-  detectedAt: z.date(),
-  entityType: z.enum(['account', 'transaction', 'customer', 'employee']),
-  entityId: z.string(),
+  severity: (z as any).enum(['low', 'medium', 'high', 'critical']),
+  status: (z as any).enum(['open', 'acknowledged', 'investigating', 'escalated', 'resolved', 'false_positive']),
+  riskScore: (z as any).number().min(0).max(100),
+  title: (z as any).string().min(1).max(500),
+  description: (z as any).string(),
+  detectedAt: (z as any).date(),
+  entityType: (z as any).enum(['account', 'transaction', 'customer', 'employee']),
+  entityId: (z as any).string(),
 });
 
 export type TradeInput = z.infer<typeof TradeSchema>;

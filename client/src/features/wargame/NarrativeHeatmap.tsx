@@ -52,7 +52,7 @@ const NarrativeHeatmap: React.FC<NarrativeHeatmapProps> = ({ scenarioId }) => {
               width: 'mapData(intensity, 0, 10, 20, 80)', // Scale node size by intensity
               height: 'mapData(intensity, 0, 10, 20, 80)',
               'font-size': 'mapData(intensity, 0, 10, 8, 24)',
-            },
+            } as any,
           },
           {
             selector: 'edge',
@@ -62,7 +62,7 @@ const NarrativeHeatmap: React.FC<NarrativeHeatmapProps> = ({ scenarioId }) => {
               'target-arrow-color': '#ccc',
               'target-arrow-shape': 'triangle',
               'curve-style': 'bezier',
-            },
+            } as any,
           },
         ],
         layout: {
@@ -73,7 +73,7 @@ const NarrativeHeatmap: React.FC<NarrativeHeatmapProps> = ({ scenarioId }) => {
           fit: true,
           padding: 30,
           nodeDimensionsIncludeLabels: true,
-        },
+        } as any,
       });
     }
 
@@ -101,7 +101,7 @@ const NarrativeHeatmap: React.FC<NarrativeHeatmapProps> = ({ scenarioId }) => {
       // those would be added as edges. For now, just nodes.
 
       cy.json({ elements: elements });
-      cy.layout({ name: 'cola' }).run(); // Re-run layout on data update
+      cy.layout({ name: 'cola' } as any).run(); // Re-run layout on data update
     }
   }, [data]); // Re-run effect when data changes
 

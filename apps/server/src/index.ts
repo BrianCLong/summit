@@ -47,7 +47,7 @@ const startServer = async () => {
 
   app.use(securityHeaders());
   app.use(extraSecurityHeaders);
-  app.use(createRateLimiter());
+  app.use(createRateLimiter() as any);
   app.use(bodyParser.json({ limit: '2mb' }));
   app.use(bodyParser.urlencoded({ extended: true, limit: '2mb' }));
 

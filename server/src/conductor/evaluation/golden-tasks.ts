@@ -606,9 +606,9 @@ export class EvaluationEngine extends EventEmitter {
       this.emit('evaluation:failed', { runId, error });
 
       prometheusConductorMetrics.recordOperationalEvent(
-        'evaluation_failed',
-        false,
-      );
+      'evaluation_failed',
+      { success: false },
+    );
     } finally {
       this.activeRuns.delete(runId);
     }

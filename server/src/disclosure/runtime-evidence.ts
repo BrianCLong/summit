@@ -309,7 +309,6 @@ class RuntimeEvidenceService {
       `runtime-evidence-${Date.now()}.tar.gz`,
     );
     await this.writeTarball({
-      root: workingDir,
       files: [
         manifestPath,
         checksumsPath,

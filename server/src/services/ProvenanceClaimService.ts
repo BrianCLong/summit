@@ -1,7 +1,7 @@
 import { pool } from '../db/pg.js';
 import { provenanceLedger } from '../provenance/ledger.js';
 import crypto from 'crypto';
-import type { PoolClient } from 'pg';
+import { type PoolClient } from 'pg';
 
 export interface EvidenceInput {
   evidence_hash: string;

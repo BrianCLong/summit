@@ -32,6 +32,7 @@ interface ScenarioInputProps {
     targetAudiences: string[];
     keyNarratives: string[];
     adversaryProfiles: string[];
+    simulationParameters?: Record<string, any>;
     createdAt: string;
   }>;
   onSelectScenario: (scenarioId: string | null) => void;

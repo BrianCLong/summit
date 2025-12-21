@@ -48,17 +48,17 @@ class ComprehensiveTelemetry {
     this.activeConnections = { add: (value: number) => {} };
     this.subsystems = {
       database: {
-        queries: { add: () => {} },
-        errors: { add: () => {} },
-        latency: { record: () => {} },
+        queries: { add: (value?: number) => {} },
+        errors: { add: (value?: number) => {} },
+        latency: { record: (value?: number) => {} },
       },
       cache: {
-        hits: { add: () => {} },
-        misses: { add: () => {} },
-        sets: { add: () => {} },
-        dels: { add: () => {} },
+        hits: { add: (value?: number) => {} },
+        misses: { add: (value?: number) => {} },
+        sets: { add: (value?: number) => {} },
+        dels: { add: (value?: number) => {} },
       },
-      api: { requests: { add: () => {} }, errors: { add: () => {} } },
+      api: { requests: { add: (value?: number) => {} }, errors: { add: (value?: number) => {} } },
     };
   }
 

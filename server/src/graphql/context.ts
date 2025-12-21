@@ -43,6 +43,11 @@ export interface Context {
     evolutionSandbox?: boolean;
     postQuantumSecurity?: boolean;
   };
+
+  // Multimodal services (optional - only available in multimodal resolvers)
+  multimodalDataService?: any;
+  mediaUploadService?: any;
+  extractionJobService?: any;
 }
 
 export default Context;

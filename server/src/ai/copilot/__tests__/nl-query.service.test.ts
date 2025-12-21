@@ -12,7 +12,7 @@ describe('NLQueryService', () => {
   let service: NLQueryService;
 
   beforeEach(() => {
-    service = createNLQueryService();
+    service = createNLQueryService({});
   });
 
   describe('Pattern Matching', () => {

@@ -274,7 +274,7 @@ export default function HuntList() {
       field: 'lastRun',
       headerName: 'Last Run',
       width: 160,
-      valueFormatter: (params) => new Date(params.value).toLocaleString(),
+      valueFormatter: (params: any) => new Date(params.value).toLocaleString(),
     },
     {
       field: 'actions',

@@ -33,6 +33,7 @@ interface PolicyInput {
     args?: any;
     params?: any;
     query?: any;
+    source?: string;
   };
   context: {
     investigationId?: string;

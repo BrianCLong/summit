@@ -161,7 +161,7 @@ router.get('/tasks/pending', async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.id;
 
-    const tasks = []; // Filter for pending/in_progress only
+    const tasks: any[] = []; // Filter for pending/in_progress only
     res.json(tasks);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch tasks' });

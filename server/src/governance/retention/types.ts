@@ -244,6 +244,7 @@ export interface RedactionRule {
     hashAlgorithm?: string; // For 'hash' operation
     preserveLength?: boolean;
     preserveFormat?: boolean;
+    maxLength?: number; // For 'truncate' operation
   };
 
   /** Whether to keep a hash stub for provenance */

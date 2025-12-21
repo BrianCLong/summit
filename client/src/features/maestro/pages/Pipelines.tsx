@@ -56,7 +56,7 @@ export function PipelinesPage() {
     );
   }, [debouncedOwner, debouncedSearch]);
 
-  const rowRenderer: ListRowRenderer = ({ index, key, style }: any) => {
+  const rowRenderer: any = ({ index, key, style }: any) => {
     const pipeline = filtered[index];
     if (!pipeline) return null;
     return (

@@ -36,8 +36,14 @@ export const createRateLimiter = (): RateLimitRequestHandler => {
     store:
       redisClient && redisClient.status !== 'end'
         ? new RedisStore({
-            sendCommand: (...args: string[]) => redisClient!.call(...args),
-          })
+          sendCommand: (...args: string[]) => {
+            const command = args[0];
+            if (typeof command !== 'string') {
+              throw new Error('Redis command must be a string');
+            }
+            return redisClient!.call(command, ...args.slice(1)) as any;
+          },
+        })
         : undefined,
   });
 

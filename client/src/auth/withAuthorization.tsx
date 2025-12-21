@@ -40,7 +40,7 @@ const normalizeAction = (action?: string | null): string | null => {
   return action.toLowerCase();
 };
 
-const unique = (values: Array<string | undefined>) =>
+const unique = (values: Array<string | undefined | null>) =>
   Array.from(new Set(values.filter(Boolean) as string[]));
 
 const resolveTenantScopes = (
@@ -185,7 +185,7 @@ export function withAuthorization<P>(
   options: WithAuthorizationOptions<P>,
 ): (component: ComponentType<P>) => ComponentType<P> {
   return (Component: ComponentType<P>) =>
-    function GuardedComponent(props: P) {
+    function GuardedComponent(props: any) {
       const resolvedTenant =
         typeof options.tenantId === 'function'
           ? options.tenantId(props)

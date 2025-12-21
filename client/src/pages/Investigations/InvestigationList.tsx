@@ -30,7 +30,7 @@ export default function InvestigationList() {
         </Stack>
         <div style={{ height: 420 }}>
           <DataGrid
-            rows={(data || []).map((r) => ({ id: r.id, ...r }))}
+            rows={(data || []).map((r) => ({ ...r }))}
             columns={cols}
             disableRowSelectionOnClick
             density="compact"

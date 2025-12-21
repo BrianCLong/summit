@@ -45,8 +45,15 @@ export interface NotificationHubConfig {
       enabled: boolean;
       config: Record<string, unknown>;
     };
+    realtime?: {
+      enabled: boolean;
+      config: Record<string, unknown>;
+    };
   };
   routing?: RoutingConfig;
+  rateLimiting?: {
+    maxPerMinute?: number;
+  };
   storage?: {
     enabled: boolean;
     retentionDays: number;
@@ -92,6 +99,8 @@ export interface NotificationPreferences {
     email?: ChannelPreference;
     chat?: ChannelPreference;
     webhook?: ChannelPreference;
+    sms?: ChannelPreference;
+    realtime?: ChannelPreference;
   };
   quietHours?: {
     enabled: boolean;

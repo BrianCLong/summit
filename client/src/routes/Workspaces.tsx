@@ -5,10 +5,10 @@ import {
   CardActionArea,
   CardContent,
   Chip,
-  Grid,
   Stack,
   Typography,
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
 
 type Workspace = {
   id: string;

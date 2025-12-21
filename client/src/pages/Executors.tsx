@@ -4,7 +4,6 @@ import {
   Button,
   Card,
   CardContent,
-  Grid,
   TextField,
   Typography,
   Alert,
@@ -12,6 +11,7 @@ import {
   ListItem,
   ListItemText,
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
 
 type Exec = {
   id: string;

@@ -144,8 +144,8 @@ export const WebhookAPI = {
     qs.set('limit', String(limit));
     const basePath = deliveryId
       ? `/api/webhooks/${encodeURIComponent(id)}/deliveries/${encodeURIComponent(
-          deliveryId,
-        )}/attempts`
+        deliveryId,
+      )}/attempts`
       : `/api/webhooks/${encodeURIComponent(id)}/attempts`;
     const suffix = qs.toString();
     return apiFetch(`${basePath}${suffix ? `?${suffix}` : ''}`);
@@ -218,4 +218,8 @@ export const GeointAPI = {
       method: 'POST',
       body: JSON.stringify({ points, intervalMinutes }),
     }),
+};
+
+export const FinOpsAPI = {
+  rollups: (windowDays) => apiFetch(`/api/finops/rollups?windowDays=${windowDays}`),
 };

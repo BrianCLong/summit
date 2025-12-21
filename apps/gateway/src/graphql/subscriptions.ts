@@ -14,15 +14,15 @@ export const resolvers = {
     onGraphEvent: {
       subscribe: withFilter(
         () => pubsub.asyncIterator(['GRAPH_EVENT']),
-        (payload, variables, context) => {
+        (payload: any, variables: any, context: any) => {
           const event = payload.onGraphEvent;
 
           // AuthZ Check: Context should contain user/tenant info
           if (!context.user) {
-             // If context not populated (e.g. dev), maybe deny?
-             // For skeleton, we'll allow if tenant matches provided variable,
-             // but ideally context.user.tenant should be checked.
-             // throw new Error("Unauthorized");
+            // If context not populated (e.g. dev), maybe deny?
+            // For skeleton, we'll allow if tenant matches provided variable,
+            // but ideally context.user.tenant should be checked.
+            // throw new Error("Unauthorized");
           }
           if (context.user && context.user.tenant !== variables.tenant) {
             return false;
@@ -49,7 +49,7 @@ export const resolvers = {
           return true;
         }
       ),
-      resolve: (payload) => payload.onGraphEvent,
+      resolve: (payload: any) => payload.onGraphEvent,
     },
   },
 };

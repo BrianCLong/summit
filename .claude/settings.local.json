@@ -140,7 +140,11 @@
       "Bash(timeout 15 npx tsc:*)",
       "Bash(do sed -i '' \"s/import { z } from ''zod'';/import * as z from ''zod'';/g\" \"$file\")",
       "Bash(timeout 90 npx tsc:*)",
-      "Bash(do grep -n \"winston.Logger\" \"$file\")"
+      "Bash(do grep -n \"winston.Logger\" \"$file\")",
+      "Bash(node --version:*)",
+      "Bash(perl -i -pe:*)",
+      "Bash(do if grep -q \"recordOperationalEvent.*,.*true\\|recordOperationalEvent.*,.*false\" $file)",
+      "Bash(then sed -i.bak2 -E 's/recordOperationalEvent\\(([^,]+),([[:space:]]*)true([[:space:]]*)\\)/recordOperationalEvent(\\1,\\2{ success: true }\\3)/g' $file sed -i.bak2 -E 's/recordOperationalEvent\\(([^,]+),([[:space:]]*)false([[:space:]]*)\\)/recordOperationalEvent(\\1,\\2{ success: false }\\3)/g' $file echo 'Fixed: $file' fi done)"
     ],
     "deny": [],
     "ask": []

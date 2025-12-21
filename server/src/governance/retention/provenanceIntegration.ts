@@ -250,7 +250,6 @@ export class ProvenanceIntegration {
         executedBy: options.executedBy,
       },
       transformedAt: now,
-      transformHash: '', // Will be computed by createProvenanceChain
     };
 
     // Create source from the original records
@@ -325,11 +324,9 @@ export class ProvenanceIntegration {
     const errors: string[] = [];
 
     // Verify signature
+    const { proof, ...tombstoneWithoutProof } = tombstone;
     const expectedSignature = this.signTombstone(
-      {
-        ...tombstone,
-        proof: undefined as any,
-      },
+      tombstoneWithoutProof,
       {
         contentHash: tombstone.proof.contentHash,
         schemaHash: tombstone.proof.schemaHash,

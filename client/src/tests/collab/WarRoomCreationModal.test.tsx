@@ -4,7 +4,7 @@ import { MockedProvider } from '@apollo/client/testing';
 import WarRoomCreationModal from '../../components/collab/WarRoomCreationModal';
 
 // Mock the CREATE_WAR_ROOM mutation
-const mocks = [];
+const mocks: any[] = [];
 
 describe('WarRoomCreationModal', () => {
   it('should render the modal and allow creation', () => {

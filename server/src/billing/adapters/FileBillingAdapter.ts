@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+// @ts-expect-error - json2csv may not have types
 import { parse } from 'json2csv';
 import { BillingAdapter, UsageReport } from '../types.js';
 import { logger } from '../../config/logger.js';

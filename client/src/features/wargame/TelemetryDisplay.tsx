@@ -89,7 +89,7 @@ const TelemetryDisplay: React.FC<TelemetryDisplayProps> = ({ scenarioId }) => {
       : 0;
   const avgVirality =
     telemetry.length > 0
-      ? telemetry.reduce((sum: any, item: any) => sum + item.viralityScore, 0) /
+      ? telemetry.reduce((sum: number, item: { viralityScore?: number }) => sum + Number(item.viralityScore ?? 0), 0) /
       telemetry.length
       : 0;
 

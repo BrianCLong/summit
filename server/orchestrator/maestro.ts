@@ -3,9 +3,9 @@ import {
   Worker,
   QueueEvents,
   Job,
-  QueueOptions,
+  type QueueOptions,
+  type WorkerOptions,
 } from 'bullmq';
-import type { WorkerOptions } from 'bullmq';
 import Redis from 'ioredis';
 import { logger } from '../utils/logger.js';
 import { PolicyGuard } from './policyGuard.js';

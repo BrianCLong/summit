@@ -7,11 +7,15 @@ export async function makeBundle({
   claimSet,
   merkleRoot,
   attestations,
+  format,
+  checksums,
 }: {
   artifacts: { name: string; path: string; sha256?: string }[];
   claimSet: any;
   merkleRoot: string;
   attestations: any[];
+  format?: string;
+  checksums?: any;
 }) {
   const outPath = `/tmp/bundle_${Date.now()}.zip`;
   const out = createWriteStream(outPath);

@@ -723,7 +723,7 @@ export class InvestigationWorkflowService extends EventEmitter {
    */
   async getInvestigation(
     investigationId: string,
-    tenantId: string,
+    tenantId?: string,
   ): Promise<Investigation | null> {
     let investigation = this.investigations.get(investigationId);
 
@@ -737,7 +737,7 @@ export class InvestigationWorkflowService extends EventEmitter {
       }
     }
 
-    if (investigation && investigation.tenantId !== tenantId) {
+    if (investigation && tenantId && investigation.tenantId !== tenantId) {
       // Return null or throw error depending on design choice.
       // Returning null simulates "not found" which is safe.
       return null;

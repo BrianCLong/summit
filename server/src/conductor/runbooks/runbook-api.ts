@@ -99,7 +99,7 @@ runbookRouter.post('/create', async (req, res) => {
     };
 
     // Record metrics
-    prometheusConductorMetrics.recordOperationalEvent('runbook_created', true);
+    prometheusConductorMetrics.recordOperationalEvent('runbook_created', { success: true });
     prometheusConductorMetrics.recordOperationalMetric(
       'runbook_creation_time',
       response.processingTime,
@@ -111,7 +111,7 @@ runbookRouter.post('/create', async (req, res) => {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'runbook_creation_error',
-      false,
+      { success: false },
     );
 
     res.status(500).json({
@@ -231,7 +231,7 @@ runbookRouter.post('/:runbookId/execute', async (req, res) => {
     };
 
     // Record metrics
-    prometheusConductorMetrics.recordOperationalEvent('runbook_executed', true);
+    prometheusConductorMetrics.recordOperationalEvent('runbook_executed', { success: true });
     prometheusConductorMetrics.recordOperationalMetric(
       'runbook_execution_time',
       response.processingTime,
@@ -243,7 +243,7 @@ runbookRouter.post('/:runbookId/execute', async (req, res) => {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'runbook_execution_error',
-      false,
+      { success: false },
     );
 
     res.status(500).json({
@@ -343,7 +343,7 @@ runbookRouter.post('/approvals/:approvalId/process', async (req, res) => {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'runbook_approval_error',
-      false,
+      { success: false },
     );
 
     res.status(500).json({
@@ -436,7 +436,7 @@ runbookRouter.put('/:runbookId', async (req, res) => {
     };
 
     // Record metrics
-    prometheusConductorMetrics.recordOperationalEvent('runbook_updated', true);
+    prometheusConductorMetrics.recordOperationalEvent('runbook_updated', { success: true });
 
     res.json(response);
   } catch (error) {
@@ -444,7 +444,7 @@ runbookRouter.put('/:runbookId', async (req, res) => {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'runbook_update_error',
-      false,
+      { success: false },
     );
 
     res.status(500).json({

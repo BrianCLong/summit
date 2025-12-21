@@ -6,7 +6,6 @@ import {
   Typography,
   Button,
   Stack,
-  Grid,
   Chip,
   Tabs,
   Tab,
@@ -34,6 +33,7 @@ import {
   AccordionDetails,
   ChipProps,
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import {
   Timeline,
   TimelineItem,
@@ -108,11 +108,11 @@ interface Entity {
 interface TimelineEvent {
   id: string;
   type:
-    | 'CREATED'
-    | 'EVIDENCE_ADDED'
-    | 'NOTE_ADDED'
-    | 'STATUS_CHANGED'
-    | 'ASSIGNED';
+  | 'CREATED'
+  | 'EVIDENCE_ADDED'
+  | 'NOTE_ADDED'
+  | 'STATUS_CHANGED'
+  | 'ASSIGNED';
   description: string;
   actor: string;
   timestamp: string;

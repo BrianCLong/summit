@@ -225,9 +225,9 @@ export class AdaptiveExpertRouter extends EventEmitter {
     } catch (error) {
       console.error('Routing error:', error);
       prometheusConductorMetrics.recordOperationalEvent(
-        'router_v2_error',
-        false,
-      );
+      'router_v2_error',
+      { success: false },
+    );
 
       // Fallback to safe default
       return this.createFallbackResponse(query, error.message, startTime);

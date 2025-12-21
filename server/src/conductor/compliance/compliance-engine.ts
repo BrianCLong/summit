@@ -560,9 +560,9 @@ export class ComplianceEngine {
         `Compliance assessment ${assessmentId} completed for ${frameworkId}`,
       );
       prometheusConductorMetrics.recordOperationalEvent(
-        'compliance_assessment_completed',
-        true,
-      );
+      'compliance_assessment_completed',
+      { success: true },
+    );
       prometheusConductorMetrics.recordOperationalMetric(
         'compliance_score',
         assessment.overallScore,
@@ -572,9 +572,9 @@ export class ComplianceEngine {
     } catch (error) {
       console.error('Compliance assessment error:', error);
       prometheusConductorMetrics.recordOperationalEvent(
-        'compliance_assessment_error',
-        false,
-      );
+      'compliance_assessment_error',
+      { success: false },
+    );
       throw error;
     }
   }

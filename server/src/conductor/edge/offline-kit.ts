@@ -273,7 +273,7 @@ export class OfflineKit extends EventEmitter {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'offline_kit_went_offline',
-      true,
+      { success: true },
     );
   }
 
@@ -293,7 +293,7 @@ export class OfflineKit extends EventEmitter {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'offline_kit_reconnected',
-      true,
+      { success: true },
     );
   }
 
@@ -476,9 +476,9 @@ export class OfflineKit extends EventEmitter {
 
           // Record but don't block sync - violations will be filtered
           prometheusConductorMetrics.recordOperationalEvent(
-            'sync_leakage_detected',
-            true,
-          );
+      'sync_leakage_detected',
+      { success: true },
+    );
         }
       }
 
@@ -522,9 +522,9 @@ export class OfflineKit extends EventEmitter {
     } catch (error) {
       logger.error('Cloud sync failed', { error });
       prometheusConductorMetrics.recordOperationalEvent(
-        'offline_kit_sync_failed',
-        false,
-      );
+      'offline_kit_sync_failed',
+      { success: false },
+    );
       throw error;
     }
   }

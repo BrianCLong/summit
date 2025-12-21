@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { LinkAnalysisCanvas } from './LinkAnalysisCanvas';
 
-const meta: Meta<typeof LinkAnalysisCanvas> = {
+const meta: any = {
   title: 'Features/LinkAnalysisCanvas',
   component: LinkAnalysisCanvas,
 };
 
 export default meta;
-export const Default: StoryObj<typeof LinkAnalysisCanvas> = {};
+export const Default: any = {};

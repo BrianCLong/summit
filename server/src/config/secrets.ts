@@ -7,81 +7,81 @@ import * as z from 'zod';
 import crypto from 'crypto';
 
 // Environment validation schema
-const EnvSchema = z.object({
+const EnvSchema = (z as any).object({
   // Application
-  NODE_ENV: z
+  NODE_ENV: (z as any)
     .enum(['development', 'test', 'staging', 'production'])
     .default('development'),
-  PORT: z.coerce.number().min(1024).max(65535).default(8080),
+  PORT: (z as any).coerce.number().min(1024).max(65535).default(8080),
 
   // Database URLs (with validation)
-  DATABASE_URL: z
+  DATABASE_URL: (z as any)
     .string()
     .url()
     .refine(
-      (url) => url.startsWith('postgresql://') || url.startsWith('postgres://'),
+      (url: string) => url.startsWith('postgresql://') || url.startsWith('postgres://'),
       {
         message: 'DATABASE_URL must be a valid PostgreSQL connection string',
       },
     ),
 
   // Neo4j Configuration
-  NEO4J_URI: z.string().default('bolt://localhost:7687'),
-  NEO4J_USER: z.string().default('neo4j'),
-  NEO4J_PASSWORD: z
+  NEO4J_URI: (z as any).string().default('bolt://localhost:7687'),
+  NEO4J_USER: (z as any).string().default('neo4j'),
+  NEO4J_PASSWORD: (z as any)
     .string()
     .min(6, 'Neo4j password must be at least 6 characters'),
 
   // Redis Configuration
-  REDIS_HOST: z.string().default('localhost'),
-  REDIS_PORT: z.coerce.number().min(1).max(65535).default(6379),
-  REDIS_PASSWORD: z.string().optional(),
+  REDIS_HOST: (z as any).string().default('localhost'),
+  REDIS_PORT: (z as any).coerce.number().min(1).max(65535).default(6379),
+  REDIS_PASSWORD: (z as any).string().optional(),
 
   // Security - JWT Secrets
-  JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
-  JWT_REFRESH_SECRET: z
+  JWT_SECRET: (z as any).string().min(32, 'JWT_SECRET must be at least 32 characters'),
+  JWT_REFRESH_SECRET: (z as any)
     .string()
     .min(32, 'JWT_REFRESH_SECRET must be at least 32 characters'),
-  JWT_EXPIRES_IN: z.string().default('24h'),
-  JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
+  JWT_EXPIRES_IN: (z as any).string().default('24h'),
+  JWT_REFRESH_EXPIRES_IN: (z as any).string().default('7d'),
 
   // OIDC Configuration
-  OIDC_ISSUER: z.string().url().optional(),
-  OIDC_CLIENT_ID: z.string().optional(),
-  OIDC_CLIENT_SECRET: z.string().optional(),
-  OIDC_REDIRECT_URI: z.string().url().optional(),
+  OIDC_ISSUER: (z as any).string().url().optional(),
+  OIDC_CLIENT_ID: (z as any).string().optional(),
+  OIDC_CLIENT_SECRET: (z as any).string().optional(),
+  OIDC_REDIRECT_URI: (z as any).string().url().optional(),
 
   // CORS
-  CORS_ORIGIN: z.string().default('http://localhost:3000'),
+  CORS_ORIGIN: (z as any).string().default('http://localhost:3000'),
 
   // Rate Limiting
-  RATE_LIMIT_WINDOW_MS: z.coerce.number().default(900000), // 15 minutes
-  RATE_LIMIT_MAX_REQUESTS: z.coerce.number().default(100),
+  RATE_LIMIT_WINDOW_MS: (z as any).coerce.number().default(900000), // 15 minutes
+  RATE_LIMIT_MAX_REQUESTS: (z as any).coerce.number().default(100),
 
   // External API Keys (sensitive)
-  OPENAI_API_KEY: z.string().startsWith('sk-').optional(),
-  VIRUSTOTAL_API_KEY: z.string().length(64).optional(),
+  OPENAI_API_KEY: (z as any).string().startsWith('sk-').optional(),
+  VIRUSTOTAL_API_KEY: (z as any).string().length(64).optional(),
 
   // Feature Flags
-  AI_ENABLED: z.coerce.boolean().default(false),
-  KAFKA_ENABLED: z.coerce.boolean().default(false),
-  MAESTRO_MCP_ENABLED: z.coerce.boolean().default(true),
-  MAESTRO_PIPELINES_ENABLED: z.coerce.boolean().default(true),
+  AI_ENABLED: (z as any).coerce.boolean().default(false),
+  KAFKA_ENABLED: (z as any).coerce.boolean().default(false),
+  MAESTRO_MCP_ENABLED: (z as any).coerce.boolean().default(true),
+  MAESTRO_PIPELINES_ENABLED: (z as any).coerce.boolean().default(true),
 
   // Logging
-  LOG_LEVEL: z.enum(['error', 'warn', 'info', 'debug']).default('info'),
+  LOG_LEVEL: (z as any).enum(['error', 'warn', 'info', 'debug']).default('info'),
 
   // TLS/Security
-  TLS_KEY_PATH: z.string().optional(),
-  TLS_CERT_PATH: z.string().optional(),
+  TLS_KEY_PATH: (z as any).string().optional(),
+  TLS_CERT_PATH: (z as any).string().optional(),
 
   // Session Configuration
-  SESSION_SECRET: z
+  SESSION_SECRET: (z as any)
     .string()
     .min(32, 'SESSION_SECRET must be at least 32 characters'),
 
   // Encryption
-  ENCRYPTION_KEY: z
+  ENCRYPTION_KEY: (z as any)
     .string()
     .length(64, 'ENCRYPTION_KEY must be exactly 64 characters (32 bytes hex)')
     .optional(),

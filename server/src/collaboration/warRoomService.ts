@@ -1,5 +1,5 @@
 import { getPostgresPool } from '../config/database.js';
-import type { QueryResult } from 'pg';
+import { type QueryResult } from 'pg';
 
 const db = getPostgresPool();
 

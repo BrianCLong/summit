@@ -6,7 +6,6 @@ import {
   CardContent,
   Chip,
   Divider,
-  Grid,
   LinearProgress,
   MenuItem,
   Select,
@@ -18,6 +17,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import {
   Assessment,
   CloudUpload,

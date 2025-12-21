@@ -135,16 +135,16 @@ export class EvidenceAccessService {
     const createdAt = this.resolveCreatedAt(evidence);
     const record: TieredRecord = {
       evidenceId: evidence.id,
-      tenantId: tenantId || evidence.metadata?.tenantId || 'unknown',
-      caseId: caseId || evidence.metadata?.caseId,
-      derivativeType: evidence.metadata?.derivativeType,
+      tenantId: (tenantId || evidence.metadata?.tenantId || 'unknown') as string,
+      caseId: (caseId || evidence.metadata?.caseId) as string | undefined,
+      derivativeType: evidence.metadata?.derivativeType as string | undefined,
       hotStorageUri: storageUri,
       coldStorageUri: this.deriveColdUri(storageUri),
       createdAt,
       tier: 'hot',
-      pinned: evidence.metadata?.pinned,
-      legalHold: evidence.metadata?.legalHold,
-      retentionDays: evidence.metadata?.retentionDays,
+      pinned: evidence.metadata?.pinned as boolean | undefined,
+      legalHold: evidence.metadata?.legalHold as boolean | undefined,
+      retentionDays: evidence.metadata?.retentionDays as number | undefined,
       lastAccessedAt: createdAt,
     };
 
@@ -289,9 +289,9 @@ export class EvidenceAccessService {
       coldStorageUri: this.deriveColdUri(storageUri),
       createdAt,
       tier: 'hot',
-      pinned: evidence.metadata?.pinned,
-      legalHold: evidence.metadata?.legalHold,
-      retentionDays: evidence.metadata?.retentionDays,
+      pinned: evidence.metadata?.pinned as boolean | undefined,
+      legalHold: evidence.metadata?.legalHold as boolean | undefined,
+      retentionDays: evidence.metadata?.retentionDays as number | undefined,
       lastAccessedAt: now,
     };
 

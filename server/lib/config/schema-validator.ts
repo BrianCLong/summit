@@ -1,5 +1,4 @@
-import Ajv from 'ajv';
-import type { ErrorObject } from 'ajv';
+import Ajv, { type ErrorObject } from 'ajv';
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';

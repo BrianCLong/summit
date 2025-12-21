@@ -156,13 +156,13 @@ const entityLoaders: Record<string, (reference: any, ctx: any) => Promise<any>> 
     const params = ref.id
       ? [validateId(ref.id, 'Policy.id')]
       : (() => {
-          const validated = validatePolicyVersionInput({
-            tenantId: ref.tenantId,
-            name: ref.name,
-            version: ref.version,
-          });
-          return [validated.tenantId, validated.name, validated.version];
-        })();
+        const validated = validatePolicyVersionInput({
+          tenantId: ref.tenantId,
+          name: ref.name,
+          version: ref.version,
+        });
+        return [validated.tenantId, validated.name, validated.version];
+      })();
     const row = await ctx.pg.oneOrNone(sql, params);
     return row ? { __typename: 'Policy', ...row } : null;
   },
@@ -471,10 +471,10 @@ export const resolvers = {
       return null;
     },
   },
-  Organization: { __resolveReference: (ref: any, ctx: any) => entityLoaders.Organization(ref, ctx) },
-  Tenant: { __resolveReference: (ref: any, ctx: any) => entityLoaders.Tenant(ref, ctx) },
+  Organization: { __resolveReference: (ref: any, ctx: any) => entityLoaders.Organization!(ref, ctx) },
+  Tenant: { __resolveReference: (ref: any, ctx: any) => entityLoaders.Tenant!(ref, ctx) },
   User: {
-    __resolveReference: (ref: any, ctx: any) => entityLoaders.User(ref, ctx),
+    __resolveReference: (ref: any, ctx: any) => entityLoaders.User!(ref, ctx),
     roles: async (user: any, _: any, ctx: any) =>
       ctx.pg.any(
         'select r.id, r.name, r.created_at as "createdAt" from role r join user_roles ur on ur.role_id=r.id where ur.user_id=$1 order by r.name',
@@ -482,25 +482,25 @@ export const resolvers = {
       ),
   },
   Role: {
-    __resolveReference: (ref: any, ctx: any) => entityLoaders.Role(ref, ctx),
+    __resolveReference: (ref: any, ctx: any) => entityLoaders.Role!(ref, ctx),
     permissions: async (role: any, _: any, ctx: any) =>
       ctx.pg.any(
         'select p.id, p.name, p.description, p.created_at as "createdAt" from permission p join role_permissions rp on rp.permission_id=p.id where rp.role_id=$1 order by p.name',
         [role.id],
       ),
   },
-  Permission: { __resolveReference: (ref: any, ctx: any) => entityLoaders.Permission(ref, ctx) },
-  Policy: { __resolveReference: (ref: any, ctx: any) => entityLoaders.Policy(ref, ctx) },
-  Plan: { __resolveReference: (ref: any, ctx: any) => entityLoaders.Plan(ref, ctx) },
-  Task: { __resolveReference: (ref: any, ctx: any) => entityLoaders.Task(ref, ctx) },
-  Artifact: { __resolveReference: (ref: any, ctx: any) => entityLoaders.Artifact(ref, ctx) },
-  Model: { __resolveReference: (ref: any, ctx: any) => entityLoaders.Model(ref, ctx) },
-  DataSet: { __resolveReference: (ref: any, ctx: any) => entityLoaders.DataSet(ref, ctx) },
-  Eval: { __resolveReference: (ref: any, ctx: any) => entityLoaders.Eval(ref, ctx) },
-  Incident: { __resolveReference: (ref: any, ctx: any) => entityLoaders.Incident(ref, ctx) },
-  Risk: { __resolveReference: (ref: any, ctx: any) => entityLoaders.Risk(ref, ctx) },
-  Control: { __resolveReference: (ref: any, ctx: any) => entityLoaders.Control(ref, ctx) },
-  KPI: { __resolveReference: (ref: any, ctx: any) => entityLoaders.KPI(ref, ctx) },
-  OKR: { __resolveReference: (ref: any, ctx: any) => entityLoaders.OKR(ref, ctx) },
-  Asset: { __resolveReference: (ref: any, ctx: any) => entityLoaders.Asset(ref, ctx) },
+  Permission: { __resolveReference: (ref: any, ctx: any) => entityLoaders.Permission!(ref, ctx) },
+  Policy: { __resolveReference: (ref: any, ctx: any) => entityLoaders.Policy!(ref, ctx) },
+  Plan: { __resolveReference: (ref: any, ctx: any) => entityLoaders.Plan!(ref, ctx) },
+  Task: { __resolveReference: (ref: any, ctx: any) => entityLoaders.Task!(ref, ctx) },
+  Artifact: { __resolveReference: (ref: any, ctx: any) => entityLoaders.Artifact!(ref, ctx) },
+  Model: { __resolveReference: (ref: any, ctx: any) => entityLoaders.Model!(ref, ctx) },
+  DataSet: { __resolveReference: (ref: any, ctx: any) => entityLoaders.DataSet!(ref, ctx) },
+  Eval: { __resolveReference: (ref: any, ctx: any) => entityLoaders.Eval!(ref, ctx) },
+  Incident: { __resolveReference: (ref: any, ctx: any) => entityLoaders.Incident!(ref, ctx) },
+  Risk: { __resolveReference: (ref: any, ctx: any) => entityLoaders.Risk!(ref, ctx) },
+  Control: { __resolveReference: (ref: any, ctx: any) => entityLoaders.Control!(ref, ctx) },
+  KPI: { __resolveReference: (ref: any, ctx: any) => entityLoaders.KPI!(ref, ctx) },
+  OKR: { __resolveReference: (ref: any, ctx: any) => entityLoaders.OKR!(ref, ctx) },
+  Asset: { __resolveReference: (ref: any, ctx: any) => entityLoaders.Asset!(ref, ctx) },
 };

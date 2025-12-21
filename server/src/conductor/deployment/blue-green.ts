@@ -324,9 +324,9 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
       this.emit('deployment:completed', execution);
 
       prometheusConductorMetrics.recordOperationalEvent(
-        'deployment_success',
-        true,
-      );
+      'deployment_success',
+      { success: true },
+    );
     } catch (error) {
       execution.status = 'failed';
       execution.endTime = Date.now();
@@ -340,9 +340,9 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
       }
 
       prometheusConductorMetrics.recordOperationalEvent(
-        'deployment_failure',
-        false,
-      );
+      'deployment_failure',
+      { success: false },
+    );
     }
 
     await this.persistDeployment(execution);

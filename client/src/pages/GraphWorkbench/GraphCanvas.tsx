@@ -18,7 +18,7 @@ export default function GraphCanvas() {
   // Mock data until GraphQL queries are available
   const data = { graphData: { nodes: [], edges: [] } };
   const loading = false;
-  const error = null;
+  const error: any = null;
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -93,7 +93,7 @@ export default function GraphCanvas() {
       e.preventDefault();
       const node = cy
         .$('node')
-        .find(
+        .filter(
           (n) =>
             n.renderedBoundingBox().x1 < e.offsetX &&
             n.renderedBoundingBox().x2 > e.offsetX &&

@@ -11,7 +11,7 @@ export interface GeoJSONLayerProps {
   data: FeatureCollection | Feature;
   style?: L.PathOptions | ((feature?: Feature) => L.PathOptions);
   onFeatureClick?: (feature: Feature) => void;
-  onEachFeature?: (feature: Feature, layer: L.Layer) => void;
+  onEachFeature?: (feature: Feature, layer: any) => void;
   pointToLayer?: (feature: Feature, latlng: L.LatLng) => L.Layer;
   filter?: (feature: Feature) => boolean;
 }
@@ -74,7 +74,7 @@ export const GeoJSONLayer: React.FC<GeoJSONLayerProps> = ({
         layerRef.current.remove();
       }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map]);
 
   // Update layer when data changes
@@ -113,7 +113,7 @@ export const GeoJSONLayer: React.FC<GeoJSONLayerProps> = ({
     }).addTo(map);
 
     layerRef.current = geoJsonLayer;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, style, onFeatureClick, onEachFeature, pointToLayer, filter]);
 
   return null;
@@ -152,11 +152,11 @@ export const ChoroplethLayer: React.FC<ChoroplethLayerProps> = ({
     };
   };
 
-  const onEachFeature = (feature: Feature, layer: L.Layer) => {
+  const onEachFeature = (feature: Feature, layer: any) => {
     if (!feature.properties) return;
 
     layer.on({
-      mouseover: (e) => {
+      mouseover: (e: any) => {
         const layer = e.target;
         layer.setStyle({
           weight: 3,
@@ -164,7 +164,7 @@ export const ChoroplethLayer: React.FC<ChoroplethLayerProps> = ({
           fillOpacity: 0.9,
         });
       },
-      mouseout: (e) => {
+      mouseout: (e: any) => {
         const layer = e.target;
         layer.setStyle(style(feature));
       },

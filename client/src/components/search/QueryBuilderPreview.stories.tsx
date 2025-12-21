@@ -6,9 +6,9 @@ import { Box } from '@mui/material';
 import QueryBuilderPreview, { QueryBuilderPreview as QueryBuilderPreviewComponent } from './QueryBuilderPreview';
 import { QueryChip } from './QueryChipBuilder';
 
-type Story = StoryObj<typeof QueryBuilderPreviewComponent>;
+type Story = any;
 
-const meta: Meta<typeof QueryBuilderPreviewComponent> = {
+const meta: any = {
   title: 'Search/QueryBuilderPreview',
   component: QueryBuilderPreviewComponent,
   parameters: {
