@@ -82,6 +82,7 @@ import commandConsoleRouter from './routes/internal/command-console.js';
 import searchV1Router from './routes/search-v1.js';
 import dataGovernanceRouter from './routes/data-governance-routes.js';
 import tenantBillingRouter from './routes/tenants/billing.js';
+import portfolioRationalizationRouter from './routes/portfolio-rationalization.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -301,6 +302,7 @@ export const createApp = async () => {
   app.use('/api', queryPreviewStreamRouter);
   app.use('/api/stream', streamRouter); // Register stream route
   app.use('/api/v1/search', searchV1Router); // Register Unified Search API
+  app.use('/api/governance/portfolio', portfolioRationalizationRouter);
   app.use('/api', dataGovernanceRouter); // Register Data Governance API
   app.get('/metrics', metricsRoute);
 
