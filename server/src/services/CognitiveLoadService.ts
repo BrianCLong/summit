@@ -1,6 +1,6 @@
 import pino from 'pino';
 
-const logger = pino({ name: 'CognitiveLoadService' });
+const logger = (pino as any)({ name: 'CognitiveLoadService' });
 
 export class CognitiveLoadService {
   private static readonly MAX_LOAD = 1.0;

@@ -4,7 +4,7 @@ import { getRedisClient } from '../db/redis.js';
 import { TimeSeriesService } from '../services/TimeSeriesService.js';
 import { getIO } from './socket.js';
 
-const logger = pino();
+const logger = (pino as any)();
 const redis = getRedisClient();
 const sub = redis.duplicate();
 const timeSeries = new TimeSeriesService();

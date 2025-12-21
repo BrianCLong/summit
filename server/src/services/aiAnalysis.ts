@@ -2,7 +2,7 @@
 import { default as pino } from 'pino';
 
 // @ts-ignore
-const logger: pino.Logger = pino();
+const logger: pino.Logger = (pino as any)();
 
 interface EntityExtractionResult {
   entities: Array<{

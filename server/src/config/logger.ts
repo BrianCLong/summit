@@ -55,7 +55,7 @@ export interface SummitLogContext {
   [key: string]: any;
 }
 
-export const logger = pino({
+export const logger = (pino as any)({
   level: process.env.LOG_LEVEL || 'info',
   base: {
     service: 'intelgraph-server',

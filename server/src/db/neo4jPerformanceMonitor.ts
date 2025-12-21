@@ -27,7 +27,7 @@ interface TrackedQuery extends QueryOutcome {
   timestamp: number;
 }
 
-const logger = pino({ name: 'neo4j-performance-monitor' });
+const logger = (pino as any)({ name: 'neo4j-performance-monitor' });
 
 export class Neo4jPerformanceMonitor {
   private readonly slowQueryThresholdMs: number;

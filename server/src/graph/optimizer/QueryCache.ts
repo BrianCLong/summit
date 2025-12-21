@@ -4,7 +4,7 @@ import { CompressionUtils } from '../../utils/compression.js';
 import crypto from 'crypto';
 import pino from 'pino';
 
-const logger = pino();
+const logger = (pino as any)();
 
 export class QueryCache {
   private readonly cachePrefix = 'graph:query_result';

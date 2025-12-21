@@ -8,7 +8,7 @@ import {
 } from './MediaUploadService.js';
 import { ExtractionJobService } from './ExtractionJobService.js';
 
-const logger = pino({ name: 'MultimodalDataService' });
+const logger = (pino as any)({ name: 'MultimodalDataService' });
 
 export interface MediaSource {
   id: string;

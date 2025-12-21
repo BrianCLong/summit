@@ -9,7 +9,7 @@ let instance: AdvancedAuditSystem | null = null;
 
 export const getAuditSystem = () => {
   if (!instance) {
-    const logger = pino({ name: 'audit-system' });
+    const logger = (pino as any)({ name: 'audit-system' });
 
     // We use a dedicated pool or the shared one.
     // Here we create a new pool to ensure audit logs can be written

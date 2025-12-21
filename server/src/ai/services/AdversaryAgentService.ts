@@ -10,7 +10,7 @@ export interface AdversaryAgentOptions {
 export class AdversaryAgentService {
   private pythonPath: string;
   private modelsPath: string;
-  private logger = pino({ name: 'AdversaryAgentService' });
+  private logger = (pino as any)({ name: 'AdversaryAgentService' });
 
   constructor(
     pythonPath = process.env.PYTHON_PATH || 'python',

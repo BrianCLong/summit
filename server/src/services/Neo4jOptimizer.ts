@@ -8,7 +8,7 @@
 import type { Driver, Session } from 'neo4j-driver';
 import pino from 'pino';
 
-const logger = pino({ name: 'Neo4jOptimizer' });
+const logger = (pino as any)({ name: 'Neo4jOptimizer' });
 
 interface QueryProfile {
   cypher: string;

@@ -17,7 +17,7 @@ import { llmGuardrails } from '../security/llm-guardrails.js';
 import LLMService from '../services/LLMService.js';
 import { randomUUID } from 'crypto';
 
-const logger = pino({ name: 'CopilotMVPResolvers' });
+const logger = (pino as any)({ name: 'CopilotMVPResolvers' });
 
 interface Context {
   user?: { id: string; tenantId?: string };

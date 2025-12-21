@@ -2,7 +2,7 @@ import neo4j, { Driver } from 'neo4j-driver';
 import { ShardConfig, ShardId } from './types.js';
 import pino from 'pino';
 
-const logger = pino({ name: 'ShardManager' });
+const logger = (pino as any)({ name: 'ShardManager' });
 
 export class ShardManager {
   private static instance: ShardManager;

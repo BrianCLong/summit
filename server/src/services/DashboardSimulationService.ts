@@ -2,7 +2,7 @@ import { Server } from 'socket.io';
 import { getIO } from '../realtime/socket.js';
 import pino from 'pino';
 
-const logger = pino();
+const logger = (pino as any)();
 
 class DashboardSimulationService {
   private interval: NodeJS.Timeout | null = null;

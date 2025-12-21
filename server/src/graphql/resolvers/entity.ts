@@ -16,7 +16,7 @@ import { getMockEntity, getMockEntities } from './__mocks__/entityMocks.js';
 import { withCache, listCacheKey } from '../../utils/cacheHelper.js';
 import type { GraphQLContext } from '../apollo-v5-server.js';
 
-const logger = pino();
+const logger = (pino as any)();
 const driver = getNeo4jDriver();
 
 // Helper function to extract tenant from context

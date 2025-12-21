@@ -4,7 +4,7 @@ import pino from 'pino';
 
 dotenv.config();
 
-const logger = pino();
+const logger = (pino as any)();
 
 const REDIS_HOST = process.env.REDIS_HOST || 'redis';
 const REDIS_PORT = parseInt(process.env.REDIS_PORT || '6379', 10);

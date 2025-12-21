@@ -4,7 +4,7 @@ import { PlanLimits, QuotaCheckResult } from './types.js';
 import { PrometheusMetrics } from '../../utils/metrics.js';
 import pino from 'pino';
 
-const logger = pino({ name: 'QuotaEnforcer' });
+const logger = (pino as any)({ name: 'QuotaEnforcer' });
 
 export class QuotaEnforcer {
   private static instance: QuotaEnforcer;

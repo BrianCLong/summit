@@ -1,7 +1,7 @@
 import pino from 'pino';
 import { DisclosurePackager, EvidenceItem } from './DisclosurePackager.js';
 
-const log = pino({ name: 'ReportServiceV2' });
+const log = (pino as any)({ name: 'ReportServiceV2' });
 
 export interface ReportSection {
   title: string;

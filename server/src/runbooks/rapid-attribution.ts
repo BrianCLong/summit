@@ -13,7 +13,7 @@ import {
   createClaim,
 } from '../../prov-ledger-service/src/ledger';
 
-const logger = pino({ name: 'rapid-attribution-runbook' });
+const logger = (pino as any)({ name: 'rapid-attribution-runbook' });
 
 // DAG node types
 type DAGNodeType =

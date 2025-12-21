@@ -92,7 +92,7 @@ export interface HashStub {
  * cryptographic evidence of deleted/redacted data for compliance.
  */
 export class ProvenanceIntegration {
-  private readonly logger = pino({ name: 'provenance-integration' });
+  private readonly logger = (pino as any)({ name: 'provenance-integration' });
   private readonly pool: Pool;
   private readonly signingKey: string;
 

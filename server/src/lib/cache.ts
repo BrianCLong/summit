@@ -1,7 +1,7 @@
 import Redis from 'ioredis';
 import pino from 'pino';
 
-const logger = pino();
+const logger = (pino as any)();
 const redisClient = new Redis(); // Assuming Redis is running and accessible
 
 redisClient.on('connect', () =>

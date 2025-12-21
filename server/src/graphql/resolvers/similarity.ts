@@ -8,7 +8,7 @@ import client from 'prom-client';
 import { register } from '../../monitoring/metrics.js';
 import EmbeddingService from '../../services/EmbeddingService.js';
 
-const log = pino({ name: 'similarity' });
+const log = (pino as any)({ name: 'similarity' });
 let pool: any = null;
 
 interface CacheEntry {

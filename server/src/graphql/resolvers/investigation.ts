@@ -2,7 +2,7 @@ import pino from 'pino';
 import { getPostgresPool } from '../../config/database.js';
 import type { GraphQLContext } from '../apollo-v5-server.js';
 
-const logger = pino();
+const logger = (pino as any)();
 
 const investigationResolvers = {
   Query: {

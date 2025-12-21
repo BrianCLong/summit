@@ -9,7 +9,7 @@ import pino from 'pino';
 import { getPostgresPool } from '../db/postgres';
 import { resourceTagging, TagCategory } from './ResourceTaggingService';
 
-const logger = pino({ name: 'cost-anomaly-detection' });
+const logger = (pino as any)({ name: 'cost-anomaly-detection' });
 
 export interface BudgetAlert {
   id: string;

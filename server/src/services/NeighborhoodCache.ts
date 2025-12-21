@@ -12,7 +12,7 @@ import {
   TenantValidator,
 } from '../middleware/tenantValidator.js';
 
-const logger = pino({ name: 'neighborhoodCache' });
+const logger = (pino as any)({ name: 'neighborhoodCache' });
 
 export interface NeighborhoodData {
   nodeId: string;

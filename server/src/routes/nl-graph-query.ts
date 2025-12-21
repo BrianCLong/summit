@@ -11,7 +11,7 @@ import { getNlGraphQueryService } from '../ai/nl-graph-query/index.js';
 import type { CompileRequest, SchemaContext } from '../ai/nl-graph-query/index.js';
 import type { AuthenticatedRequest } from './types.js';
 
-const logger = pino({ name: 'nl-graph-query-routes' });
+const logger = (pino as any)({ name: 'nl-graph-query-routes' });
 const router = express.Router();
 
 // Rate limiting for NL query compilation (moderate limits)

@@ -1,6 +1,6 @@
 import pino from 'pino';
 
-const log = pino({ name: 'PolicySimulator' });
+const log = (pino as any)({ name: 'PolicySimulator' });
 
 export interface Policy {
   id: string;

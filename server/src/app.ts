@@ -92,7 +92,7 @@ export const createApp = async () => {
   await tracer.initialize();
 
   const app = express();
-  const logger = pino();
+  const logger = (pino as any)();
 
   const isProduction = cfg.NODE_ENV === 'production';
   const allowedOrigins = cfg.CORS_ORIGIN.split(',')

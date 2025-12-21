@@ -13,7 +13,7 @@ import TextAnalysisEngine from '../ai/engines/TextAnalysisEngine.js';
 import EmbeddingService from '../ai/services/EmbeddingService.js';
 import path from 'path';
 
-const logger = pino({ name: 'ExtractionJobService' });
+const logger = (pino as any)({ name: 'ExtractionJobService' });
 
 export interface ExtractionJob {
   id: string;

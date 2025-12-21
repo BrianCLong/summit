@@ -6,7 +6,7 @@ import { randomUUID } from 'crypto';
 import pino from 'pino';
 import { Counter, Histogram } from 'prom-client';
 
-const logger = pino({ name: 'StreamingIngestionService' });
+const logger = (pino as any)({ name: 'StreamingIngestionService' });
 
 // Metrics
 const recordsIngested = new Counter({

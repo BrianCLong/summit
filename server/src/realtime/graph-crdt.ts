@@ -2,7 +2,7 @@ import { Namespace, Socket } from 'socket.io';
 import Redis from 'ioredis';
 import pino from 'pino';
 
-const logger = pino();
+const logger = (pino as any)();
 
 export interface GraphOperation {
   id: string;

@@ -13,7 +13,7 @@ const mockRedis = {
   publish: jest.fn(),
 } as unknown as Redis;
 
-const mockLogger = pino({ level: 'silent' });
+const mockLogger = (pino as any)({ level: 'silent' });
 
 describe('AdvancedAuditSystem', () => {
   let auditSystem: AdvancedAuditSystem;

@@ -23,7 +23,7 @@ import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
 import pino from 'pino';
 
-const logger = pino({ name: 'observability:tracing' });
+const logger = (pino as any)({ name: 'observability:tracing' });
 
 export interface TracingConfig {
   serviceName: string;

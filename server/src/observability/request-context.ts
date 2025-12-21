@@ -19,7 +19,7 @@ export function getRequestContext(): RequestContext | undefined {
   return contextStorage.getStore();
 }
 
-export const appLogger = pino({
+export const appLogger = (pino as any)({
   name: 'intelgraph-observability',
   level: process.env.LOG_LEVEL || 'info',
   redact: {

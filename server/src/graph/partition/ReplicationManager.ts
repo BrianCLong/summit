@@ -1,7 +1,7 @@
 import { ShardManager } from './ShardManager.js';
 import pino from 'pino';
 
-const logger = pino({ name: 'ReplicationManager' });
+const logger = (pino as any)({ name: 'ReplicationManager' });
 
 /**
  * Simulates air-gapped replication by periodically "syncing" data

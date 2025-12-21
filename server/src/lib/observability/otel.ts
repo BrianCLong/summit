@@ -7,7 +7,7 @@ import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
 import { trace, context, SpanStatusCode, SpanKind } from '@opentelemetry/api';
 import pino from 'pino';
 
-const logger = pino({ name: 'observability-otel' });
+const logger = (pino as any)({ name: 'observability-otel' });
 
 interface TracingConfig {
   serviceName: string;

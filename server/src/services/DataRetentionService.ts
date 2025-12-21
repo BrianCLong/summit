@@ -2,7 +2,7 @@ import { Driver } from 'neo4j-driver';
 import pino from 'pino';
 import { writeAudit } from '../utils/audit.js'; // Assuming audit utility exists
 
-const logger = pino();
+const logger = (pino as any)();
 
 interface RetentionPolicy {
   label: string; // Node or Relationship label

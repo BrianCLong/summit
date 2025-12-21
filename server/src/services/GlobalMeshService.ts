@@ -1,6 +1,6 @@
 import pino from 'pino';
 
-const logger = pino({ name: 'GlobalMeshService' });
+const logger = (pino as any)({ name: 'GlobalMeshService' });
 
 export class GlobalMeshService {
   static async sync(data: unknown): Promise<void> {

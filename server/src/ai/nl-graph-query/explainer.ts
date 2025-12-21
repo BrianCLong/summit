@@ -5,7 +5,7 @@
 import pino from 'pino';
 import type { ExplanationEvidence, QueryExplanation } from './types';
 
-const logger = pino({ name: 'cypher-explainer' });
+const logger = (pino as any)({ name: 'cypher-explainer' });
 
 /**
  * Generate a plain language explanation of what a Cypher query does

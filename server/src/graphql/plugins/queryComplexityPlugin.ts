@@ -12,7 +12,7 @@ import { rateLimiter } from '../../services/RateLimiter.js';
 import { cfg } from '../../config.js';
 import type { GraphQLContext } from '../apollo-v5-server.js';
 
-const logger = pino();
+const logger = (pino as any)();
 
 export interface QueryComplexityOptions {
   /**

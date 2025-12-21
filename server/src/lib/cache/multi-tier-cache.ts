@@ -8,7 +8,7 @@ import pino from 'pino';
 import { cfg } from '../../config.js';
 import { metrics } from '../../observability/metrics.js';
 
-const logger = pino();
+const logger = (pino as any)();
 const INVALIDATION_CHANNEL = 'cache:invalidation';
 
 type RedisClient = Pick<

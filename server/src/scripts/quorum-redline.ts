@@ -2,7 +2,7 @@ import { writeQuorumRouter } from '../db/WriteQuorumRouter.js';
 import { initializeNeo4jDriver, closeNeo4jDriver } from '../db/neo4j.js';
 import pino from 'pino';
 
-const log = pino({ name: 'QuorumRedline' });
+const log = (pino as any)({ name: 'QuorumRedline' });
 
 async function runRedline(): Promise<void> {
   log.info('Starting Quorum Redline Test...');

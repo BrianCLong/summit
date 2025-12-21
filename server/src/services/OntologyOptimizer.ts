@@ -1,6 +1,6 @@
 import pino from 'pino';
 
-const logger = pino({ name: 'OntologyOptimizer' });
+const logger = (pino as any)({ name: 'OntologyOptimizer' });
 
 export class OntologyOptimizer {
   static async runOptimization(): Promise<void> {

@@ -25,7 +25,7 @@ import { Request, Response, NextFunction } from 'express';
 import { costGuard, CostGuardService } from '../services/cost-guard';
 import pino from 'pino';
 
-const logger = pino({ name: 'cost-guard:middleware' });
+const logger = (pino as any)({ name: 'cost-guard:middleware' });
 
 export interface CostGuardContext {
   tenantId: string;

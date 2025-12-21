@@ -11,7 +11,7 @@ import pino from 'pino';
  * implementation intended to be expanded with persistence and RBAC rules.
  */
 export function mountLiveNamespace(io: Server): void {
-  const logger = pino();
+  const logger = (pino as any)();
   const pubClient = getRedisClient();
   const subClient = pubClient.duplicate();
   io.adapter(createAdapter(pubClient, subClient));

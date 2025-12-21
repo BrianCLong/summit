@@ -24,7 +24,7 @@ import type { Attributes } from '@opentelemetry/api';
 import { cfg } from '../config.js';
 import pino from 'pino';
 
-const logger = pino({ name: 'otel-tracer' });
+const logger = (pino as any)({ name: 'otel-tracer' });
 
 export interface TracingConfig {
   serviceName: string;

@@ -19,7 +19,7 @@ import { DataRetentionRepository } from './repository.js';
  * and legal hold status.
  */
 export class PolicyEvaluator {
-  private readonly logger = pino({ name: 'policy-evaluator' });
+  private readonly logger = (pino as any)({ name: 'policy-evaluator' });
   private readonly repository: DataRetentionRepository;
   private readonly pool: Pool;
 

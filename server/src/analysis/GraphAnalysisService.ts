@@ -1,4 +1,4 @@
-import { neo } from '../db/neo4j.js';
+import { getNeo4jDriver } from '../db/neo4j.js';
 import {
   Graph,
   GraphNode,
@@ -56,8 +56,11 @@ export class GraphAnalysisService {
     `;
 
     try {
-        const nodeResult = await neo.run(nodeQuery, { tenantId, nodeLabels }, { tenantId });
-        const edgeResult = await neo.run(edgeQuery, { tenantId, edgeTypes }, { tenantId });
+        const driver = getNeo4jDriver();
+        const session = driver.session();
+
+        const nodeResult = await session.run(nodeQuery, { tenantId, nodeLabels });
+        const edgeResult = await session.run(edgeQuery, { tenantId, edgeTypes });
 
         const nodes: GraphNode[] = nodeResult.records.map(record => {
             const n = record.get('n').properties;
@@ -86,6 +89,7 @@ export class GraphAnalysisService {
 
         logger.info(`Loaded graph slice for tenant ${tenantId}: ${nodes.length} nodes, ${edges.length} edges in ${Date.now() - start}ms`);
 
+        await session.close();
         return { nodes, edges };
 
     } catch (error) {

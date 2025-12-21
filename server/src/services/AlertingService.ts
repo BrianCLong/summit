@@ -3,7 +3,7 @@ import { getRedisClient } from '../db/redis.js';
 import pino from 'pino';
 import { z } from 'zod';
 
-const logger = pino();
+const logger = (pino as any)();
 
 export const AlertRuleSchema = z.object({
   id: z.string().uuid(),

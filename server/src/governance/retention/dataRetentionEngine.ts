@@ -53,7 +53,7 @@ export interface ComplianceReportSummary {
 }
 
 export class DataRetentionEngine {
-  private readonly logger = pino({ name: 'data-retention-engine' });
+  private readonly logger = (pino as any)({ name: 'data-retention-engine' });
   private readonly pool: Pool;
   private readonly repository: DataRetentionRepository;
   private readonly scheduler: RetentionScheduler;

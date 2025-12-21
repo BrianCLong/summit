@@ -2,7 +2,7 @@ import { getIO } from '../realtime/socket.js';
 import pino from 'pino';
 import { randomUUID } from 'crypto';
 
-const logger = pino();
+const logger = (pino as any)();
 
 export interface IntelligenceItem {
   id: string;

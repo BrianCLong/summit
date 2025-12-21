@@ -7,7 +7,7 @@ import { costGuard } from '../services/cost-guard';
 import type { AuthenticatedRequest } from './types.js';
 
 const router = Router();
-const logger = pino({ name: 'export-api' });
+const logger = (pino as any)({ name: 'export-api' });
 
 // Request schemas
 const exportRequestSchema = z.object({

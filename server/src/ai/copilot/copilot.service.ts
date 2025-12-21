@@ -47,7 +47,7 @@ import {
   createGuardrailsService,
 } from './guardrails.service.js';
 
-const logger = pino({ name: 'copilot-service' });
+const logger = (pino as any)({ name: 'copilot-service' });
 
 /**
  * LLM service interface

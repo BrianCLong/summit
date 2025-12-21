@@ -15,7 +15,7 @@ import {
 import { getTracer } from './tracer.js';
 import pino from 'pino';
 
-const logger = pino({ name: 'redis-instrumentation' });
+const logger = (pino as any)({ name: 'redis-instrumentation' });
 
 // Track cache hits/misses for ratio calculation
 const cacheStats = new Map<string, { hits: number; misses: number }>();

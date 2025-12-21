@@ -9,7 +9,7 @@ import {
   type SubscriptionEnvelope,
 } from '../subscriptionEngine.js';
 
-const logger = pino({ name: 'MultimodalResolvers' });
+const logger = (pino as any)({ name: 'MultimodalResolvers' });
 
 export interface MultimodalContext {
   user: any;

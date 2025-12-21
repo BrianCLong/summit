@@ -33,7 +33,7 @@ import type {
   StrategicPlanFilter,
 } from '../../types/strategic-planning.js';
 
-const logger = pino({ name: 'strategicPlanningResolvers' });
+const logger = (pino as any)({ name: 'strategicPlanningResolvers' });
 const pubsub = new PubSub();
 
 // Subscription event names

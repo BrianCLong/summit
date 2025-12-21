@@ -13,7 +13,7 @@ import { otelService } from '../monitoring/opentelemetry.js';
 import { context, propagation } from '@opentelemetry/api';
 import pino from 'pino';
 
-const logger = pino({ name: 'embeddingUpsertWorker' });
+const logger = (pino as any)({ name: 'embeddingUpsertWorker' });
 
 interface EntityEmbeddingJobData {
   entityId: string;

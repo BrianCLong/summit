@@ -3,7 +3,7 @@ import { GraphQLError } from 'graphql';
 import pino from 'pino';
 import type { GraphQLContext } from '../apollo-v5-server.js';
 
-const logger = pino();
+const logger = (pino as any)();
 
 export interface CircuitBreakerOptions {
   failureThreshold?: number;

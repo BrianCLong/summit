@@ -8,7 +8,7 @@ import {
 } from './types.js';
 import { tenantKillSwitch, TenantKillSwitch } from './killSwitch.js';
 
-const logger = pino({ name: 'tenant-isolation-guard' });
+const logger = (pino as any)({ name: 'tenant-isolation-guard' });
 
 export interface TenantIsolationConfig {
   defaultWindowMs: number;

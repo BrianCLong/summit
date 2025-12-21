@@ -26,7 +26,7 @@ import {
   ExtractionMetrics,
 } from './types.js';
 
-const logger = pino({ name: 'ExtractionEngine' });
+const logger = (pino as any)({ name: 'ExtractionEngine' });
 
 export class ExtractionEngine {
   private config: ExtractionEngineConfig;

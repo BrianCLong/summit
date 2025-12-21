@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import pino from 'pino';
 import { getPostgresPool } from '../../config/database.js';
 
-const logger = pino();
+const logger = (pino as any)();
 
 export interface DLQMessage<T = unknown> {
   id: string;

@@ -2,7 +2,7 @@ import { ShardManager } from './ShardManager.js';
 import { VectorIndexConfig } from './types.js';
 import pino from 'pino';
 
-const logger = pino({ name: 'VectorIndexManager' });
+const logger = (pino as any)({ name: 'VectorIndexManager' });
 
 export class VectorIndexManager {
     private shardManager: ShardManager;

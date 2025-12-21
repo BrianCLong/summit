@@ -6,7 +6,7 @@ import type { Readable } from 'stream';
 import pino from 'pino';
 import { meteringEmitter } from '../metering/emitter.js';
 
-const logger = pino({ name: 'FileStorageService' });
+const logger = (pino as any)({ name: 'FileStorageService' });
 
 export interface StorageConfig {
   basePath: string;

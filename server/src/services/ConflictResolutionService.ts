@@ -1,6 +1,6 @@
 import pino from 'pino';
 
-const logger = pino({ name: 'ConflictResolutionService' });
+const logger = (pino as any)({ name: 'ConflictResolutionService' });
 
 export enum ConflictResolutionStrategy {
   LATEST_WINS = 'LATEST_WINS',

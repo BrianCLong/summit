@@ -3,7 +3,7 @@ import path from 'path';
 import { randomUUID } from 'crypto';
 import pino from 'pino';
 
-const logger = pino({ name: 'QuietExitService' });
+const logger = (pino as any)({ name: 'QuietExitService' });
 
 export class QuietExitService {
   private static readonly STIX_FILENAME = 'stix_thank_you.json';

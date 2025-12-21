@@ -3,7 +3,7 @@ import { getIO } from '../../realtime/socket.js';
 import { NotificationRepo } from '../repo/NotificationRepo.js';
 import pino from 'pino';
 
-const logger = pino({ name: 'InAppProvider' });
+const logger = (pino as any)({ name: 'InAppProvider' });
 
 export class InAppProvider implements NotificationProvider {
   channel = NotificationChannel.IN_APP;

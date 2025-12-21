@@ -3,7 +3,7 @@ import { getPostgresPool } from '../../config/database.js';
 import { getRedisClient } from '../../config/database.js';
 import pino from 'pino';
 
-const logger = pino();
+const logger = (pino as any)();
 
 // Define the shape of a Comment (match your actual type)
 export interface SupportTicketComment {

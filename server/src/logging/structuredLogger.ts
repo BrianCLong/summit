@@ -33,7 +33,7 @@ const transport = pino.transport({
   ],
 });
 
-const baseLogger = pino(
+const baseLogger = (pino as any)(
   {
     level: process.env.LOG_LEVEL || 'info',
     base: {

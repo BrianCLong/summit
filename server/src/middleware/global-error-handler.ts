@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import pino from 'pino';
 import { cfg } from '../config.js';
 
-const logger = pino();
+const logger = (pino as any)();
 
 /**
  * Global Error Handler

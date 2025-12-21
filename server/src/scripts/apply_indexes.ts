@@ -3,7 +3,7 @@ import { createIndexManager } from '../db/indexManager.js';
 import GraphIndexAdvisorService from '../services/GraphIndexAdvisorService.js';
 import pino from 'pino';
 
-const logger = pino({ name: 'apply-indexes' });
+const logger = (pino as any)({ name: 'apply-indexes' });
 
 async function applyRecommendedIndexes(): Promise<void> {
   const tenantId = 'default'; // Default tenant for now

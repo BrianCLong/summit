@@ -20,7 +20,7 @@ import {
   type CopilotAnswer,
 } from './types.js';
 
-const logger = pino({ name: 'redaction-service' });
+const logger = (pino as any)({ name: 'redaction-service' });
 
 /**
  * Policy classification levels (in order of restrictiveness)

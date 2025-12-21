@@ -3,7 +3,7 @@ import pino from 'pino';
 import { z } from 'zod';
 import { alertingService } from './AlertingService.js';
 
-const logger = pino();
+const logger = (pino as any)();
 
 export const TimeSeriesPointSchema = z.object({
   metric: z.string(),

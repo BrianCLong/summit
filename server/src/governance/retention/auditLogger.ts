@@ -5,7 +5,7 @@ export interface RetentionAuditLogger {
   log(event: RetentionAuditEvent): Promise<void>;
 }
 
-const logger = pino({ name: 'data-retention' });
+const logger = (pino as any)({ name: 'data-retention' });
 
 export class PinoRetentionAuditLogger implements RetentionAuditLogger {
   async log(event: RetentionAuditEvent): Promise<void> {

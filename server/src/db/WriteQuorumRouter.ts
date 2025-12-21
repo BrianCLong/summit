@@ -3,7 +3,7 @@ import pino from 'pino';
 import { getNeo4jDriver } from './neo4j.js';
 import { Histogram, Counter, Gauge } from 'prom-client';
 
-const log = pino({ name: 'WriteQuorumRouter' });
+const log = (pino as any)({ name: 'WriteQuorumRouter' });
 
 // Metrics
 const quorumWriteLatency = new Histogram({

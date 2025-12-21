@@ -2,7 +2,7 @@ import pino from 'pino';
 import fs from 'fs/promises';
 import path from 'path';
 
-const logger = pino({ name: 'SchemaCatalogService' });
+const logger = (pino as any)({ name: 'SchemaCatalogService' });
 
 export interface SchemaFieldPolicy {
   field: string;

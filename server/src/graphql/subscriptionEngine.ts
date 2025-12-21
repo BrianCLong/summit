@@ -33,7 +33,7 @@ export interface SubscriptionEngineOptions {
 
 export class SubscriptionEngine {
   private readonly pubsub: PubSub | RedisPubSub;
-  private readonly logger = pino({ name: 'SubscriptionEngine' });
+  private readonly logger = (pino as any)({ name: 'SubscriptionEngine' });
   private readonly connections = new Map<
     string,
     { socket: WebSocket; subscriptions: Set<string> }

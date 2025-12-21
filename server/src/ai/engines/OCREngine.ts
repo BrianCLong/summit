@@ -6,7 +6,7 @@ import pino from 'pino';
 import sharp from 'sharp';
 import { ExtractionEngineConfig } from '../types.js';
 
-const logger = pino({ name: 'OCREngine' });
+const logger = (pino as any)({ name: 'OCREngine' });
 
 export interface OCRResult {
   text: string;

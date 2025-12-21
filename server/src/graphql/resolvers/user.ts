@@ -21,7 +21,7 @@ import { getPostgresPool } from '../../config/database.js';
 import argon2 from 'argon2';
 import type { GraphQLContext } from '../apollo-v5-server.js';
 
-const logger = pino();
+const logger = (pino as any)();
 
 interface User {
   id: string;

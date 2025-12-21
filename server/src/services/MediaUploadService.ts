@@ -23,7 +23,7 @@ import {
   type CdnUploadRequest,
 } from './CdnUploadService.js';
 
-const logger = pino({ name: 'MediaUploadService' });
+const logger = (pino as any)({ name: 'MediaUploadService' });
 
 // Configure FFmpeg binary paths
 import ffmpegStatic from 'ffmpeg-static';

@@ -8,7 +8,7 @@
 import { GraphQLError, GraphQLResolveInfo } from 'graphql';
 import pino from 'pino';
 
-const logger = pino({ name: 'withTenant' });
+const logger = (pino as any)({ name: 'withTenant' });
 
 export interface TenantContext {
   user: {

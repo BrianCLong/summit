@@ -122,7 +122,9 @@
       "Bash(/Users/brianlong/Developer/summit/fix-ts-nocheck-batch3.sh)",
       "Bash(then if head -5 \"$file\")",
       "Bash(then echo \"STILL HAS @ts-nocheck: $file\" else echo \"✓ Fixed: $file\" fi else echo \"✗ Not found: $file\" fi done)",
-      "Bash(do sed -i '' '1s|^// @ts-nocheck||' \"$file\")"
+      "Bash(do sed -i '' '1s|^// @ts-nocheck||' \"$file\")",
+      "Bash(node -e \"console.log(require(''''neo4j-driver''''))\")",
+      "Bash(node -e:*)"
     ],
     "deny": [],
     "ask": []

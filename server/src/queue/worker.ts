@@ -3,7 +3,7 @@ import { cfg } from '../config.js';
 import { QueueName } from './types.js';
 import pino from 'pino';
 
-const logger = pino({ name: 'worker-manager' });
+const logger = (pino as any)({ name: 'worker-manager' });
 
 const connection = {
   host: cfg.REDIS_HOST,

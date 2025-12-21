@@ -3,7 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import pino from 'pino';
 
-const logger = pino({ name: 'SynonymService' });
+const logger = (pino as any)({ name: 'SynonymService' });
 
 export class SynonymService {
   private synonyms: Record<string, string[]> = {};

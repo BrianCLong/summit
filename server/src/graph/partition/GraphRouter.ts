@@ -4,7 +4,7 @@ import { LocalityAwarePartitionStrategy } from './PartitionStrategy.js';
 import { QueryContext } from './types.js';
 import pino from 'pino';
 
-const logger = pino({ name: 'GraphRouter' });
+const logger = (pino as any)({ name: 'GraphRouter' });
 
 export class GraphRouter {
   private strategy: PartitionStrategy;

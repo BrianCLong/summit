@@ -1,7 +1,7 @@
 import { Socket } from 'socket.io';
 import pino from 'pino';
 
-const logger = pino();
+const logger = (pino as any)();
 
 interface Presence {
   userId: string;

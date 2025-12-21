@@ -42,7 +42,7 @@ export interface ActivityEntry {
   details?: Record<string, any>;
 }
 
-const logger = pino({ name: 'investigation-state' });
+const logger = (pino as any)({ name: 'investigation-state' });
 
 const redisUrl = process.env.REDIS_URL;
 const redisHost = process.env.REDIS_HOST;

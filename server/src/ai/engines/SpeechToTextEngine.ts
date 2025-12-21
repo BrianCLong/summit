@@ -3,7 +3,7 @@ import path from 'path';
 import pino from 'pino';
 import { ExtractionEngineConfig } from '../types.js';
 
-const logger = pino({ name: 'SpeechToTextEngine' });
+const logger = (pino as any)({ name: 'SpeechToTextEngine' });
 
 export interface TranscriptionSegment {
   text: string;

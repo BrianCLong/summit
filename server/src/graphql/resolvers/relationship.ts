@@ -11,7 +11,7 @@ import {
 import { requireTenant } from '../../middleware/withTenant.js';
 import type { GraphQLContext } from '../apollo-v5-server.js';
 
-const logger = pino();
+const logger = (pino as any)();
 const driver = getNeo4jDriver();
 
 const relationshipResolvers = {

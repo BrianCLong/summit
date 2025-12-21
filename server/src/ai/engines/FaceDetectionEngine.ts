@@ -3,7 +3,7 @@ import path from 'path';
 import pino from 'pino';
 import { ExtractionEngineConfig } from '../types.js';
 
-const logger = pino({ name: 'FaceDetectionEngine' });
+const logger = (pino as any)({ name: 'FaceDetectionEngine' });
 
 export interface FaceDetection {
   boundingBox: {

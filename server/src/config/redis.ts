@@ -3,7 +3,7 @@ import { getRedisClient } from '../db/redis.js';
 import { default as pino } from 'pino';
 
 // @ts-ignore
-const logger = pino({ name: 'RedisCacheManager' });
+const logger = (pino as any)({ name: 'RedisCacheManager' });
 
 export const CACHE_PREFIX = {
     ENTITY: 'entity',

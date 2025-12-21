@@ -2,7 +2,7 @@ import { pg } from '../db/pg';
 import { getContext } from '../auth/context';
 import pino from 'pino';
 
-const logger = pino({ name: 'resolvers:sprint28' });
+const logger = (pino as any)({ name: 'resolvers:sprint28' });
 
 export const sprint28Resolvers = {
   Query: {

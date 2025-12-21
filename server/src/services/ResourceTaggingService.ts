@@ -8,7 +8,7 @@
 import pino from 'pino';
 import { getPostgresPool, type ManagedPostgresPool } from '../db/postgres.js';
 
-const logger = pino({ name: 'resource-tagging' });
+const logger = (pino as any)({ name: 'resource-tagging' });
 
 // Standard tag categories for cost allocation
 export enum TagCategory {

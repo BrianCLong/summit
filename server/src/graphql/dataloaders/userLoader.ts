@@ -7,7 +7,7 @@ import DataLoader from 'dataloader';
 import pino from 'pino';
 import type { DataLoaderContext } from './index.js';
 
-const logger = pino();
+const logger = (pino as any)();
 
 export interface User {
   id: string;

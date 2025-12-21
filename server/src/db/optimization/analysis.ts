@@ -3,7 +3,7 @@ import pino from 'pino';
 import fs from 'fs';
 import path from 'path';
 
-const logger = pino({ name: 'query-analyzer' });
+const logger = (pino as any)({ name: 'query-analyzer' });
 
 interface PlanStats {
   operatorType: string;

@@ -1,7 +1,7 @@
 import { Server, Socket } from 'socket.io';
 import pino from 'pino';
 
-const logger = pino();
+const logger = (pino as any)();
 
 export function registerDashboardHandlers(io: Server, socket: Socket): void {
   // Join the dashboard room

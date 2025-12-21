@@ -3,7 +3,7 @@ import OrderedPubSub from './ordered-pubsub.js';
 import { requireTenant } from '../middleware/withTenant.js';
 import type { GraphQLContext } from './apollo-v5-server.js';
 
-const logger = pino();
+const logger = (pino as any)();
 export const pubsub = new OrderedPubSub();
 
 export const ENTITY_CREATED = 'ENTITY_CREATED';

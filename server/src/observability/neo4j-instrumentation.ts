@@ -19,7 +19,7 @@ import { getTracer } from './tracer.js';
 import { SpanKind } from '@opentelemetry/api';
 import pino from 'pino';
 
-const logger = pino({ name: 'neo4j-instrumentation' });
+const logger = (pino as any)({ name: 'neo4j-instrumentation' });
 
 // Track active sessions
 let activeSessionCount = 0;

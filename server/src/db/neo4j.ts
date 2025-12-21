@@ -18,7 +18,7 @@ import {
 
 dotenv.config();
 
-const logger = pino();
+const logger = (pino as any)();
 
 const NEO4J_URI = process.env.NEO4J_URI || 'bolt://neo4j:7687';
 const NEO4J_USER = process.env.NEO4J_USER || process.env.NEO4J_USERNAME || 'neo4j';

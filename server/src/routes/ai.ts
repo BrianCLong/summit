@@ -27,7 +27,7 @@ import { createRateLimitMiddleware } from '../middleware/rateLimit.js';
 import { cfg } from '../config.js';
 import { rateLimiter } from '../services/RateLimiter.js';
 
-const logger = pino();
+const logger = (pino as any)();
 const router = express.Router();
 
 // WAR-GAMED SIMULATION - BullMQ setup for video analysis jobs

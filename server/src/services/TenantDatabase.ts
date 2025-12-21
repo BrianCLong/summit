@@ -12,7 +12,7 @@ import type {
 } from '../middleware/tenantValidator.js';
 import { TenantValidator } from '../middleware/tenantValidator.js';
 
-const logger = pino({ name: 'tenantDatabase' });
+const logger = (pino as any)({ name: 'tenantDatabase' });
 
 export interface DatabaseConfig {
   neo4j?: Driver;

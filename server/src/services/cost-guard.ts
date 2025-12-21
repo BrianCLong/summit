@@ -2,7 +2,7 @@ import pino from 'pino';
 import { businessMetrics, costTracker } from '../observability/telemetry';
 import type { Request, Response, NextFunction } from 'express';
 
-const logger = pino({ name: 'cost-guard' });
+const logger = (pino as any)({ name: 'cost-guard' });
 
 // Cost configuration per operation type
 interface CostConfig {

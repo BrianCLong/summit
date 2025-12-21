@@ -4,7 +4,7 @@ import { pino } from 'pino';
 import { QueueHelper, PrioritizedItem } from './QueueHelper.js';
 import { ExecutorSelector } from './ExecutorSelector.js';
 
-const logger = pino({ name: 'maestro-scheduler' });
+const logger = (pino as any)({ name: 'maestro-scheduler' });
 
 interface QueueItem extends PrioritizedItem {
   runId: string;

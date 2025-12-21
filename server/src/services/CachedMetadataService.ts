@@ -27,7 +27,7 @@ import {
 } from '../metrics/cacheMetrics.js';
 
 // @ts-ignore
-const logger = pino({ name: 'CachedMetadataService' });
+const logger = (pino as any)({ name: 'CachedMetadataService' });
 
 // Cache configuration constants
 const METADATA_CACHE_TTL = 300; // 5 minutes

@@ -9,7 +9,7 @@ import { ChunkingService } from './ChunkingService';
 import { DLQService } from './DLQService';
 import pino from 'pino';
 
-const logger = pino({ name: 'PipelineOrchestrator' });
+const logger = (pino as any)({ name: 'PipelineOrchestrator' });
 
 export class PipelineOrchestrator {
   private normalizationService: NormalizationService;

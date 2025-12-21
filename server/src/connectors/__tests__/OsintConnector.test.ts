@@ -4,7 +4,7 @@ import { OsintSourceType, OsintSourceConfig } from '../types.js';
 import pino from 'pino';
 
 describe('OsintConnector', () => {
-  const logger = pino({ level: 'silent' });
+  const logger = (pino as any)({ level: 'silent' });
 
   it('should initialize with correct config', () => {
     const config: OsintSourceConfig = {

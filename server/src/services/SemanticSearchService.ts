@@ -50,7 +50,7 @@ export interface SemanticSearchOptions {
 
 export default class SemanticSearchService {
   private embeddingService: EmbeddingService;
-  private logger = pino({ name: 'SemanticSearchService' });
+  private logger = (pino as any)({ name: 'SemanticSearchService' });
   private pool: Pool | null = null;
   private readonly ownsPool: boolean;
   private readonly poolFactory: () => Pool;

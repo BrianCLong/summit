@@ -2,7 +2,7 @@ import { getRedisClient } from '../config/database.js';
 import { PrometheusMetrics } from '../utils/metrics.js';
 import pino from 'pino';
 
-const logger = pino();
+const logger = (pino as any)();
 
 export interface RateLimitResult {
   allowed: boolean;

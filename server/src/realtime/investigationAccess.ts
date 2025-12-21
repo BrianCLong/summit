@@ -17,7 +17,7 @@ interface AuthorizationResult {
   via: 'member' | 'global';
 }
 
-const logger = pino({ name: 'investigation-access' });
+const logger = (pino as any)({ name: 'investigation-access' });
 
 const redisUrl = process.env.REDIS_URL;
 const redisHost = process.env.REDIS_HOST;

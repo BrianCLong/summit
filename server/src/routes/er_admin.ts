@@ -4,7 +4,7 @@ import pino from 'pino';
 import type { AuthenticatedRequest } from './types.js';
 
 const router = express.Router();
-const logger = pino({ name: 'ERAdminRoutes' });
+const logger = (pino as any)({ name: 'ERAdminRoutes' });
 const erService = new EntityResolutionService();
 
 // POST /admin/er/evaluate

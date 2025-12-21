@@ -31,7 +31,7 @@ import {
 } from './investigationAccess.js';
 import { registerDashboardHandlers } from './dashboard.js';
 
-const logger = pino();
+const logger = (pino as any)();
 
 let verifyToken = verifyTokenBase;
 

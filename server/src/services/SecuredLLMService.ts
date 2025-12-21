@@ -22,7 +22,7 @@ import { default as pino } from 'pino';
 import LLMService from './LLMService.js';
 
 // @ts-ignore
-const logger = pino({ name: 'SecuredLLMService' });
+const logger = (pino as any)({ name: 'SecuredLLMService' });
 
 interface SecuredLLMParams {
   prompt: string;

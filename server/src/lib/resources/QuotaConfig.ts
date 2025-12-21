@@ -3,7 +3,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import pino from 'pino';
 
-const logger = pino({ name: 'QuotaConfig' });
+const logger = (pino as any)({ name: 'QuotaConfig' });
 
 export const DEFAULT_PLANS: Record<PlanTier, PlanLimits> = {
   starter: {

@@ -64,7 +64,7 @@ export class JobQueue<TData = unknown, TResult = unknown> {
   private readonly queueScheduler: QueueScheduler;
   private readonly deadLetterQueue?: Queue;
   private worker?: Worker<TData, TResult>;
-  private readonly logger = pino({ name: 'JobQueue' });
+  private readonly logger = (pino as any)({ name: 'JobQueue' });
   private readonly progressEmitter = new EventEmitter();
   private readonly connection: Redis;
   private readonly ownsConnection: boolean;

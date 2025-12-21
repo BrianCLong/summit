@@ -5,7 +5,7 @@ import {
   vectorQueryDurationSeconds,
 } from '../monitoring/metrics.js';
 
-const logger = pino({ name: 'hot-embeddings-refresh' });
+const logger = (pino as any)({ name: 'hot-embeddings-refresh' });
 
 let refreshTimer: NodeJS.Timer | null = null;
 const DEFAULT_REFRESH_MS = 5 * 60 * 1000;

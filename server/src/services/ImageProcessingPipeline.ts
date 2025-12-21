@@ -4,7 +4,7 @@ import sharp, { type FormatEnum, type OutputInfo } from 'sharp';
 import exifReader from 'exif-reader';
 import pino from 'pino';
 
-const logger = pino({ name: 'ImageProcessingPipeline' });
+const logger = (pino as any)({ name: 'ImageProcessingPipeline' });
 
 export interface ThumbnailConfig {
   width: number;

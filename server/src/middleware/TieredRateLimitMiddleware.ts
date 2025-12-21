@@ -14,7 +14,7 @@ import { Request, Response, NextFunction } from 'express';
 import Redis from 'ioredis';
 import pino from 'pino';
 
-const logger = pino({ name: 'advanced-rate-limit' });
+const logger = (pino as any)({ name: 'advanced-rate-limit' });
 
 export enum RateLimitTier {
   FREE = 'free',

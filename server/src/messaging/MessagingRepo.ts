@@ -2,7 +2,7 @@ import { pool } from '../db/pg.js';
 import { Message, SendMessagePayload } from './types.js';
 import pino from 'pino';
 
-const logger = pino({ name: 'MessagingRepo' });
+const logger = (pino as any)({ name: 'MessagingRepo' });
 
 interface MessageRow {
   id: string;

@@ -3,7 +3,7 @@ import { default as pino } from 'pino';
 import { getRedisClient } from '../db/redis.js';
 
 // @ts-ignore
-const logger = pino({ name: 'maestro-ws' });
+const logger = (pino as any)({ name: 'maestro-ws' });
 
 interface MaestroSocket extends Socket {
   user?: {

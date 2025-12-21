@@ -5,7 +5,7 @@ import { getNeo4jDriver } from '../db/neo4j.js';
 import { getRedisClient } from '../db/redis.js';
 import pino from 'pino';
 
-const logger = pino({ name: 'BackupService' });
+const logger = (pino as any)({ name: 'BackupService' });
 
 const BACKUP_DIR = process.env.BACKUP_DIR || '/tmp/backups';
 

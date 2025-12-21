@@ -1,6 +1,6 @@
 import pino from 'pino';
 
-const logger = pino({ name: 'TimeTravelService' });
+const logger = (pino as any)({ name: 'TimeTravelService' });
 
 export class TimeTravelService {
   static async reingestInvestigation(caseId: string, targetDate: string): Promise<void> {

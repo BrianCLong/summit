@@ -1,6 +1,6 @@
 import pino from 'pino';
 
-const log = pino({ name: 'AdversarialLab' });
+const log = (pino as any)({ name: 'AdversarialLab' });
 
 export interface AttackResult {
   probeName: string;

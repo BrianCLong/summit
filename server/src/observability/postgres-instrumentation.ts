@@ -18,7 +18,7 @@ import { getTracer } from './tracer.js';
 import { SpanKind } from '@opentelemetry/api';
 import pino from 'pino';
 
-const logger = pino({ name: 'postgres-instrumentation' });
+const logger = (pino as any)({ name: 'postgres-instrumentation' });
 
 /**
  * Start monitoring PostgreSQL connection pool metrics
