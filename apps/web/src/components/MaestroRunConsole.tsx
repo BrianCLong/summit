@@ -9,6 +9,7 @@ import { Play, Loader2, Terminal, FileSearch, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/Badge';
 import { ScrollArea } from '@/components/ui/ScrollArea';
 
@@ -27,6 +28,14 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
     e.preventDefault();
     if (!input.trim()) return;
     await run(input);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      e.preventDefault();
+      if (!input.trim() || state.isRunning) return;
+      void run(input);
+    }
   };
 
   const handleReset = () => {
@@ -79,12 +88,19 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <Textarea
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                placeholder="Describe what you want Maestro to do. Example: 'Review the last 5 PRs, summarize risk, and propose a follow-up CI improvement.'"
-                className="min-h-[120px] resize-none text-sm"
-              />
+              <div className="space-y-2">
+                <Label htmlFor="maestro-prompt" className="sr-only">
+                  Maestro Command
+                </Label>
+                <Textarea
+                  id="maestro-prompt"
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Describe what you want Maestro to do. Example: 'Review the last 5 PRs, summarize risk, and propose a follow-up CI improvement.'"
+                  className="min-h-[120px] resize-none text-sm"
+                />
+              </div>
 
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-2 text-xs text-slate-400">
@@ -93,6 +109,9 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2">
+                  <span className="hidden text-[10px] font-medium text-slate-500 sm:inline-block">
+                    ⌘+Enter
+                  </span>
                   {selectedRun && (
                     <Button
                       type="button"
