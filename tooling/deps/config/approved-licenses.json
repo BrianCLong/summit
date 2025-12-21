@@ -1,0 +1,18 @@
+{
+  "approved": [
+    "MIT",
+    "ISC",
+    "Apache-2.0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "Unlicense",
+    "CC0-1.0",
+    "0BSD",
+    "Python-2.0",
+    "Python-2.0.1",
+    "PostgreSQL"
+  ],
+  "ignoredPackages": [
+    "intelgraph-platform"
+  ]
+}
