@@ -20,6 +20,9 @@ import type { ResourceAttributes } from './types';
 import { sessionManager } from './session';
 import { requireServiceAuth } from './service-auth';
 import { breakGlassManager } from './break-glass';
+import { sloMiddleware, sloTracker, buildSloEvidence } from './slo';
+import { generateIncidentEvidence } from './incidents';
+import { buildStandardHooks, buildPolicyBundle } from './standards';
 
 export async function createApp(): Promise<express.Application> {
   await initKeys();
@@ -38,8 +41,61 @@ export async function createApp(): Promise<express.Application> {
   app.use(pinoHttp());
   app.use(express.json());
   app.use(requestMetricsMiddleware);
+  app.use(sloMiddleware);
 
   app.get('/metrics', metricsHandler);
+
+  app.get(
+    '/slo/:tenantId',
+    requireServiceAuth({
+      audience: 'authz-gateway',
+      allowedServices: trustedServices,
+      requiredScopes: ['slo:read'],
+    }),
+    (req, res) => {
+      const tenantId = String(req.params.tenantId || 'fleet');
+      const route = (req.query.route as string) || 'fleet';
+      const snapshot = sloTracker.snapshot(tenantId, route as any);
+      res.json(snapshot);
+    },
+  );
+
+  app.post(
+    '/incidents/evidence',
+    requireServiceAuth({
+      audience: 'authz-gateway',
+      allowedServices: trustedServices,
+      requiredScopes: ['incident:evidence'],
+    }),
+    async (req, res) => {
+      const evidence = await generateIncidentEvidence(req);
+      res.json(evidence);
+    },
+  );
+
+  app.get(
+    '/standards/hooks',
+    requireServiceAuth({
+      audience: 'authz-gateway',
+      allowedServices: trustedServices,
+      requiredScopes: ['standards:read'],
+    }),
+    (_req, res) => {
+      res.json(buildStandardHooks());
+    },
+  );
+
+  app.get(
+    '/policy/bundle',
+    requireServiceAuth({
+      audience: 'authz-gateway',
+      allowedServices: trustedServices,
+      requiredScopes: ['policy:export'],
+    }),
+    (_req, res) => {
+      res.json(buildPolicyBundle());
+    },
+  );
 
   app.post('/auth/login', async (req, res) => {
     try {
