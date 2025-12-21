@@ -1,0 +1,10 @@
+type CaseSpace {
+  id: ID!
+  title: String!
+  sla: String!
+  owners: [String!]!
+}
+
+type Mutation {
+  case_open(title: String!, sla: String!): CaseSpace!
+}

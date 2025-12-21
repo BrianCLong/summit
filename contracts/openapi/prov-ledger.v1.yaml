@@ -1,0 +1,35 @@
+openapi: 3.0.3
+info:
+  title: Prov-Ledger
+  version: 1.0.0
+paths:
+  /ledger/evidence:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sha256:
+                  type: string
+                contentType:
+                  type: string
+              required:
+                - sha256
+                - contentType
+      responses:
+        '201':
+          description: Created
+  /ledger/export/{caseId}:
+    get:
+      parameters:
+        - in: path
+          name: caseId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Manifest

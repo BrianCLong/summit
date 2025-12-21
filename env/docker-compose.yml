@@ -1,0 +1,112 @@
+version: '3.9'
+services:
+  prov-ledger:
+    build:
+      context: ..
+      dockerfile: env/Dockerfile.launchpad
+    environment:
+      - FLAG_PROV_LEDGER=1
+    command: ["node", "services/prov-ledger/launchpad/src/index.js"]
+    ports:
+      - "7011:7011"
+
+  lac-compiler:
+    build:
+      context: ..
+      dockerfile: env/Dockerfile.launchpad
+    environment:
+      - FLAG_LAC=1
+    command: ["node", "services/lac-compiler/launchpad/src/index.js"]
+    ports:
+      - "7012:7012"
+
+  nlq-copilot:
+    build:
+      context: ..
+      dockerfile: env/Dockerfile.launchpad
+    environment:
+      - FLAG_NLQ=1
+    command: ["node", "services/nlq-copilot/launchpad/src/index.js"]
+    ports:
+      - "7013:7013"
+
+  ingest-wizard:
+    build:
+      context: ..
+      dockerfile: env/Dockerfile.launchpad
+    environment:
+      - FLAG_INGEST=1
+    command: ["node", "services/ingest-wizard/launchpad/src/index.js"]
+    ports:
+      - "7014:7014"
+
+  license-registry:
+    build:
+      context: ..
+      dockerfile: env/Dockerfile.launchpad
+    environment:
+      - FLAG_LICENSE_REG=1
+    command: ["node", "services/license-registry/launchpad/src/index.js"]
+    ports:
+      - "7015:7015"
+
+  case-report:
+    build:
+      context: ..
+      dockerfile: env/Dockerfile.launchpad
+    environment:
+      - FLAG_CASES=1
+      - FLAG_REPORTS=1
+    command: ["node", "services/case-report/launchpad/src/index.js"]
+    ports:
+      - "7016:7016"
+
+  disclosure-packager:
+    build:
+      context: ..
+      dockerfile: env/Dockerfile.launchpad
+    environment:
+      - FLAG_REPORTS=1
+    command: ["node", "services/disclosure-packager/launchpad/src/index.js"]
+    ports:
+      - "7017:7017"
+
+  zktx:
+    build:
+      context: ..
+      dockerfile: env/Dockerfile.launchpad
+    environment:
+      - FLAG_ZKTX=1
+    command: ["node", "services/zktx/launchpad/src/index.js"]
+    ports:
+      - "7018:7018"
+
+  federation-planner:
+    build:
+      context: ..
+      dockerfile: env/Dockerfile.launchpad
+    environment:
+      - FLAG_FEDPLAN=1
+    command: ["node", "services/federation-planner/launchpad/src/index.js"]
+    ports:
+      - "7019:7019"
+
+  ops-pack:
+    build:
+      context: ..
+      dockerfile: env/Dockerfile.launchpad
+    environment:
+      - FLAG_OPS_PACK=1
+    command: ["node", "services/ops-pack/launchpad/src/index.js"]
+    ports:
+      - "7020:7020"
+
+  edge-kit:
+    build:
+      context: ..
+      dockerfile: env/Dockerfile.launchpad
+    environment:
+      - FLAG_EDGEKIT=1
+    command: ["node", "services/edge-kit/launchpad/src/index.js"]
+    ports:
+      - "7021:7021"

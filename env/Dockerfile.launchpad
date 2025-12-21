@@ -1,0 +1,7 @@
+FROM node:20-alpine
+WORKDIR /app
+COPY package.json package-lock.json pnpm-lock.yaml ./
+RUN npm ci --omit=dev || npm install --omit=dev
+COPY libs ./libs
+COPY services ./services
+CMD ["node", "-e", "console.log('set service command in docker-compose')"]

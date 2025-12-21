@@ -1,0 +1,22 @@
+type ProvEvidence {
+  id: ID!
+  sha256: String!
+  contentType: String!
+  createdAt: String!
+}
+
+type ProvClaim {
+  id: ID!
+  evidenceIds: [ID!]!
+  transformChain: [String!]!
+  hashRoot: String!
+}
+
+type Query {
+  prov_manifest(caseId: ID!): String!
+}
+
+type Mutation {
+  prov_addEvidence(sha256: String!, contentType: String!): ProvEvidence!
+  prov_addClaim(evidenceIds: [ID!]!, transformChain: [String!]!): ProvClaim!
+}
