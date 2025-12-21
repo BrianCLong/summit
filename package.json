@@ -31,6 +31,7 @@
     "deploy:prod": "scripts/deploy.sh prod",
     "backup": "scripts/backup.sh",
     "lint": "eslint . && ruff check .",
+    "lint:tsconfig": "node scripts/check-tsconfig.js",
     "lint:server": "cd server && npm run lint",
     "lint:client": "cd client && npm run lint",
     "typecheck": "tsc -b --pretty false",

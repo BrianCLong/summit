@@ -7,11 +7,12 @@
     "strict": true,
     "exactOptionalPropertyTypes": false,
     "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": false,
+    "noImplicitOverride": true,
     "skipLibCheck": true,
     "useUnknownInCatchVariables": false,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
+    "isolatedModules": true,
     "composite": false,
     "incremental": true,
     "tsBuildInfoFile": ".tsbuildinfo",
@@ -19,8 +20,10 @@
     "allowSyntheticDefaultImports": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "baseUrl": ".",
+    "typeRoots": ["./types", "./node_modules/@types"],
     "paths": {
-      "zod/v4": ["types/shims/zod-v4.d.ts"]
+      "@/*": ["./src/*"],
+      "zod/v4": ["./types/shims/zod-v4.d.ts", "../types/shims/zod-v4.d.ts"]
     }
   },
   "exclude": ["**/dist", "**/build", "**/.turbo", "**/.next"]
