@@ -1,0 +1,20 @@
+legal:
+  name: "Legal Team"
+  email: "legal@example.com"
+  lead: "General Counsel"
+finance:
+  name: "Finance Team"
+  email: "finance@example.com"
+  lead: "CFO"
+security:
+  name: "Security Team"
+  email: "security@example.com"
+  lead: "CISO"
+product:
+  name: "Product Team"
+  email: "product@example.com"
+  lead: "CPO"
+hr:
+  name: "People Team"
+  email: "hr@example.com"
+  lead: "VP People"
