@@ -9,6 +9,7 @@ import { gqlDuration, subscriptionFanoutLatency } from '../metrics';
 import { makePubSub } from '../subscriptions/pubsub';
 import Redis from 'ioredis';
 import { CausalGraphService } from '../services/CausalGraphService';
+import { nrrResolvers } from './modules/nrr/resolvers';
 
 const COHERENCE_EVENTS = 'COHERENCE_EVENTS';
 
@@ -19,6 +20,7 @@ const redisClient = process.env.REDIS_URL
 export const resolvers = {
   DateTime: new (require('graphql-iso-date').GraphQLDateTime)(),
   Query: {
+    ...nrrResolvers.Query,
     async tenantCoherence(_: any, { tenantId }: any, ctx: any) {
       const end = gqlDuration.startTimer({ operation: 'tenantCoherence' });
       try {
@@ -115,6 +117,7 @@ export const resolvers = {
     },
   },
   Mutation: {
+    ...nrrResolvers.Mutation,
     async publishCoherenceSignal(_: any, { input }: any, ctx: any) {
       const end = gqlDuration.startTimer({ operation: 'publishCoherenceSignal' });
       try {

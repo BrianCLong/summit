@@ -14,8 +14,7 @@ import provenanceTypeDefs from '../schema.provenance.js';
 import * as fs from 'fs';
 import * as path from 'path';
 import { sprint28TypeDefs } from './sprint28.js';
-import fs from 'fs';
-import path from 'path';
+import { nrrTypeDefs } from '../modules/nrr/schema.js';
 import { fileURLToPath } from 'url';
 
 const { copilotTypeDefs } = copilotModule as { copilotTypeDefs: any };
@@ -71,6 +70,7 @@ export const typeDefs = [
   sprint28TypeDefs,
   ewTypeDefs,
   collabTypeDefs,
+  nrrTypeDefs,
 ];
 
 export default typeDefs;
