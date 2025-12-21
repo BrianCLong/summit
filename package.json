@@ -169,11 +169,16 @@
     ]
   },
   "dependencies": {
+    "@octokit/plugin-retry": "^7.1.1",
+    "@octokit/rest": "^21.0.2",
+    "@vladmandic/hnswlib-node": "^3.2.0",
+    "@xenova/transformers": "^2.17.2",
     "axios": "^1.11.0",
     "cross-env": "^10.0.0",
     "docx": "^9.5.1",
     "dotenv": "^17.2.1",
     "jest-extended": "^4.0.2",
+    "p-retry": "^6.2.1",
     "neo4j-driver": "^5.28.1",
     "pg": "^8.16.3",
     "redis": "^5.8.1",
