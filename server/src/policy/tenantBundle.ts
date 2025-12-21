@@ -6,6 +6,7 @@ import get from 'lodash/get.js';
 import mergeWith from 'lodash/mergeWith.js';
 import set from 'lodash/set.js';
 import unset from 'lodash/unset.js';
+import { appLogger } from '../logging/structuredLogger.js';
 
 const overlayPatchSchema = z.object({
   op: z.enum(['set', 'remove', 'append', 'merge']),
@@ -269,7 +270,7 @@ export function simulatePolicyDecision(
 export async function runPolicySimulationCli() {
   const [, , bundlePath, inputPath] = process.argv;
   if (!bundlePath || !inputPath) {
-    console.error(
+    appLogger.error(
       'Usage: node ./dist/policy/simulationCli.js <bundle.json> <input.json> [context.json]',
     );
     process.exit(1);
@@ -287,5 +288,5 @@ export async function runPolicySimulationCli() {
     : undefined;
 
   const result = simulatePolicyDecision(bundle, input, ctx);
-  console.log(JSON.stringify(result, null, 2));
+  appLogger.info({ result }, 'Policy simulation result');
 }

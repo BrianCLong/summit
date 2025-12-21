@@ -16,8 +16,8 @@
   "dependencies": {
     "@intelgraph/signal-contracts": "workspace:*",
     "@opentelemetry/api": "1.7.0",
+    "@intelgraph/logging": "workspace:*",
     "eventemitter3": "^5.0.1",
-    "pino": "^8.17.2",
     "zod": "^3.22.4"
   },
   "devDependencies": {

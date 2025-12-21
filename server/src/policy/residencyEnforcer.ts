@@ -2,8 +2,10 @@ import { trace, Span } from '@opentelemetry/api';
 import { Counter, Histogram } from 'prom-client';
 import { TenantContext } from '../context/tenant';
 import { redis } from '../subscriptions/pubsub';
+import { appLogger } from '../logging/structuredLogger.js';
 
 const tracer = trace.getTracer('residency-enforcer', '24.3.0');
+const logger = appLogger.child({ component: 'residency-enforcer' });
 
 // Enhanced policy metrics for v24.3
 const residencyDecisions = new Counter({
@@ -615,7 +617,7 @@ export class ResidencyPolicyEnforcer {
     };
 
     // In production, this would write to an audit log or database
-    console.log('RESIDENCY_AUDIT:', JSON.stringify(record));
+    logger.info({ audit: record }, 'Residency audit recorded');
   }
 }
 

@@ -11,7 +11,7 @@
  */
 
 import { EventEmitter } from 'eventemitter3';
-import type { Logger } from 'pino';
+import type { StructuredLogger } from '@intelgraph/logging';
 
 import type { RawSignalInput } from '@intelgraph/signal-contracts';
 
@@ -54,11 +54,11 @@ const defaultConfig: ConnectorManagerConfig = {
  */
 export class ConnectorManager extends EventEmitter<ConnectorManagerEvents> {
   private config: ConnectorManagerConfig;
-  private logger: Logger;
+  private logger: StructuredLogger;
   private connectors = new Map<string, BaseConnector>();
   private healthCheckTimer: NodeJS.Timeout | null = null;
 
-  constructor(logger: Logger, config?: Partial<ConnectorManagerConfig>) {
+  constructor(logger: StructuredLogger, config?: Partial<ConnectorManagerConfig>) {
     super();
     this.logger = logger.child({ component: 'connector-manager' });
     this.config = { ...defaultConfig, ...config };
@@ -275,7 +275,7 @@ export class ConnectorManager extends EventEmitter<ConnectorManagerEvents> {
  * Create a connector manager instance
  */
 export function createConnectorManager(
-  logger: Logger,
+  logger: StructuredLogger,
   config?: Partial<ConnectorManagerConfig>,
 ): ConnectorManager {
   return new ConnectorManager(logger, config);

@@ -2,6 +2,9 @@
 import fs from 'fs';
 import path from 'path';
 import pino from 'pino';
+
+import { createLogger, type StructuredLogger } from '@intelgraph/logging';
+
 import { logEventBus, type LogLevel } from './logEventBus.js';
 import { LogAlertEngine, defaultAlertRules } from './logAlertEngine.js';
 import { scheduleRetention, type RetentionPolicy } from './logRetention.js';
@@ -34,33 +37,28 @@ const transport = pino.transport({
   ],
 });
 
-const baseLogger = pino(
-  {
-    level: process.env.LOG_LEVEL || 'info',
-    base: {
-      service: process.env.SERVICE_NAME || 'summit-api',
-      environment: process.env.NODE_ENV || 'development',
-      version: process.env.npm_package_version,
-      hostname: process.env.HOSTNAME,
-    },
-    redact: ['req.headers.authorization', 'req.headers.cookie', 'password', 'ssn', 'card.number'],
-    timestamp: pino.stdTimeFunctions.isoTime,
-    hooks: {
-      logMethod(args, method, level) {
-        try {
-          const event = formatLogEvent((level as LogLevel) || 'info', args);
-          logEventBus.publish(event);
-        } catch (error) {
-          // Guard against serialization errors without breaking application logging.
-          baseLogger.warn({ error }, 'Failed to mirror log event to bus');
-        }
+let mirrorLogger: StructuredLogger;
 
-        method.apply(this, args);
-      },
-    },
-  },
+const baseLogger = createLogger({
   transport,
-);
+  serviceName: process.env.SERVICE_NAME || 'summit-api',
+  environment: process.env.NODE_ENV || 'development',
+  level: process.env.LOG_LEVEL || 'info',
+  redactKeys: ['ssn', 'card.number'],
+  sampleRates: {
+    debug: Number(process.env.LOG_DEBUG_SAMPLE_RATE ?? '1') as number,
+  },
+  onLog(level, args) {
+    try {
+      const event = formatLogEvent((level as LogLevel) || 'info', args);
+      logEventBus.publish(event);
+    } catch (error) {
+      mirrorLogger?.warn({ error }, 'Failed to mirror log event to bus');
+    }
+  },
+});
+
+mirrorLogger = baseLogger;
 
 export const alertEngine = new LogAlertEngine([...defaultAlertRules]);
 const detachAlertEngine = alertEngine.attach(logEventBus);

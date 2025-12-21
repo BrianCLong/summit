@@ -1,0 +1,31 @@
+{
+  "name": "@intelgraph/logging",
+  "version": "1.0.0",
+  "description": "Structured logging toolkit with OpenTelemetry context propagation and PII-safe transports",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "lint": "eslint src --ext .ts"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "^1.9.0",
+    "pino": "^9.9.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.0",
+    "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "express": "^4.18.2 || ^5.0.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}

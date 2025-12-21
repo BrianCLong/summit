@@ -57,6 +57,39 @@ module.exports = {
         ],
       },
     },
+    {
+      files: [
+        'apps/intelgraph-api/src/**/*.{ts,tsx,js,jsx}',
+        'server/src/policy/**/*.{ts,js}',
+        'packages/logging/src/**/*.{ts,js}',
+      ],
+      rules: {
+        'no-console': ['error'],
+        'no-restricted-properties': [
+          'error',
+          {
+            object: 'console',
+            property: 'log',
+            message: 'Use @intelgraph/logging adapters instead of console.log in production code.',
+          },
+          {
+            object: 'console',
+            property: 'error',
+            message: 'Use @intelgraph/logging adapters instead of console.error in production code.',
+          },
+          {
+            object: 'console',
+            property: 'warn',
+            message: 'Use @intelgraph/logging adapters instead of console.warn in production code.',
+          },
+          {
+            object: 'console',
+            property: 'info',
+            message: 'Use @intelgraph/logging adapters instead of console.info in production code.',
+          },
+        ],
+      },
+    },
   ],
   rules: {
     'import/order': [

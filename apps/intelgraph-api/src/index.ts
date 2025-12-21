@@ -1,34 +1,32 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, no-console */
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import pino from 'pino';
 import { ApolloServer } from 'apollo-server-express';
 import { typeDefs, resolvers } from './schema.js';
 import { makeContext } from './lib/context.js';
 import { expressjwt, type GetVerificationKey } from 'express-jwt';
 import jwksRsa from 'jwks-rsa';
-import { trace, context } from '@opentelemetry/api';
+import { createLogger, requestContextMiddleware } from '@intelgraph/logging';
 import { registerInternalStatusRoutes } from './routes/internalStatus.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4000;
 const app = express();
 
-// Custom pino serializer to inject traceId
-const pinoLogger = pino({
-  mixin() {
-    const span = trace.getSpan(context.active());
-    if (span) {
-      const spanContext = span.spanContext();
-      return { traceId: spanContext.traceId, spanId: spanContext.spanId };
-    }
-    return {};
-  },
+const logger = createLogger({
+  serviceName: 'intelgraph-api',
+  environment: process.env.NODE_ENV,
+  sampleRates: { debug: Number(process.env.LOG_DEBUG_SAMPLE_RATE ?? '1') },
+  redactKeys: ['req.headers.authorization'],
 });
 
-const logger = pinoLogger; // Use the custom pino logger
-
 app.use(cors());
+app.use(
+  requestContextMiddleware({
+    logger,
+    resolveUserId: (req) => (req as any).user?.sub || (req as any).user?.id,
+    resolveTenantId: (req) => (req as any).user?.tenant_id,
+  }),
+);
 app.get('/healthz', (_, res) => res.json({ ok: true }));
 
 // JWT middleware for authentication
@@ -76,6 +74,6 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error(err);
+  logger.fatal({ err }, 'IntelGraph API failed to start');
   process.exit(1);
 });

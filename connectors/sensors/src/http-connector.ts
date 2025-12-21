@@ -7,7 +7,7 @@
  * @module http-connector
  */
 
-import type { Logger } from 'pino';
+import type { StructuredLogger } from '@intelgraph/logging';
 
 import { SignalTypeId, type RawSignalInput, type SignalTypeIdType } from '@intelgraph/signal-contracts';
 
@@ -38,7 +38,7 @@ export class HttpConnector extends BaseConnector {
   private httpConfig: HttpConnectorConfig;
   private isListening = false;
 
-  constructor(config: HttpConnectorConfig, logger: Logger) {
+  constructor(config: HttpConnectorConfig, logger: StructuredLogger) {
     super(config, logger);
     this.httpConfig = config;
   }
@@ -126,6 +126,9 @@ export class HttpConnector extends BaseConnector {
 /**
  * Create an HTTP connector instance
  */
-export function createHttpConnector(config: HttpConnectorConfig, logger: Logger): HttpConnector {
+export function createHttpConnector(
+  config: HttpConnectorConfig,
+  logger: StructuredLogger,
+): HttpConnector {
   return new HttpConnector(config, logger);
 }

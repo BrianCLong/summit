@@ -7,7 +7,7 @@
  * @module polling-connector
  */
 
-import type { Logger } from 'pino';
+import type { StructuredLogger } from '@intelgraph/logging';
 
 import type { RawSignalInput, SignalTypeIdType } from '@intelgraph/signal-contracts';
 
@@ -42,7 +42,7 @@ export class PollingConnector extends BaseConnector {
   private consecutiveErrors = 0;
   private isPolling = false;
 
-  constructor(config: PollingConnectorConfig, logger: Logger) {
+  constructor(config: PollingConnectorConfig, logger: StructuredLogger) {
     super(config, logger);
     this.pollingConfig = {
       jitterPercent: 10,
@@ -188,7 +188,7 @@ export class PollingConnector extends BaseConnector {
  */
 export function createPollingConnector(
   config: PollingConnectorConfig,
-  logger: Logger,
+  logger: StructuredLogger,
 ): PollingConnector {
   return new PollingConnector(config, logger);
 }

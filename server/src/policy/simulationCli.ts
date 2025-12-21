@@ -1,6 +1,7 @@
+import { appLogger } from '../logging/structuredLogger.js';
 import { runPolicySimulationCli } from './tenantBundle.js';
 
 runPolicySimulationCli().catch((error) => {
-  console.error(error instanceof Error ? error.message : String(error));
+  appLogger.fatal({ error }, 'Policy simulation failed');
   process.exit(1);
 });

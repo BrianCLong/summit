@@ -1,6 +1,8 @@
+import { appLogger } from '../logging/structuredLogger.js';
+
 export const opa = {
   enforce: (policy: string, data: any) => {
-    console.log('OPA policy enforcement:', policy, data);
+    appLogger.info({ policy, data }, 'OPA policy enforcement');
     return true;
   },
 };

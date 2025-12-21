@@ -7,8 +7,10 @@ import {
   ZeroTrustAuditLogger,
   createZeroTrustAuditLogger,
 } from '../../security/zero-trust/siem/audit-logger';
+import { appLogger } from '../logging/structuredLogger.js';
 
 const tracer = trace.getTracer('policy-enforcer', '24.2.0');
+const logger = appLogger.child({ component: 'policy-enforcer' });
 
 // Metrics
 const policyDecisions = new Counter({
@@ -402,7 +404,7 @@ export class PolicyEnforcer {
         return JSON.parse(cached) as PolicyDecision;
       }
     } catch (error) {
-      console.error('Policy cache read error:', error);
+      logger.error({ error }, 'Policy cache read error');
     }
     return null;
   }
@@ -415,7 +417,7 @@ export class PolicyEnforcer {
     try {
       await redis.setWithTTL(key, JSON.stringify(decision), ttl);
     } catch (error) {
-      console.error('Policy cache write error:', error);
+      logger.error({ error }, 'Policy cache write error');
     }
   }
 
@@ -442,7 +444,7 @@ export class PolicyEnforcer {
     try {
       await this.emitDecisionEvent(entry, context, decision);
     } catch (error) {
-      console.error('Policy audit bus publish failed:', error);
+      logger.error({ error }, 'Policy audit bus publish failed');
     }
 
     // Keep only last 10000 entries in memory
@@ -450,7 +452,7 @@ export class PolicyEnforcer {
       this.provenanceLog.splice(0, 1000);
     }
 
-    console.log('Policy provenance:', JSON.stringify(entry));
+    logger.info({ provenance: entry }, 'Policy provenance recorded');
   }
 
   private async emitDecisionEvent(
@@ -539,7 +541,7 @@ export class PolicyEnforcer {
 
   async clearCache(pattern?: string): Promise<void> {
     // In production would use Redis SCAN to find and delete keys
-    console.log('Policy cache cleared:', pattern || 'all');
+    logger.info({ pattern: pattern || 'all' }, 'Policy cache cleared');
   }
 
   getPolicyStats(): Record<string, any> {

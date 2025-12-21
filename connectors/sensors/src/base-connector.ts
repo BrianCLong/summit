@@ -12,7 +12,7 @@
  */
 
 import { EventEmitter } from 'eventemitter3';
-import type { Logger } from 'pino';
+import type { StructuredLogger } from '@intelgraph/logging';
 
 import type { RawSignalInput, SignalTypeIdType } from '@intelgraph/signal-contracts';
 
@@ -89,7 +89,7 @@ const defaultConfig: Partial<BaseConnectorConfig> = {
  */
 export abstract class BaseConnector extends EventEmitter<ConnectorEvents> {
   protected config: BaseConnectorConfig;
-  protected logger: Logger;
+  protected logger: StructuredLogger;
   protected status: ConnectorStatus = 'disconnected';
   protected metrics: ConnectorMetrics;
   protected signalBuffer: RawSignalInput[] = [];
@@ -98,7 +98,11 @@ export abstract class BaseConnector extends EventEmitter<ConnectorEvents> {
   protected reconnectAttempts = 0;
   protected connectedAt: number | null = null;
 
-  constructor(config: Partial<BaseConnectorConfig> & Pick<BaseConnectorConfig, 'connectorId' | 'name' | 'tenantId' | 'signalTypes'>, logger: Logger) {
+  constructor(
+    config: Partial<BaseConnectorConfig> &
+      Pick<BaseConnectorConfig, 'connectorId' | 'name' | 'tenantId' | 'signalTypes'>,
+    logger: StructuredLogger,
+  ) {
     super();
     this.config = { ...defaultConfig, ...config } as BaseConnectorConfig;
     this.logger = logger.child({
