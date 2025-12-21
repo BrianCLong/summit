@@ -2,7 +2,7 @@ name: Deploy to Staging
 
 on:
   workflow_run:
-    workflows: ["build-images"]
+    workflows: ["Build & Push"]
     types:
       - completed
   workflow_dispatch:
@@ -14,16 +14,32 @@ jobs:
       contents: read
       id-token: write
       packages: read
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' && (vars.DEPLOY_ENABLED || 'true') == 'true' }}
     environment: staging
+    env:
+      VERIFY_ENABLED: ${{ vars.VERIFY_ENABLED || 'true' }}
+      OPA_ENFORCE: ${{ vars.OPA_ENFORCE || 'false' }}
+      AWS_REGION: ${{ vars.AWS_REGION || 'us-west-2' }}
+      AWS_ROLE_ARN: ${{ vars.AWS_STAGE_ROLE_ARN || '' }}
     steps:
       - uses: actions/checkout@v3
 
+      - name: Configure AWS credentials (OIDC)
+        if: ${{ env.AWS_ROLE_ARN != '' }}
+        uses: aws-actions/configure-aws-credentials@b4073e4c9b5abfd2fd4b4439905c5cff90a4f8b2
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Prepare artifact directory
+        run: mkdir -p sboms
+
       - name: Download SBOM Artifacts
+        if: ${{ github.event_name == 'workflow_run' }}
         uses: actions/download-artifact@v4
         with:
           run-id: ${{ github.event.workflow_run.id }}
-          pattern: sbom-*
+          pattern: sbom
           merge-multiple: true
           path: sboms
 
@@ -34,6 +50,16 @@ jobs:
             echo "tag=${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
           else
             echo "tag=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Resolve image reference
+        id: image-ref
+        run: |
+          if [ -f sboms/image-ref.txt ]; then
+            ref=$(cat sboms/image-ref.txt)
+            echo "image_ref=$ref" >> "$GITHUB_OUTPUT"
+          else
+            echo "image_ref=ghcr.io/owner/app:${{ steps.image-tag.outputs.tag }}" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Install Trivy
@@ -49,39 +75,32 @@ jobs:
         run: |
           echo "Scanning SBOMs for Critical/High vulnerabilities..."
           # Scan each SBOM json file found
-          for sbom in sboms/*.spdx.json; do
+          shopt -s nullglob
+          for sbom in sboms/*.json; do
             echo "Scanning $sbom..."
             trivy sbom "$sbom" --severity CRITICAL,HIGH --exit-code 1
           done
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@v3
+        uses: sigstore/cosign-installer@v3.5.0
         with:
           cosign-release: 'v2.2.4'
 
-      - name: Sign and attach attestations
+      - name: Verify image signature
+        if: ${{ env.VERIFY_ENABLED == 'true' }}
         env:
-          COSIGN_EXPERIMENTAL: '1'
-          IMAGE_REPOSITORY: ghcr.io/owner/app
-          IMAGE_TAG: ${{ steps.image-tag.outputs.tag }}
+          COSIGN_EXPERIMENTAL: "true"
         run: |
-          set -euo pipefail
-          IMAGE="$IMAGE_REPOSITORY:$IMAGE_TAG"
-          cosign sign --yes "$IMAGE"
+          cosign verify \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+            --certificate-identity-regexp "https://github.com/.+" \
+            "${{ steps.image-ref.outputs.image_ref }}"
 
-          for sbom in sboms/*.spdx.json; do
-            [ -f "$sbom" ] || continue
-            cosign attest --yes --predicate "$sbom" --type spdxjson "$IMAGE"
-          done
-
-          cat > /tmp/stage-attestation.json <<'EOF'
-          {
-            "environment": "staging",
-            "workflow": "${{ github.workflow }}",
-            "sourceRun": "${{ github.run_id }}"
-          }
-          EOF
-          cosign attest --yes --predicate /tmp/stage-attestation.json --type intoto "$IMAGE"
+      - name: Run OPA policy gate
+        env:
+          OPA_ENFORCE: ${{ env.OPA_ENFORCE }}
+        run: |
+          ./scripts/policy/test.sh policy/pilot/input.example.json
 
       - name: Set up Helm
         uses: azure/setup-helm@v3

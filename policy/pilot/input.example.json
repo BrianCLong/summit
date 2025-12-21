@@ -1,0 +1,8 @@
+{
+  "iam": {
+    "wildcard_actions": false
+  },
+  "k8s": {
+    "privileged_pod": false
+  }
+}

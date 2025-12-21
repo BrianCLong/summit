@@ -16,7 +16,7 @@ env:
 
 permissions:
   contents: read
-  security-events: write
+  actions: read
 
 jobs:
   # Fast lane: Quick feedback on code quality (no build required)

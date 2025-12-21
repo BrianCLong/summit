@@ -7,12 +7,14 @@ on:
 env:
   REGISTRY: ${{ secrets.REGISTRY }}            # e.g. ghcr.io/owner
   IMAGE_NAME: app                               # replace per service
+  SIGN_ENABLED: ${{ vars.SIGN_ENABLED || 'true' }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      actions: read
       packages: write
       id-token: write
     steps:
@@ -32,6 +34,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Build and push
+        id: build-and-push
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -40,6 +43,40 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Record image references
+        id: image-ref
+        run: |
+          echo "IMAGE_DIGEST=${{ steps.build-and-push.outputs.digest }}" >> "$GITHUB_ENV"
+          echo "IMAGE_REF=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build-and-push.outputs.digest }}" >> "$GITHUB_ENV"
+          mkdir -p security-artifacts
+          echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build-and-push.outputs.digest }}" > security-artifacts/image-ref.txt
+          echo "${{ steps.build-and-push.outputs.digest }}" > security-artifacts/image-digest.txt
+
+      - name: Install syft
+        uses: anchore/sbom-action/download-syft@v0.16.0
+
+      - name: Generate SBOM
+        run: ./scripts/security/generate-sbom.sh "$IMAGE_REF" "security-artifacts"
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: security-artifacts/
+          retention-days: 5
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3.5.0
+        with:
+          cosign-release: 'v2.2.4'
+
+      - name: Cosign sign image (keyless)
+        if: ${{ env.SIGN_ENABLED == 'true' }}
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+        run: |
+          cosign sign --yes "$IMAGE_REF"
 
       - name: Trivy image scan
         uses: aquasecurity/trivy-action@0.28.0
