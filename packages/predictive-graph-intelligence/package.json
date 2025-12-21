@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "zod": "^4.1.12",
-    "@summit/graph-algorithms": "workspace:*"
+    "@intelgraph/graph-algorithms": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
