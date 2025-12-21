@@ -1,255 +1,210 @@
-# Summit Documentation Hub
+# Topicality.co Website
 
-Comprehensive developer documentation for Summit Platform built with Docusaurus.
+Marketing website for Topicality.co with Summit as the flagship initiative.
 
 ## Overview
 
-This directory contains the complete documentation website for Summit Platform, including:
+This is a Next.js-based marketing website that:
 
-- **Getting Started Guides**: Quick start, installation, configuration
-- **API Reference**: GraphQL, REST, and WebSocket documentation
-- **Architecture Docs**: System design, data flow, security
-- **Developer Guides**: Contributing, testing, debugging, performance
-- **Code Examples**: Python, JavaScript, cURL, Postman collections
-- **Tutorials**: Step-by-step guides for common tasks
+- Presents **Topicality** as a meta-platform for complex systems
+- Showcases **Summit** as the deep, flagship initiative
+- Provides first-party analytics for live testing
+- Is production-ready and SEO-optimized
 
-## Development
-
-### Prerequisites
-
-- Node.js ≥ 18.18
-- pnpm ≥ 9.12.0
-
-### Installation
+## Quick Start
 
 ```bash
 cd website
 pnpm install
+cp .env.example .env.local
+pnpm dev
 ```
 
-### Local Development
+Visit [http://localhost:3000](http://localhost:3000)
 
-```bash
-# Start development server
-pnpm start
-
-# This opens http://localhost:3000 with hot reloading
-```
-
-### Build
-
-```bash
-# Build static site
-pnpm build
-
-# Serve built site locally
-pnpm serve
-```
-
-## Project Structure
+## Structure
 
 ```
 website/
-├── docs/                   # Documentation content
-│   ├── getting-started/    # Getting started guides
-│   ├── api/               # API documentation
-│   ├── architecture/      # Architecture docs
-│   ├── guides/            # Developer guides
-│   ├── examples/          # Code examples
-│   └── deployment/        # Deployment guides
-├── blog/                  # Blog posts
-├── src/                   # React components
-│   ├── components/        # Custom components
-│   ├── css/              # Custom styles
-│   └── pages/            # Custom pages
-├── static/               # Static assets
-│   ├── img/              # Images
-│   └── diagrams/         # Architecture diagrams
-├── docusaurus.config.ts  # Docusaurus configuration
-├── sidebars.ts           # Sidebar configuration
-└── package.json          # Dependencies
+├── src/
+│   ├── app/                    # Next.js App Router pages
+│   │   ├── page.tsx           # Homepage
+│   │   ├── summit/            # Summit section pages
+│   │   │   ├── page.tsx       # Overview
+│   │   │   ├── capabilities/  # Capabilities
+│   │   │   ├── architecture/  # Architecture
+│   │   │   ├── security/      # Security & Governance
+│   │   │   ├── use-cases/     # Use Cases
+│   │   │   ├── roadmap/       # Roadmap
+│   │   │   └── faq/           # FAQ
+│   │   ├── initiatives/       # Initiatives
+│   │   ├── labs/              # Labs
+│   │   ├── research/          # Research
+│   │   ├── products/          # Products
+│   │   ├── tools/             # Tools
+│   │   ├── writing/           # Writing
+│   │   ├── about/             # About
+│   │   ├── contact/           # Contact
+│   │   ├── careers/           # Careers
+│   │   ├── legal/             # Legal
+│   │   ├── privacy/           # Privacy
+│   │   ├── status/            # Status
+│   │   └── api/               # API routes
+│   │       ├── health/        # Health check
+│   │       └── analytics/     # Analytics ingest
+│   ├── components/            # React components
+│   │   ├── site/              # Site-wide components
+│   │   └── ui/                # UI primitives
+│   ├── content/               # Content models
+│   ├── lib/                   # Utilities
+│   │   ├── analytics/         # Analytics client/server
+│   │   ├── seo.ts             # SEO utilities
+│   │   ├── route.ts           # Route utilities
+│   │   └── utils.ts           # General utilities
+│   └── styles/                # CSS
+├── tests/
+│   ├── unit/                  # Vitest unit tests
+│   └── e2e/                   # Playwright E2E tests
+├── public/                    # Static assets
+└── scripts/                   # Build scripts
 ```
 
-## Writing Documentation
+## Development
 
-### Creating a New Doc
+### Commands
 
-1. Create a new `.md` or `.mdx` file in the appropriate directory
-2. Add frontmatter:
-
-```markdown
----
-sidebar_position: 1
-title: My Document
-description: Document description
----
-
-# My Document
-
-Content here...
+```bash
+pnpm dev          # Start development server
+pnpm build        # Build for production
+pnpm start        # Start production server
+pnpm lint         # Run ESLint
+pnpm typecheck    # Run TypeScript checks
+pnpm test         # Run unit tests
+pnpm e2e          # Run E2E tests
+pnpm ci           # Run full CI suite
 ```
 
-3. Add to `sidebars.ts` if needed
+### Environment Variables
 
-### Using MDX
+Copy `.env.example` to `.env.local` and configure:
 
-Docusaurus supports MDX, allowing you to use React components in markdown:
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `NEXT_PUBLIC_SITE_URL` | Site URL | `https://topicality.co` |
+| `NEXT_PUBLIC_ANALYTICS_MODE` | Analytics mode (`none` or `firstparty`) | `firstparty` |
+| `NEXT_PUBLIC_ANALYTICS_ENDPOINT` | Analytics ingest endpoint | `/api/analytics` |
+| `NEXT_PUBLIC_ENV` | Environment label | `local` |
 
-```mdx
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+## Architecture
 
-<Tabs>
-  <TabItem value="js" label="JavaScript">
-    ```js
-    console.log('Hello');
-    ```
-  </TabItem>
-  <TabItem value="py" label="Python">
-    ```python
-    print('Hello')
-    ```
-  </TabItem>
-</Tabs>
+### Information Architecture
+
+```
+Topicality.co (oblique, expandable)
+├── Summit (flagship, deep)
+│   ├── Capabilities
+│   ├── Architecture
+│   ├── Security & Governance
+│   ├── Use Cases
+│   ├── Roadmap
+│   └── FAQ
+├── Initiatives
+├── Labs
+├── Research
+├── Products
+├── Tools
+├── Writing
+├── About
+├── Contact
+├── Careers
+├── Legal
+├── Privacy
+└── Status
 ```
 
-### Code Blocks
+### Analytics Events
 
-Use syntax highlighting:
+| Event | Description |
+|-------|-------------|
+| `page_view` | Page view tracking |
+| `nav_click` | Navigation click |
+| `cta_click` | Call-to-action click |
+| `outbound_click` | External link click |
+| `section_view` | Section visibility |
+| `scroll_milestone` | Scroll depth tracking |
+| `error_client` | Client-side error |
 
-````markdown
-```javascript title="example.js"
-const summit = new SummitClient();
+### Design Tokens
+
+Located in `src/styles/tokens.css`:
+
+```css
+:root {
+  --bg: #0b0f14;
+  --fg: #e7edf5;
+  --muted: #b8c4d4;
+  --muted2: #91a1b6;
+  --card: rgba(255, 255, 255, 0.03);
+  --border: rgba(255, 255, 255, 0.09);
+  --accent: #9fd0ff;
+}
 ```
-````
 
-### Admonitions
+## Testing
 
-```markdown
-:::note
-This is a note
-:::
+### Unit Tests (Vitest)
 
-:::tip
-This is a tip
-:::
+```bash
+pnpm test              # Run all unit tests
+pnpm test:watch        # Watch mode
+```
 
-:::warning
-This is a warning
-:::
+### E2E Tests (Playwright)
 
-:::danger
-This is dangerous
-:::
+```bash
+pnpm e2e               # Run E2E tests
 ```
 
 ## Deployment
 
-### Automatic Deployment
+The website is designed to be deployed to any static hosting or Node.js platform:
 
-The documentation is automatically deployed to GitHub Pages when changes are pushed to `main` branch.
+- Vercel (recommended)
+- Netlify
+- Cloudflare Pages
+- AWS Amplify
+- Self-hosted
 
-See `.github/workflows/docs-deploy.yml` for CI/CD configuration.
-
-### Manual Deployment
-
-```bash
-# Build
-pnpm build
-
-# Deploy (if you have gh-pages configured)
-GIT_USER=<Your GitHub username> pnpm deploy
-```
-
-## Search
-
-The documentation uses Algolia DocSearch for search functionality.
-
-To configure:
-
-1. Apply for Algolia DocSearch at https://docsearch.algolia.com/
-2. Update `docusaurus.config.ts` with your credentials:
-
-```typescript
-algolia: {
-  appId: 'YOUR_APP_ID',
-  apiKey: 'YOUR_API_KEY',
-  indexName: 'summit',
-}
-```
-
-## Versioning
-
-To create a new documentation version:
+### Build
 
 ```bash
-pnpm docusaurus docs:version 1.0.0
+pnpm build             # Creates .next/ output
 ```
 
-This creates:
-- `versioned_docs/version-1.0.0/` - Snapshot of docs
-- `versioned_sidebars/version-1.0.0-sidebars.json` - Sidebar config
+## Live Testing
+
+The website includes first-party analytics for live testing:
+
+1. **Events are logged** to server console (default)
+2. **Swap for durable storage** (PostHog, ClickHouse, etc.) in production
+3. **Dashboard specs** in project documentation
+
+### What We Measure
+
+- Which sections answer questions vs create confusion
+- Where users drop off in Summit's narrative
+- What technical pages earn deeper time-on-page
+- Which calls-to-action are credible vs ignored
 
 ## Contributing
 
-1. Make changes to documentation files
-2. Test locally with `pnpm start`
-3. Build to check for errors: `pnpm build`
+1. Make changes to content or components
+2. Test locally with `pnpm dev`
+3. Run `pnpm ci` to verify everything passes
 4. Submit a pull request
-
-## Best Practices
-
-### Writing Style
-
-- Use clear, concise language
-- Write in second person ("you" instead of "we")
-- Use active voice
-- Include code examples
-- Add screenshots when helpful
-
-### Code Examples
-
-- Test all code examples
-- Include language identifiers for syntax highlighting
-- Add comments to explain complex code
-- Show both successful and error cases
-
-### Links
-
-- Use relative links for internal docs
-- Check for broken links before committing
-- Use descriptive link text (not "click here")
-
-## Troubleshooting
-
-### Build Errors
-
-```bash
-# Clear cache
-pnpm docusaurus clear
-
-# Rebuild
-pnpm build
-```
-
-### Port Already in Use
-
-```bash
-# Kill process on port 3000
-lsof -ti:3000 | xargs kill
-
-# Or use a different port
-pnpm start -- --port 3001
-```
 
 ## Resources
 
-- [Docusaurus Documentation](https://docusaurus.io/)
-- [MDX Documentation](https://mdxjs.com/)
-- [Markdown Guide](https://www.markdownguide.org/)
-
-## Support
-
-- 🐛 [Report documentation issues](https://github.com/BrianCLong/summit/issues)
-- 💬 [Ask questions](https://github.com/BrianCLong/summit/discussions)
-- 📧 Email: docs@summit.com
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Tailwind CSS](https://tailwindcss.com/docs)
+- [Playwright Testing](https://playwright.dev/docs/intro)
