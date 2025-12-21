@@ -177,6 +177,7 @@ export class CostGuard {
 }
 
 export { DEFAULT_PROFILE };
+export { costPerActiveTenant, evaluateBudget, validateTags } from './tagging.js';
 const DEFAULT_OPTIMIZATION_CONFIG: ResourceOptimizationConfig = {
   smoothingFactor: 0.6,
   targetCpuUtilization: 0.65,

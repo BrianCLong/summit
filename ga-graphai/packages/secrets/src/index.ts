@@ -14,3 +14,5 @@ export {
   type KmsLikeClient,
 } from './providers/kms.js';
 export { VaultJwtSecretsProvider } from './providers/vault.js';
+export { KeyRotationJob, type DualReadPointer } from './rotationJob.js';
+export { enforceNoPlaintext, scanForPlaintext } from './scanner.js';

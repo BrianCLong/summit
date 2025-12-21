@@ -42,6 +42,7 @@ import { computeLedgerHash } from './quantum-safe-ledger.js';
 
 export * from './mul-ledger';
 export * from './quantum-safe-ledger';
+export { AppendOnlyAuditLog } from './auditLog.js';
 
 // ============================================================================
 // SIMPLE PROVENANCE LEDGER - From HEAD
