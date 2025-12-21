@@ -1,58 +1,63 @@
-/**
- * Provenance and Claims Ledger Service
- * Handles evidence/claim registration, provenance chains, and export manifests
- */
-
 import Fastify, { FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import pclRoutes from './routes/pcl.js';
+import { Registry, collectDefaultMetrics, Histogram, Counter } from 'prom-client';
 
-const PORT = parseInt(process.env.PORT || '4010');
-const PCL_ENABLED = process.env.PCL_ENABLED !== 'false';
+export function buildServer(): FastifyInstance {
+  const server: FastifyInstance = Fastify({
+    logger: { level: process.env.LOG_LEVEL || 'info' },
+  });
 
-// Create Fastify instance
-const server: FastifyInstance = Fastify({
-  logger: {
-    level: process.env.NODE_ENV === 'development' ? 'debug' : 'info',
-    transport: process.env.NODE_ENV === 'development' ? { target: 'pino-pretty' } : undefined,
-  },
-});
+  const register = new Registry();
+  collectDefaultMetrics({ register });
+  const httpRequests = new Counter({
+    name: 'http_requests_total',
+    help: 'Total HTTP requests',
+    labelNames: ['method', 'route', 'status'],
+    registers: [register],
+  });
+  const httpDuration = new Histogram({
+    name: 'http_request_duration_seconds',
+    help: 'Request duration in seconds',
+    labelNames: ['method', 'route'],
+    buckets: [0.05, 0.1, 0.3, 0.5, 1, 2, 5],
+    registers: [register],
+  });
 
-// Register plugins
-server.register(helmet);
-server.register(cors, {
-  origin: process.env.CORS_ORIGIN || '*',
-});
+  server.register(helmet);
+  server.register(cors, { origin: process.env.CORS_ORIGIN || '*' });
 
-// Feature Flag Middleware
-server.addHook('preHandler', async (req, reply) => {
-  if (!PCL_ENABLED && req.url !== '/health') {
-    return reply.code(503).send({ error: 'PCL Service is currently disabled by feature flag' });
-  }
-});
+  server.addHook('onRequest', async (req) => {
+    (req as any).metricsStart = process.hrtime.bigint();
+  });
 
-// Health check
-server.get('/health', async (request, reply) => {
-  return {
-    status: 'healthy',
-    pcl_enabled: PCL_ENABLED,
-    timestamp: new Date().toISOString(),
-  };
-});
+  server.addHook('onResponse', async (req, reply) => {
+    const route = req.routerPath || req.url || 'unknown';
+    httpRequests.inc({ method: req.method, route, status: reply.statusCode.toString() });
+    const start = (req as any).metricsStart as bigint | undefined;
+    if (start) {
+      const durationNs = Number(process.hrtime.bigint() - start);
+      httpDuration.observe({ method: req.method, route }, durationNs / 1e9);
+    }
+  });
 
-// Register Routes
-server.register(pclRoutes);
+  server.get('/healthz', async () => ({ status: 'ok', service: 'prov-ledger' }));
+  server.get('/readyz', async () => ({ ready: true }));
+  server.get('/metrics', async (_, reply) => {
+    reply.header('Content-Type', register.contentType);
+    return register.metrics();
+  });
 
-// Start server
-const start = async () => {
-  try {
-    await server.listen({ port: PORT, host: '0.0.0.0' });
-    server.log.info(`🗃️  Prov-Ledger service ready at http://localhost:${PORT}`);
-  } catch (err) {
+  server.register(pclRoutes);
+  return server;
+}
+
+if (process.env.NODE_ENV !== 'test') {
+  const server = buildServer();
+  const PORT = parseInt(process.env.PORT || '4010', 10);
+  server.listen({ port: PORT, host: '0.0.0.0' }).catch((err) => {
     server.log.error(err);
     process.exit(1);
-  }
-};
-
-start();
+  });
+}

@@ -1,40 +1,25 @@
 export interface Evidence {
   evidenceId: string;
   source: string;
-  url?: string;
-  blob?: string;
-  license?: string;
   hash: string;
-  timestamp: string;
-}
-
-export interface Transform {
-  transformId: string;
-  inputs: string[];
-  tool: string;
-  params: Record<string, any>;
-  outputs: string[];
-  operatorId: string;
+  license?: string;
   timestamp: string;
 }
 
 export interface Claim {
   claimId: string;
-  subject: string;
-  predicate: string;
-  object: string;
-  evidenceRefs: string[];
+  assertion: string;
   confidence: number;
-  licenseId: string;
+  evidenceRefs: string[];
   timestamp: string;
 }
 
 export interface LedgerEntry {
   id: string;
   type: 'evidence' | 'transform' | 'claim';
-  data: Evidence | Transform | Claim;
+  data: Evidence | Claim | Record<string, unknown>;
   previousHash: string | null;
-  hash: string; // Hash of (previousHash + type + data)
+  hash: string;
 }
 
 export interface Manifest {

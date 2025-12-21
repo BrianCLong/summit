@@ -2,69 +2,48 @@ import { FastifyInstance } from 'fastify';
 import { LedgerService } from '../services/LedgerService.js';
 import { z } from 'zod';
 
-const CreateEvidenceSchema = z.object({
-  url: z.string().optional(),
-  blob: z.string().optional(),
-  source: z.string(),
+const EvidenceSchema = z.object({
+  source: z.string().min(1),
+  hash: z.string().min(10),
   license: z.string().optional(),
-  hash: z.string()
 });
 
-const CreateTransformSchema = z.object({
-  inputs: z.array(z.string()),
-  tool: z.string(),
-  params: z.record(z.any()),
-  outputs: z.array(z.string()),
-  operatorId: z.string()
-});
-
-const CreateClaimSchema = z.object({
-  subject: z.string(),
-  predicate: z.string(),
-  object: z.string(),
-  evidenceRefs: z.array(z.string()),
-  confidence: z.number(),
-  licenseId: z.string()
+const ClaimSchema = z.object({
+  evidenceIds: z.array(z.string().min(3)).min(1),
+  assertion: z.string().min(1),
+  confidence: z.number().min(0).max(1),
 });
 
 export default async function pclRoutes(fastify: FastifyInstance) {
   const ledger = LedgerService.getInstance();
 
-  fastify.post('/evidence', async (req, reply) => {
+  fastify.post('/v1/evidence', async (req, reply) => {
+    const idempotencyKey = req.headers['idempotency-key'] as string | undefined;
     try {
-      const body = CreateEvidenceSchema.parse(req.body);
-      const evidenceId = await ledger.registerEvidence(body as any);
-      return reply.code(201).send({ evidenceId });
-    } catch (err) {
-      return reply.code(400).send({ error: err });
+      const body = EvidenceSchema.parse(req.body);
+      const result = await ledger.registerEvidence(body, idempotencyKey);
+      return reply.code(201).send(result);
+    } catch (err: any) {
+      return reply.code(400).send({ error: err.message ?? 'invalid payload' });
     }
   });
 
-  fastify.post('/transform', async (req, reply) => {
+  fastify.post('/v1/claims', async (req, reply) => {
+    const idempotencyKey = req.headers['idempotency-key'] as string | undefined;
     try {
-      const body = CreateTransformSchema.parse(req.body);
-      const transformId = await ledger.registerTransform(body as any);
-      return reply.code(201).send({ transformId });
-    } catch (err) {
-      return reply.code(400).send({ error: err });
+      const body = ClaimSchema.parse(req.body);
+      const result = await ledger.registerClaim(body, idempotencyKey);
+      return reply.code(201).send(result);
+    } catch (err: any) {
+      return reply.code(400).send({ error: err.message ?? 'invalid payload' });
     }
   });
 
-  fastify.post('/claim', async (req, reply) => {
-    try {
-      const body = CreateClaimSchema.parse(req.body);
-      const claimId = await ledger.registerClaim(body as any);
-      return reply.code(201).send({ claimId });
-    } catch (err) {
-      return reply.code(400).send({ error: err });
-    }
-  });
-
-  fastify.get('/manifest/:bundleId', async (req, reply) => {
-    const { bundleId } = req.params as { bundleId: string };
-    const manifest = await ledger.getManifest(bundleId);
+  fastify.get('/v1/manifest/:claimId', async (req, reply) => {
+    const { claimId } = req.params as { claimId: string };
+    const manifest = await ledger.getManifest(claimId);
     if (!manifest) {
-      return reply.code(404).send({ error: 'Bundle not found' });
+      return reply.code(404).send({ error: 'claim not found' });
     }
     return reply.send(manifest);
   });
