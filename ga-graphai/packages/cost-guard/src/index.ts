@@ -1,4 +1,5 @@
 import { performance } from 'node:perf_hooks';
+import { parse as parseYaml } from 'yaml';
 import type {
   ClusterNodeState,
   CostGuardDecision,
@@ -16,6 +17,9 @@ import type {
   WorkloadSample,
   KedaScaledObjectSpec,
   QueueAlertConfig,
+  WorkspaceBudgetConfig,
+  BudgetDecision,
+  BudgetThresholds,
 } from './types.js';
 
 const DEFAULT_PROFILE: TenantBudgetProfile = {
@@ -24,6 +28,107 @@ const DEFAULT_PROFILE: TenantBudgetProfile = {
   maxLatencyMs: 1500,
   concurrencyLimit: 12,
 };
+
+const DEFAULT_BUDGET_THRESHOLDS: BudgetThresholds = {
+  warnRatio: Number(process.env.COST_GUARD_WARN_RATIO ?? 0.85),
+  enforceRatio: Number(process.env.COST_GUARD_ENFORCE_RATIO ?? 1),
+};
+
+export class BudgetEngine {
+  private readonly thresholds: BudgetThresholds;
+  private readonly budgets = new Map<string, WorkspaceBudgetConfig>();
+  private readonly spend = new Map<string, number>();
+
+  constructor(thresholds?: Partial<BudgetThresholds>) {
+    this.thresholds = { ...DEFAULT_BUDGET_THRESHOLDS, ...thresholds };
+  }
+
+  loadFromYaml(yaml: string): WorkspaceBudgetConfig[] {
+    const parsed = parseYaml(yaml) as { budgets: WorkspaceBudgetConfig[] };
+    if (!parsed || !Array.isArray(parsed.budgets)) {
+      throw new Error('Budget YAML must include a budgets array');
+    }
+    parsed.budgets.forEach((budget) => this.budgets.set(budget.workspace, budget));
+    return parsed.budgets;
+  }
+
+  registerUsage(workspace: string, amount: number): number {
+    const current = this.spend.get(workspace) ?? 0;
+    const next = current + amount;
+    this.spend.set(workspace, next);
+    return next;
+  }
+
+  evaluate(
+    input: PlanBudgetInput & { workspace: string; simulate?: boolean },
+  ): BudgetDecision {
+    const budget = this.budgets.get(input.workspace);
+    if (!budget) {
+      return {
+        workspace: input.workspace,
+        action: 'deny',
+        remaining: 0,
+        appealed: true,
+        reason: 'Budget metadata missing; policy blocks execution by default.',
+        obligations: ['appeal-required', 'provide-budget-metadata'],
+      };
+    }
+
+    const throttleRru = budget.throttleLimits?.maxRru ?? input.profile?.maxRru;
+    const throttleLatency =
+      budget.throttleLimits?.maxLatencyMs ?? input.profile?.maxLatencyMs;
+    if (
+      (throttleRru && input.plan.estimatedRru > throttleRru) ||
+      (throttleLatency && input.plan.estimatedLatencyMs > throttleLatency)
+    ) {
+      return {
+        workspace: input.workspace,
+        action: input.simulate ? 'simulate' : 'deny',
+        remaining: Math.max(0, (throttleRru ?? 0) - input.plan.estimatedRru),
+        appealed: true,
+        reason:
+          'Plan exceeds throttling policy for this workspace; submit justification.',
+        obligations: ['opa:redact-high-cost', 'appeal-required'],
+      };
+    }
+
+    const projectedSpend = this.registerUsage(
+      input.workspace,
+      input.plan.estimatedRru,
+    );
+    const remaining = budget.monthlyCap - projectedSpend;
+    const ratio = projectedSpend / budget.monthlyCap;
+
+    if (ratio >= this.thresholds.enforceRatio && !input.simulate) {
+      return {
+        workspace: input.workspace,
+        action: 'deny',
+        remaining: Math.max(0, remaining),
+        appealed: true,
+        reason:
+          'Budget cap reached; execution blocked with appeal and manifest logging.',
+        obligations: ['notify-owner', 'record-manifest', 'appeal-required'],
+      };
+    }
+
+    const obligations = ['record-provenance'];
+    if (ratio >= this.thresholds.warnRatio) {
+      obligations.push('notify-owner', 'cost-burn-alert');
+    }
+
+    return {
+      workspace: input.workspace,
+      action: input.simulate ? 'simulate' : 'allow',
+      remaining: Math.max(0, remaining),
+      appealed: false,
+      reason:
+        ratio >= this.thresholds.warnRatio
+          ? 'Execution allowed under warning threshold; appeal path attached.'
+          : 'Execution within budget guardrails.',
+      obligations,
+    };
+  }
+}
 
 export class CostGuard {
   private readonly profile: TenantBudgetProfile;
@@ -176,7 +281,7 @@ export class CostGuard {
   }
 }
 
-export { DEFAULT_PROFILE };
+export { DEFAULT_PROFILE, DEFAULT_BUDGET_THRESHOLDS, BudgetEngine };
 const DEFAULT_OPTIMIZATION_CONFIG: ResourceOptimizationConfig = {
   smoothingFactor: 0.6,
   targetCpuUtilization: 0.65,
@@ -663,4 +768,7 @@ export type {
   WorkloadBalancingPlan,
   WorkloadQueueSignal,
   WorkloadSample,
+  WorkspaceBudgetConfig,
+  BudgetDecision,
+  BudgetThresholds,
 } from './types.js';

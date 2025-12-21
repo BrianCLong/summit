@@ -1,0 +1,19 @@
+sequenceDiagram
+    participant Src as Source Connector
+    participant Ingest as Ingest Pipeline
+    participant Graph as Graph Store
+    participant Copilot as Copilot/Parser
+    participant Ledger as Provenance Ledger
+    participant Wallet as Provenance Wallet
+    participant Export as Export Target
+
+    Src->>Ingest: Data + source metadata
+    Ingest->>Ledger: Record transform hash + policy decision
+    Ingest->>Graph: Store nodes/edges with manifest ID
+    Copilot->>Graph: NL→Cypher sandbox query
+    Copilot->>Ledger: Log query rationale + hypothesis ID
+    Graph-->>Copilot: Results + citations
+    Copilot->>Wallet: Prepare rationale and citations
+    Wallet->>Ledger: Build manifest hash tree
+    Wallet->>Export: Bundle with selective disclosure + checksums
+    Ledger-->>Export: Verification status and authority binding

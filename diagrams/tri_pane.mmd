@@ -1,0 +1,15 @@
+flowchart LR
+    subgraph UI[Tri-pane UI]
+        A[Graph View] -- explain overlay --> E[Explain this view]
+        B[Map View] -- geospatial context --> E
+        C[Timeline View] -- temporal ordering --> E
+    end
+    E -- rationale paths + citations --> R[GraphRAG Engine]
+    R -- NL→Cypher preview --> P[Copilot Parser]
+    P -- sandbox execution --> S[Graph Sandbox]
+    S -- metrics + manifests --> O[OTEL + Audit]
+    O -- policy decisions --> G[OPA/Authority Compiler]
+    G -- obligations --> UI
+    S -- export request --> L[Provenance Ledger]
+    L -- manifest bundle --> W[Provenance Wallet]
+    W -- selective disclosure --> X[External Partners]

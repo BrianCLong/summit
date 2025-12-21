@@ -1,0 +1,2 @@
+# Sprint Goal
+Deliver GA-ready IntelGraph core increments with enforceable governance, provenance-first exports, and operational guardrails: launch ABAC/OPA enforcement, immutable audit and cost guard, tri-pane UI with explainability, ≥10 hardened connectors, NL→Cypher copilot preview, and provenance ledger beta. Success is measured by p95 graph query latency <1.5s, ≥95% NL→Cypher syntactic validity, 100% exports with provenance manifests, ≥90% stories demonstrating acceptance pattern coverage, and all runbooks R1–R3/R9 demo-ready with KPI and citation evidence.

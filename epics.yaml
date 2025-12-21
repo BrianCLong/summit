@@ -1,0 +1,50 @@
+- key: EPIC-GA-CORE
+  title: "GA Core Enablement"
+  rationale: "Harden ingest→graph→analytics path with ABAC/OPA, audit, tri-pane UI, and ≥10 connectors to reach GA readiness."
+  priority: 1
+  wsjf:
+    user_value: 9
+    time_criticality: 8
+    risk_reduction: 9
+    effort: 5
+  themes: [ingest, graph core, analytics/tradecraft, experience, security/governance]
+- key: EPIC-COPILOT-XAI
+  title: "NL→Cypher Copilot & Explainability"
+  rationale: "Deliver NL preview, GraphRAG with path rationales, and tri-pane explainability to improve analyst trust and speed."
+  priority: 2
+  wsjf:
+    user_value: 8
+    time_criticality: 7
+    risk_reduction: 8
+    effort: 4
+  themes: [ai copilot & xai, experience]
+- key: EPIC-PROV-LEDGER
+  title: "Provenance & Claim Ledger Beta"
+  rationale: "Provide manifest chain, evidence registration, and verifier tooling to block unsafe exports and enable selective disclosure."
+  priority: 3
+  wsjf:
+    user_value: 8
+    time_criticality: 7
+    risk_reduction: 9
+    effort: 6
+  themes: [security/governance, analytics/tradecraft]
+- key: EPIC-OPS-GUARD
+  title: "Ops, SLO, and Cost Guard Foundations"
+  rationale: "Instrument SLO dashboards, chaos drills, and cost guardrails to keep GA Core performant and affordable."
+  priority: 4
+  wsjf:
+    user_value: 7
+    time_criticality: 8
+    risk_reduction: 8
+    effort: 5
+  themes: [ops & reliability, finops]
+- key: EPIC-CONNECTORS
+  title: "Connector Expansion & Safety"
+  rationale: "Ship ≥10 validated connectors with synthetic demo data, policy-by-default gating, and audit coverage."
+  priority: 5
+  wsjf:
+    user_value: 8
+    time_criticality: 6
+    risk_reduction: 7
+    effort: 6
+  themes: [ingest, security/governance]

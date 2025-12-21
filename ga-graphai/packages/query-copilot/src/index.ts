@@ -8,3 +8,4 @@ export {
   defaultQueryMonitor,
   type QueryMonitoringResult,
 } from './queryMonitor.js';
+export { NlQueryPipeline } from './nlQueryPipeline.js';

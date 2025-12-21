@@ -52,6 +52,31 @@ export interface CostGuardDecision {
   };
 }
 
+export interface BudgetThresholds {
+  warnRatio: number;
+  enforceRatio: number;
+}
+
+export interface WorkspaceBudgetConfig {
+  workspace: string;
+  owner: string;
+  monthlyCap: number;
+  throttleLimits?: {
+    maxRru?: number;
+    maxLatencyMs?: number;
+  };
+  rollover?: boolean;
+}
+
+export interface BudgetDecision {
+  workspace: string;
+  action: 'allow' | 'deny' | 'simulate';
+  remaining: number;
+  appealed?: boolean;
+  reason: string;
+  obligations: string[];
+}
+
 export interface SlowQueryRecord {
   queryId: string;
   tenantId: string;
