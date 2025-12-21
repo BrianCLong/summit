@@ -1,34 +1,43 @@
 // @ts-nocheck
-
-import { telemetry } from './comprehensive-telemetry';
-import { snapshotter } from './diagnostic-snapshotter';
-import { alertingService } from './alerting-service';
-import { correlationEngine } from './correlation-engine';
+import { telemetry } from './comprehensive-telemetry.js';
+import { snapshotter } from './diagnostic-snapshotter.js';
+import { alertingService } from './alerting-service.js';
+import { correlationEngine } from './correlation-engine.js';
 
 class AnomalyDetector {
   private metricBaselines: Map<string, { mean: number; std: number }> = new Map();
   private metricData: Map<string, number[]> = new Map();
 
   constructor() {
-    telemetry.onMetric(this.processMetric.bind(this));
+    // Lazy binding to avoid circular dependency issues during initialization
+    setTimeout(() => {
+      telemetry.onMetric(this.processMetric.bind(this));
+    }, 100);
+  }
+
+  // Public method for direct usage (e.g. from tests or legacy telemetry)
+  public detect(metricName: string, value: number) {
+      if (!this.metricData.has(metricName)) {
+        this.metricData.set(metricName, []);
+      }
+      const data = this.metricData.get(metricName);
+
+      let anomaly = null;
+      if (this.metricBaselines.has(metricName)) {
+        anomaly = this.detectAnomalies(metricName, value);
+      }
+
+      data.push(value);
+
+      if (data.length > 100) {
+        this.updateBaseline(metricName, data);
+        this.metricData.set(metricName, []);
+      }
+      return anomaly;
   }
 
   private processMetric(metricName: string, value: number) {
-    if (!this.metricData.has(metricName)) {
-      this.metricData.set(metricName, []);
-    }
-    const data = this.metricData.get(metricName);
-
-    if (this.metricBaselines.has(metricName)) {
-      this.detectAnomalies(metricName, value);
-    }
-
-    data.push(value);
-
-    if (data.length > 100) {
-      this.updateBaseline(metricName, data);
-      this.metricData.set(metricName, []);
-    }
+    this.detect(metricName, value);
   }
 
   private updateBaseline(metricName: string, data: number[]) {
@@ -49,13 +58,15 @@ class AnomalyDetector {
   private detectAnomalies(metricName: string, value: number) {
     const baseline = this.metricBaselines.get(metricName);
     if (!baseline || baseline.std === 0) {
-      return;
+      return null;
     }
 
     const zScore = (value - baseline.mean) / baseline.std;
     if (Math.abs(zScore) > 3) {
       this.triggerAlert(metricName, value, zScore);
+      return { zScore, value };
     }
+    return null;
   }
 
   private triggerAlert(metricName: string, value: number, zScore: number) {

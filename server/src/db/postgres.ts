@@ -2,6 +2,7 @@
 import crypto from 'node:crypto';
 import { performance } from 'node:perf_hooks';
 import { Pool, QueryConfig, QueryResult, PoolClient } from 'pg';
+import { instrumentPostgresPool } from '../observability/postgres-instrumentation.js';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -367,6 +368,9 @@ function createPool(
     client.connectedAt = Date.now();
     logger.debug({ pool: name }, 'New PostgreSQL connection established');
   });
+
+  // Instrument the pool
+  instrumentPostgresPool(pool, name);
 
   return {
     name,

@@ -1,58 +1,68 @@
 // @ts-nocheck
-
 import { snapshotter } from './diagnostic-snapshotter.js';
-import { otelService } from '../observability/otel';
-import { metrics } from '../observability/metrics';
+import { anomalyDetector } from './anomaly-detector.js';
+import { alertingService } from './alerting-service.js';
 import {
-  Meter,
-  Counter,
-  Histogram,
-  UpDownCounter,
-  ObservableGauge,
-} from '@opentelemetry/api';
-import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
-import { MeterProvider } from '@opentelemetry/sdk-metrics';
-import { Resource } from '@opentelemetry/resources';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import * as os from 'os';
+  httpRequestDuration,
+  httpRequestsTotal,
+  dbConnectionsActive,
+  dbQueryDuration,
+  dbQueriesTotal,
+  aiJobsQueued,
+  aiJobsProcessing,
+  aiJobDuration,
+  aiJobsTotal,
+  graphNodesTotal,
+  graphEdgesTotal,
+  graphOperationDuration,
+  websocketConnections,
+  websocketMessages,
+  investigationsActive,
+  investigationOperations,
+  applicationErrors,
+  tenantScopeViolationsTotal,
+  memoryUsage,
+} from '../observability/metrics.js'; // Importing from the unified metrics file
 
 // @deprecated - Use server/src/lib/observability/ instead
 class ComprehensiveTelemetry {
   private static instance: ComprehensiveTelemetry;
-  private meter: Meter;
-
-  // Performance counters
+  private listeners: Array<(metricName: string, value: number) => void> = [];
   public readonly subsystems: {
-    database: { queries: Counter; errors: Counter; latency: Histogram };
-    cache: { hits: Counter; misses: Counter; sets: Counter; dels: Counter };
-    api: { requests: Counter; errors: Counter };
+    database: { queries: { add: (n: number) => void }; errors: { add: (n: number) => void }; latency: { record: (ms: number) => void } };
+    cache: { hits: { add: (n: number) => void }; misses: { add: (n: number) => void }; sets: { add: (n: number) => void }; dels: { add: (n: number) => void } };
+    api: { requests: { add: (n: number) => void }; errors: { add: (n: number) => void } };
   };
 
-  // Request/response timing
-  public readonly requestDuration: any;
-  private activeConnections: any;
-
   private constructor() {
-    // Legacy support: Reuse the OTel service or create a bridged meter
-    // For now, we stub this to prevent breaking existing consumers but direct them to new metrics
-    // Ideally this class should be deleted and consumers migrated.
-
-    // We create a dummy meter provider for backward compat if needed,
-    // but really we should just point to the new registry.
-    const resource = new Resource({
-      [SemanticResourceAttributes.SERVICE_NAME]: 'intelgraph-server-legacy',
-    });
-    const meterProvider = new MeterProvider({ resource });
-    this.meter = meterProvider.getMeter('intelgraph-server-telemetry-legacy');
-
-    // Mocks to satisfy type checker while we migrate
-    this.requestDuration = { record: () => {} };
-    this.activeConnections = { add: () => {} };
     this.subsystems = {
-      database: { queries: { add: () => {} }, errors: { add: () => {} }, latency: { record: () => {} } },
-      cache: { hits: { add: () => {} }, misses: { add: () => {} }, sets: { add: () => {} }, dels: { add: () => {} } },
-      api: { requests: { add: () => {} }, errors: { add: () => {} } }
+      database: {
+        queries: { add: (n: number) => dbQueriesTotal.inc(n) },
+        errors: { add: (n: number) => dbQueriesTotal.inc({ status: 'error' }, n) },
+        latency: { record: (ms: number) => dbQueryDuration.observe(ms / 1000) }
+      },
+      cache: {
+        hits: { add: (n: number) => {} }, // TODO: Map to cache metrics if available
+        misses: { add: (n: number) => {} },
+        sets: { add: (n: number) => {} },
+        dels: { add: (n: number) => {} }
+      },
+      api: {
+        requests: { add: (n: number) => httpRequestsTotal.inc(n) },
+        errors: { add: (n: number) => httpRequestsTotal.inc({ status_code: '500' }, n) } // Simplified
+      }
     };
+
+    // Wire up anomaly detector and alerting service (legacy support)
+    // In a real system these should listen to Prometheus events, but for this legacy class we keep the internal pub/sub
+    this.onMetric((name, value) => {
+      // Forward to anomaly detector
+      const anomaly = anomalyDetector.detect(name, value);
+      if (anomaly) {
+         snapshotter.triggerSnapshot('anomaly_detected');
+         alertingService.sendAlert(`Anomaly detected in ${name}: value ${value} (z-score: ${anomaly.zScore})`);
+      }
+    });
   }
 
   public static getInstance(): ComprehensiveTelemetry {
@@ -62,13 +72,46 @@ class ComprehensiveTelemetry {
     return ComprehensiveTelemetry.instance;
   }
 
-  public recordRequest(duration: number, attributes: Record<string, string | number>) {
-    // Forward to new metric
-    metrics.httpRequestDuration.observe(attributes as any, duration);
+  public incrementActiveConnections() {
+    // This metric is not exactly standard http active connections, but we can assume it for now
+    // or maybe it's websocket? In app.ts it seems to be per-request.
+    // There isn't a gauge for active HTTP requests in the imported metrics,
+    // so we might skip or add one if strictly needed.
+    // However, existing code expects this method.
+  }
+
+  public decrementActiveConnections() {
+    // Same as above
+  }
+
+  public recordRequest(durationMs: number, attributes: Record<string, any>) {
+    // duration comes in ms, histogram expects seconds
+    httpRequestDuration.observe(
+      {
+        method: attributes.method || 'GET',
+        route: attributes.route || 'unknown',
+        status_code: attributes.status || '200'
+      },
+      durationMs / 1000
+    );
+
+    httpRequestsTotal.inc({
+        method: attributes.method || 'GET',
+        route: attributes.route || 'unknown',
+        status_code: attributes.status || '200'
+    });
+
+    // Legacy support for anomaly detection on request latency
+    this.notifyListeners('request_duration_ms', durationMs);
   }
 
   public onMetric(listener: (metricName: string, value: number) => void) {
-    // No-op or reimplement if critical
+    this.listeners.push(listener);
+  }
+
+  // Used by tests to simulate metric updates
+  public notifyListeners(metricName: string, value: number) {
+    this.listeners.forEach(listener => listener(metricName, value));
   }
 }
 

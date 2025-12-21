@@ -1,5 +1,6 @@
 // @ts-nocheck
 import Redis from 'ioredis';
+import { instrumentRedisClient } from '../observability/redis-instrumentation.js';
 import * as dotenv from 'dotenv';
 // @ts-ignore
 import { default as pino } from 'pino';
@@ -29,13 +30,15 @@ import { telemetry } from '../lib/telemetry/comprehensive-telemetry';
 export function getRedisClient(): Redis {
   if (!redisClient) {
     try {
-      redisClient = new Redis({
+      const rawClient = new Redis({
         host: REDIS_HOST,
         port: REDIS_PORT,
         password: REDIS_PASSWORD,
         connectTimeout: 5000,
         lazyConnect: true,
       });
+
+      redisClient = instrumentRedisClient(rawClient);
 
       redisClient.on('connect', () => logger.info('Redis client connected.'));
       redisClient.on('error', (err) => {
@@ -45,28 +48,7 @@ export function getRedisClient(): Redis {
         redisClient = createMockRedisClient() as any;
       });
 
-      const originalGet = redisClient.get.bind(redisClient);
-      redisClient.get = async (key: string) => {
-        const value = await originalGet(key);
-        if (value) {
-          telemetry.subsystems.cache.hits.add(1);
-        } else {
-          telemetry.subsystems.cache.misses.add(1);
-        }
-        return value;
-      };
-
-      const originalSet = redisClient.set.bind(redisClient);
-      redisClient.set = async (key: string, value: string) => {
-        telemetry.subsystems.cache.sets.add(1);
-        return await originalSet(key, value);
-      };
-
-      const originalDel = redisClient.del.bind(redisClient);
-      redisClient.del = (async (key: string) => {
-        telemetry.subsystems.cache.dels.add(1);
-        return await originalDel(key);
-      }) as any;
+      // Original manual telemetry hooks removed in favor of instrumentation
     } catch (error) {
       logger.warn(
         `Redis initialization failed - using development mode. Error: ${(error as Error).message}`,

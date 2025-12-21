@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { telemetry } from '../lib/telemetry/comprehensive-telemetry.js';
 import neo4j, { Driver, Session } from 'neo4j-driver';
+import { instrumentNeo4jDriver } from '../observability/neo4j-instrumentation.js';
 import * as dotenv from 'dotenv';
 // @ts-ignore
 import { default as pino } from 'pino';
@@ -43,7 +44,7 @@ export async function initializeNeo4jDriver(): Promise<void> {
   initializationPromise = (async () => {
     try {
       logger.info('Initializing Neo4j driver...');
-      realDriver = neo4j.driver(
+      const rawDriver = neo4j.driver(
         NEO4J_URI,
         neo4j.auth.basic(NEO4J_USER, NEO4J_PASSWORD),
         {
@@ -52,6 +53,9 @@ export async function initializeNeo4jDriver(): Promise<void> {
           connectionAcquisitionTimeout: ACQUISITION_TIMEOUT_MS,
         }
       );
+
+      // Wrap with instrumentation
+      realDriver = instrumentNeo4jDriver(rawDriver);
 
       await realDriver.verifyConnectivity();
       isMockMode = false;

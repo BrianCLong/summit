@@ -10,7 +10,7 @@ const config: Config = {
   ],
   testMatch: [
     '<rootDir>/tests/**/*.test.ts',
-    '<rootDir>/src/tests/**/*.test.ts',
+    '<rootDir>/src/**/*.test.ts',
     '<rootDir>/src/**/__tests__/**/*.test.ts',
   ],
   testPathIgnorePatterns: [

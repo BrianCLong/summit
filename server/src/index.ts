@@ -30,6 +30,7 @@ import { logger } from './config/logger.js';
 import { logConfigSummary } from './config/index.js';
 
 const startServer = async () => {
+  // Initialize OpenTelemetry SDK - This MUST be the first step
   const sdk = initializeOTel();
   // Optional Kafka consumer import - only when AI services enabled
   let startKafkaConsumer: any = null;
