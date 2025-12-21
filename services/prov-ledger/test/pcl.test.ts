@@ -23,7 +23,8 @@ describe('PCL Service', () => {
       url: '/evidence',
       payload: {
         source: 'http://example.com/file.pdf',
-        hash: 'sha256:abc123456'
+        hash: 'sha256:abc123456',
+        caseId: 'bundle_test_1'
       }
     });
     expect(res.statusCode).toBe(201);
@@ -40,7 +41,8 @@ describe('PCL Service', () => {
         tool: 'ocr-v1',
         params: { lang: 'en' },
         outputs: ['ev_456'],
-        operatorId: 'user_1'
+        operatorId: 'user_1',
+        caseId: 'bundle_test_1'
       }
     });
     expect(res.statusCode).toBe(201);
@@ -58,7 +60,8 @@ describe('PCL Service', () => {
         object: 'doc:report.pdf',
         evidenceRefs: ['ev_456'],
         confidence: 0.95,
-        licenseId: 'lic_cc_by'
+        licenseId: 'lic_cc_by',
+        caseId: 'bundle_test_1'
       }
     });
     expect(res.statusCode).toBe(201);

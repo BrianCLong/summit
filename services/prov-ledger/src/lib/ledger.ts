@@ -85,7 +85,7 @@ export class AppendOnlyLedger {
   }
 
   private currentTailHash(): string {
-    return this.log.length ? this.log[this.log.length - 1].hash : '';
+    return this.log.length ? this.log[this.log.length - 1]!.hash : '';
   }
 
   private append<T extends EvidenceRecord | ClaimRecord | EdgeRecord>(type: LedgerEntry['type'], payload: T): LedgerEntry {

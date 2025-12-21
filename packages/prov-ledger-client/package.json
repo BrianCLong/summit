@@ -3,11 +3,20 @@
   "version": "2.0.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "scripts": {
-    "build": "tsc"
+  "bin": {
+    "ig-prov": "dist/bin/ig-prov.js"
   },
-  "dependencies": {},
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "axios-retry": "^3.8.0",
+    "commander": "^11.1.0"
+  },
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3"
   }
 }

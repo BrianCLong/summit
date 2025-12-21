@@ -1,13 +1,37 @@
-import { verifyDisclosure } from '@intelgraph/prov-ledger/src/wallet';
-import { SelectiveDisclosureBundle } from '@intelgraph/prov-ledger/src/types';
+import axios, { AxiosInstance } from 'axios';
+import axiosRetry from 'axios-retry';
 
-export { verifyDisclosure };
+export interface Evidence {
+  evidenceId?: string;
+  source: string;
+  url?: string;
+  blob?: string;
+  license?: string;
+  hash: string;
+  caseId?: string;
+}
 
-export async function verifyKPWBadge(bundleJson: string, publicKeyPem: string) {
-  const bundle: SelectiveDisclosureBundle = JSON.parse(bundleJson);
-  const ok = verifyDisclosure(bundle, publicKeyPem);
-  const hasContradiction = bundle.disclosedSteps.some(
-    (s) => (s as any).contradiction,
-  ); // Cast to any to access contradiction
-  return { ok, hasContradiction };
+export interface DisclosureBundle {
+  bundleId: string;
+  merkleRoot: string;
+  entries: any[];
+}
+
+export class ProvLedgerClient {
+  private client: AxiosInstance;
+
+  constructor(baseURL: string) {
+    this.client = axios.create({ baseURL });
+    axiosRetry(this.client, { retries: 3 });
+  }
+
+  async registerEvidence(evidence: Evidence): Promise<string> {
+    const res = await this.client.post('/evidence', evidence);
+    return res.data.evidenceId;
+  }
+
+  async exportBundle(caseId: string): Promise<DisclosureBundle> {
+    const res = await this.client.get(`/bundle/${caseId}/export`);
+    return res.data;
+  }
 }
