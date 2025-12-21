@@ -7,7 +7,7 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "test": "vitest run && node --test tests"
+    "test": "vitest run --coverage && node --test tests"
   },
   "dependencies": {
     "@ga-graphai/cost-guard": "file:../cost-guard",
