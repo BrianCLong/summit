@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import crypto from 'crypto';
 import { body, validationResult } from 'express-validator';
 import {
   addTicketRunLink,
@@ -308,6 +309,47 @@ router.post('/trigger-test', async (req, res) => {
 
 // --- Existing Webhook Routes (GitHub, Jira, Lifecycle) ---
 
+const verifyGitHubSignature = (req: any, res: any, next: any) => {
+  const signature = req.headers['x-hub-signature-256'];
+  const secret = process.env.GITHUB_WEBHOOK_SECRET;
+
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      logger.error('GITHUB_WEBHOOK_SECRET is not set in production. Rejecting webhook.');
+      return res.status(500).json({ error: 'Server configuration error' });
+    }
+    // In dev, warn and proceed if no signature
+    if (signature) {
+        // If signature is present even in dev, verify it if we have secret (we don't here).
+        // But if we don't have secret, we can't verify.
+        // So just warn.
+    }
+    logger.warn('Skipping GitHub signature verification (no secret set)');
+    return next();
+  }
+
+  if (!signature) {
+    return res.status(401).json({ error: 'Missing X-Hub-Signature-256' });
+  }
+
+  if (!req.rawBody) {
+     logger.error('req.rawBody is missing. Cannot verify signature.');
+     return res.status(500).json({ error: 'Internal server error' });
+  }
+
+  const hmac = crypto.createHmac('sha256', secret);
+  const digest = 'sha256=' + hmac.update(req.rawBody).digest('hex');
+
+  const digestBuf = Buffer.from(digest);
+  const sigBuf = Buffer.from(Array.isArray(signature) ? signature[0] : signature);
+
+  if (digestBuf.length !== sigBuf.length || !crypto.timingSafeEqual(digestBuf, sigBuf)) {
+    return res.status(401).json({ error: 'Invalid signature' });
+  }
+
+  next();
+};
+
 /**
  * @openapi
  * /api/webhooks/github:
@@ -326,6 +368,7 @@ router.post('/trigger-test', async (req, res) => {
  */
 router.post(
   '/github',
+  verifyGitHubSignature,
   body('action').isString(),
   body('number').optional().isNumeric(),
   body('pull_request').optional().isObject(),
