@@ -4,7 +4,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { GovernancePolicy, Domain } from '@summit/mdm-core';
+import type { GovernancePolicy, Domain } from '@intelgraph/mdm-core';
 
 export interface AuditLog {
   id: string;
