@@ -17,6 +17,14 @@
     "./ownership": {
       "import": "./dist/ownership/index.js",
       "types": "./dist/ownership/index.d.ts"
+    },
+    "./records": {
+      "import": "./dist/records/framework.js",
+      "types": "./dist/records/framework.d.ts"
+    },
+    "./retention": {
+      "import": "./dist/retention/engine.js",
+      "types": "./dist/retention/engine.d.ts"
     }
   },
   "scripts": {

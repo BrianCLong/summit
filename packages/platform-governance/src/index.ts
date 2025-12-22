@@ -17,6 +17,12 @@ export * from './policy/engine.js';
 // Ownership exports
 export * from './ownership/matrix.js';
 
+// Record framework exports
+export * from './records/framework.js';
+
+// Retention engine exports
+export * from './retention/engine.js';
+
 // Re-export commonly used items
 export {
   PolicyEngine,
