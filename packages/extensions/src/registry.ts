@@ -36,14 +36,14 @@ export class ExtensionRegistry {
   /**
    * Mark an extension as loaded
    */
-  markLoaded(name: string, module: any, config?: Record<string, any>): void {
+  markLoaded(name: string, moduleExports: any, config?: Record<string, any>): void {
     const ext = this.extensions.get(name);
     if (!ext) {
       throw new Error(`Extension ${name} not found in registry`);
     }
 
     ext.loaded = true;
-    ext.module = module;
+    ext.module = moduleExports;
     ext.config = config;
     this.activationOrder.push(name);
   }
