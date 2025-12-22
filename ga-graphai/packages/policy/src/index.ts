@@ -1783,3 +1783,25 @@ export class PolicyBacktestEngine {
 
 export { analyzeEvidence } from 'common-types';
 export { ConsentStateReconciler } from './consent-reconciler';
+export type {
+  AbacControl,
+  AttributeCatalog,
+  AttributeDefinition,
+  AttributeType,
+  AuthorityDefinition,
+  AuthoritySchema,
+  AuthoritySchemaMetadata,
+  AuthoritySchemaValidationResult,
+  Binding,
+  BindingSubject,
+  ConditionLanguage,
+  Grant,
+  InheritanceRules,
+  Obligation,
+  RoleTemplate,
+  TemplateCondition,
+} from './authority-schema-validator';
+export {
+  loadAuthoritySchemaFromFile,
+  validateAuthoritySchema,
+} from './authority-schema-validator';
