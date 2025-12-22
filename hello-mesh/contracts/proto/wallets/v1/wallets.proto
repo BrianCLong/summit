@@ -1,0 +1,5 @@
+syntax = "proto3";
+package ig.wallets.v1;
+service Wallets { rpc Verify(VerifyRequest) returns (VerifyResponse); }
+message VerifyRequest { string wallet_id = 1; }
+message VerifyResponse { bool valid = 1; string holder = 2; }

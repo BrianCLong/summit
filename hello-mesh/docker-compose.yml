@@ -1,0 +1,129 @@
+version: "3.9"
+
+x-env: &default-env
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+  PROMETHEUS_SCRAPE: "true"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: pg
+    environment:
+      POSTGRES_USER: ${PGUSER}
+      POSTGRES_PASSWORD: ${PGPASSWORD}
+      POSTGRES_DB: core
+    ports: ["5432:5432"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./tools/seed.sql:/docker-entrypoint-initdb.d/seed.sql
+
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v24.1.10
+    command: ["redpanda", "start", "--overprovisioned", "--smp", "1", "--memory", "1G", "--reserve-memory", "0M",
+              "--node-id", "0", "--check=false"]
+    ports: ["9092:9092", "9644:9644"]
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.58
+    ports: ["16686:16686"]
+
+  otel-collector:
+    image: otel/opentelemetry-collector:0.113.0
+    command: ["--config=/etc/otel/config.yaml"]
+    volumes:
+      - ./ops/otel.yaml:/etc/otel/config.yaml:ro
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    volumes:
+      - ./ops/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports: ["9090:9090"]
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    ports: ["3000:3000"]
+    volumes:
+      - ./ops/grafana/provisioning:/etc/grafana/provisioning
+
+  prov-ledger:
+    build:
+      context: .
+      dockerfile: services/prov-ledger/Dockerfile
+    environment:
+      <<: *default-env
+      SERVICE_NAME: prov-ledger
+      PORT: 8101
+      DATABASE_URL: postgres://${PGUSER}:${PGPASSWORD}@postgres:5432/core?schema=prov_ledger_v1
+      KAFKA_BROKERS: redpanda:9092
+      TOPIC_CLAIM_REGISTERED: prov.claim.registered.v1
+    depends_on: [postgres, redpanda]
+    ports: ["8101:8101"]
+
+  lac-compiler:
+    build:
+      context: .
+      dockerfile: services/lac-compiler/Dockerfile
+    environment:
+      <<: *default-env
+      SERVICE_NAME: lac-compiler
+      PORT: 8102
+    ports: ["8102:8102"]
+
+  nlq-engine:
+    build:
+      context: .
+      dockerfile: services/nlq-engine/Dockerfile
+    environment:
+      <<: *default-env
+      SERVICE_NAME: nlq-engine
+      PORT: 8103
+    ports: ["8103:8103"]
+
+  graphrag:
+    build:
+      context: .
+      dockerfile: services/graphrag/Dockerfile
+    environment:
+      <<: *default-env
+      SERVICE_NAME: graphrag
+      PORT: 8104
+      LAC_ENDPOINT: http://lac-compiler:8102
+    depends_on: [lac-compiler]
+    ports: ["8104:8104"]
+
+  zk-tx:
+    build:
+      context: .
+      dockerfile: services/zk-tx/Dockerfile
+    environment:
+      <<: *default-env
+      SERVICE_NAME: zk-tx
+      PORT: 8105
+    ports: ["8105:8105"]
+
+  disclosure-wallets:
+    build:
+      context: .
+      dockerfile: services/disclosure-wallets/Dockerfile
+    environment:
+      <<: *default-env
+      SERVICE_NAME: disclosure-wallets
+      PORT: 8106
+      PROV_LEDGER_ENDPOINT: http://prov-ledger:8101
+    depends_on: [prov-ledger]
+    ports: ["8106:8106"]
+
+  ops-guardian:
+    build:
+      context: .
+      dockerfile: services/ops-guardian/Dockerfile
+    environment:
+      <<: *default-env
+      SERVICE_NAME: ops-guardian
+      PORT: 8107
+      PROMETHEUS_URL: http://prometheus:9090
+    depends_on: [prometheus]
+    ports: ["8107:8107"]
+
+volumes:
+  pgdata: {}
