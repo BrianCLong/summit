@@ -16,7 +16,9 @@
     "resolveJsonModule": true,
     "sourceMap": true,
     "lib": ["ES2022"],
-    "types": ["node", "jest"]
+    "types": ["node", "jest"],
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
   "ts-node": {
     "esm": true

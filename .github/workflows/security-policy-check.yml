@@ -1,0 +1,27 @@
+name: Security Policy Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - '**/package.json'
+      - 'security/POLICY.md'
+
+jobs:
+  check-denylist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for forbidden dependencies
+        run: |
+          FORBIDDEN="left-pad request"
+          FAILED=0
+          for pkg in $FORBIDDEN; do
+            if grep -r "\"$pkg\":" . --include=package.json; then
+              echo "::error::Found forbidden package: $pkg. See security/POLICY.md"
+              FAILED=1
+            fi
+          done
+          exit $FAILED
