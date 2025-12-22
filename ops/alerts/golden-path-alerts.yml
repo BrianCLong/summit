@@ -1,0 +1,50 @@
+# Golden Path service regression alerts
+# Triggers PagerDuty via Alertmanager route labels
+
+groups:
+  - name: golden_path
+    interval: 30s
+    rules:
+      - alert: GoldenPathHighErrorRate
+        expr: |
+          sum(rate(http_requests_total{job=~"intelgraph-(api|gateway|ingest)",status=~"5.."}[5m]))
+            /
+          sum(rate(http_requests_total{job=~"intelgraph-(api|gateway|ingest)"}[5m]))
+            > 0.01
+        for: 5m
+        labels:
+          severity: critical
+          service: golden-path
+          pagerduty_service: sre-primary
+        annotations:
+          summary: "Golden path error rate above 1%"
+          description: "Aggregated 5xx rate is {{ $value | humanizePercentage }} across API, gateway, or ingest."
+          runbook_url: "https://docs.intelgraph.dev/runbooks/golden-path-observability"
+
+      - alert: GoldenPathLatencyDegraded
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket{job=~"intelgraph-(api|gateway|ingest)"}[5m])) by (le)
+          ) > 1.2
+        for: 10m
+        labels:
+          severity: critical
+          service: golden-path
+          pagerduty_service: sre-primary
+        annotations:
+          summary: "Golden path latency p95 > 1.2s"
+          description: "p95 latency sustained above 1.2s over the last 10m across core services."
+          runbook_url: "https://docs.intelgraph.dev/runbooks/golden-path-observability"
+
+      - alert: GoldenPathTrafficDrop
+        expr: |
+          sum(rate(http_requests_total{job=~"intelgraph-(api|gateway|ingest)"}[5m])) < 5
+        for: 10m
+        labels:
+          severity: warning
+          service: golden-path
+          pagerduty_service: sre-primary
+        annotations:
+          summary: "Golden path throughput unexpectedly low"
+          description: "Request volume fell below 5 req/s across core services. Check upstream ingress and dependency health."
+          runbook_url: "https://docs.intelgraph.dev/runbooks/golden-path-observability"
