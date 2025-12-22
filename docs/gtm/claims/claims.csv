@@ -1,0 +1,3 @@
+claimId,message,evidenceType,evidenceSource,status,reviewDate,owner,channels,riskTier,expiry,publishedAt,forwardLooking,complianceSurface
+claim-core-001,Customers reduce investigation cycle time by 30% with evidence-grade workflows,customer_metric,Case Study: Regulated Bank,approved,2025-12-31T00:00:00.000Z,PMM,web|sales|content,medium,,2025-09-02T00:00:00.000Z,False,security|roi
+claim-core-002,Platform enforces provenance ledger and policy-driven controls for AI governance,security_attestation,SOC2 Type II + FedRAMP-ready controls,approved,2025-11-30T00:00:00.000Z,Security,web|sales,high,,2025-09-04T00:00:00.000Z,True,compliance|security
