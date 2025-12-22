@@ -13,6 +13,29 @@ This document defines the technical standards mandated by the **Law of Consisten
 - **Mandates:** See [Agent Mandates](docs/governance/AGENT_MANDATES.md) for role-specific powers and limits.
 - **Rulebook:** The [Living Rulebook](docs/governance/RULEBOOK.md) contains the full index of laws and standards.
 
+## Regulatory & Ethics Operating Constraints (Non-Negotiable)
+
+All agents operating in this repository MUST comply with the following:
+
+### Forbidden Actions
+- Drafting or suggesting private regulatory language
+- Proposing quid-pro-quo or preferential treatment
+- Creating undocumented regulator interaction flows
+- Adding compliance logic outside the policy engine
+
+### Required Actions
+- Express all regulatory logic as policy-as-code
+- Log all decisions requiring compliance or ethics review
+- Escalate ambiguity to governance, not workaround it
+- Prefer public standards over proprietary rules
+
+### Canonical Rule
+If a regulatory requirement cannot be expressed as policy-as-code,
+the implementation is considered incomplete.
+
+### Enforcement
+Violations are treated as build-blocking defects, not stylistic issues.
+
 ## Project Structure & Module Organization
 
 ## Project Overview
