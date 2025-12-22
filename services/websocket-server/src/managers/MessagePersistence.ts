@@ -1,265 +1,61 @@
-/**
- * Message Persistence Manager
- * Stores messages in Redis for replay on reconnection
- */
-
 import Redis from 'ioredis';
-import { Message } from '../types/index.js';
 import { logger } from '../utils/logger.js';
-import { randomUUID } from 'crypto';
-import { MPSCChannel } from '../../../../lib/streaming/channel-manager.js';
+
+export interface StoredMessage {
+    room: string;
+    from: string;
+    data: Record<string, unknown>;
+    timestamp?: number;
+}
 
 export class MessagePersistence {
-  private redis: Redis;
-  private readonly ttl: number;
-  private readonly maxMessages: number;
-  private readonly keyPrefix = 'messages';
-  private channel: MPSCChannel<Message>;
+    constructor(
+        private redis: Redis,
+        private ttlSeconds: number = 3600,
+        private maxMessages: number = 1000
+    ) { }
 
-  constructor(redis: Redis, ttlSeconds = 3600, maxMessages = 1000) {
-    this.redis = redis;
-    this.ttl = ttlSeconds;
-    this.maxMessages = maxMessages;
-    this.channel = new MPSCChannel<Message>(1000);
+    /**
+     * Store a message in the room's history
+     */
+    public async storeMessage(message: StoredMessage): Promise<void> {
+        const key = `messages:room:${message.room}`;
+        const timestamp = message.timestamp || Date.now();
+        const payload = JSON.stringify({ ...message, timestamp });
 
-    this.processMessages();
-  }
+        try {
+            const multi = this.redis.multi();
 
-  private async processMessages(): Promise<void> {
-    for await (const message of this.channel) {
-      try {
-        const key = this.getRoomKey(message.room);
-        const value = JSON.stringify(message);
-        const score = message.timestamp;
+            // Add message with timestamp score
+            multi.zadd(key, timestamp, payload);
 
-        const pipeline = this.redis.pipeline();
-        pipeline.zadd(key, score, value);
-        pipeline.zremrangebyrank(key, 0, -(this.maxMessages + 1));
-        pipeline.expire(key, message.ttl || this.ttl);
+            // Trim to max size (keep last N messages)
+            multi.zremrangebyrank(key, 0, -(this.maxMessages + 1));
 
-        await pipeline.exec();
-        logger.debug({ messageId: message.id }, 'Persisted message from channel');
-      } catch (error) {
-        logger.error({ error, messageId: message.id }, 'Error persisting message from channel');
-      }
-    }
-  }
+            // Set expiry
+            multi.expire(key, this.ttlSeconds);
 
-  /**
-   * Store a message
-   */
-  public async storeMessage(message: Omit<Message, 'id'>): Promise<Message> {
-    const fullMessage: Message = {
-      id: randomUUID(),
-      ...message,
-      timestamp: message.timestamp || Date.now(),
-    };
-    await this.channel.send(fullMessage);
-    logger.debug({ messageId: fullMessage.id }, 'Message queued for persistence');
-    return fullMessage;
-  }
-
-  /**
-   * Get recent messages from a room
-   */
-  public async getRecentMessages(
-    room: string,
-    limit = 100,
-    since?: number
-  ): Promise<Message[]> {
-    const key = this.getRoomKey(room);
-
-    // Get messages with timestamp > since
-    const minScore = since || '-inf';
-    const values = await this.redis.zrangebyscore(
-      key,
-      minScore,
-      '+inf',
-      'LIMIT',
-      0,
-      limit
-    );
-
-    const messages: Message[] = [];
-
-    for (const value of values) {
-      try {
-        const message: Message = JSON.parse(value);
-        messages.push(message);
-      } catch (error) {
-        logger.warn({ error, value }, 'Failed to parse persisted message');
-      }
-    }
-
-    return messages;
-  }
-
-  /**
-   * Get messages in time range
-   */
-  public async getMessagesByTimeRange(
-    room: string,
-    startTime: number,
-    endTime: number
-  ): Promise<Message[]> {
-    const key = this.getRoomKey(room);
-    const values = await this.redis.zrangebyscore(key, startTime, endTime);
-
-    const messages: Message[] = [];
-
-    for (const value of values) {
-      try {
-        const message: Message = JSON.parse(value);
-        messages.push(message);
-      } catch (error) {
-        logger.warn({ error }, 'Failed to parse message');
-      }
-    }
-
-    return messages;
-  }
-
-  /**
-   * Get message by ID
-   */
-  public async getMessage(room: string, messageId: string): Promise<Message | null> {
-    const messages = await this.getRecentMessages(room, 1000);
-    return messages.find(m => m.id === messageId) || null;
-  }
-
-  /**
-   * Delete messages older than timestamp
-   */
-  public async deleteOldMessages(room: string, beforeTimestamp: number): Promise<number> {
-    const key = this.getRoomKey(room);
-    const deleted = await this.redis.zremrangebyscore(key, '-inf', beforeTimestamp);
-
-    logger.debug({ room, deleted, beforeTimestamp }, 'Deleted old messages');
-
-    return deleted;
-  }
-
-  /**
-   * Clear all messages in a room
-   */
-  public async clearRoom(room: string): Promise<void> {
-    const key = this.getRoomKey(room);
-    await this.redis.del(key);
-
-    logger.debug({ room }, 'Room messages cleared');
-  }
-
-  /**
-   * Get message count for a room
-   */
-  public async getMessageCount(room: string): Promise<number> {
-    const key = this.getRoomKey(room);
-    return await this.redis.zcard(key);
-  }
-
-  /**
-   * Get statistics
-   */
-  public async getStats(): Promise<{
-    totalRooms: number;
-    totalMessages: number;
-    oldestMessage: number | null;
-    newestMessage: number | null;
-  }> {
-    const pattern = `${this.keyPrefix}:room:*`;
-    let totalMessages = 0;
-    let oldestMessage: number | null = null;
-    let newestMessage: number | null = null;
-
-    let cursor = '0';
-    let roomCount = 0;
-
-    do {
-      const [newCursor, keys] = await this.redis.scan(
-        cursor,
-        'MATCH',
-        pattern,
-        'COUNT',
-        100
-      );
-      cursor = newCursor;
-      roomCount += keys.length;
-
-      for (const key of keys) {
-        const count = await this.redis.zcard(key);
-        totalMessages += count;
-
-        if (count > 0) {
-          // Get oldest and newest timestamps
-          const oldest = await this.redis.zrange(key, 0, 0, 'WITHSCORES');
-          const newest = await this.redis.zrange(key, -1, -1, 'WITHSCORES');
-
-          if (oldest.length >= 2) {
-            const timestamp = parseFloat(oldest[1]);
-            if (oldestMessage === null || timestamp < oldestMessage) {
-              oldestMessage = timestamp;
-            }
-          }
-
-          if (newest.length >= 2) {
-            const timestamp = parseFloat(newest[1]);
-            if (newestMessage === null || timestamp > newestMessage) {
-              newestMessage = timestamp;
-            }
-          }
+            await multi.exec();
+        } catch (error) {
+            logger.error({ error, room: message.room }, 'Failed to persist message');
+            throw error;
         }
-      }
-    } while (cursor !== '0');
-
-    return {
-      totalRooms: roomCount,
-      totalMessages,
-      oldestMessage,
-      newestMessage,
-    };
-  }
-
-  /**
-   * Cleanup expired messages across all rooms
-   */
-  public async cleanupExpired(): Promise<number> {
-    const pattern = `${this.keyPrefix}:room:*`;
-    let totalDeleted = 0;
-    const now = Date.now();
-
-    let cursor = '0';
-
-    do {
-      const [newCursor, keys] = await this.redis.scan(
-        cursor,
-        'MATCH',
-        pattern,
-        'COUNT',
-        100
-      );
-      cursor = newCursor;
-
-      for (const key of keys) {
-        const expiredBefore = now - this.ttl * 1000;
-        const deleted = await this.redis.zremrangebyscore(key, '-inf', expiredBefore);
-        totalDeleted += deleted;
-
-        // Remove empty keys
-        const remaining = await this.redis.zcard(key);
-        if (remaining === 0) {
-          await this.redis.del(key);
-        }
-      }
-    } while (cursor !== '0');
-
-    if (totalDeleted > 0) {
-      logger.info({ totalDeleted }, 'Cleaned up expired messages');
     }
 
-    return totalDeleted;
-  }
+    /**
+     * Retrieve message history for a room
+     */
+    public async getHistory(room: string, limit: number = 50): Promise<StoredMessage[]> {
+        const key = `messages:room:${room}`;
 
-  private getRoomKey(room: string): string {
-    return `${this.keyPrefix}:room:${room}`;
-  }
+        try {
+            // Get last N messages
+            const rawMessages = await this.redis.zrange(key, -limit, -1);
+
+            return rawMessages.map(msg => JSON.parse(msg));
+        } catch (error) {
+            logger.error({ error, room }, 'Failed to retrieve message history');
+            return [];
+        }
+    }
 }

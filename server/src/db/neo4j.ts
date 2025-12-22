@@ -1,44 +1,24 @@
 import { telemetry } from '../lib/telemetry/comprehensive-telemetry.js';
 import neo4j, { Driver, Session } from 'neo4j-driver';
 import * as dotenv from 'dotenv';
-// @ts-ignore
-import { default as pino } from 'pino';
-// @ts-nocheck
-import { telemetry } from '../lib/telemetry/comprehensive-telemetry';
-import neo4j, { Driver, Session } from 'neo4j-driver';
-import { telemetry } from '../lib/telemetry/comprehensive-telemetry.js';
-import { graphOptimizer } from '../graph/optimizer/GraphOptimizer.js';
-import neo4j from 'neo4j-driver';
-import dotenv from 'dotenv';
 import pino from 'pino';
-import { QueryReplayService } from '../services/query-replay/QueryReplayService';
+import { graphOptimizer } from '../graph/optimizer/GraphOptimizer.js';
+import { QueryReplayService } from '../services/query-replay/QueryReplayService.js';
 import { CircuitBreaker } from '../lib/circuitBreaker.js';
 import {
-  dbPoolSize,
-  dbPoolIdle,
-  dbPoolWaiting
-} from '../metrics/dbMetrics.js';
-import {
-  neo4jConnectivityUp,
-  neo4jQueryErrorsTotal,
-  neo4jQueryLatencyMs,
-  neo4jQueryTotal,
+  neo4jConnectivityUp
 } from '../metrics/neo4jMetrics.js';
 
 dotenv.config();
 
-// @ts-ignore
-const logger: any = pino();
+const logger = pino();
 
-type Neo4jDriver = Driver;
-type Neo4jSession = Session;
-type Neo4jDriver = neo4j.Driver;
-type Neo4jSession = neo4j.Session;
+export type Neo4jDriver = Driver;
+export type Neo4jSession = Session;
 type CircuitState = 'closed' | 'half-open' | 'open';
 
 const NEO4J_URI = process.env.NEO4J_URI || 'bolt://neo4j:7687';
-const NEO4J_USER =
-  process.env.NEO4J_USER || process.env.NEO4J_USERNAME || 'neo4j';
+const NEO4J_USER = process.env.NEO4J_USER || process.env.NEO4J_USERNAME || 'neo4j';
 
 if (
   process.env.NODE_ENV === 'production' &&
@@ -50,25 +30,19 @@ if (
 }
 const NEO4J_PASSWORD = process.env.NEO4J_PASSWORD || 'devpassword';
 const REQUIRE_REAL_DBS = process.env.REQUIRE_REAL_DBS === 'true';
-const CONNECTIVITY_CHECK_INTERVAL_MS = Number(
-  process.env.NEO4J_HEALTH_INTERVAL_MS || 15000,
-);
+const CONNECTIVITY_CHECK_INTERVAL_MS = Number(process.env.NEO4J_HEALTH_INTERVAL_MS || 15000);
 const SLOW_QUERY_THRESHOLD_MS = Number(process.env.NEO4J_SLOW_QUERY_THRESHOLD_MS || 1000);
 const MAX_CONNECTION_POOL_SIZE = Number(process.env.NEO4J_MAX_POOL_SIZE || 100);
 const CONNECTION_TIMEOUT_MS = Number(process.env.NEO4J_CONNECTION_TIMEOUT_MS || 30000);
-
-// Connection Pool Settings
-const POOL_MAX_SIZE = Number(process.env.NEO4J_POOL_MAX_SIZE || 100);
-const POOL_CONNECTION_TIMEOUT = Number(process.env.NEO4J_POOL_CONNECTION_TIMEOUT || 30000);
 const POOL_ACQUISITION_TIMEOUT = Number(process.env.NEO4J_POOL_ACQUISITION_TIMEOUT || 30000);
 
-const MAX_CONNECTION_POOL_SIZE = parseInt(process.env.NEO4J_POOL_MAX_SIZE || '50', 10);
-const ACQUISITION_TIMEOUT_MS = parseInt(process.env.NEO4J_POOL_ACQUISITION_TIMEOUT_MS || '5000', 10);
+const NEO4J_FAILURE_THRESHOLD = parseInt(process.env.NEO4J_FAILURE_THRESHOLD ?? '3', 10);
+const NEO4J_COOLDOWN_MS = parseInt(process.env.NEO4J_COOLDOWN_MS ?? '30000', 10);
 
 const circuitBreaker = new CircuitBreaker({
   name: 'neo4j',
-  failureThreshold: 5,
-  cooldownMs: 30000,
+  failureThreshold: NEO4J_FAILURE_THRESHOLD,
+  cooldownMs: NEO4J_COOLDOWN_MS,
 });
 
 let realDriver: Neo4jDriver | null = null;
@@ -79,15 +53,6 @@ let neo4jFailureCount = 0;
 let neo4jCircuitOpenUntil = 0;
 let neo4jLastError: string | undefined;
 
-const NEO4J_FAILURE_THRESHOLD = parseInt(
-  process.env.NEO4J_FAILURE_THRESHOLD ?? '3',
-  10,
-);
-const NEO4J_COOLDOWN_MS = parseInt(
-  process.env.NEO4J_COOLDOWN_MS ?? '30000',
-  10,
-);
-
 const driverFacade: Neo4jDriver = createDriverFacade();
 
 type DriverReadyReason = 'initial' | 'reconnected';
@@ -97,15 +62,11 @@ type DriverReadyListener = (event: DriverReadyEvent) => void | Promise<void>;
 const driverReadyListeners = new Set<DriverReadyListener>();
 let hasEmittedReadyEvent = false;
 
-export function onNeo4jDriverReady(
-  listener: DriverReadyListener,
-): () => void {
+export function onNeo4jDriverReady(listener: DriverReadyListener): () => void {
   driverReadyListeners.add(listener);
 
   if (realDriver && !isMockMode) {
-    const reason: DriverReadyReason = hasEmittedReadyEvent
-      ? 'reconnected'
-      : 'initial';
+    const reason: DriverReadyReason = hasEmittedReadyEvent ? 'reconnected' : 'initial';
     queueMicrotask(() => {
       void invokeDriverReadyListener(listener, reason);
     });
@@ -118,17 +79,12 @@ export function onNeo4jDriverReady(
 
 ensureInitialization().catch((error) => {
   if (REQUIRE_REAL_DBS) {
-    logger.error(
-      'Neo4j connectivity required but initialization failed. Exiting.',
-      error,
-    );
+    logger.error('Neo4j connectivity required but initialization failed. Exiting.', error);
     process.nextTick(() => {
       throw error;
     });
   } else {
-    logger.warn(
-      `Neo4j connection failed - running in mock mode. Reason: ${(error as Error).message}`,
-    );
+    logger.warn(`Neo4j connection failed - running in mock mode. Reason: ${(error as Error).message}`);
   }
 });
 
@@ -139,24 +95,16 @@ if (CONNECTIVITY_CHECK_INTERVAL_MS > 0) {
         await realDriver.verifyConnectivity();
         neo4jConnectivityUp.set(1);
       } catch (error) {
-        logger.warn(
-          'Lost Neo4j connectivity - switching to mock mode.',
-          error,
-        );
+        logger.warn('Lost Neo4j connectivity - switching to mock mode.', error);
         await teardownRealDriver();
         ensureInitialization().catch((err) => {
           if (REQUIRE_REAL_DBS) {
-            logger.error(
-              'Neo4j reconnection failed while REQUIRE_REAL_DBS=true. Exiting.',
-              err,
-            );
+            logger.error('Neo4j reconnection failed while REQUIRE_REAL_DBS=true. Exiting.', err);
             process.nextTick(() => {
               throw err;
             });
           } else {
-            logger.warn(
-              `Neo4j reconnection failed - continuing in mock mode. Reason: ${(err as Error).message}`,
-            );
+            logger.warn(`Neo4j reconnection failed - continuing in mock mode. Reason: ${(err as Error).message}`);
           }
         });
       }
@@ -188,19 +136,12 @@ export async function closeNeo4jDriver(): Promise<void> {
     clearInterval(connectivityTimer);
     connectivityTimer = null;
   }
-
   await teardownRealDriver();
 }
 
 function getNeo4jCircuitState(): CircuitState {
-  if (neo4jCircuitOpenUntil === 0) {
-    return 'closed';
-  }
-
-  if (Date.now() >= neo4jCircuitOpenUntil) {
-    return 'half-open';
-  }
-
+  if (neo4jCircuitOpenUntil === 0) return 'closed';
+  if (Date.now() >= neo4jCircuitOpenUntil) return 'half-open';
   return 'open';
 }
 
@@ -213,7 +154,6 @@ function recordNeo4jSuccess(): void {
 function recordNeo4jFailure(error: Error): void {
   neo4jFailureCount += 1;
   neo4jLastError = error.message;
-
   if (neo4jFailureCount >= NEO4J_FAILURE_THRESHOLD) {
     neo4jCircuitOpenUntil = Date.now() + NEO4J_COOLDOWN_MS;
   }
@@ -244,17 +184,14 @@ async function ensureInitialization(): Promise<void> {
   if (realDriver || initializationPromise) {
     return initializationPromise ?? Promise.resolve();
   }
-
   initializationPromise = connectToNeo4j().finally(() => {
     initializationPromise = null;
   });
-
   return initializationPromise;
 }
 
 async function connectToNeo4j(): Promise<void> {
   let candidate: Neo4jDriver | null = null;
-
   try {
     candidate = neo4j.driver(
       NEO4J_URI,
@@ -265,15 +202,12 @@ async function connectToNeo4j(): Promise<void> {
         connectionAcquisitionTimeout: POOL_ACQUISITION_TIMEOUT,
         logging: {
           level: 'info',
-          logger: (level, message) => logger.debug(`Neo4j Driver: ${message}`)
-        }
           logger: (level, message) => logger[level === 'warn' ? 'warn' : 'info'](message),
         },
       }
     );
 
     await candidate.verifyConnectivity();
-
     realDriver = candidate;
     candidate = null;
     isMockMode = false;
@@ -284,34 +218,22 @@ async function connectToNeo4j(): Promise<void> {
     if (candidate) {
       await candidate.close().catch(() => { });
     }
-
     isMockMode = true;
     neo4jConnectivityUp.set(0);
-
-    if (REQUIRE_REAL_DBS) {
-      throw error;
-    }
-
-    logger.warn(
-      `Neo4j connection failed - continuing with mock driver. Reason: ${(error as Error).message}`,
-    );
+    if (REQUIRE_REAL_DBS) throw error;
+    logger.warn(`Neo4j connection failed - continuing with mock driver. Reason: ${(error as Error).message}`);
   }
 }
 
 async function notifyDriverReady(reason: DriverReadyReason): Promise<void> {
   const listeners = Array.from(driverReadyListeners);
-
   for (const listener of listeners) {
     await invokeDriverReadyListener(listener, reason);
   }
-
   hasEmittedReadyEvent = true;
 }
 
-async function invokeDriverReadyListener(
-  listener: DriverReadyListener,
-  reason: DriverReadyReason,
-): Promise<void> {
+async function invokeDriverReadyListener(listener: DriverReadyListener, reason: DriverReadyReason): Promise<void> {
   try {
     await listener({ driver: driverFacade, reason });
   } catch (error) {
@@ -328,7 +250,6 @@ async function teardownRealDriver(): Promise<void> {
     }
     realDriver = null;
   }
-
   isMockMode = true;
   neo4jConnectivityUp.set(0);
 }
@@ -342,23 +263,15 @@ export type Neo4jHealth = {
 
 export async function checkNeo4jHealth(): Promise<Neo4jHealth> {
   const circuitState = getNeo4jCircuitState();
-
   if (circuitState === 'open') {
-    return {
-      healthy: false,
-      circuitState,
-      lastError: neo4jLastError,
-    };
+    return { healthy: false, circuitState, lastError: neo4jLastError };
   }
-
   const start = Date.now();
-
   try {
     await ensureInitialization();
     const driver = getNeo4jDriver();
     await driver.verifyConnectivity();
     recordNeo4jSuccess();
-
     return {
       healthy: true,
       circuitState: getNeo4jCircuitState(),
@@ -366,17 +279,12 @@ export async function checkNeo4jHealth(): Promise<Neo4jHealth> {
     };
   } catch (error) {
     recordNeo4jFailure(error as Error);
-
     try {
       await teardownRealDriver();
       await ensureInitialization();
     } catch (reconnectError) {
-      logger.warn(
-        'Neo4j reinitialization failed during health check',
-        reconnectError,
-      );
+      logger.warn('Neo4j reinitialization failed during health check', reconnectError);
     }
-
     return {
       healthy: false,
       circuitState: getNeo4jCircuitState(),
@@ -387,34 +295,21 @@ export async function checkNeo4jHealth(): Promise<Neo4jHealth> {
 
 function createDriverFacade(): Neo4jDriver {
   const facade: Partial<Neo4jDriver> = {};
-
   facade.session = ((options?: Parameters<Neo4jDriver['session']>[0]) => {
     if (realDriver && !circuitBreaker.canExecute()) {
-       logger.warn('Neo4j circuit breaker open - returning mock session');
-       return instrumentSession(createMockSession());
+      logger.warn('Neo4j circuit breaker open - returning mock session');
+      return instrumentSession(createMockSession());
     }
-
-    const session = realDriver
-      ? realDriver.session(options)
-      : createMockSession();
-    return instrumentSession(session, true); // true = enable circuit breaker
+    const session = realDriver ? realDriver.session(options) : createMockSession();
+    return instrumentSession(session, true);
   }) as Neo4jDriver['session'];
 
   facade.close = (async () => {
-    if (realDriver) {
-      await teardownRealDriver();
-    }
+    if (realDriver) await teardownRealDriver();
   }) as Neo4jDriver['close'];
 
-  // Expose metrics retrieval if needed (Neo4j driver doesn't expose raw pool stats easily without internal access,
-  // but we can simulate or wrap if we had a custom pool. For now, we rely on Prometheus metrics from the driver if available,
-  // or we can wrap the pool. The JS driver doesn't expose pool stats publicly easily.
-  // We will trust the driver's internal management but ensure we log pool events.)
-
   facade.verifyConnectivity = (async () => {
-    if (realDriver) {
-      return realDriver.verifyConnectivity();
-    }
+    if (realDriver) return realDriver.verifyConnectivity();
     return undefined;
   }) as Neo4jDriver['verifyConnectivity'];
 
@@ -424,9 +319,7 @@ function createDriverFacade(): Neo4jDriver {
 function createMockSession(): Neo4jSession {
   return {
     run: async (cypher: string, params?: any) => {
-      logger.debug(
-        `Mock Neo4j query: Cypher: ${cypher}, Params: ${JSON.stringify(params)}`,
-      );
+      logger.debug(`Mock Neo4j query: Cypher: ${cypher}, Params: ${JSON.stringify(params)}`);
       return {
         records: [],
         summary: { counters: { nodesCreated: 0, relationshipsCreated: 0 } },
@@ -438,16 +331,8 @@ function createMockSession(): Neo4jSession {
     writeTransaction: async (fn: any) => fn(createMockTransaction()),
     executeRead: async (fn: any) => fn(createMockTransaction()),
     executeWrite: async (fn: any) => {
-      // Mock invalidation trigger
-      import('./queryOptimizer').then(({ queryOptimizer }) => {
-        // In a real scenario we'd extract labels from the mutation
-        queryOptimizer.invalidateForLabels('mock-tenant', ['*']).catch(err => logger.warn('Cache invalidation error', err));
-      });
+      graphOptimizer.invalidate('mock-tenant', ['*']).catch(err => logger.warn('Cache invalidation error', err));
       return fn(createMockTransaction());
-        // Mock invalidation trigger
-        // In a real scenario we'd extract labels from the mutation
-        graphOptimizer.invalidate('mock-tenant', ['*']).catch(err => logger.warn('Cache invalidation error', err));
-        return fn(createMockTransaction());
     },
   } as unknown as Neo4jSession;
 }
@@ -474,278 +359,97 @@ function instrumentSession(session: any, useCircuitBreaker = false) {
 
       tx.run = async (cypher: string, params?: any) => {
         const lower = cypher.toLowerCase();
-        if (lower.includes('create') ||
-          lower.includes('merge') ||
-          lower.includes('delete') ||
-          lower.includes('set') ||
-          lower.includes('remove') ||
-          lower.includes('call')) {
+        if (['create', 'merge', 'delete', 'set', 'remove', 'call'].some(op => lower.includes(op))) {
           writesDetected = true;
         }
         return originalTxRun(cypher, params);
-          tx.run = async (cypher: string, params?: any) => {
-              const lower = cypher.toLowerCase();
-              if (lower.includes('create') ||
-                  lower.includes('merge') ||
-                  lower.includes('delete') ||
-                  lower.includes('set') ||
-                  lower.includes('remove') ||
-                  lower.includes('call')) {
-                  writesDetected = true;
-              }
-              return originalTxRun(cypher, params);
-          };
-
-          tx.commit = async () => {
-              // Invalidate BEFORE returning result to ensure Read-Your-Own-Writes consistency if possible
-              // But Neo4j commits first. So we commit, then invalidate, then return.
-              const result = await originalTxCommit();
-              if (writesDetected) {
-                  try {
-                       // Await invalidation to ensure subsequent reads see freshness
-                       await graphOptimizer.invalidate('global', ['*']);
-                  } catch (err) {
-                       logger.warn('Cache invalidation error', err);
-                  }
-              }
-              return result;
-          };
-
-          return tx;
       };
 
       tx.commit = async () => {
-        // Invalidate BEFORE returning result to ensure Read-Your-Own-Writes consistency if possible
-        // But Neo4j commits first. So we commit, then invalidate, then return.
         const result = await originalTxCommit();
         if (writesDetected) {
-          try {
-            const { queryOptimizer } = await import('./queryOptimizer');
-            // Await invalidation to ensure subsequent reads see freshness
-            await queryOptimizer.invalidateForLabels('global', ['*']);
-          } catch (err) {
-            logger.warn('Cache invalidation error', err);
-          }
+          graphOptimizer.invalidate('global', ['*']).catch(err => logger.warn('Cache invalidation error', err));
         }
         return result;
       };
-
       return tx;
     };
   }
 
   if (originalExecuteWrite) {
     session.executeWrite = async (fn: any) => {
-      try {
-        const result = await originalExecuteWrite(fn);
-        import('./queryOptimizer').then(({ queryOptimizer }) => {
-          // Attempt to fallback to a broad invalidation since we lack tenant context here
-          // ideally the transaction function would provide hints.
-          queryOptimizer.invalidateForLabels('global', ['*']).catch(err => logger.warn('Cache invalidation error', err));
-        });
-        return result;
-      } catch (error) {
-        throw error;
-      }
+      const result = await originalExecuteWrite(fn);
+      graphOptimizer.invalidate('global', ['*']).catch(err => logger.warn('Cache invalidation error', err));
+      return result;
     };
-      session.executeWrite = async (fn: any) => {
-          try {
-              const result = await originalExecuteWrite(fn);
-               // Attempt to fallback to a broad invalidation since we lack tenant context here
-               // ideally the transaction function would provide hints.
-               graphOptimizer.invalidate('global', ['*']).catch(err => logger.warn('Cache invalidation error', err));
-              return result;
-          } catch (error) {
-              throw error;
-          }
-      };
   }
 
-  session.run = (
-    cypher: string,
-    params?: any,
-    labels: { operation?: string; label?: string } = {},
-  ) => {
-    telemetry.subsystems.database.queries.add(1);
-    const startTime = Date.now();
-    try {
-      return await originalRun(cypher, params);
-    } catch (error) {
-      telemetry.subsystems.database.errors.add(1);
-      throw error;
-    } finally {
-      telemetry.subsystems.database.latency.record((Date.now() - startTime) / 1000);
-    }
+  session.run = async (cypher: string, params?: any, labels: any = {}) => {
     if (useCircuitBreaker && !circuitBreaker.canExecute()) {
-      const err = new Error('Neo4j circuit breaker is open');
-      logger.warn('Neo4j circuit breaker blocked query execution');
-      throw err;
+      throw new Error('Neo4j circuit breaker is open');
     }
 
     telemetry.subsystems.database.queries.add(1);
     const startTime = Date.now();
+    const tenantId = params?.tenantId || params?.tenant_id || 'global';
+    const lowerQuery = cypher.toLowerCase();
+
     try {
-      const result = await originalRun(cypher, params);
-      if (useCircuitBreaker) {
-        circuitBreaker.recordSuccess();
+      if (lowerQuery.startsWith('explain') || params?._skipCache) {
+        return originalRun(cypher, params);
+      }
+
+      const isWrite = ['create', 'merge', 'delete', 'set', 'remove', 'call'].some(op => lowerQuery.includes(op));
+      if (isWrite) {
+        graphOptimizer.invalidate(tenantId, ['*']).catch(err => logger.warn('Cache invalidation error', err));
+        const result = await originalRun(cypher, params);
+        if (useCircuitBreaker) circuitBreaker.recordSuccess();
+        return result;
+      }
+
+      const context = { tenantId, queryType: 'cypher' as const, priority: 'medium' as const, cacheEnabled: true };
+      const result = await graphOptimizer.executeCached(cypher, params, context, (q, p) => originalRun(q, p));
+
+      if (useCircuitBreaker) circuitBreaker.recordSuccess();
+
+      if (result && Array.isArray(result.records)) {
+        result.records = result.records.map((rec: any) => {
+          if (typeof rec.get === 'function') return rec;
+          return {
+            get: (key: string) => rec[key],
+            toObject: () => rec,
+            keys: Object.keys(rec),
+            has: (key: string) => Object.prototype.hasOwnProperty.call(rec, key),
+            ...rec
+          };
+        });
       }
       return result;
     } catch (error) {
       telemetry.subsystems.database.errors.add(1);
-      if (useCircuitBreaker) {
-        circuitBreaker.recordFailure(error as Error);
-      }
+      if (useCircuitBreaker) circuitBreaker.recordFailure(error as Error);
       throw error;
     } finally {
       const durationMs = Date.now() - startTime;
       telemetry.subsystems.database.latency.record(durationMs / 1000);
       if (durationMs > SLOW_QUERY_THRESHOLD_MS) {
-        // Asynchronously record slow query
-        // labels is defined in the arguments of the wrapper function
-        const tenantId = params?.tenantId || params?.tenant_id || undefined;
         QueryReplayService.getInstance().recordSlowQuery(cypher, params, durationMs, tenantId, labels).catch(err => {
-            logger.error(err, 'Failed to record slow Neo4j query');
+          logger.error(err, 'Failed to record slow Neo4j query');
         });
       }
     }
-
-    // Extract tenantId from params if available
-    const tenantId = params?.tenantId || params?.tenant_id || 'global';
-    const lowerQuery = cypher.toLowerCase();
-
-    // Bypass optimization for EXPLAIN queries to prevent infinite recursion
-    // Also bypass if specific flag set in params to avoid buffering in GraphStreamer
-    if (lowerQuery.startsWith('explain') || params?._skipCache) {
-      return originalRun(cypher, params);
-    }
-
-    const isWrite = lowerQuery.includes('create') ||
-      lowerQuery.includes('merge') ||
-      lowerQuery.includes('delete') ||
-      lowerQuery.includes('set') ||
-      lowerQuery.includes('remove') ||
-      lowerQuery.includes('call');
-
-    if (isWrite) {
-      // Fire-and-forget invalidation for raw queries
-      // Note: For strict consistency, use executeWrite/beginTransaction
-      import('./queryOptimizer').then(({ queryOptimizer }) => {
-        queryOptimizer.invalidateForLabels(tenantId, ['*']).catch(err => logger.warn('Cache invalidation error', err));
-      });
-      return originalRun(cypher, params);
-    } else if (lowerQuery.includes('match') || lowerQuery.includes('return')) {
-      // Return a Promise that mimics a Result (optimistic optimization)
-      // We use an async IIFE to handle the logic but return the promise immediately
-      const promise: any = (async () => {
-        const startTime = Date.now();
-        try {
-          const { queryOptimizer } = await import('./queryOptimizer');
-          const context = {
-            tenantId,
-            queryType: 'cypher' as const,
-            priority: 'medium' as const,
-            cacheEnabled: true
-          };
-
-          const result = await queryOptimizer.executeCachedQuery(cypher, params, context, (q, p) => originalRun(q, p));
-         // Fire-and-forget invalidation for raw queries
-         // Note: For strict consistency, use executeWrite/beginTransaction
-         graphOptimizer.invalidate(tenantId, ['*']).catch(err => logger.warn('Cache invalidation error', err));
-         return originalRun(cypher, params);
-    } else if (lowerQuery.includes('match') || lowerQuery.includes('return')) {
-        // Return a Promise that mimics a Result (optimistic optimization)
-        // We use an async IIFE to handle the logic but return the promise immediately
-        const promise: any = (async () => {
-            const startTime = Date.now();
-            try {
-                const context = {
-                    tenantId,
-                    queryType: 'cypher' as const,
-                    priority: 'medium' as const,
-                    cacheEnabled: true
-                };
-
-                const result = await graphOptimizer.executeCached(cypher, params, context, (q, p) => originalRun(q, p));
-
-          // Shim the records to behave like Neo4j Records (implementing .get, .toObject)
-          // This ensures compatibility with existing driver code
-          if (result && Array.isArray(result.records)) {
-            result.records = result.records.map((rec: any) => {
-              // If it already looks like a record (has .get), return it
-              if (typeof rec.get === 'function') return rec;
-
-              // Otherwise wrap plain object
-              return {
-                get: (key: string) => rec[key],
-                toObject: () => rec,
-                keys: Object.keys(rec),
-                has: (key: string) => Object.prototype.hasOwnProperty.call(rec, key),
-                ...rec // Spread properties for direct access if needed, though idiomatic Neo4j usage is via .get()
-              };
-            });
-          }
-
-          return result;
-        } catch (error) {
-          logger.warn('Query optimization failed, falling back to direct execution', error);
-          return await originalRun(cypher, params);
-        } finally {
-          telemetry.subsystems.database.latency.record((Date.now() - startTime) / 1000);
-        }
-      })();
-
-      // Shim .subscribe for compatibility
-      // Note: Caching buffers the whole result, so subscribe will receive everything at once
-      promise.subscribe = (observer: any) => {
-        promise.then((result: any) => {
-          if (result.records) {
-            result.records.forEach((r: any) => observer.onNext && observer.onNext(r));
-          }
-          if (observer.onCompleted) observer.onCompleted();
-        }).catch((err: any) => {
-          if (observer.onError) observer.onError(err);
-        });
-      };
-
-      // Shim Async Iterator for compatibility
-      promise[Symbol.asyncIterator] = async function* () {
-        const result = await promise;
-        if (result.records) {
-          for (const record of result.records) {
-            yield record;
-          }
-        }
-      };
-
-      return promise;
-    }
-
-    // Default Fallback
-    try {
-      GraphIndexAdvisorService.getInstance().recordQuery(cypher);
-    } catch (err) {
-      logger.warn('Error in GraphIndexAdvisorService.recordQuery', err);
-    }
-    return originalRun(cypher, params);
   };
+
   return session;
 }
 
-// Export a convenience object for simple queries
 export const neo = {
   run: async (cypher: string, params?: any, context?: { tenantId?: string }) => {
     const driver = getNeo4jDriver();
     const session = driver.session();
     try {
-      // If tenant context is provided, ensure parameters include it
-      // Note: This relies on the query actually using $tenantId
-      // For strict enforcement, use withTenant middleware or manual query construction
-      const finalParams = context?.tenantId
-        ? { ...params, tenantId: context.tenantId }
-        : params;
-
-      const result = await session.run(cypher, finalParams);
-      return result;
+      const finalParams = context?.tenantId ? { ...params, tenantId: context.tenantId } : params;
+      return await session.run(cypher, finalParams);
     } finally {
       await session.close();
     }

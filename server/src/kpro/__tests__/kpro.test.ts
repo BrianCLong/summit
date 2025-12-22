@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
 import crypto from 'crypto';
+import { describe, it, expect } from '@jest/globals';
 import { KnowledgePurgeReindexOrchestrator } from '../kpro.js';
 import {
   InMemoryChunkStore,
@@ -11,7 +12,6 @@ import { JsonlAuditLog } from '../audit/auditLog.js';
 import { InMemoryCacheInvalidator } from '../cache/cacheInvalidator.js';
 import type { VectorStoreAdapter } from '../adapters/vectorStoreAdapter.js';
 import type {
-import { describe, it, test, expect } from '@jest/globals';
   DocumentRecord,
   ForgetRequest,
   ReplayContext,
@@ -49,7 +49,7 @@ describe('KnowledgePurgeReindexOrchestrator', () => {
       return ids
         .map((id) => this.vectors.get(id))
         .filter((doc): doc is VectorDocument => Boolean(doc))
-        .map((doc) => ({ ...doc, metadata: { ...doc.metadata } }));
+        .map((doc) => ({ ...doc!, metadata: { ...doc!.metadata } }));
     }
 
     async upsert(documents: VectorDocument[]): Promise<void> {

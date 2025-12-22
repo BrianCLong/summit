@@ -137,18 +137,8 @@ const DEFAULT_ROLES: Record<string, { permissions: string[]; inherits?: string[]
     ],
     inherits: ['supervisor'],
   },
-    ],
-    inherits: ['supervisor'],
-  },
-    ],
-    inherits: ['supervisor'],
-  },
-    ],
-    inherits: ['supervisor'],
-  },
-    ],
-    inherits: ['supervisor'],
-  },
+  'api-admin': {
+    permissions: [
       'api_key:create', 'api_key:view', 'api_key:delete', // API Key management
       'service_account:create', 'service_account:view', 'service_account:delete', // Service Account management
       'billing:read',
@@ -297,13 +287,11 @@ export class MultiTenantRBACManager {
   }
 
   private loadDeniedEnvironments(): void {
-    // Load denied environments from environment variable
     const deniedEnvs = process.env.DENIED_ENVIRONMENTS;
     if (deniedEnvs) {
       this.config.deniedEnvironments = deniedEnvs.split(',').map(e => e.trim());
     }
 
-    // Also check for OT integrations that should be denied
     const deniedOT = process.env.DENIED_OT_SYSTEMS;
     if (deniedOT) {
       const otSystems = deniedOT.split(',').map(s => `ot:${s.trim()}`);
@@ -311,9 +299,6 @@ export class MultiTenantRBACManager {
     }
   }
 
-  /**
-   * Register a tenant configuration
-   */
   registerTenant(tenant: TenantConfig): void {
     this.tenantCache.set(tenant.id, tenant);
     logger.info('Tenant registered', {
@@ -322,16 +307,10 @@ export class MultiTenantRBACManager {
     });
   }
 
-  /**
-   * Get tenant configuration
-   */
   getTenant(tenantId: string): TenantConfig | undefined {
     return this.tenantCache.get(tenantId);
   }
 
-  /**
-   * Check if user has permission in tenant context
-   */
   hasPermission(
     user: MultiTenantUser,
     permission: string,
@@ -340,32 +319,22 @@ export class MultiTenantRBACManager {
     if (!this.config.enabled) return true;
 
     const effectiveTenantId = tenantId || user.tenantId;
-    const cacheKey = `${user.id}:${effectiveTenantId}:${permission}`;
 
-    // Check if access is denied by environment
     if (this.isEnvironmentDenied(permission)) {
       return false;
     }
 
-    // Global admin bypass
     if (user.globalRoles.includes('global-admin')) {
       return true;
     }
 
-    // Get user's roles for the tenant
     const tenantRoles = user.roles.filter(r => r.tenantId === effectiveTenantId);
 
     if (tenantRoles.length === 0) {
-      logger.debug('No roles found for tenant', {
-        userId: user.id,
-        tenantId: effectiveTenantId,
-      });
       return false;
     }
 
-    // Check each role's permissions
     for (const role of tenantRoles) {
-      // Check if role has expired
       if (role.expiresAt && role.expiresAt < new Date()) {
         continue;
       }
@@ -373,18 +342,15 @@ export class MultiTenantRBACManager {
       const roleDef = this.roleDefinitions.get(role.role);
       if (!roleDef) continue;
 
-      // Wildcard check
       if (roleDef.permissions.has('*')) {
         return true;
       }
 
-      // Exact permission check
       if (roleDef.permissions.has(permission)) {
         return true;
       }
 
-      // Resource wildcard check (e.g., entity:* matches entity:read)
-      const [resource, action] = permission.split(':');
+      const [resource] = permission.split(':');
       if (roleDef.permissions.has(`${resource}:*`)) {
         return true;
       }
@@ -393,18 +359,12 @@ export class MultiTenantRBACManager {
     return false;
   }
 
-  /**
-   * Check if environment/action is denied
-   */
   private isEnvironmentDenied(permission: string): boolean {
     return this.config.deniedEnvironments.some(env =>
       permission.startsWith(env) || permission === env
     );
   }
 
-  /**
-   * Evaluate access decision with full context
-   */
   async evaluateAccess(
     user: MultiTenantUser,
     resource: ResourceContext,
@@ -413,7 +373,6 @@ export class MultiTenantRBACManager {
     const startTime = Date.now();
     const permission = `${resource.type}:${action}`;
 
-    // Base decision
     const decision: AccessDecision = {
       allowed: false,
       reason: '',
@@ -427,7 +386,6 @@ export class MultiTenantRBACManager {
       stepUpRequired: false,
     };
 
-    // Check tenant isolation
     if (this.config.enforceTenantIsolation) {
       if (!this.checkTenantIsolation(user, resource.tenantId)) {
         decision.reason = 'Tenant isolation violation';
@@ -436,7 +394,6 @@ export class MultiTenantRBACManager {
       }
     }
 
-    // Check clearance level
     if (resource.classification) {
       if (!this.checkClearance(user, resource.classification)) {
         decision.reason = 'Insufficient clearance level';
@@ -445,7 +402,6 @@ export class MultiTenantRBACManager {
       }
     }
 
-    // Check MFA for sensitive operations
     if (this.requiresStepUp(action, resource)) {
       if (!user.mfaVerified) {
         decision.stepUpRequired = true;
@@ -455,14 +411,12 @@ export class MultiTenantRBACManager {
       }
     }
 
-    // Check RBAC permission
     if (!this.hasPermission(user, permission, resource.tenantId)) {
       decision.reason = 'Insufficient permissions';
       this.logAccessDecision(decision, Date.now() - startTime);
       return decision;
     }
 
-    // If OPA client is configured, delegate to OPA for advanced policy
     if (this.opaClient) {
       const opaDecision = await this.evaluateOPAPolicy(user, resource, action);
       if (!opaDecision.allowed) {
@@ -474,11 +428,9 @@ export class MultiTenantRBACManager {
       decision.obligations = opaDecision.obligations;
     }
 
-    // Access granted
     decision.allowed = true;
     decision.reason = 'Access granted';
 
-    // Add audit obligation for sensitive resources
     if (resource.classification && resource.classification !== 'unclassified') {
       decision.obligations = decision.obligations || [];
       decision.obligations.push({
@@ -494,22 +446,13 @@ export class MultiTenantRBACManager {
     return decision;
   }
 
-  /**
-   * Check tenant isolation
-   */
   private checkTenantIsolation(user: MultiTenantUser, resourceTenantId: string): boolean {
-    // Global admin can access all tenants
     if (user.globalRoles.includes('global-admin')) {
       return true;
     }
-
-    // Check if user belongs to the resource's tenant
     return user.tenantIds.includes(resourceTenantId);
   }
 
-  /**
-   * Check clearance level
-   */
   private checkClearance(user: MultiTenantUser, requiredClassification: string): boolean {
     const clearanceLevels: Record<string, number> = {
       'unclassified': 0,
@@ -525,9 +468,6 @@ export class MultiTenantRBACManager {
     return userLevel >= requiredLevel;
   }
 
-  /**
-   * Check if action requires step-up authentication
-   */
   private requiresStepUp(action: string, resource: ResourceContext): boolean {
     const sensitiveActions = [
       'delete', 'bulk_delete', 'export', 'bulk_export',
@@ -542,9 +482,6 @@ export class MultiTenantRBACManager {
     );
   }
 
-  /**
-   * Evaluate OPA policy
-   */
   private async evaluateOPAPolicy(
     user: MultiTenantUser,
     resource: ResourceContext,
@@ -580,9 +517,6 @@ export class MultiTenantRBACManager {
     return this.opaClient.evaluate(input);
   }
 
-  /**
-   * Log access decision for audit
-   */
   private logAccessDecision(decision: AccessDecision, durationMs: number): void {
     const logData = {
       allowed: decision.allowed,
@@ -602,14 +536,10 @@ export class MultiTenantRBACManager {
     }
   }
 
-  /**
-   * Get user's effective permissions for a tenant
-   */
   getEffectivePermissions(user: MultiTenantUser, tenantId?: string): string[] {
     const effectiveTenantId = tenantId || user.tenantId;
     const permissions = new Set<string>();
 
-    // Add permissions from global roles
     for (const globalRole of user.globalRoles) {
       const roleDef = this.roleDefinitions.get(globalRole);
       if (roleDef) {
@@ -617,9 +547,7 @@ export class MultiTenantRBACManager {
       }
     }
 
-    // Add permissions from tenant roles
     for (const role of user.roles.filter(r => r.tenantId === effectiveTenantId)) {
-      // Skip expired roles
       if (role.expiresAt && role.expiresAt < new Date()) {
         continue;
       }
@@ -629,17 +557,12 @@ export class MultiTenantRBACManager {
         roleDef.permissions.forEach(p => permissions.add(p));
       }
 
-      // Add direct permissions from role assignment
       role.permissions.forEach(p => permissions.add(p));
     }
 
-    // Filter out denied environments
     return Array.from(permissions).filter(p => !this.isEnvironmentDenied(p));
   }
 
-  /**
-   * Add custom role definition
-   */
   addRole(name: string, permissions: string[], inherits?: string[]): void {
     const allPermissions = new Set<string>(permissions);
 
@@ -660,9 +583,6 @@ export class MultiTenantRBACManager {
     logger.info('Custom role added', { name, permissions: permissions.length });
   }
 
-  /**
-   * Get configuration
-   */
   getConfig(): RBACConfig {
     return { ...this.config };
   }
@@ -690,9 +610,6 @@ export interface AuthenticatedRequest extends Request {
   accessDecision?: AccessDecision;
 }
 
-/**
- * Create multi-tenant authentication middleware
- */
 export function createMultiTenantAuth(rbac: MultiTenantRBACManager) {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -706,7 +623,6 @@ export function createMultiTenantAuth(rbac: MultiTenantRBACManager) {
         return;
       }
 
-      // Validate tenant context
       const tenantId = req.headers['x-tenant-id'] as string || user.tenantId;
 
       if (rbac.getConfig().enforceTenantIsolation) {
@@ -725,9 +641,7 @@ export function createMultiTenantAuth(rbac: MultiTenantRBACManager) {
         }
       }
 
-      // Attach tenant context
       (req as AuthenticatedRequest).tenantId = tenantId;
-
       next();
     } catch (error) {
       logger.error('Multi-tenant auth middleware error', {
@@ -741,9 +655,6 @@ export function createMultiTenantAuth(rbac: MultiTenantRBACManager) {
   };
 }
 
-/**
- * Create permission check middleware
- */
 export function requireTenantPermission(rbac: MultiTenantRBACManager, permission: string) {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -789,9 +700,6 @@ export function requireTenantPermission(rbac: MultiTenantRBACManager, permission
   };
 }
 
-/**
- * Create resource access middleware with full policy evaluation
- */
 export function requireResourceAccess(
   rbac: MultiTenantRBACManager,
   resourceType: string,

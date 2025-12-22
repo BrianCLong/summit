@@ -2,9 +2,9 @@
  * Tests for validation middleware
  */
 
+import { describe, it, expect } from '@jest/globals';
 import { validateRequest } from '../validation';
 import {
-import { describe, it, test, expect } from '@jest/globals';
   requestFactory,
   responseFactory,
   nextFactory,
@@ -19,8 +19,8 @@ describe('Validation Middleware', () => {
         const res = responseFactory();
         const next = nextFactory();
 
-        const middleware = validateRequest(schema);
-        middleware(req as any, res, next);
+        const middleware = validateRequest(schema as any);
+        middleware(req as any, res as any, next);
 
         expect(next).toHaveBeenCalled();
         expect(res.status).not.toHaveBeenCalled();
@@ -32,8 +32,8 @@ describe('Validation Middleware', () => {
         const res = responseFactory();
         const next = nextFactory();
 
-        const middleware = validateRequest(schema);
-        middleware(req as any, res, next);
+        const middleware = validateRequest(schema as any);
+        middleware(req as any, res as any, next);
 
         expect(res.status).toHaveBeenCalledWith(400);
         expect(res.json).toHaveBeenCalledWith({
@@ -48,8 +48,8 @@ describe('Validation Middleware', () => {
         const res = responseFactory();
         const next = nextFactory();
 
-        const middleware = validateRequest(schema);
-        middleware(req as any, res, next);
+        const middleware = validateRequest(schema as any);
+        middleware(req as any, res as any, next);
 
         expect(res.status).toHaveBeenCalledWith(400);
         expect(next).not.toHaveBeenCalled();
@@ -61,8 +61,8 @@ describe('Validation Middleware', () => {
         const res = responseFactory();
         const next = nextFactory();
 
-        const middleware = validateRequest(schema);
-        middleware(req as any, res, next);
+        const middleware = validateRequest(schema as any);
+        middleware(req as any, res as any, next);
 
         expect(res.status).toHaveBeenCalledWith(400);
         expect(next).not.toHaveBeenCalled();
@@ -76,8 +76,8 @@ describe('Validation Middleware', () => {
         const res = responseFactory();
         const next = nextFactory();
 
-        const middleware = validateRequest(schema);
-        middleware(req as any, res, next);
+        const middleware = validateRequest(schema as any);
+        middleware(req as any, res as any, next);
 
         expect(next).toHaveBeenCalled();
         expect(res.status).not.toHaveBeenCalled();
@@ -89,8 +89,8 @@ describe('Validation Middleware', () => {
         const res = responseFactory();
         const next = nextFactory();
 
-        const middleware = validateRequest(schema);
-        middleware(req as any, res, next);
+        const middleware = validateRequest(schema as any);
+        middleware(req as any, res as any, next);
 
         expect(res.status).toHaveBeenCalledWith(400);
         expect(res.json).toHaveBeenCalledWith({
@@ -107,8 +107,8 @@ describe('Validation Middleware', () => {
         const res = responseFactory();
         const next = nextFactory();
 
-        const middleware = validateRequest(schema);
-        middleware(req as any, res, next);
+        const middleware = validateRequest(schema as any);
+        middleware(req as any, res as any, next);
 
         expect(next).toHaveBeenCalled();
         expect(res.status).not.toHaveBeenCalled();
@@ -122,8 +122,8 @@ describe('Validation Middleware', () => {
         const res = responseFactory();
         const next = nextFactory();
 
-        const middleware = validateRequest(schema);
-        middleware(req as any, res, next);
+        const middleware = validateRequest(schema as any);
+        middleware(req as any, res as any, next);
 
         expect(res.status).toHaveBeenCalledWith(400);
         expect(res.json).toHaveBeenCalledWith({
@@ -142,8 +142,8 @@ describe('Validation Middleware', () => {
         const res = responseFactory();
         const next = nextFactory();
 
-        const middleware = validateRequest(schema);
-        middleware(req as any, res, next);
+        const middleware = validateRequest(schema as any);
+        middleware(req as any, res as any, next);
 
         expect(next).toHaveBeenCalled();
         expect(res.status).not.toHaveBeenCalled();
@@ -155,8 +155,8 @@ describe('Validation Middleware', () => {
         const res = responseFactory();
         const next = nextFactory();
 
-        const middleware = validateRequest(schema);
-        middleware(req as any, res, next);
+        const middleware = validateRequest(schema as any);
+        middleware(req as any, res as any, next);
 
         expect(res.status).toHaveBeenCalledWith(400);
         expect(res.json).toHaveBeenCalledWith({
@@ -173,8 +173,8 @@ describe('Validation Middleware', () => {
         const res = responseFactory();
         const next = nextFactory();
 
-        const middleware = validateRequest(schema);
-        middleware(req as any, res, next);
+        const middleware = validateRequest(schema as any);
+        middleware(req as any, res as any, next);
 
         expect(next).toHaveBeenCalled();
         expect(res.status).not.toHaveBeenCalled();
@@ -186,8 +186,8 @@ describe('Validation Middleware', () => {
         const res = responseFactory();
         const next = nextFactory();
 
-        const middleware = validateRequest(schema);
-        middleware(req as any, res, next);
+        const middleware = validateRequest(schema as any);
+        middleware(req as any, res as any, next);
 
         expect(res.status).toHaveBeenCalledWith(400);
         expect(res.json).toHaveBeenCalledWith({ error: 'code invalid format' });
@@ -207,8 +207,8 @@ describe('Validation Middleware', () => {
         const res = responseFactory();
         const next = nextFactory();
 
-        const middleware = validateRequest(schema);
-        middleware(req as any, res, next);
+        const middleware = validateRequest(schema as any);
+        middleware(req as any, res as any, next);
 
         expect(next).toHaveBeenCalled();
         expect(res.status).not.toHaveBeenCalled();
@@ -223,8 +223,8 @@ describe('Validation Middleware', () => {
         const res = responseFactory();
         const next = nextFactory();
 
-        const middleware = validateRequest(schema);
-        middleware(req as any, res, next);
+        const middleware = validateRequest(schema as any);
+        middleware(req as any, res as any, next);
 
         expect(res.status).toHaveBeenCalledWith(400);
         expect(res.json).toHaveBeenCalledWith({
@@ -241,8 +241,8 @@ describe('Validation Middleware', () => {
         const res = responseFactory();
         const next = nextFactory();
 
-        const middleware = validateRequest(schema);
-        middleware(req as any, res, next);
+        const middleware = validateRequest(schema as any);
+        middleware(req as any, res as any, next);
 
         expect(next).toHaveBeenCalled();
       });
@@ -253,8 +253,8 @@ describe('Validation Middleware', () => {
         const res = responseFactory();
         const next = nextFactory();
 
-        const middleware = validateRequest(schema);
-        middleware(req as any, res, next);
+        const middleware = validateRequest(schema as any);
+        middleware(req as any, res as any, next);
 
         expect(next).toHaveBeenCalled();
       });
@@ -265,8 +265,8 @@ describe('Validation Middleware', () => {
         const res = responseFactory();
         const next = nextFactory();
 
-        const middleware = validateRequest(schema);
-        middleware(req as any, res, next);
+        const middleware = validateRequest(schema as any);
+        middleware(req as any, res as any, next);
 
         expect(next).toHaveBeenCalled();
       });

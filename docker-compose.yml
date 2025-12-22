@@ -56,7 +56,7 @@ services:
       retries: 12
 
   opa:
-    image: openpolicyagent/opa:0.65.0-rootless
+    image: openpolicyagent/opa:0.65.0
     container_name: opa
     command:
       - run

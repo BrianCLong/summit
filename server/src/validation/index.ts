@@ -1,26 +1,14 @@
-// @ts-nocheck
 /**
  * Centralized Validation Utilities
  *
  * This module exports all validation schemas, validators, and sanitization utilities
  * for use across the application.
- *
- * Usage:
- * ```typescript
- * import { EmailSchema, SanitizationUtils, validateInput } from './validation';
- *
- * // Validate email
- * const result = EmailSchema.safeParse(userInput);
- *
- * // Sanitize HTML
- * const safe = SanitizationUtils.sanitizeHTML(untrustedInput);
- *
- * // Validate with helper
- * const validated = await validateInput(EntityIdSchema, params.id);
- * ```
  */
 
-// Export all validation schemas
+import { z } from 'zod';
+import { GraphQLError } from 'graphql';
+
+// Export all validation schemas from MutationValidators
 export {
   TenantIdSchema,
   EntityIdSchema,
@@ -45,10 +33,6 @@ export {
   PhoneNumberSchema,
   DateRangeSchema,
   GraphQLInputSchema,
-} from './MutationValidators.js';
-
-// Export validator classes
-export {
   BusinessRuleValidator,
   RateLimitValidator,
   SecurityValidator,
@@ -56,16 +40,11 @@ export {
   QueryValidator,
 } from './MutationValidators.js';
 
-import { z } from 'zod/v4';
-import type { ZodSchema, ZodError } from 'zod/v4';
-import { GraphQLError } from 'graphql';
-
 /**
  * Helper function to validate input against a Zod schema
  * Throws GraphQLError if validation fails
  */
 export function validateInput<T>(
-  schema: ZodSchema<T>,
   schema: z.ZodType<T>,
   data: unknown,
   errorMessage?: string
@@ -75,12 +54,10 @@ export function validateInput<T>(
   if (!result.success) {
     const errors = result.error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ');
     throw new GraphQLError(errorMessage || `Validation failed: ${errors}`, {
-      extensions: { code: 'BAD_USER_INPUT', validationErrors: result.error.issues },
-    // Cast to any to access .errors if types are mismatched due to Zod version differences
-    const error = result.error as any;
-    const errors = error.errors.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(', ');
-    throw new GraphQLError(errorMessage || `Validation failed: ${errors}`, {
-      extensions: { code: 'BAD_USER_INPUT', validationErrors: error.errors },
+      extensions: {
+        code: 'BAD_USER_INPUT',
+        validationErrors: result.error.issues
+      },
     });
   }
 
@@ -92,10 +69,9 @@ export function validateInput<T>(
  * Does not throw, returns success/error information
  */
 export function validateInputSafe<T>(
-  schema: ZodSchema<T>,
   schema: z.ZodType<T>,
   data: unknown
-): { success: true; data: T } | { success: false; errors: ZodError } {
+): { success: true; data: T } | { success: false; errors: z.ZodError } {
   const result = schema.safeParse(data);
 
   if (result.success) {
@@ -109,7 +85,6 @@ export function validateInputSafe<T>(
  * Middleware factory for Express/GraphQL context validation
  */
 export function createValidationMiddleware<T>(
-  schema: ZodSchema<T>,
   schema: z.ZodType<T>,
   dataExtractor: (req: any) => unknown
 ) {
@@ -117,13 +92,13 @@ export function createValidationMiddleware<T>(
     try {
       const data = dataExtractor(req);
       const validated = validateInput(schema, data);
-      req.validated = validated;
+      (req as any).validated = validated;
       next();
     } catch (error) {
       if (error instanceof GraphQLError) {
         res.status(400).json({
           error: error.message,
-          details: error.extensions,
+          details: (error as any).extensions,
         });
       } else {
         next(error);
@@ -149,13 +124,12 @@ export function withValidation<TArgs, TResult>(
  * Batch validation for arrays of inputs
  */
 export function validateBatch<T>(
-  schema: ZodSchema<T>,
   schema: z.ZodType<T>,
   items: unknown[],
   options?: { stopOnFirstError?: boolean }
-): { valid: T[]; errors: Array<{ index: number; errors: ZodError }> } {
+): { valid: T[]; errors: Array<{ index: number; errors: z.ZodError }> } {
   const valid: T[] = [];
-  const errors: Array<{ index: number; errors: ZodError }> = [];
+  const errors: Array<{ index: number; errors: z.ZodError }> = [];
 
   for (let i = 0; i < items.length; i++) {
     const result = schema.safeParse(items[i]);
@@ -175,8 +149,6 @@ export function validateBatch<T>(
 /**
  * Compose multiple validation schemas
  */
-export function composeValidators<T>(...validators: Array<ZodSchema<any>>): ZodSchema<T> {
-  return validators.reduce((acc, validator) => acc.and(validator)) as ZodSchema<T>;
 export function composeValidators<T>(...validators: Array<z.ZodType<any>>): z.ZodType<T> {
   return validators.reduce((acc, validator) => acc.and(validator)) as z.ZodType<T>;
 }
@@ -186,14 +158,11 @@ export function composeValidators<T>(...validators: Array<z.ZodType<any>>): z.Zo
  */
 export function conditionalValidation<T>(
   condition: (data: any) => boolean,
-  schemaTrue: ZodSchema<T>,
-  schemaFalse: ZodSchema<T>
   schemaTrue: z.ZodType<T>,
   schemaFalse: z.ZodType<T>
 ) {
   return z.any().transform((data) => {
     const schema = condition(data) ? schemaTrue : schemaFalse;
     return schema.parse(data);
-  }) as ZodSchema<T>;
-  }) as z.ZodType<T>;
+  }) as unknown as z.ZodType<T>;
 }

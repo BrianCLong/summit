@@ -1,10 +1,10 @@
-import {
 import { describe, it, expect } from '@jest/globals';
-  AnalyticsConnector,
-  AttributionResult,
-  ConversionEvent,
+import {
+  type AnalyticsConnector,
+  type AttributionResult,
+  type ConversionEvent,
   FederatedAttributionEngine,
-} from '../src/services/attribution/FederatedAttributionEngine';
+} from '../src/services/attribution/FederatedAttributionEngine.js';
 
 describe('FederatedAttributionEngine', () => {
   const baseTime = Date.now();
@@ -76,7 +76,7 @@ describe('FederatedAttributionEngine', () => {
     constructor(
       public readonly id: string,
       public readonly name: string,
-    ) {}
+    ) { }
 
     async sendAttribution(payload: {
       connectorId: string;

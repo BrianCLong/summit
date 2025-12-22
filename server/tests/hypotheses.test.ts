@@ -1,11 +1,11 @@
-import {
 import { describe, it, expect } from '@jest/globals';
+import {
   bayesianUpdate,
   applyEvidence,
   addDissent,
-  Hypothesis,
-  Evidence,
-} from '../src/hypotheses';
+  type Hypothesis,
+  type Evidence,
+} from '../src/hypotheses.js';
 
 describe('hypothesis updates', () => {
   const base: Hypothesis = {

@@ -42,7 +42,8 @@ export type CommunicationProtocol =
   | 'multicast' // One-to-many
   | 'pubsub' // Publish-subscribe
   | 'request-response' // Synchronous RPC
-  | 'fire-and-forget'; // Asynchronous messaging
+  | 'fire-and-forget' // Asynchronous messaging
+  | 'websocket'; // Real-time connection
 
 // ============================================================================
 // Mesh Node Definition
@@ -872,7 +873,7 @@ export const StartEvaluationRequestSchema = z.object({
     'optimization',
     'custom',
   ]),
-  scenarioParams: z.record(z.unknown()).default({}),
+  scenarioParams: z.record(z.string(), z.unknown()).default({}),
   baselineId: z.string().optional(),
   tags: z.array(z.string()).default([]),
 });
@@ -881,7 +882,7 @@ export const SubmitTaskRequestSchema = z.object({
   meshId: z.string(),
   type: z.string(),
   name: z.string(),
-  payload: z.record(z.unknown()),
+  payload: z.record(z.string(), z.unknown()),
   targetNodes: z.array(z.string()).optional(),
   routingStrategy: z
     .enum([

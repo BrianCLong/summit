@@ -1,6 +1,6 @@
+import { describe, it, expect } from '@jest/globals';
 import { NarrativeSimulationEngine } from '../../narrative/engine.js';
 import type {
-import { describe, it, expect } from '@jest/globals';
   SimulationConfig,
   NarrativeEvent,
   LLMClient,
@@ -8,7 +8,7 @@ import { describe, it, expect } from '@jest/globals';
 } from '../../narrative/types.js';
 
 class TestLLMClient implements LLMClient {
-  constructor(private readonly shouldFail = false) {}
+  constructor(private readonly shouldFail = false) { }
 
   async generateNarrative(request: LLMNarrativeRequest): Promise<string> {
     if (this.shouldFail) {
@@ -18,7 +18,7 @@ class TestLLMClient implements LLMClient {
   }
 }
 
-const baseEntities = [
+const baseEntities: any[] = [
   {
     id: 'actor_a',
     name: 'Mayor coalition',
@@ -55,7 +55,7 @@ const createConfig = (
   initialEntities: baseEntities.map((entity) => ({ ...entity })),
   initialParameters: [{ name: 'public_trust', value: 0.4 }],
   ...overrides,
-});
+} as any);
 
 describe('NarrativeSimulationEngine', () => {
   it('applies queued events and updates entity sentiment and arcs', async () => {

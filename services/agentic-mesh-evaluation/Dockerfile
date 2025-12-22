@@ -15,7 +15,7 @@ RUN corepack enable && corepack prepare pnpm@9.12.0 --activate
 COPY package.json pnpm-lock.yaml* ./
 
 # Install dependencies
-RUN pnpm install --frozen-lockfile --prod
+RUN pnpm install --prod
 
 # ==============================================================================
 # Stage 2: Builder
@@ -31,7 +31,7 @@ RUN corepack enable && corepack prepare pnpm@9.12.0 --activate
 COPY package.json pnpm-lock.yaml* tsconfig.json ./
 
 # Install ALL dependencies (including dev)
-RUN pnpm install --frozen-lockfile
+RUN pnpm install
 
 # Copy source code
 COPY src ./src
@@ -55,7 +55,7 @@ RUN apk --no-cache upgrade
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001
+  adduser -S nodejs -u 1001
 
 WORKDIR /app
 

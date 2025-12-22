@@ -5,6 +5,7 @@ WORKDIR /app
 # Copy root package files
 COPY package*.json ./
 COPY tsconfig.base.json ./
+COPY lib ./lib
 
 # Install root dependencies
 RUN npm install --legacy-peer-deps

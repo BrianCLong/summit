@@ -1,9 +1,9 @@
-import {
 import { describe, it, expect } from '@jest/globals';
-  ActorAwarenessResult,
-  ActorSignal,
+import {
+  type ActorAwarenessResult,
+  type ActorSignal,
   StochasticActorAwareness,
-} from '../../src/services/StochasticActorAwareness';
+} from '../../src/services/StochasticActorAwareness.js';
 
 describe('StochasticActorAwareness', () => {
   it('returns stable probabilities when noise is disabled', () => {

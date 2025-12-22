@@ -2,13 +2,11 @@
  * GraphQL Resolvers for Agentic Mesh Evaluation
  */
 
-import type {
-  MeshCoordinator,
-  EvaluationEngine,
-  MetricsCollector,
-  MeshRegistry,
-  CommunicationFabric,
-} from '../index.js';
+import type { MeshCoordinator } from '../coordinator/MeshCoordinator.js';
+import type { EvaluationEngine } from '../evaluation/EvaluationEngine.js';
+import type { MetricsCollector } from '../metrics/MetricsCollector.js';
+import type { MeshRegistry } from '../registry/MeshRegistry.js';
+import type { CommunicationFabric } from '../fabric/CommunicationFabric.js';
 
 export interface ResolverContext {
   coordinator: typeof MeshCoordinator.prototype;

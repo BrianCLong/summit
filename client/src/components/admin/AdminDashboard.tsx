@@ -295,7 +295,7 @@ export default function AdminDashboard() {
       </Box>
 
       <Grid container spacing={2}>
-        <Grid item xs={12} md={7}>
+        <Grid xs={12} md={7}>
           <Card variant="outlined">
             <CardHeader
               title={<SectionHeader icon={<ManageAccounts />} title="User management" subtitle="Roles, status, and impersonation" />}
@@ -334,7 +334,7 @@ export default function AdminDashboard() {
 
               <Grid container spacing={2}>
                 {users.map((user) => (
-                  <Grid item xs={12} key={user.id}>
+                  <Grid xs={12} key={user.id}>
                     <Stack
                       direction={{ xs: 'column', sm: 'row' }}
                       spacing={2}
@@ -397,7 +397,7 @@ export default function AdminDashboard() {
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={5}>
+        <Grid xs={12} md={5}>
           <Card variant="outlined" sx={{ height: '100%' }}>
             <CardHeader
               title={<SectionHeader icon={<SettingsApplications />} title="Platform configuration" subtitle="Feature flags and guardrails" />}
@@ -464,7 +464,7 @@ export default function AdminDashboard() {
       </Grid>
 
       <Grid container spacing={2}>
-        <Grid item xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Card variant="outlined">
             <CardHeader
               title={<SectionHeader icon={<Assessment />} title="Audit log" subtitle="Filter by severity" />}
@@ -502,7 +502,7 @@ export default function AdminDashboard() {
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Card variant="outlined">
             <CardHeader
               title={<SectionHeader icon={<AutoGraph />} title="Usage & licensing" subtitle="Resource posture and entitlements" />}
@@ -510,7 +510,7 @@ export default function AdminDashboard() {
             <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Grid container spacing={1}>
                 {resourceUsage.map((item) => (
-                  <Grid item xs={12} sm={6} key={item.name}>
+                  <Grid xs={12} sm={6} key={item.name}>
                     <Card variant="outlined">
                       <CardContent>
                         <Typography variant="subtitle1">{item.name}</Typography>
@@ -553,7 +553,7 @@ export default function AdminDashboard() {
         <CardContent>
           <Grid container spacing={2}>
             {serviceHealth.map((svc) => (
-              <Grid item xs={12} sm={6} md={3} key={svc.name}>
+              <Grid xs={12} sm={6} md={3} key={svc.name}>
                 <Card variant="outlined">
                   <CardContent>
                     <Stack spacing={0.5}>

@@ -54,7 +54,8 @@
     "release": "changeset version && changeset publish",
     "precommit": "lint-staged",
     "db:prisma:diff": "prisma migrate diff --from-url $DATABASE_URL --to-schema-datamodel prisma/schema.prisma",
-    "db:knex:smoke": "knex migrate:down && knex migrate:up"
+    "db:knex:smoke": "knex migrate:down && knex migrate:up",
+    "prepare": "husky"
   },
   "keywords": [
     "intelligence-analysis",
@@ -85,30 +86,33 @@
     "@typescript-eslint/eslint-plugin": "^8.15.0",
     "@typescript-eslint/parser": "^8.15.0",
     "concurrently": "^9.2.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-jest": "^29.6.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.26",
     "globals": "^15.12.0",
     "husky": "^9.1.7",
     "jest": "^29.7.0",
     "jest-watch-typeahead": "^2.2.2",
-    "lint-staged": "^16.1.5",
+    "lint-staged": "^16.2.7",
     "markdownlint-cli": "^0.45.0",
     "prettier": "^3.6.2",
     "semantic-release": "^24.2.7",
     "ts-jest": "^29.2.6",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.50.0"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
+    "server/**/*.{ts,js}": [
       "eslint --fix",
-      "prettier -w"
+      "pnpm typecheck"
     ],
-    "*.py": [
-      "pre-commit run -a --hook-stage pre-commit"
+    "client/**/*.{ts,tsx}": [
+      "eslint --fix"
     ],
-    "*.graphql": [
-      "graphql-schema-linter"
-    ],
-    "*.{md,css,scss,json,yml,yaml}": [
-      "prettier -w"
+    "services/**/*.{ts,js}": [
+      "eslint --fix"
     ]
   },
   "release": {

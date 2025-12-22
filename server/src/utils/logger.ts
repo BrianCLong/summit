@@ -1,18 +1,14 @@
-// @ts-ignore
 import { default as pino } from 'pino';
 
-// @ts-ignore - pino types conflict with module resolution
-const pinoLogger = pino({
 /**
- * Global application logger configured with Winston.
+ * Global application logger configured with Pino.
  *
  * Features:
  * - JSON formatting for structured logging.
- * - Timestamp and error stack trace inclusion.
- * - Console transport for non-production environments.
- * - File transports for errors and combined logs.
+ * - Timestamp inclusion.
+ * - Optimized for performance.
  */
-const logger = winston.createLogger({
+const logger = pino({
   level: process.env.LOG_LEVEL || 'info',
   base: { service: 'intelgraph-api' },
   timestamp: () => `,"time":"${new Date().toISOString()}"`,
@@ -23,5 +19,5 @@ const logger = winston.createLogger({
   },
 });
 
-export const logger = pinoLogger;
-export default pinoLogger;
+export { logger };
+export default logger;

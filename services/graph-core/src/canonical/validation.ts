@@ -11,7 +11,7 @@
  * @module graph-core/canonical/validation
  */
 
-import { z, type SafeParseReturnType } from 'zod';
+import { z } from 'zod';
 import {
   CanonicalEntityType,
   CanonicalRelationshipType,
@@ -22,6 +22,7 @@ import {
   ProvenanceAction,
   requiresLegalBasis,
 } from './types.js';
+import { EntityBaseSchema, RelationshipBaseSchema } from '../schema.js';
 
 // =============================================================================
 // ENUM SCHEMAS
@@ -188,50 +189,50 @@ export function getDefaultProvenanceChain(
   };
 }
 
+const EntityBaseInternalSchema = EntityBaseSchema.extend({
+  // Identity
+  canonicalId: z.string().uuid().nullable().optional(),
+  tenantId: z.string().min(1).default('default'),
+
+  // Core
+  entityType: EntityTypeSchema,
+  label: z.string().min(1, 'label is required'),
+  description: z.string().optional(),
+
+  // Properties
+  properties: z.record(z.string(), z.unknown()).default({}),
+  customMetadata: z.record(z.string(), z.unknown()).optional(),
+
+  // Quality
+  confidence: z.number().min(0).max(1).default(0.5),
+  source: z.string().min(1).default('api'),
+
+  // Provenance
+  provenance: ProvenanceChainSchema.optional(),
+
+  // Policy (required fields enforced by PolicyLabelsSchema)
+  policyLabels: PolicyLabelsSchema.optional(),
+
+  // Bitemporal
+  validFrom: z.coerce.date().nullable().optional(),
+  validTo: z.coerce.date().nullable().optional(),
+  observedAt: z.coerce.date().nullable().optional(),
+
+  // Audit
+  createdBy: z.string().min(1).default('system'),
+
+  // Categorization
+  tags: z.array(z.string()).default([]),
+
+  // Context
+  investigationId: z.string().optional(),
+  caseId: z.string().optional(),
+});
+
 /**
  * Entity creation/update input schema
  */
-export const EntityInputSchema = z
-  .object({
-    // Identity
-    id: z.string().uuid().optional(),
-    canonicalId: z.string().uuid().nullable().optional(),
-    tenantId: z.string().min(1).default('default'),
-
-    // Core
-    entityType: EntityTypeSchema,
-    label: z.string().min(1, 'label is required'),
-    description: z.string().optional(),
-
-    // Properties
-    properties: z.record(z.string(), z.unknown()).default({}),
-    customMetadata: z.record(z.string(), z.unknown()).optional(),
-
-    // Quality
-    confidence: z.number().min(0).max(1).default(0.5),
-    source: z.string().min(1).default('api'),
-
-    // Provenance
-    provenance: ProvenanceChainSchema.optional(),
-
-    // Policy (required fields enforced by PolicyLabelsSchema)
-    policyLabels: PolicyLabelsSchema.optional(),
-
-    // Bitemporal
-    validFrom: z.coerce.date().nullable().optional(),
-    validTo: z.coerce.date().nullable().optional(),
-    observedAt: z.coerce.date().nullable().optional(),
-
-    // Audit
-    createdBy: z.string().min(1).default('system'),
-
-    // Categorization
-    tags: z.array(z.string()).default([]),
-
-    // Context
-    investigationId: z.string().optional(),
-    caseId: z.string().optional(),
-  })
+export const EntityInputSchema = EntityBaseInternalSchema
   .transform((data) => ({
     ...data,
     policyLabels: data.policyLabels ?? getDefaultPolicyLabels(),
@@ -244,7 +245,7 @@ export const EntityInputSchema = z
 /**
  * Entity stored format (with system-managed fields)
  */
-export const EntityStoredSchema = EntityInputSchema.extend({
+export const EntityStoredSchema = EntityBaseInternalSchema.extend({
   id: z.string().uuid(),
   recordedAt: z.coerce.date(),
   createdAt: z.coerce.date(),
@@ -257,59 +258,59 @@ export const EntityStoredSchema = EntityInputSchema.extend({
 // RELATIONSHIP INPUT SCHEMA
 // =============================================================================
 
-/**
- * Relationship creation/update input schema
- */
-export const RelationshipInputSchema = z
-  .object({
-    // Identity
-    id: z.string().uuid().optional(),
-    tenantId: z.string().min(1).default('default'),
+const RelationshipBaseInternalSchema = RelationshipBaseSchema.extend({
+  // Identity
+  tenantId: z.string().min(1).default('default'),
 
-    // Structure
-    type: RelationshipTypeSchema,
-    label: z.string().optional(),
-    description: z.string().optional(),
-    fromEntityId: z.string().uuid('fromEntityId must be a valid UUID'),
-    toEntityId: z.string().uuid('toEntityId must be a valid UUID'),
-    directed: z.boolean().default(true),
-    weight: z.number().min(0).max(1).optional(),
+  // Structure
+  type: RelationshipTypeSchema,
+  label: z.string().optional(),
+  description: z.string().optional(),
+  fromEntityId: z.string().uuid('fromEntityId must be a valid UUID'),
+  toEntityId: z.string().uuid('toEntityId must be a valid UUID'),
+  directed: z.boolean().default(true),
+  weight: z.number().min(0).max(1).optional(),
 
-    // Properties
-    properties: z.record(z.string(), z.unknown()).default({}),
-    customMetadata: z.record(z.string(), z.unknown()).optional(),
+  // Properties
+  properties: z.record(z.string(), z.unknown()).default({}),
+  customMetadata: z.record(z.string(), z.unknown()).optional(),
 
-    // Quality
-    confidence: z.number().min(0).max(1).default(0.5),
-    source: z.string().min(1).default('api'),
+  // Quality
+  confidence: z.number().min(0).max(1).default(0.5),
+  source: z.string().min(1).default('api'),
 
-    // Provenance
-    provenance: ProvenanceChainSchema.optional(),
+  // Provenance
+  provenance: ProvenanceChainSchema.optional(),
 
-    // Policy (required fields enforced by PolicyLabelsSchema)
-    policyLabels: PolicyLabelsSchema.optional(),
+  // Policy (required fields enforced by PolicyLabelsSchema)
+  policyLabels: PolicyLabelsSchema.optional(),
 
-    // Bitemporal
-    validFrom: z.coerce.date().nullable().optional(),
-    validTo: z.coerce.date().nullable().optional(),
-    observedAt: z.coerce.date().nullable().optional(),
-    since: z.coerce.date().optional(),
-    until: z.coerce.date().optional(),
+  // Bitemporal
+  validFrom: z.coerce.date().nullable().optional(),
+  validTo: z.coerce.date().nullable().optional(),
+  observedAt: z.coerce.date().nullable().optional(),
+  since: z.coerce.date().optional(),
+  until: z.coerce.date().optional(),
 
-    // Audit
-    createdBy: z.string().min(1).default('system'),
+  // Audit
+  createdBy: z.string().min(1).default('system'),
 
-    // Context
-    investigationId: z.string().optional(),
-    caseId: z.string().optional(),
-  })
+  // Context
+  investigationId: z.string().optional(),
+  caseId: z.string().optional(),
+})
   .refine(
     (data) => data.fromEntityId !== data.toEntityId,
     {
       message: 'Self-loops not allowed: fromEntityId cannot equal toEntityId',
       path: ['toEntityId'],
     }
-  )
+  );
+
+/**
+ * Relationship creation/update input schema
+ */
+export const RelationshipInputSchema = RelationshipBaseInternalSchema
   .transform((data) => ({
     ...data,
     policyLabels: data.policyLabels ?? getDefaultPolicyLabels(),
@@ -322,7 +323,7 @@ export const RelationshipInputSchema = z
 /**
  * Relationship stored format (with system-managed fields)
  */
-export const RelationshipStoredSchema = RelationshipInputSchema.extend({
+export const RelationshipStoredSchema = RelationshipBaseSchema.extend({ // Changed from RelationshipBaseInternalSchema.extend
   id: z.string().uuid(),
   recordedAt: z.coerce.date(),
   createdAt: z.coerce.date(),
@@ -417,36 +418,28 @@ export const QueryCostLimits = {
 /**
  * Validate entity input
  */
-export function validateEntityInput(
-  input: unknown
-): SafeParseReturnType<unknown, z.infer<typeof EntityInputSchema>> {
+export function validateEntityInput(input: unknown) {
   return EntityInputSchema.safeParse(input);
 }
 
 /**
  * Validate relationship input
  */
-export function validateRelationshipInput(
-  input: unknown
-): SafeParseReturnType<unknown, z.infer<typeof RelationshipInputSchema>> {
+export function validateRelationshipInput(input: unknown) {
   return RelationshipInputSchema.safeParse(input);
 }
 
 /**
  * Validate policy labels
  */
-export function validatePolicyLabels(
-  input: unknown
-): SafeParseReturnType<unknown, z.infer<typeof PolicyLabelsSchema>> {
+export function validatePolicyLabels(input: unknown) {
   return PolicyLabelsSchema.safeParse(input);
 }
 
 /**
  * Validate neighborhood query
  */
-export function validateNeighborhoodQuery(
-  input: unknown
-): SafeParseReturnType<unknown, z.infer<typeof NeighborhoodQuerySchema>> {
+export function validateNeighborhoodQuery(input: unknown) {
   return NeighborhoodQuerySchema.safeParse(input);
 }
 

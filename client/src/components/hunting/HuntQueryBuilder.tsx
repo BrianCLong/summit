@@ -241,7 +241,7 @@ export const HuntQueryBuilder: React.FC = () => {
 
       <Grid container spacing={3}>
         {/* Left Panel - Templates & Parameters */}
-        <Grid item xs={12} md={5}>
+        <Grid xs={12} md={5}>
           <Card sx={{ mb: 2 }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -404,7 +404,7 @@ export const HuntQueryBuilder: React.FC = () => {
         </Grid>
 
         {/* Right Panel - Query Editor & Results */}
-        <Grid item xs={12} md={7}>
+        <Grid xs={12} md={7}>
           <Card sx={{ mb: 2 }}>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>

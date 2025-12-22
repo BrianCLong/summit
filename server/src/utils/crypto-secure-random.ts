@@ -3,16 +3,9 @@
  *
  * This module provides cryptographically secure alternatives to Math.random()
  * for security-sensitive operations.
- *
- * SECURITY: Never use Math.random() for security-sensitive operations such as:
- * - Generating tokens, session IDs, or API keys
- * - Creating cryptographic nonces or IVs
- * - Generating passwords or secrets
- * - Any operation where unpredictability is a security requirement
  */
 
 import * as crypto from 'crypto';
-
 
 /**
  * Generate a cryptographically secure random string
@@ -22,9 +15,7 @@ import * as crypto from 'crypto';
  */
 export function randomString(
   length: number = 32,
-  // eslint-disable-next-line no-undef
   encoding: BufferEncoding = 'hex'
-  encoding: NodeJS.BufferEncoding = 'hex'
 ): string {
   const bytes = Math.ceil(length / 2);
   return crypto.randomBytes(bytes).toString(encoding).slice(0, length);
@@ -40,7 +31,6 @@ export function randomInt(min: number, max: number): number {
   if (min >= max) {
     throw new Error('min must be less than max');
   }
-
   return crypto.randomInt(min, max);
 }
 
@@ -49,10 +39,8 @@ export function randomInt(min: number, max: number): number {
  * @returns A cryptographically secure random float
  */
 export function randomFloat(): number {
-  // Generate 4 bytes (32 bits) for good precision
   const buffer = crypto.randomBytes(4);
   const value = buffer.readUInt32BE(0);
-  // Divide by max 32-bit unsigned int to get a value between 0 and 1
   return value / 0xFFFFFFFF;
 }
 
@@ -92,7 +80,6 @@ export function generateId(prefix?: string): string {
 /**
  * SECURITY WARNING: This function is for non-cryptographic purposes only
  * Use for things like jitter in retry logic, sampling, etc.
- * For security-sensitive operations, use the cryptographically secure alternatives above
  */
 export function insecureRandom(): number {
   console.warn(

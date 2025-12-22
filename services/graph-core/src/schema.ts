@@ -26,8 +26,8 @@ export const PolicyTags = z.object({
   needToKnow: z.string().optional(),
 });
 
-export const EntitySchema = z.object({
-  id: z.string().optional(),
+export const EntityBaseSchema = z.object({
+  id: z.string().uuid().optional(),
   type: EntityType,
   attributes: z.record(z.string(), z.any()).default({}),
   validFrom: z.string().datetime().optional(),
@@ -35,16 +35,20 @@ export const EntitySchema = z.object({
   policy: PolicyTags.optional(),
 });
 
-export const RelationshipSchema = z.object({
-  id: z.string().optional(),
-  from: z.string(),
-  to: z.string(),
+export const EntitySchema = EntityBaseSchema;
+
+export const RelationshipBaseSchema = z.object({
+  id: z.string().uuid().optional(),
+  from: z.string().uuid(),
+  to: z.string().uuid(),
   type: z.string(),
   attributes: z.record(z.string(), z.any()).default({}),
   validFrom: z.string().datetime().optional(),
   validTo: z.string().datetime().optional(),
   policy: PolicyTags.optional(),
 });
+
+export const RelationshipSchema = RelationshipBaseSchema;
 
 export type Entity = z.infer<typeof EntitySchema>;
 export type Relationship = z.infer<typeof RelationshipSchema>;

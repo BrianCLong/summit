@@ -64,7 +64,7 @@ db-seed:
 
 # ---- IntelGraph S25 Merge Orchestrator (Legacy/Specific) ---------------------
 
-SHELL := /usr/bin/env bash
+SHELL := /bin/bash
 .ONESHELL:
 .SHELLFLAGS := -eo pipefail -c
 MAKEFLAGS += --no-builtin-rules

@@ -1,6 +1,6 @@
 import * as crypto from 'crypto';
-import {
 import { describe, it, expect } from '@jest/globals';
+import {
   DataSubjectFulfillmentEngine,
   ExportPackSigner,
   InMemoryElasticsearchConnector,
@@ -15,7 +15,7 @@ import { describe, it, expect } from '@jest/globals';
   type DSARDeletionResponse,
   type DSARExportResponse,
   type DSARRectificationResponse,
-} from '../../src/privacy/dsar';
+} from '../../src/privacy/dsar.js';
 
 const subjectId = 'sub-001';
 const tenantId = 'tenant-a';

@@ -2,8 +2,8 @@
  * Unit tests for Resilience Patterns
  */
 
+import { describe, it, expect } from '@jest/globals';
 import {
-import { describe, it, test, expect } from '@jest/globals';
   CircuitBreaker,
   CircuitBreakerOpenError,
   RateLimiter,
@@ -168,7 +168,7 @@ describe('CircuitBreaker', () => {
       });
 
       const events: Array<{ from: string; to: string }> = [];
-      cb.on('stateChange', (e) => events.push(e));
+      cb.on('stateChange', (e: any) => events.push(e));
 
       // Trip circuit
       await expect(cb.execute(async () => { throw new Error('fail'); })).rejects.toThrow();
@@ -416,7 +416,7 @@ describe('ResilienceManager', () => {
     manager.getCircuitBreaker('partner-2');
     manager.getRateLimiter('partner-1');
 
-    const metrics = manager.getMetrics();
+    const metrics = (manager as any).getMetrics();
 
     expect(metrics.circuitBreakers['partner-1']).toBeDefined();
     expect(metrics.circuitBreakers['partner-2']).toBeDefined();

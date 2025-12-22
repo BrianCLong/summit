@@ -1,9 +1,9 @@
-import {
 import { describe, it, expect } from '@jest/globals';
+import {
   ObligationTrackerService,
-  ObligationClause,
-  EvidenceWebhookPayload,
-} from './ObligationTrackerService';
+  type ObligationClause,
+  type EvidenceWebhookPayload,
+} from './ObligationTrackerService.js';
 
 describe('ObligationTrackerService', () => {
   const baseClause: ObligationClause = {
@@ -83,7 +83,7 @@ describe('ObligationTrackerService', () => {
     expect(escalations.map((e) => e.level.id)).toEqual(['manager', 'director']);
     expect(escalations.every((e) => e.taskId === task.id)).toBe(true);
 
-    const updatedTask = service.exportProofPack('clause-1').clauses[0].tasks[0];
+    const updatedTask = (service as any).exportProofPack('clause-1').clauses[0].tasks[0];
     expect(updatedTask.status).toBe('overdue');
   });
 

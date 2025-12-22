@@ -1,10 +1,10 @@
 import { generateKeyPairSync } from 'crypto';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import {
   LegalHoldOrchestrator,
   InMemoryLegalHoldRepository,
-} from '../src/cases/legal-hold/orchestrator';
-import {
-import { describe, it, test, expect, beforeEach } from '@jest/globals';
+} from '../src/cases/legal-hold/orchestrator.js';
+import type {
   ChainOfCustodyAdapter,
   EDiscoveryCollectionRequest,
   EDiscoveryCollectionResult,
@@ -15,7 +15,7 @@ import { describe, it, test, expect, beforeEach } from '@jest/globals';
   PreservationHoldInput,
   PreservationHoldResult,
   PreservationVerificationResult,
-} from '../src/cases/legal-hold/types';
+} from '../src/cases/legal-hold/types.js';
 
 describe('LegalHoldOrchestrator', () => {
   const baseScope: PreservationDataScope = {
@@ -259,7 +259,7 @@ class MockNotificationDispatcher implements LegalHoldNotificationDispatcher {
     status: 'queued' | 'sent' | 'failed';
   }> {
     this.sent += 1;
-    return { id: `notif-${this.sent}`, status: 'sent' };
+    return { id: `notif-${this.sent}`, status: 'sent' as const };
   }
 }
 

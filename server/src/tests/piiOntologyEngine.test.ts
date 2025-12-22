@@ -1,11 +1,11 @@
-import {
 import { describe, it, expect, beforeAll } from '@jest/globals';
-  DataRecord,
+import {
+  type DataRecord,
   PiiOntologyEngine,
-  PIICategory,
-  RegulatoryFramework,
-  TrainingSample,
-} from '../privacy/piiOntologyEngine';
+  type PIICategory,
+  type RegulatoryFramework,
+  type TrainingSample,
+} from '../privacy/piiOntologyEngine.js';
 
 describe('PiiOntologyEngine', () => {
   let engine: PiiOntologyEngine;
@@ -154,7 +154,7 @@ describe('PiiOntologyEngine', () => {
       expect.arrayContaining(['Encrypt data at rest and in transit']),
     );
     expect(
-      emailEntity?.regulatoryMappings.map((mapping) => mapping.framework),
+      emailEntity?.regulatoryMappings.map((mapping: any) => mapping.framework),
     ).toEqual(expect.arrayContaining<RegulatoryFramework>(['GDPR', 'CCPA']));
 
     const healthEntity = report.entities.find(
@@ -164,10 +164,10 @@ describe('PiiOntologyEngine', () => {
     expect(healthEntity?.categories).toContain('HEALTH');
     expect(
       healthEntity?.sensitivity === 'HIGH' ||
-        healthEntity?.sensitivity === 'CRITICAL',
+      healthEntity?.sensitivity === 'CRITICAL',
     ).toBe(true);
     expect(
-      healthEntity?.regulatoryMappings.map((mapping) => mapping.framework),
+      healthEntity?.regulatoryMappings.map((mapping: any) => mapping.framework),
     ).toContain('HIPAA');
 
     const identifierEntity = report.entities.find(
@@ -231,7 +231,7 @@ describe('PiiOntologyEngine', () => {
       expect.arrayContaining<RegulatoryFramework>(['GDPR', 'CCPA', 'HIPAA']),
     );
 
-    const gdprSummary = report.regulatorySummary.GDPR;
+    const gdprSummary = (report.regulatorySummary as any).GDPR;
     expect(gdprSummary.entities).toBeGreaterThanOrEqual(1);
     expect(gdprSummary.categories.length).toBeGreaterThan(0);
     expect(gdprSummary.obligations).toEqual(

@@ -166,7 +166,7 @@ server.get<{ Params: { id: string } }>(
 // Create new mesh
 server.post<{ Body: any }>('/api/v1/meshes', async (request, reply) => {
   try {
-    const mesh = await coordinator.createMesh(request.body);
+    const mesh = await coordinator.createMesh(request.body as any);
     return { data: mesh };
   } catch (error: any) {
     reply.status(400);
@@ -180,7 +180,7 @@ server.post<{ Body: any }>(
   async (request, reply) => {
     try {
       const evaluation = await evaluationEngine.startEvaluation(
-        request.body
+        request.body as any
       );
       return { data: evaluation };
     } catch (error: any) {
@@ -226,7 +226,7 @@ server.get<{ Querystring: { meshId?: string } }>(
 // Submit task
 server.post<{ Body: any }>('/api/v1/tasks', async (request, reply) => {
   try {
-    const task = await coordinator.submitTask(request.body);
+    const task = await coordinator.submitTask(request.body as any);
     return { data: task };
   } catch (error: any) {
     reply.status(400);

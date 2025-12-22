@@ -1,6 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import {
-import { describe, it, test, expect, beforeEach } from '@jest/globals';
   createTicket,
   getTicketById,
   listTickets,
@@ -11,9 +10,9 @@ import { describe, it, test, expect, beforeEach } from '@jest/globals';
 } from '../src/services/support-tickets.js';
 
 // Mock the postgres pool
-vi.mock('../src/db/postgres.js', () => ({
+jest.mock('../src/db/postgres.js', () => ({
   getPostgresPool: () => ({
-    query: vi.fn().mockResolvedValue({
+    query: jest.fn<any>().mockResolvedValue({
       rows: [
         {
           id: 'test-uuid',
@@ -40,7 +39,7 @@ vi.mock('../src/db/postgres.js', () => ({
 
 describe('Support Tickets Service', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('createTicket', () => {
