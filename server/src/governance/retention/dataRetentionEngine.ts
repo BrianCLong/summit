@@ -22,6 +22,7 @@ import {
   PinoRetentionAuditLogger,
   RetentionAuditLogger,
 } from './auditLogger.js';
+import { LitigationHoldService } from '../litigation/litigationHoldService.js';
 
 export interface DataRetentionEngineOptions {
   pool: Pool;
@@ -29,6 +30,7 @@ export interface DataRetentionEngineOptions {
   scheduler?: RetentionScheduler;
   repository?: DataRetentionRepository;
   runCypher?: (cypher: string, params?: Record<string, any>) => Promise<any>;
+  holdService?: LitigationHoldService;
 }
 
 interface ComplianceReportRow {
@@ -62,6 +64,7 @@ export class DataRetentionEngine {
     cypher: string,
     params?: Record<string, any>,
   ) => Promise<any>;
+  private readonly holdService?: LitigationHoldService;
 
   constructor(options: DataRetentionEngineOptions) {
     this.pool = options.pool;
@@ -70,6 +73,7 @@ export class DataRetentionEngine {
     this.scheduler = options.scheduler ?? new RetentionScheduler();
     this.auditLogger = options.auditLogger ?? new PinoRetentionAuditLogger();
     this.cypherRunner = options.runCypher ?? runCypher;
+    this.holdService = options.holdService;
   }
 
   listPolicyTemplates() {
@@ -250,6 +254,19 @@ export class DataRetentionEngine {
       }
 
       await this.repository.setLegalHold(datasetId, undefined);
+    }
+
+    if (this.holdService?.hasActiveHold(datasetId)) {
+      await this.auditLogger.log({
+        event: 'purge.skipped',
+        datasetId,
+        policyId: record.policy.templateId,
+        severity: 'warn',
+        message: 'Purge blocked by active litigation hold registry entry',
+        metadata: { source: 'litigation-hold-service' },
+        timestamp: new Date(),
+      });
+      return;
     }
 
     await this.performPostgresPurge(record);
