@@ -134,6 +134,12 @@ Located in repository root (`/SPRINT_*.md`)
 - OPA Policy Gates
 - Evidence Pack v0.1
 
+### Production Readiness & Pilot Series
+
+| Sprint | File | Focus | Status |
+|--------|------|-------|--------|
+| **Productionization + Moat Lock** | `SPRINT_N+3_PRODUCTION_READY.md` | Production readiness, defensible moat, first pilot | 🟦 Planned |
+
 ---
 
 ## Strategic Parallel Sprints
