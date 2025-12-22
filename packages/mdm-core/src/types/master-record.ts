@@ -31,7 +31,12 @@ export interface CrossReference {
 }
 
 export interface SurvivorshipRule {
-  attributeName: string;
+  /**
+   * Primary attribute name to apply survivorship against. Field name alias is
+   * supported for legacy callers.
+   */
+  attributeName?: string;
+  fieldName?: string;
   strategy: SurvivorshipStrategy;
   priority: number;
   customLogic?: (sources: SourceRecord[]) => unknown;
@@ -142,5 +147,11 @@ export interface MasterRecordMetadata {
   dataOwner?: string;
   lastCertifiedAt?: Date;
   lastCertifiedBy?: string;
+  recordType?: string;
+  tenantId?: string;
+  retentionExpiresAt?: Date;
+  legalHolds?: string[];
+  integrityHash?: string;
+  versionChecksum?: string;
   customAttributes: Record<string, unknown>;
 }
