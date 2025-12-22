@@ -8,6 +8,16 @@ Our core principle is **Deployable First**: if the local environment is broken, 
 
 ---
 
+## 🗓️ Day-One Plan (15–30 minutes)
+
+1. **Clone & verify**: `git clone … && cd summit && ./scripts/validate-env.sh`.
+2. **Boot the stack**: `npm run quickstart -- --ai --kafka` (or omit flags for the base stack). This command validates required paths, installs dependencies, seeds the demo dataset, and launches both API and UI.
+3. **Read the runbooks**: keep [RUNBOOK.md](../RUNBOOK.md), [RUNBOOKS/CI.md](../RUNBOOKS/CI.md), and [RUNBOOKS/ONCALL.md](../RUNBOOKS/ONCALL.md) open while you work; they mirror the golden path checks in CI.
+4. **Smoke + health**: `make smoke` to mirror CI’s golden path and sanity-check health endpoints before you write code.
+5. **Watch the walkthrough**: skim the narrated flow in [docs/ONBOARDING_WALKTHROUGH.md](./ONBOARDING_WALKTHROUGH.md) to see the first-30-minutes demo.
+
+---
+
 ### ✅ Step 1: Validate Your Local Environment
 
 Before you begin, run the environment validator to ensure your machine has the required dependencies and available ports. This script checks for Docker, Node.js, pnpm, Python, and verifies that critical ports are free.

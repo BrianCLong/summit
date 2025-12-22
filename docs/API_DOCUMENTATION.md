@@ -19,6 +19,12 @@ The IntelGraph Platform provides comprehensive API documentation through both **
 | **GraphQL Schema** | http://localhost:4000/api/docs/graphql-schema | GraphQL SDL |
 | **GraphQL Docs** | http://localhost:4000/api/docs/graphql-docs | GraphQL examples & best practices |
 
+## Keeping the Docs in Sync
+
+- **Local generation**: run `./scripts/generate-docs.sh` to emit OpenAPI (converted from `openapi/spec.yaml`) and GraphQL types (via `graphql-codegen`).
+- **CI enforcement**: `.github/workflows/api-docs-sync.yml` regenerates OpenAPI + GraphQL on every PR/push and fails if the working tree is dirty. Update specs before merging to keep Swagger/GraphQL docs fresh.
+- **Artifacts**: OpenAPI JSON is written to `server/public/openapi.json`; GraphQL types are generated using the root `codegen.yml` targets.
+
 ## REST API Documentation (OpenAPI/Swagger)
 
 ### Accessing Swagger UI
