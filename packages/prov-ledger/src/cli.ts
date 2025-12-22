@@ -1,16 +1,28 @@
 #!/usr/bin/env node
+import { Verifier } from './verifier';
 import fs from 'fs';
-import { verifyDisclosure } from './wallet';
 
-const pub =
-  process.env.PUBLIC_KEY_PEM ||
-  fs.readFileSync(process.env.PUBLIC_KEY_FILE || './public.pem', 'utf8');
-const file = process.argv[2];
-if (!file) {
-  console.error('Usage: prov-verify <bundle.json>');
-  process.exit(2);
+const filePath = process.argv[2];
+
+if (!filePath) {
+  console.error('Usage: prov-verify <manifest-file>');
+  process.exit(1);
 }
-const bundle = JSON.parse(fs.readFileSync(file, 'utf8'));
-const ok = verifyDisclosure(bundle, pub);
-console.log(ok ? '✅ Selective disclosure verified' : '❌ Verification failed');
-process.exit(ok ? 0 : 1);
+
+try {
+  const content = fs.readFileSync(filePath, 'utf-8');
+  const manifest = JSON.parse(content);
+  const result = Verifier.verifyManifest(manifest);
+
+  if (result.valid) {
+    console.log('✅ Manifest verified successfully.');
+    process.exit(0);
+  } else {
+    console.error('❌ Manifest verification failed:');
+    result.errors.forEach(e => console.error(` - ${e}`));
+    process.exit(1);
+  }
+} catch (error) {
+  console.error('Failed to read or parse manifest:', error);
+  process.exit(1);
+}
