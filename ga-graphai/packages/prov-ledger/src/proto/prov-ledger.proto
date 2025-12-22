@@ -1,0 +1,97 @@
+syntax = "proto3";
+
+package prov;
+
+message LedgerFactInput {
+  string id = 1;
+  string category = 2;
+  string actor = 3;
+  string action = 4;
+  string resource = 5;
+  bytes payload = 6;
+  string timestamp = 7;
+}
+
+message LamportSignature {
+  string algorithm = 1;
+  repeated string signature = 2;
+}
+
+message LamportPublicKeyRow {
+  string left = 1;
+  string right = 2;
+}
+
+message HybridSignature {
+  string algorithm = 1;
+  LamportSignature lamport = 2;
+  repeated LamportPublicKeyRow lamportPublicKey = 3;
+  string ed25519Signature = 4;
+  string ed25519PublicKey = 5;
+}
+
+message SchnorrProof {
+  string commitment = 1;
+  string challenge = 2;
+  string response = 3;
+}
+
+message QuantumLedgerEntry {
+  string id = 1;
+  string category = 2;
+  string actor = 3;
+  string action = 4;
+  string resource = 5;
+  bytes payload = 6;
+  string timestamp = 7;
+  string previousHash = 8;
+  string hash = 9;
+  string chainHash = 10;
+  string accessToken = 11;
+  HybridSignature signature = 12;
+}
+
+message AppendClaimRequest {
+  string caseId = 1;
+  LedgerFactInput fact = 2;
+  HybridSignature signature = 3;
+  string accessToken = 4;
+  SchnorrProof zkProof = 5;
+}
+
+message AppendClaimResponse {
+  QuantumLedgerEntry entry = 1;
+}
+
+message ExportManifestRequest {
+  string caseId = 1;
+}
+
+message ManifestTransform {
+  string id = 1;
+  string category = 2;
+  string actor = 3;
+  string action = 4;
+  string resource = 5;
+  string payloadHash = 6;
+  string timestamp = 7;
+  string previousHash = 8;
+}
+
+message ExportManifest {
+  string caseId = 1;
+  string generatedAt = 2;
+  string version = 3;
+  string ledgerHead = 4;
+  string merkleRoot = 5;
+  repeated ManifestTransform transforms = 6;
+}
+
+message ExportManifestResponse {
+  ExportManifest manifest = 1;
+}
+
+service Ledger {
+  rpc AppendClaim(AppendClaimRequest) returns (AppendClaimResponse);
+  rpc ExportManifest(ExportManifestRequest) returns (ExportManifest);
+}
