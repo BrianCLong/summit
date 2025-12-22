@@ -1,19 +1,12 @@
-# Core ownership mapping
-/apps/ai-core/          @brianclong
-/apps/orchestrator/     @brianclong
-/ops/helm/              @brianclong
-/policies/              @brianclong
-/docs/                  @brianclong
-
-# Mergefix / Express 5–related surfaces
-/server/**                        @intelgraph-core @intelgraph-ci
-/policies/**                      @intelgraph-core @intelgraph-ci
-/contracts/graphql/**             @intelgraph-core @intelgraph-ci
-/docs/merge/**                    @intelgraph-core @intelgraph-ci
-/scripts/merge_s25.sh             @intelgraph-core @intelgraph-ci
-/.github/workflows/**             @intelgraph-core @intelgraph-ci
-/.github/PULL_REQUEST_TEMPLATE.md @intelgraph-core @intelgraph-ci
-/.github/ISSUE_TEMPLATE/**        @intelgraph-core @intelgraph-ci
-
-# Optional: catch-all for mergefix PRs that touch multiple areas
-*                                   @intelgraph-core
+# Core areas
+/services/prov-ledger/        @intelgraph/provenance-team
+/gateway/policy-lac/          @intelgraph/policy-team
+/server/ai/nl2cypher/         @intelgraph/ai-team
+/apps/web/ingest-wizard/      @intelgraph/ingest-team
+/services/graph-analytics/    @intelgraph/analytics-team
+/services/cases/              @intelgraph/cases-team
+/services/audit/              @intelgraph/cases-team
+/services/auth/               @intelgraph/platform-auth
+/apps/web/report-studio/      @intelgraph/reporting-team
+/services/disclosure/         @intelgraph/reporting-team
+/services/cost-guard/         @intelgraph/ops-team

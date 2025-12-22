@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dashboard-api-latency
+  labels: { grafana_dashboard: "1" }
+  annotations: { k8s-sidecar-target-directory: "/tmp/dashboards" }
+data:
+  intelgraph-api-latency.json: |
+{{ .Files.Get "deploy/grafana/dashboards/intelgraph-api-latency.json" | indent 4 }}
