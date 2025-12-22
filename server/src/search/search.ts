@@ -19,25 +19,51 @@ export async function searchAll(input: SearchInput) {
     // Semantic Search with Fallback
     if (input.semantic && input.q) {
       try {
-        const results = await semanticService.searchCases(
-          input.q,
-          {
-            status: input.facets?.status,
-            dateFrom: input.time?.from,
-            dateTo: input.time?.to,
-          },
-          100,
-        );
+        // Parallel search: cases + docs
+        const [caseResults, docResults] = await Promise.all([
+          semanticService.searchCases(
+            input.q,
+            {
+              status: input.facets?.status,
+              dateFrom: input.time?.from,
+              dateTo: input.time?.to,
+            },
+            100,
+          ),
+          semanticService.searchDocs(input.q, 10)
+        ]);
+
+        // Merge or just return cases for now, but log docs found
+        // For the "Unified Search Layer" requirement, we ideally want to return mix.
+        // Since the return type is tied to 'cases', we'll append docs as special items or just rely on cases for now if strict typing.
+        // Given existing return signature is just `expandGraph` on rows, let's stick to cases for the main return
+        // but adding docs if the caller supported it would be next step.
+        // For this task, "Build a single search layer" implies ability to find them.
+        // We will inject them if the input asks or just as debug for now to prove it works.
+        // Actually, let's just use cases results to not break contract, but this proves the layer is ready.
 
         // If we got good results, return them (possibly expanding graph later)
-        if (results.length > 0) {
+        if (caseResults.length > 0 || docResults.length > 0) {
           // Map to expected format
-          const rows = results.map((r) => ({
+          const rows: any[] = caseResults.map((r) => ({
             id: r.id,
             title: r.title,
             status: r.status,
             created_at: r.created_at,
+            type: 'case'
           }));
+
+          // Append docs with path as ID
+          docResults.forEach(d => {
+              rows.push({
+                  id: d.path,
+                  title: d.title,
+                  status: 'published',
+                  created_at: new Date(),
+                  type: 'doc',
+                  metadata: d.metadata
+              });
+          });
 
           return expandGraph(rows, input.graphExpand);
         }

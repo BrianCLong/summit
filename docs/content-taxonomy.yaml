@@ -1,0 +1,33 @@
+use_cases:
+  - Troubleshooting
+  - Installation
+  - Configuration
+  - Integration
+  - Best Practices
+  - API Reference
+  - Architecture
+  - Security
+  - Governance
+  - Usage
+
+roles:
+  - Admin
+  - Developer
+  - Data Scientist
+  - Analyst
+  - Security Officer
+  - Executive
+  - DevOps
+  - Partner
+
+product_areas:
+  - Maestro
+  - IntelGraph
+  - Summit
+  - Switchboard
+  - API
+  - SDK
+  - Connector
+  - UI
+  - Infrastructure
+  - Compliance
