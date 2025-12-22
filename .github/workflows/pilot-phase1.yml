@@ -1,0 +1,87 @@
+name: pilot-phase1-vertical-slice
+
+on:
+  push:
+    paths:
+      - 'services/authz-gateway/**'
+      - '.github/workflows/pilot-phase1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  actions: read
+
+jobs:
+  gate:
+    name: Phase 1 Gates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab0be3fa8f73c62d0a8d2c0d5a
+
+      - name: Setup Node.js
+        uses: actions/setup-node@60edb5dd545a775178f9a8e13bce519e160c7479
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: services/authz-gateway/package.json
+
+      - name: Install dependencies
+        working-directory: services/authz-gateway
+        run: npm install --legacy-peer-deps
+
+      - name: Build service
+        working-directory: services/authz-gateway
+        run: npm run build
+
+      - name: Install cosign
+        run: |
+          COSIGN_VERSION=v2.4.0
+          curl -L "https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-amd64" -o /usr/local/bin/cosign
+          chmod +x /usr/local/bin/cosign
+
+      - name: Run Phase 1 gate (SBOM, provenance, cosign verify)
+        working-directory: services/authz-gateway
+        env:
+          ENABLE_COSIGN: 'true'
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REF: ${{ github.ref }}
+          BUILD_COMMAND: 'npm run build'
+          DEPLOY_ACTOR: ${{ github.actor }}
+        run: npm run phase1:gate
+
+      - name: Upload gate artifacts
+        uses: actions/upload-artifact@a8a3f3ad6f5350a3f99e34c93f3c7878e7b8ed5c
+        with:
+          name: phase1-security-artifacts
+          path: |
+            services/authz-gateway/dist/security/sbom.json
+            services/authz-gateway/dist/security/provenance.json
+            services/authz-gateway/dist/security/*.sig
+            services/authz-gateway/dist/security/gate-status.txt
+
+  conftest:
+    name: IAM policy guardrails
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab0be3fa8f73c62d0a8d2c0d5a
+
+      - name: Install conftest
+        run: |
+          VERSION=0.56.0
+          curl -L "https://github.com/open-policy-agent/conftest/releases/download/v${VERSION}/conftest_${VERSION}_Linux_x86_64.tar.gz" \
+            | sudo tar -xz -C /usr/local/bin conftest
+
+      - name: Evaluate IAM guardrails
+        run: |
+          echo '{"resource": {"type": "aws_iam_policy", "name": "pilot-ci-role", "public": true, "tags": {}, "statement": [{"effect": "Allow", "action": ["*"], "resource": ["*"]}]}}' > /tmp/iam.json
+          conftest test --policy services/authz-gateway/policy/phase1/iam.rego /tmp/iam.json
+
+      - name: Upload policy results
+        uses: actions/upload-artifact@a8a3f3ad6f5350a3f99e34c93f3c7878e7b8ed5c
+        with:
+          name: iam-policy-results
+          path: /tmp/iam.json
