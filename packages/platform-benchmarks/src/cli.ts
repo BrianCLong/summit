@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
 /**
  * CLI for running benchmarks
  */
@@ -11,7 +12,7 @@ import { JsonReporter } from './reporters/json.js';
 import { MarkdownReporter } from './reporters/markdown.js';
 import { CsvReporter } from './reporters/csv.js';
 import { BaselineComparator } from './comparators/baseline.js';
-import type { CliOptions, OutputFormat } from './types.js';
+import type { CliOptions } from './types.js';
 
 program
   .name('benchmark')
@@ -93,9 +94,9 @@ async function main() {
         }
         // Filter by tags if specified
         if (options.tags) {
-          const filterTags = options.tags.split(',');
+          const filterTags = (options.tags as any as string).split(',');
           const defTags = def.config?.tags || [];
-          if (!filterTags.some(t => defTags.includes(t))) {
+          if (!filterTags.some((t: string) => defTags.includes(t))) {
             continue;
           }
         }
@@ -109,7 +110,7 @@ async function main() {
 
   // Compare with baseline if provided
   if (options.baseline) {
-    const comparator = new BaselineComparator(parseFloat(options.regressionThreshold));
+    const comparator = new BaselineComparator(options.regressionThreshold);
     await comparator.loadBaseline(options.baseline);
     const regressions = comparator.getRegressions(results);
 

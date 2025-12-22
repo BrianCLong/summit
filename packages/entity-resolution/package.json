@@ -1,5 +1,5 @@
 {
-  "name": "@intelgraph/entity-resolution",
+  "name": "@intelgraph/entity-resolution-core",
   "version": "0.1.0",
   "description": "Entity resolution with explainable scorecards and bitemporal support",
   "type": "module",
