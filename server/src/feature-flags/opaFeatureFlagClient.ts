@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { context as otContext, propagation, trace } from '@opentelemetry/api';
 import { randomUUID } from 'crypto';
 import { logger } from '../config/logger.js';

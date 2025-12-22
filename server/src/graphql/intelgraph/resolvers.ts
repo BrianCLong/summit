@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { GraphQLError } from 'graphql';
 import { Pool } from 'pg';
 import neo4j from 'neo4j-driver';

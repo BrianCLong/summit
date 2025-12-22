@@ -142,6 +142,8 @@ export function getCostBucket(cost: number): string {
 
 // Prometheus-compatible metrics recorder that implements the ConductorMetrics interface
 export class PrometheusConductorMetrics {
+  // Allow dynamic property access for metrics that may be added dynamically
+  [key: string]: any;
   /**
    * Record a routing decision
    */

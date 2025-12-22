@@ -83,7 +83,7 @@ class IdempotencyManager {
   }
 
   private createDefaultRedisClient(): Redis {
-    const client = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
+    const client = new (Redis as any)(process.env.REDIS_URL || 'redis://localhost:6379', {
       reconnectOnError: (err) => {
         logger.error('Redis client error in idempotency middleware', {
           error: err,

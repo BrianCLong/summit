@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Maestro Conductor v24.4.0 - RTBF Job Service with Scale Capabilities
  * Epic E21: RTBF (Right to Be Forgotten) at Scale

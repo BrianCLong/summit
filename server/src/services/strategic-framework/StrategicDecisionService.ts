@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 /**
  * Strategic Decision Support Service

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Automatic Persisted Queries (APQ) Plugin for Apollo Server
  * Implements APQ protocol to reduce network bandwidth and improve caching

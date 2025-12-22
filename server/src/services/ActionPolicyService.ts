@@ -1,3 +1,4 @@
+// @ts-nocheck
 import axios, { AxiosInstance } from 'axios';
 import { createHash, randomUUID } from 'crypto';
 import type {

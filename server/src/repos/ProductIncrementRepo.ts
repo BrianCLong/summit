@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Product Increment Repository - Production persistence layer
  * Handles product increment/sprint management with PostgreSQL

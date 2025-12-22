@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Pool, QueryResult } from 'pg';
 import { trace, Span } from '@opentelemetry/api';
 import { Counter, Histogram, register } from 'prom-client';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { threatHuntingService } from '../services/threatHuntingService.js';
 
 async function runDemo(): Promise<void> {

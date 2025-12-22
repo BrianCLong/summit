@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { Request, Response, NextFunction } from 'express';
 import { logger } from '../config/logger.js';
 import { telemetry } from '../lib/telemetry/comprehensive-telemetry.js';

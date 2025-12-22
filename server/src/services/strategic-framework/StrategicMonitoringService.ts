@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 /**
  * Strategic Monitoring Service

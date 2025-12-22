@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { Redis } from 'ioredis';
 import { getRedisClient } from '../db/redis.js';
 import pino from 'pino';

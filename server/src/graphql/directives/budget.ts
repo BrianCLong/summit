@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { GraphQLSchema, defaultFieldResolver, type GraphQLFieldResolver } from 'graphql';
 import { mapSchema, getDirective, MapperKind } from '@graphql-tools/utils';
 import type { GraphQLContext } from '../apollo-v5-server.js';

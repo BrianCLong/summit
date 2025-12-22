@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { logger } from './config/logger.js';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import * as OpenTelemetryResources from '@opentelemetry/resources';

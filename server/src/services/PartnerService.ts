@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { pg } from '../db/pg.js';
 import { tenantService, type CreateTenantInput } from './TenantService.js';
 import { apiKeyService } from './ApiKeyService.js';

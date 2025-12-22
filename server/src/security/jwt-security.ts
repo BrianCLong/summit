@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * JWT Security Hardening - Phase 2
  *

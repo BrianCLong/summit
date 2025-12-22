@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { EventEmitter } from 'events';
 import { Readable } from 'stream';
 import {

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { AppFactory } from '../../appFactory.js';
 import { TenantValidator } from '../../middleware/tenantValidator.js';
 

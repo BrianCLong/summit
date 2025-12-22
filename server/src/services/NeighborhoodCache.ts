@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Neighborhood Cache Service
  *

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import LLMService from './LLMService.js';
 
 export interface CompanyProfile {

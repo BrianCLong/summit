@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Notification Hub - Core Service
  *

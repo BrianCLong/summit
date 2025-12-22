@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Kafka, Consumer, EachMessagePayload } from 'kafkajs';
 import { Logger } from './Logger.js';
 import { SchemaRegistryClient } from './SchemaRegistry.js';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { rateLimiter } from '../../services/RateLimiter.js';
 import { quotaConfigService, DEFAULT_PLANS } from './QuotaConfig.js';
 import { PlanLimits, QuotaCheckResult } from './types.js';

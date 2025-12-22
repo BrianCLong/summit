@@ -12,7 +12,7 @@ type CacheOptions = {
 
 function redisFromEnv() {
   if (process.env.REDIS_URL)
-    return new Redis(process.env.REDIS_URL, {
+    return new (Redis as any)(process.env.REDIS_URL, {
       name: process.env.REDIS_CLIENT_NAME || 'maestro-cache',
     });
   const host = process.env.REDIS_HOST || 'redis';

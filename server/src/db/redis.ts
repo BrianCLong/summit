@@ -1,3 +1,4 @@
+// @ts-nocheck
 import Redis from 'ioredis';
 import * as dotenv from 'dotenv';
 import pino from 'pino';

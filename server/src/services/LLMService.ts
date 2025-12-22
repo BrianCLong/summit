@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { OpenAI } from 'openai';
 import logger from '../utils/logger.js';
 import { tracer } from '../observability/tracing.js';

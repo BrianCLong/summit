@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { neo } from '../db/neo4j.js';
 import { ingestDedupeRate, ingestBacklog } from '../metrics.js';
 

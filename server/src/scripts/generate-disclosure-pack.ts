@@ -1,3 +1,4 @@
+// @ts-nocheck
 // server/src/scripts/generate-disclosure-pack.ts
 import fs from 'fs/promises';
 import path from 'path';

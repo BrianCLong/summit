@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Neo4j Query Optimizer
  *

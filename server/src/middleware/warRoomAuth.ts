@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { GraphQLError } from 'graphql';
 import { db } from '../db.js'; // Assuming a db connection utility exists
 

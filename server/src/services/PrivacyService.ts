@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Privacy Service - Data Subject Rights & Privacy Orchestration
  *

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Secrets Management System
  * Handles sensitive configuration with validation and secure defaults

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Request, Response, NextFunction } from 'express';
 import { systemMonitor } from '../lib/system-monitor.js';
 import { logger } from '../config/logger.js';

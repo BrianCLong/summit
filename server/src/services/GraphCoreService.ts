@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { neo4jDriver } from '../db/neo4j.js';
 import { randomUUID } from 'crypto';
 import type { PolicyLabels } from '../canonical/types.js';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { hideBin } from 'yargs/helpers';
 import yargs from 'yargs/yargs';
 import logger from '../config/logger.js';

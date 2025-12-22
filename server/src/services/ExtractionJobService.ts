@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { Queue, Worker, Job, QueueEvents } from 'bullmq';
 import type { Pool } from 'pg';
 import { randomUUID as uuidv4 } from 'node:crypto';

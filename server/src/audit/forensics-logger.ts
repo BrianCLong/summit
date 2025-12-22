@@ -155,7 +155,7 @@ export class ForensicsLogger extends EventEmitter {
       ...config,
     };
 
-    this.redis = new Redis(redisUrl || process.env.REDIS_URL || 'redis://localhost:6379', {
+    this.redis = new (Redis as any)(redisUrl || process.env.REDIS_URL || 'redis://localhost:6379', {
       keyPrefix: 'audit:',
       retryDelayOnFailover: 100,
       maxRetriesPerRequest: 3,

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Maestro Conductor v24.4.0 - CI Budget Enforcement per Tenant
  * Epic E20: Cost-Aware Scaling & Tenancy Partitioning

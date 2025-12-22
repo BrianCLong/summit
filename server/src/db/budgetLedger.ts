@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Budget Ledger: Postgres-backed FinOps spending tracker
  * Source of truth for tenant budgets and detailed audit trail

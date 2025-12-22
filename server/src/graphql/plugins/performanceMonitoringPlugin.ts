@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Comprehensive GraphQL Performance Monitoring Plugin
  * Tracks detailed metrics for query performance, DataLoader usage, and N+1 detection

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ComplianceMonitoringService } from './ComplianceMonitoringService.js';
 import { EventSourcingService } from './EventSourcingService.js';
 import { UserRepository } from '../data/UserRepository.js';

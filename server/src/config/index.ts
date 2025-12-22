@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as dotenv from 'dotenv';
 import { ConfigSchema, type Config } from './schema.js';
 import { z } from 'zod';

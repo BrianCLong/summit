@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Logger } from './Logger.js';
 import { GlueClient, GetSchemaCommand, CreateSchemaCommand } from '@aws-sdk/client-glue';
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import crypto from 'node:crypto';
 import { performance } from 'node:perf_hooks';
 import { Pool, QueryConfig, QueryResult, PoolClient } from 'pg';

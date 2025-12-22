@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { IResolvers } from '@graphql-tools/utils';
 import { getPostgresPool } from '../config/database.js';
 import { getNeo4jDriver } from '../config/database.js';

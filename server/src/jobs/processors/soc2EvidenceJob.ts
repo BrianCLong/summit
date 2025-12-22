@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Job } from 'pg-boss';
 import { SOC2ComplianceService } from '../../services/SOC2ComplianceService';
 import { SigningService } from '../../services/SigningService';

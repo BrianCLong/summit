@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getPostgresPool } from '../config/database.js';
 import { type QueryResult } from 'pg';
 

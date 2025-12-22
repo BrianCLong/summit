@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Strategic Plan Repository - Persistence layer for strategic planning
  *

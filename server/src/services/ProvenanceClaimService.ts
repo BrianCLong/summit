@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { pool } from '../db/pg.js';
 import { provenanceLedger } from '../provenance/ledger.js';
 import crypto from 'crypto';

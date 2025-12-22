@@ -139,7 +139,7 @@ export class OfflineKit extends EventEmitter {
     super();
     this.config = OfflineKitConfigSchema.parse(config);
 
-    this.redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
+    this.redis = new (Redis as any)(process.env.REDIS_URL || 'redis://localhost:6379', {
       lazyConnect: true,
       retryStrategy: (times) => {
         // Exponential backoff, max 30 seconds

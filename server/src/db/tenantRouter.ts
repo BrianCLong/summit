@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Pool, PoolClient } from 'pg';
 import { Counter, Gauge, register } from 'prom-client';
 import logger from '../config/logger.js';

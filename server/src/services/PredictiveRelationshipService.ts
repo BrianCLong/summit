@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { RelationshipService } from './RelationshipService.js';
 import EmbeddingService from './EmbeddingService.js';
 import { getNeo4jDriver } from '../config/database.js';

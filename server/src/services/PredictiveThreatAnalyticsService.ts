@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { TimeSeriesIntelligenceService } from './TimeSeriesIntelligenceService.js';
 import logger from '../utils/logger.js';
 

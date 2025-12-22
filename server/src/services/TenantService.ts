@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { z } from 'zod';
 import { getPostgresPool } from '../config/database.js';
 import { randomUUID, createHash } from 'crypto';

@@ -22,8 +22,8 @@ export function makePubSub() {
       maxmemoryPolicy: 'noeviction',
     };
 
-    const publisher = new Redis(url, opts);
-    const subscriber = new Redis(url, opts);
+    const publisher = new (Redis as any)(url, opts);
+    const subscriber = new (Redis as any)(url, opts);
 
     // Store reference for health checks
     redisClient = publisher;

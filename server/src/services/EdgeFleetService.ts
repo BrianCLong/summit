@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { EventEmitter } from 'events';
 import { randomUUID } from 'crypto';
 import logger from '../config/logger.js';

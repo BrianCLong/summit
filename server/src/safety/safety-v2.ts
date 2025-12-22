@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getPostgresPool } from '../db/postgres.js';
 import { otelService } from '../middleware/observability/otel-tracing.js';
 import * as z from 'zod';

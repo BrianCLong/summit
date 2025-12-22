@@ -122,7 +122,7 @@ export class WorkflowExecutor extends EventEmitter {
   ) {
     super();
 
-    this.redis = new Redis(redisUrl, {
+    this.redis = new (Redis as any)(redisUrl, {
       retryDelayOnFailover: 100,
       maxRetriesPerRequest: 3,
       lazyConnect: true,

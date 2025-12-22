@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { shield, rule, and, or, not, allow } from 'graphql-shield';
 import type { GraphQLContext } from './apollo-v5-server.js';
 

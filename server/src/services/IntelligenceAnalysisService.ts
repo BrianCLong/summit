@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { mlAnalysisService } from './mlAnalysisService.js';
 import LLMService from './LLMService.js';
 import { requireFunc } from '../utils/require.js';

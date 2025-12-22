@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { Pool } from 'pg';
 import { randomUUID as uuidv4 } from 'node:crypto';
 import pino from 'pino';

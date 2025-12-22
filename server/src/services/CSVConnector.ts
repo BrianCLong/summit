@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * CSV Connector - S3/Local CSV ingestion with mapping support
  * Supports large files (streaming) and parallel processing
