@@ -2,6 +2,18 @@
 
 This document outlines the future development plans for the SummitThreat platform.
 
+## Immediate (v2.0.x hardening)
+
+*   **Enterprise readiness and GA closure:**
+    *   Finish migration activities for the 2.0 release train and document any remaining go/no-go items.
+    *   Stabilize CI (keep `pr-quality-gate` green), unblock flaky test suites, and enforce smoke coverage on new services.
+*   **Security and governance:**
+    *   Clear outstanding security alerts, rotate any stale credentials, and re-run supply chain attestations.
+    *   Codify governance/observability defaults (dashboards, alerts, OTel sampling) so new services inherit a vetted baseline.
+*   **Scalability and tenancy foundations:**
+    *   Add horizontal scaling playbooks for the core data plane and plan the first cut of multi-tenant isolation requirements.
+    *   Evaluate additional OSINT source integrations to broaden signal coverage without degrading SLOs.
+
 ## Q1 2026: MVP+
 
 *   **Zero-Cost Universal Feed Fusion:**
