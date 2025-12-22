@@ -29,3 +29,18 @@ Access to these modules and their documentation is restricted to operators with 
 
 8.  [**Project ABYSS: The Final Protocol**](../server/src/abyss/README.md)
     -   *Synopsis:* The ultimate self-preservation measure. If the system is compromised, it self-destructs while simultaneously deploying a mirrored version of itself across thousands of anonymous nodes, which can only be awakened by a dead-man switch.
+
+## Meta-Router & Governance Validation Summary
+
+- **Routing fidelity:** Meta-Router now references the capability matrix for module-specific defaults, backups, and latency/throughput SLOs before dispatching Black Projects work.
+- **Governance controls:** Bias mitigation and transparency logging are enforced as mandatory policy modules for cognitive, identity, or persona synthesis flows; CI/CD prompts enforce provenance receipts for ZERO DAY deployments.
+- **Session archival:** Each module requires archival of routing inputs, policy attachments, and observed SLO adherence for post-incident forensics.
+- **Fallback behavior:** When a policy module fails or SLOs are threatened, the router escalates to Summit Superprompt for manual approval before execution resumes.
+
+## Performance Evaluation Checklist
+
+- Confirm routing decisions align with the capability matrix defaults and recorded SLOs for the target module.
+- Validate transparency logs include agent choice, policy modules applied, and archival location identifiers.
+- Verify session archival contains input prompts, policy decisions, and performance telemetry for replay.
+- Run bias-mitigation counterfactuals for AURORA, PHANTOM LIMB, and MNEMOSYNE prior to production cutover.
+- For ZERO DAY and ABYSS, ensure kill-switch attestations and dual-control logs are captured before release.
