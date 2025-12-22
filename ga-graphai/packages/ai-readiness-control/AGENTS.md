@@ -1,0 +1,3 @@
+- AI readiness control package.
+- Use 2 spaces for indentation.
+- Run `npm test` in this package after changes.
