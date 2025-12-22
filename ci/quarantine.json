@@ -1,0 +1,11 @@
+{
+  "flakyTests": [
+    {
+      "testName": "example flaky test",
+      "suite": "server/tests/example.test.ts",
+      "reason": "Timing issue in CI",
+      "quarantinedAt": "2023-10-27",
+      "owner": "Team D"
+    }
+  ]
+}

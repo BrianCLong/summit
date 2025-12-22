@@ -1,0 +1,40 @@
+name: Release Automation
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Generate Changelog
+        id: changelog
+        run: |
+          # Simple placeholder for conventional-changelog or release-please
+          echo "## Changelog" > CHANGELOG.md
+          git log --pretty=format:"* %s (%h)" $(git describe --tags --abbrev=0 HEAD^)..HEAD >> CHANGELOG.md || echo "First release" >> CHANGELOG.md
+
+      - name: Generate Provenance
+        run: |
+          chmod +x release/provenance.sh
+          ./release/provenance.sh
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: CHANGELOG.md
+          files: |
+            release/provenance.json
+            CHANGELOG.md
