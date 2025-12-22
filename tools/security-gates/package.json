@@ -1,0 +1,14 @@
+{
+  "name": "@summit/security-gates",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "node --experimental-strip-types src/index.ts",
+    "check": "node --experimental-strip-types src/index.ts",
+    "test": "node --experimental-strip-types --test test/**/*.test.ts"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
