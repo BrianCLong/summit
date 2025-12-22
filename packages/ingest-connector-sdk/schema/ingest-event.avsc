@@ -1,0 +1,13 @@
+{
+  "type": "record",
+  "name": "IngestEvent",
+  "namespace": "com.intelgraph.ingest",
+  "fields": [
+    { "name": "id", "type": "string" },
+    { "name": "extractedAt", "type": "long", "logicalType": "timestamp-millis" },
+    { "name": "sourceId", "type": "string" },
+    { "name": "connectorType", "type": "string" },
+    { "name": "data", "type": "string", "doc": "JSON serialized data" },
+    { "name": "metadata", "type": ["null", { "type": "map", "values": "string" }], "default": null }
+  ]
+}
