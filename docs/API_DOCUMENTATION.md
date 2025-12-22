@@ -329,7 +329,7 @@ curl http://localhost:4000/api/versioning/breaking-changes/2.0.0 | jq
 
 ## Examples
 
-### REST API Example
+### REST API Examples
 
 ```bash
 # Create a case
@@ -351,6 +351,20 @@ curl -X POST http://localhost:4000/api/cases \
     "createdAt": "2025-11-29T12:00:00Z"
   }
 }
+
+# Start an ingest job with Kafka-backed streaming (optional overlay)
+curl -X POST http://localhost:4000/api/ingest/start \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "connector": "twitter",
+    "sourceId": "demo-twitter",
+    "options": {"since": "2024-01-01"}
+  }'
+
+# Check ingest progress
+curl http://localhost:4000/api/ingest/progress/<jobId> \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
 ### GraphQL Example
@@ -378,6 +392,41 @@ mutation CreateEntity {
       id
       email
     }
+  }
+}
+```
+
+### Common GraphQL Queries & Mutations
+
+```graphql
+# Query: find recent entities containing a keyword
+query SearchEntities {
+  searchEntities(query: "ransomware", filter: {limit: 5}) {
+    id
+    name
+    type
+    createdAt
+    relationships {
+      id
+      type
+      targetId
+    }
+  }
+}
+
+# Mutation: relate two existing nodes
+mutation LinkEntities {
+  createRelationship(
+    input: {
+      sourceId: "entity-123"
+      targetId: "entity-456"
+      type: "ASSOCIATED_WITH"
+      properties: {confidence: 0.82, discoveredBy: "copilot"}
+    }
+  ) {
+    id
+    type
+    properties
   }
 }
 ```

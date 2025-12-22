@@ -50,8 +50,10 @@ This single command will:
 
 When the script finishes, you will have a fully functional development environment.
 
-- **Optional AI Stack**: To include AI/ML services, run `./start.sh --ai`.
-- **Manual Mode**: If you prefer, you can run the steps manually: `make bootstrap`, `make up`, and `make smoke`.
+- **Optional AI + Streaming Stack**: Use `./start.sh --ai` (or `make up-ai` if you prefer Make targets) to layer in the AI/ML services from `deploy/compose/docker-compose.ai.yml`. This also wires the stack to the optional Kafka broker in `deploy/compose/docker-compose.full.yml` when you need event-driven or streaming flows.
+- **Manual Mode (complex workflows)**: For fine-grained control, run the steps individually and add overlays as needed:
+  1) `make bootstrap` (dependencies) → 2) `make up` (core stack) → 3) `docker compose -f deploy/compose/docker-compose.dev.yml -f deploy/compose/docker-compose.ai.yml up -d intelgraph-ai` (add AI service) → 4) `docker compose -f deploy/compose/docker-compose.dev.yml -f deploy/compose/docker-compose.full.yml up -d kafka` (start Kafka when testing ingestion/streaming) → 5) `make smoke` (golden path validation).
+  This manual path is safer for troubleshooting specific layers (e.g., isolating database vs. AI service health) and for high-RAM flows such as bulk ingestion + AI enrichment.
 
 ---
 
@@ -109,6 +111,14 @@ Now that your environment is running and validated, you're ready to contribute.
 - `make smoke`: Run the end-to-end smoke test.
 - `pnpm test`: Run unit and integration tests.
 - `docker-compose logs -f <service-name>`: Tail logs for a specific service (e.g., `api`, `client`).
+
+### 🤖 Using the AI/Kafka Add-On
+
+These commands assume you started with `./start.sh --ai` (or added the overlays manually as described above):
+
+- **AI inference API**: `curl http://localhost:8000/health` should return the AI container health. Invoke extraction with `curl -X POST http://localhost:8000/extract -H 'Content-Type: application/json' -d '{"text":"Sample document"}'` and watch the response in `docker compose -f deploy/compose/docker-compose.ai.yml logs -f intelgraph-ai`.
+- **GraphQL wired to AI**: The server forwards AI requests through `AI_SERVICE_URL`; validate with `curl -X POST http://localhost:4000/graphql -H 'Content-Type: application/json' -d '{"query":"{health{status timestamp version}}"}'` and confirm the service status is `HEALTHY` when AI is up.
+- **Kafka smoke check (optional streaming)**: If you started Kafka via the `docker-compose.full.yml` overlay, open a shell with `docker compose -f deploy/compose/docker-compose.full.yml exec kafka bash` and run `kafka-topics.sh --list --bootstrap-server localhost:9092` to verify the broker. The standard ingestion topics (e.g., `ingest.raw`, `ingest.enriched`) should appear after you trigger an ingest job.
 
 ---
 
