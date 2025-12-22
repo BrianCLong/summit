@@ -40,3 +40,41 @@ An air-gapped-capable, GPU-accelerated open OSINT platform that fuses graph anal
 - Paid support/subscription for regulated customers (LE/IC/corporate intel) with SLAs, signed builds, and long-term patch streams.
 - Marketplace revenue share for certified plugins/connectors and hosted copilot endpoints for customers who can use cloud.
 - Grants/partnerships with research orgs for open threat datasets and GPU credits to offset model hosting costs.
+
+7. Additional epics to round out the roadmap
+
+- **Epic 17 – Localization & Internationalization**
+  - Identify target locales and prioritize based on user demographics or market opportunities.
+  - Externalize all user-facing strings into translation files using an i18n framework.
+  - Implement dynamic locale switching in the UI with appropriate fallback logic.
+  - Handle date/time, number, and currency formatting according to locale conventions.
+  - Ensure text expansion tolerance in UI layouts to accommodate longer translations.
+  - Engage professional translators or crowdsource translations; set up a translation management system.
+  - Add language-specific tests to verify rendering and input handling.
+
+- **Epic 18 – Post-GA Support & Maintenance**
+  - Define a support SLA (response times, update cadence) for the GA product.
+  - Set up a ticketing/helpdesk system to collect and triage user issues after launch.
+  - Create a knowledge base or FAQ for common questions and troubleshooting tips.
+  - Plan for regular maintenance windows and communicate them to users ahead of time.
+  - Establish a backlog grooming process to prioritize bug fixes and minor enhancements.
+  - Schedule periodic dependency updates and allocate time for patch releases.
+  - Gather and act on post-GA metrics such as crash rates, support ticket volume, and customer satisfaction.
+
+- **Epic 19 – Business & Licensing Strategy**
+  - Evaluate licensing models (open-core, dual license, commercial add-ons) consistent with project goals.
+  - Draft clear terms of service and EULA for commercial use cases.
+  - Identify monetization opportunities such as premium features, hosted services, or consulting.
+  - Assess compliance requirements for exporting cryptographic or AI technologies to different jurisdictions.
+  - Engage with legal counsel to ensure all licensing and business agreements are valid.
+  - Define contributor license agreements (CLA) if opening up to external contributors.
+  - Monitor community feedback on licensing decisions and adjust if necessary.
+
+- **Epic 20 – Ecosystem & Plugin Development**
+  - Define a plugin architecture that allows third-party developers to extend the platform.
+  - Document plugin APIs (registration hooks, lifecycle, data access) and provide examples.
+  - Create a plugin marketplace or registry where plugins can be discovered and installed.
+  - Develop a security review process for plugins, including sandboxing and permission declarations.
+  - Open source starter templates to accelerate plugin development.
+  - Host hackathons or contests to encourage ecosystem growth and gather novel use cases.
+  - Offer certification badges for verified plugins that meet quality and security standards.
