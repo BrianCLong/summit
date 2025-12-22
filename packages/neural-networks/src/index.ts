@@ -4,7 +4,8 @@
  */
 
 import { z } from 'zod';
-export type { Layer, ModelMetadata } from '@intelgraph/deep-learning-core';
+import type { Layer, ModelMetadata } from '@intelgraph/deep-learning-core';
+export type { Layer, ModelMetadata };
 
 // ============================================================================
 // Neural Network Architecture Definitions
