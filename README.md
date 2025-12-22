@@ -47,6 +47,27 @@
 
 **Prerequisites:** Docker Desktop ≥ 4.x (8GB memory, BuildKit enabled), Node 18+, pnpm 9 (via `corepack enable`), Python 3.11+, ports 3000, 4000, 5432, 6379, 7474, 7687, 8080 available.
 
+## 🐍 Python Dev Quickstart
+
+For Python development (IntelGraph Core):
+
+1.  **Bootstrap**: Install dependencies and tools.
+    ```bash
+    make bootstrap
+    ```
+2.  **Test**: Run unit tests.
+    ```bash
+    make test
+    ```
+3.  **Lint**: Run ruff and mypy.
+    ```bash
+    make lint
+    ```
+4.  **Format**: Format code.
+    ```bash
+    make fmt
+    ```
+
 ```bash
 git clone https://github.com/BrianCLong/summit.git
 cd summit
