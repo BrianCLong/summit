@@ -35,11 +35,11 @@ describe('provenance manifests', () => {
   it('flags tampering with pinpointed path', () => {
     const content = fs.readFileSync(path.join(base, 'golden-manifest.json'), 'utf-8');
     const manifest = JSON.parse(content) as Manifest;
-    manifest.leaves[0].hash = '00badbeef';
+    manifest.leaves[0]!.hash = '00badbeef';
 
     const result = ledger.verifyManifest(manifest);
     expect(result.valid).toBe(false);
-    expect(result.reasons.some((reason) => reason.includes(manifest.leaves[0].id))).toBe(true);
+    expect(result.reasons.some((reason) => reason.includes(manifest.leaves[0]!.id))).toBe(true);
   });
 
   it('renders lineage adjacency for claim chain', () => {

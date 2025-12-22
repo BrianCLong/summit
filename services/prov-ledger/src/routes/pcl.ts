@@ -7,7 +7,8 @@ const CreateEvidenceSchema = z.object({
   blob: z.string().optional(),
   source: z.string(),
   license: z.string().optional(),
-  hash: z.string()
+  hash: z.string(),
+  caseId: z.string().optional()
 });
 
 const CreateTransformSchema = z.object({
@@ -15,7 +16,8 @@ const CreateTransformSchema = z.object({
   tool: z.string(),
   params: z.record(z.any()),
   outputs: z.array(z.string()),
-  operatorId: z.string()
+  operatorId: z.string(),
+  caseId: z.string().optional()
 });
 
 const CreateClaimSchema = z.object({
@@ -24,7 +26,8 @@ const CreateClaimSchema = z.object({
   object: z.string(),
   evidenceRefs: z.array(z.string()),
   confidence: z.number(),
-  licenseId: z.string()
+  licenseId: z.string(),
+  caseId: z.string().optional()
 });
 
 export default async function pclRoutes(fastify: FastifyInstance) {
@@ -67,5 +70,17 @@ export default async function pclRoutes(fastify: FastifyInstance) {
       return reply.code(404).send({ error: 'Bundle not found' });
     }
     return reply.send(manifest);
+  });
+
+  fastify.get('/bundle/:caseId/export', async (req, reply) => {
+    if (process.env.PROV_LEDGER_EXPORT_ENABLED === 'false') {
+      return reply.code(403).send({ error: 'Export disabled' });
+    }
+    const { caseId } = req.params as { caseId: string };
+    const bundle = await ledger.getBundle(caseId);
+    if (!bundle) {
+      return reply.code(404).send({ error: 'Bundle not found' });
+    }
+    return reply.send(bundle);
   });
 }
