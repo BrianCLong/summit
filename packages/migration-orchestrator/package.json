@@ -1,0 +1,14 @@
+{
+  "name": "@intelgraph/migration-orchestrator",
+  "version": "0.1.0",
+  "description": "Execution engine for customer migration program with identity mapping, entitlements, backfill, parity, and dashboards",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "node -e \"console.log('build not required for js sources')\"",
+    "test": "node --experimental-strip-types --test tests/**/*.test.ts"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
