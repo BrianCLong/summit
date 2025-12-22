@@ -1,10 +1,12 @@
 import { Router, type Request, type Response } from 'express';
 import { SimulationEngine } from '../core/SimulationEngine.js';
 import type { Event, SimConfig } from '../core/types.js';
+import { simulationTelemetry } from '../telemetry.js';
 
 export function createNarrativeRouter(engine?: SimulationEngine): Router {
   const router = Router();
-  const runtime = engine ?? new SimulationEngine();
+  const telemetry = simulationTelemetry;
+  const runtime = engine ?? new SimulationEngine(telemetry);
 
   router.post('/api/narrative/init', (req: Request, res: Response) => {
     const config = req.body as SimConfig;
@@ -15,6 +17,9 @@ export function createNarrativeRouter(engine?: SimulationEngine): Router {
         timestamp: runtime.getState().timestamp,
       });
     } catch (error) {
+      telemetry.logError('narrative_init_failed', {
+        message: (error as Error).message,
+      });
       res
         .status(400)
         .json({ status: 'error', message: (error as Error).message });
@@ -28,6 +33,9 @@ export function createNarrativeRouter(engine?: SimulationEngine): Router {
         .status(200)
         .json({ status: 'advanced', timestamp: runtime.getState().timestamp });
     } catch (error) {
+      telemetry.logError('narrative_step_failed', {
+        message: (error as Error).message,
+      });
       res
         .status(400)
         .json({ status: 'error', message: (error as Error).message });
@@ -40,6 +48,10 @@ export function createNarrativeRouter(engine?: SimulationEngine): Router {
       runtime.injectEvent(event);
       res.status(202).json({ status: 'accepted', queueSize: 1 });
     } catch (error) {
+      telemetry.logError('narrative_injection_failed', {
+        message: (error as Error).message,
+        eventType: event.type,
+      });
       res
         .status(400)
         .json({ status: 'error', message: (error as Error).message });
@@ -51,8 +63,21 @@ export function createNarrativeRouter(engine?: SimulationEngine): Router {
       const snapshot = runtime.getState().toJSON();
       res.status(200).json(snapshot);
     } catch (error) {
+      telemetry.logError('narrative_state_failed', {
+        message: (error as Error).message,
+      });
       res
         .status(400)
+        .json({ status: 'error', message: (error as Error).message });
+    }
+  });
+
+  router.get('/api/narrative/metrics', async (_req: Request, res: Response) => {
+    try {
+      res.type('text/plain').send(await telemetry.metrics());
+    } catch (error) {
+      res
+        .status(500)
         .json({ status: 'error', message: (error as Error).message });
     }
   });

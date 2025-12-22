@@ -2,8 +2,11 @@ import { Actor } from '../entities/Actor.js';
 import { NarrativeState } from './NarrativeState.js';
 import { EventProcessor } from './EventProcessor.js';
 import type { Event, SimConfig, StateUpdate } from './types.js';
+import { NarrativeTelemetry, simulationTelemetry } from '../telemetry.js';
 
 export class SimulationEngine {
+  constructor(private readonly telemetry: NarrativeTelemetry = simulationTelemetry) {}
+
   private state: NarrativeState | null = null;
   private processor: EventProcessor | null = null;
   private initialized = false;
@@ -32,6 +35,12 @@ export class SimulationEngine {
     this.processor = new EventProcessor(this.state);
     this.eventQueue = [];
 
+    this.telemetry.recordInitialization({
+      actorCount: config.actors.length,
+      relationshipCount: config.relationships?.length ?? 0,
+      seedEvents: config.seedEvents?.length ?? 0,
+    });
+
     if (config.seedEvents) {
       for (const event of config.seedEvents) {
         this.eventQueue.push({ ...event });
@@ -44,6 +53,7 @@ export class SimulationEngine {
   step(): void {
     const currentState = this.ensureState();
     const processor = this.ensureProcessor();
+    const stopTimer = this.telemetry.timer();
     currentState.advanceTime();
     const eventsToProcess = [...this.eventQueue];
     this.eventQueue = [];
@@ -56,6 +66,12 @@ export class SimulationEngine {
       const update = processor.processEvent(processedEvent);
       this.applyStateUpdate(processedEvent, update);
     }
+
+    this.telemetry.recordStep({
+      processedEvents: eventsToProcess.length,
+      queuedEvents: this.eventQueue.length,
+      durationMs: stopTimer(),
+    });
   }
 
   injectEvent(event: Event): void {
@@ -65,6 +81,10 @@ export class SimulationEngine {
         ? event.timestamp
         : (this.state?.timestamp ?? 0);
     this.eventQueue.push({ ...event, timestamp });
+    this.telemetry.recordInjection({
+      queuedEvents: this.eventQueue.length,
+      eventType: event.type,
+    });
   }
 
   getState(): NarrativeState {
