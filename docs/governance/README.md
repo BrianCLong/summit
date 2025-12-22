@@ -13,3 +13,4 @@ This directory contains the canonical governance and agent operations framework 
 - [Rulebook](RULEBOOK.md)
 - [Service Inventory](SERVICE_INVENTORY.md)
 - [Style Guide](style-guide.md)
+- [Board Governance Framework](board/README.md)
