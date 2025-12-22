@@ -8,13 +8,17 @@ export type UsageKind =
   | "llm.requests"
   | "maestro.runs"
   | "maestro.tasks"
+  | "maestro.pipeline.success"
   | "graph.analytics.jobs"
   | "graph.queries"
+  | "graph.nodes_managed"
   | "ingestion.pipeline.runs"
   | "ingestion.records"
   | "search.rag.queries"
   | "external_api.requests"
   | "storage.bytes"
+  | "risk.threats_blocked"
+  | "compliance.reports_generated"
   | "custom";
 
 export interface UsageEvent {
@@ -35,6 +39,7 @@ export interface Plan {
   name: string;          // "Free", "Pro", "Enterprise"
   description?: string;
   currency: string;      // "USD"
+  basePrice?: number;    // Monthly base price
   // per-usage-kind configuration
   limits: {
     [K in string]?: { // Index signature to allow UsageKind + strings
