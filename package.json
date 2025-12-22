@@ -54,6 +54,8 @@
     "db:knex:migrate": "knex migrate:latest --knexfile packages/db/knex/knexfile.cjs",
     "db:knex:rollback": "knex migrate:rollback --knexfile packages/db/knex/knexfile.cjs",
     "db:neo4j:migrate": "node scripts/neo4j-migrate.js",
+    "fuzz": "ts-node tooling/fuzz/cli.ts",
+    "fuzz:ci": "FUZZ_MODE=ci ts-node tooling/fuzz/cli.ts",
     "adapters:pack": "node --experimental-strip-types adapters/reference/packaging.ts",
     "changeset": "changeset",
     "release": "changeset version && changeset publish",
@@ -178,6 +180,7 @@
     "neo4j-driver": "5.28.2",
     "pg": "8.16.3",
     "redis": "5.10.0",
+    "yaml": "2.6.1",
     "ws": "8.18.3"
   },
   "private": true

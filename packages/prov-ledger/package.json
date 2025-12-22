@@ -1,5 +1,5 @@
 {
-  "name": "@intelgraph/prov-ledger",
+  "name": "@intelgraph/prov-ledger-core",
   "version": "2.1.0",
   "type": "module",
   "main": "dist/index.js",
