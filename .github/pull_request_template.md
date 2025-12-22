@@ -40,3 +40,5 @@
 - [ ] Documentation updated
 - [ ] OPA policies verified
 - [ ] Grafana dashboards updated if applicable
+- [ ] **Hot Files**: I have avoided modifying shared hot files (root config, Makefiles) unless absolutely necessary.
+- [ ] **Feature Flags**: New behavior is hidden behind a feature flag.

@@ -1,6 +1,7 @@
 # @intelgraph/feature-flags
 
 Comprehensive feature flag system for Summit/IntelGraph with provider abstraction, caching, analytics, and A/B testing support.
+<!-- Verified by Epic 1 Task 1.5 -->
 
 ## Features
 

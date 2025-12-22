@@ -1,6 +1,7 @@
 import * as z from 'zod';
 
 // Zod v4 compatibility types
+// Validated by Epic 1 Task 1.6
 export type ZodType<T = any> = z.ZodType<T>;
 export type ZodError = z.ZodError;
 
