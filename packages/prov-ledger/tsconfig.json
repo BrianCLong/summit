@@ -5,8 +5,8 @@
     "rootDir": "src",
     "declaration": true,
     "allowImportingTsExtensions": false,
-    "types": []
+    "types": ["jest", "node"]
   },
-  "include": ["src"],
+  "include": ["src", "tests", "__tests__"],
   "references": [{ "path": "../types" }]
 }

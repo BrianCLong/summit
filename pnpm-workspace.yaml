@@ -6,6 +6,7 @@ packages:
   - 'server'
   - 'tools/*'
   - 'prov-ledger-service'
+  - './packages/prov-ledger-server'
 exclude:
   - 'archive/**'
   - 'apps/desktop-electron'
