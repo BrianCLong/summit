@@ -23,6 +23,7 @@ OPA/Rego packages:
 - `summit.sbom` – SBOM quality gate
 - `summit.provenance` – provenance invariants
 - `summit.access` – access control for governance actions
+- `summit.regulatory` – clean-hands regulatory advantage strategy
 - `summit.shared` – shared helpers
 
 ### CI Workflow
