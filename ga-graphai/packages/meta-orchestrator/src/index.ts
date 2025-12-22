@@ -1354,3 +1354,22 @@ export {
   type ContextNode,
   type ContextPacket,
 } from './metaContextOrchestrator.js';
+export {
+  TrustSafetyOrchestrator,
+  TRUST_SAFETY_DEFAULTS,
+  type ContentSignals,
+  type DecisionContext,
+  type EnforcementAction,
+  type GuardrailEvaluation,
+  type GuardrailMetrics,
+  type Lane,
+  type LaneBackoutState,
+  type ModerationInput,
+  type PurposeTag,
+  type ResidencyPolicy,
+  type RetentionPolicy,
+  type RiskTier,
+  type RiskTierConfig,
+  type StageLatencyBudget,
+  type TrustSafetyConfig,
+} from './trustSafetyOrchestrator.js';
