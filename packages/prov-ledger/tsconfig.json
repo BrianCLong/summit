@@ -2,11 +2,11 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src",
+    "rootDir": ".",
     "declaration": true,
     "allowImportingTsExtensions": false,
-    "types": []
+    "types": ["node", "jest"],
+    "esModuleInterop": true
   },
-  "include": ["src"],
-  "references": [{ "path": "../types" }]
+  "include": ["src", "tests"]
 }
