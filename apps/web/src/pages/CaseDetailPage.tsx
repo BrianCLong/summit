@@ -24,6 +24,7 @@ import {
   AlertCircle,
   FileText,
   Network,
+  Download,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -31,6 +32,7 @@ import { Badge } from '@/components/ui/Badge'
 import { Tabs } from '@/components/ui/Tabs'
 import { TriPaneShell } from '@/features/triPane'
 import { useMockTriPaneData } from '@/features/triPane/mockData'
+import { CaseExportModal } from '@/components/case/CaseExportModal'
 import type {
   Case,
   CaseTask,
@@ -191,6 +193,8 @@ export default function CaseDetailPage() {
   )
   const [newComment, setNewComment] = useState('')
   const [activeTab, setActiveTab] = useState('overview')
+  const [exportOpen, setExportOpen] = useState(false)
+  const tenantId = 'tenant-demo'
 
   // Load tri-pane data
   const triPaneData = useMockTriPaneData()
@@ -269,6 +273,13 @@ export default function CaseDetailPage() {
 
   return (
     <div className="h-screen flex flex-col">
+      <CaseExportModal
+        tenantId={tenantId}
+        caseId={caseData.id}
+        caseTitle={caseData.title}
+        open={exportOpen}
+        onOpenChange={setExportOpen}
+      />
       {/* Header */}
       <div className="flex-shrink-0 border-b bg-background p-6">
         <div className="flex items-start justify-between mb-4">
@@ -301,6 +312,10 @@ export default function CaseDetailPage() {
           </div>
 
           <div className="flex gap-2">
+            <Button variant="default" onClick={() => setExportOpen(true)} aria-label="Export case">
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
             <Button variant="outline" onClick={() => navigate(`/reports/new?caseId=${caseData.id}`)}>
               <FileText className="h-4 w-4 mr-2" />
               Create Report
