@@ -1,51 +1,3 @@
-name: CI (Golden Path)
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
-jobs:
-  golden-path:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.14.0
-          cache: 'pnpm'
-
-      - name: Bootstrap
-        run: make bootstrap
-
-      - name: Start Stack
-        run: make up
-
-      - name: Smoke Test
-        run: make smoke
-
-      - name: Upload Artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: summit-validation-20.x
-          path: |
-            artifacts/golden-path.log
-            logs/
-          retention-days: 5
-
-      - name: Teardown
-        if: always()
-        run: make down
 name: CI Golden Path
 
 on:
@@ -65,6 +17,48 @@ permissions:
   pull-requests: write
 
 jobs:
+  golden-path-smoke:
+    name: Golden path smoke (install/migrate/core)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.14.0
+          cache: pnpm
+
+      - name: Bootstrap
+        run: make bootstrap
+
+      - name: Start stack
+        run: make up
+
+      - name: Smoke test
+        run: make smoke
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-path-smoke
+          path: |
+            artifacts/golden-path.log
+            logs/
+          retention-days: 5
+
+      - name: Teardown
+        if: always()
+        run: make down
+
   fast-lane:
     name: Fast lane (build + unit)
     uses: ./.github/workflows/_reusable-ci-fast.yml
@@ -80,7 +74,7 @@ jobs:
 
   promotion-gate:
     name: Gate summary
-    needs: [fast-lane, security, perf-slo]
+    needs: [golden-path-smoke, fast-lane, security, perf-slo]
     if: always()
     runs-on: ubuntu-latest
     env:
@@ -93,12 +87,16 @@ jobs:
           script: |
             const failures = [];
             const results = {
+              golden: '${{ needs.golden-path-smoke.result }}',
               fast: '${{ needs.fast-lane.result }}',
               security: '${{ needs.security.result }}',
               perf: '${{ needs.perf-slo.result }}'
             };
             const perfRequired = process.env.PERF_REQUIRED === 'true';
 
+            if (results.golden !== 'success') {
+              failures.push('Golden-path smoke failed; fix install/migrate/smoke.');
+            }
             if (results.fast !== 'success') {
               failures.push('Fast lane failed; fix build/test.');
             }
@@ -110,6 +108,7 @@ jobs:
             }
 
             const statusTable = [
+              ['golden-path-smoke', results.golden],
               ['fast-lane', results.fast],
               ['security', results.security],
               ['perf-slo', perfRequired ? results.perf : `${results.perf} (not required)`]
@@ -131,6 +130,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          STATUS_GOLDEN='${{ needs.golden-path-smoke.result }}'
           STATUS_FAST='${{ needs.fast-lane.result }}'
           STATUS_SEC='${{ needs.security.result }}'
           STATUS_PERF='${{ needs.perf-slo.result }}'
@@ -144,6 +144,7 @@ jobs:
           COMMENT
 
           {
+            echo "| Golden path smoke | ${STATUS_GOLDEN} |"
             echo "| Fast lane | ${STATUS_FAST} |"
             echo "| Security | ${STATUS_SEC} |"
             if [ "${PERF_REQUIRED}" = "true" ]; then
