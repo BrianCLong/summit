@@ -144,7 +144,11 @@
       "Bash(node --version:*)",
       "Bash(perl -i -pe:*)",
       "Bash(do if grep -q \"recordOperationalEvent.*,.*true\\|recordOperationalEvent.*,.*false\" $file)",
-      "Bash(then sed -i.bak2 -E 's/recordOperationalEvent\\(([^,]+),([[:space:]]*)true([[:space:]]*)\\)/recordOperationalEvent(\\1,\\2{ success: true }\\3)/g' $file sed -i.bak2 -E 's/recordOperationalEvent\\(([^,]+),([[:space:]]*)false([[:space:]]*)\\)/recordOperationalEvent(\\1,\\2{ success: false }\\3)/g' $file echo 'Fixed: $file' fi done)"
+      "Bash(then sed -i.bak2 -E 's/recordOperationalEvent\\(([^,]+),([[:space:]]*)true([[:space:]]*)\\)/recordOperationalEvent(\\1,\\2{ success: true }\\3)/g' $file sed -i.bak2 -E 's/recordOperationalEvent\\(([^,]+),([[:space:]]*)false([[:space:]]*)\\)/recordOperationalEvent(\\1,\\2{ success: false }\\3)/g' $file echo 'Fixed: $file' fi done)",
+      "Bash(if [ -f /tmp/claude/tasks/b028ea7.output ])",
+      "Bash(then cat /tmp/claude/tasks/b028ea7.output)",
+      "Bash(else echo \"No output yet\")",
+      "Bash(do echo \"Merging PR #$pr...\" gh pr merge $pr --squash --delete-branch)"
     ],
     "deny": [],
     "ask": []

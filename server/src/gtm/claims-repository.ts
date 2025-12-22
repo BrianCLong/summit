@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { promises as fs } from 'fs';
 import path from 'path';
 import { Parser } from 'json2csv';

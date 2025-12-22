@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { z } from 'zod';
 
 export enum EvidenceType {

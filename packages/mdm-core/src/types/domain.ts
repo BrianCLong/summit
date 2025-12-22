@@ -91,14 +91,14 @@ export interface ValidationRule {
 export interface DomainRelationship {
   id: string;
   targetDomain: string;
-  relationshipType: RelationshipType;
+  relationshipType: DomainRelationshipType;
   cardinality: '1:1' | '1:N' | 'N:1' | 'N:N';
   attributes: string[];
   cascadeDelete: boolean;
   cascadeUpdate: boolean;
 }
 
-export type RelationshipType =
+export type DomainRelationshipType =
   | 'parent_child'
   | 'reference'
   | 'association'
