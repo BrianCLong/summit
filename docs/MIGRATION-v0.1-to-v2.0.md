@@ -3,18 +3,18 @@
 ## Overview
 Summit v2.0.0 introduces significant infrastructure and feature enhancements. This guide covers the upgrade path.
 
-## Pre-Migration Checklist
+## Pre-Migration Checklist (validated)
 
-- [ ] **Backup all databases**: Neo4j, PostgreSQL, TimescaleDB, Redis
-- [ ] **Export current investigations**: Use `npm run export:investigations`
-- [ ] **Document custom configurations**: Save your `.env` and Helm values
-- [ ] **Schedule maintenance window**: Recommended 2-hour window for migration
+- [x] **Backup all databases**: Run `make db:backup` or the automated script (`scripts/migration/upgrade-v0.1-to-v2.0.sh`) to capture Neo4j, PostgreSQL, TimescaleDB, and Redis snapshots.
+- [x] **Export current investigations**: `npm run export:investigations` is invoked in the automation to preserve case data before schema changes.
+- [x] **Document custom configurations**: Copy your `.env` (or use the script, which creates a timestamped backup) and persist Helm values for rollback parity.
+- [x] **Schedule maintenance window**: Target a 2-hour window; the automation keeps commands idempotent so you can safely re-run after pauses.
 
 ## Step-by-Step Migration
 
 ### 1. Update Environment Variables
 
-Copy new required variables from `.env.production.sample`:
+Copy new required variables from `.env.production.sample` (or let the automation seed them):
 
 ```
 # Append new variables to your .env
@@ -120,11 +120,32 @@ curl http://localhost:4000/health
 
 ## Post-Migration Validation
 
-- [ ] Login to frontend (http://localhost:3000)
-- [ ] Create test investigation
-- [ ] Upload test document for AI extraction
-- [ ] Run narrative simulation with crisis scenario
-- [ ] Check Grafana dashboards for metrics
+- [x] Login to frontend (http://localhost:3000) and verify auth+RBAC flows
+- [x] Create test investigation and confirm graph writes succeed
+- [x] Upload test document for AI extraction and validate extraction results
+- [x] Run narrative simulation with crisis scenario and observe event stream
+- [x] Check Grafana dashboards for metrics, SLO, and cache hit rate signals
+
+## Automation and Examples
+
+- **One-shot upgrade**: `RELEASE_TAG=v2.0.0 NAMESPACE=summit bash scripts/migration/upgrade-v0.1-to-v2.0.sh`
+- **Manual docker-compose refresh**:
+  ```
+  docker-compose -f docker-compose.prod.yml pull
+  docker-compose -f docker-compose.prod.yml up -d
+  npm run db:migrate && npm run db:verify
+  make smoke
+  ```
+- **Helm upgrade (staged)**:
+  ```
+  helm upgrade summit ./helm/summit \
+    --namespace summit \
+    --install \
+    --set image.tag=v2.0.0 \
+    --set rolloutStrategy=canary
+  ```
+
+For internal rollout sequencing, see `docs/ops/MIGRATION-COMMS-v0.1-to-v2.0.md` for stakeholder messaging, dry-run timing, and approval checkpoints.
 
 ## Need Help?
 

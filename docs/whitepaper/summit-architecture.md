@@ -36,6 +36,12 @@
 - **Governance dashboarding:** Governance metrics service pulls Prometheus queries, caches in Redis, and updates gauges for validation rate, compliance gaps, and risk scores with p95 latency targets. 【F:server/src/governance/analytics/governance-metrics-service.ts†L20-L120】
 - **Error budgets & kill switches:** SLOBudgetManager tracks SLOs, burn rates, and defines kill switches that trigger rollback, stop-deployment, or circuit-breaker actions when budgets fall below thresholds. 【F:src/slo/SLOBudgetManager.ts†L1-L85】【F:src/slo/SLOBudgetManager.ts†L120-L203】
 - **Operational signals:** Compose stack provisions Prometheus, Alertmanager, Grafana, Jaeger, Loki, and promtail with service health checks to ensure telemetry continuity. 【F:docker-compose.dev.yml†L190-L340】
+- **Resilience drills:** Release-train stage validation runs smoke, health, GraphQL introspection, and latency probes against the release candidate before promotion, ensuring reliability regressions are caught with production-like signals. 【F:.github/workflows/release-train.yml†L439-L485】
+
+## GA Validation & Evidence
+- **Release-candidate governance:** The release-train workflow enforces GA validation for every release candidate by running the `validate-whitepaper` gate, guaranteeing governance and policy coverage stay in lock-step with the documented controls. 【F:.github/workflows/release-train.yml†L41-L191】
+- **Evidence bundle traceability:** The whitepaper references attested SBOMs, Cosign signatures, and SLSA provenance to satisfy evidence-bundle requirements before a release candidate is allowed to proceed to staging promotion. 【F:.github/workflows/release-ga.yml†L7-L37】【F:.ci/gen-provenance.js†L1-L34】
+- **Reliability assurances:** Stage validation and SLO budget checks feed into release summaries to prove the candidate meets error-budget, latency, and readiness thresholds before the GA go/no-go checkpoint. 【F:.github/workflows/release-train.yml†L439-L485】
 
 ## Auditability & Evidence
 - **Export manifests:** Deterministic export manifests store hashes, transform chains, verification status, and download audit logs; GA gate metric function enforces ≥95% manifest integrity. 【F:server/src/db/migrations/007_export_manifests.sql†L1-L207】
