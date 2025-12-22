@@ -1,0 +1,25 @@
+import { Job } from 'bullmq';
+import logger from '../../config/logger.js';
+
+interface {{CAMEL_NAME}}JobData {
+  tenantId: string;
+  // Add other job data properties
+}
+
+export const {{CAMEL_NAME}}Processor = async (job: Job<{{CAMEL_NAME}}JobData>) => {
+  const { tenantId } = job.data;
+  const log = logger.child({ jobId: job.id, jobName: '{{CAMEL_NAME}}', tenantId });
+
+  try {
+    log.info('Starting {{CAMEL_NAME}} job');
+
+    // TODO: Implement job logic here
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    log.info('Completed {{CAMEL_NAME}} job');
+    return { success: true };
+  } catch (error) {
+    log.error({ error }, 'Failed to process {{CAMEL_NAME}} job');
+    throw error; // Rethrow to trigger retry
+  }
+};

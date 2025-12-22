@@ -59,6 +59,8 @@
     "adapters:pack": "node --experimental-strip-types adapters/reference/packaging.ts",
     "changeset": "changeset",
     "release": "changeset version && changeset publish",
+    "check:golden": "npx tsx scripts/check-golden-paths.ts",
+    "scaffold": "npx tsx scripts/scaffold/index.ts",
     "sdk:generate": "pnpm --filter @intelgraph/sdk generate",
     "precommit": "lint-staged",
     "db:prisma:diff": "prisma migrate diff --from-url $DATABASE_URL --to-schema-datamodel prisma/schema.prisma",

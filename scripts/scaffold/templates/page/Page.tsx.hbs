@@ -1,0 +1,55 @@
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { useAuth } from '@/contexts/AuthContext';
+
+export default function {{PASCAL_NAME}}Page() {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<any>(null);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        // TODO: specific data loading logic
+        await new Promise(resolve => setTimeout(resolve, 500));
+        setData({ message: 'Hello from {{PASCAL_NAME}}' });
+      } catch (error) {
+        console.error('Failed to load data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  return (
+    <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">{{PASCAL_NAME}}</h1>
+          <p className="text-muted-foreground mt-1">
+            Description for {{PASCAL_NAME}} page.
+          </p>
+        </div>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Content</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <Skeleton className="h-20 w-full" />
+          ) : (
+            <div>
+              {JSON.stringify(data)}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
