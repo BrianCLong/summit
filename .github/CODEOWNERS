@@ -1,3 +1,27 @@
+# Code Ownership
+# Reference: docs/ownership/README.md
+
+# Global Fallback
+* @intelgraph-core
+
+# Infrastructure & Ops
+/.github/ @team-ops
+/ops/ @team-ops
+/infra/ @team-ops
+/k8s/ @team-ops
+/helm/ @team-ops
+/terraform/ @team-ops
+
+# Core Platform
+/server/ @intelgraph-core
+/client/ @intelgraph-core
+/apps/web/ @intelgraph-core
+/packages/ @intelgraph-core
+
+# Documentation
+/docs/ @intelgraph-core
+
+# Services (Domain Teams)
 /services/prov-ledger/  @team-prov-ledger
 /services/policy-compiler/ @team-lac
 /services/ai-nlq/ @team-nlq
@@ -6,4 +30,3 @@
 /apps/ui/ @team-ui
 /apps/gateway/ @team-gateway
 /services/zk-tx/ @team-zk
-/ops/ @team-ops

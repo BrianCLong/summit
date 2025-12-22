@@ -49,19 +49,20 @@ const rawConfig = {
   },
 };
 
-let config: Config = rawConfig as unknown as Config;
+let config: Config;
 
-if (rawConfig.requireRealDbs || rawConfig.env === 'production') {
-  try {
-    config = ConfigSchema.parse(rawConfig);
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      console.error('❌ Invalid Configuration:', error.format());
-      process.exit(1);
-    }
-    throw error;
+try {
+  // Always validate config to apply defaults and type coercion
+  config = ConfigSchema.parse(rawConfig);
+} catch (error) {
+  if (error instanceof z.ZodError) {
+    console.error('❌ Invalid Configuration:', error.format());
+    process.exit(1);
   }
+  throw error;
+}
 
+if (config.requireRealDbs || config.env === 'production') {
   const devPasswords = [
     'devpassword',
     'dev_jwt_secret_12345',
