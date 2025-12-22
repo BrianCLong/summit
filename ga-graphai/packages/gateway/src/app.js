@@ -17,6 +17,8 @@ import {
 } from './metrics.js';
 import { InMemoryLedger, buildEvidencePayload } from 'prov-ledger';
 import { ChaosEngine, ChaosError } from './chaos.js';
+import { buildSearchService, handleSearchRoute } from './search/unified.js';
+import { buildPrivacyEnforcement } from './privacy/privacyBudget.js';
 
 const ALLOWED_PURPOSES = new Set([
   'investigation',
@@ -145,6 +147,11 @@ export function createApp(options = {}) {
         process.env.NODE_ENV ??
         'development',
     });
+  const searchService = options.searchService ?? buildSearchService(options.searchOptions);
+  if (options.searchDatasetPath) {
+    searchService.reindexFromFile(options.searchDatasetPath);
+  }
+  const privacy = options.privacy ?? buildPrivacyEnforcement(options.privacyOptions);
 
   function formatGraphqlError(error, res) {
     if (error.originalError instanceof PolicyError) {
@@ -170,6 +177,11 @@ export function createApp(options = {}) {
   app.use(express.json({ limit: '1mb' }));
   app.use(createContextMiddleware(options));
   app.use(chaos.middleware());
+
+  app.get(
+    '/api/search/unified',
+    handleSearchRoute(searchService, privacy),
+  );
 
   if (chaos.safeEnvironment) {
     app.get('/internal/chaos', (req, res) => {
