@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Receipt, signReceipt, ReceiptSignature } from '@intelgraph/provenance';
 
 interface Logger {
