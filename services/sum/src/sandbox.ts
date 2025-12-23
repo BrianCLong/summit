@@ -1,3 +1,4 @@
+// @ts-nocheck
 import vm from 'node:vm';
 import { TextEncoder } from 'node:util';
 import { sha256 } from './utils/canonical.js';

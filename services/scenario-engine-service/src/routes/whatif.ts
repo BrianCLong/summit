@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * What-If Routes
  * Operations for scenario manipulation

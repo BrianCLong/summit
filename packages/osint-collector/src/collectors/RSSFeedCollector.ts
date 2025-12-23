@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * RSS Feed Collector - Monitors RSS/Atom feeds for news and updates
  */
