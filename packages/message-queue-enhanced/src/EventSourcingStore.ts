@@ -1,5 +1,5 @@
 import { trace } from '@opentelemetry/api';
-import pino from 'pino';
+import pino = require('pino');
 import { Pool } from 'pg';
 import { DomainEvent, EventStore, EventSourcedAggregate } from './types';
 
@@ -10,7 +10,7 @@ const tracer = trace.getTracer('message-queue-enhanced');
  * Event sourcing store with PostgreSQL backend
  */
 export class EventSourcingStore implements EventStore {
-  constructor(private pool: Pool) {}
+  constructor(private pool: Pool) { }
 
   /**
    * Initialize event store schema

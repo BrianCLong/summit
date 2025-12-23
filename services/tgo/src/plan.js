@@ -1,0 +1,48 @@
+import { est } from './estimator';
+export function planPR(changed) {
+    const build = {
+        id: 'build',
+        kind: 'build',
+        estSec: 120,
+        needs: [],
+        caps: ['cpu', 'linux'],
+        priority: 'hot',
+    };
+    const testShards = shardTests(changed).map((files, i) => ({
+        id: `test-${i}`,
+        kind: 'test',
+        files,
+        estSec: est(files),
+        needs: ['build'],
+        caps: ['cpu', 'linux'],
+        priority: 'hot',
+    }));
+    const lint = {
+        id: 'lint',
+        kind: 'lint',
+        estSec: 40,
+        needs: [],
+        caps: ['cpu'],
+        priority: 'normal',
+    };
+    const policy = {
+        id: 'policy',
+        kind: 'policy',
+        estSec: 20,
+        needs: [],
+        caps: ['cpu'],
+        priority: 'hot',
+    };
+    return [build, ...testShards, lint, policy];
+}
+function shardTests(changed) {
+    // cluster by top-level folder + size into ~N shards using greedy packing
+    const tests = globTests(changed);
+    const target = 6;
+    const shards = Array.from({ length: target }, () => []);
+    const cost = (arr) => arr.reduce((s, f) => s + ((f.length % 10) + 1), 0);
+    for (const t of tests.sort((a, b) => b.length - a.length)) {
+        shards.sort((a, b) => cost(a) - cost(b))[0].push(t);
+    }
+    return shards.filter((s) => s.length);
+}

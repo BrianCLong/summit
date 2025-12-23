@@ -28,7 +28,7 @@ export function scoreTier(criteria: TierCriteria, weights: TierWeights = DEFAULT
 
   return {
     weightedScore,
-    normalizedScore: parseFloat((weightedScore / maxScore) * 5),
+    normalizedScore: parseFloat(((weightedScore / maxScore) * 5).toFixed(2)),
     criteriaBreakdown: {
       revenueInfluence: criteria.revenueInfluence * weights.revenueInfluence,
       deliveryQuality: criteria.deliveryQuality * weights.deliveryQuality,

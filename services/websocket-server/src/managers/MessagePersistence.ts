@@ -202,7 +202,7 @@ export class MessagePersistence {
           }
 
           if (newest.length >= 2) {
-            const timestamp = parseFloat(newest[1]);
+            const timestamp = newest[1] ? parseFloat(newest[1]) : 0;
             if (newestMessage === null || timestamp > newestMessage) {
               newestMessage = timestamp;
             }

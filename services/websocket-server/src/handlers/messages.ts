@@ -11,7 +11,7 @@ import { logger } from '../utils/logger.js';
 import * as metrics from '../metrics/prometheus.js';
 
 export function registerMessageHandlers(
-  socket: Socket,
+  socket: AuthenticatedSocket,
   deps: HandlerDependencies
 ): void {
   const { roomManager, messagePersistence, rateLimiter, io } = deps;
