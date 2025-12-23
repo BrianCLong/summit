@@ -32,7 +32,7 @@ export function errorHandler(
         name: 'ValidationError',
         code: 'VALIDATION_ERROR',
         message: 'Invalid request data',
-        details: { issues: err.errors },
+        details: { issues: err.issues },
       },
     });
     return;

@@ -5,6 +5,11 @@ import {
   Card,
   CardContent,
   Typography,
+  Chip,
+  Alert,
+  CircularProgress,
+} from '@mui/material';
+import {
   Timeline,
   TimelineItem,
   TimelineSeparator,
@@ -12,10 +17,7 @@ import {
   TimelineContent,
   TimelineDot,
   TimelineOppositeContent,
-  Chip,
-  Alert,
-  CircularProgress,
-} from '@mui/material';
+} from '@mui/lab';
 import {
   FingerprintOutlined,
   PersonOutline,

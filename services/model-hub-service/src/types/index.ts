@@ -137,7 +137,7 @@ export const ModelVersionSchema = z.object({
     gpuRequired: z.boolean().default(false),
     gpuType: z.string().optional(),
     gpuMemoryMb: z.number().positive().optional(),
-  }).default({}),
+  }).default({ gpuRequired: false }),
   performanceMetrics: z.object({
     avgLatencyMs: z.number().positive().optional(),
     p50LatencyMs: z.number().positive().optional(),
@@ -186,7 +186,11 @@ export const PolicyProfileSchema = z.object({
       maxRetries: z.number().min(0).max(5).default(3),
       backoffMultiplier: z.number().min(1).max(5).default(2),
       initialDelayMs: z.number().positive().default(1000),
-    }).default({}),
+    }).default({
+      maxRetries: 3,
+      backoffMultiplier: 2,
+      initialDelayMs: 1000,
+    }),
   }),
   dataClassifications: z.array(z.enum([
     'unclassified',
@@ -241,7 +245,13 @@ export const DeploymentConfigSchema = z.object({
     targetCpuUtilization: z.number().min(1).max(100).default(70),
     targetMemoryUtilization: z.number().min(1).max(100).default(80),
     scaleDownDelaySeconds: z.number().positive().default(300),
-  }).default({}),
+  }).default({
+    minReplicas: 1,
+    maxReplicas: 10,
+    targetCpuUtilization: 70,
+    targetMemoryUtilization: 80,
+    scaleDownDelaySeconds: 300,
+  }),
   healthCheck: z.object({
     enabled: z.boolean().default(true),
     path: z.string().default('/health'),
@@ -249,7 +259,14 @@ export const DeploymentConfigSchema = z.object({
     timeoutSeconds: z.number().positive().default(10),
     failureThreshold: z.number().positive().default(3),
     successThreshold: z.number().positive().default(1),
-  }).default({}),
+  }).default({
+    enabled: true,
+    path: '/health',
+    intervalSeconds: 30,
+    timeoutSeconds: 10,
+    failureThreshold: 3,
+    successThreshold: 1,
+  }),
   circuitBreaker: z.object({
     enabled: z.boolean().default(true),
     failureRateThreshold: z.number().min(0).max(100).default(50),
@@ -258,7 +275,15 @@ export const DeploymentConfigSchema = z.object({
     minimumNumberOfCalls: z.number().positive().default(10),
     waitDurationInOpenStateMs: z.number().positive().default(60000),
     permittedCallsInHalfOpenState: z.number().positive().default(5),
-  }).default({}),
+  }).default({
+    enabled: true,
+    failureRateThreshold: 50,
+    slowCallRateThreshold: 80,
+    slowCallDurationMs: 5000,
+    minimumNumberOfCalls: 10,
+    waitDurationInOpenStateMs: 60000,
+    permittedCallsInHalfOpenState: 5,
+  }),
   rolloutStrategy: z.object({
     type: z.enum(['immediate', 'gradual', 'scheduled']).default('gradual'),
     incrementPercentage: z.number().min(1).max(100).default(10),
@@ -268,8 +293,20 @@ export const DeploymentConfigSchema = z.object({
     rollbackThreshold: z.object({
       errorRate: z.number().min(0).max(1).default(0.05),
       latencyP95Ms: z.number().positive().default(5000),
-    }).default({}),
-  }).default({}),
+    }).default({
+      errorRate: 0.05,
+      latencyP95Ms: 5000,
+    }),
+  }).default({
+    type: 'gradual',
+    incrementPercentage: 10,
+    incrementIntervalSeconds: 300,
+    autoRollback: true,
+    rollbackThreshold: {
+      errorRate: 0.05,
+      latencyP95Ms: 5000,
+    },
+  }),
   isActive: z.boolean().default(false),
   activatedAt: z.date().optional(),
   activatedBy: z.string().optional(),
@@ -493,7 +530,7 @@ export const EvaluationRunSchema = z.object({
       actual: z.unknown().optional(),
       error: z.string().optional(),
     })).default([]),
-  }).default({}),
+  }).default({ metrics: {}, detailedResults: [] }),
   errorMessage: z.string().optional(),
   triggeredBy: z.string(),
   triggerType: z.enum(['manual', 'promotion', 'scheduled', 'ci']),

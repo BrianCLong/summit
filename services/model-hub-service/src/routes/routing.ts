@@ -17,7 +17,7 @@ import {
   CreatePolicyProfileInputSchema,
 } from '../types/index.js';
 
-export const routingRouter = Router();
+export const routingRouter: Router = Router();
 
 // ============================================================================
 // Model Selection
