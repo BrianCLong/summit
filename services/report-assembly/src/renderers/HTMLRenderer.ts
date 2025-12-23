@@ -109,6 +109,7 @@ export class HTMLRenderer {
 
     while ((match = markdownPattern.exec(html)) !== null) {
       const markdownContent = match[1];
+      if (!markdownContent) continue;
       const htmlContent = await marked.parse(markdownContent);
       result = result.replace(match[0], htmlContent);
     }
@@ -203,10 +204,14 @@ export class HTMLRenderer {
     let match;
 
     while ((match = headingPattern.exec(html)) !== null) {
-      const id = match[2].toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      const levelStr = match[1];
+      const text = match[2];
+      if (!levelStr || !text) continue;
+
+      const id = text.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
       headings.push({
-        level: parseInt(match[1], 10),
-        text: match[2],
+        level: parseInt(levelStr, 10),
+        text: text,
         id,
       });
     }
