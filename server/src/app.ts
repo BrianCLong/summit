@@ -61,6 +61,7 @@ import { necromancerRouter } from './routes/necromancer.js';
 import { zeroDayRouter } from './routes/zero_day.js';
 import { abyssRouter } from './routes/abyss.js';
 import authRouter from './routes/authRoutes.js';
+import ssoRouter from './routes/sso.js';
 import qafRouter from './routes/qaf.js';
 import siemPlatformRouter from './routes/siem-platform.js';
 import maestroRouter from './routes/maestro.js';
@@ -294,6 +295,7 @@ export const createApp = async () => {
   // Authentication routes (exempt from global auth middleware)
   app.use('/auth', authRouter);
   app.use('/api/auth', authRouter); // Alternative path
+  app.use('/sso', ssoRouter);
 
   // Other routes
   app.use('/monitoring', monitoringRouter);
