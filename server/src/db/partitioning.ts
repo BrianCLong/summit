@@ -29,11 +29,6 @@ export class PartitionManager {
         return;
       }
 
-      // Detach from default if needed? No, LIST partitioning doesn't auto-move from default.
-      // We are creating a specific partition.
-      // Note: If rows for this tenant already exist in 'default', this CREATE might fail
-      // or require moving rows. For now, we assume this is done before data ingestion.
-
       const query = `
         CREATE TABLE ${partitionName}
         PARTITION OF maestro_runs
@@ -54,11 +49,64 @@ export class PartitionManager {
   }
 
   /**
-   * Example of Time-Based Partitioning maintenance (if we had a time-partitioned table)
+   * Create a monthly range partition for a table (e.g., audit_logs)
    */
   async createMonthlyPartition(tableName: string, date: Date): Promise<void> {
-    // Implementation placeholder for future time-series tables
-    // e.g., audit_logs could be partitioned by range (created_at)
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const partitionName = `${tableName}_y${year}m${month}`;
+
+    const startStr = `${year}-${month}-01`;
+    // Calculate next month
+    const nextMonthDate = new Date(year, date.getMonth() + 1, 1);
+    const endYear = nextMonthDate.getFullYear();
+    const endMonth = String(nextMonthDate.getMonth() + 1).padStart(2, '0');
+    const endStr = `${endYear}-${endMonth}-01`;
+
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      // Check if partition exists
+      const checkRes = await client.query(
+        `SELECT to_regclass($1::text)`,
+        [partitionName]
+      );
+
+      if (checkRes.rows[0].to_regclass) {
+        logger.info(`Partition ${partitionName} already exists.`);
+        await client.query('COMMIT');
+        return;
+      }
+
+      const query = `
+        CREATE TABLE ${partitionName}
+        PARTITION OF ${tableName}
+        FOR VALUES FROM ('${startStr}') TO ('${endStr}')
+      `;
+
+      await client.query(query);
+      logger.info(`Created range partition ${partitionName} for ${tableName} (${startStr} to ${endStr})`);
+
+      await client.query('COMMIT');
+    } catch (error) {
+      await client.query('ROLLBACK');
+      logger.error(`Failed to create monthly partition for ${tableName} (${year}-${month})`, error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Create partitions for upcoming months (maintenance task)
+   */
+  async ensureFuturePartitions(tableName: string, monthsAhead: number = 3): Promise<void> {
+      const now = new Date();
+      for (let i = 0; i <= monthsAhead; i++) {
+          const targetDate = new Date(now.getFullYear(), now.getMonth() + i, 1);
+          await this.createMonthlyPartition(tableName, targetDate);
+      }
   }
 }
 

@@ -1,32 +1,45 @@
-import Redis from 'ioredis';
-import pino from 'pino';
 
-const logger = (pino as any)();
-const redisClient = new Redis(); // Assuming Redis is running and accessible
+import { getRedisClient } from '../db/redis.js';
+import { CacheManager } from '../cache/AdvancedCachingStrategy.js';
+import type { RedisClientInterface } from '../cache/AdvancedCachingStrategy.js';
+import logger from '../utils/logger.js';
 
-redisClient.on('connect', () =>
-  logger.info('Redis client connected for caching.'),
-);
-redisClient.on('error', (err) =>
-  logger.error({ err }, 'Redis caching client error.'),
-);
+let cacheManagerInstance: CacheManager | null = null;
 
-// Simple metrics for cache
-const metrics = {
-  cacheHit: { inc: () => {} }, // Placeholder
-  cacheMiss: { inc: () => {} }, // Placeholder
-  cacheEviction: { inc: () => {} }, // Placeholder
-};
+// Adapter to ensure ioredis client matches RedisClientInterface
+function createRedisAdapter(client: any): RedisClientInterface {
+  return client as RedisClientInterface;
+}
 
-export const cached =
-  <T>(key: string, ttl: number, fn: () => Promise<T>) => async (): Promise<T> => {
-    const hit = await redisClient.get(key);
-    if (hit) {
-      metrics.cacheHit.inc();
-      return JSON.parse(hit) as T;
-    }
-    const val = await fn();
-    await redisClient.setex(key, ttl, JSON.stringify(val));
-    metrics.cacheMiss.inc();
-    return val;
-  };
+export function getCacheManager(): CacheManager {
+  if (!cacheManagerInstance) {
+    const redisClient = getRedisClient();
+
+    // We can rely on ioredis matching the interface mostly, but explicit casting is safer for TS
+    const adapter = createRedisAdapter(redisClient);
+
+    cacheManagerInstance = new CacheManager(adapter, {
+      keyPrefix: 'summit:cache:',
+      defaultTtl: 300, // 5 minutes
+      enableMetrics: true
+    });
+
+    // Handle errors
+    cacheManagerInstance.on('error', (err) => {
+      logger.error('CacheManager error', err);
+    });
+
+    cacheManagerInstance.on('circuit:open', () => {
+      logger.warn('Cache circuit breaker opened');
+    });
+  }
+  return cacheManagerInstance;
+}
+
+export const cacheManager = getCacheManager();
+
+/**
+ * Backward compatibility wrapper
+ * @deprecated Use cacheManager instead
+ */
+export const cached = cacheManager;

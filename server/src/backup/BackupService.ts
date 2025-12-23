@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { exec } from 'child_process';
+import { exec, spawn } from 'child_process';
 import { promisify } from 'util';
 import path from 'path';
 import fs from 'fs/promises';
@@ -10,15 +10,14 @@ import logger from '../utils/logger.js';
 import { backupDuration, backupSize } from '../metrics/dbMetrics.js';
 import { getNeo4jDriver } from '../db/neo4j.js';
 import { getPostgresPool } from '../db/postgres.js';
-import { getRedisClient } from '../config/database.js';
+import { getRedisClient } from '../db/redis.js';
 
 const execAsync = promisify(exec);
 
-// Minimal S3 interface for simulation or replacement with @aws-sdk/client-s3
 interface S3Config {
     bucket: string;
     region: string;
-    endpoint?: string; // For MinIO or other S3-compatible
+    endpoint?: string;
     accessKeyId?: string;
     secretAccessKey?: string;
 }
@@ -60,17 +59,10 @@ export class BackupService {
       }
       logger.info(`Uploading ${filepath} to S3 bucket ${this.s3Config.bucket} as ${key}...`);
 
-      // Simulation of S3 upload if SDK is not present, or use SDK if we were to add it.
-      // Ideally:
-      // const s3 = new S3Client(this.s3Config);
-      // await s3.send(new PutObjectCommand({ Bucket: ..., Key: ..., Body: fs.createReadStream(filepath) }));
-
-      // For now, we mock the success or use a CLI tool if available
       try {
           if (process.env.USE_AWS_CLI === 'true') {
              await execAsync(`aws s3 cp "${filepath}" "s3://${this.s3Config.bucket}/${key}" --region ${this.s3Config.region}`);
           } else {
-              // Simulating upload delay
               await new Promise(r => setTimeout(r, 500));
               logger.info('Simulated S3 upload complete.');
           }
@@ -83,16 +75,12 @@ export class BackupService {
   async verifyBackup(filepath: string): Promise<boolean> {
       logger.info(`Verifying backup integrity for ${filepath}...`);
       try {
-          // 1. Check if file exists and has size > 0
           const stats = await fs.stat(filepath);
           if (stats.size === 0) throw new Error('Backup file is empty');
 
-          // 2. If compressed, try to test gzip integrity
           if (filepath.endsWith('.gz')) {
               await execAsync(`gzip -t "${filepath}"`);
           }
-
-          // 3. (Optional) Attempt a restoration to a temporary DB (advanced)
 
           logger.info(`Backup verification successful for ${filepath}`);
           return true;
@@ -112,7 +100,6 @@ export class BackupService {
       const filepath = path.join(dir, filename);
       const finalPath = options.compress ? `${filepath}.gz` : filepath;
 
-      // Ensure pg_dump is available or handle via docker exec if running in container
       const pgHost = process.env.POSTGRES_HOST || 'localhost';
       const pgUser = process.env.POSTGRES_USER || 'intelgraph';
       const pgDb = process.env.POSTGRES_DB || 'intelgraph_dev';
@@ -147,21 +134,66 @@ export class BackupService {
     }
   }
 
+  async restorePostgres(backupPath: string): Promise<void> {
+    logger.info(`Starting PostgreSQL restore from ${backupPath}...`);
+    try {
+        const pgHost = process.env.POSTGRES_HOST || 'localhost';
+        const pgUser = process.env.POSTGRES_USER || 'intelgraph';
+        const pgDb = process.env.POSTGRES_DB || 'intelgraph_dev';
+        const pgPassword = process.env.POSTGRES_PASSWORD || 'devpassword';
+
+        // Check if file exists
+        await fs.access(backupPath);
+
+        // Security check: ensure backupPath is not obviously malicious (basic check)
+        // Ideally we use spawn to avoid shell, but we need piping.
+        // We will use spawn with stdio piping.
+
+        const psqlEnv = { ...process.env, PGPASSWORD: pgPassword };
+        const psqlArgs = ['-h', pgHost, '-U', pgUser, pgDb];
+
+        let inputStream;
+        if (backupPath.endsWith('.gz')) {
+            const fileStream = createReadStream(backupPath);
+            const gunzip = zlib.createGunzip();
+            inputStream = fileStream.pipe(gunzip);
+        } else {
+            inputStream = createReadStream(backupPath);
+        }
+
+        const psql = spawn('psql', psqlArgs, { env: psqlEnv, stdio: ['pipe', 'inherit', 'inherit'] });
+
+        inputStream.pipe(psql.stdin);
+
+        await new Promise((resolve, reject) => {
+            psql.on('close', (code) => {
+                if (code === 0) resolve(code);
+                else reject(new Error(`psql exited with code ${code}`));
+            });
+            psql.on('error', reject);
+            inputStream.on('error', reject);
+        });
+
+        logger.info('PostgreSQL restore completed successfully.');
+    } catch (error) {
+        logger.error('PostgreSQL restore failed', error);
+        throw error;
+    }
+  }
+
   async backupNeo4j(options: BackupOptions = {}): Promise<string> {
     const startTime = Date.now();
     logger.info('Starting Neo4j backup...');
     try {
       const dir = await this.ensureBackupDir('neo4j');
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const filename = `neo4j-export-${timestamp}.jsonl`; // JSON Lines for logical dump
+      const filename = `neo4j-export-${timestamp}.jsonl`;
       const filepath = path.join(dir, filename);
       const finalPath = options.compress ? `${filepath}.gz` : filepath;
 
       const driver = getNeo4jDriver();
       const session = driver.session();
 
-      // Logical backup: Export nodes and relationships to JSONL
-      // This works remotely without server-side file access
       try {
           const writeStream = options.compress
               ? zlib.createGzip()
@@ -171,7 +203,6 @@ export class BackupService {
               writeStream.pipe(createWriteStream(finalPath));
           }
 
-          // Dump Nodes
           const nodeResult = await session.run('MATCH (n) RETURN n');
           for (const record of nodeResult.records) {
               const node = record.get('n');
@@ -179,20 +210,37 @@ export class BackupService {
               writeStream.write(line);
           }
 
-          // Dump Relationships
-          const relResult = await session.run('MATCH ()-[r]->() RETURN r');
+          // Fetch relationships with start and end node IDs (assuming nodes have 'id' property)
+          // We also return internal node IDs just in case, though they are unstable across restarts,
+          // they are stable within a session for mapping.
+          // BUT, for a logical backup, we MUST rely on application-level IDs.
+          // We assume every node has an 'id' property.
+          const relResult = await session.run(`
+            MATCH (a)-[r]->(b)
+            RETURN r, a.id as startNodeId, b.id as endNodeId
+          `);
+
           for (const record of relResult.records) {
               const rel = record.get('r');
-              // Note: preserving IDs is tricky in logical dumps without more complex logic,
-              // but we are preserving the properties and type.
-              // For a full restore, we'd need start/end identifiers (e.g. uuid).
-              const line = JSON.stringify({ type: 'rel', typeName: rel.type, props: rel.properties }) + '\n';
-              writeStream.write(line);
+              const startNodeId = record.get('startNodeId');
+              const endNodeId = record.get('endNodeId');
+
+              if (startNodeId && endNodeId) {
+                const line = JSON.stringify({
+                    type: 'rel',
+                    typeName: rel.type,
+                    props: rel.properties,
+                    startNodeId,
+                    endNodeId
+                }) + '\n';
+                writeStream.write(line);
+              } else {
+                  logger.warn(`Skipping relationship ${rel.identity} because start/end node missing 'id' property`);
+              }
           }
 
           writeStream.end();
 
-          // Wait for stream to finish
           await new Promise((resolve, reject) => {
               writeStream.on('finish', resolve);
               writeStream.on('error', reject);
@@ -223,6 +271,63 @@ export class BackupService {
     }
   }
 
+  async restoreNeo4j(backupPath: string): Promise<void> {
+      logger.info(`Starting Neo4j restore from ${backupPath}...`);
+      try {
+          await fs.access(backupPath);
+          const driver = getNeo4jDriver();
+          const session = driver.session();
+
+          const fileStream = createReadStream(backupPath);
+          const rl = require('readline').createInterface({
+            input: backupPath.endsWith('.gz') ? fileStream.pipe(zlib.createGunzip()) : fileStream,
+            crlfDelay: Infinity
+          });
+
+          let nodesCount = 0;
+          let relsCount = 0;
+          const relationships = [];
+
+          try {
+             for await (const line of rl) {
+                 const data = JSON.parse(line);
+                 if (data.type === 'node') {
+                     const labels = data.labels.map((l: string) => `\`${l}\``).join(':');
+                     await session.run(`MERGE (n:${labels} {id: $props.id}) SET n += $props`, { props: data.props });
+                     nodesCount++;
+                 } else if (data.type === 'rel') {
+                     relationships.push(data);
+                 }
+             }
+
+             // Restore relationships in a second pass (or after collecting them)
+             for (const rel of relationships) {
+                 // Construct Cypher for relationship
+                 // MATCH (a {id: $start}), (b {id: $end}) MERGE (a)-[r:TYPE]->(b) SET r += $props
+                 const query = `
+                    MATCH (a {id: $startId}), (b {id: $endId})
+                    MERGE (a)-[r:\`${rel.typeName}\`]->(b)
+                    SET r += $props
+                 `;
+                 await session.run(query, {
+                     startId: rel.startNodeId,
+                     endId: rel.endNodeId,
+                     props: rel.props
+                 });
+                 relsCount++;
+             }
+
+          } finally {
+              await session.close();
+          }
+
+          logger.info(`Neo4j restore completed. Restored ${nodesCount} nodes and ${relsCount} relationships.`);
+      } catch (error) {
+          logger.error('Neo4j restore failed', error);
+          throw error;
+      }
+  }
+
   async backupRedis(options: BackupOptions = {}): Promise<string> {
      const startTime = Date.now();
      logger.info('Starting Redis backup...');
@@ -230,10 +335,8 @@ export class BackupService {
        const client = getRedisClient();
        if (!client) throw new Error('Redis client not available');
 
-       // Trigger background save
        await client.bgsave();
 
-       // Poll for completion
        let attempts = 0;
        while (attempts < 30) {
            const info = await client.info('persistence');
@@ -244,8 +347,6 @@ export class BackupService {
            attempts++;
        }
 
-       // We cannot download the RDB file if Redis is remote/containerized without volume access.
-       // We log the successful trigger and last save time.
        const lastSave = await client.lastsave();
 
        const dir = await this.ensureBackupDir('redis');
@@ -272,7 +373,6 @@ export class BackupService {
 
   async runAllBackups(): Promise<Record<string, string>> {
      const results: Record<string, string> = {};
-     // Determine if we should upload to S3 based on env
      const uploadToS3 = !!process.env.S3_BACKUP_BUCKET;
 
      try {
