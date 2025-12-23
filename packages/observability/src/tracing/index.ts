@@ -22,7 +22,7 @@ import { Resource } from '@opentelemetry/resources';
 import {
   ATTR_SERVICE_NAME,
   ATTR_SERVICE_VERSION,
-  ATTR_DEPLOYMENT_ENVIRONMENT,
+  SEMRESATTRS_DEPLOYMENT_ENVIRONMENT,
 } from '@opentelemetry/semantic-conventions';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { BatchSpanProcessor, SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base';
@@ -76,7 +76,7 @@ export async function initializeTracing(config: TracingInitConfig): Promise<void
   const resource = new Resource({
     [ATTR_SERVICE_NAME]: service.name,
     [ATTR_SERVICE_VERSION]: service.version,
-    [ATTR_DEPLOYMENT_ENVIRONMENT]: service.environment,
+    [SEMRESATTRS_DEPLOYMENT_ENVIRONMENT]: service.environment,
     'service.team': service.team,
     'service.tier': service.tier,
     'service.namespace': service.namespace,
@@ -102,7 +102,7 @@ export async function initializeTracing(config: TracingInitConfig): Promise<void
   // Initialize SDK
   sdk = new NodeSDK({
     resource,
-    spanProcessors: [spanProcessor],
+    spanProcessors: [spanProcessor as any],
     instrumentations: autoInstrumentation ? [getNodeAutoInstrumentations({
       '@opentelemetry/instrumentation-fs': { enabled: false },
       '@opentelemetry/instrumentation-dns': { enabled: false },

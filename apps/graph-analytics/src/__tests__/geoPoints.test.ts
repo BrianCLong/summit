@@ -1,10 +1,10 @@
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
-import type { Express } from 'express';
+import type { Application } from 'express';
 import { beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import type { GeoPoint } from '../data/geoPoints';
 
-let app: Express;
+let app: Application;
 
 const createToken = (role = 'user') =>
   jwt.sign(
