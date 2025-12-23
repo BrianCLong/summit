@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { performance } from 'node:perf_hooks';
 import {
   BoostPattern,

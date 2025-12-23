@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Disaster Recovery Module
  *

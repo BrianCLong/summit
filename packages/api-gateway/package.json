@@ -10,7 +10,7 @@
     "dev": "tsx watch src/index.ts",
     "test": "jest",
     "lint": "eslint src",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit --project tsconfig.typecheck.json"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",

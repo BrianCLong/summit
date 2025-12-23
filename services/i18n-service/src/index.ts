@@ -1,5 +1,5 @@
 // @ts-nocheck
-import express from 'express';
+import express, { type Express } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import pino from 'pino';
@@ -19,8 +19,8 @@ const logger = pino({
 /**
  * Create and configure Express app
  */
-export function createApp(config: TranslationServiceConfig) {
-  const app = express();
+export function createApp(config: TranslationServiceConfig): Express {
+  const app: Express = express();
 
   // Security middleware
   app.use(helmet());
