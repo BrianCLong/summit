@@ -29,7 +29,22 @@ import {
   maestroJobExecutionDurationSeconds,
   // LLM Metrics
   llmTokensTotal,
-  llmRequestDuration
+  llmRequestDuration,
+  // New Metrics from metrics.js
+  intelgraphCacheHits,
+  intelgraphCacheMisses,
+  intelgraphActiveConnections,
+  intelgraphDatabaseQueryDuration,
+  intelgraphHttpRequestDuration,
+  intelgraphGraphragQueryTotal,
+  intelgraphGraphragQueryDurationMs,
+  intelgraphQueryPreviewsTotal,
+  intelgraphQueryPreviewLatencyMs,
+  intelgraphQueryPreviewErrorsTotal,
+  intelgraphQueryPreviewExecutionsTotal,
+  intelgraphGlassBoxRunsTotal,
+  intelgraphGlassBoxRunDurationMs,
+  intelgraphGlassBoxCacheHits
 } from '../monitoring/metrics.js';
 
 export { registry };
@@ -56,7 +71,21 @@ export {
   maestroDagExecutionDurationSeconds,
   maestroJobExecutionDurationSeconds,
   llmTokensTotal,
-  llmRequestDuration
+  llmRequestDuration,
+  intelgraphCacheHits,
+  intelgraphCacheMisses,
+  intelgraphActiveConnections,
+  intelgraphDatabaseQueryDuration,
+  intelgraphHttpRequestDuration,
+  intelgraphGraphragQueryTotal,
+  intelgraphGraphragQueryDurationMs,
+  intelgraphQueryPreviewsTotal,
+  intelgraphQueryPreviewLatencyMs,
+  intelgraphQueryPreviewErrorsTotal,
+  intelgraphQueryPreviewExecutionsTotal,
+  intelgraphGlassBoxRunsTotal,
+  intelgraphGlassBoxRunDurationMs,
+  intelgraphGlassBoxCacheHits
 };
 
 export const metrics = {
@@ -81,5 +110,19 @@ export const metrics = {
   maestroDagExecutionDurationSeconds,
   maestroJobExecutionDurationSeconds,
   llmTokensTotal,
-  llmRequestDuration
+  llmRequestDuration,
+  intelgraphCacheHits,
+  intelgraphCacheMisses,
+  intelgraphActiveConnections,
+  intelgraphDatabaseQueryDuration,
+  intelgraphHttpRequestDuration,
+  intelgraphGraphragQueryTotal,
+  intelgraphGraphragQueryDurationMs,
+  intelgraphQueryPreviewsTotal,
+  intelgraphQueryPreviewLatencyMs,
+  intelgraphQueryPreviewErrorsTotal,
+  intelgraphQueryPreviewExecutionsTotal,
+  intelgraphGlassBoxRunsTotal,
+  intelgraphGlassBoxRunDurationMs,
+  intelgraphGlassBoxCacheHits
 };
