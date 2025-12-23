@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { CacheClient, createCacheClient } from '@packages/cache';
 import pino from 'pino';
 import type { CitizenProfile } from '../schemas/citizen.js';

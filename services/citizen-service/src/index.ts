@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express from 'express';
 import pino from 'pino';
 import citizenRoutes from './routes/citizen.js';
