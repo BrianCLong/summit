@@ -6,7 +6,6 @@
     "moduleResolution": "node",
     "strict": true,
     "types": ["node"]
-    "types": []
   },
   "include": ["src/**/*.ts"]
 }

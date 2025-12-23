@@ -8,7 +8,7 @@ import { CIManager } from '@intelgraph/counterintel-ops';
  * deception operations, and insider threat hunting.
  */
 
-export const ciRouter = Router();
+export const ciRouter: Router = Router();
 const ciManager = new CIManager();
 
 // ============================================================================

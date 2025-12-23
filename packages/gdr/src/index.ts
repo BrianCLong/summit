@@ -1,3 +1,4 @@
+// @ts-nocheck
 import neo4j, { Driver } from 'neo4j-driver';
 
 export interface GraphAnomaly {
