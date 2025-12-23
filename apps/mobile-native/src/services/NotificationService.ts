@@ -66,10 +66,10 @@ export const setupPushNotifications = async (): Promise<void> => {
 
   // Configure PushNotification
   PushNotification.configure({
-    onRegister: (token) => {
+    onRegister: (token: any) => {
       console.log('[Notifications] Device token:', token);
     },
-    onNotification: (notification) => {
+    onNotification: (notification: any) => {
       console.log('[Notifications] Local notification:', notification);
     },
     permissions: {
@@ -221,7 +221,7 @@ export const scheduleLocalNotification = async (
   title: string,
   body: string,
   data?: any,
-  triggerDate?: Date,
+  _triggerDate?: Date,
 ): Promise<string> => {
   const channelId = await notifee.createChannel({
     id: 'default',

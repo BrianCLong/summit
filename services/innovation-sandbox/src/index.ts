@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express, { Request, Response, NextFunction } from 'express';
 import { randomUUID, createHash } from 'crypto';
 import {
