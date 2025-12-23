@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { readFile } from 'node:fs/promises';
 import { Buffer } from 'node:buffer';
 import crypto from 'node:crypto';

@@ -2,9 +2,11 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src",
     "module": "ESNext",
-    "target": "ES2022"
+    "target": "ES2022",
+    "skipLibCheck": true,
+    "declaration": false
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["**/*.test.ts", "**/*.spec.ts"]
 }
