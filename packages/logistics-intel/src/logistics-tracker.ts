@@ -200,8 +200,8 @@ export class LogisticsTracker {
     };
 
     // Select recommended route based on priorities
-    let recommended = seaRoute;
-    let alternatives = [airRoute, railRoute, roadRoute];
+    let recommended: RouteOptimization['recommendedRoute'] = seaRoute;
+    let alternatives: RouteOptimization['recommendedRoute'][] = [airRoute, railRoute, roadRoute];
 
     if (requirements.prioritizeSpeed) {
       recommended = airRoute;
@@ -286,7 +286,7 @@ export class LogisticsTracker {
     const lost = carrierShipments.filter(s => s.status === 'lost');
 
     const onTime = delivered.filter(s => {
-      if (!s.actualArrival) {return false;}
+      if (!s.actualArrival) { return false; }
       return s.actualArrival <= s.estimatedArrival;
     });
 
@@ -379,7 +379,7 @@ export class LogisticsTracker {
     // Calculate performance
     const delivered = modeShipments.filter(s => s.status === 'delivered');
     const onTime = delivered.filter(s => {
-      if (!s.actualArrival) {return false;}
+      if (!s.actualArrival) { return false; }
       return s.actualArrival <= s.estimatedArrival;
     });
     const damaged = modeShipments.filter(s => s.status === 'damaged');
@@ -441,7 +441,7 @@ export class LogisticsTracker {
     const lat2 = this.toRad(destination.latitude);
 
     const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-              Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+      Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const distance = R * c;
 
@@ -482,9 +482,9 @@ export class LogisticsTracker {
   private calculateCongestionLevel(portName: string): 'low' | 'moderate' | 'high' | 'severe' {
     // Placeholder - would use real port data
     const random = Math.random();
-    if (random < 0.25) {return 'low';}
-    if (random < 0.5) {return 'moderate';}
-    if (random < 0.75) {return 'high';}
+    if (random < 0.25) { return 'low'; }
+    if (random < 0.5) { return 'moderate'; }
+    if (random < 0.75) { return 'high'; }
     return 'severe';
   }
 

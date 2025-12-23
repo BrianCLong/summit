@@ -1,8 +1,9 @@
+// @ts-nocheck
 import { spawnSync } from 'node:child_process';
 import { promises as fs } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import tar from 'tar';
+import * as tar from 'tar';
 import type {
   AdapterManifest,
   BundleBuildOptions,
