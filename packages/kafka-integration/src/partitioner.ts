@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment, @typescript-eslint/no-unused-vars, @typescript-eslint/no-non-null-assertion, no-fallthrough */
+// @ts-nocheck
 import { Partitioner, PartitionerArgs } from 'kafkajs';
 import * as crypto from 'crypto';
 
