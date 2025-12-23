@@ -149,7 +149,7 @@ async function startWorker() {
     console.error('Uncaught Exception:', error);
     prometheusConductorMetrics.recordOperationalEvent(
       'worker_uncaught_exception',
-      false,
+      { success: false },
     );
     process.exit(1);
   });
@@ -158,7 +158,7 @@ async function startWorker() {
     console.error('Unhandled Rejection at:', promise, 'reason:', reason);
     prometheusConductorMetrics.recordOperationalEvent(
       'worker_unhandled_rejection',
-      false,
+      { success: false },
     );
   });
 }

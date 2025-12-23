@@ -280,7 +280,7 @@ export class DataReplicationEngine extends EventEmitter {
       // Update metrics
       prometheusConductorMetrics.recordOperationalEvent(
         'replication_success',
-        true,
+        { success: true },
       );
     } catch (error) {
       operation.status = 'failed';
@@ -298,10 +298,8 @@ export class DataReplicationEngine extends EventEmitter {
         }, delay);
       }
 
-      prometheusConductorMetrics.recordOperationalEvent(
-        'replication_failure',
-        false,
-      );
+      prometheusConductorMetrics.recordOperationalEvent('data_replication_start', { success: true });
+      prometheusConductorMetrics.recordOperationalEvent('data_replication_failure', { success: false, error: error.message });
     }
 
     // Update operation in storage

@@ -71,11 +71,11 @@ interface ActionResult {
 
 interface SecurityEvent {
   type:
-    | 'syscall_blocked'
-    | 'network_violation'
-    | 'file_access_denied'
-    | 'resource_limit_exceeded'
-    | 'suspicious_behavior';
+  | 'syscall_blocked'
+  | 'network_violation'
+  | 'file_access_denied'
+  | 'resource_limit_exceeded'
+  | 'suspicious_behavior';
   timestamp: string;
   details: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
@@ -165,7 +165,7 @@ export class ActionSandbox {
    */
   async executeAction(request: ActionRequest): Promise<ActionResult> {
     const startTime = Date.now();
-    const containerId = `sandbox-${request.id}-${randomBytes(8).toString('hex')}`;
+    const containerId = `sandbox-${request.id}-${(randomBytes as any)(8).toString('hex')}`;
     const workspaceDir = join(this.sandboxDirectory, containerId);
 
     logger.info('Starting sandboxed action execution', {
@@ -242,11 +242,7 @@ export class ActionSandbox {
         executionTime,
       });
 
-      prometheusConductorMetrics.recordOperationalEvent(
-        'sandbox_execution_error',
-        false,
-        { action_type: request.type, error_type: error.name },
-      );
+      prometheusConductorMetrics.recordOperationalEvent('sandbox_error', { success: false });
 
       throw error;
     } finally {
@@ -902,7 +898,7 @@ export class ActionSandbox {
 
           if (stats.isFile() && stats.size <= this.config.maxFileSize) {
             const content = await fs.readFile(filePath, 'utf8');
-            outputFiles[file] = content;
+            outputFiles[file] = content.toString();
           }
         }
       }

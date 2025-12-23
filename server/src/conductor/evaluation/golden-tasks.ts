@@ -13,12 +13,12 @@ export interface GoldenTask {
   id: string;
   name: string;
   category:
-    | 'graph_ops'
-    | 'rag_retrieval'
-    | 'osint_analysis'
-    | 'export_generation'
-    | 'files_management'
-    | 'general_llm';
+  | 'graph_ops'
+  | 'rag_retrieval'
+  | 'osint_analysis'
+  | 'export_generation'
+  | 'files_management'
+  | 'general_llm';
   description: string;
   input: {
     query: string;
@@ -40,12 +40,12 @@ export interface GoldenTask {
   };
   scoring: {
     method:
-      | 'exact_match'
-      | 'semantic_similarity'
-      | 'regex_match'
-      | 'json_schema'
-      | 'custom_hook'
-      | 'llm_judge';
+    | 'exact_match'
+    | 'semantic_similarity'
+    | 'regex_match'
+    | 'json_schema'
+    | 'custom_hook'
+    | 'llm_judge';
     weight: number;
     passThreshold: number;
     target?: any;
@@ -590,7 +590,7 @@ export class EvaluationEngine extends EventEmitter {
       // Record metrics
       prometheusConductorMetrics.recordOperationalEvent(
         'evaluation_completed',
-        evaluationRun.summary.qualityGate === 'pass',
+        { success: evaluationRun.summary.qualityGate === 'pass' },
       );
       prometheusConductorMetrics.recordOperationalMetric(
         'evaluation_duration',
@@ -607,7 +607,7 @@ export class EvaluationEngine extends EventEmitter {
 
       prometheusConductorMetrics.recordOperationalEvent(
         'evaluation_failed',
-        false,
+        { success: false },
       );
     } finally {
       this.activeRuns.delete(runId);

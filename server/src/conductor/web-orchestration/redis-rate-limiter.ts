@@ -153,8 +153,8 @@ export class RedisRateLimiter {
       // Record metrics
       prometheusConductorMetrics.recordOperationalEvent(
         'rate_limit_check',
-        rateLimitResult.allowed,
         {
+          success: rateLimitResult.allowed,
           domain,
           tenant_id: tenantId,
           tokens_remaining: rateLimitResult.tokensRemaining.toString(),
@@ -276,7 +276,7 @@ export class RedisRateLimiter {
 
       for (const [domain, configStr] of Object.entries(configs)) {
         try {
-          const config = JSON.parse(configStr);
+          const config = JSON.parse(configStr as string) as TokenBucketConfig;
           this.domainConfigs.set(domain, config);
         } catch (error) {
           logger.warn('Failed to parse domain config', {
@@ -305,8 +305,8 @@ export class RedisRateLimiter {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'rate_limit_reset',
-      true,
       {
+        success: true,
         domain,
         tenant_id: tenantId,
       },
@@ -346,5 +346,20 @@ export class RedisRateLimiter {
       logger.error('Failed to get rate limit stats', { error: error.message });
       return { totalBuckets: 0, activeDomains: 0, avgTokensRemaining: 0 };
     }
+  }
+
+  /**
+   * Record a successful fetch to refill the bucket (reward good behavior)
+   */
+  async recordSuccessfulFetch(
+    _domain: string,
+    _tenantId: string,
+  ): Promise<void> {
+    const bucketKey = `rate_bucket:${_domain}:${_tenantId}`;
+    await this.redis.hincrby(bucketKey, 'tokens', 1);
+    logger.debug('Rate limit rewarded for successful fetch', {
+      domain: _domain,
+      tenantId: _tenantId,
+    });
   }
 }

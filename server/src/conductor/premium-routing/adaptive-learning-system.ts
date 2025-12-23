@@ -207,10 +207,10 @@ interface DomainTransferData {
 
 interface AdaptiveLearningRecommendation {
   type:
-    | 'model_adjustment'
-    | 'usage_optimization'
-    | 'training_focus'
-    | 'context_specialization';
+  | 'model_adjustment'
+  | 'usage_optimization'
+  | 'training_focus'
+  | 'context_specialization';
   priority: 'high' | 'medium' | 'low';
   recommendation: string;
   expectedImprovement: number;
@@ -318,11 +318,10 @@ export class AdaptiveLearningSystem {
       // Record learning metrics
       prometheusConductorMetrics.recordOperationalEvent(
         'adaptive_learning_point_recorded',
-        true,
         {
+          success: true,
           model_id: modelId,
           task_type: taskType,
-          success: outcome.success.toString(),
           quality_score: performance.qualityScore.toFixed(2),
         },
       );
@@ -456,8 +455,8 @@ export class AdaptiveLearningSystem {
       // Record prediction
       prometheusConductorMetrics.recordOperationalEvent(
         'model_effectiveness_prediction',
-        true,
         {
+          success: true,
           model_id: modelId,
           predicted_quality: prediction.predictedQuality.toFixed(2),
           confidence: prediction.confidence.toFixed(2),
@@ -526,8 +525,8 @@ export class AdaptiveLearningSystem {
       // Record adaptive learning completion
       prometheusConductorMetrics.recordOperationalEvent(
         'adaptive_learning_completed',
-        true,
         {
+          success: true,
           model_id: modelId,
           task_type: taskType,
           samples_processed: learningPoints.length.toString(),
@@ -828,7 +827,7 @@ export class AdaptiveLearningSystem {
     const trendSimilarity =
       profile1.recentTrends.shortTermTrend ===
         profile2.recentTrends.shortTermTrend &&
-      profile1.recentTrends.longTermTrend ===
+        profile1.recentTrends.longTermTrend ===
         profile2.recentTrends.longTermTrend
         ? 1
         : 0;
@@ -838,7 +837,7 @@ export class AdaptiveLearningSystem {
     // Compare performance levels
     const performanceDiff = Math.abs(
       profile1.learningCurve.currentPerformance -
-        profile2.learningCurve.currentPerformance,
+      profile2.learningCurve.currentPerformance,
     );
     const performanceSimilarity = Math.max(0, 1 - performanceDiff);
     similarity += performanceSimilarity * 0.3;

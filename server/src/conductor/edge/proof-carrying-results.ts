@@ -14,11 +14,11 @@ export interface ProofCarryingResult {
   sessionId: string;
   nodeId: string;
   computationType:
-    | 'investigation'
-    | 'analysis'
-    | 'search'
-    | 'inference'
-    | 'aggregation';
+  | 'investigation'
+  | 'analysis'
+  | 'search'
+  | 'inference'
+  | 'aggregation';
   inputs: ComputationInput[];
   outputs: ComputationOutput[];
   proof: ComputationProof;
@@ -54,10 +54,10 @@ export interface ComputationOutput {
 // Proof of correct computation
 export interface ComputationProof {
   proofType:
-    | 'deterministic'
-    | 'probabilistic'
-    | 'zero-knowledge'
-    | 'trusted-execution';
+  | 'deterministic'
+  | 'probabilistic'
+  | 'zero-knowledge'
+  | 'trusted-execution';
   proofData: string; // Encoded proof
   algorithm: string; // Algorithm used
   version: string; // Algorithm version
@@ -243,8 +243,8 @@ export class ProofCarryingResultSystem {
       // Record metrics
       prometheusConductorMetrics.recordOperationalEvent(
         'proof_carrying_result_created',
-        true,
         {
+          success: result.metadata.verified,
           node_id: params.nodeId,
           computation_type: params.computationType,
           verified: result.metadata.verified.toString(),

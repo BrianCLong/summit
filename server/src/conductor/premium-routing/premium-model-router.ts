@@ -10,12 +10,12 @@ interface PremiumModel {
   name: string;
   provider: 'openai' | 'anthropic' | 'google' | 'azure' | 'cohere' | 'groq';
   modelType:
-    | 'chat'
-    | 'completion'
-    | 'embedding'
-    | 'reasoning'
-    | 'code'
-    | 'vision';
+  | 'chat'
+  | 'completion'
+  | 'embedding'
+  | 'reasoning'
+  | 'code'
+  | 'vision';
   tier: 'premium' | 'enterprise' | 'flagship';
   capabilities: string[];
   costPerToken: number;
@@ -168,8 +168,8 @@ export class PremiumModelRouter {
 
       prometheusConductorMetrics.recordOperationalEvent(
         'premium_model_routed',
-        true,
         {
+          success: true,
           model_name: selectedModel.name,
           provider: selectedModel.provider,
           tier: selectedModel.tier,
@@ -190,10 +190,10 @@ export class PremiumModelRouter {
       const routingTime = Date.now() - startTime;
 
       prometheusConductorMetrics.recordOperationalEvent(
-        'premium_routing_error',
-        false,
+        'premium_routing_failure',
         {
-          error_type: error.name,
+          success: false,
+          error_type: (error as any).name,
           tenant_id: request.context.tenantId,
         },
       );
@@ -334,7 +334,7 @@ export class PremiumModelRouter {
    * Thompson Sampling for exploration/exploitation balance
    */
   private async selectModelWithThompsonSampling(
-    scoredModels: Array<{ model: PremiumModel; score: number }>,
+    scoredModels: Array<{ model: PremiumModel; score: number; breakdown: any }>,
     request: RoutingRequest,
   ): Promise<PremiumModel> {
     // Get historical performance for Thompson Sampling
@@ -427,7 +427,7 @@ export class PremiumModelRouter {
     selectedModel: PremiumModel,
     confidence: number,
     request: RoutingRequest,
-    allScoredModels: Array<{ model: PremiumModel; score: number }>,
+    allScoredModels: Array<{ model: PremiumModel; score: number; breakdown: any }>,
   ): RoutingDecision {
     const expectedCost = this.estimateModelCost(selectedModel, request);
     const expectedLatency = this.estimateLatency(selectedModel, request);
@@ -557,8 +557,8 @@ export class PremiumModelRouter {
 
       prometheusConductorMetrics.recordOperationalEvent(
         'model_execution_result',
-        result.success,
         {
+          success: result.success,
           model_id: modelId,
           task_type: taskType,
         },

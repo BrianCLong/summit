@@ -12,7 +12,14 @@ export type ExpertArm =
   | 'RAG_TOOL'
   | 'FILES_TOOL'
   | 'OSINT_TOOL'
-  | 'EXPORT_TOOL';
+  | 'EXPORT_TOOL'
+  | 'graph_ops'
+  | 'rag_retrieval'
+  | 'osint_analysis'
+  | 'export_generation'
+  | 'file_management'
+  | 'general_llm'
+  | 'code_generation';
 
 export interface BanditContext {
   domain: string;
@@ -31,16 +38,19 @@ export interface RewardSignal {
   contextHash: string;
   rewardValue: number; // 0 to 1, where 1 is perfect
   rewardType:
-    | 'success_at_k'
-    | 'human_thumbs'
-    | 'incident_free'
-    | 'accepted_insight';
+  | 'success_at_k'
+  | 'human_thumbs'
+  | 'incident_free'
+  | 'accepted_insight'
+  | 'implicit_feedback';
   timestamp: number;
   metadata?: {
     latency?: number;
     cost?: number;
     userSatisfaction?: number;
     downstreamAcceptance?: boolean;
+    quality?: number;
+    errorType?: string;
   };
 }
 
@@ -78,9 +88,9 @@ export interface RouteDecision {
   selectedArm: ExpertArm;
   confidence: number;
   explorationReason?:
-    | 'thompson_sampling'
-    | 'ucb_exploration'
-    | 'random_exploration';
+  | 'thompson_sampling'
+  | 'ucb_exploration'
+  | 'random_exploration';
   context: BanditContext;
   contextHash: string;
   expectedReward: number;
@@ -585,8 +595,12 @@ export class AdaptiveRouter extends EventEmitter {
 
     // Record metrics
     prometheusConductorMetrics.recordOperationalEvent(
-      `router_selected_${selectedArm}`,
-      true,
+      'bandit_reward_processed',
+      { success: true },
+    );
+    prometheusConductorMetrics.recordOperationalEvent(
+      'router_selected',
+      { arm: selectedArm, success: true },
     );
 
     return decision;
@@ -650,7 +664,7 @@ export class AdaptiveRouter extends EventEmitter {
     // Record metrics
     prometheusConductorMetrics.recordOperationalEvent(
       `router_reward_${rewardSignal.rewardType}`,
-      rewardSignal.rewardValue > 0.5,
+      { success: rewardSignal.rewardValue > 0.5 },
     );
   }
 

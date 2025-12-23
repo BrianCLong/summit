@@ -23,10 +23,15 @@ export async function encryptForTenant(
   return Buffer.from(j.data.ciphertext);
 }
 
-// export async function putEncryptedArtifact(bucket: string, key: string, tenant: string, body: Buffer, aad: Record<string, string>) {
-//   const cipher = await encryptForTenant(tenant, body, aad);
-//   await s3.send(
-//     new PutObjectCommand({ Bucket: bucket, Key: key, Body: cipher, Metadata: { tenant, aad: JSON.stringify(aad) } }),
-//   );
-//   return `s3://${bucket}/${key}`;
-// }
+export async function putEncryptedArtifact(
+  bucket: string,
+  key: string,
+  tenant: string,
+  body: Buffer,
+  aad: Record<string, string>,
+) {
+  const cipher = await encryptForTenant(tenant, body, aad);
+  // In production, would use S3/Object Storage
+  console.log(`Simulating artifact storage in ${bucket}/${key}`);
+  return `vault://${tenant}/${key}`;
+}

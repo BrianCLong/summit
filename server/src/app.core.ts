@@ -8,7 +8,7 @@ import pinoHttp from 'pino-http';
 
 export async function createAppCore() {
   const app = express();
-  const logger = pino();
+  const logger = (pino as any)();
 
   app.use(helmet());
   app.use(

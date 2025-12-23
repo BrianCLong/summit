@@ -67,7 +67,7 @@ export class QueueWorker {
     process.on('SIGINT', () => this.shutdown());
 
     // Record worker start
-    prometheusConductorMetrics.recordOperationalEvent('worker_started', true);
+    prometheusConductorMetrics.recordOperationalEvent('worker_started', { success: true });
   }
 
   /**
@@ -101,7 +101,7 @@ export class QueueWorker {
         console.error(`Worker loop error in ${workerId}:`, error);
         prometheusConductorMetrics.recordOperationalEvent(
           'worker_error',
-          false,
+          { success: false },
         );
 
         // Short delay before retrying on error
@@ -145,7 +145,7 @@ export class QueueWorker {
 
         prometheusConductorMetrics.recordOperationalEvent(
           'worker_task_completed',
-          true,
+          { success: true },
         );
         prometheusConductorMetrics.recordOperationalMetric(
           'worker_task_success_rate',
@@ -162,7 +162,7 @@ export class QueueWorker {
         console.error(`Task ${task.requestId} failed:`, result.error);
         prometheusConductorMetrics.recordOperationalEvent(
           'worker_task_failed',
-          false,
+          { success: false },
         );
         prometheusConductorMetrics.recordOperationalMetric(
           'worker_task_success_rate',
@@ -182,7 +182,7 @@ export class QueueWorker {
       console.error(`Task ${task.requestId} processing error:`, error);
       prometheusConductorMetrics.recordOperationalEvent(
         'worker_task_error',
-        false,
+        { success: false },
       );
     }
 
@@ -370,7 +370,7 @@ export class QueueWorker {
     }
 
     console.log(`Worker ${this.config.workerId} shutdown complete`);
-    prometheusConductorMetrics.recordOperationalEvent('worker_shutdown', true);
+    prometheusConductorMetrics.recordOperationalEvent('worker_shutdown', { success: true });
   }
 
   /**

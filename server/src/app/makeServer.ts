@@ -2,7 +2,7 @@ import { ApolloServer } from '@apollo/server';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { typeDefs } from '../graphql/schema/index.js';
 import resolvers from '../graphql/resolvers/index.js';
-import { authDirective } from '../graphql/authDirective.js';
+import { authDirectiveTransformer } from '../graphql/authDirective.js';
 import { getContext } from '../lib/auth.js';
 
 export interface MakeServerOptions {
@@ -12,13 +12,12 @@ export interface MakeServerOptions {
   scopes?: string[];
   // Provide or augment context for unit tests (in-memory stubs, tenant, etc.)
   context?:
-    | Record<string, any>
-    | ((base: any) => Promise<Record<string, any>> | Record<string, any>);
+  | Record<string, any>
+  | ((base: any) => Promise<Record<string, any>> | Record<string, any>);
 }
 
 export async function makeGraphServer(opts: MakeServerOptions = {}) {
   let schema = makeExecutableSchema({ typeDefs, resolvers: resolvers as any });
-  const { authDirectiveTransformer } = authDirective();
   schema = authDirectiveTransformer(schema);
 
   const server = new ApolloServer({
@@ -37,21 +36,21 @@ export async function makeGraphServer(opts: MakeServerOptions = {}) {
         opts.user ??
         (opts.tenant || opts.role || opts.scopes
           ? {
-              id: 'test-user',
-              email: 'test@intelgraph.local',
-              role: opts.role ?? 'ADMIN',
-              tenant: opts.tenant ?? 'test-tenant',
-              scopes: opts.scopes ?? ['*'],
-            }
+            id: 'test-user',
+            email: 'test@intelgraph.local',
+            role: opts.role ?? 'ADMIN',
+            tenant: opts.tenant ?? 'test-tenant',
+            scopes: opts.scopes ?? ['*'],
+          }
           : null);
 
       const withUser = injectedUser
         ? {
-            ...base,
-            user: injectedUser,
-            isAuthenticated: true,
-            tenantId: injectedUser.tenant,
-          }
+          ...base,
+          user: injectedUser,
+          isAuthenticated: true,
+          tenantId: injectedUser.tenant,
+        }
         : base;
       // Merge/override additional context
       if (opts.context) {

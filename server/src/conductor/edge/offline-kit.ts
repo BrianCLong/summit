@@ -4,6 +4,8 @@
 import { EventEmitter } from 'events';
 import Redis from 'ioredis';
 import { z } from 'zod';
+type ZodNamespace = any;
+const zn: ZodNamespace = z;
 import logger from '../../config/logger.js';
 import { prometheusConductorMetrics } from '../observability/prometheus.js';
 import { crdtSyncEngine } from './crdt-sync.js';
@@ -54,7 +56,7 @@ const OfflineKitConfigSchema = z.object({
   }),
 });
 
-type OfflineKitConfig = z.infer<typeof OfflineKitConfigSchema>;
+type OfflineKitConfig = any;
 
 // Service registry for offline capabilities
 const SERVICE_REGISTRY: Record<string, ServiceCapability> = {
@@ -273,7 +275,7 @@ export class OfflineKit extends EventEmitter {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'offline_kit_went_offline',
-      true,
+      { success: true },
     );
   }
 
@@ -293,7 +295,7 @@ export class OfflineKit extends EventEmitter {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'offline_kit_reconnected',
-      true,
+      { success: true },
     );
   }
 
@@ -477,7 +479,7 @@ export class OfflineKit extends EventEmitter {
           // Record but don't block sync - violations will be filtered
           prometheusConductorMetrics.recordOperationalEvent(
             'sync_leakage_detected',
-            true,
+            { success: true },
           );
         }
       }
@@ -523,7 +525,7 @@ export class OfflineKit extends EventEmitter {
       logger.error('Cloud sync failed', { error });
       prometheusConductorMetrics.recordOperationalEvent(
         'offline_kit_sync_failed',
-        false,
+        { success: false },
       );
       throw error;
     }

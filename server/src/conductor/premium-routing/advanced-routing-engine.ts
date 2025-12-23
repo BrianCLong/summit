@@ -135,11 +135,11 @@ interface EmergencyProtocol {
 
 interface OptimizationFlag {
   type:
-    | 'caching'
-    | 'batching'
-    | 'streaming'
-    | 'preprocessing'
-    | 'postprocessing';
+  | 'caching'
+  | 'batching'
+  | 'streaming'
+  | 'preprocessing'
+  | 'postprocessing';
   enabled: boolean;
   parameters: Record<string, any>;
   expectedBenefit: number;
@@ -368,9 +368,12 @@ export class AdvancedRoutingEngine {
       const analysisTime = Date.now() - startTime;
 
       prometheusConductorMetrics.recordOperationalEvent(
-        'query_complexity_analysis_error',
-        false,
-        { error_type: error.name, tenant_id: context.tenantId },
+        'query_complexity_analysis_failure',
+        {
+          success: false,
+          error_type: error.name,
+          tenant_id: context.tenantId,
+        },
       );
 
       logger.error('Query complexity analysis failed', {
@@ -527,8 +530,8 @@ export class AdvancedRoutingEngine {
 
       prometheusConductorMetrics.recordOperationalEvent(
         'advanced_routing_decision',
-        true,
         {
+          success: true,
           model_id: selectedModel,
           risk_level: riskAssessment.overallRisk,
           expected_quality: expectedPerformance.qualityScore.toFixed(2),
@@ -550,9 +553,9 @@ export class AdvancedRoutingEngine {
       const routingTime = Date.now() - startTime;
 
       prometheusConductorMetrics.recordOperationalEvent(
-        'advanced_routing_error',
-        false,
+        'advanced_routing_failure',
         {
+          success: false,
           error_type: error.name,
           tenant_id: context.tenantId,
           complexity: complexityAnalysis.overallComplexity.toFixed(2),

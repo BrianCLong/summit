@@ -54,7 +54,7 @@ export class MCPRequestSigner {
     params: any;
   }): SignedMCPRequest {
     const timestamp = Math.floor(Date.now() / 1000);
-    const nonce = randomBytes(16).toString('hex');
+    const nonce = (randomBytes as any)(16).toString('hex');
 
     // Create canonical request string for signing
     const canonicalRequest = this.createCanonicalRequest({
@@ -310,7 +310,7 @@ export function mcpSignatureVerificationMiddleware(signer: MCPRequestSigner) {
       return next();
     }
 
-    const client = new SignedMCPClient(signer.config as any);
+    const client = new SignedMCPClient((signer as any).config);
     const verification = client.verifyIncomingRequest(req.body, req.headers);
 
     if (!verification.valid) {

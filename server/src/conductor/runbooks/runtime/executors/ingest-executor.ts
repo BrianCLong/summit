@@ -12,26 +12,10 @@ import {
   StepExecutorResult,
   RunbookActionType,
   IndicatorIngestService,
+  EnrichedIndicator,
+  IndicatorType,
 } from '../types';
 
-/**
- * Indicator types supported for ingestion
- */
-export type IndicatorType = 'ip' | 'domain' | 'hash' | 'url' | 'email' | 'file_path';
-
-/**
- * Enriched indicator data
- */
-export interface EnrichedIndicator {
-  id: string;
-  value: string;
-  type: IndicatorType;
-  reputation?: 'malicious' | 'suspicious' | 'clean' | 'unknown';
-  firstSeen?: string;
-  lastSeen?: string;
-  tags?: string[];
-  context?: string;
-}
 
 /**
  * Default indicator ingest service implementation
@@ -47,7 +31,7 @@ export class DefaultIndicatorIngestService implements IndicatorIngestService {
     enrichedIndicators: EnrichedIndicator[];
   }> {
     const enrichedIndicators: EnrichedIndicator[] = input.indicators.map((value, index) => {
-      const type = this.detectIndicatorType(value);
+      const type = (this as any).detectIndicatorType(value);
       return {
         id: `ind-${Date.now()}-${index}`,
         value,

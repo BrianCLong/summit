@@ -17,12 +17,12 @@ interface CreateRunbookRequest {
   name: string;
   description: string;
   category:
-    | 'incident_response'
-    | 'maintenance'
-    | 'security'
-    | 'deployment'
-    | 'backup'
-    | 'monitoring';
+  | 'incident_response'
+  | 'maintenance'
+  | 'security'
+  | 'deployment'
+  | 'backup'
+  | 'monitoring';
   severity: 'low' | 'medium' | 'high' | 'critical';
   approvalRequired?: boolean;
   steps: RunbookStep[];
@@ -39,7 +39,7 @@ runbookRouter.post('/create', async (req, res) => {
 
   try {
     const createRequest: CreateRunbookRequest = req.body;
-    const author = req.user?.sub || 'unknown';
+    const author = (req.user as any)?.sub || (req.user as any)?.id || 'unknown';
 
     // Validation
     if (
@@ -99,7 +99,7 @@ runbookRouter.post('/create', async (req, res) => {
     };
 
     // Record metrics
-    prometheusConductorMetrics.recordOperationalEvent('runbook_created', true);
+    prometheusConductorMetrics.recordOperationalEvent('bandit_reset', { success: true });
     prometheusConductorMetrics.recordOperationalMetric(
       'runbook_creation_time',
       response.processingTime,
@@ -110,8 +110,8 @@ runbookRouter.post('/create', async (req, res) => {
     console.error('Runbook creation error:', error);
 
     prometheusConductorMetrics.recordOperationalEvent(
-      'runbook_creation_error',
-      false,
+      'runbook_creation_failure',
+      { success: false, error: (error as any).message },
     );
 
     res.status(500).json({
@@ -205,7 +205,7 @@ runbookRouter.post('/:runbookId/execute', async (req, res) => {
   try {
     const { runbookId } = req.params;
     const { version, context, priority } = req.body;
-    const executorId = req.user?.sub || 'unknown';
+    const executorId = (req.user as any)?.sub || (req.user as any)?.id || 'unknown';
     const tenantId = (req.headers['x-tenant-id'] as string) || 'default';
 
     if (!tenantId) {
@@ -231,7 +231,7 @@ runbookRouter.post('/:runbookId/execute', async (req, res) => {
     };
 
     // Record metrics
-    prometheusConductorMetrics.recordOperationalEvent('runbook_executed', true);
+    prometheusConductorMetrics.recordOperationalEvent('runbook_executed', { success: true });
     prometheusConductorMetrics.recordOperationalMetric(
       'runbook_execution_time',
       response.processingTime,
@@ -242,8 +242,8 @@ runbookRouter.post('/:runbookId/execute', async (req, res) => {
     console.error('Runbook execution error:', error);
 
     prometheusConductorMetrics.recordOperationalEvent(
-      'runbook_execution_error',
-      false,
+      'runbook_execution_failure',
+      { success: false, error: (error as any).message },
     );
 
     res.status(500).json({
@@ -303,7 +303,7 @@ runbookRouter.post('/approvals/:approvalId/process', async (req, res) => {
   try {
     const { approvalId } = req.params;
     const { decision, comments } = req.body;
-    const approverId = req.user?.sub || 'unknown';
+    const approverId = (req.user as any)?.sub || (req.user as any)?.id || 'unknown';
 
     if (!['approved', 'rejected'].includes(decision)) {
       return res.status(400).json({
@@ -327,13 +327,13 @@ runbookRouter.post('/approvals/:approvalId/process', async (req, res) => {
     // Record metrics
     prometheusConductorMetrics.recordOperationalEvent(
       'runbook_approval_processed',
-      result.success,
+      { success: result.success },
     );
 
     if (result.success) {
       prometheusConductorMetrics.recordOperationalEvent(
         `runbook_${decision}`,
-        true,
+        { success: true },
       );
     }
 
@@ -342,8 +342,8 @@ runbookRouter.post('/approvals/:approvalId/process', async (req, res) => {
     console.error('Approval processing error:', error);
 
     prometheusConductorMetrics.recordOperationalEvent(
-      'runbook_approval_error',
-      false,
+      'runbook_approval_failure',
+      { success: false, error: (error as any).message },
     );
 
     res.status(500).json({
@@ -366,7 +366,7 @@ runbookRouter.put('/:runbookId', async (req, res) => {
     const updateRequest: CreateRunbookRequest & {
       versionIncrement?: 'patch' | 'minor' | 'major';
     } = req.body;
-    const author = req.user?.sub || 'unknown';
+    const author = (req.user as any)?.sub || (req.user as any)?.id || 'unknown';
 
     // Get current runbook to determine new version
     const currentRunbook = await runbookRegistry.getRunbook(runbookId);
@@ -436,15 +436,15 @@ runbookRouter.put('/:runbookId', async (req, res) => {
     };
 
     // Record metrics
-    prometheusConductorMetrics.recordOperationalEvent('runbook_updated', true);
+    prometheusConductorMetrics.recordOperationalEvent('runbook_updated', { success: true });
 
     res.json(response);
   } catch (error) {
     console.error('Runbook update error:', error);
 
     prometheusConductorMetrics.recordOperationalEvent(
-      'runbook_update_error',
-      false,
+      'runbook_update_failure',
+      { success: false, error: (error as any).message },
     );
 
     res.status(500).json({
@@ -570,7 +570,7 @@ runbookRouter.use((req, res, next) => {
     );
     prometheusConductorMetrics.recordOperationalEvent(
       `runbook_api_${req.method.toLowerCase()}`,
-      res.statusCode < 400,
+      { success: res.statusCode < 400 },
     );
   });
 

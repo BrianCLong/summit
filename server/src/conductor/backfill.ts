@@ -1,5 +1,7 @@
 import YAML from 'yaml';
-import { DateTime } from 'luxon';
+import luxon from 'luxon';
+const { DateTime } = luxon;
+
 import pg from 'pg';
 import crypto from 'crypto';
 import { startRun } from './start.js';

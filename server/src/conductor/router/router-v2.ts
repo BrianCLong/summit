@@ -8,6 +8,12 @@ import {
   ExpertArm,
   RouteDecision,
 } from '../learn/bandit';
+export {
+  adaptiveRouter,
+  BanditContext,
+  ExpertArm,
+  RouteDecision,
+};
 import { prometheusConductorMetrics } from '../observability/prometheus';
 import { conductorResilienceManager } from '../resilience/circuit-breaker';
 
@@ -203,7 +209,7 @@ export class AdaptiveExpertRouter extends EventEmitter {
       // Record metrics
       prometheusConductorMetrics.recordOperationalEvent(
         `router_v2_selected_${selectedExpert}`,
-        true,
+        { success: true },
       );
       prometheusConductorMetrics.recordOperationalMetric(
         'router_v2_decision_time',
@@ -225,8 +231,8 @@ export class AdaptiveExpertRouter extends EventEmitter {
     } catch (error) {
       console.error('Routing error:', error);
       prometheusConductorMetrics.recordOperationalEvent(
-        'router_v2_error',
-        false,
+        'router_v2_failure',
+        { success: false, error: (error as any).message },
       );
 
       // Fallback to safe default
@@ -315,7 +321,7 @@ export class AdaptiveExpertRouter extends EventEmitter {
     // Record metrics
     prometheusConductorMetrics.recordOperationalEvent(
       'router_v2_outcome',
-      outcome.success,
+      { success: outcome.success },
     );
     prometheusConductorMetrics.recordOperationalMetric(
       'router_v2_actual_latency',

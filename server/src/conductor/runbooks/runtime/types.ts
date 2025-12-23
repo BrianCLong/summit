@@ -12,6 +12,41 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { LegalBasis, DataLicense, Evidence, Citation, CryptographicProof } from '../dags/types';
+export { LegalBasis, DataLicense, Evidence, Citation, CryptographicProof };
+
+/**
+ * Indicator types supported for ingestion
+ */
+export type IndicatorType = 'ip' | 'domain' | 'hash' | 'url' | 'email' | 'file_path';
+
+/**
+ * Infrastructure node representation
+ */
+export interface InfrastructureNode {
+  id: string;
+  type: 'server' | 'domain' | 'certificate' | 'registrar' | 'asn' | 'network' | 'malware';
+  value: string;
+  properties?: Record<string, unknown>;
+  relationships: Array<{
+    type: string;
+    target: string;
+    properties?: Record<string, unknown>;
+  }>;
+}
+
+/**
+ * Enriched indicator data
+ */
+export interface EnrichedIndicator {
+  id: string;
+  value: string;
+  type: string;
+  reputation?: 'malicious' | 'suspicious' | 'clean' | 'unknown';
+  firstSeen?: string;
+  lastSeen?: string;
+  tags?: string[];
+  context?: string;
+}
 
 // ============================================================================
 // Step & Runbook Status Types
@@ -329,6 +364,27 @@ export interface RunbookRuntime {
 // ============================================================================
 
 /**
+ * Campaign match result
+ */
+export interface CampaignMatch {
+  campaignId: string;
+  campaignName: string;
+  score: number;
+  matchedIndicators: number;
+  matchedTTPs: string[];
+  actorProfile?: {
+    id: string;
+    name: string;
+    aliases: string[];
+    motivation: string;
+    sophistication?: 'low' | 'medium' | 'high' | 'advanced';
+    targetSectors?: string[];
+    geographicFocus?: string[];
+  };
+  confidence: 'low' | 'medium' | 'high' | 'very_high';
+}
+
+/**
  * Indicator ingest service interface
  */
 export interface IndicatorIngestService {
@@ -339,14 +395,7 @@ export interface IndicatorIngestService {
     source?: string;
   }): Promise<{
     indicatorNodeIds: string[];
-    enrichedIndicators: Array<{
-      id: string;
-      value: string;
-      type: string;
-      reputation?: string;
-      firstSeen?: string;
-      lastSeen?: string;
-    }>;
+    enrichedIndicators: EnrichedIndicator[];
   }>;
 }
 
@@ -359,15 +408,7 @@ export interface InfrastructureEnrichmentService {
     depth?: number;
   }): Promise<{
     infraNodeIds: string[];
-    infrastructure: Array<{
-      id: string;
-      type: string;
-      value: string;
-      relationships: Array<{
-        type: string;
-        target: string;
-      }>;
-    }>;
+    infrastructure: InfrastructureNode[];
   }>;
 }
 
@@ -381,19 +422,7 @@ export interface PatternMinerService {
     minConfidence?: number;
   }): Promise<{
     campaignIds: string[];
-    matches: Array<{
-      campaignId: string;
-      campaignName: string;
-      score: number;
-      matchedIndicators: number;
-      matchedTTPs: string[];
-      actorProfile?: {
-        id: string;
-        name: string;
-        aliases: string[];
-        motivation: string;
-      };
-    }>;
+    matches: CampaignMatch[];
   }>;
 }
 

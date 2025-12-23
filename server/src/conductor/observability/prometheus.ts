@@ -92,6 +92,72 @@ export const conductorTaskTimeoutTotal = new client.Counter({
   labelNames: ['expert', 'timeout_type'],
 });
 
+export const evidenceExportLatencySeconds = new client.Histogram({
+  name: 'conductor_evidence_export_latency_seconds',
+  help: 'Latency of evidence export operations',
+  buckets: [0.1, 0.5, 1, 2, 5, 10, 30],
+});
+
+export const evidenceExportRequestsTotal = new client.Counter({
+  name: 'conductor_evidence_export_requests_total',
+  help: 'Total number of evidence export requests',
+});
+
+export const agentTimelineRequestsTotal = new client.Counter({
+  name: 'conductor_agent_timeline_requests_total',
+  help: 'Total number of agent timeline requests',
+});
+
+export const hitlActionRequestsTotal = new client.Counter({
+  name: 'conductor_hitl_action_requests_total',
+  help: 'Total number of HITL action requests',
+});
+
+export const evidenceDownloadRequestsTotal = new client.Counter({
+  name: 'conductor_evidence_download_requests_total',
+  help: 'Total number of evidence download requests',
+});
+
+export const evidenceVerificationRequestsTotal = new client.Counter({
+  name: 'conductor_evidence_verification_requests_total',
+  help: 'Total number of evidence verification requests',
+});
+
+export const policyExplanationLatencySeconds = new client.Histogram({
+  name: 'conductor_policy_explanation_latency_seconds',
+  help: 'Latency of policy explanation requests',
+});
+
+export const policyExplanationRequestsTotal = new client.Counter({
+  name: 'conductor_policy_explanation_requests_total',
+  help: 'Total number of policy explanation requests',
+});
+
+export const policySimulationLatencySeconds = new client.Histogram({
+  name: 'conductor_policy_simulation_latency_seconds',
+  help: 'Latency of policy simulation requests',
+});
+
+export const policySimulationRequestsTotal = new client.Counter({
+  name: 'conductor_policy_simulation_requests_total',
+  help: 'Total number of policy simulation requests',
+});
+
+export const policyRulesRequestsTotal = new client.Counter({
+  name: 'conductor_policy_rules_requests_total',
+  help: 'Total number of policy rules requests',
+});
+
+export const runRoutingRequestsTotal = new client.Counter({
+  name: 'conductor_run_routing_requests_total',
+  help: 'Total number of run routing requests',
+});
+
+export const servingMetricsRequestsTotal = new client.Counter({
+  name: 'conductor_serving_metrics_requests_total',
+  help: 'Total number of serving metrics requests',
+});
+
 // Register all conductor metrics with the main registry
 [
   conductorRouterDecisionsTotal,
@@ -108,6 +174,19 @@ export const conductorTaskTimeoutTotal = new client.Counter({
   conductorRoutingConfidenceHistogram,
   conductorConcurrencyLimitHitsTotal,
   conductorTaskTimeoutTotal,
+  evidenceExportLatencySeconds,
+  evidenceExportRequestsTotal,
+  agentTimelineRequestsTotal,
+  hitlActionRequestsTotal,
+  evidenceDownloadRequestsTotal,
+  evidenceVerificationRequestsTotal,
+  policyExplanationLatencySeconds,
+  policyExplanationRequestsTotal,
+  policySimulationLatencySeconds,
+  policySimulationRequestsTotal,
+  policyRulesRequestsTotal,
+  runRoutingRequestsTotal,
+  servingMetricsRequestsTotal,
 ].forEach((metric) => register.registerMetric(metric));
 
 // Helper functions to work with confidence buckets
@@ -291,6 +370,21 @@ export class PrometheusConductorMetrics {
       conductorActiveTasksGauge.set(value);
     }
   }
+
+  // Direct access to metrics for legacy route usage
+  public evidenceExportLatency = evidenceExportLatencySeconds;
+  public evidenceExportRequests = evidenceExportRequestsTotal;
+  public agentTimelineRequests = agentTimelineRequestsTotal;
+  public hitlActionRequests = hitlActionRequestsTotal;
+  public evidenceDownloadRequests = evidenceDownloadRequestsTotal;
+  public evidenceVerificationRequests = evidenceVerificationRequestsTotal;
+  public policyExplanationLatency = policyExplanationLatencySeconds;
+  public policyExplanationRequests = policyExplanationRequestsTotal;
+  public policySimulationLatency = policySimulationLatencySeconds;
+  public policySimulationRequests = policySimulationRequestsTotal;
+  public policyRulesRequests = policyRulesRequestsTotal;
+  public runRoutingRequests = runRoutingRequestsTotal;
+  public servingMetricsRequests = servingMetricsRequestsTotal;
 }
 
 // Singleton instance

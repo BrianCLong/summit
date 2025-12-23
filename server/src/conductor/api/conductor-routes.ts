@@ -1,6 +1,8 @@
 // server/src/conductor/api/conductor-routes.ts
 
-import { Router, Request, Response } from 'express';
+import express from 'express';
+type Request = any;
+type Response = any;
 import { OrchestrationService } from '../web-orchestration/orchestration-service.js';
 import { PremiumModelRouter } from '../premium-routing/premium-model-router.js';
 import { ComplianceGate } from '../web-orchestration/compliance-gate.js';
@@ -22,7 +24,7 @@ import { workflowRoutes } from './workflow-routes.js';
 import { workflowExecutor } from '../workflows/workflow-executor.js';
 import logger from '../../config/logger.js';
 
-const router = Router();
+const router = express.Router();
 
 // Initialize services
 const orchestrationService = new OrchestrationService();
@@ -56,13 +58,14 @@ router.use(authenticateUser);
  */
 router.post(
   '/orchestrate',
+  authenticateUser,
   requirePermission('workflow:execute'),
   async (req: Request, res: Response) => {
     try {
       await initializeServices();
 
       const { query, context, constraints } = req.body;
-      const authUser = (req as AuthenticatedRequest).user;
+      const authUser = ((req as unknown) as AuthenticatedRequest).user;
 
       if (!query) {
         return res.status(400).json({
@@ -114,7 +117,7 @@ router.post(
       logger.error('❌ Conductor orchestration API error', {
         error: error.message,
         query: req.body.query?.substring(0, 100),
-        userId: (req as AuthenticatedRequest).user?.userId,
+        userId: ((req as unknown) as AuthenticatedRequest).user?.userId,
       });
 
       res.status(500).json({
@@ -131,6 +134,7 @@ router.post(
  */
 router.get(
   '/metrics',
+  authenticateUser,
   requirePermission('metrics:read'),
   async (req: Request, res: Response) => {
     try {

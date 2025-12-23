@@ -154,7 +154,7 @@ export class PolicyExplainer {
       },
       performanceMetrics: {
         latencyEstimate: response.estimatedLatency,
-        reliabilityScore: response.selectedExpert.reliability || 0.95,
+        reliabilityScore: contextFactors.reliabilityScore || 0.95,
         capacityAvailable: contextFactors.capacityAvailable !== false,
       },
     };
@@ -197,8 +197,8 @@ export class PolicyExplainer {
       // Calculate impact
       const impact = {
         expertChanged:
-          originalTrace.decision.selectedExpert.id !==
-          simulatedTrace.decision.selectedExpert.id,
+          originalTrace.decision.selectedExpert !==
+          simulatedTrace.decision.selectedExpert,
         costDelta:
           simulatedTrace.costAnalysis.estimatedCost -
           originalTrace.costAnalysis.estimatedCost,
@@ -328,8 +328,8 @@ export class PolicyExplainer {
     }>,
   ): PolicyRule[] {
     return evaluations
-      .filter((eval) => eval.matched && eval.result !== 'allow')
-      .map((eval) => eval.rule)
+      .filter((evaluation) => evaluation.matched && evaluation.result !== 'allow')
+      .map((evaluation) => evaluation.rule)
       .sort((a, b) => b.priority - a.priority);
   }
 
@@ -366,7 +366,7 @@ export class PolicyExplainer {
 
     // Policy violations
     const violations = trace.policyEvaluations.filter(
-      (eval) => eval.result === 'deny',
+      (evaluation) => evaluation.result === 'deny',
     ).length;
     risk += violations * 0.1;
 
@@ -382,11 +382,11 @@ export class PolicyExplainer {
       queryId: trace.queryId,
       timestamp: trace.timestamp,
       decision: {
-        selectedExpert: trace.decision.selectedExpert.name,
+        selectedExpert: trace.decision.selectedExpert,
         reason: trace.decision.reason,
         confidence: `${(trace.decision.confidence * 100).toFixed(1)}%`,
         alternatives: trace.decision.alternatives.map((alt) => ({
-          expert: alt.expert.name,
+          expert: alt.expert,
           score: `${(alt.score * 100).toFixed(1)}%`,
           rejectionReason: alt.rejectionReason,
         })),
@@ -397,11 +397,11 @@ export class PolicyExplainer {
         action: rule.action,
         priority: rule.priority,
       })),
-      policyEvaluations: trace.policyEvaluations.map((eval) => ({
-        ruleName: eval.rule.name,
-        matched: eval.matched,
-        result: eval.result,
-        description: eval.rule.description,
+      policyEvaluations: trace.policyEvaluations.map((evaluation) => ({
+        ruleName: evaluation.rule.name,
+        matched: evaluation.matched,
+        result: evaluation.result,
+        description: evaluation.rule.description,
       })),
       costBreakdown: trace.costAnalysis,
       performanceMetrics: trace.performanceMetrics,
@@ -423,7 +423,7 @@ export class PolicyExplainer {
         riskDelta: `${simulation.impact.riskDelta >= 0 ? '+' : ''}${(simulation.impact.riskDelta * 100).toFixed(1)}%`,
       },
       newDecision: {
-        expert: simulation.simulatedDecision.decision.selectedExpert.name,
+        expert: simulation.simulatedDecision.decision.selectedExpert,
         reason: simulation.simulatedDecision.decision.reason,
         confidence: `${(simulation.simulatedDecision.decision.confidence * 100).toFixed(1)}%`,
       },

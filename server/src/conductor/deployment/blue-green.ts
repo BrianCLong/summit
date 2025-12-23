@@ -67,14 +67,14 @@ export interface DeploymentExecution {
   id: string;
   config: DeploymentConfig;
   status:
-    | 'pending'
-    | 'preparing'
-    | 'deploying'
-    | 'validating'
-    | 'promoting'
-    | 'completed'
-    | 'failed'
-    | 'rolled_back';
+  | 'pending'
+  | 'preparing'
+  | 'deploying'
+  | 'validating'
+  | 'promoting'
+  | 'completed'
+  | 'failed'
+  | 'rolled_back';
   startTime: number;
   endTime?: number;
   currentPhase: string;
@@ -324,8 +324,8 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
       this.emit('deployment:completed', execution);
 
       prometheusConductorMetrics.recordOperationalEvent(
-        'deployment_success',
-        true,
+        'blue_green_transition_started',
+        { success: true },
       );
     } catch (error) {
       execution.status = 'failed';
@@ -340,8 +340,8 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
       }
 
       prometheusConductorMetrics.recordOperationalEvent(
-        'deployment_failure',
-        false,
+        'blue_green_transition_error',
+        { success: false },
       );
     }
 
@@ -729,7 +729,7 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
       );
       const health = JSON.parse(response);
 
-      if (!health.status === 'ok') {
+      if (health.status !== 'ok') {
         throw new Error('Traffic routing validation failed');
       }
     }

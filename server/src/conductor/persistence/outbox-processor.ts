@@ -2,7 +2,10 @@
 // Implements reliable event processing with retry logic and dead letter queues
 // Version: 1.0.0
 
-import { Pool, PoolClient } from 'pg';
+import pg from 'pg';
+const { Pool } = pg;
+type Pool = any;
+type PoolClient = any;
 import { Redis } from 'ioredis';
 import { EventEmitter } from 'events';
 import logger from '../../config/logger.js';
@@ -185,8 +188,11 @@ export class OutboxProcessor extends EventEmitter {
       // Record metrics
       prometheusConductorMetrics.recordOperationalEvent(
         'outbox_event_published',
-        true,
-        { event_type: eventType, aggregate_type: aggregateType },
+        {
+          success: true,
+          event_type: eventType,
+          aggregate_type: aggregateType,
+        },
       );
 
       return eventId;
@@ -201,8 +207,7 @@ export class OutboxProcessor extends EventEmitter {
 
       prometheusConductorMetrics.recordOperationalEvent(
         'outbox_publish_error',
-        false,
-        { event_type: eventType, error_type: error.name },
+        { success: false, event_type: eventType, error_type: error.name },
       );
 
       throw error;
@@ -285,8 +290,7 @@ export class OutboxProcessor extends EventEmitter {
 
       prometheusConductorMetrics.recordOperationalEvent(
         'outbox_batch_error',
-        false,
-        { error_type: error.name },
+        { success: false, error_type: error.name },
       );
     } finally {
       // Release distributed lock
@@ -385,8 +389,7 @@ export class OutboxProcessor extends EventEmitter {
       // Record success metrics
       prometheusConductorMetrics.recordOperationalEvent(
         'outbox_event_processed',
-        true,
-        { event_type: event.event_type },
+        { success: true, event_type: event.event_type },
       );
 
       this.emit('eventProcessed', event);
@@ -419,8 +422,7 @@ export class OutboxProcessor extends EventEmitter {
     // Record error metrics
     prometheusConductorMetrics.recordOperationalEvent(
       'outbox_event_error',
-      false,
-      { event_type: event.event_type, error_type: error.name },
+      { success: false, event_type: event.event_type, error_type: error.name },
     );
 
     if (newRetryCount >= maxRetries) {
@@ -507,8 +509,11 @@ export class OutboxProcessor extends EventEmitter {
       // Record dead letter metrics
       prometheusConductorMetrics.recordOperationalEvent(
         'outbox_event_dead_lettered',
-        false,
-        { event_type: event.event_type, reason: reason.substring(0, 50) },
+        {
+          success: false,
+          event_type: event.event_type,
+          reason: reason.substring(0, 50),
+        },
       );
     } catch (error) {
       await client.query('ROLLBACK');

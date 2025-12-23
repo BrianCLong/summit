@@ -31,11 +31,11 @@ interface TOSCompliance {
 interface LicenseInfo {
   domain: string;
   licenseType:
-    | 'public'
-    | 'commercial'
-    | 'academic'
-    | 'restricted'
-    | 'proprietary';
+  | 'public'
+  | 'commercial'
+  | 'academic'
+  | 'restricted'
+  | 'proprietary';
   allowedUsage: string[];
   attribution: boolean;
   commercialUse: boolean;
@@ -119,14 +119,12 @@ export class ComplianceGate {
         });
 
         // Update metrics
-        prometheusConductorMetrics.recordOperationalEvent(
-          'compliance_gate_blocked',
-          false,
-          {
-            domain,
-            reason: complianceResult.reason,
-          },
-        );
+        prometheusConductorMetrics.recordOperationalEvent('compliance_gate_blocked', {
+          success: false,
+          tenant_id: tenantId,
+          domain,
+          reason: complianceResult.reason,
+        });
 
         return complianceResult;
       }
@@ -148,13 +146,11 @@ export class ComplianceGate {
       });
 
       // Update metrics
-      prometheusConductorMetrics.recordOperationalEvent(
-        'compliance_gate_allowed',
-        true,
-        {
-          domain,
-        },
-      );
+      prometheusConductorMetrics.recordOperationalEvent('compliance_gate_passed', {
+        success: true,
+        tenant_id: tenantId,
+        domain,
+      });
 
       return complianceResult;
     } catch (error) {
@@ -485,12 +481,17 @@ export class ComplianceGate {
 
     try {
       const robotsUrl = `https://${domain}/robots.txt`;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s default
+
       const response = await fetch(robotsUrl, {
-        timeout: 5000,
         headers: {
           'User-Agent': 'ConductorBot/1.0 (+https://conductor.ai/bot)',
         },
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         logger.info('No robots.txt found', { domain, status: response.status });
@@ -697,13 +698,10 @@ export class ComplianceGate {
       .expire(rateLimitKey, 3600) // 1 hour expiry
       .exec();
 
-    prometheusConductorMetrics.recordOperationalEvent(
-      'web_fetch_recorded',
-      true,
-      {
-        domain,
-        tenant_id: tenantId,
-      },
-    );
+    prometheusConductorMetrics.recordOperationalEvent('web_fetch_recorded', {
+      success: true,
+      domain,
+      tenant_id: tenantId,
+    });
   }
 }

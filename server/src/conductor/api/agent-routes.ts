@@ -8,13 +8,13 @@ interface AgentStep {
   id: string;
   role: 'planner' | 'critic' | 'executor' | 'human';
   state:
-    | 'pending'
-    | 'running'
-    | 'need_approval'
-    | 'approved'
-    | 'blocked'
-    | 'completed'
-    | 'error';
+  | 'pending'
+  | 'running'
+  | 'need_approval'
+  | 'approved'
+  | 'blocked'
+  | 'completed'
+  | 'error';
   text: string;
   ts: number;
   metadata?: {
@@ -227,14 +227,14 @@ router.post('/runs/:runId/hitl/:checkpointId/approve', async (req, res) => {
         edit_history:
           patch && patch !== originalText
             ? [
-                ...(step.metadata?.edit_history || []),
-                {
-                  timestamp: Date.now(),
-                  original: originalText,
-                  edited: patch,
-                  reason,
-                },
-              ]
+              ...(step.metadata?.edit_history || []),
+              {
+                timestamp: Date.now(),
+                original: originalText,
+                edited: patch,
+                reason,
+              },
+            ]
             : step.metadata?.edit_history,
       },
     };
@@ -302,8 +302,8 @@ router.post('/runs/:runId/hitl/:checkpointId/block', async (req, res) => {
       metadata: {
         ...step.metadata,
         user_action: 'block',
-        block_reason: reason,
-      },
+        block_reason: reason as any,
+      } as any,
     };
 
     agentSteps.set(runId, steps);

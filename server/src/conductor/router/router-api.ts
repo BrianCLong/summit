@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { adaptiveExpertRouter } from './router-v2.js';
 import { prometheusConductorMetrics } from '../observability/prometheus.js';
 import logger from '../../config/logger.js';
-import { RequestContext } from '../middleware/context-binding.js';
+import { RequestContext } from '../../observability/request-context.js';
 
 const router = express.Router();
 
@@ -57,7 +57,7 @@ router.post('/route', async (req, res) => {
     }
 
     // Dual-control enforcement for high-sensitivity tasks
-    const requestContext = req.context as RequestContext; // Assert req.context is present
+    const requestContext = req.context as any; // Cast to any to access sensitivity
     if (requestContext && requestContext.sensitivity === 'high') {
       const approvalToken = req.headers['x-approval-token'];
       const approverId = req.headers['x-approver-id'];
@@ -87,9 +87,10 @@ router.post('/route', async (req, res) => {
 
     // Route the task
     const routingResponse = await adaptiveExpertRouter.route({
+      id: taskId,
       query: taskId,
-      tenantId,
       context: {
+        tenant: tenantId,
         ...context,
         candidates: candidates || [],
       },
@@ -100,7 +101,7 @@ router.post('/route', async (req, res) => {
     // Record metrics
     prometheusConductorMetrics.recordOperationalEvent(
       'router_api_request',
-      true,
+      { success: true },
     );
     prometheusConductorMetrics.recordOperationalMetric(
       'router_api_latency',
@@ -115,36 +116,36 @@ router.post('/route', async (req, res) => {
     logger.info('Router decision made', {
       taskId,
       tenantId,
-      expertId: routingResponse.expertId,
+      expertId: routingResponse.selectedExpert,
       confidence: routingResponse.confidence,
       responseTime,
       user: req.user?.id,
       // Add approval details to audit log if present
       ...(requestContext &&
         requestContext.sensitivity === 'high' && {
-          approval: {
-            approverId: req.headers['x-approver-id'],
-            approvalReason: req.headers['x-approval-reason'],
-          },
-        }),
+        approval: {
+          approverId: req.headers['x-approver-id'],
+          approvalReason: req.headers['x-approval-reason'],
+        },
+      }),
     });
 
     res.json({
       taskId,
-      expertId: routingResponse.expertId,
+      expertId: routingResponse.selectedExpert,
       confidence: routingResponse.confidence,
-      rationaleId: routingResponse.rationaleId,
+      rationaleId: routingResponse.decisionId,
       estimatedCost: routingResponse.estimatedCost,
       metadata: {
         responseTime,
-        strategy: routingResponse.strategy,
+        strategy: routingResponse.routingReason,
       },
     });
   } catch (error) {
     logger.error('Router API error', { error, body: req.body });
     prometheusConductorMetrics.recordOperationalEvent(
-      'router_api_error',
-      false,
+      'router_api_failure',
+      { success: false, error: (error as any).message },
     );
 
     res.status(500).json({

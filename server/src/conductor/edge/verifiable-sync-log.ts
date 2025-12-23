@@ -117,7 +117,6 @@ export class VerifiableSyncLog {
         sequenceNumber,
         operation,
         previousHash,
-        signature: '', // Will be filled by signing
         metadata: {
           sessionId,
           entityType: operation.entityType,
@@ -151,8 +150,7 @@ export class VerifiableSyncLog {
       // Update metrics
       prometheusConductorMetrics.recordOperationalEvent(
         'sync_log_entry_created',
-        true,
-        { node_id: nodeId, direction: syncDirection },
+        { success: true, node_id: nodeId, direction: syncDirection },
       );
 
       logger.debug('Sync log entry recorded', {

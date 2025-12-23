@@ -1,10 +1,9 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { MCPOrchestrator, WorkflowDefinition, WorkflowRecipes } from '../orchestrator.js';
-import { describe, it, test, expect, beforeEach } from '@jest/globals';
 
 // Mock MCP client
 const mockClient = {
-  executeTool: vi.fn(),
+  executeTool: jest.fn(),
 };
 
 describe('MCPOrchestrator', () => {
@@ -12,7 +11,7 @@ describe('MCPOrchestrator', () => {
 
   beforeEach(() => {
     orchestrator = new MCPOrchestrator(mockClient as any);
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('workflow registration', () => {
@@ -48,7 +47,7 @@ describe('MCPOrchestrator', () => {
 
   describe('workflow execution', () => {
     it('executes steps in dependency order', async () => {
-      mockClient.executeTool.mockResolvedValue({ result: 'ok' });
+      (mockClient.executeTool as any).mockResolvedValue({ result: 'ok' });
 
       const workflow: WorkflowDefinition = {
         id: 'ordered',
@@ -69,7 +68,7 @@ describe('MCPOrchestrator', () => {
     });
 
     it('provides self-evaluation on completion', async () => {
-      mockClient.executeTool.mockResolvedValue({ data: 'test' });
+      (mockClient.executeTool as any).mockResolvedValue({ data: 'test' });
 
       const workflow: WorkflowDefinition = {
         id: 'eval-test',
@@ -114,7 +113,7 @@ describe('MCPOrchestrator', () => {
     });
 
     it('skips steps when condition returns false', async () => {
-      mockClient.executeTool.mockResolvedValue({});
+      (mockClient.executeTool as any).mockResolvedValue({});
 
       const workflow: WorkflowDefinition = {
         id: 'conditional',

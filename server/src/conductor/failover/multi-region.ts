@@ -179,7 +179,7 @@ export class MultiRegionFailoverManager extends EventEmitter {
         // Record metrics
         prometheusConductorMetrics.recordOperationalEvent(
           `region_health_${health.status}`,
-          true,
+          { success: true },
         );
 
         return health;
@@ -342,8 +342,8 @@ export class MultiRegionFailoverManager extends EventEmitter {
 
       // Record metrics
       prometheusConductorMetrics.recordOperationalEvent(
-        'failover_completed',
-        true,
+        'multi_region_failover_started',
+        { success: true },
       );
     } catch (error) {
       console.error(`Failover failed: ${error.message}`);
@@ -360,8 +360,8 @@ export class MultiRegionFailoverManager extends EventEmitter {
       }
 
       prometheusConductorMetrics.recordOperationalEvent(
-        'failover_failed',
-        false,
+        'multi_region_failover_error',
+        { success: false },
       );
       throw error;
     } finally {

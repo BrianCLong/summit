@@ -209,7 +209,7 @@ class QueueManager {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'scheduler_task_failed',
-      false,
+      { success: false },
     );
   }
 
@@ -418,7 +418,7 @@ class BudgetManager {
     // Apply priority multipliers for cost-based throttling
     const multiplier =
       config.priorityMultipliers[
-        priority as keyof typeof config.priorityMultipliers
+      priority as keyof typeof config.priorityMultipliers
       ] || 1;
     const adjustedCost = estimatedCost * multiplier;
 

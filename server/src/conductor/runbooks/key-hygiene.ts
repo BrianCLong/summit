@@ -37,7 +37,7 @@ interface SigningKey {
   publicKey: string;
   privateKey: string; // Encrypted in storage
   fingerprint: string;
-  algorithm: string;
+  algorithm: 'RSA-SHA256' | 'ECDSA-SHA256';
   status: 'active' | 'deactivated' | 'revoked';
   createdAt: Date;
   expiresAt: Date;
@@ -189,8 +189,8 @@ export class KeyHygieneManager {
       // Update metrics
       prometheusConductorMetrics.recordOperationalEvent(
         'runbook_signed',
-        true,
         {
+          success: true,
           runbook_id: runbookId,
           signed_by: signedBy,
         },
@@ -208,8 +208,8 @@ export class KeyHygieneManager {
         runbookId,
       });
       prometheusConductorMetrics.recordOperationalEvent(
-        'runbook_sign_error',
-        false,
+        'runbook_sign_failure',
+        { success: false, error: (error as any).message },
       );
       throw error;
     }
@@ -307,8 +307,8 @@ export class KeyHygieneManager {
       // Update metrics
       prometheusConductorMetrics.recordOperationalEvent(
         'runbook_verified',
-        isValid,
         {
+          success: isValid,
           runbook_id: runbookId,
           violations: violations.join(','),
         },
@@ -328,8 +328,8 @@ export class KeyHygieneManager {
         runbookId,
       });
       prometheusConductorMetrics.recordOperationalEvent(
-        'runbook_verify_error',
-        false,
+        'runbook_verify_failure',
+        { success: false, error: (error as any).message },
       );
       throw error;
     }

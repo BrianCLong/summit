@@ -26,11 +26,11 @@ interface BudgetLadder {
 
 interface BudgetAction {
   type:
-    | 'priority_multiplier'
-    | 'quality_reduction'
-    | 'cache_fallback'
-    | 'maintenance_mode'
-    | 'notification';
+  | 'priority_multiplier'
+  | 'quality_reduction'
+  | 'cache_fallback'
+  | 'maintenance_mode'
+  | 'notification';
   config: any;
   userMessage?: string;
 }
@@ -403,8 +403,8 @@ export class BudgetLadderController {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'budget_decision',
-      decision.allowed,
       {
+        success: decision.allowed,
         tenant_id: request.tenantId,
         stage,
       },

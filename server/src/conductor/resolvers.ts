@@ -117,8 +117,10 @@ export const conductorResolvers = {
       const budgetAdmission = await budgetController.admit(
         routingDecision.expert,
         estimatedCost,
-        input.emergency_justification ? true : false,
-        securityContext.userId,
+        {
+          isEmergency: !!input.emergency_justification,
+          userId: securityContext.userId,
+        },
       );
 
       if (!budgetAdmission.admit) {
@@ -194,7 +196,7 @@ export const conductorResolvers = {
         await budgetController.recordSpending(
           routingDecision.expert,
           actualCost,
-          securityContext.userId,
+          { userId: securityContext.userId },
         );
 
         // Decrement concurrent counter on successful completion

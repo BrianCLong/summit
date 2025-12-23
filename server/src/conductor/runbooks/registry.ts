@@ -11,12 +11,12 @@ export interface Runbook {
   version: string;
   description: string;
   category:
-    | 'incident_response'
-    | 'maintenance'
-    | 'security'
-    | 'deployment'
-    | 'backup'
-    | 'monitoring';
+  | 'incident_response'
+  | 'maintenance'
+  | 'security'
+  | 'deployment'
+  | 'backup'
+  | 'monitoring';
   severity: 'low' | 'medium' | 'high' | 'critical';
   approvalRequired: boolean;
   steps: RunbookStep[];
@@ -279,7 +279,7 @@ class ApprovalWorkflowEngine {
     );
     prometheusConductorMetrics.recordOperationalEvent(
       'approval_workflow_initiated',
-      true,
+      { success: true },
     );
   }
 
@@ -354,7 +354,7 @@ class ApprovalWorkflowEngine {
 
       prometheusConductorMetrics.recordOperationalEvent(
         'approval_processed',
-        isApproved || isRejected,
+        { success: isApproved || isRejected },
       );
 
       return {
@@ -471,15 +471,15 @@ export class RunbookRegistry {
       console.log(`Runbook registered: ${runbook.id} v${runbook.version}`);
       prometheusConductorMetrics.recordOperationalEvent(
         'runbook_registered',
-        true,
+        { success: true },
       );
 
       return signedRunbook.signature.hash;
     } catch (error) {
       console.error('Runbook registration failed:', error);
       prometheusConductorMetrics.recordOperationalEvent(
-        'runbook_registration_error',
-        false,
+        'runbook_registration_failure',
+        { success: false, error: (error as any).message },
       );
       throw error;
     }
@@ -580,7 +580,7 @@ export class RunbookRegistry {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'runbook_execution_initiated',
-      true,
+      { success: true },
     );
     return executionId;
   }

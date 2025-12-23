@@ -22,7 +22,7 @@ complianceRouter.post('/assessments/run', async (req, res) => {
   try {
     const assessmentRequest: AssessmentRequest = req.body;
     const tenantId = req.headers['x-tenant-id'] as string;
-    const assessor = req.user?.sub || 'system';
+    const assessor = (req.user as any)?.sub || (req.user as any)?.id || 'system';
 
     if (!tenantId) {
       return res.status(400).json({
@@ -55,7 +55,7 @@ complianceRouter.post('/assessments/run', async (req, res) => {
     // Record metrics
     prometheusConductorMetrics.recordOperationalEvent(
       'compliance_assessment_run',
-      true,
+      { success: true },
     );
     prometheusConductorMetrics.recordOperationalMetric(
       'compliance_assessment_time',
@@ -68,7 +68,7 @@ complianceRouter.post('/assessments/run', async (req, res) => {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'compliance_assessment_error',
-      false,
+      { success: false },
     );
 
     res.status(500).json({
@@ -281,7 +281,7 @@ complianceRouter.patch('/findings/:findingId/status', async (req, res) => {
   try {
     const { findingId } = req.params;
     const { status, comments, assignee } = req.body;
-    const updatedBy = req.user?.sub || 'system';
+    const updatedBy = req.user?.id || 'system';
 
     const validStatuses = [
       'open',
@@ -315,7 +315,7 @@ complianceRouter.patch('/findings/:findingId/status', async (req, res) => {
     // Record metrics
     prometheusConductorMetrics.recordOperationalEvent(
       'compliance_finding_updated',
-      true,
+      { success: true },
     );
 
     res.json(response);
@@ -324,7 +324,7 @@ complianceRouter.patch('/findings/:findingId/status', async (req, res) => {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'compliance_finding_update_error',
-      false,
+      { success: false },
     );
 
     res.status(500).json({
@@ -376,7 +376,7 @@ complianceRouter.post('/reports/generate', async (req, res) => {
       frameworkId,
       tenantId,
       generatedAt: Date.now(),
-      generatedBy: req.user?.sub || 'system',
+      generatedBy: req.user?.id || 'system',
       summary: {
         overallScore: dashboard.overallScore,
         riskLevel: dashboard.riskLevel,
@@ -421,7 +421,7 @@ complianceRouter.post('/reports/generate', async (req, res) => {
     // Record metrics
     prometheusConductorMetrics.recordOperationalEvent(
       'compliance_report_generated',
-      true,
+      { success: true },
     );
     prometheusConductorMetrics.recordOperationalMetric(
       'compliance_report_time',
@@ -434,7 +434,7 @@ complianceRouter.post('/reports/generate', async (req, res) => {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'compliance_report_error',
-      false,
+      { success: false },
     );
 
     res.status(500).json({
@@ -455,7 +455,7 @@ complianceRouter.post('/schedule/assessment', async (req, res) => {
   try {
     const tenantId = req.headers['x-tenant-id'] as string;
     const { frameworkId, frequency, scope, enabled = true } = req.body;
-    const scheduledBy = req.user?.sub || 'system';
+    const scheduledBy = req.user?.id || 'system';
 
     if (!tenantId || !frameworkId || !frequency) {
       return res.status(400).json({
@@ -490,7 +490,7 @@ complianceRouter.post('/schedule/assessment', async (req, res) => {
       enabled,
       scheduledBy,
       createdAt: Date.now(),
-      nextRun: this.calculateNextRun(frequency),
+      nextRun: calculateNextRun(frequency),
     };
 
     const response = {
@@ -503,7 +503,7 @@ complianceRouter.post('/schedule/assessment', async (req, res) => {
     // Record metrics
     prometheusConductorMetrics.recordOperationalEvent(
       'compliance_schedule_created',
-      true,
+      { success: true },
     );
 
     res.json(response);
@@ -512,7 +512,7 @@ complianceRouter.post('/schedule/assessment', async (req, res) => {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'compliance_schedule_error',
-      false,
+      { success: false },
     );
 
     res.status(500).json({
@@ -563,17 +563,17 @@ complianceRouter.get('/metrics', async (req, res) => {
       averageFrameworkScore:
         dashboard.frameworkStatus.length > 0
           ? Math.round(
-              dashboard.frameworkStatus.reduce((sum, f) => sum + f.score, 0) /
-                dashboard.frameworkStatus.length,
-            )
+            dashboard.frameworkStatus.reduce((sum, f) => sum + f.score, 0) /
+            dashboard.frameworkStatus.length,
+          )
           : 0,
       lastAssessment:
         dashboard.recentAssessments.length > 0
           ? Math.max(
-              ...dashboard.recentAssessments.map(
-                (a) => a.completionDate || a.startDate,
-              ),
-            )
+            ...dashboard.recentAssessments.map(
+              (a) => a.completionDate || a.startDate,
+            ),
+          )
           : 0,
     };
 
@@ -620,7 +620,7 @@ complianceRouter.use((req, res, next) => {
     );
     prometheusConductorMetrics.recordOperationalEvent(
       `compliance_api_${req.method.toLowerCase()}`,
-      res.statusCode < 400,
+      { success: res.statusCode < 400 },
     );
   });
 

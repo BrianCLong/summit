@@ -222,7 +222,7 @@ router.get('/runs/:runId/nodes/:nodeId/routing', async (req, res) => {
 
     // In a real implementation, this would fetch from the runs database
     // For now, return a mock routing decision
-    const routingDecision = {
+    const routingDecision: any = {
       runId,
       nodeId,
       queryId: `${runId}-${nodeId}-query`,

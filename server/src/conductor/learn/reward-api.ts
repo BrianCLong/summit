@@ -13,11 +13,11 @@ interface RewardRequest {
   contextHash?: string;
   armId: ExpertArm;
   rewardType:
-    | 'success_at_k'
-    | 'human_thumbs'
-    | 'incident_free'
-    | 'accepted_insight'
-    | 'implicit_feedback';
+  | 'success_at_k'
+  | 'human_thumbs'
+  | 'incident_free'
+  | 'accepted_insight'
+  | 'implicit_feedback';
   rewardValue?: number; // 0-1, will be calculated if not provided
   metadata?: {
     latency?: number;
@@ -232,7 +232,7 @@ rewardRouter.post('/reward', async (req, res) => {
     // Record metrics
     prometheusConductorMetrics.recordOperationalEvent(
       `reward_${rewardRequest.rewardType}`,
-      true,
+      { success: true },
     );
     prometheusConductorMetrics.recordOperationalMetric(
       'reward_processing_time',
@@ -249,7 +249,7 @@ rewardRouter.post('/reward', async (req, res) => {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'reward_processing_error',
-      false,
+      { success: false },
     );
 
     res.status(500).json({
@@ -445,7 +445,7 @@ rewardRouter.post('/reset', async (req, res) => {
 
     await adaptiveRouter.resetBandits();
 
-    prometheusConductorMetrics.recordOperationalEvent('bandit_reset', true);
+    prometheusConductorMetrics.recordOperationalEvent('bandit_reset', { success: true });
 
     res.json({
       success: true,
@@ -571,7 +571,7 @@ rewardRouter.use((req, res, next) => {
     );
     prometheusConductorMetrics.recordOperationalEvent(
       `reward_api_${req.method.toLowerCase()}`,
-      res.statusCode < 400,
+      { success: res.statusCode < 400 },
     );
   });
 

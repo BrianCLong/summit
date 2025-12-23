@@ -5,7 +5,7 @@ import Redis from 'ioredis';
 import logger from '../../config/logger.js';
 import { prometheusConductorMetrics } from '../observability/prometheus.js';
 
-interface ContextFeatures {
+export interface ContextFeatures {
   queryComplexity: number; // 0-1 complexity score
   queryLength: number; // Token count
   urgency: 'low' | 'medium' | 'high' | 'critical';
@@ -188,15 +188,13 @@ export class ThompsonSamplingEngine {
         },
       );
 
-      prometheusConductorMetrics.recordOperationalEvent(
-        'thompson_sampling_selection',
-        true,
-        {
-          model_id: selectedArm.arm.modelId,
-          context_confidence: contextConfidence.toFixed(2),
-          total_pulls: totalPulls.toString(),
-        },
-      );
+      prometheusConductorMetrics.recordOperationalEvent('thompson_sampling_selection', {
+        success: true,
+        model_id: selectedArm.arm.modelId,
+        context_confidence: contextConfidence.toFixed(2),
+        total_pulls: totalPulls.toString(),
+        calculated_score: selectedArm.finalScore.toFixed(4),
+      });
 
       logger.info('Thompson sampling selection completed', {
         selectedModel: selectedArm.arm.modelId,
@@ -211,11 +209,11 @@ export class ThompsonSamplingEngine {
     } catch (error) {
       const selectionTime = Date.now() - startTime;
 
-      prometheusConductorMetrics.recordOperationalEvent(
-        'thompson_sampling_error',
-        false,
-        { error_type: error.name, context_hash: contextHash.substring(0, 8) },
-      );
+      prometheusConductorMetrics.recordOperationalEvent('thompson_sampling_failure', {
+        success: false,
+        error_type: (error as any).name,
+        context_hash: contextHash.substring(0, 8),
+      });
 
       logger.error('Thompson sampling selection failed', {
         error: error.message,

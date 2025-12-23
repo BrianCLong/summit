@@ -51,7 +51,7 @@ schedulerRouter.post('/schedule', async (req, res) => {
     }
 
     // Set defaults based on expert type
-    const costEstimates: Record<ExpertArm, number> = {
+    const costEstimates: Partial<Record<ExpertArm, number>> = {
       graph_ops: 0.05,
       rag_retrieval: 0.03,
       osint_analysis: 0.08,
@@ -61,7 +61,7 @@ schedulerRouter.post('/schedule', async (req, res) => {
       code_generation: 0.01,
     };
 
-    const durationEstimates: Record<ExpertArm, number> = {
+    const durationEstimates: Partial<Record<ExpertArm, number>> = {
       graph_ops: 45000,
       rag_retrieval: 30000,
       osint_analysis: 60000,
@@ -101,7 +101,7 @@ schedulerRouter.post('/schedule', async (req, res) => {
     // Record metrics
     prometheusConductorMetrics.recordOperationalEvent(
       'scheduler_request',
-      decision.approved,
+      { success: decision.approved },
     );
     prometheusConductorMetrics.recordOperationalMetric(
       'scheduler_decision_time',
@@ -119,7 +119,7 @@ schedulerRouter.post('/schedule', async (req, res) => {
   } catch (error) {
     console.error('Scheduling error:', error);
 
-    prometheusConductorMetrics.recordOperationalEvent('scheduler_error', false);
+    prometheusConductorMetrics.recordOperationalEvent('scheduler_error', { success: false });
 
     res.status(500).json({
       success: false,
@@ -157,7 +157,7 @@ schedulerRouter.post('/dequeue/:queueName', async (req, res) => {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'scheduler_task_dequeued',
-      true,
+      { success: true },
     );
 
     res.json({
@@ -445,7 +445,7 @@ schedulerRouter.use((req, res, next) => {
     );
     prometheusConductorMetrics.recordOperationalEvent(
       `scheduler_api_${req.method.toLowerCase()}`,
-      res.statusCode < 400,
+      { success: res.statusCode < 400 },
     );
   });
 

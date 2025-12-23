@@ -7,6 +7,7 @@ import { applyMiddleware } from 'graphql-middleware';
 import cors from 'cors';
 import helmet from 'helmet';
 import pinoHttp from 'pino-http';
+import pino from 'pino';
 import { logger as appLogger } from './config/logger.js';
 import { telemetry } from './lib/telemetry/comprehensive-telemetry.js';
 import { snapshotter } from './lib/telemetry/diagnostic-snapshotter.js';
@@ -38,7 +39,7 @@ import { getNeo4jDriver } from './db/neo4j.js';
 import { initializeTracing, getTracer } from './observability/tracer.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { Request, Response, NextFunction } from 'express'; // Import types for middleware
+import type { Request, Response, NextFunction } from 'express'; // Import types for middleware
 import { startTrustWorker } from './workers/trustScoreWorker.js';
 import { startRetentionWorker } from './workers/retentionWorker.js';
 import { cfg } from './config.js';
@@ -81,7 +82,7 @@ export const createApp = async () => {
   // await tracer.initialize();
 
   const app = express();
-  const logger = pino();
+  const logger = (pino as any)();
 
   // Add correlation ID middleware FIRST (before other middleware)
   app.use(correlationIdMiddleware);
@@ -126,15 +127,15 @@ export const createApp = async () => {
     helmet({
       contentSecurityPolicy: isProduction
         ? {
-            directives: {
-              defaultSrc: ["'self'"],
-              objectSrc: ["'none'"],
-              imgSrc: ["'self'", 'data:'],
-              scriptSrc: ["'self'"],
-              styleSrc: ["'self'", "'unsafe-inline'"],
-              connectSrc: ["'self'", ...allowedOrigins],
-            },
-          }
+          directives: {
+            defaultSrc: ["'self'"],
+            objectSrc: ["'none'"],
+            imgSrc: ["'self'", 'data:'],
+            scriptSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            connectSrc: ["'self'", ...allowedOrigins],
+          },
+        }
         : false,
       referrerPolicy: { policy: 'no-referrer' },
       hsts: isProduction ? undefined : false,
@@ -236,8 +237,8 @@ export const createApp = async () => {
   // Global Rate Limiting (fallback for unauthenticated or non-specific routes)
   // Note: /graphql has its own rate limiting chain above
   app.use((req, res, next) => {
-      if (req.path === '/graphql') return next(); // Skip global limiter for graphql, handled in route
-      return rateLimitMiddleware(req, res, next);
+    if (req.path === '/graphql') return next(); // Skip global limiter for graphql, handled in route
+    return rateLimitMiddleware(req, res, next);
   });
 
   // Authentication routes (exempt from global auth middleware)
@@ -297,7 +298,7 @@ export const createApp = async () => {
     callCompletion: async (prompt: string, model: string) => `[Stub LLM Response] for: ${prompt}`
   };
 
-  const maestro = new Maestro(igClient, costMeter, llmClient, {
+  const maestro = new Maestro(igClient, costMeter, llmClient as any, {
     defaultPlannerAgent: 'openai:gpt-4.1',
     defaultActionAgent: 'openai:gpt-4.1',
   });
@@ -431,21 +432,21 @@ export const createApp = async () => {
   const authenticateToken =
     cfg.NODE_ENV === 'production'
       ? productionAuthMiddleware
-      : (req: Request, res: Response, next: NextFunction) => {
-          // Development mode - relaxed auth for easier testing
-          const authHeader = req.headers['authorization'];
-          const token = authHeader && authHeader.split(' ')[1];
+      : (req: any, res: any, next: any) => {
+        // Development mode - relaxed auth for easier testing
+        const authHeader = req.headers['authorization'];
+        const token = authHeader && authHeader.split(' ')[1];
 
-          if (!token) {
-            console.warn('Development: No token provided, allowing request');
-            (req as any).user = {
-              sub: 'dev-user',
-              email: 'dev@intelgraph.local',
-              role: 'admin',
-            };
-          }
-          next();
-        };
+        if (!token) {
+          console.warn('Development: No token provided, allowing request');
+          (req as any).user = {
+            sub: 'dev-user',
+            email: 'dev@intelgraph.local',
+            role: 'admin',
+          };
+        }
+        next();
+      };
 
   app.use(
     '/graphql',
@@ -471,8 +472,8 @@ export const createApp = async () => {
   // In a real production setup, this might be in a separate process/container.
   // For MVP/Monolith, we keep it here.
   if (webhookWorker) {
-      // Just referencing it to prevent tree-shaking/unused variable lint errors if any,
-      // though import side-effects usually suffice.
+    // Just referencing it to prevent tree-shaking/unused variable lint errors if any,
+    // though import side-effects usually suffice.
   }
 
   appLogger.info('Anomaly detector activated.');

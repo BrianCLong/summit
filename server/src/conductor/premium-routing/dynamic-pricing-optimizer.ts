@@ -376,7 +376,7 @@ export class DynamicPricingOptimizer {
       prometheusConductorMetrics.recordOperationalMetric(
         'dynamic_pricing_calculation_time',
         calculationTime,
-        { model_id: modelId, has_context: !!context },
+        { model_id: modelId, has_context: (context !== undefined).toString() },
       );
 
       prometheusConductorMetrics.recordOperationalMetric(
@@ -409,9 +409,13 @@ export class DynamicPricingOptimizer {
       const calculationTime = Date.now() - startTime;
 
       prometheusConductorMetrics.recordOperationalEvent(
-        'dynamic_pricing_calculation_error',
-        false,
-        { error_type: error.name, model_id: modelId },
+        'pricing_optimization_failure',
+        {
+          success: false,
+          error_type: (error as any).name,
+          model_id: modelId,
+          error: (error as any).message,
+        },
       );
 
       logger.error('Optimal price calculation failed', {
@@ -430,10 +434,10 @@ export class DynamicPricingOptimizer {
    */
   async getPricingRecommendations(options?: {
     targetMetric?:
-      | 'revenue'
-      | 'profit'
-      | 'market_share'
-      | 'customer_satisfaction';
+    | 'revenue'
+    | 'profit'
+    | 'market_share'
+    | 'customer_satisfaction';
     timeHorizon?: number; // hours
     aggressiveness?: 'conservative' | 'moderate' | 'aggressive';
   }): Promise<PricingRecommendation[]> {
@@ -1301,14 +1305,14 @@ export class DynamicPricingOptimizer {
       risks:
         Math.abs(changePercent) > 0.1
           ? [
-              {
-                risk: 'customer_churn',
-                probability: Math.min(0.8, Math.abs(changePercent) * 2),
-                impact: 0.7,
-                mitigation: 'Gradual rollout with monitoring',
-                monitoringRequired: true,
-              },
-            ]
+            {
+              risk: 'customer_churn',
+              probability: Math.min(0.8, Math.abs(changePercent) * 2),
+              impact: 0.7,
+              mitigation: 'Gradual rollout with monitoring',
+              monitoringRequired: true,
+            },
+          ]
           : [],
       monitoring: {
         metrics: ['revenue', 'demand', 'customer_satisfaction', 'market_share'],

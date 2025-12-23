@@ -176,8 +176,8 @@ export class PolicyEngine {
 
         prometheusConductorMetrics.recordOperationalEvent(
           'policy_evaluation',
-          decision.allow,
           {
+            success: decision.allow,
             action_type: input.action.type,
             category: input.action.category,
             tenant_id: input.subject.tenantId,
@@ -214,10 +214,13 @@ export class PolicyEngine {
       if (this.config.enableMetrics) {
         prometheusConductorMetrics.recordOperationalEvent(
           'policy_evaluation_error',
-          false,
           {
+            success: false,
             error_type: error.name,
             action_type: input.action.type,
+            category: input.action.category,
+            tenant_id: input.subject.tenantId,
+            evaluation_time_ms: evaluationTime,
           },
         );
       }
@@ -960,6 +963,7 @@ export function createPolicyInput(
   tenantId: string,
   action: {
     type: string;
+    resource: string;
     category: 'READ' | 'WRITE' | 'DEPLOY' | 'ROLLBACK';
     params?: Record<string, any>;
   },

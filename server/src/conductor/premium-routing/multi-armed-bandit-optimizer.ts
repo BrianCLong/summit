@@ -187,8 +187,8 @@ export class MultiArmedBanditOptimizer {
     // Record selection metrics
     prometheusConductorMetrics.recordOperationalEvent(
       'bandit_arm_selected',
-      true,
       {
+        success: true,
         arm_id: selectedArm.armId,
         model_id: selectedArm.modelId,
         algorithm,
@@ -573,10 +573,10 @@ export class MultiArmedBanditOptimizer {
       const recentRewards = arm.rewards.slice(-10); // Last 10 rewards
       return recentRewards.length > 0
         ? Math.max(
-            0,
-            arm.averageReward -
-              recentRewards.reduce((a, b) => a + b) / recentRewards.length,
-          )
+          0,
+          arm.averageReward -
+          recentRewards.reduce((a, b) => a + b) / recentRewards.length,
+        )
         : 0;
     });
 

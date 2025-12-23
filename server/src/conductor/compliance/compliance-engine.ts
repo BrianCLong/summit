@@ -46,11 +46,11 @@ export interface EvidenceRequirement {
   id: string;
   requirementId: string;
   type:
-    | 'documentation'
-    | 'log_analysis'
-    | 'system_config'
-    | 'user_attestation'
-    | 'third_party_cert';
+  | 'documentation'
+  | 'log_analysis'
+  | 'system_config'
+  | 'user_attestation'
+  | 'third_party_cert';
   description: string;
   collectionMethod: 'manual' | 'automated' | 'api';
   retentionPeriod: number;
@@ -89,22 +89,22 @@ export interface ComplianceFinding {
   assessmentId: string;
   requirementId: string;
   category:
-    | 'gap'
-    | 'weakness'
-    | 'non_compliance'
-    | 'best_practice'
-    | 'observation';
+  | 'gap'
+  | 'weakness'
+  | 'non_compliance'
+  | 'best_practice'
+  | 'observation';
   severity: 'low' | 'medium' | 'high' | 'critical';
   title: string;
   description: string;
   recommendation: string;
   remediation: RemediationPlan;
   status:
-    | 'open'
-    | 'in_progress'
-    | 'resolved'
-    | 'accepted_risk'
-    | 'false_positive';
+  | 'open'
+  | 'in_progress'
+  | 'resolved'
+  | 'accepted_risk'
+  | 'false_positive';
   assignee: string;
   dueDate: number;
   evidence: string[];
@@ -140,10 +140,10 @@ export interface GDPRDataMapping {
   id: string;
   tenantId: string;
   dataCategory:
-    | 'personal'
-    | 'sensitive_personal'
-    | 'pseudonymized'
-    | 'anonymized';
+  | 'personal'
+  | 'sensitive_personal'
+  | 'pseudonymized'
+  | 'anonymized';
   dataTypes: string[];
   processingPurpose: string[];
   legalBasis: string[];
@@ -560,8 +560,8 @@ export class ComplianceEngine {
         `Compliance assessment ${assessmentId} completed for ${frameworkId}`,
       );
       prometheusConductorMetrics.recordOperationalEvent(
-        'compliance_assessment_completed',
-        true,
+        'compliance_rule_evaluation',
+        { success: true },
       );
       prometheusConductorMetrics.recordOperationalMetric(
         'compliance_score',
@@ -572,8 +572,8 @@ export class ComplianceEngine {
     } catch (error) {
       console.error('Compliance assessment error:', error);
       prometheusConductorMetrics.recordOperationalEvent(
-        'compliance_assessment_error',
-        false,
+        'compliance_policy_evaluation',
+        { success: false, error: (error as any).message },
       );
       throw error;
     }

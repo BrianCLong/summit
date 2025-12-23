@@ -73,11 +73,11 @@ interface OptimizationConstraints {
 
 interface CostOptimizationRecommendation {
   recommendationType:
-    | 'model_switch'
-    | 'parameter_tuning'
-    | 'batch_optimization'
-    | 'cache_utilization'
-    | 'timing_optimization';
+  | 'model_switch'
+  | 'parameter_tuning'
+  | 'batch_optimization'
+  | 'cache_utilization'
+  | 'timing_optimization';
   currentModel: string;
   recommendedModel?: string;
   expectedCostSaving: number;
@@ -99,10 +99,10 @@ interface OptimizationAction {
 interface RealTimeAlert {
   id: string;
   type:
-    | 'cost_spike'
-    | 'quality_drop'
-    | 'budget_exceeded'
-    | 'performance_degradation';
+  | 'cost_spike'
+  | 'quality_drop'
+  | 'budget_exceeded'
+  | 'performance_degradation';
   severity: 'info' | 'warning' | 'critical';
   modelId: string;
   tenantId: string;
@@ -234,8 +234,8 @@ export class CostPerformanceOptimizer {
     // Record recommendation generation
     prometheusConductorMetrics.recordOperationalEvent(
       'optimization_recommendations_generated',
-      true,
       {
+        success: true,
         tenant_id: tenantId,
         strategy,
         recommendation_count: recommendations.length.toString(),
@@ -642,16 +642,13 @@ export class CostPerformanceOptimizer {
     await this.saveAlert(alert);
 
     // Record alert metric
-    prometheusConductorMetrics.recordOperationalEvent(
-      'cost_optimization_alert',
-      true,
-      {
-        alert_type: alert.type,
-        severity: alert.severity,
-        model_id: alert.modelId,
-        tenant_id: alert.tenantId,
-      },
-    );
+    prometheusConductorMetrics.recordOperationalEvent('cost_optimization_failure', {
+      success: false,
+      alert_type: alert.type,
+      severity: alert.severity,
+      model_id: alert.modelId,
+      tenant_id: alert.tenantId,
+    });
 
     logger.warn('Cost optimization alert created', {
       alertId,

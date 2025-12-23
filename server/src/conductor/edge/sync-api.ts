@@ -79,7 +79,7 @@ syncRouter.post('/nodes/register', async (req, res) => {
     // Record metrics
     prometheusConductorMetrics.recordOperationalEvent(
       'edge_node_registered',
-      true,
+      { success: true },
     );
     prometheusConductorMetrics.recordOperationalMetric(
       'edge_registration_time',
@@ -92,7 +92,7 @@ syncRouter.post('/nodes/register', async (req, res) => {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'edge_registration_error',
-      false,
+      { success: false },
     );
 
     res.status(500).json({
@@ -152,7 +152,7 @@ syncRouter.post('/operations/apply', async (req, res) => {
     // Record metrics
     prometheusConductorMetrics.recordOperationalEvent(
       'edge_operation_applied',
-      true,
+      { success: true },
     );
     prometheusConductorMetrics.recordOperationalMetric(
       'edge_operation_time',
@@ -165,7 +165,7 @@ syncRouter.post('/operations/apply', async (req, res) => {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'edge_operation_error',
-      false,
+      { success: false },
     );
 
     res.status(500).json({
@@ -215,7 +215,7 @@ syncRouter.post('/sync/initiate', async (req, res) => {
     // Record metrics
     prometheusConductorMetrics.recordOperationalEvent(
       'edge_sync_initiated',
-      true,
+      { success: true },
     );
     prometheusConductorMetrics.recordOperationalMetric(
       'edge_sync_time',
@@ -230,7 +230,7 @@ syncRouter.post('/sync/initiate', async (req, res) => {
   } catch (error) {
     console.error('Sync initiation error:', error);
 
-    prometheusConductorMetrics.recordOperationalEvent('edge_sync_error', false);
+    prometheusConductorMetrics.recordOperationalEvent('edge_sync_error', { success: false });
 
     res.status(500).json({
       success: false,
@@ -282,7 +282,7 @@ syncRouter.post('/sync/receive', async (req, res) => {
     // Record metrics
     prometheusConductorMetrics.recordOperationalEvent(
       'edge_operations_received',
-      true,
+      { success: true },
     );
     prometheusConductorMetrics.recordOperationalMetric(
       'edge_receive_time',
@@ -299,7 +299,7 @@ syncRouter.post('/sync/receive', async (req, res) => {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'edge_receive_error',
-      false,
+      { success: false },
     );
 
     res.status(500).json({
@@ -498,7 +498,7 @@ syncRouter.post('/sync/all', async (req, res) => {
     // Record metrics
     prometheusConductorMetrics.recordOperationalEvent(
       'edge_sync_all_completed',
-      response.success,
+      { success: response.success },
     );
     prometheusConductorMetrics.recordOperationalMetric(
       'edge_sync_all_time',
@@ -515,7 +515,7 @@ syncRouter.post('/sync/all', async (req, res) => {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'edge_sync_all_error',
-      false,
+      { success: false },
     );
 
     res.status(500).json({
@@ -558,7 +558,7 @@ syncRouter.post('/conflicts/resolve', async (req, res) => {
     // Record metrics
     prometheusConductorMetrics.recordOperationalEvent(
       'edge_conflict_resolved',
-      true,
+      { success: true },
     );
 
     res.json(response);
@@ -567,7 +567,7 @@ syncRouter.post('/conflicts/resolve', async (req, res) => {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'edge_conflict_resolution_error',
-      false,
+      { success: false },
     );
 
     res.status(500).json({
@@ -660,7 +660,7 @@ syncRouter.use((req, res, next) => {
     );
     prometheusConductorMetrics.recordOperationalEvent(
       `edge_api_${req.method.toLowerCase()}`,
-      res.statusCode < 400,
+      { success: res.statusCode < 400 },
     );
   });
 

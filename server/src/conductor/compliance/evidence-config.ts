@@ -105,7 +105,6 @@ export const getS3LifecyclePolicy = () => ({
         },
       },
       // Legal hold items are exempt from expiration
-      Status: 'Enabled',
     },
     {
       ID: 'ConductorNonCriticalCleanup',
@@ -156,19 +155,19 @@ export const getS3BucketPolicy = (bucketName: string, kmsKeyArn?: string) => ({
     },
     ...(kmsKeyArn
       ? [
-          {
-            Sid: 'RequireKMSEncryption',
-            Effect: 'Deny',
-            Principal: '*',
-            Action: 's3:PutObject',
-            Resource: `arn:aws:s3:::${bucketName}/*`,
-            Condition: {
-              StringNotEquals: {
-                's3:x-amz-server-side-encryption-aws-kms-key-id': kmsKeyArn,
-              },
+        {
+          Sid: 'RequireKMSEncryption',
+          Effect: 'Deny',
+          Principal: '*',
+          Action: 's3:PutObject',
+          Resource: `arn:aws:s3:::${bucketName}/*`,
+          Condition: {
+            StringNotEquals: {
+              's3:x-amz-server-side-encryption-aws-kms-key-id': kmsKeyArn,
             },
           },
-        ]
+        },
+      ]
       : []),
   ],
 });
@@ -227,17 +226,17 @@ export const getEvidenceStoreIAMPolicy = (
     },
     ...(kmsKeyArn
       ? [
-          {
-            Effect: 'Allow',
-            Action: [
-              'kms:Decrypt',
-              'kms:Encrypt',
-              'kms:GenerateDataKey',
-              'kms:DescribeKey',
-            ],
-            Resource: kmsKeyArn,
-          },
-        ]
+        {
+          Effect: 'Allow',
+          Action: [
+            'kms:Decrypt',
+            'kms:Encrypt',
+            'kms:GenerateDataKey',
+            'kms:DescribeKey',
+          ],
+          Resource: kmsKeyArn,
+        },
+      ]
       : []),
   ],
 });
@@ -291,9 +290,8 @@ export const getEvidenceStoreMonitoring = () => ({
     {
       name: 'UnauthorizedAccess',
       metric: 'UnauthorizedAPICallsSum',
-      threshold: 5,
-      period: 300,
-      evaluationPeriods: 1,
+      storageRetainment: '365d',
+      verificationRequired: true,
       comparisonOperator: 'GreaterThanThreshold',
     },
   ],

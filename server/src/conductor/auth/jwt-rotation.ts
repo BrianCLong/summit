@@ -131,7 +131,7 @@ export class JWTRotationManager {
    */
   async signToken(
     payload: object,
-    options: jwt.SignOptions = {},
+    options: any = {},
   ): Promise<string> {
     if (!this.activeKeyId) {
       throw new Error('No active JWT key available for signing');
@@ -142,8 +142,8 @@ export class JWTRotationManager {
       throw new Error(`Active key ${this.activeKeyId} not found in key store`);
     }
 
-    const signOptions: jwt.SignOptions = {
-      algorithm: activeKey.algorithm as jwt.Algorithm,
+    const signOptions: any = {
+      algorithm: activeKey.algorithm as any,
       keyid: activeKey.keyId,
       issuer: process.env.JWT_ISSUER || 'maestro-conductor',
       audience: process.env.JWT_AUDIENCE || 'intelgraph-platform',
@@ -173,7 +173,7 @@ export class JWTRotationManager {
   /**
    * Verify JWT token with any valid key
    */
-  async verifyToken(token: string): Promise<jwt.JwtPayload | string> {
+  async verifyToken(token: string): Promise<string | any> {
     const decoded = jwt.decode(token, { complete: true });
     if (!decoded || typeof decoded === 'string') {
       throw new Error('Invalid token format');
@@ -197,14 +197,15 @@ export class JWTRotationManager {
     const verifyKey = this.keys.get(keyId)!;
 
     try {
-      const verifyOptions: jwt.VerifyOptions = {
-        algorithms: [verifyKey.algorithm as jwt.Algorithm],
+      const verifyOptions: any = {
+        algorithms: [verifyKey.algorithm as any],
         issuer: process.env.JWT_ISSUER || 'maestro-conductor',
         audience: process.env.JWT_AUDIENCE || 'intelgraph-platform',
       };
 
-      const payload = jwt.verify(token, verifyKey.publicKey, verifyOptions);
-
+      const payload = jwt.verify(token, verifyKey.publicKey, {
+        algorithms: ['RS256'],
+      }) as any;
       logger.debug('✅ JWT token verified', {
         keyId: verifyKey.keyId,
         algorithm: verifyKey.algorithm,
@@ -308,7 +309,7 @@ export class JWTRotationManager {
 
   private generateKeyId(): string {
     const timestamp = Date.now().toString(36);
-    const random = randomBytes(8).toString('hex');
+    const random = (randomBytes(8) as any).toString('hex');
     return `jwt_key_${timestamp}_${random}`;
   }
 

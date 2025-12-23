@@ -308,7 +308,9 @@ export async function runAllExamples() {
 }
 
 // If running this file directly
-if (require.main === module) {
+// In ESM, we can check import.meta.url
+// For now, we'll just leave it as a script entry point placeholder
+if (process.env.RUN_EXAMPLES) {
   runAllExamples().catch((error) => {
     console.error('Fatal error:', error);
     process.exit(1);

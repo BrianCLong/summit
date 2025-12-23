@@ -121,7 +121,7 @@ export class OrchestrationService {
           tenantId: request.context.tenantId,
           purpose: request.context.purpose,
           budgetLimit: request.context.budgetLimit,
-          urgency: request.context.urgency,
+          urgency: request.context.urgency as any,
           qualityThreshold: request.context.qualityThreshold,
         },
       );
@@ -176,8 +176,8 @@ export class OrchestrationService {
 
       prometheusConductorMetrics.recordOperationalEvent(
         'maestro_orchestration_success',
-        true,
         {
+          success: true,
           tenant_id: request.context.tenantId,
           purpose: request.context.purpose,
         },
@@ -218,14 +218,14 @@ export class OrchestrationService {
       const totalTime = Date.now() - startTime;
 
       // Record failure metrics
+      const metadata = {
+        tenant_id: request.context.tenantId,
+        error_type: error.name,
+        purpose: request.context.purpose,
+      };
       prometheusConductorMetrics.recordOperationalEvent(
-        'maestro_orchestration_error',
-        false,
-        {
-          tenant_id: request.context.tenantId,
-          error_type: error.name,
-          purpose: request.context.purpose,
-        },
+        'orchestration_step_failed',
+        { success: false, ...metadata },
       );
 
       logger.error('❌ Maestro orchestration failed', {

@@ -594,7 +594,7 @@ async function verifyEvidenceBundle(
 
     // Verify integrity
     verification.checks.integrityValid =
-      bundle.evidence && bundle.metadata && bundle.id;
+      !!(bundle.evidence && bundle.metadata && bundle.id);
     if (!verification.checks.integrityValid) {
       verification.errors.push('Bundle structure is invalid');
     }

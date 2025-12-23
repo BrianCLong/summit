@@ -12,22 +12,9 @@ import {
   StepExecutorResult,
   RunbookActionType,
   InfrastructureEnrichmentService,
+  InfrastructureNode,
 } from '../types';
 
-/**
- * Infrastructure node representation
- */
-export interface InfrastructureNode {
-  id: string;
-  type: 'server' | 'domain' | 'certificate' | 'registrar' | 'asn' | 'network' | 'malware';
-  value: string;
-  properties?: Record<string, unknown>;
-  relationships: Array<{
-    type: string;
-    target: string;
-    properties?: Record<string, unknown>;
-  }>;
-}
 
 /**
  * Default infrastructure enrichment service implementation

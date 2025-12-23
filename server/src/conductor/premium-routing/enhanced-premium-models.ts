@@ -13,13 +13,13 @@ interface EnhancedPremiumModel {
   modelFamily: 'gpt-4' | 'claude-3' | 'gemini-ultra' | 'command' | 'mixtral';
   version: string;
   modelType:
-    | 'chat'
-    | 'completion'
-    | 'embedding'
-    | 'reasoning'
-    | 'code'
-    | 'vision'
-    | 'multimodal';
+  | 'chat'
+  | 'completion'
+  | 'embedding'
+  | 'reasoning'
+  | 'code'
+  | 'vision'
+  | 'multimodal';
   tier: 'premium' | 'enterprise' | 'flagship' | 'experimental';
   capabilities: ModelCapability[];
   costStructure: CostStructure;
@@ -232,8 +232,8 @@ export class EnhancedPremiumModelRegistry {
   > {
     const candidateModels = availableModels
       ? Array.from(this.models.values()).filter((m) =>
-          availableModels.includes(m.id),
-        )
+        availableModels.includes(m.id),
+      )
       : Array.from(this.models.values());
 
     const scoredRecommendations = [];
@@ -363,8 +363,8 @@ export class EnhancedPremiumModelRegistry {
 
       prometheusConductorMetrics.recordOperationalEvent(
         'enhanced_model_execution_success',
-        result.success,
         {
+          success: result.success,
           model_id: modelId,
           task_type: context.taskType,
         },
@@ -385,10 +385,10 @@ export class EnhancedPremiumModelRegistry {
 
       prometheusConductorMetrics.recordOperationalEvent(
         'enhanced_model_execution_error',
-        false,
         {
+          success: false,
           model_id: modelId,
-          error_type: error.name,
+          error_type: (error as any).name,
           task_type: context.taskType,
         },
       );

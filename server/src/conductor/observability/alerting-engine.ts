@@ -157,6 +157,10 @@ export class AlertingEngine {
       );
     } catch (error) {
       logger.error('Alert evaluation loop failed', { error: error.message });
+      prometheusConductorMetrics.recordOperationalEvent(
+        'alert_evaluation_error',
+        { success: false, error: error.message },
+      );
     }
   }
 
@@ -210,7 +214,8 @@ export class AlertingEngine {
       value,
     });
 
-    prometheusConductorMetrics.recordOperationalEvent('alert_fired', true, {
+    prometheusConductorMetrics.recordOperationalEvent('alert_fired', {
+      success: true,
       severity: alert.severity,
       rule_name: rule.name,
     });
@@ -240,7 +245,8 @@ export class AlertingEngine {
       duration: alert.endsAt.getTime() - alert.startsAt.getTime(),
     });
 
-    prometheusConductorMetrics.recordOperationalEvent('alert_resolved', true, {
+    prometheusConductorMetrics.recordOperationalEvent('alert_resolved', {
+      success: true,
       severity: alert.severity,
       rule_name: alert.ruleName,
     });
@@ -780,8 +786,8 @@ Started At: ${alert.startsAt.toISOString()}
 
 Labels:
 ${Object.entries(alert.labels)
-  .map(([k, v]) => `  ${k}: ${v}`)
-  .join('\n')}
+        .map(([k, v]) => `  ${k}: ${v}`)
+        .join('\n')}
 
 View Details: ${alert.generatorUrl}
     `.trim();

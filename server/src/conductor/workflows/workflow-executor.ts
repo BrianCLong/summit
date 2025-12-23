@@ -92,7 +92,7 @@ export interface WorkflowExecution {
   metadata: {
     user_id: string;
     tenant_id: string;
-    execution_context: Record<string, any>;
+    execution_context?: Record<string, any>;
   };
 }
 
@@ -235,9 +235,9 @@ export class WorkflowExecutor extends EventEmitter {
       tenant_id: string;
       execution_context?: Record<string, any>;
     } = {
-      user_id: 'system',
-      tenant_id: 'default',
-    },
+        user_id: 'system',
+        tenant_id: 'default',
+      },
   ): Promise<string> {
     const workflow = this.workflows.get(workflowName);
     if (!workflow) {
@@ -576,7 +576,7 @@ export class WorkflowExecutor extends EventEmitter {
       taskExecution.completed_at = new Date();
       taskExecution.duration_ms = taskExecution.started_at
         ? taskExecution.completed_at.getTime() -
-          taskExecution.started_at.getTime()
+        taskExecution.started_at.getTime()
         : 0;
       taskExecution.error = error.message;
 

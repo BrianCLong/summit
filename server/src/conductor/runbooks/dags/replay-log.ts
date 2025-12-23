@@ -91,7 +91,7 @@ export class ReplayLog {
     };
 
     // Compute hash
-    const hash = createReplayLogHash(entry);
+    const hash = (createReplayLogHash as any)(entry);
 
     // Sign if private key is available
     let signature: string | undefined;
@@ -122,7 +122,7 @@ export class ReplayLog {
       padding: 1, // RSA_PKCS1_PADDING
     });
 
-    return signature.toString('base64');
+    return (signature as Buffer).toString('base64');
   }
 
   /**
@@ -159,7 +159,7 @@ export class ReplayLog {
       }
 
       // Recompute hash
-      const computedHash = createReplayLogHash(entry);
+      const computedHash = (createReplayLogHash as any)(entry);
       if (entry.hash !== computedHash) {
         return {
           valid: false,

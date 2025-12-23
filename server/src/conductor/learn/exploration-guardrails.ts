@@ -182,8 +182,8 @@ export class ExplorationGuardrails {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'exploration_decision',
-      shouldExplore,
       {
+        success: shouldExplore,
         tenant_id: tenantId,
         expert_type: expertType,
       },
@@ -263,7 +263,7 @@ export class ExplorationGuardrails {
 
       for (const [key, configStr] of Object.entries(configs)) {
         try {
-          const config: ExplorationConfig = JSON.parse(configStr);
+          const config: ExplorationConfig = JSON.parse(configStr as string);
           this.configs.set(key, config);
         } catch (error) {
           logger.warn('Failed to parse exploration config', {

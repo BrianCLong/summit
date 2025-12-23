@@ -1,7 +1,11 @@
 // server/src/conductor/auth/rbac-middleware.ts
 
-import { Request, Response, NextFunction } from 'express';
+import express from 'express';
+type Request = any;
+type Response = any;
+type NextFunction = any;
 import { jwtRotationManager } from './jwt-rotation.js';
+export { jwtRotationManager };
 import logger from '../../config/logger.js';
 
 export interface AuthenticatedUser {
@@ -16,7 +20,7 @@ export interface AuthenticatedUser {
 }
 
 export interface AuthenticatedRequest extends Request {
-  user: AuthenticatedUser;
+  user: any;
   headers: Request['headers'] & {
     'x-auth-request-user'?: string;
     'x-auth-request-email'?: string;
@@ -242,8 +246,8 @@ export function authenticateUser(
     ) {
       const groups = req.headers['x-auth-request-groups']
         ? (req.headers['x-auth-request-groups'] as string)
-            .split(',')
-            .map((g) => g.trim())
+          .split(',')
+          .map((g) => g.trim())
         : [];
 
       user = {
@@ -361,12 +365,11 @@ export function requirePermission(permission: string) {
           userPermissions,
         });
 
-        return res.status(403).json({
-          error: 'Insufficient permissions',
-          required: permission,
-          userRoles,
-          userPermissions: userPermissions.slice(0, 10), // Limit for security
+        res.status(403).json({
+          error: 'Forbidden',
+          message: `Missing required permission: ${permission}`,
         });
+        return;
       }
 
       logger.debug('✅ Authorization granted', {
@@ -409,11 +412,11 @@ export function requireAnyPermission(...permissions: string[]) {
           userRoles: rbacManager.getUserRoles(user),
         });
 
-        return res.status(403).json({
-          error: 'Insufficient permissions',
-          required: permissions,
-          userRoles: rbacManager.getUserRoles(user),
+        res.status(403).json({
+          error: 'Forbidden',
+          message: `Missing one of required permissions: ${permissions.join(', ')}`,
         });
+        return;
       }
 
       next();

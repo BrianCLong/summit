@@ -12,28 +12,8 @@ import {
   StepExecutorResult,
   RunbookActionType,
   PatternMinerService,
+  CampaignMatch,
 } from '../types';
-
-/**
- * Campaign match result
- */
-export interface CampaignMatch {
-  campaignId: string;
-  campaignName: string;
-  score: number;
-  matchedIndicators: number;
-  matchedTTPs: string[];
-  actorProfile?: {
-    id: string;
-    name: string;
-    aliases: string[];
-    motivation: string;
-    sophistication: 'low' | 'medium' | 'high' | 'advanced';
-    targetSectors: string[];
-    geographicFocus: string[];
-  };
-  confidence: 'low' | 'medium' | 'high' | 'very_high';
-}
 
 /**
  * Known threat actor profiles for simulation

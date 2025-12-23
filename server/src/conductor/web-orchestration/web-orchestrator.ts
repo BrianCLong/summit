@@ -184,8 +184,8 @@ export class WebOrchestrator {
 
       prometheusConductorMetrics.recordOperationalEvent(
         'web_orchestration_success',
-        true,
         {
+          success: true,
           tenant_id: context.tenantId,
           query_type: this.classifyQuery(query),
         },
@@ -204,12 +204,8 @@ export class WebOrchestrator {
       const totalTime = Date.now() - startTime;
 
       prometheusConductorMetrics.recordOperationalEvent(
-        'web_orchestration_error',
-        false,
-        {
-          tenant_id: context.tenantId,
-          error_type: error.name,
-        },
+        'web_orchestration_failed',
+        { success: false, tenant_id: context.tenantId, error_type: error.name },
       );
 
       logger.error('Web orchestration failed', {
@@ -801,7 +797,7 @@ class RateLimiter {
   private lastRequest = 0;
   private requests: number[] = [];
 
-  constructor(private config: RateLimitConfig) {}
+  constructor(private config: RateLimitConfig) { }
 
   allowRequest(): boolean {
     const now = Date.now();
