@@ -172,11 +172,14 @@ export class WhatIfOperations {
     let failedOperations = 0;
 
     for (let i = 0; i < operations.length; i++) {
+      const operation = operations[i];
+      if (!operation) continue;
+
       const opDescription = description
         ? `${description} - Operation ${i + 1}`
         : `Batch Operation ${i + 1}`;
 
-      const result = await this.execute(operations[i], opDescription);
+      const result = await this.execute(operation, opDescription);
       results.push(result);
       deltaSets.push(result.deltaSet);
 
@@ -215,6 +218,7 @@ export class WhatIfOperations {
       after: node,
       timestamp: Date.now(),
       reversible: true,
+      metadata: {},
     });
 
     // Create connections if specified
@@ -242,6 +246,7 @@ export class WhatIfOperations {
               after: edge,
               timestamp: Date.now(),
               reversible: true,
+              metadata: {},
             });
           }
         }
@@ -263,6 +268,7 @@ export class WhatIfOperations {
               after: edge,
               timestamp: Date.now(),
               reversible: true,
+              metadata: {},
             });
           }
         }
@@ -296,6 +302,7 @@ export class WhatIfOperations {
           before: edge,
           timestamp: Date.now(),
           reversible: true,
+          metadata: {},
         });
       }
     }
@@ -309,6 +316,7 @@ export class WhatIfOperations {
       before: node,
       timestamp: Date.now(),
       reversible: true,
+      metadata: {},
     });
 
     await this.sandboxGraph.removeNode(params.nodeId, params.cascade);
@@ -340,6 +348,7 @@ export class WhatIfOperations {
       after,
       timestamp: Date.now(),
       reversible: true,
+      metadata: {},
     });
 
     return { nodeId: params.nodeId };
@@ -376,6 +385,7 @@ export class WhatIfOperations {
       after: edge,
       timestamp: Date.now(),
       reversible: true,
+      metadata: {},
     });
 
     return { edgeId: edge.id };
@@ -398,6 +408,7 @@ export class WhatIfOperations {
       before: edge,
       timestamp: Date.now(),
       reversible: true,
+      metadata: {},
     });
 
     await this.sandboxGraph.removeEdge(params.edgeId);
@@ -429,6 +440,7 @@ export class WhatIfOperations {
       after,
       timestamp: Date.now(),
       reversible: true,
+      metadata: {},
     });
 
     return { edgeId: params.edgeId };
@@ -521,6 +533,7 @@ export class WhatIfOperations {
       after: rule,
       timestamp: Date.now(),
       reversible: true,
+      metadata: {},
     });
   }
 
@@ -543,6 +556,7 @@ export class WhatIfOperations {
         after: existingRule,
         timestamp: Date.now(),
         reversible: true,
+        metadata: {},
       });
     } else {
       // Create disabled rule entry
@@ -564,6 +578,7 @@ export class WhatIfOperations {
         after: rule,
         timestamp: Date.now(),
         reversible: true,
+        metadata: {},
       });
     }
   }
@@ -588,6 +603,7 @@ export class WhatIfOperations {
       after: params.value,
       timestamp: Date.now(),
       reversible: true,
+      metadata: {},
     });
   }
 

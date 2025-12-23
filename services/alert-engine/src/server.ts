@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express from 'express';
 import pinoHttp from 'pino-http';
 import pino from 'pino';

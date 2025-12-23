@@ -1,5 +1,5 @@
 // @ts-nocheck
-import express, { Request, Response } from 'express';
+import express, { Request, Response, type Express } from 'express';
 import cron from 'node-cron';
 import { TrendAnalyzer } from './analyzers/TrendAnalyzer.js';
 import { UpgradeManager } from './managers/UpgradeManager.js';
@@ -75,7 +75,7 @@ healthManager.on('component_unhealthy', (health) => {
 });
 
 // Express app
-const app = express();
+const app: Express = express();
 app.use(express.json());
 
 // Health endpoints
