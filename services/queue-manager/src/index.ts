@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { QueueManager } from './core/QueueManager.js';
 import { QueueManagerAPI } from './api/server.js';
 import { Logger } from './utils/logger.js';

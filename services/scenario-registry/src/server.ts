@@ -4,7 +4,7 @@
  * Provides REST API for managing evaluation scenarios
  */
 
-import express from 'express';
+import express, { Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
@@ -14,6 +14,7 @@ import { getDbClient, closeDbClient } from './db/client.js';
 import { ScenarioRepository } from './repository.js';
 import { validateScenario, safeValidate, EvalScenarioSchema } from '@intelgraph/mesh-eval-sdk';
 import type { EvalScenario } from '@intelgraph/mesh-eval-sdk';
+import crypto from 'crypto';
 
 const logger = pino({ name: 'scenario-registry' });
 
@@ -27,7 +28,7 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 /**
  * Create Express application
  */
-function createApp() {
+function createApp(): Application {
   const app = express();
 
   // Middleware
@@ -80,7 +81,15 @@ function createApp() {
         });
       }
 
-      const scenario = validation.data;
+      const scenario = {
+        ...validation.data,
+        id: validation.data.id || crypto.randomUUID(),
+        version: validation.data.version || '1.0.0',
+        type: validation.data.type || 'custom',
+        name: validation.data.name || 'Untitled Scenario',
+        description: validation.data.description || '',
+        tags: validation.data.tags || [],
+      };
 
       // Check if scenario already exists
       const existing = await repo.findById(scenario.id);
