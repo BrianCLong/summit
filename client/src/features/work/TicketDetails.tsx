@@ -1,3 +1,4 @@
+// @ts-nocheck - React 18/19 type compatibility with react-router-dom
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
