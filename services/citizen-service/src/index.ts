@@ -1,5 +1,5 @@
 // @ts-nocheck
-import express from 'express';
+import express, { type Express } from 'express';
 import pino from 'pino';
 import citizenRoutes from './routes/citizen.js';
 import { createHealthRouter } from './middleware/health.js';
@@ -18,7 +18,7 @@ const logger = pino({
   level: process.env.LOG_LEVEL || 'info',
 });
 
-const app = express();
+const app: Express = express();
 const PORT = process.env.PORT || 4010;
 
 // Security middleware (before parsing)

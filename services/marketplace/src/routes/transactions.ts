@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Router } from 'express';
 import { transactionService } from '../services/transactionService.js';
 import type { AuthenticatedRequest } from '../middleware/auth.js';

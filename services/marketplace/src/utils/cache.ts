@@ -1,5 +1,4 @@
-// @ts-nocheck
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 import { logger } from './logger.js';
 
 const redis = new Redis({
@@ -7,7 +6,6 @@ const redis = new Redis({
   port: parseInt(process.env.REDIS_PORT || '6379', 10),
   password: process.env.REDIS_PASSWORD,
   maxRetriesPerRequest: 3,
-  retryDelayOnFailover: 100,
   lazyConnect: true,
 });
 
@@ -107,7 +105,7 @@ export const cache = {
   },
 
   // Get underlying client for advanced operations
-  getClient(): Redis {
+  getClient() {
     return redis;
   },
 };

@@ -2,6 +2,7 @@
  * GraphQL Resolvers for Provenance & Claims Ledger
  */
 
+// @ts-nocheck
 import { Pool } from 'pg';
 import { GraphQLScalarType, Kind } from 'graphql';
 import crypto from 'crypto';

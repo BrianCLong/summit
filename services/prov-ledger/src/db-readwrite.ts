@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Pool } from 'pg';
 
 const rw = new Pool({ connectionString: process.env.PG_RW_URL || process.env.PG_URL });

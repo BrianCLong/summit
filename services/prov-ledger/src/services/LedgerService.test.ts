@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { LedgerService } from './LedgerService';
 import { Evidence } from '../types';

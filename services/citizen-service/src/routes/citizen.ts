@@ -4,7 +4,7 @@ import { citizenService } from '../services/CitizenService.js';
 import { ServiceDomainSchema } from '../schemas/citizen.js';
 import { z } from 'zod';
 
-const router = Router();
+const router: Router = Router();
 
 // Schemas for route validation
 const RegisterCitizenSchema = z.object({

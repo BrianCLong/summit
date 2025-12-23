@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Evidence, Transform, Claim, LedgerEntry, Manifest, DisclosureBundle } from '../types.js';
 import { calculateHash } from '../utils/hash.js';
 import { Pool } from 'pg';

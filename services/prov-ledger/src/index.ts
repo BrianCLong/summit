@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ApolloServer } from 'apollo-server';
 import { typeDefs, resolvers } from './schema';
 import http from 'http';

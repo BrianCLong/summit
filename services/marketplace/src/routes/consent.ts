@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Router } from 'express';
 import { consentService } from '../services/consentService.js';
 import type { AuthenticatedRequest } from '../middleware/auth.js';

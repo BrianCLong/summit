@@ -7,7 +7,7 @@
 import { EventEmitter } from 'events';
 import { Router, Route } from './routing/router.js';
 import { LoadBalancer, LoadBalancingStrategy } from './routing/load-balancer.js';
-import { CircuitBreaker } from './routing/circuit-breaker.js';
+import { CircuitBreaker, CircuitStats } from './routing/circuit-breaker.js';
 import { createLogger } from './utils/logger.js';
 import type { IncomingMessage, ServerResponse } from 'http';
 
@@ -192,8 +192,11 @@ export class APIGateway extends EventEmitter {
     return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  // @ts-ignore - TS4053: CircuitStats type cannot be named
-  getMetrics() {
+  getMetrics(): {
+    routes: number;
+    circuitBreakerStatus: { [url: string]: CircuitStats } | CircuitStats | null;
+    loadBalancerStats: ReturnType<LoadBalancer['getStats']>;
+  } {
     return {
       routes: this.router.getRoutes().length,
       circuitBreakerStatus: this.circuitBreaker.getStatus(),

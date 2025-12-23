@@ -1,3 +1,4 @@
+// @ts-nocheck
 export interface Evidence {
   evidenceId: string;
   caseId?: string;

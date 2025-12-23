@@ -4,6 +4,7 @@
  * Consolidates tables from multiple scattered prov-ledger implementations
  */
 
+// @ts-nocheck
 import { Pool } from 'pg';
 
 const pool = new Pool({

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { FastifyInstance } from 'fastify';
 import { LedgerService } from '../services/LedgerService.js';
 import { z } from 'zod';

@@ -15,11 +15,15 @@ export { ShapefileParser } from './parsers/shapefile-parser.js';
 // Processing - GDAL, Fusion, Change Detection, Caching
 export * from './processing/index.js';
 
-// Neo4j Integration (explicitly export to avoid naming conflicts)
+// Services
+export { GeoTemporalService } from './services/GeoTemporalService.js';
+
 export {
   GeoRepository,
   createGeoRepository,
 } from './neo4j/geo-repository.js';
+
+export { Neo4jGeoGraphRepository } from './repository/GeoGraphRepository.js';
 export type {
   Neo4jConfig,
   SpatialQueryOptions as Neo4jSpatialQueryOptions,
