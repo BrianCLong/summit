@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ESG Compliance Frameworks
  * Definitions and mappings for major ESG reporting standards

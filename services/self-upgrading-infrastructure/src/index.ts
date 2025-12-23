@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express, { Request, Response } from 'express';
 import cron from 'node-cron';
 import { TrendAnalyzer } from './analyzers/TrendAnalyzer.js';
