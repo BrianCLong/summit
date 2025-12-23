@@ -5,7 +5,7 @@ const config: Config = {
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
   setupFilesAfterEnv: [
-    '<rootDir>/tests/setup/jest.setup.js',
+    '<rootDir>/tests/setup/jest.setup.ts',
     'jest-extended/all',
   ],
   testMatch: [
@@ -30,7 +30,7 @@ const config: Config = {
       'ts-jest',
       {
         useESM: true,
-        tsconfig: 'tsconfig.json',
+        tsconfig: 'tsconfig.test.json',
       },
     ],
   },

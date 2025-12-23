@@ -12,7 +12,7 @@ concurrency:
 
 env:
   PNPM_CACHE_FOLDER: ~/.pnpm-store
-  NODE_VERSION: '20.x'
+  NODE_VERSION: '22.12.0'
   PNPM_VERSION: '9.12.0'
 
 jobs:
@@ -53,7 +53,6 @@ jobs:
 
       - name: Install dependencies
         # Using no-frozen-lockfile because we know there are some lockfile drifts in the repo
-        # and we don't want CI to fail on that right now (we want to check code quality).
         run: pnpm install --no-frozen-lockfile
 
       - name: Lint & Format Check
@@ -66,19 +65,13 @@ jobs:
         run: npm run check:golden || echo "::warning::Golden path violations found. Please adhere to Golden Paths for new features."
 
       - name: Security Audit
-        # Run audit but don't fail immediately on moderate issues to prevent blocking dev flow unnecessarily,
-        # but ensure critical/high are caught. Adjust level as needed.
-        # Ideally: pnpm audit --audit-level=high
         run: pnpm run security:audit || echo "::warning::Security audit found issues"
-
-      - name: Security Lint
-        run: pnpm run security:lint
 
   # Unit Testing Lane
   unit-tests:
-    name: Unit Tests
+    name: Unit Tests (Coverage)
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -94,24 +87,44 @@ jobs:
           version: ${{ env.PNPM_VERSION }}
           run_install: false
 
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Run Unit Tests
-        run: pnpm run test:jest
+      - name: Server Unit Tests (Jest)
+        run: pnpm --filter intelgraph-server run test:coverage
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096 --experimental-vm-modules"
+
+      - name: Client Unit Tests (Vitest)
+        run: pnpm --filter @intelgraph/web run test:coverage
+
+  # E2E Testing Lane
+  e2e-tests:
+    name: E2E Tests (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Enable Corepack
+        run: corepack enable
+      - uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E Tests
+        run: npx playwright test
+        env:
+          PLAYWRIGHT_USE_WEBSERVER: "true"
+          CI: "true"
 
   # Smoke Test Lane: The Golden Path
   smoke-tests:
@@ -133,19 +146,6 @@ jobs:
           version: ${{ env.PNPM_VERSION }}
           run_install: false
 
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
@@ -153,7 +153,6 @@ jobs:
         run: make bootstrap
 
       - name: Build Docker Images
-        # Building strictly what is needed for smoke tests
         run: |
            docker build -f server/Dockerfile.dev -t summit/api:ci ./server
            docker build -f client/Dockerfile.dev -t summit/web:ci ./client

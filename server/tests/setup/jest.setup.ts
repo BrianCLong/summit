@@ -3,6 +3,7 @@
  * Provides common test utilities and matchers
  */
 
+import { jest, beforeAll, afterAll, afterEach } from '@jest/globals';
 import 'jest-extended';
 
 // Mock ioredis globally - using a simple mock implementation since module resolution fails
