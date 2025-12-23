@@ -7,7 +7,7 @@ import { EventEmitter } from 'events';
 import { v4 as uuidv4 } from 'uuid';
 import axios, { AxiosRequestConfig } from 'axios';
 import * as cheerio from 'cheerio';
-import cron from 'node-cron';
+import cron, { ScheduledTask } from 'node-cron';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -68,7 +68,7 @@ export interface RPATaskConfig {
   cc?: string[];
   bcc?: string[];
   subject?: string;
-  body?: string;
+  emailBody?: string;
   attachments?: string[];
 
   // Data transformation config
@@ -123,7 +123,7 @@ export interface ScrapedData {
 export class RPAEngine extends EventEmitter {
   private tasks = new Map<string, RPATask>();
   private executions = new Map<string, RPAExecution>();
-  private scheduledJobs = new Map<string, cron.ScheduledTask>();
+  private scheduledJobs = new Map<string, ScheduledTask>();
   private runningExecutions = new Set<string>();
 
   constructor(private maxConcurrent: number = 10) {
