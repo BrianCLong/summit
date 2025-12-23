@@ -1,4 +1,4 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { Router, Request, Response, NextFunction, type Router as ExpressRouter } from 'express';
 import { approvalService } from '../services/approval-service.js';
 import {
   CreateApprovalRequestSchema,
@@ -11,7 +11,7 @@ import {
 import { logger } from '../utils/logger.js';
 import { ZodError } from 'zod';
 
-const router = Router();
+const router: ExpressRouter = Router();
 const log = logger.child({ component: 'approvals-routes' });
 
 // ============================================================================

@@ -38,7 +38,7 @@ const EntityFacetSchema = z.object({
     propertyID: z.string(),
     value: z.string(),
   })).optional(),
-  additionalProperties: z.record(z.any()).optional(),
+  additionalProperties: z.record(z.string(), z.any()).optional(),
 });
 
 const CreateEntitySchema = z.object({
