@@ -9,7 +9,9 @@ export type {
   PluginEventBus,
   PluginPermission,
   PluginState,
-} from '@summit/plugin-system';
+} from '@intelgraph/plugin-system';
+
+export { PluginManifestSchema } from '@intelgraph/plugin-system';
 
 // SDK utilities
 export { PluginBuilder, createPlugin } from './PluginBuilder.js';

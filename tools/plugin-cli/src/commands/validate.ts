@@ -2,7 +2,8 @@ import fs from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk';
 import ora from 'ora';
-import { PluginManifestSchema } from '@summit/plugin-sdk';
+import { PluginManifestSchema } from '@intelgraph/plugin-sdk';
+import { ZodIssue } from 'zod';
 
 export async function validatePlugin(): Promise<void> {
   const spinner = ora('Validating plugin...').start();
@@ -23,7 +24,7 @@ export async function validatePlugin(): Promise<void> {
     if (!result.success) {
       spinner.fail(chalk.red('Invalid plugin manifest'));
       console.log('\nValidation errors:');
-      result.error.issues.forEach(issue => {
+      result.error.issues.forEach((issue: ZodIssue) => {
         console.log(chalk.red(`  - ${issue.path.join('.')}: ${issue.message}`));
       });
       return;
