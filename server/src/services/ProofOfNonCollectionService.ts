@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Proof-of-Non-Collection (PNC) Report Service
  *

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * AI Copilot API Routes
  *

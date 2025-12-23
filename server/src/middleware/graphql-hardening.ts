@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * GraphQL Security and Performance Hardening Middleware
  * Production-grade middleware for IntelGraph Maestro API

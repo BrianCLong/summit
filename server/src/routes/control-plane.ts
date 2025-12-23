@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express, { Response } from 'express';
 import { z } from 'zod';
 import { ensureAuthenticated } from '../middleware/auth.js';

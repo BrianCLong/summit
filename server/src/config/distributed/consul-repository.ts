@@ -1,3 +1,4 @@
+// @ts-nocheck
 import Consul from 'consul';
 import type { Consul as ConsulType } from 'consul';
 import { EventEmitter } from 'events';

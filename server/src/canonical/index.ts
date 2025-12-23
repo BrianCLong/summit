@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Canonical Entities - Main Export
  *

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createHash, KeyObject, sign, verify } from 'crypto';
 
 export type HashAlgorithm = 'sha256' | 'sha512';

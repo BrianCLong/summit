@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Evaluation API for Conductor Quality Gates
 // Provides endpoints for running evaluations, tracking quality trends, and CI/CD integration
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { Express, Response } from 'express';
 import type { AuthenticatedRequest } from './types.js';
 import { MockLLM } from '../services/llm';

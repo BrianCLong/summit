@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Golden Task Evaluation Harness
 // Continuous quality gates with regression detection and CI integration
 

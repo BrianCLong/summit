@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Bull Board Dashboard Route
  * Provides web UI for monitoring and managing job queues

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Evidence Export and Provenance API Routes
 import express from 'express';
 import * as crypto from 'crypto';

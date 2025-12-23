@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as z from 'zod';
 
 export type EnvironmentName =

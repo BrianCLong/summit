@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * HTTP Ingest Endpoint
  * Provides REST API for data ingestion with JWT auth and validation

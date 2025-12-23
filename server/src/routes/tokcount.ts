@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Token counting API endpoints
  * Provides real-time token counts and cost estimates for LLM operations

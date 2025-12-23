@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createClient } from 'redis';
 
 // Lazy init

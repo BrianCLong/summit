@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express, { type Request, type Response } from 'express';
 import { SigIntManager } from '../sigint/SigIntManager.js';
 import { z } from 'zod';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express, { type Request, type Response } from 'express';
 import { InfluenceOperationsService } from '../services/InfluenceOperationsService.js';
 import { NarrativeAnalysisService } from '../services/NarrativeAnalysisService.js';

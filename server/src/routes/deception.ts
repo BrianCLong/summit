@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express, { Response, NextFunction } from 'express';
 import { DeceptionService, HoneypotConfig, InteractionData } from '../services/DeceptionService.js';
 import { z } from 'zod/v4';

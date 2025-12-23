@@ -97,7 +97,7 @@ export interface AnomalyScore {
   zScore?: number;
   iqrScore?: number;
   isolationScore?: number;
-  method: 'zscore' | 'iqr' | 'isolation_forest' | 'autoencoder' | 'ensemble';
+  method: 'zscore' | 'iqr' | 'isolation_forest' | 'autoencoder' | 'ensemble' | 'behavioral' | 'statistical' | 'time_series';
   features: Record<string, number>;
   explanation?: string;
 }

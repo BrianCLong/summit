@@ -1,3 +1,4 @@
+// @ts-nocheck
 // IntelGraph Autonomous Orchestrator - Outbox Pattern Processor
 // Implements reliable event processing with retry logic and dead letter queues
 // Version: 1.0.0

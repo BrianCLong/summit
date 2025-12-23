@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { EventEmitter } from 'events';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';

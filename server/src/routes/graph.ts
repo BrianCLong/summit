@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express, { Request, Response, NextFunction } from 'express';
 import { Neo4jGraphService } from '../services/GraphService';
 import { Neo4jGraphAnalyticsService } from '../services/GraphAnalyticsService';

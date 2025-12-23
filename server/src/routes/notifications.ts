@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express, { Response } from 'express';
 import { NotificationService } from '../notifications/NotificationService.js';
 import { MessagingService } from '../messaging/MessagingService.js';

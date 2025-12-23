@@ -408,7 +408,7 @@ importers:
         version: 5.4.21(@types/node@25.0.3)(lightningcss@1.30.2)(terser@5.44.1)
       vitest:
         specifier: ^2.1.5
-        version: 2.1.9(@types/node@25.0.3)(happy-dom@15.11.7)(jsdom@26.1.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(terser@5.44.1)
+        version: 2.1.9(@types/node@25.0.3)(happy-dom@20.0.11)(jsdom@26.1.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(terser@5.44.1)
 
   apps/compliance-console:
     dependencies:
@@ -444,8 +444,8 @@ importers:
         specifier: ^4.3.3
         version: 4.7.0(vite@5.4.21(@types/node@25.0.3)(lightningcss@1.30.2)(terser@5.44.1))
       happy-dom:
-        specifier: ^15.11.3
-        version: 15.11.7
+        specifier: ^20.0.2
+        version: 20.0.11
       typescript:
         specifier: ^5.6.3
         version: 5.9.3
@@ -454,7 +454,7 @@ importers:
         version: 5.4.21(@types/node@25.0.3)(lightningcss@1.30.2)(terser@5.44.1)
       vitest:
         specifier: ^1.6.0
-        version: 1.6.1(@types/node@25.0.3)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@25.0.3)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   apps/desktop-electron:
     dependencies:
@@ -606,7 +606,7 @@ importers:
         version: 0.19.8(vite@7.2.6(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(workbox-build@7.4.0(@types/babel__core@7.20.5))(workbox-window@7.4.0)
       vitest:
         specifier: ^4.0.3
-        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@25.0.3)(happy-dom@15.11.7)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@25.0.3)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   apps/gateway:
     dependencies:
@@ -660,8 +660,8 @@ importers:
         specifier: ^5.6.3
         version: 5.9.3
       vitest:
-        specifier: ^2.1.3
-        version: 2.1.9(@types/node@25.0.3)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(terser@5.44.1)
+        specifier: ^4.0.16
+        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@25.0.3)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   apps/graph-analytics:
     dependencies:
@@ -943,7 +943,7 @@ importers:
         version: 5.4.21(@types/node@20.19.25)(lightningcss@1.30.2)(terser@5.44.1)
       vitest:
         specifier: ^1.3.1
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@24.1.3(canvas@2.11.2(encoding@0.1.13)))(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@24.1.3(canvas@2.11.2(encoding@0.1.13)))(lightningcss@1.30.2)(terser@5.44.1)
 
   apps/ml-engine:
     dependencies:
@@ -2089,7 +2089,7 @@ importers:
         version: 6.4.1(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.9(@types/node@25.0.3)(happy-dom@15.11.7)(jsdom@26.1.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(terser@5.44.1)
+        version: 2.1.9(@types/node@25.0.3)(happy-dom@20.0.11)(jsdom@26.1.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(terser@5.44.1)
 
   apps/ui: {}
 
@@ -2320,7 +2320,7 @@ importers:
         version: 5.1.1(vite@7.2.6(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       '@vitest/coverage-v8':
         specifier: 4.0.16
-        version: 4.0.16(vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.1)(happy-dom@15.11.7)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
+        version: 4.0.16(vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.1)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       autoprefixer:
         specifier: 10.4.22
         version: 10.4.22(postcss@8.5.6)
@@ -2377,10 +2377,10 @@ importers:
         version: 7.2.6(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: 4.0.16
-        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.1)(happy-dom@15.11.7)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.1)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest-axe:
         specifier: 0.1.0
-        version: 0.1.0(vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.1)(happy-dom@15.11.7)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
+        version: 0.1.0(vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.1)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
 
   apps/webapp:
     dependencies:
@@ -2872,7 +2872,7 @@ importers:
         version: 1.3.2(@babel/core@7.28.5)(vite@7.2.6(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       vitest:
         specifier: 4.0.16
-        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.1)(happy-dom@15.11.7)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.1)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   libs/audit/node:
     dependencies:
@@ -3049,7 +3049,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.3.1
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   packages/adc:
     devDependencies:
@@ -3192,7 +3192,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   packages/anomaly-detection:
     dependencies:
@@ -3635,7 +3635,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   packages/authz-core:
     dependencies:
@@ -3692,7 +3692,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@25.0.3)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@25.0.3)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   packages/battle-types:
     devDependencies:
@@ -3916,7 +3916,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.6.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   packages/cache-core:
     dependencies:
@@ -3935,7 +3935,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^2.1.8
-        version: 2.1.9(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.25)(typescript@5.9.3))(terser@5.44.1)
+        version: 2.1.9(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.25)(typescript@5.9.3))(terser@5.44.1)
 
   packages/canary-lattice:
     devDependencies:
@@ -3963,7 +3963,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   packages/canonical-schema:
     devDependencies:
@@ -4470,7 +4470,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   packages/connectors:
     dependencies:
@@ -4516,7 +4516,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.9
-        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.1)(happy-dom@15.11.7)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.1)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/content-verification:
     dependencies:
@@ -4987,7 +4987,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.6.0
-        version: 1.6.1(@types/node@25.0.3)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@25.0.3)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   packages/deception-detector:
     dependencies:
@@ -5044,7 +5044,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   packages/decision-support:
     dependencies:
@@ -5371,7 +5371,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^2.1.4
-        version: 2.1.9(@types/node@24.10.1)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)
+        version: 2.1.9(@types/node@24.10.1)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)
 
   packages/drug-intelligence:
     dependencies:
@@ -5527,7 +5527,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   packages/emerging-threats:
     devDependencies:
@@ -5944,7 +5944,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^2.1.1
-        version: 2.1.9(@types/node@20.19.27)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(terser@5.44.1)
+        version: 2.1.9(@types/node@20.19.27)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(terser@5.44.1)
 
   packages/extremism-monitor:
     dependencies:
@@ -6153,7 +6153,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.4
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   packages/financial-crime:
     dependencies:
@@ -6518,7 +6518,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   packages/graph-ai-core:
     devDependencies:
@@ -6540,7 +6540,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@24.10.1)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@24.10.1)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)
 
   packages/graph-analytics:
     devDependencies:
@@ -6576,7 +6576,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@24.10.1)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@24.10.1)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)
 
   packages/graph-query:
     dependencies:
@@ -6839,7 +6839,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.3
-        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@22.19.1)(happy-dom@15.11.7)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@22.19.1)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/identity-resolution:
     dependencies:
@@ -6948,7 +6948,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@20.19.27)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.27)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   packages/ingest-wizard:
     dependencies:
@@ -7248,7 +7248,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@24.10.1)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@24.10.1)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)
 
   packages/liquid-nano:
     devDependencies:
@@ -7608,7 +7608,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   packages/mdm-analytics:
     dependencies:
@@ -7768,7 +7768,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@25.0.3)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@25.0.3)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   packages/mesh-sdk:
     devDependencies:
@@ -7777,7 +7777,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@25.0.3)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@25.0.3)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   packages/message-queue-enhanced:
     dependencies:
@@ -7911,7 +7911,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^2.1.4
-        version: 2.1.9(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.25)(typescript@5.9.3))(terser@5.44.1)
+        version: 2.1.9(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.25)(typescript@5.9.3))(terser@5.44.1)
 
   packages/migration-orchestrator: {}
 
@@ -8022,7 +8022,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.1.3
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   packages/model-explainability:
     dependencies:
@@ -8529,7 +8529,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   packages/ocr:
     dependencies:
@@ -8781,7 +8781,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.6.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   packages/platform-benchmarks:
     dependencies:
@@ -8815,7 +8815,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.2.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   packages/platform-cache:
     dependencies:
@@ -8840,7 +8840,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.2.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   packages/platform-data:
     dependencies:
@@ -8868,7 +8868,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.2.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   packages/platform-governance:
     dependencies:
@@ -8887,7 +8887,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.2.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   packages/platform-telemetry:
     dependencies:
@@ -8954,7 +8954,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.2.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   packages/plugin-host:
     dependencies:
@@ -9322,7 +9322,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   packages/prov-ledger-sdk:
     dependencies:
@@ -9466,7 +9466,7 @@ importers:
         version: 5.4.21(@types/node@25.0.3)(lightningcss@1.30.2)(terser@5.44.1)
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@25.0.3)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@25.0.3)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   packages/purple-team:
     dependencies:
@@ -9516,7 +9516,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.6.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   packages/quantum-ml:
     dependencies:
@@ -9792,7 +9792,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@24.10.1)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@24.10.1)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)
 
   packages/rest-api:
     dependencies:
@@ -10022,7 +10022,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.3
-        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.1)(happy-dom@15.11.7)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.1)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/security-defense:
     dependencies:
@@ -10044,7 +10044,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.6.0
-        version: 1.6.1(@types/node@20.19.27)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.27)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   packages/semantic-analysis:
     dependencies:
@@ -10154,7 +10154,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@25.0.3)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@25.0.3)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   packages/sigint-processor:
     dependencies:
@@ -10268,7 +10268,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.6.0
-        version: 1.6.1(@types/node@25.0.3)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@25.0.3)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   packages/smart-contracts:
     dependencies:
@@ -10820,7 +10820,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.3
-        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.1)(happy-dom@15.11.7)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.1)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/technical-analysis:
     dependencies:
@@ -12072,7 +12072,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/agent-execution-platform:
     dependencies:
@@ -12501,7 +12501,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/ai-nlq:
     dependencies:
@@ -12517,7 +12517,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.6.0
-        version: 1.6.1(@types/node@25.0.3)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@25.0.3)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/ai-sandbox:
     dependencies:
@@ -12597,7 +12597,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.4
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/ai-service-platform:
     dependencies:
@@ -12652,7 +12652,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.2.2
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/alert-engine:
     dependencies:
@@ -12845,7 +12845,7 @@ importers:
         version: 10.0.0
       '@vitest/coverage-v8':
         specifier: ^3.2.3
-        version: 3.2.4(vitest@3.2.4(@types/debug@4.1.12)(@types/node@22.19.1)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.1)(typescript@5.9.3))(terser@5.44.1))
+        version: 3.2.4(vitest@3.2.4(@types/debug@4.1.12)(@types/node@22.19.1)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.1)(typescript@5.9.3))(terser@5.44.1))
       supertest:
         specifier: ^7.1.0
         version: 7.1.4
@@ -12857,7 +12857,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^3.2.3
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.19.1)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.1)(typescript@5.9.3))(terser@5.44.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.19.1)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.1)(typescript@5.9.3))(terser@5.44.1)
 
   services/audio-service:
     dependencies:
@@ -13643,7 +13643,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.2.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/citizen-ai:
     dependencies:
@@ -13711,7 +13711,7 @@ importers:
         version: 9.0.8
       '@vitest/coverage-v8':
         specifier: ^1.0.4
-        version: 1.6.1(vitest@1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1))
+        version: 1.6.1(vitest@1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1))
       supertest:
         specifier: ^6.3.3
         version: 6.3.4
@@ -13723,7 +13723,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.4
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/cloud-orchestrator:
     dependencies:
@@ -13890,7 +13890,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.1.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/config-service:
     dependencies:
@@ -14039,7 +14039,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/copilot:
     dependencies:
@@ -14419,7 +14419,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/data-factory-service:
     dependencies:
@@ -14535,7 +14535,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.6.0
-        version: 1.6.1(@types/node@25.0.3)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@25.0.3)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/data-monetization-engine:
     dependencies:
@@ -14651,7 +14651,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.6.0
-        version: 1.6.1(@types/node@25.0.3)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@25.0.3)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/data-spine: {}
 
@@ -14684,7 +14684,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/deception-detection-service:
     dependencies:
@@ -14785,7 +14785,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/dialectic-agents:
     dependencies:
@@ -14951,7 +14951,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.6.0
-        version: 1.6.1(@types/node@25.0.3)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@25.0.3)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/dl-training-service:
     dependencies:
@@ -15187,7 +15187,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/enrichment-service:
     dependencies:
@@ -15691,7 +15691,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.1.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/federation-service:
     dependencies:
@@ -15889,7 +15889,7 @@ importers:
         version: 9.0.8
       '@vitest/coverage-v8':
         specifier: ^1.0.4
-        version: 1.6.1(vitest@1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1))
+        version: 1.6.1(vitest@1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1))
       eslint:
         specifier: ^8.56.0
         version: 8.57.1
@@ -15901,7 +15901,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.4
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/foreign-intel-service:
     dependencies:
@@ -16112,7 +16112,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/geotemporal-api:
     dependencies:
@@ -16311,7 +16311,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/govtech-export-engine:
     dependencies:
@@ -16633,7 +16633,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.1.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/humint-service:
     dependencies:
@@ -16756,13 +16756,13 @@ importers:
         version: 22.19.1
       '@vitest/coverage-v8':
         specifier: ^4.0.3
-        version: 4.0.16(vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@22.19.1)(happy-dom@15.11.7)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
+        version: 4.0.16(vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@22.19.1)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
       vitest:
         specifier: ^4.0.3
-        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@22.19.1)(happy-dom@15.11.7)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@22.19.1)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   services/identity-fusion:
     dependencies:
@@ -16812,7 +16812,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.6.0
-        version: 1.6.1(@types/node@25.0.3)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@25.0.3)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/ingest-adapters:
     dependencies:
@@ -16964,7 +16964,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@20.19.27)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.27)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/innovation-sandbox:
     dependencies:
@@ -16998,7 +16998,7 @@ importers:
         version: 9.0.8
       '@vitest/coverage-v8':
         specifier: ^1.0.0
-        version: 1.6.1(vitest@1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1))
+        version: 1.6.1(vitest@1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1))
       tsx:
         specifier: ^4.6.0
         version: 4.21.0
@@ -17007,7 +17007,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/intel:
     dependencies:
@@ -17420,7 +17420,7 @@ importers:
         version: 9.0.8
       '@vitest/coverage-v8':
         specifier: ^1.0.4
-        version: 1.6.1(vitest@1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1))
+        version: 1.6.1(vitest@1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1))
       eslint:
         specifier: ^8.56.0
         version: 8.57.1
@@ -17432,7 +17432,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.4
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/mdm-service:
     dependencies:
@@ -17953,7 +17953,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.16
-        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@22.19.1)(happy-dom@15.11.7)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@22.19.1)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   services/nlp-service:
     dependencies:
@@ -18424,7 +18424,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.6.0
-        version: 1.6.1(@types/node@25.0.3)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@25.0.3)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/policy-engine:
     dependencies:
@@ -18606,7 +18606,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.6.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/privacy:
     dependencies:
@@ -19061,7 +19061,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/report-assembly:
     dependencies:
@@ -19145,8 +19145,8 @@ importers:
         specifier: ^1.17.1
         version: 1.17.1
       playwright:
-        specifier: 1.41.1
-        version: 1.41.1
+        specifier: 1.55.1
+        version: 1.55.1
       prom-client:
         specifier: ^15.1.0
         version: 15.1.3
@@ -19226,7 +19226,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.4
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/risk-assessment-service:
     dependencies:
@@ -19340,7 +19340,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.4
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/sandbox-gateway:
     dependencies:
@@ -19434,7 +19434,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/sandbox-tenant-profile:
     dependencies:
@@ -19462,7 +19462,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/scenario-engine-service:
     dependencies:
@@ -19493,7 +19493,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.4
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/scenario-registry:
     dependencies:
@@ -19635,7 +19635,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^2.1.3
-        version: 2.1.9(@types/node@22.19.1)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.1)(typescript@5.9.3))(terser@5.44.1)
+        version: 2.1.9(@types/node@22.19.1)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.1)(typescript@5.9.3))(terser@5.44.1)
 
   services/secure-elections:
     dependencies:
@@ -19660,7 +19660,7 @@ importers:
         version: 20.19.25
       '@vitest/coverage-v8':
         specifier: ^1.0.4
-        version: 1.6.1(vitest@1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1))
+        version: 1.6.1(vitest@1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1))
       tsx:
         specifier: ^4.6.2
         version: 4.21.0
@@ -19669,7 +19669,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.4
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/self-upgrading-infrastructure:
     dependencies:
@@ -19786,7 +19786,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/signal-bus-service:
     dependencies:
@@ -19957,7 +19957,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.3
-        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.1)(happy-dom@15.11.7)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.1)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   services/sparql-endpoint:
     dependencies:
@@ -20067,7 +20067,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/strategic-foresight: {}
 
@@ -20185,7 +20185,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.3.1
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/supply-chain-service:
     dependencies:
@@ -20614,7 +20614,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.3
-        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.1)(happy-dom@15.11.7)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.1)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   services/unified-audit:
     dependencies:
@@ -20651,7 +20651,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.1.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/universal-ingestion:
     dependencies:
@@ -20965,7 +20965,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.6.0
-        version: 1.6.1(@types/node@25.0.3)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@25.0.3)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   tools/admin-cli:
     dependencies:
@@ -21169,7 +21169,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.2.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   tools/prompt-system:
     dependencies:
@@ -21398,7 +21398,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.5.3
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   tools/summitctl:
     dependencies:
@@ -21472,7 +21472,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.6.0
-        version: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+        version: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
 
 packages:
 
@@ -34021,6 +34021,9 @@ packages:
   '@types/webxr@0.5.24':
     resolution: {integrity: sha512-h8fgEd/DpoS9CBrjEQXR+dIDraopAEfu4wYVNY2tEPwk60stPWhvZMf4Foo5FakuQ7HFZoa8WceaWFervK2Ovg==}
 
+  '@types/whatwg-mimetype@3.0.2':
+    resolution: {integrity: sha512-c2AKvDT8ToxLIOUlN51gTiHXflsfIFisS4pO7pDPoKouJCESkhZnEy623gwP9laCy5lnLDAw1vAzu2vM2YLOrA==}
+
   '@types/whatwg-url@11.0.5':
     resolution: {integrity: sha512-coYR071JRaHa+xoEvvYqvnIHaVqaYrLPbsufM9BF63HkwI5Lgmy2QR8Q5K/lYDYo5AK82wOvSOS0UsLTpTG7uQ==}
 
@@ -40335,9 +40338,9 @@ packages:
     engines: {node: '>=0.4.7'}
     hasBin: true
 
-  happy-dom@15.11.7:
-    resolution: {integrity: sha512-KyrFvnl+J9US63TEzwoiJOQzZBJY7KgBushJA8X61DMbNsH+2ONkDuLDnCnwUiPTF42tLoEmrPyoqbenVA5zrg==}
-    engines: {node: '>=18.0.0'}
+  happy-dom@20.0.11:
+    resolution: {integrity: sha512-QsCdAUHAmiDeKeaNojb1OHOPF7NjcWPBR7obdu3NwH2a/oyQaLg5d0aaCy/9My6CdPChYF07dvz5chaXBGaD4g==}
+    engines: {node: '>=20.0.0'}
 
   har-schema@2.0.0:
     resolution: {integrity: sha512-Oqluz6zhGX8cyRaTQlFMPw80bSJVG2x/cFb8ZPhUILGgHka9SsokCCOQgpveePerqidZOrT14ipqfJb7ILcW5Q==}
@@ -45358,9 +45361,9 @@ packages:
   platform@1.3.6:
     resolution: {integrity: sha512-fnWVljUchTro6RiCFvCXBbNhJc2NijN7oIQxbwsyL0buWJPG85v81ehlHI9fXrJsMNgTofEoWIQeClKpgxFLrg==}
 
-  playwright-core@1.41.1:
-    resolution: {integrity: sha512-/KPO5DzXSMlxSX77wy+HihKGOunh3hqndhqeo/nMxfigiKzogn8kfL0ZBDu0L1RKgan5XHCPmn6zXd2NUJgjhg==}
-    engines: {node: '>=16'}
+  playwright-core@1.55.1:
+    resolution: {integrity: sha512-Z6Mh9mkwX+zxSlHqdr5AOcJnfp+xUWLCt9uKV18fhzA8eyxUd8NUWzAjxUh55RZKSYwDGX0cfaySdhZJGMoJ+w==}
+    engines: {node: '>=18'}
     hasBin: true
 
   playwright-core@1.57.0:
@@ -45380,9 +45383,9 @@ packages:
       playwright-core:
         optional: true
 
-  playwright@1.41.1:
-    resolution: {integrity: sha512-gdZAWG97oUnbBdRL3GuBvX3nDDmUOuqzV/D24dytqlKt+eI5KbwusluZRGljx1YoJKZ2NRPaeWiFTeGZO7SosQ==}
-    engines: {node: '>=16'}
+  playwright@1.55.1:
+    resolution: {integrity: sha512-cJW4Xd/G3v5ovXtJJ52MAOclqeac9S/aGGgRzLabuF8TnIb6xHvMzKIa6JmrRzUkeXJgfL1MhukP0NK6l39h3A==}
+    engines: {node: '>=18'}
     hasBin: true
 
   playwright@1.57.0:
@@ -59240,7 +59243,7 @@ snapshots:
   '@jest/console@29.7.0':
     dependencies:
       '@jest/types': 29.6.3
-      '@types/node': 25.0.3
+      '@types/node': 20.19.27
       chalk: 4.1.2
       jest-message-util: 29.7.0
       jest-util: 29.7.0
@@ -59634,7 +59637,7 @@ snapshots:
     dependencies:
       '@jest/fake-timers': 29.7.0
       '@jest/types': 29.6.3
-      '@types/node': 25.0.3
+      '@types/node': 20.19.27
       jest-mock: 29.7.0
 
   '@jest/environment@30.2.0':
@@ -59670,7 +59673,7 @@ snapshots:
     dependencies:
       '@jest/types': 29.6.3
       '@sinonjs/fake-timers': 10.3.0
-      '@types/node': 25.0.3
+      '@types/node': 20.19.27
       jest-message-util: 29.7.0
       jest-mock: 29.7.0
       jest-util: 29.7.0
@@ -59717,7 +59720,7 @@ snapshots:
       '@jest/transform': 29.7.0
       '@jest/types': 29.6.3
       '@jridgewell/trace-mapping': 0.3.31
-      '@types/node': 25.0.3
+      '@types/node': 20.19.27
       chalk: 4.1.2
       collect-v8-coverage: 1.0.3
       exit: 0.1.2
@@ -71126,7 +71129,7 @@ snapshots:
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 25.0.3
+      '@types/node': 20.19.27
 
   '@types/content-disposition@0.5.9': {}
 
@@ -72007,7 +72010,7 @@ snapshots:
 
   '@types/send@1.2.1':
     dependencies:
-      '@types/node': 25.0.3
+      '@types/node': 20.19.27
 
   '@types/serve-static@1.15.10':
     dependencies:
@@ -72131,6 +72134,8 @@ snapshots:
   '@types/webrtc@0.0.37': {}
 
   '@types/webxr@0.5.24': {}
+
+  '@types/whatwg-mimetype@3.0.2': {}
 
   '@types/whatwg-url@11.0.5':
     dependencies:
@@ -73239,7 +73244,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/coverage-v8@1.6.1(vitest@1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1))':
+  '@vitest/coverage-v8@1.6.1(vitest@1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1))':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 0.2.3
@@ -73254,11 +73259,11 @@ snapshots:
       std-env: 3.10.0
       strip-literal: 2.1.1
       test-exclude: 6.0.0
-      vitest: 1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
+      vitest: 1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1)
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/coverage-v8@3.2.4(vitest@3.2.4(@types/debug@4.1.12)(@types/node@22.19.1)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.1)(typescript@5.9.3))(terser@5.44.1))':
+  '@vitest/coverage-v8@3.2.4(vitest@3.2.4(@types/debug@4.1.12)(@types/node@22.19.1)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.1)(typescript@5.9.3))(terser@5.44.1))':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 1.0.2
@@ -73273,11 +73278,11 @@ snapshots:
       std-env: 3.10.0
       test-exclude: 7.0.1
       tinyrainbow: 2.0.0
-      vitest: 3.2.4(@types/debug@4.1.12)(@types/node@22.19.1)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.1)(typescript@5.9.3))(terser@5.44.1)
+      vitest: 3.2.4(@types/debug@4.1.12)(@types/node@22.19.1)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.1)(typescript@5.9.3))(terser@5.44.1)
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/coverage-v8@4.0.16(vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@22.19.1)(happy-dom@15.11.7)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
+  '@vitest/coverage-v8@4.0.16(vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@22.19.1)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
     dependencies:
       '@bcoe/v8-coverage': 1.0.2
       '@vitest/utils': 4.0.16
@@ -73290,11 +73295,11 @@ snapshots:
       obug: 2.1.1
       std-env: 3.10.0
       tinyrainbow: 3.0.3
-      vitest: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@22.19.1)(happy-dom@15.11.7)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+      vitest: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@22.19.1)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/coverage-v8@4.0.16(vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.1)(happy-dom@15.11.7)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
+  '@vitest/coverage-v8@4.0.16(vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.1)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
     dependencies:
       '@bcoe/v8-coverage': 1.0.2
       '@vitest/utils': 4.0.16
@@ -73307,7 +73312,7 @@ snapshots:
       obug: 2.1.1
       std-env: 3.10.0
       tinyrainbow: 3.0.3
-      vitest: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.1)(happy-dom@15.11.7)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+      vitest: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.1)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
     transitivePeerDependencies:
       - supports-color
 
@@ -81100,10 +81105,10 @@ snapshots:
     optionalDependencies:
       uglify-js: 3.19.3
 
-  happy-dom@15.11.7:
+  happy-dom@20.0.11:
     dependencies:
-      entities: 4.5.0
-      webidl-conversions: 7.0.0
+      '@types/node': 20.19.27
+      '@types/whatwg-mimetype': 3.0.2
       whatwg-mimetype: 3.0.0
 
   har-schema@2.0.0: {}
@@ -83553,7 +83558,7 @@ snapshots:
       '@jest/environment': 29.7.0
       '@jest/fake-timers': 29.7.0
       '@jest/types': 29.6.3
-      '@types/node': 25.0.3
+      '@types/node': 20.19.27
       jest-mock: 29.7.0
       jest-util: 29.7.0
 
@@ -83587,7 +83592,7 @@ snapshots:
     dependencies:
       '@jest/types': 29.6.3
       '@types/graceful-fs': 4.1.9
-      '@types/node': 25.0.3
+      '@types/node': 20.19.27
       anymatch: 3.1.3
       fb-watchman: 2.0.2
       graceful-fs: 4.2.11
@@ -83684,7 +83689,7 @@ snapshots:
   jest-mock@29.7.0:
     dependencies:
       '@jest/types': 29.6.3
-      '@types/node': 25.0.3
+      '@types/node': 20.19.27
       jest-util: 29.7.0
 
   jest-mock@30.2.0:
@@ -83749,7 +83754,7 @@ snapshots:
       '@jest/test-result': 29.7.0
       '@jest/transform': 29.7.0
       '@jest/types': 29.6.3
-      '@types/node': 25.0.3
+      '@types/node': 20.19.27
       chalk: 4.1.2
       emittery: 0.13.1
       graceful-fs: 4.2.11
@@ -83804,7 +83809,7 @@ snapshots:
       '@jest/test-result': 29.7.0
       '@jest/transform': 29.7.0
       '@jest/types': 29.6.3
-      '@types/node': 25.0.3
+      '@types/node': 20.19.27
       chalk: 4.1.2
       cjs-module-lexer: 1.4.3
       collect-v8-coverage: 1.0.3
@@ -83907,7 +83912,7 @@ snapshots:
   jest-util@29.7.0:
     dependencies:
       '@jest/types': 29.6.3
-      '@types/node': 25.0.3
+      '@types/node': 20.19.27
       chalk: 4.1.2
       ci-info: 3.9.0
       graceful-fs: 4.2.11
@@ -83955,7 +83960,7 @@ snapshots:
     dependencies:
       '@jest/test-result': 29.7.0
       '@jest/types': 29.6.3
-      '@types/node': 25.0.3
+      '@types/node': 20.19.27
       ansi-escapes: 4.3.2
       chalk: 4.1.2
       emittery: 0.13.1
@@ -88403,7 +88408,7 @@ snapshots:
 
   platform@1.3.6: {}
 
-  playwright-core@1.41.1: {}
+  playwright-core@1.55.1: {}
 
   playwright-core@1.57.0: {}
 
@@ -88416,9 +88421,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  playwright@1.41.1:
+  playwright@1.55.1:
     dependencies:
-      playwright-core: 1.41.1
+      playwright-core: 1.55.1
     optionalDependencies:
       fsevents: 2.3.2
 
@@ -95121,7 +95126,7 @@ snapshots:
       tsx: 4.21.0
       yaml: 2.8.2
 
-  vitest-axe@0.1.0(vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.1)(happy-dom@15.11.7)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)):
+  vitest-axe@0.1.0(vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.1)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)):
     dependencies:
       aria-query: 5.3.2
       axe-core: 4.11.0
@@ -95129,9 +95134,9 @@ snapshots:
       dom-accessibility-api: 0.5.16
       lodash-es: 4.17.21
       redent: 3.0.0
-      vitest: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.1)(happy-dom@15.11.7)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+      vitest: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.1)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
-  vitest@1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@24.1.3(canvas@2.11.2(encoding@0.1.13)))(lightningcss@1.30.2)(terser@5.44.1):
+  vitest@1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@24.1.3(canvas@2.11.2(encoding@0.1.13)))(lightningcss@1.30.2)(terser@5.44.1):
     dependencies:
       '@vitest/expect': 1.6.1
       '@vitest/runner': 1.6.1
@@ -95155,7 +95160,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 20.19.25
-      happy-dom: 15.11.7
+      happy-dom: 20.0.11
       jsdom: 24.1.3(canvas@2.11.2(encoding@0.1.13))
     transitivePeerDependencies:
       - less
@@ -95167,7 +95172,7 @@ snapshots:
       - supports-color
       - terser
 
-  vitest@1.6.1(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1):
+  vitest@1.6.1(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1):
     dependencies:
       '@vitest/expect': 1.6.1
       '@vitest/runner': 1.6.1
@@ -95191,7 +95196,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 20.19.25
-      happy-dom: 15.11.7
+      happy-dom: 20.0.11
       jsdom: 27.3.0
     transitivePeerDependencies:
       - less
@@ -95203,7 +95208,7 @@ snapshots:
       - supports-color
       - terser
 
-  vitest@1.6.1(@types/node@20.19.27)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1):
+  vitest@1.6.1(@types/node@20.19.27)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1):
     dependencies:
       '@vitest/expect': 1.6.1
       '@vitest/runner': 1.6.1
@@ -95227,7 +95232,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 20.19.27
-      happy-dom: 15.11.7
+      happy-dom: 20.0.11
       jsdom: 27.3.0
     transitivePeerDependencies:
       - less
@@ -95239,7 +95244,7 @@ snapshots:
       - supports-color
       - terser
 
-  vitest@1.6.1(@types/node@25.0.3)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1):
+  vitest@1.6.1(@types/node@25.0.3)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(terser@5.44.1):
     dependencies:
       '@vitest/expect': 1.6.1
       '@vitest/runner': 1.6.1
@@ -95263,7 +95268,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 25.0.3
-      happy-dom: 15.11.7
+      happy-dom: 20.0.11
       jsdom: 27.3.0
     transitivePeerDependencies:
       - less
@@ -95275,7 +95280,7 @@ snapshots:
       - supports-color
       - terser
 
-  vitest@2.1.9(@types/node@20.19.25)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.25)(typescript@5.9.3))(terser@5.44.1):
+  vitest@2.1.9(@types/node@20.19.25)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.25)(typescript@5.9.3))(terser@5.44.1):
     dependencies:
       '@vitest/expect': 2.1.9
       '@vitest/mocker': 2.1.9(msw@2.12.4(@types/node@20.19.25)(typescript@5.9.3))(vite@5.4.21(@types/node@20.19.25)(lightningcss@1.30.2)(terser@5.44.1))
@@ -95299,7 +95304,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 20.19.25
-      happy-dom: 15.11.7
+      happy-dom: 20.0.11
       jsdom: 27.3.0
     transitivePeerDependencies:
       - less
@@ -95312,7 +95317,7 @@ snapshots:
       - supports-color
       - terser
 
-  vitest@2.1.9(@types/node@20.19.27)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(terser@5.44.1):
+  vitest@2.1.9(@types/node@20.19.27)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(terser@5.44.1):
     dependencies:
       '@vitest/expect': 2.1.9
       '@vitest/mocker': 2.1.9(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(vite@5.4.21(@types/node@20.19.27)(lightningcss@1.30.2)(terser@5.44.1))
@@ -95336,7 +95341,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 20.19.27
-      happy-dom: 15.11.7
+      happy-dom: 20.0.11
       jsdom: 27.3.0
     transitivePeerDependencies:
       - less
@@ -95349,7 +95354,7 @@ snapshots:
       - supports-color
       - terser
 
-  vitest@2.1.9(@types/node@22.19.1)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.1)(typescript@5.9.3))(terser@5.44.1):
+  vitest@2.1.9(@types/node@22.19.1)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.1)(typescript@5.9.3))(terser@5.44.1):
     dependencies:
       '@vitest/expect': 2.1.9
       '@vitest/mocker': 2.1.9(msw@2.12.4(@types/node@22.19.1)(typescript@5.9.3))(vite@5.4.21(@types/node@22.19.1)(lightningcss@1.30.2)(terser@5.44.1))
@@ -95373,7 +95378,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 22.19.1
-      happy-dom: 15.11.7
+      happy-dom: 20.0.11
       jsdom: 27.3.0
     transitivePeerDependencies:
       - less
@@ -95386,7 +95391,7 @@ snapshots:
       - supports-color
       - terser
 
-  vitest@2.1.9(@types/node@24.10.1)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1):
+  vitest@2.1.9(@types/node@24.10.1)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1):
     dependencies:
       '@vitest/expect': 2.1.9
       '@vitest/mocker': 2.1.9(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(vite@5.4.21(@types/node@24.10.1)(lightningcss@1.30.2)(terser@5.44.1))
@@ -95410,7 +95415,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 24.10.1
-      happy-dom: 15.11.7
+      happy-dom: 20.0.11
       jsdom: 27.3.0
     transitivePeerDependencies:
       - less
@@ -95423,7 +95428,7 @@ snapshots:
       - supports-color
       - terser
 
-  vitest@2.1.9(@types/node@25.0.3)(happy-dom@15.11.7)(jsdom@26.1.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(terser@5.44.1):
+  vitest@2.1.9(@types/node@25.0.3)(happy-dom@20.0.11)(jsdom@26.1.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(terser@5.44.1):
     dependencies:
       '@vitest/expect': 2.1.9
       '@vitest/mocker': 2.1.9(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(vite@5.4.21(@types/node@25.0.3)(lightningcss@1.30.2)(terser@5.44.1))
@@ -95447,7 +95452,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 25.0.3
-      happy-dom: 15.11.7
+      happy-dom: 20.0.11
       jsdom: 26.1.0
     transitivePeerDependencies:
       - less
@@ -95460,44 +95465,7 @@ snapshots:
       - supports-color
       - terser
 
-  vitest@2.1.9(@types/node@25.0.3)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(terser@5.44.1):
-    dependencies:
-      '@vitest/expect': 2.1.9
-      '@vitest/mocker': 2.1.9(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(vite@5.4.21(@types/node@25.0.3)(lightningcss@1.30.2)(terser@5.44.1))
-      '@vitest/pretty-format': 2.1.9
-      '@vitest/runner': 2.1.9
-      '@vitest/snapshot': 2.1.9
-      '@vitest/spy': 2.1.9
-      '@vitest/utils': 2.1.9
-      chai: 5.3.3
-      debug: 4.4.3(supports-color@5.5.0)
-      expect-type: 1.2.2
-      magic-string: 0.30.21
-      pathe: 1.1.2
-      std-env: 3.10.0
-      tinybench: 2.9.0
-      tinyexec: 0.3.2
-      tinypool: 1.1.1
-      tinyrainbow: 1.2.0
-      vite: 5.4.21(@types/node@25.0.3)(lightningcss@1.30.2)(terser@5.44.1)
-      vite-node: 2.1.9(@types/node@25.0.3)(lightningcss@1.30.2)(terser@5.44.1)
-      why-is-node-running: 2.3.0
-    optionalDependencies:
-      '@types/node': 25.0.3
-      happy-dom: 15.11.7
-      jsdom: 27.3.0
-    transitivePeerDependencies:
-      - less
-      - lightningcss
-      - msw
-      - sass
-      - sass-embedded
-      - stylus
-      - sugarss
-      - supports-color
-      - terser
-
-  vitest@3.2.4(@types/debug@4.1.12)(@types/node@22.19.1)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.1)(typescript@5.9.3))(terser@5.44.1):
+  vitest@3.2.4(@types/debug@4.1.12)(@types/node@22.19.1)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.1)(typescript@5.9.3))(terser@5.44.1):
     dependencies:
       '@types/chai': 5.2.3
       '@vitest/expect': 3.2.4
@@ -95525,7 +95493,7 @@ snapshots:
     optionalDependencies:
       '@types/debug': 4.1.12
       '@types/node': 22.19.1
-      happy-dom: 15.11.7
+      happy-dom: 20.0.11
       jsdom: 27.3.0
     transitivePeerDependencies:
       - less
@@ -95538,7 +95506,7 @@ snapshots:
       - supports-color
       - terser
 
-  vitest@3.2.4(@types/debug@4.1.12)(@types/node@24.10.1)(happy-dom@15.11.7)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1):
+  vitest@3.2.4(@types/debug@4.1.12)(@types/node@24.10.1)(happy-dom@20.0.11)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1):
     dependencies:
       '@types/chai': 5.2.3
       '@vitest/expect': 3.2.4
@@ -95566,7 +95534,7 @@ snapshots:
     optionalDependencies:
       '@types/debug': 4.1.12
       '@types/node': 24.10.1
-      happy-dom: 15.11.7
+      happy-dom: 20.0.11
       jsdom: 27.3.0
     transitivePeerDependencies:
       - less
@@ -95579,7 +95547,7 @@ snapshots:
       - supports-color
       - terser
 
-  vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@22.19.1)(happy-dom@15.11.7)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2):
+  vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@22.19.1)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2):
     dependencies:
       '@vitest/expect': 4.0.16
       '@vitest/mocker': 4.0.16(msw@2.12.4(@types/node@22.19.1)(typescript@5.9.3))(vite@7.2.6(@types/node@22.19.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
@@ -95604,7 +95572,7 @@ snapshots:
     optionalDependencies:
       '@opentelemetry/api': 1.9.0
       '@types/node': 22.19.1
-      happy-dom: 15.11.7
+      happy-dom: 20.0.11
       jsdom: 27.3.0
     transitivePeerDependencies:
       - jiti
@@ -95619,7 +95587,7 @@ snapshots:
       - tsx
       - yaml
 
-  vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.1)(happy-dom@15.11.7)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2):
+  vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.1)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2):
     dependencies:
       '@vitest/expect': 4.0.16
       '@vitest/mocker': 4.0.16(msw@2.12.4(@types/node@24.10.1)(typescript@5.9.3))(vite@7.2.6(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
@@ -95644,7 +95612,7 @@ snapshots:
     optionalDependencies:
       '@opentelemetry/api': 1.9.0
       '@types/node': 24.10.1
-      happy-dom: 15.11.7
+      happy-dom: 20.0.11
       jsdom: 27.3.0
     transitivePeerDependencies:
       - jiti
@@ -95659,7 +95627,7 @@ snapshots:
       - tsx
       - yaml
 
-  vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@25.0.3)(happy-dom@15.11.7)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2):
+  vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@25.0.3)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2):
     dependencies:
       '@vitest/expect': 4.0.16
       '@vitest/mocker': 4.0.16(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(vite@7.2.6(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
@@ -95684,7 +95652,7 @@ snapshots:
     optionalDependencies:
       '@opentelemetry/api': 1.9.0
       '@types/node': 25.0.3
-      happy-dom: 15.11.7
+      happy-dom: 20.0.11
       jsdom: 27.3.0
     transitivePeerDependencies:
       - jiti
