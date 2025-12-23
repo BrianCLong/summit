@@ -102,12 +102,13 @@ export class S3BucketConnector extends PullConnector {
   }
 
   protected async onInitialize(config: ConnectorConfig): Promise<void> {
-    this.s3Config = config.config as S3BucketConnectorConfig;
-
-    // Validate configuration
-    if (!this.s3Config.bucket) {
-      throw new Error('bucket is required');
+    // Validate and cast config
+    const cfg = config.config as Record<string, unknown>;
+    if (!cfg.bucket || typeof cfg.bucket !== 'string') {
+      throw new Error('bucket is required and must be a string');
     }
+
+    this.s3Config = cfg as unknown as S3BucketConnectorConfig;
 
     // If S3 client not provided, create one using AWS SDK
     if (!this.s3Client) {

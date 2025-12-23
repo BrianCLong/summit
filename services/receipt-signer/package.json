@@ -10,6 +10,7 @@
     "test": "pnpm run build && jest"
   },
   "dependencies": {
+    "@intelgraph/provenance": "workspace:*",
     "fastify": "^5.1.0",
     "pino": "^8.21.0"
   },

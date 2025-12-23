@@ -64,7 +64,7 @@ export function registerPresenceHandlers(
 
         try {
           const { status, metadata } = data;
-          const validMetadata = metadata as Record<string, unknown> | undefined;
+          const validMetadata = (metadata as Record<string, unknown>) || undefined;
 
           // Update connection manager
           connectionManager.updatePresence(socket.data.connectionId, status);
@@ -73,7 +73,7 @@ export function registerPresenceHandlers(
           const rooms = roomManager.getSocketRooms(socket.data.connectionId);
 
           for (const room of rooms) {
-            await presenceManager.updateStatus(room, socket.data.user.userId, status, metadata);
+            await presenceManager.updateStatus(room, socket.data.user.userId, status, validMetadata);
             await presenceManager.updateStatus(room, socket.user.userId, status, validMetadata);
 
             // Broadcast to room

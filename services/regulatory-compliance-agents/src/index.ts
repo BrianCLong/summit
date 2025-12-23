@@ -3,7 +3,7 @@ import cron from 'node-cron';
 import { ComplianceOrchestrator } from './services/ComplianceOrchestrator.js';
 import { logger } from './utils/logger.js';
 
-const app = express();
+const app: express.Express = express();
 app.use(express.json());
 
 const PORT = process.env.PORT || 3400;

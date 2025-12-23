@@ -7,7 +7,7 @@ import Redis from 'ioredis';
 import { Message } from '../types/index.js';
 import { logger } from '../utils/logger.js';
 import { randomUUID } from 'crypto';
-import { MPSCChannel } from '../../../../lib/streaming/channel-manager.js';
+import { MPSCChannel } from '../lib/channel-manager.js';
 
 export class MessagePersistence {
   private redis: Redis;
@@ -195,7 +195,7 @@ export class MessagePersistence {
           const newest = await this.redis.zrange(key, -1, -1, 'WITHSCORES');
 
           if (oldest.length >= 2) {
-            const timestamp = parseFloat(oldest[1]);
+            const timestamp = oldest[1] ? parseFloat(oldest[1]) : 0;
             if (oldestMessage === null || timestamp < oldestMessage) {
               oldestMessage = timestamp;
             }

@@ -4,6 +4,7 @@
 
 import { Socket } from 'socket.io';
 import { HandlerDependencies } from './index.js';
+import { AuthenticatedSocket } from '../types/index.js';
 import { wrapHandlerWithRateLimit } from '../middleware/rateLimit.js';
 import { logger } from '../utils/logger.js';
 import * as metrics from '../metrics/prometheus.js';

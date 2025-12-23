@@ -126,10 +126,10 @@ export class AdaptiveRateLimiter {
             return;
         }
 
-        const { id, resolve } = this.requestQueue[0];
-        if (this.tryAcquire(id)) {
+        const item = this.requestQueue[0];
+        if (item && this.tryAcquire(item.id)) {
             this.requestQueue.shift();
-            resolve();
+            item.resolve();
         }
         this.adapt();
     }
