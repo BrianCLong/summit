@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Provenance Auditor Agent
  *

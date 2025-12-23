@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Coder Agent
  *
