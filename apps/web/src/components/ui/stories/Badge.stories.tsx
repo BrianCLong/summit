@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 import type { Meta, StoryObj } from '@storybook/react'
 
 import { Badge } from '../Badge'

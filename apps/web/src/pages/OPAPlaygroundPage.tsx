@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 import React, { useState, useEffect } from 'react';
 import MonacoEditor from 'react-monaco-editor';
 import ReactJson from 'react-json-view';

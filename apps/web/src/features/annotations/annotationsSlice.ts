@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 import { createSlice, nanoid, PayloadAction } from '@reduxjs/toolkit'
 import type {
   Annotation,

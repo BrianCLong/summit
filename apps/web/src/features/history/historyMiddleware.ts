@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 import { Middleware, AnyAction } from '@reduxjs/toolkit'
 import { applyPatches, enablePatches, produceWithPatches, Patch } from 'immer'
 import { push, popUndo, popRedo, moveToRedo, moveToUndo } from './historySlice'

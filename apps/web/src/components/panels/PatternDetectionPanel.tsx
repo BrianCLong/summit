@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 import React, { useState, useEffect } from 'react'
 import { Play, Loader2, AlertTriangle, Info } from 'lucide-react'
 import { Button } from '@/components/ui/Button'

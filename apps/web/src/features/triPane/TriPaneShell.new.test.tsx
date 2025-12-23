@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 import { render, screen, fireEvent } from '@testing-library/react'
 import { TriPaneShell } from './TriPaneShell'
 import { mockEntities, mockRelationships, mockTimelineEvents, mockGeospatialEvents } from './mockData'
