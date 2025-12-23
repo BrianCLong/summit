@@ -189,7 +189,8 @@
       "Bash(timeout 60 turbo run build:*)",
       "Bash(turbo run build:*)",
       "Bash(timeout 90 turbo run:*)",
-      "Bash(timeout 30 turbo run:*)"
+      "Bash(timeout 30 turbo run:*)",
+      "Bash(tsc:*)"
     ],
     "deny": [],
     "ask": []

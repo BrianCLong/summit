@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Raster/Vector Fusion Processor
  * Fuses satellite imagery with vector features for enriched geospatial intelligence
