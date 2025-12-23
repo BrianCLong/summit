@@ -6,11 +6,10 @@ import pino from 'pino';
 import { randomUUID } from 'node:crypto';
 import { createLoaders, Loaders } from '../graphql/loaders.js';
 import { extractTenantContext } from '../security/tenantContext.js';
+import config from '../config/index.js';
 
 const logger = (pino as any)();
-export const JWT_SECRET =
-  process.env.JWT_SECRET ||
-  'dev_jwt_secret_12345_very_long_secret_for_development';
+export const JWT_SECRET = config.jwt.secret;
 
 export interface User {
   id: string;
