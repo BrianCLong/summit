@@ -4,10 +4,13 @@
 
 export {
   AnomalyDetector,
+  createAnomalyDetector,
+} from './anomaly-detector.js';
+
+export type {
   AnomalyDetectorConfig,
   DetectedAnomaly,
   AnomalyType,
   AnomalySeverity,
   AuditEventInput,
-  createAnomalyDetector,
 } from './anomaly-detector.js';

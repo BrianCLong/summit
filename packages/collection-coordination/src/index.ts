@@ -143,7 +143,7 @@ export const CollectionAssetSchema = z.object({
     reservedUntil: z.string().optional()
   }),
 
-  metadata: z.record(z.unknown()),
+  metadata: z.record(z.string(), z.unknown()),
   createdAt: z.string(),
   updatedAt: z.string()
 });
@@ -238,7 +238,7 @@ export const CollectionTaskSchema = z.object({
   approvedBy: z.string().optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
-  metadata: z.record(z.unknown())
+  metadata: z.record(z.string(), z.unknown())
 });
 
 // ============================================================================
@@ -261,7 +261,7 @@ export const ScheduleSlotSchema = z.object({
   ]),
   priority: z.number(),
   conflictsWith: z.array(z.string()),
-  metadata: z.record(z.unknown())
+  metadata: z.record(z.string(), z.unknown())
 });
 
 export const DeconflictionRecordSchema = z.object({
@@ -363,7 +363,7 @@ export class CollectionCoordinator {
     type?: AssetType;
     startTime: string;
     endTime: string;
-    location?: { lat: number; lon: number; radius: number };
+    location?: { lat: number; lon: number; radius?: number };
     capabilities?: string[];
   }): CollectionAsset[] {
     const assets = Array.from(this.assets.values());
