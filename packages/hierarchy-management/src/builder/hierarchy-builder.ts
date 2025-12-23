@@ -9,7 +9,7 @@ import type {
   HierarchyNode,
   HierarchyType,
   HierarchyStatus
-} from '@summit/mdm-core';
+} from '@intelgraph/mdm-core';
 
 export class HierarchyBuilder {
   private hierarchies: Map<string, Hierarchy>;
