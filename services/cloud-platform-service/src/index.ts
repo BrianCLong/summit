@@ -14,7 +14,7 @@ import {
   DisasterRecoveryManager,
   CloudProvider,
   MultiCloudDeployment
-} from '@summit/cloud-platform';
+} from '@intelgraph/cloud-platform';
 
 const logger = pino({ name: 'cloud-platform-service' });
 const app = express();

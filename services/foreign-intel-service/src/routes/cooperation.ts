@@ -5,7 +5,7 @@ import {
   historicalOperationSchema,
 } from '@intelgraph/foreign-intelligence';
 
-export const cooperationRouter = Router();
+export const cooperationRouter: Router = Router();
 const tracker = new AgencyTracker();
 
 // List cooperation relationships

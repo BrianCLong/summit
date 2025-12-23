@@ -4,7 +4,7 @@
  * Main Express server for the Agent Gateway API
  */
 
-import express from 'express';
+import express, { type Express } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { Pool } from 'pg';
@@ -85,7 +85,7 @@ const gateway = new AgentGateway(
 // Express App
 // ============================================================================
 
-const app = express();
+const app: Express = express();
 
 // Middleware
 app.use(helmet());
