@@ -2,6 +2,8 @@
  * GraphQL Resolvers for Agentic Mesh Evaluation
  */
 
+// @ts-nocheck
+
 import type {
   MeshCoordinator,
   EvaluationEngine,

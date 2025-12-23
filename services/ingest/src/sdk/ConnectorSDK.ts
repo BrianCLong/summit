@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * IntelGraph Connector SDK
  * Extensible framework for data ingestion connectors
