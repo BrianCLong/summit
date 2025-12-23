@@ -1,5 +1,5 @@
 // Core extension point
-export { ExtensionPoint, ExtensionPointRegistry } from './ExtensionPoint.js';
+export type { ExtensionPoint, ExtensionPointRegistry } from './ExtensionPoint.js';
 
 // Extension types
 export * from './extensions/DataSourceExtension.js';
