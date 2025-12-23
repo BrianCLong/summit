@@ -6,6 +6,7 @@ packages:
   - 'client'
   - 'server'
   - 'tools/*'
+  - 'RUNBOOKS/engine'
   - 'prov-ledger-service'
 exclude:
   - 'archive/**'
