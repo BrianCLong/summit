@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import React, { useState, useEffect } from 'react';
-import { useQuery } from '@apollo/client';
+import { useQuery } from '@apollo/client/react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 import { GET_STRATEGIC_PLANS, GET_STRATEGIC_PLAN_DETAILS } from './graphql/queries';
 import StrategyWall from './components/StrategyWall';

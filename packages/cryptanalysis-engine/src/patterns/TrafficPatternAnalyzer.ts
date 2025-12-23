@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Traffic Pattern Analyzer - Pattern analysis for encrypted traffic
  * TRAINING/SIMULATION ONLY

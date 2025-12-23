@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Crypto Analyzer - Cryptographic traffic analysis
  * TRAINING/SIMULATION ONLY

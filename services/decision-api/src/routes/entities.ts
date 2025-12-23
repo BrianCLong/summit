@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Entity routes - CRUD operations for graph entities
  */

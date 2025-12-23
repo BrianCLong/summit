@@ -1,50 +1,33 @@
-@import 'tailwindcss';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* Define theme as CSS-first configuration for Tailwind v4 */
-@theme {
-  --color-border: hsl(214.3 31.8% 91.4%);
-  --color-input: hsl(214.3 31.8% 91.4%);
-  --color-ring: hsl(221.2 83.2% 53.3%);
-  --color-background: hsl(0 0% 100%);
-  --color-foreground: hsl(222.2 84% 4.9%);
-  --color-primary: hsl(221.2 83.2% 53.3%);
-  --color-primary-foreground: hsl(210 40% 98%);
-  --color-secondary: hsl(210 40% 96%);
-  --color-secondary-foreground: hsl(222.2 84% 4.9%);
-  --color-muted: hsl(210 40% 96%);
-  --color-muted-foreground: hsl(215.4 16.3% 40%);
-  --color-accent: hsl(210 40% 96%);
-  --color-accent-foreground: hsl(222.2 84% 4.9%);
-  --color-destructive: hsl(0 84.2% 60.2%);
-  --color-destructive-foreground: hsl(210 40% 98%);
-  --color-card: hsl(0 0% 100%);
-  --color-card-foreground: hsl(222.2 84% 4.9%);
-  --color-popover: hsl(0 0% 100%);
-  --color-popover-foreground: hsl(222.2 84% 4.9%);
-
+@layer base {
   /* IntelGraph specific colors */
-  --color-intel-50: #f0f9ff;
-  --color-intel-100: #e0f2fe;
-  --color-intel-200: #bae6fd;
-  --color-intel-300: #7dd3fc;
-  --color-intel-400: #38bdf8;
-  --color-intel-500: #0ea5e9;
-  --color-intel-600: #0284c7;
-  --color-intel-700: #0369a1;
-  --color-intel-800: #075985;
-  --color-intel-900: #0c4a6e;
-  --color-intel-950: #082f49;
+  :root {
+    --color-intel-50: #f0f9ff;
+    --color-intel-100: #e0f2fe;
+    --color-intel-200: #bae6fd;
+    --color-intel-300: #7dd3fc;
+    --color-intel-400: #38bdf8;
+    --color-intel-500: #0ea5e9;
+    --color-intel-600: #0284c7;
+    --color-intel-700: #0369a1;
+    --color-intel-800: #075985;
+    --color-intel-900: #0c4a6e;
+    --color-intel-950: #082f49;
 
-  /* Threat severity colors */
-  --color-threat-low: #10b981;
-  --color-threat-medium: #f59e0b;
-  --color-threat-high: #ef4444;
-  --color-threat-critical: #dc2626;
+    /* Threat severity colors */
+    --color-threat-low: #10b981;
+    --color-threat-medium: #f59e0b;
+    --color-threat-high: #ef4444;
+    --color-threat-critical: #dc2626;
 
-  /* Border radius */
-  --radius-lg: 0.5rem;
-  --radius-md: calc(0.5rem - 2px);
-  --radius-sm: calc(0.5rem - 4px);
+    /* Border radius */
+    --radius-lg: 0.5rem;
+    --radius-md: calc(0.5rem - 2px);
+    --radius-sm: calc(0.5rem - 4px);
+  }
 }
 
 /* Legacy CSS custom properties for components that still use them */

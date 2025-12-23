@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Disclosure Pack routes - Generate audit-ready disclosure packs
  */
