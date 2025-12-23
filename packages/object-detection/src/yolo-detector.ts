@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-require-imports, require-await */
 /**
  * YOLO Object Detection Implementation
  * Bridges to Python YOLO implementation
@@ -38,6 +39,8 @@ export class YOLODetector extends BaseComputerVisionModel implements IObjectDete
       nms_threshold: config.nms_threshold || 0.4,
       max_detections: config.max_detections || 100,
       batch_size: config.batch_size || 1,
+      fp16: false,
+      int8: false,
     };
 
     super(modelConfig);
