@@ -68,7 +68,7 @@ export interface IMetadataStore {
 }
 
 export class PostgresMetadataStore implements IMetadataStore {
-  constructor(private pool: Pool) {}
+  constructor(private pool: Pool) { }
 
   // ====== DataSource Operations ======
 
@@ -84,7 +84,7 @@ export class PostgresMetadataStore implements IMetadataStore {
     const result = await this.pool.query(
       'SELECT * FROM catalog_data_sources ORDER BY created_at DESC'
     );
-    return result.rows.map(row => this.mapRowToDataSource(row));
+    return result.rows.map((row: any) => this.mapRowToDataSource(row));
   }
 
   async createDataSource(source: DataSource): Promise<DataSource> {
@@ -186,7 +186,7 @@ export class PostgresMetadataStore implements IMetadataStore {
     query += ' ORDER BY created_at DESC';
 
     const result = await this.pool.query(query, params);
-    return result.rows.map(row => this.mapRowToDataset(row));
+    return result.rows.map((row: any) => this.mapRowToDataset(row));
   }
 
   async createDataset(dataset: Dataset): Promise<Dataset> {
@@ -275,7 +275,7 @@ export class PostgresMetadataStore implements IMetadataStore {
       'SELECT * FROM catalog_fields WHERE dataset_id = $1 ORDER BY name',
       [datasetId]
     );
-    return result.rows.map(row => this.mapRowToField(row));
+    return result.rows.map((row: any) => this.mapRowToField(row));
   }
 
   async createField(field: Field): Promise<Field> {
@@ -361,7 +361,7 @@ export class PostgresMetadataStore implements IMetadataStore {
       'SELECT * FROM catalog_field_mappings WHERE mapping_id = $1',
       [id]
     );
-    mapping.fieldMappings = fieldMappingsResult.rows.map(row => ({
+    mapping.fieldMappings = fieldMappingsResult.rows.map((row: any) => ({
       sourceFieldName: row.source_field_name,
       targetFieldName: row.target_field_name,
       transformationType: row.transformation_type,
@@ -376,7 +376,7 @@ export class PostgresMetadataStore implements IMetadataStore {
       'SELECT * FROM catalog_transformation_rules WHERE mapping_id = $1 ORDER BY execution_order',
       [id]
     );
-    mapping.transformationRules = rulesResult.rows.map(row => ({
+    mapping.transformationRules = rulesResult.rows.map((row: any) => ({
       id: row.id,
       name: row.name,
       description: row.description,
@@ -405,7 +405,7 @@ export class PostgresMetadataStore implements IMetadataStore {
     query += ' ORDER BY created_at DESC';
 
     const result = await this.pool.query(query, params);
-    return result.rows.map(row => this.mapRowToMapping(row));
+    return result.rows.map((row: any) => this.mapRowToMapping(row));
   }
 
   async createMapping(mapping: Mapping): Promise<Mapping> {
@@ -485,7 +485,7 @@ export class PostgresMetadataStore implements IMetadataStore {
     const result = await this.pool.query(
       'SELECT * FROM catalog_licenses ORDER BY created_at DESC'
     );
-    return result.rows.map(row => this.mapRowToLicense(row));
+    return result.rows.map((row: any) => this.mapRowToLicense(row));
   }
 
   async createLicense(license: License): Promise<License> {
@@ -600,7 +600,7 @@ export class PostgresMetadataStore implements IMetadataStore {
       'SELECT * FROM catalog_schema_registry WHERE schema_id = $1 ORDER BY version DESC',
       [schemaId]
     );
-    return result.rows.map(row => this.mapRowToSchemaVersion(row));
+    return result.rows.map((row: any) => this.mapRowToSchemaVersion(row));
   }
 
   // ====== Connector Registry Operations ======
@@ -617,7 +617,7 @@ export class PostgresMetadataStore implements IMetadataStore {
     const result = await this.pool.query(
       'SELECT * FROM catalog_connector_registry ORDER BY name'
     );
-    return result.rows.map(row => this.mapRowToConnector(row));
+    return result.rows.map((row: any) => this.mapRowToConnector(row));
   }
 
   async registerConnector(connector: ConnectorRegistration): Promise<ConnectorRegistration> {

@@ -14,7 +14,7 @@ import {
 import { IMetadataStore } from '../stores/PostgresMetadataStore.js';
 
 export class MetadataService {
-  constructor(private store: IMetadataStore) {}
+  constructor(private store: IMetadataStore) { }
 
   // ====== DataSource Operations ======
 
@@ -97,7 +97,7 @@ export class MetadataService {
     // Create dataset first
     const createdDataset = await this.registerDataset({
       ...dataset,
-      fields: [],
+      ...dataset,
     });
 
     // Create fields
