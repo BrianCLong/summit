@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { Shield, AlertTriangle, Clock, Flag } from 'lucide-react';
+import { Shield, Clock } from 'lucide-react';
 import { useLabelingStore } from '../../store/labelingStore';
 import { cn } from '../../utils/cn';
 import type { Sample, LabelingJob, Label } from '../../types';
@@ -40,7 +40,6 @@ const safetyCategories: { value: SafetyCategory; label: string; description: str
 
 export function SafetyDecisionTask({
   sample,
-  job,
   onSubmit,
   instructions,
 }: SafetyDecisionTaskProps) {

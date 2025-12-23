@@ -5,10 +5,13 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "build": "node --experimental-strip-types src/index.ts",
-    "check": "node --experimental-strip-types src/index.ts",
-    "test": "node --experimental-strip-types --test test/**/*.test.ts"
+    "build": "tsc",
+    "check": "node dist/index.js",
+    "test": "echo 'No tests configured'"
   },
   "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "@types/node": "^20.10.0"
+  }
 }

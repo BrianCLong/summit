@@ -19,7 +19,6 @@ interface EntityMatchTaskProps {
 
 export function EntityMatchTask({
   sample,
-  job,
   onSubmit,
   instructions,
 }: EntityMatchTaskProps) {

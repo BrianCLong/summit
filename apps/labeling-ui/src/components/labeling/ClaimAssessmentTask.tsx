@@ -21,7 +21,6 @@ interface ClaimAssessmentTaskProps {
 
 export function ClaimAssessmentTask({
   sample,
-  job,
   onSubmit,
   instructions,
 }: ClaimAssessmentTaskProps) {

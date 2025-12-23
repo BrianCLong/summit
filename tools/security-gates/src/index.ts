@@ -1,11 +1,11 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { loadConfig } from './config.ts';
-import { enforceWorkflowGate } from './workflowGate.ts';
-import { enforceImageGate } from './imageGate.ts';
-import { scanForSecrets } from './secretScan.ts';
-import { enforcePolicyGate } from './policyGate.ts';
-import type { GateResult } from './types.ts';
+import { loadConfig } from './config.js';
+import { enforceWorkflowGate } from './workflowGate.js';
+import { enforceImageGate } from './imageGate.js';
+import { scanForSecrets } from './secretScan.js';
+import { enforcePolicyGate } from './policyGate.js';
+import type { GateResult } from './types.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 

@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import type { GateResult, SecretScanConfig } from './types.ts';
-import { findFilesByGlob } from './walker.ts';
+import type { GateResult, SecretScanConfig } from './types.js';
+import { findFilesByGlob } from './walker.js';
 
 const SECRET_PATTERNS: RegExp[] = [
   /AKIA[0-9A-Z]{16}/, // AWS access key

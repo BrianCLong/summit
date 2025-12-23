@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import type { GateResult, PolicyGateConfig } from './types.ts';
+import type { GateResult, PolicyGateConfig } from './types.js';
 
 type PolicyInput = {
   iamRoles?: Array<{

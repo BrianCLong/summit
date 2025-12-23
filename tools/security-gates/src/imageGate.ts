@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import type { GateResult, ImageGateConfig, ImageRequirement } from './types.ts';
+import type { GateResult, ImageGateConfig, ImageRequirement } from './types.js';
 
 export async function enforceImageGate(rootDir: string, config: ImageGateConfig): Promise<GateResult> {
   const issues: string[] = [];

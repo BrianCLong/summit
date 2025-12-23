@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import type { GateConfig } from './types.ts';
+import type { GateConfig } from './types.js';
 
 export function loadConfig(configPath: string): GateConfig {
   const resolvedPath = path.resolve(configPath);

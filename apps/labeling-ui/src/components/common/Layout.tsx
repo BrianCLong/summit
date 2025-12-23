@@ -12,7 +12,6 @@ import {
   CheckSquare,
   Database,
   BarChart3,
-  Settings,
   User,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
