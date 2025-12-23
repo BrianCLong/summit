@@ -164,7 +164,13 @@
       "Bash(pnpm --filter @intelgraph/election-disruption-detection build)",
       "Bash(pnpm --filter @intelgraph/multi-int-fusion build:*)",
       "Bash(do fullpath=\"/Users/brianlong/Developer/summit/server/$file\" if [ -f \"$fullpath\" ])",
-      "Bash(then if ! head -1 \"$fullpath\")"
+      "Bash(then if ! head -1 \"$fullpath\")",
+      "Bash(pnpm --filter @intelgraph/mobile-sdk build:*)",
+      "Bash(pnpm --filter @intelgraph/signal-processing build:*)",
+      "Bash(pnpm --filter @intelgraph/migration-linter build:*)",
+      "Bash(pnpm --filter @intelgraph/decentralized-identity build:*)",
+      "Bash(timeout 300 pnpm build:*)",
+      "Bash(gh pr reopen:*)"
     ],
     "deny": [],
     "ask": []
