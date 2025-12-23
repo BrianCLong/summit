@@ -12,7 +12,7 @@ exclude:
   - 'archive/**'
   - 'apps/desktop-electron'
   - 'apps/mobile-native'
-  - 'apps/desktop-electron'
+  - 'apps/.mobile-native-disabled'
   - 'tools/summitctl'
   - 'intelgraph-mvp/ui'
   - '!**/test/**'

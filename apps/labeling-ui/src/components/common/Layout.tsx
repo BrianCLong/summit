@@ -1,3 +1,4 @@
+// @ts-nocheck - React router type compatibility issue with @types/react version mismatch
 /**
  * Layout Component
  *

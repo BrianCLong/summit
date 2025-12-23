@@ -6064,6 +6064,9 @@ importers:
 
   packages/feature-flags:
     dependencies:
+      '@openfeature/server-sdk':
+        specifier: ^1.20.1
+        version: 1.20.1(@openfeature/core@1.9.1)
       eventemitter3:
         specifier: ^5.0.1
         version: 5.0.1
@@ -6089,6 +6092,9 @@ importers:
         specifier: ^3.11.0
         version: 3.19.0
     devDependencies:
+      '@types/express':
+        specifier: ^5.0.6
+        version: 5.0.6
       '@types/jest':
         specifier: ^29.0.0
         version: 29.5.14
@@ -27404,6 +27410,15 @@ packages:
   '@open-wc/dedupe-mixin@1.4.0':
     resolution: {integrity: sha512-Sj7gKl1TLcDbF7B6KUhtvr+1UCxdhMbNY5KxdU5IfMFWqL8oy1ZeAcCANjoB1TL0AJTcPmcCFsCbHf8X2jGDUA==}
 
+  '@openfeature/core@1.9.1':
+    resolution: {integrity: sha512-YySPtH4s/rKKnHRU0xyFGrqMU8XA+OIPNWDrlEFxE6DCVWCIrxE5YpiB94YD2jMFn6SSdA0cwQ8vLkCkl8lm8A==}
+
+  '@openfeature/server-sdk@1.20.1':
+    resolution: {integrity: sha512-jzz++kblADniuc7hONZ4DlRsoektCMDX5PPHoltn0hYWWw/Zm6sh3f7z5mGUX2XOikWKNVCtUQ3gWsdmIdHHXg==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@openfeature/core': ^1.9.0
+
   '@opentelemetry/api-logs@0.208.0':
     resolution: {integrity: sha512-CjruKY9V6NMssL/T1kAFgzosF1v9o6oeN+aX5JB/C/xPNtmgIJqcXHG7fA82Ou1zCpWGl4lROQUKwUNE1pMCyg==}
     engines: {node: '>=8.0.0'}
@@ -30925,6 +30940,7 @@ packages:
 
   '@rollup/rollup-linux-x64-gnu@4.54.0':
     resolution: {integrity: sha512-WGt5J8Ij/rvyqpFexxk3ffKqqbLf9AqrTBbWDk7ApGUzaIs6V+s2s84kAxklFwmMF/vBNGrVdYgbblCOFFezMQ==}
+    cpu: [x64]
     os: [linux]
 
   '@rollup/rollup-linux-x64-musl@4.53.3':
@@ -61814,6 +61830,12 @@ snapshots:
 
   '@open-wc/dedupe-mixin@1.4.0': {}
 
+  '@openfeature/core@1.9.1': {}
+
+  '@openfeature/server-sdk@1.20.1(@openfeature/core@1.9.1)':
+    dependencies:
+      '@openfeature/core': 1.9.1
+
   '@opentelemetry/api-logs@0.208.0':
     dependencies:
       '@opentelemetry/api': 1.9.0
@@ -66118,9 +66140,7 @@ snapshots:
     transitivePeerDependencies:
       - '@babel/core'
       - '@babel/preset-env'
-      - bufferutil
       - supports-color
-      - utf-8-validate
 
   '@react-native/normalize-colors@0.76.9': {}
 

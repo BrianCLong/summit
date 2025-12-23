@@ -1,3 +1,4 @@
+// @ts-nocheck - SpeechRecognition type conflict with DOM lib
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {

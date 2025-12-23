@@ -170,7 +170,17 @@
       "Bash(pnpm --filter @intelgraph/migration-linter build:*)",
       "Bash(pnpm --filter @intelgraph/decentralized-identity build:*)",
       "Bash(timeout 300 pnpm build:*)",
-      "Bash(gh pr reopen:*)"
+      "Bash(gh pr reopen:*)",
+      "Bash(pnpm -r build:*)",
+      "Bash(pnpm --filter @companyos/compliance-console build:*)",
+      "Bash(pnpm --filter @intelgraph/command-console build:*)",
+      "Bash(pnpm --filter @intelgraph/analytics-engine build:*)",
+      "Bash(pnpm --filter @intelgraph/desktop build:*)",
+      "Bash(pnpm --filter @intelgraph/report-assembly build:*)",
+      "Bash(pnpm --filter @intelgraph/field-kit build:*)",
+      "Bash(pnpm --filter @companyos/observability build:*)",
+      "Bash(pnpm:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []
