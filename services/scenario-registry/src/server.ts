@@ -81,14 +81,32 @@ function createApp(): Application {
         });
       }
 
-      const scenario = {
-        ...validation.data,
-        id: validation.data.id || crypto.randomUUID(),
-        version: validation.data.version || '1.0.0',
-        type: validation.data.type || 'custom',
-        name: validation.data.name || 'Untitled Scenario',
-        description: validation.data.description || '',
-        tags: validation.data.tags || [],
+      const data = validation.data as any;
+
+      const scenario: EvalScenario = {
+        ...data,
+        id: data.id || crypto.randomUUID(),
+        version: data.version || '1.0.0',
+        type: data.type || 'custom',
+        name: data.name || 'Untitled Scenario',
+        description: data.description || '',
+        tags: data.tags || [],
+        inputs: (data.inputs || []).map((input: any) => ({
+          type: input.type || 'text',
+          content: input.content || '',
+          metadata: input.metadata || {},
+        })),
+        steps: (data.steps || []).map((step: any) => ({
+          ...step,
+          timeout: step.timeout || 60000,
+          critical: step.critical === undefined ? true : step.critical,
+        })),
+        constraints: (data.constraints || []).map((constraint: any) => ({
+          type: constraint.type || 'policy_requirement',
+          value: constraint.value || {},
+          strict: constraint.strict === undefined ? true : constraint.strict,
+        })),
+        difficulty: data.difficulty || 'medium',
       };
 
       // Check if scenario already exists
