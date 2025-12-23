@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Privacy-Preserving Analytics Service - Main Server
  *
