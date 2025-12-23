@@ -259,3 +259,10 @@ artifacts/
 /dist
 .env
 sbom.json
+
+# Generated/runtime files
+evidence-bundles/
+data/automl/
+tmp-audit/
+**/digest-sandbox/
+**/tmp-security/
