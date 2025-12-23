@@ -3,10 +3,8 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "module": "commonjs",
-    "target": "ES2020",
-    "esModuleInterop": true,
-    "resolveJsonModule": true
+    "module": "ESNext",
+    "target": "ES2022"
   },
   "include": ["src"]
 }
