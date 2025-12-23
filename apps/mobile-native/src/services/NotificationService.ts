@@ -1,4 +1,4 @@
-import {Platform} from 'react-native';
+import { Platform } from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 import notifee, {
   AndroidImportance,
@@ -8,7 +8,7 @@ import notifee, {
 } from '@notifee/react-native';
 import PushNotification from 'react-native-push-notification';
 
-import {storage} from './Database';
+import { storage } from './Database';
 
 // Setup push notifications
 export const setupPushNotifications = async (): Promise<void> => {
@@ -45,14 +45,14 @@ export const setupPushNotifications = async (): Promise<void> => {
   });
 
   // Handle notification press
-  notifee.onForegroundEvent(async ({type, detail}) => {
+  notifee.onForegroundEvent(async ({ type, detail }) => {
     if (type === EventType.PRESS) {
       console.log('[Notifications] Notification pressed:', detail);
       await handleNotificationPress(detail.notification);
     }
   });
 
-  notifee.onBackgroundEvent(async ({type, detail}) => {
+  notifee.onBackgroundEvent(async ({ type, detail }) => {
     if (type === EventType.PRESS) {
       console.log('[Notifications] Background notification pressed:', detail);
       await handleNotificationPress(detail.notification);
@@ -124,7 +124,7 @@ const sendTokenToServer = async (token: string): Promise<void> => {
 
 // Display notification
 export const displayNotification = async (remoteMessage: any): Promise<void> => {
-  const {notification, data} = remoteMessage;
+  const { notification, data } = remoteMessage;
 
   if (!notification) {
     return;
@@ -151,18 +151,18 @@ export const displayNotification = async (remoteMessage: any): Promise<void> => 
         largeIcon: notification.android?.imageUrl,
         style: notification.android?.imageUrl
           ? {
-              type: AndroidStyle.BIGPICTURE,
-              picture: notification.android.imageUrl,
-            }
+            type: AndroidStyle.BIGPICTURE,
+            picture: notification.android.imageUrl,
+          }
           : undefined,
       },
       ios: {
         attachments: notification.ios?.imageUrl
           ? [
-              {
-                url: notification.ios.imageUrl,
-              },
-            ]
+            {
+              url: notification.ios.imageUrl,
+            },
+          ]
           : undefined,
       },
     });
@@ -208,9 +208,9 @@ const handleNotificationPress = async (notification?: Notification): Promise<voi
     return;
   }
 
-  const {type, entityId, caseId} = notification.data;
+  const { type, entityId, caseId } = notification.data;
 
-  console.log('[Notifications] Handling notification press:', {type, entityId, caseId});
+  console.log('[Notifications] Handling notification press:', { type, entityId, caseId });
 
   // TODO: Navigate to appropriate screen based on notification data
   // This will require access to navigation, which should be handled in the app layer

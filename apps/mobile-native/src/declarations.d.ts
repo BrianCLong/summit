@@ -1,0 +1,10 @@
+declare module 'react-native-vector-icons/MaterialCommunityIcons';
+declare module 'react-native-performance';
+declare module 'react-native-background-geolocation';
+declare module 'react-native-toast-message';
+declare module 'react-native-push-notification';
+declare module 'react-native-job-queue';
+declare module 'react-native-fs';
+declare module 'react-native-image-picker';
+declare module 'react-native-keychain';
+declare module 'graphql-ws';
