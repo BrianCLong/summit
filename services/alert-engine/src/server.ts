@@ -1,12 +1,12 @@
 // @ts-nocheck
-import express from 'express';
+import express, { type Express } from 'express';
 import pinoHttp from 'pino-http';
 import pino from 'pino';
 import { AlertManager } from './alert-manager';
 import { AlertSeverity } from './alert-types';
 
 const logger = pino({ name: 'alert-engine-server' });
-const app = express();
+const app: Express = express();
 
 app.use(express.json());
 app.use(pinoHttp({ logger }));
