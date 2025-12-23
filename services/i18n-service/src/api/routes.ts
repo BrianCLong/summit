@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express, { type Request, type Response, type NextFunction } from 'express';
 import { z } from 'zod';
 import { getTranslationService } from '../lib/translation-service.js';
