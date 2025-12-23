@@ -8,7 +8,9 @@ import { EventEmitter } from 'events';
 import Redis from 'ioredis';
 import type {
   Message,
-  MessageEnvelope,
+  MessageEnvelope
+} from '../core/types.js';
+import {
   DeliveryGuarantee,
   MessageStatus
 } from '../core/types.js';
