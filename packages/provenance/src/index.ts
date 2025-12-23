@@ -210,3 +210,4 @@ export type ExecutionReceipt = Receipt;
 
 // Function aliases for backward compatibility
 export const canonicalReceiptPayload = canonicalizeReceiptPayload;
+export const hashReceiptPayload = computeReceiptPayloadHash;

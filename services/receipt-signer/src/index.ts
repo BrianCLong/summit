@@ -7,8 +7,10 @@ export {
 
 export { InMemoryReceiptStore, type ReceiptStore } from './store';
 
+// Re-export utility functions from provenance package
+export { hashReceiptPayload } from '@intelgraph/provenance';
+
 // Note: The following exports were removed because they don't exist in signer.ts:
-// - hashReceiptPayload
 // - canonicalize
 // - ReceiptInput
 // - ReceiptSignerConfig
