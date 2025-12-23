@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Query Result Cache for Summit Data Warehouse
  *

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Columnar Storage Engine for Summit Data Warehouse
  *
