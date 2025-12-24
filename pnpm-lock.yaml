@@ -19410,9 +19410,6 @@ importers:
 
   services/runbooks:
     dependencies:
-      '@intelgraph/runbook-engine':
-        specifier: workspace:*
-        version: link:../../RUNBOOKS/engine
       express:
         specifier: ^4.18.2
         version: 4.22.1
@@ -21248,6 +21245,9 @@ importers:
       ora:
         specifier: ^7.0.1
         version: 7.0.1
+      zod:
+        specifier: ^3.22.4
+        version: 3.25.76
     devDependencies:
       '@types/fs-extra':
         specifier: ^11.0.4
@@ -26713,7 +26713,7 @@ packages:
   '@mui/base@5.0.0-beta.42':
     resolution: {integrity: sha512-fWRiUJVCHCPF+mxd5drn08bY2qRw3jj5f1SSQdUXmaJ/yKpk23ys8MgLO2KGVTRtbks/+ctRfgffGPbXifj0Ug==}
     engines: {node: '>=12.0.0'}
-    deprecated: This package has been replaced by @base-ui-components/react
+    deprecated: This package has been replaced by @base-ui/react
     peerDependencies:
       '@types/react': ^17.0.0 || ^18.0.0
       react: ^17.0.0 || ^18.0.0
