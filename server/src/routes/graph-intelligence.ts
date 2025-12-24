@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Router } from 'express';
+import { Router, type Request, type Response } from 'express';
 import {
   calculateDegreeCentrality,
   calculateBetweenness,
@@ -22,9 +22,13 @@ const TimeWindowSchema = z.object({
   minutes: z.coerce.number().default(60)
 });
 
-// Middleware to extract tenantId (assuming it's on req.user or header)
-// authenticate middleware already puts user in req.user
-// We'll use req.user.tenantId
+// Extend Express Request interface to include user
+interface AuthenticatedRequest extends Request {
+  user?: {
+    tenantId?: string;
+    id?: string;
+  };
+}
 
 router.use(authenticate);
 
@@ -32,10 +36,10 @@ router.use(authenticate);
  * @route GET /api/graph/centrality
  * @desc Calculate Degree Centrality (Influence)
  */
-router.get('/centrality', async (req, res) => {
+router.get('/centrality', async (req: Request, res: Response) => {
   try {
-    // @ts-ignore - tenantId exists on user
-    const tenantId = req.user?.tenantId;
+    const authReq = req as AuthenticatedRequest;
+    const tenantId = authReq.user?.tenantId;
     if (!tenantId) return res.status(400).json({ error: 'Tenant ID missing' });
 
     const results = await calculateDegreeCentrality(tenantId);
@@ -50,10 +54,10 @@ router.get('/centrality', async (req, res) => {
  * @route GET /api/graph/betweenness
  * @desc Calculate Betweenness Centrality (Bridges)
  */
-router.get('/betweenness', async (req, res) => {
+router.get('/betweenness', async (req: Request, res: Response) => {
   try {
-    // @ts-ignore
-    const tenantId = req.user?.tenantId;
+    const authReq = req as AuthenticatedRequest;
+    const tenantId = authReq.user?.tenantId;
     if (!tenantId) return res.status(400).json({ error: 'Tenant ID missing' });
 
     const results = await calculateBetweenness(tenantId);
@@ -68,10 +72,10 @@ router.get('/betweenness', async (req, res) => {
  * @route GET /api/graph/communities
  * @desc Detect Communities (Clusters)
  */
-router.get('/communities', async (req, res) => {
+router.get('/communities', async (req: Request, res: Response) => {
   try {
-    // @ts-ignore
-    const tenantId = req.user?.tenantId;
+    const authReq = req as AuthenticatedRequest;
+    const tenantId = authReq.user?.tenantId;
     if (!tenantId) return res.status(400).json({ error: 'Tenant ID missing' });
 
     const results = await detectCommunities(tenantId);
@@ -86,10 +90,10 @@ router.get('/communities', async (req, res) => {
  * @route POST /api/graph/path
  * @desc Find shortest path
  */
-router.post('/path', async (req, res) => {
+router.post('/path', async (req: Request, res: Response) => {
   try {
-    // @ts-ignore
-    const tenantId = req.user?.tenantId;
+    const authReq = req as AuthenticatedRequest;
+    const tenantId = authReq.user?.tenantId;
     if (!tenantId) return res.status(400).json({ error: 'Tenant ID missing' });
 
     const { startNodeId, endNodeId } = ShortestPathSchema.parse(req.body);
@@ -105,10 +109,10 @@ router.post('/path', async (req, res) => {
  * @route GET /api/graph/influence/bots
  * @desc Detect potential bots
  */
-router.get('/influence/bots', async (req, res) => {
+router.get('/influence/bots', async (req: Request, res: Response) => {
   try {
-    // @ts-ignore
-    const tenantId = req.user?.tenantId;
+    const authReq = req as AuthenticatedRequest;
+    const tenantId = authReq.user?.tenantId;
     if (!tenantId) return res.status(400).json({ error: 'Tenant ID missing' });
 
     const results = await InfluenceDetectionService.detectBots(tenantId);
@@ -123,10 +127,10 @@ router.get('/influence/bots', async (req, res) => {
  * @route GET /api/graph/influence/coordinated
  * @desc Detect coordinated behavior
  */
-router.get('/influence/coordinated', async (req, res) => {
+router.get('/influence/coordinated', async (req: Request, res: Response) => {
   try {
-    // @ts-ignore
-    const tenantId = req.user?.tenantId;
+    const authReq = req as AuthenticatedRequest;
+    const tenantId = authReq.user?.tenantId;
     if (!tenantId) return res.status(400).json({ error: 'Tenant ID missing' });
 
     const { minutes } = TimeWindowSchema.parse(req.query);
@@ -142,10 +146,10 @@ router.get('/influence/coordinated', async (req, res) => {
  * @route GET /api/graph/influence/amplification
  * @desc Identify amplification networks
  */
-router.get('/influence/amplification', async (req, res) => {
+router.get('/influence/amplification', async (req: Request, res: Response) => {
   try {
-    // @ts-ignore
-    const tenantId = req.user?.tenantId;
+    const authReq = req as AuthenticatedRequest;
+    const tenantId = authReq.user?.tenantId;
     if (!tenantId) return res.status(400).json({ error: 'Tenant ID missing' });
 
     const results = await InfluenceDetectionService.identifyAmplificationNetworks(tenantId);

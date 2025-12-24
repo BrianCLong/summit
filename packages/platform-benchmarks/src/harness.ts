@@ -38,7 +38,8 @@ function getPlatformInfo() {
  */
 function percentile(sorted: number[], p: number): number {
   const index = Math.ceil((p / 100) * sorted.length) - 1;
-  return sorted[Math.max(0, index)];
+  const safeIndex = Math.max(0, index);
+  return sorted[safeIndex] ?? 0;
 }
 
 /**
@@ -152,7 +153,7 @@ export class BenchmarkHarness {
    * Check if results pass threshold
    */
   private checkThreshold(stats: BenchmarkStats): boolean {
-    if (!this.threshold) return true;
+    if (!this.threshold) {return true;}
 
     const { maxMean, maxP99, minOpsPerSecond, maxRsd } = this.threshold;
 

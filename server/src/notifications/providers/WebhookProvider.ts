@@ -1,9 +1,8 @@
-// @ts-nocheck
 import { NotificationProvider, NotificationChannel, NotificationPayload, NotificationResult } from '../types.js';
 import axios from 'axios';
 import pino from 'pino';
 
-const logger = pino({ name: 'WebhookProvider' });
+const logger = (pino as any)({ name: 'WebhookProvider' });
 
 export class WebhookProvider implements NotificationProvider {
   channel = NotificationChannel.WEBHOOK;

@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Simple in-memory LRU implementation since lru-cache package is unavailable
 import { LLMResponse } from './types.js';
 import crypto from 'crypto';
@@ -68,12 +67,12 @@ export class LLMCache {
     this.cache.set(key, cachedValue);
   }
 
-  generateKey(request: any): string {
+  generateKey(request: Record<string, unknown>): string {
     const relevant = {
-      model: request.model,
-      messages: request.messages,
-      temperature: request.temperature,
-      tools: request.tools
+      model: (request as any).model,
+      messages: (request as any).messages,
+      temperature: (request as any).temperature,
+      tools: (request as any).tools
     };
     return crypto.createHash('sha256').update(JSON.stringify(relevant)).digest('hex');
   }

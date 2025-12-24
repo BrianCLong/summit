@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { http, HttpResponse } from 'msw'
 import mockData from './data.json'
 
@@ -49,7 +48,7 @@ const conductorMetrics = {
 export const handlers = [
   // GraphQL endpoint
   http.post('*/graphql', async ({ request }) => {
-    const { query, variables } = await request.json() as { query: string; variables?: any }
+    const { query, variables } = await request.json() as { query: string; variables?: Record<string, unknown> }
     const queryString = query.trim()
 
     // Health check

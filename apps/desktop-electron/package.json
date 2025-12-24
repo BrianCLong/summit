@@ -8,16 +8,16 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && electron-builder",
-    "build:win": "npm run build -- --win",
-    "build:mac": "npm run build -- --mac",
-    "build:linux": "npm run build -- --linux",
+    "build": "tsc && vite build",
+    "build:package": "tsc && vite build && electron-builder",
+    "build:win": "npm run build:package -- --win",
+    "build:mac": "npm run build:package -- --mac",
+    "build:linux": "npm run build:package -- --linux",
     "preview": "vite preview",
     "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && electron .\"",
     "electron:build": "vite build && electron-builder",
     "lint": "eslint src --ext .ts,.tsx",
-    "typecheck": "tsc --noEmit",
-    "postinstall": "electron-builder install-app-deps"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "react": "^19.2.0",

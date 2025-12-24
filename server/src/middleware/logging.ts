@@ -1,9 +1,8 @@
-// @ts-nocheck
 import pinoHttp from 'pino-http';
 import pino from 'pino';
 import { randomUUID } from 'crypto';
 
-const logger = pino();
+const logger = (pino as any)();
 
 export const loggingMiddleware = pinoHttp({
   logger,

@@ -1,7 +1,6 @@
-// @ts-nocheck
 import pino from 'pino';
 
-const logger = pino({ name: 'CognitiveLoadService' });
+const logger = (pino as any)({ name: 'CognitiveLoadService' });
 
 export class CognitiveLoadService {
   private static readonly MAX_LOAD = 1.0;
@@ -15,7 +14,7 @@ export class CognitiveLoadService {
     }
   }
 
-  private static calculateLoad(metrics: any): number {
+  private static calculateLoad(metrics: { mouseVelocity: number; pupilDilation?: number; dwellEntropy: number }): number {
     // Simulated calculation
     // High mouse velocity + high dwell entropy = high load
     return Math.random(); // Simulation

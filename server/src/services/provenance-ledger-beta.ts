@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Provenance Ledger Beta Service
  * Unified service for source tracking, transform chains, evidence registration,

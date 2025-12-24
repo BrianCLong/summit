@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { spawn } from 'child_process';
 import { createReadStream, createWriteStream } from 'fs';
 import { promisify } from 'util';
@@ -7,7 +6,7 @@ import pino from 'pino';
 import sharp from 'sharp';
 import { ExtractionEngineConfig } from '../types.js';
 
-const logger = pino({ name: 'OCREngine' });
+const logger = (pino as any)({ name: 'OCREngine' });
 
 export interface OCRResult {
   text: string;
@@ -182,7 +181,7 @@ export class OCREngine {
         }
       });
 
-      tesseract.on('error', (error) => {
+      tesseract.on('error', (error: Error) => {
         reject(new Error(`Failed to spawn tesseract: ${error.message}`));
       });
     });
@@ -241,7 +240,7 @@ export class OCREngine {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(new Error(`Failed to spawn PaddleOCR: ${error.message}`));
       });
     });

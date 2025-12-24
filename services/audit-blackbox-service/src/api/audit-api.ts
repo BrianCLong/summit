@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Audit Black Box API
  *

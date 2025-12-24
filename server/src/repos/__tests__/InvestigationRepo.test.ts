@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * InvestigationRepo Test Suite
  *

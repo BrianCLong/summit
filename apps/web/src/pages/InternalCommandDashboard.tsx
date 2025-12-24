@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useEffect, useState } from 'react';
 import {
   GovernancePanel,
@@ -14,7 +13,7 @@ import {
 import { Badge } from '@/components/ui/Badge';
 import { useAuth } from '@/contexts/AuthContext';
 
-const InternalCommandDashboard = () => {
+const InternalCommandDashboard: React.FC = () => {
   const { user } = useAuth();
   const [data, setData] = useState<Record<string, BaseStatus | null>>({
     governance: null,

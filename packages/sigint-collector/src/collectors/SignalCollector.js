@@ -57,8 +57,9 @@ class SignalCollector extends eventemitter3_1.EventEmitter {
         console.log(`[SIGINT] Stopped collection task: ${task.name}`);
     }
     startSimulation(task) {
-        if (this.simulationInterval)
-            {return;}
+        if (this.simulationInterval) {
+            return;
+        }
         this.simulationInterval = setInterval(() => {
             const signal = this.generateSimulatedSignal(task);
             this.collectedSignals.push(signal);
@@ -133,10 +134,12 @@ class SignalCollector extends eventemitter3_1.EventEmitter {
             'WIFI', 'BLUETOOTH', 'SATELLITE', 'SHORTWAVE', 'VHF', 'UHF'
         ];
         const elintTypes = ['RADAR', 'NAVIGATION', 'TELEMETRY'];
-        if (comintTypes.includes(signalType))
-            {return 'COMINT';}
-        if (elintTypes.includes(signalType))
-            {return 'ELINT';}
+        if (comintTypes.includes(signalType)) {
+            return 'COMINT';
+        }
+        if (elintTypes.includes(signalType)) {
+            return 'ELINT';
+        }
         return 'TECHINT';
     }
     setStatus(status) {

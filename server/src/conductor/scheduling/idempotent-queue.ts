@@ -1,4 +1,3 @@
-// @ts-nocheck
 // server/src/conductor/scheduling/idempotent-queue.ts
 
 import Redis from 'ioredis';
@@ -67,9 +66,9 @@ export class IdempotentQueue {
         const dupCheck = await this.checkDuplicate(item.idempotencyKey);
         if (dupCheck) {
           prometheusConductorMetrics.recordOperationalEvent(
-            'queue_duplicate_ignored',
-            true,
-          );
+      'queue_duplicate_ignored',
+      { success: true },
+    );
           return { success: true, duplicate: true, id: dupCheck };
         }
       }
@@ -79,9 +78,9 @@ export class IdempotentQueue {
       if (poisonCheck.quarantine) {
         await this.quarantineItem(queueItem, poisonCheck.reason);
         prometheusConductorMetrics.recordOperationalEvent(
-          'queue_item_quarantined',
-          false,
-        );
+      'queue_item_quarantined',
+      { success: false },
+    );
         return { success: false, quarantined: true, id: queueItem.id };
       }
 
@@ -107,9 +106,9 @@ export class IdempotentQueue {
         await this.getDepth(),
       );
       prometheusConductorMetrics.recordOperationalEvent(
-        'queue_item_enqueued',
-        true,
-      );
+      'queue_item_enqueued',
+      { success: true },
+    );
 
       logger.debug('Item enqueued successfully', {
         queueName: this.queueName,
@@ -124,9 +123,9 @@ export class IdempotentQueue {
         queueName: this.queueName,
       });
       prometheusConductorMetrics.recordOperationalEvent(
-        'queue_enqueue_error',
-        false,
-      );
+      'queue_enqueue_error',
+      { success: false },
+    );
       return { success: false };
     }
   }
@@ -156,9 +155,9 @@ export class IdempotentQueue {
 
       // Track processing start
       prometheusConductorMetrics.recordOperationalEvent(
-        'queue_item_dequeued',
-        true,
-      );
+      'queue_item_dequeued',
+      { success: true },
+    );
       prometheusConductorMetrics.recordOperationalMetric(
         'queue_depth',
         await this.getDepth(),
@@ -177,9 +176,9 @@ export class IdempotentQueue {
         queueName: this.queueName,
       });
       prometheusConductorMetrics.recordOperationalEvent(
-        'queue_dequeue_error',
-        false,
-      );
+      'queue_dequeue_error',
+      { success: false },
+    );
       return null;
     }
   }
@@ -203,9 +202,9 @@ export class IdempotentQueue {
 
       await this.redis.del(leaseKey);
       prometheusConductorMetrics.recordOperationalEvent(
-        'queue_item_completed',
-        true,
-      );
+      'queue_item_completed',
+      { success: true },
+    );
 
       logger.debug('Item completed', {
         queueName: this.queueName,
@@ -241,9 +240,9 @@ export class IdempotentQueue {
       });
 
       prometheusConductorMetrics.recordOperationalEvent(
-        'queue_item_requeued',
-        true,
-      );
+      'queue_item_requeued',
+      { success: true },
+    );
       logger.info('Item requeued with backoff', {
         itemId: item.id,
         retryCount: item.retryCount,
@@ -332,9 +331,9 @@ export class IdempotentQueue {
               rule: rule.name,
             });
             prometheusConductorMetrics.recordOperationalEvent(
-              'queue_item_dropped',
-              false,
-            );
+      'queue_item_dropped',
+      { success: false },
+    );
             return { quarantine: false };
           }
           // retry_later would need additional logic

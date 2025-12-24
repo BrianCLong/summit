@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
@@ -7,7 +6,6 @@ import {
   CardContent,
   Chip,
   Divider,
-  Grid,
   LinearProgress,
   MenuItem,
   Select,
@@ -19,6 +17,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import {
   Assessment,
   CloudUpload,
@@ -190,7 +189,7 @@ export default function FinOpsDashboard() {
       )}
 
       <Grid container spacing={2}>
-        <Grid item xs={12} md={4}>
+        <Grid xs={12} md={4}>
           <Card>
             <CardContent>
               <Stack direction="row" justifyContent="space-between" spacing={2}>
@@ -215,7 +214,7 @@ export default function FinOpsDashboard() {
         </Grid>
 
         {(overview?.buckets || []).map((bucket) => (
-          <Grid item xs={12} md={2} key={bucket.key}>
+          <Grid xs={12} md={2} key={bucket.key}>
             <Card>
               <CardContent>
                 <Stack direction="row" alignItems="center" spacing={1}>
@@ -255,7 +254,7 @@ export default function FinOpsDashboard() {
       </Grid>
 
       <Grid container spacing={2} sx={{ mt: 1 }}>
-        <Grid item xs={12} md={5}>
+        <Grid xs={12} md={5}>
           <Card>
             <CardContent>
               <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
@@ -297,7 +296,7 @@ export default function FinOpsDashboard() {
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={7}>
+        <Grid xs={12} md={7}>
           <Card>
             <CardContent>
               <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>

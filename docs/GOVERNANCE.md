@@ -23,7 +23,13 @@ OPA/Rego packages:
 - `summit.sbom` – SBOM quality gate
 - `summit.provenance` – provenance invariants
 - `summit.access` – access control for governance actions
+- `summit.regulatory` – clean-hands regulatory advantage strategy
 - `summit.shared` – shared helpers
+
+### Legal & IP
+
+- **IP Register**: `docs/legal/IP_REGISTER.yaml` tracks core assets.
+- **Due Diligence**: `docs/legal/IP_PLAYBOOK.md` defines audit and M&A readiness procedures.
 
 ### CI Workflow
 

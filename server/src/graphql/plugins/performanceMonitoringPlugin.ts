@@ -7,8 +7,9 @@
 import type { ApolloServerPlugin, GraphQLRequestListener } from '@apollo/server';
 import pino from 'pino';
 import type { DataLoaders } from '../dataloaders/index.js';
+import type { GraphQLContext } from '../apollo-v5-server.js';
 
-const logger = pino();
+const logger = (pino as any)();
 
 export interface PerformanceMetrics {
   operationName: string | undefined;

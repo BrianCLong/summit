@@ -1,10 +1,9 @@
-// @ts-nocheck
 import { RateLimiter } from '../RateLimiter.js';
 
 const store = new Map<string, { count: number; expiresAt: number }>();
 
 const redisMock = {
-  eval: jest.fn(async (_script: string, _keys: number, key: string, windowMs: number) => {
+  eval: jest.fn<(script: string, keys: number, key: string, windowMs: number) => Promise<[number, number]>>(async (_script: string, _keys: number, key: string, windowMs: number) => {
     const now = Date.now();
     const currentEntry = store.get(key);
 

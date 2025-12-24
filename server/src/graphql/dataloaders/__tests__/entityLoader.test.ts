@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Tests for Entity DataLoader
  */
@@ -7,24 +6,33 @@ import { createEntityLoader } from '../entityLoader';
 import type { DataLoaderContext } from '../index';
 import { jest, describe, it, test, expect, beforeEach } from '@jest/globals';
 
+interface MockNeo4jSession {
+  run: jest.Mock;
+  close: jest.Mock;
+}
+
+interface MockNeo4jDriver {
+  session: jest.Mock;
+}
+
 // Mock Neo4j driver
-const mockNeo4jSession = {
+const mockNeo4jSession: MockNeo4jSession = {
   run: jest.fn(),
   close: jest.fn(),
 };
 
-const mockNeo4jDriver = {
+const mockNeo4jDriver: MockNeo4jDriver = {
   session: jest.fn(() => mockNeo4jSession),
-} as any;
+};
 
-const mockPgPool = {} as any;
+const mockPgPool = {} as DataLoaderContext['pgPool'];
 
 describe('EntityLoader', () => {
   let context: DataLoaderContext;
 
   beforeEach(() => {
     context = {
-      neo4jDriver: mockNeo4jDriver,
+      neo4jDriver: mockNeo4jDriver as unknown as DataLoaderContext['neo4jDriver'],
       pgPool: mockPgPool,
       tenantId: 'test-tenant',
     };

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { quotaManager } from '../quota-manager.js';
 
 describe('QuotaManager QUOTAS_V1', () => {

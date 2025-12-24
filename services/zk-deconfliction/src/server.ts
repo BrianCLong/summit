@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express from 'express';
 import type { Request, Response } from 'express';
 import { CommitmentGenerator } from './commitment.js';

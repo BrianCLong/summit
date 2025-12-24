@@ -1,0 +1,5 @@
+server:
+  depthLimit: 8
+  complexity: 2000
+  persistedQueries: true
+  rateLimitPerIdentity: 100

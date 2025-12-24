@@ -2,7 +2,7 @@ package export
 
 import data.export
 
-test_deny_without_permission {
+test_deny_without_permission if {
   input := {
     "user": {"permissions": [], "roles": ["exporter"]},
     "bundle": {"sensitivity": "Public", "fields": []},
@@ -15,7 +15,7 @@ test_deny_without_permission {
   decision.reasons[_] == "not_authorized"
 }
 
-test_step_up_for_sensitive_without_webauthn {
+test_step_up_for_sensitive_without_webauthn if {
   input := {
     "user": {"permissions": ["export"], "roles": ["exporter"]},
     "bundle": {"sensitivity": "Sensitive", "fields": []},
@@ -27,7 +27,7 @@ test_step_up_for_sensitive_without_webauthn {
   decision.effect == "step_up"
 }
 
-test_allow_with_redactions_for_pii {
+test_allow_with_redactions_for_pii if {
   input := {
     "user": {"permissions": ["export"], "roles": ["exporter"]},
     "bundle": {"sensitivity": "Internal", "fields": [{"name": "email", "labels": ["pii:email"]}]},
@@ -40,7 +40,7 @@ test_allow_with_redactions_for_pii {
   count(decision.redact_fields) == 1
 }
 
-test_simulate_sets_flag {
+test_simulate_sets_flag if {
   input := {
     "user": {"permissions": ["export"], "roles": ["exporter"]},
     "bundle": {"sensitivity": "Public", "fields": []},

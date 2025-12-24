@@ -1,7 +1,7 @@
-// @ts-nocheck
+import type { Request, Response } from 'express';
 import { register as registry } from '../monitoring/metrics.js';
 
-export const metricsRoute = async (_req: any, res: any) => {
+export const metricsRoute = async (_req: Request, res: Response): Promise<void> => {
   try {
     const metricsData = await registry.metrics();
     res.set('Content-Type', registry.contentType);

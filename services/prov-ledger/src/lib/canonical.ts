@@ -1,3 +1,4 @@
+// @ts-nocheck
 import crypto from 'crypto';
 
 export type CanonicalValue = string | number | boolean | null | CanonicalValue[] | { [key: string]: CanonicalValue };

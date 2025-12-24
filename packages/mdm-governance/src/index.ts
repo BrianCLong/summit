@@ -6,4 +6,4 @@
 export * from './governance-engine.js';
 
 // Re-export types
-export type { GovernancePolicy, Domain } from '@summit/mdm-core';
+export type { GovernancePolicy, Domain } from '@intelgraph/mdm-core';

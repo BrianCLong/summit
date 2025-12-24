@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Pool } from 'pg';
+import { Pool, QueryResult } from 'pg';
 import { trace, Span } from '@opentelemetry/api';
 import { Counter, Histogram, register } from 'prom-client';
 
@@ -127,7 +127,7 @@ async function _executeQuery(
     poolType?: 'read' | 'write';
   },
   returnMany: boolean,
-) {
+): Promise<any> {
   return tracer.startActiveSpan(spanName, async (span: Span) => {
     const operation = query.split(' ')[0].toLowerCase();
     const { pool: selectedPool, poolType } = options.poolType
@@ -292,7 +292,7 @@ export const pg = {
   },
 
   // Tenant-scoped transaction support
-  withTenant: async <T>(
+  withTenant: async <T = any>(
     tenantId: string,
     callback: (scopedPg: any) => Promise<T>,
   ): Promise<T> => {

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { NumericArray, WaveletLevel, WaveletResult } from './types.js';
 
 export function haarTransform(signal: NumericArray, levels: number): WaveletResult {

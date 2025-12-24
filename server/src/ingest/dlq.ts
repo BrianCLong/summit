@@ -9,7 +9,7 @@ export class DLQService {
 
   async sendToDLQ(
     record: Omit<DLQRecord, 'id' | 'createdAt' | 'retryCount' | 'resolvedAt'>
-  ) {
+  ): Promise<void> {
     const id = uuidv4();
     try {
       await pg.none(
@@ -31,7 +31,7 @@ export class DLQService {
     );
   }
 
-  async resolveRecord(id: string, tenantId: string) {
+  async resolveRecord(id: string, tenantId: string): Promise<void> {
     await pg.none(
       `UPDATE ingestion_dlq SET resolved_at = NOW() WHERE id = $1 AND tenant_id = $2`,
       [id, tenantId]

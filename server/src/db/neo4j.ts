@@ -1,9 +1,7 @@
-// @ts-nocheck
 import { telemetry } from '../lib/telemetry/comprehensive-telemetry.js';
 import neo4j, { Driver, Session } from 'neo4j-driver';
 import * as dotenv from 'dotenv';
-// @ts-ignore
-import { default as pino } from 'pino';
+import pino from 'pino';
 
 import {
   dbPoolAcquisitionLatency,
@@ -20,8 +18,7 @@ import {
 
 dotenv.config();
 
-// @ts-ignore
-const logger: any = pino();
+const logger = (pino as any)();
 
 const NEO4J_URI = process.env.NEO4J_URI || 'bolt://neo4j:7687';
 const NEO4J_USER = process.env.NEO4J_USER || process.env.NEO4J_USERNAME || 'neo4j';
@@ -36,6 +33,9 @@ const ACQUISITION_TIMEOUT_MS = parseInt(process.env.NEO4J_POOL_ACQUISITION_TIMEO
 let realDriver: Driver | null = null;
 let initializationPromise: Promise<void> | null = null;
 let isMockMode = true;
+
+type Neo4jReadyCallback = (event: { reason: string }) => void | Promise<void>;
+const readyCallbacks: Neo4jReadyCallback[] = [];
 
 export async function initializeNeo4jDriver(): Promise<void> {
   if (initializationPromise) return initializationPromise;
@@ -57,6 +57,9 @@ export async function initializeNeo4jDriver(): Promise<void> {
       isMockMode = false;
       logger.info('Neo4j driver initialized successfully.');
       neo4jConnectivityUp.set(1);
+
+      // Notify ready callbacks
+      await Promise.all(readyCallbacks.map(cb => cb({ reason: 'driver_initialized' })));
     } catch (error) {
       neo4jConnectivityUp.set(0);
       if (REQUIRE_REAL_DBS) {
@@ -91,4 +94,8 @@ export async function closeNeo4jDriver(): Promise<void> {
     isMockMode = true;
     logger.info('Neo4j driver closed.');
   }
+}
+
+export function onNeo4jDriverReady(callback: Neo4jReadyCallback): void {
+  readyCallbacks.push(callback);
 }

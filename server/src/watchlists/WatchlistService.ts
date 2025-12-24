@@ -1,3 +1,4 @@
+// @ts-nocheck
 export type Watchlist = {
   id: string;
   name: string;

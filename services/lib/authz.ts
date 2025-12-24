@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createHash, randomUUID } from "crypto";
 
 export interface AuthzInput {

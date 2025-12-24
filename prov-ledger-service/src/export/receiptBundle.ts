@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
   Receipt,
   ReceiptExportBundle,

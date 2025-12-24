@@ -6,14 +6,14 @@
  * of frequent graph traversal queries.
  */
 
-import Redis from 'ioredis';
+import type Redis from 'ioredis';
 import pino from 'pino';
 import {
   TenantContext,
   TenantValidator,
 } from '../middleware/tenantValidator.js';
 
-const logger = pino({ name: 'neighborhoodCache' });
+const logger = (pino as any)({ name: 'neighborhoodCache' });
 
 export interface NeighborhoodData {
   nodeId: string;
@@ -76,7 +76,7 @@ export class NeighborhoodCache {
     }
   }
 
-  async set(tenantId: string, investigationId: string, nodeId: string, radius: number, data: any): Promise<boolean> {
+  async set(_tenantId: string, _investigationId: string, nodeId: string, radius: number, data: unknown): Promise<boolean> {
     // Type coercion for NeighborhoodData if needed, or assume data matches
     return this.setNeighborhood(
       nodeId,
@@ -389,12 +389,12 @@ export class NeighborhoodCache {
    */
   async healthCheck(): Promise<{
     status: 'healthy' | 'unhealthy';
-    stats: any;
+    stats: CacheStats & { hitRatio: number; memory?: string };
   }> {
     try {
       await this.redis.ping();
       const info = await this.redis.info('memory');
-      const stats = await this.getStats(); // Use await here
+      const stats = await this.getStats();
 
       return {
         status: 'healthy',
@@ -407,7 +407,7 @@ export class NeighborhoodCache {
       logger.error({ error }, 'Neighborhood cache health check failed');
       return {
         status: 'unhealthy',
-        stats: await this.getStats(), // Use await here
+        stats: await this.getStats(),
       };
     }
   }

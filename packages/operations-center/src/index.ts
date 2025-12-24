@@ -77,7 +77,7 @@ export const COPEntitySchema = z.object({
     altitude: z.number().optional(), // meters
 
     // Additional attributes
-    metadata: z.record(z.unknown())
+    metadata: z.record(z.string(), z.unknown())
   }),
 
   // Display properties
@@ -98,7 +98,7 @@ export const COPLayerSchema = z.object({
   visible: z.boolean(),
   opacity: z.number(), // 0-1
   entities: z.array(COPEntitySchema),
-  metadata: z.record(z.unknown())
+  metadata: z.record(z.string(), z.unknown())
 });
 
 export const CommonOperatingPictureSchema = z.object({
@@ -130,7 +130,7 @@ export const CommonOperatingPictureSchema = z.object({
   }),
 
   updatedAt: z.string(),
-  metadata: z.record(z.unknown())
+  metadata: z.record(z.string(), z.unknown())
 });
 
 // ============================================================================
@@ -184,7 +184,7 @@ export const OperationalEventSchema = z.object({
   correlationId: z.string().optional(),
   parentEventId: z.string().optional(),
 
-  metadata: z.record(z.unknown()),
+  metadata: z.record(z.string(), z.unknown()),
   createdAt: z.string(),
   updatedAt: z.string()
 });
@@ -224,7 +224,7 @@ export const AlertRuleSchema = z.object({
       'TRIGGER_WORKFLOW',
       'EXECUTE_SCRIPT'
     ]),
-    parameters: z.record(z.unknown())
+    parameters: z.record(z.string(), z.unknown())
   })),
 
   // Configuration
@@ -238,7 +238,7 @@ export const AlertRuleSchema = z.object({
 
   createdBy: z.string(),
   createdAt: z.string(),
-  metadata: z.record(z.unknown())
+  metadata: z.record(z.string(), z.unknown())
 });
 
 export const AlertSchema = z.object({
@@ -260,7 +260,7 @@ export const AlertSchema = z.object({
 
   notifiedUsers: z.array(z.string()),
 
-  metadata: z.record(z.unknown())
+  metadata: z.record(z.string(), z.unknown())
 });
 
 // ============================================================================
@@ -302,7 +302,7 @@ export const WatchShiftSchema = z.object({
     completedAt: z.string().optional()
   }).optional(),
 
-  metadata: z.record(z.unknown())
+  metadata: z.record(z.string(), z.unknown())
 });
 
 export const WatchLogEntrySchema = z.object({
@@ -326,7 +326,7 @@ export const WatchLogEntrySchema = z.object({
   author: z.string(),
   relatedEvents: z.array(z.string()),
 
-  metadata: z.record(z.unknown())
+  metadata: z.record(z.string(), z.unknown())
 });
 
 // ============================================================================
@@ -407,7 +407,7 @@ export const CrisisResponseSchema = z.object({
   resolvedAt: z.string().optional(),
   resolution: z.string().optional(),
 
-  metadata: z.record(z.unknown()),
+  metadata: z.record(z.string(), z.unknown()),
   createdAt: z.string(),
   updatedAt: z.string()
 });
@@ -581,7 +581,7 @@ export class OperationsCenter {
       timestamp: new Date().toISOString(),
       status: 'ACTIVE',
       notifiedUsers: [],
-      metadata: {}
+      metadata: {} as Record<string, unknown>
     };
 
     this.alerts.set(alert.id, AlertSchema.parse(alert));

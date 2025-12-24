@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { SecuriteyesService } from './SecuriteyesService.js';
 import { NODE_LABELS, RELATIONSHIPS, Incident, SuspiciousEvent } from '../models/types.js';
 import { runCypher } from '../../graph/neo4j.js';

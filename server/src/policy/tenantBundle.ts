@@ -1,101 +1,101 @@
 // @ts-nocheck
 import { readFile } from 'node:fs/promises';
-import { z } from 'zod';
+import * as z from 'zod';
 import cloneDeep from 'lodash/cloneDeep.js';
 import get from 'lodash/get.js';
 import mergeWith from 'lodash/mergeWith.js';
 import set from 'lodash/set.js';
 import unset from 'lodash/unset.js';
 
-const overlayPatchSchema = z.object({
-  op: z.enum(['set', 'remove', 'append', 'merge']),
-  path: z.string(),
-  value: z.any().optional(),
+const overlayPatchSchema = (z as any).object({
+  op: (z as any).enum(['set', 'remove', 'append', 'merge']),
+  path: (z as any).string(),
+  value: (z as any).any().optional(),
 });
 
-const overlaySelectorSchema = z.object({
-  environments: z.array(z.string()).optional(),
-  regions: z.array(z.string()).optional(),
-  labels: z.array(z.string()).optional(),
+const overlaySelectorSchema = (z as any).object({
+  environments: (z as any).array((z as any).string()).optional(),
+  regions: (z as any).array((z as any).string()).optional(),
+  labels: (z as any).array((z as any).string()).optional(),
 });
 
 export const overlayContextSchema = overlaySelectorSchema.extend({
-  environment: z.string().optional(),
+  environment: (z as any).string().optional(),
 });
 
-const policyRuleSchema = z.object({
-  id: z.string(),
-  description: z.string().optional(),
-  effect: z.enum(['allow', 'deny']),
-  priority: z.number().int().default(0),
-  conditions: z
+const policyRuleSchema = (z as any).object({
+  id: (z as any).string(),
+  description: (z as any).string().optional(),
+  effect: (z as any).enum(['allow', 'deny']),
+  priority: (z as any).number().int().default(0),
+  conditions: (z as any)
     .object({
-      actions: z.array(z.string()).optional(),
-      resourceTenants: z.array(z.string()).optional(),
-      subjectTenants: z.array(z.string()).optional(),
-      purposes: z.array(z.string()).optional(),
-      environments: z.array(z.string()).optional(),
+      actions: (z as any).array((z as any).string()).optional(),
+      resourceTenants: (z as any).array((z as any).string()).optional(),
+      subjectTenants: (z as any).array((z as any).string()).optional(),
+      purposes: (z as any).array((z as any).string()).optional(),
+      environments: (z as any).array((z as any).string()).optional(),
     })
     .default({}),
 });
 
-const crossTenantSchema = z.object({
-  mode: z.enum(['deny', 'allowlist', 'delegated']).default('deny'),
-  allow: z.array(z.string()).default([]),
-  requireAgreements: z.boolean().default(true),
+const crossTenantSchema = (z as any).object({
+  mode: (z as any).enum(['deny', 'allowlist', 'delegated']).default('deny'),
+  allow: (z as any).array((z as any).string()).default([]),
+  requireAgreements: (z as any).boolean().default(true),
 });
 
-const guardrailSchema = z.object({
-  defaultDeny: z.boolean().default(true),
-  requirePurpose: z.boolean().default(false),
-  requireJustification: z.boolean().default(false),
+const guardrailSchema = (z as any).object({
+  defaultDeny: (z as any).boolean().default(true),
+  requirePurpose: (z as any).boolean().default(false),
+  requireJustification: (z as any).boolean().default(false),
 });
 
-const baseProfileSchema = z.object({
-  id: z.string(),
-  version: z.string(),
-  regoPackage: z.string(),
-  entrypoints: z.array(z.string()).min(1),
+const baseProfileSchema = (z as any).object({
+  id: (z as any).string(),
+  version: (z as any).string(),
+  regoPackage: (z as any).string(),
+  entrypoints: (z as any).array((z as any).string()).min(1),
   guardrails: guardrailSchema.default({}),
   crossTenant: crossTenantSchema.default({
     mode: 'deny',
     allow: [],
     requireAgreements: true,
   }),
-  rules: z.array(policyRuleSchema).min(1),
+  rules: (z as any).array(policyRuleSchema).min(1),
 });
 
-const overlaySchema = z.object({
-  id: z.string(),
-  description: z.string().optional(),
-  precedence: z.number().int().default(0),
+const overlaySchema = (z as any).object({
+  id: (z as any).string(),
+  description: (z as any).string().optional(),
+  precedence: (z as any).number().int().default(0),
   selectors: overlaySelectorSchema.default({}),
-  patches: z.array(overlayPatchSchema).min(1),
+  patches: (z as any).array(overlayPatchSchema).min(1),
 });
 
-export const tenantPolicyBundleSchema = z.object({
-  tenantId: z.string(),
-  bundleId: z.string().optional(),
-  metadata: z
+export const tenantPolicyBundleSchema = (z as any).object({
+  tenantId: (z as any).string(),
+  bundleId: (z as any).string().optional(),
+  metadata: (z as any)
     .object({
-      issuedAt: z.string().optional(),
-      expiresAt: z.string().optional(),
-      source: z.string().optional(),
+      issuedAt: (z as any).string().optional(),
+      expiresAt: (z as any).string().optional(),
+      source: (z as any).string().optional(),
     })
     .default({}),
   baseProfile: baseProfileSchema,
-  overlays: z.array(overlaySchema).default([]),
+  overlays: (z as any).array(overlaySchema).default([]),
 });
 
 export type TenantPolicyBundle = z.infer<typeof tenantPolicyBundleSchema>;
 export type OverlayContext = z.infer<typeof overlayContextSchema>;
 
-export const policySimulationInputSchema = z.object({
-  subjectTenantId: z.string(),
-  resourceTenantId: z.string(),
-  action: z.string(),
-  purpose: z.string().optional(),
-  justification: z.string().optional(),
+export const policySimulationInputSchema = (z as any).object({
+  subjectTenantId: (z as any).string(),
+  resourceTenantId: (z as any).string(),
+  action: (z as any).string(),
+  purpose: (z as any).string().optional(),
+  justification: (z as any).string().optional(),
 });
 
 export type PolicySimulationInput = z.infer<typeof policySimulationInputSchema>;

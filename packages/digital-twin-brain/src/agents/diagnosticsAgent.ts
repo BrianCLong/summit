@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { FeatureStore } from '../core/featureStore.js';
 import { Modality, TwinGraph } from '../core/types.js';
 

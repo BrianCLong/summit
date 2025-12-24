@@ -1,10 +1,9 @@
-// @ts-nocheck
 import path from 'path';
 import { PythonShell } from 'python-shell';
 import pino from 'pino';
 import { randomUUID as uuidv4 } from 'node:crypto';
 
-const log = pino({ name: 'HybridEntityResolutionService' });
+const log = (pino as any)({ name: 'HybridEntityResolutionService' });
 
 export interface ERServiceResult {
   version: string;

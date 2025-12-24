@@ -25,18 +25,21 @@ const evidence: EvidenceNode[] = [
     label: 'email:alice@example.com',
     confidence: 0.9,
     policies: ['policy:export'],
+    time: Date.UTC(2024, 0, 1),
   },
   {
     id: 'ev-2',
     label: 'geo:berlin',
     confidence: 0.8,
     policies: ['policy:retention'],
+    time: Date.UTC(2024, 0, 2),
   },
   {
     id: 'ev-3',
     label: 'case:orion-breach',
     confidence: 0.85,
     policies: ['policy:export'],
+    time: Date.UTC(2024, 0, 3),
   },
 ];
 
@@ -54,6 +57,7 @@ describe('TriPaneController', () => {
       ['policy:export', 'policy:retention'].sort(),
     );
     expect(controller.current.confidenceOpacity).toBeLessThanOrEqual(1);
+    expect(controller.current.activePanel).toBe('graph');
     expect(mapUpdates).toBeGreaterThan(0);
   });
 
@@ -72,6 +76,7 @@ describe('TriPaneController', () => {
     expect(explain.navigationTips).toContain(
       'Ctrl+1 Graph · Ctrl+2 Timeline · Ctrl+3 Map',
     );
+    expect(explain.timeWindow).toBeUndefined();
   });
 
   it('restores saved views without later mutations leaking through', () => {
@@ -160,5 +165,93 @@ describe('TriPaneController', () => {
     controller.selectFromMap('ev-2');
     expect(controller.handleShortcut('cmd+s')).toBe(true);
     expect(controller.restoreView('snapshot')).toBeDefined();
+  });
+
+  it('captures time window as SSOT and injects it into queries and keys', () => {
+    const controller = new TriPaneController([], {
+      tenantId: 'tenant-a',
+      caseId: 'case-99',
+    });
+    controller.setTimeWindow({
+      start: Date.UTC(2024, 0, 1),
+      end: Date.UTC(2024, 0, 3),
+      timezone: 'UTC',
+    });
+
+    controller.selectFromGraph('person-1', evidence);
+
+    const payload = controller.buildQueryPayload({ filter: 'active' });
+    expect(payload.timeWindow?.start).toBe(Date.UTC(2024, 0, 1));
+    expect(payload.timeWindow?.end).toBe(Date.UTC(2024, 0, 3));
+    expect(payload.timeWindow?.timezone).toBe('UTC');
+    expect(payload.tenantId).toBe('tenant-a');
+    expect(payload.caseId).toBe('case-99');
+
+    const key = controller.buildQueryKey('graph.fetch');
+    expect(key).toContain('tenant-a');
+    expect(key).toContain('case-99');
+    expect(key).toContain(`${Date.UTC(2024, 0, 1)}-${Date.UTC(2024, 0, 3)}`);
+    expect(key).toContain('UTC');
+    expect(controller.current.evidence.length).toBe(3);
+  });
+
+  it('recomputes bindings and opacity when time window filters evidence', () => {
+    const controller = new TriPaneController(evidence);
+    controller.selectFromGraph('person-1', evidence);
+    controller.setTimeWindow({
+      start: Date.UTC(2024, 0, 2),
+      end: Date.UTC(2024, 0, 2),
+    });
+
+    expect(controller.current.evidence.map((item) => item.id)).toEqual(['ev-2']);
+    expect(controller.current.policyBindings).toEqual(['policy:retention']);
+    expect(controller.current.confidenceOpacity).toBeCloseTo(0.8);
+  });
+
+  it('supports undo/redo for time window and selections', () => {
+    const controller = new TriPaneController(evidence);
+    controller.selectFromGraph('person-1', evidence);
+    controller.setTimeWindow({
+      start: Date.UTC(2024, 0, 2),
+      end: Date.UTC(2024, 0, 3),
+    });
+    controller.selectFromTimeline('ev-3');
+
+    expect(controller.current.timelineSelection).toBe('ev-3');
+    expect(controller.current.timeWindow?.start).toBe(Date.UTC(2024, 0, 2));
+
+    controller.undo();
+    expect(controller.current.timelineSelection).toBe('ev-3');
+    expect(controller.current.timeWindow?.start).toBe(Date.UTC(2024, 0, 2));
+
+    controller.undo();
+    expect(controller.current.timeWindow).toBeUndefined();
+
+    controller.redo();
+    expect(controller.current.timeWindow?.start).toBe(Date.UTC(2024, 0, 2));
+  });
+
+  it('exposes keyboard-friendly time brush handles that adjust the window', () => {
+    const controller = new TriPaneController();
+    controller.setTimeWindow({
+      start: Date.UTC(2024, 0, 1),
+      end: Date.UTC(2024, 0, 2),
+    });
+
+    const handles = controller.getTimeBrushHandles(24 * 60 * 60 * 1000);
+    const startKeyDown = handles.startHandle.onKeyDown as (
+      event: { key: string; shiftKey?: boolean; preventDefault?: () => void },
+    ) => void;
+    startKeyDown({ key: 'ArrowLeft' });
+    expect(controller.current.timeWindow?.start).toBe(Date.UTC(2023, 11, 31));
+
+    const endKeyDown = handles.endHandle.onKeyDown as (
+      event: { key: string; shiftKey?: boolean; preventDefault?: () => void },
+    ) => void;
+    endKeyDown({ key: 'ArrowRight', shiftKey: true });
+    expect(controller.current.timeWindow?.end).toBe(Date.UTC(2024, 0, 4));
+    expect(handles.startHandle.role).toBe('slider');
+    expect(handles.endHandle['aria-label']).toBe('Time brush end');
+    expect(typeof handles.liveRegion()).toBe('string');
   });
 });

@@ -1,9 +1,8 @@
-// @ts-nocheck
 /**
  * GraphRAG Retrieval Tests
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import {
   retrieveGraphContext,
   buildLlmContextPayload,

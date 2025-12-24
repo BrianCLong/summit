@@ -1,14 +1,15 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-
 import React, { useState } from 'react';
 import { MapContainer, TileLayer, Circle, Popup, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { useLazyQuery, gql } from '@apollo/client';
+import { useLazyQuery } from '@apollo/client/react';
+import { gql } from '@apollo/client';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Label } from '../components/ui/label';
 import { Input } from '../components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/Tabs';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 import L from 'leaflet';

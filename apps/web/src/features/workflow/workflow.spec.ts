@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { test, expect } from '@playwright/test'
 import http from 'http'
 import app from '../../../../../services/workflow/src/index.js'
@@ -8,8 +7,9 @@ let base: string
 
 test.beforeAll(async () => {
   server = http.createServer(app)
-  await new Promise<void>(resolve => server.listen(0, () => resolve()))
-  const { port } = server.address() as any
+  await new Promise<void>((resolve) => server.listen(0, () => resolve()))
+  const address = server.address() as { port: number }
+  const { port } = address
   base = `http://localhost:${port}`
   await fetch(`${base}/wf/definition`, {
     method: 'POST',
@@ -51,14 +51,14 @@ test('start→transition→complete with SLA countdown UI', async ({ page }) => 
   await page.waitForTimeout(600)
   const second = Number(await page.textContent('#sla'))
   expect(second).toBeLessThan(first)
-  await page.evaluate(async base => {
+  await page.evaluate(async (base: string) => {
     await fetch(`${base}/wf/transition`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: '1', transition: 'close', reason: 'ok' }),
     })
   }, base)
-  const state = await page.evaluate(async base => {
+  const state = await page.evaluate(async (base: string) => {
     const res = await fetch(`${base}/wf/cases/1`)
     return (await res.json()).state
   }, base)

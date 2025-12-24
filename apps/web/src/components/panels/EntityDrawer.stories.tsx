@@ -1,4 +1,3 @@
-// @ts-nocheck
 import type { Meta, StoryObj } from '@storybook/react'
 import { EntityDrawer } from './EntityDrawer'
 import { TooltipProvider } from '@/components/ui/Tooltip'

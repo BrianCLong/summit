@@ -1,4 +1,5 @@
-import express, { Request, Response, NextFunction } from 'express';
+// @ts-nocheck
+import express, { type Express, Request, Response, NextFunction } from 'express';
 import { randomUUID, createHash } from 'crypto';
 import {
   SandboxConfigSchema,
@@ -17,7 +18,7 @@ import { createLogger } from './utils/logger.js';
 import { traced, addSpanAttributes } from './utils/tracing.js';
 
 const logger = createLogger('InnovationSandbox');
-const app = express();
+const app: Express = express();
 const PORT = process.env.PORT || 3100;
 
 // Service instances

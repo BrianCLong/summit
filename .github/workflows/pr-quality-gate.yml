@@ -62,6 +62,9 @@ jobs:
       - name: Typecheck
         run: pnpm run typecheck
 
+      - name: Golden Path Compliance
+        run: npm run check:golden || echo "::warning::Golden path violations found. Please adhere to Golden Paths for new features."
+
       - name: Security Audit
         # Run audit but don't fail immediately on moderate issues to prevent blocking dev flow unnecessarily,
         # but ensure critical/high are caught. Adjust level as needed.

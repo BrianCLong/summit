@@ -5,7 +5,7 @@ import { MVP1RBACService, Permission, ResourceType } from './MVP1RBACService';
 import { default as pino } from 'pino';
 
 // @ts-ignore
-const logger = pino();
+const logger = (pino as any)();
 
 interface CopilotEntity {
   type: string;

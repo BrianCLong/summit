@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals';
 import { Pool } from 'pg';
 import { DataRetentionEngine } from '../governance/retention/dataRetentionEngine.js';
@@ -20,7 +19,7 @@ function mockPool(): Pool {
 function mockAudit(): RetentionAuditLogger {
   return {
     log: jest.fn().mockResolvedValue(undefined),
-  };
+  } as unknown as RetentionAuditLogger;
 }
 
 function baseRecord(datasetId: string, overrides: Partial<RetentionRecord> = {}): RetentionRecord {

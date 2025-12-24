@@ -2,7 +2,7 @@
 import YAML from 'yaml';
 import { DateTime } from 'luxon';
 import pg from 'pg';
-import crypto from 'crypto';
+import { createHash } from 'crypto';
 import { startRun } from './start.js';
 
 const { Pool } = pg;
@@ -33,7 +33,7 @@ export async function runBackfill(rbYaml: string, dry = true) {
   for (const w of slots) {
     const idempotency =
       'backfill:' +
-      crypto.createHash('sha1').update(`${w.start}:${w.end}`).digest('hex');
+      createHash('sha1').update(`${w.start}:${w.end}`).digest('hex');
     const exists = await pgPool.query(
       `SELECT 1 FROM run WHERE idempotency_key=$1`,
       [idempotency],

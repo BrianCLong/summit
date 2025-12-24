@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * @intelgraph/neural-networks
  * Neural network architecture library and model zoo
@@ -5,6 +6,7 @@
 
 import { z } from 'zod';
 import type { Layer, ModelMetadata } from '@intelgraph/deep-learning-core';
+export type { Layer, ModelMetadata } from '@intelgraph/deep-learning-core';
 
 // ============================================================================
 // Neural Network Architecture Definitions
@@ -360,7 +362,7 @@ export class NeuralArchitectureSearch {
       const activation = activations[Math.floor(Math.random() * activations.length)];
 
       layers.push({
-        type: layerType,
+        type: layerType as string,
         name: `layer_${i}`,
         config: { units, activation },
       });

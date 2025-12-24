@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Key Metrics Grid - Displays configurable KPI widgets
  */

@@ -1,0 +1,9 @@
+redis:
+  enabled: true
+  addr: redis.default.svc.cluster.local:6379
+pg:
+  rw: pgbouncer.default.svc.cluster.local:6432
+  ro: postgres-replica.default.svc.cluster.local:5432
+keda:
+  enabled: true
+  queueLengthPerPod: 50

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Enhanced Tenant Validation Middleware
  * Provides comprehensive tenant isolation at API, DB, and cache layers
@@ -8,7 +7,7 @@ import { GraphQLError } from 'graphql';
 import pino from 'pino';
 import { TenantContext as CanonicalTenantContext } from '../tenancy/types.js';
 
-const logger = pino({ name: 'tenantValidator' });
+const logger = (pino as any)({ name: 'tenantValidator' });
 
 export interface TenantContext extends CanonicalTenantContext {
   userId: string;

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Persisted Queries Middleware
  *
@@ -12,7 +11,7 @@ import { join } from 'path';
 import { createHash } from 'crypto';
 import pino from 'pino';
 
-const logger: pino.Logger = pino({ name: 'persistedQueries' });
+const logger: pino.Logger = (pino as any)({ name: 'persistedQueries' });
 
 interface PersistedQueriesConfig {
   manifestDirectory?: string;

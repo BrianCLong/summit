@@ -1,5 +1,4 @@
 // @ts-nocheck
-
 import { getNeo4jDriver } from '../../config/database';
 import { EmbeddingService } from '../../services/EmbeddingService';
 

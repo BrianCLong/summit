@@ -26,7 +26,7 @@
 
 # SummitForge
 
-> **AI-Powered Open OSINT Fusion Platform** - Transforms the open-source Summit stack into a deployable, AI-augmented intelligence analysis suite.
+> **AI-Powered Open OSINT Fusion Platform** - The only intelligence platform that guarantees provable evidence for every AI insight, eliminating hallucination risk in high-stakes operations.
 
 ## 🛠 Developer Onboarding (Deployable-First)
 
@@ -47,18 +47,40 @@
 
 **Prerequisites:** Docker Desktop ≥ 4.x (8GB memory, BuildKit enabled), Node 18+, pnpm 9 (via `corepack enable`), Python 3.11+, ports 3000, 4000, 5432, 6379, 7474, 7687, 8080 available.
 
+## 🐍 Python Dev Quickstart
+
+For Python development (IntelGraph Core):
+
+1.  **Bootstrap**: Install dependencies and tools.
+    ```bash
+    make bootstrap
+    ```
+2.  **Test**: Run unit tests.
+    ```bash
+    make test
+    ```
+3.  **Lint**: Run ruff and mypy.
+    ```bash
+    make lint
+    ```
+4.  **Format**: Format code.
+    ```bash
+    make fmt
+    ```
+
 ```bash
 git clone https://github.com/BrianCLong/summit.git
 cd summit
-npm run quickstart      # Trivial setup: installs deps, starts infra, migrates DB, runs dev servers
+npm run quickstart      # Validates paths/env, installs deps, starts infra, migrates DB, runs dev servers
+# Optional profiles: npm run quickstart -- --ai --kafka
 ```
 
-**Manual steps:**
+**Manual steps (if you prefer explicit control):**
 ```bash
 make bootstrap          # installs pnpm deps + venv + .env
-npm run docker:dev -- up -d postgres neo4j redis # start infrastructure
-npm run db:migrate      # setup database
-npm run dev             # start frontend and backend
+docker compose -f docker-compose.dev.yml up -d postgres neo4j redis
+npm run db:migrate && npm run db:seed
+pnpm run dev            # start frontend and backend
 ```
 
 **Service Endpoints:**
@@ -84,7 +106,7 @@ npm run dev             # start frontend and backend
 - **Merge automation:** label PRs `automerge-safe` when conflict-free and green; use `merge-train` to process sequentially, with auto-update jobs rebasing from `main` as needed.
 - **Grafana**: http://localhost:3001 (Observability Dashboards)
 
-**Optional AI/Kafka stack:** `./start.sh --ai` or `make up-ai` loads `docker-compose.ai.yml`.
+**Optional AI/Kafka stack:** `npm run quickstart -- --ai --kafka` enables the AI services (LLM helpers) and Kafka profile in a single run; `./start.sh --ai` or `make up-ai` are still supported.
 
 ### Observability & Health
 

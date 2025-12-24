@@ -4,12 +4,12 @@
 
 import { trace, Span } from '@opentelemetry/api';
 import { Counter, Histogram, Gauge } from 'prom-client';
-import { getRedisClient } from '../db/redis';
+import { getRedisClient } from '../db/redis.js';
 import * as crypto from 'crypto';
-import { neo } from './neo4j';
-import { CompressionUtils } from '../utils/compression';
+import { neo } from './neo4j.js';
+import { CompressionUtils } from '../utils/compression.js';
 import neo4j from 'neo4j-driver'; // Import neo4j to handle Integer types
-import { logger } from '../config/logger';
+import { logger } from '../config/logger.js';
 
 const tracer = trace.getTracer('query-optimizer', '24.3.0');
 

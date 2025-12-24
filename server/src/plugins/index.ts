@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Plugin, PluginContext } from './sdk';
 import { vaultReadKvV2 } from '../vault/helpers';
 import { RedisService as RedisCache } from '../cache/redis.js';
@@ -7,11 +6,11 @@ import { otelService } from '../middleware/observability/otel-tracing.js';
 
 const registry = new Map<string, Plugin<any, any>>();
 
-export function register(name: string, plugin: Plugin) {
+export function register<TInput = any, TOutput = any>(name: string, plugin: Plugin<TInput, TOutput>) {
   registry.set(name, plugin);
 }
 
-export function get(name: string): Plugin | undefined {
+export function get<TInput = any, TOutput = any>(name: string): Plugin<TInput, TOutput> | undefined {
   return registry.get(name);
 }
 

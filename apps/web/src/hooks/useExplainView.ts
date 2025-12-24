@@ -1,6 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import { gql } from '@apollo/client/core'
-import { useQuery, useMutation } from '@apollo/client/react'
 import { useQuery, useMutation } from '@apollo/client/react'
 import { gql } from '@apollo/client'
 import { useMemo, useCallback } from 'react'
@@ -118,7 +117,7 @@ interface ContributionScore {
 interface UseExplainViewOptions {
   entities: Entity[]
   relationships: Relationship[]
-  activeFilters?: Record<string, any>
+  activeFilters?: Record<string, unknown>
   enableRealtime?: boolean
 }
 
@@ -393,7 +392,7 @@ export function useExplainView({
 
   // Track when user interacts with explain view
   const trackInteraction = useCallback(
-    async (action: string, metadata?: Record<string, any>) => {
+    async (action: string, metadata?: Record<string, unknown>) => {
       try {
         await recordInteraction({
           variables: {

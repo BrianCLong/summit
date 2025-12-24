@@ -5,7 +5,7 @@ import { RunbookDefinition, RunbookContext, RunbookStep, StepDefinition } from '
 import { provenanceLedger } from '../../provenance/ledger.js';
 import pino from 'pino';
 
-const logger = pino({ name: 'RunbookEngine' });
+const logger = (pino as any)({ name: 'RunbookEngine' });
 
 export class RunbookEngine extends EventEmitter {
   private definitions: Map<string, RunbookDefinition> = new Map();

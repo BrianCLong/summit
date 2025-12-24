@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useEffect } from 'react'
 import { Download, RefreshCw } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
@@ -345,7 +344,7 @@ export default function AlertsPage() {
                       </Badge>
                     </td>
                     <td>
-                      <Badge variant={getStatusColor(alert.status) as any}>
+                      <Badge variant={getStatusColor(alert.status) as 'destructive' | 'warning' | 'success' | 'secondary'}>
                         {alert.status}
                       </Badge>
                     </td>

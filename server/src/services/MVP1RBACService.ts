@@ -5,7 +5,7 @@ import { isFeatureEnabled } from '../config/mvp1-features';
 import { default as pino } from 'pino';
 
 // @ts-ignore
-const logger = pino();
+const logger = (pino as any)();
 
 // Fine-grained permissions for MVP-1+
 export enum Permission {

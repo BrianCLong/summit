@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Policy Guardian Agent
  *

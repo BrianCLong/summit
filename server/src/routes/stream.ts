@@ -1,12 +1,12 @@
-// @ts-nocheck
 
-import express from 'express';
+import express, { Response, NextFunction } from 'express';
 import { graphStreamer } from '../lib/streaming/GraphStreamer';
 import { getRedisClient } from '../db/redis';
+import type { AuthenticatedRequest } from './types.js';
 
 const router = express.Router();
 
-router.post('/start', async (req, res) => {
+router.post('/start', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { query, params, config } = req.body;
     // Validate inputs here (omitted for brevity)
@@ -18,7 +18,7 @@ router.post('/start', async (req, res) => {
   }
 });
 
-router.get('/:streamId', async (req, res) => {
+router.get('/:streamId', async (req: AuthenticatedRequest, res: Response) => {
   const { streamId } = req.params;
   const redis = getRedisClient();
   const channel = `stream:${streamId}`;

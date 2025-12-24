@@ -1,11 +1,10 @@
-// @ts-nocheck
 import { Socket } from 'socket.io';
 import pino from 'pino';
 import { getRedisClient } from '../db/redis.js';
 import { TimeSeriesService } from '../services/TimeSeriesService.js';
 import { getIO } from './socket.js';
 
-const logger = pino();
+const logger = (pino as any)();
 const redis = getRedisClient();
 const sub = redis.duplicate();
 const timeSeries = new TimeSeriesService();
@@ -18,19 +17,19 @@ sub.subscribe('alerts');
 // We need a reference to the IO server or we can use the socket instance to join rooms.
 // Using rooms is much more efficient than managing maps manually.
 
-export function registerAnalyticsHandlers(socket: Socket) {
+export function registerAnalyticsHandlers(socket: Socket): void {
 
-  socket.on('subscribe_alerts', async () => {
+  socket.on('subscribe_alerts', async (): Promise<void> => {
     logger.info({ socketId: socket.id }, 'Client subscribed to alerts');
     await socket.join('alerts');
   });
 
-  socket.on('unsubscribe_alerts', () => {
+  socket.on('unsubscribe_alerts', (): void => {
     logger.info({ socketId: socket.id }, 'Client unsubscribed from alerts');
     socket.leave('alerts');
   });
 
-  socket.on('subscribe_metric', async (metric: string) => {
+  socket.on('subscribe_metric', async (metric: string): Promise<void> => {
     logger.info({ socketId: socket.id, metric }, 'Client subscribed to metric');
 
     // Join a room specific to this metric
@@ -44,12 +43,12 @@ export function registerAnalyticsHandlers(socket: Socket) {
     }
   });
 
-  socket.on('unsubscribe_metric', (metric: string) => {
+  socket.on('unsubscribe_metric', (metric: string): void => {
     logger.info({ socketId: socket.id, metric }, 'Client unsubscribed from metric');
     socket.leave(`metric:${metric}`);
   });
 
-  socket.on('query_metrics', async ({ metric, start, end }: { metric: string, start: number, end: number }, callback) => {
+  socket.on('query_metrics', async ({ metric, start, end }: { metric: string, start: number, end: number }, callback: (response: { status: string; data?: any; error?: string }) => void): Promise<void> => {
       try {
           const data = await timeSeries.query(metric, start, end);
           if (typeof callback === 'function') {
@@ -63,7 +62,7 @@ export function registerAnalyticsHandlers(socket: Socket) {
   });
 }
 
-sub.on('pmessage', (_pattern, channel, message) => {
+sub.on('pmessage', (_pattern: string, channel: string, message: string): void => {
     try {
         if (channel.startsWith('ts:update:')) {
             const metric = channel.split(':')[2]; // ts:update:metric_name
@@ -80,7 +79,7 @@ sub.on('pmessage', (_pattern, channel, message) => {
     }
 });
 
-sub.on('message', (channel, message) => {
+sub.on('message', (channel: string, message: string): void => {
     if (channel === 'alerts') {
         try {
             const alert = JSON.parse(message);

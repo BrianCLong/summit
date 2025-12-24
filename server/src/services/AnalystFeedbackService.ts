@@ -1,6 +1,8 @@
 // @ts-nocheck
-import { PrismaClient } from '@prisma/client';
-import winston, { Logger } from 'winston';
+import type { PrismaClient } from '@prisma/client';
+import type winston from 'winston';
+import { type Logger } from 'winston';
+import { createHash } from 'crypto';
 
 export interface AnalystFeedback {
   id: string;
@@ -36,7 +38,7 @@ export type CorrectionInput = {
 
 export class AnalystFeedbackService {
   private prisma: PrismaClient;
-  private logger: winston.Logger;
+  private logger: Logger;
 
   constructor(prisma: PrismaClient, logger: Logger) {
     this.prisma = prisma;
@@ -76,7 +78,7 @@ export class AnalystFeedbackService {
       return feedbackRecord as AnalystFeedback;
     } catch (error) {
       this.logger.error('Failed to record analyst feedback', {
-        error,
+        error: error instanceof Error ? error.message : String(error),
         feedback,
       });
       throw new Error('Failed to record feedback');
@@ -110,7 +112,10 @@ export class AnalystFeedbackService {
           // Ideally, update re-ranking or trigger fine-tuning here
           // For now, we just log/store it
       } catch (error) {
-          this.logger.error('Failed to submit correction', { error, input });
+          this.logger.error('Failed to submit correction', {
+            error: error instanceof Error ? error.message : String(error),
+            input
+          });
           throw new Error('Failed to submit correction');
       }
   }
@@ -151,7 +156,10 @@ export class AnalystFeedbackService {
 
       return labelEntry as LabelStoreEntry;
     } catch (error) {
-      this.logger.error('Failed to store label', { error, label });
+      this.logger.error('Failed to store label', {
+        error: error instanceof Error ? error.message : String(error),
+        label
+      });
       throw new Error('Failed to store label');
     }
   }
@@ -168,7 +176,10 @@ export class AnalystFeedbackService {
 
       return feedback as AnalystFeedback[];
     } catch (error) {
-      this.logger.error('Failed to get feedback for alert', { error, alertId });
+      this.logger.error('Failed to get feedback for alert', {
+        error: error instanceof Error ? error.message : String(error),
+        alertId
+      });
       throw new Error('Failed to get feedback');
     }
   }
@@ -185,7 +196,10 @@ export class AnalystFeedbackService {
 
       return labels as LabelStoreEntry[];
     } catch (error) {
-      this.logger.error('Failed to get labels for alert', { error, alertId });
+      this.logger.error('Failed to get labels for alert', {
+        error: error instanceof Error ? error.message : String(error),
+        alertId
+      });
       throw new Error('Failed to get labels');
     }
   }
@@ -233,7 +247,9 @@ export class AnalystFeedbackService {
 
       return trainingData;
     } catch (error) {
-      this.logger.error('Failed to generate training data', { error });
+      this.logger.error('Failed to generate training data', {
+        error: error instanceof Error ? error.message : String(error)
+      });
       throw new Error('Failed to generate training data');
     }
   }
@@ -279,7 +295,9 @@ export class AnalystFeedbackService {
         })),
       };
     } catch (error) {
-      this.logger.error('Failed to get feedback statistics', { error });
+      this.logger.error('Failed to get feedback statistics', {
+        error: error instanceof Error ? error.message : String(error)
+      });
       throw new Error('Failed to get feedback statistics');
     }
   }
@@ -351,7 +369,7 @@ export class AnalystFeedbackService {
       }
     } catch (error) {
       this.logger.error('Failed to check retraining conditions', {
-        error,
+        error: error instanceof Error ? error.message : String(error),
         alertId,
       });
     }
@@ -365,6 +383,6 @@ export class AnalystFeedbackService {
   }
 
   private hashText(text: string): string {
-    return require('crypto').createHash('sha256').update(text).digest('hex');
+    return createHash('sha256').update(text).digest('hex');
   }
 }

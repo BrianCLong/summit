@@ -15,6 +15,8 @@ import {
 import Redis from 'ioredis';
 import logger from '../utils/logger.js';
 
+type FeatureFlagProvider = LaunchDarklyProvider | UnleashProvider;
+
 let featureFlagService: FeatureFlagService | null = null;
 
 /**
@@ -32,7 +34,7 @@ export async function initializeFeatureFlags(): Promise<FeatureFlagService> {
     const providerType = process.env.FEATURE_FLAG_PROVIDER || 'launchdarkly';
 
     // Initialize provider
-    let provider;
+    let provider: FeatureFlagProvider;
     if (providerType === 'launchdarkly') {
       if (!process.env.LAUNCHDARKLY_SDK_KEY) {
         throw new Error('LAUNCHDARKLY_SDK_KEY is required');
@@ -60,7 +62,7 @@ export async function initializeFeatureFlags(): Promise<FeatureFlagService> {
     }
 
     // Initialize Redis cache
-    let cache;
+    let cache: RedisCache | undefined;
     if (process.env.REDIS_URL) {
       const redis = new Redis(process.env.REDIS_URL, {
         maxRetriesPerRequest: 3,

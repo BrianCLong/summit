@@ -2,7 +2,7 @@
 import { default as pino } from 'pino';
 
 // @ts-ignore
-const logger = pino();
+const logger = (pino as any)();
 
 /**
  * Enum representing the possible states of a Circuit Breaker.

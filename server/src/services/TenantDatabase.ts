@@ -4,16 +4,16 @@
  * Provides database operations with automatic tenant isolation
  */
 
-import { Driver, Session, Transaction } from 'neo4j-driver';
-import { Pool } from 'pg';
-import Redis from 'ioredis';
+import type { Driver, Session, Transaction } from 'neo4j-driver';
+import type { Pool, PoolClient } from 'pg';
+import type Redis from 'ioredis';
 import pino from 'pino';
-import {
+import type {
   TenantContext,
-  TenantValidator,
 } from '../middleware/tenantValidator.js';
+import { TenantValidator } from '../middleware/tenantValidator.js';
 
-const logger = pino({ name: 'tenantDatabase' });
+const logger = (pino as any)({ name: 'tenantDatabase' });
 
 export interface DatabaseConfig {
   neo4j?: Driver;
@@ -26,6 +26,10 @@ export interface QueryOptions {
   retries?: number;
   cacheEnabled?: boolean;
   cacheTTL?: number;
+}
+
+interface QueryResult {
+  rows: Array<Record<string, unknown>>;
 }
 
 /**
@@ -47,10 +51,10 @@ export class TenantDatabase {
    */
   async executeNeo4jQuery(
     cypherQuery: string,
-    parameters: Record<string, any>,
+    parameters: Record<string, unknown>,
     tenantContext: TenantContext,
     options: QueryOptions = {},
-  ): Promise<any> {
+  ): Promise<Array<Record<string, unknown>>> {
     if (!this.neo4j) {
       throw new Error('Neo4j driver not configured');
     }
@@ -127,10 +131,10 @@ export class TenantDatabase {
    */
   async executePostgresQuery(
     sqlQuery: string,
-    parameters: any[],
+    parameters: unknown[],
     tenantContext: TenantContext,
     options: QueryOptions = {},
-  ): Promise<any> {
+  ): Promise<Array<Record<string, unknown>>> {
     if (!this.postgres) {
       throw new Error('PostgreSQL pool not configured');
     }
@@ -163,7 +167,7 @@ export class TenantDatabase {
     const { query: enhancedQuery, parameters: enhancedParams } =
       this.addTenantToPostgresQuery(sqlQuery, parameters, tenantContext);
 
-    const client = await this.postgres.connect();
+    const client: PoolClient = await this.postgres.connect();
 
     try {
       logger.debug(
@@ -208,7 +212,7 @@ export class TenantDatabase {
     key: string,
     tenantContext: TenantContext,
     scope: 'tenant' | 'global' | 'user' = 'tenant',
-  ): Promise<any | null> {
+  ): Promise<unknown | null> {
     if (!this.redis) {
       return null;
     }
@@ -241,7 +245,7 @@ export class TenantDatabase {
    */
   async setCached(
     key: string,
-    data: any,
+    data: unknown,
     tenantContext: TenantContext,
     ttl: number = 300,
     scope: 'tenant' | 'global' | 'user' = 'tenant',
@@ -313,11 +317,11 @@ export class TenantDatabase {
     operations: Array<{
       type: 'neo4j' | 'postgres';
       query: string;
-      parameters: any;
+      parameters: unknown;
     }>,
     tenantContext: TenantContext,
-  ): Promise<any[]> {
-    const results: any[] = [];
+  ): Promise<unknown[]> {
+    const results: unknown[] = [];
 
     // Group operations by database type
     const neo4jOps = operations.filter((op) => op.type === 'neo4j');
@@ -351,7 +355,7 @@ export class TenantDatabase {
 
     // Execute PostgreSQL operations in transaction
     if (postgresOps.length > 0 && this.postgres) {
-      const client = await this.postgres.connect();
+      const client: PoolClient = await this.postgres.connect();
       try {
         await client.query('BEGIN');
         for (const op of postgresOps) {
@@ -381,7 +385,7 @@ export class TenantDatabase {
    */
   private generateCacheKey(
     query: string,
-    parameters: any,
+    parameters: unknown,
     tenantContext: TenantContext,
   ): string {
     const queryHash = Buffer.from(query + JSON.stringify(parameters))
@@ -398,9 +402,9 @@ export class TenantDatabase {
    */
   private addTenantToPostgresQuery(
     sqlQuery: string,
-    parameters: any[],
+    parameters: unknown[],
     tenantContext: TenantContext,
-  ): { query: string; parameters: any[] } {
+  ): { query: string; parameters: unknown[] } {
     let enhancedQuery = sqlQuery;
     const enhancedParams = [...parameters, tenantContext.tenantId];
     const tenantParamIndex = enhancedParams.length;

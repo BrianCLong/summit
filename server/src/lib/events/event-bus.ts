@@ -4,7 +4,7 @@ import { logger } from '../config/logger.js';
 import { correlationStorage } from '../config/logger.js';
 import { summitMetrics } from './summit-metrics.js';
 
-export interface SummitEvent<T = any> {
+export interface SummitEvent<T = unknown> {
   name: string;
   data: T;
   timestamp: string;
@@ -26,8 +26,9 @@ class SummitEventBus extends EventEmitter {
     };
 
     logger.info({ event }, `Event published: ${name}`);
-    summitMetrics.getCounter('summit_events_published_total', 'Total events published')
-        .add(1, { kind: name, tenantId: event.tenantId });
+    summitMetrics
+      .getCounter('summit_events_published_total', 'Total events published')
+      .add(1, { kind: name, tenantId: event.tenantId });
 
     this.emit(name, event);
     this.emit('*', event);

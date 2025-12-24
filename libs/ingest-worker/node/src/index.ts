@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * @intelgraph/ingest-worker
  *
@@ -17,4 +16,18 @@ export * from './circuit-breaker.js';
 export * from './idempotency.js';
 export * from './rate-limiter.js';
 export * from './worker.js';
-export * from './types.js';
+export type {
+  WorkerState,
+  DLQReasonCode,
+  WorkerConfig,
+  RetryConfig,
+  CircuitBreakerConfig,
+  BackpressureConfig,
+  IdempotencyConfig,
+  WorkerMetrics,
+  Task,
+  TaskResult,
+  TaskHandler,
+  DLQHandler,
+  WorkerEvents,
+} from './types.js';

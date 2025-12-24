@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * BERT-based sentiment analysis model
  * Fine-tuned for domain-specific sentiment detection

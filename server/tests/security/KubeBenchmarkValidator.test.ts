@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { kubeBenchmarkValidator } from '../src/security/KubeBenchmarkValidator.js';
 
 describe('KubeBenchmarkValidator', () => {

@@ -42,6 +42,11 @@ export class FaceAnalyzer extends BaseComputerVisionModel implements IFaceAnalyz
       model_name: 'mtcnn_facenet',
       device: config?.device || 'cpu',
       confidence_threshold: config?.confidence_threshold || 0.7,
+      batch_size: config?.batch_size || 1,
+      nms_threshold: config?.nms_threshold || 0.4,
+      max_detections: config?.max_detections || 50,
+      fp16: config?.fp16 || false,
+      int8: config?.int8 || false,
       ...config,
     });
 
@@ -132,13 +137,13 @@ export class FaceAnalyzer extends BaseComputerVisionModel implements IFaceAnalyz
     let clusterId = 0;
 
     for (let i = 0; i < faces.length; i++) {
-      if (assigned.has(i) || !faces[i].embedding) {continue;}
+      if (assigned.has(i) || !faces[i].embedding) { continue; }
 
       const cluster: Face[] = [faces[i]];
       assigned.add(i);
 
       for (let j = i + 1; j < faces.length; j++) {
-        if (assigned.has(j) || !faces[j].embedding) {continue;}
+        if (assigned.has(j) || !faces[j].embedding) { continue; }
 
         const similarity = await this.compareFaces(faces[i], faces[j]);
         if (similarity >= threshold) {

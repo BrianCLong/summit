@@ -11,6 +11,7 @@ import requests  # type: ignore[import-untyped]
 from .models import EventEnvelope, IngestJobRequest, JobStatus
 from .pii import apply_redaction, detect_pii
 from .redis_stream import RedisStream
+from .cost import emit_cost_event
 
 try:  # Lazy import to keep ingest lightweight when ML stack is absent in tests
     from ml.app.pipelines import PostgresPreprocessingPipeline
@@ -42,8 +43,10 @@ def _iter_records(req: IngestJobRequest, raw: str) -> Iterator[Dict[str, Any]]:
 
 
 async def run_job(job_id: str, req: IngestJobRequest, stream: RedisStream) -> JobStatus:
+    start_time = time.time()
     pii_summary: Dict[str, int] = defaultdict(int)
     processed = 0
+    total_bytes = 0
     quality_insights: Dict[str, Any] | None = None
 
     if req.source_type == "postgres":
@@ -70,6 +73,7 @@ async def run_job(job_id: str, req: IngestJobRequest, stream: RedisStream) -> Jo
         records = _postgres_iter()
     else:
         raw = await _load_source(req)
+        total_bytes = len(raw.encode('utf-8'))
         records = _iter_records(req, raw)
 
     for record in records:
@@ -90,6 +94,24 @@ async def run_job(job_id: str, req: IngestJobRequest, stream: RedisStream) -> Jo
         )
         await stream.push(event.model_dump())
         processed += 1
+
+    # Emit cost event
+    try:
+        emit_cost_event(
+            operation_type='ingest',
+            tenant_id=req.tenant_id or "unknown",
+            scope_id=req.scope_id or "default",
+            correlation_id=job_id,
+            dimensions={
+                'io_bytes': total_bytes,
+                'objects_written': processed,
+                'cpu_ms': int((time.time() - start_time) * 1000),
+            },
+        )
+    except Exception as e:
+        # Non-critical, log and continue
+        print(f"Failed to emit cost event for ingest job {job_id}: {e}")
+
     status = JobStatus(
         id=job_id,
         status="completed",

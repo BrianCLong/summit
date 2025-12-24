@@ -1,39 +1,39 @@
-// @ts-nocheck
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { UsageKind } from '../../types/usage';
+import { UsageKind } from '../../types/usage.js';
+import type { PoolClient, QueryResult } from 'pg';
 
 // 1. Create dependencies
-const mockQuery = jest.fn();
-const mockRelease = jest.fn();
-const mockClient = {
+const mockQuery = jest.fn<() => Promise<QueryResult<any>>>();
+const mockRelease = jest.fn<() => Promise<void>>();
+const mockClient: PoolClient = {
   query: mockQuery,
   release: mockRelease,
-};
-const mockConnect = jest.fn(() => Promise.resolve(mockClient));
+} as unknown as PoolClient;
+const mockConnect = jest.fn<() => Promise<PoolClient>>(() => Promise.resolve(mockClient));
 
 // 2. Mock modules
-jest.mock('../../config/database', () => ({
+jest.mock('../../config/database.js', () => ({
   getPostgresPool: () => ({
       connect: mockConnect
   }),
 }));
 
-jest.mock('../../utils/logger', () => ({
+jest.mock('../../utils/logger.js', () => ({
   error: jest.fn(),
   warn: jest.fn(),
   info: jest.fn(),
 }));
 
-jest.mock('../../utils/metrics', () => ({
+jest.mock('../../utils/metrics.js', () => ({
   PrometheusMetrics: class {
-    createCounter() {}
-    incrementCounter() {}
+    createCounter(): void {}
+    incrementCounter(): void {}
   }
 }));
 
-const mockGetEffectivePlan = jest.fn();
+const mockGetEffectivePlan = jest.fn<(...args: any[]) => Promise<any>>();
 
-jest.mock('../PricingEngine', () => {
+jest.mock('../PricingEngine.js', () => {
     return {
         default: {
             getEffectivePlan: (...args: any[]) => mockGetEffectivePlan(...args)
@@ -42,7 +42,7 @@ jest.mock('../PricingEngine', () => {
 });
 
 // 3. Import Subject
-import { QuotaService } from '../QuotaService';
+import { QuotaService } from '../QuotaService.js';
 
 describe('QuotaService', () => {
   let service: QuotaService;

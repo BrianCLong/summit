@@ -1,4 +1,3 @@
-// @ts-nocheck
 import crypto from 'crypto';
 import pino from 'pino';
 import { Pool } from 'pg';
@@ -32,7 +31,7 @@ export interface RecordRedactionResult {
  * operations on data according to redaction rules.
  */
 export class RedactionEngine {
-  private readonly logger = pino({ name: 'redaction-engine' });
+  private readonly logger = (pino as any)({ name: 'redaction-engine' });
   private readonly pool: Pool;
   private readonly cypherRunner?: (
     cypher: string,

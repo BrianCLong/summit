@@ -57,14 +57,14 @@ export interface SearchAnalytics {
   clickThroughRate: number;
   averagePosition: number;
   zeroResultsCount: number;
-  topResults: SearchResult[];
+  topResults: AnalyticsSearchResult[];
   refinements: string[];
 }
 
 /**
  * Search Result
  */
-export interface SearchResult {
+export interface AnalyticsSearchResult {
   assetId: string;
   assetName: string;
   clickCount: number;

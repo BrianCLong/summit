@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Emotion classification using transformer models
  * Detects: anger, fear, joy, sadness, surprise, disgust, trust

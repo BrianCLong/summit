@@ -4,14 +4,10 @@ import { pipeline } from 'stream/promises';
 import { createHash } from 'crypto';
 import * as path from 'path';
 import { randomUUID as uuidv4 } from 'node:crypto';
-// @ts-ignore
-import { default as sharp } from 'sharp';
+import sharp from 'sharp';
 import ffprobe from 'ffprobe-static';
 import ffmpeg from 'fluent-ffmpeg';
-// @ts-ignore - Upload type not exported from graphql-upload-ts
-import { Upload } from 'graphql-upload-ts';
-// @ts-ignore
-import { default as pino } from 'pino';
+import type { Upload } from 'graphql-upload-ts';
 import pino from 'pino';
 import exifReader from 'exif-reader';
 import {
@@ -28,8 +24,7 @@ import {
   type CdnUploadRequest,
 } from './CdnUploadService.js';
 
-// @ts-ignore
-const logger = pino({ name: 'MediaUploadService' });
+const logger = (pino as any)({ name: 'MediaUploadService' });
 
 // Configure FFmpeg binary paths
 import ffmpegStatic from 'ffmpeg-static';
@@ -130,7 +125,8 @@ export class MediaUploadService {
    * Upload and process a media file with comprehensive metadata extraction
    */
   async uploadMedia(upload: Upload, userId?: string): Promise<MediaMetadata> {
-    const { createReadStream, filename, mimetype } = (await upload) as any;
+    const uploadResolved = await upload;
+    const { createReadStream, filename, mimetype } = uploadResolved;
     const stream = createReadStream();
 
     logger.info(
@@ -294,7 +290,6 @@ export class MediaUploadService {
     const writeStream = createWriteStream(filePath);
 
     try {
-      // @ts-ignore - stream type incompatibility
       await pipeline(stream, writeStream);
     } catch (error) {
       // Ensure write stream is closed
@@ -503,7 +498,7 @@ export class MediaUploadService {
    */
     private async extractAVMetadata(
       filePath: string,
-    ): Promise<Record<string, any>> {
+    ): Promise<Record<string, unknown>> {
       return new Promise((resolve) => {
         ffmpeg.ffprobe(filePath, (err, metadata) => {
         if (err) {
@@ -512,7 +507,7 @@ export class MediaUploadService {
           return;
         }
 
-        const result: Record<string, any> = {
+        const result: Record<string, unknown> = {
           format: metadata.format.format_name,
           duration: metadata.format.duration,
           bitrate: metadata.format.bit_rate,

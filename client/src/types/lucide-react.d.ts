@@ -4,6 +4,7 @@ declare module 'lucide-react' {
   export const Activity: React.FC<IconProps>;
   export const AlertCircle: React.FC<IconProps>;
   export const AlertTriangle: React.FC<IconProps>;
+  export const ArrowUpRight: React.FC<IconProps>;
   export const TrendingDown: React.FC<IconProps>;
   export const Users: React.FC<IconProps>;
   export const CheckCircle: React.FC<IconProps>;

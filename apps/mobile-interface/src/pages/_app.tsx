@@ -1,4 +1,4 @@
-// @ts-nocheck
+// @ts-nocheck - Placeholder components compatibility
 import '@/styles/globals.css';
 import type { AppProps } from 'next/app';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -20,9 +20,13 @@ function MyApp({ Component, pageProps }: AppProps) {
         defaultOptions: {
           queries: {
             staleTime: 1000 * 60 * 5, // 5 minutes
-            cacheTime: 1000 * 60 * 30, // 30 minutes
-            retry: (failureCount, error: any) => {
-              if (error?.status === 404) return false;
+            gcTime: 1000 * 60 * 30, // 30 minutes (renamed from cacheTime)
+            retry: (
+              failureCount: number,
+              error: unknown,
+            ): boolean => {
+              const err = error as { status?: number };
+              if (err?.status === 404) return false;
               return failureCount < 3;
             },
             refetchOnWindowFocus: false,

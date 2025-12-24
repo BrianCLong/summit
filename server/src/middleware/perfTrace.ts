@@ -1,9 +1,8 @@
-// @ts-nocheck
 import { Request, Response, NextFunction } from 'express';
 import { performance } from 'perf_hooks';
 import pino from 'pino';
 
-const logger = pino({ name: 'perfTrace' });
+const logger = (pino as any)({ name: 'perfTrace' });
 
 export function perfTrace(
   req: Request,

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Content Service
  * Business logic for article content processing

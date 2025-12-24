@@ -5,7 +5,7 @@ import { CompressionUtils } from '../../utils/compression.js';
 import crypto from 'crypto';
 import pino from 'pino';
 
-const logger = pino();
+const logger = (pino as any)();
 
 export class QueryCache {
   private readonly cachePrefix = 'graph:query_result';
@@ -36,7 +36,7 @@ export class QueryCache {
     };
   }
 
-  public async get(key: string): Promise<any | null> {
+  public async get(key: string): Promise<unknown | null> {
     try {
       const redis = getRedisClient();
       const cached = await redis.get(key);
@@ -49,7 +49,7 @@ export class QueryCache {
     return null;
   }
 
-  public async set(key: string, value: any, ttl: number): Promise<void> {
+  public async set(key: string, value: unknown, ttl: number): Promise<void> {
     try {
       const redis = getRedisClient();
       const compressed = await CompressionUtils.compressToString(value);
@@ -59,7 +59,7 @@ export class QueryCache {
     }
   }
 
-  public generateKey(query: string, params: any, context: OptimizationContext): string {
+  public generateKey(query: string, params: Record<string, unknown>, context: OptimizationContext): string {
     const hash = crypto.createHash('sha256')
       .update(query + JSON.stringify(params))
       .digest('hex');

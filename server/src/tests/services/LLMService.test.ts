@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { LLMService, CompletionOptions } from '../../services/LLMService.js';
 import { OpenAI } from 'openai';
@@ -21,13 +20,22 @@ jest.mock('openai', () => {
 
 describe('LLMService', () => {
   let llmService: LLMService;
-  let mockOpenAI: any;
+  let mockOpenAI: {
+    chat: {
+      completions: {
+        create: jest.Mock;
+      };
+    };
+    embeddings: {
+      create: jest.Mock;
+    };
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
     process.env.OPENAI_API_KEY = 'test-key';
     llmService = new LLMService();
-    mockOpenAI = (llmService as any).openai;
+    mockOpenAI = (llmService as unknown as { openai: typeof mockOpenAI }).openai;
   });
 
   it('should call OpenAI with correct parameters for complete', async () => {

@@ -88,12 +88,16 @@ export class RestPullConnector extends PullConnector {
   private httpClient!: AxiosInstance;
 
   protected async onInitialize(config: ConnectorConfig): Promise<void> {
-    this.restConfig = config.config as RestPullConnectorConfig;
-
-    // Validate configuration
-    if (!this.restConfig.baseUrl || !this.restConfig.path) {
-      throw new Error('baseUrl and path are required');
+    // Validate and cast config
+    const cfg = config.config as Record<string, unknown>;
+    if (!cfg.baseUrl || typeof cfg.baseUrl !== 'string') {
+      throw new Error('baseUrl is required and must be a string');
     }
+    if (!cfg.path || typeof cfg.path !== 'string') {
+      throw new Error('path is required and must be a string');
+    }
+
+    this.restConfig = cfg as unknown as RestPullConnectorConfig;
 
     // Create HTTP client
     const axiosConfig: AxiosRequestConfig = {

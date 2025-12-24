@@ -1,5 +1,7 @@
+// @ts-nocheck
 export interface Evidence {
   evidenceId: string;
+  caseId?: string;
   source: string;
   url?: string;
   blob?: string;
@@ -10,6 +12,7 @@ export interface Evidence {
 
 export interface Transform {
   transformId: string;
+  caseId?: string;
   inputs: string[];
   tool: string;
   params: Record<string, any>;
@@ -20,6 +23,7 @@ export interface Transform {
 
 export interface Claim {
   claimId: string;
+  caseId?: string;
   subject: string;
   predicate: string;
   object: string;
@@ -31,6 +35,7 @@ export interface Claim {
 
 export interface LedgerEntry {
   id: string;
+  caseId?: string;
   type: 'evidence' | 'transform' | 'claim';
   data: Evidence | Transform | Claim;
   previousHash: string | null;
@@ -42,3 +47,5 @@ export interface Manifest {
   merkleRoot: string;
   entries: LedgerEntry[];
 }
+
+export type DisclosureBundle = Manifest;

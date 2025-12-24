@@ -144,10 +144,43 @@ describe('Prompt Integrity Suite', () => {
         'Summit Superprompt',
         'CI/CD Prompt',
       ];
-      
+
       for (const agent of requiredAgents) {
         expect(content).toMatch(new RegExp(agent, 'i'));
       }
+    });
+
+    test('capability-matrix.md covers all Black Projects modules', () => {
+      const content = fs.readFileSync(
+        path.join(promptsDir, 'capability-matrix.md'),
+        'utf8'
+      );
+      const modules = [
+        'Project AURORA',
+        'Project ORACLE',
+        'Project PHANTOM LIMB',
+        'Project ECHELON-2',
+        'Project MNEMOSYNE',
+        'Project NECROMANCER',
+        'Project ZERO DAY',
+        'Project ABYSS',
+      ];
+
+      for (const module of modules) {
+        expect(content).toMatch(new RegExp(module, 'i'));
+      }
+    });
+
+    test('capability-matrix.md lists governance policy modules', () => {
+      const content = fs.readFileSync(
+        path.join(promptsDir, 'capability-matrix.md'),
+        'utf8'
+      );
+
+      expect(content).toMatch(/Governance Policy Modules/i);
+      expect(content).toMatch(/Bias Mitigation/i);
+      expect(content).toMatch(/Transparency Logging/i);
+      expect(content).toMatch(/Session Archival/i);
     });
   });
 });
@@ -182,5 +215,32 @@ describe('Prompt Version Tracking', () => {
         }
       }
     }
+  });
+});
+
+/**
+ * Session Archival Coverage
+ *
+ * Ensures routing prompts reference archival requirements for replay and forensics.
+ */
+describe('Session Archival Prompts', () => {
+  test('workflow-automation.md mandates archiving completed sessions', () => {
+    const content = fs.readFileSync(
+      path.join(promptsDir, 'workflow-automation.md'),
+      'utf8'
+    );
+
+    expect(content).toMatch(/Archive completed sessions promptly/i);
+  });
+
+  test('meta-router.md declares governance archival step', () => {
+    const content = fs.readFileSync(
+      path.join(promptsDir, 'meta-router.md'),
+      'utf8'
+    );
+
+    expect(content).toMatch(/Governance Layer/i);
+    expect(content).toMatch(/Session Archival/i);
+    expect(content).toMatch(/transparency/i);
   });
 });

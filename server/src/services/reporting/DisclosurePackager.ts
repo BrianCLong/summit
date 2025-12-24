@@ -1,8 +1,7 @@
-// @ts-nocheck
 import { createHash } from 'crypto';
 import pino from 'pino';
 
-const log = pino({ name: 'DisclosurePackager' });
+const log = (pino as any)({ name: 'DisclosurePackager' });
 
 export interface EvidenceItem {
   id: string;

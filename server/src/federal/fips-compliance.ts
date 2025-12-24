@@ -1,6 +1,6 @@
 // @ts-nocheck
 import crypto from 'node:crypto';
-import { z } from 'zod';
+import * as z from 'zod';
 import { otelService } from '../middleware/observability/otel-tracing.js';
 
 // FIPS 140-2 Level 3 compliant cryptographic service
@@ -82,7 +82,7 @@ const FIPSConfigSchema = z.object({
 export class FIPSComplianceService implements FIPSCrypto {
   private config: z.infer<typeof FIPSConfigSchema>;
   private keyStore: Map<string, FIPSKeyMaterial> = new Map();
-  private hsmConnection: any = null;
+  private hsmConnection: unknown = null;
 
   constructor(config?: Partial<z.infer<typeof FIPSConfigSchema>>) {
     this.config = FIPSConfigSchema.parse({
@@ -162,26 +162,26 @@ export class FIPSComplianceService implements FIPSCrypto {
 
     // Load existing keys from HSM partition
     // In production, enumerate keys from HSM
-    const keyList = []; // await this.hsmConnection.listKeys();
+    const keyList: Array<Record<string, unknown>> = []; // await this.hsmConnection.listKeys();
 
     for (const keyInfo of keyList) {
       const keyMaterial: FIPSKeyMaterial = {
-        keyId: keyInfo.keyId,
-        algorithm: keyInfo.algorithm,
-        keyLength: keyInfo.keyLength,
+        keyId: keyInfo.keyId as string,
+        algorithm: keyInfo.algorithm as string,
+        keyLength: keyInfo.keyLength as number,
         fipsValidated: true,
         hsm: {
           provider: this.config.hsm.provider,
           partition: this.config.hsm.partition,
         },
         auditTrail: {
-          created: new Date(keyInfo.created),
-          lastRotated: new Date(keyInfo.lastRotated),
+          created: new Date(keyInfo.created as string),
+          lastRotated: new Date(keyInfo.lastRotated as string),
           operations: [],
         },
       };
 
-      this.keyStore.set(keyInfo.keyId, keyMaterial);
+      this.keyStore.set(keyInfo.keyId as string, keyMaterial);
     }
   }
 
@@ -201,10 +201,10 @@ export class FIPSComplianceService implements FIPSCrypto {
         throw new Error(`Algorithm ${algorithm} is not FIPS 140-2 approved`);
       }
 
-      const keyId = `fips-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const keyId = `fips-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 
       // Generate key in HSM
-      let keyHandle;
+      let keyHandle: unknown;
       if (this.hsmConnection) {
         // keyHandle = await this.hsmConnection.generateKey({
         //   algorithm,

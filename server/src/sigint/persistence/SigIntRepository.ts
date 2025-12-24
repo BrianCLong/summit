@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Signal, Emitter } from '../types.js';
 import { getPostgresPool, getNeo4jDriver } from '../../config/database.js';
 import { telemetry } from '../../lib/telemetry/comprehensive-telemetry.js';

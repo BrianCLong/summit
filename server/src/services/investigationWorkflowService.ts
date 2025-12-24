@@ -1,7 +1,6 @@
-// @ts-nocheck
 import { EventEmitter } from 'events';
-import { cacheService } from './cacheService';
-import { advancedAuditSystem } from '../audit/advanced-audit-system';
+import { cacheService } from './cacheService.js';
+import { advancedAuditSystem } from '../audit/advanced-audit-system.js';
 
 export interface Investigation {
   id: string;
@@ -53,7 +52,7 @@ export interface Evidence {
   integrity: IntegrityStatus;
   chainOfCustody: ChainOfCustodyEntry[];
   attachments: string[];
-  metadata: any;
+  metadata: Record<string, unknown>;
   classification: SecurityClassification;
 }
 
@@ -89,7 +88,7 @@ export interface TimelineEntry {
   evidence: string[];
   severity: Severity;
   confidence: number;
-  metadata: any;
+  metadata: Record<string, unknown>;
 }
 
 export interface ChainOfCustodyEntry {
@@ -400,7 +399,7 @@ export class InvestigationWorkflowService extends EventEmitter {
     );
 
     // Audit Log
-    await advancedAuditSystem.logEvent({
+    await advancedAuditSystem.recordEvent({
       eventType: 'user_action',
       level: 'info',
       userId: data.createdBy,
@@ -490,7 +489,7 @@ export class InvestigationWorkflowService extends EventEmitter {
     );
 
     // Audit Log
-    await advancedAuditSystem.logEvent({
+    await advancedAuditSystem.recordEvent({
       eventType: 'user_action',
       level: 'info',
       userId,
@@ -568,7 +567,7 @@ export class InvestigationWorkflowService extends EventEmitter {
     );
 
     // Audit Log
-    await advancedAuditSystem.logEvent({
+    await advancedAuditSystem.recordEvent({
       eventType: 'user_action',
       level: 'info',
       userId: collectedBy,
@@ -631,7 +630,7 @@ export class InvestigationWorkflowService extends EventEmitter {
     );
 
     // Audit Log
-    await advancedAuditSystem.logEvent({
+    await advancedAuditSystem.recordEvent({
       eventType: 'user_action',
       level: 'info',
       userId: discoveredBy,
@@ -694,7 +693,7 @@ export class InvestigationWorkflowService extends EventEmitter {
     );
 
     // Audit Log
-    await advancedAuditSystem.logEvent({
+    await advancedAuditSystem.recordEvent({
       eventType: 'user_action',
       level: 'info',
       userId: entry.actor,
@@ -724,7 +723,7 @@ export class InvestigationWorkflowService extends EventEmitter {
    */
   async getInvestigation(
     investigationId: string,
-    tenantId: string,
+    tenantId?: string,
   ): Promise<Investigation | null> {
     let investigation = this.investigations.get(investigationId);
 
@@ -738,7 +737,7 @@ export class InvestigationWorkflowService extends EventEmitter {
       }
     }
 
-    if (investigation && investigation.tenantId !== tenantId) {
+    if (investigation && tenantId && investigation.tenantId !== tenantId) {
       // Return null or throw error depending on design choice.
       // Returning null simulates "not found" which is safe.
       return null;

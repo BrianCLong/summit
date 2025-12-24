@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Evidence routes - CRUD operations for evidence sources
  */

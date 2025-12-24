@@ -1,6 +1,6 @@
-// @ts-nocheck
 import * as fs from 'fs';
 import * as path from 'path';
+import type { Logger } from 'pino';
 import pino from 'pino';
 
 export interface SecretAuditEvent {
@@ -13,15 +13,15 @@ export interface SecretAuditEvent {
 }
 
 export class SecretAuditLogger {
-  private logger: pino.Logger;
+  private logger: Logger;
 
   constructor(private logPath: string) {
     const directory = path.dirname(logPath);
     fs.mkdirSync(directory, { recursive: true });
-    this.logger = pino({ name: 'secret-audit', level: 'info' }, pino.destination({ dest: logPath, mkdir: true }));
+    this.logger = (pino as any)({ name: 'secret-audit', level: 'info' }, (pino as any).destination({ dest: logPath, mkdir: true }));
   }
 
-  record(event: SecretAuditEvent) {
+  record(event: SecretAuditEvent): void {
     this.logger.info(
       {
         reference: event.reference,

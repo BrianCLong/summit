@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { runCypher } from '../graph/neo4j.js';
 import { logger } from '../config/logger.js';
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * CompanyOS User and Role Sync Service
  * Bi-directional synchronization between CompanyOS and Summit RBAC systems

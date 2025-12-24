@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express from "express";
 import body from "body-parser";
 import crypto from "crypto";

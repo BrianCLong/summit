@@ -22,6 +22,31 @@ class ReportService {
     evidence,
     metadata,
   }) {
+    // Citation Gate
+    let gaps = [];
+    try {
+      // Dynamic import to handle ESM/TS interop
+      const { CitationGate } = await import('../gates/CitationGate.ts').catch(() =>
+        import('../gates/CitationGate.js'),
+      );
+      if (CitationGate) {
+        const payload = { findings, evidence, metadata };
+        const validated = await CitationGate.validateCitations(payload, {
+          tenantId: (metadata && metadata.tenantId) || 'default',
+          userId: (metadata && metadata.userId) || 'system',
+        });
+        findings = validated.findings;
+        if (validated.gaps) {
+          gaps = validated.gaps;
+        }
+      }
+    } catch (e) {
+      this.logger &&
+        this.logger.warn('CitationGate check failed or skipped', {
+          error: e.message,
+        });
+    }
+
     const now = new Date();
     const safeTitle = (
       title || `investigation-${investigationId || 'general'}`
@@ -35,6 +60,7 @@ class ReportService {
       findings,
       evidence,
       metadata,
+      gaps,
       generatedAt: now.toISOString(),
     });
     fs.writeFileSync(filePath, html, 'utf-8');
@@ -91,6 +117,30 @@ class ReportService {
     evidence,
     metadata,
   }) {
+    // Citation Gate
+    let gaps = [];
+    try {
+      const { CitationGate } = await import('../gates/CitationGate.ts').catch(() =>
+        import('../gates/CitationGate.js'),
+      );
+      if (CitationGate) {
+        const payload = { findings, evidence, metadata };
+        const validated = await CitationGate.validateCitations(payload, {
+          tenantId: (metadata && metadata.tenantId) || 'default',
+          userId: (metadata && metadata.userId) || 'system',
+        });
+        findings = validated.findings;
+        if (validated.gaps) {
+          gaps = validated.gaps;
+        }
+      }
+    } catch (e) {
+      this.logger &&
+        this.logger.warn('CitationGate check failed or skipped', {
+          error: e.message,
+        });
+    }
+
     const now = new Date();
     const safeTitle = (
       title || `investigation-${investigationId || 'general'}`
@@ -107,6 +157,7 @@ class ReportService {
       findings,
       evidence,
       metadata,
+      gaps,
       generatedAt: now.toISOString(),
     });
     fs.writeFileSync(filePath, markdown, 'utf-8');
@@ -359,6 +410,7 @@ class ReportService {
     findings = [],
     evidence = [],
     metadata = {},
+    gaps = [],
     generatedAt,
   }) {
     const esc = (s) =>
@@ -366,7 +418,31 @@ class ReportService {
         /[&<>]/g,
         (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c],
       );
-    const items = (arr) => arr.map((x) => `<li>${esc(x)}</li>`).join('\n');
+    const renderItem = (x) => {
+      if (typeof x === 'object' && x.text) {
+        // Render statement with citations if present
+        let html = esc(x.text);
+        if (x.citations && x.citations.length) {
+          html += ' <span class="citations">[' + x.citations.map(c => typeof c === 'string' ? esc(c) : esc(c.locator)).join(', ') + ']</span>';
+        }
+        return `<li>${html}</li>`;
+      }
+      return `<li>${esc(x)}</li>`;
+    };
+    const items = (arr) => arr.map(renderItem).join('\n');
+
+    let gapsHtml = '';
+    if (gaps && gaps.length > 0) {
+      gapsHtml = `
+  <div class="section gaps">
+    <h2>Gaps Appendix (Uncited Statements)</h2>
+    <p>The following statements were removed from the main report due to missing evidence citations.</p>
+    <ul>
+      ${items(gaps)}
+    </ul>
+  </div>`;
+    }
+
     return `<!doctype html>
 <html>
 <head>
@@ -378,6 +454,8 @@ class ReportService {
     .meta { color: #555; font-size: 0.9rem; }
     .section { margin-bottom: 1.5rem; }
     .evidence li, .findings li { margin-bottom: 0.25rem; }
+    .citations { font-size: 0.8em; color: #666; vertical-align: super; }
+    .gaps { background-color: #fff8f8; padding: 1rem; border-left: 4px solid #ff4444; }
     code { background: #f6f8fa; padding: 2px 4px; border-radius: 4px; }
   </style>
   </head>
@@ -389,6 +467,7 @@ class ReportService {
     <ul>
       <li>Total Findings: ${findings.length}</li>
       <li>Total Evidence: ${evidence.length}</li>
+      ${gaps.length > 0 ? `<li>Uncited Statements: ${gaps.length}</li>` : ''}
     </ul>
   </div>
   <div class="section findings">
@@ -403,6 +482,7 @@ class ReportService {
       ${items(evidence)}
     </ul>
   </div>
+  ${gapsHtml}
   <div class="section">
     <h2>Metadata</h2>
     <pre>${esc(JSON.stringify(metadata || {}, null, 2))}</pre>
@@ -417,13 +497,30 @@ class ReportService {
     findings = [],
     evidence = [],
     metadata = {},
+    gaps = [],
     generatedAt,
   }) {
     const esc = (s) => String(s || '');
-    const items = (arr) => arr.map((x) => `- ${esc(x)}`).join('\n');
+    const renderItem = (x) => {
+      if (typeof x === 'object' && x.text) {
+        let md = `- ${esc(x.text)}`;
+        if (x.citations && x.citations.length) {
+          md += ` [${x.citations.map(c => typeof c === 'string' ? esc(c) : esc(c.locator)).join(', ')}]`;
+        }
+        return md;
+      }
+      return `- ${esc(x)}`;
+    };
+    const items = (arr) => arr.map(renderItem).join('\n');
+
+    let gapsMd = '';
+    if (gaps && gaps.length > 0) {
+      gapsMd = `\n## Gaps Appendix (Uncited Statements)\n\nThe following statements were removed from the main report due to missing evidence citations.\n\n${items(gaps)}\n`;
+    }
+
     return `# ${esc(title)}\n\nGenerated: ${esc(generatedAt)}$${
       investigationId ? `\nInvestigation: ${esc(investigationId)}` : ''
-    }\n\n## Summary\n\n- Total Findings: ${findings.length}\n- Total Evidence: ${evidence.length}\n\n## Findings\n${items(findings)}\n\n## Evidence\n${items(evidence)}\n\n## Metadata\n\n\`\`\`json\n${esc(
+    }\n\n## Summary\n\n- Total Findings: ${findings.length}\n- Total Evidence: ${evidence.length}${gaps.length > 0 ? `\n- Uncited Statements: ${gaps.length}` : ''}\n\n## Findings\n${items(findings)}\n\n## Evidence\n${items(evidence)}\n${gapsMd}\n## Metadata\n\n\`\`\`json\n${esc(
       JSON.stringify(metadata || {}, null, 2),
     )}\n\`\`\`\n`;
   }

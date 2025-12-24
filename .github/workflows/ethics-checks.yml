@@ -1,0 +1,14 @@
+name: Ethics Checks
+on: [push, pull_request]
+
+jobs:
+  ethics-verification:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Verify Clean Hands Charter
+        run: |
+          if [ ! -f "governance/ethics/CLEAN_HANDS_CHARTER.md" ]; then
+            echo "Clean Hands Charter is missing!"
+            exit 1
+          fi

@@ -129,12 +129,13 @@ async function createNeo4jConstraints(): Promise<void> {
     for (const constraint of constraints) {
       try {
         await session.run(constraint);
-      } catch (error: any) {
-        if (!error.message.includes('already exists')) {
+      } catch (error) {
+        const err = error as Error;
+        if (!err.message.includes('already exists')) {
           logger.warn(
             'Failed to create constraint:',
             constraint,
-            error.message,
+            err.message,
           );
         }
       }
@@ -153,9 +154,10 @@ async function createNeo4jConstraints(): Promise<void> {
     for (const index of indexes) {
       try {
         await session.run(index);
-      } catch (error: any) {
-        if (!error.message.includes('already exists')) {
-          logger.warn('Failed to create index:', index, error.message);
+      } catch (error) {
+        const err = error as Error;
+        if (!err.message.includes('already exists')) {
+          logger.warn('Failed to create index:', index, err.message);
         }
       }
     }
@@ -194,7 +196,7 @@ async function connectPostgres(): Promise<ManagedPostgresPool> {
 // Redis Connection
 async function connectRedis(): Promise<Redis | null> {
   try {
-    const redisConfig: any = {
+    const redisConfig: Redis.RedisOptions = {
       host: config.redis.host,
       port: config.redis.port,
       db: config.redis.db,
@@ -247,8 +249,9 @@ async function connectRedis(): Promise<Redis | null> {
 
     logger.info('✅ Connected to Redis');
     return redisClient;
-  } catch (error: any) {
-    logger.error('❌ Failed to connect to Redis:', error.message);
+  } catch (error) {
+    const err = error as Error;
+    logger.error('❌ Failed to connect to Redis:', err.message);
     // Don't throw error to allow server to start without Redis if needed
     logger.warn('Server will continue without Redis caching');
     return null;

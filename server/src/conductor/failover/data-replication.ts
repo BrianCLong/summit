@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Data Replication Engine
 // Handles cross-region data synchronization and conflict resolution
 
@@ -280,9 +279,9 @@ export class DataReplicationEngine extends EventEmitter {
 
       // Update metrics
       prometheusConductorMetrics.recordOperationalEvent(
-        'replication_success',
-        true,
-      );
+      'replication_success',
+      { success: true },
+    );
     } catch (error) {
       operation.status = 'failed';
       operation.error = error.message;
@@ -300,9 +299,9 @@ export class DataReplicationEngine extends EventEmitter {
       }
 
       prometheusConductorMetrics.recordOperationalEvent(
-        'replication_failure',
-        false,
-      );
+      'replication_failure',
+      { success: false },
+    );
     }
 
     // Update operation in storage

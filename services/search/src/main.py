@@ -9,7 +9,7 @@ from copy import deepcopy
 from dataclasses import dataclass
 from typing import Any, Iterable, Literal
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 logger = logging.getLogger("search-service")
@@ -227,43 +227,46 @@ class ReindexStatus(BaseModel):
 
 class SearchAnalytics:
     def __init__(self) -> None:
-        self.query_counter: Counter[str] = Counter()
-        self.language_counter: Counter[str] = Counter()
-        self.latencies: deque[int] = deque(maxlen=2000)
+        self.query_counters: defaultdict[str, Counter[str]] = defaultdict(Counter)
+        self.language_counters: defaultdict[str, Counter[str]] = defaultdict(Counter)
+        self.latencies: defaultdict[str, deque[int]] = defaultdict(lambda: deque(maxlen=2000))
 
-    def record_query(self, query: QueryRequest, took_ms: int) -> None:
+    def record_query(self, tenant_id: str, query: QueryRequest, took_ms: int) -> None:
         normalized = query.query.lower().strip()
         if normalized:
-            self.query_counter[normalized] += 1
-        self.language_counter[query.language] += 1
-        self.latencies.append(took_ms)
+            self.query_counters[tenant_id][normalized] += 1
+        self.language_counters[tenant_id][query.language] += 1
+        self.latencies[tenant_id].append(took_ms)
 
-    def suggestions(self, prefix: str, limit: int = 5) -> list[Suggestion]:
+    def suggestions(self, tenant_id: str, prefix: str, limit: int = 5) -> list[Suggestion]:
         prefix_lower = prefix.lower()
         ranked: list[Suggestion] = []
-        for term, count in self.query_counter.most_common():
+        query_counter = self.query_counters[tenant_id]
+        for term, count in query_counter.most_common():
             if term.startswith(prefix_lower):
-                score = min(1.0, 0.3 + (count / max(1, self.query_counter.total())))
+                score = min(1.0, 0.3 + (count / max(1, query_counter.total())))
                 ranked.append(Suggestion(text=term, score=score))
             if len(ranked) >= limit:
                 break
         return ranked or [Suggestion(text=s, score=0.2) for s in DEFAULT_SUGGESTIONS[:limit]]
 
-    def snapshot(self) -> AnalyticsSnapshot:
-        latencies = list(self.latencies)
+    def snapshot(self, tenant_id: str) -> AnalyticsSnapshot:
+        latencies = list(self.latencies[tenant_id])
         avg_latency = statistics.fmean(latencies) if latencies else 0.0
         p95 = statistics.quantiles(latencies, n=100)[94] if latencies else 0.0
+        query_counter = self.query_counters[tenant_id]
+        language_counter = self.language_counters[tenant_id]
         return AnalyticsSnapshot(
-            queries=dict(self.query_counter.most_common(10)),
-            languages=dict(self.language_counter),
+            queries=dict(query_counter.most_common(10)),
+            languages=dict(language_counter),
             avgLatencyMs=round(avg_latency, 2),
             p95LatencyMs=round(p95, 2),
-            totalQueries=self.query_counter.total(),
+            totalQueries=query_counter.total(),
         )
 
     def reset(self) -> None:
-        self.query_counter.clear()
-        self.language_counter.clear()
+        self.query_counters.clear()
+        self.language_counters.clear()
         self.latencies.clear()
 
 
@@ -762,12 +765,13 @@ reindex_pipeline = ReindexPipeline(registry=index_registry, feature_flags=featur
 
 
 @app.post("/search/query", response_model=QueryResponse)
-async def search(query: QueryRequest) -> QueryResponse:
+async def search(request: Request, query: QueryRequest) -> QueryResponse:
+    tenant_id = request.headers.get("x-tenant-id", "anonymous")
     start = time.perf_counter()
-    audit_logger.info("query", extra={"q": query.query, "filters": query.filters, "backend": query.backend})
+    audit_logger.info("query", extra={"q": query.query, "filters": query.filters, "backend": query.backend, "tenant": tenant_id})
     result = search_engine.search(query)
     took_ms = int((time.perf_counter() - start) * 1000)
-    analytics.record_query(query, took_ms)
+    analytics.record_query(tenant_id, query, took_ms)
     return QueryResponse(
         hits=result.hits,
         tookMs=took_ms,
@@ -780,11 +784,14 @@ async def search(query: QueryRequest) -> QueryResponse:
 
 
 @app.get("/search/suggest", response_model=list[Suggestion])
-async def suggest(q: str = Query(min_length=1), language: str = Query(default="any")) -> list[Suggestion]:
+async def suggest(
+    request: Request, q: str = Query(min_length=1), language: str = Query(default="any")
+) -> list[Suggestion]:
+    tenant_id = request.headers.get("x-tenant-id", "anonymous")
     if language not in SUPPORTED_LANGUAGES:
         raise HTTPException(status_code=400, detail="unsupported language")
-    audit_logger.info("suggest", extra={"q": q, "language": language})
-    combined = analytics.suggestions(q) + search_engine.suggest(q, language)
+    audit_logger.info("suggest", extra={"q": q, "language": language, "tenant": tenant_id})
+    combined = analytics.suggestions(tenant_id, q) + search_engine.suggest(q, language)
     combined.sort(key=lambda item: item.score, reverse=True)
     seen: set[str] = set()
     deduped: list[Suggestion] = []
@@ -862,9 +869,10 @@ async def schemas() -> list[SchemaInfo]:
 
 
 @app.get("/search/analytics", response_model=AnalyticsSnapshot)
-async def analytics_snapshot() -> AnalyticsSnapshot:
-    audit_logger.info("analytics")
-    return analytics.snapshot()
+async def analytics_snapshot(request: Request) -> AnalyticsSnapshot:
+    tenant_id = request.headers.get("x-tenant-id", "anonymous")
+    audit_logger.info("analytics", extra={"tenant": tenant_id})
+    return analytics.snapshot(tenant_id)
 
 
 def reset_state() -> None:

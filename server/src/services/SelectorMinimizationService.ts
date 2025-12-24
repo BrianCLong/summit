@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Selector Minimization Service
  *
@@ -146,8 +145,8 @@ export interface TripwireViolation {
 
 export class SelectorMinimizationService {
   private circuitBreaker: CircuitBreaker;
-  private redis: any;
-  private postgres: any;
+  private redis: Awaited<ReturnType<typeof getRedisClient>>;
+  private postgres: ReturnType<typeof getPostgresPool>;
 
   // Cache keys
   private readonly BASELINE_CACHE_PREFIX = 'selector:baseline:';
@@ -160,6 +159,9 @@ export class SelectorMinimizationService {
 
   constructor() {
     this.circuitBreaker = new CircuitBreaker({});
+    // Initialize with placeholder values - will be set in initializeConnections
+    this.redis = null as unknown as Awaited<ReturnType<typeof getRedisClient>>;
+    this.postgres = null as unknown as ReturnType<typeof getPostgresPool>;
 
     this.initializeConnections();
   }
@@ -169,7 +171,8 @@ export class SelectorMinimizationService {
       this.redis = await getRedisClient();
       this.postgres = getPostgresPool();
     } catch (error) {
-      logger.error('Failed to initialize SelectorMinimizationService connections', { error });
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Failed to initialize SelectorMinimizationService connections', { error: errorMessage });
       throw error;
     }
   }
@@ -810,59 +813,59 @@ export class SelectorMinimizationService {
   /**
    * Map database row to metrics object
    */
-  private mapRowToMetrics(row: any): QueryScopeMetrics {
+  private mapRowToMetrics(row: Record<string, unknown>): QueryScopeMetrics {
     return {
-      id: row.id,
-      tenantId: row.tenant_id,
-      userId: row.user_id,
-      queryId: row.query_id,
-      correlationId: row.correlation_id,
-      queryType: row.query_type,
-      queryName: row.query_name,
-      queryHash: row.query_hash,
-      initialSelectors: parseInt(row.initial_selectors),
-      expandedSelectors: parseInt(row.expanded_selectors),
-      expansionRatio: parseFloat(row.expansion_ratio),
-      recordsAccessed: parseInt(row.records_accessed),
-      recordsReturned: parseInt(row.records_returned),
-      selectivityRatio: parseFloat(row.selectivity_ratio),
-      purpose: row.purpose,
-      reasonForAccess: row.reason_for_access,
-      reasonRequired: row.reason_required,
-      reasonProvided: row.reason_provided,
-      isAnomaly: row.is_anomaly,
-      anomalyScore: row.anomaly_score ? parseFloat(row.anomaly_score) : undefined,
-      anomalyReasons: row.anomaly_reasons,
-      tripwireThreshold: parseFloat(row.tripwire_threshold),
-      tripwireTriggered: row.tripwire_triggered,
-      alertSent: row.alert_sent,
-      executionTimeMs: parseInt(row.execution_time_ms),
-      executedAt: new Date(row.executed_at),
+      id: row.id as string | undefined,
+      tenantId: row.tenant_id as string,
+      userId: row.user_id as string,
+      queryId: row.query_id as string,
+      correlationId: row.correlation_id as string | undefined,
+      queryType: row.query_type as 'graphql' | 'cypher' | 'sql' | 'rest',
+      queryName: row.query_name as string | undefined,
+      queryHash: row.query_hash as string,
+      initialSelectors: parseInt(row.initial_selectors as string),
+      expandedSelectors: parseInt(row.expanded_selectors as string),
+      expansionRatio: parseFloat(row.expansion_ratio as string),
+      recordsAccessed: parseInt(row.records_accessed as string),
+      recordsReturned: parseInt(row.records_returned as string),
+      selectivityRatio: parseFloat(row.selectivity_ratio as string),
+      purpose: row.purpose as string | undefined,
+      reasonForAccess: row.reason_for_access as string | undefined,
+      reasonRequired: row.reason_required as boolean,
+      reasonProvided: row.reason_provided as boolean,
+      isAnomaly: row.is_anomaly as boolean,
+      anomalyScore: row.anomaly_score ? parseFloat(row.anomaly_score as string) : undefined,
+      anomalyReasons: row.anomaly_reasons as string[] | undefined,
+      tripwireThreshold: parseFloat(row.tripwire_threshold as string),
+      tripwireTriggered: row.tripwire_triggered as boolean,
+      alertSent: row.alert_sent as boolean,
+      executionTimeMs: parseInt(row.execution_time_ms as string),
+      executedAt: new Date(row.executed_at as string),
     };
   }
 
   /**
    * Map database row to alert object
    */
-  private mapRowToAlert(row: any): SelectorMinimizationAlert {
+  private mapRowToAlert(row: Record<string, unknown>): SelectorMinimizationAlert {
     return {
-      id: row.id,
-      tenantId: row.tenant_id,
-      queryScopeMetricId: row.query_scope_metric_id,
-      alertType: row.alert_type,
-      severity: row.severity,
-      title: row.title,
-      description: row.description,
-      userId: row.user_id,
-      queryHash: row.query_hash,
-      expansionRatio: row.expansion_ratio ? parseFloat(row.expansion_ratio) : undefined,
-      thresholdExceeded: row.threshold_exceeded ? parseFloat(row.threshold_exceeded) : undefined,
-      status: row.status,
-      assignedTo: row.assigned_to,
-      resolutionNotes: row.resolution_notes,
-      triggeredAt: new Date(row.triggered_at),
-      acknowledgedAt: row.acknowledged_at ? new Date(row.acknowledged_at) : undefined,
-      resolvedAt: row.resolved_at ? new Date(row.resolved_at) : undefined,
+      id: row.id as string | undefined,
+      tenantId: row.tenant_id as string,
+      queryScopeMetricId: row.query_scope_metric_id as string | undefined,
+      alertType: row.alert_type as 'expansion_threshold' | 'anomaly_detected' | 'missing_reason' | 'excessive_records',
+      severity: row.severity as 'low' | 'medium' | 'high' | 'critical',
+      title: row.title as string,
+      description: row.description as string,
+      userId: row.user_id as string | undefined,
+      queryHash: row.query_hash as string | undefined,
+      expansionRatio: row.expansion_ratio ? parseFloat(row.expansion_ratio as string) : undefined,
+      thresholdExceeded: row.threshold_exceeded ? parseFloat(row.threshold_exceeded as string) : undefined,
+      status: row.status as 'open' | 'acknowledged' | 'investigating' | 'resolved' | 'false_positive',
+      assignedTo: row.assigned_to as string | undefined,
+      resolutionNotes: row.resolution_notes as string | undefined,
+      triggeredAt: new Date(row.triggered_at as string),
+      acknowledgedAt: row.acknowledged_at ? new Date(row.acknowledged_at as string) : undefined,
+      resolvedAt: row.resolved_at ? new Date(row.resolved_at as string) : undefined,
     };
   }
 }

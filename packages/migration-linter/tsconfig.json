@@ -10,5 +10,6 @@
     "module": "ESNext",
     "target": "ES2022"
   },
-  "include": ["src", "tests"]
+  "include": ["src"],
+  "exclude": ["tests", "**/*.test.ts"]
 }

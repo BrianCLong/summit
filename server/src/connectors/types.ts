@@ -1,5 +1,16 @@
 
 import { Readable } from 'stream';
+import { ConnectorContext } from '../data-model/types';
+
+export interface SourceConnector {
+  fetchBatch(
+    ctx: ConnectorContext,
+    cursor?: string | null
+  ): Promise<{
+    records: any[];
+    nextCursor?: string | null;
+  }>;
+}
 
 export interface ConnectorConfig {
   id: string;

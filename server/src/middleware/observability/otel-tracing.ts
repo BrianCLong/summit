@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * IntelGraph GA-Core OpenTelemetry Tracing Middleware
  * Committee Requirements: OTEL scaffolding, performance monitoring, SLO tracking

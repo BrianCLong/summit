@@ -1,7 +1,5 @@
-// @ts-nocheck
-
-import { BaseConnector } from '../base';
-import { ConnectorConfig, ConnectorSchema } from '../types';
+import { BaseConnector } from '../base.js';
+import { ConnectorConfig, ConnectorSchema } from '../types.js';
 import { Readable } from 'stream';
 import axios from 'axios';
 
@@ -43,11 +41,12 @@ export class GitHubConnector extends BaseConnector {
               { name: 'body', type: 'string', nullable: true },
               { name: 'user', type: 'json', nullable: false },
               { name: 'created_at', type: 'string', nullable: false }
-          ]
+          ],
+          version: 1
       };
   }
 
-  async readStream(options?: any): Promise<Readable> {
+  async readStream(options?: Record<string, unknown>): Promise<Readable> {
       const stream = new Readable({ objectMode: true, read() {} });
 
       setImmediate(async () => {

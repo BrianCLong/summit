@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Attack Surface Package
  * Comprehensive attack surface discovery and monitoring

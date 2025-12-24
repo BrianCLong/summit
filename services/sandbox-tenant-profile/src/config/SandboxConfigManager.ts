@@ -17,6 +17,7 @@ import {
   getDefaultConnectorRestrictions,
   SandboxErrorCode,
   SandboxError,
+  SandboxIndicatorMode,
 } from '../types/index.js';
 import { createLogger } from '../utils/logger.js';
 
@@ -542,7 +543,7 @@ export class SandboxConfigManager {
 
   private getDefaultUIIndicators(level: SandboxIsolationLevel): UIIndicatorConfig {
     const base: UIIndicatorConfig = {
-      mode: 'full' as const,
+      mode: SandboxIndicatorMode.FULL,
       bannerText: 'SANDBOX ENVIRONMENT - NOT PRODUCTION',
       bannerColor: '#FF6B35',
       watermarkText: 'SANDBOX',

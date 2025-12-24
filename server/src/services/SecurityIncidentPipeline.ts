@@ -1,12 +1,12 @@
 // @ts-nocheck
 // import { PrismaClient } from '@prisma/client';
-// Use Any for now to bypass environment issues with PrismaClient import in tests
-type PrismaClient = any;
+// Use unknown for now to bypass environment issues with PrismaClient import in tests
+type PrismaClient = unknown;
 import { Redis } from 'ioredis';
 import winston from 'winston';
-import { Neo4jService, neo } from '../db/neo4j';
-import { AdvancedAuditSystem } from '../audit/advanced-audit-system';
-import { AlertTriageV2Service, TriageRecommendation } from './AlertTriageV2Service';
+import { Neo4jService, neo } from '../db/neo4j.js';
+import { AdvancedAuditSystem } from '../audit/advanced-audit-system.js';
+import { AlertTriageV2Service, TriageRecommendation } from './AlertTriageV2Service.js';
 
 export interface SecurityEvent {
   id: string;
@@ -16,8 +16,8 @@ export interface SecurityEvent {
   tenantId: string;
   actorId?: string;
   resourceId?: string;
-  details: any;
-  context?: any;
+  details: unknown;
+  context?: unknown;
 }
 
 export interface SecurityIncident {
@@ -39,10 +39,10 @@ export interface SecurityIncident {
 
 // Define a Logger interface to avoid direct dependency on winston types if they are missing
 interface Logger {
-    info(message: string, ...meta: any[]): any;
-    error(message: string, ...meta: any[]): any;
-    warn(message: string, ...meta: any[]): any;
-    debug(message: string, ...meta: any[]): any;
+    info(message: string, ...meta: unknown[]): unknown;
+    error(message: string, ...meta: unknown[]): unknown;
+    warn(message: string, ...meta: unknown[]): unknown;
+    debug(message: string, ...meta: unknown[]): unknown;
 }
 
 export class SecurityIncidentPipeline {
@@ -119,21 +119,25 @@ export class SecurityIncidentPipeline {
       return await this.getIncident(incidentId);
 
     } catch (error) {
-      this.logger.error(`Failed to process security event ${event.id}`, { error: error.message, stack: error.stack });
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to process security event ${event.id}`, { error: errorMessage, stack: errorStack });
       throw error;
     }
   }
 
-  private extractEntities(event: SecurityEvent): any[] {
-    const entities = [];
+  private extractEntities(event: SecurityEvent): Array<{ type: string; value: string }> {
+    const entities: Array<{ type: string; value: string }> = [];
     if (event.actorId) entities.push({ type: 'user', value: event.actorId });
     if (event.resourceId) entities.push({ type: 'resource', value: event.resourceId });
     // Extract IPs, etc from details if available
-    if (event.details?.ip) entities.push({ type: 'ip', value: event.details.ip });
+    if (typeof event.details === 'object' && event.details !== null && 'ip' in event.details && typeof event.details.ip === 'string') {
+      entities.push({ type: 'ip', value: event.details.ip });
+    }
     return entities;
   }
 
-  private async createIncidentRecord(event: SecurityEvent, triage: any): Promise<string> {
+  private async createIncidentRecord(event: SecurityEvent, triage: { score: number; recommendations: TriageRecommendation[] }): Promise<string> {
     // In a real implementation, this would insert into a database table
     // For now, we'll simulate it or use Prisma if schema supports it
     // Assuming 'Incident' model exists or we create a placeholder
@@ -167,7 +171,8 @@ export class SecurityIncidentPipeline {
       // In production: return this.auditSystem.queryLogs({ actor: event.actorId, timeRange: [startTime, endTime] });
       return [`log-id-1-${event.id}`, `log-id-2-${event.id}`];
     } catch (e) {
-      this.logger.error('Log capture failed', e);
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      this.logger.error('Log capture failed', errorMessage);
       return [];
     }
   }
@@ -191,7 +196,7 @@ export class SecurityIncidentPipeline {
     return snapshotPath;
   }
 
-  private async dumpGraphNodes(event: SecurityEvent): Promise<string> {
+  private async dumpGraphNodes(event: SecurityEvent): Promise<string | null> {
     this.logger.info(`Dumping graph nodes for event ${event.id}`);
 
     if (!event.actorId && !event.resourceId) return null;
@@ -218,13 +223,16 @@ export class SecurityIncidentPipeline {
 
       return dumpPath;
     } catch (e) {
-      this.logger.error('Graph dump failed', e);
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      this.logger.error('Graph dump failed', errorMessage);
       return null;
     }
   }
 
-  private async updateIncidentEvidence(incidentId: string, logs: string[], dbPath: string, graphPath: string) {
-    const incidentData = JSON.parse(await this.redis.get(`incident:${incidentId}`));
+  private async updateIncidentEvidence(incidentId: string, logs: string[], dbPath: string, graphPath: string | null) {
+    const rawData = await this.redis.get(`incident:${incidentId}`);
+    if (!rawData) return;
+    const incidentData = JSON.parse(rawData);
     incidentData.evidence = {
       logIds: logs,
       dbSnapshotPath: dbPath,
@@ -234,19 +242,21 @@ export class SecurityIncidentPipeline {
     await this.redis.set(`incident:${incidentId}`, JSON.stringify(incidentData));
   }
 
-  private async assignOwner(incidentId: string, event: SecurityEvent, triage: any): Promise<string> {
+  private async assignOwner(incidentId: string, event: SecurityEvent, triage: { score: number; recommendations: TriageRecommendation[] }): Promise<string> {
     // Logic: Round robin or on-call based on severity
     // Simple mock implementation
     const onCallAnalyst = 'analyst-01';
 
-    const incidentData = JSON.parse(await this.redis.get(`incident:${incidentId}`));
+    const rawData = await this.redis.get(`incident:${incidentId}`);
+    if (!rawData) return onCallAnalyst;
+    const incidentData = JSON.parse(rawData);
     incidentData.ownerId = onCallAnalyst;
     await this.redis.set(`incident:${incidentId}`, JSON.stringify(incidentData));
 
     return onCallAnalyst;
   }
 
-  private async raiseAlert(incidentId: string, event: SecurityEvent, triage: any, ownerId: string) {
+  private async raiseAlert(incidentId: string, event: SecurityEvent, triage: { score: number; recommendations: TriageRecommendation[] }, ownerId: string) {
     this.logger.warn(`ALERT: Security Incident ${incidentId} created.`, {
       severity: event.severity,
       score: triage.score,
@@ -258,7 +268,7 @@ export class SecurityIncidentPipeline {
     // await this.notificationService.send(...)
   }
 
-  private async getIncident(id: string): Promise<SecurityIncident> {
+  private async getIncident(id: string): Promise<SecurityIncident | null> {
     const data = await this.redis.get(`incident:${id}`);
     return data ? JSON.parse(data) : null;
   }

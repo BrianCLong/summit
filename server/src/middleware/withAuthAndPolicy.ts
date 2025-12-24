@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * withAuthAndPolicy Higher-Order Resolver
  *
@@ -10,7 +9,7 @@ import { AuthenticationError, ForbiddenError } from 'apollo-server-express';
 import { z } from 'zod';
 import pino from 'pino';
 
-const logger: pino.Logger = pino({ name: 'authPolicy' });
+const logger: pino.Logger = (pino as any)({ name: 'authPolicy' });
 
 // Types for authentication and authorization
 interface User {

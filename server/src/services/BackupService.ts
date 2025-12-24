@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { spawn } from 'child_process';
 import path from 'path';
 import fs from 'fs';
@@ -6,7 +5,7 @@ import { getNeo4jDriver } from '../db/neo4j.js';
 import { getRedisClient } from '../db/redis.js';
 import pino from 'pino';
 
-const logger = pino({ name: 'BackupService' });
+const logger = (pino as any)({ name: 'BackupService' });
 
 const BACKUP_DIR = process.env.BACKUP_DIR || '/tmp/backups';
 
@@ -213,9 +212,10 @@ export class BackupService {
     // Trigger BGSAVE for RDB persistence on disk
     try {
         await client.bgsave();
-    } catch (err: any) {
+    } catch (err) {
         // Ignore "Background save already in progress" error
-        if (!err.message.includes('already in progress')) {
+        const message = err instanceof Error ? err.message : String(err);
+        if (!message.includes('already in progress')) {
             throw err;
         }
     }

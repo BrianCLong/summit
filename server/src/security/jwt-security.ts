@@ -6,7 +6,7 @@
  * and Redis JTI replay protection
  */
 
-import jwt from 'jsonwebtoken';
+import jwt, { Algorithm } from 'jsonwebtoken';
 import crypto from 'crypto';
 import { createClient } from 'redis';
 
@@ -44,7 +44,7 @@ interface JWTPayload {
 
 class JWTSecurityManager {
   private config: JWTConfig;
-  private redis: any;
+  private redis: ReturnType<typeof createClient>;
   private currentKey: JWTKey | null = null;
   private keyCache: Map<string, JWTKey> = new Map();
 
@@ -221,7 +221,7 @@ class JWTSecurityManager {
     } as any;
 
     const token = jwt.sign(fullPayload, this.currentKey.privateKey, {
-      algorithm: this.currentKey.algorithm as jwt.Algorithm,
+      algorithm: this.currentKey.algorithm as Algorithm,
       header: {
         kid: this.currentKey.kid,
         alg: this.currentKey.algorithm,
@@ -243,7 +243,7 @@ class JWTSecurityManager {
         throw new Error('Invalid token format');
       }
 
-      const kid = decoded.header.kid;
+      const kid = decoded.header.kid as string | undefined;
       if (!kid) {
         throw new Error('Missing kid header in JWT');
       }
@@ -256,7 +256,7 @@ class JWTSecurityManager {
 
       // Verify token signature and claims
       const payload = jwt.verify(token, verificationKey.publicKey, {
-        algorithms: [verificationKey.algorithm as jwt.Algorithm],
+        algorithms: [verificationKey.algorithm as Algorithm],
         issuer: this.config.issuer,
         audience: this.config.audience,
       }) as JWTPayload;
@@ -267,7 +267,8 @@ class JWTSecurityManager {
       console.log(`✅ Verified JWT: ${payload.jti} (kid: ${kid})`);
       return payload;
     } catch (error) {
-      console.error('❌ JWT verification failed:', error.message);
+      const err = error as Error;
+      console.error('❌ JWT verification failed:', err.message);
       throw error;
     }
   }
@@ -321,7 +322,14 @@ class JWTSecurityManager {
   /**
    * Get public keys for external verification (JWKS endpoint)
    */
-  async getPublicKeys(): Promise<any[]> {
+  async getPublicKeys(): Promise<Array<{
+    kid: string;
+    kty: string;
+    use: string;
+    alg: string;
+    n: string;
+    e: string;
+  }>> {
     const keys = [];
 
     // Add current key
@@ -369,7 +377,13 @@ class JWTSecurityManager {
    */
   async healthCheck(): Promise<{
     status: 'healthy' | 'degraded' | 'unhealthy';
-    details: any;
+    details: {
+      redis?: string;
+      currentKey?: string;
+      keyExpiry?: Date | string;
+      cacheSize?: number;
+      error?: string;
+    };
   }> {
     try {
       const redisHealthy = (await this.redis.ping()) === 'PONG';
@@ -390,10 +404,11 @@ class JWTSecurityManager {
         },
       };
     } catch (error) {
+      const err = error as Error;
       return {
         status: 'unhealthy',
         details: {
-          error: error.message,
+          error: err.message,
         },
       };
     }

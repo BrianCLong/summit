@@ -1,11 +1,10 @@
-// @ts-nocheck
 import { readFileSync, existsSync } from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import type { NextFunction, Request, Response } from 'express';
 import pino from 'pino';
 
-const logger = pino({ name: 'graphqlPersistedAllowlist' });
+const logger = (pino as any)({ name: 'graphqlPersistedAllowlist' });
 
 interface PersistedAllowlistOptions {
   manifestPaths?: string[];

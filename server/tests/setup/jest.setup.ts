@@ -1,10 +1,8 @@
-// @ts-nocheck
 /**
  * Jest Global Setup Configuration
  * Provides common test utilities and matchers
  */
 
-// @ts-nocheck
 import 'jest-extended';
 
 // Mock ioredis globally - using a simple mock implementation since module resolution fails
@@ -60,7 +58,7 @@ jest.mock('pg', () => {
 
 // Mock fluent-ffmpeg globally
 jest.mock('fluent-ffmpeg', () => {
-  const ffmpeg: any = jest.fn(() => {
+  const ffmpeg = jest.fn(() => {
     return {
       seekInput: jest.fn().mockReturnThis(),
       duration: jest.fn().mockReturnThis(),
@@ -81,7 +79,7 @@ jest.mock('fluent-ffmpeg', () => {
       format: jest.fn().mockReturnThis(),
       pipe: jest.fn(),
     };
-  });
+  }) as any;
   ffmpeg.setFfmpegPath = jest.fn();
   ffmpeg.setFfprobePath = jest.fn();
   ffmpeg.ffprobe = jest.fn();
@@ -97,13 +95,13 @@ const originalConsoleError = console.error;
 
 beforeAll(() => {
   if (!process.env.DEBUG_TESTS) {
-    console.log = jest.fn() as any;
-    console.info = jest.fn() as any;
-    console.warn = jest.fn() as any;
-    console.debug = jest.fn() as any;
+    console.log = jest.fn() as typeof console.log;
+    console.info = jest.fn() as typeof console.info;
+    console.warn = jest.fn() as typeof console.warn;
+    console.debug = jest.fn() as typeof console.debug;
   }
 
-  console.error = (...args: unknown[]) => {
+  console.error = (...args: unknown[]): void => {
     // Check if it's the "Unhandled Rejection" we caught below, don't double throw
     if (args[0] && typeof args[0] === 'string' && args[0].startsWith('Unhandled Rejection')) {
       originalConsoleError(...args);

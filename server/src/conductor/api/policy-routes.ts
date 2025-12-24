@@ -7,6 +7,7 @@ import { opaPolicyEngine } from '../governance/opa-integration.js';
 import logger from '../../config/logger.js';
 
 const router = express.Router();
+const metrics = prometheusConductorMetrics as any;
 
 async function routingOPAGuard(req, res, next) {
   const user = (req as any).user || {};
@@ -118,10 +119,10 @@ router.post('/explain', async (req, res) => {
 
     // Track metrics
     const duration = Date.now() - startTime;
-    prometheusConductorMetrics?.policyExplanationLatency?.observe(
+    metrics?.policyExplanationLatency?.observe(
       duration / 1000,
     );
-    prometheusConductorMetrics?.policyExplanationRequests?.inc({
+    metrics?.policyExplanationRequests?.inc({
       status: 'success',
     });
 
@@ -140,10 +141,10 @@ router.post('/explain', async (req, res) => {
     res.json(response);
   } catch (error) {
     const duration = Date.now() - startTime;
-    prometheusConductorMetrics?.policyExplanationLatency?.observe(
+    metrics?.policyExplanationLatency?.observe(
       duration / 1000,
     );
-    prometheusConductorMetrics?.policyExplanationRequests?.inc({
+    metrics?.policyExplanationRequests?.inc({
       status: 'error',
     });
 
@@ -195,10 +196,10 @@ router.post('/simulate', async (req, res) => {
 
     // Track metrics
     const duration = Date.now() - startTime;
-    prometheusConductorMetrics?.policySimulationLatency?.observe(
+    metrics?.policySimulationLatency?.observe(
       duration / 1000,
     );
-    prometheusConductorMetrics?.policySimulationRequests?.inc({
+    metrics?.policySimulationRequests?.inc({
       status: 'success',
       type: simulationType,
     });
@@ -211,10 +212,10 @@ router.post('/simulate', async (req, res) => {
     });
   } catch (error) {
     const duration = Date.now() - startTime;
-    prometheusConductorMetrics?.policySimulationLatency?.observe(
+    metrics?.policySimulationLatency?.observe(
       duration / 1000,
     );
-    prometheusConductorMetrics?.policySimulationRequests?.inc({
+    metrics?.policySimulationRequests?.inc({
       status: 'error',
       type: req.body.simulationType || 'unknown',
     });
@@ -276,7 +277,7 @@ router.get('/rules', async (req, res) => {
       },
     ];
 
-    prometheusConductorMetrics?.policyRulesRequests?.inc({ status: 'success' });
+    metrics?.policyRulesRequests?.inc({ status: 'success' });
 
     res.json({
       rules,
@@ -284,7 +285,7 @@ router.get('/rules', async (req, res) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    prometheusConductorMetrics?.policyRulesRequests?.inc({ status: 'error' });
+    metrics?.policyRulesRequests?.inc({ status: 'error' });
 
     console.error('Policy rules fetch error:', error);
     res.status(500).json({
@@ -342,16 +343,16 @@ router.get(
 
     if (includeTrace === 'true') {
       const trace = await policyExplainer.getPolicyExplanationAPI(
-        routingDecision.queryId,
+        (routingDecision as any).queryId,
       );
-      routingDecision.trace = trace;
+      (routingDecision as any).trace = trace;
     }
 
-    prometheusConductorMetrics?.runRoutingRequests?.inc({ status: 'success' });
+    metrics?.runRoutingRequests?.inc({ status: 'success' });
 
     res.json(routingDecision);
   } catch (error) {
-    prometheusConductorMetrics?.runRoutingRequests?.inc({ status: 'error' });
+    metrics?.runRoutingRequests?.inc({ status: 'error' });
 
     console.error('Run routing fetch error:', error);
     res.status(500).json({

@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Conductor Studio - MoE+MCP Router Interface
 // Provides routing preview, execution, and system monitoring for the Conductor
 
@@ -12,7 +11,6 @@ import {
   Typography,
   TextField,
   Button,
-  Grid,
   Alert,
   Chip,
   LinearProgress,
@@ -36,6 +34,7 @@ import {
   AccordionDetails,
   Divider,
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import {
   PlayArrow,
   Preview,
@@ -200,7 +199,7 @@ function RoutingPreview({
 
   return (
     <Grid container spacing={3}>
-      <Grid item xs={12}>
+      <Grid xs={12}>
         <Card>
           <CardContent>
             <Typography variant="h6" gutterBottom>
@@ -314,19 +313,19 @@ function RoutingPreview({
                       Extracted Features
                     </Typography>
                     <Grid container spacing={1}>
-                      <Grid item>
+                      <Grid>
                         <Chip
                           size="small"
                           label={`Complexity: ${data.previewRouting.features.complexity}`}
                         />
                       </Grid>
-                      <Grid item>
+                      <Grid>
                         <Chip
                           size="small"
                           label={`Data Intensity: ${data.previewRouting.features.dataIntensity}`}
                         />
                       </Grid>
-                      <Grid item>
+                      <Grid>
                         <Chip
                           size="small"
                           label={`Security: ${data.previewRouting.features.securityLevel}`}
@@ -335,7 +334,7 @@ function RoutingPreview({
                       {data.previewRouting.features.keywords?.length > 0 &&
                         data.previewRouting.features.keywords.map(
                           (keyword: string, idx: number) => (
-                            <Grid item key={idx}>
+                            <Grid key={idx}>
                               <Chip
                                 size="small"
                                 variant="outlined"
@@ -353,7 +352,7 @@ function RoutingPreview({
         </Card>
       </Grid>
       {/* Rollouts & SLO/Guardrails/Provenance */}
-      <Grid item xs={12}>
+      <Grid xs={12}>
         <Paper>
           <Tabs
             value={0}
@@ -368,7 +367,7 @@ function RoutingPreview({
           </Tabs>
           <Box sx={{ p: 2 }}>
             <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
+              <Grid xs={12} md={6}>
                 <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
                   <Button
                     variant="contained"
@@ -391,7 +390,7 @@ function RoutingPreview({
                   steps={(rollout.data as RolloutStep[]) || []}
                 />
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid xs={12} md={6}>
                 <CanaryHealthPanel
                   availability={canary.data?.availability || 0}
                   p95TtfbMs={canary.data?.p95TtfbMs || 0}
@@ -399,16 +398,16 @@ function RoutingPreview({
                   target={target}
                 />
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid xs={12} md={6}>
                 <BudgetGuardrails denials={(denials.data as Denial[]) || []} />
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid xs={12} md={6}>
                 <ProvenanceTree root={prov.data as StepNode} />
               </Grid>
-              <Grid item xs={12}>
+              <Grid xs={12}>
                 <SLODashboardEmbed />
               </Grid>
-              <Grid item xs={12}>
+              <Grid xs={12}>
                 <NLToCypherPreview />
               </Grid>
             </Grid>
@@ -485,7 +484,7 @@ function ExecutionPanel({ taskInput }: { taskInput: string }) {
 
   return (
     <Grid container spacing={3}>
-      <Grid item xs={12} md={6}>
+      <Grid xs={12} md={6}>
         <Card>
           <CardContent>
             <Typography variant="h6" gutterBottom>
@@ -524,7 +523,7 @@ function ExecutionPanel({ taskInput }: { taskInput: string }) {
                   spacing={1}
                   sx={{ mb: 2, alignItems: 'center' }}
                 >
-                  <Grid item xs={6}>
+                  <Grid xs={6}>
                     <Paper sx={{ p: 1, textAlign: 'center' }}>
                       <Typography variant="caption">Latency</Typography>
                       <Typography variant="h6">
@@ -532,7 +531,7 @@ function ExecutionPanel({ taskInput }: { taskInput: string }) {
                       </Typography>
                     </Paper>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid xs={6}>
                     <Paper sx={{ p: 1, textAlign: 'center' }}>
                       <Typography variant="caption">Cost</Typography>
                       <Typography variant="h6">
@@ -542,7 +541,7 @@ function ExecutionPanel({ taskInput }: { taskInput: string }) {
                   </Grid>
                   {Number(data.conduct.cost || 0) === 0 &&
                     Number(data.conduct.latencyMs || 0) < 50 && (
-                      <Grid item xs={12}>
+                      <Grid xs={12}>
                         <Chip
                           size="small"
                           color="success"
@@ -589,7 +588,7 @@ function ExecutionPanel({ taskInput }: { taskInput: string }) {
         </Card>
       </Grid>
 
-      <Grid item xs={12} md={6}>
+      <Grid xs={12} md={6}>
         <Card>
           <CardContent>
             <Typography variant="h6" gutterBottom>
@@ -688,7 +687,7 @@ function MCPRegistry() {
 
   return (
     <Grid container spacing={3}>
-      <Grid item xs={12}>
+      <Grid xs={12}>
         <Card>
           <CardContent>
             <Box
@@ -865,7 +864,7 @@ export default function ConductorStudio() {
 
       <TabPanel value={tabValue} index={3}>
         <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
+          <Grid xs={12} md={6}>
             <Card>
               <CardContent>
                 <Typography variant="h6" gutterBottom>
@@ -902,7 +901,7 @@ export default function ConductorStudio() {
             </Card>
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid xs={12} md={6}>
             <Card>
               <CardContent>
                 <Typography variant="h6" gutterBottom>
@@ -943,4 +942,3 @@ export default function ConductorStudio() {
     </Box>
   );
 }
-// @ts-nocheck

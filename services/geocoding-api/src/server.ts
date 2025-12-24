@@ -25,7 +25,7 @@ const limiter = rateLimit({
   max: process.env.NODE_ENV === 'production' ? 100 : 1000, // Limit each IP
   message: 'Too many requests from this IP, please try again later',
 });
-app.use('/api/', limiter);
+app.use('/api/', limiter as any);
 
 // Body parsing middleware
 app.use(express.json());

@@ -3,10 +3,12 @@ import { ApolloServerPlugin } from '@apollo/server';
 import { GraphQLError } from 'graphql';
 import { getComplexity, simpleEstimator, fieldExtensionsEstimator } from 'graphql-query-complexity';
 import pino from 'pino';
+import type { GraphQLSchema } from 'graphql';
+import type { GraphQLContext } from '../apollo-v5-server.js';
 
-const logger = pino();
+const logger = (pino as any)();
 
-export const rateLimitAndCachePlugin = (schema: any): ApolloServerPlugin => {
+export const rateLimitAndCachePlugin = (schema: GraphQLSchema): ApolloServerPlugin<GraphQLContext> => {
   return {
     async requestDidStart() {
       return {

@@ -1,10 +1,9 @@
-// @ts-nocheck
 import { spawn } from 'child_process';
 import path from 'path';
 import pino from 'pino';
 import { ExtractionEngineConfig } from '../types.js';
 
-const logger = pino({ name: 'ObjectDetectionEngine' });
+const logger = (pino as any)({ name: 'ObjectDetectionEngine' });
 
 export interface DetectionResult {
   className: string;
@@ -259,7 +258,7 @@ export class ObjectDetectionEngine {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(new Error(`Failed to spawn object detection: ${error.message}`));
       });
     });
@@ -345,7 +344,7 @@ export class ObjectDetectionEngine {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(
           new Error(`Failed to spawn video object detection: ${error.message}`),
         );
@@ -479,7 +478,7 @@ export class ObjectDetectionEngine {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(
           new Error(`Failed to spawn feature extraction: ${error.message}`),
         );

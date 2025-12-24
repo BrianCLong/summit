@@ -35,7 +35,7 @@
 import { Registry, Counter, Histogram, Gauge, Summary } from 'prom-client';
 import pino from 'pino';
 
-const logger = pino({ name: 'observability:metrics' });
+const logger = (pino as any)({ name: 'observability:metrics' });
 
 export interface MetricsConfig {
   enabled: boolean;

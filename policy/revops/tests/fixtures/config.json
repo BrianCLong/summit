@@ -4,6 +4,7 @@
       "global_max_discount": 50
     },
     "config": {
+      "bundle_version": "revops-blueprint-v1",
       "tenant": {
         "tenant-default": {
           "blocklist": {
@@ -99,7 +100,78 @@
           }
         }
       },
-      "tenant_overrides": {}
+      "tenant_overrides": {},
+      "governance": {
+        "naming": {
+          "deal_pattern": "^[A-Z]+-[A-Z]+-[A-Za-z0-9]+-[A-Za-z0-9]+-Q[1-4]$",
+          "campaign_pattern": "^[A-Za-z]+-[A-Za-z]+-Q[1-4]-[A-Za-z]+$",
+          "sku_pattern": "^[A-Za-z0-9]+:[A-Za-z0-9]+:[A-Za-z0-9]+$",
+          "territory_pattern": "^[A-Z]{2,}-[A-Za-z]+-[A-Za-z]+$"
+        },
+        "stage_exit": {
+          "enterprise": {
+            "discovery": ["problem_confirmed", "budget_owner_identified"],
+            "evaluation": ["champion_identified", "paper_process_known"],
+            "proposal": ["commercial_terms_sent", "technical_win"],
+            "negotiation": ["decision_date", "mutual_plan"],
+            "closed_won": ["contract_signed", "sku_config_ready"],
+            "closed_lost": ["loss_reason"]
+          },
+          "smb": {
+            "discovery": ["problem_confirmed"],
+            "evaluation": ["paper_process_known"],
+            "proposal": ["commercial_terms_sent", "budget_owner_identified"],
+            "negotiation": ["decision_date"],
+            "closed_won": ["contract_signed"],
+            "closed_lost": ["loss_reason"]
+          }
+        },
+        "sla": {
+          "speed_to_lead_minutes": 15,
+          "speed_to_first_meeting_hours": 24,
+          "stale_days": 14,
+          "stage_aging_days": {
+            "discovery": 10,
+            "evaluation": 14,
+            "proposal": 10,
+            "negotiation": 7
+          }
+        },
+        "forecast": {
+          "categories": {
+            "commit": {"min_stage": "negotiation", "evidence": ["contract_signed"]},
+            "best_case": {"min_stage": "proposal", "evidence": ["commercial_terms_sent"]},
+            "upside": {"min_stage": "evaluation", "evidence": ["champion_identified"]},
+            "pipeline": {"min_stage": "discovery", "evidence": []}
+          }
+        },
+        "quote_to_cash": {
+          "floors": {"enterprise": 5000, "smb": 1200},
+          "ceilings": {"enterprise": 1000000, "smb": 250000},
+          "approval_thresholds": [
+            {"max_discount": 10, "approvers": []},
+            {"max_discount": 20, "approvers": ["manager"]},
+            {"max_discount": 35, "approvers": ["manager", "finance"]}
+          ],
+          "renewal_creation_days": [180, 120, 90]
+        },
+        "routing": {
+          "tie_breakers": ["intent_score", "icp_fit", "recency"],
+          "manual_channels_blocked": ["slack"]
+        },
+        "handoffs": {
+          "required_packets": ["sdr_ae", "ae_cs", "cs_renewals"],
+          "commitment_registry_required": true
+        },
+        "data_quality": {
+          "mandatory_fields": ["next_step", "next_step_date", "buying_role", "source", "segment", "territory"],
+          "dedupe": true
+        },
+        "governance_controls": {
+          "access_review_quarterly": true,
+          "audit_logs_required": true
+        }
+      }
     }
   },
   "revops_fixtures": {

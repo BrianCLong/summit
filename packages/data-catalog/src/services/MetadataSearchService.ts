@@ -12,46 +12,46 @@ import {
   License,
 } from '../types/metadata.js';
 
-export interface SearchQuery {
+export interface MetadataSearchQuery {
   query?: string;
-  filters?: SearchFilter[];
-  sort?: SortOption[];
+  filters?: MetadataSearchFilter[];
+  sort?: MetadataSortOption[];
   offset?: number;
   limit?: number;
 }
 
-export interface SearchFilter {
+export interface MetadataSearchFilter {
   field: string;
   operator: 'equals' | 'contains' | 'in' | 'gt' | 'lt' | 'between';
   value: any;
 }
 
-export interface SortOption {
+export interface MetadataSortOption {
   field: string;
   direction: 'asc' | 'desc';
 }
 
-export interface SearchResult<T> {
+export interface MetadataSearchResult<T> {
   results: T[];
   total: number;
   offset: number;
   limit: number;
   took: number;
-  facets?: SearchFacet[];
+  facets?: MetadataSearchFacet[];
 }
 
-export interface SearchFacet {
+export interface MetadataSearchFacet {
   field: string;
   values: Array<{ value: string; count: number }>;
 }
 
 export class MetadataSearchService {
-  constructor(private pool: Pool) {}
+  constructor(private pool: Pool) { }
 
   /**
    * Search data sources
    */
-  async searchDataSources(query: SearchQuery): Promise<SearchResult<DataSource>> {
+  async searchDataSources(query: MetadataSearchQuery): Promise<MetadataSearchResult<DataSource>> {
     const startTime = Date.now();
 
     let sql = 'SELECT * FROM catalog_data_sources';
@@ -101,7 +101,7 @@ export class MetadataSearchService {
     const total = parseInt(countResult.rows[0].total);
 
     return {
-      results: result.rows.map(row => this.mapRowToDataSource(row)),
+      results: result.rows.map((row: any) => this.mapRowToDataSource(row)),
       total,
       offset,
       limit,
@@ -112,7 +112,7 @@ export class MetadataSearchService {
   /**
    * Search datasets
    */
-  async searchDatasets(query: SearchQuery): Promise<SearchResult<Dataset>> {
+  async searchDatasets(query: MetadataSearchQuery): Promise<MetadataSearchResult<Dataset>> {
     const startTime = Date.now();
 
     let sql = 'SELECT * FROM catalog_datasets';
@@ -162,7 +162,7 @@ export class MetadataSearchService {
     const total = parseInt(countResult.rows[0].total);
 
     return {
-      results: result.rows.map(row => this.mapRowToDataset(row)),
+      results: result.rows.map((row: any) => this.mapRowToDataset(row)),
       total,
       offset,
       limit,
@@ -173,7 +173,7 @@ export class MetadataSearchService {
   /**
    * Search fields
    */
-  async searchFields(query: SearchQuery): Promise<SearchResult<Field>> {
+  async searchFields(query: MetadataSearchQuery): Promise<MetadataSearchResult<Field>> {
     const startTime = Date.now();
 
     let sql = 'SELECT * FROM catalog_fields';
@@ -223,7 +223,7 @@ export class MetadataSearchService {
     const total = parseInt(countResult.rows[0].total);
 
     return {
-      results: result.rows.map(row => this.mapRowToField(row)),
+      results: result.rows.map((row: any) => this.mapRowToField(row)),
       total,
       offset,
       limit,
@@ -248,7 +248,7 @@ export class MetadataSearchService {
   /**
    * Search mappings
    */
-  async searchMappings(query: SearchQuery): Promise<SearchResult<Mapping>> {
+  async searchMappings(query: MetadataSearchQuery): Promise<MetadataSearchResult<Mapping>> {
     const startTime = Date.now();
 
     let sql = 'SELECT * FROM catalog_mappings';
@@ -298,7 +298,7 @@ export class MetadataSearchService {
     const total = parseInt(countResult.rows[0].total);
 
     return {
-      results: result.rows.map(row => this.mapRowToMapping(row)),
+      results: result.rows.map((row: any) => this.mapRowToMapping(row)),
       total,
       offset,
       limit,
@@ -309,8 +309,8 @@ export class MetadataSearchService {
   /**
    * Get facets for datasets
    */
-  async getDatasetFacets(): Promise<SearchFacet[]> {
-    const facets: SearchFacet[] = [];
+  async getDatasetFacets(): Promise<MetadataSearchFacet[]> {
+    const facets: MetadataSearchFacet[] = [];
 
     // Source type facet
     const sourceTypeSql = `
@@ -322,7 +322,7 @@ export class MetadataSearchService {
     const sourceTypeResult = await this.pool.query(sourceTypeSql);
     facets.push({
       field: 'type',
-      values: sourceTypeResult.rows.map(row => ({
+      values: sourceTypeResult.rows.map((row: any) => ({
         value: row.value,
         count: parseInt(row.count),
       })),
@@ -339,7 +339,7 @@ export class MetadataSearchService {
     const ownerResult = await this.pool.query(ownerSql);
     facets.push({
       field: 'owner',
-      values: ownerResult.rows.map(row => ({
+      values: ownerResult.rows.map((row: any) => ({
         value: row.value,
         count: parseInt(row.count),
       })),
@@ -357,7 +357,7 @@ export class MetadataSearchService {
     fields: Field[];
     mappings: Mapping[];
   }> {
-    const query: SearchQuery = {
+    const query: MetadataSearchQuery = {
       query: queryText,
       limit,
     };
@@ -405,13 +405,13 @@ export class MetadataSearchService {
     `;
 
     const result = await this.pool.query(sql, params);
-    return result.rows.map(row => this.mapRowToDataset(row));
+    return result.rows.map((row: any) => this.mapRowToDataset(row));
   }
 
   // ====== Private Helper Methods ======
 
   private buildFilterClause(
-    filter: SearchFilter,
+    filter: MetadataSearchFilter,
     startIndex: number
   ): { sql: string; params: any[] } | null {
     const column = this.mapFieldToColumn(filter.field);
@@ -447,7 +447,7 @@ export class MetadataSearchService {
     }
   }
 
-  private buildOrderBy(sortOptions: SortOption[]): string {
+  private buildOrderBy(sortOptions: MetadataSortOption[]): string {
     if (sortOptions.length === 0) {
       return '';
     }

@@ -4,7 +4,7 @@
 
 import { EventEmitter } from 'events';
 import Redis from 'ioredis';
-import { z } from 'zod';
+import * as z from 'zod';
 import logger from '../../config/logger.js';
 import { prometheusConductorMetrics } from '../observability/prometheus.js';
 import { crdtSyncEngine } from './crdt-sync.js';
@@ -140,7 +140,7 @@ export class OfflineKit extends EventEmitter {
     super();
     this.config = OfflineKitConfigSchema.parse(config);
 
-    this.redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
+    this.redis = new (Redis as any)(process.env.REDIS_URL || 'redis://localhost:6379', {
       lazyConnect: true,
       retryStrategy: (times) => {
         // Exponential backoff, max 30 seconds
@@ -274,7 +274,7 @@ export class OfflineKit extends EventEmitter {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'offline_kit_went_offline',
-      true,
+      { success: true },
     );
   }
 
@@ -294,7 +294,7 @@ export class OfflineKit extends EventEmitter {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'offline_kit_reconnected',
-      true,
+      { success: true },
     );
   }
 
@@ -477,9 +477,9 @@ export class OfflineKit extends EventEmitter {
 
           // Record but don't block sync - violations will be filtered
           prometheusConductorMetrics.recordOperationalEvent(
-            'sync_leakage_detected',
-            true,
-          );
+      'sync_leakage_detected',
+      { success: true },
+    );
         }
       }
 
@@ -523,9 +523,9 @@ export class OfflineKit extends EventEmitter {
     } catch (error) {
       logger.error('Cloud sync failed', { error });
       prometheusConductorMetrics.recordOperationalEvent(
-        'offline_kit_sync_failed',
-        false,
-      );
+      'offline_kit_sync_failed',
+      { success: false },
+    );
       throw error;
     }
   }

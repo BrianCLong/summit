@@ -33,7 +33,7 @@ export interface FeatureFlagMiddlewareContext {
   getNumber(key: string, defaultValue: number): Promise<number>;
 
   /** Get a JSON flag value */
-  getJSON<T = any>(key: string, defaultValue: T): Promise<T>;
+  getJSON<T extends FlagVariation = any>(key: string, defaultValue: T): Promise<T>;
 
   /** Get all flags */
   getAll(): Promise<Record<string, FlagVariation>>;
@@ -98,7 +98,7 @@ export function createFeatureFlagMiddleware(
           return service.getNumberFlag(key, defaultValue, context);
         },
 
-        getJSON: async <T = any>(key: string, defaultValue: T) => {
+        getJSON: async <T extends FlagVariation = any>(key: string, defaultValue: T) => {
           return service.getJSONFlag<T>(key, defaultValue, context);
         },
 
@@ -135,7 +135,7 @@ function buildContext(
     userEmail: (req as any).user?.email,
     userRole: (req as any).user?.role || (req as any).user?.roles,
     tenantId: (req as any).user?.tenantId || (req as any).tenant?.id,
-    sessionId: (req as any).sessionId || req.sessionID,
+    sessionId: (req as any).sessionId || (req as any).sessionID,
     ipAddress: req.ip || req.socket.remoteAddress,
     userAgent: req.get('User-Agent'),
   };

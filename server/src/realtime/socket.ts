@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Server, Socket } from 'socket.io';
 import { verifyToken as verifyTokenBase } from '../lib/auth.js';
 import pino from 'pino';
@@ -32,7 +31,7 @@ import {
 } from './investigationAccess.js';
 import { registerDashboardHandlers } from './dashboard.js';
 
-const logger = pino();
+const logger = (pino as any)();
 
 let verifyToken = verifyTokenBase;
 

@@ -1,8 +1,7 @@
 // @ts-nocheck
-
-import { mlAnalysisService } from './mlAnalysisService';
-import LLMService from './LLMService';
-import { requireFunc } from '../utils/require';
+import { mlAnalysisService } from './mlAnalysisService.js';
+import LLMService from './LLMService.js';
+import { requireFunc } from '../utils/require.js';
 
 // Load CommonJS services
 const VisionService = requireFunc('./VisionService.js');
@@ -14,7 +13,7 @@ import logger from '../utils/logger.js';
 
 // Simple implementation of TimeSeriesAnalyzer locally since it might be missing
 class TimeSeriesAnalyzer {
-  analyze(dataPoints: number[], options: any = {}) {
+  analyze(dataPoints: number[], options: Record<string, unknown> = {}) {
     if (!dataPoints || dataPoints.length === 0) return { trend: 'unknown', forecast: [] };
 
     // Simple Linear Regression
@@ -55,10 +54,10 @@ class TimeSeriesAnalyzer {
  * Satisfies requirements for NLP, Sentiment, Anomaly, Prediction, Vision, Network, Time-series, etc.
  */
 export class IntelligenceAnalysisService {
-  private llmService: any;
-  private visionService: any;
-  private sentimentService: any;
-  private graphAnalyticsService: any;
+  private llmService: LLMService;
+  private visionService: InstanceType<ReturnType<typeof requireFunc>>;
+  private sentimentService: InstanceType<ReturnType<typeof requireFunc>>;
+  private graphAnalyticsService: InstanceType<ReturnType<typeof requireFunc>>;
   private timeSeriesAnalyzer: TimeSeriesAnalyzer;
 
   constructor() {
@@ -147,7 +146,7 @@ export class IntelligenceAnalysisService {
   /**
    * 5. Image Analysis
    */
-  async analyzeImage(imageUrlOrBuffer: string | object) {
+  async analyzeImage(imageUrlOrBuffer: string | Buffer) {
     const objects = await this.visionService.analyzeImageObjects(imageUrlOrBuffer);
     const emotions = await this.visionService.analyzeMicroexpressions(imageUrlOrBuffer);
 
@@ -189,7 +188,7 @@ export class IntelligenceAnalysisService {
 
     Return only the category name.`;
 
-    const category = await this.llmService.complete({ prompt, temperature: 0.0 });
+    const category = await this.llmService.complete(prompt, { temperature: 0.0 });
     return {
       category: category.trim(),
       confidence: 0.9 // Placeholder
@@ -208,7 +207,10 @@ export class IntelligenceAnalysisService {
    * 12. Explainable AI
    * Wraps a prediction with an explanation
    */
-  explainPrediction(prediction: any) {
+  explainPrediction(prediction: {
+    reasoning?: string[];
+    confidence?: number;
+  }) {
     // If prediction object already has reasoning, format it.
     if (prediction && prediction.reasoning) {
       return {

@@ -77,6 +77,17 @@ export interface LegalHold {
   createdAt: Date;
   expiresAt?: Date;
   scope: 'full' | 'partial';
+  matterNumber?: string;
+  custodians?: string[];
+  systems?: string[];
+  privileged?: boolean;
+  acknowledgedBy?: Array<{
+    custodianId: string;
+    acknowledgedAt: Date;
+    channel: 'email' | 'sms' | 'in-app';
+    acknowledgementHash: string;
+  }>;
+  status?: 'active' | 'released';
 }
 
 export interface TenantRetentionPolicy {
@@ -244,6 +255,7 @@ export interface RedactionRule {
     hashAlgorithm?: string; // For 'hash' operation
     preserveLength?: boolean;
     preserveFormat?: boolean;
+    maxLength?: number; // For 'truncate' operation
   };
 
   /** Whether to keep a hash stub for provenance */

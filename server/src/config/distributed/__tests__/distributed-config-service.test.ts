@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { z } from 'zod';
 import DistributedConfigService from '../distributed-config-service';
 import InMemoryConfigRepository from '../repository';
@@ -44,8 +43,8 @@ describe('DistributedConfigService', () => {
   };
 
   let repository: InMemoryConfigRepository<typeof baseConfig>;
-  let secretResolver: { resolve: jest.Mock };
-  let featureFlagAdapter: { updateFlags: jest.Mock };
+  let secretResolver: { resolve: jest.MockedFunction<SecretResolver['resolve']> };
+  let featureFlagAdapter: { updateFlags: jest.MockedFunction<FeatureFlagAdapter['updateFlags']> };
   let service: DistributedConfigService<typeof baseConfig>;
 
   beforeEach(() => {
@@ -54,11 +53,11 @@ describe('DistributedConfigService', () => {
     );
     secretResolver = {
       resolve: jest.fn(
-        async ({ provider, key }) => `${provider}:${key}:resolved`,
-      ),
+        async ({ provider, key }: { provider: string; key: string }) => `${provider}:${key}:resolved`,
+      ) as jest.MockedFunction<SecretResolver['resolve']>,
     };
     featureFlagAdapter = {
-      updateFlags: jest.fn(async () => undefined),
+      updateFlags: jest.fn(async () => undefined) as jest.MockedFunction<FeatureFlagAdapter['updateFlags']>,
     };
 
     service = new DistributedConfigService(repository, {
@@ -92,7 +91,7 @@ describe('DistributedConfigService', () => {
   });
 
   it('supports dynamic watchers and audit trail entries', async () => {
-    const watcher = jest.fn();
+    const watcher = jest.fn() as jest.MockedFunction<(version: number) => void>;
     service.registerWatcher('service-core', async ({ version }) => {
       watcher(version.metadata.version);
     });

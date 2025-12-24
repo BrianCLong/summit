@@ -71,7 +71,7 @@ function buildInput(req: Request): AuthzInput {
       (req.headers["x-action"] as string | undefined) || `${req.method.toLowerCase()}:${req.path}`,
     context: {
       env: (req.headers["x-env"] as string | undefined) || "dev",
-      request_ip: req.ip,
+      request_ip: req.ip || 'unknown',
       time: new Date().toISOString(),
       reason,
       risk: (req.headers["x-risk"] as string | undefined) || "low",

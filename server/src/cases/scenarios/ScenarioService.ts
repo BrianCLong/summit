@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { randomUUID } from 'crypto';
 import { EventEmitter } from 'events';
 import { InvestigationScenario, ScenarioModification, ModificationType, ScenarioResult } from './types.js';
@@ -30,7 +29,7 @@ class ScenarioService extends EventEmitter {
     investigationId: string,
     name: string,
     description?: string,
-    userId: string = 'system'
+    userId = 'system'
   ): Promise<InvestigationScenario> {
     const investigation = await investigationWorkflowService.getInvestigation(investigationId);
     if (!investigation) {
@@ -76,7 +75,7 @@ class ScenarioService extends EventEmitter {
     type: ModificationType,
     data: unknown,
     targetId?: string,
-    userId: string = 'system'
+    userId = 'system'
   ): Promise<InvestigationScenario> {
     const scenario = this.scenarios.get(scenarioId);
     if (!scenario) {
@@ -154,7 +153,7 @@ class ScenarioService extends EventEmitter {
       switch (mod.type) {
         case 'ADD_ENTITY':
           // mod.targetId is guaranteed to be set by addModification for ADD_* types
-          entities.push({ ...mod.data, id: mod.targetId });
+          entities.push({ ...(mod.data as Record<string, unknown>), id: mod.targetId });
           break;
         case 'REMOVE_ENTITY':
           entities = entities.filter(e => e.id !== mod.targetId);
@@ -164,17 +163,17 @@ class ScenarioService extends EventEmitter {
         case 'UPDATE_ENTITY':
           const entIdx = entities.findIndex(e => e.id === mod.targetId);
           if (entIdx >= 0) {
-            entities[entIdx] = { ...entities[entIdx], ...mod.data };
+            entities[entIdx] = { ...entities[entIdx], ...(mod.data as Record<string, unknown>) };
           }
           break;
         case 'ADD_RELATIONSHIP':
-          relationships.push({ ...mod.data, id: mod.targetId });
+          relationships.push({ ...(mod.data as Record<string, unknown>), id: mod.targetId } as { id: string; source: string; target: string; [key: string]: unknown });
           break;
         case 'REMOVE_RELATIONSHIP':
           relationships = relationships.filter(r => r.id !== mod.targetId);
           break;
         case 'ADD_EVENT':
-          timeline.push({ ...mod.data, id: mod.targetId });
+          timeline.push({ ...(mod.data as Record<string, unknown>), id: mod.targetId });
           break;
         case 'REMOVE_EVENT':
           timeline = timeline.filter(t => t.id !== mod.targetId);
@@ -182,7 +181,7 @@ class ScenarioService extends EventEmitter {
         case 'MODIFY_EVENT':
           const evtIdx = timeline.findIndex(t => t.id === mod.targetId);
           if (evtIdx >= 0) {
-            timeline[evtIdx] = { ...timeline[evtIdx], ...mod.data };
+            timeline[evtIdx] = { ...timeline[evtIdx], ...(mod.data as Record<string, unknown>) };
           }
           break;
       }

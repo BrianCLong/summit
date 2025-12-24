@@ -1,4 +1,5 @@
-import type { SASLOptions, logLevel, Ssl } from 'kafkajs';
+import type { SASLOptions, logLevel } from 'kafkajs';
+import type { ConnectionOptions } from 'tls';
 
 export interface RetryPolicy {
   maxAttempts: number;
@@ -31,7 +32,7 @@ export interface DlqConfig {
   brokers: string[];
   topic: string;
   clientId?: string;
-  ssl?: boolean | Ssl;
+  ssl?: boolean | ConnectionOptions;
   sasl?: SASLOptions;
   logLevel?: logLevel;
 }

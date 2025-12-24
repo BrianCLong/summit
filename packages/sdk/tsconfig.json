@@ -2,8 +2,8 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "types": ["jest", "node"]
+    "skipLibCheck": true
   },
-  "include": ["src", "tests"],
+  "include": ["src"],
   "references": [{ "path": "../types" }]
 }

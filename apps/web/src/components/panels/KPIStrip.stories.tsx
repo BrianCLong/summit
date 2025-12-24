@@ -1,4 +1,3 @@
-// @ts-nocheck
 import type { Meta, StoryObj } from '@storybook/react'
 import { KPIStrip } from './KPIStrip'
 import mockData from '@/mock/data.json'

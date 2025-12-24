@@ -10,7 +10,7 @@ import type {
   TransformationStep,
   MatchingEvent,
   MergeEvent
-} from '@summit/mdm-core';
+} from '@intelgraph/mdm-core';
 
 export interface LineageQuery {
   recordId?: string;

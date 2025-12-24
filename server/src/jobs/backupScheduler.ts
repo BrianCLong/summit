@@ -1,8 +1,7 @@
-// @ts-nocheck
 import { BackupService } from '../services/BackupService.js';
 import pino from 'pino';
 
-const logger = pino({ name: 'BackupScheduler' });
+const logger = (pino as any)({ name: 'BackupScheduler' });
 
 const BACKUP_INTERVAL_MS = parseInt(process.env.BACKUP_INTERVAL_MS || '86400000', 10); // Default 24h
 

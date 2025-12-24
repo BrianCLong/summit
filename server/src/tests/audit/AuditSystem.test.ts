@@ -1,5 +1,5 @@
-// @ts-nocheck
-import { AdvancedAuditSystem } from '../../audit/advanced-audit-system';
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
+import { AdvancedAuditSystem } from '../../audit/advanced-audit-system.js';
 import { Pool } from 'pg';
 import Redis from 'ioredis';
 import pino from 'pino';
@@ -13,7 +13,7 @@ const mockRedis = {
   publish: jest.fn(),
 } as unknown as Redis;
 
-const mockLogger = pino({ level: 'silent' });
+const mockLogger = (pino as any)({ level: 'silent' });
 
 describe('AdvancedAuditSystem', () => {
   let auditSystem: AdvancedAuditSystem;

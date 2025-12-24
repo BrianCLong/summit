@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, {
   useCallback,
   useEffect,
@@ -16,7 +15,6 @@ import {
   Chip,
   Divider,
   FormControlLabel,
-  Grid,
   LinearProgress,
   Link,
   Stack,
@@ -24,6 +22,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import DownloadIcon from '@mui/icons-material/Download';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import InfoIcon from '@mui/icons-material/Info';
@@ -43,31 +42,31 @@ const artifactOptions: Array<{
   label: string;
   description: string;
 }> = [
-  {
-    key: 'audit-trail',
-    label: 'Audit trail',
-    description:
-      'Immutable, redacted event logs scoped to the selected tenant and timeframe.',
-  },
-  {
-    key: 'sbom',
-    label: 'SBOMs',
-    description:
-      'CycloneDX manifests for orchestrated runs and dependencies referenced in the window.',
-  },
-  {
-    key: 'attestations',
-    label: 'Attestations',
-    description:
-      'SLSA provenance statements and associated signatures for included artifacts.',
-  },
-  {
-    key: 'policy-reports',
-    label: 'Policy reports',
-    description:
-      'OPA decision logs, router verdicts, and compliance checkpoints.',
-  },
-];
+    {
+      key: 'audit-trail',
+      label: 'Audit trail',
+      description:
+        'Immutable, redacted event logs scoped to the selected tenant and timeframe.',
+    },
+    {
+      key: 'sbom',
+      label: 'SBOMs',
+      description:
+        'CycloneDX manifests for orchestrated runs and dependencies referenced in the window.',
+    },
+    {
+      key: 'attestations',
+      label: 'Attestations',
+      description:
+        'SLSA provenance statements and associated signatures for included artifacts.',
+    },
+    {
+      key: 'policy-reports',
+      label: 'Policy reports',
+      description:
+        'OPA decision logs, router verdicts, and compliance checkpoints.',
+    },
+  ];
 
 const toLocalInputValue = (date: Date) => {
   const pad = (value: number) => value.toString().padStart(2, '0');
@@ -270,7 +269,7 @@ const DisclosurePackagerPage: React.FC = () => {
         </Box>
 
         <Grid container spacing={3} component="form" onSubmit={handleSubmit}>
-          <Grid item xs={12} md={7}>
+          <Grid xs={12} md={7}>
             <Card variant="outlined">
               <CardContent>
                 <Stack spacing={3}>
@@ -279,7 +278,7 @@ const DisclosurePackagerPage: React.FC = () => {
                       Timeframe & tenant
                     </Typography>
                     <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
+                      <Grid xs={12} sm={6}>
                         <TextField
                           label="Start"
                           type="datetime-local"
@@ -290,7 +289,7 @@ const DisclosurePackagerPage: React.FC = () => {
                           InputLabelProps={{ shrink: true }}
                         />
                       </Grid>
-                      <Grid item xs={12} sm={6}>
+                      <Grid xs={12} sm={6}>
                         <TextField
                           label="End"
                           type="datetime-local"
@@ -301,7 +300,7 @@ const DisclosurePackagerPage: React.FC = () => {
                           InputLabelProps={{ shrink: true }}
                         />
                       </Grid>
-                      <Grid item xs={12} sm={6}>
+                      <Grid xs={12} sm={6}>
                         <TextField
                           label="Tenant ID"
                           value={tenantId}
@@ -311,7 +310,7 @@ const DisclosurePackagerPage: React.FC = () => {
                           helperText="Tenant isolation enforced on every export request."
                         />
                       </Grid>
-                      <Grid item xs={12} sm={6}>
+                      <Grid xs={12} sm={6}>
                         <TextField
                           label="Completion webhook (optional)"
                           placeholder="https://example.com/webhooks/disclosures"
@@ -456,7 +455,7 @@ const DisclosurePackagerPage: React.FC = () => {
             </Card>
           </Grid>
 
-          <Grid item xs={12} md={5}>
+          <Grid xs={12} md={5}>
             <Stack spacing={3}>
               <Card variant="outlined">
                 <CardContent>

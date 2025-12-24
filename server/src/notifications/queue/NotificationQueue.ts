@@ -1,10 +1,9 @@
-// @ts-nocheck
 import { Queue, Worker, Job } from 'bullmq';
 import { NotificationService } from '../NotificationService.js';
 import { NotificationPayload, NotificationResult } from '../types.js';
 import pino from 'pino';
 
-const logger = pino({ name: 'NotificationQueue' });
+const logger = (pino as any)({ name: 'NotificationQueue' });
 
 const QUEUE_NAME = 'notifications';
 

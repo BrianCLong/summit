@@ -10,8 +10,15 @@ dependencies = [
     "prometheus-client",
     "cryptography",
     "prov",
-    "python-multipart"
+    "python-multipart",
+    "strawberry-graphql",
+    "grpclib",
+    "protobuf",
+    "betterproto"
 ]
+
+[project.scripts]
+provctl = "app.cli:main"
 
 [project.optional-dependencies]
 test = ["pytest", "httpx"]

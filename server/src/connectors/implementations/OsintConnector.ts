@@ -1,11 +1,8 @@
-// @ts-nocheck
 import { BaseConnector } from '../BaseConnector.js';
 import {
   OsintSourceConfig,
   OsintSourceType,
-  OsintRecord,
-  ConnectorContext,
-  IngestionEvent
+  OsintRecord
 } from '../types.js';
 import { randomUUID } from 'crypto';
 import pino from 'pino';

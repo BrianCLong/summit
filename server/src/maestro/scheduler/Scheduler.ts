@@ -1,11 +1,10 @@
-// @ts-nocheck
 import { runsRepo } from '../runs/runs-repo.js';
 import { executorsRepo } from '../executors/executors-repo.js';
-import { pino } from 'pino';
+import pino from 'pino';
 import { QueueHelper, PrioritizedItem } from './QueueHelper.js';
 import { ExecutorSelector } from './ExecutorSelector.js';
 
-const logger = pino({ name: 'maestro-scheduler' });
+const logger = (pino as any)({ name: 'maestro-scheduler' });
 
 interface QueueItem extends PrioritizedItem {
   runId: string;

@@ -10,7 +10,7 @@ import { randomUUID } from 'crypto';
 import { default as pino } from 'pino';
 
 // @ts-ignore
-const logger = pino({ name: 'AnomalyCorrelationService' });
+const logger = (pino as any)({ name: 'AnomalyCorrelationService' });
 
 // Core Anomaly Types
 export interface Anomaly {

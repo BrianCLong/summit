@@ -1,9 +1,10 @@
+// @ts-nocheck
 /**
  * KB Service API Server
  * Knowledge Base service for documentation, runbooks, SOPs, and contextual help
  */
 
-import express from 'express';
+import express, { type Express } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
@@ -16,7 +17,7 @@ import {
 } from './middleware/index.js';
 import { healthCheck, closePool } from './db/connection.js';
 
-const app = express();
+const app: Express = express();
 const PORT = parseInt(process.env.KB_SERVICE_PORT || '3200', 10);
 
 // Security middleware

@@ -19,3 +19,4 @@ export * from './joins';
 export * from './operators';
 export * from './checkpoint';
 export * from './types';
+export * from './intelgraphPipeline';

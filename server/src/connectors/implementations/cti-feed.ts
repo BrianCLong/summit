@@ -1,9 +1,8 @@
-// @ts-nocheck
-
-import { BaseConnector } from '../base';
-import { ConnectorConfig, ConnectorSchema } from '../types';
+import { BaseConnector } from '../base.js';
+import { ConnectorConfig, ConnectorSchema } from '../types.js';
 import { Readable } from 'stream';
 import axios from 'axios';
+import * as readline from 'readline';
 
 // Generic CTI Feed (usually simple line-based text or CSV or JSON)
 export class CTIFeedConnector extends BaseConnector {
@@ -35,12 +34,12 @@ export class CTIFeedConnector extends BaseConnector {
 
   async fetchSchema(): Promise<ConnectorSchema> {
       if (this.format === 'json') {
-          return { fields: [{ name: 'data', type: 'json', nullable: false }] };
+          return { fields: [{ name: 'data', type: 'json', nullable: false }], version: 1 };
       }
-      return { fields: [{ name: 'line', type: 'string', nullable: false }] };
+      return { fields: [{ name: 'line', type: 'string', nullable: false }], version: 1 };
   }
 
-  async readStream(options?: any): Promise<Readable> {
+  async readStream(options?: Record<string, unknown>): Promise<Readable> {
     const stream = new Readable({ objectMode: true, read() {} });
 
     setImmediate(async () => {
@@ -48,7 +47,7 @@ export class CTIFeedConnector extends BaseConnector {
             const response = await axios.get(this.url, { responseType: 'stream' });
 
             // Just pipe raw chunks or lines
-            const rl = require('readline').createInterface({ input: response.data });
+            const rl = readline.createInterface({ input: response.data });
 
             rl.on('line', (line: string) => {
                 if (!line || line.startsWith('#')) return; // Skip comments

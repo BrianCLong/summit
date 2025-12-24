@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Event Detail Panel - Slide-out panel showing full event details
  */

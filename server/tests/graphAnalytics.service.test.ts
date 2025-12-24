@@ -1,4 +1,3 @@
-// @ts-nocheck
 import GraphAnalyticsService = require('../src/services/GraphAnalyticsService');
 import { jest, describe, it, expect } from '@jest/globals';
 

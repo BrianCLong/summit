@@ -75,7 +75,7 @@ export function getDriver(target: 'primary' | 'replica' = 'primary') {
 async function executeWithDriver<T>(
   driver: Driver,
   cypher: string,
-  params: Record<string, any>,
+  params: Record<string, unknown>,
   mode: 'read' | 'write',
   route: 'primary' | 'replica',
 ) {
@@ -99,9 +99,9 @@ async function executeWithDriver<T>(
   }
 }
 
-export async function runCypher<T = any>(
+export async function runCypher<T = unknown>(
   cypher: string,
-  params: Record<string, any> = {},
+  params: Record<string, unknown> = {},
   options: {
     tenantId?: string;
     caseId?: string;
@@ -110,7 +110,7 @@ export async function runCypher<T = any>(
     bypassCache?: boolean;
     write?: boolean;
   } = {},
-) {
+): Promise<T[]> {
   // Write-Aware Sharding Gate (Limited GA)
   if (options.write && options.tenantId) {
     const featureAllowed = quotaEnforcer.isFeatureAllowed(options.tenantId, 'write_aware_sharding');
@@ -134,17 +134,18 @@ export async function runCypher<T = any>(
   const preferReplica = readReplicaConfigured() && !isWrite && !stickyPrimary;
   const routes: Array<'primary' | 'replica'> = preferReplica ? ['replica', 'primary'] : ['primary'];
 
-  const fetchFromDb = async () => {
-    let lastError: any;
+  const fetchFromDb = async (): Promise<T[]> => {
+    let lastError: unknown;
     for (const route of routes) {
       try {
         const driver = getDriver(route);
         metrics.incrementCounter('route_choice_total', { target: route });
         return await executeWithDriver<T>(driver, cypher, params, isWrite ? 'write' : 'read', route);
-      } catch (err: any) {
+      } catch (err: unknown) {
         lastError = err;
         if (route === 'replica') {
-          metrics.incrementCounter('replica_fallbacks', { reason: err?.message || 'replica_error' });
+          const errorMessage = err instanceof Error ? err.message : 'replica_error';
+          metrics.incrementCounter('replica_fallbacks', { reason: errorMessage });
           continue;
         }
         throw err;

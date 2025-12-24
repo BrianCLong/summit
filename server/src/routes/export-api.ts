@@ -5,9 +5,10 @@ import pino from 'pino';
 import { opaClient } from '../services/opa-client';
 import { businessMetrics, addSpanAttributes } from '../observability/telemetry';
 import { costGuard } from '../services/cost-guard';
+import type { AuthenticatedRequest } from './types.js';
 
 const router = Router();
-const logger = pino({ name: 'export-api' });
+const logger = (pino as any)({ name: 'export-api' });
 
 // Request schemas
 const exportRequestSchema = z.object({
@@ -17,7 +18,7 @@ const exportRequestSchema = z.object({
       z.object({
         id: z.string(),
         license: z.string(),
-        owner: z.string().optional(),
+        owner: z.string(),
         classification: z
           .enum(['public', 'internal', 'confidential', 'restricted'])
           .optional(),
@@ -41,7 +42,7 @@ const exportRequestSchema = z.object({
       'admin',
       'compliance-officer',
     ]),
-    user_scopes: z.array(z.string()).optional(),
+    user_scopes: z.array(z.string()).default([]),
     tenant_id: z.string(),
     purpose: z.enum([
       'investigation',
@@ -135,7 +136,7 @@ interface SimulationResponse extends ExportResponse {
  *
  * Main export endpoint with full policy evaluation and cost tracking
  */
-router.post('/export', async (req, res) => {
+router.post('/export', async (req: AuthenticatedRequest, res: Response) => {
   const startTime = Date.now();
   const requestId =
     (req.headers['x-request-id'] as string) || `export-${Date.now()}`;
@@ -217,8 +218,11 @@ router.post('/export', async (req, res) => {
     // Evaluate export policy via OPA
     const policyDecision = await opaClient.evaluateExportPolicy({
       action: 'export',
-      dataset: exportRequest.dataset,
-      context: exportRequest.context,
+      dataset: exportRequest.dataset as any,
+      context: {
+        ...exportRequest.context,
+        user_scopes: exportRequest.context.user_scopes || [],
+      } as any,
     });
 
     // Generate redactions for sensitive fields
@@ -321,7 +325,7 @@ router.post('/export', async (req, res) => {
  *
  * Policy simulation endpoint for testing what-if scenarios
  */
-router.post('/export/simulate', async (req, res) => {
+router.post('/export/simulate', async (req: AuthenticatedRequest, res: Response) => {
   const requestId =
     (req.headers['x-request-id'] as string) || `sim-${Date.now()}`;
 
@@ -341,8 +345,11 @@ router.post('/export/simulate', async (req, res) => {
     // Get baseline decision
     const baselineDecision = await opaClient.evaluateExportPolicy({
       action: 'export',
-      dataset: simulateRequest.dataset,
-      context: simulateRequest.context,
+      dataset: simulateRequest.dataset as any,
+      context: {
+        ...simulateRequest.context,
+        user_scopes: simulateRequest.context.user_scopes || [],
+      } as any,
     });
 
     const baseline: ExportResponse['decision'] = {
@@ -377,8 +384,11 @@ router.post('/export/simulate', async (req, res) => {
 
       const scenarioDecision = await opaClient.evaluateExportPolicy({
         action: 'export',
-        dataset: simulateRequest.dataset,
-        context: modifiedContext,
+        dataset: simulateRequest.dataset as any,
+        context: {
+          ...modifiedContext,
+          user_scopes: (modifiedContext as any).user_scopes || simulateRequest.context.user_scopes || [],
+        } as any,
       });
 
       const scenarioResult = {
@@ -476,7 +486,7 @@ router.post('/export/simulate', async (req, res) => {
  *
  * Check the status of an export request
  */
-router.get('/export/status/:requestId', async (req, res) => {
+router.get('/export/status/:requestId', async (req: AuthenticatedRequest, res: Response) => {
   const { requestId } = req.params;
 
   // Mock status response

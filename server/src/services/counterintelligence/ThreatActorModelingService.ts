@@ -10,7 +10,7 @@ import { randomUUID } from 'crypto';
 import { default as pino } from 'pino';
 
 // @ts-ignore
-const logger = pino({ name: 'ThreatActorModelingService' });
+const logger = (pino as any)({ name: 'ThreatActorModelingService' });
 
 // Threat Actor Profile Types
 export interface ThreatActorProfile {

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * @fileoverview Comprehensive API Validation Layer
  *

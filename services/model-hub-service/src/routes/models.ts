@@ -8,7 +8,7 @@ import { modelRegistry } from '../registry/ModelRegistry.js';
 import { auditService } from '../governance/AuditService.js';
 import { CreateModelInputSchema, UpdateModelInputSchema, CreateModelVersionInputSchema } from '../types/index.js';
 
-export const modelsRouter = Router();
+export const modelsRouter: Router = Router();
 
 // List models
 modelsRouter.get(

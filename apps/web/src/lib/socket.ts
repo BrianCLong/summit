@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { io, Socket } from 'socket.io-client';
 import { create } from 'zustand';
 

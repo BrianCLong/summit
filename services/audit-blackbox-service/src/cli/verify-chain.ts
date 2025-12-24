@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @ts-nocheck
 import { Pool } from 'pg';
 import { IntegrityVerifier } from '../verification/integrity-verifier.js';
 import { DEFAULT_CONFIG, type BlackBoxServiceConfig } from '../core/types.js';

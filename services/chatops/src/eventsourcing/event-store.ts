@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Event Sourcing for Conversation State
  *

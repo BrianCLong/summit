@@ -327,7 +327,7 @@ export async function checkAndSendEmail(email: string, subject: string, html: st
 }
 
 // Example 8: Preview Template Before Sending
-export async function previewEmailTemplate(templateId: string, variables: Record<string, any>) {
+export async function previewEmailTemplate(templateId: string, variables: Record<string, unknown>) {
   const preview = await emailService.previewTemplate(templateId, variables);
 
   console.log('Subject:', preview.subject);
@@ -410,8 +410,10 @@ export async function updateUserEmailPreferences(
 }
 
 // Example 12: Integration with Express.js Route
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function setupEmailRoutes(app: any) {
   // Tracking pixel endpoint
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   app.get('/email/track/open/:messageId', async (req: any, res: any) => {
     const { messageId } = req.params;
     await emailService.analyticsService.trackOpen(messageId);
@@ -426,6 +428,7 @@ export function setupEmailRoutes(app: any) {
   });
 
   // Click tracking endpoint
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   app.get('/email/track/click/:messageId', async (req: any, res: any) => {
     const { messageId } = req.params;
     const { url } = req.query;
@@ -439,6 +442,7 @@ export function setupEmailRoutes(app: any) {
   });
 
   // Unsubscribe endpoint
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   app.get('/email/unsubscribe', async (req: any, res: any) => {
     const { token } = req.query;
 
@@ -466,6 +470,7 @@ export function setupEmailRoutes(app: any) {
   });
 
   // Preference center endpoint
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   app.get('/email/preferences', async (req: any, res: any) => {
     const { token } = req.query;
     // Render preference center UI

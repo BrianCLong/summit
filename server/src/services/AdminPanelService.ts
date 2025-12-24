@@ -16,8 +16,7 @@
 
 import { Pool } from 'pg';
 import { getPostgresPool } from '../config/database.js';
-// @ts-ignore
-import { default as pino } from 'pino';
+import pino from 'pino';
 import * as argon2 from 'argon2';
 import { randomBytes } from 'crypto';
 
@@ -273,10 +272,9 @@ export interface DashboardStats {
 
 export class AdminPanelService {
   private pool: Pool;
-  // @ts-ignore
   private logger: pino.Logger;
 
-  constructor(pool?: Pool, logger?: any) {
+  constructor(pool?: Pool, logger?: pino.Logger) {
     this.pool = (pool || getPostgresPool()) as unknown as Pool;
     this.logger = logger || (pino as any)({ name: 'AdminPanelService' });
   }
@@ -588,7 +586,6 @@ export class AdminPanelService {
    */
   async resetUserPassword(userId: string, resetBy: string): Promise<string> {
     // Generate temporary password
-    // @ts-ignore
     const tempPassword = randomBytes(16).toString('hex');
     const passwordHash = await argon2.hash(tempPassword);
 
@@ -1183,7 +1180,7 @@ export class AdminPanelService {
  */
 let instance: AdminPanelService | null = null;
 
-export function getAdminPanelService(pool?: Pool, logger?: any): AdminPanelService {
+export function getAdminPanelService(pool?: Pool, logger?: pino.Logger): AdminPanelService {
   if (!instance) {
     instance = new AdminPanelService(pool, logger);
   }

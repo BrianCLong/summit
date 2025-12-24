@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { randomUUID as uuidv4 } from 'node:crypto';
 import pino from 'pino';
 import { Pool } from 'pg';
@@ -33,7 +32,7 @@ import {
  * - Audit trail
  */
 export class RTBFOrchestrator {
-  private readonly logger = pino({ name: 'rtbf-orchestrator' });
+  private readonly logger = (pino as any)({ name: 'rtbf-orchestrator' });
   private readonly pool: Pool;
   private readonly repository: DataRetentionRepository;
   private readonly policyEvaluator: PolicyEvaluator;

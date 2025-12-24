@@ -58,7 +58,7 @@ export const httpRequestDuration = new Histogram({
   name: 'http_request_duration_seconds',
   help: 'HTTP request duration in seconds',
   labelNames: ['service', 'method', 'route', 'status_code'],
-  buckets: HISTOGRAM_BUCKETS.http,
+  buckets: [...HISTOGRAM_BUCKETS.http],
   registers: [registry],
 });
 
@@ -93,7 +93,7 @@ export const dbQueryDuration = new Histogram({
   name: 'db_query_duration_seconds',
   help: 'Database query duration in seconds',
   labelNames: ['service', 'db_system', 'operation'],
-  buckets: HISTOGRAM_BUCKETS.database,
+  buckets: [...HISTOGRAM_BUCKETS.database],
   registers: [registry],
 });
 
@@ -125,7 +125,7 @@ export const cacheLatency = new Histogram({
   name: 'cache_operation_duration_seconds',
   help: 'Cache operation duration in seconds',
   labelNames: ['service', 'cache_name', 'operation'],
-  buckets: HISTOGRAM_BUCKETS.cache,
+  buckets: [...HISTOGRAM_BUCKETS.cache],
   registers: [registry],
 });
 
@@ -143,7 +143,7 @@ export const jobDuration = new Histogram({
   name: 'job_duration_seconds',
   help: 'Job processing duration in seconds',
   labelNames: ['service', 'queue', 'job_type'],
-  buckets: HISTOGRAM_BUCKETS.job,
+  buckets: [...HISTOGRAM_BUCKETS.job],
   registers: [registry],
 });
 
@@ -175,7 +175,7 @@ export const externalRequestDuration = new Histogram({
   name: 'external_request_duration_seconds',
   help: 'External service request duration in seconds',
   labelNames: ['service', 'target_service', 'method'],
-  buckets: HISTOGRAM_BUCKETS.external,
+  buckets: [...HISTOGRAM_BUCKETS.external],
   registers: [registry],
 });
 
@@ -193,7 +193,7 @@ export const mlInferenceDuration = new Histogram({
   name: 'ml_inference_duration_seconds',
   help: 'ML inference duration in seconds',
   labelNames: ['service', 'model', 'version'],
-  buckets: HISTOGRAM_BUCKETS.ml,
+  buckets: [...HISTOGRAM_BUCKETS.ml],
   registers: [registry],
 });
 
@@ -228,7 +228,7 @@ export const graphqlOperationDuration = new Histogram({
   name: 'graphql_operation_duration_seconds',
   help: 'GraphQL operation duration in seconds',
   labelNames: ['service', 'operation_name', 'operation_type'],
-  buckets: HISTOGRAM_BUCKETS.http,
+  buckets: [...HISTOGRAM_BUCKETS.http],
   registers: [registry],
 });
 

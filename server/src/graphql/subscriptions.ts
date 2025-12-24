@@ -1,9 +1,10 @@
 // @ts-nocheck
 import pino from 'pino';
-import OrderedPubSub from './ordered-pubsub';
+import OrderedPubSub from './ordered-pubsub.js';
 import { requireTenant } from '../middleware/withTenant.js';
+import type { GraphQLContext } from './apollo-v5-server.js';
 
-const logger = pino();
+const logger = (pino as any)();
 export const pubsub = new OrderedPubSub();
 
 export const ENTITY_CREATED = 'ENTITY_CREATED';
@@ -19,18 +20,18 @@ export const tenantEvent = (base: string, tenantId: string): string =>
 const subscriptionResolvers = {
   Subscription: {
     entityCreated: {
-      subscribe: (_: any, __: any, context: any) => {
+      subscribe: (_: unknown, __: unknown, context: GraphQLContext) => {
         const tenantId = requireTenant(context);
         return pubsub.asyncIterator([tenantEvent(ENTITY_CREATED, tenantId)]);
       },
-      resolve: (event: any) => {
+      resolve: (event: { payload: any }) => {
         const { payload } = event;
         logger.info({ payload }, 'Resolving entityCreated subscription');
         return payload;
       },
     },
     entityUpdated: {
-      subscribe: (_: any, __: any, context: any) => {
+      subscribe: (_: unknown, __: unknown, context: GraphQLContext) => {
         const tenantId = requireTenant(context);
         return pubsub.asyncIterator([tenantEvent(ENTITY_UPDATED, tenantId)]);
       },

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import { composeStories } from '@storybook/react'
 import { render } from '@testing-library/react'

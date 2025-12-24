@@ -91,6 +91,63 @@ describe('DeterministicPromptExecutionCache core', () => {
     }));
     expect(bad).toBe(false);
   });
+
+  it('verifies miss-fill traces and detects tampering attempts', async () => {
+    let now = 0;
+    const cache = new DeterministicPromptExecutionCache({
+      maxEntries: 3,
+      clock: () => {
+        now += 1000;
+        return now;
+      }
+    });
+
+    const miss = await cache.resolve(buildKey('trace-verify'), async () => ({
+      artifact: { nested: true, value: 42 }
+    }));
+
+    expect(DeterministicPromptExecutionCache.verifyMissFillTrace(miss.trace)).toBe(true);
+
+    const tampered = {
+      ...miss.trace,
+      artifactBase64: Buffer.from('tampered').toString('base64')
+    };
+
+    expect(DeterministicPromptExecutionCache.verifyMissFillTrace(tampered)).toBe(false);
+  });
+
+  it('records audit logs for hits, misses, and evictions with defensive copies', async () => {
+    let now = 0;
+    const cache = new DeterministicPromptExecutionCache({
+      maxEntries: 1,
+      clock: () => {
+        now += 1000;
+        return now;
+      }
+    });
+
+    const missA = await cache.resolve(buildKey('audit-a'), async () => ({ artifact: 'A' }));
+    expect(missA.type).toBe('miss');
+
+    const hitA = await cache.resolve(buildKey('audit-a'), async () => ({ artifact: 'A' }));
+    expect(hitA.type).toBe('hit');
+
+    const missB = await cache.resolve(buildKey('audit-b'), async () => ({ artifact: 'B' }));
+    expect(missB.evictionProofs.length).toBe(1);
+
+    const logSnapshot = cache.getAuditLog();
+    expect(logSnapshot.misses).toHaveLength(2);
+    expect(logSnapshot.hits).toHaveLength(1);
+    expect(logSnapshot.evictions).toHaveLength(1);
+
+    // mutate snapshot and ensure internal state remains intact
+    logSnapshot.hits[0].key = 'mutated-key';
+    logSnapshot.evictions[0].survivors[0].accessCounter = -1;
+
+    const secondSnapshot = cache.getAuditLog();
+    expect(secondSnapshot.hits[0].key).not.toBe('mutated-key');
+    expect(secondSnapshot.evictions[0].survivors[0].accessCounter).toBeGreaterThan(0);
+  });
 });
 
 describe('Adapters', () => {

@@ -250,7 +250,7 @@ rewardRouter.post('/reward', async (req, res) => {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'reward_processing_error',
-      false,
+      { success: false },
     );
 
     res.status(500).json({
@@ -446,7 +446,7 @@ rewardRouter.post('/reset', async (req, res) => {
 
     await adaptiveRouter.resetBandits();
 
-    prometheusConductorMetrics.recordOperationalEvent('bandit_reset', true);
+    prometheusConductorMetrics.recordOperationalEvent('bandit_reset', { success: true });
 
     res.json({
       success: true,

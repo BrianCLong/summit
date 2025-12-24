@@ -1,10 +1,9 @@
-// @ts-nocheck
 import { workerManager } from '../../queue/worker.js';
 import { QueueName } from '../../queue/types.js';
 import { retentionProcessor } from './retentionProcessor.js';
 import pino from 'pino';
 
-const logger = pino({ name: 'processors-init' });
+const logger = (pino as any)({ name: 'processors-init' });
 
 export function initializeProcessors() {
   logger.info('Initializing job processors...');

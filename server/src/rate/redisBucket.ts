@@ -148,7 +148,7 @@ export class RedisBucket {
   private batchScriptSha: string | null = null;
 
   constructor(redisUrl?: string) {
-    this.client = new Redis(redisUrl || process.env.REDIS_URL || 'redis://localhost:6379', {
+    this.client = new (Redis as any)(redisUrl || process.env.REDIS_URL || 'redis://localhost:6379', {
       connectTimeout: 5000,
       commandTimeout: 2000,
       retryStrategy: (times) => {

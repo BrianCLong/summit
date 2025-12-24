@@ -8,6 +8,6 @@ app.use(express.json({ limit: "1mb" }));
 app.use(security);
 app.use(policyGuard);
 app.use(searchRouter);
-app.get("/healthz", (_req, res) => res.json({ ok: true, service: "gateway" }));
+app.get("/healthz", (_req: any, res: any) => res.json({ ok: true, service: "gateway" }));
 
 export default app;

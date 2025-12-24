@@ -170,8 +170,8 @@ export class ByokHsmOrchestrator {
 
     return {
       ciphertext,
-      iv: iv.toString('base64'),
-      authTag: cipher.getAuthTag().toString('base64'),
+      iv: Buffer.from(iv).toString('base64'),
+      authTag: Buffer.from(cipher.getAuthTag()).toString('base64'),
       wrappedDataKey: wrapped.wrappedDataKey,
       wrapAuthTag: wrapped.wrapAuthTag,
       wrapIv: wrapped.wrapIv,
@@ -266,7 +266,11 @@ export class ByokHsmOrchestrator {
     return { status: 'healthy', nextRotationAt };
   }
 
-  private async wrapDataKey(dataKey: Buffer, key: KeyVersion) {
+  private async wrapDataKey(dataKey: Buffer, key: KeyVersion): Promise<{
+    wrappedDataKey: string;
+    wrapAuthTag: string;
+    wrapIv: string;
+  }> {
     const publicKey = await this.hsm.exportPublicKey(key);
     const wrappingKey = createHash('sha256').update(publicKey).digest();
     const wrapIv = createHash('sha1')
@@ -280,12 +284,12 @@ export class ByokHsmOrchestrator {
 
     return {
       wrappedDataKey,
-      wrapAuthTag: cipher.getAuthTag().toString('base64'),
-      wrapIv: wrapIv.toString('base64'),
+      wrapAuthTag: Buffer.from(cipher.getAuthTag()).toString('base64'),
+      wrapIv: Buffer.from(wrapIv).toString('base64'),
     };
   }
 
-  private validateGuardrails(guardrails: RotationGuardrails) {
+  private validateGuardrails(guardrails: RotationGuardrails): void {
     if (!guardrails.attestationToken || guardrails.attestationToken.length < 16) {
       throw new Error('Guardrail attestation token is missing or too short');
     }
@@ -299,7 +303,7 @@ export class ByokHsmOrchestrator {
     }
   }
 
-  private async logAudit(event: CryptoAuditEvent) {
+  private async logAudit(event: CryptoAuditEvent): Promise<void> {
     if (this.auditLogger) {
       await this.auditLogger.log(event);
     }

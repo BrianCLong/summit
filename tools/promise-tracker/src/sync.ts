@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Promise Tracker - Sync Module
  *

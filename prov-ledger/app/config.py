@@ -16,6 +16,8 @@ class Settings(BaseModel):
     STORE_RAW: bool = os.getenv("STORE_RAW", "false").lower() == "true"
     RAW_RETENTION_HOURS: int = int(os.getenv("RAW_RETENTION_HOURS", "24"))
     ENABLE_PROMETHEUS: bool = os.getenv("ENABLE_PROMETHEUS", "true").lower() == "true"
+    ENABLE_GRAPHQL: bool = os.getenv("ENABLE_GRAPHQL", "false").lower() == "true"
+    ENABLE_GRPC: bool = os.getenv("ENABLE_GRPC", "false").lower() == "true"
 
 
 settings = Settings()

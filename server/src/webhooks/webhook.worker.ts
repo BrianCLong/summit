@@ -5,10 +5,8 @@ import axios from 'axios';
 import { pg } from '../db/pg.js';
 import { webhookService } from './webhook.service.js';
 import { logger } from '../utils/logger.js';
-import { logger } from '../../logger.js';
-import { logger } from '../utils/logger.js';
 
-const connection = new IORedis(process.env.REDIS_URL || 'redis://localhost:6379', {
+const connection = new (IORedis as any)(process.env.REDIS_URL || 'redis://localhost:6379', {
   maxRetriesPerRequest: null,
 });
 

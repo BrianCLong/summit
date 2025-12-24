@@ -3,7 +3,7 @@ import path from 'path';
 import chalk from 'chalk';
 import ora from 'ora';
 import inquirer from 'inquirer';
-import { generatePluginTemplate, generateManifest } from '@summit/plugin-sdk';
+import { generatePluginTemplate, generateManifest } from '@intelgraph/plugin-sdk';
 
 export async function createPlugin(
   pluginName: string,
@@ -76,7 +76,7 @@ export async function createPlugin(
         publish: 'summit-plugin publish',
       },
       dependencies: {
-        '@summit/plugin-sdk': '^1.0.0',
+        '@intelgraph/plugin-sdk': '^1.0.0',
       },
       devDependencies: {
         typescript: '^5.3.3',

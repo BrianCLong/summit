@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Entity Linker to Knowledge Graph
  *

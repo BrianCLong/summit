@@ -36,13 +36,13 @@ export class OPAFeatureFlagClient {
     const input = this.buildInput(flag, context, evaluationId);
     let enabled = this.failOpen;
     let reason = 'fail-open';
-    let raw: any = null;
+    let raw: Record<string, unknown> | null = null;
     let killSwitchActive = false;
 
     try {
       raw = await this.opaClient.evaluateQuery('feature_flags/decision', input);
       enabled = Boolean(raw?.enabled);
-      reason = raw?.reason || 'opa-decision';
+      reason = (raw?.reason as string) || 'opa-decision';
       killSwitchActive = Boolean(raw?.kill_switch_active);
       this.audit('feature_flag_decision', {
         evaluationId,
@@ -103,12 +103,12 @@ export class OPAFeatureFlagClient {
     const input = this.buildInput('kill_switch', { ...context, module }, evaluationId);
     let active = false;
     let reason = 'not-configured';
-    let raw: any = null;
+    let raw: Record<string, unknown> | null = null;
 
     try {
       raw = await this.opaClient.evaluateQuery('feature_flags/kill_switch', input);
       active = Boolean(raw?.active);
-      reason = raw?.reason || reason;
+      reason = (raw?.reason as string) || reason;
       killSwitchGauge.labels({ module }).set(active ? 1 : 0);
       this.audit('kill_switch_check', {
         evaluationId,
@@ -173,7 +173,7 @@ export class OPAFeatureFlagClient {
     };
   }
 
-  private audit(event: string, payload: Record<string, any>) {
+  private audit(event: string, payload: Record<string, unknown>) {
     logger.info({ event, ...payload }, 'feature-flags');
   }
 }

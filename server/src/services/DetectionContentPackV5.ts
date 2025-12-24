@@ -30,7 +30,7 @@ export interface DetectionTestCase {
   id: string;
   name: string;
   description: string;
-  test_data: any;
+  test_data: Record<string, unknown>;
   expected_result: 'match' | 'no_match';
   status: 'passing' | 'failing' | 'pending';
   last_run: Date;
@@ -47,7 +47,7 @@ export interface MitreTechnique {
 
 export class DetectionContentPackV5 {
   private prisma: PrismaClient;
-  private logger: winston.Logger;
+  private logger: Logger;
   private readonly PACK_VERSION = 'v5.0.0';
   private readonly TARGET_FP_RATE = 0.03; // 3% max FP rate
 
@@ -647,8 +647,8 @@ export class DetectionContentPackV5 {
 
   private async applyRuleTuning(
     ruleId: string,
-    improvements: any,
-  ): Promise<any> {
+    improvements: Record<string, unknown>,
+  ): Promise<{ noiseReduction: number; newFpRate: number }> {
     // Mock tuning application - would update rule logic
     const noiseReduction = Math.random() * 0.2 + 0.2; // 20-40% reduction
     const newFpRate = Math.max(0.01, Math.random() * 0.03); // 1-3% FP rate
@@ -666,7 +666,7 @@ export class DetectionContentPackV5 {
     };
   }
 
-  private calculateImprovement(baseline: any, postTuning: any): number {
+  private calculateImprovement(baseline: { totalAlerts: number; falsePositives: number }, postTuning: { totalAlerts: number; falsePositives: number }): number {
     const alertReduction =
       (baseline.totalAlerts - postTuning.totalAlerts) / baseline.totalAlerts;
     const fpReduction =
@@ -752,8 +752,8 @@ export class DetectionContentPackV5 {
     });
   }
 
-  private groupCoverageByTactic(techniques: MitreTechnique[]): any {
-    const tactics: Record<string, any> = {};
+  private groupCoverageByTactic(techniques: MitreTechnique[]): Record<string, { technique_count: number; average_coverage: number; total_coverage: number }> {
+    const tactics: Record<string, { technique_count: number; average_coverage: number; total_coverage: number }> = {};
 
     techniques.forEach((technique) => {
       if (!tactics[technique.tactic]) {
@@ -780,7 +780,7 @@ export class DetectionContentPackV5 {
   private async runTestCase(
     rule: DetectionRule,
     testCase: DetectionTestCase,
-  ): Promise<any> {
+  ): Promise<{ passed: boolean; details: string }> {
     // Mock test case execution - would run against test data
     const passed = Math.random() > 0.1; // 90% pass rate for demo
 
@@ -795,7 +795,7 @@ export class DetectionContentPackV5 {
   private async getRuleMetrics(
     ruleId: string,
     environment: string,
-  ): Promise<any> {
+  ): Promise<{ totalAlerts: number; falsePositives: number; truePositives: number; fpRate: number }> {
     // Mock metrics - would query actual monitoring data
     return {
       totalAlerts: Math.floor(Math.random() * 1000) + 100,

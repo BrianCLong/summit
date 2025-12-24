@@ -1,6 +1,6 @@
 // @ts-nocheck
 import PgBoss from 'pg-boss';
-import { cfg } from '../config';
+import { cfg } from '../config/index.js';
 
 /**
  * @class BatchJobService

@@ -1,8 +1,7 @@
-// @ts-nocheck
 /**
  * Enhanced input sanitization middleware for OWASP ZAP vulnerability remediation
  * Addresses: #13598 - OWASP ZAP Security Scan Found Vulnerabilities
- * 
+ *
  * This middleware provides comprehensive input validation and sanitization to prevent:
  * - SQL Injection
  * - NoSQL Injection

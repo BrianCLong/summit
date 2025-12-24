@@ -12,6 +12,8 @@
  * - Automated metrics calculation and storage
  */
 
+import type { Pool } from 'pg';
+import type Redis from 'ioredis';
 import logger from '../utils/logger.js';
 import { CircuitBreaker } from '../utils/CircuitBreaker.js';
 import { getRedisClient } from '../db/redis.js';
@@ -73,8 +75,8 @@ export interface TrendAnalysis {
 
 export class TripwireMetricsService {
   private circuitBreaker: CircuitBreaker;
-  private redis: any;
-  private postgres: any;
+  private redis: Redis | null = null;
+  private postgres: Pool | null = null;
 
   // Thresholds
   private readonly TARGET_VIOLATION_RATE = 0.01; // 1% or less is acceptable
@@ -93,7 +95,9 @@ export class TripwireMetricsService {
       this.redis = await getRedisClient();
       this.postgres = getPostgresPool();
     } catch (error) {
-      logger.error('Failed to initialize TripwireMetricsService connections', { error });
+      logger.error('Failed to initialize TripwireMetricsService connections', {
+        error: error instanceof Error ? error.message : String(error)
+      });
       throw error;
     }
   }
@@ -157,7 +161,10 @@ export class TripwireMetricsService {
         return metric;
       });
     } catch (error) {
-      logger.error('Failed to calculate tripwire metrics', { error, tenantId });
+      logger.error('Failed to calculate tripwire metrics', {
+        error: error instanceof Error ? error.message : String(error),
+        tenantId
+      });
       throw error;
     }
   }
@@ -170,6 +177,10 @@ export class TripwireMetricsService {
     periodStart: Date,
     periodEnd: Date
   ): Promise<Omit<TripwireTrendMetric, 'id' | 'tenantId' | 'metricDate' | 'periodType' | 'violationRateChange' | 'avgExpansionChange'>> {
+    if (!this.postgres) {
+      throw new Error('PostgreSQL not initialized');
+    }
+
     const query = `
       SELECT
         COUNT(*) as total_queries,
@@ -219,7 +230,10 @@ export class TripwireMetricsService {
       try {
         await this.calculateMetrics(tenantId, yesterday, 'daily');
       } catch (error) {
-        logger.error('Failed to calculate daily metrics for tenant', { error, tenantId });
+        logger.error('Failed to calculate daily metrics for tenant', {
+          error: error instanceof Error ? error.message : String(error),
+          tenantId
+        });
         // Continue with other tenants
       }
     }
@@ -389,6 +403,10 @@ export class TripwireMetricsService {
    * Store metric
    */
   private async storeMetric(metric: TripwireTrendMetric): Promise<void> {
+    if (!this.postgres) {
+      throw new Error('PostgreSQL not initialized');
+    }
+
     const query = `
       INSERT INTO tripwire_trend_metrics (
         tenant_id, metric_date, period_type,
@@ -436,6 +454,10 @@ export class TripwireMetricsService {
     metricDate: Date,
     periodType: 'daily' | 'weekly' | 'monthly'
   ): Promise<TripwireTrendMetric | null> {
+    if (!this.postgres) {
+      throw new Error('PostgreSQL not initialized');
+    }
+
     const query = `
       SELECT * FROM tripwire_trend_metrics
       WHERE tenant_id = $1
@@ -461,6 +483,10 @@ export class TripwireMetricsService {
     startDate: Date,
     endDate: Date
   ): Promise<TripwireTrendMetric[]> {
+    if (!this.postgres) {
+      throw new Error('PostgreSQL not initialized');
+    }
+
     const query = `
       SELECT * FROM tripwire_trend_metrics
       WHERE tenant_id = $1
@@ -477,6 +503,10 @@ export class TripwireMetricsService {
    * Get active tenants
    */
   private async getActiveTenants(): Promise<string[]> {
+    if (!this.postgres) {
+      throw new Error('PostgreSQL not initialized');
+    }
+
     const query = `
       SELECT DISTINCT tenant_id
       FROM query_scope_metrics
@@ -490,7 +520,7 @@ export class TripwireMetricsService {
   /**
    * Map database row to metric
    */
-  private mapRowToMetric(row: any): TripwireTrendMetric {
+  private mapRowToMetric(row: Record<string, unknown>): TripwireTrendMetric {
     return {
       id: row.id,
       tenantId: row.tenant_id,

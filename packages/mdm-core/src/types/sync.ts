@@ -56,18 +56,18 @@ export interface ConnectionConfig {
 export interface FieldMapping {
   sourceField: string;
   targetField: string;
-  transformations?: Transformation[];
+  transformations?: SyncTransformation[];
   required: boolean;
   defaultValue?: unknown;
 }
 
-export interface Transformation {
-  type: TransformationType;
+export interface SyncTransformation {
+  type: SyncTransformationType;
   config: Record<string, unknown>;
   order: number;
 }
 
-export type TransformationType =
+export type SyncTransformationType =
   | 'mapping'
   | 'conversion'
   | 'calculation'
@@ -136,7 +136,7 @@ export interface PriorityRule {
 export interface DataTransformation {
   id: string;
   name: string;
-  transformationType: TransformationType;
+  transformationType: SyncTransformationType;
   sourceFields: string[];
   targetFields: string[];
   logic: string;
@@ -190,7 +190,7 @@ export interface SyncConflict {
   sourceValue: unknown;
   targetValue: unknown;
   conflictType: ConflictType;
-  resolution?: ConflictResolution;
+  resolution?: SyncConflictResolution;
   detectedAt: Date;
   resolvedAt?: Date;
   resolvedBy?: string;
@@ -203,7 +203,7 @@ export type ConflictType =
   | 'version_conflict'
   | 'schema_mismatch';
 
-export interface ConflictResolution {
+export interface SyncConflictResolution {
   strategy: string;
   resolvedValue: unknown;
   reason: string;
@@ -223,17 +223,17 @@ export interface SyncStatistics {
 export interface DeltaChange {
   changeId: string;
   recordId: string;
-  changeType: ChangeType;
-  fieldChanges: FieldChange[];
+  changeType: SyncChangeType;
+  fieldChanges: SyncFieldChange[];
   sourceSystem: string;
   timestamp: Date;
   version: number;
   checksum?: string;
 }
 
-export type ChangeType = 'insert' | 'update' | 'delete' | 'merge';
+export type SyncChangeType = 'insert' | 'update' | 'delete' | 'merge';
 
-export interface FieldChange {
+export interface SyncFieldChange {
   fieldName: string;
   oldValue: unknown;
   newValue: unknown;

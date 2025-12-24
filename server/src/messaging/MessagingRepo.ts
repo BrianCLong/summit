@@ -1,9 +1,17 @@
-// @ts-nocheck
 import { pool } from '../db/pg.js';
 import { Message, SendMessagePayload } from './types.js';
 import pino from 'pino';
 
-const logger = pino({ name: 'MessagingRepo' });
+const logger = (pino as any)({ name: 'MessagingRepo' });
+
+interface MessageRow {
+  id: string;
+  sender_id: string;
+  recipient_id: string;
+  content: string;
+  created_at: Date;
+  read_at: Date | null;
+}
 
 export class MessagingRepo {
   async create(payload: SendMessagePayload): Promise<Message> {
@@ -15,9 +23,9 @@ export class MessagingRepo {
         [payload.senderId, payload.recipientId, payload.content]
       );
 
-      return this.mapRow(res.rows[0]);
-    } catch (error: any) {
-      logger.error({ senderId: payload.senderId, error: error.message }, 'Failed to create message');
+      return this.mapRow(res.rows[0] as MessageRow);
+    } catch (error) {
+      logger.error({ senderId: payload.senderId, error: error instanceof Error ? error.message : 'Unknown error' }, 'Failed to create message');
       throw error;
     }
   }
@@ -31,10 +39,10 @@ export class MessagingRepo {
        LIMIT $3`,
       [userId, otherUserId, limit]
     );
-    return res.rows.map(this.mapRow);
+    return res.rows.map((row) => this.mapRow(row as MessageRow));
   }
 
-  private mapRow(row: any): Message {
+  private mapRow(row: MessageRow): Message {
     return {
       id: row.id,
       senderId: row.sender_id,

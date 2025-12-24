@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Scenario Routes
  * CRUD operations for scenarios

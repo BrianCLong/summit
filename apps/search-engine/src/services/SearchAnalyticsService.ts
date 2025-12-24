@@ -387,8 +387,8 @@ export class SearchAnalyticsService {
       const hits = await this.redis.hGet(key, 'hits');
       const misses = await this.redis.hGet(key, 'misses');
 
-      const hitsNum = parseInt(hits || '0');
-      const missesNum = parseInt(misses || '0');
+      const hitsNum = parseInt((hits as string | null) ?? '0');
+      const missesNum = parseInt((misses as string | null) ?? '0');
       const total = hitsNum + missesNum;
 
       return total > 0 ? hitsNum / total : 0;

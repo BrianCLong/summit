@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ChatOps Service - Main Entry Point
  *

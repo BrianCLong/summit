@@ -9,6 +9,7 @@ import { TenantId } from '../graph/types';
 import logger from '../utils/logger';
 import { provenanceLedger } from '../provenance/ledger';
 import QuotaManager from '../lib/resources/quota-manager';
+import type { AuthenticatedRequest } from './types.js';
 
 const router = express.Router();
 
@@ -18,7 +19,7 @@ const patternService = GraphPatternService.getInstance();
 const sessionService = InvestigationSessionService.getInstance();
 
 // Middleware to get tenantId from user
-const getTenantId = (req: any): TenantId => {
+const getTenantId = (req: AuthenticatedRequest): TenantId => {
   // Assuming req.user is populated by ensureAuthenticated and has tenantId
   const tenantId = req.user?.tenantId;
   if (!tenantId) {
@@ -27,7 +28,7 @@ const getTenantId = (req: any): TenantId => {
   return tenantId;
 };
 
-const checkQuota = (req: any, res: Response, next: NextFunction) => {
+const checkQuota = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     // Basic quota check placeholder
     const tenantId = req.user?.tenantId;
     if (tenantId) {
@@ -41,7 +42,7 @@ const checkQuota = (req: any, res: Response, next: NextFunction) => {
 
 // --- Entity & Edge CRUD/Search ---
 
-router.post('/entities/search', ensureAuthenticated, checkQuota, async (req: Request, res: Response, next: NextFunction) => {
+router.post('/entities/search', ensureAuthenticated, checkQuota, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const tenantId = getTenantId(req);
     const query = req.body;
@@ -66,7 +67,7 @@ router.post('/entities/search', ensureAuthenticated, checkQuota, async (req: Req
   }
 });
 
-router.get('/entities/:id', ensureAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+router.get('/entities/:id', ensureAuthenticated, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const tenantId = getTenantId(req);
     const { id } = req.params;
@@ -81,7 +82,7 @@ router.get('/entities/:id', ensureAuthenticated, async (req: Request, res: Respo
   }
 });
 
-router.get('/entities/:id/neighbors', ensureAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+router.get('/entities/:id/neighbors', ensureAuthenticated, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const tenantId = getTenantId(req);
     const { id } = req.params;
@@ -102,7 +103,7 @@ router.get('/entities/:id/neighbors', ensureAuthenticated, async (req: Request, 
 
 // --- Pattern Search ---
 
-router.post('/patterns/search', ensureAuthenticated, checkQuota, async (req: Request, res: Response, next: NextFunction) => {
+router.post('/patterns/search', ensureAuthenticated, checkQuota, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const tenantId = getTenantId(req);
     const { pattern, filters, limit } = req.body;
@@ -141,7 +142,7 @@ router.post('/patterns/search', ensureAuthenticated, checkQuota, async (req: Req
 
 // --- Analytics ---
 
-router.post('/analytics/shortest-path', ensureAuthenticated, checkQuota, async (req: Request, res: Response, next: NextFunction) => {
+router.post('/analytics/shortest-path', ensureAuthenticated, checkQuota, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const tenantId = getTenantId(req);
     const { from, to, maxDepth } = req.body;
@@ -170,7 +171,7 @@ router.post('/analytics/shortest-path', ensureAuthenticated, checkQuota, async (
   }
 });
 
-router.post('/analytics/centrality', ensureAuthenticated, checkQuota, async (req: Request, res: Response, next: NextFunction) => {
+router.post('/analytics/centrality', ensureAuthenticated, checkQuota, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const tenantId = getTenantId(req);
     const { scope, algorithm } = req.body;
@@ -198,7 +199,7 @@ router.post('/analytics/centrality', ensureAuthenticated, checkQuota, async (req
   }
 });
 
-router.post('/analytics/anomalies', ensureAuthenticated, checkQuota, async (req: Request, res: Response, next: NextFunction) => {
+router.post('/analytics/anomalies', ensureAuthenticated, checkQuota, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       const tenantId = getTenantId(req);
       const { scope, kind } = req.body;
@@ -228,7 +229,7 @@ router.post('/analytics/anomalies', ensureAuthenticated, checkQuota, async (req:
 
 // --- Investigation Sessions ---
 
-router.post('/sessions', ensureAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+router.post('/sessions', ensureAuthenticated, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
         const tenantId = getTenantId(req);
         const userId = req.user!.id; // assuming id exists on user
@@ -246,7 +247,7 @@ router.post('/sessions', ensureAuthenticated, async (req: Request, res: Response
     }
 });
 
-router.get('/sessions', ensureAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+router.get('/sessions', ensureAuthenticated, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
         const tenantId = getTenantId(req);
         const userId = req.user!.id;
@@ -259,7 +260,7 @@ router.get('/sessions', ensureAuthenticated, async (req: Request, res: Response,
     }
 });
 
-router.get('/sessions/:id', ensureAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+router.get('/sessions/:id', ensureAuthenticated, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
         const tenantId = getTenantId(req);
         const { id } = req.params;
@@ -275,7 +276,7 @@ router.get('/sessions/:id', ensureAuthenticated, async (req: Request, res: Respo
     }
 });
 
-router.put('/sessions/:id', ensureAuthenticated, async (req: Request, res: Response, next: NextFunction) => {
+router.put('/sessions/:id', ensureAuthenticated, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
         const tenantId = getTenantId(req);
         const { id } = req.params;

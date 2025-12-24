@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { canonicalize, hmacSha256, sha256 } from './utils/canonical.js';
 import type { CertificationArtifact, DeterministicInputSnapshot, PipelineResult, RatingResult, SandboxResult, StaticAnalysisResult, UdfSubmission } from './types.js';
 

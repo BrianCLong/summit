@@ -15,7 +15,7 @@
  * - Comprehensive coherence scoring and risk assessment
  */
 
-import { Neo4jService } from '../db/neo4j';
+import { getNeo4jDriver } from '../db/neo4j';
 import { RedisService } from '../cache/redis';
 import { CoherenceService } from './coherenceService';
 import { createCoherenceRoutes } from './routes';

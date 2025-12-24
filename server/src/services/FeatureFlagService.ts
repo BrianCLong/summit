@@ -10,10 +10,7 @@
 
 import { readFileSync } from 'fs';
 import { resolve, isAbsolute } from 'path';
-// @ts-ignore
-import * as LaunchDarkly from 'launchdarkly-node-server-sdk';
-// @ts-ignore
-import { logger } from '../utils/logger.js';
+import logger from '../utils/logger.js';
 
 /**
  * Feature flag configuration
@@ -138,7 +135,7 @@ export class FeatureFlagService {
       this.logger.info('Feature flag service initialized successfully');
     } catch (error) {
       this.logger.error('Failed to initialize feature flag service', error);
-      throw new Error(`Feature flag initialization failed: ${error.message}`);
+      throw new Error(`Feature flag initialization failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -157,22 +154,30 @@ export class FeatureFlagService {
 
     this.logger.info('Initializing LaunchDarkly client...');
 
-    // Create LaunchDarkly client with configuration
-    this.ldClient = LaunchDarkly.init(sdkKey, {
-      timeout: timeout / 1000, // Convert to seconds
-      logger: LaunchDarkly.basicLogger({
-        level: 'info',
-        destination: (line) => this.logger.debug(`[LaunchDarkly] ${line}`),
-      }),
-    });
-
-    // Wait for client to be ready
+    // LaunchDarkly is optional - only initialize if available
     try {
-      await this.ldClient.waitForInitialization({ timeout });
-      this.logger.info('LaunchDarkly client initialized successfully');
+      const LaunchDarkly = await import('launchdarkly-node-server-sdk');
+
+      // Create LaunchDarkly client with configuration
+      this.ldClient = LaunchDarkly.init(sdkKey, {
+        timeout: timeout / 1000, // Convert to seconds
+        logger: LaunchDarkly.basicLogger({
+          level: 'info',
+          destination: (line: string) => this.logger.debug(`[LaunchDarkly] ${line}`),
+        }),
+      });
+
+      // Wait for client to be ready
+      try {
+        await this.ldClient.waitForInitialization({ timeout });
+        this.logger.info('LaunchDarkly client initialized successfully');
+      } catch (error) {
+        this.logger.error('LaunchDarkly client initialization timeout', error);
+        throw new Error('LaunchDarkly client failed to initialize within timeout');
+      }
     } catch (error) {
-      this.logger.error('LaunchDarkly client initialization timeout', error);
-      throw new Error('LaunchDarkly client failed to initialize within timeout');
+      this.logger.warn('LaunchDarkly SDK not available, falling back to local provider');
+      throw error;
     }
   }
 
@@ -213,7 +218,7 @@ export class FeatureFlagService {
       this.logger.info(`Loaded ${this.localFlags.size} feature flags from local file`);
     } catch (error) {
       this.logger.error('Failed to load local feature flags', error);
-      throw new Error(`Failed to load feature flags from ${file}: ${error.message}`);
+      throw new Error(`Failed to load feature flags from ${file}: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 

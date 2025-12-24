@@ -156,15 +156,15 @@ JOIN relationships r ON (r.source_id = e.id OR r.target_id = e.id)
 WHERE r.source_id = (SELECT id FROM entities WHERE name = $1)
    OR r.target_id = (SELECT id FROM entities WHERE name = $1)
 LIMIT $2`,
-          explanation: `Find all entities directly connected to "${match[1]}" through any relationship`,
+          explanation: `Find all entities directly connected to "${match[1] || ''}" through any relationship`,
           assumptions: [
-            `"${match[1]}" is a known entity in the graph`,
+            `"${match[1] || ''}" is a known entity in the graph`,
             'Looking for direct connections only (1 hop)',
           ],
           parameters:
             dialect === 'CYPHER'
-              ? { name: match[1].trim(), limit: 100 }
-              : { $1: match[1].trim(), $2: 100 },
+              ? { name: (match[1] || '').trim(), limit: 100 }
+              : { $1: (match[1] || '').trim(), $2: 100 },
           confidence: 0.9,
         }),
       },
@@ -193,15 +193,15 @@ LIMIT $limit`
 )
 SELECT * FROM path_cte WHERE name = $2
 LIMIT $3`,
-          explanation: `Find the shortest path connecting "${match[1]}" to "${match[2]}"`,
+          explanation: `Find the shortest path connecting "${match[1] || ''}" to "${match[2] || ''}"`,
           assumptions: [
-            `Both "${match[1]}" and "${match[2]}" exist in the graph`,
+            `Both "${match[1] || ''}" and "${match[2] || ''}" exist in the graph`,
             'Path length limited to 6 hops for performance',
           ],
           parameters:
             dialect === 'CYPHER'
-              ? { sourceName: match[1].trim(), targetName: match[2].trim(), limit: 10 }
-              : { $1: match[1].trim(), $2: match[2].trim(), $3: 10 },
+              ? { sourceName: (match[1] || '').trim(), targetName: (match[2] || '').trim(), limit: 10 }
+              : { $1: (match[1] || '').trim(), $2: (match[2] || '').trim(), $3: 10 },
           confidence: 0.85,
         }),
       },
@@ -210,7 +210,7 @@ LIMIT $3`,
       {
         regex: /(?:find|show|list)\s+all\s+(\w+)(?:\s+entities)?/i,
         generator: (match, dialect) => {
-          const entityType = match[1].toUpperCase();
+          const entityType = (match[1] || 'UNKNOWN').toUpperCase();
           return {
             query:
               dialect === 'CYPHER'
@@ -254,12 +254,12 @@ JOIN entities o ON (o.id = CASE WHEN r.source_id = e.id THEN r.target_id ELSE r.
 WHERE e.name = $1
 ORDER BY r.type, o.name
 LIMIT $2`,
-          explanation: `Show all relationships for the entity "${match[1]}"`,
-          assumptions: [`"${match[1]}" exists in the graph`],
+          explanation: `Show all relationships for the entity "${match[1] || ''}"`,
+          assumptions: [`"${match[1] || ''}" exists in the graph`],
           parameters:
             dialect === 'CYPHER'
-              ? { name: match[1].trim(), limit: 100 }
-              : { $1: match[1].trim(), $2: 100 },
+              ? { name: (match[1] || '').trim(), limit: 100 }
+              : { $1: (match[1] || '').trim(), $2: 100 },
           confidence: 0.9,
         }),
       },
@@ -268,7 +268,7 @@ LIMIT $2`,
       {
         regex: /(?:count|how\s+many)\s+(\w+)(?:\s+entities)?/i,
         generator: (match, dialect) => {
-          const entityType = match[1].toUpperCase();
+          const entityType = (match[1] || 'UNKNOWN').toUpperCase();
           return {
             query:
               dialect === 'CYPHER'
@@ -300,12 +300,12 @@ JOIN investigation_entities ie ON ie.entity_id = e.id
 WHERE ie.investigation_id = $1
 ORDER BY e.type, e.name
 LIMIT $2`,
-          explanation: `List all entities in investigation "${match[1]}"`,
-          assumptions: [`Investigation "${match[1]}" exists`],
+          explanation: `List all entities in investigation "${match[1] || ''}"`,
+          assumptions: [`Investigation "${match[1] || ''}" exists`],
           parameters:
             dialect === 'CYPHER'
-              ? { investigationId: match[1].trim(), limit: 100 }
-              : { $1: match[1].trim(), $2: 100 },
+              ? { investigationId: (match[1] || '').trim(), limit: 100 }
+              : { $1: (match[1] || '').trim(), $2: 100 },
           confidence: 0.9,
         }),
       },
@@ -338,7 +338,7 @@ LIMIT $1`,
       {
         regex: /neighbors\s+of\s+["']?([^"']+)["']?\s+within\s+(\d+)\s+hops?/i,
         generator: (match, dialect) => {
-          const depth = Math.min(parseInt(match[2], 10), 6);
+          const depth = Math.min(parseInt(match[2] || '1', 10), 6);
           return {
             query:
               dialect === 'CYPHER'
@@ -364,12 +364,12 @@ FROM neighbors WHERE distance > 0
 GROUP BY id, name, type
 ORDER BY min_distance, name
 LIMIT $3`,
-            explanation: `Find all entities within ${depth} hops of "${match[1]}"`,
-            assumptions: [`"${match[1]}" exists in the graph`, `Depth limited to ${depth} hops`],
+            explanation: `Find all entities within ${depth} hops of "${match[1] || ''}"`,
+            assumptions: [`"${match[1] || ''}" exists in the graph`, `Depth limited to ${depth} hops`],
             parameters:
               dialect === 'CYPHER'
-                ? { name: match[1].trim(), limit: 100 }
-                : { $1: match[1].trim(), $2: depth, $3: 100 },
+                ? { name: (match[1] || '').trim(), limit: 100 }
+                : { $1: (match[1] || '').trim(), $2: depth, $3: 100 },
             confidence: 0.85,
           };
         },

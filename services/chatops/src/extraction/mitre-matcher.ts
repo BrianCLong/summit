@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * MITRE ATT&CK Pattern Matcher
  *

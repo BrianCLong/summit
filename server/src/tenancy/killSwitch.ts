@@ -1,9 +1,8 @@
-// @ts-nocheck
 import fs from 'fs';
 import path from 'path';
 import pino from 'pino';
 
-const logger = pino({ name: 'tenant-kill-switch' });
+const logger = (pino as any)({ name: 'tenant-kill-switch' });
 
 export interface KillSwitchConfig {
   [tenantId: string]: boolean;

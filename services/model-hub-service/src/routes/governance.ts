@@ -8,7 +8,7 @@ import { approvalService } from '../governance/ApprovalService.js';
 import { auditService } from '../governance/AuditService.js';
 import { evaluationService } from '../evaluation/EvaluationService.js';
 
-export const governanceRouter = Router();
+export const governanceRouter: Router = Router();
 
 // ============================================================================
 // Approvals

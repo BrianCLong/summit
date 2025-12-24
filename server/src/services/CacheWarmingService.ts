@@ -22,7 +22,7 @@ import { NeighborhoodCache } from './NeighborhoodCache.js';
 import { getNeo4jDriver } from '../config/database.js';
 
 // @ts-ignore
-const logger = pino();
+const logger = (pino as any)();
 
 const GRAPHIKA_LATENCY_TARGETS = { p95: 400, p99: 750 };
 const DEFAULT_MAX_TRAVERSAL_DEPTH = 3;

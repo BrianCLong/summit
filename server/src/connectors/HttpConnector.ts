@@ -1,7 +1,6 @@
-// @ts-nocheck
-import { BaseConnector } from './BaseConnector';
-import { SourceConnector } from './types';
-import { ConnectorContext } from '../data-model/types';
+import { BaseConnector } from './BaseConnector.js';
+import { SourceConnector } from './base.js';
+import { ConnectorContext } from '../data-model/types.js';
 import axios, { AxiosInstance } from 'axios';
 
 export interface HttpSourceConfig {

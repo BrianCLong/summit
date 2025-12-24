@@ -286,10 +286,11 @@ export function kShortestPaths(
     // For each node in the previous path (except last)
     for (let i = 0; i < prevPath.nodeIds.length - 1; i++) {
       const spurNode = prevPath.nodeIds[i];
-      const rootPath = {
+      const rootPath: Partial<Path> = {
         nodeIds: prevPath.nodeIds.slice(0, i + 1),
         edgeIds: prevPath.edgeIds.slice(0, i),
         length: i,
+        weight: prevPath.weight ? (prevPath.weight * i / (prevPath.length || 1)) : i,
         relationships: prevPath.relationships.slice(0, i),
       };
 
@@ -299,7 +300,7 @@ export function kShortestPaths(
 
       for (const existingPath of results) {
         if (existingPath.nodeIds.length > i) {
-          const matches = rootPath.nodeIds.every(
+          const matches = rootPath.nodeIds!.every(
             (nodeId, idx) => existingPath.nodeIds[idx] === nodeId,
           );
           if (matches && i < existingPath.edgeIds.length) {
@@ -310,7 +311,7 @@ export function kShortestPaths(
 
       // Also remove root path nodes (except spur node)
       for (let j = 0; j < i; j++) {
-        nodesToRemove.add(rootPath.nodeIds[j]);
+        nodesToRemove.add(rootPath.nodeIds![j]);
       }
 
       // Create modified graph
@@ -332,13 +333,13 @@ export function kShortestPaths(
       if (spurPath && spurPath.nodeIds.length > 1) {
         // Combine root path and spur path
         const totalPath: Path = {
-          nodeIds: [...rootPath.nodeIds, ...spurPath.nodeIds.slice(1)],
-          edgeIds: [...rootPath.edgeIds, ...spurPath.edgeIds],
-          length: rootPath.length + spurPath.length,
+          nodeIds: [...rootPath.nodeIds!, ...spurPath.nodeIds.slice(1)],
+          edgeIds: [...rootPath.edgeIds!, ...spurPath.edgeIds],
+          length: rootPath.length! + spurPath.length,
           weight:
-            (rootPath.weight || rootPath.length) +
-            (spurPath.weight || spurPath.length),
-          relationships: [...rootPath.relationships, ...spurPath.relationships],
+            (rootPath.weight ?? rootPath.length!) +
+            (spurPath.weight ?? spurPath.length),
+          relationships: [...rootPath.relationships!, ...spurPath.relationships],
         };
 
         // Check if this path is unique

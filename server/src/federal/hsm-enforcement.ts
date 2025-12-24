@@ -319,8 +319,8 @@ class HSMEnforcement {
   /**
    * Express middleware to enforce HSM-only crypto operations
    */
-  middleware() {
-    return (req: Request, res: Response, next: NextFunction) => {
+  middleware(): (req: Request, res: Response, next: NextFunction) => void {
+    return (req: Request, res: Response, next: NextFunction): void => {
       const span = otelService.createSpan('hsm.enforcement');
 
       try {

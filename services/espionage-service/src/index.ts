@@ -28,7 +28,7 @@ export async function createApp(): Promise<Application> {
   }));
 
   // Performance middleware
-  app.use(compression());
+  app.use(compression() as unknown as express.RequestHandler);
 
   // CORS configuration
   app.use(cors({

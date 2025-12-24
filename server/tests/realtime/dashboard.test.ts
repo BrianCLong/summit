@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Server } from 'socket.io';
 import { createServer } from 'http';
 import { io as Client } from 'socket.io-client';

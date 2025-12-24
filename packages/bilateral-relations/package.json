@@ -12,5 +12,8 @@
     "@intelgraph/common-types": "workspace:*",
     "@intelgraph/diplomatic-tracking": "workspace:*",
     "@intelgraph/treaty-monitor": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.3"
   }
 }

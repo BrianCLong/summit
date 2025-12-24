@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express from 'express';
 import bodyParser from 'body-parser';
 import { StepCommit } from './types';

@@ -13,9 +13,7 @@
     "skipLibCheck": true,
     "strict": false,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "allowImportingTsExtensions": true,
-    "noEmit": false
+    "resolveJsonModule": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "tests"]

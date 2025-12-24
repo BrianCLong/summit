@@ -165,7 +165,7 @@ export class FeatureFlagService extends EventEmitter<FeatureFlagServiceEvents> {
   /**
    * Evaluate a JSON flag
    */
-  async getJSONFlag<T = any>(
+  async getJSONFlag<T extends FlagVariation = any>(
     key: string,
     defaultValue: T,
     context?: Partial<FlagContext>,
@@ -182,7 +182,7 @@ export class FeatureFlagService extends EventEmitter<FeatureFlagServiceEvents> {
   /**
    * Get detailed evaluation result
    */
-  async getEvaluation<T = FlagVariation>(
+  async getEvaluation<T extends FlagVariation = FlagVariation>(
     key: string,
     defaultValue: T,
     context?: Partial<FlagContext>,
@@ -263,7 +263,7 @@ export class FeatureFlagService extends EventEmitter<FeatureFlagServiceEvents> {
   /**
    * Evaluate a flag with caching and metrics
    */
-  private async evaluateFlag<T = FlagVariation>(
+  private async evaluateFlag<T extends FlagVariation = FlagVariation>(
     key: string,
     defaultValue: T,
     context?: Partial<FlagContext>,

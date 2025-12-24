@@ -63,12 +63,13 @@ export class CsvFileConnector extends PullConnector {
   private csvConfig!: CsvFileConnectorConfig;
 
   protected async onInitialize(config: ConnectorConfig): Promise<void> {
-    this.csvConfig = config.config as CsvFileConnectorConfig;
-
-    // Validate file path
-    if (!this.csvConfig.filePath) {
-      throw new Error('filePath is required');
+    // Validate and cast config
+    const cfg = config.config as Record<string, unknown>;
+    if (!cfg.filePath || typeof cfg.filePath !== 'string') {
+      throw new Error('filePath is required and must be a string');
     }
+
+    this.csvConfig = cfg as unknown as CsvFileConnectorConfig;
   }
 
   async testConnection(): Promise<{ success: boolean; message: string }> {

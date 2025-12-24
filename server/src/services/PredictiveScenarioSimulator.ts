@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import { EventEmitter } from 'events';
 import LLMService from './LLMService.js';
 import logger from '../utils/logger.js';
@@ -14,7 +12,7 @@ import { randomUUID as uuidv4 } from 'crypto';
 
 export interface SimulationParams {
     scenarioType: 'CONFLICT' | 'CIVIL_UNREST' | 'NATURAL_DISASTER' | 'ELECTION_RISK';
-    initialConditions: Record<string, any>; // e.g., { "location": "Border Region", "troop_count": 5000 }
+    initialConditions: Record<string, unknown>; // e.g., { "location": "Border Region", "troop_count": 5000 }
     timeHorizonDays: number;
     variables: string[]; // e.g. ["international_sanctions", "local_protests"]
 }
@@ -66,22 +64,23 @@ export class PredictiveScenarioSimulator extends EventEmitter {
         `;
 
         try {
-            const response = await this.llmService.complete({
-                prompt,
+            const response = await this.llmService.complete(prompt, {
                 temperature: 0.5, // Higher temp for creativity in simulation
                 maxTokens: 2500
             });
 
             try {
-                const parsed = JSON.parse(response);
+                const parsed = JSON.parse(response) as Record<string, unknown>;
                 // Ensure ID and timestamps are set
                 return {
                     id: uuidv4(),
-                    scenarios: parsed.scenarios || parsed, // Handle varied LLM output
+                    scenarios: (parsed.scenarios || parsed) as ScenarioResult['scenarios'], // Handle varied LLM output
                     generatedAt: new Date().toISOString()
                 };
             } catch (e) {
-                logger.error('[PredictiveSimulator] JSON parse failed', e);
+                logger.error('[PredictiveSimulator] JSON parse failed', {
+                    error: e instanceof Error ? e.message : String(e)
+                });
                 // Fallback struct
                 return {
                     id: uuidv4(),
@@ -96,7 +95,9 @@ export class PredictiveScenarioSimulator extends EventEmitter {
                 };
             }
         } catch (e) {
-            logger.error('[PredictiveSimulator] Simulation failed', e);
+            logger.error('[PredictiveSimulator] Simulation failed', {
+                error: e instanceof Error ? e.message : String(e)
+            });
             throw e;
         }
     }

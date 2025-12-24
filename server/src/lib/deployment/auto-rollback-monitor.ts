@@ -1,7 +1,6 @@
 // @ts-nocheck
-
-import { RollbackEngine } from './rollback-engine';
-import { MultiRegionProber } from './multi-region-prober';
+import { RollbackEngine } from './rollback-engine.js';
+import { MultiRegionProber } from './multi-region-prober.js';
 import { rollbackEventsTotal } from '../../monitoring/metrics.js';
 
 export interface RollbackTriggerConfig {
@@ -14,14 +13,14 @@ export class AutoRollbackMonitor {
   private rollbackEngine: RollbackEngine;
   private prober: MultiRegionProber;
   private config: RollbackTriggerConfig;
-  private failureCounter: number = 0;
+  private failureCounter = 0;
   private serviceName: string;
 
   constructor(
     serviceName: string,
     rollbackEngine: RollbackEngine,
     prober: MultiRegionProber,
-    config: RollbackTriggerConfig
+    config: RollbackTriggerConfig,
   ) {
     this.serviceName = serviceName;
     this.rollbackEngine = rollbackEngine;
@@ -40,8 +39,10 @@ export class AutoRollbackMonitor {
     // Or if the "primary" region (first one) is bad.
     // Let's assume we care about global health.
 
-    const unhealthyCount = statuses.filter(s => !s.isHealthy).length;
-    const highLatencyCount = statuses.filter(s => s.isHealthy && s.latencyMs > this.config.latencyThresholdMs).length;
+    const unhealthyCount = statuses.filter((s) => !s.isHealthy).length;
+    const highLatencyCount = statuses.filter(
+      (s) => s.isHealthy && s.latencyMs > this.config.latencyThresholdMs,
+    ).length;
 
     const totalIssues = unhealthyCount + highLatencyCount;
     const totalRegions = statuses.length;
@@ -63,7 +64,7 @@ export class AutoRollbackMonitor {
       await this.rollbackEngine.performRollback({
         serviceName: this.serviceName,
         reason: `Automatic Rollback: Health check failed for ${this.failureCounter} consecutive checks.`,
-        migrationSteps: 0 // Default, maybe configurable
+        migrationSteps: 0, // Default, maybe configurable
       });
       this.failureCounter = 0; // Reset after trigger
       return true;

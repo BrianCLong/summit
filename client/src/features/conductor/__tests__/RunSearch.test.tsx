@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import RunSearch from '../RunSearch';
@@ -6,7 +5,7 @@ import { useAuthorization } from '../../../auth/withAuthorization';
 
 jest.mock('../../../auth/withAuthorization');
 
-const mockedUseAuthorization = useAuthorization as jest.Mock;
+const mockedUseAuthorization = useAuthorization as jest.MockedFunction<typeof useAuthorization>;
 const originalFetch = global.fetch;
 
 describe('RunSearch', () => {
@@ -21,35 +20,35 @@ describe('RunSearch', () => {
   it('issues a tenant-scoped search when authorized', async () => {
     mockedUseAuthorization.mockReturnValue({
       canAccess: jest.fn().mockReturnValue(true),
-      getTenantForAction: jest.fn((_action: string, requested: string) => requested || 'tenant-scope'),
-      tenantId: 'tenant-scope',
-    });
+      tenant: 'tenant-scope',
+    } as any);
 
     const mockFetch = jest.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve({ data: { searchRuns: [] } }),
-      }),
+      } as Response),
     );
-    global.fetch = mockFetch as any;
+    global.fetch = mockFetch as typeof global.fetch;
 
     render(<RunSearch />);
 
     fireEvent.click(screen.getByTestId('run-search-submit'));
 
     await waitFor(() => expect(mockFetch).toHaveBeenCalled());
-    const body = JSON.parse((mockFetch.mock.calls[0][1] as any).body);
+    const firstCall = (mockFetch as any).mock.calls[0];
+    const requestInit = firstCall[1];
+    const body = JSON.parse(requestInit.body as string);
     expect(body.query).toContain('"tenant":"tenant-scope"');
   });
 
   it('blocks search and shows message when unauthorized', async () => {
     mockedUseAuthorization.mockReturnValue({
       canAccess: jest.fn().mockReturnValue(false),
-      getTenantForAction: jest.fn(() => 'tenant-scope'),
-      tenantId: 'tenant-scope',
-    });
+      tenant: 'tenant-scope',
+    } as any);
 
     const mockFetch = jest.fn();
-    global.fetch = mockFetch as any;
+    global.fetch = mockFetch as typeof global.fetch;
 
     render(<RunSearch />);
 

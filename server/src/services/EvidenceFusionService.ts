@@ -1,9 +1,6 @@
-// @ts-nocheck
-
 import { EventEmitter } from 'events';
 import LLMService from './LLMService.js';
 import logger from '../utils/logger.js';
-import { randomUUID as uuidv4 } from 'crypto';
 
 /**
  * Semantic Evidence Fusion Service
@@ -68,8 +65,7 @@ export class EvidenceFusionService extends EventEmitter {
     `;
 
     try {
-      const response = await this.llmService.complete({
-        prompt,
+      const response = await this.llmService.complete(prompt, {
         temperature: 0.2,
         maxTokens: 1500
       });
@@ -80,7 +76,7 @@ export class EvidenceFusionService extends EventEmitter {
            return { raw: response };
        }
     } catch (e) {
-      logger.error('[EvidenceFusion] Timeline synthesis failed', e);
+      logger.error('[EvidenceFusion] Timeline synthesis failed', e instanceof Error ? e.message : String(e));
       throw e;
     }
   }
@@ -100,9 +96,8 @@ export class EvidenceFusionService extends EventEmitter {
       Return a JSON array of Hypothesis objects.
     `;
 
-    try {
-        const response = await this.llmService.complete({
-            prompt,
+    try{
+        const response = await this.llmService.complete(prompt, {
             temperature: 0.4,
             maxTokens: 2000
         });
@@ -116,7 +111,7 @@ export class EvidenceFusionService extends EventEmitter {
             return [];
         }
     } catch (e) {
-        logger.error('[EvidenceFusion] Hypothesis generation failed', e);
+        logger.error('[EvidenceFusion] Hypothesis generation failed', e instanceof Error ? e.message : String(e));
         throw e;
     }
   }

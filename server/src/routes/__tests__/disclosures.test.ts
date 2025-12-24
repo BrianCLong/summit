@@ -1,8 +1,8 @@
-// @ts-nocheck
 import request from 'supertest';
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
 jest.mock('../../disclosure/export-service.js', () => ({
   disclosureExportService: {
@@ -21,13 +21,12 @@ jest.mock('../../metrics/disclosureMetrics.js', () => ({
 
 const { disclosureExportService } = jest.requireMock(
   '../../disclosure/export-service.js',
-);
+) as any;
 const { disclosureMetrics } = jest.requireMock(
   '../../metrics/disclosureMetrics.js',
-);
+) as any;
 
 import disclosuresRouter from '../disclosures.js';
-import { jest, describe, it, test, expect, beforeEach } from '@jest/globals';
 
 const app = express();
 app.use('/disclosures', disclosuresRouter);

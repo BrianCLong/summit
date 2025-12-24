@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, Typography, Box } from '@mui/material';
 
-type StepNode = { id: string; label: string; children?: StepNode[] };
+export type StepNode = { id: string; label: string; children?: StepNode[] };
 
 function Tree({ node, depth = 0 }: { node: StepNode; depth?: number }) {
   return (

@@ -5,7 +5,7 @@
  * Demonstrates how to wire up all components of the PII system
  */
 
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { Pool } from 'pg';
 import neo4j from 'neo4j-driver';
@@ -195,12 +195,12 @@ const app = express();
 app.use(createRESTRedactionMiddleware(redactionMiddleware));
 
 // Extract user context from request
-app.use((req: any, res, next) => {
+app.use((req: Request & { user?: any }, res: Response, next: NextFunction) => {
   // In production, extract from JWT or session
   req.user = {
     id: req.headers['x-user-id'] || 'anonymous',
     role: req.headers['x-user-role'] || 'VIEWER',
-    clearance: parseInt(req.headers['x-clearance'] || '0'),
+    clearance: parseInt((req.headers['x-clearance'] as string) || '0'),
   };
   next();
 });

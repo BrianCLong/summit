@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { graphql } from 'msw';
 
 // MSW GraphQL handlers for testing
@@ -7,17 +6,17 @@ export const handlers = [
   graphql.query('ServerStats', (req: any, res: any, ctx: any) => {
     return res(ctx.data({
 
-        serverStats: {
-          uptime: '2d 14h 32m',
-          totalInvestigations: 128,
-          totalEntities: 42137,
-          totalRelationships: 89542,
-          databaseStatus: {
-            redis: 'connected',
-            postgres: 'connected',
-            neo4j: 'connected',
-          },
+      serverStats: {
+        uptime: '2d 14h 32m',
+        totalInvestigations: 128,
+        totalEntities: 42137,
+        totalRelationships: 89542,
+        databaseStatus: {
+          redis: 'connected',
+          postgres: 'connected',
+          neo4j: 'connected',
         },
+      },
 
     }));
   }),
@@ -25,27 +24,27 @@ export const handlers = [
   // Investigations query
   graphql.query('Investigations', (req: any, res: any, ctx: any) => {
     return res(ctx.data({
-        getInvestigations: [
-          {
-            id: '1',
-            name: 'APT29 Campaign Analysis',
-            description: 'Analysis of APT29 attack patterns',
-            status: 'active',
-            createdAt: '2024-01-15T10:00:00Z',
-            nodeCount: 1205,
-            edgeCount: 2341,
-          },
-          {
-            id: '2',
-            name: 'Financial Fraud Investigation',
-            description: 'Complex financial fraud case',
-            status: 'closed',
-            createdAt: '2024-01-10T08:30:00Z',
-            nodeCount: 856,
-            edgeCount: 1678,
-          },
-        ],
-      }));
+      getInvestigations: [
+        {
+          id: '1',
+          name: 'APT29 Campaign Analysis',
+          description: 'Analysis of APT29 attack patterns',
+          status: 'active',
+          createdAt: '2024-01-15T10:00:00Z',
+          nodeCount: 1205,
+          edgeCount: 2341,
+        },
+        {
+          id: '2',
+          name: 'Financial Fraud Investigation',
+          description: 'Complex financial fraud case',
+          status: 'closed',
+          createdAt: '2024-01-10T08:30:00Z',
+          nodeCount: 856,
+          edgeCount: 1678,
+        },
+      ],
+    }));
   }),
 
   // GraphData query for Graph Workbench
@@ -117,42 +116,42 @@ export const handlers = [
   graphql.query('GW_SearchEntities', (req: any, res: any, ctx: any) => {
     return res(ctx.data({
       searchEntities: [
-          {
-            id: 'search-1',
-            type: 'Person',
-            label: 'Jane Smith',
-            description: 'Analyst',
-            properties: { department: 'Security' },
-            confidence: 0.9,
-            source: 'HR System',
-            investigationId: 'default',
-          },
-        ],
-      }));
+        {
+          id: 'search-1',
+          type: 'Person',
+          label: 'Jane Smith',
+          description: 'Analyst',
+          properties: { department: 'Security' },
+          confidence: 0.9,
+          source: 'HR System',
+          investigationId: 'default',
+        },
+      ],
+    }));
   }),
 
   // EntityDetails query
   graphql.query('GW_EntityDetails', (req: any, res: any, ctx: any) => {
     const { variables } = req;
     return res(ctx.data({
-        getEntityDetails: {
-          id: (variables as any).entityId,
-          type: 'Person',
-          label: 'Entity Details',
-          description: 'Detailed entity information',
-          properties: { key: 'value' },
-          confidence: 0.85,
-          source: 'Test Source',
-          investigationId: 'default',
-          createdBy: 'test-user',
-          updatedBy: 'test-user',
-          createdAt: '2024-01-15T10:00:00Z',
-          updatedAt: '2024-01-15T12:00:00Z',
-          attack_ttps: ['T1566.001'],
-          capec_ttps: ['CAPEC-163'],
-          triage_score: 0.75,
-          actor_links: ['APT29'],
-        },
+      getEntityDetails: {
+        id: variables.entityId,
+        type: 'Person',
+        label: 'Entity Details',
+        description: 'Detailed entity information',
+        properties: { key: 'value' },
+        confidence: 0.85,
+        source: 'Test Source',
+        investigationId: 'default',
+        createdBy: 'test-user',
+        updatedBy: 'test-user',
+        createdAt: '2024-01-15T10:00:00Z',
+        updatedAt: '2024-01-15T12:00:00Z',
+        attack_ttps: ['T1566.001'],
+        capec_ttps: ['CAPEC-163'],
+        triage_score: 0.75,
+        actor_links: ['APT29'],
+      },
 
     }));
   }),
@@ -160,7 +159,7 @@ export const handlers = [
   // Health check
   graphql.query('HealthCheck', (req: any, res: any, ctx: any) => {
     return res(ctx.data({
-        health: 'OK',
+      health: 'OK',
 
     }));
   }),
@@ -170,35 +169,35 @@ export const handlers = [
     const { variables } = req;
     return res(ctx.data({
       threatAnalysis: {
-          entityId: (variables as any).entityId,
-          riskScore: 0.85,
-          threatLevel: 'HIGH',
-          mitreAttacks: [
-            {
-              technique: 'T1566.001',
-              tactic: 'Initial Access',
-              description: 'Spearphishing Attachment',
-              severity: 'HIGH',
-              confidence: 0.9,
-            },
-          ],
-          vulnerabilities: [
-            {
-              cve: 'CVE-2024-1234',
-              severity: 'CRITICAL',
-              description: 'Remote code execution vulnerability',
-              exploitable: true,
-              patchAvailable: false,
-            },
-          ],
-          recommendations: [
-            'Block suspicious IP addresses',
-            'Update security signatures',
-            'Monitor network traffic',
-          ],
-          lastUpdated: '2024-01-15T15:30:00Z',
-        },
-      }
+        entityId: variables.entityId,
+        riskScore: 0.85,
+        threatLevel: 'HIGH',
+        mitreAttacks: [
+          {
+            technique: 'T1566.001',
+            tactic: 'Initial Access',
+            description: 'Spearphishing Attachment',
+            severity: 'HIGH',
+            confidence: 0.9,
+          },
+        ],
+        vulnerabilities: [
+          {
+            cve: 'CVE-2024-1234',
+            severity: 'CRITICAL',
+            description: 'Remote code execution vulnerability',
+            exploitable: true,
+            patchAvailable: false,
+          },
+        ],
+        recommendations: [
+          'Block suspicious IP addresses',
+          'Update security signatures',
+          'Monitor network traffic',
+        ],
+        lastUpdated: '2024-01-15T15:30:00Z',
+      },
+    }
     ));
   }),
 
@@ -226,39 +225,39 @@ export const handlers = [
   graphql.query('EntityEnrichment', (req: any, res: any, ctx: any) => {
     const { variables } = req;
     return res(ctx.data({
-        entityEnrichment: {
-          entityId: (variables as any).entityId,
-          externalSources: [
-            {
-              source: 'VirusTotal',
-              data: { malicious: true, detection_ratio: '45/67' },
-              confidence: 0.95,
-              lastUpdated: '2024-01-15T14:00:00Z',
-            },
-          ],
-          geolocation: {
-            country: 'Russia',
-            city: 'Moscow',
-            latitude: 55.7558,
-            longitude: 37.6173,
-            accuracy: 0.8,
+      entityEnrichment: {
+        entityId: variables.entityId,
+        externalSources: [
+          {
+            source: 'VirusTotal',
+            data: { malicious: true, detection_ratio: '45/67' },
+            confidence: 0.95,
+            lastUpdated: '2024-01-15T14:00:00Z',
           },
-          reputation: {
-            score: 0.15,
-            category: 'MALICIOUS',
-            sources: ['VirusTotal', 'IBM X-Force'],
-            lastChecked: '2024-01-15T14:00:00Z',
-          },
-          relatedEntities: [
-            {
-              id: 'related-1',
-              type: 'Domain',
-              label: 'related-domain.com',
-              description: 'Related malicious domain',
-            },
-          ],
-          lastEnriched: '2024-01-15T14:00:00Z',
+        ],
+        geolocation: {
+          country: 'Russia',
+          city: 'Moscow',
+          latitude: 55.7558,
+          longitude: 37.6173,
+          accuracy: 0.8,
         },
+        reputation: {
+          score: 0.15,
+          category: 'MALICIOUS',
+          sources: ['VirusTotal', 'IBM X-Force'],
+          lastChecked: '2024-01-15T14:00:00Z',
+        },
+        relatedEntities: [
+          {
+            id: 'related-1',
+            type: 'Domain',
+            label: 'related-domain.com',
+            description: 'Related malicious domain',
+          },
+        ],
+        lastEnriched: '2024-01-15T14:00:00Z',
+      },
 
     }));
   }),

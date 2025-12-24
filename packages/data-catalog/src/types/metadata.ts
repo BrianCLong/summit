@@ -251,7 +251,7 @@ export interface Mapping {
 export interface FieldMapping {
   sourceFieldName: string;
   targetFieldName: string;
-  transformationType: TransformationType;
+  transformationType: FieldTransformationType;
   transformationExpression: string | null;
   defaultValue: any;
   required: boolean;
@@ -261,7 +261,7 @@ export interface FieldMapping {
 /**
  * Transformation Type
  */
-export enum TransformationType {
+export enum FieldTransformationType {
   DIRECT = 'DIRECT', // 1:1 copy
   CAST = 'CAST', // Type conversion
   CONCAT = 'CONCAT', // Concatenation

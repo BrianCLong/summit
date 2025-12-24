@@ -9,7 +9,8 @@ export type {
   CacheHitProof,
   EvictionProof,
   MissFillTrace,
-  AdapterResolution
+  AdapterResolution,
+  CacheAuditLog
 } from './types.js';
 export { stableStringify, canonicalDigest, sha256 } from './hash.js';
 export {

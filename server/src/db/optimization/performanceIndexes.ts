@@ -1,9 +1,8 @@
-// @ts-nocheck
 import pino from 'pino';
 import { getPostgresPool } from '../postgres.js';
 import { getNeo4jDriver } from '../neo4j.js';
 
-const logger = pino({ name: 'performance-indexes' });
+const logger = (pino as any)({ name: 'performance-indexes' });
 
 async function postgresTableExists(tableName: string): Promise<boolean> {
   const pool = getPostgresPool();

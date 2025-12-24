@@ -119,7 +119,7 @@ export interface EvidenceStorageConfig {
 //       'evidence_store_upload_duration',
 //       Date.now() - startTime,
 //     );
-//     prometheusConductorMetrics.recordOperationalEvent('evidence_store_upload_success', true);
+//     prometheusConductorMetrics.recordOperationalEvent('evidence_store_upload_success', { success: true });
 
 //     logger.info('Evidence stored successfully', {
 //       evidenceId: metadata.evidenceId,
@@ -133,7 +133,7 @@ export interface EvidenceStorageConfig {
 
 //     return finalMetadata;
 //   } catch (error) {
-//     prometheusConductorMetrics.recordOperationalEvent('evidence_store_upload_error', false);
+//     prometheusConductorMetrics.recordOperationalEvent('evidence_store_upload_error', { success: false });
 //     logger.error('Failed to store evidence', {
 //       evidenceId: metadata.evidenceId,
 //       error: error.message,
@@ -206,14 +206,14 @@ export interface EvidenceStorageConfig {
 //       'evidence_store_download_duration',
 //       Date.now() - startTime,
 //     );
-//     prometheusConductorMetrics.recordOperationalEvent('evidence_store_download_success', true);
+//     prometheusConductorMetrics.recordOperationalEvent('evidence_store_download_success', { success: true });
 
 //     return {
 //       data: evidenceData,
 //       metadata,
 //     };
 //   } catch (error) {
-//     prometheusConductorMetrics.recordOperationalEvent('evidence_store_download_error', false);
+//     prometheusConductorMetrics.recordOperationalEvent('evidence_store_download_error', { success: false });
 //     logger.error('Failed to retrieve evidence', {
 //       evidenceId,
 //       tenantId,

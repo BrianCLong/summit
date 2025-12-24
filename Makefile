@@ -5,6 +5,7 @@
 .PHONY: dev test lint build format ci
 .PHONY: db-migrate db-seed sbom k6
 .PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release provenance ci-check prereqs contracts policy-sim rerere dupescans
+.PHONY: bootstrap
 
 COMPOSE_DEV_FILE ?= docker-compose.dev.yaml
 SHELL_SERVICE ?= gateway
@@ -33,17 +34,27 @@ clean:
 
 # --- Development Workflow ---
 
+bootstrap: ## Install dev dependencies
+	pip install -U pip
+	pip install -e ".[otel,policy,sbom,perf]"
+	pip install pytest ruff mypy pre-commit
+	pre-commit install
+	pnpm install
+
 dev:
 	pnpm run dev
 
 test:   ## Run unit tests (node+python)
-	pnpm -w run test:unit || true && pytest -q || true
+	pnpm -w run test:unit || true && pytest || true
 
-lint:   ## Lint js/ts
+lint:   ## Lint js/ts + python
 	pnpm -w exec eslint . || true
+	ruff check .
+	mypy src
 
 format: ## Format code
 	pnpm -w exec prettier -w . || true
+	ruff format .
 
 build:  ## Build all images
 	docker compose -f $(COMPOSE_DEV_FILE) build

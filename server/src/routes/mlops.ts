@@ -1,10 +1,10 @@
 // @ts-nocheck
-import { Router, Request } from 'express';
-import { modelRegistry } from '../mlops/registry';
-import { modelServing } from '../mlops/serving';
-import { featureStore } from '../mlops/feature_store';
-import { trainingPipeline } from '../mlops/pipeline';
-import { ensureAuthenticated } from '../middleware/auth';
+import { Router, type Request, type Response } from 'express';
+import { modelRegistry } from '../mlops/registry.js';
+import { modelServing } from '../mlops/serving.js';
+import { featureStore } from '../mlops/feature_store.js';
+import { trainingPipeline } from '../mlops/pipeline.js';
+import { ensureAuthenticated } from '../middleware/auth.js';
 
 // Extend Express Request interface to include user
 interface AuthenticatedRequest extends Request {
@@ -25,7 +25,7 @@ router.use(ensureAuthenticated);
  * @route POST /mlops/models
  * @desc Register a new model
  */
-router.post('/models', async (req: Request, res) => {
+router.post('/models', async (req: Request, res: Response) => {
   try {
     const authReq = req as AuthenticatedRequest;
     const { name, description, domain, framework } = req.body;
@@ -46,7 +46,7 @@ router.post('/models', async (req: Request, res) => {
  * @route POST /mlops/predict
  * @desc Get predictions from a model
  */
-router.post('/predict', async (req: Request, res) => {
+router.post('/predict', async (req: Request, res: Response) => {
   try {
     const authReq = req as AuthenticatedRequest;
     const { modelName, version, inputs, options } = req.body;
@@ -69,7 +69,7 @@ router.post('/predict', async (req: Request, res) => {
  * @route POST /mlops/features
  * @desc Ingest features
  */
-router.post('/features/ingest', async (req: Request, res) => {
+router.post('/features/ingest', async (req: Request, res: Response) => {
   try {
     const { featureSet, entityId, values } = req.body;
     await featureStore.ingestFeatures(featureSet, entityId, values);
@@ -83,7 +83,7 @@ router.post('/features/ingest', async (req: Request, res) => {
  * @route POST /mlops/train
  * @desc Trigger a training job
  */
-router.post('/train', async (req: Request, res) => {
+router.post('/train', async (req: Request, res: Response) => {
   try {
     const authReq = req as AuthenticatedRequest;
     const { modelName, datasetId, parameters } = req.body;

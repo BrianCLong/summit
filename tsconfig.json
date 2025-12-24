@@ -1,22 +1,16 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@app/*": ["src/*"],
-      "@ui/*": ["client/src/*"],
-      "@server/*": ["server/src/*"],
-      "@client/*": ["client/src/*"]
-    }
+    "noEmit": true
   },
-  "references": [
-    {
-      "path": "./client"
-    },
-    {
-      "path": "./server"
-    }
+  "include": [],
+  "exclude": [
+    "node_modules",
+    "**/node_modules",
+    "**/dist",
+    "**/build",
+    "**/.turbo",
+    "**/.next"
   ],
-  "files": [],
-  "include": []
+  "references": []
 }

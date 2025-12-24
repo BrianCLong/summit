@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Cost Guard Middleware Tests
  *

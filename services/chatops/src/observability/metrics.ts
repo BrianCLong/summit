@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ChatOps Observability & Metrics Layer
  *

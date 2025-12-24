@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react'
 import InfoOutlined from '@mui/icons-material/InfoOutlined'
 

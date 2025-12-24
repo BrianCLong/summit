@@ -1,5 +1,5 @@
 import { trace } from '@opentelemetry/api';
-import pino from 'pino';
+import pino = require('pino');
 import { Message, MessageHandler } from './types';
 
 const logger = pino({ name: 'MessageRouter' });

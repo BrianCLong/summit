@@ -10,7 +10,7 @@ import {
   operationalPrioritySchema,
 } from '@intelgraph/foreign-intelligence';
 
-export const agenciesRouter = Router();
+export const agenciesRouter: Router = Router();
 const tracker = new AgencyTracker();
 
 // List agencies

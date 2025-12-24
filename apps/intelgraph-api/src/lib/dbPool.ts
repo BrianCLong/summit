@@ -132,7 +132,7 @@ const getStatementName = (sql: string): string | undefined => {
 };
 
 const inferMode = (sql: string): QueryMode => {
-  const first = sql.trim().toLowerCase().split(/\s+/)[0];
+  const first = sql.trim().toLowerCase().split(/\s+/)[0] || '';
   return ['select', 'show', 'describe', 'explain', 'values'].includes(first)
     ? 'read'
     : 'write';
@@ -162,7 +162,7 @@ async function runInTransaction<T>(
     return result;
   } catch (error) {
     outcome = 'rolled_back';
-    await client.query('ROLLBACK').catch(() => {});
+    await client.query('ROLLBACK').catch(() => { });
     const lockCode = isLockError(error);
     if (lockCode) {
       lockWaits.inc({ code: lockCode });

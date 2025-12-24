@@ -1,7 +1,7 @@
-// @ts-nocheck
 // server/src/routes/zero_day.ts
-import { Router } from 'express';
+import { Router, Response, NextFunction } from 'express';
 import { zeroDayService } from '../zero_day/ZeroDayService';
+import type { AuthenticatedRequest } from './types.js';
 
 const router = Router();
 
@@ -39,7 +39,7 @@ const router = Router();
  *             schema:
  *               $ref: '#/components/schemas/KillChainLog'
  */
-router.post('/designate-threat', async (req, res, next) => {
+router.post('/designate-threat', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const { threatAnalysis } = req.body;
     if (!threatAnalysis) {
@@ -87,7 +87,7 @@ router.post('/designate-threat', async (req, res, next) => {
  *       404:
  *         description: Threat not found or not in a state awaiting delegation.
  */
-router.post('/delegate-authority', async (req, res, next) => {
+router.post('/delegate-authority', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const { threatId, humanOperatorId } = req.body;
     if (!threatId || !humanOperatorId) {
@@ -124,7 +124,7 @@ router.post('/delegate-authority', async (req, res, next) => {
  *       404:
  *         description: Kill chain log not found for the given threat ID.
  */
-router.get('/status/:threatId', async (req, res, next) => {
+router.get('/status/:threatId', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const { threatId } = req.params;
     const log = await zeroDayService.getKillChainStatus(threatId);

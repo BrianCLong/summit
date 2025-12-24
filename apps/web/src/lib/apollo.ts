@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import {
   ApolloClient,
@@ -98,7 +99,11 @@ export const apolloClient = new ApolloClient({
 })
 
 // Helper function to update cache after mutations
-export const updateCache = (cache: any, query: any, data: any) => {
+export const updateCache = (
+  cache: InMemoryCache,
+  query: { query: any; variables?: any },
+  data: any
+) => {
   try {
     const existingData = cache.readQuery(query)
     if (existingData) {

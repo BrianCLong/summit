@@ -1,7 +1,5 @@
-// @ts-nocheck
-
-import { BaseConnector } from '../base';
-import { ConnectorConfig, ConnectorSchema } from '../types';
+import { BaseConnector } from '../base.js';
+import { ConnectorConfig, ConnectorSchema } from '../types.js';
 import { Readable } from 'stream';
 import axios from 'axios';
 
@@ -71,7 +69,7 @@ export class HTTPJSONConnector extends BaseConnector {
       }
 
       if (!sample) {
-          return { fields: [] };
+          return { fields: [], version: 1 };
       }
 
       const fields = Object.keys(sample).map(key => ({
@@ -80,13 +78,13 @@ export class HTTPJSONConnector extends BaseConnector {
         nullable: true
       }));
 
-      return { fields };
+      return { fields, version: 1 };
     } catch (err) {
       throw new Error(`Failed to fetch schema: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
   }
 
-  async readStream(options?: any): Promise<Readable> {
+  async readStream(options?: Record<string, unknown>): Promise<Readable> {
     const stream = new Readable({ objectMode: true, read() {} });
 
     // In a real implementation, this should handle pagination
@@ -101,15 +99,15 @@ export class HTTPJSONConnector extends BaseConnector {
                 // Add pagination params here if configured
             });
 
-            let items = response.data;
+            let items: unknown = response.data;
             if (this.config.config.dataPath) {
                 // simple json path support
-                const parts = this.config.config.dataPath.split('.');
+                const parts = (this.config.config.dataPath as string).split('.');
                 for (const part of parts) {
-                    items = items[part];
+                    items = (items as Record<string, unknown>)[part];
                 }
-            } else if (items.data && Array.isArray(items.data)) {
-                items = items.data;
+            } else if ((items as Record<string, unknown>).data && Array.isArray((items as Record<string, unknown>).data)) {
+                items = (items as Record<string, unknown>).data;
             }
 
             if (Array.isArray(items)) {

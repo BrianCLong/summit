@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useEffect, useState, useCallback } from 'react';
 import * as Y from 'yjs';
 import type { Entity, Relationship } from '@/types';
@@ -77,7 +76,7 @@ export const useGraphSync = (
           // For simplicity, we update the entity object itself if it has x/y.
           // If not, we might need a separate 'positions' map.
           // We'll assume direct update for now.
-          entitiesMap.set(id, { ...entity, x, y } as any);
+          entitiesMap.set(id, { ...entity, x, y } as Entity);
       }
   }, [entitiesMap]);
 

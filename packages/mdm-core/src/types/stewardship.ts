@@ -125,7 +125,7 @@ export interface ChangeRequest {
   id: string;
   domain: string;
   recordId: string;
-  changeType: ChangeType;
+  changeType: StewardshipChangeType;
   requestedBy: string;
   requestedAt: Date;
   status: ChangeRequestStatus;
@@ -137,7 +137,7 @@ export interface ChangeRequest {
   workflowId: string;
 }
 
-export type ChangeType =
+export type StewardshipChangeType =
   | 'create'
   | 'update'
   | 'delete'

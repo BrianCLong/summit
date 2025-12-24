@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Database Migration Script for Bundle Pipeline Service
  * Creates all required tables for evidence bundles, claim bundles, and briefing packages

@@ -5,16 +5,15 @@
  * Export entities and their relationships with complete provenance manifests
  */
 
-// @ts-ignore - pg type imports
 import { Pool } from 'pg';
-import { BaseCanonicalEntity } from './types';
+import { BaseCanonicalEntity } from './types.js';
 import {
   ProvenanceManifest,
   ProvenanceChain,
   createProvenanceManifest,
   verifyManifest,
-} from './provenance';
-import { snapshotAtTime, getEntitiesWithProvenance } from './helpers';
+} from './provenance.js';
+import { snapshotAtTime, getEntitiesWithProvenance } from './helpers.js';
 
 export interface SubgraphExportOptions {
   /** Tenant ID */
@@ -66,7 +65,7 @@ export interface SubgraphExport {
     toEntityId: string;
     toEntityType: string;
     relationshipType: string;
-    properties?: Record<string, any>;
+    properties?: Record<string, unknown>;
   }>;
 
   /** Provenance manifest */
@@ -185,7 +184,14 @@ async function collectEntitiesRecursive(
   asOf: Date,
   asKnownAt: Date,
   collected: Map<string, BaseCanonicalEntity>,
-  relationships: SubgraphExport['relationships'],
+  relationships: Array<{
+    fromEntityId: string;
+    fromEntityType: string;
+    toEntityId: string;
+    toEntityType: string;
+    relationshipType: string;
+    properties?: Record<string, unknown>;
+  }>,
   visited: Set<string>,
 ): Promise<void> {
   if (currentDepth >= maxDepth || entityIds.length === 0) {
@@ -254,20 +260,34 @@ async function collectEntitiesRecursive(
  */
 function extractRelatedEntities(
   entity: BaseCanonicalEntity,
-): SubgraphExport['relationships'] {
-  const relationships: SubgraphExport['relationships'] = [];
-  const entityType = (entity as any).entityType;
+): Array<{
+  fromEntityId: string;
+  fromEntityType: string;
+  toEntityId: string;
+  toEntityType: string;
+  relationshipType: string;
+  properties?: Record<string, unknown>;
+}> {
+  const relationships: Array<{
+    fromEntityId: string;
+    fromEntityType: string;
+    toEntityId: string;
+    toEntityType: string;
+    relationshipType: string;
+    properties?: Record<string, unknown>;
+  }> = [];
+  const entityType = (entity as Record<string, unknown>).entityType;
 
   // Extract relationships based on entity type
   if (entityType === 'Person') {
-    const person = entity as any;
-    if (person.affiliations) {
-      for (const aff of person.affiliations) {
+    const person = entity as Record<string, unknown>;
+    if (person.affiliations && Array.isArray(person.affiliations)) {
+      for (const aff of person.affiliations as Array<Record<string, unknown>>) {
         if (aff.organizationId) {
           relationships.push({
             fromEntityId: entity.id,
             fromEntityType: 'Person',
-            toEntityId: aff.organizationId,
+            toEntityId: aff.organizationId as string,
             toEntityType: 'Organization',
             relationshipType: 'AFFILIATED_WITH',
             properties: {
@@ -280,23 +300,24 @@ function extractRelatedEntities(
       }
     }
   } else if (entityType === 'Organization') {
-    const org = entity as any;
-    if (org.parentOrganization?.organizationId) {
+    const org = entity as Record<string, unknown>;
+    const parentOrg = org.parentOrganization as Record<string, unknown> | undefined;
+    if (parentOrg?.organizationId) {
       relationships.push({
         fromEntityId: entity.id,
         fromEntityType: 'Organization',
-        toEntityId: org.parentOrganization.organizationId,
+        toEntityId: parentOrg.organizationId as string,
         toEntityType: 'Organization',
         relationshipType: 'SUBSIDIARY_OF',
       });
     }
-    if (org.keyPeople) {
-      for (const person of org.keyPeople) {
+    if (org.keyPeople && Array.isArray(org.keyPeople)) {
+      for (const person of org.keyPeople as Array<Record<string, unknown>>) {
         if (person.personId) {
           relationships.push({
             fromEntityId: entity.id,
             fromEntityType: 'Organization',
-            toEntityId: person.personId,
+            toEntityId: person.personId as string,
             toEntityType: 'Person',
             relationshipType: 'HAS_KEY_PERSON',
             properties: {
@@ -309,15 +330,15 @@ function extractRelatedEntities(
       }
     }
   } else if (entityType === 'Event') {
-    const event = entity as any;
-    if (event.participants) {
-      for (const participant of event.participants) {
+    const event = entity as Record<string, unknown>;
+    if (event.participants && Array.isArray(event.participants)) {
+      for (const participant of event.participants as Array<Record<string, unknown>>) {
         if (participant.entityId) {
           relationships.push({
             fromEntityId: entity.id,
             fromEntityType: 'Event',
-            toEntityId: participant.entityId,
-            toEntityType: participant.entityType || 'Unknown',
+            toEntityId: participant.entityId as string,
+            toEntityType: (participant.entityType as string) || 'Unknown',
             relationshipType: 'HAS_PARTICIPANT',
             properties: {
               role: participant.role,
@@ -326,13 +347,13 @@ function extractRelatedEntities(
         }
       }
     }
-    if (event.locations) {
-      for (const location of event.locations) {
+    if (event.locations && Array.isArray(event.locations)) {
+      for (const location of event.locations as Array<Record<string, unknown>>) {
         if (location.locationId) {
           relationships.push({
             fromEntityId: entity.id,
             fromEntityType: 'Event',
-            toEntityId: location.locationId,
+            toEntityId: location.locationId as string,
             toEntityType: 'Location',
             relationshipType: 'OCCURRED_AT',
           });
@@ -340,15 +361,15 @@ function extractRelatedEntities(
       }
     }
   } else if (entityType === 'Case') {
-    const caseEntity = entity as any;
-    if (caseEntity.relatedEntities) {
-      for (const related of caseEntity.relatedEntities) {
+    const caseEntity = entity as Record<string, unknown>;
+    if (caseEntity.relatedEntities && Array.isArray(caseEntity.relatedEntities)) {
+      for (const related of caseEntity.relatedEntities as Array<Record<string, unknown>>) {
         if (related.entityId) {
           relationships.push({
             fromEntityId: entity.id,
             fromEntityType: 'Case',
-            toEntityId: related.entityId,
-            toEntityType: related.entityType || 'Unknown',
+            toEntityId: related.entityId as string,
+            toEntityType: (related.entityType as string) || 'Unknown',
             relationshipType: 'RELATED_TO',
             properties: {
               relationship: related.relationship,
@@ -486,7 +507,7 @@ export function exportToJSONLD(subgraph: SubgraphExport): string {
 
   const graph = subgraph.entities.map(entity => ({
     '@id': `canonical:entity/${entity.id}`,
-    '@type': `canonical:${(entity as any).entityType}`,
+    '@type': `canonical:${(entity as Record<string, unknown>).entityType}`,
     tenantId: entity.tenantId,
     validFrom: entity.validFrom.toISOString(),
     validTo: entity.validTo?.toISOString(),
@@ -549,7 +570,7 @@ export async function importSubgraph(
     // Import entities
     // (This is simplified; in reality, we'd need type-specific imports)
     for (const entity of subgraph.entities) {
-      const entityType = (entity as any).entityType;
+      const entityType = (entity as Record<string, unknown>).entityType as string;
       const tableName = `canonical_${entityType.toLowerCase()}`;
 
       // Insert logic would go here

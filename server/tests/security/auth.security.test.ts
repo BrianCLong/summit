@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Authentication Security Tests
  *
@@ -16,6 +15,7 @@
 import AuthService from '../../src/services/AuthService';
 import { ensureAuthenticated, requirePermission } from '../../src/middleware/auth';
 import { securityTestVectors, createMockRequest, createMockResponse } from '../utils/auth-test-helpers';
+import type { Pool, PoolClient } from 'pg';
 
 jest.mock('../../src/config/database');
 jest.mock('../../src/utils/logger', () => ({
@@ -35,19 +35,19 @@ jest.mock('../../src/config/index.js', () => ({
 
 describe('Authentication Security Tests', () => {
   let authService: AuthService;
-  let mockPool: any;
-  let mockClient: any;
+  let mockPool: jest.Mocked<Pool>;
+  let mockClient: jest.Mocked<PoolClient>;
 
   beforeEach(() => {
     mockClient = {
       query: jest.fn(),
       release: jest.fn(),
-    };
+    } as unknown as jest.Mocked<PoolClient>;
 
     mockPool = {
       connect: jest.fn().mockResolvedValue(mockClient),
       query: jest.fn(),
-    };
+    } as unknown as jest.Mocked<Pool>;
 
     const { getPostgresPool } = require('../../src/config/database');
     getPostgresPool.mockReturnValue(mockPool);

@@ -1,16 +1,22 @@
-// @ts-nocheck
 import React from 'react'
 import { Drawer, List, ListItem, ListItemText, Chip } from '@mui/material'
+
+interface ExplainItem {
+  model: string
+  reason: string
+}
+
+interface ExplainRouteDrawerProps {
+  open: boolean
+  onClose: () => void
+  explain: ExplainItem[]
+}
 
 export function ExplainRouteDrawer({
   open,
   onClose,
   explain,
-}: {
-  open: boolean
-  onClose: () => void
-  explain: Array<{ model: string; reason: string }>
-}) {
+}: ExplainRouteDrawerProps) {
   return (
     <Drawer anchor="right" open={open} onClose={onClose}>
       <div style={{ width: 420, padding: 16 }}>

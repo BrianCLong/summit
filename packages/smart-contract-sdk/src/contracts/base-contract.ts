@@ -2,7 +2,7 @@
  * Base Contract - Abstract base class for contract interactions
  */
 
-import crypto from 'crypto';
+import { randomBytes } from 'crypto';
 import type {
   ContractConfig,
   TransactionReceipt,
@@ -22,7 +22,7 @@ export abstract class BaseContract {
     args: unknown[],
   ): Promise<TransactionReceipt> {
     // Simulate blockchain transaction
-    const txHash = `0x${  crypto.randomBytes(32).toString('hex')}`;
+    const txHash = `0x${  randomBytes(32).toString('hex')}`;
     const blockNumber = Math.floor(Date.now() / 1000);
 
     // In production, this would:
@@ -36,7 +36,7 @@ export abstract class BaseContract {
     return {
       txHash,
       blockNumber,
-      blockHash: `0x${  crypto.randomBytes(32).toString('hex')}`,
+      blockHash: `0x${  randomBytes(32).toString('hex')}`,
       gasUsed: 21000 + Math.floor(Math.random() * 100000),
       status: 'success',
       logs: this.generateEvents(method, args),
@@ -84,7 +84,7 @@ export abstract class BaseContract {
         args: { method, argsCount: args.length },
         address: this.config.address,
         blockNumber: Math.floor(Date.now() / 1000),
-        txHash: `0x${  crypto.randomBytes(32).toString('hex')}`,
+        txHash: `0x${  randomBytes(32).toString('hex')}`,
       },
     ];
   }
@@ -95,7 +95,7 @@ export abstract class BaseContract {
       getPoolState: () => ({
         poolId: args[0],
         owner: `0x${  '1'.repeat(40)}`,
-        merkleRoot: `0x${  crypto.randomBytes(32).toString('hex')}`,
+        merkleRoot: `0x${  randomBytes(32).toString('hex')}`,
         contributorCount: BigInt(10),
         totalContributions: BigInt(100),
         createdAt: BigInt(Math.floor(Date.now() / 1000) - 86400),

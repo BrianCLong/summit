@@ -18,7 +18,7 @@ import { subscriptionEngine } from './graphql/subscriptionEngine.js';
 import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
 import { cfg } from './config.js';
-import { initializeOTel } from './observability/otel-full.js';
+import { initializeTracing } from './observability/tracer.js';
 import { streamingRateLimiter } from './routes/streaming.js';
 import { startOSINTWorkers } from './services/OSINTQueueService.js';
 import { BackupManager } from './backup/BackupManager.js';
@@ -30,7 +30,9 @@ import { logger } from './config/logger.js';
 import { logConfigSummary } from './config/index.js';
 
 const startServer = async () => {
-  const sdk = initializeOTel();
+  const tracer = initializeTracing();
+  await tracer.initialize();
+
   // Optional Kafka consumer import - only when AI services enabled
   let startKafkaConsumer: any = null;
   let stopKafkaConsumer: any = null;
@@ -186,12 +188,10 @@ const startServer = async () => {
   // Graceful shutdown
   const shutdown = async (sig: NodeJS.Signals) => {
     logger.info(`Shutting down. Signal: ${sig}`);
-    if (sdk) {
-        try {
-            await sdk.shutdown();
-        } catch (err) {
-            logger.error(`Error shutting down OTel SDK: ${err}`);
-        }
+    try {
+        await tracer.shutdown();
+    } catch (err) {
+        logger.error(`Error shutting down Tracer: ${err}`);
     }
     wss.close();
     io.close(); // Close Socket.IO server

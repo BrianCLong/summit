@@ -1,5 +1,5 @@
 // @ts-nocheck
-import express from 'express';
+import express, { Response, NextFunction } from 'express';
 import { SecuriteyesService } from '../services/SecuriteyesService.js';
 import { DetectionEngine } from '../services/DetectionEngine.js';
 import { IncidentManager } from '../services/IncidentManager.js';
@@ -7,6 +7,7 @@ import { IngestionService } from '../services/IngestionService.js';
 import { RiskManager } from '../services/RiskManager.js';
 import { PlaybookManager } from '../services/PlaybookManager.js';
 import { ensureAuthenticated } from '../../middleware/auth.js';
+import type { AuthenticatedRequest } from './types.js';
 
 const router = express.Router();
 const securiteyes = SecuriteyesService.getInstance();
@@ -19,7 +20,7 @@ const playbookManager = PlaybookManager.getInstance();
 router.use(ensureAuthenticated);
 
 // --- Ingestion ---
-router.post('/events', async (req, res) => {
+router.post('/events', async (req: AuthenticatedRequest, res: Response) => {
     try {
         const tenantId = req.user?.tenantId;
         if (!tenantId) {
@@ -51,7 +52,7 @@ router.post('/events', async (req, res) => {
 });
 
 // --- Dashboard / Overview ---
-router.get('/dashboard/stats', async (req, res) => {
+router.get('/dashboard/stats', async (req: AuthenticatedRequest, res: Response) => {
     const tenantId = req.user?.tenantId;
     if (!tenantId) { res.status(403).send(); return; }
 
@@ -69,28 +70,28 @@ router.get('/dashboard/stats', async (req, res) => {
 });
 
 // --- Entities ---
-router.get('/campaigns', async (req, res) => {
+router.get('/campaigns', async (req: AuthenticatedRequest, res: Response) => {
     const tenantId = req.user?.tenantId;
     if (!tenantId) { res.status(403).send(); return; }
     const campaigns = await securiteyes.getCampaigns(tenantId);
     res.json(campaigns);
 });
 
-router.get('/actors', async (req, res) => {
+router.get('/actors', async (req: AuthenticatedRequest, res: Response) => {
     const tenantId = req.user?.tenantId;
     if (!tenantId) { res.status(403).send(); return; }
     const actors = await securiteyes.getThreatActors(tenantId);
     res.json(actors);
 });
 
-router.get('/incidents', async (req, res) => {
+router.get('/incidents', async (req: AuthenticatedRequest, res: Response) => {
     const tenantId = req.user?.tenantId;
     if (!tenantId) { res.status(403).send(); return; }
     const list = await securiteyes.getActiveIncidents(tenantId);
     res.json(list);
 });
 
-router.post('/incidents/:id/evidence', async (req, res) => {
+router.post('/incidents/:id/evidence', async (req: AuthenticatedRequest, res: Response) => {
     const tenantId = req.user?.tenantId;
     if (!tenantId) { res.status(403).send(); return; }
 
@@ -99,14 +100,14 @@ router.post('/incidents/:id/evidence', async (req, res) => {
 });
 
 // --- Risk ---
-router.get('/risk/profiles/:principalId', async (req, res) => {
+router.get('/risk/profiles/:principalId', async (req: AuthenticatedRequest, res: Response) => {
     const tenantId = req.user?.tenantId;
     if (!tenantId) { res.status(403).send(); return; }
     const profile = await riskManager.getRiskProfile(req.params.principalId, tenantId);
     res.json(profile);
 });
 
-router.get('/risk/high', async (req, res) => {
+router.get('/risk/high', async (req: AuthenticatedRequest, res: Response) => {
     const tenantId = req.user?.tenantId;
     if (!tenantId) { res.status(403).send(); return; }
     const profiles = await riskManager.getHighRiskProfiles(tenantId);
@@ -114,11 +115,11 @@ router.get('/risk/high', async (req, res) => {
 });
 
 // --- Playbooks ---
-router.get('/playbooks', async (req, res) => {
+router.get('/playbooks', async (req: AuthenticatedRequest, res: Response) => {
     res.json(playbookManager.getPlaybooks());
 });
 
-router.post('/playbooks/:id/execute', async (req, res) => {
+router.post('/playbooks/:id/execute', async (req: AuthenticatedRequest, res: Response) => {
      const tenantId = req.user?.tenantId;
      if (!tenantId) { res.status(403).send(); return; }
 
@@ -131,7 +132,7 @@ router.post('/playbooks/:id/execute', async (req, res) => {
 });
 
 // --- Deception Assets ---
-router.post('/deception-assets', async (req, res) => {
+router.post('/deception-assets', async (req: AuthenticatedRequest, res: Response) => {
     const tenantId = req.user?.tenantId;
     if (!tenantId) { res.status(403).send(); return; }
 
@@ -144,7 +145,7 @@ router.post('/deception-assets', async (req, res) => {
 });
 
 // --- Jobs ---
-router.post('/jobs/run-graph-detection', async (req, res) => {
+router.post('/jobs/run-graph-detection', async (req: AuthenticatedRequest, res: Response) => {
     const tenantId = req.user?.tenantId;
     if (!tenantId) { res.status(403).send(); return; }
 

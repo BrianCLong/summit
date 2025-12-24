@@ -455,7 +455,7 @@ export class DistributedConfigService<TConfig = Record<string, any>> {
     if (!this.options.secretResolver) {
       return config;
     }
-    const traverse = async (value: any): Promise<any> => {
+    const traverse = async (value: unknown): Promise<unknown> => {
       if (Array.isArray(value)) {
         return Promise.all(value.map((item) => traverse(item)));
       }

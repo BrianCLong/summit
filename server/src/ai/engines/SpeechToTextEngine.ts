@@ -1,10 +1,9 @@
-// @ts-nocheck
 import { spawn } from 'child_process';
 import path from 'path';
 import pino from 'pino';
 import { ExtractionEngineConfig } from '../types.js';
 
-const logger = pino({ name: 'SpeechToTextEngine' });
+const logger = (pino as any)({ name: 'SpeechToTextEngine' });
 
 export interface TranscriptionSegment {
   text: string;
@@ -285,7 +284,7 @@ export class SpeechToTextEngine {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(new Error(`Failed to spawn Whisper: ${error.message}`));
       });
     });
@@ -428,7 +427,7 @@ export class SpeechToTextEngine {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(
           new Error(`Failed to spawn speaker diarization: ${error.message}`),
         );
@@ -508,7 +507,7 @@ export class SpeechToTextEngine {
         }
       });
 
-      ffmpeg.on('error', (error) => {
+      ffmpeg.on('error', (error: Error) => {
         reject(new Error(`FFmpeg error: ${error.message}`));
       });
     });
@@ -571,7 +570,7 @@ export class SpeechToTextEngine {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(error);
       });
     });

@@ -5,8 +5,9 @@
     "rootDir": "src",
     "declaration": true,
     "allowImportingTsExtensions": false,
+    "resolveJsonModule": true,
     "types": []
   },
-  "include": ["src"],
+  "include": ["src/**/*.ts", "src/**/*.json"],
   "references": [{ "path": "../types" }]
 }

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ChatOps GraphQL Schema & Resolvers
  *

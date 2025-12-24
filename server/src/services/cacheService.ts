@@ -1,10 +1,9 @@
-// @ts-nocheck
 import { getRedisClient } from '../config/database.js';
 import { PrometheusMetrics } from '../utils/metrics.js';
 import { cfg } from '../config.js';
 import pino from 'pino';
 
-const logger = pino();
+const logger = (pino as any)();
 
 export class CacheService {
   private metrics: PrometheusMetrics;
@@ -49,7 +48,7 @@ export class CacheService {
    * Set a value in cache.
    * @param ttl Seconds
    */
-  async set(key: string, value: any, ttl?: number): Promise<void> {
+  async set(key: string, value: unknown, ttl?: number): Promise<void> {
     const redisClient = getRedisClient();
     if (!this.enabled || !redisClient) return;
 

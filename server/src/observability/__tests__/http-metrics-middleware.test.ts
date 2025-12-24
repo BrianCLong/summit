@@ -1,4 +1,3 @@
-// @ts-nocheck
 import express from 'express';
 import request from 'supertest';
 import { httpMetricsMiddleware } from '../http-metrics-middleware.js';

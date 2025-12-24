@@ -209,9 +209,9 @@ export class KeyHygieneManager {
         runbookId,
       });
       prometheusConductorMetrics.recordOperationalEvent(
-        'runbook_sign_error',
-        false,
-      );
+      'runbook_sign_error',
+      { success: false },
+    );
       throw error;
     }
   }
@@ -329,9 +329,9 @@ export class KeyHygieneManager {
         runbookId,
       });
       prometheusConductorMetrics.recordOperationalEvent(
-        'runbook_verify_error',
-        false,
-      );
+      'runbook_verify_error',
+      { success: false },
+    );
       throw error;
     }
   }

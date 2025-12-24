@@ -1,10 +1,11 @@
 // @ts-nocheck
 // server/src/routes/intel-graph.ts
-import express from 'express';
+import express, { Response, NextFunction } from 'express';
 import { z } from 'zod/v4';
 import { IntelGraphService } from '../services/IntelGraphService';
 import { ensureAuthenticated } from '../middleware/auth';
 import { tenantContext } from '../middleware/tenantContext';
+import type { AuthenticatedRequest } from './types.js';
 
 const router = express.Router();
 
@@ -62,7 +63,7 @@ router.use(ensureAuthenticated, tenantContext, intelGraphServiceMiddleware);
  *       201:
  *         description: The created entity.
  */
-router.post('/entities', async (req, res, next) => {
+router.post('/entities', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const { name, description } = createEntitySchema.parse(req.body);
     const owner = req.user.id;
@@ -97,7 +98,7 @@ router.post('/entities', async (req, res, next) => {
  *       201:
  *         description: The created claim.
  */
-router.post('/claims', async (req, res, next) => {
+router.post('/claims', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const { statement, confidence, entityId } = createClaimSchema.parse(req.body);
     const owner = req.user.id;
@@ -134,7 +135,7 @@ router.post('/claims', async (req, res, next) => {
  *       201:
  *         description: The created evidence.
  */
-router.post('/evidence', async (req, res, next) => {
+router.post('/evidence', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
         const { claimId, sourceURI, hash, content } = attachEvidenceSchema.parse(req.body);
         const owner = req.user.id;
@@ -169,7 +170,7 @@ router.post('/evidence', async (req, res, next) => {
  *       201:
  *         description: The created policy label.
  */
-router.post('/policies', async (req, res, next) => {
+router.post('/policies', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
         const { targetNodeId, label, sensitivity } = tagPolicySchema.parse(req.body);
         const owner = req.user.id;
@@ -197,7 +198,7 @@ router.post('/policies', async (req, res, next) => {
  *       200:
  *         description: The decision and its provenance trail.
  */
-router.get('/decisions/:id/provenance', async (req, res, next) => {
+router.get('/decisions/:id/provenance', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
         const tenantId = req.user.tenantId;
@@ -224,7 +225,7 @@ router.get('/decisions/:id/provenance', async (req, res, next) => {
  *       200:
  *         description: The entity and its claims.
  */
-router.get('/entities/:id/claims', async (req, res, next) => {
+router.get('/entities/:id/claims', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
         const tenantId = req.user.tenantId;

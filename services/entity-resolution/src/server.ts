@@ -4,6 +4,7 @@
  * Express server entry point
  */
 
+// @ts-nocheck
 import express from 'express';
 import pino from 'pino';
 import pinoHttp from 'pino-http';

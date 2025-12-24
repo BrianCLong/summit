@@ -186,7 +186,6 @@ export class OutboxProcessor extends EventEmitter {
       // Record metrics
       prometheusConductorMetrics.recordOperationalEvent(
         'outbox_event_published',
-        true,
         { event_type: eventType, aggregate_type: aggregateType },
       );
 
@@ -202,7 +201,6 @@ export class OutboxProcessor extends EventEmitter {
 
       prometheusConductorMetrics.recordOperationalEvent(
         'outbox_publish_error',
-        false,
         { event_type: eventType, error_type: error.name },
       );
 
@@ -286,7 +284,6 @@ export class OutboxProcessor extends EventEmitter {
 
       prometheusConductorMetrics.recordOperationalEvent(
         'outbox_batch_error',
-        false,
         { error_type: error.name },
       );
     } finally {
@@ -386,7 +383,6 @@ export class OutboxProcessor extends EventEmitter {
       // Record success metrics
       prometheusConductorMetrics.recordOperationalEvent(
         'outbox_event_processed',
-        true,
         { event_type: event.event_type },
       );
 
@@ -420,7 +416,6 @@ export class OutboxProcessor extends EventEmitter {
     // Record error metrics
     prometheusConductorMetrics.recordOperationalEvent(
       'outbox_event_error',
-      false,
       { event_type: event.event_type, error_type: error.name },
     );
 
@@ -508,7 +503,6 @@ export class OutboxProcessor extends EventEmitter {
       // Record dead letter metrics
       prometheusConductorMetrics.recordOperationalEvent(
         'outbox_event_dead_lettered',
-        false,
         { event_type: event.event_type, reason: reason.substring(0, 50) },
       );
     } catch (error) {

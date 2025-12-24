@@ -1,9 +1,7 @@
 // @ts-nocheck
-
 import { Command } from 'commander';
 import { maestro } from '../../orchestrator/maestro.js';
 import { PolicyGuard } from '../../orchestrator/policyGuard.js';
-import { logger } from '../../utils/logger.js';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -22,6 +20,27 @@ program
   .description('CLI for Maestro Orchestrator')
   .version('1.0.0');
 
+interface EnqueueOptions {
+  kind: string;
+  issue: string;
+  repo: string;
+  budget: string;
+}
+
+interface RunAndWaitOptions {
+  kind: string;
+  issue: string;
+  repo: string;
+  budget: string;
+  timeout: string;
+}
+
+interface CheckPolicyOptions {
+  kind: string;
+  issue: string;
+  repo: string;
+}
+
 program
   .command('enqueue')
   .description('Enqueue a task for Maestro')
@@ -29,7 +48,7 @@ program
   .requiredOption('-i, --issue <issue>', 'Issue description or command')
   .option('-r, --repo <repo>', 'Repository name', 'summit')
   .option('-b, --budget <budget>', 'Budget in USD', '1.0')
-  .action(async (options) => {
+  .action(async (options: EnqueueOptions) => {
     try {
       console.log('Enqueueing task...', options);
       // Ensure maestro is connected
@@ -48,8 +67,9 @@ program
       console.log(`Task enqueued successfully. Task ID: ${taskId}`);
       await maestro.shutdown();
       process.exit(0);
-    } catch (error: any) {
-      console.error('Failed to enqueue task:', error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Failed to enqueue task:', errorMessage);
       await maestro.shutdown();
       process.exit(1);
     }
@@ -63,7 +83,7 @@ program
   .option('-r, --repo <repo>', 'Repository name', 'summit')
   .option('-b, --budget <budget>', 'Budget in USD', '1.0')
   .option('-t, --timeout <timeout>', 'Timeout in ms', '600000')
-  .action(async (options) => {
+  .action(async (options: RunAndWaitOptions) => {
     try {
       console.log('Enqueueing task and waiting...', options);
       const taskId = await maestro.enqueueTask({
@@ -97,15 +117,16 @@ program
               await maestro.shutdown();
               process.exit(1);
           }
-          await new Promise(r => setTimeout(r, 2000));
+          await new Promise<void>(r => setTimeout(r, 2000));
       }
 
       console.error('Timeout waiting for task completion');
       await maestro.shutdown();
       process.exit(1);
 
-    } catch (error: any) {
-      console.error('Error:', error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error:', errorMessage);
       await maestro.shutdown();
       process.exit(1);
     }
@@ -125,8 +146,9 @@ program
       }
       await maestro.shutdown();
       process.exit(0);
-    } catch (error: any) {
-      console.error('Failed to get status:', error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Failed to get status:', errorMessage);
       await maestro.shutdown();
       process.exit(1);
     }
@@ -138,7 +160,7 @@ program
   .requiredOption('-k, --kind <kind>', 'Task kind')
   .requiredOption('-i, --issue <issue>', 'Issue description')
   .option('-r, --repo <repo>', 'Repository name', 'summit')
-  .action(async (options) => {
+  .action(async (options: CheckPolicyOptions) => {
     try {
         console.log("Running PolicyGuard checks...");
         const guard = new PolicyGuard();
@@ -168,8 +190,9 @@ program
             console.error(`Reason: ${result.reason}`);
             process.exit(1);
         }
-    } catch (error: any) {
-        console.error('Policy check encountered an error:', error.message);
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.error('Policy check encountered an error:', errorMessage);
         process.exit(1);
     }
   });

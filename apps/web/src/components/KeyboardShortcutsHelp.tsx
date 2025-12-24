@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react'
 import {
   Dialog,
@@ -10,10 +9,10 @@ import { useKeyboardShortcuts, Shortcut } from '@/contexts/KeyboardShortcutsCont
 import { Badge } from '@/components/ui/Badge'
 import { Command } from 'lucide-react'
 
-export function KeyboardShortcutsHelp() {
+export function KeyboardShortcutsHelp(): React.ReactElement {
   const { isHelpOpen, closeHelp, shortcuts } = useKeyboardShortcuts()
 
-  const groupedShortcuts = shortcuts.reduce((acc, shortcut) => {
+  const groupedShortcuts = shortcuts.reduce((acc: Record<string, Shortcut[]>, shortcut: Shortcut) => {
     if (!acc[shortcut.category]) {
       acc[shortcut.category] = []
     }

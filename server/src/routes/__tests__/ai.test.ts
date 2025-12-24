@@ -1,7 +1,7 @@
-// @ts-nocheck
-import request from 'supertest'; // Assuming supertest is installed for API testing
+import request from 'supertest';
 import express from 'express';
 import { Queue, Worker } from 'bullmq';
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
 // Mock BullMQ
 jest.mock('bullmq', () => ({
@@ -10,7 +10,7 @@ jest.mock('bullmq', () => ({
     getJob: jest.fn(),
   })),
   Worker: jest.fn(),
-  QueueScheduler: jest.fn(), // Mock QueueScheduler as well
+  QueueScheduler: jest.fn(),
 }));
 
 // Mock ExtractionEngine
@@ -38,19 +38,18 @@ jest.mock('../../db/neo4j', () => ({
 
 // Import the router after mocks are set up
 import aiRouter from '../ai';
-import { jest, describe, it, test, expect, beforeEach } from '@jest/globals';
 
 const app = express();
 app.use(express.json());
 app.use('/api/ai', aiRouter);
 
 describe('AI Routes - Video Analysis', () => {
-  let mockQueueAdd: jest.Mock;
-  let mockQueueGetJob: jest.Mock;
+  let mockQueueAdd: any;
+  let mockQueueGetJob: any;
 
   beforeEach(() => {
-    mockQueueAdd = (Queue as jest.Mock).mock.results[0].value.add;
-    mockQueueGetJob = (Queue as jest.Mock).mock.results[0].value.getJob;
+    mockQueueAdd = (Queue as any).mock.results[0].value.add;
+    mockQueueGetJob = (Queue as any).mock.results[0].value.getJob;
     mockQueueAdd.mockClear();
     mockQueueGetJob.mockClear();
   });

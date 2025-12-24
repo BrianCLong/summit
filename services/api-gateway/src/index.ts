@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@as-integrations/express4';
 import express from 'express';

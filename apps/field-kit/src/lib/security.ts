@@ -1,5 +1,3 @@
-import { storage } from './storage';
-
 const SESSION_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
 
 class SecurityManager {

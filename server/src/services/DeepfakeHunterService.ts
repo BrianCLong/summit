@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import { EventEmitter } from 'events';
 import LLMService from './LLMService.js';
 import logger from '../utils/logger.js';
@@ -104,8 +102,7 @@ export class DeepfakeHunterService extends EventEmitter {
       `;
 
       try {
-          const response = await this.llmService.complete({
-            prompt,
+          const response = await this.llmService.complete(prompt, {
             temperature: 0.0
           });
           return {
@@ -129,8 +126,7 @@ export class DeepfakeHunterService extends EventEmitter {
       `;
 
       try {
-          const response = await this.llmService.complete({
-              prompt,
+          const response = await this.llmService.complete(prompt, {
               temperature: 0.1
           });
           try {

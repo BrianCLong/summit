@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package provenance;
+
+service ProvenanceService {
+  rpc RegisterEvidence (RegisterEvidenceRequest) returns (EvidenceResponse) {}
+  rpc GetProvenance (GetProvenanceRequest) returns (ProvenanceResponse) {}
+}
+
+message RegisterEvidenceRequest {
+  string kind = 1;
+  string url = 2;
+  string title = 3;
+}
+
+message EvidenceResponse {
+  string id = 1;
+  string kind = 2;
+  string title = 3;
+  string url = 4;
+  string hash = 5;
+}
+
+message GetProvenanceRequest {
+  string id = 1;
+}
+
+message ProvenanceResponse {
+  string json_graph = 1;
+}

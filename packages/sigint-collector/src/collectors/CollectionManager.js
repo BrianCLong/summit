@@ -77,10 +77,12 @@ class CollectionManager extends eventemitter3_1.EventEmitter {
     async assignTask(taskId, collectorId) {
         const task = this.tasks.get(taskId);
         const collector = this.collectors.get(collectorId);
-        if (!task)
-            {throw new Error(`Task ${taskId} not found`);}
-        if (!collector)
-            {throw new Error(`Collector ${collectorId} not found`);}
+        if (!task) {
+            throw new Error(`Task ${taskId} not found`);
+        }
+        if (!collector) {
+            throw new Error(`Collector ${collectorId} not found`);
+        }
         // Check task expiration
         if (task.expirationDate < new Date()) {
             throw new Error('Cannot assign expired task');

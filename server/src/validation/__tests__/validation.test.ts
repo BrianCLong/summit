@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Comprehensive Validation and Security Tests
  */
@@ -484,7 +483,7 @@ describe('Helper Functions', () => {
       const result = validateInputSafe(EmailSchema, 'not-an-email');
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect((result as any).errors).toBeDefined();
+        expect(result.errors).toBeDefined();
       }
     });
   });

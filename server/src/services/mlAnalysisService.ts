@@ -1,16 +1,15 @@
-// @ts-nocheck
 import {
   persistenceService,
-  GraphEntity,
-  GraphRelationship,
-} from './persistenceService';
-import { cacheService } from './cacheService';
-import {
+  type GraphEntity,
+  type GraphRelationship,
+} from './persistenceService.js';
+import { cacheService } from './cacheService.js';
+import type {
   ActorAwarenessOptions,
   ActorAwarenessResult,
   ActorSignal,
-  StochasticActorAwareness,
-} from './StochasticActorAwareness';
+} from './StochasticActorAwareness.js';
+import { StochasticActorAwareness } from './StochasticActorAwareness.js';
 
 interface MLPrediction {
   confidence: number;
@@ -127,7 +126,12 @@ export class MLAnalysisService {
     }>
   > {
     const cacheKey = `ml:predictions:${entityId}:${candidateIds.join(',')}`;
-    let predictions = await cacheService.get<any[]>(cacheKey);
+    let predictions = await cacheService.get<Array<{
+      target_entity: string;
+      predicted_relationship: string;
+      confidence: number;
+      reasoning: string[];
+    }>>(cacheKey);
 
     if (predictions) {
       return predictions;
@@ -383,7 +387,7 @@ export class MLAnalysisService {
 
     entities.forEach((entity) => {
       // Simulate statistical anomaly detection
-      if (entity.confidence > 0.95 || entity.triage_score! > 0.9) {
+      if (entity.confidence > 0.95 || (entity.triage_score ?? 0) > 0.9) {
         anomalies.push({
           entity_id: entity.id,
           anomaly_type: 'STATISTICAL',
@@ -457,7 +461,6 @@ export class MLAnalysisService {
         'Anomaly Detector v3.0',
         'Behavioral Analyzer v2.5',
       ],
-      cache_stats: cacheService.getStats(),
     };
   }
 

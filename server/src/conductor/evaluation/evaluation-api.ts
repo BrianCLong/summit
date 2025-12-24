@@ -175,9 +175,9 @@ evaluationRouter.post('/evaluate', async (req, res) => {
         regressions.length,
       );
       prometheusConductorMetrics.recordOperationalEvent(
-        'evaluation_regression_detected',
-        false,
-      );
+      'evaluation_regression_detected',
+      { success: false },
+    );
     }
 
     res.json(response);
@@ -186,7 +186,7 @@ evaluationRouter.post('/evaluate', async (req, res) => {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'evaluation_error',
-      false,
+      { success: false },
     );
 
     res.status(500).json({
@@ -477,7 +477,7 @@ evaluationRouter.post('/gate', async (req, res) => {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'quality_gate_error',
-      false,
+      { success: false },
     );
 
     res.status(500).json({

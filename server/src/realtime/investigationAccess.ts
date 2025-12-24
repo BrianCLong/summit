@@ -1,4 +1,3 @@
-// @ts-nocheck
 import Redis from 'ioredis';
 import pino from 'pino';
 
@@ -18,7 +17,7 @@ interface AuthorizationResult {
   via: 'member' | 'global';
 }
 
-const logger = pino({ name: 'investigation-access' });
+const logger = (pino as any)({ name: 'investigation-access' });
 
 const redisUrl = process.env.REDIS_URL;
 const redisHost = process.env.REDIS_HOST;
@@ -49,17 +48,17 @@ try {
 const memberStore = new Map<string, Map<string, InvestigationRole>>();
 
 const ROLE_PERMISSIONS: Record<InvestigationRole, Set<InvestigationAction>> = {
-  owner: new Set(['view', 'edit', 'comment', 'manage']),
-  editor: new Set(['view', 'edit', 'comment']),
-  commenter: new Set(['view', 'comment']),
-  viewer: new Set(['view']),
+  owner: new Set<InvestigationAction>(['view', 'edit', 'comment', 'manage']),
+  editor: new Set<InvestigationAction>(['view', 'edit', 'comment']),
+  commenter: new Set<InvestigationAction>(['view', 'comment']),
+  viewer: new Set<InvestigationAction>(['view']),
 };
 
 const GLOBAL_ROLE_PERMISSIONS: Record<string, Set<InvestigationAction>> = {
-  ADMIN: new Set(['view', 'edit', 'comment', 'manage']),
-  EDITOR: new Set(['view', 'edit', 'comment']),
-  ANALYST: new Set(['view', 'comment']),
-  REVIEWER: new Set(['view']),
+  ADMIN: new Set<InvestigationAction>(['view', 'edit', 'comment', 'manage']),
+  EDITOR: new Set<InvestigationAction>(['view', 'edit', 'comment']),
+  ANALYST: new Set<InvestigationAction>(['view', 'comment']),
+  REVIEWER: new Set<InvestigationAction>(['view']),
 };
 
 function memberKey(investigationId: string) {

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { jest } from '@jest/globals';
 import { resetConfigForTesting, loadConfig } from '../src/config/index';
 import { FeatureFlags } from '../src/config/featureFlags';

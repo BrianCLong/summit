@@ -1,4 +1,4 @@
-// @ts-nocheck
+// @ts-nocheck - API client type compatibility
 import {
   createContext,
   useContext,
@@ -14,7 +14,9 @@ interface OfflineContextType {
   isOnline: boolean;
   connectionType: string | null;
   syncQueue: SyncItem[];
-  addToSyncQueue: (item: SyncItem) => void;
+  addToSyncQueue: (
+    item: Omit<SyncItem, 'id' | 'timestamp' | 'retryCount'>,
+  ) => void;
   processSyncQueue: () => Promise<void>;
   clearSyncQueue: () => void;
 }
@@ -23,9 +25,24 @@ interface SyncItem {
   id: string;
   type: 'create' | 'update' | 'delete';
   resource: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any;
   timestamp: number;
   retryCount: number;
+}
+
+// Extended Navigator interface for connection API
+interface NavigatorConnection extends EventTarget {
+  effectiveType?: '2g' | 'slow-2g' | '3g' | '4g';
+  downlink?: number;
+  rtt?: number;
+  saveData?: boolean;
+}
+
+declare global {
+  interface Navigator {
+    connection?: NavigatorConnection;
+  }
 }
 
 const OfflineContext = createContext<OfflineContextType | undefined>(undefined);
@@ -108,16 +125,16 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
     const savedQueue = localStorage.getItem('sync_queue');
     if (savedQueue) {
       try {
-        setSyncQueue(JSON.parse(savedQueue));
+        setSyncQueue(JSON.parse(savedQueue) as SyncItem[]);
       } catch (error) {
         console.error('Failed to load sync queue:', error);
       }
     }
 
     // Check connection type if available
-    if ('connection' in navigator) {
-      const connection = (navigator as any).connection;
-      setConnectionType(connection?.effectiveType || null);
+    if ('connection' in navigator && navigator.connection) {
+      const connection = navigator.connection;
+      setConnectionType(connection.effectiveType || null);
     }
   }, []);
 
@@ -149,14 +166,14 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
     };
 
     const handleConnectionChange = () => {
-      if ('connection' in navigator) {
-        const connection = (navigator as any).connection;
-        setConnectionType(connection?.effectiveType || null);
+      if ('connection' in navigator && navigator.connection) {
+        const connection = navigator.connection;
+        setConnectionType(connection.effectiveType || null);
 
         // Warn about slow connections
         if (
-          connection?.effectiveType === 'slow-2g' ||
-          connection?.effectiveType === '2g'
+          connection.effectiveType === 'slow-2g' ||
+          connection.effectiveType === '2g'
         ) {
           toast('Slow connection detected', {
             icon: '🐌',
@@ -169,19 +186,16 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    if ('connection' in navigator) {
-      (navigator as any).connection?.addEventListener(
-        'change',
-        handleConnectionChange,
-      );
+    if ('connection' in navigator && navigator.connection) {
+      navigator.connection.addEventListener('change', handleConnectionChange);
     }
 
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
 
-      if ('connection' in navigator) {
-        (navigator as any).connection?.removeEventListener(
+      if ('connection' in navigator && navigator.connection) {
+        navigator.connection.removeEventListener(
           'change',
           handleConnectionChange,
         );
@@ -298,7 +312,7 @@ export function useOfflineQuery<T>(
     const cached = localStorage.getItem(`cache_${cacheKey}`);
     if (cached) {
       try {
-        setCachedData(JSON.parse(cached));
+        setCachedData(JSON.parse(cached) as T);
       } catch (error) {
         console.error('Failed to parse cached data:', error);
       }
@@ -320,7 +334,7 @@ export function useOfflineQuery<T>(
         setCachedData(data);
         localStorage.setItem(`cache_${cacheKey}`, JSON.stringify(data));
       })
-      .catch((err) => {
+      .catch((err: Error) => {
         setError(err);
         console.error('Query failed:', err);
       })

@@ -1,0 +1,57 @@
+[
+  {
+    "id": "ent-1",
+    "tenant_id": "acme",
+    "type": "entity",
+    "title": "Bridge Alpha",
+    "body": "Suspicious activity near Bridge Alpha detected by sensors.",
+    "event_time": "2025-08-01T10:00:00Z",
+    "source": "sigint",
+    "confidence": 0.92,
+    "classification": "cui"
+  },
+  {
+    "id": "evt-9",
+    "tenant_id": "acme",
+    "type": "event",
+    "title": "Bridge Alpha disruption",
+    "body": "Physical damage observed; linked to entity ent-1.",
+    "event_time": "2025-08-04T16:30:00Z",
+    "source": "humint",
+    "confidence": 0.71,
+    "classification": "secret"
+  },
+  {
+    "id": "doc-3",
+    "tenant_id": "odin",
+    "type": "document",
+    "title": "Project Lyra brief",
+    "body": "Overview of Project Lyra schedule and milestones.",
+    "event_time": "2025-08-15T09:00:00Z",
+    "source": "osint",
+    "confidence": 0.64,
+    "classification": "unclassified"
+  },
+  {
+    "id": "ent-22",
+    "tenant_id": "odin",
+    "type": "entity",
+    "title": "Operative Fox",
+    "body": "Known alias observed in Project Lyra communications.",
+    "event_time": "2025-08-18T14:00:00Z",
+    "source": "sigint",
+    "confidence": 0.83,
+    "classification": "cui"
+  },
+  {
+    "id": "evt-31",
+    "tenant_id": "zeus",
+    "type": "event",
+    "title": "Shipment reroute",
+    "body": "Cargo rerouted through alternate port due to security advisory.",
+    "event_time": "2025-08-20T06:00:00Z",
+    "source": "osint",
+    "confidence": 0.55,
+    "classification": "unclassified"
+  }
+]

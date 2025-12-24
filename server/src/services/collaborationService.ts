@@ -1,7 +1,6 @@
-// @ts-nocheck
 import { EventEmitter } from 'events';
 import { PubSub } from 'graphql-subscriptions';
-import { cacheService } from './cacheService';
+import { cacheService } from './cacheService.js';
 
 export interface User {
   id: string;
@@ -28,7 +27,7 @@ export interface CollaborativeEdit {
   investigationId: string;
   entityId: string;
   editType: 'CREATE' | 'UPDATE' | 'DELETE' | 'MOVE';
-  changes: any;
+  changes: Record<string, unknown>;
   timestamp: string;
   status: 'PENDING' | 'APPLIED' | 'REJECTED';
 }
@@ -57,7 +56,7 @@ export interface LiveNotification {
   investigationId: string;
   message: string;
   timestamp: string;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }
 
 export class CollaborationService extends EventEmitter {
@@ -147,7 +146,7 @@ export class CollaborationService extends EventEmitter {
 
     if (presence) {
       this.activeUsers.delete(presenceKey);
-      await cacheService.delete(`presence:${userId}:${investigationId}`);
+      await cacheService.del(`presence:${userId}:${investigationId}`);
 
       const notification: LiveNotification = {
         id: `notif-${Date.now()}`,
@@ -504,7 +503,7 @@ export class CollaborationService extends EventEmitter {
 
       if (timeDiff > inactiveThreshold) {
         this.activeUsers.delete(key);
-        cacheService.delete(
+        cacheService.del(
           `presence:${presence.userId}:${presence.investigationId}`,
         );
         cleanedUp++;

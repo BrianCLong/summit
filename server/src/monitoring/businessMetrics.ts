@@ -1,4 +1,3 @@
-// @ts-nocheck
 import pino from 'pino';
 import {
   businessUserSignupsTotal,
@@ -6,7 +5,7 @@ import {
   businessRevenueTotal,
 } from './metrics.js';
 
-const logger = pino({ name: 'business-metrics' });
+const logger = (pino as any)({ name: 'business-metrics' });
 
 export type BusinessMetricEvent = {
   type: 'user_signup' | 'api_call' | 'revenue';

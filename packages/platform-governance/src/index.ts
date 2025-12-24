@@ -17,6 +17,12 @@ export * from './policy/engine.js';
 // Ownership exports
 export * from './ownership/matrix.js';
 
+// Record framework exports
+export * from './records/framework.js';
+
+// Retention engine exports
+export * from './retention/engine.js';
+
 // Re-export commonly used items
 export {
   PolicyEngine,
@@ -49,3 +55,75 @@ export type {
   OwnershipMatrix,
   EscalationLevel,
 } from './ownership/matrix.js';
+
+export {
+  canonicalModules,
+  canonicalFeatures,
+  canonicalNouns,
+  boundedContexts,
+  domainVocabulary,
+  resolveSystemOfRecord,
+  validateIdentifiers,
+} from './suite/domain.js';
+
+export type {
+  CanonicalFeature,
+  CanonicalModule,
+  CanonicalNoun,
+  BoundedContext,
+  DomainVocabulary,
+  SystemOfRecord,
+  GlossaryMapping,
+  Identifiers,
+} from './suite/domain.js';
+
+export {
+  apiContractSchema,
+  cloudEventSchema,
+  compareCloudEvents,
+  ensureIdempotentWrite,
+  isApiContractCompatible,
+  validateApiContract,
+  validateEventContract,
+  ContractRegistry,
+  requireCanonicalModule,
+} from './suite/contracts.js';
+
+export type {
+  ApiContract,
+  ApiStyle,
+  CloudEventContract,
+  CompatibilityReport,
+  EventCompatibilityResult,
+  ContractRegistryEntry,
+} from './suite/contracts.js';
+
+export {
+  enforceAcyclicDependencies,
+  discoverWorkspacePackages,
+  detectCircularDependencies,
+  buildDependencyGraph,
+} from './suite/dependency-map.js';
+
+export type {
+  DependencyGraph,
+  DependencyEdge,
+  DependencyPolicyResult,
+  CycleReport,
+} from './suite/dependency-map.js';
+
+export {
+  evaluateEntitlement,
+  calculateProratedCredit,
+  detectUsageAnomalies,
+  entitlementSchema,
+  usageRecordSchema,
+} from './suite/entitlements.js';
+
+export type {
+  Entitlement,
+  EntitlementEvaluation,
+  UsageRecord,
+  ProrationInput,
+  Anomaly,
+} from './suite/entitlements.js';

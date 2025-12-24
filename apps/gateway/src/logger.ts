@@ -8,7 +8,7 @@ import { createHash } from 'crypto';
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
-interface LogContext {
+interface LogData {
   userId?: string;
   investigationId?: string;
   entityId?: string;
@@ -27,7 +27,7 @@ class StructuredLogger {
   private log(
     level: LogLevel,
     message: string,
-    context: LogContext = {}
+    context: LogData = {}
   ): void {
     const span = trace.getActiveSpan();
     const spanContext = span?.spanContext();
@@ -73,8 +73,8 @@ class StructuredLogger {
     }
   }
 
-  private sanitizeContext(context: LogContext): LogContext {
-    const sanitized: LogContext = { ...context };
+  private sanitizeContext(context: LogData): LogData {
+    const sanitized: LogData = { ...context };
 
     // Hash user IDs to prevent PII leakage
     if (sanitized.userId) {
@@ -97,28 +97,28 @@ class StructuredLogger {
     return 'hash_' + createHash('sha256').update(id).digest('hex').slice(0, 8);
   }
 
-  debug(message: string, context?: LogContext): void {
+  debug(message: string, context?: LogData): void {
     this.log('debug', message, context);
   }
 
-  info(message: string, context?: LogContext): void {
+  info(message: string, context?: LogData): void {
     this.log('info', message, context);
   }
 
-  warn(message: string, context?: LogContext): void {
+  warn(message: string, context?: LogData): void {
     this.log('warn', message, context);
   }
 
-  error(message: string, error?: Error, context?: LogContext): void {
+  error(message: string, error?: Error, context?: LogData): void {
     const errorContext = error
       ? {
-          error: {
-            name: error.name,
-            message: error.message,
-            stack: error.stack,
-          },
-          ...context,
-        }
+        error: {
+          name: error.name,
+          message: error.message,
+          stack: error.stack,
+        },
+        ...context,
+      }
       : context;
 
     this.log('error', message, errorContext);
@@ -134,7 +134,7 @@ class StructuredLogger {
   async measure<T>(
     operationName: string,
     fn: () => Promise<T>,
-    context?: LogContext
+    context?: LogData
   ): Promise<T> {
     const start = Date.now();
     this.info(`${operationName} started`, context);
@@ -177,7 +177,7 @@ export class LogContext {
 
   constructor(
     private requestId: string,
-    private baseContext: LogContext = {}
+    private baseContext: LogData = {}
   ) {
     LogContext.contextMap.set(requestId, this);
   }
@@ -190,7 +190,7 @@ export class LogContext {
     LogContext.contextMap.delete(requestId);
   }
 
-  getContext(): LogContext {
+  getContext(): LogData {
     return { ...this.baseContext };
   }
 

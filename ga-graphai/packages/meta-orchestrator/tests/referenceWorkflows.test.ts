@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   runHelloCaseWorkflow,
   runHelloWorldWorkflow,
+  runPaymentsAndCreditWorkflow,
   type ReferenceWorkflowResult,
 } from '../src/index.js';
 
@@ -39,5 +40,22 @@ describe('reference workflows', () => {
     expect(serviceRisk.score).toBeGreaterThan(0.3);
     expect(result.auditTrail.some((entry) => entry.category === 'fallback')).toBe(true);
     expect(result.auditTrail.some((entry) => entry.category === 'reward-update')).toBe(true);
+  });
+
+  it('runs the payments and credit orchestration with PCI/PSD2 guardrails', async () => {
+    const result = await runPaymentsAndCreditWorkflow();
+
+    expect(result.plan.steps).toHaveLength(3);
+    expect(
+      result.stages.find((stage) => stage.id === 'pci-ingest')?.complianceTags,
+    ).toEqual(expect.arrayContaining(['pci', 'aml', 'gdpr']));
+
+    const recovered = result.outcome.trace.find(
+      (entry) => entry.stageId === 'fraud-decision' && entry.status === 'recovered',
+    );
+    expect(recovered).toBeDefined();
+    expect(result.telemetry.costPerThroughputUnit).toBeLessThanOrEqual(0.1);
+    expect(result.telemetry.auditCompleteness).toBeGreaterThan(0.5);
+    expect(result.auditTrail.some((entry) => entry.category === 'execution')).toBe(true);
   });
 });

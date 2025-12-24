@@ -1,6 +1,6 @@
 // @ts-nocheck
-
-import type { Express, Request, Response } from 'express';
+import type { Express, Response } from 'express';
+import type { AuthenticatedRequest } from './types.js';
 import { MockLLM } from '../services/llm';
 import { auth } from '../middleware/auth';
 import { rateLimit } from '../middleware/rateLimit';
@@ -47,10 +47,10 @@ export function mountAssistant(app: Express, io?: any) {
     '/assistant/stream',
     auth(true),
     rateLimit(),
-    async (req: Request, res: Response) => {
+    async (req: AuthenticatedRequest, res: Response) => {
       const started = Date.now();
       const reqId = (req as any).reqId;
-      const userId = (req as any).user?.sub || null;
+      const userId = req.user?.sub || null;
       let input = (req.body?.input ?? '').toString(); // Changed to `let`
       const focusIds = req.body?.focusIds || []; // Assuming focusIds in body
       if (isSuspicious(input)) {
@@ -84,7 +84,7 @@ export function mountAssistant(app: Express, io?: any) {
       }
       logExperiment(reqId, userId, 'rag_experiment', experimentVariant); // Log experiment
 
-      const tenant = (req as any).user?.org ?? 'public';
+      const tenant = req.user?.org ?? 'public';
       const cached = await getCached(tenant, input);
       if (cached) {
         res.write(cached);
@@ -157,10 +157,10 @@ export function mountAssistant(app: Express, io?: any) {
     '/assistant/sse',
     auth(true),
     rateLimit(),
-    async (req: Request, res: Response) => {
+    async (req: AuthenticatedRequest, res: Response) => {
       const started = Date.now();
       const reqId = (req as any).reqId;
-      const userId = (req as any).user?.sub || null;
+      const userId = req.user?.sub || null;
       let input = (req.query.q ?? '').toString(); // Changed to `let`
       const focusIds = (req.query.focusIds as string[] | undefined) || []; // Assuming focusIds in query
       if (isSuspicious(input)) {
@@ -194,7 +194,7 @@ export function mountAssistant(app: Express, io?: any) {
       }
       logExperiment(reqId, userId, 'rag_experiment', experimentVariant); // Log experiment
 
-      const tenant = (req as any).user?.org ?? 'public';
+      const tenant = req.user?.org ?? 'public';
       const cached = await getCached(tenant, input);
       if (cached) {
         res.write(`data: ${cached}\n\n`);

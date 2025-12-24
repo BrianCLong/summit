@@ -4,7 +4,7 @@ import { getPostgresPool } from '../../config/database.js';
 import { getRedisClient } from '../../config/database.js';
 import pino from 'pino';
 
-const logger = pino();
+const logger = (pino as any)();
 
 // Define the shape of a Comment (match your actual type)
 export interface SupportTicketComment {
@@ -25,7 +25,7 @@ const safeRows = <T = unknown>(result: unknown): T[] =>
     : [];
 
 // Helper to revive dates from JSON
-const reviveDates = (key: string, value: any) => {
+const reviveDates = (_key: string, value: unknown): unknown => {
   if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(value)) {
     return new Date(value);
   }

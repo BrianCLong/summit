@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { logger } from '../utils/logger.js';

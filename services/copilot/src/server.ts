@@ -7,7 +7,7 @@
 import express, { Express, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import pino from 'pino';
+import { pino } from 'pino';
 
 import { CopilotService, StubPolicyEngine, MockQueryExecutor } from './CopilotService.js';
 import { MockLlmAdapter } from './LlmAdapter.js';

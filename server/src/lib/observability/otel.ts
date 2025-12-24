@@ -1,5 +1,4 @@
 // @ts-nocheck
-
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { Resource } from '@opentelemetry/resources';
@@ -9,7 +8,7 @@ import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
 import { trace, context, SpanStatusCode, SpanKind } from '@opentelemetry/api';
 import pino from 'pino';
 
-const logger = pino({ name: 'observability-otel' });
+const logger = (pino as any)({ name: 'observability-otel' });
 
 interface TracingConfig {
   serviceName: string;
@@ -23,7 +22,7 @@ interface TracingConfig {
 class OpenTelemetryService {
   private static instance: OpenTelemetryService;
   private sdk: NodeSDK | null = null;
-  private tracer: any = null;
+  private tracer: ReturnType<typeof trace.getTracer> | null = null;
   private config: TracingConfig;
 
   private constructor(config: Partial<TracingConfig> = {}) {
@@ -59,14 +58,20 @@ class OpenTelemetryService {
         }),
       );
 
-      const traceExporters: any[] = [];
+      const traceExporters: JaegerExporter[] = [];
       if (this.config.jaegerEndpoint) {
-        traceExporters.push(new JaegerExporter({ endpoint: this.config.jaegerEndpoint }));
+        traceExporters.push(
+          new JaegerExporter({ endpoint: this.config.jaegerEndpoint }),
+        );
       }
 
-      const metricReaders: any[] = [];
+      const metricReaders: PrometheusExporter[] = [];
       // Use port 9464 as standard
-      metricReaders.push(new PrometheusExporter({ port: parseInt(process.env.PROMETHEUS_PORT || '9464') }));
+      metricReaders.push(
+        new PrometheusExporter({
+          port: parseInt(process.env.PROMETHEUS_PORT || '9464'),
+        }),
+      );
 
       this.sdk = new NodeSDK({
         resource,
@@ -86,7 +91,9 @@ class OpenTelemetryService {
         `OpenTelemetry initialized. Service: ${this.config.serviceName}, Env: ${this.config.environment}`,
       );
     } catch (error) {
-      logger.error(`Failed to initialize OpenTelemetry: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        `Failed to initialize OpenTelemetry: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -98,7 +105,11 @@ class OpenTelemetryService {
     }
   }
 
-  public startSpan(name: string, attributes: Record<string, any> = {}, kind: typeof SpanKind.INTERNAL = SpanKind.INTERNAL) {
+  public startSpan(
+    name: string,
+    attributes: Record<string, string | number | boolean> = {},
+    kind: (typeof SpanKind)[keyof typeof SpanKind] = SpanKind.INTERNAL,
+  ) {
     if (!this.tracer) return this.createNoOpSpan();
     return this.tracer.startSpan(name, {
       kind,
@@ -110,7 +121,11 @@ class OpenTelemetryService {
     });
   }
 
-  public wrap<T>(name: string, fn: (span: any) => Promise<T> | T, attributes: Record<string, any> = {}): Promise<T> {
+  public wrap<T>(
+    name: string,
+    fn: (span: ReturnType<typeof this.startSpan>) => Promise<T> | T,
+    attributes: Record<string, string | number | boolean> = {},
+  ): Promise<T> {
     const span = this.startSpan(name, attributes);
     return context.with(trace.setSpan(context.active(), span), async () => {
       try {
@@ -118,8 +133,13 @@ class OpenTelemetryService {
         span.setStatus({ code: SpanStatusCode.OK });
         return result;
       } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: err instanceof Error ? err.message : String(err) });
-        span.recordException(err instanceof Error ? err : new Error(String(err)));
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: err instanceof Error ? err.message : String(err),
+        });
+        span.recordException(
+          err instanceof Error ? err : new Error(String(err)),
+        );
         throw err;
       } finally {
         span.end();

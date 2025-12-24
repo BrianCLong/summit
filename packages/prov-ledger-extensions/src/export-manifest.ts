@@ -272,7 +272,7 @@ export class ExportManifestVerifier {
   verifyIntegrity(manifest: ExportManifest, data: {
     entities: any[];
     relationships: any[];
-  }): VerificationResult {
+  }): ManifestVerificationResult {
     const errors: string[] = [];
     const warnings: string[] = [];
 
@@ -362,7 +362,7 @@ export class ExportManifestVerifier {
   }
 }
 
-export interface VerificationResult {
+export interface ManifestVerificationResult {
   valid: boolean;
   errors: string[];
   warnings: string[];

@@ -194,6 +194,19 @@ export interface RecurrentLayerConfig {
 }
 
 // ============================================================================
+// Model Architecture
+// ============================================================================
+
+export interface NeuralNetworkArchitecture {
+  name: string;
+  type: string;
+  layers: Layer[];
+  inputShape: number[];
+  outputShape: number[];
+  description?: string;
+}
+
+// ============================================================================
 // Model Zoo and Registry
 // ============================================================================
 

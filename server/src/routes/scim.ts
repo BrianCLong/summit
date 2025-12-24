@@ -1,7 +1,8 @@
 // @ts-nocheck
-import { Router } from 'express';
+import { Router, Response, NextFunction } from 'express';
 import { scimService } from '../services/scim/ScimService.js';
 import { ScimUser } from '../services/scim/types.js';
+import type { AuthenticatedRequest } from './types.js';
 
 const router = Router();
 
@@ -12,10 +13,9 @@ router.use((req, res, next) => {
     next();
 });
 
-router.get('/Users', async (req, res) => {
+router.get('/Users', async (req: AuthenticatedRequest, res: Response) => {
     try {
         const { startIndex, count } = req.query;
-        // @ts-ignore
         const tenantId = req.user?.tenantId || 'default';
         const result = await scimService.listUsers(tenantId, Number(startIndex) || 1, Number(count) || 100);
         res.header('Content-Type', 'application/scim+json');
@@ -25,9 +25,8 @@ router.get('/Users', async (req, res) => {
     }
 });
 
-router.post('/Users', async (req, res) => {
+router.post('/Users', async (req: AuthenticatedRequest, res: Response) => {
     try {
-        // @ts-ignore
         const tenantId = req.user?.tenantId || 'default';
         const user = await scimService.createUser(tenantId, req.body as ScimUser);
         res.status(201).header('Content-Type', 'application/scim+json').json(user);
@@ -36,8 +35,7 @@ router.post('/Users', async (req, res) => {
     }
 });
 
-router.get('/Users/:id', async (req, res) => {
-     // @ts-ignore
+router.get('/Users/:id', async (req: AuthenticatedRequest, res: Response) => {
      const tenantId = req.user?.tenantId || 'default';
      const user = await scimService.getUser(tenantId, req.params.id);
      if (!user) {
@@ -47,15 +45,13 @@ router.get('/Users/:id', async (req, res) => {
      res.header('Content-Type', 'application/scim+json').json(user);
 });
 
-router.put('/Users/:id', async (req, res) => {
-    // @ts-ignore
+router.put('/Users/:id', async (req: AuthenticatedRequest, res: Response) => {
     const tenantId = req.user?.tenantId || 'default';
     const user = await scimService.updateUser(tenantId, req.params.id, req.body);
     res.header('Content-Type', 'application/scim+json').json(user);
 });
 
-router.delete('/Users/:id', async (req, res) => {
-    // @ts-ignore
+router.delete('/Users/:id', async (req: AuthenticatedRequest, res: Response) => {
     const tenantId = req.user?.tenantId || 'default';
     await scimService.deleteUser(tenantId, req.params.id);
     res.status(204).end();

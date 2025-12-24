@@ -1,0 +1,5 @@
+syntax = "proto3";
+package ig.nlq.v1;
+service NlqEngine { rpc Ask(AskRequest) returns (AskResponse); }
+message AskRequest { string query = 1; }
+message AskResponse { string answer = 1; }

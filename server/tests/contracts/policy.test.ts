@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { OPAClient } from '../opa-client'; // Mocked
 import { describe, it, expect } from '@jest/globals';
 

@@ -22,8 +22,8 @@ export interface Tenant {
   residency: 'US' | 'EU';
   tier: string;
   status: string;
-  config: Record<string, any>;
-  settings: Record<string, any>;
+  config: Record<string, unknown>;
+  settings: Record<string, unknown>;
   createdBy: string | null;
   createdAt: Date;
   updatedAt: Date;

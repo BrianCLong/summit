@@ -1,51 +1,49 @@
-export type UUID = string;
-
-export interface MediaAttestation {
-  captureSig: string; // device attestation
-  exifHash: string;
-  sensorFingerprint: string; // optional
-  transformChain: {
-    name: string;
-    params: Record<string, any>;
-    outHash: string;
-  }[];
+export interface Evidence {
+  id: string;
+  contentHash: string;
+  licenseId: string;
+  source: string;
+  transforms: string[]; // IDs of transformations applied
+  timestamp: string;
+  metadata?: Record<string, any>;
+  hash: string; // Hash of the complete record
 }
 
-export interface KPWMediaStep extends StepCommit {
-  media?: MediaAttestation; // present if media involved
-  contradiction?: { attesterId: string; proof: string }; // optional slot
+export interface Transformation {
+  id: string;
+  tool: string;
+  version: string;
+  params: Record<string, any>;
+  inputHash: string;
+  outputHash: string;
+  timestamp: string;
+  hash: string; // Hash of the complete record
 }
 
-export interface StepCommit {
-  id: string; // step id
-  tool: string; // tool name used
-  startedAt: string; // ISO
-  endedAt: string; // ISO
-  inputHash: string; // sha256(input payload)
-  outputHash: string; // sha256(output payload)
-  policyHash: string; // sha256(policy snapshot)
-  modelHash?: string; // sha256(model id + version + prompt)
+export interface Claim {
+  id: string;
+  evidenceIds: string[];
+  transformChainIds: string[];
+  text: string; // The claim content
+  timestamp: string;
+  hash: string; // Hash of the claim content + evidence IDs
+  signature?: string;
+  publicKey?: string;
 }
 
-export interface WalletManifest {
-  runId: UUID;
-  caseId: UUID;
-  createdAt: string;
-  merkleRoot: string; // hex
-  // opaque, signed by ledger service
-  signature: string; // base64
-  signer: string;
-  algo: 'RSA-SHA256';
+export interface Manifest {
+  version: string;
+  timestamp: string;
+  generatedBy: string;
+  merkleRoot: string;
+  claims: Claim[];
+  evidence: Evidence[];
+  transformations: Transformation[];
+  metadata?: Record<string, any>;
+  signature?: string;
 }
 
-export interface InclusionProof {
-  stepId: string;
-  leaf: string; // hex of leaf hash
-  path: { dir: 'L' | 'R'; hash: string }[]; // sibling path to root
-}
-
-export interface SelectiveDisclosureBundle {
-  manifest: WalletManifest;
-  disclosedSteps: StepCommit[]; // cleartext metadata for revealed steps
-  proofs: InclusionProof[]; // Merkle proofs for revealed leaves
+export interface LedgerConfig {
+  dataDir: string;
+  enabled: boolean;
 }

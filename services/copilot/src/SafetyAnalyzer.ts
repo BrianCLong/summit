@@ -184,7 +184,7 @@ export class SafetyAnalyzer {
     if (/shortestPath/i.test(query)) {
       const shortestPathMatch = query.match(/\[\s*\*(?:\d*)?\.\.(\d+)\s*\]/);
       if (shortestPathMatch) {
-        maxDepth = Math.max(maxDepth, parseInt(shortestPathMatch[1], 10));
+        maxDepth = Math.max(maxDepth, parseInt(shortestPathMatch[1] || '6', 10));
       } else {
         maxDepth = Math.max(maxDepth, 6); // Default shortestPath depth
       }
@@ -211,7 +211,7 @@ export class SafetyAnalyzer {
       // Look for depth limit in recursive CTE
       const depthMatch = query.match(/(?:depth|level)\s*<\s*(\d+)/i);
       if (depthMatch) {
-        depth = Math.max(depth, parseInt(depthMatch[1], 10));
+        depth = Math.max(depth, parseInt(depthMatch[1] || '10', 10));
       } else {
         depth = Math.max(depth, 10); // Assume unbounded recursive
       }
@@ -253,13 +253,13 @@ export class SafetyAnalyzer {
     // Extract LIMIT from query
     const limitMatch = query.match(/\bLIMIT\s+(\d+)/i);
     if (limitMatch) {
-      return parseInt(limitMatch[1], 10);
+      return parseInt(limitMatch[1] || '100', 10);
     }
 
     // Check for TOP in SQL Server style
     const topMatch = query.match(/\bTOP\s+(\d+)/i);
     if (topMatch) {
-      return parseInt(topMatch[1], 10);
+      return parseInt(topMatch[1] || '100', 10);
     }
 
     // No explicit limit - estimate based on query type
@@ -363,7 +363,7 @@ export class SafetyAnalyzer {
 
       // Check for very large bounds
       const largeBoundMatch = query.match(/\[\s*\*\s*(?:\d+)?\.\.(\d+)\s*\]/);
-      if (largeBoundMatch && parseInt(largeBoundMatch[1], 10) > 10) {
+      if (largeBoundMatch && parseInt(largeBoundMatch[1] || '0', 10) > 10) {
         warnings.push({
           code: 'LARGE_TRAVERSAL_BOUND',
           message: `Variable-length pattern with bound > 10 may be slow`,
