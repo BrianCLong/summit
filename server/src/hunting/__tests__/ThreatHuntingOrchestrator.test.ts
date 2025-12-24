@@ -13,14 +13,7 @@ import type {
   EnrichedFinding,
 } from '../types';
 
-// Mock dependencies
-jest.mock('../../graph/neo4j', () => ({
-  runCypher: jest.fn<() => Promise<unknown[]>>().mockResolvedValue([
-    { id: 'entity-1', name: 'Test Entity', type: 'HOST' },
-    { id: 'entity-2', name: 'Test Entity 2', type: 'USER' },
-  ]),
-}));
-
+// Mock logger first (hoisted to top)
 jest.mock('../../config/logger', () => ({
   default: {
     info: jest.fn(),
@@ -29,6 +22,94 @@ jest.mock('../../config/logger', () => ({
     debug: jest.fn(),
   },
 }));
+
+jest.mock('../../config/logger.js', () => ({
+  default: {
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    debug: jest.fn(),
+  },
+}));
+
+// Mock AutoRemediationHooks to prevent singleton instantiation with unmocked logger
+jest.mock('../AutoRemediationHooks', () => {
+  const EventEmitter = require('events').EventEmitter;
+  const mockHooks = Object.assign(new EventEmitter(), {
+    registerHook: jest.fn(),
+    createRemediationPlan: jest.fn(),
+    executePlan: jest.fn(),
+    approvePlan: jest.fn(),
+    rejectPlan: jest.fn(),
+    getActivePlans: jest.fn().mockReturnValue([]),
+    getPendingApprovals: jest.fn().mockReturnValue([]),
+  });
+  return {
+    autoRemediationHooks: mockHooks,
+    AutoRemediationHooks: jest.fn(() => mockHooks),
+  };
+});
+jest.mock('../AutoRemediationHooks.js', () => {
+  const EventEmitter = require('events').EventEmitter;
+  const mockHooks = Object.assign(new EventEmitter(), {
+    registerHook: jest.fn(),
+    createRemediationPlan: jest.fn(),
+    executePlan: jest.fn(),
+    approvePlan: jest.fn(),
+    rejectPlan: jest.fn(),
+    getActivePlans: jest.fn().mockReturnValue([]),
+    getPendingApprovals: jest.fn().mockReturnValue([]),
+  });
+  return {
+    autoRemediationHooks: mockHooks,
+    AutoRemediationHooks: jest.fn(() => mockHooks),
+  };
+});
+
+// Mock dependencies
+jest.mock('../../graph/neo4j', () => ({
+  runCypher: jest.fn<() => Promise<unknown[]>>().mockResolvedValue([
+    { id: 'entity-1', name: 'Test Entity', type: 'HOST' },
+    { id: 'entity-2', name: 'Test Entity 2', type: 'USER' },
+  ]),
+}));
+jest.mock('../../graph/neo4j.js', () => ({
+  runCypher: jest.fn<() => Promise<unknown[]>>().mockResolvedValue([
+    { id: 'entity-1', name: 'Test Entity', type: 'HOST' },
+    { id: 'entity-2', name: 'Test Entity 2', type: 'USER' },
+  ]),
+}));
+
+// Mock other hunting modules that may have singletons
+jest.mock('../CypherTemplateEngine', () => ({
+  cypherTemplateEngine: { generateQuery: jest.fn() },
+  CypherTemplateEngine: jest.fn(),
+}));
+jest.mock('../CypherTemplateEngine.js', () => ({
+  cypherTemplateEngine: { generateQuery: jest.fn() },
+  CypherTemplateEngine: jest.fn(),
+}));
+
+jest.mock('../LLMChainExecutor', () => {
+  const EventEmitter = require('events').EventEmitter;
+  const mockExecutor = Object.assign(new EventEmitter(), {
+    executeChain: jest.fn(),
+  });
+  return {
+    llmChainExecutor: mockExecutor,
+    LLMChainExecutor: jest.fn(() => mockExecutor),
+  };
+});
+jest.mock('../LLMChainExecutor.js', () => {
+  const EventEmitter = require('events').EventEmitter;
+  const mockExecutor = Object.assign(new EventEmitter(), {
+    executeChain: jest.fn(),
+  });
+  return {
+    llmChainExecutor: mockExecutor,
+    LLMChainExecutor: jest.fn(() => mockExecutor),
+  };
+});
 
 describe('ThreatHuntingOrchestrator', () => {
   let orchestrator: ThreatHuntingOrchestrator;
