@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { AnalyticsService } from '../services/AnalyticsService.js';
 import { logger } from '../config/logger.js';
+import { handleTelemetryEvent } from './telemetry/TelemetryController.js';
 
 const router = Router();
 const analyticsService = AnalyticsService.getInstance();
@@ -83,7 +84,7 @@ router.get(
 
 /**
  * @route GET /analytics/anomaly
- * @desc Detect anomalies
+ * @desc Detect anomalies (Graph-based)
  */
 router.get(
   '/anomaly',
@@ -98,5 +99,11 @@ router.get(
     res.json(result);
   })
 );
+
+/**
+ * @route POST /analytics/event
+ * @desc Ingest internal telemetry events
+ */
+router.post('/event', handleTelemetryEvent);
 
 export default router;

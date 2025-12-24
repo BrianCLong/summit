@@ -87,6 +87,13 @@ import dataGovernanceRouter from './routes/data-governance-routes.js';
 import tenantBillingRouter from './routes/tenants/billing.js';
 import { gtmRouter } from './routes/gtm-messaging.js';
 import { airgapRouter } from './routes/airgap.js';
+import analyticsRouter from './routes/analytics.js';
+import experimentRouter from './routes/experiments.js';
+import cohortRouter from './routes/cohorts.js';
+import funnelRouter from './routes/funnels.js';
+import anomaliesRouter from './routes/anomalies.js';
+import exportsRouter from './routes/exports.js';
+import retentionRouter from './routes/retention.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -342,6 +349,13 @@ export const createApp = async () => {
   app.use('/api', dataGovernanceRouter); // Register Data Governance API
   app.use('/api/gtm', gtmRouter);
   app.use('/airgap', airgapRouter);
+  app.use('/analytics', analyticsRouter);
+  app.use('/api', experimentRouter); // Mounts /api/experiments...
+  app.use('/api', cohortRouter); // Mounts /api/cohorts...
+  app.use('/api', funnelRouter); // Mounts /api/funnels...
+  app.use('/api', anomaliesRouter);
+  app.use('/api', exportsRouter);
+  app.use('/api', retentionRouter);
   app.get('/metrics', metricsRoute);
 
   // Initialize SummitInvestigate Platform Routes
