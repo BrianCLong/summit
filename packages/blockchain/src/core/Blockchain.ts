@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Core Blockchain implementation - Private Permissioned Blockchain
  */

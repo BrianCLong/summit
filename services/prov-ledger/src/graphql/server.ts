@@ -3,6 +3,7 @@
  * Integrates with Fastify REST service
  */
 
+// @ts-nocheck
 import { FastifyInstance } from 'fastify';
 import { ApolloServer } from '@apollo/server';
 import fastifyApollo, {

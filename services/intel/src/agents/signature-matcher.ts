@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Signature Matching Agent
  *

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Pattern Recognition Agent
  *

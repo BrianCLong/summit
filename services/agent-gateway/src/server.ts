@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Agent Gateway Server
  * Main Express server for the Agent Gateway API

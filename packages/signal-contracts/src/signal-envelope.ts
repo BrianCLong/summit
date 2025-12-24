@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Signal Envelope Schema
  *

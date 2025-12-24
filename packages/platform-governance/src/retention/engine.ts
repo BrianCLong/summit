@@ -64,7 +64,7 @@ export class RetentionEngine {
   private holds: Map<string, LegalHold> = new Map();
   private retentionClassDefaults: Map<string, RetentionPolicy> = new Map();
 
-  constructor(private framework: RecordFramework) {}
+  constructor(private framework: RecordFramework) { }
 
   private collectDerived(record: RecordEntry, accumulator: Set<string>): void {
     for (const childId of record.lineage.children) {
@@ -119,6 +119,7 @@ export class RetentionEngine {
       const policy = this.policyFor(record);
       if (!policy) continue;
       const createdAt = record.versions[0]?.timestamp;
+      if (!createdAt) continue;
       const expiresAt = new Date(createdAt.getTime() + policy.durationDays * 24 * 60 * 60 * 1000);
       if (expiresAt > asOf) continue;
 

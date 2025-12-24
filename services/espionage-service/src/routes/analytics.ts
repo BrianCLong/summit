@@ -13,7 +13,7 @@ import {
  * pattern analysis, and intelligence reporting.
  */
 
-export const analyticsRouter = Router();
+export const analyticsRouter: Router = Router();
 
 // ============================================================================
 // ANALYTICAL PRODUCTS

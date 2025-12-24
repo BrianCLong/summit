@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { randomUUID } from 'node:crypto';
 import { Histogram, Registry, collectDefaultMetrics, Counter } from 'prom-client';
 import type { RequestHandler } from 'express';

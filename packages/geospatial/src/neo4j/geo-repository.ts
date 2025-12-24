@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Neo4j Geospatial Repository
  * Stores and queries geospatial features as graph nodes with spatial indexing

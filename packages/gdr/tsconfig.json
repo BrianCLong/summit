@@ -6,8 +6,8 @@
     "moduleResolution": "node",
     "strict": true,
     "allowSyntheticDefaultImports": true,
-    "types": ["node", "jest"]
-    "types": []
+    "types": ["node"]
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["tests/**/*.ts", "**/*.test.ts", "**/*.spec.ts"]
 }

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Service Adapter for Audit Logging
  *

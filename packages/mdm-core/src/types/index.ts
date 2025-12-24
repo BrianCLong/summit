@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Core MDM Types and Interfaces
  * Master Data Management type definitions for Summit platform

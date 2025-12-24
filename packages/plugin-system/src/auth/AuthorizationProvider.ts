@@ -83,7 +83,7 @@ export class OPAAuthorizationProvider implements AuthorizationProvider {
         throw new Error(`OPA request failed: ${response.statusText}`);
       }
 
-      const data = await response.json();
+      const data = await response.json() as any;
 
       return {
         allowed: data.result?.allow === true,

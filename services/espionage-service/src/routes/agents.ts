@@ -12,7 +12,7 @@ import { AgentAnalyzer } from '@intelgraph/agent-identification';
  * travel patterns, and agent network mapping.
  */
 
-export const agentsRouter = Router();
+export const agentsRouter: Router = Router();
 const analyzer = new AgentAnalyzer();
 
 // ============================================================================

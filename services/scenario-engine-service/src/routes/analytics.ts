@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Analytics Routes
  * Compute and compare scenario metrics

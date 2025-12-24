@@ -130,10 +130,10 @@ export const glossaryMappings: GlossaryMapping[] = [
 ];
 
 export interface DomainVocabulary {
-  modules: CanonicalModule[];
-  features: CanonicalFeature[];
-  nouns: CanonicalNoun[];
-  contexts: BoundedContext[];
+  modules: readonly CanonicalModule[];
+  features: readonly CanonicalFeature[];
+  nouns: readonly CanonicalNoun[];
+  contexts: readonly BoundedContext[];
   systemsOfRecord: SystemOfRecord[];
   glossary: GlossaryMapping[];
 }

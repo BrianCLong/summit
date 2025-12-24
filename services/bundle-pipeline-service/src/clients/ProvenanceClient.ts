@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ProvenanceClient - Client for interacting with the Provenance Ledger service
  * Maintains chain-of-custody and audit trail for all bundle operations

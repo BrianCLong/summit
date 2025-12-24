@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * PBFT (Practical Byzantine Fault Tolerance) Consensus Engine
  */

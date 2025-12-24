@@ -4,7 +4,7 @@
  * HTTP API for the Zero-Click Multi-Language Global Integration system.
  */
 
-import express, { Request, Response, NextFunction } from 'express';
+import express, { Request, Response, NextFunction, Application } from 'express';
 import { GlobalIntegrationOrchestrator } from './GlobalIntegrationOrchestrator';
 import { PartnerDiscoveryService } from './PartnerDiscovery';
 import { APIGeneratorService } from './APIGenerator';
@@ -12,7 +12,7 @@ import { ComplianceEngine } from './ComplianceEngine';
 import { MarketExpansionService } from './MarketExpansion';
 import type { MarketRegion, PartnerType } from './types';
 
-const app = express();
+const app: Application = express();
 app.use(express.json());
 
 // Initialize services

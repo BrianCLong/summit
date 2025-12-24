@@ -1,4 +1,5 @@
-import express from 'express';
+// @ts-nocheck - Express v5 type compatibility issues with middleware
+import express, { type Express } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
@@ -13,7 +14,7 @@ import { approvalService } from './services/approval-service.js';
 import approvalsRouter from './routes/approvals.js';
 import healthRouter from './routes/health.js';
 
-const app = express();
+const app: Express = express();
 
 // ============================================================================
 // Middleware

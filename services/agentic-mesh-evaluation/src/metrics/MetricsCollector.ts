@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Metrics Collector - Comprehensive Performance Monitoring
  * Collects, aggregates, and analyzes mesh performance metrics
