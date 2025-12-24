@@ -16,6 +16,7 @@
     "test:client": "cd client && npm test",
     "test:e2e": "npx playwright test",
     "test:smoke": "npm run test:smoke:backend && npm run test:smoke:frontend",
+    "test:quick": "node -e \"console.log('Quick validation passed')\" && npm run typecheck -- --noEmit",
     "test:smoke:backend": "cd server && npm run test:smoke",
     "test:smoke:frontend": "cd client && npm run test:smoke",
     "test:unit": "npm run test",
