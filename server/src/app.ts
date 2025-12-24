@@ -87,6 +87,7 @@ import dataGovernanceRouter from './routes/data-governance-routes.js';
 import tenantBillingRouter from './routes/tenants/billing.js';
 import { gtmRouter } from './routes/gtm-messaging.js';
 import { airgapRouter } from './routes/airgap.js';
+import drRouter from './routes/dr.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -342,6 +343,7 @@ export const createApp = async () => {
   app.use('/api', dataGovernanceRouter); // Register Data Governance API
   app.use('/api/gtm', gtmRouter);
   app.use('/airgap', airgapRouter);
+  app.use('/dr', drRouter);
   app.get('/metrics', metricsRoute);
 
   // Initialize SummitInvestigate Platform Routes
