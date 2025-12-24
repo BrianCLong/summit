@@ -491,7 +491,7 @@ describe('FeatureFlagService', () => {
       service = new FeatureFlagService(
         {
           provider: 'local',
-          config: {},
+          config: { file: './non-existent-config-file-12345.json' },
         },
         mockLogger
       );
