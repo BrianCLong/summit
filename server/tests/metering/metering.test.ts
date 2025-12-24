@@ -1,31 +1,23 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { MeteringPipeline } from '../../src/metering/pipeline.js';
-import { MeterEventKind, MeterEvent } from '../../src/metering/schema.js';
-import { TenantUsageDailyRepository } from '../../src/metering/repository.js';
-import { QuotaManager } from '../../src/metering/quotas.js';
-import { checkQuotaMiddleware } from '../../src/metering/middleware.js';
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { Request, Response, NextFunction } from 'express';
 
+// Define mocks before jest.mock calls (Jest hoists these automatically)
+const mockGet = jest.fn();
+const mockSaveAll = jest.fn().mockResolvedValue(undefined);
+const mockList = jest.fn().mockResolvedValue([]);
+const mockAppend = jest.fn().mockResolvedValue(undefined);
+
 // Mock logger to avoid clutter
-vi.mock('../../src/utils/logger.js', () => ({
+jest.mock('../../src/utils/logger.js', () => ({
   default: {
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
   },
 }));
 
-// Mock persistence using hoisted variables
-const { mockGet, mockSaveAll, mockList, mockAppend } = vi.hoisted(() => {
-  return {
-    mockGet: vi.fn(),
-    mockSaveAll: vi.fn().mockResolvedValue(undefined),
-    mockList: vi.fn().mockResolvedValue([]),
-    mockAppend: vi.fn().mockResolvedValue(undefined)
-  };
-});
-
-vi.mock('../../src/metering/persistence.js', () => {
+// Mock persistence
+jest.mock('../../src/metering/persistence.js', () => {
   return {
     persistentUsageRepository: {
       get: mockGet,
@@ -35,12 +27,14 @@ vi.mock('../../src/metering/persistence.js', () => {
     meterStore: {
       append: mockAppend
     },
-    FileTenantUsageRepository: vi.fn(),
-    FileMeterStore: vi.fn()
+    FileTenantUsageRepository: jest.fn(),
+    FileMeterStore: jest.fn()
   };
 });
 
-import { persistentUsageRepository } from '../../src/metering/persistence.js';
+import { MeteringPipeline } from '../../src/metering/pipeline.js';
+import { MeterEventKind, MeterEvent } from '../../src/metering/schema.js';
+import { QuotaManager } from '../../src/metering/quotas.js';
 
 describe('Metering Subsystem', () => {
 
@@ -49,7 +43,7 @@ describe('Metering Subsystem', () => {
 
     beforeEach(() => {
       pipeline = new MeteringPipeline();
-      vi.clearAllMocks();
+      jest.clearAllMocks();
     });
 
     it('should aggregate events correctly into daily rollups', async () => {
@@ -121,7 +115,7 @@ describe('Metering Subsystem', () => {
 
     beforeEach(() => {
       quotaManager = new QuotaManager();
-      vi.clearAllMocks();
+      jest.clearAllMocks();
     });
 
     it('should allow request if no quota set', async () => {
