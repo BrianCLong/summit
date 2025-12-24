@@ -9,17 +9,24 @@ import {
   AuditAccessLogRepo,
   AuditAccessLogInput,
 } from '../repos/AuditAccessLogRepo.js';
+import { ReleaseCriteriaService } from './ReleaseCriteriaService.js';
+import { isEnabled } from '../lib/featureFlags.js';
 import logger from '../config/logger.js';
+import { UserFacingError } from '../lib/errors.js';
 
 const serviceLogger = logger.child({ name: 'CaseService' });
 
 export class CaseService {
   private caseRepo: CaseRepo;
   private auditRepo: AuditAccessLogRepo;
+  private releaseCriteriaService: ReleaseCriteriaService;
+  private pg: Pool;
 
   constructor(pg: Pool) {
+    this.pg = pg;
     this.caseRepo = new CaseRepo(pg);
     this.auditRepo = new AuditAccessLogRepo(pg);
+    this.releaseCriteriaService = new ReleaseCriteriaService(pg);
   }
 
   /**
@@ -156,6 +163,23 @@ export class CaseService {
     auditContext: Pick<AuditAccessLogInput, 'reason' | 'legalBasis'> &
       Partial<AuditAccessLogInput>,
   ): Promise<Case | null> {
+    // Check release criteria if enabled
+    if (isEnabled('release-criteria', { tenantId, userId })) {
+      const evaluation = await this.releaseCriteriaService.evaluate(id, tenantId);
+
+      if (!evaluation.passed) {
+        // If configured for hard block, prevent export
+        if (evaluation.config.hardBlock) {
+          serviceLogger.warn({ caseId: id, reasons: evaluation.reasons }, 'Export blocked by release criteria');
+          throw new UserFacingError(
+            `Export blocked by release criteria: ${evaluation.reasons.map(r => r.message).join('; ')}`
+          );
+        } else {
+          serviceLogger.info({ caseId: id, reasons: evaluation.reasons }, 'Export allowed despite unmet criteria (soft block)');
+        }
+      }
+    }
+
     const caseRecord = await this.caseRepo.findById(id, tenantId);
 
     if (caseRecord) {

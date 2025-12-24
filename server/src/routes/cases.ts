@@ -451,7 +451,72 @@ caseRouter.post('/:id/export', async (req, res) => {
 
     res.json(caseRecord);
   } catch (error) {
+    // Handle specific user-facing errors
+    if ((error as any).name === 'UserFacingError') {
+      return res.status(400).json({ error: (error as Error).message });
+    }
     routeLogger.error({ error: (error as Error).message }, 'Failed to export case');
+    res.status(500).json({ error: (error as Error).message });
+  }
+});
+
+/**
+ * POST /api/cases/:id/release-criteria - Configure release criteria
+ */
+caseRouter.post('/:id/release-criteria', async (req, res) => {
+  try {
+    const { tenantId, userId } = getRequestContext(req);
+
+    if (!tenantId) {
+      return res.status(400).json({ error: 'tenant_required' });
+    }
+
+    if (!userId) {
+      return res.status(401).json({ error: 'user_required' });
+    }
+
+    const { id } = req.params;
+    const config = req.body; // ReleaseCriteriaConfig
+
+    const pg = getPostgresPool();
+    // We need to instantiate the ReleaseCriteriaService.
+    // Since CaseService initializes it privately, we should probably access it differently
+    // or instantiate it directly here.
+    // For now, let's instantiate it directly as we didn't expose it in CaseService.
+    const { ReleaseCriteriaService } = await import('../cases/ReleaseCriteriaService.js');
+    const service = new ReleaseCriteriaService(pg);
+
+    await service.configure(id, tenantId, userId, config);
+
+    res.status(200).json({ message: 'Release criteria configured' });
+  } catch (error) {
+    routeLogger.error({ error: (error as Error).message }, 'Failed to configure release criteria');
+    res.status(500).json({ error: (error as Error).message });
+  }
+});
+
+/**
+ * GET /api/cases/:id/release-criteria/status - Get release criteria status
+ */
+caseRouter.get('/:id/release-criteria/status', async (req, res) => {
+  try {
+    const { tenantId } = getRequestContext(req);
+
+    if (!tenantId) {
+      return res.status(400).json({ error: 'tenant_required' });
+    }
+
+    const { id } = req.params;
+
+    const pg = getPostgresPool();
+    const { ReleaseCriteriaService } = await import('../cases/ReleaseCriteriaService.js');
+    const service = new ReleaseCriteriaService(pg);
+
+    const result = await service.evaluate(id, tenantId);
+
+    res.json(result);
+  } catch (error) {
+    routeLogger.error({ error: (error as Error).message }, 'Failed to get release criteria status');
     res.status(500).json({ error: (error as Error).message });
   }
 });
