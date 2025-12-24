@@ -294,6 +294,7 @@ export const createApp = async () => {
 
   // Authentication routes (exempt from global auth middleware)
   app.use('/auth', authRouter);
+  app.use('/auth/sso', ssoRouter);
   app.use('/api/auth', authRouter); // Alternative path
   app.use('/sso', ssoRouter);
 
