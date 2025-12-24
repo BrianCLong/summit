@@ -1,13 +1,117 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="4" failures="0" errors="0" time="16.006">
-  <testsuite name="Webhook API" errors="0" failures="0" skipped="0" timestamp="2025-11-20T09:50:33" time="15.834" tests="4">
-    <testcase classname="Webhook API › POST /api/webhooks" name="should create a webhook" time="0.075">
+<testsuites name="jest tests" tests="32" failures="2" errors="0" time="31.543">
+  <testsuite name="GraphQL Policy Contract Tests" errors="0" failures="2" skipped="0" timestamp="2025-12-24T03:43:17" time="0.728" tests="2">
+    <testcase classname="GraphQL Policy Contract Tests" name="should DENY access when a user queries for another tenant&apos;s data" time="0.005">
+      <failure>TypeError: opaClient.query is not a function
+    at Object.&lt;anonymous&gt; (/app/server/tests/contracts/policy.test.ts:13:38)
+    at Promise.then.completed (/app/server/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/app/server/node_modules/jest-circus/build/run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/run.js:252:3)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/run.js:126:9)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/run.js:121:9)
+    at run (/app/server/node_modules/jest-circus/build/run.js:71:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/runTest.js:367:16)
+    at runTest (/app/server/node_modules/jest-runner/build/runTest.js:444:34)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
     </testcase>
-    <testcase classname="Webhook API › POST /api/webhooks" name="should fail with invalid input" time="0.011">
+    <testcase classname="GraphQL Policy Contract Tests" name="should ALLOW access when a user queries for their own tenant&apos;s data" time="0.001">
+      <failure>TypeError: opaClient.query is not a function
+    at Object.&lt;anonymous&gt; (/app/server/tests/contracts/policy.test.ts:22:38)
+    at Promise.then.completed (/app/server/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/app/server/node_modules/jest-circus/build/run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/run.js:252:3)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/run.js:126:9)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/run.js:121:9)
+    at run (/app/server/node_modules/jest-circus/build/run.js:71:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/runTest.js:367:16)
+    at runTest (/app/server/node_modules/jest-runner/build/runTest.js:444:34)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
     </testcase>
-    <testcase classname="Webhook API › GET /api/webhooks" name="should list webhooks" time="0.009">
+  </testsuite>
+  <testsuite name="Schema Contract Testing" errors="0" failures="0" skipped="0" timestamp="2025-12-24T03:43:18" time="0.065" tests="2">
+    <testcase classname="Schema Contract Testing" name="should match the snapshot" time="0.004">
     </testcase>
-    <testcase classname="Webhook API › POST /api/webhooks/trigger-test" name="should trigger a webhook event" time="0.009">
+    <testcase classname="Schema Contract Testing" name="should detect breaking changes" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="Event Sourcing System" errors="0" failures="0" skipped="0" timestamp="2025-12-24T03:43:18" time="0.068" tests="2">
+    <testcase classname="Event Sourcing System" name="should log events with integrity hash" time="0.003">
+    </testcase>
+    <testcase classname="Event Sourcing System" name="should replay state correctly" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="SafeClient" errors="0" failures="0" skipped="0" timestamp="2025-12-24T03:43:18" time="0.138" tests="3">
+    <testcase classname="SafeClient" name="should respect rate limits" time="0.007">
+    </testcase>
+    <testcase classname="SafeClient" name="should trip circuit breaker on failures" time="0.003">
+    </testcase>
+    <testcase classname="SafeClient" name="should recover circuit breaker" time="0.062">
+    </testcase>
+  </testsuite>
+  <testsuite name="Tenant Isolation Tests" errors="0" failures="0" skipped="0" timestamp="2025-12-24T03:43:18" time="0.089" tests="8">
+    <testcase classname="Tenant Isolation Tests › TenantSentinel" name="should throw when tenantId is missing in input" time="0.009">
+    </testcase>
+    <testcase classname="Tenant Isolation Tests › TenantSentinel" name="should pass when tenantId is present" time="0">
+    </testcase>
+    <testcase classname="Tenant Isolation Tests › TenantSentinel" name="should throw when result contains data from wrong tenant" time="0.002">
+    </testcase>
+    <testcase classname="Tenant Isolation Tests › TenantSentinel" name="should pass when result matches tenant" time="0">
+    </testcase>
+    <testcase classname="Tenant Isolation Tests › TenantSentinel" name="should handle array results correctly" time="0.001">
+    </testcase>
+    <testcase classname="Tenant Isolation Tests › Integration Simulation" name="should allow valid access" time="0.001">
+    </testcase>
+    <testcase classname="Tenant Isolation Tests › Integration Simulation" name="should detect cross-tenant leak in buggy implementation" time="0.001">
+    </testcase>
+    <testcase classname="Tenant Isolation Tests › Integration Simulation" name="should enforce tenant context requirement" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="AuditQueryService" errors="0" failures="0" skipped="0" timestamp="2025-12-24T03:43:18" time="0.077" tests="4">
+    <testcase classname="AuditQueryService" name="should filter by tenant strictly" time="0.002">
+    </testcase>
+    <testcase classname="AuditQueryService" name="should respect filters" time="0.001">
+    </testcase>
+    <testcase classname="AuditQueryService" name="should paginate" time="0.001">
+    </testcase>
+    <testcase classname="AuditQueryService" name="should deny access to other tenant events by ID" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="ScoringEngine" errors="0" failures="0" skipped="0" timestamp="2025-12-24T03:43:18" time="0.074" tests="2">
+    <testcase classname="ScoringEngine" name="should calculate perfect score for ideal evidence" time="0.002">
+    </testcase>
+    <testcase classname="ScoringEngine" name="should penalize weak evidence" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="JobWrapper" errors="0" failures="0" skipped="0" timestamp="2025-12-24T03:43:18" time="0.122" tests="4">
+    <testcase classname="JobWrapper" name="should execute job successfully once" time="0.001">
+    </testcase>
+    <testcase classname="JobWrapper" name="should skip duplicate job (idempotency)" time="0">
+    </testcase>
+    <testcase classname="JobWrapper" name="should retry on failure and eventually succeed" time="0.012">
+    </testcase>
+    <testcase classname="JobWrapper" name="should fail after max retries" time="0.036">
+    </testcase>
+  </testsuite>
+  <testsuite name="Job Processors" errors="0" failures="0" skipped="0" timestamp="2025-12-24T03:42:48" time="30.767" tests="5">
+    <testcase classname="Job Processors › ingestionProcessor" name="should process job successfully" time="0.51">
+    </testcase>
+    <testcase classname="Job Processors › reportProcessor" name="should generate report url" time="2.004">
+    </testcase>
+    <testcase classname="Job Processors › analyticsProcessor" name="should return metrics" time="1.003">
+    </testcase>
+    <testcase classname="Job Processors › notificationProcessor" name="should send notification" time="0.202">
+    </testcase>
+    <testcase classname="Job Processors › webhookProcessor" name="should process webhook" time="0.101">
     </testcase>
   </testsuite>
 </testsuites>
