@@ -3,7 +3,7 @@ import {
   type GraphEntity,
   type GraphRelationship,
 } from './persistenceService.js';
-import { cacheService } from './cacheService.js';
+import { cacheService } from './CacheService.js';
 import type {
   ActorAwarenessOptions,
   ActorAwarenessResult,

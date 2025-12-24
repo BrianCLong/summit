@@ -3,6 +3,7 @@
  * Handles case operations with integrated audit logging
  */
 
+import { randomUUID } from 'node:crypto';
 import { Pool } from 'pg';
 import { CaseRepo, Case, CaseInput, CaseUpdateInput } from '../repos/CaseRepo.js';
 import {
@@ -172,7 +173,9 @@ export class CaseService {
         if (evaluation.config.hardBlock) {
           serviceLogger.warn({ caseId: id, reasons: evaluation.reasons }, 'Export blocked by release criteria');
           throw new UserFacingError(
-            `Export blocked by release criteria: ${evaluation.reasons.map(r => r.message).join('; ')}`
+            `Export blocked by release criteria: ${evaluation.reasons.map(r => r.message).join('; ')}`,
+            403,
+            randomUUID()
           );
         } else {
           serviceLogger.info({ caseId: id, reasons: evaluation.reasons }, 'Export allowed despite unmet criteria (soft block)');

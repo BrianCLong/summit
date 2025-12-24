@@ -1,4 +1,4 @@
-import { cacheService } from '../services/cacheService.js';
+import { cacheService } from '../services/CacheService.js';
 
 /**
  * Wraps a GraphQL resolver function with automatic caching capabilities.

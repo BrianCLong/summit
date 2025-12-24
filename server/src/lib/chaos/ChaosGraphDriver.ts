@@ -1,8 +1,10 @@
-import { Driver, Session, SessionConfig, Transaction, QueryResult } from 'neo4j-driver';
+import { Driver, Session, Transaction } from 'neo4j-driver';
 import { ChaosHarness } from './harness.js';
 
 // Neo4j 4.x/5.x type compatibility wrapper
 type TransactionConfig = any;
+type SessionConfig = Parameters<Driver['session']>[0];
+type QueryResult = Awaited<ReturnType<Session['run']>>;
 
 export class ChaosGraphDriver {
     private driver: Driver;

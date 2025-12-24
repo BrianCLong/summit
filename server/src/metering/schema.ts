@@ -50,4 +50,10 @@ export interface TenantUsageDailyRow {
   activeSeats: number;
   lastEventAt: string;
   correlationIds: string[];
+  // Additional quota tracking fields
+  queryExecuted?: number;
+  ingestItem?: number;
+  exportBuilt?: number;
+  artifactStoredBytes?: number;
+  webhookDelivered?: number;
 }

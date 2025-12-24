@@ -1,9 +1,7 @@
 import { getRedisClient } from '../config/database.js';
 import { PrometheusMetrics } from '../utils/metrics.js';
 import { cfg } from '../config.js';
-import pino from 'pino';
-
-const logger = pino();
+import logger from '../config/logger.js';
 
 export class CacheService {
   private metrics: PrometheusMetrics;

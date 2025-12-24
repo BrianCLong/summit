@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { cacheService } from './cacheService.js';
+import { cacheService } from './CacheService.js';
 import { advancedAuditSystem } from '../audit/advanced-audit-system.js';
 
 export interface Investigation {
