@@ -21,7 +21,7 @@ This implementation delivers a **secure, well-documented plugin system** for the
 
 ## 📦 Packages Delivered
 
-### 1. `@summit/plugin-system` - Core Plugin Framework
+### 1. `@intelgraph/plugin-system` - Core Plugin Framework
 
 **Location**: `/home/user/summit/packages/plugin-system/`
 
@@ -49,7 +49,7 @@ This implementation delivers a **secure, well-documented plugin system** for the
 - Health checks and monitoring
 - Event-driven architecture
 
-### 2. `@summit/plugin-host` - Runtime Service
+### 2. `@intelgraph/plugin-host` - Runtime Service
 
 **Location**: `/home/user/summit/packages/plugin-host/`
 
@@ -245,7 +245,7 @@ resources: {
 ### Creating a Plugin
 
 ```typescript
-import { AnalyticsExtension, AnalyticsInput, AnalyticsResult } from '@summit/plugin-system';
+import { AnalyticsExtension, AnalyticsInput, AnalyticsResult } from '@intelgraph/plugin-system';
 
 export default class MyAnalyticsPlugin extends AnalyticsExtension {
   protected async onInitialize(context: PluginContext): Promise<void> {

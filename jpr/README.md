@@ -30,7 +30,7 @@ go run ./cmd/jprdiff --policies ../jpr/testdata/policies.yaml --before 2024-05-3
 The `sdk/jpr-ts` package wraps the Go CLI. Provide the policy path and it will compile/cache the engine on-demand:
 
 ```ts
-import { JurisdictionalPolicyResolver } from '@summit/jpr';
+import { JurisdictionalPolicyResolver } from '@intelgraph/jpr';
 
 const jpr = new JurisdictionalPolicyResolver({ policiesPath: 'path/to/policies.yaml' });
 const decision = jpr.can({

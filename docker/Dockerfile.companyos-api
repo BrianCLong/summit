@@ -4,9 +4,9 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY companyos ./companyos
 
-RUN corepack enable && pnpm install --filter @companyos/companyos-api...
+RUN corepack enable && pnpm install --filter @intelgraph/companyos-api...
 
-RUN pnpm --filter @companyos/companyos-api build
+RUN pnpm --filter @intelgraph/companyos-api build
 
 FROM node:20-alpine
 WORKDIR /app

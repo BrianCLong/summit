@@ -1,5 +1,5 @@
 /**
- * @summit/platform-benchmarks
+ * @intelgraph/platform-benchmarks
  *
  * Cross-language benchmark harness for Summit platform.
  * Implements Prompt 17: Cross-subsystem Performance Benchmark Suite

@@ -11,7 +11,7 @@ Located in `sdk/qpg/typescript`.
 - Usage:
 
 ```ts
-import { QpgClient } from '@summit/qpg-client';
+import { QpgClient } from '@intelgraph/qpg-client';
 
 const client = new QpgClient('http://localhost:8080', fetch);
 const result = await client.tokenize({

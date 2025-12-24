@@ -1,4 +1,4 @@
-# @summit/pve - Policy Validation Engine
+# @intelgraph/pve - Policy Validation Engine
 
 OPA-driven governance and invariant enforcement for the Summit platform.
 
@@ -16,7 +16,7 @@ PVE (Policy Validation Engine) provides unified policy enforcement across:
 ## Installation
 
 ```bash
-pnpm add @summit/pve
+pnpm add @intelgraph/pve
 ```
 
 ## Quick Start
@@ -24,7 +24,7 @@ pnpm add @summit/pve
 ### Basic Usage
 
 ```typescript
-import { createPolicyEngine, validate } from '@summit/pve';
+import { createPolicyEngine, validate } from '@intelgraph/pve';
 
 // Quick validation
 const report = await validate({
@@ -49,7 +49,7 @@ if (report.passed) {
 ### PR Validation
 
 ```typescript
-import { createPRValidator } from '@summit/pve';
+import { createPRValidator } from '@intelgraph/pve';
 
 const validator = createPRValidator({
   owner: 'your-org',
@@ -71,7 +71,7 @@ const result = await validator.validateFromGitHub(prNumber);
 ### Agent Output Validation
 
 ```typescript
-import { createPolicyEngine } from '@summit/pve';
+import { createPolicyEngine } from '@intelgraph/pve';
 
 const engine = createPolicyEngine();
 
@@ -94,7 +94,7 @@ const report = await engine.evaluate({
 ### Security Scanning
 
 ```typescript
-import { SecurityScanValidator } from '@summit/pve';
+import { SecurityScanValidator } from '@intelgraph/pve';
 
 const scanner = new SecurityScanValidator();
 
@@ -144,7 +144,7 @@ src/policies/
 ## Custom Validators
 
 ```typescript
-import { createPolicyEngine, type CustomValidator } from '@summit/pve';
+import { createPolicyEngine, type CustomValidator } from '@intelgraph/pve';
 
 const myValidator: CustomValidator = {
   id: 'my-company.custom-check',

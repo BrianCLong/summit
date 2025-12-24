@@ -1,6 +1,6 @@
 /**
  * Predictive Models Package - Classification and Regression
- * @module @summit/predictive-models
+ * @module @intelgraph/predictive-models
  */
 
 // Types

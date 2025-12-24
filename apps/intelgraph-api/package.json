@@ -1,5 +1,5 @@
 {
-  "name": "@companyos/intelgraph-api",
+  "name": "@intelgraph/intelgraph-api",
   "version": "2.0.0",
   "private": true,
   "type": "module",

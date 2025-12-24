@@ -4,8 +4,8 @@ import {
   PluginLogger,
   PluginStorage,
   PluginAPI,
-  PluginEventBus,
-} from '@summit/plugin-system';
+  IPluginEventBus,
+} from '@intelgraph/plugin-system';
 
 /**
  * Create a mock plugin context for testing
@@ -18,7 +18,7 @@ export function createMockContext(overrides?: Partial<PluginContext>): PluginCon
     logger: createMockLogger(),
     storage: createMockStorage(),
     api: createMockAPI(),
-    events: createMockEventBus(),
+    events: createMockEventBus() as any,
     ...overrides,
   };
 }
@@ -58,11 +58,11 @@ export function createMockStorage(): PluginStorage {
  */
 export function createMockAPI(): PluginAPI {
   return {
-    request: async (endpoint, options) => {
-      return { success: true, data: {} };
+    request: async (endpoint: string, options?: any) => {
+      return { success: true, data: {} } as any;
     },
-    graphql: async (query, variables) => {
-      return { data: {} };
+    graphql: async (query: string, variables?: any) => {
+      return { data: {} } as any;
     },
   };
 }
@@ -70,20 +70,20 @@ export function createMockAPI(): PluginAPI {
 /**
  * Create a mock event bus
  */
-export function createMockEventBus(): PluginEventBus {
+export function createMockEventBus(): any {
   const handlers = new Map<string, Set<Function>>();
 
   return {
-    on: (event, handler) => {
+    on: (event: string, handler: any) => {
       if (!handlers.has(event)) {
         handlers.set(event, new Set());
       }
       handlers.get(event)!.add(handler);
     },
-    off: (event, handler) => {
+    off: (event: string, handler: any) => {
       handlers.get(event)?.delete(handler);
     },
-    emit: async (event, ...args) => {
+    emit: async (event: string, ...args: any[]) => {
       const eventHandlers = handlers.get(event);
       if (eventHandlers) {
         for (const handler of eventHandlers) {
@@ -91,7 +91,7 @@ export function createMockEventBus(): PluginEventBus {
         }
       }
     },
-    once: (event, handler) => {
+    once: (event: string, handler: any) => {
       const wrappedHandler = (...args: any[]) => {
         handler(...args);
         handlers.get(event)?.delete(wrappedHandler);

@@ -41,7 +41,7 @@ make smoke | tee artifacts/smoke.log
 
 echo "== prod guardrail negative =="
 set +e
-NODE_ENV=production JWT_SECRET=changeme CORS_ORIGIN="*" pnpm --filter @summit/server start:prod
+NODE_ENV=production JWT_SECRET=changeme CORS_ORIGIN="*" pnpm --filter @intelgraph/server start:prod
 rc=$?
 echo "server exit code: $rc" | tee artifacts/prod-guard.log
 if [ "$rc" -eq 0 ]; then

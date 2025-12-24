@@ -11,7 +11,7 @@ labels: ["a11y", "manual-check", "privacy"]
 
 ## Manual runs
 - [ ] Screen reader path validated (NVDA/VoiceOver/Narrator)
-- [ ] Logical focus order confirmed matches `pnpm --filter @summit/a11y-lab run check:focus-map`
+- [ ] Logical focus order confirmed matches `pnpm --filter @intelgraph/a11y-lab run check:focus-map`
 - [ ] No keyboard traps (Tab/Shift+Tab across modals/popovers)
 - [ ] Text zoom 200% still readable and functional
 - [ ] RTL layout and mirroring verified for critical flows

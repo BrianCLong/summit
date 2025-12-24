@@ -51,11 +51,11 @@ This is a **TRAINING AND SIMULATION** platform for signals intelligence concepts
 
 ## Packages
 
-### @summit/sigint-collector
+### @intelgraph/sigint-collector
 Signal collection simulation and management.
 
 ```typescript
-import { CollectionManager, SignalGenerator, SpectrumMonitor } from '@summit/sigint-collector';
+import { CollectionManager, SignalGenerator, SpectrumMonitor } from '@intelgraph/sigint-collector';
 
 // Initialize collection manager
 const manager = new CollectionManager({ complianceMode: 'TRAINING' });
@@ -75,11 +75,11 @@ const monitor = new SpectrumMonitor({
 monitor.start();
 ```
 
-### @summit/rf-processor
+### @intelgraph/rf-processor
 Digital signal processing and analysis.
 
 ```typescript
-import { SignalProcessor, ModulationClassifier, SpectralAnalyzer } from '@summit/rf-processor';
+import { SignalProcessor, ModulationClassifier, SpectralAnalyzer } from '@intelgraph/rf-processor';
 
 // Process signals
 const processor = new SignalProcessor(1e6);
@@ -91,11 +91,11 @@ const result = classifier.classify(iq.i, iq.q);
 console.log(`Detected: ${result.modulation} (${result.confidence * 100}%)`);
 ```
 
-### @summit/comint-analyzer
+### @intelgraph/comint-analyzer
 Communications intelligence analysis.
 
 ```typescript
-import { VoiceAnalyzer, MessageAnalyzer, CommunicationsMapper } from '@summit/comint-analyzer';
+import { VoiceAnalyzer, MessageAnalyzer, CommunicationsMapper } from '@intelgraph/comint-analyzer';
 
 // Analyze voice (simulated)
 const voiceAnalyzer = new VoiceAnalyzer();
@@ -111,11 +111,11 @@ mapper.addCommunication({ source, target, timestamp, type: 'voice' });
 const metrics = mapper.calculateMetrics();
 ```
 
-### @summit/network-interceptor
+### @intelgraph/network-interceptor
 Network traffic analysis (simulation only).
 
 ```typescript
-import { PacketAnalyzer, FlowAnalyzer, ProtocolDecoder } from '@summit/network-interceptor';
+import { PacketAnalyzer, FlowAnalyzer, ProtocolDecoder } from '@intelgraph/network-interceptor';
 
 // Generate simulated packets
 const packetAnalyzer = new PacketAnalyzer();
@@ -127,11 +127,11 @@ const flows = flowAnalyzer.generateSimulatedFlows(10);
 const stats = flowAnalyzer.getStatistics();
 ```
 
-### @summit/cryptanalysis-engine
+### @intelgraph/cryptanalysis-engine
 Cryptographic traffic analysis (educational only).
 
 ```typescript
-import { CryptoAnalyzer, TrafficPatternAnalyzer } from '@summit/cryptanalysis-engine';
+import { CryptoAnalyzer, TrafficPatternAnalyzer } from '@intelgraph/cryptanalysis-engine';
 
 // Analyze encrypted traffic metadata
 const cryptoAnalyzer = new CryptoAnalyzer();
@@ -142,11 +142,11 @@ const patternAnalyzer = new TrafficPatternAnalyzer();
 const session = patternAnalyzer.generateSimulatedSession('voip-call', 60);
 ```
 
-### @summit/geolocation-engine
+### @intelgraph/geolocation-engine
 Signal-based geolocation.
 
 ```typescript
-import { TDOALocator, Triangulator, TrackManager } from '@summit/geolocation-engine';
+import { TDOALocator, Triangulator, TrackManager } from '@intelgraph/geolocation-engine';
 
 // TDOA geolocation
 const locator = new TDOALocator();

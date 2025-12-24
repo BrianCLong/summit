@@ -17,7 +17,7 @@ The Liquid Nano pilot bundles a strict-mode TypeScript runtime, deployment artif
 1. Install dependencies and build the package:
    ```bash
    npm install
-   npm run --workspace @summit/liquid-nano build
+   npm run --workspace @intelgraph/liquid-nano build
    ```
 2. Execute the HTTP bridge demo:
    ```bash
@@ -25,8 +25,8 @@ The Liquid Nano pilot bundles a strict-mode TypeScript runtime, deployment artif
    ```
 3. Inspect coverage and linting:
    ```bash
-   npm run --workspace @summit/liquid-nano test:coverage
-   npm run --workspace @summit/liquid-nano lint
+   npm run --workspace @intelgraph/liquid-nano test:coverage
+   npm run --workspace @intelgraph/liquid-nano lint
    ```
 
 ## Pilot Goals

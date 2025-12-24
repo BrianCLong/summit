@@ -59,7 +59,7 @@ template: |
         - seeds: Deterministic seed datasets
 
     packages:
-      typescript: "@summit/test-data"
+      typescript: "@intelgraph/test-data"
       python: "summit-test-data"
       shared: "data/fixtures/*.json"
 
@@ -229,7 +229,7 @@ template: |
   usage:
     unit_test:
       typescript: |
-        import { entityFactory, investigationFactory } from '@summit/test-data';
+        import { entityFactory, investigationFactory } from '@intelgraph/test-data';
 
         describe('EntityService', () => {
           it('should create entity', async () => {

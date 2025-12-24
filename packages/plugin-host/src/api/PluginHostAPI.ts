@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { PluginHostService } from '../PluginHostService.js';
 import { Logger } from '../types.js';
-import { PluginManifestSchema } from '@summit/plugin-system';
+import { PluginManifestSchema } from '@intelgraph/plugin-system';
 
 /**
  * REST API for Plugin Host Service

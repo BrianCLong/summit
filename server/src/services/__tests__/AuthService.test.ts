@@ -348,15 +348,15 @@ describe('AuthService', () => {
       };
 
       (jwt.verify as any).mockReturnValue(mockPayload);
-      (mockPool.query as jest.Mock).mockResolvedValue({ rows: [] } as any);
-      mockClient.query.mockResolvedValue({ rows: [mockUser] } as any);
+      (mockPool.query as any).mockResolvedValue({ rows: [] });
+      mockClient.query.mockResolvedValue({ rows: [mockUser] });
 
       const result = await authService.verifyToken(mockToken);
 
       expect(result).not.toBeNull();
       expect(result?.id).toBe(mockUser.id);
       expect(result?.email).toBe(mockUser.email);
-      expect(jwt.verify).toHaveBeenCalledWith(mockToken, 'test-secret-key');
+      expect(jwt.verify).toHaveBeenCalledWith(mockToken, 'test-jwt-secret-for-testing-only');
     });
 
     it('should return null for invalid token', async () => {
@@ -609,8 +609,8 @@ describe('AuthService', () => {
       };
 
       (jwt.verify as any).mockReturnValue(mockPayload);
-      (mockPool.query as jest.Mock).mockResolvedValue({ rows: [] } as any);
-      mockClient.query.mockResolvedValue({ rows: [mockUser] } as any);
+      (mockPool.query as any).mockResolvedValue({ rows: [] });
+      mockClient.query.mockResolvedValue({ rows: [mockUser] });
 
       const result = await authService.verifyToken(mockToken);
 

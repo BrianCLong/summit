@@ -1,4 +1,4 @@
-import { defineTask } from '@summit/maestro-sdk';
+import { defineTask } from '@intelgraph/maestro-sdk';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 

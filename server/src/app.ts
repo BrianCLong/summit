@@ -83,6 +83,7 @@ import queryPreviewStreamRouter from './routes/query-preview-stream.js';
 import correctnessProgramRouter from './routes/correctness-program.js';
 import commandConsoleRouter from './routes/internal/command-console.js';
 import searchV1Router from './routes/search-v1.js';
+import searchIndexRouter from './routes/search-index.js'; // New search-index route
 import dataGovernanceRouter from './routes/data-governance-routes.js';
 import tenantBillingRouter from './routes/tenants/billing.js';
 import { gtmRouter } from './routes/gtm-messaging.js';
@@ -94,14 +95,20 @@ import funnelRouter from './routes/funnels.js';
 import anomaliesRouter from './routes/anomalies.js';
 import exportsRouter from './routes/exports.js';
 import retentionRouter from './routes/retention.js';
+import drRouter from './routes/dr.js';
+import reportingRouter from './routes/reporting.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
 
   // Initialize OpenTelemetry tracing
+  // Tracer is already initialized in index.ts, but we ensure it's available here
   const tracer = initializeTracing();
-  await tracer.initialize();
+  // Ensure initialized if this entry point is used standalone (e.g. tests)
+  if (!tracer.isInitialized()) {
+      await tracer.initialize();
+  }
 
   const app = express();
   const logger = (pino as any)();
@@ -346,6 +353,7 @@ export const createApp = async () => {
   app.use('/api', queryPreviewStreamRouter);
   app.use('/api/stream', streamRouter); // Register stream route
   app.use('/api/v1/search', searchV1Router); // Register Unified Search API
+  app.use('/search', searchIndexRouter); // Register Search Index API
   app.use('/api', dataGovernanceRouter); // Register Data Governance API
   app.use('/api/gtm', gtmRouter);
   app.use('/airgap', airgapRouter);
@@ -356,6 +364,8 @@ export const createApp = async () => {
   app.use('/api', anomaliesRouter);
   app.use('/api', exportsRouter);
   app.use('/api', retentionRouter);
+  app.use('/dr', drRouter);
+  app.use('/api/reporting', reportingRouter);
   app.get('/metrics', metricsRoute);
 
   // Initialize SummitInvestigate Platform Routes

@@ -118,9 +118,9 @@ pnpm run dev
 ### Basic Usage
 
 ```typescript
-import { APIGateway } from '@summit/api-gateway';
-import { JWTManager } from '@summit/authentication';
-import { RedisRateLimiter } from '@summit/rate-limiting';
+import { APIGateway } from '@intelgraph/api-gateway';
+import { JWTManager } from '@intelgraph/authentication';
+import { RedisRateLimiter } from '@intelgraph/rate-limiting';
 
 // Setup JWT authentication
 const jwtManager = new JWTManager({
@@ -165,11 +165,11 @@ const gateway = new APIGateway({
 
 ### Package Documentation
 
-- [@summit/api-gateway](packages/api-gateway/README.md)
-- [@summit/authentication](packages/authentication/README.md)
-- [@summit/rate-limiting](packages/rate-limiting/README.md)
-- [@summit/api-management](packages/api-management/README.md)
-- [@summit/api-analytics](packages/api-analytics/README.md)
+- [@intelgraph/api-gateway](packages/api-gateway/README.md)
+- [@intelgraph/authentication](packages/authentication/README.md)
+- [@intelgraph/rate-limiting](packages/rate-limiting/README.md)
+- [@intelgraph/api-management](packages/api-management/README.md)
+- [@intelgraph/api-analytics](packages/api-analytics/README.md)
 
 ## 🏗️ Architecture
 

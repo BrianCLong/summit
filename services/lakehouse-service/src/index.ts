@@ -8,9 +8,9 @@ import cors from 'cors';
 import helmet from 'helmet';
 import pino from 'pino';
 import pinoHttp from 'pino-http';
-import { LakehouseManager, TableFormat, TableConfig } from '@summit/lakehouse';
-import { UnifiedAnalyticsEngine } from '@summit/unified-analytics';
-import { GovernanceManager } from '@summit/cloud-governance';
+import { LakehouseManager, TableFormat, TableConfig } from '@intelgraph/lakehouse';
+import { UnifiedAnalyticsEngine } from '@intelgraph/unified-analytics';
+import { GovernanceManager } from '@intelgraph/cloud-governance';
 
 const logger = pino({ name: 'lakehouse-service' });
 const app = express();

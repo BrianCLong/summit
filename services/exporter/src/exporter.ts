@@ -4,8 +4,13 @@ import { createHash } from 'crypto';
 import { applyRedactions, RedactRule } from './redact';
 import { createPdf } from './pdf';
 import { sha256, sortObject } from './utils';
+import { emitCostEvent } from '../../finops/cost-events';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface ExportRequest {
+  tenantId?: string;
+  scopeId?: string;
+  correlationId?: string;
   entities: Record<string, unknown>[];
   edges: Record<string, unknown>[];
   redactRules: RedactRule[];
@@ -71,6 +76,8 @@ const toCsv = (data: Record<string, unknown>[]): string => {
 };
 
 export const createExport = async (req: ExportRequest): Promise<Buffer> => {
+  const startTime = Date.now();
+  const correlationId = req.correlationId || uuidv4();
   const files: { path: string; content: Buffer }[] = [];
   const redactionLog: string[] = [];
 
@@ -121,9 +128,29 @@ export const createExport = async (req: ExportRequest): Promise<Buffer> => {
   for (const f of files.sort((a, b) => a.path.localeCompare(b.path))) {
     zip.file(f.path, f.content, { date: fixedDate });
   }
-  return await zip.generateAsync({
+  const outputBuffer = await zip.generateAsync({
     type: 'nodebuffer',
     compression: 'DEFLATE',
     compressionOptions: { level: 9 },
   });
+
+  try {
+    const totalBytes = files.reduce((sum, f) => sum + f.content.length, 0);
+    emitCostEvent({
+      operationType: 'export',
+      tenantId: req.tenantId || 'unknown',
+      scopeId: req.scopeId || 'default',
+      correlationId,
+      dimensions: {
+        io_bytes: totalBytes,
+        objects_written: files.length,
+        cpu_ms: Date.now() - startTime,
+      },
+    });
+  } catch (error) {
+    // Non-critical, log and continue
+    console.error('Failed to emit cost event for export', { correlationId, error });
+  }
+
+  return outputBuffer;
 };

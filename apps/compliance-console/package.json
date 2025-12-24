@@ -1,5 +1,5 @@
 {
-  "name": "@companyos/compliance-console",
+  "name": "@intelgraph/compliance-console",
   "private": true,
   "version": "0.1.0",
   "type": "module",

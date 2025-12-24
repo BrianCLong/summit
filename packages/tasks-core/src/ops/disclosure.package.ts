@@ -1,4 +1,4 @@
-import { defineTask } from '@summit/maestro-sdk';
+import { defineTask } from '@intelgraph/maestro-sdk';
 import fs from 'node:fs';
 import path from 'node:path';
 import archiver from 'archiver';

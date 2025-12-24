@@ -1,4 +1,4 @@
-# @summit/djce-pb
+# @intelgraph/djce-pb
 
 TypeScript bindings for the [`djce-pb`](../../djce-pb) Rust library. The bindings
 are generated with [`napi-rs`](https://napi.rs/) and expose the `assessJoin`
@@ -7,7 +7,7 @@ API for pre-join risk evaluation and guardrail recommendations.
 ## Usage
 
 ```ts
-import { assessJoin } from '@summit/djce-pb';
+import { assessJoin } from '@intelgraph/djce-pb';
 
 const left = {
   name: 'marketing',

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { PluginRegistryService } from '../PluginRegistryService.js';
-import { PluginManifestSchema } from '@summit/plugin-system';
+import { PluginManifestSchema } from '@intelgraph/plugin-system';
 
 export function createPluginRoutes(registryService: PluginRegistryService): Router {
   const router = Router();

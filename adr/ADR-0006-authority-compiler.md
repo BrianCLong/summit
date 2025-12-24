@@ -89,7 +89,7 @@ authority:
 
 ```typescript
 // Middleware integration
-import { createAuthorityMiddleware, PolicyEvaluator } from '@summit/authority-compiler';
+import { createAuthorityMiddleware, PolicyEvaluator } from '@intelgraph/authority-compiler';
 
 app.use(createAuthorityMiddleware({
   evaluator: new PolicyEvaluator(compiledPolicy),

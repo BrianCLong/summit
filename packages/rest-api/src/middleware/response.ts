@@ -5,6 +5,7 @@
  */
 
 import type { Request, Response, APIResponse, HATEOASLinks, Link } from '../types';
+import { NextFunction } from 'express';
 
 /**
  * Helper to send a standardized success response

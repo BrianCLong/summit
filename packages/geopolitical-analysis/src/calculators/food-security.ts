@@ -1,6 +1,6 @@
 /**
  * Food Security Risk Calculator
- * @module @summit/geopolitical-analysis/calculators/food-security
+ * @module @intelgraph/geopolitical-analysis/calculators/food-security
  */
 
 import { FoodSecurityIndicator } from '../types/index.js';

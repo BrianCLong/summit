@@ -26,7 +26,7 @@ describe('StrategicForesightClient', () => {
           service: 'strategic-foresight',
           timestamp: '2024-01-01T00:00:00Z',
         }),
-      });
+      } as Response);
 
       const result = await client.health();
 
@@ -67,7 +67,7 @@ describe('StrategicForesightClient', () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(mockResponse),
-      });
+      } as Response);
 
       const result = await client.analyze({
         domain: 'technology',
@@ -86,7 +86,7 @@ describe('StrategicForesightClient', () => {
         ok: false,
         status: 500,
         statusText: 'Internal Server Error',
-      });
+      } as Response);
 
       await expect(client.analyze({ domain: 'test' })).rejects.toThrow(
         'Strategic Foresight API error: 500 Internal Server Error'
@@ -113,7 +113,7 @@ describe('StrategicForesightClient', () => {
             evidence_sources: [],
           },
         ]),
-      });
+      } as Response);
 
       const result = await client.getMarketTrends({
         domain: 'finance',
@@ -144,7 +144,7 @@ describe('StrategicForesightClient', () => {
             affected_capabilities: [],
           },
         ]),
-      });
+      } as Response);
 
       const result = await client.getCompetitiveThreats(
         ['CompetitorA'],
@@ -174,7 +174,7 @@ describe('StrategicForesightClient', () => {
             time_sensitivity: 'High',
           },
         ]),
-      });
+      } as Response);
 
       const result = await client.getPartnershipOpportunities('technology', [
         'AI',
@@ -202,7 +202,7 @@ describe('StrategicForesightClient', () => {
             success_factors: ['Partnerships'],
           },
         ]),
-      });
+      } as Response);
 
       const result = await client.getPivotOpportunities({
         currentPosition: 'Enterprise',

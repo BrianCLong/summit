@@ -59,7 +59,7 @@ const writePool = new Pool({
       : false,
   max: writePoolSize,
   idleTimeoutMillis: idleTimeoutMs,
-  connectionTimeoutMillis,
+  connectionTimeoutMillis: connectionTimeoutMs,
   maxUses,
   keepAlive: true,
   ...(statementTimeoutMs > 0
@@ -76,7 +76,7 @@ const readPool = new Pool({
       : false,
   max: readPoolSize, // More read connections
   idleTimeoutMillis: idleTimeoutMs,
-  connectionTimeoutMillis,
+  connectionTimeoutMillis: connectionTimeoutMs,
   maxUses,
   keepAlive: true,
   ...(statementTimeoutMs > 0

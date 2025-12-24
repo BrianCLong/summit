@@ -2,9 +2,9 @@
  * Model Training Pipeline
  */
 
-import { AutomatedFeatureGenerator, StandardScaler } from '@summit/feature-engineering';
-import { GridSearchCV } from '@summit/predictive-models';
-import type { Dataset } from '@summit/predictive-models';
+import { AutomatedFeatureGenerator, StandardScaler } from '@intelgraph/feature-engineering';
+import { GridSearchCV } from '@intelgraph/predictive-models';
+import type { Dataset } from '@intelgraph/predictive-models';
 
 export interface TrainingConfig {
   modelType: 'classification' | 'regression' | 'forecast';

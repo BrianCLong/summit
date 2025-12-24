@@ -1,11 +1,11 @@
-# @summit/authentication
+# @intelgraph/authentication
 
 Enterprise authentication and authorization package supporting OAuth 2.0, JWT, API keys, and mTLS.
 
 ## Installation
 
 ```bash
-pnpm add @summit/authentication
+pnpm add @intelgraph/authentication
 ```
 
 ## Usage
@@ -13,7 +13,7 @@ pnpm add @summit/authentication
 ### JWT Authentication
 
 ```typescript
-import { JWTManager } from '@summit/authentication';
+import { JWTManager } from '@intelgraph/authentication';
 
 const jwtManager = new JWTManager({
   secret: process.env.JWT_SECRET,
@@ -31,7 +31,7 @@ const { accessToken, refreshToken } = jwtManager.generateTokenPair({
 ### OAuth 2.0
 
 ```typescript
-import { OAuthProvider } from '@summit/authentication';
+import { OAuthProvider } from '@intelgraph/authentication';
 
 const oauth = new OAuthProvider({
   clientId: 'your-client-id',
@@ -44,7 +44,7 @@ const oauth = new OAuthProvider({
 ### API Keys
 
 ```typescript
-import { APIKeyManager } from '@summit/authentication';
+import { APIKeyManager } from '@intelgraph/authentication';
 
 const apiKeyManager = new APIKeyManager();
 

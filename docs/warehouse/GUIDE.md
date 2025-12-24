@@ -19,13 +19,13 @@ Summit Data Warehouse is an enterprise-grade data warehouse platform that surpas
 ### Installation
 
 ```bash
-npm install @summit/data-warehouse @summit/dimensional-modeling @summit/olap-engine
+npm install @intelgraph/data-warehouse @intelgraph/dimensional-modeling @intelgraph/olap-engine
 ```
 
 ### Basic Usage
 
 ```typescript
-import { WarehouseManager } from '@summit/data-warehouse';
+import { WarehouseManager } from '@intelgraph/data-warehouse';
 import { Pool } from 'pg';
 
 const pool = new Pool({
@@ -83,7 +83,7 @@ Summit uses a proprietary columnar storage engine that:
 **Example: Custom Compression**
 
 ```typescript
-import { ColumnarStorageEngine } from '@summit/data-warehouse';
+import { ColumnarStorageEngine } from '@intelgraph/data-warehouse';
 
 const storage = new ColumnarStorageEngine(pool);
 
@@ -123,7 +123,7 @@ Full support for dimensional modeling with SCD types 1-6:
 **Star Schema Example**
 
 ```typescript
-import { ModelingManager } from '@summit/dimensional-modeling';
+import { ModelingManager } from '@intelgraph/dimensional-modeling';
 
 const modeling = new ModelingManager(pool);
 
@@ -179,7 +179,7 @@ const historicalData = await modeling.scdHandler.queryAsOfDate(
 Create and query multidimensional cubes:
 
 ```typescript
-import { CubeManager } from '@summit/olap-engine';
+import { CubeManager } from '@intelgraph/olap-engine';
 
 const olap = new CubeManager(pool);
 
@@ -218,7 +218,7 @@ const dice = await olap.dice('sales_cube', {
 Efficient data loading with bulk and incremental strategies:
 
 ```typescript
-import { PipelineManager } from '@summit/etl-pipelines';
+import { PipelineManager } from '@intelgraph/etl-pipelines';
 
 const pipeline = new PipelineManager(pool);
 
@@ -254,7 +254,7 @@ console.log(`Inserted: ${incrementalResult.inserted}, Updated: ${incrementalResu
 Advanced cost-based query optimization:
 
 ```typescript
-import { OptimizerManager } from '@summit/query-optimizer';
+import { OptimizerManager } from '@intelgraph/query-optimizer';
 
 const optimizer = new OptimizerManager(pool);
 
@@ -340,7 +340,7 @@ console.log(`Compression ratio: ${cacheStats.compressionRatio}x`);
 Control query prioritization and concurrency:
 
 ```typescript
-import { QueryPriority } from '@summit/data-warehouse';
+import { QueryPriority } from '@intelgraph/data-warehouse';
 
 // Execute high-priority query
 const results = await warehouse.query(sql, QueryPriority.HIGH);
@@ -407,7 +407,7 @@ const historicalData = await modeling.scdHandler.queryAsOfDate(
 Automatic compute scaling based on workload:
 
 ```typescript
-import { ComputeScaler } from '@summit/data-warehouse';
+import { ComputeScaler } from '@intelgraph/data-warehouse';
 
 const scaler = new ComputeScaler();
 
@@ -427,11 +427,11 @@ console.log(`Scaled to ${newNodeCount} nodes`);
 
 See individual package documentation:
 
-- [@summit/data-warehouse](../packages/data-warehouse/README.md)
-- [@summit/dimensional-modeling](../packages/dimensional-modeling/README.md)
-- [@summit/olap-engine](../packages/olap-engine/README.md)
-- [@summit/etl-pipelines](../packages/etl-pipelines/README.md)
-- [@summit/query-optimizer](../packages/query-optimizer/README.md)
+- [@intelgraph/data-warehouse](../packages/data-warehouse/README.md)
+- [@intelgraph/dimensional-modeling](../packages/dimensional-modeling/README.md)
+- [@intelgraph/olap-engine](../packages/olap-engine/README.md)
+- [@intelgraph/etl-pipelines](../packages/etl-pipelines/README.md)
+- [@intelgraph/query-optimizer](../packages/query-optimizer/README.md)
 
 ## Support
 

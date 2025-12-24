@@ -1,27 +1,27 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import { ProvenanceLedgerV2, provenanceLedger } from '../ledger';
 import { witnessRegistry, CryptoWitness } from '../witness';
 import { pool } from '../../db/pg';
 
 // Mock DB connection
-vi.mock('../../db/pg', () => ({
+jest.mock('../../db/pg', () => ({
   pool: {
-    connect: vi.fn(),
-    query: vi.fn(),
+    connect: jest.fn(),
+    query: jest.fn(),
   },
 }));
 
 // Mock telemetry to avoid import side effects that crash tests
-vi.mock('../../lib/telemetry/comprehensive-telemetry.ts', () => ({
+jest.mock('../../lib/telemetry/comprehensive-telemetry.ts', () => ({
   telemetry: {
-    recordLatency: vi.fn(),
-    incrementCounter: vi.fn(),
+    recordLatency: jest.fn(),
+    incrementCounter: jest.fn(),
     // add other methods if needed
   },
   default: {
     getInstance: () => ({
-       recordLatency: vi.fn(),
-       incrementCounter: vi.fn(),
+       recordLatency: jest.fn(),
+       incrementCounter: jest.fn(),
     })
   }
 }));
@@ -30,22 +30,22 @@ vi.mock('../../lib/telemetry/comprehensive-telemetry.ts', () => ({
 // However, ledger.ts imports 'prom-client' and other things.
 // If ledger.ts imports `../db/neo4j` via some chain, we might need to mock that too.
 // The error trace showed `server/src/db/neo4j.ts` importing telemetry.
-vi.mock('../../db/neo4j', () => ({
+jest.mock('../../db/neo4j', () => ({
   neo4jDriver: {
-    session: vi.fn(),
-    close: vi.fn(),
+    session: jest.fn(),
+    close: jest.fn(),
   }
 }));
 
 // Create a mock pool client
 const mockClient = {
-  query: vi.fn(),
-  release: vi.fn(),
+  query: jest.fn(),
+  release: jest.fn(),
 };
 
 describe('ProvenanceLedgerV2 Integrity & Witnesses', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     (pool.connect as any).mockResolvedValue(mockClient);
 
     // Mock successful query response for appending
@@ -87,7 +87,7 @@ describe('ProvenanceLedgerV2 Integrity & Witnesses', () => {
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('should detect broken hash chains', async () => {
@@ -140,7 +140,7 @@ describe('ProvenanceLedgerV2 Integrity & Witnesses', () => {
     witnessRegistry.register(witness);
 
     // Spy on sign
-    const signSpy = vi.spyOn(witness, 'sign');
+    const signSpy = jest.spyOn(witness, 'sign');
 
     // Act
     const entry = await provenanceLedger.appendEntry({

@@ -3,7 +3,7 @@
  * TRAINING/SIMULATION ONLY
  */
 
-import { ModulationType } from '@summit/sigint-collector';
+import { ModulationType } from '@intelgraph/sigint-collector';
 
 export interface ClassificationResult {
   modulation: ModulationType;

@@ -1,17 +1,17 @@
-# @summit/dlc-client
+# @intelgraph/dlc-client
 
 TypeScript client for the Data Lease Controller service. The client wraps the REST endpoints exposed by the Rust DLC server and provides helpers for issuing and managing leases from JavaScript/TypeScript applications.
 
 ## Installation
 
 ```bash
-npm install @summit/dlc-client
+npm install @intelgraph/dlc-client
 ```
 
 ## Usage
 
 ```ts
-import { DlcClient, RowScope } from "@summit/dlc-client";
+import { DlcClient, RowScope } from "@intelgraph/dlc-client";
 
 const client = new DlcClient("http://localhost:8080");
 const lease = await client.createLease({

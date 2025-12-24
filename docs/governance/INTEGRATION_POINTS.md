@@ -19,7 +19,7 @@ This document identifies the specific files and code locations where governance 
 **Integration Points:**
 ```typescript
 // Add authority compiler evaluation
-import { PolicyEvaluator } from '@summit/authority-compiler';
+import { PolicyEvaluator } from '@intelgraph/authority-compiler';
 
 // Before resolver execution:
 const decision = await evaluator.evaluate({
@@ -84,7 +84,7 @@ if (decision.redactedFields?.includes(fieldName)) {
 **Integration Points:**
 ```typescript
 // Link audit logs to provenance ledger
-import { recordStep } from '@summit/prov-ledger';
+import { recordStep } from '@intelgraph/prov-ledger';
 
 // After operation completion:
 await recordStep({

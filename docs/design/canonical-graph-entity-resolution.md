@@ -777,7 +777,7 @@ export class PersonERFeatures {
 ```typescript
 // services/er/src/workflows/person-er-workflow.ts
 
-import { PersonEntity, ERMatchScore, ERDecision, ERThresholds } from '@summit/canonical-schema';
+import { PersonEntity, ERMatchScore, ERDecision, ERThresholds } from '@intelgraph/canonical-schema';
 import { PersonERFeatures } from '../features/person-features';
 import { ERScoringService } from '../services/er-scoring-service';
 import { ERDecisionService } from '../services/er-decision-service';

@@ -631,7 +631,7 @@ const briefing = decisionSupport.generateBriefing({
 Backend service integrating all components:
 
 ```javascript
-import OperationsC2Service from '@summit/operations-c2-service';
+import OperationsC2Service from '@intelgraph/operations-c2-service';
 
 // Service automatically initializes all subsystems
 
@@ -662,7 +662,7 @@ const products = service.generateDecisionProducts('op-001');
 Real-time execution monitoring:
 
 ```javascript
-import MissionCoordinationService from '@summit/mission-coordination-service';
+import MissionCoordinationService from '@intelgraph/mission-coordination-service';
 
 // Start mission execution
 const monitor = service.startMission('mission-001');

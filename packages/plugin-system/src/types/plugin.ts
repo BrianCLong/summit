@@ -122,7 +122,7 @@ export interface PluginContext {
   logger: PluginLogger;
   storage: PluginStorage;
   api: PluginAPI;
-  events: PluginEventBus;
+  events: IPluginEventBus;
 }
 
 /**
@@ -165,11 +165,11 @@ export interface RequestOptions {
 /**
  * Plugin event bus interface
  */
-export interface PluginEventBus {
-  on(event: string, handler: (...args: any[]) => void | Promise<void>): void;
-  off(event: string, handler: (...args: any[]) => void | Promise<void>): void;
-  emit(event: string, ...args: any[]): Promise<void>;
-  once(event: string, handler: (...args: any[]) => void | Promise<void>): void;
+export interface IPluginEventBus {
+  on(event: string, handler: (...args: any[]) => void | Promise<void>): any;
+  off(event: string, handler: (...args: any[]) => void | Promise<void>): any;
+  emit(event: string, ...args: any[]): any;
+  once(event: string, handler: (...args: any[]) => void | Promise<void>): any;
 }
 
 /**

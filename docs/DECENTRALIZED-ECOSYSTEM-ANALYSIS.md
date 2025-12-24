@@ -238,7 +238,7 @@ export class FIPSComplianceService implements FIPSCrypto {
 **Algorithm Registry & Migration:**
 - Cryptographic algorithm inventory
 - Agility support for algorithm migration
-- `@summit/cryptographic-agility` package
+- `@intelgraph/cryptographic-agility` package
 
 #### Post-Quantum Crypto Package
 

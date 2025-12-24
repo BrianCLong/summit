@@ -19,7 +19,7 @@ The Liquid Nano pilot enforces strict automated quality gates to guarantee >80% 
 Run the suites with:
 
 ```bash
-npm run --workspace @summit/liquid-nano test:coverage
+npm run --workspace @intelgraph/liquid-nano test:coverage
 ```
 
 CI executes `npm run lint`, `npm run typecheck`, and `npm run test:coverage` to prevent regressions.

@@ -1,4 +1,4 @@
-# @summit/canonical-schema
+# @intelgraph/canonical-schema
 
 Canonical graph schema and entity resolution types for Summit/IntelGraph platform.
 
@@ -36,13 +36,13 @@ import {
   ERMatchScore,
   ERDecision,
   ResolutionCluster,
-} from '@summit/canonical-schema';
+} from '@intelgraph/canonical-schema';
 ```
 
 ### Create a Person Entity
 
 ```typescript
-import { PersonEntity, CanonicalEntityType, SensitivityLevel, ClearanceLevel, RetentionClass, VerificationStatus } from '@summit/canonical-schema';
+import { PersonEntity, CanonicalEntityType, SensitivityLevel, ClearanceLevel, RetentionClass, VerificationStatus } from '@intelgraph/canonical-schema';
 
 const person: PersonEntity = {
   id: 'person-001',
@@ -103,7 +103,7 @@ const person: PersonEntity = {
 ### Entity Resolution Workflow
 
 ```typescript
-import { ERScoringService, ERDecisionService } from '@summit/canonical-schema';
+import { ERScoringService, ERDecisionService } from '@intelgraph/canonical-schema';
 
 const scoringService = new ERScoringService();
 const decisionService = new ERDecisionService();

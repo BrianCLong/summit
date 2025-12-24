@@ -3,9 +3,9 @@
  */
 
 import type { PredictionRequest, PredictionResponse, ModelMetadata } from '../types/index.js';
-import { ARIMAForecaster } from '@summit/forecasting';
-import { RandomForestClassifier } from '@summit/predictive-models';
-import { LogisticRiskScorer } from '@summit/risk-scoring';
+import { ARIMAForecaster } from '@intelgraph/forecasting';
+import { RandomForestClassifier } from '@intelgraph/predictive-models';
+import { LogisticRiskScorer } from '@intelgraph/risk-scoring';
 
 export class PredictionEngine {
   private modelRegistry: Map<string, any> = new Map();

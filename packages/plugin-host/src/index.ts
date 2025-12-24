@@ -6,7 +6,7 @@ export { createLogger, type Logger } from './types.js';
  * Example usage:
  *
  * ```typescript
- * import { PluginHostService, PluginHostAPI, createLogger } from '@summit/plugin-host';
+ * import { PluginHostService, PluginHostAPI, createLogger } from '@intelgraph/plugin-host';
  *
  * const config = {
  *   platformVersion: '1.0.0',

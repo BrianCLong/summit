@@ -4,7 +4,7 @@ import {
   VisualizationOutput,
   VisualizationMetadata,
   PluginContext,
-} from '@summit/plugin-system';
+} from '@intelgraph/plugin-system';
 
 /**
  * Network Graph Visualization Plugin

@@ -1,4 +1,4 @@
-# @summit/plugin-host
+# @intelgraph/plugin-host
 
 Plugin Host Service for managing plugin runtime and execution in the Summit/IntelGraph platform.
 
@@ -16,13 +16,13 @@ The Plugin Host Service provides a complete runtime environment for managing thi
 ## Installation
 
 ```bash
-pnpm add @summit/plugin-host
+pnpm add @intelgraph/plugin-host
 ```
 
 ## Quick Start
 
 ```typescript
-import { PluginHostService, PluginHostAPI, createLogger } from '@summit/plugin-host';
+import { PluginHostService, PluginHostAPI, createLogger } from '@intelgraph/plugin-host';
 
 // Configuration
 const config = {

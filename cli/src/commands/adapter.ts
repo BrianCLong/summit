@@ -7,7 +7,7 @@ import {
   verifyAdapterBundle,
   type AdapterCompatibilityMatrix,
   type AdapterManifest,
-} from '@summit/adapter-sdk';
+} from '@intelgraph/adapter-sdk';
 import { handleError } from '../utils/errors.js';
 import { error, success } from '../utils/output.js';
 

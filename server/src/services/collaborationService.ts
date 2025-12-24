@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import { PubSub } from 'graphql-subscriptions';
-import { cacheService } from './cacheService.js';
+import { cacheService } from './CacheService.js';
 
 export interface User {
   id: string;

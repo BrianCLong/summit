@@ -170,12 +170,12 @@ backend "s3" {
 
 ## Cloud Abstraction Layer
 
-The `@summit/cloud-abstraction` package provides unified APIs for:
+The `@intelgraph/cloud-abstraction` package provides unified APIs for:
 
 ### Object Storage
 
 ```typescript
-import { CloudFactory, CloudProvider } from '@summit/cloud-abstraction';
+import { CloudFactory, CloudProvider } from '@intelgraph/cloud-abstraction';
 
 // Create storage provider
 const storage = CloudFactory.createStorage({

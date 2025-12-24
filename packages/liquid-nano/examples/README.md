@@ -8,7 +8,7 @@ The `examples/` directory provides runnable demonstrations that showcase how to 
 - **What it does:** Launches the runtime, registers persistence callbacks, and exposes an HTTP endpoint for sensor ingestion.
 - **Run it:**
   ```bash
-  npm run --workspace @summit/liquid-nano build
+  npm run --workspace @intelgraph/liquid-nano build
   node packages/liquid-nano/examples/edge/http-bridge-demo.mjs
   ```
 - **Test it:**

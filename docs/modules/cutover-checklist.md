@@ -31,7 +31,7 @@ assignees: []
 
 - [ ] Verify dual-tag images (intelgraph-_ and summit-_) share digest for target tag
 - [ ] Helm install via `helm/summit` and alias `intelgraph` succeeds
-- [ ] SDK install: `@summit/sdk` and meta `@intelgraph/sdk` resolves (warn only)
+- [ ] SDK install: `@intelgraph/sdk` and meta `@intelgraph/sdk` resolves (warn only)
 
 ## Identity & SSO
 

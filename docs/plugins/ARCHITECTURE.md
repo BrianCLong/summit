@@ -64,7 +64,7 @@ The Summit Plugin System is a comprehensive extensibility framework built on the
 
 ## Core Components
 
-### 1. Plugin System Core (`@summit/plugin-system`)
+### 1. Plugin System Core (`@intelgraph/plugin-system`)
 
 The foundation of the plugin architecture.
 
@@ -84,7 +84,7 @@ The foundation of the plugin architecture.
 - Resource isolation and monitoring
 - Event bus and inter-plugin communication
 
-### 2. Plugin SDK (`@summit/plugin-sdk`)
+### 2. Plugin SDK (`@intelgraph/plugin-sdk`)
 
 Developer-friendly SDK for building plugins.
 
@@ -104,7 +104,7 @@ createPlugin()
   .build();
 ```
 
-### 3. Extension API (`@summit/extension-api`)
+### 3. Extension API (`@intelgraph/extension-api`)
 
 Defines extension points and interfaces.
 

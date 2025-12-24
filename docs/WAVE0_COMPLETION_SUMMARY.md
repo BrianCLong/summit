@@ -17,7 +17,7 @@ Wave 0 establishes the foundational governance infrastructure for Summit's strat
 
 ### 2. New Packages
 
-#### @summit/authority-compiler
+#### @intelgraph/authority-compiler
 Policy compilation and evaluation engine supporting RBAC, ABAC, and license enforcement.
 
 **Key Components:**
@@ -28,7 +28,7 @@ Policy compilation and evaluation engine supporting RBAC, ABAC, and license enfo
 - `opa-client.ts` - OPA integration for distributed evaluation
 - `service-connectors.ts` - Integration with GraphQL, REST, Copilot, RAG
 
-#### @summit/canonical-entities
+#### @intelgraph/canonical-entities
 Canonical entity type definitions with bitemporal support.
 
 **Key Components:**
@@ -37,7 +37,7 @@ Canonical entity type definitions with bitemporal support.
 - Bitemporal fields: validFrom, validTo, observedAt, recordedAt
 - Classification levels: UNCLASSIFIED, CONFIDENTIAL, SECRET, TOP_SECRET
 
-#### @summit/connector-sdk
+#### @intelgraph/connector-sdk
 SDK for building external data source connectors.
 
 **Key Components:**
@@ -46,7 +46,7 @@ SDK for building external data source connectors.
 - `testing.ts` - MockConnectorTestHarness for testing
 - Rate limiting, retry logic, health checks built-in
 
-#### @summit/prov-ledger-extensions
+#### @intelgraph/prov-ledger-extensions
 Extensions for provenance tracking and AI attribution.
 
 **Key Components:**
@@ -55,7 +55,7 @@ Extensions for provenance tracking and AI attribution.
 - `citation-tracker.ts` - Manage copilot citations
 - `export-manifest.ts` - Create verifiable export manifests
 
-#### @summit/governance-hooks
+#### @intelgraph/governance-hooks
 Pre-built hooks for service integration.
 
 **Key Components:**
@@ -99,7 +99,7 @@ Pre-built hooks for service integration.
 
 ### GraphQL API
 ```typescript
-import { createGraphQLGovernanceMiddleware } from '@summit/governance-hooks';
+import { createGraphQLGovernanceMiddleware } from '@intelgraph/governance-hooks';
 
 const middleware = createGraphQLGovernanceMiddleware(config, {
   authorityEvaluator,
@@ -110,7 +110,7 @@ const middleware = createGraphQLGovernanceMiddleware(config, {
 
 ### Copilot Service
 ```typescript
-import { createCopilotGovernanceMiddleware } from '@summit/governance-hooks';
+import { createCopilotGovernanceMiddleware } from '@intelgraph/governance-hooks';
 
 const middleware = createCopilotGovernanceMiddleware(config, {
   costTracker,
@@ -121,7 +121,7 @@ const middleware = createCopilotGovernanceMiddleware(config, {
 
 ### Connectors
 ```typescript
-import { createConnectorGovernanceMiddleware } from '@summit/governance-hooks';
+import { createConnectorGovernanceMiddleware } from '@intelgraph/governance-hooks';
 
 const middleware = createConnectorGovernanceMiddleware(config, {
   authManager,

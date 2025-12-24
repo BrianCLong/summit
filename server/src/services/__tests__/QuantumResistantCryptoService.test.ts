@@ -1,14 +1,14 @@
+// @ts-nocheck
 /**
  * Quantum-Resistant Crypto Service Tests
  */
 
-import {
-  QuantumResistantCryptoService,
-  PQCKeyStore,
-} from '../QuantumResistantCryptoService';
+import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 
-// Mock the post-quantum-crypto package
-jest.mock('@summit/post-quantum-crypto', () => {
+// Mock the post-quantum-crypto package with virtual: true since package may not be built
+jest.mock(
+  '@intelgraph/post-quantum-crypto',
+  () => {
   const mockKeyPair = {
     publicKey: new Uint8Array(32).fill(1),
     privateKey: new Uint8Array(64).fill(2),
@@ -117,7 +117,14 @@ jest.mock('@summit/post-quantum-crypto', () => {
     PQCValidator: jest.fn(),
     PQCBenchmarker: jest.fn(),
   };
-});
+  },
+  { virtual: true },
+);
+
+import {
+  QuantumResistantCryptoService,
+  PQCKeyStore,
+} from '../QuantumResistantCryptoService';
 
 describe('QuantumResistantCryptoService', () => {
   let service: QuantumResistantCryptoService;

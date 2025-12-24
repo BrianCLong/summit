@@ -1,4 +1,4 @@
-# @summit/platform-benchmarks
+# @intelgraph/platform-benchmarks
 
 Cross-language benchmark harness for the Summit/IntelGraph platform.
 
@@ -15,7 +15,7 @@ Cross-language benchmark harness for the Summit/IntelGraph platform.
 ## Installation
 
 ```bash
-pnpm add @summit/platform-benchmarks
+pnpm add @intelgraph/platform-benchmarks
 ```
 
 ## Quick Start
@@ -25,7 +25,7 @@ pnpm add @summit/platform-benchmarks
 Create a `benchmarks/api.bench.ts` file:
 
 ```typescript
-import type { BenchmarkSuite } from '@summit/platform-benchmarks';
+import type { BenchmarkSuite } from '@intelgraph/platform-benchmarks';
 
 export default function registerBenchmarks(suite: BenchmarkSuite) {
   suite.add({
@@ -79,7 +79,7 @@ pnpm benchmark --format markdown --output BENCHMARK.md
 Low-level harness for running individual benchmarks:
 
 ```typescript
-import { BenchmarkHarness } from '@summit/platform-benchmarks';
+import { BenchmarkHarness } from '@intelgraph/platform-benchmarks';
 
 const harness = new BenchmarkHarness({
   name: 'my-benchmark',
@@ -105,8 +105,8 @@ console.log(result.stats.mean); // Mean time in nanoseconds
 High-level suite for organizing multiple benchmarks:
 
 ```typescript
-import { createBenchmarkSuite } from '@summit/platform-benchmarks';
-import { JsonReporter } from '@summit/platform-benchmarks/reporters';
+import { createBenchmarkSuite } from '@intelgraph/platform-benchmarks';
+import { JsonReporter } from '@intelgraph/platform-benchmarks/reporters';
 
 const suite = createBenchmarkSuite({
   name: 'API Benchmarks',
@@ -136,7 +136,7 @@ const results = await suite.run();
 Compare results against a baseline:
 
 ```typescript
-import { BaselineComparator } from '@summit/platform-benchmarks';
+import { BaselineComparator } from '@intelgraph/platform-benchmarks';
 
 const comparator = new BaselineComparator(10); // 10% threshold
 await comparator.loadBaseline('baseline.json');

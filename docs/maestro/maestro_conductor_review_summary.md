@@ -3318,7 +3318,7 @@ This issue was auto-created by the Cutover Smoke workflow to guide run-of-show.
 ## Aliases & Installs
 - [ ] Verify dual-tag images share digest for target tag
 - [ ] Helm install via summit and intelgraph alias
-- [ ] SDK install `@summit/sdk` and meta `@intelgraph/sdk`
+- [ ] SDK install `@intelgraph/sdk` and meta `@intelgraph/sdk`
 
 ## Identity & SSO
 - [ ] Display/logo updated; EntityID/client_id unchanged

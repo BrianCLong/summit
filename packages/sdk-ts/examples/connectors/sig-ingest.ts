@@ -1,4 +1,4 @@
-import { defineConnector, type RunContext } from ' @summit/maestro-sdk';
+import { defineConnector, type RunContext } from ' @intelgraph/maestro-sdk';
 
 type Item = { id: string; payload: unknown };
 

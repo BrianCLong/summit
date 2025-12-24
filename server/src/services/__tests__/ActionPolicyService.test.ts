@@ -2,7 +2,7 @@ import {
   ActionPolicyError,
   ActionPolicyService,
 } from '../ActionPolicyService.js';
-import type { PreflightRequest } from '@summit/policy-types';
+import type { PreflightRequest } from '@intelgraph/policy-types';
 
 const baseRequest: PreflightRequest = {
   action: 'DELETE_ACCOUNT',

@@ -386,6 +386,7 @@ const intelgraphHttpRequestDuration = httpRequestDuration;
 const intelgraphGraphragQueryTotal = new client.Counter({
   name: 'graphrag_queries_total',
   help: 'Total number of GraphRAG queries',
+  labelNames: ['status', 'hasPreview', 'redactionEnabled', 'provenanceEnabled'],
 });
 const intelgraphGraphragQueryDurationMs = new client.Histogram({
   name: 'graphrag_query_duration_ms',

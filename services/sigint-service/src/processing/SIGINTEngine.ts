@@ -5,20 +5,20 @@
 
 import { EventEmitter } from 'events';
 import { v4 as uuid } from 'uuid';
-import { CollectionManager } from '@summit/sigint-collector';
-import { SignalGenerator } from '@summit/sigint-collector';
-import { SpectrumMonitor } from '@summit/sigint-collector';
-import { ModulationClassifier } from '@summit/rf-processor';
-import { SpectralAnalyzer } from '@summit/rf-processor';
-import { VoiceAnalyzer } from '@summit/comint-analyzer';
-import { MessageAnalyzer } from '@summit/comint-analyzer';
-import { CommunicationsMapper } from '@summit/comint-analyzer';
-import { PacketAnalyzer } from '@summit/network-interceptor';
-import { FlowAnalyzer } from '@summit/network-interceptor';
-import { CryptoAnalyzer } from '@summit/cryptanalysis-engine';
-import { TrafficPatternAnalyzer } from '@summit/cryptanalysis-engine';
-import { TDOALocator } from '@summit/geolocation-engine';
-import { TrackManager } from '@summit/geolocation-engine';
+import { CollectionManager } from '@intelgraph/sigint-collector';
+import { SignalGenerator } from '@intelgraph/sigint-collector';
+import { SpectrumMonitor } from '@intelgraph/sigint-collector';
+import { ModulationClassifier } from '@intelgraph/rf-processor';
+import { SpectralAnalyzer } from '@intelgraph/rf-processor';
+import { VoiceAnalyzer } from '@intelgraph/comint-analyzer';
+import { MessageAnalyzer } from '@intelgraph/comint-analyzer';
+import { CommunicationsMapper } from '@intelgraph/comint-analyzer';
+import { PacketAnalyzer } from '@intelgraph/network-interceptor';
+import { FlowAnalyzer } from '@intelgraph/network-interceptor';
+import { CryptoAnalyzer } from '@intelgraph/cryptanalysis-engine';
+import { TrafficPatternAnalyzer } from '@intelgraph/cryptanalysis-engine';
+import { TDOALocator } from '@intelgraph/geolocation-engine';
+import { TrackManager } from '@intelgraph/geolocation-engine';
 import { ComplianceManager } from '../compliance/ComplianceManager';
 
 export interface ProcessingTask {

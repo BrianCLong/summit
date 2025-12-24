@@ -643,7 +643,7 @@ Use this checklist when onboarding a new service:
 ### Installation
 
 ```bash
-pnpm add @companyos/observability
+pnpm add @intelgraph/observability
 ```
 
 ### Quick Start
@@ -653,7 +653,7 @@ import {
   initializeObservability,
   createLogger,
   setupObservability,
-} from '@companyos/observability';
+} from '@intelgraph/observability';
 import express from 'express';
 
 const app = express();
@@ -698,7 +698,7 @@ import {
   withSpan,
   recordDbQuery,
   recordCacheOperation,
-} from '@companyos/observability';
+} from '@intelgraph/observability';
 
 // Wrap operations in spans
 const result = await withSpan('fetchUser', async (span) => {

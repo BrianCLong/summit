@@ -1,11 +1,11 @@
-# @summit/rate-limiting
+# @intelgraph/rate-limiting
 
 Enterprise rate limiting package with multiple strategies and distributed support.
 
 ## Installation
 
 ```bash
-pnpm add @summit/rate-limiting
+pnpm add @intelgraph/rate-limiting
 ```
 
 ## Usage
@@ -13,7 +13,7 @@ pnpm add @summit/rate-limiting
 ### Fixed Window
 
 ```typescript
-import { FixedWindowLimiter } from '@summit/rate-limiting';
+import { FixedWindowLimiter } from '@intelgraph/rate-limiting';
 
 const limiter = new FixedWindowLimiter({
   windowMs: 60 * 1000, // 1 minute
@@ -26,7 +26,7 @@ const result = await limiter.checkLimit('user123');
 ### Sliding Window
 
 ```typescript
-import { SlidingWindowLimiter } from '@summit/rate-limiting';
+import { SlidingWindowLimiter } from '@intelgraph/rate-limiting';
 
 const limiter = new SlidingWindowLimiter({
   windowMs: 60 * 1000,
@@ -37,7 +37,7 @@ const limiter = new SlidingWindowLimiter({
 ### Token Bucket
 
 ```typescript
-import { TokenBucketLimiter } from '@summit/rate-limiting';
+import { TokenBucketLimiter } from '@intelgraph/rate-limiting';
 
 const limiter = new TokenBucketLimiter({
   bucketSize: 100,
@@ -50,7 +50,7 @@ const limiter = new TokenBucketLimiter({
 ### Distributed (Redis)
 
 ```typescript
-import { RedisRateLimiter } from '@summit/rate-limiting';
+import { RedisRateLimiter } from '@intelgraph/rate-limiting';
 
 const limiter = new RedisRateLimiter({
   redis: { host: 'localhost', port: 6379 },
@@ -62,7 +62,7 @@ const limiter = new RedisRateLimiter({
 ### Express Middleware
 
 ```typescript
-import { createRateLimitMiddleware } from '@summit/rate-limiting';
+import { createRateLimitMiddleware } from '@intelgraph/rate-limiting';
 
 app.use(createRateLimitMiddleware({
   limiter,

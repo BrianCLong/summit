@@ -23,7 +23,7 @@ This document tracks the Level B soft rename plan and artifacts.
 
 - Containers: CI pushes `summit-server` and `summit-client` tags in addition to existing intelgraph tags.
 - Helm: new chart `helm/summit/Chart.yaml` with `aliases: [intelgraph]`.
-- SDKs: publish `@summit/sdk` and `summit-sdk`; keep `@intelgraph/sdk` as meta-packages (separate repo/publish step).
+- SDKs: publish `@intelgraph/sdk` and `summit-sdk`; keep `@intelgraph/sdk` as meta-packages (separate repo/publish step).
 - OPA header alias: implemented via middleware.
 
 ## Web/Docs/SEO

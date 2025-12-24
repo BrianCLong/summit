@@ -19,7 +19,7 @@ The Summit Plugin SDK provides a comprehensive framework for building plugins th
 ### Installation
 
 ```bash
-npm install -g @summit/plugin-cli
+npm install -g @intelgraph/plugin-cli
 ```
 
 ### Create a New Plugin
@@ -81,7 +81,7 @@ The `plugin.json` file defines your plugin's metadata and requirements:
 ### Basic Plugin Structure
 
 ```typescript
-import { createPlugin, PluginPermission } from '@summit/plugin-sdk';
+import { createPlugin, PluginPermission } from '@intelgraph/plugin-sdk';
 
 export default createPlugin()
   .withMetadata({
@@ -201,7 +201,7 @@ context.events.once('init:complete', () => {
 ### Data Source Extension
 
 ```typescript
-import { BaseDataSourceExtension } from '@summit/extension-api';
+import { BaseDataSourceExtension } from '@intelgraph/extension-api';
 
 export class MyDataSource extends BaseDataSourceExtension {
   constructor() {
@@ -237,7 +237,7 @@ export class MyDataSource extends BaseDataSourceExtension {
 ### Analyzer Extension
 
 ```typescript
-import { BaseAnalyzerExtension } from '@summit/extension-api';
+import { BaseAnalyzerExtension } from '@intelgraph/extension-api';
 
 export class MyAnalyzer extends BaseAnalyzerExtension {
   constructor() {
@@ -268,7 +268,7 @@ export class MyAnalyzer extends BaseAnalyzerExtension {
 ### Visualization Extension
 
 ```typescript
-import { BaseVisualizationExtension } from '@summit/extension-api';
+import { BaseVisualizationExtension } from '@intelgraph/extension-api';
 
 export class MyVisualization extends BaseVisualizationExtension {
   constructor() {
@@ -334,7 +334,7 @@ Specify resource limits in your manifest:
 ### Unit Testing
 
 ```typescript
-import { testPluginLifecycle, createMockContext } from '@summit/plugin-sdk';
+import { testPluginLifecycle, createMockContext } from '@intelgraph/plugin-sdk';
 import myPlugin from '../src/index';
 
 describe('My Plugin', () => {

@@ -21,7 +21,7 @@ This guide enumerates common pilot issues and prescribes resolution steps.
 
 - Inspect `plugin.<name>.duration.avg` in Grafana. If values exceed thresholds, consider scaling out horizontally via the provided HPA manifest.
 - Enable adaptive throttling by ensuring `performance.adaptiveThrottling` is `true`.
-- Run the benchmark script (`npm run --workspace @summit/liquid-nano test:coverage` plus `node scripts/benchmark.mjs`) to profile the workload.
+- Run the benchmark script (`npm run --workspace @intelgraph/liquid-nano test:coverage` plus `node scripts/benchmark.mjs`) to profile the workload.
 
 ## HTTP Bridge Returns 400
 

@@ -3,7 +3,7 @@
  * Finds ground state energy of quantum systems
  */
 
-import { QuantumCircuit, QuantumSimulator, CircuitBuilder } from '@summit/quantum-simulation';
+import { QuantumCircuit, QuantumSimulator, CircuitBuilder } from '@intelgraph/quantum-simulation';
 
 export interface VQEParams {
   numQubits: number;

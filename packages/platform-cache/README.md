@@ -1,4 +1,4 @@
-# @summit/platform-cache
+# @intelgraph/platform-cache
 
 Unified caching abstraction for the Summit platform implementing **Prompt 20: Caching and Memoization Strategy**.
 
@@ -15,13 +15,13 @@ Unified caching abstraction for the Summit platform implementing **Prompt 20: Ca
 ## Installation
 
 ```bash
-pnpm add @summit/platform-cache
+pnpm add @intelgraph/platform-cache
 ```
 
 ## Quick Start
 
 ```typescript
-import { createCacheManager, SummitKeys } from '@summit/platform-cache';
+import { createCacheManager, SummitKeys } from '@intelgraph/platform-cache';
 
 // Create cache manager with configuration
 const cache = createCacheManager({
@@ -90,7 +90,7 @@ const searchKey = SummitKeys.search('test query', { type: 'person' });
 ### CacheManager
 
 ```typescript
-import { createCacheManager, CacheManager } from '@summit/platform-cache';
+import { createCacheManager, CacheManager } from '@intelgraph/platform-cache';
 
 const manager = createCacheManager({
   namespace: 'summit',
@@ -154,7 +154,7 @@ await client.invalidateByTags(['user:123']); // Invalidates all cached data tagg
 ### CacheKeyBuilder
 
 ```typescript
-import { CacheKeyBuilder, SummitKeys } from '@summit/platform-cache';
+import { CacheKeyBuilder, SummitKeys } from '@intelgraph/platform-cache';
 
 // Manual key building
 const key = new CacheKeyBuilder()
@@ -218,7 +218,7 @@ const user = await cachedFetch('123'); // Cached automatically
 In-process LRU cache using `lru-cache`:
 
 ```typescript
-import { MemoryProvider } from '@summit/platform-cache/providers';
+import { MemoryProvider } from '@intelgraph/platform-cache/providers';
 
 const provider = new MemoryProvider({
   maxSize: 1000,    // Maximum entries
@@ -231,7 +231,7 @@ const provider = new MemoryProvider({
 Distributed cache using `ioredis`:
 
 ```typescript
-import { RedisProvider } from '@summit/platform-cache/providers';
+import { RedisProvider } from '@intelgraph/platform-cache/providers';
 
 const provider = new RedisProvider({
   url: 'redis://localhost:6379',
@@ -257,7 +257,7 @@ const redisClient = provider.getClient();
 Testing provider that does nothing:
 
 ```typescript
-import { NoOpProvider } from '@summit/platform-cache/providers';
+import { NoOpProvider } from '@intelgraph/platform-cache/providers';
 
 const provider = new NoOpProvider();
 // All operations are no-ops, useful for testing
@@ -305,7 +305,7 @@ CACHE_LOCAL_TTL=60
 ### Zod Schema
 
 ```typescript
-import { CacheConfigSchema } from '@summit/platform-cache';
+import { CacheConfigSchema } from '@intelgraph/platform-cache';
 
 // Validate configuration
 const config = CacheConfigSchema.parse({
@@ -318,7 +318,7 @@ const config = CacheConfigSchema.parse({
 ## Testing
 
 ```typescript
-import { createCacheManager, NoOpProvider } from '@summit/platform-cache';
+import { createCacheManager, NoOpProvider } from '@intelgraph/platform-cache';
 
 // Use NoOp provider for unit tests
 const testManager = createCacheManager({

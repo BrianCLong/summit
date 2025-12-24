@@ -471,12 +471,12 @@ export class GraphRAGQueryServiceEnhanced {
 
       metrics.graphragQueryTotal.inc({
         status: 'success',
-        hasPreview: !!preview,
-        redactionEnabled: redactionApplied,
-        provenanceEnabled: !!answerClaimId,
+        hasPreview: preview ? 'true' : 'false',
+        redactionEnabled: redactionApplied ? 'true' : 'false',
+        provenanceEnabled: answerClaimId ? 'true' : 'false',
       });
       metrics.graphragQueryDurationMs.observe(
-        { hasPreview: !!preview },
+        { hasPreview: preview ? 'true' : 'false' },
         executionTimeMs
       );
 
@@ -495,7 +495,12 @@ export class GraphRAGQueryServiceEnhanced {
     } catch (error) {
       await this.glassBoxService.updateStatus(run.id, 'failed', undefined, String(error));
 
-      metrics.graphragQueryTotal.inc({ status: 'failed' });
+      metrics.graphragQueryTotal.inc({
+        status: 'failed',
+        hasPreview: 'false',
+        redactionEnabled: 'false',
+        provenanceEnabled: 'false',
+      });
 
       logger.error({
         error,

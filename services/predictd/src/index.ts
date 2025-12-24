@@ -1,6 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import { getPredictiveSignals } from '@summit/predictive-graph-intelligence';
+import { getPredictiveSignals } from '@intelgraph/predictive-graph-intelligence';
 
 const app = express();
 const PORT = process.env.PREDICTD_PORT || 4001;

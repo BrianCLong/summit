@@ -42,9 +42,9 @@ airgapRouter.post('/import', async (req: any, res) => {
 
     try {
         const writeStream = createWriteStream(tempFile);
-        await new Promise((resolve, reject) => {
+        await new Promise<void>((resolve, reject) => {
              req.pipe(writeStream);
-             writeStream.on('finish', resolve);
+             writeStream.on('finish', () => resolve());
              writeStream.on('error', reject);
              req.on('error', reject);
         });

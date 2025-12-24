@@ -1,10 +1,9 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, test, expect, beforeEach, jest } from '@jest/globals';
 import { MCPOrchestrator, WorkflowDefinition, WorkflowRecipes } from '../orchestrator.js';
-import { describe, it, test, expect, beforeEach } from '@jest/globals';
 
 // Mock MCP client
 const mockClient = {
-  executeTool: vi.fn(),
+  executeTool: jest.fn(),
 };
 
 describe('MCPOrchestrator', () => {
@@ -12,7 +11,7 @@ describe('MCPOrchestrator', () => {
 
   beforeEach(() => {
     orchestrator = new MCPOrchestrator(mockClient as any);
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('workflow registration', () => {

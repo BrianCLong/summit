@@ -1,5 +1,5 @@
 /**
- * @summit/platform-cache
+ * @intelgraph/platform-cache
  *
  * Unified caching abstraction for Summit platform.
  * Implements Prompt 20: Caching and Memoization Strategy

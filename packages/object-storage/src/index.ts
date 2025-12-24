@@ -3,7 +3,7 @@
  * Multi-cloud object storage with lifecycle management
  */
 
-import { CloudProvider } from '@summit/cloud-platform';
+import { CloudProvider } from '@intelgraph/cloud-platform';
 import pino from 'pino';
 
 const logger = pino({ name: 'object-storage' });

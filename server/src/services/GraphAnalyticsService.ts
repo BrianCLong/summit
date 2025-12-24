@@ -13,7 +13,7 @@ import {
 } from '../graph/types';
 import { getDriver, runCypher } from '../graph/neo4j';
 import logger from '../utils/logger';
-import { cacheService } from './cacheService';
+import { cacheService } from './CacheService';
 
 export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
   private static instance: Neo4jGraphAnalyticsService;

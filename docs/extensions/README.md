@@ -305,7 +305,7 @@ pnpm build && summit-ext reload
 
 ```typescript
 import { activate } from './index.js';
-import { createMockContext } from '@summit/extensions/testing';
+import { createMockContext } from '@intelgraph/extensions/testing';
 
 describe('My Extension', () => {
   it('activates successfully', async () => {

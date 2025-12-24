@@ -1,5 +1,5 @@
 {
-  "name": "@companyos/api-svc-template",
+  "name": "@intelgraph/api-svc-template",
   "version": "0.1.0",
   "type": "module",
   "main": "dist/index.js",

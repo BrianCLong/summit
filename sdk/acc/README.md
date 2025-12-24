@@ -6,13 +6,13 @@ It supports per-request consistency planning, replica metric updates, and explai
 ## Installation
 
 ```bash
-pnpm add @summit/acc-sdk
+pnpm add @intelgraph/acc-sdk
 ```
 
 ## Usage
 
 ```ts
-import { ACCClient, withPolicyTags } from '@summit/acc-sdk';
+import { ACCClient, withPolicyTags } from '@intelgraph/acc-sdk';
 
 const client = new ACCClient({ baseUrl: 'http://localhost:8088' });
 

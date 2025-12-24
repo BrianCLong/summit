@@ -1,5 +1,5 @@
 /**
- * @summit/platform-telemetry
+ * @intelgraph/platform-telemetry
  *
  * Unified telemetry SDK for Summit platform.
  * Implements Prompts 31-32: Metrics Taxonomy and Distributed Tracing

@@ -148,7 +148,7 @@ policy/agents/code-generation.rego:
 ### Package Naming
 ```
 @intelgraph/<package>     # Public packages
-@summit/<package>         # Internal packages
+@intelgraph/<package>         # Internal packages
 ```
 
 ### Import Structure
@@ -159,7 +159,7 @@ import { z } from 'zod';
 
 // 2. Internal packages
 import { logger } from '@intelgraph/observability';
-import { Policy } from '@summit/policy-engine';
+import { Policy } from '@intelgraph/policy-engine';
 
 // 3. Relative imports
 import { config } from './config';

@@ -6,7 +6,15 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { trace, Tracer } from '@opentelemetry/api';
 import { cfg } from './config.js';
+
+/**
+ * Get a tracer for the given instrumentation scope
+ */
+export function getTracer(name: string, version?: string): Tracer {
+  return trace.getTracer(name, version);
+}
 
 // Setup OpenTelemetry SDK
 const resource = new OpenTelemetryResources.Resource({

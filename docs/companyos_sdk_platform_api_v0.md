@@ -18,7 +18,7 @@
 
 ## Distribution and Governance
 - **Repos**: `companyos/sdk` mono-repo with per-language packages; shared specs in `/specs` (OpenAPI, protobuf, policy schemas). Language-specific repos mirror published artifacts when needed.
-- **Packages/Registries**: npm (`@companyos/*`), PyPI (`companyos-*`), Go modules (`go.companyos.dev/sdk`), Maven (`com.companyos.sdk`). Signed releases; SBOM + provenance attached.
+- **Packages/Registries**: npm (`@intelgraph/*`), PyPI (`companyos-*`), Go modules (`go.companyos.dev/sdk`), Maven (`com.companyos.sdk`). Signed releases; SBOM + provenance attached.
 - **Release process**: Automated CI with contract tests against mock platform; canary channel (`-rc` tags) before general availability. Release notes + migration guides per minor.
 - **Compatibility/Deprecation**: Deprecated APIs marked with telemetry warnings and lint rules; removal only after 2 minor versions with codemods where possible. Strongly-typed feature flags to avoid string drift.
 - **Contribution model**: Maintainers own core modules; feature teams submit RFC + contract tests. Extension points registered via provider interfaces; contributions require threat model update + docs + examples. Security review mandatory for identity/policy changes.
@@ -34,8 +34,8 @@
 ## Example Usage
 ### Auth check (TypeScript/Node)
 ```ts
-import { withContext, authorize } from "@companyos/policy";
-import { verifyRequest } from "@companyos/identity";
+import { withContext, authorize } from "@intelgraph/policy";
+import { verifyRequest } from "@intelgraph/identity";
 
 export async function handler(req, res) {
   const base = verifyRequest(req); // extracts user/tenant/trace

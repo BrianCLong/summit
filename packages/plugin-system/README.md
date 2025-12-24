@@ -20,13 +20,13 @@ Comprehensive plugin architecture for extending the Summit platform with third-p
 ### Installation
 
 ```bash
-npm install @summit/plugin-system
+npm install @intelgraph/plugin-system
 ```
 
 ### Create a Plugin
 
 ```bash
-npx @summit/plugin-cli create my-plugin
+npx @intelgraph/plugin-cli create my-plugin
 cd my-plugin
 npm install
 npm run build
@@ -41,7 +41,7 @@ import {
   PluginSandbox,
   DefaultDependencyResolver,
   InMemoryPluginRegistry,
-} from '@summit/plugin-system';
+} from '@intelgraph/plugin-system';
 
 // Initialize components
 const sandbox = new PluginSandbox();
@@ -161,7 +161,7 @@ const allowed = security.checkPermission(
 ### Data Source
 
 ```typescript
-import { BaseDataSourceExtension } from '@summit/extension-api';
+import { BaseDataSourceExtension } from '@intelgraph/extension-api';
 
 class MyDataSource extends BaseDataSourceExtension {
   async execute(query: DataSourceQuery): Promise<DataSourceResult> {
@@ -174,7 +174,7 @@ class MyDataSource extends BaseDataSourceExtension {
 ### Analyzer
 
 ```typescript
-import { BaseAnalyzerExtension } from '@summit/extension-api';
+import { BaseAnalyzerExtension } from '@intelgraph/extension-api';
 
 class MyAnalyzer extends BaseAnalyzerExtension {
   async execute(input: AnalyzerInput): Promise<AnalyzerResult> {
@@ -187,7 +187,7 @@ class MyAnalyzer extends BaseAnalyzerExtension {
 ### Visualization
 
 ```typescript
-import { BaseVisualizationExtension } from '@summit/extension-api';
+import { BaseVisualizationExtension } from '@intelgraph/extension-api';
 
 class MyVisualization extends BaseVisualizationExtension {
   async execute(input: VisualizationData): Promise<VisualizationConfig> {

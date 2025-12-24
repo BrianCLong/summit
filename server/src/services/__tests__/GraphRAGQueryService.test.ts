@@ -8,7 +8,25 @@
  * - Glass-box observability works
  */
 
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, jest } from '@jest/globals';
+
+// Mock modules before importing services
+jest.mock('../../observability/metrics', () => ({
+  metrics: {
+    featureUsageTotal: { inc: jest.fn() },
+    queryDuration: { observe: jest.fn(), startTimer: jest.fn(() => jest.fn()) },
+    queriesTotal: { inc: jest.fn() },
+    previewsTotal: { inc: jest.fn() },
+    queryPreviewErrorsTotal: { inc: jest.fn() },
+    queryExecutionErrors: { inc: jest.fn() },
+    citationValidation: { observe: jest.fn() },
+    glassBoxRunsTotal: { inc: jest.fn() },
+    previewEditTotal: { inc: jest.fn() },
+    previewExecuteTotal: { inc: jest.fn() },
+  },
+}));
+jest.mock('../../utils/logger');
+jest.mock('../../config/logger');
 import type { Pool } from 'pg';
 import type { Redis } from 'ioredis';
 import type { Driver } from 'neo4j-driver';

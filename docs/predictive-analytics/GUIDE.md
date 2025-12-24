@@ -44,7 +44,7 @@ The Predictive Analytics and Forecasting Platform provides enterprise-grade capa
 
 ## Core Packages
 
-### 1. @summit/forecasting
+### 1. @intelgraph/forecasting
 
 Time-series forecasting with state-of-the-art models.
 
@@ -59,7 +59,7 @@ Time-series forecasting with state-of-the-art models.
 
 **Example:**
 ```typescript
-import { ARIMAForecaster, AutoARIMA } from '@summit/forecasting';
+import { ARIMAForecaster, AutoARIMA } from '@intelgraph/forecasting';
 
 // Automatic parameter selection
 const autoArima = new AutoARIMA();
@@ -77,7 +77,7 @@ forecasts.forEach(f => {
 });
 ```
 
-### 2. @summit/predictive-models
+### 2. @intelgraph/predictive-models
 
 Classification and regression models with explainability.
 
@@ -91,7 +91,7 @@ Classification and regression models with explainability.
 
 **Example:**
 ```typescript
-import { RandomForestClassifier, GridSearchCV, ShapExplainer } from '@summit/predictive-models';
+import { RandomForestClassifier, GridSearchCV, ShapExplainer } from '@intelgraph/predictive-models';
 
 // Train model
 const model = new RandomForestClassifier({
@@ -112,7 +112,7 @@ const explainer = new ShapExplainer(model, backgroundData);
 const explanation = explainer.explainInstance(testInstance);
 ```
 
-### 3. @summit/time-series
+### 3. @intelgraph/time-series
 
 Time series utilities and decomposition.
 
@@ -124,7 +124,7 @@ Time series utilities and decomposition.
 
 **Example:**
 ```typescript
-import { STLDecomposer, StationarityTester } from '@summit/time-series';
+import { STLDecomposer, StationarityTester } from '@intelgraph/time-series';
 
 // Decompose time series
 const decomposer = new STLDecomposer(12); // 12-month seasonality
@@ -136,7 +136,7 @@ const adfResult = tester.adfTest(timeSeriesData);
 console.log(`Stationary: ${adfResult.isStationary}, p-value: ${adfResult.pValue}`);
 ```
 
-### 4. @summit/risk-scoring
+### 4. @intelgraph/risk-scoring
 
 Risk scoring and model monitoring.
 
@@ -149,7 +149,7 @@ Risk scoring and model monitoring.
 
 **Example:**
 ```typescript
-import { LogisticRiskScorer, PSICalculator } from '@summit/risk-scoring';
+import { LogisticRiskScorer, PSICalculator } from '@intelgraph/risk-scoring';
 
 // Train risk model
 const scorer = new LogisticRiskScorer();
@@ -168,7 +168,7 @@ const psiResult = psi.calculatePSI(baselineScores, currentScores);
 console.log(`PSI: ${psiResult.psi}, Status: ${psiResult.status}`);
 ```
 
-### 5. @summit/causal-inference
+### 5. @intelgraph/causal-inference
 
 Causal inference and treatment effect estimation.
 
@@ -181,7 +181,7 @@ Causal inference and treatment effect estimation.
 
 **Example:**
 ```typescript
-import { PropensityScoreMatcher, DifferenceInDifferences } from '@summit/causal-inference';
+import { PropensityScoreMatcher, DifferenceInDifferences } from '@intelgraph/causal-inference';
 
 // Estimate treatment effect with propensity matching
 const matcher = new PropensityScoreMatcher();
@@ -201,7 +201,7 @@ const didEffect = did.estimate(
 );
 ```
 
-### 6. @summit/feature-engineering
+### 6. @intelgraph/feature-engineering
 
 Automated feature generation and transformation.
 
@@ -214,7 +214,7 @@ Automated feature generation and transformation.
 
 **Example:**
 ```typescript
-import { AutomatedFeatureGenerator, StandardScaler } from '@summit/feature-engineering';
+import { AutomatedFeatureGenerator, StandardScaler } from '@intelgraph/feature-engineering';
 
 const generator = new AutomatedFeatureGenerator();
 
@@ -312,7 +312,7 @@ pnpm install
 pnpm -r build
 
 # Or build specific package
-pnpm --filter @summit/forecasting build
+pnpm --filter @intelgraph/forecasting build
 ```
 
 ### 3. Start Services
@@ -330,7 +330,7 @@ pnpm start
 ### 4. Make Your First Prediction
 
 ```typescript
-import { ARIMAForecaster } from '@summit/forecasting';
+import { ARIMAForecaster } from '@intelgraph/forecasting';
 
 // Prepare data
 const data = [
@@ -359,7 +359,7 @@ predictions.forEach(p => {
 Forecast future cyber threats and attack patterns.
 
 ```typescript
-import { ProphetForecaster } from '@summit/forecasting';
+import { ProphetForecaster } from '@intelgraph/forecasting';
 
 const forecaster = new ProphetForecaster({
   horizon: 30,
@@ -379,7 +379,7 @@ const threatForecast = forecaster.forecast();
 Score entities for threat risk.
 
 ```typescript
-import { LogisticRiskScorer } from '@summit/risk-scoring';
+import { LogisticRiskScorer } from '@intelgraph/risk-scoring';
 
 const scorer = new LogisticRiskScorer();
 scorer.fit(historicalFeatures, historicalLabels, [
@@ -396,7 +396,7 @@ const riskScore = scorer.score('entity_456', [0.3, 15, 0.7]);
 Measure the causal impact of interventions.
 
 ```typescript
-import { DifferenceInDifferences } from '@summit/causal-inference';
+import { DifferenceInDifferences } from '@intelgraph/causal-inference';
 
 const did = new DifferenceInDifferences();
 const impact = did.estimate(
@@ -471,7 +471,7 @@ if (registry.needsRetraining('model-1')) {
 ### Ensemble Forecasting
 
 ```typescript
-import { EnsembleForecaster } from '@summit/forecasting';
+import { EnsembleForecaster } from '@intelgraph/forecasting';
 
 const ensemble = new EnsembleForecaster({
   models: [
@@ -490,7 +490,7 @@ const forecasts = ensemble.forecast(30);
 ### Hyperparameter Optimization
 
 ```typescript
-import { GridSearchCV, RandomForestClassifier } from '@summit/predictive-models';
+import { GridSearchCV, RandomForestClassifier } from '@intelgraph/predictive-models';
 
 const gridSearch = new GridSearchCV({
   nFolds: 5,

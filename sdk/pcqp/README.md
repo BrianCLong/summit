@@ -12,7 +12,7 @@ This package provides a lightweight interface for working with plans emitted by 
 ## Usage
 
 ```ts
-import { loadPlanFromFile, policyGateSummary } from '@summit/pcqp-sdk';
+import { loadPlanFromFile, policyGateSummary } from '@intelgraph/pcqp-sdk';
 
 const plan = await loadPlanFromFile('../pcqp/tests/golden/compliant_plan.json');
 const gates = policyGateSummary(plan);

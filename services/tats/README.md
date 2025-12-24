@@ -92,7 +92,7 @@ npm run build
 Usage:
 
 ```ts
-import { TatsClient, InMemoryReplayCache, verifyToken } from '@summit/tats-client';
+import { TatsClient, InMemoryReplayCache, verifyToken } from '@intelgraph/tats-client';
 
 const client = new TatsClient('http://localhost:8080');
 const { token } = await client.issueToken({

@@ -1,0 +1,16 @@
+{
+  "components": [
+    {
+      "name": "safe-lib",
+      "version": "1.0.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/safe-lib@1.0.0"
+    }
+  ]
+}

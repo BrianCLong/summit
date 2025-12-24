@@ -8,7 +8,7 @@ import {
   DataSchema,
   Entity,
   PluginContext,
-} from '@summit/plugin-system';
+} from '@intelgraph/plugin-system';
 
 /**
  * Threat Intelligence Connector Plugin

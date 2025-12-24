@@ -1,6 +1,6 @@
 /**
  * Supply Chain Vulnerability Calculator
- * @module @summit/geopolitical-analysis/calculators/supply-chain
+ * @module @intelgraph/geopolitical-analysis/calculators/supply-chain
  */
 
 import { SupplyChainIndicator } from '../types/index.js';

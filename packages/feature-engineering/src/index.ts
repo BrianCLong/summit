@@ -1,6 +1,6 @@
 /**
  * Feature Engineering Package
- * @module @summit/feature-engineering
+ * @module @intelgraph/feature-engineering
  */
 
 // Types

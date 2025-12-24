@@ -1,4 +1,4 @@
-# @summit/geopolitical-analysis
+# @intelgraph/geopolitical-analysis
 
 Comprehensive geopolitical risk analysis, indicators, and scenario modeling for IntelGraph/Summit platform.
 
@@ -62,7 +62,7 @@ Comprehensive prompts for AI-augmented analysis in `/prompts/geopolitical/`:
 ## Installation
 
 ```bash
-pnpm install @summit/geopolitical-analysis
+pnpm install @intelgraph/geopolitical-analysis
 ```
 
 ## Usage
@@ -74,7 +74,7 @@ import {
   PoliticalStabilityCalculator,
   FoodSecurityCalculator,
   SupplyChainCalculator,
-} from '@summit/geopolitical-analysis';
+} from '@intelgraph/geopolitical-analysis';
 
 // Political stability assessment
 const politicalCalc = new PoliticalStabilityCalculator();
@@ -129,7 +129,7 @@ import {
   checkAnalysisCompliance,
   checkIndicatorCompliance,
   validatePurpose,
-} from '@summit/geopolitical-analysis';
+} from '@intelgraph/geopolitical-analysis';
 
 // Check if analysis request is compliant
 const complianceCheck = checkAnalysisCompliance(
@@ -171,7 +171,7 @@ import {
   normalize,
   calculateConfidence,
   detectTrend,
-} from '@summit/geopolitical-analysis';
+} from '@intelgraph/geopolitical-analysis';
 
 // Convert score to risk level
 const risk = scoreToRiskLevel(85); // RiskLevel.CRITICAL
@@ -234,7 +234,7 @@ All analysis requests are automatically checked for:
 All compliance checks are logged for audit trails:
 
 ```typescript
-import { logComplianceCheck } from '@summit/geopolitical-analysis';
+import { logComplianceCheck } from '@intelgraph/geopolitical-analysis';
 
 logComplianceCheck({
   timestamp: new Date(),

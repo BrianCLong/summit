@@ -47,7 +47,7 @@ app.use(
     credentialsRequired: false,
   }).unless({
     path: ['/healthz', '/graphql'],
-  }),
+  }) as unknown as express.RequestHandler,
 );
 
 // Error handling for JWT authentication

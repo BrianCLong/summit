@@ -78,7 +78,7 @@ response = analyst_assistant("How did ACME perform last quarter?")
 
 ## TypeScript/JS Sketch
 ```ts
-import { SummitClient } from "@summit/sdk";
+import { SummitClient } from "@intelgraph/sdk";
 
 const client = new SummitClient({ apiKey: process.env.SUMMIT_KEY });
 

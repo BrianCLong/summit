@@ -1,6 +1,6 @@
 /**
  * Causal Inference Package
- * @module @summit/causal-inference
+ * @module @intelgraph/causal-inference
  */
 
 // Types

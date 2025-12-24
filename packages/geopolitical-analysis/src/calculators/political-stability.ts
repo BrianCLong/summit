@@ -1,6 +1,6 @@
 /**
  * Political Stability Indicator Calculator
- * @module @summit/geopolitical-analysis/calculators/political-stability
+ * @module @intelgraph/geopolitical-analysis/calculators/political-stability
  */
 
 import { PoliticalStabilityIndicator } from '../types/index.js';

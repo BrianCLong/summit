@@ -166,7 +166,7 @@ function buildTemplateContext(options: CreateOptions): TemplateContext {
   return {
     SERVICE_NAME: serviceName,
     SERVICE_TITLE: serviceTitle,
-    PACKAGE_NAME: `@companyos/${serviceName}`,
+    PACKAGE_NAME: `@intelgraph/${serviceName}`,
     DESCRIPTION: options.description || `${serviceTitle} service`,
     TEAM: options.team || 'platform',
     TIER: options.tier,

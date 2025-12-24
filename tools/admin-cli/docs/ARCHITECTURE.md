@@ -262,7 +262,7 @@ Option 1: NPM Global Install
 ────────────────────────────
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │ npm registry    │───▶│ npm install -g  │───▶│ /usr/local/bin/ │
-│                 │    │ @summit/admin   │    │ summit-admin    │
+│                 │    │ @intelgraph/admin   │    │ summit-admin    │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 
 Option 2: Docker Container
@@ -282,7 +282,7 @@ Option 3: Kubernetes Job
 Option 4: CI/CD Integration
 ───────────────────────────
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│ GitHub Actions  │───▶│ npx @summit/    │───▶│ Automated       │
+│ GitHub Actions  │───▶│ npx @intelgraph/    │───▶│ Automated       │
 │ GitLab CI       │    │ admin-cli       │    │ Operations      │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```

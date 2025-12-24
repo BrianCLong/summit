@@ -1,5 +1,5 @@
 /**
- * @summit/platform-governance
+ * @intelgraph/platform-governance
  *
  * Policy engine and governance utilities for Summit platform.
  * Implements Prompts 46-49: Policy Engine, Platform Abstractions, Documentation QA, Ownership Matrix

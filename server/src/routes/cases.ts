@@ -9,6 +9,11 @@ import { CaseService } from '../cases/CaseService.js';
 import { CaseInput, CaseUpdateInput } from '../repos/CaseRepo.js';
 import { LegalBasis } from '../repos/AuditAccessLogRepo.js';
 import { CaseOverviewService } from '../cases/overview/CaseOverviewService.js';
+import { CommentService } from '../cases/comments/CommentService.js';
+import { ChainOfCustodyService } from '../cases/chain-of-custody.js';
+import { ReportingService, createReportingService } from '../reporting/service.js';
+import { AccessControlService } from '../reporting/access-control.js';
+import { INVESTIGATION_SUMMARY_TEMPLATE } from '../cases/reporting/templates.js';
 import { goldenPathStepTotal } from '../monitoring/metrics.js';
 import logger from '../config/logger.js';
 
@@ -451,7 +456,298 @@ caseRouter.post('/:id/export', async (req, res) => {
 
     res.json(caseRecord);
   } catch (error) {
+    // Handle specific user-facing errors
+    if ((error as any).name === 'UserFacingError') {
+      return res.status(400).json({ error: (error as Error).message });
+    }
     routeLogger.error({ error: (error as Error).message }, 'Failed to export case');
+    res.status(500).json({ error: (error as Error).message });
+  }
+});
+
+/**
+ * POST /api/cases/:id/release-criteria - Configure release criteria
+ */
+caseRouter.post('/:id/release-criteria', async (req, res) => {
+  try {
+    const { tenantId, userId } = getRequestContext(req);
+
+    if (!tenantId) {
+      return res.status(400).json({ error: 'tenant_required' });
+    }
+
+    if (!userId) {
+      return res.status(401).json({ error: 'user_required' });
+    }
+
+    const { id } = req.params;
+    const config = req.body; // ReleaseCriteriaConfig
+
+    const pg = getPostgresPool();
+    // We need to instantiate the ReleaseCriteriaService.
+    // Since CaseService initializes it privately, we should probably access it differently
+    // or instantiate it directly here.
+    // For now, let's instantiate it directly as we didn't expose it in CaseService.
+    const { ReleaseCriteriaService } = await import('../cases/ReleaseCriteriaService.js');
+    const service = new ReleaseCriteriaService(pg);
+
+    await service.configure(id, tenantId, userId, config);
+
+    res.status(200).json({ message: 'Release criteria configured' });
+  } catch (error) {
+    routeLogger.error({ error: (error as Error).message }, 'Failed to configure release criteria');
+    res.status(500).json({ error: (error as Error).message });
+  }
+});
+
+/**
+ * GET /api/cases/:id/release-criteria/status - Get release criteria status
+ */
+caseRouter.get('/:id/release-criteria/status', async (req, res) => {
+  try {
+    const { tenantId } = getRequestContext(req);
+
+    if (!tenantId) {
+      return res.status(400).json({ error: 'tenant_required' });
+    }
+
+    const { id } = req.params;
+
+    const pg = getPostgresPool();
+    const { ReleaseCriteriaService } = await import('../cases/ReleaseCriteriaService.js');
+    const service = new ReleaseCriteriaService(pg);
+
+    const result = await service.evaluate(id, tenantId);
+
+    res.json(result);
+  } catch (error) {
+    routeLogger.error({ error: (error as Error).message }, 'Failed to get release criteria status');
+    res.status(500).json({ error: (error as Error).message });
+  }
+});
+
+// ==================== COMMENTS ====================
+
+/**
+ * POST /api/cases/:id/comments - Add a comment
+ */
+caseRouter.post('/:id/comments', async (req, res) => {
+  try {
+    const { tenantId, userId } = getRequestContext(req);
+
+    if (!tenantId) {
+      return res.status(400).json({ error: 'tenant_required' });
+    }
+
+    if (!userId) {
+      return res.status(401).json({ error: 'user_required' });
+    }
+
+    const { id } = req.params;
+    const { content, metadata } = req.body;
+
+    if (!content) {
+      return res.status(400).json({ error: 'content_required' });
+    }
+
+    const pg = getPostgresPool();
+    const service = new CommentService(pg);
+
+    const comment = await service.addComment(
+      {
+        caseId: id,
+        userId,
+        content,
+        metadata,
+      },
+      tenantId,
+    );
+
+    res.status(201).json(comment);
+  } catch (error) {
+    // Handle specific user-facing errors
+    if ((error as any).name === 'UserFacingError') {
+      return res.status(404).json({ error: (error as Error).message });
+    }
+    routeLogger.error({ error: (error as Error).message }, 'Failed to add comment');
+    res.status(500).json({ error: (error as Error).message });
+  }
+});
+
+/**
+ * GET /api/cases/:id/comments - List comments
+ */
+caseRouter.get('/:id/comments', async (req, res) => {
+  try {
+    const { tenantId, userId } = getRequestContext(req);
+
+    if (!tenantId) {
+      return res.status(400).json({ error: 'tenant_required' });
+    }
+
+    const { id } = req.params;
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+    const offset = req.query.offset ? parseInt(req.query.offset as string) : undefined;
+
+    const pg = getPostgresPool();
+    const service = new CommentService(pg);
+
+    const comments = await service.listComments(id, tenantId, limit, offset);
+
+    res.json(comments);
+  } catch (error) {
+    if ((error as any).name === 'UserFacingError') {
+      return res.status(404).json({ error: (error as Error).message });
+    }
+    routeLogger.error({ error: (error as Error).message }, 'Failed to list comments');
+    res.status(500).json({ error: (error as Error).message });
+  }
+});
+
+// ==================== CHAIN OF CUSTODY ====================
+
+/**
+ * POST /api/cases/:id/evidence/event - Record chain of custody event
+ */
+caseRouter.post('/:id/evidence/event', async (req, res) => {
+  try {
+    const { tenantId, userId } = getRequestContext(req);
+
+    if (!userId) {
+      return res.status(401).json({ error: 'user_required' });
+    }
+
+    const { id: caseId } = req.params;
+    const { evidenceId, action, location, notes, verificationHash } = req.body;
+
+    if (!evidenceId || !action) {
+      return res.status(400).json({ error: 'evidenceId and action are required' });
+    }
+
+    const pg = getPostgresPool();
+    const service = new ChainOfCustodyService(pg);
+
+    const event = await service.recordEvent({
+      caseId,
+      evidenceId,
+      action,
+      actorId: userId,
+      location,
+      notes,
+      verificationHash,
+    });
+
+    res.status(201).json(event);
+  } catch (error) {
+    routeLogger.error({ error: (error as Error).message }, 'Failed to record custody event');
+    res.status(500).json({ error: (error as Error).message });
+  }
+});
+
+/**
+ * GET /api/cases/:id/evidence/:evidenceId/chain - Get chain of custody
+ */
+caseRouter.get('/:id/evidence/:evidenceId/chain', async (req, res) => {
+  try {
+    const { evidenceId } = req.params;
+
+    const pg = getPostgresPool();
+    const service = new ChainOfCustodyService(pg);
+
+    const chain = await service.getChain(evidenceId);
+
+    res.json(chain);
+  } catch (error) {
+    routeLogger.error({ error: (error as Error).message }, 'Failed to get chain of custody');
+    res.status(500).json({ error: (error as Error).message });
+  }
+});
+
+// ==================== REPORTING ====================
+
+/**
+ * POST /api/cases/:id/report - Generate case report
+ */
+caseRouter.post('/:id/report', async (req, res) => {
+  try {
+    const { tenantId, userId } = getRequestContext(req);
+
+    if (!tenantId) {
+      return res.status(400).json({ error: 'tenant_required' });
+    }
+
+    if (!userId) {
+      return res.status(401).json({ error: 'user_required' });
+    }
+
+    const { id } = req.params;
+
+    const pg = getPostgresPool();
+    const caseService = new CaseService(pg);
+
+    // Fetch case data to populate template
+    // We pass minimal audit context since this is an internal fetch for reporting
+    const caseData = await caseService.getCase(id, tenantId, userId, { reason: 'Report Generation', legalBasis: 'investigation' });
+
+    if (!caseData) {
+      return res.status(404).json({ error: 'case_not_found' });
+    }
+
+    // Fetch tasks
+    const { TaskRepo } = await import('../cases/workflow/repos/TaskRepo.js');
+    const taskRepo = new TaskRepo(pg);
+    const tasks = await taskRepo.getCaseTasks(id);
+
+    // Fetch evidence (Chain of Custody)
+    const chainService = new ChainOfCustodyService(pg);
+    const evidenceItems = await chainService.listEvidence(id);
+    const evidence = evidenceItems.map(item => ({
+      id: item.id,
+      description: 'Evidence item', // Placeholder
+      lastUpdate: item.lastUpdate
+    }));
+
+    const context = {
+      case: caseData,
+      tasks,
+      evidence,
+    };
+
+    // Initialize reporting service
+    const rules = [
+      {
+        resource: 'report',
+        action: 'view',
+        roles: ['investigator', 'admin', 'analyst']
+      },
+      {
+        resource: 'report',
+        action: 'deliver',
+        roles: ['investigator', 'admin']
+      }
+    ];
+
+    // Initialize with proper rules
+    const accessControl = new AccessControlService(rules as any);
+    const reportingService = createReportingService(accessControl);
+
+    const userRoles = (req.user as any)?.roles || ['investigator'];
+
+    const report = await reportingService.generate(
+      {
+        template: INVESTIGATION_SUMMARY_TEMPLATE,
+        context,
+        watermark: req.body.watermark,
+      },
+      {
+        userId,
+        roles: userRoles,
+      },
+    );
+
+    res.json(report);
+  } catch (error) {
+    routeLogger.error({ error: (error as Error).message }, 'Failed to generate report');
     res.status(500).json({ error: (error as Error).message });
   }
 });

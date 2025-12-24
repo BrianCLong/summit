@@ -16,10 +16,10 @@ This document specifies the scaffolding system that enables teams to create new 
 
 ```bash
 # Available as a workspace tool
-pnpm --filter @companyos/scaffold-cli build
+pnpm --filter @intelgraph/scaffold-cli build
 
 # Or run directly
-pnpm dlx @companyos/scaffold create
+pnpm dlx @intelgraph/scaffold create
 ```
 
 ### 1.2 Commands
@@ -414,7 +414,7 @@ packages/<name>/
 **Package.json Template**:
 ```json
 {
-  "name": "@companyos/{{LIBRARY_NAME}}",
+  "name": "@intelgraph/{{LIBRARY_NAME}}",
   "version": "0.0.0",
   "description": "{{DESCRIPTION}}",
   "type": "module",
@@ -609,7 +609,7 @@ All templates support these variables:
 |----------|-------------|---------|
 | `{{SERVICE_NAME}}` | Kebab-case service name | `users-api` |
 | `{{SERVICE_TITLE}}` | Title case for display | `Users API` |
-| `{{PACKAGE_NAME}}` | Full package name | `@companyos/users-api` |
+| `{{PACKAGE_NAME}}` | Full package name | `@intelgraph/users-api` |
 | `{{PORT}}` | HTTP port | `8080` |
 | `{{TEAM}}` | Owning team | `platform` |
 | `{{TIER}}` | Service tier (1-3) | `2` |

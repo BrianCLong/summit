@@ -4,7 +4,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { QualityMetrics } from '@summit/mdm-core';
+import type { QualityMetrics } from '@intelgraph/mdm-core';
 
 export interface MDMDashboard {
   id: string;

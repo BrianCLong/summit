@@ -4,7 +4,7 @@
  * TODO: Add extension description
  */
 
-import type { ExtensionContext, ExtensionActivation } from '@summit/extensions';
+import type { ExtensionContext, ExtensionActivation } from '@intelgraph/extensions';
 
 /**
  * Extension activation function

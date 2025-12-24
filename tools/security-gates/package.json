@@ -1,5 +1,5 @@
 {
-  "name": "@summit/security-gates",
+  "name": "@intelgraph/security-gates",
   "version": "0.1.0",
   "private": true,
   "type": "module",

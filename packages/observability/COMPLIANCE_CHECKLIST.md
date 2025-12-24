@@ -17,7 +17,7 @@ Use this checklist when onboarding a new service to ensure full observability co
 ## 1. SDK Integration
 
 ### 1.1 Package Installation
-- [ ] `@companyos/observability` package installed
+- [ ] `@intelgraph/observability` package installed
 - [ ] Package version is latest stable release
 - [ ] Peer dependencies satisfied (express, etc.)
 
@@ -29,7 +29,7 @@ Use this checklist when onboarding a new service to ensure full observability co
 
 **Code Reference**:
 ```typescript
-import { initializeObservability } from '@companyos/observability';
+import { initializeObservability } from '@intelgraph/observability';
 
 await initializeObservability({
   service: {

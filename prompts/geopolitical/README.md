@@ -56,7 +56,7 @@ These prompts are designed to guide legitimate analytical work in:
 
 ```typescript
 // Example: Using a prompt with Summit's Copilot
-import { loadPrompt } from '@summit/copilot';
+import { loadPrompt } from '@intelgraph/copilot';
 
 const prompt = await loadPrompt('prompts/geopolitical/03-food-security-risk.md');
 
@@ -145,7 +145,7 @@ Recommended legitimate data sources:
 
 These prompts integrate with:
 
-- **`@summit/geopolitical-analysis`** package (calculators, types)
+- **`@intelgraph/geopolitical-analysis`** package (calculators, types)
 - **Copilot service** for AI-augmented analysis
 - **GraphQL API** for querying and storing results
 - **Neo4j** for relationship modeling

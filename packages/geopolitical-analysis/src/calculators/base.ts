@@ -1,6 +1,6 @@
 /**
  * Base calculator for geopolitical indicators
- * @module @summit/geopolitical-analysis/calculators/base
+ * @module @intelgraph/geopolitical-analysis/calculators/base
  */
 
 import {

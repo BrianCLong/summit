@@ -1,6 +1,6 @@
 /**
  * Risk Scoring Package
- * @module @summit/risk-scoring
+ * @module @intelgraph/risk-scoring
  */
 
 // Types

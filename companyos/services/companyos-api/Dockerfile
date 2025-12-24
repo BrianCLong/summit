@@ -9,8 +9,8 @@ RUN mkdir -p companyos/services/companyos-api companyos/policies companyos/schem
 COPY companyos/package.json companyos/tsconfig.json ./companyos/
 COPY companyos/services/companyos-api/package.json companyos/services/companyos-api/tsconfig.json ./companyos/services/companyos-api/
 
-RUN pnpm install --filter @companyos/companyos-api --prod --frozen-lockfile --ignore-scripts || \
-  pnpm install --filter @companyos/companyos-api --prod --ignore-scripts
+RUN pnpm install --filter @intelgraph/companyos-api --prod --frozen-lockfile --ignore-scripts || \
+  pnpm install --filter @intelgraph/companyos-api --prod --ignore-scripts
 
 COPY companyos/services/companyos-api/src ./companyos/services/companyos-api/src
 COPY companyos/policies ./companyos/policies

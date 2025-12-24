@@ -96,7 +96,7 @@ During installation, discovered blocking issues that require separate resolution
 
 **Error:**
 ```
-@summit/query-optimizer is not in the npm registry
+@intelgraph/query-optimizer is not in the npm registry
 Path: services/analytics-service
 ```
 
@@ -146,7 +146,7 @@ Multiple packages in `apps/mobile-native` had version references that don't exis
 
 1. **Resolve Workspace Configuration Issues**
    ```bash
-   # Fix missing @summit/query-optimizer
+   # Fix missing @intelgraph/query-optimizer
    # Option A: Remove from services/analytics-service/package.json
    # Option B: Create the package
    # Option C: Point to correct internal package
@@ -350,7 +350,7 @@ Multiple packages in `apps/mobile-native` had version references that don't exis
 This dependency health check identified and addressed critical security vulnerabilities through pnpm overrides and development dependency updates. While full installation is blocked by workspace configuration issues, the security fixes are configured and ready to apply once these issues are resolved.
 
 **Immediate action required:**
-1. Resolve `@summit/query-optimizer` missing package issue
+1. Resolve `@intelgraph/query-optimizer` missing package issue
 2. Complete installation: `pnpm install --no-frozen-lockfile`
 3. Validate with test suite: `make smoke && pnpm test`
 

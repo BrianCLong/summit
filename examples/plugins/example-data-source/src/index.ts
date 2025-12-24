@@ -1,5 +1,5 @@
-import { createPlugin, PluginPermission } from '@summit/plugin-sdk';
-import { BaseDataSourceExtension, DataSourceQuery, DataSourceResult } from '@summit/extension-api';
+import { createPlugin, PluginPermission } from '@intelgraph/plugin-sdk';
+import { BaseDataSourceExtension, DataSourceQuery, DataSourceResult } from '@intelgraph/extension-api';
 
 /**
  * Example data source plugin that connects to a REST API

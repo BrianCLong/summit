@@ -135,7 +135,7 @@ AuthZ Gateway validates agent tokens, then forwards to Agent Gateway.
 ```typescript
 // authz-gateway/src/middleware.ts
 
-import { verifyAgentToken } from '@summit/agent-gateway';
+import { verifyAgentToken } from '@intelgraph/agent-gateway';
 
 export async function authMiddleware(req, res, next) {
   const token = req.headers.authorization?.replace('Bearer ', '');

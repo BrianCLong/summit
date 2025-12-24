@@ -3,8 +3,8 @@
  * Solves combinatorial optimization problems using quantum circuits
  */
 
-import { QuantumCircuit, QuantumSimulator } from '@summit/quantum-simulation';
-import { CircuitBuilder } from '@summit/quantum-simulation';
+import { QuantumCircuit, QuantumSimulator } from '@intelgraph/quantum-simulation';
+import { CircuitBuilder } from '@intelgraph/quantum-simulation';
 
 export interface QAOAParams {
   numQubits: number;

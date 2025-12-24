@@ -4,10 +4,10 @@
  */
 
 import express from 'express';
-import { createKyberKEM } from '@summit/post-quantum-crypto';
-import { createDilithiumSignature } from '@summit/post-quantum-crypto';
-import { createHybridKEM } from '@summit/post-quantum-crypto';
-import { createAlgorithmRegistry, createCryptoInventory, createMigrationPlanner } from '@summit/cryptographic-agility';
+import { createKyberKEM } from '@intelgraph/post-quantum-crypto';
+import { createDilithiumSignature } from '@intelgraph/post-quantum-crypto';
+import { createHybridKEM } from '@intelgraph/post-quantum-crypto';
+import { createAlgorithmRegistry, createCryptoInventory, createMigrationPlanner } from '@intelgraph/cryptographic-agility';
 
 const app = express();
 app.use(express.json());

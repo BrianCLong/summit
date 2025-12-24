@@ -7,10 +7,10 @@ An Express-based reference API for CompanyOS that follows Summit's Node + pnpm p
 Use pnpm from repo root:
 
 ```bash
-pnpm --filter @companyos/companyos-api dev   # run with ts-node-dev
-pnpm --filter @companyos/companyos-api build # emit compiled output
-pnpm --filter @companyos/companyos-api test  # run Jest tests
-pnpm --filter @companyos/companyos-api lint  # lint source files
+pnpm --filter @intelgraph/companyos-api dev   # run with ts-node-dev
+pnpm --filter @intelgraph/companyos-api build # emit compiled output
+pnpm --filter @intelgraph/companyos-api test  # run Jest tests
+pnpm --filter @intelgraph/companyos-api lint  # lint source files
 ```
 
 ## Endpoints

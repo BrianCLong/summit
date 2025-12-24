@@ -1,4 +1,4 @@
-import { cacheService } from './cacheService.js';
+import { cacheService } from './CacheService.js';
 
 export interface Investigation {
   id: string;

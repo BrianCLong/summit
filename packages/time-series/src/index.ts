@@ -1,6 +1,6 @@
 /**
  * Time Series Package - Utilities and Analysis
- * @module @summit/time-series
+ * @module @intelgraph/time-series
  */
 
 // Types

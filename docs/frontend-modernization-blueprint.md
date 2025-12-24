@@ -15,10 +15,10 @@ This document aligns nine modernization epics into a single delivery blueprint t
 ## Golden App Template (Epic 1)
 - **Repo Layout:** `/apps/web` entry app consuming `/packages/design-system`, `/packages/auth-session`, `/packages/api-client`, `/packages/feature-flags`, `/packages/logging`, `/packages/state-kit`.
 - **Scaffolding:** Plop or Turbo generator to instantiate new route features with wiring for loading skeletons, error boundaries, feature flags, and telemetry.
-- **Auth/Session Module:** Central `@summit/auth-session` package providing OIDC/OAuth client, token refresh, session heartbeats, tenant scoping, and SSR-safe cookie handling.
-- **API Client:** `@summit/api-client` wraps `fetch` with retries (expo backoff + jitter), idempotency keys, error taxonomy (auth/validation/network/dependency/unknown), structured errors, and request/response logging hooks.
-- **Feature Flags:** `@summit/feature-flags` with owner/expiry metadata, kill switch API, and dev-mode mock provider. Flags enforce governance: every flag requires owner, expiry, and rollout plan.
-- **Logging/Telemetry:** `@summit/logging` wraps OpenTelemetry to emit traces/metrics with correlation IDs propagated from headers, plus client error reporter with release/user/tenant scope.
+- **Auth/Session Module:** Central `@intelgraph/auth-session` package providing OIDC/OAuth client, token refresh, session heartbeats, tenant scoping, and SSR-safe cookie handling.
+- **API Client:** `@intelgraph/api-client` wraps `fetch` with retries (expo backoff + jitter), idempotency keys, error taxonomy (auth/validation/network/dependency/unknown), structured errors, and request/response logging hooks.
+- **Feature Flags:** `@intelgraph/feature-flags` with owner/expiry metadata, kill switch API, and dev-mode mock provider. Flags enforce governance: every flag requires owner, expiry, and rollout plan.
+- **Logging/Telemetry:** `@intelgraph/logging` wraps OpenTelemetry to emit traces/metrics with correlation IDs propagated from headers, plus client error reporter with release/user/tenant scope.
 - **State Management Kit:** React Query setup with cache hydration, optimistic update helpers with rollback, invariant checks, and stale/sync indicators.
 - **Performance Guardrails:** Route-level lazy loading, code splitting, image optimizer helpers, and a bundle analyzer script stored in CI artifacts.
 

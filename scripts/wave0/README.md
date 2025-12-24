@@ -24,11 +24,11 @@ Validates the golden path is working:
 
 ### 02-install-packages.sh
 Installs new governance packages:
-- @summit/authority-compiler
-- @summit/canonical-entities
-- @summit/connector-sdk
-- @summit/prov-ledger-extensions
-- @summit/governance-hooks
+- @intelgraph/authority-compiler
+- @intelgraph/canonical-entities
+- @intelgraph/connector-sdk
+- @intelgraph/prov-ledger-extensions
+- @intelgraph/governance-hooks
 
 ### 03-run-health-checks.sh
 Runs comprehensive health checks:

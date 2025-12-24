@@ -11,7 +11,7 @@ import type {
   SyncConflict,
   SyncError,
   DeltaChange
-} from '@summit/mdm-core';
+} from '@intelgraph/mdm-core';
 
 export class SyncEngine {
   private configurations: Map<string, SyncConfiguration>;

@@ -4,7 +4,7 @@ import { jest, test, expect } from '@jest/globals';
 test('graphRagAnswer validates JSON schema', async () => {
   const mockNeo4jDriver = {
     session: () => ({
-      run: jest.fn().mockResolvedValue({
+      run: jest.fn<() => Promise<any>>().mockResolvedValue({
         records: [
           {
             get: (key: string) => {
@@ -42,7 +42,7 @@ test('graphRagAnswer validates JSON schema', async () => {
   };
 
   const mockLlmService = {
-    complete: jest.fn().mockResolvedValue(
+    complete: jest.fn<() => Promise<string>>().mockResolvedValue(
       JSON.stringify({
         answer: 'John Doe works at Acme Corp.',
         confidence: 0.9,
@@ -55,7 +55,7 @@ test('graphRagAnswer validates JSON schema', async () => {
   };
 
   const mockEmbeddingService = {
-    generateEmbedding: jest.fn().mockResolvedValue([0.1, 0.2, 0.3]),
+    generateEmbedding: jest.fn<() => Promise<number[]>>().mockResolvedValue([0.1, 0.2, 0.3]),
   };
 
   const svc = new GraphRAGService(

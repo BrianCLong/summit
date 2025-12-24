@@ -197,7 +197,7 @@ jobs:
           DATABASE_URL=postgresql://summit:devpassword@localhost:5432/summit_dev \
           NEO4J_PASSWORD=devpassword \
           REDIS_PASSWORD=devpassword \
-          pnpm --filter @summit/server start:prod
+          pnpm --filter @intelgraph/server start:prod
           rc=$?
           {
             echo "server exit code: $rc"

@@ -18,7 +18,7 @@ This guide describes how to roll out the PerfTrace Jira automation within Summit
 
 ```bash
 npm install
-npm run --workspace=@summit/jira-integration build
+npm run --workspace=@intelgraph/jira-integration build
 ```
 
 ## 3. Configuration Checklist
@@ -36,7 +36,7 @@ npm run --workspace=@summit/jira-integration build
 
 ## 4. CI/CD Integration
 
-- Add `npm run --workspace=@summit/jira-integration test` to the CI pipeline.
+- Add `npm run --workspace=@intelgraph/jira-integration test` to the CI pipeline.
 - Enforce linting with `npm run lint` prior to packaging.
 - Require >80% coverage by checking the Jest summary output.
 - Publish generated audit logs to your observability store (e.g., CloudWatch or ELK) for compliance.

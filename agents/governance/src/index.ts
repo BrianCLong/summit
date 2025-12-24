@@ -10,7 +10,7 @@
  * - SLSA/cosign provenance for AI artifacts
  * - IC FY28 compliance validation
  *
- * @module @summit/agent-governance
+ * @module @intelgraph/agent-governance
  */
 
 // Types

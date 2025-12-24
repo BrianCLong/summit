@@ -8,7 +8,7 @@ This document summarizes the comprehensive quantum computing readiness and post-
 
 ### 1. Post-Quantum Cryptography ✅
 
-**Packages**: `@summit/post-quantum-crypto`
+**Packages**: `@intelgraph/post-quantum-crypto`
 
 - **CRYSTALS-Kyber**: Lattice-based key encapsulation (KEM)
   - Kyber-512 (Security Level 1)
@@ -33,7 +33,7 @@ This document summarizes the comprehensive quantum computing readiness and post-
 
 ### 2. Cryptographic Agility ✅
 
-**Packages**: `@summit/cryptographic-agility`
+**Packages**: `@intelgraph/cryptographic-agility`
 
 - **Algorithm Registry**: Central registry for all crypto algorithms
 - **Crypto Inventory**: Automated scanning and tracking of crypto usage
@@ -42,7 +42,7 @@ This document summarizes the comprehensive quantum computing readiness and post-
 
 ### 3. Quantum Simulation ✅
 
-**Packages**: `@summit/quantum-simulation`
+**Packages**: `@intelgraph/quantum-simulation`
 
 - **Statevector Simulator**: High-performance quantum circuit simulation
 - **Circuit Builder**: Fluent API for building quantum circuits
@@ -58,7 +58,7 @@ This document summarizes the comprehensive quantum computing readiness and post-
 
 ### 4. Quantum Optimization ✅
 
-**Packages**: `@summit/quantum-optimization`
+**Packages**: `@intelgraph/quantum-optimization`
 
 - **QAOA**: Quantum Approximate Optimization Algorithm
   - Max-Cut problems
@@ -76,7 +76,7 @@ This document summarizes the comprehensive quantum computing readiness and post-
 
 ### 5. Quantum Machine Learning ✅
 
-**Packages**: `@summit/quantum-ml`
+**Packages**: `@intelgraph/quantum-ml`
 
 - **Quantum Kernels**: Feature maps and kernel estimation
   - ZZ feature map
@@ -95,7 +95,7 @@ This document summarizes the comprehensive quantum computing readiness and post-
 
 ### 6. Services ✅
 
-**Crypto Service** (`@summit/crypto-service`)
+**Crypto Service** (`@intelgraph/crypto-service`)
 - REST API for PQC operations
 - Key generation (Kyber, Dilithium, Hybrid)
 - Key encapsulation/decapsulation
@@ -104,7 +104,7 @@ This document summarizes the comprehensive quantum computing readiness and post-
 - Crypto inventory management
 - Migration planning
 
-**Quantum Service** (`@summit/quantum-service`)
+**Quantum Service** (`@intelgraph/quantum-service`)
 - REST API for quantum operations
 - Circuit simulation
 - QAOA optimization
@@ -203,7 +203,7 @@ This document summarizes the comprehensive quantum computing readiness and post-
 ### 1. Post-Quantum Cryptography
 
 ```typescript
-import { createKyberKEM, createDilithiumSignature } from '@summit/post-quantum-crypto';
+import { createKyberKEM, createDilithiumSignature } from '@intelgraph/post-quantum-crypto';
 
 // Key encapsulation
 const kem = createKyberKEM();
@@ -220,7 +220,7 @@ const { signature } = await dss.sign(message, sigKeyPair.privateKey);
 ### 2. Quantum Simulation
 
 ```typescript
-import { createCircuit, createStatevectorSimulator } from '@summit/quantum-simulation';
+import { createCircuit, createStatevectorSimulator } from '@intelgraph/quantum-simulation';
 
 const circuit = createCircuit(2)
   .h(0)
@@ -236,7 +236,7 @@ console.log(result.counts);  // Bell state: {"00": ~512, "11": ~512}
 ### 3. Quantum Optimization
 
 ```typescript
-import { createQAOAOptimizer } from '@summit/quantum-optimization';
+import { createQAOAOptimizer } from '@intelgraph/quantum-optimization';
 
 const qaoa = createQAOAOptimizer({
   numQubits: 4,
@@ -253,7 +253,7 @@ console.log('Optimal solution:', result.optimalSolution);
 ### 4. Quantum Machine Learning
 
 ```typescript
-import { createQNN } from '@summit/quantum-ml';
+import { createQNN } from '@intelgraph/quantum-ml';
 
 const qnn = createQNN({
   numQubits: 4,

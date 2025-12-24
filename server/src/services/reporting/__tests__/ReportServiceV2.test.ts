@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { ReportServiceV2 } from '../ReportServiceV2.js';
 import { CitationValidationError } from '../../graphrag/types.js';
 

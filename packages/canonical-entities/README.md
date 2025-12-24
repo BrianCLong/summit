@@ -189,7 +189,7 @@ All entities and edges can have policy labels for access control:
 ### Time-Travel Queries
 
 ```typescript
-import { filterEntitiesAsOf, buildGraphSnapshotAtTime } from '@summit/canonical-entities';
+import { filterEntitiesAsOf, buildGraphSnapshotAtTime } from '@intelgraph/canonical-entities';
 
 // Get entities valid on a specific date
 const entitiesIn2020 = filterEntitiesAsOf(allEntities, new Date('2020-06-01'));
@@ -207,7 +207,7 @@ console.log(`Snapshot has ${snapshot.nodes.length} nodes and ${snapshot.edges.le
 ### Bitemporal Queries
 
 ```typescript
-import { isBitemporallyValid, buildBitemporalGraphSnapshot } from '@summit/canonical-entities';
+import { isBitemporallyValid, buildBitemporalGraphSnapshot } from '@intelgraph/canonical-entities';
 
 // Check if entity was valid at a time AND we knew about it
 const wasKnown = isBitemporallyValid(
@@ -228,7 +228,7 @@ const bitemporalSnapshot = buildBitemporalGraphSnapshot(
 ### Policy-Based Access Control
 
 ```typescript
-import { checkAccess, filterByAccess } from '@summit/canonical-entities';
+import { checkAccess, filterByAccess } from '@intelgraph/canonical-entities';
 
 // Define user context
 const user = {
@@ -448,7 +448,7 @@ Test files:
 The package exports GraphQL type definitions in `graphql-types.ts`. To use in your GraphQL schema:
 
 ```typescript
-import { canonicalEntityTypeDefs } from '@summit/canonical-entities';
+import { canonicalEntityTypeDefs } from '@intelgraph/canonical-entities';
 
 const typeDefs = gql`
   ${canonicalEntityTypeDefs}

@@ -8,7 +8,7 @@ import {
   ERDecision,
   ERThresholds,
   CanonicalEntityType,
-} from '@summit/canonical-schema';
+} from '@intelgraph/canonical-schema';
 import { v4 as uuidv4 } from 'uuid';
 
 export class ERDecisionService {

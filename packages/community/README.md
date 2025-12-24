@@ -1,6 +1,6 @@
-# @summit/community
+# @intelgraph/community
 
-The `@summit/community` package provides an in-memory community engagement engine designed to power discussion forums, activity feeds, contribution tracking, gamification, and analytics without requiring a backing database. The module is framework agnostic and can be wired into REST, GraphQL, or WebSocket transports.
+The `@intelgraph/community` package provides an in-memory community engagement engine designed to power discussion forums, activity feeds, contribution tracking, gamification, and analytics without requiring a backing database. The module is framework agnostic and can be wired into REST, GraphQL, or WebSocket transports.
 
 ## Features
 
@@ -21,8 +21,8 @@ The services were designed alongside WCAG 2.1 accessibility guidance, responsive
 
 ```bash
 pnpm install
-pnpm --filter @summit/community test
-pnpm --filter @summit/community build
+pnpm --filter @intelgraph/community test
+pnpm --filter @intelgraph/community build
 ```
 
 ### TypeScript Strict Mode
@@ -34,7 +34,7 @@ The package ships with strict TypeScript settings including exact optional prope
 Run ESLint to validate compliance with the monorepo rules:
 
 ```bash
-pnpm --filter @summit/community lint
+pnpm --filter @intelgraph/community lint
 ```
 
 ### Testing
@@ -42,7 +42,7 @@ pnpm --filter @summit/community lint
 The package uses Node's built-in test runner with the `ts-node` ESM loader and `c8` for coverage instrumentation. The integration suite exceeds 80% statement coverage.
 
 ```bash
-pnpm --filter @summit/community test
+pnpm --filter @intelgraph/community test
 ```
 
 ## Architecture

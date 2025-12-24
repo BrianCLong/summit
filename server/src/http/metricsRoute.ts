@@ -1,12 +1,15 @@
-import type { Request, Response } from 'express';
-import { register as registry } from '../monitoring/metrics.js';
+// @ts-nocheck
+import { Request, Response } from 'express';
+import { register } from '../observability/metrics.js';
+import { logger } from '../config/logger.js';
 
-export const metricsRoute = async (_req: Request, res: Response): Promise<void> => {
+export const metricsRoute = async (_req: Request, res: Response) => {
   try {
-    const metricsData = await registry.metrics();
-    res.set('Content-Type', registry.contentType);
-    res.send(metricsData);
+    res.set('Content-Type', register.contentType);
+    const metrics = await register.metrics();
+    res.send(metrics);
   } catch (err) {
-    res.status(500).send('Error collecting metrics');
+    logger.error({ err }, 'Error generating metrics');
+    res.status(500).send('Error generating metrics');
   }
 };

@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { EventEmitter } from 'events';
-import { cacheService } from './cacheService.js';
+import { cacheService } from './CacheService.js';
 
 // Interfaces (IOC, ThreatHunt, etc.) retained
 export interface IOC {

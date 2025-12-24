@@ -49,7 +49,7 @@ packages/
 
 ```json
 {
-  "name": "@summit/maestro-sdk",
+  "name": "@intelgraph/maestro-sdk",
   "version": "0.1.0",
   "description": "TypeScript SDK for Summit Maestro tasks, connectors, and policy-aware execution",
   "repository": "https://github.com/your-org/maestro",
@@ -252,7 +252,7 @@ import {
   defineTask,
   createRunContext,
   type TaskInput,
-} from '@summit/maestro-sdk';
+} from '@intelgraph/maestro-sdk';
 
 export default defineTask<{ url: string }, { status: number; body: string }>({
   async validate(input: TaskInput<{ url: string }>) {
@@ -280,7 +280,7 @@ if (process.env.NODE_ENV === 'development') {
 ### 1.11 Example Connector — `examples/connectors/sig-ingest.ts`
 
 ```ts
-import { defineConnector, type RunContext } from '@summit/maestro-sdk';
+import { defineConnector, type RunContext } from '@intelgraph/maestro-sdk';
 
 type Item = { id: string; payload: unknown };
 
@@ -580,7 +580,7 @@ jobs:
 ### 4.1 Using TS task in a workflow step
 
 ```ts
-import { defineTask } from '@summit/maestro-sdk';
+import { defineTask } from '@intelgraph/maestro-sdk';
 
 export default defineTask<{ path: string }, { ok: boolean }>({
   async execute(ctx, { payload }) {

@@ -4,7 +4,7 @@
  *
  * OPA-driven governance and invariant enforcement for Summit.
  *
- * @module @summit/pve
+ * @module @intelgraph/pve
  */
 
 // Core exports

@@ -15,7 +15,7 @@ GovBrief provides a repeatable and auditable pipeline for ingesting public .gov 
 Build the package once and run the CLI commands from the repository root:
 
 ```bash
-npm run --workspace=@summit/govbrief build
+npm run --workspace=@intelgraph/govbrief build
 node packages/govbrief/dist/cli.js fetch "https://nij.ojp.gov/topics/articles/what-nij-research-tells-us-about-domestic-terrorism"
 # => Artifacts written to artifacts/<sha256>
 

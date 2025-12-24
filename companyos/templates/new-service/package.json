@@ -1,5 +1,5 @@
 {
-  "name": "@companyos/service-template",
+  "name": "@intelgraph/service-template",
   "version": "0.1.0",
   "description": "CompanyOS service template with OPA, metrics, and observability pre-wired",
   "type": "module",

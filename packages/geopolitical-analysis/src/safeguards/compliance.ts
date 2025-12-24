@@ -1,6 +1,6 @@
 /**
  * Ethical compliance and safeguard checks
- * @module @summit/geopolitical-analysis/safeguards/compliance
+ * @module @intelgraph/geopolitical-analysis/safeguards/compliance
  */
 
 import {
