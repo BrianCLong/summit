@@ -37,7 +37,7 @@ export interface QueryAnalysis {
 
 export interface OptimizationContext {
   tenantId: string;
-  queryType: 'cypher' | 'sql' | 'gremlin';
+  queryType: 'cypher' | 'sql' | 'gremlin' | 'dsl';
   region?: string;
   priority: 'low' | 'medium' | 'high';
   timeoutMs?: number;
