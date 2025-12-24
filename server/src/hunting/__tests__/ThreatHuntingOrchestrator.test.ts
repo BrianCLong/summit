@@ -3,7 +3,7 @@
  * Comprehensive test suite for the threat hunting platform
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { ThreatHuntingOrchestrator } from '../ThreatHuntingOrchestrator';
 import type {
   HuntContext,
@@ -14,19 +14,19 @@ import type {
 } from '../types';
 
 // Mock dependencies
-vi.mock('../../graph/neo4j', () => ({
-  runCypher: vi.fn().mockResolvedValue([
+jest.mock('../../graph/neo4j', () => ({
+  runCypher: jest.fn().mockResolvedValue([
     { id: 'entity-1', name: 'Test Entity', type: 'HOST' },
     { id: 'entity-2', name: 'Test Entity 2', type: 'USER' },
   ]),
 }));
 
-vi.mock('../../config/logger', () => ({
+jest.mock('../../config/logger', () => ({
   default: {
-    info: vi.fn(),
-    error: vi.fn(),
-    warn: vi.fn(),
-    debug: vi.fn(),
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    debug: jest.fn(),
   },
 }));
 
@@ -38,7 +38,7 @@ describe('ThreatHuntingOrchestrator', () => {
   });
 
   afterEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('initialization', () => {
@@ -175,7 +175,7 @@ describe('ThreatHuntingOrchestrator', () => {
 
   describe('event emission', () => {
     it('should emit hunt_started event', async () => {
-      const eventHandler = vi.fn();
+      const eventHandler = jest.fn();
       orchestrator.on('hunt_started', eventHandler);
 
       await orchestrator.startHunt();
@@ -299,7 +299,7 @@ describe('LLMChainExecutor', () => {
 
     // Initialize with mock provider
     executor.initialize({
-      complete: vi.fn().mockResolvedValue({
+      complete: jest.fn().mockResolvedValue({
         content: JSON.stringify({
           hypotheses: [
             {
