@@ -64,6 +64,11 @@ const FLAG_CATALOG: Record<string, FeatureFlagDefinition> = {
     variants: ['control', 'insights-v2'],
     description: 'Controls the rollout of the updated insights UI panel.',
   },
+  'release-criteria': {
+    type: 'boolean',
+    defaultValue: false,
+    description: 'Enables the release criteria engine for case exports.',
+  },
 };
 
 const envOverrides = parseOverrideString(
