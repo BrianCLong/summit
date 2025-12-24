@@ -80,7 +80,7 @@ describe('GraphRAG citation gate integration', () => {
     const response = await service.answer(baseRequest, testUser);
 
     expect(response.answer.citations).toHaveLength(1);
-    expect(response.citationDiagnostics).toBeUndefined();
+    expect((response as any).citationDiagnostics).toBeUndefined();
   });
 
   it('emits diagnostics when citations are missing', async () => {
@@ -95,7 +95,7 @@ describe('GraphRAG citation gate integration', () => {
 
     expect(response.answer.citations.length).toBe(0);
     expect(
-      response.citationDiagnostics?.missingCitations?.message,
+      (response as any).citationDiagnostics?.missingCitations?.message,
     ).toContain('CITATION_GATE');
   });
 
@@ -112,7 +112,7 @@ describe('GraphRAG citation gate integration', () => {
     expect(response.answer.citations.length).toBe(0);
     expect(response.answer.answerText).toContain('citation-backed');
     expect(
-      response.citationDiagnostics?.danglingCitations?.evidenceIds,
+      (response as any).citationDiagnostics?.danglingCitations?.evidenceIds,
     ).toContain('ev-missing');
   });
 });

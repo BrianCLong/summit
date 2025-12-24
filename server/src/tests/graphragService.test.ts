@@ -14,7 +14,7 @@ describe('GraphRAGService', () => {
 
   function createService(llmResponses: string[]) {
     const neo4jSession = {
-      run: jest.fn().mockResolvedValue({
+      run: jest.fn<() => Promise<any>>().mockResolvedValue({
         records: [
           {
             get: (field: string) => {
