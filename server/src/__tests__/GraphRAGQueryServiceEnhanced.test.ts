@@ -96,8 +96,11 @@ describe('GraphRAGQueryServiceEnhanced', () => {
       ]),
       createClaim: jest.fn<any>().mockResolvedValue({
         id: 'claim-new',
-        statement: 'Test answer',
-        confidence: 0.85,
+        content: {
+          statement: 'Test answer',
+          type: 'graphrag_answer',
+          confidence: 0.85,
+        },
         metadata: {
           evidenceIds: ['evidence-1'],
         },
