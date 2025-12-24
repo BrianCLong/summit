@@ -1,17 +1,16 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { UsageKind } from '../../types/usage.js';
-import type { PoolClient, QueryResult } from 'pg';
 
 // 1. Create dependencies
-const mockQuery = jest.fn<() => Promise<QueryResult<any>>>();
+const mockQuery = jest.fn<(...args: any[]) => Promise<any>>();
 // IMPORTANT: mockConnect MUST return an object that mocks the client.
 // The client has methods like query() and release().
 const mockRelease = jest.fn<() => Promise<void>>();
-const mockClient: PoolClient = {
+const mockClient = {
   query: mockQuery,
   release: mockRelease,
-} as unknown as PoolClient;
-const mockConnect = jest.fn<() => Promise<PoolClient>>(() => Promise.resolve(mockClient));
+} as any;
+const mockConnect = jest.fn<() => Promise<any>>(() => Promise.resolve(mockClient));
 
 // 2. Mock modules
 jest.mock('../../config/database.js', () => ({
