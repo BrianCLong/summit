@@ -4,6 +4,7 @@ const graphOpsResolvers = require('./resolvers.graphops');
 const aiResolvers = require('./resolvers.ai');
 const annotationsResolvers = require('./resolvers.annotations');
 const { canonicalResolvers } = require('./resolvers.canonical');
+const threatActorResolvers = require('./resolvers.threat-actor');
 
 // Merge all resolvers
 const resolvers = {
@@ -13,12 +14,14 @@ const resolvers = {
     ...(aiResolvers.Query || {}),
     ...(annotationsResolvers.Query || {}),
     ...(canonicalResolvers.Query || {}),
+    ...(threatActorResolvers.Query || {}),
   },
   Mutation: {
     ...(copilotResolvers.Mutation || {}),
     ...(graphOpsResolvers.Mutation || {}),
     ...(aiResolvers.Mutation || {}),
     ...(annotationsResolvers.Mutation || {}),
+    ...(threatActorResolvers.Mutation || {}),
   },
   Subscription: {
     ...(copilotResolvers.Subscription || {}),
@@ -28,6 +31,7 @@ const resolvers = {
   },
   // Custom types
   CanonicalEntity: canonicalResolvers.CanonicalEntity,
+  ThreatActor: threatActorResolvers.ThreatActor,
 
   Entity: {
     ...(annotationsResolvers.Entity || {}),
