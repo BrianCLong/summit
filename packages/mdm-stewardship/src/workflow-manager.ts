@@ -10,7 +10,7 @@ import type {
   WorkflowStatus,
   ChangeRequest,
   DataCertification
-} from '@summit/mdm-core';
+} from '@intelgraph/mdm-core';
 
 export class StewardshipWorkflowManager {
   private workflows: Map<string, StewardshipWorkflow>;

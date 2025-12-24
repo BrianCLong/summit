@@ -450,7 +450,7 @@ Use official SDKs when available:
 
 ```bash
 # JavaScript/TypeScript
-npm install @summit/api-client
+npm install @intelgraph/api-client
 
 # Python
 pip install summit-api

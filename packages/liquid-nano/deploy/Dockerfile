@@ -3,7 +3,7 @@ WORKDIR /usr/src/app
 COPY ../../package.json ../../package-lock.json* ./
 RUN npm install --omit=dev
 COPY ../../packages/liquid-nano ./packages/liquid-nano
-RUN npm run --workspace @summit/liquid-nano build
+RUN npm run --workspace @intelgraph/liquid-nano build
 
 FROM node:20-slim
 WORKDIR /opt/liquid-nano

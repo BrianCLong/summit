@@ -43,32 +43,32 @@ Generated: $TIMESTAMP
 
 | Package | Version | Status | Tests |
 |---------|---------|--------|-------|
-| @summit/authority-compiler | 0.1.0 | ✅ Scaffolded | ✅ Added |
-| @summit/canonical-entities | 0.1.0 | ✅ Scaffolded | ✅ Added |
-| @summit/connector-sdk | 0.1.0 | ✅ Scaffolded | ✅ Added |
-| @summit/prov-ledger-extensions | 0.1.0 | ✅ Scaffolded | Pending |
-| @summit/governance-hooks | 0.1.0 | ✅ Scaffolded | Pending |
+| @intelgraph/authority-compiler | 0.1.0 | ✅ Scaffolded | ✅ Added |
+| @intelgraph/canonical-entities | 0.1.0 | ✅ Scaffolded | ✅ Added |
+| @intelgraph/connector-sdk | 0.1.0 | ✅ Scaffolded | ✅ Added |
+| @intelgraph/prov-ledger-extensions | 0.1.0 | ✅ Scaffolded | Pending |
+| @intelgraph/governance-hooks | 0.1.0 | ✅ Scaffolded | Pending |
 
 ## Package Dependencies
 
 ### authority-compiler
 - zod (schema validation)
-- @summit/types
+- @intelgraph/types
 
 ### canonical-entities
 - zod (schema validation)
-- @summit/types
+- @intelgraph/types
 
 ### connector-sdk
-- @summit/types
+- @intelgraph/types
 
 ### prov-ledger-extensions
-- @summit/prov-ledger
-- @summit/types
+- @intelgraph/prov-ledger
+- @intelgraph/types
 
 ### governance-hooks
-- @summit/authority-compiler
-- @summit/prov-ledger-extensions
+- @intelgraph/authority-compiler
+- @intelgraph/prov-ledger-extensions
 - @opentelemetry/api
 
 ## TypeScript Configuration

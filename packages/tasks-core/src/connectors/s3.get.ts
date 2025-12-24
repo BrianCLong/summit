@@ -1,4 +1,4 @@
-import { defineTask } from '@summit/maestro-sdk';
+import { defineTask } from '@intelgraph/maestro-sdk';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 
 interface In {

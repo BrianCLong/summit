@@ -248,11 +248,11 @@ Includes:
 ### JavaScript/TypeScript
 
 ```bash
-npm install @summit/client
+npm install @intelgraph/client
 ```
 
 ```typescript
-import { SummitClient } from '@summit/client';
+import { SummitClient } from '@intelgraph/client';
 
 const client = new SummitClient({
   url: 'http://localhost:4000/graphql',

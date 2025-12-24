@@ -1,4 +1,4 @@
-# @companyos/observability
+# @intelgraph/observability
 
 Unified observability SDK for CompanyOS services. Provides standardized metrics, logging, tracing, SLO management, and health checks.
 
@@ -14,7 +14,7 @@ Unified observability SDK for CompanyOS services. Provides standardized metrics,
 ## Installation
 
 ```bash
-pnpm add @companyos/observability
+pnpm add @intelgraph/observability
 ```
 
 ## Quick Start
@@ -25,7 +25,7 @@ import {
   initializeObservability,
   setupObservability,
   createLogger,
-} from '@companyos/observability';
+} from '@intelgraph/observability';
 
 const app = express();
 
@@ -116,7 +116,7 @@ import {
   recordCacheOperation,
   recordJob,
   recordError,
-} from '@companyos/observability';
+} from '@intelgraph/observability';
 
 // Record an HTTP request
 recordHttpRequest('GET', '/api/users', 200, 0.045, 'my-service');
@@ -139,7 +139,7 @@ recordError('ValidationError', 'medium', 'my-service');
 ### Structured Logging
 
 ```typescript
-import { createLogger, createAuditLogger } from '@companyos/observability';
+import { createLogger, createAuditLogger } from '@intelgraph/observability';
 
 const logger = createLogger({
   service: serviceConfig,
@@ -197,7 +197,7 @@ import {
   createDbSpan,
   addSpanAttributes,
   recordException,
-} from '@companyos/observability';
+} from '@intelgraph/observability';
 
 // Wrap an async operation
 const result = await withSpan('processOrder', async (span) => {
@@ -231,7 +231,7 @@ dbSpan.end();
 ### Context Propagation
 
 ```typescript
-import { extractContext, injectContext } from '@companyos/observability';
+import { extractContext, injectContext } from '@intelgraph/observability';
 
 // Extract context from incoming request headers
 const parentContext = extractContext(req.headers);
@@ -246,7 +246,7 @@ await fetch('http://other-service/api', { headers });
 ### Generating SLO Configuration
 
 ```typescript
-import { generateSloConfig, DEFAULT_SLO_TARGETS } from '@companyos/observability';
+import { generateSloConfig, DEFAULT_SLO_TARGETS } from '@intelgraph/observability';
 
 // Generate SLOs for a service
 const { slos, prometheusRules } = generateSloConfig('my-api', 'api-service');
@@ -258,7 +258,7 @@ console.log('Prometheus Rules:', prometheusRules);
 ### Error Budget Calculation
 
 ```typescript
-import { calculateErrorBudget, timeToExhaustion } from '@companyos/observability';
+import { calculateErrorBudget, timeToExhaustion } from '@intelgraph/observability';
 
 const budget = calculateErrorBudget(
   99.9,    // SLO target (%)
@@ -293,7 +293,7 @@ import {
   createRedisHealthCheck,
   createHttpHealthCheck,
   runHealthChecks,
-} from '@companyos/observability';
+} from '@intelgraph/observability';
 
 // Register database health check
 registerHealthCheck('postgres', createPostgresHealthCheck(pgPool));
@@ -344,7 +344,7 @@ import {
   requestLoggingMiddleware,
   errorMiddleware,
   metricsHandler,
-} from '@companyos/observability';
+} from '@intelgraph/observability';
 
 const config = { service: serviceConfig };
 

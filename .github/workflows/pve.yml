@@ -42,10 +42,10 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build PVE
-        run: pnpm --filter @summit/pve build
+        run: pnpm --filter @intelgraph/pve build
 
       - name: Run PVE Tests
-        run: pnpm --filter @summit/pve test:run
+        run: pnpm --filter @intelgraph/pve test:run
 
       - name: Validate PR
         if: github.event_name == 'pull_request'
@@ -111,7 +111,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build PVE
-        run: pnpm --filter @summit/pve build
+        run: pnpm --filter @intelgraph/pve build
 
       - name: Run Security Scan
         run: |

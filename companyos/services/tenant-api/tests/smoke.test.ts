@@ -2,7 +2,7 @@
  * CompanyOS Tenant API - Smoke Tests
  *
  * Golden path verification for tenant operations.
- * Run with: pnpm --filter @companyos/tenant-api test:smoke
+ * Run with: pnpm --filter @intelgraph/tenant-api test:smoke
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';

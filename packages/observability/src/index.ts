@@ -1,5 +1,5 @@
 /**
- * @companyos/observability
+ * @intelgraph/observability
  *
  * CompanyOS Observability SDK - Unified observability for all services
  *
@@ -18,7 +18,7 @@
  *   createLogger,
  *   withSpan,
  *   recordHttpRequest,
- * } from '@companyos/observability';
+ * } from '@intelgraph/observability';
  *
  * // Initialize observability for your service
  * await initializeObservability({

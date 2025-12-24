@@ -77,12 +77,12 @@ summit catalog validate --service=<service-id> --section=ownership
 
 - [ ] **Build Passes**: Service builds successfully
   ```bash
-  pnpm build --filter=@summit/<service-id>
+  pnpm build --filter=@intelgraph/<service-id>
   ```
 
 - [ ] **Tests Pass**: Unit tests pass
   ```bash
-  pnpm test --filter=@summit/<service-id>
+  pnpm test --filter=@intelgraph/<service-id>
   ```
 
 ---

@@ -71,6 +71,7 @@ export {
 
 // Events
 export { PluginEventBus } from './events/PluginEventBus.js';
+export type { IPluginEventBus } from './types/plugin.js';
 
 // Registry
 export { InMemoryPluginRegistry } from './registry/InMemoryPluginRegistry.js';

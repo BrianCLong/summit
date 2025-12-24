@@ -16,28 +16,28 @@ The platform supports AWS, Azure, and GCP with:
 
 ### Key Components
 
-1. **Cloud Platform** (`@summit/cloud-platform`)
+1. **Cloud Platform** (`@intelgraph/cloud-platform`)
    - Multi-cloud resource management
    - Cost optimization and monitoring
    - Disaster recovery orchestration
 
-2. **Lakehouse** (`@summit/lakehouse`)
+2. **Lakehouse** (`@intelgraph/lakehouse`)
    - Delta Lake, Iceberg, and Hudi support
    - ACID transactions
    - Time travel and versioning
    - Schema evolution
 
-3. **Object Storage** (`@summit/object-storage`)
+3. **Object Storage** (`@intelgraph/object-storage`)
    - Lifecycle management
    - Data partitioning strategies
    - Compression optimization
 
-4. **Unified Analytics** (`@summit/unified-analytics`)
+4. **Unified Analytics** (`@intelgraph/unified-analytics`)
    - SQL query engine
    - Query optimization
    - Federated queries
 
-5. **Cloud Governance** (`@summit/cloud-governance`)
+5. **Cloud Governance** (`@intelgraph/cloud-governance`)
    - Fine-grained access control
    - Audit logging
    - PII detection and masking
@@ -48,7 +48,7 @@ The platform supports AWS, Azure, and GCP with:
 ### 1. Initialize Multi-Cloud Deployment
 
 \`\`\`typescript
-import { MultiCloudManager, CloudProvider } from '@summit/cloud-platform';
+import { MultiCloudManager, CloudProvider } from '@intelgraph/cloud-platform';
 
 const deployment = {
   primary: {
@@ -81,7 +81,7 @@ await manager.validateAllConnections();
 ### 2. Create a Lakehouse Table
 
 \`\`\`typescript
-import { LakehouseManager, TableFormat } from '@summit/lakehouse';
+import { LakehouseManager, TableFormat } from '@intelgraph/lakehouse';
 
 const lakehouse = new LakehouseManager();
 
@@ -105,7 +105,7 @@ const table = await lakehouse.createTable({
 ### 3. Execute Queries
 
 \`\`\`typescript
-import { UnifiedAnalyticsEngine } from '@summit/unified-analytics';
+import { UnifiedAnalyticsEngine } from '@intelgraph/unified-analytics';
 
 const analytics = new UnifiedAnalyticsEngine({
   enableAdaptiveExecution: true,
@@ -141,7 +141,7 @@ const versionData = await table.readAtVersion({
 ### 5. Set Up Governance
 
 \`\`\`typescript
-import { GovernanceManager, AccessLevel } from '@summit/cloud-governance';
+import { GovernanceManager, AccessLevel } from '@intelgraph/cloud-governance';
 
 const governance = new GovernanceManager();
 
@@ -172,7 +172,7 @@ const piiResult = await governance.detectPII({
 ### Cost Optimization
 
 \`\`\`typescript
-import { CloudCostManager } from '@summit/cloud-platform';
+import { CloudCostManager } from '@intelgraph/cloud-platform';
 
 const costManager = new CloudCostManager();
 
@@ -197,7 +197,7 @@ const suggestions = costManager.getOptimizationSuggestions(CloudProvider.AWS);
 ### Disaster Recovery
 
 \`\`\`typescript
-import { DisasterRecoveryManager } from '@summit/cloud-platform';
+import { DisasterRecoveryManager } from '@intelgraph/cloud-platform';
 
 const drConfig = {
   enabled: true,
@@ -227,7 +227,7 @@ await drManager.initiateFailover(
 ### Table Optimization
 
 \`\`\`typescript
-import { LakehouseOptimizer } from '@summit/lakehouse';
+import { LakehouseOptimizer } from '@intelgraph/lakehouse';
 
 const optimizer = new LakehouseOptimizer();
 

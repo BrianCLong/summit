@@ -68,13 +68,13 @@ Conducted a comprehensive deep-dive audit of the Summit/IntelGraph codebase to i
 
 **File:** `packages/sigint-collector/package.json`
 
-**Issue:** Referenced non-existent `@summit/shared` workspace package.
+**Issue:** Referenced non-existent `@intelgraph/shared` workspace package.
 
 **Fix:** Removed the dependency as the package doesn't exist in the workspace.
 
 ```diff
   "dependencies": {
--   "@summit/shared": "workspace:*",
+-   "@intelgraph/shared": "workspace:*",
     "eventemitter3": "^5.0.1",
     "uuid": "^9.0.0",
     "zod": "^3.22.4"
@@ -349,7 +349,7 @@ git commit -m "fix(config): resolve tsconfig syntax errors and dependency confli
 - Update mobile-native dependencies to available versions
 - Remove duplicate allowImportingTsExtensions properties
 - Add @types/node to govbrief package
-- Remove non-existent @summit/shared dependency from sigint-collector
+- Remove non-existent @intelgraph/shared dependency from sigint-collector
 
 Fixes build-blocking TS1005 and ERR_PNPM_NO_MATCHING_VERSION errors."
 ```

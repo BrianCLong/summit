@@ -1,4 +1,4 @@
-# @companyos/scaffold-cli
+# @intelgraph/scaffold-cli
 
 Golden Path Platform scaffolding CLI for CompanyOS services.
 
@@ -6,10 +6,10 @@ Golden Path Platform scaffolding CLI for CompanyOS services.
 
 ```bash
 # Build the CLI
-pnpm --filter @companyos/scaffold-cli build
+pnpm --filter @intelgraph/scaffold-cli build
 
 # Or run directly via pnpm
-pnpm dlx @companyos/scaffold-cli <command>
+pnpm dlx @intelgraph/scaffold-cli <command>
 ```
 
 ## Commands

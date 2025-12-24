@@ -2,7 +2,7 @@ import {
   defineTask,
   createRunContext,
   type TaskInput,
-} from '@summit/maestro-sdk';
+} from '@intelgraph/maestro-sdk';
 
 export default defineTask<{ url: string }, { status: number; body: string }>({
   async validate(input: TaskInput<{ url: string }>) {

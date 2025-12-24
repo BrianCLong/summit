@@ -288,8 +288,8 @@
         "source": "docker-compose.ai.yml"
       }
     },
-    "@summit/a11y-lab": {
-      "name": "@summit/a11y-lab",
+    "@intelgraph/a11y-lab": {
+      "name": "@intelgraph/a11y-lab",
       "type": "app",
       "category": "app",
       "description": "Accessibility lab with Playwright + axe-core gates, keyboard trap detection, contrast budgeting, and SR tooling.",
@@ -312,8 +312,8 @@
         "version": "1.0.0"
       }
     },
-    "@companyos/compliance-console": {
-      "name": "@companyos/compliance-console",
+    "@intelgraph/compliance-console": {
+      "name": "@intelgraph/compliance-console",
       "type": "app",
       "category": "app",
       "dependencies": [],
@@ -347,8 +347,8 @@
         "version": "1.0.0"
       }
     },
-    "@companyos/intelgraph-api": {
-      "name": "@companyos/intelgraph-api",
+    "@intelgraph/intelgraph-api": {
+      "name": "@intelgraph/intelgraph-api",
       "type": "app",
       "category": "api",
       "dependencies": [],
@@ -807,13 +807,13 @@
         "version": "1.0.0"
       }
     },
-    "@summit/cloud-governance": {
-      "name": "@summit/cloud-governance",
+    "@intelgraph/cloud-governance": {
+      "name": "@intelgraph/cloud-governance",
       "type": "package",
       "category": "library",
       "description": "Cloud governance, security, and compliance for data lakehouse",
       "dependencies": [
-        "@summit/lakehouse"
+        "@intelgraph/lakehouse"
       ],
       "dependents": [],
       "metadata": {
@@ -853,14 +853,14 @@
         "version": "1.0.0"
       }
     },
-    "@summit/comint-analyzer": {
-      "name": "@summit/comint-analyzer",
+    "@intelgraph/comint-analyzer": {
+      "name": "@intelgraph/comint-analyzer",
       "type": "package",
       "category": "library",
       "description": "Communications Intelligence Analysis - Training Framework",
       "dependencies": [
-        "@summit/sigint-collector",
-        "@summit/rf-processor"
+        "@intelgraph/sigint-collector",
+        "@intelgraph/rf-processor"
       ],
       "dependents": [],
       "metadata": {
@@ -5152,7 +5152,7 @@
     "api": [
       "api",
       "gateway",
-      "@companyos/intelgraph-api",
+      "@intelgraph/intelgraph-api",
       "apps-server"
     ],
     "frontend": [
@@ -5181,9 +5181,9 @@
       "kafka"
     ],
     "app": [
-      "@summit/a11y-lab",
+      "@intelgraph/a11y-lab",
       "@intelgraph/analytics-engine",
-      "@companyos/compliance-console",
+      "@intelgraph/compliance-console",
       "@intelgraph/desktop",
       "@intelgraph/graph-analytics-service",
       "@intelgraph/labeling-ui",
@@ -5218,10 +5218,10 @@
       "@intelgraph/cep-engine",
       "@intelgraph/chain-of-custody",
       "@intelgraph/charting",
-      "@summit/cloud-governance",
+      "@intelgraph/cloud-governance",
       "@intelgraph/cnn-framework",
       "@intelgraph/collaboration",
-      "@summit/comint-analyzer",
+      "@intelgraph/comint-analyzer",
       "@intelgraph/compliance-monitor",
       "@intelgraph/content-verification",
       "@intelgraph/counterintel-ops",

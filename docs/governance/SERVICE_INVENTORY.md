@@ -51,7 +51,7 @@ This document provides a comprehensive inventory of all Summit services and thei
 // Integration location: server/src/graphql/middleware/governance.ts
 import {
   createGraphQLGovernanceMiddleware,
-} from '@summit/governance-hooks';
+} from '@intelgraph/governance-hooks';
 
 const governance = createGraphQLGovernanceMiddleware(config, {
   authorityEvaluator,
@@ -79,7 +79,7 @@ const schema = makeExecutableSchema({
 // Integration location: services/copilot/src/middleware/governance.ts
 import {
   createCopilotGovernanceMiddleware,
-} from '@summit/governance-hooks';
+} from '@intelgraph/governance-hooks';
 
 const governance = createCopilotGovernanceMiddleware(config, {
   costTracker,
@@ -100,7 +100,7 @@ const governance = createCopilotGovernanceMiddleware(config, {
 // Integration location: services/rag/src/middleware/governance.ts
 import {
   createRAGGovernanceMiddleware,
-} from '@summit/governance-hooks';
+} from '@intelgraph/governance-hooks';
 
 const governance = createRAGGovernanceMiddleware(config, {
   authorityFilter,
@@ -119,7 +119,7 @@ const governance = createRAGGovernanceMiddleware(config, {
 // Integration location: connectors/src/middleware/governance.ts
 import {
   createConnectorGovernanceMiddleware,
-} from '@summit/governance-hooks';
+} from '@intelgraph/governance-hooks';
 
 const governance = createConnectorGovernanceMiddleware(config, {
   authManager,

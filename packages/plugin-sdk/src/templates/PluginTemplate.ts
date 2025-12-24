@@ -7,7 +7,7 @@ export function generatePluginTemplate(config: {
   category: string;
   author: string;
 }): string {
-  return `import { createPlugin, PluginPermission } from '@summit/plugin-sdk';
+  return `import { createPlugin, PluginPermission } from '@intelgraph/plugin-sdk';
 
 export default createPlugin()
   .withMetadata({

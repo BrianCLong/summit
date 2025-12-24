@@ -227,7 +227,7 @@ template: |
 
     implementation:
       typescript: |
-        import { mask } from '@summit/privacy';
+        import { mask } from '@intelgraph/privacy';
 
         const maskedEmail = mask.email(user.email);
         // "j***@e***.com"

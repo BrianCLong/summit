@@ -3,7 +3,7 @@
 A lightweight wrapper around the PRER service REST API.
 
 ```ts
-import { PrerClient } from '@summit/prer-sdk';
+import { PrerClient } from '@intelgraph/prer-sdk';
 
 const client = new PrerClient({
   baseUrl: 'http://localhost:3000',

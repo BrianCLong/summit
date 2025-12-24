@@ -4,8 +4,8 @@ import {
   PluginLogger,
   PluginStorage,
   PluginAPI,
-  PluginEventBus,
-} from '@summit/plugin-system';
+  IPluginEventBus,
+} from '@intelgraph/plugin-system';
 
 /**
  * Create a mock plugin context for testing
@@ -18,7 +18,7 @@ export function createMockContext(overrides?: Partial<PluginContext>): PluginCon
     logger: createMockLogger(),
     storage: createMockStorage(),
     api: createMockAPI(),
-    events: createMockEventBus(),
+    events: createMockEventBus() as any,
     ...overrides,
   };
 }
@@ -70,7 +70,7 @@ export function createMockAPI(): PluginAPI {
 /**
  * Create a mock event bus
  */
-export function createMockEventBus(): PluginEventBus {
+export function createMockEventBus(): any {
   const handlers = new Map<string, Set<Function>>();
 
   return {

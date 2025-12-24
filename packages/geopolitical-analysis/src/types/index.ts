@@ -1,6 +1,6 @@
 /**
  * Geopolitical Analysis Types
- * @module @summit/geopolitical-analysis/types
+ * @module @intelgraph/geopolitical-analysis/types
  */
 
 /**

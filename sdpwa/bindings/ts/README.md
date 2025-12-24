@@ -1,4 +1,4 @@
-# @summit/sdpwa
+# @intelgraph/sdpwa
 
 TypeScript bindings for the [`sdpwa`](../..) streaming differential privacy window aggregator. The bindings are designed for use with `wasm-pack` builds of the Rust crate and provide a simple ergonomic API for ingesting events, releasing windowed metrics, and interrogating the on-device privacy ledger.
 
@@ -13,14 +13,14 @@ wasm-pack build ../../ --features wasm --target bundler --out-dir pkg
 2. Install the bindings:
 
 ```bash
-npm install @summit/sdpwa
+npm install @intelgraph/sdpwa
 ```
 
 3. Instantiate the aggregator inside your application:
 
 ```ts
 import init from './pkg/sdpwa.js'
-import { StreamingDpWindowAggregator } from '@summit/sdpwa'
+import { StreamingDpWindowAggregator } from '@intelgraph/sdpwa'
 
 const aggregator = await StreamingDpWindowAggregator.create(
   init as any,

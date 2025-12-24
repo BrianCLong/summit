@@ -1,5 +1,5 @@
 {
-  "name": "@summit/pr-review",
+  "name": "@intelgraph/pr-review",
   "version": "0.1.0",
   "description": "PR Review Assistant with zero-secret guarantee",
   "main": "dist/main.js",

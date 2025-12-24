@@ -26,7 +26,7 @@ import {
   KeyPair,
   Signature,
   EncapsulatedSecret,
-} from '@summit/post-quantum-crypto';
+} from '@intelgraph/post-quantum-crypto';
 
 export interface PQCKeyStore {
   keyId: string;

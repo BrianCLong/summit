@@ -356,7 +356,7 @@ describe('AuthService', () => {
       expect(result).not.toBeNull();
       expect(result?.id).toBe(mockUser.id);
       expect(result?.email).toBe(mockUser.email);
-      expect(jwt.verify).toHaveBeenCalledWith(mockToken, 'test-secret-key');
+      expect(jwt.verify).toHaveBeenCalledWith(mockToken, 'test-jwt-secret-for-testing-only');
     });
 
     it('should return null for invalid token', async () => {

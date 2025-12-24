@@ -422,7 +422,7 @@
   {
     "kind": "node",
     "path": "sdk/qpg/typescript",
-    "name": "@summit/qpg-client",
+    "name": "@intelgraph/qpg-client",
     "version": "0.1.0",
     "scripts": {
       "build": "tsc -p tsconfig.json"
@@ -661,7 +661,7 @@
   {
     "kind": "node",
     "path": "pcbo/cli",
-    "name": "@summit/pcbo-cli",
+    "name": "@intelgraph/pcbo-cli",
     "version": "0.1.0",
     "scripts": {
       "build": "tsc -p tsconfig.json",
@@ -1041,7 +1041,7 @@
   {
     "kind": "node",
     "path": "services/data-spine",
-    "name": "@summit/data-spine",
+    "name": "@intelgraph/data-spine",
     "version": "0.1.0",
     "scripts": {
       "test": "node --test"
@@ -1095,7 +1095,7 @@
   {
     "kind": "node",
     "path": "services/spar",
-    "name": "@summit/spar",
+    "name": "@intelgraph/spar",
     "version": "0.1.0",
     "scripts": {
       "build": "tsc -p tsconfig.json",
@@ -1518,7 +1518,7 @@
   {
     "kind": "node",
     "path": "apps/intelgraph-api",
-    "name": "@companyos/intelgraph-api",
+    "name": "@intelgraph/intelgraph-api",
     "version": "0.1.0",
     "scripts": {
       "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
@@ -1939,7 +1939,7 @@
   {
     "kind": "node",
     "path": "libs/configguard/ts",
-    "name": "@summit/configguard",
+    "name": "@intelgraph/configguard",
     "version": "0.1.0",
     "scripts": {
       "build": "tsc -p tsconfig.json",
@@ -2345,7 +2345,7 @@
   {
     "kind": "node",
     "path": "packages/liquid-nano",
-    "name": "@summit/liquid-nano",
+    "name": "@intelgraph/liquid-nano",
     "version": "0.1.0",
     "scripts": {
       "build": "tsc -p tsconfig.build.json",
@@ -2424,7 +2424,7 @@
   {
     "kind": "node",
     "path": "packages/sdk-ts",
-    "name": "@summit/maestro-sdk",
+    "name": "@intelgraph/maestro-sdk",
     "version": "0.1.0",
     "scripts": {
       "build": "tsc -p tsconfig.json",
@@ -2459,7 +2459,7 @@
   {
     "kind": "node",
     "path": "packages/narrative-engine",
-    "name": "@summit/narrative-engine",
+    "name": "@intelgraph/narrative-engine",
     "version": "0.1.0",
     "scripts": {
       "build": "tsc -p tsconfig.json"
@@ -2471,7 +2471,7 @@
   {
     "kind": "node",
     "path": "packages/tasks-core",
-    "name": "@summit/maestro-tasks-core",
+    "name": "@intelgraph/maestro-tasks-core",
     "version": "0.1.0",
     "scripts": {
       "build": "tsc -p tsconfig.json",
@@ -2510,7 +2510,7 @@
   {
     "kind": "node",
     "path": "packages/rptc",
-    "name": "@summit/rptc",
+    "name": "@intelgraph/rptc",
     "version": "0.1.0",
     "scripts": {
       "build": "tsc -p tsconfig.build.json",
@@ -2545,7 +2545,7 @@
   {
     "kind": "node",
     "path": "packages/community",
-    "name": "@summit/community",
+    "name": "@intelgraph/community",
     "version": "0.1.0",
     "scripts": {
       "build": "tsc -p tsconfig.json",
@@ -2606,7 +2606,7 @@
   {
     "kind": "node",
     "path": "packages/jira-integration",
-    "name": "@summit/jira-integration",
+    "name": "@intelgraph/jira-integration",
     "version": "0.1.0",
     "scripts": {
       "build": "tsc -p tsconfig.json",
@@ -2662,7 +2662,7 @@
   {
     "kind": "node",
     "path": "packages/govbrief",
-    "name": "@summit/govbrief",
+    "name": "@intelgraph/govbrief",
     "version": "0.1.0",
     "scripts": {
       "build": "tsc -b",
@@ -3027,7 +3027,7 @@
   {
     "kind": "node",
     "path": "tools/decs-cli",
-    "name": "@summit/decs-cli",
+    "name": "@intelgraph/decs-cli",
     "version": "0.1.0",
     "scripts": {
       "build": "tsc -p tsconfig.json",
@@ -3194,7 +3194,7 @@
   {
     "kind": "node",
     "path": "ccs/bindings",
-    "name": "@summit/ccs-bindings",
+    "name": "@intelgraph/ccs-bindings",
     "version": "0.1.0",
     "scripts": {
       "build": "tsc -p tsconfig.json",

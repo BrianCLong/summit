@@ -82,7 +82,7 @@ summit-ext reload
 ### Main Activation Function
 
 ```typescript
-import type { ExtensionContext, ExtensionActivation } from '@summit/extensions';
+import type { ExtensionContext, ExtensionActivation } from '@intelgraph/extensions';
 
 export async function activate(context: ExtensionContext): Promise<ExtensionActivation> {
   const { logger, config, api, extensionPath, storagePath } = context;

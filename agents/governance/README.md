@@ -48,7 +48,7 @@ This framework provides comprehensive governance capabilities for AI agent fleet
 ## Quick Start
 
 ```typescript
-import { createGovernanceFramework } from '@summit/agent-governance';
+import { createGovernanceFramework } from '@intelgraph/agent-governance';
 
 // Create governance framework with all components
 const governance = createGovernanceFramework({
@@ -104,7 +104,7 @@ if (decision.allow) {
 OPA-based policy evaluation with caching, retries, and fail-safe defaults.
 
 ```typescript
-import { AgentPolicyEngine } from '@summit/agent-governance/policy-engine';
+import { AgentPolicyEngine } from '@intelgraph/agent-governance/policy-engine';
 
 const engine = new AgentPolicyEngine({
   opaBaseUrl: 'http://opa:8181',
@@ -124,7 +124,7 @@ const chainDecision = await engine.evaluateChain(context, chainMetadata);
 Multi-LLM orchestration with governance controls:
 
 ```typescript
-import { PromptChainOrchestrator } from '@summit/agent-governance/orchestration';
+import { PromptChainOrchestrator } from '@intelgraph/agent-governance/orchestration';
 
 const orchestrator = new PromptChainOrchestrator(policyEngine, {
   maxConcurrentChains: 10,
@@ -149,7 +149,7 @@ const result = await orchestrator.executeChain({
 Automated detection and mitigation:
 
 ```typescript
-import { IncidentResponseManager } from '@summit/agent-governance/incident-response';
+import { IncidentResponseManager } from '@intelgraph/agent-governance/incident-response';
 
 const incidentManager = new IncidentResponseManager({
   autoMitigate: true,
@@ -180,7 +180,7 @@ await incidentManager.resolveIncident(incident.id, {
 Detection and remediation of AI hallucinations:
 
 ```typescript
-import { HallucinationAuditor } from '@summit/agent-governance/hallucination-audit';
+import { HallucinationAuditor } from '@intelgraph/agent-governance/hallucination-audit';
 
 const auditor = new HallucinationAuditor({
   enabled: true,
@@ -206,7 +206,7 @@ if (detection) {
 Automatic recovery from failures:
 
 ```typescript
-import { RollbackManager } from '@summit/agent-governance/rollback';
+import { RollbackManager } from '@intelgraph/agent-governance/rollback';
 
 const rollbackManager = new RollbackManager({
   triggers: [
@@ -239,7 +239,7 @@ const rollback = await rollbackManager.initiateRollback({
 SLSA/cosign provenance for AI artifacts:
 
 ```typescript
-import { AIProvenanceManager } from '@summit/agent-governance/provenance';
+import { AIProvenanceManager } from '@intelgraph/agent-governance/provenance';
 
 const provenanceManager = new AIProvenanceManager({
   signProvenance: true,
@@ -267,7 +267,7 @@ console.log('SLSA Level:', verification.slsaLevel);
 Intelligence Community compliance validation:
 
 ```typescript
-import { ICFY28ComplianceValidator } from '@summit/agent-governance/compliance';
+import { ICFY28ComplianceValidator } from '@intelgraph/agent-governance/compliance';
 
 const validator = new ICFY28ComplianceValidator(config, dependencies);
 

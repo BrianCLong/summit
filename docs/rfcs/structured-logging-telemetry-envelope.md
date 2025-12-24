@@ -104,7 +104,7 @@ All emissions MUST conform to the following top-level structure (JSON Schema dra
 ## Implementation Plan
 1. **Schema package**
    - Publish `telemetry-envelope.schema.json` (generated from above) under `docs/schemas` and export TS types (zod/TypeBox) for API/worker/pipeline runtimes.
-   - Add AJV validation helper (`assertEnvelope`) and redaction utility (`redactEnvelope`) shared in a lightweight `@summit/telemetry` package.
+   - Add AJV validation helper (`assertEnvelope`) and redaction utility (`redactEnvelope`) shared in a lightweight `@intelgraph/telemetry` package.
 2. **API adoption**
    - Wrap Pino transport with envelope builder and validator; ensure OTEL context manager injects `traceId`/`spanId`.
    - Enforce `serviceRole=api`, attach `request` + `actor` from auth middleware.

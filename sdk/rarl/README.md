@@ -1,17 +1,17 @@
-# @summit/rarl SDK
+# @intelgraph/rarl SDK
 
 TypeScript SDK for interacting with the Risk-Adaptive Rate Limiter (RARL) sidecar.
 
 ## Installation
 
 ```bash
-npm install @summit/rarl
+npm install @intelgraph/rarl
 ```
 
 ## Usage
 
 ```ts
-import { RarlClient } from '@summit/rarl';
+import { RarlClient } from '@intelgraph/rarl';
 
 const client = new RarlClient({ baseUrl: 'http://localhost:8080' });
 

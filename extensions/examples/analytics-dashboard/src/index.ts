@@ -4,7 +4,7 @@
  * Example extension demonstrating analytics capabilities.
  */
 
-import type { ExtensionContext, ExtensionActivation } from '@summit/extensions';
+import type { ExtensionContext, ExtensionActivation } from '@intelgraph/extensions';
 
 /**
  * Extension activation function

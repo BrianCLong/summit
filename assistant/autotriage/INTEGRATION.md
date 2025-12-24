@@ -17,7 +17,7 @@ Comprehensive guide for integrating the autotriage engine with your workflows, t
 ### As a Node.js Module
 
 ```typescript
-import { parseBacklog, generateTriageReport } from '@summit/autotriage';
+import { parseBacklog, generateTriageReport } from '@intelgraph/autotriage';
 
 // Use in your existing code
 const items = await parseBacklog();
@@ -326,7 +326,7 @@ jobs:
 
 ```typescript
 import express from 'express';
-import { parseBacklog, generateTriageReport } from '@summit/autotriage';
+import { parseBacklog, generateTriageReport } from '@intelgraph/autotriage';
 
 const app = express();
 
@@ -355,7 +355,7 @@ app.listen(3000);
 
 ```typescript
 import { ApolloServer, gql } from 'apollo-server';
-import { parseBacklog } from '@summit/autotriage';
+import { parseBacklog } from '@intelgraph/autotriage';
 
 const typeDefs = gql`
   type TriageItem {
@@ -460,7 +460,7 @@ class SentryMonitor extends TriageMonitor {
 
 ```typescript
 import JiraApi from 'jira-client';
-import { parseBacklog } from '@summit/autotriage';
+import { parseBacklog } from '@intelgraph/autotriage';
 
 const jira = new JiraApi({
   protocol: 'https',
@@ -494,7 +494,7 @@ async function syncToJira() {
 
 ```typescript
 import { LinearClient } from '@linear/sdk';
-import { parseBacklog } from '@summit/autotriage';
+import { parseBacklog } from '@intelgraph/autotriage';
 
 const linear = new LinearClient({ apiKey: process.env.LINEAR_API_KEY });
 
@@ -517,7 +517,7 @@ async function syncToLinear() {
 
 ```typescript
 import nodemailer from 'nodemailer';
-import { parseBacklog, generateTriageReport, formatReportAsMarkdown } from '@summit/autotriage';
+import { parseBacklog, generateTriageReport, formatReportAsMarkdown } from '@intelgraph/autotriage';
 
 async function sendEmailDigest() {
   const items = await parseBacklog();

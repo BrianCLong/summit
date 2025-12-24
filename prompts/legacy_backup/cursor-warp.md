@@ -74,7 +74,7 @@ gh run watch
 pnpm dev
 
 # Start specific service
-pnpm dev --filter=@summit/api
+pnpm dev --filter=@intelgraph/api
 
 # Run database migrations
 pnpm migrate:dev

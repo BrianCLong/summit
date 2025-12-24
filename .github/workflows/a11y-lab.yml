@@ -34,7 +34,7 @@ jobs:
           node-version: 20
           cache: 'pnpm'
       - name: Install dependencies (scoped)
-        run: pnpm install --filter @summit/a11y-lab...
+        run: pnpm install --filter @intelgraph/a11y-lab...
       - name: Enforce telemetry guard
         run: A11Y_LAB_ALLOW_ANALYTICS=false ./apps/a11y-lab/scripts/telemetry-guard.sh
       - name: Run Playwright a11y + axe suite

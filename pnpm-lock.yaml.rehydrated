@@ -571,7 +571,7 @@ importers:
       '@aws-sdk/client-s3':
         specifier: ^3.626.0
         version: 3.883.0
-      '@summit/maestro-sdk':
+      '@intelgraph/maestro-sdk':
         specifier: file:../sdk-ts
         version: link:../sdk-ts
       ajv:

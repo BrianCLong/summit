@@ -1,6 +1,6 @@
 /**
  * Forecasting Package - Time Series Forecasting and Prediction
- * @module @summit/forecasting
+ * @module @intelgraph/forecasting
  */
 
 // Types

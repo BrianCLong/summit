@@ -29,7 +29,7 @@ Summit implements NIST-standardized post-quantum cryptographic algorithms to pro
 
 **CRYSTALS-Kyber**
 ```typescript
-import { createKyberKEM, SecurityLevel } from '@summit/post-quantum-crypto';
+import { createKyberKEM, SecurityLevel } from '@intelgraph/post-quantum-crypto';
 
 // Create Kyber KEM with security level 3 (recommended)
 const kem = createKyberKEM(SecurityLevel.LEVEL_3);
@@ -48,7 +48,7 @@ console.assert(recoveredSecret.equals(sharedSecret));
 
 **Hybrid KEM (Recommended)**
 ```typescript
-import { createHybridKEM } from '@summit/post-quantum-crypto';
+import { createHybridKEM } from '@intelgraph/post-quantum-crypto';
 
 // Combines X25519 with Kyber-768 for defense-in-depth
 const hybridKEM = createHybridKEM('x25519');
@@ -61,7 +61,7 @@ const { ciphertext, sharedSecret } = await hybridKEM.encapsulate(keyPair.publicK
 
 **CRYSTALS-Dilithium**
 ```typescript
-import { createDilithiumSignature, SecurityLevel } from '@summit/post-quantum-crypto';
+import { createDilithiumSignature, SecurityLevel } from '@intelgraph/post-quantum-crypto';
 
 const dss = createDilithiumSignature(SecurityLevel.LEVEL_3);
 
@@ -79,7 +79,7 @@ console.log('Signature valid:', isValid);
 
 **FALCON (Compact Signatures)**
 ```typescript
-import { createFalconSignature } from '@summit/post-quantum-crypto';
+import { createFalconSignature } from '@intelgraph/post-quantum-crypto';
 
 const falcon = createFalconSignature(SecurityLevel.LEVEL_1);
 
@@ -92,7 +92,7 @@ console.log('Signature size:', signature.length);
 
 **SPHINCS+ (Hash-based, Stateless)**
 ```typescript
-import { createSphincsSignature } from '@summit/post-quantum-crypto';
+import { createSphincsSignature } from '@intelgraph/post-quantum-crypto';
 
 // Use 'fast' variant for better performance, 's' for smaller signatures
 const sphincs = createSphincsSignature(SecurityLevel.LEVEL_5, true);
@@ -104,7 +104,7 @@ const { signature } = await sphincs.sign(message, keyPair.privateKey);
 ### Performance Benchmarking
 
 ```typescript
-import { createBenchmarker } from '@summit/post-quantum-crypto';
+import { createBenchmarker } from '@intelgraph/post-quantum-crypto';
 
 const benchmarker = createBenchmarker(100);
 
@@ -121,7 +121,7 @@ console.log(benchmarker.formatResults([...kemResults, ...sigResults]));
 ### Validation
 
 ```typescript
-import { createValidator } from '@summit/post-quantum-crypto';
+import { createValidator } from '@intelgraph/post-quantum-crypto';
 
 const validator = createValidator();
 
@@ -148,7 +148,7 @@ Summit provides a complete quantum circuit simulation framework with support for
 ### Building Quantum Circuits
 
 ```typescript
-import { createCircuit } from '@summit/quantum-simulation';
+import { createCircuit } from '@intelgraph/quantum-simulation';
 
 // Create a 3-qubit circuit
 const circuit = createCircuit(3)
@@ -164,7 +164,7 @@ console.log('Created GHZ state circuit');
 ### Simulating Circuits
 
 ```typescript
-import { createStatevectorSimulator } from '@summit/quantum-simulation';
+import { createStatevectorSimulator } from '@intelgraph/quantum-simulation';
 
 const simulator = createStatevectorSimulator();
 
@@ -235,8 +235,8 @@ Summit implements quantum-inspired optimization algorithms for solving combinato
 ### QAOA (Quantum Approximate Optimization Algorithm)
 
 ```typescript
-import { createQAOAOptimizer } from '@summit/quantum-optimization';
-import { createStatevectorSimulator } from '@summit/quantum-simulation';
+import { createQAOAOptimizer } from '@intelgraph/quantum-optimization';
+import { createStatevectorSimulator } from '@intelgraph/quantum-simulation';
 
 const simulator = createStatevectorSimulator();
 
@@ -266,7 +266,7 @@ console.log('Convergence:', result.convergence);
 ### Quantum Annealing
 
 ```typescript
-import { createQuantumAnnealer } from '@summit/quantum-optimization';
+import { createQuantumAnnealer } from '@intelgraph/quantum-optimization';
 
 const annealer = createQuantumAnnealer();
 
@@ -289,7 +289,7 @@ console.log('Energy:', result.energy);
 ### VQE (Variational Quantum Eigensolver)
 
 ```typescript
-import { createVQESolver } from '@summit/quantum-optimization';
+import { createVQESolver } from '@intelgraph/quantum-optimization';
 
 // Define Hamiltonian (e.g., H2 molecule)
 const hamiltonian = {
@@ -324,7 +324,7 @@ Summit provides quantum machine learning capabilities including quantum kernels,
 ### Quantum Kernel Methods
 
 ```typescript
-import { createQuantumKernel } from '@summit/quantum-ml';
+import { createQuantumKernel } from '@intelgraph/quantum-ml';
 
 const qkernel = createQuantumKernel({
   numQubits: 4,
@@ -348,7 +348,7 @@ console.log('Kernel matrix:', kernelMatrix);
 ### Quantum Neural Networks
 
 ```typescript
-import { createQNN } from '@summit/quantum-ml';
+import { createQNN } from '@intelgraph/quantum-ml';
 
 const qnn = createQNN({
   numQubits: 4,
@@ -377,7 +377,7 @@ console.log('QNN output:', output);
 ### Hybrid Quantum-Classical Models
 
 ```typescript
-import { createHybridModel } from '@summit/quantum-ml';
+import { createHybridModel } from '@intelgraph/quantum-ml';
 
 const hybridModel = createHybridModel({
   quantumParams: {
@@ -411,8 +411,8 @@ Summit supports hybrid workflows that combine classical preprocessing with quant
 ### Example: Portfolio Optimization
 
 ```typescript
-import { createQAOAOptimizer } from '@summit/quantum-optimization';
-import { createStatevectorSimulator } from '@summit/quantum-simulation';
+import { createQAOAOptimizer } from '@intelgraph/quantum-optimization';
+import { createStatevectorSimulator } from '@intelgraph/quantum-simulation';
 
 async function optimizePortfolio(assets: number[], returns: number[][], riskTolerance: number) {
   // Classical preprocessing: compute covariance matrix
@@ -479,7 +479,7 @@ Summit can integrate with cloud quantum computing providers for access to real q
 ### Example: IBM Quantum
 
 ```typescript
-import { createIBMBackend } from '@summit/quantum-simulation';
+import { createIBMBackend } from '@intelgraph/quantum-simulation';
 
 const backend = createIBMBackend({
   apiKey: process.env.IBM_QUANTUM_API_KEY!,
@@ -596,14 +596,14 @@ const qkernel = createQuantumKernel({
 
 Enable debug logging:
 ```typescript
-import { setQuantumLogLevel } from '@summit/quantum-simulation';
+import { setQuantumLogLevel } from '@intelgraph/quantum-simulation';
 
 setQuantumLogLevel('debug');
 ```
 
 Visualize circuits:
 ```typescript
-import { visualizeCircuit } from '@summit/quantum-simulation';
+import { visualizeCircuit } from '@intelgraph/quantum-simulation';
 
 const circuit = createCircuit(3).h(0).cnot(0, 1).build();
 console.log(visualizeCircuit(circuit));

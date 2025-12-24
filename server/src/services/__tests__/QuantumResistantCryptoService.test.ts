@@ -8,7 +8,7 @@ import {
 } from '../QuantumResistantCryptoService';
 
 // Mock the post-quantum-crypto package
-jest.mock('@summit/post-quantum-crypto', () => {
+jest.mock('@intelgraph/post-quantum-crypto', () => {
   const mockKeyPair = {
     publicKey: new Uint8Array(32).fill(1),
     privateKey: new Uint8Array(64).fill(2),

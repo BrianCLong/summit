@@ -37,7 +37,7 @@ The Summit Admin CLI (`summit-admin`) provides a powerful, unified command-line 
 ### From npm (Recommended)
 
 ```bash
-npm install -g @summit/admin-cli
+npm install -g @intelgraph/admin-cli
 ```
 
 ### From Source

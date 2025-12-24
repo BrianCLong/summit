@@ -159,7 +159,7 @@ curl -X POST http://prov-ledger:4010/claims \
 **Purpose:** Runtime policy enforcement
 **Usage:**
 ```typescript
-import { AuthorityCompiler } from '@summit/authority-compiler';
+import { AuthorityCompiler } from '@intelgraph/authority-compiler';
 
 const compiler = new AuthorityCompiler();
 const policy = compiler.compile(policyText);

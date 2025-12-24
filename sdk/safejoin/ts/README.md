@@ -6,7 +6,7 @@ ECDH-derived secret and optionally adds Laplace noise before sharing
 aggregates.
 
 ```ts
-import { SafeJoinClient, SafeJoinParticipant, preparePayload } from '@summit/safejoin';
+import { SafeJoinClient, SafeJoinParticipant, preparePayload } from '@intelgraph/safejoin';
 
 const client = new SafeJoinClient('http://localhost:8080');
 const alice = new SafeJoinParticipant();

@@ -1,6 +1,6 @@
 /**
  * Geopolitical Analysis Package
- * @module @summit/geopolitical-analysis
+ * @module @intelgraph/geopolitical-analysis
  */
 
 // Types

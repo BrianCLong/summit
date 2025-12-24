@@ -12,9 +12,9 @@
 
 import express from 'express';
 import { Pool } from 'pg';
-import { WarehouseManager } from '@summit/data-warehouse';
-import { ModelingManager } from '@summit/dimensional-modeling';
-import { CubeManager } from '@summit/olap-engine';
+import { WarehouseManager } from '@intelgraph/data-warehouse';
+import { ModelingManager } from '@intelgraph/dimensional-modeling';
+import { CubeManager } from '@intelgraph/olap-engine';
 
 const app = express();
 app.use(express.json());

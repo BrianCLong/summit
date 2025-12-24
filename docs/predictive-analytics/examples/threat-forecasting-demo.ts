@@ -11,10 +11,10 @@ import {
   EnsembleForecaster,
   AnomalyForecaster,
   MonteCarloSimulator,
-} from '@summit/forecasting';
+} from '@intelgraph/forecasting';
 
-import { RandomForestClassifier, GradientBoostingClassifier } from '@summit/predictive-models';
-import { LogisticRiskScorer } from '@summit/risk-scoring';
+import { RandomForestClassifier, GradientBoostingClassifier } from '@intelgraph/predictive-models';
+import { LogisticRiskScorer } from '@intelgraph/risk-scoring';
 
 // Generate synthetic threat data
 function generateThreatData(days: number = 365) {

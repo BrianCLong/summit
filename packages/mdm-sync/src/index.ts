@@ -11,4 +11,4 @@ export type {
   SyncJob,
   SyncConflict,
   DeltaChange
-} from '@summit/mdm-core';
+} from '@intelgraph/mdm-core';

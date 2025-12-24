@@ -1,4 +1,4 @@
-import { PluginPermission } from '@summit/plugin-system';
+import { PluginPermission } from '@intelgraph/plugin-system';
 
 /**
  * Decorator to mark a class as a plugin

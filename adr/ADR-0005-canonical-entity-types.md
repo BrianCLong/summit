@@ -43,7 +43,7 @@ All entities will include:
 - `recordedAt` - When recorded in the system (immutable)
 
 ### Implementation
-- TypeScript interfaces in `@summit/canonical-entities` package
+- TypeScript interfaces in `@intelgraph/canonical-entities` package
 - GraphQL types implementing `CanonicalEntity` interface
 - Zod validation schemas for runtime checking
 - Neo4j labels for efficient graph queries

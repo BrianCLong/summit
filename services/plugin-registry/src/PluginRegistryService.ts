@@ -1,4 +1,4 @@
-import { PluginManifest, PluginMetadata, PluginState } from '@summit/plugin-system';
+import { PluginManifest, PluginMetadata, PluginState } from '@intelgraph/plugin-system';
 import { Pool } from 'pg';
 import { createClient } from 'redis';
 

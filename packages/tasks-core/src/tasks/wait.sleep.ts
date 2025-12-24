@@ -1,4 +1,4 @@
-import { defineTask, type TaskInput } from '@summit/maestro-sdk';
+import { defineTask, type TaskInput } from '@intelgraph/maestro-sdk';
 
 export default defineTask<{ ms: number }, { slept: number }>({
   validate: ({ payload }: TaskInput<{ ms: number }>) => {

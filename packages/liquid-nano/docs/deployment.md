@@ -13,7 +13,7 @@ This guide documents how to package, ship, and operate the Liquid Nano pilot usi
 
 ```bash
 npm install
-npm run --workspace @summit/liquid-nano build
+npm run --workspace @intelgraph/liquid-nano build
 ```
 
 ## Docker Image

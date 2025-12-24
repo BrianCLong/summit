@@ -33,10 +33,10 @@ jobs:
           version: 9.12.0
 
       - name: Install dependencies (scoped)
-        run: pnpm install --filter @summit/security-gates --recursive
+        run: pnpm install --filter @intelgraph/security-gates --recursive
 
       - name: Run unit tests
-        run: pnpm --filter @summit/security-gates test
+        run: pnpm --filter @intelgraph/security-gates test
 
       - name: Enforce gates
-        run: pnpm --filter @summit/security-gates run check -- security/pilot/gate-config.json
+        run: pnpm --filter @intelgraph/security-gates run check -- security/pilot/gate-config.json

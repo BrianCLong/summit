@@ -10,16 +10,16 @@ The Golden Path Platform provides a paved-road approach for building, deploying,
 
 ```bash
 # Install the scaffold CLI
-pnpm --filter @companyos/scaffold-cli build
+pnpm --filter @intelgraph/scaffold-cli build
 
 # Create a new API service
-pnpm dlx @companyos/scaffold create api-service --name my-service
+pnpm dlx @intelgraph/scaffold create api-service --name my-service
 
 # Validate against Golden Path requirements
-pnpm dlx @companyos/scaffold validate my-service
+pnpm dlx @intelgraph/scaffold validate my-service
 
 # Check your development environment
-pnpm dlx @companyos/scaffold doctor
+pnpm dlx @intelgraph/scaffold doctor
 ```
 
 ## Documentation

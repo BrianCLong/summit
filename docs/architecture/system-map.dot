@@ -39,7 +39,7 @@ digraph SystemMap {
 
     api [label="api", fillcolor="#32CD32", tooltip="api"];
     gateway [label="gateway", fillcolor="#32CD32", tooltip="gateway"];
-    _companyos_intelgraph_api [label="@companyos/intelgraph-api", fillcolor="#32CD32", tooltip="@companyos/intelgraph-api"];
+    _companyos_intelgraph_api [label="@intelgraph/intelgraph-api", fillcolor="#32CD32", tooltip="@intelgraph/intelgraph-api"];
     apps_server [label="apps-server", fillcolor="#32CD32", tooltip="IntelGraph GraphQL Server"];
   }
 
@@ -106,7 +106,7 @@ digraph SystemMap {
 
     _summit_a11y_lab [label="a11y-lab", fillcolor="#98FB98", tooltip="Accessibility lab with Playwright + axe-core gates, keyboard trap detection, contrast budgeting, and SR tooling."];
     _intelgraph_analytics_engine [label="analytics-engine", fillcolor="#98FB98", tooltip="Custom Analytics Dashboard Engine for IntelGraph"];
-    _companyos_compliance_console [label="@companyos/compliance-console", fillcolor="#98FB98", tooltip="@companyos/compliance-console"];
+    _companyos_compliance_console [label="@intelgraph/compliance-console", fillcolor="#98FB98", tooltip="@intelgraph/compliance-console"];
     _intelgraph_desktop [label="desktop", fillcolor="#98FB98", tooltip="IntelGraph Desktop Application (Windows, Mac, Linux)"];
     _intelgraph_graph_analytics_service [label="graph-analytics-service", fillcolor="#98FB98", tooltip="Advanced Graph Analytics Engine for IntelGraph"];
     _intelgraph_labeling_ui [label="labeling-ui", fillcolor="#98FB98", tooltip="Labeling UI for data factory annotation workflows"];

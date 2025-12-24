@@ -1,6 +1,6 @@
 # PerfTrace Jira Integration
 
-The `@summit/jira-integration` package automates PerfTrace ticket creation and lifecycle management in Jira. It provides opinionated helpers for applying Summit workflow conventions, enforcing custom field mappings, and capturing audit trails for every Jira interaction.
+The `@intelgraph/jira-integration` package automates PerfTrace ticket creation and lifecycle management in Jira. It provides opinionated helpers for applying Summit workflow conventions, enforcing custom field mappings, and capturing audit trails for every Jira interaction.
 
 ## Features
 
@@ -22,7 +22,7 @@ npm install
 npx jest packages/jira-integration --coverage
 
 # build the package
-npm run --workspace=@summit/jira-integration build
+npm run --workspace=@intelgraph/jira-integration build
 ```
 
 ### Configuration
@@ -32,7 +32,7 @@ import {
   JiraIntegrationService,
   JiraApiClient,
   InMemoryAuditLogger,
-} from '@summit/jira-integration';
+} from '@intelgraph/jira-integration';
 
 const config = {
   baseUrl: 'https://your-domain.atlassian.net',
@@ -130,4 +130,4 @@ export const onJiraWebhook = (event: JiraWebhookEvent) => {
 
 - **TypeScript strict mode** is enforced via the package `tsconfig.json`.
 - Run `npm run lint` at the repository root to ensure ESLint validation.
-- Unit tests target >80% coverage; see `npm run test --workspace=@summit/jira-integration` for package-only execution.
+- Unit tests target >80% coverage; see `npm run test --workspace=@intelgraph/jira-integration` for package-only execution.

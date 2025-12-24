@@ -1,11 +1,11 @@
-# @summit/jpr
+# @intelgraph/jpr
 
 TypeScript bindings for the Jurisdictional Policy Resolver (JPR). The package shells out to the Go CLI to compile YAML matrices into a deterministic decision table and caches the result with TTL + ETag semantics.
 
 ## Installation
 
 ```bash
-npm install @summit/jpr
+npm install @intelgraph/jpr
 ```
 
 Ensure the Go toolchain is available in the environment when the bindings run.
@@ -13,7 +13,7 @@ Ensure the Go toolchain is available in the environment when the bindings run.
 ## Usage
 
 ```ts
-import { JurisdictionalPolicyResolver } from '@summit/jpr';
+import { JurisdictionalPolicyResolver } from '@intelgraph/jpr';
 
 const resolver = new JurisdictionalPolicyResolver({
   policiesPath: '/etc/policies/jpr.yaml'

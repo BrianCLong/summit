@@ -6,10 +6,10 @@
 
 import express from 'express';
 import { config } from 'dotenv';
-import { APIGateway } from '@summit/api-gateway';
-import { JWTManager, AuthMiddleware, RBACManager } from '@summit/authentication';
-import { RedisRateLimiter, createRateLimitMiddleware } from '@summit/rate-limiting';
-import { MetricsCollector } from '@summit/api-analytics';
+import { APIGateway } from '@intelgraph/api-gateway';
+import { JWTManager, AuthMiddleware, RBACManager } from '@intelgraph/authentication';
+import { RedisRateLimiter, createRateLimitMiddleware } from '@intelgraph/rate-limiting';
+import { MetricsCollector } from '@intelgraph/api-analytics';
 import pino from 'pino';
 import Redis from 'ioredis';
 

@@ -19,7 +19,7 @@ Create your first plugin in 5 minutes:
 
 ```bash
 # Install CLI
-npm install -g @summit/plugin-cli
+npm install -g @intelgraph/plugin-cli
 
 # Create plugin
 summit-plugin create hello-world
@@ -44,7 +44,7 @@ npm test
 Connect to external data sources:
 
 ```typescript
-import { BaseDataSourceExtension } from '@summit/extension-api';
+import { BaseDataSourceExtension } from '@intelgraph/extension-api';
 
 export class PostgresConnector extends BaseDataSourceExtension {
   private client: any;
@@ -70,7 +70,7 @@ export class PostgresConnector extends BaseDataSourceExtension {
 Build custom analysis algorithms:
 
 ```typescript
-import { BaseAnalyzerExtension } from '@summit/extension-api';
+import { BaseAnalyzerExtension } from '@intelgraph/extension-api';
 
 export class SentimentAnalyzer extends BaseAnalyzerExtension {
   async execute(input: AnalyzerInput) {
@@ -100,7 +100,7 @@ export class SentimentAnalyzer extends BaseAnalyzerExtension {
 Create custom visualizations:
 
 ```typescript
-import { BaseVisualizationExtension } from '@summit/extension-api';
+import { BaseVisualizationExtension } from '@intelgraph/extension-api';
 
 export class NetworkGraph extends BaseVisualizationExtension {
   async execute(input: VisualizationData) {
@@ -197,7 +197,7 @@ async function notifyAnalysisComplete(context: PluginContext, results: any) {
 Add custom API endpoints:
 
 ```typescript
-import { Endpoint } from '@summit/plugin-sdk';
+import { Endpoint } from '@intelgraph/plugin-sdk';
 
 class MyPlugin {
   @Endpoint({ method: 'POST', path: '/analyze' })
@@ -219,7 +219,7 @@ class MyPlugin {
 Handle webhook events:
 
 ```typescript
-import { WebhookHandler } from '@summit/plugin-sdk';
+import { WebhookHandler } from '@intelgraph/plugin-sdk';
 
 class MyPlugin {
   @WebhookHandler('investigation:created')
@@ -246,7 +246,7 @@ Declare dependencies in manifest:
     "lodash": "^4.17.21"
   },
   "peerDependencies": {
-    "@summit/plugin-system": "^1.0.0"
+    "@intelgraph/plugin-system": "^1.0.0"
   }
 }
 ```
@@ -379,7 +379,7 @@ async function handleRequest(userId: string) {
 ### Unit Tests
 
 ```typescript
-import { createMockContext } from '@summit/plugin-sdk';
+import { createMockContext } from '@intelgraph/plugin-sdk';
 
 describe('MyPlugin', () => {
   let plugin: MyPlugin;

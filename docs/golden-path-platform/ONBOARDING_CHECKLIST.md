@@ -286,10 +286,10 @@ Run these commands to verify readiness:
 companyos validate <service-name>
 
 # 2. Run all tests
-pnpm --filter @companyos/<service-name> test
+pnpm --filter @intelgraph/<service-name> test
 
 # 3. Check security
-pnpm --filter @companyos/<service-name> audit
+pnpm --filter @intelgraph/<service-name> audit
 trivy fs ./services/<service-name>
 
 # 4. Build container

@@ -33,7 +33,7 @@ metrics ahead of nice-to-have requests.
    The `dprs` binary is also published via the `bin` entry in `package.json`:
 
    ```bash
-   npx --yes @summit/dprs-cli schedule ../sample-config.json
+   npx --yes @intelgraph/dprs-cli schedule ../sample-config.json
    ```
 
 3. The CLI ensures that removing a report from the configuration frees budget by

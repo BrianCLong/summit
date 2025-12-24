@@ -14,7 +14,7 @@ import {
   PluginManifest,
   PluginMetadata,
   PluginState,
-} from '@summit/plugin-system';
+} from '@intelgraph/plugin-system';
 import type { Logger } from './types.js';
 
 /**

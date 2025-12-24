@@ -190,7 +190,7 @@ Entrypoints define how to invoke your extension code:
 Your extension's `activate` function is called when Summit loads it:
 
 ```typescript
-import type { ExtensionContext, ExtensionActivation } from '@summit/extensions';
+import type { ExtensionContext, ExtensionActivation } from '@intelgraph/extensions';
 
 export async function activate(context: ExtensionContext): Promise<ExtensionActivation> {
   const { logger, config, api, extensionPath, storagePath } = context;

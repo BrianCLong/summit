@@ -74,7 +74,7 @@ CompanyOS handles governance-heavy workflows that must feel explainable, safe, a
   - Core primitives (raw values) scoped by mode (light/dark) and platform.
   - Semantic tokens (intent-based: `color.intent.success`, `color.surface.2`, `border.focus`).
   - Component decisions (`button.primary.bg`, `table.header.height`, `focus.ring.width`).
-- **Distribution**: Publish `@companyos/design-tokens` (JSON + CSS vars) and `@companyos/ui-tokens` (platform-agnostic). Include type definitions for token names and a snapshot test suite.
+- **Distribution**: Publish `@intelgraph/design-tokens` (JSON + CSS vars) and `@intelgraph/ui-tokens` (platform-agnostic). Include type definitions for token names and a snapshot test suite.
 - **Theming**: CSS custom properties injected at root; design tokens versioned with SemVer; light/dark/system themes plus high-contrast variant. Runtime theme switch respects `prefers-color-scheme`.
 
 ## Component implementation contracts
@@ -95,7 +95,7 @@ CompanyOS handles governance-heavy workflows that must feel explainable, safe, a
 - **Telemetry**: capture interaction funnels, rage-clicks, keyboard usage %, “why panel open” frequency, explainability satisfaction prompt, and SLO visibility interactions. Non-PII, opt-in, with retention policy and audit export.
 
 ## Implementation and rollout
-- **Packages**: `@companyos/design-tokens`, `@companyos/ui` (React + web components), `@companyos/ui-storybook` for documentation and visual regression baselines.
+- **Packages**: `@intelgraph/design-tokens`, `@intelgraph/ui` (React + web components), `@intelgraph/ui-storybook` for documentation and visual regression baselines.
 - **Pipelines**: lint tokens for contrast and naming collisions; Chromatic/Playwright visual regressions on Storybook stories; contract tests for component APIs and token snapshots; provenance event schema validation.
 - **Adoption guide**: prefer new features in `packages/`; apply strangler pattern to retire legacy styles; enforce lint rule banning unthemed colors.
 - **Rollout steps**: alpha (design+eng only), beta (one pilot product area), GA (org-wide) gated on a11y score, usability success rate, and telemetry health.

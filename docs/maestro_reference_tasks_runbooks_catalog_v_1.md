@@ -42,7 +42,7 @@ runbooks/
   rollback.yaml
 ```
 
-> All TypeScript code uses `@summit/maestro-sdk` from the SDK canvas.
+> All TypeScript code uses `@intelgraph/maestro-sdk` from the SDK canvas.
 
 ---
 
@@ -50,7 +50,7 @@ runbooks/
 
 ```json
 {
-  "name": "@summit/maestro-tasks-core",
+  "name": "@intelgraph/maestro-tasks-core",
   "version": "0.1.0",
   "description": "Reference tasks & connectors for Summit Maestro",
   "license": "UNLICENSED",
@@ -66,7 +66,7 @@ runbooks/
     "prepublishOnly": "npm run clean && npm run build && npm test"
   },
   "dependencies": {
-    "@summit/maestro-sdk": "^0.1.0",
+    "@intelgraph/maestro-sdk": "^0.1.0",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "yaml": "^2.5.0",
@@ -136,7 +136,7 @@ export function sha256(data: string | Uint8Array) {
 ### 2.1 `tasks/wait.sleep.ts`
 
 ```ts
-import { defineTask, type TaskInput } from '@summit/maestro-sdk';
+import { defineTask, type TaskInput } from '@intelgraph/maestro-sdk';
 
 export default defineTask<{ ms: number }, { slept: number }>({
   validate: ({ payload }: TaskInput<{ ms: number }>) => {
@@ -153,7 +153,7 @@ export default defineTask<{ ms: number }, { slept: number }>({
 ### 2.2 `tasks/notify.slack.ts`
 
 ```ts
-import { defineTask } from '@summit/maestro-sdk';
+import { defineTask } from '@intelgraph/maestro-sdk';
 
 type In = { webhook?: string; channel?: string; text: string };
 export default defineTask<In, { ok: boolean }>({
@@ -172,7 +172,7 @@ export default defineTask<In, { ok: boolean }>({
 ### 2.3 `tasks/schema.validate.ts`
 
 ```ts
-import { defineTask } from '@summit/maestro-sdk';
+import { defineTask } from '@intelgraph/maestro-sdk';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 
@@ -199,7 +199,7 @@ export default defineTask<In, { valid: true }>({
 ### 2.4 `tasks/transform.map.ts`
 
 ```ts
-import { defineTask } from '@summit/maestro-sdk';
+import { defineTask } from '@intelgraph/maestro-sdk';
 
 type Mapper<T> = (row: any) => T;
 interface In<TOut> {
@@ -220,7 +220,7 @@ export default defineTask<In<any>, { rows: any[] }>({
 ### 2.5 `connectors/kafka.publish.ts`
 
 ```ts
-import { defineTask } from '@summit/maestro-sdk';
+import { defineTask } from '@intelgraph/maestro-sdk';
 import { Kafka } from 'kafkajs';
 
 interface In {
@@ -243,7 +243,7 @@ export default defineTask<In, { count: number }>({
 ### 2.6 `connectors/nats.publish.ts`
 
 ```ts
-import { defineTask } from '@summit/maestro-sdk';
+import { defineTask } from '@intelgraph/maestro-sdk';
 import { connect, StringCodec } from 'nats';
 
 interface In {
@@ -265,7 +265,7 @@ export default defineTask<In, { count: number }>({
 ### 2.7 `connectors/s3.get.ts`
 
 ```ts
-import { defineTask } from '@summit/maestro-sdk';
+import { defineTask } from '@intelgraph/maestro-sdk';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 
 interface In {
@@ -290,7 +290,7 @@ export default defineTask<In, { body: string }>({
 ### 2.8 `connectors/s3.put.ts`
 
 ```ts
-import { defineTask } from '@summit/maestro-sdk';
+import { defineTask } from '@intelgraph/maestro-sdk';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
 interface In {
@@ -321,7 +321,7 @@ export default defineTask<In, { etag: string }>({
 ### 2.9 `connectors/sig.ingest.ts`
 
 ```ts
-import { defineTask } from '@summit/maestro-sdk';
+import { defineTask } from '@intelgraph/maestro-sdk';
 
 type Item = { id: string; payload: unknown };
 interface In {
@@ -348,7 +348,7 @@ export default defineTask<
 ### 2.10 `ops/approval.gate.ts`
 
 ```ts
-import { defineTask } from '@summit/maestro-sdk';
+import { defineTask } from '@intelgraph/maestro-sdk';
 
 interface In {
   approved?: boolean;
@@ -366,7 +366,7 @@ export default defineTask<In, { approved: boolean }>({
 ### 2.11 `ops/disclosure.package.ts`
 
 ```ts
-import { defineTask } from '@summit/maestro-sdk';
+import { defineTask } from '@intelgraph/maestro-sdk';
 import fs from 'node:fs';
 import path from 'node:path';
 import archiver from 'archiver';
@@ -788,7 +788,7 @@ spec:
 
 ## 5) Versioning & Publishing
 
-- Tag and publish `@summit/maestro-tasks-core` as **0.1.0** for MVP. Increment minor when adding new tasks; patch for bugfixes.
+- Tag and publish `@intelgraph/maestro-tasks-core` as **0.1.0** for MVP. Increment minor when adding new tasks; patch for bugfixes.
 - Runbook manifests reference tasks by semver (e.g., `tasks/schema.validate@0.1.0`).
 
 ---

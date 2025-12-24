@@ -167,7 +167,7 @@ template: |
     testing:
       mocks: |
         // All interfaces have mock implementations
-        import { MockConfigProvider, MockLogger, MockCache } from '@summit/platform-mocks';
+        import { MockConfigProvider, MockLogger, MockCache } from '@intelgraph/platform-mocks';
 
         const mockConfig = new MockConfigProvider({
           'database.host': 'localhost',
@@ -193,7 +193,7 @@ template: |
 
       platform_setup: |
         // platform.ts
-        import { createPlatformFactory } from '@summit/platform-core';
+        import { createPlatformFactory } from '@intelgraph/platform-core';
 
         export const platform = createPlatformFactory({
           config: process.env.CONFIG_PROVIDER || 'env',

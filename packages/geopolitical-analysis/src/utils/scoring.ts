@@ -1,6 +1,6 @@
 /**
  * Utility functions for risk scoring and calculations
- * @module @summit/geopolitical-analysis/utils/scoring
+ * @module @intelgraph/geopolitical-analysis/utils/scoring
  */
 
 import { RiskLevel, ConfidenceLevel } from '../types/index.js';

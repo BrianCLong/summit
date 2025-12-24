@@ -75,15 +75,15 @@ export class OpenAPIGenerator {
         in: param.in,
         description: param.description,
         required: param.required,
-        schema: param.schema,
+        schema: param.schema as any,
         example: param.example,
       })),
       requestBody: openapi.requestBody
         ? {
-            description: openapi.requestBody.description,
-            required: openapi.requestBody.required,
-            content: openapi.requestBody.content,
-          }
+          description: openapi.requestBody.description,
+          required: openapi.requestBody.required,
+          content: openapi.requestBody.content as any,
+        }
         : undefined,
       responses: openapi.responses,
       security: openapi.security,

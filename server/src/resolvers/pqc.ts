@@ -9,7 +9,7 @@ import {
   quantumCryptoService,
   PQCKeyStore,
 } from '../services/QuantumResistantCryptoService';
-import { PQCAlgorithm as PQCAlgorithmEnum } from '@summit/post-quantum-crypto';
+import { PQCAlgorithm as PQCAlgorithmEnum } from '@intelgraph/post-quantum-crypto';
 
 // PubSub for subscriptions
 const pubsub = new PubSub();

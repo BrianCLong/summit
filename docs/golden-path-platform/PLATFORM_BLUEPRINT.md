@@ -270,10 +270,10 @@ packages:
 
 | Type | Pattern | Example |
 |------|---------|---------|
-| API Service | `@companyos/<domain>-api` | `@companyos/users-api` |
-| Worker | `@companyos/<domain>-worker` | `@companyos/notifications-worker` |
-| Library | `@companyos/<name>` | `@companyos/auth-utils` |
-| Frontend | `@companyos/<name>-ui` | `@companyos/console-ui` |
+| API Service | `@intelgraph/<domain>-api` | `@intelgraph/users-api` |
+| Worker | `@intelgraph/<domain>-worker` | `@intelgraph/notifications-worker` |
+| Library | `@intelgraph/<name>` | `@intelgraph/auth-utils` |
+| Frontend | `@intelgraph/<name>-ui` | `@intelgraph/console-ui` |
 
 ### 5.2 Kubernetes Service Naming
 

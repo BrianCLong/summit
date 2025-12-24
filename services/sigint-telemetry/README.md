@@ -41,7 +41,7 @@ pnpm simulate
 ### Generate Synthetic Telemetry
 
 ```typescript
-import { generateNetworkBatch, generateIdentityBatch } from '@summit/sigint-telemetry';
+import { generateNetworkBatch, generateIdentityBatch } from '@intelgraph/sigint-telemetry';
 
 // Generate 100 network events
 const networkEvents = generateNetworkBatch(100);
@@ -53,7 +53,7 @@ const identityEvents = generateIdentityBatch(50);
 ### Run Detection Engine
 
 ```typescript
-import { createDetectionEngine, allRules } from '@summit/sigint-telemetry';
+import { createDetectionEngine, allRules } from '@intelgraph/sigint-telemetry';
 
 const engine = createDetectionEngine();
 engine.registerRules(allRules);
@@ -65,7 +65,7 @@ console.log(`Detections: ${results.length}`);
 ### Run Full Simulation
 
 ```typescript
-import { runSimulation } from '@summit/sigint-telemetry';
+import { runSimulation } from '@intelgraph/sigint-telemetry';
 
 const results = await runSimulation({
   seed: 42,

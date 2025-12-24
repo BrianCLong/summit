@@ -1,17 +1,17 @@
-# @summit/api-gateway
+# @intelgraph/api-gateway
 
 Enterprise API Gateway package with intelligent routing, load balancing, and circuit breaker patterns.
 
 ## Installation
 
 ```bash
-pnpm add @summit/api-gateway
+pnpm add @intelgraph/api-gateway
 ```
 
 ## Usage
 
 ```typescript
-import { APIGateway } from '@summit/api-gateway';
+import { APIGateway } from '@intelgraph/api-gateway';
 
 const gateway = new APIGateway({
   routes: [

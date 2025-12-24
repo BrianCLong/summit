@@ -3,7 +3,7 @@
  * Optimize storage costs with compression
  */
 
-import { CompressionCodec } from '@summit/lakehouse';
+import { CompressionCodec } from '@intelgraph/lakehouse';
 import pino from 'pino';
 
 const logger = pino({ name: 'compression' });

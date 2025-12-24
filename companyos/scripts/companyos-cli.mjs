@@ -165,7 +165,7 @@ Generated via CompanyOS CLI.
 ## Dev
 
 \`\`\`bash
-pnpm --filter @companyos/${name} dev
+pnpm --filter @intelgraph/${name} dev
 \`\`\`
 `;
 

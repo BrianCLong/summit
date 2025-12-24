@@ -5,8 +5,8 @@
 
 import { Span, SpanKind, SpanStatusCode, trace, metrics, context } from '@opentelemetry/api';
 
-const tracer = trace.getTracer('@summit/governance-hooks', '1.0.0');
-const meter = metrics.getMeter('@summit/governance-hooks', '1.0.0');
+const tracer = trace.getTracer('@intelgraph/governance-hooks', '1.0.0');
+const meter = metrics.getMeter('@intelgraph/governance-hooks', '1.0.0');
 
 // Metrics
 const authorityEvaluations = meter.createCounter('governance_authority_evaluations_total', {

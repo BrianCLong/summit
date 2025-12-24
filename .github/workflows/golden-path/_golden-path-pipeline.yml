@@ -109,13 +109,13 @@ jobs:
         working-directory: .
 
       - name: ESLint
-        run: pnpm --filter @companyos/${{ inputs.service }} lint
+        run: pnpm --filter @intelgraph/${{ inputs.service }} lint
 
       - name: TypeScript Check
-        run: pnpm --filter @companyos/${{ inputs.service }} typecheck
+        run: pnpm --filter @intelgraph/${{ inputs.service }} typecheck
 
       - name: Format Check
-        run: pnpm --filter @companyos/${{ inputs.service }} format:check || true
+        run: pnpm --filter @intelgraph/${{ inputs.service }} format:check || true
 
   # ============================================================================
   # Stage 2: Test
@@ -184,12 +184,12 @@ jobs:
         working-directory: .
 
       - name: Unit Tests
-        run: pnpm --filter @companyos/${{ inputs.service }} test:unit --coverage
+        run: pnpm --filter @intelgraph/${{ inputs.service }} test:unit --coverage
         env:
           CI: true
 
       - name: Integration Tests
-        run: pnpm --filter @companyos/${{ inputs.service }} test:integration || true
+        run: pnpm --filter @intelgraph/${{ inputs.service }} test:integration || true
         env:
           CI: true
           DATABASE_URL: postgres://test:test@localhost:5432/test

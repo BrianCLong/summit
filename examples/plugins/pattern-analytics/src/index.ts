@@ -8,7 +8,7 @@ import {
   Entity,
   Relationship,
   PluginContext,
-} from '@summit/plugin-system';
+} from '@intelgraph/plugin-system';
 
 /**
  * Pattern Detection Analytics Plugin

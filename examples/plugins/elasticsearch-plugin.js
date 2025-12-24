@@ -4,7 +4,7 @@
  * This plugin listens for entity creation events and indexes them into Elasticsearch.
  */
 
-const { registerPlugin } = require('@summit/core');
+const { registerPlugin } = require('@intelgraph/core');
 const { Client } = require('@elastic/elasticsearch');
 
 const client = new Client({ node: process.env.ELASTICSEARCH_URL || 'http://localhost:9200' });

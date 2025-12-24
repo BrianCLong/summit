@@ -3,7 +3,7 @@
  * Feature extraction and weighted scoring for entity resolution
  */
 
-import { ERFeatureScore, ERMatchScore } from '@summit/canonical-schema';
+import { ERFeatureScore, ERMatchScore } from '@intelgraph/canonical-schema';
 
 export interface ScoringRequest {
   entityAId: string;

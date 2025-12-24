@@ -85,3 +85,19 @@ export function notFoundHandler(req: Request, res: Response) {
     metadata: buildMetadata(req),
   });
 }
+
+/**
+ * Validation error specifically for REST API
+ */
+export class ValidationException extends SummitError {
+  constructor(message: string, context?: Record<string, any>) {
+    const error = errorFactory.validation({
+      errorCode: 'VALIDATION_ERROR',
+      humanMessage: message,
+      developerMessage: message,
+      context,
+    });
+    super(error.envelope, error.statusCode, null);
+    this.name = 'ValidationException';
+  }
+}

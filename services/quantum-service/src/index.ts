@@ -4,9 +4,9 @@
  */
 
 import express from 'express';
-import { createStatevectorSimulator, createCircuit, createLocalBackend } from '@summit/quantum-simulation';
-import { createQAOAOptimizer, createQuantumAnnealer, createVQESolver } from '@summit/quantum-optimization';
-import { createQuantumKernel, createQNN, createHybridModel } from '@summit/quantum-ml';
+import { createStatevectorSimulator, createCircuit, createLocalBackend } from '@intelgraph/quantum-simulation';
+import { createQAOAOptimizer, createQuantumAnnealer, createVQESolver } from '@intelgraph/quantum-optimization';
+import { createQuantumKernel, createQNN, createHybridModel } from '@intelgraph/quantum-ml';
 
 const app = express();
 app.use(express.json());

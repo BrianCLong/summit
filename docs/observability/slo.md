@@ -30,7 +30,7 @@ This document defines the production SLO contract for critical services. It is b
 ## Dashboards & Alerts
 
 - Grafana dashboard: [`grafana/dashboards/observability-slo-v1.json`](../../grafana/dashboards/observability-slo-v1.json)  
-- Alerting aligns to RED/USE metrics exported via `@companyos/observability`:
+- Alerting aligns to RED/USE metrics exported via `@intelgraph/observability`:
   - Request rate: `http_requests_total`
   - Latency: `http_request_duration_seconds` and `llm_invocation_duration_seconds`
   - Error budget burn: derived from availability/error-rate objectives per service
@@ -38,7 +38,7 @@ This document defines the production SLO contract for critical services. It is b
 ## Operability Expectations
 
 - All production-critical services **must**:
-  - Export Prometheus-compatible counters, histograms, and gauges via `@companyos/observability`.
+  - Export Prometheus-compatible counters, histograms, and gauges via `@intelgraph/observability`.
   - Declare SLO entries in `config/slo.yaml` with availability, p95 latency, and error budget targets.
   - Attach dashboards and runbooks referenced from the SLO source of truth.
 - GA gate fails if any required service is missing an SLO definition or required metric linkage.

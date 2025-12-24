@@ -221,7 +221,7 @@ X-User-Roles: admin,privacy_officer
 Services should use the logging pipeline for sending audit events:
 
 ```typescript
-import { createAuditSink, createServiceAdapter } from '@summit/logging-pipeline';
+import { createAuditSink, createServiceAdapter } from '@intelgraph/logging-pipeline';
 
 // Create sink connection
 const sink = await createAuditSink({

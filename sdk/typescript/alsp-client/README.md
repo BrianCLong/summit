@@ -1,4 +1,4 @@
-# @summit/alsp-client
+# @intelgraph/alsp-client
 
 TypeScript companion client for the Audit Log Succinctness & Proofs (ALSP) library.
 
@@ -12,7 +12,7 @@ TypeScript companion client for the Audit Log Succinctness & Proofs (ALSP) libra
 ## Usage
 
 ```ts
-import { AlspClient, AlspVerifier, HttpTransport } from "@summit/alsp-client";
+import { AlspClient, AlspVerifier, HttpTransport } from "@intelgraph/alsp-client";
 
 const verifier = new AlspVerifier(/* optional trusted head digest */);
 const client = new AlspClient(new HttpTransport("https://alsp.example"), verifier);

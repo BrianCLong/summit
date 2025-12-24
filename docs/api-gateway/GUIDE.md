@@ -22,11 +22,11 @@ The API Gateway Platform consists of several integrated packages:
 
 ### Core Packages
 
-- **@summit/api-gateway** - Core gateway with intelligent routing and load balancing
-- **@summit/authentication** - OAuth 2.0, JWT, API keys, and mTLS support
-- **@summit/rate-limiting** - Distributed rate limiting with multiple strategies
-- **@summit/api-management** - API versioning and lifecycle management
-- **@summit/api-analytics** - Real-time metrics and monitoring
+- **@intelgraph/api-gateway** - Core gateway with intelligent routing and load balancing
+- **@intelgraph/authentication** - OAuth 2.0, JWT, API keys, and mTLS support
+- **@intelgraph/rate-limiting** - Distributed rate limiting with multiple strategies
+- **@intelgraph/api-management** - API versioning and lifecycle management
+- **@intelgraph/api-analytics** - Real-time metrics and monitoring
 
 ### Services
 
@@ -40,7 +40,7 @@ The API Gateway Platform consists of several integrated packages:
 The gateway supports multiple routing strategies:
 
 ```typescript
-import { APIGateway, Route } from '@summit/api-gateway';
+import { APIGateway, Route } from '@intelgraph/api-gateway';
 
 const gateway = new APIGateway({
   routes: [
@@ -96,7 +96,7 @@ Handles multiple protocols seamlessly:
 - HTTP/2
 
 ```typescript
-import { ProtocolHandler, Protocol } from '@summit/api-gateway';
+import { ProtocolHandler, Protocol } from '@intelgraph/api-gateway';
 
 const protocolHandler = new ProtocolHandler({
   supportedProtocols: [Protocol.HTTP, Protocol.HTTPS, Protocol.WEBSOCKET],
@@ -113,18 +113,18 @@ const protocolHandler = new ProtocolHandler({
 
 ```bash
 # Install core packages
-pnpm add @summit/api-gateway @summit/authentication @summit/rate-limiting
+pnpm add @intelgraph/api-gateway @intelgraph/authentication @intelgraph/rate-limiting
 
 # Or install everything
-pnpm add @summit/api-platform
+pnpm add @intelgraph/api-platform
 ```
 
 ### Basic Setup
 
 ```typescript
-import { APIGateway } from '@summit/api-gateway';
-import { JWTManager } from '@summit/authentication';
-import { RedisRateLimiter } from '@summit/rate-limiting';
+import { APIGateway } from '@intelgraph/api-gateway';
+import { JWTManager } from '@intelgraph/authentication';
+import { RedisRateLimiter } from '@intelgraph/rate-limiting';
 
 // 1. Setup Authentication
 const jwtManager = new JWTManager({
@@ -212,7 +212,7 @@ const routes: Route[] = [
 ### JWT Authentication
 
 ```typescript
-import { JWTManager, TokenPayload } from '@summit/authentication';
+import { JWTManager, TokenPayload } from '@intelgraph/authentication';
 
 const jwtManager = new JWTManager({
   secret: process.env.JWT_SECRET!,
@@ -240,7 +240,7 @@ const verified = jwtManager.verifyAccessToken(accessToken);
 ### OAuth 2.0 Flow
 
 ```typescript
-import { OAuthProvider, GrantType } from '@summit/authentication';
+import { OAuthProvider, GrantType } from '@intelgraph/authentication';
 
 const oauth = new OAuthProvider({
   clientId: process.env.OAUTH_CLIENT_ID!,
@@ -270,7 +270,7 @@ const tokens = await oauth.exchangeCodeForToken({
 ### API Key Management
 
 ```typescript
-import { APIKeyManager } from '@summit/authentication';
+import { APIKeyManager } from '@intelgraph/authentication';
 
 const apiKeyManager = new APIKeyManager();
 
@@ -293,7 +293,7 @@ const validated = apiKeyManager.validateAPIKey(key);
 ### RBAC (Role-Based Access Control)
 
 ```typescript
-import { RBACManager } from '@summit/authentication';
+import { RBACManager } from '@intelgraph/authentication';
 
 const rbac = new RBACManager();
 
@@ -324,7 +324,7 @@ Choose the right strategy for your use case:
 Best for: Simple rate limiting with predictable reset times
 
 ```typescript
-import { FixedWindowLimiter } from '@summit/rate-limiting';
+import { FixedWindowLimiter } from '@intelgraph/rate-limiting';
 
 const limiter = new FixedWindowLimiter({
   windowMs: 60 * 1000, // 1 minute
@@ -336,7 +336,7 @@ const limiter = new FixedWindowLimiter({
 Best for: More accurate rate limiting without edge case bursts
 
 ```typescript
-import { SlidingWindowLimiter } from '@summit/rate-limiting';
+import { SlidingWindowLimiter } from '@intelgraph/rate-limiting';
 
 const limiter = new SlidingWindowLimiter({
   windowMs: 60 * 1000,
@@ -348,7 +348,7 @@ const limiter = new SlidingWindowLimiter({
 Best for: Allowing bursts while maintaining average rate
 
 ```typescript
-import { TokenBucketLimiter } from '@summit/rate-limiting';
+import { TokenBucketLimiter } from '@intelgraph/rate-limiting';
 
 const limiter = new TokenBucketLimiter({
   bucketSize: 100,
@@ -363,7 +363,7 @@ const limiter = new TokenBucketLimiter({
 For multi-instance deployments, use Redis-based rate limiting:
 
 ```typescript
-import { RedisRateLimiter } from '@summit/rate-limiting';
+import { RedisRateLimiter } from '@intelgraph/rate-limiting';
 import Redis from 'ioredis';
 
 const redis = new Redis({
@@ -385,7 +385,7 @@ const limiter = new RedisRateLimiter({
 Define tiered rate limit policies:
 
 ```typescript
-import { RateLimitPolicyManager } from '@summit/rate-limiting';
+import { RateLimitPolicyManager } from '@intelgraph/rate-limiting';
 
 const policyManager = new RateLimitPolicyManager();
 
@@ -402,7 +402,7 @@ policyManager.assignRoutePolicy('/api/search', 'basic');
 ### Real-time Metrics
 
 ```typescript
-import { MetricsCollector } from '@summit/api-analytics';
+import { MetricsCollector } from '@intelgraph/api-analytics';
 
 const metrics = new MetricsCollector();
 
@@ -427,7 +427,7 @@ console.log(stats);
 Track API performance and SLA compliance:
 
 ```typescript
-import { PerformanceTracker } from '@summit/api-analytics';
+import { PerformanceTracker } from '@intelgraph/api-analytics';
 
 const tracker = new PerformanceTracker({
   sla: {

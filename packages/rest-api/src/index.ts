@@ -92,7 +92,7 @@ export function createAPI(config: APIConfig): APIFramework {
   }
 
   // Compression
-  app.use(compression());
+  app.use(compression() as any);
 
   // Body parsing
   app.use(express.json({ limit: '10mb' }));
@@ -149,7 +149,7 @@ export function createAPI(config: APIConfig): APIFramework {
           // Skip rate limiting for health checks
           return req.path === '/health' || req.path === '/ready';
         },
-      })
+      }) as any
     );
   }
 
@@ -227,7 +227,7 @@ export function createAPI(config: APIConfig): APIFramework {
   app.use(
     errorHandler({
       includeStack: process.env.NODE_ENV !== 'production',
-    })
+    }) as any
   );
 
   // ===== API Interface =====

@@ -10,4 +10,4 @@ export type {
   StewardshipWorkflow,
   ChangeRequest,
   DataCertification
-} from '@summit/mdm-core';
+} from '@intelgraph/mdm-core';

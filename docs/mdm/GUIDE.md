@@ -11,7 +11,7 @@ Summit's Master Data Management platform provides enterprise-grade capabilities 
 Create and manage golden records (master records) with advanced survivorship rules:
 
 ```typescript
-import { GoldenRecordManager } from '@summit/golden-records';
+import { GoldenRecordManager } from '@intelgraph/golden-records';
 
 const manager = new GoldenRecordManager({
   domain: 'customer',
@@ -61,8 +61,8 @@ const goldenRecord = await manager.createGoldenRecord([
 Match and resolve entities across different systems:
 
 ```typescript
-import { EntityResolver } from '@summit/golden-records';
-import { MatchingEngine } from '@summit/mdm-core';
+import { EntityResolver } from '@intelgraph/golden-records';
+import { MatchingEngine } from '@intelgraph/mdm-core';
 
 const resolver = new EntityResolver({
   matchingConfig: {
@@ -112,7 +112,7 @@ console.log(`Requires review: ${result.manualReviewRequired}`);
 Assess and improve data quality:
 
 ```typescript
-import { QualityEngine } from '@summit/mdm-core';
+import { QualityEngine } from '@intelgraph/mdm-core';
 
 const qualityEngine = new QualityEngine();
 
@@ -158,7 +158,7 @@ console.log(`Issues found: ${profile.issues.length}`);
 Manage code lists and lookup tables:
 
 ```typescript
-import { ReferenceDataManager } from '@summit/reference-data';
+import { ReferenceDataManager } from '@intelgraph/reference-data';
 
 const refDataManager = new ReferenceDataManager();
 
@@ -185,7 +185,7 @@ console.log(country?.value); // 'United States'
 Build and manage organizational and product hierarchies:
 
 ```typescript
-import { HierarchyBuilder } from '@summit/hierarchy-management';
+import { HierarchyBuilder } from '@intelgraph/hierarchy-management';
 
 const hierarchyBuilder = new HierarchyBuilder();
 
@@ -224,7 +224,7 @@ const descendants = await hierarchyBuilder.getDescendants(division.id);
 Synchronize data across multiple sources:
 
 ```typescript
-import { SyncEngine } from '@summit/mdm-sync';
+import { SyncEngine } from '@intelgraph/mdm-sync';
 
 const syncEngine = new SyncEngine();
 
@@ -273,7 +273,7 @@ const job = await syncEngine.startSync('crm-erp-sync');
 Manage data stewardship and approval processes:
 
 ```typescript
-import { StewardshipWorkflowManager } from '@summit/mdm-stewardship';
+import { StewardshipWorkflowManager } from '@intelgraph/mdm-stewardship';
 
 const stewardshipManager = new StewardshipWorkflowManager();
 
@@ -309,7 +309,7 @@ const certification = await stewardshipManager.certifyRecord(
 Enforce governance policies and track compliance:
 
 ```typescript
-import { GovernanceEngine } from '@summit/mdm-governance';
+import { GovernanceEngine } from '@intelgraph/mdm-governance';
 
 const governanceEngine = new GovernanceEngine();
 
@@ -363,7 +363,7 @@ const report = await governanceEngine.generateComplianceReport('customer', 'Q1-2
 Create dashboards and generate reports:
 
 ```typescript
-import { AnalyticsEngine } from '@summit/mdm-analytics';
+import { AnalyticsEngine } from '@intelgraph/mdm-analytics';
 
 const analyticsEngine = new AnalyticsEngine();
 

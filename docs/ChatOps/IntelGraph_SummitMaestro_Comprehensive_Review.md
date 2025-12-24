@@ -6,7 +6,7 @@ _Generated: 2025-09-01 07:38:03_
 
 Overall, the repository is a substantial, production‑aspiring monorepo (client/server/services/packages) with strong CI/CD coverage, extensive Helm/K8s assets, and a thoughtful compliance/observability posture. The core risks that merit immediate attention are:
 
-- **Package management friction**: mixed lockfiles (`pnpm-lock.yaml` + `package-lock.json`), strict Node engines (`>=18.18 <20`), and a workspace resolution edge case around `@summit/maestro-sdk` driving a `404` when installing dependencies.
+- **Package management friction**: mixed lockfiles (`pnpm-lock.yaml` + `package-lock.json`), strict Node engines (`>=18.18 <20`), and a workspace resolution edge case around `@intelgraph/maestro-sdk` driving a `404` when installing dependencies.
 - **Secrets hygiene**: `.env` is committed and contains development credentials and JWT secrets; move to templated examples and secret managers.
 - **Repo hygiene**: runtime logs and generated validation artifacts live at the root; redirect to `artifacts/` and ignore in Git.
 - **Lint edge case**: a false‑positive/awkward `no-unused-vars` situation around `_userId` in `orchestration-service.ts` causing commit friction.
@@ -22,7 +22,7 @@ If we address these four items, the project will install and iterate smoothly ac
 - **pnpm workspace globs**: ['client', 'server', 'services/*', 'packages/*']
 - **Engines**: {'node': '>=18.18 <20', 'npm': '>=8.0.0'}
 - **Lockfiles present**: ['pnpm-lock.yaml', 'package-lock.json']
-- **Internal SDK**: `packages/sdk-ts` version `0.1.0`; required by `packages/tasks-core` as `@summit/maestro-sdk` with spec `^0.1.0`
+- **Internal SDK**: `packages/sdk-ts` version `0.1.0`; required by `packages/tasks-core` as `@intelgraph/maestro-sdk` with spec `^0.1.0`
 - **.env committed**: True
 - **.gitignore includes .env**: False
 
@@ -86,14 +86,14 @@ If we address these four items, the project will install and iterate smoothly ac
 "packageManager": "pnpm@10.15.0"
 ```
 
-### Workspace Linking for `@summit/maestro-sdk`
+### Workspace Linking for `@intelgraph/maestro-sdk`
 
-`@summit/maestro-sdk` lives at `packages/sdk-ts` and is consumed by `packages/tasks-core`. With pnpm, prerelease linking is most reliable when you **force workspace resolution**:
+`@intelgraph/maestro-sdk` lives at `packages/sdk-ts` and is consumed by `packages/tasks-core`. With pnpm, prerelease linking is most reliable when you **force workspace resolution**:
 
 ```jsonc
 // packages/tasks-core/package.json
 "dependencies": {
-  "@summit/maestro-sdk": "workspace:^"
+  "@intelgraph/maestro-sdk": "workspace:^"
 }
 ```
 
@@ -103,7 +103,7 @@ Additionally, add guardrails at the root:
 // package.json
 "pnpm": {
   "overrides": {
-    "@summit/maestro-sdk": "workspace:^"
+    "@intelgraph/maestro-sdk": "workspace:^"
   }
 }
 ```
@@ -230,7 +230,7 @@ private async validatePurpose(purpose: string, userId: string) {
 
 ## Architecture & Code Quality (High‑Level)
 
-- **Monorepo** with workspaces: `client` (Vite/React), `server` (Node/TS), `services/*`, `packages/*` (incl. `@summit/maestro-sdk`), plus extensive Helm/K8s assets.
+- **Monorepo** with workspaces: `client` (Vite/React), `server` (Node/TS), `services/*`, `packages/*` (incl. `@intelgraph/maestro-sdk`), plus extensive Helm/K8s assets.
 - **Back end**: policy/compliance gates, Redis rate limiting, premium model routing, and web orchestration layers are well‑structured with clear separation of concerns.
 - **Front end**: GraphQL persisted ops and a solid lint/test toolchain.
 - **Infra**: Many Dockerfiles & Helm charts; consider standardizing base images and non‑root users across Dockerfiles.
@@ -240,7 +240,7 @@ private async validatePurpose(purpose: string, userId: string) {
 ## Immediate Action Checklist (Next 24–48h)
 
 1. **Standardize on pnpm**: delete `package-lock.json`; add `"packageManager": "pnpm@10.15.0"`.
-2. **Fix local linking for `@summit/maestro-sdk`**: change spec to `"workspace:^"` and add pnpm `overrides` at root.
+2. **Fix local linking for `@intelgraph/maestro-sdk`**: change spec to `"workspace:^"` and add pnpm `overrides` at root.
 3. **Unblock ESLint**: apply one of the two `_userId` remedies above.
 4. **Secrets hygiene**: add `.env` to `.gitignore`; move real values to a secret manager; keep `.env.example` only.
 5. **Node version policy**: either enforce Node 18.20.4 via nvm/CI or bump `engines.node` (after validation) to Node 20/22 LTS.

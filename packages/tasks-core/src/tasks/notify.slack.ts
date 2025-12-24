@@ -1,4 +1,4 @@
-import { defineTask } from '@summit/maestro-sdk';
+import { defineTask } from '@intelgraph/maestro-sdk';
 
 type In = { webhook?: string; channel?: string; text: string };
 export default defineTask<In, { ok: boolean }>({

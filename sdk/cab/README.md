@@ -6,7 +6,7 @@ Lightweight TypeScript helper for interacting with the Contextual Access Broker 
 ## Usage
 
 ```ts
-import { CABClient } from '@summit/cab-sdk';
+import { CABClient } from '@intelgraph/cab-sdk';
 
 const client = new CABClient({ baseUrl: 'http://localhost:8085' });
 const decision = await client.evaluate({

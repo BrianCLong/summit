@@ -3,7 +3,7 @@ import {
   PluginManifest,
   PluginContext,
   PluginPermission,
-} from '@summit/plugin-system';
+} from '@intelgraph/plugin-system';
 
 /**
  * Builder class for creating plugins with fluent API

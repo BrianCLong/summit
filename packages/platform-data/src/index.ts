@@ -1,5 +1,5 @@
 /**
- * @summit/platform-data
+ * @intelgraph/platform-data
  *
  * Data utilities for Summit platform.
  * Implements Prompts 36-40: Data Lineage, Mock Data, Privacy

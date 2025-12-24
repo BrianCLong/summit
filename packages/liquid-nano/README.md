@@ -1,4 +1,4 @@
-# @summit/liquid-nano
+# @intelgraph/liquid-nano
 
 Liquid Nano is a strict-mode TypeScript runtime designed for pilot deployments on edge hardware. The package includes the runtime core, sample applications, deployment tooling, monitoring assets, and extensive documentation to accelerate production readiness.
 
@@ -14,10 +14,10 @@ Liquid Nano is a strict-mode TypeScript runtime designed for pilot deployments o
 ## Scripts
 
 ```bash
-npm run --workspace @summit/liquid-nano build         # Compile TypeScript to dist/
-npm run --workspace @summit/liquid-nano test:coverage # Run unit + integration tests
-npm run --workspace @summit/liquid-nano lint          # ESLint validation
-npm run --workspace @summit/liquid-nano typecheck     # Strict TS checks
+npm run --workspace @intelgraph/liquid-nano build         # Compile TypeScript to dist/
+npm run --workspace @intelgraph/liquid-nano test:coverage # Run unit + integration tests
+npm run --workspace @intelgraph/liquid-nano lint          # ESLint validation
+npm run --workspace @intelgraph/liquid-nano typecheck     # Strict TS checks
 ```
 
 ## Pilot Deployment

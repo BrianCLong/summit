@@ -12,9 +12,9 @@ The Data Spine service provides a lightweight schema registry with data residenc
 
 ```bash
 npm install
-npm exec --workspace=@summit/data-spine data-spine validate --all
-npm exec --workspace=@summit/data-spine data-spine compat customer-profile
-npm exec --workspace=@summit/data-spine data-spine audit residency --output services/data-spine/reports/residency-audit.json
+npm exec --workspace=@intelgraph/data-spine data-spine validate --all
+npm exec --workspace=@intelgraph/data-spine data-spine compat customer-profile
+npm exec --workspace=@intelgraph/data-spine data-spine audit residency --output services/data-spine/reports/residency-audit.json
 ```
 
 The CLI will exit non-zero on breaking schema changes or residency violations, enabling compatibility gates in CI.

@@ -16,7 +16,7 @@ import {
   buildAdapterBundle,
   verifyAdapterBundle,
   type BundleBuildOptions,
-} from '@summit/adapter-sdk';
+} from '@intelgraph/adapter-sdk';
 
 const result = await buildAdapterBundle({
   manifest,

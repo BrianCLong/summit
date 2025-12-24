@@ -22,7 +22,7 @@ languages.forEach((lang) => {
     try {
         // Using openapi-generator-cli via npx
         // Note: This requires java to be installed in the environment
-        const command = `npx @openapitools/openapi-generator-cli generate -i ${openApiSpecPath} -g ${lang} -o ${langOutputDir} --additional-properties=npmName=@summit/client-${lang}`;
+        const command = `npx @openapitools/openapi-generator-cli generate -i ${openApiSpecPath} -g ${lang} -o ${langOutputDir} --additional-properties=npmName=@intelgraph/client-${lang}`;
         execSync(command, { stdio: 'inherit' });
         console.log(`Successfully generated ${lang} client.`);
     } catch (error) {

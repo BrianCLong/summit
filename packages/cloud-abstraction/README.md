@@ -14,7 +14,7 @@ A unified, cloud-agnostic interface for multi-cloud operations across AWS, Azure
 ## Installation
 
 ```bash
-npm install @summit/cloud-abstraction
+npm install @intelgraph/cloud-abstraction
 ```
 
 ## Usage
@@ -22,7 +22,7 @@ npm install @summit/cloud-abstraction
 ### Basic Storage Operations
 
 ```typescript
-import { CloudFactory, CloudProvider } from '@summit/cloud-abstraction';
+import { CloudFactory, CloudProvider } from '@intelgraph/cloud-abstraction';
 
 // Create storage provider
 const storage = CloudFactory.createStorage({
@@ -52,7 +52,7 @@ const url = await storage.getSignedUrl('my-bucket', 'file.txt', 3600, 'get');
 ### Multi-Cloud with Automatic Failover
 
 ```typescript
-import { CloudFactory, CloudProvider } from '@summit/cloud-abstraction';
+import { CloudFactory, CloudProvider } from '@intelgraph/cloud-abstraction';
 
 // Create multi-cloud storage with failover
 const storage = CloudFactory.createMultiCloudStorage([
@@ -79,7 +79,7 @@ await storage.upload('my-bucket', 'file.txt', data);
 ### Provider-Specific Implementations
 
 ```typescript
-import { AWSStorageProvider, AzureStorageProvider, GCPStorageProvider } from '@summit/cloud-abstraction';
+import { AWSStorageProvider, AzureStorageProvider, GCPStorageProvider } from '@intelgraph/cloud-abstraction';
 
 // AWS
 const awsStorage = new AWSStorageProvider('us-east-1');
@@ -152,7 +152,7 @@ All storage providers implement the `IStorageProvider` interface:
 All operations throw typed errors:
 
 ```typescript
-import { StorageError, CloudProvider } from '@summit/cloud-abstraction';
+import { StorageError, CloudProvider } from '@intelgraph/cloud-abstraction';
 
 try {
   await storage.upload('my-bucket', 'file.txt', data);
