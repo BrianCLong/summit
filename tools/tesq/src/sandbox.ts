@@ -73,7 +73,8 @@ class GuardedSandboxContext implements SandboxContext {
 
     if (!this.policy.allowAllNetwork) {
       const hostAllowed = this.policy.allowedNetworkDestinations.has(destination);
-      const hostnameAllowed = this.policy.allowedNetworkDestinations.has(destination.split(':')[0]);
+      const hostname = destination.split(':')[0] ?? destination;
+      const hostnameAllowed = this.policy.allowedNetworkDestinations.has(hostname);
       if (!hostAllowed && !hostnameAllowed) {
         this.auditLog.record(
           'violation',

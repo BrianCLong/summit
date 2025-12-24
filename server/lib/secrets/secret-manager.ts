@@ -1,4 +1,3 @@
-// @ts-nocheck
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -51,7 +50,7 @@ export class SecretManager {
   private cache: Map<string, CachedSecret> = new Map();
   private auditLogger: SecretAuditLogger;
   private options: Required<SecretManagerOptions>;
-  private rotationTimer?: NodeJS.Timer;
+  private rotationTimer?: NodeJS.Timeout;
 
   constructor(options: SecretManagerOptions = {}) {
     this.options = {
@@ -68,7 +67,7 @@ export class SecretManager {
     this.configureRotation();
   }
 
-  updateOptions(options: SecretManagerOptions) {
+  updateOptions(options: SecretManagerOptions): void {
     this.options = { ...this.options, ...options };
     this.configureRotation();
     if (options.auditLogPath) {
@@ -85,34 +84,34 @@ export class SecretManager {
     return `enc::v1:${iv.toString('base64')}:${authTag.toString('base64')}:${ciphertext.toString('base64')}`;
   }
 
-  resolveConfig(config: any): any {
+  resolveConfig<T>(config: T): T {
     if (Array.isArray(config)) {
-      return config.map(value => this.resolveConfig(value));
+      return config.map(value => this.resolveConfig(value)) as T;
     }
     if (config && typeof config === 'object') {
       return Object.keys(config).reduce((acc, key) => {
-        acc[key] = this.resolveConfig((config as any)[key]);
+        acc[key] = this.resolveConfig((config as Record<string, unknown>)[key]);
         return acc;
-      }, {} as any);
+      }, {} as Record<string, unknown>) as T;
     }
     if (typeof config === 'string') {
-      return this.resolveString(config);
+      return this.resolveString(config) as T;
     }
     return config;
   }
 
-  rotateSecret(reference: string) {
+  rotateSecret(reference: string): void {
     this.cache.delete(reference);
     this.resolveString(reference, true);
   }
 
-  close() {
+  close(): void {
     if (this.rotationTimer) {
       clearInterval(this.rotationTimer);
     }
   }
 
-  private configureRotation() {
+  private configureRotation(): void {
     if (this.rotationTimer) {
       clearInterval(this.rotationTimer);
     }
@@ -121,16 +120,18 @@ export class SecretManager {
     }
   }
 
-  private evictExpired() {
+  private evictExpired(): void {
     const now = Date.now();
-    for (const [key, value] of this.cache.entries()) {
+    const keysToDelete: string[] = [];
+    this.cache.forEach((value, key) => {
       if (value.expiresAt <= now) {
-        this.cache.delete(key);
+        keysToDelete.push(key);
       }
-    }
+    });
+    keysToDelete.forEach(key => this.cache.delete(key));
   }
 
-  private resolveString(value: string, rotated = false): any {
+  private resolveString(value: string, rotated = false): string {
     const reference = this.parseReference(value);
     if (!reference) {
       return value;
@@ -328,15 +329,15 @@ export class SecretManager {
     return raw.trim();
   }
 
-  private lookupSecret(source: Record<string, any>, reference: SecretReference): string | undefined {
+  private lookupSecret(source: Record<string, unknown>, reference: SecretReference): string | undefined {
     const pathParts = reference.key.split('/').filter(Boolean);
-    let current: any = source;
+    let current: unknown = source;
     for (const part of pathParts) {
-      current = current?.[part];
+      current = (current as Record<string, unknown>)?.[part];
       if (current === undefined) return undefined;
     }
     if (reference.field) {
-      return current?.[reference.field];
+      return (current as Record<string, unknown>)?.[reference.field] as string | undefined;
     }
     if (typeof current === 'string') {
       return current;

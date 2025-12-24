@@ -13,7 +13,7 @@ export function createLSTM(config: {
   dropout?: number;
   bidirectional?: boolean;
 }): NeuralNetworkArchitecture {
-  const layers = [
+  const layers: any[] = [
     { type: 'input', name: 'input', config: { shape: [null, config.inputDim] } },
   ];
 

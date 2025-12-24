@@ -1,9 +1,8 @@
-// @ts-nocheck
-
-import { SecurityIncidentPipeline } from '../services/SecurityIncidentPipeline';
-import { AlertTriageV2Service } from '../services/AlertTriageV2Service';
-import { Neo4jService, neo } from '../db/neo4j';
-import { AdvancedAuditSystem } from '../audit/advanced-audit-system';
+import { SecurityIncidentPipeline } from '../services/SecurityIncidentPipeline.js';
+import { AlertTriageV2Service } from '../services/AlertTriageV2Service.js';
+import { Neo4jService, neo } from '../db/neo4j.js';
+import { AdvancedAuditSystem } from '../audit/advanced-audit-system.js';
+import { jest } from '@jest/globals';
 // Mock PrismaClient manually as it's hard to import in test env sometimes
 const PrismaClient = class {};
 import { Redis } from 'ioredis';
@@ -11,21 +10,21 @@ import { Redis } from 'ioredis';
 
 // Mock Logger interface
 interface MockLogger {
-  info: any;
-  warn: any;
-  error: any;
-  debug: any;
+  info: jest.Mock;
+  warn: jest.Mock;
+  error: jest.Mock;
+  debug: jest.Mock;
 }
 
 // Mock dependencies
-const mockPrisma = new PrismaClient() as any;
+const mockPrisma = new PrismaClient() as unknown as Record<string, unknown>;
 const mockRedis = {
   get: jest.fn(),
   set: jest.fn(),
   setex: jest.fn(),
 } as unknown as Redis;
 
-const mockLogger = {
+const mockLogger: MockLogger = {
   info: jest.fn(),
   warn: jest.fn(),
   error: jest.fn(),

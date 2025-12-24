@@ -1,0 +1,96 @@
+name: companyos-service-template-ci
+
+on:
+  push:
+    branches: ["main", "feat/**", "chore/**", "fix/**"]
+    paths:
+      - "templates/companyos-service-template/**"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "templates/companyos-service-template/**"
+
+defaults:
+  run:
+    working-directory: templates/companyos-service-template
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: templates/companyos-service-template/package.json
+      - run: npm install --ignore-scripts
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@v2
+      - name: SAST (semgrep)
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: p/ci
+      - name: Build image
+        run: |
+          docker build -t ${{ github.repository }}:${{ github.sha }} .
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ github.repository }}:${{ github.sha }}
+          format: spdx-json
+          output-file: sbom.json
+      - name: Scan vulnerabilities (trivy)
+        uses: aquasecurity/trivy-action@0.22.0
+        with:
+          image-ref: ${{ github.repository }}:${{ github.sha }}
+          format: table
+          output: trivy.txt
+          exit-code: '1'
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push image
+        run: |
+          docker tag ${{ github.repository }}:${{ github.sha }} ghcr.io/${{ github.repository }}:${{ github.sha }}
+          docker push ghcr.io/${{ github.repository }}:${{ github.sha }}
+      - name: Cosign sign
+        uses: sigstore/cosign-installer@v3
+      - run: cosign sign --yes ghcr.io/${{ github.repository }}:${{ github.sha }}
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-bundle
+          path: |
+            templates/companyos-service-template/sbom.json
+            templates/companyos-service-template/trivy.txt
+
+  deploy-demo:
+    needs: build-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+      - name: Verify cosign signature
+        run: cosign verify ghcr.io/${{ github.repository }}:${{ github.sha }}
+      - name: Helm install/upgrade
+        uses: azure/k8s-deploy@v5
+        with:
+          action: deploy
+          manifests: |
+            templates/companyos-service-template/deploy/chart/values.yaml
+            templates/companyos-service-template/deploy/chart/templates/deployment.yaml
+            templates/companyos-service-template/deploy/chart/templates/service.yaml
+          images: ghcr.io/${{ github.repository }}:${{ github.sha }}
+      - name: Post-deploy smoke
+        run: |
+          kubectl rollout status deploy/golden-path
+          kubectl run canary-probe --rm -it --image=curlimages/curl --restart=Never -- curl -f http://golden-path:3000/healthz

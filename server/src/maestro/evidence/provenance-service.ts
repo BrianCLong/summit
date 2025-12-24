@@ -1,4 +1,3 @@
-// @ts-nocheck
 import crypto from 'crypto';
 // import { S3Client, PutObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
 import { getPostgresPool } from '../../db/postgres.js';
@@ -16,7 +15,7 @@ export interface EvidenceArtifact {
     | 'policy_decision'
     | 'receipt';
   content: Buffer | string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   retentionDays?: number;
 }
 
@@ -206,7 +205,7 @@ export class EvidenceProvenanceService {
     valid: boolean;
     integrity: boolean;
     provenance: boolean;
-    details: any;
+    details: unknown;
   }> {
     const span = otelService.createSpan('evidence.verify');
 
@@ -237,7 +236,7 @@ export class EvidenceProvenanceService {
       // });
 
       const integrityValid = false;
-      const s3Metadata = null;
+      const s3Metadata: Record<string, string> | null = null;
 
       // try {
       //   const s3Response = await this.s3Client.send(headCommand);
@@ -311,7 +310,13 @@ export class EvidenceProvenanceService {
    */
   async generateSBOMEvidence(
     runId: string,
-    dependencies: any[],
+    dependencies: Array<{
+      name: string;
+      version: string;
+      licenses?: string[];
+      hashes?: string[];
+      externalReferences?: string[];
+    }>,
   ): Promise<string> {
     const sbom = {
       bomFormat: 'CycloneDX',
@@ -397,7 +402,15 @@ export class EvidenceProvenanceService {
   /**
    * List evidence artifacts for a run
    */
-  async listEvidenceForRun(runId: string): Promise<any[]> {
+  async listEvidenceForRun(runId: string): Promise<Array<{
+    id: string;
+    artifact_type: string;
+    sha256_hash: string;
+    size_bytes: number;
+    immutable: boolean;
+    retention_until: Date;
+    created_at: Date;
+  }>> {
     const pool = getPostgresPool();
     const { rows } = await pool.query(
       `SELECT 

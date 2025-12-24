@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Centralized logging configuration
  * Exports a typed logger instance compatible with the Logger interface
@@ -6,7 +5,7 @@
 import pino from 'pino';
 import type { Logger } from './Logger';
 
-const pinoLogger = pino({
+const pinoLogger = (pino as any)({
   level: process.env.LOG_LEVEL || 'info',
   transport:
     process.env.NODE_ENV === 'development'

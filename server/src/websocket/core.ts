@@ -34,7 +34,7 @@ interface WebSocketMessage {
   type: 'subscribe' | 'unsubscribe' | 'publish' | 'heartbeat';
   topics?: string[];
   topic?: string;
-  payload?: any;
+  payload?: unknown;
   timestamp?: number;
   id?: string;
 }
@@ -83,14 +83,19 @@ export class WebSocketCore {
 
   private verifyJWT(token: string): WebSocketClaims | null {
     try {
-      const decoded = jwt.verify(token, this.JWT_SECRET) as any;
+      const decoded = jwt.verify(token, this.JWT_SECRET) as jwt.JwtPayload & {
+        tenantId?: string;
+        userId?: string;
+        roles?: string[];
+        permissions?: string[];
+      };
       return {
         tenantId: decoded.tenantId || 'default',
-        userId: decoded.sub || decoded.userId,
+        userId: decoded.sub || decoded.userId || 'unknown',
         roles: decoded.roles || [],
         permissions: decoded.permissions || [],
-        sub: decoded.sub,
-        exp: decoded.exp,
+        sub: decoded.sub || 'unknown',
+        exp: decoded.exp || 0,
       };
     } catch (error) {
       console.warn('JWT verification failed:', error);

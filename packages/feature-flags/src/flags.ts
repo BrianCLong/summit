@@ -1,4 +1,4 @@
-import { OpenFeature } from ' @openfeature/server-sdk';
+import { OpenFeature } from '@openfeature/server-sdk';
 export const ff = OpenFeature.getClient('symphony');
 
 export async function enabled(flag: string, defaultValue = false) {

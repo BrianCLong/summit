@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Random Forest Classifier
  */

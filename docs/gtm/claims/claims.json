@@ -1,0 +1,44 @@
+[
+  {
+    "claimId": "claim-core-001",
+    "message": "Customers reduce investigation cycle time by 30% with evidence-grade workflows",
+    "evidenceType": "customer_metric",
+    "evidenceSource": "Case Study: Regulated Bank",
+    "status": "approved",
+    "reviewDate": "2025-12-31T00:00:00.000Z",
+    "owner": "PMM",
+    "channels": ["web", "sales", "content"],
+    "riskTier": "medium",
+    "approvals": [
+      { "approver": "evidence", "approvedAt": "2025-09-01T00:00:00.000Z" },
+      { "approver": "pmm", "approvedAt": "2025-09-02T00:00:00.000Z" }
+    ],
+    "createdAt": "2025-09-01T00:00:00.000Z",
+    "updatedAt": "2025-09-02T00:00:00.000Z",
+    "publishedAt": "2025-09-02T00:00:00.000Z",
+    "forwardLooking": false,
+    "complianceSurface": ["security", "roi"]
+  },
+  {
+    "claimId": "claim-core-002",
+    "message": "Platform enforces provenance ledger and policy-driven controls for AI governance",
+    "evidenceType": "security_attestation",
+    "evidenceSource": "SOC2 Type II + FedRAMP-ready controls",
+    "status": "approved",
+    "reviewDate": "2025-11-30T00:00:00.000Z",
+    "owner": "Security",
+    "channels": ["web", "sales"],
+    "riskTier": "high",
+    "approvals": [
+      { "approver": "evidence", "approvedAt": "2025-09-01T00:00:00.000Z" },
+      { "approver": "legal", "approvedAt": "2025-09-03T00:00:00.000Z" },
+      { "approver": "security", "approvedAt": "2025-09-03T05:00:00.000Z" },
+      { "approver": "pmm", "approvedAt": "2025-09-04T00:00:00.000Z" }
+    ],
+    "createdAt": "2025-09-01T00:00:00.000Z",
+    "updatedAt": "2025-09-04T00:00:00.000Z",
+    "publishedAt": "2025-09-04T00:00:00.000Z",
+    "forwardLooking": true,
+    "complianceSurface": ["compliance", "security"]
+  }
+]

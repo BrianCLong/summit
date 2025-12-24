@@ -15,23 +15,24 @@ import axios from 'axios';
 import { GraphQLError } from 'graphql';
 import { getMockEntity, getMockEntities } from './__mocks__/entityMocks.js';
 import { withCache, listCacheKey } from '../../utils/cacheHelper.js';
+import type { GraphQLContext } from '../apollo-v5-server.js';
 
-const logger = pino();
+const logger = (pino as any)();
 const driver = getNeo4jDriver();
 
 // Helper function to extract tenant from context
-const requireTenant = (ctx: any): string => {
-  if (!ctx?.user?.tenant) {
+const requireTenant = (ctx: GraphQLContext): string => {
+  if (!ctx?.user?.tenantId) {
     throw new GraphQLError('Tenant required', {
       extensions: { code: 'FORBIDDEN' },
     });
   }
-  return ctx.user.tenant;
+  return ctx.user.tenantId;
 };
 
 const entityResolvers = {
   Query: {
-    entity: async (_: any, { id }: { id: string }, context: any) => {
+    entity: async (_: unknown, { id }: { id: string }, context: GraphQLContext) => {
       // Return mock data if database is not available
       if (isNeo4jMockMode()) {
         return getMockEntity(id);
@@ -51,20 +52,20 @@ const entityResolvers = {
     },
     entities: withCache(
       // Cache key generator
-      (_parent, args, context) => {
-        const tenantId = context?.user?.tenant || 'default';
+      (_parent: unknown, args: any, context: GraphQLContext) => {
+        const tenantId = context?.user?.tenantId || 'default';
         return listCacheKey('entities', { ...args, tenantId });
       },
       // Resolver implementation
       async (
-        _: any,
+        _: unknown,
         {
           type,
           q,
           limit,
           offset,
         }: { type?: string; q?: string; limit: number; offset: number },
-        context: any,
+        context: GraphQLContext,
       ) => {
         // Return mock data if database is not available
         if (isNeo4jMockMode()) {
@@ -145,7 +146,8 @@ const entityResolvers = {
             { error, type, q, limit, offset },
             'Error fetching entities',
           );
-          throw new Error(`Failed to fetch entities: ${error.message}`);
+          const message = error instanceof Error ? error.message : 'Unknown error';
+          throw new Error(`Failed to fetch entities: ${message}`);
         } finally {
           await session.close();
         }
@@ -154,7 +156,7 @@ const entityResolvers = {
       { ttl: 30, tenantId: 'context' } // 30s TTL
     ),
     semanticSearch: async (
-      _: any,
+      _: unknown,
       {
         query,
         filters,
@@ -166,7 +168,7 @@ const entityResolvers = {
         limit: number;
         offset: number;
       },
-      context: any,
+      context: GraphQLContext,
     ) => {
       const pgPool = getPostgresPool();
       const neo4jSession = driver.session();
@@ -256,7 +258,8 @@ const entityResolvers = {
           { error, query, filters },
           'Error performing semantic search with filters',
         );
-        throw new Error(`Failed to perform semantic search: ${error.message}`);
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        throw new Error(`Failed to perform semantic search: ${message}`);
       } finally {
         await neo4jSession.close();
         if (pgClient) pgClient.release();
@@ -265,9 +268,9 @@ const entityResolvers = {
   },
   Mutation: {
     createEntity: async (
-      _: any,
+      _: unknown,
       { input }: { input: { type: string; props: any } },
-      context: any,
+      context: GraphQLContext,
     ) => {
       const session = driver.session();
       try {
@@ -302,13 +305,14 @@ const entityResolvers = {
         return entity;
       } catch (error) {
         logger.error({ error, input }, 'Error creating entity');
-        throw new Error(`Failed to create entity: ${error.message}`);
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        throw new Error(`Failed to create entity: ${message}`);
       } finally {
         await session.close();
       }
     },
     updateEntity: async (
-      _: any,
+      _: unknown,
       {
         id,
         input,
@@ -318,7 +322,7 @@ const entityResolvers = {
         input: { type?: string; props?: any };
         lastSeenTimestamp: string;
       },
-      context: any,
+      context: GraphQLContext,
     ) => {
       const session = driver.session();
       try {
@@ -378,12 +382,13 @@ const entityResolvers = {
         return entity;
       } catch (error) {
         logger.error({ error, id, input }, 'Error updating entity');
-        throw new Error(`Failed to update entity: ${error.message}`);
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        throw new Error(`Failed to update entity: ${message}`);
       } finally {
         await session.close();
       }
     },
-    deleteEntity: async (_: any, { id }: { id: string }, context: any) => {
+    deleteEntity: async (_: unknown, { id }: { id: string }, context: GraphQLContext) => {
       const session = driver.session();
       try {
         const tenantId = requireTenant(context);
@@ -400,12 +405,13 @@ const entityResolvers = {
         return true;
       } catch (error) {
         logger.error({ error, id }, 'Error deleting entity');
-        throw new Error(`Failed to delete entity: ${error.message}`);
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        throw new Error(`Failed to delete entity: ${message}`);
       } finally {
         await session.close();
       }
     },
-    linkEntities: async (_: any, { text }: { text: string }) => {
+    linkEntities: async (_: unknown, { text }: { text: string }) => {
       try {
         const mlServiceUrl =
           process.env.ML_SERVICE_URL || 'http://localhost:8081';
@@ -438,13 +444,14 @@ const entityResolvers = {
         }
       } catch (error) {
         logger.error({ error, text }, 'Error linking entities');
-        throw new Error(`Failed to link entities: ${error.message}`);
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        throw new Error(`Failed to link entities: ${message}`);
       }
     },
     extractRelationships: async (
-      _: any,
+      _: unknown,
       { text, entities }: { text: string; entities: any[] },
-      context: any,
+      context: GraphQLContext,
     ) => {
       const neo4jSession = driver.session(); // Get Neo4j session
       try {
@@ -514,7 +521,8 @@ const entityResolvers = {
           { error, text, entities },
           'Error extracting relationships',
         );
-        throw new Error(`Failed to extract relationships: ${error.message}`);
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        throw new Error(`Failed to extract relationships: ${message}`);
       } finally {
         await neo4jSession.close(); // Close Neo4j session
       }

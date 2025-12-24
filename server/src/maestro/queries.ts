@@ -8,7 +8,7 @@ import type {
 export class MaestroQueries {
   constructor(public ig: IntelGraphClient) {}
 
-  async getTaskWithArtifacts(taskId: string): Promise<{ task: any; artifacts: any[] } | null> {
+  async getTaskWithArtifacts(taskId: string): Promise<{ task: unknown; artifacts: unknown[] } | null> {
     const task = await this.ig.getTask(taskId);
     if (!task) return null;
     const artifacts = await this.ig.getArtifactsForTask(taskId);

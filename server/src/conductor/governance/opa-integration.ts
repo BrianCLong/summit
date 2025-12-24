@@ -1,9 +1,8 @@
-// @ts-nocheck
 // Open Policy Agent (OPA) Integration for Conductor
 // Implements policy-based authorization and tenant isolation
 
 import axios from 'axios';
-import { prometheusConductorMetrics } from '../observability/prometheus';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
 import crypto from 'crypto';
 
 export interface PolicyContext {
@@ -12,7 +11,7 @@ export interface PolicyContext {
   role: string;
   action: string;
   resource: string;
-  resourceAttributes?: Record<string, any>;
+  resourceAttributes?: Record<string, unknown>;
   sessionContext?: {
     ipAddress?: string;
     userAgent?: string;
@@ -34,12 +33,12 @@ export interface PolicyDecision {
   auditLog?: {
     logLevel: 'info' | 'warn' | 'error';
     message: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   };
   dataFilters?: {
     tenantScope: string[];
     fieldMask?: string[];
-    rowLevelFilters?: Record<string, any>;
+    rowLevelFilters?: Record<string, unknown>;
   };
 }
 

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { PrivacyIncidentDrillEngine, defaultScenario } from '@server/pits';
 import { describe, it, expect } from '@jest/globals';
 

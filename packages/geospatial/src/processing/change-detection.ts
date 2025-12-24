@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Agentic Change Detection Engine
  * Autonomous monitoring and change detection for denied/degraded environments

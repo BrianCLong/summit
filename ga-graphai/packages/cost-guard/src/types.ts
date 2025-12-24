@@ -196,3 +196,135 @@ export interface ResourceOptimizationConfig {
   rebalanceTolerance: number;
   confidenceWindow: number;
 }
+
+export interface JourneyStepTarget {
+  journey: string;
+  steps: Record<string, number>;
+}
+
+export interface JourneyTelemetrySample {
+  journey: string;
+  step: string;
+  p95: number;
+  errorRate: number;
+  sampleRate: number;
+  cacheHit: boolean;
+  payloadBytes: number;
+  tenant?: string;
+}
+
+export interface PerformanceBudgetResult {
+  status: 'pass' | 'breach' | 'warn';
+  reason: string;
+  targetMs: number;
+  observedMs: number;
+  annotations: Record<string, string | number | boolean>;
+}
+
+export type OffenderKind = 'endpoint' | 'query' | 'page';
+
+export interface OffenderRecord {
+  id: string;
+  kind: OffenderKind;
+  p95Ms: number;
+  errorRate: number;
+  volume: number;
+  owner?: string;
+  lastDeployId?: string;
+  exemplarTraceUrl?: string;
+}
+
+export interface OffenderBoard {
+  slowestEndpoints: OffenderRecord[];
+  slowestQueries: OffenderRecord[];
+  slowestPages: OffenderRecord[];
+}
+
+export interface CacheConfig {
+  defaultTtlMs: number;
+  jitterPct: number;
+  negativeTtlMs: number;
+}
+
+export interface CacheEntry<TValue> {
+  key: string;
+  tenantId: string;
+  value: TValue;
+  checksum: string;
+  expiresAt: number;
+  negative: boolean;
+}
+
+export interface CacheRetrieval<TValue> {
+  value: TValue;
+  negative?: boolean;
+}
+
+export interface ResponseShapeOptions {
+  allowedFields: string[];
+  pageSizeLimit: number;
+  tenantTier: 'standard' | 'premium' | 'strategic';
+  compressionThresholdBytes: number;
+  version: string;
+  partial?: boolean;
+  offset?: number;
+  limit?: number;
+}
+
+export interface ShapedResponse {
+  version: string;
+  checksum: string;
+  partial: boolean;
+  data: Record<string, unknown> | null;
+  pagination: { offset: number; limit: number; total?: number };
+  compressed?: Buffer;
+  encoding?: 'gzip' | 'brotli';
+}
+
+export interface JobDefinition<TResult = unknown> {
+  idempotencyKey: string;
+  tenantId: string;
+  classification: 'cpu' | 'io';
+  handler: () => Promise<TResult>;
+}
+
+export interface JobExecutionResult<TResult = unknown> {
+  id: string;
+  tenantId: string;
+  status: 'success';
+  durationMs: number;
+  classification: JobDefinition['classification'];
+  result: TResult;
+}
+
+export interface JobSchedulerConfig {
+  defaultConcurrency: number;
+  perTenantConcurrency: number;
+  dedupeWindowMs: number;
+}
+
+export interface TelemetryBudgetConfig {
+  logsPerMinute: number;
+  metricsPerMinute: number;
+  tracesPerMinute: number;
+  cardinalityLimit: number;
+}
+
+export interface TelemetrySignal {
+  kind: 'logs' | 'metrics' | 'traces';
+  labels?: Record<string, string>;
+}
+
+export interface TelemetryIngestResult {
+  accepted: boolean;
+  action: 'allow' | 'throttle' | 'reject';
+  reason: string;
+}
+
+export interface ReleaseMarker {
+  owner: string;
+  version: string;
+  commitSha: string;
+  emittedAt: string;
+  annotations: Record<string, string>;
+}

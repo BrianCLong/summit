@@ -1,5 +1,4 @@
-// @ts-nocheck
-import { buildDbConfig } from '../config';
+import { buildDbConfig } from '../config.js';
 
 describe('db config', () => {
   it('disables aggressive tuning when DB_POOL_TUNING is off', () => {

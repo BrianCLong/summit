@@ -103,6 +103,8 @@ BLACK_PROJECTS_ENABLED=true
 - Added migration guide (v0.1.0 → v2.0.0)
 - Created API documentation for narrative simulation
 - Updated Helm charts with new service configs
+- Added automated migration script and internal comms playbook for v0.1.0 → v2.0.0 rollouts
+- Wired GA whitepaper validation into the release-train CI gate for all release candidates
 
 ## 🙏 Contributors
 

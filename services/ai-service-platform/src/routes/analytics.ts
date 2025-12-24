@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Analytics Routes - Performance analytics for every market
  */

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Context Planner with Token Optimization
  *

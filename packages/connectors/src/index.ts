@@ -570,7 +570,7 @@ export class ConnectorRegistry extends EventEmitter {
       throw new Error(`Unknown connector type: ${config.type}`);
     }
 
-    const connector = new ConnectorClass(config, options.operations ?? []);
+    const connector = new ConnectorClass(config);
     connector.validate();
 
     this.connectors.set(config.id, connector);

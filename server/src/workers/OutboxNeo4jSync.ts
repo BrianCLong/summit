@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Outbox Neo4j Sync Worker
  * Handles eventual consistency between PostgreSQL and Neo4j

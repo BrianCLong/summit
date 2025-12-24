@@ -16,10 +16,10 @@
     "@intelgraph/model-optimization": "workspace:*",
     "express": "^4.19.2",
     "zod": "^4.1.12",
-    "redis": "^5.8.1"
+    "redis": "^5.8.1",
+    "@types/express": "^4.17.21"
   },
   "devDependencies": {
-    "@types/express": "^4.17.21",
     "typescript": "^5.9.3",
     "tsx": "^4.7.1",
     "jest": "^30.2.0",

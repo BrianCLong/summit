@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { sign } from 'jsonwebtoken';
 import { ComprehensiveAuditLoggingService } from '../src/services/ComprehensiveAuditLoggingService.js';
 import {

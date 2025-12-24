@@ -77,7 +77,7 @@ export const IntelligenceRequirementSchema = z.object({
   collectionGuidance: z.string(),
   disseminationRestrictions: z.array(z.string()),
   relatedRequirements: z.array(z.string()),
-  metadata: z.record(z.unknown())
+  metadata: z.record(z.string(), z.unknown())
 });
 
 export const MissionPlanSchema = z.object({
@@ -213,7 +213,7 @@ export const MissionPlanSchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
   createdBy: z.string(),
-  metadata: z.record(z.unknown())
+  metadata: z.record(z.string(), z.unknown())
 });
 
 // ============================================================================
@@ -243,7 +243,7 @@ export const WorkflowStepSchema = z.object({
   })),
   dependencies: z.array(z.string()),
   deadline: z.string().optional(),
-  metadata: z.record(z.unknown())
+  metadata: z.record(z.string(), z.unknown())
 });
 
 export const OperationWorkflowSchema = z.object({
@@ -260,7 +260,7 @@ export const OperationWorkflowSchema = z.object({
   status: z.enum(['ACTIVE', 'COMPLETED', 'FAILED', 'CANCELLED']),
   startedAt: z.string(),
   completedAt: z.string().optional(),
-  metadata: z.record(z.unknown())
+  metadata: z.record(z.string(), z.unknown())
 });
 
 // ============================================================================
@@ -363,7 +363,7 @@ export const AfterActionReviewSchema = z.object({
   reviewedBy: z.string(),
   reviewDate: z.string(),
   approved: z.boolean(),
-  metadata: z.record(z.unknown())
+  metadata: z.record(z.string(), z.unknown())
 });
 
 // ============================================================================
@@ -498,7 +498,7 @@ export class OperationsManager {
     }
 
     const totalMilestones = mission.timeline.milestones.length;
-    if (totalMilestones === 0) {return 0;}
+    if (totalMilestones === 0) { return 0; }
 
     const completedMilestones = mission.timeline.milestones.filter(m => m.completed).length;
     return (completedMilestones / totalMilestones) * 100;

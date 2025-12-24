@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
 import {
   ConsoleSpanExporter,
@@ -13,17 +12,18 @@ import {
   SEMRESATTRS_SERVICE_NAME,
   SEMRESATTRS_DEPLOYMENT_ENVIRONMENT,
 } from '@opentelemetry/semantic-conventions'; // Assuming this import
-import { scrub } from '../../services/api'; // Assuming scrub function is available or can be imported
+// Internal PII scrubbing logic
+const scrub = (val: string) => val.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[EMAIL]');
 
 // Custom SpanProcessor for PII redaction in UI
-class PiiRedactingWebSpanProcessor implements SpanProcessor {
+class PiiRedactingWebSpanProcessor {
   forceFlush(): Promise<void> {
     return Promise.resolve();
   }
   shutdown(): Promise<void> {
     return Promise.resolve();
   }
-  onStart(span: ReadableSpan): void {
+  onStart(span: any): void {
     // Redact PII from span attributes
     for (const key in span.attributes) {
       if (typeof span.attributes[key] === 'string') {
@@ -31,14 +31,13 @@ class PiiRedactingWebSpanProcessor implements SpanProcessor {
       }
     }
   }
-  onEnd(span: ReadableSpan): void {
+  onEnd(span: any): void {
     // Redact PII from span events
     for (const event of span.events) {
       for (const key in event.attributes) {
         if (typeof event.attributes[key] === 'string') {
           event.attributes[key] = scrub(event.attributes[key] as string);
         }
-        d;
       }
     }
   }
@@ -58,4 +57,3 @@ registerInstrumentations({
     new FetchInstrumentation({ propagateTraceHeaderCorsUrls: /.*/ }),
   ],
 });
-// @ts-nocheck

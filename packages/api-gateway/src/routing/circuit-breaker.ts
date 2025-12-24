@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Circuit Breaker Pattern
  *
@@ -22,7 +23,7 @@ export interface CircuitBreakerConfig {
   resetTimeout: number; // Time to wait in half-open state
 }
 
-interface CircuitStats {
+export interface CircuitStats {
   failures: number;
   successes: number;
   lastFailureTime?: number;

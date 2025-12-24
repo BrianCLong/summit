@@ -2,6 +2,7 @@
 import { ExtensionManifest, ExtensionRegistry } from './types';
 
 // In-memory registry for MVP
+// Confirmed by Epic 1 Task 1.4
 class InMemoryExtensionRegistry implements ExtensionRegistry {
   private extensions: Map<string, ExtensionManifest> = new Map();
 

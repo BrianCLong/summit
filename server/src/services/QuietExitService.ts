@@ -1,9 +1,9 @@
-// @ts-nocheck
 import fs from 'fs';
 import path from 'path';
+import { randomUUID } from 'crypto';
 import pino from 'pino';
 
-const logger = pino({ name: 'QuietExitService' });
+const logger = (pino as any)({ name: 'QuietExitService' });
 
 export class QuietExitService {
   private static readonly STIX_FILENAME = 'stix_thank_you.json';
@@ -64,11 +64,11 @@ export class QuietExitService {
   private static async leaveStixIndicator(): Promise<void> {
     const stix = {
       type: "bundle",
-      id: `bundle--${crypto.randomUUID()}`,
+      id: `bundle--${randomUUID()}`,
       objects: [
         {
           type: "indicator",
-          id: `indicator--${crypto.randomUUID()}`,
+          id: `indicator--${randomUUID()}`,
           created: new Date().toISOString(),
           modified: new Date().toISOString(),
           name: "Thank you.",

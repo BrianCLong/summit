@@ -1,3 +1,4 @@
+// @ts-nocheck - React 18/19 type compatibility
 'use client';
 import React from 'react';
 import {

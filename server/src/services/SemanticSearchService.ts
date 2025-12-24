@@ -1,9 +1,7 @@
-// @ts-nocheck
 import { Pool } from 'pg';
 import EmbeddingService from './EmbeddingService.js';
 import { synonymService } from './SynonymService.js';
-// @ts-ignore
-import { default as pino } from 'pino';
+import pino from 'pino';
 
 // Manual interface to match what search.ts expects if we return raw rows,
 // but we defined SemanticSearchResult.
@@ -52,8 +50,8 @@ export interface SemanticSearchOptions {
 
 export default class SemanticSearchService {
   private embeddingService: EmbeddingService;
-  private logger = pino({ name: 'SemanticSearchService' });
-  private pool: Pool | null;
+  private logger = (pino as any)({ name: 'SemanticSearchService' });
+  private pool: Pool | null = null;
   private readonly ownsPool: boolean;
   private readonly poolFactory: () => Pool;
   private readonly healthCheckIntervalMs: number;
@@ -110,7 +108,7 @@ export default class SemanticSearchService {
   }
 
   // Deprecated indexDocument for backward compatibility
-  async indexDocument(doc: any) {
+  async indexDocument(doc: { id?: string; text?: string }) {
     this.logger.warn("indexDocument is deprecated in SemanticSearchService. Use specific indexing methods.");
     if (doc.id && doc.text) {
       await this.indexCase(doc.id, doc.text);
@@ -118,7 +116,7 @@ export default class SemanticSearchService {
   }
 
   // Deprecated search method for backward compatibility
-  async search(query: string, filters: any = {}, limit = 10): Promise<any[]> {
+  async search(query: string, filters: Record<string, unknown> = {}, limit = 10): Promise<Array<{ id: string; text: string; score: number; metadata: { status: string; date: Date } }>> {
     this.logger.warn("search() is deprecated in SemanticSearchService. Use searchCases() or update usage.");
     const results = await this.searchCases(query, {
       status: undefined,
@@ -216,19 +214,50 @@ export default class SemanticSearchService {
 
         const res = await client.query(sql, params);
 
-        return res.rows.map(r => ({
-          id: r.id,
-          title: r.title,
-          status: r.status,
-          created_at: r.created_at,
-          similarity: parseFloat(r.similarity),
-          score: parseFloat(r.similarity)
+        return res.rows.map((r: Record<string, unknown>) => ({
+          id: r.id as string,
+          title: r.title as string,
+          status: r.status as string,
+          created_at: r.created_at as Date,
+          similarity: parseFloat(r.similarity as string),
+          score: parseFloat(r.similarity as string)
         }));
       } finally {
         client.release();
       }
     } catch (err) {
       this.logger.error({ err }, "Semantic search failed");
+      return [];
+    }
+  }
+
+  async searchDocs(query: string, limit = 10) {
+    try {
+      const vector = await this.embeddingService.generateEmbedding({ text: query });
+      const vectorStr = `[${vector.join(',')}]`;
+      const pool = await this.getPool();
+
+      const sql = `
+        SELECT
+          path,
+          title,
+          metadata,
+          1 - (embedding <=> $1::vector) as similarity
+        FROM knowledge_articles
+        WHERE embedding IS NOT NULL
+        ORDER BY similarity DESC
+        LIMIT $2
+      `;
+
+      const res = await pool.query(sql, [vectorStr, limit]);
+      return res.rows.map(r => ({
+        path: r.path,
+        title: r.title,
+        metadata: r.metadata,
+        similarity: parseFloat(r.similarity)
+      }));
+    } catch (err) {
+      this.logger.error({ err }, "Doc search failed");
       return [];
     }
   }

@@ -5,7 +5,7 @@ import { pg } from '../../db/pg.js';
 export class IndexingStage extends BasePipelineStage {
   name = 'indexing';
 
-  async process(ctx: PipelineContext, items: any[]): Promise<any[]> {
+  async process(ctx: PipelineContext, items: Record<string, unknown>[]): Promise<Record<string, unknown>[]> {
     ctx.logger.info(`Indexing ${items.length} items`);
 
     const entities = items.filter(i => 'kind' in i);
@@ -22,7 +22,7 @@ export class IndexingStage extends BasePipelineStage {
     return items;
   }
 
-  private async saveEntities(ctx: PipelineContext, entities: any[]) {
+  private async saveEntities(ctx: PipelineContext, entities: Record<string, unknown>[]): Promise<void> {
     // Bulk insert entities
     // Using a simple loop for MVP, but should be batched/COPY in prod
     for (const entity of entities) {
@@ -47,7 +47,7 @@ export class IndexingStage extends BasePipelineStage {
     }
   }
 
-  private async saveDocuments(ctx: PipelineContext, documents: any[]) {
+  private async saveDocuments(ctx: PipelineContext, documents: Record<string, unknown>[]): Promise<void> {
     for (const doc of documents) {
       await pg.none(
         `INSERT INTO documents (id, tenant_id, title, mime_type, source, text, metadata, created_at, updated_at)

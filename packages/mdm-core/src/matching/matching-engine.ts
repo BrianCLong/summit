@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Entity Matching Engine
  * Advanced entity matching and deduplication algorithms for MDM

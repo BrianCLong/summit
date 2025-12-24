@@ -74,9 +74,9 @@ export interface EventStoreRecord {
   event_type: string;
   source: string;
   timestamp: bigint;
-  data: unknown;
-  metadata: unknown;
-  provenance: unknown;
+  data: Record<string, unknown>;
+  metadata: Record<string, unknown>;
+  provenance: Record<string, unknown>;
   partition: number;
   offset: string;
   created_at: Date;

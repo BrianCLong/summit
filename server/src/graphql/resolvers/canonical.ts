@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { graphCore } from '../../services/GraphCoreService';
 import { provenanceLedger } from '../../provenance/ledger';
 

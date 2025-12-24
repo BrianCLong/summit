@@ -274,7 +274,7 @@ export function createCopilotRouter(config: CopilotRouterConfig): Router {
         const { id } = req.params;
         const user = getUser(req);
 
-        const draft = await copilotService.getDraft(id);
+        const draft = await copilotService.getDraft(id || '');
 
         if (!draft) {
           const error: ErrorResponse = {
@@ -314,7 +314,7 @@ export function createCopilotRouter(config: CopilotRouterConfig): Router {
       try {
         const user = getUser(req);
         const limit = Math.min(
-          parseInt(req.query.limit as string, 10) || 10,
+          parseInt(typeof req.query.limit === 'string' ? req.query.limit : '10', 10) || 10,
           50,
         );
 
@@ -339,7 +339,7 @@ export function createCopilotRouter(config: CopilotRouterConfig): Router {
         const user = getUser(req);
 
         // Get draft to check ownership
-        const draft = await copilotService.getDraft(id);
+        const draft = await copilotService.getDraft(id || '');
 
         if (!draft) {
           const error: ErrorResponse = {
@@ -362,7 +362,7 @@ export function createCopilotRouter(config: CopilotRouterConfig): Router {
           return res.status(403).json(error);
         }
 
-        await copilotService.deleteDraft(id);
+        await copilotService.deleteDraft(id || '');
 
         return res.status(200).json({ success: true });
       } catch (error) {

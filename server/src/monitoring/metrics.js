@@ -356,30 +356,103 @@ const idempotentHitsTotal = new client.Counter({
   help: 'Total number of idempotent mutation hits',
 });
 
+// Cache metrics
+const intelgraphCacheHits = new client.Counter({
+  name: 'cache_hits_total',
+  help: 'Total number of cache hits',
+  labelNames: ['cache_type'],
+});
+const intelgraphCacheMisses = new client.Counter({
+  name: 'cache_misses_total',
+  help: 'Total number of cache misses',
+  labelNames: ['cache_type'],
+});
+const intelgraphJobsProcessed = new client.Counter({
+  name: 'jobs_processed_total',
+  help: 'Total number of background jobs processed',
+  labelNames: ['job_type', 'status'],
+});
+const intelgraphOutboxSyncLatency = new client.Histogram({
+  name: 'outbox_sync_latency_seconds',
+  help: 'Latency of outbox synchronization',
+  buckets: [0.01, 0.05, 0.1, 0.5, 1, 5],
+});
+const intelgraphActiveConnections = new client.Gauge({
+  name: 'active_connections',
+  help: 'Number of active connections',
+});
+const intelgraphDatabaseQueryDuration = dbQueryDuration;
+const intelgraphHttpRequestDuration = httpRequestDuration;
+const intelgraphGraphragQueryTotal = new client.Counter({
+  name: 'graphrag_queries_total',
+  help: 'Total number of GraphRAG queries',
+});
+const intelgraphGraphragQueryDurationMs = new client.Histogram({
+  name: 'graphrag_query_duration_ms',
+  help: 'Duration of GraphRAG queries in ms',
+  buckets: [10, 50, 100, 500, 1000, 5000],
+});
+const intelgraphQueryPreviewsTotal = new client.Counter({
+  name: 'query_previews_total',
+  help: 'Total number of query previews',
+});
+const intelgraphQueryPreviewLatencyMs = new client.Histogram({
+  name: 'query_preview_latency_ms',
+  help: 'Latency of query previews in ms',
+});
+const intelgraphQueryPreviewErrorsTotal = new client.Counter({
+  name: 'query_preview_errors_total',
+  help: 'Total number of query preview errors',
+});
+const intelgraphQueryPreviewExecutionsTotal = new client.Counter({
+  name: 'query_preview_executions_total',
+  help: 'Total number of query preview executions',
+});
+const intelgraphGlassBoxRunsTotal = new client.Counter({
+  name: 'glassbox_runs_total',
+  help: 'Total number of GlassBox runs',
+});
+const intelgraphGlassBoxRunDurationMs = new client.Histogram({
+  name: 'glassbox_run_duration_ms',
+  help: 'Duration of GlassBox runs in ms',
+});
+const intelgraphGlassBoxCacheHits = new client.Counter({
+  name: 'glassbox_cache_hits_total',
+  help: 'Total number of GlassBox cache hits',
+});
+const copilotApiRequestTotal = new client.Counter({
+  name: 'copilot_api_requests_total',
+  help: 'Total number of Copilot API requests',
+});
+const copilotApiRequestDurationMs = new client.Histogram({
+  name: 'copilot_api_request_duration_ms',
+  help: 'Duration of Copilot API requests in ms',
+});
+const maestroDagExecutionDurationSeconds = new client.Histogram({
+  name: 'maestro_dag_execution_duration_seconds',
+  help: 'Maestro DAG execution duration in seconds',
+});
+const maestroJobExecutionDurationSeconds = new client.Histogram({
+  name: 'maestro_job_execution_duration_seconds',
+  help: 'Maestro job execution duration in seconds',
+  labelNames: ['job_type', 'status'],
+});
+const llmTokensTotal = new client.Counter({
+  name: 'llm_tokens_total',
+  help: 'Total number of LLM tokens',
+  labelNames: ['model', 'type'],
+});
+const llmRequestDuration = new client.Histogram({
+  name: 'llm_request_duration_seconds',
+  help: 'Duration of LLM requests in seconds',
+  labelNames: ['model'],
+});
+
 // Auto-remediation execution tracking
 const serviceAutoRemediationsTotal = new client.Counter({
   name: 'service_auto_remediations_total',
   help: 'Total number of automated remediation actions executed',
   labelNames: ['service', 'action', 'result'],
-});
-
-// Query Budget Metrics
-const queryBudgetRemaining = new client.Gauge({
-  name: 'query_budget_remaining',
-  help: 'Remaining query tokens for tenant',
-  labelNames: ['tenant'],
-});
-
-const queryBudgetBlockedTotal = new client.Counter({
-  name: 'query_budget_blocked_total',
-  help: 'Total number of queries blocked due to budget',
-  labelNames: ['tenant'],
-});
-
-const queryBudgetLatencySeconds = new client.Histogram({
-  name: 'query_budget_latency_seconds',
-  help: 'Latency overhead introduced by query budget guard',
-  buckets: [0.001, 0.005, 0.01, 0.05],
 });
 
 register.registerMetric(graphExpandRequestsTotal);
@@ -397,9 +470,26 @@ register.registerMetric(businessUserSignupsTotal);
 register.registerMetric(businessApiCallsTotal);
 register.registerMetric(businessRevenueTotal);
 register.registerMetric(serviceAutoRemediationsTotal);
-register.registerMetric(queryBudgetRemaining);
-register.registerMetric(queryBudgetBlockedTotal);
-register.registerMetric(queryBudgetLatencySeconds);
+register.registerMetric(intelgraphCacheHits);
+register.registerMetric(intelgraphCacheMisses);
+register.registerMetric(intelgraphJobsProcessed);
+register.registerMetric(intelgraphOutboxSyncLatency);
+register.registerMetric(intelgraphActiveConnections);
+register.registerMetric(intelgraphGraphragQueryTotal);
+register.registerMetric(intelgraphGraphragQueryDurationMs);
+register.registerMetric(intelgraphQueryPreviewsTotal);
+register.registerMetric(intelgraphQueryPreviewLatencyMs);
+register.registerMetric(intelgraphQueryPreviewErrorsTotal);
+register.registerMetric(intelgraphQueryPreviewExecutionsTotal);
+register.registerMetric(intelgraphGlassBoxRunsTotal);
+register.registerMetric(intelgraphGlassBoxRunDurationMs);
+register.registerMetric(intelgraphGlassBoxCacheHits);
+register.registerMetric(copilotApiRequestTotal);
+register.registerMetric(copilotApiRequestDurationMs);
+register.registerMetric(maestroDagExecutionDurationSeconds);
+register.registerMetric(maestroJobExecutionDurationSeconds);
+register.registerMetric(llmTokensTotal);
+register.registerMetric(llmRequestDuration);
 
 const metrics = {
   graphExpandRequestsTotal,
@@ -410,6 +500,28 @@ const metrics = {
   neighborhoodCacheHitRatio,
   neighborhoodCacheLatencyMs,
   pbacDecisionsTotal,
+  intelgraphCacheHits,
+  intelgraphCacheMisses,
+  intelgraphJobsProcessed,
+  intelgraphOutboxSyncLatency,
+  intelgraphActiveConnections,
+  intelgraphDatabaseQueryDuration,
+  intelgraphHttpRequestDuration,
+  intelgraphGraphragQueryTotal,
+  intelgraphGraphragQueryDurationMs,
+  intelgraphQueryPreviewsTotal,
+  intelgraphQueryPreviewLatencyMs,
+  intelgraphQueryPreviewErrorsTotal,
+  intelgraphQueryPreviewExecutionsTotal,
+  intelgraphGlassBoxRunsTotal,
+  intelgraphGlassBoxRunDurationMs,
+  intelgraphGlassBoxCacheHits,
+  copilotApiRequestTotal,
+  copilotApiRequestDurationMs,
+  maestroDagExecutionDurationSeconds,
+  maestroJobExecutionDurationSeconds,
+  llmTokensTotal,
+  llmRequestDuration
 };
 
 // Update memory usage periodically
@@ -472,7 +584,26 @@ export {
   businessApiCallsTotal,
   businessRevenueTotal,
   serviceAutoRemediationsTotal,
-  queryBudgetRemaining,
-  queryBudgetBlockedTotal,
-  queryBudgetLatencySeconds,
+  intelgraphCacheHits,
+  intelgraphCacheMisses,
+  intelgraphJobsProcessed,
+  intelgraphOutboxSyncLatency,
+  intelgraphActiveConnections,
+  intelgraphDatabaseQueryDuration,
+  intelgraphHttpRequestDuration,
+  intelgraphGraphragQueryTotal,
+  intelgraphGraphragQueryDurationMs,
+  intelgraphQueryPreviewsTotal,
+  intelgraphQueryPreviewLatencyMs,
+  intelgraphQueryPreviewErrorsTotal,
+  intelgraphQueryPreviewExecutionsTotal,
+  intelgraphGlassBoxRunsTotal,
+  intelgraphGlassBoxRunDurationMs,
+  intelgraphGlassBoxCacheHits,
+  copilotApiRequestTotal,
+  copilotApiRequestDurationMs,
+  maestroDagExecutionDurationSeconds,
+  maestroJobExecutionDurationSeconds,
+  llmTokensTotal,
+  llmRequestDuration
 };

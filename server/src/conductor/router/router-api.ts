@@ -101,7 +101,7 @@ router.post('/route', async (req, res) => {
     // Record metrics
     prometheusConductorMetrics.recordOperationalEvent(
       'router_api_request',
-      true,
+      { success: true },
     );
     prometheusConductorMetrics.recordOperationalMetric(
       'router_api_latency',
@@ -145,7 +145,7 @@ router.post('/route', async (req, res) => {
     logger.error('Router API error', { error, body: req.body });
     prometheusConductorMetrics.recordOperationalEvent(
       'router_api_error',
-      false,
+      { success: false },
     );
 
     res.status(500).json({

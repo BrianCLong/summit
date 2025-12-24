@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Authentication Integration Tests
  *
@@ -20,9 +19,9 @@ import { Express } from 'express';
 import jwt from 'jsonwebtoken';
 
 // Mock the database pool
-const mockQuery = jest.fn();
-const mockConnect = jest.fn();
-const mockRelease = jest.fn();
+const mockQuery = jest.fn<() => Promise<any>>();
+const mockConnect = jest.fn<() => Promise<any>>();
+const mockRelease = jest.fn<() => Promise<void>>();
 
 jest.mock('../../config/database.js', () => ({
   getPostgresPool: jest.fn(() => ({
@@ -33,8 +32,8 @@ jest.mock('../../config/database.js', () => ({
 }));
 
 jest.mock('argon2', () => ({
-  hash: jest.fn().mockResolvedValue('$argon2id$v=19$m=65536$...hashed...'),
-  verify: jest.fn().mockImplementation((hash, password) => {
+  hash: jest.fn<() => Promise<string>>().mockResolvedValue('$argon2id$v=19$m=65536$...hashed...'),
+  verify: jest.fn<(hash: string, password: string) => Promise<boolean>>().mockImplementation((hash: string, password: string) => {
     return Promise.resolve(password === 'ValidPassword123!');
   }),
 }));

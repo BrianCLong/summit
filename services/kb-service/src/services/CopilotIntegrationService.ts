@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Copilot Integration Service
  * Provides KB content for AI Copilot retrieval

@@ -19,6 +19,7 @@ import { tenantMiddleware } from '../middleware/tenant.js';
 import { rateLimitMiddleware } from '../middleware/rateLimit.js';
 import { tenantIsolationGuard } from '../tenancy/TenantIsolationGuard.js';
 import { TenantContext } from '../tenancy/types.js';
+import { AuthenticatedRequest } from './types.js';
 
 const router = Router();
 
@@ -73,16 +74,16 @@ const ReplayQuerySchema = z.object({
  */
 router.post('/query',
   rateLimitMiddleware,
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const startTime = Date.now();
 
     try {
       // Validate request
       const validated = CopilotQuerySchema.parse(req.body);
 
-      const userId = (req as any).user?.id;
-      const tenantContext = (req as any).tenant as TenantContext | undefined;
-      const tenantId = tenantContext?.tenantId || (req as any).tenant?.id;
+      const userId = req.user?.id;
+      const tenantContext = req.tenant as TenantContext | undefined;
+      const tenantId = tenantContext?.tenantId || req.tenant?.id;
 
       if (!userId || !tenantId) {
         return res.status(401).json({
@@ -114,7 +115,7 @@ router.post('/query',
       }
 
       // Get orchestrator instance (would be injected via DI in production)
-      const orchestrator = (req as any).orchestrator as AICopilotOrchestrator;
+      const orchestrator = req.orchestrator as AICopilotOrchestrator;
       if (!orchestrator) {
         return res.status(500).json({
           error: 'ServiceUnavailable',
@@ -208,12 +209,12 @@ router.post('/query',
  */
 router.get('/history/:investigationId',
   requireAuth,
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       const { investigationId } = req.params;
       const { limit = '20', offset = '0', mode } = req.query;
 
-      const orchestrator = (req as any).orchestrator as AICopilotOrchestrator;
+      const orchestrator = req.orchestrator as AICopilotOrchestrator;
       if (!orchestrator) {
         return res.status(500).json({
           error: 'ServiceUnavailable',
@@ -258,11 +259,11 @@ router.get('/history/:investigationId',
  */
 router.get('/run/:runId',
   requireAuth,
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       const { runId } = req.params;
 
-      const orchestrator = (req as any).orchestrator as AICopilotOrchestrator;
+      const orchestrator = req.orchestrator as AICopilotOrchestrator;
       if (!orchestrator) {
         return res.status(500).json({
           error: 'ServiceUnavailable',

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Ingest Worker
  *
@@ -12,7 +11,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { trace, context, SpanStatusCode } from '@opentelemetry/api';
+import { trace, context, SpanStatusCode, type Span } from '@opentelemetry/api';
 import pino from 'pino';
 
 import type {
@@ -102,13 +101,13 @@ export class IngestWorker<T = unknown, R = unknown> extends EventEmitter {
     this.semaphore = new Semaphore(config.maxConcurrency);
 
     // Wire up events
-    this.backpressure.on('stateChange', (state, metrics) => {
+    this.backpressure.on('stateChange', (state: WorkerState, metrics: WorkerMetrics) => {
       this.state = state;
       this.events.onStateChange?.(state, this.getMetrics());
       this.events.onBackpressure?.(this.getMetrics());
     });
 
-    this.circuitBreaker.on('stateChange', (state) => {
+    this.circuitBreaker.on('stateChange', (state: 'closed' | 'open' | 'half-open') => {
       this.events.onCircuitStateChange?.(state);
     });
   }
@@ -254,7 +253,7 @@ export class IngestWorker<T = unknown, R = unknown> extends EventEmitter {
   }
 
   private async processTask(task: Task<T>): Promise<TaskResult<R>> {
-    return tracer.startActiveSpan('ingest.worker.process', async (span) => {
+    return tracer.startActiveSpan('ingest.worker.process', async (span): Promise<TaskResult<R>> => {
       span.setAttribute('task.id', task.id);
       span.setAttribute('task.tenant_id', task.tenantId);
       span.setAttribute('task.priority', task.priority);
@@ -269,7 +268,7 @@ export class IngestWorker<T = unknown, R = unknown> extends EventEmitter {
               success: true,
               attempts: 0,
               totalDelayMs: 0,
-            };
+            } as TaskResult<R>;
           }
         }
 
@@ -356,7 +355,7 @@ export class IngestWorker<T = unknown, R = unknown> extends EventEmitter {
     });
   }
 
-  private async executeWithRetry(task: Task<T>, parentSpan: any): Promise<TaskResult<R>> {
+  private async executeWithRetry(task: Task<T>, parentSpan: Span): Promise<TaskResult<R>> {
     if (!this.taskHandler) {
       throw new Error('Task handler not set');
     }

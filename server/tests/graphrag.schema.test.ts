@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { GraphRAGService } from '../src/services/GraphRAGService';
 import { jest, test, expect } from '@jest/globals';
 

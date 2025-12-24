@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * KGExplorer - Knowledge Graph Explorer
  * Main component for interactive graph exploration with Cytoscape.js
@@ -140,7 +139,7 @@ export function KGExplorer({
     const cy = cytoscape({
       container: containerRef.current,
       elements: [],
-      style: getCytoscapeStylesheet(),
+      style: getCytoscapeStylesheet() as any,
       layout: { name: 'preset' },
       minZoom: 0.1,
       maxZoom: 4,
@@ -250,22 +249,6 @@ export function KGExplorer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enableDragTraversal]);
 
-  // Update elements when data changes
-  useEffect(() => {
-    const cy = cyRef.current;
-    if (!cy) return;
-
-    // Batch update elements
-    cy.batch(() => {
-      cy.elements().remove();
-      cy.add(filteredElements as any);
-    });
-
-    // Run layout
-    if (filteredElements.length > 0) {
-      runLayout(layout);
-    }
-  }, [filteredElements, layout, runLayout]);
 
   // Layout function
   const runLayout = useCallback(
@@ -346,11 +329,28 @@ export function KGExplorer({
         },
       };
 
-      const opts = layoutOptions[layoutName] ?? layoutOptions.fcose;
+      const opts = (layoutOptions[layoutName] ?? layoutOptions.fcose) as any;
       cy.layout(opts).run();
     },
     [],
   );
+
+  // Update elements when data changes
+  useEffect(() => {
+    const cy = cyRef.current;
+    if (!cy) return;
+
+    // Batch update elements
+    cy.batch(() => {
+      cy.elements().remove();
+      cy.add(filteredElements as any);
+    });
+
+    // Run layout
+    if (filteredElements.length > 0) {
+      runLayout(layout);
+    }
+  }, [filteredElements, layout, runLayout]);
 
   // Zoom controls
   const handleZoomIn = useCallback(() => {

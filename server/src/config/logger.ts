@@ -1,4 +1,3 @@
-// @ts-ignore
 // @ts-nocheck
 import pino from 'pino';
 import { correlationEngine } from '../lib/telemetry/correlation-engine';
@@ -57,7 +56,7 @@ export interface SummitLogContext {
   [key: string]: any;
 }
 
-export const logger = pino({
+export const logger = (pino as any)({
   level: process.env.LOG_LEVEL || 'info',
   base: {
     service: 'intelgraph-server',
@@ -69,7 +68,7 @@ export const logger = pino({
     paths: REDACT_PATHS,
     censor: '[REDACTED]',
   },
-  mixin(_context, level) {
+  mixin(_context: unknown, level: number) {
     const store = correlationStorage.getStore();
     if (store) {
         return {
@@ -94,12 +93,9 @@ export const logger = pino({
     },
   },
   serializers: {
-    // @ts-ignore
-    err: (pino as any).stdSerializers?.err,
-    // @ts-ignore
-    req: (pino as any).stdSerializers?.req,
-    // @ts-ignore
-    res: (pino as any).stdSerializers?.res,
+    err: (pino as any).stdSerializers.err,
+    req: (pino as any).stdSerializers.req,
+    res: (pino as any).stdSerializers.res,
   },
   // Remove pino-pretty transport for production readiness
   // In production, logs should be structured JSON for log aggregation

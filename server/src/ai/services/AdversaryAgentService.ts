@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { spawn } from 'child_process';
 import path from 'path';
 import pino from 'pino';
@@ -11,7 +10,7 @@ export interface AdversaryAgentOptions {
 export class AdversaryAgentService {
   private pythonPath: string;
   private modelsPath: string;
-  private logger = pino({ name: 'AdversaryAgentService' });
+  private logger = (pino as any)({ name: 'AdversaryAgentService' });
 
   constructor(
     pythonPath = process.env.PYTHON_PATH || 'python',

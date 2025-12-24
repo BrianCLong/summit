@@ -8,7 +8,7 @@
  * - Integration with DLA, NATO, and allied supply systems
  */
 
-import express from 'express';
+import express, { Application } from 'express';
 import pino from 'pino';
 import pinoHttp from 'pino-http';
 import { v4 as uuidv4 } from 'uuid';
@@ -25,7 +25,7 @@ import {
 } from '@intelgraph/logistics-automation-types';
 
 const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
-const app = express();
+const app: Application = express();
 const PORT = process.env.PORT || 4030;
 
 app.use(express.json());

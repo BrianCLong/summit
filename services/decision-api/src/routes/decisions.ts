@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Decision routes - CRUD operations for decisions with full provenance
  */

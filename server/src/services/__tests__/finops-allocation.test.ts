@@ -1,8 +1,7 @@
-// @ts-nocheck
 import {
   allocateCostBuckets,
   defaultMeteringRatios,
-} from '../../../../finops/allocation';
+} from '../../../../finops/allocation.js';
 
 describe('allocateCostBuckets', () => {
   it('calculates bucket costs using metering ratios', () => {

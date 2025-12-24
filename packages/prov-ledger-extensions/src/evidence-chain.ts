@@ -355,7 +355,7 @@ export class EvidenceChainVerifier {
   /**
    * Verify integrity of an evidence chain
    */
-  verify(chain: EvidenceChain): VerificationResult {
+  verify(chain: EvidenceChain): EvidenceChainVerificationResult {
     const errors: string[] = [];
     const warnings: string[] = [];
 
@@ -449,7 +449,7 @@ export class EvidenceChainVerifier {
   }
 }
 
-export interface VerificationResult {
+export interface EvidenceChainVerificationResult {
   valid: boolean;
   errors: string[];
   warnings: string[];

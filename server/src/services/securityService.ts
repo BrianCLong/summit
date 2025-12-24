@@ -2,7 +2,7 @@
 import { EventEmitter } from 'events';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
-import { cacheService } from './cacheService';
+import { cacheService } from './CacheService';
 
 export interface User {
   id: string;
@@ -411,18 +411,8 @@ export class SecurityService extends EventEmitter {
       accessContext: {
         ipWhitelist: [],
         timeRestrictions: [],
-        deviceRestrictions: {
-          allowedDeviceTypes: ['DESKTOP', 'LAPTOP'],
-          requireTrustedDevice: false,
-          blockUnknownDevices: false,
-        },
-        locationRestrictions: {
-          allowedCountries: [],
-          blockedCountries: [],
-          allowedRegions: [],
-          blockedRegions: [],
-          requireVPN: false,
-        },
+        deviceRestrictions: [],
+        locationRestrictions: [],
         requireMFA: false,
         maxConcurrentSessions: 5,
       },
@@ -825,11 +815,13 @@ export class SecurityService extends EventEmitter {
 
     // Device restrictions
     const deviceType = this.detectDeviceType(userAgent);
-    if (
-      context.deviceRestrictions.allowedDeviceTypes.length > 0 &&
-      !context.deviceRestrictions.allowedDeviceTypes.includes(deviceType)
-    ) {
-      return false;
+    const deviceRestrictions = context.deviceRestrictions;
+    if (Array.isArray(deviceRestrictions) && deviceRestrictions.length > 0) {
+      // Check if any device restriction matches
+      const allowed = deviceRestrictions.some(restriction =>
+        restriction.allowedDeviceTypes?.includes(deviceType)
+      );
+      if (!allowed) return false;
     }
 
     return true;
@@ -940,7 +932,7 @@ export class SecurityService extends EventEmitter {
     for (const [sessionId, session] of this.sessions.entries()) {
       if (!session.isActive || new Date(session.expiresAt) < now) {
         this.sessions.delete(sessionId);
-        cacheService.delete(`session:${sessionId}`);
+        await cacheService.del(`session:${sessionId}`);
         cleanedUp++;
       }
     }

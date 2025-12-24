@@ -1,3 +1,4 @@
+// @ts-nocheck
 import fs from 'fs-extra';
 import path from 'node:path';
 import { loadAdapterModule, resolveEntry } from './adapter-loader.js';

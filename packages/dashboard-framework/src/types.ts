@@ -155,7 +155,7 @@ export interface GlobalFilter {
   field: string;
   value: any;
   options?: any[];
-  applies to?: string[]; // widget IDs
+  appliesTo?: string[]; // widget IDs
 }
 
 // Widget Type Definitions

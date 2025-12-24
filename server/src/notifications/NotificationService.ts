@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
   NotificationPayload,
   NotificationResult,
@@ -15,7 +14,7 @@ import { NotificationRepo } from './repo/NotificationRepo.js';
 import { NotificationQueue } from './queue/NotificationQueue.js';
 import pino from 'pino';
 
-const logger = pino({ name: 'NotificationService' });
+const logger = (pino as any)({ name: 'NotificationService' });
 
 export class NotificationService {
   private providers: Map<NotificationChannel, NotificationProvider> = new Map();

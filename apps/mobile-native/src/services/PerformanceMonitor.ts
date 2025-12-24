@@ -1,7 +1,7 @@
-import {Platform} from 'react-native';
+import { Platform } from 'react-native';
 import * as Sentry from '@sentry/react-native';
 import analytics from '@react-native-firebase/analytics';
-import {performance} from 'react-native-performance';
+import { performance } from 'react-native-performance';
 
 interface PerformanceMetric {
   name: string;
@@ -204,7 +204,7 @@ class PerformanceMonitor {
 
       Sentry.captureMessage(`Slow operation: ${metric.name}`, {
         level: 'warning',
-        extra: metric,
+        extra: metric as any,
       });
     }
   }

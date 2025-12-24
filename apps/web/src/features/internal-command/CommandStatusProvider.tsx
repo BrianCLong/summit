@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import React from 'react'
 import type { PropsWithChildren } from 'react'

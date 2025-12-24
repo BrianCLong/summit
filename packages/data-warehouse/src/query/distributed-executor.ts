@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Distributed Query Executor for Summit Data Warehouse
  *

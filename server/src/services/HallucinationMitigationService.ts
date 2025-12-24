@@ -1,5 +1,4 @@
 // @ts-nocheck
-
 import { GraphRAGService, GraphRAGRequest, GraphRAGResponse } from './GraphRAGService.js';
 import { IntelCorroborationService } from './IntelCorroborationService.js';
 import logger from '../utils/logger.js';
@@ -8,33 +7,33 @@ import * as z from 'zod';
 import { CircuitBreaker } from '../utils/CircuitBreaker.js';
 
 // Schemas for Hallucination Mitigation
-const VerificationQuestionSchema = z.object({
-  questions: z.array(z.string()).min(1).max(5),
+const VerificationQuestionSchema = (z as any).object({
+  questions: (z as any).array((z as any).string()).min(1).max(5),
 });
 
-const VerificationResultSchema = z.object({
-  question: z.string(),
-  answer: z.string(),
-  citations: z.array(z.string()),
-  confidence: z.number(),
+const VerificationResultSchema = (z as any).object({
+  question: (z as any).string(),
+  answer: (z as any).string(),
+  citations: (z as any).array((z as any).string()),
+  confidence: (z as any).number(),
 });
 
-const ConflictSchema = z.object({
-  hasConflict: z.boolean(),
-  type: z.enum(['temporal', 'source_disagreement', 'fact_mismatch', 'none']),
-  description: z.string().optional(),
-  conflictingSources: z.array(z.string()).optional(),
-  recommendedResolution: z.string().optional(),
+const ConflictSchema = (z as any).object({
+  hasConflict: (z as any).boolean(),
+  type: (z as any).enum(['temporal', 'source_disagreement', 'fact_mismatch', 'none']),
+  description: (z as any).string().optional(),
+  conflictingSources: (z as any).array((z as any).string()).optional(),
+  recommendedResolution: (z as any).string().optional(),
 });
 
-const RevisionSchema = z.object({
-  originalAnswer: z.string(),
-  revisedAnswer: z.string(),
-  inconsistencies: z.array(z.string()),
-  corrections: z.array(z.string()),
-  confidenceScore: z.number(),
-  verificationStatus: z.enum(['verified', 'unverified', 'conflicted']),
-  reasoningTrace: z.string(),
+const RevisionSchema = (z as any).object({
+  originalAnswer: (z as any).string(),
+  revisedAnswer: (z as any).string(),
+  inconsistencies: (z as any).array((z as any).string()),
+  corrections: (z as any).array((z as any).string()),
+  confidenceScore: (z as any).number(),
+  verificationStatus: (z as any).enum(['verified', 'unverified', 'conflicted']),
+  reasoningTrace: (z as any).string(),
   conflictAnalysis: ConflictSchema.optional(),
 });
 

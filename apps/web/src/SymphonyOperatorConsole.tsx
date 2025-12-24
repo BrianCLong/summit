@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -75,7 +74,7 @@ async function getJSON<T = any>(path: string, init?: RequestInit): Promise<T> {
   return r.json()
 }
 
-function useInterval(callback: () => void, delay: number) {
+function useInterval(callback: () => void, delay: number | null) {
   const savedRef = useRef<(() => void) | undefined>(undefined)
   useEffect(() => {
     savedRef.current = callback
@@ -226,8 +225,24 @@ function KPIBar() {
 }
 
 // ---------- Prompt Activity Monitor ----------
+interface PromptHistory {
+  id: string
+  status: string
+  timestamp: string
+  provider: string
+  model: string
+  latency: number
+  tokens?: {
+    total_tokens: number
+  }
+  messages?: unknown
+  prompt?: string
+  response?: string
+  error?: string
+}
+
 export function PromptActivityMonitor({ active }: { active: boolean }) {
-  const [prompts, setPrompts] = useState<any[]>([])
+  const [prompts, setPrompts] = useState<PromptHistory[]>([])
   const [loading, setLoading] = useState(false)
   const [expanded, setExpanded] = useState<string | null>(null)
   const pollerRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -235,7 +250,7 @@ export function PromptActivityMonitor({ active }: { active: boolean }) {
   const fetchPrompts = async () => {
     setLoading(true)
     try {
-      const data = await getJSON<{ history: any[] }>('/api/ai/activity')
+      const data = await getJSON<{ history: PromptHistory[] }>('/api/ai/activity')
       if (data && data.history) {
         setPrompts(data.history)
       }
@@ -390,8 +405,8 @@ function LatencyChart() {
             />
             <YAxis hide />
             <Tooltip
-              formatter={(v: any, n: any) => [v, n]}
-              labelFormatter={t => new Date(t).toLocaleTimeString()}
+              formatter={(v: number, n: string) => [v, n]}
+              labelFormatter={(t: number) => new Date(t).toLocaleTimeString()}
             />
             <Area type="monotone" dataKey="p95" fillOpacity={0.2} />
             <Line type="monotone" dataKey="count" dot={false} />
@@ -692,7 +707,7 @@ function RequestComposer() {
   const [task, setTask] = useState('qa')
   const [input, setInput] = useState('say hello')
   const [model, setModel] = useState('')
-  const [result, setResult] = useState<any>(null)
+  const [result, setResult] = useState<unknown>(null)
   const [lat, setLat] = useState<number | null>(null)
 
   const send = async () => {
@@ -703,8 +718,9 @@ function RequestComposer() {
         body: JSON.stringify({ task, input, env: 'dev', loa: 1, model }),
       })
       setResult(r)
-    } catch (e: any) {
-      setResult({ error: String(e.message || e) })
+    } catch (e) {
+      const errorMessage = e instanceof Error ? e.message : String(e)
+      setResult({ error: errorMessage })
     }
     setLat(performance.now() - t0)
   }
@@ -828,7 +844,15 @@ function GitHubPane() {
   const [repo, setRepo] = useState<string>(
     typeof window !== 'undefined' ? localStorage.getItem('gh:repo') || '' : ''
   )
-  const [issues, setIssues] = useState<any[]>([])
+  const [issues, setIssues] = useState<Array<{
+    id: number
+    number: number
+    title: string
+    html_url: string
+    user?: { login: string }
+    state: string
+    labels?: Array<{ name: string }>
+  }>>([])
   const save = () => {
     localStorage.setItem('gh:token', token)
     localStorage.setItem('gh:owner', owner)

@@ -1,0 +1,13 @@
+{
+  "version": "v1",
+  "rules": [
+    {
+      "id": "deny-export-missing-purpose",
+      "effect": "deny",
+      "actions": ["export:bundle"],
+      "resources": ["case:*"],
+      "conditions": { "purpose": ["press", "court", "partner"] },
+      "reason": "Export requires declared audience purpose"
+    }
+  ]
+}

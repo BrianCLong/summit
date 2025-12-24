@@ -1,17 +1,16 @@
-// @ts-nocheck
 import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 
 describe('Production Guardrails', () => {
   const originalEnv = process.env;
-  let exitMock: any;
-  let consoleErrorMock: any;
+  let exitMock: jest.SpiedFunction<typeof process.exit>;
+  let consoleErrorMock: jest.SpiedFunction<typeof console.error>;
 
   beforeEach(() => {
     jest.resetModules();
     process.env = { ...originalEnv };
-    exitMock = jest.spyOn(process, 'exit').mockImplementation(((code?: number) => {
+    exitMock = jest.spyOn(process, 'exit').mockImplementation((code?: number | string): never => {
       throw new Error(`PROCESS_EXIT_${code}`);
-    }) as any);
+    });
     consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 

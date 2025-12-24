@@ -1,11 +1,11 @@
 // @ts-nocheck
-import { rateLimiter } from '../../services/RateLimiter';
-import { quotaConfigService, DEFAULT_PLANS } from './QuotaConfig';
-import { PlanLimits, PlanTier, QuotaCheckResult } from './types';
-import { PrometheusMetrics } from '../../utils/metrics';
+import { rateLimiter } from '../../services/RateLimiter.js';
+import { quotaConfigService, DEFAULT_PLANS } from './QuotaConfig.js';
+import { PlanLimits, QuotaCheckResult } from './types.js';
+import { PrometheusMetrics } from '../../utils/metrics.js';
 import pino from 'pino';
 
-const logger = pino({ name: 'QuotaEnforcer' });
+const logger = (pino as any)({ name: 'QuotaEnforcer' });
 
 export class QuotaEnforcer {
   private static instance: QuotaEnforcer;
@@ -13,8 +13,15 @@ export class QuotaEnforcer {
 
   private constructor() {
     this.metrics = new PrometheusMetrics('quota_enforcer');
-    this.metrics.createCounter('quota_rejections_total', 'Total quota rejections', ['tenant_id', 'reason']);
-    this.metrics.createCounter('feature_access_denied_total', 'Total feature access denials', ['tenant_id', 'feature']);
+    this.metrics.createCounter('quota_rejections_total', 'Total quota rejections', [
+      'tenant_id',
+      'reason',
+    ]);
+    this.metrics.createCounter(
+      'feature_access_denied_total',
+      'Total feature access denials',
+      ['tenant_id', 'feature'],
+    );
   }
 
   public static getInstance(): QuotaEnforcer {
@@ -43,7 +50,10 @@ export class QuotaEnforcer {
     const allowed = allowedTenants.includes(tenantId);
 
     if (!allowed) {
-        this.metrics.incrementCounter('feature_access_denied_total', { tenant_id: tenantId, feature });
+      this.metrics.incrementCounter('feature_access_denied_total', {
+        tenant_id: tenantId,
+        feature,
+      });
     }
 
     return allowed;
@@ -54,10 +64,17 @@ export class QuotaEnforcer {
    */
   public async checkApiQuota(tenantId: string): Promise<QuotaCheckResult> {
     const limits = this.getLimits(tenantId);
-    const result = await rateLimiter.checkLimit(`quota:${tenantId}:api_rpm`, limits.api_rpm, 60 * 1000);
+    const result = await rateLimiter.checkLimit(
+      `quota:${tenantId}:api_rpm`,
+      limits.api_rpm,
+      60 * 1000,
+    );
 
     if (!result.allowed) {
-        this.metrics.incrementCounter('quota_rejections_total', { tenant_id: tenantId, reason: 'api_rpm' });
+      this.metrics.incrementCounter('quota_rejections_total', {
+        tenant_id: tenantId,
+        reason: 'api_rpm',
+      });
     }
 
     return {
@@ -73,13 +90,24 @@ export class QuotaEnforcer {
    * Enforce Ingest Events Per Second (EPS) quota.
    * @param count Number of events in this batch
    */
-  public async checkIngestQuota(tenantId: string, count: number = 1): Promise<QuotaCheckResult> {
+  public async checkIngestQuota(
+    tenantId: string,
+    count = 1,
+  ): Promise<QuotaCheckResult> {
     const limits = this.getLimits(tenantId);
     // EPS check: window 1 second
-    const result = await rateLimiter.checkLimit(`quota:${tenantId}:ingest_eps`, limits.ingest_eps, 1000, count);
+    const result = await rateLimiter.checkLimit(
+      `quota:${tenantId}:ingest_eps`,
+      limits.ingest_eps,
+      1000,
+      count,
+    );
 
     if (!result.allowed) {
-        this.metrics.incrementCounter('quota_rejections_total', { tenant_id: tenantId, reason: 'ingest_eps' });
+      this.metrics.incrementCounter('quota_rejections_total', {
+        tenant_id: tenantId,
+        reason: 'ingest_eps',
+      });
     }
 
     return {
@@ -95,15 +123,26 @@ export class QuotaEnforcer {
    * Enforce Egress Volume (GB/Day) quota.
    * @param bytes Number of bytes to check/consume
    */
-  public async checkEgressQuota(tenantId: string, bytes: number): Promise<QuotaCheckResult> {
+  public async checkEgressQuota(
+    tenantId: string,
+    bytes: number,
+  ): Promise<QuotaCheckResult> {
     const limits = this.getLimits(tenantId);
     const limitBytes = limits.egress_gb_day * 1024 * 1024 * 1024;
     const windowMs = 24 * 60 * 60 * 1000; // 1 day
 
-    const result = await rateLimiter.checkLimit(`quota:${tenantId}:egress_day`, limitBytes, windowMs, bytes);
+    const result = await rateLimiter.checkLimit(
+      `quota:${tenantId}:egress_day`,
+      limitBytes,
+      windowMs,
+      bytes,
+    );
 
     if (!result.allowed) {
-        this.metrics.incrementCounter('quota_rejections_total', { tenant_id: tenantId, reason: 'egress_day' });
+      this.metrics.incrementCounter('quota_rejections_total', {
+        tenant_id: tenantId,
+        reason: 'egress_day',
+      });
     }
 
     return {

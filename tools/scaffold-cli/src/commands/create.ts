@@ -51,7 +51,7 @@ export const createCommand = new Command('create')
   .option('--tier <tier>', 'Service tier (1-3)', '2')
   .option('-p, --port <port>', 'HTTP port (API services)', '8080')
   .option('--dry-run', 'Preview without creating files')
-  .action(async (type: string | undefined, options: Record<string, string>) => {
+  .action(async (type: string | undefined, options: Record<string, any>) => {
     try {
       const config = await gatherOptions(type, options);
       await createService(config, options['dryRun'] === true);

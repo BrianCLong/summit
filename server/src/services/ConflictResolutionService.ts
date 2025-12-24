@@ -1,7 +1,7 @@
 // @ts-nocheck
 import pino from 'pino';
 
-const logger = pino({ name: 'ConflictResolutionService' });
+const logger = (pino as any)({ name: 'ConflictResolutionService' });
 
 export enum ConflictResolutionStrategy {
   LATEST_WINS = 'LATEST_WINS',
@@ -10,7 +10,7 @@ export enum ConflictResolutionStrategy {
 }
 
 interface Entity {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export class ConflictResolutionService {
@@ -71,13 +71,13 @@ export class ConflictResolutionService {
 
   private applyStrategy(
     key: string,
-    valA: any,
-    valB: any,
+    valA: unknown,
+    valB: unknown,
     entityA: Entity,
     entityB: Entity,
     strategy: ConflictResolutionStrategy,
     sourcePriority: string[]
-  ): any {
+  ): unknown {
     switch (strategy) {
       case ConflictResolutionStrategy.LATEST_WINS:
         // Assume there is a 'updatedAt' or 'lastSeen' field. If not, default to existing (A).

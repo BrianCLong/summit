@@ -26,8 +26,25 @@ export class TenantUsageDailyRepository {
     }
   }
 
-  async list(): Promise<TenantUsageDailyRow[]> {
-    return Array.from(this.store.values());
+  async list(tenantId?: string, from?: string, to?: string): Promise<TenantUsageDailyRow[]> {
+    let rows = Array.from(this.store.values());
+
+    if (tenantId) {
+      rows = rows.filter(r => r.tenantId === tenantId);
+    }
+    if (from) {
+      rows = rows.filter(r => r.date >= from);
+    }
+    if (to) {
+      rows = rows.filter(r => r.date <= to);
+    }
+
+    return rows;
+  }
+
+  async get(tenantId: string, date: string): Promise<TenantUsageDailyRow | undefined> {
+    const key = `${tenantId}:${date}`;
+    return this.store.get(key);
   }
 
   clear(): void {

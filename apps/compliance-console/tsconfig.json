@@ -3,6 +3,7 @@
     "target": "ESNext",
     "useDefineForClassFields": true,
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "types": ["@testing-library/jest-dom"],
     "module": "ESNext",
     "skipLibCheck": true,
     "moduleResolution": "Bundler",

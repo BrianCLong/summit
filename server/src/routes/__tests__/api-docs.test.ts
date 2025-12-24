@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * API Documentation Routes Tests
  * Issue: #11814 - API Documentation with OpenAPI/Swagger
@@ -9,7 +8,7 @@ import express from 'express';
 import apiDocsRouter from '../api-docs.js';
 import fs from 'node:fs';
 import path from 'node:path';
-import { describe, it, expect, beforeAll, jest } from '@jest/globals';
+import { describe, it, expect, beforeAll } from '@jest/globals';
 
 describe('API Documentation Routes', () => {
   let app: express.Application;

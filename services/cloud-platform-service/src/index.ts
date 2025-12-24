@@ -3,7 +3,7 @@
  * REST API for multi-cloud platform management
  */
 
-import express from 'express';
+import express, { Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import pino from 'pino';
@@ -14,10 +14,10 @@ import {
   DisasterRecoveryManager,
   CloudProvider,
   MultiCloudDeployment
-} from '@summit/cloud-platform';
+} from '@intelgraph/cloud-platform';
 
 const logger = pino({ name: 'cloud-platform-service' });
-const app = express();
+const app: Application = express();
 
 // Middleware
 app.use(helmet());

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Enhanced NL-to-Query Service
  *
@@ -40,7 +39,7 @@ import {
 import { explainQuery, summarizeQuery } from '../nl-graph-query/explainer.js';
 import type { SchemaContext } from '../nl-graph-query/types.js';
 
-const logger = pino({ name: 'nl-query-service' });
+const logger = (pino as any)({ name: 'nl-query-service' });
 
 // Configuration from environment
 const LLM_ENABLED = process.env.COPILOT_LLM_ENABLED !== 'false';

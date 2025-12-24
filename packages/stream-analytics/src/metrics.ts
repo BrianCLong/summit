@@ -28,7 +28,8 @@ export class MetricsCalculator extends EventEmitter {
       await this.redis.incrby(key, value);
     } else {
       const current = this.inMemoryMetrics.get(key) || { value: 0, timestamp: Date.now() };
-      this.inMemoryMetrics.set(key, { value: current.value + value, timestamp: Date.now() });
+      const val = typeof current.value === 'number' ? current.value : 0;
+      this.inMemoryMetrics.set(key, { value: val + value, timestamp: Date.now() });
     }
 
     this.emit('metric', { metric, value, tags, type: 'counter' });
@@ -78,14 +79,14 @@ export class MetricsCalculator extends EventEmitter {
 
     if (this.redis) {
       const values = await this.redis.zrange(key, 0, -1);
-      if (values.length === 0) {return 0;}
+      if (values.length === 0) { return 0; }
 
       const sorted = values.map(Number).sort((a, b) => a - b);
       const index = Math.ceil((p / 100) * sorted.length) - 1;
       return sorted[Math.max(0, index)];
     } else {
       const current = this.inMemoryMetrics.get(key);
-      if (!current || !Array.isArray(current.value)) {return 0;}
+      if (!current || !Array.isArray(current.value)) { return 0; }
 
       const sorted = (current.value as number[]).sort((a, b) => a - b);
       const index = Math.ceil((p / 100) * sorted.length) - 1;
@@ -112,7 +113,7 @@ export class MetricsCalculator extends EventEmitter {
    * Build metric key with tags
    */
   private buildKey(metric: string, tags?: Record<string, string>): string {
-    if (!tags) {return metric;}
+    if (!tags) { return metric; }
 
     const tagString = Object.entries(tags)
       .sort(([a], [b]) => a.localeCompare(b))
@@ -143,7 +144,7 @@ interface MetricValue {
 export class MovingAverageCalculator {
   private windows: Map<string, number[]> = new Map();
 
-  constructor(private windowSize: number) {}
+  constructor(private windowSize: number) { }
 
   /**
    * Add value and get moving average
@@ -168,7 +169,7 @@ export class MovingAverageCalculator {
    */
   get(key: string): number {
     const window = this.windows.get(key);
-    if (!window || window.length === 0) {return 0;}
+    if (!window || window.length === 0) { return 0; }
 
     return window.reduce((a, b) => a + b, 0) / window.length;
   }
@@ -221,9 +222,9 @@ export class HyperLogLog {
 
     // Alpha constant for bias correction
     this.alpha = precision <= 4 ? 0.673 :
-                 precision === 5 ? 0.697 :
-                 precision === 6 ? 0.709 :
-                 0.7213 / (1 + 1.079 / this.m);
+      precision === 5 ? 0.697 :
+        precision === 6 ? 0.709 :
+          0.7213 / (1 + 1.079 / this.m);
   }
 
   /**
@@ -249,7 +250,7 @@ export class HyperLogLog {
 
     for (let i = 0; i < this.m; i++) {
       sum += 1 / Math.pow(2, this.registers[i]);
-      if (this.registers[i] === 0) {zeros++;}
+      if (this.registers[i] === 0) { zeros++; }
     }
 
     const estimate = this.alpha * this.m * this.m / sum;
@@ -283,7 +284,7 @@ export class HyperLogLog {
    * Count leading zeros
    */
   private countLeadingZeros(n: number): number {
-    if (n === 0) {return 32;}
+    if (n === 0) { return 32; }
     let count = 0;
     for (let i = 31; i >= 0; i--) {
       if ((n & (1 << i)) === 0) {

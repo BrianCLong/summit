@@ -33,7 +33,7 @@ export interface MatchingFieldConfig {
   comparator: Comparator;
   weight: number;
   required: boolean;
-  transformations?: Transformation[];
+  transformations?: MatchingTransformation[];
   customLogic?: string;
 }
 
@@ -49,7 +49,7 @@ export type Comparator =
   | 'jaccard'
   | 'custom';
 
-export type Transformation =
+export type MatchingTransformation =
   | 'lowercase'
   | 'uppercase'
   | 'trim'
@@ -68,7 +68,7 @@ export interface MatchBlockingStrategy {
 
 export interface MatchBlockingKey {
   fields: string[];
-  transformations?: Transformation[];
+  transformations?: MatchingTransformation[];
   weight: number;
 }
 

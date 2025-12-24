@@ -15,7 +15,7 @@ export interface InteractionData {
   payload: string;
   method?: string;
   timestamp: Date;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }
 
 export interface AttackerProfile {

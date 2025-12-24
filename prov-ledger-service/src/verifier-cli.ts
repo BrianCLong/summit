@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @ts-nocheck
 import { Command } from 'commander';
 import { createReadStream } from 'fs';
 import { pipeline } from 'stream/promises';

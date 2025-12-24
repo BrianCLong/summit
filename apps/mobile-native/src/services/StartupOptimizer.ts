@@ -1,6 +1,6 @@
-import {InteractionManager, AppState} from 'react-native';
-import {performanceMonitor} from './PerformanceMonitor';
-import {useAppStore} from '../stores/appStore';
+import { InteractionManager } from 'react-native';
+import { performanceMonitor } from './PerformanceMonitor';
+import { useAppStore } from '../stores/appStore';
 import * as Sentry from '@sentry/react-native';
 
 interface StartupTask {
@@ -231,7 +231,7 @@ export const configureDefaultStartupTasks = () => {
   startupOptimizer.registerTask(
     'initialize_database',
     async () => {
-      const {initializeDatabase} = await import('./Database');
+      const { initializeDatabase } = await import('./Database');
       await initializeDatabase();
     },
     'critical',
@@ -240,7 +240,7 @@ export const configureDefaultStartupTasks = () => {
   startupOptimizer.registerTask(
     'restore_apollo_cache',
     async () => {
-      const {restoreCache} = await import('./GraphQLClient');
+      const { restoreCache } = await import('./GraphQLClient');
       await restoreCache();
     },
     'critical',
@@ -271,7 +271,7 @@ export const configureDefaultStartupTasks = () => {
   startupOptimizer.registerTask(
     'request_location_permission',
     async () => {
-      const {requestLocationPermission} = await import('./LocationService');
+      const { requestLocationPermission } = await import('./LocationService');
       await requestLocationPermission();
     },
     'high',
@@ -280,7 +280,7 @@ export const configureDefaultStartupTasks = () => {
   startupOptimizer.registerTask(
     'register_background_tasks',
     async () => {
-      const {registerBackgroundTasks} = await import('./BackgroundTasks');
+      const { registerBackgroundTasks } = await import('./BackgroundTasks');
       await registerBackgroundTasks();
     },
     'high',
@@ -292,7 +292,7 @@ export const configureDefaultStartupTasks = () => {
     async () => {
       const settings = useAppStore.getState().settings;
       if (settings.notificationsEnabled) {
-        const {setupPushNotifications} = await import('./NotificationService');
+        const { setupPushNotifications } = await import('./NotificationService');
         await setupPushNotifications();
       }
     },
@@ -302,7 +302,7 @@ export const configureDefaultStartupTasks = () => {
   startupOptimizer.registerTask(
     'sync_offline_data',
     async () => {
-      const {enhancedOfflineSync} = await import('./EnhancedOfflineSync');
+      const { enhancedOfflineSync } = await import('./EnhancedOfflineSync');
       await enhancedOfflineSync.sync();
     },
     'medium',

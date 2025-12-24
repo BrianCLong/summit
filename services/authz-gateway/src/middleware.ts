@@ -152,6 +152,9 @@ export function requireAuth(
       req.user = payload;
       req.subjectAttributes = subject;
       req.resourceAttributes = resource;
+      res.locals.tenantId = subject.tenantId;
+      res.locals.resourceId = resource.id;
+      res.locals.action = options.action;
       return next();
     } catch (error) {
       const message = (error as Error).message;

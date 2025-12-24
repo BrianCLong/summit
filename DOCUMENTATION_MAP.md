@@ -75,6 +75,7 @@
 
 | Document | Purpose | Key Content |
 |----------|---------|-------------|
+| **CATEGORY_NARRATIVE.md** | Category Narrative | Wedge, Positioning, Messaging |
 | **MAESTRO_PRD_ADDENDA.md** | Maestro specifications | Feature requirements, technical design |
 | **PRD_Template.md** | Product requirements template | Standard format for PRDs |
 | **ORCHESTRATOR_SUPERSET_CAPABILITIES.md** | Orchestrator vision | CompanyOS strategy |

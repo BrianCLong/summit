@@ -10,23 +10,28 @@ import { readFileSync } from 'fs';
 import { createRateLimiter } from './config/rateLimit.js';
 import { securityHeaders, extraSecurityHeaders } from './config/security.js';
 import { dropResolvers } from './graphql/resolvers/drop.js';
+import { scoreboardResolvers } from './graphql/resolvers/scoreboard.js';
 import { fetchSecret } from './security/vault.js';
 import { securityLogger } from './observability/securityLogger.js';
 
-const typeDefs = readFileSync(
-  new URL('./graphql/schemas/drop.graphql', import.meta.url),
-  'utf8',
-);
+const typeDefs = [
+  readFileSync(new URL('./graphql/schemas/drop.graphql', import.meta.url), 'utf8'),
+  readFileSync(new URL('./graphql/schemas/scoreboard.graphql', import.meta.url), 'utf8'),
+];
 
 const server = new ApolloServer({
   typeDefs,
   resolvers: {
     Query: {
       ...dropResolvers.Query,
+      ...scoreboardResolvers.Query,
     },
     Mutation: {
       ...dropResolvers.Mutation,
+      ...scoreboardResolvers.Mutation,
     },
+    DomainScoreboard: scoreboardResolvers.DomainScoreboard,
+    DomainMetrics: scoreboardResolvers.DomainMetrics,
   },
 });
 
@@ -47,14 +52,12 @@ const startServer = async () => {
 
   app.use(securityHeaders());
   app.use(extraSecurityHeaders);
-  app.use(createRateLimiter());
+  app.use(createRateLimiter() as any);
   app.use(bodyParser.json({ limit: '2mb' }));
   app.use(bodyParser.urlencoded({ extended: true, limit: '2mb' }));
 
   const redisUrl = process.env.REDIS_URL;
-  const redisClient = redisUrl
-    ? new Redis(redisUrl, { enableReadyCheck: false })
-    : undefined;
+  const redisClient = redisUrl ? new Redis(redisUrl, { enableReadyCheck: false }) : undefined;
   const RedisStore = RedisStoreFactory(session);
   const sessionSecret =
     (await fetchSecret('session_secret', process.env.SESSION_SECRET || '')) || 'change-me';

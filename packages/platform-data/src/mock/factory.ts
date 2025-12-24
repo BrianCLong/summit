@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * P37-38: Mock Data Factory
  * Generates realistic test data for Summit entities

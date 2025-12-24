@@ -1,0 +1,48 @@
+name: Dependency Governance
+
+on:
+  pull_request:
+    branches: ["main", "develop", "master"]
+  push:
+    branches: ["main", "develop", "master"]
+
+jobs:
+  compliance-check:
+    name: Dependency Compliance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+        with:
+          node-version: "20"
+
+      - name: Install Tools
+        run: npm install -g pnpm@9.12.0
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: License Scan
+        # Use pnpm dlx to run license-checker without adding it to deps
+        # But wait, check_licenses.cjs imports 'license-checker'.
+        # So it must be installed.
+        # I'll rely on it being in devDependencies (which I added).
+        run: node scripts/compliance/check_licenses.cjs
+
+      - name: Check Package Pinning
+        run: |
+          # Find all package.json files excluding node_modules and verify no ^ or ~
+          if find . -name "package.json" -not -path "*/node_modules/*" -print0 | xargs -0 grep -l -E '"(\^|~)[0-9]' > violations.txt; then
+            echo "❌ Found unpinned dependencies (with ^ or ~). Please pin to exact versions."
+            cat violations.txt
+            exit 1
+          fi
+          echo "✅ All package versions pinned."
+
+      - name: Check GitHub Actions Pinning
+        run: |
+          chmod +x scripts/compliance/check_actions_pinning.sh
+          ./scripts/compliance/check_actions_pinning.sh

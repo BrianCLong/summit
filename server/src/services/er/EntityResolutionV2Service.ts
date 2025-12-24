@@ -1,10 +1,9 @@
-// @ts-nocheck
 import { Session, Transaction } from 'neo4j-driver';
 import pino from 'pino';
 import { randomUUID } from 'crypto';
 import { soundex } from './soundex.js';
 
-const log = pino({ name: 'EntityResolutionV2Service' });
+const log = (pino as any)({ name: 'EntityResolutionV2Service' });
 
 export interface Bitemporal {
   validFrom?: string;

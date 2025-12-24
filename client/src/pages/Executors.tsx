@@ -1,11 +1,9 @@
-// @ts-nocheck
 import React, { useEffect, useState } from 'react';
 import {
   Box,
   Button,
   Card,
   CardContent,
-  Grid,
   TextField,
   Typography,
   Alert,
@@ -13,6 +11,7 @@ import {
   ListItem,
   ListItemText,
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
 
 type Exec = {
   id: string;
@@ -65,7 +64,7 @@ export default function ExecutorsPage() {
       <Typography variant="h4">Executors</Typography>
       {error && <Alert severity="error">{error}</Alert>}
       <Grid container spacing={2} sx={{ mt: 1 }}>
-        <Grid item xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Card>
             <CardContent>
               <Typography variant="h6">Register Executor</Typography>
@@ -80,7 +79,12 @@ export default function ExecutorsPage() {
                 fullWidth
                 label="Kind (cpu/gpu)"
                 value={kind}
-                onChange={(e) => setKind(e.target.value as any)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === 'cpu' || value === 'gpu') {
+                    setKind(value);
+                  }
+                }}
                 sx={{ my: 1 }}
               />
               <TextField
@@ -104,7 +108,7 @@ export default function ExecutorsPage() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Card>
             <CardContent>
               <Typography variant="h6">Pools</Typography>

@@ -1,0 +1,15 @@
+{
+  "name": "customer-success-os",
+  "version": "1.0.0",
+  "type": "module",
+  "exports": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.1"
+  }
+}

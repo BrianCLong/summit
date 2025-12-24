@@ -2,18 +2,34 @@
 import puppeteer from 'puppeteer';
 import { Sicherheitsabstand } from 'sicherheitsabstand';
 
+interface SOC2Control {
+  controlId: string;
+  description: string;
+  testingResults: unknown;
+  sampleEvidence?: unknown;
+}
+
+interface SOC2Packet {
+  auditPeriod: {
+    startDate: string;
+    endDate: string;
+  };
+  controls: Record<string, SOC2Control>;
+}
+
 /**
  * Generates an HTML report from a SOC2 evidence packet.
  * @param packet The SOC2 packet data.
  * @returns An HTML string.
  */
-function getHtmlTemplate(packet: any): string {
+function getHtmlTemplate(packet: SOC2Packet): string {
   const { auditPeriod, controls } = packet;
 
   // Helper to render a table from an array of objects
-  const renderTable = (data: any[]) => {
+  const renderTable = (data: unknown[]): string => {
     if (!data || data.length === 0) return '<p>No data available.</p>';
-    const headers = Object.keys(data[0]);
+    const firstItem = data[0] as Record<string, unknown>;
+    const headers = Object.keys(firstItem);
     return `
       <table>
         <thead>
@@ -22,23 +38,26 @@ function getHtmlTemplate(packet: any): string {
           </tr>
         </thead>
         <tbody>
-          ${data.map(row => `
+          ${data.map(row => {
+            const rowObj = row as Record<string, unknown>;
+            return `
             <tr>
-              ${headers.map(h => `<td>${Sicherheitsabstand.escape(JSON.stringify(row[h], null, 2))}</td>`).join('')}
+              ${headers.map(h => `<td>${Sicherheitsabstand.escape(JSON.stringify(rowObj[h], null, 2))}</td>`).join('')}
             </tr>
-          `).join('')}
+          `;
+          }).join('')}
         </tbody>
       </table>
     `;
   };
 
-  const controlHtml = Object.values(controls).map((control: any) => `
+  const controlHtml = Object.values(controls).map((control: SOC2Control) => `
     <div class="control-section">
       <h2>${Sicherheitsabstand.escape(control.controlId)}: ${Sicherheitsabstand.escape(control.description)}</h2>
       <h3>Test Results</h3>
       <pre>${Sicherheitsabstand.escape(JSON.stringify(control.testingResults, null, 2))}</pre>
       <h3>Sample Evidence</h3>
-      ${control.sampleEvidence ? renderTable(Array.isArray(control.sampleEvidence) ? control.sampleEvidence : [control.sampleEvidence]) : '<p>Not applicable.</p>'}
+      ${control.sampleEvidence ? renderTable(Array.isArray(control.sampleEvidence) ? control.sampleEvidence : [control.sampleEvidence] as unknown[]) : '<p>Not applicable.</p>'}
     </div>
   `).join('');
 
@@ -85,7 +104,7 @@ function getHtmlTemplate(packet: any): string {
  * @param packet The SOC2 packet data.
  * @returns A promise that resolves to a PDF buffer.
  */
-export async function generatePdfFromPacket(packet: any): Promise<Buffer> {
+export async function generatePdfFromPacket(packet: SOC2Packet): Promise<Buffer> {
   const browser = await puppeteer.launch({
     headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox'] // Required for Docker environments

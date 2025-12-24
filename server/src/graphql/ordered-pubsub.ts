@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { PubSub } from 'graphql-subscriptions';
 import pino from 'pino';
 
@@ -8,7 +7,7 @@ interface EventEnvelope<T> {
   payload: T;
 }
 
-const logger = pino();
+const logger = (pino as any)();
 
 /**
  * OrderedPubSub wraps the standard PubSub implementation to provide

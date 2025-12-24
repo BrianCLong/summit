@@ -16,7 +16,7 @@ import { z } from 'zod/v4';
 import { logger as appLogger } from '../utils/logger.js';
 import { LLMGuardrailsService } from '../security/llm-guardrails.js';
 import LLMService from './LLMService.js';
-import { Driver, Session } from 'neo4j-driver';
+import type { Driver, Session } from 'neo4j-driver';
 
 const logger = appLogger.child({ module: 'NLToCypherService' });
 
@@ -189,7 +189,13 @@ export class NLToCypherService {
     cypher: string,
     investigationId: string,
     auditId?: string
-  ): Promise<any> {
+  ): Promise<{
+    records: Record<string, unknown>[];
+    summary: {
+      recordCount: number;
+      executionTime: number;
+    };
+  }> {
     logger.info({
       investigationId,
       auditId,

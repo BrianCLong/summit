@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * CompanyOS Operations Dashboard
  * Meta-view showing how Summit operates itself
@@ -10,11 +9,16 @@ import { AlertCircle, CheckCircle, Clock, GitBranch, Activity, ArrowUpRight } fr
 const TrendingUp = ArrowUpRight;
 
 // Import shadcn/ui components
-const Card = ({ className = '', children, ...props }: any) => <div className={`rounded-lg border bg-card text-card-foreground shadow-sm ${className}`} {...props}>{children}</div>;
-const CardHeader = ({ className = '', children, ...props }: any) => <div className={`flex flex-col space-y-1.5 p-6 ${className}`} {...props}>{children}</div>;
-const CardTitle = ({ className = '', children, ...props }: any) => <h3 className={`text-2xl font-semibold leading-none tracking-tight ${className}`} {...props}>{children}</h3>;
-const CardContent = ({ className = '', children, ...props }: any) => <div className={`p-6 pt-0 ${className}`} {...props}>{children}</div>;
-const Badge = ({ variant = 'default', className = '', children, ...props }: any) => <div className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${className}`} {...props}>{children}</div>;
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  className?: string;
+  children: React.ReactNode;
+}
+
+const Card = ({ className = '', children, ...props }: CardProps) => <div className={`rounded-lg border bg-card text-card-foreground shadow-sm ${className}`} {...props}>{children}</div>;
+const CardHeader = ({ className = '', children, ...props }: CardProps) => <div className={`flex flex-col space-y-1.5 p-6 ${className}`} {...props}>{children}</div>;
+const CardTitle = ({ className = '', children, ...props }: CardProps) => <h3 className={`text-2xl font-semibold leading-none tracking-tight ${className}`} {...props}>{children}</h3>;
+const CardContent = ({ className = '', children, ...props }: CardProps) => <div className={`p-6 pt-0 ${className}`} {...props}>{children}</div>;
+const Badge = ({ variant = 'default', className = '', children, ...props }: CardProps & { variant?: string }) => <div className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${className}`} {...props}>{children}</div>;
 
 interface Incident {
   id: string;

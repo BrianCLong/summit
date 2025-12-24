@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 /**
  * Tri-Pane Analysis Shell - Mock Data Service
@@ -296,29 +297,29 @@ export class MockTriPaneDataProvider implements TriPaneDataProvider {
     this.geospatialEvents = generateMockGeospatialEvents(25)
   }
 
-  async fetchEntities(filters?: any): Promise<Entity[]> {
+  async fetchEntities(filters?: Record<string, unknown>): Promise<Entity[]> {
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 300))
     return this.entities
   }
 
-  async fetchRelationships(filters?: any): Promise<Relationship[]> {
+  async fetchRelationships(filters?: Record<string, unknown>): Promise<Relationship[]> {
     await new Promise(resolve => setTimeout(resolve, 300))
     return this.relationships
   }
 
-  async fetchTimelineEvents(filters?: any): Promise<TimelineEvent[]> {
+  async fetchTimelineEvents(filters?: Record<string, unknown>): Promise<TimelineEvent[]> {
     await new Promise(resolve => setTimeout(resolve, 300))
     return this.timelineEvents
   }
 
-  async fetchGeospatialEvents(filters?: any): Promise<GeospatialEvent[]> {
+  async fetchGeospatialEvents(filters?: Record<string, unknown>): Promise<GeospatialEvent[]> {
     await new Promise(resolve => setTimeout(resolve, 300))
     return this.geospatialEvents
   }
 
   // Optional: Real-time updates simulation
-  subscribeToUpdates(callback: (data: any) => void): () => void {
+  subscribeToUpdates(callback: (data: { type: string; payload: unknown }) => void): () => void {
     const interval = setInterval(() => {
       // Simulate a new event every 10 seconds
       const newEvent: TimelineEvent = {

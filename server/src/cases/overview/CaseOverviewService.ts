@@ -99,7 +99,7 @@ export class CaseOverviewService {
     await this.cacheRepo.markStale(caseId, tenantId);
   }
 
-  private async triggerRevalidation(cacheKey: string, caseId: string, tenantId: string) {
+  private async triggerRevalidation(cacheKey: string, caseId: string, tenantId: string): Promise<void> {
     if (this.inflight.has(cacheKey)) return;
     void this.refresh(caseId, tenantId, cacheKey);
   }

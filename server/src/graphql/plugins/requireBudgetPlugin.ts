@@ -13,7 +13,8 @@ import {
   SelectionSetNode,
   FieldNode,
 } from 'graphql';
-import logger from '../../utils/logger';
+import logger from '../../utils/logger.js';
+import type { GraphQLContext } from '../apollo-v5-server.js';
 
 interface BudgetPluginOptions {
   /**
@@ -46,7 +47,7 @@ interface MutationFieldInfo {
 
 export function requireBudgetPlugin(
   options: BudgetPluginOptions = {},
-): ApolloServerPlugin {
+): ApolloServerPlugin<GraphQLContext> {
   const {
     enforceBudget = process.env.REQUIRE_BUDGET_PLUGIN === 'true',
     logViolations = true,

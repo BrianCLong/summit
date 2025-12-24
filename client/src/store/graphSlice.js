@@ -1,4 +1,3 @@
-// @ts-nocheck
 import * as graphSliceModule from './slices/graphSlice';
 const graphSlice = graphSliceModule.default || graphSliceModule;
 export default graphSlice.reducer;

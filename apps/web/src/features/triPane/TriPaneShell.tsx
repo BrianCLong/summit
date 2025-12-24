@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Tri-Pane Analysis Shell
  *
@@ -142,23 +141,23 @@ export function TriPaneShell({
     const { start, end } = syncState.globalTimeWindow
 
     // Filter timeline events
-    const filteredTimelineEvents = timelineEvents.filter(event => {
+    const filteredTimelineEvents = timelineEvents.filter((event) => {
       const eventTime = new Date(event.timestamp)
       return eventTime >= start && eventTime <= end
     })
 
     // Filter geospatial events
-    const filteredGeospatialEvents = geospatialEvents.filter(event => {
+    const filteredGeospatialEvents = geospatialEvents.filter((event) => {
       const eventTime = new Date(event.timestamp)
       return eventTime >= start && eventTime <= end
     })
 
     // Filter entities that appear in the filtered events
     const relevantEntityIds = new Set(
-      filteredTimelineEvents.map(e => e.entityId).filter(Boolean) as string[]
+      filteredTimelineEvents.map((e) => e.entityId).filter(Boolean) as string[]
     )
 
-    const filteredEntities = currentEntities.filter(entity => {
+    const filteredEntities = currentEntities.filter((entity) => {
       if (relevantEntityIds.has(entity.id)) return true
 
       // Also include entities updated within the time window
@@ -171,9 +170,9 @@ export function TriPaneShell({
     })
 
     // Filter relationships to only include those between filtered entities
-    const filteredEntityIds = new Set(filteredEntities.map(e => e.id))
+    const filteredEntityIds = new Set(filteredEntities.map((e) => e.id))
     const filteredRelationships = currentRelationships.filter(
-      rel =>
+      (rel) =>
         filteredEntityIds.has(rel.sourceId) &&
         filteredEntityIds.has(rel.targetId)
     )
@@ -195,8 +194,8 @@ export function TriPaneShell({
   // Handle entity selection from graph
   const handleEntitySelect = useCallback(
     (entity: Entity) => {
-      setAnnotationContext(prev => ({ ...prev, entity }))
-      setSyncState(prev => ({
+      setAnnotationContext((prev) => ({ ...prev, entity }))
+      setSyncState((prev) => ({
         ...prev,
         graph: {
           ...prev.graph,
@@ -204,8 +203,8 @@ export function TriPaneShell({
           focusedEntityIds: [
             entity.id,
             ...relationships
-              .filter(r => r.sourceId === entity.id || r.targetId === entity.id)
-              .map(r => (r.sourceId === entity.id ? r.targetId : r.sourceId)),
+              .filter((r) => r.sourceId === entity.id || r.targetId === entity.id)
+              .map((r) => (r.sourceId === entity.id ? r.targetId : r.sourceId)),
           ],
         },
         timeline: {
@@ -229,14 +228,14 @@ export function TriPaneShell({
   const handleTimelineEventSelect = useCallback(
     (event: TimelineEvent) => {
       if (event.entityId) {
-        const entity = entities.find(e => e.id === event.entityId)
+        const entity = entities.find((e) => e.id === event.entityId)
         if (entity) {
           handleEntitySelect(entity)
         }
       }
 
-      setAnnotationContext(prev => ({ ...prev, timelineEvent: event }))
-      setSyncState(prev => ({
+      setAnnotationContext((prev) => ({ ...prev, timelineEvent: event }))
+      setSyncState((prev) => ({
         ...prev,
         timeline: {
           ...prev.timeline,
@@ -253,8 +252,8 @@ export function TriPaneShell({
   // Handle map location selection
   const handleLocationSelect = useCallback(
     (locationId: string) => {
-      setAnnotationContext(prev => ({ ...prev, locationId }))
-      setSyncState(prev => ({
+      setAnnotationContext((prev) => ({ ...prev, locationId }))
+      setSyncState((prev) => ({
         ...prev,
         map: {
           ...prev.map,
@@ -276,7 +275,7 @@ export function TriPaneShell({
         end: new Date(range.end),
       }
 
-      setSyncState(prev => ({
+      setSyncState((prev) => ({
         ...prev,
         globalTimeWindow: timeWindow,
         timeline: {
@@ -335,7 +334,7 @@ export function TriPaneShell({
       } else if (e.key === 'e' && !e.ctrlKey && !e.metaKey) {
         onExport?.()
       } else if (e.key === 'p' && !e.ctrlKey && !e.metaKey) {
-        setShowProvenance(prev => !prev)
+        setShowProvenance((prev) => !prev)
       }
     }
 
@@ -389,7 +388,7 @@ export function TriPaneShell({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setShowProvenance(!showProvenance)}
+            onClick={() => { setShowProvenance(!showProvenance) }}
             aria-label={`${showProvenance ? 'Hide' : 'Show'} provenance overlay`}
             title="Toggle provenance overlay (P)"
           >
@@ -483,7 +482,7 @@ export function TriPaneShell({
             </CardHeader>
             <CardContent className="p-0 flex-1 min-h-0">
               <GraphCanvas
-                entities={filteredData.entities.map(entity => ({
+                entities={filteredData.entities.map((entity) => ({
                   ...entity,
                   confidence: showProvenance ? entity.confidence : 1.0,
                 }))}
@@ -534,7 +533,7 @@ export function TriPaneShell({
                 entity: annotationContext.entity,
                 timelineEvent: annotationContext.timelineEvent,
                 location: filteredData.geospatialEvents.find(
-                  loc => loc.id === annotationContext.locationId
+                  (loc) => loc.id === annotationContext.locationId
                 ),
               }}
             />

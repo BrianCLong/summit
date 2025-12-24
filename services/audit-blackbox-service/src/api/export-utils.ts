@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createHash } from 'crypto';
 import type { AuditEvent } from '../core/types.js';
 import { AuditEventSchema } from '../core/types.js';

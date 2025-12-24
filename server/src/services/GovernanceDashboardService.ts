@@ -1,6 +1,16 @@
 // @ts-nocheck
 import { promptRegistry } from '../../prompts/registry.js';
-import { runsRepo } from '../maestro/runs/runs-repo.js';
+import { runsRepo, type Run } from '../maestro/runs/runs-repo.js';
+import type { PromptConfig } from '../../prompts/types.js';
+
+interface RecentRun {
+  id: string;
+  pipeline: string;
+  status: string;
+  duration: number | null;
+  createdAt: Date;
+  error: string | null;
+}
 
 export interface GovernanceStats {
   totalAgents: number;
@@ -28,8 +38,13 @@ export interface PromptSummary {
 }
 
 export class GovernanceDashboardService {
-  async getDashboardData(tenantId: string) {
-    const [prompts, runs] = await Promise.all([
+  async getDashboardData(tenantId: string): Promise<{
+    stats: GovernanceStats;
+    agents: AgentSummary[];
+    prompts: PromptSummary[];
+    recentRuns: RecentRun[];
+  }> {
+    const [prompts, runs]: [PromptConfig[], Run[]] = await Promise.all([
       promptRegistry.getAllPrompts(),
       runsRepo.list(tenantId, 100), // Fetch last 100 runs for stats
     ]);
@@ -37,11 +52,11 @@ export class GovernanceDashboardService {
     // Calculate Stats
     const totalPrompts = prompts.length;
     const totalRuns = runs.length;
-    const failedRuns = runs.filter((r) => r.status === 'failed').length;
+    const failedRuns = runs.filter((r: Run) => r.status === 'failed').length;
     const successRate = totalRuns > 0 ? ((totalRuns - failedRuns) / totalRuns) * 100 : 0;
 
     // Analyze Prompts for Risk (Heuristic)
-    const promptSummaries: PromptSummary[] = prompts.map((p) => {
+    const promptSummaries: PromptSummary[] = prompts.map((p: PromptConfig) => {
       let riskLevel: 'low' | 'medium' | 'high' = 'low';
       if (p.meta?.tags?.includes('write') || p.meta?.tags?.includes('execute')) {
         riskLevel = 'high';
@@ -64,7 +79,7 @@ export class GovernanceDashboardService {
     const agentsMap = new Map<string, AgentSummary>();
 
     // From Prompts
-    prompts.forEach((p) => {
+    prompts.forEach((p: PromptConfig) => {
       if (p.meta.id.startsWith('agent.')) {
         const name = p.meta.id.split('.')[1];
         agentsMap.set(name, {
@@ -77,10 +92,13 @@ export class GovernanceDashboardService {
     });
 
     // From Runs
-    runs.forEach((r) => {
+    runs.forEach((r: Run) => {
       const name = r.pipeline || r.pipeline_id;
       const existing = agentsMap.get(name);
-      const runStatus = r.status === 'failed' ? 'error' : r.status === 'running' ? 'active' : 'idle';
+      const runStatus: 'active' | 'idle' | 'error' =
+        r.status === 'failed' ? 'error' :
+        r.status === 'running' ? 'active' :
+        'idle';
 
       if (existing) {
         if (r.created_at > (existing.lastRun || new Date(0))) {
@@ -112,7 +130,7 @@ export class GovernanceDashboardService {
       },
       agents,
       prompts: promptSummaries,
-      recentRuns: runs.slice(0, 10).map(r => ({
+      recentRuns: runs.slice(0, 10).map((r: Run): RecentRun => ({
         id: r.id,
         pipeline: r.pipeline,
         status: r.status,

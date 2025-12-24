@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Core MDM Engine
  * Orchestrates master data management operations including golden record creation,

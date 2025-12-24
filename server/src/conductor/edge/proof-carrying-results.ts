@@ -2,7 +2,7 @@
 // Proof-Carrying Results: Edge sessions produce results with cryptographic attestations
 // Enables verification of computations performed offline
 
-import crypto from 'crypto';
+import { createHash, createSign, createVerify, randomUUID, randomBytes } from 'crypto';
 import Redis from 'ioredis';
 import { Pool } from 'pg';
 import logger from '../../config/logger.js';
@@ -140,7 +140,7 @@ export class ProofCarryingResultSystem {
     resourceUsage: ResourceUsage;
   }): Promise<ProofCarryingResult> {
     try {
-      const resultId = crypto.randomUUID();
+      const resultId = randomUUID();
       const timestamp = new Date();
 
       logger.info('Creating proof-carrying result', {
@@ -312,7 +312,7 @@ export class ProofCarryingResultSystem {
     resultId: string,
     timestamp: Date,
   ): Promise<ResultAttestation> {
-    const nonce = crypto.randomBytes(32).toString('hex');
+    const nonce = randomBytes(32).toString('hex');
 
     // Create attestation data
     const attestationData = {

@@ -3,7 +3,14 @@
  */
 
 import type { GenerationResult } from '../types';
-import { UsageMeteringService, QuotaService } from '../../../../server/src/usage';
+// Mock interfaces to decouple from server
+interface UsageMeteringService {
+  record(event: any): Promise<void>;
+}
+
+interface QuotaService {
+  assert(quota: any): Promise<void>;
+}
 
 export class TextGenerator {
   private usageMeteringService: UsageMeteringService;
@@ -32,9 +39,9 @@ export class TextGenerator {
     // Placeholder for text generation
     // In production, use GPT or similar models
     const result = {
-      text: `${prompt  } [generated text]`,
+      text: `${prompt} [generated text]`,
       tokens: maxLength,
-      finishReason: 'completed',
+      finishReason: 'completed' as const,
     };
 
     await this.usageMeteringService.record({

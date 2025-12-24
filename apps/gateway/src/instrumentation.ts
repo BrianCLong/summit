@@ -11,7 +11,7 @@ import {
   PeriodicExportingMetricReader,
   MeterProvider,
 } from '@opentelemetry/sdk-metrics';
-import { Resource } from '@opentelemetry/resources';
+import * as resources from '@opentelemetry/resources';
 import {
   SemanticResourceAttributes,
   SEMRESATTRS_SERVICE_NAME,
@@ -29,7 +29,7 @@ const otlpEndpoint =
   process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://otel-collector:4318';
 
 // Resource attributes
-const resource = new Resource({
+const resource = new (resources as any).Resource({
   [SEMRESATTRS_SERVICE_NAME]: serviceName,
   [SEMRESATTRS_SERVICE_VERSION]: serviceVersion,
   [SEMRESATTRS_DEPLOYMENT_ENVIRONMENT]: environment,

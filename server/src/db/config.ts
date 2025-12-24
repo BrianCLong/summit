@@ -4,7 +4,7 @@ import config from '../config/index.js';
 export const dbConfig = {
   connectionConfig: {
     host: config.postgres.host || 'localhost',
-    port: parseInt(config.postgres.port || '5432'),
+    port: parseInt(String(config.postgres.port || '5432')),
     database: config.postgres.database || 'postgres',
     user: config.postgres.username || 'postgres',
     password: config.postgres.password || 'postgres',

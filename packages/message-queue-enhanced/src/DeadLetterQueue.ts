@@ -1,6 +1,6 @@
 import { Channel, ConsumeMessage } from 'amqplib';
 import { trace } from '@opentelemetry/api';
-import pino from 'pino';
+import pino = require('pino');
 
 const logger = pino({ name: 'DeadLetterQueue' });
 const tracer = trace.getTracer('message-queue-enhanced');
@@ -12,7 +12,7 @@ export class DeadLetterQueue {
   private readonly exchangeName = 'dlx.exchange';
   private readonly queueName = 'dlq.failed-messages';
 
-  constructor(private channel: Channel) {}
+  constructor(private channel: Channel) { }
 
   /**
    * Initialize dead letter exchange and queue

@@ -3,7 +3,7 @@
  * Combines quantum circuits with classical neural networks
  */
 
-import { QuantumSimulator } from '@summit/quantum-simulation';
+import { QuantumSimulator } from '@intelgraph/quantum-simulation';
 import { QuantumNeuralNetwork, QNNParams } from '../circuits/quantum-neural-network';
 
 export interface HybridModelConfig {

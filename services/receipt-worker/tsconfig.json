@@ -7,7 +7,7 @@
     "moduleResolution": "node",
     "allowImportingTsExtensions": false,
     "baseUrl": ".",
-    "types": ["jest"],
+    "skipLibCheck": true,
     "paths": {
       "@intelgraph/provenance": ["../../packages/provenance/dist"]
     }

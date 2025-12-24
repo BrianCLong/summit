@@ -3,7 +3,7 @@ import { getNeo4jDriver } from '../db/neo4j.js';
 import { default as pino } from 'pino';
 
 // @ts-ignore
-const logger = pino({ name: 'GraphIndexAdvisorService' });
+const logger = (pino as any)({ name: 'GraphIndexAdvisorService' });
 
 interface AccessPattern {
   label: string;

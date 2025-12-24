@@ -12,7 +12,7 @@ export interface FusionEntity {
   externalId: string; // ID in the source system
   entityType: EntityType;
   name: string;
-  attributes: Record<string, any>; // Raw attributes from source
+  attributes: Record<string, unknown>; // Raw attributes from source
   associatedDate?: string; // Timestamp of the event/object
 }
 
@@ -20,7 +20,7 @@ export interface FusionRelationship {
   sourceExternalId: string;
   targetExternalId: string;
   edgeType: EdgeType;
-  attributes?: Record<string, any>;
+  attributes?: Record<string, unknown>;
 }
 
 export interface EntityResolutionResult {

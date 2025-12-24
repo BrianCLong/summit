@@ -1,0 +1,20 @@
+{
+  "name": "@intelgraph/ingest-connector-sdk",
+  "version": "0.1.0",
+  "description": "SDK for streaming ingest connectors with backpressure and exactly-once semantics",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "lint": "eslint src/"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0",
+    "@types/node": "^20.0.0"
+  },
+  "dependencies": {
+    "zod": "^3.0.0"
+  }
+}

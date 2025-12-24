@@ -2,7 +2,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { z } from 'zod';
+import * as z from 'zod';
 import { otelService } from '../middleware/observability/otel-tracing.js';
 
 // SLSA v1.0 provenance verification for air-gap supply chain security
@@ -18,8 +18,8 @@ interface SLSA3Provenance {
   predicate: {
     buildDefinition: {
       buildType: string;
-      externalParameters: any;
-      internalParameters?: any;
+      externalParameters: Record<string, unknown>;
+      internalParameters?: Record<string, unknown>;
       resolvedDependencies?: {
         uri: string;
         digest: { [algorithm: string]: string };
@@ -155,11 +155,16 @@ export class SLSA3Verifier {
   /**
    * Verify SLSA v1.0 provenance format and structure
    */
-  private verifyProvenanceFormat(provenance: any): {
+  private verifyProvenanceFormat(provenance: Record<string, unknown>): {
     valid: boolean;
     errors: string[];
   } {
     const errors: string[] = [];
+    const pred = provenance.predicate as Record<string, unknown> | undefined;
+    const buildDef = pred?.buildDefinition as Record<string, unknown> | undefined;
+    const runDetails = pred?.runDetails as Record<string, unknown> | undefined;
+    const builder = runDetails?.builder as Record<string, unknown> | undefined;
+    const metadata = runDetails?.metadata as Record<string, unknown> | undefined;
 
     // Check required fields
     if (provenance._type !== 'https://in-toto.io/Statement/v0.1') {
@@ -174,21 +179,21 @@ export class SLSA3Verifier {
       errors.push('Missing or empty subject array');
     }
 
-    if (!provenance.predicate?.buildDefinition?.buildType) {
+    if (!buildDef?.buildType) {
       errors.push('Missing build type in predicate');
     }
 
-    if (!provenance.predicate?.runDetails?.builder?.id) {
+    if (!builder?.id) {
       errors.push('Missing builder ID in run details');
     }
 
     // Check timestamps
-    const startedOn = provenance.predicate?.runDetails?.metadata?.startedOn;
-    const finishedOn = provenance.predicate?.runDetails?.metadata?.finishedOn;
+    const startedOn = metadata?.startedOn;
+    const finishedOn = metadata?.finishedOn;
 
     if (startedOn) {
       try {
-        const startTime = new Date(startedOn);
+        const startTime = new Date(startedOn as string);
         const age = Date.now() - startTime.getTime();
         if (age > this.config.maxAge * 1000) {
           errors.push(`Provenance too old: ${age / 1000 / 86400} days`);
@@ -200,8 +205,8 @@ export class SLSA3Verifier {
 
     if (startedOn && finishedOn) {
       try {
-        const start = new Date(startedOn);
-        const finish = new Date(finishedOn);
+        const start = new Date(startedOn as string);
+        const finish = new Date(finishedOn as string);
         if (finish <= start) {
           errors.push('Invalid build duration: finishedOn <= startedOn');
         }
@@ -462,7 +467,10 @@ export class SLSA3Verifier {
       result.errors.push(...signatureCheck.errors);
 
       // Verify builder trust
-      const builderId = provenance.predicate?.runDetails?.builder?.id;
+      const pred2 = provenance.predicate as Record<string, unknown> | undefined;
+      const runDetails2 = pred2?.runDetails as Record<string, unknown> | undefined;
+      const builder2 = runDetails2?.builder as Record<string, unknown> | undefined;
+      const builderId = builder2?.id as string | undefined;
       if (builderId) {
         result.checks.builderTrusted = this.verifyBuilderTrust(builderId);
         if (!result.checks.builderTrusted) {
@@ -505,11 +513,13 @@ export class SLSA3Verifier {
       if (this.config.requireReproducible) {
         // This would require additional verification of reproducible builds
         // For now, check if byproducts include reproducibility attestation
-        const byproducts = provenance.predicate?.runDetails?.byproducts || [];
+        const pred3 = provenance.predicate as Record<string, unknown> | undefined;
+        const runDetails3 = pred3?.runDetails as Record<string, unknown> | undefined;
+        const byproducts = (runDetails3?.byproducts as Array<Record<string, unknown>>) || [];
         const hasReproducibilityAttestation = byproducts.some(
           (bp) =>
-            bp.name?.includes('reproducibility') ||
-            bp.name?.includes('rebuild'),
+            (bp.name as string | undefined)?.includes('reproducibility') ||
+            (bp.name as string | undefined)?.includes('rebuild'),
         );
         result.checks.reproduced = hasReproducibilityAttestation;
 

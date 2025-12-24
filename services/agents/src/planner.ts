@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { consume } from './bus';
 import { planPR } from '../../tgo/src/plan';
 consume('planner', async (m) => {

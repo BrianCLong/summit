@@ -5,7 +5,6 @@ import type {
   OPAApprovalDecision,
   OPADecisionInput,
   OPADecisionResult,
-  PolicyDenialError,
 } from '../types.js';
 
 const log = logger.child({ component: 'opa-client' });
@@ -34,7 +33,7 @@ export class OPAClient {
   async evaluateApprovalRequest(
     input: OPAApprovalInput,
   ): Promise<OPAApprovalDecision> {
-    const cacheKey = this.getCacheKey('approval', input);
+    const cacheKey = this.getCacheKey('approval', input as unknown as Record<string, unknown>);
     const cached = this.getFromCache(cacheKey);
     if (cached) {
       log.debug({ cacheKey }, 'OPA decision cache hit');

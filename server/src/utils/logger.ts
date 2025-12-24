@@ -10,7 +10,7 @@ import { default as pino } from 'pino';
  * - Service name included in all logs.
  */
 // @ts-ignore - pino types conflict with module resolution
-const pinoLogger = pino({
+const pinoLogger = (pino as any)({
   level: process.env.LOG_LEVEL || 'info',
   base: { service: 'intelgraph-api' },
   timestamp: () => `,"time":"${new Date().toISOString()}"`,

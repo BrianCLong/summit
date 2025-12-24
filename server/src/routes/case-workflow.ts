@@ -1,13 +1,13 @@
-// @ts-nocheck
 /**
  * Case Workflow API Routes
  * RESTful API endpoints for case workflow operations
  */
 
-import { Router } from 'express';
+import { Router, Response, NextFunction } from 'express';
 import { Pool } from 'pg';
 import { CaseWorkflowService } from '../cases/workflow/index.js';
 import logger from '../config/logger.js';
+import type { AuthenticatedRequest } from './types.js';
 
 const routeLogger = logger.child({ name: 'CaseWorkflowRoutes' });
 
@@ -21,7 +21,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    * POST /api/cases/:id/transition
    * Transition case to a new stage
    */
-  router.post('/cases/:id/transition', async (req, res) => {
+  router.post('/cases/:id/transition', async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id: caseId } = req.params;
       const { toStage, reason, legalBasis, metadata } = req.body;
@@ -61,7 +61,8 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
         warnings: result.warnings,
       });
     } catch (error) {
-      routeLogger.error({ error }, 'Stage transition failed');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      routeLogger.error({ error: errorMessage }, 'Stage transition failed');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -70,7 +71,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    * GET /api/cases/:id/available-transitions
    * Get available transitions for a case
    */
-  router.get('/cases/:id/available-transitions', async (req, res) => {
+  router.get('/cases/:id/available-transitions', async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id: caseId } = req.params;
       const userId = req.user?.id || 'unknown';
@@ -82,7 +83,8 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
 
       res.json({ transitions });
     } catch (error) {
-      routeLogger.error({ error }, 'Failed to get available transitions');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      routeLogger.error({ error: errorMessage }, 'Failed to get available transitions');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -93,7 +95,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    * POST /api/cases/:id/tasks
    * Create a task
    */
-  router.post('/cases/:id/tasks', async (req, res) => {
+  router.post('/cases/:id/tasks', async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id: caseId } = req.params;
       const {
@@ -133,7 +135,8 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
 
       res.status(201).json(task);
     } catch (error) {
-      routeLogger.error({ error }, 'Task creation failed');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      routeLogger.error({ error: errorMessage }, 'Task creation failed');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -142,7 +145,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    * GET /api/cases/:id/tasks
    * List tasks for a case
    */
-  router.get('/cases/:id/tasks', async (req, res) => {
+  router.get('/cases/:id/tasks', async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id: caseId } = req.params;
       const { status, priority, assignedTo } = req.query;
@@ -156,7 +159,8 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
 
       res.json(tasks);
     } catch (error) {
-      routeLogger.error({ error }, 'Failed to list tasks');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      routeLogger.error({ error: errorMessage }, 'Failed to list tasks');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -165,7 +169,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    * PUT /api/tasks/:id/assign
    * Assign task to user
    */
-  router.put('/tasks/:id/assign', async (req, res) => {
+  router.put('/tasks/:id/assign', async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id: taskId } = req.params;
       const { userId: assignedTo } = req.body;
@@ -183,7 +187,8 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
 
       res.json(task);
     } catch (error) {
-      routeLogger.error({ error }, 'Task assignment failed');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      routeLogger.error({ error: errorMessage }, 'Task assignment failed');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -192,7 +197,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    * PUT /api/tasks/:id/complete
    * Complete a task
    */
-  router.put('/tasks/:id/complete', async (req, res) => {
+  router.put('/tasks/:id/complete', async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id: taskId } = req.params;
       const { resultData } = req.body;
@@ -206,7 +211,8 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
 
       res.json(task);
     } catch (error) {
-      routeLogger.error({ error }, 'Task completion failed');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      routeLogger.error({ error: errorMessage }, 'Task completion failed');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -215,7 +221,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    * GET /api/cases/:id/tasks/overdue
    * Get overdue tasks for a case
    */
-  router.get('/cases/:id/tasks/overdue', async (req, res) => {
+  router.get('/cases/:id/tasks/overdue', async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id: caseId } = req.params;
 
@@ -223,7 +229,8 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
 
       res.json(overdueTasks);
     } catch (error) {
-      routeLogger.error({ error }, 'Failed to get overdue tasks');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      routeLogger.error({ error: errorMessage }, 'Failed to get overdue tasks');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -234,7 +241,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    * POST /api/cases/:id/participants
    * Add participant to case
    */
-  router.post('/cases/:id/participants', async (req, res) => {
+  router.post('/cases/:id/participants', async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id: caseId } = req.params;
       const { userId, roleId, metadata } = req.body;
@@ -254,7 +261,8 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
 
       res.status(201).json(participant);
     } catch (error) {
-      routeLogger.error({ error }, 'Failed to add participant');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      routeLogger.error({ error: errorMessage }, 'Failed to add participant');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -263,7 +271,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    * GET /api/cases/:id/participants
    * Get case participants
    */
-  router.get('/cases/:id/participants', async (req, res) => {
+  router.get('/cases/:id/participants', async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id: caseId } = req.params;
 
@@ -271,7 +279,8 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
 
       res.json(participants);
     } catch (error) {
-      routeLogger.error({ error }, 'Failed to get participants');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      routeLogger.error({ error: errorMessage }, 'Failed to get participants');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -280,7 +289,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    * DELETE /api/cases/:caseId/participants/:userId/:roleId
    * Remove participant from case
    */
-  router.delete('/cases/:caseId/participants/:userId/:roleId', async (req, res) => {
+  router.delete('/cases/:caseId/participants/:userId/:roleId', async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { caseId, userId, roleId } = req.params;
       const removedBy = req.user?.id || 'unknown';
@@ -298,7 +307,8 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
 
       res.json(participant);
     } catch (error) {
-      routeLogger.error({ error }, 'Failed to remove participant');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      routeLogger.error({ error: errorMessage }, 'Failed to remove participant');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -309,7 +319,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    * POST /api/cases/:id/approvals
    * Request approval
    */
-  router.post('/cases/:id/approvals', async (req, res) => {
+  router.post('/cases/:id/approvals', async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id: caseId } = req.params;
       const {
@@ -341,7 +351,8 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
 
       res.status(201).json(approval);
     } catch (error) {
-      routeLogger.error({ error }, 'Approval request failed');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      routeLogger.error({ error: errorMessage }, 'Approval request failed');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -350,7 +361,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    * POST /api/approvals/:id/vote
    * Submit approval vote
    */
-  router.post('/approvals/:id/vote', async (req, res) => {
+  router.post('/approvals/:id/vote', async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id: approvalId } = req.params;
       const { decision, reason, metadata } = req.body;
@@ -370,7 +381,8 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
 
       res.status(201).json(vote);
     } catch (error) {
-      routeLogger.error({ error }, 'Approval vote failed');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      routeLogger.error({ error: errorMessage }, 'Approval vote failed');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -379,7 +391,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    * GET /api/approvals/pending
    * Get pending approvals for current user
    */
-  router.get('/approvals/pending', async (req, res) => {
+  router.get('/approvals/pending', async (req: AuthenticatedRequest, res: Response) => {
     try {
       const userId = req.user?.id || 'unknown';
 
@@ -387,7 +399,8 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
 
       res.json(approvals);
     } catch (error) {
-      routeLogger.error({ error }, 'Failed to get pending approvals');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      routeLogger.error({ error: errorMessage }, 'Failed to get pending approvals');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -398,7 +411,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    * GET /api/cases/:id/slas
    * Get SLAs for a case
    */
-  router.get('/cases/:id/slas', async (req, res) => {
+  router.get('/cases/:id/slas', async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id: caseId } = req.params;
 
@@ -406,7 +419,8 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
 
       res.json(slas);
     } catch (error) {
-      routeLogger.error({ error }, 'Failed to get SLAs');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      routeLogger.error({ error: errorMessage }, 'Failed to get SLAs');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -415,7 +429,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    * GET /api/cases/:id/slas/summary
    * Get SLA summary for a case
    */
-  router.get('/cases/:id/slas/summary', async (req, res) => {
+  router.get('/cases/:id/slas/summary', async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id: caseId } = req.params;
 
@@ -423,7 +437,8 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
 
       res.json(summary);
     } catch (error) {
-      routeLogger.error({ error }, 'Failed to get SLA summary');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      routeLogger.error({ error: errorMessage }, 'Failed to get SLA summary');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -434,7 +449,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    * GET /api/roles
    * List all roles
    */
-  router.get('/roles', async (req, res) => {
+  router.get('/roles', async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { systemOnly } = req.query;
 
@@ -442,23 +457,11 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
 
       res.json(roles);
     } catch (error) {
-      routeLogger.error({ error }, 'Failed to list roles');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      routeLogger.error({ error: errorMessage }, 'Failed to list roles');
       res.status(500).json({ error: 'Internal server error' });
     }
   });
 
   return router;
-}
-
-// Type augmentation for Express Request
-declare global {
-  namespace Express {
-    interface Request {
-      user?: {
-        id: string;
-        email?: string;
-        roles?: string[];
-      };
-    }
-  }
 }

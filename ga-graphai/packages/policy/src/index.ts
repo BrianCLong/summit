@@ -228,6 +228,24 @@ export {
   type OpaGuard,
   type PolicyBundleDocument,
 } from './authority-compiler.js';
+export {
+  MultiRegionReadiness,
+  type ApiEdgeControls,
+  type CicdControls,
+  type CustomerReadinessControls,
+  type GraphControls,
+  type IngestControls,
+  type MultiRegionConfig,
+  type PredictiveRoutingControls,
+  type RegionAccessDecision,
+  type RegionAccessRequest,
+  type RegionDefinition,
+  type RegionSloTargets,
+  type ReplicationControls,
+  type ResidencyRule,
+  type TrafficControls,
+  type ObservabilityFinopsControls,
+} from './multi-region-readiness.js';
 
 export function buildDefaultPolicyEngine(): PolicyEngine {
   const engine = new PolicyEngine([
@@ -1783,3 +1801,25 @@ export class PolicyBacktestEngine {
 
 export { analyzeEvidence } from 'common-types';
 export { ConsentStateReconciler } from './consent-reconciler';
+export type {
+  AbacControl,
+  AttributeCatalog,
+  AttributeDefinition,
+  AttributeType,
+  AuthorityDefinition,
+  AuthoritySchema,
+  AuthoritySchemaMetadata,
+  AuthoritySchemaValidationResult,
+  Binding,
+  BindingSubject,
+  ConditionLanguage,
+  Grant,
+  InheritanceRules,
+  Obligation,
+  RoleTemplate,
+  TemplateCondition,
+} from './authority-schema-validator';
+export {
+  loadAuthoritySchemaFromFile,
+  validateAuthoritySchema,
+} from './authority-schema-validator';

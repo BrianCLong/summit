@@ -1,11 +1,10 @@
-// @ts-nocheck
 import { ShardManager } from './ShardManager.js';
 import { PartitionStrategy } from './types.js';
 import { LocalityAwarePartitionStrategy } from './PartitionStrategy.js';
 import { QueryContext } from './types.js';
 import pino from 'pino';
 
-const logger = pino({ name: 'GraphRouter' });
+const logger = (pino as any)({ name: 'GraphRouter' });
 
 export class GraphRouter {
   private strategy: PartitionStrategy;
@@ -21,7 +20,7 @@ export class GraphRouter {
     this.strategy = strategy;
   }
 
-  public async execute(query: string, params: any, context: QueryContext) {
+  public async execute(query: string, params: Record<string, unknown>, context: QueryContext) {
     const shardId = this.strategy.resolveShard(context);
     const driver = this.shardManager.getDriver(shardId);
 

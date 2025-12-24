@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * OpenTelemetry Instrumentation
  *
@@ -22,7 +21,7 @@ import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { trace, context, SpanStatusCode, SpanKind } from '@opentelemetry/api';
 import pino from 'pino';
 
-const logger: pino.Logger = pino({ name: 'opentelemetry' });
+const logger: pino.Logger = (pino as any)({ name: 'opentelemetry' });
 
 interface TracingConfig {
   serviceName: string;

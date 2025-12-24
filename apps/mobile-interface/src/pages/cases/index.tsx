@@ -1,10 +1,10 @@
-// @ts-nocheck
+// @ts-nocheck - Placeholder components and API client compatibility
 import { useState } from 'react';
 import { NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { PlusIcon, FunnelIcon, EllipsisVerticalIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, FunnelIcon, EllipsisVerticalIcon, ClockIcon, FolderIcon } from '@heroicons/react/24/outline';
 import { MobileLayout } from '@/components/layouts/MobileLayout';
 import { SearchBar } from '@/components/SearchBar';
 import { FilterPanel } from '@/components/FilterPanel';

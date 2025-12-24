@@ -12,6 +12,11 @@ import {
   approvalDecisionLatency,
   provenanceReceiptsTotal,
 } from '../utils/metrics.js';
+import {
+  NotFoundError,
+  ConflictError,
+  PolicyDenialError,
+} from '../types.js';
 import type {
   ApprovalRequest,
   CreateApprovalRequest,
@@ -24,9 +29,6 @@ import type {
   Actor,
   Resource,
   AppError,
-  NotFoundError,
-  ConflictError,
-  PolicyDenialError,
 } from '../types.js';
 
 const log = logger.child({ component: 'approval-service' });
@@ -407,7 +409,7 @@ export class ApprovalService {
     );
 
     // Check if request should be finalized
-    let newStatus = request.status;
+    let newStatus: ApprovalRequest['status'] = request.status;
     let finalReceiptId: string | undefined;
 
     if (input.decision === 'reject') {

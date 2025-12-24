@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Pool } from 'pg';
 import pino from 'pino';
 import {
@@ -13,7 +12,7 @@ import {
 
 export class DataRetentionRepository {
   private readonly pool: Pool;
-  private readonly logger = pino({ name: 'data-retention-repository' });
+  private readonly logger = (pino as any)({ name: 'data-retention-repository' });
   private readonly records = new Map<string, RetentionRecord>();
 
   constructor(pool: Pool) {

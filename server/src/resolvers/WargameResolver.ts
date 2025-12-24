@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { GraphQLContext } from '../types/context';
 // @ts-ignore - GraphQL generated type: CrisisScenario
 import type { CrisisScenario } from '../generated/graphql-types';

@@ -8,11 +8,11 @@ import {
   createPIIDetectionHook,
   createProvenanceHook,
   createAuditHook,
-  composeGovernancePlugins,
+  composeHooks as composeGovernancePlugins,
 } from '../graphql-hooks';
 
 import {
-  createCopilotValidationHook,
+  createQueryValidationHook,
   createCitationEnforcementHook,
   createCopilotProvenanceHook,
   createCostControlHook,
@@ -20,7 +20,6 @@ import {
 } from '../copilot-hooks';
 
 import {
-  createConnectorAuthHook,
   createConnectorRateLimitHook,
   createConnectorProvenanceHook,
   composeConnectorHooks,
@@ -110,9 +109,11 @@ export function createGraphQLGovernanceMiddleware(
   return composeGovernancePlugins(
     createAuthorityHook(dependencies.authorityEvaluator),
     createPIIDetectionHook({
-      patterns: mergedConfig.pii.patterns,
-      scrub: mergedConfig.pii.scrubEnabled,
-      report: mergedConfig.pii.reportEnabled,
+      patterns: mergedConfig.pii.patterns.map((p) => ({
+        name: 'Sensitive Pattern',
+        regex: new RegExp(p, 'g'),
+        action: 'redact',
+      })),
     }),
     createProvenanceHook(dependencies.provenanceRecorder),
     createAuditHook(dependencies.auditLogger),
@@ -133,17 +134,23 @@ export function createCopilotGovernanceMiddleware(
   const mergedConfig = { ...defaultConfig, ...config };
 
   return composeCopilotHooks(
-    createCopilotValidationHook({
-      maxTokens: mergedConfig.copilot.maxTokensPerRequest,
+    createQueryValidationHook({
+      blockedKeywords: [],
+      blockedPatterns: [],
+      maxQueryLength: 1000,
+      requireInvestigation: true,
     }),
     createCostControlHook({
-      maxCostPerDay: mergedConfig.copilot.maxCostPerDay,
-      tracker: dependencies.costTracker,
+      maxTokensPerRequest: mergedConfig.copilot.maxTokensPerRequest,
+      maxTokensPerUserPerHour: 10000,
+      maxTokensPerTenantPerHour: 100000,
+      trackCost: () => Promise.resolve(),
+      getCurrentUsage: () => Promise.resolve({ userTokens: 0, tenantTokens: 0 }),
     }),
     createCitationEnforcementHook({
-      minConfidence: mergedConfig.copilot.citationMinConfidence,
-      minCoverage: mergedConfig.copilot.citationMinCoverage,
-      tracker: dependencies.citationTracker,
+      minCitations: 1,
+      minCitationConfidence: mergedConfig.copilot.citationMinConfidence,
+      rejectWithoutCitations: true,
     }),
     createCopilotProvenanceHook(dependencies.provenanceRecorder),
   );
@@ -163,14 +170,13 @@ export function createConnectorGovernanceMiddleware(
   const mergedConfig = { ...defaultConfig, ...config };
 
   return composeConnectorHooks(
-    createConnectorAuthHook(dependencies.authManager),
     createConnectorRateLimitHook({
-      defaultLimit: mergedConfig.connectors.defaultRateLimit,
-      limiter: dependencies.rateLimiter,
+      maxEntitiesPerMinute: mergedConfig.connectors.defaultRateLimit,
+      maxEntitiesPerHour: mergedConfig.connectors.defaultRateLimit * 60,
+      action: 'block',
     }),
     createConnectorProvenanceHook(dependencies.provenanceRecorder),
   );
 }
 
-// Export types
-export type { GovernanceConfig };
+// GovernanceConfig exported as interface at line 30

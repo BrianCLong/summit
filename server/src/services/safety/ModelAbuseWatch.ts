@@ -1,9 +1,8 @@
-// @ts-nocheck
 import pino from 'pino';
 import fs from 'fs';
 import path from 'path';
 
-const log = pino({ name: 'ModelAbuseWatch' });
+const log = (pino as any)({ name: 'ModelAbuseWatch' });
 
 export class ModelAbuseWatch {
   private abuseCounts: Record<string, number> = {};

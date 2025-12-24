@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
 import List from '@mui/material/List'
@@ -20,25 +21,25 @@ interface CaseInfo {
   slaRemaining: number | null
 }
 
-export default function WorkflowPanel() {
+export default function WorkflowPanel(): React.ReactElement {
   const [caseId, setCaseId] = useState<string | null>(null)
   const [info, setInfo] = useState<CaseInfo | null>(null)
 
   useEffect(() => {
-    const handler = (_e: any, node: any) => setCaseId(node.id())
+    const handler = (_e: JQuery.Event, node: { id: () => string }) => setCaseId(node.id())
     $(document).on('cy:selected', handler)
     return () => $(document).off('cy:selected', handler)
   }, [])
 
   useEffect(() => {
-    let timer: any
+    let timer: NodeJS.Timeout | undefined
     if (caseId) {
-      const fetchInfo = async () => {
+      const fetchInfo = async (): Promise<void> => {
         const res = await fetch(`/wf/cases/${caseId}`)
         const data = await res.json()
         setInfo(data)
       }
-      fetchInfo()
+      void fetchInfo()
       timer = setInterval(fetchInfo, 1000)
     }
     return () => clearInterval(timer)
@@ -62,12 +63,13 @@ export default function WorkflowPanel() {
         variant="contained"
         tabIndex={0}
         aria-label="refresh"
-        onClick={() =>
-          caseId &&
-          fetch(`/wf/cases/${caseId}`)
-            .then(r => r.json())
-            .then(setInfo)
-        }
+        onClick={() => {
+          if (caseId) {
+            void fetch(`/wf/cases/${caseId}`)
+              .then((r) => r.json())
+              .then(setInfo)
+          }
+        }}
       >
         Refresh
       </Button>

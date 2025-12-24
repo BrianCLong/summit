@@ -10,7 +10,7 @@
 import { EventEmitter } from 'events';
 import { Pool } from 'pg';
 import logger from '../config/logger.js';
-import { cacheService } from './cacheService.js';
+import { cacheService } from './CacheService.js';
 import { StrategicPlanRepo } from '../repos/StrategicPlanRepo.js';
 import { getTracer } from '../otel.js';
 import type {

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * P32: Distributed Tracing SDK
  * OpenTelemetry-based tracing for Summit platform

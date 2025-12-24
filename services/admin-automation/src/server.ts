@@ -1,4 +1,4 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express, { type Express, Request, Response, NextFunction } from 'express';
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
 import cors from 'cors';
@@ -8,7 +8,7 @@ import { createContext, type GraphQLContext } from './graphql/context.js';
 import { config } from './config.js';
 
 export async function createServer() {
-  const app = express();
+  const app: Express = express();
 
   // Middleware
   app.use(cors());

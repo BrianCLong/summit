@@ -1,7 +1,5 @@
-// @ts-nocheck
-
-import { BaseConnector } from '../base';
-import { ConnectorConfig, ConnectorSchema } from '../types';
+import { BaseConnector } from '../base.js';
+import { ConnectorConfig, ConnectorSchema } from '../types.js';
 import { Readable } from 'stream';
 import axios from 'axios';
 
@@ -41,11 +39,12 @@ export class MISPConnector extends BaseConnector {
               { name: 'info', type: 'string', nullable: false },
               { name: 'Attribute', type: 'array', nullable: true },
               { name: 'Object', type: 'array', nullable: true }
-          ]
+          ],
+          version: 1
       };
   }
 
-  async readStream(options?: any): Promise<Readable> {
+  async readStream(options?: Record<string, unknown>): Promise<Readable> {
       const stream = new Readable({ objectMode: true, read() {} });
 
       setImmediate(async () => {
@@ -57,7 +56,7 @@ export class MISPConnector extends BaseConnector {
               );
 
               const responseData = response.data;
-              const events = responseData.response || responseData;
+              const events = (responseData as Record<string, unknown>).response || responseData;
 
               if (Array.isArray(events)) {
                   for (const event of events) {

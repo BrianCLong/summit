@@ -4,7 +4,7 @@ import { default as pino } from 'pino';
 import { z } from 'zod';
 
 // @ts-ignore
-const logger = pino({ name: 'ErrorMapper' });
+const logger = (pino as any)({ name: 'ErrorMapper' });
 
 export class UserFacingError extends Error {
   statusCode: number;

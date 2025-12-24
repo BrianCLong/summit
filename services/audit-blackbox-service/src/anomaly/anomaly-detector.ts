@@ -842,7 +842,7 @@ export class AnomalyDetector extends EventEmitter {
   /**
    * Calculate time anomaly score
    */
-  private calculateTimeAnomalyScore(event: AuditEventInput, hour: number): number {
+  private calculateTimeAnomalyScore(_event: AuditEventInput, hour: number): number {
     // Higher score for later hours, highest at 3 AM
     const distanceFrom3AM = Math.abs(hour - 3);
     return Math.max(0, 1 - distanceFrom3AM / 12);

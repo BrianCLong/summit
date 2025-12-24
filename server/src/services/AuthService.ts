@@ -46,8 +46,7 @@ import config from '../config/index.js';
 import logger from '../utils/logger.js';
 import { secretsService } from './SecretsService.js';
 import { SECRETS } from '../config/secretRefs.js';
-// @ts-ignore - pg type imports
-import { Pool, PoolClient } from 'pg';
+import type { Pool, PoolClient } from 'pg';
 import { metrics } from '../observability/metrics.js';
 
 /**
@@ -334,6 +333,51 @@ export class AuthService {
   }
 
   /**
+   * Login a user via external provider (SSO)
+   * TRUSTED CALLER ONLY: Does not verify password.
+   */
+  async externalLogin(email: string): Promise<AuthResponse> {
+    const client = await this.pool.connect();
+    let tenantId = 'unknown';
+
+    try {
+      const userResult = await client.query(
+        'SELECT * FROM users WHERE email = $1 AND is_active = true',
+        [email],
+      );
+
+      if (userResult.rows.length === 0) {
+        throw new Error('User not found');
+      }
+
+      const user = userResult.rows[0] as DatabaseUser;
+      tenantId = user.tenant_id || 'unknown';
+
+      await client.query(
+        'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1',
+        [user.id],
+      );
+
+      const { token, refreshToken } = await this.generateTokens(user, client);
+
+      (metrics as any).userLoginsTotal?.inc({ tenant_id: tenantId, result: 'success_sso' });
+
+      return {
+        user: this.formatUser(user),
+        token,
+        refreshToken,
+        expiresIn: 24 * 60 * 60,
+      };
+    } catch (error) {
+      logger.error('Error logging in user via SSO:', error);
+      (metrics as any).userLoginsTotal?.inc({ tenant_id: tenantId, result: 'failure_sso' });
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
    * Authenticate a user with email and password
    *
    * Validates user credentials against stored Argon2 hash, updates last login timestamp,
@@ -393,7 +437,7 @@ export class AuthService {
 
       const { token, refreshToken } = await this.generateTokens(user, client);
 
-      metrics.userLoginsTotal.inc({ tenant_id: tenantId, result: 'success' });
+      (metrics as any).userLoginsTotal?.inc({ tenant_id: tenantId, result: 'success' });
       return {
         user: this.formatUser(user),
         token,
@@ -402,7 +446,7 @@ export class AuthService {
       };
     } catch (error) {
       logger.error('Error logging in user:', error);
-      metrics.userLoginsTotal.inc({ tenant_id: tenantId, result: 'failure' });
+      (metrics as any).userLoginsTotal?.inc({ tenant_id: tenantId, result: 'failure' });
       throw error;
     } finally {
       client.release();
@@ -415,12 +459,12 @@ export class AuthService {
    * Creates a signed JWT with user payload and stores refresh token in database.
    * Refresh tokens have 7-day validity and are stored for token rotation.
    *
-   * @private
+   * @public
    * @param {DatabaseUser} user - Database user record
    * @param {PoolClient} client - PostgreSQL client for transaction
    * @returns {Promise<TokenPair>} Object containing access token and refresh token
    */
-  private async generateTokens(
+  async generateTokens(
     user: DatabaseUser,
     client: PoolClient,
   ): Promise<TokenPair> {
@@ -432,10 +476,9 @@ export class AuthService {
 
     const jwtSecret = await secretsService.getSecret(SECRETS.JWT_SECRET);
 
-    // @ts-ignore - jwt.sign overload mismatch
     const token = jwt.sign(tokenPayload, jwtSecret, {
       expiresIn: config.jwt.expiresIn,
-    });
+    }) as string;
 
     const refreshToken = uuidv4();
     const expiresAt = new Date();
@@ -623,11 +666,11 @@ export class AuthService {
 
       const userData = result.rows[0];
       const tenantId = userData?.tenant_id || 'unknown';
-      metrics.userLogoutsTotal.inc({ tenant_id: tenantId });
+      (metrics as any).userLogoutsTotal?.inc({ tenant_id: tenantId });
 
       if (userData?.last_login) {
         const sessionDuration = (new Date().getTime() - new Date(userData.last_login).getTime()) / 1000;
-        metrics.userSessionDurationSeconds.observe({ tenant_id: tenantId }, sessionDuration);
+        (metrics as any).userSessionDurationSeconds?.observe({ tenant_id: tenantId }, sessionDuration);
       }
 
       // Blacklist current access token if provided

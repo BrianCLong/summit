@@ -1,15 +1,14 @@
-// @ts-nocheck
 import { otelService } from '../../middleware/observability/otel-tracing.js';
 
 export const activities = {
-  async heartbeat(payload: any) {
+  async heartbeat(payload: unknown) {
     const span = otelService.createSpan('temporal.activity.heartbeat', {
       payload_len: JSON.stringify(payload || {}).length,
     });
     if (span) span.end();
     return { ok: true, received: payload, ts: Date.now() };
   },
-  async planRun(input: { runId: string; parameters?: any }) {
+  async planRun(input: { runId: string; parameters?: { steps?: string[] } }) {
     const span = otelService.createSpan('temporal.activity.planRun', {
       'run.id': input.runId,
     });
@@ -38,7 +37,7 @@ export const activities = {
     if (span) span.end();
     return res;
   },
-  async finalizeRun(input: { runId: string; result: any }) {
+  async finalizeRun(input: { runId: string; result: unknown }) {
     const span = otelService.createSpan('temporal.activity.finalizeRun', {
       'run.id': input.runId,
     });

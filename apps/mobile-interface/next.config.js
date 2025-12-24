@@ -122,14 +122,13 @@ const nextConfig = {
   output: 'standalone',
   poweredByHeader: false,
   reactStrictMode: true,
-  swcMinify: true,
+  turbopack: {},
   images: {
     domains: ['localhost', 'intelgraph.com'],
     formats: ['image/webp', 'image/avif'],
     minimumCacheTTL: 60,
   },
   experimental: {
-    optimizeCss: true,
     optimizePackageImports: [
       '@heroicons/react',
       '@headlessui/react',

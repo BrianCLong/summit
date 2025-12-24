@@ -16,6 +16,8 @@ anyio==4.11.0
     # via
     #   httpx
     #   starlette
+async-timeout==5.0.1
+    # via asyncpg
 asyncpg==0.29.0
     # via -r requirements.in
 attrs==25.4.0
@@ -79,7 +81,7 @@ langchain-classic==1.0.0
     # via langchain-community
 langchain-community==0.4.1
     # via -r requirements.in
-langchain-core==1.0.7
+langchain-core==1.2.5
     # via
     #   langchain-classic
     #   langchain-community
@@ -209,8 +211,12 @@ typing-inspection==0.4.2
     # via
     #   pydantic
     #   pydantic-settings
-urllib3>=2.6.0
-    # via requests
+urllib3==2.6.2
+    # via
+    #   -r requirements.in
+    #   requests
+uuid-utils==0.12.0
+    # via langchain-core
 uvicorn==0.35.0
     # via -r requirements.in
 yarl==1.22.0

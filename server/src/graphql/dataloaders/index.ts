@@ -5,19 +5,19 @@
  */
 
 import DataLoader from 'dataloader';
-import { createEntityLoader } from './entityLoader.js';
-import { createRelationshipLoader } from './relationshipLoader.js';
-import { createInvestigationLoader } from './investigationLoader.js';
-import { createUserLoader } from './userLoader.js';
+import { createEntityLoader, type Entity } from './entityLoader.js';
+import { createRelationshipLoader, type Relationship } from './relationshipLoader.js';
+import { createInvestigationLoader, type Investigation } from './investigationLoader.js';
+import { createUserLoader, type User } from './userLoader.js';
 import type { Driver as Neo4jDriver } from 'neo4j-driver';
 import type { Pool as PgPool } from 'pg';
 
 export interface DataLoaders {
-  entityLoader: DataLoader<string, any, string>;
-  relationshipLoader: DataLoader<string, any, string>;
-  investigationLoader: DataLoader<string, any, string>;
-  userLoader: DataLoader<string, any, string>;
-  entitiesByTypeLoader: DataLoader<string, any[], string>;
+  entityLoader: DataLoader<string, Entity, string>;
+  relationshipLoader: DataLoader<string, Relationship, string>;
+  investigationLoader: DataLoader<string, Investigation, string>;
+  userLoader: DataLoader<string, User, string>;
+  entitiesByTypeLoader: DataLoader<string, Entity[], string>;
 }
 
 export interface DataLoaderContext {

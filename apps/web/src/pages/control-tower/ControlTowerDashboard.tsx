@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Control Tower Dashboard - Main operational command center
  * @module @intelgraph/web/pages/control-tower

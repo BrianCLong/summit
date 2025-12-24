@@ -1,4 +1,3 @@
-// @ts-nocheck
 import crypto from 'node:crypto';
 import { getPostgresPool, getRedisClient } from '../config/database.js';
 import config from '../config/index.js';
@@ -8,11 +7,11 @@ import logger from '../utils/logger.js';
 
 export type CacheWarmer = {
   name: string;
-  keyParts: any[];
+  keyParts: unknown[];
   ttlSec: number;
   tags?: string[];
   patterns?: string[];
-  fetcher: () => Promise<any>;
+  fetcher: () => Promise<unknown>;
 };
 
 export type WarmReason = 'startup' | 'schedule' | 'invalidation' | 'manual';
@@ -36,7 +35,13 @@ function shouldRunWarmer(warmer: CacheWarmer, patterns: string[]): boolean {
   return warmer.patterns.some((p) => patterns.includes(p) || p === '*');
 }
 
-async function acquireLock(redis: any, ttlMs: number, lockKey: string, lockId: string) {
+interface RedisClient {
+  set(key: string, value: string, options: { PX: number; NX: boolean }): Promise<string | null>;
+  get(key: string): Promise<string | null>;
+  del(key: string): Promise<number>;
+}
+
+async function acquireLock(redis: RedisClient | null, ttlMs: number, lockKey: string, lockId: string): Promise<boolean> {
   if (!redis) return true;
   try {
     const res = await redis.set(lockKey, lockId, { PX: ttlMs, NX: true });
@@ -46,7 +51,7 @@ async function acquireLock(redis: any, ttlMs: number, lockKey: string, lockId: s
   }
 }
 
-async function releaseLock(redis: any, lockKey: string, lockId: string) {
+async function releaseLock(redis: RedisClient | null, lockKey: string, lockId: string): Promise<void> {
   if (!redis) return;
   try {
     const existing = await redis.get(lockKey);
@@ -81,7 +86,7 @@ export async function runWarmers(
   reason: WarmReason = 'manual',
   patterns: string[] = [],
 ): Promise<WarmResult[]> {
-  const redis = process.env.REDIS_DISABLE === '1' ? null : getRedisClient();
+  const redis = process.env.REDIS_DISABLE === '1' ? null : (getRedisClient() as RedisClient | null);
   const lockKey = 'cache:warm:lock';
   const lockId = crypto.randomUUID();
   const lockTtlMs = config.cache.warmerIntervalSeconds * 1000;

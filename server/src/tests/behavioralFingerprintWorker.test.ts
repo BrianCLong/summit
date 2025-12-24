@@ -1,5 +1,4 @@
-// @ts-nocheck
-import { runBehavioralFingerprintJob } from '../workers/behavioralFingerprintWorker';
+import { runBehavioralFingerprintJob } from '../workers/behavioralFingerprintWorker.js';
 import { describe, it, expect } from '@jest/globals';
 
 describe('behavioral fingerprint job', () => {

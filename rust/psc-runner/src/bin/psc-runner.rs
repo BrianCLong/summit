@@ -2,9 +2,12 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
 
-use clap::{Parser, Subcommand};
+use clap::{Parser, Subcommand, ValueEnum};
 use psc_runner::attestation::AttestationProof;
 use psc_runner::functional_encryption::FunctionalEncryptionEngine;
+use psc_runner::graph::{
+    GraphAnalyticsEngine, GraphAnalyticsRequest, GraphAnalyticsResponse, GraphInput,
+};
 use psc_runner::policy::{CompiledPolicy, PolicyCompiler, PolicySpec, SigningKey};
 use psc_runner::{Auditor, EnclaveShim};
 use serde::de::DeserializeOwned;
@@ -58,6 +61,43 @@ enum Commands {
         #[arg(long)]
         proof: PathBuf,
     },
+    /// Execute heavy graph analytics using the Rust runner
+    Graph {
+        /// Graph data (nodes and edges) in JSON format
+        #[arg(long)]
+        graph: PathBuf,
+        /// Output path for analytics result JSON
+        #[arg(long)]
+        out: PathBuf,
+        /// Algorithm to run
+        #[arg(long, value_enum)]
+        algorithm: GraphAlgorithm,
+        /// Start node for path-based algorithms
+        #[arg(long)]
+        start: Option<String>,
+        /// End node for path-based algorithms
+        #[arg(long)]
+        end: Option<String>,
+        /// Damping factor for PageRank
+        #[arg(long, default_value_t = 0.85)]
+        damping: f64,
+        /// Convergence tolerance for PageRank
+        #[arg(long, default_value_t = 1e-6)]
+        tolerance: f64,
+        /// Maximum iterations for PageRank
+        #[arg(long, default_value_t = 100)]
+        iterations: usize,
+    },
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, ValueEnum)]
+enum GraphAlgorithm {
+    #[value(name = "shortest-path")]
+    ShortestPath,
+    #[value(name = "page-rank")]
+    PageRank,
+    #[value(name = "connected-components")]
+    ConnectedComponents,
 }
 
 fn main() -> anyhow::Result<()> {
@@ -106,6 +146,49 @@ fn main() -> anyhow::Result<()> {
             let proof: AttestationProof = read_json(&proof)?;
             Auditor::verify(&policy, &sealed_output, &proof)?;
             println!("Verified attestation for policy {}", policy.policy_id);
+        }
+        Commands::Graph {
+            graph,
+            out,
+            algorithm,
+            start,
+            end,
+            damping,
+            tolerance,
+            iterations,
+        } => {
+            let input: GraphInput = read_json(&graph)?;
+            let engine = GraphAnalyticsEngine::try_from_input(input)?;
+            let request = match algorithm {
+                GraphAlgorithm::ShortestPath => GraphAnalyticsRequest::ShortestPath {
+                    start: start.ok_or_else(|| anyhow::anyhow!("--start is required"))?,
+                    end: end.ok_or_else(|| anyhow::anyhow!("--end is required"))?,
+                },
+                GraphAlgorithm::PageRank => GraphAnalyticsRequest::PageRank {
+                    damping,
+                    tolerance,
+                    max_iterations: iterations,
+                },
+                GraphAlgorithm::ConnectedComponents => GraphAnalyticsRequest::ConnectedComponents,
+            };
+
+            let response = engine.execute(request)?;
+            write_json(&out, &response)?;
+            match response {
+                GraphAnalyticsResponse::ShortestPath { ref result } => println!(
+                    "Shortest path computed with cost {:.4} covering {} hops",
+                    result.cost,
+                    result.path.len().saturating_sub(1)
+                ),
+                GraphAnalyticsResponse::PageRank { ref scores } => println!(
+                    "PageRank completed for {} nodes (top score {:.4})",
+                    scores.len(),
+                    scores.first().map(|s| s.score).unwrap_or_default()
+                ),
+                GraphAnalyticsResponse::ConnectedComponents { ref components } => {
+                    println!("Found {} connected component(s)", components.len())
+                }
+            }
         }
     }
     Ok(())

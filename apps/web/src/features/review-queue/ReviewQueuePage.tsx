@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react'
 import { CheckCircle2, Clock4, Filter, Loader2, MinusCircle, UserRound, RotateCcw } from 'lucide-react'
 import {
@@ -119,7 +118,7 @@ const PreviewPane: React.FC<{ item?: QueueItem }> = ({ item }) => {
           <div className="col-span-2">
             <Label className="text-xs uppercase tracking-wide text-muted-foreground">Highlights</Label>
             <div className="mt-2 flex flex-wrap gap-2">
-              {item.preview.entityDiff.highlights.map(highlight => (
+              {item.preview.entityDiff.highlights.map((highlight) => (
                 <Badge key={highlight} variant="outline" className="text-[11px]">
                   {highlight}
                 </Badge>
@@ -173,7 +172,7 @@ const ActionsPane: React.FC<{
       <Textarea
         placeholder="Add rationale (optional but recommended)"
         value={reason}
-        onChange={e => setReason(e.target.value)}
+        onChange={(e) => setReason(e.target.value)}
         rows={5}
         className="text-sm"
       />
@@ -235,7 +234,7 @@ const FiltersPane: React.FC<{
             id="filter-type"
             className="mt-1 h-9 w-full rounded-md border bg-background px-2 text-sm"
             value={filters.type}
-            onChange={e => update({ type: e.target.value as QueueFilters['type'] })}
+            onChange={(e) => update({ type: e.target.value as QueueFilters['type'] })}
           >
             <option value="all">All</option>
             <option value="entity-diff">Entity diff</option>
@@ -249,7 +248,7 @@ const FiltersPane: React.FC<{
             id="filter-priority"
             className="mt-1 h-9 w-full rounded-md border bg-background px-2 text-sm"
             value={filters.priority}
-            onChange={e => update({ priority: e.target.value as QueueFilters['priority'] })}
+            onChange={(e) => update({ priority: e.target.value as QueueFilters['priority'] })}
           >
             <option value="all">All</option>
             <option value="critical">Critical</option>
@@ -264,7 +263,7 @@ const FiltersPane: React.FC<{
             id="filter-assignee"
             placeholder="Any"
             value={filters.assignee === 'all' ? '' : filters.assignee}
-            onChange={e => update({ assignee: e.target.value || 'all' })}
+            onChange={(e) => update({ assignee: e.target.value || 'all' })}
           />
         </div>
         <div>
@@ -273,7 +272,7 @@ const FiltersPane: React.FC<{
             id="filter-status"
             className="mt-1 h-9 w-full rounded-md border bg-background px-2 text-sm"
             value={filters.status}
-            onChange={e => update({ status: e.target.value as QueueFilters['status'] })}
+            onChange={(e) => update({ status: e.target.value as QueueFilters['status'] })}
           >
             <option value="open">Open</option>
             <option value="resolved">Resolved</option>
@@ -293,13 +292,13 @@ export const ReviewQueuePage: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [acting, setActing] = useState(false)
 
-  const activeItem = useMemo(() => items.find(item => item.id === activeId), [items, activeId])
+  const activeItem = useMemo(() => items.find((item) => item.id === activeId), [items, activeId])
 
   const refresh = async (nextFilters = filters) => {
     setLoading(true)
     const result = await adapter.list(nextFilters)
     setItems(result)
-    if (result.length && (!activeId || !result.some(item => item.id === activeId))) {
+    if (result.length && (!activeId || !result.some((item) => item.id === activeId))) {
       setActiveId(result[0].id)
     }
     setLoading(false)
@@ -320,14 +319,14 @@ export const ReviewQueuePage: React.FC = () => {
 
   useShortcut('j', () => {
     if (!items.length || !activeId) return
-    const idx = items.findIndex(item => item.id === activeId)
+    const idx = items.findIndex((item) => item.id === activeId)
     const next = items[idx + 1]
     if (next) setActiveId(next.id)
   }, { id: 'queue-next', description: 'Next review item', category: 'Navigation' })
 
   useShortcut('k', () => {
     if (!items.length || !activeId) return
-    const idx = items.findIndex(item => item.id === activeId)
+    const idx = items.findIndex((item) => item.id === activeId)
     const prev = items[idx - 1]
     if (prev) setActiveId(prev.id)
   }, { id: 'queue-prev', description: 'Previous review item', category: 'Navigation' })
@@ -337,8 +336,8 @@ export const ReviewQueuePage: React.FC = () => {
   useShortcut('d', () => handleAct('defer'), { id: 'queue-defer', description: 'Defer item', category: 'Actions' })
 
   const counts = useMemo(() => {
-    const open = items.filter(i => i.status === 'open').length
-    const resolved = items.filter(i => i.status !== 'open').length
+    const open = items.filter((i) => i.status === 'open').length
+    const resolved = items.filter((i) => i.status !== 'open').length
     return { open, resolved }
   }, [items])
 
@@ -395,7 +394,7 @@ export const ReviewQueuePage: React.FC = () => {
                       No items match the current filters.
                     </div>
                   )}
-                  {!loading && items.map(item => (
+                  {!loading && items.map((item) => (
                     <ItemRow
                       key={item.id}
                       item={item}

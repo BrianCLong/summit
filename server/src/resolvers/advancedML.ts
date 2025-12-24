@@ -24,10 +24,11 @@ const resolvers = {
           timestamp: new Date().toISOString(),
         };
       } catch (error) {
-        logger.error('Failed to get ML system info', { error: error.message });
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        logger.error('Failed to get ML system info', { error: errorMessage });
         return {
           healthy: false,
-          error: error.message,
+          error: errorMessage,
           timestamp: new Date().toISOString(),
         };
       }
@@ -48,8 +49,9 @@ const resolvers = {
           memoryUsage: model.memory_usage,
         }));
       } catch (error) {
-        logger.error('Failed to list ML models', { error: error.message });
-        throw new Error(`Failed to list ML models: ${error.message}`);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        logger.error('Failed to list ML models', { error: errorMessage });
+        throw new Error(`Failed to list ML models: ${errorMessage}`);
       }
     },
 
@@ -69,8 +71,9 @@ const resolvers = {
           timestamp: new Date().toISOString(),
         };
       } catch (error) {
-        logger.error('Failed to get ML metrics', { error: error.message });
-        throw new Error(`Failed to get ML metrics: ${error.message}`);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        logger.error('Failed to get ML metrics', { error: errorMessage });
+        throw new Error(`Failed to get ML metrics: ${errorMessage}`);
       }
     },
   },
@@ -102,13 +105,14 @@ const resolvers = {
           config: modelConfig,
         };
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Failed to create ML model', {
-          error: error.message,
+          error: errorMessage,
           input,
         });
         return {
           success: false,
-          error: error.message,
+          error: errorMessage,
           modelId: null,
         };
       }
@@ -147,13 +151,14 @@ const resolvers = {
           trainingConfig: config,
         };
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Failed to train ML model', {
-          error: error.message,
+          error: errorMessage,
           modelId,
         });
         return {
           success: false,
-          error: error.message,
+          error: errorMessage,
           modelId,
         };
       }
@@ -184,10 +189,11 @@ const resolvers = {
           device: result.device,
         };
       } catch (error) {
-        logger.error('ML inference failed', { error: error.message, modelId });
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        logger.error('ML inference failed', { error: errorMessage, modelId });
         return {
           success: false,
-          error: error.message,
+          error: errorMessage,
           modelId,
         };
       }
@@ -215,13 +221,14 @@ const resolvers = {
           targetPrecision: targetPrecision || 'fp16',
         };
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('ML model optimization failed', {
-          error: error.message,
+          error: errorMessage,
           modelId,
         });
         return {
           success: false,
-          error: error.message,
+          error: errorMessage,
           modelId,
         };
       }
@@ -248,13 +255,14 @@ const resolvers = {
           problemType: input.problemType,
         };
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Quantum optimization failed', {
-          error: error.message,
+          error: errorMessage,
           input,
         });
         return {
           success: false,
-          error: error.message,
+          error: errorMessage,
           problemType: input.problemType,
         };
       }
@@ -300,13 +308,14 @@ const resolvers = {
           insights: generateInsights(result),
         };
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Graph ML analysis failed', {
-          error: error.message,
+          error: errorMessage,
           graphId,
         });
         return {
           success: false,
-          error: error.message,
+          error: errorMessage,
           graphId,
         };
       }
@@ -350,13 +359,14 @@ const resolvers = {
           recommendations: generateOptimizationRecommendations(result),
         };
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Quantum graph optimization failed', {
-          error: error.message,
+          error: errorMessage,
           graphId,
         });
         return {
           success: false,
-          error: error.message,
+          error: errorMessage,
           graphId,
         };
       }
@@ -375,13 +385,14 @@ const resolvers = {
           modelId,
         };
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Failed to delete ML model', {
-          error: error.message,
+          error: errorMessage,
           modelId,
         });
         return {
           success: false,
-          error: error.message,
+          error: errorMessage,
           modelId,
         };
       }

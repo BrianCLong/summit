@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { WargameResolver } from '../WargameResolver';
 import { getNeo4jDriver } from '../../db/neo4j'; // Import the actual driver getter
 import axios from 'axios';

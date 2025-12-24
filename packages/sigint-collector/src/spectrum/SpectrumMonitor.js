@@ -46,8 +46,9 @@ class SpectrumMonitor extends eventemitter3_1.EventEmitter {
         this.simulatedSources = sources.map(s => ({ ...s, active: true }));
     }
     start() {
-        if (this.running)
-            {return;}
+        if (this.running) {
+            return;
+        }
         this.running = true;
         const intervalMs = 1000 / this.config.sweepRate;
         this.sweepInterval = setInterval(() => {
@@ -71,10 +72,12 @@ class SpectrumMonitor extends eventemitter3_1.EventEmitter {
         });
         // Add simulated signals
         for (const source of this.simulatedSources) {
-            if (!source.active)
-                {continue;}
-            if (source.intermittent && Math.random() > 0.7)
-                {continue;}
+            if (!source.active) {
+                continue;
+            }
+            if (source.intermittent && Math.random() > 0.7) {
+                continue;
+            }
             const binIndex = Math.floor((source.frequency - this.config.startFrequency) / this.config.resolution);
             const binWidth = Math.ceil(source.bandwidth / this.config.resolution);
             if (binIndex >= 0 && binIndex < binCount) {
@@ -203,12 +206,15 @@ class SpectrumMonitor extends eventemitter3_1.EventEmitter {
         return Array.from(this.detectedSignals.values()).filter(s => s.active);
     }
     formatFreq(hz) {
-        if (hz >= 1e9)
-            {return `${(hz / 1e9).toFixed(2)} GHz`;}
-        if (hz >= 1e6)
-            {return `${(hz / 1e6).toFixed(2)} MHz`;}
-        if (hz >= 1e3)
-            {return `${(hz / 1e3).toFixed(2)} kHz`;}
+        if (hz >= 1e9) {
+            return `${(hz / 1e9).toFixed(2)} GHz`;
+        }
+        if (hz >= 1e6) {
+            return `${(hz / 1e6).toFixed(2)} MHz`;
+        }
+        if (hz >= 1e3) {
+            return `${(hz / 1e3).toFixed(2)} kHz`;
+        }
         return `${hz} Hz`;
     }
     isRunning() {

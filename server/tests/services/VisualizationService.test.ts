@@ -1,6 +1,4 @@
-// @ts-nocheck
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
-// @ts-ignore
 const VisualizationService = require('../../src/services/VisualizationService');
 
 describe('VisualizationService', () => {

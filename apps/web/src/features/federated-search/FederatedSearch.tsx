@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import { useEffect, useRef } from 'react'
 import $ from 'jquery'
@@ -11,7 +12,9 @@ export function FederatedSearch() {
 
   useEffect(() => {
     const el = matrixRef.current ? $(matrixRef.current) : null
-    if (!el) {return}
+    if (!el) {
+      return
+    }
     const handler = (e: JQuery.MouseMoveEvent) => {
       el.text(`x:${e.offsetX}, y:${e.offsetY}`)
     }

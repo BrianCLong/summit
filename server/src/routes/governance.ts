@@ -1,36 +1,37 @@
 
-import express from 'express';
+import express, { Response } from 'express';
 import { SchemaRegistryService } from '../governance/ontology/SchemaRegistryService';
 import { WorkflowService } from '../governance/ontology/WorkflowService';
 import { ensureAuthenticated } from '../middleware/auth';
+import type { AuthenticatedRequest } from './types.js';
 
 const router = express.Router();
 const registry = SchemaRegistryService.getInstance();
 const workflow = WorkflowService.getInstance();
 
 // Schema Routes
-router.get('/schemas', ensureAuthenticated, (req, res) => {
+router.get('/schemas', ensureAuthenticated, (req: AuthenticatedRequest, res: Response) => {
   res.json(registry.listSchemas());
 });
 
-router.get('/schemas/latest', ensureAuthenticated, (req, res) => {
+router.get('/schemas/latest', ensureAuthenticated, (req: AuthenticatedRequest, res: Response) => {
   const schema = registry.getLatestSchema();
   if (!schema) return res.status(404).json({ error: 'No active schema' });
   res.json(schema);
 });
 
-router.get('/schemas/:id', ensureAuthenticated, (req, res) => {
+router.get('/schemas/:id', ensureAuthenticated, (req: AuthenticatedRequest, res: Response) => {
   const schema = registry.getSchemaById(req.params.id);
   if (!schema) return res.status(404).json({ error: 'Schema not found' });
   res.json(schema);
 });
 
 // Vocabulary Routes
-router.get('/vocabularies', ensureAuthenticated, (req, res) => {
+router.get('/vocabularies', ensureAuthenticated, (req: AuthenticatedRequest, res: Response) => {
   res.json(registry.listVocabularies());
 });
 
-router.post('/vocabularies', ensureAuthenticated, (req, res) => {
+router.post('/vocabularies', ensureAuthenticated, (req: AuthenticatedRequest, res: Response) => {
     // TODO: Add permission check (schema.admin)
     try {
         const { name, description, concepts } = req.body;
@@ -42,14 +43,13 @@ router.post('/vocabularies', ensureAuthenticated, (req, res) => {
 });
 
 // Change Request Routes
-router.get('/changes', ensureAuthenticated, (req, res) => {
+router.get('/changes', ensureAuthenticated, (req: AuthenticatedRequest, res: Response) => {
     res.json(workflow.listChangeRequests());
 });
 
-router.post('/changes', ensureAuthenticated, (req, res) => {
+router.post('/changes', ensureAuthenticated, (req: AuthenticatedRequest, res: Response) => {
     try {
         const { title, description, proposedChanges } = req.body;
-        // @ts-ignore - req.user is added by ensureAuthenticated
         const author = req.user?.id || 'unknown';
         const cr = workflow.createChangeRequest(title, description, author, proposedChanges);
         res.status(201).json(cr);
@@ -58,22 +58,21 @@ router.post('/changes', ensureAuthenticated, (req, res) => {
     }
 });
 
-router.get('/changes/:id', ensureAuthenticated, (req, res) => {
+router.get('/changes/:id', ensureAuthenticated, (req: AuthenticatedRequest, res: Response) => {
     const cr = workflow.getChangeRequest(req.params.id);
     if (!cr) return res.status(404).json({ error: 'Change Request not found' });
     res.json(cr);
 });
 
-router.get('/changes/:id/impact', ensureAuthenticated, (req, res) => {
+router.get('/changes/:id/impact', ensureAuthenticated, (req: AuthenticatedRequest, res: Response) => {
     // Determine impact
     const impact = workflow.calculateImpact(req.params.id);
     res.json(impact);
 });
 
-router.post('/changes/:id/review', ensureAuthenticated, (req, res) => {
+router.post('/changes/:id/review', ensureAuthenticated, (req: AuthenticatedRequest, res: Response) => {
     try {
         const { decision, comment } = req.body;
-        // @ts-ignore
         const reviewer = req.user?.id || 'unknown';
         const cr = workflow.reviewChangeRequest(req.params.id, reviewer, decision, comment);
         res.json(cr);
@@ -82,9 +81,8 @@ router.post('/changes/:id/review', ensureAuthenticated, (req, res) => {
     }
 });
 
-router.post('/changes/:id/merge', ensureAuthenticated, (req, res) => {
+router.post('/changes/:id/merge', ensureAuthenticated, (req: AuthenticatedRequest, res: Response) => {
     try {
-        // @ts-ignore
         const merger = req.user?.id || 'unknown';
         const newSchema = workflow.mergeChangeRequest(req.params.id, merger);
         res.json(newSchema);

@@ -1,12 +1,19 @@
 // @ts-nocheck
-
 import { AppFactory } from '../../appFactory.js';
 import { TenantValidator } from '../../middleware/tenantValidator.js';
 
 // This is a standalone simulation engine script, distinct from the Jest test.
 // It is intended to be run against a live server or in a stress-test scenario.
 
-const runSimulation = async () => {
+interface SimulatedContext {
+  user: {
+    id: string;
+    tenantId: string;
+    roles: string[];
+  };
+}
+
+const runSimulation = async (): Promise<void> => {
     console.log("Starting Tenant Boundary Leak Simulation Engine...");
 
     const tenantA = 'tenant-a-' + Date.now();
@@ -40,8 +47,9 @@ const runSimulation = async () => {
                  // We expect this to THROW
                  try {
                      // Using the internal validator to simulate the check
+                    const ctx: SimulatedContext = { user: { id: 'sim-user', tenantId: sourceTenant, roles: ['ANALYST'] } };
                     TenantValidator.validateTenantAccess(
-                        { user: { id: 'sim-user', tenantId: sourceTenant, roles: ['ANALYST'] } },
+                        ctx,
                         targetTenant,
                         { validateOwnership: true }
                     );
@@ -52,8 +60,9 @@ const runSimulation = async () => {
              } else {
                  // Valid access simulation
                  // We expect this to SUCCEED
+                  const ctx: SimulatedContext = { user: { id: 'sim-user', tenantId: sourceTenant, roles: ['ANALYST'] } };
                   TenantValidator.validateTenantAccess(
-                        { user: { id: 'sim-user', tenantId: sourceTenant, roles: ['ANALYST'] } },
+                        ctx,
                         targetTenant,
                         { validateOwnership: true }
                     );

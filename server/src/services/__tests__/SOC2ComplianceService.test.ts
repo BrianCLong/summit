@@ -1,13 +1,12 @@
-// @ts-nocheck
-import { SOC2ComplianceService } from '../SOC2ComplianceService';
-import { ComplianceMonitoringService } from '../ComplianceMonitoringService';
-import { EventSourcingService } from '../EventSourcingService';
-import { UserRepository } from '../../data/UserRepository';
+import { SOC2ComplianceService } from '../SOC2ComplianceService.js';
+import { ComplianceMonitoringService } from '../ComplianceMonitoringService.js';
+import { EventSourcingService } from '../EventSourcingService.js';
+import { UserRepository } from '../../data/UserRepository.js';
 
 // Mock dependencies
-jest.mock('../ComplianceMonitoringService');
-jest.mock('../EventSourcingService');
-jest.mock('../../data/UserRepository');
+jest.mock('../ComplianceMonitoringService.js');
+jest.mock('../EventSourcingService.js');
+jest.mock('../../data/UserRepository.js');
 
 describe('SOC2ComplianceService', () => {
   let soc2Service: SOC2ComplianceService;
@@ -20,23 +19,23 @@ describe('SOC2ComplianceService', () => {
     jest.clearAllMocks();
 
     // Mock the implementation of verifyLogIntegrity
-    mockEventSourcingService = new EventSourcingService(null) as jest.Mocked<EventSourcingService>;
-    mockEventSourcingService.verifyLogIntegrity = jest.fn().mockResolvedValue({
+    mockEventSourcingService = new EventSourcingService(null as any) as jest.Mocked<EventSourcingService>;
+    mockEventSourcingService.verifyLogIntegrity = jest.fn<() => Promise<any>>().mockResolvedValue({
       valid: true,
       totalLogs: 12345,
       validLogs: 12345,
       invalidLogs: [],
     });
 
-    mockComplianceMonitoringService = new ComplianceMonitoringService(null) as jest.Mocked<ComplianceMonitoringService>;
+    mockComplianceMonitoringService = new ComplianceMonitoringService(null as any) as jest.Mocked<ComplianceMonitoringService>;
 
     mockUserRepository = new UserRepository() as jest.Mocked<UserRepository>;
-    mockUserRepository.getActiveUserCount.mockResolvedValue(152);
-    mockUserRepository.getMfaUserCount.mockResolvedValue(152);
-    mockUserRepository.getAccessReviewSummary.mockResolvedValue([
+    mockUserRepository.getActiveUserCount = jest.fn<() => Promise<number>>().mockResolvedValue(152);
+    mockUserRepository.getMfaUserCount = jest.fn<() => Promise<number>>().mockResolvedValue(152);
+    mockUserRepository.getAccessReviewSummary = jest.fn<() => Promise<any[]>>().mockResolvedValue([
         { role: 'tenant_admin', user_count: 25, last_review_date: '2025-12-15', status: 'APPROVED' },
     ]);
-    mockUserRepository.getDeprovisioningStats.mockResolvedValue({ total: 14, within24h: 14 });
+    mockUserRepository.getDeprovisioningStats = jest.fn<() => Promise<any>>().mockResolvedValue({ total: 14, within24h: 14 });
 
     soc2Service = new SOC2ComplianceService(
       mockComplianceMonitoringService,

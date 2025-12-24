@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Map Pane Component for Tri-Pane Analysis Shell
  *
@@ -38,7 +37,7 @@ export function MapPane({
   const groupedLocations = useMemo(() => {
     const groups: Record<string, GeospatialEvent[]> = {}
 
-    locations.forEach(event => {
+    locations.forEach((event) => {
       const key = `${event.location.coordinates[0]},${event.location.coordinates[1]}`
       if (!groups[key]) {
         groups[key] = []
@@ -140,9 +139,9 @@ export function MapPane({
           const firstEvent = events[0]
           const position = getMarkerPosition(firstEvent.location.coordinates)
           const isSelected = events.some(
-            e => e.location.id === selectedLocationId
+            (e) => e.location.id === selectedLocationId
           )
-          const isHovered = events.some(e => e.location.id === hoveredLocationId)
+          const isHovered = events.some((e) => e.location.id === hoveredLocationId)
           const maxSeverity = events.reduce((max, event) => {
             const severities = ['info', 'low', 'medium', 'high', 'critical']
             const currentIndex = severities.indexOf(event.severity || 'info')
@@ -165,7 +164,7 @@ export function MapPane({
               role="button"
               tabIndex={0}
               aria-label={`Location marker: ${firstEvent.location.name}, ${events.length} events`}
-              onKeyDown={e => {
+              onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault()
                   onLocationSelect?.(firstEvent.location.id)
@@ -216,7 +215,7 @@ export function MapPane({
                   {events.length > 0 && (
                     <div className="mt-2 pt-2 border-t text-xs">
                       <div className="font-medium mb-1">Recent Events:</div>
-                      {events.slice(0, 3).map(event => (
+                      {events.slice(0, 3).map((event) => (
                         <div
                           key={event.id}
                           className="text-muted-foreground truncate"

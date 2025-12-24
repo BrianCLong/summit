@@ -56,3 +56,9 @@ pnpm typecheck
 - **Golden path failures**: Review attached docker logs (API, web, DB). Reproduce locally with `make bootstrap && make up && make smoke`. Ensure `scripts/wait-for-*` probes succeed and ports are free.
 - **Security failures**: Update vulnerable packages, regenerate lockfiles, or mark false positives per tool guidance. Re-run the security workflow locally if a script is available under `.ci/`.
 - **Merge train stalls**: If a PR consistently fails, remove the `automerge-safe` label and leave a comment with the failing check. Resolve conflicts before re-queuing.
+
+## Observability coverage
+
+- Grafana dashboard: `ops/observability/grafana/dashboards/golden-path-service-health.json` tracks error rate, throughput, and latency (p50/p95/p99) for `intelgraph-api`, `intelgraph-gateway`, and `intelgraph-ingest`. Filter by environment or service to validate golden-path health before/after CI runs.
+- Prometheus alert rules: `ops/alerts/golden-path-alerts.yml` raises PagerDuty-bound alerts for error rate spikes (>1%), latency regressions (p95 > 1.2s for 10m), and unexpected throughput drops (<5 rps sustained).
+- On-call runbook: see `RUNBOOKS/golden-path-observability.md` for step-by-step response guidance (dashboard drilldowns, PromQL spot-checks, rollback/scale levers) when CI or post-deploy checks surface regression signals.

@@ -7,7 +7,7 @@
  * MIT License - Copyright (c) 2025 IntelGraph
  */
 
-import { Router } from 'express';
+import { Router, type Request, type Response } from 'express';
 import { createBullBoard } from '@bull-board/api';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter.js';
 import { ExpressAdapter } from '@bull-board/express';
@@ -56,7 +56,7 @@ const bullBoardAdapter = initializeBullBoard();
 router.use('/', bullBoardAdapter.getRouter());
 
 // Health check for dashboard
-router.get('/health', (_req, res) => {
+router.get('/health', (_req: Request, res: Response) => {
   const queues = queueRegistry.getAllQueues();
   res.json({
     ok: true,

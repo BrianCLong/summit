@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Webhook Adapter
  *
@@ -167,7 +166,7 @@ export class WebhookAdapter extends BaseAdapter {
           this.recordCount++;
         } catch (error) {
           results.push({
-            id: record.id ?? 'unknown',
+            id: String(record.id ?? 'unknown'),
             success: false,
             error: String(error),
           });

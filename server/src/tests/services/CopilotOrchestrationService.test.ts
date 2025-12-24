@@ -1,13 +1,36 @@
-// @ts-nocheck
 import CopilotOrchestrationService from '../../src/services/CopilotOrchestrationService.js'; // Note the .js extension
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
+interface MockSession {
+  run: jest.Mock;
+  close: jest.Mock;
+}
+
+interface MockNeo4jDriver {
+  session: jest.Mock<() => MockSession>;
+}
+
+interface MockAIExtractionService {
+  extractEntities: jest.Mock;
+  extractRelationships: jest.Mock;
+}
+
+interface MockFederatedSearchService {
+  search: jest.Mock;
+}
+
+interface MockLogger {
+  info: jest.Mock;
+  error: jest.Mock;
+  warn: jest.Mock;
+}
+
 describe('CopilotOrchestrationService', () => {
-  let service;
-  let mockNeo4jDriver;
-  let mockAIExtractionService;
-  let mockFederatedSearchService;
-  let mockLogger;
+  let service: CopilotOrchestrationService;
+  let mockNeo4jDriver: MockNeo4jDriver;
+  let mockAIExtractionService: MockAIExtractionService;
+  let mockFederatedSearchService: MockFederatedSearchService;
+  let mockLogger: MockLogger;
 
   beforeEach(() => {
     mockNeo4jDriver = {

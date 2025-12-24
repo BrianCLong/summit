@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { jest } from '@jest/globals';
 
 describe('Schema Migration Tests', () => {

@@ -39,7 +39,7 @@ export const ColumnSchema = z.object({
     'struct'
   ]),
   nullable: z.boolean().default(true),
-  metadata: z.record(z.any()).optional()
+  metadata: z.record(z.string(), z.any()).optional()
 });
 
 export type Column = z.infer<typeof ColumnSchema>;
@@ -59,7 +59,7 @@ export const TableConfigSchema = z.object({
   schema: TableSchema,
   location: z.string(),
   compression: z.nativeEnum(CompressionCodec).default(CompressionCodec.SNAPPY),
-  properties: z.record(z.any()).optional()
+  properties: z.record(z.string(), z.any()).optional()
 });
 
 export type TableConfig = z.infer<typeof TableConfigSchema>;

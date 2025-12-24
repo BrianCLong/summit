@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { describe, it, expect, beforeAll, afterAll, jest } from '@jest/globals';
 import { QueueName, JobData } from '../src/queue/types.js';
 import { Job } from 'bullmq';

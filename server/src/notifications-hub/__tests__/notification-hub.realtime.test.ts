@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { NotificationHub } from '../NotificationHub.js';
 import { EventBuilder, EventSeverity, EventType } from '../events/EventSchema.js';
 import { RealtimeSessionManager } from '../receivers/RealtimeReceiver.js';

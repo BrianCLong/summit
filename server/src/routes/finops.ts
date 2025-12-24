@@ -1,6 +1,5 @@
 // @ts-nocheck
-
-import { Router, Request, Response, NextFunction } from 'express';
+import { Router, type Request, type Response, type NextFunction } from 'express';
 import { CostOptimizationService } from '../services/CostOptimizationService.js';
 import { FinOpsPolicyService } from '../services/FinOpsPolicyService.js';
 import { PrometheusMetricProvider } from '../services/MetricProvider.js';
@@ -13,13 +12,24 @@ const policyService = new FinOpsPolicyService();
 const metricProvider = new PrometheusMetricProvider();
 const tracer = trace.getTracer('finops-router');
 
+// Extend Express Request interface to include user
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string;
+    tenantId?: string;
+    role?: string;
+  };
+}
+
 // Middleware to ensure user has access to finops data
 // Hardened to check for specific roles rather than just existence of user object.
-const ensureFinOpsAccess = (req: Request, res: Response, next: NextFunction) => {
-  const user = (req as any).user;
+const ensureFinOpsAccess = (req: Request, res: Response, next: NextFunction): void => {
+  const authReq = req as AuthenticatedRequest;
+  const user = authReq.user;
 
   if (!user) {
-    return res.status(401).json({ error: 'Unauthorized' });
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
   }
 
   // Check for admin or specific finops role
@@ -27,7 +37,8 @@ const ensureFinOpsAccess = (req: Request, res: Response, next: NextFunction) => 
   const allowedRoles = ['admin', 'finops_manager', 'superadmin'];
   if (!allowedRoles.includes(user.role)) {
     logger.warn({ userId: user.id, role: user.role }, 'Access denied to FinOps endpoints');
-    return res.status(403).json({ error: 'Forbidden: Insufficient permissions for FinOps operations' });
+    res.status(403).json({ error: 'Forbidden: Insufficient permissions for FinOps operations' });
+    return;
   }
 
   next();
@@ -40,7 +51,8 @@ router.use(ensureFinOpsAccess);
  * Returns aggregated cost data for the dashboard.
  */
 router.get('/dashboard', async (req: Request, res: Response) => {
-  const tenantId = ((req as any).user.tenantId || req.query.tenantId) as string;
+  const authReq = req as AuthenticatedRequest;
+  const tenantId = (authReq.user?.tenantId || req.query.tenantId) as string;
 
   if (!tenantId) {
     return res.status(400).json({ error: 'Tenant ID required' });
@@ -59,7 +71,10 @@ router.get('/dashboard', async (req: Request, res: Response) => {
     // Check policies against real metrics
     // Convert resourceMetrics to record<string, number> for evaluation
     const metricsForEval: Record<string, number> = {
-        ...resourceMetrics,
+        cpu_utilization: resourceMetrics.cpu_utilization,
+        memory_utilization: resourceMetrics.memory_utilization,
+        storage_usage_gb: resourceMetrics.storage_usage_gb,
+        network_io: resourceMetrics.network_io,
         current_cost: currentCost,
         budget_utilization: budgetUtilization
     };
@@ -124,7 +139,8 @@ router.get('/dashboard', async (req: Request, res: Response) => {
 // GET /api/finops/recommendations
 // Returns cost optimization recommendations
 router.get('/recommendations', async (req: Request, res: Response) => {
-  const tenantId = ((req as any).user.tenantId || req.query.tenantId) as string;
+  const authReq = req as AuthenticatedRequest;
+  const tenantId = (authReq.user?.tenantId || req.query.tenantId) as string;
 
   try {
     const opportunities = await costOptimizer.identifyOptimizationOpportunities(tenantId);
@@ -138,7 +154,8 @@ router.get('/recommendations', async (req: Request, res: Response) => {
 // POST /api/finops/recommendations/:id/execute
 // Executes a specific recommendation
 router.post('/recommendations/:id/execute', async (req: Request, res: Response) => {
-  const tenantId = ((req as any).user.tenantId || req.query.tenantId) as string;
+  const authReq = req as AuthenticatedRequest;
+  const tenantId = (authReq.user?.tenantId || req.query.tenantId) as string;
   const opportunityId = req.params.id;
 
   try {
@@ -160,7 +177,8 @@ router.post('/recommendations/:id/execute', async (req: Request, res: Response) 
 // GET /api/finops/policies
 // Returns active FinOps policies
 router.get('/policies', async (req: Request, res: Response) => {
-    const tenantId = ((req as any).user.tenantId || req.query.tenantId) as string;
+    const authReq = req as AuthenticatedRequest;
+    const tenantId = (authReq.user?.tenantId || req.query.tenantId) as string;
     try {
         const policies = await policyService.getPolicies(tenantId);
         res.json({ policies });
@@ -173,7 +191,8 @@ router.get('/policies', async (req: Request, res: Response) => {
 // POST /api/finops/policies
 // Creates or updates a policy
 router.post('/policies', async (req: Request, res: Response) => {
-    const tenantId = ((req as any).user.tenantId || req.query.tenantId) as string;
+    const authReq = req as AuthenticatedRequest;
+    const tenantId = (authReq.user?.tenantId || req.query.tenantId) as string;
     const policy = req.body;
 
     // Basic validation

@@ -41,6 +41,7 @@ const AccessDeniedPage = React.lazy(() => import('@/pages/AccessDeniedPage'))
 const TriPanePage = React.lazy(() => import('@/pages/TriPanePage'))
 const GeoIntPane = React.lazy(() => import('@/panes/GeoIntPane').then(module => ({ default: module.GeoIntPane })))
 const NarrativeIntelligencePage = React.lazy(() => import('@/pages/NarrativeIntelligencePage'))
+const MissionControlPage = React.lazy(() => import('@/features/mission-control/MissionControlPage'))
 
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
@@ -150,6 +151,7 @@ function App() {
                         path="internal/command"
                         element={<InternalCommandDashboard />}
                       />
+                      <Route path="mission-control" element={<MissionControlPage />} />
 
                       {/* Data & Models */}
                       <Route

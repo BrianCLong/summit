@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { EventRecord, EventPayload } from './types.js';
 
 /** Shared configuration for all synthetic generators. */

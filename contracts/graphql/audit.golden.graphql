@@ -1,0 +1,21 @@
+# Golden contract for Audit API (v1)
+scalar JSON
+
+type AuditEvent {
+  id: ID!
+  ts: String!
+  actor: String!
+  action: String!
+  subject: String!
+  details: JSON
+  caseId: ID
+}
+
+type Query {
+  auditEvent(id: ID!): AuditEvent
+  auditEventsByCase(caseId: ID!, after: String, limit: Int = 100): [AuditEvent!]!
+}
+
+input AuditRecordInput { action: String!, subject: String!, details: JSON, caseId: ID }
+
+type Mutation { recordAudit(input: AuditRecordInput!): AuditEvent! }

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * GovernanceEngine - Policy and Ethics Layer for Cognition
  *

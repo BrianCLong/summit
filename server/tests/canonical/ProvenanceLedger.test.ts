@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { describe, expect, it, jest, beforeEach, afterEach } from '@jest/globals';
 import { ProvenanceLedgerV2 } from '../../src/provenance/ledger';
 import { pool } from '../../src/db/pg';

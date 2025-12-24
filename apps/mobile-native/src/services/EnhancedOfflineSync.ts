@@ -1,8 +1,9 @@
-import NetInfo from '@react-native-community/netinfo';
-import {apolloClient} from './GraphQLClient';
-import {useSyncStore} from '../stores/syncStore';
-import {useAppStore} from '../stores/appStore';
-import {performanceMonitor} from './PerformanceMonitor';
+// @ts-nocheck
+import { isConnected } from '@react-native-community/netinfo';
+import { apolloClient } from './GraphQLClient';
+import { useSyncStore } from '../stores/syncStore';
+import { useAppStore } from '../stores/appStore';
+import { performanceMonitor } from './PerformanceMonitor';
 import * as Sentry from '@sentry/react-native';
 
 const MAX_RETRIES = 3;
@@ -268,7 +269,7 @@ class EnhancedOfflineSyncService {
    */
   private async processUpload(item: any): Promise<void> {
     // Import the MediaUpload service dynamically to avoid circular deps
-    const {uploadMedia} = await import('./MediaUpload');
+    const { uploadMedia } = await import('./MediaUpload');
     await uploadMedia(item.data);
     console.log(`[EnhancedSync] Upload synced: ${item.id}`);
   }

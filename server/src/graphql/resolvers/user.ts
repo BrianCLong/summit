@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * User GraphQL Resolvers
  *
@@ -20,8 +19,9 @@ import { cache } from '../../lib/cache/index.js';
 import { cfg } from '../../config.js';
 import { getPostgresPool } from '../../config/database.js';
 import argon2 from 'argon2';
+import type { GraphQLContext } from '../apollo-v5-server.js';
 
-const logger = pino();
+const logger = (pino as any)();
 
 interface User {
   id: string;
@@ -80,7 +80,7 @@ const userResolvers = {
     /**
      * Fetch a single user by ID
      */
-    user: async (_: any, { id }: { id: string }, context: any) => {
+    user: async (_: unknown, { id }: { id: string }, context: GraphQLContext) => {
       const cacheKey = `user:${id}`;
 
       try {

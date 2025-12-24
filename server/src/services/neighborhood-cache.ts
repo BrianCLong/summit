@@ -1,4 +1,3 @@
-// @ts-nocheck
 import Redis from 'ioredis';
 import {
   neighborhoodCacheHitRatio,
@@ -9,7 +8,7 @@ import { expandNeighborhood } from './GraphOpsService.js';
 
 export interface Graph {
   nodes: Array<{ id: string }>;
-  edges: Array<any>;
+  edges: Array<Record<string, unknown>>;
 }
 
 export class NeighborhoodCache {

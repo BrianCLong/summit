@@ -1,8 +1,7 @@
-// @ts-nocheck
 import _ from 'lodash';
 import pino from 'pino';
 
-const logger = pino({ name: 'TemplateEngine' });
+const logger = (pino as any)({ name: 'TemplateEngine' });
 
 export class TemplateEngine {
   private templates: Map<string, string> = new Map();

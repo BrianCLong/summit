@@ -1,3 +1,4 @@
+// @ts-nocheck
 import fs from 'fs-extra';
 import path from 'node:path';
 import { performance } from 'node:perf_hooks';

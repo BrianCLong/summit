@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { AudioSentimentAnalyzer } from '../audio/AudioSentimentAnalyzer.js';
 import { VisualEmotionAnalyzer } from '../vision/VisualEmotionAnalyzer.js';
 import { MultimodalSentimentFusion } from '../multimodal/MultimodalSentimentFusion.js';

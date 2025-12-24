@@ -1,14 +1,13 @@
-// @ts-nocheck
 import { AnalyticsService } from '../AnalyticsService.js';
 import { jest } from '@jest/globals';
 
 // Mock runCypher
 jest.mock('../../graph/neo4j.js', () => ({
-  runCypher: jest.fn(),
-  getDriver: jest.fn().mockReturnValue({
-    session: jest.fn().mockReturnValue({
-      run: jest.fn(),
-      close: jest.fn()
+  runCypher: jest.fn<() => Promise<any>>(),
+  getDriver: jest.fn<() => any>().mockReturnValue({
+    session: jest.fn<() => any>().mockReturnValue({
+      run: jest.fn<() => Promise<any>>(),
+      close: jest.fn<() => Promise<void>>()
     })
   })
 }));

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { EventEmitter } from 'node:events';
 import { jest } from '@jest/globals';
 import { JobQueue } from '../job-queue.js';

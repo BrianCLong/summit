@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Cost Estimator - Analyzes Cypher queries to estimate execution cost
  *
@@ -12,7 +11,7 @@
 import type { CostEstimate } from './types';
 import pino from 'pino';
 
-const logger = pino({ name: 'cost-estimator' });
+const logger = (pino as any)({ name: 'cost-estimator' });
 
 /**
  * Estimate the cost of executing a Cypher query

@@ -11,4 +11,4 @@ export type {
   HierarchyNode,
   HierarchyType,
   HierarchyStatus
-} from '@summit/mdm-core';
+} from '@intelgraph/mdm-core';

@@ -1,0 +1,37 @@
+{{- if .Values.prometheus.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: policy-lac
+  labels: {{ toYaml .Values.prometheus.serviceMonitor.labels | nindent 4 }}
+spec:
+  selector: { matchLabels: { app: policy-lac } }
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: {{ .Values.prometheus.serviceMonitor.interval }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: prov-ledger
+  labels: {{ toYaml .Values.prometheus.serviceMonitor.labels | nindent 4 }}
+spec:
+  selector: { matchLabels: { app: prov-ledger } }
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: {{ .Values.prometheus.serviceMonitor.interval }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: nl2cypher
+  labels: {{ toYaml .Values.prometheus.serviceMonitor.labels | nindent 4 }}
+spec:
+  selector: { matchLabels: { app: nl2cypher } }
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: {{ .Values.prometheus.serviceMonitor.interval }}
+{{- end }}

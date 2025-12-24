@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Centralized Validation Utilities
  *
@@ -56,8 +55,7 @@ export {
   QueryValidator,
 } from './MutationValidators.js';
 
-import { z } from 'zod/v4';
-import type { ZodSchema, ZodError } from 'zod/v4';
+import { z, type ZodError } from 'zod/v4';
 import { GraphQLError } from 'graphql';
 
 /**
@@ -84,10 +82,13 @@ export function validateInput<T>(
 /**
  * Express middleware for request validation
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createValidationMiddleware<T>(
   schema: z.ZodType<T>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   dataExtractor: (req: any) => unknown
 ) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return async (req: any, res: any, next: any) => {
     try {
       const data = dataExtractor(req);
@@ -110,10 +111,13 @@ export function createValidationMiddleware<T>(
 /**
    * GraphQL resolver wrapper with automatic validation
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export function withValidation<TArgs, TResult>(
     schema: z.ZodType<TArgs>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: (parent: any, args: TArgs, context: any, info: any) => Promise<TResult> | TResult
   ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return async (parent: any, args: any, context: any, info: any): Promise<TResult> => {
       const validatedArgs = validateInput(schema, args);
       return resolver(parent, validatedArgs, context, info);
@@ -149,6 +153,7 @@ export function createValidationMiddleware<T>(
 /**
  * Compose multiple validation schemas
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function composeValidators<T>(...validators: Array<z.ZodType<any>>): z.ZodType<T> {
   return validators.reduce((acc, validator) => acc.and(validator)) as z.ZodType<T>;
 }
@@ -156,13 +161,30 @@ export function composeValidators<T>(...validators: Array<z.ZodType<any>>): z.Zo
 /**
  * Create a conditional validator
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function conditionalValidation<T>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   condition: (data: any) => boolean,
   schemaTrue: z.ZodType<T>,
   schemaFalse: z.ZodType<T>
 ) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return z.any().transform((data) => {
     const schema = condition(data) ? schemaTrue : schemaFalse;
     return schema.parse(data);
   }) as z.ZodType<T>;
+}
+
+// Add a safe version of validateInput that returns a result object
+export function validateInputSafe<T>(
+  schema: z.ZodType<T>,
+  data: unknown
+): { success: true; data: T } | { success: false; errors: ZodError } {
+  const result = schema.safeParse(data);
+
+  if (result.success) {
+    return { success: true, data: result.data };
+  } else {
+    return { success: false, errors: result.error };
+  }
 }

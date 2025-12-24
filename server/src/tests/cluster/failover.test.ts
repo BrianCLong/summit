@@ -1,10 +1,10 @@
-// @ts-nocheck
 import { Neo4jError } from 'neo4j-driver';
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
+import type { Driver } from 'neo4j-driver';
 
 describe('Neo4j Causal Cluster Failover Tests', () => {
   // Placeholder for actual cluster connection and setup
-  let driver: any; // Mock or actual driver
+  let driver: Driver | null; // Mock or actual driver
 
   beforeAll(async () => {
     // Initialize Neo4j driver for cluster

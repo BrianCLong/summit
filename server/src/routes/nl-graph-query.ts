@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 /**
  * NL Graph Query Copilot API Endpoints
@@ -10,8 +11,9 @@ import rateLimit from 'express-rate-limit';
 import pino from 'pino';
 import { getNlGraphQueryService } from '../ai/nl-graph-query/index.js';
 import type { CompileRequest, SchemaContext } from '../ai/nl-graph-query/index.js';
+import type { AuthenticatedRequest } from './types.js';
 
-const logger = pino({ name: 'nl-graph-query-routes' });
+const logger = (pino as any)({ name: 'nl-graph-query-routes' });
 const router = express.Router();
 
 // Rate limiting for NL query compilation (moderate limits)
@@ -143,7 +145,7 @@ router.post(
   '/compile',
   validateCompileRequest,
   handleValidationErrors,
-  async (req: Request, res: Response) => {
+  async (req: AuthenticatedRequest, res: Response) => {
     const startTime = Date.now();
 
     try {
@@ -253,7 +255,7 @@ router.post(
  *   count: number
  * }
  */
-router.get('/patterns', async (req: Request, res: Response) => {
+router.get('/patterns', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const service = getNlGraphQueryService();
     const patterns = service.getAvailablePatterns();
@@ -293,7 +295,7 @@ router.get('/patterns', async (req: Request, res: Response) => {
  *   uptime: number
  * }
  */
-router.get('/health', async (req: Request, res: Response) => {
+router.get('/health', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const service = getNlGraphQueryService();
     const cacheStats = service.getCacheStats();
@@ -329,7 +331,7 @@ router.get('/health', async (req: Request, res: Response) => {
  *   message: string
  * }
  */
-router.post('/cache/clear', async (req: Request, res: Response) => {
+router.post('/cache/clear', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const service = getNlGraphQueryService();
     service.clearCache();

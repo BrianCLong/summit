@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { render } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { PromptActivityMonitor } from '../SymphonyOperatorConsole'
@@ -21,8 +20,7 @@ describe('PromptActivityMonitor', () => {
 
   test('pauses polling when the Prompts tab is inactive', async () => {
     const mockFetch = createMockFetch()
-    // @ts-expect-error jsdom global
-    global.fetch = mockFetch
+    global.fetch = mockFetch as unknown as typeof fetch
 
     render(<PromptActivityMonitor active={false} />)
 
@@ -32,8 +30,7 @@ describe('PromptActivityMonitor', () => {
 
   test('starts polling when the Prompts tab becomes active', async () => {
     const mockFetch = createMockFetch()
-    // @ts-expect-error jsdom global
-    global.fetch = mockFetch
+    global.fetch = mockFetch as unknown as typeof fetch
 
     const { rerender } = render(<PromptActivityMonitor active={false} />)
 

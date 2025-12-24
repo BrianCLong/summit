@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { getPostgresPool } from '../db/postgres.js';
 import { otelService } from '../middleware/observability/otel-tracing.js';
-import { z } from 'zod';
+import * as z from 'zod';
 
 // Safety v2 types per Chair's synthesis
 interface ActionRisk {
@@ -221,7 +221,7 @@ export class SafetyV2Service {
   /**
    * Evaluate action safety with dynamic risk scoring (Chair's OPA policy)
    */
-  async evaluateActionSafety(request: any): Promise<SafetyEvaluation> {
+  async evaluateActionSafety(request: unknown): Promise<SafetyEvaluation> {
     const span = otelService.createSpan('safety-v2.evaluate-action');
 
     try {
@@ -320,7 +320,9 @@ export class SafetyV2Service {
    * Calculate action risk score using Chair's formula:
    * risk = sensitivity × blast × reversibility × tenant
    */
-  private async calculateActionRiskScore(request: any): Promise<number> {
+  private async calculateActionRiskScore(
+    request: z.infer<typeof ActionRequestSchema>,
+  ): Promise<number> {
     // Data sensitivity based on classification
     const sensitivityMap = {
       public: 0.1,
@@ -686,7 +688,12 @@ export class SafetyV2Service {
   private async logGuardrailViolation(
     tenantId: string,
     guardrailId: string,
-    details: any,
+    details: {
+      violationScore: number;
+      matchCount: number;
+      action: string;
+      textLength?: number;
+    },
   ): Promise<void> {
     const pool = getPostgresPool();
 
@@ -707,7 +714,7 @@ export class SafetyV2Service {
   }
 
   private async storeEvaluationAudit(
-    request: any,
+    request: z.infer<typeof ActionRequestSchema>,
     evaluation: SafetyEvaluation,
   ): Promise<void> {
     const pool = getPostgresPool();
@@ -735,7 +742,7 @@ export class SafetyV2Service {
   /**
    * Configure tenant-specific guardrails
    */
-  async configureGuardrail(tenantId: string, config: any): Promise<string> {
+  async configureGuardrail(tenantId: string, config: unknown): Promise<string> {
     const span = otelService.createSpan('safety-v2.configure-guardrail');
 
     try {

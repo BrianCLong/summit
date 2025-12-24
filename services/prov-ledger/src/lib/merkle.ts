@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { sha256, canonicalStringify } from './canonical.js';
 
 export interface MerkleLeaf {

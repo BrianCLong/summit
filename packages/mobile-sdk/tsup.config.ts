@@ -8,7 +8,7 @@ export default defineConfig({
     'storage/index': 'src/storage/index.ts',
   },
   format: ['esm', 'cjs'],
-  dts: true,
+  dts: false, // Disabled due to export conflicts between db/Entity and types/Entity
   splitting: false,
   sourcemap: true,
   clean: true,

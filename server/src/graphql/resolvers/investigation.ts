@@ -1,12 +1,12 @@
-// @ts-nocheck
 import pino from 'pino';
 import { getPostgresPool } from '../../config/database.js';
+import type { GraphQLContext } from '../apollo-v5-server.js';
 
-const logger = pino();
+const logger = (pino as any)();
 
 const investigationResolvers = {
   Query: {
-    investigation: async (_: any, { id }: { id: string }) => {
+    investigation: async (_: unknown, { id }: { id: string }) => {
       logger.info(`Fetching investigation with ID: ${id} (placeholder)`);
       // Placeholder: In a real implementation, fetch investigation from PostgreSQL
       return {
@@ -17,7 +17,7 @@ const investigationResolvers = {
       };
     },
     investigations: async (
-      _: any,
+      _: unknown,
       { limit, offset }: { limit: number; offset: number },
     ) => {
       logger.info(
@@ -40,7 +40,7 @@ const investigationResolvers = {
       ];
     },
     auditTrace: async (
-      _: any,
+      _: unknown,
       {
         investigationId,
         filter,
@@ -90,7 +90,7 @@ const investigationResolvers = {
       const { rows } = await pool.query(query, params);
       return rows;
     },
-    investigationSnapshots: async (_: any, { investigationId }: { investigationId: string }) => {
+    investigationSnapshots: async (_: unknown, { investigationId }: { investigationId: string }) => {
       logger.info(`Fetching snapshots for investigation ${investigationId}`);
       const pool = getPostgresPool();
       const result = await pool.query(

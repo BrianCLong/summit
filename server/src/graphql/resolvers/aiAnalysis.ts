@@ -1,9 +1,8 @@
-// @ts-nocheck
 import { aiAnalysisService } from '../../services/aiAnalysis.js';
 import { requireAuth } from '../../lib/auth.js';
 import pino from 'pino';
 
-const logger: pino.Logger = pino();
+const logger: pino.Logger = (pino as any)();
 
 export const aiAnalysisResolvers = {
   Query: {

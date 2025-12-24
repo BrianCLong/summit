@@ -4,8 +4,8 @@ import {
   Worker,
   QueueEvents,
   Job,
-  QueueOptions,
-  WorkerOptions,
+  type QueueOptions,
+  type WorkerOptions,
 } from 'bullmq';
 import Redis from 'ioredis';
 import { logger } from '../utils/logger.js';
@@ -36,7 +36,7 @@ export type AgentTask = {
   pr?: number;
   issue: string;
   budgetUSD: number;
-  context: Record<string, any>;
+  context: Record<string, unknown>;
   parentTaskId?: string;
   dependencies?: string[];
   metadata: {
@@ -48,7 +48,7 @@ export type AgentTask = {
 
 export type TaskResult = {
   success: boolean;
-  output?: any;
+  output?: unknown;
   cost: number;
   duration: number;
   errors?: string[];
@@ -197,11 +197,12 @@ class MaestroOrchestrator {
           duration,
           cost: budget.usedUSD,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         const duration = Date.now() - startTime;
+        const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Agent task failed', {
           taskId: job.id,
-          error: error.message,
+          error: errorMessage,
           duration,
         });
 
@@ -209,7 +210,7 @@ class MaestroOrchestrator {
           success: false,
           duration,
           cost: budget.usedUSD,
-          errors: [error.message],
+          errors: [errorMessage],
         };
       }
     };
@@ -382,21 +383,30 @@ class MaestroOrchestrator {
     };
   }
 
-  private setupEventHandlers() {
-    queueEvents.on('completed', (jobId, result) => {
+  private setupEventHandlers(): void {
+    queueEvents.on('completed', ({ jobId }: { jobId: string }, result: unknown) => {
       logger.info('Task completed', { taskId: jobId, result });
     });
 
-    queueEvents.on('failed', (jobId, failedReason) => {
+    queueEvents.on('failed', ({ jobId, failedReason }: { jobId: string; failedReason: string }) => {
       logger.error('Task failed', { taskId: jobId, reason: failedReason });
     });
 
-    queueEvents.on('stalled', (jobId) => {
+    queueEvents.on('stalled', ({ jobId }: { jobId: string }) => {
       logger.warn('Task stalled', { taskId: jobId });
     });
   }
 
-  async getTaskStatus(taskId: string) {
+  async getTaskStatus(taskId: string): Promise<{
+    id: string | undefined;
+    name: string;
+    data: AgentTask;
+    progress: number | object | string | boolean;
+    state: string;
+    finishedOn: number | undefined;
+    processedOn: number | undefined;
+    failedReason: string | undefined;
+  } | null> {
     const job = await maestroQueue.getJob(taskId);
     if (!job) return null;
 
@@ -412,13 +422,15 @@ class MaestroOrchestrator {
     };
   }
 
-  async shutdown() {
+  async shutdown(): Promise<void> {
     logger.info('Shutting down Maestro orchestrator');
 
-    for (const [name, worker] of this.workers) {
+    const workerClosurePromises: Promise<void>[] = [];
+    this.workers.forEach((worker, name) => {
       logger.info(`Closing worker: ${name}`);
-      await worker.close();
-    }
+      workerClosurePromises.push(worker.close());
+    });
+    await Promise.all(workerClosurePromises);
 
     await maestroQueue.close();
     await redis.quit();

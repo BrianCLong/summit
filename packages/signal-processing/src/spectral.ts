@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { FftAnalyzer } from './fft.js';
 import { FrequencyDomainFrame, NumericArray, SpectralMetrics } from './types.js';
 

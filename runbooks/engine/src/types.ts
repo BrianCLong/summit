@@ -150,6 +150,12 @@ export interface StepResult {
   evidence: Evidence[];
   /** Logs generated during execution */
   logs: RunbookLogEntry[];
+  /** Approvals received (for approval steps) */
+  approvals?: ApprovalDecision[];
+  /** Whether the step was skipped */
+  skipped?: boolean;
+  /** Reason for skipping the step */
+  skipReason?: string;
 }
 
 /**
@@ -236,6 +242,18 @@ export interface RunbookExecution {
   isReplay: boolean;
   /** Original execution ID if this is a replay */
   originalExecutionId?: string;
+  /** Current step where execution is paused */
+  pausedAtStep?: string;
+  /** When the execution was paused */
+  pausedAt?: Date;
+  /** User who cancelled the execution */
+  cancelledBy?: string;
+  /** Reason for cancellation */
+  cancellationReason?: string;
+  /** Execution depth (for nested runbooks) */
+  depth?: number;
+  /** Parent execution ID if this is a sub-runbook */
+  parentExecutionId?: string;
 }
 
 /**
@@ -365,23 +383,23 @@ export interface ApprovalRequest {
   /** Expires at */
   expiresAt?: Date;
   /** Approvals received */
-  approvals: Approval[];
+  approvals: ApprovalDecision[];
   /** Status */
   status: 'pending' | 'approved' | 'rejected' | 'timeout';
 }
 
 /**
- * Individual approval
+ * Individual approval decision
  */
-export interface Approval {
+export interface ApprovalDecision {
   /** Approver user ID */
   approverId: string;
   /** Approval decision */
   decision: 'approve' | 'reject';
-  /** Comment */
-  comment?: string;
-  /** Approved at */
-  approvedAt: Date;
+  /** Comments */
+  comments?: string;
+  /** Decision timestamp */
+  timestamp: Date;
 }
 
 /**

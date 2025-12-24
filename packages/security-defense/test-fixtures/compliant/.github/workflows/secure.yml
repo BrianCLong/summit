@@ -1,0 +1,19 @@
+name: secure-pipeline
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@5f4b9f1267f5b8af58dfc2c6d77f3cf1a7af5c9c
+      - uses: actions/cache@8f4e2b1c5d3a20f23c7b8d2d0fb8a365c8a1f9b7
+        with:
+          path: node_modules
+          key: cache-${{ runner.os }}-${{ github.sha }}
+      - name: OPA policy gate
+        run: |
+          npm install -g conftest
+          conftest test policy
+      - name: Build
+        run: npm ci && npm run build

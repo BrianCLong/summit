@@ -1,0 +1,5 @@
+jurisdiction: US
+requirements:
+  explainability: recommended
+  data_residency: minimal
+  sector_specific: true

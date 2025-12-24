@@ -14,7 +14,6 @@ export function useDashboard(dashboardId?: string) {
   return {
     dashboard: store.getActiveDashboard(),
     activePage: store.getActivePage(),
-    editMode: store.editMode,
     ...store,
   };
 }

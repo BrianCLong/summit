@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useCallback, useMemo } from 'react';
 import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 
@@ -139,9 +138,6 @@ export function VirtualizedListTable<T>({
           itemSize={rowHeight}
           itemData={itemData}
           overscanCount={overscan}
-          outerElementType="div"
-          innerElementType="div"
-          className="relative"
         >
           {RowRenderer}
         </List>

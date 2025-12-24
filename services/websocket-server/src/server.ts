@@ -19,7 +19,7 @@ import {
 } from './types/index.js';
 import { createAuthMiddleware } from './middleware/auth.js';
 import { createRateLimitMiddleware } from './middleware/rateLimit.js';
-import { AdaptiveRateLimiter } from '../../../lib/streaming/rate-limiter.js';
+import { AdaptiveRateLimiter } from './lib/rate-limiter.js';
 import { ConnectionManager } from './managers/ConnectionManager.js';
 import { PresenceManager } from './managers/PresenceManager.js';
 import { RoomManager } from './managers/RoomManager.js';
@@ -253,8 +253,8 @@ export class WebSocketServer {
     // Close HTTP server
     await new Promise<void>((resolve, reject) => {
       this.httpServer.close((err) => {
-        if (err) {reject(err);}
-        else {resolve();}
+        if (err) { reject(err); }
+        else { resolve(); }
       });
     });
 

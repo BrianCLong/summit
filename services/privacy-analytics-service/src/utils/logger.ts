@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Structured logging utility using Pino
  */

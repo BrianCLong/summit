@@ -1,7 +1,5 @@
-// @ts-nocheck
-
-import { BaseConnector } from '../base';
-import { ConnectorConfig, ConnectorSchema } from '../types';
+import { BaseConnector } from '../base.js';
+import { ConnectorConfig, ConnectorSchema } from '../types.js';
 import { Readable } from 'stream';
 
 export class KafkaConnector extends BaseConnector {
@@ -43,11 +41,12 @@ export class KafkaConnector extends BaseConnector {
               { name: 'value', type: 'json', nullable: false },
               { name: 'headers', type: 'json', nullable: true },
               { name: 'timestamp', type: 'number', nullable: false }
-          ]
+          ],
+          version: 1
       };
   }
 
-  async readStream(options?: any): Promise<Readable> {
+  async readStream(options?: Record<string, unknown>): Promise<Readable> {
     const stream = new Readable({ objectMode: true, read() {} });
 
     // Simulate consuming messages

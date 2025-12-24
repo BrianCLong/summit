@@ -1,4 +1,5 @@
 // @ts-nocheck
+
 // Files MCP Server
 // Provides secure file operations with policy controls via MCP protocol
 

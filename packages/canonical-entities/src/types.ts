@@ -187,6 +187,7 @@ export type EntityType =
 // -----------------------------------------------------------------------------
 
 export interface PersonProps {
+  [key: string]: unknown;
   /** Full name */
   name: string;
   /** First/given name */
@@ -240,6 +241,7 @@ export interface Person extends CanonicalEntity {
 // -----------------------------------------------------------------------------
 
 export interface OrganizationProps {
+  [key: string]: unknown;
   /** Legal name */
   name: string;
   /** Trading/DBA names */
@@ -290,19 +292,20 @@ export interface Organization extends CanonicalEntity {
 // -----------------------------------------------------------------------------
 
 export interface AssetProps {
+  [key: string]: unknown;
   /** Asset name/description */
   name: string;
   /** Asset type */
   assetType:
-    | 'vehicle'
-    | 'vessel'
-    | 'aircraft'
-    | 'real_estate'
-    | 'financial_account'
-    | 'cryptocurrency'
-    | 'intellectual_property'
-    | 'equipment'
-    | 'other';
+  | 'vehicle'
+  | 'vessel'
+  | 'aircraft'
+  | 'real_estate'
+  | 'financial_account'
+  | 'cryptocurrency'
+  | 'intellectual_property'
+  | 'equipment'
+  | 'other';
   /** Serial number / identifier */
   serialNumber?: string;
   /** Registration number */
@@ -371,19 +374,20 @@ export interface Asset extends CanonicalEntity {
 // -----------------------------------------------------------------------------
 
 export interface LocationProps {
+  [key: string]: unknown;
   /** Location name */
   name: string;
   /** Location type */
   locationType:
-    | 'address'
-    | 'city'
-    | 'region'
-    | 'country'
-    | 'coordinates'
-    | 'facility'
-    | 'port'
-    | 'airport'
-    | 'other';
+  | 'address'
+  | 'city'
+  | 'region'
+  | 'country'
+  | 'coordinates'
+  | 'facility'
+  | 'port'
+  | 'airport'
+  | 'other';
   /** Full address */
   address?: {
     street?: string;
@@ -427,6 +431,7 @@ export interface Location extends CanonicalEntity {
 // -----------------------------------------------------------------------------
 
 export interface EventProps {
+  [key: string]: unknown;
   /** Event name/title */
   name: string;
   /** Event type */
@@ -468,21 +473,22 @@ export interface Event extends CanonicalEntity {
 // -----------------------------------------------------------------------------
 
 export interface DocumentProps {
+  [key: string]: unknown;
   /** Document title */
   title: string;
   /** Document type */
   documentType:
-    | 'report'
-    | 'email'
-    | 'chat'
-    | 'social_media'
-    | 'news'
-    | 'legal'
-    | 'financial'
-    | 'image'
-    | 'video'
-    | 'audio'
-    | 'other';
+  | 'report'
+  | 'email'
+  | 'chat'
+  | 'social_media'
+  | 'news'
+  | 'legal'
+  | 'financial'
+  | 'image'
+  | 'video'
+  | 'audio'
+  | 'other';
   /** MIME type */
   mimeType?: string;
   /** File size in bytes */
@@ -532,6 +538,7 @@ export interface Document extends CanonicalEntity {
 // -----------------------------------------------------------------------------
 
 export interface ClaimProps {
+  [key: string]: unknown;
   /** Claim statement */
   statement: string;
   /** Claim type */
@@ -570,6 +577,7 @@ export interface Claim extends CanonicalEntity {
 // -----------------------------------------------------------------------------
 
 export interface CaseProps {
+  [key: string]: unknown;
   /** Case title */
   title: string;
   /** Case number/reference */
@@ -580,12 +588,12 @@ export interface CaseProps {
   description?: string;
   /** Status */
   status:
-    | 'open'
-    | 'in_progress'
-    | 'pending_review'
-    | 'escalated'
-    | 'closed'
-    | 'archived';
+  | 'open'
+  | 'in_progress'
+  | 'pending_review'
+  | 'escalated'
+  | 'closed'
+  | 'archived';
   /** Priority */
   priority: 'low' | 'medium' | 'high' | 'critical';
   /** Assigned to (user IDs) */
@@ -636,6 +644,7 @@ export interface Case extends CanonicalEntity {
 // -----------------------------------------------------------------------------
 
 export interface AccountProps {
+  [key: string]: unknown;
   /** Account identifier/username */
   accountId: string;
   /** Account name */
@@ -676,6 +685,7 @@ export interface Account extends CanonicalEntity {
 // -----------------------------------------------------------------------------
 
 export interface CommunicationProps {
+  [key: string]: unknown;
   /** Communication subject/title */
   subject?: string;
   /** Communication type */
@@ -718,6 +728,7 @@ export interface Communication extends CanonicalEntity {
 // -----------------------------------------------------------------------------
 
 export interface DeviceProps {
+  [key: string]: unknown;
   /** Device name */
   name: string;
   /** Device type */
@@ -762,6 +773,7 @@ export interface Device extends CanonicalEntity {
 // -----------------------------------------------------------------------------
 
 export interface VehicleProps {
+  [key: string]: unknown;
   /** Vehicle name/identifier */
   name: string;
   /** Vehicle type */
@@ -798,6 +810,7 @@ export interface Vehicle extends CanonicalEntity {
 // -----------------------------------------------------------------------------
 
 export interface InfrastructureProps {
+  [key: string]: unknown;
   /** Infrastructure name */
   name: string;
   /** Infrastructure type */
@@ -840,6 +853,7 @@ export interface Infrastructure extends CanonicalEntity {
 // -----------------------------------------------------------------------------
 
 export interface FinancialInstrumentProps {
+  [key: string]: unknown;
   /** Instrument name */
   name: string;
   /** Instrument type */
@@ -882,6 +896,7 @@ export interface FinancialInstrument extends CanonicalEntity {
 // -----------------------------------------------------------------------------
 
 export interface IndicatorProps {
+  [key: string]: unknown;
   /** Indicator name */
   name: string;
   /** Indicator type */
@@ -918,6 +933,7 @@ export interface Indicator extends CanonicalEntity {
 // -----------------------------------------------------------------------------
 
 export interface NarrativeProps {
+  [key: string]: unknown;
   /** Narrative title */
   title: string;
   /** Narrative description */
@@ -954,6 +970,7 @@ export interface Narrative extends CanonicalEntity {
 // -----------------------------------------------------------------------------
 
 export interface CampaignProps {
+  [key: string]: unknown;
   /** Campaign name */
   name: string;
   /** Campaign description */
@@ -992,6 +1009,7 @@ export interface Campaign extends CanonicalEntity {
 // -----------------------------------------------------------------------------
 
 export interface AuthorityProps {
+  [key: string]: unknown;
   /** Authority name */
   name: string;
   /** Authority type */
@@ -1024,6 +1042,7 @@ export interface Authority extends CanonicalEntity {
 // -----------------------------------------------------------------------------
 
 export interface LicenseProps {
+  [key: string]: unknown;
   /** License name */
   name: string;
   /** License type */

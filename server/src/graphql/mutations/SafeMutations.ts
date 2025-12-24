@@ -4,61 +4,61 @@
  * Type-safe, validated mutations for graph operations with audit trails and rollback
  */
 
-import { z } from 'zod';
+import * as z from 'zod';
 import { randomUUID as uuidv4 } from 'crypto';
-import { getNeo4jDriver, getPostgresPool } from '../../config/database';
-import { validateCustomMetadata } from '../../services/CustomSchemaService';
-import logger from '../../utils/logger';
+import { getNeo4jDriver, getPostgresPool } from '../../config/database.js';
+import { validateCustomMetadata } from '../../services/CustomSchemaService.js';
+import logger from '../../utils/logger.js';
 
 // Validation schemas for IntelGraph operations
-const EntityMutationSchema = z.object({
-  tenantId: z.string().min(1, 'Tenant ID required'),
-  kind: z.string().min(1, 'Entity kind required'),
-  labels: z.array(z.string()).default([]),
-  props: z.record(z.any()).default({}),
-  investigationId: z.string().optional(),
-  confidence: z.number().min(0).max(1, 'Confidence must be 0-1').default(1.0),
-  source: z.string().default('user_input'),
-  customMetadata: z.record(z.any()).optional(),
+const EntityMutationSchema = (z as any).object({
+  tenantId: (z as any).string().min(1, 'Tenant ID required'),
+  kind: (z as any).string().min(1, 'Entity kind required'),
+  labels: (z as any).array((z as any).string()).default([]),
+  props: (z as any).record((z as any).any()).default({}),
+  investigationId: (z as any).string().optional(),
+  confidence: (z as any).number().min(0).max(1, 'Confidence must be 0-1').default(1.0),
+  source: (z as any).string().default('user_input'),
+  customMetadata: (z as any).record((z as any).any()).optional(),
 });
 
-const RelationshipMutationSchema = z.object({
-  tenantId: z.string().min(1, 'Tenant ID required'),
-  srcId: z.string().min(1, 'Source entity ID required'),
-  dstId: z.string().min(1, 'Destination entity ID required'),
-  type: z.string().min(1, 'Relationship type required'),
-  props: z.record(z.any()).default({}),
-  investigationId: z.string().optional(),
-  confidence: z.number().min(0).max(1, 'Confidence must be 0-1').default(1.0),
-  source: z.string().default('user_input'),
-  customMetadata: z.record(z.any()).optional(),
+const RelationshipMutationSchema = (z as any).object({
+  tenantId: (z as any).string().min(1, 'Tenant ID required'),
+  srcId: (z as any).string().min(1, 'Source entity ID required'),
+  dstId: (z as any).string().min(1, 'Destination entity ID required'),
+  type: (z as any).string().min(1, 'Relationship type required'),
+  props: (z as any).record((z as any).any()).default({}),
+  investigationId: (z as any).string().optional(),
+  confidence: (z as any).number().min(0).max(1, 'Confidence must be 0-1').default(1.0),
+  source: (z as any).string().default('user_input'),
+  customMetadata: (z as any).record((z as any).any()).optional(),
 });
 
-const InvestigationMutationSchema = z.object({
-  tenantId: z.string().min(1, 'Tenant ID required'),
-  name: z.string().min(1, 'Investigation name required'),
-  description: z.string().optional(),
-  status: z.enum(['ACTIVE', 'ARCHIVED', 'COMPLETED']).default('ACTIVE'),
-  props: z.record(z.any()).default({}),
-  customSchema: z.array(z.any()).optional(),
+const InvestigationMutationSchema = (z as any).object({
+  tenantId: (z as any).string().min(1, 'Tenant ID required'),
+  name: (z as any).string().min(1, 'Investigation name required'),
+  description: (z as any).string().optional(),
+  status: (z as any).enum(['ACTIVE', 'ARCHIVED', 'COMPLETED']).default('ACTIVE'),
+  props: (z as any).record((z as any).any()).default({}),
+  customSchema: (z as any).array((z as any).any()).optional(),
 });
 
-const BulkEntityMutationSchema = z.object({
-  entities: z
+const BulkEntityMutationSchema = (z as any).object({
+  entities: (z as any)
     .array(EntityMutationSchema)
     .min(1, 'At least one entity required')
     .max(1000, 'Maximum 1000 entities per batch'),
-  validateSchema: z.boolean().default(true),
-  skipDuplicates: z.boolean().default(false),
+  validateSchema: (z as any).boolean().default(true),
+  skipDuplicates: (z as any).boolean().default(false),
 });
 
-const GraphTraversalSchema = z.object({
-  startEntityId: z.string().min(1, 'Start entity ID required'),
-  tenantId: z.string().min(1, 'Tenant ID required'),
-  maxDepth: z.number().min(1).max(5, 'Max depth must be 1-5').default(2),
-  relationshipTypes: z.array(z.string()).optional(),
-  entityKinds: z.array(z.string()).optional(),
-  limit: z.number().min(1).max(1000, 'Limit must be 1-1000').default(100),
+const GraphTraversalSchema = (z as any).object({
+  startEntityId: (z as any).string().min(1, 'Start entity ID required'),
+  tenantId: (z as any).string().min(1, 'Tenant ID required'),
+  maxDepth: (z as any).number().min(1).max(5, 'Max depth must be 1-5').default(2),
+  relationshipTypes: (z as any).array((z as any).string()).optional(),
+  entityKinds: (z as any).array((z as any).string()).optional(),
+  limit: (z as any).number().min(1).max(1000, 'Limit must be 1-1000').default(100),
 });
 
 export type EntityMutation = z.infer<typeof EntityMutationSchema>;
@@ -154,7 +154,7 @@ async function createAuditLog(
 
     return auditId;
   } catch (auditError) {
-    logger.error('Failed to create audit log:', auditError);
+    logger.error('Failed to create audit log:', auditError instanceof Error ? auditError.message : String(auditError));
     return auditId; // Return ID even if logging failed
   }
 }

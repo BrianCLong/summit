@@ -1,13 +1,11 @@
-// @ts-nocheck
 /**
  * Canonical Entities - Helper Functions
  *
  * Utilities for querying and manipulating bitemporal entities
  */
 
-// @ts-ignore - pg type imports
 import { Pool } from 'pg';
-import { BaseCanonicalEntity, TemporalQuery, BitemporalFields } from './types';
+import { BaseCanonicalEntity, TemporalQuery, BitemporalFields } from './types.js';
 
 /**
  * Get a snapshot of entities as they were at a specific point in time
@@ -140,7 +138,7 @@ export async function createEntityVersion<T extends BaseCanonicalEntity>(
 
   // Get column names and values from entity
   const columns: string[] = [];
-  const values: any[] = [];
+  const values: unknown[] = [];
   let paramIndex = 1;
 
   for (const [key, value] of Object.entries(entity)) {
@@ -298,7 +296,7 @@ export async function getEntitiesWithProvenance<T extends BaseCanonicalEntity>(
   entityType: string,
   entityIds: string[],
   tenantId: string,
-): Promise<Array<{ entity: T; provenance: any }>> {
+): Promise<Array<{ entity: T; provenance: unknown }>> {
   const tableName = `canonical_${entityType.toLowerCase()}`;
 
   const query = `
@@ -314,7 +312,7 @@ export async function getEntitiesWithProvenance<T extends BaseCanonicalEntity>(
   const result = await pool.query(query, [entityIds, tenantId]);
 
   // Deduplicate - keep only the latest version of each entity
-  const entityMap = new Map<string, { entity: T; provenance: any }>();
+  const entityMap = new Map<string, { entity: T; provenance: unknown }>();
   for (const row of result.rows) {
     const entity = mapRowToEntity<T>(row);
     if (!entityMap.has(entity.id)) {
@@ -331,8 +329,8 @@ export async function getEntitiesWithProvenance<T extends BaseCanonicalEntity>(
 /**
  * Map a database row to an entity object
  */
-function mapRowToEntity<T extends BaseCanonicalEntity>(row: any): T {
-  const entity: any = {};
+function mapRowToEntity<T extends BaseCanonicalEntity>(row: Record<string, unknown>): T {
+  const entity: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(row)) {
     const camelKey = snakeToCamel(key);

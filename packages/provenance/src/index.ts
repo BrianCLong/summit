@@ -203,3 +203,11 @@ export function applyRedactions<T extends object>(source: T, redactions: Redacti
 
   return clone as T;
 }
+
+// Type aliases for backward compatibility
+export type ProvenanceReceipt = Receipt;
+export type ExecutionReceipt = Receipt;
+
+// Function aliases for backward compatibility
+export const canonicalReceiptPayload = canonicalizeReceiptPayload;
+export const hashReceiptPayload = computeReceiptPayloadHash;

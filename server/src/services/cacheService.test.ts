@@ -1,12 +1,11 @@
-// @ts-nocheck
-import { CacheService } from './cacheService';
+import { CacheService } from './CacheService';
 import { describe, it, expect, beforeEach } from '@jest/globals';
 
 describe('CacheService (memory fallback)', () => {
   let cache: CacheService;
 
   beforeEach(() => {
-    delete (process.env as any).REDIS_URL;
+    delete (process.env as Record<string, string | undefined>).REDIS_URL;
     cache = new CacheService();
   });
 

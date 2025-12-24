@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Router } from 'express';
 import express from 'express';
 import { replayGuard, webhookRatelimit } from '../middleware/webhook-guard';

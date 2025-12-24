@@ -1,0 +1,99 @@
+# IP Asset Register
+# Epic 1: Inventory & Chain-of-Title
+# This file tracks core assets, their owners, and licensing status.
+
+assets:
+  - id: intelgraph-server
+    name: IntelGraph Server
+    type: codebase
+    path: server/
+    owner: IntelGraph Inc.
+    license: Proprietary
+    encumbrances: []
+    description: Core API server and backend logic.
+
+  - id: intelgraph-client
+    name: IntelGraph Client
+    type: codebase
+    path: client/
+    owner: IntelGraph Inc.
+    license: Proprietary
+    encumbrances: []
+    description: React-based frontend application.
+
+  - id: companyos-switchboard
+    name: CompanyOS Switchboard
+    type: codebase
+    path: companyos/switchboard
+    owner: IntelGraph Inc.
+    license: Proprietary
+    encumbrances: []
+    description: Real-time communication and routing layer.
+
+  - id: maestro-orchestrator
+    name: Maestro Orchestrator
+    type: module
+    path: server/src/maestro/
+    owner: IntelGraph Inc.
+    license: Proprietary
+    encumbrances: []
+    description: Workflow orchestration engine.
+
+  - id: provenance-ledger
+    name: Provenance Ledger
+    type: module
+    path: server/src/provenance/
+    owner: IntelGraph Inc.
+    license: Proprietary
+    encumbrances: []
+    description: Immutable audit log and chain-of-custody system.
+
+  - id: docs-site
+    name: Documentation Site
+    type: codebase
+    path: docs-site/
+    owner: IntelGraph Inc.
+    license: Proprietary
+    encumbrances: []
+    description: Docusaurus-based documentation portal.
+
+  - id: intelgraph-mvp
+    name: IntelGraph MVP
+    type: codebase
+    path: intelgraph-mvp/
+    owner: IntelGraph Inc.
+    license: Proprietary
+    encumbrances: []
+    description: MVP implementation (legacy/reference).
+
+models:
+  - id: model-embedding-v1
+    name: Embedding Service Model
+    type: model
+    owner: IntelGraph Inc.
+    license: Proprietary
+    path: server/src/services/EmbeddingService.js
+    notes: Wraps external API currently, need to track internal weights if any.
+
+datasets:
+  - id: golden-datasets
+    name: Golden Evaluation Datasets
+    type: dataset
+    path: GOLDEN/datasets/
+    owner: IntelGraph Inc.
+    license: Proprietary
+    description: Validated datasets for model evaluation.
+
+trademarks:
+  - name: IntelGraph
+    status: Unregistered
+    jurisdiction: US
+    classes: [9, 42]
+  - name: CompanyOS
+    status: Unregistered
+    jurisdiction: US
+    classes: [9, 42]
+  - name: Maestro
+    status: Unregistered
+    jurisdiction: US
+    classes: [9]

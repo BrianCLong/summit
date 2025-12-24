@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * PostgreSQL Pool Test Suite
  *
@@ -19,7 +18,7 @@ import {
   getPostgresPool,
   closePostgresPool,
   __private,
-} from '../postgres';
+} from '../postgres.js';
 import type pg from 'pg';
 
 type Pool = pg.Pool;

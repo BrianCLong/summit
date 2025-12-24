@@ -1,7 +1,8 @@
 // @ts-nocheck
 // Evidence Export and Provenance API Routes
 import express from 'express';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
+import { createHash, createHmac, randomBytes, randomUUID } from 'crypto';
 import jwt from 'jsonwebtoken';
 import { prometheusConductorMetrics } from '../observability/prometheus';
 import { getPostgresPool } from '../../db/postgres.js';
@@ -15,6 +16,7 @@ import {
 } from '../../maestro/evidence/receipt.js';
 
 const router = express.Router();
+const metrics = prometheusConductorMetrics as any;
 
 const inlineContentKey = (artifactId: string) =>
   `inline://evidence_artifact_content/${artifactId}`;
@@ -72,9 +74,8 @@ router.post(
       const receipt = buildProvenanceReceipt(run, events, artifacts);
       const receiptJson = canonicalStringify(receipt);
       const receiptBuffer = Buffer.from(receiptJson);
-      const artifactId = crypto.randomUUID();
-      const sha256Hash = crypto
-        .createHash('sha256')
+      const artifactId = randomUUID();
+      const sha256Hash = createHash('sha256')
         .update(receiptBuffer)
         .digest('hex');
 
@@ -216,8 +217,8 @@ router.post('/export', async (req, res) => {
 
     // Track metrics
     const duration = Date.now() - startTime;
-    prometheusConductorMetrics?.evidenceExportLatency?.observe(duration / 1000);
-    prometheusConductorMetrics?.evidenceExportRequests?.inc({
+    metrics?.evidenceExportLatency?.observe(duration / 1000);
+    metrics?.evidenceExportRequests?.inc({
       status: 'success',
       format,
     });
@@ -243,8 +244,8 @@ router.post('/export', async (req, res) => {
     });
   } catch (error) {
     const duration = Date.now() - startTime;
-    prometheusConductorMetrics?.evidenceExportLatency?.observe(duration / 1000);
-    prometheusConductorMetrics?.evidenceExportRequests?.inc({
+    metrics?.evidenceExportLatency?.observe(duration / 1000);
+    metrics?.evidenceExportRequests?.inc({
       status: 'error',
       format: req.body.format || 'json',
     });
@@ -298,12 +299,12 @@ router.get('/:evidenceId/download', async (req, res) => {
         res.json(evidenceBundle);
     }
 
-    prometheusConductorMetrics?.evidenceDownloadRequests?.inc({
+    metrics?.evidenceDownloadRequests?.inc({
       status: 'success',
       format,
     });
   } catch (error) {
-    prometheusConductorMetrics?.evidenceDownloadRequests?.inc({
+    metrics?.evidenceDownloadRequests?.inc({
       status: 'error',
       format: req.query.format || 'json',
     });
@@ -342,7 +343,7 @@ router.post('/:evidenceId/verify', async (req, res) => {
       expectedHash,
     );
 
-    prometheusConductorMetrics?.evidenceVerificationRequests?.inc({
+    metrics?.evidenceVerificationRequests?.inc({
       status: verification.valid ? 'success' : 'failed',
     });
 
@@ -353,7 +354,7 @@ router.post('/:evidenceId/verify', async (req, res) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    prometheusConductorMetrics?.evidenceVerificationRequests?.inc({
+    metrics?.evidenceVerificationRequests?.inc({
       status: 'error',
     });
 
@@ -534,7 +535,7 @@ async function generateEvidenceBundle(
         name: 'execution.log',
         content: `[${new Date().toISOString()}] Starting execution...\n[${new Date().toISOString()}] Completed successfully`,
         contentType: 'text/plain',
-        hash: crypto.createHash('sha256').update('log-content').digest('hex'),
+        hash: createHash('sha256').update('log-content').digest('hex'),
         size: 125,
         timestamp: new Date(),
         metadata: { level: 'info', source: 'maestro-conductor' },
@@ -589,7 +590,7 @@ async function generateEvidenceBundle(
         2,
       ),
       contentType: 'application/json',
-      hash: crypto.createHash('sha256').update('sbom-content').digest('hex'),
+      hash: createHash('sha256').update('sbom-content').digest('hex'),
       size: 512,
       timestamp: new Date(),
       metadata: { format: 'CycloneDX', version: '1.4' },
@@ -640,7 +641,7 @@ async function generateEvidenceBundle(
     signature: undefined,
     hash: undefined,
   });
-  bundle.hash = crypto.createHash('sha256').update(bundleContent).digest('hex');
+  bundle.hash = createHash('sha256').update(bundleContent).digest('hex');
 
   return bundle;
 }

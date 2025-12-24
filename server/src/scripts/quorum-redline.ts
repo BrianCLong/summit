@@ -1,11 +1,10 @@
-// @ts-nocheck
 import { writeQuorumRouter } from '../db/WriteQuorumRouter.js';
-import { getNeo4jDriver, initializeNeo4jDriver, closeNeo4jDriver } from '../db/neo4j.js';
+import { initializeNeo4jDriver, closeNeo4jDriver } from '../db/neo4j.js';
 import pino from 'pino';
 
-const log = pino({ name: 'QuorumRedline' });
+const log = (pino as any)({ name: 'QuorumRedline' });
 
-async function runRedline() {
+async function runRedline(): Promise<void> {
   log.info('Starting Quorum Redline Test...');
 
   // Initialize DB
@@ -20,8 +19,8 @@ async function runRedline() {
 
   const iterations = 100;
   const tenant = 'TENANT_REDLINE';
-  const errors = [];
-  const latencies = [];
+  const errors: unknown[] = [];
+  const latencies: number[] = [];
 
   log.info(`Running ${iterations} iterations for tenant ${tenant}...`);
 
@@ -31,7 +30,7 @@ async function runRedline() {
       // Simulate Chaos (random latency injection)
       const chaosDelay = Math.random() < 0.1 ? 1000 : 0; // 10% chance of 1s lag
       if (chaosDelay > 0) {
-        await new Promise(r => setTimeout(r, chaosDelay));
+        await new Promise<void>(r => setTimeout(r, chaosDelay));
       }
 
       await writeQuorumRouter.write(
@@ -39,7 +38,7 @@ async function runRedline() {
         { id: `test-${i}` },
         tenant
       );
-    } catch (e) {
+    } catch (e: unknown) {
       errors.push(e);
     }
     latencies.push(Date.now() - start);
@@ -79,7 +78,7 @@ async function runRedline() {
   await closeNeo4jDriver();
 }
 
-runRedline().catch(err => {
+runRedline().catch((err: unknown) => {
   log.error(err);
   process.exit(1);
 });

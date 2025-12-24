@@ -1,9 +1,8 @@
-// @ts-nocheck
 import { pool } from '../../db/pg.js';
 import { NotificationPayload, NotificationStatus, NotificationPriority } from '../types.js';
 import pino from 'pino';
 
-const logger = pino({ name: 'NotificationRepo' });
+const logger = (pino as any)({ name: 'NotificationRepo' });
 
 export interface NotificationRecord {
   id: string;

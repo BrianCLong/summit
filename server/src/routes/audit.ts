@@ -1,17 +1,50 @@
 // @ts-nocheck
-import { Router } from 'express';
+import { Router, Response } from 'express';
+import type { AuthenticatedRequest } from './types.js';
 import archiver from 'archiver';
 import { getPostgresPool } from '../db/postgres.js';
 import { ProvenanceRepo } from '../repos/ProvenanceRepo.js';
 import { ensureAuthenticated, requirePermission } from '../middleware/auth.js';
 import { getAuditSystem, ComplianceFramework } from '../audit/advanced-audit-system.js';
 import logger from '../utils/logger.js';
+import { BundleVerifier } from '../audit/BundleVerifier.js';
+import rateLimit from 'express-rate-limit';
 
 export const auditRouter = Router();
 
+// Rate limiter for verification endpoint
+const verificationLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // Limit each IP to 10 requests per windowMs
+  message: 'Too many verification requests from this IP, please try again later',
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+
+// --- Public-Facing Bundle Verifier ---
+auditRouter.post('/verify-bundle', verificationLimiter, async (req: any, res: Response) => {
+  if (process.env.AUDIT_VERIFY !== 'true') {
+    return res.status(404).json({ error: 'Feature disabled' });
+  }
+
+  // Token scope check (simulated)
+  const token = req.headers['x-verify-token'];
+  if (!token) {
+    return res.status(401).json({ error: 'Missing verification token' });
+  }
+
+  try {
+    const report = await BundleVerifier.getInstance().verify(req.body);
+    res.json(report);
+  } catch (error) {
+    logger.error('Bundle verification failed', error);
+    res.status(500).json({ error: 'Verification process failed' });
+  }
+});
+
 // --- Legacy Incident/Investigation Audit Routes ---
 
-auditRouter.get('/incidents/:id/audit-bundle.zip', async (req, res) => {
+auditRouter.get('/incidents/:id/audit-bundle.zip', async (req: AuthenticatedRequest, res: Response) => {
   const tenant = String(
     (req.headers['x-tenant-id'] as any) ||
       (req.headers['x-tenant'] as any) ||
@@ -76,7 +109,7 @@ auditRouter.get('/incidents/:id/audit-bundle.zip', async (req, res) => {
   await archive.finalize();
 });
 
-auditRouter.get('/investigations/:id/audit-bundle.zip', async (req, res) => {
+auditRouter.get('/investigations/:id/audit-bundle.zip', async (req: AuthenticatedRequest, res: Response) => {
   const tenant = String(
     (req.headers['x-tenant-id'] as any) ||
       (req.headers['x-tenant'] as any) ||
@@ -152,7 +185,7 @@ auditRouter.get(
   '/',
   ensureAuthenticated,
   requirePermission('audit:read'), // Admin or compliance officer only
-  async (req, res) => {
+  async (req: AuthenticatedRequest, res: Response) => {
     try {
       const {
         startTime,
@@ -176,7 +209,7 @@ auditRouter.get(
         correlationIds: correlationIds ? (correlationIds as string).split(',') : undefined,
         limit: limit ? parseInt(limit as string, 10) : 50,
         offset: offset ? parseInt(offset as string, 10) : 0,
-        tenantIds: [req.user.tenantId || 'system'], // Scoped to tenant
+        tenantIds: [req.user?.tenantId || 'system'], // Scoped to tenant
       });
 
       res.json({ data: events });
@@ -192,7 +225,7 @@ auditRouter.get(
   '/compliance-report',
   ensureAuthenticated,
   requirePermission('audit:report'),
-  async (req, res) => {
+  async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { framework, startTime, endTime } = req.query;
 
@@ -219,7 +252,7 @@ auditRouter.get(
   '/integrity',
   ensureAuthenticated,
   requirePermission('audit:verify'),
-  async (req, res) => {
+  async (req: AuthenticatedRequest, res: Response) => {
     try {
        const { startTime, endTime } = req.query;
 

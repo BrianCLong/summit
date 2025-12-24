@@ -131,7 +131,7 @@ export class CommandConsoleService {
         details.push(
           ...missing.map((item) => ({
             component: item,
-            status: 'fail' as GateStatus,
+            status: 'fail' as const,
             message: `${item} not detected`,
           })),
         );
@@ -372,7 +372,7 @@ export class CommandConsoleService {
     return { gaGateFailures: gaFailures, policyDenials, killSwitchActivations };
   }
 
-  private readJsonIfExists(pathsToTry: string[]): any | null {
+  private readJsonIfExists(pathsToTry: string[]): Record<string, unknown> | null {
     for (const p of pathsToTry) {
       if (fs.existsSync(p)) {
         try {

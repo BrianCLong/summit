@@ -11,6 +11,10 @@ import { EventSourcingService } from '../../services/EventSourcingService';
 import { UserRepository } from '../../data/UserRepository';
 import { getPostgresPool } from '../../config/database';
 
+interface SOC2JobPayload {
+  [key: string]: unknown;
+}
+
 export const JOB_NAME = 'generate-soc2-evidence';
 
 // Instantiate all required services
@@ -26,7 +30,7 @@ const storageService = new WormStorageService();
  * Handles the automated generation of SOC2 evidence packets.
  * This job is scheduled to run monthly.
  */
-export default async function handle(job: Job<any>) {
+export default async function handle(job: Job<SOC2JobPayload>) {
   const tracer = getTracer('soc2-evidence-job');
   const parentSpan = tracer.startSpan('generate-soc2-evidence-job');
 
@@ -40,7 +44,7 @@ export default async function handle(job: Job<any>) {
 
   try {
     // 1. Generate the evidence packet
-    const packet = await tracer.startActiveSpan('generate-packet', async (span) => {
+    const packet = await (tracer as any).startActiveSpan('generate-packet', async (span) => {
       const result = await soc2Service.generateSOC2Packet(startDate, endDate);
       span.end();
       return result;
@@ -48,14 +52,14 @@ export default async function handle(job: Job<any>) {
     const jsonPacket = JSON.stringify(packet, null, 2);
 
     // 2. Generate the PDF report
-    const pdfBuffer = await tracer.startActiveSpan('generate-pdf', async (span) => {
+    const pdfBuffer = await (tracer as any).startActiveSpan('generate-pdf', async (span) => {
         const result = await generatePdfFromPacket(packet);
         span.end();
         return result;
     });
 
     // 3. Sign both artifacts
-    const { jsonSignature, pdfSignature } = await tracer.startActiveSpan('sign-artifacts', async (span) => {
+    const { jsonSignature, pdfSignature } = await (tracer as any).startActiveSpan('sign-artifacts', async (span) => {
         const jsonSig = signingService.sign(jsonPacket);
         const pdfSig = signingService.sign(pdfBuffer);
         span.end();
@@ -63,7 +67,7 @@ export default async function handle(job: Job<any>) {
     });
 
     // 4. Store the artifacts and their signatures
-    await tracer.startActiveSpan('store-artifacts', async (span) => {
+    await (tracer as any).startActiveSpan('store-artifacts', async (span) => {
         const fileSuffix = `${startDate.toISOString()}_${endDate.toISOString()}`;
         await storageService.store(`SOC2_Evidence_${fileSuffix}.json`, Buffer.from(jsonPacket));
         await storageService.store(`SOC2_Evidence_${fileSuffix}.json.sig`, Buffer.from(jsonSignature));
@@ -73,15 +77,15 @@ export default async function handle(job: Job<any>) {
     });
 
     const duration = Date.now() - startTime;
-    metrics.soc2JobDuration.observe(duration);
-    metrics.soc2JobRuns.inc({ status: 'success' });
-    metrics.soc2PacketSize.observe(jsonPacket.length);
+    (metrics as any).soc2JobDuration?.observe(duration);
+    (metrics as any).soc2JobRuns?.inc({ status: 'success' });
+    (metrics as any).soc2PacketSize?.observe(jsonPacket.length);
 
     console.log(`[JOB: ${JOB_NAME}] Successfully generated and stored SOC2 evidence for ${startDate.toDateString()} - ${endDate.toDateString()}`);
   } catch (error) {
     const duration = Date.now() - startTime;
-    metrics.soc2JobDuration.observe(duration);
-    metrics.soc2JobRuns.inc({ status: 'failure' });
+    (metrics as any).soc2JobDuration?.observe(duration);
+    (metrics as any).soc2JobRuns?.inc({ status: 'failure' });
 
     console.error(`[JOB: ${JOB_NAME}] Failed to generate SOC2 evidence:`, error);
     parentSpan.recordException(error as Error);

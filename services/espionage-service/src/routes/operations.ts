@@ -17,7 +17,7 @@ import {
  * and operational tracking.
  */
 
-export const operationsRouter = Router();
+export const operationsRouter: Router = Router();
 const detector = new OperationsDetector();
 
 // ============================================================================

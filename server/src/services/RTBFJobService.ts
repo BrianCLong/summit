@@ -13,6 +13,7 @@ import { PrometheusMetrics } from '../utils/metrics.js';
 import logger from '../utils/logger.js';
 import { tracer } from '../observability/telemetry.js';
 import { DatabaseService } from './DatabaseService.js';
+import type { Span } from '@opentelemetry/api';
 
 // RTBF job configuration
 interface RTBFConfig {
@@ -339,7 +340,7 @@ export class RTBFJobService extends EventEmitter {
     this.metrics.setGauge('rtbf_workers_active', this.workers.size);
   }
 
-  private handleWorkerMessage(workerId: string, message: any): void {
+  private handleWorkerMessage(workerId: string, message: Record<string, unknown>): void {
     const metrics = this.workerMetrics.get(workerId)!;
 
     switch (message.type) {
@@ -388,8 +389,11 @@ export class RTBFJobService extends EventEmitter {
     });
   }
 
-  private handleBatchCompleted(workerId: string, data: any): void {
-    const { batchId, recordsProcessed, recordsDeleted, errors } = data;
+  private handleBatchCompleted(workerId: string, data: Record<string, unknown>): void {
+    const batchId = data.batchId as string;
+    const recordsProcessed = data.recordsProcessed as number;
+    const recordsDeleted = data.recordsDeleted as number;
+    const errors = data.errors as number;
     const metrics = this.workerMetrics.get(workerId)!;
 
     metrics.recordsProcessed += recordsProcessed;
@@ -423,8 +427,10 @@ export class RTBFJobService extends EventEmitter {
     this.assignNextBatch(workerId);
   }
 
-  private handleBatchError(workerId: string, data: any): void {
-    const { batchId, error, recordsAffected } = data;
+  private handleBatchError(workerId: string, data: Record<string, unknown>): void {
+    const batchId = data.batchId as string;
+    const error = data.error as string;
+    const recordsAffected = data.recordsAffected as number;
 
     logger.error('Batch processing error', {
       workerId,
@@ -449,9 +455,10 @@ export class RTBFJobService extends EventEmitter {
     this.assignNextBatch(workerId);
   }
 
-  private handleProgressUpdate(workerId: string, data: any): void {
+  private handleProgressUpdate(workerId: string, data: Record<string, unknown>): void {
     const metrics = this.workerMetrics.get(workerId)!;
-    const { recordsPerSecond, currentTable } = data;
+    const recordsPerSecond = data.recordsPerSecond as number;
+    const currentTable = data.currentTable as string;
 
     metrics.averageRecordsPerSecond = recordsPerSecond;
 
@@ -513,7 +520,7 @@ export class RTBFJobService extends EventEmitter {
     return tracer.startActiveSpan(
       'rtbf_service.submit_request',
       {},
-      async (span: any) => {
+      async (span: Span) => {
         span.setAttributes({
           'rtbf.tenant_id': request.tenantId,
           'rtbf.job_id': request.id,
@@ -690,12 +697,12 @@ export class RTBFJobService extends EventEmitter {
   private buildCountQuery(
     table: string,
     target: RTBFTarget,
-  ): { sql: string; params: any[] } {
+  ): { sql: string; params: unknown[] } {
     const { field, value, operator } = target.identifier;
     this.validateIdentifier(table);
     this.validateIdentifier(field);
     let whereClause = '';
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     switch (operator) {
       case '=':
@@ -854,12 +861,12 @@ export class RTBFJobService extends EventEmitter {
   private buildSelectQuery(
     table: string,
     target: RTBFTarget,
-  ): { sql: string; params: any[] } {
+  ): { sql: string; params: unknown[] } {
     const { field, value, operator } = target.identifier;
     this.validateIdentifier(table);
     this.validateIdentifier(field);
     let whereClause = '';
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     switch (operator) {
       case '=':
@@ -1187,10 +1194,10 @@ class RTBFWorker {
   private db: DatabaseService;
   private processingBatch: RTBFBatch | null = null;
 
-  constructor(data: any) {
-    this.workerId = data.workerId;
-    this.config = data.config;
-    this.db = new DatabaseService(data.dbConfig);
+  constructor(data: Record<string, unknown>) {
+    this.workerId = data.workerId as string;
+    this.config = data.config as RTBFConfig;
+    this.db = new DatabaseService(data.dbConfig as Record<string, unknown>);
   }
 
   public async start(): Promise<void> {
@@ -1208,10 +1215,10 @@ class RTBFWorker {
     });
   }
 
-  private async handleMessage(message: any): Promise<void> {
+  private async handleMessage(message: Record<string, unknown>): Promise<void> {
     switch (message.type) {
       case 'process_batch':
-        await this.processBatch(message.batch);
+        await this.processBatch(message.batch as RTBFBatch);
         break;
     }
   }
@@ -1260,7 +1267,7 @@ class RTBFWorker {
           logger.error('Failed to process record', {
             workerId: this.workerId,
             recordId,
-            error: error.message,
+            error: error instanceof Error ? error.message : String(error),
           });
           errors++;
         }
@@ -1289,7 +1296,7 @@ class RTBFWorker {
         type: 'batch_error',
         data: {
           batchId: batch.batchId,
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           recordsAffected: batch.records.length,
         },
       });
@@ -1329,6 +1336,12 @@ class RTBFWorker {
     }
   }
 
+  private validateIdentifier(identifier: string): void {
+    if (!/^[a-zA-Z0-9_]+$/.test(identifier)) {
+      throw new Error(`Invalid identifier: ${identifier}`);
+    }
+  }
+
   private async anonymizeRecord(
     table: string,
     recordId: string,
@@ -1343,7 +1356,7 @@ class RTBFWorker {
     };
 
     const updateClauses = Object.entries(anonymizeFields)
-      .map(([field, value], index) => `${field} = $${index + 2}`)
+      .map(([field], index) => `${field} = $${index + 2}`)
       .join(', ');
 
     if (updateClauses) {

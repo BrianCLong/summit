@@ -1,0 +1,29 @@
+name: CI Baseline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install pnpm
+        run: npm install -g pnpm
+      - name: Install dependencies (Bootstrap)
+        run: make bootstrap
+      - name: Lint
+        run: make lint
+      - name: Test
+        run: make test

@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import * as zlib from 'zlib';
 import { promisify } from 'util';
 

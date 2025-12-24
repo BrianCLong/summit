@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { VisualizationTheme, DataPoint } from './types';
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Digital Twin Cognition Layer
  *

@@ -63,8 +63,7 @@ export class GrowthPlaybookService {
     `;
 
     try {
-      const response = await this.llm.complete({
-        prompt,
+      const response = await this.llm.complete(prompt, {
         temperature: 0.7,
         maxTokens: 1500
       });

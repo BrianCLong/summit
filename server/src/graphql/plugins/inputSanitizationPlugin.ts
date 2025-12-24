@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * GraphQL Input Sanitization Plugin
  *
@@ -11,8 +10,9 @@
 import { ApolloServerPlugin, GraphQLRequestListener } from '@apollo/server';
 import { GraphQLError } from 'graphql';
 import pino from 'pino';
+import type { GraphQLContext } from '../apollo-v5-server.js';
 
-const logger = pino();
+const logger = (pino as any)();
 
 export interface InputSanitizationOptions {
   /**
@@ -52,11 +52,11 @@ const DEFAULT_OPTIONS: InputSanitizationOptions = {
  */
 export function createInputSanitizationPlugin(
   options: InputSanitizationOptions = {}
-): ApolloServerPlugin {
+): ApolloServerPlugin<GraphQLContext> {
   const finalOptions = { ...DEFAULT_OPTIONS, ...options };
 
   return {
-    async requestDidStart(): Promise<GraphQLRequestListener<any>> {
+    async requestDidStart(): Promise<GraphQLRequestListener<GraphQLContext>> {
       return {
         async didResolveOperation({ request }) {
           if (!request.variables) {

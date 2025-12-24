@@ -6,7 +6,7 @@ export class TraversalOptimizer {
    * Generates an optimized traversal query based on intent and strategy.
    * Focuses on OSINT patterns like shortest path, neighborhood expansion, and common connections.
    */
-  public optimize(strategy: TraversalStrategy, params: any): string {
+  public optimize(strategy: TraversalStrategy, params: Record<string, unknown>): string {
     switch (strategy.type) {
       case 'shortest_path':
         return this.generateShortestPathQuery(strategy, params);
@@ -32,11 +32,11 @@ export class TraversalOptimizer {
     return `:${validTypes.map(t => `\`${t}\``).join('|')}`;
   }
 
-  private generateShortestPathQuery(strategy: TraversalStrategy, params: any): string {
+  private generateShortestPathQuery(strategy: TraversalStrategy, params: Record<string, unknown>): string {
     const maxDepth = strategy.maxDepth || 5;
     const limit = strategy.limit || 1;
     // Expects params: { startId, endId, relationshipTypes?, direction? }
-    const relTypes = this.sanitizeRelTypes(params.relationshipTypes);
+    const relTypes = this.sanitizeRelTypes(params.relationshipTypes as string[] | undefined);
     const dirStart = params.direction === 'INCOMING' ? '<' : '';
     const dirEnd = params.direction === 'OUTGOING' ? '>' : '';
 
@@ -48,10 +48,10 @@ export class TraversalOptimizer {
     `;
   }
 
-  private generateAllSimplePathsQuery(strategy: TraversalStrategy, params: any): string {
+  private generateAllSimplePathsQuery(strategy: TraversalStrategy, params: Record<string, unknown>): string {
     const maxDepth = strategy.maxDepth || 3;
     const limit = strategy.limit || 10;
-    const relTypes = this.sanitizeRelTypes(params.relationshipTypes);
+    const relTypes = this.sanitizeRelTypes(params.relationshipTypes as string[] | undefined);
 
     return `
       MATCH (start {id: $startId}), (end {id: $endId})
@@ -61,7 +61,7 @@ export class TraversalOptimizer {
     `;
   }
 
-  private generateApocSubgraphQuery(strategy: TraversalStrategy, params: any): string {
+  private generateApocSubgraphQuery(strategy: TraversalStrategy, params: Record<string, unknown>): string {
     const maxLevel = strategy.maxDepth || 2;
     // APOC is more efficient for broad expansion
     // APOC procedures take filter strings, validation is handled by caller or APOC logic,
@@ -80,9 +80,9 @@ export class TraversalOptimizer {
     `;
   }
 
-  private generateNativeExpansionQuery(strategy: TraversalStrategy, params: any): string {
+  private generateNativeExpansionQuery(strategy: TraversalStrategy, params: Record<string, unknown>): string {
     const hops = strategy.maxDepth || 2;
-    const relTypes = this.sanitizeRelTypes(params.relationshipTypes);
+    const relTypes = this.sanitizeRelTypes(params.relationshipTypes as string[] | undefined);
 
     // Optimized native expansion using pattern comprehension or simple MATCH
     // For 1 hop
@@ -107,7 +107,7 @@ export class TraversalOptimizer {
     `;
   }
 
-  private generateGDSQuery(strategy: TraversalStrategy, params: any): string {
+  private generateGDSQuery(strategy: TraversalStrategy, params: Record<string, unknown>): string {
      // Placeholder for Graph Data Science integration
      // e.g., PageRank, Centrality
      const algo = strategy.algorithmConfig?.name || 'pageRank';

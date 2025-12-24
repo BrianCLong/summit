@@ -1,14 +1,22 @@
-// @ts-nocheck
 /**
  * Computer Vision Integration Module
  * Bridges new CV packages with existing Python models
+ *
+ * NOTE: These packages are optional and may not be built yet.
+ * The imports are suppressed with @ts-expect-error to allow gradual integration.
  */
 
+// @ts-expect-error - Optional package, may not be built yet
 import { createYOLODetector } from '@intelgraph/object-detection';
+// @ts-expect-error - Optional package, may not be built yet
 import { FaceAnalyzer } from '@intelgraph/face-analysis';
+// @ts-expect-error - Optional package, may not be built yet
 import { OCREngine } from '@intelgraph/ocr';
+// @ts-expect-error - Optional package, may not be built yet
 import { SatelliteAnalyzer } from '@intelgraph/satellite-imagery';
+// @ts-expect-error - Optional package, may not be built yet
 import { VideoAnalyzer } from '@intelgraph/video-analysis';
+// @ts-expect-error - Optional package, may not be built yet
 import { ForensicsAnalyzer } from '@intelgraph/image-forensics';
 
 /**

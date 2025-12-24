@@ -2,7 +2,7 @@
 // Signed Runbook Registry for Conductor
 // Provides secure, version-controlled operational procedures with approval workflows
 
-import crypto from 'crypto';
+import { createHash, createSign, createVerify, randomBytes, randomUUID, generateKeyPairSync } from 'crypto';
 import { prometheusConductorMetrics } from '../observability/prometheus';
 import Redis from 'ioredis';
 
@@ -126,7 +126,7 @@ class RunbookSigningService {
 
   constructor() {
     // In production, these should be loaded from secure key management
-    const keyPair = crypto.generateKeyPairSync('rsa', {
+    const keyPair = generateKeyPairSync('rsa', {
       modulusLength: 2048,
       publicKeyEncoding: { type: 'spki', format: 'pem' },
       privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
@@ -151,7 +151,7 @@ class RunbookSigningService {
       .digest('hex');
 
     // Sign the hash
-    const sign = crypto.createSign('RSA-SHA256');
+    const sign = createSign('RSA-SHA256');
     sign.update(hash);
     const signature = sign.sign(this.privateKey, 'hex');
 
@@ -189,7 +189,7 @@ class RunbookSigningService {
       }
 
       // Verify signature
-      const verify = crypto.createVerify('RSA-SHA256');
+      const verify = createVerify('RSA-SHA256');
       verify.update(hash);
       return verify.verify(
         runbook.signature.publicKey,
@@ -243,7 +243,7 @@ class ApprovalWorkflowEngine {
     execution: RunbookExecution,
     workflow: ApprovalWorkflow,
   ): Promise<void> {
-    const approvalId = crypto.randomUUID();
+    const approvalId = randomUUID();
 
     const approvalRequest = {
       id: approvalId,
@@ -280,7 +280,7 @@ class ApprovalWorkflowEngine {
     );
     prometheusConductorMetrics.recordOperationalEvent(
       'approval_workflow_initiated',
-      true,
+      { success: true },
     );
   }
 
@@ -323,7 +323,7 @@ class ApprovalWorkflowEngine {
 
       // Add approval/rejection
       const approvalRecord = {
-        id: crypto.randomUUID(),
+        id: randomUUID(),
         approverId,
         decision,
         timestamp: Date.now(),
@@ -471,17 +471,17 @@ export class RunbookRegistry {
 
       console.log(`Runbook registered: ${runbook.id} v${runbook.version}`);
       prometheusConductorMetrics.recordOperationalEvent(
-        'runbook_registered',
-        true,
-      );
+      'runbook_registered',
+      { success: true },
+    );
 
       return signedRunbook.signature.hash;
     } catch (error) {
       console.error('Runbook registration failed:', error);
       prometheusConductorMetrics.recordOperationalEvent(
-        'runbook_registration_error',
-        false,
-      );
+      'runbook_registration_error',
+      { success: false },
+    );
       throw error;
     }
   }
@@ -539,7 +539,7 @@ export class RunbookRegistry {
       throw new Error('Runbook not found or invalid');
     }
 
-    const executionId = crypto.randomUUID();
+    const executionId = randomUUID();
     const execution: RunbookExecution = {
       id: executionId,
       runbookId: runbook.id,
@@ -581,7 +581,7 @@ export class RunbookRegistry {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'runbook_execution_initiated',
-      true,
+      { success: true },
     );
     return executionId;
   }

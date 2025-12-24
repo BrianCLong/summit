@@ -16,7 +16,7 @@ import {
   CreateAssetInput,
   UpdateAssetInput,
   AssetQueryFilter,
-} from '../types/digitalTwin';
+} from '../types/digitalTwin.js';
 
 /**
  * Service for managing digital twin assets

@@ -1,9 +1,10 @@
 // @ts-nocheck
+import type { Redis } from 'ioredis';
 import { getRedisClient } from '../db/redis.js';
 import pino from 'pino';
-import { z } from 'zod';
+import * as z from 'zod';
 
-const logger = pino();
+const logger = (pino as any)();
 
 export const AlertRuleSchema = z.object({
   id: z.string().uuid(),
@@ -26,14 +27,14 @@ export interface AlertEvent {
 }
 
 class AlertingService {
-  private redis: any;
+  private redis: Redis | null = null;
   private rules = new Map<string, AlertRule[]>();
 
   constructor() {
       try {
         this.redis = getRedisClient();
       } catch (e) {
-        console.error("Failed to get redis client in AlertingService", e);
+        logger.error({ error: e instanceof Error ? e.message : String(e) }, "Failed to get redis client in AlertingService");
       }
       // Load rules from DB/Redis on startup?
       // For now, we'll use in-memory rules populated via API or hardcoded for demo
@@ -47,15 +48,15 @@ class AlertingService {
       });
   }
 
-  addRule(rule: AlertRule) {
+  addRule(rule: AlertRule): void {
     const metricRules = this.rules.get(rule.metric) || [];
     metricRules.push(rule);
     this.rules.set(rule.metric, metricRules);
   }
 
-  async checkAlerts(metric: string, value: number, tags: Record<string, string> = {}) {
+  async checkAlerts(metric: string, value: number, tags: Record<string, string> = {}): Promise<void> {
     const rules = this.rules.get(metric);
-    if (!rules) return;
+    if (!rules || !this.redis) return;
 
     for (const rule of rules) {
       if (!rule.enabled) continue;

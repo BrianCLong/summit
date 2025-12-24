@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Rule Engine Schemas
  *

@@ -1,4 +1,3 @@
-// @ts-nocheck
 // =============================================
 // Router Bench Runner & Performance Analysis
 // =============================================
@@ -157,7 +156,7 @@ export default function RouterBenchRunner() {
   }
 
   const getBestModel = (results: BenchResult[]) => {
-    if (results.length === 0) {return null}
+    if (results.length === 0) return null
     return results.reduce((best, current) =>
       current.score > best.score ? current : best
     )

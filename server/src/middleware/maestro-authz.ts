@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Request, Response, NextFunction } from 'express';
 import { randomUUID } from 'crypto';
 import { opaPolicyEngine } from '../conductor/governance/opa-integration.js';

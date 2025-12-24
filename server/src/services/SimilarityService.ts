@@ -203,22 +203,41 @@ export class SimilarityService {
           for (let i = 0; i < validated.entityIds.length; i += batchSize) {
             const batch = validated.entityIds.slice(i, i + batchSize);
 
+            // Fetch all embeddings for the batch in one query
+            // This reduces DB roundtrips by avoiding N getEntityEmbedding calls
+            const embeddingsMap = await this.getEntitiesEmbeddings(batch);
+
             const batchPromises = batch.map(async (entityId) => {
               try {
-                const similarResult = await this.findSimilar({
-                  investigationId: validated.investigationId,
-                  entityId,
-                  topK: validated.topK,
-                  threshold: validated.threshold,
-                  includeText: false,
-                });
+                const targetEmbedding = embeddingsMap.get(entityId);
 
-                return [entityId, similarResult.results] as const;
+                if (!targetEmbedding) {
+                  serviceLogger.warn(
+                    'No embedding found for entity in bulk search',
+                    { entityId },
+                  );
+                  return [entityId, [] as SimilarEntity[]] as const;
+                }
+
+                const similarEntities = await this.performVectorSearch(
+                  targetEmbedding,
+                  validated.investigationId,
+                  validated.topK,
+                  validated.threshold,
+                  false, // includeText
+                  entityId, // excludeEntityId
+                );
+
+                return [entityId, similarEntities] as const;
               } catch (error) {
-                serviceLogger.warn('Failed to find similar entities for entity', {
-                  entityId,
-                  error: error instanceof Error ? error.message : 'Unknown error',
-                });
+                serviceLogger.warn(
+                  'Failed to find similar entities for entity',
+                  {
+                    entityId,
+                    error:
+                      error instanceof Error ? error.message : 'Unknown error',
+                  },
+                );
                 return [entityId, [] as SimilarEntity[]] as const;
               }
             });
@@ -246,6 +265,28 @@ export class SimilarityService {
         }
       },
     );
+  }
+
+  /**
+   * Get embeddings for multiple entities in a single query
+   */
+  private async getEntitiesEmbeddings(entityIds: string[]): Promise<Map<string, number[]>> {
+    const client = await this.getPool().connect();
+
+    try {
+      const result = await client.query(
+        'SELECT entity_id, embedding FROM entity_embeddings WHERE entity_id = ANY($1)',
+        [entityIds],
+      );
+
+      const map = new Map<string, number[]>();
+      for (const row of result.rows) {
+        map.set(row.entity_id, this.parseVectorString(row.embedding));
+      }
+      return map;
+    } finally {
+      client.release();
+    }
   }
 
   /**

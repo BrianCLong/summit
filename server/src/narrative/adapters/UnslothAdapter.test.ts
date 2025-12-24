@@ -1,10 +1,9 @@
-// @ts-nocheck
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { UnslothAdapter } from './UnslothAdapter.js';
 import type { NarrativeState, NarrativeEvent } from '../types.js';
 
 // Mock global fetch
-global.fetch = jest.fn() as unknown as typeof fetch;
+global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 
 describe('UnslothAdapter', () => {
   let adapter: UnslothAdapter;
@@ -75,7 +74,7 @@ describe('UnslothAdapter', () => {
       ]
     };
 
-    (global.fetch as jest.Mock).mockResolvedValue({
+    (global.fetch as jest.MockedFunction<typeof fetch>).mockResolvedValue({
       ok: true,
       json: async () => mockResponse
     } as Response);
@@ -99,8 +98,8 @@ describe('UnslothAdapter', () => {
       })
     );
 
-    const callArgs = (global.fetch as jest.Mock).mock.calls[0];
-    const body = JSON.parse(callArgs[1].body as string);
+    const callArgs = (global.fetch as jest.MockedFunction<typeof fetch>).mock.calls[0];
+    const body = JSON.parse(callArgs[1]?.body as string);
 
     // Verify prompt contains history (length check or specific content)
     const userPrompt = body.messages[1].content;
@@ -110,7 +109,7 @@ describe('UnslothAdapter', () => {
   });
 
   it('should handle API errors gracefully', async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
+    (global.fetch as jest.MockedFunction<typeof fetch>).mockResolvedValue({
       ok: false,
       status: 500,
       text: async () => 'Internal Server Error'

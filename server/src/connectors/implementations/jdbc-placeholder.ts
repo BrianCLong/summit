@@ -1,7 +1,5 @@
-// @ts-nocheck
-
-import { BaseConnector } from '../base';
-import { ConnectorConfig, ConnectorSchema } from '../types';
+import { BaseConnector } from '../base.js';
+import { ConnectorConfig, ConnectorSchema } from '../types.js';
 import { Readable } from 'stream';
 
 // Placeholder for Database connector
@@ -24,10 +22,10 @@ export class JDBCConnector extends BaseConnector {
   }
 
   async fetchSchema(): Promise<ConnectorSchema> {
-      return { fields: [] };
+      return { fields: [], version: 1 };
   }
 
-  async readStream(options?: any): Promise<Readable> {
+  async readStream(options?: Record<string, unknown>): Promise<Readable> {
       const stream = new Readable({ objectMode: true, read() {} });
       stream.push(null);
       return stream;

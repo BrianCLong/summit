@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import { describe, expect, it, jest, beforeEach, afterEach } from '@jest/globals';
 import complianceService, { ComplianceFramework } from '../../src/services/ComplianceService';
 import { dlpService } from '../../src/services/DLPService';

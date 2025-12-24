@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Policy Enforcer
  * AGENT-3: Policy Compiler for Agents

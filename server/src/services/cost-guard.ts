@@ -1,8 +1,8 @@
-// @ts-nocheck
 import pino from 'pino';
 import { businessMetrics, costTracker } from '../observability/telemetry';
+import type { Request, Response, NextFunction } from 'express';
 
-const logger = pino({ name: 'cost-guard' });
+const logger = (pino as any)({ name: 'cost-guard' });
 
 // Cost configuration per operation type
 interface CostConfig {
@@ -46,7 +46,7 @@ interface CostContext {
   complexity?: number; // Query complexity multiplier
   resultCount?: number; // Number of results
   duration?: number; // Operation duration in ms
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 // Cost guard result
@@ -393,9 +393,9 @@ export const costGuard = new CostGuardService();
 
 // Middleware for Express to check costs
 export function costGuardMiddleware() {
-  return async (req: any, res: any, next: any) => {
-    const tenantId = req.headers['x-tenant-id'] || 'default';
-    const userId = req.headers['x-user-id'] || 'unknown';
+  return async (req: Request & { costContext?: CostContext; estimatedCost?: number }, res: Response, next: NextFunction) => {
+    const tenantId = (req.headers['x-tenant-id'] as string) || 'default';
+    const userId = (req.headers['x-user-id'] as string) || 'unknown';
     const operation = req.path.includes('graphql')
       ? 'graphql_query'
       : 'api_request';
@@ -445,7 +445,7 @@ export function costGuardMiddleware() {
 
 // Express middleware to record actual costs
 export function costRecordingMiddleware() {
-  return async (req: any, res: any, next: any) => {
+  return async (req: Request & { costContext?: CostContext }, res: Response, next: NextFunction) => {
     const startTime = Date.now();
 
     res.on('finish', async () => {

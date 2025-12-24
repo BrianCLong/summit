@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, {
   ComponentType,
   PropsWithChildren,
@@ -10,6 +9,17 @@ import {
   normalizePermission,
   permissionsForRole,
 } from '../utils/capabilities';
+
+interface AuthUser {
+  role?: string;
+  tenants?: string[];
+  tenantId?: string;
+  actionGrants?: string[];
+  permissions?: string[];
+  attributes?: {
+    tenants?: string[];
+  };
+}
 
 type AccessRequest = {
   action: string;
@@ -30,11 +40,11 @@ const normalizeAction = (action?: string | null): string | null => {
   return action.toLowerCase();
 };
 
-const unique = (values: Array<string | undefined>) =>
+const unique = (values: Array<string | undefined | null>) =>
   Array.from(new Set(values.filter(Boolean) as string[]));
 
 const resolveTenantScopes = (
-  user: any,
+  user: AuthUser | null | undefined,
   preferredTenant?: string,
 ): string[] => {
   const explicitScopes = unique([
@@ -58,7 +68,7 @@ const resolveTenantScopes = (
   return ['*'];
 };
 
-const resolveAllowedActions = (user: any): string[] => {
+const resolveAllowedActions = (user: AuthUser | null | undefined): string[] => {
   if (!user) return [];
   if (user.role?.toUpperCase() === 'ADMIN') return ['*'];
 
@@ -175,7 +185,7 @@ export function withAuthorization<P>(
   options: WithAuthorizationOptions<P>,
 ): (component: ComponentType<P>) => ComponentType<P> {
   return (Component: ComponentType<P>) =>
-    function GuardedComponent(props: P) {
+    function GuardedComponent(props: any) {
       const resolvedTenant =
         typeof options.tenantId === 'function'
           ? options.tenantId(props)

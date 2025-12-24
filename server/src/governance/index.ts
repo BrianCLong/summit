@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { PolicyEngine } from './PolicyEngine.js';
 import { TelemetryLayer } from './TelemetryLayer.js';
 import { PolicyContext, GovernanceDecision, TelemetryEvent, Policy } from './types.js';
@@ -48,3 +47,4 @@ export const governance = {
 };
 
 export * from './types.js';
+export * from './war-plan/index.js';

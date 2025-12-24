@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import { Linter } from 'eslint'
 import { describe, expect, it } from 'vitest'

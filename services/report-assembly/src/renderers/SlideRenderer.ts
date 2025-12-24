@@ -417,7 +417,7 @@ export class SlideRenderer {
         .slide h2 { border-bottom-color: #333; }
       `,
     };
-    return themes[theme] || themes.professional;
+    return themes[theme] || themes.professional!;
   }
 
   /**

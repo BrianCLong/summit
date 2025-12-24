@@ -1,9 +1,8 @@
-// @ts-nocheck
 import { pool } from '../../db/pg.js';
 import { UserPreferences } from '../types.js';
 import pino from 'pino';
 
-const logger = pino({ name: 'NotificationPreferenceRepo' });
+const logger = (pino as any)({ name: 'NotificationPreferenceRepo' });
 
 export class NotificationPreferenceRepo {
   async getPreferences(userId: string): Promise<UserPreferences | null> {

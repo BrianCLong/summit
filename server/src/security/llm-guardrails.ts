@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * LLM Guardrails Service
  *
@@ -21,7 +20,6 @@ import { logger as rootLogger } from '../utils/logger.js';
 import { metrics as rootMetrics } from '../observability/metrics.js';
 import { SafetyV2Service } from '../safety/safety-v2.js';
 import { isSuspicious } from '../services/guard.js';
-// @ts-ignore
 import * as crypto from 'crypto';
 
 const logger = rootLogger.child({ service: 'LLMGuardrails' });

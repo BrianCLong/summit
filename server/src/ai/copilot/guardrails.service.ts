@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Copilot Guardrails Service
  *
@@ -27,7 +26,7 @@ import {
 } from './types.js';
 import { PromptInjectionDetector } from '../../security/llm-guardrails.js';
 
-const logger = pino({ name: 'guardrails-service' });
+const logger = (pino as any)({ name: 'guardrails-service' });
 
 // Configuration
 const REQUIRE_CITATIONS =

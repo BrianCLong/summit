@@ -12,6 +12,9 @@ import type {
   CloudProviderDescriptor,
   PipelineStageDefinition,
   PricingSignal,
+  CapabilityMatrix,
+  ModuleDecisionPolicy,
+  GovernanceEvent,
 } from '@ga-graphai/common-types';
 
 class MockPricingFeed implements PricingFeed {
@@ -253,5 +256,155 @@ describe('MetaOrchestrator', () => {
     const telemetry = orchestrator.deriveTelemetry(outcome);
     expect(telemetry.throughputPerMinute).toBe(130);
     expect(telemetry.selfHealingRate).toBeGreaterThan(0);
+  });
+
+  it('leverages capability matrix and fairness policy for transparent selection', async () => {
+    const capabilityMatrix: CapabilityMatrix = {
+      updatedAt: new Date().toISOString(),
+      entries: [
+        {
+          provider: 'aws',
+          region: 'us-east-1',
+          capability: 'compute',
+          throughputPerMinute: 160,
+          latencyMs: 45,
+          costPerUnit: 1,
+        },
+        {
+          provider: 'azure',
+          region: 'eastus',
+          capability: 'compute',
+          throughputPerMinute: 120,
+          latencyMs: 90,
+          costPerUnit: 0.9,
+        },
+      ],
+    };
+
+    const orchestrator = new MetaOrchestrator({
+      pipelineId: 'pipeline-x',
+      providers,
+      pricingFeed,
+      execution,
+      auditSink: { record: (entry) => auditTrail.push(entry) },
+      reasoningModel: new TemplateReasoningModel(),
+      capabilityMatrix,
+      fairness: { minDiversityRatio: 0.5 },
+    });
+
+    const plan = await orchestrator.createPlan([stage]);
+    expect(plan.steps[0].primary.provider).toBe('aws');
+    const governance = plan.metadata.governance as GovernanceEvent[];
+    expect(governance.some((event) => event.kind === 'explanation')).toBe(true);
+    expect((plan.metadata.fairness as { compliant: boolean }).compliant).toBe(true);
+  });
+
+  it('applies decision-tree policies for urgent data profiles', async () => {
+    const policy: ModuleDecisionPolicy = {
+      id: 'policy-urgency',
+      dataTypes: ['stream'],
+      urgencies: ['high'],
+      costSensitivity: 'medium',
+      preferredModules: ['aws'],
+      rationale: 'prefer AWS for high urgency streaming workloads',
+    };
+
+    const customProviders: CloudProviderDescriptor[] = [
+      {
+        name: 'aws',
+        regions: ['us-east-1'],
+        services: ['compute'],
+        reliabilityScore: 0.91,
+        sustainabilityScore: 0.52,
+        securityCertifications: ['fedramp'],
+        maxThroughputPerMinute: 100,
+        baseLatencyMs: 60,
+        policyTags: ['fedramp'],
+      },
+      {
+        name: 'azure',
+        regions: ['eastus'],
+        services: ['compute'],
+        reliabilityScore: 0.93,
+        sustainabilityScore: 0.55,
+        securityCertifications: ['fedramp'],
+        maxThroughputPerMinute: 100,
+        baseLatencyMs: 55,
+        policyTags: ['fedramp'],
+      },
+    ];
+
+    const policyPricing: PricingSignal[] = [
+      {
+        provider: 'aws',
+        region: 'us-east-1',
+        service: 'compute',
+        pricePerUnit: 0.85,
+        currency: 'USD',
+        unit: 'per-minute',
+        effectiveAt: new Date().toISOString(),
+      },
+      {
+        provider: 'azure',
+        region: 'eastus',
+        service: 'compute',
+        pricePerUnit: 0.85,
+        currency: 'USD',
+        unit: 'per-minute',
+        effectiveAt: new Date().toISOString(),
+      },
+    ];
+
+    const policyMatrix: CapabilityMatrix = {
+      updatedAt: new Date().toISOString(),
+      entries: [
+        {
+          provider: 'aws',
+          region: 'us-east-1',
+          capability: 'compute',
+          throughputPerMinute: 100,
+          latencyMs: 55,
+          costPerUnit: 0.85,
+        },
+        {
+          provider: 'azure',
+          region: 'eastus',
+          capability: 'compute',
+          throughputPerMinute: 100,
+          latencyMs: 70,
+          costPerUnit: 0.85,
+        },
+      ],
+    };
+
+    const policyStage: PipelineStageDefinition = {
+      ...stage,
+      id: 'stream-stage',
+      dataType: 'stream',
+      urgency: 'high',
+      costSensitivity: 'medium',
+    };
+
+    const policyOrchestrator = new MetaOrchestrator({
+      pipelineId: 'pipeline-policy',
+      providers: customProviders,
+      pricingFeed: new MockPricingFeed(policyPricing),
+      execution,
+      auditSink: { record: (entry) => auditTrail.push(entry) },
+      reasoningModel: new TemplateReasoningModel(),
+      decisionPolicies: [policy],
+      capabilityMatrix: policyMatrix,
+    });
+
+    const plan = await policyOrchestrator.createPlan([policyStage]);
+    expect(plan.steps[0].primary.provider).toBe('aws');
+    const governance = plan.metadata.governance as GovernanceEvent[];
+    expect(
+      governance.some(
+        (event) =>
+          event.kind === 'selection' &&
+          (event.details as { policy?: ModuleDecisionPolicy }).policy?.id === 'policy-urgency',
+      ),
+    ).toBe(true);
   });
 });

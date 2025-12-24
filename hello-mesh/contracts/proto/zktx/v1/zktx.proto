@@ -1,0 +1,5 @@
+syntax = "proto3";
+package ig.zktx.v1;
+service ZkTx { rpc Prove(ProofRequest) returns (ProofResponse); }
+message ProofRequest { string tx_id = 1; }
+message ProofResponse { string proof_id = 1; string status = 2; }

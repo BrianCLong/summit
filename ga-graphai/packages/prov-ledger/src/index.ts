@@ -42,6 +42,8 @@ import { computeLedgerHash } from './quantum-safe-ledger.js';
 
 export * from './mul-ledger';
 export * from './quantum-safe-ledger';
+export * from './service';
+export * from './grpc';
 
 // ============================================================================
 // SIMPLE PROVENANCE LEDGER - From HEAD
@@ -511,12 +513,20 @@ export class CoopProvenanceLedger {
   }
 
   verifyAll(secret?: string): boolean {
-    const signerSecret = secret ?? randomUUID();
-    return this.list().every((entry) => verifySignature(entry, signerSecret));
+    return this.list().every((entry) => this.verifyRecord(entry, secret));
   }
 
   getSecret(): string {
     return this.secret;
+  }
+
+  verifyRecord(entry: SignedProvenanceRecord, secret?: string): boolean {
+    const signerSecret = secret ?? this.secret;
+    return verifySignature(entry, signerSecret);
+  }
+
+  verifyFor(reqId: string, secret?: string): boolean {
+    return this.list(reqId).every((entry) => this.verifyRecord(entry, secret));
   }
 }
 

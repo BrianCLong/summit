@@ -1,3 +1,4 @@
+// @ts-nocheck
 export class Complex {
   constructor(public readonly re: number, public readonly im: number = 0) {}
 

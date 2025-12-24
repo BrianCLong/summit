@@ -1,8 +1,5 @@
-// @ts-nocheck
-import { describe, it, expect, beforeEach } from 'vitest';
-import { SubscriptionManager } from '../payments/SubscriptionManager.js';
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { SubscriptionManager } from '../payments/SubscriptionManager';
+import { SubscriptionManager } from '../payments/SubscriptionManager.js';
 
 describe('SubscriptionManager', () => {
   let manager: SubscriptionManager;

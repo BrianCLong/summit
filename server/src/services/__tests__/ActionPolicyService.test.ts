@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
   ActionPolicyError,
   ActionPolicyService,
@@ -12,11 +11,11 @@ const baseRequest: PreflightRequest = {
   context: { currentAcr: 'loa2' },
 };
 
-function buildService(result: any, ttlSeconds = 60) {
+function buildService(result: any, ttlSeconds: number = 60): ActionPolicyService {
   return new ActionPolicyService({
     ttlSeconds,
     opaClient: {
-      post: jest.fn().mockResolvedValue({ data: { result } }),
+      post: jest.fn<() => Promise<{ data: { result: any } }>>().mockResolvedValue({ data: { result } }),
     } as any,
     persistDecisions: false,
   });

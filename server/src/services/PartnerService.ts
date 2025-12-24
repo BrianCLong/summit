@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { pg } from '../db/pg.js';
-import { tenantService, CreateTenantInput } from './TenantService.js';
+import { tenantService, type CreateTenantInput } from './TenantService.js';
 import { apiKeyService } from './ApiKeyService.js';
 import { z } from 'zod';
 import { provenanceLedger } from '../provenance/ledger.js';

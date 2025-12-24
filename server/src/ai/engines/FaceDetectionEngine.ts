@@ -1,10 +1,9 @@
-// @ts-nocheck
 import { spawn } from 'child_process';
 import path from 'path';
 import pino from 'pino';
 import { ExtractionEngineConfig } from '../types.js';
 
-const logger = pino({ name: 'FaceDetectionEngine' });
+const logger = (pino as any)({ name: 'FaceDetectionEngine' });
 
 export interface FaceDetection {
   boundingBox: {
@@ -325,7 +324,7 @@ export class FaceDetectionEngine {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(new Error(`Failed to spawn face detection: ${error.message}`));
       });
     });
@@ -396,7 +395,7 @@ export class FaceDetectionEngine {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(
           new Error(`Failed to spawn video face detection: ${error.message}`),
         );
@@ -470,7 +469,7 @@ export class FaceDetectionEngine {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(error);
       });
     });
@@ -522,7 +521,7 @@ export class FaceDetectionEngine {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(error);
       });
     });
@@ -575,7 +574,7 @@ export class FaceDetectionEngine {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         logger.warn('Emotion analysis failed, using defaults');
         resolve(this.getDefaultEmotions());
       });

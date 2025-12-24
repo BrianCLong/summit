@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Validator - Validates Cypher queries for syntax and security issues
  */
@@ -6,7 +5,7 @@
 import type { ValidationResult } from './types';
 import pino from 'pino';
 
-const logger = pino({ name: 'cypher-validator' });
+const logger = (pino as any)({ name: 'cypher-validator' });
 
 /**
  * Validate a Cypher query for syntax correctness and security

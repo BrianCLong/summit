@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * E2E Tests for AI Copilot
  *

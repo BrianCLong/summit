@@ -2,7 +2,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { z } from 'zod';
+import * as z from 'zod';
 import { otelService } from '../middleware/observability/otel-tracing.js';
 import { fipsService } from './fips-compliance.js';
 
@@ -13,7 +13,7 @@ interface AuditEntry {
   userId: string;
   action: string;
   resource: string;
-  details: any;
+  details: Record<string, unknown>;
   classification: string;
   sessionId?: string;
 }

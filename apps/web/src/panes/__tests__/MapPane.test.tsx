@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -10,13 +9,20 @@ let currentZoom = 2;
 const fitBounds = vi.fn();
 const setView = vi.fn();
 
+interface MockCircleMarkerProps {
+  children?: React.ReactNode
+  'data-cluster'?: string
+  center?: [number, number]
+  [key: string]: unknown
+}
+
 vi.mock('react-leaflet', () => {
   const React = require('react');
   return {
-    MapContainer: ({ children }: any) => <div data-testid="map">{children}</div>,
+    MapContainer: ({ children }: { children?: React.ReactNode }) => <div data-testid="map">{children}</div>,
     TileLayer: () => <div data-testid="tile-layer" />,
-    Popup: ({ children }: any) => <div data-testid="popup">{children}</div>,
-    CircleMarker: ({ children, ...props }: any) => (
+    Popup: ({ children }: { children?: React.ReactNode }) => <div data-testid="popup">{children}</div>,
+    CircleMarker: ({ children, ...props }: MockCircleMarkerProps) => (
       <div
         data-testid="circle-marker"
         data-cluster={props['data-cluster']}
@@ -31,7 +37,7 @@ vi.mock('react-leaflet', () => {
       setView,
       getZoom: () => currentZoom,
     }),
-    useMapEvents: (handlers: any) => {
+    useMapEvents: (handlers: { zoomend?: () => void }) => {
       zoomHandlers.push(handlers);
       return { getZoom: () => currentZoom, setView, on: vi.fn() };
     },
@@ -124,7 +130,7 @@ describe('MapPane clustering controls', () => {
     const clusteredMarkers = screen.getAllByTestId('circle-marker');
     expect(clusteredMarkers.length).toBe(2);
 
-    const leaflet = await import('react-leaflet');
+    const leaflet = await import('react-leaflet') as typeof import('react-leaflet') & { __setZoom: (zoom: number) => void };
     await act(async () => {
       leaflet.__setZoom(13);
     });

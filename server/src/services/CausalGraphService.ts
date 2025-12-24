@@ -7,7 +7,7 @@ export interface CausalNode {
   label: string;
   type: string;
   confidence?: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface CausalEdge {

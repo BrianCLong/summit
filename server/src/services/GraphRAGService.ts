@@ -10,13 +10,13 @@
  * - Explainable why_paths and citations
  */
 
-import { Driver, Session as _Session } from 'neo4j-driver';
+import { Driver } from 'neo4j-driver';
 import Redis from 'ioredis';
 import { z } from 'zod/v4';
 import { createHash } from 'crypto';
 import logger from '../utils/logger.js';
-import { CircuitBreaker } from '../utils/CircuitBreaker.js'; // Import CircuitBreaker
-import { rankPaths, ScoreBreakdown as _PathScoreBreakdown } from './PathRankingService.js';
+import { CircuitBreaker } from '../utils/CircuitBreaker.js';
+import { rankPaths } from './PathRankingService.js';
 import {
   graphragSchemaFailuresTotal,
   graphragCacheHitRatio,
@@ -86,19 +86,12 @@ const GraphRAGResponseSchema = z.object({
 });
 
 // Types derived from schemas
-// @ts-ignore - zod type resolution issue
 export type GraphRAGRequest = z.input<typeof GraphRAGRequestSchema>;
-// @ts-ignore - zod type resolution issue
 export type Entity = z.infer<typeof EntitySchema>;
-// @ts-ignore - zod type resolution issue
 export type Relationship = z.infer<typeof RelationshipSchema>;
-// @ts-ignore - zod type resolution issue
 export type WhyPath = z.infer<typeof WhyPathSchema>;
-// @ts-ignore - zod type resolution issue
 export type ScoreBreakdown = z.infer<typeof ScoreBreakdownSchema>;
-// @ts-ignore - zod type resolution issue
 export type Citations = z.infer<typeof CitationsSchema>;
-// @ts-ignore - zod type resolution issue
 export type GraphRAGResponse = z.infer<typeof GraphRAGResponseSchema>;
 
 interface SubgraphContext {
@@ -421,7 +414,6 @@ export class GraphRAGService {
   /**
    * Build concise string from Zod validation issues
    */
-  // @ts-ignore - zod type resolution issue
   private summarizeZodIssues(error: z.ZodError): string {
     return error.issues
       .map((i) => `${i.path.join('.')}: ${i.message}`)
@@ -435,7 +427,6 @@ export class GraphRAGService {
     question: string,
     context: SubgraphContext,
     request: GraphRAGRequest,
-    // @ts-ignore - zod type resolution issue
     schema: z.ZodTypeAny,
   ): Promise<GraphRAGResponse> {
     const prompt = this.buildContextPrompt(question, context);
@@ -443,8 +434,7 @@ export class GraphRAGService {
     const callLLMAndValidate = async (
       temp: number,
     ): Promise<GraphRAGResponse> => {
-      const rawResponse = await this.llmService.complete({
-        prompt,
+      const rawResponse = await this.llmService.complete(prompt, {
         model:
           request.temperature !== undefined ? this.config.llmModel : undefined,
         maxTokens: request.maxTokens || 1000,
@@ -452,7 +442,7 @@ export class GraphRAGService {
         responseFormat: 'json',
       });
 
-      let parsedResponse: any;
+      let parsedResponse: unknown;
       try {
         parsedResponse = JSON.parse(rawResponse);
       } catch (error) {
@@ -645,7 +635,7 @@ Respond with JSON only:`;
   /**
    * Parse Neo4j entities into typed Entity objects
    */
-  private parseEntities(nodes: any[]): Entity[] {
+  private parseEntities(nodes: Array<{ properties: Record<string, unknown> }>): Entity[] {
     return nodes.map((node) => {
       const props = node.properties;
       return EntitySchema.parse({
@@ -653,7 +643,7 @@ Respond with JSON only:`;
         type: props.type,
         label: props.label,
         description: props.description || undefined,
-        properties: props.properties ? JSON.parse(props.properties) : {},
+        properties: props.properties ? JSON.parse(props.properties as string) : {},
         confidence: props.confidence || 1.0,
       });
     });
@@ -662,7 +652,7 @@ Respond with JSON only:`;
   /**
    * Parse Neo4j relationships into typed Relationship objects
    */
-  private parseRelationships(rels: any[]): Relationship[] {
+  private parseRelationships(rels: Array<{ properties: Record<string, unknown> }>): Relationship[] {
     return rels.map((rel) => {
       const props = rel.properties;
       return RelationshipSchema.parse({
@@ -671,7 +661,7 @@ Respond with JSON only:`;
         fromEntityId: props.fromEntityId,
         toEntityId: props.toEntityId,
         label: props.label || undefined,
-        properties: props.properties ? JSON.parse(props.properties) : {},
+        properties: props.properties ? JSON.parse(props.properties as string) : {},
         confidence: props.confidence || 1.0,
       });
     });
@@ -684,7 +674,7 @@ Respond with JSON only:`;
     status: string;
     cacheStatus: string;
     config: typeof this.config;
-    circuitBreaker: any;
+    circuitBreaker: Record<string, unknown>;
   }> {
     let cacheStatus = 'disabled';
 

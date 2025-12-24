@@ -7,22 +7,39 @@
 
 import { createFeatureFlagMiddleware } from '@intelgraph/feature-flags/middleware';
 import { getFeatureFlagService } from './setup.js';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import type { FlagContext } from '@intelgraph/feature-flags';
+
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id?: string;
+    userId?: string;
+    email?: string;
+    role?: string;
+    roles?: string;
+    tenantId?: string;
+    attributes?: Record<string, unknown>;
+  };
+  tenant?: {
+    id?: string;
+  };
+  sessionId?: string;
+}
 
 /**
  * Build feature flag context from request
  */
 function buildFlagContext(req: Request): Partial<FlagContext> {
-  const user = (req as any).user;
+  const authReq = req as AuthenticatedRequest;
+  const user = authReq.user;
 
   return {
     userId: user?.id || user?.userId,
     userEmail: user?.email,
     userRole: user?.role || user?.roles,
-    tenantId: user?.tenantId || (req as any).tenant?.id,
+    tenantId: user?.tenantId || authReq.tenant?.id,
     environment: process.env.NODE_ENV || 'development',
-    sessionId: (req as any).sessionId || req.sessionID,
+    sessionId: authReq.sessionId || req.sessionID,
     ipAddress: req.ip || req.socket.remoteAddress,
     userAgent: req.get('User-Agent'),
     attributes: {
@@ -53,7 +70,7 @@ export const featureFlagMiddleware = createFeatureFlagMiddleware({
 /**
  * Expose feature flags endpoint
  */
-export async function exposeFeatureFlags(req: Request, res: any): Promise<void> {
+export async function exposeFeatureFlags(req: Request, res: Response): Promise<void> {
   try {
     const service = getFeatureFlagService();
     const context = buildFlagContext(req);
