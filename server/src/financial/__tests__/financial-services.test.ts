@@ -24,7 +24,7 @@ const mockPool = {
 
 describe('Financial Compliance Module', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks(); // Reset implementations, not just calls
   });
 
   describe('createFinancialServices', () => {
@@ -143,15 +143,23 @@ describe('Financial Compliance Module', () => {
           updatedAt: new Date(),
         };
 
+        // Set up all mocks including constructor's loadRestrictedList and loadPositionLimits
         mockQuery
-          .mockResolvedValueOnce({ rows: [] }) // restricted list
-          .mockResolvedValueOnce({ rows: [] }) // position limits
+          .mockResolvedValueOnce({ rows: [] }) // loadRestrictedList (constructor)
+          .mockResolvedValueOnce({ rows: [] }) // loadPositionLimits (constructor)
           .mockResolvedValueOnce({ rows: [{
             cancelled_count: '8',
             total_count: '10',
             price_levels: '5'
-          }] }) // layering check
-          .mockResolvedValueOnce({ rows: [] }); // spoofing check
+          }] }) // detectLayering query - 80% cancel ratio triggers alert
+          .mockResolvedValueOnce({ rows: [] }) // detectSpoofing query
+          .mockResolvedValue({ rows: [] }); // storeAlert and fallback
+
+        // Re-create service to use mocked constructor calls
+        service = new TradeSurveillanceService(mockPool);
+
+        // Wait for constructor's async load methods to complete
+        await new Promise(resolve => setTimeout(resolve, 10));
 
         const alerts = await service.analyzeOrder(order);
 
@@ -256,11 +264,15 @@ describe('Financial Compliance Module', () => {
         mockQuery
           .mockResolvedValue({ rows: priceHistory });
 
-        // This would throw in a real scenario without proper mock setup
-        // but demonstrates the test structure
-        await expect(
-          service.calculatePortfolioRisk('tenant-1', 'portfolio-1'),
-        ).rejects.toThrow();
+        // With proper mock setup, the service should calculate risk metrics
+        const result = await service.calculatePortfolioRisk('tenant-1', 'portfolio-1');
+
+        // Verify that risk metrics are calculated
+        expect(result).toBeDefined();
+        expect(result.portfolioId).toBe('portfolio-1');
+        expect(result.tenantId).toBe('tenant-1');
+        expect(typeof result.var95).toBe('number');
+        expect(typeof result.var99).toBe('number');
       });
     });
 
