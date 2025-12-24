@@ -57,20 +57,10 @@ const config: Config = {
   testTimeout: 30000,
   globalSetup: '<rootDir>/tests/setup/globalSetup.cjs',
   globalTeardown: '<rootDir>/tests/setup/globalTeardown.cjs',
-  testResultsProcessor: 'jest-junit',
+  // testResultsProcessor: 'jest-junit', // Disabled to avoid dependency issues in environment
   reporters: [
     'default',
-    [
-      'jest-junit',
-      {
-        outputDirectory: '<rootDir>/test-results',
-        outputName: 'junit.xml',
-        classNameTemplate: '{classname}',
-        titleTemplate: '{title}',
-        ancestorSeparator: ' › ',
-        usePathForSuiteName: true,
-      },
-    ],
+    // 'jest-junit', // Disabled
   ],
   verbose: true,
   clearMocks: true,

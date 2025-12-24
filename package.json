@@ -128,7 +128,7 @@
     "prettier": "3.7.4",
     "prom-client": "15.1.3",
     "semantic-release": "24.2.9",
-    "ts-jest": "29.4.6",
+    "ts-jest": "^29.4.6",
     "ts-node": "10.9.2",
     "tsx": "4.21.0",
     "typescript": "5.9.3",
@@ -187,8 +187,8 @@
     "neo4j-driver": "5.28.2",
     "pg": "8.16.3",
     "redis": "5.10.0",
-    "yaml": "2.6.1",
-    "ws": "8.18.3"
+    "ws": "8.18.3",
+    "yaml": "2.6.1"
   },
   "private": true
 }
