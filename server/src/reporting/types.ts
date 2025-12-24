@@ -5,7 +5,8 @@ export type ReportFormat =
   | 'xlsx'
   | 'docx'
   | 'pptx'
-  | 'txt';
+  | 'txt'
+  | 'xml';
 
 export type DeliveryChannel = 'email' | 'slack' | 'webhook';
 
