@@ -1,9 +1,11 @@
 
 import { getPostgresPool } from './postgres.js';
 import logger from '../utils/logger.js';
+import { RedisService } from '../cache/redis.js';
 
 export class PartitionManager {
   private pool = getPostgresPool();
+  private redis = RedisService.getInstance();
 
   /**
    * Creates a new partition for a specific tenant in the maestro_runs table.
@@ -29,11 +31,6 @@ export class PartitionManager {
         return;
       }
 
-      // Detach from default if needed? No, LIST partitioning doesn't auto-move from default.
-      // We are creating a specific partition.
-      // Note: If rows for this tenant already exist in 'default', this CREATE might fail
-      // or require moving rows. For now, we assume this is done before data ingestion.
-
       const query = `
         CREATE TABLE ${partitionName}
         PARTITION OF maestro_runs
@@ -54,11 +51,80 @@ export class PartitionManager {
   }
 
   /**
-   * Example of Time-Based Partitioning maintenance (if we had a time-partitioned table)
+   * Creates a monthly partition for a time-series table (e.g., audit_logs, metrics).
+   * Range Partitioning: FOR VALUES FROM ('2023-01-01') TO ('2023-02-01')
    */
   async createMonthlyPartition(tableName: string, date: Date): Promise<void> {
-    // Implementation placeholder for future time-series tables
-    // e.g., audit_logs could be partitioned by range (created_at)
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const partitionName = `${tableName}_y${year}m${month}`;
+
+    // Calculate range start and end
+    const startObj = new Date(year, date.getMonth(), 1);
+    const endObj = new Date(year, date.getMonth() + 1, 1); // First day of next month
+
+    const startStr = startObj.toISOString().split('T')[0];
+    const endStr = endObj.toISOString().split('T')[0];
+
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+
+       // Check if partition exists
+       const checkRes = await client.query(
+        `SELECT to_regclass($1::text)`,
+        [partitionName]
+      );
+
+      if (checkRes.rows[0].to_regclass) {
+        logger.info(`Partition ${partitionName} already exists.`);
+        await client.query('COMMIT');
+        return;
+      }
+
+      const query = `
+        CREATE TABLE ${partitionName}
+        PARTITION OF ${tableName}
+        FOR VALUES FROM ('${startStr}') TO ('${endStr}')
+      `;
+
+      await client.query(query);
+      logger.info(`Created monthly partition ${partitionName} (${startStr} to ${endStr})`);
+
+      await client.query('COMMIT');
+    } catch (error) {
+       await client.query('ROLLBACK');
+       // Don't log error if it's just that the parent table doesn't exist yet (might be dev env)
+       if ((error as any).code === '42P01') {
+           logger.warn(`Parent table ${tableName} does not exist. Skipping partition creation.`);
+       } else {
+           logger.error(`Failed to create partition ${partitionName}`, error);
+           throw error;
+       }
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Maintenance job to ensure upcoming partitions exist and detach/archive old ones.
+   * Can be scheduled via pg-boss or node-cron.
+   */
+  async maintainPartitions(tables: string[] = ['audit_logs', 'metrics']): Promise<void> {
+    const now = new Date();
+    const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const monthAfterNext = new Date(now.getFullYear(), now.getMonth() + 2, 1);
+
+    for (const table of tables) {
+        // Ensure current month exists
+        await this.createMonthlyPartition(table, now);
+        // Ensure next month exists (pre-creation)
+        await this.createMonthlyPartition(table, nextMonth);
+        // Ensure month after next exists (buffer)
+        await this.createMonthlyPartition(table, monthAfterNext);
+    }
+
+    // Future: Logic to detach old partitions and move to cold storage (e.g. S3 parquet)
   }
 }
 
