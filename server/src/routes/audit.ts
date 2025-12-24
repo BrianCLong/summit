@@ -7,8 +7,40 @@ import { ProvenanceRepo } from '../repos/ProvenanceRepo.js';
 import { ensureAuthenticated, requirePermission } from '../middleware/auth.js';
 import { getAuditSystem, ComplianceFramework } from '../audit/advanced-audit-system.js';
 import logger from '../utils/logger.js';
+import { BundleVerifier } from '../audit/BundleVerifier.js';
+import rateLimit from 'express-rate-limit';
 
 export const auditRouter = Router();
+
+// Rate limiter for verification endpoint
+const verificationLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // Limit each IP to 10 requests per windowMs
+  message: 'Too many verification requests from this IP, please try again later',
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+
+// --- Public-Facing Bundle Verifier ---
+auditRouter.post('/verify-bundle', verificationLimiter, async (req: any, res: Response) => {
+  if (process.env.AUDIT_VERIFY !== 'true') {
+    return res.status(404).json({ error: 'Feature disabled' });
+  }
+
+  // Token scope check (simulated)
+  const token = req.headers['x-verify-token'];
+  if (!token) {
+    return res.status(401).json({ error: 'Missing verification token' });
+  }
+
+  try {
+    const report = await BundleVerifier.getInstance().verify(req.body);
+    res.json(report);
+  } catch (error) {
+    logger.error('Bundle verification failed', error);
+    res.status(500).json({ error: 'Verification process failed' });
+  }
+});
 
 // --- Legacy Incident/Investigation Audit Routes ---
 
