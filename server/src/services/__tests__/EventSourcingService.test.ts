@@ -13,17 +13,21 @@ describe('EventSourcingService', () => {
   let mockPool: jest.Mocked<Pool>;
   let service: EventSourcingService;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     mockPool = {
-      query: jest.fn(),
+      query: jest.fn<any>().mockResolvedValue({ rows: [] }), // Default mock for constructor's initializeLastEventHash
       connect: jest.fn(),
     } as any;
 
     service = new EventSourcingService(mockPool);
+    // Wait for constructor's async initializeLastEventHash to complete
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    // Clear call count but keep implementation
+    mockPool.query.mockClear();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   describe('appendEvent', () => {
@@ -290,6 +294,9 @@ describe('EventSourcingService', () => {
 
   describe('verifyIntegrity', () => {
     it('should verify event store integrity', async () => {
+      // Hash calculated for these exact event fields using SHA-256
+      const expectedHash =
+        '0626259b68b11402af8fdfb126d1ac887b3ee1a01be7fcd72ab4780b7a2b4d07';
       const mockEvents = [
         {
           event_id: 'event-1',
@@ -301,7 +308,7 @@ describe('EventSourcingService', () => {
           event_metadata: {},
           tenant_id: 'tenant-123',
           user_id: 'user-456',
-          event_hash: 'valid-hash-1',
+          event_hash: expectedHash,
           previous_event_hash: null,
           event_timestamp: new Date('2025-01-01'),
           created_at: new Date('2025-01-01'),
