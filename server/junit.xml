@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="4" failures="0" errors="0" time="16.015">
-  <testsuite name="Webhook API" errors="0" failures="0" skipped="0" timestamp="2025-11-20T09:50:33" time="15.834" tests="4">
-    <testcase classname="Webhook API POST /api/webhooks should create a webhook" name="Webhook API POST /api/webhooks should create a webhook" time="0.075">
+<testsuites name="jest tests" tests="6" failures="0" errors="0" time="18.225">
+  <testsuite name="QueryBudgetGuard" errors="0" failures="0" skipped="0" timestamp="2025-12-24T12:55:05" time="18.111" tests="6">
+    <testcase classname="QueryBudgetGuard should allow request when budget is sufficient" name="QueryBudgetGuard should allow request when budget is sufficient" time="0.007">
     </testcase>
-    <testcase classname="Webhook API POST /api/webhooks should fail with invalid input" name="Webhook API POST /api/webhooks should fail with invalid input" time="0.011">
+    <testcase classname="QueryBudgetGuard should refill tokens over time" name="QueryBudgetGuard should refill tokens over time" time="0.003">
     </testcase>
-    <testcase classname="Webhook API GET /api/webhooks should list webhooks" name="Webhook API GET /api/webhooks should list webhooks" time="0.009">
+    <testcase classname="QueryBudgetGuard should block request when budget is empty and mode is block" name="QueryBudgetGuard should block request when budget is empty and mode is block" time="0.002">
     </testcase>
-    <testcase classname="Webhook API POST /api/webhooks/trigger-test should trigger a webhook event" name="Webhook API POST /api/webhooks/trigger-test should trigger a webhook event" time="0.009">
+    <testcase classname="QueryBudgetGuard should warn only when budget is empty and mode is warn" name="QueryBudgetGuard should warn only when budget is empty and mode is warn" time="0.003">
+    </testcase>
+    <testcase classname="QueryBudgetGuard should skip check if disabled" name="QueryBudgetGuard should skip check if disabled" time="0.001">
+    </testcase>
+    <testcase classname="QueryBudgetGuard should identify tenant from headers if user not present" name="QueryBudgetGuard should identify tenant from headers if user not present" time="0.001">
     </testcase>
   </testsuite>
 </testsuites>

@@ -363,6 +363,25 @@ const serviceAutoRemediationsTotal = new client.Counter({
   labelNames: ['service', 'action', 'result'],
 });
 
+// Query Budget Metrics
+const queryBudgetRemaining = new client.Gauge({
+  name: 'query_budget_remaining',
+  help: 'Remaining query tokens for tenant',
+  labelNames: ['tenant'],
+});
+
+const queryBudgetBlockedTotal = new client.Counter({
+  name: 'query_budget_blocked_total',
+  help: 'Total number of queries blocked due to budget',
+  labelNames: ['tenant'],
+});
+
+const queryBudgetLatencySeconds = new client.Histogram({
+  name: 'query_budget_latency_seconds',
+  help: 'Latency overhead introduced by query budget guard',
+  buckets: [0.001, 0.005, 0.01, 0.05],
+});
+
 register.registerMetric(graphExpandRequestsTotal);
 register.registerMetric(aiRequestTotal);
 register.registerMetric(resolverLatencyMs);
@@ -378,6 +397,9 @@ register.registerMetric(businessUserSignupsTotal);
 register.registerMetric(businessApiCallsTotal);
 register.registerMetric(businessRevenueTotal);
 register.registerMetric(serviceAutoRemediationsTotal);
+register.registerMetric(queryBudgetRemaining);
+register.registerMetric(queryBudgetBlockedTotal);
+register.registerMetric(queryBudgetLatencySeconds);
 
 const metrics = {
   graphExpandRequestsTotal,
@@ -450,4 +472,7 @@ export {
   businessApiCallsTotal,
   businessRevenueTotal,
   serviceAutoRemediationsTotal,
+  queryBudgetRemaining,
+  queryBudgetBlockedTotal,
+  queryBudgetLatencySeconds,
 };
