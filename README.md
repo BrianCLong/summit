@@ -48,10 +48,50 @@
 ```bash
 git clone https://github.com/BrianCLong/summit.git
 cd summit
-npm run quickstart      # Trivial setup: installs deps, starts infra, migrates DB, runs dev servers
 ```
 
-**Manual steps:**
+## 🎮 Demo
+
+Launch a complete working demo environment with one command, including seeded sample data:
+
+### Prerequisites
+
+- Docker Desktop ≥ 4.x (8GB memory, BuildKit enabled)
+- Node 18+
+- pnpm 9 (via `corepack enable`)
+- Available ports: 3000, 4000, 5432, 6379, 7474, 7687, 8080, 9090
+
+### One-Command Demo
+
+```bash
+# Using the make command
+make demo
+
+# Or run directly with proper environment
+DEMO_MODE=1 ./scripts/demo-up.sh
+```
+
+### What's Included
+
+- **Frontend UI**: http://localhost:3000
+- **GraphQL API**: http://localhost:4000/graphql
+- **Neo4j Database**: http://localhost:7474
+- **PostgreSQL Database**: http://localhost:8080 (Adminer)
+- **Monitoring**: Grafana at http://localhost:8080, Prometheus at http://localhost:9090
+- **Pre-seeded Demo Data**: Sample investigation with entities and relationships
+
+### Demo Credentials
+
+- **Username**: demo@example.com (or as configured)
+- **Password**: demo123 (or as configured)
+
+### Stopping the Demo
+
+```bash
+# Stop all services
+docker compose -f docker-compose.yml down
+```
+
 ```bash
 make bootstrap          # installs pnpm deps + venv + .env
 npm run docker:dev -- up -d postgres neo4j redis # start infrastructure
@@ -60,6 +100,7 @@ npm run dev             # start frontend and backend
 ```
 
 **Service Endpoints:**
+
 - **Frontend**: http://localhost:3000 (React Application)
 - **GraphQL API**: http://localhost:4000/graphql (Apollo Playground)
 - **API Documentation**: http://localhost:4000/api/docs (Swagger UI - REST API)
@@ -149,9 +190,9 @@ All workflows use cached `pnpm install` and Docker layer caching. These are requ
 
 We use a "Safe Merge" label strategy to manage the PR backlog:
 
-* **Developers**: Open PR → Get Approval → Add `automerge-safe` label.
-* **Automation**: The merge train script updates your branch from `main`, verifies CI, and merges automatically when green.
-* **Conflict/Failure**: If CI fails or conflicts arise, the label is removed and you are notified.
+- **Developers**: Open PR → Get Approval → Add `automerge-safe` label.
+- **Automation**: The merge train script updates your branch from `main`, verifies CI, and merges automatically when green.
+- **Conflict/Failure**: If CI fails or conflicts arise, the label is removed and you are notified.
 
 **Note**: Do not use "Squash and merge" manually if the train is active. Let the bot handle it to ensure linear history and green builds.
 
@@ -174,12 +215,12 @@ We use a "Safe Merge" label strategy to manage the PR backlog:
 
 ### Key Performance Metrics
 
-| Capability | Metric | Validation |
-|------------|--------|------------|
-| **Insight Acceleration** | 50% faster time-to-insight vs. legacy systems | Validated against IC baseline workflows |
-| **Edge Deployment** | Sub-100ms latency at tactical edge | JWICS/SIPRNet compatible architecture |
-| **AI Governance** | 85% automated policy validation | OPA-based with human-in-the-loop escalation |
-| **Agent Fleet Control** | Real-time incident response | Automated containment with audit trail |
+| Capability               | Metric                                        | Validation                                  |
+| ------------------------ | --------------------------------------------- | ------------------------------------------- |
+| **Insight Acceleration** | 50% faster time-to-insight vs. legacy systems | Validated against IC baseline workflows     |
+| **Edge Deployment**      | Sub-100ms latency at tactical edge            | JWICS/SIPRNet compatible architecture       |
+| **AI Governance**        | 85% automated policy validation               | OPA-based with human-in-the-loop escalation |
+| **Agent Fleet Control**  | Real-time incident response                   | Automated containment with audit trail      |
 
 ### RFI-Ready Differentiators
 
@@ -236,6 +277,7 @@ This 5-minute workflow validates the core platform functionality using the datas
 SummitIntelEvo represents the next evolution of autonomous development agents, featuring **EntangleEvo** technology for self-reorganizing teams and **IntelGraph** for deep semantic memory.
 
 ### Quick Demo
+
 Experience the EntangleEvo self-optimization process in your terminal:
 
 ```bash
@@ -243,16 +285,20 @@ Experience the EntangleEvo self-optimization process in your terminal:
 ```
 
 This demo showcases:
+
 - **Autonomous PR Resolution**: >95% success rate on the Summit13 benchmark.
 - **Self-Healing Infrastructure**: <45s MTTR under chaos conditions.
 - **Enterprise Compliance**: Automated SOC2 artifact generation.
 
 ### Licensing & Enterprise
+
 Summit is available under a dual-license model:
+
 - **Community Edition**: MIT License (Open Source).
 - **Enterprise Edition**: Commercial license including EntangleEvo, IntelGraph Enterprise features, and 24/7 support.
 
 **Generated Artifacts**:
+
 - **Helm Charts**: `deploy/helm/summit-intel-evo/`
 - **Benchmarks**: `benchmarks/summit13_results.csv`
 - **Research Paper**: `docs/papers/entangle-evo/main.tex`
@@ -295,6 +341,7 @@ make down
 - [Support](#-support)
 
 **📚 Additional Documentation:**
+
 - [Developer Onboarding Guide](docs/ONBOARDING.md) - 30-minute quickstart for new developers
 - [AI Agent Collaboration Guide](CONTRIBUTING.md) - Guidelines for AI agent contributions
 - [Documentation Index](docs/README.md) - Complete documentation reference
@@ -872,19 +919,19 @@ Real-time updates via Socket.io:
 
 ```javascript
 // Connect to WebSocket
-const socket = io('http://localhost:4000');
+const socket = io("http://localhost:4000");
 
 // Listen for entity updates
-socket.on('entity:created', (entity) => {
-  console.log('New entity created:', entity);
+socket.on("entity:created", (entity) => {
+  console.log("New entity created:", entity);
 });
 
-socket.on('entity:updated', (entity) => {
-  console.log('Entity updated:', entity);
+socket.on("entity:updated", (entity) => {
+  console.log("Entity updated:", entity);
 });
 
 // Join investigation room for real-time collaboration
-socket.emit('join:investigation', { investigationId: '123' });
+socket.emit("join:investigation", { investigationId: "123" });
 ```
 
 ## 🔒 Security
@@ -1048,10 +1095,12 @@ Access Grafana dashboards at http://localhost:3100:
 ## 🏆 Success Stories
 
 **Global Financial Intelligence Unit**
-> "Summit reduced our investigation time by 60% by automatically correlating SARs with offshore entity data." - *Director of Analytics*
+
+> "Summit reduced our investigation time by 60% by automatically correlating SARs with offshore entity data." - _Director of Analytics_
 
 **Cyber Defense Operations Center**
-> "The AI Copilot helped us identify a state-sponsored campaign that traditional SIEM rules missed completely." - *SOC Manager*
+
+> "The AI Copilot helped us identify a state-sponsored campaign that traditional SIEM rules missed completely." - _SOC Manager_
 
 ## 🌍 Community & Ecosystem
 
@@ -1062,6 +1111,7 @@ We are building a vibrant community of intelligence analysts, developers, and re
 - **🐦 Twitter/X**: [@SummitPlatform](https://twitter.com/SummitPlatform) - Updates and tips.
 
 ### Extending Summit
+
 Check out our [Examples Directory](examples/) for plugins and custom pipelines.
 
 ## 🤝 Contributing
@@ -1178,8 +1228,8 @@ The current Topicality Summit software is proprietary and is licensed only
 under the **IntelGraph / Topicality Summit Enterprise License Agreement
 (Version 1.0)**.
 
-- Copyright (c) 2024–2025  \
-  Topicality LLC, Topicality Summit, and Brian C. Long  \
+- Copyright (c) 2024–2025 \
+  Topicality LLC, Topicality Summit, and Brian C. Long \
   All rights reserved.
 
 Use of the current software requires a valid commercial agreement with

@@ -4,6 +4,7 @@
 .PHONY: up down restart logs shell clean
 .PHONY: dev test lint build
 .PHONY: db-migrate db-seed
+.PHONY: demo
 .PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release sbom provenance ci-check prereqs contracts policy-sim rerere dupescans
 
 # --- Docker Compose Controls ---
@@ -61,6 +62,10 @@ db-migrate:
 db-seed:
 	@echo "Seeding DB..."
 	npm run seed
+
+demo:
+	@echo "Starting demo environment..."
+	DEMO_MODE=1 ./scripts/demo-up.sh
 
 # ---- IntelGraph S25 Merge Orchestrator (Legacy/Specific) ---------------------
 
