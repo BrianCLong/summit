@@ -30,9 +30,9 @@ export interface AuditEntry {
   changes?: string[];
 }
 
-export interface DeepPartialObject<T> {
+export type DeepPartialObject<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;
-}
+};
 
 export type DeepPartial<T> = T extends (infer U)[]
   ? DeepPartial<U>[]

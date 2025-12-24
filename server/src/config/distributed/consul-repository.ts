@@ -1,4 +1,4 @@
-import Consul from 'consul';
+import * as Consul from 'consul';
 import { EventEmitter } from 'events';
 import {
   AppliedState,
@@ -321,7 +321,7 @@ export class ConsulConfigRepository<TConfig = Record<string, any>>
    */
   async close(): Promise<void> {
     // Stop all active watches
-    for (const watch of this.watchers.values()) {
+    for (const watch of Array.from(this.watchers.values())) {
       watch.end();
     }
     this.watchers.clear();

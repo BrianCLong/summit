@@ -127,7 +127,7 @@ function collectDiffs(
     ...Object.keys(actual as Record<string, unknown>),
   ]);
   const deltas: DriftDelta[] = [];
-  for (const key of keys) {
+  for (const key of Array.from(keys)) {
     deltas.push(
       ...collectDiffs((expected as any)[key], (actual as any)[key], [
         ...path,
@@ -206,7 +206,7 @@ export class DistributedConfigService<TConfig = Record<string, any>> {
       if (options.overrides) {
         for (const override of Object.values(options.overrides)) {
           if (override) {
-            schema.partial().parse(override);
+            (schema as any).partial().parse(override);
           }
         }
       }
@@ -217,7 +217,7 @@ export class DistributedConfigService<TConfig = Record<string, any>> {
             z.object({
               name: z.string(),
               weight: z.number().positive(),
-              config: schema.partial(),
+              config: (schema as any).partial(),
             }),
           ),
           startAt: z.date(),
@@ -229,7 +229,7 @@ export class DistributedConfigService<TConfig = Record<string, any>> {
         z.object({
           environment: z.string(),
           trafficPercent: z.number().min(0).max(100),
-          config: schema.partial(),
+          config: (schema as any).partial(),
           startAt: z.date(),
           endAt: z.date().optional(),
           guardRailMetrics: z.array(z.string()).optional(),
@@ -251,7 +251,7 @@ export class DistributedConfigService<TConfig = Record<string, any>> {
     const payload: ConfigVersion<TConfig> = {
       id: configId,
       config: deepClone(options.config),
-      overrides: deepClone(options.overrides ?? {}),
+      overrides: deepClone(options.overrides ?? {}) as any,
       metadata,
       checksum: this.computeChecksum(
         options.config,
@@ -326,7 +326,7 @@ export class DistributedConfigService<TConfig = Record<string, any>> {
       if (variant) {
         effectiveConfig = deepMerge(
           effectiveConfig,
-          variant.config as Partial<TConfig>,
+          variant.config as any,
         );
       }
     }
@@ -350,7 +350,7 @@ export class DistributedConfigService<TConfig = Record<string, any>> {
     }
     return this.createOrUpdate(configId, {
       config: target.config,
-      overrides: target.overrides,
+      overrides: target.overrides as any,
       metadata: { actor, message: message ?? `Rollback to ${versionNumber}` },
       abTest: target.abTest,
       canary: target.canary,
@@ -428,7 +428,7 @@ export class DistributedConfigService<TConfig = Record<string, any>> {
   ): Promise<void> {
     const watchers = this.watchers.get(configId);
     if (watchers) {
-      for (const watcher of watchers) {
+      for (const watcher of Array.from(watchers)) {
         await watcher({ configId, version });
       }
     }
@@ -437,7 +437,7 @@ export class DistributedConfigService<TConfig = Record<string, any>> {
 
   private computeChecksum(
     config: TConfig,
-    overrides?: Partial<Record<EnvironmentName, Partial<TConfig>>>,
+    overrides?: Partial<Record<EnvironmentName, DeepPartial<TConfig>>>,
     abTest?: ABTestConfig<TConfig>,
     canary?: CanaryConfig<TConfig>,
   ): string {
