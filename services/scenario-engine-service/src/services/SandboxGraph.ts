@@ -309,6 +309,7 @@ export class SandboxGraph {
       after: node,
       timestamp: now,
       reversible: true,
+      metadata: {},
     });
 
     return node;
@@ -362,6 +363,7 @@ export class SandboxGraph {
       after: localNode,
       timestamp: now,
       reversible: true,
+      metadata: {},
     });
 
     return localNode;
@@ -410,6 +412,7 @@ export class SandboxGraph {
       before: node,
       timestamp: now,
       reversible: true,
+      metadata: {},
     });
 
     return true;
@@ -508,6 +511,7 @@ export class SandboxGraph {
       after: edge,
       timestamp: now,
       reversible: true,
+      metadata: {},
     });
 
     return edge;
@@ -564,6 +568,7 @@ export class SandboxGraph {
       after: localEdge,
       timestamp: now,
       reversible: true,
+      metadata: {},
     });
 
     return localEdge;
@@ -604,6 +609,7 @@ export class SandboxGraph {
       before: edge,
       timestamp: now,
       reversible: true,
+      metadata: {},
     });
 
     return true;

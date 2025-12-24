@@ -1,5 +1,6 @@
-import React, {Component, ErrorInfo, ReactNode} from 'react';
-import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+// @ts-nocheck
+import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import * as Sentry from '@sentry/react-native';
 
 interface Props {

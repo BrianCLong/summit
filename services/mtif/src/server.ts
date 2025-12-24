@@ -1,4 +1,3 @@
-// @ts-nocheck
 import express from 'express';
 import type { Request, Response } from 'express';
 import { loadConfig, type MtifConfig } from './config.js';
@@ -42,7 +41,12 @@ const bootstrapRepository = (): FeedRepository =>
     }
   ]);
 
-export const createApp = (configOverride?: Partial<MtifConfig>) => {
+export const createApp = (configOverride?: Partial<MtifConfig>): {
+  app: express.Express;
+  repository: FeedRepository;
+  signing: SigningService;
+  taxiiService: TaxiiService;
+} => {
   const config = { ...loadConfig(), ...configOverride } satisfies MtifConfig;
   const app = express();
   app.use(express.json({ limit: '2mb' }));

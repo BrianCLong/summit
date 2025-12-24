@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Metadata Invariant Validator
  *

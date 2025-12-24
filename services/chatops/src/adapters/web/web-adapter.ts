@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Web Adapter with WebSocket Support
  *

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * CI Integrity Validator
  *

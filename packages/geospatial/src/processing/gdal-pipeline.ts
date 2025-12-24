@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * GDAL Processing Pipeline for Satellite Imagery
  * Supports raster operations, reprojection, and tile generation

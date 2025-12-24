@@ -3,7 +3,7 @@
  * Implements quantum feature maps and kernel estimation
  */
 
-import { QuantumCircuit, QuantumSimulator, CircuitBuilder } from '@summit/quantum-simulation';
+import { QuantumCircuit, QuantumSimulator, CircuitBuilder } from '@intelgraph/quantum-simulation';
 
 export interface QuantumKernelParams {
   numQubits: number;

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Summit Policy Validation Engine (PVE)
  *

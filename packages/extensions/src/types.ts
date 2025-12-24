@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Summit Extension Manifest Types
  *

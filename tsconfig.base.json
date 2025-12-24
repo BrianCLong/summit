@@ -12,7 +12,7 @@
     "useUnknownInCatchVariables": false,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "composite": false,
+    "composite": true,
     "incremental": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,

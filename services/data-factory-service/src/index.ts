@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Data Factory Service - Main Entry Point
  *

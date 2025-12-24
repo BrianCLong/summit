@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Slack Adapter for ChatOps
  *

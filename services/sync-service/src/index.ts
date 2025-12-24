@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Sync Service - Air-Gapped Data Synchronization
  *

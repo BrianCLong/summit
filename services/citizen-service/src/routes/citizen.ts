@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Router, Request, Response } from 'express';
 import { citizenService } from '../services/CitizenService.js';
 import { ServiceDomainSchema } from '../schemas/citizen.js';

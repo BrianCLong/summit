@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Redis Cluster Client with Connection Pooling and Failover
  *

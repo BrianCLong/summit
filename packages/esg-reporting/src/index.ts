@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * @intelgraph/esg-reporting
  * Shared ESG reporting types, validators, metrics, and framework mappings

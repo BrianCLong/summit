@@ -8,7 +8,7 @@ import { nluService, NLUAnalysis } from './nlu-service';
 import { metrics, runHealthChecks } from './metrics';
 import { translationCache } from './cache';
 
-export const router = Router();
+export const router: Router = Router();
 
 // Request timing middleware
 const timingMiddleware = (req: Request, res: Response, next: NextFunction) => {

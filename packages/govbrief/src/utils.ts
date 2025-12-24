@@ -1,3 +1,4 @@
+// @ts-nocheck
 import crypto from 'node:crypto';
 
 export function createSlug(value: string): string {

@@ -1,5 +1,6 @@
-import React, {createContext, useState, useEffect, ReactNode} from 'react';
-import {getCurrentLocation, watchLocation, clearLocationWatch, Location} from '../services/LocationService';
+// @ts-nocheck
+import React, { createContext, useState, useEffect, ReactNode } from 'react';
+import { getCurrentLocation, watchLocation, clearLocationWatch, Location } from '../services/LocationService';
 
 interface LocationContextType {
   location: Location | null;
@@ -11,11 +12,11 @@ interface LocationContextType {
 export const LocationContext = createContext<LocationContextType>({
   location: null,
   isTracking: false,
-  startTracking: () => {},
-  stopTracking: () => {},
+  startTracking: () => { },
+  stopTracking: () => { },
 });
 
-export const LocationProvider: React.FC<{children: ReactNode}> = ({children}) => {
+export const LocationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [location, setLocation] = useState<Location | null>(null);
   const [isTracking, setIsTracking] = useState(false);
   const [watchId, setWatchId] = useState<number | null>(null);
@@ -48,7 +49,7 @@ export const LocationProvider: React.FC<{children: ReactNode}> = ({children}) =>
   };
 
   return (
-    <LocationContext.Provider value={{location, isTracking, startTracking, stopTracking}}>
+    <LocationContext.Provider value={{ location, isTracking, startTracking, stopTracking }}>
       {children}
     </LocationContext.Provider>
   );

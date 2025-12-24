@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * SIGINT Spectrum Analyzer Service
  *

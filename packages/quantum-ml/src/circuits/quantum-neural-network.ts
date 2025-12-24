@@ -3,7 +3,7 @@
  * Parameterized quantum circuit for machine learning
  */
 
-import { QuantumCircuit, QuantumSimulator, CircuitBuilder } from '@summit/quantum-simulation';
+import { QuantumCircuit, QuantumSimulator, CircuitBuilder } from '@intelgraph/quantum-simulation';
 
 export interface QNNParams {
   numQubits: number;

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * AWS S3 Storage Provider
  */

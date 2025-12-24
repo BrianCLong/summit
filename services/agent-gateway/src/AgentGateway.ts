@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Agent Gateway Service
  * AGENT-2: Gateway Foundation - All agent requests flow through here

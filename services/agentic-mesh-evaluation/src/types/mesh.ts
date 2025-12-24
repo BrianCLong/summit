@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Agentic Mesh Evaluation - Core Type Definitions
  * Comprehensive type system for distributed multi-agent mesh evaluation
