@@ -31,13 +31,13 @@ const graphragConfig: {
   redisUrl?: string;
   useCases: Record<string, UseCaseConfig>;
 } = {
-  redisUrl: config.graphrag.redisUrl,
+  redisUrl: config.graphrag?.redisUrl,
   useCases: {
     default: {
       promptSchema: defaultPrompt,
       outputSchema: defaultOutput,
-      tokenBudget: config.graphrag.tokenBudget,
-      latencyBudgetMs: config.graphrag.latencyBudgetMs,
+      tokenBudget: config.graphrag?.tokenBudget ?? 4096,
+      latencyBudgetMs: config.graphrag?.latencyBudgetMs ?? 5000,
     },
   },
 };
