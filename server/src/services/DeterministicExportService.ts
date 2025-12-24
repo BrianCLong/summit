@@ -22,6 +22,8 @@ import { createHash } from 'crypto';
 import { join } from 'path';
 import archiver from 'archiver';
 import { randomUUID as uuidv4 } from 'node:crypto';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 import logger from '../config/logger';
 import { getPostgresPool } from '../config/database';
 import { redactData } from '../utils/dataRedaction';
@@ -36,6 +38,7 @@ export interface ExportRequest {
   endDate?: string;
   format: 'json' | 'csv' | 'bundle';
   userId: string;
+  tenantId: string;
   includeManifest?: boolean;
   includeProvenance?: boolean;
 }
@@ -622,23 +625,8 @@ export class DeterministicExportService {
     archive.directory(workDir, false);
     await archive.finalize();
 
-    // Calculate bundle hash
-    const bundleHash = await this.calculateFileHash(bundlePath);
-
-    // Update manifest with bundle hash
-    manifest.integrity.bundleHash = bundleHash;
-    await import('fs/promises').then((fs) =>
-      fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2)),
-    );
-
-    // Recreate bundle with updated manifest
-    rmSync(bundlePath);
-    const output2 = createWriteStream(bundlePath);
-    const archive2 = archiver('zip', { zlib: { level: 9 } });
-
-    archive2.pipe(output2);
-    archive2.directory(workDir, false);
-    await archive2.finalize();
+    // Bundle hash calculation removed to avoid circular dependency
+    // The manifest inside the bundle cannot contain the hash of the bundle itself
 
     return bundlePath;
   }
