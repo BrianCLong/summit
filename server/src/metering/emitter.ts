@@ -7,6 +7,7 @@ export class MeteringEmitter {
     await meteringPipeline.enqueue(event);
   }
 
+  // Legacy Helpers
   async emitIngestUnits(input: {
     tenantId: string;
     units: number;
@@ -82,6 +83,103 @@ export class MeteringEmitter {
       metadata: input.metadata,
       seatCount: input.seatCount ?? 1,
       userId: input.userId,
+    });
+  }
+
+  // New Helpers
+
+  async emitQueryExecuted(input: {
+    tenantId: string;
+    source: string;
+    count?: number;
+    correlationId?: string;
+    idempotencyKey?: string;
+    metadata?: Record<string, unknown>;
+  }) {
+    await this.safeEmit({
+      kind: MeterEventKind.QUERY_EXECUTED,
+      tenantId: input.tenantId,
+      source: input.source,
+      count: input.count ?? 1,
+      correlationId: input.correlationId,
+      idempotencyKey: input.idempotencyKey,
+      metadata: input.metadata,
+    });
+  }
+
+  async emitIngestItem(input: {
+    tenantId: string;
+    source: string;
+    count?: number;
+    correlationId?: string;
+    idempotencyKey?: string;
+    metadata?: Record<string, unknown>;
+  }) {
+    await this.safeEmit({
+      kind: MeterEventKind.INGEST_ITEM,
+      tenantId: input.tenantId,
+      source: input.source,
+      count: input.count ?? 1,
+      correlationId: input.correlationId,
+      idempotencyKey: input.idempotencyKey,
+      metadata: input.metadata,
+    });
+  }
+
+  async emitExportBuilt(input: {
+    tenantId: string;
+    source: string;
+    count?: number;
+    correlationId?: string;
+    idempotencyKey?: string;
+    metadata?: Record<string, unknown>;
+  }) {
+    await this.safeEmit({
+      kind: MeterEventKind.EXPORT_BUILT,
+      tenantId: input.tenantId,
+      source: input.source,
+      count: input.count ?? 1,
+      correlationId: input.correlationId,
+      idempotencyKey: input.idempotencyKey,
+      metadata: input.metadata,
+    });
+  }
+
+  async emitArtifactStoredBytes(input: {
+    tenantId: string;
+    bytes: number;
+    source: string;
+    correlationId?: string;
+    idempotencyKey?: string;
+    metadata?: Record<string, unknown>;
+  }) {
+    await this.safeEmit({
+      kind: MeterEventKind.ARTIFACT_STORED_BYTES,
+      tenantId: input.tenantId,
+      bytes: input.bytes,
+      source: input.source,
+      correlationId: input.correlationId,
+      idempotencyKey: input.idempotencyKey,
+      metadata: input.metadata,
+    });
+  }
+
+  async emitWebhookDelivered(input: {
+    tenantId: string;
+    source: string;
+    count?: number;
+    correlationId?: string;
+    idempotencyKey?: string;
+    metadata?: Record<string, unknown>;
+  }) {
+    await this.safeEmit({
+      kind: MeterEventKind.WEBHOOK_DELIVERED,
+      tenantId: input.tenantId,
+      source: input.source,
+      count: input.count ?? 1,
+      correlationId: input.correlationId,
+      idempotencyKey: input.idempotencyKey,
+      metadata: input.metadata,
     });
   }
 

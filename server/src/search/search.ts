@@ -1,6 +1,7 @@
 import { Pool } from 'pg';
 import neo4j from 'neo4j-driver';
 import SemanticSearchService from '../services/SemanticSearchService.js';
+import { meteringEmitter } from '../metering/emitter.js';
 
 type SearchInput = {
   q?: string;
@@ -9,9 +10,20 @@ type SearchInput = {
   geo?: { lat: number; lon: number; radiusKm: number };
   semantic?: boolean;
   graphExpand?: boolean;
+  // Injected for metering context if available
+  tenantId?: string;
 };
 
 export async function searchAll(input: SearchInput) {
+  // Metering
+  if (input.tenantId) {
+    meteringEmitter.emitQueryExecuted({
+      tenantId: input.tenantId,
+      source: 'search-service',
+      metadata: { semantic: input.semantic, graphExpand: input.graphExpand }
+    }).catch(err => console.error('Metering failed', err));
+  }
+
   const pg = new Pool({ connectionString: process.env.DATABASE_URL });
   const semanticService = new SemanticSearchService({ pool: pg });
 
