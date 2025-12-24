@@ -1,6 +1,5 @@
-import { Pool } from 'pg';
-import neo4j from 'neo4j-driver';
 import SemanticSearchService from '../services/SemanticSearchService.js';
+import { getNeo4jDriver, getPostgresPool } from '../config/database.js';
 
 type SearchInput = {
   q?: string;
@@ -12,8 +11,11 @@ type SearchInput = {
 };
 
 export async function searchAll(input: SearchInput) {
-  const pg = new Pool({ connectionString: process.env.DATABASE_URL });
-  const semanticService = new SemanticSearchService({ pool: pg });
+  // Use shared pool
+  const managedPg = getPostgresPool();
+  // SemanticSearchService expects a raw Pool for some operations or will use its own factory if not provided.
+  // We pass the raw pool from the managed pool to reuse connections.
+  const semanticService = new SemanticSearchService({ pool: managedPg.pool });
 
   try {
     // Semantic Search with Fallback
@@ -73,13 +75,7 @@ export async function searchAll(input: SearchInput) {
     }
 
     // Keyword Search Fallback
-    const driver = neo4j.driver(
-      process.env.NEO4J_URI!,
-      neo4j.auth.basic(
-        process.env.NEO4J_USER!,
-        process.env.NEO4J_PASSWORD || process.env.NEO4J_PASS || '',
-      ),
-    );
+    const driver = getNeo4jDriver();
 
     const where: string[] = [];
     const params: any = {};
@@ -102,16 +98,16 @@ export async function searchAll(input: SearchInput) {
       params.to = input.time.to;
     }
     const sql = `SELECT id, title, status, created_at FROM cases ${where.length ? 'WHERE ' + where.join(' AND ') : ''} ORDER BY created_at DESC LIMIT 100`;
-    const base = await pg.query(sql, Object.values(params));
+    const base = await managedPg.query(sql, Object.values(params));
 
     // Keyword search expansion uses the local driver, but we want to use the helper.
     // The helper creates its own driver.
-    await driver.close();
+    // await driver.close(); // Shared driver, do not close
 
     return expandGraph(base.rows, input.graphExpand);
   } finally {
     await semanticService.close();
-    await pg.end();
+    // await pg.end(); // Shared pool, do not close
   }
 }
 
@@ -121,16 +117,8 @@ async function expandGraph(rows: any[], expand: boolean | undefined) {
     return { results: rows, graph: [] };
   }
 
-  // NOTE: Ideally we should use a shared driver instance from config/database.ts
-  // but to minimize dependencies and keep this file self-contained as before,
-  // we create a transient driver. In high-load, this should be refactored to use a singleton.
-  const driver = neo4j.driver(
-    process.env.NEO4J_URI!,
-    neo4j.auth.basic(
-      process.env.NEO4J_USER!,
-      process.env.NEO4J_PASSWORD || process.env.NEO4J_PASS || '',
-    ),
-  );
+  // Use shared driver
+  const driver = getNeo4jDriver();
 
   let graph: any[] = [];
   const ids = rows.map((r: any) => r.id);
@@ -150,10 +138,10 @@ async function expandGraph(rows: any[], expand: boolean | undefined) {
     console.error("Graph expansion failed", e);
   } finally {
     await session.close();
-    await driver.close();
+    // await driver.close(); // Shared driver, do not close
   }
 
   return { results: rows, graph };
 }
 
-export { AdvancedSearchEngine, createAdvancedSearchEngine } from './advanced-search-engine';
+export { AdvancedSearchEngine, createAdvancedSearchEngine } from './advanced-search-engine.js';
