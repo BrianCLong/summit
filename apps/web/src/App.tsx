@@ -26,6 +26,9 @@ const CommandCenterDashboard = React.lazy(
 const SupplyChainDashboard = React.lazy(
   () => import('@/pages/dashboards/SupplyChainDashboard')
 )
+const AdvancedDashboardPage = React.lazy(
+  () => import('@/pages/dashboards/AdvancedDashboardPage')
+)
 const DataSourcesPage = React.lazy(() => import('@/pages/DataSourcesPage'))
 const ModelsPage = React.lazy(() => import('@/pages/ModelsPage'))
 const ReportsPage = React.lazy(() => import('@/pages/ReportsPage'))
@@ -146,6 +149,10 @@ function App() {
                       <Route
                         path="dashboards/supply-chain"
                         element={<SupplyChainDashboard />}
+                      />
+                      <Route
+                        path="dashboards/advanced"
+                        element={<AdvancedDashboardPage />}
                       />
                       <Route
                         path="internal/command"
