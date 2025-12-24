@@ -10087,6 +10087,9 @@ importers:
       '@turf/union':
         specifier: ^7.1.0
         version: 7.3.1
+      '@types/consul':
+        specifier: ^2.0.0
+        version: 2.0.0
       apollo-server-express:
         specifier: ^3.13.0
         version: 3.13.0(encoding@0.1.13)(express@4.22.1)(graphql@16.12.0)
@@ -10108,6 +10111,9 @@ importers:
       compression:
         specifier: ^1.8.1
         version: 1.8.1
+      consul:
+        specifier: ^2.0.1
+        version: 2.0.1
       cors:
         specifier: ^2.8.5
         version: 2.8.5
@@ -29955,6 +29961,10 @@ packages:
   '@types/connect@3.4.38':
     resolution: {integrity: sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==}
 
+  '@types/consul@2.0.0':
+    resolution: {integrity: sha512-IyvUaJNOrU+X/Zh46/zwwUPHOEULuC4zod8KNUDElBqN8d9XwtPdyvEeHBZ/HPmkWN9EqR4KbfnzQuRLlWt9+Q==}
+    deprecated: This is a stub types definition. consul provides its own type definitions, so you do not need this installed.
+
   '@types/content-disposition@0.5.9':
     resolution: {integrity: sha512-8uYXI3Gw35MhiVYhG3s295oihrxRyytcRHjSjqnqZVDDy/xcGBRny7+Xj1Wgfhv5QzRtN2hB2dVRBUX9XW3UcQ==}
 
@@ -33581,6 +33591,10 @@ packages:
 
   constants-browserify@1.0.0:
     resolution: {integrity: sha512-xFxOwqIzR/e1k1gLiWEophSCMqXcwVHIH7akf7b/vxcUeGunlj3hvZaaqxwHsTgn+IndtkQJgSztIDWeumWJDQ==}
+
+  consul@2.0.1:
+    resolution: {integrity: sha512-91ExUUelOJ1yyB0etYAR0w1p6Ues1VosEyBVxPcWJdnQDTKqAEFzL0MHfOqZWYI2d4HZ4FgotHZkAPW2A/xahA==}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
 
   content-disposition@0.5.4:
     resolution: {integrity: sha512-FveZTNuGw04cxlAiWbzi6zTAL/lhehaWbTtgluJh4/E95DqMwTmha3KZN1aAWA8cFIhHzMZUvLevkw5Rqk+tSQ==}
@@ -40983,6 +40997,11 @@ packages:
 
   pako@1.0.11:
     resolution: {integrity: sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==}
+
+  papi@1.1.2:
+    resolution: {integrity: sha512-cwM6pPpfAYgPe3EQi23SmB5J5s4XFS9lou9z63I5BbnMGmFaR8LAKvKboW7n1IUAKj76OtnyK0YU16JjnZrqVg==}
+    engines: {node: '>=10.0.0'}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
 
   param-case@3.0.4:
     resolution: {integrity: sha512-RXlj7zCYokReqWpOPH9oYivUzLYZ5vAPIfEmCTNViosC78F8F0H9y7T7gG2M39ymgutxF5gcFEsyZQSph9Bp3A==}
@@ -64862,6 +64881,10 @@ snapshots:
     dependencies:
       '@types/node': 20.19.25
 
+  '@types/consul@2.0.0':
+    dependencies:
+      consul: 2.0.1
+
   '@types/content-disposition@0.5.9': {}
 
   '@types/conventional-commits-parser@5.0.2':
@@ -69896,6 +69919,11 @@ snapshots:
       upper-case: 2.0.2
 
   constants-browserify@1.0.0: {}
+
+  consul@2.0.1:
+    dependencies:
+      papi: 1.1.2
+      uuid: 10.0.0
 
   content-disposition@0.5.4:
     dependencies:
@@ -79966,6 +79994,8 @@ snapshots:
   pako@0.2.9: {}
 
   pako@1.0.11: {}
+
+  papi@1.1.2: {}
 
   param-case@3.0.4:
     dependencies:

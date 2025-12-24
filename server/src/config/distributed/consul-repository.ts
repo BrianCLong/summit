@@ -22,12 +22,11 @@ export interface ConsulRepositoryConfig {
  * Provides real-time distributed configuration with automatic change propagation
  */
 export class ConsulConfigRepository<TConfig = Record<string, any>>
-  implements RepositoryWriter<TConfig>
-{
-  private readonly consul: Consul.Consul;
+  implements RepositoryWriter<TConfig> {
+  private readonly consul: any;
   private readonly prefix: string;
   private readonly events = new EventEmitter();
-  private readonly watchers = new Map<string, Consul.Watch>();
+  private readonly watchers = new Map<string, any>();
 
   constructor(config: ConsulRepositoryConfig = {}) {
     this.consul = new Consul({
@@ -152,10 +151,10 @@ export class ConsulConfigRepository<TConfig = Record<string, any>>
   ): () => void {
     const key = `${this.prefix}/${configId}/latest`;
 
-    const watch = this.consul.watch({
-      method: this.consul.kv.get,
+    const watch = (this.consul as any).watch({
+      method: (this.consul as any).kv.get,
       options: { key },
-    } as any);
+    });
 
     watch.on('change', async (data: any) => {
       if (!data || !data.Value) {

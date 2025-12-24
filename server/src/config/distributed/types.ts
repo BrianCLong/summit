@@ -30,6 +30,16 @@ export interface AuditEntry {
   changes?: string[];
 }
 
+export interface DeepPartialObject<T> {
+  [P in keyof T]?: DeepPartial<T[P]>;
+}
+
+export type DeepPartial<T> = T extends (infer U)[]
+  ? DeepPartial<U>[]
+  : T extends object
+  ? DeepPartialObject<T>
+  : T;
+
 export interface AppliedState {
   environment: EnvironmentName;
   version: number;
@@ -39,7 +49,7 @@ export interface AppliedState {
 
 export interface ABTestVariant<TConfig> {
   name: string;
-  config: Partial<TConfig>;
+  config: DeepPartial<TConfig>;
   weight: number;
 }
 
@@ -54,7 +64,7 @@ export interface ABTestConfig<TConfig> {
 export interface CanaryConfig<TConfig> {
   environment: EnvironmentName;
   trafficPercent: number;
-  config: Partial<TConfig>;
+  config: DeepPartial<TConfig>;
   startAt: Date;
   endAt?: Date;
   guardRailMetrics?: string[];
@@ -67,7 +77,7 @@ export interface FeatureFlagBindings {
 export interface ConfigVersion<TConfig = Record<string, any>> {
   id: string;
   config: TConfig;
-  overrides: Partial<Record<EnvironmentName, Partial<TConfig>>>;
+  overrides: Partial<Record<EnvironmentName, DeepPartial<TConfig>>>;
   metadata: ConfigMetadata;
   checksum: string;
   abTest?: ABTestConfig<TConfig>;

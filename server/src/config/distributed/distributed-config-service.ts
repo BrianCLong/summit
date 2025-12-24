@@ -13,6 +13,7 @@ import {
   ConfigWatcher,
   DriftDelta,
   DriftReport,
+  DeepPartial,
   EnvironmentName,
   FeatureFlagAdapter,
   FeatureFlagBindings,
@@ -25,7 +26,7 @@ const SECRET_REFERENCE_KEY = '__secretRef';
 
 interface CreateOrUpdateOptions<TConfig> {
   config: TConfig;
-  overrides?: Partial<Record<EnvironmentName, Partial<TConfig>>>;
+  overrides?: Partial<Record<EnvironmentName, DeepPartial<TConfig>>>;
   metadata: {
     actor: string;
     message?: string;
@@ -60,16 +61,16 @@ function isSecretReference(
 ): value is { [SECRET_REFERENCE_KEY]: SecretReference } {
   return Boolean(
     value &&
-      typeof value === 'object' &&
-      SECRET_REFERENCE_KEY in (value as Record<string, unknown>) &&
-      typeof (value as Record<string, unknown>)[SECRET_REFERENCE_KEY] ===
-        'object',
+    typeof value === 'object' &&
+    SECRET_REFERENCE_KEY in (value as Record<string, unknown>) &&
+    typeof (value as Record<string, unknown>)[SECRET_REFERENCE_KEY] ===
+    'object',
   );
 }
 
 function deepMerge<TConfig>(
   base: TConfig,
-  override?: Partial<TConfig>,
+  override?: DeepPartial<TConfig>,
 ): TConfig {
   if (!override) {
     return base;
@@ -160,9 +161,9 @@ function selectVariant<TConfig>(
     assignmentValue !== undefined
       ? assignmentValue
       : parseInt(
-          createHash('sha1').update(identifier).digest('hex').slice(0, 8),
-          16,
-        ) / 0xffffffff;
+        createHash('sha1').update(identifier).digest('hex').slice(0, 8),
+        16,
+      ) / 0xffffffff;
 
   let cumulative = 0;
   for (const variant of normalized) {
@@ -268,7 +269,7 @@ export class DistributedConfigService<TConfig = Record<string, any>> {
       actor: options.metadata.actor,
       timestamp: metadata.createdAt,
       message: options.metadata.message,
-      changes: this.computeChanges(latest?.config ?? {}, options.config),
+      changes: this.computeChanges((latest?.config ?? {}) as any, options.config),
     };
 
     await this.repository.saveVersion(configId, payload, auditEntry);
@@ -315,12 +316,12 @@ export class DistributedConfigService<TConfig = Record<string, any>> {
       const identifier = options.actorId ?? options.requestId ?? 'anonymous';
       const variant =
         options.abTestVariant &&
-        version.abTest.variants.find(
-          (entry) => entry.name === options.abTestVariant,
-        )
+          version.abTest.variants.find(
+            (entry) => entry.name === options.abTestVariant,
+          )
           ? version.abTest.variants.find(
-              (entry) => entry.name === options.abTestVariant,
-            )
+            (entry) => entry.name === options.abTestVariant,
+          )
           : selectVariant(version.abTest, identifier, options.assignmentValue);
       if (variant) {
         effectiveConfig = deepMerge(
