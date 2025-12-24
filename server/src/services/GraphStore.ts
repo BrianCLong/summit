@@ -2,6 +2,7 @@ import { Driver, Node, Relationship as Neo4jRelationship } from 'neo4j-driver';
 import { getNeo4jDriver } from '../db/neo4j';
 import { provLedgerClient } from '../lib/prov-ledger.js';
 import logger from '../utils/logger.js';
+import { SearchIndexService } from '../search-index/SearchIndexService.js';
 
 export interface Entity {
   id: string;
@@ -131,7 +132,12 @@ export function createGraphStore(
             entityWithProv,
           ),
         );
-        return nodeToEntity(res.records[0].get('n'));
+        const entity = nodeToEntity(res.records[0].get('n'));
+        // Ingest into Search Index
+        SearchIndexService.getInstance().onEntityUpsert(entity).catch(err => {
+            logger.error({ err }, 'Failed to index entity on upsert');
+        });
+        return entity;
       } finally {
         await session.close();
       }

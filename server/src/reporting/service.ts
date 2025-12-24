@@ -1,3 +1,4 @@
+import { provenanceLedger } from '../provenance/ledger';
 import { AccessControlService } from './access-control';
 import { DeliveryService } from './delivery-service';
 import { exporterMap } from './exporters';
@@ -47,7 +48,46 @@ export class ReportingService {
     });
 
     const version = this.recordVersion(validatedRequest.template, artifact, access.userId);
+
+    // Audit Logging
+    await provenanceLedger.appendEntry({
+      tenantId: 'system', // TODO: extract from access context if available
+      actionType: 'REPORT_GENERATED',
+      resourceType: 'Report',
+      resourceId: version.id,
+      actorId: access.userId,
+      actorType: 'user',
+      timestamp: new Date(),
+      payload: {
+        templateId: validatedRequest.template.id,
+        format: validatedRequest.template.format,
+        watermark: validatedRequest.watermark,
+      },
+      metadata: {
+        versionChecksum: version.checksum,
+      },
+    });
+
     const delivery = await this.delivery.deliver(artifact, validatedRequest.recipients);
+
+    if (delivery) {
+      await provenanceLedger.appendEntry({
+        tenantId: 'system', // TODO: extract from access context if available
+        actionType: 'REPORT_DELIVERED',
+        resourceType: 'Report',
+        resourceId: version.id,
+        actorId: access.userId,
+        actorType: 'user',
+        timestamp: new Date(),
+        payload: {
+          delivery,
+        },
+        metadata: {
+          versionChecksum: version.checksum,
+        },
+      });
+    }
+
     artifact.metadata = {
       ...(artifact.metadata || {}),
       versionId: version.id,

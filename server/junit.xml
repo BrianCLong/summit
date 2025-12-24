@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="4" failures="0" errors="0" time="16.015">
-  <testsuite name="Webhook API" errors="0" failures="0" skipped="0" timestamp="2025-11-20T09:50:33" time="15.834" tests="4">
-    <testcase classname="Webhook API POST /api/webhooks should create a webhook" name="Webhook API POST /api/webhooks should create a webhook" time="0.075">
+<testsuites name="jest tests" tests="6" failures="0" errors="0" time="14.676">
+  <testsuite name="SummitAnomalyService" errors="0" failures="0" skipped="0" timestamp="2025-12-24T18:41:43" time="14.558" tests="6">
+    <testcase classname="SummitAnomalyService should be a singleton" name="SummitAnomalyService should be a singleton" time="0.003">
     </testcase>
-    <testcase classname="Webhook API POST /api/webhooks should fail with invalid input" name="Webhook API POST /api/webhooks should fail with invalid input" time="0.011">
+    <testcase classname="SummitAnomalyService Temporal Detection should detect a temporal anomaly" name="SummitAnomalyService Temporal Detection should detect a temporal anomaly" time="0.002">
     </testcase>
-    <testcase classname="Webhook API GET /api/webhooks should list webhooks" name="Webhook API GET /api/webhooks should list webhooks" time="0.009">
+    <testcase classname="SummitAnomalyService Temporal Detection should not detect anomaly for normal values" name="SummitAnomalyService Temporal Detection should not detect anomaly for normal values" time="0.001">
     </testcase>
-    <testcase classname="Webhook API POST /api/webhooks/trigger-test should trigger a webhook event" name="Webhook API POST /api/webhooks/trigger-test should trigger a webhook event" time="0.009">
+    <testcase classname="SummitAnomalyService Spatial Detection should detect spatial anomaly" name="SummitAnomalyService Spatial Detection should detect spatial anomaly" time="0.001">
+    </testcase>
+    <testcase classname="SummitAnomalyService Behavioral Detection should detect flapping" name="SummitAnomalyService Behavioral Detection should detect flapping" time="0.01">
+    </testcase>
+    <testcase classname="SummitAnomalyService False Positive Reduction should suppress alerts if whitelisted" name="SummitAnomalyService False Positive Reduction should suppress alerts if whitelisted" time="0.002">
     </testcase>
   </testsuite>
 </testsuites>
