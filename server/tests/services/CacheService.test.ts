@@ -1,13 +1,11 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { CacheService } from '../../src/services/cacheService.js';
+import { CacheService } from '../../src/services/CacheService.js';
 
 const mockRedis = {
-  get: jest.fn(),
-  setex: jest.fn(),
-  del: jest.fn(),
+  get: jest.fn<(key: string) => Promise<string | null>>(),
+  setex: jest.fn<(key: string, ttl: number, value: string) => Promise<void>>(),
+  del: jest.fn<(key: string) => Promise<number>>(),
 };
-
-const cacheLocalGauge = { set: jest.fn() };
 
 jest.mock('../../src/config/database.js', () => ({
   getRedisClient: () => mockRedis,
@@ -20,12 +18,12 @@ jest.mock('../../src/config.js', () => ({
   },
 }));
 
-jest.mock('../../src/metrics/cacheMetrics.js', () => ({
-  recHit: jest.fn(),
-  recMiss: jest.fn(),
-  recSet: jest.fn(),
-  cacheLocalSize: {
-    labels: jest.fn(() => cacheLocalGauge),
+jest.mock('../../src/config/logger.js', () => ({
+  default: {
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    debug: jest.fn(),
   },
 }));
 
@@ -38,28 +36,25 @@ describe('CacheService', () => {
     mockRedis.get.mockResolvedValue(null);
   });
 
-  it('returns memory hits without touching redis', async () => {
-    await cache.set('test', { from: 'memory' }, 60);
-    mockRedis.get.mockResolvedValue(JSON.stringify({ from: 'redis' }));
+  it('returns null when key not in cache', async () => {
+    mockRedis.get.mockResolvedValue(null);
 
     const result = await cache.get<{ from: string }>('test');
 
-    expect(result).toEqual({ from: 'memory' });
-    expect(mockRedis.get).not.toHaveBeenCalled();
+    expect(result).toBeNull();
+    expect(mockRedis.get).toHaveBeenCalledWith('cache:test');
   });
 
-  it('falls back to redis and seeds memory cache', async () => {
+  it('returns parsed value from redis', async () => {
     mockRedis.get.mockResolvedValue(JSON.stringify({ payload: true }));
 
     const result = await cache.get<{ payload: boolean }>('redis-key');
 
     expect(result).toEqual({ payload: true });
     expect(mockRedis.get).toHaveBeenCalledWith('cache:redis-key');
-    const memoryHit = await cache.get('redis-key');
-    expect(memoryHit).toEqual({ payload: true });
   });
 
-  it('writes to redis and memory on set', async () => {
+  it('writes to redis on set', async () => {
     await cache.set('write-key', { foo: 'bar' }, 45);
 
     expect(mockRedis.setex).toHaveBeenCalledWith(
@@ -67,12 +62,21 @@ describe('CacheService', () => {
       45,
       JSON.stringify({ foo: 'bar' }),
     );
-    expect(cacheLocalGauge.set).toHaveBeenCalledWith(1);
+  });
+
+  it('uses default TTL when not specified', async () => {
+    await cache.set('default-ttl-key', { data: 123 });
+
+    expect(mockRedis.setex).toHaveBeenCalledWith(
+      'cache:default-ttl-key',
+      300, // default TTL from config
+      JSON.stringify({ data: 123 }),
+    );
   });
 
   it('getOrSet returns cached value and skips factory', async () => {
-    await cache.set('hydrate', { cached: true });
-    const factory = jest.fn();
+    mockRedis.get.mockResolvedValue(JSON.stringify({ cached: true }));
+    const factory = jest.fn<() => Promise<{ cached: boolean }>>();
 
     const result = await cache.getOrSet('hydrate', factory);
 
@@ -80,12 +84,14 @@ describe('CacheService', () => {
     expect(factory).not.toHaveBeenCalled();
   });
 
-  it('getOrSet populates cache when missing', async () => {
-    const factory = jest.fn().mockResolvedValue({ fresh: true });
+  it('getOrSet calls factory and populates cache when missing', async () => {
+    mockRedis.get.mockResolvedValue(null);
+    const factory = jest.fn<() => Promise<{ fresh: boolean }>>().mockResolvedValue({ fresh: true });
 
     const result = await cache.getOrSet('hydrate', factory, 25);
 
     expect(result).toEqual({ fresh: true });
+    expect(factory).toHaveBeenCalled();
     expect(mockRedis.setex).toHaveBeenCalledWith(
       'cache:hydrate',
       25,
@@ -93,12 +99,9 @@ describe('CacheService', () => {
     );
   });
 
-  it('delete clears both layers', async () => {
-    await cache.set('temp', { value: 1 });
-    await cache.delete('temp');
+  it('del removes key from redis', async () => {
+    await cache.del('temp');
 
     expect(mockRedis.del).toHaveBeenCalledWith('cache:temp');
-    const result = await cache.get('temp');
-    expect(result).toBeNull();
   });
 });
