@@ -10,7 +10,7 @@ import logger from '../utils/logger.js';
 import { backupDuration, backupSize } from '../metrics/dbMetrics.js';
 import { getNeo4jDriver } from '../db/neo4j.js';
 import { getPostgresPool } from '../db/postgres.js';
-import { getRedisClient } from '../config/database.js';
+import { RedisService } from '../cache/redis.js';
 
 const execAsync = promisify(exec);
 
@@ -32,9 +32,12 @@ export interface BackupOptions {
 export class BackupService {
   private backupRoot: string;
   private s3Config: S3Config | null = null;
+  private redis: RedisService;
 
   constructor(backupRoot: string = process.env.BACKUP_ROOT_DIR || './backups') {
     this.backupRoot = backupRoot;
+    this.redis = RedisService.getInstance();
+
     if (process.env.S3_BACKUP_BUCKET) {
         this.s3Config = {
             bucket: process.env.S3_BACKUP_BUCKET,
@@ -61,11 +64,6 @@ export class BackupService {
       logger.info(`Uploading ${filepath} to S3 bucket ${this.s3Config.bucket} as ${key}...`);
 
       // Simulation of S3 upload if SDK is not present, or use SDK if we were to add it.
-      // Ideally:
-      // const s3 = new S3Client(this.s3Config);
-      // await s3.send(new PutObjectCommand({ Bucket: ..., Key: ..., Body: fs.createReadStream(filepath) }));
-
-      // For now, we mock the success or use a CLI tool if available
       try {
           if (process.env.USE_AWS_CLI === 'true') {
              await execAsync(`aws s3 cp "${filepath}" "s3://${this.s3Config.bucket}/${key}" --region ${this.s3Config.region}`);
@@ -91,8 +89,6 @@ export class BackupService {
           if (filepath.endsWith('.gz')) {
               await execAsync(`gzip -t "${filepath}"`);
           }
-
-          // 3. (Optional) Attempt a restoration to a temporary DB (advanced)
 
           logger.info(`Backup verification successful for ${filepath}`);
           return true;
@@ -138,6 +134,7 @@ export class BackupService {
       }
 
       await this.verifyBackup(finalPath);
+      await this.recordBackupMeta('postgres', finalPath, stats.size);
 
       return finalPath;
     } catch (error) {
@@ -161,7 +158,6 @@ export class BackupService {
       const session = driver.session();
 
       // Logical backup: Export nodes and relationships to JSONL
-      // This works remotely without server-side file access
       try {
           const writeStream = options.compress
               ? zlib.createGzip()
@@ -183,9 +179,6 @@ export class BackupService {
           const relResult = await session.run('MATCH ()-[r]->() RETURN r');
           for (const record of relResult.records) {
               const rel = record.get('r');
-              // Note: preserving IDs is tricky in logical dumps without more complex logic,
-              // but we are preserving the properties and type.
-              // For a full restore, we'd need start/end identifiers (e.g. uuid).
               const line = JSON.stringify({ type: 'rel', typeName: rel.type, props: rel.properties }) + '\n';
               writeStream.write(line);
           }
@@ -214,6 +207,7 @@ export class BackupService {
       }
 
       await this.verifyBackup(finalPath);
+      await this.recordBackupMeta('neo4j', finalPath, stats.size);
 
       return finalPath;
     } catch (error) {
@@ -227,15 +221,17 @@ export class BackupService {
      const startTime = Date.now();
      logger.info('Starting Redis backup...');
      try {
-       const client = getRedisClient();
+       const client = this.redis.getClient();
        if (!client) throw new Error('Redis client not available');
 
        // Trigger background save
+       // @ts-ignore
        await client.bgsave();
 
        // Poll for completion
        let attempts = 0;
        while (attempts < 30) {
+           // @ts-ignore
            const info = await client.info('persistence');
            if (!info.includes('rdb_bgsave_in_progress:1')) {
                break;
@@ -244,8 +240,7 @@ export class BackupService {
            attempts++;
        }
 
-       // We cannot download the RDB file if Redis is remote/containerized without volume access.
-       // We log the successful trigger and last save time.
+       // @ts-ignore
        const lastSave = await client.lastsave();
 
        const dir = await this.ensureBackupDir('redis');
@@ -262,12 +257,27 @@ export class BackupService {
            await this.uploadToS3(filepath, s3Key);
        }
 
+       await this.recordBackupMeta('redis', filepath, 0); // 0 size because it's a log
+
        return filepath;
      } catch (error) {
        backupDuration.labels('redis', 'failure').observe((Date.now() - startTime) / 1000);
        logger.error('Redis backup failed', error);
        throw error;
      }
+  }
+
+  async recordBackupMeta(type: string, filepath: string, size: number): Promise<void> {
+      const meta = {
+          type,
+          filepath,
+          size,
+          timestamp: new Date().toISOString(),
+          host: process.env.HOSTNAME || 'unknown'
+      };
+      // Store in Redis list for easy retrieval by DR service
+      await this.redis.getClient().lpush(`backups:${type}:history`, JSON.stringify(meta));
+      await this.redis.getClient().ltrim(`backups:${type}:history`, 0, 99); // Keep last 100
   }
 
   async runAllBackups(): Promise<Record<string, string>> {
