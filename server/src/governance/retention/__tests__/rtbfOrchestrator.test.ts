@@ -324,8 +324,8 @@ describe('RTBFOrchestrator', () => {
 
   describe('Dry-Run Mode', () => {
     it('should perform dry-run and populate results', async () => {
-      const mockQuery = pool.query as jest.Mock;
-      mockQuery.mockResolvedValueOnce({
+      const mockQuery = pool.query as jest.Mock<() => Promise<{ rows: { count: string }[] }>>;
+      mockQuery.mockResolvedValue({
         rows: [{ count: '250' }],
       });
 

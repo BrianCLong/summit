@@ -15,7 +15,7 @@ import type {
 
 // Mock dependencies
 jest.mock('../../graph/neo4j', () => ({
-  runCypher: jest.fn().mockResolvedValue([
+  runCypher: jest.fn<() => Promise<unknown[]>>().mockResolvedValue([
     { id: 'entity-1', name: 'Test Entity', type: 'HOST' },
     { id: 'entity-2', name: 'Test Entity 2', type: 'USER' },
   ]),
@@ -84,15 +84,19 @@ describe('ThreatHuntingOrchestrator', () => {
     });
 
     it('should accept custom hypotheses', async () => {
-      const customHypotheses = [
+      const customHypotheses: Partial<ThreatHypothesis>[] = [
         {
+          id: 'custom-hypo-1',
           statement: 'Detect lateral movement via RDP',
           mitreAttackTechniques: [
-            { id: 'T1021.001', name: 'Remote Desktop Protocol', tactic: 'Lateral Movement' },
+            { id: 'T1021.001', name: 'Remote Desktop Protocol', tactic: 'Lateral Movement', description: 'RDP abuse' },
           ],
           requiredQueryTemplate: 'lateral_movement_chain',
           expectedIndicators: ['RDP connections', 'Off-hours access'],
           confidenceLevel: 0.85,
+          priority: 1,
+          rationale: 'Common attack vector',
+          dataRequirements: ['network logs'],
         },
       ];
 
@@ -299,13 +303,13 @@ describe('LLMChainExecutor', () => {
 
     // Initialize with mock provider
     executor.initialize({
-      complete: jest.fn().mockResolvedValue({
+      complete: jest.fn<() => Promise<unknown>>().mockResolvedValue({
         content: JSON.stringify({
           hypotheses: [
             {
               id: 'h1',
               statement: 'Test hypothesis',
-              mitreAttackTechniques: [{ id: 'T1021', name: 'Remote Services', tactic: 'Lateral Movement' }],
+              mitreAttackTechniques: [{ id: 'T1021', name: 'Remote Services', tactic: 'Lateral Movement', description: 'Remote access' }],
               requiredQueryTemplate: 'lateral_movement_chain',
               expectedIndicators: ['indicator1'],
               confidenceLevel: 0.8,
@@ -530,12 +534,15 @@ describe('AutoRemediationHooks', () => {
   describe('getPendingApprovals', () => {
     it('should return list of pending approvals', async () => {
       const findings: EnrichedFinding[] = [];
-      await hooks.createRemediationPlan('hunt-1', findings, true);
-      await hooks.createRemediationPlan('hunt-2', findings, true);
+      const plan = await hooks.createRemediationPlan('hunt-pending-test', findings, true);
 
       const pending = hooks.getPendingApprovals();
 
-      expect(pending.length).toBeGreaterThanOrEqual(2);
+      // The created plan should be in pending approvals
+      expect(Array.isArray(pending)).toBe(true);
+      const ourPlan = pending.find((p) => p.id === plan.id);
+      expect(ourPlan).toBeDefined();
+      expect(ourPlan?.status).toBe('pending_approval');
     });
   });
 });
