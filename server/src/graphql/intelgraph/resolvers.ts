@@ -8,6 +8,7 @@ import { telemetry } from '../../lib/telemetry/comprehensive-telemetry.js';
 import { logger } from '../../config/logger.js';
 import { UserFacingError } from '../../lib/errors.js';
 import { CircuitBreaker } from '../../utils/CircuitBreaker.js';
+import { SearchIndexService } from '../../search-index/SearchIndexService.js';
 
 import type {
   Entity,
@@ -537,12 +538,16 @@ export const resolvers = {
             1.0,
             [],
           );
-          return {
+          const result = {
             ...claim,
             ...input,
             createdAt: new Date(claim.createdAt || Date.now()),
             updatedAt: new Date(claim.createdAt || Date.now()),
           };
+          SearchIndexService.getInstance().onClaimUpsert(result).catch(err => {
+              logger.error({ err }, 'Failed to index claim on upsert');
+          });
+          return result;
         }
 
         // Fallback to direct Neo4j via Circuit Breaker
@@ -580,7 +585,7 @@ export const resolvers = {
             );
 
             const node = result.records[0]?.get('c').properties;
-            return {
+            const createdClaim = {
               ...node,
               subjects: JSON.parse(node.subjects),
               sources: JSON.parse(node.sources),
@@ -592,6 +597,12 @@ export const resolvers = {
               createdAt: new Date(node.createdAt),
               updatedAt: new Date(node.updatedAt),
             };
+
+            SearchIndexService.getInstance().onClaimUpsert(createdClaim).catch(err => {
+                logger.error({ err }, 'Failed to index claim on upsert');
+            });
+
+            return createdClaim;
           } finally {
             await session.close();
           }

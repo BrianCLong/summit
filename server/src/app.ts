@@ -83,6 +83,7 @@ import queryPreviewStreamRouter from './routes/query-preview-stream.js';
 import correctnessProgramRouter from './routes/correctness-program.js';
 import commandConsoleRouter from './routes/internal/command-console.js';
 import searchV1Router from './routes/search-v1.js';
+import searchIndexRouter from './routes/search-index.js'; // New search-index route
 import dataGovernanceRouter from './routes/data-governance-routes.js';
 import tenantBillingRouter from './routes/tenants/billing.js';
 import { gtmRouter } from './routes/gtm-messaging.js';
@@ -345,6 +346,7 @@ export const createApp = async () => {
   app.use('/api', queryPreviewStreamRouter);
   app.use('/api/stream', streamRouter); // Register stream route
   app.use('/api/v1/search', searchV1Router); // Register Unified Search API
+  app.use('/search', searchIndexRouter); // Register Search Index API
   app.use('/api', dataGovernanceRouter); // Register Data Governance API
   app.use('/api/gtm', gtmRouter);
   app.use('/airgap', airgapRouter);
