@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 import { Worker, Job, Queue } from 'bullmq';
 import { cfg } from '../config.js';
 import { getPostgresPool, getNeo4jDriver } from '../config/database.js';

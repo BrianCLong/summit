@@ -125,7 +125,7 @@ export const GeospatialDashboard: React.FC<GeospatialDashboardProps> = ({
       {/* Stats Bar */}
       <Paper sx={{ p: 1.5 }}>
         <Grid container spacing={2}>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <Grid xs={12} sm={6} md={3}>
             <Card variant="outlined">
               <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
                 <Stack direction="row" alignItems="center" spacing={1}>
@@ -140,7 +140,7 @@ export const GeospatialDashboard: React.FC<GeospatialDashboardProps> = ({
               </CardContent>
             </Card>
           </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <Grid xs={12} sm={6} md={3}>
             <Card variant="outlined">
               <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
                 <Stack direction="row" alignItems="center" spacing={1}>
@@ -155,7 +155,7 @@ export const GeospatialDashboard: React.FC<GeospatialDashboardProps> = ({
               </CardContent>
             </Card>
           </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <Grid xs={12} sm={6} md={3}>
             <Card variant="outlined">
               <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
                 <Stack direction="row" alignItems="center" spacing={1}>
@@ -170,7 +170,7 @@ export const GeospatialDashboard: React.FC<GeospatialDashboardProps> = ({
               </CardContent>
             </Card>
           </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <Grid xs={12} sm={6} md={3}>
             <Card variant="outlined">
               <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
                 <Stack direction="row" alignItems="center" spacing={1}>

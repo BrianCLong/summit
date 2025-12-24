@@ -61,7 +61,7 @@ app.use(
   }),
 );
 
-app.use(compression() as express.RequestHandler);
+app.use(compression() as unknown as express.RequestHandler);
 
 const generalRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -71,7 +71,7 @@ const generalRateLimit = rateLimit({
   legacyHeaders: false,
 });
 
-app.use(generalRateLimit);
+app.use(generalRateLimit as unknown as express.RequestHandler);
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));

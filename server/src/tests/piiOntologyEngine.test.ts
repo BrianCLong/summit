@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { describe, it, expect, beforeAll } from '@jest/globals';
 import {
   DataRecord,
@@ -6,7 +5,7 @@ import {
   PIICategory,
   RegulatoryFramework,
   TrainingSample,
-} from '../privacy/piiOntologyEngine';
+} from '../privacy/piiOntologyEngine.js';
 
 describe('PiiOntologyEngine', () => {
   let engine: PiiOntologyEngine;

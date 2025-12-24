@@ -1,7 +1,7 @@
 // @ts-nocheck
-import { threatHuntingService } from '../services/threatHuntingService';
+import { threatHuntingService } from '../services/threatHuntingService.js';
 
-async function runDemo() {
+async function runDemo(): Promise<void> {
   console.log('=== CTI Platform Demo ===');
   console.log('1. Fetching Threat Actors...');
   const actors = threatHuntingService.getThreatActors();
@@ -40,4 +40,7 @@ async function runDemo() {
   process.exit(0);
 }
 
-runDemo().catch(console.error);
+runDemo().catch((error: unknown) => {
+  console.error(error);
+  process.exit(1);
+});

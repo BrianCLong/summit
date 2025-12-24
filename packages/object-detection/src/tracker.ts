@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Multi-Object Tracking (MOT) Implementation
  */
@@ -19,8 +20,8 @@ import {
  * Based on SORT (Simple Online and Realtime Tracking)
  */
 export class ObjectTracker {
-  private config: MOTConfig;
-  private tracks: Map<number, TrackedObject>;
+  protected config: MOTConfig;
+  protected tracks: Map<number, TrackedObject>;
   private nextTrackId: number = 1;
   private frameId: number = 0;
 
@@ -186,9 +187,9 @@ export class ObjectTracker {
   /**
    * Update an existing track
    */
-  private updateTrack(trackId: number, detection: Detection): void {
+  protected updateTrack(trackId: number, detection: Detection): void {
     const track = this.tracks.get(trackId);
-    if (!track) {return;}
+    if (!track) { return; }
 
     // Calculate velocity
     const oldCenter = getBboxCenter(track.detection.bbox);

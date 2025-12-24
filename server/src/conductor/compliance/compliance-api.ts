@@ -56,7 +56,7 @@ complianceRouter.post('/assessments/run', async (req, res) => {
     // Record metrics
     prometheusConductorMetrics.recordOperationalEvent(
       'compliance_assessment_run',
-      true,
+      { success: true },
     );
     prometheusConductorMetrics.recordOperationalMetric(
       'compliance_assessment_time',
@@ -69,7 +69,7 @@ complianceRouter.post('/assessments/run', async (req, res) => {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'compliance_assessment_error',
-      false,
+      { success: false },
     );
 
     res.status(500).json({
@@ -316,7 +316,7 @@ complianceRouter.patch('/findings/:findingId/status', async (req, res) => {
     // Record metrics
     prometheusConductorMetrics.recordOperationalEvent(
       'compliance_finding_updated',
-      true,
+      { success: true },
     );
 
     res.json(response);
@@ -325,7 +325,7 @@ complianceRouter.patch('/findings/:findingId/status', async (req, res) => {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'compliance_finding_update_error',
-      false,
+      { success: false },
     );
 
     res.status(500).json({
@@ -422,7 +422,7 @@ complianceRouter.post('/reports/generate', async (req, res) => {
     // Record metrics
     prometheusConductorMetrics.recordOperationalEvent(
       'compliance_report_generated',
-      true,
+      { success: true },
     );
     prometheusConductorMetrics.recordOperationalMetric(
       'compliance_report_time',
@@ -435,7 +435,7 @@ complianceRouter.post('/reports/generate', async (req, res) => {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'compliance_report_error',
-      false,
+      { success: false },
     );
 
     res.status(500).json({
@@ -504,7 +504,7 @@ complianceRouter.post('/schedule/assessment', async (req, res) => {
     // Record metrics
     prometheusConductorMetrics.recordOperationalEvent(
       'compliance_schedule_created',
-      true,
+      { success: true },
     );
 
     res.json(response);
@@ -513,7 +513,7 @@ complianceRouter.post('/schedule/assessment', async (req, res) => {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'compliance_schedule_error',
-      false,
+      { success: false },
     );
 
     res.status(500).json({

@@ -19,3 +19,9 @@ export function isExplainViewEnabled(): boolean {
   if (raw === undefined) {return true} // default enabled in dev
   return String(raw).toLowerCase() === 'true'
 }
+
+export function isCaseExportRevampEnabled(): boolean {
+  const raw = (import.meta as any).env?.VITE_CASE_EXPORT_REVAMP_ENABLED
+  if (raw === undefined) {return true} // default enabled in dev
+  return String(raw).toLowerCase() !== 'false'
+}

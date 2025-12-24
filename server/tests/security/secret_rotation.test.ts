@@ -1,10 +1,9 @@
-// @ts-nocheck
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import jwt from 'jsonwebtoken';
 
 describe('AuthService - Secret Rotation', () => {
-  let authService;
-  let config;
+  let authService: any;
+  let config: any;
   const SECRET_V1 = 'secret-v1-must-be-long-enough-for-security';
   const SECRET_V2 = 'secret-v2-must-be-long-enough-for-security';
 

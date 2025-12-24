@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { GraphRAGService } from '../services/GraphRAGService.js';
 import {
   graphragSchemaFailuresTotal,

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Pool } from 'pg';
 import { createHash, randomUUID } from 'crypto';
 import { IngestService, IngestInput } from '../services/IngestService.js';
@@ -53,7 +52,7 @@ export interface AsyncIngestRepository {
   countProcessingForTenant(tenantId: string): Promise<number>;
 }
 
-function stableStringify(value: any): string {
+function stableStringify(value: unknown): string {
   if (value === null || typeof value !== 'object') {
     return JSON.stringify(value);
   }
@@ -64,7 +63,7 @@ function stableStringify(value: any): string {
 
   const keys = Object.keys(value).sort();
   const entries = keys.map(
-    (key) => `${JSON.stringify(key)}:${stableStringify(value[key])}`,
+    (key) => `${JSON.stringify(key)}:${stableStringify((value as Record<string, unknown>)[key])}`,
   );
   return `{${entries.join(',')}}`;
 }
@@ -295,19 +294,19 @@ export class PgAsyncIngestRepository implements AsyncIngestRepository {
     return Number(rows[0]?.count || 0);
   }
 
-  private mapRow(row: any): AsyncIngestJob {
+  private mapRow(row: Record<string, unknown>): AsyncIngestJob {
     return {
-      id: row.id,
-      tenantId: row.tenant_id,
-      payload: row.payload,
-      payloadHash: row.payload_hash,
-      idempotencyKey: row.idempotency_key,
-      status: row.status,
+      id: row.id as string,
+      tenantId: row.tenant_id as string,
+      payload: row.payload as IngestInput,
+      payloadHash: row.payload_hash as string,
+      idempotencyKey: row.idempotency_key as string | null,
+      status: row.status as AsyncIngestStatus,
       attempts: Number(row.attempts || 0),
-      nextAttemptAt: row.next_attempt_at,
-      lastError: row.last_error,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
+      nextAttemptAt: row.next_attempt_at as Date,
+      lastError: row.last_error as string | null,
+      createdAt: row.created_at as Date,
+      updatedAt: row.updated_at as Date,
     };
   }
 }

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -6,7 +5,7 @@ import pino from 'pino';
 import { enforceRetention } from '../logRetention.js';
 
 describe('log retention', () => {
-  const logger = pino({ level: 'silent' });
+  const logger = (pino as any)({ level: 'silent' });
   let tempDir: string;
 
   const createFile = (name: string, sizeBytes: number, daysAgo: number) => {

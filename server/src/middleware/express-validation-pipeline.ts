@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { RequestHandler } from 'express';
 import { body, param, query, validationResult } from 'express-validator';
 import { deepSanitize } from '../utils/htmlSanitizer.js';

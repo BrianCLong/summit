@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useEffect, useRef, useState } from 'react'
 import {
   Box,
@@ -23,6 +22,14 @@ interface Props {
   client: CollabClient
 }
 
+interface CytoscapeEventTarget {
+  id: () => string
+}
+
+interface CytoscapeSelectEvent {
+  target: CytoscapeEventTarget
+}
+
 export const CollabWidget: React.FC<Props> = ({ entityId, client }) => {
   const [comments, setComments] = useState<Comment[]>([])
   const [text, setText] = useState('')
@@ -31,15 +38,7 @@ export const CollabWidget: React.FC<Props> = ({ entityId, client }) => {
   useEffect(() => {
     const cy = (window as { cy?: unknown }).cy
     if (cy) {
-      (
-        $ as unknown as (el: unknown) => {
-          on: (
-            event: string,
-            selector: string,
-            cb: (e: { target: { id: () => string } }) => void
-          ) => void
-        }
-      )(cy).on('select', 'node', (e: { target: { id: () => string } }) => {
+      $(cy as never).on('select', 'node', (e: CytoscapeSelectEvent) => {
         client.updateSelection(e.target.id(), true)
       })
     }
@@ -67,10 +66,12 @@ export const CollabWidget: React.FC<Props> = ({ entityId, client }) => {
   }
 
   const onKey = (e: React.KeyboardEvent<HTMLLIElement>) => {
-    if (e.key === 'ArrowDown')
-      {(e.currentTarget.nextElementSibling as HTMLElement)?.focus()}
-    if (e.key === 'ArrowUp')
-      {(e.currentTarget.previousElementSibling as HTMLElement)?.focus()}
+    if (e.key === 'ArrowDown') {
+      (e.currentTarget.nextElementSibling as HTMLElement)?.focus()
+    }
+    if (e.key === 'ArrowUp') {
+      (e.currentTarget.previousElementSibling as HTMLElement)?.focus()
+    }
   }
 
   return (

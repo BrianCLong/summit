@@ -18,7 +18,7 @@ export async function createApp(): Promise<Application> {
 
   // Security and performance middleware
   app.use(helmet());
-  app.use(compression());
+  app.use(compression() as any);
   app.use(cors({
     origin: process.env.ALLOWED_ORIGINS?.split(',') || '*',
     credentials: true,

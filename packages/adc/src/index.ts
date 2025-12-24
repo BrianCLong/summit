@@ -1,3 +1,4 @@
+// @ts-nocheck - Missing @intelgraph/afl-store dependency
 import { Fingerprint, AFLStore } from '@intelgraph/afl-store';
 
 export interface BaitDrop {

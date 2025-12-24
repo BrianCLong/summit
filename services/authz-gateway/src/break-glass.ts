@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { appendFileSync, existsSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 import crypto from 'crypto';

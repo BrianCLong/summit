@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { engagementCascade } from '../../src/insights/engagementCascade';
 import { describe, it, expect } from '@jest/globals';
 

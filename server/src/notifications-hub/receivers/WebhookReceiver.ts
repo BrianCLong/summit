@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Webhook Receiver for custom integrations
  *

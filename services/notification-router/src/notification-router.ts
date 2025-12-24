@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Notification Router Service
  *

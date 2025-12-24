@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { schedule } from '../../tgo/src/csat';
 import { emit, consume } from './bus';
 consume('decomposer', async (m) => {

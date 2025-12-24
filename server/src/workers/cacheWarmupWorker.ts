@@ -11,7 +11,7 @@ import { getNeo4jDriver } from '../db/neo4j.js';
 import { responseCache, buildCacheKey } from '../cache/responseCache.js';
 import { cfg } from '../config.js';
 
-const logger = pino({ name: 'cache-warmup-worker' });
+const logger = (pino as any)({ name: 'cache-warmup-worker' });
 
 interface CacheWarmupJob {
   query: string;

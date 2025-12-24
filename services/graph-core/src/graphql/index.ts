@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * GraphQL Server Setup for Graph Core
  *

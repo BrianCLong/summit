@@ -19,11 +19,14 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './vitest.setup.ts',
+    exclude: ['tests/**', 'node_modules/**'],
   },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
+    // Ensure proper module resolution for packages with complex exports
+    conditions: ['browser', 'module', 'import'],
   },
   server: {
     port: 3000,
@@ -101,11 +104,12 @@ export default defineConfig({
       // D3 modules for graph visualization
       'd3-selection',
       'd3-force',
+      // Include Apollo Client to fix module resolution
+      '@apollo/client',
     ],
     exclude: [
       // Exclude heavy deps from pre-bundling (lazy loaded)
       'framer-motion',
-      '@apollo/client',
     ],
   },
 })

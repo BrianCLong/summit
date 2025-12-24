@@ -1,4 +1,3 @@
-// @ts-nocheck
 import crypto from 'node:crypto';
 import {
   getCachedJson,
@@ -23,7 +22,7 @@ export interface GraphQueryCacheOptions {
 
 export interface GraphQueryCacheContext extends GraphQueryCacheOptions {
   query: string;
-  params: Record<string, any>;
+  params: Record<string, unknown>;
   op?: string;
 }
 
@@ -33,11 +32,11 @@ export function normalizeQuery(query: string): string {
   return query.replace(/\s+/g, ' ').trim();
 }
 
-export function stableHash(input: any): string {
+export function stableHash(input: unknown): string {
   return crypto.createHash('sha1').update(stableStringify(input)).digest('hex');
 }
 
-function stableStringify(value: any): string {
+function stableStringify(value: unknown): string {
   if (value === null || value === undefined) return String(value);
   if (typeof value !== 'object') return JSON.stringify(value);
   if (Array.isArray(value)) return `[${value.map((v) => stableStringify(v)).join(',')}]`;

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ManifestService - Creates and verifies bundle manifests with cryptographic integrity
  */

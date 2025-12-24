@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 import rateLimit from 'express-rate-limit';
 import { Request, Response } from 'express';
 

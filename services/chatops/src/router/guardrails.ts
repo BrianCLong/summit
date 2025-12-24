@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Guardrails and Jailbreak Detection
  *

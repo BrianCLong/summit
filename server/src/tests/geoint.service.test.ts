@@ -1,6 +1,5 @@
-// @ts-nocheck
-
-import { geoIntService, GeoPointSchema, TrackSchema } from '../services/GeoIntService';
+import { describe, it, expect } from '@jest/globals';
+import { geoIntService, GeoPointSchema, TrackSchema } from '../services/GeoIntService.js';
 
 describe('GeoIntService', () => {
     describe('Zod Validation', () => {

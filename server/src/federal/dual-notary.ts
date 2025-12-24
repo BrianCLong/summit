@@ -1,11 +1,9 @@
 // @ts-nocheck
-import * as crypto from 'node:crypto';
-import * as fs from 'node:fs/promises';
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
-import { z } from 'zod';
+import * as z from 'zod';
 import { otelService } from '../middleware/observability/otel-tracing.js';
 import { initPKCS11, ecdsaP384Sign, finalizePKCS11 } from './pkcs11-guard.js';
 
@@ -47,7 +45,7 @@ const execAsync = promisify(exec);
 
 export class DualNotaryService {
   private config: z.infer<typeof DualNotaryConfigSchema>;
-  private pkcs11Ctx: any = null;
+  private pkcs11Ctx: unknown = null;
 
   constructor(config?: Partial<z.infer<typeof DualNotaryConfigSchema>>) {
     this.config = DualNotaryConfigSchema.parse({
@@ -66,7 +64,7 @@ export class DualNotaryService {
     }
   }
 
-  private async initializeHSM() {
+  private async initializeHSM(): Promise<void> {
     try {
       this.pkcs11Ctx = initPKCS11();
       console.log('✅ Dual notary HSM initialized');

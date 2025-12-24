@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Advanced Audit System - Comprehensive audit trails and decision logging
  * Implements immutable event logging, compliance tracking, and forensic capabilities
@@ -10,7 +9,8 @@ import { Pool } from 'pg';
 import Redis from 'ioredis';
 import { Logger } from 'pino';
 import { z } from 'zod';
-import { sign, verify } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
+const { sign, verify } = jwt;
 import { getPostgresPool, getRedisClient } from '../config/database.js';
 import logger from '../utils/logger.js';
 import { AuditTimelineRollupService } from './AuditTimelineRollupService.js';

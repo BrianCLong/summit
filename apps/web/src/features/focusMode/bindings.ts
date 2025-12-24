@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import $ from 'jquery'
 import { AppDispatch } from '../../store'

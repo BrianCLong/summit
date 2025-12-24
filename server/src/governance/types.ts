@@ -28,6 +28,7 @@ export interface PolicyContext {
   region?: string;
   // Dynamic payload to check against rules
   payload: Record<string, any>;
+  metadata?: Record<string, any>;
 }
 
 export interface GovernanceDecision {

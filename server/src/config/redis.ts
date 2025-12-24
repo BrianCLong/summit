@@ -1,9 +1,7 @@
-import { getRedisClient } from '../db/redis.js';
-// @ts-ignore
+import { getCacheManager } from '../cache/factory.js';
 import { default as pino } from 'pino';
 
-// @ts-ignore
-const logger = pino({ name: 'RedisCacheManager' });
+const logger = (pino as any)({ name: 'RedisCacheManager' });
 
 export const CACHE_PREFIX = {
     ENTITY: 'entity',
@@ -11,34 +9,58 @@ export const CACHE_PREFIX = {
     INVESTIGATION: 'investigation',
 };
 
+/**
+ * Adapter class to maintain backward compatibility with the old RedisCacheManager
+ * while leveraging the new AdvancedCachingStrategy.
+ */
 export class RedisCacheManager {
-    private redis = getRedisClient();
+    private cacheManager = getCacheManager();
+
+    private getFullKey(prefix: string, key: string, tenantId: string): string {
+        // The CacheManager applies its own prefix (summit:cache:), so we just provide the rest
+        return `${prefix}:${tenantId}:${key}`;
+    }
 
     async get(prefix: string, key: string, tenantId: string): Promise<any> {
-        const cacheKey = `${prefix}:${tenantId}:${key}`;
-        const data = await this.redis.get(cacheKey);
-        return data ? JSON.parse(data) : null;
+        const cacheKey = this.getFullKey(prefix, key, tenantId);
+        try {
+            return await this.cacheManager.get(cacheKey);
+        } catch (error) {
+            logger.error({ error, key: cacheKey }, 'Error getting from cache');
+            return null;
+        }
     }
 
     async set(prefix: string, key: string, value: any, tenantId: string, ttl: number = 300): Promise<void> {
-        const cacheKey = `${prefix}:${tenantId}:${key}`;
-        await this.redis.setex(cacheKey, ttl, JSON.stringify(value));
+        const cacheKey = this.getFullKey(prefix, key, tenantId);
+        try {
+            await this.cacheManager.set(cacheKey, value, { ttl });
+        } catch (error) {
+            logger.error({ error, key: cacheKey }, 'Error setting cache');
+        }
     }
 
     async delete(prefix: string, key: string, tenantId: string): Promise<void> {
-        const cacheKey = `${prefix}:${tenantId}:${key}`;
-        await this.redis.del(cacheKey);
+        const cacheKey = this.getFullKey(prefix, key, tenantId);
+        try {
+            await this.cacheManager.delete(cacheKey);
+        } catch (error) {
+            logger.error({ error, key: cacheKey }, 'Error deleting from cache');
+        }
     }
 
     async deleteByPattern(pattern: string): Promise<number> {
-        const keys = await this.redis.keys(pattern);
-        if (keys.length > 0) {
-            return await this.redis.del(...keys);
+        try {
+            // AdvancedCachingStrategy handles pattern invalidation
+            return await this.cacheManager.invalidateByPattern(pattern);
+        } catch (error) {
+            logger.error({ error, pattern }, 'Error deleting by pattern');
+            return 0;
         }
-        return 0;
     }
 
     async invalidateGraphQLQueries(tenantId: string): Promise<void> {
+        // We match the pattern expected by the old implementation, but routed through the new manager
         await this.deleteByPattern(`graphql:${tenantId}:*`);
     }
 
@@ -47,6 +69,6 @@ export class RedisCacheManager {
     }
 
     getAllStats(): any {
-        return {};
+        return this.cacheManager.getMetrics();
     }
 }

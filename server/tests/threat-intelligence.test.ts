@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import { jest } from '@jest/globals';
 import request from 'supertest';
 import { ThreatIntelligenceFusionService } from '../src/services/ThreatIntelligenceFusionService.js';

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Active Situations - Displays grouped operational issues requiring attention
  */

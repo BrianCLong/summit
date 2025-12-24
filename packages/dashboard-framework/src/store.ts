@@ -84,17 +84,17 @@ export const useDashboardStore = create<DashboardState>()(
     getActivePage: () => {
       const dashboard = get().getActiveDashboard();
       const { activePageId } = get();
-      if (!dashboard || !activePageId) {return null;}
+      if (!dashboard || !activePageId) { return null; }
       return dashboard.pages.find(p => p.id === activePageId) || null;
     },
 
     getWidget: (widgetId: string) => {
       const dashboard = get().getActiveDashboard();
-      if (!dashboard) {return null;}
+      if (!dashboard) { return null; }
 
       for (const page of dashboard.pages) {
         const widget = page.widgets.find(w => w.id === widgetId);
-        if (widget) {return widget;}
+        if (widget) { return widget; }
       }
       return null;
     },
@@ -144,7 +144,7 @@ export const useDashboardStore = create<DashboardState>()(
         state.activeDashboardId = id;
         const dashboard = state.dashboards.get(id);
         if (dashboard && dashboard.pages.length > 0) {
-          state.activePageId = dashboard.pages[0].id;
+          state.activePageId = dashboard.pages[0]?.id ?? null;
         } else {
           state.activePageId = null;
         }
@@ -154,7 +154,7 @@ export const useDashboardStore = create<DashboardState>()(
 
     duplicateDashboard: (id) => {
       const dashboard = get().dashboards.get(id);
-      if (!dashboard) {return '';}
+      if (!dashboard) { return ''; }
 
       const newId = get().createDashboard({
         ...dashboard,
@@ -205,7 +205,7 @@ export const useDashboardStore = create<DashboardState>()(
           dashboard.updatedAt = new Date();
 
           if (state.activePageId === pageId && dashboard.pages.length > 0) {
-            state.activePageId = dashboard.pages[0].id;
+            state.activePageId = dashboard.pages[0]?.id ?? null;
           }
         }
       });
@@ -287,10 +287,10 @@ export const useDashboardStore = create<DashboardState>()(
     duplicateWidget: (widgetId) => {
       const dashboard = get().getActiveDashboard();
       const page = get().getActivePage();
-      if (!dashboard || !page) {return '';}
+      if (!dashboard || !page) { return ''; }
 
       const widget = page.widgets.find(w => w.id === widgetId);
-      if (!widget) {return '';}
+      if (!widget) { return ''; }
 
       const newWidgetId = get().addWidget(page.id, {
         ...widget,
@@ -315,7 +315,10 @@ export const useDashboardStore = create<DashboardState>()(
           for (const page of dashboard.pages) {
             const index = page.widgets.findIndex(w => w.id === widgetId);
             if (index !== -1) {
-              widget = page.widgets.splice(index, 1)[0];
+              const spliced = page.widgets.splice(index, 1);
+              if (spliced.length > 0) {
+                widget = spliced[0] as unknown as Widget;
+              }
               break;
             }
           }
@@ -391,7 +394,7 @@ export const useDashboardStore = create<DashboardState>()(
     // Clipboard Actions
     copyWidgets: (widgetIds) => {
       const page = get().getActivePage();
-      if (!page) {return;}
+      if (!page) { return; }
 
       const widgets = widgetIds
         .map(id => page.widgets.find(w => w.id === id))
@@ -409,7 +412,7 @@ export const useDashboardStore = create<DashboardState>()(
 
     pasteWidgets: (pageId) => {
       const { clipboardWidgets } = get();
-      if (clipboardWidgets.length === 0) {return;}
+      if (clipboardWidgets.length === 0) { return; }
 
       clipboardWidgets.forEach(widget => {
         get().addWidget(pageId, {
@@ -432,7 +435,7 @@ export const useDashboardStore = create<DashboardState>()(
         if (dashboard) {
           const page = dashboard.pages.find(p => p.id === pageId);
           if (page) {
-            if (!page.filters) {page.filters = [];}
+            if (!page.filters) { page.filters = []; }
             page.filters.push({ ...filter, id: filterId });
             dashboard.updatedAt = new Date();
           }

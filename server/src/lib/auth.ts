@@ -6,13 +6,12 @@ import pino from 'pino';
 import { randomUUID } from 'node:crypto';
 import { createLoaders, Loaders } from '../graphql/loaders.js';
 import { extractTenantContext } from '../security/tenantContext.js';
+import config from '../config/index.js';
 
-const logger = pino();
-export const JWT_SECRET =
-  process.env.JWT_SECRET ||
-  'dev_jwt_secret_12345_very_long_secret_for_development';
+const logger = (pino as any)();
+export const JWT_SECRET = config.jwt.secret;
 
-interface User {
+export interface User {
   id: string;
   email: string;
   username?: string;
@@ -20,18 +19,33 @@ interface User {
   token_version?: number;
 }
 
-interface AuthContext {
+export interface AuthContext {
   user?: User;
   isAuthenticated: boolean;
   requestId: string;
   loaders: Loaders;
-  tenantContext?: any;
+  tenantContext?: unknown;
+}
+
+interface RequestWithUser {
+  user?: User;
+  tenantContext?: unknown;
+  headers?: {
+    authorization?: string;
+  };
+}
+
+interface JWTPayload {
+  userId: string;
+  email: string;
+  role?: string;
+  token_version?: number;
 }
 
 export const getContext = async ({
   req,
 }: {
-  req: any;
+  req: RequestWithUser;
 }): Promise<AuthContext> => {
   const requestId = randomUUID();
   const loaders = createLoaders();
@@ -46,8 +60,8 @@ export const getContext = async ({
            requestId,
            loaders,
            tenantContext:
-             (req as any).tenantContext ||
-             extractTenantContext(req as any, { strict: false }),
+             req.tenantContext ||
+             extractTenantContext(req, { strict: false }),
          };
     }
 
@@ -65,8 +79,8 @@ export const getContext = async ({
       requestId,
       loaders,
       tenantContext:
-        (req as any).tenantContext ||
-        extractTenantContext(req as any, { strict: false }),
+        req.tenantContext ||
+        extractTenantContext(req, { strict: false }),
     };
   } catch (error) {
     logger.warn(
@@ -91,7 +105,7 @@ export const verifyToken = async (token: string): Promise<User> => {
     }
 
     // Verify JWT token
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
 
     // Get user from database
     const pool = getPostgresPool();
@@ -104,7 +118,7 @@ export const verifyToken = async (token: string): Promise<User> => {
       throw new Error('User not found');
     }
 
-    const user = result.rows[0];
+    const user = result.rows[0] as User;
 
     if (user.token_version !== decoded.token_version) {
       throw new Error('Token is revoked');
@@ -173,7 +187,7 @@ export const requireRole = (
   return user;
 };
 
-function extractToken(req: any): string | null {
+function extractToken(req: RequestWithUser): string | null {
   const authHeader = req.headers?.authorization;
   if (authHeader?.startsWith('Bearer ')) {
     return authHeader.substring(7);

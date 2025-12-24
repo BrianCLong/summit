@@ -6,6 +6,7 @@ import type {
   CacheKeyComponents,
   CacheManifest,
   CacheManifestEntry,
+  CacheAuditLog,
   CacheMissResult,
   CacheResolution,
   EvictionProof,
@@ -70,6 +71,10 @@ export class DeterministicPromptExecutionCache {
 
   private readonly traces: MissFillTrace[] = [];
 
+  private readonly hitProofs: CacheHitProof[] = [];
+
+  private readonly evictionLog: EvictionProof[] = [];
+
   private readonly options: Required<DeterministicPromptExecutionCacheOptions>;
 
   private accessCounter = 0;
@@ -97,6 +102,7 @@ export class DeterministicPromptExecutionCache {
       existing.accessCounter = ++this.accessCounter;
       const entryManifest = this.toManifestEntry(existing);
       const proof = this.buildHitProof(entryManifest);
+      this.hitProofs.push(proof);
       return {
         type: 'hit',
         artifact: Buffer.from(existing.artifact),
@@ -155,6 +161,18 @@ export class DeterministicPromptExecutionCache {
         promptHash: trace.input.promptHash
       }
     }));
+  }
+
+  getAuditLog(): CacheAuditLog {
+    return {
+      hits: this.hitProofs.map((proof) => ({ ...proof })),
+      misses: this.getTraces(),
+      evictions: this.evictionLog.map((proof) => ({
+        ...proof,
+        victim: { ...proof.victim },
+        survivors: proof.survivors.map((survivor) => ({ ...survivor }))
+      }))
+    } satisfies CacheAuditLog;
   }
 
   generateManifest(): CacheManifest {
@@ -262,6 +280,7 @@ export class DeterministicPromptExecutionCache {
       };
       this.entries.delete(victim.key);
       proofs.push(proof);
+      this.evictionLog.push(proof);
     }
     return proofs;
   }
@@ -318,6 +337,35 @@ export class DeterministicPromptExecutionCache {
       entry.hits === proof.hits &&
       entry.sequence === proof.sequence
     );
+  }
+
+  static verifyMissFillTrace(trace: MissFillTrace): boolean {
+    if (trace.type !== 'miss-fill') {
+      return false;
+    }
+    const recomputedKey = computeKey(trace.input);
+    if (recomputedKey !== trace.key) {
+      return false;
+    }
+    if (canonicalKey(trace.input) !== trace.canonicalKey) {
+      return false;
+    }
+    const artifactBuffer = Buffer.from(trace.artifactBase64, 'base64');
+    if (sha256(artifactBuffer) !== trace.artifactDigest) {
+      return false;
+    }
+    const payload = {
+      type: trace.type,
+      key: trace.key,
+      canonicalKey: trace.canonicalKey,
+      input: trace.input,
+      artifactDigest: trace.artifactDigest,
+      artifactBase64: trace.artifactBase64,
+      metadataDigest: trace.metadataDigest,
+      timestamp: trace.timestamp
+    } satisfies Omit<MissFillTrace, 'eventDigest'>;
+    const canonical = stableStringify(payload);
+    return sha256(Buffer.from(canonical)) === trace.eventDigest;
   }
 
   static verifyEvictionProof(proof: EvictionProof): boolean {

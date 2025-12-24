@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { rateLimitMiddleware } from '../../src/middleware/rateLimit.js';
 import { rateLimiter } from '../../src/services/RateLimiter.js';
 import { quotaManager } from '../../src/lib/resources/quota-manager.js';

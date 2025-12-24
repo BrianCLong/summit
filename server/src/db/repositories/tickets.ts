@@ -1,6 +1,5 @@
-// @ts-nocheck
-import { getPostgresPool } from '../postgres';
-import baseLogger from '../../config/logger';
+import { getPostgresPool } from '../postgres.js';
+import baseLogger from '../../config/logger.js';
 
 const logger = baseLogger.child({ name: 'tickets-repo' });
 

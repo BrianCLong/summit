@@ -550,12 +550,18 @@ export class OptimizationManager {
     };
     details: any;
   }> {
-    const components = {
-      neo4jOptimizer: 'healthy' as const,
-      pgOptimizer: 'healthy' as const,
-      gatewayOptimizer: 'healthy' as const,
-      costOptimizer: 'healthy' as const,
-      monitoringSystem: 'healthy' as const,
+    const components: {
+      neo4jOptimizer: 'healthy' | 'degraded' | 'critical';
+      pgOptimizer: 'healthy' | 'degraded' | 'critical';
+      gatewayOptimizer: 'healthy' | 'degraded' | 'critical';
+      costOptimizer: 'healthy' | 'degraded' | 'critical';
+      monitoringSystem: 'healthy' | 'degraded' | 'critical';
+    } = {
+      neo4jOptimizer: 'healthy',
+      pgOptimizer: 'healthy',
+      gatewayOptimizer: 'healthy',
+      costOptimizer: 'healthy',
+      monitoringSystem: 'healthy',
     };
 
     const details: any = {};
@@ -738,8 +744,8 @@ export class OptimizationManager {
   private calculateConnectionEfficiency(poolMetrics: any): number {
     if (!poolMetrics) return 0;
 
-    const totalConnections = poolMetrics.totalConnections || 1;
-    const activeConnections = poolMetrics.activeConnections || 0;
+    const totalConnections = (poolMetrics.totalConnections as number) || 1;
+    const activeConnections = (poolMetrics.activeConnections as number) || 0;
 
     return (activeConnections / totalConnections) * 100;
   }
@@ -748,7 +754,7 @@ export class OptimizationManager {
     return Object.values(gatewayReport.circuitBreakers || {}).reduce(
       (sum: number, cb: any) => sum + (cb.failures || 0),
       0,
-    );
+    ) as number;
   }
 
   private calculateLatencyReduction(): number {

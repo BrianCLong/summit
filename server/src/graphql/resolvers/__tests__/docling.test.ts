@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { doclingResolvers } from '../docling';
 import { doclingService } from '../../../services/DoclingService';
 import { doclingRepository } from '../../../db/repositories/doclingRepository';

@@ -1,9 +1,8 @@
-// @ts-nocheck
 import { Message, SendMessagePayload } from './types.js';
 import { MessagingRepo } from './MessagingRepo.js';
 import pino from 'pino';
 
-const logger = pino({ name: 'MessagingService' });
+const logger = (pino as any)({ name: 'MessagingService' });
 
 export class MessagingService {
   private repo: MessagingRepo;

@@ -1,8 +1,8 @@
 // @ts-nocheck
 import { neo4jDriver } from '../db/neo4j.js';
 import { randomUUID } from 'crypto';
-import { BaseCanonicalEntity, PolicyLabels } from '../canonical/types';
-import { provenanceLedger } from '../provenance/ledger';
+import type { PolicyLabels } from '../canonical/types.js';
+import { provenanceLedger } from '../provenance/ledger.js';
 
 /**
  * GraphCoreService
@@ -33,10 +33,10 @@ export class GraphCoreService {
   async saveEntity(
     tenantId: string,
     entityType: string,
-    data: Record<string, any>,
+    data: Record<string, unknown>,
     policyLabels: PolicyLabels,
     actorId: string
-  ): Promise<any> {
+  ): Promise<unknown> {
     const session = neo4jDriver.session();
     const id = data.id || randomUUID();
     const now = new Date();
@@ -156,14 +156,14 @@ export class GraphCoreService {
     tenantId: string,
     id: string,
     asOf?: Date
-  ): Promise<any | null> {
+  ): Promise<unknown | null> {
     const session = neo4jDriver.session();
     try {
       let query = `
         MATCH (e:CanonicalEntity {id: $id, tenantId: $tenantId})
       `;
 
-      const params: any = { id, tenantId };
+      const params: Record<string, unknown> = { id, tenantId };
 
       if (asOf) {
         query += `
@@ -199,9 +199,9 @@ export class GraphCoreService {
     fromId: string,
     toId: string,
     relationType: string,
-    properties: Record<string, any> = {},
+    properties: Record<string, unknown> = {},
     actorId: string
-  ): Promise<any> {
+  ): Promise<unknown> {
     const session = neo4jDriver.session();
     const now = new Date();
 
@@ -280,7 +280,7 @@ export class GraphCoreService {
     weight: number,
     description: string,
     actorId: string
-  ): Promise<any> {
+  ): Promise<unknown> {
     return this.createRelationship(
       tenantId,
       evidenceId, // Evidence supports Claim? Or Claim supported by Evidence? Usually Evidence -> SUPPORTS -> Claim
@@ -291,8 +291,8 @@ export class GraphCoreService {
     );
   }
 
-  private parseNodeProperties(props: any): any {
-    const p = { ...props };
+  private parseNodeProperties(props: unknown): unknown {
+    const p = { ...(props as Record<string, unknown>) };
     if (p.policyLabels && typeof p.policyLabels === 'string') {
       try {
         p.policyLabels = JSON.parse(p.policyLabels);

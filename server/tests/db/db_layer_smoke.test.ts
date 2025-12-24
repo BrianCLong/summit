@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import { jest } from '@jest/globals';
 import { getPostgresPool, closePostgresPool } from '../../src/db/postgres';
 import { dbConfig } from '../../src/db/config';

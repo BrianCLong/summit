@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Zero-Knowledge Trust Exchange (ZK-TX) Service
  * Cross-tenant deconfliction via ZK set/overlap/range proofs

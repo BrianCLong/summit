@@ -1,0 +1,4 @@
+sinks:
+  - type: cloudtrail
+    retention: 365d
+    immutable: true

@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-// @ts-nocheck
 import { DbObservabilityService, EXPLAIN_WHITELIST } from '../observability/db-observability.js';
 
 function parseParams(raw: string | undefined): Record<string, string | number> | undefined {

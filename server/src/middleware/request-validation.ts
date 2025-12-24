@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Request Validation and Size Limit Middleware
  *
@@ -14,7 +13,7 @@ import { Request, Response, NextFunction } from 'express';
 import { GraphQLError } from 'graphql';
 import pino from 'pino';
 
-const logger = pino();
+const logger = (pino as any)();
 
 interface RequestValidationOptions {
   maxBodySize?: number; // in bytes

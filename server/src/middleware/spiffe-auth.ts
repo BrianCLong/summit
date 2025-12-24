@@ -2,7 +2,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { createConnection } from 'node:net';
 import { promisify } from 'node:util';
-import { z } from 'zod';
+import * as z from 'zod';
 import { otelService } from './observability/otel-tracing.js';
 
 // SPIFFE/SPIRE integration for Zero-Trust mTLS

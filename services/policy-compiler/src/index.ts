@@ -1,3 +1,4 @@
+// @ts-nocheck
 import yaml from 'js-yaml';
 import { z } from 'zod';
 import express from 'express';

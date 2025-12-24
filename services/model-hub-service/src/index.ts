@@ -5,7 +5,7 @@
  * and classifiers in the IntelGraph platform.
  */
 
-import express from 'express';
+import express, { Application } from 'express';
 import { logger } from './utils/logger.js';
 import { db } from './db/connection.js';
 import { runMigrations } from './db/migrations.js';
@@ -14,7 +14,7 @@ import { modelsRouter } from './routes/models.js';
 import { routingRouter } from './routes/routing.js';
 import { governanceRouter } from './routes/governance.js';
 
-const app = express();
+const app: Application = express();
 
 // Middleware
 app.use(express.json({ limit: '10mb' }));

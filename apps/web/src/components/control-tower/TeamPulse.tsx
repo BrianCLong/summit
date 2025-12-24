@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Team Pulse - Shows team members' current status and assignments
  */

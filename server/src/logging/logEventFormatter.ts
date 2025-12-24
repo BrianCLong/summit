@@ -1,6 +1,8 @@
 // @ts-nocheck
-import { stdSerializers } from 'pino';
+import pino from 'pino';
 import type { LogEvent, LogLevel } from './logEventBus.js';
+
+const stdSerializers = (pino as any).stdSerializers;
 
 const SENSITIVE_KEYS = new Set([
   'authorization',

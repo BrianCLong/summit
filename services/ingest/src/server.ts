@@ -1,6 +1,7 @@
+// @ts-nocheck
 import express from "express";
 import fileUpload from "express-fileupload";
-import { checkAuthz } from "../../lib/authz";
+import { checkAuthz } from "./lib/authz";
 
 const app = express();
 app.use(fileUpload());

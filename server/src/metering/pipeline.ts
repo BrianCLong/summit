@@ -109,7 +109,7 @@ export class MeteringPipeline {
         break;
       default:
         const exhaustive: never = event.kind;
-        throw new Error(`Unsupported meter event kind: ${exhaustive}`);
+        throw new Error(`Unsupported meter event kind: ${(exhaustive as any)}`);
     }
 
     current.lastEventAt = occurred.toISOString();

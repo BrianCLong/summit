@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import { Middleware } from '@reduxjs/toolkit'
+import { Middleware, AnyAction } from '@reduxjs/toolkit'
 import { applyPatches, enablePatches, produceWithPatches, Patch } from 'immer'
 import { push, popUndo, popRedo, moveToRedo, moveToUndo } from './historySlice'
 import { recordAudit } from '../../telemetry/audit' // stub below
@@ -20,7 +21,7 @@ const ALLOW = new Set([
   'settings/setAnimationMode',
 ])
 
-export const historyMiddleware: Middleware = store => next => (action: any) => {
+export const historyMiddleware: Middleware = store => next => (action: AnyAction) => {
   if (action.type === 'history/undo') {return undo(store)}
   if (action.type === 'history/redo') {return redo(store)}
 
@@ -29,7 +30,7 @@ export const historyMiddleware: Middleware = store => next => (action: any) => {
   const prev = store.getState()
   const [nextState, patches, inverse] = produceWithPatches(
     prev,
-    (draft: any) => {
+    (draft: unknown) => {
       // replay the action against the draft state
       // We call `next(action)` after, but we need patches now; so we mirror reducer invocation:
     }
@@ -54,7 +55,7 @@ export const historyMiddleware: Middleware = store => next => (action: any) => {
 }
 
 // Minimal diff/invert shims (replace with robust impl or library if approved)
-function diffState(a: any, b: any): Patch[] {
+function diffState(a: unknown, b: unknown): Patch[] {
   // naive shallow + slice-specific diff; expand as needed
   // For S1, capture allowlisted slice roots
   const paths = [['viewSync'], ['codex'], ['focus'], ['settings']]
@@ -65,39 +66,39 @@ function diffState(a: any, b: any): Patch[] {
     if (ka !== kb)
       {patches.push({
         op: 'replace',
-        path: `/${p.join('/')}`,
+        path: `/${p.join('/')}` as never,
         value: valueAt(b, p),
-      } as any)}
+      })}
   }
   return patches
 }
 function invertPatches(patches: Patch[]): Patch[] {
-  return patches.map(p => ({ op: 'replace', path: p.path, value: null }) as any) // filled at apply-time using snapshot
+  return patches.map(p => ({ op: 'replace', path: p.path as never, value: null })) // filled at apply-time using snapshot
 }
-function valueAt(obj: any, path: string[]) {
-  return path.reduce((o, k) => o?.[k], obj)
+function valueAt(obj: unknown, path: string[]): unknown {
+  return path.reduce((o, k) => (o as Record<string, unknown>)?.[k], obj)
 }
 
-function undo(store: any) {
+function undo(store: ReturnType<typeof import('@reduxjs/toolkit').configureStore>) {
   return withSpan('ui.undo.apply', () => {
     const entry = store.getState().history.undo.at(-1)
     if (!entry) {return}
-    store.dispatch(popUndo() as any)
+    store.dispatch(popUndo())
     const snap = store.getState() // capture snapshot to compute inverses
-    const state = applyPatches(snap, entry.inverse as any)
-    store.replaceReducer((_: any) => state) // synchronous state swap (dev-only shim)
+    const state = applyPatches(snap, entry.inverse)
+    store.replaceReducer((_: unknown) => state) // synchronous state swap (dev-only shim)
     store.dispatch(moveToRedo(entry))
     recordAudit('ui.history.undo', { label: entry.label })
   })
 }
-function redo(store: any) {
+function redo(store: ReturnType<typeof import('@reduxjs/toolkit').configureStore>) {
   return withSpan('ui.redo.apply', () => {
     const entry = store.getState().history.redo.at(-1)
     if (!entry) {return}
-    store.dispatch(popRedo() as any)
+    store.dispatch(popRedo())
     const snap = store.getState()
-    const state = applyPatches(snap, entry.patches as any)
-    store.replaceReducer((_: any) => state)
+    const state = applyPatches(snap, entry.patches)
+    store.replaceReducer((_: unknown) => state)
     store.dispatch(moveToUndo(entry))
     recordAudit('ui.history.redo', { label: entry.label })
   })

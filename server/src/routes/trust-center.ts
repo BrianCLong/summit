@@ -1,11 +1,21 @@
 // @ts-nocheck
-import express from 'express';
+import express, { type Request, type Response } from 'express';
 import { z } from 'zod';
 import { TrustCenterService } from '../trust-center/trust-center-service.js';
 import { otelService } from '../middleware/observability/otel-tracing.js';
 import { ensureAuthenticated, requirePermission } from '../middleware/auth.js';
 import { Permission } from '../services/MVP1RBACService.js';
 import { writeAudit } from '../utils/audit.js';
+
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id?: string;
+    tenantId?: string;
+    email?: string;
+    permissions?: string[];
+    role?: string;
+  };
+}
 
 const router = express.Router();
 const trustCenter = new TrustCenterService();
@@ -51,11 +61,12 @@ router.post(
   '/audit-export',
   ensureAuthenticated,
   requirePermission(Permission.AUDIT_EXPORT),
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     const span = otelService.createSpan('trust-center.audit-export');
 
     try {
-      const actor = (req as any).user;
+      const authReq = req as AuthenticatedRequest;
+      const actor = authReq.user;
       // Extract tenant from auth context (assuming middleware sets this)
       const tenantId =
         actor?.tenantId || (req.headers['x-tenant-id'] as string) || 'default';
@@ -144,7 +155,7 @@ router.post(
  * POST /api/trust-center/slsa-attestation
  * Generate SLSA attestation for supply chain security
  */
-router.post('/slsa-attestation', async (req, res) => {
+router.post('/slsa-attestation', async (req: Request, res: Response) => {
   const span = otelService.createSpan('trust-center.slsa-attestation');
 
   try {
@@ -192,7 +203,7 @@ router.post('/slsa-attestation', async (req, res) => {
  * POST /api/trust-center/sbom
  * Generate Software Bill of Materials (SBOM) report
  */
-router.post('/sbom', async (req, res) => {
+router.post('/sbom', async (req: Request, res: Response) => {
   const span = otelService.createSpan('trust-center.sbom');
 
   try {
@@ -228,7 +239,7 @@ router.post('/sbom', async (req, res) => {
  * GET /api/trust-center/compliance/:framework
  * Check compliance status for specific framework
  */
-router.get('/compliance/:framework', async (req, res) => {
+router.get('/compliance/:framework', async (req: Request, res: Response) => {
   const span = otelService.createSpan('trust-center.compliance-check');
 
   try {
@@ -274,7 +285,7 @@ router.get('/compliance/:framework', async (req, res) => {
  * GET /api/trust-center/compliance
  * Get comprehensive compliance dashboard
  */
-router.get('/compliance', async (req, res) => {
+router.get('/compliance', async (req: Request, res: Response) => {
   const span = otelService.createSpan('trust-center.compliance-dashboard');
 
   try {
@@ -331,7 +342,7 @@ router.get('/compliance', async (req, res) => {
  * GET /api/trust-center/verify-attestation/:hash
  * Independently verify SLSA attestation by hash
  */
-router.get('/verify-attestation/:hash', async (req, res) => {
+router.get('/verify-attestation/:hash', async (req: Request, res: Response) => {
   const span = otelService.createSpan('trust-center.verify-attestation');
 
   try {
@@ -368,7 +379,7 @@ router.get('/verify-attestation/:hash', async (req, res) => {
  * GET /api/trust-center/health
  * Trust Center health and status
  */
-router.get('/health', async (req, res) => {
+router.get('/health', async (req: Request, res: Response) => {
   const span = otelService.createSpan('trust-center.health');
 
   try {

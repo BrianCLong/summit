@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Serving Lane Metrics API Routes
 import express from 'express';
 import { prometheusConductorMetrics } from '../observability/prometheus';

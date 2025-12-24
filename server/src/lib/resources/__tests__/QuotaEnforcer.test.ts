@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { QuotaEnforcer } from '../QuotaEnforcer.js';
 import { rateLimiter } from '../../../services/RateLimiter.js';
 import { quotaConfigService } from '../QuotaConfig.js';

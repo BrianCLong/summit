@@ -19,6 +19,7 @@
 
     // Packages workspace
     { "path": "./packages/common-types" },
+    { "path": "./packages/competitive-execution" },
     { "path": "./packages/govbrief" },
     { "path": "./packages/graph-ai-core" },
     { "path": "./packages/ingest-wizard" },

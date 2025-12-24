@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { DataPoint, DataFilter, Dimension } from './types';
 

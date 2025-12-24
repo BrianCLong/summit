@@ -1,5 +1,5 @@
 // @ts-nocheck
-import type { NarrativeState, PsyOpsForecast, SimulationEntity } from './types.js';
+import type { PsyOpsForecast } from './types.js';
 import { NarrativeSimulationEngine } from './engine.js';
 import { randomUUID } from 'node:crypto';
 

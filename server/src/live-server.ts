@@ -16,7 +16,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import pino from 'pino';
 
-const logger = pino({ name: 'intelgraph-live' });
+const logger = (pino as any)({ name: 'intelgraph-live' });
 
 // Simplified GraphQL Schema for live demonstration
 const typeDefs = `

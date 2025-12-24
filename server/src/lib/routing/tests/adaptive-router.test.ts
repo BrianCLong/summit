@@ -1,4 +1,3 @@
-// @ts-nocheck
 
 import AdaptiveRouter from '../adaptive-router';
 

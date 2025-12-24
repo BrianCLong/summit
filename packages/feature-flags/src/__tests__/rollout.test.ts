@@ -28,11 +28,11 @@ describe('Rollout Utilities', () => {
       for (let i = 0; i < 1000; i++) {
         const variation = evaluateRollout(rollout, { userId: `user-${i}` });
         if (variation) {
-          results[variation] = (results[variation] || 0) + 1;
+          results[variation]++;
         }
       }
 
-      const enabledPercentage = ((results.enabled || 0) / 1000) * 100;
+      const enabledPercentage = (results.enabled / 1000) * 100;
       expect(enabledPercentage).toBeGreaterThan(45);
       expect(enabledPercentage).toBeLessThan(55);
     });
@@ -85,8 +85,8 @@ describe('Rollout Utilities', () => {
 
       expect(rollout.type).toBe('percentage');
       expect(rollout.variations).toHaveLength(2);
-      expect(rollout.variations[0]?.percentage).toBe(25);
-      expect(rollout.variations[1]?.percentage).toBe(75);
+      expect(rollout.variations[0].percentage).toBe(25);
+      expect(rollout.variations[1].percentage).toBe(75);
     });
   });
 
@@ -96,15 +96,15 @@ describe('Rollout Utilities', () => {
 
       expect(abTest.type).toBe('ab_test');
       expect(abTest.variations).toHaveLength(2);
-      expect(abTest.variations[0]?.percentage).toBe(50);
-      expect(abTest.variations[1]?.percentage).toBe(50);
+      expect(abTest.variations[0].percentage).toBe(50);
+      expect(abTest.variations[1].percentage).toBe(50);
     });
 
     it('should handle custom percentages', () => {
       const abTest = createABTest('variant-a', 'variant-b', 30);
 
-      expect(abTest.variations[0]?.percentage).toBe(30);
-      expect(abTest.variations[1]?.percentage).toBe(70);
+      expect(abTest.variations[0].percentage).toBe(30);
+      expect(abTest.variations[1].percentage).toBe(70);
     });
   });
 });

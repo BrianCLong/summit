@@ -1,19 +1,26 @@
-// @ts-nocheck
 import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/Card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
 import { Badge } from '@/components/ui/Badge';
 import { AlertCircle, CheckCircle, Shield } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 import { InvestigationWorkbench } from '../components/InvestigationWorkbench';
 import { RiskProfileView } from '../components/RiskProfileView';
+
+interface Incident {
+  id: string
+  title: string
+  severity: string
+  status: string
+  createdAt: string
+}
 
 interface Stats {
   activeIncidentsCount: number;
   recentEventsCount: number;
   highRiskCount: number;
-  activeIncidents: any[];
-  recentEvents: any[];
+  activeIncidents: Incident[];
+  recentEvents: unknown[];
 }
 
 export const SecuriteyesDashboard: React.FC = () => {
@@ -98,7 +105,7 @@ export const SecuriteyesDashboard: React.FC = () => {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {stats.activeIncidents.map((inc: any) => (
+                            {stats.activeIncidents.map((inc) => (
                                 <TableRow key={inc.id}>
                                     <TableCell>{inc.title}</TableCell>
                                     <TableCell>

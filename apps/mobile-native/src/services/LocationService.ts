@@ -1,8 +1,8 @@
-import {Platform, PermissionsAndroid} from 'react-native';
+import { Platform, PermissionsAndroid } from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
 import BackgroundGeolocation from 'react-native-background-geolocation';
 
-import {storeLocationUpdate} from './Database';
+import { storeLocationUpdate } from './Database';
 
 export interface Location {
   latitude: number;
@@ -30,9 +30,9 @@ export const requestLocationPermission = async (): Promise<boolean> => {
 
       return (
         granted['android.permission.ACCESS_FINE_LOCATION'] ===
-          PermissionsAndroid.RESULTS.GRANTED ||
+        PermissionsAndroid.RESULTS.GRANTED ||
         granted['android.permission.ACCESS_COARSE_LOCATION'] ===
-          PermissionsAndroid.RESULTS.GRANTED
+        PermissionsAndroid.RESULTS.GRANTED
       );
     }
 
@@ -157,7 +157,7 @@ export const initializeBackgroundGeolocation = async (): Promise<void> => {
           accuracy: location.coords.accuracy,
           speed: location.coords.speed,
           heading: location.coords.heading,
-          timestamp: location.timestamp,
+          timestamp: location.timestamp as any,
         };
 
         // Store location in local database

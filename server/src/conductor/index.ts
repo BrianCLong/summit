@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Main Conductor Implementation
 // Orchestrates MoE routing with MCP tool execution and security controls
 

@@ -249,21 +249,19 @@ describe('FeatureFlagService', () => {
     it('should emit evaluation event', (done) => {
       provider.setFlag('tracked-flag', true);
 
-      const analyticsService = new FeatureFlagService({
-        provider,
-        enableAnalytics: true,
-      });
-
-      analyticsService.on('evaluation', (event) => {
+      service.on('evaluation', (event) => {
         expect(event.flagKey).toBe('tracked-flag');
         expect(event.value).toBe(true);
         done();
       });
 
+      const analyticsService = new FeatureFlagService({
+        provider,
+        enableAnalytics: true,
+      });
+
       analyticsService.initialize().then(() => {
-        analyticsService.getBooleanFlag('tracked-flag', false).then(() => {
-          analyticsService.close();
-        });
+        analyticsService.getBooleanFlag('tracked-flag', false);
       });
     });
   });

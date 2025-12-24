@@ -1,4 +1,3 @@
-// @ts-nocheck
 import Redis from 'ioredis';
 import pino from 'pino';
 import { randomUUID } from 'node:crypto';
@@ -43,7 +42,7 @@ export interface ActivityEntry {
   details?: Record<string, any>;
 }
 
-const logger = pino({ name: 'investigation-state' });
+const logger = (pino as any)({ name: 'investigation-state' });
 
 const redisUrl = process.env.REDIS_URL;
 const redisHost = process.env.REDIS_HOST;

@@ -70,7 +70,7 @@ export function I18nProvider({
     );
   }
 
-  return <I18nextProvider i18n={i18nInstance}>{children}</I18nextProvider>;
+  return <I18nextProvider i18n={i18nInstance}>{children as any}</I18nextProvider>;
 }
 
 /**

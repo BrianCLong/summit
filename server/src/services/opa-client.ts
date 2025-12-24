@@ -1,9 +1,8 @@
-// @ts-nocheck
-import axios, { AxiosInstance } from 'axios';
+import axios, { type AxiosInstance } from 'axios';
 import pino from 'pino';
 import { setTimeout } from 'timers/promises';
 
-const logger = pino({ name: 'opa-client' });
+const logger = (pino as any)({ name: 'opa-client' });
 
 export interface OPAInput {
   action: string;
@@ -34,7 +33,7 @@ export interface OPAInput {
 export interface OPAViolation {
   code: string;
   message: string;
-  source: any;
+  source: unknown;
   appeal_code: string;
   appeal_url: string;
   severity: 'blocking' | 'warning';

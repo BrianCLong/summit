@@ -1,0 +1,168 @@
+scalar DateTime
+
+type OnCallHealth {
+  pagesPerShift: Int!
+  sleepDebtHours: Float!
+  toilHours: Float!
+  status: HealthState!
+}
+
+type DomainMetrics {
+  domainId: ID!
+  domainName: String!
+  periodStart: String!
+  periodEnd: String!
+  sloBurnRate: Float!
+  errorBudgetRemaining: Float!
+  cycleTimeDays: Float!
+  wipCount: Int!
+  wipLimit: Int!
+  blockedTimeHours: Float!
+  reworkRate: Float!
+  costPerUnit: Float!
+  onCall: OnCallHealth!
+  deletionShipped: Int!
+  debtBurn: Int!
+  repeatIncidents: Int!
+  prSizeLimitBreaches: Int!
+  releaseEnvelopeRequired: Boolean!
+}
+
+enum GateType {
+  ROADMAP_SCOPE
+  RELEASE_ENVELOPE
+  PR_SIZE_LIMIT
+  WIP_LIMIT
+}
+
+enum GateState {
+  OPEN
+  BLOCKED
+  OVERRIDDEN
+}
+
+enum HealthState {
+  GOOD
+  WATCH
+  POOR
+}
+
+type GateStatus {
+  gate: GateType!
+  state: GateState!
+  reason: String!
+  ownerOverride: String
+  expiresAt: String
+}
+
+type DecisionLogEntry {
+  id: ID!
+  domainId: ID!
+  title: String!
+  owner: String!
+  rationale: String!
+  revisitDate: String!
+  decisionType: String!
+  createdAt: String!
+}
+
+type ExceptionEntry {
+  id: ID!
+  domainId: ID!
+  gate: GateType!
+  owner: String!
+  reason: String!
+  expiresAt: String!
+  createdAt: String!
+}
+
+type ReleaseEnvelope {
+  id: ID!
+  domainId: ID!
+  owner: String!
+  metrics: [String!]!
+  rollbackPlan: String!
+  createdAt: String!
+  expiresAt: String
+}
+
+type DomainHealth {
+  reliability: HealthState!
+  flow: HealthState!
+  onCall: HealthState!
+}
+
+type DomainScoreboard {
+  domainId: ID!
+  domainName: String!
+  metrics: DomainMetrics!
+  gates: [GateStatus!]!
+  decisions: [DecisionLogEntry!]!
+  exceptions: [ExceptionEntry!]!
+  releaseEnvelope: ReleaseEnvelope
+  health: DomainHealth!
+}
+
+input OnCallHealthInput {
+  pagesPerShift: Int!
+  sleepDebtHours: Float!
+  toilHours: Float!
+}
+
+input DomainMetricsInput {
+  domainId: ID!
+  domainName: String!
+  periodStart: String!
+  periodEnd: String!
+  sloBurnRate: Float!
+  errorBudgetRemaining: Float!
+  cycleTimeDays: Float!
+  wipCount: Int!
+  wipLimit: Int!
+  blockedTimeHours: Float!
+  reworkRate: Float!
+  costPerUnit: Float!
+  onCall: OnCallHealthInput!
+  deletionShipped: Int!
+  debtBurn: Int!
+  repeatIncidents: Int!
+  prSizeLimitBreaches: Int!
+  releaseEnvelopeRequired: Boolean!
+}
+
+input DecisionInput {
+  domainId: ID!
+  title: String!
+  owner: String!
+  rationale: String!
+  revisitDate: String!
+  decisionType: String!
+}
+
+input ExceptionInput {
+  domainId: ID!
+  gate: GateType!
+  owner: String!
+  reason: String!
+  expiresAt: String!
+}
+
+input ReleaseEnvelopeInput {
+  domainId: ID!
+  owner: String!
+  metrics: [String!]!
+  rollbackPlan: String!
+  expiresAt: String
+}
+
+extend type Query {
+  scoreboards: [DomainScoreboard!]!
+  domainScoreboard(domainId: ID!): DomainScoreboard
+}
+
+extend type Mutation {
+  upsertDomainMetrics(input: DomainMetricsInput!): DomainScoreboard!
+  logDecision(input: DecisionInput!): DecisionLogEntry!
+  registerException(input: ExceptionInput!): ExceptionEntry!
+  registerReleaseEnvelope(input: ReleaseEnvelopeInput!): ReleaseEnvelope!
+}

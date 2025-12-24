@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Multi-Tenant RBAC (Role-Based Access Control) System
  *

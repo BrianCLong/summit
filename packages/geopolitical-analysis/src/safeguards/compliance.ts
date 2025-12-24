@@ -59,7 +59,7 @@ export function checkAnalysisCompliance(
 
   // Check for sensitive indicators without proper justification
   if (request.indicatorTypes) {
-    const sensitiverequest = request.indicatorTypes.filter((type) =>
+    const sensitiveRequested = request.indicatorTypes.filter((type) =>
       SENSITIVE_INDICATORS.has(type)
     );
 

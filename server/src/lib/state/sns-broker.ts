@@ -1,8 +1,11 @@
 // @ts-nocheck
-
-import { SNSClient, PublishCommand } from "@aws-sdk/client-sns";
-import { SQSClient, ReceiveMessageCommand, DeleteMessageCommand } from "@aws-sdk/client-sqs";
-import { MessageBroker } from "./cross-region-sync.js";
+import { SNSClient, PublishCommand } from '@aws-sdk/client-sns';
+import {
+  SQSClient,
+  ReceiveMessageCommand,
+  DeleteMessageCommand,
+} from '@aws-sdk/client-sqs';
+import { MessageBroker } from './cross-region-sync.js';
 
 /**
  * Production-ready implementation of MessageBroker using AWS SNS and SQS.
@@ -31,13 +34,18 @@ export class SnsMessageBroker implements MessageBroker {
     // Here we wrap it in a structure.
     const payload = JSON.stringify({ channel, message });
 
-    await this.snsClient.send(new PublishCommand({
-      TopicArn: this.topicArn,
-      Message: payload,
-    }));
+    await this.snsClient.send(
+      new PublishCommand({
+        TopicArn: this.topicArn,
+        Message: payload,
+      }),
+    );
   }
 
-  async subscribe(channel: string, callback: (message: string) => void): Promise<void> {
+  async subscribe(
+    channel: string,
+    callback: (message: string) => void,
+  ): Promise<void> {
     // In this architecture, we subscribe to the Queue, which is subscribed to SNS.
     // We just filter messages by channel if necessary.
 
@@ -50,18 +58,23 @@ export class SnsMessageBroker implements MessageBroker {
   private async pollQueue(channel: string, callback: (message: string) => void) {
     while (this.isPolling) {
       try {
-        const response = await this.sqsClient.send(new ReceiveMessageCommand({
-          QueueUrl: this.queueUrl,
-          MaxNumberOfMessages: 10,
-          WaitTimeSeconds: 20, // Long polling
-        }));
+        const response = await this.sqsClient.send(
+          new ReceiveMessageCommand({
+            QueueUrl: this.queueUrl,
+            MaxNumberOfMessages: 10,
+            WaitTimeSeconds: 20, // Long polling
+          }),
+        );
 
         if (response.Messages) {
           for (const msg of response.Messages) {
             if (msg.Body) {
               // Parse SNS notification structure
-              const snsMessage = JSON.parse(msg.Body); // SQS wraps SNS message
-              const payload = JSON.parse(snsMessage.Message);
+              const snsMessage = JSON.parse(msg.Body) as { Message: string }; // SQS wraps SNS message
+              const payload = JSON.parse(snsMessage.Message) as {
+                channel: string;
+                message: string;
+              };
 
               if (payload.channel === channel) {
                 callback(payload.message);
@@ -69,15 +82,17 @@ export class SnsMessageBroker implements MessageBroker {
             }
 
             // Acknowledge (Delete) message
-            await this.sqsClient.send(new DeleteMessageCommand({
-              QueueUrl: this.queueUrl,
-              ReceiptHandle: msg.ReceiptHandle,
-            }));
+            await this.sqsClient.send(
+              new DeleteMessageCommand({
+                QueueUrl: this.queueUrl,
+                ReceiptHandle: msg.ReceiptHandle,
+              }),
+            );
           }
         }
       } catch (error) {
-        console.error("Error polling SQS:", error);
-        await new Promise(resolve => setTimeout(resolve, 5000)); // Backoff
+        console.error('Error polling SQS:', error);
+        await new Promise((resolve) => setTimeout(resolve, 5000)); // Backoff
       }
     }
   }

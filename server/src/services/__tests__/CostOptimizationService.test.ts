@@ -1,30 +1,28 @@
-// @ts-nocheck
-
-import { CostOptimizationService, OptimizationType, ImplementationEffort, RiskLevel } from '../CostOptimizationService';
+import { CostOptimizationService, OptimizationType, ImplementationEffort, RiskLevel } from '../CostOptimizationService.js';
 import { describe, expect, test, jest, beforeEach } from '@jest/globals';
 
-jest.mock('../../db/pg', () => ({
+jest.mock('../../db/pg.js', () => ({
   pg: {
-    query: jest.fn(),
-    oneOrNone: jest.fn(),
+    query: jest.fn<() => Promise<any>>(),
+    oneOrNone: jest.fn<() => Promise<any>>(),
   },
 }));
 
-jest.mock('../../db/neo4j', () => ({
+jest.mock('../../db/neo4j.js', () => ({
   neo: {
-    session: jest.fn(),
+    session: jest.fn<() => any>(),
   },
-  getNeo4jDriver: jest.fn(),
+  getNeo4jDriver: jest.fn<() => any>(),
 }));
 
 jest.mock('@opentelemetry/api', () => ({
   trace: {
     getTracer: () => ({
-      startActiveSpan: (name: string, fn: any) => fn({
-        setAttributes: jest.fn(),
-        recordException: jest.fn(),
-        setStatus: jest.fn(),
-        end: jest.fn(),
+      startActiveSpan: (name: string, fn: (span: any) => any) => fn({
+        setAttributes: jest.fn<() => void>(),
+        recordException: jest.fn<() => void>(),
+        setStatus: jest.fn<() => void>(),
+        end: jest.fn<() => void>(),
       }),
     }),
   },

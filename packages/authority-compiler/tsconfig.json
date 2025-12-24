@@ -3,8 +3,14 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",
-    "declaration": true
+    "declaration": true,
+    "composite": true
   },
   "include": ["src"],
-  "references": [{ "path": "../types" }]
+  "exclude": ["__tests__", "**/*.test.ts", "**/*.spec.ts"],
+  "references": [
+    {
+      "path": "../types"
+    }
+  ]
 }

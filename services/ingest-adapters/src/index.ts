@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Ingest Adapters Service
  *
@@ -350,7 +349,7 @@ export class IngestService {
   }
 
   private createDLQStore(): DLQStore {
-    return {
+    const dlqStore: DLQStore = {
       add: async (record: DLQRecord): Promise<void> => {
         const key = `dlq:${record.envelope.tenant_id}:${record.id}`;
         const listKey = `dlq:list:${record.envelope.tenant_id}`;
@@ -380,7 +379,7 @@ export class IngestService {
       get: async (id: string): Promise<DLQRecord | null> => {
         // Need tenant_id to construct key - search all keys
         const keys = await this.redis!.keys(`dlq:*:${id}`);
-        if (keys.length === 0) return null;
+        if (keys.length === 0 || !keys[0]) return null;
 
         const data = await this.redis!.get(keys[0]);
         return data ? JSON.parse(data) : null;
@@ -406,7 +405,7 @@ export class IngestService {
       },
 
       redrive: async (id: string): Promise<IngestEnvelope | null> => {
-        const record = await this.get(id);
+        const record = await dlqStore.get(id);
         if (!record || !record.can_redrive) {
           return null;
         }
@@ -415,7 +414,7 @@ export class IngestService {
         await this.handleRecord(record.envelope);
 
         // Remove from DLQ
-        await this.delete(id);
+        await dlqStore.delete(id);
 
         return record.envelope;
       },
@@ -426,7 +425,8 @@ export class IngestService {
           await this.redis!.del(...keys);
         }
       },
-    } as DLQStore;
+    };
+    return dlqStore;
   }
 }
 

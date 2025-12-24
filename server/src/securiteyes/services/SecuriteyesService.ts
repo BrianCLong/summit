@@ -44,7 +44,7 @@ export class SecuriteyesService {
     if (!result || result.length === 0) {
       throw new Error(`Failed to create node of label ${label}`);
     }
-    return result[0].n.properties as T;
+    return (result as any)[0].n.properties as T;
   }
 
   // --- Generic Edge Creation ---
@@ -80,7 +80,7 @@ export class SecuriteyesService {
     `;
     const existing = await runCypher(checkQuery, { value: data.value, tenantId: data.tenantId });
     if (existing.length > 0) {
-      return existing[0].n.properties as Indicator;
+      return (existing as any)[0].n.properties as Indicator;
     }
     return this.createNode<Indicator>(NODE_LABELS.INDICATOR, data);
   }
@@ -114,7 +114,7 @@ export class SecuriteyesService {
       RETURN n
     `;
     const result = await runCypher(query, { principalId, tenantId, id: randomUUID() });
-    const profile = result[0].n.properties;
+    const profile = (result as any)[0].n.properties;
     // Parse riskFactors if it comes back as string (depending on Neo4j driver serialization)
     if (typeof profile.riskFactors === 'string') {
         profile.riskFactors = JSON.parse(profile.riskFactors);
@@ -141,7 +141,7 @@ export class SecuriteyesService {
       LIMIT toInteger($limit)
     `;
     const res = await runCypher(query, { tenantId, limit });
-    return res.map(r => r.n.properties);
+    return (res as any).map((r: any) => r.n.properties);
   }
 
   async getActiveIncidents(tenantId: string): Promise<Incident[]> {
@@ -152,7 +152,7 @@ export class SecuriteyesService {
       ORDER BY n.createdAt DESC
     `;
     const res = await runCypher(query, { tenantId });
-    return res.map(r => r.n.properties);
+    return (res as any).map((r: any) => r.n.properties);
   }
 
   async getCampaigns(tenantId: string): Promise<Campaign[]> {
@@ -162,7 +162,7 @@ export class SecuriteyesService {
         ORDER BY n.updatedAt DESC
       `;
       const res = await runCypher(query, { tenantId });
-      return res.map(r => r.n.properties);
+      return (res as any).map((r: any) => r.n.properties);
   }
 
   async getThreatActors(tenantId: string): Promise<ThreatActor[]> {
@@ -172,7 +172,7 @@ export class SecuriteyesService {
         ORDER BY n.confidence DESC
       `;
       const res = await runCypher(query, { tenantId });
-      return res.map(r => r.n.properties);
+      return (res as any).map((r: any) => r.n.properties);
   }
 
   async getHighRiskProfiles(tenantId: string, threshold: number): Promise<InsiderRiskProfile[]> {
@@ -183,7 +183,7 @@ export class SecuriteyesService {
           ORDER BY n.riskScore DESC
       `;
       const res = await runCypher(query, { tenantId, threshold });
-      return res.map((r: any) => {
+      return (res as any).map((r: any) => {
           const profile = r.n.properties;
            if (typeof profile.riskFactors === 'string') {
               try { profile.riskFactors = JSON.parse(profile.riskFactors); } catch {}

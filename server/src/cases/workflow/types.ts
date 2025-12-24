@@ -486,3 +486,13 @@ export interface PendingApproval {
   requiredApprovers: number;
   currentApprovals: number;
 }
+
+export interface CaseDashboardMetrics {
+  participantCount: number;
+  openTaskCount: number;
+  breachedSlaCount: number;
+  atRiskSlaCount: number;
+  pendingApprovalCount: number;
+  lastTaskDueAt: Date | null;
+  refreshedAt?: Date;
+}

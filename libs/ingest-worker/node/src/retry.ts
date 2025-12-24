@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Retry Logic with Exponential Backoff and Jitter
  *
@@ -252,15 +251,19 @@ export function createRetrier(config: RetryConfig = DEFAULT_RETRY_CONFIG) {
  * Decorator for retrying class methods.
  */
 export function Retryable(config: RetryConfig = DEFAULT_RETRY_CONFIG) {
-  return function (
-    target: any,
+  return function <T>(
+    target: object,
     propertyKey: string,
-    descriptor: PropertyDescriptor
-  ) {
+    descriptor: TypedPropertyDescriptor<(...args: unknown[]) => Promise<T>>
+  ): TypedPropertyDescriptor<(...args: unknown[]) => Promise<T>> {
     const originalMethod = descriptor.value;
 
-    descriptor.value = async function (...args: any[]) {
-      const result = await retry(
+    if (!originalMethod) {
+      return descriptor;
+    }
+
+    descriptor.value = async function (this: unknown, ...args: unknown[]): Promise<T> {
+      const result = await retry<T>(
         () => originalMethod.apply(this, args),
         config
       );
@@ -269,7 +272,7 @@ export function Retryable(config: RetryConfig = DEFAULT_RETRY_CONFIG) {
         throw result.error ?? new Error('Retry failed');
       }
 
-      return result.value;
+      return result.value!;
     };
 
     return descriptor;

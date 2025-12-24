@@ -5,7 +5,7 @@
  */
 
 import { Router, Request, Response } from 'express';
-import { z } from 'zod';
+import * as z from 'zod';
 import { spawn } from 'child_process';
 import path from 'path';
 import logger from '../config/logger.js';
@@ -14,57 +14,57 @@ import { Pool } from 'pg';
 const apiLogger = logger.child({ name: 'ETLAssistantAPI' });
 
 // Request schemas
-const PreviewSchemaRequest = z.object({
-  sample_rows: z.array(z.record(z.string(), z.any())),
-  source_name: z.string().optional(),
-  tenant_id: z.string(),
+const PreviewSchemaRequest = (z as any).object({
+  sample_rows: (z as any).array((z as any).record((z as any).string(), (z as any).any())),
+  source_name: (z as any).string().optional(),
+  tenant_id: (z as any).string(),
 });
 
-const PIIScanRequest = z.object({
-  sample_rows: z.array(z.record(z.string(), z.any())),
-  tenant_id: z.string(),
+const PIIScanRequest = (z as any).object({
+  sample_rows: (z as any).array((z as any).record((z as any).string(), (z as any).any())),
+  tenant_id: (z as any).string(),
 });
 
-const LicenseCheckRequest = z.object({
-  source_name: z.string(),
-  source_type: z.string(),
-  data_source_ids: z.array(z.string()).optional(),
-  operation: z.enum(['ingest', 'query', 'export', 'transform']).default('ingest'),
-  purpose: z.string().default('intelligence'),
-  tenant_id: z.string(),
+const LicenseCheckRequest = (z as any).object({
+  source_name: (z as any).string(),
+  source_type: (z as any).string(),
+  data_source_ids: (z as any).array((z as any).string()).optional(),
+  operation: (z as any).enum(['ingest', 'query', 'export', 'transform']).default('ingest'),
+  purpose: (z as any).string().default('intelligence'),
+  tenant_id: (z as any).string(),
 });
 
-const SaveConfigurationRequest = z.object({
-  tenant_id: z.string(),
-  source_name: z.string(),
-  source_type: z.string(),
-  sample_rows: z.array(z.record(z.string(), z.any())),
-  field_mappings: z.array(
-    z.object({
-      source_field: z.string(),
-      canonical_entity: z.string(),
-      canonical_property: z.string(),
-      transformation: z.string().optional(),
-      confidence: z.number(),
+const SaveConfigurationRequest = (z as any).object({
+  tenant_id: (z as any).string(),
+  source_name: (z as any).string(),
+  source_type: (z as any).string(),
+  sample_rows: (z as any).array((z as any).record((z as any).string(), (z as any).any())),
+  field_mappings: (z as any).array(
+    (z as any).object({
+      source_field: (z as any).string(),
+      canonical_entity: (z as any).string(),
+      canonical_property: (z as any).string(),
+      transformation: (z as any).string().optional(),
+      confidence: (z as any).number(),
     }),
   ),
-  pii_handling: z.array(
-    z.object({
-      field_name: z.string(),
-      pii_category: z.string(),
-      redaction_strategy: z.string(),
-      reason: z.string(),
+  pii_handling: (z as any).array(
+    (z as any).object({
+      field_name: (z as any).string(),
+      pii_category: (z as any).string(),
+      redaction_strategy: (z as any).string(),
+      reason: (z as any).string(),
     }),
   ),
-  license_decision: z
+  license_decision: (z as any)
     .object({
-      source_name: z.string(),
-      license_id: z.string().nullable(),
-      compliance_status: z.string(),
-      reason: z.string(),
+      source_name: (z as any).string(),
+      license_id: (z as any).string().nullable(),
+      compliance_status: (z as any).string(),
+      reason: (z as any).string(),
     })
     .optional(),
-  created_by: z.string(),
+  created_by: (z as any).string(),
 });
 
 type PreviewSchemaRequestType = z.infer<typeof PreviewSchemaRequest>;

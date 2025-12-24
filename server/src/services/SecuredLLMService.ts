@@ -7,7 +7,7 @@
  * Usage:
  *   import { securedLLM } from './services/SecuredLLMService.js';
  *
- *   const result = await securedLLM.complete({
+ *   const result = await securedLLM.complete(
  *     prompt: 'User input here',
  *     userId: 'user-123',
  *     tenantId: 'tenant-456',
@@ -22,7 +22,7 @@ import { default as pino } from 'pino';
 import LLMService from './LLMService.js';
 
 // @ts-ignore
-const logger = pino({ name: 'SecuredLLMService' });
+const logger = (pino as any)({ name: 'SecuredLLMService' });
 
 interface SecuredLLMParams {
   prompt: string;

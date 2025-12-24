@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * GraphRAG Provenance Service
  *
@@ -27,7 +26,7 @@ import {
   SourceTypeSchema,
 } from './types.js';
 
-const logger = pino({ name: 'graphrag-provenance' });
+const logger = (pino as any)({ name: 'graphrag-provenance' });
 
 // Configuration
 const PROV_LEDGER_URL =

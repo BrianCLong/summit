@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Simulation Engine
  * Runs various simulations for disaster resilience, maintenance, urban planning, and more

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { GraphQLContext } from '../apollo-v5-server';
 import { applyMiddleware } from 'graphql-middleware';
 import { makeExecutableSchema } from '@graphql-tools/schema';
@@ -66,10 +65,10 @@ describe('GraphQL Permissions Integration', () => {
     tenantId: 'tenant-1'
   };
 
-  const context = (user: any): GraphQLContext => ({
+  const context = (user: typeof adminUser | null): Partial<GraphQLContext> => ({
     user,
     dataSources: {},
-    loaders: {} as any,
+    loaders: {} as GraphQLContext['loaders'],
     request: {
       ip: '127.0.0.1',
       headers: {},

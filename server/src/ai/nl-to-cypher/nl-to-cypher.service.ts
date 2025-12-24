@@ -4,7 +4,7 @@ import { randomUUID as uuidv4 } from 'crypto';
 import { default as pino } from 'pino';
 
 // @ts-ignore
-const logger = pino({ name: 'nl-to-cypher' });
+const logger = (pino as any)({ name: 'nl-to-cypher' });
 
 export interface CypherValidationResult {
   isValid: boolean;

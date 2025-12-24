@@ -1,11 +1,10 @@
-// @ts-nocheck
 import fs from 'fs';
 import path from 'path';
 import pino from 'pino';
 
-const log = pino({ name: 'SOC2Evidence' });
+const log = (pino as any)({ name: 'SOC2Evidence' });
 
-async function generateEvidence() {
+async function generateEvidence(): Promise<void> {
   log.info('Generating SOC2 Evidence Bundle v3.1...');
 
   const artifactsDir = path.resolve('artifacts/soc2');
@@ -80,7 +79,7 @@ async function generateEvidence() {
   log.info('Evidence bundle hashed and signed (manifest.json created).');
 }
 
-generateEvidence().catch(err => {
+generateEvidence().catch((err: unknown) => {
   log.error(err);
   process.exit(1);
 });

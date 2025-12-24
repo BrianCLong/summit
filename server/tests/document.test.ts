@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createTestClient } from 'apollo-server-testing';
 import { ApolloServer } from 'apollo-server-express';
 import { typeDefs } from '../../src/graphql/schema-combined';
@@ -7,9 +6,9 @@ import { neo } from '../../src/db/neo4j';
 import { parseTaxonomy, ingestTaxonomy } from '../../../scripts/ingest-taxonomy.js';
 
 describe('GraphQL Document API', () => {
-  let server;
-  let testClient;
-  let createdDocId;
+  let server: ApolloServer;
+  let testClient: ReturnType<typeof createTestClient>;
+  let createdDocId: string;
 
   beforeAll(async () => {
     server = new ApolloServer({

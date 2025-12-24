@@ -5,13 +5,13 @@
  * Sends emails using SMTP with nodemailer
  */
 
-import nodemailer from 'nodemailer';
+import nodemailer, { Transporter, SendMailOptions } from 'nodemailer';
 import { htmlToText } from 'html-to-text';
 import { EmailProvider } from './EmailProvider.js';
 import { EmailMessage, EmailSendResult, EmailProviderConfig } from '../types.js';
 
 export class SMTPProvider extends EmailProvider {
-  private transporter: nodemailer.Transporter | null = null;
+  private transporter: Transporter | null = null;
   private config: EmailProviderConfig;
 
   constructor(config: EmailProviderConfig) {
@@ -54,7 +54,7 @@ export class SMTPProvider extends EmailProvider {
         preserveNewlines: true,
       });
 
-      const mailOptions: nodemailer.SendMailOptions = {
+      const mailOptions: SendMailOptions = {
         from: message.from || this.config.from,
         replyTo: message.replyTo || this.config.replyTo,
         to: message.to,
@@ -67,7 +67,7 @@ export class SMTPProvider extends EmailProvider {
           filename: att.filename,
           content: att.content,
           contentType: att.contentType,
-          encoding: att.encoding as any,
+          encoding: att.encoding,
           cid: att.cid,
         })),
         headers: {
@@ -133,9 +133,9 @@ export class SMTPProvider extends EmailProvider {
     }
     if (Array.isArray(message.to)) {
       const first = message.to[0];
-      return typeof first === 'string' ? first : first.email;
+      return typeof first === 'string' ? first : (first as { email: string }).email;
     }
-    return (message.to as any).email;
+    return (message.to as { email: string }).email;
   }
 
   private getPriority(priority?: 'high' | 'normal' | 'low'): string {

@@ -15,19 +15,14 @@
  */
 
 import { trace, context, SpanStatusCode, SpanKind, Span } from '@opentelemetry/api';
-// @ts-ignore
+import type { Attributes } from '@opentelemetry/api';
 import { NodeSDK } from '@opentelemetry/sdk-node';
-// @ts-ignore
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-// @ts-ignore
 import { Resource } from '@opentelemetry/resources';
-// @ts-ignore
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+import { SEMRESATTRS_SERVICE_NAME, SEMRESATTRS_SERVICE_VERSION, SEMRESATTRS_DEPLOYMENT_ENVIRONMENT } from '@opentelemetry/semantic-conventions';
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
-// @ts-ignore
 import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
-// @ts-ignore
-import { default as pino } from 'pino';
+import pino from 'pino';
 
 const logger = (pino as any)({ name: 'observability:tracing' });
 
@@ -42,8 +37,8 @@ export interface TracingConfig {
 }
 
 export interface SpanOptions {
-  kind?: any;
-  attributes?: Record<string, any>;
+  kind?: SpanKind;
+  attributes?: Attributes;
   parentSpan?: Span;
 }
 
@@ -54,7 +49,7 @@ export interface SpanOptions {
 export class TracingService {
   private static instance: TracingService;
   private sdk: NodeSDK | null = null;
-  private tracer: any = null;
+  private tracer: ReturnType<typeof trace.getTracer> | null = null;
   private config: TracingConfig;
 
   private constructor(config?: Partial<TracingConfig>) {
@@ -87,9 +82,9 @@ export class TracingService {
     try {
       const resource = Resource.default().merge(
         new Resource({
-          [SemanticResourceAttributes.SERVICE_NAME]: this.config.serviceName,
-          [SemanticResourceAttributes.SERVICE_VERSION]: this.config.serviceVersion,
-          [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: this.config.environment,
+          [SEMRESATTRS_SERVICE_NAME]: this.config.serviceName,
+          [SEMRESATTRS_SERVICE_VERSION]: this.config.serviceVersion,
+          [SEMRESATTRS_DEPLOYMENT_ENVIRONMENT]: this.config.environment,
         }),
       );
 
@@ -196,15 +191,15 @@ export class TracingService {
     operationName: string,
     fieldName: string,
     resolver: () => Promise<T>,
-    context?: any,
+    contextData?: { user?: { id: string } },
   ): Promise<T> {
     return this.trace(
       `graphql.${operationName}`,
       async (span) => {
         span.setAttribute('graphql.operation.name', operationName);
         span.setAttribute('graphql.field.name', fieldName);
-        if (context?.user?.id) {
-          span.setAttribute('user.id', context.user.id);
+        if (contextData?.user?.id) {
+          span.setAttribute('user.id', contextData.user.id);
         }
         return await resolver();
       },
@@ -281,7 +276,7 @@ export class TracingService {
   /**
    * Add attributes to the active span
    */
-  addAttributes(attributes: Record<string, any>): void {
+  addAttributes(attributes: Attributes): void {
     const span = this.getActiveSpan();
     if (span) {
       span.setAttributes(attributes);
@@ -291,7 +286,7 @@ export class TracingService {
   /**
    * Record an exception in the active span
    */
-  recordException(error: Error | string, attributes?: Record<string, any>): void {
+  recordException(error: Error | string, attributes?: Attributes): void {
     const span = this.getActiveSpan();
     if (span) {
       const errorObj = typeof error === 'string' ? new Error(error) : error;
@@ -334,15 +329,15 @@ export class TracingService {
   /**
    * Create no-op span for disabled tracing
    */
-  private createNoOpSpan() {
-    const noopSpan: any = {
-      setStatus: () => noopSpan,
-      setAttributes: () => noopSpan,
-      setAttribute: () => noopSpan,
-      addEvent: () => noopSpan,
+  private createNoOpSpan(): Partial<Span> {
+    const noopSpan: Partial<Span> = {
+      setStatus: () => noopSpan as Span,
+      setAttributes: () => noopSpan as Span,
+      setAttribute: () => noopSpan as Span,
+      addEvent: () => noopSpan as Span,
       recordException: () => { },
       end: () => { },
-      updateName: () => noopSpan,
+      updateName: () => noopSpan as Span,
       isRecording: () => false,
       spanContext: () => ({
         traceId: '00000000000000000000000000000000',

@@ -6,10 +6,10 @@
  * for common graph operations.
  */
 
-import { Driver, Session } from 'neo4j-driver';
+import type { Driver, Session } from 'neo4j-driver';
 import pino from 'pino';
 
-const logger = pino({ name: 'Neo4jOptimizer' });
+const logger = (pino as any)({ name: 'Neo4jOptimizer' });
 
 interface QueryProfile {
   cypher: string;
@@ -284,9 +284,9 @@ export class Neo4jOptimizer {
    * Extract performance profile from query result
    */
   private extractProfile(
-    result: any,
+    result: { summary: { plan?: unknown; profile?: unknown } },
     cypher: string,
-    parameters: Record<string, any>,
+    parameters: Record<string, unknown>,
     executionTime: number,
   ): QueryProfile {
     const summary = result.summary;
@@ -313,17 +313,17 @@ export class Neo4jOptimizer {
     };
   }
 
-  private extractDbHits(plan: any): number {
+  private extractDbHits(plan: { dbHits?: number; children?: unknown[] }): number {
     let hits = plan.dbHits || 0;
     if (plan.children) {
       for (const child of plan.children) {
-        hits += this.extractDbHits(child);
+        hits += this.extractDbHits(child as { dbHits?: number; children?: unknown[] });
       }
     }
     return hits;
   }
 
-  private extractIndexUsage(plan: any): string[] {
+  private extractIndexUsage(plan: { operatorType?: string; children?: unknown[] }): string[] {
     const indexes: string[] = [];
 
     if (plan.operatorType && plan.operatorType.includes('Index')) {
@@ -332,7 +332,7 @@ export class Neo4jOptimizer {
 
     if (plan.children) {
       for (const child of plan.children) {
-        indexes.push(...this.extractIndexUsage(child));
+        indexes.push(...this.extractIndexUsage(child as { operatorType?: string; children?: unknown[] }));
       }
     }
 

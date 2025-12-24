@@ -11,7 +11,7 @@ import type {
   CertificationStatus,
   MergeEvent,
   CrossReference
-} from '@summit/mdm-core';
+} from '@intelgraph/mdm-core';
 
 export interface GoldenRecordConfig {
   domain: string;
@@ -20,6 +20,13 @@ export interface GoldenRecordConfig {
   qualityCertificationThreshold?: number;
   enableVersioning: boolean;
   enableLineageTracking: boolean;
+}
+
+export interface GoldenRecordContextOptions {
+  recordType?: string;
+  tenantId?: string;
+  tags?: string[];
+  classifications?: string[];
 }
 
 export class GoldenRecordManager {
@@ -36,7 +43,10 @@ export class GoldenRecordManager {
   /**
    * Create a new golden record from source records
    */
-  async createGoldenRecord(sourceRecords: SourceRecord[]): Promise<MasterRecord> {
+  async createGoldenRecord(
+    sourceRecords: SourceRecord[],
+    context: GoldenRecordContextOptions = {}
+  ): Promise<MasterRecord> {
     if (sourceRecords.length === 0) {
       throw new Error('At least one source record required');
     }
@@ -57,19 +67,21 @@ export class GoldenRecordManager {
     const certificationStatus = this.determineCertificationStatus(qualityScore);
 
     // Build cross-references
-    const crossReferences = this.buildCrossReferences(sourceRecords);
+    const crossReferences = this.buildCrossReferences([], sourceRecords);
+
+    const masterId = uuidv4();
 
     // Create master record
     const masterRecord: MasterRecord = {
       id: {
-        id: uuidv4(),
+        id: masterId,
         domain: this.config.domain,
         version: 1
       },
       domain: this.config.domain,
       data: goldenData,
       sourceRecords,
-      crossReferences,
+      crossReferences: this.buildCrossReferences(masterId, sourceRecords),
       qualityScore,
       certificationStatus,
       lineage: {
@@ -86,9 +98,11 @@ export class GoldenRecordManager {
         mergeHistory: []
       },
       metadata: {
-        tags: [],
-        classifications: [],
+        tags: context.tags ?? [],
+        classifications: context.classifications ?? [],
         sensitivity: 'internal',
+        recordType: context.recordType,
+        tenantId: context.tenantId,
         customAttributes: {}
       },
       createdAt: new Date(),
@@ -110,7 +124,8 @@ export class GoldenRecordManager {
    */
   async updateGoldenRecord(
     masterRecordId: string,
-    newSourceRecords: SourceRecord[]
+    newSourceRecords: SourceRecord[],
+    context: GoldenRecordContextOptions = {}
   ): Promise<MasterRecord> {
     const existingRecord = this.records.get(masterRecordId);
     if (!existingRecord) {
@@ -127,8 +142,11 @@ export class GoldenRecordManager {
     const qualityScore = this.calculateQualityScore(goldenData, allSourceRecords);
 
     // Update cross-references
-    const newCrossRefs = this.buildCrossReferences(newSourceRecords);
-    const allCrossRefs = [...existingRecord.crossReferences, ...newCrossRefs];
+    const allCrossRefs = this.buildCrossReferences(
+      masterRecordId,
+      newSourceRecords,
+      existingRecord.crossReferences
+    );
 
     // Update master record
     const updatedRecord: MasterRecord = {
@@ -138,6 +156,13 @@ export class GoldenRecordManager {
       crossReferences: allCrossRefs,
       qualityScore,
       certificationStatus: this.determineCertificationStatus(qualityScore),
+      metadata: {
+        ...existingRecord.metadata,
+        recordType: existingRecord.metadata.recordType ?? context.recordType,
+        tenantId: existingRecord.metadata.tenantId ?? context.tenantId,
+        tags: context.tags ?? existingRecord.metadata.tags,
+        classifications: context.classifications ?? existingRecord.metadata.classifications,
+      },
       updatedAt: new Date(),
       version: existingRecord.version + 1
     };
@@ -212,7 +237,7 @@ export class GoldenRecordManager {
       ...records[0],
       data: mergedData,
       sourceRecords: allSourceRecords,
-      crossReferences: allCrossRefs,
+      crossReferences: this.buildCrossReferences(records[0].id.id, allSourceRecords, allCrossRefs),
       qualityScore,
       certificationStatus: this.determineCertificationStatus(qualityScore),
       updatedAt: new Date(),
@@ -268,9 +293,12 @@ export class GoldenRecordManager {
     const result: Record<string, unknown> = {};
 
     for (const rule of this.config.survivorshipRules) {
+      const fieldName = rule.attributeName ?? rule.fieldName;
+      if (!fieldName) continue;
+
       const value = this.applyRule(rule, sourceRecords);
       if (value !== undefined && value !== null) {
-        result[rule.fieldName] = value;
+        result[fieldName] = value;
       }
     }
 
@@ -292,8 +320,11 @@ export class GoldenRecordManager {
    * Apply individual survivorship rule
    */
   private applyRule(rule: SurvivorshipRule, sourceRecords: SourceRecord[]): unknown {
+    const attributeName = rule.attributeName ?? rule.fieldName;
+    if (!attributeName) return undefined;
+
     const values = sourceRecords
-      .map(sr => ({ value: sr.data[rule.fieldName], record: sr }))
+      .map(sr => ({ value: sr.data[attributeName], record: sr }))
       .filter(v => v.value !== undefined && v.value !== null);
 
     if (values.length === 0) return undefined;
@@ -408,16 +439,26 @@ export class GoldenRecordManager {
   /**
    * Build cross-references
    */
-  private buildCrossReferences(sourceRecords: SourceRecord[]): CrossReference[] {
-    return sourceRecords.map(sr => ({
-      sourceSystem: sr.sourceSystem,
-      sourceRecordId: sr.sourceRecordId,
-      masterRecordId: '',
-      linkType: 'exact' as const,
-      confidence: sr.confidence,
-      createdAt: new Date(),
-      createdBy: 'system'
-    }));
+  private buildCrossReferences(
+    masterRecordId: string,
+    sourceRecords: SourceRecord[],
+    existingCrossReferences: CrossReference[] = []
+  ): CrossReference[] {
+    const seen = new Set(existingCrossReferences.map(ref => `${ref.sourceSystem}:${ref.sourceRecordId}`));
+
+    const newRefs = sourceRecords
+      .filter(sr => !seen.has(`${sr.sourceSystem}:${sr.sourceRecordId}`))
+      .map(sr => ({
+        sourceSystem: sr.sourceSystem,
+        sourceRecordId: sr.sourceRecordId,
+        masterRecordId,
+        linkType: 'exact' as const,
+        confidence: sr.confidence,
+        createdAt: new Date(),
+        createdBy: 'system'
+      }));
+
+    return [...existingCrossReferences, ...newRefs];
   }
 
   /**
@@ -485,19 +526,23 @@ export class GoldenRecordManager {
   /**
    * Get golden record by ID
    */
-  async getGoldenRecord(recordId: string): Promise<MasterRecord | undefined> {
+  getGoldenRecord(recordId: string): MasterRecord | undefined {
     return this.records.get(recordId);
   }
 
   /**
    * Find golden record by source record
    */
-  async findBySourceRecord(
+  findBySourceRecord(
     sourceSystem: string,
     sourceRecordId: string
-  ): Promise<MasterRecord | undefined> {
+  ): MasterRecord | undefined {
     const key = `${sourceSystem}:${sourceRecordId}`;
     const masterId = this.sourceIndex.get(key);
     return masterId ? this.records.get(masterId) : undefined;
+  }
+
+  async getAllRecords(): Promise<MasterRecord[]> {
+    return Array.from(this.records.values());
   }
 }

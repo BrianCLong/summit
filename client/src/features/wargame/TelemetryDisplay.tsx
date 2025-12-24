@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import {
   Box,
@@ -7,8 +6,8 @@ import {
   Alert,
   Card,
   CardContent,
-  Grid,
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import { useQuery, gql } from '@apollo/client';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 
@@ -38,7 +37,7 @@ const columns: GridColDef[] = [
     field: 'timestamp',
     headerName: 'Time',
     width: 180,
-    valueFormatter: (params) => new Date(params.value).toLocaleString(),
+    valueFormatter: (params: any) => new Date(params.value).toLocaleString(),
   },
   { field: 'platform', headerName: 'Platform', width: 100 },
   { field: 'author', headerName: 'Author', width: 150 },
@@ -82,16 +81,16 @@ const TelemetryDisplay: React.FC<TelemetryDisplayProps> = ({ scenarioId }) => {
   const avgSentiment =
     telemetry.length > 0
       ? telemetry.reduce(
-          (sum: number, item: { sentiment?: number }) =>
-            sum + Number(item.sentiment ?? 0),
-          0,
-        ) /
-        telemetry.length
+        (sum: number, item: { sentiment?: number }) =>
+          sum + Number(item.sentiment ?? 0),
+        0,
+      ) /
+      telemetry.length
       : 0;
   const avgVirality =
     telemetry.length > 0
-      ? telemetry.reduce((sum: any, item: any) => sum + item.viralityScore, 0) /
-        telemetry.length
+      ? telemetry.reduce((sum: number, item: { viralityScore?: number }) => sum + Number(item.viralityScore ?? 0), 0) /
+      telemetry.length
       : 0;
 
   return (
@@ -105,7 +104,7 @@ const TelemetryDisplay: React.FC<TelemetryDisplayProps> = ({ scenarioId }) => {
       </Alert>
 
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid item xs={4}>
+        <Grid xs={4}>
           <Card>
             <CardContent>
               <Typography variant="h6">Total Volume</Typography>
@@ -115,7 +114,7 @@ const TelemetryDisplay: React.FC<TelemetryDisplayProps> = ({ scenarioId }) => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={4}>
+        <Grid xs={4}>
           <Card>
             <CardContent>
               <Typography variant="h6">Avg. Sentiment</Typography>
@@ -123,7 +122,7 @@ const TelemetryDisplay: React.FC<TelemetryDisplayProps> = ({ scenarioId }) => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={4}>
+        <Grid xs={4}>
           <Card>
             <CardContent>
               <Typography variant="h6">Avg. Virality</Typography>

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Claim routes - CRUD operations for claims about entities
  */

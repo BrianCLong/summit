@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Copilot Service
  *
@@ -48,7 +47,7 @@ import {
   createGuardrailsService,
 } from './guardrails.service.js';
 
-const logger = pino({ name: 'copilot-service' });
+const logger = (pino as any)({ name: 'copilot-service' });
 
 /**
  * LLM service interface
@@ -104,7 +103,7 @@ export class CopilotService {
     this.config = config;
 
     // Initialize services
-    this.nlQueryService = createNLQueryService();
+    this.nlQueryService = createNLQueryService({});
     this.sandboxExecutor = createSandboxExecutor(config.neo4jDriver);
     this.graphRAGService = createGraphRAGProvenanceService(
       config.neo4jDriver,

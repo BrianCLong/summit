@@ -1,17 +1,16 @@
 // @ts-nocheck
-
 import { Pool } from 'pg';
 import Redis from 'ioredis';
-import { pino } from 'pino';
+import pino from 'pino';
 import { AdvancedAuditSystem } from './advanced-audit-system.js';
-import { cfg, dbUrls } from '../../config.js';
+import { cfg, dbUrls } from '../config.js';
 
 // Create singleton instance
 let instance: AdvancedAuditSystem | null = null;
 
 export const getAuditSystem = () => {
   if (!instance) {
-    const logger = pino({ name: 'audit-system' });
+    const logger = (pino as any)({ name: 'audit-system' });
 
     // We use a dedicated pool or the shared one.
     // Here we create a new pool to ensure audit logs can be written
@@ -20,7 +19,7 @@ export const getAuditSystem = () => {
     // For simplicity in this factory, we'll reuse the connection string.
     const db = new Pool({ connectionString: dbUrls.postgres });
 
-    const redis = new Redis(dbUrls.redis, {
+    const redis = new (Redis as any)(dbUrls.redis, {
         password: cfg.REDIS_PASSWORD || undefined,
     });
 

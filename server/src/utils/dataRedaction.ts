@@ -3,7 +3,7 @@ import { User } from '../types/context'; // Assuming User type is defined here
 import { default as pino } from 'pino';
 
 // @ts-ignore
-const logger = pino();
+const logger = (pino as any)();
 
 // Define PII types and their associated properties/paths
 // This should ideally be driven by a central schema or configuration

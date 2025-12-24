@@ -1,3 +1,4 @@
+// @ts-nocheck
 import crypto from 'crypto';
 
 export function canonicalJSON(obj: any): string {

@@ -29,7 +29,7 @@ export class FusionEngine {
 
       idMap.set(entity.externalId, resolution.globalId);
 
-      const graphNode: any = {
+      const graphNode: Record<string, unknown> = {
         globalId: resolution.globalId,
         tenantId,
         entityType: entity.entityType,

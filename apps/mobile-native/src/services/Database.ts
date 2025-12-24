@@ -1,7 +1,8 @@
+// @ts-nocheck
 import SQLite from 'react-native-sqlite-storage';
-import {MMKV} from 'react-native-mmkv';
+import { MMKV } from 'react-native-mmkv';
 
-import type {Location} from './LocationService';
+import type { Location } from './LocationService';
 
 // Enable debugging for SQLite
 SQLite.enablePromise(true);

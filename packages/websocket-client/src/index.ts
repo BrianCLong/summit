@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * WebSocket Client SDK
  * Provides auto-reconnection, message queuing, and type-safe events

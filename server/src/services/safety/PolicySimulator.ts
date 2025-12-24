@@ -1,7 +1,7 @@
 // @ts-nocheck
 import pino from 'pino';
 
-const log = pino({ name: 'PolicySimulator' });
+const log = (pino as any)({ name: 'PolicySimulator' });
 
 export interface Policy {
   id: string;
@@ -10,7 +10,7 @@ export interface Policy {
 
 export class PolicySimulator {
 
-  public simulateDiff(oldPolicy: Policy, newPolicy: Policy, historicalLogs: any[]): string {
+  public simulateDiff(oldPolicy: Policy, newPolicy: Policy, historicalLogs: Array<Record<string, unknown>>): string {
     let allowedByOld = 0;
     let allowedByNew = 0;
     let newDenials = 0;

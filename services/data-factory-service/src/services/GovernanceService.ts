@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Data Factory Service - Governance Service
  *

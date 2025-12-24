@@ -1,8 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {QueryClient} from '@tanstack/react-query';
-import {createAsyncStoragePersister} from '@tanstack/query-async-storage-persister';
-import {persistQueryClient} from '@tanstack/react-query-persist-client';
-import {performanceMonitor} from '../services/PerformanceMonitor';
+import { QueryClient } from '@tanstack/react-query';
+import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
+import { persistQueryClient } from '@tanstack/react-query-persist-client';
+import { performanceMonitor } from '../services/PerformanceMonitor';
 
 const CACHE_TIME = 1000 * 60 * 60 * 24 * 7; // 7 days
 const MAX_AGE = 1000 * 60 * 60 * 24; // 24 hours
@@ -22,7 +22,7 @@ export const createPersistedQueryClient = (): QueryClient => {
         refetchOnReconnect: true,
         networkMode: 'offlineFirst',
         // Provide cached data immediately while fetching fresh data
-        placeholderData: (previousData) => previousData,
+        placeholderData: (previousData: any) => previousData,
       },
       mutations: {
         networkMode: 'offlineFirst',
@@ -61,7 +61,7 @@ const setupPersistence = async (queryClient: QueryClient) => {
       defaultOptions: {
         queries: {
           refetchOnMount: false,
-        },
+        } as any,
       },
     },
     dehydrateOptions: {
@@ -156,7 +156,7 @@ export const createOptimisticUpdate = <TData, TVariables>(
   return {
     onMutate: async (variables: TVariables) => {
       // Cancel outgoing refetches
-      await queryClient.cancelQueries({queryKey});
+      await queryClient.cancelQueries({ queryKey });
 
       // Snapshot previous value
       const previousData = queryClient.getQueryData<TData>(queryKey);
@@ -164,7 +164,7 @@ export const createOptimisticUpdate = <TData, TVariables>(
       // Optimistically update
       queryClient.setQueryData<TData>(queryKey, (old) => updater(old, variables));
 
-      return {previousData};
+      return { previousData };
     },
     onError: (_err: any, _variables: TVariables, context: any) => {
       // Rollback on error
@@ -174,7 +174,7 @@ export const createOptimisticUpdate = <TData, TVariables>(
     },
     onSettled: () => {
       // Refetch after mutation
-      queryClient.invalidateQueries({queryKey});
+      queryClient.invalidateQueries({ queryKey });
     },
   };
 };

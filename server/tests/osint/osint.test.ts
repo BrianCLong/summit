@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import { OSINTPrioritizationService } from '../../src/services/OSINTPrioritizationService';
 import { VeracityScoringService } from '../../src/services/VeracityScoringService';

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { JobsRepo } from '../../src/db/repositories/jobs.js';
 
 describe('JobsRepo tenant partitioning', () => {

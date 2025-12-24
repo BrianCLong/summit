@@ -1,9 +1,8 @@
-// @ts-nocheck
 import { Request, Response, NextFunction } from 'express';
 import axios from 'axios';
 import pino from 'pino';
 
-const logger = pino();
+const logger = (pino as any)();
 
 export const serviceAuthzMiddleware = async (
   req: Request,

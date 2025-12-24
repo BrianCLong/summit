@@ -5,29 +5,29 @@ package export
 
 default decision := {"effect": "deny", "redact_fields": [], "reasons": ["no_rules_evaluated"], "simulated": false}
 
-export_allowed_roles := { r | r := "admin" } ∪ { r | r := "exporter" }
+export_allowed_roles := { "admin", "exporter" }
 is_sensitive := input.bundle.sensitivity == "Sensitive" or input.bundle.sensitivity == "Restricted"
 
-has_export_perm {
+has_export_perm if {
   some p
   p := input.user.permissions[_]
   p == "export"
 }
 
-in_allowed_role {
+in_allowed_role if {
   some r
   r := input.user.roles[_]
   r == export_allowed_roles[_]
 }
 
-is_pii_field[f] {
+is_pii_field[f] if {
   f := input.bundle.fields[_]
   some l
   l := f.labels[_]
   startswith(l, "pii:")
 }
 
-is_explicit_mask[f] {
+is_explicit_mask[f] if {
   f := input.bundle.fields[_]
   some m
   m := input.options.dlp_mask_fields[_]
@@ -36,17 +36,17 @@ is_explicit_mask[f] {
 
 redact_fields := { f.name | f := input.bundle.fields[_]; is_pii_field[f] }
 explicit_masks := { f.name | f := input.bundle.fields[_]; is_explicit_mask[f] }
-all_masks := redact_fields ∪ explicit_masks
+all_masks := redact_fields | explicit_masks
 
-reason["not_authorized"] { not has_export_perm }
-reason["role_not_allowed"] { not in_allowed_role }
-reason["step_up_required"] { is_sensitive; not input.webauthn_verified }
+reason["not_authorized"] if { not has_export_perm }
+reason["role_not_allowed"] if { not in_allowed_role }
+reason["step_up_required"] if { is_sensitive; not input.webauthn_verified }
 
-base_effect := "allow" { has_export_perm; in_allowed_role; not is_sensitive }
-base_effect := "step_up" { has_export_perm; in_allowed_role; is_sensitive; not input.webauthn_verified }
-base_effect := "allow" { has_export_perm; in_allowed_role; is_sensitive; input.webauthn_verified }
+base_effect := "allow" if { has_export_perm; in_allowed_role; not is_sensitive }
+base_effect := "step_up" if { has_export_perm; in_allowed_role; is_sensitive; not input.webauthn_verified }
+base_effect := "allow" if { has_export_perm; in_allowed_role; is_sensitive; input.webauthn_verified }
 
-must_deny {
+must_deny if {
   some r
   r := reason[_]
   r != "step_up_required"
@@ -58,7 +58,7 @@ result := {
   "reasons": [ r | r := reason[_] ],
   "simulated": false,
   "note": "Denied by policy"
-} { must_deny }
+} if { must_deny }
 
 result := {
   "effect": "step_up",
@@ -66,27 +66,36 @@ result := {
   "reasons": ["step_up_required"],
   "simulated": false,
   "note": "Sensitive export requires WebAuthn step‑up"
-} { not must_deny; base_effect == "step_up" }
+} if { not must_deny; base_effect == "step_up" }
 
-result := allow_obj {
+result := allow_obj if {
   not must_deny
   base_effect == "allow"
+
+  masks := array.concat([], sort(all_masks))
+
+  eff := get_effect(masks)
+  rs := get_reasons(masks)
+  note := sprintf("Allowed. Redactions: %v", [masks])
+
   allow_obj := {
     "effect": eff,
     "redact_fields": masks,
-    "reasons": ["dlp_redaction"] { count(masks) > 0 },
+    "reasons": rs,
     "simulated": false,
     "note": note
   }
-  masks := array.concat([], sort(all_masks))
-  eff := "allow_with_redactions" { count(masks) > 0 }
-  eff := "allow" { count(masks) == 0 }
-  note := sprintf("Allowed. Redactions: %v", [masks])
 }
 
-decision := sim_obj {
+get_effect(masks) := "allow_with_redactions" if { count(masks) > 0 }
+get_effect(masks) := "allow" if { count(masks) == 0 }
+
+get_reasons(masks) := ["dlp_redaction"] if { count(masks) > 0 }
+get_reasons(masks) := [] if { count(masks) == 0 }
+
+decision := sim_obj if {
   input.simulate
   sim_obj := result with sim_obj.simulated as true
 }
 
-decision := result { not input.simulate }
+decision := result if { not input.simulate }

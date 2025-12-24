@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import { jest } from '@jest/globals';
 import { PrivacyService, DSARType, DSARStatus } from '../PrivacyService.js';
 import { provenanceLedger } from '../../provenance/ledger.js';
@@ -7,7 +5,7 @@ import { provenanceLedger } from '../../provenance/ledger.js';
 // Mock dependencies
 jest.mock('../../provenance/ledger.js', () => ({
   provenanceLedger: {
-    appendEntry: jest.fn().mockResolvedValue({ id: 'mock-entry-id' }),
+    appendEntry: jest.fn<() => Promise<{ id: string }>>().mockResolvedValue({ id: 'mock-entry-id' }),
   },
 }));
 

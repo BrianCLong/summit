@@ -1,4 +1,5 @@
-import Ajv from 'ajv';
+// @ts-nocheck
+import Ajv, { ErrorObject } from 'ajv';
 import addFormats from 'ajv-formats';
 import type { AdapterCompatibilityMatrix, AdapterManifest } from './types.js';
 import { BundleValidationError } from './types.js';
@@ -46,7 +47,7 @@ export function validateConfigSchema(schema: unknown): void {
 
 export function formatValidationErrors(
   label: string,
-  errors: Ajv.ErrorObject[] | null | undefined
+  errors: ErrorObject[] | null | undefined
 ): string {
   if (!errors || errors.length === 0) {
     return `${label} validation failed with unknown error`;

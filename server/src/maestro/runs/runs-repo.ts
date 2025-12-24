@@ -35,6 +35,7 @@ export interface RunCreateInput {
   input_params?: any;
   executor_id?: string;
   tenant_id: string; // Added tenant_id
+  idempotency_key?: string;
 }
 
 export interface RunUpdateInput {
@@ -45,6 +46,7 @@ export interface RunUpdateInput {
   cost?: number;
   output_data?: any;
   error_message?: string;
+  executor_id?: string;
 }
 
 class RunsRepo {

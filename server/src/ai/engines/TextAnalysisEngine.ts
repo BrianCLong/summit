@@ -1,10 +1,9 @@
-// @ts-nocheck
 import { spawn } from 'child_process';
 import path from 'path';
 import pino from 'pino';
 import { ExtractionEngineConfig } from '../types.js';
 
-const logger = pino({ name: 'TextAnalysisEngine' });
+const logger = (pino as any)({ name: 'TextAnalysisEngine' });
 
 export interface NamedEntity {
   text: string;
@@ -347,7 +346,7 @@ export class TextAnalysisEngine {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(error);
       });
     });
@@ -405,7 +404,7 @@ export class TextAnalysisEngine {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(error);
       });
     });
@@ -583,7 +582,7 @@ export class TextAnalysisEngine {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(error);
       });
     });

@@ -34,7 +34,7 @@ export abstract class ConnectorExtension extends BaseExtension {
   /**
    * Optional: Support for streaming data
    */
-  async *stream?(request: FetchRequest): AsyncGenerator<FetchResult, void, unknown>;
+  stream?(request: FetchRequest): AsyncGenerator<FetchResult, void, unknown>;
 
   protected async onInitialize(context: PluginContext): Promise<void> {
     const metadata = this.getMetadata();

@@ -1,10 +1,9 @@
-// @ts-nocheck
 /**
  * Redis Instrumentation
  * Wraps Redis operations with metrics and tracing
  */
 
-import { Redis } from 'ioredis';
+import type { Redis } from 'ioredis';
 import {
   redisCacheHits,
   redisCacheMisses,
@@ -16,7 +15,7 @@ import {
 import { getTracer } from './tracer.js';
 import pino from 'pino';
 
-const logger = pino({ name: 'redis-instrumentation' });
+const logger = (pino as any)({ name: 'redis-instrumentation' });
 
 // Track cache hits/misses for ratio calculation
 const cacheStats = new Map<string, { hits: number; misses: number }>();
@@ -42,6 +41,7 @@ export function instrumentRedisClient(client: Redis, clientType: string = 'defau
 
   // Wrap command execution with metrics
   const originalSendCommand = client.sendCommand.bind(client);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   client.sendCommand = async function (command: any, ...args: any[]) {
     const commandName = command?.name?.toLowerCase() || 'unknown';
     const startTime = Date.now();

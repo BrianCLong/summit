@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Router } from 'express';
+import { Router, Response } from 'express';
 import { z } from 'zod';
 import { ensureAuthenticated } from '../../middleware/auth.js';
 import { tenantService, createTenantSchema } from '../../services/TenantService.js';
@@ -7,6 +7,7 @@ import QuotaManager from '../../lib/resources/quota-manager.js';
 import { provenanceLedger } from '../../provenance/ledger.js';
 import { tenantIsolationGuard } from '../../tenancy/TenantIsolationGuard.js';
 import logger from '../../utils/logger.js';
+import { AuthenticatedRequest } from '../types.js';
 
 const router = Router();
 
@@ -17,7 +18,7 @@ const provisionSchema = createTenantSchema.extend({
   storageEstimateBytes: z.number().int().min(0).optional(),
 });
 
-router.post('/', ensureAuthenticated, async (req, res) => {
+router.post('/', ensureAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const actorId = req.user?.id;
     if (!actorId) {
@@ -34,7 +35,7 @@ router.post('/', ensureAuthenticated, async (req, res) => {
     const tenantContext = {
       tenantId: tenant.id,
       environment: body.environment,
-      privilegeTier: 'standard',
+      privilegeTier: 'standard' as const,
       userId: actorId,
     };
 

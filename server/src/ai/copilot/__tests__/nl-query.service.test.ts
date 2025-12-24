@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Unit tests for NL-to-Query Service
  *
@@ -13,7 +12,7 @@ describe('NLQueryService', () => {
   let service: NLQueryService;
 
   beforeEach(() => {
-    service = createNLQueryService();
+    service = createNLQueryService({});
   });
 
   describe('Pattern Matching', () => {

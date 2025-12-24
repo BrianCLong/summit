@@ -1,17 +1,11 @@
-// @ts-nocheck
-
-import { telemetry } from './comprehensive-telemetry';
-import { snapshotter } from './diagnostic-snapshotter';
-import { alertingService } from './alerting-service';
-import { correlationEngine } from './correlation-engine';
+import { snapshotter } from './diagnostic-snapshotter.js';
+import { alertingService } from './alerting-service.js';
+import { correlationEngine } from './correlation-engine.js';
 
 class AnomalyDetector {
-  private metricBaselines: Map<string, { mean: number; std: number }> = new Map();
+  private metricBaselines: Map<string, { mean: number; std: number }> =
+    new Map();
   private metricData: Map<string, number[]> = new Map();
-
-  constructor() {
-    telemetry.onMetric(this.processMetric.bind(this));
-  }
 
   private processMetric(metricName: string, value: number) {
     if (!this.metricData.has(metricName)) {
@@ -33,7 +27,10 @@ class AnomalyDetector {
 
   private updateBaseline(metricName: string, data: number[]) {
     const mean = data.reduce((a, b) => a + b, 0) / data.length;
-    const std = Math.sqrt(data.map((x) => Math.pow(x - mean, 2)).reduce((a, b) => a + b, 0) / data.length);
+    const std = Math.sqrt(
+      data.map((x) => Math.pow(x - mean, 2)).reduce((a, b) => a + b, 0) /
+        data.length,
+    );
 
     const existingBaseline = this.metricBaselines.get(metricName);
     if (existingBaseline) {

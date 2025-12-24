@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * NL Graph Query Copilot Service
  *
@@ -19,7 +18,7 @@ import { estimateQueryCost, isSafeToExecute, generateCostWarnings } from './cost
 import { validateCypher, extractRequiredParameters, isReadOnlyQuery } from './validator';
 import { buildQueryExplanation, explainQuery, summarizeQuery } from './explainer';
 
-const logger = pino({ name: 'nl-graph-query' });
+const logger = (pino as any)({ name: 'nl-graph-query' });
 
 export class NlGraphQueryService {
   private readonly queryCache = new Map<string, CompileResponse>();

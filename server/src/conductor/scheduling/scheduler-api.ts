@@ -120,7 +120,7 @@ schedulerRouter.post('/schedule', async (req, res) => {
   } catch (error) {
     console.error('Scheduling error:', error);
 
-    prometheusConductorMetrics.recordOperationalEvent('scheduler_error', false);
+    prometheusConductorMetrics.recordOperationalEvent('scheduler_error', { success: false });
 
     res.status(500).json({
       success: false,
@@ -158,7 +158,7 @@ schedulerRouter.post('/dequeue/:queueName', async (req, res) => {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'scheduler_task_dequeued',
-      true,
+      { success: true },
     );
 
     res.json({

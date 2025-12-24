@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { NarrativeSimulationEngine } from '../src/narrative/engine';
 import { PredictivePsyOpsLayer } from '../src/narrative/psyops-layer';
@@ -49,21 +48,21 @@ describe('NarrativeSimulationEngine Extensions', () => {
 
   describe('Negotiation Simulation', () => {
     it('should start a negotiation', () => {
-      const negotiationId = engine.startNegotiation('agent-1', ['agent-2'], 'resource-sharing');
+      const negotiationId = (engine as any).startNegotiation('agent-1', ['agent-2'], 'resource-sharing');
       const state = engine.getState();
-      expect(state.negotiations[negotiationId]).toBeDefined();
-      expect(state.negotiations[negotiationId].status).toBe('proposed');
+      expect((state as any).negotiations[negotiationId]).toBeDefined();
+      expect((state as any).negotiations[negotiationId].status).toBe('proposed');
     });
 
     it('should progress negotiation over ticks', async () => {
-      const negotiationId = engine.startNegotiation('agent-1', ['agent-2'], 'peace-treaty');
+      const negotiationId = (engine as any).startNegotiation('agent-1', ['agent-2'], 'peace-treaty');
       await engine.tick(1);
       const state = engine.getState();
-      expect(state.negotiations[negotiationId].turns).toBe(1);
+      expect((state as any).negotiations[negotiationId].turns).toBe(1);
     });
 
     it('should eventually resolve negotiation', async () => {
-      const negotiationId = engine.startNegotiation('agent-1', ['agent-2'], 'fast-deal');
+      const negotiationId = (engine as any).startNegotiation('agent-1', ['agent-2'], 'fast-deal');
       // Force offers to converge manually for test if needed, or rely on loop
       // Given random logic, we just check it runs without error
       await engine.tick(1); // Tick 1: Status becomes active, turns=1
@@ -77,7 +76,7 @@ describe('NarrativeSimulationEngine Extensions', () => {
       // If tick runs loop 5 times (steps=5 in one call), it might behave differently if negotiation completes early.
       // The random logic might complete it before 5 turns.
       // So check if turns > 0 or status is changed.
-      expect(state.negotiations[negotiationId].turns).toBeGreaterThan(0);
+      expect((state as any).negotiations[negotiationId].turns).toBeGreaterThan(0);
     });
   });
 

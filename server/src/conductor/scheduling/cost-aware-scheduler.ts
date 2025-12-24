@@ -210,7 +210,7 @@ class QueueManager {
 
     prometheusConductorMetrics.recordOperationalEvent(
       'scheduler_task_failed',
-      false,
+      { success: false },
     );
   }
 

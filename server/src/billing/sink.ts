@@ -1,9 +1,9 @@
-// @ts-nocheck
+// @ts-expect-error - AWS SDK optional dependency
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { createHmac, randomUUID } from 'crypto';
 import pino from 'pino';
 
-const logger = pino({ name: 'BillingAdapter' });
+const logger = (pino as any)({ name: 'BillingAdapter' });
 
 export interface UsageRecord {
   tenant_id: string;
@@ -46,7 +46,7 @@ export class BillingAdapter {
   }
 
   // Simple CSV escape function
-  private escapeCsv(field: any): string {
+  private escapeCsv(field: unknown): string {
     if (field === null || field === undefined) return '';
     const stringField = String(field);
     if (stringField.includes(',') || stringField.includes('"') || stringField.includes('\n')) {

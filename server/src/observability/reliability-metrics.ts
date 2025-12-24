@@ -1,8 +1,8 @@
 // @ts-nocheck
 import { Counter, Gauge, Histogram, Summary } from 'prom-client';
-import { registry } from '../metrics';
+import { registry } from '../metrics.js';
 
-type ReliabilityEndpoint = 'ingest' | 'graph_query' | 'rag';
+type ReliabilityEndpoint = 'ingest' | 'graph_query' | 'rag' | 'login' | 'maestro_execution' | 'health';
 
 const latencyHistogram = getOrCreateHistogram(
   'reliability_request_duration_seconds',

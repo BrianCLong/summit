@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @ts-nocheck
 import fs from 'fs';
 import path from 'path';
 import { ledger } from '../lib/ledger.js';

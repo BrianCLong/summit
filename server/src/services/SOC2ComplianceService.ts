@@ -1,8 +1,8 @@
 // @ts-nocheck
-import { ComplianceMonitoringService } from './ComplianceMonitoringService';
-import { EventSourcingService } from './EventSourcingService';
-import { UserRepository } from '../data/UserRepository';
-import { cfg } from '../config';
+import { ComplianceMonitoringService } from './ComplianceMonitoringService.js';
+import { EventSourcingService } from './EventSourcingService.js';
+import { UserRepository } from '../data/UserRepository.js';
+import { cfg } from '../config.js';
 
 /**
  * @class SOC2ComplianceService
@@ -39,7 +39,7 @@ export class SOC2ComplianceService {
    * @param {Date} endDate - The end date of the audit period.
    * @returns {Promise<any>} A promise that resolves to the SOC2 evidence packet.
    */
-  public async generateSOC2Packet(startDate: Date, endDate: Date): Promise<any> {
+  public async generateSOC2Packet(startDate: Date, endDate: Date): Promise<Record<string, unknown>> {
     console.log(`Generating SOC2 packet for period: ${startDate.toISOString()} to ${endDate.toISOString()}`);
 
     const controls = {
@@ -69,7 +69,7 @@ export class SOC2ComplianceService {
   /**
    * Generates evidence for CC6.1 - Logical and Physical Access Controls.
    */
-  private async generateCC61Evidence(startDate: Date, endDate: Date): Promise<any> {
+  private async generateCC61Evidence(startDate: Date, endDate: Date): Promise<Record<string, unknown>> {
     const totalUsers = await this.userRepository.getActiveUserCount();
     const usersWithMfa = await this.userRepository.getMfaUserCount();
     const mfaCompliance = totalUsers > 0 ? (usersWithMfa / totalUsers) * 100 : 100;

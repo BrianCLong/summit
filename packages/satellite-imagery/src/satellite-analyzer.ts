@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Satellite and Aerial Imagery Analysis
  * Change detection, building detection, land use classification

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express from 'express';
 import { Client } from 'typesense';
 import Redis from 'ioredis';

@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 15s
+scrape_configs:
+  - job_name: "services"
+    static_configs:
+      - targets:
+          - prov-ledger:8101
+          - lac-compiler:8102
+          - nlq-engine:8103
+          - graphrag:8104
+          - zk-tx:8105
+          - disclosure-wallets:8106
+          - ops-guardian:8107

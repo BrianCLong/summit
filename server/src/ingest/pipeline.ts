@@ -1,5 +1,4 @@
-// @ts-nocheck
-import { PipelineConfig, IngestionRun } from '../data-model/types.js';
+import { PipelineConfig } from '../data-model/types.js';
 import { Logger } from 'pino';
 
 export interface PipelineContext {
@@ -11,10 +10,10 @@ export interface PipelineContext {
 
 export interface PipelineStage {
   name: string;
-  process(ctx: PipelineContext, records: any[]): Promise<any[]>;
+  process(ctx: PipelineContext, records: Record<string, unknown>[]): Promise<Record<string, unknown>[]>;
 }
 
 export abstract class BasePipelineStage implements PipelineStage {
   abstract name: string;
-  abstract process(ctx: PipelineContext, records: any[]): Promise<any[]>;
+  abstract process(ctx: PipelineContext, records: Record<string, unknown>[]): Promise<Record<string, unknown>[]>;
 }

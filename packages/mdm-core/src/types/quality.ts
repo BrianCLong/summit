@@ -165,17 +165,17 @@ export interface EnrichmentRule {
   targetFields: string[];
   sourceFields: string[];
   provider: string;
-  transformations: Transformation[];
+  transformations: DataQualityTransformation[];
   active: boolean;
 }
 
-export interface Transformation {
-  type: TransformationType;
+export interface DataQualityTransformation {
+  type: DataQualityTransformationType;
   config: Record<string, unknown>;
   order: number;
 }
 
-export type TransformationType =
+export type DataQualityTransformationType =
   | 'lookup'
   | 'calculation'
   | 'concatenation'
@@ -211,7 +211,7 @@ export interface StandardizationRule {
   domain: string;
   fields: string[];
   standardFormat: string;
-  transformations: Transformation[];
+  transformations: DataQualityTransformation[];
   validationPattern?: string;
   active: boolean;
 }

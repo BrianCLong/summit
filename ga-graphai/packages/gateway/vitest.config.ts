@@ -15,6 +15,22 @@ export default defineConfig({
     },
   },
   test: {
+    coverage: {
+      provider: 'istanbul',
+      reporter: ['text', 'json'],
+      thresholds: {
+        lines: 85,
+        statements: 85,
+        branches: 80,
+        functions: 85,
+      },
+      include: [
+        'src/search/**',
+        'src/privacy/**',
+        'src/drift/**',
+        'src/versioning/**',
+      ],
+    },
     deps: {
       registerNodeLoader: true,
       optimizer: {

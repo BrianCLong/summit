@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import { useEffect, useState, useRef } from 'react';
 import * as Y from 'yjs';
@@ -13,10 +14,17 @@ export interface UserAwareness {
   clientId?: number;
 }
 
-export const useCollaboration = (docName: string, user: { id: string; name: string }, token?: string) => {
+export const useCollaboration = (docName: string, user: { id: string; name: string }, token?: string): {
+  doc: Y.Doc;
+  provider: WebsocketProvider | null;
+  awareness: any;
+  users: UserAwareness[];
+  isConnected: boolean;
+  isSynced: boolean;
+} => {
   const [doc] = useState(() => new Y.Doc());
   const [provider, setProvider] = useState<WebsocketProvider | null>(null);
-  const [awareness, setAwareness] = useState<any>(null);
+  const [awareness, setAwareness] = useState<WebsocketProvider['awareness'] | null>(null);
   const [users, setUsers] = useState<UserAwareness[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [isSynced, setIsSynced] = useState(false);
@@ -54,7 +62,7 @@ export const useCollaboration = (docName: string, user: { id: string; name: stri
       { connect: true, params: { token: token } }
     );
 
-    wsProvider.on('status', (event: any) => {
+    wsProvider.on('status', (event: { status: string }) => {
       setIsConnected(event.status === 'connected');
     });
 
@@ -88,7 +96,7 @@ export const useCollaboration = (docName: string, user: { id: string; name: stri
     const handleAwarenessUpdate = () => {
       const states = awareness.getStates();
       const activeUsers: UserAwareness[] = [];
-      states.forEach((state: any, clientId: number) => {
+      states.forEach((state: { user?: UserAwareness }, clientId: number) => {
         if (state.user) {
           activeUsers.push({
             ...state.user,

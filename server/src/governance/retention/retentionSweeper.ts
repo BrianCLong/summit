@@ -1,4 +1,3 @@
-// @ts-nocheck
 import pino from 'pino';
 import { DataRetentionEngine } from './dataRetentionEngine.js';
 import { DataRetentionRepository } from './repository.js';
@@ -45,7 +44,7 @@ export class RetentionSweeper {
   private readonly auditLogger: RetentionAuditLogger;
   private readonly enforcementEnvVar: string;
   private readonly clock: () => Date;
-  private readonly logger = pino({ name: 'retention-sweeper' });
+  private readonly logger = (pino as any)({ name: 'retention-sweeper' });
   private timer?: NodeJS.Timeout;
 
   constructor(options: RetentionSweeperOptions) {

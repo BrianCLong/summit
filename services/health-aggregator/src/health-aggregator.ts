@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Cross-System Health Checks and Status Reporting
  * Consolidated health check endpoints and dashboards that aggregate status

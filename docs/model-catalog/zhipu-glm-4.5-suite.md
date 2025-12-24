@@ -1,8 +1,20 @@
 id: zhipu-glm-4.5-suite
 vendor: Zhipu AI (Z.ai)
 family: GLM / ChatGLM
-last_verified: 2025-09-25
+last_verified: 2025-09-30
 models:
+
+- name: GLM-4.6
+  class: flagship LLM (reasoning/coding/agents)
+  context: 200k
+  modes: thinking (deep), fast (low-latency)
+  best_for: long-context reasoning, tool-using/search agents, front-end/codegen polish
+  pricing_ref: BigModel pricing page (live) # check portal before use
+  notes: MoE; Sept 2025 release; improved coding/agent stack; supports tool-use + thinking
+  sources:
+  - Z.ai blog + docs (GLM-4.6)
+  - HF model card (GLM-4.6)
+  - BigModel console/pricing
 
 - name: GLM-4.5
   class: flagship LLM (reasoning/coding/agents)
@@ -32,27 +44,47 @@ models:
 - name: GLM-4 (family legacy)
   variants: GLM-4, GLM-4-Air, GLM-4-9B
   purpose: stable API docs, comparisons
-  sources: - BigModel docs
-  open_weights:
+  sources:
+  - BigModel docs
+open_weights:
+- name: GLM-4.6 (HF)
+  license: MIT (open weights)
+  capability: 200k ctx MoE; improved coding/reasoning vs 4.5
+  runtimes: transformers
+  sources:
+  - HF GLM-4.6 card
 - name: GLM-4-9B-Chat (and 1M ctx variant)
   license: vendor license on HF
   capability: competitive 9B class; long-context option
   runtimes: chatglm.cpp; (community) other runtimes
-  sources: - HF 9B Chat - HF 9B Chat 1M - chatglm.cpp repo (GLM-4(V) support)
-  access_and_pricing:
+  sources:
+  - HF 9B Chat
+  - HF 9B Chat 1M
+  - chatglm.cpp repo (GLM-4(V) support)
+access_and_pricing:
   primary_portal: BigModel (official rates & quotas)
   mirrors: CometAPI / OpenRouter / SiliconFlow (for VLM + alt pricing)
   migration_note: Sept 2025 “Claude→GLM” switch offer (URL swap + bonus tokens)
-  sources: - BigModel pricing - CometAPI pricing explainer - Reuters migration story (+ AOL syndication)
-  capability_highlights:
+  sources:
+  - BigModel pricing
+  - CometAPI pricing explainer
+  - Reuters migration story (+ AOL syndication)
+capability_highlights:
+- 200k context (GLM-4.6) with upgraded tool-use/thinking
 - dual-mode execution (deep-think vs fast)
 - long context + artifact-level code gen (HTML/SVG/Python)
 - VLM on 4.5V for image understanding grounded to 4.5 text stack
-- local/open path with 9B class
-  sources: - Z.ai blog - SiliconFlow blog - HF pages
-  defaults:
-  choose: - Max-IQ: GLM-4.5; fall back to 4.5-Air for latency/cost - Multimodal: GLM-4.5V - On-prem/local: GLM-4-9B-Chat (HF) via chatglm.cpp
-  risk_notes:
+- local/open path with 9B class + HF GLM-4.6 weights
+sources:
+- Z.ai blog
+- SiliconFlow blog
+- HF pages
+defaults:
+  choose:
+  - Max-IQ: GLM-4.6 (fallback 4.5 or 4.5-Air for latency/cost)
+  - Multimodal: GLM-4.5V
+  - On-prem/local: GLM-4-9B-Chat via chatglm.cpp (or HF GLM-4.6 for research)
+risk_notes:
 - Always verify official pricing on BigModel before quoting
 - Provider features (context, tool-use) vary; pin per-environment
 - China/US policy shifts can affect provider access; keep a fallback route

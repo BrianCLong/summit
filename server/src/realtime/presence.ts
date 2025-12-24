@@ -1,8 +1,7 @@
-// @ts-nocheck
 import { Socket } from 'socket.io';
 import pino from 'pino';
 
-const logger = pino();
+const logger = (pino as any)();
 
 interface Presence {
   userId: string;
@@ -13,13 +12,13 @@ interface Presence {
 
 const presence = new Map<string, Map<string, Presence>>();
 
-function broadcast(workspaceId: string, socket: Socket) {
+function broadcast(workspaceId: string, socket: Socket): void {
   const list = Array.from(presence.get(workspaceId)?.values() || []);
   socket.to(`workspace:${workspaceId}`).emit('presence:update', list);
   socket.emit('presence:update', list);
 }
 
-export function registerPresenceHandlers(socket: Socket) {
+export function registerPresenceHandlers(socket: Socket): void {
   const user = (socket as any).user;
   const workspaceId = socket.handshake.auth?.workspaceId;
   if (!user?.id || !workspaceId) {
@@ -38,7 +37,7 @@ export function registerPresenceHandlers(socket: Socket) {
   presence.set(workspaceId, wsMap);
   broadcast(workspaceId, socket);
 
-  socket.on('presence:update', (status: string) => {
+  socket.on('presence:update', (status: string): void => {
     const map = presence.get(workspaceId);
     if (!map) return;
     map.set(user.id, {
@@ -50,7 +49,7 @@ export function registerPresenceHandlers(socket: Socket) {
     broadcast(workspaceId, socket);
   });
 
-  socket.on('disconnect', () => {
+  socket.on('disconnect', (): void => {
     const map = presence.get(workspaceId);
     if (!map) return;
     map.delete(user.id);

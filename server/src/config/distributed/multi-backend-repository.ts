@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { EventEmitter } from 'events';
 import {
   AppliedState,
@@ -293,7 +292,7 @@ export class MultiBackendRepository<TConfig = Record<string, any>>
    */
   on(
     event: 'failover' | 'restore' | 'version:saved' | 'health:changed',
-    listener: (...args: any[]) => void,
+    listener: (...args: unknown[]) => void,
   ): void {
     this.events.on(event, listener);
   }
@@ -390,7 +389,8 @@ export class MultiBackendRepository<TConfig = Record<string, any>>
 
       // Try calling healthCheck if available
       if ('healthCheck' in backend && typeof backend.healthCheck === 'function') {
-        healthy = await (backend as any).healthCheck();
+        const backendWithHealth = backend as RepositoryWriter<TConfig> & { healthCheck: () => Promise<boolean> };
+        healthy = await backendWithHealth.healthCheck();
       }
 
       const health: BackendHealth = {

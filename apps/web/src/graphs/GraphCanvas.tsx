@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useRef, useEffect, useState } from 'react'
 // Tree-shaken D3 imports for better bundle size
 import { select } from 'd3-selection'
@@ -331,7 +330,7 @@ export function GraphCanvas({
     })
 
     // Hover effects
-    node.on('mouseenter', function (event, d) {
+    node.on('mouseenter', function (this: SVGGElement, event, d) {
       select(this)
         .select('circle')
         .transition()
@@ -344,7 +343,7 @@ export function GraphCanvas({
       )
     })
 
-    node.on('mouseleave', function (event, d) {
+    node.on('mouseleave', function (this: SVGGElement, event, d) {
       select(this)
         .select('circle')
         .transition()

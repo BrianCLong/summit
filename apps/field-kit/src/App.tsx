@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useParams, useNavigate } from 'react-router-dom';
-import { Camera, FileText, Plus, Wifi, WifiOff, Lock, Unlock, Shield, AlertTriangle } from 'lucide-react';
+import { Camera, FileText, Plus, Wifi, WifiOff, Lock, Shield } from 'lucide-react';
 import { storage } from './lib/storage';
 import { syncEngine } from './lib/sync-engine';
 import { securityManager } from './lib/security';

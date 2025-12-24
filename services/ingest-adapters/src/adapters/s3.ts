@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * S3 Adapter
  *
@@ -227,6 +226,8 @@ export class S3Adapter extends BaseAdapter {
 
       for (let i = 0; i < records.length; i++) {
         const record = records[i];
+        if (!record) continue;
+
         const envelope = this.createEnvelopeFromRecord(
           record,
           obj.key,

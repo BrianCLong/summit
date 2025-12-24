@@ -1,5 +1,4 @@
-// @ts-nocheck
-import SemanticSearchService from '../services/SemanticSearchService';
+import SemanticSearchService from '../services/SemanticSearchService.js';
 import { describe, it, expect } from '@jest/globals';
 
 describe('SemanticSearchService', () => {
@@ -9,12 +8,19 @@ describe('SemanticSearchService', () => {
     }
   }
 
+  interface DocRecord {
+    className?: string;
+    id?: string;
+    vector?: number[];
+    properties?: Record<string, unknown>;
+  }
+
   class MockWeaviateClient {
-    docs: any[] = [];
+    docs: DocRecord[] = [];
     data = {
       creator: () => {
         const ctx = this;
-        const record: any = {};
+        const record: DocRecord = {};
         return {
           withClassName(name: string) {
             record.className = name;

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Health Score Card - Displays operational health score with components
  */

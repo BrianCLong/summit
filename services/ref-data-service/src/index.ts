@@ -5,9 +5,10 @@
 
 import express from 'express';
 import cors from 'cors';
-import { ReferenceDataManager } from '@summit/reference-data';
+import { ReferenceDataManager } from '@intelgraph/reference-data';
+import { Application } from 'express';
 
-const app = express();
+const app: Application = express();
 const PORT = process.env.REF_DATA_SERVICE_PORT || 3101;
 
 // Middleware

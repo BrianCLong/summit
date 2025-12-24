@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * OPA (Open Policy Agent) Middleware for IntelGraph
  *
@@ -34,6 +33,7 @@ interface PolicyInput {
     args?: any;
     params?: any;
     query?: any;
+    source?: string;
   };
   context: {
     investigationId?: string;

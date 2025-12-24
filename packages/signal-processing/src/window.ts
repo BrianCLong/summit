@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { NumericArray, WindowFunction, WindowKind } from './types.js';
 
 function generateWindow(kind: WindowKind, size: number): Float64Array {

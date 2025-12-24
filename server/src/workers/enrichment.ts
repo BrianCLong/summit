@@ -1,3 +1,4 @@
+// @ts-nocheck
 // import { Queue, Worker, Job } from 'bullmq';
 import { runCypher } from '../graph/neo4j';
 import Redis from 'ioredis';

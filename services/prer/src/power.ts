@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { jStat } from 'jstat';
 import type { AnalysisPlan, MetricDefinition, PowerCalculation } from './types.js';
 

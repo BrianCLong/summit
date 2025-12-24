@@ -32,6 +32,7 @@
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
+    "@types/geoip-lite": "^1.4.1",
     "@types/cors": "^2.8.17",
     "@types/node": "^24.10.1",
     "@types/jest": "^30.0.0",

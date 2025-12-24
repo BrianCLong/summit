@@ -3,14 +3,14 @@ import { ApprovalDetails } from './ApprovalDetails';
 import { ApprovalsList } from './ApprovalsList';
 import { AuditTimeline } from './AuditTimeline';
 import { approvalsData, demoUser } from './mockData';
-import { ApprovalRequest, DecisionAction } from './types';
+import { ApprovalRequest, AuditEvent, DecisionAction } from './types';
 
 function hydrateRequest(base: ApprovalRequest, nextAction: DecisionAction): ApprovalRequest {
   const approvals = [...base.approvals, nextAction];
   const nextStatus =
     nextAction.statusOverride ??
     (nextAction.decision === 'denied' ? 'denied' : base.status);
-  const timelineEntry = {
+  const timelineEntry: AuditEvent = {
     id: `timeline-${nextAction.id}`,
     correlationId: base.correlationId,
     type: nextAction.decision === 'approved' ? 'approval' : 'denial',

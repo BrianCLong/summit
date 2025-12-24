@@ -98,7 +98,7 @@ export const TrackedObjectSchema = z.object({
   time_since_update: z.number().int(),
   hits: z.number().int(),
   embedding: z.array(z.number()).optional(),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
 });
 
 export type TrackedObject = z.infer<typeof TrackedObjectSchema>;

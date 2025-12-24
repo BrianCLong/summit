@@ -8,6 +8,7 @@
 import { Command } from 'commander';
 import * as path from 'path';
 import { ExtensionManager } from './src/manager.js';
+import { ExtensionInstaller } from './src/installer.js';
 
 const program = new Command();
 
@@ -106,25 +107,34 @@ program
   .command('install <path>')
   .description('Install an extension from a path')
   .action(async (extensionPath) => {
-    console.log(`Installing extension from ${extensionPath}...`);
-    // This would copy the extension to the extensions directory
-    // For now, just validate the manifest
-    const fs = await import('fs/promises');
-    const manifestPath = path.join(extensionPath, 'extension.json');
-
+    const installer = createInstaller();
     try {
-      const content = await fs.readFile(manifestPath, 'utf-8');
-      const manifest = JSON.parse(content);
-      console.log(`Found extension: ${manifest.displayName} (${manifest.name}@${manifest.version})`);
-      console.log('Extension validated successfully');
-      console.log('\nNext steps:');
-      console.log(`1. Copy to extensions directory: cp -r ${extensionPath} /path/to/summit/extensions/`);
-      console.log('2. Build: cd /path/to/summit/extensions/${manifest.name} && pnpm install && pnpm build');
-      console.log('3. Reload: summit-ext reload');
+      const manifest = await installer.install(extensionPath);
+      console.log(
+        `Installed ${manifest.displayName || manifest.name} (${manifest.name}@${manifest.version}) into ${installer.getInstallDir()}`
+      );
     } catch (err) {
       console.error('Failed to install extension:', err);
       process.exit(1);
     }
+  });
+
+program
+  .command('rollback <name> <version>')
+  .description('Rollback an extension to a backup version')
+  .action(async (name, version) => {
+    const installer = createInstaller();
+    await installer.rollback(name, version);
+    console.log(`Rolled back ${name} to backup version ${version}`);
+  });
+
+program
+  .command('uninstall <name>')
+  .description('Uninstall an extension and verify cleanup')
+  .action(async (name) => {
+    const installer = createInstaller();
+    await installer.uninstall(name);
+    console.log(`Uninstalled ${name}`);
   });
 
 // Stats
@@ -192,6 +202,14 @@ function createManager(): ExtensionManager {
     storagePath: path.join(cwd, '.summit/extensions/storage'),
     enablePolicy: process.env.OPA_URL !== undefined,
     opaUrl: process.env.OPA_URL,
+  });
+}
+
+function createInstaller(): ExtensionInstaller {
+  const cwd = process.cwd();
+  return new ExtensionInstaller({
+    installDir: path.join(cwd, 'extensions'),
+    auditFile: path.join(cwd, '.summit/extensions/audit.log'),
   });
 }
 

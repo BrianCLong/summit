@@ -1,0 +1,5 @@
+syntax = "proto3";
+package ig.graphrag.v1;
+service GraphRag { rpc Query(QueryRequest) returns (QueryResponse); }
+message QueryRequest { string question = 1; }
+message QueryResponse { string result = 1; }

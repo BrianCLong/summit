@@ -92,3 +92,9 @@ export interface AdapterResolution<TResponse> {
   evictionProofs?: EvictionProof[];
   entry: CacheManifestEntry;
 }
+
+export interface CacheAuditLog {
+  hits: CacheHitProof[];
+  misses: MissFillTrace[];
+  evictions: EvictionProof[];
+}

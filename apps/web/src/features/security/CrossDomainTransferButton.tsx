@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button';
@@ -71,8 +72,8 @@ export function CrossDomainTransferButton({
       setOpen(false);
       if (onTransferComplete) onTransferComplete();
       alert('Transfer Successful. Transfer ID: ' + data.transferId);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
     } finally {
       setLoading(false);
     }

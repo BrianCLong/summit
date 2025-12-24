@@ -8,6 +8,7 @@
 
 import fetch from 'node-fetch';
 import { getTracer } from '../otel';
+import type { Span } from '@opentelemetry/api';
 
 interface Entity {
   id: string;
@@ -89,7 +90,7 @@ export class AIInsightsClient {
 
     return (this.tracer as any).startActiveSpan(
       'ai-insights.resolve-entities',
-      async (span) => {
+      async (span: Span) => {
         try {
           span.setAttributes({
             'ai.service': 'entity-resolution',
@@ -143,7 +144,7 @@ export class AIInsightsClient {
 
     return (this.tracer as any).startActiveSpan(
       'ai-insights.score-links',
-      async (span) => {
+      async (span: Span) => {
         try {
           span.setAttributes({
             'ai.service': 'link-scoring',

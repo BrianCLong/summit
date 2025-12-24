@@ -1,6 +1,6 @@
-// @ts-nocheck
 import React from 'react';
-import { Card, CardContent, Grid, Typography, Chip } from '@mui/material';
+import { Card, CardContent, Typography, Chip } from '@mui/material';
+import Grid from '@mui/material/Grid';
 
 export function CanaryHealthPanel({
   availability = 0.0,
@@ -31,7 +31,7 @@ export function CanaryHealthPanel({
           Canary Health (Blackbox): {target}
         </Typography>
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={4}>
+          <Grid xs={12} sm={4}>
             <Typography variant="body2" color="text.secondary">
               Availability (avg 5m)
             </Typography>
@@ -40,13 +40,13 @@ export function CanaryHealthPanel({
               color={availColor}
             />
           </Grid>
-          <Grid item xs={12} sm={4}>
+          <Grid xs={12} sm={4}>
             <Typography variant="body2" color="text.secondary">
               p95 TTFB
             </Typography>
             <Chip label={`${Math.round(p95TtfbMs)} ms`} color={p95Color} />
           </Grid>
-          <Grid item xs={12} sm={4}>
+          <Grid xs={12} sm={4}>
             <Typography variant="body2" color="text.secondary">
               5xx Error Rate
             </Typography>

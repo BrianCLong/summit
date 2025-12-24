@@ -9,7 +9,7 @@ const reportQueue = new Queue('report-generation', {
   },
 });
 
-router.post('/v1/reports/render', async (req, res) => {
+router.post('/v1/reports/render', async (req: any, res: any) => {
   const { templateId, version, data, options } = req.body;
   const classification = req.body.classification || 'unclassified';
 
@@ -34,7 +34,7 @@ router.post('/v1/reports/render', async (req, res) => {
   }
 });
 
-router.get('/v1/reports/jobs/:id', async (req, res) => {
+router.get('/v1/reports/jobs/:id', async (req: any, res: any) => {
   const job = await reportQueue.getJob(req.params.id);
   if (!job) {
     return res.status(404).json({ error: 'Job not found' });

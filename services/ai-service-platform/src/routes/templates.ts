@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Template Routes - Pre-built templates for rapid deployment
  */

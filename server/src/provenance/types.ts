@@ -26,6 +26,15 @@ export interface MutationPayload {
   newState?: EntityState;     // null for DELETE
   diff?: JsonPatch[];         // RFC 6902 JSON Patch
   reason?: string;
+  // Additional properties from various usages
+  sourceId?: string;
+  hash?: string;
+  bucket?: string;
+  remaining?: number;
+  modelName?: string;
+  versions?: any;
+  stage?: string;
+  [key: string]: any; // Allow additional properties
 }
 
 export interface MutationWitness {
@@ -79,6 +88,16 @@ export interface ProvenanceEntry {
     // V2 Extensions stored in metadata for backward compatibility
     witness?: MutationWitness;
     attribution?: CrossServiceAttribution;
+    // Additional properties from various usages
+    correlationId?: string;
+    connectorType?: string;
+    environment?: string;
+    method?: string;
+    jobId?: string;
+    domain?: string;
+    modelId?: string;
+    traceId?: string;
+    [key: string]: any; // Allow additional properties
   };
   signature?: string;
   attestation?: {

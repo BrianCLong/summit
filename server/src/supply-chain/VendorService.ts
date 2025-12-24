@@ -8,12 +8,18 @@ export class VendorService {
   async createVendor(data: Omit<Vendor, 'id' | 'createdAt' | 'updatedAt'>): Promise<Vendor> {
     const id = randomUUID();
     const now = new Date().toISOString();
+
+    // Initialize with defaults for arrays, allowing override by data
     const vendor: Vendor = {
+      financeRecords: [],
+      ssoLogs: [],
+      expenseData: [],
       ...data,
       id,
       createdAt: now,
       updatedAt: now,
     };
+
     this.vendors.set(id, vendor);
     return vendor;
   }

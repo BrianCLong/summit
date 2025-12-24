@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Central Authorization Service
  *

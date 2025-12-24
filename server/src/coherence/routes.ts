@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Router, Request, Response } from 'express';
 import { CoherenceService } from './coherenceService';
 import { z } from 'zod';

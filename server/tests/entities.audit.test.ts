@@ -1,4 +1,3 @@
-// @ts-nocheck
 import express from 'express';
 import request from 'supertest';
 import { jest, describe, it, expect } from '@jest/globals';

@@ -4,7 +4,30 @@ import * as crypto from 'node:crypto';
 import { otelService } from '../middleware/observability/otel-tracing.js';
 
 // Type declarations for pkcs11js (not fully typed in the package)
-type PKCS11 = any;
+interface PKCS11Instance {
+  load(libPath: string): void;
+  C_Initialize(): void;
+  C_GetSlotList(tokenPresent: boolean): any[];
+  C_GetSlotInfo(slot: any): any;
+  C_GetTokenInfo(slot: any): any;
+  C_GetMechanismList(slot: any): number[];
+  C_OpenSession(slot: any, flags: number): any;
+  C_CloseSession(session: any): void;
+  C_Finalize(): void;
+  C_GenerateRandom(session: any, length: number): Buffer;
+  C_GenerateKey(session: any, mech: any, template: any[]): any;
+  C_EncryptInit(session: any, mech: any, key: any): void;
+  C_EncryptUpdate(session: any, data: Buffer): Buffer;
+  C_EncryptFinal(session: any): Buffer;
+  C_DestroyObject(session: any, object: any): void;
+  C_FindObjectsInit(session: any, template: any[]): void;
+  C_FindObjects(session: any, maxCount: number): any[];
+  C_FindObjectsFinal(session: any): void;
+  C_SignInit(session: any, mech: any, key: any): void;
+  C_Sign(session: any, data: Buffer): Buffer;
+}
+
+type PKCS11 = PKCS11Instance;
 type Slot = any;
 type Session = any;
 type Handle = any;
@@ -20,7 +43,7 @@ const ALLOWLIST: Record<
   AllowedMech,
   {
     mech: number;
-    guard?: (params: any) => void;
+    guard?: (params: Record<string, unknown> | undefined) => void;
     description: string;
   }
 > = {
@@ -28,13 +51,14 @@ const ALLOWLIST: Record<
     mech: 0x00001087, // CKM_AES_GCM
     description: 'AES-256-GCM with 96+ bit tag',
     guard: (p) => {
-      if (!p || typeof p.iv !== 'object' || p.iv.length < 12) {
+      const iv = p?.iv as Buffer | undefined;
+      if (!p || !iv || iv.length < 12) {
         throw new Error('AES-GCM requires IV >= 12 bytes');
       }
       if (!p.ulTagBits || p.ulTagBits < 96) {
         throw new Error('AES-GCM requires tag >= 96 bits');
       }
-      if (p.iv.length > 16) {
+      if (iv.length > 16) {
         throw new Error('AES-GCM IV should be <= 16 bytes for security');
       }
     },
@@ -65,7 +89,7 @@ export interface PKCS11Context {
   p11: PKCS11;
   slot: Slot;
   session: Session;
-  tokenInfo: any;
+  tokenInfo: Record<string, unknown>;
   mechanisms: number[];
 }
 
@@ -96,7 +120,7 @@ export function initPKCS11(
   const span = otelService.createSpan('pkcs11.init');
 
   try {
-    const p11 = new pkcs11.PKCS11();
+    const p11 = new (pkcs11 as any).PKCS11() as PKCS11Instance;
     p11.load(libPath);
     p11.C_Initialize();
 
@@ -127,19 +151,19 @@ export function initPKCS11(
 
     const session = p11.C_OpenSession(
       slot,
-      pkcs11.CKF_SERIAL_SESSION | pkcs11.CKF_RW_SESSION,
+      (pkcs11 as any).CKF_SERIAL_SESSION | (pkcs11 as any).CKF_RW_SESSION,
     );
 
     otelService.addSpanAttributes({
       'pkcs11.lib_path': libPath,
       'pkcs11.slot_index': slotIndex,
       'pkcs11.fips_mode': true,
-      'pkcs11.token_label': tokenInfo.label?.trim(),
+      'pkcs11.token_label': (tokenInfo.label as string | undefined)?.trim(),
       'pkcs11.mechanism_count': mechanisms.length,
     });
 
     console.log(
-      `✅ PKCS#11 initialized: ${tokenInfo.label?.trim()} (FIPS mode active)`,
+      `✅ PKCS#11 initialized: ${(tokenInfo.label as string | undefined)?.trim()} (FIPS mode active)`,
     );
 
     return {
@@ -205,8 +229,8 @@ export function assertMechanismsSupported(ctx: PKCS11Context): AllowedMech[] {
  */
 export function enforceMech(
   name: AllowedMech,
-  params?: any,
-): { mechanism: number; parameter?: any } {
+  params?: Record<string, unknown>,
+): { mechanism: number; parameter?: Record<string, unknown> } {
   const def = ALLOWLIST[name];
   if (!def) {
     throw new Error(`Mechanism '${name}' not in allowlist`);
@@ -247,13 +271,14 @@ export async function performHSMSelfTest(
     // Test 2: Key generation (temporary AES key)
     let hTempKey: Handle | null = null;
     try {
+      const p11Constants = pkcs11 as any;
       const template = [
-        { type: pkcs11.CKA_CLASS, value: pkcs11.CKO_SECRET_KEY },
-        { type: pkcs11.CKA_KEY_TYPE, value: pkcs11.CKK_AES },
-        { type: pkcs11.CKA_VALUE_LEN, value: 32 }, // 256 bits
-        { type: pkcs11.CKA_ENCRYPT, value: true },
-        { type: pkcs11.CKA_DECRYPT, value: true },
-        { type: pkcs11.CKA_TOKEN, value: false }, // session key
+        { type: p11Constants.CKA_CLASS, value: p11Constants.CKO_SECRET_KEY },
+        { type: p11Constants.CKA_KEY_TYPE, value: p11Constants.CKK_AES },
+        { type: p11Constants.CKA_VALUE_LEN, value: 32 }, // 256 bits
+        { type: p11Constants.CKA_ENCRYPT, value: true },
+        { type: p11Constants.CKA_DECRYPT, value: true },
+        { type: p11Constants.CKA_TOKEN, value: false }, // session key
       ];
 
       const mech = enforceMech('AES_GCM_256');
@@ -287,9 +312,10 @@ export async function performHSMSelfTest(
     // Test 4: Digital signature (if ECDSA key available)
     try {
       // Look for existing ECDSA key for testing
+      const p11Constants = pkcs11 as any;
       ctx.p11.C_FindObjectsInit(ctx.session, [
-        { type: pkcs11.CKA_CLASS, value: pkcs11.CKO_PRIVATE_KEY },
-        { type: pkcs11.CKA_KEY_TYPE, value: pkcs11.CKK_EC },
+        { type: p11Constants.CKA_CLASS, value: p11Constants.CKO_PRIVATE_KEY },
+        { type: p11Constants.CKA_KEY_TYPE, value: p11Constants.CKK_EC },
       ]);
       const keys = ctx.p11.C_FindObjects(ctx.session, 1);
       ctx.p11.C_FindObjectsFinal(ctx.session);
@@ -309,11 +335,11 @@ export async function performHSMSelfTest(
 
     const selfTest: HSMSelfTest = {
       timestamp: new Date(),
-      vendor: ctx.tokenInfo.manufacturerID?.trim() || 'unknown',
-      model: ctx.tokenInfo.model?.trim() || 'unknown',
-      serialNumber: ctx.tokenInfo.serialNumber?.trim() || 'unknown',
-      firmwareVersion: `${ctx.tokenInfo.firmwareVersion?.major || 0}.${ctx.tokenInfo.firmwareVersion?.minor || 0}`,
-      fipsMode: (ctx.tokenInfo.flags & CKF_FIPS_MODE) !== 0,
+      vendor: (ctx.tokenInfo.manufacturerID as string | undefined)?.trim() || 'unknown',
+      model: (ctx.tokenInfo.model as string | undefined)?.trim() || 'unknown',
+      serialNumber: (ctx.tokenInfo.serialNumber as string | undefined)?.trim() || 'unknown',
+      firmwareVersion: `${(ctx.tokenInfo.firmwareVersion as any)?.major || 0}.${(ctx.tokenInfo.firmwareVersion as any)?.minor || 0}`,
+      fipsMode: ((ctx.tokenInfo.flags as number) & CKF_FIPS_MODE) !== 0,
       supportedMechanisms: ctx.mechanisms.map(
         (m) => `0x${m.toString(16).padStart(8, '0')}`,
       ),
@@ -365,10 +391,11 @@ export function aes256gcmEncrypt(
 
   try {
     // Find AES key by label
+    const p11Constants = pkcs11 as any;
     ctx.p11.C_FindObjectsInit(ctx.session, [
-      { type: pkcs11.CKA_LABEL, value: Buffer.from(keyLabel) },
-      { type: pkcs11.CKA_CLASS, value: pkcs11.CKO_SECRET_KEY },
-      { type: pkcs11.CKA_KEY_TYPE, value: pkcs11.CKK_AES },
+      { type: p11Constants.CKA_LABEL, value: Buffer.from(keyLabel) },
+      { type: p11Constants.CKA_CLASS, value: p11Constants.CKO_SECRET_KEY },
+      { type: p11Constants.CKA_KEY_TYPE, value: p11Constants.CKK_AES },
     ]);
     const keys = ctx.p11.C_FindObjects(ctx.session, 1);
     ctx.p11.C_FindObjectsFinal(ctx.session);
@@ -425,10 +452,11 @@ export function ecdsaP384Sign(
 
   try {
     // Find ECDSA private key by label
+    const p11Constants = pkcs11 as any;
     ctx.p11.C_FindObjectsInit(ctx.session, [
-      { type: pkcs11.CKA_LABEL, value: Buffer.from(keyLabel) },
-      { type: pkcs11.CKA_CLASS, value: pkcs11.CKO_PRIVATE_KEY },
-      { type: pkcs11.CKA_KEY_TYPE, value: pkcs11.CKK_EC },
+      { type: p11Constants.CKA_LABEL, value: Buffer.from(keyLabel) },
+      { type: p11Constants.CKA_CLASS, value: p11Constants.CKO_PRIVATE_KEY },
+      { type: p11Constants.CKA_KEY_TYPE, value: p11Constants.CKK_EC },
     ]);
     const keys = ctx.p11.C_FindObjects(ctx.session, 1);
     ctx.p11.C_FindObjectsFinal(ctx.session);

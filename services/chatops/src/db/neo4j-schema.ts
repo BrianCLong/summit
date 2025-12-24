@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Neo4j Graph Schema for ChatOps Long-Term Memory
  *

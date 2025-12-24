@@ -32,7 +32,7 @@ export class RedisStateStore implements StateStore {
   private logger = new Logger('RedisStateStore');
 
   constructor(redisUrl: string = 'redis://localhost:6379') {
-    this.redis = new Redis(redisUrl, {
+    this.redis = new (Redis as any)(redisUrl, {
       lazyConnect: true,
       retryStrategy: (times) => Math.min(times * 50, 2000),
     });

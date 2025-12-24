@@ -4,6 +4,11 @@ route:
   group_wait: 30s
   group_interval: 5m
   repeat_interval: 3h
+  routes:
+    - matchers:
+        - severity = "page"
+      receiver: pagerduty
+      continue: true
 receivers:
   - name: default
     slack_configs:
@@ -16,3 +21,12 @@ receivers:
           Service: {{ .CommonLabels.service }}
           Summary: {{ .CommonAnnotations.summary }}
           Description: {{ .CommonAnnotations.description }}
+  - name: pagerduty
+    pagerduty_configs:
+      - routing_key: REPLACE_WITH_PD_ROUTING_KEY
+        severity: '{{ .CommonLabels.severity | default "critical" }}'
+        class: '{{ .CommonLabels.slo | default "availability" }}'
+        component: '{{ .CommonLabels.service | default "intelgraph" }}'
+        details:
+          summary: '{{ .CommonAnnotations.summary }}'
+          description: '{{ .CommonAnnotations.description }}'

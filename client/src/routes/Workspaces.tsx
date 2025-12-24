@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useMemo, useState } from 'react';
 import {
   Box,
@@ -6,10 +5,10 @@ import {
   CardActionArea,
   CardContent,
   Chip,
-  Grid,
   Stack,
   Typography,
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
 
 type Workspace = {
   id: string;
@@ -54,7 +53,7 @@ export default function Workspaces() {
       </Typography>
       <Grid container spacing={2}>
         {workspaces.map((workspace) => (
-          <Grid item xs={12} md={4} key={workspace.id}>
+          <Grid xs={12} md={4} key={workspace.id}>
             <Card
               variant={active === workspace.id ? 'outlined' : undefined}
               sx={{

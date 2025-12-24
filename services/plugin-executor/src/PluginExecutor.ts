@@ -5,7 +5,7 @@ import {
   PluginSandbox,
   DefaultDependencyResolver,
   InMemoryPluginRegistry,
-} from '@summit/plugin-system';
+} from '@intelgraph/plugin-system';
 
 /**
  * Plugin executor service with job queue

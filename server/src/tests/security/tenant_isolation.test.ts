@@ -1,30 +1,28 @@
-// @ts-nocheck
-
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { OPAMiddleware } from '../../middleware/opa';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { OPAMiddleware } from '../../middleware/opa.js';
 
 // Mock axios
-const mockPost = vi.fn();
-vi.mock('axios', () => ({
+const mockPost = jest.fn();
+jest.mock('axios', () => ({
   default: {
-    post: (...args) => mockPost(...args),
-    get: vi.fn(),
+    post: (...args: unknown[]) => mockPost(...args),
+    get: jest.fn(),
   },
 }));
 
 // Mock database config to avoid import errors
-vi.mock('../../config/database', () => ({
-  getPostgresPool: vi.fn(),
+jest.mock('../../config/database.js', () => ({
+  getPostgresPool: jest.fn(),
 }));
 
 // Mock logger
-vi.mock('../../utils/logger', () => ({
-  default: { error: vi.fn(), warn: vi.fn(), info: vi.fn() }
+jest.mock('../../utils/logger.js', () => ({
+  default: { error: jest.fn(), warn: jest.fn(), info: jest.fn() }
 }));
 
 // Mock audit
-vi.mock('../../utils/audit', () => ({
-  writeAudit: vi.fn()
+jest.mock('../../utils/audit.js', () => ({
+  writeAudit: jest.fn()
 }));
 
 describe('Tenant Isolation via OPAMiddleware', () => {
@@ -33,7 +31,7 @@ describe('Tenant Isolation via OPAMiddleware', () => {
   const tenantB = 'tenant-b-uuid';
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     middleware = new OPAMiddleware({ enabled: true, cacheEnabled: false });
   });
 

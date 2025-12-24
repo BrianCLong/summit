@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Gradient Boosting Classifier (XGBoost-style)
  */

@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { capabilityAssessmentSchema, doctrineSchema } from '@intelgraph/foreign-intelligence';
 import { TechintAnalyzer } from '@intelgraph/technical-intelligence';
 
-export const capabilitiesRouter = Router();
+export const capabilitiesRouter: Router = Router();
 const analyzer = new TechintAnalyzer();
 
 // List capability assessments

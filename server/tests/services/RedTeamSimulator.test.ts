@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { RedTeamSimulator } from '../../src/services/RedTeamSimulator';
 import { EventEmitter } from 'events';
 import { createRequire } from 'module';

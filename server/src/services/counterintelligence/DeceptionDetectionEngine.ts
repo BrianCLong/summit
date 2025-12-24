@@ -10,7 +10,7 @@ import { randomUUID } from 'crypto';
 import { default as pino } from 'pino';
 
 // @ts-ignore
-const logger = pino({ name: 'DeceptionDetectionEngine' });
+const logger = (pino as any)({ name: 'DeceptionDetectionEngine' });
 
 // Core Types
 export interface DeceptionIndicator {

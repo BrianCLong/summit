@@ -5,6 +5,7 @@ import { ensureAuthenticated } from '../middleware/auth.js';
 import { tenantContext } from '../middleware/tenantContext.js';
 import { z } from 'zod';
 import { SourceReliability, SourceStatus, ReportGrading, ReportStatus, RequirementPriority } from '../types/humint.js';
+import type { AuthenticatedRequest } from './types.js';
 
 const router = express.Router();
 const service = HumintService.getInstance();
@@ -23,7 +24,7 @@ const createSourceSchema = z.object({
   recruitedAt: z.string().datetime().optional(),
 });
 
-router.post('/sources', async (req: Request, res: Response) => {
+router.post('/sources', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const data = createSourceSchema.parse(req.body);
     const tenantId = req.user!.tenantId; // ensureAuthenticated guarantees req.user
@@ -37,7 +38,7 @@ router.post('/sources', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/sources', async (req: Request, res: Response) => {
+router.get('/sources', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const sources = await service.listSources(req.user!.tenantId);
     res.json(sources);
@@ -46,7 +47,7 @@ router.get('/sources', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/sources/:id', async (req: Request, res: Response) => {
+router.get('/sources/:id', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const source = await service.getSource(req.user!.tenantId, req.params.id);
     if (!source) return res.status(404).json({ error: 'Source not found' });
@@ -65,7 +66,7 @@ const createReportSchema = z.object({
   disseminationList: z.array(z.string()).optional(),
 });
 
-router.post('/reports', async (req: Request, res: Response) => {
+router.post('/reports', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const data = createReportSchema.parse(req.body);
     const report = await service.createReport(req.user!.tenantId, req.user!.id, data);
@@ -75,7 +76,7 @@ router.post('/reports', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/reports', async (req: Request, res: Response) => {
+router.get('/reports', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const sourceId = req.query.sourceId as string | undefined;
     const reports = await service.listReports(req.user!.tenantId, sourceId);
@@ -85,7 +86,7 @@ router.get('/reports', async (req: Request, res: Response) => {
   }
 });
 
-router.patch('/reports/:id/status', async (req: Request, res: Response) => {
+router.patch('/reports/:id/status', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { status } = req.body;
     if (!Object.values(ReportStatus).includes(status)) {
@@ -108,7 +109,7 @@ const debriefSchema = z.object({
   notes: z.string(),
 });
 
-router.post('/debriefs', async (req: Request, res: Response) => {
+router.post('/debriefs', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const data = debriefSchema.parse(req.body);
     const debrief = await service.logDebrief(req.user!.tenantId, req.user!.id, {
@@ -130,7 +131,7 @@ const requirementSchema = z.object({
   assignedTo: z.string().optional(),
 });
 
-router.post('/requirements', async (req: Request, res: Response) => {
+router.post('/requirements', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const data = requirementSchema.parse(req.body);
     const reqItem = await service.createRequirement(req.user!.tenantId, {
@@ -145,7 +146,7 @@ router.post('/requirements', async (req: Request, res: Response) => {
 
 // --- Network/Graph ---
 
-router.post('/sources/:id/relationships', async (req: Request, res: Response) => {
+router.post('/sources/:id/relationships', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { targetName, relationshipType, notes } = req.body;
     await service.addSourceRelationship(req.user!.tenantId, req.params.id, targetName, relationshipType, notes);
@@ -155,7 +156,7 @@ router.post('/sources/:id/relationships', async (req: Request, res: Response) =>
   }
 });
 
-router.get('/sources/:id/network', async (req: Request, res: Response) => {
+router.get('/sources/:id/network', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const network = await service.getSourceNetwork(req.user!.tenantId, req.params.id);
     res.json(network);
@@ -166,7 +167,7 @@ router.get('/sources/:id/network', async (req: Request, res: Response) => {
 
 // --- CI Screening ---
 
-router.post('/sources/:id/screen', async (req: Request, res: Response) => {
+router.post('/sources/:id/screen', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const result = await service.runCIScreening(req.user!.tenantId, req.params.id);
     res.json(result);

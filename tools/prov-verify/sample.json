@@ -1,0 +1,16 @@
+{
+  "bundleId": "case-verify",
+  "entries": [
+    {
+      "id": "ev_1",
+      "type": "evidence",
+      "data": {
+        "source": "s1"
+      },
+      "previousHash": null,
+      "hash": "8a922f9e4795ac512f1289190e882c4c5cb01de86136261baa9a441ef6d31ba9",
+      "caseId": "case-verify"
+    }
+  ],
+  "merkleRoot": "8a922f9e4795ac512f1289190e882c4c5cb01de86136261baa9a441ef6d31ba9"
+}

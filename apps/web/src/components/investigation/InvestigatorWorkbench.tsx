@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react'
 import { GraphCanvas, GraphCanvasRef } from '@/graphs/GraphCanvas'

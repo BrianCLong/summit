@@ -4,7 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import pino from 'pino';
 
-const logger = pino({ name: 'SynonymService' });
+const logger = (pino as any)({ name: 'SynonymService' });
 
 export class SynonymService {
   private synonyms: Record<string, string[]> = {};
@@ -42,7 +42,8 @@ export class SynonymService {
         logger.warn(`Synonym file not found at ${configPath}`);
       }
     } catch (err) {
-      logger.error({ err }, 'Failed to load synonyms');
+      const error = err instanceof Error ? err : new Error(String(err));
+      logger.error({ err: error }, 'Failed to load synonyms');
     }
   }
 

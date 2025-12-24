@@ -1,13 +1,22 @@
 {
-  "annotations": { "list": [] },
+  "annotations": {
+    "list": []
+  },
   "editable": true,
   "graphTooltip": 0,
   "panels": [
     {
       "type": "stat",
       "title": "GraphQL Error Rate (5m)",
-      "datasource": { "type": "prometheus" },
-      "gridPos": { "x": 0, "y": 0, "w": 8, "h": 6 },
+      "datasource": {
+        "type": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 8,
+        "h": 6
+      },
       "targets": [
         {
           "expr": "sum(rate(apollo_request_errors_total[5m])) / sum(rate(apollo_request_total[5m]))",
@@ -20,72 +29,154 @@
           "decimals": 2,
           "thresholds": {
             "mode": "absolute",
-            "steps": [{ "color": "green" }, { "color": "red", "value": 0.02 }]
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0.02
+              }
+            ]
           }
         },
         "overrides": []
       },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"], "values": false }
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        }
       }
     },
     {
       "type": "stat",
       "title": "GraphQL p95 Latency (5m)",
-      "datasource": { "type": "prometheus" },
-      "gridPos": { "x": 8, "y": 0, "w": 8, "h": 6 },
+      "datasource": {
+        "type": "prometheus"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 0,
+        "w": 8,
+        "h": 6
+      },
       "targets": [
         {
           "expr": "histogram_quantile(0.95, sum(rate(apollo_request_duration_seconds_bucket[5m])) by (le))",
           "legendFormat": "p95"
         }
       ],
-      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"], "values": false }
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        }
       }
     },
     {
       "type": "stat",
       "title": "Cache Invalidations (5m)",
-      "datasource": { "type": "prometheus" },
-      "gridPos": { "x": 16, "y": 0, "w": 8, "h": 6 },
+      "datasource": {
+        "type": "prometheus"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 0,
+        "w": 8,
+        "h": 6
+      },
       "targets": [
-        { "expr": "sum(rate(cache_invalidations_total[5m]))", "refId": "A" }
+        {
+          "expr": "sum(rate(cache_invalidations_total[5m]))",
+          "refId": "A"
+        }
       ],
-      "fieldConfig": { "defaults": { "unit": "ops" }, "overrides": [] },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        },
+        "overrides": []
+      },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"], "values": false }
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        }
       }
     },
     {
       "type": "timeseries",
       "title": "Resolver Hotspots (avg)",
-      "datasource": { "type": "prometheus" },
-      "gridPos": { "x": 0, "y": 6, "w": 24, "h": 8 },
+      "datasource": {
+        "type": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 6,
+        "w": 24,
+        "h": 8
+      },
       "targets": [
         {
           "expr": "topk(10, sum by (parent, field) (rate(apollo_resolver_duration_seconds_sum[5m]) / rate(apollo_resolver_duration_seconds_count[5m])))",
           "legendFormat": "{{parent}}.{{field}}"
         }
       ],
-      "fieldConfig": { "defaults": {}, "overrides": [] },
-      "options": { "legend": { "showLegend": true } }
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true
+        }
+      }
     },
     {
       "type": "row",
       "title": "Tenant Breakdown",
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 14 }
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      }
     },
     {
       "type": "stat",
       "title": "p95 Latency by Tenant (5m)",
-      "gridPos": { "x": 0, "y": 15, "w": 12, "h": 6 },
+      "gridPos": {
+        "x": 0,
+        "y": 15,
+        "w": 12,
+        "h": 6
+      },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
         "colorMode": "value"
       },
-      "fieldConfig": { "defaults": { "unit": "s" } },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        }
+      },
       "targets": [
         {
           "expr": "histogram_quantile(0.95, sum by (le, tenant) (rate(apollo_request_duration_seconds_bucket{tenant=~\"$tenant\"}[5m])))",
@@ -96,10 +187,24 @@
     {
       "type": "stat",
       "title": "Error Ratio by Tenant (5m)",
-      "gridPos": { "x": 12, "y": 15, "w": 12, "h": 6 },
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "gridPos": {
+        "x": 12,
+        "y": 15,
+        "w": 12,
+        "h": 6
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
       "fieldConfig": {
-        "defaults": { "unit": "percentunit", "decimals": 2 },
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 2
+        },
         "overrides": []
       },
       "targets": [
@@ -112,9 +217,24 @@
     {
       "type": "stat",
       "title": "Cache Hit % by Tenant (5m)",
-      "gridPos": { "x": 0, "y": 21, "w": 12, "h": 6 },
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } },
-      "fieldConfig": { "defaults": { "unit": "percentunit" } },
+      "gridPos": {
+        "x": 0,
+        "y": 21,
+        "w": 12,
+        "h": 6
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        }
+      },
       "targets": [
         {
           "expr": "sum by (tenant) (rate(cache_hits_total{tenant=~\"$tenant\"}[5m])) / (sum by (tenant) (rate(cache_hits_total{tenant=~\"$tenant\"}[5m])) + sum by (tenant) (rate(cache_misses_total{tenant=~\"$tenant\"}[5m])))",
@@ -124,11 +244,26 @@
     },
     {
       "type": "stat",
-      "title": "Error Ratio (5m) — Tenant×Status",
+      "title": "Error Ratio (5m) \u2014 Tenant\u00d7Status",
       "description": "rate(errors)/rate(total) filtered by $tenant and $status (All = no filter on that label).",
-      "gridPos": { "x": 12, "y": 21, "w": 12, "h": 6 },
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } },
-      "fieldConfig": { "defaults": { "unit": "percentunit" } },
+      "gridPos": {
+        "x": 12,
+        "y": 21,
+        "w": 12,
+        "h": 6
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        }
+      },
       "targets": [
         {
           "refId": "A",
@@ -138,8 +273,13 @@
     },
     {
       "type": "table",
-      "title": "Errors by Tenant×Status (5m)",
-      "gridPos": { "x": 0, "y": 27, "w": 24, "h": 8 },
+      "title": "Errors by Tenant\u00d7Status (5m)",
+      "gridPos": {
+        "x": 0,
+        "y": 27,
+        "w": 24,
+        "h": 8
+      },
       "targets": [
         {
           "refId": "A",
@@ -147,21 +287,40 @@
         }
       ],
       "transformations": [
-        { "id": "labelsToFields", "options": { "mode": "columns" } }
+        {
+          "id": "labelsToFields",
+          "options": {
+            "mode": "columns"
+          }
+        }
       ],
-      "options": { "showHeader": true }
+      "options": {
+        "showHeader": true
+      }
     },
     {
       "type": "stat",
-      "title": "p95 Latency (5m) — Tenant×Status",
+      "title": "p95 Latency (5m) \u2014 Tenant\u00d7Status",
       "description": "histogram_quantile over apollo_request_duration_seconds_bucket, sliced by $tenant and $status",
-      "gridPos": { "x": 0, "y": 35, "w": 12, "h": 6 },
+      "gridPos": {
+        "x": 0,
+        "y": 35,
+        "w": 12,
+        "h": 6
+      },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
         "colorMode": "value"
       },
       "fieldConfig": {
-        "defaults": { "unit": "ms", "decimals": 1 },
+        "defaults": {
+          "unit": "ms",
+          "decimals": 1
+        },
         "overrides": []
       },
       "targets": [
@@ -173,10 +332,18 @@
     },
     {
       "type": "timeseries",
-      "title": "p95 Trend (5m) — Tenant×Status",
-      "gridPos": { "x": 12, "y": 35, "w": 12, "h": 8 },
+      "title": "p95 Trend (5m) \u2014 Tenant\u00d7Status",
+      "gridPos": {
+        "x": 12,
+        "y": 35,
+        "w": 12,
+        "h": 8
+      },
       "fieldConfig": {
-        "defaults": { "unit": "ms", "decimals": 1 },
+        "defaults": {
+          "unit": "ms",
+          "decimals": 1
+        },
         "overrides": []
       },
       "targets": [
@@ -186,16 +353,27 @@
         }
       ],
       "options": {
-        "legend": { "displayMode": "table", "placement": "right" }
+        "legend": {
+          "displayMode": "table",
+          "placement": "right"
+        }
       }
     },
     {
       "type": "timeseries",
-      "title": "p95 by Operation (5m) — Tenant×Status",
+      "title": "p95 by Operation (5m) \u2014 Tenant\u00d7Status",
       "description": "p95 from apollo_request_duration_seconds_bucket grouped by operation; filter by $tenant/$status",
-      "gridPos": { "x": 0, "y": 43, "w": 24, "h": 8 },
+      "gridPos": {
+        "x": 0,
+        "y": 43,
+        "w": 24,
+        "h": 8
+      },
       "fieldConfig": {
-        "defaults": { "unit": "ms", "decimals": 1 },
+        "defaults": {
+          "unit": "ms",
+          "decimals": 1
+        },
         "overrides": []
       },
       "targets": [
@@ -205,15 +383,28 @@
           "legendFormat": "{{operation}}"
         }
       ],
-      "options": { "legend": { "displayMode": "list", "placement": "right" } }
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "right"
+        }
+      }
     },
     {
       "type": "timeseries",
-      "title": "p95 by Type (5m) — Tenant×Status",
+      "title": "p95 by Type (5m) \u2014 Tenant\u00d7Status",
       "description": "p95 grouped by GraphQL operation type (query/mutation/subscription)",
-      "gridPos": { "x": 0, "y": 51, "w": 24, "h": 8 },
+      "gridPos": {
+        "x": 0,
+        "y": 51,
+        "w": 24,
+        "h": 8
+      },
       "fieldConfig": {
-        "defaults": { "unit": "ms", "decimals": 1 },
+        "defaults": {
+          "unit": "ms",
+          "decimals": 1
+        },
         "overrides": []
       },
       "targets": [
@@ -223,13 +414,28 @@
           "legendFormat": "{{type}}"
         }
       ],
-      "options": { "legend": { "displayMode": "list", "placement": "right" } }
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "right"
+        }
+      }
     },
     {
       "type": "table",
       "title": "Top-5 Slowest Resolvers (5m)",
-      "gridPos": { "x": 0, "y": 59, "w": 24, "h": 7 },
-      "fieldConfig": { "defaults": { "unit": "ms", "decimals": 1 } },
+      "gridPos": {
+        "x": 0,
+        "y": 59,
+        "w": 24,
+        "h": 7
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "decimals": 1
+        }
+      },
       "targets": [
         {
           "refId": "A",
@@ -237,9 +443,16 @@
         }
       ],
       "transformations": [
-        { "id": "labelsToFields", "options": { "mode": "columns" } }
+        {
+          "id": "labelsToFields",
+          "options": {
+            "mode": "columns"
+          }
+        }
       ],
-      "options": { "showHeader": true },
+      "options": {
+        "showHeader": true
+      },
       "links": [
         {
           "title": "Open in Jaeger",
@@ -250,15 +463,27 @@
     },
     {
       "type": "stat",
-      "title": "SLO Burn (5m) — vs ${slo_target}",
+      "title": "SLO Burn (5m) \u2014 vs ${slo_target}",
       "description": "Burn = current error rate / allowed error rate",
-      "gridPos": { "x": 0, "y": 66, "w": 12, "h": 6 },
+      "gridPos": {
+        "x": 0,
+        "y": 66,
+        "w": 12,
+        "h": 6
+      },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
         "colorMode": "value"
       },
       "fieldConfig": {
-        "defaults": { "unit": "none", "decimals": 2 },
+        "defaults": {
+          "unit": "none",
+          "decimals": 2
+        },
         "overrides": []
       },
       "targets": [
@@ -270,14 +495,28 @@
     },
     {
       "type": "stat",
-      "title": "Error Ratio (5m) — Operation",
+      "title": "Error Ratio (5m) \u2014 Operation",
       "description": "rate(errors)/rate(total) filtered by $tenant, $status, and $operation",
-      "gridPos": { "x": 0, "y": 72, "w": 12, "h": 6 },
+      "gridPos": {
+        "x": 0,
+        "y": 72,
+        "w": 12,
+        "h": 6
+      },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
         "colorMode": "value"
       },
-      "fieldConfig": { "defaults": { "unit": "percentunit", "decimals": 2 } },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 2
+        }
+      },
       "targets": [
         {
           "refId": "A",
@@ -288,7 +527,12 @@
     {
       "type": "table",
       "title": "Top Operations by Error Ratio (5m)",
-      "gridPos": { "x": 12, "y": 72, "w": 12, "h": 6 },
+      "gridPos": {
+        "x": 12,
+        "y": 72,
+        "w": 12,
+        "h": 6
+      },
       "targets": [
         {
           "refId": "A",
@@ -296,21 +540,47 @@
         }
       ],
       "transformations": [
-        { "id": "labelsToFields", "options": { "mode": "columns" } }
+        {
+          "id": "labelsToFields",
+          "options": {
+            "mode": "columns"
+          }
+        }
       ],
-      "fieldConfig": { "defaults": { "unit": "percentunit", "decimals": 2 } },
-      "options": { "showHeader": true }
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 2
+        }
+      },
+      "options": {
+        "showHeader": true
+      }
     },
     {
       "type": "stat",
-      "title": "p95 Latency (5m) — Mutations",
+      "title": "p95 Latency (5m) \u2014 Mutations",
       "description": "type=\"mutation\" only; sliced by $tenant/$status",
-      "gridPos": { "x": 0, "y": 78, "w": 12, "h": 6 },
+      "gridPos": {
+        "x": 0,
+        "y": 78,
+        "w": 12,
+        "h": 6
+      },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
         "colorMode": "value"
       },
-      "fieldConfig": { "defaults": { "unit": "ms", "decimals": 1 } },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "decimals": 1
+        }
+      },
       "targets": [
         {
           "refId": "A",
@@ -320,27 +590,56 @@
     },
     {
       "type": "timeseries",
-      "title": "p95 Trend (5m) — Mutations by Operation",
-      "gridPos": { "x": 12, "y": 78, "w": 12, "h": 8 },
-      "fieldConfig": { "defaults": { "unit": "ms", "decimals": 1 } },
+      "title": "p95 Trend (5m) \u2014 Mutations by Operation",
+      "gridPos": {
+        "x": 12,
+        "y": 78,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "decimals": 1
+        }
+      },
       "targets": [
         {
           "refId": "A",
           "expr": "1000 * histogram_quantile(0.95, sum by (le, operation, tenant, status) (rate(apollo_request_duration_seconds_bucket{type=\"mutation\",tenant=~\"$tenant\",status=~\"$status\",operation=~\"$operation\"}[5m])))"
         }
       ],
-      "options": { "legend": { "displayMode": "list", "placement": "right" } }
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "right"
+        }
+      }
     },
     {
       "type": "stat",
-      "title": "Error Ratio (5m) — Mutations",
+      "title": "Error Ratio (5m) \u2014 Mutations",
       "description": "rate(errors)/rate(total) for type=\"mutation\", sliced by $tenant / $status",
-      "gridPos": { "x": 0, "y": 86, "w": 12, "h": 6 },
+      "gridPos": {
+        "x": 0,
+        "y": 86,
+        "w": 12,
+        "h": 6
+      },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
         "colorMode": "value"
       },
-      "fieldConfig": { "defaults": { "unit": "percentunit", "decimals": 2 } },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 2
+        }
+      },
       "targets": [
         {
           "refId": "A",
@@ -351,7 +650,12 @@
     {
       "type": "table",
       "title": "Top Mutation Operations by Error Ratio (5m)",
-      "gridPos": { "x": 12, "y": 86, "w": 12, "h": 6 },
+      "gridPos": {
+        "x": 12,
+        "y": 86,
+        "w": 12,
+        "h": 6
+      },
       "targets": [
         {
           "refId": "A",
@@ -359,21 +663,45 @@
         }
       ],
       "transformations": [
-        { "id": "labelsToFields", "options": { "mode": "columns" } }
+        {
+          "id": "labelsToFields",
+          "options": {
+            "mode": "columns"
+          }
+        }
       ],
-      "fieldConfig": { "defaults": { "unit": "percentunit", "decimals": 2 } },
-      "options": { "showHeader": true }
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 2
+        }
+      },
+      "options": {
+        "showHeader": true
+      }
     },
     {
       "type": "row",
       "title": "ML Observability",
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 92 }
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 92
+      }
     },
     {
       "type": "stat",
       "title": "ML p95 Inference Latency (5m)",
-      "datasource": { "type": "prometheus" },
-      "gridPos": { "x": 0, "y": 93, "w": 8, "h": 7 },
+      "datasource": {
+        "type": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 93,
+        "w": 8,
+        "h": 7
+      },
       "targets": [
         {
           "refId": "A",
@@ -387,21 +715,44 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green" },
-              { "value": 0.5, "color": "yellow" },
-              { "value": 0.75, "color": "red" }
+              {
+                "color": "green"
+              },
+              {
+                "value": 0.5,
+                "color": "yellow"
+              },
+              {
+                "value": 0.75,
+                "color": "red"
+              }
             ]
           }
         },
         "overrides": []
       },
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "values": false }, "colorMode": "value" }
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value"
+      }
     },
     {
       "type": "timeseries",
       "title": "Model Accuracy vs Target (1h avg)",
-      "datasource": { "type": "prometheus" },
-      "gridPos": { "x": 8, "y": 93, "w": 16, "h": 7 },
+      "datasource": {
+        "type": "prometheus"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 93,
+        "w": 16,
+        "h": 7
+      },
       "targets": [
         {
           "refId": "A",
@@ -422,15 +773,27 @@
         "overrides": []
       },
       "options": {
-        "legend": { "displayMode": "table", "placement": "bottom" },
-        "tooltip": { "mode": "multi" }
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
       }
     },
     {
       "type": "stat",
       "title": "Data Drift Score (30m avg)",
-      "datasource": { "type": "prometheus" },
-      "gridPos": { "x": 0, "y": 100, "w": 8, "h": 7 },
+      "datasource": {
+        "type": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 100,
+        "w": 8,
+        "h": 7
+      },
       "targets": [
         {
           "refId": "A",
@@ -444,21 +807,44 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green" },
-              { "value": 0.5, "color": "yellow" },
-              { "value": 0.7, "color": "red" }
+              {
+                "color": "green"
+              },
+              {
+                "value": 0.5,
+                "color": "yellow"
+              },
+              {
+                "value": 0.7,
+                "color": "red"
+              }
             ]
           }
         },
         "overrides": []
       },
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "values": false }, "colorMode": "value" }
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "colorMode": "value"
+      }
     },
     {
       "type": "timeseries",
       "title": "Inference Throughput vs Errors",
-      "datasource": { "type": "prometheus" },
-      "gridPos": { "x": 8, "y": 100, "w": 16, "h": 7 },
+      "datasource": {
+        "type": "prometheus"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 100,
+        "w": 16,
+        "h": 7
+      },
       "targets": [
         {
           "refId": "A",
@@ -471,14 +857,163 @@
           "legendFormat": "{{model}} failures/s"
         }
       ],
-      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
-      "options": { "legend": { "displayMode": "table", "placement": "bottom" } }
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Request Error Rate (5m)",
+      "datasource": {
+        "type": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 107,
+        "w": 8,
+        "h": 7
+      },
+      "targets": [
+        {
+          "expr": "sum by (service) (rate(http_requests_total{service!='',status=~\"5..\"}[5m])) / clamp_min(sum by (service) (rate(http_requests_total{service!=''}[5m])), 0.001)",
+          "legendFormat": "{{service}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "orange",
+                "value": 0.01
+              },
+              {
+                "color": "red",
+                "value": 0.02
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Request Throughput (RPS)",
+      "datasource": {
+        "type": "prometheus"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 107,
+        "w": 8,
+        "h": 7
+      },
+      "targets": [
+        {
+          "expr": "sum by (service) (rate(http_requests_total{service!=''}[1m]))",
+          "legendFormat": "{{service}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Cache Hit vs Miss (5m)",
+      "datasource": {
+        "type": "prometheus"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 107,
+        "w": 8,
+        "h": 7
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(cache_hits_total[5m]))",
+          "legendFormat": "hits"
+        },
+        {
+          "expr": "sum(rate(cache_misses_total[5m]))",
+          "legendFormat": "misses"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
     }
   ],
   "refresh": "30s",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["intelgraph"],
+  "tags": [
+    "intelgraph"
+  ],
   "templating": {
     "list": [
       {
@@ -490,7 +1025,11 @@
         "query": "label_values(apollo_request_total, tenant)",
         "refresh": 2,
         "includeAll": true,
-        "current": { "text": "All", "value": "$__all", "selected": true }
+        "current": {
+          "text": "All",
+          "value": "$__all",
+          "selected": true
+        }
       },
       {
         "type": "query",
@@ -502,7 +1041,11 @@
         "refresh": 2,
         "includeAll": true,
         "allValue": ".*",
-        "current": { "text": "All", "value": "$__all", "selected": true }
+        "current": {
+          "text": "All",
+          "value": "$__all",
+          "selected": true
+        }
       },
       {
         "type": "query",
@@ -513,7 +1056,11 @@
         "query": "label_values(apollo_request_total, status)",
         "refresh": 2,
         "includeAll": true,
-        "current": { "text": "All", "value": "$__all", "selected": true }
+        "current": {
+          "text": "All",
+          "value": "$__all",
+          "selected": true
+        }
       },
       {
         "type": "query",
@@ -524,7 +1071,11 @@
         "query": "label_values(apollo_request_duration_seconds_bucket, operation)",
         "refresh": 2,
         "includeAll": true,
-        "current": { "text": "All", "value": "$__all", "selected": true }
+        "current": {
+          "text": "All",
+          "value": "$__all",
+          "selected": true
+        }
       },
       {
         "type": "constant",
@@ -532,14 +1083,22 @@
         "label": "SLO",
         "hide": 0,
         "query": "0.9995",
-        "current": { "text": "99.95%", "value": "0.9995", "selected": true }
+        "current": {
+          "text": "99.95%",
+          "value": "0.9995",
+          "selected": true
+        }
       },
       {
         "type": "custom",
         "name": "jaeger_env",
         "label": "Jaeger Env",
         "query": "dev,staging,prod",
-        "current": { "text": "dev", "value": "dev", "selected": true },
+        "current": {
+          "text": "dev",
+          "value": "dev",
+          "selected": true
+        },
         "includeAll": false
       },
       {
@@ -572,11 +1131,18 @@
         "label": "Jaeger Lookback",
         "hide": 0,
         "query": "1h",
-        "current": { "text": "1h", "value": "1h", "selected": true }
+        "current": {
+          "text": "1h",
+          "value": "1h",
+          "selected": true
+        }
       }
     ]
   },
-  "time": { "from": "now-6h", "to": "now" },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
   "timezone": "",
   "title": "IntelGraph Overview",
   "version": 1

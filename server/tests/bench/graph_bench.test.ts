@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { describe, it, expect, jest, beforeAll, afterAll } from '@jest/globals';
 import { Neo4jGraphAnalyticsService } from '../../src/services/GraphAnalyticsService';
 

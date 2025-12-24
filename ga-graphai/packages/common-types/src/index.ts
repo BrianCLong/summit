@@ -546,6 +546,42 @@ export interface PricingSignal {
   effectiveAt: string;
 }
 
+export type UrgencyLevel = 'low' | 'medium' | 'high';
+
+export type CostSensitivity = 'low' | 'medium' | 'high';
+
+export interface CapabilityMatrixEntry {
+  provider: string;
+  region: string;
+  capability: string;
+  throughputPerMinute: number;
+  latencyMs: number;
+  costPerUnit: number;
+  freshnessSeconds?: number;
+  source?: string;
+  sampleSize?: number;
+}
+
+export interface CapabilityMatrix {
+  entries: CapabilityMatrixEntry[];
+  updatedAt: string;
+  notes?: string;
+}
+
+export interface BiasMitigationStrategy {
+  id: string;
+  description: string;
+  signal: 'cost' | 'latency' | 'reliability' | 'diversity';
+  threshold?: number;
+  correctiveAction: 'rebalance' | 'penalize' | 'route-to-human';
+}
+
+export interface FairnessPolicy {
+  minDiversityRatio?: number;
+  preferredSpread?: number;
+  mitigations?: BiasMitigationStrategy[];
+}
+
 export interface StageExecutionGuardrail {
   maxErrorRate: number;
   recoveryTimeoutSeconds: number;
@@ -567,6 +603,11 @@ export interface PipelineStageDefinition {
   slaSeconds: number;
   guardrail?: StageExecutionGuardrail;
   fallbackStrategies?: StageFallbackStrategy[];
+  dataType?: string;
+  urgency?: UrgencyLevel;
+  costSensitivity?: CostSensitivity;
+  governanceTags?: string[];
+  auditContext?: Record<string, unknown>;
 }
 
 export interface PlannerRewardWeights {
@@ -619,6 +660,50 @@ export interface ExplainablePlan {
   steps: ExplainablePlanStep[];
   aggregateScore: number;
   metadata: Record<string, unknown>;
+}
+
+export interface GovernanceEvent {
+  id: string;
+  kind: 'selection' | 'fallback' | 'fairness' | 'archive' | 'explanation';
+  timestamp: string;
+  summary: string;
+  details: Record<string, unknown>;
+}
+
+export interface SessionArchiveDescriptor {
+  id: string;
+  createdAt: string;
+  owner: string;
+  scope: string;
+  labels?: readonly string[];
+  checksum?: string;
+}
+
+export interface ModuleDecisionPolicy {
+  id: string;
+  dataTypes: string[];
+  urgencies: UrgencyLevel[];
+  costSensitivity: CostSensitivity;
+  preferredModules: string[];
+  fallbackModules?: string[];
+  rationale?: string;
+}
+
+export interface MetaOrchestratorPluginContext {
+  pipelineId: string;
+  stage?: PipelineStageDefinition;
+  plan?: ExplainablePlan;
+  outcome?: ExecutionOutcome;
+  metadata?: Record<string, unknown>;
+}
+
+export interface MetaOrchestratorPlugin {
+  name: string;
+  beforePlan?(context: MetaOrchestratorPluginContext): Promise<void> | void;
+  afterPlan?(context: MetaOrchestratorPluginContext): Promise<void> | void;
+  beforeStage?(context: MetaOrchestratorPluginContext): Promise<void> | void;
+  afterStage?(context: MetaOrchestratorPluginContext): Promise<void> | void;
+  afterExecution?(context: MetaOrchestratorPluginContext): Promise<void> | void;
 }
 
 export interface ExecutionTraceEntry {

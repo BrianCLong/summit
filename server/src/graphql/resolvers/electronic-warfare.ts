@@ -1,4 +1,3 @@
-// @ts-nocheck
 import EWService, {
   EWAsset,
   JammingMission,

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { jest } from '@jest/globals';
 import { getPostgresPool } from '../../db/postgres.js';
 import { Permission, Role } from '../../services/MVP1RBACService.js';

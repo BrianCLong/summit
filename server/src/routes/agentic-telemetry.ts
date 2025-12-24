@@ -1,8 +1,9 @@
 // @ts-nocheck
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { maestro } from '../orchestrator/maestro.js';
 import { logger } from '../utils/logger.js';
 import { z } from 'zod/v4';
+import { AuthenticatedRequest } from './types.js';
 
 const router = Router();
 
@@ -16,14 +17,14 @@ const taskSchema = z.object({
 });
 
 // POST /tasks - Submit a new agent task
-router.post('/tasks', async (req, res) => {
+router.post('/tasks', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const taskData = taskSchema.parse(req.body);
 
     const task = {
       ...taskData,
       metadata: {
-        actor: (req as any).user?.sub || 'anonymous',
+        actor: req.user?.sub || 'anonymous',
         timestamp: new Date().toISOString(),
         sprint_version: 'v1.0.0', // dynamic in real app
       },
@@ -47,7 +48,7 @@ router.post('/tasks', async (req, res) => {
 });
 
 // GET /tasks/:id - Get task status
-router.get('/tasks/:id', async (req, res) => {
+router.get('/tasks/:id', async (req: Request, res: Response) => {
   try {
     const status = await maestro.getTaskStatus(req.params.id);
     if (!status) {
@@ -61,7 +62,7 @@ router.get('/tasks/:id', async (req, res) => {
 });
 
 // GET /metrics - Get agent velocity metrics
-router.get('/metrics', async (req, res) => {
+router.get('/metrics', async (req: Request, res: Response) => {
   // Mock metrics for now - in production this would query Prometheus/Redis
   const metrics = {
     velocity: {

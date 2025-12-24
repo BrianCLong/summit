@@ -1,3 +1,4 @@
+// @ts-nocheck
 import os from 'node:os';
 import type { ClientRequest } from 'node:http';
 import type { Request, RequestHandler, Response } from 'express';

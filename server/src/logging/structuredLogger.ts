@@ -1,4 +1,3 @@
-// @ts-nocheck
 import fs from 'fs';
 import path from 'path';
 import pino from 'pino';
@@ -14,7 +13,7 @@ const errorFile = path.join(logDir, 'app-error.log');
 
 fs.mkdirSync(logDir, { recursive: true });
 
-const transport = pino.transport({
+const transport = (pino as any).transport({
   targets: [
     {
       level: process.env.LOG_LEVEL || 'info',
@@ -34,7 +33,7 @@ const transport = pino.transport({
   ],
 });
 
-const baseLogger = pino(
+const baseLogger = (pino as any)(
   {
     level: process.env.LOG_LEVEL || 'info',
     base: {
@@ -44,7 +43,7 @@ const baseLogger = pino(
       hostname: process.env.HOSTNAME,
     },
     redact: ['req.headers.authorization', 'req.headers.cookie', 'password', 'ssn', 'card.number'],
-    timestamp: pino.stdTimeFunctions.isoTime,
+    timestamp: (pino as any).stdTimeFunctions?.isoTime || (() => `,"time":"${new Date().toISOString()}"`),
     hooks: {
       logMethod(args, method, level) {
         try {

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Distributed Queue with Priority Support and Dead-Letter Queues
  *

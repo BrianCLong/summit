@@ -1,10 +1,9 @@
-// @ts-nocheck
 import { Job } from 'bullmq';
 import { retentionEngine } from '../retention.js';
 import { JobData } from '../../queue/types.js';
 import pino from 'pino';
 
-const logger = pino({ name: 'retention-processor' });
+const logger = (pino as any)({ name: 'retention-processor' });
 
 export async function retentionProcessor(job: Job<JobData>) {
   const { payload } = job.data;

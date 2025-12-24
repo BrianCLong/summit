@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Fact Extractor for Long-Term Memory
  *

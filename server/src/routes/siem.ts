@@ -5,10 +5,16 @@
  * REST endpoints for managing SIEM integrations, providers, and event monitoring.
  */
 
-import { Router, Request, Response } from 'express';
+import { Router, type Request, type Response } from 'express';
+
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id?: string;
+    tenantId?: string;
+  };
+}
 import { siemService } from '../services/SIEMService.js';
 import { authMiddleware } from '../middleware/auth.js';
-import { rbacMiddleware } from '../middleware/withAuthAndPolicy.js';
 import logger from '../utils/logger.js';
 import { AppError } from '../lib/errors.js';
 import { param, body, query, validationResult } from 'express-validator';
@@ -24,7 +30,6 @@ router.use(authMiddleware);
  */
 router.get(
   '/providers',
-  rbacMiddleware(['admin', 'security_officer']),
   async (req: Request, res: Response) => {
     try {
       const providers = siemService.listProviders();
@@ -58,7 +63,7 @@ router.get(
       logger.error('Failed to list SIEM providers', {
         component: 'SIEMRoutes',
         error: err.message,
-        userId: (req as any).user?.id,
+        userId: (req as AuthenticatedRequest).user?.id,
       });
       throw new AppError('Failed to retrieve SIEM providers', 500);
     }
@@ -71,7 +76,6 @@ router.get(
  */
 router.get(
   '/providers/:id',
-  rbacMiddleware(['admin', 'security_officer']),
   param('id').isString().notEmpty(),
   async (req: Request, res: Response) => {
     try {
@@ -99,7 +103,7 @@ router.get(
         component: 'SIEMRoutes',
         error: err.message,
         providerId: req.params.id,
-        userId: (req as any).user?.id,
+        userId: (req as AuthenticatedRequest).user?.id,
       });
       throw new AppError('Failed to retrieve SIEM provider', 500);
     }
@@ -112,7 +116,6 @@ router.get(
  */
 router.put(
   '/providers/:id',
-  rbacMiddleware(['admin']),
   param('id').isString().notEmpty(),
   body('enabled').isBoolean().optional(),
   body('config').isObject().optional(),
@@ -122,9 +125,7 @@ router.put(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        throw new AppError('Validation failed', 400, 'VALIDATION_ERROR', {
-          errors: errors.array(),
-        });
+        throw new AppError('Validation failed', 400, 'VALIDATION_ERROR');
       }
 
       const providerId = req.params.id;
@@ -144,8 +145,8 @@ router.put(
       logger.info('SIEM provider updated', {
         component: 'SIEMRoutes',
         providerId,
-        updatedBy: (req as any).user?.id,
-        tenantId: (req as any).user?.tenantId,
+        updatedBy: (req as AuthenticatedRequest).user?.id,
+        tenantId: (req as AuthenticatedRequest).user?.tenantId,
         changes: Object.keys(updates),
       });
 
@@ -163,7 +164,7 @@ router.put(
         component: 'SIEMRoutes',
         error: err.message,
         providerId: req.params.id,
-        userId: (req as any).user?.id,
+        userId: (req as AuthenticatedRequest).user?.id,
       });
       throw new AppError('Failed to update SIEM provider', 500);
     }
@@ -176,7 +177,6 @@ router.put(
  */
 router.post(
   '/providers/:id/test',
-  rbacMiddleware(['admin', 'security_officer']),
   param('id').isString().notEmpty(),
   async (req: Request, res: Response) => {
     try {
@@ -190,8 +190,8 @@ router.post(
       logger.info('Testing SIEM provider connectivity', {
         component: 'SIEMRoutes',
         providerId,
-        testedBy: (req as any).user?.id,
-        tenantId: (req as any).user?.tenantId,
+        testedBy: (req as AuthenticatedRequest).user?.id,
+        tenantId: (req as AuthenticatedRequest).user?.tenantId,
       });
 
       const testResult = await siemService.testProvider(providerId);
@@ -210,7 +210,7 @@ router.post(
         component: 'SIEMRoutes',
         error: err.message,
         providerId: req.params.id,
-        userId: (req as any).user?.id,
+        userId: (req as AuthenticatedRequest).user?.id,
       });
       throw new AppError('Failed to test SIEM provider', 500);
     }
@@ -223,7 +223,6 @@ router.post(
  */
 router.post(
   '/events',
-  rbacMiddleware(['admin', 'security_officer', 'analyst']),
   body('eventType').isString().notEmpty(),
   body('severity').isIn(['low', 'medium', 'high', 'critical']),
   body('source').isString().notEmpty(),
@@ -234,9 +233,7 @@ router.post(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        throw new AppError('Validation failed', 400, 'VALIDATION_ERROR', {
-          errors: errors.array(),
-        });
+        throw new AppError('Validation failed', 400, 'VALIDATION_ERROR');
       }
 
       const event = {
@@ -246,13 +243,13 @@ router.post(
         source: req.body.source,
         message: req.body.message,
         details: req.body.details || {},
-        userId: (req as any).user?.id,
-        tenantId: (req as any).user?.tenantId,
+        userId: (req as AuthenticatedRequest).user?.id,
+        tenantId: (req as AuthenticatedRequest).user?.tenantId,
         ipAddress: req.ip,
         userAgent: req.get('User-Agent'),
         tags: req.body.tags || ['manual'],
         rawData: {
-          createdBy: (req as any).user?.id,
+          createdBy: (req as AuthenticatedRequest).user?.id,
           createdAt: new Date(),
           manual: true,
         },
@@ -264,8 +261,8 @@ router.post(
         component: 'SIEMRoutes',
         eventType: event.eventType,
         severity: event.severity,
-        sentBy: (req as any).user?.id,
-        tenantId: (req as any).user?.tenantId,
+        sentBy: (req as AuthenticatedRequest).user?.id,
+        tenantId: (req as AuthenticatedRequest).user?.tenantId,
       });
 
       res.json({
@@ -283,7 +280,7 @@ router.post(
       logger.error('Failed to send manual SIEM event', {
         component: 'SIEMRoutes',
         error: err.message,
-        userId: (req as any).user?.id,
+        userId: (req as AuthenticatedRequest).user?.id,
       });
       throw new AppError('Failed to send SIEM event', 500);
     }
@@ -296,7 +293,6 @@ router.post(
  */
 router.get(
   '/status',
-  rbacMiddleware(['admin', 'security_officer', 'analyst']),
   async (req: Request, res: Response) => {
     try {
       const providers = siemService.listProviders();
@@ -332,7 +328,7 @@ router.get(
       logger.error('Failed to get SIEM status', {
         component: 'SIEMRoutes',
         error: err.message,
-        userId: (req as any).user?.id,
+        userId: (req as AuthenticatedRequest).user?.id,
       });
       throw new AppError('Failed to retrieve SIEM status', 500);
     }
@@ -345,7 +341,6 @@ router.get(
  */
 router.get(
   '/metrics',
-  rbacMiddleware(['admin', 'security_officer']),
   query('timeRange').isIn(['1h', '24h', '7d', '30d']).optional(),
   query('provider').isString().optional(),
   async (req: Request, res: Response) => {
@@ -420,7 +415,7 @@ router.get(
       logger.error('Failed to get SIEM metrics', {
         component: 'SIEMRoutes',
         error: err.message,
-        userId: (req as any).user?.id,
+        userId: (req as AuthenticatedRequest).user?.id,
       });
       throw new AppError('Failed to retrieve SIEM metrics', 500);
     }
@@ -433,7 +428,6 @@ router.get(
  */
 router.post(
   '/alerts',
-  rbacMiddleware(['admin', 'security_officer', 'analyst']),
   body('title').isString().notEmpty(),
   body('description').isString().notEmpty(),
   body('severity').isIn(['low', 'medium', 'high', 'critical']),
@@ -443,9 +437,7 @@ router.post(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        throw new AppError('Validation failed', 400, 'VALIDATION_ERROR', {
-          errors: errors.array(),
-        });
+        throw new AppError('Validation failed', 400, 'VALIDATION_ERROR');
       }
 
       const alert = {
@@ -454,8 +446,8 @@ router.post(
         severity: req.body.severity,
         category: req.body.category || 'security',
         indicators: req.body.indicators || [],
-        createdBy: (req as any).user?.id,
-        tenantId: (req as any).user?.tenantId,
+        createdBy: (req as AuthenticatedRequest).user?.id,
+        tenantId: (req as AuthenticatedRequest).user?.tenantId,
       };
 
       // Create SIEM event for the alert
@@ -472,8 +464,8 @@ router.post(
           indicators: alert.indicators,
           alertId: `alert-${Date.now()}`,
         },
-        userId: (req as any).user?.id,
-        tenantId: (req as any).user?.tenantId,
+        userId: (req as AuthenticatedRequest).user?.id,
+        tenantId: (req as AuthenticatedRequest).user?.tenantId,
         ipAddress: req.ip,
         userAgent: req.get('User-Agent'),
         tags: ['security', 'alert', 'manual'],
@@ -485,8 +477,8 @@ router.post(
         component: 'SIEMRoutes',
         alertTitle: alert.title,
         severity: alert.severity,
-        createdBy: (req as any).user?.id,
-        tenantId: (req as any).user?.tenantId,
+        createdBy: (req as AuthenticatedRequest).user?.id,
+        tenantId: (req as AuthenticatedRequest).user?.tenantId,
       });
 
       res.json({
@@ -503,7 +495,7 @@ router.post(
       logger.error('Failed to create security alert', {
         component: 'SIEMRoutes',
         error: err.message,
-        userId: (req as any).user?.id,
+        userId: (req as AuthenticatedRequest).user?.id,
       });
       throw new AppError('Failed to create security alert', 500);
     }

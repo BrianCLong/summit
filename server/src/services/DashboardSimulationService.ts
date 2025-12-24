@@ -1,9 +1,8 @@
-// @ts-nocheck
 import { Server } from 'socket.io';
 import { getIO } from '../realtime/socket.js';
 import pino from 'pino';
 
-const logger = pino();
+const logger = (pino as any)();
 
 class DashboardSimulationService {
   private interval: NodeJS.Timeout | null = null;
@@ -57,7 +56,7 @@ class DashboardSimulationService {
         }
 
       } catch (err) {
-        logger.error({ err }, 'Error in dashboard simulation');
+        logger.error({ err: err instanceof Error ? err.message : String(err) }, 'Error in dashboard simulation');
       }
     }, 2000); // Update every 2 seconds
   }

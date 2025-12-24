@@ -392,12 +392,16 @@ export class IOCManagementService {
 
       const pattern = this.generateRulePattern(ioc, ruleType);
       if (pattern) {
+        // Map IOC severity to DetectionRule severity (filter out 'INFO')
+        const ruleSeverity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' =
+          ioc.severity === 'INFO' ? 'LOW' : ioc.severity;
+
         rules.push(await this.createDetectionRule({
           name: `Detect ${ioc.type}: ${ioc.value.substring(0, 30)}`,
           description: `Auto-generated rule for ${ioc.type} indicator`,
           type: ruleType,
           pattern,
-          severity: ioc.severity,
+          severity: ruleSeverity,
           tags: ioc.context.tags || [],
           iocTypes: [ioc.type],
           enabled: true,

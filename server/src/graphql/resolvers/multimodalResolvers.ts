@@ -10,7 +10,7 @@ import {
   type SubscriptionEnvelope,
 } from '../subscriptionEngine.js';
 
-const logger = pino({ name: 'MultimodalResolvers' });
+const logger = (pino as any)({ name: 'MultimodalResolvers' });
 
 export interface MultimodalContext {
   user: any;
@@ -20,7 +20,7 @@ export interface MultimodalContext {
 }
 
 const buildMultimodalMetadata = (
-  context: MultimodalContext,
+  context,
   investigationId: string | undefined,
   type: string,
 ) => ({
@@ -36,7 +36,7 @@ export const multimodalResolvers = {
     mediaSource: withAuthAndPolicy('read', (args) => ({
       type: 'media_source',
       id: args.id,
-    }))(async (_, { id }, context: MultimodalContext) => {
+    }))(async (_, { id }, context) => {
       return await context.multimodalDataService.getMediaSource(id);
     }),
 
@@ -47,7 +47,7 @@ export const multimodalResolvers = {
       async (
         _,
         { investigationId, mediaType, status, limit, offset },
-        context: MultimodalContext,
+        context,
       ) => {
         return await context.multimodalDataService.getMediaSources(
           investigationId,
@@ -65,7 +65,7 @@ export const multimodalResolvers = {
     multimodalEntity: withAuthAndPolicy('read', (args) => ({
       type: 'multimodal_entity',
       id: args.id,
-    }))(async (_, { id }, context: MultimodalContext) => {
+    }))(async (_, { id }, context) => {
       return await context.multimodalDataService.getMultimodalEntity(id);
     }),
 
@@ -84,7 +84,7 @@ export const multimodalResolvers = {
           limit,
           offset,
         },
-        context: MultimodalContext,
+        context,
       ) => {
         return await context.multimodalDataService.getMultimodalEntities(
           investigationId,
@@ -104,7 +104,7 @@ export const multimodalResolvers = {
     semanticSearch: withAuthAndPolicy('read', (args) => ({
       type: 'investigation',
       id: args.input.investigationId,
-    }))(async (_, { input }, context: MultimodalContext) => {
+    }))(async (_, { input }, context) => {
       return await context.multimodalDataService.semanticSearch(
         input.investigationId,
         {
@@ -122,7 +122,7 @@ export const multimodalResolvers = {
       type: 'multimodal_entity',
       id: args.entityId,
     }))(
-      async (_, { entityId, topK, threshold }, context: MultimodalContext) => {
+      async (_, { entityId, topK, threshold }, context) => {
         return await context.multimodalDataService.findSimilarEntities(
           entityId,
           topK,
@@ -135,7 +135,7 @@ export const multimodalResolvers = {
     extractionJob: withAuthAndPolicy('read', (args) => ({
       type: 'extraction_job',
       id: args.id,
-    }))(async (_, { id }, context: MultimodalContext) => {
+    }))(async (_, { id }, context) => {
       return await context.extractionJobService.getExtractionJob(id);
     }),
 
@@ -146,7 +146,7 @@ export const multimodalResolvers = {
       async (
         _,
         { investigationId, status, limit, offset },
-        context: MultimodalContext,
+        context,
       ) => {
         return await context.extractionJobService.getExtractionJobs(
           investigationId,
@@ -165,7 +165,7 @@ export const multimodalResolvers = {
     uploadMediaSource: withAuthAndPolicy('create', (args) => ({
       type: 'media_source',
       id: 'new',
-    }))(async (_, { input, file }, context: MultimodalContext) => {
+    }))(async (_, { input, file }, context) => {
       try {
         let mediaMetadata;
 
@@ -211,7 +211,7 @@ export const multimodalResolvers = {
     updateMediaSource: withAuthAndPolicy('update', (args) => ({
       type: 'media_source',
       id: args.id,
-    }))(async (_, { id, input }, context: MultimodalContext) => {
+    }))(async (_, { id, input }, context) => {
       // Implementation for updating media source metadata
       throw new Error('updateMediaSource not yet implemented');
     }),
@@ -219,7 +219,7 @@ export const multimodalResolvers = {
     deleteMediaSource: withAuthAndPolicy('delete', (args) => ({
       type: 'media_source',
       id: args.id,
-    }))(async (_, { id }, context: MultimodalContext) => {
+    }))(async (_, { id }, context) => {
       const mediaSource =
         await context.multimodalDataService.getMediaSource(id);
       if (!mediaSource) {
@@ -245,7 +245,7 @@ export const multimodalResolvers = {
     createMultimodalEntity: withAuthAndPolicy('create', (args) => ({
       type: 'multimodal_entity',
       id: 'new',
-    }))(async (_, { input }, context: MultimodalContext) => {
+    }))(async (_, { input }, context) => {
       const entity = await context.multimodalDataService.createMultimodalEntity(
         input,
         context.user.id,
@@ -274,7 +274,7 @@ export const multimodalResolvers = {
     updateMultimodalEntity: withAuthAndPolicy('update', (args) => ({
       type: 'multimodal_entity',
       id: args.id,
-    }))(async (_, { id, input }, context: MultimodalContext) => {
+    }))(async (_, { id, input }, context) => {
       const entity = await context.multimodalDataService.updateMultimodalEntity(
         id,
         input,
@@ -301,7 +301,7 @@ export const multimodalResolvers = {
     verifyMultimodalEntity: withAuthAndPolicy('update', (args) => ({
       type: 'multimodal_entity',
       id: args.id,
-    }))(async (_, { id, verification }, context: MultimodalContext) => {
+    }))(async (_, { id, verification }, context) => {
       const entity = await context.multimodalDataService.verifyMultimodalEntity(
         id,
         verification,
@@ -331,7 +331,7 @@ export const multimodalResolvers = {
     deleteMultimodalEntity: withAuthAndPolicy('delete', (args) => ({
       type: 'multimodal_entity',
       id: args.id,
-    }))(async (_, { id }, context: MultimodalContext) => {
+    }))(async (_, { id }, context) => {
       const deleted =
         await context.multimodalDataService.deleteMultimodalEntity(id);
 
@@ -346,7 +346,7 @@ export const multimodalResolvers = {
     startExtractionJob: withAuthAndPolicy('create', (args) => ({
       type: 'extraction_job',
       id: 'new',
-    }))(async (_, { input }, context: MultimodalContext) => {
+    }))(async (_, { input }, context) => {
       const job = await context.extractionJobService.startExtractionJob(
         input,
         context.user.id,
@@ -375,7 +375,7 @@ export const multimodalResolvers = {
     cancelExtractionJob: withAuthAndPolicy('update', (args) => ({
       type: 'extraction_job',
       id: args.id,
-    }))(async (_, { id }, context: MultimodalContext) => {
+    }))(async (_, { id }, context) => {
       const job = await context.extractionJobService.cancelExtractionJob(id);
 
       // Publish real-time update
@@ -399,7 +399,7 @@ export const multimodalResolvers = {
     retryExtractionJob: withAuthAndPolicy('update', (args) => ({
       type: 'extraction_job',
       id: args.id,
-    }))(async (_, { id }, context: MultimodalContext) => {
+    }))(async (_, { id }, context) => {
       const job = await context.extractionJobService.retryExtractionJob(id);
 
       // Publish real-time update
@@ -424,7 +424,7 @@ export const multimodalResolvers = {
     batchVerifyEntities: withAuthAndPolicy('update', (args) => ({
       type: 'investigation',
       id: 'batch',
-    }))(async (_, { entityIds, verification }, context: MultimodalContext) => {
+    }))(async (_, { entityIds, verification }, context) => {
       const verifiedEntities = [];
 
       for (const entityId of entityIds) {
@@ -464,7 +464,7 @@ export const multimodalResolvers = {
     batchDeleteEntities: withAuthAndPolicy('delete', (args) => ({
       type: 'investigation',
       id: 'batch',
-    }))(async (_, { entityIds }, context: MultimodalContext) => {
+    }))(async (_, { entityIds }, context) => {
       let deletedCount = 0;
 
       for (const entityId of entityIds) {
@@ -567,7 +567,7 @@ export const multimodalResolvers = {
     entities: withAuthAndPolicy('read', () => ({
       type: 'media_source',
       id: 'related',
-    }))(async (parent, _, context: MultimodalContext) => {
+    }))(async (parent, _, context) => {
       // This would fetch entities related to this media source
       // Implementation depends on your query requirements
       return [];
@@ -579,7 +579,7 @@ export const multimodalResolvers = {
     mediaSource: withAuthAndPolicy('read', () => ({
       type: 'media_source',
       id: 'related',
-    }))(async (parent, _, context: MultimodalContext) => {
+    }))(async (parent, _, context) => {
       return await context.multimodalDataService.getMediaSource(
         parent.mediaSourceId,
       );
@@ -628,7 +628,7 @@ export const multimodalResolvers = {
     relatedEntities: withAuthAndPolicy('read', () => ({
       type: 'multimodal_entity',
       id: 'related',
-    }))(async (parent, _, context: MultimodalContext) => {
+    }))(async (parent, _, context) => {
       return await context.multimodalDataService.findSimilarEntities(
         parent.id,
         5,
@@ -642,7 +642,7 @@ export const multimodalResolvers = {
     mediaSource: withAuthAndPolicy('read', () => ({
       type: 'media_source',
       id: 'related',
-    }))(async (parent, _, context: MultimodalContext) => {
+    }))(async (parent, _, context) => {
       return await context.multimodalDataService.getMediaSource(
         parent.mediaSourceId,
       );
@@ -652,7 +652,7 @@ export const multimodalResolvers = {
     results: withAuthAndPolicy('read', () => ({
       type: 'extraction_job',
       id: 'results',
-    }))(async (parent, _, context: MultimodalContext) => {
+    }))(async (parent, _, context) => {
       return await context.multimodalDataService.getMultimodalEntities(
         parent.investigationId,
         {

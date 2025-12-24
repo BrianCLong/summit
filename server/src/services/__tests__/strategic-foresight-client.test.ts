@@ -1,14 +1,13 @@
-// @ts-nocheck
 /**
  * Tests for Strategic Foresight Client
  */
 
-import { StrategicForesightClient } from '../strategic-foresight-client';
+import { StrategicForesightClient } from '../strategic-foresight-client.js';
 import { jest, describe, it, test, expect, beforeEach } from '@jest/globals';
 
 // Mock fetch globally
-const mockFetch = jest.fn();
-global.fetch = mockFetch;
+const mockFetch = jest.fn<typeof fetch>();
+global.fetch = mockFetch as any;
 
 describe('StrategicForesightClient', () => {
   let client: StrategicForesightClient;

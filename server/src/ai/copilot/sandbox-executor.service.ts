@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Sandbox Query Executor Service
  *
@@ -12,7 +11,7 @@
 import { randomUUID } from 'crypto';
 import pino from 'pino';
 import { z } from 'zod';
-import type { Driver, Session, QueryResult } from 'neo4j-driver';
+import type { Driver, Session, Result } from 'neo4j-driver';
 
 import {
   type QueryPreview,
@@ -23,7 +22,7 @@ import {
 import { estimateQueryCost } from '../nl-graph-query/cost-estimator.js';
 import { validateCypher, isReadOnlyQuery } from '../nl-graph-query/validator.js';
 
-const logger = pino({ name: 'sandbox-executor' });
+const logger = (pino as any)({ name: 'sandbox-executor' });
 
 // Configuration
 const DEFAULT_TIMEOUT_MS = parseInt(
@@ -385,7 +384,7 @@ export class SandboxExecutorService {
     cypher: string,
     parameters: Record<string, any>,
     timeoutMs: number,
-  ): Promise<QueryResult> {
+  ): Promise<Result> {
     return new Promise((resolve, reject) => {
       const timeoutId = setTimeout(() => {
         reject(new Error(`Query timeout after ${timeoutMs}ms`));

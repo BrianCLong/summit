@@ -70,7 +70,7 @@ export function useI18n(): I18nHook {
       options.defaultValue = context.defaultValue;
     }
 
-    return i18nT(key, options);
+    return i18nT(key, options) as string;
   }, [i18nT]);
 
   /**

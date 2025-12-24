@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { redactionService } from '../../redaction/redact.js';
 import { isAgentEnabled } from '../../config/agent-features.js';
 import {

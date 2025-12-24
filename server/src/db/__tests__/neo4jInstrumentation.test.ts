@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { instrumentSession } from '../neo4j.js';
 import { neo4jPerformanceMonitor } from '../neo4jPerformanceMonitor.js';
 import { neo4jQueryTotal } from '../../metrics/neo4jMetrics.js';

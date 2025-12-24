@@ -1,6 +1,5 @@
-// @ts-nocheck
 import { BaseSourceConnector } from './base.js';
-import { ConnectorContext } from './types.js';
+import { ConnectorContext } from '../data-model/types.js';
 import fs from 'fs/promises';
 import path from 'path';
 

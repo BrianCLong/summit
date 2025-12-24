@@ -7,6 +7,7 @@ import { makeExecutableSchema } from '@graphql-tools/schema';
 import { applyMiddleware } from 'graphql-middleware';
 import cors from 'cors';
 import helmet from 'helmet';
+import pino from 'pino';
 import pinoHttp from 'pino-http';
 import { logger as appLogger } from './config/logger.js';
 import { telemetry } from './lib/telemetry/comprehensive-telemetry.js';
@@ -60,6 +61,7 @@ import { necromancerRouter } from './routes/necromancer.js';
 import { zeroDayRouter } from './routes/zero_day.js';
 import { abyssRouter } from './routes/abyss.js';
 import authRouter from './routes/authRoutes.js';
+import ssoRouter from './routes/sso.js';
 import qafRouter from './routes/qaf.js';
 import siemPlatformRouter from './routes/siem-platform.js';
 import maestroRouter from './routes/maestro.js';
@@ -78,21 +80,29 @@ import resourceCostsRouter from './routes/resource-costs.js';
 import queryReplayRouter from './routes/query-replay.js';
 import streamRouter from './routes/stream.js'; // Added import
 import queryPreviewStreamRouter from './routes/query-preview-stream.js';
+import correctnessProgramRouter from './routes/correctness-program.js';
 import commandConsoleRouter from './routes/internal/command-console.js';
 import searchV1Router from './routes/search-v1.js';
 import dataGovernanceRouter from './routes/data-governance-routes.js';
 import tenantBillingRouter from './routes/tenants/billing.js';
+import { gtmRouter } from './routes/gtm-messaging.js';
+import { airgapRouter } from './routes/airgap.js';
+import drRouter from './routes/dr.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
 
   // Initialize OpenTelemetry tracing
+  // Tracer is already initialized in index.ts, but we ensure it's available here
   const tracer = initializeTracing();
-  await tracer.initialize();
+  // Ensure initialized if this entry point is used standalone (e.g. tests)
+  if (!tracer.isInitialized()) {
+      await tracer.initialize();
+  }
 
   const app = express();
-  const logger = pino();
+  const logger = (pino as any)();
 
   const isProduction = cfg.NODE_ENV === 'production';
   const allowedOrigins = cfg.CORS_ORIGIN.split(',')
@@ -207,7 +217,7 @@ export const createApp = async () => {
     snapshotter.trackRequest(req);
     const start = process.hrtime();
     telemetry.incrementActiveConnections();
-    telemetry.subsystems.api.requests.add(1);
+    telemetry.subsystems.api.requests.add();
 
     res.on('finish', () => {
       snapshotter.untrackRequest(req);
@@ -221,7 +231,7 @@ export const createApp = async () => {
       telemetry.decrementActiveConnections();
 
       if (res.statusCode >= 500) {
-        telemetry.subsystems.api.errors.add(1);
+        telemetry.subsystems.api.errors.add();
       }
     });
 
@@ -234,6 +244,36 @@ export const createApp = async () => {
 
   // Swagger UI
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+  // Production Authentication - Use proper JWT validation
+  const {
+    productionAuthMiddleware,
+    applyProductionSecurity,
+  } = await import('./config/production-security.js');
+
+  // Apply security middleware based on environment
+  if (cfg.NODE_ENV === 'production') {
+    applyProductionSecurity(app);
+  }
+
+  const authenticateToken =
+    cfg.NODE_ENV === 'production'
+      ? productionAuthMiddleware
+      : (req: Request, res: Response, next: NextFunction) => {
+          // Development mode - relaxed auth for easier testing
+          const authHeader = req.headers['authorization'];
+          const token = authHeader && authHeader.split(' ')[1];
+
+          if (!token) {
+            console.warn('Development: No token provided, allowing request');
+            (req as any).user = {
+              sub: 'dev-user',
+              email: 'dev@intelgraph.local',
+              role: 'admin',
+            };
+          }
+          next();
+        };
 
   // Global Rate Limiting (fallback for unauthenticated or non-specific routes)
   // Note: /graphql has its own rate limiting chain above
@@ -260,7 +300,9 @@ export const createApp = async () => {
 
   // Authentication routes (exempt from global auth middleware)
   app.use('/auth', authRouter);
+  app.use('/auth/sso', ssoRouter);
   app.use('/api/auth', authRouter); // Alternative path
+  app.use('/sso', ssoRouter);
 
   // Other routes
   app.use('/monitoring', monitoringRouter);
@@ -298,10 +340,14 @@ export const createApp = async () => {
   app.use('/api/tenants/:tenantId/billing', tenantBillingRouter);
   app.use('/api/internal/command-console', commandConsoleRouter);
   app.use('/api/query-replay', queryReplayRouter);
+  app.use('/api/correctness', correctnessProgramRouter);
   app.use('/api', queryPreviewStreamRouter);
   app.use('/api/stream', streamRouter); // Register stream route
   app.use('/api/v1/search', searchV1Router); // Register Unified Search API
   app.use('/api', dataGovernanceRouter); // Register Data Governance API
+  app.use('/api/gtm', gtmRouter);
+  app.use('/airgap', airgapRouter);
+  app.use('/dr', drRouter);
   app.get('/metrics', metricsRoute);
 
   // Initialize SummitInvestigate Platform Routes
@@ -441,36 +487,6 @@ export const createApp = async () => {
     },
   });
   await apollo.start();
-
-  // Production Authentication - Use proper JWT validation
-  const {
-    productionAuthMiddleware,
-    applyProductionSecurity,
-  } = await import('./config/production-security.js');
-
-  // Apply security middleware based on environment
-  if (cfg.NODE_ENV === 'production') {
-    applyProductionSecurity(app);
-  }
-
-  const authenticateToken =
-    cfg.NODE_ENV === 'production'
-      ? productionAuthMiddleware
-      : (req: Request, res: Response, next: NextFunction) => {
-          // Development mode - relaxed auth for easier testing
-          const authHeader = req.headers['authorization'];
-          const token = authHeader && authHeader.split(' ')[1];
-
-          if (!token) {
-            console.warn('Development: No token provided, allowing request');
-            (req as any).user = {
-              sub: 'dev-user',
-              email: 'dev@intelgraph.local',
-              role: 'admin',
-            };
-          }
-          next();
-        };
 
   app.use(
     '/graphql',

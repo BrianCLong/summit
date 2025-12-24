@@ -13,7 +13,6 @@
  */
 
 import { z } from 'zod/v4';
-import { z } from 'zod';
 import { sanitizeHtml } from '../utils/htmlSanitizer.js';
 
 // Base validation schemas
@@ -61,6 +60,7 @@ export const EntityLabelsSchema = z
     'Duplicate labels not allowed',
   );
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const EntityPropsSchema = z
   .record(z.string(), z.any())
   .refine(
@@ -68,7 +68,7 @@ export const EntityPropsSchema = z
     'Entity properties too large (max 32KB)',
   )
   .refine(
-    (props) => !props.hasOwnProperty('id') && !props.hasOwnProperty('tenantId'),
+    (props) => !Object.prototype.hasOwnProperty.call(props, 'id') && !Object.prototype.hasOwnProperty.call(props, 'tenantId'),
     'Reserved property names not allowed in props',
   );
 
@@ -100,6 +100,7 @@ export const InvestigationStatusSchema = z.enum([
 ]);
 
 // Custom metadata validation
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const CustomMetadataSchema = z
   .record(z.string(), z.any())
   .refine(
@@ -141,8 +142,11 @@ export class BusinessRuleValidator {
   /**
    * Validates entity creation against business rules
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static validateEntityCreation(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     entity: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     context: any,
   ): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
@@ -181,8 +185,11 @@ export class BusinessRuleValidator {
   /**
    * Validates relationship creation against business rules
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static validateRelationshipCreation(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     relationship: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     context: any,
   ): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
@@ -214,9 +221,12 @@ export class BusinessRuleValidator {
   /**
    * Validates investigation operations
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static validateInvestigationOperation(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     investigation: any,
     operation: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     context: any,
   ): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
@@ -252,8 +262,10 @@ export class BusinessRuleValidator {
   /**
    * Validates token usage against budgets and limits
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static validateTokenUsage(
     tokens: number,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     context: any,
   ): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
@@ -284,9 +296,12 @@ export class BusinessRuleValidator {
   /**
    * Validates bulk operations
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static validateBulkOperation(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     items: any[],
     operation: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     context: any,
   ): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
@@ -379,6 +394,7 @@ export class SecurityValidator {
   /**
    * Validate input for potential security issues
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static validateInput(input: any): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
 
@@ -429,10 +445,13 @@ export class SecurityValidator {
   /**
    * Validate user permissions for operation
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static validatePermissions(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     user: any,
     operation: string,
     resource: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     context?: any,
   ): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
@@ -618,6 +637,7 @@ export const DateRangeSchema = z
 /**
  * Comprehensive GraphQL input validation
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const GraphQLInputSchema = z.object({
   operationName: z.string().max(100, 'Operation name too long').optional(),
   query: z
@@ -632,6 +652,7 @@ export const GraphQLInputSchema = z.object({
       },
       'Query depth exceeds maximum allowed'
     ),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   variables: z.record(z.string(), z.any()).optional(),
 });
 
@@ -672,6 +693,7 @@ export class SanitizationUtils {
   /**
    * Sanitize user input for safe storage and display
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static sanitizeUserInput(input: any): any {
     if (typeof input === 'string') {
       return this.sanitizeHTML(input).trim().slice(0, 10000); // Max 10KB
@@ -680,6 +702,7 @@ export class SanitizationUtils {
       return input.slice(0, 1000).map((item) => this.sanitizeUserInput(item));
     }
     if (input && typeof input === 'object') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const sanitized: Record<string, any> = {};
       for (const [key, value] of Object.entries(input)) {
         if (Object.keys(sanitized).length >= 100) break; // Max 100 keys
@@ -710,6 +733,7 @@ export class QueryValidator {
   /**
    * Validate that a query uses parameterized inputs (not string interpolation)
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static isParameterized(query: string, params: Record<string, any>): boolean {
     // Check that all params are referenced in query with $ syntax
     const paramKeys = Object.keys(params);
@@ -750,8 +774,10 @@ export class QueryValidator {
   /**
    * Validate Cypher query safety
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static validateCypherQuery(
     query: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     params: Record<string, any>
   ): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
@@ -774,8 +800,10 @@ export class QueryValidator {
   /**
    * Validate SQL query safety
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static validateSQLQuery(
     query: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     params: any[]
   ): { valid: boolean; errors: string[] } {
     const errors: string[] = [];

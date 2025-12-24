@@ -1,12 +1,11 @@
-// @ts-nocheck
 import { Server, Socket } from 'socket.io';
 import pino from 'pino';
 
-const logger = pino();
+const logger = (pino as any)();
 
-export function registerDashboardHandlers(io: Server, socket: Socket) {
+export function registerDashboardHandlers(io: Server, socket: Socket): void {
   // Join the dashboard room
-  socket.on('dashboard:join', () => {
+  socket.on('dashboard:join', (): void => {
     logger.info(`User ${socket.id} joined dashboard`);
     socket.join('dashboard:main');
 
@@ -18,7 +17,7 @@ export function registerDashboardHandlers(io: Server, socket: Socket) {
     });
   });
 
-  socket.on('dashboard:leave', () => {
+  socket.on('dashboard:leave', (): void => {
     logger.info(`User ${socket.id} left dashboard`);
     socket.leave('dashboard:main');
   });

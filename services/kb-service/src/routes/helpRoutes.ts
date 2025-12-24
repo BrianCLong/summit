@@ -1,12 +1,13 @@
+// @ts-nocheck
 /**
  * Help Routes
  * REST API routes for contextual help and Copilot integration
  */
 
-import { Router } from 'express';
+import { Router, type Router as RouterType } from 'express';
 import { contextualHelpController } from '../controllers/index.js';
 
-const router = Router();
+const router: RouterType = Router();
 
 // Contextual help
 router.post('/context', (req, res, next) => contextualHelpController.getContextualHelp(req, res, next));

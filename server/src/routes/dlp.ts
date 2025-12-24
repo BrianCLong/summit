@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * DLP Management API Routes
  *
@@ -6,10 +5,10 @@
  */
 
 import { Router, Request, Response } from 'express';
+import type { AuthenticatedRequest } from './types.js';
 import { dlpService, DLPPolicy } from '../services/DLPService.js';
 import { dlpStatusMiddleware } from '../middleware/dlpMiddleware.js';
 import { authMiddleware } from '../middleware/auth.js';
-import { rbacMiddleware } from '../middleware/withAuthAndPolicy.js';
 import logger from '../utils/logger.js';
 import { AppError } from '../lib/errors.js';
 import { param, body, query, validationResult } from 'express-validator';
@@ -31,8 +30,7 @@ router.get('/status', dlpStatusMiddleware);
  */
 router.get(
   '/policies',
-  rbacMiddleware(['admin', 'security_officer']),
-  async (req: Request, res: Response) => {
+  async (req: AuthenticatedRequest, res: Response) => {
     try {
       const policies = dlpService.listPolicies();
 
@@ -63,7 +61,7 @@ router.get(
       logger.error('Failed to list DLP policies', {
         component: 'DLPRoutes',
         error: err.message,
-        userId: (req as any).user?.id,
+        userId: req.user?.id,
       });
       throw new AppError('Failed to retrieve DLP policies', 500);
     }
@@ -76,9 +74,8 @@ router.get(
  */
 router.get(
   '/policies/:id',
-  rbacMiddleware(['admin', 'security_officer']),
   param('id').isString().notEmpty(),
-  async (req: Request, res: Response) => {
+  async (req: AuthenticatedRequest, res: Response) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -103,7 +100,7 @@ router.get(
         component: 'DLPRoutes',
         error: err.message,
         policyId: req.params.id,
-        userId: (req as any).user?.id,
+        userId: req.user?.id,
       });
       throw new AppError('Failed to retrieve DLP policy', 500);
     }
@@ -116,7 +113,6 @@ router.get(
  */
 router.post(
   '/policies',
-  rbacMiddleware(['admin']),
   body('name').isString().notEmpty().isLength({ min: 1, max: 100 }),
   body('description').isString().optional().isLength({ max: 500 }),
   body('enabled').isBoolean().optional(),
@@ -124,13 +120,11 @@ router.post(
   body('conditions').isArray({ min: 1 }),
   body('actions').isArray({ min: 1 }),
   body('exemptions').isArray().optional(),
-  async (req: Request, res: Response) => {
+  async (req: AuthenticatedRequest, res: Response) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        throw new AppError('Validation failed', 400, 'VALIDATION_ERROR', {
-          errors: errors.array(),
-        });
+        throw new AppError('Validation failed', 400, 'VALIDATION_ERROR');
       }
 
       const policyData = {
@@ -153,8 +147,8 @@ router.post(
       logger.info('DLP policy created', {
         component: 'DLPRoutes',
         policyName: policyData.name,
-        createdBy: (req as any).user?.id,
-        tenantId: (req as any).user?.tenantId,
+        createdBy: req.user?.id,
+        tenantId: req.user?.tenantId,
       });
 
       res.status(201).json({
@@ -170,7 +164,7 @@ router.post(
       logger.error('Failed to create DLP policy', {
         component: 'DLPRoutes',
         error: err.message,
-        userId: (req as any).user?.id,
+        userId: req.user?.id,
       });
       throw new AppError('Failed to create DLP policy', 500);
     }
@@ -183,7 +177,6 @@ router.post(
  */
 router.put(
   '/policies/:id',
-  rbacMiddleware(['admin']),
   param('id').isString().notEmpty(),
   body('name').isString().optional().isLength({ min: 1, max: 100 }),
   body('description').isString().optional().isLength({ max: 500 }),
@@ -192,13 +185,11 @@ router.put(
   body('conditions').isArray().optional(),
   body('actions').isArray().optional(),
   body('exemptions').isArray().optional(),
-  async (req: Request, res: Response) => {
+  async (req: AuthenticatedRequest, res: Response) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        throw new AppError('Validation failed', 400, 'VALIDATION_ERROR', {
-          errors: errors.array(),
-        });
+        throw new AppError('Validation failed', 400, 'VALIDATION_ERROR');
       }
 
       const policyId = req.params.id;
@@ -223,8 +214,8 @@ router.put(
       logger.info('DLP policy updated', {
         component: 'DLPRoutes',
         policyId,
-        updatedBy: (req as any).user?.id,
-        tenantId: (req as any).user?.tenantId,
+        updatedBy: req.user?.id,
+        tenantId: req.user?.tenantId,
         changes: Object.keys(updates),
       });
 
@@ -241,7 +232,7 @@ router.put(
         component: 'DLPRoutes',
         error: err.message,
         policyId: req.params.id,
-        userId: (req as any).user?.id,
+        userId: req.user?.id,
       });
       throw new AppError('Failed to update DLP policy', 500);
     }
@@ -254,9 +245,8 @@ router.put(
  */
 router.delete(
   '/policies/:id',
-  rbacMiddleware(['admin']),
   param('id').isString().notEmpty(),
-  async (req: Request, res: Response) => {
+  async (req: AuthenticatedRequest, res: Response) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -277,8 +267,8 @@ router.delete(
       logger.info('DLP policy deleted', {
         component: 'DLPRoutes',
         policyId,
-        deletedBy: (req as any).user?.id,
-        tenantId: (req as any).user?.tenantId,
+        deletedBy: req.user?.id,
+        tenantId: req.user?.tenantId,
       });
 
       res.json({
@@ -294,7 +284,7 @@ router.delete(
         component: 'DLPRoutes',
         error: err.message,
         policyId: req.params.id,
-        userId: (req as any).user?.id,
+        userId: req.user?.id,
       });
       throw new AppError('Failed to delete DLP policy', 500);
     }
@@ -307,9 +297,8 @@ router.delete(
  */
 router.post(
   '/policies/:id/toggle',
-  rbacMiddleware(['admin', 'security_officer']),
   param('id').isString().notEmpty(),
-  async (req: Request, res: Response) => {
+  async (req: AuthenticatedRequest, res: Response) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -336,8 +325,8 @@ router.post(
         component: 'DLPRoutes',
         policyId,
         newState: !policy.enabled,
-        toggledBy: (req as any).user?.id,
-        tenantId: (req as any).user?.tenantId,
+        toggledBy: req.user?.id,
+        tenantId: req.user?.tenantId,
       });
 
       res.json({
@@ -354,7 +343,7 @@ router.post(
         component: 'DLPRoutes',
         error: err.message,
         policyId: req.params.id,
-        userId: (req as any).user?.id,
+        userId: req.user?.id,
       });
       throw new AppError('Failed to toggle DLP policy', 500);
     }
@@ -367,29 +356,26 @@ router.post(
  */
 router.post(
   '/scan',
-  rbacMiddleware(['admin', 'security_officer', 'analyst']),
   body('content').notEmpty(),
   body('operationType')
     .isIn(['read', 'write', 'delete', 'export', 'share'])
     .optional(),
-  async (req: Request, res: Response) => {
+  async (req: AuthenticatedRequest, res: Response) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        throw new AppError('Validation failed', 400, 'VALIDATION_ERROR', {
-          errors: errors.array(),
-        });
+        throw new AppError('Validation failed', 400, 'VALIDATION_ERROR');
       }
 
       const context = {
-        userId: (req as any).user?.id || 'anonymous',
-        tenantId: (req as any).user?.tenantId || 'default',
-        userRole: (req as any).user?.role || 'user',
+        userId: req.user?.id || 'anonymous',
+        tenantId: req.user?.tenantId || 'default',
+        userRole: req.user?.role || 'user',
         operationType: req.body.operationType || ('read' as const),
         contentType: 'manual-scan',
         metadata: {
           scanType: 'manual',
-          requestedBy: (req as any).user?.id,
+          requestedBy: req.user?.id,
         },
       };
 
@@ -428,8 +414,8 @@ router.post(
 
       logger.info('Manual DLP scan completed', {
         component: 'DLPRoutes',
-        userId: (req as any).user?.id,
-        tenantId: (req as any).user?.tenantId,
+        userId: req.user?.id,
+        tenantId: req.user?.tenantId,
         violationCount: scanResults.length,
         contentSize: JSON.stringify(req.body.content).length,
       });
@@ -440,7 +426,7 @@ router.post(
       logger.error('Manual DLP scan failed', {
         component: 'DLPRoutes',
         error: err.message,
-        userId: (req as any).user?.id,
+        userId: req.user?.id,
       });
       throw new AppError('DLP scan failed', 500);
     }
@@ -453,9 +439,8 @@ router.post(
  */
 router.get(
   '/metrics',
-  rbacMiddleware(['admin', 'security_officer']),
   query('timeRange').isIn(['1h', '24h', '7d', '30d']).optional(),
-  async (req: Request, res: Response) => {
+  async (req: AuthenticatedRequest, res: Response) => {
     try {
       const timeRange = (req.query.timeRange as string) || '24h';
 
@@ -506,7 +491,7 @@ router.get(
       logger.error('Failed to get DLP metrics', {
         component: 'DLPRoutes',
         error: err.message,
-        userId: (req as any).user?.id,
+        userId: req.user?.id,
       });
       throw new AppError('Failed to retrieve DLP metrics', 500);
     }

@@ -166,7 +166,7 @@ export default function App() {
             rows={[
               { label: 'LLM Tokens (agg)', value: snapshot.llm.aggregate.tokens.toLocaleString() },
               { label: 'LLM Cost (agg)', value: `$${snapshot.llm.aggregate.cost.toFixed(2)}` },
-              { label: 'Dependency Risk', value: snapshot.dependencyRisk.topRisks[0], status: snapshot.dependencyRisk.level },
+              { label: 'Dependency Risk', value: snapshot.dependencyRisk.topRisks[0] ?? 'None', status: snapshot.dependencyRisk.level },
             ]}
           />
         </div>

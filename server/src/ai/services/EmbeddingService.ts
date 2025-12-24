@@ -1,11 +1,10 @@
-// @ts-nocheck
 import { spawn } from 'child_process';
 import path from 'path';
 import pino from 'pino';
 import { Pool } from 'pg';
 import { ExtractionEngineConfig } from '../types.js';
 
-const logger = pino({ name: 'EmbeddingService' });
+const logger = (pino as any)({ name: 'EmbeddingService' });
 
 export interface EmbeddingVector {
   id: string;

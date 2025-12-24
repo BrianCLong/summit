@@ -12,7 +12,7 @@
  * being refactored to use a persistent queue (e.g., BullMQ, RabbitMQ).
  */
 
-import { quotaManager, ResourceType } from './quota-manager';
+import { quotaManager, ResourceType } from './quota-manager.js';
 
 interface QueuedRequest {
   id: string;
@@ -22,7 +22,7 @@ interface QueuedRequest {
   priority: number; // Lower number means higher priority
   identifiers: { teamId?: string; userId?: string };
   resolve: (value: boolean | PromiseLike<boolean>) => void;
-  reject: (reason?: any) => void;
+  reject: (reason?: unknown) => void;
 }
 
 export class ResourceAllocator {
@@ -34,10 +34,19 @@ export class ResourceAllocator {
     resource: ResourceType,
     amount: number,
     priority: number,
-    identifiers: { teamId?: string; userId?: string }
+    identifiers: { teamId?: string; userId?: string },
   ): Promise<boolean> {
     return new Promise((resolve, reject) => {
-      this.requestQueue.push({ id, tenantId, resource, amount, priority, identifiers, resolve, reject });
+      this.requestQueue.push({
+        id,
+        tenantId,
+        resource,
+        amount,
+        priority,
+        identifiers,
+        resolve,
+        reject,
+      });
       this.requestQueue.sort((a, b) => a.priority - b.priority);
       this.processQueue();
     });
@@ -47,7 +56,7 @@ export class ResourceAllocator {
     tenantId: string,
     resource: ResourceType,
     amount: number,
-    identifiers: { teamId?: string; userId?: string }
+    identifiers: { teamId?: string; userId?: string },
   ): void {
     quotaManager.releaseQuota(tenantId, resource, amount, identifiers);
     this.processQueue();
@@ -68,7 +77,7 @@ export class ResourceAllocator {
           request.tenantId,
           request.resource,
           request.amount,
-          request.identifiers
+          request.identifiers,
         );
         // Remove the request from the queue and resolve its promise
         this.requestQueue.splice(i, 1);

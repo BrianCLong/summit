@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { cacheService } from '../services/cacheService.js';
 
 /**
@@ -15,12 +14,12 @@ import { cacheService } from '../services/cacheService.js';
  * @param ttl - Optional time-to-live for the cached entry in seconds. If not provided, the default TTL from CacheService is used.
  * @returns A new resolver function that implements the caching logic.
  */
-export const withCache = <TArgs = any, TResult = any>(
-  keyGenerator: (parent: any, args: TArgs, context: any, info: any) => string,
-  resolver: (parent: any, args: TArgs, context: any, info: any) => Promise<TResult>,
+export const withCache = <TArgs = unknown, TResult = unknown>(
+  keyGenerator: (parent: unknown, args: TArgs, context: unknown, info: unknown) => string,
+  resolver: (parent: unknown, args: TArgs, context: unknown, info: unknown) => Promise<TResult>,
   ttl?: number
-) => {
-  return async (parent: any, args: TArgs, context: any, info: any): Promise<TResult> => {
+): ((parent: unknown, args: TArgs, context: unknown, info: unknown) => Promise<TResult>) => {
+  return async (parent: unknown, args: TArgs, context: unknown, info: unknown): Promise<TResult> => {
     const key = keyGenerator(parent, args, context, info);
 
     return cacheService.getOrSet(

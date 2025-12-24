@@ -1,5 +1,5 @@
 // @ts-nocheck
-import express from 'express';
+import express, { type Request, type Response } from 'express';
 import { InfluenceOperationsService } from '../services/InfluenceOperationsService.js';
 import { NarrativeAnalysisService } from '../services/NarrativeAnalysisService.js';
 import { CIBDetectionService } from '../services/CIBDetectionService.js';
@@ -15,7 +15,7 @@ const cibService = new CIBDetectionService();
 const sentimentService = new SentimentAnalysisService();
 
 // Trigger narrative detection/snapshot
-router.post('/narrative/:id/detect', ensureAuthenticated, async (req, res) => {
+router.post('/narrative/:id/detect', ensureAuthenticated, async (req: Request, res: Response) => {
     try {
         const narrativeId = req.params.id;
         const snapshot = await narrativeService.takeSnapshot(narrativeId);
@@ -27,7 +27,7 @@ router.post('/narrative/:id/detect', ensureAuthenticated, async (req, res) => {
 });
 
 // Get narrative evolution
-router.get('/narrative/:id/evolution', ensureAuthenticated, async (req, res) => {
+router.get('/narrative/:id/evolution', ensureAuthenticated, async (req: Request, res: Response) => {
     try {
         const history = await narrativeService.getNarrativeEvolution(req.params.id);
         const trends = await narrativeService.detectTrends(req.params.id);
@@ -39,7 +39,7 @@ router.get('/narrative/:id/evolution', ensureAuthenticated, async (req, res) => 
 });
 
 // Get graph stats/metrics
-router.get('/narrative/:id/graph', ensureAuthenticated, async (req, res) => {
+router.get('/narrative/:id/graph', ensureAuthenticated, async (req: Request, res: Response) => {
     try {
         // Expose graph centrality and communities
         const network = await influenceService.getInfluenceNetwork(req.params.id);
@@ -51,7 +51,7 @@ router.get('/narrative/:id/graph', ensureAuthenticated, async (req, res) => {
 });
 
 // Analyze sentiment (ad-hoc)
-router.post('/analyze/sentiment', ensureAuthenticated, async (req, res) => {
+router.post('/analyze/sentiment', ensureAuthenticated, async (req: Request, res: Response) => {
     try {
         const { text, topic } = req.body;
         if (!text) return res.status(400).json({ error: 'Text required' });
@@ -69,7 +69,7 @@ router.post('/analyze/sentiment', ensureAuthenticated, async (req, res) => {
 });
 
 // CIB Detection Trigger
-router.post('/cib/detect', ensureAuthenticated, async (req, res) => {
+router.post('/cib/detect', ensureAuthenticated, async (req: Request, res: Response) => {
     try {
         const { entityIds, telemetry, texts } = req.body;
         // Transform JSON body to Maps

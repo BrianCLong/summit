@@ -62,7 +62,7 @@ export class PolicyEngine {
 
       if (/^tenant\s+/i.test(line) && line.endsWith('{')) {
         const match = line.match(/^tenant\s+([\w*\-]+)\s*\{$/i);
-        if (!match) {
+        if (!match || !match[1]) {
           throw new Error(`Invalid tenant declaration: ${rawLine}`);
         }
         currentPolicy = createEmptyPolicy(match[1]);
@@ -156,7 +156,7 @@ export class PolicyEngine {
 
   private parseQuota(policy: TenantPolicy, statement: string) {
     const match = statement.match(/^quota\s+(\S+)\s+(\d+)(?:\s+per\s+([\w\-]+))?$/i);
-    if (!match) {
+    if (!match || !match[1] || !match[2]) {
       throw new Error(`Invalid quota statement: ${statement}`);
     }
     const [, toolName, limitStr, window] = match;

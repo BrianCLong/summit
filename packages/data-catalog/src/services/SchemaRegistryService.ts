@@ -17,7 +17,7 @@ export interface SchemaCompatibilityResult {
 }
 
 export class SchemaRegistryService {
-  constructor(private store: IMetadataStore) {}
+  constructor(private store: IMetadataStore) { }
 
   /**
    * Register a new schema version
@@ -255,8 +255,8 @@ export class SchemaRegistryService {
     const oldColumns = oldSchema.columns || [];
     const newColumns = newSchema.columns || [];
 
-    const oldColumnMap = new Map(oldColumns.map((c: any) => [c.name, c]));
-    const newColumnMap = new Map(newColumns.map((c: any) => [c.name, c]));
+    const oldColumnMap = new Map<string, any>(oldColumns.map((c: any) => [c.name, c]));
+    const newColumnMap = new Map<string, any>(newColumns.map((c: any) => [c.name, c]));
 
     // Check for removed columns
     for (const [name, oldCol] of oldColumnMap) {

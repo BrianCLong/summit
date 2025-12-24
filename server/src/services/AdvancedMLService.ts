@@ -1,5 +1,4 @@
-// @ts-nocheck
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { logger } from '../logging';
 import { CacheService } from './cacheService';
 
@@ -63,7 +62,7 @@ export class AdvancedMLService {
       });
       return response.status === 200;
     } catch (error) {
-      logger.error('ML service health check failed', { error: error.message });
+      logger.error('ML service health check failed', { error: error instanceof Error ? error.message : String(error) });
       return false;
     }
   }
@@ -78,7 +77,7 @@ export class AdvancedMLService {
       });
       return response.data;
     } catch (error) {
-      logger.error('Failed to get ML system info', { error: error.message });
+      logger.error('Failed to get ML system info', { error: error instanceof Error ? error.message : String(error) });
       throw new Error('ML service unavailable');
     }
   }
@@ -104,10 +103,10 @@ export class AdvancedMLService {
       return modelId;
     } catch (error) {
       logger.error('Failed to create ML model', {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         config,
       });
-      throw new Error(`Failed to create ML model: ${error.message}`);
+      throw new Error(`Failed to create ML model: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -121,7 +120,7 @@ export class AdvancedMLService {
       });
       return response.data.models;
     } catch (error) {
-      logger.error('Failed to list ML models', { error: error.message });
+      logger.error('Failed to list ML models', { error: error instanceof Error ? error.message : String(error) });
       throw new Error('Failed to retrieve ML models');
     }
   }
@@ -140,10 +139,10 @@ export class AdvancedMLService {
       return response.data;
     } catch (error) {
       logger.error('Failed to get ML model info', {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         modelId,
       });
-      throw new Error(`Failed to get model info: ${error.message}`);
+      throw new Error(`Failed to get model info: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -158,10 +157,10 @@ export class AdvancedMLService {
       logger.info('ML model deleted successfully', { modelId });
     } catch (error) {
       logger.error('Failed to delete ML model', {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         modelId,
       });
-      throw new Error(`Failed to delete model: ${error.message}`);
+      throw new Error(`Failed to delete model: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -185,10 +184,10 @@ export class AdvancedMLService {
       return response.data.message;
     } catch (error) {
       logger.error('Failed to start ML model training', {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         modelId: request.model_id,
       });
-      throw new Error(`Failed to start training: ${error.message}`);
+      throw new Error(`Failed to start training: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -200,7 +199,7 @@ export class AdvancedMLService {
       // Check cache first
       const cacheKey = `ml_inference:${request.model_id}:${JSON.stringify(request).slice(0, 100)}`;
       const cached = await this.cacheService.get(cacheKey);
-      if (cached) {
+      if (cached && typeof cached === 'string') {
         logger.debug('Returning cached ML inference result', {
           modelId: request.model_id,
         });
@@ -236,10 +235,10 @@ export class AdvancedMLService {
       return result;
     } catch (error) {
       logger.error('ML inference failed', {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         modelId: request.model_id,
       });
-      throw new Error(`Inference failed: ${error.message}`);
+      throw new Error(`Inference failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -280,11 +279,11 @@ export class AdvancedMLService {
       return response.data.message;
     } catch (error) {
       logger.error('ML model optimization failed', {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         modelId,
         optimizationType,
       });
-      throw new Error(`Optimization failed: ${error.message}`);
+      throw new Error(`Optimization failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -318,10 +317,10 @@ export class AdvancedMLService {
       return result;
     } catch (error) {
       logger.error('Quantum optimization failed', {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         problemType: request.problem_type,
       });
-      throw new Error(`Quantum optimization failed: ${error.message}`);
+      throw new Error(`Quantum optimization failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -354,8 +353,8 @@ export class AdvancedMLService {
 
       return result;
     } catch (error) {
-      logger.error('Quantum feature mapping failed', { error: error.message });
-      throw new Error(`Quantum feature mapping failed: ${error.message}`);
+      logger.error('Quantum feature mapping failed', { error: error instanceof Error ? error.message : String(error) });
+      throw new Error(`Quantum feature mapping failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -369,7 +368,7 @@ export class AdvancedMLService {
       });
       return response.data;
     } catch (error) {
-      logger.error('Failed to get ML metrics', { error: error.message });
+      logger.error('Failed to get ML metrics', { error: error instanceof Error ? error.message : String(error) });
       throw new Error('Failed to retrieve ML metrics');
     }
   }
@@ -384,7 +383,7 @@ export class AdvancedMLService {
       });
       return response.data;
     } catch (error) {
-      logger.error('Failed to get model metrics', { error: error.message });
+      logger.error('Failed to get model metrics', { error: error instanceof Error ? error.message : String(error) });
       throw new Error('Failed to retrieve model metrics');
     }
   }
@@ -437,10 +436,10 @@ export class AdvancedMLService {
       };
     } catch (error) {
       logger.error('Graph ML analysis failed', {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         analysisType,
       });
-      throw new Error(`Graph ML analysis failed: ${error.message}`);
+      throw new Error(`Graph ML analysis failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -479,9 +478,9 @@ export class AdvancedMLService {
       };
     } catch (error) {
       logger.error('Quantum graph optimization failed', {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       });
-      throw new Error(`Quantum graph optimization failed: ${error.message}`);
+      throw new Error(`Quantum graph optimization failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 }

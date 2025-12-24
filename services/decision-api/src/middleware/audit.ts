@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Audit logging middleware for Decision API
  */

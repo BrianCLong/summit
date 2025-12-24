@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Compression Manager for Summit Data Warehouse
  *

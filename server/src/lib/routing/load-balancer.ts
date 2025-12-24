@@ -1,9 +1,8 @@
 // @ts-nocheck
+import AdaptiveRouter from './adaptive-router.js';
+import MetricsCollector from './metrics-collector.js';
 
-import AdaptiveRouter from './adaptive-router';
-import MetricsCollector from './metrics-collector';
-
-import { Backend } from './types';
+import { Backend } from './types.js';
 
 /**
  * @class LoadBalancer
@@ -48,10 +47,15 @@ class LoadBalancer {
    * @param {string} [sessionId] - An optional session ID for sticky sessions.
    * @returns {Backend | null} The selected backend.
    */
-  public getNextBackend(strategy: 'weightedRoundRobin' | 'leastConnections' | 'lowestLatency', sessionId?: string): Backend | null {
+  public getNextBackend(
+    strategy: 'weightedRoundRobin' | 'leastConnections' | 'lowestLatency',
+    sessionId?: string,
+  ): Backend | null {
     if (sessionId && this.stickySessions.has(sessionId)) {
       const backendId = this.stickySessions.get(sessionId)!;
-      const backend = this.backends.find(b => b.id === backendId && b.status === 'UP');
+      const backend = this.backends.find(
+        (b) => b.id === backendId && b.status === 'UP',
+      );
       if (backend) {
         return backend;
       }
@@ -72,7 +76,7 @@ class LoadBalancer {
       clearInterval(this.healthCheckInterval);
     }
     this.healthCheckInterval = setInterval(() => {
-      this.backends.forEach(backend => {
+      this.backends.forEach((backend) => {
         // In a real implementation, this would be an actual health check (e.g., a TCP ping or an HTTP request).
         const isHealthy = Math.random() > 0.1; // 90% chance of being healthy.
         backend.status = isHealthy ? 'UP' : 'DOWN';
@@ -110,11 +114,15 @@ class LoadBalancer {
    * Updates backend properties with the latest metrics.
    */
   private updateBackendMetrics(): void {
-    const metrics = this.metrics.getMetrics() as any;
-    this.backends.forEach(backend => {
+    const metrics = this.metrics.getMetrics() as {
+      latencies: Record<string, number[]>;
+    };
+    this.backends.forEach((backend) => {
       const backendLatencies = metrics.latencies[backend.id];
       if (backendLatencies && backendLatencies.length > 0) {
-        const avgLatency = backendLatencies.reduce((a: number, b: number) => a + b, 0) / backendLatencies.length;
+        const avgLatency =
+          backendLatencies.reduce((a: number, b: number) => a + b, 0) /
+          backendLatencies.length;
         backend.latency = avgLatency;
       }
       // In a real implementation, we would also update connections from a reliable source.
@@ -136,7 +144,7 @@ class LoadBalancer {
    * @param {string} backendId - The ID of the backend to remove.
    */
   public removeBackend(backendId: string): void {
-    this.backends = this.backends.filter(b => b.id !== backendId);
+    this.backends = this.backends.filter((b) => b.id !== backendId);
     this.router.updateBackends(this.backends);
   }
 
@@ -145,7 +153,7 @@ class LoadBalancer {
    * @param {string} backendId - The ID of the backend.
    * @returns {any} A connection from the pool.
    */
-  public getConnection(backendId: string): any {
+  public getConnection(_backendId: string): { status: string } {
     // In a real implementation, this would manage a pool of connections.
     return { status: 'connected' };
   }
@@ -154,7 +162,7 @@ class LoadBalancer {
    * Placeholder for request queuing during overload.
    * @param {any} request - The request to queue.
    */
-  public queueRequest(request: any): void {
+  public queueRequest(_request: unknown): void {
     // In a real implementation, this would add the request to a queue.
   }
 }

@@ -1,0 +1,1 @@
+"quoted,field",99,"newline\ninside"

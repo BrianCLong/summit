@@ -1,9 +1,7 @@
-// @ts-nocheck
-
 import { EventEmitter } from 'events';
+import { randomUUID as uuidv4 } from 'crypto';
 import LLMService from './LLMService.js';
 import logger from '../utils/logger.js';
-import { randomUUID as uuidv4 } from 'crypto';
 
 /**
  * AI-Augmented Verification Swarm Service
@@ -20,9 +18,9 @@ export interface VerificationRequest {
   id?: string;
   type: 'IMAGE' | 'VIDEO' | 'CLAIM' | 'GEOLOCATION';
   content: string; // URL or text
-  context?: any;
+  context?: unknown;
   priority?: 'HIGH' | 'NORMAL' | 'LOW';
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface VerificationResult {
@@ -32,9 +30,9 @@ export interface VerificationResult {
   confidence: number; // 0-1
   agents_consensus: number; // 0-1
   details: {
-    photoAnalysis?: any;
-    geoAnalysis?: any;
-    factCheck?: any;
+    photoAnalysis?: unknown;
+    geoAnalysis?: unknown;
+    factCheck?: unknown;
     swarmDialogue?: string[]; // Log of agent interactions
   };
   timestamp: string;
@@ -61,9 +59,12 @@ export class VerificationSwarmService extends EventEmitter {
     // Process async to return ID immediately
     // Note: For testing purposes, we might want to await this if we can't sleep long enough
     // But sticking to the async pattern:
-    this.processVerification(id, request).catch(err => {
+    this.processVerification(id, request).catch((err: unknown) => {
       logger.error(`[VerificationSwarm] Error processing ${id}:`, err);
-      this.emit('error', { id, error: err.message });
+      this.emit('error', {
+        id,
+        error: err instanceof Error ? err.message : String(err)
+      });
     });
 
     return id;
@@ -79,7 +80,7 @@ export class VerificationSwarmService extends EventEmitter {
   /**
    * Core swarm orchestration logic.
    */
-  private async processVerification(id: string, request: VerificationRequest) {
+  private async processVerification(id: string, request: VerificationRequest): Promise<void> {
     logger.info(`[VerificationSwarm] Spawning agents for request ${id}`);
 
     // Parallel agent execution
@@ -115,7 +116,7 @@ export class VerificationSwarmService extends EventEmitter {
 
   // --- Agent Implementations (Simulated with LLM prompts) ---
 
-  private async runPhotoAnalyst(request: VerificationRequest) {
+  private async runPhotoAnalyst(request: VerificationRequest): Promise<{ status?: string; raw?: string; error?: string }> {
     if (request.type !== 'IMAGE' && request.type !== 'VIDEO') return { status: 'skipped' };
 
     const prompt = `
@@ -132,20 +133,19 @@ export class VerificationSwarmService extends EventEmitter {
     `;
 
     try {
-        const response = await this.llmService.complete({
-            prompt,
+        const response = await this.llmService.complete(prompt, {
             temperature: 0.1,
             maxTokens: 500
         });
         // Heuristic fallback if not JSON
         return { raw: response };
-    } catch (e) {
+    } catch (e: unknown) {
         logger.error(`[PhotoAnalyst] Failed`, e);
         return { error: 'Agent failed' };
     }
   }
 
-  private async runGeoExpert(request: VerificationRequest) {
+  private async runGeoExpert(request: VerificationRequest): Promise<{ raw?: string; error?: string }> {
     const prompt = `
       You are 'GeoExpert', a specialist in geolocation and chronolocation.
       Analyze the content/claim: "${request.content}"
@@ -158,18 +158,17 @@ export class VerificationSwarmService extends EventEmitter {
       Return a JSON object with 'location_match' (boolean), 'confidence' (0-1), and 'coordinates' (if found).
     `;
      try {
-        const response = await this.llmService.complete({
-            prompt,
+        const response = await this.llmService.complete(prompt, {
             temperature: 0.1,
             maxTokens: 500
         });
         return { raw: response };
-    } catch (e) {
+    } catch (e: unknown) {
         return { error: 'Agent failed' };
     }
   }
 
-  private async runFactChecker(request: VerificationRequest) {
+  private async runFactChecker(request: VerificationRequest): Promise<{ raw?: string; error?: string }> {
     const prompt = `
       You are 'FactChecker', a researcher with access to real-time search tools.
       Verify the claim: "${request.content}"
@@ -181,18 +180,29 @@ export class VerificationSwarmService extends EventEmitter {
       Return a JSON object with 'verified' (boolean), 'sources' (list), and 'notes'.
     `;
      try {
-        const response = await this.llmService.complete({
-            prompt,
+        const response = await this.llmService.complete(prompt, {
             temperature: 0.2,
             maxTokens: 500
         });
         return { raw: response };
-    } catch (e) {
+    } catch (e: unknown) {
         return { error: 'Agent failed' };
     }
   }
 
-  private async synthesizeSwarmResults(request: VerificationRequest, agentResults: any) {
+  private async synthesizeSwarmResults(
+    request: VerificationRequest,
+    agentResults: {
+      photoAnalysis: unknown;
+      geoAnalysis: unknown;
+      factCheck: unknown;
+    }
+  ): Promise<{
+    verdict: 'VERIFIED' | 'DEBUNKED' | 'INCONCLUSIVE';
+    confidence: number;
+    consensus: number;
+    dialogue: string[];
+  }> {
     const prompt = `
       You are the 'SwarmLead', synthesizing results from multiple specialized agents.
 
@@ -213,8 +223,7 @@ export class VerificationSwarmService extends EventEmitter {
     `;
 
     try {
-        const response = await this.llmService.complete({
-            prompt,
+        const response = await this.llmService.complete(prompt, {
             temperature: 0.0,
             maxTokens: 500
         });
@@ -222,10 +231,10 @@ export class VerificationSwarmService extends EventEmitter {
         try {
             return JSON.parse(response);
         } catch {
-             return { verdict: 'INCONCLUSIVE', confidence: 0.5, consensus: 0.5, dialogue: [response] };
+             return { verdict: 'INCONCLUSIVE' as const, confidence: 0.5, consensus: 0.5, dialogue: [response] };
         }
-    } catch (e) {
-        return { verdict: 'INCONCLUSIVE', confidence: 0.0, consensus: 0.0, dialogue: ['Synthesis failed'] };
+    } catch (e: unknown) {
+        return { verdict: 'INCONCLUSIVE' as const, confidence: 0.0, consensus: 0.0, dialogue: ['Synthesis failed'] };
     }
   }
 }

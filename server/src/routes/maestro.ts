@@ -30,6 +30,7 @@ import { MaestroEngine } from '../maestro/engine';
 import { MaestroTemplate } from '../maestro/model';
 import { Pool } from 'pg';
 import { logger } from '../utils/logger';
+import { recordEndpointResult } from '../observability/reliability-metrics.js';
 
 // Note: This assumes `req.user` is populated by auth middleware
 // and `engine` and `db` are injected or available via singleton/context.
@@ -41,16 +42,47 @@ export const createMaestroRouter = (engine: MaestroEngine, db: Pool) => {
   // --- Runs ---
 
   router.post('/runs', ensureAuthenticated, async (req, res) => {
+    const start = process.hrtime();
+    const tenantId = (req as any).user.tenantId;
+
     try {
       const { templateId, input } = req.body;
-      const tenantId = (req as any).user.tenantId;
       const principalId = (req as any).user.id;
 
-      if (!templateId) return res.status(400).json({ error: 'templateId required' });
+      if (!templateId) {
+        recordEndpointResult({
+          endpoint: 'maestro_execution',
+          statusCode: 400,
+          durationSeconds: 0,
+          tenantId
+        });
+        return res.status(400).json({ error: 'templateId required' });
+      }
 
       const run = await engine.createRun(tenantId, templateId, input, principalId);
+
+      const [seconds, nanoseconds] = process.hrtime(start);
+      const duration = seconds + nanoseconds / 1e9;
+
+      recordEndpointResult({
+        endpoint: 'maestro_execution',
+        statusCode: 201,
+        durationSeconds: duration,
+        tenantId
+      });
+
       res.status(201).json(run);
     } catch (err: any) {
+      const [seconds, nanoseconds] = process.hrtime(start);
+      const duration = seconds + nanoseconds / 1e9;
+
+      recordEndpointResult({
+        endpoint: 'maestro_execution',
+        statusCode: 500,
+        durationSeconds: duration,
+        tenantId
+      });
+
       logger.error('Failed to create run', err);
       res.status(500).json({ error: err.message });
     }

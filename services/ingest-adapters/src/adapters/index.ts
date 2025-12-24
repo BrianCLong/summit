@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Ingest Adapters Index
  *
@@ -16,6 +15,9 @@ export type { WebhookRequest, WebhookResponse } from './webhook.js';
 // Factory function to create adapters by type
 import type { AdapterConfig, IngestAdapter, AdapterEvents } from '../types/index.js';
 import type { CheckpointStore, DLQStore } from './base.js';
+import { S3Adapter } from './s3.js';
+import { KafkaAdapter } from './kafka.js';
+import { WebhookAdapter } from './webhook.js';
 import pino from 'pino';
 
 export interface CreateAdapterOptions {

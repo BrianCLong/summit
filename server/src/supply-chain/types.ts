@@ -1,4 +1,36 @@
 
+export interface FinanceRecord {
+  id: string;
+  amount: number;
+  currency: string;
+  date: string;
+  invoiceId?: string;
+  description?: string;
+}
+
+export interface SSOLog {
+  id: string;
+  userId: string;
+  timestamp: string;
+  action: 'login' | 'logout' | 'failed_login';
+}
+
+export interface ExpenseRecord {
+  id: string;
+  employeeId: string;
+  amount: number;
+  currency: string;
+  date: string;
+  category: string;
+  description?: string;
+}
+
+export interface DataAccess {
+  systems: string[];
+  dataTypes: string[]; // e.g., "PII", "Financial", "Health"
+  accessMethods: string[]; // e.g., "API", "Portal", "SFTP"
+}
+
 export interface Vendor {
   id: string;
   name: string;
@@ -11,6 +43,22 @@ export interface Vendor {
     gdpr: boolean;
     lastAuditDate?: string;
   };
+
+  // Epic 1 additions
+  owner?: string;
+  purpose?: string;
+  costCenter?: string;
+  renewalDate?: string;
+  usageLevel?: 'high' | 'medium' | 'low';
+  criticality?: 'Tier 0' | 'Tier 1' | 'Tier 2';
+
+  dataAccess?: DataAccess;
+
+  // Inventory data
+  financeRecords?: FinanceRecord[];
+  ssoLogs?: SSOLog[];
+  expenseData?: ExpenseRecord[];
+
   createdAt: string;
   updatedAt: string;
 }

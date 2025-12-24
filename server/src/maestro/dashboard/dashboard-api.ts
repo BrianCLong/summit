@@ -1,5 +1,5 @@
-// @ts-nocheck
 import express from 'express';
+import type { Request, Response } from 'express';
 import { runsRepo } from '../runs/runs-repo.js';
 import { Pool } from 'pg';
 import { ensureAuthenticated } from '../../middleware/auth.js';
@@ -18,7 +18,7 @@ const pool = new Pool({
 router.get(
   '/summary',
   requirePermission('dashboard:read'),
-  async (_req, res) => {
+  async (_req: Request, res: Response) => {
     try {
       // Get runs statistics
       const runsQuery = `
@@ -50,7 +50,7 @@ router.get(
       );
 
       // Get recent runs for activity feed
-      const recentRuns = await runsRepo.list(8);
+      const recentRuns = await runsRepo.list('default', 8);
 
       // Get recent approvals (mock for now)
       const approvals =
@@ -113,7 +113,7 @@ router.get(
 router.get(
   '/pipelines',
   requirePermission('pipeline:read'),
-  async (_req, res) => {
+  async (_req: Request, res: Response) => {
     try {
       const query = `
       SELECT p.id, p.name, p.spec, p.created_at,
@@ -148,7 +148,7 @@ router.get(
 router.get(
   '/autonomy',
   requirePermission('autonomy:read'),
-  async (_req, res) => {
+  async (_req: Request, res: Response) => {
     try {
       // Calculate autonomy level based on system health
       const healthQuery = `
@@ -196,7 +196,7 @@ router.get(
 router.put(
   '/autonomy',
   requirePermission('autonomy:update'),
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     try {
       const { level } = req.body;
 
@@ -234,7 +234,7 @@ router.put(
 );
 
 // GET /recipes - Available recipes/templates
-router.get('/recipes', requirePermission('recipe:read'), async (_req, res) => {
+router.get('/recipes', requirePermission('recipe:read'), async (_req: Request, res: Response) => {
   try {
     const recipes = [
       { id: 'r1', name: 'Rapid Attribution', version: '1.0.0', verified: true },

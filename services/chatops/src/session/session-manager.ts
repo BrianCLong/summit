@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ChatOps Session Manager
  *

@@ -1,6 +1,3 @@
-// @ts-nocheck
-import * as crypto from 'node:crypto';
-import fetch from 'node-fetch';
 import crypto from 'node:crypto';
 import { writeAudit } from '../../utils/audit.js';
 import type { CryptoAuditEvent, JsonObject, KeyVersion } from './types.js';
@@ -84,7 +81,7 @@ export class Rfc3161TimestampingService implements TimestampingService {
   ) { }
 
   async getTimestampToken(payload: Buffer): Promise<string> {
-    const fetchFn = global.fetch;
+    const fetchFn: typeof fetch = global.fetch as typeof fetch;
     const response = await fetchFn(this.endpoint, {
       method: 'POST',
       headers: {
@@ -131,7 +128,7 @@ export class Rfc3161TimestampingService implements TimestampingService {
     }
 
       // Use native fetch if available (Node 18+) or dynamic import
-      const fetchFn = global.fetch;
+      const fetchFn: typeof fetch = global.fetch as typeof fetch;
 
       const response = await fetchFn(this.options.verifyEndpoint, {
       method: 'POST',

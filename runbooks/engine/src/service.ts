@@ -9,9 +9,9 @@ import express, { Express } from 'express';
 import { RunbookEngine } from './engine';
 import { createRunbookAPI } from './api';
 import {
-  CallServiceExecutor,
-  WaitForEventExecutor,
-  HumanApprovalExecutor,
+  ServiceCallExecutor,
+  EventWaitExecutor,
+  ApprovalExecutor,
   ConditionalExecutor,
   LoopExecutor,
 } from './executors';
@@ -61,9 +61,9 @@ export class RunbookService {
    * Register standard step executors
    */
   private registerStandardExecutors(): void {
-    this.engine.registerExecutor(new CallServiceExecutor());
-    this.engine.registerExecutor(new WaitForEventExecutor());
-    this.engine.registerExecutor(new HumanApprovalExecutor());
+    this.engine.registerExecutor(new ServiceCallExecutor());
+    this.engine.registerExecutor(new EventWaitExecutor());
+    this.engine.registerExecutor(new ApprovalExecutor());
     this.engine.registerExecutor(new ConditionalExecutor());
     this.engine.registerExecutor(new LoopExecutor());
   }
@@ -235,14 +235,14 @@ export async function createServiceFromEnv(): Promise<RunbookService> {
     const postgresConfig: PostgresConfig = process.env.DATABASE_URL
       ? { connectionString: process.env.DATABASE_URL }
       : {
-          host: process.env.DB_HOST,
-          port: parseInt(process.env.DB_PORT || '5432', 10),
-          database: process.env.DB_NAME || 'runbooks',
-          user: process.env.DB_USER,
-          password: process.env.DB_PASSWORD,
-          ssl: process.env.DB_SSL === 'true',
-          max: parseInt(process.env.DB_POOL_MAX || '20', 10),
-        };
+        host: process.env.DB_HOST,
+        port: parseInt(process.env.DB_PORT || '5432', 10),
+        database: process.env.DB_NAME || 'runbooks',
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        ssl: process.env.DB_SSL === 'true',
+        max: parseInt(process.env.DB_POOL_MAX || '20', 10),
+      };
 
     storage = new PostgresStorage(postgresConfig);
     console.log('Initializing PostgreSQL storage backend...');

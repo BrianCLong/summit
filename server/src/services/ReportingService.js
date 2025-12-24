@@ -609,6 +609,26 @@ class ReportingService extends EventEmitter {
 
       // Generate output format
       report.progress = 90;
+
+      // Citation Gate Validation
+      try {
+        const { CitationGate } = await import('../gates/CitationGate.ts').catch(
+          () => import('../gates/CitationGate.js'),
+        );
+        if (CitationGate) {
+          const payload = { sections: report.sections };
+          const validated = await CitationGate.validateCitations(payload, {
+            tenantId: report.parameters.tenantId || 'default',
+            userId: report.requestedBy,
+          });
+          report.sections = validated.sections;
+        }
+      } catch (error) {
+        this.logger.warn('CitationGate check failed or skipped', {
+          error: error.message,
+        });
+      }
+
       const outputData = await this.generateReportOutput(report, template);
 
       report.outputPath = outputData.path;

@@ -2,6 +2,9 @@
 export type ProviderId = "openai" | "anthropic" | "mock" | "groq" | "openrouter" | "other";
 export type ModelId = string;
 export type Role = "system" | "user" | "assistant" | "tool";
+export type ModelClass = "smart" | "fast" | "balanced" | "vision" | "embedding";
+export type SensitivityLevel = "low" | "medium" | "high" | "critical";
+export type TaskType = "rag_answer" | "summarization" | "classification" | "agent" | "tool_call" | "embedding" | "other";
 
 export interface ToolCallInvocation {
   toolName: string;
@@ -73,9 +76,74 @@ export interface RoutingDecision {
 }
 
 export interface RoutingPolicy {
-  chooseModel(ctx: RoutingContext): RoutingDecision;
+  name: string;
+  chooseModel?(ctx: RoutingContext): RoutingDecision;
+  sortProviders(providers: ProviderAdapter[], request: LLMRequest): Promise<ProviderAdapter[]>;
 }
 
 export interface LlmOrchestrator {
   chat(request: ChatCompletionRequest): Promise<ChatCompletionResult>;
+}
+
+// Legacy types for router compatibility
+export type ProviderType = ProviderId;
+
+export interface Message {
+  role: Role;
+  content: string;
+}
+
+export interface LLMRequest {
+  id: string;
+  messages: Message[];
+  model?: string;
+  maxTokens?: number;
+  temperature?: number;
+  tags?: string[];
+  budget?: {
+    maxCost?: number;
+  };
+  tools?: unknown;
+  toolChoice?: unknown;
+}
+
+export interface LLMResponse {
+  id: string;
+  requestId: string;
+  provider: ProviderType;
+  model: string;
+  text: string;
+  usage: {
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+    cost?: number;
+  };
+  latencyMs: number;
+  cached: boolean;
+  toolCalls?: unknown;
+}
+
+export interface ModelCapability {
+  name: string;
+  tags: string[];
+  inputCostPer1k: number;
+  outputCostPer1k: number;
+  avgLatencyMs?: number;
+  contextWindow?: number;
+}
+
+export interface ProviderAdapter {
+  name: ProviderType;
+  isHealthy(): boolean;
+  supports(model: string): boolean;
+  estimateCost(request: LLMRequest): number;
+  getCapabilities(): ModelCapability[];
+  generate(request: LLMRequest): Promise<LLMResponse>;
+}
+
+export interface SafetyGuardrail {
+  name: string;
+  validateRequest(request: LLMRequest): Promise<LLMRequest>;
+  validateResponse(response: LLMResponse): Promise<LLMResponse>;
 }

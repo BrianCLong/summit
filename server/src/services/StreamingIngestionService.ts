@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Queue, Worker, Job } from 'bullmq';
+import { Queue, Worker, type Job } from 'bullmq';
 import { OsintConnector } from '../connectors/implementations/OsintConnector.js';
 import { OsintSourceType, OsintRecord, IngestionEvent } from '../connectors/types.js';
 import { provenanceLedger } from '../provenance/ledger.js';
@@ -7,7 +7,7 @@ import { randomUUID } from 'crypto';
 import pino from 'pino';
 import { Counter, Histogram } from 'prom-client';
 
-const logger = pino({ name: 'StreamingIngestionService' });
+const logger = (pino as any)({ name: 'StreamingIngestionService' });
 
 // Metrics
 const recordsIngested = new Counter({

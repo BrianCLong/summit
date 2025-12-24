@@ -49,7 +49,7 @@ export class LaunchDarklyProvider implements FeatureFlagProvider {
    */
   async initialize(): Promise<void> {
     try {
-      await this.client.waitForInitialization({ timeout: this.timeout / 1000 });
+      await this.client.waitForInitialization();
       this.ready = true;
     } catch (error) {
       throw new Error(
@@ -82,7 +82,7 @@ export class LaunchDarklyProvider implements FeatureFlagProvider {
     context: FlagContext,
   ): Promise<FlagEvaluation<boolean>> {
     const ldContext = this.buildLDContext(context);
-    const detail = await this.client.booleanVariationDetail(
+    const detail = await this.client.variationDetail(
       key,
       ldContext,
       defaultValue,
@@ -107,7 +107,7 @@ export class LaunchDarklyProvider implements FeatureFlagProvider {
     context: FlagContext,
   ): Promise<FlagEvaluation<string>> {
     const ldContext = this.buildLDContext(context);
-    const detail = await this.client.stringVariationDetail(
+    const detail = await this.client.variationDetail(
       key,
       ldContext,
       defaultValue,
@@ -132,7 +132,7 @@ export class LaunchDarklyProvider implements FeatureFlagProvider {
     context: FlagContext,
   ): Promise<FlagEvaluation<number>> {
     const ldContext = this.buildLDContext(context);
-    const detail = await this.client.numberVariationDetail(
+    const detail = await this.client.variationDetail(
       key,
       ldContext,
       defaultValue,
@@ -157,7 +157,7 @@ export class LaunchDarklyProvider implements FeatureFlagProvider {
     context: FlagContext,
   ): Promise<FlagEvaluation<T>> {
     const ldContext = this.buildLDContext(context);
-    const detail = await this.client.jsonVariationDetail(
+    const detail = await this.client.variationDetail(
       key,
       ldContext,
       defaultValue,
@@ -190,7 +190,7 @@ export class LaunchDarklyProvider implements FeatureFlagProvider {
     for (const [key, value] of Object.entries(flags)) {
       const flagState = allFlags.getFlagValue(key);
       const reason = allFlags.getFlagReason(key);
-      const variation = allFlags.getVariationIndex(key);
+      const variation = null; // allFlags.getVariationIndex(key) not available in v7
 
       result[key] = {
         key,

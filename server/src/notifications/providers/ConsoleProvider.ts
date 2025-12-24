@@ -1,8 +1,7 @@
-// @ts-nocheck
 import { NotificationProvider, NotificationChannel, NotificationPayload, NotificationResult } from '../types.js';
 import pino from 'pino';
 
-const logger = pino({ name: 'ConsoleProvider' });
+const logger = (pino as any)({ name: 'ConsoleProvider' });
 
 export class ConsoleProvider implements NotificationProvider {
   channel: NotificationChannel;

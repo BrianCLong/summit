@@ -2,7 +2,7 @@
 // Verifiable Sync Log: Cryptographically signed, tamper-evident sync logs
 // Ensures integrity and non-repudiation of offline sync operations
 
-import crypto from 'crypto';
+import { createHash, createSign, createVerify, randomUUID } from 'crypto';
 import Redis from 'ioredis';
 import { Pool } from 'pg';
 import logger from '../../config/logger.js';
@@ -103,7 +103,7 @@ export class VerifiableSyncLog {
     syncDirection: 'inbound' | 'outbound',
   ): Promise<SyncLogEntry> {
     try {
-      const entryId = crypto.randomUUID();
+      const entryId = randomUUID();
       const timestamp = new Date();
       const sequenceNumber = this.getNextSequence(nodeId);
 
@@ -179,7 +179,7 @@ export class VerifiableSyncLog {
     sessionId: string,
   ): Promise<SyncBatch> {
     try {
-      const batchId = crypto.randomUUID();
+      const batchId = randomUUID();
       const startTime = new Date();
 
       // Build Merkle tree for batch
@@ -433,7 +433,7 @@ export class VerifiableSyncLog {
     const lastEntry = await this.redis.zrevrange(`sync_log:${nodeId}`, 0, 0);
     if (lastEntry.length === 0) {
       // Genesis entry
-      return crypto.createHash('sha256').update('genesis').digest('hex');
+      return createHash('sha256').update('genesis').digest('hex');
     }
 
     const entry: SyncLogEntry = JSON.parse(lastEntry[0]);
@@ -452,7 +452,7 @@ export class VerifiableSyncLog {
       previousHash: entry.previousHash,
     });
 
-    return crypto.createHash('sha256').update(data).digest('hex');
+    return createHash('sha256').update(data).digest('hex');
   }
 
   private buildMerkleTree(operations: CRDTOperation[]): {
@@ -461,7 +461,7 @@ export class VerifiableSyncLog {
   } {
     // Hash each operation
     const leaves = operations.map((op) =>
-      crypto.createHash('sha256').update(JSON.stringify(op)).digest('hex'),
+      createHash('sha256').update(JSON.stringify(op)).digest('hex'),
     );
 
     const tree: string[][] = [leaves];
@@ -475,8 +475,7 @@ export class VerifiableSyncLog {
         const left = currentLevel[i];
         const right = currentLevel[i + 1] || left; // Duplicate if odd
 
-        const combined = crypto
-          .createHash('sha256')
+        const combined = createHash('sha256')
           .update(left + right)
           .digest('hex');
 
@@ -523,8 +522,7 @@ export class VerifiableSyncLog {
   private async verifyHashChain(entry: SyncLogEntry): Promise<boolean> {
     if (entry.sequenceNumber === 1) {
       // Genesis entry
-      const genesisHash = crypto
-        .createHash('sha256')
+      const genesisHash = createHash('sha256')
         .update('genesis')
         .digest('hex');
       return entry.previousHash === genesisHash;

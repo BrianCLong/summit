@@ -1,8 +1,7 @@
-// @ts-nocheck
 import { jest } from '@jest/globals';
 
 // We need to mock process.exit before importing config
-const mockExit = jest.spyOn(process, 'exit').mockImplementation((code) => {
+const mockExit = jest.spyOn(process, 'exit').mockImplementation((code?: number | string): never => {
   throw new Error(`process.exit called with ${code}`);
 });
 

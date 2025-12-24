@@ -1,33 +1,33 @@
-// @ts-nocheck
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { UsageKind } from '../../types/usage';
+import { UsageKind } from '../../types/usage.js';
+import type { PoolClient, QueryResult } from 'pg';
 
 // 1. Create dependencies
-const mockQuery = jest.fn();
+const mockQuery = jest.fn<() => Promise<QueryResult<any>>>();
 // IMPORTANT: mockConnect MUST return an object that mocks the client.
 // The client has methods like query() and release().
-const mockRelease = jest.fn();
-const mockClient = {
+const mockRelease = jest.fn<() => Promise<void>>();
+const mockClient: PoolClient = {
   query: mockQuery,
   release: mockRelease,
-};
-const mockConnect = jest.fn(() => Promise.resolve(mockClient));
+} as unknown as PoolClient;
+const mockConnect = jest.fn<() => Promise<PoolClient>>(() => Promise.resolve(mockClient));
 
 // 2. Mock modules
-jest.mock('../../config/database', () => ({
+jest.mock('../../config/database.js', () => ({
   getPostgresPool: () => ({
       connect: mockConnect
   }),
 }));
 
-jest.mock('../../utils/logger', () => ({
+jest.mock('../../utils/logger.js', () => ({
   error: jest.fn(),
 }));
 
-jest.mock('../../utils/metrics', () => ({
+jest.mock('../../utils/metrics.js', () => ({
   PrometheusMetrics: class {
-    createCounter() {}
-    incrementCounter() {}
+    createCounter(): void {}
+    incrementCounter(): void {}
   }
 }));
 
@@ -36,7 +36,7 @@ jest.mock('../../utils/metrics', () => ({
 // However, since we mock entire modules with `jest.mock`, the hoisting is handled by Jest.
 // But the issue might be that UsageMeteringService calls getPostgresPool inside constructor or similar.
 // Let's rely on Jest hoisting.
-import { UsageMeteringService } from '../UsageMeteringService';
+import { UsageMeteringService } from '../UsageMeteringService.js';
 
 describe('UsageMeteringService', () => {
   let service: UsageMeteringService;

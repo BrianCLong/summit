@@ -1,10 +1,9 @@
-// @ts-nocheck
-import { modelQuantumThreats } from '../ai/quantumModelEngine';
-import { simulateCognitiveTwins } from '../ai/cognitiveTwins';
-import { correlateBehavioralDna } from '../ai/behavioralDnaNetwork';
-import { runOtRedTeam } from '../ai/otDigitalTwinRedTeam';
-import { orchestrateContinuity } from '../ai/serviceContinuityOrchestrator';
-import { analyzeContent } from '../ai/deepfakeSentinel';
+import { modelQuantumThreats } from '../ai/quantumModelEngine.js';
+import { simulateCognitiveTwins } from '../ai/cognitiveTwins.js';
+import { correlateBehavioralDna } from '../ai/behavioralDnaNetwork.js';
+import { runOtRedTeam } from '../ai/otDigitalTwinRedTeam.js';
+import { orchestrateContinuity } from '../ai/serviceContinuityOrchestrator.js';
+import { analyzeContent } from '../ai/deepfakeSentinel.js';
 import { describe, it, expect } from '@jest/globals';
 
 describe('feature placeholders', () => {

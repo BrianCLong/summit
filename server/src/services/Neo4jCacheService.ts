@@ -25,7 +25,7 @@ export class Neo4jCacheService {
     /**
      * Generates a standardized cache key for graph queries
      */
-    static generateKey(prefix: string, tenantId: string, params: Record<string, any>): string {
+    static generateKey(prefix: string, tenantId: string, params: Record<string, unknown>): string {
         const paramStr = Object.entries(params)
             .sort(([a], [b]) => a.localeCompare(b))
             .map(([k, v]) => `${k}:${v}`)

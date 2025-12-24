@@ -482,7 +482,7 @@ export class ArchivalTieringService {
     });
 
     const response = await this.s3Client.send(command);
-    let buffer = await this.streamToBuffer(response.Body as any);
+    let buffer = await this.streamToBuffer(response.Body as NodeJS.ReadableStream);
 
     // Decompress if needed
     if (s3Key.endsWith('.gz')) {
@@ -525,10 +525,10 @@ export class ArchivalTieringService {
   /**
    * Convert stream to buffer
    */
-  private async streamToBuffer(stream: any): Promise<Buffer> {
+  private async streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
     const chunks: Buffer[] = [];
     for await (const chunk of stream) {
-      chunks.push(Buffer.from(chunk));
+      chunks.push(Buffer.from(chunk as Uint8Array));
     }
     return Buffer.concat(chunks);
   }

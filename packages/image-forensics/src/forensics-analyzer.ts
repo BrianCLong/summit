@@ -51,6 +51,12 @@ export class ForensicsAnalyzer extends BaseComputerVisionModel implements IImage
     super({
       model_name: 'forensics_analyzer',
       device: config?.device || 'cuda',
+      batch_size: config?.batch_size || 1,
+      confidence_threshold: config?.confidence_threshold || 0.5,
+      nms_threshold: config?.nms_threshold || 0.4,
+      max_detections: config?.max_detections || 100,
+      fp16: config?.fp16 || false,
+      int8: config?.int8 || false,
       ...config,
     });
   }

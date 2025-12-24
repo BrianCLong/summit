@@ -133,7 +133,7 @@ export const TargetSchema = z.object({
   validFrom: z.string(),
   validUntil: z.string().optional(),
 
-  metadata: z.record(z.unknown()),
+  metadata: z.record(z.string(), z.unknown()),
   createdAt: z.string(),
   updatedAt: z.string()
 });
@@ -237,7 +237,7 @@ export const TargetPackageSchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
 
-  metadata: z.record(z.unknown())
+  metadata: z.record(z.string(), z.unknown())
 });
 
 // ============================================================================
@@ -293,7 +293,7 @@ export const StrikeRequestSchema = z.object({
   requestedBy: z.string(),
   approvedBy: z.string().optional(),
 
-  metadata: z.record(z.unknown())
+  metadata: z.record(z.string(), z.unknown())
 });
 
 // ============================================================================
@@ -354,7 +354,7 @@ export const BattleDamageAssessmentSchema = z.object({
   validated: z.boolean(),
   validatedBy: z.string().optional(),
 
-  metadata: z.record(z.unknown())
+  metadata: z.record(z.string(), z.unknown())
 });
 
 // ============================================================================
@@ -435,7 +435,7 @@ export const HighValueTargetSchema = z.object({
     summary: z.string()
   })),
 
-  metadata: z.record(z.unknown()),
+  metadata: z.record(z.string(), z.unknown()),
   createdAt: z.string(),
   updatedAt: z.string()
 });

@@ -1,12 +1,13 @@
+// @ts-nocheck
 /**
  * Admin Routes
  * REST API routes for KB administration
  */
 
-import { Router } from 'express';
+import { Router, type Router as RouterType } from 'express';
 import { adminController } from '../controllers/index.js';
 
-const router = Router();
+const router: RouterType = Router();
 
 // Tags
 router.get('/tags', (req, res, next) => adminController.listTags(req, res, next));

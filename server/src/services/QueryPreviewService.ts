@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * QueryPreviewService - Generates query previews with cost estimation and edit capability
  *
@@ -19,6 +18,7 @@ import { metrics } from '../observability/metrics.js';
 import { NlToCypherService } from '../ai/nl-to-cypher/nl-to-cypher.service.js';
 import { GlassBoxRunService } from './GlassBoxRunService.js';
 import { QueryResultCache, type QueryResultPayload } from './queryResultCache.js';
+import { wrapCypherWithPagination } from './pagination.js';
 
 export type QueryLanguage = 'cypher' | 'sql';
 
@@ -866,8 +866,8 @@ export class QueryPreviewService {
       }) => void;
     }
   ): Promise<{
-    records: any[];
-    rows?: any[];
+    records: unknown[];
+    rows?: unknown[];
     warnings: string[];
     nextCursor?: number;
     hasMore?: boolean;
@@ -929,8 +929,8 @@ export class QueryPreviewService {
       }) => void;
     }
   ): Promise<{
-    rows: any[];
-    records: any[];
+    rows: unknown[];
+    records: unknown[];
     warnings: string[];
     nextCursor?: number;
     hasMore?: boolean;
@@ -1043,41 +1043,37 @@ export class QueryPreviewService {
   /**
    * Convert database row to QueryPreview
    */
-  private rowToPreview(row: any): QueryPreview {
+  private rowToPreview(row: Record<string, unknown>): QueryPreview {
     return {
-      id: row.id,
-      investigationId: row.investigation_id,
-      tenantId: row.tenant_id,
-      userId: row.user_id,
-      naturalLanguageQuery: row.natural_language_query,
-      parameters: JSON.parse(row.parameters || '{}'),
-      language: row.language,
-      generatedQuery: row.generated_query,
-      queryExplanation: row.query_explanation,
-      costEstimate: JSON.parse(row.cost_estimate),
-      riskAssessment: JSON.parse(row.risk_assessment),
-      syntacticallyValid: row.syntactically_valid,
-      validationErrors: JSON.parse(row.validation_errors || '[]'),
-      canExecute: row.can_execute,
-      requiresApproval: row.requires_approval,
-      sandboxOnly: row.sandbox_only,
-      modelUsed: row.model_used,
-      confidence: parseFloat(row.confidence),
-      generatedAt: new Date(row.generated_at),
-      expiresAt: new Date(row.expires_at),
-      executed: row.executed,
-      executedAt: row.executed_at ? new Date(row.executed_at) : undefined,
-      executionRunId: row.execution_run_id,
-      editedQuery: row.edited_query,
-      editedBy: row.edited_by,
-      editedAt: row.edited_at ? new Date(row.edited_at) : undefined,
-      createdAt: new Date(row.created_at),
-      updatedAt: new Date(row.updated_at),
+      id: row.id as string,
+      investigationId: row.investigation_id as string,
+      tenantId: row.tenant_id as string,
+      userId: row.user_id as string,
+      naturalLanguageQuery: row.natural_language_query as string,
+      parameters: JSON.parse((row.parameters as string) || '{}'),
+      language: row.language as QueryLanguage,
+      generatedQuery: row.generated_query as string,
+      queryExplanation: row.query_explanation as string,
+      costEstimate: JSON.parse(row.cost_estimate as string),
+      riskAssessment: JSON.parse(row.risk_assessment as string),
+      syntacticallyValid: row.syntactically_valid as boolean,
+      validationErrors: JSON.parse((row.validation_errors as string) || '[]'),
+      canExecute: row.can_execute as boolean,
+      requiresApproval: row.requires_approval as boolean,
+      sandboxOnly: row.sandbox_only as boolean,
+      modelUsed: row.model_used as string,
+      confidence: parseFloat(row.confidence as string),
+      generatedAt: new Date(row.generated_at as string),
+      expiresAt: new Date(row.expires_at as string),
+      executed: row.executed as boolean,
+      executedAt: row.executed_at ? new Date(row.executed_at as string) : undefined,
+      executionRunId: row.execution_run_id as string | undefined,
+      editedQuery: row.edited_query as string | undefined,
+      editedBy: row.edited_by as string | undefined,
+      editedAt: row.edited_at ? new Date(row.edited_at as string) : undefined,
+      createdAt: new Date(row.created_at as string),
+      updatedAt: new Date(row.updated_at as string),
     };
-  }
-
-  private wrapCypherWithPagination(query: string): string {
-    return `${query.replace(/;?\s*$/, '')} SKIP $skip LIMIT $limitPlusOne`;
   }
 
   private wrapSqlWithPagination(query: string): string {

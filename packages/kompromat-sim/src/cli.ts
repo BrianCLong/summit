@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @ts-nocheck
 import { buildStar } from './graph';
 import { simulate } from './sim';
 

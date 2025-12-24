@@ -382,7 +382,17 @@ export class PostgresConfigRepository<TConfig = Record<string, any>>
     await this.pool.end();
   }
 
-  private mapRowToConfigVersion(row: any): ConfigVersion<TConfig> {
+  private mapRowToConfigVersion(row: {
+    config_id: string;
+    config: TConfig;
+    overrides: Partial<Record<EnvironmentName, Partial<TConfig>>>;
+    metadata: ConfigMetadata;
+    created_at: Date;
+    checksum: string;
+    ab_test?: unknown;
+    canary?: unknown;
+    feature_flags?: unknown;
+  }): ConfigVersion<TConfig> {
     return {
       id: row.config_id,
       config: row.config,
