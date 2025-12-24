@@ -348,8 +348,8 @@ describe('AuthService', () => {
       };
 
       (jwt.verify as any).mockReturnValue(mockPayload);
-      (mockPool.query as jest.Mock).mockResolvedValue({ rows: [] } as any);
-      mockClient.query.mockResolvedValue({ rows: [mockUser] } as any);
+      (mockPool.query as any).mockResolvedValue({ rows: [] });
+      mockClient.query.mockResolvedValue({ rows: [mockUser] });
 
       const result = await authService.verifyToken(mockToken);
 
@@ -609,8 +609,8 @@ describe('AuthService', () => {
       };
 
       (jwt.verify as any).mockReturnValue(mockPayload);
-      (mockPool.query as jest.Mock).mockResolvedValue({ rows: [] } as any);
-      mockClient.query.mockResolvedValue({ rows: [mockUser] } as any);
+      (mockPool.query as any).mockResolvedValue({ rows: [] });
+      mockClient.query.mockResolvedValue({ rows: [mockUser] });
 
       const result = await authService.verifyToken(mockToken);
 

@@ -654,7 +654,7 @@ describe('Financial Compliance Module', () => {
 
         const result = await service.getReports('tenant-1', {
           reportType: ['cat'],
-          status: ['pending'],
+          status: ['pending_review'],
           limit: 10,
         });
 
