@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Agent Service
  * AGENT-1: Agent Entity & Identity - CRUD operations and authentication

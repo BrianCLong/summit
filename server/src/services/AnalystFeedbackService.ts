@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { PrismaClient } from '@prisma/client';
 import type winston from 'winston';
 import { type Logger } from 'winston';

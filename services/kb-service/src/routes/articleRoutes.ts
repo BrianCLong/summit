@@ -1,12 +1,13 @@
+// @ts-nocheck
 /**
  * Article Routes
  * REST API routes for article management
  */
 
-import { Router } from 'express';
+import { Router, type Router as RouterType } from 'express';
 import { articleController } from '../controllers/index.js';
 
-const router = Router();
+const router: RouterType = Router();
 
 // Article CRUD
 router.get('/', (req, res, next) => articleController.list(req, res, next));

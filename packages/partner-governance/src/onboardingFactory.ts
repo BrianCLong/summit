@@ -22,7 +22,7 @@ const DEFAULT_CONFIG: OnboardingConfig = {
 
 export class OnboardingFactory {
   private onboardings: Map<string, OnboardingState> = new Map();
-  constructor(private readonly config: OnboardingConfig = DEFAULT_CONFIG) {}
+  constructor(private readonly config: OnboardingConfig = DEFAULT_CONFIG) { }
 
   startIntake(profile: Omit<IntakeProfile, 'partnerId'>): OnboardingState {
     const partnerId = uuid();
@@ -88,7 +88,7 @@ export class OnboardingFactory {
     if (status === 'passed') {
       return this.markFirstSuccess({ ...state, certificationStatus: 'passed' }, achievedAt);
     }
-    const updated = { ...state, certificationStatus: 'failed' };
+    const updated: OnboardingState = { ...state, certificationStatus: 'failed' };
     this.onboardings.set(partnerId, updated);
     return updated;
   }

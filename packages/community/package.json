@@ -16,6 +16,7 @@
     "test": "npm_config_progress=false npx --yes c8 node --loader ts-node/esm --test __tests__/communityHub.test.ts"
   },
   "devDependencies": {
+    "@types/node": "^25.0.3",
     "ts-node": "^10.9.2"
   }
 }

@@ -1,9 +1,9 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, type Router as ExpressRouter } from 'express';
 import { db } from '../db/database.js';
 import { opaClient } from '../services/opa-client.js';
 import { provenanceClient } from '../services/provenance-client.js';
 
-const router = Router();
+const router: ExpressRouter = Router();
 
 /**
  * GET /health - Basic health check

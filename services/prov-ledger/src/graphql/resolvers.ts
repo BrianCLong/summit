@@ -781,7 +781,7 @@ const Case = {
 
   async disclosureBundle(parent: any) {
     // Reuse the query logic
-    return Query.disclosureBundle(null, { caseId: parent.id }, null);
+    return Query.disclosureBundle(null, { caseId: parent.id });
   },
 };
 

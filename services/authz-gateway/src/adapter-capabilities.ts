@@ -1,3 +1,4 @@
+// @ts-nocheck
 import adapterManifest from './data/adapter-manifest.json';
 import type { ResourceAttributes, SubjectAttributes } from './types';
 

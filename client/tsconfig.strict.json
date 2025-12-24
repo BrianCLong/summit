@@ -9,8 +9,16 @@
     "dist",
     "build",
     "src/__tests__/**",
+    "src/*/__tests__/**",
+    "src/**/__tests__/**",
+    "src/tests/**",
+    "src/routes/__tests__/**",
     "src/components/**/__tests__/**",
     "src/components/ai-enhanced/tests/**",
-    "src/components/ai-enhanced/__tests__/**"
+    "src/components/ai-enhanced/__tests__/**",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx"
   ]
 }

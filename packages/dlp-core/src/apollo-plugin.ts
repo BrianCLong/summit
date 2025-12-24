@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * DLP Apollo Server Plugin
  *

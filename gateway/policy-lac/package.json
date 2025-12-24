@@ -11,17 +11,18 @@
     "policy:sim:read": "lac-sim policies/examples/allow-read-low.json contexts/examples/read-low.json"
   },
   "dependencies": {
+    "ajv": "8.17.1",
     "apollo-server": "3.13.0",
-    "express": "4.21.1",
-    "ajv": "8.17.1"
+    "express": "4.21.1"
   },
   "devDependencies": {
-    "typescript": "5.6.3",
-    "jest": "29.7.0",
-    "@types/jest": "29.5.14",
     "@types/express": "4.17.21",
+    "@types/jest": "29.5.14",
+    "@types/node": "^25.0.3",
+    "@types/supertest": "2.0.16",
+    "jest": "29.7.0",
     "supertest": "6.3.4",
-    "@types/supertest": "2.0.16"
+    "typescript": "5.6.3"
   },
   "bin": {
     "lac-sim": "bin/lac-sim.js"

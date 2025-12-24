@@ -510,11 +510,15 @@ export class ScenarioAnalytics {
       const neighborArray = Array.from(neighbors);
 
       for (let i = 0; i < neighborArray.length; i++) {
-        const neighborAdj = adjacency.get(neighborArray[i]);
+        const nodeId = neighborArray[i];
+        if (!nodeId) continue;
+
+        const neighborAdj = adjacency.get(nodeId);
         if (neighborAdj) {
           for (let j = i + 1; j < neighborArray.length; j++) {
-            if (neighborAdj.outgoing.has(neighborArray[j]) ||
-                neighborAdj.incoming.has(neighborArray[j])) {
+            const neighbor = neighborArray[j];
+            if (neighbor && (neighborAdj.outgoing.has(neighbor) ||
+              neighborAdj.incoming.has(neighbor))) {
               triangles++;
             }
           }
@@ -595,10 +599,10 @@ export class ScenarioAnalytics {
         totalRisk += riskScore;
         riskNodeCount++;
 
-        if (riskScore < 25) distribution.low++;
-        else if (riskScore < 50) distribution.medium++;
-        else if (riskScore < 75) distribution.high++;
-        else distribution.critical++;
+        if (riskScore < 25) distribution.low = (distribution.low ?? 0) + 1;
+        else if (riskScore < 50) distribution.medium = (distribution.medium ?? 0) + 1;
+        else if (riskScore < 75) distribution.high = (distribution.high ?? 0) + 1;
+        else distribution.critical = (distribution.critical ?? 0) + 1;
       }
     }
 
@@ -774,7 +778,10 @@ export class ScenarioAnalytics {
     const step = Math.floor(nodes.length / sampleSize);
 
     for (let i = 0; i < sampleSize; i++) {
-      sampled.push(nodes[i * step]);
+      const node = nodes[i * step];
+      if (node) {
+        sampled.push(node);
+      }
     }
 
     return sampled;

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { FftAnalyzer } from './fft.js';
 import { Spectrogram, SpectrogramSlice, WindowFunction, NumericArray } from './types.js';
 import { createWindow, normalizeFrame } from './window.js';

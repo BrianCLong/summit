@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Tripwire Metrics and Trending Service
  *

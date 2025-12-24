@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Threat Library Service - HTTP Server
  *

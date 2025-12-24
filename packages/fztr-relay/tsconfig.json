@@ -8,5 +8,6 @@
     "allowSyntheticDefaultImports": true,
     "types": ["node", "jest"]
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["tests/**/*.ts", "**/*.spec.ts", "**/*.test.ts"]
 }

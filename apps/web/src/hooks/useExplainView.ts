@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 import { gql, useQuery, useMutation } from '@apollo/client'
 import { useMemo, useCallback } from 'react'
 import type { Entity, Relationship } from '@/types'

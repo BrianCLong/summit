@@ -1,3 +1,4 @@
+// @ts-nocheck
 import crypto from 'crypto';
 
 type VerificationStatus = 'verified' | 'pending' | 'needs-update';

@@ -1,5 +1,5 @@
 {
-  "name": "prov-ledger",
+  "name": "@intelgraph/prov-ledger",
   "private": true,
   "type": "module",
   "scripts": {

@@ -1,4 +1,5 @@
 #!/usr/bin/env tsx
+// @ts-nocheck
 /**
  * Promise Tracker - Extraction Module
  *

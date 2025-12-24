@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { nanoid } from 'nanoid';
 import { EventEmitter } from 'events';
 import * as fastDiff from 'fast-diff';

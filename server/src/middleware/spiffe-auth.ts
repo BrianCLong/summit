@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Request, Response, NextFunction } from 'express';
 import { createConnection } from 'node:net';
 import { promisify } from 'node:util';

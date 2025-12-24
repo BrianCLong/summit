@@ -15,7 +15,7 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
-    "noEmit": false
+    "emitDeclarationOnly": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "tests"]

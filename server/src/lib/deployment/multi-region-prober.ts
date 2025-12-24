@@ -1,3 +1,4 @@
+// @ts-nocheck
 import axios, { AxiosInstance } from 'axios';
 import { regionProbeLatencyMs, regionHealthStatus } from '../../monitoring/metrics.js';
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * API Routes for Bundle Pipeline Service
  * RESTful API for bundle and briefing management

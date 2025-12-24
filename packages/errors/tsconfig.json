@@ -3,12 +3,23 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
+    "composite": true,
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
     "skipLibCheck": true,
-    "types": []
+    "types": [
+      "node"
+    ]
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts", "**/__tests__/**"]
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/__tests__/**"
+  ]
 }

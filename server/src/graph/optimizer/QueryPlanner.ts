@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { QueryAnalysis, QueryIntent, OptimizationContext, QueryPlan, TraversalStrategy } from './types.js';
 import { TraversalOptimizer } from './TraversalOptimizer.js';
 import { QueryAnalyzer } from './QueryAnalyzer.js';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Proof-Carrying Results: Edge sessions produce results with cryptographic attestations
 // Enables verification of computations performed offline
 

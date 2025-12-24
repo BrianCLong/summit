@@ -54,9 +54,14 @@ export class OCREngine extends BaseComputerVisionModel implements IOCREngine {
     super({
       model_name: engine,
       device: config?.device || 'cpu',
+      batch_size: config?.batch_size || 1,
       confidence_threshold: config?.confidence_threshold || 0.6,
+      nms_threshold: config?.nms_threshold || 0.4,
+      max_detections: config?.max_detections || 100,
+      fp16: config?.fp16 || false,
+      int8: config?.int8 || false,
       ...config,
-    });
+    } as ModelConfig);
 
     this.engine = engine;
     this.pythonScriptPath = process.env.OCR_SCRIPT_PATH ||

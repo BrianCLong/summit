@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /**
  * Movement pattern analysis for tracking entities over time
  */
@@ -123,7 +124,7 @@ export class MovementAnalyzer {
       const p1 = points[i];
       const p2 = points[i + 1];
 
-      if (!p1.timestamp || !p2.timestamp) continue;
+      if (!p1.timestamp || !p2.timestamp) {continue;}
 
       const distance = haversineDistance(p1, p2);
 
@@ -133,7 +134,7 @@ export class MovementAnalyzer {
         }
         stopEnd = p2;
       } else {
-        if (stopStart && stopEnd) {
+        if (stopStart && stopEnd && stopStart.timestamp && stopEnd.timestamp) {
           const duration = (stopEnd.timestamp.getTime() - stopStart.timestamp.getTime()) / 1000;
           if (duration >= timeThreshold) {
             stops.push({
@@ -196,7 +197,7 @@ export class MovementAnalyzer {
     }
 
     // Circular pattern (high tortuosity, returns to origin)
-    const startEnd Distance = haversineDistance(
+    const startEndDistance = haversineDistance(
       track.points[0],
       track.points[track.points.length - 1]
     );
@@ -272,7 +273,7 @@ export class MovementAnalyzer {
    * Calculate circular mean of angles (for bearings)
    */
   private static circularMean(angles: number[]): number {
-    if (angles.length === 0) return 0;
+    if (angles.length === 0) {return 0;}
 
     let sumSin = 0;
     let sumCos = 0;

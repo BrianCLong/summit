@@ -3,7 +3,9 @@
   "compilerOptions": {
     "outDir": "dist",
     "jsx": "react-jsx",
-    "tsBuildInfoFile": "./.tsbuildinfo.app"
+    "tsBuildInfoFile": "./.tsbuildinfo.app",
+    "skipLibCheck": true,
+    "types": ["vite/client"]
   },
   "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]

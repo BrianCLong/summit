@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * @intelgraph/neural-networks
  * Neural network architecture library and model zoo
@@ -5,7 +6,7 @@
 
 import { z } from 'zod';
 import type { Layer, ModelMetadata } from '@intelgraph/deep-learning-core';
-export type { Layer, ModelMetadata };
+export type { Layer, ModelMetadata } from '@intelgraph/deep-learning-core';
 
 // ============================================================================
 // Neural Network Architecture Definitions

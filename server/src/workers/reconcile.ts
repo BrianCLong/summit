@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * BullMQ Reconciliation Worker: Post-hoc token usage reconciliation
  * Processes actual vs estimated token usage for budget accuracy

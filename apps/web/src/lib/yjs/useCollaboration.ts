@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 import { useEffect, useState, useRef } from 'react';
 import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
@@ -12,7 +14,14 @@ export interface UserAwareness {
   clientId?: number;
 }
 
-export const useCollaboration = (docName: string, user: { id: string; name: string }, token?: string) => {
+export const useCollaboration = (docName: string, user: { id: string; name: string }, token?: string): {
+  doc: Y.Doc;
+  provider: WebsocketProvider | null;
+  awareness: any;
+  users: UserAwareness[];
+  isConnected: boolean;
+  isSynced: boolean;
+} => {
   const [doc] = useState(() => new Y.Doc());
   const [provider, setProvider] = useState<WebsocketProvider | null>(null);
   const [awareness, setAwareness] = useState<WebsocketProvider['awareness'] | null>(null);

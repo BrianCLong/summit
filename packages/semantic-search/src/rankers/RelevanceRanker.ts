@@ -99,7 +99,7 @@ export class RelevanceRanker {
     }
 
     // Tag match
-    const tagMatch = asset.tags.some((tag) => tag.toLowerCase().includes(queryLower));
+    const tagMatch = asset.tags.some((tag: string) => tag.toLowerCase().includes(queryLower));
     if (tagMatch) {
       score += 0.4;
     }

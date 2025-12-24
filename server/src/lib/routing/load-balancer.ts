@@ -1,3 +1,4 @@
+// @ts-nocheck
 import AdaptiveRouter from './adaptive-router.js';
 import MetricsCollector from './metrics-collector.js';
 

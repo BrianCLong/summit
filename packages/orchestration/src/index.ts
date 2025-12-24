@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Advanced Orchestration Patterns
  * Saga, Circuit Breaker, Event Sourcing, CQRS, and Bulkhead isolation

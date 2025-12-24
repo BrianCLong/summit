@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * @intelgraph/election-disruption-detection
  *

@@ -1,7 +1,5 @@
 {
   "name": "@intelgraph/data-warehouse",
-  "version": "1.0.0",
-  "description": "Data warehouse integration for Summit platform",
   "version": "2.0.0",
   "description": "Enterprise data warehouse with MPP, columnar storage, and advanced analytics",
   "main": "dist/index.js",
@@ -12,7 +10,10 @@
     "test": "jest"
   },
   "devDependencies": {
+    "@types/node": "^18.0.0",
     "typescript": "^5.3.3"
   },
-  "dependencies": {}
+  "dependencies": {
+    "pg": "^8.11.0"
+  }
 }

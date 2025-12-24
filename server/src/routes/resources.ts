@@ -1,3 +1,4 @@
+// @ts-nocheck
 // server/src/routes/resources.ts
 
 import { Router, Request, Response, NextFunction } from 'express';

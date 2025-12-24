@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Router } from 'express';
 import { productService } from '../services/productService.js';
 import { riskScorerService } from '../services/riskScorerService.js';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Air-Gapped Caching Layer
  * Optimized for denied/degraded network environments

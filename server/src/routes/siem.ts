@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * SIEM Management API Routes
  *

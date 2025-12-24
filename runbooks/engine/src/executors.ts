@@ -449,7 +449,7 @@ export class ApprovalExecutor implements StepExecutor {
     approvalId: string,
     approverId: string,
     decision: 'approve' | 'reject',
-    comment?: string
+    comments?: string
   ): Promise<ApprovalRequest> {
     const request = this.approvalRequests.get(approvalId);
     if (!request) {
@@ -471,8 +471,8 @@ export class ApprovalExecutor implements StepExecutor {
     request.approvals.push({
       approverId,
       decision,
-      comment,
-      approvedAt: new Date(),
+      comments,
+      timestamp: new Date(),
     });
 
     // Check if approval threshold met

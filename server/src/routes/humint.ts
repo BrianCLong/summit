@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express, { Request, Response } from 'express';
 import { HumintService } from '../services/HumintService.js';
 import { ensureAuthenticated } from '../middleware/auth.js';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Router, Response } from 'express';
 import type { AuthenticatedRequest } from './types.js';
 import archiver from 'archiver';

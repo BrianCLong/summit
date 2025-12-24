@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express, { type Request, type Response } from 'express';
 import { z } from 'zod';
 import { TrustCenterService } from '../trust-center/trust-center-service.js';

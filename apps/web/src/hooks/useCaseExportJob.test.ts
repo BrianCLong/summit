@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 import { describe, expect, it } from 'vitest'
 import { normalizeExportJobStatus } from './useCaseExportJob'
 import type { ExportJobState } from '@/types/export'

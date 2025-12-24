@@ -152,7 +152,7 @@ function assertRequiredFields(required: string[], data: unknown, label: string):
 export class AuditTrail {
   private events: AuditEvent[] = [];
 
-  record(event: Omit<AuditEvent, 'hash'> & { previousHash?: string }): AuditEvent {
+  record(event: Omit<AuditEvent, 'hash' | 'previousHash'> & { previousHash?: string }): AuditEvent {
     const previousHash = event.previousHash ?? this.events.at(-1)?.hash ?? '';
     const fullEvent: AuditEvent = {
       ...event,
@@ -346,6 +346,7 @@ export class RecordFramework {
       if (query.tags && !query.tags.every(tag => record.metadata.tags.includes(tag))) continue;
 
       const createdAt = record.versions[0]?.timestamp;
+      if (!createdAt) continue;
       if (query.from && createdAt < query.from) continue;
       if (query.to && createdAt > query.to) continue;
       results.push(record);
@@ -458,7 +459,7 @@ export interface AccessScope {
 }
 
 export class ScopedRecordApi {
-  constructor(private readonly framework: RecordFramework, private readonly scope: AccessScope) {}
+  constructor(private readonly framework: RecordFramework, private readonly scope: AccessScope) { }
 
   private assertAccess(record: RecordEntry): void {
     if (this.scope.allowedDomains && !this.scope.allowedDomains.includes(record.domain)) {

@@ -14,7 +14,7 @@
     "useUnknownInCatchVariables": true,
     "exactOptionalPropertyTypes": true,
     "noUncheckedIndexedAccess": true,
-    "types": []
+    "types": ["node"]
   },
   "include": ["src"]
 }

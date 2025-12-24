@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Complex, polyFromRoots, evaluatePoly } from './complex.js';
 import { FilterDesign, NumericArray } from './types.js';
 

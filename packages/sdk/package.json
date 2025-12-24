@@ -7,5 +7,8 @@
     "build": "tsc -p tsconfig.json --noEmit",
     "generate": "pnpm dlx openapi-typescript-codegen --input ../../openapi/intelgraph-core-api.yaml --output src/generated --client fetch --useOptions --exportSchemas true --indent 2 --name IntelGraphCoreClient",
     "test": "jest --config jest.config.cjs"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.3"
   }
 }

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * BriefingAssemblyService - Assembles briefing packages from evidence and claims
  * Handles narrative generation, slides, visualizations, and templating

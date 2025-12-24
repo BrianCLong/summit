@@ -407,7 +407,7 @@ export interface GraphSnapshot {
   /** Snapshot timestamp */
   asOf: Date;
   /** Nodes in this snapshot */
-  nodes: Array<{ id: string; type: string; [key: string]: unknown }>;
+  nodes: Array<{ id: string; type?: string;[key: string]: unknown }>;
   /** Edges in this snapshot */
   edges: Array<GraphEdge>;
   /** Metadata about the snapshot */

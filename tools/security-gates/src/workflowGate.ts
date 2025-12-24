@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import type { GateResult, WorkflowGateConfig } from './types.ts';
-import { findFilesByGlob } from './walker.ts';
+import type { GateResult, WorkflowGateConfig } from './types.js';
+import { findFilesByGlob } from './walker.js';
 
 const COMMIT_SHA_REGEX = /^[a-f0-9]{40}$/i;
 

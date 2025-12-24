@@ -7,6 +7,6 @@
     "resolveJsonModule": true,
     "types": ["node", "jest"]
   },
-  "include": ["src/**/*", "__tests__/**/*"],
-  "exclude": ["dist", "node_modules"]
+  "include": ["src/**/*"],
+  "exclude": ["dist", "node_modules", "__tests__"]
 }

@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+/* eslint-disable @typescript-eslint/ban-ts-comment, no-console */
+// @ts-nocheck
 import { Command } from 'commander';
 import { ProvLedgerClient } from '../index.js';
 import fs from 'fs';

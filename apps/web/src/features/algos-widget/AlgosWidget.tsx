@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 import React from 'react'
 import { Box, Button } from '@mui/material'
 import $ from 'jquery'

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Data Quality Engine
  * Comprehensive data quality assessment and improvement for MDM

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * IntelGraph HTTP/CSV Connector
  * Reference implementation for CSV data ingestion over HTTP

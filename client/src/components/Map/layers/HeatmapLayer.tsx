@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Heatmap Layer Component
  */

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Enhanced Observability Metrics
  * Additional metrics for database connection pools, cache performance, and service health

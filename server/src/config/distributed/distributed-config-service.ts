@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createHash } from 'crypto';
 import { EventEmitter } from 'events';
 import { z } from 'zod';

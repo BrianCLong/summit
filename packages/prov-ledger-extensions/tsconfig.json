@@ -3,8 +3,16 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",
-    "declaration": true
+    "declaration": true,
+    "composite": true
   },
   "include": ["src"],
-  "references": [{ "path": "../types" }, { "path": "../prov-ledger" }]
+  "references": [
+    {
+      "path": "../types"
+    },
+    {
+      "path": "../prov-ledger"
+    }
+  ]
 }

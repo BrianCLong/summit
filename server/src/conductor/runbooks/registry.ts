@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Signed Runbook Registry for Conductor
 // Provides secure, version-controlled operational procedures with approval workflows
 

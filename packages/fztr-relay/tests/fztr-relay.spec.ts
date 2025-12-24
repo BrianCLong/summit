@@ -1,10 +1,8 @@
 import { FZTRRelay, VerifiableCredential } from '../src';
-import request from 'supertest';
 import { createHash } from 'crypto';
 
 describe('FZTRRelay', () => {
   let relay: FZTRRelay;
-  let app: express.Application; // Assuming express is imported in FZTRRelay
 
   beforeAll(() => {
     relay = new FZTRRelay();

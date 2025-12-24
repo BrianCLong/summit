@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import express, { Router } from 'express';
 import { rateLimit } from 'express-rate-limit';
 
 import { authMiddleware } from '../middleware/auth';
@@ -19,7 +19,7 @@ const searchRateLimit = rateLimit({
 });
 
 router.use(authMiddleware);
-router.use(searchRateLimit);
+router.use(searchRateLimit as unknown as express.RequestHandler);
 
 router.post('/search', async (req, res) => {
   try {

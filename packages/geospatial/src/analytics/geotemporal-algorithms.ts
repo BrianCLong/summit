@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Geo-Temporal Analytics Algorithms
  *

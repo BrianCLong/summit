@@ -2,8 +2,9 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "composite": true,
-    "types": ["node", "vite/client"],
-    "tsBuildInfoFile": "./.tsbuildinfo.node"
+    "types": ["vite/client"],
+    "tsBuildInfoFile": "./.tsbuildinfo.node",
+    "skipLibCheck": true
   },
   "include": ["vite.config.ts"]
 }

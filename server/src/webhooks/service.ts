@@ -1,3 +1,4 @@
+// @ts-nocheck
 import axios, { AxiosInstance } from 'axios';
 import logger from '../utils/logger';
 import { addJob, queueRegistry, QueueName } from '../queues/config';

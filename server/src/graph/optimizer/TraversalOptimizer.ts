@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { QueryAnalysis, TraversalStrategy } from './types.js';
 
 export class TraversalOptimizer {

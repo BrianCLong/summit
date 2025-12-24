@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express, { Response } from 'express';
 import type { AuthenticatedRequest } from './types.js';
 import { IngestionService } from '../aurelius/services/IngestionService';

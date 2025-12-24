@@ -54,7 +54,7 @@ const fusionService = new FusionService(repository, geointService, iocService);
 // Express App Setup
 // ============================================================================
 
-const app = express();
+const app: express.Express = express();
 
 // Middleware
 app.use(helmet());

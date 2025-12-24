@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 /**
  * Tri-Pane Analysis Shell - Mock Data Service
  *

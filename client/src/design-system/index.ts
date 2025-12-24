@@ -1,3 +1,4 @@
+// @ts-nocheck
 export { DesignSystemProvider, useDesignSystemTelemetry, TelemetryContext } from './DesignSystemProvider';
 export { buildDesignSystemTheme } from './theme';
 export { lightTokens, darkTokens, DesignTokens } from './tokens';

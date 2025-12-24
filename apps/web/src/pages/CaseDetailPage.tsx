@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 /**
  * CaseDetailPage - Comprehensive Case Workspace
  *

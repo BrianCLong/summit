@@ -4,7 +4,10 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "composite": false,
-    "declaration": true
+    "declaration": true,
+    "types": ["node"],
+    "allowImportingTsExtensions": false,
+    "noEmit": false
   },
   "include": ["src/**/*"],
   "exclude": ["dist", "node_modules"]

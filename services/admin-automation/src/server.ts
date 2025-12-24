@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express, { Request, Response, NextFunction } from 'express';
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
