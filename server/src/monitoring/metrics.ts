@@ -611,7 +611,7 @@ export const intelgraphHttpRequestDuration = new client.Histogram({
 export const intelgraphGraphragQueryTotal = new client.Counter({
   name: 'intelgraph_graphrag_query_total',
   help: 'Total GraphRAG queries executed',
-  labelNames: ['status', 'hasPreview'],
+  labelNames: ['status', 'hasPreview', 'redactionEnabled', 'provenanceEnabled'],
 });
 
 export const intelgraphGraphragQueryDurationMs = new client.Histogram({
