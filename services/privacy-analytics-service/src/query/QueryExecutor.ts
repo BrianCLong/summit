@@ -28,6 +28,7 @@ import { QueryTranslator } from './QueryTranslator.js';
 import { PolicyEnforcer } from '../privacy/PolicyEnforcer.js';
 import { DifferentialPrivacy } from '../privacy/DifferentialPrivacy.js';
 import { logger, logQueryMetrics, logPrivacyAudit } from '../utils/logger.js';
+import { emitCostEvent } from '../../../../finops/cost-events/index.js';
 
 /**
  * Database connections
@@ -250,6 +251,28 @@ export class QueryExecutor {
 
       // Log metrics and audit
       this.logExecution(executionId, query, context, result);
+
+      // Emit cost event
+      try {
+        emitCostEvent({
+          operationType: 'query',
+          tenantId: context.tenantId,
+          scopeId: query.source, // Use data source as a proxy for scope
+          correlationId: executionId,
+          dimensions: {
+            query_complexity:
+              (query.dimensions?.length || 0) +
+              (query.measures?.length || 0) +
+              (query.filters ? 1 : 0),
+            rows_scanned: result.totalCount,
+            rows_returned: result.filteredCount,
+            cpu_ms: result.metadata.executionTimeMs,
+          },
+        });
+      } catch (costError) {
+        logger.error({ executionId, error: costError }, 'Failed to emit cost event');
+        // Do not fail the query if cost event fails
+      }
 
       return result;
     } catch (error) {
