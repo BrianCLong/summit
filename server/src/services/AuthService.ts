@@ -414,12 +414,12 @@ export class AuthService {
    * Creates a signed JWT with user payload and stores refresh token in database.
    * Refresh tokens have 7-day validity and are stored for token rotation.
    *
-   * @private
+   * @public
    * @param {DatabaseUser} user - Database user record
    * @param {PoolClient} client - PostgreSQL client for transaction
    * @returns {Promise<TokenPair>} Object containing access token and refresh token
    */
-  private async generateTokens(
+  async generateTokens(
     user: DatabaseUser,
     client: PoolClient,
   ): Promise<TokenPair> {
