@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="6" failures="0" errors="0" time="14.676">
+  <testsuite name="SummitAnomalyService" errors="0" failures="0" skipped="0" timestamp="2025-12-24T18:41:43" time="14.558" tests="6">
+    <testcase classname="SummitAnomalyService should be a singleton" name="SummitAnomalyService should be a singleton" time="0.003">
+    </testcase>
+    <testcase classname="SummitAnomalyService Temporal Detection should detect a temporal anomaly" name="SummitAnomalyService Temporal Detection should detect a temporal anomaly" time="0.002">
+    </testcase>
+    <testcase classname="SummitAnomalyService Temporal Detection should not detect anomaly for normal values" name="SummitAnomalyService Temporal Detection should not detect anomaly for normal values" time="0.001">
+    </testcase>
+    <testcase classname="SummitAnomalyService Spatial Detection should detect spatial anomaly" name="SummitAnomalyService Spatial Detection should detect spatial anomaly" time="0.001">
+    </testcase>
+    <testcase classname="SummitAnomalyService Behavioral Detection should detect flapping" name="SummitAnomalyService Behavioral Detection should detect flapping" time="0.01">
+    </testcase>
+    <testcase classname="SummitAnomalyService False Positive Reduction should suppress alerts if whitelisted" name="SummitAnomalyService False Positive Reduction should suppress alerts if whitelisted" time="0.002">
+    </testcase>
+  </testsuite>
+</testsuites>

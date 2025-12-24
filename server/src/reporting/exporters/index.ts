@@ -4,6 +4,7 @@ import { ExcelExporter } from './excel-exporter';
 import { JsonExporter } from './json-exporter';
 import { PdfExporter } from './pdf-exporter';
 import { PptxExporter } from './pptx-exporter';
+import { XmlExporter } from './xml-exporter';
 import { ReportExporter } from './base';
 
 export const exporters: ReportExporter[] = [
@@ -13,6 +14,7 @@ export const exporters: ReportExporter[] = [
   new ExcelExporter(),
   new DocxExporter(),
   new PptxExporter(),
+  new XmlExporter(),
 ];
 
 export const exporterMap: Record<string, ReportExporter> = Object.fromEntries(
