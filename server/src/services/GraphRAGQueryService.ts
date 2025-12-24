@@ -283,9 +283,14 @@ export class GraphRAGQueryService {
 
       await this.glassBoxService.updateStatus(run.id, 'completed', response);
 
-      metrics.graphragQueryTotal.inc({ status: 'success', hasPreview: !!preview });
+      metrics.graphragQueryTotal.inc({
+        status: 'success',
+        hasPreview: preview ? 'true' : 'false',
+        redactionEnabled: 'false',
+        provenanceEnabled: 'false',
+      });
       metrics.graphragQueryDurationMs.observe(
-        { hasPreview: !!preview },
+        { hasPreview: preview ? 'true' : 'false' },
         executionTimeMs
       );
 
@@ -321,7 +326,12 @@ export class GraphRAGQueryService {
     } catch (error) {
       await this.glassBoxService.updateStatus(run.id, 'failed', undefined, String(error));
 
-      metrics.graphragQueryTotal.inc({ status: 'failed' });
+      metrics.graphragQueryTotal.inc({
+        status: 'failed',
+        hasPreview: 'false',
+        redactionEnabled: 'false',
+        provenanceEnabled: 'false',
+      });
 
       logger.error({
         error,

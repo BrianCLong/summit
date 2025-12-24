@@ -87,16 +87,20 @@ describe('GraphRAGQueryServiceEnhanced', () => {
       getProvenanceChains: jest.fn<any>().mockResolvedValue([
         {
           id: 'chain-1',
-          rootHash: 'roothash123',
-          transformChain: ['transform-1'],
-          verified: true,
+          lineage: {
+            rootHash: 'roothash123',
+            verified: true,
+          },
+          transforms: ['transform-1'],
         },
       ]),
       createClaim: jest.fn<any>().mockResolvedValue({
         id: 'claim-new',
         statement: 'Test answer',
         confidence: 0.85,
-        evidenceIds: ['evidence-1'],
+        metadata: {
+          evidenceIds: ['evidence-1'],
+        },
       }),
       createProvenanceChain: jest.fn<any>().mockResolvedValue({
         id: 'chain-new',
@@ -319,6 +323,24 @@ describe('GraphRAGQueryServiceEnhanced', () => {
     });
 
     it('should handle redaction of citations', async () => {
+      // Update mock to return data with PII that would trigger redaction
+      (mockPool.query as unknown as jest.Mock<() => Promise<unknown>>).mockResolvedValueOnce({
+        rows: [
+          {
+            id: 'entity-1',
+            kind: 'Person',
+            labels: ['Person'],
+            name: 'John Doe',
+            description: 'Contact email: john.doe@example.com and phone: 555-123-4567',
+            source_url: 'https://example.com/1',
+            confidence: '0.9',
+            evidence_id: 'evidence-1',
+            classification: 'internal',
+            props: { email: 'john.doe@example.com' },
+          },
+        ],
+      });
+
       const request: GraphRAGQueryRequestEnhanced = {
         investigationId: 'inv-1',
         tenantId: 'tenant-1',
