@@ -94,8 +94,12 @@ export const createApp = async () => {
   const __dirname = path.dirname(__filename);
 
   // Initialize OpenTelemetry tracing
+  // Tracer is already initialized in index.ts, but we ensure it's available here
   const tracer = initializeTracing();
-  await tracer.initialize();
+  // Ensure initialized if this entry point is used standalone (e.g. tests)
+  if (!tracer.isInitialized()) {
+      await tracer.initialize();
+  }
 
   const app = express();
   const logger = (pino as any)();
