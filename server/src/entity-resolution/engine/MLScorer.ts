@@ -1,5 +1,5 @@
-import { FeatureExtractor } from '../models/FeatureExtractor.js';
-import { SimilarityModel, ModelPrediction, WeightedRuleBasedModel } from '../models/SimilarityModel.js';
+import { FeatureExtractor } from '../models/FeatureExtractor';
+import { SimilarityModel, ModelPrediction, WeightedRuleBasedModel } from '../models/SimilarityModel';
 
 export class MLScorer {
   private model: SimilarityModel;

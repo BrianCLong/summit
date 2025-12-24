@@ -138,7 +138,6 @@
     "jest-extended": "4.0.2",
     "jest-junit": "16.0.0",
     "jest-ts-webcompat-resolver": "1.0.1",
-    "launchdarkly-node-server-sdk": "^7.0.4",
     "mongodb-memory-server": "9.1.1",
     "nock": "13.4.0",
     "nodemon": "3.1.11",
