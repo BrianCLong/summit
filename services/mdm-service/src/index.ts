@@ -5,16 +5,16 @@
 
 import express from 'express';
 import cors from 'cors';
-import { MDMEngine, MatchingEngine, QualityEngine } from '@summit/mdm-core';
-import { GoldenRecordManager } from '@summit/golden-records';
-import { ReferenceDataManager } from '@summit/reference-data';
-import { HierarchyBuilder } from '@summit/hierarchy-management';
-import { SyncEngine } from '@summit/mdm-sync';
-import { StewardshipWorkflowManager } from '@summit/mdm-stewardship';
-import { GovernanceEngine } from '@summit/mdm-governance';
-import { AnalyticsEngine } from '@summit/mdm-analytics';
+import { MDMEngine, MatchingEngine, QualityEngine } from '@intelgraph/mdm-core';
+import { GoldenRecordManager } from '@intelgraph/golden-records';
+import { ReferenceDataManager } from '@intelgraph/reference-data';
+import { HierarchyBuilder } from '@intelgraph/hierarchy-management';
+import { SyncEngine } from '@intelgraph/mdm-sync';
+import { StewardshipWorkflowManager } from '@intelgraph/mdm-stewardship';
+import { GovernanceEngine } from '@intelgraph/mdm-governance';
+import { AnalyticsEngine } from '@intelgraph/mdm-analytics';
 
-const app = express();
+const app: express.Application = express();
 const PORT = process.env.MDM_SERVICE_PORT || 3100;
 
 // Middleware
