@@ -93,6 +93,9 @@ const ApprovalsPage = React.lazy(() =>
 import { MilitaryTech } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import { Security } from '@mui/icons-material';
 
+// Demo indicator
+import DemoIndicator from './components/common/DemoIndicator';
+
 // Navigation items
 const ADMIN = 'ADMIN';
 const APPROVER_ROLES = [ADMIN, 'SECURITY_ADMIN', 'OPERATIONS', 'SAFETY'];
@@ -661,6 +664,7 @@ function MainLayout() {
       />
 
       <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8 }}>
+        <DemoIndicator />
         <React.Suspense
           fallback={
             <Box sx={{ width: '100%', mt: 2 }}>

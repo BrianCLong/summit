@@ -79,6 +79,7 @@ DEMO_MODE=1 ./scripts/demo-up.sh
 - **PostgreSQL Database**: http://localhost:8080 (Adminer)
 - **Monitoring**: Grafana at http://localhost:8080, Prometheus at http://localhost:9090
 - **Pre-seeded Demo Data**: Sample investigation with entities and relationships
+- **Demo Indicators**: Visual "DEMO MODE" badges in UI to distinguish from production
 
 ### Demo Credentials
 
@@ -88,8 +89,17 @@ DEMO_MODE=1 ./scripts/demo-up.sh
 ### Stopping the Demo
 
 ```bash
-# Stop all services
-docker compose -f docker-compose.yml down
+# Stop demo environment (preserves data)
+make demo-down
+
+# Or directly
+DEMO_MODE=1 ./scripts/demo-down.sh
+
+# Stop demo environment and remove volumes (removes all data)
+make demo-down-cleanup
+
+# Or directly
+DEMO_MODE=1 ./scripts/demo-down.sh --cleanup-volumes
 ```
 
 ```bash
