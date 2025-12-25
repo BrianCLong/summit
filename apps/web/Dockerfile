@@ -1,43 +1,22 @@
-FROM node:20-alpine@sha256:be8d32d651b3e0c9c2b28fdc1d3888408125d703232013cff955344d052027e5 AS base
+# Apps Web Dockerfile (Vite)
 
-# Install dependencies only when needed
-FROM base AS deps
-WORKDIR /app
+FROM node:20-alpine AS builder
 
-# Copy package files
-COPY package*.json ./
-RUN npm ci
-
-# Build the application
-FROM base AS builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+# Assuming workspace usage, we might need root lockfile?
+# But for now let's assume isolated build or use what's available.
+# In monorepo, usually we copy root package.json and workspace file too.
+# But keeping it simple for now if it works.
+
+RUN npm install --legacy-peer-deps
 
 COPY . .
 RUN npm run build
 
-# Production image
-FROM base AS runner
-WORKDIR /app
-
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
-
-# Create non-root user
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-# Copy built application
-COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-USER nextjs
-
-EXPOSE 3000
-
-ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
-
-CMD ["node", "server.js"]
+# Production serve
+FROM nginx:alpine
+COPY --from=builder /app/dist /usr/share/nginx/html
+# COPY nginx.conf /etc/nginx/conf.d/default.conf # Optional custom config
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

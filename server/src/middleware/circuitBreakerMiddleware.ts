@@ -1,48 +1,74 @@
 import { Request, Response, NextFunction } from 'express';
-import { createRequire } from 'module';
+import { metrics } from '../monitoring/metrics.js';
 
-const require = createRequire(import.meta.url);
-const CircuitBreaker = require('./circuitBreaker.js');
+// Simple in-memory breaker state
+interface Breaker {
+  state: 'CLOSED' | 'OPEN' | 'HALF_OPEN';
+  failures: number;
+  lastFailure: number;
+  nextAttempt: number;
+}
 
-// Create a global circuit breaker instance
-// In a real app, you might have one per downstream service or heavy endpoint
-export const globalApiBreaker = new CircuitBreaker({
-  name: 'global-api-breaker',
-  failureThreshold: 100, // Trip after 100 failures in window
-  recoveryTimeout: 30000, // 30s recovery
-  monitoringWindow: 60000, // 1 min window
-  volumeThreshold: 50, // Min 50 reqs before tripping
-});
+const breakers: Record<string, Breaker> = {};
 
-export const circuitBreakerMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  // 1. Fail Fast if Circuit is Open
-  if (globalApiBreaker.state === 'OPEN') {
-    const now = Date.now();
-    if (now < globalApiBreaker.nextAttempt) {
-      res.status(503).json({
-        error: 'Service Temporarily Unavailable',
-        message: 'Circuit breaker is open due to high failure rate',
-        retryAfter: Math.ceil((globalApiBreaker.nextAttempt - now) / 1000),
-      });
-      return;
-    }
-    // If timeout passed, let it through (Half-Open logic implicit in next success/fail)
-  }
-
-  const startTime = Date.now();
-
-  // 2. Monitor Response
-  res.on('finish', () => {
-    const duration = Date.now() - startTime;
-
-    // Consider 5xx as failures
-    if (res.statusCode >= 500) {
-      globalApiBreaker.onFailure(new Error(`HTTP ${res.statusCode}`), startTime);
-    } else {
-      // 4xx and 2xx/3xx are successes for availability purposes
-      globalApiBreaker.onSuccess(startTime);
-    }
-  });
-
-  next();
+const CONFIG = {
+  FAILURE_THRESHOLD: 10,
+  RESET_TIMEOUT: 30000, // 30s
 };
+
+function getBreaker(service: string): Breaker {
+  if (!breakers[service]) {
+    breakers[service] = {
+      state: 'CLOSED',
+      failures: 0,
+      lastFailure: 0,
+      nextAttempt: 0,
+    };
+    metrics.breakerState.labels(service).set(0);
+  }
+  return breakers[service];
+}
+
+export const circuitBreaker = (serviceName: string) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    // Feature flag check (env var for now)
+    if (process.env.CIRCUIT_BREAKER_ENABLED !== 'true') {
+      return next();
+    }
+
+    const breaker = getBreaker(serviceName);
+
+    if (breaker.state === 'OPEN') {
+      if (Date.now() > breaker.nextAttempt) {
+        breaker.state = 'HALF_OPEN';
+        metrics.breakerState.labels(serviceName).set(2); // 2 = Half Open
+      } else {
+        return res.status(503).json({ error: 'Service Unavailable (Circuit Breaker)' });
+      }
+    }
+
+    // Wrap response to catch errors
+    // Express response 'finish' event captures status code
+    res.on('finish', () => {
+      if (res.statusCode >= 500) {
+        breaker.failures++;
+        breaker.lastFailure = Date.now();
+
+        if (breaker.failures >= CONFIG.FAILURE_THRESHOLD) {
+          breaker.state = 'OPEN';
+          breaker.nextAttempt = Date.now() + CONFIG.RESET_TIMEOUT;
+          metrics.breakerState.labels(serviceName).set(1); // 1 = Open
+        }
+      } else if (res.statusCode < 500 && breaker.state === 'HALF_OPEN') {
+        // Success in half-open -> Close
+        breaker.state = 'CLOSED';
+        breaker.failures = 0;
+        metrics.breakerState.labels(serviceName).set(0); // 0 = Closed
+      }
+    });
+
+    next();
+  };
+};
+
+export const circuitBreakerMiddleware = circuitBreaker('API_GATEWAY');
