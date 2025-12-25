@@ -138,7 +138,12 @@ export class FederationService {
       resourceId: requestId,
       actorId,
       actorType: 'system',
-      payload: { overlapCount: result.overlapCount },
+      payload: {
+        mutationType: 'UPDATE',
+        entityId: requestId,
+        entityType: 'DeconflictionRequest',
+        overlapCount: result.overlapCount
+      },
       metadata: { purpose: request.purpose }
     });
 
