@@ -51,9 +51,6 @@ cd summit
 npm run quickstart      # Trivial setup: installs deps, starts infra, migrates DB, runs dev servers
 ```
 
-<<<<<<< HEAD
-**Manual steps:**
-=======
 ## 🎮 Demo
 
 Launch a complete working demo environment with one command, including seeded sample data:
@@ -106,7 +103,6 @@ make demo-down-cleanup
 DEMO_MODE=1 ./scripts/demo-down.sh --cleanup-volumes
 ```
 
->>>>>>> ba282e4842 (feat: add demo mode UI indicator with safety gating)
 ```bash
 make bootstrap          # installs pnpm deps + venv + .env
 npm run docker:dev -- up -d postgres neo4j redis # start infrastructure
