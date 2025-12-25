@@ -30,10 +30,14 @@ const config: Config = {
       'ts-jest',
       {
         useESM: true,
-        tsconfig: 'tsconfig.json',
+        tsconfig: 'tsconfig.test.json',
       },
     ],
   },
+  transformIgnorePatterns: [
+    '/node_modules/',
+    '/tests/setup/jest.setup.js'
+  ],
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/__tests__/**',
@@ -68,7 +72,6 @@ const config: Config = {
   resetMocks: true,
   bail: false,
   errorOnDeprecated: true,
-  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$))'],
   maxWorkers: process.env.CI ? 2 : '50%',
 };
 

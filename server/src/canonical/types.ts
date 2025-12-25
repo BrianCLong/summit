@@ -1,120 +1,75 @@
-/**
- * Canonical Entities - Bitemporal Types
- *
- * Implements dual-timeline tracking:
- * - Valid time: when facts were true in reality (validFrom/validTo)
- * - Transaction time: when facts were recorded in system (observedAt/recordedAt)
- */
+export type CanonicalEntityKind = 'Person' | 'Org' | 'Account' | 'Document' | 'Event';
 
-import { PolicyLabels } from './policy';
-
-export interface BitemporalFields {
-  /** When this version became valid in the real world */
-  validFrom: Date;
-
-  /** When this version ceased to be valid in the real world (null = current) */
-  validTo: Date | null;
-
-  /** When this fact was first observed/discovered */
-  observedAt: Date;
-
-  /** When this record was created in the database */
-  recordedAt: Date;
+export interface PolicyLabels {
+  sensitivity: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED';
+  jurisdiction?: string[];
+  retention?: string;
 }
 
-export interface BaseCanonicalEntity extends BitemporalFields {
-  /** Unique identifier for the entity */
+export interface CanonicalEntity {
   id: string;
-
-  /** Multi-tenant isolation */
+  kind: CanonicalEntityKind;
   tenantId: string;
+  sourceIds: string[];
+  properties: Record<string, unknown>;
 
-  /** Version number for optimistic locking */
-  version: number;
+  // Bitemporal & Provenance
+  createdAt: string;
+  updatedAt: string;
+  validFrom?: string;
+  validTo?: string;
+  observedAt?: string;
+  provenanceId?: string;
 
-  /** User who created/modified this version */
-  modifiedBy: string;
-
-  /** Soft delete flag */
-  deleted: boolean;
-
-  /** Provenance tracking */
-  provenanceId: string;
-
-  /** Policy and Governance labels */
-  policy?: PolicyLabels;
+  // Governance
+  policyLabels?: PolicyLabels;
 }
 
-export interface EntityVersion<T> {
-  entity: T;
-  validPeriod: {
-    from: Date;
-    to: Date | null;
-  };
-  recordedPeriod: {
-    from: Date;
-    to: Date | null;
+export interface Person extends CanonicalEntity {
+  kind: 'Person';
+  properties: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phone?: string;
+    role?: string;
   };
 }
 
-export interface TemporalQuery {
-  /** Point in time for valid time dimension */
-  asOf?: Date;
-
-  /** Point in time for transaction time dimension */
-  asKnownAt?: Date;
-
-  /** Query historical versions */
-  includeHistory?: boolean;
+export interface Org extends CanonicalEntity {
+  kind: 'Org';
+  properties: {
+    name: string;
+    industry?: string;
+    domain?: string;
+  };
 }
 
-export interface CanonicalEntityMetadata {
-  /** Entity type identifier */
-  entityType: string;
-
-  /** Schema version */
-  schemaVersion: string;
-
-  /** Classification tags */
-  classifications: string[];
-
-  /** Custom metadata */
-  metadata: Record<string, any>;
+export interface Account extends CanonicalEntity {
+  kind: 'Account';
+  properties: {
+    accountId: string;
+    type?: string;
+    status?: string;
+  };
 }
 
-/**
- * Helper to check if an entity is valid at a specific point in time
- */
-export function isValidAt(entity: BitemporalFields, asOf: Date): boolean {
-  return (
-    entity.validFrom <= asOf &&
-    (entity.validTo === null || entity.validTo > asOf)
-  );
+export interface Document extends CanonicalEntity {
+  kind: 'Document';
+  properties: {
+    title: string;
+    text: string;
+    mimeType?: string;
+    metadata?: Record<string, unknown>;
+  };
 }
 
-/**
- * Helper to check if an entity was known at a specific point in time
- */
-export function wasKnownAt(entity: BitemporalFields, asKnownAt: Date): boolean {
-  return entity.recordedAt <= asKnownAt;
-}
-
-/**
- * Filter entities by temporal constraints
- */
-export function filterByTemporal<T extends BitemporalFields>(
-  entities: T[],
-  query: TemporalQuery,
-): T[] {
-  let filtered = entities;
-
-  if (query.asOf) {
-    filtered = filtered.filter(e => isValidAt(e, query.asOf!));
-  }
-
-  if (query.asKnownAt) {
-    filtered = filtered.filter(e => wasKnownAt(e, query.asKnownAt!));
-  }
-
-  return filtered;
+export interface Event extends CanonicalEntity {
+  kind: 'Event';
+  properties: {
+    name: string;
+    date: string;
+    location?: string;
+    participants?: string[];
+  };
 }

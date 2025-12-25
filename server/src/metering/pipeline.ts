@@ -1,5 +1,6 @@
 // @ts-nocheck
 import logger from '../utils/logger.js';
+import { postgresMeterRepository } from './postgres-repository.js';
 import {
   MeterEvent,
   MeterEventKind,
@@ -9,15 +10,28 @@ import {
 type DeadLetter = { event: MeterEvent; reason: string };
 
 const dateKey = (d: Date) => d.toISOString().slice(0, 10);
+const MAX_CACHE_SIZE = 10000;
 
 export class MeteringPipeline {
   private processedKeys = new Set<string>();
   private deadLetters: DeadLetter[] = [];
   private rollups = new Map<string, TenantUsageDailyRow>();
 
+  constructor() {
+    // Periodically clean up cache to avoid memory leak
+    setInterval(() => this.cleanupCache(), 1000 * 60 * 60); // Every hour
+  }
+
+  private cleanupCache() {
+    if (this.processedKeys.size > MAX_CACHE_SIZE) {
+        this.processedKeys.clear();
+        logger.info('Cleared metering idempotency cache');
+    }
+  }
+
   async enqueue(event: MeterEvent): Promise<void> {
     try {
-      this.handleEvent(event);
+      await this.handleEvent(event);
     } catch (error) {
       this.deadLetters.push({
         event,
@@ -30,16 +44,16 @@ export class MeteringPipeline {
     }
   }
 
-  replayDLQ(
+  async replayDLQ(
     transform?: (event: MeterEvent) => MeterEvent,
-  ): { replayed: number; remaining: number } {
+  ): Promise<{ replayed: number; remaining: number }> {
     const stillDead: DeadLetter[] = [];
     let replayed = 0;
 
     for (const dlq of this.deadLetters) {
       const event = transform ? transform(dlq.event) : dlq.event;
       try {
-        this.handleEvent(event);
+        await this.handleEvent(event);
         replayed++;
       } catch (error) {
         stillDead.push({
@@ -67,14 +81,36 @@ export class MeteringPipeline {
     this.rollups.clear();
   }
 
-  private handleEvent(event: MeterEvent) {
+  private async handleEvent(event: MeterEvent) {
     const idempotencyKey =
       event.idempotencyKey || event.correlationId || this.buildSyntheticKey(event);
+
+    // In-memory dedup for speed
     if (this.processedKeys.has(idempotencyKey)) {
       return;
     }
 
     this.validate(event);
+
+    // Persist to Postgres (Handles Idempotency)
+    // If we have an idempotency key, we use it.
+    // If not, we fall back to synthetic key in memory, but for DB we need to pass something if we want dedup.
+    // The repository handles insertion into usage_events table.
+    const eventWithKey = { ...event, idempotencyKey };
+
+    try {
+        const inserted = await postgresMeterRepository.recordEvent(eventWithKey);
+
+        if (!inserted) {
+            // Duplicate in DB
+            this.processedKeys.add(idempotencyKey);
+            return;
+        }
+    } catch (err) {
+        logger.error({ err }, 'Failed to persist meter event');
+        throw err;
+    }
+
     this.processedKeys.add(idempotencyKey);
 
     const occurred = event.occurredAt ? new Date(event.occurredAt) : new Date();

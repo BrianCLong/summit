@@ -19,6 +19,12 @@ export interface EvidenceInput {
 
 export interface ClaimInput {
   content: string;
+  subject?: string;
+  predicate?: string;
+  object?: string;
+  effective_date?: Date;
+  location?: Record<string, any>;
+  extraction_method?: string;
   claim_type: string;
   confidence: number;
   evidence_ids: string[];
@@ -34,6 +40,11 @@ export interface ClaimEvidenceLinkInput {
   claim_id: string;
   evidence_id: string;
   relation_type: 'SUPPORTS' | 'CONTRADICTS';
+  offset_start?: number;
+  offset_end?: number;
+  page_number?: number;
+  bbox?: number[];
+  segment_text?: string;
   confidence?: number;
   created_by: string;
   notes?: string;
@@ -124,12 +135,18 @@ export class ProvenanceClaimService {
       // 1. Insert into claims_registry
       const res = await client.query(
         `INSERT INTO claims_registry
-        (content_hash, content, claim_type, confidence, evidence_hashes, source_id, transform_chain, license_id, created_by, investigation_id, tenant_id, extracted_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW())
+        (content_hash, content, subject, predicate, object, effective_date, location, extraction_method, claim_type, confidence, evidence_hashes, source_id, transform_chain, license_id, created_by, investigation_id, tenant_id, extracted_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, NOW())
         RETURNING *`,
         [
           contentHash,
           input.content,
+          input.subject,
+          input.predicate,
+          input.object,
+          input.effective_date,
+          input.location ? JSON.stringify(input.location) : null,
+          input.extraction_method,
           input.claim_type,
           input.confidence,
           JSON.stringify(evidenceHashes),
@@ -208,14 +225,19 @@ export class ProvenanceClaimService {
 
     const res = await client.query(
       `INSERT INTO claim_evidence_links
-      (claim_id, evidence_id, relation_type, confidence, created_by, notes, tenant_id)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      (claim_id, evidence_id, relation_type, confidence, offset_start, offset_end, page_number, bbox, segment_text, created_by, notes, tenant_id)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       RETURNING *`,
       [
         input.claim_id,
         input.evidence_id,
         input.relation_type,
         input.confidence || 1.0,
+        input.offset_start,
+        input.offset_end,
+        input.page_number,
+        input.bbox ? JSON.stringify(input.bbox) : null,
+        input.segment_text,
         input.created_by,
         input.notes,
         input.tenant_id

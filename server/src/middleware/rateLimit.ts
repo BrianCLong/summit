@@ -51,7 +51,7 @@ export const createRateLimiter = (endpointClass: EndpointClass = EndpointClass.D
         const quota = QuotaManager.getQuotaForTenant(tenantContext.tenantId);
         if (quota) {
             // Apply a multiplier or override based on class
-            if (endpointClass === EndpointClass.INGEST) limit = quota.requestsPerMinute * 2;
+            if (endpointClass === EndpointClass.INGEST) limit = quota.ingestEventsPerMinute;
             else if (endpointClass === EndpointClass.EXPORT) limit = Math.max(5, Math.floor(quota.requestsPerMinute / 20));
             else limit = quota.requestsPerMinute;
         }

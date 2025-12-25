@@ -1,6 +1,6 @@
 import React from 'react'
 import { AlertTriangle, CheckCircle2, Loader2 } from 'lucide-react'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 import { useCommandStatusContext } from '../CommandStatusProvider'
 import { cn } from '@/lib/utils'
