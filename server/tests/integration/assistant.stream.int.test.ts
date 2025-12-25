@@ -1,2 +1,2 @@
 import { test } from '@jest/globals';
-export * from '../assistant.stream.test.ts';
+export * from '../assistant.stream.test.js';

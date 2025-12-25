@@ -10,6 +10,8 @@
 
 COMPOSE_DEV_FILE ?= docker-compose.dev.yaml
 SHELL_SERVICE ?= gateway
+VENV_DIR ?= .venv
+VENV_BIN = $(VENV_DIR)/bin
 
 # --- Docker Compose Controls ---
 
@@ -36,26 +38,27 @@ clean:
 # --- Development Workflow ---
 
 bootstrap: ## Install dev dependencies
-	pip3 install -U pip
-	pip3 install -e ".[otel,policy,sbom,perf]"
-	pip3 install pytest ruff mypy pre-commit
-	pre-commit install
+	python3 -m venv $(VENV_DIR)
+	$(VENV_BIN)/pip install -U pip
+	$(VENV_BIN)/pip install -e ".[otel,policy,sbom,perf]"
+	$(VENV_BIN)/pip install pytest ruff mypy pre-commit
+	$(VENV_BIN)/pre-commit install
 	pnpm install
 
 dev:
 	pnpm run dev
 
 test:   ## Run unit tests (node+python)
-	pnpm -w run test:unit || true && pytest || true
+	pnpm -w run test:unit || true && $(VENV_BIN)/pytest || true
 
 lint:   ## Lint js/ts + python
 	pnpm -w exec eslint . || true
-	ruff check .
-	mypy src
+	$(VENV_BIN)/ruff check .
+	$(VENV_BIN)/mypy src
 
 format: ## Format code
 	pnpm -w exec prettier -w . || true
-	ruff format .
+	$(VENV_BIN)/ruff format .
 
 build:  ## Build all images
 	docker compose -f $(COMPOSE_DEV_FILE) build
