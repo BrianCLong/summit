@@ -11,9 +11,10 @@ import Redis from 'ioredis';
 import { logger } from '../utils/logger';
 import { PolicyGuard } from './policyGuard';
 import { Budget } from '../ai/llmBudget';
-import { systemMonitor } from '../src/lib/system-monitor';
+import { systemMonitor } from '../lib/system-monitor';
+import { getTracer, SpanStatusCode, SpanKind } from '../observability/tracer';
 
-const redis = new (Redis as any)(process.env.REDIS_URL || 'redis://localhost:6379', {
+const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
   maxRetriesPerRequest: null,
 });
 
@@ -70,52 +71,74 @@ class MaestroOrchestrator {
   }
 
   async enqueueTask(task: AgentTask): Promise<string> {
-    // 1. System Health Check (Backpressure)
-    const health = systemMonitor.getHealth();
-    if (health.isOverloaded) {
-      throw new Error(`System overloaded: ${health.reason}. Task rejected.`);
-    }
+    const tracer = getTracer();
+    return tracer.withSpan('maestro.enqueueTask', async (span) => {
+      span.setAttribute('maestro.task.kind', task.kind);
+      span.setAttribute('maestro.task.repo', task.repo);
+      span.setAttribute('maestro.task.budget', task.budgetUSD);
 
-    // 2. Queue Depth Check (Backpressure)
-    const waitingCount = await maestroQueue.count();
-    const MAX_QUEUE_DEPTH = 1000; // Hard limit for backlog
-    if (waitingCount > MAX_QUEUE_DEPTH) {
-      throw new Error(`Queue full (${waitingCount} pending). Task rejected.`);
-    }
+      // 1. System Health Check (Backpressure)
+      const health = systemMonitor.getHealth();
+      if (health.isOverloaded) {
+        throw new Error(`System overloaded: ${health.reason}. Task rejected.`);
+      }
 
-    // Pre-flight policy check
-    const policyResult = await this.policyGuard.checkPolicy(task);
-    if (!policyResult.allowed) {
-      throw new Error(`Task blocked by policy: ${policyResult.reason}`);
-    }
+      // 2. Queue Depth Check (Backpressure)
+      const waitingCount = await maestroQueue.count();
+      const MAX_QUEUE_DEPTH = 1000; // Hard limit for backlog
+      if (waitingCount > MAX_QUEUE_DEPTH) {
+        throw new Error(`Queue full (${waitingCount} pending). Task rejected.`);
+      }
 
-    const job = await maestroQueue.add(task.kind, task, {
-      jobId: `${task.kind}-${task.repo}-${Date.now()}`,
-    });
+      try {
+        // Pre-flight policy check
+        const policyResult = await this.policyGuard.checkPolicy(task);
+        if (!policyResult.allowed) {
+          throw new Error(`Task blocked by policy: ${policyResult.reason}`);
+        }
 
-    logger.info('Task enqueued', {
-      taskId: job.id,
-      kind: task.kind,
-      repo: task.repo,
-      budgetUSD: task.budgetUSD,
-    });
+        const job = await maestroQueue.add(task.kind, task, {
+          jobId: `${task.kind}-${task.repo}-${Date.now()}`,
+        });
 
-    return job.id!;
+        span.setAttribute('maestro.job.id', job.id || 'unknown');
+
+        logger.info('Task enqueued', {
+          taskId: job.id,
+          kind: task.kind,
+          repo: task.repo,
+          budgetUSD: task.budgetUSD,
+        });
+
+        return job.id!;
+      } catch (error) {
+        span.recordException(error as Error);
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: (error as Error).message,
+        });
+        throw error;
+      }
+    }, { kind: SpanKind.PRODUCER });
   }
 
   async enqueueTaskChain(tasks: AgentTask[]): Promise<string[]> {
-    const taskIds: string[] = [];
+    const tracer = getTracer();
+    return tracer.withSpan('maestro.enqueueTaskChain', async (span) => {
+      span.setAttribute('maestro.chain.length', tasks.length);
+      const taskIds: string[] = [];
 
-    for (let i = 0; i < tasks.length; i++) {
-      const task = tasks[i];
-      if (i > 0) {
-        task.dependencies = [taskIds[i - 1]];
+      for (let i = 0; i < tasks.length; i++) {
+        const task = tasks[i];
+        if (i > 0) {
+          task.dependencies = [taskIds[i - 1]];
+        }
+        const taskId = await this.enqueueTask(task);
+        taskIds.push(taskId);
       }
-      const taskId = await this.enqueueTask(task);
-      taskIds.push(taskId);
-    }
 
-    return taskIds;
+      return taskIds;
+    });
   }
 
   private initializeWorkers() {
@@ -128,7 +151,7 @@ class MaestroOrchestrator {
     // Planner Agent
     const plannerWorker = new Worker<AgentTask>(
       'maestro',
-      this.withGuards(this.plannerHandler.bind(this)),
+      this.withGuards(this.plannerHandler.bind(this), 'planner'),
       { ...workerOptions, name: 'planner' },
     );
     this.workers.set('planner', plannerWorker);
@@ -136,7 +159,7 @@ class MaestroOrchestrator {
     // Scaffolder Agent
     const scaffolderWorker = new Worker<AgentTask>(
       'maestro',
-      this.withGuards(this.scaffolderHandler.bind(this)),
+      this.withGuards(this.scaffolderHandler.bind(this), 'scaffolder'),
       { ...workerOptions, name: 'scaffolder' },
     );
     this.workers.set('scaffolder', scaffolderWorker);
@@ -144,7 +167,7 @@ class MaestroOrchestrator {
     // Implementer Agent
     const implementerWorker = new Worker<AgentTask>(
       'maestro',
-      this.withGuards(this.implementerHandler.bind(this)),
+      this.withGuards(this.implementerHandler.bind(this), 'implementer'),
       { ...workerOptions, name: 'implementer' },
     );
     this.workers.set('implementer', implementerWorker);
@@ -152,7 +175,7 @@ class MaestroOrchestrator {
     // Tester Agent
     const testerWorker = new Worker<AgentTask>(
       'maestro',
-      this.withGuards(this.testerHandler.bind(this)),
+      this.withGuards(this.testerHandler.bind(this), 'tester'),
       { ...workerOptions, name: 'tester' },
     );
     this.workers.set('tester', testerWorker);
@@ -160,7 +183,7 @@ class MaestroOrchestrator {
     // Reviewer Agent
     const reviewerWorker = new Worker<AgentTask>(
       'maestro',
-      this.withGuards(this.reviewerHandler.bind(this)),
+      this.withGuards(this.reviewerHandler.bind(this), 'reviewer'),
       { ...workerOptions, name: 'reviewer' },
     );
     this.workers.set('reviewer', reviewerWorker);
@@ -168,7 +191,7 @@ class MaestroOrchestrator {
     // Doc Writer Agent
     const docWriterWorker = new Worker<AgentTask>(
       'maestro',
-      this.withGuards(this.docWriterHandler.bind(this)),
+      this.withGuards(this.docWriterHandler.bind(this), 'doc-writer'),
       { ...workerOptions, name: 'doc-writer' },
     );
     this.workers.set('doc-writer', docWriterWorker);
@@ -176,86 +199,108 @@ class MaestroOrchestrator {
 
   private withGuards<T extends AgentTask>(
     handler: (job: Job<T>) => Promise<TaskResult>,
+    agentName: string
   ) {
     return async (job: Job<T>): Promise<TaskResult> => {
-      const startTime = Date.now();
-      const budget = new Budget(job.data.budgetUSD);
+      const tracer = getTracer();
+      return tracer.withSpan(`maestro.agent.${agentName}`, async (span) => {
+        span.setAttribute('maestro.agent.name', agentName);
+        span.setAttribute('maestro.job.id', job.id || 'unknown');
+        span.setAttribute('maestro.task.kind', job.data.kind);
+        span.setAttribute('maestro.task.repo', job.data.repo);
 
-      try {
-        // Policy guard
-        const policyResult = await this.policyGuard.checkPolicy(job.data);
-        if (!policyResult.allowed) {
-          throw new Error(`Policy violation: ${policyResult.reason}`);
+        const startTime = Date.now();
+        const budget = new Budget(job.data.budgetUSD);
+
+        try {
+          // Policy guard
+          const policyResult = await this.policyGuard.checkPolicy(job.data);
+          if (!policyResult.allowed) {
+            throw new Error(`Policy violation: ${policyResult.reason}`);
+          }
+
+          // Budget guard
+          if (budget.maxUSD <= 0) {
+            throw new Error('Budget exceeded: action blocked by budget guard');
+          }
+
+          // Wait for dependencies
+          if (job.data.dependencies?.length) {
+            await this.waitForDependencies(job.data.dependencies);
+          }
+
+          logger.info('Starting agent task', {
+            taskId: job.id,
+            kind: job.data.kind,
+            budget: budget.maxUSD,
+          });
+
+          const result = await handler(job);
+          const duration = Date.now() - startTime;
+
+          // Update task result with guardrail metadata
+          return {
+            ...result,
+            duration,
+            cost: budget.usedUSD,
+          };
+        } catch (error: any) {
+          const duration = Date.now() - startTime;
+          const errorMessage = error.message;
+
+          span.recordException(error);
+          span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: errorMessage,
+          });
+
+          logger.error('Agent task failed', {
+            taskId: job.id,
+            error: errorMessage,
+            duration,
+          });
+
+          return {
+            success: false,
+            duration,
+            cost: budget.usedUSD,
+            errors: [errorMessage],
+          };
         }
-
-        // Budget guard
-        if (budget.maxUSD <= 0) {
-          throw new Error('Budget exceeded: action blocked by budget guard');
-        }
-
-        // Wait for dependencies
-        if (job.data.dependencies?.length) {
-          await this.waitForDependencies(job.data.dependencies);
-        }
-
-        logger.info('Starting agent task', {
-          taskId: job.id,
-          kind: job.data.kind,
-          budget: budget.maxUSD,
-        });
-
-        const result = await handler(job);
-        const duration = Date.now() - startTime;
-
-        // Update task result with guardrail metadata
-        return {
-          ...result,
-          duration,
-          cost: budget.usedUSD,
-        };
-      } catch (error: any) {
-        const duration = Date.now() - startTime;
-        logger.error('Agent task failed', {
-          taskId: job.id,
-          error: error.message,
-          duration,
-        });
-
-        return {
-          success: false,
-          duration,
-          cost: budget.usedUSD,
-          errors: [error.message],
-        };
-      }
+      }, { kind: SpanKind.CONSUMER });
     };
   }
 
   private async waitForDependencies(dependencies: string[]): Promise<void> {
-    // Simple dependency waiting - in production would use more sophisticated coordination
-    const maxWait = 300000; // 5 minutes
-    const pollInterval = 5000; // 5 seconds
-    const startTime = Date.now();
+    const tracer = getTracer();
+    return tracer.withSpan('maestro.waitForDependencies', async (span) => {
+      span.setAttribute('maestro.dependencies.count', dependencies.length);
 
-    while (Date.now() - startTime < maxWait) {
-      const jobs = await Promise.all(
-        dependencies.map((id) => maestroQueue.getJob(id)),
-      );
+      // Simple dependency waiting - in production would use more sophisticated coordination
+      const maxWait = 300000; // 5 minutes
+      const pollInterval = 5000; // 5 seconds
+      const startTime = Date.now();
 
-      const allComplete = jobs.every(
-        (job) =>
-          job &&
-          (job.finishedOn !== undefined || job.failedReason !== undefined),
-      );
+      while (Date.now() - startTime < maxWait) {
+        const jobs = await Promise.all(
+          dependencies.map((id) => maestroQueue.getJob(id)),
+        );
 
-      if (allComplete) {
-        return;
+        const allComplete = jobs.every(
+          (job) =>
+            job &&
+            (job.finishedOn !== undefined || job.failedReason !== undefined),
+        );
+
+        if (allComplete) {
+          return;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, pollInterval));
       }
 
-      await new Promise((resolve) => setTimeout(resolve, pollInterval));
-    }
-
-    throw new Error(`Dependencies not satisfied within ${maxWait}ms`);
+      throw new Error(`Dependencies not satisfied within ${maxWait}ms`);
+    });
   }
 
   // Agent Handlers

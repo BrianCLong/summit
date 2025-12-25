@@ -1,9 +1,10 @@
-// @ts-nocheck
-import { IntelGraphService } from '../../services/IntelGraphService.js';
-import { MLScorer } from './MLScorer.js';
-import { ConflictResolver, StrategyType } from './ConflictResolver.js';
-import { provenanceLedger } from '../../provenance/ledger.js';
+import { IntelGraphService } from '../../services/IntelGraphService';
+import { MLScorer } from './MLScorer';
+import { ConflictResolver, StrategyType } from './ConflictResolver';
+import { provenanceLedger } from '../../provenance/ledger';
 import { randomUUID } from 'crypto';
+import { SimilarityModel } from '../models/SimilarityModel';
+import { NaiveBayesModel } from '../models/NaiveBayesModel';
 
 export interface EntityResolutionResult {
   matchCandidateId: string;
@@ -17,9 +18,10 @@ export class EntityResolver {
   private graphService: IntelGraphService;
   private scorer: MLScorer;
 
-  constructor() {
+  constructor(model?: SimilarityModel) {
     this.graphService = IntelGraphService.getInstance();
-    this.scorer = new MLScorer();
+    // Default to NaiveBayesModel for "Advanced" resolution, or fallback to default
+    this.scorer = new MLScorer(model || new NaiveBayesModel());
   }
 
   /**
@@ -38,46 +40,22 @@ export class EntityResolver {
 
     // 2. Fetch candidates using Blocking Strategy
     // In production, use search index or blocking keys.
-    // Here we query by Email, Phone, and Name if available.
+    // We use the new findSimilarNodes for fuzzy blocking.
     const label = (entity as any).label || 'Person';
 
     let candidates: any[] = [];
     try {
-        const promises: Promise<any[]>[] = [];
         const e = entity as any;
 
-        // Block by Email
-        if (e.email) {
-            promises.push(this.graphService.searchNodes(tenantId, label, { email: e.email }, 50));
-        }
+        // Use the new fuzzy search capability
+        candidates = await this.graphService.findSimilarNodes(tenantId, label, {
+            name: e.name,
+            email: e.email,
+            phone: e.phone
+        }, 100);
 
-        // Block by Phone
-        if (e.phone) {
-            promises.push(this.graphService.searchNodes(tenantId, label, { phone: e.phone }, 50));
-        }
-
-        // Block by Name (Exact match)
-        if (e.name) {
-             promises.push(this.graphService.searchNodes(tenantId, label, { name: e.name }, 50));
-        }
-
-        // Fallback: if no strong identifiers, fetch recent entities?
-        // Or if promises empty (e.g. only ID known?), maybe generic search?
-        // If blocking keys yielded nothing, we might want to try broader search but that's expensive.
-        if (promises.length === 0) {
-             promises.push(this.graphService.searchNodes(tenantId, label, {}, 100));
-        }
-
-        const resultSets = await Promise.all(promises);
-
-        // Flatten and Deduplicate
-        const uniqueMap = new Map<string, any>();
-        for (const set of resultSets) {
-            for (const item of set) {
-                uniqueMap.set(item.id, item);
-            }
-        }
-        candidates = Array.from(uniqueMap.values());
+        // Fallback: if no candidates found via fuzzy search, maybe fetch some recent ones?
+        // But findSimilarNodes should cover exact matches too.
 
     } catch (e) {
         // If labels are invalid, ignore.

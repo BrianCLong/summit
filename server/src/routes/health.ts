@@ -2,6 +2,7 @@ import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { logger } from '../utils/logger.js';
 import { getVariant, isEnabled } from '../lib/featureFlags.js';
+import { telemetryService } from '../analytics/telemetry/TelemetryService.js';
 
 const router = Router();
 
@@ -44,6 +45,7 @@ interface ServiceHealthError {
  *                   type: string
  */
 router.get('/health', async (_req: Request, res: Response) => {
+  // Removed telemetry call to avoid spam
   res.status(200).json({
     status: 'ok',
     timestamp: new Date().toISOString(),
@@ -90,6 +92,11 @@ router.get('/health', async (_req: Request, res: Response) => {
  *         description: System is degraded
  */
 router.get('/health/detailed', async (_req: Request, res: Response) => {
+  telemetryService.track('system_alert', 'system', 'detailed_health_check', 'system', {
+      component: 'health_detailed',
+      severity: 'info',
+      alertId: 'health_check_deep',
+  });
   const errors: ServiceHealthError[] = [];
   const health: {
     status: string;

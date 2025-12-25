@@ -11,6 +11,25 @@ export const createTenantSchema = z.object({
   name: z.string().min(2).max(100),
   slug: z.string().min(3).max(50).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
   residency: z.enum(['US', 'EU']),
+  region: z.string().optional(),
+}).transform(data => {
+  // Default region based on residency
+  if (!data.region) {
+    data.region = data.residency === 'EU' ? 'eu-central-1' : 'us-east-1';
+  }
+  return data as { name: string; slug: string; residency: 'US' | 'EU'; region: string };
+}).refine(data => {
+  // Validate residency/region alignment
+  if (data.residency === 'EU' && !data.region.startsWith('eu-')) {
+    return false;
+  }
+  if (data.residency === 'US' && !data.region.startsWith('us-')) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Region must match residency (e.g., 'eu-central-1' for 'EU')",
+  path: ["region"]
 });
 
 export type CreateTenantInput = z.infer<typeof createTenantSchema>;
@@ -19,6 +38,7 @@ export interface Tenant {
   id: string;
   name: string;
   slug: string;
+  region?: string;
   residency: 'US' | 'EU';
   tier: string;
   status: string;
@@ -90,9 +110,9 @@ export class TenantService {
       const tenantId = randomUUID();
       const insertQuery = `
         INSERT INTO tenants (
-          id, name, slug, residency, tier, status, config, settings, created_by
+          id, name, slug, residency, region, tier, status, config, settings, created_by
         ) VALUES (
-          $1, $2, $3, $4, $5, $6, $7, $8, $9
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
         ) RETURNING *
       `;
 
@@ -101,6 +121,7 @@ export class TenantService {
         validated.name,
         validated.slug,
         validated.residency,
+        validated.region,
         defaults.tier,
         defaults.status,
         defaults.config,
@@ -301,6 +322,7 @@ export class TenantService {
       id: row.id,
       name: row.name,
       slug: row.slug,
+      region: row.region,
       residency: row.residency,
       tier: row.tier,
       status: row.status,

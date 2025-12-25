@@ -1,5 +1,5 @@
 import natural from 'natural';
-import { StringNormalizer } from '../utils/StringNormalizer.js';
+import { StringNormalizer } from '../utils/StringNormalizer';
 
 export class FuzzyMatcher {
   /**
