@@ -10,6 +10,7 @@ import { createHash } from 'crypto';
 import { randomUUID as uuidv4 } from 'crypto';
 import logger from '../config/logger.js';
 import { meteringEmitter } from '../metering/emitter.js';
+import { getTracer } from '../observability/tracer.js';
 
 const ingestLogger = logger.child({ name: 'IngestService' });
 
@@ -54,202 +55,215 @@ export class IngestService {
    * Ingest entities and relationships with full provenance tracking
    */
   async ingest(input: IngestInput): Promise<IngestResult> {
-    const startTime = Date.now();
-    const provenanceId = uuidv4();
-    const errors: string[] = [];
+    return getTracer().withSpan('IngestService.ingest', async (span) => {
+      span.setAttribute('ingest.tenant_id', input.tenantId);
+      span.setAttribute('ingest.source_type', input.sourceType);
+      span.setAttribute('ingest.entity_count', input.entities.length);
+      span.setAttribute('ingest.relationship_count', input.relationships.length);
 
-    let entitiesCreated = 0;
-    let entitiesUpdated = 0;
-    let relationshipsCreated = 0;
-    let relationshipsUpdated = 0;
+      const startTime = Date.now();
+      const provenanceId = uuidv4();
+      const errors: string[] = [];
 
-    const client = await this.pg.connect();
+      let entitiesCreated = 0;
+      let entitiesUpdated = 0;
+      let relationshipsCreated = 0;
+      let relationshipsUpdated = 0;
 
-    try {
-      await client.query('BEGIN');
-
-      // 1. Create provenance record
-      await this.createProvenanceRecord(client, {
-        id: provenanceId,
-        tenantId: input.tenantId,
-        sourceType: input.sourceType,
-        sourceId: input.sourceId,
-        userId: input.userId,
-        entityCount: input.entities.length,
-        relationshipCount: input.relationships.length,
-      });
-
-      // 2. Map external IDs to internal stable IDs
-      const idMap = new Map<string, string>();
-
-      // 3. Upsert entities in batches for performance
-      const BATCH_SIZE = 1000;
-      for (let i = 0; i < input.entities.length; i += BATCH_SIZE) {
-        const batch = input.entities.slice(i, i + BATCH_SIZE);
-
-        for (const entityInput of batch) {
-          try {
-            const stableId = this.generateStableId(
-              input.tenantId,
-              entityInput.kind,
-              entityInput.properties,
-            );
-
-            // Map external ID to stable ID
-            if (entityInput.externalId) {
-              idMap.set(entityInput.externalId, stableId);
-            }
-
-            const existing = await this.findEntityByStableId(client, stableId);
-
-            if (existing) {
-              // Update existing entity
-              await this.updateEntity(client, {
-                id: existing.id,
-                labels: entityInput.labels,
-                properties: entityInput.properties,
-                provenanceId,
-              });
-              entitiesUpdated++;
-            } else {
-              // Create new entity
-              await this.createEntity(client, {
-                id: stableId,
-                tenantId: input.tenantId,
-                kind: entityInput.kind,
-                labels: entityInput.labels,
-                properties: entityInput.properties,
-                userId: input.userId,
-                provenanceId,
-              });
-              entitiesCreated++;
-            }
-          } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            errors.push(`Entity ${entityInput.externalId}: ${errorMessage}`);
-            ingestLogger.warn({ error, entityInput }, 'Failed to ingest entity');
-          }
-        }
-      }
-
-      // 4. Upsert relationships
-      for (const relInput of input.relationships) {
-        try {
-          const fromId = idMap.get(relInput.fromExternalId);
-          const toId = idMap.get(relInput.toExternalId);
-
-          if (!fromId || !toId) {
-            errors.push(
-              `Relationship ${relInput.fromExternalId}->${relInput.toExternalId}: Entity not found`,
-            );
-            continue;
-          }
-
-          const relId = this.generateRelationshipId(
-            fromId,
-            toId,
-            relInput.relationshipType,
-          );
-
-          const existing = await this.findRelationshipById(client, relId);
-
-          if (existing) {
-            await this.updateRelationship(client, {
-              id: relId,
-              properties: relInput.properties,
-              confidence: relInput.confidence,
-              provenanceId,
-            });
-            relationshipsUpdated++;
-          } else {
-            await this.createRelationship(client, {
-              id: relId,
-              tenantId: input.tenantId,
-              fromEntityId: fromId,
-              toEntityId: toId,
-              relationshipType: relInput.relationshipType,
-              properties: relInput.properties || {},
-              confidence: relInput.confidence,
-              source: relInput.source || input.sourceType,
-              provenanceId,
-            });
-            relationshipsCreated++;
-          }
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          errors.push(
-            `Relationship ${relInput.fromExternalId}->${relInput.toExternalId}: ${errorMessage}`,
-          );
-          ingestLogger.warn({ error, relInput }, 'Failed to ingest relationship');
-        }
-      }
-
-      // 5. Commit PostgreSQL transaction
-      await client.query('COMMIT');
-
-      // 6. Sync to Neo4j (best effort, with outbox fallback)
-      try {
-        await this.syncToNeo4j(input.tenantId, provenanceId);
-      } catch (neo4jError) {
-        ingestLogger.warn(
-          { provenanceId, error: neo4jError },
-          'Neo4j sync failed, will retry via outbox',
-        );
-      }
-
-      const took = Date.now() - startTime;
-      const throughput = Math.round(
-        ((entitiesCreated + entitiesUpdated) / took) * 1000,
-      );
-
-      ingestLogger.info({
-        provenanceId,
-        tenantId: input.tenantId,
-        entitiesCreated,
-        entitiesUpdated,
-        relationshipsCreated,
-        relationshipsUpdated,
-        errors: errors.length,
-        took,
-        throughput: `${throughput} entities/sec`,
-      });
+      const client = await this.pg.connect();
 
       try {
-        await meteringEmitter.emitIngestUnits({
+        await client.query('BEGIN');
+
+        // 1. Create provenance record
+        await this.createProvenanceRecord(client, {
+          id: provenanceId,
           tenantId: input.tenantId,
-          units:
-            entitiesCreated +
-            entitiesUpdated +
-            relationshipsCreated +
-            relationshipsUpdated,
-          source: 'ingest-service',
-          correlationId: provenanceId,
-          idempotencyKey: provenanceId,
-          metadata: {
-            sourceType: input.sourceType,
-            sourceId: input.sourceId,
-            userId: input.userId,
-          },
+          sourceType: input.sourceType,
+          sourceId: input.sourceId,
+          userId: input.userId,
+          entityCount: input.entities.length,
+          relationshipCount: input.relationships.length,
         });
-      } catch (err) {
-        ingestLogger.warn({ err, provenanceId }, 'Failed to emit ingest metering');
-      }
 
-      return {
-        success: errors.length === 0,
-        entitiesCreated,
-        entitiesUpdated,
-        relationshipsCreated,
-        relationshipsUpdated,
-        errors,
-        provenanceId,
-      };
-    } catch (error) {
-      await client.query('ROLLBACK');
-      throw error;
-    } finally {
-      client.release();
-    }
+        // 2. Map external IDs to internal stable IDs
+        const idMap = new Map<string, string>();
+
+        // 3. Upsert entities in batches for performance
+        const BATCH_SIZE = 1000;
+        await getTracer().withSpan('IngestService.processEntities', async (entitySpan) => {
+          for (let i = 0; i < input.entities.length; i += BATCH_SIZE) {
+            const batch = input.entities.slice(i, i + BATCH_SIZE);
+
+            for (const entityInput of batch) {
+              try {
+                const stableId = this.generateStableId(
+                  input.tenantId,
+                  entityInput.kind,
+                  entityInput.properties,
+                );
+
+                // Map external ID to stable ID
+                if (entityInput.externalId) {
+                  idMap.set(entityInput.externalId, stableId);
+                }
+
+                const existing = await this.findEntityByStableId(client, stableId);
+
+                if (existing) {
+                  // Update existing entity
+                  await this.updateEntity(client, {
+                    id: existing.id,
+                    labels: entityInput.labels,
+                    properties: entityInput.properties,
+                    provenanceId,
+                  });
+                  entitiesUpdated++;
+                } else {
+                  // Create new entity
+                  await this.createEntity(client, {
+                    id: stableId,
+                    tenantId: input.tenantId,
+                    kind: entityInput.kind,
+                    labels: entityInput.labels,
+                    properties: entityInput.properties,
+                    userId: input.userId,
+                    provenanceId,
+                  });
+                  entitiesCreated++;
+                }
+              } catch (error) {
+                const errorMessage = error instanceof Error ? error.message : String(error);
+                errors.push(`Entity ${entityInput.externalId}: ${errorMessage}`);
+                ingestLogger.warn({ error, entityInput }, 'Failed to ingest entity');
+              }
+            }
+          }
+        });
+
+        // 4. Upsert relationships
+        await getTracer().withSpan('IngestService.processRelationships', async (relSpan) => {
+          for (const relInput of input.relationships) {
+            try {
+              const fromId = idMap.get(relInput.fromExternalId);
+              const toId = idMap.get(relInput.toExternalId);
+
+              if (!fromId || !toId) {
+                errors.push(
+                  `Relationship ${relInput.fromExternalId}->${relInput.toExternalId}: Entity not found`,
+                );
+                continue;
+              }
+
+              const relId = this.generateRelationshipId(
+                fromId,
+                toId,
+                relInput.relationshipType,
+              );
+
+              const existing = await this.findRelationshipById(client, relId);
+
+              if (existing) {
+                await this.updateRelationship(client, {
+                  id: relId,
+                  properties: relInput.properties,
+                  confidence: relInput.confidence,
+                  provenanceId,
+                });
+                relationshipsUpdated++;
+              } else {
+                await this.createRelationship(client, {
+                  id: relId,
+                  tenantId: input.tenantId,
+                  fromEntityId: fromId,
+                  toEntityId: toId,
+                  relationshipType: relInput.relationshipType,
+                  properties: relInput.properties || {},
+                  confidence: relInput.confidence,
+                  source: relInput.source || input.sourceType,
+                  provenanceId,
+                });
+                relationshipsCreated++;
+              }
+            } catch (error) {
+              const errorMessage = error instanceof Error ? error.message : String(error);
+              errors.push(
+                `Relationship ${relInput.fromExternalId}->${relInput.toExternalId}: ${errorMessage}`,
+              );
+              ingestLogger.warn({ error, relInput }, 'Failed to ingest relationship');
+            }
+          }
+        });
+
+        // 5. Commit PostgreSQL transaction
+        await client.query('COMMIT');
+
+        // 6. Sync to Neo4j (best effort, with outbox fallback)
+        try {
+          await getTracer().withSpan('IngestService.syncToNeo4j', async () => {
+             await this.syncToNeo4j(input.tenantId, provenanceId);
+          });
+        } catch (neo4jError) {
+          ingestLogger.warn(
+            { provenanceId, error: neo4jError },
+            'Neo4j sync failed, will retry via outbox',
+          );
+        }
+
+        const took = Date.now() - startTime;
+        const throughput = Math.round(
+          ((entitiesCreated + entitiesUpdated) / took) * 1000,
+        );
+
+        ingestLogger.info({
+          provenanceId,
+          tenantId: input.tenantId,
+          entitiesCreated,
+          entitiesUpdated,
+          relationshipsCreated,
+          relationshipsUpdated,
+          errors: errors.length,
+          took,
+          throughput: `${throughput} entities/sec`,
+        });
+
+        try {
+          await meteringEmitter.emitIngestUnits({
+            tenantId: input.tenantId,
+            units:
+              entitiesCreated +
+              entitiesUpdated +
+              relationshipsCreated +
+              relationshipsUpdated,
+            source: 'ingest-service',
+            correlationId: provenanceId,
+            idempotencyKey: provenanceId,
+            metadata: {
+              sourceType: input.sourceType,
+              sourceId: input.sourceId,
+              userId: input.userId,
+            },
+          });
+        } catch (err) {
+          ingestLogger.warn({ err, provenanceId }, 'Failed to emit ingest metering');
+        }
+
+        return {
+          success: errors.length === 0,
+          entitiesCreated,
+          entitiesUpdated,
+          relationshipsCreated,
+          relationshipsUpdated,
+          errors,
+          provenanceId,
+        };
+      } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+      } finally {
+        client.release();
+      }
+    });
   }
 
   /**
