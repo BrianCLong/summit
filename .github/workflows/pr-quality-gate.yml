@@ -65,11 +65,8 @@ jobs:
       - name: Golden Path Compliance
         run: npm run check:golden || echo "::warning::Golden path violations found. Please adhere to Golden Paths for new features."
 
-      - name: Security Audit
-        # Run audit but don't fail immediately on moderate issues to prevent blocking dev flow unnecessarily,
-        # but ensure critical/high are caught. Adjust level as needed.
-        # Ideally: pnpm audit --audit-level=high
-        run: pnpm run security:audit || echo "::warning::Security audit found issues"
+      - name: Security Audit (Fail on High)
+        run: pnpm audit --audit-level=high
 
       - name: Security Lint
         run: pnpm run security:lint
@@ -174,3 +171,44 @@ jobs:
       - name: Teardown
         if: always()
         run: make down
+
+  sonarqube-sast:
+    name: SonarQube SAST Scan
+    needs: [static-checks, unit-tests]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        with:
+          args: >
+            -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
+            -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }}
+            -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }}
+            -Dsonar.scm.revision=${{ github.event.pull_request.head.sha }}
+
+  pr-quality-gate-status:
+    name: PR Quality Gate Status
+    runs-on: ubuntu-latest
+    needs: [static-checks, unit-tests, smoke-tests, sonarqube-sast]
+    if: always() # This ensures the job runs even if previous jobs fail
+    steps:
+      - name: Check Status of All Jobs
+        run: |
+          if [[ "${{ needs.static-checks.result }}" != "success" || \
+                "${{ needs.unit-tests.result }}" != "success" || \
+                "${{ needs.smoke-tests.result }}" != "success" || \
+                "${{ needs.sonarqube-sast.result }}" != "success" ]]; then
+            echo "One or more jobs in the PR Quality Gate failed."
+            exit 1
+          else
+            echo "All jobs in the PR Quality Gate passed."
+          fi
