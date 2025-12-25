@@ -5,7 +5,7 @@ import archiver from 'archiver';
 import { getPostgresPool } from '../db/postgres.js';
 import { ProvenanceRepo } from '../repos/ProvenanceRepo.js';
 import { ensureAuthenticated, requirePermission } from '../middleware/auth.js';
-import { getAuditSystem, ComplianceFramework } from '../audit/advanced-audit-system.js';
+import { advancedAuditSystem, ComplianceFramework } from '../audit/advanced-audit-system.js';
 import logger from '../utils/logger.js';
 import { BundleVerifier } from '../audit/BundleVerifier.js';
 import rateLimit from 'express-rate-limit';
@@ -199,7 +199,7 @@ auditRouter.get(
         offset,
       } = req.query;
 
-      const events = await getAuditSystem().queryEvents({
+      const events = await advancedAuditSystem.queryEvents({
         startTime: startTime ? new Date(startTime as string) : undefined,
         endTime: endTime ? new Date(endTime as string) : undefined,
         eventTypes: eventTypes ? (eventTypes as string).split(',') as any[] : undefined,
@@ -209,7 +209,11 @@ auditRouter.get(
         correlationIds: correlationIds ? (correlationIds as string).split(',') : undefined,
         limit: limit ? parseInt(limit as string, 10) : 50,
         offset: offset ? parseInt(offset as string, 10) : 0,
-        tenantIds: [req.user?.tenantId || 'system'], // Scoped to tenant
+        // Strictly enforce tenant isolation.
+        // If req.user.tenantId is missing (e.g. system admin or error), we default to empty array or specific handling.
+        // But for "Customer-grade compliance", we want to ensure they ONLY see their own data.
+        // Assuming 'system' is only for internal use and shouldn't be the default fallback for a logged-in user without tenantId.
+        tenantIds: req.user?.tenantId ? [req.user.tenantId] : [],
       });
 
       res.json({ data: events });
@@ -233,7 +237,7 @@ auditRouter.get(
         return res.status(400).json({ error: 'Missing required parameters' });
       }
 
-      const report = await getAuditSystem().generateComplianceReport(
+      const report = await advancedAuditSystem.generateComplianceReport(
         framework as ComplianceFramework,
         new Date(startTime as string),
         new Date(endTime as string),
@@ -256,7 +260,7 @@ auditRouter.get(
     try {
        const { startTime, endTime } = req.query;
 
-       const result = await getAuditSystem().verifyIntegrity(
+       const result = await advancedAuditSystem.verifyIntegrity(
          startTime ? new Date(startTime as string) : undefined,
          endTime ? new Date(endTime as string) : undefined
        );
