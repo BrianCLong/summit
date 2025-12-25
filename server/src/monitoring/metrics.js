@@ -449,6 +449,12 @@ const llmRequestDuration = new client.Histogram({
   labelNames: ['model'],
 });
 
+const intelgraphJobQueueDepth = new client.Gauge({
+  name: 'intelgraph_job_queue_depth',
+  help: 'Current depth of job queues',
+  labelNames: ['queue_name', 'status'],
+});
+
 // Auto-remediation execution tracking
 const serviceAutoRemediationsTotal = new client.Counter({
   name: 'service_auto_remediations_total',
@@ -522,7 +528,8 @@ const metrics = {
   maestroDagExecutionDurationSeconds,
   maestroJobExecutionDurationSeconds,
   llmTokensTotal,
-  llmRequestDuration
+  llmRequestDuration,
+  intelgraphJobQueueDepth
 };
 
 // Update memory usage periodically
@@ -608,5 +615,6 @@ module.exports = {
   maestroDagExecutionDurationSeconds,
   maestroJobExecutionDurationSeconds,
   llmTokensTotal,
-  llmRequestDuration
+  llmRequestDuration,
+  intelgraphJobQueueDepth
 };
