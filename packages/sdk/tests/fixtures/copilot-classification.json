@@ -1,5 +1,0 @@
-{
-  "ok": true,
-  "classification": "unsafe",
-  "reasons": ["risky_intent", "pii"]
-}

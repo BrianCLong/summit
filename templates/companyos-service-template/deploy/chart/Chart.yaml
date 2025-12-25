@@ -1,4 +1,0 @@
-apiVersion: v2
-name: golden-path-service
-version: 0.1.0
-description: Golden-path reference service with canary support

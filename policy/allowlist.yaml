@@ -1,9 +1,0 @@
-exceptions:
-  - id: iam-wildcard
-    owner: platform-team
-    ticket: SEC-1234
-    expires: 2025-12-31T23:59:59Z
-  - id: public-ingress
-    owner: sre
-    ticket: SEC-2345
-    expires: 2025-10-01T00:00:00Z

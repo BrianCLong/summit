@@ -1,5 +1,0 @@
-jurisdiction: EU
-requirements:
-  explainability: required
-  data_residency: stringent
-  right_to_be_forgotten: true
