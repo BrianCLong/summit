@@ -5,6 +5,7 @@ import { store } from './store'
 import App from './App'
 import config from './config'
 import './index.css'
+import reportWebVitals from './reportWebVitals';
 
 // Start MSW for development
 async function enableMocking() {
@@ -27,4 +28,7 @@ enableMocking().then(() => {
       </Provider>
     </React.StrictMode>
   )
+
+  // Initialize Web Vitals reporting
+  reportWebVitals();
 })

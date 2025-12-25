@@ -5,6 +5,7 @@ global:
 
 rule_files:
   - 'alert_rules.yml'
+  - 'summit-alerts.yml'
 
 alerting:
   alertmanagers:

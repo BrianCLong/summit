@@ -325,7 +325,7 @@ export const createApp = async () => {
   app.use('/sso', ssoRouter);
 
   // Other routes
-  app.use('/monitoring', monitoringRouter);
+  app.use(['/monitoring', '/api/monitoring'], monitoringRouter);
   app.use('/api/ai', aiRouter);
   app.use('/api/ai/nl-graph-query', nlGraphQueryRouter);
   app.use('/api/narrative-sim', narrativeSimulationRouter);

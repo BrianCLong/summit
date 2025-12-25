@@ -41,7 +41,7 @@ const REDACT_PATHS = [
   'user.phone',
 ];
 
-// Standard logging context
+// Standard logging context for structured logging (JSON)
 export interface SummitLogContext {
   correlationId?: string;
   tenantId?: string;
