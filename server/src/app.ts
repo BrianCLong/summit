@@ -97,6 +97,7 @@ import exportsRouter from './routes/exports.js';
 import retentionRouter from './routes/retention.js';
 import drRouter from './routes/dr.js';
 import reportingRouter from './routes/reporting.js';
+import demoRouter from './routes/demo.js';
 import claimsRouter from './routes/claims.js';
 
 export const createApp = async () => {
@@ -367,6 +368,7 @@ export const createApp = async () => {
   app.use('/api', retentionRouter);
   app.use('/dr', drRouter);
   app.use('/api/reporting', reportingRouter);
+  app.use('/api/demo', demoRouter);
   app.use('/api/claims', claimsRouter);
   app.get('/metrics', metricsRoute);
 

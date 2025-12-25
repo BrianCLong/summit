@@ -45,6 +45,7 @@ const TriPanePage = React.lazy(() => import('@/pages/TriPanePage'))
 const GeoIntPane = React.lazy(() => import('@/panes/GeoIntPane').then(module => ({ default: module.GeoIntPane })))
 const NarrativeIntelligencePage = React.lazy(() => import('@/pages/NarrativeIntelligencePage'))
 const MissionControlPage = React.lazy(() => import('@/features/mission-control/MissionControlPage'))
+const DemoControlPage = React.lazy(() => import('@/pages/DemoControlPage'))
 
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
@@ -175,6 +176,8 @@ function App() {
                       {/* Support */}
                       <Route path="help" element={<HelpPage />} />
                       <Route path="changelog" element={<ChangelogPage />} />
+
+                      <Route path="demo" element={<DemoControlPage />} />
 
                       {/* Catch all */}
                       <Route path="*" element={<NotFound />} />
