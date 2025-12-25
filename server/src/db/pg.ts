@@ -324,6 +324,31 @@ export const pg = {
     );
   },
 
+  // Generic transaction support
+  transaction: async <T>(
+    callback: (tx: {
+      query: (text: string, params?: any[]) => Promise<any>;
+    }) => Promise<T>,
+  ): Promise<T> => {
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      const tx = {
+        query: async (text: string, params: any[] = []) => {
+          return (await client.query(text, params)).rows;
+        },
+      };
+      const result = await callback(tx);
+      await client.query('COMMIT');
+      return result;
+    } catch (e) {
+      await client.query('ROLLBACK');
+      throw e;
+    } finally {
+      client.release();
+    }
+  },
+
   healthCheck: async () => {
     try {
       await pool.query('SELECT 1');
