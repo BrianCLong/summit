@@ -1,7 +1,7 @@
 /**
  * Prometheus metrics collection for IntelGraph Platform
  */
-import * as client from 'prom-client';
+const client = require('prom-client');
 
 // Create a Registry which registers the metrics
 const register = new client.Registry();
@@ -526,15 +526,17 @@ const metrics = {
 };
 
 // Update memory usage periodically
-setInterval(() => {
-  const usage = process.memoryUsage();
-  memoryUsage.set({ component: 'heap_used' }, usage.heapUsed);
-  memoryUsage.set({ component: 'heap_total' }, usage.heapTotal);
-  memoryUsage.set({ component: 'external' }, usage.external);
-  memoryUsage.set({ component: 'rss' }, usage.rss);
-}, 30000); // Every 30 seconds
+if (process.env.NODE_ENV !== 'test') {
+  setInterval(() => {
+    const usage = process.memoryUsage();
+    memoryUsage.set({ component: 'heap_used' }, usage.heapUsed);
+    memoryUsage.set({ component: 'heap_total' }, usage.heapTotal);
+    memoryUsage.set({ component: 'external' }, usage.external);
+    memoryUsage.set({ component: 'rss' }, usage.rss);
+  }, 30000); // Every 30 seconds
+}
 
-export {
+module.exports = {
   register,
   httpRequestDuration,
   httpRequestsTotal,
