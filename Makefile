@@ -42,7 +42,7 @@ bootstrap: ## Install dev dependencies
 	$(VENV_BIN)/pip install -U pip
 	$(VENV_BIN)/pip install -e ".[otel,policy,sbom,perf]"
 	$(VENV_BIN)/pip install pytest ruff mypy pre-commit
-	$(VENV_BIN)/pre-commit install
+	$(VENV_BIN)/pre-commit install || true
 	pnpm install
 
 dev:
