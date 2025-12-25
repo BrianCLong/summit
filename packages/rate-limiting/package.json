@@ -17,7 +17,7 @@
     "pino": "^8.17.0"
   },
   "devDependencies": {
-    "@types/node": "^24.10.1",
+    "@types/node": "20.19.27",
     "typescript": "^5.9.3",
     "tsx": "^4.7.0",
     "jest": "^30.2.0",

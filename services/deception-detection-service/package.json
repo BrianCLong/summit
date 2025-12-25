@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "typescript": "^5.9.3",
-    "@types/node": "^24.10.1",
+    "@types/node": "20.19.27",
     "@types/express": "^5.0.0",
     "@types/cors": "^2.8.17",
     "@types/multer": "^1.4.12"

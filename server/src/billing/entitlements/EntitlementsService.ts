@@ -12,7 +12,7 @@ export interface EntitlementsInterface {
 export class EntitlementsService implements EntitlementsInterface {
   private static instance: EntitlementsService;
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance(): EntitlementsService {
     if (!EntitlementsService.instance) {
@@ -57,7 +57,7 @@ export class EntitlementsService implements EntitlementsInterface {
 
     // If 'quota' key exists in limits
     if (limits && typeof limits.quota === 'number') {
-        return limits.quota;
+      return limits.quota;
     }
     return Infinity;
   }
@@ -88,11 +88,11 @@ export class EntitlementsService implements EntitlementsInterface {
         // Let's update limits and end_date
         const id = existing.rows[0].id;
         const result = await client.query(
-            `UPDATE entitlements SET limits = $1, updated_at = NOW() WHERE id = $2 RETURNING *`,
-            [limits, id]
+          `UPDATE entitlements SET limits = $1, updated_at = NOW() WHERE id = $2 RETURNING *`,
+          [limits, id]
         );
-         await client.query('COMMIT');
-         return this.mapRow(result.rows[0]);
+        await client.query('COMMIT');
+        return this.mapRow(result.rows[0]);
       }
 
       const id = randomUUID();
@@ -108,15 +108,27 @@ export class EntitlementsService implements EntitlementsInterface {
 
       // Provenance
       await provenanceLedger.appendEntry({
-          action: 'ENTITLEMENT_GRANTED',
-          actor: { id: actorId, role: 'admin' },
-          metadata: {
-              tenantId,
-              artifactKey,
-              source,
-              entitlementId: id
-          },
-          artifacts: []
+        tenantId,
+        actionType: 'ENTITLEMENT_GRANTED',
+        resourceType: 'Entitlement',
+        resourceId: id,
+        actorId: actorId,
+        actorType: 'user',
+        timestamp: new Date(),
+        payload: {
+          mutationType: 'CREATE',
+          entityId: id,
+          entityType: 'Entitlement',
+          artifactKey,
+          source,
+          sourceId
+        },
+        metadata: {
+          tenantId,
+          artifactKey,
+          source,
+          entitlementId: id
+        }
       });
 
       await client.query('COMMIT');
@@ -130,39 +142,39 @@ export class EntitlementsService implements EntitlementsInterface {
   }
 
   async revokeEntitlement(id: string, actorId: string): Promise<void> {
-      const pool = getPostgresPool();
-      await pool.write(
-          `UPDATE entitlements SET status = 'expired', end_date = NOW(), updated_at = NOW() WHERE id = $1`,
-          [id]
-      );
-       await provenanceLedger.appendEntry({
-          tenantId: 'system',
-          actionType: 'ENTITLEMENT_REVOKED',
-          resourceType: 'Entitlement',
-          resourceId: id,
-          actorId: actorId,
-          actorType: 'user',
-          timestamp: new Date(),
-          payload: {
-            mutationType: 'UPDATE',
-            entityId: id,
-            entityType: 'Entitlement',
-            actorRole: 'admin',
-            action: 'revoke'
-          },
-          metadata: {
-              entitlementId: id
-          }
-      });
+    const pool = getPostgresPool();
+    await pool.write(
+      `UPDATE entitlements SET status = 'expired', end_date = NOW(), updated_at = NOW() WHERE id = $1`,
+      [id]
+    );
+    await provenanceLedger.appendEntry({
+      tenantId: 'system',
+      actionType: 'ENTITLEMENT_REVOKED',
+      resourceType: 'Entitlement',
+      resourceId: id,
+      actorId: actorId,
+      actorType: 'user',
+      timestamp: new Date(),
+      payload: {
+        mutationType: 'UPDATE',
+        entityId: id,
+        entityType: 'Entitlement',
+        actorRole: 'admin',
+        action: 'revoke'
+      },
+      metadata: {
+        entitlementId: id
+      }
+    });
   }
 
   async getEntitlements(tenantId: string): Promise<Entitlement[]> {
-      const pool = getPostgresPool();
-      const result = await pool.read(
-          `SELECT * FROM entitlements WHERE tenant_id = $1`,
-          [tenantId]
-      );
-      return result.rows.map(this.mapRow);
+    const pool = getPostgresPool();
+    const result = await pool.read(
+      `SELECT * FROM entitlements WHERE tenant_id = $1`,
+      [tenantId]
+    );
+    return result.rows.map(this.mapRow);
   }
 
   private mapRow(row: any): Entitlement {

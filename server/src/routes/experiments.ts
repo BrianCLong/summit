@@ -4,7 +4,7 @@ import {
     listExperiments,
     stopExperiment,
     getAssignment
-} from './experiments/ExperimentController.js';
+} from '../analytics/experiments/ExperimentController.js';
 
 const router = Router();
 

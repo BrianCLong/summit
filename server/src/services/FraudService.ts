@@ -7,7 +7,7 @@ import { provenanceLedger } from '../provenance/ledger.js';
 export class FraudService {
   private static instance: FraudService;
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance(): FraudService {
     if (!FraudService.instance) {
@@ -44,10 +44,21 @@ export class FraudService {
     );
 
     await provenanceLedger.appendEntry({
-        action: 'INVESTIGATION_OPENED',
-        actor: { id: actorId, role: 'system' },
-        metadata: { caseId: id },
-        artifacts: []
+      tenantId: input.tenantId || 'system',
+      actionType: 'INVESTIGATION_OPENED',
+      resourceType: 'investigation',
+      resourceId: id,
+      actorId: actorId,
+      actorType: 'system',
+      payload: {
+        mutationType: 'CREATE',
+        entityId: id,
+        entityType: 'investigation',
+        title: input.title,
+        severity: input.severity
+      },
+      timestamp: new Date(),
+      metadata: { caseId: id }
     });
 
     return this.mapCaseRow(result.rows[0]);
@@ -65,10 +76,22 @@ export class FraudService {
     );
 
     await provenanceLedger.appendEntry({
-        action: 'HOLD_APPLIED',
-        actor: { id: actorId, role: 'admin' },
-        metadata: { holdId: id, targetType: input.targetType, targetId: input.targetId },
-        artifacts: []
+      tenantId: 'system', // HoldAction lacks tenantId, defaulting to system
+      actionType: 'HOLD_APPLIED',
+      resourceType: 'hold',
+      resourceId: id,
+      actorId: actorId,
+      actorType: 'user', // Mapping admin role to user actorType
+      payload: {
+        mutationType: 'CREATE',
+        entityId: id,
+        entityType: 'hold',
+        targetType: input.targetType,
+        targetId: input.targetId,
+        reason: input.reason
+      },
+      timestamp: new Date(),
+      metadata: { holdId: id, investigationId: input.investigationId }
     });
 
     return this.mapHoldRow(result.rows[0]);
@@ -99,32 +122,32 @@ export class FraudService {
   }
 
   private mapCaseRow(row: any): InvestigationCase {
-      return {
-          id: row.id,
-          tenantId: row.tenant_id,
-          title: row.title,
-          status: row.status,
-          severity: row.severity,
-          assignedTo: row.assigned_to,
-          resolutionNotes: row.resolution_notes,
-          createdAt: row.created_at,
-          updatedAt: row.updated_at
-      };
+    return {
+      id: row.id,
+      tenantId: row.tenant_id,
+      title: row.title,
+      status: row.status,
+      severity: row.severity,
+      assignedTo: row.assigned_to,
+      resolutionNotes: row.resolution_notes,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    };
   }
 
   private mapHoldRow(row: any): HoldAction {
-      return {
-          id: row.id,
-          targetType: row.target_type,
-          targetId: row.target_id,
-          reason: row.reason,
-          status: row.status,
-          appliedBy: row.applied_by,
-          releasedBy: row.released_by,
-          releasedAt: row.released_at,
-          investigationId: row.investigation_id,
-          createdAt: row.created_at
-      };
+    return {
+      id: row.id,
+      targetType: row.target_type,
+      targetId: row.target_id,
+      reason: row.reason,
+      status: row.status,
+      appliedBy: row.applied_by,
+      releasedBy: row.released_by,
+      releasedAt: row.released_at,
+      investigationId: row.investigation_id,
+      createdAt: row.created_at
+    };
   }
 }
 

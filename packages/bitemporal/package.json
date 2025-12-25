@@ -19,7 +19,7 @@
     "crypto": "^1.0.1"
   },
   "devDependencies": {
-    "@types/node": "^24.10.1",
+    "@types/node": "20.19.27",
     "@types/pg": "^8.15.6",
     "typescript": "^5.9.3",
     "jest": "^30.2.0",

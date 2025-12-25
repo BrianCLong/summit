@@ -14,7 +14,7 @@
   "dependencies": {
     "@intelgraph/deep-learning-core": "workspace:*",
     "zod": "^4.1.12",
-    "@types/node": "^24.10.1"
+    "@types/node": "20.19.27"
   },
   "devDependencies": {
     "typescript": "^5.9.3",

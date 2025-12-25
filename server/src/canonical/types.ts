@@ -73,3 +73,12 @@ export interface Event extends CanonicalEntity {
     participants?: string[];
   };
 }
+
+export function filterByTemporal<T extends CanonicalEntity>(entities: T[], pointInTime: string): T[] {
+  const pit = new Date(pointInTime).getTime();
+  return entities.filter(e => {
+    const from = e.validFrom ? new Date(e.validFrom).getTime() : 0;
+    const to = e.validTo ? new Date(e.validTo).getTime() : Infinity;
+    return pit >= from && pit <= to;
+  });
+}

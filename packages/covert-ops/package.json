@@ -5,7 +5,15 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "description": "Covert operations management and tradecraft support",
-  "scripts": { "build": "tsc -p tsconfig.json" },
-  "dependencies": { "@intelgraph/common-types": "workspace:*", "zod": "^4.1.12" },
-  "devDependencies": { "@types/node": "^24.10.1", "typescript": "^5.9.3" }
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@intelgraph/common-types": "workspace:*",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/node": "20.19.27",
+    "typescript": "^5.9.3"
+  }
 }

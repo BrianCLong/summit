@@ -7,7 +7,6 @@ packages:
   - 'server'
   - 'tools/*'
   - 'devtools/*'
-  - 'runbooks/engine'
   - 'prov-ledger-service'
 exclude:
   - 'archive/**'

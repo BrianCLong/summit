@@ -34,7 +34,7 @@
     "@types/express": "^5.0.0",
     "@types/geoip-lite": "^1.4.1",
     "@types/cors": "^2.8.17",
-    "@types/node": "^24.10.1",
+    "@types/node": "20.19.27",
     "@types/jest": "^30.0.0",
     "jest": "^30.2.0",
     "tsx": "^4.19.2",

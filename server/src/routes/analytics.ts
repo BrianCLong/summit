@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { AnalyticsService } from '../services/AnalyticsService.js';
 import { logger } from '../config/logger.js';
-import { handleTelemetryEvent } from './telemetry/TelemetryController.js';
+import { handleTelemetryEvent } from '../analytics/telemetry/TelemetryController.js';
 
 const router = Router();
 const analyticsService = AnalyticsService.getInstance();
@@ -73,7 +73,7 @@ router.get(
   asyncHandler(async (req: any, res: any) => {
     const { type } = req.query;
     if (!type) {
-        return res.status(400).json({ error: 'Pattern type is required (temporal-motifs, co-travel, financial-structuring)' });
+      return res.status(400).json({ error: 'Pattern type is required (temporal-motifs, co-travel, financial-structuring)' });
     }
     const result = await analyticsService.minePatterns(
       type as 'temporal-motifs' | 'co-travel' | 'financial-structuring'
@@ -91,7 +91,7 @@ router.get(
   asyncHandler(async (req: any, res: any) => {
     const { type } = req.query;
     if (!type) {
-        return res.status(400).json({ error: 'Anomaly type is required (degree, temporal-spike, selector-misuse)' });
+      return res.status(400).json({ error: 'Anomaly type is required (degree, temporal-spike, selector-misuse)' });
     }
     const result = await analyticsService.detectAnomalies(
       type as 'degree' | 'temporal-spike' | 'selector-misuse'

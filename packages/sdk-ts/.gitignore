@@ -1,0 +1,9 @@
+# Build output
+dist/
+
+# Generated files (should only be in dist/)
+src/*.js
+src/*.d.ts
+
+# Node modules
+node_modules/

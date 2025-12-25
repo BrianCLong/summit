@@ -23,7 +23,7 @@
     "libphonenumber-js": "^1.11.11"
   },
   "devDependencies": {
-    "@types/node": "^24.10.1",
+    "@types/node": "20.19.27",
     "typescript": "^5.9.3"
   }
 }

@@ -32,7 +32,7 @@
     "@types/compression": "^1.7.5",
     "@types/jest": "^30.0.0",
     "jest": "^30.2.0",
-    "@types/node": "^24.10.1",
+    "@types/node": "20.19.27",
     "tsx": "^4.7.0"
   }
 }

@@ -7,7 +7,7 @@
 
 import { EventEmitter } from 'events';
 import { randomUUID } from 'crypto';
-import logger from '../config/logger.js';
+import logger from '../utils/logger.js';
 import { runCypher } from '../graph/neo4j.js';
 import { cypherTemplateEngine, CypherTemplateEngine } from './CypherTemplateEngine.js';
 import { llmChainExecutor, LLMChainExecutor } from './LLMChainExecutor.js';

@@ -19,7 +19,7 @@ export class ReportingService {
     private readonly delivery: DeliveryService,
     private readonly versions: VersionStore,
     private readonly templateEngine: TemplateEngine = defaultTemplateEngine,
-  ) {}
+  ) { }
 
   async generate(request: ReportRequest, access: AccessContext): Promise<ReportArtifact> {
     const validatedRequest = validateReportRequest(request);
@@ -59,6 +59,9 @@ export class ReportingService {
       actorType: 'user',
       timestamp: new Date(),
       payload: {
+        mutationType: 'CREATE',
+        entityId: version.id,
+        entityType: 'Report',
         templateId: validatedRequest.template.id,
         format: validatedRequest.template.format,
         watermark: validatedRequest.watermark,
@@ -80,6 +83,9 @@ export class ReportingService {
         actorType: 'user',
         timestamp: new Date(),
         payload: {
+          mutationType: 'UPDATE', // Delivery is an update to the report's lifecycle
+          entityId: version.id,
+          entityType: 'Report',
           delivery,
         },
         metadata: {

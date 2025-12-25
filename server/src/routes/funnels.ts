@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createFunnel, getFunnelReport } from './funnels/FunnelController.js';
+import { createFunnel, getFunnelReport } from '../analytics/funnels/FunnelController.js';
 
 const router = Router();
 

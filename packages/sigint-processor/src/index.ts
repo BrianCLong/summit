@@ -143,20 +143,20 @@ export class SIGINTProcessor {
   /**
    * Process raw signal intercept
    */
-  async processIntercept(raw: {
+  processIntercept(raw: {
     sourceId: string;
     data: Uint8Array;
     timestamp: Date;
     metadata: Record<string, any>;
-  }): Promise<Intercept> {
-    const analysis = await this.analyzeSignal(raw.data, raw.metadata);
+  }): Intercept {
+    const analysis = this.analyzeSignal(raw.data, raw.metadata);
 
     const intercept: Intercept = {
       id: crypto.randomUUID(),
       sourceId: raw.sourceId,
       timestamp: raw.timestamp,
       duration: raw.metadata.duration || 0,
-      rawData: raw.data,
+      rawData: raw.data as any,
       decodedContent: analysis.decoded,
       metadata: {
         signalStrength: raw.metadata.signalStrength || -80,
@@ -180,17 +180,17 @@ export class SIGINTProcessor {
   /**
    * Geolocate signal source using multiple techniques
    */
-  async geolocateSource(measurements: Array<{
+  geolocateSource(measurements: Array<{
     sensorId: string;
     sensorLocation: { lat: number; lon: number; alt: number };
     timestamp: Date;
     measurement: { type: 'TDOA' | 'AOA' | 'RSSI'; value: number; error: number };
-  }>): Promise<{
+  }>): {
     location: { latitude: number; longitude: number; altitude?: number };
     accuracy: number;
     confidence: number;
     method: string;
-  }> {
+  } {
     // Multi-sensor geolocation fusion
     const tdoaMeasurements = measurements.filter(m => m.measurement.type === 'TDOA');
     const aoaMeasurements = measurements.filter(m => m.measurement.type === 'AOA');
@@ -222,13 +222,13 @@ export class SIGINTProcessor {
   /**
    * Identify emitter from signal characteristics
    */
-  async identifyEmitter(signal: {
+  identifyEmitter(signal: {
     frequency: { center: number; bandwidth: number };
     pulseWidth?: number;
     pri?: number;
     scanPattern?: string;
     modulation?: string;
-  }): Promise<{
+  }): {
     matches: Array<{
       systemName: string;
       platform: string;
@@ -237,7 +237,7 @@ export class SIGINTProcessor {
       threatLevel: string;
     }>;
     bestMatch: string | null;
-  }> {
+  } {
     const matches: any[] = [];
 
     // Compare against emitter library
@@ -265,12 +265,12 @@ export class SIGINTProcessor {
   /**
    * Analyze network traffic patterns
    */
-  async analyzeNetworkTraffic(traffic: NetworkTraffic[]): Promise<{
+  analyzeNetworkTraffic(traffic: NetworkTraffic[]): {
     c2Candidates: Array<{ address: string; score: number; indicators: string[] }>;
     exfiltrationEvents: Array<{ sourceIp: string; destIp: string; dataVolume: number; timestamp: Date }>;
     beacons: Array<{ address: string; interval: number; jitter: number }>;
     encryptedChannels: Array<{ endpoints: string[]; protocol: string; volume: number }>;
-  }> {
+  } {
     const results = {
       c2Candidates: [] as any[],
       exfiltrationEvents: [] as any[],
@@ -324,12 +324,12 @@ export class SIGINTProcessor {
   /**
    * Decrypt and decode communications
    */
-  async processCommsIntercept(intercept: {
+  processCommsIntercept(intercept: {
     type: 'VOICE' | 'DATA' | 'VIDEO' | 'TEXT';
     encrypted: boolean;
     protocol: string;
     data: Uint8Array;
-  }): Promise<{
+  }): {
     decoded: boolean;
     content: string | null;
     language: string | null;
@@ -337,7 +337,7 @@ export class SIGINTProcessor {
     translation: string | null;
     keywords: string[];
     entities: Array<{ type: string; value: string }>;
-  }> {
+  } {
     // Simulated processing
     return {
       decoded: !intercept.encrypted,
@@ -388,7 +388,7 @@ export class SIGINTProcessor {
   }
 
   // Private helper methods
-  private async analyzeSignal(data: Uint8Array, metadata: any): Promise<any> {
+  private analyzeSignal(_data: Uint8Array, _metadata: any): any {
     return {
       decoded: 'Decoded signal content',
       encrypted: false,
@@ -401,15 +401,15 @@ export class SIGINTProcessor {
     };
   }
 
-  private tdoaMultilateration(measurements: any[]): any {
+  private tdoaMultilateration(_measurements: any[]): any {
     return { latitude: 38.8977, longitude: -77.0365 };
   }
 
-  private aoaTriangulation(measurements: any[]): any {
+  private aoaTriangulation(_measurements: any[]): any {
     return { latitude: 38.8977, longitude: -77.0365 };
   }
 
-  private calculateEmitterMatchScore(signal: any, entry: any): number {
+  private calculateEmitterMatchScore(_signal: any, _entry: any): number {
     return 0.75;
   }
 
@@ -423,7 +423,7 @@ export class SIGINTProcessor {
   }
 
   private detectBeaconPattern(intervals: number[]): { isBeacon: boolean; interval: number; jitter: number; confidence: number } {
-    if (intervals.length < 5) return { isBeacon: false, interval: 0, jitter: 0, confidence: 0 };
+    if (intervals.length < 5) {return { isBeacon: false, interval: 0, jitter: 0, confidence: 0 };}
 
     const avg = intervals.reduce((a, b) => a + b, 0) / intervals.length;
     const variance = intervals.reduce((sum, i) => sum + Math.pow(i - avg, 2), 0) / intervals.length;
@@ -449,4 +449,4 @@ export class SIGINTProcessor {
   loadEmitterLibrary(library: Map<string, any>): void { this.emitterLibrary = library; }
 }
 
-export { SIGINTProcessor };
+

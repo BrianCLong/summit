@@ -19,6 +19,14 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "baseUrl": ".",
     "paths": {
+      "@intelgraph/maestro-sdk": ["packages/sdk-ts/src/index.ts"],
+      "@intelgraph/maestro-tasks-core": ["packages/tasks-core/src/index.ts"],
+      "@intelgraph/entity-resolution-core": ["packages/entity-resolution/src/index.ts"],
+      "@intelgraph/feature-flags-pkg": ["packages/feature-flags/src/index.ts"],
+      "@intelgraph/maestro": ["packages/maestro-cli/src/index.ts"],
+      "@intelgraph/prov-ledger-core": ["packages/prov-ledger/src/index.ts"],
+      "@intelgraph/strategic-foresight-pkg": ["packages/strategic-foresight/src/index.ts"],
+      "@summitsec/vcr-kit": ["packages/vcr-kit/src/index.ts"],
       "zod/v4": ["types/shims/zod-v4.d.ts"]
     }
   },

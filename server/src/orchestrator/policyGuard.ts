@@ -1,5 +1,5 @@
-import { logger } from '../utils/logger';
-import { AgentTask } from './maestro';
+import { logger } from '../utils/logger.js';
+import { AgentTask } from './types.js';
 
 export interface PolicyResult {
   allowed: boolean;

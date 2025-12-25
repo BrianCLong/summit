@@ -497,8 +497,7 @@ router.post('/telemetry/events', (req: Request, res: Response) => {
         tenant_id: tenantId,
       });
       // Log full error details for debugging (the metric only tracks counts)
-      logger.error({
-        msg: 'UI Error Boundary Caught Exception',
+      logger.error('UI Error Boundary Caught Exception', {
         component: labels?.component,
         message: labels?.message,
         stack: labels?.stack,

@@ -6,7 +6,7 @@ import logger from '../../utils/logger.js';
 export const JOB_QUEUE_RENEWALS = 'process-renewals';
 export const JOB_QUEUE_PARTNER_PAYOUTS = 'process-partner-payouts';
 
-export async function registerRevenueJobs(boss: PgBoss) {
+export async function registerRevenueJobs(boss: any) {
     // Renewals Job
     await boss.work(JOB_QUEUE_RENEWALS, async (job) => {
         logger.info(`[Job] Processing renewals job ${job.id}`);

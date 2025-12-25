@@ -1,4 +1,4 @@
-import MiniSearch, { SearchResult as MiniSearchResult } from 'minisearch';
+import MiniSearch from 'minisearch';
 import { SearchableItem, SearchQuery, SearchResult } from './types';
 import fs from 'fs';
 import path from 'path';
@@ -88,9 +88,9 @@ export class SearchIndexService {
 
   public ingest(item: SearchableItem) {
     if (!this.miniSearch.has(item.id)) {
-        this.miniSearch.add(item);
+      this.miniSearch.add(item);
     } else {
-        this.miniSearch.replace(item);
+      this.miniSearch.replace(item);
     }
     this.isDirty = true;
   }
@@ -109,16 +109,16 @@ export class SearchIndexService {
         if (query.filters) {
           if (query.filters.type && query.filters.type.length > 0 && !query.filters.type.includes(result.type)) return false;
           if (query.filters.tags && query.filters.tags.length > 0) {
-             // check intersection
-             const hasTag = query.filters.tags.some(t => result.tags && result.tags.includes(t));
-             if (!hasTag) return false;
+            // check intersection
+            const hasTag = query.filters.tags.some(t => result.tags && result.tags.includes(t));
+            if (!hasTag) return false;
           }
           if (query.filters.source && query.filters.source.length > 0 && !query.filters.source.includes(result.source)) return false;
 
           if (query.filters.timeRange) {
-             const created = new Date(result.createdAt).getTime();
-             if (query.filters.timeRange.start && created < new Date(query.filters.timeRange.start).getTime()) return false;
-             if (query.filters.timeRange.end && created > new Date(query.filters.timeRange.end).getTime()) return false;
+            const created = new Date(result.createdAt).getTime();
+            if (query.filters.timeRange.start && created < new Date(query.filters.timeRange.start).getTime()) return false;
+            if (query.filters.timeRange.end && created > new Date(query.filters.timeRange.end).getTime()) return false;
           }
         }
         return true;
@@ -134,74 +134,74 @@ export class SearchIndexService {
     const pagedResults = results.slice(offset, offset + limit);
 
     return pagedResults.map(r => {
-        // Generate snippet (simple substring for now, MiniSearch doesn't do full snippets out of box easily without raw access)
-        // We stored content.
-        const content = r.content || '';
-        const snippet = content.length > 100 ? content.substring(0, 100) + '...' : content;
+      // Generate snippet (simple substring for now, MiniSearch doesn't do full snippets out of box easily without raw access)
+      // We stored content.
+      const content = r.content || '';
+      const snippet = content.length > 100 ? content.substring(0, 100) + '...' : content;
 
-        return {
-            objectRef: {
-                id: r.id,
-                type: r.type
-            },
-            score: r.score,
-            snippet: snippet,
-            matchedFields: Object.keys(r.match),
-            item: r as any // The full stored item
-        };
+      return {
+        objectRef: {
+          id: r.id,
+          type: r.type
+        },
+        score: r.score,
+        snippet: snippet,
+        matchedFields: Object.keys(r.match),
+        item: r as any // The full stored item
+      };
     });
   }
 
   public async reindex(caseId?: string) {
-      logger.info(`Reindexing triggered for caseId: ${caseId || 'all'}`);
-      this.miniSearch.removeAll();
+    logger.info(`Reindexing triggered for caseId: ${caseId || 'all'}`);
+    this.miniSearch.removeAll();
 
-      // In a real production scenario, we would stream data from Neo4j/Postgres.
-      // For this MVP, we will simulate a scan by logging.
-      // Ideally, we would inject GraphStore and iterate over all entities.
+    // In a real production scenario, we would stream data from Neo4j/Postgres.
+    // For this MVP, we will simulate a scan by logging.
+    // Ideally, we would inject GraphStore and iterate over all entities.
 
-      // Attempt to load from GraphStore if possible (using dynamic import or dependency injection)
+    // Attempt to load from GraphStore if possible (using dynamic import or dependency injection)
+    try {
+      const { getNeo4jDriver } = await import('../db/neo4j.js');
+      const driver = getNeo4jDriver();
+      const session = driver.session();
+
       try {
-          const { getNeo4jDriver } = await import('../db/neo4j.js');
-          const driver = getNeo4jDriver();
-          const session = driver.session();
+        // Reindex Entities
+        const entityQuery = caseId
+          ? `MATCH (e:Entity) WHERE e.context.caseId = $caseId OR e.caseId = $caseId RETURN e`
+          : `MATCH (e:Entity) RETURN e LIMIT 10000`; // Limit for safety
 
-          try {
-              // Reindex Entities
-              const entityQuery = caseId
-                  ? `MATCH (e:Entity) WHERE e.context.caseId = $caseId OR e.caseId = $caseId RETURN e`
-                  : `MATCH (e:Entity) RETURN e LIMIT 10000`; // Limit for safety
+        const entityRes = await session.run(entityQuery, { caseId });
+        for (const record of entityRes.records) {
+          const node = record.get('e').properties;
+          await this.onEntityUpsert(node);
+        }
 
-              const entityRes = await session.run(entityQuery, { caseId });
-              for (const record of entityRes.records) {
-                  const node = record.get('e').properties;
-                  await this.onEntityUpsert(node);
-              }
+        // Reindex Claims
+        const claimQuery = caseId
+          ? `MATCH (c:Claim) WHERE c.context.caseId = $caseId RETURN c`
+          : `MATCH (c:Claim) RETURN c LIMIT 10000`; // Limit for safety
 
-              // Reindex Claims
-              const claimQuery = caseId
-                  ? `MATCH (c:Claim) WHERE c.context.caseId = $caseId RETURN c`
-                  : `MATCH (c:Claim) RETURN c LIMIT 10000`; // Limit for safety
+        const claimRes = await session.run(claimQuery, { caseId });
+        for (const record of claimRes.records) {
+          const node = record.get('c').properties;
+          // Need to parse JSON fields for Claims as they are stored as strings in Neo4j sometimes
+          // Adjust based on schema. Assuming standard properties for now.
+          // Ideally we use a mapper.
+          await this.onClaimUpsert(node);
+        }
 
-              const claimRes = await session.run(claimQuery, { caseId });
-              for (const record of claimRes.records) {
-                  const node = record.get('c').properties;
-                  // Need to parse JSON fields for Claims as they are stored as strings in Neo4j sometimes
-                  // Adjust based on schema. Assuming standard properties for now.
-                  // Ideally we use a mapper.
-                  await this.onClaimUpsert(node);
-              }
+        logger.info(`Reindexing completed. processed ${entityRes.records.length} entities and ${claimRes.records.length} claims.`);
 
-              logger.info(`Reindexing completed. processed ${entityRes.records.length} entities and ${claimRes.records.length} claims.`);
-
-          } finally {
-              await session.close();
-          }
-      } catch (err) {
-          logger.error('Reindexing failed to fetch data from DB', err);
+      } finally {
+        await session.close();
       }
+    } catch (err) {
+      logger.error('Reindexing failed to fetch data from DB', err);
+    }
 
-      this.isDirty = true;
+    this.isDirty = true;
   }
 
   private async saveIndex() {
@@ -210,7 +210,7 @@ export class SearchIndexService {
       // Ensure dir exists
       const dir = path.dirname(INDEX_FILE_PATH);
       if (!fs.existsSync(dir)) {
-          fs.mkdirSync(dir, { recursive: true });
+        fs.mkdirSync(dir, { recursive: true });
       }
       await fs.promises.writeFile(INDEX_FILE_PATH, json);
       this.isDirty = false;
@@ -224,16 +224,16 @@ export class SearchIndexService {
       if (fs.existsSync(INDEX_FILE_PATH)) {
         const json = fs.readFileSync(INDEX_FILE_PATH, 'utf-8');
         this.miniSearch = MiniSearch.loadJSON(json, {
-            fields: ['content', 'tags', 'source', 'type'],
-            storeFields: ['id', 'type', 'caseId', 'tags', 'source', 'createdAt', 'content', 'originalObject'],
-            searchOptions: {
-                boost: { type: 2, tags: 1.5 },
-                fuzzy: 0.2,
-                prefix: true
-            },
-            extractField: (document: any, fieldName: string) => {
-                return document[fieldName];
-            }
+          fields: ['content', 'tags', 'source', 'type'],
+          storeFields: ['id', 'type', 'caseId', 'tags', 'source', 'createdAt', 'content', 'originalObject'],
+          searchOptions: {
+            boost: { type: 2, tags: 1.5 },
+            fuzzy: 0.2,
+            prefix: true
+          },
+          extractField: (document: any, fieldName: string) => {
+            return document[fieldName];
+          }
         });
         logger.info('Search index loaded from disk.');
       }

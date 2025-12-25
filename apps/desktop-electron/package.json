@@ -30,7 +30,7 @@
     "electron-log": "^5.2.6"
   },
   "devDependencies": {
-    "@types/node": "^24.10.1",
+    "@types/node": "20.19.27",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.0.4",
@@ -56,7 +56,10 @@
     ],
     "mac": {
       "category": "public.app-category.productivity",
-      "target": ["dmg", "zip"],
+      "target": [
+        "dmg",
+        "zip"
+      ],
       "icon": "build/icon.icns",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
@@ -64,11 +67,18 @@
       "entitlementsInherit": "build/entitlements.mac.plist"
     },
     "win": {
-      "target": ["nsis", "portable"],
+      "target": [
+        "nsis",
+        "portable"
+      ],
       "icon": "build/icon.ico"
     },
     "linux": {
-      "target": ["AppImage", "deb", "rpm"],
+      "target": [
+        "AppImage",
+        "deb",
+        "rpm"
+      ],
       "icon": "build/icon.png",
       "category": "Office"
     },

@@ -19,6 +19,15 @@ export class RedisService {
   private pub: RedisLike;
   private sub: RedisLike;
 
+  private static instance: RedisService;
+
+  public static getInstance(): RedisService {
+    if (!RedisService.instance) {
+      RedisService.instance = new RedisService();
+    }
+    return RedisService.instance;
+  }
+
   constructor(
     urlOrOpts: string | { url?: string; clusterNodes?: string[] } =
       process.env.REDIS_URL || 'redis://localhost:6379',

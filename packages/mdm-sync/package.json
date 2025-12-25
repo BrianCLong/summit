@@ -10,14 +10,19 @@
     "lint": "eslint src/**/*.ts",
     "typecheck": "tsc --noEmit"
   },
-  "keywords": ["synchronization", "multi-source", "conflict-resolution", "mdm"],
+  "keywords": [
+    "synchronization",
+    "multi-source",
+    "conflict-resolution",
+    "mdm"
+  ],
   "dependencies": {
     "@intelgraph/mdm-core": "workspace:*",
     "zod": "^3.22.4",
     "uuid": "^11.0.3"
   },
   "devDependencies": {
-    "@types/node": "^24.10.1",
+    "@types/node": "20.19.27",
     "@types/uuid": "^10.0.0",
     "typescript": "^5.9.3"
   }

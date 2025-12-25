@@ -39,7 +39,7 @@
     "@types/express": "^5.0.3",
     "@types/http-proxy-middleware": "^1.0.0",
     "@types/jest": "^30.0.0",
-    "@types/node": "^24.10.1",
+    "@types/node": "20.19.27",
     "@types/supertest": "^6.0.3",
     "@jest/globals": "^30.2.0",
     "fast-check": "^3.18.0",

@@ -36,9 +36,9 @@ clean:
 # --- Development Workflow ---
 
 bootstrap: ## Install dev dependencies
-	pip install -U pip
-	pip install -e ".[otel,policy,sbom,perf]"
-	pip install pytest ruff mypy pre-commit
+	pip3 install -U pip
+	pip3 install -e ".[otel,policy,sbom,perf]"
+	pip3 install pytest ruff mypy pre-commit
 	pre-commit install
 	pnpm install
 

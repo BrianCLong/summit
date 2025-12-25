@@ -7,7 +7,7 @@ import { provenanceLedger } from '../provenance/ledger.js';
 export class ContractService {
   private static instance: ContractService;
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance(): ContractService {
     if (!ContractService.instance) {
@@ -35,14 +35,25 @@ export class ContractService {
     const po = this.mapPORow(result.rows[0]);
 
     await provenanceLedger.appendEntry({
-      action: 'PO_CREATED',
-      actor: { id: actorId, role: 'admin' },
+      tenantId: input.tenantId,
+      actionType: 'PO_CREATED',
+      resourceType: 'PurchaseOrder',
+      resourceId: id,
+      actorId: actorId,
+      actorType: 'user',
+      timestamp: new Date(),
+      payload: {
+        mutationType: 'CREATE',
+        entityId: id,
+        entityType: 'PurchaseOrder',
+        poNumber: input.poNumber,
+        issuer: input.issuer
+      },
       metadata: {
         poId: id,
         tenantId: input.tenantId,
         poNumber: input.poNumber
-      },
-      artifacts: []
+      }
     });
 
     return po;
@@ -77,14 +88,24 @@ export class ContractService {
     const contract = this.mapContractRow(result.rows[0]);
 
     await provenanceLedger.appendEntry({
-      action: 'CONTRACT_CREATED',
-      actor: { id: actorId, role: 'admin' },
+      tenantId: input.tenantId,
+      actionType: 'CONTRACT_CREATED',
+      resourceType: 'Contract',
+      resourceId: id,
+      actorId: actorId,
+      actorType: 'user',
+      timestamp: new Date(),
+      payload: {
+        mutationType: 'CREATE',
+        entityId: id,
+        entityType: 'Contract',
+        title: input.title
+      },
       metadata: {
         contractId: id,
         tenantId: input.tenantId,
         title: input.title
-      },
-      artifacts: []
+      }
     });
 
     return contract;

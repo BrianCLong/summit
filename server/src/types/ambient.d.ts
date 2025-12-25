@@ -12,12 +12,14 @@ declare module 'graphql-subscriptions' {
     publish(trigger: string, payload: any): Promise<void>;
   }
   export function withFilter<TPayload = any, TVariables = any>(
-    asyncIteratorFn: (args?: any) => AsyncIterableIterator<TPayload>,
+    asyncIteratorFn: (rootValue?: any, args?: TVariables, context?: any, info?: any) => AsyncIterableIterator<TPayload>,
     filterFn: (
       payload: TPayload,
       variables: TVariables,
+      context?: any,
+      info?: any
     ) => boolean | Promise<boolean>,
-  ): (args?: any) => AsyncIterableIterator<TPayload>;
+  ): (rootValue?: any, args?: TVariables, context?: any, info?: any) => AsyncIterableIterator<TPayload>;
 }
 
 // zod: ensure `z` is available even if types are not picked up

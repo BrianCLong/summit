@@ -133,6 +133,15 @@ export class ProvenanceLedgerV2 extends EventEmitter {
   private cryptoPipeline?: CryptoPipeline;
   private cryptoPipelineInit?: Promise<void>;
 
+  private static instance: ProvenanceLedgerV2;
+
+  public static getInstance(): ProvenanceLedgerV2 {
+    if (!ProvenanceLedgerV2.instance) {
+      ProvenanceLedgerV2.instance = new ProvenanceLedgerV2();
+    }
+    return ProvenanceLedgerV2.instance;
+  }
+
   constructor() {
     super();
     this.initializeTables();
@@ -193,10 +202,10 @@ export class ProvenanceLedgerV2 extends EventEmitter {
           // If the payload is a MutationPayload, we witness it.
           let witness: MutationWitness | undefined;
           if (this.isMutationPayload(entry.payload)) {
-             witness = await mutationWitness.witnessMutation(
-               entry.payload,
-               { tenantId: entry.tenantId, actorId: entry.actorId }
-             );
+            witness = await mutationWitness.witnessMutation(
+              entry.payload,
+              { tenantId: entry.tenantId, actorId: entry.actorId }
+            );
           }
 
           const client = await pool.connect();
@@ -253,9 +262,9 @@ export class ProvenanceLedgerV2 extends EventEmitter {
 
             // Actually, let's just update `metadata` with witness info for storage
             const storageMetadata = {
-                ...completeEntry.metadata,
-                witness: completeEntry.witness,
-                attribution: completeEntry.attribution
+              ...completeEntry.metadata,
+              witness: completeEntry.witness,
+              attribution: completeEntry.attribution
             };
 
             const insertQuery = `
@@ -317,20 +326,20 @@ export class ProvenanceLedgerV2 extends EventEmitter {
 
             // Integration: Send to Audit System
             (advancedAuditSystem as any).logEvent?.({
-                eventType: 'resource_modify', // Generic mapping, could be more specific
-                action: entry.actionType,
-                tenantId: entry.tenantId,
-                userId: entry.actorId,
-                resourceId: entry.resourceId,
-                resourceType: entry.resourceType,
-                message: `Provenance entry appended: ${entry.actionType} on ${entry.resourceType}`,
-                details: {
-                    provenanceId: completeEntry.id,
-                    sequence: completeEntry.sequenceNumber.toString(),
-                    witnessId: witness?.witnessId
-                },
-                level: 'info',
-                complianceRelevant: true // Provenance is always compliance relevant
+              eventType: 'resource_modify', // Generic mapping, could be more specific
+              action: entry.actionType,
+              tenantId: entry.tenantId,
+              userId: entry.actorId,
+              resourceId: entry.resourceId,
+              resourceType: entry.resourceType,
+              message: `Provenance entry appended: ${entry.actionType} on ${entry.resourceType}`,
+              details: {
+                provenanceId: completeEntry.id,
+                sequence: completeEntry.sequenceNumber.toString(),
+                witnessId: witness?.witnessId
+              },
+              level: 'info',
+              complianceRelevant: true // Provenance is always compliance relevant
             });
 
             return completeEntry;
@@ -352,7 +361,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
   }
 
   private isMutationPayload(payload: any): payload is MutationPayload {
-      return payload && typeof payload === 'object' && 'mutationType' in payload;
+    return payload && typeof payload === 'object' && 'mutationType' in payload;
   }
 
   async batchAppendEntries(
@@ -767,16 +776,16 @@ export class ProvenanceLedgerV2 extends EventEmitter {
 
     // Tamper-proof Log Layer: Archive Root to WORM Storage
     try {
-        const wormKey = `roots/${root.tenantId}/${root.id}.json`;
-        const location = await putLocked(
-            process.env.AUDIT_BUCKET || 'provenance-logs',
-            wormKey,
-            JSON.stringify(root, null, 2)
-        );
-        console.log(`Archived provenance root to WORM storage: ${location}`);
+      const wormKey = `roots/${root.tenantId}/${root.id}.json`;
+      const location = await putLocked(
+        process.env.AUDIT_BUCKET || 'provenance-logs',
+        wormKey,
+        JSON.stringify(root, null, 2)
+      );
+      console.log(`Archived provenance root to WORM storage: ${location}`);
     } catch (e) {
-        console.error('Failed to archive root to WORM storage', e);
-        // We don't fail the operation, but we log the error
+      console.error('Failed to archive root to WORM storage', e);
+      // We don't fail the operation, but we log the error
     }
 
     return root;

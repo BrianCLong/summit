@@ -18,7 +18,7 @@
     "winston": "^3.18.3"
   },
   "devDependencies": {
-    "@types/node": "^24.10.1",
+    "@types/node": "20.19.27",
     "@types/uuid": "^11.0.0",
     "typescript": "^5.9.3"
   },

@@ -9,9 +9,58 @@ import type {
   HuntContext,
   HuntConfiguration,
   ThreatHypothesis,
-  HuntFinding,
   EnrichedFinding,
+  LLMChainResult,
+  QueryValidationStatus,
+  RemediationPlan,
 } from '../types';
+
+// Define these interfaces locally as they are not exported from ../types
+interface HypothesisGenerationOutput {
+  hypotheses: ThreatHypothesis[];
+  priorityOrder: string[];
+}
+
+interface QueryGenerationOutput {
+  queries: {
+    id: string;
+    hypothesisId: string;
+    query: string;
+    params: Record<string, unknown>;
+    templateUsed: string;
+    estimatedComplexity: number;
+    estimatedResultSize: number;
+    validationStatus: QueryValidationStatus;
+    validationErrors: string[];
+  }[];
+  metadata: {
+    templatesCached: number;
+    queriesGenerated: number;
+    validationsPassed: number;
+  };
+}
+
+interface ResultAnalysisOutput {
+  findings: HuntFinding[];
+  precisionEstimate: number;
+  falsePositiveIndicators: string[];
+}
+
+interface HuntFinding {
+  id: string;
+  hypothesisId: string;
+  severity: string;
+  confidence: number;
+  classification: string;
+  entitiesInvolved: any[];
+  iocsIdentified: any[];
+  ttpsMatched: any[];
+  recommendedActions: any[];
+  autoRemediationEligible: boolean;
+  evidenceSummary: string;
+  rawEvidence: any[];
+  timestamp: Date;
+}
 
 // Mock logger first (hoisted to top)
 jest.mock('../../config/logger', () => ({
@@ -35,14 +84,36 @@ jest.mock('../../config/logger.js', () => ({
 // Mock AutoRemediationHooks to prevent singleton instantiation with unmocked logger
 jest.mock('../AutoRemediationHooks', () => {
   const EventEmitter = require('events').EventEmitter;
+  const plans: RemediationPlan[] = [];
+
   const mockHooks = Object.assign(new EventEmitter(), {
     registerHook: jest.fn(),
-    createRemediationPlan: jest.fn(),
+    createRemediationPlan: jest.fn((huntId: string, findings: EnrichedFinding[], approvalRequired: boolean) => {
+      const newPlan: RemediationPlan = {
+        id: `plan-${plans.length + 1}`,
+        huntId,
+        findings: findings.map(f => f.id),
+        actions: [], // Simplified for mock
+        status: approvalRequired ? 'pending_approval' : 'approved',
+        approvalRequired,
+        createdAt: new Date(),
+      };
+      plans.push(newPlan);
+      return Promise.resolve(newPlan);
+    }),
     executePlan: jest.fn(),
-    approvePlan: jest.fn(),
+    approvePlan: jest.fn((planId: string, userId: string) => {
+      const plan = plans.find(p => p.id === planId);
+      if (!plan) throw new Error('Plan not found');
+      plan.status = 'approved';
+      plan.approvedBy = userId;
+      plan.approvedAt = new Date();
+      return Promise.resolve(plan);
+    }),
     rejectPlan: jest.fn(),
-    getActivePlans: jest.fn().mockReturnValue([]),
-    getPendingApprovals: jest.fn().mockReturnValue([]),
+    getActivePlans: jest.fn(() => plans.filter(p => p.status !== 'completed' && p.status !== 'failed' && p.status !== 'cancelled')),
+    getPendingApprovals: jest.fn(() => plans.filter(p => p.status === 'pending_approval')),
+    enrichFindings: jest.fn((findings: HuntFinding[]) => findings.map(f => ({ ...f, enrichmentTimestamp: new Date(), ctiCorrelations: [], osintData: [], threatActorAttribution: [], campaignAssociations: [] }))),
   });
   return {
     autoRemediationHooks: mockHooks,
@@ -51,14 +122,36 @@ jest.mock('../AutoRemediationHooks', () => {
 });
 jest.mock('../AutoRemediationHooks.js', () => {
   const EventEmitter = require('events').EventEmitter;
+  const plans: RemediationPlan[] = [];
+
   const mockHooks = Object.assign(new EventEmitter(), {
     registerHook: jest.fn(),
-    createRemediationPlan: jest.fn(),
+    createRemediationPlan: jest.fn((huntId: string, findings: EnrichedFinding[], approvalRequired: boolean) => {
+      const newPlan: RemediationPlan = {
+        id: `plan-${plans.length + 1}`,
+        huntId,
+        findings: findings.map(f => f.id),
+        actions: [], // Simplified for mock
+        status: approvalRequired ? 'pending_approval' : 'approved',
+        approvalRequired,
+        createdAt: new Date(),
+      };
+      plans.push(newPlan);
+      return Promise.resolve(newPlan);
+    }),
     executePlan: jest.fn(),
-    approvePlan: jest.fn(),
+    approvePlan: jest.fn((planId: string, userId: string) => {
+      const plan = plans.find(p => p.id === planId);
+      if (!plan) throw new Error('Plan not found');
+      plan.status = 'approved';
+      plan.approvedBy = userId;
+      plan.approvedAt = new Date();
+      return Promise.resolve(plan);
+    }),
     rejectPlan: jest.fn(),
-    getActivePlans: jest.fn().mockReturnValue([]),
-    getPendingApprovals: jest.fn().mockReturnValue([]),
+    getActivePlans: jest.fn(() => plans.filter(p => p.status !== 'completed' && p.status !== 'failed' && p.status !== 'cancelled')),
+    getPendingApprovals: jest.fn(() => plans.filter(p => p.status === 'pending_approval')),
+    enrichFindings: jest.fn((findings: HuntFinding[]) => findings.map(f => ({ ...f, enrichmentTimestamp: new Date(), ctiCorrelations: [], osintData: [], threatActorAttribution: [], campaignAssociations: [] }))),
   });
   return {
     autoRemediationHooks: mockHooks,
@@ -81,19 +174,172 @@ jest.mock('../../graph/neo4j.js', () => ({
 }));
 
 // Mock other hunting modules that may have singletons
-jest.mock('../CypherTemplateEngine', () => ({
-  cypherTemplateEngine: { generateQuery: jest.fn() },
-  CypherTemplateEngine: jest.fn(),
-}));
-jest.mock('../CypherTemplateEngine.js', () => ({
-  cypherTemplateEngine: { generateQuery: jest.fn() },
-  CypherTemplateEngine: jest.fn(),
-}));
+jest.mock('../CypherTemplateEngine', () => {
+  const mockCypherTemplateEngine = {
+    initialize: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
+    generateQuery: jest.fn(),
+    getAllTemplates: jest.fn<() => any[]>().mockReturnValue([]),
+    validateQuery: jest.fn((query: string) => {
+      const upperQuery = query.toUpperCase();
+      let isValid = true;
+      let isReadOnly = true;
+      let hasLimit = /\bLIMIT\s+\d+/i.test(query);
+      let complexity = 10; // Default complexity
+
+      if (upperQuery.includes('DELETE') || upperQuery.includes('SET') || upperQuery.includes('CREATE') || upperQuery.includes('MERGE')) {
+        isValid = false;
+        isReadOnly = false;
+      }
+
+      // Simple complexity estimation for mock
+      if ((query.match(/MATCH/gi) || []).length > 1) complexity = 20;
+      if ((query.match(/\*\d*\.\./gi) || []).length > 0) complexity = 30;
+
+      return { isValid, isReadOnly, hasLimit, complexity };
+    }),
+    ensureLimit: jest.fn((query: string, limit: number = 100) => {
+      if (/\bLIMIT\s+\d+/i.test(query)) {
+        return query;
+      }
+      return `${query.trim()} LIMIT ${limit}`;
+    }),
+  };
+  return {
+    cypherTemplateEngine: mockCypherTemplateEngine,
+    CypherTemplateEngine: jest.fn(() => mockCypherTemplateEngine),
+  };
+});
+jest.mock('../CypherTemplateEngine.js', () => {
+  const mockCypherTemplateEngine = {
+    initialize: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
+    generateQuery: jest.fn(),
+    getAllTemplates: jest.fn<() => any[]>().mockReturnValue([]),
+    validateQuery: jest.fn((query: string) => {
+      const upperQuery = query.toUpperCase();
+      let isValid = true;
+      let isReadOnly = true;
+      let hasLimit = /\bLIMIT\s+\d+/i.test(query);
+      let complexity = 10; // Default complexity
+
+      if (upperQuery.includes('DELETE') || upperQuery.includes('SET') || upperQuery.includes('CREATE') || upperQuery.includes('MERGE')) {
+        isValid = false;
+        isReadOnly = false;
+      }
+
+      // Simple complexity estimation for mock
+      if ((query.match(/MATCH/gi) || []).length > 1) complexity = 20;
+      if ((query.match(/\*\d*\.\./gi) || []).length > 0) complexity = 30;
+
+      return { isValid, isReadOnly, hasLimit, complexity };
+    }),
+    ensureLimit: jest.fn((query: string, limit: number = 100) => {
+      if (/\bLIMIT\s+\d+/i.test(query)) {
+        return query;
+      }
+      return `${query.trim()} LIMIT ${limit}`;
+    }),
+  };
+  return {
+    cypherTemplateEngine: mockCypherTemplateEngine,
+    CypherTemplateEngine: jest.fn(() => mockCypherTemplateEngine),
+  };
+});
 
 jest.mock('../LLMChainExecutor', () => {
   const EventEmitter = require('events').EventEmitter;
   const mockExecutor = Object.assign(new EventEmitter(), {
+    initialize: jest.fn((provider: any) => {
+      mockExecutor.provider = provider;
+    }),
+    generateHypotheses: jest.fn<() => Promise<LLMChainResult<HypothesisGenerationOutput>>>().mockResolvedValue({
+      success: true,
+      output: {
+        hypotheses: [
+          {
+            id: 'hypothesis-1',
+            statement: 'Test Hypothesis',
+            mitreAttackTechniques: [],
+            requiredQueryTemplate: 'test_template',
+            expectedIndicators: [],
+            confidenceLevel: 0.8,
+            priority: 1,
+            rationale: 'Test rationale',
+            dataRequirements: [],
+          },
+        ],
+        priorityOrder: ['hypothesis-1'],
+      },
+      tokensUsed: { prompt: 100, completion: 200, total: 300 },
+      latencyMs: 50,
+      model: 'test-model',
+      validationPassed: true,
+      validationErrors: [],
+    }),
+    generateQueries: jest.fn<() => Promise<LLMChainResult<QueryGenerationOutput>>>().mockResolvedValue({
+      success: true,
+      output: {
+        queries: [
+          {
+            id: 'query-1',
+            hypothesisId: 'hypothesis-1',
+            query: 'MATCH (n) RETURN n LIMIT 10',
+            params: {},
+            templateUsed: 'test_template',
+            estimatedComplexity: 10,
+            estimatedResultSize: 10,
+            validationStatus: { isValid: true, isReadOnly: true, hasLimit: true, complexity: 10, estimatedCost: 100 },
+            validationErrors: [],
+          },
+        ],
+        metadata: {
+          templatesCached: 0,
+          queriesGenerated: 1,
+          validationsPassed: 1,
+        },
+      },
+      tokensUsed: { prompt: 100, completion: 200, total: 300 },
+      latencyMs: 50,
+      model: 'test-model',
+      validationPassed: true,
+      validationErrors: [],
+    }),
+    analyzeResults: jest.fn<() => Promise<LLMChainResult<ResultAnalysisOutput>>>().mockResolvedValue({
+      success: true,
+      output: {
+        findings: [
+          {
+            id: 'finding-1',
+            hypothesisId: 'hypothesis-1',
+            severity: 'HIGH',
+            confidence: 0.9,
+            classification: 'TEST',
+            entitiesInvolved: [],
+            iocsIdentified: [],
+            ttpsMatched: [],
+            recommendedActions: [],
+            autoRemediationEligible: false,
+            evidenceSummary: 'Test evidence',
+            rawEvidence: [],
+            timestamp: new Date(),
+          },
+        ],
+        precisionEstimate: 0.9,
+        falsePositiveIndicators: [],
+      },
+      tokensUsed: { prompt: 100, completion: 200, total: 300 },
+      latencyMs: 50,
+      model: 'test-model',
+      validationPassed: true,
+      validationErrors: [],
+    }),
     executeChain: jest.fn(),
+    getExecutionStats: jest.fn().mockReturnValue({
+      totalExecutions: 1,
+      successRate: 1,
+      avgTokensPerExecution: 300,
+      avgLatencyMs: 50,
+      totalTokensUsed: 300,
+    }),
   });
   return {
     llmChainExecutor: mockExecutor,
@@ -103,7 +349,98 @@ jest.mock('../LLMChainExecutor', () => {
 jest.mock('../LLMChainExecutor.js', () => {
   const EventEmitter = require('events').EventEmitter;
   const mockExecutor = Object.assign(new EventEmitter(), {
+    initialize: jest.fn((provider: any) => {
+      mockExecutor.provider = provider;
+    }),
+    generateHypotheses: jest.fn<() => Promise<LLMChainResult<HypothesisGenerationOutput>>>().mockResolvedValue({
+      success: true,
+      output: {
+        hypotheses: [
+          {
+            id: 'hypothesis-1',
+            statement: 'Test Hypothesis',
+            mitreAttackTechniques: [],
+            requiredQueryTemplate: 'test_template',
+            expectedIndicators: [],
+            confidenceLevel: 0.8,
+            priority: 1,
+            rationale: 'Test rationale',
+            dataRequirements: [],
+          },
+        ],
+        priorityOrder: ['hypothesis-1'],
+      },
+      tokensUsed: { prompt: 100, completion: 200, total: 300 },
+      latencyMs: 50,
+      model: 'test-model',
+      validationPassed: true,
+      validationErrors: [],
+    }),
+    generateQueries: jest.fn<() => Promise<LLMChainResult<QueryGenerationOutput>>>().mockResolvedValue({
+      success: true,
+      output: {
+        queries: [
+          {
+            id: 'query-1',
+            hypothesisId: 'hypothesis-1',
+            query: 'MATCH (n) RETURN n LIMIT 10',
+            params: {},
+            templateUsed: 'test_template',
+            estimatedComplexity: 10,
+            estimatedResultSize: 10,
+            validationStatus: { isValid: true, isReadOnly: true, hasLimit: true, complexity: 10, estimatedCost: 100 },
+            validationErrors: [],
+          },
+        ],
+        metadata: {
+          templatesCached: 0,
+          queriesGenerated: 1,
+          validationsPassed: 1,
+        },
+      },
+      tokensUsed: { prompt: 100, completion: 200, total: 300 },
+      latencyMs: 50,
+      model: 'test-model',
+      validationPassed: true,
+      validationErrors: [],
+    }),
+    analyzeResults: jest.fn<() => Promise<LLMChainResult<ResultAnalysisOutput>>>().mockResolvedValue({
+      success: true,
+      output: {
+        findings: [
+          {
+            id: 'finding-1',
+            hypothesisId: 'hypothesis-1',
+            severity: 'HIGH',
+            confidence: 0.9,
+            classification: 'TEST',
+            entitiesInvolved: [],
+            iocsIdentified: [],
+            ttpsMatched: [],
+            recommendedActions: [],
+            autoRemediationEligible: false,
+            evidenceSummary: 'Test evidence',
+            rawEvidence: [],
+            timestamp: new Date(),
+          },
+        ],
+        precisionEstimate: 0.9,
+        falsePositiveIndicators: [],
+      },
+      tokensUsed: { prompt: 100, completion: 200, total: 300 },
+      latencyMs: 50,
+      model: 'test-model',
+      validationPassed: true,
+      validationErrors: [],
+    }),
     executeChain: jest.fn(),
+    getExecutionStats: jest.fn().mockReturnValue({
+      totalExecutions: 1,
+      successRate: 1,
+      avgTokensPerExecution: 300,
+      avgLatencyMs: 50,
+      totalTokensUsed: 300,
+    }),
   });
   return {
     llmChainExecutor: mockExecutor,

@@ -1,4 +1,5 @@
-import { Pool, PoolClient } from 'pg';
+import { Pool } from 'pg';
+type PoolClient = any;
 import { getPostgresPool } from '../config/database.js';
 import { TenantUsageDailyRepository } from './repository.js';
 import { TenantUsageDailyRow, MeterEvent, MeterEventKind } from './schema.js';
@@ -121,26 +122,26 @@ export class PostgresTenantUsageRepository extends TenantUsageDailyRepository {
 
         // Ingest Units
         if (row.ingestUnits > 0) {
-            await client.query(query, [
-                row.tenantId, periodStart, periodEnd,
-                MeterEventKind.INGEST_UNITS, row.ingestUnits, 'units', '{}'
-            ]);
+          await client.query(query, [
+            row.tenantId, periodStart, periodEnd,
+            MeterEventKind.INGEST_UNITS, row.ingestUnits, 'units', '{}'
+          ]);
         }
 
         // Query Credits
         if (row.queryCredits > 0) {
-            await client.query(query, [
-                row.tenantId, periodStart, periodEnd,
-                MeterEventKind.QUERY_CREDITS, row.queryCredits, 'credits', '{}'
-            ]);
+          await client.query(query, [
+            row.tenantId, periodStart, periodEnd,
+            MeterEventKind.QUERY_CREDITS, row.queryCredits, 'credits', '{}'
+          ]);
         }
 
         // Storage
         if (row.storageBytesEstimate > 0) {
-            await client.query(query, [
-                row.tenantId, periodStart, periodEnd,
-                MeterEventKind.STORAGE_BYTES_ESTIMATE, row.storageBytesEstimate, 'bytes', '{}'
-            ]);
+          await client.query(query, [
+            row.tenantId, periodStart, periodEnd,
+            MeterEventKind.STORAGE_BYTES_ESTIMATE, row.storageBytesEstimate, 'bytes', '{}'
+          ]);
         }
 
         // Seats (this is max, not sum, usually. But let's assume sum for now or handle differently)

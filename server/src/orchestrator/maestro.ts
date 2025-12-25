@@ -8,8 +8,9 @@ import {
   WorkerOptions,
 } from 'bullmq';
 import Redis from 'ioredis';
-import { logger } from '../utils/logger';
-import { PolicyGuard } from './policyGuard';
+import { logger } from '../utils/logger.js';
+import { AgentTask, TaskResult } from './types.js';
+import { PolicyGuard } from './policyGuard.js';
 import { Budget } from '../ai/llmBudget';
 import { systemMonitor } from '../lib/system-monitor';
 import { getTracer, SpanStatusCode, SpanKind } from '../observability/tracer';
@@ -34,31 +35,6 @@ const queueOptions: QueueOptions = {
 const maestroQueue = new Queue('maestro', queueOptions);
 const queueEvents = new QueueEvents('maestro', { connection: redis });
 
-export type AgentTask = {
-  kind: 'plan' | 'scaffold' | 'implement' | 'test' | 'review' | 'docs';
-  repo: string;
-  pr?: number;
-  issue: string;
-  budgetUSD: number;
-  context: Record<string, any>;
-  parentTaskId?: string;
-  dependencies?: string[];
-  metadata: {
-    actor: string;
-    timestamp: string;
-    sprint_version: string;
-  };
-};
-
-export type TaskResult = {
-  success: boolean;
-  output?: any;
-  cost: number;
-  duration: number;
-  errors?: string[];
-  artifacts?: string[];
-  nextTasks?: Omit<AgentTask, 'budgetUSD'>[];
-};
 
 class MaestroOrchestrator {
   private policyGuard: PolicyGuard;

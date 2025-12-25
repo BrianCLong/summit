@@ -4,9 +4,15 @@
     "outDir": "dist",
     "rootDir": "src",
     "declaration": true,
-    "allowImportingTsExtensions": false,
-    "types": []
+    "allowImportingTsExtensions": false
   },
   "include": ["src"],
-  "references": [{ "path": "../types" }]
+  "references": [
+    {
+      "path": "../types"
+    },
+    {
+      "path": "../sdk-ts"
+    }
+  ]
 }

@@ -30,7 +30,7 @@
     "http-proxy-middleware": "^2.0.6"
   },
   "devDependencies": {
-    "@types/node": "^24.10.1",
+    "@types/node": "20.19.27",
     "@types/express": "^4.17.21",
     "@types/cors": "^2.8.17",
     "@types/jsonwebtoken": "^9.0.5",

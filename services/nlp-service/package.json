@@ -27,7 +27,7 @@
   "devDependencies": {
     "@types/express": "^5.0.1",
     "@types/cors": "^2.8.17",
-    "@types/node": "^24.10.1",
+    "@types/node": "20.19.27",
     "tsx": "^4.19.2",
     "typescript": "^5.9.3",
     "eslint": "9.39.1"

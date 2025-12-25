@@ -15,8 +15,8 @@ export class DocxExporter implements ReportExporter {
   readonly format = 'docx' as const;
 
   async export(data: unknown, options: ExportOptions = {}): Promise<ReportArtifact> {
-    const rows = normalizeTabularData(data);
-    const headers = Object.keys(rows[0] || { value: 'value' });
+    const dataRows = normalizeTabularData(data);
+    const headers = Object.keys(dataRows[0] || { value: 'value' });
 
     const table = new Table({
       rows: [
@@ -28,7 +28,7 @@ export class DocxExporter implements ReportExporter {
               }),
           ),
         }),
-        ...rows.map(
+        ...dataRows.map(
           (row) =>
             new TableRow({
               children: headers.map((header) =>
@@ -38,7 +38,7 @@ export class DocxExporter implements ReportExporter {
               ),
             }),
         ),
-      ],
+      ] as readonly TableRow[],
     });
 
     const doc = new Document({
@@ -51,16 +51,16 @@ export class DocxExporter implements ReportExporter {
             }),
             ...(options.watermark
               ? [
-                  new Paragraph({
-                    children: [
-                      new TextRun({
-                        text: options.watermark,
-                        italics: true,
-                        color: '808080',
-                      }),
-                    ],
-                  }),
-                ]
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: options.watermark,
+                      italics: true,
+                      color: '808080',
+                    }),
+                  ],
+                }),
+              ]
               : []),
             table,
           ],

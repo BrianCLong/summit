@@ -30,7 +30,7 @@
     "@types/express-jwt": "^7.4.4",
     "@types/cors": "^2.8.17",
     "@types/pg": "^8.11.10",
-    "@types/node": "^24.10.1",
+    "@types/node": "20.19.27",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3",
     "eslint": "^9.39.1",

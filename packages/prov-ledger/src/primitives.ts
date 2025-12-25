@@ -58,3 +58,25 @@ export function recordStep(
   manifest.steps.push(step);
   return step;
 }
+
+export interface ManifestSignature {
+  signature: string;
+  publicKey?: string;
+}
+
+export function verifyManifestSignature(
+  _manifest: ProvenanceManifest,
+  _signature: ManifestSignature,
+  _publicKey: Buffer | string,
+): boolean {
+  // TODO: Implement real signature verification
+  return true;
+}
+
+export function verifyManifest(
+  _manifest: ProvenanceManifest,
+  _artifacts: Record<string, Buffer>,
+): boolean {
+  // TODO: Implement real manifest chain verification
+  return true;
+}

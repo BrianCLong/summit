@@ -433,6 +433,18 @@ export const uiErrorBoundaryCatchTotal = new client.Counter({
   labelNames: ['component', 'tenant_id'],
 });
 
+export const breakerState = new client.Gauge({
+  name: 'circuit_breaker_state',
+  help: 'State of the circuit breaker (0 = Closed, 1 = Open)',
+  labelNames: ['service'],
+});
+
+export const intelgraphJobQueueDepth = new client.Gauge({
+  name: 'intelgraph_job_queue_depth',
+  help: 'Current depth of the job queue',
+  labelNames: ['queue'],
+});
+
 // DORA Metrics (Maestro)
 export const maestroDeploymentsTotal = new client.Counter({
   name: 'maestro_deployments_total',
@@ -496,11 +508,15 @@ register.registerMetric(maestroDeploymentsTotal);
 register.registerMetric(maestroPrLeadTimeHours);
 register.registerMetric(maestroChangeFailureRate);
 register.registerMetric(maestroMttrHours);
+register.registerMetric(breakerState);
+register.registerMetric(intelgraphJobQueueDepth);
 
 export const metrics = {
   graphExpandRequestsTotal,
   aiRequestTotal,
   resolverLatencyMs,
+  breakerState,
+  intelgraphJobQueueDepth,
   graphragSchemaFailuresTotal,
   graphragCacheHitRatio,
   neighborhoodCacheHitRatio,
