@@ -136,12 +136,23 @@ export class EntitlementsService implements EntitlementsInterface {
           [id]
       );
        await provenanceLedger.appendEntry({
-          action: 'ENTITLEMENT_REVOKED',
-          actor: { id: actorId, role: 'admin' },
+          tenantId: 'system',
+          actionType: 'ENTITLEMENT_REVOKED',
+          resourceType: 'Entitlement',
+          resourceId: id,
+          actorId: actorId,
+          actorType: 'user',
+          timestamp: new Date(),
+          payload: {
+            mutationType: 'UPDATE',
+            entityId: id,
+            entityType: 'Entitlement',
+            actorRole: 'admin',
+            action: 'revoke'
+          },
           metadata: {
               entitlementId: id
-          },
-          artifacts: []
+          }
       });
   }
 

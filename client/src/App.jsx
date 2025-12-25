@@ -9,6 +9,7 @@ import AdminPanel from './components/AdminPanel';
 import HealthScore from './components/HealthScore/HealthScore';
 import TimelineView from './features/timeline/TimelineView';
 import { useFeatureFlag, useFeatureVariant } from './hooks/useFeatureFlag';
+import DemoIndicator from './components/common/DemoIndicator';
 import {
   ApolloClient,
   InMemoryCache,
@@ -67,6 +68,7 @@ function TestApp() {
   return (
     <ApolloProvider client={client}>
       <Provider store={store}>
+        <DemoIndicator />
         <div style={{ height: '100vh', display: 'flex', flexDirection: 'row' }}>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
             <div style={{ flex: 1 }}>

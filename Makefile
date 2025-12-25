@@ -6,6 +6,7 @@
 .PHONY: db-migrate db-seed sbom k6
 .PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release provenance ci-check prereqs contracts policy-sim rerere dupescans
 .PHONY: bootstrap
+.PHONY: demo demo-down demo-check demo-seed demo-smoke
 
 COMPOSE_DEV_FILE ?= docker-compose.dev.yaml
 SHELL_SERVICE ?= gateway
@@ -183,3 +184,20 @@ secrets/lint:
 	@.ci/scripts/secrets/leak_scan.sh
 	@echo "Running OPA checks"
 	@conftest test --policy .ci/policies --namespace secrets --all-namespaces
+
+# --- Demo Environment ---
+
+demo: ## Launch one-command demo environment
+	@DEMO_MODE=1 ./scripts/demo-up.sh
+
+demo-down: ## Stop demo environment
+	@./scripts/demo-down.sh
+
+demo-check: ## Check demo prerequisites
+	@./scripts/demo-check.sh
+
+demo-seed: ## Seed demo data
+	@DEMO_MODE=1 ./scripts/demo-seed.sh
+
+demo-smoke: ## Run demo smoke tests
+	@./scripts/demo-smoke-test.sh
