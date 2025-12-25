@@ -22,13 +22,16 @@ export interface BillingConfig {
   enabled: boolean;
 }
 
+// InvoiceLineItem - merged version
 export interface InvoiceLineItem {
   description: string;
   amount: number;
   quantity?: number;
+  unitPrice?: number;
   periodStart?: Date;
   periodEnd?: Date;
   meterId?: string;
+  kind?: string; // 'api', 'ingest', etc.
   metadata?: Record<string, any>;
 }
 
@@ -40,6 +43,7 @@ export enum InvoiceStatus {
   UNCOLLECTIBLE = 'UNCOLLECTIBLE',
 }
 
+// Invoice - merged version with fields from both branches
 export interface Invoice {
   id: string;
   tenantId: string;
@@ -51,9 +55,12 @@ export interface Invoice {
   lineItems: InvoiceLineItem[];
   periodStart: Date;
   periodEnd: Date;
-  dueDate: Date;
+  subtotal?: number;
+  taxes?: number;
+  total?: number;
+  dueDate?: Date;
   createdAt: Date;
-  updatedAt: Date;
+  updatedAt?: Date;
   finalizedAt?: Date;
   paidAt?: Date;
 }

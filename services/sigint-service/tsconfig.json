@@ -1,7 +1,26 @@
 {
-  "extends": "../../packages/sigint-collector/tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "../../"
-  }
+    "rootDir": "./src",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "types": [
+      "node",
+      "uuid"
+    ],
+    "paths": {
+      "@intelgraph/sigint-collector": [
+        "../../packages/sigint-collector/src"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/__tests__/*"
+  ]
 }

@@ -1,0 +1,299 @@
+openapi: 3.0.3
+info:
+  title: CompanyOS Policy & Provenance API
+  version: 1.0.0
+  description: >
+    API for Policy-Gated Operations, Provenance Receipts, Approvals, and Usage Metering.
+    Sprint S-OS-08.
+servers:
+  - url: /api/v1
+paths:
+  /provenance/receipts:
+    get:
+      summary: List provenance receipts
+      operationId: listReceipts
+      tags: [Provenance]
+      parameters:
+        - name: tenant_id
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: List of receipts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Receipt'
+
+  /provenance/receipts/{id}:
+    get:
+      summary: Get a specific receipt
+      operationId: getReceipt
+      tags: [Provenance]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Receipt details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Receipt'
+
+  /provenance/receipts/export:
+    post:
+      summary: Export receipts bundle
+      operationId: exportReceipts
+      tags: [Provenance]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [purpose]
+              properties:
+                purpose:
+                  type: string
+                  description: Reason for export (required by policy)
+                redaction_manifest:
+                  type: object
+                  description: Fields to redact
+      responses:
+        '200':
+          description: Signed export bundle
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReceiptBundle'
+
+  /approvals:
+    get:
+      summary: List pending approvals
+      operationId: listApprovals
+      tags: [Approvals]
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, approved, rejected]
+      responses:
+        '200':
+          description: List of approval requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ApprovalRequest'
+
+  /approvals/{id}/action:
+    post:
+      summary: Approve or Reject a request
+      operationId: actionApproval
+      tags: [Approvals]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [action, rationale]
+              properties:
+                action:
+                  type: string
+                  enum: [approve, reject]
+                rationale:
+                  type: string
+                  minLength: 10
+      responses:
+        '200':
+          description: Action recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApprovalRequest'
+
+  /policies/simulate:
+    post:
+      summary: Simulate a policy decision
+      operationId: simulatePolicy
+      tags: [Policy]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [policy_path, input]
+              properties:
+                policy_path:
+                  type: string
+                  example: "policies/bundles/core/approvals"
+                input:
+                  type: object
+      responses:
+        '200':
+          description: Policy decision
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyResult'
+
+  /usage/tenant/{id}:
+    get:
+      summary: Get tenant usage metering
+      operationId: getTenantUsage
+      tags: [Usage]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Usage metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantUsage'
+
+components:
+  schemas:
+    Receipt:
+      type: object
+      required: [spec_version, id, timestamp, correlation_id, tenant_id, actor, action, resource, policy, result]
+      properties:
+        spec_version:
+          type: string
+          example: "1.0.0"
+        id:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        correlation_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        actor:
+          type: object
+          properties:
+            id: {type: string}
+            email: {type: string}
+            principal_type: {type: string, enum: [user, service_account, system]}
+            roles: {type: array, items: {type: string}}
+            ip_address: {type: string}
+        action:
+          type: string
+        resource:
+          type: object
+          properties:
+            id: {type: string}
+            type: {type: string}
+            attributes: {type: object}
+        policy:
+          type: object
+          properties:
+            decision_id: {type: string}
+            policy_set: {type: string}
+            evaluation_timestamp: {type: string, format: date-time}
+        result:
+          type: object
+          properties:
+            status: {type: string, enum: [success, failure, denied]}
+            details: {type: string}
+            rationale_hash: {type: string}
+        signature:
+          type: object
+          properties:
+            key_id: {type: string}
+            algorithm: {type: string}
+            value: {type: string}
+
+    ReceiptBundle:
+      type: object
+      properties:
+        bundle_id: {type: string}
+        receipts:
+          type: array
+          items: { $ref: '#/components/schemas/Receipt' }
+        manifest: {type: object}
+        signature: {type: string}
+
+    ApprovalRequest:
+      type: object
+      properties:
+        id: {type: string}
+        workflow_id: {type: string}
+        status: {type: string, enum: [pending, approved, rejected]}
+        requested_by: {type: string}
+        risk_level: {type: string}
+        payload: {type: object}
+        actions:
+          type: array
+          items:
+            type: object
+            properties:
+              actor: {type: string}
+              action: {type: string}
+              timestamp: {type: string}
+              rationale: {type: string}
+
+    PolicyResult:
+      type: object
+      properties:
+        allow: {type: boolean}
+        reasons:
+          type: array
+          items: {type: string}
+        obligations:
+          type: array
+          items: {type: string}
+
+    TenantUsage:
+      type: object
+      properties:
+        tenant_id: {type: string}
+        period:
+          type: object
+          properties:
+            from: {type: string}
+            to: {type: string}
+        metrics:
+          type: object
+          additionalProperties:
+            type: number

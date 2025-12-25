@@ -1,4 +1,4 @@
-import { runCypher } from '../graph/neo4j.js';
+import { runCypher } from '../graph/neo4j';
 import {
   SCHEMA_CONSTRAINTS,
   Entity,
@@ -7,7 +7,7 @@ import {
   NodeLabels,
   EdgeTypes,
   NATURAL_KEYS
-} from '../graph/schema.js';
+} from '../graph/schema';
 import { randomUUID } from 'crypto';
 
 export class IntelGraphService {
@@ -195,6 +195,74 @@ export class IntelGraphService {
 
     const result = await runCypher(cypher, params);
     return result.map((r) => r['n'] as T);
+  }
+
+  /**
+   * Finds nodes using fuzzy matching on specific properties.
+   * Useful for entity resolution blocking.
+   */
+  public async findSimilarNodes<T extends Entity>(
+    tenantId: string,
+    label: NodeLabel,
+    criteria: {
+      name?: string;
+      email?: string;
+      phone?: string;
+    },
+    limit: number = 50
+  ): Promise<T[]> {
+    this.validateNodeLabel(label);
+
+    const conditions: string[] = [];
+    const params: any = { tenantId };
+
+    if (criteria.email) {
+      conditions.push('n.email = $email'); // Exact match for email usually best, but could do toLower
+      params.email = criteria.email;
+    }
+
+    if (criteria.phone) {
+      // Assuming phone is somewhat normalized, or use CONTAINS
+      conditions.push('n.phone = $phone');
+      params.phone = criteria.phone;
+    }
+
+    if (criteria.name) {
+      // Fuzzy name matching: Case-insensitive, STARTS WITH, or token overlap if we had FullText index.
+      // Here we use simple case-insensitive matching and STARTS WITH.
+      conditions.push('(toLower(n.name) = toLower($name) OR toLower(n.name) STARTS WITH toLower($namePrefix))');
+      params.name = criteria.name;
+      params.namePrefix = criteria.name.substring(0, 3); // First 3 chars
+    }
+
+    if (conditions.length === 0) {
+      return [];
+    }
+
+    const whereClause = `n.tenantId = $tenantId AND (${conditions.join(' OR ')})`;
+
+    const cypher = `
+      MATCH (n:${label})
+      WHERE ${whereClause}
+      RETURN n
+      LIMIT ${limit}
+    `;
+
+    const result = await runCypher(cypher, params);
+
+    // Deduplicate by ID in case query engine returns multiples (unlikely here but safe practice)
+    const seen = new Set<string>();
+    const uniqueResults: T[] = [];
+
+    for (const row of result) {
+      const node = row['n'] as T;
+      if (!seen.has(node.id)) {
+        seen.add(node.id);
+        uniqueResults.push(node);
+      }
+    }
+
+    return uniqueResults;
   }
 
   private validateNodeLabel(label: string): void {

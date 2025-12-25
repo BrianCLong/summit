@@ -10,9 +10,20 @@ on:
       - 'apps/**/models/**'
       - 'services/**/models/**'
       - '.ci/policies/**'
+  push:
+    branches:
+      - main
+    paths:
+      - 'migrations/**'
+      - 'services/**/db/**'
+      - 'apps/**/db/**'
+      - 'packages/**/db/**'
+      - 'apps/**/models/**'
+      - 'services/**/models/**'
+      - '.ci/policies/**'
 
 concurrency:
-  group: migration-gate-${{ github.event.pull_request.number || github.ref }}
+  group: migration-gate-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 permissions:
@@ -47,6 +58,25 @@ jobs:
           npm install -g pnpm
           pip install --upgrade pip
           pip install alembic psycopg2-binary neo4j typesense
+
+      - name: Check for migration labels
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          # Fetch PR labels
+          LABELS=$(gh pr view $PR_NUMBER --json labels -q '.labels[].name')
+
+          if [[ "$LABELS" == *"migration:approved"* ]]; then
+            echo "✅ PR has 'migration:approved' label"
+          elif [[ "$LABELS" == *"migration:safe"* ]]; then
+            echo "✅ PR has 'migration:safe' label"
+          else
+            echo "::error::Schema-affecting PRs require 'migration:approved' or 'migration:safe' label"
+            exit 1
+          fi
 
       - name: Conftest policy check
         uses: open-policy-agent/conftest-action@v1.6.0
@@ -125,6 +155,27 @@ jobs:
             - Policy check: ✅ (OPA expand/contract enforcement)
             - Shadow compare: see `shadow-report.json`
             - Rollback plan: produced in `rollback-plan/`
+
+  check-approval:
+    name: Check for Migration Approval
+    needs: plan-and-validate
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.number != ''
+    steps:
+      - name: Verify approval label
+        env:
+          LABELS: ${{ toJson(github.event.pull_request.labels) }}
+        run: |
+          echo "Checking for 'migration:approved' label on PR #${{ github.event.pull_request.number }}"
+
+          if echo "$LABELS" | jq -e '.[] | select(.name == "migration:approved")' > /dev/null; then
+            echo "✅ 'migration:approved' label found."
+            exit 0
+          else
+            echo "❌ 'migration:approved' label MISSING."
+            echo "::error::Schema changes require explicit approval. Please add the 'migration:approved' label to this PR."
+            exit 1
+          fi
 
   synthetic-load:
     needs: plan-and-validate
