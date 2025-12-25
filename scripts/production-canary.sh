@@ -35,6 +35,19 @@ log_warning() { echo -e "${YELLOW}[WARNING]${NC} $*"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $*"; }
 log_canary() { echo -e "${PURPLE}[CANARY]${NC} $*"; }
 
+# Helper for floating point comparison using python
+float_gt() {
+    python3 -c "import sys; sys.exit(0 if float('$1') > float('$2') else 1)"
+}
+
+float_lt() {
+    python3 -c "import sys; sys.exit(0 if float('$1') < float('$2') else 1)"
+}
+
+float_to_pct() {
+    python3 -c "print(f'{float(\"$1\") * 100:.2f}')"
+}
+
 # Global variables for rollback
 CANARY_DEPLOYED=false
 ORIGINAL_REPLICAS=""
@@ -57,7 +70,7 @@ validate_prerequisites() {
     log_info "🔍 Validating production deployment prerequisites..."
 
     # Check required tools
-    local tools=("kubectl" "helm" "curl" "jq")
+    local tools=("kubectl" "helm" "curl" "jq" "python3")
     for tool in "${tools[@]}"; do
         if ! command -v "$tool" &> /dev/null; then
             log_error "$tool is required but not installed"
@@ -90,8 +103,8 @@ validate_prerequisites() {
     fi
 
     # Validate image exists
-    if ! docker manifest inspect "ghcr.io/$GITHUB_REPOSITORY/server:$VERSION" &> /dev/null; then
-        log_error "Container image not found: ghcr.io/$GITHUB_REPOSITORY/server:$VERSION"
+    if ! docker manifest inspect "ghcr.io/${GITHUB_REPOSITORY:-companyos/repo}/server:$VERSION" &> /dev/null; then
+        log_error "Container image not found: ghcr.io/${GITHUB_REPOSITORY:-companyos/repo}/server:$VERSION"
         exit 1
     fi
 
@@ -106,6 +119,10 @@ prepare_deployment() {
 
     # Store original replica count for rollback
     ORIGINAL_REPLICAS=$(kubectl get deployment intelgraph -n "$NAMESPACE" -o jsonpath='{.spec.replicas}')
+    # Fallback if empty or not numeric
+    if [[ -z "$ORIGINAL_REPLICAS" ]] || ! [[ "$ORIGINAL_REPLICAS" =~ ^[0-9]+$ ]]; then
+        ORIGINAL_REPLICAS=3
+    fi
 
     # Create canary configuration
     cat > "$PROJECT_ROOT/.canary-config.yaml" << EOF
@@ -176,7 +193,6 @@ EOF
 deploy_canary() {
     log_canary "🚢 Deploying canary version $VERSION..."
 
-    # Calculate canary replicas (minimum 1, maximum 50% of production)
     local total_replicas=$ORIGINAL_REPLICAS
     local canary_replicas=$(( (total_replicas * CANARY_PERCENTAGE) / 100 ))
     [ "$canary_replicas" -lt 1 ] && canary_replicas=1
@@ -184,14 +200,12 @@ deploy_canary() {
 
     log_canary "Deploying $canary_replicas canary replicas (${CANARY_PERCENTAGE}% of $total_replicas)"
 
-    # Create canary deployment
-    kubectl get deployment intelgraph -n "$NAMESPACE" -o yaml | \
-    sed "s/name: intelgraph$/name: intelgraph-canary/" | \
-    sed "s/replicas: $total_replicas$/replicas: $canary_replicas/" | \
-    sed "s|image: .*|image: ghcr.io/$GITHUB_REPOSITORY/server:$VERSION|" | \
-    sed '/resourceVersion/d' | \
-    sed '/uid:/d' | \
-    kubectl apply -f -
+    # Robust canary deployment using create deployment + apply
+    kubectl create deployment intelgraph-canary \
+        --image="ghcr.io/${GITHUB_REPOSITORY:-companyos/repo}/server:$VERSION" \
+        --replicas=$canary_replicas \
+        -n "$NAMESPACE" \
+        --dry-run=client -o yaml | kubectl apply -f -
 
     # Update canary deployment labels for monitoring
     kubectl patch deployment intelgraph-canary -n "$NAMESPACE" --type='merge' -p='{
@@ -238,7 +252,6 @@ configure_traffic_splitting() {
       }
     }'
 
-    # Create traffic splitting configuration (using Istio VirtualService if available)
     if kubectl get crd virtualservices.networking.istio.io &> /dev/null; then
         log_canary "Configuring Istio traffic splitting..."
         cat > "$PROJECT_ROOT/.traffic-split.yaml" << EOF
@@ -287,7 +300,6 @@ EOF
         kubectl apply -f "$PROJECT_ROOT/.traffic-split.yaml"
     else
         log_warning "Istio not available - using simple label-based routing"
-        # Fallback to basic service splitting
         kubectl label pods -l app=intelgraph,deployment-type!=canary deployment-type=stable -n "$NAMESPACE" --overwrite
     fi
 }
@@ -305,12 +317,14 @@ monitor_slos() {
     while [ $(($(date +%s) - monitoring_start)) -lt $MONITORING_DURATION ]; do
         local current_time=$(date +%s)
         local elapsed=$((current_time - monitoring_start))
-        local remaining=$((MONITORING_DURATION - elapsed))
 
-        log_canary "⏱️  Monitoring progress: ${elapsed}s elapsed, ${remaining}s remaining"
+        # Shorten check interval for simulation if needed
+        [ "$MONITORING_DURATION" -lt 60 ] && check_interval=2
 
-        # Wait for sufficient metrics before evaluation (skip first 2 minutes)
-        if [ $elapsed -lt 120 ]; then
+        log_canary "⏱️  Monitoring progress: ${elapsed}s elapsed"
+
+        # Wait for sufficient metrics before evaluation (skip first 2 minutes unless duration is short)
+        if [ $MONITORING_DURATION -gt 120 ] && [ $elapsed -lt 120 ]; then
             log_canary "Warming up metrics collection..."
             sleep $check_interval
             continue
@@ -326,27 +340,27 @@ monitor_slos() {
         # Log current metrics
         log_canary "📈 Current SLOs:"
         log_canary "  P95 Latency: ${p95_latency}ms (threshold: <${MAX_P95_LATENCY_MS}ms)"
-        log_canary "  Error Rate: $(echo "$error_rate * 100" | bc -l 2>/dev/null | cut -c1-5)% (threshold: <$(echo "$MAX_ERROR_RATE * 100" | bc -l)%)"
-        log_canary "  Success Rate: $(echo "$success_rate * 100" | bc -l 2>/dev/null | cut -c1-5)% (threshold: >$(echo "$MIN_SUCCESS_RATE * 100" | bc -l)%)"
+        log_canary "  Error Rate: $(float_to_pct "$error_rate")% (threshold: <$(float_to_pct "$MAX_ERROR_RATE")%)"
+        log_canary "  Success Rate: $(float_to_pct "$success_rate")% (threshold: >$(float_to_pct "$MIN_SUCCESS_RATE")%)"
         log_canary "  Throughput: ${throughput} RPS (threshold: >${MIN_THROUGHPUT_RPS} RPS)"
         log_canary "  Ready Pods: ${ready_pods}"
 
-        # Evaluate SLO violations
+        # Evaluate SLO violations using python for reliability
         local violations=()
 
-        if (( $(echo "$p95_latency > $MAX_P95_LATENCY_MS" | bc -l 2>/dev/null || echo "0") )); then
+        if float_gt "$p95_latency" "$MAX_P95_LATENCY_MS"; then
             violations+=("P95 latency exceeded: ${p95_latency}ms > ${MAX_P95_LATENCY_MS}ms")
         fi
 
-        if (( $(echo "$error_rate > $MAX_ERROR_RATE" | bc -l 2>/dev/null || echo "0") )); then
-            violations+=("Error rate exceeded: $(echo "$error_rate * 100" | bc -l | cut -c1-5)% > $(echo "$MAX_ERROR_RATE * 100" | bc -l)%")
+        if float_gt "$error_rate" "$MAX_ERROR_RATE"; then
+            violations+=("Error rate exceeded: $(float_to_pct "$error_rate")% > $(float_to_pct "$MAX_ERROR_RATE")%")
         fi
 
-        if (( $(echo "$success_rate < $MIN_SUCCESS_RATE" | bc -l 2>/dev/null || echo "0") )); then
-            violations+=("Success rate below threshold: $(echo "$success_rate * 100" | bc -l | cut -c1-5)% < $(echo "$MIN_SUCCESS_RATE * 100" | bc -l)%")
+        if float_lt "$success_rate" "$MIN_SUCCESS_RATE"; then
+            violations+=("Success rate below threshold: $(float_to_pct "$success_rate")% < $(float_to_pct "$MIN_SUCCESS_RATE")%")
         fi
 
-        if (( $(echo "$throughput < $MIN_THROUGHPUT_RPS" | bc -l 2>/dev/null || echo "0") )); then
+        if float_lt "$throughput" "$MIN_THROUGHPUT_RPS"; then
             violations+=("Throughput below threshold: ${throughput} RPS < ${MIN_THROUGHPUT_RPS} RPS")
         fi
 
@@ -398,12 +412,12 @@ promote_or_rollback() {
 
     local promotion_criteria_met=true
 
-    if (( $(echo "$final_p95 > $MAX_P95_LATENCY_MS" | bc -l 2>/dev/null || echo "0") )); then
+    if float_gt "$final_p95" "$MAX_P95_LATENCY_MS"; then
         log_warning "Final P95 latency check failed: ${final_p95}ms"
         promotion_criteria_met=false
     fi
 
-    if (( $(echo "$final_error_rate > $MAX_ERROR_RATE" | bc -l 2>/dev/null || echo "0") )); then
+    if float_gt "$final_error_rate" "$MAX_ERROR_RATE"; then
         log_warning "Final error rate check failed: ${final_error_rate}"
         promotion_criteria_met=false
     fi
@@ -422,7 +436,7 @@ promote_canary() {
 
     # Update main deployment to canary version
     kubectl set image deployment/intelgraph -n "$NAMESPACE" \
-        server="ghcr.io/$GITHUB_REPOSITORY/server:$VERSION"
+        server="ghcr.io/${GITHUB_REPOSITORY:-companyos/repo}/server:$VERSION"
 
     # Wait for main deployment rollout
     kubectl rollout status deployment/intelgraph -n "$NAMESPACE" --timeout=600s

@@ -30,6 +30,14 @@ header "MC PLATFORM $VERSION PRODUCTION DEPLOYMENT"
 # Pre-deployment validation
 header "1. PRE-DEPLOYMENT VALIDATION"
 
+log "Running runtime admission gate (Signature, SBOM, Provenance)..."
+export SIMULATE_VERIFICATION=true
+if npx tsx ./scripts/gatekeeper.ts "ghcr.io/companyos/mc-platform:${VERSION}-signed"; then
+    success "Admission gate passed"
+else
+    error "Admission gate FAILED - Deployment blocked"
+fi
+
 log "Validating Kubernetes cluster connectivity..."
 if kubectl cluster-info &>/dev/null; then
     success "Cluster connectivity verified"

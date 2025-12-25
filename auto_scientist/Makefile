@@ -1,3 +1,4 @@
+.PHONY: run test benchmark
 
 run:
 	python3 -m auto_scientist.impl.src.main

@@ -46,3 +46,19 @@ def execute_experiment(hypothesis):
 -   **Generator Agent**: High-creativity model (e.g., GPT-4-Turbo).
 -   **Oversight Agent**: High-reasoning/Safety-tuned model (e.g., Claude 3 Opus or specialized fine-tune).
 -   **Execution Engine**: Python-based DAG runner (Airflow or custom `psc-runner`).
+
+## 6. Metrics
+-   **Safety Pass Rate**: Percentage of generated hypotheses that pass oversight on first attempt.
+-   **Refinement Success Rate**: Percentage of failed hypotheses that pass after refinement.
+-   **Execution Success Rate**: Percentage of approved hypotheses that execute without errors.
+-   **End-to-End Latency**: Total time from topic submission to experiment completion.
+
+## 7. Failure Modes
+-   **Generator Hallucination**: LLM generates invalid or impossible experiments.
+    - Mitigation: Structured output validation, domain-specific checks.
+-   **Oversight Bypass**: Adversarial prompts bypass safety checks.
+    - Mitigation: Multi-model oversight, defense-in-depth policies.
+-   **Execution Timeout**: Experiments exceed resource limits.
+    - Mitigation: Hard timeouts, resource quotas per experiment.
+-   **Refinement Loop**: Hypothesis stuck in infinite refinement.
+    - Mitigation: Max iteration limits, early termination criteria.
