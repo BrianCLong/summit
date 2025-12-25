@@ -1,6 +1,0 @@
-{
-  "images": [
-    "ghcr.io/summit/platform-api:latest",
-    "ghcr.io/summit/client-web:latest"
-  ]
-}
