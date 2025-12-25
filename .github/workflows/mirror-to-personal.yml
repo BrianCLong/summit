@@ -1,0 +1,41 @@
+name: Mirror to BrianCLong/summit
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout TopicalityLLC/Summit
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PERSONAL_MIRROR_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "TopicalityLLC Mirror Bot"
+          git config user.email "bot@topicalityllc.com"
+
+      - name: Add Personal Repo Remote
+        run: |
+          git remote add personal https://x-access-token:${{ secrets.PERSONAL_MIRROR_TOKEN }}@github.com/BrianCLong/summit.git
+
+      - name: Push to BrianCLong/summit
+        run: |
+          git push personal main --force
+
+      - name: Sync All Branches
+        run: |
+          for branch in $(git branch -r | grep -v '\->' | grep 'origin/' | sed 's/origin\///'); do
+            git checkout -b $branch origin/$branch 2>/dev/null || git checkout $branch
+            git push personal $branch --force
+          done
+
+      - name: Sync Tags
+        run: |
+          git push personal --tags --force
