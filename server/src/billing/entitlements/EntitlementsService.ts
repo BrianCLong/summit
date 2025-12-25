@@ -1,18 +1,11 @@
-export interface EntitlementsInterface {
-  /**
-   * Checks if a tenant has access to a specific feature.
-   * @param feature The feature key (e.g., 'sso', 'advanced_reporting').
-   * @param tenantId The ID of the tenant.
-   * @returns Promise<boolean> True if the tenant can use the feature.
-   */
-  canUse(feature: string, tenantId: string): Promise<boolean>;
+import { getPostgresPool } from '../../config/database.js';
+import logger from '../../utils/logger.js';
+import { Entitlement, EntitlementCheckResult } from './types.js';
+import { randomUUID } from 'crypto';
+import { provenanceLedger } from '../../provenance/ledger.js';
 
-  /**
-   * Checks the remaining quota for a metered feature.
-   * @param feature The feature key (e.g., 'api_requests', 'storage_gb').
-   * @param tenantId The ID of the tenant.
-   * @returns Promise<number> The remaining amount, or Infinity if unlimited/not metered.
-   */
+export interface EntitlementsInterface {
+  canUse(feature: string, tenantId: string): Promise<boolean>;
   quotaRemaining(feature: string, tenantId: string): Promise<number>;
 }
 
@@ -28,25 +21,154 @@ export class EntitlementsService implements EntitlementsInterface {
     return EntitlementsService.instance;
   }
 
-  /**
-   * Default no-op implementation.
-   * In a real implementation, this would query a database or cache to check the tenant's plan.
-   * Currently defaults to allowing everything for development/MVP.
-   */
   async canUse(feature: string, tenantId: string): Promise<boolean> {
-    // TODO: Implement actual plan checking logic.
-    // For now, return true to not block development.
-    return Promise.resolve(true);
+    const pool = getPostgresPool();
+    const result = await pool.read(
+      `SELECT 1 FROM entitlements
+       WHERE tenant_id = $1
+       AND artifact_key = $2
+       AND status = 'active'
+       AND (end_date IS NULL OR end_date > NOW())
+       LIMIT 1`,
+      [tenantId, feature]
+    );
+
+    return (result.rowCount ?? 0) > 0;
   }
 
-  /**
-   * Default no-op implementation.
-   * In a real implementation, this would check usage metering against plan limits.
-   * Currently defaults to Infinity (unlimited).
-   */
   async quotaRemaining(feature: string, tenantId: string): Promise<number> {
-    // TODO: Implement actual quota checking logic.
-    // For now, return Infinity.
-    return Promise.resolve(Infinity);
+    const pool = getPostgresPool();
+    const result = await pool.read(
+      `SELECT limits FROM entitlements
+       WHERE tenant_id = $1
+       AND artifact_key = $2
+       AND status = 'active'
+       AND (end_date IS NULL OR end_date > NOW())
+       LIMIT 1`,
+      [tenantId, feature]
+    );
+
+    if (result.rowCount === 0) return 0;
+
+    const limits = result.rows[0].limits;
+    // Assuming limits structure like { "daily_requests": 1000 }
+    // Ideally we need to check current usage too.
+    // For this MVP step, we just return the limit if defined, or Infinity.
+
+    // If 'quota' key exists in limits
+    if (limits && typeof limits.quota === 'number') {
+        return limits.quota;
+    }
+    return Infinity;
+  }
+
+  async grantEntitlement(
+    tenantId: string,
+    artifactKey: string,
+    source: string,
+    sourceId: string | null,
+    limits: Record<string, any> = {},
+    actorId: string
+  ): Promise<Entitlement> {
+    const pool = getPostgresPool();
+    const client = await pool.connect();
+
+    try {
+      await client.query('BEGIN');
+
+      // Check for existing active entitlement
+      const existing = await client.query(
+        `SELECT * FROM entitlements
+         WHERE tenant_id = $1 AND artifact_key = $2 AND status = 'active'`,
+        [tenantId, artifactKey]
+      );
+
+      if (existing.rowCount && existing.rowCount > 0) {
+        // Update existing? Or throw?
+        // Let's update limits and end_date
+        const id = existing.rows[0].id;
+        const result = await client.query(
+            `UPDATE entitlements SET limits = $1, updated_at = NOW() WHERE id = $2 RETURNING *`,
+            [limits, id]
+        );
+         await client.query('COMMIT');
+         return this.mapRow(result.rows[0]);
+      }
+
+      const id = randomUUID();
+      const result = await client.query(
+        `INSERT INTO entitlements (
+          id, tenant_id, artifact_key, status, limits, source, source_id
+        ) VALUES ($1, $2, $3, 'active', $4, $5, $6)
+        RETURNING *`,
+        [id, tenantId, artifactKey, limits, source, sourceId]
+      );
+
+      const entitlement = this.mapRow(result.rows[0]);
+
+      // Provenance
+      await provenanceLedger.appendEntry({
+          action: 'ENTITLEMENT_GRANTED',
+          actor: { id: actorId, role: 'admin' },
+          metadata: {
+              tenantId,
+              artifactKey,
+              source,
+              entitlementId: id
+          },
+          artifacts: []
+      });
+
+      await client.query('COMMIT');
+      return entitlement;
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
+  }
+
+  async revokeEntitlement(id: string, actorId: string): Promise<void> {
+      const pool = getPostgresPool();
+      await pool.write(
+          `UPDATE entitlements SET status = 'expired', end_date = NOW(), updated_at = NOW() WHERE id = $1`,
+          [id]
+      );
+       await provenanceLedger.appendEntry({
+          action: 'ENTITLEMENT_REVOKED',
+          actor: { id: actorId, role: 'admin' },
+          metadata: {
+              entitlementId: id
+          },
+          artifacts: []
+      });
+  }
+
+  async getEntitlements(tenantId: string): Promise<Entitlement[]> {
+      const pool = getPostgresPool();
+      const result = await pool.read(
+          `SELECT * FROM entitlements WHERE tenant_id = $1`,
+          [tenantId]
+      );
+      return result.rows.map(this.mapRow);
+  }
+
+  private mapRow(row: any): Entitlement {
+    return {
+      id: row.id,
+      tenantId: row.tenant_id,
+      artifactKey: row.artifact_key,
+      status: row.status,
+      startDate: row.start_date,
+      endDate: row.end_date,
+      limits: row.limits,
+      source: row.source,
+      sourceId: row.source_id,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    };
   }
 }
+
+export const entitlementsService = EntitlementsService.getInstance();
