@@ -30,10 +30,14 @@ const config: Config = {
       'ts-jest',
       {
         useESM: true,
-        tsconfig: 'tsconfig.json',
+        tsconfig: 'tsconfig.test.json',
       },
     ],
   },
+  transformIgnorePatterns: [
+    '/node_modules/',
+    '/tests/setup/jest.setup.js'
+  ],
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/__tests__/**',
@@ -57,20 +61,10 @@ const config: Config = {
   testTimeout: 30000,
   globalSetup: '<rootDir>/tests/setup/globalSetup.cjs',
   globalTeardown: '<rootDir>/tests/setup/globalTeardown.cjs',
-  testResultsProcessor: 'jest-junit',
+  // testResultsProcessor: 'jest-junit', // Disabled to avoid dependency issues in environment
   reporters: [
     'default',
-    [
-      'jest-junit',
-      {
-        outputDirectory: '<rootDir>/test-results',
-        outputName: 'junit.xml',
-        classNameTemplate: '{classname}',
-        titleTemplate: '{title}',
-        ancestorSeparator: ' › ',
-        usePathForSuiteName: true,
-      },
-    ],
+    // 'jest-junit', // Disabled
   ],
   verbose: true,
   clearMocks: true,
@@ -78,7 +72,6 @@ const config: Config = {
   resetMocks: true,
   bail: false,
   errorOnDeprecated: true,
-  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$))'],
   maxWorkers: process.env.CI ? 2 : '50%',
 };
 

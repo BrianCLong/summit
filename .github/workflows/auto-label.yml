@@ -1,0 +1,113 @@
+name: Auto Label
+
+on:
+  issues:
+    types: [opened, edited]
+  pull_request:
+    types: [opened, edited, synchronize]
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: read
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Label based on title
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.issue?.title || context.payload.pull_request?.title || '';
+            const body = context.payload.issue?.body || context.payload.pull_request?.body || '';
+            const labels = [];
+            
+            // Type labels
+            if (title.match(/\[(bug|BUG)\]/i) || body.match(/##\s*bug/i)) {
+              labels.push('bug');
+            }
+            if (title.match(/\[(feat|feature|FEAT|FEATURE)\]/i) || body.match(/##\s*feature/i)) {
+              labels.push('enhancement');
+            }
+            if (title.match(/\[(docs?|DOCS?)\]/i) || body.match(/##\s*documentation/i)) {
+              labels.push('documentation');
+            }
+            if (title.match(/\[(perf|PERF|performance)\]/i)) {
+              labels.push('performance');
+            }
+            if (title.match(/\[(refactor|REFACTOR)\]/i)) {
+              labels.push('refactor');
+            }
+            if (title.match(/\[(test|TEST|tests)\]/i)) {
+              labels.push('tests');
+            }
+            
+            // Component labels
+            if (body.match(/api|gateway/i) || title.match(/api|gateway/i)) {
+              labels.push('api');
+            }
+            if (body.match(/frontend|ui|interface/i) || title.match(/frontend|ui/i)) {
+              labels.push('frontend');
+            }
+            if (body.match(/backend|server/i) || title.match(/backend|server/i)) {
+              labels.push('backend');
+            }
+            if (body.match(/database|db|postgres|sql/i) || title.match(/database|db/i)) {
+              labels.push('database');
+            }
+            if (body.match(/auth|authentication|authorization/i)) {
+              labels.push('authentication');
+            }
+            if (body.match(/intelligence|analysis|intel/i)) {
+              labels.push('intelligence');
+            }
+            if (body.match(/workflow|automation|n8n/i)) {
+              labels.push('automation');
+            }
+            if (body.match(/integration|webhook|api/i)) {
+              labels.push('integration');
+            }
+            
+            // Priority labels based on severity
+            if (body.match(/critical|urgent|blocker/i) || title.match(/critical|urgent/i)) {
+              labels.push('priority:critical');
+            } else if (body.match(/high priority|important/i)) {
+              labels.push('priority:high');
+            }
+            
+            // Security
+            if (body.match(/security|vulnerability|cve/i) || title.match(/security|vuln/i)) {
+              labels.push('security');
+            }
+            
+            // Size estimation for PRs
+            if (context.payload.pull_request) {
+              const additions = context.payload.pull_request.additions || 0;
+              const deletions = context.payload.pull_request.deletions || 0;
+              const total = additions + deletions;
+              
+              if (total < 10) {
+                labels.push('size:XS');
+              } else if (total < 50) {
+                labels.push('size:S');
+              } else if (total < 200) {
+                labels.push('size:M');
+              } else if (total < 500) {
+                labels.push('size:L');
+              } else {
+                labels.push('size:XL');
+              }
+            }
+            
+            // Add labels if any were found
+            if (labels.length > 0) {
+              const issue_number = context.payload.issue?.number || context.payload.pull_request?.number;
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue_number,
+                labels: labels
+              });
+              console.log(`Added labels: ${labels.join(', ')}`);
+            }
