@@ -51,7 +51,62 @@ cd summit
 npm run quickstart      # Trivial setup: installs deps, starts infra, migrates DB, runs dev servers
 ```
 
+<<<<<<< HEAD
 **Manual steps:**
+=======
+## 🎮 Demo
+
+Launch a complete working demo environment with one command, including seeded sample data:
+
+### Prerequisites
+
+- Docker Desktop ≥ 4.x (8GB memory, BuildKit enabled)
+- Node 18+
+- pnpm 9 (via `corepack enable`)
+- Available ports: 3000, 4000, 5432, 6379, 7474, 7687, 8080, 9090
+
+### One-Command Demo
+
+```bash
+# Using the make command
+make demo
+
+# Or run directly with proper environment
+DEMO_MODE=1 ./scripts/demo-up.sh
+```
+
+### What's Included
+
+- **Frontend UI**: http://localhost:3000
+- **GraphQL API**: http://localhost:4000/graphql
+- **Neo4j Database**: http://localhost:7474
+- **PostgreSQL Database**: http://localhost:8080 (Adminer)
+- **Monitoring**: Grafana at http://localhost:8080, Prometheus at http://localhost:9090
+- **Pre-seeded Demo Data**: Sample investigation with entities and relationships
+- **Demo Indicators**: Visual "DEMO MODE" badges in UI to distinguish from production
+
+### Demo Credentials
+
+- **Username**: demo@example.com (or as configured)
+- **Password**: demo123 (or as configured)
+
+### Stopping the Demo
+
+```bash
+# Stop demo environment (preserves data)
+make demo-down
+
+# Or directly
+DEMO_MODE=1 ./scripts/demo-down.sh
+
+# Stop demo environment and remove volumes (removes all data)
+make demo-down-cleanup
+
+# Or directly
+DEMO_MODE=1 ./scripts/demo-down.sh --cleanup-volumes
+```
+
+>>>>>>> ba282e4842 (feat: add demo mode UI indicator with safety gating)
 ```bash
 make bootstrap          # installs pnpm deps + venv + .env
 npm run docker:dev -- up -d postgres neo4j redis # start infrastructure
