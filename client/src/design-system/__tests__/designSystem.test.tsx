@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { vi, describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, jest } from '@jest/globals';
 import { ThemeProvider } from '@mui/material/styles';
 import { PageShell } from '../components/PageShell';
 import { SettingsLayout } from '../components/SettingsLayout';
@@ -34,11 +34,11 @@ describe('Design system components', () => {
   it('tracks sections in SettingsLayout telemetry', () => {
     const telemetry = new DesignSystemTelemetry(
       {
-        send: vi.fn().mockResolvedValue(undefined),
+        send: jest.fn().mockResolvedValue(undefined),
       },
       { autoFlushMs: null },
     );
-    const recordSpy = vi.spyOn(telemetry, 'record');
+    const recordSpy = jest.spyOn(telemetry, 'record');
     renderWithTheme(
       <TelemetryContext.Provider value={telemetry as unknown as DesignSystemTelemetry}>
         <SettingsLayout
@@ -54,7 +54,7 @@ describe('Design system components', () => {
   });
 
   it('shows empty state and retry for DataTable', () => {
-    const handleRetry = vi.fn();
+    const handleRetry = jest.fn();
     renderWithTheme(
       <DataTable
         title="Investigations"

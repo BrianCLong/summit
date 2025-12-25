@@ -1,5 +1,18 @@
 import '@testing-library/jest-dom';
 
+// Polyfill for TextEncoder
+import { TextEncoder } from 'util';
+global.TextEncoder = TextEncoder;
+
+// Polyfill for performance.getEntriesByType
+if (typeof performance === 'undefined') {
+  global.performance = {
+    getEntriesByType: () => [],
+  } as Performance;
+} else if (!performance.getEntriesByType) {
+  performance.getEntriesByType = () => [];
+}
+
 declare global {
   interface Window {
     __srInstances?: any[];

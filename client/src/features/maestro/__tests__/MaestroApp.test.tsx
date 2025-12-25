@@ -1,13 +1,13 @@
 import React from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, jest } from '@jest/globals';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MaestroApp } from '../../maestro/MaestroApp';
 
-vi.mock('react-virtualized', async () => {
+jest.mock('react-virtualized', async () => {
   const actual =
-    await vi.importActual<typeof import('react-virtualized')>(
+    await jest.importActual<typeof import('react-virtualized')>(
       'react-virtualized',
     );
   return {

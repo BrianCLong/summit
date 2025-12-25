@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 import '@testing-library/jest-dom';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import ErrorBoundary from '../ErrorBoundary';
-import { vi } from 'vitest';
+import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 
 type ThrowerProps = { shouldThrow?: boolean };
 
@@ -18,7 +18,7 @@ describe('ErrorBoundary', () => {
   const originalConsoleError = console.error;
 
   beforeEach(() => {
-    vi.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -61,7 +61,7 @@ describe('ErrorBoundary', () => {
   });
 
   it('invokes onError when errors are captured', () => {
-    const onError = vi.fn();
+    const onError = jest.fn();
 
     render(
       <ErrorBoundary onError={onError}>
