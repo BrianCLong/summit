@@ -1,26 +1,8 @@
 # Gitleaks Ignore File
-# Add specific fingerprints or line hashes here to suppress false positives
-
+# Add specific fingerprints here to suppress individual false positives
+# Format: fingerprint (the hash shown in gitleaks output)
+#
+# Path exclusions are configured in .gitleaks.toml
+#
 # Example:
-# file.ts:line_hash:fingerprint
-
-# Test files often have fake secrets
-**/*.test.ts
-**/*.test.js
-**/*.spec.ts
-**/__tests__/**
-**/setup/**
-**/test/fixtures/**
-**/examples/**
-
-# Docs and Scripts (False Positives)
-docs/**
-.orchestrator/patches/**
-server/scripts/*.sh
-helm/**
-.github/workflows/**
-
-# Lock files
-pnpm-lock.yaml
-package-lock.json
-yarn.lock
+# a]b]c]d]e]f]g]h]i:generic-api-key

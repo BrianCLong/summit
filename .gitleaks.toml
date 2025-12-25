@@ -1,3 +1,32 @@
-title = "intelgraph"
+# Gitleaks Configuration
+# See https://github.com/gitleaks/gitleaks for documentation
+
+title = "Summit/IntelGraph Gitleaks Configuration"
+
 [allowlist]
-paths = ["docs/", "fixtures/"]
+  description = "Global allowlist"
+
+  # Paths to exclude from scanning
+  paths = [
+    '''.*\.test\.ts$''',
+    '''.*\.test\.js$''',
+    '''.*\.spec\.ts$''',
+    '''__tests__/.*''',
+    '''setup/.*''',
+    '''test/fixtures/.*''',
+    '''examples/.*''',
+    '''docs/.*''',
+    '''\.orchestrator/patches/.*''',
+    '''server/scripts/.*\.sh$''',
+    '''helm/.*''',
+    '''\.github/workflows/.*''',
+    '''pnpm-lock\.yaml$''',
+    '''package-lock\.json$''',
+    '''yarn\.lock$''',
+  ]
+
+  # Regex patterns for content that's allowed (false positives)
+  regexes = [
+    # Example placeholder secrets
+    '''(?i)example|placeholder|changeme|your[-_]?secret''',
+  ]

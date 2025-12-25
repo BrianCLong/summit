@@ -10,7 +10,7 @@ log "🔒 Running pre-commit checks..."
 # Run gitleaks if available
 if command -v gitleaks >/dev/null 2>&1; then
   log "🔍 Scanning for secrets with gitleaks..."
-  gitleaks protect --staged --verbose || {
+  gitleaks protect --staged --verbose --config .gitleaks.toml || {
     log "❌ Secret detected by gitleaks!"
     exit 1
   }
