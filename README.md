@@ -81,6 +81,14 @@ DEMO_MODE=1 ./scripts/demo-up.sh
 - **Monitoring**: Grafana at http://localhost:8080, Prometheus at http://localhost:9090
 - **Pre-seeded Demo Data**: Sample investigation with entities and relationships
 - **Demo Indicators**: Visual "DEMO MODE" badges in UI to distinguish from production
+- **Demo Walkthrough**: Guided tour page at http://localhost:3000/demo (when DEMO_MODE=1)
+
+### Demo Walkthrough Page
+
+When running in demo mode, access the guided walkthrough at `/demo` to learn about the platform features:
+- Available only when `VITE_DEMO_MODE=1` is set
+- Includes step-by-step instructions for non-technical users
+- Shows where to click and what to look for in the interface
 
 ### Demo Credentials
 

@@ -95,10 +95,12 @@ import { Security } from '@mui/icons-material';
 
 // Demo indicator
 import DemoIndicator from './components/common/DemoIndicator';
+import DemoWalkthrough from './pages/DemoWalkthrough';
 
 // Navigation items
 const ADMIN = 'ADMIN';
 const APPROVER_ROLES = [ADMIN, 'SECURITY_ADMIN', 'OPERATIONS', 'SAFETY'];
+
 const navigationItems = [
   { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
   { path: '/investigations', label: 'Timeline', icon: <Search /> },
@@ -132,6 +134,18 @@ const navigationItems = [
     roles: [ADMIN],
   },
 ];
+
+// Function to get navigation items (including demo walkthrough when in demo mode)
+const getNavigationItems = () => {
+  const items = [...navigationItems]; // Copy the base items
+
+  // Add demo walkthrough link only in demo mode
+  if (import.meta.env.VITE_DEMO_MODE === '1') {
+    items.push({ path: '/demo', label: 'Demo Walkthrough', icon: <RocketLaunch /> });
+  }
+
+  return items;
+};
 
 // Connection Status Component
 function ConnectionStatus() {
@@ -187,7 +201,7 @@ function NavigationDrawer({ open, onClose }) {
     onClose();
   };
 
-  const items = navigationItems.filter((item) => {
+  const items = getNavigationItems().filter((item) => {
     if (item.roles && !item.roles.some((r) => hasRole(r))) return false;
     if (item.permissions && !item.permissions.some((p) => hasPermission(p)))
       return false;
@@ -221,6 +235,10 @@ function AppHeader({ onMenuClick }) {
   const currentPage = navigationItems.find(
     (item) => item.path === location.pathname,
   );
+  const navigate = useNavigate();
+
+  // Show demo walkthrough link only in demo mode
+  const showDemoWalkthrough = import.meta.env.VITE_DEMO_MODE === '1';
 
   return (
     <AppBar position="fixed">
@@ -236,6 +254,20 @@ function AppHeader({ onMenuClick }) {
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           IntelGraph Platform - {currentPage?.label || 'Unknown'}
         </Typography>
+
+        {showDemoWalkthrough && (
+          <Button
+            color="inherit"
+            onClick={() => navigate('/demo')}
+            sx={{
+              mr: 1,
+              textTransform: 'none',
+              fontSize: '0.875rem'
+            }}
+          >
+            Demo Walkthrough
+          </Button>
+        )}
       </Toolbar>
     </AppBar>
   );
@@ -694,6 +726,7 @@ function MainLayout() {
               <Route path="/access-intel" element={<AccessIntelPage />} />
               <Route path="/geoint" element={<InvestigationsPage />} />
               <Route path="/reports" element={<InvestigationsPage />} />
+              <Route path="/demo" element={<DemoWalkthrough />} />
               <Route element={<ProtectedRoute roles={APPROVER_ROLES} />}>
                 <Route path="/approvals" element={<ApprovalsPage />} />
               </Route>
