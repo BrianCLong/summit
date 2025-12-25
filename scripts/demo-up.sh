@@ -221,12 +221,28 @@ wait_for_health() {
     }
     echo -e "${GREEN}✓${NC}"
 
+    # More comprehensive API health check
+    echo -n "Verifying API health endpoints... "
+    if curl -f -s http://localhost:4000/health &>/dev/null; then
+        echo -e "${GREEN}✓${NC}"
+    else
+        warning_msg "API health endpoint not responding, continuing..."
+    fi
+
     # Wait for UI to be ready
     echo -n "Waiting for UI... "
     timeout 120 bash -c 'until curl -f -s http://localhost:3000 &>/dev/null; do sleep 5; done' || {
         warning_msg "UI did not become ready within 120 seconds, but continuing..."
     }
     echo -e "${GREEN}✓${NC}"
+
+    # Verify GraphQL endpoint is accessible
+    echo -n "Verifying GraphQL endpoint... "
+    if curl -f -s -X POST http://localhost:4000/graphql -H "Content-Type: application/json" -d '{"query":"{__typename}"}' | grep -q "__typename"; then
+        echo -e "${GREEN}✓${NC}"
+    else
+        warning_msg "GraphQL endpoint not responding properly, continuing..."
+    fi
 
     success_msg "All services are healthy"
 }
@@ -246,6 +262,18 @@ seed_demo_data() {
     fi
 
     success_msg "Demo data seeded successfully"
+}
+
+# Validate demo environment
+validate_demo() {
+    info_msg "Validating demo environment..."
+
+    # Run demo validation script
+    if ! "$PROJECT_ROOT/scripts/demo-validate.sh"; then
+        warning_msg "Demo validation had some issues, but continuing..."
+    fi
+
+    success_msg "Demo validation completed"
 }
 
 # Print demo info
@@ -329,6 +357,9 @@ main() {
 
     # Seed demo data
     seed_demo_data
+
+    # Validate demo environment
+    validate_demo
 
     # Print demo info
     print_demo_info

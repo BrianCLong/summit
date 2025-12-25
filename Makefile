@@ -67,6 +67,14 @@ demo:
 	@echo "Starting demo environment..."
 	DEMO_MODE=1 ./scripts/demo-up.sh
 
+demo-down:
+	@echo "Stopping demo environment..."
+	DEMO_MODE=1 ./scripts/demo-down.sh
+
+demo-down-cleanup:
+	@echo "Stopping demo environment and removing volumes..."
+	DEMO_MODE=1 CLEANUP_VOLUMES=true ./scripts/demo-down.sh --cleanup-volumes
+
 # ---- IntelGraph S25 Merge Orchestrator (Legacy/Specific) ---------------------
 
 SHELL := /bin/bash

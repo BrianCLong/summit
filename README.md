@@ -88,8 +88,17 @@ DEMO_MODE=1 ./scripts/demo-up.sh
 ### Stopping the Demo
 
 ```bash
-# Stop all services
-docker compose -f docker-compose.yml down
+# Stop demo environment (preserves data)
+make demo-down
+
+# Or directly
+DEMO_MODE=1 ./scripts/demo-down.sh
+
+# Stop demo environment and remove volumes (removes all data)
+make demo-down-cleanup
+
+# Or directly
+DEMO_MODE=1 ./scripts/demo-down.sh --cleanup-volumes
 ```
 
 ```bash
