@@ -456,6 +456,22 @@ const serviceAutoRemediationsTotal = new client.Counter({
   labelNames: ['service', 'action', 'result'],
 });
 
+// Rate limiting and Circuit Breaker metrics
+const rateLimitExceededTotal = new client.Counter({
+  name: 'rate_limit_exceeded_total',
+  help: 'Total number of rate limit exceeded events',
+  labelNames: ['tenant', 'class'],
+});
+
+const breakerState = new client.Gauge({
+  name: 'breaker_state',
+  help: 'Circuit breaker state (0=closed, 1=open, 2=half-open)',
+  labelNames: ['service'],
+});
+
+register.registerMetric(rateLimitExceededTotal);
+register.registerMetric(breakerState);
+
 register.registerMetric(graphExpandRequestsTotal);
 register.registerMetric(aiRequestTotal);
 register.registerMetric(resolverLatencyMs);
@@ -522,7 +538,9 @@ const metrics = {
   maestroDagExecutionDurationSeconds,
   maestroJobExecutionDurationSeconds,
   llmTokensTotal,
-  llmRequestDuration
+  llmRequestDuration,
+  rateLimitExceededTotal,
+  breakerState
 };
 
 // Update memory usage periodically
@@ -606,5 +624,7 @@ export {
   maestroDagExecutionDurationSeconds,
   maestroJobExecutionDurationSeconds,
   llmTokensTotal,
-  llmRequestDuration
+  llmRequestDuration,
+  rateLimitExceededTotal,
+  breakerState
 };

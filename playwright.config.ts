@@ -20,23 +20,16 @@ export default defineConfig({
   retries: 2,
   reporter: [['html', { outputFolder: 'reports/playwright' }], ['list']],
   use: {
-    // The client seems to be running on port 3000 now based on vite.config.js and curl check
     baseURL: process.env.BASE_URL || 'http://localhost:3000',
     trace: 'retain-on-failure',
     video: 'retain-on-failure',
     screenshot: 'on',
-    baseURL: process.env.BASE_URL || (process.env.CI ? 'http://localhost:3000' : 'http://localhost:5173'),
-    baseURL: process.env.BASE_URL || 'http://localhost:3000', // Defaulting to 3000 for apps/web
-    trace: 'retain-on-failure',
-    video: 'on',
   },
   ...(useWebServer
     ? {
         webServer: [
           {
             command: 'npm run client:dev',
-            port: 3000, // Changed to 3000
-            command: 'npm run web:dev',
             port: 3000,
             reuseExistingServer: !process.env.CI,
             timeout: 120_000,
