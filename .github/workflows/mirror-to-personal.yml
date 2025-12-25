@@ -4,11 +4,15 @@ on:
   push:
     branches:
       - main
+      - 'release/**'
   workflow_dispatch:
 
 jobs:
   mirror:
     runs-on: ubuntu-latest
+    # Prevent infinite loop by checking if the push came from GitHub Actions
+    if: github.event.head_commit.author.name != 'BrianCLong Mirror Bot'
+    
     steps:
       - name: Checkout TopicalityLLC/Summit
         uses: actions/checkout@v4
@@ -29,13 +33,28 @@ jobs:
         run: |
           git push personal main --force
 
-      - name: Sync All Branches
+      - name: Sync Release Branches
+        if: success()
+        continue-on-error: true
         run: |
-          for branch in $(git branch -r | grep -v '\->' | grep 'origin/' | sed 's/origin\///'); do
+          for branch in $(git branch -r | grep 'origin/release/' | sed 's|origin/||'); do
+            echo "Syncing branch: $branch"
             git checkout -b $branch origin/$branch 2>/dev/null || git checkout $branch
             git push personal $branch --force
           done
 
       - name: Sync Tags
+        if: success()
+        continue-on-error: true
         run: |
           git push personal --tags --force
+
+      - name: Notify on success
+        if: success()
+        run: |
+          echo "✅ Successfully mirrored to BrianCLong/summit"
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::Failed to mirror to BrianCLong/summit"
