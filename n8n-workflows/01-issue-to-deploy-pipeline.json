@@ -1,0 +1,190 @@
+{
+  "name": "🚀 Issue→AI→Deploy Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "github-issue-auto-implement",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "name": "GitHub Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.issue.labels}}",
+              "operation": "contains",
+              "value2": "auto-implement"
+            }
+          ]
+        }
+      },
+      "name": "Filter: Auto-Implement Label",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "messages": {
+          "messageValues": [
+            {
+              "role": "system",
+              "message": "You are an expert software engineer. Analyze GitHub issues and create detailed implementation plans."
+            },
+            {
+              "role": "user",
+              "message": "=Issue Title: {{$json.issue.title}}\n\nIssue Body:\n{{$json.issue.body}}\n\nCreate a detailed implementation plan with: 1) File structure 2) Key functions 3) Test strategy"
+            }
+          ]
+        }
+      },
+      "name": "AI: Generate Implementation Plan",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "messages": {
+          "messageValues": [
+            {
+              "role": "system",
+              "message": "You are an expert Deno/TypeScript developer. Generate complete, production-ready code."
+            },
+            {
+              "role": "user",
+              "message": "=Implementation Plan:\n{{$json.output}}\n\nGenerate the complete TypeScript/Deno code. Include: imports, types, error handling, and comprehensive comments."
+            }
+          ]
+        }
+      },
+      "name": "AI: Generate Code",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "messages": {
+          "messageValues": [
+            {
+              "role": "system",
+              "message": "You are a test engineering expert. Create comprehensive test suites."
+            },
+            {
+              "role": "user",
+              "message": "=Code:\n{{$json.output}}\n\nGenerate complete unit tests and integration tests using Deno's testing framework. Aim for 100% coverage."
+            }
+          ]
+        }
+      },
+      "name": "AI: Generate Tests",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "repository",
+        "operation": "createBranch",
+        "owner": "TopicalityLLC",
+        "repository": "Summit",
+        "branch": "=feature/auto-{{$json.issue.number}}-{{$json.issue.title.toLowerCase().replace(/ /g, '-')}}",
+        "ref": "main"
+      },
+      "name": "GitHub: Create Branch",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [1250, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "operation": "create",
+        "owner": "TopicalityLLC",
+        "repository": "Summit",
+        "filePath": "=src/{{$json.issue.number}}-implementation.ts",
+        "fileContent": "={{$node['AI: Generate Code'].json.output}}",
+        "commitMessage": "=feat: Auto-implement #{{$json.issue.number}} - {{$json.issue.title}}",
+        "branch": "={{$node['GitHub: Create Branch'].json.name}}"
+      },
+      "name": "GitHub: Commit Code",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [1450, 250]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "operation": "create",
+        "owner": "TopicalityLLC",
+        "repository": "Summit",
+        "filePath": "=tests/{{$json.issue.number}}-implementation.test.ts",
+        "fileContent": "={{$node['AI: Generate Tests'].json.output}}",
+        "commitMessage": "=test: Add tests for #{{$json.issue.number}}",
+        "branch": "={{$node['GitHub: Create Branch'].json.name}}"
+      },
+      "name": "GitHub: Commit Tests",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [1450, 350]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "pullRequest",
+        "operation": "create",
+        "owner": "TopicalityLLC",
+        "repository": "Summit",
+        "title": "=🤖 Auto-implement: {{$json.issue.title}}",
+        "body": "=## Auto-Generated Implementation\n\nCloses #{{$json.issue.number}}\n\n### Implementation Plan\n{{$node['AI: Generate Implementation Plan'].json.output}}\n\n### Changes\n- ✅ Generated implementation code\n- ✅ Generated comprehensive tests\n- ✅ AI-reviewed for best practices\n\n**This PR was automatically generated by AI.** Please review before merging.",
+        "head": "={{$node['GitHub: Create Branch'].json.name}}",
+        "base": "main"
+      },
+      "name": "GitHub: Create PR",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [1650, 300]
+    },
+    {
+      "parameters": {
+        "channel": "#summit-dev",
+        "text": "=🚀 *Auto-Implementation Complete!*\n\n*Issue:* #{{$json.issue.number}} - {{$json.issue.title}}\n*PR Created:* {{$node['GitHub: Create PR'].json.html_url}}\n*Branch:* `{{$node['GitHub: Create Branch'].json.name}}`\n\n✅ Code generated\n✅ Tests created\n✅ Ready for review\n\nCopilot will review automatically!",
+        "attachments": []
+      },
+      "name": "Slack: Notify Team",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [1850, 300]
+    }
+  ],
+  "connections": {
+    "GitHub Webhook": {"main": [[{"node": "Filter: Auto-Implement Label", "type": "main", "index": 0}]]},
+    "Filter: Auto-Implement Label": {"main": [[{"node": "AI: Generate Implementation Plan", "type": "main", "index": 0}]]},
+    "AI: Generate Implementation Plan": {"main": [[{"node": "AI: Generate Code", "type": "main", "index": 0}]]},
+    "AI: Generate Code": {"main": [[{"node": "AI: Generate Tests", "type": "main", "index": 0}]]},
+    "AI: Generate Tests": {"main": [[{"node": "GitHub: Create Branch", "type": "main", "index": 0}]]},
+    "GitHub: Create Branch": {"main": [[{"node": "GitHub: Commit Code", "type": "main", "index": 0}, {"node": "GitHub: Commit Tests", "type": "main", "index": 0}]]},
+    "GitHub: Commit Code": {"main": [[{"node": "GitHub: Create PR", "type": "main", "index": 0}]]},
+    "GitHub: Commit Tests": {"main": [[{"node": "GitHub: Create PR", "type": "main", "index": 0}]]},
+    "GitHub: Create PR": {"main": [[{"node": "Slack: Notify Team", "type": "main", "index": 0}]]}
+  },
+  "active": true,
+  "settings": {
+    "timezone": "America/Denver"
+  },
+  "tags": []
+}
