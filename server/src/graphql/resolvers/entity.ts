@@ -16,30 +16,21 @@ import { GraphQLError } from 'graphql';
 import { getMockEntity, getMockEntities } from './__mocks__/entityMocks.js';
 import { withCache, listCacheKey } from '../../utils/cacheHelper.js';
 import type { GraphQLContext } from '../apollo-v5-server.js';
+import { authGuard } from '../utils/auth.js';
+import { provenanceLedger } from '../../provenance/ledger.js';
 
 const logger = (pino as any)();
 const driver = getNeo4jDriver();
 
-// Helper function to extract tenant from context
-const requireTenant = (ctx: GraphQLContext): string => {
-  if (!ctx?.user?.tenantId) {
-    throw new GraphQLError('Tenant required', {
-      extensions: { code: 'FORBIDDEN' },
-    });
-  }
-  return ctx.user.tenantId;
-};
-
 const entityResolvers = {
   Query: {
-    entity: async (_: unknown, { id }: { id: string }, context: GraphQLContext) => {
+    entity: authGuard(async (_: unknown, { id }: { id: string }, context: GraphQLContext) => {
       // Return mock data if database is not available
       if (isNeo4jMockMode()) {
         return getMockEntity(id);
       }
 
       try {
-        requireTenant(context);
         // Use DataLoader for batched entity fetching
         const entity = await context.loaders.entityLoader.load(id);
         return entity;
@@ -49,8 +40,8 @@ const entityResolvers = {
         logger.warn('Falling back to mock entity data');
         return getMockEntity(id);
       }
-    },
-    entities: withCache(
+    }),
+    entities: authGuard(withCache(
       // Cache key generator
       (_parent: unknown, args: any, context: GraphQLContext) => {
         const tenantId = context?.user?.tenantId || 'default';
@@ -74,7 +65,7 @@ const entityResolvers = {
 
         const session = driver.session();
         try {
-          const tenantId = requireTenant(context);
+          const tenantId = context.user!.tenantId;
           // Optimized: Use labels in MATCH if type is provided
           // MATCH (n:Entity) -> MATCH (n:Entity:Type)
           let query = 'MATCH (n:Entity';
@@ -154,58 +145,65 @@ const entityResolvers = {
       },
       // Cache options
       { ttl: 30, tenantId: 'context' } // 30s TTL
-    ),
-    semanticSearch: async (
-      _: unknown,
-      {
-        query,
-        filters,
-        limit,
-        offset,
-      }: {
-        query: string;
-        filters?: any;
-        limit: number;
-        offset: number;
-      },
-      context: GraphQLContext,
-    ) => {
-      const pgPool = getPostgresPool();
-      const neo4jSession = driver.session();
-      let pgClient;
+    )),
+    semanticSearch: authGuard(withCache(
+      (_p: any, args: any, ctx: GraphQLContext) => listCacheKey('semanticSearch', { ...args, tenantId: ctx.user!.tenantId }),
+      async (
+        _: unknown,
+        {
+          query,
+          filters,
+          limit,
+          offset,
+        }: {
+          query: string;
+          filters?: any;
+          limit: number;
+          offset: number;
+        },
+        context: GraphQLContext,
+      ) => {
+        const pgPool = getPostgresPool();
+        const neo4jSession = driver.session();
+        let pgClient;
 
-      try {
-        // 1. Get embedding for the query from ML service
-        const mlServiceUrl =
-          process.env.ML_SERVICE_URL || 'http://localhost:8081';
-        const embeddingResponse = await axios.post(
-          `${mlServiceUrl}/gnn/generate_embeddings`,
-          {
-            graph_data: { nodes: [{ id: 'query', features: [] }] }, // Dummy graph for query embedding
-            node_features: { query: [0.0] }, // Placeholder for actual query features
-            model_name: 'text_embedding_model', // Assuming a text embedding model in ML service
-            job_id: `semantic-search-${Date.now()}`,
-          },
-        );
-        const queryEmbedding = embeddingResponse.data.node_embeddings.query;
+        try {
+          const tenantId = context.user!.tenantId;
+          // 1. Get embedding for the query from ML service
+          const mlServiceUrl =
+            process.env.ML_SERVICE_URL || 'http://localhost:8081';
+          const embeddingResponse = await axios.post(
+            `${mlServiceUrl}/gnn/generate_embeddings`,
+            {
+              graph_data: { nodes: [{ id: 'query', features: [] }] }, // Dummy graph for query embedding
+              node_features: { query: [0.0] }, // Placeholder for actual query features
+              model_name: 'text_embedding_model', // Assuming a text embedding model in ML service
+              job_id: `semantic-search-${Date.now()}`,
+            },
+          );
+          const queryEmbedding = embeddingResponse.data.node_embeddings.query;
 
-        if (!queryEmbedding || queryEmbedding.length === 0) {
-          throw new Error('Failed to get embedding for query from ML service.');
-        }
+          if (!queryEmbedding || queryEmbedding.length === 0) {
+            throw new Error('Failed to get embedding for query from ML service.');
+          }
 
-        // 2. Perform vector similarity search in PostgreSQL with filters
-        pgClient = await pgPool.connect();
-        const embeddingVectorString = `[${queryEmbedding.join(',')}]`;
+          // 2. Perform vector similarity search in PostgreSQL with filters
+          pgClient = await pgPool.connect();
+          const embeddingVectorString = `[${queryEmbedding.join(',')}]`;
 
-        let pgQuery = `SELECT ee.entity_id FROM entity_embeddings ee`;
-        const pgQueryParams: any[] = [embeddingVectorString];
-        let paramIndex = 2; // Start index for additional parameters
+          let pgQuery = `SELECT ee.entity_id FROM entity_embeddings ee`;
+          const pgQueryParams: any[] = [embeddingVectorString];
+          let paramIndex = 2; // Start index for additional parameters
 
-        // Add filters for type and props
-        const type = filters?.type;
-        const props = filters?.props;
-        if (type || props) {
-          pgQuery += ` JOIN entities e ON ee.entity_id = e.id WHERE 1=1`; // Assuming 'entities' table exists with 'id' and 'type'
+          // Add filters for type and props
+          const type = filters?.type;
+          const props = filters?.props;
+
+          // Always JOIN entities to filter by tenant_id
+          pgQuery += ` JOIN entities e ON ee.entity_id = e.id WHERE e.tenant_id = $${paramIndex}`;
+          pgQueryParams.push(tenantId);
+          paramIndex++;
+
           if (type) {
             pgQuery += ` AND e.type = $${paramIndex}`;
             pgQueryParams.push(type);
@@ -218,63 +216,64 @@ const entityResolvers = {
             pgQueryParams.push(JSON.stringify(props));
             paramIndex++;
           }
+
+          pgQuery += ` ORDER BY ee.embedding <-> $1 LIMIT ${paramIndex} OFFSET ${paramIndex + 1}`;
+          pgQueryParams.push(limit);
+          pgQueryParams.push(offset);
+
+          const pgResult = await pgClient.query(pgQuery, pgQueryParams);
+
+          const entityIds = pgResult.rows.map((row) => row.entity_id);
+
+          if (entityIds.length === 0) {
+            return [];
+          }
+
+          // 3. Fetch corresponding entities from Neo4j using DataLoader
+          const searchService = new (
+            await import('../../services/SemanticSearchService.js')
+          ).default();
+          const docs = await searchService.search(
+            query,
+            filters || {},
+            limit + offset,
+          );
+          const sliced = docs.slice(offset);
+          const ids = sliced.map((d) => d.metadata.graphId).filter(Boolean);
+
+          if (ids.length === 0) return [];
+
+          // Use DataLoader to batch fetch entities - prevents N+1 queries
+          const entities = await Promise.all(
+            ids.map((id) => context.loaders.entityLoader.load(id))
+          );
+
+          // Filter out any errors (entities not found)
+          return entities.filter((entity) => !(entity instanceof Error));
+        } catch (error) {
+          logger.error(
+            { error, query, filters },
+            'Error performing semantic search with filters',
+          );
+          const message = error instanceof Error ? error.message : 'Unknown error';
+          throw new Error(`Failed to perform semantic search: ${message}`);
+        } finally {
+          await neo4jSession.close();
+          if (pgClient) pgClient.release();
         }
-
-        pgQuery += ` ORDER BY ee.embedding <-> $1 LIMIT ${paramIndex} OFFSET ${paramIndex + 1}`;
-        pgQueryParams.push(limit);
-        pgQueryParams.push(offset);
-
-        const pgResult = await pgClient.query(pgQuery, pgQueryParams);
-
-        const entityIds = pgResult.rows.map((row) => row.entity_id);
-
-        if (entityIds.length === 0) {
-          return [];
-        }
-
-        // 3. Fetch corresponding entities from Neo4j using DataLoader
-        const searchService = new (
-          await import('../../services/SemanticSearchService.js')
-        ).default();
-        const docs = await searchService.search(
-          query,
-          filters || {},
-          limit + offset,
-        );
-        const sliced = docs.slice(offset);
-        const ids = sliced.map((d) => d.metadata.graphId).filter(Boolean);
-
-        if (ids.length === 0) return [];
-
-        // Use DataLoader to batch fetch entities - prevents N+1 queries
-        const entities = await Promise.all(
-          ids.map((id) => context.loaders.entityLoader.load(id))
-        );
-
-        // Filter out any errors (entities not found)
-        return entities.filter((entity) => !(entity instanceof Error));
-      } catch (error) {
-        logger.error(
-          { error, query, filters },
-          'Error performing semantic search with filters',
-        );
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        throw new Error(`Failed to perform semantic search: ${message}`);
-      } finally {
-        await neo4jSession.close();
-        if (pgClient) pgClient.release();
-      }
-    },
+      },
+      { ttl: 60, tenantId: 'context' }
+    )),
   },
   Mutation: {
-    createEntity: async (
+    createEntity: authGuard(async (
       _: unknown,
       { input }: { input: { type: string; props: any } },
       context: GraphQLContext,
     ) => {
       const session = driver.session();
       try {
-        const tenantId = requireTenant(context);
+        const tenantId = context.user!.tenantId;
         const id = uuidv4();
         const createdAt = new Date().toISOString();
         const type = input.type;
@@ -302,6 +301,22 @@ const entityResolvers = {
         pubsub.publish(tenantEvent(ENTITY_CREATED, tenantId), {
           payload: entity,
         });
+
+        // Audit Log (IG-206)
+        await provenanceLedger.appendEntry({
+          tenantId,
+          actionType: 'CREATE_ENTITY',
+          resourceType: 'Entity',
+          resourceId: entity.id,
+          actorId: context.user!.id,
+          actorType: 'user',
+          payload: entity,
+          metadata: {
+            correlationId: context.telemetry.traceId,
+            timestamp: new Date().toISOString()
+          }
+        }).catch(err => logger.error({ err }, 'Failed to append audit log'));
+
         return entity;
       } catch (error) {
         logger.error({ error, input }, 'Error creating entity');
@@ -310,8 +325,8 @@ const entityResolvers = {
       } finally {
         await session.close();
       }
-    },
-    updateEntity: async (
+    }),
+    updateEntity: authGuard(async (
       _: unknown,
       {
         id,
@@ -326,7 +341,7 @@ const entityResolvers = {
     ) => {
       const session = driver.session();
       try {
-        const tenantId = requireTenant(context);
+        const tenantId = context.user!.tenantId;
         const existing = await session.run(
           'MATCH (n:Entity {id: $id, tenantId: $tenantId}) RETURN n',
           { id, tenantId },
@@ -379,6 +394,22 @@ const entityResolvers = {
         pubsub.publish(tenantEvent(ENTITY_UPDATED, tenantId), {
           payload: entity,
         });
+
+        // Audit Log (IG-206)
+        await provenanceLedger.appendEntry({
+          tenantId,
+          actionType: 'UPDATE_ENTITY',
+          resourceType: 'Entity',
+          resourceId: entity.id,
+          actorId: context.user!.id,
+          actorType: 'user',
+          payload: entity,
+          metadata: {
+            correlationId: context.telemetry.traceId,
+            timestamp: new Date().toISOString()
+          }
+        }).catch(err => logger.error({ err }, 'Failed to append audit log'));
+
         return entity;
       } catch (error) {
         logger.error({ error, id, input }, 'Error updating entity');
@@ -387,11 +418,11 @@ const entityResolvers = {
       } finally {
         await session.close();
       }
-    },
-    deleteEntity: async (_: unknown, { id }: { id: string }, context: GraphQLContext) => {
+    }),
+    deleteEntity: authGuard(async (_: unknown, { id }: { id: string }, context: GraphQLContext) => {
       const session = driver.session();
       try {
-        const tenantId = requireTenant(context);
+        const tenantId = context.user!.tenantId;
         // Soft delete: set a 'deletedAt' timestamp
         const deletedAt = new Date().toISOString();
         const result = await session.run(
@@ -402,6 +433,22 @@ const entityResolvers = {
           return false; // Or throw an error if entity not found
         }
         pubsub.publish(tenantEvent(ENTITY_DELETED, tenantId), { payload: id });
+
+        // Audit Log (IG-206)
+        await provenanceLedger.appendEntry({
+          tenantId,
+          actionType: 'DELETE_ENTITY',
+          resourceType: 'Entity',
+          resourceId: id,
+          actorId: context.user!.id,
+          actorType: 'user',
+          payload: { id },
+          metadata: {
+            correlationId: context.telemetry.traceId,
+            timestamp: new Date().toISOString()
+          }
+        }).catch(err => logger.error({ err }, 'Failed to append audit log'));
+
         return true;
       } catch (error) {
         logger.error({ error, id }, 'Error deleting entity');
@@ -410,7 +457,7 @@ const entityResolvers = {
       } finally {
         await session.close();
       }
-    },
+    }),
     linkEntities: async (_: unknown, { text }: { text: string }) => {
       try {
         const mlServiceUrl =
