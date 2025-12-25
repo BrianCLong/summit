@@ -7,7 +7,18 @@
 - Metrics to watch: [p95 latency, error rate, saturation]
 - Ramp: 5% → 20% → 50% → 100% (hold 20% for 30–60m)
 - Rollback trigger(s): [SLO burn > X, error rate > Y, anomaly Z]
-- Rollback steps: `helm rollback <release> <rev>` + feature flag off
+- Rollback steps: `helm rollback <release> <rev>` + feature flag
+## Test Evidence
+- Provide details on tests performed and evidence of success
+
+## CI Confirmation
+- Confirm that the golden path CI workflow ran and all required checks passed
+
+## Non-Goals
+- Outline what this pull request does not address or intentionally leaves out
+
+## Hard Guarantees
+- Specify any hard guarantees this change delivers and what remains simulated off
 
 ## Migration Gate (if applicable)
 
