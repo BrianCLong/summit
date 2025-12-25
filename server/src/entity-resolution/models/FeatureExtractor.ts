@@ -1,15 +1,17 @@
-import { FuzzyMatcher } from '../engine/FuzzyMatcher.js';
-import { PhoneticMatchers } from '../utils/PhoneticMatchers.js';
-import { StringNormalizer } from '../utils/StringNormalizer.js';
+import { FuzzyMatcher } from '../engine/FuzzyMatcher';
+import { PhoneticMatchers } from '../utils/PhoneticMatchers';
+import { StringNormalizer } from '../utils/StringNormalizer';
 
 export interface EntityFeatures {
   name_levenshtein: number;
   name_jaro_winkler: number;
+  name_token_jaccard: number;
   name_soundex_match: number; // 1 or 0
   name_metaphone_match: number; // 1 or 0
   address_cosine: number | null;
   phone_match: number | null; // 1 or 0
   email_match: number | null; // 1 or 0
+  date_similarity: number | null; // 1 or 0 or score
   [key: string]: number | null;
 }
 
@@ -18,11 +20,13 @@ export class FeatureExtractor {
     const features: EntityFeatures = {
       name_levenshtein: 0,
       name_jaro_winkler: 0,
+      name_token_jaccard: 0,
       name_soundex_match: 0,
       name_metaphone_match: 0,
       address_cosine: null,
       phone_match: null,
-      email_match: null
+      email_match: null,
+      date_similarity: null,
     };
 
     // Name features
@@ -35,6 +39,7 @@ export class FeatureExtractor {
 
     features.name_levenshtein = FuzzyMatcher.levenshteinSimilarity(nameA, nameB);
     features.name_jaro_winkler = FuzzyMatcher.jaroWinklerSimilarity(nameA, nameB);
+    features.name_token_jaccard = FuzzyMatcher.tokenJaccardSimilarity(nameA, nameB);
     features.name_soundex_match = PhoneticMatchers.matchesSoundex(nameA, nameB) ? 1 : 0;
     features.name_metaphone_match = PhoneticMatchers.matchesMetaphone(nameA, nameB) ? 1 : 0;
 
@@ -61,6 +66,18 @@ export class FeatureExtractor {
         features.email_match = StringNormalizer.normalize(entityA.email) === StringNormalizer.normalize(entityB.email) ? 1 : 0;
     } else {
         features.email_match = null;
+    }
+
+    // Date similarity (DOB or Founded Date)
+    const dateA = entityA.dateOfBirth || entityA.foundedDate;
+    const dateB = entityB.dateOfBirth || entityB.foundedDate;
+
+    if (dateA && dateB) {
+      // Exact match for now, could be fuzzy (e.g. within days/years)
+      // Assuming ISO strings
+      features.date_similarity = dateA === dateB ? 1 : 0;
+    } else {
+      features.date_similarity = null;
     }
 
     return features;
