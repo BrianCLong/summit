@@ -27,7 +27,8 @@ async function batchLoadUsers(
   ids: readonly string[],
   context: DataLoaderContext
 ): Promise<(User | Error)[]> {
-  const client = await context.pgPool.connect();
+  const client = context.pgClient || await context.pgPool.connect();
+  const shouldRelease = !context.pgClient;
 
   try {
     const startTime = Date.now();
@@ -79,7 +80,9 @@ async function batchLoadUsers(
     logger.error({ error, ids }, 'Error in user batch loader');
     return ids.map(() => error as Error);
   } finally {
-    client.release();
+    if (shouldRelease) {
+      client.release();
+    }
   }
 }
 
@@ -107,7 +110,8 @@ export function createUserByEmailLoader(
 ): DataLoader<string, User, string> {
   return new DataLoader(
     async (emails: readonly string[]) => {
-      const client = await context.pgPool.connect();
+      const client = context.pgClient || await context.pgPool.connect();
+      const shouldRelease = !context.pgClient;
 
       try {
         const result = await client.query(
@@ -141,7 +145,9 @@ export function createUserByEmailLoader(
           return user;
         });
       } finally {
-        client.release();
+        if (shouldRelease) {
+          client.release();
+        }
       }
     },
     {
