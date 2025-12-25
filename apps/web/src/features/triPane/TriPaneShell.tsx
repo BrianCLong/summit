@@ -21,6 +21,8 @@ import {
   Download,
   Eye,
   EyeOff,
+  Sparkles,
+  Save
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
@@ -38,6 +40,9 @@ import type { Entity, TimelineEvent } from '@/types'
 import type { TriPaneShellProps, TriPaneSyncState, TimeWindow } from './types'
 import { useSnapshotHandler } from '@/features/snapshots'
 import { isFeatureEnabled } from '@/config'
+import { TimelineBrush } from './TimelineBrush'
+import { ExplainThisView } from './ExplainThisView'
+import { TriPaneCommandPalette } from './TriPaneCommandPalette'
 
 /**
  * Main TriPaneShell component
@@ -86,6 +91,8 @@ export function TriPaneShell({
     timelineEvent?: TimelineEvent
     locationId?: string
   }>({})
+  const [showExplain, setShowExplain] = useState(false)
+  const [showCommandPalette, setShowCommandPalette] = useState(false)
 
   // Snapshot integration
   useSnapshotHandler(
@@ -312,10 +319,30 @@ export function TriPaneShell({
     }))
   }, [])
 
+  // Save view functionality
+  const handleSaveView = useCallback(() => {
+    const viewState = {
+      syncState,
+      timestamp: new Date().toISOString(),
+      name: `View ${new Date().toLocaleTimeString()}`
+    }
+    // In a real app, this would be an API call
+    localStorage.setItem('tri-pane-saved-view', JSON.stringify(viewState))
+    console.log('View saved:', viewState)
+    alert('View saved successfully')
+  }, [syncState])
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
-      // Only handle shortcuts when not in an input
+      // Handle Command Palette shortcut (Ctrl+K or Cmd+K)
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault()
+        setShowCommandPalette(prev => !prev)
+        return
+      }
+
+      // Only handle other shortcuts when not in an input
       if (
         e.target instanceof HTMLInputElement ||
         e.target instanceof HTMLTextAreaElement
@@ -348,6 +375,18 @@ export function TriPaneShell({
       role="main"
       aria-label="Tri-pane analysis shell"
     >
+      <TriPaneCommandPalette
+        isOpen={showCommandPalette}
+        onOpenChange={setShowCommandPalette}
+        onSaveView={handleSaveView}
+        onResetFilters={handleResetFilters}
+        entities={entities}
+        onSelectEntity={(id) => {
+          const entity = entities.find(e => e.id === id);
+          if(entity) handleEntitySelect(entity);
+        }}
+      />
+
       {/* Header Controls */}
       <div className="flex items-center justify-between bg-background border rounded-lg p-3 shadow-sm">
         <div className="flex items-center gap-4">
@@ -385,6 +424,26 @@ export function TriPaneShell({
         </div>
 
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowExplain(!showExplain)}
+            className={showExplain ? "bg-indigo-600/20 text-indigo-400 border-indigo-600/50" : ""}
+          >
+            <Sparkles className="h-4 w-4 mr-1" />
+            Explain
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSaveView}
+            title="Save View"
+          >
+            <Save className="h-4 w-4 mr-1" />
+            Save
+          </Button>
+
           <Button
             variant="outline"
             size="sm"
@@ -428,14 +487,29 @@ export function TriPaneShell({
       </div>
 
       {/* Three-pane layout */}
-      <div className="flex-1 grid grid-cols-12 gap-4 min-h-0">
+      <div className="flex-1 grid grid-cols-12 gap-4 min-h-0 relative">
+        {/* Explain This View Overlay */}
+        {showExplain && (
+          <div className="absolute top-0 right-0 z-50 w-80 shadow-2xl mr-4 mt-2">
+            <ExplainThisView
+              syncState={syncState}
+              filteredData={filteredData}
+              onClose={() => setShowExplain(false)}
+            />
+          </div>
+        )}
+
         {/* Timeline Pane */}
-        <div className="col-span-3 flex flex-col min-h-0">
+        <div className="col-span-3 flex flex-col min-h-0 gap-4">
+          <TimelineBrush
+              data={timelineEvents} // Show ALL events in brush for context
+              onTimeRangeChange={handleTimeWindowChange}
+          />
           <Card className="flex-1 flex flex-col min-h-0">
             <CardHeader className="pb-3 flex-shrink-0">
               <CardTitle className="flex items-center gap-2 text-sm" role="heading" aria-level={2}>
                 <Clock className="h-4 w-4" aria-hidden="true" />
-                Timeline
+                Timeline Events
                 {syncState.globalTimeWindow && (
                   <Badge variant="secondary" className="text-xs">
                     Filtered

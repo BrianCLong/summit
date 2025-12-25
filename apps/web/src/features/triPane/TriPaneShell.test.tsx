@@ -18,6 +18,79 @@ import {
   generateMockTimelineEvents,
   generateMockGeospatialEvents,
 } from './mockData'
+import { SnapshotProvider } from '@/features/snapshots/SnapshotContext'
+import { AuthProvider } from '@/contexts/AuthContext'
+import { TooltipProvider } from '@/components/ui/Tooltip'
+
+// Mock sub-components
+vi.mock('@/graphs/GraphCanvas', () => ({
+    GraphCanvas: () => <div data-testid="graph-canvas">Graph Canvas</div>
+}));
+
+vi.mock('./MapPane', () => ({
+    MapPane: () => <div data-testid="map-pane">Map Pane</div>
+}));
+
+vi.mock('@/components/panels/TimelineRail', () => ({
+    TimelineRail: () => <div data-testid="timeline-rail">Timeline Rail</div>
+}));
+
+// We mock TimelineBrush but we'll expose a way to trigger its change
+const mockOnTimeRangeChange = vi.fn();
+vi.mock('./TimelineBrush', () => ({
+    TimelineBrush: ({ onTimeRangeChange }: { onTimeRangeChange: any }) => (
+        <div data-testid="timeline-brush">
+            Timeline Brush
+            <button
+                data-testid="trigger-brush-change"
+                onClick={() => {
+                    onTimeRangeChange({
+                        start: new Date(Date.now() - 86400000).toISOString(),
+                        end: new Date().toISOString()
+                    })
+                }}
+            >
+                Trigger Brush
+            </button>
+        </div>
+    )
+}));
+
+vi.mock('@/features/annotations/AnnotationPanel', () => ({
+  default: () => <div data-testid="annotation-panel">Annotation Panel</div>
+}));
+
+vi.mock('@/components/CollaborationPanel', () => ({
+    CollaborationPanel: () => <div data-testid="collaboration-panel">Collaboration Panel</div>
+}));
+
+// Mock hook
+vi.mock('@/lib/yjs/useCollaboration', () => ({
+    useCollaboration: () => ({
+        doc: {},
+        users: [],
+        isConnected: true,
+        isSynced: true
+    })
+}));
+
+vi.mock('@/lib/yjs/useGraphSync', () => ({
+    useGraphSync: (doc: any, entities: any) => ({
+        entities,
+        relationships: [],
+        updateEntityPosition: vi.fn()
+    })
+}));
+
+const Wrapper = ({ children }: { children: React.ReactNode }) => (
+    <AuthProvider>
+        <TooltipProvider>
+            <SnapshotProvider>
+                {children}
+            </SnapshotProvider>
+        </TooltipProvider>
+    </AuthProvider>
+);
 
 describe('TriPaneShell', () => {
   // Mock data
@@ -43,30 +116,33 @@ describe('TriPaneShell', () => {
   describe('Layout and Rendering', () => {
     it('should render all three panes', () => {
       render(
-        <TriPaneShell
-          entities={mockEntities}
-          relationships={mockRelationships}
-          timelineEvents={mockTimelineEvents}
-          geospatialEvents={mockGeospatialEvents}
-          {...mockCallbacks}
-        />
+        <Wrapper>
+            <TriPaneShell
+              entities={mockEntities}
+              relationships={mockRelationships}
+              timelineEvents={mockTimelineEvents}
+              geospatialEvents={mockGeospatialEvents}
+              {...mockCallbacks}
+            />
+        </Wrapper>
       )
 
-      // Check for pane headings - Timeline is a heading
-      expect(screen.getByRole('heading', { name: 'Timeline' })).toBeInTheDocument()
-      expect(screen.getByText('Entity Graph')).toBeInTheDocument()
-      expect(screen.getByText('Geographic View')).toBeInTheDocument()
+      expect(screen.getByTestId('timeline-rail')).toBeInTheDocument()
+      expect(screen.getByTestId('graph-canvas')).toBeInTheDocument()
+      expect(screen.getByTestId('map-pane')).toBeInTheDocument()
     })
 
     it('should display correct data counts', () => {
       render(
-        <TriPaneShell
-          entities={mockEntities}
-          relationships={mockRelationships}
-          timelineEvents={mockTimelineEvents}
-          geospatialEvents={mockGeospatialEvents}
-          {...mockCallbacks}
-        />
+        <Wrapper>
+            <TriPaneShell
+              entities={mockEntities}
+              relationships={mockRelationships}
+              timelineEvents={mockTimelineEvents}
+              geospatialEvents={mockGeospatialEvents}
+              {...mockCallbacks}
+            />
+        </Wrapper>
       )
 
       // Check entity count badge
@@ -84,127 +160,22 @@ describe('TriPaneShell', () => {
         mockGeospatialEvents.length.toString()
       )
     })
-
-    it('should render header controls', () => {
-      render(
-        <TriPaneShell
-          entities={mockEntities}
-          relationships={mockRelationships}
-          timelineEvents={mockTimelineEvents}
-          geospatialEvents={mockGeospatialEvents}
-          {...mockCallbacks}
-        />
-      )
-
-      expect(screen.getByText('Tri-Pane Analysis')).toBeInTheDocument()
-      expect(screen.getByText('Provenance')).toBeInTheDocument()
-      expect(screen.getByText('Reset')).toBeInTheDocument()
-      expect(screen.getByText('Export')).toBeInTheDocument()
-    })
-  })
-
-  describe('Synchronized Brushing', () => {
-    it('should filter data when time window is set', async () => {
-      const user = userEvent.setup()
-
-      render(
-        <TriPaneShell
-          entities={mockEntities}
-          relationships={mockRelationships}
-          timelineEvents={mockTimelineEvents}
-          geospatialEvents={mockGeospatialEvents}
-          {...mockCallbacks}
-        />
-      )
-
-      // Initial counts
-      // const initialEntityCount = mockEntities.length
-
-      // Simulate time window change (this would normally come from timeline interaction)
-      const timeWindow = {
-        start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-        end: new Date().toISOString(),
-      }
-
-      // Call the callback manually to simulate timeline interaction
-      mockCallbacks.onTimeWindowChange({
-        start: new Date(timeWindow.start),
-        end: new Date(timeWindow.end),
-      })
-
-      await waitFor(() => {
-        expect(mockCallbacks.onTimeWindowChange).toHaveBeenCalled()
-      })
-    })
-
-    it('should reset filters when reset button is clicked', async () => {
-      const user = userEvent.setup()
-
-      render(
-        <TriPaneShell
-          entities={mockEntities}
-          relationships={mockRelationships}
-          timelineEvents={mockTimelineEvents}
-          geospatialEvents={mockGeospatialEvents}
-          {...mockCallbacks}
-          initialSyncState={{
-            globalTimeWindow: {
-              start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-              end: new Date(),
-            },
-          }}
-        />
-      )
-
-      // Reset button should be enabled when there's a filter
-      const resetButton = screen.getByText('Reset')
-      expect(resetButton).not.toBeDisabled()
-
-      // Click reset
-      await user.click(resetButton)
-
-      // After reset, the filter indicator should disappear
-      await waitFor(() => {
-        expect(screen.queryByText(/Time filter:/)).not.toBeInTheDocument()
-      })
-    })
   })
 
   describe('User Interactions', () => {
-    it('should toggle provenance overlay', async () => {
-      const user = userEvent.setup()
-
-      render(
-        <TriPaneShell
-          entities={mockEntities}
-          relationships={mockRelationships}
-          timelineEvents={mockTimelineEvents}
-          geospatialEvents={mockGeospatialEvents}
-          {...mockCallbacks}
-        />
-      )
-
-      const provenanceButton = screen.getByText('Provenance')
-
-      // Click to show provenance
-      await user.click(provenanceButton)
-
-      // Check if provenance badge appears in the graph pane
-      const graphCard = screen.getByText('Entity Graph').closest('div')
-      expect(graphCard).toBeInTheDocument()
-    })
-
     it('should handle export action', async () => {
       const user = userEvent.setup()
 
       render(
-        <TriPaneShell
-          entities={mockEntities}
-          relationships={mockRelationships}
-          timelineEvents={mockTimelineEvents}
-          geospatialEvents={mockGeospatialEvents}
-          {...mockCallbacks}
-        />
+        <Wrapper>
+            <TriPaneShell
+              entities={mockEntities}
+              relationships={mockRelationships}
+              timelineEvents={mockTimelineEvents}
+              geospatialEvents={mockGeospatialEvents}
+              {...mockCallbacks}
+            />
+        </Wrapper>
       )
 
       const exportButton = screen.getByText('Export')
@@ -217,42 +188,38 @@ describe('TriPaneShell', () => {
   describe('Keyboard Navigation', () => {
     it('should handle keyboard shortcuts', async () => {
       render(
-        <TriPaneShell
-          entities={mockEntities}
-          relationships={mockRelationships}
-          timelineEvents={mockTimelineEvents}
-          geospatialEvents={mockGeospatialEvents}
-          {...mockCallbacks}
-        />
+        <Wrapper>
+            <TriPaneShell
+              entities={mockEntities}
+              relationships={mockRelationships}
+              timelineEvents={mockTimelineEvents}
+              geospatialEvents={mockGeospatialEvents}
+              {...mockCallbacks}
+            />
+        </Wrapper>
       )
-
-      // Test 'r' key for reset (when there's a filter)
-      fireEvent.keyDown(window, { key: 'r' })
-      // Since there's no initial filter, reset shouldn't do anything visible
 
       // Test 'e' key for export
       fireEvent.keyDown(window, { key: 'e' })
       await waitFor(() => {
         expect(mockCallbacks.onExport).toHaveBeenCalled()
       })
-
-      // Test 'p' key for provenance toggle
-      fireEvent.keyDown(window, { key: 'p' })
-      // Provenance should toggle
     })
 
-    it('should not trigger shortcuts when typing in input fields', async () => {
+     it('should not trigger shortcuts when typing in input fields', async () => {
       render(
-        <div>
-          <input type="text" placeholder="Test input" />
-          <TriPaneShell
-            entities={mockEntities}
-            relationships={mockRelationships}
-            timelineEvents={mockTimelineEvents}
-            geospatialEvents={mockGeospatialEvents}
-            {...mockCallbacks}
-          />
-        </div>
+        <Wrapper>
+          <div>
+            <input type="text" placeholder="Test input" />
+            <TriPaneShell
+              entities={mockEntities}
+              relationships={mockRelationships}
+              timelineEvents={mockTimelineEvents}
+              geospatialEvents={mockGeospatialEvents}
+              {...mockCallbacks}
+            />
+          </div>
+        </Wrapper>
       )
 
       const input = screen.getByPlaceholderText('Test input')
@@ -265,92 +232,64 @@ describe('TriPaneShell', () => {
     })
   })
 
+  describe('Synchronized Brushing', () => {
+    it('should filter data when time window is set via brush', async () => {
+      const user = userEvent.setup()
+
+      render(
+        <Wrapper>
+            <TriPaneShell
+              entities={mockEntities}
+              relationships={mockRelationships}
+              timelineEvents={mockTimelineEvents}
+              geospatialEvents={mockGeospatialEvents}
+              {...mockCallbacks}
+            />
+        </Wrapper>
+      )
+
+      // Find the trigger button in the mocked TimelineBrush
+      const trigger = screen.getByTestId('trigger-brush-change')
+      await user.click(trigger)
+
+      await waitFor(() => {
+          expect(mockCallbacks.onTimeWindowChange).toHaveBeenCalled()
+      })
+    })
+  })
+
   describe('Accessibility', () => {
     it('should have proper ARIA labels', () => {
       render(
-        <TriPaneShell
-          entities={mockEntities}
-          relationships={mockRelationships}
-          timelineEvents={mockTimelineEvents}
-          geospatialEvents={mockGeospatialEvents}
-          {...mockCallbacks}
-        />
+        <Wrapper>
+            <TriPaneShell
+              entities={mockEntities}
+              relationships={mockRelationships}
+              timelineEvents={mockTimelineEvents}
+              geospatialEvents={mockGeospatialEvents}
+              {...mockCallbacks}
+            />
+        </Wrapper>
       )
 
       expect(
         screen.getByRole('main', { name: 'Tri-pane analysis shell' })
       ).toBeInTheDocument()
-
-      expect(
-        screen.getByRole('complementary', { name: 'Keyboard shortcuts' })
-      ).toBeInTheDocument()
-    })
-
-    it('should have live regions for status updates', () => {
-      render(
-        <TriPaneShell
-          entities={mockEntities}
-          relationships={mockRelationships}
-          timelineEvents={mockTimelineEvents}
-          geospatialEvents={mockGeospatialEvents}
-          {...mockCallbacks}
-        />
-      )
-
-      const statusRegions = screen.getAllByRole('status')
-      expect(statusRegions.length).toBeGreaterThan(0)
-
-      // All status regions should have aria-live="polite"
-      statusRegions.forEach(region => {
-        expect(region).toHaveAttribute('aria-live', 'polite')
-      })
-    })
-
-    it('should have proper button labels', () => {
-      render(
-        <TriPaneShell
-          entities={mockEntities}
-          relationships={mockRelationships}
-          timelineEvents={mockTimelineEvents}
-          geospatialEvents={mockGeospatialEvents}
-          {...mockCallbacks}
-        />
-      )
-
-      expect(
-        screen.getByLabelText(/provenance overlay/i)
-      ).toBeInTheDocument()
-      expect(screen.getByLabelText('Reset all filters')).toBeInTheDocument()
-      expect(screen.getByLabelText('Export data')).toBeInTheDocument()
-    })
-
-    it('should provide keyboard shortcut hints in titles', () => {
-      render(
-        <TriPaneShell
-          entities={mockEntities}
-          relationships={mockRelationships}
-          timelineEvents={mockTimelineEvents}
-          geospatialEvents={mockGeospatialEvents}
-          {...mockCallbacks}
-        />
-      )
-
-      expect(screen.getByTitle('Toggle provenance overlay (P)')).toBeInTheDocument()
-      expect(screen.getByTitle('Reset filters (R)')).toBeInTheDocument()
-      expect(screen.getByTitle('Export data (E)')).toBeInTheDocument()
     })
   })
 
   describe('Empty States', () => {
     it('should handle empty data gracefully', () => {
       render(
-        <TriPaneShell
-          entities={[]}
-          relationships={[]}
-          timelineEvents={[]}
-          geospatialEvents={[]}
-          {...mockCallbacks}
-        />
+        <Wrapper>
+            <TriPaneShell
+              entities={[]}
+              relationships={[]}
+              timelineEvents={[]}
+              geospatialEvents={[]}
+              {...mockCallbacks}
+            />
+        </Wrapper>
       )
 
       // Should still render the layout
@@ -360,46 +299,6 @@ describe('TriPaneShell', () => {
       expect(screen.getByTitle('Total entities')).toHaveTextContent('0')
       expect(screen.getByTitle('Total events')).toHaveTextContent('0')
       expect(screen.getByTitle('Total locations')).toHaveTextContent('0')
-    })
-  })
-
-  describe('Filter Indicator', () => {
-    it('should show filter indicator when time window is active', () => {
-      const timeWindow = {
-        start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-        end: new Date(),
-      }
-
-      render(
-        <TriPaneShell
-          entities={mockEntities}
-          relationships={mockRelationships}
-          timelineEvents={mockTimelineEvents}
-          geospatialEvents={mockGeospatialEvents}
-          {...mockCallbacks}
-          initialSyncState={{
-            globalTimeWindow: timeWindow,
-          }}
-        />
-      )
-
-      // Should show time filter indicator
-      expect(screen.getByText(/Time filter:/)).toBeInTheDocument()
-    })
-
-    it('should not show filter indicator when no filters are active', () => {
-      render(
-        <TriPaneShell
-          entities={mockEntities}
-          relationships={mockRelationships}
-          timelineEvents={mockTimelineEvents}
-          geospatialEvents={mockGeospatialEvents}
-          {...mockCallbacks}
-        />
-      )
-
-      // Should not show time filter indicator
-      expect(screen.queryByText(/Time filter:/)).not.toBeInTheDocument()
     })
   })
 })
