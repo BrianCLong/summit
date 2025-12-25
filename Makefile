@@ -6,6 +6,7 @@
 .PHONY: db-migrate db-seed sbom k6
 .PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release provenance ci-check prereqs contracts policy-sim rerere dupescans
 .PHONY: bootstrap
+.PHONY: demo demo-down demo-check demo-seed demo-smoke
 
 COMPOSE_DEV_FILE ?= docker-compose.dev.yaml
 SHELL_SERVICE ?= gateway
@@ -66,6 +67,15 @@ k6:     ## Perf smoke (TARGET=http://host:port make k6)
 
 sbom:   ## Generate CycloneDX SBOM
 	@pnpm cyclonedx-npm --output-format JSON --output-file sbom.json
+
+smoke: bootstrap up ## Fresh clone smoke test: bootstrap -> up -> health check
+	@echo "Waiting for services to start..."
+	@sleep 20
+	@echo "Checking UI health..."
+	@curl -s -f http://localhost:3000 > /dev/null && echo "✅ UI is up" || (echo "❌ UI failed" && exit 1)
+	@echo "Checking Gateway health..."
+	@curl -s -f http://localhost:8080/health > /dev/null && echo "✅ Gateway is up" || (echo "❌ Gateway failed" && exit 1)
+	@echo "Smoke test complete."
 
 # ---- IntelGraph S25 Merge Orchestrator (Legacy/Specific) ---------------------
 
@@ -174,3 +184,20 @@ secrets/lint:
 	@.ci/scripts/secrets/leak_scan.sh
 	@echo "Running OPA checks"
 	@conftest test --policy .ci/policies --namespace secrets --all-namespaces
+
+# --- Demo Environment ---
+
+demo: ## Launch one-command demo environment
+	@DEMO_MODE=1 ./scripts/demo-up.sh
+
+demo-down: ## Stop demo environment
+	@./scripts/demo-down.sh
+
+demo-check: ## Check demo prerequisites
+	@./scripts/demo-check.sh
+
+demo-seed: ## Seed demo data
+	@DEMO_MODE=1 ./scripts/demo-seed.sh
+
+demo-smoke: ## Run demo smoke tests
+	@./scripts/demo-smoke-test.sh

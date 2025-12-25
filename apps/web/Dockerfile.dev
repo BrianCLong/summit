@@ -1,0 +1,21 @@
+FROM node:20-alpine
+WORKDIR /app
+RUN apk add --no-cache curl
+COPY package*.json ./
+# Install deps (including workspace) - using pnpm if possible, or npm
+# Since this is a workspace, we might need pnpm.
+# But this Dockerfile is context specific.
+# Usually in monorepos, dockerfile needs root context to install everything.
+# docker-compose.dev.yml sets context to ./apps/web (if I change it) or root.
+# Currently context is ./client.
+
+# If I change context to ./apps/web, I lose access to root pnpm-lock.yaml if it's outside.
+# But apps/web has its own package-lock.json?
+# ls -F apps/web/ showed package-lock.json and pnpm-lock.yaml.
+# If it has its own lockfile, it might be independent enough.
+
+RUN npm install --legacy-peer-deps
+COPY . .
+ENV PORT=3000
+EXPOSE 3000
+CMD ["npm", "run", "dev"]

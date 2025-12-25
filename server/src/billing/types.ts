@@ -22,24 +22,94 @@ export interface BillingConfig {
   enabled: boolean;
 }
 
-export interface Invoice {
-    id: string;
-    tenantId: string;
-    periodStart: Date;
-    periodEnd: Date;
-    currency: string;
-    lineItems: InvoiceLineItem[];
-    subtotal: number;
-    taxes: number;
-    total: number;
-    status: 'DRAFT' | 'FINALIZED' | 'PAID' | 'VOID';
-    createdAt: Date;
+// InvoiceLineItem - merged version
+export interface InvoiceLineItem {
+  description: string;
+  amount: number;
+  quantity?: number;
+  unitPrice?: number;
+  periodStart?: Date;
+  periodEnd?: Date;
+  meterId?: string;
+  kind?: string; // 'api', 'ingest', etc.
+  metadata?: Record<string, any>;
 }
 
-export interface InvoiceLineItem {
-    description: string;
-    quantity: number;
-    unitPrice: number;
-    amount: number;
-    kind: string; // 'api', 'ingest', etc.
+export enum InvoiceStatus {
+  DRAFT = 'DRAFT',
+  OPEN = 'OPEN',
+  PAID = 'PAID',
+  VOID = 'VOID',
+  UNCOLLECTIBLE = 'UNCOLLECTIBLE',
+}
+
+// Invoice - merged version with fields from both branches
+export interface Invoice {
+  id: string;
+  tenantId: string;
+  status: InvoiceStatus;
+  amountDue: number;
+  amountPaid: number;
+  amountRemaining: number;
+  currency: string;
+  lineItems: InvoiceLineItem[];
+  periodStart: Date;
+  periodEnd: Date;
+  subtotal?: number;
+  taxes?: number;
+  total?: number;
+  dueDate?: Date;
+  createdAt: Date;
+  updatedAt?: Date;
+  finalizedAt?: Date;
+  paidAt?: Date;
+}
+
+export enum DisputeStatus {
+  OPEN = 'OPEN',
+  UNDER_REVIEW = 'UNDER_REVIEW',
+  WON = 'WON',
+  LOST = 'LOST',
+}
+
+export interface Dispute {
+  id: string;
+  invoiceId: string;
+  tenantId: string;
+  amount: number;
+  reason: string;
+  status: DisputeStatus;
+  evidence: string[]; // URLs or IDs
+  createdAt: Date;
+  updatedAt: Date;
+  resolvedAt?: Date;
+}
+
+export interface Adjustment {
+  id: string;
+  invoiceId: string;
+  amount: number;
+  reason: string;
+  type: 'CREDIT' | 'DEBIT';
+  createdAt: Date;
+  appliedAt: Date;
+}
+
+export interface Credit {
+  id: string;
+  tenantId: string;
+  amount: number;
+  currency: string;
+  balance: number;
+  expiresAt?: Date;
+}
+
+export interface AuditTrail {
+  id: string;
+  entityId: string;
+  entityType: 'INVOICE' | 'DISPUTE' | 'ADJUSTMENT';
+  action: string;
+  actorId: string;
+  changes: Record<string, { old: any; new: any }>;
+  timestamp: Date;
 }

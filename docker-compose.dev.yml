@@ -203,7 +203,7 @@ services:
 
   web:
     build:
-      context: ./client
+      context: ./apps/web
       dockerfile: Dockerfile.dev
     container_name: summit-web
     restart: unless-stopped

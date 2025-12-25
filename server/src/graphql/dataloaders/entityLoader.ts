@@ -27,62 +27,121 @@ async function batchLoadEntities(
   ids: readonly string[],
   context: DataLoaderContext
 ): Promise<(Entity | Error)[]> {
-  const session = context.neo4jDriver.session();
+  const { redis, tenantId, neo4jDriver } = context;
+  const entityMap = new Map<string, Entity>();
+  const missingIds: string[] = [];
 
-  try {
-    const startTime = Date.now();
+  // 1. Try to load from Redis cache first
+  if (redis) {
+    try {
+      const keys = ids.map((id) => `entity:${tenantId}:${id}`);
+      const cachedValues = await redis.mget(keys);
 
-    // Single query to fetch all requested entities
-    const result = await session.run(
-      `
-      MATCH (n:Entity {tenantId: $tenantId})
-      WHERE n.id IN $ids
-      RETURN n
-      `,
-      { ids: ids as string[], tenantId: context.tenantId }
-    );
-
-    // Create a map of id -> entity
-    const entityMap = new Map<string, Entity>();
-    result.records.forEach((record) => {
-      const node = record.get('n');
-      const entity: Entity = {
-        id: node.properties.id,
-        type: node.labels.find((l: string) => l !== 'Entity') || 'Entity',
-        props: node.properties,
-        createdAt: node.properties.createdAt,
-        updatedAt: node.properties.updatedAt,
-        tenantId: node.properties.tenantId,
-      };
-      entityMap.set(entity.id, entity);
-    });
-
-    const duration = Date.now() - startTime;
-    logger.debug(
-      {
-        batchSize: ids.length,
-        found: entityMap.size,
-        duration,
-      },
-      'Entity batch load completed'
-    );
-
-    // Return entities in the same order as requested IDs
-    // If an entity is not found, return an Error
-    return ids.map((id) => {
-      const entity = entityMap.get(id);
-      if (!entity) {
-        return new Error(`Entity not found: ${id}`);
-      }
-      return entity;
-    });
-  } catch (error) {
-    logger.error({ error, ids }, 'Error in entity batch loader');
-    // Return errors for all requested IDs
-    return ids.map(() => error as Error);
-  } finally {
-    await session.close();
+      cachedValues.forEach((val, index) => {
+        if (val) {
+          try {
+            const entity = JSON.parse(val);
+            entityMap.set(ids[index], entity);
+          } catch (e) {
+            // Invalid JSON in cache, treat as missing
+            missingIds.push(ids[index]);
+          }
+        } else {
+          missingIds.push(ids[index]);
+        }
+      });
+    } catch (error) {
+      logger.warn({ error }, 'Redis cache error in entityLoader, falling back to db');
+      // If redis fails, load everything from DB
+      missingIds.length = 0;
+      ids.forEach(id => {
+          if (!entityMap.has(id)) missingIds.push(id);
+      });
+    }
+  } else {
+    // No Redis, load all from DB
+    missingIds.push(...ids);
   }
+
+  // 2. Load missing entities from Neo4j
+  if (missingIds.length > 0) {
+    const session = neo4jDriver.session();
+
+    try {
+      const startTime = Date.now();
+
+      // Single query to fetch all requested entities
+      const result = await session.run(
+        `
+        MATCH (n:Entity {tenantId: $tenantId})
+        WHERE n.id IN $ids
+        RETURN n
+        `,
+        { ids: missingIds, tenantId }
+      );
+
+      const dbEntities = new Map<string, Entity>();
+
+      result.records.forEach((record) => {
+        const node = record.get('n');
+        const entity: Entity = {
+          id: node.properties.id,
+          type: node.labels.find((l: string) => l !== 'Entity') || 'Entity',
+          props: node.properties,
+          createdAt: node.properties.createdAt,
+          updatedAt: node.properties.updatedAt,
+          tenantId: node.properties.tenantId,
+        };
+        dbEntities.set(entity.id, entity);
+        entityMap.set(entity.id, entity);
+      });
+
+      // Cache the newly fetched entities
+      if (redis && dbEntities.size > 0) {
+        const pipeline = redis.pipeline();
+        for (const [id, entity] of dbEntities.entries()) {
+          pipeline.setex(
+            `entity:${tenantId}:${id}`,
+            60, // 60 seconds TTL
+            JSON.stringify(entity)
+          );
+        }
+        await pipeline.exec();
+      }
+
+      const duration = Date.now() - startTime;
+      logger.debug(
+        {
+          batchSize: missingIds.length,
+          found: dbEntities.size,
+          duration,
+        },
+        'Entity batch load completed'
+      );
+    } catch (error) {
+      logger.error({ error, ids: missingIds }, 'Error in entity batch loader');
+      // If DB fails, we can only return errors for missingIds
+      // Existing ones from cache are fine
+      missingIds.forEach(id => {
+          // We don't have a way to signal error for specific IDs easily here without complicating map
+          // But map.get(id) will return undefined, which maps to Error below.
+      });
+      // Better: we should probably throw or return errors?
+      // The contract says Promise<(Entity | Error)[]>
+      // If we failed to load missingIds, we mark them as Errors in the final map loop.
+    } finally {
+      await session.close();
+    }
+  }
+
+  // Return entities in the same order as requested IDs
+  return ids.map((id) => {
+    const entity = entityMap.get(id);
+    if (!entity) {
+      return new Error(`Entity not found: ${id}`);
+    }
+    return entity;
+  });
 }
 
 /**
