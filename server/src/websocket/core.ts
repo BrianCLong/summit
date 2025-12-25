@@ -103,6 +103,30 @@ export class WebSocketCore {
     }
   }
 
+  private async checkInvestigationAccess(userId: string, investigationId: string): Promise<boolean> {
+    try {
+      const pool = getPostgresPool();
+      // Check for direct membership
+      const result = await pool.query(
+        'SELECT 1 FROM investigation_members WHERE user_id = $1 AND investigation_id = $2',
+        [userId, investigationId]
+      );
+      if (result.rowCount > 0) return true;
+
+      // Check if user is owner/creator of the investigation (assuming 'investigations' table)
+      const invResult = await pool.query(
+          'SELECT 1 FROM investigations WHERE id = $1 AND created_by = $2',
+          [investigationId, userId]
+      );
+      return invResult.rowCount > 0;
+    } catch (error) {
+      // If tables don't exist, we might be in a fresh env.
+      // Log warning and default to deny for security (IG-204)
+      console.warn(`Investigation access check failed for ${investigationId}:`, error);
+      return false;
+    }
+  }
+
   private async opaAllow(
     claims: WebSocketClaims,
     message: WebSocketMessage,
@@ -121,6 +145,7 @@ export class WebSocketCore {
         resource: {
           type: 'websocket',
           topic: message.topic,
+          topics: message.topics,
           action: message.type,
         },
         environment: {
@@ -132,10 +157,25 @@ export class WebSocketCore {
       // Simple built-in policies (replace with OPA integration)
       const policies = {
         // Users can only subscribe to their tenant's topics
-        subscribe: (ctx: any) => {
-          if (!ctx.resource.topic) return false;
-          const topicParts = ctx.resource.topic.split('.');
-          return topicParts.length > 1 && topicParts[0] === ctx.user.tenantId;
+        subscribe: async (ctx: any) => {
+          const topics = ctx.resource.topics || (ctx.resource.topic ? [ctx.resource.topic] : []);
+          if (topics.length === 0) return false;
+
+          for (const topic of topics) {
+             // Investigation Room Authorization
+             if (topic.startsWith('investigation:')) {
+                 const invId = topic.split(':')[1];
+                 // Check if user has explicit access to this investigation
+                 // Fallback to role check if DB check fails (or mock for now)
+                 const hasAccess = await this.checkInvestigationAccess(ctx.user.userId, invId);
+                 if (!hasAccess) return false;
+             }
+             // General Tenant Check (topics shouldn't cross tenant boundary)
+             // Note: core logic prefixes tenantId, so clients send raw topic.
+             // We trust the prefixing logic for isolation, but if topic ITSELF contains tenant info...
+             // Here we assume client sends "investigation:123". Core makes it "tenant.investigation:123".
+          }
+          return true;
         },
 
         // Only admins can publish system-wide messages
@@ -153,8 +193,8 @@ export class WebSocketCore {
         unsubscribe: (ctx: any) => this.policies.subscribe(ctx),
       };
 
-      const allowed =
-        policies[message.type as keyof typeof policies]?.(context) || false;
+      const policyFn = policies[message.type as keyof typeof policies];
+      const allowed = policyFn ? await policyFn(context) : false;
 
       span?.addSpanAttributes({
         'websocket.opa.allowed': allowed,

@@ -13,6 +13,7 @@ import { shield } from 'graphql-shield';
 import { applyMiddleware } from 'graphql-middleware';
 import bodyParser from 'body-parser';
 import cors from 'cors';
+import { randomUUID } from 'node:crypto';
 import logger from '../utils/logger.js';
 import type { PoolClient } from 'pg';
 
@@ -133,7 +134,7 @@ async function createContext({ req }: { req: any }): Promise<GraphQLContext> {
       userAgent: req.get('User-Agent'),
     },
     telemetry: {
-      traceId: (req.headers?.['x-trace-id'] as string) || 'unknown',
+      traceId: (req.headers?.['x-trace-id'] as string) || (req.headers?.['traceparent'] as string) || randomUUID(),
       spanId: 'unknown',
     },
   };

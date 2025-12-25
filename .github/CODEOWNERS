@@ -30,3 +30,24 @@
 /apps/ui/ @team-ui
 /apps/gateway/ @team-gateway
 /services/zk-tx/ @team-zk
+
+# Critical Path Protection (IG-202)
+# Auth & Security
+/server/src/auth/ @intelgraph-security
+/server/src/security/ @intelgraph-security
+
+# GraphQL API & Resolvers
+/server/src/graphql/ @intelgraph-api
+/server/src/resolvers/ @intelgraph-api
+
+# Realtime / Socket.io
+/server/src/websocket/ @intelgraph-backend
+/services/websocket-server/ @intelgraph-backend
+
+# Database Access
+/server/src/db/ @intelgraph-data
+/server/src/database/ @intelgraph-data
+
+# CI/CD & Deploy (Overrides)
+/.github/workflows/ @team-ops
+/deploy/ @team-ops

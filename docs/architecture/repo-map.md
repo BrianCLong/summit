@@ -1,11 +1,10 @@
 # Repository Architecture Map
 
-**Scope:** `feature/sprint-lock-2025-12-29`
 **Last Updated:** 2025-12-29
 
-This map provides a high-level overview of the `summit` monorepo structure, identifying key domains and critical paths for new engineers.
+This map provides a high-level overview of the `summit` monorepo structure, identifying key domains, critical paths, and production boundaries for new engineers.
 
-## 🗺️ High-Level Geography
+## High-Level Geography
 
 ```mermaid
 graph TD
@@ -27,7 +26,36 @@ graph TD
     Services --> Agents[AI Agents]
 ```
 
-## 📂 Key Directories
+## Production vs. Labs Boundaries
+
+### Production Critical (Strict Gates)
+*Modifications here require Code Owner approval and full CI pass.*
+
+*   `server/src/` - Core API logic.
+*   `server/src/auth/` - Authentication & Authorization.
+*   `server/src/graphql/` - Public Schema & Resolvers.
+*   `apps/web/` - Customer-facing Frontend.
+*   `server/src/provenance/` - Ledger & Audit integrity.
+*   `.github/workflows/` - CI/CD Pipelines.
+*   `deploy/` - Infrastructure as Code.
+
+### Shared Infrastructure (Library)
+*Modifications here affect multiple zones.*
+
+*   `server/src/lib/` - Shared utilities.
+*   `prompts/` - LLM Prompts (Production & Experimental mixed).
+*   `docs/` - Documentation.
+
+### Labs / Experimental (Quarantined)
+*Code here is not guaranteed to be stable or secure for production use.*
+
+*   `server/src/black-projects/` - Experimental modules (Aurora, Oracle).
+*   `tools/ultra-agent/` - Autonomous agent prototypes.
+*   `experiments/` - Data science scripts.
+*   `intelgraph-mvp/` - Legacy/MVP code (to be migrated).
+*   `policy-fuzzer/` - Testing tools.
+
+## Key Directories
 
 ### 1. Core Applications
 *   **`server/`**: The primary **IntelGraph API** (Node.js/Express/Apollo).
@@ -56,7 +84,7 @@ graph TD
 *   **`.github/workflows/`**: CI/CD pipelines (`pr-quality-gate.yml` is the source of truth).
 *   **`AGENTS.md`**: Master instruction file for AI agents.
 
-## 🚦 Critical Paths & Owners
+## Critical Paths & Owners
 
 | Domain | Path | Key Files |
 | :--- | :--- | :--- |
@@ -66,13 +94,19 @@ graph TD
 | **Search** | `server/src/search` | `search.ts`, `search-engine/` |
 | **Audit** | `server/src/provenance` | `ledger.ts`, `audit/worm.ts` |
 
-## 🛠️ Developer Workflow
+## Developer Workflow
 
 *   **Bootstrap:** `make bootstrap` (Installs deps, setups env)
 *   **Start:** `make up` (Runs full stack via Docker Compose)
 *   **Verify:** `make smoke` (Runs golden path tests)
 
-## ⚠️ "Ghost" & Legacy Zones
+## Boundary Enforcement
+
+*   **CI**: Production paths enforce blocking SAST/SCA checks.
+*   **Runtime**: "Labs" features must be behind Feature Flags (`ENABLE_LABS_MODE`).
+*   **Dependencies**: Production code cannot import from `black-projects` or `experiments`.
+
+## "Ghost" & Legacy Zones
 
 *   `client/`: Legacy React client (prefer `apps/web`).
 *   `apps/server`: Experimental v2 Server (prefer root `server/`).

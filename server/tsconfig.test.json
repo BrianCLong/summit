@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "nodenext",
+    "target": "es2020",
+    "types": ["jest", "node"]
+  },
+  "include": ["src/**/*", "tests/**/*", "../packages/**/*"]
+}
