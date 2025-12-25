@@ -212,7 +212,13 @@
       "Bash(timeout 30 npx jest:*)",
       "Bash(timeout 90 pnpm:*)",
       "Bash(timeout 45 npx jest:*)",
-      "Bash(timeout 120 npx jest:*)"
+      "Bash(timeout 120 npx jest:*)",
+      "Bash(then if ! head -1 \"$file\")",
+      "Bash(do echo \"=== PR #$pr ===\" gh pr view $pr --json mergeable,title,headRefName)",
+      "Bash(gh issue list:*)",
+      "Bash(timeout 30 npx eslint:*)",
+      "Bash(git remote prune:*)",
+      "Bash(npm run test:*)"
     ],
     "deny": [],
     "ask": []

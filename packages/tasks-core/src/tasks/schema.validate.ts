@@ -12,10 +12,11 @@ export default defineTask<In, { valid: true }>({
     const ajv = new Ajv({ allErrors: true });
     addFormats(ajv);
     const validate = ajv.compile(payload.schema as any);
-    if (!validate(payload.data))
-      {throw new Error(
-        `Schema validation failed: ${  JSON.stringify(validate.errors)}`,
-      );}
-    return { payload: { valid: true } };
+    if (!validate(payload.data)) {
+      throw new Error(
+        `Schema validation failed: ${JSON.stringify(validate.errors)}`,
+      );
+    }
+    return Promise.resolve({ payload: { valid: true as const } });
   },
 });
