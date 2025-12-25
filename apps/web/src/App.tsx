@@ -53,6 +53,7 @@ import { AuthProvider } from '@/contexts/AuthContext'
 import { ErrorBoundary, NotFound } from '@/components/error'
 import Explain from '@/components/Explain'
 import { CommandStatusProvider } from '@/features/internal-command/CommandStatusProvider'
+import { DemoIndicator } from '@/components/common/DemoIndicator'
 
 function App() {
   const [showPalette, setShowPalette] = React.useState(false);
@@ -71,6 +72,7 @@ function App() {
 
   return (
     <ApolloProvider client={apolloClient}>
+      <DemoIndicator />
       <SocketProvider>
         <TooltipProvider>
           <AuthProvider>

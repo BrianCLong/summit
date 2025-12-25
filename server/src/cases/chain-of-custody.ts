@@ -60,9 +60,22 @@ export class ChainOfCustodyService {
 
     // 2. Append to Provenance Ledger for immutability
     await this.ledger.appendEntry({
-      type: 'CUSTODY_EVENT',
-      actor: event.actorId,
-      entityId: event.evidenceId,
+      tenantId: 'system',
+      actionType: 'CUSTODY_EVENT',
+      resourceType: 'Evidence',
+      resourceId: event.evidenceId,
+      actorId: event.actorId,
+      actorType: 'user',
+      timestamp: new Date(),
+      payload: {
+        mutationType: 'UPDATE',
+        entityId: event.evidenceId,
+        entityType: 'Evidence',
+        caseId: event.caseId,
+        action: event.action,
+        location: event.location,
+        notes: event.notes
+      },
       metadata: {
         caseId: event.caseId,
         action: event.action,

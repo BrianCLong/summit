@@ -7,6 +7,7 @@ import { tenantIsolationGuard } from '../tenancy/TenantIsolationGuard.js';
 import { TenantContext } from '../tenancy/types.js';
 import { tenantLimitEnforcer } from '../lib/resources/tenant-limit-enforcer.js';
 import { provenanceLedger } from '../provenance/ledger.js';
+import { metrics } from '../monitoring/metrics.js';
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -92,6 +93,7 @@ export const createRateLimiter = (endpointClass: EndpointClass = EndpointClass.D
         if (!result.allowed) {
             // Audit
             if (tenantContext) {
+                metrics.rateLimitExceededTotal.labels(tenantContext.tenantId, endpointClass).inc();
                 provenanceLedger.appendEntry({
                     tenantId: tenantContext.tenantId,
                     actionType: 'RATE_LIMIT_EXCEEDED',
@@ -102,6 +104,8 @@ export const createRateLimiter = (endpointClass: EndpointClass = EndpointClass.D
                     payload: { key, limit, remaining: result.remaining },
                     metadata: { ip: req.ip }
                 }).catch(() => {});
+            } else {
+                metrics.rateLimitExceededTotal.labels('unknown', endpointClass).inc();
             }
 
             return res.status(429).json({

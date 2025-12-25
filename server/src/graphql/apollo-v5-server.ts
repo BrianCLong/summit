@@ -13,7 +13,9 @@ import { shield } from 'graphql-shield';
 import { applyMiddleware } from 'graphql-middleware';
 import bodyParser from 'body-parser';
 import cors from 'cors';
+import { randomUUID } from 'node:crypto';
 import logger from '../utils/logger.js';
+import type { PoolClient } from 'pg';
 
 // Import schemas and resolvers
 import { typeDefs } from './schema/index.js';
@@ -24,6 +26,7 @@ import { authDirectiveTransformer } from './authDirective.js';
 import { createDataLoaders, type DataLoaders } from './dataloaders/index.js';
 import { getNeo4jDriver } from '../db/neo4j.js';
 import { getPostgresPool } from '../db/postgres.js';
+import { getRedisClient } from '../config/database.js';
 
 // Import performance optimization plugins
 import { createQueryComplexityPlugin, getMaxComplexityByRole } from './plugins/queryComplexityPlugin.js';
@@ -39,6 +42,7 @@ import { recordEndpointResult } from '../observability/reliability-metrics.js';
 export interface GraphQLContext {
   dataSources: any;
   loaders: DataLoaders;
+  pgClient?: PoolClient;
   user?: {
     id: string;
     roles: string[];
@@ -92,12 +96,28 @@ function createSecureSchema() {
 async function createContext({ req }: { req: any }): Promise<GraphQLContext> {
   const neo4jDriver = getNeo4jDriver();
   const pgPool = getPostgresPool();
+  const redis = getRedisClient();
   const tenantId = req.user?.tenantId || req.user?.tenant || 'default';
+
+  // Checkout client for RLS
+  let pgClient: PoolClient | undefined;
+  try {
+    pgClient = await pgPool.connect();
+    // Set tenant context for RLS
+    // Use set_config with is_local=false to set for session duration (until release)
+    await pgClient.query("SELECT set_config('app.tenant_id', $1, false)", [tenantId]);
+  } catch (error) {
+    logger.error('Failed to initialize Postgres client for request context', error);
+    if (pgClient) pgClient.release();
+    pgClient = undefined;
+  }
 
   // Create request-scoped DataLoaders to batch queries
   const loaders = createDataLoaders({
     neo4jDriver,
     pgPool,
+    pgClient,
+    redis,
     tenantId,
   });
 
@@ -106,6 +126,7 @@ async function createContext({ req }: { req: any }): Promise<GraphQLContext> {
       // Data sources will be injected here
     },
     loaders, // DataLoaders for batch loading
+    pgClient,
     user: req.user, // Populated by auth middleware
     request: {
       ip: req.ip || req.connection.remoteAddress,
@@ -113,7 +134,7 @@ async function createContext({ req }: { req: any }): Promise<GraphQLContext> {
       userAgent: req.get('User-Agent'),
     },
     telemetry: {
-      traceId: (req.headers?.['x-trace-id'] as string) || 'unknown',
+      traceId: (req.headers?.['x-trace-id'] as string) || (req.headers?.['traceparent'] as string) || randomUUID(),
       spanId: 'unknown',
     },
   };
@@ -160,6 +181,7 @@ export function createApolloV5Server(
         // Redis will be injected if available
         enabled: process.env.ENABLE_APQ !== 'false',
         ttl: 86400, // 24 hours
+        allowlistEnabled: process.env.NODE_ENV === 'production',
       }),
 
       createCircuitBreakerPlugin({
@@ -171,6 +193,19 @@ export function createApolloV5Server(
       createPerformanceMonitoringPlugin(),
 
       resolverMetricsPlugin,
+
+      // RLS Cleanup Plugin
+      {
+        async requestDidStart() {
+          return {
+            async willSendResponse(requestContext) {
+              if (requestContext.contextValue?.pgClient) {
+                requestContext.contextValue.pgClient.release();
+              }
+            }
+          };
+        }
+      },
 
       // Custom telemetry plugin
       {

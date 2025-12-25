@@ -145,11 +145,13 @@ interface AuthResponse {
  * @property {string} userId - User's UUID
  * @property {string} email - User's email
  * @property {string} role - User's role for authorization
+ * @property {string} tenantId - Tenant ID
  */
 interface TokenPayload {
   userId: string;
   email: string;
   role: string;
+  tenantId: string;
 }
 
 /**
@@ -472,6 +474,7 @@ export class AuthService {
       userId: user.id,
       email: user.email,
       role: user.role,
+      tenantId: user.tenant_id || user.default_tenant_id || 'unknown',
     };
 
     const jwtSecret = await secretsService.getSecret(SECRETS.JWT_SECRET);
