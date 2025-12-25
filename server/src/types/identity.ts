@@ -25,10 +25,15 @@ export interface Tenant {
   id: TenantId;
   name: string;
   slug: string;
+  region?: string; // e.g. 'us-east-1'
+  residency?: 'US' | 'EU';
+  tier?: string;
   status: 'active' | 'suspended' | 'trial' | 'closed';
+  config?: Record<string, unknown>;
+  settings: Record<string, unknown>; // feature flags, quotas, etc.
+  createdBy?: string | null;
   createdAt: Date;
   updatedAt: Date;
-  settings: Record<string, unknown>; // feature flags, quotas, etc.
 }
 
 export interface Project {

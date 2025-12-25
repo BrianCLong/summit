@@ -46,4 +46,15 @@
 - [ ] OPA policies verified
 - [ ] Grafana dashboards updated if applicable
 - [ ] **Hot Files**: I have avoided modifying shared hot files (root config, Makefiles) unless absolutely necessary.
-- [ ] **Feature Flags**: New behavior is hidden behind a feature flag.
+
+## Test Evidence  
+- [ ] Provide links or attachments for test results.  
+
+## CI Confirmation  
+- [ ] Confirm that the golden-path CI workflow has run and passed successfully.  
+
+## Non-Goals  
+- Describe what this change does not cover.  
+
+## Hard Guarantees  
+- List the guarantees this change provides (e.g., performance thresholds, invariants).- [ ] **Feature Flags**: New behavior is hidden behind a feature flag.

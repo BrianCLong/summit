@@ -3,6 +3,7 @@ import { EntityInput, ResolutionCandidate, ResolutionDecision, ERConfig, Decisio
 import { ScoringEngine } from './scoring';
 import { provenanceLedger } from '../../provenance/ledger';
 import { getDriver } from '../../graph/neo4j';
+import { getTracer } from '../../observability/tracer.js';
 import pLimit from 'p-limit';
 
 export class EntityResolutionService {
@@ -29,39 +30,42 @@ export class EntityResolutionService {
    * This is a simplified "blocking" approach where we query for potential candidates.
    */
   async resolveBatch(entities: EntityInput[]): Promise<ResolutionDecision[]> {
-    const limit = pLimit(10); // Concurrency limit
-    const decisions: ResolutionDecision[] = [];
+    return getTracer().withSpan('EntityResolutionService.resolveBatch', async (span) => {
+        span.setAttribute('er.batch_size', entities.length);
+        const limit = pLimit(10); // Concurrency limit
+        const decisions: ResolutionDecision[] = [];
 
-    const tasks = entities.map(entity => limit(async () => {
-      // 1. Find candidates in the graph (Blocking phase)
-      const candidates = await this.findCandidates(entity);
+        const tasks = entities.map(entity => limit(async () => {
+        // 1. Find candidates in the graph (Blocking phase)
+        const candidates = await this.findCandidates(entity);
 
-      for (const candidateEntity of candidates) {
-        // 2. Score candidate
-        const { score, features, reasons } = this.scoringEngine.calculateScore(entity, candidateEntity);
+        for (const candidateEntity of candidates) {
+            // 2. Score candidate
+            const { score, features, reasons } = this.scoringEngine.calculateScore(entity, candidateEntity);
 
-        // 3. Make Decision
-        const decisionType = this.makeDecision(score);
+            // 3. Make Decision
+            const decisionType = this.makeDecision(score);
 
-        if (decisionType !== 'NO_MATCH') {
-            decisions.push({
-                candidate: {
-                    sourceEntityId: entity.id,
-                    targetEntityId: candidateEntity.id,
-                    overallScore: score,
-                    features,
-                    reasons
-                },
-                decision: decisionType,
-                confidence: score,
-                ruleId: 'default-weighted-score'
-            });
+            if (decisionType !== 'NO_MATCH') {
+                decisions.push({
+                    candidate: {
+                        sourceEntityId: entity.id,
+                        targetEntityId: candidateEntity.id,
+                        overallScore: score,
+                        features,
+                        reasons
+                    },
+                    decision: decisionType,
+                    confidence: score,
+                    ruleId: 'default-weighted-score'
+                });
+            }
         }
-      }
-    }));
+        }));
 
-    await Promise.all(tasks);
-    return decisions;
+        await Promise.all(tasks);
+        return decisions;
+    });
   }
 
   /**

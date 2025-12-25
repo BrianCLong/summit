@@ -1,6 +1,6 @@
-
 import express from 'express';
 import crypto from 'crypto';
+import { exportData } from '../analytics/exports/ExportController.js';
 
 const router = express.Router();
 
@@ -28,5 +28,7 @@ router.post('/sign-manifest', async (req, res) => {
     res.status(500).json({ error: 'Failed to sign manifest' });
   }
 });
+
+router.post('/analytics/export', exportData);
 
 export default router;
