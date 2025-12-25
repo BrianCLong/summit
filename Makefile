@@ -67,6 +67,15 @@ k6:     ## Perf smoke (TARGET=http://host:port make k6)
 sbom:   ## Generate CycloneDX SBOM
 	@pnpm cyclonedx-npm --output-format JSON --output-file sbom.json
 
+smoke: bootstrap up ## Fresh clone smoke test: bootstrap -> up -> health check
+	@echo "Waiting for services to start..."
+	@sleep 20
+	@echo "Checking UI health..."
+	@curl -s -f http://localhost:3000 > /dev/null && echo "✅ UI is up" || (echo "❌ UI failed" && exit 1)
+	@echo "Checking Gateway health..."
+	@curl -s -f http://localhost:8080/health > /dev/null && echo "✅ Gateway is up" || (echo "❌ Gateway failed" && exit 1)
+	@echo "Smoke test complete."
+
 # ---- IntelGraph S25 Merge Orchestrator (Legacy/Specific) ---------------------
 
 SHELL := /bin/bash
