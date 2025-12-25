@@ -13,6 +13,7 @@ import {
   maestroChangeFailureRate,
   maestroMttrHours,
 } from '../monitoring/metrics.js';
+import { logger } from '../observability/index.js';
 import {
   performHealthCheck,
   getCachedHealthStatus,
@@ -496,12 +497,12 @@ router.post('/telemetry/events', (req: Request, res: Response) => {
         tenant_id: tenantId,
       });
       // Log full error details for debugging (the metric only tracks counts)
-      console.error('🚨 UI Error Boundary Caught Exception:', {
+      logger.error({
+        msg: 'UI Error Boundary Caught Exception',
         component: labels?.component,
         message: labels?.message,
         stack: labels?.stack,
         tenantId,
-        timestamp: new Date().toISOString(),
       });
     }
 
@@ -558,7 +559,7 @@ router.post('/telemetry/events', (req: Request, res: Response) => {
  */
 router.post('/telemetry/dora', (req: Request, res: Response) => {
   const { metric, value, labels } = req.body;
-  const tenantId = (req.headers['x-tenant-id'] as string) || 'unknown';
+  const _tenantId = (req.headers['x-tenant-id'] as string) || 'unknown'; // Reserved for future tenant-scoped metrics
 
   if (!metric) {
     return res.status(400).json({ error: 'Metric name is required' });
