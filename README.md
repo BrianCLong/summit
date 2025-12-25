@@ -207,6 +207,13 @@ Summit/IntelGraph is purpose-built for the intelligence community with:
 
 This 5-minute workflow validates the core platform functionality using the dataset in [`data/golden-path/demo-investigation.json`](data/golden-path/demo-investigation.json). `make smoke` and the `scripts/smoke-test.js` harness use the same payload so local runs match CI exactly.
 
+### Demo Walkthrough Page
+
+When running in demo mode, access the guided walkthrough at `/demo` to learn about the platform features:
+- Available only when `VITE_DEMO_MODE=1` is set
+- Includes step-by-step instructions for non-technical users
+- Shows where to click and what to look for in the interface
+
 1. **Open Frontend**: Navigate to http://localhost:3000
    - Verify: Login page loads, no console errors
 
