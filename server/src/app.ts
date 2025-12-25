@@ -90,6 +90,7 @@ import { gtmRouter } from './routes/gtm-messaging.js';
 import { airgapRouter } from './routes/airgap.js';
 import drRouter from './routes/dr.js';
 import reportingRouter from './routes/reporting.js';
+import masteryRouter from './routes/mastery.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -352,6 +353,7 @@ export const createApp = async () => {
   app.use('/airgap', airgapRouter);
   app.use('/dr', drRouter);
   app.use('/api/reporting', reportingRouter);
+  app.use('/api/mastery', masteryRouter);
   app.get('/metrics', metricsRoute);
 
   // Initialize SummitInvestigate Platform Routes
