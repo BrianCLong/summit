@@ -1,4 +1,7 @@
-## 2025-10-27 - Hardcoded JWT Secret Fallback in Auth Library
-**Vulnerability:** The authentication library (`server/src/lib/auth.ts`) contained a hardcoded fallback JWT secret (`dev_jwt_secret_12345_very_long_secret_for_development`) that was used if the environment variable `JWT_SECRET` was missing. This bypassed the centralized configuration validation system which checks for insecure secrets in production.
-**Learning:** Hardcoded fallbacks in utility libraries can undermine centralized security configuration checks. Even if the config system is secure, if individual modules bypass it with their own defaults, the system remains vulnerable.
-**Prevention:** Always import configuration from the centralized config module (`server/src/config/index.ts`). Never define default secrets in library code. Use the type-safe configuration object to ensure values are validated.
+# Sentinel Journal
+
+## 2025-12-25 - Unauthenticated Webhooks & Raw Body Capture
+
+**Vulnerability:** The `/api/webhooks/github` endpoint was accepting requests without verifying the `X-Hub-Signature-256` header, allowing anyone to spoof PR events and potentially trigger internal workflows or corrupt ticket data.
+**Learning:** The global `express.json()` middleware consumed the request stream, making it impossible to verify signatures in downstream route handlers because the raw body was lost. This is a common pattern in Express apps where global middleware interferes with specific security requirements.
+**Prevention:** Modified `server/src/app.ts` to capture `req.rawBody` within the `express.json()` `verify` callback. This enables any downstream route to perform cryptographic verification of the original payload. Future webhook implementations should always verify signatures and ensure `rawBody` is available.

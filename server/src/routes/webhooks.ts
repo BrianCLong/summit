@@ -10,8 +10,55 @@ import { webhookService, CreateWebhookSchema, UpdateWebhookSchema } from '../web
 import { z } from 'zod/v4';
 import { logger, metrics, tracer } from '../observability/index.js';
 import { SpanKind, SpanStatusCode } from '@opentelemetry/api';
+import crypto from 'crypto';
 
 const router = Router();
+
+// GitHub Signature Verification Middleware
+const verifyGitHubSignature = (req: any, res: any, next: any) => {
+  const signature = req.headers['x-hub-signature-256'];
+  const secret = process.env.GITHUB_WEBHOOK_SECRET;
+
+  // Skip verification if secret is not configured (e.g. dev/test)
+  // WARN: In production this should be enforced strictly.
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      logger.error('GITHUB_WEBHOOK_SECRET is missing in production');
+      return res.status(500).json({ error: 'Server configuration error' });
+    }
+    return next();
+  }
+
+  if (!signature) {
+    return res.status(401).json({ error: 'Missing X-Hub-Signature-256 header' });
+  }
+
+  const rawBody = req.rawBody;
+  if (!rawBody) {
+    logger.warn('Webhook received without rawBody (express.json verify hook missing?)');
+    return res.status(400).json({ error: 'Payload verification failed' });
+  }
+
+  const hmac = crypto.createHmac('sha256', secret);
+  const digest = 'sha256=' + hmac.update(rawBody).digest('hex');
+
+  const sigString = Array.isArray(signature) ? signature[0] : signature;
+  const sigBuffer = Buffer.from(sigString);
+  const digestBuffer = Buffer.from(digest);
+
+  try {
+    if (
+      sigBuffer.length !== digestBuffer.length ||
+      !crypto.timingSafeEqual(digestBuffer, sigBuffer)
+    ) {
+      return res.status(401).json({ error: 'Invalid signature' });
+    }
+  } catch (error) {
+    return res.status(401).json({ error: 'Invalid signature format' });
+  }
+
+  next();
+};
 
 // Helper for validation (for new routes)
 const validate = (schema: any) => (req: any, res: any, next: any) => {
@@ -326,6 +373,7 @@ router.post('/trigger-test', async (req, res) => {
  */
 router.post(
   '/github',
+  verifyGitHubSignature,
   body('action').isString(),
   body('number').optional().isNumeric(),
   body('pull_request').optional().isObject(),

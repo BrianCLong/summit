@@ -192,7 +192,14 @@ export const createApp = async () => {
     }),
   );
 
-  app.use(express.json({ limit: '1mb' }));
+  app.use(
+    express.json({
+      limit: '1mb',
+      verify: (req: any, _res, buf) => {
+        req.rawBody = buf;
+      },
+    }),
+  );
   app.use(sanitizeInput);
   app.use(safetyModeMiddleware);
 
