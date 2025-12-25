@@ -1,7 +1,7 @@
 /**
  * Prometheus metrics collection for IntelGraph Platform
  */
-import * as client from 'prom-client';
+const client = require('prom-client');
 
 // Create a Registry which registers the metrics
 const register = new client.Registry();
@@ -449,6 +449,12 @@ const llmRequestDuration = new client.Histogram({
   labelNames: ['model'],
 });
 
+const intelgraphJobQueueDepth = new client.Gauge({
+  name: 'intelgraph_job_queue_depth',
+  help: 'Current depth of job queues',
+  labelNames: ['queue_name', 'status'],
+});
+
 // Auto-remediation execution tracking
 const serviceAutoRemediationsTotal = new client.Counter({
   name: 'service_auto_remediations_total',
@@ -522,19 +528,22 @@ const metrics = {
   maestroDagExecutionDurationSeconds,
   maestroJobExecutionDurationSeconds,
   llmTokensTotal,
-  llmRequestDuration
+  llmRequestDuration,
+  intelgraphJobQueueDepth
 };
 
 // Update memory usage periodically
-setInterval(() => {
-  const usage = process.memoryUsage();
-  memoryUsage.set({ component: 'heap_used' }, usage.heapUsed);
-  memoryUsage.set({ component: 'heap_total' }, usage.heapTotal);
-  memoryUsage.set({ component: 'external' }, usage.external);
-  memoryUsage.set({ component: 'rss' }, usage.rss);
-}, 30000); // Every 30 seconds
+if (process.env.NODE_ENV !== 'test') {
+  setInterval(() => {
+    const usage = process.memoryUsage();
+    memoryUsage.set({ component: 'heap_used' }, usage.heapUsed);
+    memoryUsage.set({ component: 'heap_total' }, usage.heapTotal);
+    memoryUsage.set({ component: 'external' }, usage.external);
+    memoryUsage.set({ component: 'rss' }, usage.rss);
+  }, 30000); // Every 30 seconds
+}
 
-export {
+module.exports = {
   register,
   httpRequestDuration,
   httpRequestsTotal,
@@ -606,5 +615,6 @@ export {
   maestroDagExecutionDurationSeconds,
   maestroJobExecutionDurationSeconds,
   llmTokensTotal,
-  llmRequestDuration
+  llmRequestDuration,
+  intelgraphJobQueueDepth
 };

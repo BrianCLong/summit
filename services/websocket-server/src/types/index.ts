@@ -83,11 +83,17 @@ export interface ServerToClientEvents {
 
   // Collaboration events
   'collaboration:cursor_update': (data: { connectionId: string; userId: string; x: number; y: number; username?: string }) => void;
+  'collaboration:annotation_add': (data: { room: string; annotation: any }) => void;
+  'collaboration:annotation_remove': (data: { room: string; annotationId: string }) => void;
+  'collaboration:filter_update': (data: { room: string; filter: any }) => void;
 }
 
 export interface ClientToServerEvents {
   // Collaboration events
   'collaboration:cursor_move': (data: { room: string; x: number; y: number; username?: string }) => void;
+  'collaboration:annotation_add': (data: { room: string; annotation: any }) => void;
+  'collaboration:annotation_remove': (data: { room: string; annotationId: string }) => void;
+  'collaboration:filter_update': (data: { room: string; filter: any }) => void;
 
   // Presence events
   'presence:heartbeat': (data: { status?: PresenceStatus }) => void;

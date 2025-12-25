@@ -4,6 +4,7 @@ import { cfg } from '../config/index.js';
 import { createReportingService } from '../reporting/service.js';
 import { AccessControlService } from '../reporting/access-control.js';
 import { AccessRule, AccessContext } from '../reporting/types.js';
+import { registerRevenueJobs } from '../jobs/revenue/RevenueJobs.js';
 
 // Define system-level access rules for background jobs
 const systemRules: AccessRule[] = [
@@ -49,6 +50,9 @@ class BatchJobService {
   }
 
   private async registerWorkers() {
+      // Register revenue jobs
+      await registerRevenueJobs(this.boss);
+
       // Register worker for report generation
       await this.boss.work(JOB_QUEUE_GENERATE_REPORT, async (job) => {
           console.log(`[PG-BOSS] Processing report job ${job.id} (${job.name})`);

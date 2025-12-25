@@ -1,13 +1,14 @@
-import { Pool } from 'pg';
+import { ManagedPostgresPool } from '../db/postgres.js';
 import { getPostgresPool } from '../config/database.js';
 import { UsageEvent } from '../types/usage.js';
 import logger from '../utils/logger.js';
 import { randomUUID } from 'crypto';
 import { PrometheusMetrics } from '../utils/metrics.js';
+import { fraudService } from './FraudService.js';
 
 export class UsageMeteringService {
   private static instance: UsageMeteringService;
-  private pool: Pool;
+  private pool: ManagedPostgresPool;
   private metrics: PrometheusMetrics;
 
   private constructor() {
@@ -54,6 +55,19 @@ export class UsageMeteringService {
 
       this.metrics.incrementCounter('events_recorded_total', { kind: event.kind });
 
+      // Basic Fraud Detection: Velocity/Spike check (naive implementation)
+      // In real world, this would be async or in a separate worker.
+      // Arbitrary threshold of 10000 for demo purposes
+      if (event.quantity > 10000) {
+         await fraudService.reportSignal({
+             tenantId: event.tenantId,
+             signalType: 'usage_spike',
+             severity: 'medium',
+             source: 'usage_metering',
+             payload: { eventId: event.id, quantity: event.quantity, kind: event.kind }
+         });
+      }
+
     } catch (error) {
       logger.error('Failed to record usage event', { error, event });
       throw error;
@@ -92,6 +106,16 @@ export class UsageMeteringService {
         ]
       );
       this.metrics.incrementCounter('events_recorded_total', { kind: event.kind });
+
+      if (event.quantity > 10000) {
+         await fraudService.reportSignal({
+             tenantId: event.tenantId,
+             signalType: 'usage_spike',
+             severity: 'medium',
+             source: 'usage_metering',
+             payload: { eventId: event.id, quantity: event.quantity, kind: event.kind }
+         });
+      }
       }
       await client.query('COMMIT');
     } catch (error) {

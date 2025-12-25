@@ -8,6 +8,10 @@ export interface DSLQuery {
     edgeTypes: string[];
     depth?: number;
     direction?: 'out' | 'in' | 'both';
+    target?: {
+        type?: string;
+        filter?: Record<string, any>;
+    };
   }[];
   filter?: Record<string, any>; // applied to results
   aggregate?: {
@@ -42,6 +46,9 @@ function validateDSL(query: DSLQuery) {
              throw new Error(`Invalid edge type: ${type}`);
           }
         });
+      }
+      if (step.target?.type && !identifierRegex.test(step.target.type)) {
+          throw new Error(`Invalid target type: ${step.target.type}`);
       }
     });
   }
@@ -84,6 +91,26 @@ export function buildCypherFromDSL(query: DSLQuery, tenantId: string): { cypher:
       const dirEnd = step.direction === 'out' ? '->' : '-';
 
       cypher += `MATCH (${currentNode})${dir}[${edges}${depthStr}]${dirEnd}(${nextNode}) \n`;
+
+      // Target Node Filtering
+      if (step.target) {
+          let hasWhere = false;
+          if (step.target.type) {
+              cypher += `WHERE ${nextNode}.entityType = $targetType${idx} \n`;
+              params[`targetType${idx}`] = step.target.type;
+              hasWhere = true;
+          }
+          if (step.target.filter) {
+               Object.entries(step.target.filter).forEach(([key, val], fIdx) => {
+                   const paramName = `targetFilter${idx}_${fIdx}`;
+                   const prefix = hasWhere ? 'AND' : 'WHERE';
+                   cypher += `${prefix} ${nextNode}.${key} = $${paramName} \n`;
+                   params[paramName] = val;
+                   hasWhere = true;
+               });
+          }
+      }
+
       currentNode = nextNode;
     });
   }

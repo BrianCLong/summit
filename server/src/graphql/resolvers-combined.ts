@@ -8,6 +8,7 @@ import { v040Resolvers } from './resolvers/v040/index';
 import { activityResolvers } from './resolvers/activity.js';
 import { geoIntResolvers } from './resolvers/geoint.js';
 import { documentResolvers } from './resolvers.document.js';
+import { ingestionResolvers } from './resolvers/ingestionResolvers.js';
 import { randomUUID } from 'node:crypto';
 
 interface User {
@@ -126,6 +127,7 @@ export const resolvers = {
     ...(copilotResolvers.Subscription || {}),
     ...(aiResolvers.Subscription || {}),
     ...(annotationsResolvers.Subscription || {}),
+    ...(ingestionResolvers.Subscription || {}),
     investigationUpdated: {
       subscribe: () => pubsub.asyncIterator(['INVESTIGATION_UPDATED']),
     },

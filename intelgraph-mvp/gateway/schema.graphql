@@ -1,14 +1,13 @@
 type Query {
-  entityById(id: ID!, tenant: ID!): Entity!
+  entityById(id: ID!, tenant: ID!): Entity
   searchEntities(q: String!, limit: Int = 25, tenant: ID!): [Entity!]!
-  neighbors(id: ID!, hops: Int = 2, filter: NeighborFilter, tenant: ID!): [Entity!]!
+  neighbors(id: ID!, hops: Int = 1, filter: NeighborFilter, tenant: ID!): [Entity!]!
 }
 
 interface Entity {
   id: ID!
   tenant: ID!
   labels: [String!]!
-  score: Float
   metadata: JSON
 }
 
@@ -16,48 +15,53 @@ type Person implements Entity {
   id: ID!
   tenant: ID!
   labels: [String!]!
-  score: Float
   metadata: JSON
   name: String!
-  email: String @pii
+  description: String
 }
 
 type Org implements Entity {
   id: ID!
   tenant: ID!
   labels: [String!]!
-  score: Float
   metadata: JSON
   name: String!
+  description: String
 }
 
-type Asset implements Entity {
+type Location implements Entity {
   id: ID!
   tenant: ID!
   labels: [String!]!
-  score: Float
   metadata: JSON
-  type: String!
-  value: String!
+  name: String!
+  description: String
 }
 
 type Event implements Entity {
   id: ID!
   tenant: ID!
   labels: [String!]!
-  score: Float
   metadata: JSON
-  description: String!
-  timestamp: String!
+  name: String!
+  description: String
 }
 
-type Indicator implements Entity {
+type Document implements Entity {
   id: ID!
   tenant: ID!
   labels: [String!]!
-  score: Float
   metadata: JSON
-  pattern: String!
+  name: String!
+  description: String
+}
+
+# Fallback for generic entities
+type GenericEntity implements Entity {
+  id: ID!
+  tenant: ID!
+  labels: [String!]!
+  metadata: JSON
 }
 
 input NeighborFilter {

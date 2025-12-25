@@ -1,6 +1,7 @@
 export interface Quota {
     tier: 'FREE' | 'STARTER' | 'PRO' | 'ENTERPRISE';
     requestsPerMinute: number;
+    ingestEventsPerMinute: number;
     maxTokensPerRequest: number;
     storageLimitBytes: number;
     seatCap: number;
@@ -33,6 +34,7 @@ export class QuotaManager {
                 return {
                     tier: 'ENTERPRISE',
                     requestsPerMinute: 10000,
+                    ingestEventsPerMinute: 50000,
                     maxTokensPerRequest: 32000,
                     storageLimitBytes: 1_000_000_000_000, // 1 TB
                     seatCap: 500,
@@ -41,6 +43,7 @@ export class QuotaManager {
                 return {
                     tier: 'PRO',
                     requestsPerMinute: 1000,
+                    ingestEventsPerMinute: 5000,
                     maxTokensPerRequest: 16000,
                     storageLimitBytes: 250_000_000_000, // 250 GB
                     seatCap: 150,
@@ -49,6 +52,7 @@ export class QuotaManager {
                 return {
                     tier: 'STARTER',
                     requestsPerMinute: 100,
+                    ingestEventsPerMinute: 500,
                     maxTokensPerRequest: 4000,
                     storageLimitBytes: 50_000_000_000, // 50 GB
                     seatCap: 50,
@@ -58,6 +62,7 @@ export class QuotaManager {
                 return {
                     tier: 'FREE',
                     requestsPerMinute: 20,
+                    ingestEventsPerMinute: 100,
                     maxTokensPerRequest: 1000,
                     storageLimitBytes: 5_000_000_000, // 5 GB
                     seatCap: 5,
