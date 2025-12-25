@@ -1,10 +1,11 @@
 #!/usr/bin/env node
-const fs = require('fs');
-const crypto = require('crypto');
+import fs from 'fs';
+import { createHash } from 'crypto';
+import { execSync } from 'child_process';
 
 function sha256(path) {
   const buf = fs.readFileSync(path);
-  return crypto.createHash('sha256').update(buf).digest('hex');
+  return createHash('sha256').update(buf).digest('hex');
 }
 
 const files = [
@@ -20,11 +21,10 @@ const manifest = {
   git: {
     commit:
       process.env.GITHUB_SHA ||
-      require('child_process').execSync('git rev-parse HEAD').toString().trim(),
+      execSync('git rev-parse HEAD').toString().trim(),
     branch:
       process.env.GITHUB_REF_NAME ||
-      require('child_process')
-        .execSync('git rev-parse --abbrev-ref HEAD')
+      execSync('git rev-parse --abbrev-ref HEAD')
         .toString()
         .trim(),
   },
