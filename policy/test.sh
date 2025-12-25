@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -uo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OPA_VERSION="${OPA_VERSION:-0.67.1}"
@@ -10,11 +10,32 @@ if command -v opa >/dev/null 2>&1; then
 elif [ -x "${OPA_BIN_DEFAULT}" ]; then
   OPA_BIN="${OPA_BIN_DEFAULT}"
 else
+  echo "Downloading OPA..."
   mkdir -p "$(dirname "${OPA_BIN_DEFAULT}")"
+  # Use curl -L for redirects
   curl -sL "https://openpolicyagent.org/downloads/v${OPA_VERSION}/opa_linux_amd64_static" -o "${OPA_BIN_DEFAULT}"
   chmod +x "${OPA_BIN_DEFAULT}"
   OPA_BIN="${OPA_BIN_DEFAULT}"
 fi
 
+echo "Using OPA from: ${OPA_BIN}"
 cd "${ROOT_DIR}"
-"${OPA_BIN}" test "${ROOT_DIR}/abac" "${ROOT_DIR}/simulation" "${ROOT_DIR}/tests/abac_test.rego" "${ROOT_DIR}/tests/simulation_test.rego" -v
+
+echo "Running OPA tests..."
+
+# Run tests and capture exit code
+set +e
+"${OPA_BIN}" test . -v
+TEST_EXIT_CODE=$?
+set -e
+
+# Generate JSON report regardless of success/failure
+"${OPA_BIN}" test . -f json > test_report.json || true
+echo "Test report generated at ${ROOT_DIR}/test_report.json"
+
+if [ $TEST_EXIT_CODE -ne 0 ]; then
+  echo "Tests failed."
+  exit 1
+else
+  echo "Tests passed."
+fi

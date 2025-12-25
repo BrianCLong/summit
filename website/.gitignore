@@ -2,7 +2,10 @@ node_modules
 .next
 out
 .env.local
-.env*
+.env*.local
+.env.production
+.env.development
+!.env.example
 playwright-report
 coverage
 *.log
