@@ -1,0 +1,13 @@
+Summary,Description,Acceptance Criteria,Story Points,Owner
+"SCOUT: Prior Art Search","Identify 10-20 prior art references for Telemetry-Aware DPO and Human-in-the-loop Alignment. Create a novelty matrix.","CSV of prior art + Novelty Matrix MD delivered.",3,SCOUT
+"ARCHITECT: Method Spec","Define the architecture for connecting Telemetry to Alignment Trainer and the Human Review API.","Spec document in /auto_scientist/spec/method.md.",5,ARCHITECT
+"ARCHITECT: API Contract","Define the OpenAPI/GRPC contract for the Human Review Service.","Contract file in /auto_scientist/integration/api_contract.md.",3,ARCHITECT
+"EXPERIMENTALIST: Repro Harness","Create a simulation harness for generating synthetic telemetry events with known faults.","Harness code running via `make harness`.",5,EXPERIMENTALIST
+"EXPERIMENTALIST: Baseline DPO","Implement a baseline DPO training script using standard datasets (no telemetry).","Script runs and produces metrics.",3,EXPERIMENTALIST
+"IMPLEMENTATION: TelemetryConnector","Implement the `TelemetryConnector` module to ingest logs from `server/src/telemetry`.","Module consumes logs and normalizes them.",8,IMPLEMENTATION
+"IMPLEMENTATION: PreferenceBuilder","Implement logic to convert normalized telemetry + human feedback into DPO preference pairs.","Unit tests passing for preference generation.",5,IMPLEMENTATION
+"IMPLEMENTATION: HumanReviewService","Implement the backend service for human review of escalated cases.","Service API up and running.",8,IMPLEMENTATION
+"PATENT: Claims Draft","Draft 2 independent and 8 dependent claims for the Self-Correcting Telemetry Protocol.","Claims MD file committed.",3,PATENT-COUNSEL
+"COMMERCIAL: One-Pager","Draft the commercial brief and ROI narrative for Alignment-as-a-Service.","Brief MD file committed.",2,COMMERCIALIZER
+"COMPLIANCE: SBOM & Governance","Generate SBOM and document PII handling for preference data.","SBOM and Governance MD files committed.",3,COMPLIANCE
+"INTEGRATION: End-to-End Demo","Create a demo script showing the full loop: Telemetry -> Flag -> Human -> Train -> Update.","Demo script operational.",5,INTEGRATION
