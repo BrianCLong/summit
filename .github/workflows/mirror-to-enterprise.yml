@@ -1,0 +1,36 @@
+name: Mirror to TopicalityLLC/Summit
+
+on:
+  push:
+    branches:
+      - main
+      - 'release/**'
+  workflow_dispatch:
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.ENTERPRISE_MIRROR_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+
+      - name: Add TopicalityLLC remote
+        run: |
+          git remote add topicality https://x-access-token:${{ secrets.ENTERPRISE_MIRROR_TOKEN }}@github.com/TopicalityLLC/Summit.git
+
+      - name: Push to TopicalityLLC/Summit
+        run: |
+          git push topicality ${{ github.ref }}:${{ github.ref }} --force
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::Failed to mirror to TopicalityLLC/Summit"
