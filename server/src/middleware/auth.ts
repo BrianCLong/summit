@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import AuthService from '../services/AuthService.js';
 import { getAuditSystem } from '../audit/advanced-audit-system.js';
 import logger from '../utils/logger.js';
+import { metrics } from '../observability/metrics.js';
 
 interface AuthenticatedRequest extends Request {
   user?: any;
@@ -39,8 +40,10 @@ export function requirePermission(permission: string) {
     const user = req.user;
     if (!user) return res.status(401).json({ error: 'Unauthorized' });
     if (authService.hasPermission(user, permission)) {
+      (metrics as any).pbacDecisionsTotal?.inc({ decision: 'allow' });
       return next();
     } else {
+      (metrics as any).pbacDecisionsTotal?.inc({ decision: 'deny' });
       try {
         getAuditSystem().recordEvent({
           eventType: 'policy_violation',

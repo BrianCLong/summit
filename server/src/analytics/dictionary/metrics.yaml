@@ -1,0 +1,29 @@
+# Analytics Metrics Dictionary
+# Single source of truth for all tracked metrics
+
+- name: active_users_daily
+  type: count_unique
+  owner: analytics-team
+  description: Number of unique users active in a day
+  formula: count_unique(user_id) where event_type = 'any'
+  sourceEvents: ['page_view', 'api_call']
+  piiClass: none
+  retentionDays: 90
+
+- name: checkout_conversion_rate
+  type: ratio
+  owner: growth-team
+  description: Percentage of users who start checkout and complete it
+  formula: count(purchase) / count(checkout_start)
+  sourceEvents: ['purchase', 'checkout_start']
+  piiClass: none
+  retentionDays: 365
+
+- name: error_rate
+  type: ratio
+  owner: engineering
+  description: Ratio of 500 errors to total requests
+  formula: count(status=500) / count(requests)
+  sourceEvents: ['api_call']
+  piiClass: none
+  retentionDays: 30

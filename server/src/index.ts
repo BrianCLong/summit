@@ -21,6 +21,7 @@ import { cfg } from './config.js';
 import { initializeTracing } from './observability/tracer.js';
 import { streamingRateLimiter } from './routes/streaming.js';
 import { startOSINTWorkers } from './services/OSINTQueueService.js';
+import { ingestionService } from './services/IngestionService.js';
 import { BackupManager } from './backup/BackupManager.js';
 import { checkNeo4jIndexes } from './db/indexManager.js';
 const __filename = fileURLToPath(import.meta.url);

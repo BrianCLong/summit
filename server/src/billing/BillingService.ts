@@ -3,6 +3,7 @@ import { BillingAdapter, UsageReport } from './types.js';
 import { tenantCostService } from '../services/TenantCostService.js';
 import { logger } from '../config/logger.js';
 import { DatabaseService } from '../services/DatabaseService.js';
+import { fraudService } from '../services/FraudService.js';
 
 export class BillingService {
   private adapter: BillingAdapter;
@@ -24,6 +25,13 @@ export class BillingService {
   }
 
   async generateAndExportReport(tenantId: string, date: Date = new Date()): Promise<UsageReport> {
+    // Check for active holds
+    const isHoldActive = await fraudService.isHoldActive('tenant', tenantId);
+    if (isHoldActive) {
+        logger.warn({ tenantId }, 'Billing report generation paused due to active hold.');
+        throw new Error('Billing operations paused for this tenant.');
+    }
+
     // Calculate period (previous day 00:00 to 23:59)
     const periodStart = new Date(date);
     periodStart.setDate(periodStart.getDate() - 1);

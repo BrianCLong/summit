@@ -10,7 +10,8 @@ import { createRelationshipLoader, type Relationship } from './relationshipLoade
 import { createInvestigationLoader, type Investigation } from './investigationLoader.js';
 import { createUserLoader, type User } from './userLoader.js';
 import type { Driver as Neo4jDriver } from 'neo4j-driver';
-import type { Pool as PgPool } from 'pg';
+import type { Pool as PgPool, PoolClient } from 'pg';
+import type { Redis } from 'ioredis';
 
 export interface DataLoaders {
   entityLoader: DataLoader<string, Entity, string>;
@@ -23,6 +24,8 @@ export interface DataLoaders {
 export interface DataLoaderContext {
   neo4jDriver: Neo4jDriver;
   pgPool: PgPool;
+  pgClient?: PoolClient;
+  redis?: Redis | null;
   tenantId: string;
 }
 

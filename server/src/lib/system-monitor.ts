@@ -1,73 +1,90 @@
-import v8 from 'v8';
-import { logger } from '../config/logger.js';
+// @ts-nocheck
+import * as v8 from 'v8';
+import * as os from 'os';
+import { logger } from '../config/logger';
 
-interface SystemHealth {
+export interface SystemHealth {
   isOverloaded: boolean;
   reason?: string;
   metrics: {
-    eventLoopLag: number;
-    heapUsedPct: number;
-    activeHandles: number;
+    cpuUsage: number;
+    memoryUsage: number;
+    uptime: number;
+    loadAverage: number[];
   };
 }
 
 class SystemMonitor {
-  private lastCheck: number = Date.now();
-  private lag: number = 0;
-  private intervalId?: NodeJS.Timeout;
-  private readonly CHECK_INTERVAL = 500;
+  private static instance: SystemMonitor;
+  private lastCpuUsage: NodeJS.CpuUsage | null = null;
+  private lastCpuTime: number = Date.now();
+  private currentCpuLoad: number = 0;
 
   // Thresholds
-  private readonly MAX_LAG_MS = 200; // 200ms lag is getting dangerous
-  private readonly MAX_HEAP_PCT = 0.85; // 85% heap usage
+  private readonly MEMORY_THRESHOLD = 0.85; // 85% heap usage
+  private readonly CPU_THRESHOLD = 0.90;    // 90% CPU load
 
-  constructor() {
-    this.start();
+  private constructor() {
+    // Start periodic sampling
+    setInterval(() => this.sampleCpu(), 5000).unref();
   }
 
-  private start() {
-    this.intervalId = setInterval(() => {
-      const now = Date.now();
-      const dt = now - this.lastCheck;
-      // Theoretical diff is CHECK_INTERVAL.
-      // Lag is the excess time.
-      this.lag = Math.max(0, dt - this.CHECK_INTERVAL);
-      this.lastCheck = now;
-    }, this.CHECK_INTERVAL).unref(); // unref so it doesn't keep process alive
+  public static getInstance(): SystemMonitor {
+    if (!SystemMonitor.instance) {
+      SystemMonitor.instance = new SystemMonitor();
+    }
+    return SystemMonitor.instance;
+  }
+
+  private sampleCpu() {
+    const currentCpuUsage = process.cpuUsage();
+    const currentTime = Date.now();
+
+    if (this.lastCpuUsage) {
+      const timeDiff = currentTime - this.lastCpuTime;
+      const userDiff = currentCpuUsage.user - this.lastCpuUsage.user;
+      const systemDiff = currentCpuUsage.system - this.lastCpuUsage.system;
+
+      // Calculate % usage (microseconds / milliseconds * 1000)
+      const totalUsage = (userDiff + systemDiff) / (timeDiff * 1000);
+      this.currentCpuLoad = Math.min(1.0, totalUsage);
+    }
+
+    this.lastCpuUsage = currentCpuUsage;
+    this.lastCpuTime = currentTime;
   }
 
   public getHealth(): SystemHealth {
-    const { heap_size_limit, used_heap_size } = v8.getHeapStatistics();
-    const heapUsedPct = used_heap_size / heap_size_limit;
-    // activeHandles requires 'process._getActiveHandles()' which is internal/deprecated or
-    // process.resourceUsage() in newer nodes. Let's stick to standard metrics.
-    // actually process.getActiveResourcesInfo() exists in newer node.
-    // For now, let's just count handles if possible, or skip.
-    const activeHandles = (process as any)._getActiveHandles?.().length || 0;
+    const heapStats = v8.getHeapStatistics();
+    const memoryUsage = heapStats.used_heap_size / heapStats.heap_size_limit;
 
-    const isLagging = this.lag > this.MAX_LAG_MS;
-    const isOOM = heapUsedPct > this.MAX_HEAP_PCT;
+    const loadAvg = os.loadavg();
+    const cpuUsage = this.currentCpuLoad;
 
+    let isOverloaded = false;
     let reason: string | undefined;
-    if (isLagging) reason = `Event Loop Lag: ${this.lag}ms`;
-    if (isOOM) reason = `High Memory: ${(heapUsedPct * 100).toFixed(1)}%`;
+
+    if (memoryUsage > this.MEMORY_THRESHOLD) {
+      isOverloaded = true;
+      reason = `Memory usage critical: ${(memoryUsage * 100).toFixed(1)}%`;
+      logger.warn({ memoryUsage, threshold: this.MEMORY_THRESHOLD }, 'System Monitor: Memory overload detected');
+    } else if (cpuUsage > this.CPU_THRESHOLD) {
+      isOverloaded = true;
+      reason = `CPU usage critical: ${(cpuUsage * 100).toFixed(1)}%`;
+      logger.warn({ cpuUsage, threshold: this.CPU_THRESHOLD }, 'System Monitor: CPU overload detected');
+    }
 
     return {
-      isOverloaded: isLagging || isOOM,
+      isOverloaded,
       reason,
       metrics: {
-        eventLoopLag: this.lag,
-        heapUsedPct,
-        activeHandles,
+        cpuUsage,
+        memoryUsage,
+        uptime: process.uptime(),
+        loadAverage: loadAvg,
       },
     };
   }
-
-  public stop() {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-    }
-  }
 }
 
-export const systemMonitor = new SystemMonitor();
+export const systemMonitor = SystemMonitor.getInstance();

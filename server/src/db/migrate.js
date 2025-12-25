@@ -4,10 +4,22 @@ import { Client } from 'pg';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { dbConfig } from '../config.js';
+// Use explicit path and no extension if possible or allow resolution of .ts
+// For now, we'll try to use a simplified config loader or rely on env
+import dotenv from 'dotenv';
+
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Minimal config for migration
+const dbConfig = {
+  connectionConfig: {
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined,
+  },
+};
 
 class MigrationRunner {
   constructor() {
