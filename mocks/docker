@@ -1,0 +1,2 @@
+#!/bin/bash
+if [[ "$*" == *"manifest inspect"* ]]; then echo "Digest: sha256:12345"; exit 0; fi

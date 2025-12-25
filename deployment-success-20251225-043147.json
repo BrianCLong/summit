@@ -1,0 +1,12 @@
+{
+  "timestamp": "2025-12-25T04:31:48Z",
+  "version": "v1.24.0",
+  "environment": "production",
+  "deployment_type": "canary",
+  "status": "success",
+  "duration_seconds": 5,
+  "canary_percentage": 10,
+  "monitoring_duration": 2,
+  "slo_compliance": true,
+  "promotion_time": "2025-12-25T04:31:48Z"
+}

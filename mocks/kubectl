@@ -1,0 +1,4 @@
+#!/bin/bash
+if [[ "$*" == *"set image"* ]]; then exit 0; fi
+if [[ "$*" == *"rollout status"* ]]; then exit 0; fi
+echo "Mock kubectl: $*"
