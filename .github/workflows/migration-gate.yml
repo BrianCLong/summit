@@ -126,6 +126,27 @@ jobs:
             - Shadow compare: see `shadow-report.json`
             - Rollback plan: produced in `rollback-plan/`
 
+  check-approval:
+    name: Check for Migration Approval
+    needs: plan-and-validate
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.number != ''
+    steps:
+      - name: Verify approval label
+        env:
+          LABELS: ${{ toJson(github.event.pull_request.labels) }}
+        run: |
+          echo "Checking for 'migration:approved' label on PR #${{ github.event.pull_request.number }}"
+
+          if echo "$LABELS" | jq -e '.[] | select(.name == "migration:approved")' > /dev/null; then
+            echo "✅ 'migration:approved' label found."
+            exit 0
+          else
+            echo "❌ 'migration:approved' label MISSING."
+            echo "::error::Schema changes require explicit approval. Please add the 'migration:approved' label to this PR."
+            exit 1
+          fi
+
   synthetic-load:
     needs: plan-and-validate
     runs-on: ubuntu-22.04

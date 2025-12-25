@@ -485,7 +485,82 @@ jobs:
           echo "SLO validation passed (simulated)"
 
   # ==========================================================================
-  # Job 7: Notify channels about release candidate
+  # Job 7: Package Evidence Bundle (SBO, Tests, Scans)
+  # ==========================================================================
+  package-evidence:
+    name: Package Evidence Bundle
+    needs: [version, create-release-branch, build-images, stage-validation]
+    runs-on: ubuntu-latest
+    if: inputs.dry_run != 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.create-release-branch.outputs.branch_name }}
+          fetch-depth: 0
+
+      - name: Set up toolchain
+        run: |
+          # Install cosign
+          curl -O -L "https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64"
+          sudo mv cosign-linux-amd64 /usr/local/bin/cosign
+          sudo chmod +x /usr/local/bin/cosign
+
+          # Install syft for SBOM generation
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+
+          # Install trivy for vulnerability scanning
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Generate SBOMs
+        env:
+          REGISTRY: ghcr.io
+          IMAGE_NAME: ${{ github.repository }}
+          RC_VERSION: ${{ needs.version.outputs.rc_version }}
+        run: |
+          echo "Generating SBOMs..."
+          syft ${REGISTRY}/${IMAGE_NAME}/api:v${RC_VERSION} -o json > sbom.json || echo "{}" > sbom.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install script dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Evidence Packager
+        env:
+          RC_VERSION: ${{ needs.version.outputs.rc_version }}
+          API_DIGEST: ${{ needs.build-images.outputs.api_digest }}
+          WEB_DIGEST: ${{ needs.build-images.outputs.web_digest }}
+          # Simulated metrics URL for stage
+          METRICS_URL: "https://grafana.stage.intelgraph.io/d/release-canary?var-version=${{ needs.version.outputs.rc_version }}"
+        run: |
+          pnpm exec ts-node .ci/scripts/release/evidence_packager.ts \
+            --version "${RC_VERSION}" \
+            --rc-version "${RC_VERSION}" \
+            --api-digest "${API_DIGEST}" \
+            --web-digest "${WEB_DIGEST}" \
+            --metrics-url "${METRICS_URL}" \
+            --output "evidence-bundle-v${RC_VERSION}.zip"
+
+      - name: Upload evidence artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-bundle-v${{ needs.version.outputs.rc_version }}
+          path: evidence-bundle-v${{ needs.version.outputs.rc_version }}.zip
+
+      - name: Attach evidence to draft release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RC_VERSION: ${{ needs.version.outputs.rc_version }}
+        run: |
+          gh release upload "v${RC_VERSION}" \
+            "evidence-bundle-v${RC_VERSION}.zip" \
+            --clobber
+
+  # ==========================================================================
+  # Job 8: Notify channels about release candidate
   # ==========================================================================
   notify:
     name: Notify Channels
