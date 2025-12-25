@@ -1,18 +1,3 @@
-# Python artifacts
 __pycache__/
+experiments/results/
 *.pyc
-*.pyo
-*.pyd
-
-# Build artifacts
-build/
-dist/
-*.egg-info/
-
-# Local outputs
-outputs/
-
-# Virtual environments
-.venv
-venv
-ENV

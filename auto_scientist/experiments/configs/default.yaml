@@ -1,0 +1,3 @@
+experiment_name: "skeleton_run"
+parameters:
+  param1: "value1"
