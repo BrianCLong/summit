@@ -1,6 +1,12 @@
-category,method,description,delta_vs_ours
-RLHF,PPO (Proximal Policy Optimization),Standard RLHF using a reward model and PPO to optimize the policy.,"Tight coupling to training/data telemetry and tool/graph traces. We use graph-structured preference data."
-Preference Opt,DPO (Direct Preference Optimization),Optimizes policy directly from preferences without a separate reward model.,"We incorporate telemetry-aware sampling and tool-execution traces into the preference objective."
-Preference Opt,IPO / ORPO,Variations of DPO handling regularization and odds ratio.,"Same as DPO delta; focus on tool/graph-aware loss."
-Self-Alignment,Constitutional AI,Uses a set of principles (constitution) to guide self-improvement via RLAIF.,"We use multi-tier oversight policies that include graph-operations constraints, not just text principles."
-Agent RL,Bandit/RL for Tools,Optimizes tool selection using RL (e.g. contextual bandits).,"We integrate this into the general alignment loop with a unified oversight layer, rather than separate agent training."
+Source,Date,Relevance,Notes
+"Constitutional AI: Harmlessness from AI Feedback",2022-12-15,High,"Defines method for AI oversight using a constitution."
+"Deep Reinforcement Learning from Human Preferences",2017-06-12,Medium,"Foundational RLHF work."
+"Automated Scientific Discovery",2023-01-01,High,"Generic concept of AI scientists."
+"Self-Refining LLMs for Automated Research",2023-05-20,High,"Iterative refinement loop similar to our 'Refinement' phase."
+"Safety-First AI: A Survey",2023-08-10,Medium,"Overview of safety constraints in generative models."
+"Robotic Laboratory Automation with LLMs",2023-11-05,High,"Integration of LLMs with physical execution engines."
+"Chain-of-Thought Prompting Elicits Reasoning",2022-01-28,Medium,"Underlying mechanism for our Oversight model's reasoning."
+"Red Teaming Language Models with Language Models",2022-02-07,High,"Similar to our 'Oversight' vs 'Generator' dynamic."
+"Scalable Oversight for Large Language Models",2022-11-22,High,"Discusses using AI to oversee AI."
+"The AI Scientist: Automated Discovery",2024-01-15,Critical,"Direct competitor IP; focuses on open-ended discovery."
+"Closed-Loop Autonomous Materials Discovery",2023-09-12,High,"Specific application in materials science."
