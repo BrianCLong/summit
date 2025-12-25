@@ -457,6 +457,66 @@ class ComplianceService {
       this.frameworks.set('cis-k8s', cisK8sFramework);
       this.frameworks.set('nsa-k8s', nsaK8sFramework);
 
+      // Revenue Maturity Framework (Sprint N+12)
+      const revenueFramework: ComplianceFramework = {
+        id: 'revenue-ops',
+        name: 'Revenue Operations Integrity',
+        version: '1.0',
+        description: 'Controls for Revenue, Renewals, and Partner Payouts',
+        enabled: true,
+        assessmentFrequency: 'monthly',
+        nextAssessment: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        status: 'pending',
+        score: 0,
+        requirements: [
+          {
+            id: 'rev-001',
+            frameworkId: 'revenue-ops',
+            category: 'Data Integrity',
+            title: 'Partner Payout Integrity',
+            description: 'Ensure partner payout reports are generated from immutable usage records',
+            priority: 'critical',
+            status: 'partial',
+            controls: [
+              {
+                id: 'rev-001-ctrl-1',
+                type: 'technical',
+                description: 'Immutable usage logs',
+                implementation: 'WORM storage for usage summaries',
+                automated: true,
+                effectiveness: 'high'
+              }
+            ],
+            evidence: [],
+            nextCheck: new Date(Date.now() + 24 * 60 * 60 * 1000),
+            automatedCheck: true
+          },
+           {
+            id: 'rev-002',
+            frameworkId: 'revenue-ops',
+            category: 'Access Control',
+            title: 'Pricing Configuration Access',
+            description: 'Only authorized roles can modify pricing rules',
+            priority: 'high',
+            status: 'partial',
+            controls: [
+              {
+                id: 'rev-002-ctrl-1',
+                type: 'technical',
+                description: 'RBAC for Pricing',
+                implementation: 'Enforce MANAGE_PRICING permission',
+                automated: true,
+                effectiveness: 'high'
+              }
+            ],
+            evidence: [],
+            nextCheck: new Date(Date.now() + 24 * 60 * 60 * 1000),
+            automatedCheck: true
+          }
+        ]
+      };
+      this.frameworks.set('revenue-ops', revenueFramework);
+
       logger.info('Compliance frameworks initialized', {
         component: 'ComplianceService',
         frameworkCount: this.frameworks.size,
