@@ -3,24 +3,18 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "types": [
-      "node",
-      "uuid"
-    ],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "types": ["node", "uuid"],
     "paths": {
-      "@intelgraph/sigint-collector": [
-        "../../packages/sigint-collector/src"
-      ]
+      "@intelgraph/sigint-collector": ["../../packages/sigint-collector/src/index.ts"],
+      "@intelgraph/comint-analyzer": ["../../packages/comint-analyzer/src/index.ts"],
+      "@intelgraph/geolocation-engine": ["../../packages/geolocation-engine/src/index.ts"],
+      "@intelgraph/cryptanalysis-engine": ["../../packages/cryptanalysis-engine/src/index.ts"],
+      "@intelgraph/network-interceptor": ["../../packages/network-interceptor/src/index.ts"],
+      "@intelgraph/rf-processor": ["../../packages/rf-processor/src/index.ts"]
     }
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "**/__tests__/*"
-  ]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/__tests__/*"]
 }

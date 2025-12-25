@@ -90,7 +90,15 @@ export class FederationService {
       resourceId: id,
       actorId,
       actorType: 'user',
-      payload: { targetTenantId, tokenCount: tokens.length, purpose },
+      timestamp: new Date(),
+      payload: {
+        mutationType: 'CREATE',
+        entityId: id,
+        entityType: 'DeconflictionRequest',
+        targetTenantId,
+        tokenCount: tokens.length,
+        purpose
+      },
       metadata: { purpose }
     });
 
@@ -138,6 +146,7 @@ export class FederationService {
       resourceId: requestId,
       actorId,
       actorType: 'system',
+      timestamp: new Date(),
       payload: {
         mutationType: 'UPDATE',
         entityId: requestId,
