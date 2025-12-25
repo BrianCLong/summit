@@ -50,6 +50,7 @@ export class FraudService {
       resourceId: id,
       actorId: actorId,
       actorType: 'system',
+      timestamp: new Date(),
       payload: {
         mutationType: 'CREATE',
         entityId: id,
@@ -57,7 +58,6 @@ export class FraudService {
         title: input.title,
         severity: input.severity
       },
-      timestamp: new Date(),
       metadata: { caseId: id }
     });
 

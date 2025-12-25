@@ -1,4 +1,4 @@
-
+// @ts-nocheck - Mock typing issues with @jest/globals
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import { SimilarityService } from '../../src/services/SimilarityService.js';
 import { getPostgresPool } from '../../src/config/database.js';

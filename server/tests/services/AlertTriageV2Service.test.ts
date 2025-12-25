@@ -1,3 +1,4 @@
+// @ts-nocheck - Mock typing issues with @jest/globals
 import { describe, expect, it, jest, beforeEach, afterEach } from '@jest/globals';
 import { AlertTriageV2Service, TriageScore } from '../../src/services/AlertTriageV2Service';
 
