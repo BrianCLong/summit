@@ -32,6 +32,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { Tabs } from '@/components/ui/Tabs'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/Tooltip'
 import { TriPaneShell } from '@/features/triPane'
 import { useMockTriPaneData } from '@/features/triPane/mockData'
 import { CaseExportModal } from '@/components/case/CaseExportModal'
@@ -286,14 +291,22 @@ export default function CaseDetailPage() {
       <div className="flex-shrink-0 border-b bg-background p-6">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-start gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/cases')}
-              className="mt-1"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate('/cases')}
+                  className="mt-1"
+                  aria-label="Go back to cases"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Go back to cases</p>
+              </TooltipContent>
+            </Tooltip>
             <div>
               <h1 className="text-2xl font-bold mb-2">{caseData.title}</h1>
               <div className="flex flex-wrap gap-2 mb-3">
@@ -508,9 +521,21 @@ export default function CaseDetailPage() {
                               <p className="text-xs text-muted-foreground">
                                 Tip: Use @alice-johnson, @bob-smith, @carol-davis to mention team members
                               </p>
-                              <Button onClick={handleSubmitComment} disabled={!newComment.trim()}>
-                                Post Comment
-                              </Button>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  {/* Span needed because disabled buttons don't fire events in some browsers/screen readers correctly unless wrapped or configured carefully, though we removed pointer-events-none */}
+                                  <span tabIndex={!newComment.trim() ? 0 : -1}>
+                                    <Button onClick={handleSubmitComment} disabled={!newComment.trim()}>
+                                      Post Comment
+                                    </Button>
+                                  </span>
+                                </TooltipTrigger>
+                                {!newComment.trim() && (
+                                  <TooltipContent>
+                                    <p>Please enter a comment to post</p>
+                                  </TooltipContent>
+                                )}
+                              </Tooltip>
                             </div>
                           </div>
                         </div>
