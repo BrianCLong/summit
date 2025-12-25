@@ -1,3 +1,0 @@
-## 2025-10-27 - Button Accessibility & Tooltips
-**Learning:** React/Radix buttons with `disabled` attribute + `pointer-events-none` (common in shadcn/ui) prevent tooltips from appearing. Removing `pointer-events-none` and adding `cursor-not-allowed` allows the tooltip to show, but implementing it requires wrapping the disabled button in a `span` or similar to ensure the tooltip trigger works reliably across browsers without relying on the disabled element firing events.
-**Action:** When implementing tooltips on disabled actions, always remove `pointer-events-none` from the base component and wrap the trigger in a span to capture the hover event.

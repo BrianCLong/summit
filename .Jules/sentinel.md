@@ -1,4 +1,0 @@
-## 2025-10-27 - Hardcoded JWT Secret Fallback in Auth Library
-**Vulnerability:** The authentication library (`server/src/lib/auth.ts`) contained a hardcoded fallback JWT secret (`dev_jwt_secret_12345_very_long_secret_for_development`) that was used if the environment variable `JWT_SECRET` was missing. This bypassed the centralized configuration validation system which checks for insecure secrets in production.
-**Learning:** Hardcoded fallbacks in utility libraries can undermine centralized security configuration checks. Even if the config system is secure, if individual modules bypass it with their own defaults, the system remains vulnerable.
-**Prevention:** Always import configuration from the centralized config module (`server/src/config/index.ts`). Never define default secrets in library code. Use the type-safe configuration object to ensure values are validated.
