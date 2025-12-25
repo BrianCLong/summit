@@ -422,6 +422,7 @@ router.post('/metrics/business', (req: Request, res: Response) => {
  *         description: Failed to record metric
  */
 router.post('/web-vitals', (req: Request, res: Response) => {
+  // Receives LCP, CLS, INP from frontend via reportWebVitals.ts
   const { name, value, id } = req.body || {};
   if (typeof name !== 'string' || typeof value !== 'number') {
     return res.status(400).json({ error: 'Invalid web vitals payload' });

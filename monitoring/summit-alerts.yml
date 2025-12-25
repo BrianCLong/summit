@@ -1,0 +1,46 @@
+# Summit Experience Alerts
+groups:
+  - name: summit.experience.rules
+    rules:
+      - alert: HighGoldenPathFailureRate
+        expr: |
+          sum(rate(golden_path_step_total{status="failure"}[5m]))
+          /
+          sum(rate(golden_path_step_total[5m])) > 0.1
+        for: 5m
+        labels:
+          severity: critical
+          team: frontend
+        annotations:
+          summary: "High Golden Path Failure Rate"
+          description: "Over 10% of users are failing on critical path steps."
+
+      - alert: HighUIErrorRate
+        expr: increase(ui_error_boundary_catch_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          team: frontend
+        annotations:
+          summary: "Spike in UI Errors"
+          description: "Detected {{ $value }} UI boundary errors in the last 5 minutes."
+
+      - alert: PoorLCP
+        expr: avg(web_vital_value{metric="LCP"}) > 2500
+        for: 15m
+        labels:
+          severity: warning
+          team: frontend
+        annotations:
+          summary: "Poor Largest Contentful Paint"
+          description: "Average LCP is {{ $value }}ms, exceeding 2.5s threshold."
+
+      - alert: HighChangeFailureRate
+        expr: maestro_change_failure_rate > 0.15
+        for: 15m
+        labels:
+          severity: warning
+          team: devops
+        annotations:
+          summary: "High Change Failure Rate"
+          description: "Change failure rate is {{ $value | humanizePercentage }}."
