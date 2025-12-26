@@ -16,6 +16,7 @@
     "test:quick": "echo 'Quick sanity check passed'",
     "test:server": "cd server && npm test",
     "test:client": "cd client && npm test",
+    "test:web": "cd apps/web && npm test",
     "test:e2e": "npx playwright test",
     "test:smoke": "npm run test:smoke:backend && npm run test:smoke:frontend",
     "test:smoke:backend": "cd server && npm run test:smoke",

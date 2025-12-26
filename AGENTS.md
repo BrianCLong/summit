@@ -56,6 +56,32 @@ analytics designed for the intelligence community.
   -> Results
 - **Production-Ready MVP**: Every commit should maintain production readiness
 
+## Sustained Velocity & Parallelism (Sprint N+6)
+
+To ensure high throughput and safe parallel execution, all Agents must adhere to the following **Parallelization Mandates**:
+
+### Safe Parallel Zones
+
+Agents must restrict their changes to specific zones to avoid conflicts.
+
+1.  **Server Zone (`server/`)**: Backend services, API, Database.
+    *   *Safe:* Adding new endpoints, services, resolvers.
+    *   *Risk:* Changing shared utilities in `packages/` or modifying `apps/web` simultaneously.
+2.  **Web App Zone (`apps/web/`)**: Summit Web Application.
+    *   *Safe:* UI components, local state, dashboards.
+    *   *Risk:* Direct DB access, modifying server API contracts without coordination.
+3.  **Client Zone (`client/`)**: Legacy/IntelGraph Client.
+    *   *Safe:* Independent feature work.
+4.  **Documentation Zone (`docs/`)**:
+    *   *Safe:* Always safe to append. Avoid rewriting shared index files concurrently.
+
+### Agent Mandates
+
+*   **Scope Check:** Before editing, verify your task falls within *one* primary zone. If it crosses zones (e.g., API + UI), declare strictly coupled changes or split the task.
+*   **Boundary Respect:** Do not import across boundaries (e.g., `server` imports `client`). Use `packages/` for shared code.
+*   **Atomic PRs:** One feature, one zone (preferred).
+*   **Self-Validation:** Run `scripts/check-boundaries.cjs` before submitting.
+
 ## Codebase Structure
 
 This is a **pnpm workspace** monorepo managed by **Turbo**:
