@@ -290,6 +290,9 @@ tmp-audit/
 
 # Test reports
 reports/
+bug-bash-results/
+*-report.json
+lint_output.txt
 
 # Aider (AI coding assistant) cache and history
 .aider.chat.history.md

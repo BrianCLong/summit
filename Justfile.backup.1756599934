@@ -1,5 +1,0 @@
-#mvp3-validate-lite:
-#	just status
-#	( curl -fsS "{{PROM_BASE}}/api/v1/rules" | jq . >/dev/null && echo "✔ Prom rules" ) || echo "ℹ Prom not reachable"
-#	( curl -fsS "{{TEMPO_BASE}}/api/metrics" >/dev/null && echo "✔ Tempo reachable" ) || echo "ℹ Tempo not reachable"
-#	@echo "✅ MVP-3 lite validation finished"
