@@ -210,3 +210,30 @@ export interface ExceptionWaiver {
 }
 
 export const newIdentifier = () => randomUUID();
+
+export interface AgentCoordinationPlan {
+  id: string;
+  agents: string[];
+  dependencies: { from: string; to: string; type: 'data' | 'control' | 'resource' }[];
+  executionSequence: string[][]; // Parallel execution groups
+  timeoutMs: number;
+  governanceRequirements: string[];
+  auditTrail: boolean;
+}
+
+export interface CoordinationResult {
+  success: boolean;
+  agentResults: Map<string, any>;
+  invariantViolations: number;
+  governanceCompliance: boolean;
+  elapsedMs: number;
+  traceId: string;
+}
+
+export interface AgentCoordinationConfig {
+  enableGovernanceChecks: boolean;
+  maxConcurrency: number;
+  requireAuditTrail: boolean;
+  correctnessThreshold: number;
+  circuitBreakerEnabled: boolean;
+}
