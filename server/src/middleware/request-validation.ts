@@ -231,8 +231,7 @@ export function createFileUploadValidator(options: {
   };
 
   return (req: Request, res: Response, next: NextFunction): void | Response => {
-    // @ts-ignore - files may be added by multer or similar
-    const files = req.files || [];
+    const files = (req as any).files || [];
     const filesArray = Array.isArray(files) ? files : Object.values(files).flat();
 
     if (filesArray.length > config.maxFiles) {
@@ -249,38 +248,39 @@ export function createFileUploadValidator(options: {
     }
 
     for (const file of filesArray) {
-      // Validate file size
-      if (file.size > config.maxFileSize) {
+      // Validate file size (with type guard)
+      if (typeof file === 'object' && file.size && file.size > config.maxFileSize) {
         logger.warn({
           message: 'File exceeds maximum size',
-          filename: file.originalname,
+          filename: file.originalname || 'unknown',
           size: file.size,
           maxSize: config.maxFileSize,
           ip: req.ip,
         });
         return res.status(413).json({
           error: 'File too large',
-          filename: file.originalname,
+          filename: file.originalname || 'unknown',
           maxSize: config.maxFileSize,
         });
       }
 
-      // Validate MIME type
-      if (!config.allowedMimeTypes.includes(file.mimetype)) {
+      // Validate MIME type (with type guard)
+      if (typeof file === 'object' && file.mimetype && !config.allowedMimeTypes.includes(file.mimetype)) {
         logger.warn({
           message: 'Invalid file type',
-          filename: file.originalname,
+          filename: file.originalname || 'unknown',
           mimetype: file.mimetype,
           ip: req.ip,
         });
         return res.status(415).json({
           error: 'Invalid file type',
-          filename: file.originalname,
+          filename: file.originalname || 'unknown',
           allowedTypes: config.allowedMimeTypes,
         });
       }
 
-      // Validate filename
+      // Validate filename (with type guard)
+      const filename = file.originalname || 'unknown';
       const suspiciousFilenamePatterns = [
         /\.\./g, // Path traversal
         /<|>/g, // HTML tags
@@ -288,10 +288,10 @@ export function createFileUploadValidator(options: {
       ];
 
       for (const pattern of suspiciousFilenamePatterns) {
-        if (pattern.test(file.originalname)) {
+        if (pattern.test(filename)) {
           logger.warn({
             message: 'Suspicious filename detected',
-            filename: file.originalname,
+            filename: filename,
             ip: req.ip,
           });
           return res.status(400).json({

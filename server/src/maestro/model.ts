@@ -93,3 +93,67 @@ export interface MaestroSpec {
   nodes: MaestroNode[];
   edges: { from: string; to: string; conditionId?: string }[];
 }
+
+// Coordination Types for Subagent Collaboration
+export interface CoordinationTask {
+  id: string;
+  title: string;
+  description: string;
+  assignedAgentIds: string[];
+  dependencies?: string[];
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  deadline?: Date;
+  payload: Record<string, any>;
+  status: 'pending' | 'delegated' | 'in_progress' | 'completed' | 'failed' | 'cancelled';
+  createdAt: Date;
+  updatedAt: Date;
+  result?: any;
+  error?: string;
+}
+
+export interface CoordinationChannel {
+  id: string;
+  participants: string[];
+  topic: string;  // What they're coordinating about (e.g., "threat-analysis", "entity-resolution")
+  messages: CoordinationMessage[];
+  createdAt: Date;
+  updatedAt?: Date;
+  isActive: boolean;
+}
+
+export interface CoordinationMessage {
+  id: string;
+  senderId: string;
+  recipientId?: string;  // If null, broadcast to channel
+  timestamp: Date;
+  type: 'TASK_ASSIGNMENT' | 'TASK_RESULT' | 'REQUEST_HELP' | 'REQUEST_REVIEW' | 'CONSENSUS_PROPOSAL' | 'CONSENSUS_VOTE' | 'STATUS_UPDATE' | 'COORDINATION_MESSAGE';
+  content: string;
+  attachments?: any[];
+  correlationId?: string;  // For linking related messages
+  metadata?: Record<string, any>;
+}
+
+export interface ConsensusProposal<T = any> {
+  id: string;
+  coordinatorId: string;
+  topic: string;
+  proposal: T;
+  voters: string[];  // Agent IDs that should vote
+  votingDeadline: Date;
+  votes: Map<string, { vote: 'approve' | 'reject' | 'abstain'; timestamp: Date; rationale?: string }>;
+  status: 'draft' | 'in_voting' | 'passed' | 'rejected' | 'cancelled';
+  createdAt: Date;
+  updatedAt?: Date;
+  closedAt?: Date;
+}
+
+export interface AgentCoordinationMetrics {
+  coordinationMessagesSent: number;
+  coordinationMessagesReceived: number;
+  collaborativeTasksCompleted: number;
+  consensusDecisionsMade: number;
+  resourceSharingEvents: number;
+  conflictResolutionEvents: number;
+  averageCollaborationTimeMs: number;
+  updatedAt?: Date;
+}
