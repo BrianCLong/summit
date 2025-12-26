@@ -7382,7 +7382,7 @@ importers:
     dependencies:
       '@maestro/core':
         specifier: file:../maestro-core
-        version: file:packages/maestro-core(@opentelemetry/core@2.2.0(@opentelemetry/api@1.9.0))(pg@8.16.3)
+        version: link:../maestro-core
       chalk:
         specifier: ^5.6.2
         version: 5.6.2
@@ -8517,7 +8517,7 @@ importers:
         version: 1.9.0
       '@opentelemetry/auto-instrumentations-node':
         specifier: ^0.48.0
-        version: 0.48.0(@opentelemetry/api@1.9.0)(encoding@0.1.13)
+        version: 0.48.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/exporter-prometheus':
         specifier: ^0.52.0
         version: 0.52.1(@opentelemetry/api@1.9.0)
@@ -11565,7 +11565,7 @@ importers:
         version: 7.2.2
       wappalyzer:
         specifier: ^6.10.66
-        version: 6.10.66(typescript@5.9.3)
+        version: 6.10.66(encoding@0.1.13)(typescript@5.9.3)
     devDependencies:
       '@types/jest':
         specifier: ^30.0.0
@@ -26285,12 +26285,6 @@ packages:
     resolution: {integrity: sha512-FW5e+zxPuMI6gOJI6az5UnACrRwitzcghyUCVJBQq6/ZK/Z7bjBP5JQgd287DmFXrhLUrNBJ5NYRLmfbraGdDw==}
     peerDependencies:
       '@luma.gl/core': ~9.2.0
-
-  '@maestro/core@file:packages/maestro-core':
-    resolution: {directory: packages/maestro-core, type: directory}
-    engines: {node: '>=18.0.0'}
-    peerDependencies:
-      pg: ^8.0.0
 
   '@malept/cross-spawn-promise@2.0.0':
     resolution: {integrity: sha512-1DpKU0Z5ThltBwjNySMC14g0CkbyhCaz9FkhxqNsZI6uAPJXFS8cMXlBKo26FJ8ZuW6S9GCMcR9IO5k2X5/9Fg==}
@@ -57418,36 +57412,6 @@ snapshots:
       '@math.gl/types': 4.1.0
       '@probe.gl/env': 4.1.0
 
-  '@maestro/core@file:packages/maestro-core(@opentelemetry/core@2.2.0(@opentelemetry/api@1.9.0))(pg@8.16.3)':
-    dependencies:
-      '@aws-sdk/client-s3': 3.958.0
-      '@aws-sdk/lib-storage': 3.958.0(@aws-sdk/client-s3@3.958.0)
-      '@opentelemetry/api': 1.9.0
-      '@opentelemetry/api-metrics': 0.33.0
-      '@opentelemetry/auto-instrumentations-node': 0.67.3(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.2.0(@opentelemetry/api@1.9.0))(encoding@0.1.13)
-      '@opentelemetry/exporter-jaeger': 2.2.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/exporter-prometheus': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/resources': 2.2.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/sdk-node': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.38.0
-      axios: 1.13.2
-      cheerio: 1.1.2
-      crypto: 1.0.1
-      events: 3.3.0
-      jsdom: 27.3.0
-      pg: 8.16.3
-      robots-txt-parser: 2.0.3
-      uuid: 13.0.0
-    transitivePeerDependencies:
-      - '@opentelemetry/core'
-      - aws-crt
-      - bufferutil
-      - canvas
-      - debug
-      - encoding
-      - supports-color
-      - utf-8-validate
-
   '@malept/cross-spawn-promise@2.0.0':
     dependencies:
       cross-spawn: 7.0.6
@@ -58883,7 +58847,7 @@ snapshots:
       - encoding
       - supports-color
 
-  '@opentelemetry/auto-instrumentations-node@0.48.0(@opentelemetry/api@1.9.0)(encoding@0.1.13)':
+  '@opentelemetry/auto-instrumentations-node@0.48.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
@@ -83479,7 +83443,7 @@ snapshots:
 
   punycode@2.3.1: {}
 
-  puppeteer-core@19.7.5(typescript@5.9.3):
+  puppeteer-core@19.7.5(encoding@0.1.13)(typescript@5.9.3):
     dependencies:
       chromium-bidi: 0.4.5(devtools-protocol@0.0.1094867)
       cross-fetch: 3.1.5(encoding@0.1.13)
@@ -83616,13 +83580,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  puppeteer@19.7.5(typescript@5.9.3):
+  puppeteer@19.7.5(encoding@0.1.13)(typescript@5.9.3):
     dependencies:
       cosmiconfig: 8.1.0
       https-proxy-agent: 5.0.1
       progress: 2.0.3
       proxy-from-env: 1.1.0
-      puppeteer-core: 19.7.5(typescript@5.9.3)
+      puppeteer-core: 19.7.5(encoding@0.1.13)(typescript@5.9.3)
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -89812,9 +89776,9 @@ snapshots:
     dependencies:
       makeerror: 1.0.12
 
-  wappalyzer@6.10.66(typescript@5.9.3):
+  wappalyzer@6.10.66(encoding@0.1.13)(typescript@5.9.3):
     dependencies:
-      puppeteer: 19.7.5(typescript@5.9.3)
+      puppeteer: 19.7.5(encoding@0.1.13)(typescript@5.9.3)
     transitivePeerDependencies:
       - bufferutil
       - encoding

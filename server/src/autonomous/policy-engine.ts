@@ -39,6 +39,8 @@ export interface PolicyContext {
       usd: number;
       timeMinutes: number;
     };
+    maxSteps?: number;
+    maxDepth?: number;
   };
   environment: {
     name: string;
@@ -77,6 +79,8 @@ const PolicyContextSchema = z.object({
         timeMinutes: z.number().positive(),
       })
       .optional(),
+    maxSteps: z.number().int().optional(),
+    maxDepth: z.number().int().optional(),
   }),
   environment: z.object({
     name: z.string(),
@@ -291,6 +295,8 @@ export class PolicyEngine {
         category: this.getActionCategory(action),
         autonomy: context.autonomy || 0,
         budgets: context.budgets,
+        maxSteps: context.maxSteps,
+        maxDepth: context.maxDepth,
       },
       environment,
       time: timeContext,
@@ -347,6 +353,23 @@ export class PolicyEngine {
           requiresApproval: true,
         };
       }
+    }
+
+    // Step and Depth checks
+    if (action.maxSteps && action.maxSteps > 100) {
+      return {
+        allowed: false,
+        reason: 'Step count exceeds hard limit (100)',
+        requiresApproval: true,
+      };
+    }
+
+    if (action.maxDepth && action.maxDepth > 5) {
+      return {
+        allowed: false,
+        reason: 'Planning depth exceeds hard limit (5)',
+        requiresApproval: true,
+      };
     }
 
     // Deployment restrictions
@@ -457,6 +480,16 @@ export class PolicyEngine {
 
     // High-risk operations always require approval
     if (riskScore >= 70) return true;
+
+    // Escalation: High step count requires approval
+    if (context.action.maxSteps && context.action.maxSteps > 50) {
+      return true;
+    }
+
+    // Escalation: Deep planning requires approval
+    if (context.action.maxDepth && context.action.maxDepth > 3) {
+      return true;
+    }
 
     // Production deployments require approval
     if (

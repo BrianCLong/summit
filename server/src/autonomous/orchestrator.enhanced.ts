@@ -10,6 +10,7 @@ import Redis from 'ioredis';
 import { trace, context, SpanStatusCode } from '@opentelemetry/api';
 import { Logger } from 'pino';
 import { z } from 'zod';
+import { PlanningCapability } from './capabilities/planning';
 
 // Type definitions
 export interface RunConfig {
@@ -21,6 +22,8 @@ export interface RunConfig {
     usd: number;
     timeMinutes: number;
   };
+  maxSteps?: number;
+  maxDepth?: number;
   createdBy: string;
   tenantId: string;
   reasonForAccess?: string;
@@ -90,6 +93,8 @@ const RunConfigSchema = z.object({
     usd: z.number().positive().max(1000),
     timeMinutes: z.number().positive().max(480),
   }),
+  maxSteps: z.number().int().min(1).max(100).optional(),
+  maxDepth: z.number().int().min(1).max(10).optional(),
   createdBy: z.string().min(1),
   tenantId: z.string().min(1),
   reasonForAccess: z.string().optional(),
@@ -158,7 +163,13 @@ export class EnhancedAutonomousOrchestrator {
             config.createdBy,
             'orchestration:create',
             config.tenantId,
-            { autonomy: config.autonomy, mode: config.mode },
+            {
+              autonomy: config.autonomy,
+              mode: config.mode,
+              budgets: config.budgets,
+              maxSteps: config.maxSteps,
+              maxDepth: config.maxDepth,
+            },
           );
 
           if (!policyDecision.allowed) {
@@ -306,9 +317,11 @@ export class EnhancedAutonomousOrchestrator {
 
           // Get pending tasks
           const tasks = await this.getPendingTasks(runId);
+          const run = await this.getRun(runId);
+          const config = run.config ? (typeof run.config === 'string' ? JSON.parse(run.config) : run.config) : {};
 
           // Execute tasks in dependency order with parallelism
-          await this.executeTasksInOrder(tasks, correlationId);
+          await this.executeTasksInOrder(tasks, correlationId, config.maxSteps);
 
           await this.updateRunStatus(runId, 'completed');
           await this.logEvent(
@@ -513,8 +526,40 @@ export class EnhancedAutonomousOrchestrator {
    * Generate tasks from run goal using AI planning
    */
   private async generateTasks(run: any): Promise<Task[]> {
-    // This would use AI to break down the goal into actionable tasks
-    // For now, return a simple example
+    // Check if Planning Capability is applicable
+    try {
+      const planningContext = {
+        killSwitch: () => this.killSwitchEnabled,
+        logger: this.logger.child({ component: 'PlanningCapability' })
+      };
+
+      const config = run.config ? (typeof run.config === 'string' ? JSON.parse(run.config) : run.config) : {};
+
+      // Execute Planning Capability
+      // Note: In a real scenario, we might pass config limits to override capability defaults
+      // For now, we use the capability's internal logic which is simulated
+      const plan = await PlanningCapability.execute({ goal: run.goal }, planningContext);
+
+      if (plan && plan.steps && Array.isArray(plan.steps)) {
+        return plan.steps.map((step: any) => ({
+          id: randomUUID(),
+          runId: run.id,
+          type: 'analyze_goal', // Reuse existing type for safety in this sprint
+          params: { goal: run.goal, stepDescription: step.description, stepId: step.stepId },
+          dependencies: [],
+          safetyCategory: 'read',
+          requiresApproval: false,
+          idempotencyKey: this.generateIdempotencyKey('analyze_goal', {
+            goal: run.goal,
+            stepId: step.stepId
+          }),
+        }));
+      }
+    } catch (error) {
+      this.logger.warn({ error: error.message }, 'Planning capability failed, falling back to default');
+    }
+
+    // Fallback to simple example
     const baseTask: Task = {
       id: randomUUID(),
       runId: run.id,
@@ -537,12 +582,19 @@ export class EnhancedAutonomousOrchestrator {
   private async executeTasksInOrder(
     tasks: Task[],
     correlationId: string,
+    maxSteps: number = 50
   ): Promise<void> {
     const taskMap = new Map(tasks.map((t) => [t.id, t]));
     const completed = new Set<string>();
     const running = new Map<string, Promise<any>>();
+    let stepsExecuted = 0;
 
     while (completed.size < tasks.length && !this.killSwitchEnabled) {
+      // Check step limit
+      if (stepsExecuted >= maxSteps) {
+        throw new Error(`Execution stopped: max steps (${maxSteps}) reached`);
+      }
+
       // Find ready tasks (dependencies satisfied)
       const ready = tasks.filter(
         (task) =>
@@ -566,6 +618,11 @@ export class EnhancedAutonomousOrchestrator {
       const toStart = ready.slice(0, maxParallel - running.size);
 
       for (const task of toStart) {
+        stepsExecuted++; // Count starting a task as a step
+        if (stepsExecuted > maxSteps) {
+           break; // Stop scheduling if we hit limit
+        }
+
         const promise = this.executeTask(task, correlationId)
           .then((result) => {
             completed.add(task.id);
@@ -587,6 +644,7 @@ export class EnhancedAutonomousOrchestrator {
     }
 
     if (this.killSwitchEnabled) {
+      // Clean up logic would go here (e.g. marking run as cancelled in DB)
       throw new Error('Execution cancelled by kill switch');
     }
   }

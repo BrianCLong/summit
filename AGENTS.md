@@ -70,7 +70,7 @@ This is a **pnpm workspace** monorepo managed by **Turbo**:
 
 - Conventional Commits: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`.
 - PRs: concise description, linked issues (`Closes #123`), screenshots for UI; CI green required.
-- Branches: `type/scope/short-desc` (e.g., `feat/ingest/rest-connector`).
+- Branches: `type/scope/short-desc` (e.g., `feat/ingest/rest-connector`) (e.g., `feat/autonomous/planning`).
 
 ## Web Codex Global Guidance
 
@@ -361,6 +361,34 @@ pnpm typecheck    # Type check
 make down
 docker system prune -af
 ```
+
+---
+
+## Agent Expansion & Safety Standards (Sprint N+14)
+
+### Capability Expansion Protocol
+
+Any new capability added to the autonomous agent system (Orchestrator, Policy Engine) must adhere to:
+
+1.  **Capability → Cap → Proof**:
+    *   **Capability**: Defined in `server/src/autonomous/capability_types.ts`.
+    *   **Cap**: Must have explicit limits (e.g., `maxSteps`, `maxDepth`, `tokenBudget`) enforced by code.
+    *   **Proof**: Must have a corresponding negative test demonstrating failure when caps are exceeded.
+
+2.  **Versioning**:
+    *   Capabilities must use semantic versioning (e.g., `1.0.0`).
+    *   Breaking changes to a capability schema require a major version bump.
+
+3.  **Prohibited Actions**:
+    *   Explicitly list actions the capability is *never* allowed to take (e.g., `exec_shell`).
+
+4.  **Kill-Switch Integration**:
+    *   Long-running loops (planning, execution) must check `killSwitch()` at every iteration.
+    *   On kill, state must be safely discarded or marked as cancelled.
+
+5.  **Human-in-the-Loop (HITL)**:
+    *   Escalation thresholds must be defined in `PolicyEngine`.
+    *   High-risk actions (deploy, critical write) or high-resource consumption (> 50 steps) must trigger approval.
 
 ---
 
