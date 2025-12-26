@@ -219,7 +219,8 @@
       "Bash(timeout 30 npx eslint:*)",
       "Bash(git remote prune:*)",
       "Bash(npm run test:*)",
-      "Bash(npm view:*)"
+      "Bash(npm view:*)",
+      "Bash(timeout 180 npm run test:quick)"
     ],
     "deny": [],
     "ask": []
