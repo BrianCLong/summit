@@ -94,7 +94,9 @@ __pycache__/
 *.pyo
 *.egg-info/
 **/*.egg-info/
+# Python virtual environments (but not source directories named env)
 .venv/
+venv/
 poetry.lock
 
 # Gradle state
