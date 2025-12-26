@@ -534,12 +534,30 @@ importers:
       '@opentelemetry/api':
         specifier: latest
         version: 1.9.0
+      '@opentelemetry/auto-instrumentations-node':
+        specifier: ^0.67.3
+        version: 0.67.3(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.2.0(@opentelemetry/api@1.9.0))(encoding@0.1.13)
       '@opentelemetry/exporter-metrics-otlp-http':
         specifier: latest
+        version: 0.208.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/exporter-prometheus':
+        specifier: ^0.208.0
+        version: 0.208.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/exporter-trace-otlp-http':
+        specifier: ^0.208.0
         version: 0.208.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources':
         specifier: latest
         version: 2.2.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/sdk-metrics':
+        specifier: ^2.2.0
+        version: 2.2.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/sdk-node':
+        specifier: ^0.208.0
+        version: 0.208.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/semantic-conventions':
+        specifier: ^1.38.0
+        version: 1.38.0
       bullmq:
         specifier: ^5.8.2
         version: 5.66.1
@@ -561,6 +579,9 @@ importers:
       keyv:
         specifier: ^4.5.4
         version: 4.5.4
+      prom-client:
+        specifier: ^15.1.3
+        version: 15.1.3
       typesense:
         specifier: ^1.8.2
         version: 1.8.2(@babel/runtime@7.28.4)
