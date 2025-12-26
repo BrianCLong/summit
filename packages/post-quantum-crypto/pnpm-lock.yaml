@@ -1,0 +1,123 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+overrides:
+  d3-color: '>=3.1.0'
+  node-fetch: '>=2.6.7'
+  ws: '>=8.17.1'
+  parse-duration: '>=2.1.3'
+  braces: '>=3.0.3'
+  micromatch: '>=4.0.8'
+  path-to-regexp: '>=8.0.0'
+  validator: '>=13.15.20'
+  nanoid: '>=5.0.9'
+  cross-spawn: '>=7.0.6'
+  tar: '>=6.2.1'
+  cookie: '>=0.7.0'
+  send: '>=0.19.0'
+  serve-static: '>=1.16.0'
+  express: '>=4.21.0'
+  glob: '>=11.1.0'
+  tar-fs: '>=3.0.6'
+  '@babel/runtime': '>=7.26.0'
+  esbuild: '>=0.25.0'
+  electron: '>=35.7.5'
+
+importers:
+
+  .:
+    dependencies:
+      '@noble/hashes':
+        specifier: ^1.3.3
+        version: 1.8.0
+      '@stablelib/random':
+        specifier: ^1.0.2
+        version: 1.0.2
+      dilithium-crystals:
+        specifier: ^1.0.6
+        version: 1.0.6
+      pqc-kyber:
+        specifier: ^0.7.0
+        version: 0.7.0
+      sphincs:
+        specifier: ^3.0.0
+        version: 3.0.4
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.27
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+packages:
+
+  '@noble/hashes@1.8.0':
+    resolution: {integrity: sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==}
+    engines: {node: ^14.21.3 || >=16}
+
+  '@stablelib/binary@1.0.1':
+    resolution: {integrity: sha512-ClJWvmL6UBM/wjkvv/7m5VP3GMr9t0osr4yVgLZsLCOz4hGN9gIAFEqnJ0TsSMAN+n840nf2cHZnA5/KFqHC7Q==}
+
+  '@stablelib/int@1.0.1':
+    resolution: {integrity: sha512-byr69X/sDtDiIjIV6m4roLVWnNNlRGzsvxw+agj8CIEazqWGOQp2dTYgQhtyVXV9wpO6WyXRQUzLV/JRNumT2w==}
+
+  '@stablelib/random@1.0.2':
+    resolution: {integrity: sha512-rIsE83Xpb7clHPVRlBj8qNe5L8ISQOzjghYQm/dZ7VaM2KHYwMW5adjQjrzTZCchFnNCNhkwtnOBa9HTMJCI8w==}
+
+  '@stablelib/wipe@1.0.1':
+    resolution: {integrity: sha512-WfqfX/eXGiAd3RJe4VU2snh/ZPwtSjLG4ynQ/vYzvghTh7dHFcI1wl+nrkWG6lGhukOxOsUHfv8dUXr58D0ayg==}
+
+  '@types/node@20.19.27':
+    resolution: {integrity: sha512-N2clP5pJhB2YnZJ3PIHFk5RkygRX5WO/5f0WC08tp0wd+sv0rsJk3MqWn3CbNmT2J505a5336jaQj4ph1AdMug==}
+
+  dilithium-crystals@1.0.6:
+    resolution: {integrity: sha512-zPMHDmr2l2A6ZU574cbwNn1AX1UkIIYcJTcN4DEycrKXtgqGp7kPYSpatzcEthTLEKwwYBWYyV6mO5HcBlZwyg==}
+
+  pqc-kyber@0.7.0:
+    resolution: {integrity: sha512-mu8Mq2zYekx81iHkjXILQ+cojeuqgI+JM8p/NqoQm7/A1JTvBLOQzMpWwm89km2DDlnlyA/aeeuHwRMNvUOkwg==}
+
+  sphincs@3.0.4:
+    resolution: {integrity: sha512-GUW2oL6DoJgj9mHVfHJPn87vuhQtdGigXDpcrGCGgmdrZVX9AF5NrL3boElBqIy0oLGqSA/45k9dWHvCPSjj+Q==}
+
+  typescript@5.9.3:
+    resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
+  undici-types@6.21.0:
+    resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
+
+snapshots:
+
+  '@noble/hashes@1.8.0': {}
+
+  '@stablelib/binary@1.0.1':
+    dependencies:
+      '@stablelib/int': 1.0.1
+
+  '@stablelib/int@1.0.1': {}
+
+  '@stablelib/random@1.0.2':
+    dependencies:
+      '@stablelib/binary': 1.0.1
+      '@stablelib/wipe': 1.0.1
+
+  '@stablelib/wipe@1.0.1': {}
+
+  '@types/node@20.19.27':
+    dependencies:
+      undici-types: 6.21.0
+
+  dilithium-crystals@1.0.6: {}
+
+  pqc-kyber@0.7.0: {}
+
+  sphincs@3.0.4: {}
+
+  typescript@5.9.3: {}
+
+  undici-types@6.21.0: {}
