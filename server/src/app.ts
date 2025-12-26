@@ -51,6 +51,7 @@ import { webhookWorker } from './webhooks/webhook.worker.js';
 import supportTicketsRouter from './routes/support-tickets.js';
 import ticketLinksRouter from './routes/ticket-links.js';
 import tenantContextMiddleware from './middleware/tenantContext.js';
+import sharingRouter from './routes/sharing.js';
 import { auroraRouter } from './routes/aurora.js';
 import { oracleRouter } from './routes/oracle.js';
 import { phantomLimbRouter } from './routes/phantom_limb.js';
@@ -336,6 +337,7 @@ export const createApp = async () => {
   app.use('/api/stream', streamRouter); // Register stream route
   app.use('/api/v1/search', searchV1Router); // Register Unified Search API
   app.use('/api', dataGovernanceRouter); // Register Data Governance API
+  app.use('/api', sharingRouter);
   app.use('/api/gtm', gtmRouter);
   app.get('/metrics', metricsRoute);
 
