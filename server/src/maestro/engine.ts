@@ -7,6 +7,7 @@ import { MaestroDSL } from './dsl';
 import { Pool } from 'pg';
 import { Queue, Worker, QueueEvents } from 'bullmq';
 import { logger } from '../utils/logger';
+import { OutcomeMetrics } from '../lib/telemetry/outcome-metrics';
 
 // Interface for dependencies
 interface MaestroDependencies {
@@ -257,6 +258,9 @@ export class MaestroEngine {
         `UPDATE maestro_runs SET status = $2, completed_at = NOW() WHERE id = $1`,
         [runId, finalStatus]
       );
+
+      // Record Outcome Metric
+      OutcomeMetrics.recordWorkflowOutcome(runId, finalStatus === 'succeeded');
 
       logger.info(`Run ${runId} completed with status ${finalStatus}`);
     }

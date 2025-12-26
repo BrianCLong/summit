@@ -85,3 +85,26 @@ backlog:
       - story: Evidence Pack v0.1
         priority: P2 - Stretch
         sprint: Paved Road + Governance
+
+  - epic: Outcome Engineering (Sprint N+60)
+    stories:
+      - story: Defense Visualization Simplification (Reduce Friction)
+        priority: P0 - Critical
+        sprint: Sprint N+60
+        jtbd: Defend Against Influence Operations
+      - story: One-Click Compliance Bundle Export (UI)
+        priority: P0 - Critical
+        sprint: Sprint N+60
+        jtbd: Ensure Regulatory Compliance
+      - story: Maestro Workflow Circuit Breaker (Cost/Loop Protection)
+        priority: P1 - Important
+        sprint: Sprint N+60
+        jtbd: Orchestrate Reliable Agentic Workflows
+      - story: Graph Citation UI (Outcome Verification)
+        priority: P1 - Important
+        sprint: Sprint N+60
+        jtbd: Accelerate Intelligence Analysis
+      - story: Strict Sandbox Isolation Enforcement (Network/Data)
+        priority: P0 - Critical
+        sprint: Sprint N+60
+        jtbd: Safe & Governed AI Experimentation
