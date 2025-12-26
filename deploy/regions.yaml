@@ -1,0 +1,7 @@
+regions:
+  - name: us-east-1
+    role: primary
+    description: "Primary region for production workloads"
+  - name: eu-west-1
+    role: secondary
+    description: "Secondary region for disaster recovery and read-only workloads"
