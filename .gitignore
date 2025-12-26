@@ -125,8 +125,10 @@ cognitive_insights_engine/poetry.lock
 
 # JavaScript/TypeScript package manager lockfiles
 # NOTE: pnpm-lock.yaml MUST be tracked for supply chain security
-# yarn.lock is ignored as we use pnpm
+# yarn.lock and package-lock.json are ignored as we use pnpm
 yarn.lock
+package-lock.json
+**/package-lock.json
 
 # Additional large data artifacts generated during investigations or exports
 *.parquet
@@ -204,6 +206,8 @@ conductor-ui/.jest-cache-ui/
 apps/**/dist/
 **/dist/
 server/test-results/
+test-results/
+**/test-results/
 server/junit.xml
 junit.xml
 **/junit.xml
