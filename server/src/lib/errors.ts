@@ -29,6 +29,13 @@ export class AppError extends Error {
   }
 }
 
+export class PredictiveAnalyticsNotEnabledError extends AppError {
+  constructor(message: string = 'Predictive analytics not enabled for this tenant.') {
+    super(message, 403, 'PREDICTIVE_ANALYTICS_DISABLED');
+    this.name = 'PredictiveAnalyticsNotEnabledError';
+  }
+}
+
 export function mapGraphRAGError(error: unknown): UserFacingError {
   const traceId = randomUUID();
   let summary = 'Unknown error';

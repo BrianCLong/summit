@@ -23,6 +23,7 @@ export interface ForecastResult {
 }
 
 export class TimeSeriesIntelligenceService {
+  public readonly ALGORITHM_NAME = 'Holt-Winters Double Exponential Smoothing';
   private static instance: TimeSeriesIntelligenceService;
 
   private constructor() {}

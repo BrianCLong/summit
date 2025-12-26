@@ -385,6 +385,10 @@ export const createApp = async () => {
 
   // Initialize SummitInvestigate Platform Routes
   SummitInvestigate.initialize(app);
+  // Predictive Analytics (Strictly Bounded)
+  const { default: predictiveAnalyticsRouter } = await import('./routes/predictive-analytics.js');
+  app.use('/api/predictive-analytics', predictiveAnalyticsRouter);
+
   // Maestro
   const { buildMaestroRouter } = await import('./routes/maestro_routes.js');
   const { Maestro } = await import('./maestro/core.js');

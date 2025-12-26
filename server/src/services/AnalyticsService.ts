@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { runCypher } from '../graph/neo4j.js';
 import { logger } from '../config/logger.js';
+import { AnalyticsType } from '../types/analytics.js';
 
 export interface XAIPayload {
   features: Record<string, any>;
@@ -15,6 +16,7 @@ export interface AnalyticResult<T> {
 }
 
 export class AnalyticsService {
+  public static readonly type = AnalyticsType.DESCRIPTIVE;
   private static instance: AnalyticsService;
 
   private constructor() {}
