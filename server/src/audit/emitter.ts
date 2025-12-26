@@ -1,1 +1,3 @@
-File written successfully.
+import { EventEmitter } from 'events';
+
+export const auditEmitter = new EventEmitter();

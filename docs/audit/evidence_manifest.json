@@ -1,0 +1,310 @@
+{
+  "timestamp": "2025-12-26T05:34:11Z",
+  "collected_by": "Jules (Automated Script)",
+  "artifacts": [
+    {
+      "path": "incidents/metrics_def.ts",
+      "sha256": "b4bd4be26a2d16728b37a667e1607d6ac444b55798258e83b73866a5fb6cd524"
+    }
+,
+    {
+      "path": "change/release.yml",
+      "sha256": "4e2605248f28b3a8e155873e60097208612cf6348cfa0ce6baaed4b49850eabb"
+    }
+,
+    {
+      "path": "change/current_commit_provenance.txt",
+      "sha256": "d094c0923a9ed78b05e81760baa79577333534d2a92dc029ce81e189dd36935f"
+    }
+,
+    {
+      "path": "change/security.yml",
+      "sha256": "92aa45327be047361e8aa2f4507e76a9a770744b46254e4e265e8d50781b4bda"
+    }
+,
+    {
+      "path": "change/git_status_snapshot.txt",
+      "sha256": "f14198d34b96ce5c6abd237f50c7b1d9832d371c28560fbb2aede5683fc4ef36"
+    }
+,
+    {
+      "path": "data/encryption_logic_snapshot.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+,
+    {
+      "path": "data/pii_fields_snapshot.txt",
+      "sha256": "ea789033217d1d61058acab10e31fa8efe0093f6c845fa558d7e539f47f41426"
+    }
+,
+    {
+      "path": "access/migration_gate.rego",
+      "sha256": "c6b66d8a65ead569d20bc4c72f42af1e6a77bc3ded1348045bb606c622290b5a"
+    }
+,
+    {
+      "path": "access/regulatory_advantage.rego",
+      "sha256": "5823bed1384f6aaa8723b1b7b61f1cc83321cd9fa86903310e0f425beb6f0801"
+    }
+,
+    {
+      "path": "access/dockerfile.rego",
+      "sha256": "0d03ef298fa709338de727c6bc15fbfe0bb11e1bea4c02ed0905d77a59f015a3"
+    }
+,
+    {
+      "path": "access/sbom.rego",
+      "sha256": "ef52dbd4f692c25a9bd5ec2624a452b65e958c47d00f672ac80cab5c6c42325c"
+    }
+,
+    {
+      "path": "access/authz.rego",
+      "sha256": "27dc54ae521efe7d11b393fea9a0a9596e2e647dac5f51729e3eb0352924b258"
+    }
+,
+    {
+      "path": "access/slsa_attestation.rego",
+      "sha256": "738efb8759bd2b615ec35949ba45cf81347d34aef21d60165583f5b470c376db"
+    }
+,
+    {
+      "path": "access/main.rego",
+      "sha256": "df1d036cbbf3df46e2045071e082245ece204c7f53ecf0a4e022bff9bb228f47"
+    }
+,
+    {
+      "path": "access/supply_chain.rego",
+      "sha256": "dcd87a8ea7707d174f6915e1347cf17ce86471952c3f23c472b0432cdc3ccb8b"
+    }
+,
+    {
+      "path": "access/regulatory_advantage_test.rego",
+      "sha256": "2f1c998f6879d25c58211cbbb6db0ed5c0870a41817f3fd09ab8690fdcc97f2a"
+    }
+,
+    {
+      "path": "access/stewardship.rego",
+      "sha256": "be79ca9812d36589f51abb6ff57a11e90a2907432bf502ad2f4dfd3041ec8544"
+    }
+,
+    {
+      "path": "access/auth_service_signature.txt",
+      "sha256": "7fb9ea952bfd5e79b8a87f2ff9ab4b33f3c5b82036cb1ce6a7c1249f06887544"
+    }
+,
+    {
+      "path": "access/graphql_test.rego",
+      "sha256": "9c332210a5bcdb5332240a763a9dcb86db59982f6f3ab15731d58fbba64b48cb"
+    }
+,
+    {
+      "path": "access/release.rego",
+      "sha256": "f1e0a0cee727ec06c5706b0c12e3a65d7ff11818c91c92b2522d4a9e62ec3b2e"
+    }
+,
+    {
+      "path": "access/pr.rego",
+      "sha256": "92ece1c4821b5545600f346587fb46b8a63a01ff501bb05bb7de911d0ef020ae"
+    }
+,
+    {
+      "path": "access/graphql.rego",
+      "sha256": "fb3c4d7ed96c619f7b33f8f37b5bc45cb5973f55101325c98b443d157123f7df"
+    }
+,
+    {
+      "path": "access/docker.rego",
+      "sha256": "2ea7ad2d880d88786bba72d74597ddb0d055ba4edd87a35c63d62e187dcd2f65"
+    }
+,
+    {
+      "path": "access/governance.rego",
+      "sha256": "da30d92eb1f4ad8bb9c22d94aa5a6d90523de7e181e33b6d720c4a803e8ac1ee"
+    }
+,
+    {
+      "path": "access/shared.rego",
+      "sha256": "20fa2a1181f0e4aece8ec7c99f92d7930d05a0f358506898eb77ed1271196e63"
+    }
+,
+    {
+      "path": "access/provenance_test.rego",
+      "sha256": "e05b7f7eb920100fa1d99b2f82d25dc68cba90aa6ee0defc9ea8b00158c2e46d"
+    }
+,
+    {
+      "path": "access/rest.rego",
+      "sha256": "94af4820568935f71eb125ed5983c559af3a45d335cd2fb33ed39deef951bbab"
+    }
+,
+    {
+      "path": "access/lineage_integrity.rego",
+      "sha256": "f077e4679489f39192f7ad1d970890dd53d231c41b0033d8a71b4e4b168d9687"
+    }
+,
+    {
+      "path": "access/sbom_test.rego",
+      "sha256": "b05583873983c9a246935c54669f6e5f97bedfe9d2a5948553caf030f334e09f"
+    }
+,
+    {
+      "path": "access/release-gates.rego",
+      "sha256": "3f9a85cfc2ff51436a9b3ccd48a2177fff13d6a7db2fe9bfef941acc3d52c253"
+    }
+,
+    {
+      "path": "access/merge_train.rego",
+      "sha256": "3cf502104175344f44294df93fdcee368e58239539151359eaa69b3db82e40ba"
+    }
+,
+    {
+      "path": "access/deploy_test.rego",
+      "sha256": "e6b40ba0309ec96c757afd3d1b44f7c56936192db0967f360d62c98eac335c4c"
+    }
+,
+    {
+      "path": "access/conductor.rego",
+      "sha256": "a675e2215ece6e392977d7d5e1ca27c8e7a678128eba05ac043fdaa8ad5ff2b9"
+    }
+,
+    {
+      "path": "access/access_control.rego",
+      "sha256": "647d5a2305f0f07f61fe6397394b8e7715779c5ccb8f6c4eed5462cf9b11ac7a"
+    }
+,
+    {
+      "path": "access/helm.rego",
+      "sha256": "68ab8cece3ee51fafd549851a6d1566e672d04255ae25fdd04f197e3147dc7b7"
+    }
+,
+    {
+      "path": "access/loa.rego",
+      "sha256": "d61555e58f311611201d726c4e07d66eb50a99407f5cf2bad5f8a2158ef8cba2"
+    }
+,
+    {
+      "path": "access/pr_test.rego",
+      "sha256": "a13c02b82b6b1ccbf233ef1794a64a1c08b3712a1c2309f27cfc01aee9eb065e"
+    }
+,
+    {
+      "path": "access/signer.rego",
+      "sha256": "fb6e4abfb2f915382e1b91a5861659f7e855603c4f64fc5e96c83a07eaf99fa4"
+    }
+,
+    {
+      "path": "access/kubernetes.rego",
+      "sha256": "0a152c87bd9667ce8b2d38c9d13a2791c327a2c54adb1f193fb53e7bf378a038"
+    }
+,
+    {
+      "path": "access/dockerfile_test.rego",
+      "sha256": "70afa677ff236cc7a61de0beef24b604137fdf52c7411b36eec2ff2cf4b27410"
+    }
+,
+    {
+      "path": "access/ingestion.rego",
+      "sha256": "b4924af7893582c07e8722a1b350d09c29c4ce26e8464b70ea142c24ac37195b"
+    }
+,
+    {
+      "path": "access/deploy.rego",
+      "sha256": "1bc6365d4c90429e9e7e2654025bc7ce71afc378ad242ced0143d2311f36ea74"
+    }
+,
+    {
+      "path": "access/edge_agent.rego",
+      "sha256": "0f4263a72156caf1e8cf965d824a32f5af047f90cd01303076b282a148de1e75"
+    }
+,
+    {
+      "path": "access/access_test.rego",
+      "sha256": "55bae4e2818cf49e3163c1f16d256c4ca39f009d3ef08292dae637d96fbf8398"
+    }
+,
+    {
+      "path": "access/docs.rego",
+      "sha256": "89e0da3103e8edb4fedace6d48693028e51a8e4042cc19170f6efb801553ac0b"
+    }
+,
+    {
+      "path": "access/intelgraph_governance.rego",
+      "sha256": "0b6c37fb81dd2655ce4a3764b93df72666579ed027ec0af3d81329528f926d47"
+    }
+,
+    {
+      "path": "access/export.rego",
+      "sha256": "89a86137ac197ef742424544ff3da56737b003208c41f75fa1fcdf3197f00727"
+    }
+,
+    {
+      "path": "access/ci_agent_gate.rego",
+      "sha256": "36251ce5002cf56e7b9cc7facdccf2d26fcac518e754317637e38079db823906"
+    }
+,
+    {
+      "path": "access/sbom_policy.rego",
+      "sha256": "766c69900fa6af9394890d280159e5112a19f23519abd2e6f43b53422b52c9e3"
+    }
+,
+    {
+      "path": "access/data_science.rego",
+      "sha256": "adff9e25083b26396ce92fda518bc6a813137af89f04cf9f553cbfd996bd559c"
+    }
+,
+    {
+      "path": "access/obligations.rego",
+      "sha256": "4697718bb3849d4bc08f7b8cf5ad68b4f89828f4cca3096680e2365edbf35a6e"
+    }
+,
+    {
+      "path": "access/migrations.rego",
+      "sha256": "675223215e8f11a2f4f79384fbc4cd30d3249a0ba90944aa04aba66a626d9d49"
+    }
+,
+    {
+      "path": "access/ci_gate.rego",
+      "sha256": "ea21097cf754410131c44a630d12980f8fb2b72297b7d7bbbd060d10326a8fff"
+    }
+,
+    {
+      "path": "access/access.rego",
+      "sha256": "f3a147b05f4d9a7303c67eca5a79d06fe6c0dc0627460952ace953a61f3f31ce"
+    }
+,
+    {
+      "path": "access/auditor.rego",
+      "sha256": "e21e45ad6df9e2fb5c86b28473a3daf88388b2ab0de937a8b19f53262748a248"
+    }
+,
+    {
+      "path": "access/simulation.rego",
+      "sha256": "50b426f5c84cf122f79c3050adf262cbf53c9caae5a9a7b2944c013acfc02cef"
+    }
+,
+    {
+      "path": "access/admin-panel.rego",
+      "sha256": "f340d020ae3eb83ec279f1077701ec9718b53897523ee9f8a40059d23a860622"
+    }
+,
+    {
+      "path": "access/provenance.rego",
+      "sha256": "feb12f33ae85551eb7208a04eccb9ead56ca949f9a862ce3849584ab92414822"
+    }
+,
+    {
+      "path": "access/orchestrator.rego",
+      "sha256": "7c21f06f672e293fce244e7e42c77aaf068622d99e2b6e12b55be2b61f9dea10"
+    }
+,
+    {
+      "path": "access/mc-admin.rego",
+      "sha256": "73a923228ee952c138888a79240ec8f90bce4135a1b3d7e3065667254306c31a"
+    }
+,
+    {
+      "path": "access/maestro.rego",
+      "sha256": "56afb4c80e3a6af03489962ee46053fe1519616732c161aa9fbc776bf09f140e"
+    }
+  ]
+}
