@@ -200,6 +200,8 @@ apps/**/dist/
 **/dist/
 server/test-results/
 server/junit.xml
+junit.xml
+**/junit.xml
 coverage/
 **/coverage/
 coverage-reports/
