@@ -8,7 +8,7 @@ const INDEX_FILE_PATH = path.join(process.cwd(), 'storage', 'search_index.json')
 
 export class SearchIndexService {
   private static instance: SearchIndexService;
-  private miniSearch: MiniSearch<SearchableItem>;
+  private miniSearch: any; // Temporary workaround for miniSearch type issue
   private isDirty: boolean = false;
   private saveInterval: NodeJS.Timeout | null = null;
 

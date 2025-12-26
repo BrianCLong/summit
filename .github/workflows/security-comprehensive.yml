@@ -15,7 +15,15 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+  conconcurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+tents: read
   security-events: write
   pull-requests: write
   issues: write
