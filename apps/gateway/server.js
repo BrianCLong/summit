@@ -1,13 +1,13 @@
-import path from 'path';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+/* eslint-disable @typescript-eslint/no-var-requires */
+const path = require('path');
+const fs = require('fs');
 
 const distPath = path.join(__dirname, 'dist', 'server.js');
+
 if (fs.existsSync(distPath)) {
-  await import(distPath);
+  require(distPath);
 } else {
-  await import('./src/server.js');
+  // Fallback for dev/tools
+  console.warn('Production build not found, falling back to src/server.js (this might fail if not using ts-node)');
+  require('./src/server.js');
 }
