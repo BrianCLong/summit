@@ -104,3 +104,6 @@ export class CorrectnessProgram {
 
 export const correctnessProgram = new CorrectnessProgram();
 correctnessProgram.bootstrapDefaultDomains();
+
+// Export the enhanced agent coordination service
+export { AgentCoordinationService, agentCoordinationService } from './agent-coordination.js';
