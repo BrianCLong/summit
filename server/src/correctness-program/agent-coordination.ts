@@ -7,9 +7,9 @@
 
 import { CorrectnessProgram, correctnessProgram } from './index.js';
 import { InvariantDefinition, DomainName, StateMachineDefinition } from './types.js';
-import logger from '../../config/logger.js';
-import { provenanceLedger } from '../../provenance/ledger.js';
-import type { ProvenanceEntry } from '../../provenance/types.js';
+import logger from '../config/logger.js';
+import { provenanceLedger } from '../provenance/ledger.js';
+import type { ProvenanceEntryV2 } from '../provenance/types.js';
 
 export interface AgentCoordinationPlan {
   id: string;
