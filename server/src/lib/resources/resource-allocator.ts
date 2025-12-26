@@ -1,18 +1,17 @@
-// @ts-nocheck
 // server/src/lib/resources/resource-allocator.ts
 
 /**
  * @file Allocates resources to tenants based on quotas and priority.
  * @author Jules
- * @version 1.0.0
+ * @version 1.1.0
  *
  * @warning This implementation uses a non-persistent in-memory queue.
- * All pending resource requests will be lost on application restart.
- * This is a prototype and is NOT suitable for production use without
- * being refactored to use a persistent queue (e.g., BullMQ, RabbitMQ).
  */
 
-import { quotaManager, ResourceType } from './quota-manager.js';
+import { QuotaManager, ResourceType, ResourceIdentifiers } from './quota-manager.js';
+
+// Access the singleton instance
+const quotaManager = QuotaManager.getInstance();
 
 interface QueuedRequest {
   id: string;
@@ -20,7 +19,7 @@ interface QueuedRequest {
   resource: ResourceType;
   amount: number;
   priority: number; // Lower number means higher priority
-  identifiers: { teamId?: string; userId?: string };
+  identifiers: ResourceIdentifiers;
   resolve: (value: boolean | PromiseLike<boolean>) => void;
   reject: (reason?: unknown) => void;
 }
@@ -34,7 +33,7 @@ export class ResourceAllocator {
     resource: ResourceType,
     amount: number,
     priority: number,
-    identifiers: { teamId?: string; userId?: string },
+    identifiers: ResourceIdentifiers,
   ): Promise<boolean> {
     return new Promise((resolve, reject) => {
       this.requestQueue.push({
@@ -56,7 +55,7 @@ export class ResourceAllocator {
     tenantId: string,
     resource: ResourceType,
     amount: number,
-    identifiers: { teamId?: string; userId?: string },
+    identifiers: ResourceIdentifiers,
   ): void {
     quotaManager.releaseQuota(tenantId, resource, amount, identifiers);
     this.processQueue();
@@ -65,14 +64,14 @@ export class ResourceAllocator {
   private processQueue(): void {
     for (let i = 0; i < this.requestQueue.length; i++) {
       const request = this.requestQueue[i];
-      const { allowed } = quotaManager.checkQuota(
+      const check = quotaManager.checkQuota(
         request.tenantId,
         request.resource,
         request.amount,
         request.identifiers
       );
 
-      if (allowed) {
+      if (check.allowed) {
         quotaManager.consumeQuota(
           request.tenantId,
           request.resource,
@@ -86,7 +85,16 @@ export class ResourceAllocator {
       } else {
         // If a high-priority request is blocked, stop processing the queue
         // to ensure lower-priority requests don't jump ahead.
-        break;
+        // Optional: Implement timeout or rejection for blocked requests
+
+        // For now, if blocked by budget (hard stop), we might want to reject immediately
+        if (check.reason && check.reason.includes('Budget exceeded')) {
+             this.requestQueue.splice(i, 1);
+             i--;
+             request.resolve(false); // Resolve as false (denied)
+        } else {
+             break; // Blocked by concurrency limit, wait.
+        }
       }
     }
   }

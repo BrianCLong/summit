@@ -1,0 +1,39 @@
+{
+  "timestamp": "2025-12-26T18:29:20.072Z",
+  "totalCost": 60.499999999999275,
+  "breakdown": {
+    "agent_runs": {
+      "domain": "agent_runs",
+      "limit": 1000000,
+      "period": "monthly",
+      "currency": "USD",
+      "alertThresholds": [],
+      "currentSpending": 9.99999999999998,
+      "forecastedSpending": 12959999999.999975,
+      "periodStart": "2025-12-26T18:29:19.923Z",
+      "periodEnd": "2026-01-25T18:29:19.923Z"
+    },
+    "coordination": {
+      "domain": "coordination",
+      "limit": 1000000,
+      "period": "monthly",
+      "currency": "USD",
+      "alertThresholds": [],
+      "currentSpending": 0.5000000000000003,
+      "forecastedSpending": 40500000.00000003,
+      "periodStart": "2025-12-26T18:29:19.924Z",
+      "periodEnd": "2026-01-25T18:29:19.924Z"
+    },
+    "write_actions": {
+      "domain": "write_actions",
+      "limit": 1000000,
+      "period": "monthly",
+      "currency": "USD",
+      "alertThresholds": [],
+      "currentSpending": 49.9999999999993,
+      "forecastedSpending": 875675675.6756635,
+      "periodStart": "2025-12-26T18:29:19.924Z",
+      "periodEnd": "2026-01-25T18:29:19.924Z"
+    }
+  }
+}
