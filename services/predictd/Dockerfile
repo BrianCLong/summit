@@ -11,6 +11,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 # Copy package.json files for the service and its local dependencies
 # This leverages Docker's layer caching.
 COPY packages/predictive-graph-intelligence/package.json ./packages/predictive-graph-intelligence/package.json
+COPY packages/graph-algorithms/package.json ./packages/graph-algorithms/package.json
 COPY services/predictd/package.json ./services/predictd/package.json
 
 # Install dependencies for the service only

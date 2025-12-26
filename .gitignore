@@ -206,7 +206,11 @@ webapp/.pnpm-store/ops/compose/.env
 !webapp/package-lock.json
 
 # Test caches and artifacts
+# Jest cache directories
+.jest-cache*/
 .jest-cache-*/
+**/.jest-cache*/
+**/.jest-cache-*/
 conductor-ui/.jest-cache-ui/
 .orchestrator/
 apps/**/dist/
@@ -286,3 +290,11 @@ tmp-audit/
 
 # Test reports
 reports/
+bug-bash-results/
+*-report.json
+lint_output.txt
+
+# Aider (AI coding assistant) cache and history
+.aider.chat.history.md
+.aider.input.history
+.aider.tags.cache.v4/

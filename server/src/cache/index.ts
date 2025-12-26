@@ -1,5 +1,5 @@
-// @ts-nocheck
 import { createClient } from 'redis';
+import { safeJsonParse, safeJsonStringify } from '../utils/safe-json.js';
 
 // Lazy init
 let redisClient: ReturnType<typeof createClient> | null = null;
@@ -21,14 +21,14 @@ export async function cached<T>(
 ): Promise<T> {
   const r = getRedis();
   const cachedVal = await r.get(key);
-  if (cachedVal) return JSON.parse(cachedVal) as T;
+  if (cachedVal) return safeJsonParse<T>(cachedVal);
 
   // Dogpile protection: check if request is already in flight locally
   if (inflight.has(key)) return inflight.get(key) as Promise<T>;
 
   const p = (async (): Promise<T> => {
     const v = await fn();
-    await r.setEx(key, ttlSec, JSON.stringify(v));
+    await r.setEx(key, ttlSec, safeJsonStringify(v));
     return v;
   })();
 
