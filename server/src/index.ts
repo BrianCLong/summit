@@ -29,6 +29,7 @@ const __dirname = path.dirname(__filename);
 import { bootstrapSecrets } from './bootstrap-secrets.js';
 import { logger } from './config/logger.js';
 import { logConfigSummary } from './config/index.js';
+import './monitoring/metrics.js'; // Initialize Prometheus metrics collection
 
 const startServer = async () => {
   const tracer = initializeTracing();
