@@ -1,15 +1,23 @@
 import {
-  GraphService,
-  Entity,
-  Edge,
-  TenantId,
-  EntityId,
-  EdgeId,
-  EntityQuery,
-  EdgeQuery,
-} from '../graph/types';
-import { getDriver, runCypher } from '../graph/neo4j';
-import logger from '../utils/logger';
+  GraphService as GraphServiceContract,
+  // Entity,
+  // Edge,
+  // TenantId,
+  // EntityId,
+  // EdgeId,
+  // EntityQuery,
+  // EdgeQuery,
+} from '../contracts/services.js';
+import {
+    Entity,
+    Edge,
+    TenantId,
+    EntityId,
+    EdgeId,
+    EntityQuery,
+    EdgeQuery,
+} from '../graph/types.js';
+import { runCypher } from '../graph/neo4j.js';
 
 // Helper to sanitize attribute keys to prevent injection
 function sanitizeKey(key: string): string {
@@ -56,7 +64,7 @@ function unflattenAttributes(properties: Record<string, any>, prefix = 'attr_'):
     return attributes;
 }
 
-export class Neo4jGraphService implements GraphService {
+export class Neo4jGraphService implements GraphServiceContract {
   private static instance: Neo4jGraphService;
 
   public static getInstance(): Neo4jGraphService {
@@ -210,9 +218,11 @@ export class Neo4jGraphService implements GraphService {
     tenantId: TenantId,
     entity: Partial<Entity>,
   ): Promise<Entity> {
-    if (!entity.id || !entity.type || !entity.label) {
-      throw new Error('Entity must have id, type, and label');
+    if (!entity.id || !entity.type) {
+      throw new Error('Entity must have id and type');
     }
+    // Handle optional label
+    const label = entity.label || entity.type;
 
     const flattenedAttrs = flattenAttributes(entity.attributes || {});
 
@@ -233,7 +243,7 @@ export class Neo4jGraphService implements GraphService {
         id: entity.id,
         tenantId,
         type: entity.type,
-        label: entity.label,
+        label: label,
         props: flattenedAttrs, // Dynamically set flattened attributes
         metadata: JSON.stringify(entity.metadata || {}),
         sensitivity: entity.sensitivity || 'internal'

@@ -5,7 +5,7 @@
 
 // No-op tracer shim to avoid OTEL dependency
 import { Counter, Histogram, Gauge } from 'prom-client';
-import { pool } from '../db/pg';
+import { pool } from '../db/pg.js';
 import { EventEmitter } from 'events';
 import * as crypto from 'crypto';
 import { execSync } from 'child_process';
@@ -18,6 +18,7 @@ import { MutationWitnessService, mutationWitness } from './witness.js';
 import { ProvenanceEntryV2, MutationPayload, MutationWitness, CrossServiceAttribution } from './types.js';
 import { advancedAuditSystem } from '../audit/advanced-audit-system.js';
 import { putLocked } from '../audit/worm.js';
+import { ProvenanceService as ProvenanceServiceContract } from '../contracts/services.js';
 
 const tracer = {
   startActiveSpan: async (
@@ -126,7 +127,7 @@ export interface LedgerVerification {
   }>;
 }
 
-export class ProvenanceLedgerV2 extends EventEmitter {
+export class ProvenanceLedgerV2 extends EventEmitter implements ProvenanceServiceContract {
   private readonly genesisHash =
     '0000000000000000000000000000000000000000000000000000000000000000';
   private rootSigningInterval: NodeJS.Timeout | null = null;
@@ -182,17 +183,22 @@ export class ProvenanceLedgerV2 extends EventEmitter {
   async appendEntry(
     entry: Omit<
       ProvenanceEntry,
-      'id' | 'sequenceNumber' | 'previousHash' | 'currentHash' | 'witness'
-    >,
+      'id' | 'sequenceNumber' | 'previousHash' | 'currentHash' | 'witness' | 'timestamp'
+    > & { timestamp?: Date },
   ): Promise<ProvenanceEntry> {
+    const entryWithDefaults = {
+        timestamp: new Date(),
+        ...entry
+    };
+
     return tracer.startActiveSpan(
       'provenance_ledger.append_entry',
       async (span: any) => {
         span.setAttributes?.({
-          tenant_id: entry.tenantId,
-          action_type: entry.actionType,
-          resource_type: entry.resourceType,
-          actor_type: entry.actorType,
+          tenant_id: entryWithDefaults.tenantId,
+          action_type: entryWithDefaults.actionType,
+          resource_type: entryWithDefaults.resourceType,
+          actor_type: entryWithDefaults.actorType,
         });
 
         const startTime = Date.now();
@@ -201,10 +207,10 @@ export class ProvenanceLedgerV2 extends EventEmitter {
           // 1. Witnessing Phase: Validate and Sign Mutation
           // If the payload is a MutationPayload, we witness it.
           let witness: MutationWitness | undefined;
-          if (this.isMutationPayload(entry.payload)) {
+          if (this.isMutationPayload(entryWithDefaults.payload)) {
             witness = await mutationWitness.witnessMutation(
-              entry.payload,
-              { tenantId: entry.tenantId, actorId: entry.actorId }
+              entryWithDefaults.payload,
+              { tenantId: entryWithDefaults.tenantId, actorId: entryWithDefaults.actorId }
             );
           }
 
@@ -215,7 +221,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
 
             // Get the previous entry for hash chaining
             const previousEntry = await this.getLastEntry(
-              entry.tenantId,
+              entryWithDefaults.tenantId,
               client,
             );
             const previousHash = previousEntry?.currentHash || this.genesisHash;
@@ -229,7 +235,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
             // Create the entry object first to compute hash (including witness)
             // Note: entry.payload is now strongly typed as MutationPayload
             const entryData = {
-              ...entry,
+              ...entryWithDefaults,
               id,
               sequenceNumber,
               previousHash,
@@ -241,7 +247,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
             const completeEntry: ProvenanceEntry = {
               ...entryData,
               currentHash,
-              payload: entry.payload as MutationPayload
+              payload: entryWithDefaults.payload as MutationPayload
             };
 
             // Insert into database
@@ -300,13 +306,13 @@ export class ProvenanceLedgerV2 extends EventEmitter {
 
             // Update metrics
             ledgerEntries.inc({
-              tenant_id: entry.tenantId,
-              action_type: entry.actionType,
-              resource_type: entry.resourceType,
+              tenant_id: entryWithDefaults.tenantId,
+              action_type: entryWithDefaults.actionType,
+              resource_type: entryWithDefaults.resourceType,
             });
 
             ledgerChainHeight.set(
-              { tenant_id: entry.tenantId },
+              { tenant_id: entryWithDefaults.tenantId },
               Number(completeEntry.sequenceNumber),
             );
 
@@ -327,12 +333,12 @@ export class ProvenanceLedgerV2 extends EventEmitter {
             // Integration: Send to Audit System
             (advancedAuditSystem as any).logEvent?.({
               eventType: 'resource_modify', // Generic mapping, could be more specific
-              action: entry.actionType,
-              tenantId: entry.tenantId,
-              userId: entry.actorId,
-              resourceId: entry.resourceId,
-              resourceType: entry.resourceType,
-              message: `Provenance entry appended: ${entry.actionType} on ${entry.resourceType}`,
+              action: entryWithDefaults.actionType,
+              tenantId: entryWithDefaults.tenantId,
+              userId: entryWithDefaults.actorId,
+              resourceId: entryWithDefaults.resourceId,
+              resourceType: entryWithDefaults.resourceType,
+              message: `Provenance entry appended: ${entryWithDefaults.actionType} on ${entryWithDefaults.resourceType}`,
               details: {
                 provenanceId: completeEntry.id,
                 sequence: completeEntry.sequenceNumber.toString(),

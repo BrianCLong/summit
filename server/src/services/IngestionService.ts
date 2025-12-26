@@ -1,11 +1,13 @@
 import { Queue, Worker, QueueEvents } from 'bullmq';
 import { getRedisClient } from '../config/database.js';
 import logger from '../utils/logger.js';
-import { ingestionProcessor } from '../jobs/processors/ingestionProcessor.js';
+// Removed direct worker import to decouple process
+// import { ingestionProcessor } from '../jobs/processors/ingestionProcessor.js';
 
 export class IngestionService {
   private queue: Queue | null = null;
-  private worker: Worker | null = null;
+  // Worker is no longer managed here for the API service
+  // private worker: Worker | null = null;
   private queueEvents: QueueEvents | null = null;
 
   constructor() {
@@ -22,20 +24,10 @@ export class IngestionService {
     this.queue = new Queue('evidence-ingestion', { connection });
     this.queueEvents = new QueueEvents('evidence-ingestion', { connection });
 
-    this.worker = new Worker('evidence-ingestion', ingestionProcessor, {
-       connection,
-       concurrency: 5
-    });
+    // WORKER REMOVED: The API service should only produce jobs.
+    // The worker should be started in a separate process (e.g. via `npm run worker:ingestion`).
 
-    this.worker.on('completed', job => {
-      logger.info({ jobId: job.id }, 'Ingestion job completed');
-    });
-
-    this.worker.on('failed', (job, err) => {
-      logger.error({ jobId: job?.id, error: err }, 'Ingestion job failed');
-    });
-
-    logger.info('IngestionService initialized');
+    logger.info('IngestionService initialized (Producer Only)');
   }
 
   async addJob(file: { path: string; tenantId: string; flags?: Record<string, boolean> }) {

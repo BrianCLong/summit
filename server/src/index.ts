@@ -21,6 +21,7 @@ import { cfg } from './config.js';
 import { initializeTracing } from './observability/tracer.js';
 import { streamingRateLimiter } from './routes/streaming.js';
 import { startOSINTWorkers } from './services/OSINTQueueService.js';
+// Removed implicit side-effect initialization of worker
 import { ingestionService } from './services/IngestionService.js';
 import { BackupManager } from './backup/BackupManager.js';
 import { checkNeo4jIndexes } from './db/indexManager.js';
@@ -153,7 +154,7 @@ const startServer = async () => {
     const dataRetentionService = new DataRetentionService(neo4jDriver);
     dataRetentionService.startCleanupJob(); // Start the cleanup job
 
-    // Start OSINT Workers
+    // Start OSINT Workers (Keep as is, assuming it handles its own internal logic safely or should be split later)
     startOSINTWorkers();
 
     // Initialize Backup Manager
@@ -164,7 +165,9 @@ const startServer = async () => {
     checkNeo4jIndexes().catch(err => logger.error('Failed to run initial index check', err));
 
     // WAR-GAMED SIMULATION - Start Kafka Consumer
-    await startKafkaConsumer();
+    if (startKafkaConsumer) {
+      await startKafkaConsumer();
+    }
 
     // Create sample data for development
     if (process.env.NODE_ENV === 'development') {
