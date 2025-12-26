@@ -1,0 +1,17 @@
+{
+  "name": "@summit/research",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Sandboxed research track for Summit platform",
+  "scripts": {
+    "test": "jest",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "jest": "^29.0.0",
+    "ts-jest": "^29.0.0",
+    "@types/jest": "^29.0.0",
+    "@types/node": "^18.0.0"
+  }
+}

@@ -43,6 +43,7 @@
     "db:migrate:neo4j": "npx ts-node --esm scripts/migrate.ts",
     "health": "chmod +x scripts/health-check.sh && scripts/health-check.sh",
     "install:pm": "node scripts/select-pm.js",
+    "check:research": "concurrently \"npx ts-node research/scripts/check-isolation.ts\" \"npx ts-node research/scripts/manage-experiments.ts\"",
     "e2e": "playwright test",
     "graphql:schema:check": "graphql-inspector diff packages/graphql/schema.graphql origin/main:packages/graphql/schema.graphql --fail-on-breaking",
     "graphql:codegen": "graphql-codegen",
