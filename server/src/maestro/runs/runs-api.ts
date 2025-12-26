@@ -2,6 +2,7 @@
 import express from 'express';
 import { z } from 'zod';
 import { runsRepo } from './runs-repo.js';
+import { runEventsRepo } from './run-events-repo.js';
 import { ensureAuthenticated } from '../../middleware/auth.js';
 import { authorize } from '../../middleware/authorization.js';
 import {
@@ -13,6 +14,7 @@ import Redis from 'ioredis'; // Assuming Redis is used for budget control
 import { scheduler } from '../scheduler/Scheduler.js';
 import { maestroAuthzMiddleware } from '../../middleware/maestro-authz.js';
 import { recordEndpointResult } from '../../observability/reliability-metrics.js';
+import { maestroService } from '../MaestroService.js';
 
 const router = express.Router();
 router.use(express.json());
@@ -33,7 +35,7 @@ const RunCreateSchema = z.object({
 
 const RunUpdateSchema = z.object({
   status: z
-    .enum(['queued', 'running', 'succeeded', 'failed', 'cancelled'])
+    .enum(['queued', 'running', 'succeeded', 'failed', 'cancelled', 'created', 'paused', 'halted', 'completed', 'aborted'])
     .optional(),
   started_at: z.coerce.date().optional(),
   completed_at: z.coerce.date().optional(),
@@ -41,6 +43,48 @@ const RunUpdateSchema = z.object({
   cost: z.number().min(0).optional(),
   output_data: z.record(z.any()).optional(),
   error_message: z.string().optional(),
+  failure_details: z.object({
+    code: z.string(),
+    reason: z.string(),
+    remediation: z.string().optional()
+  }).optional()
+});
+
+// GET /runs/limits - Get budget and control loop status
+router.get('/runs/limits', authorize('run_maestro'), async (req, res) => {
+  try {
+    const tenantId = (req.context as RequestContext).tenantId;
+
+    // Get control loops (kill switches)
+    const loops = await maestroService.getControlLoops();
+
+    // Mock budget status for now as BudgetAdmissionController doesn't expose easy "get status"
+    // without an admission check, or we need to peek into Redis.
+    // For MVP/Sprint, we'll return a simulated view or extend controller.
+
+    res.json({
+      limits: {
+        budget: {
+          remainingUsd: 100.00, // Placeholder
+          period: 'monthly',
+          resetAt: new Date(Date.now() + 86400000).toISOString()
+        },
+        caps: {
+          concurrentRuns: 10,
+          maxTokensPerRun: 100000
+        }
+      },
+      controls: loops.map(l => ({
+        id: l.id,
+        name: l.name,
+        status: l.status, // active vs paused
+        lastDecision: l.lastDecision
+      }))
+    });
+  } catch (error) {
+    console.error('Error fetching limits:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 // GET /runs - List all runs with pagination
@@ -110,15 +154,6 @@ router.post('/runs', authorize('run_maestro'), async (req, res) => {
       });
     }
 
-    //
-    // TODO: This is a placeholder for the quota service
-    //
-    // await quotaService.assert({
-    //   tenantId,
-    //   dimension: 'maestro.runs',
-    //   quantity: 1,
-    // });
-
     const run = await runsRepo.create({
       ...validation.data,
       tenant_id: tenantId,
@@ -172,28 +207,28 @@ router.get('/runs/:id', authorize('run_maestro'), async (req, res) => {
       return res.status(404).json({ error: 'Run not found' });
     }
 
-    //
-    // TODO: This is a placeholder for the usage metering service
-    //
-    // if (run.status === 'succeeded') {
-    //   await usageMeteringService.record({
-    //     id: '',
-    //     tenantId,
-    //     dimension: 'maestro.runs',
-    //     quantity: 1,
-    //     unit: 'count',
-    //     source: 'maestro',
-    //     metadata: {
-    //       pipeline_id: run.pipeline_id,
-    //     },
-    //     occurredAt: new Date().toISOString(),
-    //     recordedAt: new Date().toISOString(),
-    //   });
-    // }
-
     res.json(run);
   } catch (error) {
     console.error('Error fetching run:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET /runs/:id/timeline - Get run timeline
+router.get('/runs/:id/timeline', authorize('run_maestro'), async (req, res) => {
+  try {
+    const tenantId = (req.context as RequestContext).tenantId;
+
+    // Verify run access first
+    const run = await runsRepo.getRunForTenant(req.params.id, tenantId);
+    if (!run) {
+      return res.status(404).json({ error: 'Run not found' });
+    }
+
+    const events = await runEventsRepo.getEvents(req.params.id, tenantId);
+    res.json({ items: events });
+  } catch (error) {
+    console.error('Error fetching run timeline:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

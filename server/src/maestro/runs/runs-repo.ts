@@ -1,6 +1,8 @@
 import { Pool } from 'pg';
 import { randomUUID as uuidv4 } from 'crypto';
 import { getPostgresPool } from '../../config/database.js';
+import { RunFailure, RunStatus } from '../types.js';
+import { runEventsRepo } from './run-events-repo.js';
 
 let pool: Pool | null = null;
 
@@ -15,7 +17,7 @@ export interface Run {
   id: string;
   pipeline_id: string;
   pipeline: string;
-  status: 'queued' | 'running' | 'succeeded' | 'failed' | 'cancelled';
+  status: RunStatus;
   started_at?: Date;
   completed_at?: Date;
   duration_ms?: number;
@@ -23,6 +25,7 @@ export interface Run {
   input_params?: any;
   output_data?: any;
   error_message?: string;
+  failure_details?: RunFailure;
   executor_id?: string;
   created_at: Date;
   updated_at: Date;
@@ -39,13 +42,14 @@ export interface RunCreateInput {
 }
 
 export interface RunUpdateInput {
-  status?: 'queued' | 'running' | 'succeeded' | 'failed' | 'cancelled';
+  status?: RunStatus;
   started_at?: Date;
   completed_at?: Date;
   duration_ms?: number;
   cost?: number;
   output_data?: any;
   error_message?: string;
+  failure_details?: RunFailure;
   executor_id?: string;
 }
 
@@ -54,7 +58,7 @@ class RunsRepo {
     const query = `
       SELECT id, pipeline_id, pipeline_name as pipeline, status, started_at, 
              completed_at, duration_ms, cost, input_params, output_data, 
-             error_message, executor_id, created_at, updated_at, tenant_id
+             error_message, failure_details, executor_id, created_at, updated_at, tenant_id
       FROM runs 
       WHERE tenant_id = $1
       ORDER BY created_at DESC 
@@ -68,7 +72,7 @@ class RunsRepo {
     const query = `
       SELECT id, pipeline_id, pipeline_name as pipeline, status, started_at, 
              completed_at, duration_ms, cost, input_params, output_data, 
-             error_message, executor_id, created_at, updated_at, tenant_id
+             error_message, failure_details, executor_id, created_at, updated_at, tenant_id
       FROM runs 
       WHERE id = $1 AND tenant_id = $2
     `;
@@ -83,7 +87,7 @@ class RunsRepo {
       VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING id, pipeline_id, pipeline_name as pipeline, status, started_at, 
                 completed_at, duration_ms, cost, input_params, output_data, 
-                error_message, executor_id, created_at, updated_at, tenant_id
+                error_message, failure_details, executor_id, created_at, updated_at, tenant_id
     `;
     const result = await getPool().query(query, [
       id,
@@ -93,6 +97,9 @@ class RunsRepo {
       data.executor_id,
       data.tenant_id,
     ]);
+
+    await runEventsRepo.logEvent(id, 'run.created', { pipeline_id: data.pipeline_id }, data.tenant_id);
+
     return result.rows[0];
   }
 
@@ -133,6 +140,10 @@ class RunsRepo {
       sets.push(`error_message = $${paramCount++}`);
       values.push(data.error_message);
     }
+    if (data.failure_details !== undefined) {
+      sets.push(`failure_details = $${paramCount++}`);
+      values.push(JSON.stringify(data.failure_details));
+    }
 
     if (sets.length === 0) return this.get(id, tenantId);
 
@@ -142,13 +153,22 @@ class RunsRepo {
       WHERE id = $${paramCount} AND tenant_id = $${paramCount + 1}
       RETURNING id, pipeline_id, pipeline_name as pipeline, status, started_at, 
                 completed_at, duration_ms, cost, input_params, output_data, 
-                error_message, executor_id, created_at, updated_at, tenant_id
+                error_message, failure_details, executor_id, created_at, updated_at, tenant_id
     `;
     values.push(id);
     values.push(tenantId);
 
     const result = await getPool().query(query, values);
-    return result.rows[0] || null;
+    const run = result.rows[0] || null;
+
+    if (run && data.status) {
+      await runEventsRepo.logEvent(id, 'run.status_changed', {
+        old_status: 'unknown', // Ideally we'd have fetched this, but avoiding extra read for now
+        new_status: data.status
+      }, tenantId);
+    }
+
+    return run;
   }
 
   async delete(id: string, tenantId: string): Promise<boolean> {
@@ -165,7 +185,7 @@ class RunsRepo {
     const query = `
       SELECT id, pipeline_id, pipeline_name as pipeline, status, started_at, 
              completed_at, duration_ms, cost, input_params, output_data, 
-             error_message, executor_id, created_at, updated_at, tenant_id
+             error_message, failure_details, executor_id, created_at, updated_at, tenant_id
       FROM runs 
       WHERE pipeline_id = $1 AND tenant_id = $2
       ORDER BY created_at DESC 
