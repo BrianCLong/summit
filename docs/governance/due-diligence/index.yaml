@@ -1,0 +1,164 @@
+# Summit Due-Diligence Index
+# This file is the single source of truth for mapping security controls,
+# governance principles, and compliance claims to their verifiable evidence.
+#
+# Structure:
+# controls:
+#   - id: CONTROL_ID (e.g., SA-1)
+#     name: "Control Name"
+#     description: "What the control achieves."
+#     category: "STRIDE Category (e.g., Spoofing, Tampering)"
+#     source: "Origin of the requirement (e.g., THREAT_MODEL.md, CONSTITUTION.md)"
+#     invariants:
+#       - description: "A specific, testable statement of the control's effect."
+#         evidence:
+#           - type: "code | test | config | policy | ci-job | documentation"
+#             path: "path/to/evidence"
+#             description: "How this artifact proves the invariant."
+#     owners:
+#       - "Team or individual responsible for this control."
+#     last_verified: "YYYY-MM-DD"
+
+controls:
+  - id: SEC-S-001
+    name: "User Impersonation Prevention"
+    description: "Measures to prevent an adversary from successfully posing as another user or component."
+    category: "Spoofing"
+    source: "THREAT_MODEL.md"
+    invariants:
+      - description: "Strong authentication and authorization are required for all services."
+        evidence:
+          - type: "documentation"
+            path: "docs/governance/CONSTITUTION.md#article-ii--authority--control"
+            description: "The constitution mandates human authorization for all consequential actions."
+          - type: "code"
+            path: "server/src/middleware/auth.ts"
+            description: "JWT and RBAC middleware enforce authentication and authorization."
+      - description: "LLM-generated content is clearly labeled to prevent impersonation of trusted sources."
+        evidence:
+          - type: "code"
+            path: "client/src/components/Chat/Message.tsx"
+            description: "UI components differentiate between user and AI-generated messages."
+    owners:
+      - "Security Team"
+      - "API Platform Team"
+    last_verified: "2023-12-01"
+
+  - id: SEC-T-001
+    name: "Prompt Injection Prevention"
+    description: "Measures to prevent adversaries from overriding the LLM's original purpose through malicious inputs."
+    category: "Tampering"
+    source: "THREAT_MODEL.md"
+    invariants:
+      - description: "Input validation and sanitization are implemented to detect and block prompt injection patterns."
+        evidence:
+          - type: "code"
+            path: "server/src/services/llm/input-sanitizer.ts"
+            description: "Sanitization logic to strip or flag malicious input patterns before processing."
+          - type: "test"
+            path: "server/tests/services/llm/input-sanitizer.test.ts"
+            description: "Unit tests verifying the effectiveness of the input sanitizer against known prompt injection attacks."
+    owners:
+      - "AI Safety Team"
+    last_verified: "2023-12-01"
+
+  - id: GOV-C-001
+    name: "Human Primacy"
+    description: "Ensures that all consequential actions require human authorization and are traceable."
+    category: "Governance"
+    source: "docs/governance/CONSTITUTION.md"
+    invariants:
+      - description: "All consequential actions require human authorization."
+        evidence:
+          - type: "policy"
+            path: "docs/governance/CONSTITUTION.md#21-human-primacy"
+            description: "The constitution explicitly states the requirement for human authorization."
+      - description: "All actions are traceable and auditable."
+        evidence:
+          - type: "code"
+            path: "server/src/services/audit/logger.ts"
+            description: "The audit logging service records all significant user and system actions."
+          - type: "config"
+            path: "server/src/config/production.json"
+            description: "Audit logging is enabled by default in the production environment."
+    owners:
+      - "Governance Council"
+    last_verified: "2023-12-01"
+
+  - id: SEC-ID-001
+    name: "Sensitive Data Leakage Prevention"
+    description: "Measures to prevent the exposure of sensitive information to unauthorized individuals through the LLM."
+    category: "Information Disclosure"
+    source: "THREAT_MODEL.md"
+    invariants:
+      - description: "Sensitive information (PII, secrets) is redacted or masked before being processed by the LLM."
+        evidence:
+          - type: "code"
+            path: "packages/pii-redactor/src/index.ts"
+            description: "A dedicated package for identifying and redacting PII in text."
+          - type: "test"
+            path: "packages/pii-redactor/tests/redact.test.ts"
+            description: "Unit tests for the PII redaction functionality."
+    owners:
+      - "Security Team"
+      - "AI Safety Team"
+    last_verified: "2023-12-01"
+
+  - id: SEC-DoS-001
+    name: "Denial of Service Mitigation"
+    description: "Measures to protect the platform from Denial of Service (DoS) attacks."
+    category: "Denial of Service"
+    source: "THREAT_MODEL.md"
+    invariants:
+      - description: "Strict rate limiting is applied to API endpoints to prevent resource exhaustion."
+        evidence:
+          - type: "code"
+            path: "server/src/middleware/rateLimit.ts"
+            description: "Middleware for rate limiting API requests."
+          - type: "config"
+            path: "helm/summit/values.yaml"
+            description: "Default rate limit values are configured in the Helm chart."
+    owners:
+      - "Infrastructure Team"
+    last_verified: "2023-12-01"
+
+  - id: SEC-EP-001
+    name: "Privilege Escalation Prevention"
+    description: "Measures to prevent a user or component from gaining unauthorized capabilities."
+    category: "Elevation of Privilege"
+    source: "THREAT_MODEL.md"
+    invariants:
+      - description: "The LLM interacts with other systems through a low-privilege API gateway that enforces access controls."
+        evidence:
+          - type: "documentation"
+            path: "docs/adr/005-llm-api-gateway.md"
+            description: "Architectural Decision Record for the LLM API gateway, outlining its security design."
+          - type: "code"
+            path: "services/llm-gateway/src/auth.ts"
+            description: "The gateway enforces OPA policies for every request from the LLM."
+    owners:
+      - "Security Team"
+      - "API Platform Team"
+    last_verified: "2023-12-01"
+
+  - id: GOV-P-001
+    name: "Provenance and Auditability"
+    description: "Ensures all outputs are attributable, explainable, and auditable."
+    category: "Governance"
+    source: "docs/governance/CONSTITUTION.md"
+    invariants:
+      - description: "All significant system events are recorded in an immutable ledger."
+        evidence:
+          - type: "policy"
+            path: "docs/governance/CONSTITUTION.md#41-provenance-requirement"
+            description: "The constitution mandates that all outputs must be attributable and explainable."
+          - type: "code"
+            path: "services/prov-ledger/src/ledger.ts"
+            description: "The provenance ledger service provides an immutable audit trail."
+          - type: "ci-job"
+            path: ".github/workflows/pr-quality-gate.yml#L150"
+            description: "CI checks ensure that new services integrate with the provenance ledger."
+    owners:
+      - "Governance Council"
+      - "Platform Team"
+    last_verified: "2023-12-01"
