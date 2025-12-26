@@ -22,13 +22,15 @@ export interface MaestroTemplate {
   metadata: Record<string, unknown>;
 }
 
+export type RunStatus = "pending" | "running" | "succeeded" | "failed" | "cancelled";
+
 export interface MaestroRun {
   id: RunId;
   tenantId: TenantId;
   templateId: TemplateId;
   templateVersion: number;
   createdByPrincipalId: string;
-  status: "pending" | "running" | "succeeded" | "failed" | "cancelled";
+  status: RunStatus;
   startedAt?: string;
   completedAt?: string;
   input: unknown;   // validated against template.inputSchema

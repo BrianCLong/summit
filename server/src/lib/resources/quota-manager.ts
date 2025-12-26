@@ -1,3 +1,5 @@
+import { WorkloadClass, ResourceLimit } from './types.js';
+
 export interface Quota {
     tier: 'FREE' | 'STARTER' | 'PRO' | 'ENTERPRISE';
     requestsPerMinute: number;
@@ -5,6 +7,7 @@ export interface Quota {
     maxTokensPerRequest: number;
     storageLimitBytes: number;
     seatCap: number;
+    workloadLimits?: Partial<Record<WorkloadClass, ResourceLimit>>;
 }
 
 export class QuotaManager {
@@ -29,6 +32,41 @@ export class QuotaManager {
     }
 
     public getQuotaForTier(tier: string): Quota {
+        const baseQuota: Quota = this.getBaseQuota(tier);
+
+        // Add outcome-based workload limits (Epic 3: Pricing & Entitlement Alignment)
+        // Incentivize high-value behaviors by giving more headroom to EVALUATION and PLANNING
+        // while capping brute-force interactions.
+        const workloadLimits: Partial<Record<WorkloadClass, ResourceLimit>> = {};
+
+        switch (tier) {
+            case 'ENTERPRISE':
+                workloadLimits.PLANNING = { limit: 10000, period: 'minute' }; // High capacity for reasoning
+                workloadLimits.EVALUATION = { limit: 5000, period: 'minute' }; // Encouraged safety checks
+                workloadLimits.READ_ONLY = { limit: 50000, period: 'minute' };
+                break;
+            case 'PRO':
+                workloadLimits.PLANNING = { limit: 1000, period: 'minute' };
+                workloadLimits.EVALUATION = { limit: 500, period: 'minute' };
+                workloadLimits.READ_ONLY = { limit: 5000, period: 'minute' };
+                break;
+            case 'STARTER':
+                workloadLimits.PLANNING = { limit: 100, period: 'minute' };
+                workloadLimits.EVALUATION = { limit: 50, period: 'minute' };
+                workloadLimits.READ_ONLY = { limit: 500, period: 'minute' };
+                break;
+            case 'FREE':
+            default:
+                workloadLimits.PLANNING = { limit: 10, period: 'minute' };
+                workloadLimits.EVALUATION = { limit: 5, period: 'minute' };
+                workloadLimits.READ_ONLY = { limit: 100, period: 'minute' };
+                break;
+        }
+
+        return { ...baseQuota, workloadLimits };
+    }
+
+    private getBaseQuota(tier: string): Quota {
         switch (tier) {
             case 'ENTERPRISE':
                 return {
