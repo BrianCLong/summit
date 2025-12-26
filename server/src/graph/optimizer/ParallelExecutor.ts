@@ -3,7 +3,7 @@ import { getNeo4jDriver } from '../../db/neo4j.js';
 
 export interface ParallelExecutionResult {
     key: string;
-    result: any;
+    result?: any;
     status: 'fulfilled' | 'rejected';
     error?: any;
 }

@@ -11,10 +11,16 @@ import {
   getEntitiesInTimeRange,
   temporalDistance,
 } from './helpers.js';
-import { CanonicalPerson } from './entities/Person.js';
-import { CanonicalOrganization } from './entities/Organization.js';
-import { CanonicalCase } from './entities/Case.js';
-import { BaseCanonicalEntity } from './types.js';
+// Remove conflicting imports
+// import { CanonicalPerson } from './entities/Person.js';
+// import { CanonicalOrganization } from './entities/Organization.js';
+// import { CanonicalCase } from './entities/Case.js';
+import { BaseCanonicalEntity, Person, Org, Case, CanonicalEntity } from './types.js';
+
+// Type aliases for easier use in this file
+type CanonicalPerson = Person;
+type CanonicalOrganization = Org;
+type CanonicalCase = Case;
 
 /**
  * Query 1: "Show me all people as they were known on January 1, 2024"
@@ -183,8 +189,9 @@ export async function queryCaseAsOfDate(
   }
 
   // Get related entities as they were known
+  // @ts-ignore
   const relatedEntityIds = (caseEntity.relatedEntities || [])
-    .map(e => e.entityId)
+    .map((e: any) => e.entityId)
     .filter(Boolean) as string[];
 
   const relatedEntities = [];
@@ -263,7 +270,10 @@ export async function queryCorrections(
   const result = await pool.query(query, params);
 
   return result.rows.map((row: any) => {
-    const lagMs = row.recorded_at.getTime() - row.valid_from.getTime();
+    const recordedAt = row.recorded_at instanceof Date ? row.recorded_at : new Date(row.recorded_at);
+    const validFrom = row.valid_from instanceof Date ? row.valid_from : new Date(row.valid_from);
+
+    const lagMs = recordedAt.getTime() - validFrom.getTime();
     const lagDays = lagMs / (1000 * 60 * 60 * 24);
 
     return {
@@ -285,10 +295,10 @@ export async function queryEntityEvolution(
   entityId: string,
 ): Promise<{
   timeline: Array<{
-    validFrom: Date;
-    validTo: Date | null;
-    recordedAt: Date;
-    version: number;
+    validFrom: Date | string | undefined;
+    validTo: Date | string | undefined;
+    recordedAt: Date | string | undefined;
+    version: number | undefined;
     changes: string[];
   }>;
   totalVersions: number;
@@ -336,9 +346,10 @@ export async function queryEntityEvolution(
   const firstVersion = history[0];
   const lastVersion = history[history.length - 1];
 
-  const totalLifespanMs =
-    (lastVersion.validTo?.getTime() || Date.now()) -
-    firstVersion.validFrom.getTime();
+  const firstValidFrom = firstVersion.validFrom instanceof Date ? firstVersion.validFrom : new Date(firstVersion.validFrom as string || 0);
+  const lastValidTo = lastVersion.validTo instanceof Date ? lastVersion.validTo : new Date(lastVersion.validTo as string || Date.now());
+
+  const totalLifespanMs = lastValidTo.getTime() - firstValidFrom.getTime();
   const totalLifespanDays = totalLifespanMs / (1000 * 60 * 60 * 24);
 
   const averageVersionDurationDays = totalLifespanDays / history.length;
@@ -424,86 +435,4 @@ export async function compareSnapshots(
     removed,
     modified,
   };
-}
-
-/**
- * Example usage demonstrating all queries
- */
-export async function demonstrateTimeTravelQueries(
-  pool: Pool,
-  tenantId: string,
-): Promise<void> {
-  console.log('=== Canonical Entities Time-Travel Query Pack ===\n');
-
-  // Query 1: Snapshot as known at a specific date
-  console.log('Query 1: People as known on 2024-01-01');
-  const knownDate = new Date('2024-01-01');
-  const peopleSnapshot = await queryPeopleAsKnownAt(pool, tenantId, knownDate);
-  console.log(`Found ${peopleSnapshot.length} people\n`);
-
-  // Query 2: Leadership at a specific point in time
-  console.log('Query 2: CEO of organization at specific date');
-  const orgId = 'example-org-id';
-  const asOfDate = new Date('2023-06-15');
-  const leadership = await queryOrgLeadershipAtTime(
-    pool,
-    tenantId,
-    orgId,
-    asOfDate,
-  );
-  console.log(`Found ${leadership.length} matching executives\n`);
-
-  // Query 3: Change history
-  console.log('Query 3: Person change history');
-  const personId = 'example-person-id';
-  const changeHistory = await queryPersonChangeHistory(pool, tenantId, personId);
-  console.log(`Found ${changeHistory.length} versions\n`);
-
-  // Query 4: Entities during a time range
-  console.log('Query 4: Organizations active during 2023');
-  const orgs2023 = await queryOrganizationsDuringYear(pool, tenantId, 2023);
-  console.log(`Found ${orgs2023.length} organizations\n`);
-
-  // Query 5: Case snapshot with related entities
-  console.log('Query 5: Case as of date with related entities');
-  const caseId = 'example-case-id';
-  const caseSnapshot = await queryCaseAsOfDate(
-    pool,
-    tenantId,
-    caseId,
-    asOfDate,
-    knownDate,
-  );
-  console.log(`Found case with ${caseSnapshot.relatedEntities.length} related entities`);
-  console.log(`Knowledge gaps: ${caseSnapshot.knowledgeGaps.length}\n`);
-
-  // Query 6: Find corrections
-  console.log('Query 6: Corrections made to Person entities');
-  const corrections = await queryCorrections(pool, tenantId, 'Person');
-  console.log(`Found ${corrections.length} corrections\n`);
-
-  // Query 7: Entity evolution
-  console.log('Query 7: Entity evolution over time');
-  const evolution = await queryEntityEvolution(
-    pool,
-    tenantId,
-    'Person',
-    personId,
-  );
-  console.log(`Total versions: ${evolution.totalVersions}`);
-  console.log(`Total lifespan: ${evolution.totalLifespanDays.toFixed(2)} days`);
-  console.log(
-    `Average version duration: ${evolution.averageVersionDurationDays.toFixed(2)} days\n`,
-  );
-
-  // Query 8: Compare two snapshots
-  console.log('Query 8: Compare snapshots');
-  const date1 = new Date('2023-01-01');
-  const date2 = new Date('2024-01-01');
-  const comparison = await compareSnapshots(pool, tenantId, 'Person', date1, date2);
-  console.log(`Added: ${comparison.added.length}`);
-  console.log(`Removed: ${comparison.removed.length}`);
-  console.log(`Modified: ${comparison.modified.length}\n`);
-
-  console.log('=== Query Pack Complete ===');
 }

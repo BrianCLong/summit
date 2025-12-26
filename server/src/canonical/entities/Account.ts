@@ -7,7 +7,7 @@
 import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types';
 
 export interface CanonicalAccount extends BaseCanonicalEntity, CanonicalEntityMetadata {
-  entityType: 'Account';
+  // entityType: 'Account'; // This conflicts with 'kind' in BaseCanonicalEntity, removing or unifying
 
   /** Platform or service name (e.g., 'Twitter', 'GitHub', 'Bank of America') */
   platform: string;
@@ -28,10 +28,10 @@ export interface CanonicalAccount extends BaseCanonicalEntity, CanonicalEntityMe
   status?: 'active' | 'suspended' | 'deleted' | 'private' | 'unknown';
 
   /** Creation date on the platform */
-  createdAt?: Date;
+  createdAt: Date | string; // Relaxing type
 
   /** Last activity date */
-  lastActiveAt?: Date;
+  lastActiveAt?: Date | string;
 
   /** Associated owner (Person or Organization) */
   ownerId?: string;
@@ -40,14 +40,14 @@ export interface CanonicalAccount extends BaseCanonicalEntity, CanonicalEntityMe
 }
 
 export function createAccount(
-  data: Omit<CanonicalAccount, keyof BaseCanonicalEntity | 'entityType' | 'schemaVersion'>,
-  baseFields: Omit<BaseCanonicalEntity, 'provenanceId'>,
+  data: Omit<CanonicalAccount, keyof BaseCanonicalEntity | 'entityType' | 'schemaVersion' | 'kind'>,
+  baseFields: Omit<BaseCanonicalEntity, 'provenanceId' | 'kind'>,
   provenanceId: string,
 ): CanonicalAccount {
   return {
     ...baseFields,
     ...data,
-    entityType: 'Account',
+    kind: 'Account',
     schemaVersion: '1.0.0',
     provenanceId,
   };

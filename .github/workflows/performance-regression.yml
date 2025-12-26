@@ -141,10 +141,14 @@ jobs:
           echo "  Current: ${CURRENT_MB} MB"
           echo "  Diff: ${DIFF} MB (${PERCENT}%)"
 
-          # Check threshold (warn if >5% increase)
-          if (( $(echo "$PERCENT > 5" | bc -l) )); then
+          # Check threshold (fail if >10% increase, warn if >5%)
+          if (( $(echo "$PERCENT > 10" | bc -l) )); then
             echo "size_warning=true" >> $GITHUB_OUTPUT
-            echo "⚠️ Bundle size increased by more than 5%"
+            echo "❌ Bundle size increased by more than 10% ($PERCENT%)"
+            exit 1
+          elif (( $(echo "$PERCENT > 5" | bc -l) )); then
+            echo "size_warning=true" >> $GITHUB_OUTPUT
+            echo "⚠️ Bundle size increased by more than 5% ($PERCENT%)"
           else
             echo "size_warning=false" >> $GITHUB_OUTPUT
           fi

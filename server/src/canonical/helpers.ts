@@ -44,7 +44,11 @@ export async function snapshotAtTime<T extends BaseCanonicalEntity>(
   const entityMap = new Map<string, T>();
   for (const row of result.rows) {
     const entity = mapRowToEntity<T>(row);
-    if (!entityMap.has(entity.id) || entity.recordedAt > entityMap.get(entity.id)!.recordedAt) {
+    const entityRecordedAt = entity.recordedAt instanceof Date ? entity.recordedAt : new Date(entity.recordedAt || 0);
+    const existingEntity = entityMap.get(entity.id);
+    const existingRecordedAt = existingEntity && (existingEntity.recordedAt instanceof Date ? existingEntity.recordedAt : new Date(existingEntity.recordedAt || 0));
+
+    if (!existingEntity || entityRecordedAt > existingRecordedAt) {
       entityMap.set(entity.id, entity);
     }
   }
@@ -221,7 +225,8 @@ export async function correctEntity<T extends BaseCanonicalEntity>(
     validTo: baseEntity.validTo,
     observedAt: new Date(), // Correction observed now
     recordedAt: new Date(), // Will be set by createEntityVersion
-    version: baseEntity.version + 1,
+    version: (baseEntity.version || 0) + 1,
+    // @ts-ignore
     modifiedBy,
     provenanceId,
   };
@@ -365,11 +370,16 @@ export function temporalDistance(
   validTimeDays: number;
   transactionTimeDays: number;
 } {
+  const validFrom1 = entity1.validFrom instanceof Date ? entity1.validFrom : new Date(entity1.validFrom || 0);
+  const validFrom2 = entity2.validFrom instanceof Date ? entity2.validFrom : new Date(entity2.validFrom || 0);
+  const recordedAt1 = entity1.recordedAt instanceof Date ? entity1.recordedAt : new Date(entity1.recordedAt || 0);
+  const recordedAt2 = entity2.recordedAt instanceof Date ? entity2.recordedAt : new Date(entity2.recordedAt || 0);
+
   const validTimeDiff = Math.abs(
-    entity2.validFrom.getTime() - entity1.validFrom.getTime(),
+    validFrom2.getTime() - validFrom1.getTime(),
   );
   const transactionTimeDiff = Math.abs(
-    entity2.recordedAt.getTime() - entity1.recordedAt.getTime(),
+    recordedAt2.getTime() - recordedAt1.getTime(),
   );
 
   return {

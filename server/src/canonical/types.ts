@@ -1,31 +1,82 @@
-export type CanonicalEntityKind = 'Person' | 'Org' | 'Account' | 'Document' | 'Event';
+export type CanonicalEntityKind =
+  | 'Person'
+  | 'Org'
+  | 'Organization'
+  | 'Account'
+  | 'Document'
+  | 'Event'
+  | 'Activity'
+  | 'Asset'
+  | 'Authority'
+  | 'Campaign'
+  | 'Case'
+  | 'Claim'
+  | 'Communication'
+  | 'Decision'
+  | 'Device'
+  | 'Evidence'
+  | 'Financial'
+  | 'FinancialInstrument'
+  | 'Indicator'
+  | 'Infrastructure'
+  | 'Legal'
+  | 'License'
+  | 'Location'
+  | 'Narrative'
+  | 'Sensor'
+  | 'Vehicle';
 
 export interface PolicyLabels {
-  sensitivity: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED';
+  sensitivity: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED' | 'public' | 'internal' | 'confidential' | 'restricted';
   jurisdiction?: string[];
   retention?: string;
 }
 
-export interface CanonicalEntity {
+export interface BaseCanonicalEntity {
   id: string;
   kind: CanonicalEntityKind;
   tenantId: string;
   sourceIds: string[];
-  properties: Record<string, unknown>;
 
   // Bitemporal & Provenance
-  createdAt: string;
-  updatedAt: string;
-  validFrom?: string;
-  validTo?: string;
-  observedAt?: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
+  validFrom?: string | Date;
+  validTo?: string | Date;
+  observedAt?: string | Date;
   provenanceId?: string;
 
   // Governance
   policyLabels?: PolicyLabels;
+
+  // Backwards compatibility
+  schemaVersion?: string;
+  recordedAt?: string | Date;
+  version?: number;
 }
 
-export interface Person extends CanonicalEntity {
+export type CanonicalEntity = BaseCanonicalEntity;
+
+export interface CanonicalEntityMetadata {
+    confidence?: number;
+    source?: string | { sourceType: string; sourceId?: string; reliability?: string };
+    classification?: string | any;
+}
+
+export interface TemporalQuery {
+    validAt?: Date;
+    transactionAt?: Date;
+}
+
+export interface BitemporalFields {
+    validFrom?: Date | string;
+    validTo?: Date | string;
+    transactionFrom?: Date | string;
+    transactionTo?: Date | string;
+    recordedAt?: Date | string;
+}
+
+export interface Person extends BaseCanonicalEntity {
   kind: 'Person';
   properties: {
     firstName?: string;
@@ -36,7 +87,7 @@ export interface Person extends CanonicalEntity {
   };
 }
 
-export interface Org extends CanonicalEntity {
+export interface Org extends BaseCanonicalEntity {
   kind: 'Org';
   properties: {
     name: string;
@@ -45,7 +96,7 @@ export interface Org extends CanonicalEntity {
   };
 }
 
-export interface Account extends CanonicalEntity {
+export interface Account extends BaseCanonicalEntity {
   kind: 'Account';
   properties: {
     accountId: string;
@@ -54,7 +105,7 @@ export interface Account extends CanonicalEntity {
   };
 }
 
-export interface Document extends CanonicalEntity {
+export interface Document extends BaseCanonicalEntity {
   kind: 'Document';
   properties: {
     title: string;
@@ -64,7 +115,7 @@ export interface Document extends CanonicalEntity {
   };
 }
 
-export interface Event extends CanonicalEntity {
+export interface Event extends BaseCanonicalEntity {
   kind: 'Event';
   properties: {
     name: string;
@@ -74,7 +125,20 @@ export interface Event extends CanonicalEntity {
   };
 }
 
-export function filterByTemporal<T extends CanonicalEntity>(entities: T[], pointInTime: string): T[] {
+export interface Case extends BaseCanonicalEntity {
+    kind: 'Case';
+    properties: {
+        title: string;
+        description?: string;
+        status?: string;
+    };
+    relatedEntities?: {
+        entityId: string;
+        relationType: string;
+    }[];
+}
+
+export function filterByTemporal<T extends BaseCanonicalEntity>(entities: T[], pointInTime: string): T[] {
   const pit = new Date(pointInTime).getTime();
   return entities.filter(e => {
     const from = e.validFrom ? new Date(e.validFrom).getTime() : 0;

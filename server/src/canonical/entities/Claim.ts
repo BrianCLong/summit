@@ -4,8 +4,8 @@
  * Represents assertions, allegations, or statements that may be verified
  */
 
-import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types';
-import { PolicyLabel } from './Decision';
+import { BaseCanonicalEntity, CanonicalEntityMetadata, PolicyLabels } from '../types';
+// import { PolicyLabel } from './Decision'; // Circular dependency risk?
 
 export interface ClaimSubject {
   /** Subject entity ID */
@@ -70,7 +70,7 @@ export interface ClaimVerification {
 }
 
 export interface CanonicalClaim extends BaseCanonicalEntity, CanonicalEntityMetadata {
-  entityType: 'Claim';
+  // entityType: 'Claim';
 
   /** Claim type */
   claimType:
@@ -131,7 +131,7 @@ export interface CanonicalClaim extends BaseCanonicalEntity, CanonicalEntityMeta
   };
 
   /** Policy labels for compliance */
-  policyLabels?: PolicyLabel;
+  // policyLabels?: PolicyLabels; // Inherited from BaseCanonicalEntity
 
   /** Risk indicators */
   riskFlags?: {
@@ -149,14 +149,14 @@ export interface CanonicalClaim extends BaseCanonicalEntity, CanonicalEntityMeta
  * Create a new Claim entity
  */
 export function createClaim(
-  data: Omit<CanonicalClaim, keyof BaseCanonicalEntity | 'entityType' | 'schemaVersion'>,
-  baseFields: Omit<BaseCanonicalEntity, 'provenanceId'>,
+  data: Omit<CanonicalClaim, keyof BaseCanonicalEntity | 'entityType' | 'schemaVersion' | 'kind'>,
+  baseFields: Omit<BaseCanonicalEntity, 'provenanceId' | 'kind'>,
   provenanceId: string,
 ): CanonicalClaim {
   return {
     ...baseFields,
     ...data,
-    entityType: 'Claim',
+    kind: 'Claim',
     schemaVersion: '1.0.0',
     provenanceId,
   };

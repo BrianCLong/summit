@@ -5,27 +5,7 @@
  * decisions made with evidence and policy context.
  */
 
-import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types';
-
-export interface PolicyLabel {
-  /** Origin classification */
-  origin?: string;
-
-  /** Sensitivity level */
-  sensitivity?: 'public' | 'internal' | 'confidential' | 'restricted';
-
-  /** Legal basis for processing */
-  legalBasis?: string;
-
-  /** Data residency requirement */
-  residency?: string;
-
-  /** Retention tier */
-  retentionTier?: string;
-
-  /** Additional policy metadata */
-  metadata?: Record<string, any>;
-}
+import { BaseCanonicalEntity, CanonicalEntityMetadata, PolicyLabels } from '../types';
 
 export interface DecisionContext {
   /** Related case or investigation ID */
@@ -69,7 +49,7 @@ export interface DecisionOption {
 }
 
 export interface CanonicalDecision extends BaseCanonicalEntity, CanonicalEntityMetadata {
-  entityType: 'Decision';
+  // entityType: 'Decision';
 
   /** Decision title/summary */
   title: string;
@@ -130,7 +110,7 @@ export interface CanonicalDecision extends BaseCanonicalEntity, CanonicalEntityM
   }[];
 
   /** Policy labels for compliance */
-  policyLabels: PolicyLabel;
+  // policyLabels: PolicyLabels; // Inherited
 
   /** Risk assessment */
   risks?: {
@@ -167,14 +147,14 @@ export interface CanonicalDecision extends BaseCanonicalEntity, CanonicalEntityM
  * Create a new Decision entity
  */
 export function createDecision(
-  data: Omit<CanonicalDecision, keyof BaseCanonicalEntity | 'entityType' | 'schemaVersion'>,
-  baseFields: Omit<BaseCanonicalEntity, 'provenanceId'>,
+  data: Omit<CanonicalDecision, keyof BaseCanonicalEntity | 'entityType' | 'schemaVersion' | 'kind'>,
+  baseFields: Omit<BaseCanonicalEntity, 'provenanceId' | 'kind'>,
   provenanceId: string,
 ): CanonicalDecision {
   return {
     ...baseFields,
     ...data,
-    entityType: 'Decision',
+    kind: 'Decision',
     schemaVersion: '1.0.0',
     provenanceId,
   };
