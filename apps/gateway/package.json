@@ -1,7 +1,6 @@
 {
   "name": "@intelgraph/gateway",
   "private": true,
-  "type": "module",
   "scripts": {
     "build": "tsc -p . || true",
     "dev": "node --watch dist/server.js || ts-node src/server.ts",
