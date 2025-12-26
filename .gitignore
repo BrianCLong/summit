@@ -290,3 +290,8 @@ tmp-audit/
 
 # Test reports
 reports/
+
+# Aider (AI coding assistant) cache and history
+.aider.chat.history.md
+.aider.input.history
+.aider.tags.cache.v4/
