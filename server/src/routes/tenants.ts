@@ -49,8 +49,12 @@ function ensureTenantScope(req: Request, res: Response, next: NextFunction): voi
   const authReq = req as AuthenticatedRequest;
   const tenantId = req.params.id;
   const userTenant = authReq.user?.tenantId || authReq.user?.tenant_id;
-  const isSuper = ['SUPER_ADMIN', 'ADMIN', 'admin'].includes(authReq.user?.role || '');
+  // SECURITY HARDENING: 'ADMIN' is a tenant-scoped role. Only 'SUPER_ADMIN' or 'global-admin' can cross boundaries.
+  // We explicitly exclude 'ADMIN' and 'admin' from this list to prevent cross-tenant escalation.
+  const isSuper = ['SUPER_ADMIN', 'global-admin'].includes(authReq.user?.role || '');
+
   if (!isSuper && userTenant && userTenant !== tenantId) {
+    logger.warn(`Tenant isolation enforcement: User ${authReq.user?.id} (Role: ${authReq.user?.role}) from tenant ${userTenant} attempted to access tenant ${tenantId}`);
     res.status(403).json({ success: false, error: 'Forbidden' });
     return;
   }
