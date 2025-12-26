@@ -5,6 +5,7 @@ import axios from 'axios';
 import { enableTemporal, disableTemporal } from '../temporal/control.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
 import { authorize } from '../middleware/authorization.js';
+import { advancedAuditSystem } from '../audit/advanced-audit-system.js';
 
 const memConfig: Record<string, any> = {
   REQUIRE_BUDGET_PLUGIN: process.env.REQUIRE_BUDGET_PLUGIN === 'true',
@@ -103,7 +104,7 @@ router.get('/admin/config', (req, res) => {
   res.json(memConfig);
 });
 
-router.post('/admin/config', express.json(), (req, res) => {
+router.post('/admin/config', express.json(), async (req, res) => {
   const tenantId = (req.query.tenantId as string) || '';
   const allowed = Object.keys(memConfig).filter(
     (k) => !['TENANT_OVERRIDES', 'TENANT_DEFAULTS'].includes(k),
@@ -130,6 +131,25 @@ router.post('/admin/config', express.json(), (req, res) => {
     }
 
     memConfig.TENANT_OVERRIDES[tenantId] = cur;
+
+    // Audit the configuration change
+    await advancedAuditSystem.recordEvent({
+      eventType: 'config_change',
+      level: 'warn',
+      action: 'update_tenant_config',
+      tenantId,
+      userId: (req.user as any)?.id || 'unknown',
+      serviceId: 'admin-service',
+      outcome: 'success',
+      message: `Updated configuration for tenant ${tenantId}`,
+      details: {
+        updatedKeys: Object.keys(req.body).filter(k => allowed.includes(k)),
+        tenantId
+      },
+      complianceRelevant: true,
+      complianceFrameworks: ['SOC2']
+    });
+
     return res.json({
       ok: true,
       config: { ...memConfig, ...cur },
@@ -152,6 +172,23 @@ router.post('/admin/config', express.json(), (req, res) => {
       }
     }
 
+    // Audit the global configuration change
+    await advancedAuditSystem.recordEvent({
+      eventType: 'config_change',
+      level: 'critical',
+      action: 'update_global_config',
+      tenantId: 'system',
+      userId: (req.user as any)?.id || 'unknown',
+      serviceId: 'admin-service',
+      outcome: 'success',
+      message: 'Updated global system configuration',
+      details: {
+        updatedKeys: Object.keys(req.body).filter(k => allowed.includes(k))
+      },
+      complianceRelevant: true,
+      complianceFrameworks: ['SOC2', 'GDPR']
+    });
+
     return res.json({
       ok: true,
       config: memConfig,
@@ -161,7 +198,7 @@ router.post('/admin/config', express.json(), (req, res) => {
 });
 
 // Add endpoint to manage tenant defaults
-router.post('/admin/tenant-defaults', express.json(), (req, res) => {
+router.post('/admin/tenant-defaults', express.json(), async (req, res) => {
   const { tenantId, config } = req.body;
 
   if (!tenantId) {
@@ -180,6 +217,20 @@ router.post('/admin/tenant-defaults', express.json(), (req, res) => {
   }
 
   memConfig.TENANT_DEFAULTS[tenantId] = config;
+
+  await advancedAuditSystem.recordEvent({
+    eventType: 'config_change',
+    level: 'warn',
+    action: 'update_tenant_defaults',
+    tenantId,
+    userId: (req.user as any)?.id || 'unknown',
+    serviceId: 'admin-service',
+    outcome: 'success',
+    message: `Updated tenant defaults for ${tenantId}`,
+    details: { tenantId },
+    complianceRelevant: true,
+    complianceFrameworks: ['SOC2']
+  });
 
   res.json({
     ok: true,
