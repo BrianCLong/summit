@@ -5,6 +5,8 @@ import axios from 'axios';
 import { enableTemporal, disableTemporal } from '../temporal/control.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
 import { authorize } from '../middleware/authorization.js';
+import GAEnrollmentService from '../services/GAEnrollmentService.js';
+import { getPostgresPool } from '../config/database.js';
 
 const memConfig: Record<string, any> = {
   REQUIRE_BUDGET_PLUGIN: process.env.REQUIRE_BUDGET_PLUGIN === 'true',
@@ -90,6 +92,58 @@ function validateConfig(config: any): { isValid: boolean; errors: string[] } {
 const router = express.Router();
 
 router.use(ensureAuthenticated, authorize('manage_users'));
+
+// GA Signals Endpoint
+router.get('/admin/ga/signals', async (_req, res) => {
+  try {
+    const config = await GAEnrollmentService.getConfig();
+
+    // Get real-time stats
+    const pool = getPostgresPool();
+    const userCountRes = await pool.query('SELECT COUNT(*) FROM users');
+    const tenantCountRes = await pool.query('SELECT COUNT(*) FROM tenants');
+
+    const userCount = parseInt(userCountRes.rows[0].count, 10);
+    const tenantCount = parseInt(tenantCountRes.rows[0].count, 10);
+
+    res.json({
+        config,
+        stats: {
+            users: {
+                current: userCount,
+                max: config.maxUsers,
+                utilization: (userCount / config.maxUsers) * 100
+            },
+            tenants: {
+                current: tenantCount,
+                max: config.maxTenants,
+                utilization: (tenantCount / config.maxTenants) * 100
+            }
+        },
+        status: config.status
+    });
+  } catch (error) {
+    res.status(500).json({ ok: false, error: error instanceof Error ? error.message : 'Unknown error' });
+  }
+});
+
+// GA Config Endpoint (Rollback/Throttle)
+router.post('/admin/ga/config', express.json(), async (req, res) => {
+  try {
+      const { status, maxTenants, maxUsers } = req.body;
+      const updates: any = {};
+
+      if (status) updates.status = status;
+      if (maxTenants) updates.maxTenants = maxTenants;
+      if (maxUsers) updates.maxUsers = maxUsers;
+
+      await GAEnrollmentService.updateConfig(updates);
+
+      res.json({ ok: true, config: await GAEnrollmentService.getConfig() });
+  } catch (error) {
+      res.status(500).json({ ok: false, error: error instanceof Error ? error.message : 'Unknown error' });
+  }
+});
 
 router.get('/admin/config', (req, res) => {
   const tenantId = (req.query.tenantId as string) || '';
