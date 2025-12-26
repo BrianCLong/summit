@@ -206,7 +206,11 @@ webapp/.pnpm-store/ops/compose/.env
 !webapp/package-lock.json
 
 # Test caches and artifacts
+# Jest cache directories
+.jest-cache*/
 .jest-cache-*/
+**/.jest-cache*/
+**/.jest-cache-*/
 conductor-ui/.jest-cache-ui/
 .orchestrator/
 apps/**/dist/
