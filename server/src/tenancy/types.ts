@@ -1,3 +1,5 @@
+import { PilotConfig } from './pilot';
+
 /**
  * Canonical tenant identity shared across API, ingestion, and RAG flows.
  */
@@ -29,4 +31,21 @@ export interface TenantPolicyDecision {
   reason?: string;
   status?: number;
   warning?: string;
+}
+
+// Re-introducing TenantConfig for logical configuration including Pilot
+export interface TenantConfig {
+  id: string;
+  name: string;
+  active: boolean;
+  maintenanceMode?: boolean;
+  features?: Record<string, boolean>;
+  settings?: Record<string, any>;
+  quotas?: {
+    apiRequestsPerMinute?: number;
+    storageLimit?: number; // in MB
+    usersLimit?: number;
+  };
+  tier?: 'free' | 'pro' | 'enterprise' | 'pilot';
+  pilotProgram?: PilotConfig;
 }
