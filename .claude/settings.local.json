@@ -220,7 +220,10 @@
       "Bash(git remote prune:*)",
       "Bash(npm run test:*)",
       "Bash(npm view:*)",
-      "Bash(timeout 180 npm run test:quick)"
+      "Bash(timeout 180 npm run test:quick)",
+      "Bash(while read f)",
+      "Bash(then echo \"EXISTS: $f\" else echo \"MISSING: $f\" fi done)",
+      "Bash(if [ -f \"$f\" ])"
     ],
     "deny": [],
     "ask": []
