@@ -177,6 +177,21 @@ const startServer = async () => {
         }
       }, 2000); // Wait 2 seconds for connections to be established
     }
+    // Safety check: Explicitly prevent demo features in production
+    if (process.env.NODE_ENV === 'production' && process.env.DEMO_MODE === 'true') {
+      logger.error('CRITICAL: Attempted to enable DEMO_MODE in production. Refusing startup.');
+      process.exit(1);
+    } else if (process.env.NODE_ENV === 'development' && process.env.DEMO_MODE === 'true') {
+      logger.info('DEMO_MODE active: Mocking external APIs and seeding visual data.');
+      setTimeout(async () => {
+        try {
+          const { createSampleData } = await import('./utils/sampleData.js');
+          await createSampleData();
+        } catch (error) {
+          logger.warn('Failed to create sample data, continuing without it');
+        }
+      }, 2000); // Wait 2 seconds for connections to be established
+    }
   });
 
   // Initialize Socket.IO
