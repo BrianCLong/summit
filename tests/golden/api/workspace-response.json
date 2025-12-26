@@ -1,0 +1,15 @@
+{
+  "workspaceId": "<UUID>",
+  "name": "Mission Control",
+  "members": [
+    {
+      "userId": "<UUID>",
+      "role": "admin"
+    },
+    {
+      "userId": "<UUID>",
+      "role": "analyst"
+    }
+  ],
+  "updatedAt": "<ISO_TIMESTAMP>"
+}

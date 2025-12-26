@@ -1,0 +1,17 @@
+{
+  "query": "threat intel",
+  "results": [
+    {
+      "id": "<UUID>",
+      "score": 0.98,
+      "title": "Threat Intel Report",
+      "updatedAt": "<ISO_TIMESTAMP>"
+    },
+    {
+      "id": "<UUID>",
+      "score": 0.86,
+      "title": "Related Investigation",
+      "updatedAt": "<ISO_TIMESTAMP>"
+    }
+  ]
+}

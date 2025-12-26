@@ -18,6 +18,7 @@ import { auditFirstMiddleware } from './middleware/audit-first.js';
 import { correlationIdMiddleware } from './middleware/correlation-id.js';
 import { featureFlagContextMiddleware } from './middleware/feature-flag-context.js';
 import { sanitizeInput } from './middleware/sanitization.js';
+import { apiVersioningMiddleware } from './middleware/api-versioning.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { advancedRateLimiter } from './middleware/TieredRateLimitMiddleware.js';
 import { circuitBreakerMiddleware } from './middleware/circuitBreakerMiddleware.js';
@@ -85,6 +86,7 @@ import searchV1Router from './routes/search-v1.js';
 import dataGovernanceRouter from './routes/data-governance-routes.js';
 import tenantBillingRouter from './routes/tenants/billing.js';
 import { gtmRouter } from './routes/gtm-messaging.js';
+import versionRouter from './routes/version.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -110,6 +112,7 @@ export const createApp = async () => {
   // Add correlation ID middleware FIRST (before other middleware)
   app.use(correlationIdMiddleware);
   app.use(featureFlagContextMiddleware);
+  app.use(apiVersioningMiddleware);
 
   // Load Shedding / Overload Protection (Second, to reject early)
   app.use(overloadProtection);
@@ -185,22 +188,8 @@ export const createApp = async () => {
   app.use(auditFirstMiddleware);
   app.use(httpCacheMiddleware);
 
-  // API Versioning Middleware (Epic 2: API v1.1 Default)
-  app.use((req, res, next) => {
-    const version = req.headers['x-ig-api-version'];
-    if (!version) {
-      // Default to v1.1 if not specified
-      req.headers['x-ig-api-version'] = '1.1';
-    }
-    // Attach to request for downstream consumption
-    (req as any).apiVersion = req.headers['x-ig-api-version'];
-
-    // Compat guard: If legacy client detected (v1.0), we might want to log or adjust behavior
-    if ((req as any).apiVersion === '1.0') {
-      // Logic for v1.0 compatibility if needed
-    }
-    next();
-  });
+  // API Versioning Middleware (standardized)
+  app.use(apiVersioningMiddleware);
 
   // Resolve and enforce tenant context for API and GraphQL surfaces
   app.use(['/api', '/graphql'], tenantContextMiddleware());
@@ -297,6 +286,7 @@ export const createApp = async () => {
 
   // Other routes
   app.use('/monitoring', monitoringRouter);
+  app.use('/version', versionRouter);
   app.use('/api/ai', aiRouter);
   app.use('/api/ai/nl-graph-query', nlGraphQueryRouter);
   app.use('/api/narrative-sim', narrativeSimulationRouter);

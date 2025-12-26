@@ -1,0 +1,148 @@
+openapi: 3.1.0
+info:
+  title: IntelGraph Contract Surface
+  version: 0.1.0
+servers:
+  - url: http://localhost:4000
+paths:
+  /health:
+    get:
+      summary: Health probe
+      responses:
+        '200':
+          description: Healthy status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  uptime:
+                    type: number
+                required: [status, uptime]
+  /flags:
+    get:
+      summary: Feature flags listing
+      responses:
+        '200':
+          description: Available flags
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  flags:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        key:
+                          type: string
+                        enabled:
+                          type: boolean
+                      required: [key, enabled]
+                required: [flags]
+  /search:
+    post:
+      summary: Search endpoint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+              required: [query]
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        score:
+                          type: number
+                        title:
+                          type: string
+                      required: [id, score, title]
+                required: [results]
+  /workspace:
+    get:
+      summary: Workspace metadata
+      responses:
+        '200':
+          description: Workspace payload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  members:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        role:
+                          type: string
+                      required: [id, role]
+                required: [id, name, members]
+  /activity:
+    get:
+      summary: Activity feed
+      responses:
+        '200':
+          description: Activity entries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        type:
+                          type: string
+                        createdAt:
+                          type: string
+                          format: date-time
+                      required: [id, type, createdAt]
+                required: [items]
+  /version:
+    get:
+      summary: Supported API versions
+      responses:
+        '200':
+          description: Version list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  supported:
+                    type: array
+                    items:
+                      type: string
+                  default:
+                    type: string
+                required: [supported, default]

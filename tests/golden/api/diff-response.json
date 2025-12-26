@@ -1,0 +1,18 @@
+{
+  "from": "abc123",
+  "to": "def456",
+  "changes": [
+    {
+      "path": "nodes/0/title",
+      "before": "Old Title",
+      "after": "New Title"
+    },
+    {
+      "path": "edges/1/weight",
+      "before": 0.1,
+      "after": 0.2
+    }
+  ],
+  "generatedAt": "<ISO_TIMESTAMP>",
+  "diffId": "<UUID>"
+}
