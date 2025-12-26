@@ -8,7 +8,7 @@
 import { CorrectnessProgram, correctnessProgram } from './index.js';
 import { InvariantDefinition, DomainName, StateMachineDefinition } from './types.js';
 import logger from '../../config/logger.js';
-import { ProvenanceLedgerV2 } from '../../provenance/ledger.js';
+import { provenanceLedger } from '../../provenance/ledger.js';
 
 export interface AgentCoordinationPlan {
   id: string;
@@ -41,12 +41,10 @@ export class AgentCoordinationService {
   private static instance: AgentCoordinationService;
   private coordinationPlans = new Map<string, AgentCoordinationPlan>();
   private config: AgentCoordinationConfig;
-  private ledger: ProvenanceLedgerV2;
   private correctnessProgram: CorrectnessProgram;
 
   private constructor() {
     this.config = this.loadConfig();
-    this.ledger = ProvenanceLedgerV2.getInstance();
     this.correctnessProgram = correctnessProgram;
     this.setupCommonInvariants();
   }
@@ -205,7 +203,7 @@ export class AgentCoordinationService {
 
     // 3. Record provenance of coordination
     if (this.config.requireAuditTrail) {
-      await this.ledger.appendEntry({
+      await provenanceLedger.appendEntry({
         tenantId: 'system',
         actionType: 'AGENT_COORDINATION',
         resourceType: 'CoordinationPlan',
