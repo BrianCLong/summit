@@ -152,6 +152,10 @@ package-lock.json
 # Backup files
 backups/
 *.bak
+*.old
+*.orig
+*.tmp
+*~
 
 # Conflicts directory
 conflicts/
