@@ -1,12 +1,13 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-const path = require('path');
-const fs = require('fs');
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const distPath = path.join(__dirname, 'dist', 'server.js');
 if (fs.existsSync(distPath)) {
-  // eslint-disable-next-line global-require
-  require(distPath);
+  await import(distPath);
 } else {
-  // eslint-disable-next-line global-require
-  require('./src/server');
+  await import('./src/server.js');
 }

@@ -14,7 +14,7 @@ COPY packages/predictive-graph-intelligence/package.json ./packages/predictive-g
 COPY services/predictd/package.json ./services/predictd/package.json
 
 # Install dependencies for the service only
-RUN pnpm install --filter predictd --prod
+RUN pnpm install --filter predictd --prod --ignore-scripts
 
 # Copy the entire monorepo source code
 COPY . .
