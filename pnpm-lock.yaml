@@ -11544,7 +11544,7 @@ importers:
         version: 7.2.2
       wappalyzer:
         specifier: ^6.10.66
-        version: 6.10.66(typescript@5.9.3)
+        version: 6.10.66(encoding@0.1.13)(typescript@5.9.3)
     devDependencies:
       '@types/jest':
         specifier: ^30.0.0
@@ -62979,9 +62979,7 @@ snapshots:
     transitivePeerDependencies:
       - '@babel/core'
       - '@babel/preset-env'
-      - bufferutil
       - supports-color
-      - utf-8-validate
 
   '@react-native/normalize-colors@0.76.9': {}
 
@@ -83458,7 +83456,7 @@ snapshots:
 
   punycode@2.3.1: {}
 
-  puppeteer-core@19.7.5(typescript@5.9.3):
+  puppeteer-core@19.7.5(encoding@0.1.13)(typescript@5.9.3):
     dependencies:
       chromium-bidi: 0.4.5(devtools-protocol@0.0.1094867)
       cross-fetch: 3.1.5(encoding@0.1.13)
@@ -83595,13 +83593,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  puppeteer@19.7.5(typescript@5.9.3):
+  puppeteer@19.7.5(encoding@0.1.13)(typescript@5.9.3):
     dependencies:
       cosmiconfig: 8.1.0
       https-proxy-agent: 5.0.1
       progress: 2.0.3
       proxy-from-env: 1.1.0
-      puppeteer-core: 19.7.5(typescript@5.9.3)
+      puppeteer-core: 19.7.5(encoding@0.1.13)(typescript@5.9.3)
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -89791,9 +89789,9 @@ snapshots:
     dependencies:
       makeerror: 1.0.12
 
-  wappalyzer@6.10.66(typescript@5.9.3):
+  wappalyzer@6.10.66(encoding@0.1.13)(typescript@5.9.3):
     dependencies:
-      puppeteer: 19.7.5(typescript@5.9.3)
+      puppeteer: 19.7.5(encoding@0.1.13)(typescript@5.9.3)
     transitivePeerDependencies:
       - bufferutil
       - encoding
