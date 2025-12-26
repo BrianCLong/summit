@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { CostOptimizationService } from '../services/CostOptimizationService.js';
 import { FinOpsPolicyService } from '../services/FinOpsPolicyService.js';
@@ -124,7 +123,8 @@ router.get('/dashboard', async (req: Request, res: Response) => {
       activeViolations: policyViolations,
       realTimeMetrics: resourceMetrics,
       meta: {
-          isSimulated: true,
+          isSimulated: resourceMetrics.isSimulated || true,
+          provenance: resourceMetrics.provenance || 'simulated',
           source: 'SimulatedProvider'
       }
     });
