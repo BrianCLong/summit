@@ -1,0 +1,4 @@
+# This file contains the SHA256 checksums of critical governance documents.
+# Modifying these documents requires updating these hashes with explicit justification.
+AGENTS_MD_SHA256=cc8e83331535f952a61c8ae692aca342e7203eb701445f4e330d4a1eeffd5018
+AGENT_MANDATES_MD_SHA256=b76a8c90152ff85ae8d4e2b4f913e367c184caaa767b8330cc763499aaab17f0
