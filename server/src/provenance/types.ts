@@ -115,3 +115,58 @@ export interface ProvenanceEntryV2 extends ProvenanceEntry {
   // Payload is strictly typed in V2
   payload: MutationPayload;
 }
+
+// --- Canonical Graph Types (Sprint N+62) ---
+
+export type ProvenanceNodeType = 'Input' | 'Decision' | 'Action' | 'Outcome';
+
+export interface CanonicalNode {
+  id: string;
+  tenantId: string;
+  nodeType: ProvenanceNodeType;
+  subType: string; // e.g., 'PolicyDefinition', 'MaestroRun'
+  label: string;
+  timestamp: string;
+  metadata: Record<string, any>;
+  // Verification
+  hash?: string;
+  sourceEntryId?: string; // Link back to Ledger Entry
+}
+
+export interface CanonicalEdge {
+  sourceId: string;
+  targetId: string;
+  relation: 'FED_INTO' | 'USED_BY' | 'TRIGGERED' | 'BLOCKED' | 'PRODUCED' | 'GENERATED' | 'AFFECTED' | 'DERIVED_FROM';
+  timestamp: string;
+  properties?: Record<string, any>;
+}
+
+// Specialized Node Interfaces for Type Safety
+
+export interface InputNode extends CanonicalNode {
+  nodeType: 'Input';
+  hash: string;
+  uri?: string;
+  version?: string;
+}
+
+export interface DecisionNode extends CanonicalNode {
+  nodeType: 'Decision';
+  result: 'ALLOW' | 'DENY' | 'FLAG' | 'APPROVED' | 'REJECTED' | 'UNKNOWN';
+  confidence?: number;
+  evaluator?: string;
+}
+
+export interface ActionNode extends CanonicalNode {
+  nodeType: 'Action';
+  status: 'PENDING' | 'RUNNING' | 'COMPLETED' | 'FAILED';
+  durationMs?: number;
+  startedAt?: string;
+  completedAt?: string;
+}
+
+export interface OutcomeNode extends CanonicalNode {
+  nodeType: 'Outcome';
+  value: any;
+  dimension?: string;
+}
