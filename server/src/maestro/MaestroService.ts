@@ -4,6 +4,15 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { metrics } from '../observability/metrics.js';
 import { runsRepo } from './runs/runs-repo.js';
+import { SubagentCoordinator, agentGovernance } from './subagent-coordinator.js';
+// Import from the same file where the types are defined
+import type {
+  CoordinationTask,
+  CoordinationChannel,
+  ConsensusProposal,
+  AgentCoordinationMetrics
+} from './model.js';
+import { AgentGovernanceService } from './governance-service.js';
 import {
   HealthSnapshot,
   SLOSnapshot,
@@ -113,8 +122,11 @@ const DEFAULT_DB: MaestroDB = {
 export class MaestroService {
   private static instance: MaestroService;
   private dbCache: MaestroDB | null = null;
+  private subagentCoordinator: SubagentCoordinator;
 
-  private constructor() {}
+  private constructor() {
+    this.subagentCoordinator = SubagentCoordinator.getInstance();
+  }
 
   static getInstance(): MaestroService {
     if (!MaestroService.instance) {
@@ -276,7 +288,7 @@ export class MaestroService {
     const db = await this.getDB();
     db.auditLog.push({
       id: Math.random().toString(36).substring(7),
-      timestamp: new Date().toISOString(),
+      timestamp: new.Date().toISOString(),
       actor,
       action,
       resource,
@@ -286,6 +298,141 @@ export class MaestroService {
     // Keep log size manageable
     if (db.auditLog.length > 1000) db.auditLog.shift();
     await this.saveDB();
+  }
+
+  // --- Subagent Coordination Methods ---
+
+  /**
+   * Coordinate tasks between multiple agents
+   */
+  async coordinateAgents(
+    task: Omit<CoordinationTask, 'id' | 'status' | 'createdAt' | 'updatedAt' | 'result' | 'error'>,
+    participantAgentIds: string[],
+    actor: string
+  ): Promise<CoordinationTask> {
+    // First, check governance compliance
+    const governanceCheck = await agentGovernance.evaluateAction(
+      {
+        id: actor,
+        name: 'MaestroService',
+        tenantId: 'system',
+        capabilities: ['coordination', 'orchestration'],
+        metadata: {},
+        status: 'active',
+        health: { cpuUsage: 0, memoryUsage: 0, lastHeartbeat: new Date(), activeTasks: 0, errorRate: 0 }
+      } as MaestroAgent,
+      'coordinate_agents',
+      { task, participants: participantAgentIds }
+    );
+
+    if (!governanceCheck.allowed) {
+      throw new Error(`Agent coordination prohibited: ${governanceCheck.reason}`);
+    }
+
+    const coordinationTask = await this.subagentCoordinator.assignTask(task, participantAgentIds);
+
+    await this.logAudit(
+      actor,
+      'coordinate_agents',
+      `coordination_task:${coordinationTask.id}`,
+      `Coordinated task ${task.title} among ${participantAgentIds.length} agents`
+    );
+
+    return coordinationTask;
+  }
+
+  /**
+   * Create a coordination channel for multi-agent collaboration
+   */
+  async createCoordinationChannel(
+    topic: string,
+    participantAgentIds: string[],
+    actor: string
+  ): Promise<CoordinationChannel> {
+    // Check governance compliance
+    const governanceCheck = await agentGovernance.evaluateAction(
+      {
+        id: actor,
+        name: 'MaestroService',
+        tenantId: 'system',
+        capabilities: ['coordination', 'orchestration'],
+        metadata: {},
+        status: 'active',
+        health: { cpuUsage: 0, memoryUsage: 0, lastHeartbeat: new Date(), activeTasks: 0, errorRate: 0 }
+      },
+      'create_coordination_channel',
+      { topic, participants: participantAgentIds }
+    );
+
+    if (!governanceCheck.allowed) {
+      throw new Error(`Coordination channel creation prohibited: ${governanceCheck.reason}`);
+    }
+
+    const channel = await this.subagentCoordinator.createChannel(topic, participantAgentIds);
+
+    await this.logAudit(
+      actor,
+      'create_coordination_channel',
+      `channel:${channel.id}`,
+      `Created coordination channel for topic: ${topic}`
+    );
+
+    return channel;
+  }
+
+  /**
+   * Initiate consensus process among agents
+   */
+  async initiateConsensus<T>(
+    coordinatorId: string,
+    topic: string,
+    proposal: T,
+    voterAgentIds: string[],
+    deadlineHours: number = 24,
+    actor: string
+  ): Promise<ConsensusProposal<T>> {
+    // Check governance compliance
+    const governanceCheck = await agentGovernance.evaluateAction(
+      {
+        id: actor,
+        name: 'MaestroService',
+        tenantId: 'system',
+        capabilities: ['consensus', 'governance'],
+        metadata: {},
+        status: 'active',
+        health: { cpuUsage: 0, memoryUsage: 0, lastHeartbeat: new Date(), activeTasks: 0, errorRate: 0 }
+      },
+      'initiate_consensus',
+      { topic, voters: voterAgentIds }
+    );
+
+    if (!governanceCheck.allowed) {
+      throw new Error(`Consensus initiation prohibited: ${governanceCheck.reason}`);
+    }
+
+    const consensusProposal = await this.subagentCoordinator.submitConsensusProposal(
+      coordinatorId,
+      topic,
+      proposal,
+      voterAgentIds,
+      deadlineHours
+    );
+
+    await this.logAudit(
+      actor,
+      'initiate_consensus',
+      `proposal:${consensusProposal.id}`,
+      `Initiated consensus for topic: ${topic}`
+    );
+
+    return consensusProposal;
+  }
+
+  /**
+   * Get coordination metrics for an agent
+   */
+  async getCoordinationMetrics(agentId: string): Promise<any | null> {
+    return this.subagentCoordinator.getAgentMetrics(agentId);
   }
 }
 
