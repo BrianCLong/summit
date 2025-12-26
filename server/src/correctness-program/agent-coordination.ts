@@ -213,7 +213,7 @@ export class AgentCoordinationService {
         actorType: 'system',
         timestamp: new Date(),
         payload: {
-          mutationType: 'EXECUTE',
+          mutationType: 'CREATE',
           entityId: plan.id,
           entityType: 'CoordinationPlan',
           agentIds: plan.agents,
