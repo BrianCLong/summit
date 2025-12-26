@@ -24,6 +24,7 @@ import { circuitBreakerMiddleware } from './middleware/circuitBreakerMiddleware.
 import { overloadProtection } from './middleware/overloadProtection.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
 import { safetyModeMiddleware, resolveSafetyState } from './middleware/safety-mode.js';
+import { provenanceGuardMiddleware } from './middleware/provenanceGuard.js';
 import monitoringRouter from './routes/monitoring.js';
 import billingRouter from './routes/billing.js';
 import entityResolutionRouter from './routes/entity-resolution.js';
@@ -211,6 +212,9 @@ export const createApp = async () => {
   // Audit-First middleware for cryptographic stamping of sensitive operations
   app.use(auditFirstMiddleware);
   app.use(httpCacheMiddleware);
+
+  // Provenance Guard - Ensures critical outputs have provenance
+  app.use(provenanceGuardMiddleware);
 
   // API Versioning Middleware (Epic 2: API v1.1 Default)
   app.use((req, res, next) => {
