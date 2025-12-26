@@ -94,7 +94,9 @@ __pycache__/
 *.pyo
 *.egg-info/
 **/*.egg-info/
+# Python virtual environments (but not source directories named env)
 .venv/
+venv/
 poetry.lock
 
 # Gradle state
@@ -125,8 +127,10 @@ cognitive_insights_engine/poetry.lock
 
 # JavaScript/TypeScript package manager lockfiles
 # NOTE: pnpm-lock.yaml MUST be tracked for supply chain security
-# yarn.lock is ignored as we use pnpm
+# yarn.lock and package-lock.json are ignored as we use pnpm
 yarn.lock
+package-lock.json
+**/package-lock.json
 
 # Additional large data artifacts generated during investigations or exports
 *.parquet
@@ -150,6 +154,10 @@ yarn.lock
 # Backup files
 backups/
 *.bak
+*.old
+*.orig
+*.tmp
+*~
 
 # Conflicts directory
 conflicts/
@@ -198,12 +206,18 @@ webapp/.pnpm-store/ops/compose/.env
 !webapp/package-lock.json
 
 # Test caches and artifacts
+# Jest cache directories
+.jest-cache*/
 .jest-cache-*/
+**/.jest-cache*/
+**/.jest-cache-*/
 conductor-ui/.jest-cache-ui/
 .orchestrator/
 apps/**/dist/
 **/dist/
 server/test-results/
+test-results/
+**/test-results/
 server/junit.xml
 junit.xml
 **/junit.xml
@@ -276,3 +290,11 @@ tmp-audit/
 
 # Test reports
 reports/
+bug-bash-results/
+*-report.json
+lint_output.txt
+
+# Aider (AI coding assistant) cache and history
+.aider.chat.history.md
+.aider.input.history
+.aider.tags.cache.v4/

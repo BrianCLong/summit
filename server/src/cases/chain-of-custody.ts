@@ -43,7 +43,7 @@ export class ChainOfCustodyService {
 
   constructor(pg: Pool) {
     this.pg = pg;
-    this.ledger = ProvenanceLedgerV2.getInstance();
+    this.ledger = new ProvenanceLedgerV2();
   }
 
   async recordEvent(event: Omit<CustodyEvent, 'id' | 'timestamp'>): Promise<CustodyEvent> {

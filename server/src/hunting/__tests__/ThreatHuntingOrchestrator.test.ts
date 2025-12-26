@@ -6,6 +6,7 @@
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { ThreatHuntingOrchestrator } from '../ThreatHuntingOrchestrator';
 import type {
+  GeneratedCypherQuery,
   HuntContext,
   HuntConfiguration,
   ThreatHypothesis,
@@ -15,52 +16,7 @@ import type {
   RemediationPlan,
 } from '../types';
 
-// Define these interfaces locally as they are not exported from ../types
-interface HypothesisGenerationOutput {
-  hypotheses: ThreatHypothesis[];
-  priorityOrder: string[];
-}
 
-interface QueryGenerationOutput {
-  queries: {
-    id: string;
-    hypothesisId: string;
-    query: string;
-    params: Record<string, unknown>;
-    templateUsed: string;
-    estimatedComplexity: number;
-    estimatedResultSize: number;
-    validationStatus: QueryValidationStatus;
-    validationErrors: string[];
-  }[];
-  metadata: {
-    templatesCached: number;
-    queriesGenerated: number;
-    validationsPassed: number;
-  };
-}
-
-interface ResultAnalysisOutput {
-  findings: HuntFinding[];
-  precisionEstimate: number;
-  falsePositiveIndicators: string[];
-}
-
-interface HuntFinding {
-  id: string;
-  hypothesisId: string;
-  severity: string;
-  confidence: number;
-  classification: string;
-  entitiesInvolved: any[];
-  iocsIdentified: any[];
-  ttpsMatched: any[];
-  recommendedActions: any[];
-  autoRemediationEligible: boolean;
-  evidenceSummary: string;
-  rawEvidence: any[];
-  timestamp: Date;
-}
 
 // Mock logger first (hoisted to top)
 jest.mock('../../config/logger', () => ({
@@ -72,14 +28,6 @@ jest.mock('../../config/logger', () => ({
   },
 }));
 
-jest.mock('../../config/logger.js', () => ({
-  default: {
-    info: jest.fn(),
-    error: jest.fn(),
-    warn: jest.fn(),
-    debug: jest.fn(),
-  },
-}));
 
 // Mock AutoRemediationHooks to prevent singleton instantiation with unmocked logger
 jest.mock('../AutoRemediationHooks', () => {
@@ -120,44 +68,7 @@ jest.mock('../AutoRemediationHooks', () => {
     AutoRemediationHooks: jest.fn(() => mockHooks),
   };
 });
-jest.mock('../AutoRemediationHooks.js', () => {
-  const EventEmitter = require('events').EventEmitter;
-  const plans: RemediationPlan[] = [];
 
-  const mockHooks = Object.assign(new EventEmitter(), {
-    registerHook: jest.fn(),
-    createRemediationPlan: jest.fn((huntId: string, findings: EnrichedFinding[], approvalRequired: boolean) => {
-      const newPlan: RemediationPlan = {
-        id: `plan-${plans.length + 1}`,
-        huntId,
-        findings: findings.map(f => f.id),
-        actions: [], // Simplified for mock
-        status: approvalRequired ? 'pending_approval' : 'approved',
-        approvalRequired,
-        createdAt: new Date(),
-      };
-      plans.push(newPlan);
-      return Promise.resolve(newPlan);
-    }),
-    executePlan: jest.fn(),
-    approvePlan: jest.fn((planId: string, userId: string) => {
-      const plan = plans.find(p => p.id === planId);
-      if (!plan) throw new Error('Plan not found');
-      plan.status = 'approved';
-      plan.approvedBy = userId;
-      plan.approvedAt = new Date();
-      return Promise.resolve(plan);
-    }),
-    rejectPlan: jest.fn(),
-    getActivePlans: jest.fn(() => plans.filter(p => p.status !== 'completed' && p.status !== 'failed' && p.status !== 'cancelled')),
-    getPendingApprovals: jest.fn(() => plans.filter(p => p.status === 'pending_approval')),
-    enrichFindings: jest.fn((findings: HuntFinding[]) => findings.map(f => ({ ...f, enrichmentTimestamp: new Date(), ctiCorrelations: [], osintData: [], threatActorAttribution: [], campaignAssociations: [] }))),
-  });
-  return {
-    autoRemediationHooks: mockHooks,
-    AutoRemediationHooks: jest.fn(() => mockHooks),
-  };
-});
 
 // Mock dependencies
 jest.mock('../../graph/neo4j', () => ({

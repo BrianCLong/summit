@@ -6,8 +6,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.stableStringify = stableStringify;
 function stableStringify(obj) {
-    var allKeys = [];
-    JSON.stringify(obj, function (key, value) {
+    const allKeys = [];
+    JSON.stringify(obj, (key, value) => {
         allKeys.push(key);
         return value;
     });
@@ -18,15 +18,15 @@ function stableStringify(obj) {
             return v.map(sortObject);
         }
         else if (v !== null && typeof v === 'object') {
-            var sortedKeys = Object.keys(v).sort();
-            var result_1 = {};
-            sortedKeys.forEach(function (key) {
-                result_1[key] = sortObject(v[key]);
+            const sortedKeys = Object.keys(v).sort();
+            const result = {};
+            sortedKeys.forEach(key => {
+                result[key] = sortObject(v[key]);
             });
-            return result_1;
+            return result;
         }
         return v;
     }
-    var sortedObj = sortObject(obj);
+    const sortedObj = sortObject(obj);
     return JSON.stringify(sortedObj);
 }
