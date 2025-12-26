@@ -21,6 +21,7 @@ import {
   type WorkflowRuntimeProfile,
   type WorkflowSnapshot,
 } from 'common-types';
+import { canonicalize, canonicalStringify } from '@ga-graphai/data-integrity';
 
 interface LayeredGraphNode {
   id: string;
@@ -43,26 +44,6 @@ interface LayeredGraph {
 
 const LAYER_PREFIX_SEPARATOR = ':';
 
-function canonicalize(value: unknown): unknown {
-  if (Array.isArray(value)) {
-    return value.map((entry) => canonicalize(entry));
-  }
-  if (value && typeof value === 'object') {
-    const sorted = Object.keys(value as Record<string, unknown>).sort();
-    const result: Record<string, unknown> = {};
-    for (const key of sorted) {
-       
-      result[key] = canonicalize((value as Record<string, unknown>)[key]);
-    }
-    return result;
-  }
-  return value;
-}
-
-function stableStringify(value: unknown): string {
-  return JSON.stringify(canonicalize(value));
-}
-
 function hashParts(parts: string[]): string {
   const hash = createHash('sha256');
   for (const part of parts) {
@@ -84,7 +65,7 @@ function addNode(
     node.id,
     node.layer,
     node.label,
-    stableStringify(canonicalAttributes),
+    canonicalStringify(canonicalAttributes),
   ]);
   graph.nodes.set(node.id, {
     ...node,
@@ -492,7 +473,7 @@ function computeAttributeDelta(
   for (const key of keys) {
     const beforeValue = before[key];
     const afterValue = after[key];
-    if (stableStringify(beforeValue) === stableStringify(afterValue)) {
+    if (canonicalStringify(beforeValue) === canonicalStringify(afterValue)) {
       continue;
     }
     deltas.push({

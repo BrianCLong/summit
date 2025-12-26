@@ -8,6 +8,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@ga-graphai/data-integrity": "file:../data-integrity",
     "common-types": "file:../common-types"
   },
   "devDependencies": {
