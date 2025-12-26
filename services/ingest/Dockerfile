@@ -1,12 +1,14 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci --omit=dev
+RUN npm install -g pnpm
+COPY package.json pnpm-lock.yaml* ./
+RUN pnpm install --prod --frozen-lockfile
 
 FROM node:20-alpine AS build
 WORKDIR /app
+RUN npm install -g pnpm
 COPY . .
-RUN npm ci && npm run build || true
+RUN pnpm install --frozen-lockfile && pnpm run build || true
 
 FROM node:20-alpine
 WORKDIR /app
