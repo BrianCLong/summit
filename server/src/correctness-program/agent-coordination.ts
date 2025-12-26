@@ -9,6 +9,7 @@ import { CorrectnessProgram, correctnessProgram } from './index.js';
 import { InvariantDefinition, DomainName, StateMachineDefinition } from './types.js';
 import logger from '../../config/logger.js';
 import { provenanceLedger } from '../../provenance/ledger.js';
+import type { ProvenanceEntry } from '../../provenance/types.js';
 
 export interface AgentCoordinationPlan {
   id: string;
@@ -73,7 +74,7 @@ export class AgentCoordinationService {
     const coordinationInvariants: InvariantDefinition[] = [
       {
         id: 'agent-coordination-sequential-execute',
-        domain: 'agent',
+        domain: 'generic',
         description: 'Agents must respect execution dependencies and sequences',
         severity: 'critical',
         validate: async (plan: AgentCoordinationPlan) => {
@@ -83,7 +84,7 @@ export class AgentCoordinationService {
       },
       {
         id: 'agent-governance-compliance',
-        domain: 'agent',
+        domain: 'generic',
         description: 'All agent coordination must meet governance requirements',
         severity: 'critical',
         validate: async (plan: AgentCoordinationPlan) => {
@@ -93,9 +94,9 @@ export class AgentCoordinationService {
       },
       {
         id: 'agent-resource-isolation',
-        domain: 'agent',
+        domain: 'generic',
         description: 'Agents must not interfere with each other\'s resources',
-        severity: 'high',
+        severity: 'critical',
         validate: async (plan: AgentCoordinationPlan) => {
           // Validate that resource access is properly isolated
           return this.validateResourceIsolation(plan);
@@ -170,7 +171,7 @@ export class AgentCoordinationService {
 
     // 1. Validate plan against invariants
     if (this.config.enableGovernanceChecks) {
-      const { violations } = await this.correctnessProgram.invariants.validateWrite('agent', plan);
+      const { violations } = await this.correctnessProgram.invariants.validateWrite('generic', plan);
       if (violations.length > 0) {
         throw new Error(`Coordination plan violates ${violations.length} governance invariants`);
       }
@@ -311,7 +312,7 @@ export class AgentCoordinationService {
   /**
    * Create a state machine for agent lifecycle management
    */
-  registerAgentLifecycleStateMachine(domain: DomainName = 'agent'): StateMachineDefinition {
+  registerAgentLifecycleStateMachine(domain: DomainName = 'generic'): StateMachineDefinition {
     const stateMachine: StateMachineDefinition = {
       id: 'agent-lifecycle',
       domain,
