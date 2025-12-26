@@ -7,6 +7,8 @@ import { MaestroDSL } from './dsl';
 import { Pool } from 'pg';
 import { Queue, Worker, QueueEvents } from 'bullmq';
 import { logger } from '../utils/logger';
+import { coordinationService } from './coordination/service';
+import * as crypto from 'node:crypto';
 
 // Interface for dependencies
 interface MaestroDependencies {
@@ -158,6 +160,24 @@ export class MaestroEngine {
     );
 
     try {
+      // 2.5 Check Coordination Constraints (Budget, Kill-Switch)
+      if (task.metadata?.coordinationId) {
+        const coordId = task.metadata.coordinationId as string;
+        // Assume task has a 'role' in metadata, or default to WORKER
+        const role = (task.metadata.role as any) || 'WORKER';
+        // We use the run's creator or a specific agentId if present
+        const agentId = (task.metadata.agentId as string) || 'unknown_agent';
+
+        // Check if allowed to proceed
+        const allowed = coordinationService.validateAction(coordId, agentId, role);
+        if (!allowed) {
+          throw new Error(`Coordination constraints prevented execution for ${coordId}`);
+        }
+
+        // Track start (could consume a 'step' budget here)
+        coordinationService.consumeBudget(coordId, { totalSteps: 1 });
+      }
+
       // 3. Execute Handler
       const handler = this.taskHandlers.get(task.kind);
       if (!handler) {
@@ -165,6 +185,12 @@ export class MaestroEngine {
       }
 
       const result = await handler(task);
+
+      // 3.5 Consumne Token Budget if available
+      if (task.metadata?.coordinationId && result && typeof result === 'object' && result.usage?.totalTokens) {
+        const coordId = task.metadata.coordinationId as string;
+        coordinationService.consumeBudget(coordId, { totalTokens: result.usage.totalTokens });
+      }
 
       // 4. Mark Succeeded
       await this.db.query(
