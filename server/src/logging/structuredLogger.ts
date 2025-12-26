@@ -6,6 +6,7 @@ import { LogAlertEngine, defaultAlertRules } from './logAlertEngine.js';
 import { scheduleRetention, type RetentionPolicy } from './logRetention.js';
 import { formatLogEvent } from './logEventFormatter.js';
 import { AuditLogPipeline } from './auditLogPipeline.js';
+import { AuditLedger } from '../audit/ledger.js';
 
 const logDir = process.env.LOG_DIR || path.join(process.cwd(), 'logs');
 const logFile = path.join(logDir, 'app-structured.log');
@@ -86,11 +87,20 @@ const auditPipeline = new AuditLogPipeline({
   },
 });
 
+const auditChainEnabled = process.env.AUDIT_CHAIN === 'true';
+const auditLedger = auditChainEnabled
+  ? new AuditLedger({
+      ledgerFilePath: process.env.AUDIT_LEDGER_FILE,
+      logger: baseLogger.child({ component: 'audit-ledger' }),
+    })
+  : null;
+
 export const appLogger = baseLogger;
 export const auditLogDashboard = auditPipeline;
 export const stopLogAggregation = () => {
   detachAlertEngine();
   stopRetention();
   auditPipeline.stop();
+  auditLedger?.stop();
   logEventBus.reset();
 };

@@ -101,6 +101,7 @@ import masteryRouter from './routes/mastery.js';
 import cryptoIntelligenceRouter from './routes/crypto-intelligence.js';
 import demoRouter from './routes/demo.js';
 import claimsRouter from './routes/claims.js';
+import opsRouter from './routes/ops.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -376,6 +377,7 @@ export const createApp = async () => {
   app.use('/api', exportsRouter);
   app.use('/api', retentionRouter);
   app.use('/dr', drRouter);
+  app.use('/', opsRouter);
   app.use('/api/reporting', reportingRouter);
   app.use('/api/mastery', masteryRouter);
   app.use('/api/crypto-intelligence', cryptoIntelligenceRouter);
