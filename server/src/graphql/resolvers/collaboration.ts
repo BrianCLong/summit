@@ -1,7 +1,13 @@
 // @ts-nocheck
+import { UserInputError } from 'apollo-server-express';
+import * as yup from 'yup';
 import { warRoomService } from '../../collaboration/warRoomService';
 import { collaborationService } from '../../services/collaborationService'; // for pubsub
 import { checkAuth, checkWarRoomAdmin } from '../../middleware/warRoomAuth';
+
+const createWarRoomSchema = yup.object({
+  name: yup.string().required().max(256, 'Input validation failed: name cannot be longer than 256 characters.'),
+});
 
 export const collaborationResolvers = {
   Query: {
@@ -15,8 +21,13 @@ export const collaborationResolvers = {
   Mutation: {
     createWarRoom: async (_: any, { name }: { name: string }, context: any) => {
       checkAuth(context);
-      const createdBy = context.user.id;
-      return warRoomService.createWarRoom(name, createdBy);
+      try {
+        await createWarRoomSchema.validate({ name });
+        const createdBy = context.user.id;
+        return warRoomService.createWarRoom(name, createdBy);
+      } catch (error: any) {
+        throw new UserInputError(error.message);
+      }
     },
     addParticipant: async (
       _: any,
