@@ -30,7 +30,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "P1809F7CD0C75ACF3"
+        "uid": "${datasource}"
       },
       "gridPos": {
         "h": 8,
@@ -58,7 +58,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "P1809F7CD0C75ACF3"
+            "uid": "${datasource}"
           },
           "editorMode": "code",
           "expr": "rate(http_requests_total[5m])",
@@ -73,7 +73,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "P1809F7CD0C75ACF3"
+        "uid": "${datasource}"
       },
       "gridPos": {
         "h": 8,
@@ -101,7 +101,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "P1809F7CD0C75ACF3"
+            "uid": "${datasource}"
           },
           "editorMode": "code",
           "expr": "rate(http_requests_total{status_code=~\"5..\"}[5m]) / rate(http_requests_total[5m])",
@@ -116,7 +116,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "P1809F7CD0C75ACF3"
+        "uid": "${datasource}"
       },
       "gridPos": {
         "h": 8,
@@ -144,7 +144,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "P1809F7CD0C75ACF3"
+            "uid": "${datasource}"
           },
           "editorMode": "code",
           "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))",
@@ -159,7 +159,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "P1809F7CD0C75ACF3"
+        "uid": "${datasource}"
       },
       "gridPos": {
         "h": 8,
@@ -187,7 +187,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "P1809F7CD0C75ACF3"
+            "uid": "${datasource}"
           },
           "editorMode": "code",
           "expr": "active_connections",
@@ -202,7 +202,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "P1809F7CD0C75ACF3"
+        "uid": "${datasource}"
       },
       "gridPos": {
         "h": 8,
@@ -228,7 +228,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "P1809F7CD0C75ACF3"
+            "uid": "${datasource}"
           },
           "editorMode": "code",
           "expr": "rate(http_requests_total[5m])",
@@ -243,7 +243,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "P1809F7CD0C75ACF3"
+        "uid": "${datasource}"
       },
       "gridPos": {
         "h": 8,
@@ -269,7 +269,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "P1809F7CD0C75ACF3"
+            "uid": "${datasource}"
           },
           "editorMode": "code",
           "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))",
@@ -284,7 +284,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "P1809F7CD0C75ACF3"
+        "uid": "${datasource}"
       },
       "gridPos": {
         "h": 8,
@@ -310,7 +310,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "P1809F7CD0C75ACF3"
+            "uid": "${datasource}"
           },
           "editorMode": "code",
           "expr": "rate(ai_jobs_total[5m])",
@@ -325,7 +325,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "P1809F7CD0C75ACF3"
+        "uid": "${datasource}"
       },
       "gridPos": {
         "h": 8,
@@ -351,7 +351,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "P1809F7CD0C75ACF3"
+            "uid": "${datasource}"
           },
           "editorMode": "code",
           "expr": "db_connections_active",
@@ -371,7 +371,26 @@
     "monitoring"
   ],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "Prometheus",
+          "value": "P1809F7CD0C75ACF3"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Datasource",
+        "multi": false,
+        "name": "datasource",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
+      }
+    ]
   },
   "time": {
     "from": "now-6h",
