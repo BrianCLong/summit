@@ -1,5 +1,36 @@
 # Policy Package
 
+## GovernanceVerdict Mesh
+
+The package now ships a universal governance mesh that standardises how every
+microservice, workflow, and UI thread attaches a `GovernanceVerdict` to its
+outputs. Use the `GovernanceOrchestrator` to evaluate user actions,
+recommendations, and workflow results against dynamic policy rules. The
+orchestrator accepts temporary rule overrides for simulations, emits
+latency-aware verdict metadata, and exposes an adversarial probe harness to
+continuously test for bypass attempts.
+
+```ts
+import { GovernanceOrchestrator, PolicyEngine } from 'policy';
+
+const orchestrator = new GovernanceOrchestrator(
+  new PolicyEngine(myRules),
+  { evaluatedBy: 'governance-mesh', engineFactory: (rules) => new PolicyEngine(rules) },
+);
+
+const envelope = orchestrator.evaluateUserAction({
+  action: 'dataset:delete',
+  resource: 'dataset',
+  context: { tenantId: 't-1', userId: 'u-1', roles: ['analyst'] },
+}, { dynamicRules: myOverrideRules });
+
+// envelope.governance contains the immutable GovernanceVerdict
+```
+
+Run `npm test` in this package to execute the Vitest suite, including the
+adversarial probes that assert no policy evaluation path can skip the
+GovernanceVerdict.
+
 ## Backtesting Framework
 
 The policy package now includes a comprehensive backtesting framework for validating
