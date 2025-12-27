@@ -11,6 +11,8 @@ import {
   createDataEnvelope,
   DataEnvelope,
   DataClassification,
+  GovernanceVerdict,
+  GovernanceResult,
 } from '../types/data-envelope';
 import { randomUUID } from 'crypto';
 

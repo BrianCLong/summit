@@ -18,7 +18,7 @@ const previewSchema = z.object({
 router.get('/usage/preview', ensureAuthenticated, async (req, res, next) => {
   try {
     const { start, end } = previewSchema.parse(req.query);
-    const tenantId = (req as any).user.tenantId;
+    const tenantId = req.user.tenantId;
 
     if (!tenantId) {
         res.status(401).json({ error: 'Tenant context required' });

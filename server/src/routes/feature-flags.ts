@@ -110,11 +110,11 @@ router.post('/evaluate', async (req, res) => {
   try {
     const context = req.body.context || {};
     // Augment context with authenticated user info if available
-    if ((req as any).user) {
-      context.userId = (req as any).user.id || (req as any).user.sub;
-      context.userEmail = (req as any).user.email;
-      context.userRole = (req as any).user.role;
-      context.tenantId = (req as any).user.tenantId || (req as any).user.tenant_id;
+    if (req.user) {
+      context.userId = req.user.id || req.user.sub;
+      context.userEmail = req.user.email;
+      context.userRole = req.user.role;
+      context.tenantId = req.user.tenantId || req.user.tenant_id;
     }
 
     const service = getFeatureFlagService();

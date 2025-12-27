@@ -3,10 +3,20 @@ import logger from '../utils/logger.js';
 import { AuthSSOProvider, OIDCProvider, SAMLProviderStub, SSOConfig, SSOUserClaims } from './SSOProvider.js';
 import { AuthService } from '../services/AuthService.js';
 import { randomUUID } from 'node:crypto';
-import { Pool } from 'pg';
+import { Pool, PoolClient } from 'pg';
 
-// Workaround for pg type issue
-type PoolClient = any;
+interface User {
+  id: string;
+  email: string;
+  username: string;
+  password_hash: string;
+  first_name: string;
+  last_name: string;
+  role: string;
+  is_active: boolean;
+  created_at: Date;
+  default_tenant_id: string;
+}
 
 export class SSOService {
   private pool: Pool;
@@ -113,7 +123,16 @@ export class SSOService {
     return provider.generateAuthUrl(tenantId, state, callbackUrl);
   }
 
-  async handleCallback(code: string, state: string, callbackUrl: string): Promise<any> {
+  async handleCallback(
+    code: string,
+    state: string,
+    callbackUrl: string,
+  ): Promise<{
+    user: User;
+    token: string;
+    refreshToken: string;
+    expiresIn: number;
+  }> {
     // 1. Verify state and get tenantId
     const stateResult = await this.pool.query(
         `DELETE FROM sso_states WHERE state = $1 RETURNING tenant_id`,

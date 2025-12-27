@@ -15,8 +15,15 @@ import {
   validateDataEnvelope,
   DataEnvelope,
   DataClassification,
-  ProvenanceChain,
+  GovernanceVerdict,
+  GovernanceResult,
 } from '../types/data-envelope.js';
+
+// ProvenanceChain type for chain tracking
+interface ProvenanceChain {
+  chainId: string;
+  source?: { sourceId: string };
+}
 import { verifyChain } from '../canonical/provenance.js';
 
 /**
@@ -141,12 +148,13 @@ export function validateIngressProvenance(
     const body = req.body;
 
     if (!body) {
-      return res.status(400).json({
+      res.status(400).json({
         error: 'Request body required for protected route',
         code: 'MISSING_BODY',
         path: req.path,
         correlationId: req.correlationId,
       });
+      return;
     }
 
     // Check if body is wrapped in DataEnvelope
@@ -335,38 +343,38 @@ export function responseWrapperMiddleware(config?: {
         // Build lineage from provenance chain if available
         const lineage = req.provenanceChain
           ? [
-              {
-                id: randomUUID(),
-                operation: `${req.method} ${req.path}`,
-                inputs: req.provenanceChain.source
-                  ? [req.provenanceChain.source.sourceId]
-                  : [],
-                timestamp: new Date(),
-                actor: userId,
-                metadata: {
-                  method: req.method,
-                  path: req.path,
-                  tenantId,
-                  correlationId: req.correlationId,
-                  upstreamChainId: req.provenanceChain.chainId,
-                },
+            {
+              id: randomUUID(),
+              operation: `${req.method} ${req.path}`,
+              inputs: req.provenanceChain.source
+                ? [req.provenanceChain.source.sourceId]
+                : [],
+              timestamp: new Date(),
+              actor: userId,
+              metadata: {
+                method: req.method,
+                path: req.path,
+                tenantId,
+                correlationId: req.correlationId,
+                upstreamChainId: req.provenanceChain.chainId,
               },
-            ]
+            },
+          ]
           : [
-              {
-                id: randomUUID(),
-                operation: `${req.method} ${req.path}`,
-                inputs: Object.keys(req.body || {}),
-                timestamp: new Date(),
-                actor: userId,
-                metadata: {
-                  method: req.method,
-                  path: req.path,
-                  tenantId,
-                  correlationId: req.correlationId,
-                },
+            {
+              id: randomUUID(),
+              operation: `${req.method} ${req.path}`,
+              inputs: Object.keys(req.body || {}),
+              timestamp: new Date(),
+              actor: userId,
+              metadata: {
+                method: req.method,
+                path: req.path,
+                tenantId,
+                correlationId: req.correlationId,
               },
-            ];
+            },
+          ];
 
         // Collect warnings
         const warnings: string[] = res.locals?.warnings || [];
@@ -379,6 +387,16 @@ export function responseWrapperMiddleware(config?: {
           warnings.push('Response generated without upstream provenance chain');
         }
 
+        // Create governance verdict for automatic response wrapping (GA Compliance)
+        const governanceVerdict: GovernanceVerdict = {
+          verdictId: randomUUID(),
+          policyId: 'policy:response-wrapper:auto',
+          result: GovernanceResult.ALLOW,
+          decidedAt: new Date(),
+          reason: 'Automatic response wrapping by provenance enforcement middleware',
+          evaluator: 'provenance-enforcement-middleware',
+        };
+
         // Create envelope
         const envelope: DataEnvelope = createDataEnvelope(data, {
           source,
@@ -387,6 +405,7 @@ export function responseWrapperMiddleware(config?: {
           confidence,
           isSimulated: process.env.NODE_ENV !== 'production',
           classification,
+          governanceVerdict,
           lineage,
           warnings,
         });

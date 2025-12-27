@@ -5,14 +5,10 @@ import { getAuditSystem } from '../audit/advanced-audit-system.js';
 import logger from '../utils/logger.js';
 import { metrics } from '../observability/metrics.js';
 
-interface AuthenticatedRequest extends Request {
-  user?: any;
-}
-
 const authService = new AuthService();
 
 export async function ensureAuthenticated(
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void | Response> {
@@ -33,7 +29,7 @@ export async function ensureAuthenticated(
 
 export function requirePermission(permission: string) {
   return (
-    req: AuthenticatedRequest,
+    req: Request,
     res: Response,
     next: NextFunction,
   ): Response | void => {
@@ -71,7 +67,7 @@ export function requirePermission(permission: string) {
 export function ensureRole(requiredRole: string | string[]) {
   const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
   return (
-    req: AuthenticatedRequest,
+    req: Request,
     res: Response,
     next: NextFunction,
   ): Response | void => {
