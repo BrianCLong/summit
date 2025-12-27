@@ -1,5 +1,6 @@
 import { StructuredEventEmitter } from '@ga-graphai/common-types';
 import type { PolicyRule } from '@ga-graphai/common-types';
+import { stableHash } from '@ga-graphai/data-integrity';
 
 type NodeType =
   | 'service'
@@ -21,10 +22,22 @@ type RelationshipType =
   | 'GOVERNS'
   | 'OBSERVED_FOR';
 
+export interface GraphProvenance {
+  source: string;
+  ingress: 'api' | 'database' | 'message-broker' | 'ingestion' | string;
+  observedAt: string;
+  checksum: string;
+  traceId?: string;
+  lineage?: string[];
+  attributes?: Record<string, unknown>;
+  signature?: string;
+}
+
 export interface GraphNode<TData = Record<string, unknown>> {
   id: string;
   type: NodeType;
   data: TData;
+  provenance?: GraphProvenance;
 }
 
 export interface GraphEdge<TMetadata = Record<string, unknown>> {
@@ -33,6 +46,7 @@ export interface GraphEdge<TMetadata = Record<string, unknown>> {
   to: string;
   type: RelationshipType;
   metadata?: TMetadata;
+  provenance?: GraphProvenance;
 }
 
 export interface ServiceRecord {
@@ -44,6 +58,7 @@ export interface ServiceRecord {
   dependencies?: string[];
   soxCritical?: boolean;
   piiClassification?: string;
+  provenance?: GraphProvenance;
 }
 
 export interface EnvironmentRecord {
@@ -54,6 +69,7 @@ export interface EnvironmentRecord {
   deploymentMechanism?: string;
   zeroTrustTier?: number;
   complianceTags?: string[];
+  provenance?: GraphProvenance;
 }
 
 export interface PipelineStageRecord {
@@ -66,6 +82,7 @@ export interface PipelineStageRecord {
   guardrails?: Record<string, unknown>;
   policies?: string[];
   complianceTags?: string[];
+  provenance?: GraphProvenance;
 }
 
 export interface PipelineRecord {
@@ -75,6 +92,7 @@ export interface PipelineRecord {
   goldenPath?: string;
   changeWindow?: string;
   stages: PipelineStageRecord[];
+  provenance?: GraphProvenance;
 }
 
 export type IncidentSeverity = 'low' | 'medium' | 'high' | 'critical';
@@ -87,6 +105,7 @@ export interface IncidentRecord {
   occurredAt: string;
   status: 'open' | 'mitigated' | 'closed';
   rootCauseCategory?: string;
+  provenance?: GraphProvenance;
 }
 
 export interface CostSignalRecord {
@@ -96,6 +115,7 @@ export interface CostSignalRecord {
   budgetBreaches: number;
   throttleCount: number;
   slowQueryCount: number;
+  provenance?: GraphProvenance;
 }
 
 export interface PipelineConnector {
@@ -142,6 +162,12 @@ export interface GraphSnapshot {
   sandbox?: boolean;
   namespace?: string;
   warnings?: string[];
+  lineage?: {
+    nodesWithProvenance: number;
+    edgesWithProvenance: number;
+    missingNodes: string[];
+    missingEdges: string[];
+  };
   stats?: {
     nodes: number;
     edges: number;
@@ -359,6 +385,7 @@ export class OrchestrationKnowledgeGraph {
     const warnings = this.options.sandboxMode
       ? ['Sandbox mode active: graph mutations isolated']
       : undefined;
+    const lineage = this.lineageSummary(nodes, edges);
     const namespace = this.namespace();
     if (warnings) {
       this.logWarn('intelgraph.kg.sandbox', { namespace });
@@ -372,6 +399,7 @@ export class OrchestrationKnowledgeGraph {
       sandbox: this.options.sandboxMode,
       namespace,
       warnings,
+      lineage,
       stats: {
         nodes: nodes.length,
         edges: edges.length,
@@ -673,15 +701,76 @@ export class OrchestrationKnowledgeGraph {
     span?.end({ durationMs, costSignals: this.state.costSignals.size });
   }
 
+  private provenanceForRecord(
+    record: { provenance?: GraphProvenance },
+    type: NodeType,
+    nodeId: string,
+  ): GraphProvenance {
+    const checksum = record.provenance?.checksum ?? stableHash({ type, nodeId, record });
+    const lineage = new Set(record.provenance?.lineage ?? []);
+    if (record.provenance?.checksum) {
+      lineage.add(record.provenance.checksum);
+    }
+    return {
+      source: record.provenance?.source ?? 'intelgraph.connector',
+      ingress: record.provenance?.ingress ?? 'ingestion',
+      observedAt: record.provenance?.observedAt ?? new Date().toISOString(),
+      traceId: record.provenance?.traceId,
+      checksum,
+      lineage: Array.from(lineage),
+      attributes: record.provenance?.attributes,
+      signature: record.provenance?.signature,
+    };
+  }
+
+  private edgeProvenance(
+    type: RelationshipType,
+    from?: GraphProvenance,
+    to?: GraphProvenance,
+  ): GraphProvenance {
+    const observedAt = new Date().toISOString();
+    const parents = [from?.checksum, to?.checksum].filter(Boolean) as string[];
+    const lineage = new Set<string>([
+      ...(from?.lineage ?? []),
+      ...(to?.lineage ?? []),
+      ...parents,
+    ]);
+    return {
+      source: 'intelgraph.graph-builder',
+      ingress: 'ingestion',
+      observedAt,
+      traceId: from?.traceId ?? to?.traceId,
+      checksum: stableHash({ type, observedAt, parents }),
+      lineage: Array.from(lineage),
+    };
+  }
+
+  private lineageSummary(nodes: GraphNode[], edges: GraphEdge[]) {
+    const missingNodes = nodes.filter((node) => !node.provenance).map((node) => node.id);
+    const missingEdges = edges.filter((edge) => !edge.provenance).map((edge) => edge.id);
+    return {
+      nodesWithProvenance: nodes.length - missingNodes.length,
+      edgesWithProvenance: edges.length - missingEdges.length,
+      missingNodes,
+      missingEdges,
+    };
+  }
+
   private rebuildGraph(): void {
     this.state.nodes.clear();
     this.state.edges.clear();
 
+    const nodeProvenance = new Map<string, GraphProvenance>();
+
     for (const service of this.state.services.values()) {
-      this.state.nodes.set(`service:${service.id}`, {
-        id: `service:${service.id}`,
+      const nodeId = `service:${service.id}`;
+      const provenance = this.provenanceForRecord(service, 'service', nodeId);
+      nodeProvenance.set(nodeId, provenance);
+      this.state.nodes.set(nodeId, {
+        id: nodeId,
         type: 'service',
         data: service,
+        provenance,
       });
       for (const dependency of service.dependencies ?? []) {
         const edge = {
@@ -689,37 +778,53 @@ export class OrchestrationKnowledgeGraph {
           from: `service:${service.id}`,
           to: `service:${dependency}`,
           type: 'DEPENDS_ON' as const,
+          provenance: this.edgeProvenance(
+            'DEPENDS_ON',
+            provenance,
+            nodeProvenance.get(`service:${dependency}`),
+          ),
         } satisfies GraphEdge;
         this.state.edges.set(edge.id, edge);
       }
     }
 
     for (const environment of this.state.environments.values()) {
-      this.state.nodes.set(`env:${environment.id}`, {
-        id: `env:${environment.id}`,
+      const nodeId = `env:${environment.id}`;
+      const provenance = this.provenanceForRecord(environment, 'environment', nodeId);
+      nodeProvenance.set(nodeId, provenance);
+      this.state.nodes.set(nodeId, {
+        id: nodeId,
         type: 'environment',
         data: environment,
+        provenance,
       });
     }
 
     for (const pipeline of this.state.pipelines.values()) {
-      this.state.nodes.set(`pipeline:${pipeline.id}`, {
-        id: `pipeline:${pipeline.id}`,
+      const pipelineNodeId = `pipeline:${pipeline.id}`;
+      const pipelineProv = this.provenanceForRecord(pipeline, 'pipeline', pipelineNodeId);
+      nodeProvenance.set(pipelineNodeId, pipelineProv);
+      this.state.nodes.set(pipelineNodeId, {
+        id: pipelineNodeId,
         type: 'pipeline',
         data: pipeline,
+        provenance: pipelineProv,
       });
       for (const stage of pipeline.stages) {
         const stageNode: GraphNode = {
           id: `stage:${stage.id}`,
           type: 'stage',
           data: stage,
+          provenance: this.provenanceForRecord(stage, 'stage', `stage:${stage.id}`),
         };
+        nodeProvenance.set(stageNode.id, stageNode.provenance!);
         this.state.nodes.set(stageNode.id, stageNode);
         const containsEdge: GraphEdge = {
           id: edgeId(`pipeline:${pipeline.id}`, 'CONTAINS', stageNode.id),
           from: `pipeline:${pipeline.id}`,
           to: stageNode.id,
           type: 'CONTAINS',
+          provenance: this.edgeProvenance('CONTAINS', pipelineProv, stageNode.provenance),
         };
         this.state.edges.set(containsEdge.id, containsEdge);
 
@@ -728,6 +833,11 @@ export class OrchestrationKnowledgeGraph {
           from: stageNode.id,
           to: `service:${stage.serviceId}`,
           type: 'TARGETS',
+          provenance: this.edgeProvenance(
+            'TARGETS',
+            stageNode.provenance,
+            nodeProvenance.get(`service:${stage.serviceId}`),
+          ),
         };
         this.state.edges.set(serviceEdge.id, serviceEdge);
 
@@ -736,6 +846,11 @@ export class OrchestrationKnowledgeGraph {
           from: stageNode.id,
           to: `env:${stage.environmentId}`,
           type: 'RUNS_IN',
+          provenance: this.edgeProvenance(
+            'RUNS_IN',
+            stageNode.provenance,
+            nodeProvenance.get(`env:${stage.environmentId}`),
+          ),
         };
         this.state.edges.set(envEdge.id, envEdge);
       }
@@ -746,7 +861,9 @@ export class OrchestrationKnowledgeGraph {
         id: `incident:${incident.id}`,
         type: 'incident',
         data: incident,
+        provenance: this.provenanceForRecord(incident, 'incident', `incident:${incident.id}`),
       };
+      nodeProvenance.set(incidentNode.id, incidentNode.provenance!);
       this.state.nodes.set(incidentNode.id, incidentNode);
       const serviceEdge: GraphEdge = {
         id: edgeId(incidentNode.id, 'AFFECTS', `service:${incident.serviceId}`),
@@ -754,6 +871,11 @@ export class OrchestrationKnowledgeGraph {
         to: `service:${incident.serviceId}`,
         type: 'AFFECTS',
         metadata: { severity: incident.severity, occurredAt: incident.occurredAt },
+        provenance: this.edgeProvenance(
+          'AFFECTS',
+          incidentNode.provenance,
+          nodeProvenance.get(`service:${incident.serviceId}`),
+        ),
       };
       this.state.edges.set(serviceEdge.id, serviceEdge);
       const envEdge: GraphEdge = {
@@ -761,6 +883,11 @@ export class OrchestrationKnowledgeGraph {
         from: incidentNode.id,
         to: `env:${incident.environmentId}`,
         type: 'OCCURRED_IN',
+        provenance: this.edgeProvenance(
+          'OCCURRED_IN',
+          incidentNode.provenance,
+          nodeProvenance.get(`env:${incident.environmentId}`),
+        ),
       };
       this.state.edges.set(envEdge.id, envEdge);
     }
@@ -770,7 +897,9 @@ export class OrchestrationKnowledgeGraph {
         id: `policy:${policy.id}`,
         type: 'policy',
         data: policy,
+        provenance: this.provenanceForRecord(policy as unknown as { provenance?: GraphProvenance }, 'policy', `policy:${policy.id}`),
       };
+      nodeProvenance.set(policyNode.id, policyNode.provenance!);
       this.state.nodes.set(policyNode.id, policyNode);
       for (const resource of policy.resources) {
         const targetId = resource.includes(':') ? resource : `service:${resource}`;
@@ -779,6 +908,11 @@ export class OrchestrationKnowledgeGraph {
           from: policyNode.id,
           to: targetId,
           type: 'GOVERNS',
+          provenance: this.edgeProvenance(
+            'GOVERNS',
+            policyNode.provenance,
+            nodeProvenance.get(targetId),
+          ),
         };
         this.state.edges.set(edge.id, edge);
       }
@@ -789,13 +923,24 @@ export class OrchestrationKnowledgeGraph {
         id: `cost:${signal.serviceId}:${signal.timeBucket}`,
         type: 'cost-signal',
         data: signal,
+        provenance: this.provenanceForRecord(
+          signal,
+          'cost-signal' as NodeType,
+          `cost:${signal.serviceId}:${signal.timeBucket}`,
+        ),
       };
+      nodeProvenance.set(signalNode.id, signalNode.provenance!);
       this.state.nodes.set(signalNode.id, signalNode);
       const edge: GraphEdge = {
         id: edgeId(signalNode.id, 'OBSERVED_FOR', `service:${signal.serviceId}`),
         from: signalNode.id,
         to: `service:${signal.serviceId}`,
         type: 'OBSERVED_FOR',
+        provenance: this.edgeProvenance(
+          'OBSERVED_FOR',
+          signalNode.provenance,
+          nodeProvenance.get(`service:${signal.serviceId}`),
+        ),
       };
       this.state.edges.set(edge.id, edge);
     }

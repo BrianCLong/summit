@@ -32,22 +32,28 @@ describe('OrchestrationKnowledgeGraph', () => {
     graph = new OrchestrationKnowledgeGraph(emitter);
     pipelineConnector = {
       loadPipelines: vi.fn<[], Promise<PipelineRecord[]>>().mockResolvedValue([
-        {
-          id: 'pipeline-a',
-          name: 'Primary Deploy',
-          stages: [
-            {
-              id: 'stage-a1',
-              name: 'Build',
-              pipelineId: 'pipeline-a',
-              serviceId: 'svc-api',
-              environmentId: 'env-prod',
-              capability: 'build',
-              guardrails: { maxErrorRate: 0.02 },
-            },
-          ],
-        },
-      ]),
+          {
+            id: 'pipeline-a',
+            name: 'Primary Deploy',
+            stages: [
+              {
+                id: 'stage-a1',
+                name: 'Build',
+                pipelineId: 'pipeline-a',
+                serviceId: 'svc-api',
+                environmentId: 'env-prod',
+                capability: 'build',
+                guardrails: { maxErrorRate: 0.02 },
+                provenance: {
+                  source: 'cicd',
+                  ingress: 'api',
+                  observedAt: '2024-03-18T00:00:00Z',
+                  checksum: 'stage-a1-checksum',
+                },
+              },
+            ],
+          },
+        ]),
     };
     serviceConnector = {
       loadServices: vi
@@ -59,6 +65,12 @@ describe('OrchestrationKnowledgeGraph', () => {
             tier: 'tier-0',
             dependencies: ['svc-db'],
             soxCritical: true,
+            provenance: {
+              source: 'cmdb',
+              ingress: 'database',
+              observedAt: '2024-03-15T00:00:00Z',
+              checksum: 'svc-api-checksum',
+            },
           },
           {
             id: 'svc-db',
@@ -148,6 +160,18 @@ describe('OrchestrationKnowledgeGraph', () => {
     const risk = snapshot.serviceRisk['svc-api'];
     expect(risk.score).toBeGreaterThan(0.3);
     expect(risk.factors.incidentLoad).toBeGreaterThan(risk.factors.costPressure * 0.5);
+  });
+
+  it('attaches provenance metadata across the graph for lineage dashboards', async () => {
+    const snapshot = await graph.refresh();
+    const serviceNode = snapshot.nodes.find((node) => node.id === 'service:svc-api');
+    const depEdge = snapshot.edges.find((edge) => edge.id.includes('DEPENDS_ON'));
+
+    expect(serviceNode?.provenance?.source).toBe('cmdb');
+    expect(serviceNode?.provenance?.checksum).toBeDefined();
+    expect(depEdge?.provenance?.lineage?.length).toBeGreaterThan(0);
+    expect(snapshot.lineage?.nodesWithProvenance).toBe(snapshot.nodes.length);
+    expect(snapshot.lineage?.missingNodes).toEqual([]);
   });
 
   it('exposes service context view with incidents and policies', async () => {

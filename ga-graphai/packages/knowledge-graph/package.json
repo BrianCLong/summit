@@ -8,7 +8,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@ga-graphai/common-types": "file:../common-types"
+    "@ga-graphai/common-types": "file:../common-types",
+    "@ga-graphai/data-integrity": "file:../data-integrity"
   },
   "devDependencies": {
     "@types/node": "^20.12.7",

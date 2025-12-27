@@ -15,6 +15,7 @@ This package centralizes schema evolution checks, migrations safety, invariants,
 - `invariants/`: runtime boundary and audit invariant helpers.
 - `reconcile/`: deterministic cross-store reconciliation reports.
 - `eventlog/`: append-only canonical event log with hash-chain verification.
+- `lineage/`: distributed provenance tracker that stamps ingress/egress hops with cryptographic hashes.
 - `write-boundary/`: transactional wrapper with partial write detection.
 - `roundtrip/`: export/import roundtrip verification helpers.
 - `lineage/`: provenance-first lineage graph builder ensuring every artifact is tagged with origin, confidence, and simulation

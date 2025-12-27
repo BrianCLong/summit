@@ -9,3 +9,4 @@ export * from './eventlog/eventLog.js';
 export * from './write-boundary/transactionalBoundary.js';
 export * from './roundtrip/roundtripVerifier.js';
 export * from './lineage/lineageService.js';
+export * from './lineage/lineageTracker.js';
