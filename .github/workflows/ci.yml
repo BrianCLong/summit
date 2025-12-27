@@ -100,7 +100,7 @@ jobs:
       - name: Run k6 smoke (policy hot path)
         run: k6 run k6/policy-hot-path.js
 
-  smoke-checks:
+  golden-path-smoke:
     needs: setup
     uses: ./.github/workflows/reusable/smoke.yml
 
@@ -145,7 +145,7 @@ jobs:
 
   quality-gates:
     runs-on: ubuntu-latest
-    needs: [test, policy-fixtures, perf-budget, sbom, smoke-checks, latency-quality]
+    needs: [test, policy-fixtures, perf-budget, sbom, golden-path-smoke, latency-quality]
     steps:
       - name: Verify required job statuses
         run: echo "All gates passed"

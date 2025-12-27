@@ -1,0 +1,53 @@
+apiVersion: sloth.slok.dev/v1
+kind: PrometheusSLO
+metadata:
+  name: ai-copilot-availability
+  labels:
+    app: ai-copilot
+    team: platform
+spec:
+  service: ai-copilot
+  slo: 99.9
+  window: 30d
+  slos:
+    - name: requests-availability
+      objective: 99.9
+      description: "Availability SLO for AI Copilot requests"
+      sli:
+        events:
+          errorQuery: sum(rate(http_request_duration_seconds_count{job="ai-copilot", status=~"5.."}[5m]))
+          totalQuery: sum(rate(http_request_duration_seconds_count{job="ai-copilot"}[5m]))
+      alerting:
+        name: AiCopilotAvailabilityBurnRate
+        labels:
+          severity: critical
+        annotations:
+          summary: High error rate on AI Copilot
+          description: "Error budget is burning too fast for AI Copilot."
+---
+apiVersion: sloth.slok.dev/v1
+kind: PrometheusSLO
+metadata:
+  name: ai-copilot-latency
+  labels:
+    app: ai-copilot
+    team: platform
+spec:
+  service: ai-copilot
+  slo: 99.0
+  window: 30d
+  slos:
+    - name: requests-latency
+      objective: 99.0
+      description: "Latency SLO for AI Copilot requests"
+      sli:
+        events:
+          errorQuery: sum(rate(http_request_duration_seconds_bucket{job="ai-copilot", le="+Inf"}[5m])) - sum(rate(http_request_duration_seconds_bucket{job="ai-copilot", le="1"}[5m]))
+          totalQuery: sum(rate(http_request_duration_seconds_bucket{job="ai-copilot", le="+Inf"}[5m]))
+      alerting:
+        name: AiCopilotLatencyBurnRate
+        labels:
+          severity: warning
+        annotations:
+          summary: High latency on AI Copilot
+          description: "Latency budget is burning too fast for AI Copilot."

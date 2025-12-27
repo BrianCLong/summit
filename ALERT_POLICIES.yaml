@@ -123,6 +123,44 @@ spec:
     # AUTHENTICATION & AUTHORIZATION ALERTS
     # ====================================================================
 
+    - name: intelgraph.ai.copilot
+      interval: 30s
+      rules:
+        - alert: IntelGraphAICopilotErrorRate
+          expr: |
+            (
+              (1 - (rate(http_request_duration_seconds_count{job="ai-copilot",status!~"5.."}[10m]) / rate(http_request_duration_seconds_count{job="ai-copilot"}[10m])))
+              > 0.005
+            )
+          for: 10m
+          labels:
+            severity: critical
+            service: ai-copilot
+            slo: error_rate
+            team: platform
+            pager: immediate
+          annotations:
+            summary: '🤖 AI Copilot error rate elevated'
+            description: |
+              AI Copilot error rate {{ $value | humanizePercentage }} exceeds 0.5% for 10 minutes.
+              Investigate recent deploys, model endpoints, and upstream dependencies.
+            runbook_url: 'https://runbooks.intelgraph.ai/ai-copilot'
+            dashboard_url: 'https://grafana.intelgraph.ai/d/ai-copilot-overview'
+
+        - alert: IntelGraphAICopilotLatencyP95High
+          expr: |
+            histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="ai-copilot"}[5m])) > 1
+          for: 10m
+          labels:
+            severity: warning
+            service: ai-copilot
+            slo: latency
+            team: platform
+          annotations:
+            summary: '🤖 AI Copilot P95 latency high'
+            description: 'AI Copilot P95 latency {{ $value | humanizeDuration }} exceeds 1s threshold'
+            runbook_url: 'https://runbooks.intelgraph.ai/ai-copilot'
+
     - name: intelgraph.security.auth
       interval: 30s
       rules:
