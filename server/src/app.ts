@@ -36,6 +36,7 @@ import aiRouter from './routes/ai.js';
 import nlGraphQueryRouter from './routes/nl-graph-query.js';
 import disclosuresRouter from './routes/disclosures.js';
 import narrativeSimulationRouter from './routes/narrative-sim.js';
+import predictiveRouter from './routes/predictive.js';
 import { metricsRoute } from './http/metricsRoute.js';
 const rbacRouter = require('./routes/rbacRoutes.js');
 import { typeDefs } from './graphql/schema.js';
@@ -345,6 +346,7 @@ export const createApp = async () => {
   app.use('/api/ai', aiRouter);
   app.use('/api/ai/nl-graph-query', nlGraphQueryRouter);
   app.use('/api/narrative-sim', narrativeSimulationRouter);
+  app.use('/api/predictive', predictiveRouter);
   app.use('/disclosures', disclosuresRouter);
   app.use('/rbac', rbacRouter);
   app.use('/api/billing', billingRouter);
