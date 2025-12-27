@@ -1,0 +1,4 @@
+# Disclosure pack PII denylist
+# One literal string per line (case-sensitive). Lines starting with # are ignored.
+PII_SAMPLE_DO_NOT_SHIP
+REDACT_THIS_VALUE
