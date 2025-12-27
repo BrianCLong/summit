@@ -14,7 +14,7 @@ async fn test_config_driven_serialization() {
     let config = SummitFeaturesConfig {
         tracing: TracingConfig { enabled: true, sampling_rate: 1.0 },
         serialization: SerializationConfig { format: "json".to_string() },
-        storage: StorageConfig { backend: "s3".to_string(), connection_string: "s3://bucket".to_string() },
+        storage: StorageConfig { backend: "memory".to_string(), connection_string: "memory://local".to_string() },
         health: HealthConfig { interval_seconds: 30 },
         load_balancing: LoadBalancingConfig { strategy: "round_robin".to_string() },
         operator: OperatorConfig { auto_scaling: true },
