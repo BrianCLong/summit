@@ -48,7 +48,10 @@ Action: Revert to previous hash.
 Estimated RTO: < 1 minute.
 EOF
 
-# 4. Zip it up
+# 4. Redact PII and secrets
+python3 scripts/compliance/redact_disclosure_pack.py --pack-dir "$PACK_DIR"
+
+# 5. Zip it up
 cd "$OUTPUT_DIR"
 zip -r "${PACK_NAME}.zip" "$PACK_NAME"
 cd -
