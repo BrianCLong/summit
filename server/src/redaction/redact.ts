@@ -13,7 +13,7 @@ const redactionApplied = new Counter({
 type RedactionRule = 'pii' | 'financial' | 'sensitive' | 'k_anon';
 
 interface RedactionPolicy {
-  rules: RedactionRule[];
+  rules: RedactionRule[] | Record<string, string>;
   kAnonThreshold?: number;
   allowedFields?: string[];
   redactionMask?: string;
@@ -64,7 +64,9 @@ export class RedactionService {
       async (span: Span) => {
         span.setAttributes({
           tenant_id: tenantId,
-          rules: policy.rules.join(','),
+          rules: Array.isArray(policy.rules)
+            ? policy.rules.join(',')
+            : Object.keys(policy.rules).join(','),
           has_k_anon: !!policy.kAnonThreshold,
         });
 
@@ -153,6 +155,12 @@ export class RedactionService {
       return !policy.allowedFields.includes(field);
     }
 
+    // Handle object-based rules (field -> ruleType mapping)
+    if (!Array.isArray(policy.rules)) {
+      return field in policy.rules;
+    }
+
+    // Handle array-based rules (check against field metadata)
     const metadata = FIELD_METADATA[field];
     if (!metadata) {
       return false; // Unknown fields are not redacted by default
@@ -174,6 +182,12 @@ export class RedactionService {
   }
 
   private getApplicableRule(field: string, policy: RedactionPolicy): string {
+    // Handle object-based rules (field -> ruleType mapping)
+    if (!Array.isArray(policy.rules)) {
+      return policy.rules[field] || 'default';
+    }
+
+    // Handle array-based rules (check against field metadata)
     const metadata = FIELD_METADATA[field];
     if (!metadata) return 'unknown';
 
