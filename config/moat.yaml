@@ -1,0 +1,16 @@
+# Moat evaluation pipeline configuration
+pipeline: moat-evaluation
+# Default version to run when callers do not specify a variant
+default_version: v1
+# Baseline version used for comparative reporting
+baseline_version: v1
+# Allowed variants for execution
+versions:
+  - v1
+  - v1b
+# Shared metrics store for comparative runs
+metrics_store: pipelines/demo/moat-metrics.json
+# Metrics to compare when a baseline is available
+comparative_metrics:
+  - duration_ms
+  - task_success_rate

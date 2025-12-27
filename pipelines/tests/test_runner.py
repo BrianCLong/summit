@@ -365,3 +365,72 @@ def test_run_metadata():
         assert run.end_time is not None
         assert run.duration_ms is not None
         assert run.duration_ms > 0
+
+
+def test_moat_versions_and_metrics(tmp_path):
+    """Moat config selects versions and emits comparative metrics."""
+
+    manifest = {
+        "apiVersion": "summit.io/v1",
+        "kind": "Pipeline",
+        "metadata": {
+            "name": "moat-evaluation",
+            "owners": ["moat@summit.io"],
+        },
+        "spec": {
+            "tasks": [
+                {
+                    "id": "step1",
+                    "type": "python",
+                    "code": {"command": "result = 'v1 step'"},
+                },
+                {
+                    "id": "step2",
+                    "type": "python",
+                    "depends_on": ["step1"],
+                    "code": {"command": "result = 'v1 step 2'"},
+                },
+            ],
+        },
+    }
+
+    manifest_path = tmp_path / "pipeline.yaml"
+    with open(manifest_path, "w") as f:
+        yaml.dump(manifest, f)
+
+    metrics_store_path = tmp_path / "metrics.json"
+    moat_config = {
+        "pipeline": "moat-evaluation",
+        "default_version": "v1b",
+        "baseline_version": "v1",
+        "versions": ["v1", "v1b"],
+        "metrics_store": str(metrics_store_path),
+        "comparative_metrics": ["duration_ms", "task_success_rate"],
+    }
+
+    config_path = tmp_path / "moat.yaml"
+    with open(config_path, "w") as f:
+        yaml.dump(moat_config, f)
+
+    registry = PipelineRegistry(manifest_dirs=[tmp_path])
+    registry.load_all()
+
+    runner = LocalRunner(registry, moat_config_path=config_path)
+
+    baseline_run = runner.run_pipeline("moat-evaluation", context={"variant": "v1"})
+    assert baseline_run.succeeded
+    assert baseline_run.context["variant"] == "v1"
+
+    variant_run = runner.run_pipeline("moat-evaluation")
+    assert variant_run.succeeded
+    assert variant_run.context["variant"] == "v1b"
+
+    with open(metrics_store_path) as f:
+        records = json.load(f)
+
+    baseline_entry = next(r for r in records if r["version"] == "v1")
+    variant_entry = next(r for r in records if r["version"] == "v1b")
+
+    assert baseline_entry["duration_ms"] is not None
+    assert variant_entry["baseline_version"] == "v1"
+    assert "duration_ms_delta" in variant_entry.get("comparisons", {})

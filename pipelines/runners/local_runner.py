@@ -18,6 +18,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from pipelines.config import MoatConfig
+from pipelines.observability import MetricsStore, RunMetrics
 from pipelines.registry.core import Pipeline, PipelineRegistry
 
 # Configure logging
@@ -206,10 +208,21 @@ class LocalRunner:
     Executes pipeline tasks in topological order with retry logic.
     """
 
-    def __init__(self, registry: PipelineRegistry, dry_run: bool = False):
+    def __init__(
+        self,
+        registry: PipelineRegistry,
+        dry_run: bool = False,
+        moat_config_path: Optional[str] = None,
+        metrics_store: Optional[MetricsStore] = None,
+    ):
         self.registry = registry
         self.dry_run = dry_run
         self.lineage_emitter = OpenLineageEmitter()
+        self.moat_config = MoatConfig.load(moat_config_path)
+        self.metrics_store = metrics_store
+
+        if not self.metrics_store and self.moat_config:
+            self.metrics_store = MetricsStore(self.moat_config.metrics_store)
 
     def parse_duration(self, duration_str: str) -> int:
         """Parse duration string to seconds (e.g., '5m' -> 300)."""
@@ -227,6 +240,96 @@ class LocalRunner:
             return value * 3600
         else:
             raise ValueError(f"Invalid duration unit: {unit}")
+
+    def _resolve_moat_version(
+        self, pipeline: Pipeline, context: Dict[str, Any]
+    ) -> Optional[str]:
+        """Resolve the active version for Moat-managed pipelines."""
+
+        if not self.moat_config or not self.moat_config.is_managed_pipeline(
+            pipeline.name
+        ):
+            return None
+
+        requested = context.get("variant") or context.get("moat_version")
+        version = self.moat_config.resolve_version(requested)
+        context.setdefault("variant", version)
+        return version
+
+    def _collect_run_metrics(
+        self,
+        pipeline: Pipeline,
+        run: PipelineRun,
+        version: Optional[str],
+    ) -> Optional[RunMetrics]:
+        """Build run metrics for Moat pipelines with optional comparisons."""
+
+        if not (self.moat_config and self.metrics_store):
+            return None
+
+        if not version:
+            return None
+
+        total_tasks = len(run.task_results) or 1
+        successes = sum(1 for result in run.task_results.values() if result.succeeded)
+        failures = total_tasks - successes
+        success_rate = successes / total_tasks
+
+        comparisons: Dict[str, Any] = {}
+
+        # Compare against baseline when available
+        baseline_version = self.moat_config.baseline_version
+        if (
+            baseline_version
+            and baseline_version in self.moat_config.versions
+            and baseline_version != version
+        ):
+            baseline = self.metrics_store.latest_for(pipeline.name, baseline_version)
+            if baseline:
+                if (
+                    "duration_ms" in self.moat_config.comparative_metrics
+                    and baseline.get("duration_ms") is not None
+                    and run.duration_ms is not None
+                ):
+                    comparisons["duration_ms_delta"] = run.duration_ms - baseline[
+                        "duration_ms"
+                    ]
+                if "task_success_rate" in self.moat_config.comparative_metrics:
+                    comparisons["task_success_rate_delta"] = success_rate - baseline.get(
+                        "task_success_rate", 0
+                    )
+
+        return RunMetrics(
+            pipeline=pipeline.name,
+            version=version,
+            run_id=run.run_id,
+            timestamp=MetricsStore.build_timestamp(),
+            duration_ms=run.duration_ms,
+            succeeded=run.succeeded,
+            task_success_rate=success_rate,
+            task_failures=failures,
+            dry_run=self.dry_run,
+            baseline_version=self.moat_config.baseline_version,
+            comparisons=comparisons,
+        )
+
+    def _record_moat_metrics(
+        self,
+        pipeline: Pipeline,
+        run: PipelineRun,
+        version: Optional[str],
+    ) -> None:
+        """Persist run metrics to the shared store when configured."""
+
+        metrics = self._collect_run_metrics(pipeline, run, version)
+        if metrics and self.metrics_store:
+            self.metrics_store.append(metrics)
+            logger.info(
+                "📈 Recorded metrics for %s version %s in %s",
+                pipeline.name,
+                version,
+                self.metrics_store.path,
+            )
 
     def execute_python_task(
         self, task: Dict[str, Any], context: Dict[str, Any]
@@ -425,6 +528,16 @@ class LocalRunner:
             context=context or {},
         )
 
+        active_version = self._resolve_moat_version(pipeline, run.context)
+
+        if active_version:
+            logger.info(
+                "🔀 Moat pipeline configured: %s (version=%s, baseline=%s)",
+                pipeline.name,
+                active_version,
+                self.moat_config.baseline_version if self.moat_config else "",
+            )
+
         logger.info(f"🚀 Starting pipeline: {pipeline_name} (run_id: {run_id})")
 
         # Emit start event
@@ -501,6 +614,9 @@ class LocalRunner:
             for task_id, result in run.task_results.items():
                 status_icon = "✅" if result.succeeded else "❌" if result.status == TaskStatus.FAILED else "⏭️"
                 logger.info(f"   {status_icon} {task_id}: {result.status.value} ({result.attempts} attempts)")
+
+            # Persist comparative metrics for Moat-managed pipelines
+            self._record_moat_metrics(pipeline, run, active_version)
 
         return run
 
