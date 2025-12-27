@@ -11,6 +11,7 @@ This package codifies the production-ready Prometheus + Grafana + OpenTelemetry 
 ## Key Capabilities
 
 - **Metrics & Dashboards**: Prometheus with SLA/SLO rules, Grafana dashboards (platform + reliability views), Pyroscope profiling charts.
+- **Governance & Correlation**: Service dashboard `ops-service-observability.json` shows error budgets, latency, and governance verdicts with correlation_id coverage.
 - **Tracing**: OpenTelemetry Collector with OTLP ingress and export to Jaeger (OTLP gRPC) and Prometheus remote write for metrics.
 - **Logging**: Filebeat → Elasticsearch/Kibana for log aggregation plus Loki for lightweight, queryable logs.
 - **Alerting**: Alertmanager with SLA/SLO/error-budget alerts, OTel pipeline error detection, profiling ingestion stalls, and Elasticsearch health checks.

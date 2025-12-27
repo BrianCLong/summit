@@ -2,10 +2,18 @@
 
 from __future__ import annotations
 
+import contextvars
+from contextlib import contextmanager
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from threading import Lock
-from typing import Dict, List, Mapping, Optional
+from typing import TYPE_CHECKING, Dict, List, Mapping, MutableMapping, Optional
+from uuid import uuid4
+
+
+if TYPE_CHECKING:  # pragma: no cover - import hints only
+    from opentelemetry.sdk.trace import SpanProcessor
+    from opentelemetry.trace import Span
 
 
 @dataclass(frozen=True)
@@ -19,12 +27,52 @@ class _MetricSample:
 
 _RECORDED_PROM_METRICS: Dict[str, List[_MetricSample]] = {}
 _METRICS_LOCK = Lock()
+_CORRELATION_ID = contextvars.ContextVar("correlation_id", default=None)
 
 
-def init_otel_tracing():
-    """Stub for initializing OpenTelemetry tracing."""
+def init_otel_tracing(
+    service_name: str,
+    endpoint: str = "http://otel-collector:4317",
+    environment: str | None = None,
+):
+    """Configure OpenTelemetry tracing for a service with correlation context.
 
-    print("Initializing OpenTelemetry tracing.")
+    This helper wires a production-ready OTLP exporter, sampler, and resource
+    attributes. It also attaches a span processor that enriches spans with the
+    current correlation ID so downstream services and logs stay aligned.
+    """
+
+    from opentelemetry import trace
+    from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import (
+        OTLPSpanExporter,
+    )
+    from opentelemetry.sdk.resources import Resource
+    from opentelemetry.sdk.trace import TracerProvider
+    from opentelemetry.sdk.trace.export import BatchSpanProcessor
+    from opentelemetry.sdk.trace.sampling import ParentBased, TraceIdRatioBased
+
+    resource = Resource.create(
+        {
+            "service.name": service_name,
+            "deployment.environment": environment or "dev",
+        }
+    )
+
+    tracer_provider = TracerProvider(
+        resource=resource,
+        sampler=ParentBased(TraceIdRatioBased(1.0)),
+    )
+    span_exporter = OTLPSpanExporter(endpoint=endpoint, insecure=True)
+    span_processor = BatchSpanProcessor(span_exporter)
+    tracer_provider.add_span_processor(span_processor)
+
+    def _add_correlation_id(span, *_args):
+        correlation_id = get_correlation_id()
+        if correlation_id:
+            span.set_attribute("correlation_id", correlation_id)
+
+    tracer_provider.add_span_processor(_CallbackSpanProcessor(_add_correlation_id))
+    trace.set_tracer_provider(tracer_provider)
 
 
 def _normalise_labels(labels: Optional[Mapping[str, object]]) -> Dict[str, str]:
@@ -72,6 +120,76 @@ def record_prom_metric(metric_name: str, value: float, labels: Optional[Mapping[
         f"Recording Prometheus metric: {metric_name}={numeric_value} "
         f"with labels {normalised_labels}"
     )
+
+
+def generate_correlation_id() -> str:
+    """Generate a RFC4122 correlation identifier and set it in the context."""
+
+    correlation_id = str(uuid4())
+    _CORRELATION_ID.set(correlation_id)
+    return correlation_id
+
+
+def get_correlation_id(headers: Optional[Mapping[str, str]] = None) -> Optional[str]:
+    """Return the active correlation ID, seeding it from incoming headers if present."""
+
+    existing = _CORRELATION_ID.get()
+    if existing:
+        return existing
+
+    header_value: Optional[str] = None
+    if headers:
+        header_value = headers.get("x-request-id") or headers.get("X-Request-Id")
+        header_value = header_value or headers.get("traceparent")
+
+    if header_value:
+        _CORRELATION_ID.set(header_value)
+        return header_value
+
+    return generate_correlation_id()
+
+
+def attach_correlation_header(headers: MutableMapping[str, str]) -> MutableMapping[str, str]:
+    """Ensure outbound headers carry the correlation ID alongside trace context."""
+
+    correlation_id = get_correlation_id(headers)
+    headers["x-request-id"] = correlation_id
+    return headers
+
+
+class _CallbackSpanProcessor:
+    """Minimal span processor used to inject correlation IDs on span start."""
+
+    def __init__(self, callback):
+        self._callback = callback
+
+    def on_start(self, span: "Span", parent_context=None):
+        self._callback(span, parent_context)
+
+    def on_end(self, span: "Span"):  # pragma: no cover - passthrough
+        return None
+
+    def shutdown(self):  # pragma: no cover - passthrough
+        return None
+
+    def force_flush(self, timeout_millis: int = 30000):  # pragma: no cover
+        return True
+
+
+@contextmanager
+def traced_operation(operation: str, attributes: Optional[Mapping[str, object]] = None):
+    """Context manager to trace an operation with correlation-aware metadata."""
+
+    from opentelemetry import trace
+
+    tracer = trace.get_tracer("summit.ops.observability")
+    with tracer.start_as_current_span(operation) as span:
+        correlation_id = get_correlation_id()
+        span.set_attribute("correlation_id", correlation_id)
+        if attributes:
+            for key, value in attributes.items():
+                span.set_attribute(str(key), value)
+        yield span
 
 
 def get_recorded_prom_metrics(metric_name: Optional[str] = None):

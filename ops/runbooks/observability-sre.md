@@ -114,6 +114,29 @@ This runbook guides on-call engineers through diagnosing and resolving SLO, cost
 
 **Exit Criteria**: Collector ready, metrics exporting to Prometheus and ELK within 5 minutes.
 
+## Correlation ID & Trace Propagation
+
+**Symptoms**: Grafana `Correlation Coverage` table shows empty IDs, trace-to-log linking fails, Jaeger spans missing `correlation_id` attribute.
+
+**Diagnosis**:
+
+1. Verify gateway propagation: ensure Kong plugin `correlation-id` enabled and setting `x-request-id` headers (see `ops/gateway/kong/kong.yaml`).
+2. Check collector enrichment: `kubectl get cm otel-collector-config -n monitoring -o yaml | rg correlation_id` should include `attributes/enrich_correlation` processor.
+3. Quantify propagation gaps:
+   ```bash
+   promql "sum(rate(traces_spanmetrics_calls_total{correlation_id=\"\"}[5m]))" "topk(5, sum by (service_name) (rate(traces_spanmetrics_calls_total{correlation_id=\"\"}[5m])))"
+   ```
+
+**Mitigation / Auto-remediation**:
+
+- Trigger targeted restarts for services dropping IDs and refresh the collector:
+  ```bash
+  NAMESPACE=platform-prod PROM_URL=http://prometheus.monitoring:9090 ./ops/runbooks/auto_remediate_tracing.sh
+  ```
+- For individual services, add middleware to call `init_otel_tracing(service_name)` and wrap handlers with `traced_operation("<route>")` from `ops/observability.py` to enforce span + correlation injection.
+
+**Exit Criteria**: `correlation_id` label populated on new spans and logs for 15 minutes, error budget panels stable.
+
 ## GraphQL Latency Buckets & SLO Tuning
 
 **When to use**: Burn-rate alert `GraphQLErrorBudgetBurn` firing or Grafana shows p95 >500ms for gateway GraphQL traffic.
