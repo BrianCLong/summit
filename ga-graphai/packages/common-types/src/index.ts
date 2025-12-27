@@ -522,7 +522,10 @@ export type FallbackTrigger =
   | 'cost-spike'
   | 'latency-breach'
   | 'policy-violation'
-  | 'execution-failure';
+  | 'execution-failure'
+  | 'timeout'
+  | 'circuit-open'
+  | 'graceful-degradation';
 
 export interface CloudProviderDescriptor {
   name: string;
@@ -714,6 +717,8 @@ export interface ExecutionTraceEntry {
   finishedAt: string;
   logs: string[];
   fallbackTriggered?: FallbackTrigger;
+  degraded?: boolean;
+  featureFlags?: string[];
 }
 
 export interface ExecutionOutcome {
