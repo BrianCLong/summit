@@ -294,7 +294,7 @@ export class MaestroService {
     const db = await this.getDB();
     db.auditLog.push({
       id: Math.random().toString(36).substring(7),
-      timestamp: new.Date().toISOString(),
+      timestamp: new Date().toISOString(),
       actor,
       action,
       resource,

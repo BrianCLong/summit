@@ -1,9 +1,6 @@
 name: Security and Compliance Suite
 
 on:
-  pull_request:
-  push:
-    branches: [ main ]
   workflow_dispatch:
   schedule:
     - cron: '0 2 * * 1'

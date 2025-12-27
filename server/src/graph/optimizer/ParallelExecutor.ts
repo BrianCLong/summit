@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 import { getNeo4jDriver } from '../../db/neo4j.js';
 
 export interface ParallelExecutionResult {

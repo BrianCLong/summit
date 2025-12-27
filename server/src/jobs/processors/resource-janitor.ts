@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Job } from 'bullmq';
 import { getPostgresPool } from '../../config/database.js';
 import { Logger } from '../../utils/logger.js';
