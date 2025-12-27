@@ -1,0 +1,11 @@
+{
+  "baseline": {
+    "name": "k8s",
+    "path": "k8s",
+    "extensions": [".yaml", ".yml"]
+  },
+  "snapshots": {
+    "staging": "deploy/staging/config-drift-snapshot.json",
+    "production": "deploy/production/config-drift-snapshot.json"
+  }
+}
