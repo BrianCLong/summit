@@ -1,6 +1,6 @@
 import { PolicyEngine } from './PolicyEngine.js';
 import { TelemetryLayer } from './TelemetryLayer.js';
-import { PolicyContext, GovernanceDecision, TelemetryEvent, Policy } from './types.js';
+import { PolicyContext, GovernanceVerdict, TelemetryEvent, Policy } from './types.js';
 import { v4 as uuidv4 } from 'uuid';
 
 const policyEngine = new PolicyEngine();
@@ -11,7 +11,7 @@ export const governance = {
   loadPolicies: (policies: Policy[]) => policyEngine.loadPolicies(policies),
 
   // Core API
-  check: (context: PolicyContext): GovernanceDecision => {
+  check: (context: PolicyContext): GovernanceVerdict => {
     const decision = policyEngine.check(context);
 
     // Auto-log policy decisions? Maybe only violations?

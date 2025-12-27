@@ -2,7 +2,7 @@
  * Jest Configuration for IntelGraph Server
  */
 export default {
-  preset: 'ts-jest',
+  preset: 'ts-jest/presets/default-esm', // Use ESM preset
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
   setupFilesAfterEnv: [
@@ -34,9 +34,12 @@ export default {
         tsconfig: {
           module: 'esnext',
           target: 'es2020',
+          allowJs: true // Allow JS files to be processed if needed
         },
       },
     ],
+    // Transform JS files as well using ts-jest or babel-jest if needed
+    '^.+\\.js$': 'babel-jest',
   },
   collectCoverageFrom: [
     'src/**/*.ts',
