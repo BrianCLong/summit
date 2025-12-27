@@ -15,6 +15,7 @@ export enum QueueName {
   MAIL = 'mail',
   REPORT = 'report',
   RETENTION = 'retention',
+  PLAYBOOK = 'playbook',
 }
 
 export interface JobOptions {
