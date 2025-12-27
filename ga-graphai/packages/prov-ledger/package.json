@@ -15,6 +15,7 @@
     "test:record": "node --loader ts-node/esm ./tests/record.test.ts"
   },
   "dependencies": {
+    "@ga-graphai/data-integrity": "file:../data-integrity",
     "common-types": "file:../common-types",
     "better-sqlite3": "^9.4.0",
     "express": "^4.19.2",

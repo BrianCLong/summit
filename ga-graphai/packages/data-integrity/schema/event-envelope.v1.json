@@ -1,0 +1,12 @@
+{
+  "name": "event-envelope",
+  "version": "v1",
+  "fields": {
+    "id": { "type": "string", "required": true },
+    "type": { "type": "string", "required": true },
+    "scope": { "type": "string", "required": true },
+    "actor": { "type": "string", "required": true },
+    "timestamp": { "type": "string", "required": true },
+    "payload": { "type": "object", "required": true }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "export-manifest",
+  "version": "v2",
+  "fields": {
+    "caseId": { "type": "string", "required": true },
+    "generatedAt": { "type": "string", "required": true },
+    "version": { "type": "string", "required": true },
+    "ledgerHead": { "type": "string", "required": true },
+    "merkleRoot": { "type": "string", "required": true },
+    "transforms": { "type": "array", "required": true },
+    "evidenceHash": { "type": "string", "required": false }
+  }
+}

@@ -1,0 +1,3 @@
+- Data integrity and correctness tooling package.
+- Use 2 spaces for TypeScript.
+- Run `npm test --workspace @ga-graphai/data-integrity` after changes.
