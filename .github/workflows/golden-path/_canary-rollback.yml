@@ -1,0 +1,78 @@
+name: Canary + Rollback Guard
+
+on:
+  workflow_call:
+    inputs:
+      service:
+        description: "Service name"
+        required: true
+        type: string
+      environment:
+        description: "Deployment environment"
+        required: false
+        type: string
+        default: "staging"
+      prometheus-url:
+        description: "Prometheus base URL (optional)"
+        required: false
+        type: string
+        default: ""
+      canary-window:
+        description: "Prometheus range window (e.g., 10m)"
+        required: false
+        type: string
+        default: "10m"
+      canary-slo-p95-ms:
+        description: "Latency SLO p95 threshold in ms"
+        required: false
+        type: number
+        default: 1500
+      canary-error-rate:
+        description: "Error rate threshold (ratio)"
+        required: false
+        type: number
+        default: 0.01
+      canary-saturation-max:
+        description: "Resource saturation threshold (ratio)"
+        required: false
+        type: number
+        default: 0.8
+      rollback-enabled:
+        description: "Enable automatic rollback on canary breach"
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  guard:
+    name: Canary SLO guard + rollback
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Canary SLO guard
+        id: canary
+        run: ./scripts/canary-watch.sh
+        env:
+          PROM_URL: ${{ inputs['prometheus-url'] }}
+          WINDOW: ${{ inputs['canary-window'] }}
+          SVC: ${{ inputs.service }}
+          SLO_P95_MS: ${{ inputs['canary-slo-p95-ms'] }}
+          ERR_RATE: ${{ inputs['canary-error-rate'] }}
+          SAT_MAX: ${{ inputs['canary-saturation-max'] }}
+        continue-on-error: true
+
+      - name: Trigger rollback
+        if: ${{ steps.canary.outcome == 'failure' && inputs['rollback-enabled'] }}
+        run: ./scripts/rollback.sh "${{ inputs.service }}"
+        env:
+          KUBE_NAMESPACE: ${{ inputs.environment }}
+
+      - name: Report canary status
+        run: |
+          if [ "${{ steps.canary.outcome }}" = "success" ]; then
+            echo "✅ Canary guard passed for ${{ inputs.service }}"
+          else
+            echo "⚠️ Canary guard failed for ${{ inputs.service }}"
+          fi

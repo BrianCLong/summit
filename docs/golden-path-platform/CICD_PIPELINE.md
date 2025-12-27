@@ -49,17 +49,17 @@ The Golden Path CI/CD pipeline provides a standardized, policy-governed deployme
 
 ### 1.2 Stage Details
 
-| Stage | Purpose | Duration Target | Required |
-|-------|---------|-----------------|----------|
-| **Lint** | Code quality and style | < 2 min | Yes |
-| **Test** | Functional correctness | < 10 min | Yes |
-| **Security** | Vulnerability scanning | < 5 min | Yes |
-| **Build** | Container image creation | < 5 min | Yes |
-| **Publish** | Registry push + attestation | < 2 min | Yes |
-| **Deploy** | Environment deployment | < 5 min | Yes |
-| **Verify** | Health + smoke tests | < 5 min | Yes |
-| **Promote** | Progressive rollout | Variable | Tier 1-2 |
-| **Monitor** | Post-deploy observability | Continuous | Yes |
+| Stage        | Purpose                     | Duration Target | Required |
+| ------------ | --------------------------- | --------------- | -------- |
+| **Lint**     | Code quality and style      | < 2 min         | Yes      |
+| **Test**     | Functional correctness      | < 10 min        | Yes      |
+| **Security** | Vulnerability scanning      | < 5 min         | Yes      |
+| **Build**    | Container image creation    | < 5 min         | Yes      |
+| **Publish**  | Registry push + attestation | < 2 min         | Yes      |
+| **Deploy**   | Environment deployment      | < 5 min         | Yes      |
+| **Verify**   | Health + smoke tests        | < 5 min         | Yes      |
+| **Promote**  | Progressive rollout         | Variable        | Tier 1-2 |
+| **Monitor**  | Post-deploy observability   | Continuous      | Yes      |
 
 **Total Pipeline Target**: < 30 minutes for full production deployment
 
@@ -95,6 +95,7 @@ lint:
 ```
 
 **Exit Criteria**:
+
 - Zero ESLint errors (warnings allowed with limits)
 - All files properly formatted
 - No TypeScript compilation errors
@@ -159,6 +160,7 @@ test:
 ```
 
 **Exit Criteria**:
+
 - All unit tests pass
 - All integration tests pass
 - Code coverage ≥ 80% lines
@@ -179,7 +181,7 @@ security:
   steps:
     - uses: actions/checkout@v4
       with:
-        fetch-depth: 0  # Full history for secret scanning
+        fetch-depth: 0 # Full history for secret scanning
 
     # SAST - Static Application Security Testing
     - name: CodeQL Analysis
@@ -206,17 +208,17 @@ security:
       if: hashFiles('**/Dockerfile') != ''
       uses: aquasecurity/trivy-action@master
       with:
-        image-ref: '${{ inputs.service }}:scan'
-        format: 'sarif'
-        output: 'trivy-results.sarif'
-        severity: 'CRITICAL,HIGH'
-        exit-code: '1'
+        image-ref: "${{ inputs.service }}:scan"
+        format: "sarif"
+        output: "trivy-results.sarif"
+        severity: "CRITICAL,HIGH"
+        exit-code: "1"
 
     - name: Upload Trivy Results
       uses: github/codeql-action/upload-sarif@v3
       if: always()
       with:
-        sarif_file: 'trivy-results.sarif'
+        sarif_file: "trivy-results.sarif"
 
     # License Compliance
     - name: License Check
@@ -225,6 +227,7 @@ security:
 ```
 
 **Exit Criteria**:
+
 - No critical/high CVEs in dependencies
 - No secrets detected in code or history
 - No high-severity SAST findings
@@ -302,6 +305,7 @@ build:
 ```
 
 **Exit Criteria**:
+
 - Image builds successfully
 - Image pushed to registry
 - SBOM generated and attached
@@ -359,6 +363,7 @@ deploy:
 ```
 
 **Exit Criteria**:
+
 - Image signature verified
 - OPA policy gates pass
 - Helm deployment succeeds
@@ -428,6 +433,7 @@ verify:
 ```
 
 **Exit Criteria**:
+
 - All health endpoints respond 200
 - Smoke tests pass
 - Initial SLO metrics within bounds
@@ -490,6 +496,7 @@ promote:
 ```
 
 **Rollout Strategy**:
+
 ```yaml
 # Argo Rollouts configuration
 apiVersion: argoproj.io/v1alpha1
@@ -499,12 +506,12 @@ spec:
     canary:
       steps:
         - setWeight: 10
-        - pause: {duration: 5m}
+        - pause: { duration: 5m }
         - analysis:
             templates:
               - templateName: success-rate
         - setWeight: 50
-        - pause: {duration: 5m}
+        - pause: { duration: 5m }
         - analysis:
             templates:
               - templateName: success-rate
@@ -578,22 +585,22 @@ monitor:
 
 ### 3.1 Required Gates (Cannot Bypass)
 
-| Gate | Stage | Enforcement |
-|------|-------|-------------|
-| **Secret Detection** | Security | Blocks merge if secrets found |
-| **Critical CVE** | Security | Blocks deploy if critical CVE |
-| **Image Signature** | Deploy | Rejects unsigned images |
-| **OPA Policy** | Deploy | Validates against Rego policies |
-| **Health Check** | Verify | Fails deployment if unhealthy |
+| Gate                 | Stage    | Enforcement                     |
+| -------------------- | -------- | ------------------------------- |
+| **Secret Detection** | Security | Blocks merge if secrets found   |
+| **Critical CVE**     | Security | Blocks deploy if critical CVE   |
+| **Image Signature**  | Deploy   | Rejects unsigned images         |
+| **OPA Policy**       | Deploy   | Validates against Rego policies |
+| **Health Check**     | Verify   | Fails deployment if unhealthy   |
 
 ### 3.2 Conditional Gates (Tier-Based)
 
-| Gate | Tier 1 | Tier 2 | Tier 3 |
-|------|--------|--------|--------|
-| **Coverage Threshold** | 90% | 80% | 70% |
-| **Canary Analysis** | Required | Required | Optional |
-| **Soak Test** | 30 min | 15 min | Skip |
-| **Manual Approval** | Required | Optional | Skip |
+| Gate                   | Tier 1   | Tier 2   | Tier 3   |
+| ---------------------- | -------- | -------- | -------- |
+| **Coverage Threshold** | 90%      | 80%      | 70%      |
+| **Canary Analysis**    | Required | Required | Optional |
+| **Soak Test**          | 30 min   | 15 min   | Skip     |
+| **Manual Approval**    | Required | Optional | Skip     |
 
 ### 3.3 OPA Policy Examples
 
@@ -642,12 +649,12 @@ deny[msg] {
 
 ### 4.1 Automatic Rollback Triggers
 
-| Trigger | Threshold | Action |
-|---------|-----------|--------|
-| Error Rate Spike | > 5% for 2 min | Immediate rollback |
-| Latency Degradation | p99 > 2x baseline for 5 min | Automatic rollback |
-| Health Check Failure | 3 consecutive failures | Pod restart, then rollback |
-| SLO Burn Rate | > 10x for 5 min | Alert + manual decision |
+| Trigger              | Threshold                   | Action                     |
+| -------------------- | --------------------------- | -------------------------- |
+| Error Rate Spike     | > 5% for 2 min              | Immediate rollback         |
+| Latency Degradation  | p99 > 2x baseline for 5 min | Automatic rollback         |
+| Health Check Failure | 3 consecutive failures      | Pod restart, then rollback |
+| SLO Burn Rate        | > 10x for 5 min             | Alert + manual decision    |
 
 ### 4.2 Rollback Commands
 
@@ -722,26 +729,31 @@ To opt-out of specific gates, teams must:
 ## Exception: [Service Name]
 
 ### Requested By
+
 - Team: Platform Team
 - Approver: @security-lead
 - Date: 2024-01-15
 
 ### Exception Type
+
 - [ ] Skip coverage gate
 - [x] Reduce canary duration
 - [ ] Skip soak test
 - [ ] Custom rollout strategy
 
 ### Justification
+
 Service handles only internal traffic with no user-facing SLOs.
 Reduced canary duration acceptable due to low traffic volume.
 
 ### Compensating Controls
+
 - Extended monitoring period (2 hours)
 - Manual verification checklist
 - Rollback runbook documented
 
 ### Expiration
+
 2024-04-15 (90 days)
 ```
 
@@ -759,8 +771,8 @@ jobs:
     uses: ./.github/workflows/_golden-path-pipeline.yml
     with:
       service: ${{ github.event.repository.name }}
-      skip_soak_test: true  # Exception: EXCEPTIONS.md#service-name
-      canary_duration: 2m   # Exception: EXCEPTIONS.md#service-name
+      skip_soak_test: true # Exception: EXCEPTIONS.md#service-name
+      canary_duration: 2m # Exception: EXCEPTIONS.md#service-name
     secrets: inherit
 ```
 
@@ -824,6 +836,34 @@ on:
         required: false
         type: string
         default: 5m
+      canary-enabled:
+        required: false
+        type: boolean
+        default: false
+      prometheus-url:
+        required: false
+        type: string
+        default: ""
+      canary-window:
+        required: false
+        type: string
+        default: 10m
+      canary-slo-p95-ms:
+        required: false
+        type: number
+        default: 1500
+      canary-error-rate:
+        required: false
+        type: number
+        default: 0.01
+      canary-saturation-max:
+        required: false
+        type: number
+        default: 0.8
+      rollback-enabled:
+        required: false
+        type: boolean
+        default: true
 
 jobs:
   lint:
@@ -867,6 +907,20 @@ jobs:
       service: ${{ inputs.service }}
       environment: ${{ inputs.environment }}
 
+  canary:
+    needs: verify
+    if: inputs['canary-enabled']
+    uses: ./.github/workflows/golden-path/_canary-rollback.yml
+    with:
+      service: ${{ inputs.service }}
+      environment: ${{ inputs.environment }}
+      prometheus-url: ${{ inputs['prometheus-url'] }}
+      canary-window: ${{ inputs['canary-window'] }}
+      canary-slo-p95-ms: ${{ inputs['canary-slo-p95-ms'] }}
+      canary-error-rate: ${{ inputs['canary-error-rate'] }}
+      canary-saturation-max: ${{ inputs['canary-saturation-max'] }}
+      rollback-enabled: ${{ inputs['rollback-enabled'] }}
+
   promote:
     needs: verify
     if: inputs.environment == 'production'
@@ -883,13 +937,13 @@ jobs:
 
 ### 7.1 Pipeline Metrics
 
-| Metric | Description |
-|--------|-------------|
-| `cicd_pipeline_duration_seconds` | Total pipeline duration |
-| `cicd_stage_duration_seconds` | Per-stage duration |
-| `cicd_deployments_total` | Deployment count by status |
-| `cicd_rollbacks_total` | Rollback count by trigger |
-| `cicd_policy_violations_total` | Policy gate violations |
+| Metric                           | Description                |
+| -------------------------------- | -------------------------- |
+| `cicd_pipeline_duration_seconds` | Total pipeline duration    |
+| `cicd_stage_duration_seconds`    | Per-stage duration         |
+| `cicd_deployments_total`         | Deployment count by status |
+| `cicd_rollbacks_total`           | Rollback count by trigger  |
+| `cicd_policy_violations_total`   | Policy gate violations     |
 
 ### 7.2 Pipeline Dashboard
 
@@ -900,30 +954,38 @@ jobs:
     {
       "title": "Deployment Frequency",
       "type": "stat",
-      "targets": [{
-        "expr": "sum(increase(cicd_deployments_total{status=\"success\"}[7d]))"
-      }]
+      "targets": [
+        {
+          "expr": "sum(increase(cicd_deployments_total{status=\"success\"}[7d]))"
+        }
+      ]
     },
     {
       "title": "Lead Time for Changes",
       "type": "gauge",
-      "targets": [{
-        "expr": "histogram_quantile(0.50, sum(rate(cicd_pipeline_duration_seconds_bucket[7d])) by (le))"
-      }]
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(cicd_pipeline_duration_seconds_bucket[7d])) by (le))"
+        }
+      ]
     },
     {
       "title": "Change Failure Rate",
       "type": "stat",
-      "targets": [{
-        "expr": "sum(cicd_rollbacks_total) / sum(cicd_deployments_total)"
-      }]
+      "targets": [
+        {
+          "expr": "sum(cicd_rollbacks_total) / sum(cicd_deployments_total)"
+        }
+      ]
     },
     {
       "title": "Mean Time to Recovery",
       "type": "stat",
-      "targets": [{
-        "expr": "avg(cicd_recovery_duration_seconds)"
-      }]
+      "targets": [
+        {
+          "expr": "avg(cicd_recovery_duration_seconds)"
+        }
+      ]
     }
   ]
 }
