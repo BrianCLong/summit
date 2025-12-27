@@ -171,6 +171,12 @@
     "server"
   ],
   "pnpm": {
+    "auditConfig": {
+      "ignoreCves": [
+        "CVE-2024-22363",
+        "CVE-2023-30533"
+      ]
+    },
     "overrides": {
       "d3-color": ">=3.1.0",
       "node-fetch": ">=2.6.7",
@@ -191,7 +197,8 @@
       "tar-fs": ">=3.0.6",
       "@babel/runtime": ">=7.26.0",
       "esbuild": ">=0.25.0",
-      "electron": ">=35.7.5"
+      "electron": ">=35.7.5",
+      "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
     }
   }
 }

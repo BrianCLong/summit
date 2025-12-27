@@ -25,6 +25,9 @@ overrides:
   '@babel/runtime': '>=7.26.0'
   esbuild: '>=0.25.0'
   electron: '>=35.7.5'
+  xlsx: https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz
+
+pnpmfileChecksum: sha256-a6bZRKVps8e/vFm+ZHjptEhSt2AMVrBBZPNF7tFCrHw=
 
 importers:
 
