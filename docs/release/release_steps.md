@@ -1,6 +1,7 @@
 # Release Steps (Checklist)
 
 - Prereqs: Docker, Node 18+, psql, k6 (optional), syft (optional)
+- Review known issues & mitigations: `docs/onboarding/known-issues.md`
 - Install deps: `npm install && (cd server && npm install) && (cd client && npm install)`
 - Apply DB migrations: `npm run db:api:migrate` (set `PG_URL`)
 - Start stack (dev): `npm run dev` or compose scripts
