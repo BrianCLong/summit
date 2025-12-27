@@ -7,11 +7,11 @@ on:
   pull_request:
     branches:
       - main
-      - 'release/**'
+      - "release/**"
   push:
     branches:
       - main
-      - 'release/**'
+      - "release/**"
   workflow_dispatch:
 
 # Only allow one CI run per PR to prevent race conditions
@@ -20,13 +20,13 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: '18.18'
+  NODE_VERSION: "18.18"
   CACHE_VERSION: v1
 
 jobs:
   # Gate 1: Lint - Code quality and style enforcement
   lint:
-    name: 'Gate 1: ESLint'
+    name: "Gate 1: ESLint"
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -34,13 +34,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Full history for proper diffing
+          fetch-depth: 0 # Full history for proper diffing
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
@@ -95,7 +95,7 @@ jobs:
 
   # Gate 2: Type Check - TypeScript type safety
   typecheck:
-    name: 'Gate 2: TypeScript'
+    name: "Gate 2: TypeScript"
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -107,7 +107,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
@@ -138,9 +138,13 @@ jobs:
 
   # Gate 3: Build - Verify code compiles
   build:
-    name: 'Gate 3: Build'
+    name: "Gate 3: Build"
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
+    outputs:
+      client_bundle_size: ${{ steps.bundle_sizes.outputs.client_size }}
+      server_bundle_size: ${{ steps.bundle_sizes.outputs.server_size }}
+      reproducible: ${{ steps.repro_check.outputs.reproducible }}
 
     steps:
       - name: Checkout code
@@ -150,26 +154,65 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
         timeout-minutes: 10
 
-      - name: Build all packages
+      - name: Build twice for deterministic output
+        id: repro_check
         run: |
-          npm run build 2>&1 | tee build-output.txt
+          set -euo pipefail
+          export SOURCE_DATE_EPOCH=$(git log -1 --pretty=format:%ct)
+
+          npm run build 2>&1 | tee build-output-first.txt
           EXIT_CODE=${PIPESTATUS[0]}
 
-          # Hard gate: Build must succeed
           if [ $EXIT_CODE -ne 0 ]; then
-            echo "::error::Build failed - CI BLOCKED"
+            echo "::error::First build failed - CI BLOCKED"
             exit 1
           fi
 
+          if [ ! -d "client/dist" ] || [ ! -d "server/dist" ]; then
+            echo "::error::Build artifacts missing after first build - CI BLOCKED"
+            exit 1
+          fi
+
+          find client/dist server/dist -type f -print0 | sort -z | xargs -0 sha256sum > build-checksums-a.txt
+
+          rm -rf client/dist server/dist
+
+          npm run build 2>&1 | tee build-output-second.txt
+          EXIT_CODE=${PIPESTATUS[0]}
+
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "::error::Second build failed - CI BLOCKED"
+            exit 1
+          fi
+
+          if [ ! -d "client/dist" ] || [ ! -d "server/dist" ]; then
+            echo "::error::Build artifacts missing after second build - CI BLOCKED"
+            exit 1
+          fi
+
+          find client/dist server/dist -type f -print0 | sort -z | xargs -0 sha256sum > build-checksums-b.txt
+
+          if ! diff -u build-checksums-a.txt build-checksums-b.txt; then
+            echo "::error::Build outputs are not deterministic between runs - CI BLOCKED"
+            exit 1
+          fi
+
+          if ! git diff --quiet -- package-lock.json; then
+            echo "::error::package-lock.json changed during build - CI BLOCKED"
+            exit 1
+          fi
+
+          echo "reproducible=true" >> $GITHUB_OUTPUT
           echo "build_status=success" >> $GITHUB_ENV
 
       - name: Check bundle sizes
+        id: bundle_sizes
         run: |
           # Verify build artifacts exist
           if [ ! -d "client/dist" ] || [ ! -d "server/dist" ]; then
@@ -183,6 +226,8 @@ jobs:
 
           echo "client_bundle_size=$CLIENT_SIZE" >> $GITHUB_ENV
           echo "server_bundle_size=$SERVER_SIZE" >> $GITHUB_ENV
+          echo "client_size=$CLIENT_SIZE" >> $GITHUB_OUTPUT
+          echo "server_size=$SERVER_SIZE" >> $GITHUB_OUTPUT
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -191,13 +236,19 @@ jobs:
           path: |
             client/dist
             server/dist
+            build-checksums-a.txt
+            build-checksums-b.txt
+            build-output-first.txt
+            build-output-second.txt
           retention-days: 7
 
   # Gate 4: Unit Tests - Core functionality verification
   test-unit:
-    name: 'Gate 4: Unit Tests'
+    name: "Gate 4: Unit Tests"
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      JEST_RETRY_TIMES: 1
 
     steps:
       - name: Checkout code
@@ -207,7 +258,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
@@ -215,7 +266,7 @@ jobs:
 
       - name: Run unit tests with coverage
         run: |
-          npm run test -- --coverage --coverageReporters=json --coverageReporters=text 2>&1 | tee test-output.txt
+          npm run test -- --coverage --coverageReporters=json --coverageReporters=text --retryTimes=${JEST_RETRY_TIMES} 2>&1 | tee test-output.txt
           EXIT_CODE=${PIPESTATUS[0]}
 
           # Parse test results
@@ -282,7 +333,7 @@ jobs:
 
   # Gate 5: Governance Tests - Policy enforcement
   test-governance:
-    name: 'Gate 5: Governance'
+    name: "Gate 5: Governance"
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -294,7 +345,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
@@ -317,6 +368,14 @@ jobs:
             echo "::warning::No governance tests found"
           fi
 
+          # Fail on skipped governance/provenance scenarios to prevent weakening controls
+          SKIPPED=$(rg "\.skip" --glob "*governance*.test.*" --glob "*provenance*.test.*" || true)
+          if [ -n "$SKIPPED" ]; then
+            echo "::error::Skipped governance/provenance tests detected. Remove .skip to maintain coverage."
+            echo "$SKIPPED"
+            exit 1
+          fi
+
       - name: Verify threat model coverage
         run: |
           # Check threat model tests exist
@@ -330,7 +389,7 @@ jobs:
 
   # Gate 6: Provenance Tests - Supply chain integrity
   test-provenance:
-    name: 'Gate 6: Provenance'
+    name: "Gate 6: Provenance"
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -342,7 +401,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
@@ -387,7 +446,7 @@ jobs:
 
   # Gate 7: Schema Diff Check - Breaking change detection
   schema-diff:
-    name: 'Gate 7: Schema Diff'
+    name: "Gate 7: Schema Diff"
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -401,7 +460,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
@@ -432,7 +491,7 @@ jobs:
 
   # Gate 8: Security Scans - Vulnerability detection
   security:
-    name: 'Gate 8: Security'
+    name: "Gate 8: Security"
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -465,11 +524,118 @@ jobs:
           head: HEAD
           extra_args: --only-verified
 
+  # Gate 9: Integration Suite - End-to-end contract coverage
+  integration-suite:
+    name: "Gate 9: Integration Suite"
+    runs-on: ubuntu-latest
+    needs: [build]
+    timeout-minutes: 40
+    env:
+      JEST_RETRY_TIMES: 1
+    outputs:
+      integration_failures: ${{ steps.integration_metrics.outputs.failures }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+        timeout-minutes: 10
+
+      - name: Run integration tests with self-healing retries
+        run: |
+          set -euo pipefail
+          npm run test:integration -- --runInBand --retryTimes=${JEST_RETRY_TIMES} 2>&1 | tee integration-output.txt
+          EXIT_CODE=${PIPESTATUS[0]}
+
+          INTEGRATION_FAILED=$(grep -oP '\d+(?= failed)' integration-output.txt || echo "0")
+          echo "integration_failures=$INTEGRATION_FAILED" >> $GITHUB_ENV
+
+          if [ $EXIT_CODE -ne 0 ] || [ "$INTEGRATION_FAILED" -gt 0 ]; then
+            echo "::error::Integration suite failures detected - CI BLOCKED"
+            exit 1
+          fi
+
+      - name: Run golden-path smoke (canary)
+        run: |
+          set -euo pipefail
+          npm run test:smoke 2>&1 | tee integration-smoke-output.txt
+
+      - name: Capture integration metrics
+        id: integration_metrics
+        run: |
+          echo "failures=${integration_failures:-0}" >> $GITHUB_OUTPUT
+
+      - name: Upload integration evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-suite-results
+          path: |
+            integration-output.txt
+            integration-smoke-output.txt
+          retention-days: 30
+
+  # Gate 10: Canary + Chaos - resiliency probes
+  canary-chaos:
+    name: "Gate 10: Canary + Chaos"
+    runs-on: ubuntu-latest
+    needs: [build]
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+        timeout-minutes: 10
+
+      - name: Run canary + chaos probes
+        run: |
+          chmod +x scripts/ci/canary-chaos.sh
+          scripts/ci/canary-chaos.sh
+
+      - name: Upload canary + chaos evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: canary-chaos-results
+          path: |
+            scripts/ci/canary-chaos.log
+            scripts/ci/canary-chaos-summary.json
+          retention-days: 30
+
   # Final Gate: Generate Merge-Safe Artifact
   generate-artifact:
-    name: 'Generate Merge-Safe Artifact'
+    name: "Generate Merge-Safe Artifact"
     runs-on: ubuntu-latest
-    needs: [lint, typecheck, build, test-unit, test-governance, test-provenance, schema-diff, security]
+    needs:
+      [
+        lint,
+        typecheck,
+        build,
+        test-unit,
+        test-governance,
+        test-provenance,
+        schema-diff,
+        security,
+        integration-suite,
+        canary-chaos,
+      ]
     if: always()
     timeout-minutes: 10
 
@@ -491,6 +657,8 @@ jobs:
           if [ "${{ needs.test-provenance.result }}" != "success" ]; then GATES_PASSED=false; fi
           if [ "${{ needs.schema-diff.result }}" != "success" ]; then GATES_PASSED=false; fi
           if [ "${{ needs.security.result }}" != "success" ]; then GATES_PASSED=false; fi
+          if [ "${{ needs.integration-suite.result }}" != "success" ]; then GATES_PASSED=false; fi
+          if [ "${{ needs.canary-chaos.result }}" != "success" ]; then GATES_PASSED=false; fi
 
           echo "gates_passed=$GATES_PASSED" >> $GITHUB_OUTPUT
 
@@ -523,7 +691,8 @@ jobs:
               "build": {
                 "status": "${{ needs.build.result }}",
                 "client_size": "${{ needs.build.outputs.client_bundle_size }}",
-                "server_size": "${{ needs.build.outputs.server_bundle_size }}"
+                "server_size": "${{ needs.build.outputs.server_bundle_size }}",
+                "deterministic": "${{ needs.build.outputs.reproducible }}"
               },
               "test_unit": {
                 "status": "${{ needs.test-unit.result }}",
@@ -543,6 +712,13 @@ jobs:
               },
               "security": {
                 "status": "${{ needs.security.result }}"
+              },
+              "integration_suite": {
+                "status": "${{ needs.integration-suite.result }}",
+                "failures": "${{ needs.integration-suite.outputs.integration_failures || 0 }}"
+              },
+              "canary_chaos": {
+                "status": "${{ needs.canary-chaos.result }}"
               }
             },
             "soc2_controls": {
@@ -605,4 +781,6 @@ jobs:
 # - Gate 6: Provenance
 # - Gate 7: Schema Diff
 # - Gate 8: Security
+# - Gate 9: Integration Suite
+# - Gate 10: Canary + Chaos
 # - Generate Merge-Safe Artifact

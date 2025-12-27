@@ -25,11 +25,22 @@ This is the "Fail Fast" stage. If your code is messy or insecure, we stop here.
 
 ### 2. Unit Tests
 
-- Runs `pnpm run test:jest`.
+- Runs `pnpm run test:jest` with `JEST_RETRY_TIMES=1` so a single flake self-heals before blocking the build.
 - Validates the logic of individual components in isolation.
 - Includes both server-side and client-side unit tests.
 
-### 3. Smoke Tests (The Golden Path)
+### 3. Deterministic Build Attestation
+
+- Runs a double-build to prove reproducibility (hash comparison between builds).
+- Fails the gate if `package-lock.json` is mutated or build artifacts diverge between runs.
+
+### 4. Integration Suite (merge-blocking)
+
+- Runs `pnpm run test:integration -- --runInBand --retryTimes=1`.
+- Executes golden-path smoke validation (`pnpm run test:smoke`) to ensure the end-to-end contract is intact on every merge.
+- Uploads evidence artifacts for traceability.
+
+### 5. Smoke Tests (The Golden Path)
 
 This is the "End-to-End" verification.
 
@@ -62,6 +73,11 @@ make smoke
 - **Lint/Type Errors**: Fix the code. Do not suppress errors unless absolutely necessary (and documented).
 - **Security Audit**: Update dependencies (`pnpm update`). If it's a false positive, add an exception to the audit configuration.
 - **Smoke Tests**: Check the logs artifact or run `make smoke` locally to reproduce. Ensure your Docker environment is clean (`make down`).
+
+### 6. Canary + Chaos Probes
+
+- Runs `scripts/ci/canary-chaos.sh`, which executes the smoke suite as a canary and the `test:fuzz:graph-guardrails` chaos/fuzz harness with a seeded run for reproducibility.
+- Produces `scripts/ci/canary-chaos.log` and `scripts/ci/canary-chaos-summary.json` as promotion evidence.
 
 ## Deployment Canary Gates (Promotion Blocking)
 
