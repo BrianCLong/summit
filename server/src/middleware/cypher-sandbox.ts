@@ -16,7 +16,20 @@ interface CypherSandboxConfig {
   costLimit: number;
 }
 
-interface QueryAnalysis {
+export type GuardrailReasonCode =
+  | 'BLOCKED_PATTERN'
+  | 'DISALLOWED_OPERATION'
+  | 'COST_LIMIT_EXCEEDED'
+  | 'WRITE_OPERATION'
+  | 'TENANT_FILTER_MISSING'
+  | 'CARTESIAN_PRODUCT'
+  | 'DEEP_TRAVERSAL'
+  | 'UNBOUNDED_RESULT_SET'
+  | 'INSUFFICIENT_CLEARANCE'
+  | 'MISSING_ADMIN_AUTH'
+  | 'SAFE_READ';
+
+export interface QueryAnalysis {
   estimatedCost: number;
   operations: string[];
   returnsNodes: boolean;
@@ -29,8 +42,21 @@ interface ExecutionResult {
   allowed: boolean;
   query?: string;
   reason?: string;
+  reasonCode?: GuardrailReasonCode;
+  reasonCodes?: GuardrailReasonCode[];
   analysis: QueryAnalysis;
   sanitizedQuery?: string;
+}
+
+function hasTenantFilter(query: string): boolean {
+  const normalized = query.toLowerCase();
+  return /tenantid/.test(normalized) || /tenant_id/.test(normalized) || /\$tenant/.test(query);
+}
+
+function pushReason(reasons: GuardrailReasonCode[], code: GuardrailReasonCode) {
+  if (!reasons.includes(code)) {
+    reasons.push(code);
+  }
 }
 
 export class CypherSandbox {
@@ -79,7 +105,7 @@ export class CypherSandbox {
   }
 
   // Committee requirement: Query analysis and cost estimation
-  private analyzeQuery(query: string): QueryAnalysis {
+  public analyzeQuery(query: string): QueryAnalysis {
     const normalizedQuery = query.toLowerCase().trim();
     const analysis: QueryAnalysis = {
       estimatedCost: 0,
@@ -114,7 +140,11 @@ export class CypherSandbox {
     cost += matchCount * 1000;
 
     // Cartesian product risk
-    if (matchCount > 1 && !/where/i.test(query)) {
+    const commaSeparatedMatches = /match[^\n]*\([^)]*\)\s*,\s*\([^)]*\)/i.test(
+      normalizedQuery,
+    );
+
+    if ((matchCount > 1 || commaSeparatedMatches) && !/where/i.test(query)) {
       cost += 50000;
       analysis.securityRisks.push(
         'Potential cartesian product without WHERE clause',
@@ -133,6 +163,10 @@ export class CypherSandbox {
     if (/\*\d*\.\.\d*/.test(query)) {
       cost += 25000;
       analysis.securityRisks.push('Variable length path pattern detected');
+    }
+
+    if (!hasTenantFilter(query)) {
+      analysis.securityRisks.push('Missing tenant filter');
     }
 
     analysis.estimatedCost = cost;
@@ -206,6 +240,27 @@ export class CypherSandbox {
     authorityBindings: string[] = [],
   ): ExecutionResult {
     const analysis = this.analyzeQuery(query);
+    const reasonCodes: GuardrailReasonCode[] = [];
+
+    if (!hasTenantFilter(query)) {
+      pushReason(reasonCodes, 'TENANT_FILTER_MISSING');
+    }
+
+    if (analysis.hasWrites) {
+      pushReason(reasonCodes, 'WRITE_OPERATION');
+    }
+
+    if (analysis.securityRisks.some((risk) => /cartesian/i.test(risk))) {
+      pushReason(reasonCodes, 'CARTESIAN_PRODUCT');
+    }
+
+    if (analysis.securityRisks.some((risk) => /Variable length path/i.test(risk))) {
+      pushReason(reasonCodes, 'DEEP_TRAVERSAL');
+    }
+
+    if (analysis.securityRisks.some((risk) => /No LIMIT/i.test(risk))) {
+      pushReason(reasonCodes, 'UNBOUNDED_RESULT_SET');
+    }
 
     // Check blocked patterns (Committee security requirement)
     for (const pattern of this.config.blockedPatterns) {
@@ -216,12 +271,26 @@ export class CypherSandbox {
           query: query.substring(0, 100),
         });
 
+        pushReason(reasonCodes, 'BLOCKED_PATTERN');
+
         return {
           allowed: false,
           reason: `Query contains blocked pattern: ${pattern.source}`,
+          reasonCode: 'BLOCKED_PATTERN',
+          reasonCodes,
           analysis,
         };
       }
+    }
+
+    if (!hasTenantFilter(query)) {
+      return {
+        allowed: false,
+        reason: 'Tenant filter required for multi-tenant isolation',
+        reasonCode: 'TENANT_FILTER_MISSING',
+        reasonCodes,
+        analysis,
+      };
     }
 
     // Check for disallowed operations
@@ -233,18 +302,44 @@ export class CypherSandbox {
     );
 
     if (disallowedOps.length > 0) {
+      pushReason(reasonCodes, 'DISALLOWED_OPERATION');
       return {
         allowed: false,
         reason: `Disallowed operations: ${disallowedOps.join(', ')}`,
+        reasonCode: 'DISALLOWED_OPERATION',
+        reasonCodes,
+        analysis,
+      };
+    }
+
+    if (analysis.securityRisks.some((risk) => /cartesian/i.test(risk))) {
+      return {
+        allowed: false,
+        reason: 'Potential cartesian product without WHERE clause',
+        reasonCode: 'CARTESIAN_PRODUCT',
+        reasonCodes,
+        analysis,
+      };
+    }
+
+    if (analysis.securityRisks.some((risk) => /Variable length path/i.test(risk))) {
+      return {
+        allowed: false,
+        reason: 'Variable length path pattern detected',
+        reasonCode: 'DEEP_TRAVERSAL',
+        reasonCodes,
         analysis,
       };
     }
 
     // Committee requirement: Cost limiting
     if (analysis.estimatedCost > this.config.costLimit) {
+      pushReason(reasonCodes, 'COST_LIMIT_EXCEEDED');
       return {
         allowed: false,
         reason: `Query cost (${analysis.estimatedCost}) exceeds limit (${this.config.costLimit})`,
+        reasonCode: 'COST_LIMIT_EXCEEDED',
+        reasonCodes,
         analysis,
       };
     }
@@ -252,23 +347,33 @@ export class CypherSandbox {
     // Authority validation
     const authorityCheck = this.validateAuthority(query, userClearance);
     if (!authorityCheck.valid) {
+      pushReason(reasonCodes, 'INSUFFICIENT_CLEARANCE');
       return {
         allowed: false,
         reason: authorityCheck.reason,
+        reasonCode: 'INSUFFICIENT_CLEARANCE',
+        reasonCodes,
         analysis,
       };
     }
 
     // Write operations require additional authority
     if (analysis.hasWrites && !authorityBindings.includes('ADMIN_AUTH')) {
+      pushReason(reasonCodes, 'MISSING_ADMIN_AUTH');
       return {
         allowed: false,
         reason: 'Write operations require ADMIN_AUTH authority binding',
+        reasonCode: 'MISSING_ADMIN_AUTH',
+        reasonCodes,
         analysis,
       };
     }
 
     const sanitizedQuery = this.sanitizeQuery(query);
+
+    if (reasonCodes.length === 0) {
+      pushReason(reasonCodes, 'SAFE_READ');
+    }
 
     logger.info({
       message: 'Cypher query validated and sanitized',
@@ -283,6 +388,7 @@ export class CypherSandbox {
       allowed: true,
       query: sanitizedQuery,
       sanitizedQuery,
+      reasonCodes,
       analysis,
     };
   }
