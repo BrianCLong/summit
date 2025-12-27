@@ -5,7 +5,15 @@ import { useState } from 'react';
 import { useMaestroRun } from '@/hooks/useMaestroRun';
 import type { MaestroRunResponse, TaskResult } from '@/types/maestro';
 
-import { Play, Loader2, Terminal, FileSearch, DollarSign } from 'lucide-react';
+import {
+  Play,
+  Loader2,
+  Terminal,
+  FileSearch,
+  DollarSign,
+  Copy,
+  Check,
+} from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Textarea } from '@/components/ui/textarea';
@@ -25,8 +33,12 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
   const { state, run, reset } = useMaestroRun(userId);
 
   const handleSubmit = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!input.trim()) return;
+    if (e) {
+      e.preventDefault();
+    }
+    if (!input.trim()) {
+      return;
+    }
     await run(input);
   };
 
@@ -332,9 +344,15 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
                       </div>
 
                       {result.artifact ? (
-                        <pre className="mt-1 max-h-40 overflow-auto rounded-xl bg-slate-900/80 p-3 text-[11px] leading-relaxed text-slate-100">
-                          {formatArtifactData(result.artifact.data)}
-                        </pre>
+                        <div className="relative group">
+                          <pre className="mt-1 max-h-40 overflow-auto rounded-xl bg-slate-900/80 p-3 text-[11px] leading-relaxed text-slate-100 pr-10">
+                            {formatArtifactData(result.artifact.data)}
+                          </pre>
+                          <CopyButton
+                            text={formatArtifactData(result.artifact.data)}
+                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity bg-slate-800/80 hover:bg-slate-700 text-slate-300 h-7 w-7"
+                          />
+                        </div>
                       ) : (
                         <p className="mt-1 text-[11px] text-slate-500">
                           No artifact produced for this task.
@@ -353,10 +371,46 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
 
 // Helper to pretty-print artifact data
 function formatArtifactData(data: unknown): string {
-  if (typeof data === 'string') return data;
+  if (typeof data === 'string') {
+    return data;
+  }
   try {
     return JSON.stringify(data, null, 2);
   } catch {
     return String(data);
   }
+}
+
+function CopyButton({
+  text,
+  className,
+}: {
+  text: string;
+  className?: string;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to copy text', err);
+    }
+  };
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className={className}
+      onClick={handleCopy}
+      aria-label={copied ? 'Copied' : 'Copy to clipboard'}
+      title={copied ? 'Copied!' : 'Copy to clipboard'}
+    >
+      {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+    </Button>
+  );
 }
