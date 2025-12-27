@@ -1,33 +1,3 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="10" failures="0" errors="0" time="20.266">
-  <testsuite name="DeletionService" errors="0" failures="0" skipped="0" timestamp="2025-12-27T06:32:08" time="8.906" tests="1">
-    <testcase classname="DeletionService should hard delete tenant data" name="DeletionService should hard delete tenant data" time="0.011">
-    </testcase>
-  </testsuite>
-  <testsuite name="LegalHoldManager" errors="0" failures="0" skipped="0" timestamp="2025-12-27T06:32:17" time="7.922" tests="3">
-    <testcase classname="LegalHoldManager should return false if no hold exists" name="LegalHoldManager should return false if no hold exists" time="0.002">
-    </testcase>
-    <testcase classname="LegalHoldManager should return true if hold exists" name="LegalHoldManager should return true if hold exists" time="0.001">
-    </testcase>
-    <testcase classname="LegalHoldManager should create a hold table and insert record" name="LegalHoldManager should create a hold table and insert record" time="0.002">
-    </testcase>
-  </testsuite>
-  <testsuite name="RetentionManager" errors="0" failures="0" skipped="0" timestamp="2025-12-27T06:32:08" time="18.873" tests="1">
-    <testcase classname="RetentionManager should scan and attempt to delete expired records" name="RetentionManager should scan and attempt to delete expired records" time="0.021">
-    </testcase>
-  </testsuite>
-  <testsuite name="LifecycleEvidence" errors="0" failures="0" skipped="0" timestamp="2025-12-27T06:32:25" time="2.712" tests="1">
-    <testcase classname="LifecycleEvidence should record evidence to provenance_records" name="LifecycleEvidence should record evidence to provenance_records" time="0.002">
-    </testcase>
-  </testsuite>
-  <testsuite name="Data Classification &amp; Lifecycle Model" errors="0" failures="0" skipped="0" timestamp="2025-12-27T06:32:27" time="0.656" tests="4">
-    <testcase classname="Data Classification &amp; Lifecycle Model should have defined policies for all categories" name="Data Classification &amp; Lifecycle Model should have defined policies for all categories" time="0.002">
-    </testcase>
-    <testcase classname="Data Classification &amp; Lifecycle Model should parse retention periods correctly" name="Data Classification &amp; Lifecycle Model should parse retention periods correctly" time="0.001">
-    </testcase>
-    <testcase classname="Data Classification &amp; Lifecycle Model should map tables to categories" name="Data Classification &amp; Lifecycle Model should map tables to categories" time="0.002">
-    </testcase>
-    <testcase classname="Data Classification &amp; Lifecycle Model should ensure vital audit tables are classified as AUDIT_RECORDS" name="Data Classification &amp; Lifecycle Model should ensure vital audit tables are classified as AUDIT_RECORDS" time="0.001">
-    </testcase>
-  </testsuite>
+<testsuites name="jest tests" tests="0" failures="0" errors="0" time="7.074">
 </testsuites>
