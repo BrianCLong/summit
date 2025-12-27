@@ -1,4 +1,5 @@
 import { BackupService } from '../services/BackupService.js';
+import { flagService } from '../services/FlagService.js';
 import pino from 'pino';
 
 const logger = (pino as any)({ name: 'BackupScheduler' });
@@ -17,6 +18,11 @@ export function startBackupScheduler() {
 }
 
 async function runBackup() {
+  if (flagService.getFlag('DISABLE_BACKUPS')) {
+      logger.warn('Skipping scheduled backup due to kill switch DISABLE_BACKUPS');
+      return;
+  }
+
   try {
     logger.info('Triggering scheduled backup...');
     await BackupService.getInstance().performFullBackup();

@@ -108,6 +108,7 @@ import demoRouter from './routes/demo.js';
 import claimsRouter from './routes/claims.js';
 import opsRouter from './routes/ops.js';
 import featureFlagsRouter from './routes/feature-flags.js';
+import adminFlagsRouter from './routes/admin-flags.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -399,6 +400,7 @@ export const createApp = async () => {
   app.use('/api/demo', demoRouter);
   app.use('/api/claims', claimsRouter);
   app.use('/api/feature-flags', featureFlagsRouter);
+  app.use('/api/admin/flags', adminFlagsRouter);
   app.get('/metrics', metricsRoute);
 
   // Initialize SummitInvestigate Platform Routes
