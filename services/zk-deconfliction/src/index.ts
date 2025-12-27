@@ -6,6 +6,8 @@
 export { CommitmentGenerator } from './commitment.js';
 export { ZKSetProof } from './proof.js';
 export { AuditLogger } from './audit.js';
+export { ZkdMetrics } from './metrics.js';
+export { guardDeconflictRequest, SafetyError } from './safety.js';
 export { app as server } from './server.js';
 export type {
   Salt,
@@ -14,4 +16,5 @@ export type {
   DeconflictRequest,
   DeconflictResponse,
   AuditLogEntry,
+  DeconflictRevealMode,
 } from './types.js';

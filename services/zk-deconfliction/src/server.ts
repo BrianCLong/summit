@@ -6,6 +6,8 @@ import { ZKSetProof } from './proof.js';
 import { AuditLogger } from './audit.js';
 import { DeconflictRequestSchema } from './types.js';
 import type { Salt } from './types.js';
+import { guardDeconflictRequest, SafetyError } from './safety.js';
+import { ZkdMetrics } from './metrics.js';
 
 /**
  * ZK Deconfliction API Server
@@ -14,12 +16,46 @@ import type { Salt } from './types.js';
 const app = express();
 app.use(express.json());
 
+const metrics = new ZkdMetrics();
+
 const commitmentGen = new CommitmentGenerator();
 const zkProof = new ZKSetProof();
 const auditLogger = new AuditLogger();
 
 // In-memory salt storage (use secure storage in production)
 const saltStore = new Map<string, Salt>();
+
+const rateLimitWindowMs = 60_000;
+const rateLimitMaxRequests = 120;
+const rateLimitStore = new Map<string, number[]>();
+
+function enforceRateLimit(tenantId: string) {
+  const now = Date.now();
+  const windowStart = now - rateLimitWindowMs;
+  const existing = rateLimitStore.get(tenantId) || [];
+  const recent = existing.filter((ts) => ts >= windowStart);
+  if (recent.length >= rateLimitMaxRequests) {
+    throw new SafetyError(
+      'rate_limited',
+      'rate limit exceeded for tenant; retry after cool-down',
+      429,
+    );
+  }
+  recent.push(now);
+  rateLimitStore.set(tenantId, recent);
+}
+
+// Lightweight latency + active session tracking
+app.use((req, res, next) => {
+  const start = process.hrtime.bigint();
+  metrics.incrementActive();
+  res.on('finish', () => {
+    const durationNs = Number(process.hrtime.bigint() - start);
+    metrics.observeLatency(durationNs / 1_000_000_000);
+    metrics.decrementActive();
+  });
+  next();
+});
 
 /**
  * POST /zk/salt
@@ -79,7 +115,10 @@ app.post('/zk/commit', (req: Request, res: Response) => {
  */
 app.post('/zk/deconflict', (req: Request, res: Response) => {
   try {
-    const parsed = DeconflictRequestSchema.parse(req.body);
+    const parsed = DeconflictRequestSchema.parse({
+      revealMode: 'cardinality',
+      ...req.body,
+    });
     const {
       tenantAId,
       tenantBId,
@@ -87,6 +126,14 @@ app.post('/zk/deconflict', (req: Request, res: Response) => {
       tenantBCommitments,
       auditContext,
     } = parsed;
+
+    guardDeconflictRequest(parsed, {
+      maxSetSize: 100_000,
+      maxCommitmentLength: 256,
+    });
+
+    enforceRateLimit(tenantAId);
+    enforceRateLimit(tenantBId);
 
     // Check overlap
     const { hasOverlap, count } = zkProof.checkOverlap(
@@ -120,8 +167,17 @@ app.post('/zk/deconflict', (req: Request, res: Response) => {
       proof,
       auditLogId: auditEntry.id,
       timestamp: auditEntry.timestamp,
+      mode: parsed.revealMode,
     });
   } catch (error) {
+    if (error instanceof SafetyError) {
+      metrics.recordDenial(error.reason);
+      res.status(error.statusCode).json({
+        error: error.message,
+        reason: error.reason,
+      });
+      return;
+    }
     res.status(400).json({ error: String(error) });
   }
 });
@@ -169,6 +225,14 @@ app.get('/health', (_req: Request, res: Response) => {
   });
 });
 
+/**
+ * GET /metrics
+ * Prometheus-compatible metrics for Grafana dashboards
+ */
+app.get('/metrics', (_req: Request, res: Response) => {
+  res.type('text/plain').send(metrics.snapshotPrometheus());
+});
+
 const PORT = process.env.PORT || 3100;
 
 app.listen(PORT, () => {
@@ -180,6 +244,7 @@ app.listen(PORT, () => {
   console.log(`  GET  /zk/audit         - Retrieve audit logs`);
   console.log(`  GET  /zk/audit/:id     - Get specific log`);
   console.log(`  GET  /health           - Health check`);
+  console.log(`  GET  /metrics          - Prometheus metrics`);
 });
 
 export { app };
