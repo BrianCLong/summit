@@ -24,12 +24,16 @@ AUTO_ROLLBACK_ENABLED="${AUTO_ROLLBACK_ENABLED:-true}"
 ROLLBACK_ON_HEALTH_FAILURE="${ROLLBACK_ON_HEALTH_FAILURE:-true}"
 ROLLBACK_ON_VALIDATION_FAILURE="${ROLLBACK_ON_VALIDATION_FAILURE:-true}"
 ROLLBACK_ON_SLO_BREACH="${ROLLBACK_ON_SLO_BREACH:-true}"
+ROLLBACK_ON_DIGEST_MISMATCH="${ROLLBACK_ON_DIGEST_MISMATCH:-true}"
 CANARY_ROLLBACK_THRESHOLD="${CANARY_ROLLBACK_THRESHOLD:-5}" # 5% error rate
 
 # Monitoring configuration
 PROMETHEUS_URL="${PROMETHEUS_URL:-http://prometheus-server.monitoring.svc.cluster.local:80}"
 GRAFANA_URL="${GRAFANA_URL:-http://grafana.monitoring.svc.cluster.local:3000}"
 ENABLE_METRICS_VALIDATION="${ENABLE_METRICS_VALIDATION:-true}"
+
+# Supply chain verification configuration
+SIGNED_DIGEST_FILE="${SIGNED_DIGEST_FILE:-$PROJECT_ROOT/release-artifacts/provenance.json}"
 
 # Colors for output
 RED='\033[0;31m'
@@ -79,6 +83,7 @@ initialize_validation() {
         "rollback_on_health_failure": $ROLLBACK_ON_HEALTH_FAILURE,
         "rollback_on_validation_failure": $ROLLBACK_ON_VALIDATION_FAILURE,
         "rollback_on_slo_breach": $ROLLBACK_ON_SLO_BREACH,
+        "rollback_on_digest_mismatch": $ROLLBACK_ON_DIGEST_MISMATCH,
         "canary_threshold": $CANARY_ROLLBACK_THRESHOLD
     },
     "status": "initialized",
@@ -87,6 +92,138 @@ initialize_validation() {
 EOF
     
     success "Validation environment initialized: $VALIDATION_RUN_ID"
+}
+
+# Normalize digest strings
+normalize_digest() {
+    local digest="$1"
+    if [ -z "$digest" ]; then
+        echo ""
+        return
+    fi
+    digest="${digest##*@}"
+    digest="${digest#sha256:}"
+    if [ -n "$digest" ]; then
+        echo "sha256:$digest"
+    else
+        echo ""
+    fi
+}
+
+# Resolve deployed image digest
+get_deployed_image_digest() {
+    if [ -n "${DEPLOYED_IMAGE_DIGEST:-}" ]; then
+        normalize_digest "$DEPLOYED_IMAGE_DIGEST"
+        return 0
+    fi
+
+    local deployment_status
+    deployment_status=$(get_deployment_status)
+    local image_ref
+    image_ref=$(echo "$deployment_status" | jq -r '.spec.template.spec.containers[0].image // ""')
+    local digest
+    digest=$(echo "$image_ref" | grep -Eo 'sha256:[0-9a-f]{64}' | head -n 1 || true)
+
+    if [ -z "$digest" ]; then
+        local image_id
+        image_id=$(kubectl get pods -n "$K8S_NAMESPACE" -l app="$APP_DEPLOYMENT" \
+            -o jsonpath='{.items[0].status.containerStatuses[0].imageID}' 2>/dev/null || echo "")
+        digest=$(echo "$image_id" | grep -Eo 'sha256:[0-9a-f]{64}' | head -n 1 || true)
+    fi
+
+    normalize_digest "$digest"
+}
+
+# Resolve signed artifact digest
+get_signed_image_digest() {
+    if [ -n "${SIGNED_IMAGE_DIGEST:-}" ]; then
+        normalize_digest "$SIGNED_IMAGE_DIGEST"
+        return 0
+    fi
+
+    if [ -f "$SIGNED_DIGEST_FILE" ]; then
+        local digest_file_value
+        digest_file_value=$(grep -Eo 'sha256:[0-9a-f]{64}' "$SIGNED_DIGEST_FILE" | head -n 1 || true)
+        if [ -n "$digest_file_value" ]; then
+            normalize_digest "$digest_file_value"
+            return 0
+        fi
+
+        local provenance_digest
+        provenance_digest=$(jq -r '.subject[0].digest.sha256 // empty' "$SIGNED_DIGEST_FILE" 2>/dev/null || echo "")
+        if [ -n "$provenance_digest" ]; then
+            normalize_digest "$provenance_digest"
+            return 0
+        fi
+    fi
+
+    if [ -f "$PROJECT_ROOT/cosign-verify.txt" ]; then
+        local cosign_digest
+        cosign_digest=$(grep -Eo 'sha256:[0-9a-f]{64}' "$PROJECT_ROOT/cosign-verify.txt" | head -n 1 || true)
+        normalize_digest "$cosign_digest"
+        return 0
+    fi
+
+    echo ""
+}
+
+# Record digest verification evidence
+record_digest_evidence() {
+    local deployed_digest="$1"
+    local signed_digest="$2"
+    local status="$3"
+    local evidence_dir="$PROJECT_ROOT/evidence-bundles"
+    local evidence_file="$evidence_dir/deployment-digest-${VALIDATION_RUN_ID}.json"
+
+    mkdir -p "$evidence_dir"
+
+    cat > "$evidence_file" << EOF
+{
+    "validation_run_id": "$VALIDATION_RUN_ID",
+    "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+    "deployment": {
+        "namespace": "$K8S_NAMESPACE",
+        "app": "$APP_DEPLOYMENT"
+    },
+    "digests": {
+        "deployed": "$deployed_digest",
+        "signed": "$signed_digest"
+    },
+    "status": "$status",
+    "sources": {
+        "deployed": "${DEPLOYED_IMAGE_DIGEST:-kubectl}",
+        "signed": "${SIGNED_IMAGE_DIGEST:-$SIGNED_DIGEST_FILE}"
+    }
+}
+EOF
+
+    success "Digest evidence recorded: $evidence_file"
+}
+
+# Verify deployed image digest matches signed artifact
+verify_deployment_digest() {
+    log "🔐 Verifying deployed image digest against signed artifact"
+
+    local deployed_digest
+    deployed_digest=$(get_deployed_image_digest)
+    local signed_digest
+    signed_digest=$(get_signed_image_digest)
+
+    if [ -z "$deployed_digest" ] || [ -z "$signed_digest" ]; then
+        record_digest_evidence "$deployed_digest" "$signed_digest" "missing"
+        error "Digest verification failed: missing deployed or signed digest"
+        return 1
+    fi
+
+    if [ "$deployed_digest" = "$signed_digest" ]; then
+        record_digest_evidence "$deployed_digest" "$signed_digest" "matched"
+        success "Digest verification passed: $deployed_digest"
+        return 0
+    fi
+
+    record_digest_evidence "$deployed_digest" "$signed_digest" "mismatch"
+    error "Digest mismatch detected: deployed $deployed_digest != signed $signed_digest"
+    return 1
 }
 
 # Get current deployment status
@@ -604,7 +741,8 @@ generate_validation_report() {
     "artifacts": {
         "log_file": "$VALIDATION_LOG_DIR/${VALIDATION_RUN_ID}.log",
         "baseline_metrics": "$PROJECT_ROOT/deployment/validation-state/$VALIDATION_RUN_ID/baseline.json",
-        "current_metrics": "$PROJECT_ROOT/deployment/validation-state/$VALIDATION_RUN_ID/current_metrics.json"
+        "current_metrics": "$PROJECT_ROOT/deployment/validation-state/$VALIDATION_RUN_ID/current_metrics.json",
+        "digest_evidence": "$PROJECT_ROOT/evidence-bundles/deployment-digest-${VALIDATION_RUN_ID}.json"
     }
 }
 EOF
@@ -662,7 +800,15 @@ run_full_validation() {
         fi
     fi
     
-    # Phase 4: Functional validation
+    # Phase 4: Supply chain digest verification
+    if ! validation_failed && ! verify_deployment_digest; then
+        validation_failed=true
+        if [ "$ROLLBACK_ON_DIGEST_MISMATCH" = "true" ]; then
+            rollback_required=true
+        fi
+    fi
+
+    # Phase 5: Functional validation
     if ! validation_failed && ! run_functional_validation; then
         validation_failed=true
         if [ "$ROLLBACK_ON_VALIDATION_FAILURE" = "true" ]; then
@@ -670,13 +816,13 @@ run_full_validation() {
         fi
     fi
     
-    # Phase 5: Performance validation
+    # Phase 6: Performance validation
     if ! validation_failed && ! validate_performance_metrics; then
         validation_failed=true
         warning "Performance degradation detected, but not triggering rollback"
     fi
     
-    # Phase 6: SLO breach check
+    # Phase 7: SLO breach check
     if ! validation_failed && ! check_slo_breaches; then
         validation_failed=true
         if [ "$ROLLBACK_ON_SLO_BREACH" = "true" ]; then
@@ -730,6 +876,7 @@ Options:
     --no-health-rollback        Don't rollback on health failures
     --no-validation-rollback    Don't rollback on validation failures
     --no-slo-rollback           Don't rollback on SLO breaches
+    --no-digest-rollback        Don't rollback on digest mismatch
     --no-metrics                Disable metrics validation
     --canary-threshold PERCENT   Error rate threshold for canary rollback
     --help                      Show this help message
@@ -739,6 +886,10 @@ Environment Variables:
     APP_DEPLOYMENT              Application deployment name
     ROLLOUT_TIMEOUT             Rollout timeout in seconds
     AUTO_ROLLBACK_ENABLED       Enable automatic rollback (true/false)
+    ROLLBACK_ON_DIGEST_MISMATCH Roll back on digest mismatch (true/false)
+    SIGNED_DIGEST_FILE          Path to signed artifact digest file
+    SIGNED_IMAGE_DIGEST         Signed artifact digest override
+    DEPLOYED_IMAGE_DIGEST       Deployed image digest override
     PROMETHEUS_URL              Prometheus server URL
     ENABLE_METRICS_VALIDATION   Enable metrics validation (true/false)
 
@@ -790,6 +941,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --no-slo-rollback)
             ROLLBACK_ON_SLO_BREACH="false"
+            shift
+            ;;
+        --no-digest-rollback)
+            ROLLBACK_ON_DIGEST_MISMATCH="false"
             shift
             ;;
         --no-metrics)
