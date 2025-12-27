@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       regions:
-        description: 'Comma-separated list of regions to deploy to (e.g., us-east-1,eu-west-1). Leave blank for all.'
+        description: "Comma-separated list of regions to deploy to (e.g., us-east-1,eu-west-1). Leave blank for all."
         required: false
-        default: ''
+        default: ""
 
 jobs:
   deploy:
@@ -18,18 +18,21 @@ jobs:
       - name: Set up Helm
         uses: azure/setup-helm@v3
         with:
-          version: 'v3.12.0'
+          version: "v3.12.0"
 
       - name: Set up yq
         uses: mikefarah/yq@v4.30.8
 
-      - name: Run multi-region deployment script and performance tests
+      - name: Resolve target regions
         run: |
           REGIONS_TO_DEPLOY=$(echo "${{ github.event.inputs.regions }}" | tr ',' ' ')
           if [ -z "$REGIONS_TO_DEPLOY" ]; then
             REGIONS_TO_DEPLOY=$(yq e '.regions[].name' deploy/regions.yaml | tr '\n' ' ')
           fi
+          echo "REGIONS_TO_DEPLOY=$REGIONS_TO_DEPLOY" >> "$GITHUB_ENV"
 
+      - name: Run multi-region deployment script and performance tests
+        run: |
           for region in $REGIONS_TO_DEPLOY; do
             echo "--- Deploying to $region ---"
             # In a real scenario, you'd remove --dry-run
@@ -39,4 +42,34 @@ jobs:
             k6 run \
               -e REGION=$region \
               k6/cross-region-latency.js
+          done
+
+      - name: Canary error rate & latency gate
+        run: |
+          for region in $REGIONS_TO_DEPLOY; do
+            echo "--- Canary metrics gate for $region ---"
+            PROMETHEUS_LABEL_FILTER="region=\"$region\"" ./scripts/canary-gate.sh
+          done
+        env:
+          PROMETHEUS_URL: ${{ secrets.PROMETHEUS_URL || 'http://prometheus:9090' }}
+
+      - name: Canary synthetic probe
+        run: |
+          for region in $REGIONS_TO_DEPLOY; do
+            echo "--- Synthetic probe for $region ---"
+            BASE_URL=${SERVICE_BASE_URL_TEMPLATE/\{region\}/$region}
+            TARGET="$BASE_URL" k6 run k6/slo-probe.js
+          done
+        env:
+          SERVICE_BASE_URL_TEMPLATE: ${{ secrets.SERVICE_BASE_URL_TEMPLATE || 'https://{region}.summit.example' }}
+
+      - name: Promotion gate
+        run: |
+          echo "All canary gates passed. Ready to promote."
+
+      - name: Promote canary to stable
+        run: |
+          for region in $REGIONS_TO_DEPLOY; do
+            echo "--- Promoting $region ---"
+            ./deploy/promote-region.sh "$region"
           done
