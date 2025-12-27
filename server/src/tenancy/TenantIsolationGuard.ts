@@ -1,12 +1,12 @@
 import pino from 'pino';
-import { RateLimitResult, rateLimiter } from '../services/RateLimiter.js';
+import { RateLimitResult, rateLimiter } from '../services/RateLimiter';
 import {
   TenantContext,
   TenantPolicyDecision,
   TenantPolicyInput,
   TenantPrivilegeTier,
-} from './types.js';
-import { tenantKillSwitch, TenantKillSwitch } from './killSwitch.js';
+} from './types';
+import { tenantKillSwitch, TenantKillSwitch } from './killSwitch';
 
 const logger = (pino as any)({ name: 'tenant-isolation-guard' });
 

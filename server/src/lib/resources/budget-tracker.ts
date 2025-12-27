@@ -13,9 +13,6 @@ import { EventEmitter } from 'events';
  * being refactored to use a persistent data store.
  */
 
-// A simple in-memory key-value store to simulate a persistent data store.
-const store: { [key: string]: any } = {};
-
 export interface Cost {
   tenantId: string;
   operation: string;
@@ -41,15 +38,17 @@ export interface CostReport {
   periodEnd: Date;
 }
 
-class BudgetTracker extends EventEmitter {
+export class BudgetTracker extends EventEmitter {
+  private store: { [key: string]: any } = {};
+
   private getCosts(tenantId: string): Cost[] {
-    return store[`costs_${tenantId}`] || [];
+    return this.store[`costs_${tenantId}`] || [];
   }
 
   private addCost(cost: Cost): void {
     const costs = this.getCosts(cost.tenantId);
     costs.push(cost);
-    store[`costs_${cost.tenantId}`] = costs;
+    this.store[`costs_${cost.tenantId}`] = costs;
   }
 
   public trackCost(cost: Cost): void {
@@ -63,11 +62,11 @@ class BudgetTracker extends EventEmitter {
   }
 
   public getBudgetStatus(tenantId: string): Budget | undefined {
-    return store[`budget_${tenantId}`];
+    return this.store[`budget_${tenantId}`];
   }
 
   public setBudget(tenantId: string, budget: Budget): void {
-    store[`budget_${tenantId}`] = budget;
+    this.store[`budget_${tenantId}`] = budget;
   }
 
   private checkThresholds(tenantId: string, budget: Budget): void {

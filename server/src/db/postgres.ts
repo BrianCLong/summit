@@ -5,8 +5,8 @@ import { Pool, QueryConfig, QueryResult, PoolClient } from 'pg';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
-import { dbConfig } from './config.js';
-import baseLogger from '../config/logger.js';
+import { dbConfig } from './config';
+import baseLogger from '../config/logger';
 
 // Constants for pool monitoring and connection management
 const POOL_MONITOR_INTERVAL_MS = 30000; // 30 seconds

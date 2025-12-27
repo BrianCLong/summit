@@ -1,7 +1,7 @@
 // @ts-nocheck
 import Redis from 'ioredis';
-import config from './index.js';
-import logger from '../utils/logger.js';
+import config from './index';
+import logger from '../utils/logger';
 import {
   getPostgresPool as getManagedPostgresPool,
   closePostgresPool as closeManagedPostgresPool,
@@ -12,7 +12,7 @@ import {
   initializeNeo4jDriver,
   isNeo4jMockMode,
   onNeo4jDriverReady,
-} from '../db/neo4j.js';
+} from '../db/neo4j';
 
 type Neo4jDriver = ReturnType<typeof getSharedNeo4jDriver>;
 

@@ -8,13 +8,13 @@ import {
   dbPoolSize,
   dbPoolUsage,
   dbPoolWaiting
-} from '../metrics/dbMetrics.js';
+} from '../metrics/dbMetrics';
 import {
   neo4jConnectivityUp,
   neo4jQueryErrorsTotal,
   neo4jQueryLatencyMs,
   neo4jQueryTotal,
-} from '../metrics/neo4jMetrics.js';
+} from '../metrics/neo4jMetrics';
 
 dotenv.config();
 

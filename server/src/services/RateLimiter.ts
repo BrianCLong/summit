@@ -1,5 +1,5 @@
-import { getRedisClient } from '../config/database.js';
-import { PrometheusMetrics } from '../utils/metrics.js';
+import { getRedisClient } from '../config/database';
+import { PrometheusMetrics } from '../utils/metrics';
 import pino from 'pino';
 
 const logger = (pino as any)();

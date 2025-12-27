@@ -73,6 +73,10 @@ export class QuotaManager {
     public setTenantTier(tenantId: string, tier: 'FREE' | 'STARTER' | 'PRO' | 'ENTERPRISE') {
         this.tenantTiers.set(tenantId, tier);
     }
+
+    public _resetForTesting() {
+        this.tenantTiers.clear();
+    }
 }
 
 export default QuotaManager.getInstance();
