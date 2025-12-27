@@ -411,6 +411,41 @@ make down
 docker system prune -af
 ```
 
+## Sprint N+7 Execution Assignments
+
+The following agents are assigned to execute the specific epics defined in `docs/sprints/SPRINT_N_PLUS_7_ROADMAP.md`.
+
+### Agent: Jules (Architecture & Core Services)
+**Scope:**
+- **Epic A1:** Local Vector Store & Embeddings Service
+- **Epic A2:** RAG Ingestion Pipeline
+- **Epic A3:** Copilot Query Service
+- **Epic C1:** Policy-as-Code Engine (OPA)
+- **Epic C2:** Immutable Audit Log
+
+**Change Surface:**
+- `server/src/services/`
+- `docker-compose*.yml`
+- `server/src/policies/`
+- `server/src/provenance/`
+
+### Agent: Amp (Frontend & Connectors)
+**Scope:**
+- **Epic B1:** Connector SDK & Registry
+- **Epic B2:** RSS/Atom Connector
+- **Epic B3:** STIX/TAXII Connector
+
+**Change Surface:**
+- `server/src/connectors/`
+- `packages/connector-sdk/` (new)
+- `server/src/ingestion/`
+
+### Execution Invariants
+All agents must:
+1.  Check `docs/roadmap/STATUS.json` before starting work.
+2.  Update `docs/roadmap/STATUS.json` in the same PR as the implementation.
+3.  Adhere to the contracts defined in `docs/sprints/SPRINT_N_PLUS_7_ROADMAP.md`.
+
 ---
 
 ## Legacy Guidance (preserved)
