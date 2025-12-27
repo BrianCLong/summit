@@ -1,0 +1,11 @@
+{
+  "name": "@summit/deps-drift",
+  "version": "0.1.0",
+  "description": "Dependency drift reporter for Summit",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node --test"
+  },
+  "dependencies": {}
+}
