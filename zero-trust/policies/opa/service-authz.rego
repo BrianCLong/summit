@@ -8,7 +8,7 @@ package zerotrust.service_authz
 
 import rego.v1
 
-# Default deny - all service communication denied unless explicitly allowed
+# Default deny - all service communication denied unless explicitly allowed and governed
 default allow := false
 
 # Policy metadata
@@ -32,6 +32,7 @@ allow if {
     communication_allowed
     not deny_rules_triggered
     rate_limit_ok
+    governance_enforced
 }
 
 # Detailed decision with explanation
@@ -43,7 +44,8 @@ decision := {
     "source_spiffe_id": input.source.spiffe_id,
     "destination_spiffe_id": input.destination.spiffe_id,
     "timestamp": time.now_ns(),
-    "request_id": input.request_id
+    "request_id": input.request_id,
+    "governance": governance_verdict
 }
 
 reason := "allowed: all conditions met" if {
@@ -52,6 +54,77 @@ reason := "allowed: all conditions met" if {
 
 reason := concat(": ", ["denied", denial_reason]) if {
     not allow
+}
+
+#############################################
+# GOVERNANCE VERDICTS
+#############################################
+
+governance_enforced if {
+    enforcement_mode := governance_enforcement_mode
+    enforcement_mode != "disabled"
+    not governance_bypass_requested
+    governance_controls_healthy
+}
+
+governance_enforcement_mode := input.governance.enforcement_mode if {
+    input.governance.enforcement_mode
+}
+
+governance_enforcement_mode := "enforce"
+
+governance_bypass_requested if {
+    input.governance.bypass == true
+}
+
+governance_controls_healthy if {
+    controls := governance_controls
+    count(controls) > 0
+    not controls[_].status == "failed"
+}
+
+governance_controls := input.governance.controls if {
+    input.governance.controls
+}
+
+governance_controls := [
+    {
+        "name": "opa-service-authz",
+        "status": "pass",
+        "enforced": true
+    }
+]
+
+governance_status := "permit" if {
+    allow
+}
+
+governance_status := "deny" if {
+    not allow
+}
+
+governance_reason := "enforced" if {
+    governance_enforced
+}
+
+governance_reason := "governance bypass requested" if {
+    governance_bypass_requested
+}
+
+governance_reason := "governance controls failed" if {
+    not governance_controls_healthy
+}
+
+governance_reason := "enforcement disabled" if {
+    governance_enforcement_mode == "disabled"
+}
+
+governance_verdict := {
+    "status": governance_status,
+    "enforcement_mode": governance_enforcement_mode,
+    "bypass": governance_bypass_requested,
+    "controls": governance_controls,
+    "reason": governance_reason
 }
 
 #############################################
@@ -428,6 +501,14 @@ denial_reason := "rate limit exceeded" if {
     not rate_limit_ok
 }
 
+denial_reason := "governance enforcement inactive" if {
+    valid_spiffe_identity
+    communication_allowed
+    not deny_rules_triggered
+    rate_limit_ok
+    not governance_enforced
+}
+
 #############################################
 # AUDIT LOGGING
 #############################################
@@ -454,7 +535,8 @@ audit_event := {
     },
     "decision": {
         "allowed": allow,
-        "reason": reason
+        "reason": reason,
+        "governance": governance_verdict
     },
     "policy_version": policy_info.version
 }

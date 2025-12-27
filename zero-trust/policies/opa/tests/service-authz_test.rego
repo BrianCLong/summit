@@ -6,6 +6,17 @@ package zerotrust.service_authz_test
 import rego.v1
 import data.zerotrust.service_authz
 
+good_governance := {
+    "enforcement_mode": "enforce",
+    "controls": [
+        {
+            "name": "opa-service-authz",
+            "status": "pass",
+            "enforced": true
+        }
+    ]
+}
+
 #############################################
 # TEST: GATEWAY TO API SERVER
 #############################################
@@ -22,6 +33,7 @@ test_gateway_to_api_allowed if {
             "method": "POST",
             "path": "/graphql"
         },
+        "governance": good_governance,
         "request_id": "test-001"
     }
 }
@@ -38,6 +50,7 @@ test_gateway_to_api_health_check_allowed if {
             "method": "GET",
             "path": "/health/live"
         },
+        "governance": good_governance,
         "request_id": "test-002"
     }
 }
@@ -58,6 +71,7 @@ test_gateway_to_adminsec_auth_allowed if {
             "method": "POST",
             "path": "/auth/login"
         },
+        "governance": good_governance,
         "request_id": "test-003"
     }
 }
@@ -78,6 +92,7 @@ test_osint_to_graphai_allowed if {
             "method": "POST",
             "path": "/feature/extract"
         },
+        "governance": good_governance,
         "request_id": "test-004"
     }
 }
@@ -94,6 +109,7 @@ test_intel_cross_communication_allowed if {
             "method": "POST",
             "path": "/correlate/entities"
         },
+        "governance": good_governance,
         "request_id": "test-005"
     }
 }
@@ -114,6 +130,7 @@ test_api_to_postgresql_allowed if {
             "method": "POST",
             "path": "/query"
         },
+        "governance": good_governance,
         "request_id": "test-006"
     }
 }
@@ -130,6 +147,7 @@ test_api_to_neo4j_allowed if {
             "method": "POST",
             "path": "/cypher"
         },
+        "governance": good_governance,
         "request_id": "test-007"
     }
 }
@@ -150,6 +168,7 @@ test_worker_to_api_allowed if {
             "method": "POST",
             "path": "/internal/task-complete"
         },
+        "governance": good_governance,
         "request_id": "test-008"
     }
 }
@@ -166,6 +185,7 @@ test_worker_to_kafka_allowed if {
             "method": "POST",
             "path": "/produce"
         },
+        "governance": good_governance,
         "request_id": "test-009"
     }
 }
@@ -186,6 +206,7 @@ test_copilot_to_graphai_allowed if {
             "method": "POST",
             "path": "/embed/text"
         },
+        "governance": good_governance,
         "request_id": "test-010"
     }
 }
@@ -202,6 +223,7 @@ test_nlp_to_model_serving_allowed if {
             "method": "POST",
             "path": "/v1/models/ner/infer"
         },
+        "governance": good_governance,
         "request_id": "test-011"
     }
 }
@@ -222,6 +244,7 @@ test_prometheus_scraping_allowed if {
             "method": "GET",
             "path": "/metrics"
         },
+        "governance": good_governance,
         "request_id": "test-012"
     }
 }
@@ -238,6 +261,7 @@ test_service_to_otel_allowed if {
             "method": "POST",
             "path": "/v1/traces"
         },
+        "governance": good_governance,
         "request_id": "test-013"
     }
 }
@@ -258,6 +282,7 @@ test_invalid_spiffe_id_denied if {
             "method": "POST",
             "path": "/graphql"
         },
+        "governance": good_governance,
         "request_id": "test-014"
     }
 }
@@ -274,6 +299,7 @@ test_unauthorized_communication_denied if {
             "method": "POST",
             "path": "/admin/delete-all"
         },
+        "governance": good_governance,
         "request_id": "test-015"
     }
 }
@@ -290,6 +316,7 @@ test_wrong_method_denied if {
             "method": "DELETE",
             "path": "/metrics"
         },
+        "governance": good_governance,
         "request_id": "test-016"
     }
 }
@@ -306,6 +333,7 @@ test_wrong_path_denied if {
             "method": "POST",
             "path": "/internal/dangerous-operation"
         },
+        "governance": good_governance,
         "request_id": "test-017"
     }
 }
@@ -326,6 +354,7 @@ test_decision_contains_required_fields if {
             "method": "POST",
             "path": "/graphql"
         },
+        "governance": good_governance,
         "request_id": "test-018"
     }
     decision.allowed == true
@@ -346,10 +375,69 @@ test_audit_event_generated if {
             "method": "POST",
             "path": "/graphql"
         },
+        "governance": good_governance,
         "request_id": "test-019"
     }
     audit.event_type == "service_authz"
     audit.source.service == "ga-gateway"
     audit.destination.service == "intelgraph-api"
     audit.decision.allowed == true
+}
+
+#############################################
+# TEST: GOVERNANCE ENFORCEMENT
+#############################################
+
+test_governance_bypass_denied if {
+    not service_authz.allow with input as {
+        "source": {
+            "spiffe_id": "spiffe://intelgraph.local/ns/intelgraph-ga/sa/ga-gateway"
+        },
+        "destination": {
+            "spiffe_id": "spiffe://intelgraph.local/ns/intelgraph-ga/sa/intelgraph-api"
+        },
+        "request": {
+            "method": "POST",
+            "path": "/graphql"
+        },
+        "governance": merge(good_governance, {"bypass": true}),
+        "request_id": "test-020"
+    }
+}
+
+test_governance_disabled_denied if {
+    not service_authz.allow with input as {
+        "source": {
+            "spiffe_id": "spiffe://intelgraph.local/ns/intelgraph-ga/sa/ga-gateway"
+        },
+        "destination": {
+            "spiffe_id": "spiffe://intelgraph.local/ns/intelgraph-ga/sa/intelgraph-api"
+        },
+        "request": {
+            "method": "POST",
+            "path": "/graphql"
+        },
+        "governance": merge(good_governance, {"enforcement_mode": "disabled"}),
+        "request_id": "test-021"
+    }
+}
+
+test_governance_verdict_exposes_control_chain if {
+    decision := service_authz.decision with input as {
+        "source": {
+            "spiffe_id": "spiffe://intelgraph.local/ns/intelgraph-ga/sa/ga-gateway"
+        },
+        "destination": {
+            "spiffe_id": "spiffe://intelgraph.local/ns/intelgraph-ga/sa/intelgraph-api"
+        },
+        "request": {
+            "method": "POST",
+            "path": "/graphql"
+        },
+        "governance": good_governance,
+        "request_id": "test-022"
+    }
+    decision.governance.enforcement_mode == "enforce"
+    decision.governance.controls[_].name == "opa-service-authz"
+    decision.governance.status == "permit"
 }
