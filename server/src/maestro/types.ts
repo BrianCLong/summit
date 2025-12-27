@@ -72,6 +72,60 @@ export interface RunCostSummary {
   }>;
 }
 
+export interface PlaybookSignature {
+  algorithm: 'ed25519';
+  signature: string;
+  publicKey: string;
+  signedAt: string;
+}
+
+export interface Playbook {
+  id: string;
+  name: string;
+  description?: string;
+  triggers: string[];
+  actions: string[];
+  isEnabled: boolean;
+  version?: string;
+  signature?: PlaybookSignature;
+}
+
+export interface PlaybookSignature {
+  algorithm: 'ed25519';
+  signature: string;
+  publicKey: string;
+  signedAt: string;
+}
+
+export interface Playbook {
+  id: string;
+  name: string;
+  description?: string;
+  triggers: string[];
+  actions: string[];
+  isEnabled: boolean;
+  version?: string;
+  signature?: PlaybookSignature;
+}
+
+export interface PlaybookSignature {
+  algorithm: 'ed25519';
+  signature: string;
+  publicKey: string;
+  signedAt: string;
+}
+
+export interface Playbook {
+  id: string;
+  name: string;
+  description?: string;
+  triggers: string[];
+  actions: string[];
+  isEnabled: boolean;
+  version?: string;
+  signature?: PlaybookSignature;
+}
+
 // Coordination Types for Subagent Collaboration (Added in Phase 3)
 export interface CoordinationTask {
   id: string;
