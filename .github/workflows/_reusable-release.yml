@@ -27,8 +27,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -43,10 +43,76 @@ jobs:
       - name: Generate provenance manifest
         run: node scripts/provenance/manifest.mjs > provenance.json
 
+      - name: Prepare evidence directory
+        run: |
+          set -euo pipefail
+          RELEASE_VERSION="${{ inputs.version }}"
+          EVIDENCE_DIR="evidence/release-${RELEASE_VERSION}"
+          mkdir -p "${EVIDENCE_DIR}"
+          echo "RELEASE_VERSION=${RELEASE_VERSION}" >> "$GITHUB_ENV"
+          echo "EVIDENCE_DIR=${EVIDENCE_DIR}" >> "$GITHUB_ENV"
+
+      - name: Generate SBOM
+        run: |
+          set -euo pipefail
+          bash scripts/release/generate_sbom.sh "${EVIDENCE_DIR}/sbom-${RELEASE_VERSION}.json"
+
+      - name: Install Trivy
+        uses: aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1 # v0.2.4
+
+      - name: Generate vulnerability report
+        run: |
+          set -euo pipefail
+          trivy fs \
+            --scanners vuln,secret,misconfig \
+            --ignore-unfixed \
+            --exit-code 0 \
+            --format json \
+            --output "${EVIDENCE_DIR}/vuln-report.json" \
+            .
+
+      - name: Generate attestation summary
+        run: |
+          set -euo pipefail
+          cp ATTESTATION_SCOPE.md "${EVIDENCE_DIR}/attestation-scope.md"
+          node -e "const fs=require('fs');const data={release:`v${process.env.RELEASE_VERSION}`,commit:process.env.GITHUB_SHA,workflow:process.env.GITHUB_WORKFLOW,run_id:process.env.GITHUB_RUN_ID,generated_at:new Date().toISOString(),scope_document:'ATTESTATION_SCOPE.md'};fs.writeFileSync(`${process.env.EVIDENCE_DIR}/attestation-summary.json`,JSON.stringify(data,null,2));"
+
+      - name: Install OPA
+        uses: open-policy-agent/setup-opa@v2
+
+      - name: Generate policy decision logs
+        run: |
+          set -euo pipefail
+          node scripts/ci/generate-opa-input.cjs \
+            --sbom "${EVIDENCE_DIR}/sbom-${RELEASE_VERSION}.json" \
+            --trivy "${EVIDENCE_DIR}/vuln-report.json" \
+            --output "${EVIDENCE_DIR}/opa-input.json"
+          opa eval \
+            --format=json \
+            -d policies \
+            -i "${EVIDENCE_DIR}/opa-input.json" \
+            "data.intelgraph" \
+            > "${EVIDENCE_DIR}/policy-decisions.json"
+
+      - name: Capture deploy metadata
+        run: |
+          set -euo pipefail
+          node -e "const fs=require('fs');const data={release:`v${process.env.RELEASE_VERSION}`,sha:process.env.GITHUB_SHA,ref:process.env.GITHUB_REF,repository:process.env.GITHUB_REPOSITORY,workflow:process.env.GITHUB_WORKFLOW,run_id:process.env.GITHUB_RUN_ID,run_number:process.env.GITHUB_RUN_NUMBER,actor:process.env.GITHUB_ACTOR,generated_at:new Date().toISOString()};fs.writeFileSync(`${process.env.EVIDENCE_DIR}/deploy-metadata.json`,JSON.stringify(data,null,2));"
+
+      - name: Package evidence bundle
+        run: |
+          set -euo pipefail
+          EVIDENCE_PACK="evidence/pack-v${RELEASE_VERSION}.tgz"
+          tar -czf "${EVIDENCE_PACK}" -C evidence "release-${RELEASE_VERSION}"
+          echo "EVIDENCE_PACK=${EVIDENCE_PACK}" >> "$GITHUB_ENV"
+
       - name: Collect evidence bundle
         run: |
           mkdir -p release
           cp provenance.json release/
+          if [ -n "${EVIDENCE_PACK:-}" ] && [ -f "${EVIDENCE_PACK}" ]; then
+            cp "${EVIDENCE_PACK}" release/
+          fi
           if [ -f sbom.json ]; then cp sbom.json release/; fi
           if [ -d perf/reports ]; then cp -r perf/reports release/perf-reports; fi
           if [ -d artifacts/sast ]; then cp -r artifacts/sast release/sast; fi
