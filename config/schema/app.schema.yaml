@@ -1,0 +1,131 @@
+$id: app.schema.json
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: IntelGraph application configuration
+description: Base configuration contract for runtime and deployment environments.
+type: object
+required:
+  - version
+  - database
+  - auth
+properties:
+  version:
+    type: integer
+    minimum: 1
+    description: Configuration version for migration tracking.
+  database:
+    type: object
+    required: [host, port, user, password, database]
+    additionalProperties: false
+    properties:
+      host:
+        type: string
+      port:
+        type: integer
+        minimum: 1
+      user:
+        type: string
+      password:
+        type: string
+      database:
+        type: string
+  auth:
+    type: object
+    required: [jwt]
+    additionalProperties: false
+    properties:
+      jwt:
+        type: object
+        required: [secret, expiresIn]
+        additionalProperties: false
+        properties:
+          secret:
+            type: string
+          expiresIn:
+            type: string
+      apiKey:
+        type: object
+        additionalProperties: false
+        properties:
+          header:
+            type: string
+  services:
+    type: object
+    additionalProperties: false
+    properties:
+      redis:
+        type: object
+        required: [url]
+        additionalProperties: false
+        properties:
+          url:
+            type: string
+      neo4j:
+        type: object
+        required: [url, user, password]
+        additionalProperties: false
+        properties:
+          url:
+            type: string
+          user:
+            type: string
+          password:
+            type: string
+  features:
+    $ref: feature-flags.schema.json#/$defs/FeatureFlagsConfiguration
+  security:
+    type: object
+    additionalProperties: false
+    properties:
+      secrets:
+        type: object
+        required: [providerPreference, cacheTtlSeconds]
+        additionalProperties: false
+        properties:
+          providerPreference:
+            type: array
+            minItems: 1
+            items:
+              enum: [vault, awsSecretsManager, environment, file]
+          cacheTtlSeconds:
+            type: integer
+            minimum: 0
+          rotation:
+            type: object
+            additionalProperties: false
+            properties:
+              enabled:
+                type: boolean
+              intervalSeconds:
+                type: integer
+                minimum: 0
+          encryptionKeyEnv:
+            type: string
+          auditLogPath:
+            type: string
+          fileBasePath:
+            type: string
+          vault:
+            type: object
+            additionalProperties: false
+            properties:
+              address:
+                type: string
+              tokenEnv:
+                type: string
+              kvMountPath:
+                type: string
+          aws:
+            type: object
+            additionalProperties: false
+            properties:
+              region:
+                type: string
+              endpoint:
+                type: string
+  environments:
+    type: object
+    description: Environment-specific overrides keyed by environment name.
+    additionalProperties:
+      $ref: '#'
+additionalProperties: false

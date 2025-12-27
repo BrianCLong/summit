@@ -70,6 +70,7 @@ export class MigrationEngine {
             migratedConfig = applied.down(migratedConfig);
             console.log(`Rolled back migration version ${applied.version}`);
           }
+          migratedConfig.version = currentVersion;
           throw new MigrationError(`Migration failed at version ${migration.version} and was rolled back.`, migratedConfig);
         }
       }

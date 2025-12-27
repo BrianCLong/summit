@@ -1,0 +1,114 @@
+{
+  "$id": "feature-flags.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Feature flags configuration",
+  "type": "object",
+  "required": ["version", "environments", "flags"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "environments": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["provider", "config"],
+        "properties": {
+          "provider": {
+            "enum": ["local", "launchdarkly", "flagsmith"]
+          },
+          "config": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "flags": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["key", "type", "defaultValue"],
+        "properties": {
+          "key": { "type": "string" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "type": { "enum": ["boolean", "string", "number", "json"] },
+          "defaultValue": {},
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "rollout": {
+            "type": "object",
+            "properties": {
+              "type": { "enum": ["gradual", "targeted"] },
+              "percentage": { "type": "number", "minimum": 0, "maximum": 100 },
+              "rules": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["attribute", "operator", "values"],
+                  "properties": {
+                    "attribute": { "type": "string" },
+                    "operator": { "type": "string" },
+                    "values": {
+                      "type": "array",
+                      "items": {}
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "killSwitch": { "type": "boolean" },
+          "allowedValues": {
+            "type": "array",
+            "items": {}
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "$defs": {
+    "FeatureFlagsConfiguration": {
+      "type": "object",
+      "properties": {
+        "enableNewDashboard": { "type": "boolean" },
+        "enableExperimentalFeatures": { "type": "boolean" },
+        "flags": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "description": { "type": "string" },
+              "enabled": { "type": "boolean" },
+              "environments": {
+                "type": "object",
+                "additionalProperties": { "type": "boolean" }
+              },
+              "rolloutPercentage": { "type": "number", "minimum": 0, "maximum": 100 },
+              "salt": { "type": "string" }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}
