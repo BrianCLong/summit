@@ -1,0 +1,452 @@
+{
+  "$schema": "https://intelgraph.io/schemas/policy-audit-log.json",
+  "description": "Audit log entries demonstrating access grants, revocations, data corrections, and governance actions",
+  "generated_at": "2025-12-27T10:45:00Z",
+  "audit_period": "2025-Q4",
+  "log_entries": [
+    {
+      "log_id": "audit_000001",
+      "timestamp": "2025-12-01T09:00:00Z",
+      "event_type": "access_grant",
+      "severity": "info",
+      "principal": {
+        "user_id": "usr_admin_frank",
+        "username": "frank.admin@intelgraph.io",
+        "roles": ["admin", "user_manager"],
+        "ip_address": "10.0.5.10"
+      },
+      "action": {
+        "type": "user.access.grant",
+        "description": "Granted SECRET clearance level to new analyst",
+        "target_user": "usr_analyst_grace",
+        "target_username": "grace.newanalyst@intelgraph.io",
+        "granted_clearance": "SECRET",
+        "granted_roles": ["analyst", "investigator"],
+        "tenant_id": "tenant_ic_alpha",
+        "approval_ticket": "JIRA-SEC-12345"
+      },
+      "metadata": {
+        "justification": "New hire onboarding - background check completed, security training passed",
+        "approver": "security.lead@intelgraph.io",
+        "approval_date": "2025-11-28",
+        "effective_date": "2025-12-01",
+        "expiration_date": "2026-12-01",
+        "compliance_review_required": true
+      },
+      "audit_trail": {
+        "logged_by": "audit_svc",
+        "service_version": "2.3.1",
+        "retention_period_days": 2555,
+        "immutable": true,
+        "hash": "sha256:a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"
+      }
+    },
+    {
+      "log_id": "audit_000002",
+      "timestamp": "2025-12-03T14:30:15Z",
+      "event_type": "access_revocation",
+      "severity": "warning",
+      "principal": {
+        "user_id": "usr_admin_frank",
+        "username": "frank.admin@intelgraph.io",
+        "roles": ["admin", "user_manager"],
+        "ip_address": "10.0.5.10"
+      },
+      "action": {
+        "type": "user.access.revoke",
+        "description": "Revoked all access for departing contractor",
+        "target_user": "usr_contractor_henry",
+        "target_username": "henry.contractor@external.com",
+        "revoked_clearance": "CONFIDENTIAL",
+        "revoked_roles": ["contractor", "viewer"],
+        "tenant_id": "tenant_ic_alpha",
+        "reason_code": "employment_termination"
+      },
+      "metadata": {
+        "justification": "Contract ended - offboarding process initiated",
+        "termination_date": "2025-12-03",
+        "last_login": "2025-12-02T16:45:00Z",
+        "sessions_terminated": 2,
+        "tokens_invalidated": 5,
+        "compliance_review_required": false
+      },
+      "audit_trail": {
+        "logged_by": "audit_svc",
+        "service_version": "2.3.1",
+        "retention_period_days": 2555,
+        "immutable": true,
+        "hash": "sha256:b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7",
+        "related_events": ["session_termination_001", "token_revocation_001"]
+      }
+    },
+    {
+      "log_id": "audit_000003",
+      "timestamp": "2025-12-05T10:15:42Z",
+      "event_type": "policy_update",
+      "severity": "info",
+      "principal": {
+        "user_id": "usr_security_iris",
+        "username": "iris.security@intelgraph.io",
+        "roles": ["security_engineer", "policy_admin"],
+        "ip_address": "10.0.5.22"
+      },
+      "action": {
+        "type": "policy.update",
+        "description": "Updated OPA policy for temporal access restrictions",
+        "policy_id": "pol_temporal_restrictions",
+        "previous_version": "1.0.4",
+        "new_version": "1.0.5",
+        "changes": [
+          "Added exception workflow for after-hours access",
+          "Updated business hours window: 08:00-18:00 ET (was 09:00-17:00 ET)",
+          "Added supervisor approval requirement for override"
+        ],
+        "approval_ticket": "JIRA-POL-67890"
+      },
+      "metadata": {
+        "justification": "Operational requirement: extend access window for West Coast analysts",
+        "approver": "compliance.lead@intelgraph.io",
+        "approval_date": "2025-12-04",
+        "effective_date": "2025-12-05T10:00:00Z",
+        "policy_file": "/services/policy/policies/temporal_restrictions.rego",
+        "git_commit": "e6a30084f9",
+        "policy_validation_passed": true
+      },
+      "audit_trail": {
+        "logged_by": "audit_svc",
+        "service_version": "2.3.1",
+        "retention_period_days": 2555,
+        "immutable": true,
+        "hash": "sha256:c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8"
+      }
+    },
+    {
+      "log_id": "audit_000004",
+      "timestamp": "2025-12-07T16:22:33Z",
+      "event_type": "data_correction",
+      "severity": "notice",
+      "principal": {
+        "user_id": "usr_analyst_julia",
+        "username": "julia.analyst@intelgraph.io",
+        "roles": ["analyst", "data_steward"],
+        "ip_address": "10.0.5.55"
+      },
+      "action": {
+        "type": "entity.correction",
+        "description": "Corrected entity classification after review",
+        "entity_id": "ent_person_54321",
+        "entity_type": "Person",
+        "field_corrected": "classification",
+        "old_value": "SECRET",
+        "new_value": "CONFIDENTIAL",
+        "correction_ticket": "JIRA-DATA-11122"
+      },
+      "metadata": {
+        "justification": "Misclassification during initial import - reviewed by classification authority",
+        "approver": "classification.authority@intelgraph.io",
+        "approval_date": "2025-12-06",
+        "affected_relationships": 12,
+        "downstream_updates_required": true,
+        "compliance_review_required": true,
+        "data_quality_impact": "Improved accuracy, reduced over-classification"
+      },
+      "audit_trail": {
+        "logged_by": "audit_svc",
+        "service_version": "2.3.1",
+        "retention_period_days": 2555,
+        "immutable": true,
+        "hash": "sha256:d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9",
+        "provenance_chain_updated": true,
+        "provenance_chain_id": "prov_chain_ent_54321_002"
+      }
+    },
+    {
+      "log_id": "audit_000005",
+      "timestamp": "2025-12-10T08:45:18Z",
+      "event_type": "emergency_override",
+      "severity": "critical",
+      "principal": {
+        "user_id": "usr_oncall_karl",
+        "username": "karl.oncall@intelgraph.io",
+        "roles": ["on_call_engineer", "incident_responder"],
+        "ip_address": "10.0.5.88"
+      },
+      "action": {
+        "type": "access.emergency_override",
+        "description": "Emergency access override for active security incident",
+        "target_resource": "inv_operation_redflag",
+        "override_reason": "Active security incident - unauthorized access detected",
+        "incident_ticket": "INCIDENT-SEC-99999",
+        "override_duration_minutes": 60,
+        "override_granted_by": "security.lead@intelgraph.io"
+      },
+      "metadata": {
+        "justification": "Immediate investigation required for suspected data breach",
+        "incident_severity": "P1",
+        "incident_start_time": "2025-12-10T08:30:00Z",
+        "approval_method": "phone_approval",
+        "approver_phone_last4": "5678",
+        "post_incident_review_required": true,
+        "override_expiration": "2025-12-10T09:45:18Z"
+      },
+      "audit_trail": {
+        "logged_by": "audit_svc",
+        "service_version": "2.3.1",
+        "retention_period_days": 2555,
+        "immutable": true,
+        "hash": "sha256:e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        "security_alert": true,
+        "alert_recipients": ["security-team@intelgraph.io", "compliance@intelgraph.io"],
+        "follow_up_required": true
+      }
+    },
+    {
+      "log_id": "audit_000006",
+      "timestamp": "2025-12-12T11:00:00Z",
+      "event_type": "periodic_access_review",
+      "severity": "info",
+      "principal": {
+        "user_id": "system",
+        "username": "automated_review_system",
+        "roles": ["system", "compliance_automation"],
+        "ip_address": "internal"
+      },
+      "action": {
+        "type": "access.periodic_review",
+        "description": "Quarterly access review completed",
+        "review_period": "2025-Q3",
+        "users_reviewed": 47,
+        "access_grants_reviewed": 215,
+        "access_grants_expired": 8,
+        "access_grants_renewed": 207,
+        "anomalies_detected": 2
+      },
+      "metadata": {
+        "review_type": "automated_quarterly",
+        "reviewer": "compliance.lead@intelgraph.io",
+        "review_completion_date": "2025-12-12",
+        "compliance_standard": "SOC2_TSC_CC6.2",
+        "anomalies": [
+          {
+            "user_id": "usr_analyst_laura",
+            "issue": "No login activity in 90 days",
+            "recommendation": "Deactivate account"
+          },
+          {
+            "user_id": "usr_contractor_mike",
+            "issue": "Clearance level exceeds contract terms",
+            "recommendation": "Downgrade to CONFIDENTIAL"
+          }
+        ],
+        "remediation_ticket": "JIRA-COMPLIANCE-33344"
+      },
+      "audit_trail": {
+        "logged_by": "audit_svc",
+        "service_version": "2.3.1",
+        "retention_period_days": 2555,
+        "immutable": true,
+        "hash": "sha256:f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1",
+        "compliance_report_generated": true,
+        "report_location": "/audit/reports/2025-Q3-access-review.pdf"
+      }
+    },
+    {
+      "log_id": "audit_000007",
+      "timestamp": "2025-12-15T13:30:00Z",
+      "event_type": "cross_tenant_grant",
+      "severity": "warning",
+      "principal": {
+        "user_id": "usr_admin_nancy",
+        "username": "nancy.admin@intelgraph.io",
+        "roles": ["admin", "tenant_manager"],
+        "ip_address": "10.0.5.15"
+      },
+      "action": {
+        "type": "access.cross_tenant_grant",
+        "description": "Granted cross-tenant access for joint investigation",
+        "source_tenant": "tenant_ic_alpha",
+        "target_tenant": "tenant_ic_bravo",
+        "granted_user": "usr_analyst_oscar",
+        "granted_username": "oscar.analyst@intelgraph.io",
+        "granted_resources": ["inv_operation_nightfall"],
+        "grant_duration_days": 30,
+        "approval_ticket": "JIRA-COLLAB-55566"
+      },
+      "metadata": {
+        "justification": "Multi-agency joint investigation - information sharing agreement executed",
+        "approver_alpha": "tenant.alpha.lead@intelgraph.io",
+        "approver_bravo": "tenant.bravo.lead@intelgraph.io",
+        "approval_date": "2025-12-14",
+        "effective_date": "2025-12-15",
+        "expiration_date": "2026-01-14",
+        "sharing_agreement_id": "ISA-2025-12-001",
+        "compliance_review_required": true,
+        "audit_trail_shared": true
+      },
+      "audit_trail": {
+        "logged_by": "audit_svc",
+        "service_version": "2.3.1",
+        "retention_period_days": 2555,
+        "immutable": true,
+        "hash": "sha256:g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2",
+        "security_alert": true,
+        "alert_reason": "Cross-tenant access (requires elevated monitoring)"
+      }
+    },
+    {
+      "log_id": "audit_000008",
+      "timestamp": "2025-12-18T15:45:30Z",
+      "event_type": "data_deletion",
+      "severity": "notice",
+      "principal": {
+        "user_id": "usr_privacy_officer_paula",
+        "username": "paula.privacy@intelgraph.io",
+        "roles": ["privacy_officer", "data_steward"],
+        "ip_address": "10.0.5.33"
+      },
+      "action": {
+        "type": "data.deletion",
+        "description": "Executed data deletion per retention policy",
+        "deletion_type": "scheduled_retention",
+        "entities_deleted": 127,
+        "relationships_deleted": 358,
+        "retention_policy_id": "pol_retention_investigations",
+        "retention_period_exceeded": true,
+        "investigation_ids": ["inv_operation_sunrise", "inv_operation_twilight"]
+      },
+      "metadata": {
+        "justification": "Investigations closed 7+ years ago - retention period expired per DOD guidelines",
+        "deletion_method": "cryptographic_erasure",
+        "backup_deletion_verified": true,
+        "compliance_standard": "DOD_5015.2",
+        "deletion_certificate_generated": true,
+        "certificate_id": "CERT-DEL-2025-12-18-001",
+        "approver": "legal.counsel@intelgraph.io",
+        "approval_date": "2025-12-17"
+      },
+      "audit_trail": {
+        "logged_by": "audit_svc",
+        "service_version": "2.3.1",
+        "retention_period_days": 2555,
+        "immutable": true,
+        "hash": "sha256:h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3",
+        "compliance_report_generated": true,
+        "report_location": "/audit/deletion-certificates/CERT-DEL-2025-12-18-001.pdf"
+      }
+    },
+    {
+      "log_id": "audit_000009",
+      "timestamp": "2025-12-20T09:10:22Z",
+      "event_type": "privacy_request",
+      "severity": "info",
+      "principal": {
+        "user_id": "usr_external_quinn",
+        "username": "quinn.external@example.com",
+        "roles": ["data_subject"],
+        "ip_address": "203.0.113.45"
+      },
+      "action": {
+        "type": "privacy.data_access_request",
+        "description": "User submitted data access request (GDPR Article 15)",
+        "request_type": "data_export",
+        "request_ticket": "PRIVACY-REQ-88899",
+        "data_scope": ["personal_information", "investigation_involvement"],
+        "regulation": "GDPR"
+      },
+      "metadata": {
+        "request_received": "2025-12-20T09:10:22Z",
+        "request_deadline": "2025-12-30T23:59:59Z",
+        "identity_verification_required": true,
+        "identity_verified": true,
+        "verification_method": "government_id_upload",
+        "processor": "privacy.team@intelgraph.io",
+        "estimated_completion": "2025-12-23",
+        "compliance_standard": "GDPR_Article_15"
+      },
+      "audit_trail": {
+        "logged_by": "audit_svc",
+        "service_version": "2.3.1",
+        "retention_period_days": 2555,
+        "immutable": true,
+        "hash": "sha256:i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4",
+        "privacy_request_tracking": true,
+        "sla_monitoring": true
+      }
+    },
+    {
+      "log_id": "audit_000010",
+      "timestamp": "2025-12-22T14:20:55Z",
+      "event_type": "policy_violation_detected",
+      "severity": "error",
+      "principal": {
+        "user_id": "system",
+        "username": "opa_policy_engine",
+        "roles": ["system", "policy_enforcement"],
+        "ip_address": "internal"
+      },
+      "action": {
+        "type": "policy.violation_detected",
+        "description": "Detected repeated unauthorized access attempts",
+        "violating_user": "usr_contractor_rachel",
+        "violating_username": "rachel.contractor@external.com",
+        "violation_count": 5,
+        "time_window_minutes": 10,
+        "attempted_resources": ["ent_facility_top_secret_001", "inv_operation_classified_002"],
+        "violation_type": "clearance_insufficient"
+      },
+      "metadata": {
+        "first_violation": "2025-12-22T14:10:00Z",
+        "last_violation": "2025-12-22T14:20:55Z",
+        "user_clearance": "CONFIDENTIAL",
+        "required_clearance": "TOP_SECRET",
+        "automated_response": "account_locked",
+        "lock_duration_minutes": 30,
+        "security_team_notified": true,
+        "incident_ticket_created": "INCIDENT-SEC-10001",
+        "recommended_action": "Security review + potential access revocation"
+      },
+      "audit_trail": {
+        "logged_by": "audit_svc",
+        "service_version": "2.3.1",
+        "retention_period_days": 2555,
+        "immutable": true,
+        "hash": "sha256:j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5",
+        "security_alert": true,
+        "alert_recipients": ["security-team@intelgraph.io", "rachel.contractor@external.com"],
+        "follow_up_required": true
+      }
+    }
+  ],
+  "statistics": {
+    "total_entries": 10,
+    "event_types": {
+      "access_grant": 1,
+      "access_revocation": 1,
+      "policy_update": 1,
+      "data_correction": 1,
+      "emergency_override": 1,
+      "periodic_access_review": 1,
+      "cross_tenant_grant": 1,
+      "data_deletion": 1,
+      "privacy_request": 1,
+      "policy_violation_detected": 1
+    },
+    "severity_distribution": {
+      "info": 4,
+      "notice": 2,
+      "warning": 2,
+      "error": 1,
+      "critical": 1
+    },
+    "security_alerts_triggered": 3,
+    "compliance_reviews_required": 4,
+    "follow_up_actions_required": 2
+  },
+  "compliance_coverage": {
+    "soc2_controls": ["CC6.2", "CC6.3", "CC6.8", "PI1.5", "P3.1", "C1.2"],
+    "audit_retention": "7 years (2555 days) per DOD 5015.2 requirements",
+    "immutability": "All audit logs cryptographically signed (SHA-256)",
+    "completeness": "100% of governance actions logged",
+    "availability": "99.99% audit service uptime (2025-Q4)"
+  }
+}

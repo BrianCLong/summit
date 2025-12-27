@@ -1,0 +1,322 @@
+{
+  "$schema": "https://intelgraph.io/schemas/governance-verdict.json",
+  "description": "Sample OPA authorization verdicts demonstrating ABAC enforcement across various security contexts",
+  "generated_at": "2025-12-27T10:30:00Z",
+  "audit_period": "2025-Q4",
+  "verdicts": [
+    {
+      "verdict_id": "vrd_001_analyst_entity_read",
+      "timestamp": "2025-12-15T14:23:45Z",
+      "request": {
+        "principal": {
+          "user_id": "usr_analytics_alice",
+          "username": "alice.analyst@intelgraph.io",
+          "roles": ["analyst", "investigator"],
+          "clearance_level": "SECRET",
+          "organization": "org_intel_division",
+          "tenant_id": "tenant_ic_alpha"
+        },
+        "resource": {
+          "type": "entity",
+          "id": "ent_person_12345",
+          "classification": "CONFIDENTIAL",
+          "owner_tenant": "tenant_ic_alpha",
+          "labels": ["pii", "investigation_active"]
+        },
+        "action": "read",
+        "context": {
+          "ip_address": "10.0.5.42",
+          "user_agent": "IntelGraph-Web/1.5.2",
+          "time_of_day": "14:23:45",
+          "geo_location": "US-VA",
+          "mfa_verified": true,
+          "session_id": "sess_abc123xyz"
+        }
+      },
+      "decision": {
+        "allow": true,
+        "reason": "User has SECRET clearance and CONFIDENTIAL resource is accessible within same tenant",
+        "policy_id": "pol_rbac_clearance_based",
+        "policy_version": "1.2.0",
+        "evaluated_rules": [
+          "clearance_level_sufficient",
+          "tenant_isolation_check",
+          "active_investigation_access",
+          "mfa_requirement_met"
+        ]
+      },
+      "audit": {
+        "logged_at": "2025-12-15T14:23:45.123Z",
+        "log_id": "audit_log_98765",
+        "retention_period_days": 2555
+      }
+    },
+    {
+      "verdict_id": "vrd_002_contractor_entity_write_denied",
+      "timestamp": "2025-12-16T09:15:22Z",
+      "request": {
+        "principal": {
+          "user_id": "usr_contractor_bob",
+          "username": "bob.contractor@external.com",
+          "roles": ["contractor", "viewer"],
+          "clearance_level": "UNCLASSIFIED",
+          "organization": "org_external_vendor",
+          "tenant_id": "tenant_ic_alpha"
+        },
+        "resource": {
+          "type": "entity",
+          "id": "ent_facility_67890",
+          "classification": "SECRET",
+          "owner_tenant": "tenant_ic_alpha",
+          "labels": ["facility", "critical_infrastructure"]
+        },
+        "action": "update",
+        "context": {
+          "ip_address": "203.0.113.88",
+          "user_agent": "IntelGraph-Web/1.5.2",
+          "time_of_day": "09:15:22",
+          "geo_location": "US-CA",
+          "mfa_verified": true,
+          "session_id": "sess_xyz789def"
+        }
+      },
+      "decision": {
+        "allow": false,
+        "reason": "User clearance level UNCLASSIFIED insufficient for SECRET resource; contractor role lacks update permission",
+        "policy_id": "pol_rbac_clearance_based",
+        "policy_version": "1.2.0",
+        "evaluated_rules": [
+          "clearance_level_sufficient",
+          "role_permission_check",
+          "contractor_write_restriction"
+        ],
+        "violations": [
+          {
+            "rule": "clearance_level_sufficient",
+            "message": "Required: SECRET, Actual: UNCLASSIFIED"
+          },
+          {
+            "rule": "contractor_write_restriction",
+            "message": "Contractors cannot modify entities classified above CONFIDENTIAL"
+          }
+        ]
+      },
+      "audit": {
+        "logged_at": "2025-12-16T09:15:22.456Z",
+        "log_id": "audit_log_98766",
+        "retention_period_days": 2555,
+        "security_alert": true,
+        "alert_reason": "Unauthorized access attempt to classified resource"
+      }
+    },
+    {
+      "verdict_id": "vrd_003_admin_cross_tenant_denied",
+      "timestamp": "2025-12-17T16:42:18Z",
+      "request": {
+        "principal": {
+          "user_id": "usr_admin_charlie",
+          "username": "charlie.admin@intelgraph.io",
+          "roles": ["admin", "system_administrator"],
+          "clearance_level": "TOP_SECRET",
+          "organization": "org_intel_division",
+          "tenant_id": "tenant_ic_alpha"
+        },
+        "resource": {
+          "type": "investigation",
+          "id": "inv_operation_nightfall",
+          "classification": "SECRET",
+          "owner_tenant": "tenant_ic_bravo",
+          "labels": ["active_operation", "multi_agency"]
+        },
+        "action": "read",
+        "context": {
+          "ip_address": "10.0.5.99",
+          "user_agent": "IntelGraph-Web/1.5.2",
+          "time_of_day": "16:42:18",
+          "geo_location": "US-DC",
+          "mfa_verified": true,
+          "session_id": "sess_ghi456jkl"
+        }
+      },
+      "decision": {
+        "allow": false,
+        "reason": "Cross-tenant access denied: tenant_ic_alpha user attempting access to tenant_ic_bravo resource without explicit grant",
+        "policy_id": "pol_multi_tenant_isolation",
+        "policy_version": "2.0.1",
+        "evaluated_rules": [
+          "tenant_isolation_check",
+          "cross_tenant_grant_verification",
+          "clearance_level_sufficient"
+        ],
+        "violations": [
+          {
+            "rule": "tenant_isolation_check",
+            "message": "Resource tenant (tenant_ic_bravo) does not match user tenant (tenant_ic_alpha)"
+          },
+          {
+            "rule": "cross_tenant_grant_verification",
+            "message": "No active cross-tenant sharing grant found for this investigation"
+          }
+        ]
+      },
+      "audit": {
+        "logged_at": "2025-12-17T16:42:18.789Z",
+        "log_id": "audit_log_98767",
+        "retention_period_days": 2555,
+        "security_alert": true,
+        "alert_reason": "Admin attempted cross-tenant access (may be legitimate, requires review)"
+      }
+    },
+    {
+      "verdict_id": "vrd_004_time_restricted_after_hours_denied",
+      "timestamp": "2025-12-18T23:55:33Z",
+      "request": {
+        "principal": {
+          "user_id": "usr_analyst_diana",
+          "username": "diana.analyst@intelgraph.io",
+          "roles": ["analyst"],
+          "clearance_level": "SECRET",
+          "organization": "org_intel_division",
+          "tenant_id": "tenant_ic_alpha"
+        },
+        "resource": {
+          "type": "relationship",
+          "id": "rel_financial_flow_99999",
+          "classification": "CONFIDENTIAL",
+          "owner_tenant": "tenant_ic_alpha",
+          "labels": ["financial_intelligence", "time_restricted"]
+        },
+        "action": "read",
+        "context": {
+          "ip_address": "10.0.5.123",
+          "user_agent": "IntelGraph-Web/1.5.2",
+          "time_of_day": "23:55:33",
+          "geo_location": "US-VA",
+          "mfa_verified": true,
+          "session_id": "sess_mno789pqr"
+        }
+      },
+      "decision": {
+        "allow": false,
+        "reason": "Resource has time-restricted access policy; access only permitted during business hours (08:00-18:00 ET)",
+        "policy_id": "pol_temporal_restrictions",
+        "policy_version": "1.0.5",
+        "evaluated_rules": [
+          "clearance_level_sufficient",
+          "tenant_isolation_check",
+          "time_of_day_restriction"
+        ],
+        "violations": [
+          {
+            "rule": "time_of_day_restriction",
+            "message": "Access attempted at 23:55:33 (outside permitted window: 08:00-18:00 ET)"
+          }
+        ],
+        "exceptions": {
+          "override_available": true,
+          "override_requires": ["supervisor_approval", "justification"],
+          "emergency_override_contact": "on-call-security@intelgraph.io"
+        }
+      },
+      "audit": {
+        "logged_at": "2025-12-18T23:55:33.234Z",
+        "log_id": "audit_log_98768",
+        "retention_period_days": 2555,
+        "security_alert": false,
+        "notification_sent": true,
+        "notification_recipients": ["diana.analyst@intelgraph.io", "supervisor.lead@intelgraph.io"]
+      }
+    },
+    {
+      "verdict_id": "vrd_005_copilot_data_processing_allowed",
+      "timestamp": "2025-12-19T11:20:15Z",
+      "request": {
+        "principal": {
+          "user_id": "usr_analyst_eve",
+          "username": "eve.investigator@intelgraph.io",
+          "roles": ["analyst", "investigator", "copilot_user"],
+          "clearance_level": "SECRET",
+          "organization": "org_intel_division",
+          "tenant_id": "tenant_ic_alpha"
+        },
+        "resource": {
+          "type": "investigation",
+          "id": "inv_operation_starlight",
+          "classification": "SECRET",
+          "owner_tenant": "tenant_ic_alpha",
+          "labels": ["active_investigation", "ai_assisted"]
+        },
+        "action": "copilot:analyze",
+        "context": {
+          "ip_address": "10.0.5.77",
+          "user_agent": "IntelGraph-Web/1.5.2",
+          "time_of_day": "11:20:15",
+          "geo_location": "US-VA",
+          "mfa_verified": true,
+          "session_id": "sess_stu123vwx",
+          "copilot_model": "claude-opus-4-5",
+          "data_residency": "US-GOV-EAST"
+        }
+      },
+      "decision": {
+        "allow": true,
+        "reason": "User authorized for copilot usage; clearance sufficient; data residency compliant",
+        "policy_id": "pol_ai_copilot_authorization",
+        "policy_version": "1.1.2",
+        "evaluated_rules": [
+          "clearance_level_sufficient",
+          "copilot_role_check",
+          "data_residency_compliance",
+          "ai_model_approval_check",
+          "tenant_isolation_check"
+        ],
+        "conditions": [
+          {
+            "condition": "data_residency_compliance",
+            "details": "SECRET data processed in US-GOV-EAST region only (FedRAMP High compliant)"
+          },
+          {
+            "condition": "audit_trail_required",
+            "details": "All copilot interactions logged with full provenance chain"
+          }
+        ]
+      },
+      "audit": {
+        "logged_at": "2025-12-19T11:20:15.567Z",
+        "log_id": "audit_log_98769",
+        "retention_period_days": 2555,
+        "copilot_session_id": "copilot_sess_20251219_112015",
+        "provenance_chain_id": "prov_chain_inv_starlight_001",
+        "compliance_attestation": "FedRAMP_High_Copilot_v1.1"
+      }
+    }
+  ],
+  "statistics": {
+    "total_verdicts": 5,
+    "allowed": 2,
+    "denied": 3,
+    "allow_rate": 0.4,
+    "deny_rate": 0.6,
+    "security_alerts_triggered": 2,
+    "policy_violations": 5,
+    "average_evaluation_time_ms": 8.5
+  },
+  "policy_coverage": {
+    "policies_evaluated": [
+      "pol_rbac_clearance_based",
+      "pol_multi_tenant_isolation",
+      "pol_temporal_restrictions",
+      "pol_ai_copilot_authorization"
+    ],
+    "total_rules_evaluated": 18,
+    "unique_principals": 5,
+    "unique_resources": 5,
+    "unique_tenants": 2
+  },
+  "compliance_notes": {
+    "soc2_controls": ["CC6.1", "CC6.2", "PI1.1", "C1.1"],
+    "audit_retention": "7 years (2555 days) per DOD requirements",
+    "fedramp_level": "High",
+    "multi_tenancy_isolation": "Enforced at policy layer + database row-level security"
+  }
+}

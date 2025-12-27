@@ -236,7 +236,11 @@
       "Bash(# Add and commit the new agent coordination file\ngit add server/src/correctness-program/agent-coordination.ts && git commit -m \"\"$(cat <<''EOF''\nfeat(correctness): add agent coordination and governance system\n\nAdd sophisticated multi-agent coordination module with:\n- Correctness checks and governance invariants\n- Operational integrity tracking\n- Audit trail support\n- Provenance ledger integration\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\"\")",
       "Bash(# Commit correctness-program updates\ngit add server/src/correctness-program/index.ts server/src/correctness-program/types.ts && git commit -m \"\"$(cat <<''EOF''\nrefactor(correctness): update correctness program types and exports\n\nUpdate types and main module to support the new agent coordination system.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\"\")",
       "Bash(timeout 120 pnpm lint:*)",
-      "Bash(timeout 60 npx eslint:*)"
+      "Bash(timeout 60 npx eslint:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr merge:*)",
+      "Bash(git merge:*)",
+      "Bash(ls:*)"
     ],
     "deny": [],
     "ask": []

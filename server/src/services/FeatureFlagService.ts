@@ -1,9 +1,5 @@
 /**
- * Feature Flag Service
- *
- * Provides a unified interface for feature flag management across different providers.
- * Supports LaunchDarkly for production and file-based flags for development.
- *
+ * @file Provides a unified interface for feature flag management.
  * @module services/FeatureFlagService
  * @deprecated Use '@intelgraph/feature-flags' instead. See server/src/feature-flags/setup.ts
  */
@@ -13,7 +9,13 @@ import { resolve, isAbsolute } from 'path';
 import logger from '../utils/logger.js';
 
 /**
- * Feature flag configuration
+ * @interface FeatureFlagConfig
+ * @description Configuration for the FeatureFlagService, specifying the provider and its settings.
+ * @property {'local' | 'launchdarkly'} provider - The feature flag provider to use.
+ * @property {object} config - Provider-specific configuration.
+ * @property {string} [config.sdkKey] - SDK key for LaunchDarkly.
+ * @property {number} [config.timeout] - Initialization timeout in milliseconds.
+ * @property {string} [config.file] - Path to a local JSON file for the 'local' provider.
  */
 export interface FeatureFlagConfig {
   provider: 'local' | 'launchdarkly';
@@ -26,7 +28,14 @@ export interface FeatureFlagConfig {
 }
 
 /**
- * User context for feature flag evaluation
+ * @interface FlagUser
+ * @description Represents the user context for evaluating a feature flag.
+ * @property {string} key - A unique identifier for the user.
+ * @property {string} [email] - The user's email address.
+ * @property {string} [name] - The user's name.
+ * @property {string} [organization] - The organization the user belongs to.
+ * @property {string} [userRole] - The user's role.
+ * @property {Record<string, any>} [custom] - A map for any other custom attributes.
  */
 export interface FlagUser {
   key: string;
@@ -38,12 +47,20 @@ export interface FlagUser {
 }
 
 /**
- * Feature flag value types
+ * @typedef FlagValue
+ * @description Represents the possible value types of a feature flag.
  */
 export type FlagValue = boolean | string | number | object;
 
 /**
- * Feature flag metadata
+ * @interface FlagMetadata
+ * @description Contains descriptive metadata about a feature flag.
+ * @property {string} key - The unique key for the flag.
+ * @property {string} name - A human-readable name for the flag.
+ * @property {string} [description] - A description of what the flag controls.
+ * @property {'boolean' | 'string' | 'number' | 'json'} type - The data type of the flag's value.
+ * @property {FlagValue} defaultValue - The default value of the flag if evaluation fails or no rule matches.
+ * @property {string[]} [tags] - Tags for organizing and categorizing flags.
  */
 export interface FlagMetadata {
   key: string;
@@ -55,7 +72,11 @@ export interface FlagMetadata {
 }
 
 /**
- * Feature flag evaluation result
+ * @interface FlagEvaluation
+ * @description Represents the detailed result of a feature flag evaluation.
+ * @property {FlagValue} value - The evaluated value of the flag.
+ * @property {string} [reason] - An explanation of how the value was determined (e.g., 'TARGET_MATCH').
+ * @property {number} [variationIndex] - The index of the variation that was served.
  */
 export interface FlagEvaluation {
   value: FlagValue;
@@ -64,10 +85,9 @@ export interface FlagEvaluation {
 }
 
 /**
- * Feature Flag Service
- *
- * Manages feature flags across different providers with fallback support,
- * caching, and comprehensive error handling.
+ * @class FeatureFlagService
+ * @description Manages feature flags, supporting different providers like LaunchDarkly or a local file.
+ * It includes caching, fallback mechanisms, and robust error handling.
  */
 export class FeatureFlagService {
   private provider: 'local' | 'launchdarkly';
@@ -80,10 +100,10 @@ export class FeatureFlagService {
   private initializationPromise?: Promise<void>;
 
   /**
-   * Create a new Feature Flag Service
-   *
-   * @param config - Feature flag configuration
-   * @param logger - Logger instance (optional)
+   * @constructor
+   * @description Creates an instance of the FeatureFlagService.
+   * @param {FeatureFlagConfig} config - The configuration for the service.
+   * @param {any} [injectedLogger] - An optional logger instance.
    */
   constructor(
     private config: FeatureFlagConfig,
@@ -94,12 +114,11 @@ export class FeatureFlagService {
   }
 
   /**
-   * Initialize the feature flag service
-   *
-   * Sets up the appropriate provider (LaunchDarkly or local file-based)
-   * and performs initial validation.
-   *
-   * @throws {Error} If initialization fails
+   * @method initialize
+   * @description Initializes the feature flag service by setting up the configured provider.
+   * This method is idempotent and safe to call multiple times.
+   * @returns {Promise<void>}
+   * @throws {Error} If initialization of the provider fails.
    */
   async initialize(): Promise<void> {
     // Return existing initialization promise if already initializing
@@ -117,9 +136,9 @@ export class FeatureFlagService {
   }
 
   /**
-   * Internal initialization method
-   *
    * @private
+   * @method _initialize
+   * @description The internal implementation of the initialization logic.
    */
   private async _initialize(): Promise<void> {
     try {
@@ -140,10 +159,10 @@ export class FeatureFlagService {
   }
 
   /**
-   * Initialize LaunchDarkly provider
-   *
    * @private
-   * @throws {Error} If SDK key is missing or initialization fails
+   * @method initializeLaunchDarkly
+   * @description Sets up the LaunchDarkly SDK client.
+   * @throws {Error} If the SDK key is missing or the client fails to initialize.
    */
   private async initializeLaunchDarkly(): Promise<void> {
     const { sdkKey, timeout = 5000 } = this.config.config;
@@ -182,10 +201,10 @@ export class FeatureFlagService {
   }
 
   /**
-   * Initialize local file-based provider
-   *
    * @private
-   * @throws {Error} If configuration file cannot be loaded
+   * @method initializeLocalProvider
+   * @description Loads feature flags from a local JSON file.
+   * @throws {Error} If the configuration file cannot be read or parsed.
    */
   private async initializeLocalProvider(): Promise<void> {
     const { file = './config/feature-flags.json' } = this.config.config;
@@ -223,19 +242,16 @@ export class FeatureFlagService {
   }
 
   /**
-   * Check if a boolean feature flag is enabled
-   *
-   * @param flagKey - The feature flag key
-   * @param user - User context for evaluation
-   * @param defaultValue - Default value if flag doesn't exist (default: false)
-   * @returns Promise resolving to true if flag is enabled
+   * @method isEnabled
+   * @description Checks if a boolean feature flag is enabled for a given user context.
+   * @param {string} flagKey - The key of the feature flag to check.
+   * @param {FlagUser} user - The user context for evaluation.
+   * @param {boolean} [defaultValue=false] - The default value to return if the flag cannot be evaluated.
+   * @returns {Promise<boolean>} `true` if the flag is enabled, otherwise `false`.
    *
    * @example
    * ```typescript
-   * const isEnabled = await flagService.isEnabled('new-dashboard', {
-   *   key: 'user-123',
-   *   email: 'user@example.com'
-   * });
+   * const isEnabled = await flagService.isEnabled('new-dashboard', { key: 'user-123' });
    * ```
    */
   async isEnabled(
@@ -253,16 +269,18 @@ export class FeatureFlagService {
   }
 
   /**
-   * Get feature flag value
-   *
-   * @param flagKey - The feature flag key
-   * @param user - User context for evaluation
-   * @param defaultValue - Default value if flag doesn't exist
-   * @returns Promise resolving to flag value
+   * @method getValue
+   * @description Retrieves the value of a feature flag for a given user context.
+   * It handles caching, provider-specific evaluation, and fallbacks to a default value.
+   * @template T
+   * @param {string} flagKey - The key of the feature flag.
+   * @param {FlagUser} user - The user context for evaluation.
+   * @param {T} defaultValue - The default value to return if the flag cannot be evaluated.
+   * @returns {Promise<T>} The evaluated value of the flag.
    *
    * @example
    * ```typescript
-   * const cacheStrategy = await flagService.getValue('cache-strategy', user, 'redis');
+   * const theme = await flagService.getValue('ui-theme', { key: 'user-123' }, 'light');
    * ```
    */
   async getValue<T extends FlagValue = FlagValue>(
@@ -305,19 +323,17 @@ export class FeatureFlagService {
   }
 
   /**
-   * Get JSON feature flag value
-   *
-   * @param flagKey - The feature flag key
-   * @param user - User context for evaluation
-   * @param defaultValue - Default JSON value
-   * @returns Promise resolving to parsed JSON value
+   * @method getJSONValue
+   * @description Retrieves a JSON feature flag value and parses it into an object.
+   * @template T
+   * @param {string} flagKey - The key of the JSON feature flag.
+   * @param {FlagUser} user - The user context for evaluation.
+   * @param {T} defaultValue - The default object to return on failure.
+   * @returns {Promise<T>} The parsed JSON object from the flag's value.
    *
    * @example
    * ```typescript
-   * const config = await flagService.getJSONValue('api-rate-limit', user, {
-   *   requestsPerMinute: 100,
-   *   burstSize: 200
-   * });
+   * const config = await flagService.getJSONValue('api-config', { key: 'user-123' }, { retries: 3 });
    * ```
    */
   async getJSONValue<T extends FlagValue = any>(
@@ -346,9 +362,10 @@ export class FeatureFlagService {
   }
 
   /**
-   * Evaluate flag using LaunchDarkly
-   *
    * @private
+   * @method evaluateLaunchDarklyFlag
+   * @description Evaluates a flag using the LaunchDarkly SDK.
+   * @template T
    */
   private async evaluateLaunchDarklyFlag<T extends FlagValue>(
     flagKey: string,
@@ -399,9 +416,10 @@ export class FeatureFlagService {
   }
 
   /**
-   * Evaluate flag using local provider
-   *
    * @private
+   * @method evaluateLocalFlag
+   * @description Evaluates a flag using the local file provider, including rollout rules.
+   * @template T
    */
   private evaluateLocalFlag<T extends FlagValue>(
     flagKey: string,
@@ -446,9 +464,12 @@ export class FeatureFlagService {
   }
 
   /**
-   * Check if user matches a rollout rule
-   *
    * @private
+   * @method matchesRule
+   * @description Checks if a user's context matches a specific targeting rule.
+   * @param {FlagUser} user - The user context.
+   * @param {any} rule - The rule to evaluate against.
+   * @returns {boolean} `true` if the user matches the rule.
    */
   private matchesRule(user: FlagUser, rule: any): boolean {
     const { attribute, operator, values } = rule;
@@ -490,9 +511,11 @@ export class FeatureFlagService {
   }
 
   /**
-   * Simple string hash function for bucketing
-   *
    * @private
+   * @method hashString
+   * @description A simple string hashing function used for bucketing users in gradual rollouts.
+   * @param {string} str - The string to hash.
+   * @returns {number} An integer hash value.
    */
   private hashString(str: string): number {
     let hash = 0;
@@ -505,9 +528,11 @@ export class FeatureFlagService {
   }
 
   /**
-   * Get value from cache if not expired
-   *
    * @private
+   * @method getFromCache
+   * @description Retrieves a value from the cache if it exists and has not expired.
+   * @param {string} flagKey - The key of the flag to retrieve.
+   * @returns {FlagValue | null} The cached value or null.
    */
   private getFromCache(flagKey: string): FlagValue | null {
     const cached = this.cache.get(flagKey);
@@ -528,9 +553,11 @@ export class FeatureFlagService {
   }
 
   /**
-   * Set value in cache
-   *
    * @private
+   * @method setCache
+   * @description Stores a flag's evaluated value in the cache.
+   * @param {string} flagKey - The key of the flag.
+   * @param {FlagValue} value - The value to cache.
    */
   private setCache(flagKey: string, value: FlagValue): void {
     this.cache.set(flagKey, {
@@ -540,50 +567,45 @@ export class FeatureFlagService {
   }
 
   /**
-   * Track flag evaluation for monitoring
-   *
    * @private
+   * @method trackFlagEvaluation
+   * @description A placeholder for tracking flag evaluations for monitoring and analytics.
+   * @param {string} flagKey - The key of the evaluated flag.
+   * @param {FlagUser} user - The user context.
+   * @param {FlagValue} value - The resulting value.
    */
   private trackFlagEvaluation(flagKey: string, user: FlagUser, value: FlagValue): void {
-    // This would integrate with your metrics/monitoring system
-    // For example: Prometheus, Datadog, etc.
     this.logger.debug('Flag evaluation', {
       flag: flagKey,
       user: user.key,
       value,
       timestamp: new Date().toISOString(),
     });
-
-    // TODO: Emit metric for monitoring
-    // metrics.increment('feature_flag.evaluation', {
-    //   flag: flagKey,
-    //   value: String(value)
-    // });
   }
 
   /**
-   * Get all available feature flags
-   *
-   * @returns Array of flag metadata
+   * @method getAllFlags
+   * @description Retrieves metadata for all feature flags loaded by the service.
+   * @returns {FlagMetadata[]} An array of flag metadata.
    */
   getAllFlags(): FlagMetadata[] {
     return Array.from(this.localFlags.values());
   }
 
   /**
-   * Get feature flag metadata
-   *
-   * @param flagKey - The feature flag key
-   * @returns Flag metadata or undefined if not found
+   * @method getFlagMetadata
+   * @description Retrieves metadata for a specific feature flag.
+   * @param {string} flagKey - The key of the flag.
+   * @returns {FlagMetadata | undefined} The flag's metadata or undefined if not found.
    */
   getFlagMetadata(flagKey: string): FlagMetadata | undefined {
     return this.localFlags.get(flagKey);
   }
 
   /**
-   * Clear the cache
-   *
-   * Useful for testing or when you want to force fresh evaluations
+   * @method clearCache
+   * @description Clears the in-memory cache of flag evaluations.
+   * Useful for testing or forcing fresh evaluations.
    */
   clearCache(): void {
     this.cache.clear();
@@ -591,9 +613,9 @@ export class FeatureFlagService {
   }
 
   /**
-   * Gracefully shutdown the service
-   *
-   * Closes LaunchDarkly connection and cleans up resources
+   * @method shutdown
+   * @description Gracefully shuts down the service, closing any active connections.
+   * @returns {Promise<void>}
    */
   async shutdown(): Promise<void> {
     this.logger.info('Shutting down feature flag service...');
@@ -613,30 +635,29 @@ export class FeatureFlagService {
 }
 
 /**
- * Singleton instance for easy access
+ * @const {FeatureFlagService | null} instance
+ * @description The singleton instance of the FeatureFlagService.
+ * @private
  */
 let instance: FeatureFlagService | null = null;
 
 /**
- * Get or create feature flag service instance
- *
- * @param config - Feature flag configuration (required on first call)
- * @param logger - Logger instance (optional)
- * @returns Feature flag service instance
+ * @function getFeatureFlagService
+ * @description Gets the singleton instance of the FeatureFlagService.
+ * The configuration must be provided on the first call to initialize the service.
+ * @param {FeatureFlagConfig} [config] - The configuration, required on first call.
+ * @param {any} [logger] - An optional logger instance.
+ * @returns {FeatureFlagService} The singleton instance.
+ * @throws {Error} If called without configuration before the service is initialized.
  *
  * @example
  * ```typescript
- * // Initialize
- * const flagService = getFeatureFlagService({
- *   provider: 'launchdarkly',
- *   config: { sdkKey: process.env.LD_SDK_KEY }
- * });
- *
+ * // In your main application file
+ * const flagService = getFeatureFlagService({ provider: 'local' });
  * await flagService.initialize();
  *
- * // Use anywhere in your app
+ * // In another file
  * const service = getFeatureFlagService();
- * const isEnabled = await service.isEnabled('new-feature', user);
  * ```
  */
 export function getFeatureFlagService(
@@ -655,7 +676,9 @@ export function getFeatureFlagService(
 }
 
 /**
- * Reset singleton instance (useful for testing)
+ * @function resetFeatureFlagService
+ * @description Resets the singleton instance of the service.
+ * Primarily useful for testing purposes to ensure a clean state between tests.
  */
 export function resetFeatureFlagService(): void {
   if (instance) {

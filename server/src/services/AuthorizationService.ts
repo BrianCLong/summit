@@ -13,14 +13,35 @@ import { Pool } from 'pg';
 import logger from '../utils/logger.js';
 import { MultiTenantRBACManager, getMultiTenantRBAC } from '../auth/multi-tenant-rbac.js';
 
-// Interface definition (matching the prompt requirement)
+/**
+ * @interface AuthorizationService
+ * @description Defines the core methods for performing authorization checks.
+ */
 export interface AuthorizationService {
+  /**
+   * @method can
+   * @description Checks if a principal is allowed to perform a specific action on a resource.
+   * @param {Principal} principal - The user, service, or API key attempting the action.
+   * @param {Action} action - The action being performed (e.g., 'view', 'create').
+   * @param {ResourceRef} resource - A reference to the resource being accessed.
+   * @returns {Promise<boolean>} `true` if the action is permitted, `false` otherwise.
+   */
   can(
     principal: Principal,
     action: Action,
     resource: ResourceRef
   ): Promise<boolean>;
 
+  /**
+   * @method assertCan
+   * @description Asserts that a principal is allowed to perform an action on a resource.
+   * If the action is not permitted, it throws an error.
+   * @param {Principal} principal - The user, service, or API key attempting the action.
+   * @param {Action} action - The action being performed.
+   * @param {ResourceRef} resource - A reference to the resource being accessed.
+   * @returns {Promise<void>}
+   * @throws {Error} If the principal is not authorized.
+   */
   assertCan(
     principal: Principal,
     action: Action,
@@ -28,15 +49,46 @@ export interface AuthorizationService {
   ): Promise<void>;
 }
 
+/**
+ * @class AuthorizationServiceImpl
+ * @implements {AuthorizationService}
+ * @description An implementation of the AuthorizationService that uses a multi-tenant RBAC manager
+ * and OPA for fine-grained access control decisions.
+ *
+ * @example
+ * ```typescript
+ * const authService = new AuthorizationServiceImpl();
+ * const userPrincipal = { id: 'user-1', kind: 'user', tenantId: 'tenant-a', roles: ['analyst'] };
+ * const resourceRef = { type: 'investigation', id: 'inv-123', tenantId: 'tenant-a' };
+ *
+ * if (await authService.can(userPrincipal, 'view', resourceRef)) {
+ *   // allow access
+ * }
+ *
+ * try {
+ *   await authService.assertCan(userPrincipal, 'delete', resourceRef);
+ *   // proceed with deletion
+ * } catch (e) {
+ *   // handle authorization error
+ * }
+ * ```
+ */
 export class AuthorizationServiceImpl implements AuthorizationService {
   private rbac: MultiTenantRBACManager;
   private pool: Pool;
 
+  /**
+   * @constructor
+   * @description Initializes the service by getting instances of the RBAC manager and the database pool.
+   */
   constructor() {
     this.rbac = getMultiTenantRBAC();
     this.pool = getPostgresPool();
   }
 
+  /**
+   * @inheritdoc
+   */
   async can(
     principal: Principal,
     action: Action,
@@ -127,6 +179,9 @@ export class AuthorizationServiceImpl implements AuthorizationService {
     }
   }
 
+  /**
+   * @inheritdoc
+   */
   async assertCan(
     principal: Principal,
     action: Action,
@@ -138,6 +193,14 @@ export class AuthorizationServiceImpl implements AuthorizationService {
     }
   }
 
+  /**
+   * @private
+   * @method mapToPermission
+   * @description Maps a high-level action and resource type to a standard RBAC permission string (e.g., 'investigation:read').
+   * @param {Action} action - The action being performed (e.g., 'view').
+   * @param {string} resourceType - The type of the resource (e.g., 'investigation').
+   * @returns {string} The formatted permission string.
+   */
   private mapToPermission(action: Action, resourceType: string): string {
       // Simple mapping strategy
       // view -> read

@@ -244,8 +244,9 @@ export class AuthService {
   private metrics: PrometheusMetrics;
 
   /**
-   * Creates an instance of AuthService
-   * Initializes the PostgreSQL connection pool from the shared database configuration
+   * @constructor
+   * @description Creates an instance of AuthService.
+   * Initializes the PostgreSQL connection pool and sets up Prometheus metrics for authentication events.
    */
   constructor() {
     this.pool = getPostgresPool() as unknown as Pool;
@@ -258,26 +259,25 @@ export class AuthService {
   }
 
   /**
-   * Register a new user account
+   * @method register
+   * @description Registers a new user account.
+   * Creates a new user, hashes the password using Argon2, and generates the initial JWT and refresh tokens.
    *
-   * Creates a new user with the provided credentials, hashes the password using Argon2,
-   * and generates initial JWT access and refresh tokens.
-   *
-   * @param {UserData} userData - User registration data
-   * @returns {Promise<AuthResponse>} Authentication response with user and tokens
-   * @throws {Error} If user with email or username already exists
-   * @throws {Error} If database operation fails
+   * @param {UserData} userData - The user's registration data, including email, password, and name.
+   * @returns {Promise<AuthResponse>} An object containing the new user's details and authentication tokens.
+   * @throws {Error} Throws an error if a user with the same email or username already exists, or if the database operation fails.
    *
    * @example
    * ```typescript
-   * const response = await authService.register({
-   *   email: 'newuser@example.com',
-   *   password: 'SecurePassword123!',
-   *   firstName: 'John',
-   *   lastName: 'Smith',
+   * const authResponse = await authService.register({
+   *   email: 'new.user@example.com',
+   *   password: 'a-very-secure-password',
+   *   firstName: 'Jane',
+   *   lastName: 'Doe',
    *   role: 'ANALYST'
    * });
-   * console.log(response.token); // JWT access token
+   * console.log(authResponse.user.id);
+   * console.log(authResponse.token);
    * ```
    */
   async register(userData: UserData): Promise<AuthResponse> {
@@ -356,8 +356,14 @@ export class AuthService {
   }
 
   /**
-   * Login a user via external provider (SSO)
-   * TRUSTED CALLER ONLY: Does not verify password.
+   * @method externalLogin
+   * @description Logs in a user via an external provider (e.g., SSO).
+   * This method trusts the caller and does not verify a password. It finds the user by email
+   * and generates authentication tokens.
+   *
+   * @param {string} email - The email of the user to log in.
+   * @returns {Promise<AuthResponse>} An object containing the user's details and authentication tokens.
+   * @throws {Error} Throws an error if the user is not found.
    */
   async externalLogin(email: string): Promise<AuthResponse> {
     const client = await this.pool.connect();
@@ -401,24 +407,22 @@ export class AuthService {
   }
 
   /**
-   * Authenticate a user with email and password
+   * @method login
+   * @description Authenticates a user with their email and password.
+   * It verifies the password against the stored hash, updates the last login timestamp, and generates new tokens.
    *
-   * Validates user credentials against stored Argon2 hash, updates last login timestamp,
-   * and generates new JWT access and refresh tokens.
-   *
-   * @param {string} email - User's email address
-   * @param {string} password - User's plain text password
-   * @param {string} [ipAddress] - Client IP address for audit logging (optional)
-   * @param {string} [userAgent] - Client user agent for audit logging (optional)
-   * @returns {Promise<AuthResponse>} Authentication response with user and tokens
-   * @throws {Error} 'Invalid credentials' if email not found or password doesn't match
+   * @param {string} email - The user's email address.
+   * @param {string} password - The user's plain text password.
+   * @param {string} [ipAddress] - Optional client IP address for audit logging.
+   * @param {string} [userAgent] - Optional client user agent for audit logging.
+   * @returns {Promise<AuthResponse>} An object containing the user's details and authentication tokens.
+   * @throws {Error} Throws 'Invalid credentials' if the email is not found or the password does not match.
    *
    * @example
    * ```typescript
    * try {
    *   const auth = await authService.login('user@example.com', 'password123');
-   *   // Store auth.token for subsequent API requests
-   *   // Store auth.refreshToken for token refresh
+   *   // Store auth.token and auth.refreshToken securely
    * } catch (error) {
    *   console.error('Login failed:', error.message);
    * }
@@ -477,15 +481,13 @@ export class AuthService {
   }
 
   /**
-   * Generate JWT access token and refresh token pair
+   * @method generateTokens
+   * @description Generates a new JWT and refresh token pair for a user.
+   * The JWT is signed with the user's essential details, and the refresh token is stored in the database.
    *
-   * Creates a signed JWT with user payload and stores refresh token in database.
-   * Refresh tokens have 7-day validity and are stored for token rotation.
-   *
-   * @public
-   * @param {DatabaseUser} user - Database user record
-   * @param {PoolClient} client - PostgreSQL client for transaction
-   * @returns {Promise<TokenPair>} Object containing access token and refresh token
+   * @param {DatabaseUser} user - The user object from the database.
+   * @param {PoolClient} client - The PostgreSQL client to use for the database transaction.
+   * @returns {Promise<TokenPair>} An object containing the new JWT and refresh token.
    */
   async generateTokens(
     user: DatabaseUser,
@@ -520,19 +522,17 @@ export class AuthService {
   }
 
   /**
-   * Verify and decode a JWT access token
+   * @method verifyToken
+   * @description Verifies a JWT. It checks the token's signature, expiry, and whether it has been blacklisted.
    *
-   * Validates token signature, checks against blacklist, and returns user if valid.
-   * Returns null for invalid, expired, or blacklisted tokens.
-   *
-   * @param {string} token - JWT access token to verify
-   * @returns {Promise<User | null>} User object if valid, null otherwise
+   * @param {string} token - The JWT to verify.
+   * @returns {Promise<User | null>} The user object if the token is valid, otherwise null.
    *
    * @example
    * ```typescript
-   * const user = await authService.verifyToken(request.headers.authorization);
+   * const user = await authService.verifyToken(request.headers.authorization.split(' ')[1]);
    * if (!user) {
-   *   throw new UnauthorizedError('Invalid or expired token');
+   *   // Handle unauthorized access
    * }
    * ```
    */
@@ -575,8 +575,12 @@ export class AuthService {
   }
 
   /**
-   * Refresh access token using refresh token
-   * Implements token rotation - old refresh token is invalidated
+   * @method refreshAccessToken
+   * @description Refreshes a user's access token using a refresh token.
+   * It implements token rotation by invalidating the old refresh token and issuing a new pair.
+   *
+   * @param {string} refreshToken - The refresh token to use.
+   * @returns {Promise<TokenPair | null>} A new token pair if the refresh token is valid, otherwise null.
    */
   async refreshAccessToken(refreshToken: string): Promise<TokenPair | null> {
     const client = await this.pool.connect();
@@ -650,7 +654,11 @@ export class AuthService {
   }
 
   /**
-   * Revoke/blacklist an access token
+   * @method revokeToken
+   * @description Revokes an access token by adding its hash to a blacklist.
+   *
+   * @param {string} token - The JWT to revoke.
+   * @returns {Promise<boolean>} True if the token was successfully blacklisted, false otherwise.
    */
   async revokeToken(token: string): Promise<boolean> {
     try {
@@ -674,7 +682,12 @@ export class AuthService {
   }
 
   /**
-   * Logout - revoke all user sessions
+   * @method logout
+   * @description Logs out a user by revoking all their active sessions and, optionally, the current access token.
+   *
+   * @param {string} userId - The ID of the user to log out.
+   * @param {string} [currentToken] - The user's current JWT to blacklist.
+   * @returns {Promise<boolean>} True if the logout was successful, false otherwise.
    */
   async logout(userId: string, currentToken?: string): Promise<boolean> {
     const client = await this.pool.connect();
@@ -716,7 +729,12 @@ export class AuthService {
   }
 
   /**
-   * Hash token for blacklist storage (avoid storing full tokens)
+   * @private
+   * @method hashToken
+   * @description Hashes a token for storage in the blacklist, to avoid storing raw tokens.
+   *
+   * @param {string} token - The token to hash.
+   * @returns {string} The SHA256 hash of the token.
    */
   private hashToken(token: string): string {
     const crypto = require('crypto');
@@ -724,31 +742,21 @@ export class AuthService {
   }
 
   /**
-   * Check if a user has a specific permission
+   * @method hasPermission
+   * @description Checks if a user has a specific permission based on their role.
+   * The ADMIN role has wildcard access to all permissions.
    *
-   * Uses role-based permission checking against ROLE_PERMISSIONS mapping.
-   * ADMIN role has wildcard (*) access to all permissions.
-   *
-   * @param {User | null} user - User object to check permissions for
-   * @param {string} permission - Permission string in format 'resource:action'
-   * @returns {boolean} True if user has the permission, false otherwise
+   * @param {User | null} user - The user object to check.
+   * @param {string} permission - The permission string to check for (e.g., 'investigation:create').
+   * @returns {boolean} True if the user has the permission, false otherwise.
    *
    * @example
    * ```typescript
-   * // Check if user can create investigations
    * if (authService.hasPermission(currentUser, 'investigation:create')) {
-   *   await createInvestigation(data);
+   *   // Proceed with creating investigation
    * } else {
-   *   throw new ForbiddenError('Insufficient permissions');
+   *   // Deny access
    * }
-   *
-   * // Available permission patterns:
-   * // - investigation:create, investigation:read, investigation:update
-   * // - entity:create, entity:read, entity:update, entity:delete
-   * // - relationship:create, relationship:read, relationship:update, relationship:delete
-   * // - tag:create, tag:read, tag:delete
-   * // - graph:read, graph:export
-   * // - ai:request
    * ```
    */
   hasPermission(user: User | null, permission: string): boolean {

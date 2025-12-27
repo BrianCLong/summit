@@ -44,7 +44,8 @@ interface ServiceHealthError {
  *                 environment:
  *                   type: string
  */
-router.get('/health', async (_req: Request, res: Response) => {
+import { asyncHandler } from '../middleware/async-handler.js';
+router.get('/health', asyncHandler(async (_req: Request, res: Response) => {
   // Removed telemetry call to avoid spam
   res.status(200).json({
     status: 'ok',
@@ -52,7 +53,7 @@ router.get('/health', async (_req: Request, res: Response) => {
     uptime: process.uptime(),
     environment: process.env.NODE_ENV || 'development',
   });
-});
+}));
 
 /**
  * @openapi

@@ -18,10 +18,27 @@ export const JOB_QUEUE_GENERATE_REPORT = 'generate-report';
 
 /**
  * @class BatchJobService
- * @description Manages background job processing with pg-boss.
+ * @description Manages background job processing using pg-boss.
+ * This service is responsible for initializing the job queue, registering workers for different job types,
+ * and scheduling recurring or one-off tasks. It is implemented as a singleton.
  *
- * This singleton service initializes and configures pg-boss, registers job
- * processors, and schedules recurring tasks.
+ * @example
+ * ```typescript
+ * import BatchJobService from './BatchJobService';
+ *
+ * async function initializeApp() {
+ *   const jobService = BatchJobService.getInstance();
+ *   await jobService.start();
+ *
+ *   // Queue a report to be generated immediately
+ *   await jobService.queueReport('daily-summary', { date: new Date() });
+ *
+ *   // Schedule a weekly report
+ *   await jobService.scheduleReport('weekly-digest', '0 8 * * 1', { period: 'weekly' });
+ * }
+ *
+ * initializeApp();
+ * ```
  */
 class BatchJobService {
   private static instance: BatchJobService;
@@ -32,6 +49,12 @@ class BatchJobService {
     this.boss.on('error', error => console.error(`[PG-BOSS] Error: ${error.message}`));
   }
 
+  /**
+   * @method getInstance
+   * @description Gets the singleton instance of the BatchJobService.
+   * @static
+   * @returns {BatchJobService} The singleton instance.
+   */
   public static getInstance(): BatchJobService {
     if (!BatchJobService.instance) {
       BatchJobService.instance = new BatchJobService();
@@ -40,7 +63,11 @@ class BatchJobService {
   }
 
   /**
-   * Starts the job processor and schedules recurring jobs.
+   * @method start
+   * @description Starts the pg-boss instance, which begins processing jobs from the queue.
+   * It also registers all necessary job workers and schedules any recurring system jobs.
+   * This should be called once during application startup.
+   * @returns {Promise<void>}
    */
   public async start() {
     await this.boss.start();
@@ -49,6 +76,12 @@ class BatchJobService {
     await this.scheduleJobs();
   }
 
+  /**
+   * @private
+   * @method registerWorkers
+   * @description Registers all worker functions that process jobs from the queues.
+   * Each worker is associated with a specific job queue name.
+   */
   private async registerWorkers() {
       // Register revenue jobs
       await registerRevenueJobs(this.boss);
@@ -76,7 +109,10 @@ class BatchJobService {
   }
 
   /**
-   * Registers and schedules all recurring jobs for the application.
+   * @private
+   * @method scheduleJobs
+   * @description Schedules recurring system-level jobs using a cron-like syntax.
+   * It ensures that existing schedules are cleared on startup to prevent duplicates.
    */
   private async scheduleJobs() {
     // Unschedule existing jobs to prevent duplicates during restarts
@@ -90,41 +126,26 @@ class BatchJobService {
   }
 
   /**
-   * Schedules a one-off or recurring reporting job.
+   * @method scheduleReport
+   * @description Schedules a report to be generated on a recurring basis, defined by a cron string.
+   * @param {string} reportName - A descriptive name for the report being scheduled.
+   * @param {string} cron - The cron string defining the schedule (e.g., '0 8 * * 1' for every Monday at 8 AM).
+   * @param {any} data - The data required by the report generation job.
+   * @returns {Promise<string | null>} The ID of the scheduled job.
    */
   public async scheduleReport(reportName: string, cron: string, data: any) {
-      // We use a single queue 'generate-report' and pass the name in data
       const jobData = { ...data, reportName };
-      // pg-boss schedule key (the job name) should be unique per schedule, so we use reportName as key suffix if needed,
-      // but boss.schedule(queue, cron, data) uses queue as the grouping.
-      // Wait, pg-boss schedule signature is (name, cron, data, options).
-      // If we use 'generate-report' as name, all reports share the same schedule entry? No, that overrides.
-      // We need unique names for different schedules.
-      // BUT we want the WORKER to pick them up. The worker listens to a queue.
-      // In pg-boss, the first argument to schedule() is the queue name.
-      // To have different schedules on the same queue, pg-boss documentation says:
-      // "When scheduling a job, the job name is used as the schedule key." - Wait, no.
-      // "boss.schedule(queue, cron, data)"
-      // So if I call boss.schedule('generate-report', ...) multiple times, it might overwrite?
-      // Actually, standard pg-boss usage for singleton schedules is: schedule('job-name', cron).
-      // Worker listens to 'job-name'.
-      // If we want dynamic schedules, maybe we shouldn't use `schedule()` which is for system maintenance tasks usually.
-      // But the requirement is "Scheduled generation".
-      // If we use distinct queue names like `report-${name}`, we need wildcard listeners.
-      // If wildcard listeners are not supported or tricky, we can use a single queue `generate-report`
-      // but `schedule` might be limited.
-      // Let's check if we can use `send()` with `startAfter` or `repeat` options?
-      // `boss.send('generate-report', data, { retryLimit: 3, repeat: { cron: ... } })` ?
-      // Modern pg-boss supports `send(name, data, options)` where options has `cron` or `repeat`.
-      // Let's assume we use that pattern instead of `schedule()` which is often for singletons.
-
       const jobId = await this.boss.send(JOB_QUEUE_GENERATE_REPORT, jobData, { tz: 'UTC', ... (cron ? { cron } : {}) });
       console.log(`[PG-BOSS] Scheduled report '${reportName}' on queue '${JOB_QUEUE_GENERATE_REPORT}' with cron: ${cron}`);
       return jobId;
   }
 
   /**
-   * Queues an immediate reporting job.
+   * @method queueReport
+   * @description Adds a report generation job to the queue for immediate, one-time execution.
+   * @param {string} reportName - A descriptive name for the report.
+   * @param {any} data - The data required for the report generation.
+   * @returns {Promise<string | null>} The ID of the queued job.
    */
   public async queueReport(reportName: string, data: any) {
       const jobData = { ...data, reportName };
@@ -134,7 +155,10 @@ class BatchJobService {
   }
 
   /**
-   * Stops the job processor gracefully.
+   * @method stop
+   * @description Gracefully stops the job processor.
+   * This allows any currently running jobs to complete before shutting down.
+   * @returns {Promise<void>}
    */
   public async stop() {
     await this.boss.stop();

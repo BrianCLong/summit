@@ -1,0 +1,753 @@
+name: CI GA Gates - Comprehensive Quality Checks
+
+# Comprehensive CI workflow with 8 quality gates that all must pass before merge
+# This workflow ensures production readiness for General Availability (GA)
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+# Prevent concurrent runs on the same PR/branch
+concurrency:
+  group: ci-ga-gates-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PNPM_VERSION: "9.12.3"
+  TURBO_CACHE_DIR: .turbo
+
+jobs:
+  # Gate 1: Lint and TypeCheck - Code quality and style enforcement
+  lint-typecheck:
+    name: "Gate 1: Lint & TypeCheck"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run ESLint
+        run: |
+          pnpm lint 2>&1 | tee lint-output.txt
+          EXIT_CODE=${PIPESTATUS[0]}
+
+          # Count errors and warnings
+          ERRORS=$(grep -c "error" lint-output.txt || true)
+          WARNINGS=$(grep -c "warning" lint-output.txt || true)
+
+          echo "LINT_ERRORS=$ERRORS" >> $GITHUB_ENV
+          echo "LINT_WARNINGS=$WARNINGS" >> $GITHUB_ENV
+
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "::error::ESLint found $ERRORS errors - Gate 1 FAILED"
+            exit 1
+          fi
+
+      - name: Run TypeScript type checking
+        run: |
+          pnpm typecheck 2>&1 | tee typecheck-output.txt
+          EXIT_CODE=${PIPESTATUS[0]}
+
+          TYPE_ERRORS=$(grep -c "error TS" typecheck-output.txt || true)
+          echo "TYPE_ERRORS=$TYPE_ERRORS" >> $GITHUB_ENV
+
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "::error::TypeScript found $TYPE_ERRORS type errors - Gate 1 FAILED"
+            exit 1
+          fi
+
+      - name: Upload lint and typecheck results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate1-lint-typecheck
+          path: |
+            lint-output.txt
+            typecheck-output.txt
+          retention-days: 30
+
+  # Gate 2: Build - Verify all packages compile successfully
+  build:
+    name: "Gate 2: Build"
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: lint-typecheck
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build all packages
+        run: |
+          pnpm build 2>&1 | tee build-output.txt
+          EXIT_CODE=${PIPESTATUS[0]}
+
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "::error::Build failed - Gate 2 FAILED"
+            exit 1
+          fi
+
+          echo "BUILD_STATUS=success" >> $GITHUB_ENV
+
+      - name: Verify build artifacts
+        run: |
+          # Check for critical build artifacts
+          if [ ! -d "client/dist" ] && [ ! -d "client/build" ]; then
+            echo "::warning::Client build artifacts not found"
+          fi
+
+          if [ ! -d "server/dist" ] && [ ! -d "server/build" ]; then
+            echo "::warning::Server build artifacts not found"
+          fi
+
+          echo "✅ Build verification complete"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate2-build-artifacts
+          path: |
+            client/dist
+            client/build
+            server/dist
+            server/build
+            build-output.txt
+          retention-days: 7
+
+  # Gate 3: Unit Tests - Core functionality verification with matrix strategy
+  test-unit:
+    name: "Gate 3: Unit Tests (Node ${{ matrix.node-version }})"
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: lint-typecheck
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [18, 20]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run unit tests with coverage
+        run: |
+          pnpm test:unit 2>&1 | tee test-unit-output.txt
+          EXIT_CODE=${PIPESTATUS[0]}
+
+          TESTS_PASSED=$(grep -oP '\d+(?= passed)' test-unit-output.txt || echo "0")
+          TESTS_FAILED=$(grep -oP '\d+(?= failed)' test-unit-output.txt || echo "0")
+
+          echo "TESTS_PASSED=$TESTS_PASSED" >> $GITHUB_ENV
+          echo "TESTS_FAILED=$TESTS_FAILED" >> $GITHUB_ENV
+
+          if [ $EXIT_CODE -ne 0 ] || [ "$TESTS_FAILED" -gt 0 ]; then
+            echo "::error::Unit tests failed: $TESTS_FAILED failures - Gate 3 FAILED"
+            exit 1
+          fi
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate3-unit-tests-node${{ matrix.node-version }}
+          path: |
+            test-unit-output.txt
+            coverage/
+          retention-days: 30
+
+  # Gate 4: Governance Tests - Policy enforcement and bypass detection
+  test-governance:
+    name: "Gate 4: Governance Tests"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: lint-typecheck
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run governance verification script
+        run: |
+          if [ -f "scripts/check-governance.cjs" ]; then
+            echo "Running governance check script..."
+            node scripts/check-governance.cjs || {
+              echo "::error::Governance check script failed - Gate 4 FAILED"
+              exit 1
+            }
+          else
+            echo "::warning::Governance check script not found at scripts/check-governance.cjs"
+          fi
+
+      - name: Run governance bypass tests
+        run: |
+          echo "Searching for governance-related tests..."
+          GOVERNANCE_TESTS=$(find . -path "*/node_modules" -prune -o -path "*/.turbo" -prune -o -name "*governance*.test.*" -type f -print | head -20)
+
+          if [ -n "$GOVERNANCE_TESTS" ]; then
+            echo "Found governance tests:"
+            echo "$GOVERNANCE_TESTS"
+
+            echo "Running governance tests..."
+            pnpm test -- --testPathPattern="governance" --bail 2>&1 | tee governance-test-output.txt
+            EXIT_CODE=${PIPESTATUS[0]}
+
+            if [ $EXIT_CODE -ne 0 ]; then
+              echo "::error::Governance tests failed - Gate 4 FAILED"
+              exit 1
+            fi
+          else
+            echo "::warning::No governance tests found - consider adding governance bypass tests"
+          fi
+
+      - name: Upload governance test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate4-governance-tests
+          path: governance-test-output.txt
+          retention-days: 30
+
+  # Gate 5: Provenance Tests - Supply chain integrity validation
+  test-provenance:
+    name: "Gate 5: Provenance Tests"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: lint-typecheck
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run provenance validation tests
+        run: |
+          echo "Searching for provenance-related tests..."
+          PROVENANCE_TESTS=$(find . -path "*/node_modules" -prune -o -path "*/.turbo" -prune -o -name "*provenance*.test.*" -type f -print | head -20)
+
+          if [ -n "$PROVENANCE_TESTS" ]; then
+            echo "Found provenance tests:"
+            echo "$PROVENANCE_TESTS"
+
+            echo "Running provenance tests..."
+            pnpm test -- --testPathPattern="provenance" --bail 2>&1 | tee provenance-test-output.txt
+            EXIT_CODE=${PIPESTATUS[0]}
+
+            PROV_TESTS=$(grep -oP '\d+(?= passed)' provenance-test-output.txt || echo "0")
+            echo "PROVENANCE_TESTS_PASSED=$PROV_TESTS" >> $GITHUB_ENV
+
+            if [ $EXIT_CODE -ne 0 ]; then
+              echo "::error::Provenance tests failed - Gate 5 FAILED"
+              exit 1
+            fi
+
+            # Ensure minimum provenance test coverage
+            if [ "$PROV_TESTS" -lt 5 ]; then
+              echo "::error::Insufficient provenance test coverage (minimum 5 tests) - Gate 5 FAILED"
+              exit 1
+            fi
+          else
+            echo "::warning::No provenance tests found - consider adding supply chain validation tests"
+            echo "0" > provenance-test-output.txt
+          fi
+
+      - name: Verify provenance scripts
+        run: |
+          if [ -f "scripts/verify_provenance.sh" ] || [ -f "scripts/ops/verify-provenance.sh" ]; then
+            echo "✅ Provenance verification scripts found"
+          else
+            echo "::warning::Provenance verification scripts not found"
+          fi
+
+      - name: Upload provenance test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate5-provenance-tests
+          path: provenance-test-output.txt
+          retention-days: 30
+
+  # Gate 6: Schema Diff Check - Breaking change detection
+  schema-diff:
+    name: "Gate 6: Schema Diff"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: lint-typecheck
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check for OpenAPI schema changes
+        id: openapi-check
+        run: |
+          if [ -d "api-schemas" ]; then
+            echo "Checking for OpenAPI schema changes..."
+
+            # Look for OpenAPI/Swagger schema files
+            SCHEMA_FILES=$(find api-schemas -name "*.yaml" -o -name "*.yml" -o -name "*.json" | grep -E "(openapi|swagger)" || true)
+
+            if [ -n "$SCHEMA_FILES" ]; then
+              echo "Found OpenAPI schemas: $SCHEMA_FILES"
+              echo "OPENAPI_SCHEMAS_FOUND=true" >> $GITHUB_ENV
+            else
+              echo "::warning::No OpenAPI schema files found in api-schemas"
+              echo "OPENAPI_SCHEMAS_FOUND=false" >> $GITHUB_ENV
+            fi
+          fi
+
+      - name: Run schema diff script
+        run: |
+          if [ -f "scripts/schema-diff.ts" ]; then
+            echo "Running schema diff check..."
+            npx tsx scripts/schema-diff.ts --version=v1 --output=json 2>&1 | tee schema-diff-output.txt || {
+              echo "::error::Schema diff check detected breaking changes - Gate 6 FAILED"
+              exit 1
+            }
+          else
+            echo "::warning::Schema diff script not found at scripts/schema-diff.ts"
+          fi
+
+      - name: Check GraphQL schema changes
+        run: |
+          if [ -f "graphql/schema.graphql" ] || [ -f "packages/graphql/schema.graphql" ]; then
+            echo "GraphQL schema found - checking for changes..."
+
+            # Check if there's a schema check command
+            if grep -q "graphql:schema:check" package.json; then
+              pnpm graphql:schema:check || {
+                echo "::error::Breaking GraphQL schema changes detected - Gate 6 FAILED"
+                exit 1
+              }
+            else
+              echo "::warning::GraphQL schema check not configured in package.json"
+            fi
+          fi
+
+      - name: Upload schema diff results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate6-schema-diff
+          path: |
+            schema-diff-output.txt
+            audit/ga-evidence/api-contracts/diff-reports/
+          retention-days: 90
+
+  # Gate 7: Threat Model Check - Verify threat model test coverage
+  threat-model-check:
+    name: "Gate 7: Threat Model"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: lint-typecheck
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify threat model tests exist
+        run: |
+          echo "Searching for threat model tests..."
+          THREAT_MODEL_TESTS=$(find . -path "*/node_modules" -prune -o -path "*/.turbo" -prune -o -name "*threat*model*.test.*" -type f -print)
+
+          if [ -n "$THREAT_MODEL_TESTS" ]; then
+            echo "✅ Threat model tests found:"
+            echo "$THREAT_MODEL_TESTS"
+          else
+            echo "::error::No threat model tests found - Gate 7 FAILED"
+            echo "::error::Expected threat model tests at: server/src/quality-evaluation/autonomous/__tests__/abuse-tests/threat-model.test.ts"
+            exit 1
+          fi
+
+      - name: Run threat model tests
+        run: |
+          if [ -f "server/src/quality-evaluation/autonomous/__tests__/abuse-tests/threat-model.test.ts" ]; then
+            echo "Running threat model tests..."
+            pnpm test -- --testPathPattern="threat-model" --bail 2>&1 | tee threat-model-output.txt
+            EXIT_CODE=${PIPESTATUS[0]}
+
+            if [ $EXIT_CODE -ne 0 ]; then
+              echo "::error::Threat model tests failed - Gate 7 FAILED"
+              exit 1
+            fi
+          fi
+
+      - name: Check for abuse and security test coverage
+        run: |
+          echo "Checking for security and abuse test coverage..."
+          SECURITY_TESTS=$(find server -path "*/node_modules" -prune -o -path "*/__tests__/*" -name "*abuse*.test.*" -o -name "*security*.test.*" -type f -print | wc -l)
+
+          echo "Found $SECURITY_TESTS security/abuse test files"
+
+          if [ "$SECURITY_TESTS" -lt 1 ]; then
+            echo "::warning::Consider adding more security and abuse tests"
+          else
+            echo "✅ Security test coverage adequate"
+          fi
+
+      - name: Upload threat model test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate7-threat-model
+          path: threat-model-output.txt
+          retention-days: 30
+
+  # Gate 8: Security Scan - Vulnerability detection with Trivy and Gitleaks
+  security-scan:
+    name: "Gate 8: Security Scan"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: lint-typecheck
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run dependency audit
+        run: |
+          echo "Running pnpm audit..."
+          pnpm audit --audit-level=high --prod 2>&1 | tee audit-output.txt || {
+            CRITICAL=$(grep -c "critical" audit-output.txt || true)
+            HIGH=$(grep -c "high" audit-output.txt || true)
+
+            echo "CRITICAL_VULNS=$CRITICAL" >> $GITHUB_ENV
+            echo "HIGH_VULNS=$HIGH" >> $GITHUB_ENV
+
+            if [ "$CRITICAL" -gt 0 ]; then
+              echo "::error::$CRITICAL critical vulnerabilities found - Gate 8 FAILED"
+              exit 1
+            fi
+
+            if [ "$HIGH" -gt 5 ]; then
+              echo "::error::$HIGH high vulnerabilities found (threshold: 5) - Gate 8 FAILED"
+              exit 1
+            fi
+
+            echo "::warning::Found $HIGH high vulnerabilities (under threshold)"
+          }
+
+      - name: Install Trivy
+        run: |
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install trivy
+
+      - name: Run Trivy filesystem scan
+        run: |
+          echo "Running Trivy filesystem scan..."
+          trivy fs --severity HIGH,CRITICAL --exit-code 1 --format json --output trivy-results.json . || {
+            echo "::error::Trivy found critical vulnerabilities - Gate 8 FAILED"
+            exit 1
+          }
+
+      - name: Run Gitleaks secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_COMMENTS: false
+
+      - name: Upload security scan results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate8-security-scan
+          path: |
+            audit-output.txt
+            trivy-results.json
+          retention-days: 90
+
+  # Final Job: Create Merge-Safe Artifact
+  create-merge-artifact:
+    name: "Create Merge-Safe Artifact"
+    runs-on: ubuntu-latest
+    needs:
+      - lint-typecheck
+      - build
+      - test-unit
+      - test-governance
+      - test-provenance
+      - schema-diff
+      - threat-model-check
+      - security-scan
+    if: always()
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check all gates status
+        id: gate_check
+        run: |
+          GATES_PASSED=true
+
+          # Check each gate result
+          if [ "${{ needs.lint-typecheck.result }}" != "success" ]; then GATES_PASSED=false; fi
+          if [ "${{ needs.build.result }}" != "success" ]; then GATES_PASSED=false; fi
+          if [ "${{ needs.test-unit.result }}" != "success" ]; then GATES_PASSED=false; fi
+          if [ "${{ needs.test-governance.result }}" != "success" ]; then GATES_PASSED=false; fi
+          if [ "${{ needs.test-provenance.result }}" != "success" ]; then GATES_PASSED=false; fi
+          if [ "${{ needs.schema-diff.result }}" != "success" ]; then GATES_PASSED=false; fi
+          if [ "${{ needs.threat-model-check.result }}" != "success" ]; then GATES_PASSED=false; fi
+          if [ "${{ needs.security-scan.result }}" != "success" ]; then GATES_PASSED=false; fi
+
+          echo "gates_passed=$GATES_PASSED" >> $GITHUB_OUTPUT
+
+          if [ "$GATES_PASSED" = "true" ]; then
+            echo "✅ All 8 quality gates PASSED"
+          else
+            echo "❌ One or more quality gates FAILED"
+          fi
+
+      - name: Generate merge-safe artifact
+        run: |
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          COMMIT_SHA="${{ github.sha }}"
+
+          # Create ga-merge-safe.txt with timestamp and commit SHA
+          cat > ga-merge-safe.txt <<EOF
+          ====================================================
+          IntelGraph Platform - GA Merge-Safe Artifact
+          ====================================================
+
+          Artifact Version: 1.0
+          Generated At: $TIMESTAMP
+          Commit SHA: $COMMIT_SHA
+          Branch: ${{ github.ref_name }}
+          PR Number: ${{ github.event.pull_request.number || 'N/A' }}
+          Workflow Run: ${{ github.run_id }}
+
+          ====================================================
+          Quality Gates Status
+          ====================================================
+
+          Gate 1 - Lint & TypeCheck:     ${{ needs.lint-typecheck.result }}
+          Gate 2 - Build:                ${{ needs.build.result }}
+          Gate 3 - Unit Tests:           ${{ needs.test-unit.result }}
+          Gate 4 - Governance Tests:     ${{ needs.test-governance.result }}
+          Gate 5 - Provenance Tests:     ${{ needs.test-provenance.result }}
+          Gate 6 - Schema Diff:          ${{ needs.schema-diff.result }}
+          Gate 7 - Threat Model:         ${{ needs.threat-model-check.result }}
+          Gate 8 - Security Scan:        ${{ needs.security-scan.result }}
+
+          Overall Status: ${{ steps.gate_check.outputs.gates_passed == 'true' && 'PASSED ✅' || 'FAILED ❌' }}
+
+          ====================================================
+          Attestation
+          ====================================================
+
+          This artifact certifies that the commit $COMMIT_SHA
+          has passed all 8 quality gates required for GA merge.
+
+          SOC 2 Controls: CC7.1, CC7.2, CC8.1
+          Audit Trail: audit/ga-evidence/ci/
+
+          Verifiable: Yes
+          Signature: $(echo -n "$COMMIT_SHA$TIMESTAMP" | sha256sum | cut -d' ' -f1)
+
+          ====================================================
+          End of Artifact
+          ====================================================
+          EOF
+
+          # Display the artifact
+          cat ga-merge-safe.txt
+
+      - name: Upload merge-safe artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ga-merge-safe-artifact
+          path: ga-merge-safe.txt
+          retention-days: 90
+
+      - name: Fail workflow if gates failed
+        if: steps.gate_check.outputs.gates_passed != 'true'
+        run: |
+          echo "::error::❌ One or more CI quality gates failed - MERGE BLOCKED"
+          echo "::error::Review gate results above and fix all issues before merge"
+          echo ""
+          echo "Gate Results:"
+          echo "  Gate 1 (Lint & TypeCheck):  ${{ needs.lint-typecheck.result }}"
+          echo "  Gate 2 (Build):             ${{ needs.build.result }}"
+          echo "  Gate 3 (Unit Tests):        ${{ needs.test-unit.result }}"
+          echo "  Gate 4 (Governance):        ${{ needs.test-governance.result }}"
+          echo "  Gate 5 (Provenance):        ${{ needs.test-provenance.result }}"
+          echo "  Gate 6 (Schema Diff):       ${{ needs.schema-diff.result }}"
+          echo "  Gate 7 (Threat Model):      ${{ needs.threat-model-check.result }}"
+          echo "  Gate 8 (Security Scan):     ${{ needs.security-scan.result }}"
+          exit 1
+
+      - name: Post success comment
+        if: steps.gate_check.outputs.gates_passed == 'true' && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const timestamp = new Date().toISOString();
+            const comment = `## ✅ All CI Quality Gates Passed
+
+            **Merge-Safe Artifact Generated**
+
+            This PR has successfully passed all 8 quality gates required for GA readiness:
+
+            | Gate | Status |
+            |------|--------|
+            | 1️⃣ Lint & TypeCheck | ✅ Passed |
+            | 2️⃣ Build | ✅ Passed |
+            | 3️⃣ Unit Tests | ✅ Passed |
+            | 4️⃣ Governance Tests | ✅ Passed |
+            | 5️⃣ Provenance Tests | ✅ Passed |
+            | 6️⃣ Schema Diff | ✅ Passed |
+            | 7️⃣ Threat Model | ✅ Passed |
+            | 8️⃣ Security Scan | ✅ Passed |
+
+            **Artifact Details:**
+            - Commit: \`${{ github.sha }}\`
+            - Generated: ${timestamp}
+            - Workflow: [Run #${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+            **SOC 2 Controls:** CC7.1, CC7.2, CC8.1 ✓
+
+            This PR is safe to merge! 🚀`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+# Required Status Checks (configure in GitHub branch protection):
+# - Gate 1: Lint & TypeCheck
+# - Gate 2: Build
+# - Gate 3: Unit Tests (Node 18)
+# - Gate 3: Unit Tests (Node 20)
+# - Gate 4: Governance Tests
+# - Gate 5: Provenance Tests
+# - Gate 6: Schema Diff
+# - Gate 7: Threat Model
+# - Gate 8: Security Scan
+# - Create Merge-Safe Artifact

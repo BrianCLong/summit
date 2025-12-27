@@ -1,0 +1,518 @@
+{
+  "$schema": "https://intelgraph.io/schemas/provenance-chain.json",
+  "description": "Sample provenance chain demonstrating end-to-end data lineage for intelligence analysis workflow",
+  "chain_id": "prov_chain_inv_starlight_001",
+  "chain_version": "1.0",
+  "generated_at": "2025-12-27T11:00:00Z",
+  "investigation": {
+    "investigation_id": "inv_operation_starlight",
+    "investigation_name": "Operation Starlight",
+    "classification": "SECRET",
+    "created_at": "2025-11-01T10:00:00Z",
+    "created_by": "usr_analyst_eve",
+    "tenant_id": "tenant_ic_alpha"
+  },
+  "provenance_nodes": [
+    {
+      "node_id": "prov_node_001",
+      "sequence_number": 1,
+      "timestamp": "2025-11-01T10:00:00Z",
+      "event_type": "investigation_created",
+      "actor": {
+        "user_id": "usr_analyst_eve",
+        "username": "eve.investigator@intelgraph.io",
+        "roles": ["analyst", "investigator"],
+        "clearance_level": "SECRET"
+      },
+      "action": {
+        "type": "create",
+        "description": "Investigation created from intelligence report",
+        "resource_type": "investigation",
+        "resource_id": "inv_operation_starlight"
+      },
+      "inputs": [
+        {
+          "source_type": "intelligence_report",
+          "source_id": "report_ir_20251101_001",
+          "source_system": "external_intelligence_db",
+          "source_classification": "SECRET",
+          "ingestion_method": "manual_upload",
+          "hash": "sha256:1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p"
+        }
+      ],
+      "outputs": [
+        {
+          "resource_type": "investigation",
+          "resource_id": "inv_operation_starlight",
+          "classification": "SECRET",
+          "hash": "sha256:2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q"
+        }
+      ],
+      "metadata": {
+        "system_version": "intelgraph-v1.5.2",
+        "ip_address": "10.0.5.77",
+        "session_id": "sess_stu123vwx",
+        "compliance_attestation": true
+      },
+      "cryptographic_proof": {
+        "algorithm": "SHA-256",
+        "previous_node_hash": null,
+        "current_node_hash": "sha256:3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r",
+        "signature": "RSA-4096:sig_prov_node_001",
+        "signed_by": "prov-ledger-service",
+        "verified": true
+      }
+    },
+    {
+      "node_id": "prov_node_002",
+      "sequence_number": 2,
+      "timestamp": "2025-11-01T11:30:00Z",
+      "event_type": "entity_created",
+      "actor": {
+        "user_id": "usr_analyst_eve",
+        "username": "eve.investigator@intelgraph.io",
+        "roles": ["analyst", "investigator"],
+        "clearance_level": "SECRET"
+      },
+      "action": {
+        "type": "create",
+        "description": "Entity extracted from intelligence report via NLP pipeline",
+        "resource_type": "entity",
+        "resource_id": "ent_person_90001"
+      },
+      "inputs": [
+        {
+          "source_type": "investigation",
+          "source_id": "inv_operation_starlight",
+          "source_classification": "SECRET",
+          "hash": "sha256:2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q"
+        },
+        {
+          "source_type": "nlp_extraction",
+          "source_id": "nlp_job_20251101_002",
+          "source_system": "analytics_engine",
+          "extraction_confidence": 0.95,
+          "hash": "sha256:4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s"
+        }
+      ],
+      "outputs": [
+        {
+          "resource_type": "entity",
+          "resource_id": "ent_person_90001",
+          "entity_name": "John Doe",
+          "entity_type": "Person",
+          "classification": "SECRET",
+          "properties": {
+            "extracted_fields": ["name", "alias", "nationality"],
+            "confidence_score": 0.95
+          },
+          "hash": "sha256:5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t"
+        }
+      ],
+      "metadata": {
+        "system_version": "intelgraph-v1.5.2",
+        "analytics_engine_version": "3.2.1",
+        "nlp_model": "bert-base-ner-v2.1",
+        "processing_duration_ms": 1250,
+        "ip_address": "10.0.5.77",
+        "session_id": "sess_stu123vwx"
+      },
+      "cryptographic_proof": {
+        "algorithm": "SHA-256",
+        "previous_node_hash": "sha256:3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r",
+        "current_node_hash": "sha256:6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1u",
+        "signature": "RSA-4096:sig_prov_node_002",
+        "signed_by": "prov-ledger-service",
+        "verified": true
+      }
+    },
+    {
+      "node_id": "prov_node_003",
+      "sequence_number": 3,
+      "timestamp": "2025-11-02T09:15:00Z",
+      "event_type": "entity_enriched",
+      "actor": {
+        "user_id": "usr_analyst_eve",
+        "username": "eve.investigator@intelgraph.io",
+        "roles": ["analyst", "investigator"],
+        "clearance_level": "SECRET"
+      },
+      "action": {
+        "type": "update",
+        "description": "Entity enriched with external data source",
+        "resource_type": "entity",
+        "resource_id": "ent_person_90001"
+      },
+      "inputs": [
+        {
+          "source_type": "entity",
+          "source_id": "ent_person_90001",
+          "source_classification": "SECRET",
+          "hash": "sha256:5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t"
+        },
+        {
+          "source_type": "external_database",
+          "source_id": "watchlist_db_query_20251102",
+          "source_system": "treasury_ofac_watchlist",
+          "source_classification": "UNCLASSIFIED",
+          "query_timestamp": "2025-11-02T09:10:00Z",
+          "hash": "sha256:7g8h9i0j1k2l3m4n5o6p7q8r9s0t1u2v"
+        }
+      ],
+      "outputs": [
+        {
+          "resource_type": "entity",
+          "resource_id": "ent_person_90001",
+          "classification": "SECRET",
+          "enrichment_fields": ["ofac_match", "sanctions_list", "risk_score"],
+          "enrichment_metadata": {
+            "ofac_match": true,
+            "sanctions_list": "SDN",
+            "risk_score": 85
+          },
+          "hash": "sha256:8h9i0j1k2l3m4n5o6p7q8r9s0t1u2v3w"
+        }
+      ],
+      "metadata": {
+        "system_version": "intelgraph-v1.5.2",
+        "enrichment_connector": "ofac-watchlist-v2.0",
+        "processing_duration_ms": 850,
+        "ip_address": "10.0.5.77",
+        "session_id": "sess_stu123vwx",
+        "data_sharing_agreement": "DHS-OFAC-2025-001"
+      },
+      "cryptographic_proof": {
+        "algorithm": "SHA-256",
+        "previous_node_hash": "sha256:6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1u",
+        "current_node_hash": "sha256:9i0j1k2l3m4n5o6p7q8r9s0t1u2v3w4x",
+        "signature": "RSA-4096:sig_prov_node_003",
+        "signed_by": "prov-ledger-service",
+        "verified": true
+      }
+    },
+    {
+      "node_id": "prov_node_004",
+      "sequence_number": 4,
+      "timestamp": "2025-11-05T14:45:00Z",
+      "event_type": "relationship_created",
+      "actor": {
+        "user_id": "usr_analyst_eve",
+        "username": "eve.investigator@intelgraph.io",
+        "roles": ["analyst", "investigator"],
+        "clearance_level": "SECRET"
+      },
+      "action": {
+        "type": "create",
+        "description": "Relationship created via graph analytics",
+        "resource_type": "relationship",
+        "resource_id": "rel_transaction_90501"
+      },
+      "inputs": [
+        {
+          "source_type": "entity",
+          "source_id": "ent_person_90001",
+          "source_classification": "SECRET",
+          "hash": "sha256:8h9i0j1k2l3m4n5o6p7q8r9s0t1u2v3w"
+        },
+        {
+          "source_type": "entity",
+          "source_id": "ent_organization_80002",
+          "source_classification": "CONFIDENTIAL",
+          "hash": "sha256:0j1k2l3m4n5o6p7q8r9s0t1u2v3w4x5y"
+        },
+        {
+          "source_type": "graph_analytics",
+          "source_id": "analytics_job_20251105_003",
+          "source_system": "graph_analytics_engine",
+          "algorithm": "link_prediction_v3.1",
+          "confidence": 0.89,
+          "hash": "sha256:1k2l3m4n5o6p7q8r9s0t1u2v3w4x5y6z"
+        }
+      ],
+      "outputs": [
+        {
+          "resource_type": "relationship",
+          "resource_id": "rel_transaction_90501",
+          "relationship_type": "FINANCIAL_TRANSACTION",
+          "source_entity": "ent_person_90001",
+          "target_entity": "ent_organization_80002",
+          "classification": "SECRET",
+          "properties": {
+            "amount_usd": 250000,
+            "transaction_date": "2025-10-15",
+            "confidence_score": 0.89
+          },
+          "hash": "sha256:2l3m4n5o6p7q8r9s0t1u2v3w4x5y6z7a"
+        }
+      ],
+      "metadata": {
+        "system_version": "intelgraph-v1.5.2",
+        "analytics_engine_version": "3.2.1",
+        "graph_algorithm": "link_prediction_v3.1",
+        "processing_duration_ms": 3200,
+        "ip_address": "10.0.5.77",
+        "session_id": "sess_stu123vwx"
+      },
+      "cryptographic_proof": {
+        "algorithm": "SHA-256",
+        "previous_node_hash": "sha256:9i0j1k2l3m4n5o6p7q8r9s0t1u2v3w4x",
+        "current_node_hash": "sha256:3m4n5o6p7q8r9s0t1u2v3w4x5y6z7a8b",
+        "signature": "RSA-4096:sig_prov_node_004",
+        "signed_by": "prov-ledger-service",
+        "verified": true
+      }
+    },
+    {
+      "node_id": "prov_node_005",
+      "sequence_number": 5,
+      "timestamp": "2025-11-10T16:20:00Z",
+      "event_type": "copilot_analysis",
+      "actor": {
+        "user_id": "usr_analyst_eve",
+        "username": "eve.investigator@intelgraph.io",
+        "roles": ["analyst", "investigator", "copilot_user"],
+        "clearance_level": "SECRET"
+      },
+      "action": {
+        "type": "analyze",
+        "description": "AI copilot generated investigation insights",
+        "resource_type": "copilot_analysis",
+        "resource_id": "copilot_analysis_20251110_001"
+      },
+      "inputs": [
+        {
+          "source_type": "investigation",
+          "source_id": "inv_operation_starlight",
+          "source_classification": "SECRET",
+          "entities_count": 15,
+          "relationships_count": 42,
+          "hash": "sha256:4n5o6p7q8r9s0t1u2v3w4x5y6z7a8b9c"
+        },
+        {
+          "source_type": "ai_model",
+          "model_id": "claude-opus-4-5",
+          "model_version": "20251101",
+          "prompt_template_id": "investigation_summary_v2.1",
+          "data_residency": "US-GOV-EAST",
+          "compliance_level": "FedRAMP_High",
+          "hash": "sha256:5o6p7q8r9s0t1u2v3w4x5y6z7a8b9c0d"
+        }
+      ],
+      "outputs": [
+        {
+          "resource_type": "copilot_analysis",
+          "resource_id": "copilot_analysis_20251110_001",
+          "classification": "SECRET",
+          "analysis_content": {
+            "summary": "Analysis identified high-risk financial flow pattern...",
+            "key_findings": 3,
+            "recommended_actions": 5,
+            "confidence_score": 0.92
+          },
+          "hash": "sha256:6p7q8r9s0t1u2v3w4x5y6z7a8b9c0d1e"
+        }
+      ],
+      "metadata": {
+        "system_version": "intelgraph-v1.5.2",
+        "copilot_service_version": "2.1.0",
+        "ai_model": "claude-opus-4-5",
+        "processing_duration_ms": 8500,
+        "tokens_used": 15234,
+        "ip_address": "10.0.5.77",
+        "session_id": "sess_stu123vwx",
+        "copilot_session_id": "copilot_sess_20251110_162000",
+        "data_residency_verified": true,
+        "compliance_attestation": "FedRAMP_High_Copilot_v1.1"
+      },
+      "cryptographic_proof": {
+        "algorithm": "SHA-256",
+        "previous_node_hash": "sha256:3m4n5o6p7q8r9s0t1u2v3w4x5y6z7a8b",
+        "current_node_hash": "sha256:7q8r9s0t1u2v3w4x5y6z7a8b9c0d1e2f",
+        "signature": "RSA-4096:sig_prov_node_005",
+        "signed_by": "prov-ledger-service",
+        "verified": true
+      }
+    },
+    {
+      "node_id": "prov_node_006",
+      "sequence_number": 6,
+      "timestamp": "2025-11-12T10:00:00Z",
+      "event_type": "analyst_annotation",
+      "actor": {
+        "user_id": "usr_analyst_eve",
+        "username": "eve.investigator@intelgraph.io",
+        "roles": ["analyst", "investigator"],
+        "clearance_level": "SECRET"
+      },
+      "action": {
+        "type": "annotate",
+        "description": "Analyst added manual assessment and recommendations",
+        "resource_type": "investigation_annotation",
+        "resource_id": "annotation_20251112_001"
+      },
+      "inputs": [
+        {
+          "source_type": "copilot_analysis",
+          "source_id": "copilot_analysis_20251110_001",
+          "source_classification": "SECRET",
+          "hash": "sha256:6p7q8r9s0t1u2v3w4x5y6z7a8b9c0d1e"
+        },
+        {
+          "source_type": "analyst_knowledge",
+          "description": "Subject matter expertise on financial crime patterns",
+          "analyst_experience_years": 12,
+          "domain_expertise": "financial_intelligence"
+        }
+      ],
+      "outputs": [
+        {
+          "resource_type": "investigation_annotation",
+          "resource_id": "annotation_20251112_001",
+          "classification": "SECRET",
+          "annotation_content": {
+            "analyst_assessment": "Copilot findings corroborated by additional HUMINT...",
+            "risk_level": "HIGH",
+            "recommended_next_steps": [
+              "Request warrant for financial records",
+              "Coordinate with OFAC enforcement",
+              "Initiate surveillance operation"
+            ]
+          },
+          "hash": "sha256:8r9s0t1u2v3w4x5y6z7a8b9c0d1e2f3g"
+        }
+      ],
+      "metadata": {
+        "system_version": "intelgraph-v1.5.2",
+        "ip_address": "10.0.5.77",
+        "session_id": "sess_stu123vwx",
+        "annotation_duration_minutes": 45,
+        "human_analyst_hours": 0.75
+      },
+      "cryptographic_proof": {
+        "algorithm": "SHA-256",
+        "previous_node_hash": "sha256:7q8r9s0t1u2v3w4x5y6z7a8b9c0d1e2f",
+        "current_node_hash": "sha256:9s0t1u2v3w4x5y6z7a8b9c0d1e2f3g4h",
+        "signature": "RSA-4096:sig_prov_node_006",
+        "signed_by": "prov-ledger-service",
+        "verified": true
+      }
+    },
+    {
+      "node_id": "prov_node_007",
+      "sequence_number": 7,
+      "timestamp": "2025-11-15T14:30:00Z",
+      "event_type": "report_generated",
+      "actor": {
+        "user_id": "usr_analyst_eve",
+        "username": "eve.investigator@intelgraph.io",
+        "roles": ["analyst", "investigator"],
+        "clearance_level": "SECRET"
+      },
+      "action": {
+        "type": "export",
+        "description": "Final intelligence report generated for dissemination",
+        "resource_type": "intelligence_report",
+        "resource_id": "report_inv_starlight_final"
+      },
+      "inputs": [
+        {
+          "source_type": "investigation",
+          "source_id": "inv_operation_starlight",
+          "source_classification": "SECRET",
+          "hash": "sha256:4n5o6p7q8r9s0t1u2v3w4x5y6z7a8b9c"
+        },
+        {
+          "source_type": "copilot_analysis",
+          "source_id": "copilot_analysis_20251110_001",
+          "source_classification": "SECRET",
+          "hash": "sha256:6p7q8r9s0t1u2v3w4x5y6z7a8b9c0d1e"
+        },
+        {
+          "source_type": "investigation_annotation",
+          "source_id": "annotation_20251112_001",
+          "source_classification": "SECRET",
+          "hash": "sha256:8r9s0t1u2v3w4x5y6z7a8b9c0d1e2f3g"
+        }
+      ],
+      "outputs": [
+        {
+          "resource_type": "intelligence_report",
+          "resource_id": "report_inv_starlight_final",
+          "classification": "SECRET",
+          "report_metadata": {
+            "report_format": "PDF",
+            "page_count": 27,
+            "dissemination_controls": ["NOFORN", "ORCON"],
+            "distribution_list": ["DHS", "FBI", "Treasury"],
+            "c2pa_signed": true
+          },
+          "hash": "sha256:0t1u2v3w4x5y6z7a8b9c0d1e2f3g4h5i"
+        }
+      ],
+      "metadata": {
+        "system_version": "intelgraph-v1.5.2",
+        "report_generator_version": "1.8.0",
+        "ip_address": "10.0.5.77",
+        "session_id": "sess_stu123vwx",
+        "c2pa_manifest_id": "c2pa_manifest_20251115_001",
+        "digital_signature": "RSA-4096:sig_report_starlight",
+        "approver": "supervisory.analyst@intelgraph.io",
+        "approval_date": "2025-11-15T14:00:00Z"
+      },
+      "cryptographic_proof": {
+        "algorithm": "SHA-256",
+        "previous_node_hash": "sha256:9s0t1u2v3w4x5y6z7a8b9c0d1e2f3g4h",
+        "current_node_hash": "sha256:1u2v3w4x5y6z7a8b9c0d1e2f3g4h5i6j",
+        "signature": "RSA-4096:sig_prov_node_007",
+        "signed_by": "prov-ledger-service",
+        "verified": true
+      }
+    }
+  ],
+  "chain_summary": {
+    "total_nodes": 7,
+    "chain_duration_days": 14,
+    "chain_start": "2025-11-01T10:00:00Z",
+    "chain_end": "2025-11-15T14:30:00Z",
+    "unique_actors": 1,
+    "data_sources": 6,
+    "transformations": 7,
+    "classification_levels": ["UNCLASSIFIED", "CONFIDENTIAL", "SECRET"],
+    "highest_classification": "SECRET",
+    "ai_processing_steps": 2,
+    "human_analysis_steps": 5,
+    "external_data_integrations": 2
+  },
+  "chain_integrity": {
+    "chain_hash": "sha256:2v3w4x5y6z7a8b9c0d1e2f3g4h5i6j7k",
+    "chain_signature": "RSA-4096:sig_chain_inv_starlight_001",
+    "signed_by": "prov-ledger-service",
+    "signing_timestamp": "2025-11-15T14:30:01Z",
+    "all_nodes_verified": true,
+    "hash_chain_intact": true,
+    "signature_valid": true,
+    "tampering_detected": false
+  },
+  "compliance_metadata": {
+    "soc2_controls": ["PI1.2", "PI1.3", "PI1.4", "C1.1"],
+    "data_lineage_complete": true,
+    "audit_trail_immutable": true,
+    "provenance_transparency": "full",
+    "fedramp_compliant": true,
+    "c2pa_attestation": true,
+    "retention_period_days": 2555
+  },
+  "usage_notes": {
+    "purpose": "Demonstrates end-to-end provenance tracking from data ingestion to intelligence product dissemination",
+    "key_features": [
+      "Cryptographic hash chaining for tamper-evidence",
+      "Multi-source data integration with source attribution",
+      "AI/human collaboration tracking",
+      "Classification-aware processing",
+      "External data source integration",
+      "C2PA digital signature for final product",
+      "Complete audit trail for compliance"
+    ],
+    "validation": "Chain integrity verified via cryptographic signatures and hash chaining"
+  }
+}
