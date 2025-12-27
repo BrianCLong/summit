@@ -6,7 +6,7 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 import { dbConfig } from './config.js';
-import baseLogger from '../config/logger.js';
+import { logger as baseLogger, correlationStorage } from '../config/logger.js';
 import { ResidencyGuard } from '../data-residency/residency-guard.js';
 
 // Constants for pool monitoring and connection management
@@ -882,8 +882,19 @@ function recordSlowQuery(
     }
   }
 
+  const store = correlationStorage.getStore();
+  const traceId = store?.get('traceId');
+  const tenantId = store?.get('tenantId');
+
   logger.warn(
-    { pool: poolName, durationMs: duration, statement: statementName, sql },
+    {
+      pool: poolName,
+      durationMs: duration,
+      queryName: statementName,
+      traceId,
+      tenantId,
+      sql,
+    },
     'Slow PostgreSQL query detected',
   );
 }
@@ -1068,4 +1079,5 @@ export const __private = {
   inferQueryType,
   isRetryableError,
   CircuitBreaker,
+  recordSlowQuery,
 };
