@@ -3,12 +3,14 @@
 This service now ships a managed Postgres migration/seed workflow built on SQL files with online-safety guardrails, rollback support, and automated backup/restore hooks. It runs alongside the existing raw SQL and Neo4j migrations and is designed to be CI-friendly.
 
 ## Layout
+
 - **`db/managed-migrations/*.up.sql`** and matching **`*.down.sql`**: paired migrations that support rollback.
 - **`db/managed-seeds/*.sql`**: deterministic seed scripts tracked in `seed_history`.
 - **`src/db/migrations/versioning.ts`**: migration engine (applies, rolls back, seeds, status, backup/restore helpers).
 - **`scripts/managed-migrate.ts`**: CLI entrypoint for local use and CI.
 
 ## Running migrations
+
 ```bash
 cd server
 # Apply pending migrations (takes a pg_dump backup first)
@@ -22,6 +24,7 @@ npm run db:migrate:managed -- --dry-run
 ```
 
 ## Rollback and seeds
+
 ```bash
 # Roll back the latest migration
 npm run db:rollback
@@ -34,11 +37,13 @@ npm run db:seed:managed
 ```
 
 ## Zero-downtime protections
+
 - Online guardrails reject destructive statements (drop table/column, renames, type changes) unless `ALLOW_BREAKING_MIGRATIONS=true` is set.
 - Each migration is executed with `lock_timeout` and `statement_timeout` to avoid long blocking DDL.
 - Use additive changes (create table/column, backfill with defaults) for smooth deploys.
 
 ## Backup & restore
+
 ```bash
 # pg_dump prior to running migrations (default behavior of `db:migrate:managed`)
 npm run db:migrate:managed -- --backup-path /tmp/db-backup.sql
@@ -47,21 +52,28 @@ npm run db:migrate:managed -- --backup-path /tmp/db-backup.sql
 npm run db:backup -- --backup-path /tmp/db.sql
 npm run db:restore -- --restore /tmp/db.sql
 ```
+
 > Requires `POSTGRES_URL` or `DATABASE_URL` and access to `pg_dump`/`psql` binaries.
 
 ## Testing migrations
+
 ```bash
 # Validates SQL by running all migrations inside a single transaction and rolling back
 npm run db:migrate:test
+
+# Check for destructive operations (drop table/column, type changes, NOT NULL without default)
+MIGRATION_DESTRUCTIVE_OK=1 npm run db:migration:check -- --format json
 ```
 
 ## Online migration toolkit (expand/contract helpers)
+
 - Helpers live in `src/db/online-migrations` (expand/contract phases, dual-writes, backfills, parity checks).
 - Managed migration `202604150001_online_migration_toolkit.up.sql` seeds the tracking tables and adds the example column used by `runExampleDisplayNameMigration`.
 - Templates and docs: `server/templates/online-migration/expand-contract.template.ts` and `docs/online-migration-toolkit.md`.
 - Metrics are exposed via the `migrationMetricsRegistry` Prometheus registry (`online_migration_*` series).
 
 ## Adding migrations
+
 1. Add paired files under `db/managed-migrations` following `YYYYMMDDHHMM_name.up.sql`/`down.sql`.
 2. Keep changes additive to preserve zero-downtime.
 3. Optionally add seed data to `db/managed-seeds` for the new schema.
