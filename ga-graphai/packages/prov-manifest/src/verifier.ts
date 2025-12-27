@@ -1,11 +1,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { MANIFEST_VERSION, validateManifestStructure } from './schema.js';
+import { hashManifest, verifyManifestSignature } from './signature.js';
 import { fileExists, hashFile, toCanonicalPath } from './utils.js';
 import type {
   Manifest,
   ManifestFileEntry,
   ManifestTransform,
+  ManifestSignatureFile,
+  DisclosureSummary,
   VerificationIssue,
   VerificationReport
 } from './types.js';
@@ -170,6 +173,7 @@ export async function verifyManifest(bundlePath: string): Promise<VerificationRe
   const issues: VerificationIssue[] = [];
   const absoluteBundle = path.resolve(bundlePath);
   const manifestPath = path.join(absoluteBundle, 'manifest.json');
+  const signaturePath = path.join(absoluteBundle, 'signature.json');
 
   if (!(await fileExists(manifestPath))) {
     issues.push({ code: 'MISSING_MANIFEST', message: 'manifest.json not found', path: manifestPath });
@@ -263,6 +267,72 @@ export async function verifyManifest(bundlePath: string): Promise<VerificationRe
     issues.push(...verifyTransformChain(entry, entryMap, transformMap));
   }
 
+  const disclosureSummary: DisclosureSummary | undefined = manifest.disclosure
+    ? {
+        licenseId: manifest.disclosure.license?.id,
+        audiencePolicyId: manifest.disclosure.audience?.policyId,
+        redactionCount: manifest.disclosure.redactions?.length ?? 0,
+        redactedFields: Array.from(
+          new Set(manifest.disclosure.redactions?.map((redaction) => redaction.field) ?? []),
+        ),
+      }
+    : undefined;
+
+  let signature: VerificationReport['signature'];
+  if (await fileExists(signaturePath)) {
+    try {
+      const rawSignature = await fs.promises.readFile(signaturePath, 'utf8');
+      const signatureFile = JSON.parse(rawSignature) as ManifestSignatureFile;
+      const { valid, reason } = verifyManifestSignature(manifest, signatureFile);
+      if (!valid) {
+        issues.push({
+          code: 'SIGNATURE_INVALID',
+          message: reason ?? 'Signature invalid',
+          path: signaturePath,
+        });
+      }
+      signature = {
+        valid,
+        keyId: signatureFile.signature.keyId,
+        algorithm: signatureFile.signature.algorithm,
+        signedAt: signatureFile.signature.signedAt,
+        manifestHash: signatureFile.manifestHash,
+        reason,
+      };
+    } catch (error) {
+      issues.push({
+        code: 'SIGNATURE_INVALID',
+        message: 'Signature file invalid JSON',
+        path: signaturePath,
+        details: { error: (error as Error).message },
+      });
+      signature = { valid: false, reason: 'Signature file invalid JSON' };
+    }
+  } else if (manifest.signature) {
+    const signatureFile: ManifestSignatureFile = {
+      manifestHash: hashManifest(manifest),
+      signature: manifest.signature,
+    };
+    const { valid, reason } = verifyManifestSignature(manifest, signatureFile);
+    if (!valid) {
+      issues.push({
+        code: 'SIGNATURE_INVALID',
+        message: reason ?? 'Signature invalid',
+        path: manifestPath,
+      });
+    }
+    signature = {
+      valid,
+      keyId: manifest.signature.keyId,
+      algorithm: manifest.signature.algorithm,
+      signedAt: manifest.signature.signedAt,
+      manifestHash: signatureFile.manifestHash,
+      reason,
+    };
+  } else {
+    signature = undefined;
+  }
+
   return {
     bundlePath: absoluteBundle,
     manifestPath,
@@ -270,6 +340,8 @@ export async function verifyManifest(bundlePath: string): Promise<VerificationRe
     valid: issues.length === 0,
     issues,
     filesChecked,
-    transformsChecked
+    transformsChecked,
+    signature,
+    disclosure: disclosureSummary,
   };
 }

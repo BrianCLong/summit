@@ -1,8 +1,10 @@
 import assert from 'node:assert';
 import crypto from 'node:crypto';
+import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { toCanonicalPath, verifyManifest } from '../src/index.js';
+import { signManifest, toCanonicalPath, verifyManifest } from '../src/index.js';
 
 const fixturesRoot = path.join(process.cwd(), 'tests', 'fixtures');
 
@@ -42,4 +44,46 @@ test('path traversal safety property', () => {
     const candidate = i % 2 === 0 ? `../${token}` : `/abs/${token}`;
     assert.throws(() => toCanonicalPath(root, candidate));
   }
+});
+
+test('verifies signed disclosure bundles', async () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'prov-manifest-'));
+  const manifest = {
+    manifestVersion: '1.0.0',
+    createdAt: new Date('2025-01-01T00:00:00Z').toISOString(),
+    documents: [
+      {
+        id: 'doc-1',
+        path: 'doc.txt',
+        sha256: crypto.createHash('sha256').update('hello').digest('hex'),
+      },
+    ],
+    disclosure: {
+      audience: { policyId: 'aud:public', label: 'Public' },
+      redactions: [
+        {
+          field: 'email',
+          path: 'doc.txt',
+          reason: 'PII',
+          appliedAt: new Date('2025-01-01T00:00:00Z').toISOString(),
+        },
+      ],
+      license: { id: 'CC-BY-4.0', name: 'Creative Commons BY 4.0' },
+    },
+  };
+  fs.writeFileSync(path.join(tempDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
+  fs.writeFileSync(path.join(tempDir, 'doc.txt'), 'hello');
+
+  const { privateKey, publicKey } = crypto.generateKeyPairSync('ed25519');
+  const signatureFile = signManifest(manifest, {
+    privateKeyPem: privateKey.export({ type: 'pkcs8', format: 'pem' }).toString(),
+    publicKeyPem: publicKey.export({ type: 'spki', format: 'pem' }).toString(),
+    keyId: 'test-key',
+  });
+  fs.writeFileSync(path.join(tempDir, 'signature.json'), JSON.stringify(signatureFile, null, 2));
+
+  const report = await verifyManifest(tempDir);
+  assert.equal(report.valid, true);
+  assert.equal(report.signature?.valid, true);
+  assert.equal(report.disclosure?.licenseId, 'CC-BY-4.0');
 });

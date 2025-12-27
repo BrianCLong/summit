@@ -65,6 +65,35 @@ export const validateManifest = (manifest) => {
     });
   }
 
+  if (manifest.disclosure) {
+    const { disclosure } = manifest;
+    if (!disclosure.audience || typeof disclosure.audience.policyId !== 'string') {
+      errors.push('disclosure.audience.policyId must be a string');
+    }
+    if (!disclosure.audience || typeof disclosure.audience.label !== 'string') {
+      errors.push('disclosure.audience.label must be a string');
+    }
+    if (!Array.isArray(disclosure.redactions)) {
+      errors.push('disclosure.redactions must be an array');
+    }
+    if (!disclosure.license || typeof disclosure.license.id !== 'string') {
+      errors.push('disclosure.license.id must be a string');
+    }
+    if (!disclosure.license || typeof disclosure.license.name !== 'string') {
+      errors.push('disclosure.license.name must be a string');
+    }
+  }
+
+  if (manifest.signature) {
+    const { signature } = manifest;
+    if (!signature.keyId || typeof signature.keyId !== 'string') {
+      errors.push('signature.keyId must be a string');
+    }
+    if (!signature.signature || typeof signature.signature !== 'string') {
+      errors.push('signature.signature must be a string');
+    }
+  }
+
   return errors;
 };
 

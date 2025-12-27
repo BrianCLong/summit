@@ -51,6 +51,71 @@
           "sha256": { "type": "string", "pattern": "^[a-fA-F0-9]{64}$" }
         }
       }
+    },
+    "disclosure": {
+      "type": "object",
+      "required": ["audience", "redactions", "license"],
+      "properties": {
+        "audience": {
+          "type": "object",
+          "required": ["policyId", "label"],
+          "properties": {
+            "policyId": { "type": "string" },
+            "label": { "type": "string" },
+            "decision": { "type": "string", "enum": ["allow", "deny", "conditional"] }
+          },
+          "additionalProperties": false
+        },
+        "redactions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["field", "path", "reason", "appliedAt"],
+            "properties": {
+              "field": { "type": "string" },
+              "path": { "type": "string" },
+              "reason": { "type": "string" },
+              "policyId": { "type": "string" },
+              "appliedBy": { "type": "string" },
+              "appliedAt": { "type": "string", "format": "date-time" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "license": {
+          "type": "object",
+          "required": ["id", "name"],
+          "properties": {
+            "id": { "type": "string" },
+            "name": { "type": "string" },
+            "url": { "type": "string" },
+            "notes": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "redactionSummary": {
+          "type": "object",
+          "required": ["total", "fields"],
+          "properties": {
+            "total": { "type": "integer", "minimum": 0 },
+            "fields": { "type": "array", "items": { "type": "string" } }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "signature": {
+      "type": "object",
+      "required": ["algorithm", "keyId", "publicKey", "signature", "signedAt"],
+      "properties": {
+        "algorithm": { "type": "string", "enum": ["ed25519"] },
+        "keyId": { "type": "string" },
+        "publicKey": { "type": "string" },
+        "signature": { "type": "string" },
+        "signedAt": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false

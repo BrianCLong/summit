@@ -27,6 +27,71 @@ export const manifestSchema: Record<string, unknown> = {
     transforms: {
       type: 'array',
       items: { $ref: '#/$defs/manifestTransform' }
+    },
+    disclosure: {
+      type: 'object',
+      required: ['audience', 'redactions', 'license'],
+      additionalProperties: false,
+      properties: {
+        audience: {
+          type: 'object',
+          required: ['policyId', 'label'],
+          additionalProperties: false,
+          properties: {
+            policyId: { type: 'string' },
+            label: { type: 'string' },
+            decision: { type: 'string', enum: ['allow', 'deny', 'conditional'] }
+          }
+        },
+        redactions: {
+          type: 'array',
+          items: {
+            type: 'object',
+            required: ['field', 'path', 'reason', 'appliedAt'],
+            additionalProperties: false,
+            properties: {
+              field: { type: 'string' },
+              path: { type: 'string' },
+              reason: { type: 'string' },
+              policyId: { type: 'string' },
+              appliedBy: { type: 'string' },
+              appliedAt: { type: 'string', format: 'date-time' }
+            }
+          }
+        },
+        license: {
+          type: 'object',
+          required: ['id', 'name'],
+          additionalProperties: false,
+          properties: {
+            id: { type: 'string' },
+            name: { type: 'string' },
+            url: { type: 'string' },
+            notes: { type: 'string' }
+          }
+        },
+        redactionSummary: {
+          type: 'object',
+          required: ['total', 'fields'],
+          additionalProperties: false,
+          properties: {
+            total: { type: 'integer', minimum: 0 },
+            fields: { type: 'array', items: { type: 'string' } }
+          }
+        }
+      }
+    },
+    signature: {
+      type: 'object',
+      required: ['algorithm', 'keyId', 'publicKey', 'signature', 'signedAt'],
+      additionalProperties: false,
+      properties: {
+        algorithm: { type: 'string', enum: ['ed25519'] },
+        keyId: { type: 'string' },
+        publicKey: { type: 'string' },
+        signature: { type: 'string' },
+        signedAt: { type: 'string', format: 'date-time' }
+      }
     }
   },
   $defs: {
@@ -144,6 +209,28 @@ export function validateManifestStructure(manifest: unknown): { valid: boolean; 
       errors.push('transforms must be an array when provided');
     } else {
       candidate.transforms.forEach((transform, idx) => validateTransform(transform, idx, errors));
+    }
+  }
+  if (candidate.disclosure) {
+    if (!candidate.disclosure.audience?.policyId || !candidate.disclosure.audience?.label) {
+      errors.push('disclosure.audience must include policyId and label');
+    }
+    if (!candidate.disclosure.license?.id || !candidate.disclosure.license?.name) {
+      errors.push('disclosure.license must include id and name');
+    }
+    if (!Array.isArray(candidate.disclosure.redactions)) {
+      errors.push('disclosure.redactions must be an array');
+    } else {
+      candidate.disclosure.redactions.forEach((redaction, idx) => {
+        if (!redaction.field || !redaction.path || !redaction.reason) {
+          errors.push(`disclosure.redactions[${idx}] must include field, path, and reason`);
+        }
+      });
+    }
+  }
+  if (candidate.signature) {
+    if (!candidate.signature.keyId || !candidate.signature.signature) {
+      errors.push('signature must include keyId and signature');
     }
   }
 

@@ -6,8 +6,14 @@ import type {
   CandidateScore,
   EntityRecord,
   ExplainResponse,
+  MergePreview,
+  MergePreviewRequest,
   MergeRecord,
   MergeRequest,
+  ScoringModel,
+  ScoringOptions,
+  ScoreDecision,
+  ScoreThresholds,
 } from './types.js';
 
 export interface StructuredLogger {
@@ -34,6 +40,53 @@ export interface ObservabilityOptions {
   logger?: StructuredLogger;
   metrics?: MetricsRecorder;
   tracer?: Tracer;
+}
+
+const DEFAULT_THRESHOLDS: ScoreThresholds = {
+  autoMerge: 0.9,
+  review: 0.75,
+};
+
+const DEFAULT_RULES_MODEL: ScoringModel = {
+  id: 'rules-v1',
+  version: '1.0.0',
+  hash: 'rules-only',
+};
+
+const DEFAULT_ML_MODEL: ScoringModel = {
+  id: 'ml-lite',
+  version: '0.9.0',
+  hash: 'ml-lite-2026-01-12',
+};
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
+function resolveThresholds(input?: ScoreThresholds): ScoreThresholds {
+  return {
+    autoMerge: input?.autoMerge ?? DEFAULT_THRESHOLDS.autoMerge,
+    review: input?.review ?? DEFAULT_THRESHOLDS.review,
+  };
+}
+
+function resolveScoring(input?: ScoringOptions): Required<ScoringOptions> {
+  const mlEnabled = input?.mlEnabled ?? false;
+  return {
+    mlEnabled,
+    mlBlend: input?.mlBlend ?? (mlEnabled ? 0.35 : 0),
+    model: input?.model ?? (mlEnabled ? DEFAULT_ML_MODEL : DEFAULT_RULES_MODEL),
+  };
+}
+
+function decideScore(score: number, thresholds: ScoreThresholds): ScoreDecision {
+  if (score >= thresholds.autoMerge) {
+    return 'auto-merge';
+  }
+  if (score >= thresholds.review) {
+    return 'review';
+  }
+  return 'reject';
 }
 
 function tokenize(text: string): string[] {
@@ -109,6 +162,8 @@ function propertyOverlap(a: EntityRecord, b: EntityRecord): number {
 function buildCandidateScore(
   entity: EntityRecord,
   candidate: EntityRecord,
+  scoring: ScoringOptions,
+  thresholds: ScoreThresholds,
 ): CandidateScore {
   const nameTokensA = tokenize(entity.name);
   const nameTokensB = tokenize(candidate.name);
@@ -129,17 +184,33 @@ function buildCandidateScore(
         : 0,
     editDistance,
   };
-  const score =
+  const ruleScore =
     features.nameSimilarity * 0.35 +
     (features.typeMatch ? 0.2 : 0) +
     features.propertyOverlap * 0.15 +
     features.semanticSimilarity * 0.2 +
     features.phoneticSimilarity * 0.05 +
     features.editDistance * 0.05;
+  let mlScore: number | undefined;
+  if (scoring.mlEnabled) {
+    const raw =
+      features.nameSimilarity * 0.32 +
+      (features.typeMatch ? 0.15 : 0) +
+      features.propertyOverlap * 0.18 +
+      features.semanticSimilarity * 0.2 +
+      features.phoneticSimilarity * 0.05 +
+      features.editDistance * 0.1;
+    mlScore = clamp(raw, 0, 1);
+  }
+  const finalScore = scoring.mlEnabled && mlScore !== undefined
+    ? clamp(ruleScore * (1 - scoring.mlBlend) + mlScore * scoring.mlBlend, 0, 1)
+    : clamp(ruleScore, 0, 1);
+  const decision = decideScore(finalScore, thresholds);
   const rationale = [
     `Name similarity ${(features.nameSimilarity * 100).toFixed(1)}%`,
     `Type ${features.typeMatch ? 'matches' : 'differs'}`,
     `Property overlap ${(features.propertyOverlap * 100).toFixed(1)}%`,
+    `Rule score ${(ruleScore * 100).toFixed(1)}%`,
   ];
   if (features.semanticSimilarity > 0) {
     rationale.push(
@@ -149,11 +220,20 @@ function buildCandidateScore(
   if (features.phoneticSimilarity === 1) {
     rationale.push('Phonetic signature aligned');
   }
+  if (mlScore !== undefined) {
+    rationale.push(`ML score ${(mlScore * 100).toFixed(1)}%`);
+  }
   return {
     entityId: candidate.id,
-    score: Number(score.toFixed(3)),
-    features,
+    score: Number(finalScore.toFixed(3)),
+    features: {
+      ...features,
+      ruleScore: Number(ruleScore.toFixed(3)),
+      mlScore: mlScore !== undefined ? Number(mlScore.toFixed(3)) : undefined,
+      finalScore: Number(finalScore.toFixed(3)),
+    },
     rationale,
+    decision,
   };
 }
 
@@ -185,13 +265,17 @@ export class EntityResolutionService {
       tenantId: request.tenantId,
       entityId: request.entity.id,
     });
+    const thresholds = resolveThresholds(request.thresholds);
+    const scoring = resolveScoring(request.scoring);
     const topK = request.topK ?? 5;
     const population = request.population.filter(
       (candidate) => candidate.tenantId === request.tenantId,
     );
     const scored = population
       .filter((candidate) => candidate.id !== request.entity.id)
-      .map((candidate) => buildCandidateScore(request.entity, candidate))
+      .map((candidate) =>
+        buildCandidateScore(request.entity, candidate, scoring, thresholds),
+      )
       .sort((a, b) => b.score - a.score)
       .slice(0, topK);
     const durationMs = Date.now() - startedAt;
@@ -208,10 +292,17 @@ export class EntityResolutionService {
     this.metricsIncrement('intelgraph_er_candidates_total', 1, {
       tenantId: request.tenantId,
     });
-    span?.end({ durationMs, candidateCount: scored.length, topScore: scored[0]?.score });
+    span?.end({
+      durationMs,
+      candidateCount: scored.length,
+      topScore: scored[0]?.score,
+      model: scoring.model.id,
+    });
     return {
       requestId: randomUUID(),
       candidates: scored,
+      thresholds,
+      model: scoring.model,
     };
   }
 
@@ -222,6 +313,10 @@ export class EntityResolutionService {
       primaryId: request.primaryId,
       duplicateId: request.duplicateId,
     });
+    const model =
+      request.model ??
+      (featureSource.features.mlScore ? DEFAULT_ML_MODEL : DEFAULT_RULES_MODEL);
+    const decision = featureSource.decision ?? decideScore(featureSource.score, DEFAULT_THRESHOLDS);
     const mergeId = randomUUID();
     const record: MergeRecord = {
       mergeId,
@@ -233,6 +328,9 @@ export class EntityResolutionService {
       policyTags: request.policyTags,
       mergedAt: this.clock().toISOString(),
       reversible: true,
+      score: featureSource.score,
+      decision,
+      modelHash: model.hash,
     };
     this.merges.set(mergeId, record);
     this.auditLog.push({
@@ -243,6 +341,9 @@ export class EntityResolutionService {
       target: mergeId,
       reason: request.reason,
       createdAt: record.mergedAt,
+      modelHash: model.hash,
+      decision,
+      score: featureSource.score,
     });
     this.explanations.set(mergeId, {
       mergeId,
@@ -253,6 +354,7 @@ export class EntityResolutionService {
       ],
       policyTags: request.policyTags,
       createdAt: record.mergedAt,
+      modelHash: model.hash,
     });
     const durationMs = Date.now() - startedAt;
     this.logInfo('intelgraph.entities.merge', {
@@ -260,6 +362,7 @@ export class EntityResolutionService {
       mergeId,
       durationMs,
       policyTags: request.policyTags,
+      decision,
     });
     this.metricsIncrement('intelgraph_er_merges_total', 1, {
       tenantId: request.tenantId,
@@ -307,6 +410,56 @@ export class EntityResolutionService {
     span?.end({ durationMs });
   }
 
+  previewMerge(request: MergePreviewRequest): MergePreview {
+    const startedAt = Date.now();
+    const span = this.startSpan('intelgraph.entities.merge.preview', {
+      tenantId: request.tenantId,
+      primaryId: request.primary.id,
+      duplicateId: request.duplicate.id,
+    });
+    const thresholds = resolveThresholds(request.thresholds);
+    const scoring = resolveScoring(request.scoring);
+    const score = buildCandidateScore(request.primary, request.duplicate, scoring, thresholds);
+    const keys = new Set([
+      ...Object.keys(request.primary.attributes),
+      ...Object.keys(request.duplicate.attributes),
+    ]);
+    let sharedAttributes = 0;
+    keys.forEach((key) => {
+      if (
+        request.primary.attributes[key] &&
+        request.primary.attributes[key] === request.duplicate.attributes[key]
+      ) {
+        sharedAttributes += 1;
+      }
+    });
+    const impact = {
+      attributesChanged: Math.max(keys.size - sharedAttributes, 0),
+      sharedAttributes,
+      totalPopulation: request.population.length,
+    };
+    const preview: MergePreview = {
+      previewId: randomUUID(),
+      score,
+      decision: score.decision ?? decideScore(score.score, thresholds),
+      impact,
+      sandboxId: randomUUID(),
+      createdAt: this.clock().toISOString(),
+    };
+    const durationMs = Date.now() - startedAt;
+    this.logInfo('intelgraph.entities.merge.preview', {
+      tenantId: request.tenantId,
+      durationMs,
+      decision: preview.decision,
+      attributesChanged: impact.attributesChanged,
+    });
+    this.metricsObserve('intelgraph_er_preview_ms', durationMs, {
+      tenantId: request.tenantId,
+    });
+    span?.end({ durationMs, decision: preview.decision });
+    return preview;
+  }
+
   explain(mergeId: string): ExplainResponse {
     const explanation = this.explanations.get(mergeId);
     if (!explanation) {
@@ -351,6 +504,12 @@ export type {
   CandidateScore,
   EntityRecord,
   ExplainResponse,
+  MergePreview,
+  MergePreviewRequest,
   MergeRecord,
   MergeRequest,
+  ScoringModel,
+  ScoringOptions,
+  ScoreDecision,
+  ScoreThresholds,
 } from './types.js';

@@ -2,6 +2,9 @@ import { performance } from 'node:perf_hooks';
 import type {
   ClusterNodeState,
   CostGuardDecision,
+  PolicyGateAction,
+  PolicyGateDecision,
+  PolicyGateInput,
   PlanBudgetInput,
   ResourceOptimizationConfig,
   QueueScalingDecision,
@@ -30,6 +33,7 @@ export class CostGuard {
   private budgetsExceeded = 0;
   private kills = 0;
   private readonly slowQueries = new Map<string, SlowQueryRecord>();
+  private readonly killReasons = new Map<string, number>();
 
   constructor(profile?: TenantBudgetProfile) {
     this.profile = profile ?? DEFAULT_PROFILE;
@@ -40,6 +44,7 @@ export class CostGuard {
       budgetsExceeded: this.budgetsExceeded,
       kills: this.kills,
       activeSlowQueries: this.slowQueries.size,
+      killReasons: Object.fromEntries(this.killReasons),
     };
   }
 
@@ -61,6 +66,9 @@ export class CostGuard {
         action: 'kill',
         reason:
           'Plan exceeds safe limits (cartesian product or excessive RRU).',
+        reasonCode: input.plan.containsCartesianProduct
+          ? 'cartesian-product'
+          : 'rru-overage',
         nextCheckMs: 0,
         metrics: {
           projectedRru,
@@ -79,6 +87,11 @@ export class CostGuard {
       return {
         action: 'throttle',
         reason: 'Plan approaches tenant guardrails; deferring execution.',
+        reasonCode: projectedLatency > profile.maxLatencyMs
+          ? 'latency-pressure'
+          : saturation > 1
+            ? 'concurrency-saturation'
+            : 'depth-overage',
         nextCheckMs: 250,
         metrics: {
           projectedRru,
@@ -91,6 +104,7 @@ export class CostGuard {
     return {
       action: 'allow',
       reason: 'Plan within guardrails.',
+      reasonCode: 'within-guardrails',
       nextCheckMs: 120,
       metrics: {
         projectedRru,
@@ -150,6 +164,7 @@ export class CostGuard {
     queryId: string,
     tenantId: string,
     reason: string,
+    reasonCode = 'slow-query',
   ): SlowQueryRecord {
     const record: SlowQueryRecord = {
       queryId,
@@ -157,9 +172,11 @@ export class CostGuard {
       startedAt: performance.now(),
       observedLatencyMs: 0,
       reason,
+      reasonCode,
     };
     this.slowQueries.set(queryId, record);
     this.kills += 1;
+    this.killReasons.set(reasonCode, (this.killReasons.get(reasonCode) ?? 0) + 1);
     return record;
   }
 
@@ -173,6 +190,38 @@ export class CostGuard {
 
   release(queryId: string): void {
     this.slowQueries.delete(queryId);
+  }
+
+  evaluatePolicyGate(input: PolicyGateInput): PolicyGateDecision {
+    const reasons: string[] = [];
+    const tags = new Set<string>([...(input.budgetTags ?? []), ...(input.abacTags ?? [])]);
+
+    if (input.denylistTags?.some((tag) => tags.has(tag))) {
+      reasons.push('denylist-tag');
+    }
+    if (input.requiresApproval) {
+      reasons.push('approval-required');
+    }
+    if (input.estimatedCostUsd !== undefined && input.estimatedCostUsd > 100) {
+      reasons.push('cost-cap-exceeded');
+    }
+    if (input.action === 'export' && !tags.has('export-approved')) {
+      reasons.push('export-not-approved');
+    }
+
+    let action: PolicyGateDecision['action'] = 'allow';
+    if (reasons.some((reason) => reason.includes('denylist') || reason.includes('cost-cap'))) {
+      action = 'deny';
+    } else if (reasons.length > 0) {
+      action = 'warn';
+    }
+
+    return {
+      action,
+      reasons,
+      evaluatedAt: new Date().toISOString(),
+      tags: Array.from(tags),
+    };
   }
 }
 
@@ -650,6 +699,8 @@ export { DEFAULT_OPTIMIZATION_CONFIG, DEFAULT_QUEUE_SLO };
 export type {
   ClusterNodeState,
   CostGuardDecision,
+  PolicyGateDecision,
+  PolicyGateInput,
   PlanBudgetInput,
   ResourceOptimizationConfig,
   ScalingDecision,

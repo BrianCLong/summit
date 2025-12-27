@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { promises as fs, existsSync } from 'node:fs';
 import path from 'node:path';
 import { validateManifest } from './schema.js';
+import { verifyManifestSignature } from './signature.js';
 
 const normalizePath = (bundlePath, relativePath) => {
   const resolved = path.resolve(bundlePath, relativePath);
@@ -90,6 +91,7 @@ const verifyTransforms = async (bundlePath, asset, issues) => {
 
 export const verifyManifest = async (bundlePath) => {
   const manifestPath = path.join(bundlePath, 'manifest.json');
+  const signaturePath = path.join(bundlePath, 'signature.json');
   const issues = [];
   let manifest;
 
@@ -164,12 +166,44 @@ export const verifyManifest = async (bundlePath) => {
     }
   }
 
+  let signature;
+  if (existsSync(signaturePath)) {
+    try {
+      const rawSignature = await fs.readFile(signaturePath, 'utf8');
+      const signatureFile = JSON.parse(rawSignature);
+      const { valid: signatureValid, reason } = verifyManifestSignature(manifest, signatureFile);
+      if (!signatureValid) {
+        issues.push({
+          code: 'signature-invalid',
+          target: 'signature.json',
+          message: reason ?? 'Signature invalid',
+        });
+      }
+      signature = {
+        valid: signatureValid,
+        keyId: signatureFile.signature?.keyId,
+        algorithm: signatureFile.signature?.algorithm,
+        signedAt: signatureFile.signature?.signedAt,
+        manifestHash: signatureFile.manifestHash,
+        reason,
+      };
+    } catch (error) {
+      issues.push({
+        code: 'signature-invalid',
+        target: 'signature.json',
+        message: `Signature file invalid JSON: ${error.message}`,
+      });
+      signature = { valid: false, reason: 'Signature file invalid JSON' };
+    }
+  }
+
   const valid = issues.length === 0;
   return {
     manifestVersion: manifest.manifestVersion,
     valid,
     issues,
     checkedFiles,
+    signature,
   };
 };
 

@@ -44,6 +44,7 @@ export type CostGuardAction = 'allow' | 'throttle' | 'kill';
 export interface CostGuardDecision {
   action: CostGuardAction;
   reason: string;
+  reasonCode?: string;
   nextCheckMs: number;
   metrics: {
     projectedRru: number;
@@ -58,6 +59,27 @@ export interface SlowQueryRecord {
   startedAt: number;
   observedLatencyMs: number;
   reason: string;
+  reasonCode?: string;
+}
+
+export type PolicyGateAction = 'allow' | 'deny' | 'warn';
+
+export interface PolicyGateInput {
+  tenantId: string;
+  action: 'read' | 'write' | 'export';
+  budgetTags?: string[];
+  abacTags?: string[];
+  estimatedCostUsd?: number;
+  requiresApproval?: boolean;
+  allowlistTags?: string[];
+  denylistTags?: string[];
+}
+
+export interface PolicyGateDecision {
+  action: PolicyGateAction;
+  reasons: string[];
+  evaluatedAt: string;
+  tags: string[];
 }
 
 export interface WorkloadSample {

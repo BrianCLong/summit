@@ -902,3 +902,5 @@ export type {
   ServiceRecord,
   ServiceRiskProfile,
 };
+
+export * from './osint.js';

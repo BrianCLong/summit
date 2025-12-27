@@ -25,6 +25,7 @@ describe('EntityResolutionService', () => {
     });
     expect(candidates[0].entityId).toBe('p-2');
     expect(candidates[0].score).toBeGreaterThan(0.8);
+    expect(candidates[0].decision).toBeDefined();
   });
 
   it('merges duplicates and supports explain + revert', () => {
@@ -45,13 +46,16 @@ describe('EntityResolutionService', () => {
         actor: 'analyst@example.com',
         reason: 'Duplicate person record',
         policyTags: ['er:manual-review'],
+        model: { id: 'rules-v1', version: '1.0.0', hash: 'rules-only' },
       },
       top,
     );
     expect(merge.reversible).toBe(true);
+    expect(merge.modelHash).toBe('rules-only');
     const explanation = service.explain(merge.mergeId);
     expect(explanation.features.nameSimilarity).toBeGreaterThan(0.7);
     expect(explanation.policyTags).toContain('er:manual-review');
+    expect(explanation.modelHash).toBe('rules-only');
     service.revertMerge(
       merge.mergeId,
       'lead@example.com',
@@ -87,6 +91,7 @@ describe('EntityResolutionService', () => {
       entity: fixture.entities[0],
       population: fixture.entities,
       topK: 2,
+      scoring: { mlEnabled: true, mlBlend: 0.4 },
     });
 
     const merge = service.merge(
@@ -125,5 +130,23 @@ describe('EntityResolutionService', () => {
     expect(spans.some((span) => span.end.mock.calls.length > 0)).toBe(true);
 
     service.revertMerge(merge.mergeId, 'observer@example.com', 'test revert');
+  });
+
+  it('previews merge impact in a sandbox', () => {
+    const service = new EntityResolutionService(
+      () => new Date('2024-04-04T00:00:00Z'),
+    );
+    const preview = service.previewMerge({
+      tenantId: fixture.tenantId,
+      primary: fixture.entities[0],
+      duplicate: fixture.entities[1],
+      population: fixture.entities,
+      actor: 'analyst@example.com',
+      thresholds: { autoMerge: 0.9, review: 0.7 },
+      scoring: { mlEnabled: true, mlBlend: 0.3 },
+    });
+    expect(preview.impact.totalPopulation).toBeGreaterThan(0);
+    expect(preview.decision).toBeDefined();
+    expect(preview.sandboxId).toMatch(/-/);
   });
 });
