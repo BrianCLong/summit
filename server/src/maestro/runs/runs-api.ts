@@ -14,6 +14,7 @@ import { scheduler } from '../scheduler/Scheduler.js';
 import { maestroAuthzMiddleware } from '../../middleware/maestro-authz.js';
 import { recordEndpointResult } from '../../observability/reliability-metrics.js';
 import { flagService } from '../../services/FlagService.js';
+import { MaestroEvents } from '../../realtime/maestro.js';
 
 const router = express.Router();
 router.use(express.json());
@@ -24,6 +25,22 @@ router.use(maestroAuthzMiddleware({ resource: 'runs' }));
 // In a real application, Redis client would be injected or managed globally
 const redisClient = new Redis(); // This should be a proper Redis client instance
 const budgetController = createBudgetController(redisClient);
+
+const emitRunStatus = async (
+  tenantId: string,
+  runId: string,
+  status: string,
+) => {
+  try {
+    const { getIO } = await import('../../realtime/socket.js');
+    const io = typeof getIO === 'function' ? getIO() : null;
+    if (io) {
+      MaestroEvents.emitStatusChange(io, tenantId, runId, status);
+    }
+  } catch (error) {
+    console.warn('Failed to emit maestro status update', error);
+  }
+};
 
 const RunCreateSchema = z.object({
   pipeline_id: z.string().uuid(),
@@ -132,6 +149,7 @@ router.post('/runs', authorize('run_maestro'), async (req, res) => {
 
     // Enqueue the run in the scheduler
     await scheduler.enqueueRun(run.id, tenantId);
+    await emitRunStatus(tenantId, run.id, run.status);
 
     // Format response
     const formattedRun = {
@@ -227,6 +245,10 @@ router.put('/runs/:id', authorize('run_maestro'), async (req, res) => {
     const run = await runsRepo.update(req.params.id, validation.data, tenantId); // Pass tenantId
     if (!run) {
       return res.status(404).json({ error: 'Run not found' });
+    }
+
+    if (validation.data.status) {
+      await emitRunStatus(tenantId, run.id, validation.data.status);
     }
 
     res.json(run);

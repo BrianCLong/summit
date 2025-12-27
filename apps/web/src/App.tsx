@@ -48,6 +48,7 @@ const NarrativeIntelligencePage = React.lazy(() => import('@/pages/NarrativeInte
 const MissionControlPage = React.lazy(() => import('@/features/mission-control/MissionControlPage'))
 const DemoControlPage = React.lazy(() => import('@/pages/DemoControlPage'))
 const OnboardingWizard = React.lazy(() => import('@/pages/Onboarding/OnboardingWizard').then(module => ({ default: module.OnboardingWizard })))
+const MaestroDashboard = React.lazy(() => import('@/pages/maestro/MaestroDashboard'))
 
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
@@ -116,6 +117,7 @@ function App() {
                       path="/access-denied"
                       element={<AccessDeniedPage />}
                     />
+                    <Route path="/maestro/*" element={<MaestroDashboard />} />
 
                     {/* Protected routes with layout */}
                     <Route path="/" element={<Layout />}>
