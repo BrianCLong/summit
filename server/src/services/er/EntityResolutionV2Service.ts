@@ -1,15 +1,16 @@
-import { Session, Transaction } from 'neo4j-driver';
+import { Session } from 'neo4j-driver';
 import pino from 'pino';
-import { randomUUID } from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 import { soundex } from './soundex.js';
-import { provenanceLedger } from '../../provenance/ledger.js';
-import {
-  evaluateGuardrails,
-  type GuardrailResult,
-  type FixtureEntity,
-} from './guardrails.js';
+import { getPostgresPool } from '../../config/database.js';
+import { dlqFactory } from '../../lib/dlq/index.js';
 
 const log = (pino as any)({ name: 'EntityResolutionV2Service' });
+
+const MERGE_GUARDRAILS = {
+  maxMergeIds: 20,
+  maxRelationships: 500,
+};
 
 export interface Bitemporal {
   validFrom?: string;
@@ -46,11 +47,145 @@ export interface MergeRequest {
   mergeIds: string[];
   userContext: any;
   rationale: string;
-  guardrailDatasetId?: string;
-  guardrailOverrideReason?: string;
+  mergeId?: string;
+  idempotencyKey?: string;
 }
 
 export class EntityResolutionV2Service {
+  private readonly dlq = dlqFactory('er-merge-conflicts');
+
+  private buildMergeId(masterId: string, mergeIds: string[]): string {
+    const hash = createHash('sha256')
+      .update([masterId, ...mergeIds.sort()].join(':'))
+      .digest('hex')
+      .slice(0, 20);
+    return `merge-${hash}`;
+  }
+
+  private async recordMergeConflict({
+    mergeId,
+    masterId,
+    mergeIds,
+    reason,
+    userContext,
+    metadata,
+  }: {
+    mergeId: string;
+    masterId: string;
+    mergeIds: string[];
+    reason: string;
+    userContext: any;
+    metadata?: Record<string, unknown>;
+  }): Promise<void> {
+    await this.dlq.enqueue({
+      payload: {
+        mergeId,
+        masterId,
+        mergeIds,
+        userId: userContext?.userId || 'unknown',
+      },
+      error: reason,
+      retryCount: 0,
+      metadata,
+    });
+  }
+
+  private async persistRollbackSnapshot({
+    mergeId,
+    decisionId,
+    masterId,
+    mergeIds,
+    entities,
+    relationships,
+    userContext,
+    metadata,
+  }: {
+    mergeId: string;
+    decisionId: string;
+    masterId: string;
+    mergeIds: string[];
+    entities: EntityV2[];
+    relationships: any[];
+    userContext: any;
+    metadata?: Record<string, unknown>;
+  }): Promise<string> {
+    const pool = getPostgresPool();
+    const snapshotId = randomUUID();
+
+    const snapshot = {
+      entities,
+      relationships,
+    };
+
+    await pool.query(
+      `
+        INSERT INTO er_merge_rollback_snapshots (
+          id, merge_id, decision_id, master_id, merge_ids,
+          snapshot, metadata, created_by
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        ON CONFLICT (merge_id) DO NOTHING
+      `,
+      [
+        snapshotId,
+        mergeId,
+        decisionId,
+        masterId,
+        JSON.stringify(mergeIds),
+        JSON.stringify(snapshot),
+        JSON.stringify(metadata || {}),
+        userContext?.userId || 'unknown',
+      ],
+    );
+
+    return snapshotId;
+  }
+
+  public async rollbackMergeSnapshot(
+    session: Session,
+    {
+      mergeId,
+      reason,
+      userContext,
+    }: { mergeId: string; reason: string; userContext: any },
+  ): Promise<{ success: boolean; snapshotId: string; decisionId: string }> {
+    const pool = getPostgresPool();
+    const snapshotResult = await pool.query(
+      'SELECT * FROM er_merge_rollback_snapshots WHERE merge_id = $1',
+      [mergeId],
+    );
+
+    if (snapshotResult.rows.length === 0) {
+      throw new Error('Merge snapshot not found');
+    }
+
+    const snapshot = snapshotResult.rows[0];
+    if (snapshot.restored_at) {
+      return {
+        success: true,
+        snapshotId: snapshot.id,
+        decisionId: snapshot.decision_id,
+      };
+    }
+
+    await this.split(session, snapshot.decision_id, userContext);
+
+    await pool.query(
+      `
+        UPDATE er_merge_rollback_snapshots
+        SET restored_at = NOW(),
+            restored_by = $2,
+            restore_reason = $3
+        WHERE id = $1
+      `,
+      [snapshot.id, userContext?.userId || 'unknown', reason],
+    );
+
+    return {
+      success: true,
+      snapshotId: snapshot.id,
+      decisionId: snapshot.decision_id,
+    };
+  }
 
   public generateSignals(entity: EntityV2): EntitySignals {
     const signals: EntitySignals = {
@@ -165,26 +300,57 @@ export class EntityResolutionV2Service {
     return true;
   }
 
-  public evaluateGuardrails(datasetId?: string): GuardrailResult {
-    const resolvedDatasetId =
-      datasetId || process.env.ER_GUARDRAIL_DATASET_ID || 'baseline';
-
-    return evaluateGuardrails(
-      resolvedDatasetId,
-      (entityA: FixtureEntity, entityB: FixtureEntity) =>
-        this.explain(entityA as EntityV2, entityB as EntityV2).score
-    );
-  }
-
   public async merge(
     session: Session,
-    req: MergeRequest
-  ): Promise<{ guardrails: GuardrailResult; overrideUsed: boolean }> {
+    req: MergeRequest,
+  ): Promise<{
+    decisionId: string;
+    mergeId: string;
+    snapshotId?: string;
+    idempotent: boolean;
+  }> {
     const { masterId, mergeIds, userContext, rationale } = req;
+    const uniqueMergeIds = Array.from(new Set(mergeIds));
+    const mergeId = req.mergeId || this.buildMergeId(masterId, uniqueMergeIds);
+    const idempotencyKey = req.idempotencyKey || mergeId;
+
+    if (uniqueMergeIds.length !== mergeIds.length) {
+      await this.recordMergeConflict({
+        mergeId,
+        masterId,
+        mergeIds,
+        reason: 'Duplicate merge IDs detected',
+        userContext,
+      });
+      throw new Error('Duplicate merge IDs detected');
+    }
+
+    if (uniqueMergeIds.includes(masterId)) {
+      await this.recordMergeConflict({
+        mergeId,
+        masterId,
+        mergeIds,
+        reason: 'Master entity included in merge set',
+        userContext,
+      });
+      throw new Error('Master entity cannot be merged into itself');
+    }
+
+    if (uniqueMergeIds.length > MERGE_GUARDRAILS.maxMergeIds) {
+      await this.recordMergeConflict({
+        mergeId,
+        masterId,
+        mergeIds: uniqueMergeIds,
+        reason: 'Merge cardinality exceeds guardrail',
+        userContext,
+        metadata: { limit: MERGE_GUARDRAILS.maxMergeIds },
+      });
+      throw new Error('Merge cardinality exceeds guardrail limits');
+    }
 
     const result = await session.run(
       `MATCH (n) WHERE n.id IN $ids RETURN n`,
-      { ids: [masterId, ...mergeIds] }
+      { ids: [masterId, ...uniqueMergeIds] }
     );
 
     const entities: EntityV2[] = result.records.map(r => {
@@ -197,98 +363,59 @@ export class EntityResolutionV2Service {
       };
     });
 
-    if (entities.length !== mergeIds.length + 1) {
+    if (entities.length !== uniqueMergeIds.length + 1) {
+      await this.recordMergeConflict({
+        mergeId,
+        masterId,
+        mergeIds: uniqueMergeIds,
+        reason: 'One or more entities not found',
+        userContext,
+      });
       throw new Error("One or more entities not found");
     }
 
     if (!this.checkPolicy(userContext, entities)) {
-      throw new Error(
-        'Policy violation: Insufficient authority to merge these entities.'
-      );
-    }
-
-    const guardrails = this.evaluateGuardrails(req.guardrailDatasetId);
-    const overrideReason = req.guardrailOverrideReason?.trim();
-    const overrideUsed = !guardrails.passed && Boolean(overrideReason);
-
-    if (!guardrails.passed && !overrideUsed) {
-      throw new Error(
-        `Entity resolution guardrails failed for dataset ${guardrails.datasetId}. ` +
-          `Precision ${guardrails.metrics.precision.toFixed(2)}, ` +
-          `Recall ${guardrails.metrics.recall.toFixed(2)}.`
-      );
-    }
-
-    if (overrideUsed) {
-      await provenanceLedger.appendEntry({
-        timestamp: new Date(),
-        tenantId: userContext?.tenantId || 'unknown',
-        actionType: 'ER_GUARDRAIL_OVERRIDE',
-        resourceType: 'EntityResolution',
-        resourceId: masterId,
-        actorId: userContext.userId || 'unknown',
-        actorType: 'user',
-        payload: {
-          datasetId: guardrails.datasetId,
-          reason: overrideReason,
-          metrics: guardrails.metrics,
-          thresholds: guardrails.thresholds,
-          mergeIds,
-        },
-        metadata: {
-          purpose: 'Entity Resolution guardrail override',
-        },
+      await this.recordMergeConflict({
+        mergeId,
+        masterId,
+        mergeIds: uniqueMergeIds,
+        reason: 'Policy violation',
+        userContext,
       });
+      throw new Error("Policy violation: Insufficient authority to merge these entities.");
     }
 
     const tx = session.beginTransaction();
     try {
-      // 1. Create ERDecision node
-      const decisionId = randomUUID();
-      await tx.run(`
-        CREATE (d:ERDecision {
-          id: $decisionId,
-          timestamp: datetime(),
-          user: $userId,
-          rationale: $rationale,
-          originalIds: $mergeIds,
-          masterId: $masterId,
-          guardrailDatasetId: $guardrailDatasetId,
-          guardrailStatus: $guardrailStatus,
-          guardrailPrecision: $guardrailPrecision,
-          guardrailRecall: $guardrailRecall,
-          guardrailMinPrecision: $guardrailMinPrecision,
-          guardrailMinRecall: $guardrailMinRecall,
-          guardrailMatchThreshold: $guardrailMatchThreshold,
-          guardrailOverrideReason: $guardrailOverrideReason,
-          guardrailOverrideBy: $guardrailOverrideBy
-        })
-        WITH d
-        MATCH (m {id: $masterId})
-        MERGE (d)-[:AFFECTS]->(m)
-      `, {
-        decisionId,
-        userId: userContext.userId || 'unknown',
-        rationale,
-        mergeIds,
-        masterId,
-        guardrailDatasetId: guardrails.datasetId,
-        guardrailStatus: guardrails.passed ? 'passed' : 'failed',
-        guardrailPrecision: guardrails.metrics.precision,
-        guardrailRecall: guardrails.metrics.recall,
-        guardrailMinPrecision: guardrails.thresholds.minPrecision,
-        guardrailMinRecall: guardrails.thresholds.minRecall,
-        guardrailMatchThreshold: guardrails.thresholds.matchThreshold,
-        guardrailOverrideReason: overrideReason || null,
-        guardrailOverrideBy: overrideUsed ? userContext.userId || 'unknown' : null,
-      });
+      const existingDecision = await tx.run(
+        `
+          MATCH (d:ERDecision {idempotencyKey: $idempotencyKey})
+          RETURN d.id AS decisionId, d.mergeId AS mergeId
+          LIMIT 1
+        `,
+        { idempotencyKey },
+      );
 
-      // 2. Fetch existing relationships to preserve and replicate
+      if (existingDecision.records.length > 0) {
+        const decisionId = existingDecision.records[0].get('decisionId');
+        await tx.commit();
+        log.info(
+          { mergeId, decisionId },
+          'Idempotent merge request detected; skipping duplicate merge',
+        );
+        return {
+          decisionId,
+          mergeId,
+          idempotent: true,
+        };
+      }
+
+      // 1. Fetch existing relationships to preserve and replicate
       const relsResult = await tx.run(`
          MATCH (source)-[r]->(target)
          WHERE (source.id IN $mergeIds OR target.id IN $mergeIds) AND NOT (source:ERDecision OR target:ERDecision)
          RETURN id(r) as relId, type(r) as type, startNode(r).id as startId, endNode(r).id as endId, properties(r) as props
-      `, { mergeIds });
+      `, { mergeIds: uniqueMergeIds });
 
       const relationshipsToArchive: any[] = [];
 
@@ -300,34 +427,113 @@ export class EntityResolutionV2Service {
         const relId = record.get('relId').toString();
 
         relationshipsToArchive.push({ relId, type, startId, endId, props });
+      }
+
+      if (relationshipsToArchive.length > MERGE_GUARDRAILS.maxRelationships) {
+        await this.recordMergeConflict({
+          mergeId,
+          masterId,
+          mergeIds: uniqueMergeIds,
+          reason: 'Relationship cardinality exceeds guardrail',
+          userContext,
+          metadata: {
+            limit: MERGE_GUARDRAILS.maxRelationships,
+            actual: relationshipsToArchive.length,
+          },
+        });
+        throw new Error('Relationship cardinality exceeds guardrail limits');
+      }
+
+      // 2. Create ERDecision node
+      const decisionId = randomUUID();
+      await tx.run(
+        `
+          CREATE (d:ERDecision {
+            id: $decisionId,
+            mergeId: $mergeId,
+            idempotencyKey: $idempotencyKey,
+            timestamp: datetime(),
+            user: $userId,
+            rationale: $rationale,
+            originalIds: $mergeIds,
+            masterId: $masterId
+          })
+          WITH d
+          MATCH (m {id: $masterId})
+          MERGE (d)-[:AFFECTS]->(m)
+        `,
+        {
+          decisionId,
+          userId: userContext.userId || 'unknown',
+          rationale,
+          mergeIds: uniqueMergeIds,
+          masterId,
+          mergeId,
+          idempotencyKey,
+        },
+      );
+
+      for (const rel of relationshipsToArchive) {
+        const { relId, type, startId, endId, props } = rel;
 
         // Safely scope uniqueness by originalId to prevent overwriting existing Master relationships
         // If master already has WORKS_AT -> Company X, and merged node also has WORKS_AT -> Company X,
         // we want two distinct edges, one representing the merged node's history.
-
-        if (mergeIds.includes(startId)) {
-           const safeType = type.replace(/[^a-zA-Z0-9_]/g, '');
-           await tx.run(`
-             MATCH (m {id: $masterId})
-             MATCH (t {id: $targetId})
-             // Use MERGE with originalId to ensure we create a distinct edge for this specific original relationship
-             MERGE (m)-[newR:${safeType} {originalId: $relId}]->(t)
-             SET newR += $props
-             SET newR.validFrom = $now
-           `, { masterId, targetId: endId, props, relId, now: new Date().toISOString() });
+        if (uniqueMergeIds.includes(startId)) {
+          const safeType = type.replace(/[^a-zA-Z0-9_]/g, '');
+          await tx.run(
+            `
+              MATCH (m {id: $masterId})
+              MATCH (t {id: $targetId})
+              // Use MERGE with originalId to ensure we create a distinct edge for this specific original relationship
+              MERGE (m)-[newR:${safeType} {originalId: $relId}]->(t)
+              SET newR += $props
+              SET newR.validFrom = $now
+            `,
+            {
+              masterId,
+              targetId: endId,
+              props,
+              relId,
+              now: new Date().toISOString(),
+            },
+          );
         }
 
-        if (mergeIds.includes(endId)) {
-           const safeType = type.replace(/[^a-zA-Z0-9_]/g, '');
-           await tx.run(`
-             MATCH (s {id: $sourceId})
-             MATCH (m {id: $masterId})
-             MERGE (s)-[newR:${safeType} {originalId: $relId}]->(m)
-             SET newR += $props
-             SET newR.validFrom = $now
-           `, { sourceId: startId, masterId, props, relId, now: new Date().toISOString() });
+        if (uniqueMergeIds.includes(endId)) {
+          const safeType = type.replace(/[^a-zA-Z0-9_]/g, '');
+          await tx.run(
+            `
+              MATCH (s {id: $sourceId})
+              MATCH (m {id: $masterId})
+              MERGE (s)-[newR:${safeType} {originalId: $relId}]->(m)
+              SET newR += $props
+              SET newR.validFrom = $now
+            `,
+            {
+              sourceId: startId,
+              masterId,
+              props,
+              relId,
+              now: new Date().toISOString(),
+            },
+          );
         }
       }
+
+      const snapshotId = await this.persistRollbackSnapshot({
+        mergeId,
+        decisionId,
+        masterId,
+        mergeIds: uniqueMergeIds,
+        entities,
+        relationships: relationshipsToArchive,
+        userContext,
+        metadata: {
+          rationale,
+          guardrails: MERGE_GUARDRAILS,
+        },
+      });
 
       await tx.run(`
         MATCH (d:ERDecision {id: $decisionId})
@@ -340,9 +546,9 @@ export class EntityResolutionV2Service {
         SET r.merged = true
         SET r.mergedAt = datetime()
         SET r.mergedByDecision = $decisionId
-      `, { mergeIds, decisionId });
+      `, { mergeIds: uniqueMergeIds, decisionId });
 
-      for (const id of mergeIds) {
+      for (const id of uniqueMergeIds) {
          await tx.run(`
             MATCH (n {id: $id})
             SET n:MergedEntity
@@ -353,13 +559,16 @@ export class EntityResolutionV2Service {
       }
 
       await tx.commit();
-      log.info(`Merged entities ${mergeIds.join(', ')} into ${masterId} with decision ${decisionId}`);
+      log.info(
+        `Merged entities ${uniqueMergeIds.join(', ')} into ${masterId} with decision ${decisionId}`,
+      );
 
       return {
-        guardrails,
-        overrideUsed,
+        decisionId,
+        mergeId,
+        snapshotId,
+        idempotent: false,
       };
-
     } catch (e) {
       await tx.rollback();
       log.error(e, 'Merge failed');

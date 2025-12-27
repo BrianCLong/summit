@@ -32,6 +32,8 @@ router.post('/merge', async (req, res) => {
       rationale,
       guardrailDatasetId,
       guardrailOverrideReason,
+      mergeId,
+      idempotencyKey,
     } = req.body;
     // Assuming req.user is populated by auth middleware
     const userContext = (req as any).user || { userId: 'anonymous' };
@@ -43,9 +45,11 @@ router.post('/merge', async (req, res) => {
       rationale,
       guardrailDatasetId,
       guardrailOverrideReason,
+      mergeId,
+      idempotencyKey,
     });
 
-    res.json({ success: true, guardrails: result.guardrails, overrideUsed: result.overrideUsed });
+    res.json({ success: true, ...result, guardrails: result.guardrails, overrideUsed: result.overrideUsed });
   } catch (error: any) {
     res.status(400).json({ error: error.message });
   } finally {

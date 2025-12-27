@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react'
 import { trackGoldenPathStep } from '@/telemetry/metrics'
 import { markStepComplete } from '@/lib/activation'
 import { ContextualNudge } from '@/components/activation/ContextualNudge'
+import MergeRollbackPanel from '@/components/admin/MergeRollbackPanel'
 
 export default function AdminPage() {
   const handleCreateTenant = () => {
@@ -35,6 +36,9 @@ export default function AdminPage() {
         description="This will show administrative controls and user management"
         icon="plus"
       />
+      <div className="mt-8">
+        <MergeRollbackPanel />
+      </div>
     </div>
   )
 }

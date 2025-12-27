@@ -12,6 +12,7 @@ import trustRiskTypeDefs from '../schema.trust-risk.js';
 import provenanceTypeDefs from '../schema.provenance.js';
 import { sprint28TypeDefs } from './sprint28.js';
 import { ingestionTypeDefs } from './ingestion.js';
+import { erTypeDefs } from '../schema.er.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -68,6 +69,7 @@ export const typeDefs = [
   provenanceTypeDefs,
   sprint28TypeDefs,
   ingestionTypeDefs,
+  erTypeDefs,
   ewTypeDefs,
   collabTypeDefs,
 ];

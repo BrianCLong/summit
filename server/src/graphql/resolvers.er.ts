@@ -3,12 +3,14 @@ import type { IResolvers } from '@graphql-tools/utils';
 import { getPostgresPool } from '../config/database.js';
 import { getNeo4jDriver } from '../config/database.js';
 import { resolveEntities } from '../services/HybridEntityResolutionService.js';
+import { EntityResolutionV2Service } from '../services/er/EntityResolutionV2Service.js';
 import logger from '../config/logger.js';
 import { trace, SpanStatusCode } from '@opentelemetry/api';
 import { erMergeOutcomesTotal } from '../monitoring/metrics.js';
 
 const log = logger.child({ name: 'ERResolvers' });
 const tracer = trace.getTracer('er-resolvers', '1.0.0');
+const erV2Service = new EntityResolutionV2Service();
 
 // GA Core precision thresholds
 const GA_PRECISION_THRESHOLDS = {
@@ -516,6 +518,23 @@ export const erResolvers: IResolvers = {
       } catch (error) {
         log.error({ error: error.message }, 'Failed to record CI metric');
         throw new Error('Failed to record CI metric');
+      }
+    },
+
+    rollbackMergeSnapshot: async (_, { mergeId, reason }, context) => {
+      const session = getNeo4jDriver().session();
+
+      try {
+        return await erV2Service.rollbackMergeSnapshot(session, {
+          mergeId,
+          reason,
+          userContext: { userId: context.user?.id || 'system' },
+        });
+      } catch (error) {
+        log.error({ error: error.message, mergeId }, 'Failed to rollback merge');
+        throw new Error('Failed to rollback merge: ' + error.message);
+      } finally {
+        await session.close();
       }
     },
   },
