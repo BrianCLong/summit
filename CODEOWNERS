@@ -1,59 +1,59 @@
 # Core areas
-/services/prov-ledger/        @intelgraph/provenance-team
-/gateway/policy-lac/          @intelgraph/policy-team
-/server/ai/nl2cypher/         @intelgraph/ai-team
-/apps/web/ingest-wizard/      @intelgraph/ingest-team
-/services/graph-analytics/    @intelgraph/analytics-team
-/services/cases/              @intelgraph/cases-team
-/services/audit/              @intelgraph/cases-team
-/services/auth/               @intelgraph/platform-auth
-/apps/web/report-studio/      @intelgraph/reporting-team
-/services/disclosure/         @intelgraph/reporting-team
-/services/cost-guard/         @intelgraph/ops-team
+/services/prov-ledger/        @acme/provenance-team @alice-dev
+/gateway/policy-lac/          @acme/policy-team
+/server/ai/nl2cypher/         @acme/ai-team @bob-ml
+/apps/web/ingest-wizard/      @acme/ingest-team
+/services/graph-analytics/    @acme/analytics-team
+/services/cases/              @acme/cases-team
+/services/audit/              @acme/cases-team
+/services/auth/               @acme/platform-auth
+/apps/web/report-studio/      @acme/reporting-team
+/services/disclosure/         @acme/reporting-team
+/services/cost-guard/         @acme/ops-team
 
 # Capabilities & Agents
-/server/src/agents/           @intelgraph/platform-core
-/server/src/services/         @intelgraph/platform-core
-/tools/ultra-agent/           @intelgraph/platform-core
-/agents/                      @intelgraph/platform-core
+/server/src/agents/           @acme/platform-core
+/server/src/services/         @acme/platform-core
+/tools/ultra-agent/           @acme/platform-core
+/agents/                      @acme/platform-core
 
 # Policies & Entitlements
-/policy/                      @intelgraph/policy-team
-/opa/                         @intelgraph/policy-team
-/server/src/middleware/auth.ts @intelgraph/policy-team
-/server/src/lib/permissions/  @intelgraph/policy-team
+/policy/                      @acme/policy-team
+/opa/                         @acme/policy-team
+/server/src/middleware/auth.ts @acme/policy-team
+/server/src/lib/permissions/  @acme/policy-team
 
 # Budgets & Cost Domains
-/finops/                      @intelgraph/finops-team
-/server/src/lib/resources/    @intelgraph/finops-team
-/deploy/                      @intelgraph/finops-team
+/finops/                      @acme/finops-team
+/server/src/lib/resources/    @acme/finops-team
+/deploy/                      @acme/finops-team
 
 # Invariants & Proofs
-/security/                    @intelgraph/security-team
-/server/src/provenance/       @intelgraph/security-team
-/server/src/security/         @intelgraph/security-team
+/security/                    @acme/security-team
+/server/src/provenance/       @acme/security-team
+/server/src/security/         @acme/security-team
 
 # Integrations & Plug-ins
-/integrations/                @intelgraph/integrations-team
-/connectors/                  @intelgraph/integrations-team
-/server/src/connectors/       @intelgraph/integrations-team
+/integrations/                @acme/integrations-team
+/connectors/                  @acme/integrations-team
+/server/src/connectors/       @acme/integrations-team
 
 # Data & Graph Schema
-/server/src/db/               @intelgraph/data-team
-/migrations/                  @intelgraph/data-team
-/schema/                      @intelgraph/data-team
+/server/src/db/               @acme/data-team
+/migrations/                  @acme/data-team
+/schema/                      @acme/data-team
 
 # Observability & SLOs
-/observability/               @intelgraph/ops-team
-/monitoring/                  @intelgraph/ops-team
-/server/src/monitoring/       @intelgraph/ops-team
-/server/src/observability/    @intelgraph/ops-team
+/observability/               @acme/ops-team
+/monitoring/                  @acme/ops-team
+/server/src/monitoring/       @acme/ops-team
+/server/src/observability/    @acme/ops-team
 
 # Frontend & UX
-/client/                      @intelgraph/frontend-team
-/apps/web/                    @intelgraph/frontend-team
-/conductor-ui/                @intelgraph/frontend-team
+/client/                      @acme/frontend-team
+/apps/web/                    @acme/frontend-team
+/conductor-ui/                @acme/frontend-team
 
 # Provenance & Audit
-/audit/                       @intelgraph/provenance-team
-/server/src/audit/            @intelgraph/provenance-team
+/audit/                       @acme/provenance-team
+/server/src/audit/            @acme/provenance-team
