@@ -5,6 +5,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import axios from 'axios';
 import {
   ScenarioGenerator,
   GhostAnalyst,
@@ -15,9 +16,15 @@ import {
   ScenarioParameters,
   Workflow,
   WorkflowStep,
+  SoakTestHarness,
 } from './index.js';
 
 const logger = new Logger('CLI');
+const HEALTH_CHECK_QUERY = `
+  query HealthCheck {
+    __typename
+  }
+`;
 
 interface CLIOptions {
   scenario?: string;
@@ -30,6 +37,13 @@ interface CLIOptions {
   baseline?: string;
   candidate?: string;
   workflow?: string;
+  soak?: boolean;
+  requests?: number;
+  targetErrorRate?: number;
+  latencySpikeEvery?: number;
+  latencySpikeDelay?: number;
+  dependencyDownEvery?: number;
+  concurrency?: number;
   help?: boolean;
   version?: boolean;
 }
@@ -77,6 +91,27 @@ function parseArgs(): CLIOptions {
       case '-w':
         options.workflow = args[++i];
         break;
+      case '--soak':
+        options.soak = true;
+        break;
+      case '--requests':
+        options.requests = parseInt(args[++i], 10);
+        break;
+      case '--target-error-rate':
+        options.targetErrorRate = parseFloat(args[++i]);
+        break;
+      case '--latency-spike-every':
+        options.latencySpikeEvery = parseInt(args[++i], 10);
+        break;
+      case '--latency-spike-delay':
+        options.latencySpikeDelay = parseInt(args[++i], 10);
+        break;
+      case '--dependency-down-every':
+        options.dependencyDownEvery = parseInt(args[++i], 10);
+        break;
+      case '--concurrency':
+        options.concurrency = parseInt(args[++i], 10);
+        break;
       case '--help':
       case '-h':
         options.help = true;
@@ -114,6 +149,13 @@ Options:
   --candidate <version>     Candidate version for comparison
   -h, --help                Show this help message
   -v, --version             Show version
+  --soak                    Run soak test harness instead of scenario workflow
+  --requests <number>       Number of requests to send during soak (default: 500)
+  --target-error-rate <n>   Maximum acceptable error rate (0-1) for soak
+  --latency-spike-every <n> Inject latency spike every N requests
+  --latency-spike-delay <n> Delay in ms applied to latency spike injections (default: 500)
+  --dependency-down-every <n> Simulate dependency outage every N requests
+  --concurrency <n>           Concurrent workers for soak (default: safety.maxConcurrentSessions)
 
 Examples:
   # Run fraud ring scenario
@@ -216,6 +258,63 @@ async function runScenario(
   );
   fs.writeFileSync(csvFile, metricsCollector.exportToCSV(), 'utf8');
   logger.info(`CSV exported to: ${csvFile}`);
+}
+
+async function runSoakTest(config: any, options: CLIOptions): Promise<void> {
+  const requestCount = options.requests || 500;
+  const targetErrorRate = options.targetErrorRate ?? 0.01;
+  const concurrency = options.concurrency || config.safety.maxConcurrentSessions;
+
+  logger.info(
+    `Starting soak test: ${requestCount} requests, target error rate ${(targetErrorRate * 100).toFixed(2)}%`
+  );
+
+  const client = axios.create({
+    baseURL: config.api.graphqlUrl,
+    timeout: config.api.timeout,
+    headers: config.api.headers,
+    validateStatus: () => true,
+  });
+
+  const harness = new SoakTestHarness(client, new Logger('SoakTestHarness')); 
+
+  const result = await harness.run(
+    {
+      requestCount,
+      targetErrorRate,
+      concurrency,
+      payload: { query: HEALTH_CHECK_QUERY },
+      chaos: {
+        latencySpikeEvery: options.latencySpikeEvery,
+        latencySpikeDelayMs: options.latencySpikeDelay,
+        dependencyDownEvery: options.dependencyDownEvery,
+      },
+    },
+    async () => {
+      const response = await client.post('', { query: HEALTH_CHECK_QUERY });
+      if (response.status >= 400) {
+        const error: any = new Error(`Received status ${response.status}`);
+        error.response = { status: response.status };
+        throw error;
+      }
+    }
+  );
+
+  logger.info(`Soak window: ${result.startTime} -> ${result.endTime}`);
+  logger.info(`Success: ${result.successCount}/${result.totalRequests}`);
+  logger.info(`Error rate: ${(result.errorRate * 100).toFixed(2)}%`);
+  logger.info(
+    `Latency (avg/p95/p99): ${result.averageLatency.toFixed(2)}ms/${result.p95Latency.toFixed(2)}ms/${result.p99Latency.toFixed(2)}ms`
+  );
+  logger.info(
+    `Chaos injections - latency spikes: ${result.latencySpikesInjected}, dependency drops: ${result.dependencyDownInjected}`
+  );
+
+  if (!result.passed) {
+    logger.error(
+      `Soak test failed: observed error rate ${(result.errorRate * 100).toFixed(2)}% exceeds target ${(targetErrorRate * 100).toFixed(2)}%`
+    );
+  }
 }
 
 function loadWorkflowFromFile(filepath: string): Workflow {
@@ -385,6 +484,11 @@ async function main(): Promise<void> {
     // Handle comparison report
     if (options.report && options.baseline && options.candidate) {
       await generateComparisonReport(options, config);
+      return;
+    }
+
+    if (options.soak) {
+      await runSoakTest(config, options);
       return;
     }
 
