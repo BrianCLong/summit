@@ -132,6 +132,7 @@ kubectl create configmap opa-service-authz \
 ### Service Identity (SPIFFE/SPIRE)
 
 Every service has a cryptographic identity in the form of a SPIFFE ID:
+
 ```
 spiffe://intelgraph.local/ns/<namespace>/sa/<service-account>
 ```
@@ -139,6 +140,7 @@ spiffe://intelgraph.local/ns/<namespace>/sa/<service-account>
 ### Communication Matrix
 
 The communication matrix (`config/communication-matrix.yaml`) defines:
+
 - Which services can communicate
 - Allowed methods/paths
 - Rate limits and circuit breakers
@@ -146,9 +148,16 @@ The communication matrix (`config/communication-matrix.yaml`) defines:
 ### Default-Deny Posture
 
 All network traffic is denied by default. Services must explicitly be granted access through:
+
 1. NetworkPolicies (L3/L4)
 2. Istio AuthorizationPolicies (L7)
 3. OPA service authorization (application-level)
+
+### Governance Verdicts (First-Class)
+
+- Every authorization decision now emits a **governance verdict** that includes enforcement mode, bypass flags, and the exact control chain applied.
+- Requests are permitted only when governance is **enforced** (no disabled mode, no bypass, and all controls healthy), preventing silent circumvention.
+- The verdict is embedded in both the Rego `decision` object and the structured audit event so downstream systems can assert policy provenance.
 
 ## Testing
 
@@ -189,6 +198,7 @@ pnpm run validate:matrix
 ### Alerts
 
 See `observability/alerts/zero-trust.yaml` for configured alerts:
+
 - `ZeroTrustPolicyDenialRateHigh`
 - `MTLSHandshakeFailureRateHigh`
 - `SPIFFESVIDExpiryImminent`
@@ -197,6 +207,7 @@ See `observability/alerts/zero-trust.yaml` for configured alerts:
 ## Compliance
 
 This zero-trust implementation supports:
+
 - **FedRAMP**: Continuous authorization
 - **NIST 800-207**: Zero Trust Architecture
 - **CISA Zero Trust Maturity Model**: Identity-centric security
