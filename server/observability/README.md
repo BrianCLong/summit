@@ -72,6 +72,73 @@ APP_VERSION=1.0.0
 
 ### 2. Using the Observability Features
 
+#### Operational Intelligence (auto-RCA + drills)
+
+The operational-intelligence toolkit stitches together metrics, traces, and logs to generate real-time health snapshots, predict anomalies, and rehearse failure runbooks without developer assistance.
+
+- **Fabric:** `ObservabilityFabric` (server/src/observability/operational-intelligence/fabric.ts) ingests signals and maintains correlated windows keyed by correlation or trace IDs.
+- **Auto-RCA:** `RootCauseAnalyzer` (server/src/observability/operational-intelligence/root-cause.ts) scores services using error/log density, tail latency, and dependency graph context to surface probable causes plus remediations.
+- **Predictive anomalies:** `AnomalyPredictor` (server/src/observability/operational-intelligence/predictive.ts) maintains lightweight EMA/variance baselines and flags deviations beyond configurable sigma thresholds.
+- **Failure drills:** `FailureSimulator` (server/src/observability/operational-intelligence/failure-simulator.ts) evaluates declared scenarios against live correlated signals to validate that observability hooks fire during chaos/game-day events.
+
+Example (plug into an incident command hook):
+
+```typescript
+import {
+  ObservabilityFabric,
+  RootCauseAnalyzer,
+  AnomalyPredictor,
+  FailureSimulator,
+} from "./observability/operational-intelligence/index.js";
+
+const fabric = new ObservabilityFabric();
+const analyzer = new RootCauseAnalyzer([
+  { from: "edge-proxy", to: "search-api", criticality: 0.8 },
+]);
+const predictor = new AnomalyPredictor();
+const simulator = new FailureSimulator(fabric);
+
+// ingest logs/metrics/traces from your pipeline
+fabric.ingest({
+  id: "m1",
+  kind: "metric",
+  name: "latency_ms",
+  value: 240,
+  service: "search-api",
+  timestamp: Date.now(),
+  correlationId: "c1",
+  expected: { p95: 120 },
+});
+
+// auto-RCA and anomaly alerting
+const insights = analyzer.analyze(fabric.getCorrelatedGroups());
+const anomaly = predictor.ingest({
+  id: "m1",
+  kind: "metric",
+  name: "latency_ms",
+  value: 240,
+  service: "search-api",
+  timestamp: Date.now(),
+  correlationId: "c1",
+});
+
+// disaster-recovery rehearsal
+const drill = simulator.simulate({
+  id: "drill-001",
+  name: "Search failover",
+  owner: "oncall",
+  blastRadius: "service",
+  expectedRecoveryMinutes: 15,
+  steps: [
+    {
+      description: "Detect elevated latency",
+      successCriteria: "p95 recorded",
+      expectedSignals: [{ service: "search-api", kind: "metric", name: "latency_ms" }],
+    },
+  ],
+});
+```
+
 #### **Automatic Instrumentation** (Already Enabled)
 
 The observability stack is automatically initialized in `app.ts`:
@@ -98,31 +165,39 @@ For new routes, no extra wiring is required—metrics, logs, and traces flow aut
 Wrap your database clients with instrumentation:
 
 **PostgreSQL:**
-```typescript
-import { instrumentPostgresPool } from './observability/postgres-instrumentation.js';
 
-const pool = new Pool({ /* config */ });
-const instrumentedPool = instrumentPostgresPool(pool, 'main');
+```typescript
+import { instrumentPostgresPool } from "./observability/postgres-instrumentation.js";
+
+const pool = new Pool({
+  /* config */
+});
+const instrumentedPool = instrumentPostgresPool(pool, "main");
 ```
 
 **Neo4j:**
+
 ```typescript
-import { instrumentNeo4jDriver } from './observability/neo4j-instrumentation.js';
+import { instrumentNeo4jDriver } from "./observability/neo4j-instrumentation.js";
 
 const driver = neo4j.driver(/* ... */);
 const instrumentedDriver = instrumentNeo4jDriver(driver);
 ```
 
 **Redis:**
+
 ```typescript
-import { instrumentRedisClient, InstrumentedRedisCache } from './observability/redis-instrumentation.js';
+import {
+  instrumentRedisClient,
+  InstrumentedRedisCache,
+} from "./observability/redis-instrumentation.js";
 
 const redis = new Redis(/* ... */);
-const instrumentedRedis = instrumentRedisClient(redis, 'main');
+const instrumentedRedis = instrumentRedisClient(redis, "main");
 
 // Or use the high-level wrapper:
-const cache = new InstrumentedRedisCache(redis, 'user-cache');
-await cache.get('user:123');
+const cache = new InstrumentedRedisCache(redis, "user-cache");
+await cache.get("user:123");
 ```
 
 #### **Manual Tracing**
@@ -130,14 +205,14 @@ await cache.get('user:123');
 Add custom spans to your code:
 
 ```typescript
-import { getTracer } from './observability/tracer.js';
+import { getTracer } from "./observability/tracer.js";
 
 const tracer = getTracer();
 
 // Method 1: Using withSpan helper
-await tracer.withSpan('myOperation', async (span) => {
-  span.setAttribute('user.id', userId);
-  span.setAttribute('entity.type', 'investigation');
+await tracer.withSpan("myOperation", async (span) => {
+  span.setAttribute("user.id", userId);
+  span.setAttribute("entity.type", "investigation");
 
   const result = await doSomeWork();
 
@@ -145,9 +220,9 @@ await tracer.withSpan('myOperation', async (span) => {
 });
 
 // Method 2: Manual span management
-const span = tracer.startSpan('myOperation');
+const span = tracer.startSpan("myOperation");
 try {
-  span.setAttribute('foo', 'bar');
+  span.setAttribute("foo", "bar");
   const result = await doSomeWork();
   return result;
 } catch (error) {
@@ -158,13 +233,13 @@ try {
 }
 
 // Method 3: Using decorator
-import { traced } from './observability/tracer.js';
+import { traced } from "./observability/tracer.js";
 
 class MyService {
-  @traced('MyService.fetchUser')
+  @traced("MyService.fetchUser")
   async fetchUser(userId: string) {
     // Automatically traced
-    return await db.query('SELECT * FROM users WHERE id = $1', [userId]);
+    return await db.query("SELECT * FROM users WHERE id = $1", [userId]);
   }
 }
 ```
@@ -174,24 +249,24 @@ class MyService {
 Record custom business metrics:
 
 ```typescript
-import { serviceErrors, recordServiceError } from './observability/enhanced-metrics.js';
+import { serviceErrors, recordServiceError } from "./observability/enhanced-metrics.js";
 
 // Increment a counter
-recordServiceError('InvestigationService', 'ValidationError', 'error');
+recordServiceError("InvestigationService", "ValidationError", "error");
 
 // Record a histogram value
-import { serviceResponseTime } from './observability/enhanced-metrics.js';
+import { serviceResponseTime } from "./observability/enhanced-metrics.js";
 const start = Date.now();
 try {
   await service.processRequest();
   const duration = (Date.now() - start) / 1000;
   serviceResponseTime.observe(
-    { service: 'InvestigationService', method: 'processRequest', status: 'success' },
+    { service: "InvestigationService", method: "processRequest", status: "success" },
     duration
   );
 } catch (error) {
   serviceResponseTime.observe(
-    { service: 'InvestigationService', method: 'processRequest', status: 'error' },
+    { service: "InvestigationService", method: "processRequest", status: "error" },
     (Date.now() - start) / 1000
   );
 }
@@ -226,17 +301,20 @@ logger.info({ userId, action: 'create' }, 'User created investigation');
 ## Metrics Reference
 
 ### HTTP Metrics
+
 - `http_request_duration_seconds` - HTTP request latency histogram
 - `http_requests_total` - Total HTTP requests counter
 - `http_request_size_bytes` - HTTP request body size
 
 ### GraphQL Metrics
+
 - `graphql_request_duration_seconds` - GraphQL operation latency
 - `graphql_resolver_duration_seconds` - Per-resolver latency
 - `graphql_resolver_calls_total` - Resolver invocation count
 - `graphql_resolver_errors_total` - Resolver errors
 
 ### Database Metrics
+
 - `db_connection_pool_active` - Active connections
 - `db_connection_pool_idle` - Idle connections
 - `db_connection_pool_waiting` - Queued requests
@@ -245,17 +323,20 @@ logger.info({ userId, action: 'create' }, 'User created investigation');
 - `neo4j_transaction_duration_seconds` - Transaction duration
 
 ### Cache Metrics
+
 - `redis_cache_hit_ratio` - Cache hit ratio (0-1)
 - `redis_cache_hits_total` - Cache hits counter
 - `redis_cache_misses_total` - Cache misses counter
 - `redis_operation_duration_seconds` - Redis operation latency
 
 ### Queue Metrics
+
 - `queue_jobs_waiting` - Jobs waiting in queue
 - `queue_jobs_active` - Jobs being processed
 - `queue_job_duration_seconds` - Job processing time
 
 ### System Metrics
+
 - `nodejs_heap_size_used_bytes` - Heap memory used
 - `nodejs_eventloop_lag_seconds` - Event loop lag
 - `process_cpu_seconds_total` - CPU usage
@@ -286,11 +367,13 @@ logger.info({ userId, action: 'create' }, 'User created investigation');
 ### Configure Prometheus AlertManager
 
 1. Copy `prometheus-alerts.yml` to your Prometheus config directory:
+
    ```bash
    cp observability/prometheus-alerts.yml /etc/prometheus/rules/
    ```
 
 2. Update `prometheus.yml`:
+
    ```yaml
    rule_files:
      - /etc/prometheus/rules/prometheus-alerts.yml
@@ -317,12 +400,12 @@ logger.info({ userId, action: 'create' }, 'User created investigation');
 
 ### SLO Definitions
 
-| SLI | Target | Error Budget |
-|-----|--------|--------------|
-| Availability | 99.9% | 0.1% errors/hour |
-| Latency (P95) | <500ms | 5% >500ms |
-| Latency (P99) | <2s | 1% >2s |
-| Cache Hit Ratio | >70% | - |
+| SLI             | Target | Error Budget     |
+| --------------- | ------ | ---------------- |
+| Availability    | 99.9%  | 0.1% errors/hour |
+| Latency (P95)   | <500ms | 5% >500ms        |
+| Latency (P99)   | <2s    | 1% >2s           |
+| Cache Hit Ratio | >70%   | -                |
 
 Operational metrics mapped to these SLOs:
 
@@ -348,6 +431,7 @@ The following fields are automatically redacted from logs:
 ### PII Handling
 
 **Logged:**
+
 - ✅ User ID (hashed/opaque identifier)
 - ✅ Tenant ID
 - ✅ Request ID / Correlation ID
@@ -355,6 +439,7 @@ The following fields are automatically redacted from logs:
 - ✅ Error types (without sensitive details)
 
 **NOT Logged:**
+
 - ❌ Email addresses
 - ❌ Authentication tokens
 - ❌ Passwords
@@ -400,6 +485,7 @@ Observability overhead has been minimized:
 **Total overhead**: ~3-5% in production
 
 To reduce overhead further:
+
 - Lower sampling rate: `OTEL_SAMPLE_RATE=0.1` (10% of traces)
 - Disable auto-instrumentation: `OTEL_AUTO_INSTRUMENT=false`
 
