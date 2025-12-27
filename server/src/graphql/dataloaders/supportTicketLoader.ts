@@ -5,6 +5,7 @@ import { getRedisClient } from '../../config/database.js';
 import pino from 'pino';
 
 const logger = (pino as any)();
+const safeDeleteEnabled = process.env.SAFE_DELETE !== 'false';
 
 // Define the shape of a Comment (match your actual type)
 export interface SupportTicketComment {
@@ -78,6 +79,7 @@ const batchGetComments = async (ticketIds: readonly string[]): Promise<SupportTi
       const query = `
         SELECT * FROM support_ticket_comments
         WHERE ticket_id = ANY($1)
+        ${safeDeleteEnabled ? 'AND deleted_at IS NULL' : ''}
         ORDER BY created_at ASC
       `;
 

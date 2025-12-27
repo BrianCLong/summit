@@ -8,6 +8,9 @@ import {
   addComment,
   getComments,
   getTicketCount,
+  getCommentById,
+  softDeleteComment,
+  restoreComment,
   type CreateTicketInput,
   type UpdateTicketInput,
   type ListTicketsOptions,
@@ -151,11 +154,79 @@ router.post('/tickets/:id/comments', express.json(), async (req, res) => {
 /** GET /api/support/tickets/:id/comments - Get comments for a ticket */
 router.get('/tickets/:id/comments', async (req, res) => {
   try {
-    const comments = await getComments(req.params.id);
+    const includeDeleted = req.query.includeDeleted === 'true';
+    const comments = await getComments(req.params.id, { includeDeleted });
     res.json(comments);
   } catch (error) {
     console.error('Error getting comments:', error);
     res.status(500).json({ error: 'Failed to get comments' });
+  }
+});
+
+const resolveActor = (req: express.Request) => {
+  const user = (req as any).user;
+  const idHeader = req.headers['x-user-id'];
+  const roleHeader = req.headers['x-user-role'];
+
+  const id = (user?.sub || user?.id || (Array.isArray(idHeader) ? idHeader[0] : idHeader) || '').toString();
+  const roles = Array.isArray(user?.roles)
+    ? (user?.roles as string[])
+    : roleHeader
+      ? [roleHeader].flat()
+      : [];
+
+  return { id, roles };
+};
+
+const canModerateComments = (roles: string[]) => roles.some((role) => role === 'admin' || role === 'support_admin');
+
+router.post('/tickets/:ticketId/comments/:commentId/delete', express.json(), async (req, res) => {
+  try {
+    const { id: actorId, roles } = resolveActor(req);
+    if (!actorId) {
+      return res.status(401).json({ error: 'user_required' });
+    }
+
+    const comment = await getCommentById(req.params.commentId);
+    if (!comment || comment.ticket_id !== req.params.ticketId) {
+      return res.status(404).json({ error: 'comment_not_found' });
+    }
+
+    const isOwner = comment.author_id === actorId;
+    if (!isOwner && !canModerateComments(roles)) {
+      return res.status(403).json({ error: 'forbidden' });
+    }
+
+    const deleted = await softDeleteComment(comment.id, actorId, req.body.reason);
+    res.json({ status: 'deleted', comment: deleted });
+  } catch (error) {
+    console.error('Error deleting comment:', error);
+    res.status(500).json({ error: 'Failed to delete comment' });
+  }
+});
+
+router.post('/tickets/:ticketId/comments/:commentId/restore', express.json(), async (req, res) => {
+  try {
+    const { id: actorId, roles } = resolveActor(req);
+    if (!actorId) {
+      return res.status(401).json({ error: 'user_required' });
+    }
+
+    const comment = await getCommentById(req.params.commentId);
+    if (!comment || comment.ticket_id !== req.params.ticketId) {
+      return res.status(404).json({ error: 'comment_not_found' });
+    }
+
+    const isOwner = comment.author_id === actorId;
+    if (!isOwner && !canModerateComments(roles)) {
+      return res.status(403).json({ error: 'forbidden' });
+    }
+
+    const restored = await restoreComment(comment.id, actorId);
+    res.json({ status: 'restored', comment: restored });
+  } catch (error) {
+    console.error('Error restoring comment:', error);
+    res.status(500).json({ error: 'Failed to restore comment' });
   }
 });
 
