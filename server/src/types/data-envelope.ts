@@ -268,11 +268,16 @@ export function createDataEnvelope<T>(
     confidence?: number;
     isSimulated?: boolean;
     classification?: DataClassification;
-    governanceVerdict?: GovernanceVerdict;
+    governanceVerdict: GovernanceVerdict; // MANDATORY for GA
     lineage?: LineageNode[];
     warnings?: string[];
   }
 ): DataEnvelope<T> {
+  // GA ENFORCEMENT: Verify governance verdict is present
+  if (!options.governanceVerdict) {
+    throw new Error('GA ENFORCEMENT: GovernanceVerdict is required (SOC 2 CC6.1, CC7.2)');
+  }
+
   const provenanceId = generateProvenanceId();
   const generatedAt = new Date();
 
