@@ -1,0 +1,166 @@
+import { Router } from 'express';
+import logger from '../config/logger.js';
+import { getPostgresPool } from '../db/postgres.js';
+import {
+  EntityCommentService,
+  type EntityCommentAttachmentInput,
+} from '../entities/comments/EntityCommentService.js';
+import {
+  createEntityCommentAuthorizer,
+  EntityCommentAccessError,
+} from '../entities/comments/access.js';
+import { opaClient } from '../services/opa-client.js';
+import { NotificationChannel } from '../notifications/types.js';
+
+const routeLogger = logger.child({ name: 'EntityCommentRoutes' });
+const entityCommentsRouter = Router();
+const authorizer = createEntityCommentAuthorizer(opaClient);
+
+function getRequestContext(req: any): {
+  tenantId: string | null;
+  userId: string | null;
+} {
+  const tenantId = String(
+    req.headers['x-tenant-id'] || req.headers['x-tenant'] || '',
+  );
+  const userId =
+    req.user?.id || req.headers['x-user-id'] || req.user?.email || 'system';
+
+  return {
+    tenantId: tenantId || null,
+    userId: userId || null,
+  };
+}
+
+entityCommentsRouter.post('/:id/comments', async (req, res) => {
+  try {
+    const { tenantId, userId } = getRequestContext(req);
+
+    if (!tenantId) {
+      return res.status(400).json({ error: 'tenant_required' });
+    }
+
+    if (!userId) {
+      return res.status(401).json({ error: 'user_required' });
+    }
+
+    const { id } = req.params;
+    const { content, entityType, entityLabel, metadata, attachments } = req.body;
+
+    if (!content) {
+      return res.status(400).json({ error: 'content_required' });
+    }
+
+    await authorizer({
+      userId,
+      tenantId,
+      entityId: id,
+      action: 'comment:write',
+    });
+
+    const pg = getPostgresPool();
+    const service = new EntityCommentService(pg);
+
+    const comment = await service.addComment({
+      tenantId,
+      entityId: id,
+      entityType,
+      entityLabel,
+      authorId: userId,
+      content,
+      metadata,
+      attachments: (attachments || []) as EntityCommentAttachmentInput[],
+    });
+
+    const notificationService = req.app?.locals?.notificationService;
+    if (notificationService && comment.mentions.length > 0) {
+      await Promise.all(
+        comment.mentions.map((mention) => {
+          const payload = {
+            userId: mention.userId,
+            type: 'entity_comment_mention',
+            subject: 'You were mentioned in a comment',
+            message: `You were mentioned in a comment on entity ${entityLabel || id}.`,
+            data: {
+              entityId: id,
+              commentId: comment.id,
+              mentionedBy: userId,
+            },
+            channels: [NotificationChannel.IN_APP],
+          };
+
+          if (typeof notificationService.sendAsync === 'function') {
+            return notificationService.sendAsync(payload);
+          }
+          if (typeof notificationService.send === 'function') {
+            return notificationService.send(payload);
+          }
+          return Promise.resolve();
+        }),
+      );
+    }
+
+    res.status(201).json(comment);
+  } catch (error) {
+    if (error instanceof EntityCommentAccessError) {
+      return res.status(error.status).json({ error: error.code });
+    }
+    routeLogger.error(
+      { error: (error as Error).message },
+      'Failed to add entity comment',
+    );
+    res.status(500).json({ error: (error as Error).message });
+  }
+});
+
+entityCommentsRouter.get('/:id/comments', async (req, res) => {
+  try {
+    const { tenantId, userId } = getRequestContext(req);
+
+    if (!tenantId) {
+      return res.status(400).json({ error: 'tenant_required' });
+    }
+
+    if (!userId) {
+      return res.status(401).json({ error: 'user_required' });
+    }
+
+    const { id } = req.params;
+    const limit = req.query.limit
+      ? parseInt(req.query.limit as string, 10)
+      : undefined;
+    const offset = req.query.offset
+      ? parseInt(req.query.offset as string, 10)
+      : undefined;
+
+    await authorizer({
+      userId,
+      tenantId,
+      entityId: id,
+      action: 'comment:read',
+    });
+
+    const pg = getPostgresPool();
+    const service = new EntityCommentService(pg);
+
+    const comments = await service.listComments(
+      tenantId,
+      id,
+      limit,
+      offset,
+    );
+
+    res.json(comments);
+  } catch (error) {
+    if (error instanceof EntityCommentAccessError) {
+      return res.status(error.status).json({ error: error.code });
+    }
+    routeLogger.error(
+      { error: (error as Error).message },
+      'Failed to list entity comments',
+    );
+    res.status(500).json({ error: (error as Error).message });
+  }
+});
+
+export default entityCommentsRouter;
