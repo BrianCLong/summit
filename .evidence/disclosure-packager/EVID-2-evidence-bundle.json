@@ -1,0 +1,30 @@
+{
+  "bundle_id": "EVID-2",
+  "type": "staged-regression-canary",
+  "generated_at": "2025-12-27T05:52:30Z",
+  "schedule": {
+    "cadence": "per sprint",
+    "scheduled_for": "2025-12-30T15:00:00Z"
+  },
+  "environment": "stage",
+  "service": "api",
+  "rollback": {
+    "trigger": "canary failure",
+    "script": "scripts/release/canary-rollback-playbook.sh",
+    "revision": "2025.12.27-rc1",
+    "actor": "staged-regression-drill",
+    "audit_log": ".evidence/disclosure-packager/EVID-2-canary-rollback.json",
+    "dry_run": true,
+    "executed_at": "2025-12-27T05:52:30Z"
+  },
+  "logs": [
+    "2025-12-27T05:52:30+00:00 Initiating rollback for api-stage (revision: 2025.12.27-rc1)",
+    "2025-12-27T05:52:30+00:00 Reason: Staged regression drill - canary failure",
+    "2025-12-27T05:52:30+00:00 Dry run enabled. Not executing helm rollback.",
+    "2025-12-27T05:52:30+00:00 Rollback recorded to .evidence/disclosure-packager/EVID-2-canary-rollback.json"
+  ],
+  "evidence_files": [
+    ".evidence/disclosure-packager/EVID-2-canary-rollback.json",
+    ".evidence/disclosure-packager/EVID-2-staged-regression-2025-12-27.md"
+  ]
+}
