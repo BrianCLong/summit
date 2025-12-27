@@ -18,6 +18,7 @@ import { auditFirstMiddleware } from './middleware/audit-first.js';
 import { correlationIdMiddleware } from './middleware/correlation-id.js';
 import { featureFlagContextMiddleware } from './middleware/feature-flag-context.js';
 import { sanitizeInput } from './middleware/sanitization.js';
+import { piiGuardMiddleware } from './middleware/pii-guard.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { advancedRateLimiter } from './middleware/TieredRateLimitMiddleware.js';
 import { circuitBreakerMiddleware } from './middleware/circuitBreakerMiddleware.js';
@@ -206,6 +207,7 @@ export const createApp = async () => {
     }),
   );
   app.use(sanitizeInput);
+  app.use(piiGuardMiddleware);
   app.use(safetyModeMiddleware);
 
   // Circuit Breaker Middleware - Fail fast if system is unstable
