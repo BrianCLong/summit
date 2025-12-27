@@ -1,0 +1,26 @@
+[
+  {
+    "id": "staging-cpu",
+    "name": "Staging CPU (c6i.2xlarge)",
+    "description": "Staging stack on CPU nodes exercising the public graph query mix with circuit-breakers enabled.",
+    "runs": 240,
+    "p95LatencyMs": 369.39,
+    "meanLatencyMs": 248.24,
+    "throughputRps": 4.03,
+    "qualityAverage": 0.907,
+    "qualityPassRate": 0.754,
+    "costPerRunUsd": 0.00235
+  },
+  {
+    "id": "prod-gpu",
+    "name": "Prod GPU (A100 shared pool)",
+    "description": "Production tuned A100-backed pool with higher concurrency and speculative decoding enabled.",
+    "runs": 240,
+    "p95LatencyMs": 271.09,
+    "meanLatencyMs": 206.53,
+    "throughputRps": 4.84,
+    "qualityAverage": 0.944,
+    "qualityPassRate": 0.958,
+    "costPerRunUsd": 0.00372
+  }
+]

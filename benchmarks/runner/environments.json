@@ -1,0 +1,62 @@
+{
+  "environments": [
+    {
+      "id": "staging-cpu",
+      "name": "Staging CPU (c6i.2xlarge)",
+      "seed": "bench-staging",
+      "description": "Staging stack on CPU nodes exercising the public graph query mix with circuit-breakers enabled.",
+      "warmupIterations": 20,
+      "measureIterations": 240,
+      "concurrency": 18,
+      "latency": {
+        "baselineMs": 240,
+        "jitterMs": 45,
+        "tailMs": 110,
+        "tailProbability": 0.12,
+        "latencyBudgetMs": 260,
+        "floorMs": 120
+      },
+      "quality": {
+        "mean": 0.91,
+        "stddev": 0.04,
+        "threshold": 0.88,
+        "latencyPenaltyPerBudgetOverrun": 0.015
+      },
+      "tokens": {
+        "prompt": 1800,
+        "completion": 700,
+        "usdPerThousand": 0.0009
+      },
+      "computeCostPerSecondUsd": 0.00042
+    },
+    {
+      "id": "prod-gpu",
+      "name": "Prod GPU (A100 shared pool)",
+      "seed": "bench-prod",
+      "description": "Production tuned A100-backed pool with higher concurrency and speculative decoding enabled.",
+      "warmupIterations": 20,
+      "measureIterations": 240,
+      "concurrency": 26,
+      "latency": {
+        "baselineMs": 190,
+        "jitterMs": 35,
+        "tailMs": 80,
+        "tailProbability": 0.08,
+        "latencyBudgetMs": 210,
+        "floorMs": 90
+      },
+      "quality": {
+        "mean": 0.945,
+        "stddev": 0.03,
+        "threshold": 0.9,
+        "latencyPenaltyPerBudgetOverrun": 0.012
+      },
+      "tokens": {
+        "prompt": 2100,
+        "completion": 900,
+        "usdPerThousand": 0.0012
+      },
+      "computeCostPerSecondUsd": 0.00058
+    }
+  ]
+}
