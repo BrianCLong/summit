@@ -296,6 +296,31 @@ watch -n 30 'curl -s https://prometheus.intelgraph.io/api/v1/query \
 
 ## Rollback Procedure
 
+### Rollback vs Roll-forward decision tree
+
+Use this decision tree before triggering a rollback or a roll-forward (fix forward).
+Reference the canary signals defined in [REL-1](../project_management/companyos/COS-POD-TICKET-SET.md#rel-1--adr-standard-release-strategy-v1),
+and follow the rollback automation steps and thresholds in
+[REL-2](../project_management/companyos/COS-POD-TICKET-SET.md#rel-2--define-release-gates--canary-thresholds).
+
+**Decision criteria**
+
+- **Blast radius**: If impact is widespread (multi-service or >50% traffic), prefer rollback.
+  If isolated to a narrow feature path, consider roll-forward with a targeted fix or feature flag.
+- **Data migration**: If the release includes irreversible or risky migrations, prefer roll-forward
+  with compensating changes unless a verified down-migration exists.
+- **User impact**: If users are blocked from core workflows or data integrity is at risk, rollback.
+  If impact is low and can be mitigated by flags or config changes, roll-forward.
+- **SLO breach**: If canary signals show sustained SLO breach per REL-1/REL-2 thresholds, rollback.
+  If signals are near-threshold and stabilizing, pause promotions and roll-forward only after recovery.
+
+**Decision flow**
+
+1. Check canary signals (REL-1) and gate thresholds (REL-2).
+2. If blast radius or user impact is high **and** SLO breach is confirmed → **Rollback**.
+3. If data migration blocks rollback or impact is contained → **Roll-forward** with flags or hotfix.
+4. If unclear, **pause promotion**, page on-call SRE, and reassess in 10 minutes.
+
 ### When to Rollback
 
 Trigger rollback if ANY of these occur:
