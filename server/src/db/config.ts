@@ -15,5 +15,8 @@ export const dbConfig = {
   maxPoolSize: 20,
   readPoolSize: 5,
   statementTimeoutMs: 30000,
-  slowQueryThresholdMs: 1000,
+  slowQueryThresholdMs: Number.parseInt(
+    process.env.SLOW_QUERY_MS ?? '250',
+    10,
+  ),
 };

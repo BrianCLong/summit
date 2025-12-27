@@ -26,6 +26,7 @@ import { overloadProtection } from './middleware/overloadProtection.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
 import { safetyModeMiddleware, resolveSafetyState } from './middleware/safety-mode.js';
 import { residencyEnforcement } from './middleware/residency.js';
+import { requestProfilingMiddleware } from './middleware/request-profiling.js';
 import exceptionRouter from './data-residency/exceptions/routes.js';
 import monitoringRouter from './routes/monitoring.js';
 import billingRouter from './routes/billing.js';
@@ -197,6 +198,7 @@ export const createApp = async () => {
       }),
     }),
   );
+  app.use(requestProfilingMiddleware);
 
   app.use(
     express.json({
