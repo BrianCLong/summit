@@ -355,7 +355,7 @@ export function getTracer(): IntelGraphTracer {
   return tracerInstance;
 }
 
-// Decorator for automatic method tracing
+// Decorator for automatic method tracing - ensures critical path visibility
 export function traced(operationName?: string) {
   return function (
     target: unknown,

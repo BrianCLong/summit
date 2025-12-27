@@ -21,7 +21,7 @@ const stream = {
 import { cfg } from '../config';
 import { AsyncLocalStorage } from 'async_hooks';
 
-// AsyncLocalStorage for correlation ID propagation
+// AsyncLocalStorage for correlation ID propagation - enables distributed tracing correlation in logs
 export const correlationStorage = new AsyncLocalStorage<Map<string, string>>();
 
 // Configuration for redaction of sensitive data
