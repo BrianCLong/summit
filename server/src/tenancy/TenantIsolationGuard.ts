@@ -7,6 +7,7 @@ import {
   TenantPrivilegeTier,
 } from './types.js';
 import { tenantKillSwitch, TenantKillSwitch } from './killSwitch.js';
+import { tenantLimitEnforcer } from '../lib/resources/tenant-limit-enforcer.js';
 
 const logger = (pino as any)({ name: 'tenant-isolation-guard' });
 
@@ -145,6 +146,26 @@ export class TenantIsolationGuard {
         : undefined,
       limit: rateResult.total,
       reset: rateResult.reset,
+    };
+  }
+
+  async enforceStorageQuota(
+    context: TenantContext,
+    estimatedBytes: number
+  ): Promise<TenantPolicyDecision & { projected: number; limit: number }> {
+    this.assertTenantContext(context);
+    const result = await tenantLimitEnforcer.enforceStorageBudget(
+      context.tenantId,
+      estimatedBytes,
+      'ingestion'
+    );
+
+    return {
+        allowed: result.allowed,
+        status: result.allowed ? 200 : 403,
+        reason: result.allowed ? undefined : 'Tenant storage quota exceeded',
+        projected: result.projected,
+        limit: result.limit,
     };
   }
 
