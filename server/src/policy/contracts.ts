@@ -4,6 +4,9 @@ import { AppError } from '../lib/errors.js';
 import { logger } from '../config/logger.js';
 import { getPostgresPool } from '../db/postgres.js';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ZodSchema = any; // z.ZodSchema - using any for zod 3.25+ compatibility
+
 // --- Types ---
 
 export type SchemaId = string;
@@ -24,7 +27,7 @@ export interface Contract {
 // --- Schemas (Avro/JSON simulation) ---
 
 // Simulated schema registry (id -> validator)
-const SCHEMA_REGISTRY: Map<SchemaId, z.ZodType<any>> = new Map();
+const SCHEMA_REGISTRY: Map<SchemaId, ZodSchema> = new Map();
 
 // Default schemas
 SCHEMA_REGISTRY.set('user-clickstream-v1', z.object({
@@ -56,7 +59,7 @@ export async function registerContract(contract: Contract) {
     logger.info({ contractId: contract.id }, 'Contract registered/updated');
 }
 
-export function registerSchema(id: SchemaId, schema: z.ZodType<any>) {
+export function registerSchema(id: SchemaId, schema: ZodSchema) {
     SCHEMA_REGISTRY.set(id, schema);
 }
 

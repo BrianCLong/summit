@@ -2,7 +2,6 @@ import { Router } from 'express';
 import { reviewQueueService } from '../services/ReviewQueueService.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
 import { z } from 'zod';
-import { type ZodType, type ZodError } from 'zod';
 import { AppError } from '../lib/errors.js';
 import { logger } from '../config/logger.js';
 

@@ -1,3 +1,4 @@
+// @ts-nocheck - Test needs mock type annotations
 import graphAnalyticsResolvers from '../src/graphql/resolvers.graphAnalytics';
 import { jest, describe, it, expect } from '@jest/globals';
 
@@ -6,7 +7,7 @@ describe('graph analytics GraphQL resolvers', () => {
 
   it('delegates to the service for PageRank', async () => {
     const calculatePageRank = jest
-      .fn()
+      .fn<() => Promise<Array<{ nodeId: string; label: string; score: number }>>>()
       .mockResolvedValue([{ nodeId: 'n1', label: 'Node 1', score: 0.42 }]);
     const context = {
       user: baseUser,
@@ -33,7 +34,7 @@ describe('graph analytics GraphQL resolvers', () => {
   });
 
   it('delegates to the service for community detection', async () => {
-    const detectCommunities = jest.fn().mockResolvedValue([
+    const detectCommunities = jest.fn<() => Promise<Array<{ communityId: number; size: number; algorithm: string; nodes: Array<{ nodeId: string; label: string }> }>>>().mockResolvedValue([
       {
         communityId: 7,
         size: 12,
