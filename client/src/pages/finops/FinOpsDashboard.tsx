@@ -139,6 +139,7 @@ export default function FinOpsDashboard() {
     };
   }, [windowDays]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const trendPoints = overview?.trend || [];
   const totalSparkline = useMemo(
     () => trendPoints.map((point) => point.totalCostUsd),

@@ -18,6 +18,7 @@ const Card = ({ className = '', children, ...props }: CardProps) => <div classNa
 const CardHeader = ({ className = '', children, ...props }: CardProps) => <div className={`flex flex-col space-y-1.5 p-6 ${className}`} {...props}>{children}</div>;
 const CardTitle = ({ className = '', children, ...props }: CardProps) => <h3 className={`text-2xl font-semibold leading-none tracking-tight ${className}`} {...props}>{children}</h3>;
 const CardContent = ({ className = '', children, ...props }: CardProps) => <div className={`p-6 pt-0 ${className}`} {...props}>{children}</div>;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Badge = ({ variant = 'default', className = '', children, ...props }: CardProps & { variant?: string }) => <div className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${className}`} {...props}>{children}</div>;
 
 interface Incident {

@@ -535,9 +535,11 @@ kubectl set env deployment/intelgraph-api PQ_BYPASS=1
                       style={{ display: 'flex', flexDirection: 'column' }}
                     >
                       <span style={{ fontWeight: 600 }}>{k}</span>
+                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                       {typeof (cfg as any)[k] === 'boolean' ? (
                         <input
                           type="checkbox"
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           checked={!!(cfg as any)[k]}
                           onChange={(e) =>
                             setCfg({
@@ -548,6 +550,7 @@ kubectl set env deployment/intelgraph-api PQ_BYPASS=1
                         />
                       ) : (
                         <input
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           value={String((cfg as any)[k])}
                           onChange={(e) =>
                             setCfg({
@@ -620,7 +623,7 @@ kubectl set env deployment/intelgraph-api PQ_BYPASS=1
               checked={!!cfg?.TEMPORAL_ENABLED}
               onChange={async (e) => {
                 const enabled = e.target.checked;
-                cfg && setCfg({ ...cfg, TEMPORAL_ENABLED: enabled });
+                if (cfg) setCfg({ ...cfg, TEMPORAL_ENABLED: enabled });
                 await fetch('/api/admin/temporal/toggle', {
                   method: 'POST',
                   headers: { 'content-type': 'application/json' },

@@ -12,6 +12,7 @@ import {
   Typography,
 } from '@mui/material';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const AnyGrid = Grid as any;
 
 import {
@@ -55,6 +56,7 @@ export default function ApprovalsPage() {
       }
       const data = await response.json();
       setApprovals(Array.isArray(data) ? data : []);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err?.message || 'Unable to load approvals');
     } finally {
@@ -85,6 +87,7 @@ export default function ApprovalsPage() {
       }
 
       await fetchApprovals();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err?.message || 'Decision failed');
     }

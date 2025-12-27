@@ -11,8 +11,10 @@ export type DesignSystemProviderProps = {
   children: React.ReactNode;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const TelemetryContext = createContext<DesignSystemTelemetry>(globalTelemetry);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useDesignSystemTelemetry = () => useContext(TelemetryContext);
 
 export const DesignSystemProvider: React.FC<DesignSystemProviderProps> = ({

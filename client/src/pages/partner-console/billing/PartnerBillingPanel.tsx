@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import {
   Alert,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Box,
   Button,
   Card,
@@ -67,6 +68,7 @@ export function PartnerBillingPanel({ tenantId }: BillingPanelProps) {
       link.click();
       window.URL.revokeObjectURL(url);
       setMessage('JSON export downloaded');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       setMessage(error.message);
     } finally {

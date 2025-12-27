@@ -35,6 +35,7 @@ describe('NlGraphQueryExplainer', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).__telemetry = { nlGraphExplanation: [] };
   });
 
@@ -60,6 +61,7 @@ describe('NlGraphQueryExplainer', () => {
 
     fireEvent.click(screen.getByText(/Evidence with sources/i));
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect((window as any).__telemetry.nlGraphExplanation).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ event: 'explanation_generated' }),
@@ -83,6 +85,7 @@ describe('NlGraphQueryExplainer', () => {
       expect(screen.getByTestId('compile-error')).toHaveTextContent('Unable to compile prompt'),
     );
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect((window as any).__telemetry.nlGraphExplanation).toHaveLength(0);
     expect(screen.queryByText(/Generated Cypher/i)).not.toBeInTheDocument();
   });

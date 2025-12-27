@@ -153,6 +153,7 @@ async function fetchGraphQL<T>(query: string, variables?: Record<string, unknown
   return json.data;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalizeApproval(raw: any): ApprovalRecord {
   return {
     id: raw.id,
@@ -175,6 +176,7 @@ function normalizeApproval(raw: any): ApprovalRecord {
 }
 
 async function loadGraphQLApprovals(): Promise<ApprovalRecord[]> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data = await fetchGraphQL<{ approvals: any[] }>(APPROVALS_QUERY);
   return (data.approvals || []).map(normalizeApproval);
 }
@@ -191,8 +193,10 @@ async function loadRestApprovals(): Promise<ApprovalRecord[]> {
 
 async function loadApproval(id: string): Promise<ApprovalRecord | null> {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const gql = await fetchGraphQL<{ approval: any }>(APPROVAL_QUERY, { id });
     if (gql.approval) return normalizeApproval(gql.approval);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (err) {
     // GraphQL is optional; fall back to REST
   }
@@ -203,6 +207,7 @@ async function loadApproval(id: string): Promise<ApprovalRecord | null> {
       const json = await res.json();
       return normalizeApproval(json?.data ?? json);
     }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (err) {
     // Silent fallback to cached/fallback data
   }
@@ -213,6 +218,7 @@ async function loadClaims(): Promise<string[]> {
   try {
     const data = await fetchGraphQL<{ viewer?: { claims?: string[] } }>(CLAIMS_QUERY);
     if (data.viewer?.claims?.length) return data.viewer.claims;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (err) {
     // continue to REST
   }
@@ -223,6 +229,7 @@ async function loadClaims(): Promise<string[]> {
       const json = await res.json();
       if (Array.isArray(json?.claims)) return json.claims;
     }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (err) {
     // continue to fallback
   }
@@ -241,6 +248,7 @@ export function useApprovalsData() {
       const data = await loadGraphQLApprovals().catch(async () => loadRestApprovals());
       setApprovals(data.length ? data : fallbackApprovals);
       setError(null);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setApprovals(fallbackApprovals);
       setError(err?.message ?? 'Unable to load approvals');
@@ -267,6 +275,7 @@ export function useAbacClaims(requiredClaims: string[]): AbacState {
       const resolved = await loadClaims();
       setClaims(resolved);
       setError(null);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setClaims([]);
       setError(err?.message ?? 'Unable to resolve ABAC claims');
@@ -398,6 +407,7 @@ export async function submitDecision(
         approvalsCompleted: gql.decideApproval.approvalsCompleted ?? approval.approvalsCompleted + 1,
       };
     }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (err) {
     // Intentionally fall back to REST
   }

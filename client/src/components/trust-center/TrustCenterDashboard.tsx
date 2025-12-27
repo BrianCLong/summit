@@ -28,6 +28,7 @@ import {
   ListItemIcon,
 } from '@mui/material';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const AnyGrid = Grid as any;
 
 import {
@@ -301,6 +302,7 @@ export const TrustCenterDashboard: React.FC = () => {
         if (!packsRes.ok) throw new Error('Failed to fetch packs');
         const packsData = await packsRes.json();
         setPacks(packsData.packs || []);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -328,7 +330,9 @@ export const TrustCenterDashboard: React.FC = () => {
       if (!res.ok) throw new Error('Failed to generate report');
       const report = await res.json();
       // Handle download
+      // eslint-disable-next-line no-console
       console.log('Report generated:', report);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message);
     }
@@ -450,6 +454,7 @@ export const TrustCenterDashboard: React.FC = () => {
             <AnyGrid xs={12} sm={6} md={4} key={cert.framework}>
               <CertificationCard
                 cert={cert}
+                // eslint-disable-next-line no-console
                 onDownload={() => console.log('Download', cert.framework)}
               />
             </AnyGrid>
@@ -556,6 +561,7 @@ export const TrustCenterDashboard: React.FC = () => {
                     <Button
                       variant="outlined"
                       size="small"
+                      // eslint-disable-next-line no-console
                       onClick={() => console.log('View pack', pack.id)}
                     >
                       View Details

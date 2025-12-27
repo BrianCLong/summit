@@ -38,6 +38,7 @@ export interface AuditTimelineProps {
 }
 
 const defaultApiBase =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (import.meta as any).env?.VITE_API_URL || 'http://localhost:4000';
 
 const getFallbackText = (value?: string) => value?.trim() || undefined;

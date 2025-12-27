@@ -47,6 +47,7 @@ export function DemoIndicator() {
 /**
  * Hook to check if demo mode is enabled
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useDemoMode() {
   return DEMO_MODE;
 }

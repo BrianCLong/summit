@@ -82,6 +82,7 @@ const resolveAllowedActions = (user: AuthUser | null | undefined): string[] => {
   return unique([...fromUser, ...fromRole]);
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuthorization(preferredTenant?: string) {
   const { user, loading } = useAuth();
 
@@ -181,10 +182,12 @@ export function AuthorizationGate({
   return <>{children}</>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function withAuthorization<P>(
   options: WithAuthorizationOptions<P>,
 ): (component: ComponentType<P>) => ComponentType<P> {
   return (Component: ComponentType<P>) =>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     function GuardedComponent(props: any) {
       const resolvedTenant =
         typeof options.tenantId === 'function'

@@ -57,6 +57,7 @@ const baseApproval = {
   ],
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockResponse = (body: any, ok = true) =>
   Promise.resolve(
     new Response(JSON.stringify(body), {
@@ -88,6 +89,7 @@ describe('ApprovalsExperience', () => {
   const originalFetch = global.fetch;
 
   beforeAll(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
   });
 

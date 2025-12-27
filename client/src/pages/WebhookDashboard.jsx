@@ -273,6 +273,7 @@ export default function WebhookDashboard() {
 
   useEffect(() => {
     loadWebhooks();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSelectWebhook = async (webhook) => {

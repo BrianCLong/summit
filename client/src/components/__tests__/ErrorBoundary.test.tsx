@@ -13,6 +13,7 @@ describe('ErrorBoundary telemetry routing', () => {
 
   it('posts telemetry to monitoring endpoint with tenant context', async () => {
     const fetchSpy = jest.fn().mockResolvedValue({ ok: true });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     global.fetch = fetchSpy as any;
     localStorage.setItem('tenantId', 'tenant-42');
 

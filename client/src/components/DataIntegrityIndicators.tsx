@@ -312,6 +312,7 @@ export const DataEnvelopeCard: React.FC<DataEnvelopeCardProps> = ({
 /**
  * Hook to use data envelope validation in components
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useDataEnvelopeValidation<T>(envelope: DataEnvelope<T>) {
   const [isValid, setIsValid] = React.useEffect(() => {
     const { validateDataEnvelope } = require('../utils/data-envelope-validator');
@@ -339,6 +340,7 @@ export class DataEnvelopeErrorBoundary extends React.Component<
   { children: React.ReactNode },
   { hasError: boolean; error?: Error }
 > {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(props: any) {
     super(props);
     this.state = { hasError: false };

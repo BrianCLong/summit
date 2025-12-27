@@ -16,6 +16,7 @@ import {
   Typography,
 } from '@mui/material';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const AnyGrid = Grid as any;
 
 import {
@@ -76,6 +77,7 @@ const normalizeApprovals = (payload: unknown): ApprovalQueueItem[] => {
   });
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useApprovalsQueue(fetchImpl: Fetcher = fetch) {
   const [approvals, setApprovals] = React.useState<ApprovalQueueItem[]>([]);
   const [loading, setLoading] = React.useState(true);

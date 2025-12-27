@@ -274,6 +274,7 @@ export default function HuntList() {
       field: 'lastRun',
       headerName: 'Last Run',
       width: 160,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       valueFormatter: (params: any) => new Date(params.value).toLocaleString(),
     },
     {

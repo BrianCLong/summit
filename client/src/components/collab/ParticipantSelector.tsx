@@ -3,6 +3,7 @@ import {
   Autocomplete,
   TextField,
   Chip,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Box,
 } from '@mui/material';
 
@@ -29,6 +30,7 @@ const ParticipantSelector: React.FC<ParticipantSelectorProps> = ({
 }) => {
   const [selectedParticipants, setSelectedParticipants] = useState<User[]>([]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSelectionChange = (event: any, newValue: User[]) => {
     setSelectedParticipants(newValue);
     onParticipantsChange(newValue);

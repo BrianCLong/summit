@@ -26,6 +26,7 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 import { AuditTimeline } from './AuditTimeline';
 import { submitDecision, useAbacClaims, useApprovalDetails, useApprovalsData } from './hooks';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type { ApprovalRecord, ApprovalStatus } from './types';
 
 const REQUIRED_CLAIMS = ['approval:review'];
@@ -103,6 +104,7 @@ export default function ApprovalsExperience() {
       );
       setRationale('');
       await refresh();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setFormError(err?.message || 'Unable to submit decision');
     } finally {

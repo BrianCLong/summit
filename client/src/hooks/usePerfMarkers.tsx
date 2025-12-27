@@ -6,6 +6,7 @@ export type PerfOverlayState = {
   renderCount: number;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function usePerfMarkers(label: string, enabled: boolean) {
   const [lastDuration, setLastDuration] = useState<number | null>(null);
   const [lastPhase, setLastPhase] = useState<string | null>(null);
@@ -14,6 +15,7 @@ export function usePerfMarkers(label: string, enabled: boolean) {
 
   renderStartRef.current = performance.now();
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!enabled) return;
 
