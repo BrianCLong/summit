@@ -46,6 +46,9 @@ const GeoIntPane = React.lazy(() => import('@/panes/GeoIntPane').then(module => 
 const NarrativeIntelligencePage = React.lazy(() => import('@/pages/NarrativeIntelligencePage'))
 const MissionControlPage = React.lazy(() => import('@/features/mission-control/MissionControlPage'))
 const DemoControlPage = React.lazy(() => import('@/pages/DemoControlPage'))
+const MaestroRunConsolePage = React.lazy(
+  () => import('@/pages/MaestroRunConsolePage')
+)
 
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
@@ -180,6 +183,10 @@ function App() {
                       <Route path="changelog" element={<ChangelogPage />} />
 
                       <Route path="demo" element={<DemoControlPage />} />
+                      <Route
+                        path="maestro/run-console"
+                        element={<MaestroRunConsolePage />}
+                      />
 
                       {/* Catch all */}
                       <Route path="*" element={<NotFound />} />

@@ -6,6 +6,7 @@ import { MaestroRunConsole } from '@/components/MaestroRunConsole';
 export default function MaestroRunConsolePage() {
   // You can replace this with actual user context
   const userId = 'ui-demo-user';
+  const agentUrl = import.meta.env.VITE_AGUI_URL as string | undefined;
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 text-slate-50">
@@ -20,7 +21,7 @@ export default function MaestroRunConsolePage() {
           </p>
         </header>
 
-        <MaestroRunConsole userId={userId} />
+        <MaestroRunConsole userId={userId} agentUrl={agentUrl} />
       </div>
     </main>
   );

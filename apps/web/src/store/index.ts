@@ -4,6 +4,7 @@ import historyReducer from '../features/history/historySlice'
 import explainReducer from '../features/explain/explainSlice'
 import uiReducer from '../features/ui/uiSlice'
 import annotationsReducer from '../features/annotations/annotationsSlice'
+import agentRunReducer from '../agent/agentRunSlice'
 import { historyMiddleware } from '../features/history/historyMiddleware'
 import { enablePatches } from 'immer'
 
@@ -16,6 +17,7 @@ export const store = configureStore({
     explain: explainReducer,
     ui: uiReducer,
     annotations: annotationsReducer,
+    agentRun: agentRunReducer,
   },
   middleware: gDM => gDM().concat(historyMiddleware),
 })

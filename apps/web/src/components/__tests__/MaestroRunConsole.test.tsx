@@ -9,7 +9,10 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
 import * as matchers from '@testing-library/jest-dom/matchers';
-import { MaestroRunConsole } from '../maestro/MaestroRunConsole';
+import { MaestroRunConsole } from '../MaestroRunConsole';
+import { Provider } from 'react-redux';
+import { store } from '@/store';
+import { clearPromptArchive } from '@/lib/promptArchive';
 
 expect.extend(matchers as any);
 import * as api from '../../lib/api/maestro';
@@ -65,10 +68,15 @@ describe('<MaestroRunConsole />', () => {
 
   beforeEach(() => {
     vi.spyOn(api, 'runMaestroRequest').mockResolvedValue(mockRunResponse);
+    clearPromptArchive();
   });
 
   it('renders initial state and runs Maestro pipeline on submit', async () => {
-    render(<MaestroRunConsole userId="user-123" />);
+    render(
+      <Provider store={store}>
+        <MaestroRunConsole userId="user-123" />
+      </Provider>,
+    );
 
     expect(
       screen.getByText(/Maestro Run Console/i),
@@ -99,6 +107,11 @@ describe('<MaestroRunConsole />', () => {
     expect(descriptions.length).toBeGreaterThan(0);
     expect(descriptions[0]).toBeInTheDocument();
     expect(screen.getByText('hello world')).toBeInTheDocument();
+
+    expect(
+      screen.getByText(/Prompt Archive & Retrieval/i),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/test request/i)).toBeInTheDocument();
   });
 
   it('shows error when API fails', async () => {
@@ -106,7 +119,11 @@ describe('<MaestroRunConsole />', () => {
       new Error('API down'),
     );
 
-    render(<MaestroRunConsole userId="user-123" />);
+    render(
+      <Provider store={store}>
+        <MaestroRunConsole userId="user-123" />
+      </Provider>,
+    );
 
     const textarea = screen.getByPlaceholderText(/describe what you want/i);
     fireEvent.change(textarea, { target: { value: 'test request' } });
