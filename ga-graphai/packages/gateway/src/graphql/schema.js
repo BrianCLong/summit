@@ -1,6 +1,6 @@
 import { buildSchema } from 'graphql';
 
-export const schema = buildSchema(`
+export const sdl = `
   type Query {
     plan(input: PlanInput!): PlanResult!
     generate(input: GenerateInput!): GenResult!
@@ -84,7 +84,9 @@ export const schema = buildSchema(`
     usd: Float!
     latencyMs: Int!
   }
-`);
+`;
+
+export const schema = buildSchema(sdl);
 
 export function buildRoot(resolvers) {
   return {
