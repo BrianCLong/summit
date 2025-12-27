@@ -314,6 +314,63 @@ export interface EvidenceBundle {
   entries: LedgerEntry[];
 }
 
+export type ComplianceFramework =
+  | 'soc2'
+  | 'iso27001'
+  | 'gdpr'
+  | 'hipaa'
+  | 'pci-dss'
+  | 'nist-800-53'
+  | (string & {});
+
+export interface ControlRequirement {
+  framework: ComplianceFramework;
+  controlId: string;
+  title: string;
+  description?: string;
+  category?: string;
+}
+
+export interface EvidenceArtifact {
+  id: string;
+  type:
+    | 'policy'
+    | 'procedure'
+    | 'log'
+    | 'screenshot'
+    | 'attestation'
+    | 'dataset'
+    | 'configuration'
+    | (string & {});
+  title: string;
+  uri: string;
+  collectedAt: string;
+  expiresAt?: string;
+  owner?: string;
+  checksum?: string;
+  tags?: string[];
+  controlIds?: string[];
+}
+
+export interface ControlEvidenceMapping {
+  canonicalId: string;
+  canonicalTitle: string;
+  frameworks: ControlRequirement[];
+  evidence: EvidenceArtifact[];
+}
+
+export interface ControlEvidenceBundle {
+  generatedAt: string;
+  frameworks: ComplianceFramework[];
+  controls: ControlEvidenceMapping[];
+  coverage: {
+    canonical: number;
+    frameworkMappings: number;
+    evidence: number;
+  };
+  readOnly: boolean;
+}
+
 export type WorkTaskStatus = 'success' | 'rejected' | 'failed';
 
 export interface WorkTaskInput {
