@@ -123,6 +123,25 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Generate SBOM (CycloneDX)
         run: pnpm dlx @cyclonedx/cyclonedx-npm --spec-version 1.5 --output-file sbom.json
+      - name: Install Trivy for SBOM verification
+        uses: aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1 # v0.2.4
+      - name: Scan SBOM for license and compliance violations
+        run: |
+          trivy sbom \
+            --scanners license \
+            --severity HIGH,CRITICAL \
+            --exit-code 1 \
+            --format sarif \
+            --output sbom-license.sarif \
+            sbom.json
+      - name: Persist SBOM artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-and-license
+          path: |
+            sbom.json
+            sbom-license.sarif
 
   quality-gates:
     runs-on: ubuntu-latest
