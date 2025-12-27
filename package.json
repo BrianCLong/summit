@@ -29,6 +29,8 @@
     "deploy:staging": "scripts/deploy.sh staging",
     "deploy:prod": "scripts/deploy.sh prod",
     "backup": "scripts/backup.sh",
+    "optimize:check": "npx tsx scripts/optimization/check_optimization_metrics.ts",
+    "optimize:report": "npx tsx scripts/optimization/generate_report.ts",
     "lint": "eslint . && ruff check .",
     "lint:server": "cd server && npm run lint",
     "lint:client": "cd client && npm run lint",

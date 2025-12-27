@@ -1,0 +1,14 @@
+[
+  {
+    "area": "Cost",
+    "action": "Reduce replica count or CPU limits on API service.",
+    "impact": "Estimated 10-20% cost reduction.",
+    "risk": "Potential latency increase; monitor p95 closely."
+  },
+  {
+    "area": "Performance",
+    "action": "Enable response caching for read-heavy endpoints.",
+    "impact": "Reduce compute usage and cost.",
+    "risk": "Stale data; ensure proper cache invalidation."
+  }
+]
