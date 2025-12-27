@@ -91,6 +91,8 @@ jobs:
         run: pnpm run lint
       - name: Typecheck
         run: pnpm run typecheck
+      - name: Test Hygiene Check
+        run: node scripts/guard-tests.cjs
       - name: Unit and integration tests
         run: pnpm run test:jest
       - name: Coverage

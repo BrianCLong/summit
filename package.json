@@ -82,7 +82,7 @@
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
-    "@eslint/js": "^9.33.0",
+    "@eslint/js": "^9.39.1",
     "@playwright/test": "^1.54.2",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "10.0.1",
@@ -97,6 +97,7 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.26",
+    "fast-glob": "^3.3.3",
     "globals": "^15.12.0",
     "husky": "^9.1.7",
     "jest": "^29.7.0",
