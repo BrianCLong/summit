@@ -44,6 +44,7 @@ export * from './mul-ledger';
 export * from './quantum-safe-ledger';
 export * from './service';
 export * from './grpc';
+export * from './audit-readiness';
 
 // ============================================================================
 // SIMPLE PROVENANCE LEDGER - From HEAD
