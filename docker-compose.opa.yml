@@ -8,13 +8,15 @@ services:
     command:
       - 'run'
       - '--server'
-      - '--bundle'
+      - '--config-file=/config/config.yaml'
       - '--log-level=debug'
-      - '/policies'
     ports:
       - '8181:8181'
+    depends_on:
+      bundle-server:
+        condition: service_started
     volumes:
-      - ./opa/policies:/policies:ro
+      - ./opa/config.yaml:/config/config.yaml:ro
       - ./opa/data:/data:ro
     environment:
       - OPA_LOG_LEVEL=debug
@@ -23,6 +25,13 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+
+  bundle-server:
+    build: ./bundle-server
+    ports:
+      - '3001:3001'
+    volumes:
+      - ./bundle-server/bundles:/usr/src/app/bundles:ro
 
   # Redis for caching and queues
   redis:

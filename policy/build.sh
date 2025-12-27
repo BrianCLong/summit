@@ -17,3 +17,6 @@ if command -v cosign >/dev/null 2>&1; then
 else
   echo "cosign not found; skipping signature (CI should sign)" >&2
 fi
+
+echo "Copying bundle to bundle-server..."
+cp maestro-policy-bundle.tgz ../bundle-server/bundles/

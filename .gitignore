@@ -341,3 +341,7 @@ logs_*.zip
 .aider.input.history
 .aider.tags.cache.v4/
 reports/
+
+# Policy artifacts
+policy/bin/
+policy/test_report.json
