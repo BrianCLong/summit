@@ -1,3 +1,5 @@
+const path = require('path');
+
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
@@ -7,9 +9,12 @@ module.exports = {
     '^.+\\.[tj]sx?$': [
       'ts-jest',
       {
-        tsconfig: '../../tsconfig.test.json',
+        tsconfig: path.join(__dirname, '../../tsconfig.test.json'),
       },
     ],
+  },
+  moduleNameMapper: {
+    '^(.*)\\.js$': '$1',
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
 };
