@@ -13,7 +13,7 @@ scipy==1.11.3
 prometheus-client==0.19.0
 
 # HTTP client for testing
-requests==2.31.0
+requests==2.32.4
 httpx==0.25.1
 
 # Testing
