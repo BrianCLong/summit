@@ -108,6 +108,12 @@ jobs:
     needs: [test]
     uses: ./.github/workflows/_reusable-ci-perf.yml
 
+  security-scan:
+    needs: [test]
+    uses: ./.github/workflows/ci-security.yml
+    secrets:
+      snyk_token: ${{ secrets.SNYK_TOKEN }}
+
   sbom:
     runs-on: ubuntu-latest
     needs: setup
@@ -145,7 +151,7 @@ jobs:
 
   quality-gates:
     runs-on: ubuntu-latest
-    needs: [test, policy-fixtures, perf-budget, sbom, smoke-checks, latency-quality]
+    needs: [test, policy-fixtures, perf-budget, smoke-checks, latency-quality, security-scan, sbom]
     steps:
       - name: Verify required job statuses
         run: echo "All gates passed"
