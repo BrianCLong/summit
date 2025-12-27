@@ -3,6 +3,7 @@ import { Pool } from 'pg';
 import Redis from 'ioredis';
 import pino from 'pino';
 import { AdvancedAuditSystem } from './advanced-audit-system.js';
+import { emitAuditEvent } from './emit.js';
 import { cfg, dbUrls } from '../config.js';
 
 // Create singleton instance
@@ -72,4 +73,8 @@ export const advancedAuditSystem = {
       filters,
     );
   },
+};
+
+export const audit = {
+  emit: emitAuditEvent,
 };

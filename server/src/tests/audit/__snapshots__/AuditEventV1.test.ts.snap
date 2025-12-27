@@ -1,0 +1,83 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AuditEventV1 schema matches the audit.v1 schema (golden snapshots) 1`] = `
+{
+  "action": {
+    "name": "login",
+    "outcome": "success",
+    "type": "user_login",
+  },
+  "actor": {
+    "id": "user-123",
+    "ipAddress": "203.0.113.10",
+    "name": "Analyst One",
+    "type": "user",
+  },
+  "eventId": "evt-001",
+  "metadata": {
+    "message": "User signed in",
+  },
+  "occurredAt": "2025-01-01T00:00:00.000Z",
+  "target": {
+    "id": "session-abc",
+    "type": "session",
+  },
+  "tenantId": "tenant-1",
+  "traceId": "trace-001",
+}
+`;
+
+exports[`AuditEventV1 schema matches the audit.v1 schema (golden snapshots) 2`] = `
+{
+  "action": {
+    "name": "ingest",
+    "outcome": "partial",
+    "type": "data_import",
+  },
+  "actor": {
+    "id": "svc-ingest",
+    "name": "Ingestion Service",
+    "type": "service",
+  },
+  "eventId": "evt-002",
+  "metadata": {
+    "sizeBytes": 2048,
+    "source": "upload",
+  },
+  "occurredAt": "2025-01-02T12:34:56.000Z",
+  "target": {
+    "id": "artifact-789",
+    "path": "/uploads/sample.pdf",
+    "type": "artifact",
+  },
+  "tenantId": "tenant-2",
+  "traceId": "trace-002",
+}
+`;
+
+exports[`AuditEventV1 schema matches the audit.v1 schema (golden snapshots) 3`] = `
+{
+  "action": {
+    "name": "policy-eval",
+    "outcome": "failure",
+    "type": "policy_decision",
+  },
+  "actor": {
+    "name": "scheduler",
+    "type": "system",
+  },
+  "eventId": "evt-003",
+  "metadata": {
+    "decision": "deny",
+    "reason": "missing clearance",
+  },
+  "occurredAt": "2025-01-03T08:15:30.000Z",
+  "target": {
+    "id": "policy-opa-1",
+    "name": "Access Policy",
+    "type": "policy",
+  },
+  "tenantId": "tenant-1",
+  "traceId": "trace-003",
+}
+`;
