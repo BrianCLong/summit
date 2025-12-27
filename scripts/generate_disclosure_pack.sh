@@ -48,7 +48,10 @@ Action: Revert to previous hash.
 Estimated RTO: < 1 minute.
 EOF
 
-# 4. Zip it up
+# 4. Redact sensitive values in the pack
+node scripts/compliance/redact-disclosure-pack.cjs "$PACK_DIR"
+
+# 5. Zip it up
 cd "$OUTPUT_DIR"
 zip -r "${PACK_NAME}.zip" "$PACK_NAME"
 cd -
