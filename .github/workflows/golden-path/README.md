@@ -4,16 +4,17 @@ This directory contains reusable GitHub Actions workflows that implement the Gol
 
 ## Available Workflows
 
-| Workflow | Description |
-|----------|-------------|
-| `_golden-path-pipeline.yml` | Main orchestrator workflow |
-| `_lint.yml` | Linting and code quality checks |
-| `_test.yml` | Unit and integration tests |
-| `_security.yml` | Security scanning (SAST, secrets, CVE) |
-| `_build.yml` | Container build with signing |
-| `_deploy.yml` | Kubernetes deployment |
-| `_verify.yml` | Post-deploy verification |
-| `_promote.yml` | Progressive rollout |
+| Workflow                    | Description                            |
+| --------------------------- | -------------------------------------- |
+| `_golden-path-pipeline.yml` | Main orchestrator workflow             |
+| `_lint.yml`                 | Linting and code quality checks        |
+| `_test.yml`                 | Unit and integration tests             |
+| `_security.yml`             | Security scanning (SAST, secrets, CVE) |
+| `_build.yml`                | Container build with signing           |
+| `_deploy.yml`               | Kubernetes deployment                  |
+| `_verify.yml`               | Post-deploy verification               |
+| `_promote.yml`              | Progressive rollout                    |
+| `_canary-rollback.yml`      | Canary SLO guard with rollback         |
 
 ## Usage
 

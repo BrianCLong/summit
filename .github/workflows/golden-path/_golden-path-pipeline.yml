@@ -17,49 +17,84 @@ on:
   workflow_call:
     inputs:
       service:
-        description: 'Service name'
+        description: "Service name"
         required: true
         type: string
       working-directory:
-        description: 'Working directory for the service'
+        description: "Working directory for the service"
         required: false
         type: string
-        default: '.'
+        default: "."
       environment:
-        description: 'Target environment (staging, production)'
+        description: "Target environment (staging, production)"
         required: false
         type: string
-        default: 'staging'
+        default: "staging"
       node-version:
-        description: 'Node.js version'
+        description: "Node.js version"
         required: false
         type: string
-        default: '20'
+        default: "20"
       skip-security:
-        description: 'Skip security scanning (requires exception)'
+        description: "Skip security scanning (requires exception)"
         required: false
         type: boolean
         default: false
       skip-deploy:
-        description: 'Skip deployment stage'
+        description: "Skip deployment stage"
         required: false
         type: boolean
         default: false
       coverage-threshold:
-        description: 'Minimum code coverage percentage'
+        description: "Minimum code coverage percentage"
         required: false
         type: number
         default: 80
+      canary-enabled:
+        description: "Enable canary SLO guard + rollback"
+        required: false
+        type: boolean
+        default: false
+      prometheus-url:
+        description: "Prometheus base URL for canary checks (optional)"
+        required: false
+        type: string
+        default: ""
+      canary-window:
+        description: "Prometheus range window for canary checks"
+        required: false
+        type: string
+        default: "10m"
+      canary-slo-p95-ms:
+        description: "Latency SLO p95 threshold in ms"
+        required: false
+        type: number
+        default: 1500
+      canary-error-rate:
+        description: "Error rate threshold (ratio)"
+        required: false
+        type: number
+        default: 0.01
+      canary-saturation-max:
+        description: "Resource saturation threshold (ratio)"
+        required: false
+        type: number
+        default: 0.8
+      rollback-enabled:
+        description: "Enable automatic rollback on canary breach"
+        required: false
+        type: boolean
+        default: true
 
     outputs:
       image:
-        description: 'Built container image'
+        description: "Built container image"
         value: ${{ jobs.build.outputs.image }}
       digest:
-        description: 'Image digest'
+        description: "Image digest"
         value: ${{ jobs.build.outputs.digest }}
       deployed:
-        description: 'Whether deployment was successful'
+        description: "Whether deployment was successful"
         value: ${{ jobs.verify.outputs.success }}
 
 env:
@@ -255,17 +290,17 @@ jobs:
       - name: Trivy - Filesystem Scan
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
+          scan-type: "fs"
           scan-ref: ${{ inputs.working-directory }}
-          format: 'sarif'
-          output: 'trivy-fs-results.sarif'
-          severity: 'CRITICAL,HIGH'
+          format: "sarif"
+          output: "trivy-fs-results.sarif"
+          severity: "CRITICAL,HIGH"
 
       - name: Upload Trivy Results
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          sarif_file: 'trivy-fs-results.sarif'
+          sarif_file: "trivy-fs-results.sarif"
 
   # ============================================================================
   # Stage 4: Build
@@ -416,12 +451,30 @@ jobs:
           fi
 
   # ============================================================================
+  # Stage 7: Canary + Rollback Guard
+  # ============================================================================
+  canary-rollback:
+    name: Canary + Rollback Guard
+    needs: verify
+    if: ${{ inputs['canary-enabled'] && !inputs.skip-deploy && github.event_name != 'pull_request' }}
+    uses: ./.github/workflows/golden-path/_canary-rollback.yml
+    with:
+      service: ${{ inputs.service }}
+      environment: ${{ inputs.environment }}
+      prometheus-url: ${{ inputs['prometheus-url'] }}
+      canary-window: ${{ inputs['canary-window'] }}
+      canary-slo-p95-ms: ${{ inputs['canary-slo-p95-ms'] }}
+      canary-error-rate: ${{ inputs['canary-error-rate'] }}
+      canary-saturation-max: ${{ inputs['canary-saturation-max'] }}
+      rollback-enabled: ${{ inputs['rollback-enabled'] }}
+
+  # ============================================================================
   # Summary
   # ============================================================================
   summary:
     name: Pipeline Summary
     runs-on: ubuntu-latest
-    needs: [lint, test, security, build, deploy, verify]
+    needs: [lint, test, security, build, deploy, verify, canary-rollback]
     if: always()
 
     steps:
@@ -437,6 +490,7 @@ jobs:
           echo "| Build | ${{ needs.build.result == 'success' && '✅' || '❌' }} ${{ needs.build.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Deploy | ${{ needs.deploy.result == 'success' && '✅' || needs.deploy.result == 'skipped' && '⏭️' || '❌' }} ${{ needs.deploy.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Verify | ${{ needs.verify.result == 'success' && '✅' || needs.verify.result == 'skipped' && '⏭️' || '❌' }} ${{ needs.verify.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Canary + Rollback | ${{ needs['canary-rollback'].result == 'success' && '✅' || needs['canary-rollback'].result == 'skipped' && '⏭️' || '❌' }} ${{ needs['canary-rollback'].result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Service:** ${{ inputs.service }}" >> $GITHUB_STEP_SUMMARY
           echo "**Environment:** ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
