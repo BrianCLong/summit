@@ -1,13 +1,35 @@
 {
-  "last_updated": "2025-12-27T00:00:00Z",
+  "last_updated": "2025-12-27T01:30:00Z",
   "initiatives": [
     {
       "id": "A",
       "name": "Secure LLM Copilot & Retrieval",
       "epics": [
         { "id": "A1", "name": "Local Vector Store", "status": "pending", "owner": "Jules" },
-        { "id": "A2", "name": "RAG Ingestion Pipeline", "status": "pending", "owner": "Jules" },
-        { "id": "A3", "name": "Copilot Query Service", "status": "pending", "owner": "Jules" }
+        {
+          "id": "A2",
+          "name": "RAG Ingestion Pipeline",
+          "status": "pending",
+          "owner": "Jules",
+          "repo_path": "server/src/ingestion",
+          "observability": {
+            "slo": "docs/observability/slo/sample-service-slo.md",
+            "alerts": "docs/observability/alerts/observability-first-alerts.yaml",
+            "runbook": "docs/runbooks/service-degradation.md"
+          }
+        },
+        {
+          "id": "A3",
+          "name": "Copilot Query Service",
+          "status": "pending",
+          "owner": "Jules",
+          "repo_path": "services/copilot",
+          "observability": {
+            "slo": "docs/observability/slo/sample-service-slo.md",
+            "alerts": "docs/observability/alerts/observability-first-alerts.yaml",
+            "runbook": "docs/runbooks/service-degradation.md"
+          }
+        }
       ]
     },
     {

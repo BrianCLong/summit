@@ -7,23 +7,7 @@ on:
 
 jobs:
   canary:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "18"
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-
-      - name: Install dependencies (script only)
-        # Using pnpm add -w to respect workspace root
-        run: pnpm add -w js-yaml
-
-      - name: Run Canary Check
-        run: node scripts/canary-check.cjs
+    uses: ./.github/workflows/reusable/canary-rollback.yml
+    with:
+      service-name: summit
+      rollback-enabled: false
