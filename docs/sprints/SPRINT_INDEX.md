@@ -122,6 +122,12 @@ Located in repository root (`/SPRINT_*.md`)
 - Consistency validation
 - Performance benchmarking
 
+### Strategic Roadmaps
+
+| Roadmap | File | Scope | Status |
+|---------|------|-------|--------|
+| **Hardening Roadmap** | `docs/sprints/HARDENING_ROADMAP_N_PLUS_4_TO_8.md` | Sprints N+4 → N+8 | Active |
+
 ---
 
 ## Chronological Sprint Timeline
