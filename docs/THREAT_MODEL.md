@@ -3,11 +3,35 @@
 This document provides a high-level overview of the project's threat modeling activities.
 
 - Detailed STRIDE analysis: see [THREAT_MODEL_STRIDE.md](./THREAT_MODEL_STRIDE.md).
+- Detailed Threat Matrix: see [THREAT_MATRIX.md](./THREAT_MATRIX.md).
 - CI-generated architecture diagrams are stored in [docs/generated](./generated/) for each release.
 
 ![Threat Model Diagram](./generated/threat-model-diagram.png)
 
-Diagrams are produced automatically during continuous integration to capture architecture and data flows relevant to the threat model.
+## Scope
+This threat model covers:
+1.  **Agents**: Autonomous actors within the system.
+2.  **Policies**: Rules governing agent and user behavior.
+3.  **Extensions**: Third-party or auxiliary modules.
+4.  **Data Inputs**: Ingestion pipelines and user inputs.
+5.  **Observability/Logging**: The monitoring plane itself.
+
+## Threat Classes
+
+### Abuse
+Misuse of features by authorized users or agents to degrade system performance or violate intent (e.g., resource hogging, spamming).
+
+### Escalation
+Gaining higher privileges than authorized (e.g., standard user accessing admin functions, agent modifying its own permissions).
+
+### Data Poisoning
+Injecting malicious or false data to corrupt analytics, search results, or model training (e.g., graph injection, fake evidence).
+
+### Hallucinated Authority
+Agents or components acting on false beliefs of permission or capability (e.g., an agent "thinking" it can deploy code when it cannot).
+
+### Silent Failure
+Failures that occur without triggering alerts or visible errors, leading to "zombie" states or partial data corruption.
 
 ## Multi-Agent Coordination Threats
 

@@ -129,7 +129,7 @@
     "@types/node": "20.19.27",
     "@types/pg": "8.16.0",
     "@types/pino-http": "5.8.4",
-    "@types/supertest": "2.0.16",
+    "@types/supertest": "^2.0.16",
     "@types/uuid": "10.0.0",
     "@types/ws": "8.18.1",
     "@typescript-eslint/eslint-plugin": "8.50.0",
