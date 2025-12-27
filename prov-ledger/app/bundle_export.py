@@ -57,6 +57,15 @@ def build_bundle(case_id: str, evidence_ids: list[str]) -> Path:
     entries: list[dict] = []
 
     for ev in resolved_evidence:
+        # Check license terms
+        terms = (ev.get("license_terms") or "").lower()
+        if "no-export" in terms:
+            owner = ev.get("license_owner") or "unknown"
+            raise HTTPException(
+                403,
+                detail=f"license restricts export by {owner}: {ev.get('license_terms')}",
+            )
+
         payload = {k: v for k, v in ev.items() if k not in {"embedding"}}
         artifact_path = artifacts_dir / f"{ev['id']}.json"
         _write_json(artifact_path, payload)

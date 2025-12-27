@@ -51,7 +51,11 @@ def test_bundle_tamper_detection(client, tmp_path):
         zf.extractall(tmp_path / "extract")
 
     target = tmp_path / "extract" / "artifacts" / f"{evid['id']}.json"
-    target.write_bytes(target.read_bytes() + b" ")
+    # Modify JSON content to ensure hash mismatch (whitespace is ignored by canonicalizer)
+    import json
+    data = json.loads(target.read_text())
+    data["tampered"] = True
+    target.write_text(json.dumps(data))
 
     tampered_zip = tmp_path / "tampered.zip"
     shutil.make_archive(str(tampered_zip.with_suffix("")), "zip", root_dir=tmp_path / "extract")

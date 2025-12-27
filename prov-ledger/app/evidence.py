@@ -15,7 +15,9 @@ def register_evidence(
     title: str | None = None,
     signature: bytes | None = None,
     public_key: str | None = None,
-    metadata: dict | None = None, # Added metadata argument
+    metadata: dict | None = None,
+    license_terms: str | None = None,
+    license_owner: str | None = None,
 ) -> dict:
     evid_id = str(uuid.uuid4())
     data = content or (url or "").encode()
@@ -34,7 +36,9 @@ def register_evidence(
         "created_at": datetime.utcnow().isoformat(),
         "signed": signed,
         "signer_fp": signer_fp,
-        "metadata": metadata or {}, # Store metadata
+        "metadata": metadata or {},
+        "license_terms": license_terms,
+        "license_owner": license_owner,
     }
     _evidence[evid_id] = evid
     return evid
