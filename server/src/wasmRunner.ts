@@ -21,10 +21,9 @@ export async function runWasmStep(
     preopens: caps.fs ? { '/': '/' } : {},
   });
   const bin = await fs.readFile(wasmPath);
-  // @ts-ignore Node 20 has global WebAssembly
   const mod = await WebAssembly.compile(bin);
-  // @ts-ignore
   const inst = await WebAssembly.instantiate(mod, {
+    // @ts-ignore WASI types are experimental/incomplete in Node typings
     wasi_snapshot_preview1: (wasi as any).wasiImport,
   });
   const deadline =
@@ -33,24 +32,22 @@ export async function runWasmStep(
     (caps.memMb || Number(process.env.WASM_MAX_MEM_MB || 256)) * 1024 * 1024;
 
   const guard = setInterval(() => {
-    // @ts-ignore
     const m = inst.exports?.memory as WebAssembly.Memory | undefined;
     if (m && m.buffer.byteLength > memLimit) throw new Error('wasm OOM');
     if (Date.now() > deadline) throw new Error('wasm timeout');
   }, 50);
 
   try {
-    // @ts-ignore
+    // @ts-ignore WASI start expects specific instance type
     wasi.start(inst as any);
     // Convention: export_json(ptr) returns a pointer to a NUL-terminated JSON string
-    // @ts-ignore
     const exportJson = inst.exports?.['export_json'] as Function | undefined;
     if (typeof exportJson !== 'function')
       throw new Error('missing export_json()');
     // Pass input via memory: simple approach, let plugin read from stdin or global if needed.
     const resPtr = exportJson(JSON.stringify(input));
-    // @ts-ignore
-    const mem = new Uint8Array(inst.exports.memory.buffer);
+    // @ts-ignore Memory access needs cast
+    const mem = new Uint8Array((inst.exports.memory as WebAssembly.Memory).buffer);
     const out = decodeCString(mem, resPtr as number);
     return JSON.parse(out);
   } finally {

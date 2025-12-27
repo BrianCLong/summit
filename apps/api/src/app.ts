@@ -12,6 +12,8 @@ import { PolicyDecisionStore as InMemoryPolicyDecisionStore } from './services/P
 import { EventPublisher } from './services/EventPublisher.js';
 import { EpicService } from './services/EpicService.js';
 import { OpaPolicySimulationService } from './services/policyService.js';
+import { ReviewQueueService } from './review/ReviewQueueService.js';
+import { createReviewRouter } from './routes/review/index.js';
 
 export interface ApiDependencies extends Partial<GetReceiptDependencies> {
   decisionStore?: PolicyDecisionStore;
@@ -19,6 +21,7 @@ export interface ApiDependencies extends Partial<GetReceiptDependencies> {
   events?: EventPublisher;
   epicService?: EpicService;
   policyService?: OpaPolicySimulationService;
+  reviewQueue?: ReviewQueueService;
 }
 
 export function buildApp(dependencies: ApiDependencies = {}) {
@@ -28,6 +31,9 @@ export function buildApp(dependencies: ApiDependencies = {}) {
 
   const epicService = dependencies.epicService ?? new EpicService();
   app.use('/epics', createEpicsRouter({ epicService }));
+
+  const reviewQueue = dependencies.reviewQueue ?? new ReviewQueueService();
+  app.use('/review', createReviewRouter({ queue: reviewQueue }));
 
   if (dependencies.store || dependencies.verifier) {
     app.use('/receipts', createGetReceiptRouter(dependencies as GetReceiptDependencies));

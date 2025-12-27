@@ -8,6 +8,7 @@ This directory serves as the virtual data room for diligence readiness.
 
 | Area | Location | Owner |
 |---|---|---|
+| **Technical** | [./technical](./technical/) | CTO / VP Eng |
 | **Legal** | [./legal](./legal/) | Legal |
 | **Finance** | [./finance](./finance/) | Finance |
 | **Security** | [./security](./security/) | CISO |
@@ -22,6 +23,13 @@ This directory serves as the virtual data room for diligence readiness.
 *   [Document Retention Policy](./RETENTION_POLICY.md)
 *   [Internal Comms Rules](./COMMS_RULES.md)
 *   [Owners & Stakeholders](./OWNERS.yaml)
+
+### Technical Diligence Framework
+*   [Technical DD Framework](./technical/FRAMEWORK.md)
+*   [Integration Surfaces](./technical/INTEGRATION_SURFACES.md)
+*   [Integration Patterns](./technical/INTEGRATION_PATTERNS.md)
+*   [Valuation Inputs](./technical/VALUATION_INPUTS.md)
+*   [Integration & Exit Playbooks](./technical/PLAYBOOKS.md)
 
 ## Readiness Sweep
 

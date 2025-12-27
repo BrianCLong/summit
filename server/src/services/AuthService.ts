@@ -48,6 +48,8 @@ import { secretsService } from './SecretsService.js';
 import { SECRETS } from '../config/secretRefs.js';
 import type { Pool, PoolClient } from 'pg';
 import { metrics } from '../observability/metrics.js';
+import GAEnrollmentService from './GAEnrollmentService.js';
+import { PrometheusMetrics } from '../utils/metrics.js';
 
 /**
  * User registration data payload
@@ -239,6 +241,7 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
 export class AuthService {
   /** PostgreSQL connection pool for database operations */
   private pool: Pool;
+  private metrics: PrometheusMetrics;
 
   /**
    * Creates an instance of AuthService
@@ -246,6 +249,12 @@ export class AuthService {
    */
   constructor() {
     this.pool = getPostgresPool() as unknown as Pool;
+    this.metrics = new PrometheusMetrics('summit_auth');
+    this.metrics.createHistogram(
+        'user_registration_duration_seconds',
+        'Time taken to register a user',
+        ['status']
+    );
   }
 
   /**
@@ -272,9 +281,17 @@ export class AuthService {
    * ```
    */
   async register(userData: UserData): Promise<AuthResponse> {
+    const start = process.hrtime();
     const client = await this.pool.connect();
 
     try {
+      // GA Enrollment Check
+      const enrollmentCheck = await GAEnrollmentService.checkUserEnrollmentEligibility(userData.email);
+      if (!enrollmentCheck.eligible) {
+        this.metrics.observeHistogram('user_registration_duration_seconds', { status: 'rejected_enrollment' }, 0);
+        throw new Error(`Registration rejected: ${enrollmentCheck.reason}`);
+      }
+
       await client.query('BEGIN');
 
       const existingUser = await client.query(
@@ -318,6 +335,10 @@ export class AuthService {
       const { token, refreshToken } = await this.generateTokens(user, client);
 
       await client.query('COMMIT');
+
+      const [seconds, nanoseconds] = process.hrtime(start);
+      const duration = seconds + nanoseconds / 1e9;
+      this.metrics.observeHistogram('user_registration_duration_seconds', { status: 'success' }, duration);
 
       return {
         user: this.formatUser(user),

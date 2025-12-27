@@ -80,6 +80,7 @@ export const cfg = (() => {
     const insecureTokens = ['devpassword', 'changeme', 'secret', 'localhost'];
     const fail = (key: string, reason: string) => {
       console.error('\n❌ Production Configuration Error\n');
+      console.error(`  Invariant GC-03 Violated: Production environment cannot use default secrets.`);
       console.error(`  Variable: ${key}`);
       console.error(`  Issue: ${reason}\n`);
       console.error('Production deployments require secure configuration:');

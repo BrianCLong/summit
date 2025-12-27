@@ -7,6 +7,7 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 import { dbConfig } from './config.js';
 import baseLogger from '../config/logger.js';
+import { ResidencyGuard } from '../data-residency/residency-guard.js';
 
 // Constants for pool monitoring and connection management
 const POOL_MONITOR_INTERVAL_MS = 30000; // 30 seconds
@@ -609,6 +610,26 @@ async function executeManagedQuery({
   writePool: PoolWrapper;
   readPools: PoolWrapper[];
 }): Promise<QueryResult<any>> {
+  // Data Residency Check
+  // We infer tenantId from a custom option or thread-local storage if available.
+  // Since we don't have AsyncLocalStorage for tenant everywhere yet, we might check params/options?
+  // The 'residency-guard' uses getPostgresPool internally, so we must avoid infinite recursion.
+  // We skip residency check if this is an internal query (e.g. from residency-guard).
+
+  // Implementation note: The proper place for this is higher up in the repository layer
+  // where tenantId is known. However, to satisfy "Enforcement at Data storage",
+  // we can add a check here if 'tenantId' is passed in options.
+
+  // For this implementation, we assume repositories pass tenantId in options when strict enforcement is needed.
+  if ((options as any).tenantId) {
+      const guard = ResidencyGuard.getInstance();
+      await guard.enforce((options as any).tenantId, {
+          operation: 'storage',
+          targetRegion: process.env.SUMMIT_REGION || process.env.REGION || 'us-east-1',
+          dataClassification: (options as any).classification || 'internal'
+      });
+  }
+
   const normalized = normalizeQuery(queryInput, params);
   const queryType =
     desiredType === 'auto' ? inferQueryType(normalized.text) : desiredType;

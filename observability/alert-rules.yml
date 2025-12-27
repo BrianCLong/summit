@@ -316,6 +316,45 @@ groups:
           description: '{{ $value }} security policy violations of type {{ $labels.type }} in 1 minute'
           runbook_url: 'https://docs.intelgraph.com/runbooks/critical-security-violations'
 
+      - alert: KillSwitchActive
+        expr: intelgraph_kill_switch_active > 0
+        for: 30s
+        labels:
+          severity: critical
+          service: conductor
+          component: security
+        annotations:
+          summary: 'Kill Switch Activated'
+          description: 'A kill switch has been activated for scope {{ $labels.scope }} (ID: {{ $labels.switch_id }})'
+          runbook_url: 'https://docs.intelgraph.com/runbooks/kill-switch-activation'
+
+      - alert: CrossTenantAccessAttempts
+        expr: rate(intelgraph_security_cross_tenant_access_denied_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          service: conductor
+          component: security
+        annotations:
+          summary: 'Cross-Tenant Access Attempt Detected'
+          description: 'Denied access attempt from {{ $labels.source_tenant }} to {{ $labels.target_tenant }}'
+          runbook_url: 'https://docs.intelgraph.com/runbooks/data-exposure-suspicion'
+
+  # Agent Behavior Monitoring
+  - name: conductor.agents
+    rules:
+      - alert: AgentRunawayLoop
+        expr: histogram_quantile(0.95, rate(intelgraph_agent_loop_iterations_bucket[5m])) > 50
+        for: 2m
+        labels:
+          severity: warning
+          service: conductor
+          component: agent
+        annotations:
+          summary: 'Possible Agent Runaway Loop'
+          description: 'Agent {{ $labels.agent_id }} is showing high loop iteration counts.'
+          runbook_url: 'https://docs.intelgraph.com/runbooks/agent-runaway'
+
   # Data quality and integrity
   - name: conductor.data
     rules:

@@ -13,6 +13,29 @@ This document defines the technical standards mandated by the **Law of Consisten
 - **Mandates:** See [Agent Mandates](docs/governance/AGENT_MANDATES.md) for role-specific powers and limits.
 - **Rulebook:** The [Living Rulebook](docs/governance/RULEBOOK.md) contains the full index of laws and standards.
 
+## Agent Roles & Permissions
+
+### Role: Jules (Release Captain)
+- **Permissions**:
+  - Full read/write access to repository.
+  - Can modify CI/CD workflows.
+  - Can merge PRs (if checks pass).
+  - Can create release artifacts.
+- **Stop Conditions**:
+  - CI failure in `main`.
+  - Detection of PII in output.
+  - Sandbox violation alert.
+- **Escalation**:
+  - Notify `security-council` on policy violations.
+  - Notify `devops` on persistent CI failures.
+
+### Role: Codex (Documentation & Standards)
+- **Permissions**:
+  - Write access to `docs/` and markdown files.
+  - Read-only access to source code.
+- **Stop Conditions**:
+  - Generated documentation contradicts code (detected via drift check).
+
 ## Regulatory & Ethics Operating Constraints (Non-Negotiable)
 
 All agents operating in this repository MUST comply with the following:
@@ -55,6 +78,32 @@ analytics designed for the intelligence community.
 - **Deployable-First**: Maintain the workflow: Investigation -> Entities -> Relationships -> Copilot
   -> Results
 - **Production-Ready MVP**: Every commit should maintain production readiness
+
+## Sustained Velocity & Parallelism (Sprint N+6)
+
+To ensure high throughput and safe parallel execution, all Agents must adhere to the following **Parallelization Mandates**:
+
+### Safe Parallel Zones
+
+Agents must restrict their changes to specific zones to avoid conflicts.
+
+1.  **Server Zone (`server/`)**: Backend services, API, Database.
+    *   *Safe:* Adding new endpoints, services, resolvers.
+    *   *Risk:* Changing shared utilities in `packages/` or modifying `apps/web` simultaneously.
+2.  **Web App Zone (`apps/web/`)**: Summit Web Application.
+    *   *Safe:* UI components, local state, dashboards.
+    *   *Risk:* Direct DB access, modifying server API contracts without coordination.
+3.  **Client Zone (`client/`)**: Legacy/IntelGraph Client.
+    *   *Safe:* Independent feature work.
+4.  **Documentation Zone (`docs/`)**:
+    *   *Safe:* Always safe to append. Avoid rewriting shared index files concurrently.
+
+### Agent Mandates
+
+*   **Scope Check:** Before editing, verify your task falls within *one* primary zone. If it crosses zones (e.g., API + UI), declare strictly coupled changes or split the task.
+*   **Boundary Respect:** Do not import across boundaries (e.g., `server` imports `client`). Use `packages/` for shared code.
+*   **Atomic PRs:** One feature, one zone (preferred).
+*   **Self-Validation:** Run `scripts/check-boundaries.cjs` before submitting.
 
 ## Codebase Structure
 
@@ -362,6 +411,41 @@ make down
 docker system prune -af
 ```
 
+## Sprint N+7 Execution Assignments
+
+The following agents are assigned to execute the specific epics defined in `docs/sprints/SPRINT_N_PLUS_7_ROADMAP.md`.
+
+### Agent: Jules (Architecture & Core Services)
+**Scope:**
+- **Epic A1:** Local Vector Store & Embeddings Service
+- **Epic A2:** RAG Ingestion Pipeline
+- **Epic A3:** Copilot Query Service
+- **Epic C1:** Policy-as-Code Engine (OPA)
+- **Epic C2:** Immutable Audit Log
+
+**Change Surface:**
+- `server/src/services/`
+- `docker-compose*.yml`
+- `server/src/policies/`
+- `server/src/provenance/`
+
+### Agent: Amp (Frontend & Connectors)
+**Scope:**
+- **Epic B1:** Connector SDK & Registry
+- **Epic B2:** RSS/Atom Connector
+- **Epic B3:** STIX/TAXII Connector
+
+**Change Surface:**
+- `server/src/connectors/`
+- `packages/connector-sdk/` (new)
+- `server/src/ingestion/`
+
+### Execution Invariants
+All agents must:
+1.  Check `docs/roadmap/STATUS.json` before starting work.
+2.  Update `docs/roadmap/STATUS.json` in the same PR as the implementation.
+3.  Adhere to the contracts defined in `docs/sprints/SPRINT_N_PLUS_7_ROADMAP.md`.
+
 ---
 
 ## Legacy Guidance (preserved)
@@ -420,3 +504,22 @@ instructions for full script). Ensure binaries/large files are sanitized before 
 ---
 
 **Remember**: The golden path is sacred. Keep it green!
+
+## Agent & Partner Responsibility Boundaries
+
+To maintain clear accountability and human oversight, the following boundaries are strictly enforced:
+
+### 1. Agents Cannot Self-Approve
+- **Principle**: Agents (including AI coding assistants) are tools, not owners.
+- **Rule**: An agent may *propose* a change (via PR, commit, or suggestion), but a human owner defined in `CODEOWNERS` must explicitly *approve* it.
+- **Constraint**: CI pipelines must block any merge that relies solely on an agent's token or approval.
+
+### 2. Partner Submissions Require Owner Sign-Off
+- **Principle**: Partners operate within defined integration scopes.
+- **Rule**: Any code, configuration, or policy submitted by a partner or integration bot requires sign-off from the domain DRI.
+- **Constraint**: Partner accounts are granted `read` or `triage` access, but `write`/`maintain` access is restricted to internal DRIs.
+
+### 3. Non-Human Authority
+- **Principle**: Decision rights are exclusively human.
+- **Rule**: Automated systems cannot make "judgment call" decisions (e.g., overriding a safety check, approving a budget increase).
+- **Constraint**: All critical decisions must be traceable to a specific human identity in the `provenance-ledger`.

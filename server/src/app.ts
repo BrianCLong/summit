@@ -24,6 +24,8 @@ import { circuitBreakerMiddleware } from './middleware/circuitBreakerMiddleware.
 import { overloadProtection } from './middleware/overloadProtection.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
 import { safetyModeMiddleware, resolveSafetyState } from './middleware/safety-mode.js';
+import { residencyEnforcement } from './middleware/residency.js';
+import exceptionRouter from './data-residency/exceptions/routes.js';
 import monitoringRouter from './routes/monitoring.js';
 import billingRouter from './routes/billing.js';
 import entityResolutionRouter from './routes/entity-resolution.js';
@@ -51,6 +53,7 @@ import { webhookWorker } from './webhooks/webhook.worker.js';
 import supportTicketsRouter from './routes/support-tickets.js';
 import ticketLinksRouter from './routes/ticket-links.js';
 import tenantContextMiddleware from './middleware/tenantContext.js';
+import sharingRouter from './routes/sharing.js';
 import { auroraRouter } from './routes/aurora.js';
 import { oracleRouter } from './routes/oracle.js';
 import { phantomLimbRouter } from './routes/phantom_limb.js';
@@ -101,6 +104,7 @@ import masteryRouter from './routes/mastery.js';
 import cryptoIntelligenceRouter from './routes/crypto-intelligence.js';
 import demoRouter from './routes/demo.js';
 import claimsRouter from './routes/claims.js';
+import opsRouter from './routes/ops.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -231,6 +235,12 @@ export const createApp = async () => {
 
   // Resolve and enforce tenant context for API and GraphQL surfaces
   app.use(['/api', '/graphql'], tenantContextMiddleware());
+
+  // Enforce Data Residency
+  app.use(['/api', '/graphql'], residencyEnforcement);
+
+  // Residency Exception Routes
+  app.use('/api/residency/exceptions', authenticateToken, exceptionRouter);
 
   // Telemetry middleware
   app.use((req, res, next) => {
@@ -366,6 +376,7 @@ export const createApp = async () => {
   app.use('/api/v1/search', searchV1Router); // Register Unified Search API
   app.use('/search', searchIndexRouter); // Register Search Index API
   app.use('/api', dataGovernanceRouter); // Register Data Governance API
+  app.use('/api', sharingRouter);
   app.use('/api/gtm', gtmRouter);
   app.use('/airgap', airgapRouter);
   app.use('/analytics', analyticsRouter);
@@ -376,6 +387,7 @@ export const createApp = async () => {
   app.use('/api', exportsRouter);
   app.use('/api', retentionRouter);
   app.use('/dr', drRouter);
+  app.use('/', opsRouter);
   app.use('/api/reporting', reportingRouter);
   app.use('/api/mastery', masteryRouter);
   app.use('/api/crypto-intelligence', cryptoIntelligenceRouter);

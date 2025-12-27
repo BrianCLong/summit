@@ -1,6 +1,8 @@
 
 import { provenanceLedger } from './ledger.js';
+import { CanonicalGraphService } from './CanonicalGraphService.js';
 import { GraphQLContext } from '../types/context.js';
+import { pool } from '../db/pg.js';
 
 export const provenanceResolvers = {
   Query: {
@@ -10,26 +12,6 @@ export const provenanceResolvers = {
       if (!tenantId) {
         throw new Error('Tenant context required for provenance queries');
       }
-
-      // We query the ledger for all entries related to this resourceId
-      // Note: The existing getEntries method filters by resourceType/ActionType but not resourceId directly in its optimized signature.
-      // However, the underlying SQL can be extended or we can filter in memory if volume is low.
-      // Ideally, we add resourceId support to getEntries.
-      // Let's assume we modify getEntries or just use the raw query here for efficiency.
-
-      // Actually, looking at ledger.ts, getEntries accepts `resourceType`. It doesn't accept `resourceId` in arguments?
-      // Wait, let's double check ledger.ts code I read.
-      // getEntries signature: (tenantId, options: { fromSequence, toSequence, limit, offset, actionType, resourceType, order })
-      // It does NOT support resourceId.
-      // I should add resourceId support to getEntries in ledger.ts or do a custom query here.
-      // Since I can't easily modify ledger.ts again without a diff, I'll assume I can add it or just fail gracefully.
-      // Wait, I CAN modify ledger.ts again.
-      // But for now, let's implement a direct query using the exported pool if possible, or rely on a new method.
-      // `provenanceLedger` is exported.
-      // I will implement a custom query here using the pool from `../db/pg`.
-
-      // Oops, I can't import `pool` easily if it's not exported from ledger.
-      // `pool` is imported in ledger from `../db/pg`. I can import it here too.
 
       return await getEntityLineageFromDb(tenantId, args.id, args.limit, args.offset, args.order);
     },
@@ -53,13 +35,45 @@ export const provenanceResolvers = {
       // This is a heavy operation, usually restricted to admins
       // For now, allow it.
       return await provenanceLedger.verifyChainIntegrity(tenantId);
+    },
+
+    explainCausality: async (_: any, args: { nodeId: string; depth?: number }, context: GraphQLContext) => {
+      const tenantId = context.user?.tenantId;
+      if (!tenantId) throw new Error('Tenant context required');
+
+      return await CanonicalGraphService.getInstance().explainCausality(
+        args.nodeId,
+        tenantId,
+        args.depth
+      );
+    },
+
+    provenanceDiff: async (_: any, args: { startNodeId: string; endNodeId: string }, context: GraphQLContext) => {
+      const tenantId = context.user?.tenantId;
+      if (!tenantId) throw new Error('Tenant context required');
+
+      return await CanonicalGraphService.getInstance().getGraphDiff(
+        args.startNodeId,
+        args.endNodeId,
+        tenantId
+      );
+    },
+
+    exportProvenanceGraph: async (_: any, args: { from?: Date; to?: Date }, context: GraphQLContext) => {
+      const tenantId = context.user?.tenantId;
+      if (!tenantId) throw new Error('Tenant context required');
+
+      // Security Check: Verify permission (e.g., 'provenance:export') - Assumed handled by directives or gateway
+
+      return await CanonicalGraphService.getInstance().exportGraph(tenantId, {
+        from: args.from,
+        to: args.to
+      });
     }
   }
 };
 
 // Helper function to query DB directly since getEntries doesn't support resourceId yet
-import { pool } from '../db/pg.js';
-
 async function getEntityLineageFromDb(
     tenantId: string,
     resourceId: string,

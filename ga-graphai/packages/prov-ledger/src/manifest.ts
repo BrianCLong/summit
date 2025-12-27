@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import type { EvidenceBundle, LedgerEntry } from 'common-types';
+import { stableHash } from '@ga-graphai/data-integrity';
 
 export interface ManifestTransformNode {
   id: string;
@@ -22,7 +23,7 @@ export interface ExportManifest {
 }
 
 function hashPayload(payload: unknown): string {
-  return createHash('sha256').update(JSON.stringify(payload)).digest('hex');
+  return stableHash(payload);
 }
 
 function buildMerkleRoot(hashes: string[]): string {

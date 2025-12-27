@@ -5,6 +5,8 @@ import { randomUUID, createHash } from 'crypto';
 import logger from '../utils/logger.js';
 import { provenanceLedger } from '../provenance/ledger.js';
 import { QuotaManager } from '../lib/resources/quota-manager.js';
+import GAEnrollmentService from './GAEnrollmentService.js';
+import { PrometheusMetrics } from '../utils/metrics.js';
 
 // Input Validation Schema
 export const createTenantSchema = z.object({
@@ -51,8 +53,16 @@ export interface Tenant {
 
 export class TenantService {
   private static instance: TenantService;
+  private metrics: PrometheusMetrics;
 
-  private constructor() {}
+  private constructor() {
+    this.metrics = new PrometheusMetrics('summit_tenancy');
+    this.metrics.createHistogram(
+        'tenant_creation_duration_seconds',
+        'Time taken to create a tenant',
+        ['residency', 'tier']
+    );
+  }
 
   public static getInstance(): TenantService {
     if (!TenantService.instance) {
@@ -65,14 +75,21 @@ export class TenantService {
    * Create a new tenant with self-serve guardrails
    */
   async createTenant(input: CreateTenantInput, actorId: string): Promise<Tenant> {
+    const start = process.hrtime();
     const pool = getPostgresPool();
     const client = await pool.connect();
 
     try {
-      await client.query('BEGIN');
-
       // 1. Validate Input
       const validated = createTenantSchema.parse(input);
+
+      // GA Enrollment Check for Tenant Creation
+      const enrollmentCheck = await GAEnrollmentService.checkTenantEnrollmentEligibility(validated.region);
+      if (!enrollmentCheck.eligible) {
+          throw new Error(`Tenant creation rejected: ${enrollmentCheck.reason}`);
+      }
+
+      await client.query('BEGIN');
 
       // 2. Idempotency Check
       // If a tenant with the same slug exists, check if it was created by the same actor.
@@ -159,6 +176,13 @@ export class TenantService {
 
       await client.query('COMMIT');
       logger.info(`Tenant created successfully: ${tenant.slug} (${tenant.id})`);
+
+      const [seconds, nanoseconds] = process.hrtime(start);
+      const duration = seconds + nanoseconds / 1e9;
+      this.metrics.observeHistogram('tenant_creation_duration_seconds', {
+          residency: tenant.residency,
+          tier: tenant.tier
+      }, duration);
 
       return tenant;
 

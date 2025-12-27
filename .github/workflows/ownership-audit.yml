@@ -1,0 +1,26 @@
+name: Ownership Audit
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 9 * * *'  # Daily at 9am
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Check Ownership Drift
+        run: python3 scripts/governance/check_ownership_drift.py
+
+      - name: Verify Decision Routing Script
+        run: python3 scripts/governance/route_decision.py --help

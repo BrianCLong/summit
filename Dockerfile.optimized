@@ -34,7 +34,7 @@ RUN apk add --no-cache \
 WORKDIR /app
 
 # Enable corepack for pnpm support
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
 
 # =============================================================================
 # Stage 2: Dependencies Installation (leverages layer caching)
@@ -83,7 +83,7 @@ RUN if [ -f "tsconfig.json" ]; then \
 # =============================================================================
 # Stage 4: Security Scanning (optional, can be skipped in dev)
 # =============================================================================
-FROM aquasec/trivy:latest AS security-scan
+FROM aquasec/trivy:0.49.1 AS security-scan
 
 COPY --from=builder /app /scan
 

@@ -18,6 +18,7 @@ import { MutationWitnessService, mutationWitness } from './witness.js';
 import { ProvenanceEntryV2, MutationPayload, MutationWitness, CrossServiceAttribution } from './types.js';
 import { advancedAuditSystem } from '../audit/advanced-audit-system.js';
 import { putLocked } from '../audit/worm.js';
+import { CanonicalGraphService } from './CanonicalGraphService.js';
 
 const tracer = {
   startActiveSpan: async (
@@ -323,6 +324,18 @@ export class ProvenanceLedgerV2 extends EventEmitter {
 
             // Emit to event bus
             this.emit('entryAppended', completeEntry);
+
+            // Integration: Project to Canonical Graph (Best-effort async)
+            CanonicalGraphService.getInstance()
+              .projectEntry(completeEntry)
+              .catch((err) => {
+                console.error('Failed to project entry to Canonical Graph', {
+                  entryId: completeEntry.id,
+                  error: err
+                });
+                // We don't fail the transaction if graph projection fails, ensuring Ledger availability.
+                // In a production system, this should go to a durable queue (e.g. BullMQ).
+              });
 
             // Integration: Send to Audit System
             (advancedAuditSystem as any).logEvent?.({

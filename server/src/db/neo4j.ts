@@ -99,3 +99,30 @@ export async function closeNeo4jDriver(): Promise<void> {
 export function onNeo4jDriverReady(callback: Neo4jReadyCallback): void {
   readyCallbacks.push(callback);
 }
+
+// Helper to provide a unified interface like 'neo.session()'
+// to avoid importing 'getNeo4jDriver' everywhere and handling nulls manually
+export const neo = {
+  session: () => {
+    if (isMockMode || !realDriver) {
+      // Return a dummy session or throw?
+      // For now, simple mock if needed or just rely on realDriver if available
+      // But typically we should just return realDriver.session() if initialized
+      if(realDriver) return realDriver.session();
+      // If we are in mock mode but no driver (e.g. tests without init),
+      // we might need a better mock strategy.
+      // For now, let's assume getNeo4jDriver throws or handles it.
+      return getNeo4jDriver().session();
+    }
+    return realDriver.session();
+  },
+  run: async (query: string, params?: any) => {
+    const session = neo.session();
+    try {
+      const result = await session.run(query, params);
+      return result;
+    } finally {
+      await session.close();
+    }
+  }
+};

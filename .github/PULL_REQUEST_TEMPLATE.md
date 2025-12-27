@@ -2,12 +2,33 @@
 
 [What/why]
 
+## M&A / Integration Readiness (DD Signal)
+
+*If this PR involves integrating an external system or library:*
+
+*   **DD Signal**: [Link to DD Scorecard or "N/A"]
+*   **Risk/Cost**: [Estimated Risk Delta & Integration Cost]
+*   **Control/Pattern**: [Selected Pattern: Sidecar / Event Bridge / Adapter / Full Merge]
+*   **Proof**: [Link to Test Plan or PoC Results]
+*   **Reversibility**: [Explicit statement on how to unwind this change]
+
 ## Canary Plan
 
 - Metrics to watch: [p95 latency, error rate, saturation]
 - Ramp: 5% → 20% → 50% → 100% (hold 20% for 30–60m)
 - Rollback trigger(s): [SLO burn > X, error rate > Y, anomaly Z]
-- Rollback steps: `helm rollback <release> <rev>` + feature flag off
+- Rollback steps: `helm rollback <release> <rev>` + feature flag
+## Test Evidence
+- Provide details on tests performed and evidence of success
+
+## CI Confirmation
+- Confirm that the golden path CI workflow ran and all required checks passed
+
+## Non-Goals
+- Outline what this pull request does not address or intentionally leaves out
+
+## Hard Guarantees
+- Specify any hard guarantees this change delivers and what remains simulated off
 
 ## Migration Gate (if applicable)
 
@@ -46,6 +67,7 @@
 - [ ] OPA policies verified
 - [ ] Grafana dashboards updated if applicable
 - [ ] **Hot Files**: I have avoided modifying shared hot files (root config, Makefiles) unless absolutely necessary.
+- [ ] **Feature Flags**: New behavior is hidden behind a feature flag.
 
 ## Test Evidence  
 - [ ] Provide links or attachments for test results.  
@@ -57,4 +79,4 @@
 - Describe what this change does not cover.  
 
 ## Hard Guarantees  
-- List the guarantees this change provides (e.g., performance thresholds, invariants).- [ ] **Feature Flags**: New behavior is hidden behind a feature flag.
+- List the guarantees this change provides (e.g., performance thresholds, invariants).

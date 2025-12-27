@@ -1,0 +1,11 @@
+{
+  "perf_api_p95": 120,
+  "perf_graph_p95": 200,
+  "perf_throughput": 250,
+  "cost_per_req": 0.01,
+  "cost_hourly": 22.5,
+  "cost_storage_eff": 88,
+  "safe_error_rate": 0.005,
+  "safe_auth_deny": 12,
+  "safe_invariant": 100
+}
