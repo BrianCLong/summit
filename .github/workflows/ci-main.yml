@@ -2,9 +2,23 @@ name: CI Main - Green Lock Strategy
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'LICENSE'
+      - '.gitignore'
+      - '.dockerignore'
   pull_request:
     branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'LICENSE'
+      - '.gitignore'
+      - '.dockerignore'
   merge_group:
+    types: [checks_requested]
+    branches: [main]
 env:
   NODE_VERSIONS: '18,20'
   FORCE_COLOR: 3
