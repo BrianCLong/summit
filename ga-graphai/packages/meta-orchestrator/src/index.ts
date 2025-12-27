@@ -75,6 +75,10 @@ export interface StageExecutionResult {
   cost: number;
   errorRate: number;
   logs: string[];
+  degraded?: boolean;
+  attempts?: number;
+  timedOut?: boolean;
+  featureFlags?: string[];
 }
 
 export interface ExecutionAdapter {
@@ -93,6 +97,31 @@ export interface AuditSink {
   record(entry: AuditEntry): void | Promise<void>;
 }
 
+interface CircuitBreakerState {
+  failures: number;
+  openedAt?: number;
+}
+
+interface CircuitBreakerPolicy {
+  failureThreshold: number;
+  cooldownMs: number;
+}
+
+interface ResiliencePolicy {
+  maxRetries: number;
+  backoffMs: number;
+  timeoutMs: number;
+  circuitBreaker: CircuitBreakerPolicy;
+}
+
+interface FeatureFlagConfig {
+  gracefulDegradation: boolean;
+  enableCircuitBreaker: boolean;
+  deterministicLogging: boolean;
+}
+
+type ExecutionMode = 'deterministic' | 'production';
+
 export interface MetaOrchestratorOptions {
   pipelineId: string;
   providers: CloudProviderDescriptor[];
@@ -107,6 +136,10 @@ export interface MetaOrchestratorOptions {
   decisionPolicies?: ModuleDecisionPolicy[];
   fairness?: FairnessPolicy;
   plugins?: MetaOrchestratorPlugin[];
+  resilience?: Partial<ResiliencePolicy>;
+  featureFlags?: Partial<FeatureFlagConfig>;
+  mode?: ExecutionMode;
+  deterministicSeed?: number;
   sessionArchive?: {
     owner?: string;
     scope?: string;
@@ -123,11 +156,56 @@ const DEFAULT_WEIGHTS: PlannerRewardWeights = {
   sustainability: 0.05,
 };
 
+const DEFAULT_RESILIENCE: ResiliencePolicy = {
+  maxRetries: 2,
+  backoffMs: 150,
+  timeoutMs: 10000,
+  circuitBreaker: {
+    failureThreshold: 3,
+    cooldownMs: 30000,
+  },
+};
+
+const DEFAULT_FEATURE_FLAGS: FeatureFlagConfig = {
+  gracefulDegradation: true,
+  enableCircuitBreaker: true,
+  deterministicLogging: true,
+};
+
 const DEFAULT_SELF_HEALING: SelfHealingPolicy = {
   maxRetries: 2,
   backoffSeconds: 5,
   triggers: ['execution-failure', 'latency-breach', 'cost-spike'],
 };
+
+function createSeededRandom(seed: number): () => number {
+  let state = seed + 0x6d2b79f5;
+  return () => {
+    state |= 0;
+    state = (state + 0x6d2b79f5) | 0;
+    let t = Math.imul(state ^ (state >>> 15), 1 | state);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function mergeResilience(
+  base: ResiliencePolicy,
+  overrides: Partial<ResiliencePolicy>,
+): ResiliencePolicy {
+  return {
+    maxRetries: overrides.maxRetries ?? base.maxRetries,
+    backoffMs: overrides.backoffMs ?? base.backoffMs,
+    timeoutMs: overrides.timeoutMs ?? base.timeoutMs,
+    circuitBreaker: {
+      failureThreshold:
+        overrides.circuitBreaker?.failureThreshold ??
+        base.circuitBreaker.failureThreshold,
+      cooldownMs:
+        overrides.circuitBreaker?.cooldownMs ?? base.circuitBreaker.cooldownMs,
+    },
+  };
+}
 
 function nowIso(): string {
   return new Date().toISOString();
@@ -729,6 +807,12 @@ export class MetaOrchestrator {
   private readonly archiveOwner?: string;
   private readonly archiveScope?: string;
   private readonly sessionArchiveLabels?: string[];
+  private readonly resilience: ResiliencePolicy;
+  private readonly featureFlags: FeatureFlagConfig;
+  private readonly circuitStates = new Map<string, CircuitBreakerState>();
+  private readonly mode: ExecutionMode;
+  private readonly deterministicSeed?: number;
+  private readonly random: () => number;
 
   constructor(options: MetaOrchestratorOptions) {
     this.pipelineId = options.pipelineId;
@@ -758,6 +842,23 @@ export class MetaOrchestrator {
     );
     this.selfHealing = options.selfHealing ?? DEFAULT_SELF_HEALING;
     this.events = options.events ?? new StructuredEventEmitter();
+    this.resilience = mergeResilience(
+      DEFAULT_RESILIENCE,
+      options.resilience ?? {},
+    );
+    this.featureFlags = {
+      ...DEFAULT_FEATURE_FLAGS,
+      ...(options.featureFlags ?? {}),
+    };
+    this.mode = options.mode ?? 'production';
+    this.deterministicSeed =
+      this.mode === 'deterministic'
+        ? options.deterministicSeed ?? Date.now()
+        : undefined;
+    this.random =
+      this.mode === 'deterministic'
+        ? createSeededRandom(this.deterministicSeed ?? Date.now())
+        : Math.random;
   }
 
   async createPlan(
@@ -778,6 +879,10 @@ export class MetaOrchestrator {
       { pricing, rewards: rewardSignals },
       weights,
     );
+    plan.metadata.executionMode = this.mode;
+    if (this.deterministicSeed !== undefined) {
+      plan.metadata.deterministicSeed = this.deterministicSeed;
+    }
     const fairness = this.fairnessMonitor.metrics(plan.steps.length);
     plan.metadata.fairness = fairness;
     plan.metadata.governance = this.governance.flush();
@@ -955,6 +1060,142 @@ export class MetaOrchestrator {
     }
   }
 
+  private backoffForAttempt(attempt: number): number {
+    const jitter = this.random() * this.resilience.backoffMs;
+    return this.resilience.backoffMs * attempt + jitter;
+  }
+
+  private async sleep(delayMs: number): Promise<void> {
+    await new Promise((resolve) => {
+      setTimeout(resolve, delayMs);
+    });
+  }
+
+  private async executeWithResilience(
+    stage: PipelineStageDefinition,
+    decision: PlannerDecision,
+    metadata: Record<string, unknown>,
+  ): Promise<StageExecutionResult> {
+    const circuitKey = `${stage.id}:${decision.provider}`;
+    const existing = this.circuitStates.get(circuitKey) ?? { failures: 0 };
+    const now = Date.now();
+    const circuitCoolingDown =
+      existing.openedAt &&
+      now - existing.openedAt < this.resilience.circuitBreaker.cooldownMs;
+    if (this.featureFlags.enableCircuitBreaker && circuitCoolingDown) {
+      return {
+        status: this.featureFlags.gracefulDegradation ? 'success' : 'failure',
+        throughputPerMinute: this.featureFlags.gracefulDegradation
+          ? Math.max(1, stage.minThroughputPerMinute * 0.1)
+          : 0,
+        cost: 0,
+        errorRate: 1,
+        logs: [`circuit open for ${circuitKey}`],
+        degraded: this.featureFlags.gracefulDegradation,
+        attempts: 0,
+        featureFlags: ['circuit-breaker'],
+      };
+    }
+
+    if (
+      existing.openedAt &&
+      now - existing.openedAt >= this.resilience.circuitBreaker.cooldownMs
+    ) {
+      existing.failures = 0;
+      existing.openedAt = undefined;
+    }
+
+    let attempts = 0;
+    let lastLogs: string[] = [];
+    let lastError: string | undefined;
+    let timedOut = false;
+    while (attempts <= this.resilience.maxRetries) {
+      attempts += 1;
+      let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+      try {
+        const result = await Promise.race([
+          this.execution.execute({
+            stage,
+            decision,
+            planMetadata: metadata,
+          }),
+          new Promise<StageExecutionResult>((_, reject) => {
+            timeoutHandle = setTimeout(
+              () => reject(new Error(`timeout after ${this.resilience.timeoutMs}ms`)),
+              this.resilience.timeoutMs,
+            );
+          }),
+        ]);
+        if (timeoutHandle) {
+          clearTimeout(timeoutHandle);
+        }
+        if (
+          this.mode === 'deterministic' &&
+          this.featureFlags.deterministicLogging
+        ) {
+          result.logs = [
+            `[deterministic seed=${this.deterministicSeed}]`,
+            ...result.logs,
+          ];
+          result.featureFlags = [
+            ...(result.featureFlags ?? []),
+            'deterministic',
+          ];
+        }
+        if (result.status === 'success') {
+          this.circuitStates.set(circuitKey, { failures: 0 });
+          result.attempts = attempts;
+          result.timedOut = timedOut;
+          return result;
+        }
+        lastLogs = result.logs;
+        lastError = 'execution-failure';
+      } catch (error) {
+        if (timeoutHandle) {
+          clearTimeout(timeoutHandle);
+        }
+        lastError =
+          error instanceof Error ? error.message : 'execution timed out';
+        timedOut ||= lastError.includes('timeout');
+        lastLogs = [`${lastError}`];
+      }
+      existing.failures += 1;
+      const shouldOpenCircuit =
+        this.featureFlags.enableCircuitBreaker &&
+        existing.failures >= this.resilience.circuitBreaker.failureThreshold;
+      if (shouldOpenCircuit) {
+        existing.openedAt = Date.now();
+        break;
+      }
+      if (attempts <= this.resilience.maxRetries) {
+        await this.sleep(this.backoffForAttempt(attempts));
+      }
+    }
+    this.circuitStates.set(circuitKey, existing);
+    const degraded = this.featureFlags.gracefulDegradation;
+    return {
+      status: degraded ? 'success' : 'failure',
+      throughputPerMinute: degraded
+        ? Math.max(1, stage.minThroughputPerMinute * 0.1)
+        : 0,
+      cost: 0,
+      errorRate: 1,
+      logs: degraded
+        ? ['graceful-degradation enabled', ...lastLogs]
+        : lastLogs,
+      degraded,
+      attempts,
+      timedOut: timedOut || (lastError?.includes('timeout') ?? false),
+      featureFlags: [
+        ...(degraded ? ['graceful-degradation'] : []),
+        ...(existing.openedAt ? ['circuit-breaker'] : []),
+        ...(this.mode === 'deterministic' && this.featureFlags.deterministicLogging
+          ? ['deterministic']
+          : []),
+      ],
+    };
+  }
+
   private async runStage(
     stage: PipelineStageDefinition,
     step: ExplainablePlanStep,
@@ -964,11 +1205,11 @@ export class MetaOrchestrator {
     rewardSignal: PlannerRewardSignal;
   }> {
     const startedAt = nowIso();
-    const primaryResult = await this.execution.execute({
+    const primaryResult = await this.executeWithResilience(
       stage,
-      decision: step.primary,
-      planMetadata: metadata,
-    });
+      step.primary,
+      metadata,
+    );
     if (primaryResult.status === 'success') {
       const finishedAt = nowIso();
       const traceEntry: ExecutionTraceEntry = {
@@ -978,13 +1219,23 @@ export class MetaOrchestrator {
         startedAt,
         finishedAt,
         logs: primaryResult.logs,
+        fallbackTriggered: primaryResult.degraded
+          ? 'graceful-degradation'
+          : primaryResult.timedOut
+            ? 'timeout'
+            : undefined,
+        degraded: primaryResult.degraded,
+        featureFlags: primaryResult.featureFlags,
       };
       const rewardSignal: PlannerRewardSignal = {
         stageId: stage.id,
         observedThroughput: primaryResult.throughputPerMinute,
         observedCost: primaryResult.cost,
-        observedErrorRate: primaryResult.errorRate,
-        recovered: false,
+        observedErrorRate:
+          primaryResult.degraded && stage.guardrail?.maxErrorRate
+            ? Math.min(primaryResult.errorRate, stage.guardrail.maxErrorRate)
+            : primaryResult.errorRate,
+        recovered: primaryResult.degraded ?? false,
       };
       await this.auditSink.record({
         id: `${stage.id}:${Date.now()}:execution`,
@@ -1005,7 +1256,10 @@ export class MetaOrchestrator {
         startedAt,
         finishedAt,
         logs: primaryResult.logs,
-        fallbackTriggered: 'execution-failure',
+        fallbackTriggered: primaryResult.timedOut
+          ? 'timeout'
+          : 'execution-failure',
+        featureFlags: primaryResult.featureFlags,
       };
       const rewardSignal: PlannerRewardSignal = {
         stageId: stage.id,
@@ -1069,11 +1323,11 @@ export class MetaOrchestrator {
         data: { fallbackDecision, stage },
       });
       const fallbackStartedAt = nowIso();
-      const result = await this.execution.execute({
+      const result = await this.executeWithResilience(
         stage,
-        decision: fallbackDecision,
-        planMetadata: metadata,
-      });
+        fallbackDecision,
+        metadata,
+      );
       lastStartedAt = fallbackStartedAt;
       if (result.status === 'success') {
         const finishedAt = nowIso();
@@ -1084,7 +1338,13 @@ export class MetaOrchestrator {
           startedAt: fallbackStartedAt,
           finishedAt,
           logs: [...accumulatedLogs, ...result.logs],
-          fallbackTriggered: 'execution-failure',
+          fallbackTriggered: result.degraded
+            ? 'graceful-degradation'
+            : result.timedOut
+              ? 'timeout'
+              : 'execution-failure',
+          degraded: result.degraded,
+          featureFlags: result.featureFlags,
         };
         const rewardSignal: PlannerRewardSignal = {
           stageId: stage.id,
