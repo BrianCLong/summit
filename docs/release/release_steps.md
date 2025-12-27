@@ -1,5 +1,7 @@
 # Release Steps (Checklist)
 
+- Review onboarding pitfalls and mitigations:
+  - [`docs/onboarding/known-issues.md`](../onboarding/known-issues.md)
 - Prereqs: Docker, Node 18+, psql, k6 (optional), syft (optional)
 - Install deps: `npm install && (cd server && npm install) && (cd client && npm install)`
 - Apply DB migrations: `npm run db:api:migrate` (set `PG_URL`)
