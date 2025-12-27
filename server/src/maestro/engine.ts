@@ -52,6 +52,43 @@ export class MaestroEngine {
     input: unknown,
     principalId: string
   ): Promise<MaestroRun> {
+    // 0. Epic 2: Cost-to-Value Skew Reduction - Check for Duplicate Run
+    // Check for recent identical runs to prevent redundant execution
+    // Simple hash of templateId + input (assuming input is deterministic JSON)
+    const inputHash = JSON.stringify(input); // Basic serialization for prototype
+    // In production, use a stable hash function
+    const dupRes = await this.db.query(
+      `SELECT * FROM maestro_runs
+       WHERE tenant_id = $1
+       AND template_id = $2
+       AND input = $3::jsonb
+       AND status = 'succeeded'
+       AND completed_at > NOW() - INTERVAL '1 hour'`,
+      [tenantId, templateId, inputHash]
+    );
+
+    if (dupRes.rows.length > 0) {
+      logger.info(`Returning cached run result for template ${templateId}`);
+      // Return the existing run (mapped to model)
+      // Note: This assumes the caller handles the 'succeeded' status correctly
+      // and doesn't expect a 'pending' run they need to poll.
+      // Ideally we'd return a new run pointer to the old data, but for now we return the old run.
+      // We need to map the row to MaestroRun interface
+      const row = dupRes.rows[0];
+       return {
+          id: row.id,
+          tenantId: row.tenant_id,
+          templateId: row.template_id,
+          templateVersion: row.template_version,
+          createdByPrincipalId: row.created_by_principal_id,
+          status: row.status,
+          input: row.input,
+          startedAt: row.started_at,
+          completedAt: row.completed_at,
+          metadata: row.metadata || {}
+       };
+    }
+
     // 1. Fetch Template
     const res = await this.db.query(
       `SELECT * FROM maestro_templates WHERE id = $1 AND tenant_id = $2`,
