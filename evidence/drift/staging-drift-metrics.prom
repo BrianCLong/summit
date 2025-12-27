@@ -1,0 +1,2 @@
+config_drift_detected{env="staging"} 1
+config_drift_mismatches_total{env="staging"} 1

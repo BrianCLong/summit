@@ -1,0 +1,14 @@
+{
+  "env": "staging",
+  "generatedAt": "2025-12-27T05:55:20.443Z",
+  "driftDetected": true,
+  "driftCount": 1,
+  "drifts": [
+    {
+      "path": "k8s/client-deployment.yaml",
+      "driftType": "HASH_MISMATCH",
+      "expected": "3041346870b18940a80b8990e586efb43b7961239731646dfd1d97d03b49aeea",
+      "actual": "deadbeef70b18940a80b8990e586efb43b7961239731646dfd1d97d03b49aeea"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "sources": [
+    {
+      "name": "k8s",
+      "paths": ["k8s/client-deployment.yaml", "k8s/conductor-autoscaling.yaml"]
+    },
+    {
+      "name": "helm",
+      "paths": ["helm/intelgraph/Chart.yaml", "helm/intelgraph/values.yaml"]
+    },
+    {
+      "name": "terraform",
+      "paths": ["terraform/backend.tf", "terraform/infra.tf"]
+    }
+  ]
+}

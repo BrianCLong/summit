@@ -1,0 +1,42 @@
+{
+  "env": "staging",
+  "generatedAt": "2025-12-27T05:55:08.264Z",
+  "entries": [
+    {
+      "path": "k8s/client-deployment.yaml",
+      "source": "k8s",
+      "sha256": "3041346870b18940a80b8990e586efb43b7961239731646dfd1d97d03b49aeea",
+      "bytes": 326
+    },
+    {
+      "path": "k8s/conductor-autoscaling.yaml",
+      "source": "k8s",
+      "sha256": "dc8c239adc0c5cf86a68a1416943f82a53f25e915a19593afe03704afe2c9d20",
+      "bytes": 13422
+    },
+    {
+      "path": "helm/intelgraph/Chart.yaml",
+      "source": "helm",
+      "sha256": "b27f4ddf2b85752903dad81fbb5681b516ef8ec56d011321525abbbad74ebd1d",
+      "bytes": 168
+    },
+    {
+      "path": "helm/intelgraph/values.yaml",
+      "source": "helm",
+      "sha256": "dbee30fb2753596b0741e49cd544b86ad608c906774fc53a0af5b87ff8d0fc92",
+      "bytes": 1527
+    },
+    {
+      "path": "terraform/backend.tf",
+      "source": "terraform",
+      "sha256": "e904258dbb15d2b4213ad834d442853c7cce331a4d89a1592e4dc631f35cb53a",
+      "bytes": 220
+    },
+    {
+      "path": "terraform/infra.tf",
+      "source": "terraform",
+      "sha256": "ef9b2a76ba7d6d17ba43c92fced1d5e82ceb0c918dc8b1da886f71d0b1f1f2a9",
+      "bytes": 1017
+    }
+  ]
+}

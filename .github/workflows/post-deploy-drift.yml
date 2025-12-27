@@ -1,0 +1,45 @@
+name: Post-Deploy Drift Check
+
+on:
+  workflow_run:
+    workflows: ["Deploy to Multiple Regions"]
+    types: [completed]
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  drift-check:
+    runs-on: ubuntu-latest
+    if: >-
+      ${
+        github.event_name != 'workflow_run' ||
+        github.event.workflow_run.conclusion == 'success'
+      }
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Run drift check
+        env:
+          DRIFT_ENV: staging
+          DRIFT_SNAPSHOT_PATH: artifacts/drift/staging-snapshot.json
+        run: |
+          node scripts/drift/check-drift.cjs \
+            --baseline config/drift-baseline.json \
+            --snapshot "${DRIFT_SNAPSHOT_PATH}" \
+            --env "${DRIFT_ENV}" \
+            --out artifacts/drift/drift-report.json \
+            --metrics artifacts/drift/drift-metrics.prom
+
+      - name: Upload drift artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: drift-report
+          path: |
+            artifacts/drift/drift-report.json
+            artifacts/drift/drift-metrics.prom

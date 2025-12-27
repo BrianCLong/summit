@@ -315,6 +315,29 @@ spec:
             description: 'Pod {{ $labels.pod }} restarting frequently'
 
     # ====================================================================
+    # CONFIGURATION DRIFT ALERTS
+    # ====================================================================
+
+    - name: intelgraph.config.drift
+      interval: 60s
+      rules:
+        - alert: IntelGraphConfigDriftDetected
+          expr: |
+            config_drift_detected{env="staging"} == 1
+          for: 5m
+          labels:
+            severity: critical
+            service: config-drift
+            team: platform
+            pager: immediate
+          annotations:
+            summary: '🧭 Configuration drift detected in staging'
+            description: |
+              Drift detected between Git baseline and staging snapshot for configuration sources.
+              Review the drift report artifact and remediate changes outside GitOps.
+            runbook_url: 'https://runbooks.intelgraph.ai/config-drift'
+
+    # ====================================================================
     # COST & CAPACITY ALERTS
     # ====================================================================
 
