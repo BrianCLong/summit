@@ -305,6 +305,25 @@ Trigger rollback if ANY of these occur:
 - Golden-path probes failing
 - P0/P1 incident attributed to release
 
+### Rollback vs Roll-forward decision tree
+
+Use this decision tree to determine whether to roll back immediately or roll
+forward with a safe fix. Confirm canary signals per
+[REL-1](../project_management/companyos/COS-POD-TICKET-SET.md#rel-1--adr-standard-release-strategy-v1)
+before proceeding, and follow rollback automation steps in
+[REL-2](../project_management/companyos/COS-POD-TICKET-SET.md#rel-2--define-release-gates--canary-thresholds).
+
+| Decision criteria | Roll back when                                                    | Roll forward when                                                               |
+| ----------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Blast radius      | Broad impact across multiple services, regions, or core workflows | Isolated to a non-critical feature or single tenant                             |
+| Data migration    | Irreversible or partial migrations risk data integrity            | Forward fix can be applied without schema changes or with reversible migrations |
+| User impact       | User-facing outages, auth failures, or critical UX regressions    | Minor UX issues with no data loss and clear workaround                          |
+| SLO breach        | Error budget burn is rapid or SLO thresholds are breached         | SLOs are within guardrails and trending stable                                  |
+
+**If any "Roll back when" criteria are true**, initiate rollback and pause
+promotion. **If all are "Roll forward when"**, prioritize a hotfix with guarded
+feature flags, then re-run smoke/soak validation.
+
 ### Auto-Rollback
 
 The system automatically rolls back if SLO gates fail during canary. When this happens:
