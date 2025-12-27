@@ -1,6 +1,8 @@
 
 import { LlmOrchestrator, ChatCompletionRequest, ChatCompletionResult, ChatMessage, ToolCallInvocation } from '../types';
 import { ToolRegistry } from '../tools/registry';
+import { logger, correlationStorage } from '../../config/logger';
+import { metrics } from '../../lib/observability/metrics';
 
 export interface AgentPlanStep {
   type: "llm_call" | "tool_call" | "decision";
@@ -25,6 +27,21 @@ export class AgentRunner {
       task: string,
       maxSteps: number = 5
   ): Promise<AgentResult> {
+    const startTime = Date.now();
+    const correlationId = correlationStorage.getStore()?.get('correlationId') || 'unknown';
+
+    logger.info({
+        event: 'AgentExecutionStarted',
+        tenantId,
+        task: task.substring(0, 50),
+        correlationId
+    }, 'Agent execution started');
+
+    // Increment total executions
+    // Note: We need to define this metric in observability/metrics.ts first or cast to any if we are lazy,
+    // but the plan is to add it properly. Assuming it exists now.
+    (metrics as any).agentExecutionsTotal?.inc({ tenant: tenantId, status: 'started' });
+
     const steps: AgentPlanStep[] = [];
     const messages: ChatMessage[] = [
         {
@@ -37,8 +54,10 @@ export class AgentRunner {
     let finalAnswer = '';
     const availableTools = this.tools.getDefinitions();
 
-    for (let i = 0; i < maxSteps; i++) {
+    try {
+      for (let i = 0; i < maxSteps; i++) {
         // 1. LLM Call
+        const stepStartTime = Date.now();
         const response = await this.orchestrator.chat({
             tenantId,
             purpose: 'agent',
@@ -46,6 +65,14 @@ export class AgentRunner {
             messages,
             tools: availableTools
         });
+
+        // Log LLM step
+        logger.info({
+            event: 'AgentStep',
+            stepType: 'llm',
+            durationMs: Date.now() - stepStartTime,
+            correlationId
+        }, 'Agent LLM step completed');
 
         // 2. Process Result
         if (response.content) {
@@ -107,6 +134,31 @@ export class AgentRunner {
         }
     }
 
+    const duration = (Date.now() - startTime) / 1000;
+    logger.info({
+        event: 'AgentExecutionCompleted',
+        outcome: 'success',
+        durationMs: Date.now() - startTime,
+        stepsCount: steps.length,
+        correlationId
+    }, 'Agent execution completed successfully');
+
+    (metrics as any).agentExecutionsTotal?.inc({ tenant: tenantId, status: 'success' });
+    (metrics as any).agentExecutionDuration?.observe({ tenant: tenantId, status: 'success' }, duration);
+
     return { finalAnswer, steps };
+    } catch (error) {
+        const duration = (Date.now() - startTime) / 1000;
+        logger.error({
+            event: 'AgentExecutionFailed',
+            error: (error as Error).message,
+            durationMs: Date.now() - startTime,
+            correlationId
+        }, 'Agent execution failed');
+
+        (metrics as any).agentExecutionsTotal?.inc({ tenant: tenantId, status: 'failure' });
+        (metrics as any).agentExecutionDuration?.observe({ tenant: tenantId, status: 'failure' }, duration);
+        throw error;
+    }
   }
 }

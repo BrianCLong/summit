@@ -1,33 +1,48 @@
-
 export interface ExtensionManifest {
   id: string;
-  name: string;
   version: string;
+  type: 'agent' | 'analytics' | 'datasource';
+  name: string;
   description: string;
-  permissions: ExtensionPermission[];
-  entryPoint: string; // URL or local path
+  author: string;
+  capabilities: string[];
+  permissions: string[];
+  dependencies?: Record<string, string>;
 }
-
-export type ExtensionPermission =
-  | 'read:graph'
-  | 'write:graph'
-  | 'read:user'
-  | 'execute:analysis';
 
 export interface ExtensionContext {
   tenantId: string;
-  extensionId: string;
-  permissions: ExtensionPermission[];
+  logger: any; // Using explicit type in real code
+  config: Record<string, any>;
 }
 
-export interface ExtensionHook {
-  event: string;
-  callbackUrl: string;
+export interface Extension {
+  manifest: ExtensionManifest;
+
+  /**
+   * Initialize the extension.
+   * This is where you should set up any resources, connections, or subscriptions.
+   */
+  initialize(context: ExtensionContext): Promise<void>;
+
+  /**
+   * Shutdown the extension.
+   * Clean up resources, close connections.
+   */
+  shutdown(): Promise<void>;
+
+  /**
+   * Health check.
+   */
+  health(): Promise<{ status: 'healthy' | 'unhealthy' | 'degraded'; details?: any }>;
 }
 
-export interface ExtensionRegistry {
-  register(manifest: ExtensionManifest): Promise<void>;
-  get(id: string): Promise<ExtensionManifest | null>;
-  list(): Promise<ExtensionManifest[]>;
-  uninstall(id: string): Promise<void>;
+export interface AgentExtension extends Extension {
+  manifest: ExtensionManifest & { type: 'agent' };
+  execute(task: string, context: ExtensionContext): Promise<any>;
+}
+
+export interface AnalyticsExtension extends Extension {
+  manifest: ExtensionManifest & { type: 'analytics' };
+  analyze(data: any, context: ExtensionContext): Promise<any>;
 }
