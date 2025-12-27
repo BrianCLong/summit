@@ -1,0 +1,48 @@
+version: "3.9"
+
+services:
+  opa:
+    image: openpolicyagent/opa:latest
+    command:
+      - "run"
+      - "--server"
+      - "--addr=0.0.0.0:8181"
+      - "--log-level=info"
+      - "--set=decision_logs.console=true"
+      - "/policies"
+    ports:
+      - "8181:8181"
+    volumes:
+      - ./policies/rego:/policies:ro
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8181/health?plugins"]
+      interval: 5s
+      timeout: 2s
+      retries: 20
+
+  compliance-evaluator:
+    image: node:20-alpine
+    working_dir: /work
+    depends_on:
+      opa:
+        condition: service_healthy
+    environment:
+      PORT: "4319"
+      OPA_URL: "http://opa:8181"
+      COMPLIANCE_LEDGER_PATH: "/data/attestations.ndjson"
+      LOG_LEVEL: "info"
+    ports:
+      - "4319:4319"
+    volumes:
+      - ./:/work
+      - compliance_evaluator_data:/data
+    command: >
+      sh -lc "
+        corepack enable &&
+        corepack prepare pnpm@9.0.0 --activate &&
+        pnpm -C services/compliance-evaluator install &&
+        pnpm -C services/compliance-evaluator dev
+      "
+
+volumes:
+  compliance_evaluator_data:

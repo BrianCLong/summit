@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "summit.evidence.dsr.v1",
+  "title": "Summit DSR Evidence v1",
+  "type": "object",
+  "required": ["spec", "control_id", "event_type", "occurred_at", "ticket"],
+  "properties": {
+    "spec": { "const": "summit.evidence.dsr.v1" },
+    "control_id": { "type": "string" },
+    "event_type": { "enum": ["dsr.opened", "dsr.acknowledged", "dsr.fulfilled"] },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "trace_id": { "type": "string" },
+    "subject_id": { "type": "string" },
+    "ticket": {
+      "type": "object",
+      "required": ["ticket_id", "opened_at", "status"],
+      "properties": {
+        "ticket_id": { "type": "string" },
+        "opened_at": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["opened", "acknowledged", "fulfilled", "rejected"] }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

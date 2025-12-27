@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "summit.evidence.authz.v1",
+  "title": "Summit Authorization Decision Evidence v1",
+  "type": "object",
+  "required": ["spec", "control_id", "event_type", "occurred_at", "decision", "actor", "resource"],
+  "properties": {
+    "spec": { "const": "summit.evidence.authz.v1" },
+    "control_id": { "type": "string" },
+    "event_type": { "const": "authz.decision" },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "trace_id": { "type": "string" },
+    "request_id": { "type": "string" },
+    "decision": { "type": "string", "enum": ["allow", "deny"] },
+    "actor": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {
+        "id": { "type": "string" },
+        "roles": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": true
+    },
+    "resource": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string" }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}
