@@ -7,6 +7,16 @@ on:
         description: 'Comma-separated list of regions to deploy to (e.g., us-east-1,eu-west-1). Leave blank for all.'
         required: false
         default: ''
+      prom_url:
+        description: 'Prometheus base URL for canary SLO gates (e.g., https://prom.example.com).'
+        required: true
+      canary_base_url:
+        description: 'Base URL template for canary synthetic probe (use {region} placeholder).'
+        required: true
+      canary_service:
+        description: 'Service label used in Prometheus queries (default: summit).'
+        required: false
+        default: 'summit'
 
 jobs:
   deploy:
@@ -22,6 +32,9 @@ jobs:
 
       - name: Set up yq
         uses: mikefarah/yq@v4.30.8
+
+      - name: Set up k6
+        uses: grafana/setup-k6-action@v1
 
       - name: Run multi-region deployment script and performance tests
         run: |
@@ -39,4 +52,34 @@ jobs:
             k6 run \
               -e REGION=$region \
               k6/cross-region-latency.js
+
+            echo "--- Running canary SLO gate (latency/error) for $region ---"
+            if [ -z "${PROM_URL}" ]; then
+              echo "PROM_URL is required for canary gating."
+              exit 1
+            fi
+            SVC="${CANARY_SERVICE:-summit}" PROM_URL="${PROM_URL}" scripts/canary-watch.sh
+
+            echo "--- Running synthetic canary probe for $region ---"
+            if [ -z "${CANARY_BASE_URL_TEMPLATE}" ]; then
+              echo "CANARY_BASE_URL_TEMPLATE is required for synthetic probing."
+              exit 1
+            fi
+            CANARY_BASE_URL="${CANARY_BASE_URL_TEMPLATE//\{region\}/$region}"
+            k6 run -e TARGET="${CANARY_BASE_URL}" k6/slo-probe.js
           done
+        env:
+          PROM_URL: ${{ github.event.inputs.prom_url }}
+          CANARY_BASE_URL_TEMPLATE: ${{ github.event.inputs.canary_base_url }}
+          CANARY_SERVICE: ${{ github.event.inputs.canary_service }}
+
+      - name: Promotion gate
+        if: success()
+        run: echo "✅ Promotion gate passed. Safe to promote canary."
+
+      - name: Evidence - CI logs link
+        if: always()
+        run: |
+          echo "### Evidence" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- CI logs: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" >> "$GITHUB_STEP_SUMMARY"

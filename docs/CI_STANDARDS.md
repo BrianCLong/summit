@@ -57,6 +57,31 @@ make smoke
 - **Security Audit**: Update dependencies (`pnpm update`). If it's a false positive, add an exception to the audit configuration.
 - **Smoke Tests**: Check the logs artifact or run `make smoke` locally to reproduce. Ensure your Docker environment is clean (`make down`).
 
+## Deployment Canary Gates (Promotion)
+
+Deployment workflows must gate promotion on production canary SLO checks and synthetic probes.
+
+### Canary SLO Gates (Prometheus)
+- **Error rate**: 5xx error rate must remain **< 1%** during the canary window.
+- **Latency**: p95 latency must remain **< 1500ms** over the canary window.
+- **Implementation**: `scripts/canary-watch.sh` (`SLO_P95_MS=1500`, `ERR_RATE=0.01`).
+
+### Synthetic Probe (k6)
+- **p95 latency**: `< 200ms`
+- **Error rate**: `< 1%`
+- **Checks**: `> 95%` pass rate
+- **Implementation**: `k6/slo-probe.js` (thresholds defined in `options.thresholds`).
+
+### Promotion Gate
+Promotion must be blocked if any canary gate or synthetic probe fails. Deployment workflows should include an explicit "Promotion gate" step that only runs after all canary checks succeed.
+
+## Evidence & Logs
+
+Every deployment workflow run must capture evidence links to CI logs for auditability.
+
+- **CI logs link**: `https://github.com/<org>/<repo>/actions/runs/<run_id>`
+- **Evidence section**: Record the link in the workflow summary or release evidence bundle.
+
 ## Workflow Maintenance
 
 - **Adding Steps**: Only add steps to `pr-quality-gate.yml` if they are critical for *every* PR. Niche checks should be separate or run on a schedule.
