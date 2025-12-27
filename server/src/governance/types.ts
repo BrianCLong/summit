@@ -1,4 +1,4 @@
-export type PolicyAction = 'ALLOW' | 'DENY' | 'ESCALATE';
+export type PolicyAction = 'ALLOW' | 'DENY' | 'ESCALATE' | 'WARN';
 export type Stage = 'data' | 'train' | 'alignment' | 'runtime';
 
 export interface PolicyRule {
@@ -15,27 +15,36 @@ export interface Policy {
     tenants: string[]; // "*" for all
   };
   rules: PolicyRule[];
-  action: PolicyAction; // Action to take if rules match (or if rules FAIL? usually rules define violation)
-  // Let's assume rules define "Allowed" conditions or "Blocked" conditions.
-  // For simplicity: If ALL rules match, the policy applies.
-  // Wait, usually policies are "Block if toxicity > 0.8".
-  // So if rules match, we return the action (e.g., DENY).
+  action: PolicyAction;
 }
 
 export interface PolicyContext {
   stage: Stage;
   tenantId: string;
   region?: string;
-  // Dynamic payload to check against rules
   payload: Record<string, any>;
   metadata?: Record<string, any>;
+  simulation?: boolean; // Request is a simulation
 }
 
-export interface GovernanceDecision {
+export interface GovernanceVerdict {
   action: PolicyAction;
   reasons: string[];
   policyIds: string[];
+  metadata: {
+    timestamp: string;
+    evaluator: string;
+    latencyMs: number;
+    simulation: boolean;
+  };
+  provenance: {
+    origin: string;
+    confidence: number;
+  };
 }
+
+// Backward compatibility alias
+export type GovernanceDecision = GovernanceVerdict;
 
 export interface TelemetryEvent {
   id: string;
@@ -45,6 +54,5 @@ export interface TelemetryEvent {
   tenantId?: string;
   timestamp: string;
   details: Record<string, any>;
-  // For graph linking
   previousEventId?: string;
 }
