@@ -24,6 +24,8 @@ import { circuitBreakerMiddleware } from './middleware/circuitBreakerMiddleware.
 import { overloadProtection } from './middleware/overloadProtection.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
 import { safetyModeMiddleware, resolveSafetyState } from './middleware/safety-mode.js';
+import { residencyEnforcement } from './middleware/residency.js';
+import exceptionRouter from './data-residency/exceptions/routes.js';
 import monitoringRouter from './routes/monitoring.js';
 import billingRouter from './routes/billing.js';
 import entityResolutionRouter from './routes/entity-resolution.js';
@@ -232,6 +234,12 @@ export const createApp = async () => {
 
   // Resolve and enforce tenant context for API and GraphQL surfaces
   app.use(['/api', '/graphql'], tenantContextMiddleware());
+
+  // Enforce Data Residency
+  app.use(['/api', '/graphql'], residencyEnforcement);
+
+  // Residency Exception Routes
+  app.use('/api/residency/exceptions', authenticateToken, exceptionRouter);
 
   // Telemetry middleware
   app.use((req, res, next) => {

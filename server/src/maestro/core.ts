@@ -2,6 +2,7 @@ import { IntelGraphClient } from '../intelgraph/client';
 import { Task, Run, Artifact, TaskStatus } from './types';
 import { CostMeter } from './cost_meter';
 import { OpenAILLM } from './adapters/llm_openai';
+import { ResidencyGuard } from '../data-residency/residency-guard';
 
 export interface MaestroConfig {
   defaultPlannerAgent: string;   // e.g. "openai:gpt-4.1"
@@ -31,6 +32,8 @@ export class Maestro {
 
   async planRequest(run: Run): Promise<Task[]> {
     // Here you can do something simple at first: single action task
+    const tenantId = (run as any).tenantId;
+
     const planTask: Task = {
       id: crypto.randomUUID(),
       runId: run.id,
@@ -43,7 +46,7 @@ export class Maestro {
       },
       kind: 'plan',
       description: `Plan for: ${run.requestText}`,
-      input: { requestText: run.requestText },
+      input: { requestText: run.requestText, tenantId },
       output: { steps: ['single_action'] },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -62,7 +65,7 @@ export class Maestro {
       },
       kind: 'action',
       description: `Execute user request: ${run.requestText}`,
-      input: { requestText: run.requestText },
+      input: { requestText: run.requestText, tenantId },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -78,6 +81,19 @@ export class Maestro {
     await this.ig.updateTask(task.id, { status: 'running', updatedAt: now });
 
     try {
+      // Residency Check for Agent Execution
+      // We assume run or task input has tenantId.
+      // If run object isn't passed here, we rely on task input.
+      // Or we should fetch the Run. For v0.1 simplification, we assume context is in task inputs
+      // or we extract it from runId lookup (not efficient here without caching).
+      // Assuming tasks created by createRun have tenantId in their metadata/input if provided.
+      const tenantId = (task.input as any)?.tenantId;
+
+      if (tenantId) {
+          const guard = ResidencyGuard.getInstance();
+          await guard.validateAgentExecution(tenantId);
+      }
+
       let result: string = '';
 
       if (task.agent.kind === 'llm') {
