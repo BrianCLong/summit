@@ -33,6 +33,7 @@ import billingRouter from './routes/billing.js';
 import entityResolutionRouter from './routes/entity-resolution.js';
 import workspaceRouter from './routes/workspaces.js';
 import aiRouter from './routes/ai.js';
+import gaCoreMetricsRouter from './routes/ga-core-metrics.js';
 import nlGraphQueryRouter from './routes/nl-graph-query.js';
 import disclosuresRouter from './routes/disclosures.js';
 import narrativeSimulationRouter from './routes/narrative-sim.js';
@@ -348,6 +349,7 @@ export const createApp = async () => {
 
   // Other routes
   app.use(['/monitoring', '/api/monitoring'], monitoringRouter);
+  app.use('/api/ga-core-metrics', gaCoreMetricsRouter);
   app.use('/api/ai', aiRouter);
   app.use('/api/ai/nl-graph-query', nlGraphQueryRouter);
   app.use('/api/narrative-sim', narrativeSimulationRouter);

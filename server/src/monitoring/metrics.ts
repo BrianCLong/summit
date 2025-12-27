@@ -196,6 +196,20 @@ export const investigationOperations = new client.Counter({
   labelNames: ['operation', 'user_id'],
 });
 
+// Entity resolution merge outcomes
+export const erMergeOutcomesTotal = new client.Counter({
+  name: 'er_merge_outcomes_total',
+  help: 'Total number of ER merge outcomes recorded',
+  labelNames: ['decision', 'entity_type', 'method'],
+});
+
+// Deployment rollbacks
+export const deploymentRollbacksTotal = new client.Counter({
+  name: 'deployment_rollbacks_total',
+  help: 'Total number of deployment rollbacks',
+  labelNames: ['service', 'reason', 'success'],
+});
+
 // Human-in-the-loop approvals
 const approvalsPending = new client.Gauge({
   name: 'approvals_pending',
@@ -280,6 +294,8 @@ register.registerMetric(websocketConnections);
 register.registerMetric(websocketMessages);
 register.registerMetric(investigationsActive);
 register.registerMetric(investigationOperations);
+register.registerMetric(erMergeOutcomesTotal);
+register.registerMetric(deploymentRollbacksTotal);
 register.registerMetric(approvalsPending);
 register.registerMetric(approvalsApprovedTotal);
 register.registerMetric(approvalsRejectedTotal);

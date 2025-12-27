@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { KPIStrip } from '@/components/panels/KPIStrip'
+import { EROpsPanel } from '@/components/panels/EROpsPanel'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import mockData from '@/mock/data.json'
@@ -57,6 +58,8 @@ export default function CommandCenterDashboard() {
         columns={6}
         className="cyber-glow"
       />
+
+      <EROpsPanel />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         <Card className="intel-gradient text-white">
