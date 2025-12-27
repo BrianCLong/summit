@@ -91,3 +91,19 @@ The gate runs **after deployment** and **before promotion** and blocks promotion
 
 - **Adding Steps**: Only add steps to `pr-quality-gate.yml` if they are critical for _every_ PR. Niche checks should be separate or run on a schedule.
 - **Performance**: Monitor execution time. If a job exceeds 10 minutes, investigate optimization (caching, splitting).
+
+## Release Evidence Pack
+
+Release workflows produce a compliance evidence bundle to support attestations in
+`ATTESTATION_SCOPE.md`. The reusable release workflow generates the following
+artifacts and packs them into a single archive:
+
+- `sbom.json` (CycloneDX SBOM)
+- `vuln-report.json` (Trivy SBOM vulnerability report)
+- `attestations/attestation-scope.json` (attestation scope hash + metadata)
+- `policy/opa-decisions.json` (OPA policy decision logs)
+- `deploy/deploy-metadata.json` (pipeline context metadata)
+- `provenance.json` and `evidence-bundles/` manifest output
+
+The release job bundles these into `evidence/pack-<release>.tgz` and uploads it
+with the release artifacts.
