@@ -1,0 +1,47 @@
+name: RC Lockdown
+
+on:
+  pull_request:
+    branches: [main, release/*]
+
+jobs:
+  check-freeze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for Feature Flag Changes
+        run: |
+          # Get list of changed files
+          changed_files=$(git diff --name-only origin/${{ github.base_ref }} ${{ github.sha }})
+
+          # Check if any file in feature-flags/ is changed
+          if echo "$changed_files" | grep -q "^feature-flags/"; then
+            echo "::error::RC SCOPE FREEZE: Modifications to feature-flags/ are prohibited during Release Candidate lockdown."
+            echo "Changed files:"
+            echo "$changed_files" | grep "^feature-flags/"
+            exit 1
+          fi
+
+      - name: Check for Schema Changes
+        run: |
+          # Check if graphql/schema.graphql is changed
+          changed_files=$(git diff --name-only origin/${{ github.base_ref }} ${{ github.sha }})
+
+          if echo "$changed_files" | grep -q "^graphql/schema.graphql"; then
+            echo "::error::RC SCOPE FREEZE: Modifications to graphql/schema.graphql are prohibited during Release Candidate lockdown."
+            exit 1
+          fi
+
+      - name: Check for Agent Contract Changes
+        run: |
+          # Check if agent contracts (e.g. AGENTS.md) are changed
+          # AGENTS.md is critical for agent behavior
+          changed_files=$(git diff --name-only origin/${{ github.base_ref }} ${{ github.sha }})
+
+          if echo "$changed_files" | grep -q "^AGENTS.md"; then
+             echo "::warning::RC SCOPE ALERT: AGENTS.md modified. Verify this does not introduce new agent capabilities."
+             # Not failing, just warning for AGENTS.md as it might be docs update
+          fi
