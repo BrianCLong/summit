@@ -1,36 +1,76 @@
 alerting_rules:
-  - alert: HighErrorRate
-    expr: rate(summit_errors_total[5m]) > 0.05
+  # Critical Application Alerts
+  - alert: HighApplicationErrorRate
+    expr: rate(application_errors_total[5m]) > 0.05
     for: 2m
     labels:
       severity: critical
     annotations:
-      summary: "Error rate exceeding 5%"
+      summary: "Application Error Rate > 5% ({{ $value }})"
 
-  - alert: PerformanceDegradation
-    expr: summit_request_duration_seconds{p99="0.1"} > 0.15
-    for: 5m
+  - alert: HighGraphQLErrorRate
+    expr: rate(graphql_errors_total[5m]) > 0.1
+    for: 2m
     labels:
       severity: warning
+    annotations:
+      summary: "GraphQL Error Rate > 10%"
 
-  - alert: ConfigReloadFailure
-    expr: summit_config_reload_failures_total > 0
-    for: 1m
-    labels:
-      severity: critical
-
-  - alert: LLMHighLatency
-    expr: histogram_quantile(0.99, sum(rate(llm_request_duration_seconds_bucket[5m])) by (le, model)) > 10
+  - alert: HighResponseTime
+    expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 2.0
     for: 5m
     labels:
       severity: warning
     annotations:
-      summary: "LLM Latency p99 > 10s for model {{ $labels.model }}"
+      summary: "P95 HTTP Response Time > 2s"
 
-  - alert: MaestroJobFailure
-    expr: rate(maestro_job_execution_duration_seconds_count{status="failed"}[5m]) > 0
+  # System Health Alerts
+  - alert: HighMemoryUsage
+    expr: process_resident_memory_bytes / 1024 / 1024 > 1500
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Memory Usage > 1.5GB"
+
+  - alert: HighEventLoopLag
+    expr: nodejs_eventloop_lag_seconds > 0.5
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Event Loop Lag > 500ms"
+
+  # Database Alerts
+  - alert: PostgresConnectionPoolSaturation
+    expr: db_connections_active{database="postgres"} > 80
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Postgres Connection Pool > 80 active"
+
+  - alert: Neo4jConnectionSaturation
+    expr: db_connections_active{database="neo4j"} > 80
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Neo4j Connection Pool > 80 active"
+
+  # Maestro / Job Alerts
+  - alert: HighJobFailureRate
+    expr: rate(maestro_job_execution_duration_seconds_count{status="failed"}[5m]) > 0.1
     for: 5m
     labels:
       severity: error
     annotations:
-      summary: "Maestro Job Failures detected for job {{ $labels.job_type }}"
+      summary: "Maestro Job Failures detected"
+
+  - alert: LLMHighLatency
+    expr: histogram_quantile(0.99, sum(rate(llm_request_duration_seconds_bucket[5m])) by (le, model)) > 20
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "LLM Latency p99 > 20s for model {{ $labels.model }}"
