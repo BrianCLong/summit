@@ -34,3 +34,27 @@ Each item includes a mitigation and the best link to use when you are blocked.
   - **Mitigation:** Capture and store a baseline fingerprint at the end of a green release, then
     wire alerting for diffs on subsequent deploys.
   - **Reference:** [`docs/releases/docs_phase_21_22_compliance_provenance_drift_watcher_enterprise_ops.md`](../releases/docs_phase_21_22_compliance_provenance_drift_watcher_enterprise_ops.md)
+
+## CI naming mismatch
+
+- `docs/CI_STANDARDS.md` references `pr-quality-gate.yml`, but the active
+  quality gate workflows are currently:
+  - `.github/workflows/ci.yml`
+  - `.github/workflows/ci-golden-path.yml`
+- Treat those workflows as the source of truth until the naming is updated.
+
+## Docs-only changes can skip CI
+
+- The `CI` workflow ignores `docs/**` paths, so documentation-only PRs might not
+  trigger full CI. If you need CI validation, add a non-doc change or run checks
+  locally.
+
+## Policy checks are required for services
+
+- OPA policy lint/simulation runs in `ci.yml` (policy-fixtures job). Missing or
+  mis-scoped policy updates will block promotion.
+
+## Boundary checks are easy to forget
+
+- `scripts/check-boundaries.cjs` is not part of every workflow. Run it locally
+  before opening the PR.
