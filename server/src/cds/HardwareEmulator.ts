@@ -3,7 +3,6 @@
  * In a real deployment, this would be a physically separate network interface.
  */
 export class HardwareEmulator {
-  private static instance: HardwareEmulator;
   private highToLowQueue: any[] = [];
   private lowToHighQueue: any[] = [];
 
@@ -22,8 +21,6 @@ export class HardwareEmulator {
   }
 
   // In a real system, a separate process would poll these.
-  // Here we just provide a method to pop from the "other side".
-
   readHighToLow(): any | null {
     return this.highToLowQueue.shift() || null;
   }

@@ -48,8 +48,5 @@ export class ContentInspector {
         issues.push(`Found restricted term "${word}" at ${path}`);
       }
     }
-
-    // Regex for potential SSNs or specific patterns could go here
-    // e.g. /\b\d{3}-\d{2}-\d{4}\b/
   }
 }

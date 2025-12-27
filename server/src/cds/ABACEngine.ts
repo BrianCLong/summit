@@ -29,7 +29,6 @@ export class ABACEngine {
 
     // 3. Releasability Check (User nationality must be in releasability list if it exists)
     if (resourceLabel.releasability && resourceLabel.releasability.length > 0) {
-      // Assuming 'REL_TO_' + Nationality code convention or direct match
       const userRelTag = `REL_TO_${user.nationality}`;
       const isReleasable = resourceLabel.releasability.some(
         (r) => r === userRelTag || r === 'REL_TO_ALL'
@@ -56,31 +55,22 @@ export class ABACEngine {
 
     // High-to-Low (Downgrade)
     if (sourceLevel > targetLevel) {
-      // Must have explicit downgrade authority (implied if user has high clearance, but typically requires review)
-      // For now, we allow if user has source clearance.
       if (!this.canAccess(user, resourceLabel)) {
         return { allowed: false, reason: 'User lacks access to source material' };
-      }
-
-      // Strict rule: Cannot downgrade TS/SCI automatically without specific review (simulated here)
-      if (resourceLabel.classification === 'TOP_SECRET' && targetDomainDetails.classification !== 'TOP_SECRET') {
-         // In a real system, this might require two-person control.
-         // We'll allow it but flag it for Content Inspection.
       }
     }
 
     // Low-to-High (Ingest)
     if (sourceLevel < targetLevel) {
-      // Always allowed to move up, provided user has access to source.
       if (!this.canAccess(user, resourceLabel)) {
-         return { allowed: false, reason: 'User lacks access to source material' };
+        return { allowed: false, reason: 'User lacks access to source material' };
       }
     }
 
     // Lateral
     if (sourceLevel === targetLevel) {
-       if (!this.canAccess(user, resourceLabel)) {
-         return { allowed: false, reason: 'User lacks access to source material' };
+      if (!this.canAccess(user, resourceLabel)) {
+        return { allowed: false, reason: 'User lacks access to source material' };
       }
     }
 

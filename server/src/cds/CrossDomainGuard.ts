@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { EntityRepo } from '../repos/EntityRepo.js';
 import { ABACEngine } from './ABACEngine.js';
 import { ContentInspector } from './ContentInspector.js';
@@ -43,15 +42,12 @@ export class CrossDomainGuard {
     }
 
     // 2. Fetch Entity (Simulate fetching from Source Domain)
-    // In reality, we might need to connect to a different DB or Schema.
-    // Here we assume tenantId proxies for Domain or we just fetch by ID.
     const entity = await this.entityRepo.findById(entityId);
     if (!entity) {
       return { success: false, timestamp: new Date(), error: 'Entity not found' };
     }
 
     // 3. Construct Security Label from Entity
-    // Assuming props contains security metadata, else default to Source Domain level
     const entityLabel = {
       classification: (entity.props.classification as any) || sourceDomain.classification,
       releasability: (entity.props.releasability as any) || [],
@@ -80,42 +76,38 @@ export class CrossDomainGuard {
         await this.diode.sendLowToHigh(entity);
       }
     } catch {
-        return { success: false, timestamp: new Date(), error: 'Hardware Diode Fault' };
+      return { success: false, timestamp: new Date(), error: 'Hardware Diode Fault' };
     }
 
-    // 7. Execute Write on Target (Effectively cloning)
-    // We modify the tenantId to "targetDomainId" to simulate it landing in the new domain/tenant.
+    // 7. Execute Write on Target
     const payload = (sourceDomain.classification === 'TOP_SECRET')
-        ? this.diode.readHighToLow()
-        : this.diode.readLowToHigh();
+      ? this.diode.readHighToLow()
+      : this.diode.readLowToHigh();
 
     if (payload) {
-        // Create new entity in target tenant/domain
-        // We strip the ID to create a new record
-        const { id, ...inputData } = payload;
+      const { id, ...inputData } = payload;
 
-        // Add provenance/lineage info
-        const newProps = {
-            ...inputData.props,
-            _cds_provenance: {
-                originalId: id,
-                sourceDomain: sourceDomainId,
-                transferId,
-                transferredBy: userContext.userId,
-                justification,
-                timestamp: new Date().toISOString()
-            }
-        };
+      const newProps = {
+        ...inputData.props,
+        _cds_provenance: {
+          originalId: id,
+          sourceDomain: sourceDomainId,
+          transferId,
+          transferredBy: userContext.userId,
+          justification,
+          timestamp: new Date().toISOString()
+        }
+      };
 
-        await this.entityRepo.create({
-            tenantId: targetDomainId, // Using Domain ID as Tenant ID for simulation
-            kind: inputData.kind,
-            labels: inputData.labels,
-            props: newProps
-        }, userContext.userId);
+      await this.entityRepo.create({
+        tenantId: targetDomainId,
+        kind: inputData.kind,
+        labels: inputData.labels,
+        props: newProps
+      }, userContext.userId);
 
-        guardLogger.info({ transferId }, 'Cross-Domain Transfer Successful');
-        return { success: true, transferId, timestamp: new Date() };
+      guardLogger.info({ transferId }, 'Cross-Domain Transfer Successful');
+      return { success: true, transferId, timestamp: new Date() };
     }
 
     return { success: false, timestamp: new Date(), error: 'Transfer simulation failed' };
