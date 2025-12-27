@@ -1,0 +1,27 @@
+version: 1
+controls:
+  - id: sec-ENC-001
+    title: "Encryption at rest enabled for production data stores"
+    statement: "Production data stores that hold PII must be encrypted at rest."
+    scope:
+      services: ["server", "services/*"]
+      environments: ["prod"]
+      data_classes: ["PII"]
+    trigger:
+      event_spec: "summit.evidence.v1"
+      when: ["asset.snapshot"]
+    evaluation:
+      policy_entrypoint: "compliance/allow"
+      inputs:
+        - asset.kind
+        - asset.env
+        - asset.encryption_at_rest
+        - asset.data_classes
+      pass_condition: "asset.env == prod AND 'PII' IN data_classes => encryption_at_rest == true"
+    evidence:
+      required_specs:
+        - "summit.evidence.v1"
+      correlation:
+        keys: ["asset.id"]
+    owner: "platform@company"
+    severity: "high"

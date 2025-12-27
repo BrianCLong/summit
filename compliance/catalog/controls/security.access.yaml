@@ -1,0 +1,26 @@
+version: 1
+controls:
+  - id: sec-AUTHZ-001
+    title: "Every access decision is logged"
+    statement: "All authorization decisions for protected resources must emit a structured authz evidence event."
+    scope:
+      services: ["server", "services/*"]
+      endpoints: ["*"]
+    trigger:
+      event_spec: "summit.evidence.authz.v1"
+      when: ["authz.decision"]
+    evaluation:
+      policy_entrypoint: "compliance/allow"
+      inputs:
+        - decision
+        - actor
+        - resource
+        - occurred_at
+      pass_condition: "decision IN {allow, deny} AND actor.id IS NOT NULL AND resource.id IS NOT NULL"
+    evidence:
+      required_specs:
+        - "summit.evidence.authz.v1"
+      correlation:
+        keys: ["trace_id", "request_id"]
+    owner: "security@company"
+    severity: "critical"
