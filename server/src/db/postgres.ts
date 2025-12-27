@@ -3,7 +3,8 @@ import { performance } from 'node:perf_hooks';
 // @ts-ignore - pg type imports
 import { Pool, QueryConfig, QueryResult, PoolClient } from 'pg';
 import dotenv from 'dotenv';
-import baseLogger from '../config/logger';
+import baseLogger from '../config/logger.js';
+import { configService } from '../config/ConfigService.js';
 
 dotenv.config();
 
@@ -228,16 +229,16 @@ const transientNodeErrors = new Set([
 ]);
 
 function parseConnectionConfig(): PoolConfig {
-  if (process.env.DATABASE_URL) {
-    return { connectionString: process.env.DATABASE_URL };
+  if (configService.get('postgres').url) {
+    return { connectionString: configService.get('postgres').url };
   }
 
   return {
-    host: process.env.POSTGRES_HOST || 'postgres',
-    user: process.env.POSTGRES_USER || 'intelgraph',
-    password: process.env.POSTGRES_PASSWORD || 'devpassword',
-    database: process.env.POSTGRES_DB || 'intelgraph_dev',
-    port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
+    host: configService.get('postgres').host || 'postgres',
+    user: configService.get('postgres').username || 'intelgraph',
+    password: configService.get('postgres').password || 'devpassword',
+    database: configService.get('postgres').database || 'intelgraph_dev',
+    port: configService.get('postgres').port || 5432,
   };
 }
 

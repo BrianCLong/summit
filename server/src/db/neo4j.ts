@@ -7,6 +7,7 @@ import {
   neo4jQueryLatencyMs,
   neo4jQueryTotal,
 } from '../metrics/neo4jMetrics.js';
+import { configService } from '../config/ConfigService.js';
 
 dotenv.config();
 
@@ -15,11 +16,11 @@ const logger: ReturnType<typeof pino> = pino();
 type Neo4jDriver = neo4j.Driver;
 type Neo4jSession = neo4j.Session;
 
-const NEO4J_URI = process.env.NEO4J_URI || 'bolt://neo4j:7687';
-const NEO4J_USER =
-  process.env.NEO4J_USER || process.env.NEO4J_USERNAME || 'neo4j';
-const NEO4J_PASSWORD = process.env.NEO4J_PASSWORD || 'devpassword';
-const REQUIRE_REAL_DBS = process.env.REQUIRE_REAL_DBS === 'true';
+const NEO4J_URI = configService.get('neo4j').uri;
+const NEO4J_USER = configService.get('neo4j').username;
+const NEO4J_PASSWORD = configService.get('neo4j').password;
+const REQUIRE_REAL_DBS = configService.get('app').requireRealDbs;
+// This one wasn't in ConfigService, maybe add later if needed, defaulting to 15000
 const CONNECTIVITY_CHECK_INTERVAL_MS = Number(
   process.env.NEO4J_HEALTH_INTERVAL_MS || 15000,
 );
