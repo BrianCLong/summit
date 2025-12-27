@@ -49,7 +49,7 @@ describe('POST /actions/preflight', () => {
         { code: 'redact', message: 'remove pii', targets: ['ssn'] }
       ],
       redactions: ['account_number'],
-      raw: { result: { allow: true } }
+      raw: { result: { allow: true, policy_id: 'policy-123' } }
     };
 
     const store = new PolicyDecisionStore(() => new Date('2024-01-01T00:00:00Z'));
@@ -63,11 +63,14 @@ describe('POST /actions/preflight', () => {
 
     expect(response.body).toMatchObject({
       decisionId: expect.any(String),
+      preflight_id: expect.any(String),
+      policy_id: 'policy-123',
       decision: 'allow',
       reason: 'permit',
       obligations: decision.obligations,
       redactions: ['account_number', 'ssn']
     });
+    expect(response.body.preflight_id).toBe(response.body.decisionId);
 
     expect(policyService.lastInput).toEqual(baseInput);
 

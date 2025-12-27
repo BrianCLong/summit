@@ -52,13 +52,39 @@ function normalizeRequest(body: Partial<PreflightRequestContract>): {
 function toResponsePayload(
   record: PolicyDecisionRecord
 ): PreflightDecisionContract {
+  const policyId = extractPolicyId(record.rawDecision);
   return {
     decisionId: record.id,
+    preflight_id: record.id,
+    policy_id: policyId,
     decision: record.allow ? 'allow' : 'deny',
     reason: record.reason,
     obligations: record.obligations,
     redactions: record.redactions
   };
+}
+
+function extractPolicyId(rawDecision: unknown): string | undefined {
+  if (!rawDecision || typeof rawDecision !== 'object') {
+    return undefined;
+  }
+
+  const result = (rawDecision as { result?: Record<string, unknown> }).result;
+  if (!result) {
+    return undefined;
+  }
+
+  const candidates = [
+    result.policy_id,
+    result.policy,
+    result.matched_policy,
+    result.rule,
+    result.path
+  ];
+
+  return candidates.find((candidate) => typeof candidate === 'string') as
+    | string
+    | undefined;
 }
 
 function mergeRedactions(decision: PolicyDecisionResult): PolicyDecisionResult {
