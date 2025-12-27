@@ -172,7 +172,7 @@ const AuditEventSchema = z.object({
 
 export class AdvancedAuditSystem extends EventEmitter {
   private db: Pool;
-  private redis: Redis;
+  private redis: Redis | null;
   private logger: Logger;
   private signingKey: string;
   private encryptionKey: string;
@@ -180,6 +180,8 @@ export class AdvancedAuditSystem extends EventEmitter {
 
   // Configuration
   private retentionPeriodDays: number = 2555; // 7 years for compliance
+  private retentionEnabled: boolean = true;
+  private retentionIntervalHours: number = 24;
   private batchSize: number = 100;
   private compressionEnabled: boolean = true;
   private realTimeAlerting: boolean = true;
@@ -187,13 +189,14 @@ export class AdvancedAuditSystem extends EventEmitter {
   // Caching
   private eventBuffer: AuditEvent[] = [];
   private flushInterval: NodeJS.Timeout;
+  private retentionInterval?: NodeJS.Timeout;
   private rollupService: AuditTimelineRollupService;
 
   private static instance: AdvancedAuditSystem;
 
   private constructor(
     db: Pool,
-    redis: Redis,
+    redis: Redis | null,
     logger: Logger,
     signingKey: string,
     encryptionKey: string,
@@ -206,6 +209,17 @@ export class AdvancedAuditSystem extends EventEmitter {
     this.rollupService = new AuditTimelineRollupService(db);
     this.signingKey = signingKey;
     this.encryptionKey = encryptionKey;
+    this.retentionEnabled = process.env.AUDIT_RETENTION_ENABLED !== 'false';
+    const retentionDays = Number(process.env.AUDIT_RETENTION_DAYS);
+    if (!Number.isNaN(retentionDays) && retentionDays > 0) {
+      this.retentionPeriodDays = retentionDays;
+    }
+    const retentionIntervalHours = Number(
+      process.env.AUDIT_RETENTION_SWEEP_HOURS,
+    );
+    if (!Number.isNaN(retentionIntervalHours) && retentionIntervalHours > 0) {
+      this.retentionIntervalHours = retentionIntervalHours;
+    }
 
     // Initialize schema
     this.initializeSchema().catch((err) => {
@@ -224,6 +238,21 @@ export class AdvancedAuditSystem extends EventEmitter {
         );
       });
     }, 5000); // Every 5 seconds
+
+    const scheduleRetention =
+      this.retentionEnabled &&
+      process.env.AUDIT_RETENTION_SCHEDULE_ENABLED !== 'false' &&
+      process.env.NODE_ENV !== 'test';
+    if (scheduleRetention) {
+      this.retentionInterval = setInterval(() => {
+        this.pruneExpiredEvents().catch((err) => {
+          this.logger.error(
+            { error: err.message },
+            'Failed to prune audit events by retention policy',
+          );
+        });
+      }, this.retentionIntervalHours * 60 * 60 * 1000);
+    }
 
     // Cleanup on exit
     process.on('SIGTERM', () => this.gracefulShutdown());
@@ -253,6 +282,26 @@ export class AdvancedAuditSystem extends EventEmitter {
       );
     }
     return AdvancedAuditSystem.instance;
+  }
+
+  public static createForTest(options: {
+    db: Pool;
+    redis?: Redis | null;
+    logger: Logger;
+    signingKey?: string;
+    encryptionKey?: string;
+  }): AdvancedAuditSystem {
+    return new AdvancedAuditSystem(
+      options.db,
+      options.redis ?? null,
+      options.logger,
+      options.signingKey ?? 'test-signing-key',
+      options.encryptionKey ?? 'test-encryption-key',
+    );
+  }
+
+  public async shutdown(): Promise<void> {
+    await this.gracefulShutdown();
   }
 
   /**
@@ -437,6 +486,29 @@ export class AdvancedAuditSystem extends EventEmitter {
       eventTypes: filters.eventTypes,
       levels: filters.levels,
     });
+  }
+
+  public async pruneExpiredEvents(
+    retentionDays: number = this.retentionPeriodDays,
+  ): Promise<number> {
+    if (!this.retentionEnabled) {
+      return 0;
+    }
+    const effectiveDays = Math.max(0, retentionDays);
+    if (effectiveDays === 0) {
+      return 0;
+    }
+    const result = await this.db.query(
+      `DELETE FROM audit_events
+       WHERE timestamp < NOW() - ($1 * INTERVAL '1 day')`,
+      [effectiveDays],
+    );
+    const deleted = result.rowCount ?? 0;
+    this.logger.info(
+      { deleted, retentionDays: effectiveDays },
+      'Audit retention cleanup completed',
+    );
+    return deleted;
   }
 
   /**
@@ -1174,6 +1246,9 @@ export class AdvancedAuditSystem extends EventEmitter {
     this.logger.info('Shutting down audit system gracefully');
 
     clearInterval(this.flushInterval);
+    if (this.retentionInterval) {
+      clearInterval(this.retentionInterval);
+    }
     await this.flushEventBuffer();
 
     this.logger.info('Audit system shutdown complete');
