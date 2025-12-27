@@ -153,6 +153,7 @@ export interface AgentRun {
   error?: AgentRunError;
   traceId?: string; // OpenTelemetry trace ID
   spanId?: string; // OpenTelemetry span ID
+  correlationId?: string; // Correlation ID for cross-service tracing
   durationMs?: number;
   tokensConsumed?: number;
   apiCallsMade: number;
@@ -434,6 +435,7 @@ export interface AgentRequest {
     target?: string;
     payload?: Record<string, unknown>;
   };
+  correlationId?: string; // Optional correlation ID for cross-service tracing
   metadata?: Record<string, unknown>;
 }
 
@@ -441,6 +443,7 @@ export interface AgentResponse<T = unknown> {
   success: boolean;
   runId: string;
   operationMode: OperationMode;
+  correlationId: string; // Echoed correlation ID for cross-service tracing
   action: {
     id: string;
     type: ActionType;
@@ -493,6 +496,37 @@ export interface GatewayConfig {
   enableSafetyChecks: boolean;
   enableCrossTenantBlocking: boolean;
   enableQuotaEnforcement: boolean;
+}
+
+// ============================================================================
+// Gateway Hooks for Auth & Policy Events
+// ============================================================================
+
+export interface GatewayHookContext {
+  agent: Agent;
+  request: AgentRequest & { correlationId: string };
+  correlationId: string;
+}
+
+export interface GatewayPolicyHookContext {
+  agent: Agent;
+  action: AgentAction;
+  decision: PolicyDecision;
+  correlationId: string;
+}
+
+export interface GatewayHooks {
+  /**
+   * Called after successful agent authentication.
+   * Use for logging, metrics, or custom authorization enrichment.
+   */
+  onAuthSuccess?: (context: GatewayHookContext) => Promise<void>;
+
+  /**
+   * Called after policy decision is made.
+   * Use for audit logging, decision analytics, or custom notifications.
+   */
+  onPolicyDecision?: (context: GatewayPolicyHookContext) => Promise<void>;
 }
 
 // ============================================================================

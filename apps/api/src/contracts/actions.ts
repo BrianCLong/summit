@@ -40,6 +40,8 @@ export interface PreflightObligation {
 
 export interface PreflightDecisionContract {
   decisionId: string;
+  preflight_id: string;
+  policy_id?: string;
   decision: 'allow' | 'deny';
   reason?: string;
   obligations: PreflightObligation[];

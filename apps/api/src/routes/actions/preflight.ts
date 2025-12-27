@@ -49,11 +49,30 @@ function normalizeRequest(body: Partial<PreflightRequestContract>): {
   };
 }
 
+/**
+ * Extract policy ID from the raw OPA decision metadata if available.
+ * OPA decisions may include policy path/name in the decision result.
+ */
+function extractPolicyId(record: PolicyDecisionRecord): string | undefined {
+  // Check for policy_id in the raw decision metadata
+  const rawDecision = record.rawDecision as Record<string, unknown> | undefined;
+  if (rawDecision?.policy_id && typeof rawDecision.policy_id === 'string') {
+    return rawDecision.policy_id;
+  }
+  // Check for policy path in OPA result structure
+  if (rawDecision?.policy_path && typeof rawDecision.policy_path === 'string') {
+    return rawDecision.policy_path;
+  }
+  return undefined;
+}
+
 function toResponsePayload(
   record: PolicyDecisionRecord
 ): PreflightDecisionContract {
   return {
     decisionId: record.id,
+    preflight_id: record.id,
+    policy_id: extractPolicyId(record),
     decision: record.allow ? 'allow' : 'deny',
     reason: record.reason,
     obligations: record.obligations,

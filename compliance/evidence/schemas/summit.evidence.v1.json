@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "summit.evidence.v1",
+  "title": "Summit Evidence Base Event v1",
+  "type": "object",
+  "required": ["spec", "control_id", "event_type", "occurred_at"],
+  "properties": {
+    "spec": { "type": "string" },
+    "control_id": { "type": "string" },
+    "event_type": { "type": "string" },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "trace_id": { "type": "string" },
+    "request_id": { "type": "string" },
+    "actor": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "payload": { "type": "object" }
+  },
+  "additionalProperties": false
+}

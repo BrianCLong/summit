@@ -1,0 +1,26 @@
+version: 1
+controls:
+  - id: chg-DEPLOY-001
+    title: "Production deployments must be traceable to CI"
+    statement: "Every production deployment must include a CI run reference and a commit SHA."
+    scope:
+      services: ["server", "services/*", "packages/*"]
+      environments: ["prod"]
+    trigger:
+      event_spec: "summit.evidence.deployment.v1"
+      when: ["deploy.completed"]
+    evaluation:
+      policy_entrypoint: "compliance/allow"
+      inputs:
+        - deployment.env
+        - deployment.commit_sha
+        - deployment.ci_run_id
+        - deployment.artifact_digest
+      pass_condition: "env == prod => commit_sha != null AND ci_run_id != null AND artifact_digest != null"
+    evidence:
+      required_specs:
+        - "summit.evidence.deployment.v1"
+      correlation:
+        keys: ["deployment_id"]
+    owner: "release@company"
+    severity: "critical"
