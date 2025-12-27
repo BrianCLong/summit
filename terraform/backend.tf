@@ -1,8 +1,8 @@
 terraform {
   backend "s3" {
-    bucket         = "summit-tf-state"
+    bucket         = "summit-tf-state-acme-prod"
     key            = "global/terraform.tfstate"
-    region         = "us-east-1"
+    region         = "us-west-2"
     dynamodb_table = "summit-tf-locks"
     encrypt        = true
   }
