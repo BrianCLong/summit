@@ -135,3 +135,21 @@ export interface AgentCoordinationMetrics {
   averageCollaborationTimeMs: number;
   updatedAt?: Date;
 }
+
+export interface PlaybookSignature {
+  algorithm: 'ed25519';
+  signature: string;
+  publicKey: string;
+  signedAt: string;
+}
+
+export interface Playbook {
+  id: string;
+  name: string;
+  description?: string;
+  triggers: string[];
+  actions: string[];
+  isEnabled: boolean;
+  version?: string;
+  signature?: PlaybookSignature;
+}
