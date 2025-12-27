@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-01-26T00:00:00Z",
+  "last_updated": "2026-01-12T00:00:00Z",
   "initiatives": [
     {
       "id": "A",
@@ -38,7 +38,7 @@
         {
           "id": "B2",
           "name": "RSS/Atom Connector",
-          "status": "pending",
+          "status": "in_progress",
           "owner": "Jules"
         },
         {

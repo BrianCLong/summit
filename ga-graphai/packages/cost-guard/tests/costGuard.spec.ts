@@ -59,16 +59,34 @@ describe('CostGuard', () => {
       recentLatencyP95: 1200,
     });
     expect(decision.action).toBe('kill');
+    expect(decision.reasonCode).toBeDefined();
     const record = guard.killSlowQuery(
       'query-1',
       'tenant-c',
       'exceeded budget',
+      'cartesian-product',
     );
     guard.observeQueryCompletion(record.queryId, 3200);
     expect(guard.metrics.kills).toBe(1);
     expect(guard.metrics.activeSlowQueries).toBe(1);
+    expect(guard.metrics.killReasons['cartesian-product']).toBe(1);
     guard.release(record.queryId);
     expect(guard.metrics.activeSlowQueries).toBe(0);
+  });
+
+  it('evaluates policy gates with allow/deny reasons', () => {
+    const guard = new CostGuard();
+    const decision = guard.evaluatePolicyGate({
+      tenantId: 'tenant-policy',
+      action: 'export',
+      budgetTags: ['budget:low'],
+      abacTags: ['class:restricted'],
+      estimatedCostUsd: 180,
+      denylistTags: ['class:restricted'],
+    });
+    expect(decision.action).toBe('deny');
+    expect(decision.reasons).toContain('denylist-tag');
+    expect(decision.reasons).toContain('cost-cap-exceeded');
   });
 
   it('produces adaptive queue scaling signals that blend cost and latency', () => {
