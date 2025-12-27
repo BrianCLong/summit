@@ -1,0 +1,3 @@
+# HELP intelgraph_config_drift_detected Config drift detected between Git baseline and deployed snapshot.
+# TYPE intelgraph_config_drift_detected gauge
+intelgraph_config_drift_detected{env="staging",source="k8s"} 1

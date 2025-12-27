@@ -27,3 +27,6 @@ jobs:
 
       - name: Run Canary Check
         run: node scripts/canary-check.cjs
+
+      - name: Run Config Drift Check
+        run: node scripts/post-deploy/config-drift-check.cjs --env staging

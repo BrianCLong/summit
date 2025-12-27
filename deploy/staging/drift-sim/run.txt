@@ -1,0 +1,4 @@
+Baseline: k8s (154 files)
+Snapshot: deploy/staging/config-drift-snapshot.json
+Baseline hash: 6edde2204da848243765c96f94a207f71dc603f74698ef81602c4dad8fbec943
+Snapshot hash: 6edde2204da848243765c96f94a207f71dc603f74698ef81602c4dad8fbec943

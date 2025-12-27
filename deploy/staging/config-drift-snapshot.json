@@ -1,0 +1,10 @@
+{
+  "env": "staging",
+  "baseline": {
+    "name": "k8s",
+    "path": "k8s",
+    "fileCount": 154
+  },
+  "baselineHash": "6edde2204da848243765c96f94a207f71dc603f74698ef81602c4dad8fbec943",
+  "generatedAt": "2025-12-27T05:40:34.848Z"
+}

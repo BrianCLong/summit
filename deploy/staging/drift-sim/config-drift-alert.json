@@ -1,0 +1,9 @@
+{
+  "alert": "IntelGraphConfigDriftDetected",
+  "severity": "critical",
+  "env": "staging",
+  "source": "k8s",
+  "detected": true,
+  "reportPath": "deploy/staging/drift-sim/config-drift-summary.json",
+  "detectedAt": "2025-12-27T05:43:00.578Z"
+}

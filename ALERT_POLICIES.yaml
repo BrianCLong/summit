@@ -206,6 +206,30 @@ spec:
             summary: '🗄️ PostgreSQL replication lag high'
             description: 'Replication lag {{ $value | humanizeDuration }} exceeds 5 minutes'
 
+    # ====================================================================
+    # CONFIGURATION DRIFT ALERTS
+    # ====================================================================
+
+    - name: intelgraph.governance.config_drift
+      interval: 5m
+      rules:
+        - alert: IntelGraphConfigDriftDetected
+          expr: |
+            max(intelgraph_config_drift_detected{env="staging"}) > 0
+          for: 10m
+          labels:
+            severity: critical
+            service: config-governance
+            category: compliance
+            team: platform
+            pager: immediate
+          annotations:
+            summary: '⚠️ Config drift detected in staging'
+            description: |
+              Config drift detected between Git baseline and deployed snapshot in staging.
+              Review post-deploy drift report for details and reconcile before promotion.
+            runbook_url: 'https://runbooks.intelgraph.ai/config-drift'
+
     - name: intelgraph.data.neo4j
       interval: 60s
       rules:
