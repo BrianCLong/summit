@@ -24,6 +24,17 @@ processors:
       - key: deployment.environment
         value: ${DEPLOYMENT_ENVIRONMENT}
         action: upsert
+  attributes/enrich_correlation:
+    actions:
+      - key: correlation_id
+        action: insert
+        from_attribute: http.request.header.x-request-id
+      - key: correlation_id
+        action: insert
+        from_attribute: http.request_id
+      - key: correlation_id
+        action: insert
+        from_attribute: trace_id
 extensions:
   health_check:
     endpoint: 0.0.0.0:13133
@@ -56,7 +67,7 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [batch, attributes/add_env]
+      processors: [batch, attributes/add_env, attributes/enrich_correlation]
       exporters: [otlp/jaeger]
     metrics:
       receivers: [otlp, prometheus]
@@ -64,5 +75,5 @@ service:
       exporters: [prometheus, prometheusremotewrite/main]
     logs/intake:
       receivers: [otlp]
-      processors: [batch, attributes/add_env]
+      processors: [batch, attributes/add_env, attributes/enrich_correlation]
       exporters: [otlp/elasticsearch, loki, logging/metrics]
