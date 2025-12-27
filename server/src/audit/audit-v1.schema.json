@@ -1,0 +1,61 @@
+{
+  "$id": "audit.v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AuditEventV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["eventId", "occurredAt", "actor", "action", "tenantId"],
+  "properties": {
+    "eventId": {
+      "type": "string"
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["user", "service", "system", "api"]
+        },
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "ipAddress": { "type": "string" }
+      }
+    },
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": { "type": "string" },
+        "name": { "type": "string" },
+        "outcome": {
+          "type": "string",
+          "enum": ["success", "failure", "partial"]
+        }
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": { "type": "string" },
+        "id": { "type": "string" },
+        "path": { "type": "string" },
+        "name": { "type": "string" }
+      }
+    },
+    "tenantId": { "type": "string" },
+    "traceId": { "type": "string" },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}
