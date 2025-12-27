@@ -158,6 +158,36 @@ export interface CaseComment {
   replyToId?: string // For threaded comments
 }
 
+export interface EntityCommentAttachment {
+  id: string
+  fileName: string
+  contentType?: string | null
+  sizeBytes?: number | null
+  storageUri?: string | null
+  metadata: Record<string, unknown>
+  createdAt: string
+}
+
+export interface EntityCommentMention {
+  userId: string
+  username: string
+}
+
+export interface EntityComment {
+  id: string
+  tenantId: string
+  entityId: string
+  entityType?: string | null
+  entityLabel?: string | null
+  authorId: string
+  content: string
+  metadata: Record<string, unknown>
+  createdAt: string
+  updatedAt: string
+  attachments: EntityCommentAttachment[]
+  mentions: EntityCommentMention[]
+}
+
 export interface User {
   id: string
   name: string

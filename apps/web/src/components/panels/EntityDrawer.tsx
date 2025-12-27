@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/Drawer'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
+import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import {
@@ -24,8 +25,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/Tooltip'
+import { useAuth } from '@/contexts/AuthContext'
+import { renderMarkdown } from '@/lib/markdown'
 import { formatDate, getRiskColor, capitalizeFirst } from '@/lib/utils'
-import type { Entity, Relationship, PanelProps } from '@/types'
+import type { Entity, EntityComment, Relationship, PanelProps } from '@/types'
 
 interface EntityDrawerProps extends PanelProps<Entity[]> {
   open: boolean
@@ -46,6 +49,115 @@ export function EntityDrawer({
   relationships = [],
 }: EntityDrawerProps) {
   const selectedEntity = entities.find(e => e.id === selectedEntityId)
+  const { user } = useAuth()
+  const [comments, setComments] = React.useState<EntityComment[]>([])
+  const [commentDraft, setCommentDraft] = React.useState('')
+  const [commentsLoading, setCommentsLoading] = React.useState(false)
+  const [commentError, setCommentError] = React.useState<string | null>(null)
+  const [commentSubmitting, setCommentSubmitting] = React.useState(false)
+
+  const tenantId =
+    (user as { tenantId?: string } | null)?.tenantId ||
+    localStorage.getItem('tenant_id') ||
+    'demo-tenant'
+  const userId =
+    user?.id || localStorage.getItem('user_id') || user?.email || 'system'
+  const authToken = localStorage.getItem('auth_token')
+
+  const fetchComments = React.useCallback(async () => {
+    if (!selectedEntity?.id) {
+      return
+    }
+
+    setCommentsLoading(true)
+    setCommentError(null)
+
+    try {
+      const headers: HeadersInit = {
+        'x-tenant-id': tenantId,
+        'x-user-id': userId,
+      }
+      if (authToken) {
+        headers.Authorization = `Bearer ${authToken}`
+      }
+
+      const response = await fetch(
+        `/api/entities/${selectedEntity.id}/comments`,
+        { headers },
+      )
+
+      if (!response.ok) {
+        throw new Error('Failed to load comments')
+      }
+
+      const data = (await response.json()) as EntityComment[]
+      setComments(data)
+    } catch (err) {
+      setCommentError((err as Error).message)
+    } finally {
+      setCommentsLoading(false)
+    }
+  }, [authToken, selectedEntity?.id, tenantId, userId])
+
+  const handleAddComment = React.useCallback(async () => {
+    if (!selectedEntity?.id || !commentDraft.trim()) {
+      return
+    }
+
+    setCommentSubmitting(true)
+    setCommentError(null)
+
+    try {
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+        'x-tenant-id': tenantId,
+        'x-user-id': userId,
+      }
+      if (authToken) {
+        headers.Authorization = `Bearer ${authToken}`
+      }
+
+      const response = await fetch(
+        `/api/entities/${selectedEntity.id}/comments`,
+        {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            content: commentDraft.trim(),
+            entityType: selectedEntity.type,
+            entityLabel: selectedEntity.name,
+            metadata: { source: 'entity-inspector' },
+          }),
+        },
+      )
+
+      if (!response.ok) {
+        throw new Error('Failed to add comment')
+      }
+
+      const created = (await response.json()) as EntityComment
+      setComments(prev => [...prev, created])
+      setCommentDraft('')
+    } catch (err) {
+      setCommentError((err as Error).message)
+    } finally {
+      setCommentSubmitting(false)
+    }
+  }, [
+    authToken,
+    commentDraft,
+    selectedEntity?.id,
+    selectedEntity?.name,
+    selectedEntity?.type,
+    tenantId,
+    userId,
+  ])
+
+  React.useEffect(() => {
+    if (open && selectedEntity?.id) {
+      fetchComments()
+    }
+  }, [fetchComments, open, selectedEntity?.id])
 
   const getEntityIcon = (type: string) => {
     switch (type) {
@@ -179,10 +291,11 @@ export function EntityDrawer({
 
         <div className="flex-1 overflow-hidden">
           <Tabs defaultValue="overview" className="h-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="relationships">Relations</TabsTrigger>
               <TabsTrigger value="timeline">Timeline</TabsTrigger>
+              <TabsTrigger value="comments">Comments</TabsTrigger>
             </TabsList>
 
             <TabsContent
@@ -351,6 +464,91 @@ export function EntityDrawer({
                 </div>
 
                 {/* Add more timeline events as needed */}
+              </div>
+            </TabsContent>
+
+            <TabsContent
+              value="comments"
+              className="space-y-4 p-4 overflow-y-auto"
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm">Add comment</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Textarea
+                    value={commentDraft}
+                    onChange={event => setCommentDraft(event.target.value)}
+                    placeholder="Write a comment with @mentions"
+                    rows={4}
+                  />
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">
+                      Markdown supported
+                    </span>
+                    <Button
+                      size="sm"
+                      onClick={handleAddComment}
+                      disabled={commentSubmitting || !commentDraft.trim()}
+                    >
+                      {commentSubmitting ? 'Posting…' : 'Post comment'}
+                    </Button>
+                  </div>
+                  {commentError && (
+                    <div className="text-xs text-destructive">
+                      {commentError}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <div className="space-y-3">
+                {commentsLoading ? (
+                  <div className="text-sm text-muted-foreground">
+                    Loading comments…
+                  </div>
+                ) : comments.length === 0 ? (
+                  <div className="text-sm text-muted-foreground">
+                    No comments yet.
+                  </div>
+                ) : (
+                  comments.map(comment => (
+                    <Card key={comment.id}>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-xs text-muted-foreground">
+                          {comment.authorId} •{' '}
+                          {formatDate(comment.createdAt)}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3 text-sm">
+                        <div
+                          className="prose prose-sm max-w-none"
+                          dangerouslySetInnerHTML={{
+                            __html: renderMarkdown(comment.content),
+                          }}
+                        />
+                        {comment.mentions?.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {comment.mentions.map(mention => (
+                              <Badge key={mention.userId} variant="secondary">
+                                @{mention.username}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                        {comment.attachments?.length > 0 && (
+                          <div className="space-y-1 text-xs text-muted-foreground">
+                            {comment.attachments.map(attachment => (
+                              <div key={attachment.id}>
+                                📎 {attachment.fileName}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
               </div>
             </TabsContent>
           </Tabs>
