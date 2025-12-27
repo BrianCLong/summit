@@ -1,17 +1,17 @@
 deps:
-pip install -e .[test]
+	pip install -e .[test]
 
 lint:
-ruff . || true
+	ruff check . || true
 
 typecheck:
-mypy . || true
+	mypy . || true
 
 test:
-pytest -q
+	pytest -q
 
 run:
-uvicorn app.main:app --reload
+	uvicorn app.main:app --reload
 
 docker:
-docker build -t prov-ledger:latest -f infra/Dockerfile .
+	docker build -t prov-ledger:latest -f infra/Dockerfile .

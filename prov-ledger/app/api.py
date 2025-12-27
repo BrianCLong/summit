@@ -1,13 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import FileResponse, PlainTextResponse
 
 from . import claims, evidence, provenance, scoring
+from .bundle_export import build_bundle
 from .ethics import check_request
 from .exporters import prov_json
 from .nlp import extractor
 from .observability import metrics
 from .schemas import (
     AttachEvidenceRequest,
+    BundleExportRequest,
     Claim,
     Corroboration,
     Evidence,
@@ -99,6 +101,16 @@ async def get_ledger(claim_id: str, _: None = Depends(api_key_auth)):
 @router.get("/export/prov", response_model=ProvExport)
 async def export_all(_: None = Depends(api_key_auth)):
     return ProvExport(**prov_json.export(provenance._graph))
+
+
+@router.post("/bundles/export")
+async def export_bundle(req: BundleExportRequest, _: None = Depends(api_key_auth)):
+    archive_path = build_bundle(req.case_id, req.evidence_ids)
+    return FileResponse(
+        archive_path,
+        media_type="application/zip",
+        filename=f"bundle-{req.case_id}.zip",
+    )
 
 
 @router.get("/healthz", response_class=PlainTextResponse)

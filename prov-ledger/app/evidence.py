@@ -19,7 +19,7 @@ def register_evidence(
 ) -> dict:
     evid_id = str(uuid.uuid4())
     data = content or (url or "").encode()
-    h, length = sha256_digest(BytesIO(data))
+    h, _length = sha256_digest(BytesIO(data))
     signed = False
     signer_fp = None
     if signature and public_key:

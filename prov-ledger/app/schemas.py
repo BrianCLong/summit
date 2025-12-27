@@ -50,3 +50,8 @@ class ProvExport(BaseModel):
     nodes: list[dict]
     edges: list[dict]
     metadata: dict[str, str]
+
+
+class BundleExportRequest(BaseModel):
+    case_id: str
+    evidence_ids: list[str]
