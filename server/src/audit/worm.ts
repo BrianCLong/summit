@@ -9,7 +9,7 @@ import * as path from 'path';
 const s3 = process.env.AWS_S3_BUCKET
   ? (() => {
       try {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
+         
         const { S3Client } = require('@aws-sdk/client-s3');
         return new S3Client({});
       } catch (err) {
@@ -39,7 +39,7 @@ export async function putLocked(
   if (s3) {
     // S3 Mode (Production)
     const retainUntil = new Date(Date.now() + days * 86400 * 1000);
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+     
     const { PutObjectCommand } = require('@aws-sdk/client-s3');
     await s3.send(
       new PutObjectCommand({

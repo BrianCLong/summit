@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
+ 
 // @ts-nocheck
 import 'dotenv/config';
 import express from 'express';

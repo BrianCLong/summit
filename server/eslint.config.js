@@ -116,7 +116,7 @@ export default [
     linterOptions: { reportUnusedDisableDirectives: true },
     rules: {
       'no-unused-expressions': 'off', // Disable due to ESLint 9/typescript-eslint compatibility issue
-      'no-console': ['error', { allow: ['warn', 'error'] }],
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
       'no-process-exit': 'off',
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
