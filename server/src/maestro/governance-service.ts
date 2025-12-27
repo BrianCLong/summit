@@ -12,6 +12,17 @@ import { MaestroAgent } from './model.js';
 import { ProvenanceLedgerV2 } from '../provenance/ledger.js';
 import logger from '../utils/logger.js';
 
+interface Agent extends MaestroAgent {
+  status: string;
+  health: {
+    cpuUsage: number;
+    memoryUsage: number;
+    lastHeartbeat: Date;
+    activeTasks: number;
+    errorRate: number;
+  };
+}
+
 export interface AgentGovernanceConfig {
   maxConcurrency: number; // Maximum concurrent operations per agent
   maxBudget: number; // Max computational budget per operation
@@ -94,7 +105,7 @@ export class AgentGovernanceService {
    */
   private initializePolicies(): void {
     this.policies.set('*', this.defaultConfig); // Default for all agents
-    
+
     // Define governance tiers based on sensitivity and risk
     this.policies.set('tier-0', {
       ...this.defaultConfig,
@@ -127,7 +138,7 @@ export class AgentGovernanceService {
     });
 
     this.policies.set('tier-2', this.defaultConfig);
-    
+
     logger.info('Agent governance policies initialized');
   }
 
@@ -142,7 +153,7 @@ export class AgentGovernanceService {
   ): Promise<GovernanceDecision> {
     const config = this.getAgentConfig(agent);
     const violations: SafetyViolation[] = [];
-    
+
     // Check 1: Capability whitelist
     if (!config.capabilitiesWhitelist.includes(action)) {
       const violation: SafetyViolation = {
@@ -154,7 +165,7 @@ export class AgentGovernanceService {
         timestamp: new Date(),
         context
       };
-      
+
       violations.push(violation);
       logger.warn({
         agentId: agent.id,
@@ -175,7 +186,7 @@ export class AgentGovernanceService {
         timestamp: new Date(),
         context
       };
-      
+
       violations.push(violation);
       logger.warn({
         agentId: agent.id,
@@ -187,13 +198,13 @@ export class AgentGovernanceService {
 
     // Check 3: Risk assessment
     const riskScore = this.calculateRiskScore(agent, action, context);
-    
+
     // Check 4: Required approvals
     let requiredApprovals = config.requiredApprovals;
     if (riskScore > this.riskThresholds.high) {
       requiredApprovals = Math.max(requiredApprovals, 2); // Increase approvals for high risk
     }
-    
+
     if (riskScore > this.riskThresholds.critical) {
       const violation: SafetyViolation = {
         id: `violation-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
@@ -204,7 +215,7 @@ export class AgentGovernanceService {
         timestamp: new Date(),
         context
       };
-      
+
       violations.push(violation);
       logger.error({
         agentId: agent.id,
@@ -213,7 +224,7 @@ export class AgentGovernanceService {
         violationId: violation.id
       }, 'Critical risk threshold exceeded');
     }
-    
+
     // Record violations in provenance ledger
     for (const violation of violations) {
       await this.ledger.appendEntry({
@@ -240,7 +251,7 @@ export class AgentGovernanceService {
           ...metadata
         }
       });
-    }  
+    }
 
     const allowed = violations.length === 0 && riskScore <= this.riskThresholds.critical;
     const decision: GovernanceDecision = {
@@ -267,7 +278,7 @@ export class AgentGovernanceService {
    */
   private calculateRiskScore(agent: MaestroAgent, action: string, context: any): number {
     let score = 0.0;
-    
+
     // Base risk from action type
     switch (action) {
       case 'delete':
@@ -286,16 +297,16 @@ export class AgentGovernanceService {
         score += 0.5;
         break;
     }
-    
+
     // Additional risk based on context
     if (context.tenantId === 'restricted') {
       score += 0.2;
     }
-    
+
     if (context.riskFactors?.includes('high_value_target')) {
       score += 0.3;
     }
-    
+
     // Data sensitivity risk
     if (context.dataClassification) {
       switch (context.dataClassification) {
@@ -310,13 +321,13 @@ export class AgentGovernanceService {
           break;
       }
     }
-    
+
     // Time-of-day risk (operations at unusual hours)
     const hour = new Date().getUTCHours();
     if (hour < 6 || hour > 22) {  // After-hours operations
       score += 0.1;
     }
-    
+
     return Math.min(1.0, score);  // Cap at 1.0
   }
 
@@ -339,13 +350,13 @@ export class AgentGovernanceService {
       'export_csv': 0.05,
       'execute_arbitrary_code': 10000  // Very high cost for unapproved code execution
     };
-    
+
     const baseCost = baseCosts[action as keyof typeof baseCosts] || 0.05;
-    
+
     // Scale by data volume if available
     const dataSize = context.dataSize || 1; // Size factor, default to 1
     const volumeFactor = Math.log10(Math.max(1, dataSize)) / 10; // Logarithmic scaling
-    
+
     return baseCost * (1 + volumeFactor) * 100; // Scale appropriately
   }
 
@@ -366,7 +377,7 @@ export class AgentGovernanceService {
     // In a real implementation, would check cross-agent coordination permissions
     // and ensure no unauthorized data sharing occurs
     return this.evaluateAction(
-      { id: 'coordinator', name: 'SubagentCoordinator', tenantId: 'system', capabilities: [], metadata: {}, status: 'idle', health: { cpuUsage: 0, memoryUsage: 0, lastHeartbeat: new Date(), activeTasks: 0, errorRate: 0 } },
+      { id: 'coordinator', name: 'SubagentCoordinator', tenantId: 'system', capabilities: [], metadata: {}, status: 'idle', health: { cpuUsage: 0, memoryUsage: 0, lastHeartbeat: new Date(), activeTasks: 0, errorRate: 0 }, templateId: 'system', config: {} },
       `COORDINATION:${action}`,
       context
     );
@@ -377,7 +388,7 @@ export class AgentGovernanceService {
    */
   registerPolicy(id: string, config: AgentGovernanceConfig): void {
     this.policies.set(id, config);
-    
+
     logger.info({
       policyId: id,
       config
@@ -402,7 +413,7 @@ export class AgentGovernanceService {
     const isHealthy = agent.health.memoryUsage < 90 && agent.health.cpuUsage < 90;
     const recentViolations = this.getRecentViolations(agent.id, 1);  // Check last day
     const hasCriticalViolations = recentViolations.some(v => v.severity === 'critical');
-    
+
     return isHealthy && !hasCriticalViolations;
   }
 
@@ -412,7 +423,7 @@ export class AgentGovernanceService {
   async generateComplianceReport(): Promise<any> {
     const allViolations = this.safetyViolations;
     const totalAgents = Array.from(this.policies.keys()).length;
-    
+
     const report = {
       timestamp: new Date().toISOString(),
       summary: {
