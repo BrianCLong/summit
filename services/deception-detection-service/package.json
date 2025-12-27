@@ -19,7 +19,7 @@
     "@intelgraph/content-verification": "workspace:*",
     "express": "^5.2.0",
     "cors": "^2.8.5",
-    "multer": "^1.4.5-lts.1"
+    "multer": "^2.0.2"
   },
   "devDependencies": {
     "typescript": "^5.9.3",
