@@ -26,6 +26,7 @@ import { overloadProtection } from './middleware/overloadProtection.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
 import { safetyModeMiddleware, resolveSafetyState } from './middleware/safety-mode.js';
 import { residencyEnforcement } from './middleware/residency.js';
+import { requestProfilingMiddleware } from './middleware/request-profiling.js';
 import exceptionRouter from './data-residency/exceptions/routes.js';
 import monitoringRouter from './routes/monitoring.js';
 import billingRouter from './routes/billing.js';
@@ -35,6 +36,7 @@ import aiRouter from './routes/ai.js';
 import nlGraphQueryRouter from './routes/nl-graph-query.js';
 import disclosuresRouter from './routes/disclosures.js';
 import narrativeSimulationRouter from './routes/narrative-sim.js';
+import predictiveRouter from './routes/predictive.js';
 import { metricsRoute } from './http/metricsRoute.js';
 const rbacRouter = require('./routes/rbacRoutes.js');
 import { typeDefs } from './graphql/schema.js';
@@ -109,6 +111,7 @@ import claimsRouter from './routes/claims.js';
 import opsRouter from './routes/ops.js';
 import featureFlagsRouter from './routes/feature-flags.js';
 import mlReviewRouter from './routes/ml_review.js';
+import adminFlagsRouter from './routes/admin-flags.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -199,6 +202,7 @@ export const createApp = async () => {
       }),
     }),
   );
+  app.use(requestProfilingMiddleware);
 
   app.use(
     express.json({
@@ -344,6 +348,7 @@ export const createApp = async () => {
   app.use('/api/ai', aiRouter);
   app.use('/api/ai/nl-graph-query', nlGraphQueryRouter);
   app.use('/api/narrative-sim', narrativeSimulationRouter);
+  app.use('/api/predictive', predictiveRouter);
   app.use('/disclosures', disclosuresRouter);
   app.use('/rbac', rbacRouter);
   app.use('/api/billing', billingRouter);
@@ -400,6 +405,7 @@ export const createApp = async () => {
   app.use('/api/claims', claimsRouter);
   app.use('/api/feature-flags', featureFlagsRouter);
   app.use('/api/ml-reviews', mlReviewRouter);
+  app.use('/api/admin/flags', adminFlagsRouter);
   app.get('/metrics', metricsRoute);
 
   // Initialize SummitInvestigate Platform Routes

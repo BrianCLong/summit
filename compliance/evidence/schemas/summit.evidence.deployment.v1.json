@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "summit.evidence.deployment.v1",
+  "title": "Summit Deployment Evidence v1",
+  "type": "object",
+  "required": ["spec", "control_id", "event_type", "occurred_at", "deployment"],
+  "properties": {
+    "spec": { "const": "summit.evidence.deployment.v1" },
+    "control_id": { "type": "string" },
+    "event_type": { "const": "deploy.completed" },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "trace_id": { "type": "string" },
+    "deployment": {
+      "type": "object",
+      "required": ["deployment_id", "env", "service", "commit_sha", "ci_run_id", "artifact_digest"],
+      "properties": {
+        "deployment_id": { "type": "string" },
+        "env": { "type": "string" },
+        "service": { "type": "string" },
+        "commit_sha": { "type": "string" },
+        "ci_run_id": { "type": "string" },
+        "artifact_digest": { "type": "string" }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

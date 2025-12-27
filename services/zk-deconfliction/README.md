@@ -10,6 +10,8 @@ A runnable prototype that checks selector overlaps across tenants **without reve
 - ✅ **Audit logging**: Tamper-evident log of all deconfliction operations
 - ✅ **REST API**: Simple HTTP endpoints for integration
 - ✅ **No data leakage**: Only boolean overlap + count are revealed
+- ✅ **Safety guardrails**: Bounded set sizes, supported modes enforced, and tenant-level rate limiting
+- ✅ **Observability**: Prometheus metrics for sessions, denials, and latency
 
 ## Quick Start
 
@@ -33,6 +35,7 @@ curl -X POST http://localhost:3100/zk/salt \
 ```
 
 Response:
+
 ```json
 {
   "tenantId": "org-alpha",
@@ -53,6 +56,7 @@ curl -X POST http://localhost:3100/zk/commit \
 ```
 
 Response:
+
 ```json
 {
   "tenantId": "org-alpha",
@@ -77,13 +81,15 @@ curl -X POST http://localhost:3100/zk/deconflict \
 ```
 
 Response:
+
 ```json
 {
   "hasOverlap": true,
   "overlapCount": 1,
   "proof": "zk-proof-hash...",
   "auditLogId": "log-uuid",
-  "timestamp": "2025-01-15T10:05:00Z"
+  "timestamp": "2025-01-15T10:05:00Z",
+  "mode": "cardinality"
 }
 ```
 
@@ -102,11 +108,22 @@ curl http://localhost:3100/zk/audit?tenantId=org-alpha
 curl http://localhost:3100/zk/audit/log-uuid
 ```
 
+### Metrics
+
+Prometheus/Grafana compatible metrics are exposed at `/metrics`:
+
+```bash
+curl http://localhost:3100/metrics
+```
+
+Key series: `zkd_sessions_active`, `zkd_denials_total`, `zkd_denials_reason_total`, and `zkd_latency_seconds_*`.
+
 ## Usage Flow
 
 ### Scenario: Two agencies want to check if they're targeting the same entities
 
 1. **Agency A** generates a salt and commitments:
+
    ```bash
    POST /zk/salt {"tenantId": "agency-a"}
    # Store salt securely
@@ -119,6 +136,7 @@ curl http://localhost:3100/zk/audit/log-uuid
    ```
 
 2. **Agency B** does the same:
+
    ```bash
    POST /zk/salt {"tenantId": "agency-b"}
    POST /zk/commit {
@@ -129,6 +147,7 @@ curl http://localhost:3100/zk/audit/log-uuid
    ```
 
 3. **Deconfliction coordinator** checks overlap:
+
    ```bash
    POST /zk/deconflict {
      "tenantAId": "agency-a",
@@ -142,46 +161,40 @@ curl http://localhost:3100/zk/audit/log-uuid
 
 4. **Audit trail** is automatically created and retrievable.
 
+5. **Operational visibility**: scrape `/metrics` to feed dashboards and alerts (p95 latency, denials by reason).
+
 ## Programmatic API
 
 ```typescript
-import {
-  CommitmentGenerator,
-  ZKSetProof,
-  AuditLogger,
-} from '@intelgraph/zk-deconfliction';
+import { CommitmentGenerator, ZKSetProof, AuditLogger } from "@intelgraph/zk-deconfliction";
 
 // Generate commitments
 const gen = new CommitmentGenerator();
-const salt = gen.generateSalt('tenant-a');
-const commitments = gen.commitSet(
-  ['alice', 'bob', 'charlie'],
-  'tenant-a',
-  salt.salt,
-);
+const salt = gen.generateSalt("tenant-a");
+const commitments = gen.commitSet(["alice", "bob", "charlie"], "tenant-a", salt.salt);
 
 // Check overlap
 const zkProof = new ZKSetProof();
 const result = zkProof.checkOverlap(
-  commitmentsA.map(c => c.hash),
-  commitmentsB.map(c => c.hash),
+  commitmentsA.map((c) => c.hash),
+  commitmentsB.map((c) => c.hash)
 );
 
 console.log(`Overlap: ${result.hasOverlap}, Count: ${result.count}`);
 
 // Generate proof
 const proof = zkProof.generateProof(
-  'tenant-a',
-  'tenant-b',
+  "tenant-a",
+  "tenant-b",
   commitmentsA,
   commitmentsB,
   result.hasOverlap,
-  result.count,
+  result.count
 );
 
 // Audit log
 const logger = new AuditLogger();
-logger.log('tenant-a', 'tenant-b', result.hasOverlap, result.count, proof);
+logger.log("tenant-a", "tenant-b", result.hasOverlap, result.count, proof);
 ```
 
 ## Security Model
@@ -230,6 +243,7 @@ docker run -p 3100:3100 zk-deconfliction
 ## Integration with Summit/IntelGraph
 
 Integrates with:
+
 - **Policy Compiler**: Enforce deconfliction policies
 - **Audit Service**: Long-term audit log storage
 - **Investigation Service**: Deconflict case selectors

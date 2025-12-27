@@ -1,0 +1,54 @@
+name: Schema compatibility
+
+on:
+  pull_request:
+    paths:
+      - "schemas/**"
+      - "scripts/schema-compat/**"
+      - "scripts/schema_compat.js"
+
+jobs:
+  schema-compatibility:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout baseline
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.base_ref }}
+          path: baseline
+          fetch-depth: 0
+
+      - name: Checkout proposed changes
+        uses: actions/checkout@v4
+        with:
+          path: current
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies (head)
+        working-directory: current
+        run: npm install --ignore-scripts
+
+      - name: Run schema compatibility check
+        working-directory: current
+        env:
+          BASELINE_SCHEMAS: ../baseline/schemas
+        run: |
+          REPORT_PATH="schema-compat-report.md"
+          COMPAT_FLAG=""
+          if [ -f schemas/compatibility-map.json ]; then
+            COMPAT_FLAG="--compat schemas/compatibility-map.json"
+          fi
+          node scripts/schema-compat/cli.mjs --baseline "$BASELINE_SCHEMAS" --current schemas --report "$REPORT_PATH" $COMPAT_FLAG
+
+      - name: Upload schema compatibility report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: schema-compatibility-report
+          path: current/schema-compat-report.md

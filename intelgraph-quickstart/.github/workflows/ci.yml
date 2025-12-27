@@ -1,0 +1,19 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci --prefix api && npm ci --prefix ingest
+      - run: npm test --prefix api
+      - run: npm test --prefix ingest
+      - name: SBOM
+        run: |
+          npm i -g @cyclonedx/cyclonedx-npm
+          cyclonedx-npm --output-file sbom.xml --output-format xml --ignore-npm-errors
+      - name: Lint Policy (OPA)
+        uses: open-policy-agent/setup-opa@v2
+      - run: opa fmt -w policies && opa check policies

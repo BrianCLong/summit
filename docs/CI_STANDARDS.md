@@ -5,6 +5,7 @@ This document defines the official Continuous Integration (CI) process for the I
 ## Philosophy
 
 Our CI philosophy is **Fast, Strict, and Consolidated**.
+
 - **Fast**: We use caching and parallel jobs to keep feedback loops short.
 - **Strict**: We enforce high standards (type safety, linting, security, testing) on every PR.
 - **Consolidated**: We rely on a single "Quality Gate" workflow rather than many fragmented checks.
@@ -14,19 +15,24 @@ Our CI philosophy is **Fast, Strict, and Consolidated**.
 All Pull Requests targeting `main` or `develop` must pass the **PR Quality Gate**. This workflow replaces previous ad-hoc checks.
 
 ### 1. Static Checks & Security (Parallel)
+
 This is the "Fail Fast" stage. If your code is messy or insecure, we stop here.
+
 - **Lint & Format**: Runs `pnpm run lint`. Ensures code style and best practices.
 - **Typecheck**: Runs `pnpm run typecheck`. Ensures strict type safety across the monorepo.
 - **Security Audit**: Runs `pnpm run security:audit`. Checks for known vulnerabilities in dependencies.
 - **Security Lint**: Runs `pnpm run security:lint`. Static analysis for security patterns.
 
 ### 2. Unit Tests
+
 - Runs `pnpm run test:jest`.
 - Validates the logic of individual components in isolation.
 - Includes both server-side and client-side unit tests.
 
 ### 3. Smoke Tests (The Golden Path)
+
 This is the "End-to-End" verification.
+
 - **Bootstrap**: Sets up the environment (`make bootstrap`).
 - **Build**: Builds Docker images for API and Client.
 - **Spin Up**: Starts the full stack (`make up`).
@@ -57,7 +63,47 @@ make smoke
 - **Security Audit**: Update dependencies (`pnpm update`). If it's a false positive, add an exception to the audit configuration.
 - **Smoke Tests**: Check the logs artifact or run `make smoke` locally to reproduce. Ensure your Docker environment is clean (`make down`).
 
+## Deployment Canary Gates (Promotion Blocking)
+
+Production promotions must pass the canary gates in `.github/workflows/deploy-multi-region.yml`.
+The gate runs **after deployment** and **before promotion** and blocks promotion on failure.
+
+### Metrics Gate (Prometheus)
+
+- **Error rate**: `< 1%` over 5 minutes.
+- **Latency p95**: `< 500ms` over 5 minutes.
+- **Latency p99**: `< 1000ms` over 5 minutes.
+
+### Synthetic Gate (k6)
+
+- **Script**: `k6/slo-probe.js`
+- **Thresholds** (enforced by k6):
+  - p95 latency `< 200ms`
+  - error rate `< 1%`
+  - success rate `> 95%`
+
+### Evidence & Logs
+
+- Attach the GitHub Actions run link and any canary summaries to the evidence index:
+  [`docs/observability/evidence/README.md`](observability/evidence/README.md).
+
 ## Workflow Maintenance
 
-- **Adding Steps**: Only add steps to `pr-quality-gate.yml` if they are critical for *every* PR. Niche checks should be separate or run on a schedule.
+- **Adding Steps**: Only add steps to `pr-quality-gate.yml` if they are critical for _every_ PR. Niche checks should be separate or run on a schedule.
 - **Performance**: Monitor execution time. If a job exceeds 10 minutes, investigate optimization (caching, splitting).
+
+## Release Evidence Pack
+
+Release workflows produce a compliance evidence bundle to support attestations in
+`ATTESTATION_SCOPE.md`. The reusable release workflow generates the following
+artifacts and packs them into a single archive:
+
+- `sbom.json` (CycloneDX SBOM)
+- `vuln-report.json` (Trivy SBOM vulnerability report)
+- `attestations/attestation-scope.json` (attestation scope hash + metadata)
+- `policy/opa-decisions.json` (OPA policy decision logs)
+- `deploy/deploy-metadata.json` (pipeline context metadata)
+- `provenance.json` and `evidence-bundles/` manifest output
+
+The release job bundles these into `evidence/pack-<release>.tgz` and uploads it
+with the release artifacts.

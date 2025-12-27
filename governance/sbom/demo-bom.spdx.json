@@ -1,0 +1,30 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "summit-demo-sbom",
+  "documentNamespace": "https://example.invalid/summit/sbom/demo",
+  "creationInfo": {
+    "created": "2025-12-26T00:00:00Z",
+    "creators": ["Tool: summit-governance-demo"]
+  },
+  "packages": [
+    {
+      "name": "summit",
+      "SPDXID": "SPDXRef-Package-summit",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "supplier": "NOASSERTION",
+      "versionInfo": "0.0.0"
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-DOCUMENT",
+      "relationshipType": "DESCRIBES",
+      "relatedSpdxElement": "SPDXRef-Package-summit"
+    }
+  ]
+}

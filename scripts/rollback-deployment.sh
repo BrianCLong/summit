@@ -21,12 +21,103 @@ RELEASE_NAME="${RELEASE_NAME:-intelgraph}"
 CANARY_PERCENTAGE="${CANARY_PERCENTAGE:-10}"
 HEALTH_CHECK_TIMEOUT="${HEALTH_CHECK_TIMEOUT:-300}"
 ROLLBACK_TIMEOUT="${ROLLBACK_TIMEOUT:-600}"
+EVIDENCE_DIR="${EVIDENCE_DIR:-${PROJECT_ROOT}/evidence/rollbacks}"
 
 log() { echo -e "${GREEN}[$(date +'%Y-%m-%d %H:%M:%S')] $1${NC}"; }
 warn() { echo -e "${YELLOW}[$(date +'%Y-%m-%d %H:%M:%S')] WARNING: $1${NC}"; }
 error() { echo -e "${RED}[$(date +'%Y-%m-%d %H:%M:%S')] ERROR: $1${NC}"; }
 info() { echo -e "${BLUE}[$(date +'%Y-%m-%d %H:%M:%S')] INFO: $1${NC}"; }
 bold() { echo -e "${BOLD}$1${NC}"; }
+
+record_rollback_evidence() {
+    local action="$1"
+    local status="$2"
+    local target_version="${3:-}"
+    local timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
+    local evidence_path="${EVIDENCE_DIR}/rollback-${action}-${timestamp}.json"
+    local git_sha="${GIT_SHA:-$(git -C "${PROJECT_ROOT}" rev-parse HEAD 2>/dev/null || echo "unknown")}"
+
+    mkdir -p "${EVIDENCE_DIR}"
+
+    jq -n \
+        --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+        --arg action "${action}" \
+        --arg status "${status}" \
+        --arg namespace "${NAMESPACE}" \
+        --arg release "${RELEASE_NAME}" \
+        --arg targetVersion "${target_version}" \
+        --arg logUrl "${DEPLOYMENT_LOG_URL:-}" \
+        --arg evidencePath "${evidence_path}" \
+        --arg gitSha "${git_sha}" \
+        --arg rollbackReason "${ROLLBACK_REASON:-}" \
+        --arg currentRevision "${ROLLBACK_CURRENT_REVISION:-}" \
+        --arg targetRevision "${ROLLBACK_TARGET_REVISION:-}" \
+        --arg stableVersion "${ROLLBACK_STABLE_VERSION:-}" \
+        --arg canaryVersion "${ROLLBACK_CANARY_VERSION:-}" \
+        '{
+          timestamp: $timestamp,
+          action: $action,
+          status: $status,
+          namespace: $namespace,
+          release: $release,
+          target_version: $targetVersion,
+          log_url: $logUrl,
+          evidence_path: $evidencePath,
+          git_sha: $gitSha,
+          rollback_reason: $rollbackReason,
+          current_revision: $currentRevision,
+          target_revision: $targetRevision,
+          stable_version: $stableVersion,
+          canary_version: $canaryVersion
+        }' > "${evidence_path}"
+
+    export ROLLBACK_EVIDENCE_PATH="${evidence_path}"
+    log "Evidence recorded: ${evidence_path}"
+    if [ -n "${DEPLOYMENT_LOG_URL:-}" ]; then
+        info "Deployment logs: ${DEPLOYMENT_LOG_URL}"
+    fi
+}
+
+emit_audit_event() {
+    local action="$1"
+    local status="$2"
+    local target_version="${3:-}"
+
+    PROJECT_ROOT="${PROJECT_ROOT}" \
+    ROLLBACK_AUDIT_ACTION="${action}" \
+    ROLLBACK_AUDIT_STATUS="${status}" \
+    ROLLBACK_AUDIT_TARGET_VERSION="${target_version}" \
+    ROLLBACK_AUDIT_NAMESPACE="${NAMESPACE}" \
+    ROLLBACK_AUDIT_RELEASE="${RELEASE_NAME}" \
+    ROLLBACK_AUDIT_LOG_URL="${DEPLOYMENT_LOG_URL:-}" \
+    ROLLBACK_AUDIT_EVIDENCE_PATH="${ROLLBACK_EVIDENCE_PATH:-}" \
+    ROLLBACK_AUDIT_REASON="${ROLLBACK_REASON:-}" \
+    node <<'EOF'
+const { appendAuditEvent } = require(`${process.env.PROJECT_ROOT}/agents/audit/logStub`);
+
+appendAuditEvent({
+  event: 'deployment-rollback',
+  action: process.env.ROLLBACK_AUDIT_ACTION,
+  status: process.env.ROLLBACK_AUDIT_STATUS,
+  targetVersion: process.env.ROLLBACK_AUDIT_TARGET_VERSION,
+  namespace: process.env.ROLLBACK_AUDIT_NAMESPACE,
+  release: process.env.ROLLBACK_AUDIT_RELEASE,
+  logUrl: process.env.ROLLBACK_AUDIT_LOG_URL,
+  evidencePath: process.env.ROLLBACK_AUDIT_EVIDENCE_PATH,
+  reason: process.env.ROLLBACK_AUDIT_REASON,
+  source: 'scripts/rollback-deployment.sh',
+});
+EOF
+}
+
+finalize_rollback_event() {
+    local action="$1"
+    local status="$2"
+    local target_version="${3:-}"
+
+    record_rollback_evidence "${action}" "${status}" "${target_version}"
+    emit_audit_event "${action}" "${status}" "${target_version}"
+}
 
 show_help() {
     cat << EOF
@@ -307,6 +398,10 @@ abort_canary() {
 
     # Reset traffic to 100% stable
     local stable_version=$(helm get values "${RELEASE_NAME}" -n "${NAMESPACE}" -o json | jq -r '.stable.version // .image.tag')
+    local canary_version="unknown"
+    if kubectl get deployment "${RELEASE_NAME}-canary" -n "${NAMESPACE}" >/dev/null 2>&1; then
+        canary_version=$(kubectl get deployment "${RELEASE_NAME}-canary" -n "${NAMESPACE}" -o json | jq -r '.spec.template.spec.containers[0].image | split(\":\")[1] // \"unknown\"')
+    fi
 
     helm upgrade "${RELEASE_NAME}" ./deploy/helm/intelgraph \
         --namespace "${NAMESPACE}" \
@@ -317,8 +412,14 @@ abort_canary() {
 
     if run_health_check; then
         log "Canary aborted and rollback successful ✅"
+        ROLLBACK_STABLE_VERSION="${stable_version}"
+        ROLLBACK_CANARY_VERSION="${canary_version}"
+        finalize_rollback_event "canary-abort" "success" "${stable_version}"
     else
         error "Rollback health checks failed!"
+        ROLLBACK_STABLE_VERSION="${stable_version}"
+        ROLLBACK_CANARY_VERSION="${canary_version}"
+        finalize_rollback_event "canary-abort" "failed" "${stable_version}"
         exit 1
     fi
 }
@@ -326,6 +427,7 @@ abort_canary() {
 # Rollback to previous or specific version
 rollback_deployment() {
     local target_version="$1"
+    local rollback_target_version=""
 
     if [ -z "$target_version" ]; then
         # Rollback to previous Helm revision
@@ -340,11 +442,14 @@ rollback_deployment() {
         fi
 
         info "Rolling back from revision $current_revision to $target_revision..."
+        ROLLBACK_CURRENT_REVISION="${current_revision}"
+        ROLLBACK_TARGET_REVISION="${target_revision}"
 
         helm rollback "${RELEASE_NAME}" "$target_revision" -n "${NAMESPACE}" --timeout "${ROLLBACK_TIMEOUT}s" --wait
     else
         # Rollback to specific version
         bold "🔄 Rolling back to version: $target_version"
+        rollback_target_version="${target_version}"
 
         helm upgrade "${RELEASE_NAME}" ./deploy/helm/intelgraph \
             --namespace "${NAMESPACE}" \
@@ -359,9 +464,17 @@ rollback_deployment() {
 
     # Health check after rollback
     if run_health_check; then
+        if [ -z "${rollback_target_version}" ]; then
+            rollback_target_version=$(helm get values "${RELEASE_NAME}" -n "${NAMESPACE}" -o json | jq -r '.image.tag // "unknown"')
+        fi
         log "Rollback successful! ✅"
+        finalize_rollback_event "rollback" "success" "${rollback_target_version}"
     else
+        if [ -z "${rollback_target_version}" ]; then
+            rollback_target_version=$(helm get values "${RELEASE_NAME}" -n "${NAMESPACE}" -o json | jq -r '.image.tag // "unknown"')
+        fi
         error "Rollback health checks failed!"
+        finalize_rollback_event "rollback" "failed" "${rollback_target_version}"
         exit 1
     fi
 }

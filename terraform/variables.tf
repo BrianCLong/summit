@@ -1,19 +1,23 @@
 variable "region" {
   description = "AWS region for deployments"
   type        = string
-  default     = "us-east-1"
+  default     = "us-west-2"
 }
 
 variable "environment" {
   description = "Environment name used for tagging and naming"
   type        = string
-  default     = "dev"
+  default     = "prod-canary"
 }
 
 variable "tags" {
   description = "Common tags applied to provisioned resources"
   type        = map(string)
-  default     = {}
+  default     = {
+    Tenant = "acme-corp"
+    ManagedBy = "Terraform"
+    Project = "IntelGraph"
+  }
 }
 
 variable "kms_keys" {

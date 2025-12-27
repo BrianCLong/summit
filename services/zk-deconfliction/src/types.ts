@@ -28,6 +28,7 @@ export const DeconflictRequestSchema = z.object({
   tenantACommitments: z.array(z.string()),
   tenantBCommitments: z.array(z.string()),
   auditContext: z.record(z.any()).optional(),
+  revealMode: z.enum(['cardinality']).default('cardinality'),
 });
 
 export const DeconflictResponseSchema = z.object({
@@ -55,3 +56,6 @@ export type CommitmentSet = z.infer<typeof CommitmentSetSchema>;
 export type DeconflictRequest = z.infer<typeof DeconflictRequestSchema>;
 export type DeconflictResponse = z.infer<typeof DeconflictResponseSchema>;
 export type AuditLogEntry = z.infer<typeof AuditLogEntrySchema>;
+export type DeconflictRevealMode = z.infer<
+  typeof DeconflictRequestSchema
+>['revealMode'];

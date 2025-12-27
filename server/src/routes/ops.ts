@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { rollup } from '../ops/capacity';
 import { verifyAuditLedgerChain } from '../audit/ledger.js';
+import { evidenceIntegrityService } from '../evidence/integrity-service.js';
 
 const r = Router();
 
@@ -21,6 +22,22 @@ r.get('/ops/audit-ledger/verify', async (req, res) => {
     typeof req.query.since === 'string' ? String(req.query.since) : undefined;
   const result = await verifyAuditLedgerChain({ since });
   return res.json(result);
+});
+
+r.post('/ops/evidence/verify', async (req, res) => {
+  if (process.env.EVIDENCE_INTEGRITY !== 'true') {
+    return res.status(404).json({ error: 'EVIDENCE_INTEGRITY disabled' });
+  }
+
+  const { chunkSize, rateLimitPerSecond, emitIncidents } = req.body || {};
+  const result = await evidenceIntegrityService.verifyAll({
+    chunkSize: chunkSize ? Number(chunkSize) : undefined,
+    rateLimitPerSecond: rateLimitPerSecond ? Number(rateLimitPerSecond) : undefined,
+    emitIncidents:
+      emitIncidents ?? process.env.EVIDENCE_INTEGRITY_INCIDENTS === 'true',
+  });
+
+  return res.json({ success: true, data: result });
 });
 
 export default r;

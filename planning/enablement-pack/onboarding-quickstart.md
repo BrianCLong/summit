@@ -1,16 +1,21 @@
-# Onboarding & Quickstart
+# Onboarding & Quickstart (ADOPT-1)
 
 This guide provides the **Golden Path** to get your local development environment set up and running.
+
+## Known Issues & Mitigations
+
+Before you start, review the onboarding pitfalls and fixes in
+[`docs/onboarding/known-issues.md`](../../docs/onboarding/known-issues.md).
 
 ## 1. Prerequisites
 
 Ensure you have the following installed:
 
-*   **Node.js**: v20+ (Check `package.json` engines or `Makefile`)
-*   **pnpm**: v9.12.0+ (We use `pnpm` exclusively)
-*   **Docker & Docker Compose**: For running backing services (Postgres, Neo4j, Redis).
-*   **Git**: For version control.
-*   **VS Code** (Recommended): With ESLint and Prettier extensions.
+- **Node.js**: v20+ (Check `package.json` engines or `Makefile`)
+- **pnpm**: v9.12.0+ (We use `pnpm` exclusively)
+- **Docker & Docker Compose**: For running backing services (Postgres, Neo4j, Redis).
+- **Git**: For version control.
+- **VS Code** (Recommended): With ESLint and Prettier extensions.
 
 ## 2. Setup Repository
 
@@ -49,12 +54,15 @@ This will start all services defined in `docker-compose.dev.yml`.
 If you prefer running Node processes locally for faster iteration:
 
 1.  **Start Infrastructure (DBs)**:
+
     ```bash
     pnpm run docker:dev up -d postgres neo4j redis
     ```
-    *(Note: Adjust service names based on actual docker-compose file if needed)*
+
+    _(Note: Adjust service names based on actual docker-compose file if needed)_
 
 2.  **Run Migrations**:
+
     ```bash
     pnpm run db:migrate
     pnpm run db:seed
@@ -70,8 +78,8 @@ If you prefer running Node processes locally for faster iteration:
 
 Once running, verify the services are accessible:
 
-*   **Web Client**: [http://localhost:3000](http://localhost:3000)
-*   **Server API**: [http://localhost:4000/graphql](http://localhost:4000/graphql) (or similar port)
+- **Web Client**: [http://localhost:3000](http://localhost:3000)
+- **Server API**: [http://localhost:4000/graphql](http://localhost:4000/graphql) (or similar port)
 
 ## 6. First Safe Change
 

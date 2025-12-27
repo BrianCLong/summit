@@ -296,6 +296,31 @@ watch -n 30 'curl -s https://prometheus.intelgraph.io/api/v1/query \
 
 ## Rollback Procedure
 
+### Rollback vs Roll-forward decision tree
+
+Use this decision tree before triggering a rollback or a roll-forward (fix forward).
+Reference the canary signals defined in [REL-1](../project_management/companyos/COS-POD-TICKET-SET.md#rel-1--adr-standard-release-strategy-v1),
+and follow the rollback automation steps and thresholds in
+[REL-2](../project_management/companyos/COS-POD-TICKET-SET.md#rel-2--define-release-gates--canary-thresholds).
+
+**Decision criteria**
+
+- **Blast radius**: If impact is widespread (multi-service or >50% traffic), prefer rollback.
+  If isolated to a narrow feature path, consider roll-forward with a targeted fix or feature flag.
+- **Data migration**: If the release includes irreversible or risky migrations, prefer roll-forward
+  with compensating changes unless a verified down-migration exists.
+- **User impact**: If users are blocked from core workflows or data integrity is at risk, rollback.
+  If impact is low and can be mitigated by flags or config changes, roll-forward.
+- **SLO breach**: If canary signals show sustained SLO breach per REL-1/REL-2 thresholds, rollback.
+  If signals are near-threshold and stabilizing, pause promotions and roll-forward only after recovery.
+
+**Decision flow**
+
+1. Check canary signals (REL-1) and gate thresholds (REL-2).
+2. If blast radius or user impact is high **and** SLO breach is confirmed → **Rollback**.
+3. If data migration blocks rollback or impact is contained → **Roll-forward** with flags or hotfix.
+4. If unclear, **pause promotion**, page on-call SRE, and reassess in 10 minutes.
+
 ### When to Rollback
 
 Trigger rollback if ANY of these occur:
@@ -304,6 +329,25 @@ Trigger rollback if ANY of these occur:
 - P95 latency > 1000ms for 5 minutes
 - Golden-path probes failing
 - P0/P1 incident attributed to release
+
+### Rollback vs Roll-forward decision tree
+
+Use this decision tree to determine whether to roll back immediately or roll
+forward with a safe fix. Confirm canary signals per
+[REL-1](../project_management/companyos/COS-POD-TICKET-SET.md#rel-1--adr-standard-release-strategy-v1)
+before proceeding, and follow rollback automation steps in
+[REL-2](../project_management/companyos/COS-POD-TICKET-SET.md#rel-2--define-release-gates--canary-thresholds).
+
+| Decision criteria | Roll back when                                                    | Roll forward when                                                               |
+| ----------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Blast radius      | Broad impact across multiple services, regions, or core workflows | Isolated to a non-critical feature or single tenant                             |
+| Data migration    | Irreversible or partial migrations risk data integrity            | Forward fix can be applied without schema changes or with reversible migrations |
+| User impact       | User-facing outages, auth failures, or critical UX regressions    | Minor UX issues with no data loss and clear workaround                          |
+| SLO breach        | Error budget burn is rapid or SLO thresholds are breached         | SLOs are within guardrails and trending stable                                  |
+
+**If any "Roll back when" criteria are true**, initiate rollback and pause
+promotion. **If all are "Roll forward when"**, prioritize a hotfix with guarded
+feature flags, then re-run smoke/soak validation.
 
 ### Auto-Rollback
 

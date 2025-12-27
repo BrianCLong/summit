@@ -27,6 +27,7 @@ import {
   startTenantHotEmbeddingsRefresh,
   stopTenantHotEmbeddingsRefresh,
 } from './jobs/hotEmbeddingsRefresh.js';
+import { startEvidenceIntegrityJob } from './jobs/evidenceIntegrityJob.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logger: pino.Logger = (pino as any)();
@@ -113,6 +114,7 @@ const startServer = async () => {
     const dataRetentionService = new DataRetentionService(neo4jDriver);
     dataRetentionService.startCleanupJob(); // Start the cleanup job
     startTenantHotEmbeddingsRefresh();
+    startEvidenceIntegrityJob();
 
     // WAR-GAMED SIMULATION - Start Kafka Consumer
     await startKafkaConsumer();

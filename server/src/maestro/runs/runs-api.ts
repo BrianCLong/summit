@@ -13,6 +13,7 @@ import Redis from 'ioredis'; // Assuming Redis is used for budget control
 import { scheduler } from '../scheduler/Scheduler.js';
 import { maestroAuthzMiddleware } from '../../middleware/maestro-authz.js';
 import { recordEndpointResult } from '../../observability/reliability-metrics.js';
+import { flagService } from '../../services/FlagService.js';
 
 const router = express.Router();
 router.use(express.json());
@@ -70,6 +71,11 @@ router.get('/runs', authorize('run_maestro'), async (req, res) => {
 
 // POST /runs - Create a new run
 router.post('/runs', authorize('run_maestro'), async (req, res) => {
+  // Kill Switch Check
+  if (flagService.getFlag('DISABLE_MAESTRO_RUNS')) {
+      return res.status(503).json({ error: 'Maestro run creation is currently disabled due to maintenance or high load.' });
+  }
+
   const start = process.hrtime();
   const tenantId = (req.context as RequestContext).tenantId; // Get tenantId from context
   try {

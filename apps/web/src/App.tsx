@@ -47,6 +47,7 @@ const GeoIntPane = React.lazy(() => import('@/panes/GeoIntPane').then(module => 
 const NarrativeIntelligencePage = React.lazy(() => import('@/pages/NarrativeIntelligencePage'))
 const MissionControlPage = React.lazy(() => import('@/features/mission-control/MissionControlPage'))
 const DemoControlPage = React.lazy(() => import('@/pages/DemoControlPage'))
+const OnboardingWizard = React.lazy(() => import('@/pages/Onboarding/OnboardingWizard').then(module => ({ default: module.OnboardingWizard })))
 
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
@@ -182,6 +183,7 @@ function App() {
                       <Route path="changelog" element={<ChangelogPage />} />
 
                       <Route path="demo" element={<DemoControlPage />} />
+                      <Route path="onboarding" element={<OnboardingWizard />} />
 
                       {/* Catch all */}
                       <Route path="*" element={<NotFound />} />

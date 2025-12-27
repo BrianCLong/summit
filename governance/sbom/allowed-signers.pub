@@ -1,0 +1,13 @@
+-----BEGIN PUBLIC KEY-----
+# Placeholder public key for demo wiring.
+#
+# To enforce SBOM signature verification end-to-end:
+# 1) Generate a keypair (DO NOT COMMIT PRIVATE KEY):
+#    cosign generate-key-pair
+# 2) Replace this file with the generated cosign.pub contents.
+# 3) Sign the SBOM:
+#    cosign sign-blob --key cosign.key governance/sbom/demo-bom.spdx.json > governance/sbom/demo-bom.spdx.json.sig
+# 4) Set REQUIRE_SBOM_SIGNATURE=1 in CI.
+#
+# This placeholder keeps CI non-blocking by default.
+-----END PUBLIC KEY-----

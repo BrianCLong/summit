@@ -1,0 +1,25 @@
+version: 1
+controls:
+  - id: ccpa-DSR-001
+    title: "Respond to data-subject requests within 45 days"
+    statement: "DSR requests must be acknowledged and fulfilled within 45 days of opening."
+    scope:
+      services: ["*"]
+      data_classes: ["PII"]
+    trigger:
+      event_spec: "summit.evidence.dsr.v1"
+      when: ["dsr.opened"]
+    evaluation:
+      policy_entrypoint: "compliance/allow"
+      inputs:
+        - ticket.opened_at
+        - ticket.status
+        - now
+      pass_condition: "elapsed_days(ticket.opened_at, now) <= 45 AND status IN {acknowledged, fulfilled}"
+    evidence:
+      required_specs:
+        - "summit.evidence.dsr.v1"
+      correlation:
+        keys: ["ticket_id", "subject_id"]
+    owner: "privacy@company"
+    severity: "high"

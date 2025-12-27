@@ -30,6 +30,20 @@
    - Queue depth: check Grafana panel `Maestro queue depth`
 5. **Decide**: If the regression started immediately after a deploy or config change, proceed to rollback; otherwise continue investigation (logs, dashboards, traces).
 
+## Rollback decision gates (explicit)
+
+Proceed with rollback **immediately** when **any** of the following are true:
+
+- Health checks fail for >3 minutes after a deploy or config change.
+- Error rate exceeds the SLO breach threshold for >5 minutes with no clear mitigation.
+- Canary or stable pods are crash-looping, failing readiness probes, or violating SLO burn alerts.
+- External dependencies are healthy, but Maestro errors/latency regress relative to the last known good version.
+
+Hold rollback and continue investigation when:
+
+- The regression predates the latest deploy.
+- Downstream dependencies (DB, Redis, ingress) are in a known degraded state.
+
 ## Rollback execution
 
 ### Option A: GitHub Action (preferred for prod) — `.github/workflows/cd-rollback.yml`
@@ -41,6 +55,7 @@
      -f environment=staging \
      -f image_tag=<good_tag>
    ```
+
    - The workflow logs into GHCR, pulls the requested tag, recreates `server`/`client` via Compose, and prunes unused images.
 3. Monitor the workflow logs and proceed to post-rollback validation below.
 
@@ -67,6 +82,38 @@ kubectl -n maestro rollout history deploy/maestro-control-plane
 kubectl -n maestro rollout undo deploy/maestro-control-plane --to-revision=<REVISION>
 kubectl -n maestro rollout status deploy/maestro-control-plane --watch
 ```
+
+## Audit + evidence capture (required)
+
+When using `scripts/rollback-deployment.sh`, provide evidence metadata and log links so the audit
+trail is recorded automatically:
+
+```bash
+export DEPLOYMENT_LOG_URL="https://logs.example.com/deployments/<id>"
+export ROLLBACK_REASON="canary health check failed"
+export EVIDENCE_DIR="$PWD/evidence/rollbacks"
+./scripts/rollback-deployment.sh rollback
+```
+
+- The script writes a JSON evidence record under `evidence/rollbacks/` and emits an audit event.
+- Post the evidence path and `DEPLOYMENT_LOG_URL` in the incident or release channel.
+
+## Staging rollback validation (controlled canary failure)
+
+Run a monthly drill in **staging** to confirm rollback behavior:
+
+1. Deploy a controlled bad canary (a tag with a failing `/health` endpoint or a deliberately throttled build):
+   ```bash
+   export NAMESPACE=intelgraph-staging
+   export DEPLOYMENT_LOG_URL="https://logs.example.com/deployments/<id>"
+   export ROLLBACK_REASON="staging canary drill"
+   ./scripts/rollback-deployment.sh canary-deploy <bad_tag>
+   ```
+2. Confirm health checks fail and execute the rollback:
+   ```bash
+   ./scripts/rollback-deployment.sh canary-abort
+   ```
+3. Validate the evidence record and audit event exist, and link them in the staging release notes.
 
 ## Post-rollback validation
 

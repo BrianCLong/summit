@@ -36,9 +36,16 @@ async def extract(submit: SubmitText, _: None = Depends(api_key_auth)):
 @router.post("/evidence/register", response_model=Evidence)
 async def register_evidence(e: Evidence, _: None = Depends(api_key_auth)):
     check_request(e.title or "")
-    evid = evidence.register_evidence(e.kind, url=e.url, title=e.title)
+    evid = evidence.register_evidence(
+        e.kind,
+        url=e.url,
+        title=e.title,
+        license_terms=e.license_terms,
+        license_owner=e.license_owner,
+    )
     provenance.add_evidence(evid)
     return Evidence(**evid)
+
 
 # ST-01: Prov-Ledger Service API (New Endpoint)
 @router.post("/v1/evidence", response_model=Evidence)
@@ -51,7 +58,9 @@ async def register_evidence_v1(req: EvidenceRequest, _: None = Depends(api_key_a
         kind=req.type,
         url=req.url,
         title=req.metadata.get("title", "Untitled"),
-        metadata=req.metadata
+        metadata=req.metadata,
+        license_terms=req.license_terms,
+        license_owner=req.license_owner,
     )
     # TODO: Calculate hash if not provided or verify provided hash
     # evid['hash'] = req.hash

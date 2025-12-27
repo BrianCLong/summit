@@ -1,0 +1,5 @@
+{
+  "person": { "id": "person_id", "name": "name", "email": "email" },
+  "org": { "name": "org", "domain": "domain" },
+  "since": "since"
+}

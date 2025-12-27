@@ -5,6 +5,12 @@ import type { AuthorizationInput } from '../src/types';
 jest.mock('axios');
 
 const mockedAxios = axios as jest.Mocked<typeof axios>;
+const originalEnv = {
+  OPA_BASE_URL: process.env.OPA_BASE_URL,
+  OPA_POLICY_PATH: process.env.OPA_POLICY_PATH,
+  OPA_TENANT_POLICY_TEMPLATE: process.env.OPA_TENANT_POLICY_TEMPLATE,
+  OPA_URL: process.env.OPA_URL,
+};
 
 const baseInput: AuthorizationInput = {
   subject: {
@@ -37,6 +43,13 @@ const baseInput: AuthorizationInput = {
 describe('authorize', () => {
   afterEach(() => {
     jest.resetAllMocks();
+    Object.entries(originalEnv).forEach(([key, value]) => {
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    });
   });
 
   it('coerces string allow values', async () => {
@@ -89,5 +102,32 @@ describe('authorize', () => {
     const decision = await authorize(baseInput);
     expect(decision.allowed).toBe(false);
     expect(decision.reason).toBe('deny');
+  });
+
+  it('prefers tenant policy path and falls back on 404', async () => {
+    process.env.OPA_BASE_URL = 'http://opa:8181';
+    process.env.OPA_POLICY_PATH = 'global/abac/decision';
+    process.env.OPA_TENANT_POLICY_TEMPLATE = 'tenants/{tenantId}/abac/decision';
+
+    mockedAxios.post
+      .mockRejectedValueOnce({ response: { status: 404 } })
+      .mockResolvedValueOnce({
+        data: { result: { allow: true, reason: 'allow' } },
+      });
+
+    const decision = await authorize(baseInput);
+
+    expect(mockedAxios.post).toHaveBeenNthCalledWith(
+      1,
+      'http://opa:8181/v1/data/tenants/tenant-a/abac/decision',
+      { input: baseInput },
+    );
+    expect(mockedAxios.post).toHaveBeenNthCalledWith(
+      2,
+      'http://opa:8181/v1/data/global/abac/decision',
+      { input: baseInput },
+    );
+    expect(decision.allowed).toBe(true);
+    expect(decision.reason).toBe('allow');
   });
 });

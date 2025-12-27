@@ -1,7 +1,9 @@
-import { describe, it, expect, beforeEach } from '@jest/globals';
+/// <reference types="jest" />
 import { CommitmentGenerator } from '../src/commitment';
 import { ZKSetProof } from '../src/proof';
 import { AuditLogger } from '../src/audit';
+import { guardDeconflictRequest, SafetyError } from '../src/safety';
+import { ZkdMetrics } from '../src/metrics';
 
 describe('CommitmentGenerator', () => {
   let gen: CommitmentGenerator;
@@ -170,5 +172,72 @@ describe('AuditLogger', () => {
     expect(exported).toContain('proof-2');
     const parsed = JSON.parse(exported);
     expect(parsed.length).toBe(2);
+  });
+});
+
+describe('Safety guardrails', () => {
+  const config = { maxSetSize: 3, maxCommitmentLength: 64 };
+
+  it('rejects empty commitment sets', () => {
+    expect(() =>
+      guardDeconflictRequest(
+        {
+          tenantAId: 'a',
+          tenantBId: 'b',
+          tenantACommitments: [],
+          tenantBCommitments: ['c1'],
+          revealMode: 'cardinality',
+        },
+        config,
+      ),
+    ).toThrow(SafetyError);
+  });
+
+  it('rejects oversized payloads', () => {
+    const oversized = Array.from({ length: 5 }, (_, i) => `h${i}`);
+    expect(() =>
+      guardDeconflictRequest(
+        {
+          tenantAId: 'a',
+          tenantBId: 'b',
+          tenantACommitments: oversized,
+          tenantBCommitments: ['c1'],
+          revealMode: 'cardinality',
+        },
+        config,
+      ),
+    ).toThrow(SafetyError);
+  });
+
+  it('rejects unsupported modes', () => {
+    expect(() =>
+      guardDeconflictRequest(
+        {
+          tenantAId: 'a',
+          tenantBId: 'b',
+          tenantACommitments: ['c1'],
+          tenantBCommitments: ['c2'],
+          // @ts-expect-error intentionally invalid to test guard
+          revealMode: 'members',
+        },
+        config,
+      ),
+    ).toThrow('only cardinality mode is allowed');
+  });
+});
+
+describe('Metrics', () => {
+  it('tracks active sessions, denials, and latency histogram', () => {
+    const metrics = new ZkdMetrics();
+    metrics.incrementActive();
+    metrics.recordDenial('max_set_size');
+    metrics.observeLatency(0.12);
+    metrics.decrementActive();
+
+    const snapshot = metrics.snapshotPrometheus();
+    expect(snapshot).toContain('zkd_sessions_active 0');
+    expect(snapshot).toContain('zkd_denials_total 1');
+    expect(snapshot).toContain('zkd_denials_reason_total{reason="max_set_size"} 1');
+    expect(snapshot).toContain('zkd_latency_seconds_bucket');
   });
 });

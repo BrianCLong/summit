@@ -111,6 +111,22 @@ ingestRouter.post(
         });
       }
 
+      // Estimate payload size for storage quota (Performance: use Content-Length if available)
+      // QUO-2: Storage Hard Limit Enforcement
+      const contentLength = req.get('content-length');
+      const estimatedBytes = contentLength ? parseInt(contentLength, 10) : (JSON.stringify(entities).length + JSON.stringify(relationships).length);
+
+      const storageDecision = await tenantIsolationGuard.enforceStorageQuota(tenantContext, estimatedBytes);
+
+      if (!storageDecision.allowed) {
+          return res.status(storageDecision.status || 403).json({
+              error: 'StorageQuotaExceeded',
+              message: storageDecision.reason,
+              limit: storageDecision.limit,
+              projected: storageDecision.projected
+          });
+      }
+
       // Validate entity count limits
       const MAX_ENTITIES_PER_REQUEST = 10000;
       if (entities.length > MAX_ENTITIES_PER_REQUEST) {

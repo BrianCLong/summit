@@ -1,14 +1,23 @@
 imagePullPolicy: IfNotPresent
 services:
   policyLac:
-    image: policy-lac:dev
+    image: policy-lac:v1.0.0
     port: 4000
   provLedger:
-    image: prov-ledger:dev
+    image: prov-ledger:v1.0.0
     port: 4010
   nl2cypher:
-    image: ai-nl2cypher:dev
+    image: ai-nl2cypher:v1.0.0
     port: 4020
+
+ingress:
+  enabled: true
+  hosts:
+    - host: intelgraph.acme.com
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+
 prometheus:
   enabled: true
   serviceMonitor:
