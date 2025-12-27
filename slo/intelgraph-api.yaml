@@ -1,0 +1,56 @@
+apiVersion: sloth.slok.dev/v1
+kind: PrometheusSLO
+metadata:
+  name: intelgraph-api-availability
+  labels:
+    service: intelgraph-api
+    team: platform
+spec:
+  service: intelgraph-api
+  slo: 99.9
+  window: 30d
+  slos:
+    - name: requests-availability
+      objective: 99.9
+      description: "Availability for IntelGraph API (Service #2)."
+      sli:
+        events:
+          errorQuery: sum(rate(http_requests_total{job="intelgraph-api",code=~"5.."}[5m]))
+          totalQuery: sum(rate(http_requests_total{job="intelgraph-api"}[5m]))
+      alerting:
+        name: IntelGraphAPIAvailabilityBurnRate
+        labels:
+          severity: critical
+        annotations:
+          summary: IntelGraph API availability burn rate high
+          description: "Error budget for IntelGraph API availability is burning too fast."
+---
+apiVersion: sloth.slok.dev/v1
+kind: PrometheusSLO
+metadata:
+  name: intelgraph-api-latency
+  labels:
+    service: intelgraph-api
+    team: platform
+spec:
+  service: intelgraph-api
+  slo: 99.0
+  window: 30d
+  slos:
+    - name: requests-latency
+      objective: 99.0
+      description: "P95 latency for IntelGraph API should stay under 350ms."
+      sli:
+        events:
+          errorQuery: |
+            sum(rate(http_request_duration_seconds_bucket{job="intelgraph-api",le="+Inf"}[5m]))
+              - sum(rate(http_request_duration_seconds_bucket{job="intelgraph-api",le="0.35"}[5m]))
+          totalQuery: |
+            sum(rate(http_request_duration_seconds_bucket{job="intelgraph-api",le="+Inf"}[5m]))
+      alerting:
+        name: IntelGraphAPILatencyBurnRate
+        labels:
+          severity: warning
+        annotations:
+          summary: IntelGraph API latency burn rate high
+          description: "Latency budget for IntelGraph API is burning faster than target."

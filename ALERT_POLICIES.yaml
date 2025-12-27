@@ -64,6 +64,26 @@ spec:
               At this rate, monthly budget will be exhausted in {{ div 2160 (div $value 0.001) | humanizeDuration }}.
             runbook_url: 'https://runbooks.intelgraph.ai/slo-burn-rate'
 
+        - alert: IntelGraphAPICanaryErrorBudget
+          expr: |
+            (
+              (1 - (rate(http_requests_total{job="intelgraph-api",code!~"5.."}[15m]) / rate(http_requests_total{job="intelgraph-api"}[15m])))
+              > (3 * 0.001)
+            )
+          for: 5m
+          labels:
+            severity: warning
+            service: intelgraph-api
+            slo: error_rate
+            team: platform
+            pager: business_hours
+          annotations:
+            summary: '🧪 IntelGraph API canary error budget burn'
+            description: |
+              Canary window indicates error budget burn >3x on IntelGraph API for 15 minutes.
+              Validate canary deployment before promoting.
+            runbook_url: 'https://runbooks.intelgraph.ai/intelgraph-api'
+
     # ====================================================================
     # API PERFORMANCE ALERTS
     # ====================================================================

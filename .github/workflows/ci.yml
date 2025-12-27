@@ -26,6 +26,9 @@ jobs:
   setup:
     uses: ./.github/workflows/_reusable-setup.yml
 
+  golden-path:
+    uses: ./.github/workflows/ci-golden-path.yml
+
   lint:
     needs: setup
     runs-on: ubuntu-latest

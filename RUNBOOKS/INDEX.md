@@ -52,6 +52,10 @@ Quick reference for operational procedures and incident response.
 
 ## Service-Specific
 
+### IntelGraph API
+
+- [IntelGraph API](./intelgraph-api.md) — canary + error-budget guidance (Service #2)
+
 ### Docling
 
 - [Docling Deploy](./docling-deploy.md)

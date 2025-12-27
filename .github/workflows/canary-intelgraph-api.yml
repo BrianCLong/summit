@@ -1,0 +1,25 @@
+name: Canary - IntelGraph API
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "15 3 * * *"
+
+concurrency:
+  group: canary-intelgraph-api
+  cancel-in-progress: true
+
+jobs:
+  validate-canary-config:
+    name: Validate canary config (intelgraph-api)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify SLO, alert, and runbook wiring
+        run: |
+          test -f slo/intelgraph-api.yaml
+          rg -n "IntelGraphAPICanaryErrorBudget" ALERT_POLICIES.yaml
+          rg -n "intelgraph-api" RUNBOOKS/intelgraph-api.md
+          rg -n "intelgraph-api" RUNBOOKS/INDEX.md
