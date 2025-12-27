@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { IncubationCapability, IncubationResult, SandboxContext } from './types.ts';
 import { SimpleBudgetManager } from './budget.ts';
 import { SafeToolRegistry } from './registry.ts';

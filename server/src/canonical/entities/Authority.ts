@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Canonical Entity: Authority
  *

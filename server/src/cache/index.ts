@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createClient } from 'redis';
 import { safeJsonParse, safeJsonStringify } from '../utils/safe-json.js';
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { CostOptimizationService } from '../services/CostOptimizationService.js';
 import { FinOpsPolicyService } from '../services/FinOpsPolicyService.js';

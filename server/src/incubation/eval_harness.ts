@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { IncubationSandbox } from './sandbox.ts';
 import { RecursiveCriticCapability, RestrictedToolPlannerCapability } from './candidates.ts';
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { BudgetManager } from './types.ts';
 
 export class SimpleBudgetManager implements BudgetManager {

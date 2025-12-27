@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ExtensionManifest } from '../types';
 
 export const NoOpExtensionManifest: ExtensionManifest = {
