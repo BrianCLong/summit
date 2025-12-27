@@ -113,5 +113,74 @@ export const provenanceTypeDefs = gql`
     Verify the integrity of the provenance chain for the current tenant.
     """
     verifyProvenanceChain: ProvenanceChainVerification!
+
+    """
+    Explain the causality of a specific outcome or action.
+    """
+    explainCausality(
+      nodeId: String!
+      depth: Int
+    ): CanonicalGraphPath
+
+    """
+    Get the difference between two states in the provenance graph.
+    """
+    provenanceDiff(
+      startNodeId: String!
+      endNodeId: String!
+    ): GraphDiff
+
+    """
+    Export the provenance graph for the tenant.
+    """
+    exportProvenanceGraph(
+      from: DateTime
+      to: DateTime
+    ): ProvenanceGraphExport
+  }
+
+  type ProvenanceGraphExport {
+    nodes: [CanonicalNode!]!
+    edges: [CanonicalEdge!]!
+    generatedAt: DateTime!
+    checksum: String!
+  }
+
+  type CanonicalNode {
+    id: String!
+    tenantId: String!
+    nodeType: String!
+    subType: String!
+    label: String!
+    timestamp: DateTime!
+    metadata: JSON
+    hash: String
+    sourceEntryId: String
+  }
+
+  type CanonicalEdge {
+    sourceId: String!
+    targetId: String!
+    relation: String!
+    timestamp: DateTime!
+    properties: JSON
+  }
+
+  type CanonicalGraphPath {
+    nodes: [CanonicalNode!]!
+    edges: [CanonicalEdge!]!
+  }
+
+  type GraphDiff {
+    additions: [CanonicalNode!]!
+    deletions: [CanonicalNode!]!
+    modifications: [NodeModification!]!
+  }
+
+  type NodeModification {
+    nodeId: String!
+    field: String!
+    oldValue: JSON
+    newValue: JSON
   }
 `;
