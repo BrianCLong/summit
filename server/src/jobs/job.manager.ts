@@ -6,6 +6,7 @@ import { reportProcessor } from './processors/report.processor.js';
 import { analyticsProcessor } from './processors/analytics.processor.js';
 import { notificationProcessor } from './processors/notification.processor.js';
 import { webhookProcessor } from './processors/webhook.processor.js';
+import { intentProcessor } from './processors/intent.processor.js';
 import logger from '../utils/logger.js';
 
 class JobManager {
@@ -23,6 +24,7 @@ class JobManager {
     this.queues[QueueNames.ANALYTICS] = QueueFactory.createQueue(QueueNames.ANALYTICS);
     this.queues[QueueNames.NOTIFICATIONS] = QueueFactory.createQueue(QueueNames.NOTIFICATIONS);
     this.queues[QueueNames.WEBHOOKS] = QueueFactory.createQueue(QueueNames.WEBHOOKS);
+    this.queues[QueueNames.INTENTS] = QueueFactory.createQueue(QueueNames.INTENTS);
   }
 
   private initializeWorkers() {
@@ -32,6 +34,7 @@ class JobManager {
     this.workers[QueueNames.ANALYTICS] = QueueFactory.createWorker(QueueNames.ANALYTICS, analyticsProcessor, { concurrency: 2 });
     this.workers[QueueNames.NOTIFICATIONS] = QueueFactory.createWorker(QueueNames.NOTIFICATIONS, notificationProcessor, { concurrency: 10 });
     this.workers[QueueNames.WEBHOOKS] = QueueFactory.createWorker(QueueNames.WEBHOOKS, webhookProcessor, { concurrency: 5 });
+    this.workers[QueueNames.INTENTS] = QueueFactory.createWorker(QueueNames.INTENTS, intentProcessor, { concurrency: 5 });
 
     logger.info('Job Workers Initialized');
   }

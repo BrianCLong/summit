@@ -4,6 +4,7 @@ export const QueueNames = {
   ANALYTICS: 'analytics-queue',
   NOTIFICATIONS: 'notifications-queue',
   WEBHOOKS: 'webhooks-queue',
+  INTENTS: 'intents-queue',
 };
 
 export const JobPriorities = {
