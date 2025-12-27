@@ -420,3 +420,22 @@ instructions for full script). Ensure binaries/large files are sanitized before 
 ---
 
 **Remember**: The golden path is sacred. Keep it green!
+
+## Agent & Partner Responsibility Boundaries
+
+To maintain clear accountability and human oversight, the following boundaries are strictly enforced:
+
+### 1. Agents Cannot Self-Approve
+- **Principle**: Agents (including AI coding assistants) are tools, not owners.
+- **Rule**: An agent may *propose* a change (via PR, commit, or suggestion), but a human owner defined in `CODEOWNERS` must explicitly *approve* it.
+- **Constraint**: CI pipelines must block any merge that relies solely on an agent's token or approval.
+
+### 2. Partner Submissions Require Owner Sign-Off
+- **Principle**: Partners operate within defined integration scopes.
+- **Rule**: Any code, configuration, or policy submitted by a partner or integration bot requires sign-off from the domain DRI.
+- **Constraint**: Partner accounts are granted `read` or `triage` access, but `write`/`maintain` access is restricted to internal DRIs.
+
+### 3. Non-Human Authority
+- **Principle**: Decision rights are exclusively human.
+- **Rule**: Automated systems cannot make "judgment call" decisions (e.g., overriding a safety check, approving a budget increase).
+- **Constraint**: All critical decisions must be traceable to a specific human identity in the `provenance-ledger`.
