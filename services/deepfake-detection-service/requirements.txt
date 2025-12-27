@@ -13,7 +13,7 @@ onnxruntime-gpu==1.16.3
 
 # Computer vision
 opencv-python==4.8.1.78
-pillow==10.1.0
+pillow==10.3.0
 scikit-image==0.22.0
 
 # Audio processing
