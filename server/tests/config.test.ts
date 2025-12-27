@@ -4,13 +4,10 @@ import { SchemaValidator } from '../lib/config/schema-validator';
 import { MigrationEngine, MigrationError } from '../lib/config/migration-engine';
 import { ConfigWatcher } from '../lib/config/config-watcher';
 import * as yaml from 'js-yaml';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Jest runs in CommonJS mode; use the runtime-provided __dirname
 
 const TEST_CONFIG_DIR = path.join(__dirname, 'test_config');
-const SCHEMA_DIR = path.join(__dirname, '../../config/schemas');
+const SCHEMA_DIR = path.join(__dirname, '../../config/schema');
 
 describe('Configuration System', () => {
 
@@ -19,6 +16,7 @@ describe('Configuration System', () => {
         fs.rmSync(TEST_CONFIG_DIR, { recursive: true, force: true });
     }
     fs.mkdirSync(TEST_CONFIG_DIR, { recursive: true });
+    fs.mkdirSync(SCHEMA_DIR, { recursive: true });
     // Create a dummy schema for testing
     fs.writeFileSync(path.join(SCHEMA_DIR, 'test.schema.json'), JSON.stringify({
       type: 'object',

@@ -64,7 +64,7 @@ class ConfigManager {
     const migratedConfig = this.migrateConfig(loadedConfig);
     const environmentApplied = this.applyEnvironmentOverrides(migratedConfig);
     this.applySecretOptions(environmentApplied);
-    const validated = this.validator.validate(environmentApplied, 'app') as ApplicationConfiguration;
+    const validated = this.validator.validate<ApplicationConfiguration>(environmentApplied, 'app');
     this.featureFlags = new FeatureFlagService(validated.features, this.environment);
     return validated;
   }

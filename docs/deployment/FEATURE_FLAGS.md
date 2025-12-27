@@ -18,7 +18,7 @@ We use **LaunchDarkly** as our feature flag provider for staging and production 
 
 ### Configuration
 
-Feature flags are defined in `config/feature-flags.json` and follow a structured schema defined in `config/feature-flags.schema.json`.
+Feature flags are defined in `config/feature-flags.json` and follow a structured schema defined in `config/schema/feature-flags.schema.json`.
 
 ## Flag Types
 
@@ -127,29 +127,29 @@ curl -X PATCH https://app.launchdarkly.com/api/v2/flags/default/maintenance-mode
 ### Backend (Node.js)
 
 ```typescript
-import { FeatureFlagService } from './services/feature-flags';
+import { FeatureFlagService } from "./services/feature-flags";
 
 const flags = new FeatureFlagService();
 
 // Check boolean flag
-if (await flags.isEnabled('new-ui-dashboard', user)) {
+if (await flags.isEnabled("new-ui-dashboard", user)) {
   // Serve new dashboard
 }
 
 // Get string flag value
-const cacheStrategy = await flags.getValue('cache-strategy', user);
+const cacheStrategy = await flags.getValue("cache-strategy", user);
 
 // Get JSON flag value
-const rateLimitConfig = await flags.getJSONValue('api-rate-limit', user);
+const rateLimitConfig = await flags.getJSONValue("api-rate-limit", user);
 ```
 
 ### Frontend (React)
 
 ```tsx
-import { useFeatureFlag } from './hooks/useFeatureFlag';
+import { useFeatureFlag } from "./hooks/useFeatureFlag";
 
 function Dashboard() {
-  const { isEnabled, loading } = useFeatureFlag('new-ui-dashboard');
+  const { isEnabled, loading } = useFeatureFlag("new-ui-dashboard");
 
   if (loading) return <Spinner />;
 
@@ -166,7 +166,7 @@ Always default flags to the safe/stable option:
 ```json
 {
   "experimental-feature": {
-    "defaultValue": false  // ✓ Safe default
+    "defaultValue": false // ✓ Safe default
   }
 }
 ```
@@ -250,6 +250,7 @@ ldcli flag-archive --flag old-feature
 ### Phase 3: General Availability (25-100%)
 
 Increase percentage gradually:
+
 - 25% → 50% (monitor for 24h)
 - 50% → 75% (monitor for 24h)
 - 75% → 100% (monitor for 48h)
@@ -257,6 +258,7 @@ Increase percentage gradually:
 ### Phase 4: Cleanup
 
 Once at 100% for 30 days:
+
 1. Remove flag checks from code
 2. Archive flag in LaunchDarkly
 3. Update documentation
@@ -266,6 +268,7 @@ Once at 100% for 30 days:
 ### Flag Evaluation Metrics
 
 Track in Grafana:
+
 - Flag evaluation latency
 - Flag evaluation errors
 - Flag evaluation count by flag
@@ -274,6 +277,7 @@ Track in Grafana:
 ### Alerts
 
 Set up alerts for:
+
 - Kill switch activations
 - Flag evaluation failures
 - Unusual flag toggle patterns
@@ -316,17 +320,17 @@ Feature flags are validated during CI:
 ### Unit Tests
 
 ```typescript
-describe('Feature with flag', () => {
-  it('should use new implementation when flag enabled', async () => {
-    mockFeatureFlag('new-feature', true);
+describe("Feature with flag", () => {
+  it("should use new implementation when flag enabled", async () => {
+    mockFeatureFlag("new-feature", true);
 
     const result = await performAction();
 
     expect(result).toMatchNewBehavior();
   });
 
-  it('should use old implementation when flag disabled', async () => {
-    mockFeatureFlag('new-feature', false);
+  it("should use old implementation when flag disabled", async () => {
+    mockFeatureFlag("new-feature", false);
 
     const result = await performAction();
 
@@ -340,9 +344,9 @@ describe('Feature with flag', () => {
 Test both flag states in integration tests:
 
 ```typescript
-describe('API endpoint with feature flag', () => {
-  testWithFlag('new-feature', true, 'new implementation');
-  testWithFlag('new-feature', false, 'old implementation');
+describe("API endpoint with feature flag", () => {
+  testWithFlag("new-feature", true, "new implementation");
+  testWithFlag("new-feature", false, "old implementation");
 });
 ```
 
@@ -355,6 +359,7 @@ describe('API endpoint with feature flag', () => {
 ## Support
 
 For issues with feature flags:
+
 - **Emergency**: Use #incidents Slack channel
 - **Non-urgent**: Create ticket in JIRA (PLATFORM project)
 - **Questions**: Ask in #platform-engineering Slack channel

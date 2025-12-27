@@ -1,5 +1,5 @@
 {
-  "$schema": "./feature-flags.schema.json",
+  "$schema": "./schema/feature-flags.schema.json",
   "version": "1.0.0",
   "description": "Feature flags configuration for IntelGraph platform",
   "environments": {

@@ -1,36 +1,46 @@
-import Ajv, { type ErrorObject } from 'ajv';
+import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv';
+import Ajv2020 from 'ajv/dist/2020';
+import addFormats from 'ajv-formats';
 import * as fs from 'fs';
 import * as path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import * as yaml from 'js-yaml';
+import { SecretManager } from '../secrets/secret-manager';
 
 export class SchemaValidator {
   private ajv: InstanceType<typeof Ajv>;
-  private schemas: Map<string, unknown> = new Map();
+  private schemas: Map<string, string> = new Map();
+  private secretManager?: SecretManager;
 
-  constructor() {
-    this.ajv = new Ajv({ allErrors: true });
+  constructor(secretManager?: SecretManager) {
+    this.secretManager = secretManager;
+    this.ajv = new Ajv2020({ allErrors: true, strict: false }) as InstanceType<typeof Ajv>;
+    addFormats(this.ajv);
     this.loadSchemas();
   }
 
   private loadSchemas() {
-    const schemaDir = path.join(__dirname, '../../config/schemas');
-    const schemaFiles = fs.readdirSync(schemaDir).filter(file => file.endsWith('.schema.json'));
+    const schemaDir = path.resolve(process.cwd(), 'config/schema');
+    if (!fs.existsSync(schemaDir)) {
+      return;
+    }
+
+    const schemaFiles = fs.readdirSync(schemaDir).filter(file => file.match(/\.schema\.(json|ya?ml)$/));
     for (const file of schemaFiles) {
-      const schemaName = path.basename(file, '.schema.json');
-      const schema = JSON.parse(fs.readFileSync(path.join(schemaDir, file), 'utf-8'));
-      this.schemas.set(schemaName, schema);
-      this.ajv.addSchema(schema, schemaName);
+      const schemaName = path.basename(file).replace(/\.schema\.(json|ya?ml)$/i, '');
+      const schemaPath = path.join(schemaDir, file);
+      const rawSchema = fs.readFileSync(schemaPath, 'utf-8');
+      const schema = file.endsWith('.json') ? JSON.parse(rawSchema) : (yaml.load(rawSchema) as any);
+      const schemaId = schema.$id || schemaName;
+      this.schemas.set(schemaName, schemaId);
+      this.ajv.addSchema(schema, schemaId);
     }
   }
 
-  public validate(config: unknown, schemaName: string): void {
+  public validate<T>(config: unknown, schemaName: string): T {
     const interpolatedConfig = this.interpolate(config);
-    const resolvedConfig = this.resolveSecrets(interpolatedConfig);
+    const resolvedConfig = this.secretManager?.resolveConfig(interpolatedConfig) ?? this.resolveSecrets(interpolatedConfig);
 
-    const validate = this.ajv.getSchema(schemaName);
+    const validate = this.getValidator(schemaName);
     if (!validate) {
       throw new Error(`Schema ${schemaName} not found.`);
     }
@@ -38,6 +48,13 @@ export class SchemaValidator {
     if (!validate(resolvedConfig)) {
       throw new Error(this.formatErrors(validate.errors));
     }
+
+    return resolvedConfig as T;
+  }
+
+  private getValidator(schemaName: string): ValidateFunction | undefined {
+    const schemaId = this.schemas.get(schemaName) ?? schemaName;
+    return this.ajv.getSchema(schemaId) ?? this.ajv.getSchema(schemaName);
   }
 
   private interpolate(config: unknown): unknown {

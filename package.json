@@ -32,6 +32,7 @@
     "backup": "scripts/backup.sh",
     "optimize:check": "npx tsx scripts/optimization/check_optimization_metrics.ts",
     "optimize:report": "npx tsx scripts/optimization/generate_report.ts",
+    "config:validate": "pnpm --filter intelgraph-server run config:validate",
     "lint": "eslint . && ruff check .",
     "lint:server": "cd server && npm run lint",
     "lint:client": "cd client && npm run lint",
