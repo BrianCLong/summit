@@ -1,0 +1,24 @@
+# Golden Path disclosure pack configuration
+service:
+  name: TODO
+  owner: TODO
+  primary_zone: TODO
+
+slo_targets:
+  latency: TODO
+  error_rate: TODO
+  availability: TODO
+
+alerting:
+  policy_link: TODO
+  on_call_rotation: TODO
+
+runbook:
+  link: TODO
+
+evidence:
+  policy_decision_logs: TODO
+  ci_runs:
+    - TODO
+  canary_metrics_snapshot: TODO
+  approvals: TODO
