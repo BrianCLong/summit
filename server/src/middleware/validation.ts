@@ -1,5 +1,44 @@
 import { Request, Response, NextFunction } from 'express';
+import { AnyZodObject, ZodError } from 'zod';
 
+/**
+ * Zod-based request validation middleware
+ * Validates params, body, and query against provided Zod schemas
+ */
+export const validateRequest = (schemas: {
+  params?: AnyZodObject;
+  body?: AnyZodObject;
+  query?: AnyZodObject;
+}) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (schemas.params) {
+        req.params = await schemas.params.parseAsync(req.params);
+      }
+      if (schemas.body) {
+        req.body = await schemas.body.parseAsync(req.body);
+      }
+      if (schemas.query) {
+        req.query = await schemas.query.parseAsync(req.query);
+      }
+      next();
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const formattedErrors = error.errors.map((e) => ({
+          path: e.path.join('.'),
+          message: e.message,
+        }));
+        return res.status(400).json({
+          error: 'Validation failed',
+          details: formattedErrors,
+        });
+      }
+      next(error);
+    }
+  };
+};
+
+// Legacy validation interface for backward compatibility
 interface ValidationRule {
   required?: boolean;
   minLength?: number;
@@ -12,10 +51,12 @@ interface ValidationSchema {
   [key: string]: ValidationRule;
 }
 
-export function validateRequest(schema: ValidationSchema) {
+/**
+ * @deprecated Use validateRequest with Zod schemas instead
+ */
+export function validateRequestLegacy(schema: ValidationSchema) {
   return (req: Request, res: Response, next: NextFunction): Response | void => {
     const body = req.body || {};
-    // minimal required + basic constraints
     for (const [key, rules] of Object.entries(schema)) {
       if (
         rules.required &&
