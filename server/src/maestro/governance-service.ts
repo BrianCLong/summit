@@ -135,7 +135,7 @@ export class AgentGovernanceService {
    * Evaluate whether an agent action is permitted
    */
   async evaluateAction(
-    agent: Agent,
+    agent: MaestroAgent,
     action: string,
     context: any,
     metadata?: Record<string, any>
@@ -222,7 +222,7 @@ export class AgentGovernanceService {
         resourceType: 'SafetyViolation',
         resourceId: violation.id,
         actorId: agent.id,
-        actorType: 'agent',
+        actorType: 'system',
         timestamp: new Date(),
         payload: {
           mutationType: 'CREATE',
@@ -265,7 +265,7 @@ export class AgentGovernanceService {
   /**
    * Calculate risk score for an agent action based on multiple factors
    */
-  private calculateRiskScore(agent: Agent, action: string, context: any): number {
+  private calculateRiskScore(agent: MaestroAgent, action: string, context: any): number {
     let score = 0.0;
     
     // Base risk from action type
@@ -352,7 +352,7 @@ export class AgentGovernanceService {
   /**
    * Get governance configuration for an agent
    */
-  getAgentConfig(agent: Agent): AgentGovernanceConfig {
+  getAgentConfig(agent: MaestroAgent): AgentGovernanceConfig {
     // Could have tenant-specific or role-specific policies
     // For now, return default config if no specific policy exists
     const policyId = agent.metadata?.governanceTier || agent.tenantId || '*';
@@ -397,7 +397,7 @@ export class AgentGovernanceService {
   /**
    * Check if an agent is in safe/governed state
    */
-  isAgentOperational(agent: Agent): boolean {
+  isAgentOperational(agent: MaestroAgent): boolean {
     // Check if agent is within resource limits and hasn't exceeded safety thresholds
     const isHealthy = agent.health.memoryUsage < 90 && agent.health.cpuUsage < 90;
     const recentViolations = this.getRecentViolations(agent.id, 1);  // Check last day

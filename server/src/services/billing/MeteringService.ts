@@ -95,6 +95,9 @@ export class MeteringService {
         actorType: 'system',
         timestamp: new Date(),
         payload: {
+          mutationType: 'CREATE',
+          entityId: eventId,
+          entityType: 'BillableEvent',
           originalEvent: event,
           meteringId: eventId
         },

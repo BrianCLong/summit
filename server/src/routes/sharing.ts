@@ -47,7 +47,6 @@ router.post('/share-links', (req, res) => {
     permissions,
     createdBy,
     labelId,
-    watermark,
   });
   res.status(201).json({ link, token, planHash: plan.planHash });
 });

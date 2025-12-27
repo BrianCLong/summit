@@ -61,4 +61,5 @@ export interface BudgetStatus extends BudgetConfig {
   forecastedSpending: number;
   periodStart: Date;
   periodEnd: Date;
+  triggeredThresholds?: number[];
 }

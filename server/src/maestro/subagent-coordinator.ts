@@ -340,7 +340,7 @@ export class SubagentCoordinator {
       resourceType: 'ConsensusProposal',
       resourceId: proposalId,
       actorId: agentId,
-      actorType: 'agent',
+      actorType: 'system',
       timestamp: new Date(),
       payload: {
         mutationType: 'UPDATE',
@@ -431,7 +431,7 @@ export class SubagentCoordinator {
       resourceType: 'CoordinationMessage',
       resourceId: messageId,
       actorId: senderId,
-      actorType: 'agent',
+      actorType: 'system',
       timestamp: new Date(),
       payload: {
         mutationType: 'CREATE',
@@ -477,6 +477,7 @@ export class SubagentCoordinator {
     const helpTask = await this.assignTask({
       title: `Help Request from Agent ${requestingAgentId}`,
       description: `Agent ${requestingAgentId} needs help with: ${taskDescription}`,
+      assignedAgentIds: availableAgents,
       priority: urgency,
       payload: {
         originalRequestId: requestingAgentId,
@@ -492,7 +493,7 @@ export class SubagentCoordinator {
       resourceType: 'CoordinationRequest',
       resourceId: helpTask.id,
       actorId: requestingAgentId,
-      actorType: 'agent',
+      actorType: 'system',
       timestamp: new Date(),
       payload: {
         mutationType: 'CREATE',
