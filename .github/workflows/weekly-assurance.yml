@@ -1,0 +1,34 @@
+name: Weekly Assurance Check
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Run every Sunday at midnight
+  workflow_dispatch:
+
+jobs:
+  assurance-snapshot:
+    name: Assurance Snapshot
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify agent file checksums
+        run: |
+          AGENTS_MD_SHA256=$(grep '^AGENTS_MD_SHA256=' .github/governance_hashes | cut -d'=' -f2)
+          AGENT_MANDATES_MD_SHA256=$(grep '^AGENT_MANDATES_MD_SHA256=' .github/governance_hashes | cut -d'=' -f2)
+          if ! echo "$AGENTS_MD_SHA256 AGENTS.md" | sha256sum --check --status; then
+            echo "::error::AGENTS.md has drifted from its known state. Please investigate immediately."
+            exit 1
+          fi
+          if ! echo "$AGENT_MANDATES_MD_SHA256 docs/governance/AGENT_MANDATES.md" | sha256sum --check --status; then
+            echo "::error::AGENT_MANDATES.md has drifted from its known state. Please investigate immediately."
+            exit 1
+          fi
+      - name: Create assurance snapshot artifact
+        run: |
+          echo "Weekly assurance check passed at $(date)" > assurance-snapshot.txt
+          echo "AGENTS.md hash: $(sha256sum AGENTS.md | awk '{print $1}')" >> assurance-snapshot.txt
+          echo "AGENT_MANDATES.md hash: $(sha256sum docs/governance/AGENT_MANDATES.md | awk '{print $1}')" >> assurance-snapshot.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: assurance-snapshot-${{ github.run_id }}
+          path: assurance-snapshot.txt
