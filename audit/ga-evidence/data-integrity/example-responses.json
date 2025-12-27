@@ -1,0 +1,259 @@
+{
+  "examples": {
+    "ai_hypothesis_response": {
+      "description": "AI-generated hypothesis with full envelope metadata",
+      "endpoint": "POST /api/graphql generateHypothesesWithEnvelope",
+      "response": {
+        "data": {
+          "id": "hyp-12345",
+          "statement": "Entity A is connected to Entity B through intermediary C based on financial transaction patterns",
+          "confidence": 0.85,
+          "supportingEvidence": [
+            {
+              "id": "ev-001",
+              "type": "relationship",
+              "description": "Direct financial transaction observed on 2025-12-15",
+              "strength": 0.9,
+              "sourceIds": ["entity-a", "entity-b"]
+            }
+          ],
+          "involvedEntities": ["entity-a", "entity-b", "entity-c"],
+          "suggestedSteps": [
+            "Investigate intermediary C's role",
+            "Analyze transaction patterns over last 90 days",
+            "Check for similar patterns with other entities"
+          ]
+        },
+        "provenance": {
+          "source": "ai-hypothesis-generator-v1.2.0",
+          "generatedAt": "2025-12-27T10:30:00.000Z",
+          "lineage": [
+            {
+              "id": "lineage-001",
+              "operation": "hypothesis-generation",
+              "inputs": ["investigation-789", "entity-a", "entity-b"],
+              "timestamp": "2025-12-27T10:30:00.000Z",
+              "actor": "user-analyst-42",
+              "metadata": {
+                "investigationId": "investigation-789",
+                "model": "hypothesis-generator-v1.2.0",
+                "modelVersion": "1.2.0",
+                "temperature": 0.7
+              }
+            }
+          ],
+          "actor": "user-analyst-42",
+          "version": "1.2.0",
+          "provenanceId": "prov-1735297800000-abc123"
+        },
+        "confidence": 0.85,
+        "isSimulated": false,
+        "classification": "CONFIDENTIAL",
+        "dataHash": "8f7a4b2c9e1d3f5a7b9c4e2f8d1a6b3c5e7f9a2b4d6e8f1a3c5e7b9d2f4a6c8",
+        "warnings": []
+      }
+    },
+    "low_confidence_ai_response": {
+      "description": "Low confidence AI response with warning",
+      "endpoint": "POST /api/ai/narrative",
+      "response": {
+        "data": {
+          "id": "narr-98765",
+          "title": "Investigation Summary: Financial Network Analysis",
+          "content": "# Investigation Summary\n\nBased on limited available data...",
+          "keyFindings": ["Partial pattern detected", "Additional data needed"],
+          "confidence": 0.65
+        },
+        "provenance": {
+          "source": "ai-narrative-builder-v2.0.0",
+          "generatedAt": "2025-12-27T11:15:00.000Z",
+          "lineage": [
+            {
+              "id": "lineage-002",
+              "operation": "narrative-generation",
+              "inputs": ["investigation-790"],
+              "timestamp": "2025-12-27T11:15:00.000Z",
+              "actor": "user-analyst-42",
+              "metadata": {
+                "theme": "financial-network",
+                "style": "ANALYTICAL"
+              }
+            }
+          ],
+          "actor": "user-analyst-42",
+          "version": "2.0.0",
+          "provenanceId": "prov-1735300500000-def456"
+        },
+        "confidence": 0.65,
+        "isSimulated": false,
+        "classification": "CONFIDENTIAL",
+        "dataHash": "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2",
+        "warnings": [
+          "Low confidence hypothesis - manual review recommended",
+          "Limited training data available for this pattern type"
+        ]
+      }
+    },
+    "simulated_data_response": {
+      "description": "Simulated data for testing/demo purposes",
+      "endpoint": "POST /api/risk/compute",
+      "response": {
+        "data": {
+          "riskScore": 0.72,
+          "riskBand": "MEDIUM",
+          "factors": ["High transaction frequency", "Geographic anomalies"]
+        },
+        "provenance": {
+          "source": "xai-risk-engine-v3.1.0",
+          "generatedAt": "2025-12-27T12:00:00.000Z",
+          "lineage": [
+            {
+              "id": "lineage-003",
+              "operation": "risk-computation",
+              "inputs": ["entity-test-001"],
+              "timestamp": "2025-12-27T12:00:00.000Z",
+              "actor": "simulation-system",
+              "metadata": {
+                "simulationScenario": "high-risk-demo",
+                "seed": "test-seed-42"
+              }
+            }
+          ],
+          "actor": "simulation-system",
+          "version": "3.1.0",
+          "provenanceId": "prov-1735303200000-sim789"
+        },
+        "confidence": 0.95,
+        "isSimulated": true,
+        "classification": "INTERNAL",
+        "dataHash": "9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8",
+        "warnings": [
+          "This is simulated data - do not use for production decisions"
+        ]
+      }
+    },
+    "export_bundle_response": {
+      "description": "Export bundle with multiple items and provenance",
+      "endpoint": "POST /api/export/withProvenance",
+      "request": {
+        "itemIds": ["item-001", "item-002", "item-003"],
+        "format": "JSON",
+        "purpose": "regulatory-compliance",
+        "destination": "internal-audit"
+      },
+      "response": {
+        "exportId": "export-abc123",
+        "items": [
+          {
+            "data": {
+              "id": "item-001",
+              "content": "Investigation finding 1"
+            },
+            "provenance": {
+              "source": "investigation-system",
+              "generatedAt": "2025-12-27T09:00:00.000Z",
+              "lineage": [],
+              "provenanceId": "prov-item-001"
+            },
+            "isSimulated": false,
+            "classification": "CONFIDENTIAL",
+            "dataHash": "abc123def456",
+            "warnings": []
+          }
+        ],
+        "provenance": {
+          "source": "export-service-v1.0.0",
+          "generatedAt": "2025-12-27T13:00:00.000Z",
+          "lineage": [
+            {
+              "id": "lineage-export-001",
+              "operation": "export-bundle-creation",
+              "inputs": ["item-001", "item-002", "item-003"],
+              "timestamp": "2025-12-27T13:00:00.000Z",
+              "actor": "user-compliance-officer",
+              "metadata": {
+                "format": "JSON",
+                "purpose": "regulatory-compliance",
+                "itemCount": 3
+              }
+            }
+          ],
+          "actor": "user-compliance-officer",
+          "version": "1.0.0",
+          "provenanceId": "prov-export-abc123"
+        },
+        "format": "JSON",
+        "licenses": ["MIT", "Apache-2.0"],
+        "licenseCheck": {
+          "valid": true,
+          "policyDecision": {
+            "action": "ALLOW",
+            "reasons": ["All licenses compatible with export policy"],
+            "requiredApprovals": null
+          },
+          "riskAssessment": {
+            "level": "LOW",
+            "factors": []
+          }
+        },
+        "merkleRoot": "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+        "generatedAt": "2025-12-27T13:00:00.000Z"
+      }
+    },
+    "validation_failure_example": {
+      "description": "Example of response that fails validation",
+      "endpoint": "POST /api/legacy/endpoint",
+      "response": {
+        "data": {
+          "result": "Some data"
+        }
+      },
+      "validationResult": {
+        "valid": false,
+        "errors": [
+          "Missing provenance metadata - unlabeled data rejected",
+          "Missing isSimulated flag - data integrity cannot be verified",
+          "Missing data classification",
+          "Missing data hash - integrity cannot be verified"
+        ],
+        "warnings": []
+      }
+    },
+    "governance_verdict_example": {
+      "description": "Response with governance verdict",
+      "endpoint": "POST /api/data/restricted-access",
+      "response": {
+        "data": {
+          "sensitiveData": "Redacted for compliance"
+        },
+        "provenance": {
+          "source": "data-access-service-v1.0.0",
+          "generatedAt": "2025-12-27T14:00:00.000Z",
+          "lineage": [],
+          "provenanceId": "prov-restricted-001"
+        },
+        "isSimulated": false,
+        "governanceVerdict": {
+          "verdictId": "verdict-001",
+          "policyId": "data-access-policy-v2",
+          "result": "FLAG",
+          "decidedAt": "2025-12-27T14:00:00.000Z",
+          "reason": "Access to restricted data requires additional logging",
+          "requiredApprovals": ["compliance-officer"],
+          "evaluator": "policy-engine-v3.0.0"
+        },
+        "classification": "RESTRICTED",
+        "dataHash": "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210",
+        "warnings": [
+          "This data is subject to additional governance controls"
+        ]
+      }
+    }
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "createdAt": "2025-12-27T00:00:00.000Z",
+    "purpose": "GA-E2 Data Integrity Evidence",
+    "controls": ["PI1.1", "PI1.2", "PI1.4", "C1.2"]
+  }
+}

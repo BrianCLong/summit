@@ -244,6 +244,8 @@ export const CopilotAnswerSchema = z.object({
   redaction: RedactionStatusSchema,
   /** Guardrail check results */
   guardrails: GuardrailCheckSchema,
+  /** REQUIRED: Governance verdict for this answer */
+  governanceVerdict: GovernanceVerdictSchema,
   /** Timestamp of generation */
   generatedAt: z.string().datetime(),
   /** Investigation context */
@@ -282,6 +284,8 @@ export const CopilotRefusalSchema = z.object({
   timestamp: z.string().datetime(),
   /** Audit ID for logging */
   auditId: z.string(),
+  /** REQUIRED: Governance verdict for this refusal */
+  governanceVerdict: GovernanceVerdictSchema,
 });
 
 export type CopilotRefusal = (typeof CopilotRefusalSchema)['_output'];
@@ -341,6 +345,54 @@ export const GraphRAGRequestSchema = z.object({
 });
 
 export type GraphRAGRequest = (typeof GraphRAGRequestSchema)['_output'];
+
+// ============================================================================
+// Governance Types
+// ============================================================================
+
+/**
+ * Governance verdict type - REQUIRED for all copilot outputs
+ */
+export const GovernanceVerdictTypeSchema = z.enum([
+  'APPROVED',
+  'REJECTED',
+  'REQUIRES_REVIEW',
+]);
+export type GovernanceVerdictType = (typeof GovernanceVerdictTypeSchema)['_output'];
+
+/**
+ * Governance verdict schema
+ *
+ * Ensures all AI/copilot outputs include governance evaluation per SOC 2 controls
+ * (CC6.1, CC7.2, PI1.3)
+ */
+export const GovernanceVerdictSchema = z.object({
+  /** Verdict decision */
+  verdict: GovernanceVerdictTypeSchema,
+  /** Policy evaluated */
+  policy: z.string(),
+  /** Rationale for verdict */
+  rationale: z.string(),
+  /** ISO 8601 timestamp */
+  timestamp: z.string().datetime(),
+  /** System/agent that evaluated */
+  evaluatedBy: z.string(),
+  /** Confidence 0-1 */
+  confidence: z.number().min(0).max(1),
+  /** Optional metadata */
+  metadata: z
+    .object({
+      policyVersion: z.string().optional(),
+      evidence: z.array(z.string()).optional(),
+      riskLevel: z.enum(['low', 'medium', 'high', 'critical']).optional(),
+      soc2Controls: z.array(z.string()).optional(),
+      remediationSuggestions: z.array(z.string()).optional(),
+    })
+    .passthrough()
+    .optional(),
+});
+
+export type GovernanceVerdict = (typeof GovernanceVerdictSchema)['_output'];
 
 // ============================================================================
 // Audit and Logging Types

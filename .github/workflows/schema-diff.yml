@@ -1,0 +1,266 @@
+name: API Schema Diff
+
+# Part of GA-E3: API Contracts initiative
+# Validates API schema changes on every PR to prevent breaking changes
+
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+      - develop
+    paths:
+      - 'graphql/schema.graphql'
+      - 'server/src/**/routes.ts'
+      - 'server/src/**/routes/**'
+      - 'api-schemas/**'
+      - '.github/workflows/schema-diff.yml'
+
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Base version to compare against'
+        required: false
+        default: 'v1'
+      strict:
+        description: 'Fail on breaking changes'
+        type: boolean
+        required: false
+        default: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  schema-diff:
+    name: Schema Diff Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for accurate diffs
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install -g ts-node typescript
+
+      - name: Run schema diff
+        id: schema-diff
+        run: |
+          echo "Running schema diff against v${{ github.event.inputs.version || 'v1' }}"
+
+          # Run diff script
+          if [ "${{ github.event.inputs.strict }}" = "true" ] || [ "${{ github.event_name }}" = "pull_request" ]; then
+            ts-node scripts/schema-diff.ts --version=${{ github.event.inputs.version || 'v1' }} --output=json --strict || echo "BREAKING_CHANGES=true" >> $GITHUB_OUTPUT
+          else
+            ts-node scripts/schema-diff.ts --version=${{ github.event.inputs.version || 'v1' }} --output=json
+          fi
+
+          # Also generate text report for PR comment
+          ts-node scripts/schema-diff.ts --version=${{ github.event.inputs.version || 'v1' }} --output=text
+
+      - name: Upload diff report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: schema-diff-report
+          path: audit/ga-evidence/api-contracts/diff-reports/
+          retention-days: 90
+
+      - name: Find latest report
+        id: find-report
+        if: github.event_name == 'pull_request'
+        run: |
+          LATEST_REPORT=$(ls -t audit/ga-evidence/api-contracts/diff-reports/schema-diff-*.json | head -1)
+          echo "report_path=$LATEST_REPORT" >> $GITHUB_OUTPUT
+
+          # Extract summary for PR comment
+          HAS_BREAKING=$(jq -r '.hasBreakingChanges' "$LATEST_REPORT")
+          BREAKING_COUNT=$(jq -r '.summary.breaking' "$LATEST_REPORT")
+          NON_BREAKING_COUNT=$(jq -r '.summary.nonBreaking' "$LATEST_REPORT")
+          DEPRECATED_COUNT=$(jq -r '.summary.deprecated' "$LATEST_REPORT")
+
+          echo "has_breaking=$HAS_BREAKING" >> $GITHUB_OUTPUT
+          echo "breaking_count=$BREAKING_COUNT" >> $GITHUB_OUTPUT
+          echo "non_breaking_count=$NON_BREAKING_COUNT" >> $GITHUB_OUTPUT
+          echo "deprecated_count=$DEPRECATED_COUNT" >> $GITHUB_OUTPUT
+
+      - name: Generate PR comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const reportPath = '${{ steps.find-report.outputs.report_path }}';
+            const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+
+            const hasBreaking = '${{ steps.find-report.outputs.has_breaking }}' === 'true';
+            const icon = hasBreaking ? '⚠️' : '✅';
+            const status = hasBreaking ? 'BREAKING CHANGES DETECTED' : 'No Breaking Changes';
+
+            let comment = `## ${icon} API Schema Diff Report\n\n`;
+            comment += `**Status:** ${status}\n`;
+            comment += `**Base Version:** ${report.baseVersion}\n`;
+            comment += `**Timestamp:** ${report.timestamp}\n\n`;
+
+            comment += `### Summary\n\n`;
+            comment += `| Type | Count |\n`;
+            comment += `|------|-------|\n`;
+            comment += `| 🔴 Breaking Changes | ${report.summary.breaking} |\n`;
+            comment += `| 🟢 Non-Breaking Changes | ${report.summary.nonBreaking} |\n`;
+            comment += `| 🟡 Deprecated | ${report.summary.deprecated} |\n\n`;
+
+            if (report.breakingChanges.length > 0) {
+              comment += `### 🔴 Breaking Changes\n\n`;
+              for (const change of report.breakingChanges) {
+                comment += `- **[${change.severity.toUpperCase()}]** \`${change.location}\`\n`;
+                comment += `  - ${change.message}\n`;
+                if (change.oldValue && change.newValue) {
+                  comment += `  - Changed from \`${change.oldValue}\` to \`${change.newValue}\`\n`;
+                }
+              }
+              comment += `\n`;
+            }
+
+            if (report.nonBreakingChanges.length > 0 && report.nonBreakingChanges.length <= 10) {
+              comment += `### 🟢 Non-Breaking Changes\n\n`;
+              for (const change of report.nonBreakingChanges) {
+                comment += `- \`${change.location}\`: ${change.message}\n`;
+              }
+              comment += `\n`;
+            } else if (report.nonBreakingChanges.length > 10) {
+              comment += `### 🟢 Non-Breaking Changes\n\n`;
+              comment += `${report.nonBreakingChanges.length} non-breaking changes detected. See full report for details.\n\n`;
+            }
+
+            if (report.deprecatedChanges.length > 0) {
+              comment += `### 🟡 Deprecations\n\n`;
+              for (const change of report.deprecatedChanges) {
+                comment += `- \`${change.location}\`: ${change.message}\n`;
+              }
+              comment += `\n`;
+            }
+
+            comment += `### Recommendations\n\n`;
+            for (const rec of report.recommendations) {
+              comment += `- ${rec}\n`;
+            }
+            comment += `\n`;
+
+            comment += `### Schema Hashes\n\n`;
+            comment += `<details>\n<summary>View hashes</summary>\n\n`;
+            comment += '```\n';
+            comment += `Current GraphQL:  ${report.schemaHashes.current.graphql}\n`;
+            comment += `Snapshot GraphQL: ${report.schemaHashes.snapshot.graphql}\n`;
+            comment += `Current OpenAPI:  ${report.schemaHashes.current.openapi}\n`;
+            comment += `Snapshot OpenAPI: ${report.schemaHashes.snapshot.openapi}\n`;
+            comment += '```\n';
+            comment += `</details>\n\n`;
+
+            comment += `---\n`;
+            comment += `📋 **Full Report:** Available in workflow artifacts\n`;
+            comment += `📚 **Policy:** See [VERSION_POLICY.md](/api-schemas/VERSION_POLICY.md)\n`;
+            comment += `🔒 **SOC 2 Controls:** CC8.1, CC3.1, PI1.5\n`;
+
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existingComment = comments.find(c =>
+              c.user.type === 'Bot' &&
+              c.body.includes('API Schema Diff Report')
+            );
+
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: comment
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment
+              });
+            }
+
+      - name: Check version bump requirement
+        if: github.event_name == 'pull_request' && steps.find-report.outputs.has_breaking == 'true'
+        run: |
+          echo "::error::Breaking changes detected! A new API version is required."
+          echo "::error::Please create a new version snapshot and update the registry."
+          echo "::error::See /api-schemas/VERSION_POLICY.md for guidance."
+          exit 1
+
+      - name: Success message
+        if: steps.find-report.outputs.has_breaking != 'true'
+        run: |
+          echo "✅ No breaking changes detected - safe to merge!"
+          if [ "${{ steps.find-report.outputs.non_breaking_count }}" -gt "0" ]; then
+            echo "ℹ️  ${{ steps.find-report.outputs.non_breaking_count }} non-breaking change(s) detected"
+          fi
+
+  # SOC 2 audit trail
+  record-audit:
+    name: Record Audit Trail
+    runs-on: ubuntu-latest
+    needs: schema-diff
+    if: always()
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download diff report
+        uses: actions/download-artifact@v4
+        with:
+          name: schema-diff-report
+          path: ./diff-reports
+
+      - name: Record in audit log
+        run: |
+          mkdir -p audit/ga-evidence/api-contracts/audit-log
+
+          AUDIT_ENTRY=$(cat <<EOF
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "event": "schema_diff_check",
+            "pr_number": "${{ github.event.pull_request.number }}",
+            "pr_title": "${{ github.event.pull_request.title }}",
+            "author": "${{ github.event.pull_request.user.login }}",
+            "workflow_run": "${{ github.run_id }}",
+            "result": "${{ needs.schema-diff.result }}",
+            "report_artifacts": "schema-diff-report",
+            "soc2_controls": ["CC8.1", "CC3.1", "PI1.5"]
+          }
+          EOF
+          )
+
+          echo "$AUDIT_ENTRY" >> audit/ga-evidence/api-contracts/audit-log/schema-checks.jsonl
+
+          echo "✅ Audit entry recorded"
+
+      - name: Upload audit log
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-log
+          path: audit/ga-evidence/api-contracts/audit-log/
+          retention-days: 2555  # 7 years for SOC 2 compliance

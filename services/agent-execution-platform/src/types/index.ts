@@ -63,6 +63,8 @@ export interface AgentResult {
   error?: AgentError;
   metrics: ExecutionMetrics;
   artifacts?: Artifact[];
+  /** REQUIRED: Governance verdict for this execution */
+  governanceVerdict: GovernanceVerdict;
 }
 
 export interface AgentError {
@@ -429,6 +431,85 @@ export interface EventHandler {
 }
 
 // ========================================
+// GOVERNANCE TYPES
+// ========================================
+
+/**
+ * Governance verdict - REQUIRED for all AI/agent outputs
+ *
+ * This type enforces governance evaluation for every autonomous AI/agent action.
+ * All responses MUST include a verdict to ensure compliance with organizational
+ * policies and SOC 2 controls (CC6.1, CC7.2, PI1.3).
+ */
+export type GovernanceVerdictType = 'APPROVED' | 'REJECTED' | 'REQUIRES_REVIEW';
+
+export interface GovernanceVerdict {
+  /** Verdict decision - MUST be present for all AI/agent outputs */
+  verdict: GovernanceVerdictType;
+
+  /** Policy that was evaluated (e.g., 'container.rego', 'deps.rego', 'ai-safety-policy') */
+  policy: string;
+
+  /** Human-readable rationale for the verdict */
+  rationale: string;
+
+  /** ISO 8601 timestamp of verdict generation */
+  timestamp: string;
+
+  /** System or agent that evaluated the policy (e.g., 'agent-execution-platform', 'ai-copilot') */
+  evaluatedBy: string;
+
+  /** Confidence in the verdict (0.0 to 1.0) */
+  confidence: number;
+
+  /** Optional metadata for additional context */
+  metadata?: {
+    /** Policy version evaluated */
+    policyVersion?: string;
+
+    /** Evidence or citations that influenced the decision */
+    evidence?: string[];
+
+    /** Risk level assessment */
+    riskLevel?: 'low' | 'medium' | 'high' | 'critical';
+
+    /** SOC 2 control mappings */
+    soc2Controls?: string[];
+
+    /** Remediation suggestions if rejected or requires review */
+    remediationSuggestions?: string[];
+
+    /** Additional key-value pairs */
+    [key: string]: any;
+  };
+}
+
+/**
+ * Governance evaluation result with full context
+ */
+export interface GovernanceEvaluation {
+  /** Primary verdict */
+  verdict: GovernanceVerdict;
+
+  /** All policies evaluated */
+  policiesEvaluated: string[];
+
+  /** Whether any policy violations were detected */
+  hasViolations: boolean;
+
+  /** Detailed violations if any */
+  violations?: Array<{
+    policy: string;
+    rule: string;
+    severity: 'info' | 'warning' | 'error' | 'critical';
+    message: string;
+  }>;
+
+  /** Audit trail ID for compliance tracking */
+  auditId: string;
+}
+
+// ========================================
 // API TYPES
 // ========================================
 
@@ -445,6 +526,8 @@ export interface APIResponse<T = any> {
     timestamp: Date;
     version: string;
   };
+  /** REQUIRED: Governance verdict for all AI/agent responses */
+  governanceVerdict?: GovernanceVerdict;
 }
 
 export interface PaginatedResponse<T> extends APIResponse<T[]> {

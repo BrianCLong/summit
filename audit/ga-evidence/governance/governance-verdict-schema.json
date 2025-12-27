@@ -1,0 +1,141 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GovernanceVerdict",
+  "description": "Mandatory governance verdict for all AI/agent outputs. SOC 2 Controls: CC6.1, CC7.2, PI1.3",
+  "type": "object",
+  "required": [
+    "verdict",
+    "policy",
+    "rationale",
+    "timestamp",
+    "evaluatedBy",
+    "confidence"
+  ],
+  "properties": {
+    "verdict": {
+      "type": "string",
+      "enum": ["APPROVED", "REJECTED", "REQUIRES_REVIEW"],
+      "description": "The governance decision for this AI/agent output"
+    },
+    "policy": {
+      "type": "string",
+      "description": "Policy that was evaluated (e.g., 'container.rego', 'deps.rego', 'ai-safety-policy')",
+      "minLength": 1
+    },
+    "rationale": {
+      "type": "string",
+      "description": "Human-readable explanation for the verdict",
+      "minLength": 1
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of verdict generation"
+    },
+    "evaluatedBy": {
+      "type": "string",
+      "description": "System or agent that evaluated the policy (e.g., 'agent-execution-platform', 'ai-copilot')",
+      "minLength": 1
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Confidence in the verdict (0.0 to 1.0)"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Optional metadata for additional context",
+      "properties": {
+        "policyVersion": {
+          "type": "string",
+          "description": "Version of the policy evaluated"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Evidence or citations that influenced the decision"
+        },
+        "riskLevel": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"],
+          "description": "Risk level assessment"
+        },
+        "soc2Controls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(CC|A|C|P|PI|M)[0-9]+\\.[0-9]+$"
+          },
+          "description": "SOC 2 control mappings (e.g., 'CC6.1', 'CC7.2', 'PI1.3')"
+        },
+        "remediationSuggestions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Remediation suggestions if rejected or requires review"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "examples": [
+    {
+      "verdict": "APPROVED",
+      "policy": "copilot-answer-policy",
+      "rationale": "Answer generated with 5 citations, passed guardrails",
+      "timestamp": "2025-12-27T10:30:00Z",
+      "evaluatedBy": "ai-copilot-service",
+      "confidence": 0.95,
+      "metadata": {
+        "policyVersion": "1.0.0",
+        "riskLevel": "low",
+        "soc2Controls": ["CC6.1", "CC7.2", "PI1.3"],
+        "evidence": [
+          "Citations: 5",
+          "Provenance chain confidence: 0.9",
+          "Guardrails: PASSED"
+        ]
+      }
+    },
+    {
+      "verdict": "REJECTED",
+      "policy": "safety-validation",
+      "rationale": "Safety violations detected: critical security violation",
+      "timestamp": "2025-12-27T10:35:00Z",
+      "evaluatedBy": "agent-execution-platform",
+      "confidence": 1.0,
+      "metadata": {
+        "policyVersion": "1.0.0",
+        "riskLevel": "critical",
+        "soc2Controls": ["CC6.1", "PI1.3"],
+        "evidence": ["Critical security violation detected"],
+        "remediationSuggestions": [
+          "Contact security team immediately",
+          "Review system logs"
+        ]
+      }
+    },
+    {
+      "verdict": "REQUIRES_REVIEW",
+      "policy": "agent-execution-policy",
+      "rationale": "Policy violations require manual review",
+      "timestamp": "2025-12-27T10:40:00Z",
+      "evaluatedBy": "agent-execution-platform",
+      "confidence": 0.9,
+      "metadata": {
+        "policyVersion": "1.0.0",
+        "riskLevel": "high",
+        "soc2Controls": ["CC6.1", "CC7.2", "PI1.3"],
+        "evidence": ["Resource usage exceeded threshold"],
+        "remediationSuggestions": [
+          "Review resource allocation",
+          "Contact platform team for quota increase"
+        ]
+      }
+    }
+  ]
+}

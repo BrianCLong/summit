@@ -14,6 +14,7 @@ import { logger } from '../logging/index.js';
 import { SafetyValidator, RateLimiter } from '../safety/index.js';
 import { pipelineEngine } from '../pipeline/index.js';
 import { promptRegistry } from '../registry/index.js';
+import { getGovernanceService } from '../governance/index.js';
 
 export interface RunnerConfig {
   maxConcurrent: number;
@@ -77,6 +78,9 @@ export class AgentRunner {
     // Safety validation
     if (this.safetyValidator) {
       const safetyReport = await this.safetyValidator.validate(input, executionId);
+      const governanceService = getGovernanceService();
+      const safetyVerdict = await governanceService.generateVerdictFromSafety(safetyReport);
+
       if (!safetyReport.passed) {
         const error: AgentError = {
           code: 'SAFETY_VIOLATION',
@@ -88,12 +92,14 @@ export class AgentRunner {
         logger.getLogger().error('Safety validation failed', new Error(error.message), {
           executionId,
           violations: safetyReport.violations.length,
+          governanceVerdict: safetyVerdict.verdict,
         });
 
         return {
           success: false,
           error,
           metrics: this.createMetrics(executionId, startTime),
+          governanceVerdict: safetyVerdict,
         };
       }
     }
@@ -129,16 +135,26 @@ export class AgentRunner {
       execution.endTime = new Date();
       execution.result = result;
 
+      // Generate governance verdict for successful execution
+      const governanceService = getGovernanceService();
+      const verdict = await governanceService.generateVerdict(
+        { input, result },
+        context,
+        'agent-execution-policy'
+      );
+
       logger.getLogger().info('Agent execution completed successfully', {
         agentId: agentConfig.metadata.id,
         executionId,
         durationMs: execution.endTime.getTime() - execution.startTime.getTime(),
+        governanceVerdict: verdict.verdict,
       });
 
       return {
         success: true,
         data: result,
         metrics: this.createMetrics(executionId, startTime),
+        governanceVerdict: verdict,
       };
     } catch (error) {
       execution.status = 'failed';
@@ -156,10 +172,19 @@ export class AgentRunner {
         recoverable: this.isRecoverableError(error as Error),
       };
 
+      // Generate governance verdict for failed execution
+      const governanceService = getGovernanceService();
+      const verdict = await governanceService.generateVerdict(
+        { input, error: agentError },
+        context,
+        'agent-execution-policy'
+      );
+
       return {
         success: false,
         error: agentError,
         metrics: this.createMetrics(executionId, startTime),
+        governanceVerdict: verdict,
       };
     } finally {
       this.activeAgents.delete(executionId);

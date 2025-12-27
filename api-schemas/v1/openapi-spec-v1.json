@@ -1,0 +1,707 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Summit API",
+    "version": "1.0.0",
+    "description": "Summit Intelligence Platform API - Version 1",
+    "contact": {
+      "name": "Platform Engineering Team",
+      "email": "support@summit.io"
+    },
+    "license": {
+      "name": "MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.summit.io/api/v1",
+      "description": "Production API v1"
+    },
+    {
+      "url": "http://localhost:4000/api/v1",
+      "description": "Local development"
+    }
+  ],
+  "paths": {
+    "/graphql": {
+      "post": {
+        "summary": "GraphQL endpoint",
+        "description": "Execute GraphQL queries and mutations",
+        "operationId": "graphql",
+        "tags": ["GraphQL"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GraphQLRequest"
+              },
+              "examples": {
+                "queryRunbooks": {
+                  "summary": "Query runbooks",
+                  "value": {
+                    "query": "query { runbooks(limit: 10) { id name version } }"
+                  }
+                },
+                "launchRun": {
+                  "summary": "Launch a run",
+                  "value": {
+                    "query": "mutation LaunchRun($input: LaunchRunInput!) { launchRun(input: $input) { id state } }",
+                    "variables": {
+                      "input": {
+                        "runbookId": "runbook-123",
+                        "tenantId": "tenant-456",
+                        "params": {}
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "GraphQL response",
+            "headers": {
+              "X-API-Version": {
+                "schema": { "type": "string" },
+                "description": "API version used for this request"
+              },
+              "X-API-Latest-Version": {
+                "schema": { "type": "string" },
+                "description": "Latest available API version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GraphQLResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/coherence/health": {
+      "get": {
+        "summary": "Coherence service health check",
+        "description": "Check the health status of the coherence service",
+        "operationId": "getCoherenceHealth",
+        "tags": ["Coherence", "Health"],
+        "responses": {
+          "200": {
+            "description": "Health status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/coherence/signals/ingest": {
+      "post": {
+        "summary": "Ingest a signal",
+        "description": "Ingest a single coherence signal",
+        "operationId": "ingestSignal",
+        "tags": ["Coherence", "Signals"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignalIngestRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Signal ingested successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignalIngestResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimitExceeded"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/coherence/signals/batch": {
+      "post": {
+        "summary": "Batch ingest signals",
+        "description": "Ingest multiple coherence signals in a single request (max 100)",
+        "operationId": "batchIngestSignals",
+        "tags": ["Coherence", "Signals"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchSignalRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Batch processing results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchSignalResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimitExceeded"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/coherence/analysis": {
+      "post": {
+        "summary": "Analyze coherence",
+        "description": "Perform coherence analysis for a tenant",
+        "operationId": "analyzeCoherence",
+        "tags": ["Coherence", "Analysis"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalysisRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Analysis results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimitExceeded"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/coherence/status/{tenantId}": {
+      "get": {
+        "summary": "Get coherence status",
+        "description": "Get current coherence status for a tenant",
+        "operationId": "getCoherenceStatus",
+        "tags": ["Coherence", "Status"],
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Tenant identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Coherence status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoherenceStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GraphQLRequest": {
+        "type": "object",
+        "required": ["query"],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "GraphQL query or mutation"
+          },
+          "variables": {
+            "type": "object",
+            "description": "Query variables"
+          },
+          "operationName": {
+            "type": "string",
+            "description": "Operation name for multi-operation documents"
+          }
+        }
+      },
+      "GraphQLResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "description": "Query result data"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GraphQLError"
+            }
+          }
+        }
+      },
+      "GraphQLError": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "line": { "type": "integer" },
+                "column": { "type": "integer" }
+              }
+            }
+          },
+          "path": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                { "type": "string" },
+                { "type": "integer" }
+              ]
+            }
+          }
+        }
+      },
+      "HealthStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["healthy", "unhealthy", "degraded"]
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "string"
+          },
+          "components": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "SignalIngestRequest": {
+        "type": "object",
+        "required": ["tenantId", "type", "value", "source"],
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "type": "string",
+            "minLength": 1
+          },
+          "value": {
+            "type": "number",
+            "minimum": -1000,
+            "maximum": 1000
+          },
+          "weight": {
+            "type": "number",
+            "default": 1.0
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1
+          },
+          "ts": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "signalId": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "object"
+          }
+        }
+      },
+      "SignalIngestResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "signalId": {
+            "type": "string"
+          },
+          "triggeredAnalysis": {
+            "type": "boolean"
+          }
+        }
+      },
+      "BatchSignalRequest": {
+        "type": "object",
+        "required": ["tenantId", "signals"],
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "signals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SignalIngestRequest"
+            },
+            "maxItems": 100
+          }
+        }
+      },
+      "BatchSignalResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "total": { "type": "integer" },
+              "successful": { "type": "integer" },
+              "failed": { "type": "integer" }
+            }
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "success": { "type": "boolean" },
+                "signalId": { "type": "string" },
+                "error": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "AnalysisRequest": {
+        "type": "object",
+        "required": ["tenantId"],
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "timeRange": {
+            "type": "object",
+            "properties": {
+              "start": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "end": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "forceRefresh": {
+            "type": "boolean",
+            "default": false
+          },
+          "includeRealTimeAnalysis": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      },
+      "AnalysisResponse": {
+        "type": "object",
+        "properties": {
+          "analysisId": {
+            "type": "string"
+          },
+          "coherenceScore": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "metadata": {
+            "type": "object",
+            "properties": {
+              "signalCount": { "type": "integer" },
+              "timeRange": {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "string", "format": "date-time" },
+                  "end": { "type": "string", "format": "date-time" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "CoherenceStatus": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string"
+          },
+          "currentScore": {
+            "type": "number"
+          },
+          "trend": {
+            "type": "string",
+            "enum": ["increasing", "decreasing", "stable"]
+          },
+          "lastAnalysis": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": ["error", "message"],
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error code"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable error message"
+          },
+          "details": {
+            "type": "object",
+            "description": "Additional error details"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Bad request - invalid input",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "validation_error",
+              "message": "Invalid request format",
+              "timestamp": "2025-12-27T12:00:00Z"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Unauthorized - authentication required",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "unauthorized",
+              "message": "Authentication required",
+              "timestamp": "2025-12-27T12:00:00Z"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Resource not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "not_found",
+              "message": "Resource not found",
+              "timestamp": "2025-12-27T12:00:00Z"
+            }
+          }
+        }
+      },
+      "RateLimitExceeded": {
+        "description": "Rate limit exceeded",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "schema": { "type": "integer" },
+            "description": "Request limit per window"
+          },
+          "X-RateLimit-Remaining": {
+            "schema": { "type": "integer" },
+            "description": "Requests remaining"
+          },
+          "X-RateLimit-Reset": {
+            "schema": { "type": "integer" },
+            "description": "Unix timestamp when limit resets"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "rate_limit_exceeded",
+              "message": "Too many requests, please try again later",
+              "timestamp": "2025-12-27T12:00:00Z"
+            }
+          }
+        }
+      },
+      "InternalError": {
+        "description": "Internal server error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "internal_error",
+              "message": "An internal error occurred",
+              "timestamp": "2025-12-27T12:00:00Z"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT authentication token"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "GraphQL",
+      "description": "GraphQL API endpoint"
+    },
+    {
+      "name": "Coherence",
+      "description": "Coherence monitoring and analysis"
+    },
+    {
+      "name": "Signals",
+      "description": "Signal ingestion endpoints"
+    },
+    {
+      "name": "Analysis",
+      "description": "Analysis endpoints"
+    },
+    {
+      "name": "Health",
+      "description": "Health check endpoints"
+    },
+    {
+      "name": "Status",
+      "description": "Status information endpoints"
+    }
+  ]
+}

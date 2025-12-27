@@ -1,0 +1,499 @@
+# Data Integrity Envelope Schema
+# Ensures all API responses carry provenance, confidence, and governance metadata
+# SOC 2: PI1.1, PI1.2, PI1.4, C1.2
+
+"""
+Provenance metadata for tracking data lineage and source
+"""
+type Provenance {
+  """
+  Source identifier (system, model, user, or integration)
+  """
+  source: String!
+
+  """
+  Timestamp when the data was generated (ISO 8601)
+  """
+  generatedAt: DateTime!
+
+  """
+  Data lineage chain showing transformation history
+  """
+  lineage: [LineageNode!]!
+
+  """
+  Actor who initiated or approved this operation
+  """
+  actor: String
+
+  """
+  Source system version
+  """
+  version: String
+
+  """
+  Unique identifier for this provenance entry
+  """
+  provenanceId: ID!
+}
+
+"""
+Single node in the data lineage chain
+"""
+type LineageNode {
+  """
+  Unique identifier for this lineage step
+  """
+  id: ID!
+
+  """
+  Type of transformation or operation
+  """
+  operation: String!
+
+  """
+  Input identifiers used in this step
+  """
+  inputs: [ID!]!
+
+  """
+  Timestamp of this transformation
+  """
+  timestamp: DateTime!
+
+  """
+  Actor responsible for this step
+  """
+  actor: String
+
+  """
+  Additional metadata for this step
+  """
+  metadata: JSON
+}
+
+"""
+Governance verdict reference for compliance tracking
+"""
+type GovernanceVerdict {
+  """
+  Unique identifier for the governance decision
+  """
+  verdictId: ID!
+
+  """
+  Policy that was evaluated
+  """
+  policyId: String!
+
+  """
+  Result of the policy evaluation
+  """
+  result: GovernanceResult!
+
+  """
+  Timestamp of the decision
+  """
+  decidedAt: DateTime!
+
+  """
+  Reason for the decision
+  """
+  reason: String
+
+  """
+  Required approvals (if any)
+  """
+  requiredApprovals: [String!]
+
+  """
+  Evaluator (human or automated)
+  """
+  evaluator: String!
+}
+
+"""
+Governance result enumeration
+"""
+enum GovernanceResult {
+  ALLOW
+  DENY
+  FLAG
+  REVIEW_REQUIRED
+}
+
+"""
+Generic data envelope wrapping all API responses with integrity metadata
+"""
+type DataEnvelope {
+  """
+  The actual response payload (type-specific)
+  """
+  data: JSON!
+
+  """
+  Provenance metadata for data lineage tracking
+  """
+  provenance: Provenance!
+
+  """
+  Confidence score for AI-generated content (0.0 to 1.0)
+  Null for non-AI data
+  """
+  confidence: Float
+
+  """
+  Flag indicating if this is simulated/synthetic data
+  """
+  isSimulated: Boolean!
+
+  """
+  Governance verdict reference (if applicable)
+  """
+  governanceVerdict: GovernanceVerdict
+
+  """
+  Data classification level
+  """
+  classification: DataClassification!
+
+  """
+  Integrity hash of the payload
+  """
+  dataHash: String!
+
+  """
+  Digital signature (if signed)
+  """
+  signature: String
+
+  """
+  Warnings or alerts about the data
+  """
+  warnings: [String!]!
+}
+
+"""
+Data classification levels
+"""
+enum DataClassification {
+  PUBLIC
+  INTERNAL
+  CONFIDENTIAL
+  RESTRICTED
+  HIGHLY_RESTRICTED
+}
+
+"""
+Typed data envelopes for specific response types
+"""
+type HypothesisEnvelope {
+  """
+  The hypothesis data
+  """
+  data: Hypothesis!
+
+  """
+  Provenance metadata
+  """
+  provenance: Provenance!
+
+  """
+  AI confidence score (required for hypotheses)
+  """
+  confidence: Float!
+
+  """
+  Simulation flag
+  """
+  isSimulated: Boolean!
+
+  """
+  Governance verdict
+  """
+  governanceVerdict: GovernanceVerdict
+
+  """
+  Data classification
+  """
+  classification: DataClassification!
+
+  """
+  Integrity hash
+  """
+  dataHash: String!
+
+  """
+  Warnings
+  """
+  warnings: [String!]!
+}
+
+"""
+Narrative envelope with full metadata
+"""
+type NarrativeEnvelope {
+  """
+  The narrative data
+  """
+  data: Narrative!
+
+  """
+  Provenance metadata
+  """
+  provenance: Provenance!
+
+  """
+  AI confidence score (required for narratives)
+  """
+  confidence: Float!
+
+  """
+  Simulation flag
+  """
+  isSimulated: Boolean!
+
+  """
+  Governance verdict
+  """
+  governanceVerdict: GovernanceVerdict
+
+  """
+  Data classification
+  """
+  classification: DataClassification!
+
+  """
+  Integrity hash
+  """
+  dataHash: String!
+
+  """
+  Warnings
+  """
+  warnings: [String!]!
+}
+
+"""
+Reasoning trace envelope
+"""
+type ReasoningTraceEnvelope {
+  """
+  The reasoning trace data
+  """
+  data: ReasoningTrace!
+
+  """
+  Provenance metadata
+  """
+  provenance: Provenance!
+
+  """
+  AI confidence score
+  """
+  confidence: Float!
+
+  """
+  Simulation flag
+  """
+  isSimulated: Boolean!
+
+  """
+  Governance verdict
+  """
+  governanceVerdict: GovernanceVerdict
+
+  """
+  Data classification
+  """
+  classification: DataClassification!
+
+  """
+  Integrity hash
+  """
+  dataHash: String!
+
+  """
+  Warnings
+  """
+  warnings: [String!]!
+}
+
+"""
+Batch export with full provenance
+"""
+type ExportBundle {
+  """
+  Export identifier
+  """
+  exportId: ID!
+
+  """
+  Exported data items (each wrapped in envelope)
+  """
+  items: [DataEnvelope!]!
+
+  """
+  Export provenance
+  """
+  provenance: Provenance!
+
+  """
+  Export format (PDF, CSV, JSON, etc.)
+  """
+  format: ExportFormat!
+
+  """
+  License information
+  """
+  licenses: [String!]!
+
+  """
+  License compliance check
+  """
+  licenseCheck: LicenseCheckResult!
+
+  """
+  Merkle root for bundle integrity
+  """
+  merkleRoot: String!
+
+  """
+  Generated timestamp
+  """
+  generatedAt: DateTime!
+}
+
+"""
+Export format enumeration
+"""
+enum ExportFormat {
+  PDF
+  CSV
+  JSON
+  EXCEL
+  XML
+}
+
+"""
+License check result for exports
+"""
+type LicenseCheckResult {
+  """
+  Whether the export is allowed
+  """
+  valid: Boolean!
+
+  """
+  Reason if denied
+  """
+  reason: String
+
+  """
+  Appeal code for manual review
+  """
+  appealCode: String
+
+  """
+  Appeal URL
+  """
+  appealUrl: String
+
+  """
+  Policy decision details
+  """
+  policyDecision: PolicyDecision!
+
+  """
+  Risk assessment
+  """
+  riskAssessment: RiskAssessment!
+}
+
+"""
+Policy decision for export
+"""
+type PolicyDecision {
+  """
+  Action to take
+  """
+  action: PolicyAction!
+
+  """
+  Reasons for the decision
+  """
+  reasons: [String!]!
+
+  """
+  Required approvals (if any)
+  """
+  requiredApprovals: [String!]
+}
+
+"""
+Policy action enumeration
+"""
+enum PolicyAction {
+  ALLOW
+  DENY
+  REVIEW
+}
+
+"""
+Risk assessment for export
+"""
+type RiskAssessment {
+  """
+  Risk level
+  """
+  level: RiskLevel!
+
+  """
+  Risk factors identified
+  """
+  factors: [String!]!
+}
+
+"""
+Risk level enumeration
+"""
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+# Query extensions for envelope-based responses
+extend type Query {
+  """
+  Generate hypotheses with full envelope metadata
+  """
+  generateHypothesesWithEnvelope(input: HypothesisInput!): [HypothesisEnvelope!]!
+
+  """
+  Build narrative with envelope metadata
+  """
+  generateNarrativeWithEnvelope(input: NarrativeInput!): NarrativeEnvelope!
+
+  """
+  Compute risk with envelope and provenance
+  """
+  computeRiskWithEnvelope(input: RiskComputeInput!): ReasoningTraceEnvelope!
+}
+
+# Mutation extensions for exports
+extend type Mutation {
+  """
+  Export data with full provenance and license checking
+  """
+  exportWithProvenance(
+    itemIds: [ID!]!
+    format: ExportFormat!
+    purpose: String!
+    destination: String
+  ): ExportBundle!
+}
+
+scalar DateTime
+scalar JSON

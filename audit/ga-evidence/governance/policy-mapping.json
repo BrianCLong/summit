@@ -1,0 +1,190 @@
+{
+  "policyMappings": [
+    {
+      "policyName": "agent-execution-policy",
+      "description": "Evaluates agent executions for safety and resource compliance",
+      "service": "agent-execution-platform",
+      "version": "1.0.0",
+      "soc2Controls": [
+        {
+          "control": "CC6.1",
+          "rationale": "Ensures agent executions are authorized and comply with access policies"
+        },
+        {
+          "control": "CC7.2",
+          "rationale": "Validates agent changes/actions against documented policies"
+        },
+        {
+          "control": "PI1.3",
+          "rationale": "Ensures agent inputs and outputs meet quality and safety standards"
+        }
+      ],
+      "evaluationCriteria": [
+        "Safety violations",
+        "Resource usage limits",
+        "Rate limiting compliance",
+        "Input validation",
+        "Output quality"
+      ],
+      "verdictLogic": {
+        "APPROVED": "No safety violations, within resource limits, passed all checks",
+        "REJECTED": "Critical safety violations or policy breaches detected",
+        "REQUIRES_REVIEW": "Non-critical violations requiring manual assessment"
+      }
+    },
+    {
+      "policyName": "copilot-answer-policy",
+      "description": "Evaluates copilot answers for quality, citations, and compliance",
+      "service": "ai-copilot-service",
+      "version": "1.0.0",
+      "soc2Controls": [
+        {
+          "control": "CC6.1",
+          "rationale": "Controls access to information through citation and provenance requirements"
+        },
+        {
+          "control": "CC7.2",
+          "rationale": "Documents answer generation process and policy compliance"
+        },
+        {
+          "control": "PI1.3",
+          "rationale": "Ensures answer accuracy through citations, provenance, and confidence scoring"
+        }
+      ],
+      "evaluationCriteria": [
+        "Citation count and quality",
+        "Provenance chain confidence",
+        "Guardrail validation results",
+        "Redaction requirements",
+        "Answer confidence score"
+      ],
+      "verdictLogic": {
+        "APPROVED": "Sufficient citations, high confidence, passed guardrails",
+        "REJECTED": "Failed guardrails or critical quality issues",
+        "REQUIRES_REVIEW": "Low confidence or guardrail concerns"
+      }
+    },
+    {
+      "policyName": "copilot-refusal-policy",
+      "description": "Evaluates refusal decisions for appropriateness and risk",
+      "service": "ai-copilot-service",
+      "version": "1.0.0",
+      "soc2Controls": [
+        {
+          "control": "CC6.1",
+          "rationale": "Documents access denial decisions with rationale"
+        },
+        {
+          "control": "CC7.2",
+          "rationale": "Tracks refusal decisions as system change events"
+        },
+        {
+          "control": "PI1.3",
+          "rationale": "Ensures refusal decisions are accurate and appropriate"
+        }
+      ],
+      "evaluationCriteria": [
+        "Refusal category",
+        "Risk level",
+        "Audit trail completeness"
+      ],
+      "verdictLogic": {
+        "APPROVED": "N/A - refusals are inherently restrictive",
+        "REJECTED": "Policy violations, unsafe queries, authorization failures",
+        "REQUIRES_REVIEW": "Internal errors or ambiguous situations"
+      }
+    },
+    {
+      "policyName": "prompt-guardrails-policy",
+      "description": "Validates user prompts for safety and appropriateness",
+      "service": "ai-copilot-service",
+      "version": "1.0.0",
+      "soc2Controls": [
+        {
+          "control": "CC6.1",
+          "rationale": "Controls input access to prevent unauthorized or malicious requests"
+        },
+        {
+          "control": "PI1.3",
+          "rationale": "Ensures input completeness and accuracy before processing"
+        }
+      ],
+      "evaluationCriteria": [
+        "Malicious content detection",
+        "PII detection",
+        "Injection attempt detection",
+        "Content moderation",
+        "Risk level assessment"
+      ],
+      "verdictLogic": {
+        "APPROVED": "Prompt passed all guardrail checks",
+        "REJECTED": "Prompt contains malicious content or violates policies",
+        "REQUIRES_REVIEW": "Prompt flagged for potential issues"
+      }
+    },
+    {
+      "policyName": "safety-validation",
+      "description": "Evaluates safety check results and converts to governance verdicts",
+      "service": "agent-execution-platform",
+      "version": "1.0.0",
+      "soc2Controls": [
+        {
+          "control": "CC6.1",
+          "rationale": "Enforces safety-based access controls"
+        },
+        {
+          "control": "PI1.3",
+          "rationale": "Ensures processing safety and integrity"
+        }
+      ],
+      "evaluationCriteria": [
+        "Safety violation count",
+        "Violation severity",
+        "Blocking violations",
+        "Action required (block/warn/audit)"
+      ],
+      "verdictLogic": {
+        "APPROVED": "No safety violations detected",
+        "REJECTED": "Critical or blocking safety violations",
+        "REQUIRES_REVIEW": "Non-critical violations requiring assessment"
+      }
+    },
+    {
+      "policyName": "emergency-failsafe",
+      "description": "Emergency rejection when normal verdict generation fails",
+      "service": "all",
+      "version": "1.0.0",
+      "soc2Controls": [
+        {
+          "control": "CC6.1",
+          "rationale": "Fail-safe defaults to deny to maintain access controls"
+        },
+        {
+          "control": "CC7.2",
+          "rationale": "Documents system failures for investigation"
+        },
+        {
+          "control": "PI1.3",
+          "rationale": "Prevents processing when integrity cannot be assured"
+        }
+      ],
+      "evaluationCriteria": [
+        "Verdict generation failure",
+        "System errors",
+        "Timeout conditions"
+      ],
+      "verdictLogic": {
+        "APPROVED": "N/A - emergency failsafe always rejects",
+        "REJECTED": "Always - fail-safe default",
+        "REQUIRES_REVIEW": "N/A"
+      }
+    }
+  ],
+  "metadata": {
+    "version": "1.0.0",
+    "lastUpdated": "2025-12-27",
+    "initiative": "GA-E1: Governance Hardening",
+    "approvedBy": "Security & Compliance Team",
+    "nextReview": "2026-03-27"
+  }
+}
