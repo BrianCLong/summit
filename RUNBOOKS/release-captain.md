@@ -14,11 +14,12 @@ This runbook provides comprehensive procedures for Release Captains managing the
 4. [Release Cut Procedure](#release-cut-procedure)
 5. [Canary Deployment](#canary-deployment)
 6. [Production Promotion](#production-promotion)
-7. [Rollback Procedure](#rollback-procedure)
-8. [Hotfix Procedure](#hotfix-procedure)
-9. [Communication Templates](#communication-templates)
-10. [Incident Hooks](#incident-hooks)
-11. [Break-Glass Procedures](#break-glass-procedures)
+7. [Post-Merge Validation](#post-merge-validation)
+8. [Rollback Procedure](#rollback-procedure)
+9. [Hotfix Procedure](#hotfix-procedure)
+10. [Communication Templates](#communication-templates)
+11. [Incident Hooks](#incident-hooks)
+12. [Break-Glass Procedures](#break-glass-procedures)
 
 ---
 
@@ -27,6 +28,7 @@ This runbook provides comprehensive procedures for Release Captains managing the
 ### Release Train Model
 
 We operate a **weekly release train** with scheduled cuts on Wednesdays at 17:00 UTC. This provides:
+
 - Predictable release cadence
 - Automated validation gates
 - Gradual canary rollout (10% → 50% → 100%)
@@ -41,11 +43,11 @@ We operate a **weekly release train** with scheduled cuts on Wednesdays at 17:00
 
 ### Roles
 
-| Role | Responsibility | Required For |
-|------|---------------|--------------|
-| Release Captain | Manages release process, makes promote/rollback decisions | All releases |
-| On-Call SRE | Approves production actions, monitors health | 100% promote, rollback |
-| Security Review | Approves security-sensitive changes | Security PRs |
+| Role            | Responsibility                                            | Required For           |
+| --------------- | --------------------------------------------------------- | ---------------------- |
+| Release Captain | Manages release process, makes promote/rollback decisions | All releases           |
+| On-Call SRE     | Approves production actions, monitors health              | 100% promote, rollback |
+| Security Review | Approves security-sensitive changes                       | Security PRs           |
 
 ---
 
@@ -53,19 +55,20 @@ We operate a **weekly release train** with scheduled cuts on Wednesdays at 17:00
 
 ### Weekly Schedule
 
-| Day | Time (UTC) | Activity |
-|-----|-----------|----------|
-| Monday | 09:00 | Feature freeze for current train |
-| Tuesday | 17:00 | Code freeze, final testing |
-| Wednesday | 17:00 | **Release train cuts** |
-| Wednesday | 18:00 | Stage deployment + validation |
-| Thursday | 10:00 | Production 10% canary |
-| Thursday | 14:00 | Production 50% canary |
-| Friday | 10:00 | Production 100% (if healthy) |
+| Day       | Time (UTC) | Activity                         |
+| --------- | ---------- | -------------------------------- |
+| Monday    | 09:00      | Feature freeze for current train |
+| Tuesday   | 17:00      | Code freeze, final testing       |
+| Wednesday | 17:00      | **Release train cuts**           |
+| Wednesday | 18:00      | Stage deployment + validation    |
+| Thursday  | 10:00      | Production 10% canary            |
+| Thursday  | 14:00      | Production 50% canary            |
+| Friday    | 10:00      | Production 100% (if healthy)     |
 
 ### Freeze Windows
 
 No production deployments during:
+
 - Friday 17:00 UTC - Monday 09:00 UTC (weekends)
 - Major holidays (see `.maestro/freeze_windows.json`)
 - Active incidents (P0/P1)
@@ -112,7 +115,7 @@ The release train runs automatically on Wednesday at 17:00 UTC:
 # .github/workflows/release-train.yml
 on:
   schedule:
-    - cron: '0 17 * * 3'  # Wednesday 17:00 UTC
+    - cron: "0 17 * * 3" # Wednesday 17:00 UTC
 ```
 
 ### Manual Cut (If Needed)
@@ -157,11 +160,11 @@ curl -sf https://api.stage.intelgraph.io/health
 
 ### Canary Stages
 
-| Stage | Weight | Duration | Auto-Advance |
-|-------|--------|----------|--------------|
-| 10% | 10% of traffic | Minimum 2h | Yes, if healthy |
-| 50% | 50% of traffic | Minimum 2h | Yes, if healthy |
-| 100% | All traffic | Permanent | N/A |
+| Stage | Weight         | Duration   | Auto-Advance    |
+| ----- | -------------- | ---------- | --------------- |
+| 10%   | 10% of traffic | Minimum 2h | Yes, if healthy |
+| 50%   | 50% of traffic | Minimum 2h | Yes, if healthy |
+| 100%  | All traffic    | Permanent  | N/A             |
 
 ### Promote to 10% Canary
 
@@ -176,6 +179,7 @@ gh workflow run release-promote.yml \
 **Grafana Dashboard**: `https://grafana.intelgraph.io/d/release-canary`
 
 Key metrics to watch:
+
 - Error rate (should be < 1% or within 2x of baseline)
 - P95 latency (should be < 500ms or within 2x of baseline)
 - Request rate (should be stable)
@@ -183,6 +187,7 @@ Key metrics to watch:
 ### SLO Gate Criteria
 
 Canary advances automatically if ALL conditions are met for 5 consecutive minutes:
+
 - Error rate ≤ 1.0%
 - P95 latency ≤ 500ms
 - Golden-path probes passing
@@ -203,6 +208,7 @@ gh workflow run release-promote.yml \
 ### Prerequisites
 
 Before promoting to 100%:
+
 - [ ] 10% canary validated (minimum 2 hours)
 - [ ] 50% canary validated (minimum 2 hours)
 - [ ] No SLO breaches detected
@@ -243,11 +249,57 @@ watch -n 30 'curl -s https://prometheus.intelgraph.io/api/v1/query \
 
 ---
 
+## Post-Merge Validation
+
+### Objectives and Timing
+
+- **T+0–30m (Smoke)**: Validate core paths and guardrails immediately after the merge lands on main and production deploy completes.
+- **T+2h–24h (Soak)**: Observe steady-state behavior under real traffic while keeping feature flags in a controlled posture.
+- **T+24h (Compliance)**: Regenerate compliance evidence to confirm no regressions in attestations, licenses, or policy-as-code checks.
+
+### Smoke Validation (T+0–30m)
+
+- [ ] Release Captain + On-Call SRE run `make smoke` and confirm health endpoints return `200` (`/health`, `/ready`).
+- [ ] Verify golden-path probes and dashboards (SystemHUD + Grafana release-canary) show no error-rate or latency regression.
+- [ ] Check for zero P0/P1 alerts in PagerDuty and confirm error budget remains > 10%.
+- [ ] Document results in the release ticket with links to the successful smoke run and dashboards.
+
+### Soak Validation (T+2h–24h)
+
+- [ ] Maintain canary/stable split used during promotion for at least 2h of real traffic before considering flag flips.
+- [ ] Monitor for p95 latency drift, sustained error rates > 1%, and queue depth anomalies; capture snapshots in the release dashboard.
+- [ ] Execute one synthetic golden-path run every hour (same probes as smoke) to detect latent regressions.
+- [ ] Keep feature flags in "guarded" mode (rollout < 50% or read-only) until soak completes without regression.
+
+### Compliance Rerun (T+24h or sooner if risk identified)
+
+- [ ] Re-dispatch the `ci-security.yml` workflow in GitHub Actions to rerun license compliance and Kubernetes CIS checks; attach the run URL in `COMPLIANCE_EVIDENCE_INDEX.md`.
+- [ ] Confirm evidence bundles and SBOM artifacts remain unchanged or regenerated for the merged version; archive in `EVIDENCE_BUNDLE.manifest.json`.
+- [ ] Log any deviations requiring ethics or governance review per `COMPLIANCE_CONTROLS.md` and escalate to the security-council alias.
+
+### Rollback & Feature-Flag Strategy
+
+- If any smoke or soak check fails, **pause all promotions**, disable launch-specific flags using the runbook in `RUNBOOKS/feature-flags.md`, and execute the rollback procedure in the next section.
+- Keep kill-switch flags enabled for at least 24h post-merge so rollback can be executed without new deployments.
+- For partial failures isolated to a feature, prefer flagging off that feature and re-running smoke/soak before initiating a full rollback.
+
+### Ownership and Communications
+
+| Owner           | Scope                                                                             | Channel                              |
+| --------------- | --------------------------------------------------------------------------------- | ------------------------------------ |
+| Release Captain | Orchestrates smoke/soak, signs off on completion, coordinates compliance rerun    | `#releases`, release ticket          |
+| On-Call SRE     | Runs smoke jobs, monitors canary/soak health, executes rollback if required       | `#sre-alerts`, PagerDuty             |
+| Compliance Lead | Triggers compliance rerun, updates evidence indices, files governance escalations | `#compliance`, evidence bundle notes |
+| Feature Owner   | Confirms feature-level metrics, manages feature flags, validates functional KPIs  | Team channel, feature flag audit log |
+
+---
+
 ## Rollback Procedure
 
 ### When to Rollback
 
 Trigger rollback if ANY of these occur:
+
 - Error rate > 2% for 5 minutes
 - P95 latency > 1000ms for 5 minutes
 - Golden-path probes failing
@@ -303,6 +355,7 @@ kubectl -n production rollout status deployment/api
 ### When to Use Hotfix
 
 Use hotfix for:
+
 - Critical security vulnerabilities
 - P0/P1 production incidents
 - Urgent bug fixes affecting > 10% of users
@@ -427,6 +480,7 @@ assignees: [@release-captain, @oncall-sre]
 ### PagerDuty Integration
 
 Rollbacks trigger PagerDuty alerts if:
+
 - Error rate spike detected during canary
 - Multiple consecutive probe failures
 - SLO budget exhausted
@@ -434,6 +488,7 @@ Rollbacks trigger PagerDuty alerts if:
 ### Slack Integration
 
 Auto-posts to:
+
 - `#releases` - All release activities
 - `#incidents` - Rollbacks and issues
 - `#sre-alerts` - PagerDuty escalations
@@ -445,6 +500,7 @@ Auto-posts to:
 ### When to Use Break-Glass
 
 Use break-glass when:
+
 - Normal processes are unavailable (GitHub outage)
 - Time-critical response needed (active incident)
 - Automation has failed
@@ -490,6 +546,7 @@ helm upgrade --install api ./charts/server \
 ### Post-Break-Glass
 
 After using break-glass:
+
 1. Document all actions taken
 2. Create audit trail entry
 3. Trigger evidence bundle generation manually
@@ -520,10 +577,10 @@ promql 'slo:error_budget_remaining{service="api"}'
 
 ### Contacts
 
-| Team | Slack | PagerDuty |
-|------|-------|-----------|
+| Team     | Slack          | PagerDuty       |
+| -------- | -------------- | --------------- |
 | Platform | #platform-team | platform-oncall |
-| SRE | #sre-team | sre-oncall |
+| SRE      | #sre-team      | sre-oncall      |
 | Security | #security-team | security-oncall |
 
 ### Related Documentation
@@ -536,5 +593,5 @@ promql 'slo:error_budget_remaining{service="api"}'
 
 ---
 
-*This runbook is version controlled. Submit PRs for updates.*
-*Last reviewed: 2025-12-19*
+_This runbook is version controlled. Submit PRs for updates._
+_Last reviewed: 2025-12-19_
