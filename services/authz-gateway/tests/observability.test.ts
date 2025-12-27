@@ -1,4 +1,4 @@
-import { propagation } from '@opentelemetry/api';
+import { context, propagation } from '@opentelemetry/api';
 import {
   BasicTracerProvider,
   ParentBasedSampler,
@@ -10,6 +10,7 @@ import {
   createSampler,
   createSpanProcessors,
   injectTraceContext,
+  createPropagator,
 } from '../src/observability';
 
 describe('observability tracing configuration', () => {
@@ -75,5 +76,33 @@ describe('trace context propagation', () => {
     });
 
     await provider.shutdown();
+  });
+
+  it('injects baggage headers when an authorization context is provided', () => {
+    propagation.setGlobalPropagator(createPropagator());
+    const headers: Record<string, string> = {};
+    const ctx = attachAuthorizationBaggage({
+      subjectId: 'user-42',
+      tenantId: 'tenant-9',
+      resourceId: 'res-7',
+      action: 'approve',
+      classification: 'top-secret',
+      residency: 'eu',
+    });
+
+    context.with(ctx, () => {
+      injectTraceContext(
+        {
+          setHeader: (key: string, value: unknown) => {
+            headers[key] = String(value);
+          },
+        } as unknown as import('http').ClientRequest,
+        ctx,
+      );
+    });
+
+    expect(headers.baggage).toContain('subject.id=user-42');
+    expect(headers.baggage).toContain('resource.id=res-7');
+    expect(headers.baggage).toContain('action.name=approve');
   });
 });

@@ -86,7 +86,7 @@ export function tracingContextMiddleware(
   next();
 }
 
-export function injectTraceContext(proxyReq: any) {
+export function injectTraceContext(proxyReq: any, _context?: unknown) {
   const span = trace.getSpan(context.active());
   const traceId = span?.spanContext().traceId || 'stub-trace';
   if (proxyReq?.setHeader) {

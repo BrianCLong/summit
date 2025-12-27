@@ -71,6 +71,7 @@ export function injectTraceContext(
     traceId?: string;
     spanId?: string;
   },
+  _context?: unknown,
 ) {
   const spanContext = (span &&
     typeof span.spanContext === 'function' &&

@@ -2,6 +2,7 @@ import express from 'express';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import pino from 'pino';
 import pinoHttp from 'pino-http';
+import { context } from '@opentelemetry/api';
 import { initKeys, getPublicJwk } from './keys';
 import { login, introspect, oidcLogin } from './auth';
 import { requireAuth } from './middleware';
@@ -320,8 +321,10 @@ export async function createApp(): Promise<express.Application> {
       target: upstream,
       changeOrigin: true,
       pathRewrite: { '^/protected': '' },
-      onProxyReq: (proxyReq) => {
-        injectTraceContext(proxyReq);
+      onProxyReq: (proxyReq, req) => {
+        const authReq = req as AuthenticatedRequest;
+        const activeContext = authReq.authorizationContext || context.active();
+        injectTraceContext(proxyReq, activeContext);
       },
     } as any),
   );

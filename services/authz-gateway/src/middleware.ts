@@ -1,11 +1,13 @@
 import type { Request, Response, NextFunction } from 'express';
 import type { JWTPayload } from 'jose';
 import pino from 'pino';
+import { context, type Context as OtelContext } from '@opentelemetry/api';
 import { authorize } from './policy';
 import { log } from './audit';
 import { sessionManager } from './session';
 import { breakGlassManager } from './break-glass';
 import type { AttributeService } from './attribute-service';
+import { attachAuthorizationBaggage } from './observability';
 import type {
   AuthorizationInput,
   DecisionObligation,
@@ -25,6 +27,7 @@ export interface AuthenticatedRequest extends Request {
   subjectAttributes?: SubjectAttributes;
   resourceAttributes?: ResourceAttributes;
   obligations?: DecisionObligation[];
+  authorizationContext?: OtelContext;
 }
 
 async function buildResource(
@@ -79,7 +82,9 @@ export function requireAuth(
     }
     try {
       const token = auth.replace('Bearer ', '');
-      const { payload } = await sessionManager.validate(token, { consume: true });
+      const { payload } = await sessionManager.validate(token, {
+        consume: true,
+      });
       if (options.requiredAcr && payload.acr !== options.requiredAcr) {
         return res
           .status(401)
@@ -96,63 +101,76 @@ export function requireAuth(
         options.resourceIdHeader,
       );
 
-      if (!options.skipAuthorization) {
-        const input: AuthorizationInput = {
-          subject,
-          resource,
-          action: options.action,
-          context: attributeService.getDecisionContext(
-            String(payload.acr || 'loa1'),
-            payload.breakGlass
-              ? {
-                  breakGlass: payload.breakGlass as AuthorizationInput['context']['breakGlass'],
-                }
-              : {},
-          ),
-        };
-        const decision = await authorize(input);
-        await log({
-          subject: String(payload.sub || ''),
-          action: options.action,
-          resource: JSON.stringify(resource),
-          tenantId: subject.tenantId,
-          allowed: decision.allowed,
-          reason: decision.reason,
-          breakGlass: (payload as { breakGlass?: unknown }).breakGlass as
-            | undefined
-            | AuthorizationInput['context']['breakGlass'],
-        });
-        if (payload.breakGlass) {
-          breakGlassManager.recordUsage(String(payload.sid || ''), {
+      const baggageContext = attachAuthorizationBaggage({
+        subjectId: subject.id,
+        tenantId: subject.tenantId,
+        resourceId: resource.id,
+        action: options.action,
+        classification: resource.classification,
+        residency: resource.residency,
+      });
+      req.authorizationContext = baggageContext;
+
+      return await context.with(baggageContext, async () => {
+        if (!options.skipAuthorization) {
+          const input: AuthorizationInput = {
+            subject,
+            resource,
             action: options.action,
-            resource: resource.id,
+            context: attributeService.getDecisionContext(
+              String(payload.acr || 'loa1'),
+              payload.breakGlass
+                ? {
+                    breakGlass:
+                      payload.breakGlass as AuthorizationInput['context']['breakGlass'],
+                  }
+                : {},
+            ),
+          };
+          const decision = await authorize(input);
+          await log({
+            subject: String(payload.sub || ''),
+            action: options.action,
+            resource: JSON.stringify(resource),
             tenantId: subject.tenantId,
             allowed: decision.allowed,
+            reason: decision.reason,
+            breakGlass: (payload as { breakGlass?: unknown }).breakGlass as
+              | undefined
+              | AuthorizationInput['context']['breakGlass'],
           });
-        }
-        if (!decision.allowed) {
-          if (decision.obligations.length > 0) {
-            req.obligations = decision.obligations;
-            return res
-              .status(401)
-              .set('WWW-Authenticate', 'acr=loa2 step-up=webauthn')
-              .json({
-                error: 'step_up_required',
-                obligations: decision.obligations,
-                reason: decision.reason,
-              });
+          if (payload.breakGlass) {
+            breakGlassManager.recordUsage(String(payload.sid || ''), {
+              action: options.action,
+              resource: resource.id,
+              tenantId: subject.tenantId,
+              allowed: decision.allowed,
+            });
           }
-          return res
-            .status(403)
-            .json({ error: 'forbidden', reason: decision.reason });
+          if (!decision.allowed) {
+            if (decision.obligations.length > 0) {
+              req.obligations = decision.obligations;
+              return res
+                .status(401)
+                .set('WWW-Authenticate', 'acr=loa2 step-up=webauthn')
+                .json({
+                  error: 'step_up_required',
+                  obligations: decision.obligations,
+                  reason: decision.reason,
+                });
+            }
+            return res
+              .status(403)
+              .json({ error: 'forbidden', reason: decision.reason });
+          }
+          req.obligations = decision.obligations;
         }
-        req.obligations = decision.obligations;
-      }
 
-      req.user = payload;
-      req.subjectAttributes = subject;
-      req.resourceAttributes = resource;
-      return next();
+        req.user = payload;
+        req.subjectAttributes = subject;
+        req.resourceAttributes = resource;
+        return next();
+      });
     } catch (error) {
       const message = (error as Error).message;
       if (message === 'session_expired') {
