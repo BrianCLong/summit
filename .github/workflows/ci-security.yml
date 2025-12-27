@@ -3,17 +3,17 @@ name: Security and Compliance Suite
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 2 * * 1'
+    - cron: "0 2 * * 1"
   workflow_call:
     inputs:
       run_dast:
-        description: 'Enable or disable dynamic application security testing.'
+        description: "Enable or disable dynamic application security testing."
         required: false
         type: boolean
         default: true
     secrets:
       snyk_token:
-        description: 'Snyk API token when invoking as a reusable workflow.'
+        description: "Snyk API token when invoking as a reusable workflow."
         required: false
 
 permissions:
@@ -84,7 +84,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ javascript, python ]
+        language: [javascript, python]
     steps:
       - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
       - name: Initialize CodeQL
@@ -97,7 +97,37 @@ jobs:
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@v3
         with:
-          category: '/language:${{ matrix.language }}'
+          category: "/language:${{ matrix.language }}"
+
+  semgrep:
+    name: Semgrep policy-as-code (SAST)
+    runs-on: ubuntu-latest
+    needs: context
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - name: Prepare report directory
+        run: mkdir -p "$REPORT_DIR"
+      - name: Run Semgrep CI ruleset
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: p/ci
+          generateSarif: true
+          sarifFile: ${{ env.REPORT_DIR }}/semgrep.sarif
+          auditOn: push
+      - name: Upload Semgrep SARIF
+        if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ env.REPORT_DIR }}/semgrep.sarif
+      - name: Persist Semgrep report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: ${{ env.REPORT_DIR }}/semgrep.sarif
 
   dependency-scan:
     name: Dependency vulnerability scan (Snyk)
@@ -283,7 +313,7 @@ jobs:
       - name: Install Helm
         uses: azure/setup-helm@v4
         with:
-          version: '3.12.0'
+          version: "3.12.0"
       - name: Install Conftest
         run: |
           set -euo pipefail
@@ -316,7 +346,7 @@ jobs:
       - name: Install Helm
         uses: azure/setup-helm@v4
         with:
-          version: '3.12.0'
+          version: "3.12.0"
       - uses: aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1 # v0.2.4
       - name: Render manifests for CIS evaluation
         run: |
@@ -386,9 +416,9 @@ jobs:
       - name: OWASP ZAP baseline scan
         uses: zaproxy/action-baseline@v0.14.0
         with:
-          target: 'http://localhost:3000'
-          cmd_options: '-a -m 5'
-          rules_file_name: '.zap/rules.tsv'
+          target: "http://localhost:3000"
+          cmd_options: "-a -m 5"
+          rules_file_name: ".zap/rules.tsv"
       - name: Collect ZAP artifacts
         if: always()
         run: |
@@ -414,6 +444,7 @@ jobs:
     needs:
       - secret-scan
       - sast
+      - semgrep
       - dependency-scan
       - filesystem-scan
       - container-scan
@@ -439,6 +470,7 @@ jobs:
         env:
           SECRET_STATUS: ${{ needs.secret-scan.result }}
           SAST_STATUS: ${{ needs.sast.result }}
+          SEMGREP_STATUS: ${{ needs.semgrep.result }}
           DEP_STATUS: ${{ needs.dependency-scan.result }}
           FS_STATUS: ${{ needs.filesystem-scan.result }}
           IMG_STATUS: ${{ needs.container-scan.result }}
@@ -450,34 +482,35 @@ jobs:
           DAST_STATUS: ${{ needs.dast.result }}
         run: |
           python - <<'PY'
-import json
-import os
-from pathlib import Path
+            import json
+            import os
+            from pathlib import Path
 
-report_root = Path('aggregated-security')
-files = sorted(str(p.relative_to(report_root)) for p in report_root.rglob('*') if p.is_file())
-status = {
-    "Secret scanning": os.environ.get('SECRET_STATUS', 'unknown'),
-    "SAST": os.environ.get('SAST_STATUS', 'unknown'),
-    "Dependencies": os.environ.get('DEP_STATUS', 'unknown'),
-    "Filesystem": os.environ.get('FS_STATUS', 'unknown'),
-    "Container": os.environ.get('IMG_STATUS', 'unknown'),
-    "Licenses": os.environ.get('LIC_STATUS', 'unknown'),
-    "IaC": os.environ.get('IAC_STATUS', 'unknown'),
-    "OPA policies": os.environ.get('OPA_STATUS', 'unknown'),
-    "CIS benchmark": os.environ.get('CIS_STATUS', 'unknown'),
-    "Baseline": os.environ.get('BASELINE_STATUS', 'unknown'),
-    "DAST": os.environ.get('DAST_STATUS', 'skipped'),
-}
-summary = {
-    "reportCount": len(files),
-    "reports": files,
-    "statuses": status,
-}
-report_root.mkdir(parents=True, exist_ok=True)
-with (report_root / 'security-summary.json').open('w', encoding='utf-8') as fh:
-    json.dump(summary, fh, indent=2)
-PY
+            report_root = Path('aggregated-security')
+            files = sorted(str(p.relative_to(report_root)) for p in report_root.rglob('*') if p.is_file())
+            status = {
+                "Secret scanning": os.environ.get('SECRET_STATUS', 'unknown'),
+                "SAST": os.environ.get('SAST_STATUS', 'unknown'),
+                "Semgrep": os.environ.get('SEMGREP_STATUS', 'unknown'),
+                "Dependencies": os.environ.get('DEP_STATUS', 'unknown'),
+                "Filesystem": os.environ.get('FS_STATUS', 'unknown'),
+                "Container": os.environ.get('IMG_STATUS', 'unknown'),
+                "Licenses": os.environ.get('LIC_STATUS', 'unknown'),
+                "IaC": os.environ.get('IAC_STATUS', 'unknown'),
+                "OPA policies": os.environ.get('OPA_STATUS', 'unknown'),
+                "CIS benchmark": os.environ.get('CIS_STATUS', 'unknown'),
+                "Baseline": os.environ.get('BASELINE_STATUS', 'unknown'),
+                "DAST": os.environ.get('DAST_STATUS', 'skipped'),
+            }
+            summary = {
+                "reportCount": len(files),
+                "reports": files,
+                "statuses": status,
+            }
+            report_root.mkdir(parents=True, exist_ok=True)
+            with (report_root / 'security-summary.json').open('w', encoding='utf-8') as fh:
+                json.dump(summary, fh, indent=2)
+          PY
       - name: Publish job summary
         uses: actions/github-script@v7
         with:
