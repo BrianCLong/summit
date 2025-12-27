@@ -20,8 +20,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -50,16 +50,27 @@ jobs:
         uses: grafana/k6-action@v0.3.1
         with:
           filename: perf/k6/graphql-slo.js
+          flags: --summary-export perf/reports/k6-summary.json
         env:
           K6_OUT: json=perf/reports/k6-results.json
           GRAPHQL_URL: http://localhost:4000/graphql
+
+      - name: Enforce latency budgets and regressions
+        run: |
+          node scripts/ci/assert-latency-budgets.mjs \
+            perf/reports/k6-summary.json \
+            --tolerance 0.1 \
+            --journey GP-001 \
+            --report perf/reports/latency-budget-report.json
 
       - name: Upload k6 report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: k6-report
-          path: perf/reports
+          path: |
+            perf/reports
+            perf/metrics
 
       - name: Resolver budget check
         run: |
