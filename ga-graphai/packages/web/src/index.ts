@@ -9,3 +9,4 @@ export * from './disclosure-review.js';
 export * from './er-tuner.js';
 export * from './cost-guard-tiles.js';
 export * from './osint-mapping.js';
+export * from './components/graph/LineageDashboard.js';
