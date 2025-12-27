@@ -112,8 +112,14 @@ data:
               
         # Performance and SLO alerts
         - match_re:
-            alertname: '.*Latency.*|.*Performance.*|.*SLO.*'
+            alertname: '.*Latency.*|.*Performance.*|.*SLO.*|.*ErrorBudget.*|.*SlowQuery.*'
           receiver: 'performance-team'
+          continue: true
+
+        # SLO burn + slow query routing
+        - match_re:
+            alertname: '.*ErrorBudget.*|.*SlowQuery.*'
+          receiver: 'slo-alerts'
           
         # Warning alerts go to Slack only
         - match:
@@ -255,6 +261,22 @@ data:
               *SLO Target:* {{ .Labels.slo }}
               *Current Value:* {{ .Annotations.description }}
               *Dashboard:* <{{ .Annotations.dashboard_url }}|View Metrics>
+              {{ if .Annotations.drilldown_url }}*Drilldown:* <{{ .Annotations.drilldown_url }}|View Logs>{{ end }}
+              {{ end }}
+            color: 'warning'
+
+      # SLO alerts
+      - name: 'slo-alerts'
+        slack_configs:
+          - channel: '#slo-alerts'
+            title: 'SLO Alert'
+            text: |
+              {{ range .Alerts }}
+              *SLO:* {{ .Annotations.summary }}
+              *Service:* {{ .Labels.service }}
+              *Severity:* {{ .Labels.severity }}
+              *Runbook:* <{{ .Annotations.runbook_url }}|Runbook>
+              {{ if .Annotations.drilldown_url }}*Drilldown:* <{{ .Annotations.drilldown_url }}|Logs>{{ end }}
               {{ end }}
             color: 'warning'
             

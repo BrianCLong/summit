@@ -12,8 +12,14 @@ spec:
           for: 10m
           labels:
             severity: warning
+            service: api
+            slo: latency_p95
           annotations:
             summary: High API latency P95 (>1s)
+            description: P95 latency is above 1s for API services over 10m.
+            runbook_url: "https://docs.intelgraph.com/runbooks/high-latency"
+            dashboard_url: "https://grafana.intelgraph.io/d/api-golden-signals/api-golden-signals"
+            drilldown_url: 'https://grafana.intelgraph.io/explore?orgId=1&left={"datasource":"Loki","queries":[{"expr":"{app=\\"intelgraph-server\\"} |= \\"Slow query\\""}],"range":{"from":"now-1h","to":"now"}}'
         - alert: HighErrorRate
           expr:
             sum(rate(http_requests_total{status=~"5..",job=~"server|ai-service|nlp-service|osint-service"}[5m]))
@@ -21,5 +27,60 @@ spec:
           for: 10m
           labels:
             severity: critical
+            service: api
+            slo: error_rate
           annotations:
             summary: Error rate above 2%
+            description: API 5xx error rate is above 2% over 10m.
+            runbook_url: "https://docs.intelgraph.com/runbooks/high-error-rate"
+            dashboard_url: "https://grafana.intelgraph.io/d/api-golden-signals/api-golden-signals"
+            drilldown_url: 'https://grafana.intelgraph.io/explore?orgId=1&left={"datasource":"Loki","queries":[{"expr":"{app=\\"intelgraph-server\\"} |= \\"Slow query\\""}],"range":{"from":"now-1h","to":"now"}}'
+        - alert: APIErrorBudgetBurnFast
+          expr: |
+            (
+              sum(rate(http_requests_total{status=~"5..",job=~"server|ai-service|nlp-service|osint-service"}[5m]))
+              /
+              sum(rate(http_requests_total{job=~"server|ai-service|nlp-service|osint-service"}[5m]))
+            ) > (0.001 * 14)
+          for: 5m
+          labels:
+            severity: critical
+            service: api
+            slo: error_budget
+          annotations:
+            summary: API fast error budget burn
+            description: 5xx rate exceeds 14x burn on a 99.9% SLO over 5m.
+            runbook_url: "https://docs.intelgraph.com/runbooks/slo-burn"
+            dashboard_url: "https://grafana.intelgraph.io/d/api-golden-signals/api-golden-signals"
+            drilldown_url: 'https://grafana.intelgraph.io/explore?orgId=1&left={"datasource":"Loki","queries":[{"expr":"{app=\\"intelgraph-server\\"} |= \\"Slow query\\""}],"range":{"from":"now-1h","to":"now"}}'
+        - alert: APIErrorBudgetBurnSlow
+          expr: |
+            (
+              sum(rate(http_requests_total{status=~"5..",job=~"server|ai-service|nlp-service|osint-service"}[1h]))
+              /
+              sum(rate(http_requests_total{job=~"server|ai-service|nlp-service|osint-service"}[1h]))
+            ) > (0.001 * 6)
+          for: 2h
+          labels:
+            severity: warning
+            service: api
+            slo: error_budget
+          annotations:
+            summary: API slow error budget burn
+            description: 5xx rate exceeds 6x burn on a 99.9% SLO over 1h.
+            runbook_url: "https://docs.intelgraph.com/runbooks/slo-burn"
+            dashboard_url: "https://grafana.intelgraph.io/d/api-golden-signals/api-golden-signals"
+            drilldown_url: 'https://grafana.intelgraph.io/explore?orgId=1&left={"datasource":"Loki","queries":[{"expr":"{app=\\"intelgraph-server\\"} |= \\"Slow query\\""}],"range":{"from":"now-1h","to":"now"}}'
+        - alert: SlowQueryKillRateHigh
+          expr: sum(rate(intelgraph_slow_queries_total{operation="auto_kill"}[5m])) by (database, tenant_id) > 0.05
+          for: 10m
+          labels:
+            severity: warning
+            service: database
+            slo: slow_query_kills
+          annotations:
+            summary: Slow query auto-kill activity elevated
+            description: Auto-kill rate is above 0.05/s over 10m. Review kill events and query traces.
+            runbook_url: "https://docs.intelgraph.com/runbooks/slow-query-killer"
+            dashboard_url: "https://grafana.intelgraph.io/d/api-golden-signals/api-golden-signals"
+            drilldown_url: 'https://grafana.intelgraph.io/explore?orgId=1&left={"datasource":"Loki","queries":[{"expr":"{app=\\"intelgraph-server\\"} |= \\"Slow query killed successfully\\""}],"range":{"from":"now-2h","to":"now"}}'
