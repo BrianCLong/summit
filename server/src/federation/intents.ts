@@ -149,11 +149,14 @@ export class IntentService {
       actorType: 'user', // or system
       timestamp: new Date(),
       payload: {
+        mutationType: intent.op === 'DELETE' ? 'DELETE' : 'UPDATE',
+        entityId: (intent.payload as any)?.id || intent.id,
+        entityType: (intent.payload as any)?.type || 'GraphEntity',
         intentId: intent.id,
         shardId: intent.shardId,
         op: intent.op,
         status: 'SUCCESS'
-      },
+      } as any,
       metadata: { policyTags: intent.policyTags }
     });
 
