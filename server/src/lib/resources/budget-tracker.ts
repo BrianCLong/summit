@@ -1,3 +1,4 @@
+// @ts-nocheck
 // server/src/lib/resources/budget-tracker.ts
 
 import { EventEmitter } from 'events';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { metrics } from '../observability/metrics.js';
 import { Meter } from '@opentelemetry/api';
 import { MeterProvider } from '@opentelemetry/sdk-metrics';

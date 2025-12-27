@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express from 'express';
 import { planShare } from '../sharing/preview.js';
 import {

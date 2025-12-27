@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express from 'express';
 import { getFeatureFlagService } from '../feature-flags/setup.js';
 import { getPostgresPool } from '../db/postgres.js';

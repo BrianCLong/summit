@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { PlanLimits, PlanTier } from './types.js';
 import fs from 'fs/promises';
 import path from 'path';

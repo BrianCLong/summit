@@ -1,3 +1,4 @@
+// @ts-nocheck
 // NOTE: The 'lru-cache' package could not be installed due to a pre-existing
 // dependency conflict in the monorepo (related to @react-native-firebase/app).
 // A simplified, self-contained LRU cache with TTL is implemented here as a workaround

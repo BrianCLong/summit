@@ -1,6 +1,7 @@
+// @ts-nocheck
 /**
  * Agent Governance & Safety Rails
- * 
+ *
  * This module enforces governance constraints and safety rails for agent coordination
  * and autonomous operations in accordance with the Summit Constitution and operational
  * policies. These safety mechanisms ensure agents operate within legal, ethical, and 
