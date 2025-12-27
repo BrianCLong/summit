@@ -1,0 +1,34 @@
+{
+  "current": "v1",
+  "latest": "v1",
+  "default": "v1",
+  "supported": ["v1"],
+  "deprecated": [],
+  "sunset": [],
+  "versions": {
+    "v1": {
+      "status": "active",
+      "releaseDate": "2025-12-27",
+      "sunsetDate": null,
+      "schemaPath": "/api-schemas/v1/",
+      "documentationUrl": "https://docs.summit.io/api/v1",
+      "endpoints": {
+        "graphql": "/api/v1/graphql",
+        "rest": "/api/v1/*"
+      },
+      "features": [
+        "GraphQL API for runbooks and runs",
+        "Coherence signal ingestion",
+        "Batch signal processing",
+        "Coherence analysis",
+        "Mission management"
+      ],
+      "breaking_changes_from_previous": null
+    }
+  },
+  "metadata": {
+    "lastUpdated": "2025-12-27T00:00:00Z",
+    "maintainer": "Platform Engineering Team",
+    "policyDocument": "/api-schemas/VERSION_POLICY.md"
+  }
+}

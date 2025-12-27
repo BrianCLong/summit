@@ -1,0 +1,38 @@
+{
+  "version": "v1",
+  "status": "active",
+  "createdAt": "2025-12-27T00:00:00Z",
+  "updatedAt": "2025-12-27T00:00:00Z",
+  "sunsetDate": null,
+  "schemaHash": {
+    "graphql": "sha256:d917320558d8df5aa3b2d0d4f091bff582261bd8ed98250ca78980a75fd78c42",
+    "openapi": "sha256:6207a49038728ea0a8664af4e9a06b235330eb6ae1390d1e3162dcc435e6c3d4"
+  },
+  "files": {
+    "graphql": "graphql-schema-v1.graphql",
+    "openapi": "openapi-spec-v1.json",
+    "metadata": "version-metadata.json"
+  },
+  "endpoints": {
+    "graphql": "/api/v1/graphql",
+    "rest": "/api/v1/*"
+  },
+  "changelog": [
+    {
+      "date": "2025-12-27",
+      "type": "creation",
+      "description": "Initial v1 schema snapshot for GA hardening",
+      "author": "Platform Engineering Team",
+      "epic": "GA-E3: API Contracts"
+    }
+  ],
+  "documentation": {
+    "versionPolicy": "/api-schemas/VERSION_POLICY.md",
+    "apiVersioning": "/docs/API_VERSIONING.md",
+    "migrationGuides": []
+  },
+  "compatibility": {
+    "backwardCompatible": [],
+    "forwardCompatible": []
+  }
+}
