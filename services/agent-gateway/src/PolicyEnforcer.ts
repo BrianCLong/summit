@@ -20,6 +20,7 @@ export interface PolicyEvaluationInput {
   tenantId: string;
   projectId?: string;
   operationMode: OperationMode;
+  correlationId?: string;
 }
 
 export class PolicyEnforcer {
@@ -107,6 +108,7 @@ export class PolicyEnforcer {
       },
       context: {
         operationMode: input.operationMode,
+        correlationId: input.correlationId,
         timestamp: new Date().toISOString(),
       },
     };

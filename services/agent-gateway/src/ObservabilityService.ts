@@ -10,6 +10,7 @@ import type { Agent, AgentRun } from './types.js';
 export interface TraceContext {
   traceId: string;
   spanId: string;
+  correlationId?: string;
 }
 
 export class ObservabilityService {
@@ -22,11 +23,12 @@ export class ObservabilityService {
    * Start a distributed trace for an agent run
    * AGENT-7a: Structured logging for agent runs
    */
-  async startTrace(agent: Agent, run: AgentRun): Promise<TraceContext> {
+  async startTrace(agent: Agent, run: AgentRun, correlationId?: string): Promise<TraceContext> {
     if (!this.tracingEnabled) {
       return {
         traceId: randomUUID(),
         spanId: randomUUID(),
+        correlationId,
       };
     }
 
@@ -42,6 +44,7 @@ export class ObservabilityService {
       runId: run.id,
       tenantId: run.tenantId,
       operationMode: run.operationMode,
+      correlationId,
       timestamp: new Date().toISOString(),
     });
 
@@ -57,7 +60,7 @@ export class ObservabilityService {
     //   },
     // });
 
-    return { traceId, spanId };
+    return { traceId, spanId, correlationId };
   }
 
   /**
@@ -66,7 +69,7 @@ export class ObservabilityService {
   async endTrace(
     traceId: string,
     spanId: string,
-    result: { status: 'success' | 'error'; error?: string }
+    result: { status: 'success' | 'error'; error?: string; correlationId?: string }
   ): Promise<void> {
     if (!this.tracingEnabled) {
       return;
@@ -77,6 +80,7 @@ export class ObservabilityService {
       spanId,
       status: result.status,
       error: result.error,
+      correlationId: result.correlationId,
       timestamp: new Date().toISOString(),
     });
 
@@ -201,7 +205,8 @@ export class ObservabilityService {
     agentName: string,
     actionType: string,
     reason: string,
-    traceId?: string
+    traceId?: string,
+    correlationId?: string
   ): Promise<void> {
     this.log('warn', 'agent_policy_violation', {
       agentId,
@@ -209,6 +214,7 @@ export class ObservabilityService {
       actionType,
       reason,
       traceId,
+      correlationId,
     });
 
     await this.recordMetric('agent.policy_violations.total', 1, {
@@ -248,7 +254,8 @@ export class ObservabilityService {
     actionType: string,
     riskLevel: string,
     requiresApproval: boolean,
-    traceId?: string
+    traceId?: string,
+    correlationId?: string
   ): Promise<void> {
     this.log('warn', 'agent_high_risk_action', {
       agentId,
@@ -257,6 +264,7 @@ export class ObservabilityService {
       riskLevel,
       requiresApproval,
       traceId,
+      correlationId,
     });
 
     await this.recordMetric('agent.high_risk_actions.total', 1, {
@@ -274,7 +282,8 @@ export class ObservabilityService {
     agentId: string,
     decision: 'approved' | 'rejected',
     decidedBy: string,
-    traceId?: string
+    traceId?: string,
+    correlationId?: string
   ): Promise<void> {
     this.log('info', 'agent_approval_decision', {
       approvalId,
@@ -282,11 +291,19 @@ export class ObservabilityService {
       decision,
       decidedBy,
       traceId,
+      correlationId,
     });
 
     await this.recordMetric('agent.approvals.decisions.total', 1, {
       agent_id: agentId,
       decision,
     });
+  }
+
+  async logGatewayEvent(
+    stage: 'ingress' | 'auth' | 'policy' | 'execution' | 'egress',
+    data: Record<string, unknown>
+  ): Promise<void> {
+    this.log('info', `gateway.${stage}`, data);
   }
 }

@@ -141,6 +141,8 @@ export interface AgentRun {
   tenantId: string;
   projectId?: string;
   operationMode: OperationMode;
+  correlationId?: string;
+  requestId?: string;
   triggerType: TriggerType;
   triggerSource?: Record<string, unknown>;
   status: RunStatus;
@@ -435,12 +437,14 @@ export interface AgentRequest {
     payload?: Record<string, unknown>;
   };
   metadata?: Record<string, unknown>;
+  correlationId?: string;
 }
 
 export interface AgentResponse<T = unknown> {
   success: boolean;
   runId: string;
   operationMode: OperationMode;
+  correlationId?: string;
   action: {
     id: string;
     type: ActionType;
@@ -459,6 +463,24 @@ export interface AgentResponse<T = unknown> {
     expiresAt: Date;
   };
   metadata?: Record<string, unknown>;
+}
+
+export interface AuthHookContext {
+  agent: Agent;
+  request: AgentRequest;
+  correlationId: string;
+}
+
+export interface PolicyHookContext {
+  agent: Agent;
+  action: AgentAction;
+  decision: PolicyDecision;
+  correlationId: string;
+}
+
+export interface GatewayHooks {
+  onAuthSuccess?: (context: AuthHookContext) => Promise<void> | void;
+  onPolicyDecision?: (context: PolicyHookContext) => Promise<void> | void;
 }
 
 // ============================================================================

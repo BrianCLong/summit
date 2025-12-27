@@ -7,6 +7,7 @@
 import express, { type Express } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import { randomUUID } from 'crypto';
 import { Pool } from 'pg';
 import { AgentService } from './AgentService.js';
 import { AgentGateway } from './AgentGateway.js';
@@ -18,8 +19,8 @@ import type {
   AgentRequest,
   GatewayConfig,
   ApprovalDecision,
-  AgentType,
 } from './types.js';
+import { validateAgentRequest } from './schemas.js';
 
 // ============================================================================
 // Configuration
@@ -92,6 +93,14 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
+// Correlation IDs
+app.use((req, res, next) => {
+  const headerId = (req.headers['x-correlation-id'] as string) || randomUUID();
+  (req as any).correlationId = headerId;
+  res.setHeader('x-correlation-id', headerId);
+  next();
+});
+
 // Request logging middleware
 app.use((req, res, next) => {
   const startTime = Date.now();
@@ -105,6 +114,7 @@ app.use((req, res, next) => {
       duration,
       ip: req.ip,
       userAgent: req.get('user-agent'),
+      correlationId: (req as any).correlationId,
     }));
   });
   next();
@@ -278,16 +288,23 @@ app.post('/api/agent/execute', authenticateAgent, async (req, res) => {
     const agent = (req as any).agent;
     const authToken = req.headers.authorization!.substring(7);
 
-    const request: AgentRequest = {
+    const parsedRequest = validateAgentRequest({
+      ...req.body,
       agentId: agent.id,
-      tenantId: req.body.tenantId,
-      projectId: req.body.projectId,
-      operationMode: req.body.operationMode,
-      action: req.body.action,
-      metadata: req.body.metadata,
-    };
+      correlationId: (req as any).correlationId,
+    });
 
-    const response = await gateway.executeRequest(request, authToken);
+    if (!parsedRequest.success) {
+      return res.status(400).json({
+        error: 'Invalid request payload',
+        details: parsedRequest.error.errors.map(issue => ({
+          path: issue.path.join('.'),
+          message: issue.message,
+        })),
+      });
+    }
+
+    const response = await gateway.executeRequest(parsedRequest.data as AgentRequest, authToken);
     res.json(response);
   } catch (error: any) {
     console.error('Execute request error:', error);

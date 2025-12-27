@@ -19,6 +19,7 @@ import type {
   GatewayConfig,
   TriggerType,
   PolicyDecision,
+  GatewayHooks,
 } from './types.js';
 import { OPERATION_MODES } from './types.js';
 import { AgentService } from './AgentService.js';
@@ -35,7 +36,8 @@ export class AgentGateway {
     private quotaManager: QuotaManager,
     private approvalService: ApprovalService,
     private observability: ObservabilityService,
-    private config: GatewayConfig
+    private config: GatewayConfig,
+    private hooks: GatewayHooks = {}
   ) {}
 
   /**
@@ -47,9 +49,18 @@ export class AgentGateway {
     authToken: string
   ): Promise<AgentResponse<T>> {
     const startTime = Date.now();
+    const correlationId = request.correlationId || randomUUID();
+    request.correlationId = correlationId;
     let agent: Agent | null = null;
     let run: AgentRun | null = null;
     let action: AgentAction | null = null;
+
+    await this.observability.logGatewayEvent('ingress', {
+      correlationId,
+      agentId: request.agentId,
+      tenantId: request.tenantId,
+      actionType: request.action?.type,
+    });
 
     try {
       // =====================================================================
@@ -59,6 +70,19 @@ export class AgentGateway {
       if (!agent) {
         throw new Error('Authentication failed: Invalid credentials');
       }
+
+      await this.hooks.onAuthSuccess?.({
+        agent,
+        request: { ...request, correlationId },
+        correlationId,
+      });
+
+      await this.observability.logGatewayEvent('auth', {
+        correlationId,
+        agentId: agent.id,
+        tenantId: request.tenantId,
+        status: 'authenticated',
+      });
 
       // Check agent status
       if (agent.status !== 'active') {
@@ -83,14 +107,15 @@ export class AgentGateway {
       // =====================================================================
       // Create agent run
       // =====================================================================
-      run = await this.createRun(agent, request, operationMode);
+      run = await this.createRun(agent, request, operationMode, correlationId);
 
       // =====================================================================
       // AGENT-7: Observability - Start tracing
       // =====================================================================
-      const { traceId, spanId } = await this.observability.startTrace(agent, run);
+      const { traceId, spanId } = await this.observability.startTrace(agent, run, correlationId);
       run.traceId = traceId;
       run.spanId = spanId;
+      run.correlationId = correlationId;
 
       // =====================================================================
       // Assess risk and create action
@@ -107,9 +132,25 @@ export class AgentGateway {
         tenantId: request.tenantId,
         projectId: request.projectId,
         operationMode,
+        correlationId,
       });
 
       action.policyDecision = policyDecision;
+
+      await this.observability.logGatewayEvent('policy', {
+        correlationId,
+        agentId: agent.id,
+        actionId: action.id,
+        actionType: action.actionType,
+        allowed: policyDecision.allowed,
+      });
+
+      await this.hooks.onPolicyDecision?.({
+        agent,
+        action,
+        decision: policyDecision,
+        correlationId,
+      });
 
       // Handle policy decision
       if (!policyDecision.allowed) {
@@ -123,7 +164,7 @@ export class AgentGateway {
             code: 'POLICY_DENIED',
             message: policyDecision.reason,
           },
-        });
+        }, correlationId);
       }
 
       // =====================================================================
@@ -158,7 +199,7 @@ export class AgentGateway {
             status: 'pending',
             expiresAt: approval.expiresAt,
           },
-        });
+        }, correlationId);
       }
 
       // =====================================================================
@@ -206,12 +247,18 @@ export class AgentGateway {
       // =====================================================================
       // AGENT-7: Complete tracing
       // =====================================================================
-      await this.observability.endTrace(traceId, spanId, { status: 'success' });
+      await this.observability.endTrace(traceId, spanId, { status: 'success', correlationId });
+
+      await this.observability.logGatewayEvent('egress', {
+        correlationId,
+        runId: run.id,
+        status: 'success',
+      });
 
       return this.buildResponse(run, action, operationMode, {
         success: true,
         result,
-      });
+      }, correlationId);
     } catch (error: any) {
       const errorMessage = error.message || 'Unknown error';
 
@@ -239,8 +286,16 @@ export class AgentGateway {
         await this.observability.endTrace(run.traceId, run.spanId, {
           status: 'error',
           error: errorMessage,
+          correlationId,
         });
       }
+
+      await this.observability.logGatewayEvent('egress', {
+        correlationId,
+        runId: run?.id,
+        status: 'error',
+        error: errorMessage,
+      });
 
       return this.buildResponse(
         run,
@@ -253,7 +308,8 @@ export class AgentGateway {
             message: errorMessage,
             details: error.details,
           },
-        }
+        },
+        correlationId
       );
     }
   }
@@ -463,7 +519,12 @@ export class AgentGateway {
   // Database operations
   // =========================================================================
 
-  private async createRun(agent: Agent, request: AgentRequest, operationMode: OperationMode): Promise<AgentRun> {
+  private async createRun(
+    agent: Agent,
+    request: AgentRequest,
+    operationMode: OperationMode,
+    correlationId?: string
+  ): Promise<AgentRun> {
     const result = await this.db.query(
       `INSERT INTO agent_runs (
         agent_id, tenant_id, project_id, operation_mode,
@@ -481,7 +542,9 @@ export class AgentGateway {
       ]
     );
 
-    return this.mapRowToRun(result.rows[0]);
+    const run = this.mapRowToRun(result.rows[0]);
+    run.correlationId = correlationId;
+    return run;
   }
 
   private async updateRun(run: AgentRun): Promise<void> {
@@ -564,12 +627,14 @@ export class AgentGateway {
       result?: T;
       error?: { code: string; message: string; details?: Record<string, unknown> };
       approval?: { id: string; status: string; expiresAt: Date };
-    }
+    },
+    correlationId?: string
   ): AgentResponse<T> {
     return {
       success: data.success,
       runId: run?.id || 'unknown',
       operationMode,
+      correlationId: correlationId || run?.correlationId,
       action: {
         id: action?.id || 'unknown',
         type: action?.actionType || 'unknown',
@@ -598,6 +663,7 @@ export class AgentGateway {
       status: row.status,
       startedAt: row.started_at,
       completedAt: row.completed_at,
+      correlationId: row.correlation_id || row.correlationId,
       actionsProposed: JSON.parse(row.actions_proposed || '[]'),
       actionsExecuted: JSON.parse(row.actions_executed || '[]'),
       actionsDenied: JSON.parse(row.actions_denied || '[]'),
