@@ -17,49 +17,49 @@ on:
   workflow_call:
     inputs:
       service:
-        description: 'Service name'
+        description: "Service name"
         required: true
         type: string
       working-directory:
-        description: 'Working directory for the service'
+        description: "Working directory for the service"
         required: false
         type: string
-        default: '.'
+        default: "."
       environment:
-        description: 'Target environment (staging, production)'
+        description: "Target environment (staging, production)"
         required: false
         type: string
-        default: 'staging'
+        default: "staging"
       node-version:
-        description: 'Node.js version'
+        description: "Node.js version"
         required: false
         type: string
-        default: '20'
+        default: "20"
       skip-security:
-        description: 'Skip security scanning (requires exception)'
+        description: "Skip security scanning (requires exception)"
         required: false
         type: boolean
         default: false
       skip-deploy:
-        description: 'Skip deployment stage'
+        description: "Skip deployment stage"
         required: false
         type: boolean
         default: false
       coverage-threshold:
-        description: 'Minimum code coverage percentage'
+        description: "Minimum code coverage percentage"
         required: false
         type: number
         default: 80
 
     outputs:
       image:
-        description: 'Built container image'
+        description: "Built container image"
         value: ${{ jobs.build.outputs.image }}
       digest:
-        description: 'Image digest'
+        description: "Image digest"
         value: ${{ jobs.build.outputs.digest }}
       deployed:
-        description: 'Whether deployment was successful'
+        description: "Whether deployment was successful"
         value: ${{ jobs.verify.outputs.success }}
 
 env:
@@ -255,17 +255,17 @@ jobs:
       - name: Trivy - Filesystem Scan
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
+          scan-type: "fs"
           scan-ref: ${{ inputs.working-directory }}
-          format: 'sarif'
-          output: 'trivy-fs-results.sarif'
-          severity: 'CRITICAL,HIGH'
+          format: "sarif"
+          output: "trivy-fs-results.sarif"
+          severity: "CRITICAL,HIGH"
 
       - name: Upload Trivy Results
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          sarif_file: 'trivy-fs-results.sarif'
+          sarif_file: "trivy-fs-results.sarif"
 
   # ============================================================================
   # Stage 4: Build
@@ -402,9 +402,14 @@ jobs:
       - name: Verify Deployment
         id: verify
         run: |
-          echo "Verifying deployment..."
-          # Placeholder for actual verification
+          echo "Verifying deployment digest..."
+          ./deploy/verify-deployment-digest.sh
           echo "healthy=true" >> $GITHUB_OUTPUT
+        env:
+          K8S_NAMESPACE: ${{ inputs.environment }}
+          K8S_DEPLOYMENT: ${{ inputs.service }}
+          K8S_CONTAINER: ${{ inputs.service }}
+          SIGNED_ARTIFACT_DIGEST: ${{ needs.build.outputs.digest }}
 
       - name: Post Verification Status
         run: |
@@ -414,6 +419,13 @@ jobs:
             echo "❌ Deployment verification failed"
             exit 1
           fi
+
+      - name: Upload deployment evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-evidence-${{ inputs.service }}
+          path: evidence-bundles/*.json
 
   # ============================================================================
   # Summary
