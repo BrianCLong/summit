@@ -1,7 +1,7 @@
 # IntelGraph Threat Modeling Framework
 
-> **Version**: 1.0.0
-> **Last Updated**: 2025-12-06
+> **Version**: 1.1.0
+> **Last Updated**: 2025-12-27
 > **Owner**: Security Team
 > **Status**: Active
 
@@ -29,30 +29,39 @@ We use **STRIDE** as our base framework with additional categories for AI/ML-spe
 
 ### STRIDE Categories
 
-| Category | Description | Key Questions |
-|----------|-------------|---------------|
-| **S**poofing | Impersonating a user, service, or system | Can an attacker pretend to be someone else? |
-| **T**ampering | Modifying data or code maliciously | Can data be altered in transit or at rest? |
-| **R**epudiation | Denying actions without proof | Can actions be traced and attributed? |
-| **I**nformation Disclosure | Exposing data to unauthorized parties | Can sensitive data leak? |
-| **D**enial of Service | Making systems unavailable | Can the feature be overwhelmed or crashed? |
-| **E**levation of Privilege | Gaining unauthorized access | Can an attacker gain higher permissions? |
+| Category                   | Description                              | Key Questions                               |
+| -------------------------- | ---------------------------------------- | ------------------------------------------- |
+| **S**poofing               | Impersonating a user, service, or system | Can an attacker pretend to be someone else? |
+| **T**ampering              | Modifying data or code maliciously       | Can data be altered in transit or at rest?  |
+| **R**epudiation            | Denying actions without proof            | Can actions be traced and attributed?       |
+| **I**nformation Disclosure | Exposing data to unauthorized parties    | Can sensitive data leak?                    |
+| **D**enial of Service      | Making systems unavailable               | Can the feature be overwhelmed or crashed?  |
+| **E**levation of Privilege | Gaining unauthorized access              | Can an attacker gain higher permissions?    |
 
 ### AI/Agent-Specific Categories (Extension)
 
-| Category | Description | Key Questions |
-|----------|-------------|---------------|
-| **PI** - Prompt Injection | Manipulating LLM behavior via crafted inputs | Can user input alter agent behavior? |
-| **MA** - Model Abuse | Using AI capabilities for unintended purposes | Can the model be misused? |
-| **DP** - Data Poisoning | Corrupting training or reference data | Can adversaries influence model outputs? |
-| **GH** - Goal Hijacking | Diverting agent from intended objectives | Can agent goals be subverted? |
-| **OA** - Over-Autonomy | Agents taking unreviewed high-risk actions | Are human checkpoints in place? |
+| Category                  | Description                                   | Key Questions                            |
+| ------------------------- | --------------------------------------------- | ---------------------------------------- |
+| **PI** - Prompt Injection | Manipulating LLM behavior via crafted inputs  | Can user input alter agent behavior?     |
+| **MA** - Model Abuse      | Using AI capabilities for unintended purposes | Can the model be misused?                |
+| **DP** - Data Poisoning   | Corrupting training or reference data         | Can adversaries influence model outputs? |
+| **GH** - Goal Hijacking   | Diverting agent from intended objectives      | Can agent goals be subverted?            |
+| **OA** - Over-Autonomy    | Agents taking unreviewed high-risk actions    | Are human checkpoints in place?          |
+
+### Supply Chain, Insider, and Third-Party Categories (Extension)
+
+| Category              | Description                                                        | Key Questions                                                     |
+| --------------------- | ------------------------------------------------------------------ | ----------------------------------------------------------------- |
+| **SC** - Supply Chain | Dependency integrity, build pipeline tampering, unsigned artifacts | Are inputs pinned, attested, and verified end-to-end?             |
+| **TP** - Third-Party  | Vendor or connector abuse, over-scoped integrations                | Do vendors operate with least privilege and monitored egress?     |
+| **IN** - Insider      | Privileged misuse, unreviewed deployments, audit evasion           | Are dual control and immutable logs enforced for privileged work? |
 
 ## Required Sections Per Threat Model
 
 Each threat model MUST include:
 
 ### 1. Feature Overview
+
 - **Name**: Feature/component name
 - **Description**: 1-2 sentence summary
 - **Owner**: Team/individual responsible
@@ -60,69 +69,80 @@ Each threat model MUST include:
 - **Risk Tier**: Critical / High / Medium / Low
 
 ### 2. Assets
+
 What are we protecting?
 
 ```markdown
-| Asset | Sensitivity | Description |
-|-------|-------------|-------------|
-| User credentials | Critical | Passwords, tokens, API keys |
-| Investigation data | High | Intelligence analysis results |
+| Asset              | Sensitivity | Description                   |
+| ------------------ | ----------- | ----------------------------- |
+| User credentials   | Critical    | Passwords, tokens, API keys   |
+| Investigation data | High        | Intelligence analysis results |
 ```
 
 ### 3. Entry Points
+
 Where can actors interact with the system?
 
 ```markdown
-| Entry Point | Protocol | Authentication | Trust Level |
-|-------------|----------|----------------|-------------|
-| GraphQL API | HTTPS | JWT | Authenticated |
-| WebSocket | WSS | JWT | Authenticated |
+| Entry Point | Protocol | Authentication | Trust Level   |
+| ----------- | -------- | -------------- | ------------- |
+| GraphQL API | HTTPS    | JWT            | Authenticated |
+| WebSocket   | WSS      | JWT            | Authenticated |
 ```
 
 ### 4. Trust Boundaries
+
 Where does trust change?
 
 ```markdown
-| Boundary | From | To | Controls |
-|----------|------|-----|----------|
+| Boundary     | From      | To            | Controls            |
+| ------------ | --------- | ------------- | ------------------- |
 | Client → API | Untrusted | Authenticated | TLS, JWT validation |
 ```
 
 ### 5. Threats
+
 Enumerated threats with STRIDE/AI classification:
 
 ```markdown
-| ID | Category | Threat | Likelihood | Impact | Risk |
-|----|----------|--------|------------|--------|------|
-| T1 | S | Session hijacking | Medium | High | High |
+| ID  | Category | Threat            | Likelihood | Impact | Risk |
+| --- | -------- | ----------------- | ---------- | ------ | ---- |
+| T1  | S        | Session hijacking | Medium     | High   | High |
 ```
 
 ### 6. Mitigations
+
 Controls addressing each threat:
 
 ```markdown
-| Threat ID | Mitigation | Status | Implementation |
-|-----------|------------|--------|----------------|
-| T1 | Short-lived tokens | Implemented | server/src/auth/jwt.ts |
+| Threat ID | Mitigation         | Status      | Implementation         |
+| --------- | ------------------ | ----------- | ---------------------- |
+| T1        | Short-lived tokens | Implemented | server/src/auth/jwt.ts |
 ```
 
 ### 7. Residual Risk
+
 What remains after mitigations?
 
 ```markdown
-| Threat ID | Residual Risk | Acceptance | Accepted By |
-|-----------|---------------|------------|-------------|
-| T1 | Token theft during validity | Low | Security Team |
+| Threat ID | Residual Risk               | Acceptance | Accepted By   |
+| --------- | --------------------------- | ---------- | ------------- |
+| T1        | Token theft during validity | Low        | Security Team |
+
+**Supply chain/insider/third-party coverage is mandatory.** Each threat model must include at least one SC, TP, and IN threat
+with explicit mitigations and automation hooks referencing `docs/security/control-implementations.json`.
 ```
 
 ## Risk Scoring
 
 ### Likelihood Scale
+
 - **High**: Likely to occur; known attack patterns exist
 - **Medium**: Possible under specific conditions
 - **Low**: Requires significant effort or unusual circumstances
 
 ### Impact Scale
+
 - **Critical**: System-wide compromise, major data breach
 - **High**: Significant data exposure or service disruption
 - **Medium**: Limited data exposure or degraded service
@@ -130,38 +150,43 @@ What remains after mitigations?
 
 ### Risk Matrix
 
-|              | Low Impact | Medium Impact | High Impact | Critical Impact |
-|--------------|------------|---------------|-------------|-----------------|
-| **High**     | Medium     | High          | Critical    | Critical        |
-| **Medium**   | Low        | Medium        | High        | Critical        |
-| **Low**      | Low        | Low           | Medium      | High            |
+|            | Low Impact | Medium Impact | High Impact | Critical Impact |
+| ---------- | ---------- | ------------- | ----------- | --------------- |
+| **High**   | Medium     | High          | Critical    | Critical        |
+| **Medium** | Low        | Medium        | High        | Critical        |
+| **Low**    | Low        | Low           | Medium      | High            |
 
 ## Risk Tiers for Features
 
-| Tier | Criteria | Review Cadence | Approvers |
-|------|----------|----------------|-----------|
-| **Critical** | Auth, multi-tenant, AI agents, secrets | 30 days | Security Lead + Architect |
-| **High** | Data ingestion, exports, integrations | 60 days | Security Team |
-| **Medium** | Core features, analytics | 90 days | Tech Lead |
-| **Low** | UI components, internal tools | 180 days | Developer |
+| Tier         | Criteria                               | Review Cadence | Approvers                 |
+| ------------ | -------------------------------------- | -------------- | ------------------------- |
+| **Critical** | Auth, multi-tenant, AI agents, secrets | 30 days        | Security Lead + Architect |
+| **High**     | Data ingestion, exports, integrations  | 60 days        | Security Team             |
+| **Medium**   | Core features, analytics               | 90 days        | Tech Lead                 |
+| **Low**      | UI components, internal tools          | 180 days       | Developer                 |
 
 ## Coverage Requirements
 
 ### Mandatory Coverage
+
 These directories/features MUST have threat models:
 
-| Path Pattern | Feature | Risk Tier |
-|--------------|---------|-----------|
-| `server/src/auth/**` | Authentication | Critical |
-| `server/src/maestro/**` | AI Orchestration | Critical |
-| `services/copilot/**` | AI Copilot | Critical |
-| `server/src/graphql/intelgraph/**` | Graph Queries | High |
-| `SECURITY/policy/**` | Authorization Policies | Critical |
-| `services/api/**` | Core API | High |
-| `server/src/conductor/**` | Conductor/JWT | Critical |
-| `packages/plugin-system/**` | Plugin System | High |
+| Path Pattern                                                           | Feature                    | Risk Tier |
+| ---------------------------------------------------------------------- | -------------------------- | --------- |
+| `server/src/auth/**`                                                   | Authentication             | Critical  |
+| `server/src/maestro/**`                                                | AI Orchestration           | Critical  |
+| `services/copilot/**`                                                  | AI Copilot                 | Critical  |
+| `server/src/graphql/intelgraph/**`                                     | Graph Queries              | High      |
+| `SECURITY/policy/**`                                                   | Authorization Policies     | Critical  |
+| `services/api/**`                                                      | Core API                   | High      |
+| `server/src/conductor/**`                                              | Conductor/JWT              | Critical  |
+| `packages/plugin-system/**`                                            | Plugin System              | High      |
+| `**/package.json`, `**/pnpm-lock.yaml`, `**/Cargo.{toml,lock}`         | Dependency Supply Chain    | Critical  |
+| `Dockerfile*`, `docker/**`, `.github/workflows/**`                     | Build & Artifact Integrity | Critical  |
+| `services/**/connector/**`, `adapters/**`, `packages/**/connector*/**` | Third-Party Connectors     | High      |
 
 ### Staleness Thresholds
+
 - **Critical** features: Alert if > 30 days old
 - **High** features: Alert if > 60 days old
 - **Medium** features: Alert if > 90 days old
@@ -169,21 +194,26 @@ These directories/features MUST have threat models:
 ## Workflow Integration
 
 ### 1. New Feature Development
+
 1. Create threat model from template during design
 2. Review with Security Team before implementation
 3. Reference threat model in PR description
-4. Update threat model if design changes
+4. Run `scripts/security/enforce-threat-model-design.ts --base-ref main` on every ADR/design PR
+5. Update threat model and regenerate control automation if design changes
 
 ### 2. Code Changes to Existing Features
+
 1. CI checks if change touches covered paths
 2. If threat model exists: verify not stale
 3. If threat model missing: advisory comment on PR
 4. Update threat model if change affects threat surface
 
 ### 3. Periodic Review
+
 1. Security Team reviews threat model index monthly
 2. Stale models flagged for owner action
 3. Annual comprehensive review of all models
+4. Regenerate `docs/security/generated/control-automation-plan.md` from the JSON control library
 
 ## File Locations
 
@@ -212,9 +242,22 @@ The `scripts/security/check-threat-model-coverage.ts` script:
 **Phase 1 (Current)**: Advisory only - does not block PRs
 **Phase 2 (Future)**: Blocking for Critical tier features
 
+The `scripts/security/enforce-threat-model-design.ts` script:
+
+1. Detects new ADRs or design documents
+2. Verifies they reference an approved threat model and that `THREAT_MODEL_INDEX.md` is updated
+3. Blocks (`exit 1`) when missing, preventing feature design merges without an updated model
+
+The `scripts/security/generate-control-automation.ts` script:
+
+1. Reads `docs/security/control-implementations.json`
+2. Generates `docs/security/generated/control-automation-plan.md` for CI/ops consumption
+3. Ensures mitigations have executable controls for supply chain, insider, and third-party threats
+
 ## Quick Reference
 
 ### Creating a New Threat Model
+
 ```bash
 cp docs/security/threat-models/template.md \
    docs/security/threat-models/[feature].md
@@ -223,12 +266,27 @@ cp docs/security/threat-models/template.md \
 ```
 
 ### Running Coverage Check Locally
+
 ```bash
 npx ts-node scripts/security/check-threat-model-coverage.ts \
   --changed-files "server/src/auth/jwt.ts"
 ```
 
+### Enforcing Design-Time Threat Models
+
+```bash
+npx ts-node scripts/security/enforce-threat-model-design.ts \
+  --base-ref main --format markdown
+```
+
+### Regenerating Control Automation Plan
+
+```bash
+npx ts-node scripts/security/generate-control-automation.ts
+```
+
 ### Updating an Existing Model
+
 1. Edit the threat model file
 2. Update `last_updated` in frontmatter
 3. Update entry in `THREAT_MODEL_INDEX.md`
@@ -244,9 +302,9 @@ npx ts-node scripts/security/check-threat-model-coverage.ts \
 
 ## Changelog
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0.0 | 2025-12-06 | Security Team | Initial framework |
+| Version | Date       | Author        | Changes           |
+| ------- | ---------- | ------------- | ----------------- |
+| 1.0.0   | 2025-12-06 | Security Team | Initial framework |
 
 ---
 

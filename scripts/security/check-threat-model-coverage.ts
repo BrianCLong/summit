@@ -32,6 +32,20 @@ interface CoverageMapping {
 
 const COVERAGE_MAPPINGS: CoverageMapping[] = [
   {
+    pattern: /^(?:.*\/)?(package\.json|pnpm-lock\.yaml|Cargo\.toml|Cargo\.lock)$/,
+    feature: 'Supply Chain Dependencies',
+    threatModel: 'docs/security/threat-models/supply-chain-insider-third-party.md',
+    riskTier: 'Critical',
+    stalenessThresholdDays: 30,
+  },
+  {
+    pattern: /^(Dockerfile.*|docker\/.*|\.github\/workflows\/.*|scripts\/ci\/.*|terraform\/.*)$/,
+    feature: 'Artifact & Build Integrity',
+    threatModel: 'docs/security/threat-models/supply-chain-insider-third-party.md',
+    riskTier: 'Critical',
+    stalenessThresholdDays: 30,
+  },
+  {
     pattern: /^server\/src\/auth\//,
     feature: 'Authentication',
     threatModel: 'docs/security/threat-models/auth.md',
@@ -100,6 +114,13 @@ const COVERAGE_MAPPINGS: CoverageMapping[] = [
     threatModel: 'docs/security/threat-models/maestro-runs.md',
     riskTier: 'Critical',
     stalenessThresholdDays: 30,
+  },
+  {
+    pattern: /^(services\/[^/]+\/connector\/.*|adapters\/.*|packages\/[^/]*connector[^/]*\/.*)$/,
+    feature: 'Third-Party Connectors',
+    threatModel: 'docs/security/threat-models/supply-chain-insider-third-party.md',
+    riskTier: 'High',
+    stalenessThresholdDays: 60,
   },
 ];
 

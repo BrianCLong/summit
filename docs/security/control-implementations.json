@@ -1,0 +1,50 @@
+{
+  "controls": [
+    {
+      "id": "SC-1",
+      "title": "Supply chain dependency integrity",
+      "threatModel": "docs/security/threat-models/supply-chain-insider-third-party.md",
+      "mitigation": "Pin dependencies, verify lockfiles, and require SLSA provenance for builds",
+      "automation": [
+        "pnpm audit --prod",
+        "npm audit --audit-level=high || true",
+        "cosign verify-blob --key cosign.pub",
+        "scripts/security/check-threat-model-coverage.ts --strict"
+      ],
+      "evidence": ["sbom-mc-v0.4.5.json", "SECURITY/sbom-process.md"],
+      "owner": "Security"
+    },
+    {
+      "id": "TP-1",
+      "title": "Third-party connector scope enforcement",
+      "threatModel": "docs/security/threat-models/supply-chain-insider-third-party.md",
+      "mitigation": "Limit vendor tokens to least privilege, validate ingress, and track vendor attestations",
+      "automation": [
+        "scripts/security/enforce-threat-model-design.ts --base-ref main",
+        "pnpm --filter connector-registry lint",
+        "npx ts-node scripts/security/check-threat-model-coverage.ts --format markdown"
+      ],
+      "evidence": [
+        "docs/security/THREAT_MODEL_INDEX.md",
+        "audit/ga-evidence/security/threat-model-v1.0.md"
+      ],
+      "owner": "Platform Governance"
+    },
+    {
+      "id": "IN-1",
+      "title": "Insider privileged action controls",
+      "threatModel": "docs/security/threat-models/supply-chain-insider-third-party.md",
+      "mitigation": "Require dual approval, signed releases, and immutable audit export for privileged ops",
+      "automation": [
+        "git log --show-signature -n 5",
+        "just audit-export",
+        "npx ts-node scripts/security/generate-control-automation.ts"
+      ],
+      "evidence": [
+        "audit/ga-evidence/ci/ci-hard-gates.yml",
+        "SECURITY/threat-models/MITIGATION-MAPPING.md"
+      ],
+      "owner": "Security + SRE"
+    }
+  ]
+}
