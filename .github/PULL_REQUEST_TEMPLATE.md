@@ -2,6 +2,16 @@
 
 [What/why]
 
+## M&A / Integration Readiness (DD Signal)
+
+*If this PR involves integrating an external system or library:*
+
+*   **DD Signal**: [Link to DD Scorecard or "N/A"]
+*   **Risk/Cost**: [Estimated Risk Delta & Integration Cost]
+*   **Control/Pattern**: [Selected Pattern: Sidecar / Event Bridge / Adapter / Full Merge]
+*   **Proof**: [Link to Test Plan or PoC Results]
+*   **Reversibility**: [Explicit statement on how to unwind this change]
+
 ## Canary Plan
 
 - Metrics to watch: [p95 latency, error rate, saturation]
@@ -46,6 +56,7 @@
 - [ ] OPA policies verified
 - [ ] Grafana dashboards updated if applicable
 - [ ] **Hot Files**: I have avoided modifying shared hot files (root config, Makefiles) unless absolutely necessary.
+- [ ] **Feature Flags**: New behavior is hidden behind a feature flag.
 
 ## Test Evidence  
 - [ ] Provide links or attachments for test results.  
@@ -57,4 +68,4 @@
 - Describe what this change does not cover.  
 
 ## Hard Guarantees  
-- List the guarantees this change provides (e.g., performance thresholds, invariants).- [ ] **Feature Flags**: New behavior is hidden behind a feature flag.
+- List the guarantees this change provides (e.g., performance thresholds, invariants).
