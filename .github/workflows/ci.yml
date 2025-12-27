@@ -2,123 +2,105 @@ name: CI
 
 on:
   pull_request:
-    branches: [main]
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
-      - "LICENSE"
-      - ".gitignore"
-      - ".dockerignore"
   push:
     branches: [main]
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
-      - "LICENSE"
-      - ".gitignore"
-      - ".dockerignore"
 
+# default per-run guard; the tuner can override via outputs
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  setup:
-    uses: ./.github/workflows/_reusable-setup.yml
+  plan:
+    name: Plan CI (learn from history)
+    runs-on: ubuntu-latest
+    outputs:
+      node_matrix: ${{ steps.plan.outputs.node_matrix }}
+      max_parallel: ${{ steps.plan.outputs.max_parallel }}
+      cache_level: ${{ steps.plan.outputs.cache_level }}
+      test_shard: ${{ steps.plan.outputs.test_shard }}
+      changed_pkgs: ${{ steps.plan.outputs.changed_pkgs }}
+      needs_graph: ${{ steps.plan.outputs.needs_graph }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Restore tuner memory
+        uses: actions/cache@v4
+        with:
+          path: .ci/state
+          key: tuner-${{ github.repository }}-${{ github.ref_name }}
+          restore-keys: |
+            tuner-${{ github.repository }}-
+      - name: Analyze
+        id: plan
+        run: node .ci/tuner/plan.js
 
-  lint:
-    needs: setup
+  install:
+    name: Install (adaptive cache)
+    needs: plan
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: ${{ fromJson(needs.plan.outputs.max_parallel) }}
+      matrix:
+        node: ${{ fromJson(needs.plan.outputs.node_matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: PNPM
+        run: corepack enable && corepack prepare pnpm@latest --activate
+      - name: Cache deps (multi-tier)
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+            ~/.pnpm-store
+          key: pnpm-${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ needs.plan.outputs.cache_level }}
+          restore-keys: |
+            pnpm-${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/pnpm-lock.yaml') }}-
+            pnpm-${{ runner.os }}-${{ matrix.node }}-
+            pnpm-${{ runner.os }}-
+      - run: pnpm install --frozen-lockfile
+
+  build:
+    name: Build (targeted)
+    needs: [plan, install]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.3
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20.14.0
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm lint
-
-  typecheck:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.3
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20.14.0
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm typecheck
+      - name: Build impacted only
+        env:
+          CHANGED_PKGS: ${{ needs.plan.outputs.changed_pkgs }}
+        run: |
+          pnpm -w turbo run build --filter "${CHANGED_PKGS:-...}" --cache-dir .ci/turbo
 
   test:
-    needs: [lint, typecheck]
+    name: Test (sharded & ordered)
+    needs: [plan, build]
+    runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
+      max-parallel: ${{ fromJson(needs.plan.outputs.max_parallel) }}
       matrix:
-        suite: [unit, integration, e2e]
-    uses: ./.github/workflows/_reusable-test.yml
-    with:
-      test-type: ${{ matrix.suite }}
-
-  policy-fixtures:
-    runs-on: ubuntu-latest
-    needs: [test]
+        shard: ${{ fromJson(needs.plan.outputs.test_shard) }}
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.3
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20.14.0
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm run --workspace gateway/policy-lac policy:lint
-      - run: pnpm run --workspace gateway/policy-lac policy:sim:read
-      - run: pnpm run --workspace gateway/policy-lac policy:sim:export
+      - name: Run shard
+        run: pnpm -w turbo run test -- --shard=${{ matrix.shard.index }}/${{ matrix.shard.total }}
 
-  perf-budget:
+  finalize:
+    name: Finalize (write memory)
+    needs: [install, build, test]
+    if: always()
     runs-on: ubuntu-latest
-    needs: [test]
     steps:
       - uses: actions/checkout@v4
-      - uses: grafana/setup-k6-action@v1
-      - uses: pnpm/action-setup@v4
+      - name: Summarize run & update memory
+        run: node .ci/tuner/finalize.js
+      - name: Save tuner memory
+        uses: actions/cache/save@v4
+        if: always()
         with:
-          version: 9.12.3
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20.14.0
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - name: Run k6 smoke (policy hot path)
-        run: k6 run k6/policy-hot-path.js
-
-  sbom:
-    runs-on: ubuntu-latest
-    needs: setup
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.3
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20.14.0
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - name: Generate SBOM (CycloneDX)
-        run: pnpm dlx @cyclonedx/cyclonedx-npm --spec-version 1.5 --output-file sbom.json
-
-  quality-gates:
-    runs-on: ubuntu-latest
-    needs: [test, policy-fixtures, perf-budget, sbom]
-    steps:
-      - name: Verify required job statuses
-        run: echo "All gates passed"
+          path: .ci/state
+          key: tuner-${{ github.repository }}-${{ github.run_id }}

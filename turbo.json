@@ -1,9 +1,9 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "tasks": {
+  "pipeline": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", "build/**", ".next/**", "out/**"],
+      "outputs": ["dist/**", "build/**", ".next/**", "out/**", ".turbo/**"],
       "inputs": [
         "src/**",
         "public/**",
@@ -19,7 +19,7 @@
     },
     "test": {
       "dependsOn": ["build"],
-      "outputs": ["coverage/**"],
+      "outputs": ["coverage/**", ".turbo/**"],
       "inputs": [
         "src/**",
         "tests/**",
@@ -51,13 +51,7 @@
     "typecheck": {
       "outputs": [],
       "cache": true,
-      "inputs": [
-        "src/**",
-        "types/**",
-        "package.json",
-        "tsconfig.json",
-        "tsconfig.base.json"
-      ]
+      "inputs": ["src/**", "types/**", "package.json", "tsconfig.json", "tsconfig.base.json"]
     },
     "smoke": {
       "dependsOn": ["build"],
