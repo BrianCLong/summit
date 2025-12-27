@@ -5,6 +5,9 @@ import { fileURLToPath } from 'url';
 import { metrics } from '../observability/metrics.js';
 import { runsRepo } from './runs/runs-repo.js';
 import { SubagentCoordinator, agentGovernance } from './subagent-coordinator.js';
+import { killSwitchService } from '../services/KillSwitchService.js';
+import { telemetryService } from '../services/TelemetryService.js';
+import { driftDetectionService } from '../services/DriftDetectionService.js';
 // Import from the same file where the types are defined
 import type {
   CoordinationTask,
@@ -126,6 +129,8 @@ export class MaestroService {
 
   private constructor() {
     this.subagentCoordinator = SubagentCoordinator.getInstance();
+    // Initialize Drift Detection
+    driftDetectionService.startMonitoring();
   }
 
   static getInstance(): MaestroService {
@@ -310,7 +315,13 @@ export class MaestroService {
     participantAgentIds: string[],
     actor: string
   ): Promise<CoordinationTask> {
-    // First, check governance compliance
+    // 1. Kill Switch Check
+    const healthCheck = killSwitchService.checkSystemHealth({ agentId: actor, feature: 'agent_coordination' });
+    if (!healthCheck.allowed) {
+        throw new Error(`System Kill Switch Active: ${healthCheck.reason}`);
+    }
+
+    // 2. First, check governance compliance
     const governanceCheck = await agentGovernance.evaluateAction(
       {
         id: actor,
@@ -325,6 +336,18 @@ export class MaestroService {
       { task, participants: participantAgentIds }
     );
 
+    // Telemetry for Policy Decision
+    telemetryService.logEvent('policy_decision', {
+        id: `pol-${Date.now()}`,
+        policyId: 'agent_governance',
+        decision: governanceCheck.allowed ? 'allow' : 'deny',
+        reason: governanceCheck.reason,
+        actorId: actor,
+        resourceId: 'coordinate_agents',
+        timestamp: new Date(),
+        context: { task, participants: participantAgentIds }
+    });
+
     if (!governanceCheck.allowed) {
       throw new Error(`Agent coordination prohibited: ${governanceCheck.reason}`);
     }
@@ -338,6 +361,18 @@ export class MaestroService {
       `Coordinated task ${task.title} among ${participantAgentIds.length} agents`
     );
 
+    // Telemetry for Agent Action
+    const duration = Date.now() - (task.createdAt ? new Date(task.createdAt).getTime() : Date.now());
+    telemetryService.logEvent('agent_action', {
+        id: `act-${Date.now()}`,
+        agentId: actor,
+        actionType: 'coordinate_agents',
+        status: 'success',
+        durationMs: duration > 0 ? duration : 0,
+        timestamp: new Date(),
+        metadata: { taskId: coordinationTask.id }
+    });
+
     return coordinationTask;
   }
 
@@ -349,6 +384,12 @@ export class MaestroService {
     participantAgentIds: string[],
     actor: string
   ): Promise<CoordinationChannel> {
+    // 1. Kill Switch Check
+    const healthCheck = killSwitchService.checkSystemHealth({ agentId: actor, feature: 'coordination_channel' });
+    if (!healthCheck.allowed) {
+        throw new Error(`System Kill Switch Active: ${healthCheck.reason}`);
+    }
+
     // Check governance compliance
     const governanceCheck = await agentGovernance.evaluateAction(
       {
@@ -364,6 +405,17 @@ export class MaestroService {
       { topic, participants: participantAgentIds }
     );
 
+    telemetryService.logEvent('policy_decision', {
+        id: `pol-${Date.now()}`,
+        policyId: 'agent_governance',
+        decision: governanceCheck.allowed ? 'allow' : 'deny',
+        reason: governanceCheck.reason,
+        actorId: actor,
+        resourceId: 'create_coordination_channel',
+        timestamp: new Date(),
+        context: { topic, participants: participantAgentIds }
+    });
+
     if (!governanceCheck.allowed) {
       throw new Error(`Coordination channel creation prohibited: ${governanceCheck.reason}`);
     }
@@ -376,6 +428,17 @@ export class MaestroService {
       `channel:${channel.id}`,
       `Created coordination channel for topic: ${topic}`
     );
+
+    // Estimate duration or track start time if possible. Here we assume near-instant for channel creation
+    telemetryService.logEvent('agent_action', {
+        id: `act-${Date.now()}`,
+        agentId: actor,
+        actionType: 'create_coordination_channel',
+        status: 'success',
+        durationMs: 50, // Mocked latency for channel creation (usually fast)
+        timestamp: new Date(),
+        metadata: { channelId: channel.id }
+    });
 
     return channel;
   }
