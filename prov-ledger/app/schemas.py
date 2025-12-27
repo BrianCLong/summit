@@ -25,7 +25,10 @@ class Evidence(BaseModel):
     created_at: str | None = None
     signed: bool | None = False
     signer_fp: str | None = None
-    proof_status: str | None = None # e.g. "anchored"
+    proof_status: str | None = None  # e.g. "anchored"
+    license_terms: str | None = None
+    license_owner: str | None = None
+
 
 class EvidenceRequest(BaseModel):
     hash: str
@@ -33,6 +36,8 @@ class EvidenceRequest(BaseModel):
     url: str | None = None
     content: str | None = None
     metadata: dict = Field(default_factory=dict)
+    license_terms: str | None = None
+    license_owner: str | None = None
 
 class AttachEvidenceRequest(BaseModel):
     claim_id: str
