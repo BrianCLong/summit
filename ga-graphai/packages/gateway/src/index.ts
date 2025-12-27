@@ -164,20 +164,41 @@ interface KnowledgeGraphLoaders {
   nodeLoader: SimpleDataLoader<string, GraphNode | null>;
 }
 
-class SimpleDataLoader<K, V> {
-  private readonly cache = new Map<K, Promise<V>>();
+interface DataLoaderOptions {
+  cacheTtlMs?: number;
+  mode?: 'deterministic' | 'non-deterministic';
+  batchMaxSize?: number;
+  maxPending?: number;
+  onBackpressure?: 'throw' | 'dispatch';
+}
+
+export class SimpleDataLoader<K, V> {
+  private readonly cache = new Map<K, { promise: Promise<V>; expiresAt?: number }>();
   private pending: K[] = [];
   private readonly callbacks = new Map<K, { resolve: (value: V) => void; reject: (error: unknown) => void }[]>();
   private scheduled = false;
 
   constructor(
     private readonly batchLoadFn: (keys: readonly K[]) => Promise<readonly V[]>,
+    private readonly options: DataLoaderOptions = {},
   ) {}
 
   load(key: K): Promise<V> {
     const cached = this.cache.get(key);
     if (cached) {
-      return cached;
+      if (!cached.expiresAt || cached.expiresAt > Date.now()) {
+        return cached.promise;
+      }
+      this.cache.delete(key);
+    }
+
+    if (this.options.maxPending && this.pending.length >= this.options.maxPending) {
+      if (this.options.onBackpressure === 'throw') {
+        throw new Error('DATALOADER_BACKPRESSURE');
+      }
+      if (this.options.onBackpressure === 'dispatch') {
+        void this.dispatch();
+      }
     }
 
     const promise = new Promise<V>((resolve, reject) => {
@@ -191,7 +212,12 @@ class SimpleDataLoader<K, V> {
       }
     });
 
-    this.cache.set(key, promise);
+    const expiresAt =
+      this.options.cacheTtlMs && this.options.cacheTtlMs > 0
+        ? Date.now() + this.options.cacheTtlMs
+        : undefined;
+
+    this.cache.set(key, { promise, expiresAt });
     return promise;
   }
 
@@ -201,22 +227,39 @@ class SimpleDataLoader<K, V> {
 
   private async dispatch() {
     this.scheduled = false;
-    const keys = Array.from(new Set(this.pending));
+    const uniqueKeys = Array.from(new Set(this.pending));
     this.pending = [];
 
+    const deterministic = this.options.mode !== 'non-deterministic';
+    const orderedKeys = deterministic ? uniqueKeys.slice().sort() : uniqueKeys;
+    const batchSize = this.options.batchMaxSize && this.options.batchMaxSize > 0 ? this.options.batchMaxSize : orderedKeys.length;
+
+    const batches: K[][] = [];
+    for (let i = 0; i < orderedKeys.length; i += batchSize) {
+      batches.push(orderedKeys.slice(i, i + batchSize));
+    }
+
     try {
-      const values = await this.batchLoadFn(keys);
-      keys.forEach((key, index) => {
-        const callbacks = this.callbacks.get(key) ?? [];
-        const value = values[index];
-        callbacks.forEach(({ resolve }) => resolve(value));
-        this.cache.set(key, Promise.resolve(value));
-        this.callbacks.delete(key);
-      });
+      for (const batch of batches) {
+        const values = await this.batchLoadFn(batch);
+        batch.forEach((key, index) => {
+          const callbacks = this.callbacks.get(key) ?? [];
+          const value = values[index];
+          callbacks.forEach(({ resolve }) => resolve(value));
+          const expiresAt =
+            this.options.cacheTtlMs && this.options.cacheTtlMs > 0
+              ? Date.now() + this.options.cacheTtlMs
+              : undefined;
+          this.cache.set(key, { promise: Promise.resolve(value), expiresAt });
+          this.callbacks.delete(key);
+        });
+      }
     } catch (error) {
-      keys.forEach((key) => {
+      orderedKeys.forEach((key) => {
         const callbacks = this.callbacks.get(key) ?? [];
         callbacks.forEach(({ reject }) => reject(error));
+        this.cache.delete(key);
+        this.callbacks.delete(key);
       });
     }
   }
@@ -235,10 +278,27 @@ interface CacheClientLike {
   setEx(key: string, ttlSeconds: number, value: string): Promise<unknown> | unknown;
 }
 
+interface KnowledgeGraphLoaderOptions {
+  mode?: 'deterministic' | 'non-deterministic';
+  cacheTtlMs?: number;
+  batchMaxSize?: number;
+  maxPending?: number;
+  onBackpressure?: 'throw' | 'dispatch';
+}
+
+interface KnowledgeGraphStreamingOptions {
+  protocol: 'async-iterator';
+  fallback?: 'batch' | 'individual';
+}
+
 interface KnowledgeGraphOptions {
   knowledgeGraph: OrchestrationKnowledgeGraph;
   cacheClient?: CacheClientLike;
   cacheTtlSeconds?: number;
+  cacheKeyPrefix?: string;
+  cacheKeyFn?: (id: string) => string;
+  loader?: KnowledgeGraphLoaderOptions;
+  streaming?: KnowledgeGraphStreamingOptions;
 }
 
 const PolicyEffectEnum = new GraphQLEnumType({
@@ -689,6 +749,9 @@ export class GatewayRuntime {
   private readonly knowledgeGraphOptions?: KnowledgeGraphOptions;
   private readonly cacheClient?: CacheClientLike;
   private readonly cacheTtlSeconds: number;
+  private readonly cacheKeyBuilder?: (id: string) => string;
+  private readonly loaderOptions?: KnowledgeGraphLoaderOptions;
+  private readonly streamingOptions?: KnowledgeGraphStreamingOptions;
 
   constructor(options: GatewayOptions = {}) {
     this.policy = options.rules
@@ -711,6 +774,11 @@ export class GatewayRuntime {
     this.knowledgeGraphOptions = options.knowledgeGraph;
     this.cacheClient = this.knowledgeGraphOptions?.cacheClient;
     this.cacheTtlSeconds = this.knowledgeGraphOptions?.cacheTtlSeconds ?? 300;
+    const cacheKeyPrefix = this.knowledgeGraphOptions?.cacheKeyPrefix ?? 'kg:node:';
+    this.cacheKeyBuilder =
+      this.knowledgeGraphOptions?.cacheKeyFn ?? ((id: string) => `${cacheKeyPrefix}${id}`);
+    this.loaderOptions = this.knowledgeGraphOptions?.loader;
+    this.streamingOptions = this.knowledgeGraphOptions?.streaming;
     if (!options.workcell?.tools || options.workcell.tools.length === 0) {
       this.workcell.registerTool({
         name: 'analysis',
@@ -744,58 +812,98 @@ export class GatewayRuntime {
     }
     const cache = this.cacheClient;
     const ttl = this.cacheTtlSeconds;
-    const cacheKey = (id: string) => `kg:node:${id}`;
+    const cacheKey = this.cacheKeyBuilder ?? ((id: string) => `kg:node:${id}`);
+    const loader = this.loaderOptions;
+    const streaming = this.streamingOptions;
 
-    const nodeLoader = new SimpleDataLoader<string, GraphNode | null>(async (ids) => {
-      const cachedResults = await Promise.all(
-        ids.map(async (id) => {
-          if (!cache) {
-            return null;
-          }
-          const cached = await cache.get(cacheKey(id));
-          if (!cached) {
-            return null;
-          }
-          try {
-            return JSON.parse(cached) as GraphNode;
-          } catch {
-            return null;
-          }
-        }),
-      );
-
-      const results: (GraphNode | null)[] = [];
-      const missingIds: string[] = [];
-      cachedResults.forEach((node, index) => {
-        if (node) {
-          results[index] = node;
-        } else {
-          results[index] = null;
-          missingIds.push(ids[index]);
-        }
-      });
-
-      if (missingIds.length > 0) {
-        const fetched = await Promise.all(
-          missingIds.map((id) =>
-            Promise.resolve(knowledgeGraph.getNode(id)).then((node) => node ?? null),
-          ),
-        );
-        let fetchIndex = 0;
-        for (let i = 0; i < results.length; i += 1) {
-          if (results[i] === null) {
-            const node = fetched[fetchIndex] ?? null;
-            results[i] = node;
-            if (node && cache) {
-              void cache.setEx(cacheKey(ids[i]), ttl, JSON.stringify(node));
+    const nodeLoader = new SimpleDataLoader<string, GraphNode | null>(
+      async (ids) => {
+        const cachedResults = await Promise.all(
+          ids.map(async (id) => {
+            if (!cache) {
+              return null;
             }
-            fetchIndex += 1;
+            const cached = await cache.get(cacheKey(id));
+            if (!cached) {
+              return null;
+            }
+            try {
+              return JSON.parse(cached) as GraphNode;
+            } catch {
+              return null;
+            }
+          }),
+        );
+
+        const results: (GraphNode | null)[] = [];
+        const missingIds: string[] = [];
+        cachedResults.forEach((node, index) => {
+          if (node) {
+            results[index] = node;
+          } else {
+            results[index] = null;
+            missingIds.push(ids[index]);
+          }
+        });
+
+        const fetchMissing = async (idsToFetch: string[]): Promise<(GraphNode | null)[]> =>
+          Promise.all(
+            idsToFetch.map((id) =>
+              Promise.resolve(knowledgeGraph.getNode(id)).then((node) => node ?? null),
+            ),
+          );
+
+        const streamNodes = (knowledgeGraph as unknown as {
+          streamNodes?: (ids: string[]) => AsyncIterable<GraphNode | null>;
+        }).streamNodes;
+
+        const useStreaming =
+          streaming?.protocol === 'async-iterator' && typeof streamNodes === 'function';
+
+        if (missingIds.length > 0) {
+          let fetched: (GraphNode | null)[] = [];
+          if (useStreaming) {
+            try {
+              for await (const node of streamNodes(missingIds)) {
+                fetched.push(node ?? null);
+              }
+              if (fetched.length !== missingIds.length && streaming?.fallback) {
+                fetched = await fetchMissing(missingIds);
+              }
+            } catch (error) {
+              if (streaming?.fallback) {
+                fetched = await fetchMissing(missingIds);
+              } else {
+                throw error;
+              }
+            }
+          } else {
+            fetched = await fetchMissing(missingIds);
+          }
+
+          let fetchIndex = 0;
+          for (let i = 0; i < results.length; i += 1) {
+            if (results[i] === null) {
+              const node = fetched[fetchIndex] ?? null;
+              results[i] = node;
+              if (node && cache) {
+                void cache.setEx(cacheKey(ids[i]), ttl, JSON.stringify(node));
+              }
+              fetchIndex += 1;
+            }
           }
         }
-      }
 
-      return results;
-    });
+        return results;
+      },
+      {
+        cacheTtlMs: loader?.cacheTtlMs ?? ttl * 1000,
+        mode: loader?.mode ?? 'deterministic',
+        batchMaxSize: loader?.batchMaxSize,
+        maxPending: loader?.maxPending,
+        onBackpressure: loader?.onBackpressure ?? 'dispatch',
+      },
+    );
 
     return { nodeLoader };
   }
