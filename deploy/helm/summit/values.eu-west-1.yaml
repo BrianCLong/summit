@@ -1,0 +1,17 @@
+replicaCount: 1
+image:
+  repository: ghcr.io/BrianCLong/summit
+  tag: stable
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+featureFlags:
+  someRiskyPath: false
+region: "eu-west-1"
+endpointUrl: "https://api.eu-west-1.summit.com"
+storage:
+  type: "standard"
