@@ -1,0 +1,13 @@
+components:
+  - name: base-routing
+    router: auto-router
+    guardrail: balanced
+    reranker: none
+  - name: safety-first
+    router: auto-router
+    guardrail: strict
+    reranker: cross-encoder
+  - name: fast-light
+    router: lightweight
+    guardrail: minimal
+    reranker: fastsort

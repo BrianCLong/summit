@@ -1,0 +1,11 @@
+data:
+  - name: canonical
+    augmentation: off
+    provenance: frozen
+  - name: retrieval-aug
+    augmentation: on
+    provenance: retrieval
+  - name: synthetic-boost
+    augmentation: on
+    provenance: synthetic
+    notes: "Adds counterfactual documents for guardrail coverage"

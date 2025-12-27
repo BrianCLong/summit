@@ -1,0 +1,11 @@
+compute:
+  - name: cost-optimized
+    tier: s
+    usd_per_1k_tokens: 0.0022
+  - name: balanced
+    tier: m
+    usd_per_1k_tokens: 0.0035
+  - name: quality-max
+    tier: l
+    usd_per_1k_tokens: 0.0068
+    accelerator: a100
