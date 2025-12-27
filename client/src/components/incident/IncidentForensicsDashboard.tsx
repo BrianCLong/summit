@@ -209,6 +209,7 @@ const IncidentForensicsDashboard: React.FC<IncidentForensicsDashboardProps> = ({
   const [metrics, setMetrics] = useState<IncidentMetrics | null>(null);
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
   const [selectedEvidence, setSelectedEvidence] = useState<ForensicEvidence | null>(null);
+  const [downloadingBundles, setDownloadingBundles] = useState<Record<string, boolean>>({});
 
   // Filters
   const [severityFilter, setSeverityFilter] = useState<string>('all');
@@ -988,6 +989,27 @@ const IncidentForensicsDashboard: React.FC<IncidentForensicsDashboardProps> = ({
     [onWarRoomJoin]
   );
 
+  const handleDownloadBundle = useCallback(async (runId: string) => {
+    setDownloadingBundles((prev) => ({ ...prev, [runId]: true }));
+    try {
+      const response = await fetch(`/api/soar/runs/${runId}/bundle`);
+      if (!response.ok) {
+        throw new Error('Failed to download bundle');
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `playbook-run-${runId}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } finally {
+      setDownloadingBundles((prev) => ({ ...prev, [runId]: false }));
+    }
+  }, []);
+
   // ============================================================================
   // Render Functions
   // ============================================================================
@@ -1587,9 +1609,18 @@ const IncidentForensicsDashboard: React.FC<IncidentForensicsDashboardProps> = ({
                 {playbook.startedAt?.toLocaleString()}
               </div>
             </div>
-            <span className={`px-3 py-1 rounded ${getStatusColor(playbook.status)}`}>
-              {playbook.status.toUpperCase()}
-            </span>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => handleDownloadBundle(playbook.id)}
+                className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wide border border-gray-300 rounded hover:bg-gray-100"
+                disabled={downloadingBundles[playbook.id]}
+              >
+                {downloadingBundles[playbook.id] ? 'Preparing...' : 'Download Bundle'}
+              </button>
+              <span className={`px-3 py-1 rounded ${getStatusColor(playbook.status)}`}>
+                {playbook.status.toUpperCase()}
+              </span>
+            </div>
           </div>
 
           {/* Progress Bar */}
