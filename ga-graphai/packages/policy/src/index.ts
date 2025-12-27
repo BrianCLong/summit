@@ -247,6 +247,22 @@ export {
   type ObservabilityFinopsControls,
 } from './multi-region-readiness.js';
 
+export {
+  type AdversarialProbe,
+  type AdversarialProbeResult,
+  type GovernedEnvelope,
+  GovernanceOrchestrator,
+  type GovernanceOrchestratorOptions,
+  type GovernanceSurface,
+  type GovernanceVerdict,
+  type GovernanceVerdictStatus,
+  type PolicyEvaluator,
+  assertGovernanceIntegrity,
+  buildGovernanceVerdict,
+  runAdversarialProbes,
+  summarizeWorkflowIssues,
+} from './governance-verdict.js';
+
 export function buildDefaultPolicyEngine(): PolicyEngine {
   const engine = new PolicyEngine([
     {
