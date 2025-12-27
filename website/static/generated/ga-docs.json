@@ -1,0 +1,1038 @@
+{
+  "generatedAt": "2025-12-27T16:25:53.761Z",
+  "codeCommentDocs": [
+    {
+      "file": "src/ComposerVNext.ts",
+      "title": "ComposerVNext.ts",
+      "summary": "* Composer vNext - Main Orchestrator * \"Faster • Smarter • Safer\" build system integration * Execute full build pipeline with all optimizations * Create optimized build plan /*.ts', 'tsconfig.json'], outputs: [], dependencies: ['install-deps'], metadata: { toolchain: 'typescript', environment: {}, estimatedDuration: 5000, }, }, { id: 'lint', name: 'ESLint Ch",
+      "snippet": "* Composer vNext - Main Orchestrator\n * \"Faster • Smarter • Safer\" build system integration\n\n* Execute full build pipeline with all optimizations\n\n* Create optimized build plan\n\n/*.ts', 'tsconfig.json'],\n        outputs: [],\n        dependencies: ['install-deps'],\n        metadata: {\n          toolchain: 'typescript',\n          environment: {},\n          estimatedDuration: 5000,\n        },\n      },\n      {\n        id: 'lint',\n        name: 'ESLint Check',\n        command: 'npx eslint src/',\n        workdir: process.cwd(),\n        inputs: ['src/*",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/absolute/AbsoluteSourceIntegrator.ts",
+      "title": "AbsoluteSourceIntegrator.ts",
+      "summary": "import { EventEmitter } from 'events'; export interface SourceDimension { id: string; name: string; sourceLevel: number; absoluteCoordinates: number[]; primordialEnergy: number; sourceConnection: numb",
+      "snippet": "import { EventEmitter } from 'events'; export interface SourceDimension { id: string; name: string; sourceLevel: number; absoluteCoordinates: number[]; primordialEnergy: number; sourceConnection: numb",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/agents/archetypes/base/AgentRegistry.ts",
+      "title": "AgentRegistry.ts",
+      "summary": "* AgentRegistry - Manages lifecycle and discovery of agent archetypes * * Provides centralized registration, discovery, and invocation of agents. * Get singleton instance * Register an agent * Unregister an agent",
+      "snippet": "* AgentRegistry - Manages lifecycle and discovery of agent archetypes\n *\n * Provides centralized registration, discovery, and invocation of agents.\n\n* Get singleton instance\n\n* Register an agent\n\n* Unregister an agent",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/agents/archetypes/base/BaseAgentArchetype.ts",
+      "title": "BaseAgentArchetype.ts",
+      "summary": "* BaseAgentArchetype - Abstract base class for all agent archetypes * * Provides core functionality for graph operations, policy evaluation, * audit logging, and integration with Summit's infrastructure. * Initialize the agent (setup connections, load config, etc.) * Execute agent with given context * Analyze a query and return findings/insights",
+      "snippet": "* BaseAgentArchetype - Abstract base class for all agent archetypes\n *\n * Provides core functionality for graph operations, policy evaluation,\n * audit logging, and integration with Summit's infrastructure.\n\n* Initialize the agent (setup connections, load config, etc.)\n\n* Execute agent with given context\n\n* Analyze a query and return findings/insights",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/agents/archetypes/base/index.ts",
+      "title": "index.ts",
+      "summary": "* Agent Archetypes - Base Module Exports",
+      "snippet": "* Agent Archetypes - Base Module Exports",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/agents/archetypes/base/types.ts",
+      "title": "types.ts",
+      "summary": "* Agent Archetypes - Core Type Definitions * * Defines the interfaces and types for Summit's named agent archetypes. * User context for agent operations * Organization context for agent operations * Policy set for organization",
+      "snippet": "* Agent Archetypes - Core Type Definitions\n *\n * Defines the interfaces and types for Summit's named agent archetypes.\n\n* User context for agent operations\n\n* Organization context for agent operations\n\n* Policy set for organization",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/agents/archetypes/chief-of-staff/ChiefOfStaffAgent.ts",
+      "title": "ChiefOfStaffAgent.ts",
+      "summary": "* ChiefOfStaffAgent - AI assistant for leaders * * Capabilities: * - Inbox triage and prioritization * - Meeting preparation and pre-reads * - Follow-up tracking and action items * - Decision support and synthesis * - Calendar optimization * - Delegation recommendations",
+      "snippet": "* ChiefOfStaffAgent - AI assistant for leaders\n *\n * Capabilities:\n * - Inbox triage and prioritization\n * - Meeting preparation and pre-reads\n * - Follow-up tracking and action items\n * - Decision support and synthesis\n * - Calendar optimization\n * - Delegation recommendations",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/agents/archetypes/coo/COOAgent.ts",
+      "title": "COOAgent.ts",
+      "summary": "* COOAgent - AI Chief Operating Officer * * Capabilities: * - SLA monitoring and breach prediction * - Incident triage and routing * - Approval queue management and escalation * - Process drift detection * - Resource utilization tracking * - Operational metrics and dashboards",
+      "snippet": "* COOAgent - AI Chief Operating Officer\n *\n * Capabilities:\n * - SLA monitoring and breach prediction\n * - Incident triage and routing\n * - Approval queue management and escalation\n * - Process drift detection\n * - Resource utilization tracking\n * - Operational metrics and dashboards",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/agents/archetypes/index.ts",
+      "title": "index.ts",
+      "summary": "* Agent Archetypes - Main Module * * Summit's named, opinionated AI agents for business functions: * - Chief of Staff: Personal AI assistant for leaders * - COO: Operations AI for SLAs, incidents, approvals * - RevOps: Revenue AI for pipeline, forecast, churn * Initialize all agent archetypes and register them * Shutdown all agent archetypes",
+      "snippet": "* Agent Archetypes - Main Module\n *\n * Summit's named, opinionated AI agents for business functions:\n * - Chief of Staff: Personal AI assistant for leaders\n * - COO: Operations AI for SLAs, incidents, approvals\n * - RevOps: Revenue AI for pipeline, forecast, churn\n\n* Initialize all agent archetypes and register them\n\n* Shutdown all agent archetypes",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/agents/archetypes/revops/RevOpsAgent.ts",
+      "title": "RevOpsAgent.ts",
+      "summary": "* RevOpsAgent - AI Revenue Operations Officer * * Capabilities: * - Pipeline sanity checks and health scoring * - Forecast variance analysis and attribution * - Churn risk prediction and intervention * - Lead scoring and prioritization * - Multi-touch attribution modeling * - Revenue analytics and dashboards",
+      "snippet": "* RevOpsAgent - AI Revenue Operations Officer\n *\n * Capabilities:\n * - Pipeline sanity checks and health scoring\n * - Forecast variance analysis and attribution\n * - Churn risk prediction and intervention\n * - Lead scoring and prioritization\n * - Multi-touch attribution modeling\n * - Revenue analytics and dashboards",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/agents/critic.ts",
+      "title": "critic.ts",
+      "summary": "import { spawn } from 'child_process'; import { readFile, writeFile, access } from 'fs/promises'; import { join } from 'path'; import { promisify } from 'util'; import { exec } from 'child_process'; c",
+      "snippet": "import { spawn } from 'child_process'; import { readFile, writeFile, access } from 'fs/promises'; import { join } from 'path'; import { promisify } from 'util'; import { exec } from 'child_process'; c",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/agents/fixer.ts",
+      "title": "fixer.ts",
+      "summary": "import { readFile, writeFile } from 'fs/promises'; import { join } from 'path'; import { promisify } from 'util'; import { exec } from 'child_process'; import { CriticAgent } from './critic'; const ex",
+      "snippet": "import { readFile, writeFile } from 'fs/promises'; import { join } from 'path'; import { promisify } from 'util'; import { exec } from 'child_process'; import { CriticAgent } from './critic'; const ex",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/agents/index.ts",
+      "title": "index.ts",
+      "summary": "import { CriticAgent } from './critic'; import { FixerAgent } from './fixer'; import { ReflectiveLoop } from './reflectiveLoop'; import { StrategicCounterAntifragileOrchestrationNetwork } from './stra",
+      "snippet": "import { CriticAgent } from './critic'; import { FixerAgent } from './fixer'; import { ReflectiveLoop } from './reflectiveLoop'; import { StrategicCounterAntifragileOrchestrationNetwork } from './stra",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/agents/osint-fusion/GraphTraversal.ts",
+      "title": "GraphTraversal.ts",
+      "summary": "* GraphTraversal - Semantic knowledge graph traversal for OSINT fusion * * Provides optimized Neo4j queries for multi-hop traversal, * path finding, and subgraph extraction with p95 < 2s target. * Execute a graph traversal query * Find shortest paths between entities * Find all entities within N hops of a starting entity",
+      "snippet": "* GraphTraversal - Semantic knowledge graph traversal for OSINT fusion\n *\n * Provides optimized Neo4j queries for multi-hop traversal,\n * path finding, and subgraph extraction with p95 < 2s target.\n\n* Execute a graph traversal query\n\n* Find shortest paths between entities\n\n* Find all entities within N hops of a starting entity",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/agents/osint-fusion/HallucinationGuard.ts",
+      "title": "HallucinationGuard.ts",
+      "summary": "* HallucinationGuard - Multi-layer validation for OSINT data integrity * * Implements defense-in-depth validation to prevent hallucinated/fabricated * intelligence from entering the knowledge graph. Targets 85%+ validation rate. * Validate an entity against hallucination checks * Validate a relationship between entities * Batch validate entities with optimiz",
+      "snippet": "* HallucinationGuard - Multi-layer validation for OSINT data integrity\n *\n * Implements defense-in-depth validation to prevent hallucinated/fabricated\n * intelligence from entering the knowledge graph. Targets 85%+ validation rate.\n\n* Validate an entity against hallucination checks\n\n* Validate a relationship between entities\n\n* Batch validate entities with optimized processing",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/agents/osint-fusion/OSINTFusionAgent.ts",
+      "title": "OSINTFusionAgent.ts",
+      "summary": "* OSINTFusionAgent - Autonomous agent for multi-source intelligence fusion * * Implements ODNI-compliant zero-trust data coordination with semantic * knowledge graph traversal, achieving 85%+ validation rate with p95 < 2s. * Initialize the agent * Execute fusion request * Main fusion pipeline",
+      "snippet": "* OSINTFusionAgent - Autonomous agent for multi-source intelligence fusion\n *\n * Implements ODNI-compliant zero-trust data coordination with semantic\n * knowledge graph traversal, achieving 85%+ validation rate with p95 < 2s.\n\n* Initialize the agent\n\n* Execute fusion request\n\n* Main fusion pipeline",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/agents/osint-fusion/SourceConnectors.ts",
+      "title": "SourceConnectors.ts",
+      "summary": "* SourceConnectors - Adapters for multi-source OSINT data collection * * Provides unified interface for querying social media, domain registries, * dark web sources, and other OSINT data streams with air-gap compatibility. * Base connector with common functionality * Social Media OSINT Connector * Aggregates data from social platforms (air-gap compatible via",
+      "snippet": "* SourceConnectors - Adapters for multi-source OSINT data collection\n *\n * Provides unified interface for querying social media, domain registries,\n * dark web sources, and other OSINT data streams with air-gap compatibility.\n\n* Base connector with common functionality\n\n* Social Media OSINT Connector\n * Aggregates data from social platforms (air-gap compatible via cached feeds)\n\n* Domain Registry OSINT Connector\n * Queries WHOIS and DNS data (air-gap compatible)",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/agents/osint-fusion/__tests__/OSINTFusionAgent.test.ts",
+      "title": "OSINTFusionAgent.test.ts",
+      "summary": "* OSINT Fusion Agent - Comprehensive Test Suite",
+      "snippet": "* OSINT Fusion Agent - Comprehensive Test Suite",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/agents/osint-fusion/index.ts",
+      "title": "index.ts",
+      "summary": "* OSINT Fusion Engine * * Autonomous multi-source intelligence fusion with semantic knowledge * graph traversal, hallucination guards, and ODNI-compliant zero-trust * data coordination. * * @module osint-fusion * Create and optionally register an OSINT Fusion Agent * Default export for convenience",
+      "snippet": "* OSINT Fusion Engine\n *\n * Autonomous multi-source intelligence fusion with semantic knowledge\n * graph traversal, hallucination guards, and ODNI-compliant zero-trust\n * data coordination.\n *\n * @module osint-fusion\n\n* Create and optionally register an OSINT Fusion Agent\n\n* Default export for convenience",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/agents/osint-fusion/types.ts",
+      "title": "types.ts",
+      "summary": "* OSINT Fusion Engine - Type Definitions * * Defines interfaces for multi-source intelligence fusion with * zero-trust, air-gapped data coordination support. * OSINT Source Types * Source reliability classification (NATO-style) * Information credibility rating",
+      "snippet": "* OSINT Fusion Engine - Type Definitions\n *\n * Defines interfaces for multi-source intelligence fusion with\n * zero-trust, air-gapped data coordination support.\n\n* OSINT Source Types\n\n* Source reliability classification (NATO-style)\n\n* Information credibility rating",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/agents/reflectiveLoop.ts",
+      "title": "reflectiveLoop.ts",
+      "summary": "import { CriticAgent } from './critic'; import { FixerAgent } from './fixer'; import { promisify } from 'util'; import { exec } from 'child_process'; import { writeFile, readFile } from 'fs/promises';",
+      "snippet": "import { CriticAgent } from './critic'; import { FixerAgent } from './fixer'; import { promisify } from 'util'; import { exec } from 'child_process'; import { writeFile, readFile } from 'fs/promises';",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/agents/strategicCounterAntifragileNetwork.ts",
+      "title": "strategicCounterAntifragileNetwork.ts",
+      "summary": "import { randomUUID } from 'crypto'; export type WorkflowDomain = 'engineering' | 'data' | 'business'; export type SignalCategory = 'behavioral' | 'operational' | 'pricing'; export interface WorkflowS",
+      "snippet": "import { randomUUID } from 'crypto'; export type WorkflowDomain = 'engineering' | 'data' | 'business'; export type SignalCategory = 'behavioral' | 'operational' | 'pricing'; export interface WorkflowS",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/analytics/AdvancedAnalytics.ts",
+      "title": "AdvancedAnalytics.ts",
+      "summary": "* IntelGraph Maestro Composer vNext+6: Advanced Analytics & Insights Platform * * Comprehensive analytics system with predictive modeling, anomaly detection, * performance insights, and intelligent recommendations. * * Objectives: * - Predictive Analytics: build failure prediction ≥85% accuracy * - Anomaly Detection: performance regressions detected ≤2min * ",
+      "snippet": "* IntelGraph Maestro Composer vNext+6: Advanced Analytics & Insights Platform\n *\n * Comprehensive analytics system with predictive modeling, anomaly detection,\n * performance insights, and intelligent recommendations.\n *\n * Objectives:\n * - Predictive Analytics: build failure prediction ≥85% accuracy\n * - Anomaly Detection: performance regressions detected ≤2min\n * - Cost Analytics: spend optimization recommendations with ≥20% savings potential\n * - Performance Insights: bottleneck identification with automated tuning suggestions\n * - Developer Experience: personalized insights and workflow optimization\n *\n * @author IntelGraph Maestro Composer\n * @version 6.0.0\n\n* Initialize machine learning prediction models\n\n* Initialize baseline analytics data\n\n* Start the analytics engine with continu",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/analytics/FederalAnalytics.ts",
+      "title": "FederalAnalytics.ts",
+      "summary": "import { EventEmitter } from 'events'; export interface AnalyticsModel { id: string; name: string; type: | 'CLASSIFICATION' | 'REGRESSION' | 'CLUSTERING' | 'ANOMALY_DETECTION' | 'NLP' | 'GRAPH_ANALYSI",
+      "snippet": "import { EventEmitter } from 'events'; export interface AnalyticsModel { id: string; name: string; type: | 'CLASSIFICATION' | 'REGRESSION' | 'CLUSTERING' | 'ANOMALY_DETECTION' | 'NLP' | 'GRAPH_ANALYSI",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/analytics/KumorFM.ts",
+      "title": "KumorFM.ts",
+      "summary": "* KumorFM - Knowledge Utility Matrix for Operational Relationship Frequency Modeling * * The KumorFM engine translates raw collaboration signals into an actionable RFM-like * score tuned for the IntelGraph delivery organization. It captures how recently * a partner engaged with the platform, how frequently they return, and the magnitude * of their impact so ",
+      "snippet": "* KumorFM - Knowledge Utility Matrix for Operational Relationship Frequency Modeling\n *\n * The KumorFM engine translates raw collaboration signals into an actionable RFM-like\n * score tuned for the IntelGraph delivery organization. It captures how recently\n * a partner engaged with the platform, how frequently they return, and the magnitude\n * of their impact so that product, operations, and go-to-market teams can prioritize\n * enablement.\n\nRecord a single interaction and update the scorecard.\n\nIngest a batch of interactions in timestamp order.\n\nRetrieve the current KumorFM score for a given entity.",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/analytics/metricsAggregator.ts",
+      "title": "metricsAggregator.ts",
+      "summary": "* Advanced Metrics Aggregation Engine for IntelGraph Analytics * Real-time metrics collection, aggregation, and dashboard generation * Record a metric value * Record multiple metrics in batch * Increment a counter metric",
+      "snippet": "* Advanced Metrics Aggregation Engine for IntelGraph Analytics\n * Real-time metrics collection, aggregation, and dashboard generation\n\n* Record a metric value\n\n* Record multiple metrics in batch\n\n* Increment a counter metric",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/analytics/streamProcessor.ts",
+      "title": "streamProcessor.ts",
+      "summary": "* Advanced Stream Processing Engine for IntelGraph Analytics * Real-time data processing with Apache Kafka, time-series analysis, and ML pipeline integration * Create a new stream processor * Start a stream processor * Stop a stream processor",
+      "snippet": "* Advanced Stream Processing Engine for IntelGraph Analytics\n * Real-time data processing with Apache Kafka, time-series analysis, and ML pipeline integration\n\n* Create a new stream processor\n\n* Start a stream processor\n\n* Stop a stream processor",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/audit/AuditLogger.ts",
+      "title": "AuditLogger.ts",
+      "summary": "* Advanced Audit Logging System for IntelGraph * Enterprise-grade audit trail with correlation IDs, structured logging, and SIEM integration * Log audit event with comprehensive context and correlation * Validate the public API input to prevent malformed or malicious events * Enrich event with context and correlation data",
+      "snippet": "* Advanced Audit Logging System for IntelGraph\n * Enterprise-grade audit trail with correlation IDs, structured logging, and SIEM integration\n\n* Log audit event with comprehensive context and correlation\n\n* Validate the public API input to prevent malformed or malicious events\n\n* Enrich event with context and correlation data",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/audit/auditDashboard.ts",
+      "title": "auditDashboard.ts",
+      "summary": "* Audit Dashboard and Analytics for IntelGraph * Real-time audit monitoring, compliance reporting, and security analytics * Get comprehensive dashboard metrics * Get real-time security alerts * Generate compliance report",
+      "snippet": "* Audit Dashboard and Analytics for IntelGraph\n * Real-time audit monitoring, compliance reporting, and security analytics\n\n* Get comprehensive dashboard metrics\n\n* Get real-time security alerts\n\n* Generate compliance report",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/audit/auditMiddleware.ts",
+      "title": "auditMiddleware.ts",
+      "summary": "* Audit Middleware for Express/GraphQL Integration * Automatically captures HTTP requests and GraphQL operations * Express middleware for HTTP request auditing * GraphQL operation auditing middleware * Database operation auditing",
+      "snippet": "* Audit Middleware for Express/GraphQL Integration\n * Automatically captures HTTP requests and GraphQL operations\n\n* Express middleware for HTTP request auditing\n\n* GraphQL operation auditing middleware\n\n* Database operation auditing",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/auth/webauthn/WebAuthnManager.ts",
+      "title": "WebAuthnManager.ts",
+      "summary": "* @fileoverview WebAuthn Step-up Authentication Manager * Comprehensive WebAuthn implementation with risk-based authentication, * biometric and hardware key support, session elevation, and timeout management. * WebAuthn credential types * Authenticator attachment types * User verification requirement",
+      "snippet": "* @fileoverview WebAuthn Step-up Authentication Manager\n * Comprehensive WebAuthn implementation with risk-based authentication,\n * biometric and hardware key support, session elevation, and timeout management.\n\n* WebAuthn credential types\n\n* Authenticator attachment types\n\n* User verification requirement",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/auth/webauthn/WebAuthnMiddleware.ts",
+      "title": "WebAuthnMiddleware.ts",
+      "summary": "* @fileoverview WebAuthn Express Middleware * Express middleware for WebAuthn authentication with automatic * step-up enforcement, session management, and risk assessment. * Extended request interface with WebAuthn context * WebAuthn middleware configuration * WebAuthn middleware for Express applications",
+      "snippet": "* @fileoverview WebAuthn Express Middleware\n * Express middleware for WebAuthn authentication with automatic\n * step-up enforcement, session management, and risk assessment.\n\n* Extended request interface with WebAuthn context\n\n* WebAuthn middleware configuration\n\n* WebAuthn middleware for Express applications",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/autonomous/AutoOperations.ts",
+      "title": "AutoOperations.ts",
+      "summary": "* IntelGraph Maestro Composer vNext+7: Autonomous Operations & Self-Healing Systems * * Advanced autonomous system with self-healing capabilities, predictive maintenance, * intelligent resource management, and fully automated incident response. * * Objectives: * - Autonomous Healing: system self-repair with ≥95% success rate * - Predictive Maintenance: issue",
+      "snippet": "* IntelGraph Maestro Composer vNext+7: Autonomous Operations & Self-Healing Systems\n *\n * Advanced autonomous system with self-healing capabilities, predictive maintenance,\n * intelligent resource management, and fully automated incident response.\n *\n * Objectives:\n * - Autonomous Healing: system self-repair with ≥95% success rate\n * - Predictive Maintenance: issues prevented ≥80% before occurrence\n * - Zero-Touch Operations: ≥90% incidents resolved without human intervention\n * - Intelligent Scaling: resource optimization with ≤5min response time\n * - Proactive Security: threat detection and mitigation in ≤30s\n *\n * @author IntelGraph Maestro Composer\n * @version 7.0.0\n\n* Initialize system components for monitoring\n\n* Start autonomous operations engine\n\n* Perform comprehensive system heal",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/autopilot/AutoTriageBot.ts",
+      "title": "AutoTriageBot.ts",
+      "summary": "* Auto-Triage & Bisect Bot * Isolate culprit commit/target/test with cached replays + binary search * Start automatic triage for a build failure * Perform quick log-based analysis for obvious failures * Use TIA to narrow down the targets that need bisection",
+      "snippet": "* Auto-Triage & Bisect Bot\n * Isolate culprit commit/target/test with cached replays + binary search\n\n* Start automatic triage for a build failure\n\n* Perform quick log-based analysis for obvious failures\n\n* Use TIA to narrow down the targets that need bisection",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/bot/prHealthBot.ts",
+      "title": "prHealthBot.ts",
+      "summary": "${pr.number}: ${pr.title}`); \\d+/i.test(title); 123)', # Context|## Background|## Why/i.test(body);",
+      "snippet": "${pr.number}: ${pr.title}`);\n\n\\d+/i.test(title);\n\n123)',\n\n# Context|## Background|## Why/i.test(body);",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/build-cache/CacheManager.ts",
+      "title": "CacheManager.ts",
+      "summary": "* Remote Build Cache Manager - Content Addressed Storage * Composer vNext Sprint: Shared cache between CI + dev machines * Generate content-addressed key from inputs * Check if artifact exists in cache * Store build artifact in cache",
+      "snippet": "* Remote Build Cache Manager - Content Addressed Storage\n * Composer vNext Sprint: Shared cache between CI + dev machines\n\n* Generate content-addressed key from inputs\n\n* Check if artifact exists in cache\n\n* Store build artifact in cache",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/build-executor/BuildExecutor.ts",
+      "title": "BuildExecutor.ts",
+      "summary": "* Sandboxed Parallel Build Executor - Composer vNext Sprint * Work-stealing task executor with deterministic I/O and cache integration * Add build task to execution queue * Execute all tasks with parallel processing and work stealing",
+      "snippet": "* Sandboxed Parallel Build Executor - Composer vNext Sprint\n * Work-stealing task executor with deterministic I/O and cache integration\n\n* Add build task to execution queue\n\n* Execute all tasks with parallel processing and work stealing",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/cache/OCILayerCache.ts",
+      "title": "OCILayerCache.ts",
+      "summary": "* OCI Layer Remote Cache * Cache reusable container layers in an OCI registry with de-duplication * Build a container with layer caching * Lookup a cached layer for a build step * Pull a layer from cache",
+      "snippet": "* OCI Layer Remote Cache\n * Cache reusable container layers in an OCI registry with de-duplication\n\n* Build a container with layer caching\n\n* Lookup a cached layer for a build step\n\n* Pull a layer from cache",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/cache/WarmCacheSeeder.ts",
+      "title": "WarmCacheSeeder.ts",
+      "summary": "import { EventEmitter } from 'events'; import { promises as fs } from 'fs'; import * as path from 'path'; export interface CacheEntry { key: string; size: number; contentHash: string; lastAccessed: Da",
+      "snippet": "import { EventEmitter } from 'events'; import { promises as fs } from 'fs'; import * as path from 'path'; export interface CacheEntry { key: string; size: number; contentHash: string; lastAccessed: Da",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/ccc/cli.js",
+      "title": "cli.js",
+      "summary": "!/usr/bin/env node",
+      "snippet": "!/usr/bin/env node",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/ccc/compiler.js",
+      "title": "compiler.js",
+      "summary": "* @param {string} content @type {Record<string, unknown>} @type {Record<string, unknown>} @type {Record<string, unknown>}",
+      "snippet": "* @param {string} content\n\n@type {Record<string, unknown>}\n\n@type {Record<string, unknown>}\n\n@type {Record<string, unknown>}",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/ccc/index.js",
+      "title": "index.js",
+      "summary": "export * from './compiler.js'; export * from './linter.js'; export * from './playground.js';",
+      "snippet": "export * from './compiler.js'; export * from './linter.js'; export * from './playground.js';",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/ccc/linter.js",
+      "title": "linter.js",
+      "summary": "* @param {{ version: string; clauses: Array<any> }} document",
+      "snippet": "* @param {{ version: string; clauses: Array<any> }} document",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/ccc/playground.js",
+      "title": "playground.js",
+      "summary": "* @param {{version: string; generatedAt: string; scopes: Record<string, Record<string, string>>}} policy * @param {Array<{name: string; scope: string; purpose: string}>} calls * @param {Array<{name: string; scope: string; purpose: string; allowed: boolean; lawfulBasis?: string; reason?: string}>} results",
+      "snippet": "* @param {{version: string; generatedAt: string; scopes: Record<string, Record<string, string>>}} policy\n * @param {Array<{name: string; scope: string; purpose: string}>} calls\n\n* @param {Array<{name: string; scope: string; purpose: string; allowed: boolean; lawfulBasis?: string; reason?: string}>} results",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/ccc/simple-yaml.js",
+      "title": "simple-yaml.js",
+      "summary": "')) { ')) {",
+      "snippet": "')) {\n\n')) {",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/chaos/core/ChaosEngine.ts",
+      "title": "ChaosEngine.ts",
+      "summary": "* @fileoverview Advanced Chaos Engineering System * Comprehensive chaos experiments with Chaos Toolkit integration, * network partitions, service degradation, resource exhaustion, * and automated chaos scheduling with detailed analysis. * Chaos experiment types and categories * Experiment target types * Chaos experiment status",
+      "snippet": "* @fileoverview Advanced Chaos Engineering System\n * Comprehensive chaos experiments with Chaos Toolkit integration,\n * network partitions, service degradation, resource exhaustion,\n * and automated chaos scheduling with detailed analysis.\n\n* Chaos experiment types and categories\n\n* Experiment target types\n\n* Chaos experiment status",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/chaos/experiments/ChaosExperimentLibrary.ts",
+      "title": "ChaosExperimentLibrary.ts",
+      "summary": "* @fileoverview Chaos Experiment Library * Pre-built chaos experiments for common failure scenarios * with detailed configuration and best practices. * Library of pre-built chaos experiments * Network partition experiments * Isolate service from network",
+      "snippet": "* @fileoverview Chaos Experiment Library\n * Pre-built chaos experiments for common failure scenarios\n * with detailed configuration and best practices.\n\n* Library of pre-built chaos experiments\n\n* Network partition experiments\n\n* Isolate service from network",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/chaos/reporting/ChaosReportGenerator.ts",
+      "title": "ChaosReportGenerator.ts",
+      "summary": "* @fileoverview Chaos Engineering Report Generator * Comprehensive reporting and analysis system for chaos experiments * with detailed insights, trend analysis, and executive summaries. * Report types and formats * Report configuration * Report filtering options",
+      "snippet": "* @fileoverview Chaos Engineering Report Generator\n * Comprehensive reporting and analysis system for chaos experiments\n * with detailed insights, trend analysis, and executive summaries.\n\n* Report types and formats\n\n* Report configuration\n\n* Report filtering options",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/cli/intelgraph.ts",
+      "title": "intelgraph.ts",
+      "summary": "!/usr/bin/env node IntelGraph Configuration'); \\s+ADR-\\d+:\\s*(.+)/m);",
+      "snippet": "!/usr/bin/env node\n\nIntelGraph Configuration');\n\n\\s+ADR-\\d+:\\s*(.+)/m);",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/cli/maestro-doctor.ts",
+      "title": "maestro-doctor.ts",
+      "summary": "* Maestro Doctor - Composer vNext Sprint * Environment checks and build system diagnostics !/usr/bin/env node",
+      "snippet": "* Maestro Doctor - Composer vNext Sprint\n * Environment checks and build system diagnostics\n\n!/usr/bin/env node",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/cli/maestro-explain.ts",
+      "title": "maestro-explain.ts",
+      "summary": "* Maestro Explain - Composer vNext Sprint * Critical path analysis and cache statistics visualization * Analyze build from logs or live execution * Generate build graph in various formats !/usr/bin/env node",
+      "snippet": "* Maestro Explain - Composer vNext Sprint\n * Critical path analysis and cache statistics visualization\n\n* Analyze build from logs or live execution\n\n* Generate build graph in various formats\n\n!/usr/bin/env node",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/cli/maestro-init.js",
+      "title": "maestro-init.js",
+      "summary": "!/usr/bin/env node Interactive wizard Analyze current directory Dry run migration",
+      "snippet": "!/usr/bin/env node\n\nInteractive wizard\n\nAnalyze current directory\n\nDry run migration",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/cli/maestro-profile.ts",
+      "title": "maestro-profile.ts",
+      "summary": "* Maestro Profile - Composer vNext+1 * Task timelines, RBE utilization, and performance profiling * Start profiling a build * Record task execution * Finish profiling and generate report",
+      "snippet": "* Maestro Profile - Composer vNext+1\n * Task timelines, RBE utilization, and performance profiling\n\n* Start profiling a build\n\n* Record task execution\n\n* Finish profiling and generate report",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/cli/maestro-query.ts",
+      "title": "maestro-query.ts",
+      "summary": "* Maestro Query - Composer vNext+1 * Graph Q&A system with sub-500ms dependency queries * Process natural language queries about the dependency graph * Interactive query session * Get query performance metrics",
+      "snippet": "* Maestro Query - Composer vNext+1\n * Graph Q&A system with sub-500ms dependency queries\n\n* Process natural language queries about the dependency graph\n\n* Interactive query session\n\n* Get query performance metrics",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/cloud/CloudOrchestrator.ts",
+      "title": "CloudOrchestrator.ts",
+      "summary": "import { EventEmitter } from 'events'; export interface CloudProvider { id: string; name: string; type: 'AWS' | 'AZURE' | 'GCP' | 'ORACLE' | 'ALIBABA' | 'IBM' | 'PRIVATE'; region: string; availability",
+      "snippet": "import { EventEmitter } from 'events'; export interface CloudProvider { id: string; name: string; type: 'AWS' | 'AZURE' | 'GCP' | 'ORACLE' | 'ALIBABA' | 'IBM' | 'PRIVATE'; region: string; availability",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/cognition/DistributedCognitionEngine.ts",
+      "title": "DistributedCognitionEngine.ts",
+      "summary": "import { EventEmitter } from 'events'; export interface CognitiveNode { id: string; name: string; type: | 'perception' | 'reasoning' | 'memory' | 'decision' | 'learning' | 'creativity' | 'metacognitio",
+      "snippet": "import { EventEmitter } from 'events'; export interface CognitiveNode { id: string; name: string; type: | 'perception' | 'reasoning' | 'memory' | 'decision' | 'learning' | 'creativity' | 'metacognitio",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/collaboration/collaborationEngine.ts",
+      "title": "collaborationEngine.ts",
+      "summary": "* Real-time Collaboration Engine for IntelGraph * WebSocket-based collaboration with operational transforms, presence awareness, and conflict resolution * Create a new collaboration session * Join a collaboration session * Leave a collaboration session",
+      "snippet": "* Real-time Collaboration Engine for IntelGraph\n * WebSocket-based collaboration with operational transforms, presence awareness, and conflict resolution\n\n* Create a new collaboration session\n\n* Join a collaboration session\n\n* Leave a collaboration session",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/collaboration/presenceManager.ts",
+      "title": "presenceManager.ts",
+      "summary": "* Presence Manager for Real-time Collaboration * Manages user presence, cursors, selections, and real-time activity tracking * Initialize user presence in a session * Update cursor position * Update selection",
+      "snippet": "* Presence Manager for Real-time Collaboration\n * Manages user presence, cursors, selections, and real-time activity tracking\n\n* Initialize user presence in a session\n\n* Update cursor position\n\n* Update selection",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/collaborationHub.ts",
+      "title": "collaborationHub.ts",
+      "summary": "export function collaborationHub(config) { return { hub: 'Collaboration Hub Placeholder' }; }",
+      "snippet": "export function collaborationHub(config) { return { hub: 'Collaboration Hub Placeholder' }; }",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/components/AnswerCard.tsx",
+      "title": "AnswerCard.tsx",
+      "summary": "import React from 'react'; export default function AnswerCard({ tldr, steps, facts, }: { tldr: string; steps?: string[]; facts?: string[]; }) { return ( <div className=\"card padding--md\"> <p> <strong>",
+      "snippet": "import React from 'react'; export default function AnswerCard({ tldr, steps, facts, }: { tldr: string; steps?: string[]; facts?: string[]; }) { return ( <div className=\"card padding--md\"> <p> <strong>",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/components/Assistant.tsx",
+      "title": "Assistant.tsx",
+      "summary": "// This is a stub for the Doc Assistant component. // It would typically include a search input and display results. import React from 'react'; const Assistant = () => { return ( <div> <h2>Doc Assista",
+      "snippet": "// This is a stub for the Doc Assistant component. // It would typically include a search input and display results. import React from 'react'; const Assistant = () => { return ( <div> <h2>Doc Assista",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/components/CollaborativePlanningHub.jsx",
+      "title": "CollaborativePlanningHub.jsx",
+      "summary": "import ReactFlow from 'react-flow-renderer'; import { useState } from 'react'; import 'tailwindcss/tailwind.css'; import * as THREE from 'three'; const CollaborativePlanningHub = ({ plan }) => { const",
+      "snippet": "import ReactFlow from 'react-flow-renderer'; import { useState } from 'react'; import 'tailwindcss/tailwind.css'; import * as THREE from 'three'; const CollaborativePlanningHub = ({ plan }) => { const",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/components/ConfigGen.tsx",
+      "title": "ConfigGen.tsx",
+      "summary": "import React, { useState } from 'react'; export default function ConfigGen() { const [apiKey, setApiKey] = useState('IG_API_KEY'); const [endpoint, setEndpoint] = useState('https://api.intelgraph.exam",
+      "snippet": "import React, { useState } from 'react'; export default function ConfigGen() { const [apiKey, setApiKey] = useState('IG_API_KEY'); const [endpoint, setEndpoint] = useState('https://api.intelgraph.exam",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/components/CopyMacro.tsx",
+      "title": "CopyMacro.tsx",
+      "summary": "import React from 'react'; export default function CopyMacro({ slug }: { slug: string }) { const data = require('@site/docs/ops/support/macros.json'); const m = data.find((x: any) => x.title.endsWith(",
+      "snippet": "import React from 'react'; export default function CopyMacro({ slug }: { slug: string }) { const data = require('@site/docs/ops/support/macros.json'); const m = data.find((x: any) => x.title.endsWith(",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/components/CwvCard.tsx",
+      "title": "CwvCard.tsx",
+      "summary": "import React from 'react'; export default function CwvCard() { const data = require('@site/docs/ops/telemetry/cwv.json'); if (!data?.p50) return null; return ( <div className=\"card padding--md\"> <stro",
+      "snippet": "import React from 'react'; export default function CwvCard() { const data = require('@site/docs/ops/telemetry/cwv.json'); if (!data?.p50) return null; return ( <div className=\"card padding--md\"> <stro",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/components/DocsHealth.tsx",
+      "title": "DocsHealth.tsx",
+      "summary": "import React, { useEffect, useState } from 'react'; import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, } from 'recharts'; export default function DocsHealth() { const",
+      "snippet": "import React, { useEffect, useState } from 'react'; import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, } from 'recharts'; export default function DocsHealth() { const",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/components/DocsQualityCard.tsx",
+      "title": "DocsQualityCard.tsx",
+      "summary": "import React from 'react'; export default function DocsQualityCard(){ const data = require('@site/docs/ops/quality/scores.json'); if (!data?.length) return null; const low = data.filter((d:any)=> d.sc",
+      "snippet": "import React from 'react'; export default function DocsQualityCard(){ const data = require('@site/docs/ops/quality/scores.json'); if (!data?.length) return null; const low = data.filter((d:any)=> d.sc",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/components/Feedback.tsx",
+      "title": "Feedback.tsx",
+      "summary": "import React, { useState } from 'react'; export default function Feedback() { const [v, setV] = useState(null as null | 'up' | 'down'); const url = (title: string) => `https://github.com/intelgraph/in",
+      "snippet": "import React, { useState } from 'react'; export default function Feedback() { const [v, setV] = useState(null as null | 'up' | 'down'); const url = (title: string) => `https://github.com/intelgraph/in",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/components/Flags.tsx",
+      "title": "Flags.tsx",
+      "summary": "import React, { createContext, useContext, useEffect, useState } from 'react'; const Ctx = createContext<{ flags: any }>({ flags: {} }); export function FlagsProvider({ children }: { children: any })",
+      "snippet": "import React, { createContext, useContext, useEffect, useState } from 'react'; const Ctx = createContext<{ flags: any }>({ flags: {} }); export function FlagsProvider({ children }: { children: any }) ",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/components/IntegrationsGrid.tsx",
+      "title": "IntegrationsGrid.tsx",
+      "summary": "import React from 'react'; import Link from '@docusaurus/Link'; export default function IntegrationsGrid({ items, }: { items: { slug: string; label: string }[]; }) { return ( <div className=\"margin-to",
+      "snippet": "import React from 'react'; import Link from '@docusaurus/Link'; export default function IntegrationsGrid({ items, }: { items: { slug: string; label: string }[]; }) { return ( <div className=\"margin-to",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/components/LearningPath.tsx",
+      "title": "LearningPath.tsx",
+      "summary": "import React, { useEffect, useState } from 'react'; import Link from '@docusaurus/Link'; export default function LearningPath({ id, modules, }: { id: string; modules: string[]; }) { const key = `learn",
+      "snippet": "import React, { useEffect, useState } from 'react'; import Link from '@docusaurus/Link'; export default function LearningPath({ id, modules, }: { id: string; modules: string[]; }) { const key = `learn",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/components/NotFoundSuggest.tsx",
+      "title": "NotFoundSuggest.tsx",
+      "summary": "import React, { useEffect, useState } from 'react'; export default function NotFoundSuggest() { const [best, setBest] = useState<string | null>(null); useEffect(() => { import('@site/docs/ops/meta/red",
+      "snippet": "import React, { useEffect, useState } from 'react'; export default function NotFoundSuggest() { const [best, setBest] = useState<string | null>(null); useEffect(() => { import('@site/docs/ops/meta/red",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/components/Playground.tsx",
+      "title": "Playground.tsx",
+      "summary": "import React from 'react'; import { Sandpack } from '@codesandbox/sandpack-react'; export default function Playground({ files, template = 'vanilla-ts', }: { files: Record<string, string>; template?: s",
+      "snippet": "import React from 'react'; import { Sandpack } from '@codesandbox/sandpack-react'; export default function Playground({ files, template = 'vanilla-ts', }: { files: Record<string, string>; template?: s",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/components/PyPlayground.tsx",
+      "title": "PyPlayground.tsx",
+      "summary": "import React, { useEffect, useRef, useState } from 'react'; export default function PyPlayground({ code, requirements = [], }: { code: string; requirements?: string[]; }) { const [ready, setReady] = u",
+      "snippet": "import React, { useEffect, useRef, useState } from 'react'; export default function PyPlayground({ code, requirements = [], }: { code: string; requirements?: string[]; }) { const [ready, setReady] = u",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/components/QualityBadge.tsx",
+      "title": "QualityBadge.tsx",
+      "summary": "import React from 'react'; export default function QualityBadge({ score }: { score: number }) { const pct = Math.round(score * 100); const color = pct >= 90 ? 'success' : pct >= 75 ? 'warning' : 'dang",
+      "snippet": "import React from 'react'; export default function QualityBadge({ score }: { score: number }) { const pct = Math.round(score * 100); const color = pct >= 90 ? 'success' : pct >= 75 ? 'warning' : 'dang",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/components/Quiz.tsx",
+      "title": "Quiz.tsx",
+      "summary": "import React, { useState } from 'react'; export default function Quiz({ items, }: { items: { id: string; prompt: string; options: string[]; answer: number }[]; }) { const [score, setScore] = useState<",
+      "snippet": "import React, { useState } from 'react'; export default function Quiz({ items, }: { items: { id: string; prompt: string; options: string[]; answer: number }[]; }) { const [score, setScore] = useState<",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/components/SdkPicker.tsx",
+      "title": "SdkPicker.tsx",
+      "summary": "import React, { useState, useEffect } from 'react'; export default function SdkPicker({ sdks, }: { sdks: { id: string; label: string }[]; }) { const [sdk, setSdk] = useState(localStorage.getItem('sdk'",
+      "snippet": "import React, { useState, useEffect } from 'react'; export default function SdkPicker({ sdks, }: { sdks: { id: string; label: string }[]; }) { const [sdk, setSdk] = useState(localStorage.getItem('sdk'",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/components/Segment.tsx",
+      "title": "Segment.tsx",
+      "summary": "import React from 'react'; export function seg() { const role = localStorage.getItem('role') || 'user'; const plan = localStorage.getItem('plan') || 'free'; return `${role}-${plan}`; } export const If",
+      "snippet": "import React from 'react'; export function seg() { const role = localStorage.getItem('role') || 'user'; const plan = localStorage.getItem('plan') || 'free'; return `${role}-${plan}`; } export const If",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/components/SmartSearch.tsx",
+      "title": "SmartSearch.tsx",
+      "summary": "import React, { useEffect, useState } from 'react'; export default function SmartSearch() { const [q, setQ] = useState(''); const [hits, setHits] = useState<any[]>([]); useEffect(() => { const t = set",
+      "snippet": "import React, { useEffect, useState } from 'react'; export default function SmartSearch() { const [q, setQ] = useState(''); const [hits, setHits] = useState<any[]>([]); useEffect(() => { const t = set",
+      "kind": "codeCommentDocs"
+    },
+    {
+      "file": "src/components/Tour.tsx",
+      "title": "Tour.tsx",
+      "summary": "import React, { useEffect, useState } from 'react'; const stepsAttr = 'data-tour-step'; export default function Tour({ id, role, steps, }: { id: string; role?: string; steps: { selector: string; title",
+      "snippet": "import React, { useEffect, useState } from 'react'; const stepsAttr = 'data-tour-step'; export default function Tour({ id, role, steps, }: { id: string; role?: string; steps: { selector: string; title",
+      "kind": "codeCommentDocs"
+    }
+  ],
+  "schemas": [
+    {
+      "file": "schemas/agent-budget-manifest.schema.json",
+      "title": "agent-budget-manifest.schema.json",
+      "summary": "{ \"$id\": \"https://summit.dev/schemas/agent-budget-manifest\", \"$schema\": \"https://json-schema.org/draft/2020-12/schema\", \"title\": \"Agent Budget Manifest\", \"description\": \"Deterministic resource budgets and risk ceilings for autonomous agents.\", \"type\": \"object\", \"required\": [ \"$schema\", \"schemaVersion\", \"agentId\", \"owner\", \"description\", \"deterministicLimits\"",
+      "snippet": "{ \"$id\": \"https://summit.dev/schemas/agent-budget-manifest\", \"$schema\": \"https://json-schema.org/draft/2020-12/schema\", \"title\": \"Agent Budget Manifest\", \"description\": \"Deterministic resource budgets and risk ceilings for autonomous agents.\", \"type\": \"object\", \"required\": [ \"$schema\", \"schemaVersion\", \"agentId\", \"owner\", \"description\", \"deterministicLimits\", \"risk\", \"telemetry\" ], \"properties\": { \"$schema\": {",
+      "kind": "schemas"
+    },
+    {
+      "file": "schemas/agent-run.schema.json",
+      "title": "agent-run.schema.json",
+      "summary": "{ \"$id\": \"https://summit.dev/schemas/agent-run\", \"$schema\": \"https://json-schema.org/draft/2020-12/schema\", \"title\": \"Agent Run\", \"type\": \"object\", \"required\": [ \"id\", \"agentName\", \"sessionId\", \"startedAt\", \"status\" ], \"properties\": { \"id\": { \"type\": \"string\", \"pattern\": \"^arun_[a-zA-Z0-9\\\\-_.]+$\" }, \"agentName\": {",
+      "snippet": "{ \"$id\": \"https://summit.dev/schemas/agent-run\", \"$schema\": \"https://json-schema.org/draft/2020-12/schema\", \"title\": \"Agent Run\", \"type\": \"object\", \"required\": [ \"id\", \"agentName\", \"sessionId\", \"startedAt\", \"status\" ], \"properties\": { \"id\": { \"type\": \"string\", \"pattern\": \"^arun_[a-zA-Z0-9\\\\-_.]+$\" }, \"agentName\": {",
+      "kind": "schemas"
+    },
+    {
+      "file": "schemas/dag-node.schema.yaml",
+      "title": "dag-node.schema.yaml",
+      "summary": "# schemas/dag-node.schema.yaml type: object properties: id: type: string description: Unique identifier for the node in the DAG. needs: type: array items: type: string description: A list of node IDs that must be completed before this node can run. run: type: string description: The command to execute for this node. cache_key: type: string description: A key",
+      "snippet": "# schemas/dag-node.schema.yaml type: object properties: id: type: string description: Unique identifier for the node in the DAG. needs: type: array items: type: string description: A list of node IDs that must be completed before this node can run. run: type: string description: The command to execute for this node. cache_key: type: string description: A key representing the state of inputs, used for caching. outputs",
+      "kind": "schemas"
+    },
+    {
+      "file": "schemas/data-spine/events/authz.decision.v1.schema.json",
+      "title": "authz.decision.v1.schema.json",
+      "summary": "{ \"$schema\": \"http://json-schema.org/draft-07/schema#\", \"$id\": \"https://companyos.example.com/schemas/data-spine/authz.decision.v1.schema.json\", \"title\": \"CompanyOS Authorization Decision Event v1\", \"description\": \"Event emitted for every authorization decision produced by the shared authz gateway.\", \"allOf\": [ { \"$ref\": \"./base-envelope.schema.json\" }, { \"t",
+      "snippet": "{ \"$schema\": \"http://json-schema.org/draft-07/schema#\", \"$id\": \"https://companyos.example.com/schemas/data-spine/authz.decision.v1.schema.json\", \"title\": \"CompanyOS Authorization Decision Event v1\", \"description\": \"Event emitted for every authorization decision produced by the shared authz gateway.\", \"allOf\": [ { \"$ref\": \"./base-envelope.schema.json\" }, { \"type\": \"object\", \"properties\": { \"event_type\": { \"const\": \"au",
+      "kind": "schemas"
+    },
+    {
+      "file": "schemas/data-spine/events/base-envelope.schema.json",
+      "title": "base-envelope.schema.json",
+      "summary": "{ \"$schema\": \"http://json-schema.org/draft-07/schema#\", \"$id\": \"https://companyos.example.com/schemas/data-spine/base-envelope.schema.json\", \"title\": \"CompanyOS Data Spine Envelope v1\", \"description\": \"Canonical envelope for all CompanyOS Data Spine events.\", \"type\": \"object\", \"additionalProperties\": false, \"properties\": { \"event_id\": { \"description\": \"Stabl",
+      "snippet": "{ \"$schema\": \"http://json-schema.org/draft-07/schema#\", \"$id\": \"https://companyos.example.com/schemas/data-spine/base-envelope.schema.json\", \"title\": \"CompanyOS Data Spine Envelope v1\", \"description\": \"Canonical envelope for all CompanyOS Data Spine events.\", \"type\": \"object\", \"additionalProperties\": false, \"properties\": { \"event_id\": { \"description\": \"Stable, unique identifier for the emitted event (UUIDv4 recommend",
+      "kind": "schemas"
+    },
+    {
+      "file": "schemas/data-spine/events/company.profile_changed.v1.schema.json",
+      "title": "company.profile_changed.v1.schema.json",
+      "summary": "{ \"$schema\": \"http://json-schema.org/draft-07/schema#\", \"$id\": \"https://companyos.example.com/schemas/data-spine/company.profile_changed.v1.schema.json\", \"title\": \"Company Profile Changed Event v1\", \"description\": \"CDC-style event for CompanyOS company profile mutations with redacted sensitive fields.\", \"allOf\": [ { \"$ref\": \"./base-envelope.schema.json\" }, {",
+      "snippet": "{ \"$schema\": \"http://json-schema.org/draft-07/schema#\", \"$id\": \"https://companyos.example.com/schemas/data-spine/company.profile_changed.v1.schema.json\", \"title\": \"Company Profile Changed Event v1\", \"description\": \"CDC-style event for CompanyOS company profile mutations with redacted sensitive fields.\", \"allOf\": [ { \"$ref\": \"./base-envelope.schema.json\" }, { \"type\": \"object\", \"properties\": { \"event_type\": { \"const\": ",
+      "kind": "schemas"
+    },
+    {
+      "file": "schemas/data-spine/events/config.changed.v1.schema.json",
+      "title": "config.changed.v1.schema.json",
+      "summary": "{ \"$schema\": \"http://json-schema.org/draft-07/schema#\", \"$id\": \"https://companyos.example.com/schemas/data-spine/config.changed.v1.schema.json\", \"title\": \"CompanyOS Config Changed Event v1\", \"description\": \"Event emitted for configuration changes such as feature flags or service parameters.\", \"allOf\": [ { \"$ref\": \"./base-envelope.schema.json\" }, { \"type\": \"o",
+      "snippet": "{ \"$schema\": \"http://json-schema.org/draft-07/schema#\", \"$id\": \"https://companyos.example.com/schemas/data-spine/config.changed.v1.schema.json\", \"title\": \"CompanyOS Config Changed Event v1\", \"description\": \"Event emitted for configuration changes such as feature flags or service parameters.\", \"allOf\": [ { \"$ref\": \"./base-envelope.schema.json\" }, { \"type\": \"object\", \"properties\": { \"event_type\": { \"const\": \"config.cha",
+      "kind": "schemas"
+    },
+    {
+      "file": "schemas/data-spine/events/examples/authz.decision.v1.example.json",
+      "title": "authz.decision.v1.example.json",
+      "summary": "{ \"event_id\": \"c5b0c815-8d93-4e43-b5b5-4fa1d3ef69b9\", \"event_type\": \"authz.decision.v1\", \"event_version\": \"v1\", \"occurred_at\": \"2025-01-10T18:22:13Z\", \"recorded_at\": \"2025-01-10T18:22:13Z\", \"tenant_id\": \"tenant-acme\", \"subject_id\": \"user-123\", \"source_service\": \"authz-gateway\", \"trace_id\": \"trace-abc-123\", \"correlation_id\": \"req-789\", \"region\": \"us-east-1\", ",
+      "snippet": "{ \"event_id\": \"c5b0c815-8d93-4e43-b5b5-4fa1d3ef69b9\", \"event_type\": \"authz.decision.v1\", \"event_version\": \"v1\", \"occurred_at\": \"2025-01-10T18:22:13Z\", \"recorded_at\": \"2025-01-10T18:22:13Z\", \"tenant_id\": \"tenant-acme\", \"subject_id\": \"user-123\", \"source_service\": \"authz-gateway\", \"trace_id\": \"trace-abc-123\", \"correlation_id\": \"req-789\", \"region\": \"us-east-1\", \"data\": { \"resource\": { \"type\": \"document\", \"id\": \"doc-55\", ",
+      "kind": "schemas"
+    },
+    {
+      "file": "schemas/data-spine/events/examples/company.profile_changed.v1.example.json",
+      "title": "company.profile_changed.v1.example.json",
+      "summary": "{ \"event_id\": \"4c060ca9-3ea8-4b1f-8d1a-5c2f7e9d34d9\", \"event_type\": \"company.profile_changed.v1\", \"event_version\": \"v1\", \"occurred_at\": \"2025-01-10T18:15:30Z\", \"recorded_at\": \"2025-01-10T18:15:31Z\", \"tenant_id\": \"tenant-acme\", \"subject_id\": \"system-cdc\", \"source_service\": \"company-service\", \"trace_id\": \"trace-cdc-22\", \"correlation_id\": \"update-555\", \"region\"",
+      "snippet": "{ \"event_id\": \"4c060ca9-3ea8-4b1f-8d1a-5c2f7e9d34d9\", \"event_type\": \"company.profile_changed.v1\", \"event_version\": \"v1\", \"occurred_at\": \"2025-01-10T18:15:30Z\", \"recorded_at\": \"2025-01-10T18:15:31Z\", \"tenant_id\": \"tenant-acme\", \"subject_id\": \"system-cdc\", \"source_service\": \"company-service\", \"trace_id\": \"trace-cdc-22\", \"correlation_id\": \"update-555\", \"region\": \"us-east-1\", \"data\": { \"entity_id\": \"company-44\", \"change_",
+      "kind": "schemas"
+    },
+    {
+      "file": "schemas/data-spine/events/examples/config.changed.v1.example.json",
+      "title": "config.changed.v1.example.json",
+      "summary": "{ \"event_id\": \"aa6a5dea-4bfd-4f96-8c88-7f216a5722a7\", \"event_type\": \"config.changed.v1\", \"event_version\": \"v1\", \"occurred_at\": \"2025-01-10T18:18:45Z\", \"recorded_at\": \"2025-01-10T18:18:45Z\", \"tenant_id\": \"tenant-acme\", \"subject_id\": \"feature-admin-2\", \"source_service\": \"config-service\", \"trace_id\": \"trace-config-77\", \"correlation_id\": \"ticket-4421\", \"region\":",
+      "snippet": "{ \"event_id\": \"aa6a5dea-4bfd-4f96-8c88-7f216a5722a7\", \"event_type\": \"config.changed.v1\", \"event_version\": \"v1\", \"occurred_at\": \"2025-01-10T18:18:45Z\", \"recorded_at\": \"2025-01-10T18:18:45Z\", \"tenant_id\": \"tenant-acme\", \"subject_id\": \"feature-admin-2\", \"source_service\": \"config-service\", \"trace_id\": \"trace-config-77\", \"correlation_id\": \"ticket-4421\", \"region\": \"us-east-1\", \"data\": { \"config_key\": \"authz.rollout_engine\"",
+      "kind": "schemas"
+    },
+    {
+      "file": "schemas/data-spine/events/examples/policy.bundle_updated.v1.example.json",
+      "title": "policy.bundle_updated.v1.example.json",
+      "summary": "{ \"event_id\": \"f7708107-29f1-4d6b-8f4e-70e1d0c5e8ec\", \"event_type\": \"policy.bundle_updated.v1\", \"event_version\": \"v1\", \"occurred_at\": \"2025-01-10T18:20:01Z\", \"recorded_at\": \"2025-01-10T18:20:02Z\", \"tenant_id\": \"tenant-acme\", \"subject_id\": \"policy-admin-5\", \"source_service\": \"policy-service\", \"trace_id\": \"trace-xyz-001\", \"correlation_id\": \"change-1188\", \"regi",
+      "snippet": "{ \"event_id\": \"f7708107-29f1-4d6b-8f4e-70e1d0c5e8ec\", \"event_type\": \"policy.bundle_updated.v1\", \"event_version\": \"v1\", \"occurred_at\": \"2025-01-10T18:20:01Z\", \"recorded_at\": \"2025-01-10T18:20:02Z\", \"tenant_id\": \"tenant-acme\", \"subject_id\": \"policy-admin-5\", \"source_service\": \"policy-service\", \"trace_id\": \"trace-xyz-001\", \"correlation_id\": \"change-1188\", \"region\": \"us-east-1\", \"data\": { \"bundle_id\": \"policy-bundle-2025",
+      "kind": "schemas"
+    },
+    {
+      "file": "schemas/data-spine/events/policy.bundle_updated.v1.schema.json",
+      "title": "policy.bundle_updated.v1.schema.json",
+      "summary": "{ \"$schema\": \"http://json-schema.org/draft-07/schema#\", \"$id\": \"https://companyos.example.com/schemas/data-spine/policy.bundle_updated.v1.schema.json\", \"title\": \"CompanyOS Policy Bundle Updated Event v1\", \"description\": \"Event emitted whenever a policy bundle is published or rolled back.\", \"allOf\": [ { \"$ref\": \"./base-envelope.schema.json\" }, { \"type\": \"obje",
+      "snippet": "{ \"$schema\": \"http://json-schema.org/draft-07/schema#\", \"$id\": \"https://companyos.example.com/schemas/data-spine/policy.bundle_updated.v1.schema.json\", \"title\": \"CompanyOS Policy Bundle Updated Event v1\", \"description\": \"Event emitted whenever a policy bundle is published or rolled back.\", \"allOf\": [ { \"$ref\": \"./base-envelope.schema.json\" }, { \"type\": \"object\", \"properties\": { \"event_type\": { \"const\": \"policy.bundle",
+      "kind": "schemas"
+    },
+    {
+      "file": "schemas/disclosure-pack.schema.json",
+      "title": "disclosure-pack.schema.json",
+      "summary": "{ \"$id\": \"https://companyos/schemas/disclosure-pack.schema.json\", \"$schema\": \"http://json-schema.org/draft-07/schema#\", \"title\": \"DisclosurePack\", \"type\": \"object\", \"properties\": { \"id\": { \"type\": \"string\" }, \"generated_at\": { \"type\": \"string\", \"format\": \"date-time\" }, \"generated_by\": { \"type\": \"string\" }, \"tenant_id\": { \"type\": \"string\" }, \"product\": { \"typ",
+      "snippet": "{ \"$id\": \"https://companyos/schemas/disclosure-pack.schema.json\", \"$schema\": \"http://json-schema.org/draft-07/schema#\", \"title\": \"DisclosurePack\", \"type\": \"object\", \"properties\": { \"id\": { \"type\": \"string\" }, \"generated_at\": { \"type\": \"string\", \"format\": \"date-time\" }, \"generated_by\": { \"type\": \"string\" }, \"tenant_id\": { \"type\": \"string\" }, \"product\": { \"type\": \"string\" }, \"environment\": { \"type\": \"string\", \"enum\": [",
+      "kind": "schemas"
+    },
+    {
+      "file": "schemas/index_catalog.yaml",
+      "title": "index_catalog.yaml",
+      "summary": "# Catalog of critical indexes with ownership and evidence links postgres: - name: idx_cases_tenant_created_at table: cases columns: [tenant_id, created_at] owner: data-platform purpose: accelerate tenant-scoped case listings evidence: https://grafana.example.com/d/slow-queries status: present - name: idx_audit_events_tenant_created_at table: audit_events col",
+      "snippet": "# Catalog of critical indexes with ownership and evidence links postgres: - name: idx_cases_tenant_created_at table: cases columns: [tenant_id, created_at] owner: data-platform purpose: accelerate tenant-scoped case listings evidence: https://grafana.example.com/d/slow-queries status: present - name: idx_audit_events_tenant_created_at table: audit_events columns: [tenant_id, created_at] owner: security purpose: time-",
+      "kind": "schemas"
+    },
+    {
+      "file": "schemas/lsc.schema.json",
+      "title": "lsc.schema.json",
+      "summary": "{ \"$schema\": \"http://json-schema.org/draft-07/schema#\", \"title\": \"Live Safety Case (GSN)\", \"type\": \"object\", \"properties\": { \"goal\": { \"$ref\": \"#/definitions/Node\" }, \"strategy\": { \"$ref\": \"#/definitions/Node\" }, \"contexts\": { \"type\": \"array\", \"items\": { \"$ref\": \"#/definitions/Node\" } }, \"solutions\": { \"type\": \"array\", \"items\": { \"$ref\": \"#/definitions/Node\"",
+      "snippet": "{ \"$schema\": \"http://json-schema.org/draft-07/schema#\", \"title\": \"Live Safety Case (GSN)\", \"type\": \"object\", \"properties\": { \"goal\": { \"$ref\": \"#/definitions/Node\" }, \"strategy\": { \"$ref\": \"#/definitions/Node\" }, \"contexts\": { \"type\": \"array\", \"items\": { \"$ref\": \"#/definitions/Node\" } }, \"solutions\": { \"type\": \"array\", \"items\": { \"$ref\": \"#/definitions/Node\" } }, \"claims\": { \"type\": \"array\", \"items\": { \"$ref\": \"#/def",
+      "kind": "schemas"
+    },
+    {
+      "file": "schemas/policy-decision.schema.json",
+      "title": "policy-decision.schema.json",
+      "summary": "{ \"$id\": \"https://summit.dev/schemas/policy-decision\", \"$schema\": \"https://json-schema.org/draft/2020-12/schema\", \"title\": \"Policy Decision\", \"type\": \"object\", \"required\": [ \"id\", \"timestamp\", \"policy\", \"input\", \"result\" ], \"properties\": { \"id\": { \"type\": \"string\", \"pattern\": \"^pdec_[a-zA-Z0-9\\\\-_.]+$\" }, \"timestamp\": {",
+      "snippet": "{ \"$id\": \"https://summit.dev/schemas/policy-decision\", \"$schema\": \"https://json-schema.org/draft/2020-12/schema\", \"title\": \"Policy Decision\", \"type\": \"object\", \"required\": [ \"id\", \"timestamp\", \"policy\", \"input\", \"result\" ], \"properties\": { \"id\": { \"type\": \"string\", \"pattern\": \"^pdec_[a-zA-Z0-9\\\\-_.]+$\" }, \"timestamp\": {",
+      "kind": "schemas"
+    },
+    {
+      "file": "schemas/provenance-event.schema.json",
+      "title": "provenance-event.schema.json",
+      "summary": "{ \"$id\": \"https://summit.dev/schemas/provenance-event\", \"$schema\": \"https://json-schema.org/draft/2020-12/schema\", \"title\": \"Provenance Event\", \"type\": \"object\", \"required\": [ \"id\", \"timestamp\", \"actor\", \"action\", \"subject\", \"context\" ], \"properties\": { \"id\": { \"type\": \"string\", \"pattern\": \"^prov_[a-zA-Z0-9\\\\-_.]+$\" },",
+      "snippet": "{ \"$id\": \"https://summit.dev/schemas/provenance-event\", \"$schema\": \"https://json-schema.org/draft/2020-12/schema\", \"title\": \"Provenance Event\", \"type\": \"object\", \"required\": [ \"id\", \"timestamp\", \"actor\", \"action\", \"subject\", \"context\" ], \"properties\": { \"id\": { \"type\": \"string\", \"pattern\": \"^prov_[a-zA-Z0-9\\\\-_.]+$\" },",
+      "kind": "schemas"
+    },
+    {
+      "file": "schemas/purchase-order.schema.json",
+      "title": "purchase-order.schema.json",
+      "summary": "{ \"$id\": \"https://summit.dev/schemas/purchase-order\", \"$schema\": \"https://json-schema.org/draft/2020-12/schema\", \"title\": \"Purchase Order\", \"type\": \"object\", \"required\": [ \"id\", \"amount\", \"currency\", \"vendorId\", \"createdAt\" ], \"properties\": { \"id\": { \"type\": \"string\", \"pattern\": \"^po_[a-zA-Z0-9]{10}$\" }, \"amount\": {",
+      "snippet": "{ \"$id\": \"https://summit.dev/schemas/purchase-order\", \"$schema\": \"https://json-schema.org/draft/2020-12/schema\", \"title\": \"Purchase Order\", \"type\": \"object\", \"required\": [ \"id\", \"amount\", \"currency\", \"vendorId\", \"createdAt\" ], \"properties\": { \"id\": { \"type\": \"string\", \"pattern\": \"^po_[a-zA-Z0-9]{10}$\" }, \"amount\": {",
+      "kind": "schemas"
+    },
+    {
+      "file": "schemas/runbook.maestro.yaml",
+      "title": "runbook.maestro.yaml",
+      "summary": "apiVersion: maestro/v1 kind: Runbook metadata: name: backfill-entity-resolver version: 0.9.0 owner: sre@summit approvals: required: true approvers: ['sre-oncall', 'data-lead'] allowList: roles: ['sre', 'platform-engineer'] schedule: null spec: inputs: - name: since type: datetime required: true - name: until",
+      "snippet": "apiVersion: maestro/v1 kind: Runbook metadata: name: backfill-entity-resolver version: 0.9.0 owner: sre@summit approvals: required: true approvers: ['sre-oncall', 'data-lead'] allowList: roles: ['sre', 'platform-engineer'] schedule: null spec: inputs: - name: since type: datetime required: true - name: until",
+      "kind": "schemas"
+    },
+    {
+      "file": "schemas/runbook.schema.json",
+      "title": "runbook.schema.json",
+      "summary": "{ \"$schema\": \"http://json-schema.org/draft-07/schema#\", \"title\": \"MaestroRunbook\", \"type\": \"object\", \"required\": [\"apiVersion\", \"kind\", \"metadata\", \"spec\"], \"properties\": { \"apiVersion\": { \"const\": \"maestro/v1\" }, \"kind\": { \"const\": \"Runbook\" }, \"metadata\": { \"type\": \"object\", \"required\": [\"name\", \"version\", \"owner\"], \"properties\": { \"name\": { \"type\": \"strin",
+      "snippet": "{ \"$schema\": \"http://json-schema.org/draft-07/schema#\", \"title\": \"MaestroRunbook\", \"type\": \"object\", \"required\": [\"apiVersion\", \"kind\", \"metadata\", \"spec\"], \"properties\": { \"apiVersion\": { \"const\": \"maestro/v1\" }, \"kind\": { \"const\": \"Runbook\" }, \"metadata\": { \"type\": \"object\", \"required\": [\"name\", \"version\", \"owner\"], \"properties\": { \"name\": { \"type\": \"string\", \"pattern\": \"^[a-z0-9-]+$\" }, \"version\": { \"type\": \"strin",
+      "kind": "schemas"
+    },
+    {
+      "file": "schemas/sbom.schema.json",
+      "title": "sbom.schema.json",
+      "summary": "{ \"$id\": \"https://summit.dev/schemas/sbom\", \"$schema\": \"https://json-schema.org/draft/2020-12/schema\", \"title\": \"Software Bill of Materials (SBOM)\", \"type\": \"object\", \"required\": [ \"id\", \"version\", \"createdAt\", \"generator\", \"components\" ], \"properties\": { \"id\": { \"type\": \"string\", \"pattern\": \"^sbom_[a-zA-Z0-9\\\\-_.]+$\" }, \"version\": {",
+      "snippet": "{ \"$id\": \"https://summit.dev/schemas/sbom\", \"$schema\": \"https://json-schema.org/draft/2020-12/schema\", \"title\": \"Software Bill of Materials (SBOM)\", \"type\": \"object\", \"required\": [ \"id\", \"version\", \"createdAt\", \"generator\", \"components\" ], \"properties\": { \"id\": { \"type\": \"string\", \"pattern\": \"^sbom_[a-zA-Z0-9\\\\-_.]+$\" }, \"version\": {",
+      "kind": "schemas"
+    },
+    {
+      "file": "schemas/user.schema.json",
+      "title": "user.schema.json",
+      "summary": "{ \"$id\": \"https://companyos/schemas/user.schema.json\", \"$schema\": \"http://json-schema.org/draft-07/schema#\", \"title\": \"User\", \"type\": \"object\", \"properties\": { \"id\": { \"type\": \"string\" }, \"tenant_id\": { \"type\": \"string\" }, \"email\": { \"type\": \"string\", \"format\": \"email\" }, \"display_name\": { \"type\": \"string\" }, \"status\": { \"type\": \"string\", \"enum\": [\"active\", ",
+      "snippet": "{ \"$id\": \"https://companyos/schemas/user.schema.json\", \"$schema\": \"http://json-schema.org/draft-07/schema#\", \"title\": \"User\", \"type\": \"object\", \"properties\": { \"id\": { \"type\": \"string\" }, \"tenant_id\": { \"type\": \"string\" }, \"email\": { \"type\": \"string\", \"format\": \"email\" }, \"display_name\": { \"type\": \"string\" }, \"status\": { \"type\": \"string\", \"enum\": [\"active\", \"inactive\", \"locked\"] }, \"region\": { \"type\": \"string\" }, \"cr",
+      "kind": "schemas"
+    },
+    {
+      "file": "schemas/workflow.maestro.yaml",
+      "title": "workflow.maestro.yaml",
+      "summary": "apiVersion: maestro/v1 kind: Workflow metadata: name: ingest-enrich-handoff version: 1.2.0 owner: platform@summit description: Ingest raw files, validate, normalize, and hand off to SIG labels: [sig, etl, production] attestations: signature: algorithm: ed25519 keyRef: kms://projects/summit/keys/maestro signature: 'BASE64_SIGNATURE' spec: parameters: - name: ",
+      "snippet": "apiVersion: maestro/v1 kind: Workflow metadata: name: ingest-enrich-handoff version: 1.2.0 owner: platform@summit description: Ingest raw files, validate, normalize, and hand off to SIG labels: [sig, etl, production] attestations: signature: algorithm: ed25519 keyRef: kms://projects/summit/keys/maestro signature: 'BASE64_SIGNATURE' spec: parameters: - name: source_bucket type: string required: true",
+      "kind": "schemas"
+    },
+    {
+      "file": "schemas/workflow.schema.json",
+      "title": "workflow.schema.json",
+      "summary": "{ \"$schema\": \"http://json-schema.org/draft-07/schema#\", \"title\": \"MaestroWorkflow\", \"type\": \"object\", \"required\": [\"apiVersion\", \"kind\", \"metadata\", \"spec\"], \"properties\": { \"apiVersion\": { \"const\": \"maestro/v1\" }, \"kind\": { \"const\": \"Workflow\" }, \"metadata\": { \"type\": \"object\", \"required\": [\"name\", \"version\"], \"properties\": { \"name\": { \"type\": \"string\", \"pa",
+      "snippet": "{ \"$schema\": \"http://json-schema.org/draft-07/schema#\", \"title\": \"MaestroWorkflow\", \"type\": \"object\", \"required\": [\"apiVersion\", \"kind\", \"metadata\", \"spec\"], \"properties\": { \"apiVersion\": { \"const\": \"maestro/v1\" }, \"kind\": { \"const\": \"Workflow\" }, \"metadata\": { \"type\": \"object\", \"required\": [\"name\", \"version\"], \"properties\": { \"name\": { \"type\": \"string\", \"pattern\": \"^[a-z0-9-]+$\" }, \"version\": { \"type\": \"string\" }, \"",
+      "kind": "schemas"
+    },
+    {
+      "file": "schema/baseline.graphql",
+      "title": "baseline.graphql",
+      "summary": "# Baseline GraphQL schema for Summit IntelGraph + Strategy Engines. # Update this through dedicated changes when intentionally evolving the contract. scalar DateTime scalar JSON enum Role { CEO CHAIR EXEC PM IC AUDITOR } enum GraphEntityType { MISSION VISION",
+      "snippet": "# Baseline GraphQL schema for Summit IntelGraph + Strategy Engines. # Update this through dedicated changes when intentionally evolving the contract. scalar DateTime scalar JSON enum Role { CEO CHAIR EXEC PM IC AUDITOR } enum GraphEntityType { MISSION VISION",
+      "kind": "schemas"
+    },
+    {
+      "file": "schema/placement.graphql",
+      "title": "placement.graphql",
+      "summary": "# schema/placement.graphql type WorkloadPolicy { id: ID! name: String! class: String! # \"ingest\", \"embed\", \"export\", \"api-readonly\" placement: String! # \"aws\" | \"oci\" | \"auto\" pinned: Boolean! # true = never move cpu: Int memMiB: Int maxConcurrency: Int } type Mutation { setWorkloadPolicy( id: ID! placement: String! pinned: Boolean ): WorkloadPolicy!",
+      "snippet": "# schema/placement.graphql type WorkloadPolicy { id: ID! name: String! class: String! # \"ingest\", \"embed\", \"export\", \"api-readonly\" placement: String! # \"aws\" | \"oci\" | \"auto\" pinned: Boolean! # true = never move cpu: Int memMiB: Int maxConcurrency: Int } type Mutation { setWorkloadPolicy( id: ID! placement: String! pinned: Boolean ): WorkloadPolicy!",
+      "kind": "schemas"
+    },
+    {
+      "file": "schema/prov-ledger.graphql",
+      "title": "prov-ledger.graphql",
+      "summary": "",
+      "snippet": "",
+      "kind": "schemas"
+    }
+  ],
+  "runbooks": [
+    {
+      "file": "RUNBOOKS/BREAK_GLASS_ACCESS.md",
+      "title": "BREAK_GLASS_ACCESS.md",
+      "summary": "## Purpose Document the operational process for requesting, approving, and auditing temporary break-glass elevation through `authz-gateway`. ## Request Flow 1. **Authenticate:** Obtain a standard token via `/auth/login`. 2. **Submit request:** - Endpoint: `POST /access/break-glass/request` - Payload: `{ \"justification\": \"<why>\", \"ticketId\": \"<INC/JIRA>\", \"sc",
+      "snippet": "## Purpose Document the operational process for requesting, approving, and auditing temporary break-glass elevation through `authz-gateway`. ## Request Flow 1. **Authenticate:** Obtain a standard token via `/auth/login`. 2. **Submit request:** - Endpoint: `POST /access/break-glass/request` - Payload: `{ \"justification\": \"<why>\", \"ticketId\": \"<INC/JIRA>\", \"scope\": [\"break_glass:elevated\"] }` - Requirements: `justifica",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/DR.md",
+      "title": "DR.md",
+      "summary": "This document outlines the procedures for backing up and restoring the `summit` platform's critical state in **development** and **staging** environments. ## Critical State The platform's state consists of three critical components that must be backed up together to ensure consistency: 1. **Relational Data (Postgres)**: Stores users, tenants, investigations ",
+      "snippet": "This document outlines the procedures for backing up and restoring the `summit` platform's critical state in **development** and **staging** environments. ## Critical State The platform's state consists of three critical components that must be backed up together to ensure consistency: 1. **Relational Data (Postgres)**: Stores users, tenants, investigations metadata, trust scores, and risk signals. * Database: `intel",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/INCIDENT_RESPONSE_PLAYBOOK.md",
+      "title": "INCIDENT_RESPONSE_PLAYBOOK.md",
+      "summary": "**Version**: 2.0 **Last Updated**: 2025-11-21 **Classification**: Internal Use --- ## Quick Reference ### Severity Levels | Level | Description | Response Time | Example | |-------|-------------|---------------|---------| | **SEV1** | Complete outage | Immediate | Platform down | | **SEV2** | Major degradation | 15 min | Core feature broken | | **SEV3** | Mi",
+      "snippet": "**Version**: 2.0 **Last Updated**: 2025-11-21 **Classification**: Internal Use --- ## Quick Reference ### Severity Levels | Level | Description | Response Time | Example | |-------|-------------|---------------|---------| | **SEV1** | Complete outage | Immediate | Platform down | | **SEV2** | Major degradation | 15 min | Core feature broken | | **SEV3** | Minor issue | 1 hour | Non-critical bug | | **SEV4** | Cosmeti",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/INDEX.md",
+      "title": "INDEX.md",
+      "summary": "Quick reference for operational procedures and incident response. ## Core Services ### MC Platform v0.4.5 - **[IncidentAutoReweighter](./incident-auto-reweighter.md)** - Auto-reweighting during critical incidents (NEW) - Feature flags, pin/unpin commands, failure modes, recovery procedures - P1 service with comprehensive monitoring and alerting ### General O",
+      "snippet": "Quick reference for operational procedures and incident response. ## Core Services ### MC Platform v0.4.5 - **[IncidentAutoReweighter](./incident-auto-reweighter.md)** - Auto-reweighting during critical incidents (NEW) - Feature flags, pin/unpin commands, failure modes, recovery procedures - P1 service with comprehensive monitoring and alerting ### General Operations - [Release Captain Quick Reference](./release-capt",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/KEY_MANAGEMENT.md",
+      "title": "KEY_MANAGEMENT.md",
+      "summary": "## Overview This runbook provides procedures for managing encryption keys via KMS (Key Management Service) and performing key rotation operations with zero downtime. ## Architecture ### Supported KMS Providers - **AWS KMS**: Default provider for production environments - **Azure Key Vault**: Enterprise environments using Azure - **GCP Cloud KMS**: GCP-based ",
+      "snippet": "## Overview This runbook provides procedures for managing encryption keys via KMS (Key Management Service) and performing key rotation operations with zero downtime. ## Architecture ### Supported KMS Providers - **AWS KMS**: Default provider for production environments - **Azure Key Vault**: Enterprise environments using Azure - **GCP Cloud KMS**: GCP-based deployments - **Local HSM**: Air-gapped/on-premises deployme",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/NEO4J_CAUSAL_CLUSTER.md",
+      "title": "NEO4J_CAUSAL_CLUSTER.md",
+      "summary": "**Issue**: #251 - Neo4j: Causal Cluster setup **Owner**: DevOps Team **Last Updated**: 2025-12-19 ## Overview This runbook covers the deployment, operation, and maintenance of the Neo4j Causal Cluster for high availability and horizontal scalability of graph database operations in the Summit intelligence platform. ## Architecture ### Cluster Topology - **3-C",
+      "snippet": "**Issue**: #251 - Neo4j: Causal Cluster setup **Owner**: DevOps Team **Last Updated**: 2025-12-19 ## Overview This runbook covers the deployment, operation, and maintenance of the Neo4j Causal Cluster for high availability and horizontal scalability of graph database operations in the Summit intelligence platform. ## Architecture ### Cluster Topology - **3-Core Cluster**: Primary cluster with leader election and cons",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/RACI-MATRIX.md",
+      "title": "RACI-MATRIX.md",
+      "summary": "**Purpose**: Clearly define roles and responsibilities during incident response **RACI Legend**: - **R** = Responsible (does the work) - **A** = Accountable (decision maker, only one per activity) - **C** = Consulted (provides input) - **I** = Informed (kept in the loop) --- ## Incident Lifecycle RACI | Activity | Incident Commander (IC) | Technical Lead | O",
+      "snippet": "**Purpose**: Clearly define roles and responsibilities during incident response **RACI Legend**: - **R** = Responsible (does the work) - **A** = Accountable (decision maker, only one per activity) - **C** = Consulted (provides input) - **I** = Informed (kept in the loop) --- ## Incident Lifecycle RACI | Activity | Incident Commander (IC) | Technical Lead | On-Call Engineer | Scribe | Communications | SRE Lead | Eng M",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/TTD-TTR-IMPROVEMENTS.md",
+      "title": "TTD-TTR-IMPROVEMENTS.md",
+      "summary": "**Purpose**: Reduce incident detection and recovery time through observability and automation improvements **Target Metrics**: - **TTD**: < 5 minutes (currently ~10-15 minutes based on manual observation) - **TTR**: < 30 minutes for SEV1, < 60 minutes for SEV2 --- ## Current State Assessment ### Existing Gaps | Area | Current State | Impact on TTD/TTR | |---",
+      "snippet": "**Purpose**: Reduce incident detection and recovery time through observability and automation improvements **Target Metrics**: - **TTD**: < 5 minutes (currently ~10-15 minutes based on manual observation) - **TTR**: < 30 minutes for SEV1, < 60 minutes for SEV2 --- ## Current State Assessment ### Existing Gaps | Area | Current State | Impact on TTD/TTR | |------|---------------|-------------------| | **Alert Coverage*",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/_template.md",
+      "title": "_template.md",
+      "summary": "**ID:** [Alert ID] **Service:** [Service Name] **Severity:** [Severity] **Owner:** [Owner] **SLO Impact:** [SLO Reference] --- ## 1. Detection * **Trigger:** [PromQL expression or description of what triggered this] * **Threshold:** [Value/Duration] * **Dashboards:** [Links to relevant Grafana dashboards] * **Traces:** [Link to Jaeger/Tempo search query] ## ",
+      "snippet": "**ID:** [Alert ID] **Service:** [Service Name] **Severity:** [Severity] **Owner:** [Owner] **SLO Impact:** [SLO Reference] --- ## 1. Detection * **Trigger:** [PromQL expression or description of what triggered this] * **Threshold:** [Value/Duration] * **Dashboards:** [Links to relevant Grafana dashboards] * **Traces:** [Link to Jaeger/Tempo search query] ## 2. Triage * **Impact:** [What is broken? User impact?] * **U",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/adapters/dlq-replay.md",
+      "title": "dlq-replay.md",
+      "summary": "This runbook documents how to triage and replay adapter messages that land in the dead letter queue (DLQ) without dropping data or overloading upstream systems. ## Detection - Alert: `AdapterDLQBacklogGrowing` (Prometheus). Investigate the Grafana DLQ dashboard: `observability/dashboards/adapters/dlq.json`. - Key signals: rising `adapter_dlq_messages_total`,",
+      "snippet": "This runbook documents how to triage and replay adapter messages that land in the dead letter queue (DLQ) without dropping data or overloading upstream systems. ## Detection - Alert: `AdapterDLQBacklogGrowing` (Prometheus). Investigate the Grafana DLQ dashboard: `observability/dashboards/adapters/dlq.json`. - Key signals: rising `adapter_dlq_messages_total`, increasing `adapter_dlq_oldest_age_seconds`, and `adapter_d",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/adapters/isolation-incidents.md",
+      "title": "isolation-incidents.md",
+      "summary": "This runbook covers how to isolate a misbehaving adapter to prevent cross-tenant or systemic impact while keeping healthy adapters online. ## Detection - Alerts: `AdapterRepeatedFailures` or `AdapterExcessiveRetries` for a specific adapter. - Dashboards: check `observability/dashboards/adapters/latency.json` and `observability/dashboards/adapters/error-rate.",
+      "snippet": "This runbook covers how to isolate a misbehaving adapter to prevent cross-tenant or systemic impact while keeping healthy adapters online. ## Detection - Alerts: `AdapterRepeatedFailures` or `AdapterExcessiveRetries` for a specific adapter. - Dashboards: check `observability/dashboards/adapters/latency.json` and `observability/dashboards/adapters/error-rate.json` for outliers. - Symptoms: cascading retries, saturatio",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/adapters/signature-verification-failures.md",
+      "title": "signature-verification-failures.md",
+      "summary": "Use this runbook when adapters start rejecting messages due to signature or envelope validation errors. ## Detection - Alerts: `AdapterRepeatedFailures` if verification errors manifest as 4xx/5xx responses; review `observability/dashboards/adapters/error-rate.json`. - Logs: adapter service logs with `signature invalid`, `untrusted issuer`, or `timestamp outs",
+      "snippet": "Use this runbook when adapters start rejecting messages due to signature or envelope validation errors. ## Detection - Alerts: `AdapterRepeatedFailures` if verification errors manifest as 4xx/5xx responses; review `observability/dashboards/adapters/error-rate.json`. - Logs: adapter service logs with `signature invalid`, `untrusted issuer`, or `timestamp outside window`. - Metrics: spikes in `adapter_retry_outcomes_to",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/ai-copilot-service.md",
+      "title": "ai-copilot-service.md",
+      "summary": "## Ownership - **Team**: Platform - **Service**: AI Copilot (`ai-copilot`) - **Code Location**: `services/ai-copilot/` ## Dashboards - Grafana: https://grafana.intelgraph.ai/d/ai-copilot-overview ## SLOs - Availability: 99.9% (see `slo/ai-copilot.yaml`) - Latency: 99% ≤ 1s P95 (see `slo/ai-copilot.yaml`) ## Alerts - `IntelGraphAICopilotErrorRate` - `IntelGra",
+      "snippet": "## Ownership - **Team**: Platform - **Service**: AI Copilot (`ai-copilot`) - **Code Location**: `services/ai-copilot/` ## Dashboards - Grafana: https://grafana.intelgraph.ai/d/ai-copilot-overview ## SLOs - Availability: 99.9% (see `slo/ai-copilot.yaml`) - Latency: 99% ≤ 1s P95 (see `slo/ai-copilot.yaml`) ## Alerts - `IntelGraphAICopilotErrorRate` - `IntelGraphAICopilotLatencyP95High` ## Triage Checklist 1. Verify err",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/approvals-service.md",
+      "title": "approvals-service.md",
+      "summary": "> **Service**: `approvals-service` > **Team**: Platform / CompanyOS > **On-Call**: #platform-oncall > **Dashboard**: [Grafana - Approvals Service](http://grafana:3001/d/approvals-service) ## Overview The Approvals Service provides policy-gated approval workflows for high-risk operations in Summit/CompanyOS. It integrates with: - **OPA (Open Policy Agent)**: ",
+      "snippet": "> **Service**: `approvals-service` > **Team**: Platform / CompanyOS > **On-Call**: #platform-oncall > **Dashboard**: [Grafana - Approvals Service](http://grafana:3001/d/approvals-service) ## Overview The Approvals Service provides policy-gated approval workflows for high-risk operations in Summit/CompanyOS. It integrates with: - **OPA (Open Policy Agent)**: Policy evaluation for approval requirements - **PostgreSQL**",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/audit-and-rfa.md",
+      "title": "audit-and-rfa.md",
+      "summary": "## Overview This runbook covers the operation, forensics, and maintenance of the Access Audit and Reason-for-Access (RFA) system. ## Procedures ### 1. Generating an Evidence Bundle Use the `auditctl` tool to generate a signed evidence bundle for an incident. ```bash auditctl bundle --incident INC-123 --scope forensics --approver \"admin1,compliance_officer\" `",
+      "snippet": "## Overview This runbook covers the operation, forensics, and maintenance of the Access Audit and Reason-for-Access (RFA) system. ## Procedures ### 1. Generating an Evidence Bundle Use the `auditctl` tool to generate a signed evidence bundle for an incident. ```bash auditctl bundle --incident INC-123 --scope forensics --approver \"admin1,compliance_officer\" ``` ### 2. Verifying Audit Chain Integrity To verify the tamp",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/auth-outage.md",
+      "title": "auth-outage.md",
+      "summary": "Guides triage and mitigation when authentication or SSO is unavailable. ## Detection - [ ] Alert: `/auth/login` or `/auth/oidc/callback` error rate >5% for 5 minutes. - [ ] Alert: Token issuance latency >2s or JWKS fetch failures. - [ ] Increased support tickets: users unable to log in or refresh sessions. ## Immediate Actions (10 minutes) - [ ] Declare inci",
+      "snippet": "Guides triage and mitigation when authentication or SSO is unavailable. ## Detection - [ ] Alert: `/auth/login` or `/auth/oidc/callback` error rate >5% for 5 minutes. - [ ] Alert: Token issuance latency >2s or JWKS fetch failures. - [ ] Increased support tickets: users unable to log in or refresh sessions. ## Immediate Actions (10 minutes) - [ ] Declare incident channel; assign auth lead. - [ ] Pause planned releases",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/authz.md",
+      "title": "authz.md",
+      "summary": "This runbook describes how to manage authorization policies, validate changes, and roll out OPA bundles across Summit/IntelGraph services. ## Roles and Permissions Roles are defined in `policy/data/roles.json` and map to permissions. Permission metadata (risk, clearance, time windows, warrant requirements) live in `policy/data/permissions.json`. - Roles: `an",
+      "snippet": "This runbook describes how to manage authorization policies, validate changes, and roll out OPA bundles across Summit/IntelGraph services. ## Roles and Permissions Roles are defined in `policy/data/roles.json` and map to permissions. Permission metadata (risk, clearance, time windows, warrant requirements) live in `policy/data/permissions.json`. - Roles: `analyst`, `lead_analyst`, `admin`, `auditor`, `service_account",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/canary/raise_conductor_canary.md",
+      "title": "raise_conductor_canary.md",
+      "summary": "## Preconditions - Dashboards green: SLO burn < 1 over 6h; Queue oldest age < target for 80% queues. - Alerts quiet: no `RouterInstantRegretHigh` in last 2h. ## Steps 1. Set router traffic weights: - 5% → 25% → 50% → 100% (hold 30m between steps). - Command: ```bash kubectl -n intelgraph annotate deploy/router \\ canary.percent=<PERCENT> --overwrite ``` 2. Wa",
+      "snippet": "## Preconditions - Dashboards green: SLO burn < 1 over 6h; Queue oldest age < target for 80% queues. - Alerts quiet: no `RouterInstantRegretHigh` in last 2h. ## Steps 1. Set router traffic weights: - 5% → 25% → 50% → 100% (hold 30m between steps). - Command: ```bash kubectl -n intelgraph annotate deploy/router \\ canary.percent=<PERCENT> --overwrite ``` 2. Watch guard metrics (PromQL quickies): - Deny rate (gold): `su",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/canary-slo-gates.md",
+      "title": "canary-slo-gates.md",
+      "summary": "## Purpose This runbook documents the SLO-gated canary and preview enforcement path. It ties HTTP golden-path probes, Prometheus SLO checks, and provenance/SBOM verification into the promotion and rollback flow. ## Preconditions - Prometheus endpoint reachable from CI via `PROMETHEUS_BASE_URL`. - Namespace carries correct labels (e.g., `intelgraph-pr-1234` f",
+      "snippet": "## Purpose This runbook documents the SLO-gated canary and preview enforcement path. It ties HTTP golden-path probes, Prometheus SLO checks, and provenance/SBOM verification into the promotion and rollback flow. ## Preconditions - Prometheus endpoint reachable from CI via `PROMETHEUS_BASE_URL`. - Namespace carries correct labels (e.g., `intelgraph-pr-1234` for previews). - Grafana dashboard `observability/grafana/das",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/compliance/dsar_export_validation.md",
+      "title": "dsar_export_validation.md",
+      "summary": "### Runbook: DSAR Export Validation **Objective:** To securely validate the contents of a DSAR export package and provide the auditable proof of completion to the requesting party. **Trigger:** A DSAR request reaches the `completed` state. **Steps:** 1. **Retrieve Export Path:** - Query the `dsar_requests` table for the `export_path` using the request ID. - ",
+      "snippet": "### Runbook: DSAR Export Validation **Objective:** To securely validate the contents of a DSAR export package and provide the auditable proof of completion to the requesting party. **Trigger:** A DSAR request reaches the `completed` state. **Steps:** 1. **Retrieve Export Path:** - Query the `dsar_requests` table for the `export_path` using the request ID. - Example: `s3://conductor-dsar-exports/tnt-abc/12345.ndjson` ",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/compliance/rtbf_two_phase_confirm.md",
+      "title": "rtbf_two_phase_confirm.md",
+      "summary": "### Runbook: RTBF Two-Phase Confirmation **Objective:** To ensure the complete and audited removal of a data subject's information across all primary data stores. **Trigger:** An RTBF request reaches the `completed` state in the queue. **Phase 1: Verify Tombstoning** This phase confirms that the automated RTBF worker has correctly marked all data for deletio",
+      "snippet": "### Runbook: RTBF Two-Phase Confirmation **Objective:** To ensure the complete and audited removal of a data subject's information across all primary data stores. **Trigger:** An RTBF request reaches the `completed` state in the queue. **Phase 1: Verify Tombstoning** This phase confirms that the automated RTBF worker has correctly marked all data for deletion. 1. **Get Subject ID:** Identify the `subject_id` from the",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/connector-rate-limit-storm.md",
+      "title": "connector-rate-limit-storm.md",
+      "summary": "For incidents where upstream connectors return widespread 429s or hard quotas are exceeded. ## Detection - [ ] Alert: Connector 429 rate >5% for 10 minutes across >2 tenants. - [ ] Alert: Retry queue depth > SLO or exponential backoff saturating workers. - [ ] Partner status page indicates throttling. ## Immediate Actions (10 minutes) - [ ] Activate incident",
+      "snippet": "For incidents where upstream connectors return widespread 429s or hard quotas are exceeded. ## Detection - [ ] Alert: Connector 429 rate >5% for 10 minutes across >2 tenants. - [ ] Alert: Retry queue depth > SLO or exponential backoff saturating workers. - [ ] Partner status page indicates throttling. ## Immediate Actions (10 minutes) - [ ] Activate incident channel; notify partner liaison. - [ ] Halt new connector e",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/container-hardening.md",
+      "title": "container-hardening.md",
+      "summary": "This runbook documents the default hardening posture for IntelGraph services. All images are built with non-root users, read-only root filesystems, dropped capabilities, and seccomp/AppArmor defaults. Use this guide to adopt the golden Dockerfile patterns and to troubleshoot runtime issues introduced by the stricter sandboxing. ## Golden Dockerfile patterns ",
+      "snippet": "This runbook documents the default hardening posture for IntelGraph services. All images are built with non-root users, read-only root filesystems, dropped capabilities, and seccomp/AppArmor defaults. Use this guide to adopt the golden Dockerfile patterns and to troubleshoot runtime issues introduced by the stricter sandboxing. ## Golden Dockerfile patterns Templates live in `build/docker/`: - `node.Dockerfile`: mult",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/data-plane.md",
+      "title": "data-plane.md",
+      "summary": "## Topology - Postgres via pgBouncer (`pgbouncer.svc`) transaction pooling. - Neo4j routed via `neo4j+s://` with bookmarks enabled. - Redis with TLS and auto-pipelining. - Typesense HTTP with 5s timeout and retries. ## Hot paths - `pg:hot_path` (case reads), `neo4j:pattern_match`, `redis:get/set`, `typesense:search`. ## Circuit breaker states - Metric: `db_c",
+      "snippet": "## Topology - Postgres via pgBouncer (`pgbouncer.svc`) transaction pooling. - Neo4j routed via `neo4j+s://` with bookmarks enabled. - Redis with TLS and auto-pipelining. - Typesense HTTP with 5s timeout and retries. ## Hot paths - `pg:hot_path` (case reads), `neo4j:pattern_match`, `redis:get/set`, `typesense:search`. ## Circuit breaker states - Metric: `db_cb_state{service,store}` (0 closed, 1 open, 2 half-open). - A",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/dev-bootstrap.md",
+      "title": "dev-bootstrap.md",
+      "summary": "## Context Use this runbook to bring up the Summit stack on a fresh workstation or CI runner. It mirrors the golden path (`make bootstrap && make up && make smoke`) and is the fastest way to validate that the Investigation → Entities → Relationships → Copilot → Results flow is healthy. ## Preconditions - Docker Desktop ≥ 4.x with 8 GB memory and BuildKit ena",
+      "snippet": "## Context Use this runbook to bring up the Summit stack on a fresh workstation or CI runner. It mirrors the golden path (`make bootstrap && make up && make smoke`) and is the fastest way to validate that the Investigation → Entities → Relationships → Copilot → Results flow is healthy. ## Preconditions - Docker Desktop ≥ 4.x with 8 GB memory and BuildKit enabled. - Node 18+ with `corepack enable` (pnpm 9) available o",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/docling-deploy.md",
+      "title": "docling-deploy.md",
+      "summary": "## Preconditions - Argo Rollouts plugin installed locally (`kubectl argo rollouts`). - Helm values updated with desired image tag and resource overrides. - Canary dataset test suite (`npm run test -- docling`) green in CI. ## Steps 1. Render chart to verify manifests: ```bash helm template docling-svc services/docling-svc/helm/docling-svc -f values/platform.",
+      "snippet": "## Preconditions - Argo Rollouts plugin installed locally (`kubectl argo rollouts`). - Helm values updated with desired image tag and resource overrides. - Canary dataset test suite (`npm run test -- docling`) green in CI. ## Steps 1. Render chart to verify manifests: ```bash helm template docling-svc services/docling-svc/helm/docling-svc -f values/platform.yaml ``` 2. Deploy to staging: ```bash helm upgrade --instal",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/docling-oncall.md",
+      "title": "docling-oncall.md",
+      "summary": "## Dashboards - Grafana: `Docling Overview` (latency, error rate, cost per tenant) - Kibana: `docling-svc` index for structured logs (redacted) - OpenTelemetry: Trace search `service.name=docling-svc` ## Common Alarms 1. **DoclingParseLatencyBreached** - Check Argo Rollout status for canary pods. - Inspect `/metrics` for increased histogram buckets. - If p95",
+      "snippet": "## Dashboards - Grafana: `Docling Overview` (latency, error rate, cost per tenant) - Kibana: `docling-svc` index for structured logs (redacted) - OpenTelemetry: Trace search `service.name=docling-svc` ## Common Alarms 1. **DoclingParseLatencyBreached** - Check Argo Rollout status for canary pods. - Inspect `/metrics` for increased histogram buckets. - If p95 > 900ms, enable circuit breaker: set `DOCILING_ENABLED=fals",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/docling-rollback.md",
+      "title": "docling-rollback.md",
+      "summary": "## Trigger Conditions - Docling SLO burn rate breach (>0.5 for 30m) - Error rate >0.1% sustained for 10 minutes - Compliance policy simulation failing in CI ## Rollback Steps 1. Freeze promotions: ```bash kubectl argo rollouts pause docling-svc -n platform-ml ``` 2. Roll back to previous stable revision: ```bash kubectl argo rollouts undo docling-svc -n plat",
+      "snippet": "## Trigger Conditions - Docling SLO burn rate breach (>0.5 for 30m) - Error rate >0.1% sustained for 10 minutes - Compliance policy simulation failing in CI ## Rollback Steps 1. Freeze promotions: ```bash kubectl argo rollouts pause docling-svc -n platform-ml ``` 2. Roll back to previous stable revision: ```bash kubectl argo rollouts undo docling-svc -n platform-ml --to-revision=<REVISION> ``` Use `kubectl argo rollo",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/dr-cutback.md",
+      "title": "dr-cutback.md",
+      "summary": "## Preconditions - Primary region healthy and consistent with DR data. - Write freeze maintained until cutback completes. - Approvals and trace_id captured. ## Steps 1. Trigger workflow `DR Failover/Cutback` with action `cutback` and trace_id + approver. 2. Resynchronize data delta from DR to primary; validate checksums and replication lag. 3. Flip DNS/ingre",
+      "snippet": "## Preconditions - Primary region healthy and consistent with DR data. - Write freeze maintained until cutback completes. - Approvals and trace_id captured. ## Steps 1. Trigger workflow `DR Failover/Cutback` with action `cutback` and trace_id + approver. 2. Resynchronize data delta from DR to primary; validate checksums and replication lag. 3. Flip DNS/ingress back to primary; lift read-only mode once golden paths pa",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/dr-failover.md",
+      "title": "dr-failover.md",
+      "summary": "## Preconditions - Backups fresh within RPO thresholds. - Write-freeze flag enabled on primary. - Dual approval recorded with trace_id. ## Steps 1. Trigger workflow `DR Failover/Cutback` with action `failover` and provide trace_id + approver. 2. Validate backups restored in DR namespace; run smoke checks for golden paths. 3. Update DNS/ingress to DR endpoint",
+      "snippet": "## Preconditions - Backups fresh within RPO thresholds. - Write-freeze flag enabled on primary. - Dual approval recorded with trace_id. ## Steps 1. Trigger workflow `DR Failover/Cutback` with action `failover` and provide trace_id + approver. 2. Validate backups restored in DR namespace; run smoke checks for golden paths. 3. Update DNS/ingress to DR endpoints; monitor 5-minute error budget burn. 4. Confirm user-facin",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/export-failure.md",
+      "title": "export-failure.md",
+      "summary": "For incidents where scheduled or ad-hoc exports fail or deliver incomplete data. ## Detection - [ ] Alert: Export job failure rate >2% over 10 minutes. - [ ] Alert: Export latency >2× SLO or stuck in `running` state beyond SLA. - [ ] Customer reports incomplete files or checksum mismatches. ## Immediate Actions (10 minutes) - [ ] Declare incident; assign com",
+      "snippet": "For incidents where scheduled or ad-hoc exports fail or deliver incomplete data. ## Detection - [ ] Alert: Export job failure rate >2% over 10 minutes. - [ ] Alert: Export latency >2× SLO or stuck in `running` state beyond SLA. - [ ] Customer reports incomplete files or checksum mismatches. ## Immediate Actions (10 minutes) - [ ] Declare incident; assign comms lead. - [ ] Pause new bulk exports to reduce load. - [ ] ",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/feature-flags.md",
+      "title": "feature-flags.md",
+      "summary": "## Purpose Safe rollout, staged ramp, and rapid rollback for high-risk changes under feature flags. ## Staging to Production 1. **Define** flag in `flags/catalog.yaml` with owner, expiry, and kill_switch. 2. **Configure** per-environment rollout in `flags/targets/<env>.yaml`. 3. **Validate** locally: `python tools/flagctl/flagctl.py get feature.policy-guard ",
+      "snippet": "## Purpose Safe rollout, staged ramp, and rapid rollback for high-risk changes under feature flags. ## Staging to Production 1. **Define** flag in `flags/catalog.yaml` with owner, expiry, and kill_switch. 2. **Configure** per-environment rollout in `flags/targets/<env>.yaml`. 3. **Validate** locally: `python tools/flagctl/flagctl.py get feature.policy-guard --env dev`. 4. **CI** enforces metadata and policy via `.git",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/gateway-latency.md",
+      "title": "gateway-latency.md",
+      "summary": "**ID:** GATEWAY_P95_BREACH **Service:** gateway **Severity:** high **Owner:** @sre/observability **SLO Impact:** web.p95 < 1.5s --- ## 1. Detection * **Trigger:** P95 latency > 1.5s for 10m. * **Threshold:** > 1.5s * **Dashboards:** [Gateway Dashboard](/grafana/d/gateway) * **Traces:** [Slow Requests](/tempo/search?tags=service=gateway&minDuration=1.5s) ## 2",
+      "snippet": "**ID:** GATEWAY_P95_BREACH **Service:** gateway **Severity:** high **Owner:** @sre/observability **SLO Impact:** web.p95 < 1.5s --- ## 1. Detection * **Trigger:** P95 latency > 1.5s for 10m. * **Threshold:** > 1.5s * **Dashboards:** [Gateway Dashboard](/grafana/d/gateway) * **Traces:** [Slow Requests](/tempo/search?tags=service=gateway&minDuration=1.5s) ## 2. Triage * **Impact:** Users experiencing slow page loads. A",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/golden-path-failure.md",
+      "title": "golden-path-failure.md",
+      "summary": "**Alert**: `GoldenPathBroken` or `GoldenPathDegraded` **Severity**: SEV1 (success < 95%) or SEV2 (success < 98%) **Component**: golden-path --- ## Overview The \"Golden Path\" is our core user journey: **Investigation → Entities → Relationships → Copilot → Results** Success rate below threshold indicates a critical user experience degradation. --- ## Quick Res",
+      "snippet": "**Alert**: `GoldenPathBroken` or `GoldenPathDegraded` **Severity**: SEV1 (success < 95%) or SEV2 (success < 98%) **Component**: golden-path --- ## Overview The \"Golden Path\" is our core user journey: **Investigation → Entities → Relationships → Copilot → Results** Success rate below threshold indicates a critical user experience degradation. --- ## Quick Response (First 5 Minutes) ### 1. Identify Failing Step ```bash",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/golden-path-observability.md",
+      "title": "golden-path-observability.md",
+      "summary": "Use this runbook when Grafana dashboards or Alertmanager/PagerDuty incidents indicate a regression on the user-facing golden path (API → Gateway → Ingest). ## Quick links - Dashboard: `ops/observability/grafana/dashboards/golden-path-service-health.json` (import into Grafana; pin service/environment variables). - Alerts: `ops/alerts/golden-path-alerts.yml` (",
+      "snippet": "Use this runbook when Grafana dashboards or Alertmanager/PagerDuty incidents indicate a regression on the user-facing golden path (API → Gateway → Ingest). ## Quick links - Dashboard: `ops/observability/grafana/dashboards/golden-path-service-health.json` (import into Grafana; pin service/environment variables). - Alerts: `ops/alerts/golden-path-alerts.yml` (PagerDuty routes via `pagerduty_service: sre-primary`). - Pr",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/golden-paths.md",
+      "title": "golden-paths.md",
+      "summary": "## Purpose Synthetic probes validate end-to-end user journeys and enforce SLOs. This runbook explains how to run probes, interpret dashboards, and react to failures across preview, stage, and prod. ## Journeys See `observability/golden_paths.yaml` for the authoritative catalog. Each journey defines steps, expected responses, required span attributes, and p95",
+      "snippet": "## Purpose Synthetic probes validate end-to-end user journeys and enforce SLOs. This runbook explains how to run probes, interpret dashboards, and react to failures across preview, stage, and prod. ## Journeys See `observability/golden_paths.yaml` for the authoritative catalog. Each journey defines steps, expected responses, required span attributes, and p95 budgets. ## Operating the probe 1. Install dependencies: `p",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/graphql-high-error-rate.md",
+      "title": "graphql-high-error-rate.md",
+      "summary": "**Alert**: `GraphQLHighErrorRate` or `GraphQLModerateErrorRate` **Severity**: SEV1 (>5%) or SEV2 (>2%) **Component**: graphql-gateway --- ## Symptoms - GraphQL error rate > threshold - Increased 5xx responses - User reports of failed operations - Alert fired in #alerts-critical or #alerts-warning --- ## Quick Response (First 5 Minutes) ### 1. Check Current E",
+      "snippet": "**Alert**: `GraphQLHighErrorRate` or `GraphQLModerateErrorRate` **Severity**: SEV1 (>5%) or SEV2 (>2%) **Component**: graphql-gateway --- ## Symptoms - GraphQL error rate > threshold - Increased 5xx responses - User reports of failed operations - Alert fired in #alerts-critical or #alerts-warning --- ## Quick Response (First 5 Minutes) ### 1. Check Current Error Rate ```bash # Error rate by operation curl 'http://loc",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/graphql-high-latency.md",
+      "title": "graphql-high-latency.md",
+      "summary": "**Alert**: `GraphQLHighLatency` or `GraphQLModerateLatency` **Severity**: SEV1 (p95 > 2s) or SEV2 (p95 > 1s) **Component**: graphql-gateway --- ## Symptoms - GraphQL API p95 latency > threshold for sustained period - User reports of slow page loads - Increased error rates from client timeouts - Alert fired in #alerts-critical or #alerts-warning --- ## Quick ",
+      "snippet": "**Alert**: `GraphQLHighLatency` or `GraphQLModerateLatency` **Severity**: SEV1 (p95 > 2s) or SEV2 (p95 > 1s) **Component**: graphql-gateway --- ## Symptoms - GraphQL API p95 latency > threshold for sustained period - User reports of slow page loads - Increased error rates from client timeouts - Alert fired in #alerts-critical or #alerts-warning --- ## Quick Response (First 5 Minutes) ### 1. Check Current Latency ```b",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/incident-auto-reweighter.md",
+      "title": "incident-auto-reweighter.md",
+      "summary": "**Service:** MC Platform v0.4.5 IncidentAutoReweighter **Component:** QAM (Quantum Application Manager) **On-Call Priority:** P1 (Critical Production Service) ## Overview The IncidentAutoReweighter automatically reduces exploration rates and pins weights during critical incidents to stabilize system behavior. It provides 50% exploration reduction and 2-hour ",
+      "snippet": "**Service:** MC Platform v0.4.5 IncidentAutoReweighter **Component:** QAM (Quantum Application Manager) **On-Call Priority:** P1 (Critical Production Service) ## Overview The IncidentAutoReweighter automatically reduces exploration rates and pins weights during critical incidents to stabilize system behavior. It provides 50% exploration reduction and 2-hour weight pinning with automatic restoration. ## Feature Flags ",
+      "kind": "runbooks"
+    },
+    {
+      "file": "RUNBOOKS/incident-response-playbook.md",
+      "title": "incident-response-playbook.md",
+      "summary": "> **Version**: 1.0.0 > **Last Updated**: 2025-11-21 > **Owner**: Platform Engineering > **Review Cycle**: Quarterly --- ## Table of Contents 1. [Overview](#1-overview) 2. [Severity Definitions](#2-severity-definitions) 3. [Detection](#3-detection) 4. [Triage and Roles](#4-triage-and-roles) 5. [Containment and Mitigation](#5-containment-and-mitigation) 6. [Ro",
+      "snippet": "> **Version**: 1.0.0 > **Last Updated**: 2025-11-21 > **Owner**: Platform Engineering > **Review Cycle**: Quarterly --- ## Table of Contents 1. [Overview](#1-overview) 2. [Severity Definitions](#2-severity-definitions) 3. [Detection](#3-detection) 4. [Triage and Roles](#4-triage-and-roles) 5. [Containment and Mitigation](#5-containment-and-mitigation) 6. [Root Cause Analysis and Post-Mortem](#6-root-cause-analysis-an",
+      "kind": "runbooks"
+    }
+  ]
+}
