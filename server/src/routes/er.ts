@@ -26,22 +26,42 @@ router.post('/merge', async (req, res) => {
   const driver = getDriver();
   const session = driver.session();
   try {
-    const { masterId, mergeIds, rationale } = req.body;
+    const {
+      masterId,
+      mergeIds,
+      rationale,
+      guardrailDatasetId,
+      guardrailOverrideReason,
+    } = req.body;
     // Assuming req.user is populated by auth middleware
     const userContext = (req as any).user || { userId: 'anonymous' };
 
-    await erService.merge(session, {
+    const result = await erService.merge(session, {
       masterId,
       mergeIds,
       userContext,
-      rationale
+      rationale,
+      guardrailDatasetId,
+      guardrailOverrideReason,
     });
 
-    res.json({ success: true });
+    res.json({ success: true, guardrails: result.guardrails, overrideUsed: result.overrideUsed });
   } catch (error: any) {
     res.status(400).json({ error: error.message });
   } finally {
     await session.close();
+  }
+});
+
+// GET /er/guardrails
+// Returns guardrail evaluation metrics for current fixtures
+router.get('/guardrails', async (req, res) => {
+  try {
+    const datasetId = req.query.datasetId as string | undefined;
+    const guardrails = erService.evaluateGuardrails(datasetId);
+    res.json(guardrails);
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
   }
 });
 

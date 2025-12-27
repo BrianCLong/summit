@@ -2,6 +2,12 @@ import { Session, Transaction } from 'neo4j-driver';
 import pino from 'pino';
 import { randomUUID } from 'crypto';
 import { soundex } from './soundex.js';
+import { provenanceLedger } from '../../provenance/ledger.js';
+import {
+  evaluateGuardrails,
+  type GuardrailResult,
+  type FixtureEntity,
+} from './guardrails.js';
 
 const log = (pino as any)({ name: 'EntityResolutionV2Service' });
 
@@ -40,6 +46,8 @@ export interface MergeRequest {
   mergeIds: string[];
   userContext: any;
   rationale: string;
+  guardrailDatasetId?: string;
+  guardrailOverrideReason?: string;
 }
 
 export class EntityResolutionV2Service {
@@ -157,7 +165,21 @@ export class EntityResolutionV2Service {
     return true;
   }
 
-  public async merge(session: Session, req: MergeRequest): Promise<void> {
+  public evaluateGuardrails(datasetId?: string): GuardrailResult {
+    const resolvedDatasetId =
+      datasetId || process.env.ER_GUARDRAIL_DATASET_ID || 'baseline';
+
+    return evaluateGuardrails(
+      resolvedDatasetId,
+      (entityA: FixtureEntity, entityB: FixtureEntity) =>
+        this.explain(entityA as EntityV2, entityB as EntityV2).score
+    );
+  }
+
+  public async merge(
+    session: Session,
+    req: MergeRequest
+  ): Promise<{ guardrails: GuardrailResult; overrideUsed: boolean }> {
     const { masterId, mergeIds, userContext, rationale } = req;
 
     const result = await session.run(
@@ -180,7 +202,43 @@ export class EntityResolutionV2Service {
     }
 
     if (!this.checkPolicy(userContext, entities)) {
-      throw new Error("Policy violation: Insufficient authority to merge these entities.");
+      throw new Error(
+        'Policy violation: Insufficient authority to merge these entities.'
+      );
+    }
+
+    const guardrails = this.evaluateGuardrails(req.guardrailDatasetId);
+    const overrideReason = req.guardrailOverrideReason?.trim();
+    const overrideUsed = !guardrails.passed && Boolean(overrideReason);
+
+    if (!guardrails.passed && !overrideUsed) {
+      throw new Error(
+        `Entity resolution guardrails failed for dataset ${guardrails.datasetId}. ` +
+          `Precision ${guardrails.metrics.precision.toFixed(2)}, ` +
+          `Recall ${guardrails.metrics.recall.toFixed(2)}.`
+      );
+    }
+
+    if (overrideUsed) {
+      await provenanceLedger.appendEntry({
+        timestamp: new Date(),
+        tenantId: userContext?.tenantId || 'unknown',
+        actionType: 'ER_GUARDRAIL_OVERRIDE',
+        resourceType: 'EntityResolution',
+        resourceId: masterId,
+        actorId: userContext.userId || 'unknown',
+        actorType: 'user',
+        payload: {
+          datasetId: guardrails.datasetId,
+          reason: overrideReason,
+          metrics: guardrails.metrics,
+          thresholds: guardrails.thresholds,
+          mergeIds,
+        },
+        metadata: {
+          purpose: 'Entity Resolution guardrail override',
+        },
+      });
     }
 
     const tx = session.beginTransaction();
@@ -194,7 +252,16 @@ export class EntityResolutionV2Service {
           user: $userId,
           rationale: $rationale,
           originalIds: $mergeIds,
-          masterId: $masterId
+          masterId: $masterId,
+          guardrailDatasetId: $guardrailDatasetId,
+          guardrailStatus: $guardrailStatus,
+          guardrailPrecision: $guardrailPrecision,
+          guardrailRecall: $guardrailRecall,
+          guardrailMinPrecision: $guardrailMinPrecision,
+          guardrailMinRecall: $guardrailMinRecall,
+          guardrailMatchThreshold: $guardrailMatchThreshold,
+          guardrailOverrideReason: $guardrailOverrideReason,
+          guardrailOverrideBy: $guardrailOverrideBy
         })
         WITH d
         MATCH (m {id: $masterId})
@@ -204,7 +271,16 @@ export class EntityResolutionV2Service {
         userId: userContext.userId || 'unknown',
         rationale,
         mergeIds,
-        masterId
+        masterId,
+        guardrailDatasetId: guardrails.datasetId,
+        guardrailStatus: guardrails.passed ? 'passed' : 'failed',
+        guardrailPrecision: guardrails.metrics.precision,
+        guardrailRecall: guardrails.metrics.recall,
+        guardrailMinPrecision: guardrails.thresholds.minPrecision,
+        guardrailMinRecall: guardrails.thresholds.minRecall,
+        guardrailMatchThreshold: guardrails.thresholds.matchThreshold,
+        guardrailOverrideReason: overrideReason || null,
+        guardrailOverrideBy: overrideUsed ? userContext.userId || 'unknown' : null,
       });
 
       // 2. Fetch existing relationships to preserve and replicate
@@ -278,6 +354,11 @@ export class EntityResolutionV2Service {
 
       await tx.commit();
       log.info(`Merged entities ${mergeIds.join(', ')} into ${masterId} with decision ${decisionId}`);
+
+      return {
+        guardrails,
+        overrideUsed,
+      };
 
     } catch (e) {
       await tx.rollback();
