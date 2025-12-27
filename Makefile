@@ -12,6 +12,22 @@ COMPOSE_DEV_FILE ?= docker-compose.dev.yaml
 SHELL_SERVICE ?= gateway
 VENV_DIR ?= .venv
 VENV_BIN = $(VENV_DIR)/bin
+PYTHON ?= python3
+PACKAGE_VERSION ?= $(shell $(PYTHON) - <<'PY'
+import tomllib
+from pathlib import Path
+
+pyproject = Path("pyproject.toml")
+try:
+    with pyproject.open('rb') as f:
+        data = tomllib.load(f)
+    print(data.get("project", {}).get("version", "latest"))
+except FileNotFoundError:
+    print("latest")
+PY)
+IMAGE_NAME ?= intelgraph-platform
+IMAGE_TAG ?= $(PACKAGE_VERSION)
+IMAGE ?= $(IMAGE_NAME):$(IMAGE_TAG)
 
 # --- Docker Compose Controls ---
 
@@ -61,7 +77,12 @@ format: ## Format code
 	$(VENV_BIN)/ruff format .
 
 build:  ## Build all images
-	docker compose -f $(COMPOSE_DEV_FILE) build
+        docker compose -f $(COMPOSE_DEV_FILE) build
+
+release: ## Build Python wheel and Docker image tagged with project version
+        $(PYTHON) -m pip wheel . -w dist
+        docker build -t $(IMAGE) -f Dockerfile .
+        docker tag $(IMAGE) $(IMAGE_NAME):latest
 
 ci: lint test
 
