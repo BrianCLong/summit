@@ -9,7 +9,7 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
 import * as matchers from '@testing-library/jest-dom/matchers';
-import { MaestroRunConsole } from '../maestro/MaestroRunConsole';
+import { MaestroRunConsole } from '../MaestroRunConsole';
 
 expect.extend(matchers as any);
 import * as api from '../../lib/api/maestro';
@@ -91,14 +91,46 @@ describe('<MaestroRunConsole />', () => {
 
     // Summary
     expect(await screen.findByText(/run-1/)).toBeInTheDocument();
-    // The component displays it with 4 decimals
-    expect(screen.getByText(/\$0.0012/)).toBeInTheDocument();
+    // The component displays it with 4 decimals (appears twice: total and per-model)
+    expect(screen.getAllByText(/\$0.0012/)[0]).toBeInTheDocument();
 
     // Task description & artifact output
     const descriptions = screen.getAllByText('Execute user request: test request');
     expect(descriptions.length).toBeGreaterThan(0);
     expect(descriptions[0]).toBeInTheDocument();
     expect(screen.getByText('hello world')).toBeInTheDocument();
+  });
+
+  it('copies artifact to clipboard', async () => {
+    const writeTextMock = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, {
+      clipboard: {
+        writeText: writeTextMock,
+      },
+    });
+
+    render(<MaestroRunConsole userId="user-123" />);
+
+    const textarea = screen.getByPlaceholderText(/describe what you want/i);
+    fireEvent.change(textarea, { target: { value: 'test request' } });
+    fireEvent.click(screen.getByRole('button', { name: /run with maestro/i }));
+
+    await waitFor(() =>
+      expect(screen.getByText('hello world')).toBeInTheDocument(),
+    );
+
+    // The copy button is initially hidden/opacity 0 but present in DOM
+    const copyButton = screen.getByRole('button', { name: /copy to clipboard/i });
+    expect(copyButton).toBeInTheDocument();
+
+    fireEvent.click(copyButton);
+
+    expect(writeTextMock).toHaveBeenCalledWith('hello world');
+
+    // Check for success state (aria-label changes)
+    await waitFor(() => {
+        expect(screen.getByRole('button', { name: /copied/i })).toBeInTheDocument();
+    });
   });
 
   it('shows error when API fails', async () => {
