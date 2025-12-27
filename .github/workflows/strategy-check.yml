@@ -1,0 +1,29 @@
+name: Strategy Alignment Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+  push:
+    branches: [main, master]
+
+jobs:
+  check-strategy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Verify Strategy Documents
+        run: |
+          if [ ! -f "docs/strategy/STRATEGIC_BETS.md" ]; then
+            echo "Error: docs/strategy/STRATEGIC_BETS.md is missing!"
+            exit 1
+          fi
+          if [ ! -f "docs/strategy/ROADMAP.md" ]; then
+            echo "Error: docs/strategy/ROADMAP.md is missing!"
+            exit 1
+          fi
+          echo "Strategy documents present."
+
+      - name: Run Governance Script
+        run: node scripts/compliance/check_strategy_alignment.cjs
