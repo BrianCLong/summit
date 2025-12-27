@@ -1,4 +1,4 @@
-import graphAnalyticsResolvers = require('../src/graphql/resolvers.graphAnalytics');
+import graphAnalyticsResolvers from '../src/graphql/resolvers.graphAnalytics';
 import { jest, describe, it, expect } from '@jest/globals';
 
 describe('graph analytics GraphQL resolvers', () => {

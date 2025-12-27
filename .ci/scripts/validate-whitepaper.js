@@ -21,11 +21,11 @@ const checks = [
   },
   {
     name: 'Security & Supply Chain Integrity section',
-    patterns: [/## Security \& Supply Chain Integrity/, /SBOM/i, /Cosign|provenance/i]
+    patterns: [/## Security & Supply Chain Integrity/, /SBOM/i, /Cosign|provenance/i]
   },
   {
     name: 'Observability & Reliability section',
-    patterns: [/## Observability \& Reliability/, /SLO|SLOs|error budgets/i, /Prometheus|Grafana|Alertmanager/i]
+    patterns: [/## Observability & Reliability/, /SLO|SLOs|error budgets/i, /Prometheus|Grafana|Alertmanager/i]
   },
   {
     name: 'GA validation evidence',

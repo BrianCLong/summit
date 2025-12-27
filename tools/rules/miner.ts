@@ -15,7 +15,7 @@ async function mine(): Promise<Candidate[]> {
   const { rows: infra } = await pg.query(`
     SELECT COUNT(*) filter (WHERE owners_required=true) AS ok, COUNT(*) AS total
     FROM pr_events
-    WHERE risk='high' AND (paths ~ '^(charts/|\.github/workflows/)')`);
+    WHERE risk='high' AND (paths ~ '^(charts/|.github/workflows/)')`);
   const prec = Number(infra[0].ok) / Math.max(1, Number(infra[0].total));
   const c1: Candidate = {
     id: 'risk-block-infra-mined',

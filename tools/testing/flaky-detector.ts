@@ -105,7 +105,7 @@ export class FlakyTestDetector {
     this.saveKillList(killList);
 
     console.log(` Quarantined flaky test: ${test.testFile}::${test.testName}`);
-    await this.notifySlack(`=® Flaky test quarantined: \`${test.testFile}::${test.testName}\` (${(test.failureRate * 100).toFixed(1)}% failure rate)`);
+    await this.notifySlack(`=ÔøΩ Flaky test quarantined: \`${test.testFile}::${test.testName}\` (${(test.failureRate * 100).toFixed(1)}% failure rate)`);
   }
 
   /**
@@ -140,7 +140,7 @@ export class FlakyTestDetector {
     this.saveKillList(killList);
 
     console.log(` Marked test as fixed: ${testFile}::${testName}`);
-    await this.notifySlack(`<â Flaky test fixed: \`${testFile}::${testName}\` - ${fixDescription}`);
+    await this.notifySlack(`<ÔøΩ Flaky test fixed: \`${testFile}::${testName}\` - ${fixDescription}`);
   }
 
   /**
@@ -173,13 +173,13 @@ export class FlakyTestDetector {
    * Run flaky test detection on recent test results
    */
   async runDetection(): Promise<void> {
-    console.log('= Running flaky test detection...');
+    console.log('üîç Running flaky test detection...');
 
     const testResults = await this.loadRecentTestResults();
-    console.log(`=  Analyzing ${testResults.length} test results`);
+    console.log(`=ÔøΩ Analyzing ${testResults.length} test results`);
 
     const flakyTests = await this.detectFlaky(testResults);
-    console.log(`=® Found ${flakyTests.length} potentially flaky tests`);
+    console.log(`=ÔøΩ Found ${flakyTests.length} potentially flaky tests`);
 
     // Auto-quarantine severely flaky tests
     const killList = this.loadKillList();
@@ -192,7 +192,7 @@ export class FlakyTestDetector {
         );
 
         if (!isAlreadyQuarantined) {
-          console.log(`=® Auto-quarantining severely flaky test: ${test.testFile}::${test.testName}`);
+          console.log(`=ÔøΩ Auto-quarantining severely flaky test: ${test.testFile}::${test.testName}`);
           await this.quarantineTest(test);
         }
       }
@@ -200,11 +200,11 @@ export class FlakyTestDetector {
 
     // Generate report
     const stability = this.generateStabilityReport(testResults);
-    console.log(`=» Overall test stability: ${stability.overallStability.toFixed(2)}%`);
+    console.log(`=ÔøΩ Overall test stability: ${stability.overallStability.toFixed(2)}%`);
 
     if (stability.overallStability < 99.0) {
-      console.log('†  Test stability below target (99%)');
-      await this.notifySlack(`† Test stability below target: ${stability.overallStability.toFixed(2)}% (${stability.flakyTests} flaky tests)`);
+      console.log('ÔøΩ  Test stability below target (99%)');
+      await this.notifySlack(`ÔøΩ Test stability below target: ${stability.overallStability.toFixed(2)}% (${stability.flakyTests} flaky tests)`);
     }
   }
 
@@ -212,7 +212,7 @@ export class FlakyTestDetector {
    * Validate that a previously flaky test is now stable
    */
   async validateFix(testFile: string, testName: string, runs = 50): Promise<boolean> {
-    console.log(`>Í Validating fix for ${testFile}::${testName} over ${runs} runs...`);
+    console.log(`>ÔøΩ Validating fix for ${testFile}::${testName} over ${runs} runs...`);
 
     let failures = 0;
     for (let i = 0; i < runs; i++) {
@@ -229,8 +229,8 @@ export class FlakyTestDetector {
     const failureRate = failures / runs;
     const isStable = failureRate < this.flakyThreshold;
 
-    console.log(`\n=  Validation results: ${failures}/${runs} failures (${(failureRate * 100).toFixed(1)}%)`);
-    console.log(isStable ? ' Test is now stable!' : 'L Test is still flaky');
+    console.log(`\n=ÔøΩ Validation results: ${failures}/${runs} failures (${(failureRate * 100).toFixed(1)}%)`);
+    console.log(isStable ? '‚úÖ Test is now stable!' : '‚ùå Test is still flaky');
 
     return isStable;
   }

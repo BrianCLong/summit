@@ -16,7 +16,9 @@ export class McAdminClient {
 
   private async call<T>(op: string, variables: any): Promise<T> {
     const sha = PERSISTED[op];
-    if (!sha) throw new Error(`persisted_id_missing:${op}`);
+    if (!sha) {
+      throw new Error(`persisted_id_missing:${op}`);
+    }
     const body = {
       operationName: op,
       variables,
@@ -27,9 +29,13 @@ export class McAdminClient {
       headers: { ...baseHeaders, ...this.authHeaders },
       body: JSON.stringify(body),
     });
-    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+    if (!res.ok) {
+      throw new Error(`${res.status} ${res.statusText}`);
+    }
     const payload: any = await res.json();
-    if (payload.errors?.length) throw new Error(payload.errors[0].message);
+    if (payload.errors?.length) {
+      throw new Error(payload.errors[0].message);
+    }
     return payload.data?.[op];
   }
 

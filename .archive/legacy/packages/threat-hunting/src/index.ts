@@ -201,7 +201,9 @@ export class ThreatHuntingEngine {
     recommendations: string[];
   }> {
     const playbook = this.playbooks.get(playbookId);
-    if (!playbook) throw new Error(`Playbook ${playbookId} not found`);
+    if (!playbook) {
+      throw new Error(`Playbook ${playbookId} not found`);
+    }
 
     const findings: HuntMission['findings'] = [];
     const coverage = new Map<string, boolean>();
@@ -527,9 +529,15 @@ export class ThreatHuntingEngine {
   }
 
   private assessHypothesisPriority(hypothesis: ThreatHypothesis): HuntMission['priority'] {
-    if (hypothesis.confidence > 0.8) return 'CRITICAL';
-    if (hypothesis.confidence > 0.6) return 'HIGH';
-    if (hypothesis.confidence > 0.4) return 'MEDIUM';
+    if (hypothesis.confidence > 0.8) {
+      return 'CRITICAL';
+    }
+    if (hypothesis.confidence > 0.6) {
+      return 'HIGH';
+    }
+    if (hypothesis.confidence > 0.4) {
+      return 'MEDIUM';
+    }
     return 'LOW';
   }
 

@@ -1,4 +1,4 @@
-import GraphAnalyticsService = require('../src/services/GraphAnalyticsService');
+import GraphAnalyticsService from '../src/services/GraphAnalyticsService';
 import { jest, describe, it, expect } from '@jest/globals';
 
 describe('GraphAnalyticsService caching', () => {
