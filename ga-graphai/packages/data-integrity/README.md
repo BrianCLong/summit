@@ -17,3 +17,5 @@ This package centralizes schema evolution checks, migrations safety, invariants,
 - `eventlog/`: append-only canonical event log with hash-chain verification.
 - `write-boundary/`: transactional wrapper with partial write detection.
 - `roundtrip/`: export/import roundtrip verification helpers.
+- `lineage/`: provenance-first lineage graph builder ensuring every artifact is tagged with origin, confidence, and simulation
+  metadata for audit replay.
