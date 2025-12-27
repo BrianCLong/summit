@@ -82,6 +82,14 @@ export interface CandidateResponse {
   executionTimeMs: number;
 }
 
+export interface FeatureContribution {
+  feature: string;
+  value: number | boolean;
+  weight: number;
+  contribution: number;
+  normalizedContribution: number;
+}
+
 // Merge operations
 export const MergeRequestSchema = z.object({
   tenantId: z.string(),
@@ -140,10 +148,55 @@ export interface ExplainResponse {
   features: ERFeatures;
   rationale: string[];
   featureWeights: Record<string, number>;
+  featureContributions: FeatureContribution[];
   threshold: number;
   policyTags: string[];
   method: string;
   createdAt: string;
+}
+
+export const ExplainPairRequestSchema = z.object({
+  entityA: EntityRecordSchema,
+  entityB: EntityRecordSchema,
+  method: z.enum(['deterministic', 'probabilistic', 'hybrid']).optional(),
+  threshold: z.number().min(0).max(1).optional(),
+});
+
+export type ExplainPairRequest = z.infer<typeof ExplainPairRequestSchema>;
+
+export const FeatureContributionSchema = z.object({
+  feature: z.string(),
+  value: z.union([z.number(), z.boolean()]),
+  weight: z.number(),
+  contribution: z.number(),
+  normalizedContribution: z.number(),
+});
+
+export const ExplainPairResponseSchema = z.object({
+  score: z.number(),
+  confidence: z.number(),
+  method: z.string(),
+  threshold: z.number(),
+  features: z.record(z.string(), z.union([z.number(), z.boolean()])),
+  rationale: z.array(z.string()),
+  featureWeights: z.record(z.string(), z.number()),
+  featureContributions: z.array(FeatureContributionSchema),
+});
+
+export interface ExplainPairResponse {
+  score: number;
+  confidence: number;
+  method: string;
+  threshold: number;
+  features: ERFeatures;
+  rationale: string[];
+  featureWeights: Record<string, number>;
+  featureContributions: FeatureContribution[];
+}
+
+export interface MergeExportBundle {
+  merge: MergeRecord;
+  explanation: ExplainResponse;
 }
 
 // Audit trail

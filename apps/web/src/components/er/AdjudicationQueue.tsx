@@ -3,43 +3,28 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Textarea } from '@/components/ui/textarea';
-import { Check, X, Split, Info } from 'lucide-react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/Table';
+import { Split, Info, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface CandidateGroup {
   canonicalKey: string;
   entities: any[]; // In real app, define proper Entity type
 }
 
-interface GuardrailMetrics {
-  precision: number;
-  recall: number;
-}
-
-interface GuardrailThresholds {
-  minPrecision: number;
-  minRecall: number;
-  matchThreshold: number;
-}
-
-interface GuardrailStatus {
-  datasetId: string;
-  metrics: GuardrailMetrics;
-  thresholds: GuardrailThresholds;
-  passed: boolean;
-  evaluatedAt: string;
-}
-
 export const AdjudicationQueue: React.FC = () => {
   const [candidates, setCandidates] = useState<CandidateGroup[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<CandidateGroup | null>(null);
-  const [guardrails, setGuardrails] = useState<GuardrailStatus | null>(null);
-  const [overrideReason, setOverrideReason] = useState('');
 
   useEffect(() => {
     fetchCandidates();
-    fetchGuardrails();
   }, []);
 
   const fetchCandidates = async () => {
@@ -59,42 +44,17 @@ export const AdjudicationQueue: React.FC = () => {
     }
   };
 
-  const fetchGuardrails = async () => {
-    try {
-      const res = await fetch('/er/guardrails');
-      if (res.ok) {
-        const data = await res.json();
-        setGuardrails(data);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
   const handleMerge = async (masterId: string, mergeIds: string[]) => {
     try {
-      if (guardrails && !guardrails.passed && !overrideReason.trim()) {
-        alert('Guardrails failed. Provide an override reason to proceed.');
-        return;
-      }
-
       const res = await fetch('/er/merge', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          masterId,
-          mergeIds,
-          rationale: 'Manual adjudication',
-          guardrailDatasetId: guardrails?.datasetId,
-          guardrailOverrideReason: guardrails?.passed ? undefined : overrideReason.trim(),
-        })
+        body: JSON.stringify({ masterId, mergeIds, rationale: 'Manual adjudication' })
       });
       if (res.ok) {
         // Remove from list
         setCandidates(prev => prev.filter(c => c !== selectedGroup));
         setSelectedGroup(null);
-        setOverrideReason('');
-        fetchGuardrails();
       } else {
         alert('Merge failed - check policy?');
       }
@@ -126,13 +86,7 @@ export const AdjudicationQueue: React.FC = () => {
 
       <div className="col-span-8 pl-4">
         {selectedGroup ? (
-          <EntityDiffPane
-            group={selectedGroup}
-            onMerge={handleMerge}
-            guardrails={guardrails}
-            overrideReason={overrideReason}
-            onOverrideReasonChange={setOverrideReason}
-          />
+          <EntityDiffPane group={selectedGroup} onMerge={handleMerge} />
         ) : (
           <div className="flex items-center justify-center h-full text-gray-400">
             Select a candidate group to adjudicate
@@ -146,82 +100,63 @@ export const AdjudicationQueue: React.FC = () => {
 interface DiffPaneProps {
   group: CandidateGroup;
   onMerge: (masterId: string, mergeIds: string[]) => void;
-  guardrails: GuardrailStatus | null;
-  overrideReason: string;
-  onOverrideReasonChange: (value: string) => void;
 }
 
-const EntityDiffPane: React.FC<DiffPaneProps> = ({
-  group,
-  onMerge,
-  guardrails,
-  overrideReason,
-  onOverrideReasonChange,
-}) => {
+interface FeatureContribution {
+  feature: string;
+  value: number | boolean;
+  weight: number;
+  contribution: number;
+  normalizedContribution: number;
+}
+
+interface ExplainResponse {
+  score: number;
+  confidence: number;
+  method: string;
+  threshold: number;
+  rationale: string[];
+  featureContributions: FeatureContribution[];
+}
+
+const EntityDiffPane: React.FC<DiffPaneProps> = ({ group, onMerge }) => {
   const [masterId, setMasterId] = useState<string>(group.entities[0]?.id);
-  const [explanation, setExplanation] = useState<any>(null);
+  const [explanation, setExplanation] = useState<ExplainResponse | null>(null);
+  const [showContributions, setShowContributions] = useState(false);
 
   useEffect(() => {
     // Fetch explanation for the group relative to master
     if (group.entities.length > 1) {
-       // Just example logic: explain 0 vs 1
-       fetch('/er/explain', {
-         method: 'POST',
-         headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify({ entityA: group.entities[0], entityB: group.entities[1] })
-       })
-       .then(res => res.json())
-       .then(data => setExplanation(data))
-       .catch(console.error);
+      const normalizeEntity = (entity: any) => ({
+        id: entity.id,
+        type: entity.type || 'entity',
+        name: entity.properties?.name || entity.name || 'Unknown',
+        tenantId: entity.tenantId || 'unknown',
+        attributes: entity.properties || entity.attributes || {},
+        aliases: entity.aliases,
+        locations: entity.locations,
+        timestamps: entity.timestamps,
+        deviceIds: entity.deviceIds,
+        accountIds: entity.accountIds,
+        ipAddresses: entity.ipAddresses,
+      });
+
+      fetch('/er/explain', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          entityA: normalizeEntity(group.entities[0]),
+          entityB: normalizeEntity(group.entities[1]),
+        }),
+      })
+        .then(res => res.json())
+        .then(data => setExplanation(data))
+        .catch(console.error);
     }
   }, [group, masterId]);
 
   return (
     <div className="space-y-6">
-      {guardrails && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              Guardrail Status
-              <Badge variant={guardrails.passed ? 'success' : 'error'}>
-                {guardrails.passed ? 'PASS' : 'FAIL'}
-              </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm space-y-2">
-            <div className="flex justify-between">
-              <span>Dataset</span>
-              <span className="font-medium">{guardrails.datasetId}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Precision</span>
-              <span className="font-medium">
-                {Math.round(guardrails.metrics.precision * 100)}% (min{' '}
-                {Math.round(guardrails.thresholds.minPrecision * 100)}%)
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span>Recall</span>
-              <span className="font-medium">
-                {Math.round(guardrails.metrics.recall * 100)}% (min{' '}
-                {Math.round(guardrails.thresholds.minRecall * 100)}%)
-              </span>
-            </div>
-            {!guardrails.passed && (
-              <div className="space-y-2">
-                <div className="text-xs text-red-500">
-                  Guardrails failed. Provide a reason to override.
-                </div>
-                <Textarea
-                  value={overrideReason}
-                  onChange={(event) => onOverrideReasonChange(event.target.value)}
-                  placeholder="Override reason (required)"
-                />
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
       <div className="flex justify-between items-center">
         <h3 className="text-2xl font-bold">Merge Candidates</h3>
         <Button
@@ -245,6 +180,14 @@ const EntityDiffPane: React.FC<DiffPaneProps> = ({
                    {Math.round(explanation.score * 100)}%
                  </Badge>
                </div>
+               <div className="flex justify-between text-sm text-muted-foreground">
+                 <span>Confidence:</span>
+                 <span>{Math.round(explanation.confidence * 100)}%</span>
+               </div>
+               <div className="flex justify-between text-sm text-muted-foreground">
+                 <span>Method:</span>
+                 <span>{explanation.method}</span>
+               </div>
                <div>
                  <strong>Rationale:</strong>
                  <ul className="list-disc pl-5">
@@ -253,6 +196,53 @@ const EntityDiffPane: React.FC<DiffPaneProps> = ({
                    ))}
                  </ul>
                </div>
+               <div>
+                 <Button
+                   variant="secondary"
+                   size="sm"
+                   onClick={() => setShowContributions(prev => !prev)}
+                 >
+                   {showContributions ? (
+                     <>
+                       <ChevronUp className="mr-2 h-4 w-4" /> Hide feature contributions
+                     </>
+                   ) : (
+                     <>
+                       <ChevronDown className="mr-2 h-4 w-4" /> Show feature contributions
+                     </>
+                   )}
+                 </Button>
+               </div>
+               {showContributions && (
+                 <div className="rounded-md border">
+                   <Table>
+                     <TableHeader>
+                       <TableRow>
+                         <TableHead>Feature</TableHead>
+                         <TableHead>Value</TableHead>
+                         <TableHead>Weight</TableHead>
+                         <TableHead>Contribution</TableHead>
+                       </TableRow>
+                     </TableHeader>
+                     <TableBody>
+                       {explanation.featureContributions.map((row) => (
+                         <TableRow key={row.feature}>
+                           <TableCell className="font-medium">{row.feature}</TableCell>
+                           <TableCell>
+                             {typeof row.value === 'boolean'
+                               ? row.value
+                                 ? 'true'
+                                 : 'false'
+                               : row.value.toFixed(3)}
+                           </TableCell>
+                           <TableCell>{(row.weight * 100).toFixed(0)}%</TableCell>
+                           <TableCell>{(row.normalizedContribution * 100).toFixed(1)}%</TableCell>
+                         </TableRow>
+                       ))}
+                     </TableBody>
+                   </Table>
+                 </div>
+               )}
              </div>
            </CardContent>
         </Card>

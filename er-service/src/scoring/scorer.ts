@@ -1,4 +1,10 @@
-import type { ERFeatures, ScoringConfig, CandidateScore, EntityRecord } from '../types.js';
+import type {
+  ERFeatures,
+  ScoringConfig,
+  CandidateScore,
+  EntityRecord,
+  FeatureContribution,
+} from '../types.js';
 import { extractFeatures } from '../core/features.js';
 
 /**
@@ -7,6 +13,38 @@ import { extractFeatures } from '../core/features.js';
 export interface Scorer {
   score(entityA: EntityRecord, entityB: EntityRecord): CandidateScore;
   getMethod(): string;
+}
+
+export function buildFeatureContributions(
+  features: ERFeatures,
+  weights: ScoringConfig['weights'],
+): FeatureContribution[] {
+  const entries = Object.entries(weights).map(([feature, weight]) => {
+    const rawValue = features[feature as keyof ERFeatures];
+    const numericValue =
+      typeof rawValue === 'boolean'
+        ? rawValue
+          ? 1
+          : 0
+        : typeof rawValue === 'number'
+          ? rawValue
+          : 0;
+    return {
+      feature,
+      value: rawValue,
+      weight,
+      contribution: numericValue * weight,
+      normalizedContribution: 0,
+    };
+  });
+
+  const total = entries.reduce((sum, entry) => sum + entry.contribution, 0);
+  return entries
+    .map(entry => ({
+      ...entry,
+      normalizedContribution: total > 0 ? entry.contribution / total : 0,
+    }))
+    .sort((a, b) => b.contribution - a.contribution);
 }
 
 /**
