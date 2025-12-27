@@ -12,6 +12,7 @@ This is the public-facing marketing website for Topicality.co, featuring:
 - **Products**: Commercial offerings
 - **Research**: Published papers and analysis
 - **Writing**: Blog and thought leadership
+- **Documentation & Evidence Portal**: GA-grade documentation composed from repository artefacts with automated regeneration.
 
 ## Tech Stack
 
@@ -70,16 +71,17 @@ website/
 
 ## Scripts
 
-| Command | Description |
-|---------|-------------|
-| `pnpm dev` | Start development server |
-| `pnpm build` | Build for production |
-| `pnpm start` | Start production server |
-| `pnpm lint` | Run ESLint |
-| `pnpm typecheck` | Run TypeScript checks |
-| `pnpm test` | Run unit tests |
-| `pnpm e2e` | Run E2E tests |
-| `pnpm ci` | Run full CI suite |
+| Command              | Description                                                                 |
+| -------------------- | --------------------------------------------------------------------------- |
+| `pnpm dev`           | Start development server                                                    |
+| `pnpm build`         | Build for production                                                        |
+| `pnpm start`         | Start production server                                                     |
+| `pnpm lint`          | Run ESLint                                                                  |
+| `pnpm typecheck`     | Run TypeScript checks                                                       |
+| `pnpm test`          | Run unit tests                                                              |
+| `pnpm e2e`           | Run E2E tests                                                               |
+| `pnpm docs:generate` | Build the GA documentation bundle from code comments, schemas, and runbooks |
+| `pnpm ci`            | Run full CI suite                                                           |
 
 ## Environment Variables
 

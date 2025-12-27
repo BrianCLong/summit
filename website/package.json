@@ -14,6 +14,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "playwright test",
+    "docs:generate": "node scripts/generate-ga-docs.mjs",
     "ci": "pnpm -s lint && pnpm -s typecheck && pnpm -s test && pnpm -s build && pnpm -s e2e"
   },
   "dependencies": {
