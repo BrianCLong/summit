@@ -5,7 +5,176 @@
 
 import { EventEmitter } from 'events';
 import { v4 as uuidv4 } from 'uuid';
-import { Parser } from 'expr-eval';
+
+/**
+ * Safe Expression Parser
+ * Replaces vulnerable expr-eval with a secure implementation
+ * that only allows arithmetic operations and comparisons
+ */
+class SafeExpressionParser {
+  private allowedOperators = ['+', '-', '*', '/', '%', '>', '<', '>=', '<=', '==', '!=', '&&', '||', '!'];
+  private allowedFunctions = ['Math.abs', 'Math.ceil', 'Math.floor', 'Math.round', 'Math.max', 'Math.min'];
+
+  parse(expression: string): { evaluate: (context: Record<string, any>) => any } {
+    // Validate expression for safety
+    this.validateExpression(expression);
+
+    return {
+      evaluate: (context: Record<string, any>) => {
+        return this.safeEvaluate(expression, context);
+      }
+    };
+  }
+
+  private validateExpression(expr: string): void {
+    // Block dangerous patterns
+    const dangerousPatterns = [
+      /constructor/i,
+      /__proto__/i,
+      /prototype/i,
+      /eval\s*\(/i,
+      /Function\s*\(/i,
+      /\bthis\b/i,
+      /\bglobal\b/i,
+      /\bprocess\b/i,
+      /\brequire\b/i,
+      /\bimport\b/i,
+      /\bexport\b/i,
+    ];
+
+    for (const pattern of dangerousPatterns) {
+      if (pattern.test(expr)) {
+        throw new Error(`Expression contains forbidden pattern: ${pattern}`);
+      }
+    }
+  }
+
+  private safeEvaluate(expression: string, context: Record<string, any>): any {
+    // Create a safe evaluation context with only allowed variables
+    const safeContext: Record<string, any> = {};
+
+    // Copy only primitive values and simple objects from context
+    for (const [key, value] of Object.entries(context)) {
+      if (typeof value === 'number' ||
+          typeof value === 'string' ||
+          typeof value === 'boolean' ||
+          value === null ||
+          value === undefined) {
+        safeContext[key] = value;
+      } else if (typeof value === 'object' && !Array.isArray(value)) {
+        // Shallow copy of simple objects
+        safeContext[key] = { ...value };
+      } else if (Array.isArray(value)) {
+        safeContext[key] = [...value];
+      }
+    }
+
+    // Simple expression evaluator using manual parsing (no eval/Function)
+    try {
+      // Replace variable names with their values
+      let evalExpr = expression;
+      for (const [key, value] of Object.entries(safeContext)) {
+        const regex = new RegExp(`\\b${key}\\b`, 'g');
+        if (typeof value === 'string') {
+          evalExpr = evalExpr.replace(regex, JSON.stringify(value));
+        } else if (typeof value === 'number' || typeof value === 'boolean') {
+          evalExpr = evalExpr.replace(regex, String(value));
+        }
+      }
+
+      // Parse and evaluate simple expressions manually
+      return this.parseExpression(evalExpr.trim());
+    } catch (error) {
+      throw new Error(`Safe expression evaluation failed: ${(error as Error).message}`);
+    }
+  }
+
+  /**
+   * Manual expression parser - supports basic arithmetic and comparisons
+   * without using eval() or Function()
+   */
+  private parseExpression(expr: string): number | boolean | string {
+    expr = expr.trim();
+
+    // Handle parentheses first
+    while (expr.includes('(')) {
+      expr = expr.replace(/\(([^()]+)\)/g, (_, inner) => {
+        return String(this.parseExpression(inner));
+      });
+    }
+
+    // Handle logical operators (lowest precedence)
+    if (expr.includes('||')) {
+      const parts = expr.split('||');
+      return parts.some(p => Boolean(this.parseExpression(p.trim())));
+    }
+    if (expr.includes('&&')) {
+      const parts = expr.split('&&');
+      return parts.every(p => Boolean(this.parseExpression(p.trim())));
+    }
+
+    // Handle comparison operators
+    const compMatch = expr.match(/^(.+?)(===|!==|==|!=|>=|<=|>|<)(.+)$/);
+    if (compMatch) {
+      const left = this.parseExpression(compMatch[1]);
+      const op = compMatch[2];
+      const right = this.parseExpression(compMatch[3]);
+
+      switch (op) {
+        case '===': return left === right;
+        case '!==': return left !== right;
+        // eslint-disable-next-line eqeqeq -- intentional loose equality for expression language
+        case '==': return left == right;
+        // eslint-disable-next-line eqeqeq -- intentional loose inequality for expression language
+        case '!=': return left != right;
+        case '>=': return Number(left) >= Number(right);
+        case '<=': return Number(left) <= Number(right);
+        case '>': return Number(left) > Number(right);
+        case '<': return Number(left) < Number(right);
+      }
+    }
+
+    // Handle arithmetic operators (higher precedence)
+    // Addition/Subtraction
+    const addMatch = expr.match(/^(.+?)([+-])([^*/]+)$/);
+    if (addMatch) {
+      const left = Number(this.parseExpression(addMatch[1]));
+      const op = addMatch[2];
+      const right = Number(this.parseExpression(addMatch[3]));
+      return op === '+' ? left + right : left - right;
+    }
+
+    // Multiplication/Division
+    const mulMatch = expr.match(/^(.+?)([*/])(.+)$/);
+    if (mulMatch) {
+      const left = Number(this.parseExpression(mulMatch[1]));
+      const op = mulMatch[2];
+      const right = Number(this.parseExpression(mulMatch[3]));
+      return op === '*' ? left * right : left / right;
+    }
+
+    // Handle negation
+    if (expr.startsWith('!')) {
+      return !this.parseExpression(expr.slice(1));
+    }
+
+    // Handle string literals
+    if ((expr.startsWith('"') && expr.endsWith('"')) ||
+        (expr.startsWith("'") && expr.endsWith("'"))) {
+      return expr.slice(1, -1);
+    }
+
+    // Handle boolean literals
+    if (expr === 'true') {return true;}
+    if (expr === 'false') {return false;}
+
+    // Handle numeric literals
+    const num = Number(expr);
+    if (!isNaN(num)) {return num;}
+
+    throw new Error(`Cannot parse expression: ${expr}`);
+  }
+}
 
 export interface DecisionTable {
   id: string;
@@ -137,12 +306,12 @@ export class BusinessRulesEngine extends EventEmitter {
   private decisionTables = new Map<string, DecisionTable>();
   private expressions = new Map<string, Expression>();
   private ruleSets = new Map<string, RuleSet>();
-  private parser: Parser;
+  private parser: SafeExpressionParser;
   private ruleVersions = new Map<string, DecisionTable[]>();
 
   constructor() {
     super();
-    this.parser = new Parser();
+    this.parser = new SafeExpressionParser();
   }
 
   /**
@@ -168,10 +337,9 @@ export class BusinessRulesEngine extends EventEmitter {
 
     // Store version history
     const versionKey = `${decisionTable.name}:${decisionTable.version}`;
-    if (!this.ruleVersions.has(versionKey)) {
-      this.ruleVersions.set(versionKey, []);
-    }
-    this.ruleVersions.get(versionKey)!.push(decisionTable);
+    const versions = this.ruleVersions.get(versionKey) ?? [];
+    versions.push(decisionTable);
+    this.ruleVersions.set(versionKey, versions);
 
     this.emit('decision_table.created', decisionTable);
     return decisionTable;
