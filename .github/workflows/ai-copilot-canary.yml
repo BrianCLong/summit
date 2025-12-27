@@ -1,0 +1,34 @@
+name: AI Copilot Canary
+
+on:
+  schedule:
+    - cron: "15 * * * *"
+  workflow_dispatch:
+  push:
+    paths:
+      - "slo/ai-copilot.yaml"
+      - "RUNBOOKS/ai-copilot-service.md"
+      - "services/ai-copilot/**"
+      - ".github/workflows/ai-copilot-canary.yml"
+
+jobs:
+  canary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Install dependencies (script only)
+        run: pnpm add -w js-yaml
+
+      - name: Run AI Copilot canary checks
+        run: node scripts/ai-copilot-canary.cjs

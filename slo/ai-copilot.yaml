@@ -1,0 +1,57 @@
+apiVersion: sloth.slok.dev/v1
+kind: PrometheusSLO
+metadata:
+  name: ai-copilot-availability
+  labels:
+    app: ai-copilot
+    team: platform
+spec:
+  service: ai-copilot
+  slo: 99.9
+  window: 30d
+  slos:
+    - name: requests-availability
+      objective: 99.9
+      description: "Availability SLO for AI Copilot requests"
+      sli:
+        events:
+          errorQuery: sum(rate(http_request_duration_seconds_count{job="ai-copilot", status=~"5.."}[5m]))
+          totalQuery: sum(rate(http_request_duration_seconds_count{job="ai-copilot"}[5m]))
+      alerting:
+        name: AiCopilotAvailabilityBurnRate
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: AI Copilot availability burn rate high
+          runbook_url: https://runbooks.intelgraph.ai/ai-copilot
+
+---
+apiVersion: sloth.slok.dev/v1
+kind: PrometheusSLO
+metadata:
+  name: ai-copilot-latency
+  labels:
+    app: ai-copilot
+    team: platform
+spec:
+  service: ai-copilot
+  slo: 99.0
+  window: 30d
+  slos:
+    - name: requests-latency
+      objective: 99.0
+      description: "Latency SLO for AI Copilot P95 < 1s"
+      sli:
+        events:
+          errorQuery: |
+            sum(rate(http_request_duration_seconds_bucket{job="ai-copilot", le="1"}[5m]))
+          totalQuery: sum(rate(http_request_duration_seconds_count{job="ai-copilot"}[5m]))
+      alerting:
+        name: AiCopilotLatencyBurnRate
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: AI Copilot latency burn rate high
+          runbook_url: https://runbooks.intelgraph.ai/ai-copilot
