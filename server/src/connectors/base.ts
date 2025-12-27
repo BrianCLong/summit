@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { EventEmitter } from 'events';
+import { randomUUID } from 'crypto';
 import { Readable } from 'stream';
 import {
   ConnectorConfig,
@@ -119,17 +120,26 @@ export abstract class BaseConnector extends EventEmitter {
    * Wrap data in a standard ingestion event structure with provenance
    */
   protected wrapEvent(data: any): IngestionEvent {
+    const lineageId = randomUUID();
+    const consent = this.config.metadata?.consent;
+    const termsUrl = this.config.metadata?.termsUrl;
     return {
       id: `evt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       sourceId: this.config.id,
       timestamp: new Date(),
       data,
-      metadata: {},
+      metadata: {
+        consent,
+        termsUrl
+      },
       provenance: {
         source: this.config.name,
         sourceId: this.config.id,
         ingestTimestamp: new Date(),
-        connectorType: this.config.type
+        connectorType: this.config.type,
+        lineageId,
+        consent,
+        termsUrl
       }
     };
   }
