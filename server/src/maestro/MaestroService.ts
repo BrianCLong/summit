@@ -13,7 +13,8 @@ import type {
   CoordinationTask,
   CoordinationChannel,
   ConsensusProposal,
-  AgentCoordinationMetrics
+  AgentCoordinationMetrics,
+  MaestroAgent
 } from './model.js';
 import { AgentGovernanceService } from './governance-service.js';
 import {

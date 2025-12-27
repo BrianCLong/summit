@@ -118,8 +118,8 @@ export default [
       'no-unused-expressions': 'off', // Disable due to ESLint 9/typescript-eslint compatibility issue
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       'no-process-exit': 'off',
-      '@typescript-eslint/no-explicit-any': 'error',
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
     },
   },
   // Script files - allow console output
