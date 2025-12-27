@@ -85,3 +85,21 @@ backlog:
       - story: Evidence Pack v0.1
         priority: P2 - Stretch
         sprint: Paved Road + Governance
+
+  - epic: Agentic Capabilities (L)
+    stories:
+      - story: Agentic Prompt Library
+        priority: P0 - Must
+        sprint: Future
+      - story: Adaptive Agent Orchestration
+        priority: P0 - Must
+        sprint: Future
+      - story: Agent Feedback Loop
+        priority: P1 - Love
+        sprint: Future
+      - story: Multi-Agent Collaboration Workflows
+        priority: P1 - Love
+        sprint: Future
+      - story: Agent Security & Compliance Audits
+        priority: P0 - Must
+        sprint: Future
