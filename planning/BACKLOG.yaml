@@ -249,3 +249,321 @@ backlog:
     status: "Idea"
     priority: "P1"
     description: "Source: server/src/middleware/TieredRateLimitMiddleware.ts"
+  - id: TASK-0001
+    title: "GTM: Build sales collateral library and automated demo environments"
+    status: open
+    priority: critical
+    category: "GTM"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0002
+    title: "GTM: Implement pricing/packaging experimentation framework with A/B testing"
+    status: open
+    priority: critical
+    category: "GTM"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0003
+    title: "GTM: Build lead generation and qualification pipeline automation"
+    status: open
+    priority: critical
+    category: "GTM"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0004
+    title: "GTM: Create sales playbooks for IC, enterprise, and self-serve segments"
+    status: open
+    priority: critical
+    category: "GTM"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0005
+    title: "GTM: Develop competitive battlecards and positioning frameworks"
+    status: open
+    priority: critical
+    category: "GTM"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0006
+    title: "GTM: Build revenue operations and forecasting dashboard tools"
+    status: open
+    priority: critical
+    category: "GTM"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0007
+    title: "GTM: Create partner portal and optimize marketplace listings"
+    status: open
+    priority: critical
+    category: "GTM"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0008
+    title: "Customer Success: Build customer health scoring (125% NRR target)"
+    status: open
+    priority: critical
+    category: "Customer Success"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0009
+    title: "Customer Success: Implement onboarding automation and time-to-value tracking  "
+    status: open
+    priority: critical
+    category: "Customer Success"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0010
+    title: "Customer Success: Create expansion playbooks and automated upsell triggers"
+    status: open
+    priority: critical
+    category: "Customer Success"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0011
+    title: "Customer Success: Establish customer advisory board program"
+    status: open
+    priority: critical
+    category: "Customer Success"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0012
+    title: "Customer Success: Build success metrics dashboards per segment"
+    status: open
+    priority: critical
+    category: "Customer Success"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0013
+    title: "Customer Success: Implement churn prediction system (<6% churn target)"
+    status: open
+    priority: critical
+    category: "Customer Success"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0014
+    title: "Customer Success: Deploy usage analytics and adoption tracking"
+    status: open
+    priority: critical
+    category: "Customer Success"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0015
+    title: "Product-Market Fit: User research and feedback collection automation"
+    status: open
+    priority: critical
+    category: "Product-Market Fit"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0016
+    title: "Product-Market Fit: A/B testing framework for key workflows"
+    status: open
+    priority: critical
+    category: "Product-Market Fit"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0017
+    title: "Product-Market Fit: Product analytics instrumentation"
+    status: open
+    priority: critical
+    category: "Product-Market Fit"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0018
+    title: "Product-Market Fit: Customer interview program and insights synthesis"
+    status: open
+    priority: critical
+    category: "Product-Market Fit"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0019
+    title: "Product-Market Fit: Feature usage analysis and sunset criteria"
+    status: open
+    priority: critical
+    category: "Product-Market Fit"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0020
+    title: "Product-Market Fit: Competitive intelligence gathering automation"
+    status: open
+    priority: critical
+    category: "Product-Market Fit"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0021
+    title: "Enterprise: FedRAMP certification roadmap and implementation tracking"
+    status: open
+    priority: critical
+    category: "Enterprise"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0022
+    title: "Enterprise: ICD 503 compliance implementation for IC alignment"
+    status: open
+    priority: critical
+    category: "Enterprise"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0023
+    title: "Enterprise: SOC 2 Type II certification process"
+    status: open
+    priority: critical
+    category: "Enterprise"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0024
+    title: "Enterprise: Customer security questionnaire automation system"
+    status: open
+    priority: critical
+    category: "Enterprise"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0025
+    title: "Enterprise: Procurement process optimization and documentation"
+    status: open
+    priority: critical
+    category: "Enterprise"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0026
+    title: "Enterprise: Reference architecture documentation library"
+    status: open
+    priority: critical
+    category: "Enterprise"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0027
+    title: "Enterprise: TCO/ROI calculators for enterprise sales"
+    status: open
+    priority: critical
+    category: "Enterprise"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0028
+    title: "Enterprise: Proof-of-value frameworks and methodologies"
+    status: open
+    priority: critical
+    category: "Enterprise"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0029
+    title: "Monetization: Usage-based pricing implementation"
+    status: open
+    priority: critical
+    category: "Monetization"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0030
+    title: "Monetization: Marketplace revenue share mechanism"
+    status: open
+    priority: critical
+    category: "Monetization"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0031
+    title: "Monetization: Enterprise licensing models and SKUs"
+    status: open
+    priority: critical
+    category: "Monetization"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0032
+    title: "Monetization: Channel partner compensation structures"
+    status: open
+    priority: critical
+    category: "Monetization"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0033
+    title: "Monetization: Freemium conversion optimization engine"
+    status: open
+    priority: critical
+    category: "Monetization"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0034
+    title: "Monetization: Multi-currency and international pricing system"
+    status: open
+    priority: critical
+    category: "Monetization"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0035
+    title: "Operations: Revenue recognition automation"
+    status: open
+    priority: critical
+    category: "Operations"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0036
+    title: "Operations: Customer data platform (CDP) integration"
+    status: open
+    priority: critical
+    category: "Operations"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0037
+    title: "Operations: Marketing automation workflows"
+    status: open
+    priority: critical
+    category: "Operations"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0038
+    title: "Operations: Sales CRM integration and data quality enforcement"
+    status: open
+    priority: critical
+    category: "Operations"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0039
+    title: "Operations: Customer communication templates and sequences"
+    status: open
+    priority: critical
+    category: "Operations"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0040
+    title: "Operations: Support ticket deflection and self-service knowledge base"
+    status: open
+    priority: critical
+    category: "Operations"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0041
+    title: "Operations: Community platform and user-generated content system"
+    status: open
+    priority: critical
+    category: "Operations"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0042
+    title: "Partnership: Partner certification program"
+    status: open
+    priority: critical
+    category: "Partnership"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0043
+    title: "Partnership: Marketplace developer portal"
+    status: open
+    priority: critical
+    category: "Partnership"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0044
+    title: "Partnership: Partner co-marketing automation"
+    status: open
+    priority: critical
+    category: "Partnership"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0045
+    title: "Partnership: Integration marketplace curation system"
+    status: open
+    priority: critical
+    category: "Partnership"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0046
+    title: "Partnership: Partner success metrics and incentive tracking"
+    status: open
+    priority: critical
+    category: "Partnership"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0047
+    title: "Partnership: Technology alliance program structure"
+    status: open
+    priority: critical
+    category: "Partnership"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0048
+    title: "Finance: Subscription billing automation system"
+    status: open
+    priority: critical
+    category: "Finance"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0049
+    title: "Finance: Revenue reporting dashboards for $149M target"
+    status: open
+    priority: critical
+    category: "Finance"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0050
+    title: "Finance: Unit economics tracking per customer segment"
+    status: open
+    priority: critical
+    category: "Finance"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0051
+    title: "Finance: LTV:CAC ratio monitoring dashboard"
+    status: open
+    priority: critical
+    category: "Finance"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0052
+    title: "Finance: Cash flow forecasting system"
+    status: open
+    priority: critical
+    category: "Finance"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
+  - id: TASK-0053
+    title: "Finance: Investor reporting automation"
+    status: open
+    priority: critical
+    category: "Finance"
+    source: "CRITICAL_COMPANY_SUCCESS_ROADMAP_ITEMS.md"
