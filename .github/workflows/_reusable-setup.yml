@@ -93,22 +93,17 @@ jobs:
         run: |
           echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
 
-      - name: Cache pnpm store
-        id: cache-pnpm
+      - name: Cache dependencies
+        id: cache-deps
         uses: actions/cache@v4
         with:
-          path: ${{ steps.pnpm-store.outputs.path }}
+          path: |
+            ~/.pnpm-store
+            node_modules
+            .next/cache
           key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
-
-      - name: Cache Turbo
-        uses: actions/cache@v4
-        with:
-          path: .turbo
-          key: ${{ runner.os }}-turbo-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-turbo-
 
       - name: Install dependencies
         if: inputs.install-deps
