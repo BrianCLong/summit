@@ -1,18 +1,34 @@
 import React from 'react';
 
+interface MappingField {
+  sourceField: string;
+  targetField: string;
+  pii?: boolean;
+  piiCategory?: string;
+}
+
 interface PreviewStepProps {
   data: any[];
-  mapping: any;
+  mapping: { fields?: MappingField[] } | null;
   onImport: () => void;
   isProcessing: boolean;
 }
 
 export const PreviewStep: React.FC<PreviewStepProps> = ({ data, mapping, onImport, isProcessing }) => {
+  const piiFlags = new Map<string, string>();
+  if (mapping?.fields) {
+    mapping.fields.forEach((field) => {
+      if (field.pii || field.piiCategory) {
+        piiFlags.set(field.targetField, field.piiCategory ?? 'PII');
+      }
+    });
+  }
+
   // Simple simulation of applying mapping for preview
   const previewData = data.slice(0, 5).map(row => {
     const mapped: any = {};
     if (mapping && mapping.fields) {
-      mapping.fields.forEach((f: any) => {
+      mapping.fields.forEach((f) => {
         mapped[f.targetField] = row[f.sourceField];
       });
     }
@@ -36,7 +52,14 @@ export const PreviewStep: React.FC<PreviewStepProps> = ({ data, mapping, onImpor
             <tr>
               {previewData.length > 0 && Object.keys(previewData[0]).map((key) => (
                 <th key={key} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {key}
+                  <div className="flex items-center gap-2">
+                    <span>{key}</span>
+                    {piiFlags.has(key) && (
+                      <span className="rounded bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-700">
+                        PII{piiFlags.get(key) ? `: ${piiFlags.get(key)}` : ''}
+                      </span>
+                    )}
+                  </div>
                 </th>
               ))}
             </tr>

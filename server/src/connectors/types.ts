@@ -12,13 +12,25 @@ export interface SourceConnector {
   }>;
 }
 
+export interface ConsentMetadata {
+  status: 'granted' | 'denied' | 'unknown';
+  collectedAt?: Date;
+  scopes?: string[];
+  actorId?: string;
+}
+
+export interface ConnectorMetadata extends Record<string, any> {
+  consent?: ConsentMetadata;
+  termsUrl?: string;
+}
+
 export interface ConnectorConfig {
   id: string;
   name: string;
   type: string;
   tenantId: string;
   config: Record<string, any>;
-  metadata?: Record<string, any>;
+  metadata?: ConnectorMetadata;
 }
 
 export interface ConnectorSchema {
@@ -33,6 +45,7 @@ export interface SchemaField {
   nullable: boolean;
   description?: string;
   piiCategory?: string;
+  pii?: boolean;
 }
 
 export interface ConnectorMetrics {
@@ -54,6 +67,8 @@ export interface IngestionEvent {
     ingestTimestamp: Date;
     connectorType: string;
     lineageId: string;
+    consent?: ConsentMetadata;
+    termsUrl?: string;
   };
 }
 
