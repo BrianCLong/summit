@@ -8,13 +8,14 @@
 
 1. [Overview](#overview)
 2. [Versioning Approach](#versioning-approach)
-3. [Version Detection](#version-detection)
-4. [Backward Compatibility](#backward-compatibility)
-5. [Deprecation Policy](#deprecation-policy)
-6. [Migration Guides](#migration-guides)
-7. [Best Practices](#best-practices)
-8. [API Reference](#api-reference)
-9. [Examples](#examples)
+3. [Immutable API Contracts](#immutable-api-contracts)
+4. [Version Detection](#version-detection)
+5. [Backward Compatibility](#backward-compatibility)
+6. [Deprecation Policy](#deprecation-policy)
+7. [Migration Guides](#migration-guides)
+8. [Best Practices](#best-practices)
+9. [API Reference](#api-reference)
+10. [Examples](#examples)
 
 ---
 
@@ -95,6 +96,28 @@ When multiple version indicators are present, the priority order is:
 2. `API-Version` header
 3. `Accept` header
 4. Default version (currently `v1`)
+
+---
+
+## Immutable API Contracts
+
+### Contract-First Development
+
+- **Source of truth:** All API contracts originate from versioned schemas stored in `schemas/` (OpenAPI/AsyncAPI/GraphQL SDL) and are treated as immutable once released.
+- **Review gates:** Schema PRs require breaking-change detection, owner approval, and semantic version bumps before any implementation work begins.
+- **Compatibility shims:** Backward-compatibility adapters are generated alongside schema changes to preserve stable integrations across minor/patch releases.
+
+### Automated SDK and Client Generation
+
+- **Code generation:** CI builds TypeScript, Python, and Go SDKs from the versioned schemas and publishes them with matching semantic versions.
+- **Language parity:** Every contract change must produce regenerated clients, reference docs, and example snippets for each supported language.
+- **Regression safety:** SDK pipelines include contract conformance tests that validate generated clients against golden fixtures for every active version.
+
+### Deprecation Schedules and Guarantees
+
+- **Planned deprecations:** Each breaking change ships with a deprecation schedule (announce, warn, sunset) embedded in headers and SDK release notes.
+- **Dual support windows:** Dual-write/dual-read compatibility layers remain enabled through the warning period to allow safe migrations.
+- **Observability:** Deprecation metrics (call volume by version, warning counts, sunset countdowns) are exported to monitoring to detect stragglers early.
 
 ---
 
