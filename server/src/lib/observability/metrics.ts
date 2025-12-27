@@ -203,11 +203,31 @@ export const maestroChangeFailureRate = new client.Gauge({
   help: 'Change failure rate percentage',
 });
 
+// --- Agent Metrics ---
+export const agentExecutionsTotal = new client.Counter({
+  name: 'agent_executions_total',
+  help: 'Total number of agent executions',
+  labelNames: ['tenant', 'status'],
+});
+
+export const agentExecutionDuration = new client.Histogram({
+  name: 'agent_execution_duration_seconds',
+  help: 'Duration of agent execution in seconds',
+  labelNames: ['tenant', 'status'],
+  buckets: [1, 5, 10, 30, 60, 120, 300],
+});
+
+export const policyDecisionsTotal = new client.Counter({
+  name: 'policy_decisions_total',
+  help: 'Total number of policy decisions',
+  labelNames: ['policy', 'decision', 'signal_type'],
+});
+
 // --- System/Error Metrics ---
 export const applicationErrors = new client.Counter({
   name: 'application_errors_total',
   help: 'Total number of application errors',
-  labelNames: ['module', 'error_type', 'severity'],
+  labelNames: ['module', 'error_type', 'severity', 'signal_type'],
 });
 
 export const memoryUsage = new client.Gauge({
@@ -232,6 +252,7 @@ const metricsToRegister = [
   graphNodesTotal, graphEdgesTotal, graphOperationDuration, graphExpandRequestsTotal,
   pipelineUptimeRatio, pipelineLatencySeconds,
   maestroDeploymentsTotal, maestroChangeFailureRate,
+  agentExecutionsTotal, agentExecutionDuration, policyDecisionsTotal,
   applicationErrors, memoryUsage, tenantScopeViolationsTotal,
   businessUserSignupsTotal, businessApiCallsTotal, businessRevenueTotal,
 ];
@@ -259,4 +280,7 @@ export const metrics = {
   aiJobDuration,
   applicationErrors,
   businessApiCallsTotal,
+  agentExecutionsTotal,
+  agentExecutionDuration,
+  policyDecisionsTotal,
 };
