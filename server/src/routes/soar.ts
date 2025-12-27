@@ -4,12 +4,14 @@ import { ensureAuthenticated } from '../middleware/auth.js';
 import { getPostgresPool } from '../config/database.js';
 import { SoarService } from '../soar/SoarService.js';
 import { IntegrationRegistry } from '../soar/IntegrationRegistry.js';
+import { PlaybookRunBundleExporter } from '../soar/PlaybookRunBundleExporter.js';
 import logger from '../config/logger.js';
 
 const router = Router();
 // Cast ManagedPostgresPool to any to allow it to be passed to SoarService which expects Pool
 // In a real scenario, we should update SoarService to accept ManagedPostgresPool
 const service = new SoarService(getPostgresPool() as any);
+const bundleExporter = new PlaybookRunBundleExporter(getPostgresPool() as any);
 
 // Get available actions/integrations
 router.get('/actions', ensureAuthenticated, async (req, res) => {
@@ -83,6 +85,27 @@ router.get('/runs', ensureAuthenticated, async (req, res) => {
         });
         res.json(runs);
     } catch (err: any) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Export Run Bundle
+router.get('/runs/:id/bundle', ensureAuthenticated, async (req, res) => {
+    try {
+        const user = (req as any).user;
+        const { filename, buffer } = await bundleExporter.createBundle(
+            user!.tenantId,
+            req.params.id
+        );
+        res.setHeader('Content-Type', 'application/zip');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.send(buffer);
+    } catch (err: any) {
+        logger.error(err);
+        if (err.message?.includes('not found')) {
+            res.status(404).json({ error: err.message });
+            return;
+        }
         res.status(500).json({ error: err.message });
     }
 });
